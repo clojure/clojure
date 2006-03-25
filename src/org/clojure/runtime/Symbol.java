@@ -12,5 +12,5 @@
 
 package org.clojure.runtime;
 
-public class Symbol{
+public class Symbol extends AMap{
 }

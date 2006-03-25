@@ -8,19 +8,28 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Mar 25, 2006 11:01:29 AM */
+/* rich Mar 25, 2006 3:44:58 PM */
 
 package org.clojure.runtime;
 
-public class Cons extends AMap{
+import java.util.IdentityHashMap;
 
-public Object first;
-public Cons rest;
+public class AMap{
 
-public Cons(Object first, Cons rest)
+IdentityHashMap attrs;
+public static final int INITIAL_SIZE = 7;
+
+public void put(Symbol key, Object val)
 	{
-	this.first = first;
-	this.rest = rest;
+	if(attrs == null)
+		attrs = new IdentityHashMap(INITIAL_SIZE);
+	attrs.put(key, val);
 	}
 
+public Object get(Symbol key)
+	{
+	if(attrs == null)
+		return null;
+	return attrs.get(key);
+	}
 }
