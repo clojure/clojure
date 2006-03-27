@@ -12,5 +12,32 @@
 
 package org.clojure.runtime;
 
-public class Symbol extends AMap{
+public class Symbol extends AFn{
+
+/**
+ *  Symbol implements IFn for attr access
+ *  This single arg version is the getter
+ * @param tld
+ * @param obj - must be AMap
+ * @return the value of the attr or nil if not found
+ * @throws Exception
+ */
+public Object invoke(ThreadLocalData tld, Object obj) throws Exception
+	{
+	return ((AMap)obj).get(this);
+	}
+
+/**
+ *  Symbol implements IFn for attr access
+ *  This two arg version is the setter
+ * @param tld
+ * @param obj - must be AMap
+ * @param val
+ * @return val
+ * @throws Exception
+ */
+public Object invoke(ThreadLocalData tld, Object obj, Object val) throws Exception
+	{
+	return ((AMap)obj).put(this,val);
+	}
 }
