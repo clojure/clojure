@@ -14,6 +14,48 @@ package org.clojure.runtime;
 
 public class Symbol extends AFn{
 
+public final static Object UNBOUND = new Object();
+
+public final String name;
+public final Namespace namespace;
+public Object val = UNBOUND;
+public IFn fn;
+
+
+/**
+ * Used by Namespace.intern()
+ * @param name
+ * @param ns
+ */
+Symbol(String name, Namespace ns)
+	{
+	this.namespace = ns;
+	this.name = name;
+	}
+
+public Object getValue(ThreadLocalData tld)  throws Exception
+	{
+	Cons binding = tld.getDynamicBinding(this);
+	if(binding != null)
+		return binding.first;
+	if(val == UNBOUND)
+		throw new Exception(name + " is unbound.");
+	return val;
+	}
+
+public Object setValue(ThreadLocalData tld, Object val)
+	{
+	Cons binding = tld.getDynamicBinding(this);
+	if(binding != null)
+		return binding.first = val;
+	//allow global set to create binding like this?
+	if(val instanceof IFn)
+		this.fn = (IFn) val;
+	else
+		this.fn = null; //todo, bind to throw stub?
+	return this.val = val;
+	}
+
 /**
  *  Symbol implements IFn for attr access
  *  This single arg version is the getter
