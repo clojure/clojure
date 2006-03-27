@@ -19,11 +19,12 @@ public class AMap{
 IdentityHashMap attrs;
 public static final int INITIAL_SIZE = 7;
 
-public void put(Symbol key, Object val)
+public Object put(Symbol key, Object val)
 	{
 	if(attrs == null)
 		attrs = new IdentityHashMap(INITIAL_SIZE);
 	attrs.put(key, val);
+	return val;
 	}
 
 public Object get(Symbol key)
