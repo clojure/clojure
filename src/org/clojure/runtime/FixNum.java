@@ -13,7 +13,7 @@
 package org.clojure.runtime;
 
 import java.math.BigInteger;
-
+ 
 public class FixNum extends IntegerNum {
 	public int val;
 
