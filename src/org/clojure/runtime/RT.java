@@ -93,4 +93,81 @@ static public int boundedLength(Cons list, int limit)
 		}
 	return i;
 	}
+
+static public Object setValues(ThreadLocalData tld, Object arg1)
+	{
+	if(tld == null)
+		tld = ThreadLocalData.get();
+	tld.mvCount = 1;
+	tld.mvArray[0] = arg1;
+	return arg1;
+	}
+
+static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2)
+	{
+	if(tld == null)
+		tld = ThreadLocalData.get();
+	tld.mvCount = 2;
+	tld.mvArray[0] = arg1;
+	tld.mvArray[1] = arg2;
+	return arg1;
+	}
+
+static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3)
+	{
+	if(tld == null)
+		tld = ThreadLocalData.get();
+	tld.mvCount = 3;
+	tld.mvArray[0] = arg1;
+	tld.mvArray[1] = arg2;
+	tld.mvArray[2] = arg3;
+	return arg1;
+	}
+
+static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4)
+	{
+	if(tld == null)
+		tld = ThreadLocalData.get();
+	tld.mvCount = 4;
+	tld.mvArray[0] = arg1;
+	tld.mvArray[1] = arg2;
+	tld.mvArray[2] = arg3;
+	tld.mvArray[3] = arg4;
+	return arg1;
+	}
+
+static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4,
+                               Object arg5)
+	{
+	if(tld == null)
+		tld = ThreadLocalData.get();
+	tld.mvCount = 5;
+	tld.mvArray[0] = arg1;
+	tld.mvArray[1] = arg2;
+	tld.mvArray[2] = arg3;
+	tld.mvArray[3] = arg4;
+	tld.mvArray[4] = arg5;
+	return arg1;
+	}
+
+static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4,
+                               Object arg5, Cons args) throws Exception
+	{
+	if(tld == null)
+		tld = ThreadLocalData.get();
+	tld.mvCount = 5;
+	tld.mvArray[0] = arg1;
+	tld.mvArray[1] = arg2;
+	tld.mvArray[2] = arg3;
+	tld.mvArray[3] = arg4;
+	tld.mvArray[4] = arg5;
+	for(int i = 5; args != null && i < ThreadLocalData.MULTIPLE_VALUES_LIMIT; i++, args = args.rest)
+		{
+		tld.mvArray[i] = args.first;
+		}
+	if(args != null)
+		throw new IllegalArgumentException("Too many arguments to values (> ThreadLocalData.MULTIPLE_VALUES_LIMIT)");
+	return arg1;
+	}
+
 }
