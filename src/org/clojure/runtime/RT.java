@@ -14,6 +14,39 @@ package org.clojure.runtime;
 
 public class RT{
 
+    static public Object eq(Object arg1, Object arg2) {
+        return (arg1 == arg2)?Boolean.TRUE:null;
+        }
+
+    static public Object eql(Object arg1, Object arg2) {
+        if(arg1 == arg2)
+        	return Boolean.TRUE;
+        if(arg1 == null || arg2 == null)
+        	return null;
+        if(arg1 instanceof Num
+        		&& arg1.getClass() == arg2.getClass()
+				&& arg1.equals(arg2))
+        	return Boolean.TRUE;
+        if(arg1.getClass() == Character.class
+        		&& arg2.getClass() == Character.class
+				&& arg1.equals(arg2))
+        	return Boolean.TRUE;
+        return null;
+        }
+
+    static public Object equal(Object arg1, Object arg2) {
+        if(arg1 == null)
+        	return arg2 == null ? Boolean.TRUE : null;
+        else if(arg2 == null)
+            return null;
+    	return (eql(arg1,arg2) != null
+    			|| (arg1.getClass() == Cons.class
+    					&& arg2.getClass() == Cons.class
+						&& equal(((Cons)arg1).first,((Cons)arg2).first)!=null
+						&& equal(((Cons)arg1).rest,((Cons)arg2).rest)!=null))
+		?Boolean.TRUE:null;
+    	}
+
 static public Cons cons(Object x, Cons y)
 	{
 	return new Cons(x, y);
