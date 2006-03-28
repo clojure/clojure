@@ -19,7 +19,7 @@ public final static Object UNBOUND = new Object();
 public final String name;
 public final Namespace namespace;
 public Object val = UNBOUND;
-public IFn fn;
+public IFn fn;  //todo, bind to throw stub?
 
 
 /**
