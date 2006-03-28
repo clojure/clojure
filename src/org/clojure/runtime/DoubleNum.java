@@ -56,18 +56,22 @@ public class DoubleNum extends FloatNum {
 		return toRational().equivTo(x);
 	}
 
-	public boolean lt(Num rhs) throws Exception {
+	public boolean lt(Num rhs)
+		{
 	    if(rhs instanceof RatioNum)
 	        return toRational().lt(rhs);
 		return val < rhs.doubleValue();
 	}
-	public boolean gt(BigInteger x) throws Exception {
+	public boolean gt(BigInteger x)
+		{
 		return val > x.doubleValue();
 	}
-	public boolean gt(int x) throws Exception {
+	public boolean gt(int x)
+		{
 		return val > x;
 	}
-	public boolean gt(RatioNum x) throws Exception {
+	public boolean gt(RatioNum x)
+		{
 		return toRational().gt(x);
 	}
 
@@ -139,7 +143,7 @@ public class DoubleNum extends FloatNum {
     public Object truncateDivide(ThreadLocalData tld, Num num) {
         return truncate(tld, num.doubleValue(),val);
     }
-	public Num negate() throws Exception{
+	public Num negate(){
 		return Num.from(-val);
 	}
 

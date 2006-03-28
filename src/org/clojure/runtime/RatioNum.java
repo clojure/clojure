@@ -64,16 +64,20 @@ public class RatioNum extends Rational {
 		return numerator.equiv(x.numerator) && denominator.equiv(x.denominator);
 	}
 
-	public boolean lt(Num rhs) throws Exception {
+	public boolean lt(Num rhs)
+		{
 		return rhs.gt(this);
 	}
-	public boolean gt(BigInteger x) throws Exception {
+	public boolean gt(BigInteger x)
+		{
 		return denominator.multiply(x).lt(numerator);
 	}
-	public boolean gt(int x) throws Exception {
+	public boolean gt(int x)
+		{
 		return denominator.multiply(x).lt(numerator);
 	}
-	public boolean gt(RatioNum x) throws Exception {
+	public boolean gt(RatioNum x)
+		{
 		return x.numerator.multiplyBy(denominator).lt(numerator.multiplyBy(x.denominator));
 	}
 
@@ -149,7 +153,7 @@ public class RatioNum extends Rational {
 	}
 
 
-	public Num negate() throws Exception{
+	public Num negate(){
 		return Num.divide(numerator.negate(),denominator);
 	}
 
