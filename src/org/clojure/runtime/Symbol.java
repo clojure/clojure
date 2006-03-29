@@ -21,6 +21,14 @@ public Namespace namespace;
 public Object val = UNBOUND;
 public IFn fn;  //todo, bind to throw stub?
 
+public String toString()
+	{
+	if(namespace == Namespace.globalNS)
+		return name;
+	if(namespace == null)
+		return "#:" + name;
+	return namespace.name + ":" + name;
+	}
 
 /**
  * Used by Namespace.intern()
