@@ -17,7 +17,7 @@ public class Symbol extends AFn{
 public final static Object UNBOUND = new Object();
 
 public final String name;
-public final Namespace namespace;
+public Namespace namespace;
 public Object val = UNBOUND;
 public IFn fn;  //todo, bind to throw stub?
 
@@ -33,13 +33,13 @@ Symbol(String name, Namespace ns)
 	this.name = name;
 	}
 
-public Object getValue(ThreadLocalData tld)  throws Exception
+public Object getValue(ThreadLocalData tld)
 	{
 	Cons binding = tld.getDynamicBinding(this);
 	if(binding != null)
 		return binding.first;
 	if(val == UNBOUND)
-		throw new Exception(name + " is unbound.");
+		throw new IllegalStateException(name + " is unbound.");
 	return val;
 	}
 
