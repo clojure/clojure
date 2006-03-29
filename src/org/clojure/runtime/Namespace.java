@@ -27,9 +27,21 @@ static final public HashMap table = new HashMap();
 final public HashMap symbols = new HashMap();
 final public String name;
 
+static final public Namespace globalNS = new Namespace("");
+static final public Namespace keywordNS = new Namespace("keyword"){
+	public Symbol intern(String name)
+		{
+		Symbol sym = (Symbol) symbols.get(name);
+		if(sym == null)
+			symbols.put(name, sym = new Keyword(name, this));
+		return sym;
+		}
+};
+
 Namespace(String name)
 	{
 	this.name = name;
+	table.put(name, this);
 	}
 
 static public Namespace find(String name)
@@ -43,7 +55,7 @@ static public Namespace findOrCreate(String name)
 		{
 		Namespace ns = find(name);
 		if(ns == null)
-			table.put(name, ns = new Namespace(name));
+			ns = new Namespace(name);
 		return ns;
 		}
 	}
@@ -52,7 +64,7 @@ public Symbol intern(String name)
 	{
 	synchronized(symbols)
 		{
-	    Symbol sym = (Symbol) symbols.get(name);
+		Symbol sym = (Symbol) symbols.get(name);
 		if(sym == null)
 			symbols.put(name, sym = new Symbol(name, this));
 		return sym;
