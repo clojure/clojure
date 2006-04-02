@@ -14,7 +14,7 @@ package org.clojure.runtime;
 
 import java.math.BigInteger;
 
-public class RatioNum extends Rational{
+public class RatioNum extends RationalNum{
 public boolean equals(Object arg0)
 	{
 	return arg0 != null

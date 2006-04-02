@@ -12,6 +12,6 @@
 
 package org.clojure.runtime;
 
-public abstract class Rational extends RealNum {
+public abstract class RationalNum extends RealNum {
 
 }
