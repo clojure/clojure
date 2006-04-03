@@ -11,6 +11,7 @@
 /* rich Mar 25, 2006 4:28:27 PM */
 
 using System;
+using System.Collections;
 
 namespace org.clojure.runtime
 {
@@ -52,6 +53,26 @@ public class RT
 		?TRUE:null;
     	}
 
+    static public Iter iter(Object coll)
+        {
+        if (coll == null)
+            return null;
+        else if (coll is ISeq)
+            return ((ISeq)coll).iter();
+        else if (coll is IEnumerable)
+            {
+            IEnumerator e = ((IEnumerable)coll).GetEnumerator();
+            if (e.MoveNext())
+                return new EnumeratorIter(e);
+            return null;
+            }
+        else
+            {
+            throw new ArgumentException("Don't know how to create Iter from arg");
+            }
+
+        }
+                    
 static public Cons cons(Object x, Cons y)
 	{
 	return new Cons(x, y);

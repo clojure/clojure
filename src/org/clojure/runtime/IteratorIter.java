@@ -8,33 +8,37 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Mar 25, 2006 11:01:29 AM */
+/* rich Apr 3, 2006 */
 
 package org.clojure.runtime;
 
-public class Cons extends AMap implements Iter, ISeq{
+import java.util.Iterator;
 
-public Object first;
-public Cons rest;
+public class IteratorIter implements Iter{
 
-public Cons(Object first, Cons rest)
+Iterator i;
+Object val;
+
+IteratorIter(Iterator i)
 	{
-	this.first = first;
-	this.rest = rest;
+	if(!i.hasNext())
+		throw new IllegalStateException("Iterator must have elements to construct Iter");
+	this.i = i;
+	val = i.next();
 	}
 
 public Object get()
 	{
-	return first;
+	return val;
 	}
 
 public Iter iterate()
 	{
-	return rest;
-	}
-
-public Iter iter()
-	{
-	return this;
+	if(i.hasNext())
+		{
+		val = i.next();
+		return this;
+		}
+	return null;
 	}
 }

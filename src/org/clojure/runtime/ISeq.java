@@ -8,33 +8,12 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Mar 25, 2006 11:01:29 AM */
+/* rich Apr 3, 2006 */
 
 package org.clojure.runtime;
 
-public class Cons extends AMap implements Iter, ISeq{
+public interface ISeq{
 
-public Object first;
-public Cons rest;
+public Iter iter();
 
-public Cons(Object first, Cons rest)
-	{
-	this.first = first;
-	this.rest = rest;
-	}
-
-public Object get()
-	{
-	return first;
-	}
-
-public Iter iterate()
-	{
-	return rest;
-	}
-
-public Iter iter()
-	{
-	return this;
-	}
 }

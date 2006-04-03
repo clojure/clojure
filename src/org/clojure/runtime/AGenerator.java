@@ -8,33 +8,23 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Mar 25, 2006 11:01:29 AM */
+/* rich Apr 3, 2006 */
 
 package org.clojure.runtime;
 
-public class Cons extends AMap implements Iter, ISeq{
+public abstract class AGenerator implements ISeq, Iter{
 
-public Object first;
-public Cons rest;
-
-public Cons(Object first, Cons rest)
-	{
-	this.first = first;
-	this.rest = rest;
-	}
+Object __val;
+int __state = 0;
 
 public Object get()
 	{
-	return first;
-	}
-
-public Iter iterate()
-	{
-	return rest;
+	return __val;
 	}
 
 public Iter iter()
 	{
-	return this;
+	//generators get 'primed' by calling iterate once, which pulls up to first yield
+	return iterate();
 	}
 }
