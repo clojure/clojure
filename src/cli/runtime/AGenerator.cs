@@ -4,22 +4,10 @@ using System.Text;
 
 namespace org.clojure.runtime
     {
-public abstract class AGenerator : ISeq, Iter{
+public abstract class AGenerator : Iter{
 
     Object __val;
     int __state = 0;
-
-
-
-    #region ISeq Members
-
-    public Iter iter()
-        {
-        //generators get 'primed' by calling iterate once, which pulls up to first yield
-        return iterate();
-        }
-
-    #endregion
 
     #region Iter Members
 

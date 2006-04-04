@@ -12,7 +12,7 @@
 
 package org.clojure.runtime;
 
-public class Cons extends AMap implements Iter, ISeq{
+public class Cons extends AMap implements Iter{
 
 public Object first;
 public Cons rest;

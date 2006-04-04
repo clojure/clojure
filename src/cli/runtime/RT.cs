@@ -55,10 +55,8 @@ public class RT
 
     static public Iter iter(Object coll)
         {
-        if (coll == null)
-            return null;
-        else if (coll is ISeq)
-            return ((ISeq)coll).iter();
+        if (coll == null || coll is Iter)
+            return (Iter)coll;
         else if (coll is IEnumerable)
             {
             IEnumerator e = ((IEnumerable)coll).GetEnumerator();

@@ -51,10 +51,8 @@ public class RT{
 
 static public Iter iter(Object coll)
 	{
-	if(coll == null)
-		return null;
-	else if(coll instanceof ISeq)
-		return ((ISeq) coll).iter();
+	if(coll == null || coll instanceof Iter)
+		return (Iter) coll;
 	else if(coll instanceof Iterator)
 		{
 		Iterator i = (Iterator) coll;

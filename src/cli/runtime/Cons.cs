@@ -15,7 +15,7 @@ using System;
 namespace org.clojure.runtime
 {
 
-public class Cons : AMap,Iter,ISeq
+public class Cons : AMap,Iter
 				  {
 
 public Object first;
@@ -42,14 +42,6 @@ public Iter iterate()
 
 #endregion
 
-#region ISeq Members
-
-public Iter iter()
-    {
-    return this;
-    }
-
-#endregion
     }
 
 }

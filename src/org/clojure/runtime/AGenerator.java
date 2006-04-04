@@ -12,7 +12,7 @@
 
 package org.clojure.runtime;
 
-public abstract class AGenerator implements ISeq, Iter{
+public abstract class AGenerator implements Iter{
 
 Object __val;
 int __state = 0;
@@ -22,9 +22,4 @@ public Object get()
 	return __val;
 	}
 
-public Iter iter()
-	{
-	//generators get 'primed' by calling iterate once, which pulls up to first yield
-	return iterate();
-	}
 }
