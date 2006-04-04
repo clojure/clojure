@@ -39,6 +39,7 @@ static public void main(String jarName[])
 		TypeDump v = new TypeDump(System.out);
 		ZipFile f = new ZipFile(jarName[0]);
 		Enumeration en = f.entries();
+		System.out.println('(');
 		while(en.hasMoreElements())
 			{
 			ZipEntry e = (ZipEntry) en.nextElement();
@@ -49,6 +50,7 @@ static public void main(String jarName[])
 				cr.accept(v, false);
 				}
 			}
+		System.out.println(')');
 		}
 	catch(IOException e)
 		{
@@ -97,6 +99,30 @@ public void visitInnerClass(String name, String outerName, String innerName, int
 
 public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
 	{
+	if((access & Opcodes.ACC_PUBLIC) != 0)
+		{
+		p.println();
+		p.print(" (:field (:name ");
+		p.print(name);
+		p.print(") (:type ");
+		p.print(internalName(Type.getType(desc)));
+		p.print(")");
+		if((access & Opcodes.ACC_STATIC) != 0)
+			{
+			p.print(" (:static t)");
+			if(value != null && (access & Opcodes.ACC_FINAL) != 0)
+				{
+				p.print(" (:const-value ");
+				if(value instanceof String)
+					p.print('"');
+				p.print(value);
+				if(value instanceof String)
+					p.print('"');
+				p.print(")");
+				}
+			}
+		p.print(")");
+		}
 	return null;
 	}
 
@@ -109,20 +135,34 @@ String internalName(Type t)
 
 public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions)
 	{
-	Type args[] = Type.getArgumentTypes(desc);
-
-	p.println();
-	p.print(" (:method (:name " + name + ") (:arity " + args.length + ") (:ret " + internalName(Type.getReturnType(desc)) + ")");
-	p.println();
-	p.println("  (:desc \"" + desc + "\")");
-	p.print("  (:args");
-	for(int i = 0; i < args.length; i++)
+	if((access & Opcodes.ACC_PUBLIC) != 0)
 		{
-		Type arg = args[i];
-		p.print(" " + internalName(arg));
+		Type args[] = Type.getArgumentTypes(desc);
+
+		p.println();
+		p.print(" (:method (:name " + name + ") (:arity " + args.length + ") (:ret " +
+		        internalName(Type.getReturnType(desc)) + ")");
+		p.println();
+		p.println("  (:desc \"" + desc + "\")");
+		p.print("  (:args");
+		for(int i = 0; i < args.length; i++)
+			{
+			Type arg = args[i];
+			p.print(" " + internalName(arg));
+			}
+		p.print(')');
+		if((access & Opcodes.ACC_STATIC) != 0)
+			{
+			p.println();
+			p.print("  (:static t)");
+			}
+		if((access & Opcodes.ACC_VARARGS) != 0)
+			{
+			p.println();
+			p.print("  (:varargs t)");
+			}
+		p.print(')');
 		}
-	p.print(')');
-	p.print(')');
 	return null;
 	}
 
