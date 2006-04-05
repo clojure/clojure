@@ -14,11 +14,13 @@ package org.clojure.tools;
 
 import org.objectweb.asm.*;
 
-import java.io.PrintStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.Enumeration;
 
 /**
  * Creates an sexpr dump of type info
@@ -26,18 +28,26 @@ import java.util.Enumeration;
 public class TypeDump implements ClassVisitor{
 
 PrintStream p;
+boolean ignore;
+static List packages;
 
 public TypeDump(PrintStream p)
 	{
 	this.p = p;
 	}
 
-static public void main(String jarName[])
+static public void main(String args[])
 	{
+	if(args.length < 2)
+		{
+		System.err.println("Usage: java org.clojure.tools.TypeDump jarfile package [package ...]");
+		return;
+		}
+	packages = Arrays.asList(args).subList(1, args.length);
 	try
 		{
 		TypeDump v = new TypeDump(System.out);
-		ZipFile f = new ZipFile(jarName[0]);
+		ZipFile f = new ZipFile(args[0]);
 		Enumeration en = f.entries();
 		System.out.println('(');
 		while(en.hasMoreElements())
@@ -60,9 +70,18 @@ static public void main(String jarName[])
 
 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)
 	{
+	String pkg = name.substring(0,name.lastIndexOf('/')).replace('/','.');
+	if((access & Opcodes.ACC_PUBLIC) == 0
+			|| !packages.contains(pkg))
+		{
+		ignore = true;
+		return;
+		}
+	else
+		ignore = false;
 	p.print('(');
-	p.println("(:name " + name + ")");
-	p.print(" (:super " + superName + ")");
+	p.println("(:name \"" + name + "\")");
+	p.print(" (:super \"" + superName + "\")");
 	if(interfaces.length > 0)
 		{
 		p.println();
@@ -70,7 +89,7 @@ public void visit(int version, int access, String name, String signature, String
 		for(int i = 0; i < interfaces.length; i++)
 			{
 			String anInterface = interfaces[i];
-			p.print(" " + anInterface);
+			p.print(" \"" + anInterface + "\"");
 			}
 		p.print(')');
 		}
@@ -99,14 +118,14 @@ public void visitInnerClass(String name, String outerName, String innerName, int
 
 public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
 	{
-	if((access & Opcodes.ACC_PUBLIC) != 0)
+	if(!ignore && (access & Opcodes.ACC_PUBLIC) != 0)
 		{
 		p.println();
-		p.print(" (:field (:name ");
+		p.print(" (:field (:name \"");
 		p.print(name);
-		p.print(") (:type ");
+		p.print("\") (:type \"");
 		p.print(internalName(Type.getType(desc)));
-		p.print(")");
+		p.print("\")");
 		if((access & Opcodes.ACC_STATIC) != 0)
 			{
 			p.print(" (:static t)");
@@ -135,31 +154,37 @@ String internalName(Type t)
 
 public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions)
 	{
-	if((access & Opcodes.ACC_PUBLIC) != 0)
+	if(!ignore && (access & Opcodes.ACC_PUBLIC) != 0)
 		{
 		Type args[] = Type.getArgumentTypes(desc);
 
 		p.println();
-		p.print(" (:method (:name " + name + ") (:arity " + args.length + ") (:ret " +
-		        internalName(Type.getReturnType(desc)) + ")");
-		p.println();
-		p.println("  (:desc \"" + desc + "\")");
-		p.print("  (:args");
-		for(int i = 0; i < args.length; i++)
-			{
-			Type arg = args[i];
-			p.print(" " + internalName(arg));
-			}
-		p.print(')');
+		if(name.equals("<init>"))
+			p.print(" (:ctor ");
+		else
+			p.print(" (:method (:name \"" + name + "\") (:ret \"" +
+		        internalName(Type.getReturnType(desc)) + "\")");
+		p.print("(:arity " + args.length + ")");
 		if((access & Opcodes.ACC_STATIC) != 0)
 			{
-			p.println();
 			p.print("  (:static t)");
 			}
 		if((access & Opcodes.ACC_VARARGS) != 0)
 			{
-			p.println();
 			p.print("  (:varargs t)");
+			}
+		p.println();
+		p.print("  (:desc \"" + desc + "\")");
+		if(args.length > 0)
+			{
+			p.println();
+			p.print("  (:args");
+			for(int i = 0; i < args.length; i++)
+				{
+				Type arg = args[i];
+				p.print(" \"" + internalName(arg) + "\"");
+				}
+			p.print(')');
 			}
 		p.print(')');
 		}
@@ -168,6 +193,7 @@ public MethodVisitor visitMethod(int access, String name, String desc, String si
 
 public void visitEnd()
 	{
-	p.println(')');
+	if(!ignore)
+		p.println(')');
 	}
 }
