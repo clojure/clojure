@@ -12,9 +12,21 @@
 "generates symbols for types/classes and members in supplied file
 see typedump in the Java/C# side"
   (labels ((type-name (td)
-             (second (assoc :name td))))
+             (second (assoc :name td)))
+           (arity (entry)
+             (second (assoc :arity (rest entry))))
+           (name (entry)
+             (second (assoc :name (rest entry))))
+           (simple-name (tn)
+             (if (find *package-separator* tn)
+                 (subseq tn (1+ (position *package-separator* tn :from-end t)))
+               tn))
+           (sig (entry)
+             (format nil "<~{~A~^*~}>~@[~A~]"
+                     (mapcar #'simple-name (rest (assoc :args (rest entry))))
+                     (simple-name (second (assoc :ret (rest entry)))))))
     (let ((type-descriptors (with-open-file (f type-file)
-                           (read f))))
+                              (read f))))
       (dolist (td type-descriptors)
         (let* ((split (position *package-separator* (type-name td) :from-end t))
                (package-name (subseq (type-name td) 0 split))
@@ -26,7 +38,39 @@ see typedump in the Java/C# side"
             (case (first entry)
               (:field
                (let ((field-sym (intern (string-append class-name
-                                                       (second (assoc :name (rest entry))))
+                                                       (name entry))
                                         package)))
                  (export field-sym package)
-                 (setf (get field-sym 'type-info) entry))))))))))
+                 (setf (get field-sym 'type-info) entry)))
+              (:ctor
+               (let* ((ar (arity entry))
+                      (overloaded (member-if (lambda (e)
+                                               (and (not (eql e entry))
+                                                    (eql (first e) :ctor)
+                                                    (eql (arity e) ar)))
+                                             td))
+                      (ctor-sym (intern (concatenate 'string 
+                                                     class-name
+                                                     "new"
+                                                     (when overloaded
+                                                       (sig entry)))
+                                        package)))
+                 (export ctor-sym package)
+                 (push entry (get ctor-sym 'type-info))))
+              (:method
+               (let* ((ar (arity entry))
+                      (nm (name entry))
+                      (overloaded (member-if (lambda (e)
+                                               (and (not (eql e entry))
+                                                    (eql (first e) :method)
+                                                    (string= (name e) nm)
+                                                    (eql (arity e) ar)))
+                                             td))
+                      (method-sym (intern (concatenate 'string 
+                                                     class-name
+                                                     nm
+                                                     (when overloaded
+                                                       (sig entry)))
+                                        package)))
+                 (export method-sym package)
+                 (push entry (get method-sym 'type-info)))))))))))
