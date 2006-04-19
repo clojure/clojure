@@ -24,19 +24,9 @@ static final public HashMap table = new HashMap();
 /**
  * String->Symbol
  */
-final public HashMap symbols = new HashMap();
+final public HashMap accessors = new HashMap();
+final public HashMap vars = new HashMap();
 final public String name;
-
-static final public Namespace globalNS = new Namespace("");
-static final public Namespace keywordNS = new Namespace("keyword"){
-	public Symbol intern(String name)
-		{
-		Symbol sym = (Symbol) symbols.get(name);
-		if(sym == null)
-			symbols.put(name, sym = new Keyword(name, this));
-		return sym;
-		}
-};
 
 Namespace(String name)
 	{
@@ -60,14 +50,25 @@ static public Namespace findOrCreate(String name)
 		}
 	}
 
-public Symbol intern(String name)
+public Var internVar(String name)
 	{
-	synchronized(symbols)
+	synchronized(vars)
 		{
-		Symbol sym = (Symbol) symbols.get(name);
-		if(sym == null)
-			symbols.put(name, sym = new Symbol(name, this));
-		return sym;
+		Var var = (Var) vars.get(name);
+		if(var == null)
+			vars.put(name, var = new Var(name, this));
+		return var;
+		}
+	}
+
+public Accessor internAccessor(String name)
+	{
+	synchronized(accessors)
+		{
+		Accessor acc = (Accessor) accessors.get(name);
+		if(acc == null)
+			accessors.put(name, acc = new Accessor(name, this));
+		return acc;
 		}
 	}
 }

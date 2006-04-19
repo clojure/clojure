@@ -12,32 +12,65 @@
 
 package org.clojure.runtime;
 
-public class Keyword extends Symbol{
+import java.util.HashMap;
+
+public class Keyword extends Indexer{
+
+
+final public static HashMap table = new HashMap();
+
+public final String name;
+
+public static Keyword intern(String name)
+	{
+	synchronized(table)
+		{
+		Keyword sym = (Keyword) table.get(name);
+		if(sym == null)
+			table.put(name, sym = new Keyword(name));
+		return sym;
+		}
+	}
 /**
  * Used by Namespace.intern()
  *
  * @param name
- * @param ns
+
  */
-Keyword(String name, Namespace ns)
+Keyword(String name)
 	{
-	super(name, ns);
-	this.val = this;
-	this.fn = this;
-	}
-
-public Object getValue(ThreadLocalData tld)
-	{
-	return this;
-	}
-
-public Object setValue(ThreadLocalData tld, Object val)
-	{
-	throw new UnsupportedOperationException("Cannot set the value of a keyword");
+	this.name = name;
 	}
 
 public String toString()
 	{
 	return ":" + name;
+	}
+
+/**
+ *  Indexer implements IFn for attr access
+ *  This single arg version is the getter
+ * @param tld
+ * @param obj - must be AMap
+ * @return the value of the attr or nil if not found
+ * @throws Exception
+ */
+public Object invoke(ThreadLocalData tld, Object obj) throws Exception
+	{
+	return ((AMap)obj).get(this);
+	}
+
+/**
+ *  Indexer implements IFn for attr access
+ *  This two arg version is the setter
+ * @param tld
+ * @param obj - must be AMap
+ * @param val
+ * @return val
+ * @throws Exception
+ */
+public Object invoke(ThreadLocalData tld, Object obj, Object val) throws Exception
+	{
+	return ((AMap)obj).put(this,val);
 	}
 }

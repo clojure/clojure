@@ -22,24 +22,6 @@ public Object[] mvArray = new Object[MULTIPLE_VALUES_LIMIT];
 
 IdentityHashMap dynamicBindings = new IdentityHashMap();
 
-final public Cons getDynamicBinding(Symbol sym)
-	{
-	return (Cons) dynamicBindings.get(sym);
-	}
-
-final public Cons pushDynamicBinding(Symbol sym, Object val)
-	{
-	Cons ret = new Cons(val, getDynamicBinding(sym));
-	dynamicBindings.put(sym, ret);
-	return ret;
-	}
-
-
-final public Cons popDynamicBinding(Symbol sym)
-	{
-	return (Cons) dynamicBindings.put(sym, getDynamicBinding(sym).rest);
-	}
-
 public ThreadLocalData(IdentityHashMap dynamicBindings)
 	{
 	this.mvCount = 0;

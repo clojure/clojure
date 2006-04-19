@@ -16,6 +16,9 @@ import java.util.Iterator;
 
 public class RT{
 
+	public Object test;
+	public Object test(){return null;}
+
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?Boolean.TRUE:null;
         }

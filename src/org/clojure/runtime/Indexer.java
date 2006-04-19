@@ -8,29 +8,9 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Mar 25, 2006 3:44:58 PM */
+/* rich Apr 19, 2006 */
 
 package org.clojure.runtime;
 
-import java.util.IdentityHashMap;
-
-public class AMap{
-
-IdentityHashMap attrs;
-public static final int INITIAL_SIZE = 7;
-
-public Object put(Indexer key, Object val)
-	{
-	if(attrs == null)
-		attrs = new IdentityHashMap(INITIAL_SIZE);
-	attrs.put(key, val);
-	return val;
-	}
-
-public Object get(Indexer key)
-	{
-	if(attrs == null)
-		return null;
-	return attrs.get(key);
-	}
+public class Indexer extends AFn{
 }

@@ -12,82 +12,40 @@
 
 package org.clojure.runtime;
 
-public class Symbol extends AFn{
+import java.util.HashMap;
 
-public final static Object UNBOUND = new Object();
+public class Symbol extends AMap{
+
+final public static HashMap table = new HashMap();
 
 public final String name;
-public Namespace namespace;
-public Object val = UNBOUND;
-public IFn fn;  //todo, bind to throw stub?
 
 public String toString()
 	{
-	if(namespace == Namespace.globalNS)
-		return name;
-	if(namespace == null)
-		return "#:" + name;
-	return namespace.name + ":" + name;
+	return name;
+	}
+
+public static Symbol intern(String name)
+	{
+	synchronized(table)
+		{
+		Symbol sym = (Symbol) table.get(name);
+		if(sym == null)
+			table.put(name, sym = new Symbol(name));
+		return sym;
+		}
 	}
 
 /**
- * Used by Namespace.intern()
+ * Used by intern()
  * @param name
- * @param ns
  */
-Symbol(String name, Namespace ns)
+Symbol(String name)
 	{
-	this.namespace = ns;
 	this.name = name;
 	}
 
-public Object getValue(ThreadLocalData tld)
-	{
-	Cons binding = tld.getDynamicBinding(this);
-	if(binding != null)
-		return binding.first;
-	if(val == UNBOUND)
-		throw new IllegalStateException(name + " is unbound.");
-	return val;
-	}
 
-public Object setValue(ThreadLocalData tld, Object val)
-	{
-	Cons binding = tld.getDynamicBinding(this);
-	if(binding != null)
-		return binding.first = val;
-	//allow global set to create binding like this?
-	if(val instanceof IFn)
-		this.fn = (IFn) val;
-	else
-		this.fn = null; //todo, bind to throw stub?
-	return this.val = val;
-	}
 
-/**
- *  Symbol implements IFn for attr access
- *  This single arg version is the getter
- * @param tld
- * @param obj - must be AMap
- * @return the value of the attr or nil if not found
- * @throws Exception
- */
-public Object invoke(ThreadLocalData tld, Object obj) throws Exception
-	{
-	return ((AMap)obj).get(this);
-	}
 
-/**
- *  Symbol implements IFn for attr access
- *  This two arg version is the setter
- * @param tld
- * @param obj - must be AMap
- * @param val
- * @return val
- * @throws Exception
- */
-public Object invoke(ThreadLocalData tld, Object obj, Object val) throws Exception
-	{
-	return ((AMap)obj).put(this,val);
-	}
 }
