@@ -27,25 +27,10 @@ static public HybridDictionary table = new HybridDictionary();
 /**
  * String->Symbol
  */
-public HybridDictionary symbols = new HybridDictionary();
+public HybridDictionary vars = new HybridDictionary();
+public HybridDictionary accessors = new HybridDictionary();
 public String name;
 
-static public Namespace globalNS = new Namespace("");
-static public Namespace keywordNS = new KeywordNamespace("keyword");
-
-class KeywordNamespace : Namespace{
-	public KeywordNamespace(String name) : base(name)
-	{
-	
-	}
-	override public Symbol intern(String name)
-		{
-		Symbol sym = (Symbol) symbols[name];
-		if(sym == null)
-			symbols.Add(name, sym = new Keyword(name, this));
-		return sym;
-		}
-};
 
 Namespace(String name)
 	{
@@ -69,15 +54,8 @@ static public Namespace findOrCreate(String name)
 		}
 	}
 
-virtual public Symbol intern(String name)
-	{
-	lock(symbols)
-		{
-		Symbol sym = (Symbol) symbols[name];
-		if(sym == null)
-			symbols.Add(name, sym = new Symbol(name, this));
-		return sym;
-		}
-	}
+public Var internVar(String name)	{	lock(vars)		{		Var var = (Var) vars[name];		if(var == null)			vars.Add(name,var = new Var(name, this));		return var;		}	}
+
+public Accessor internAccessor(String name)	{	lock(accessors)		{		Accessor acc = (Accessor) accessors[name];		if(acc == null)			accessors.Add(name, acc = new Accessor(name, this));		return acc;		}	}
 }
 }

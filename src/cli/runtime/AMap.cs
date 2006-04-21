@@ -22,7 +22,7 @@ public class AMap
 HybridDictionary attrs;
 public static int INITIAL_SIZE = 7;
 
-public Object put(Symbol key, Object val)
+public Object put(Indexer key, Object val)
 	{
 	if(attrs == null)
 		attrs = new HybridDictionary(INITIAL_SIZE);
@@ -30,7 +30,7 @@ public Object put(Symbol key, Object val)
 	return val;
 	}
 
-public Object get(Symbol key)
+public Object get(Indexer key)
 	{
 	if(attrs == null)
 		return null;

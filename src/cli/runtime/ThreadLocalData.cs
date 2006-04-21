@@ -21,27 +21,7 @@ public const int MULTIPLE_VALUES_LIMIT = 20;
 public int mvCount = 0;
 public Object[] mvArray = new Object[MULTIPLE_VALUES_LIMIT];
 
-HybridDictionary dynamicBindings = new HybridDictionary();
-
-public Cons getDynamicBinding(Symbol sym)
-	{
-	return (Cons) dynamicBindings[sym];
-	}
-
-public Cons pushDynamicBinding(Symbol sym, Object val)
-	{
-	Cons ret = new Cons(val, getDynamicBinding(sym));
-	dynamicBindings[sym] = ret;
-	return ret;
-	}
-
-
-public Cons popDynamicBinding(Symbol sym)
-	{
-	Cons ret = (Cons) getDynamicBinding(sym).rest; 
-	dynamicBindings[sym] = ret;
-	return ret;
-	}
+internal HybridDictionary dynamicBindings = new HybridDictionary();
 
 public ThreadLocalData(HybridDictionary dynamicBindings)
 	{

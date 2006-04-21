@@ -11,39 +11,21 @@
 /* rich Mar 29, 2006 10:39:05 AM */
 
 using System;
+using System.Collections.Specialized;
 
 namespace org.clojure.runtime
 {
 
-public class Keyword : Symbol
+public class Keyword : Indexer
 					 {
-/**
- * Used by Namespace.intern()
- *
- * @param name
- * @param ns
- */
-internal Keyword(String name, Namespace ns):
-	base(name, ns)
+static public HybridDictionary table = new HybridDictionary();
 
-	{
-	this.val = this;
-	this.fn = this;
-	}
 
-override public Object getValue(ThreadLocalData tld)
-	{
-	return this;
-	}
-
-override public Object setValue(ThreadLocalData tld, Object val)
-	{
-	throw new InvalidOperationException("Cannot set the value of a keyword");
-	}
-
-override public String ToString()
+public String name;override public String ToString()
 	{
 	return ":" + name;
 	}
+public static Keyword intern(String name)	{	lock(table)		{		Keyword sym = (Keyword) table[name];		if(sym == null)			table.Add(name, sym = new Keyword(name));		return sym;		}	}/** * Used by Namespace.intern() * * @param name */Keyword(String name)	{	this.name = name;	}/** *  Indexer implements IFn for attr access *  This single arg version is the getter * @param tld * @param obj - must be AMap * @return the value of the attr or nil if not found */override public Object invoke(ThreadLocalData tld, Object obj) /*throws Exception*/	{	return ((AMap)obj).get(this);	}/** *  Indexer implements IFn for attr access *  This two arg version is the setter * @param tld * @param obj - must be AMap * @param val * @return val */override public Object invoke(ThreadLocalData tld, Object obj, Object val) /*throws Exception*/	{	return ((AMap)obj).put(this,val);	}
+
 }
 }
