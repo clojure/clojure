@@ -55,6 +55,11 @@ static public Var internVar(String ns,String var)
 	return findOrCreate(ns).internVar(var);
 	}
 
+static public Accessor internAccessor(String ns,String name)
+	{
+	return findOrCreate(ns).internAccessor(name);
+	}
+
 public Var internVar(String name)
 	{
 	synchronized(vars)
