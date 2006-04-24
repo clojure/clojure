@@ -50,6 +50,11 @@ static public Namespace findOrCreate(String name)
 		}
 	}
 
+static public Var internVar(String ns,String var)
+	{
+	return findOrCreate(ns).internVar(var);
+	}
+
 public Var internVar(String name)
 	{
 	synchronized(vars)
