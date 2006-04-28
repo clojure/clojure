@@ -17,7 +17,7 @@ namespace org.clojure.runtime
 
 public abstract class RestFn5 : AFn{
 
-protected abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
+    public abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
                                    Cons rest)
 		/*throws Exception*/;
 

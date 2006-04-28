@@ -17,7 +17,7 @@ namespace org.clojure.runtime
 
 public abstract class RestFn3 : AFn{
 
-protected abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Cons rest) /*throws Exception*/;
+    public abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Cons rest) /*throws Exception*/;
 
 override public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Exception*/
 	{
