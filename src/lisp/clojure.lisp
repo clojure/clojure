@@ -22,6 +22,8 @@
  "set to #\/ for JVM, #\. for CLI")
 
 
+(defconstant +MAX-POSITIONAL-ARITY+ 5)
+
 (defvar *host* nil) ; :jvm or :cli
 (defvar *clojure-source-path*)
 (defvar *clojure-target-path*)
@@ -143,12 +145,12 @@
 
 (defun var-member-name (symbol)
   (format nil "~A__~A"
-          (munge-name (symbol-package symbol))
+          (munge-name (package-name (symbol-package symbol)))
           (munge-name (symbol-name symbol))))
 
 (defun accessor-member-name (symbol)
-  (format nil "DOT__~A__~A"
-          (munge-name (symbol-package symbol))
+  (format nil "ACC__~A__~A"
+          (munge-name (package-name (symbol-package symbol)))
           (munge-name (symbol-name symbol))))
 
 (defun symbol-member-name (symbol)
@@ -258,7 +260,7 @@
       (dolist (var *vars*)
         (format target "static Var ~A = Namespace.internVar(~S,~S);~%"
                 (var-member-name var)
-                (munge-name (symbol-package var))
+                (munge-name (package-name (symbol-package var)))
                 (munge-name (symbol-name var))))
       (dolist (accessor *accessors*)
         (format target "static Accessor ~A = Namespace.internAccessor(~S,~S);~%"
@@ -332,19 +334,94 @@
     (|let*| (analyze-let* context form))
     (|loop| (analyze-loop context form))
     (|try| (analyze-try context form))
-    (t (analyze-invoke context form))))
+    (t (analyze-invoke context op form))))
+
+(defmacro emit-to-string (&body body)
+  `(with-output-to-string (s)
+     (let ((*standard-output* s))
+       ,@body)))
+
+(defun analyze-invoke (context op form)
+  (declare (ignore context))
+  ;if we hit this unspecialized method, it is not a special op, presume function invocation
+  (newobj :type :invoke
+          :fexpr (if (symbolp op)
+                     (analyze-symbol :fn op)
+                   (analyze :expression op))
+          :args (mapcar (lambda (e)
+                          (analyze :expression e))
+                        (rest form))))
+
+(defun emit-invoke (context expr)
+  (ccase context
+    (:statement
+     (emit :expression expr)
+     (format t ";~%"))
+    (:return
+     (emit-return expr))
+    (:expression
+     (let* ((fexpr (@ :fexpr expr))
+            (global-binding? (eql :global-binding (@ :type fexpr)))
+            (static-method? (will-be-static-method fexpr))
+            (args (@ :args expr)))
+       (when (not (or global-binding? static-method?))
+         (format t "((IFn)"))
+       (emit :expression fexpr)        
+       (if global-binding?
+           (format t ".fn")
+         (unless static-method?
+           (format t ")")))
+       (unless static-method?
+         (format t ".invoke"))
+       (format t "(__tld")
+       (when static-method?
+         (let ((closes (@ :closes (first (@ :methods (@ :fn fexpr))))))
+           (format t "~{, ~A~}"
+                   (mapcar (lambda (b)
+                             (binding-name b))
+                           closes))))
+       (format t "~{, ~A~}"
+               (mapcar (lambda (e)
+                         (emit-to-string
+                          (emit :expression e)))
+                       (ldiff args (nthcdr +MAX-POSITIONAL-ARITY+ args))))
+       (when (nthcdr +MAX-POSITIONAL-ARITY+ args)
+         (format t ",new Object[]{~{~A~^,~}}"
+                 (mapcar (lambda (e)
+                           (emit-to-string
+                            (emit :expression e)))
+                         (nthcdr +MAX-POSITIONAL-ARITY+ args))))
+       (format t ")")))))
 
 (defun emit (context expr)
   (cond
    ((null expr) (emit-nil context))
-   (t (ecase (@ :type expr)
+   (t (ccase (@ :type expr)
         (:defn* (emit-defn* context expr))
-        (:binding (emit-binding context expr))))))
+        (:binding (emit-binding context expr))
+        (:accessor (emit-accessor context expr))
+        (:keyword (emit-keyword context expr))
+        (:global-binding (emit-global-binding context expr))
+        (:block (emit-block context expr))
+        (:invoke (emit-invoke context expr))))))
 
 (defun emit-return (expr)
   (format t "return ")
   (emit :expression expr)
   (format t ";~%"))
+
+
+(defun emit-global-binding (context expr)
+  (declare (ignore context))
+  (format t "~A" (var-member-name (@ :symbol expr))))
+
+(defun emit-accessor (context expr)
+  (declare (ignore context))
+  (format t "~A" (accessor-member-name (@ :symbol expr))))
+
+(defun emit-keyword (context expr)
+  (declare (ignore context))
+  (format t "~A" (keyword-member-name (@ :symbol expr))))
 
 (defun emit-new-closure-instance (name-binding-fn)
   (format t "(new ~A(~{~A~^, ~}))"
@@ -354,7 +431,8 @@
                   (@ :closes (first (@ :methods (@ :fn name-binding-fn)))))))
 
 (defun emit-binding (context expr)
-  (ecase context
+  (ccase context
+    (:statement) ;var statement is a no-op
     (:expression
      (if (and (@ :anonymous-fn? expr) (not (will-be-static-method expr)))
          (emit-new-closure-instance expr)
@@ -377,13 +455,31 @@
                        (butlast exprs))
                (list (analyze :return (first (last exprs)))))))))
 
+(defun emit-body (context body)
+  (case context
+        (:return 
+         (dolist (e (butlast body))
+           (emit :statement e))
+         (if body
+             (emit :return (first (last body)))
+           (format t "return null;~%")))
+        (:statement
+         (dolist (e body)
+           (emit :statement e)))))
+
+(defun emit-block (context expr)
+  (when (@ :body expr)
+    (format t "{~%")
+    (emit-body context (@ :body expr))
+    (format t "}~%")))
+
 (defun analyze-block (context form)
   (cond 
    ((null (rest form))
       (analyze context '|nil|))
    ((null (rest (rest form)))
       (analyze context (second form)))
-   (t (ecase context
+   (t (ccase context
         (:expression (analyze context `(|fn*| (() ,@(rest form)))))
         ((:statement :return) (newobj :type :block
                                       :body (analyze-body context (rest form))))))))
@@ -409,7 +505,7 @@
     (emit-fn-declaration :top (munge-name name) (@ :fn expr) nil)))
 
 (defun emit-nil (context)
-  (ecase context
+  (ccase context
     (:expression (format t "null"))
     (:statement)
     (:return (emit-return nil))))
@@ -455,6 +551,8 @@
                (:rest
                 (setf (@ :rest *frame*) (create-param-binding p)))))))
 
+      (when (> (length (@ :reqs *frame*)) +MAX-POSITIONAL-ARITY+)
+        (error "sorry, can't have more than ~S required args" +MAX-POSITIONAL-ARITY+))
       (setf (@ :reqs *frame*) (nreverse (@ :reqs *frame*)))
       (setf (@ :body *frame*) (analyze :return `(|block| ,@body)))
 
@@ -485,6 +583,11 @@
   (case *host*
     (:jvm "extends")
     (:cli ":")))
+
+(defun overrides-string ()
+  (case *host*
+    (:jvm "")
+    (:cli "override ")))
 
 (defun fn-name (fn)
   (if (@ :rest fn)
@@ -565,7 +668,7 @@
     (dolist (m methods)
       ;if static, we are expecting this to run once
       (unless as-static-method?
-        (format t "public Object ~A(" (fn-name m)))
+        (format t "~Apublic Object ~A(" (overrides-string) (fn-name m)))
 
         ;params
       (let ((rest (@ :rest m)))
@@ -638,6 +741,12 @@
 (defun register-var-reference (sym)
   (pushnew sym *vars*))
 
+(defun register-accessor-reference (sym)
+  (pushnew sym *accessors*))
+
+(defun register-keyword-reference (sym)
+  (pushnew sym *keywords*))
+
 (defun register-needs-tls ()
   (setf (@ :needs-tls *frame*) t))
 
@@ -652,16 +761,21 @@
 
 (defun analyze-symbol (context sym)
   (cond
-   ((keywordp sym) (newobj :type :keyword :symbol sym))
+   ((keywordp sym)
+    (register-keyword-reference sym)
+    (newobj :type :keyword :symbol sym))
    ((host-symbol? sym) (newobj :type :host-symbol :symbol sym))
-   ((accessor? sym) (newobj :type :accessor :symbol sym))
+   ((accessor? sym)
+    (register-accessor-reference sym)
+    (newobj :type :accessor :symbol sym))
    (t (or (reference-var sym)
           ;not a local var
           (progn
             (register-var-reference sym)
-            (newobj :type :global-binding :symbol sym)
             (unless (eql context :fn)
-              (register-needs-tls)))))))
+              (register-needs-tls))
+            (newobj :type :global-binding :symbol sym)
+            )))))
 
 
 ;load-types is for typed host references
