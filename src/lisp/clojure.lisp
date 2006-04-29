@@ -398,6 +398,7 @@
    ((null expr) (emit-nil context))
    (t (ccase (@ :type expr)
         (:defn* (emit-defn* context expr))
+        (:fn* (emit-fn* context expr))
         (:binding (emit-binding context expr))
         (:accessor (emit-accessor context expr))
         (:keyword (emit-keyword context expr))
@@ -470,6 +471,30 @@
                   (register-local-binding (@ :binding binit))
                   (add-to-var-env (@ :binding binit)))
                 binding-inits)
+          (newobj :type :let
+                  :binding-inits binding-inits
+                  :body (analyze-body context body)))))))
+
+(defun analyze-let* (context form)
+  (let ((bindings (normalize-let-bindings (second form)))
+        (body (rest (rest form))))
+    (cond
+     ;special case of (let () expr) ==> expr
+     ((not (or bindings (> (length body) 1)))
+      (analyze context (third form)))
+     ((eql context :expression)
+      (analyze :expression `((|fn*| (() ,form)))))
+     (t (let* ((*var-env* *var-env*)
+               (binding-inits
+                (mapcar (lambda (b)
+                          ;sequential binding
+                          (let ((binit
+                                 (newobj :binding (newobj :type :binding :symbol (first b))
+                                         :init (analyze :expression (second b)))))
+                            (register-local-binding (@ :binding binit))
+                            (add-to-var-env (@ :binding binit))
+                            binit))
+                        bindings))) 
           (newobj :type :let
                   :binding-inits binding-inits
                   :body (analyze-body context body)))))))
@@ -573,12 +598,26 @@
 (defun add-to-var-env (b)
   (push b *var-env*))
 
+(defun register-nested-fn-binding (b)
+  (push b *nested-fn-bindings*))
+
 (defun analyze-fn* (context form)
-  (declare (ignore context))
-  (newobj :type :fn*
-          :methods (mapcar (lambda (m)
-                             (analyze-method (first m) (rest m)))
-                           (rest form))))
+  (let ((fn (newobj :type :fn*
+                    :methods (mapcar (lambda (m)
+                                       (analyze-method (first m) (rest m)))
+                                     (rest form)))))
+    (if (eql context :expression)
+      ;presume anonymous fn
+      (let ((b (newobj :type :binding :fn fn :symbol (gensym) :anonymous-fn? t)))
+        (setf (@ :binding fn) b)
+        (register-nested-fn-binding b)
+        b)
+      fn)))
+
+(defun emit-fn* (context expr)
+  ;not meaningful except in expression context
+  (when (eql context :expression)
+    (emit-binding context (@ :binding expr))))
 
 (defun analyze-method (params body)
   (let* ((*frame* (newobj :parent *frame*))
