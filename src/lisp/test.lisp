@@ -19,4 +19,10 @@
 (defn fk (x)
       (:foo x))
 
+(defn fl (a b c)
+      (let ((d b)
+            d))
+      (let ((e c)
+            e)))
+
 (defn fr (a b & c) c)

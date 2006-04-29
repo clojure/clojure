@@ -403,7 +403,8 @@
         (:keyword (emit-keyword context expr))
         (:global-binding (emit-global-binding context expr))
         (:block (emit-block context expr))
-        (:invoke (emit-invoke context expr))))))
+        (:invoke (emit-invoke context expr))
+        (:let (emit-let context expr))))))
 
 (defun emit-return (expr)
   (format t "return ")
@@ -439,8 +440,50 @@
        (format t "~A~:[~;.val~]" (binding-name expr) (needs-box expr))))
     (:return (emit-return expr))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;; let ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun normalize-let-bindings (binding-list)
+  (mapcar (lambda (b)
+            (if (atom b)
+                (list b nil)
+              b))
+          binding-list))
+
 (defun analyze-let (context form)
-  )
+  (let ((bindings (normalize-let-bindings (second form)))
+        (body (rest (rest form))))
+    (cond
+     ;special case of (let () expr) ==> expr
+     ((not (or bindings (> (length body) 1)))
+      (analyze context (third form)))
+     ((eql context :expression)
+      (analyze :expression `((|fn*| (,(mapcar #' first bindings) ,@body))
+                             ,@(mapcar #'second bindings))))
+     (t (let* ((binding-inits
+                ;init exprs are analyzed prior to adding bindings to env
+                (mapcar (lambda (b)
+                          (newobj :binding (newobj :type :binding :symbol (first b))
+                                :init (analyze :expression (second b))))
+                        bindings))
+               (*var-env* *var-env*))
+          (mapc (lambda (binit)
+                  (register-local-binding (@ :binding binit))
+                  (add-to-var-env (@ :binding binit)))
+                binding-inits)
+          (newobj :type :let
+                  :binding-inits binding-inits
+                  :body (analyze-body context body)))))))
+
+(defun emit-let (context expr)
+  (let ((binding-inits (@ :binding-inits expr))
+        (body (@ :body expr)))
+    (dolist (bi binding-inits)
+      (unless (will-be-static-method (@ :binding bi))
+        (emit :expression (@ :binding bi))
+        (format t " = ")
+        (emit :expression (@ :init bi))
+        (format t ";~%")))
+    (emit-body context body)))
 
 (defun analyze-body (context exprs)
   (when exprs
@@ -467,6 +510,8 @@
          (dolist (e body)
            (emit :statement e)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; block ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun emit-block (context expr)
   (when (@ :body expr)
     (format t "{~%")
@@ -483,6 +528,8 @@
         (:expression (analyze context `(|fn*| (() ,@(rest form)))))
         ((:statement :return) (newobj :type :block
                                       :body (analyze-body context (rest form))))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; defn ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun analyze-defn* (context form)
   (assert (eql context :top))
