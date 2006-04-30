@@ -345,6 +345,61 @@
      (let ((*standard-output* s))
        ,@body)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; if ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze-if (context form)
+  (if (eql (second form) '|t|)
+      ;optimize macro-generated (if t ...) forms
+      (analyze context (macroexpand (third form)))
+    (let* ((test (analyze :expression (macroexpand (second form))))
+           (negate (eql :not (@ :type test))))
+      (newobj :type :if
+              :test (if negate (@ :expr test) test)
+              :comp (if negate "==" "!=")
+              :then (analyze context (macroexpand (third form)))
+              :else (when (fourth form)
+                      (analyze context (macroexpand (fourth form))))
+              :else-p (= 4 (length form))))))
+
+(defun emit-if (context expr)
+  (let ((test (@ :test expr))
+        (then (@ :then expr))
+        (else (@ :else expr))
+        (else-p (@ :else-p expr))
+        (comp (@ :comp expr)))
+    (ccase context
+      (:expression
+       (format t "(")
+       (emit :expression test)
+       (format t " ~A null?" comp)
+       (emit :expression then)
+       (format t ":")
+       (emit :expression else)
+       (format t ")"))
+      (:statement
+       (format t "if(")
+       (emit :expression test)
+       (format t " ~A null)~%{~%" comp)
+       (emit context then)
+       (format t "}~%")
+       (when (and else-p else)
+         (format t "else~%{~%")
+         (emit context else)
+         (format t "}~%")))
+      (:return
+       (format t "if(")
+       (emit :expression test)
+       (format t " ~A null)~%{~%" comp)
+       (emit context then)
+       (format t "}~%")
+       (format t "else~%{~%")
+       (if else-p
+           (emit context else)
+         (format t "return null;~%"))
+       (format t "}~%")))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; invoke ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun analyze-invoke (context op form)
   (declare (ignore context))
   ;if we hit this unspecialized method, it is not a special op, presume function invocation
@@ -409,7 +464,8 @@
         (:global-binding (emit-global-binding context expr))
         (:block (emit-block context expr))
         (:invoke (emit-invoke context expr))
-        (:let (emit-let context expr))))))
+        (:let (emit-let context expr))
+        (:if (emit-if context expr))))))
 
 (defun emit-return (expr)
   (format t "return ")

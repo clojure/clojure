@@ -40,4 +40,12 @@
               (d (x) (d a)))
              (c x)))
 
+
+(defn fif (a b x y z)
+      (if a
+          (if (if x y z)
+              y
+            z)
+        b))
+
 (defn fr (a b & c) c)
