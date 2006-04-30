@@ -20,14 +20,18 @@
       (:foo x))
 
 (defn fl (a b c)
-      (let ((d (let ((x a)) x)))
-            d)
+      (let ((d (let ((x a))
+                 x)))
+        d)
       (let ((e c))
-            e))
+        e))
 
 (defn fl* (a b c)
       (let* ((d b)
              (e d))
-            e))
+        e))
+
+(defn always (x)
+      (fn () x))
 
 (defn fr (a b & c) c)

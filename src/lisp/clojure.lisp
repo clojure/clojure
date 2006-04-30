@@ -12,7 +12,7 @@
   (:export :load-types :*namespace-separator*
    :newobj :@ :compile-to :*clojure-source-path* :*clojure-target-path*
    "in-module"
-   "defn*" "def"
+   "defn*" "def" "defn" "fn"
    "if" "and" "or" "not"
    "block" "let" "let*"))
 
@@ -313,7 +313,10 @@
    (t (newobj :type :literal :val form))))
 
 (defmacro |defn| (name params &body body)
-  `(|defn*| , name (,params ,@body)))
+  `(|defn*| ,name (,params ,@body)))
+
+(defmacro |fn| (params &body body)
+  `(|fn*| (,params ,@body)))
 
 ;(defmacro |block| (&body body)
 ;  `(|let| nil ,@body))
@@ -347,7 +350,7 @@
   (newobj :type :invoke
           :fexpr (if (symbolp op)
                      (analyze-symbol :fn op)
-                   (analyze :expression op))
+                   (analyze :fn op))
           :args (mapcar (lambda (e)
                           (analyze :expression e))
                         (rest form))))
@@ -456,7 +459,7 @@
     (cond
      ;special case of (let () expr) ==> expr
      ((not (or bindings (> (length body) 1)))
-      (analyze context (third form)))
+      (analyze context (macroexpand (third form))))
      ((eql context :expression)
       (analyze :expression `((|fn*| (,(mapcar #' first bindings) ,@body))
                              ,@(mapcar #'second bindings))))
@@ -481,7 +484,7 @@
     (cond
      ;special case of (let () expr) ==> expr
      ((not (or bindings (> (length body) 1)))
-      (analyze context (third form)))
+      (analyze context (macroexpand (third form))))
      ((eql context :expression)
       (analyze :expression `((|fn*| (() ,form)))))
      (t (let* ((*var-env* *var-env*)
@@ -515,13 +518,13 @@
     (case context
       (:statement
        (mapcar (lambda (expr)
-                 (analyze :statement expr))
+                 (analyze :statement (macroexpand expr)))
                exprs))
       (:return
        (append (mapcar (lambda (expr)
-                         (analyze :statement expr))
+                         (analyze :statement (macroexpand expr)))
                        (butlast exprs))
-               (list (analyze :return (first (last exprs)))))))))
+               (list (analyze :return (macroexpand (first (last exprs))))))))))
 
 (defun emit-body (context body)
   (case context
@@ -548,9 +551,9 @@
    ((null (rest form))
       (analyze context '|nil|))
    ((null (rest (rest form)))
-      (analyze context (second form)))
+      (analyze context (macroexpand (second form))))
    (t (ccase context
-        (:expression (analyze context `(|fn*| (() ,@(rest form)))))
+        (:expression (analyze context `((|fn*| (() ,@(rest form))))))
         ((:statement :return) (newobj :type :block
                                       :body (analyze-body context (rest form))))))))
 
@@ -606,18 +609,20 @@
                     :methods (mapcar (lambda (m)
                                        (analyze-method (first m) (rest m)))
                                      (rest form)))))
-    (if (eql context :expression)
+    (if (member context '(:return :expression :fn))
       ;presume anonymous fn
-      (let ((b (newobj :type :binding :fn fn :symbol (gensym) :anonymous-fn? t)))
-        (setf (@ :binding fn) b)
-        (register-nested-fn-binding b)
-        b)
+        (let ((b (newobj :type :binding
+                         :fn fn
+                         :symbol (gensym "FN__")
+                         :anonymous-fn? t
+                         :value-taken? (not (eql context :fn)))))
+          (setf (@ :binding fn) b)
+          (register-nested-fn-binding b)
+          b)
       fn)))
 
 (defun emit-fn* (context expr)
-  ;not meaningful except in expression context
-  (when (eql context :expression)
-    (emit-binding context (@ :binding expr))))
+  (emit-binding context (@ :binding expr)))
 
 (defun analyze-method (params body)
   (let* ((*frame* (newobj :parent *frame*))
@@ -725,8 +730,8 @@
   (let* ((methods (@ :methods fn))
          (base (fn-base-class fn))
          (closes-decls (mapcan (lambda (b)
-                                 (list (binding-type-decl b) (@ :name b)))
-                               ;expecting only one method if closjure
+                                 (list (binding-type-decl b) (binding-name b)))
+                               ;expecting only one method if closure
                                (@ :closes (first methods)))))
     (unless as-static-method?
       ;emit a class declaration
@@ -816,11 +821,11 @@
           (format t "static public Object ~A = " (munge-name (@ :symbol qa)))
           (emit :expression (@ :form qa))
           (format t ";~%")))
-      (when (eql context :top)       
+      ;(when (eql context :top)       
         ;anonymous lambdas are named w/gensyms
         ;todo - change, this is fragile
-        (when (and (symbolp name) (not (symbol-package name)))
-          (format t "static public IFn fn = new ~A();~%" name)))
+      ;  (when (and (symbolp name) (not (symbol-package name)))
+      ;    (format t "static public IFn fn = new ~A();~%" name)))
        ;end of class
       (format t "}~%"))))
 
