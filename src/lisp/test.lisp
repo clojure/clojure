@@ -34,4 +34,10 @@
 (defn always (x)
       (fn () x))
 
+(defn fletfn (x)
+      (letfn ((a (b) b)
+              (c (d) (a d))
+              (d (x) (d a)))
+             (c x)))
+
 (defn fr (a b & c) c)

@@ -14,7 +14,7 @@
    "in-module"
    "defn*" "def" "defn" "fn"
    "if" "and" "or" "not"
-   "block" "let" "let*"))
+   "block" "let" "let*" "letfn"))
 
 (in-package "clojure")
 
@@ -334,6 +334,7 @@
     (|or| (analyze-or context form))
     (|set| (analyze-set context form))
     (|let| (analyze-let context form))
+    (|letfn| (analyze-letfn context form))
     (|let*| (analyze-let* context form))
     (|loop| (analyze-loop context form))
     (|try| (analyze-try context form))
@@ -501,6 +502,35 @@
           (newobj :type :let
                   :binding-inits binding-inits
                   :body (analyze-body context body)))))))
+
+(defun analyze-letfn (context form)
+  (cond
+   ((eql context :expression)
+    (analyze :expression `((|fn*| (() ,form)))))
+   (t
+    (let* ((*var-env* *var-env*)
+           (binding-exprs
+            ;adding all bindings to env first, mark as assigned to allow for recursion and mutual reference
+            (mapcar (lambda (b)
+                      (destructuring-bind (name params &rest body) b
+                        (let ((binding (newobj :type :binding :symbol name
+                                               ;:assigned? t
+                                               )))
+                          (register-local-binding binding)
+                          ;(register-nested-fn-binding binding)
+                          (add-to-var-env binding)
+                          ;don't analyze lambdas yet
+                          (list binding `(|fn*| (,params ,@body))))))
+                    (second form))))
+      (newobj :type :let
+              :binding-inits (mapcar (lambda (be)
+                                       (let ((binding (first be))
+                                             (fn (analyze :expression (second be))))
+                                         (setf (@ :fn binding) fn)
+                                         (setf (@ :binding fn) binding)
+                                         (newobj :binding  binding :init fn)))
+                                     binding-exprs)
+              :body (analyze-body context (rest (rest form))))))))
 
 (defun emit-let (context expr)
   (let ((binding-inits (@ :binding-inits expr))
@@ -800,7 +830,7 @@
           (setf (@ :id b) (get-next-id))
           (unless (or (@ :anonymous-lambda? b)
                       (will-be-static-method b))
-            (emit-binding-declaration b))))
+            (emit-binding-declaration b "null"))))
 
           ;body
       (emit :return (@ :body m))
