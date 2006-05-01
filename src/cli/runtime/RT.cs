@@ -19,7 +19,7 @@ namespace org.clojure.runtime
 public class RT
 {
 
-    static Symbol T = Symbol.intern("t");
+    public static Symbol T = Symbol.intern("t");
 
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?T:null;
