@@ -19,30 +19,31 @@ namespace org.clojure.runtime
 public class RT
 {
 
-	static Object TRUE = true;
+    static Symbol T = Symbol.intern("t");
+
     static public Object eq(Object arg1, Object arg2) {
-        return (arg1 == arg2)?TRUE:null;
+        return (arg1 == arg2)?T:null;
         }
 
     static public Object eql(Object arg1, Object arg2) {
         if(arg1 == arg2)
-        	return TRUE;
+        	return T;
         if(arg1 == null || arg2 == null)
         	return null;
         if(arg1 is Num
         		&& arg1.GetType() == arg2.GetType()
 				&& arg1.Equals(arg2))
-        	return TRUE;
+        	return T;
         if(arg1 is Char
         		&& arg2 is Char
 				&& arg1.Equals(arg2))
-        	return TRUE;
+        	return T;
         return null;
         }
 
     static public Object equal(Object arg1, Object arg2) {
         if(arg1 == null)
-        	return arg2 == null ? TRUE : null;
+        	return arg2 == null ? T : null;
         else if(arg2 == null)
             return null;
     	return (eql(arg1,arg2) != null
@@ -50,7 +51,7 @@ public class RT
     					&& arg2 is Cons
 						&& equal(((Cons)arg1).first,((Cons)arg2).first)!=null
 						&& equal(((Cons)arg1).rest,((Cons)arg2).rest)!=null))
-		?TRUE:null;
+		?T:null;
     	}
 
     static public Iter iter(Object coll)
