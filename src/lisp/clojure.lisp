@@ -329,7 +329,7 @@
     (|block| (analyze-block context form))
     (|fn*| (analyze-fn* context form))
     (|if| (analyze-if context form))
-    (|not| (analyze-not context form))
+    ((|not| |null|) (analyze-not context form))
     (|and| (analyze-and context form))
     (|or| (analyze-or context form))
     (|set| (analyze-set context form))
@@ -344,6 +344,29 @@
   `(with-output-to-string (s)
      (let ((*standard-output* s))
        ,@body)))
+
+(defun emit (context expr)
+  (cond
+   ((null expr) (emit-nil context))
+   (t (ccase (@ :type expr)
+        (:defn* (emit-defn* context expr))
+        (:fn* (emit-fn* context expr))
+        (:binding (emit-binding context expr))
+        (:accessor (emit-accessor context expr))
+        (:keyword (emit-keyword context expr))
+        (:global-binding (emit-global-binding context expr))
+        (:block (emit-block context expr))
+        (:invoke (emit-invoke context expr))
+        (:let (emit-let context expr))
+        (:if (emit-if context expr))
+        (:not (emit-not context expr))
+        (:or (emit-or context expr))
+        (:and (emit-and context expr))))))
+
+(defun emit-return (expr)
+  (format t "return ")
+  (emit :expression expr)
+  (format t ";~%"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; if ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -397,6 +420,78 @@
            (emit context else)
          (format t "return null;~%"))
        (format t "}~%")))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; not/null ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze-not (context form)
+  (declare (ignore context))
+  (newobj :type :not :expr (analyze :expression (macroexpand (second form)))))
+
+(defun emit-not (context expr)
+  (ccase context
+  ;just for side effects if statement, no negation
+    (:return (emit-return expr))
+    (:statement
+     (emit context (@ :expr expr)))
+    ((:fn :expression)
+     (format t "((")
+     (emit :expression (@ :expr expr))
+     (format t ")==null?RT.T:null)"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; or ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze-or (context form)
+  (let ((temp (newobj :type :binding :symbol (gensym))))
+    (unless (eql context :statement)
+      (register-local-binding temp))
+    (newobj :type :or
+            :temp temp
+            :exprs (mapcar (lambda (e)
+                             (analyze :expression (macroexpand e)))
+                           (rest form)))))
+
+(defun emit-or (context expr)
+  (let ((temp (@ :temp expr))
+        (exprs (@ :exprs expr)))
+    (ccase context
+      (:return (emit-return expr))
+      (:statement
+       (format t "if(~{(~A != null)~^||~})~%;~%"
+               (mapcar (lambda (e)
+                         (emit-to-string (emit :expression e)))
+                       exprs)))
+      ((:expression :fn)
+       (format t "((~{((~A = ~A) != null)~^||~})?~A:null)"
+               (mapcan (lambda (e)
+                         (list (binding-name temp) (emit-to-string (emit :expression e))))
+                       exprs)
+               (binding-name temp))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; and ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defun analyze-and (context form)
+  (declare (ignore context))
+  (newobj :type :and
+          :exprs (mapcar (lambda (e)
+                           (analyze :expression (macroexpand e)))
+                         (rest form))))
+
+(defun emit-and (context expr)
+  (let ((exprs (@ :exprs expr)))
+    (ccase context
+      (:return (emit-return expr))
+      (:statement
+       (format t "if(~{(~A != null)~^&&~})~%;~%"
+            (mapcar (lambda (e)
+                      (emit-to-string (emit :expression e)))
+                    exprs)))
+      ((:expression :fn)
+       (format t "((~{(~A != null)~^&&~})?~A:null)"
+            (mapcar (lambda (e)
+                      (emit-to-string (emit :expression e)))
+                    (butlast exprs))
+            (emit-to-string (emit :expression (first (last exprs)))))))))                         
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; invoke ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -452,25 +547,6 @@
                          (nthcdr +MAX-POSITIONAL-ARITY+ args))))
        (format t ")")))))
 
-(defun emit (context expr)
-  (cond
-   ((null expr) (emit-nil context))
-   (t (ccase (@ :type expr)
-        (:defn* (emit-defn* context expr))
-        (:fn* (emit-fn* context expr))
-        (:binding (emit-binding context expr))
-        (:accessor (emit-accessor context expr))
-        (:keyword (emit-keyword context expr))
-        (:global-binding (emit-global-binding context expr))
-        (:block (emit-block context expr))
-        (:invoke (emit-invoke context expr))
-        (:let (emit-let context expr))
-        (:if (emit-if context expr))))))
-
-(defun emit-return (expr)
-  (format t "return ")
-  (emit :expression expr)
-  (format t ";~%"))
 
 
 (defun emit-global-binding (context expr)
@@ -570,7 +646,7 @@
             (mapcar (lambda (b)
                       (destructuring-bind (name params &rest body) b
                         (let ((binding (newobj :type :binding :symbol name
-                                               ;:assigned? t
+                                               :assigned? t
                                                )))
                           (register-local-binding binding)
                           ;(register-nested-fn-binding binding)
@@ -886,7 +962,7 @@
           (setf (@ :id b) (get-next-id))
           (unless (or (@ :anonymous-lambda? b)
                       (will-be-static-method b))
-            (emit-binding-declaration b "null"))))
+            (emit-binding-declaration b))))
 
           ;body
       (emit :return (@ :body m))

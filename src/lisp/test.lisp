@@ -43,9 +43,25 @@
 
 (defn fif (a b x y z)
       (if a
-          (if (if x y z)
-              y
-            z)
-        b))
+           (if (if x y z)
+               y
+             z)
+         b))
 
 (defn fr (a b & c) c)
+
+(defn fnot (x y z)
+      (if (not x)
+          (not y)
+        (not z)))
+
+(defn forf (x y z)
+      (if (or x y)
+          x
+        (or x y z)))
+
+
+(defn fand (x y z)
+      (if (and x y)
+          x
+        (and x y z)))
