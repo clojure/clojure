@@ -361,12 +361,86 @@
         (:if (emit-if context expr))
         (:not (emit-not context expr))
         (:or (emit-or context expr))
-        (:and (emit-and context expr))))))
+        (:and (emit-and context expr))
+        (:set (emit-set context expr))))))
 
 (defun emit-return (expr)
   (format t "return ")
   (emit :expression expr)
   (format t ";~%"))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; set ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze-set (context form)
+  ;expecting one of
+  ;(set local val) => local = val;
+  ;(set var val) => var.setValue(val);
+  ;(set (:key x) val) => key.invoke(x,val);
+  ;(set (.accessor x) val) => accessor.invoke(x, val);
+  ;(set (global x y z ...) val)) => global.setfn.invoke(val, x, y, z)
+  (declare (ignore context))
+  (let ((val (analyze :expression (macroexpand (third form)))))
+    (if (atom (second form))
+        (let ((target (analyze-symbol :statement (second form))))
+          (when (eql (@ :type target) :binding)
+            (setf (@ :assigned? target) t))
+          (newobj :type :set
+                  :target target
+                  :val val))
+      (let* ((place (second form))
+             (name (analyze-symbol :statement (first place)))
+             (args (mapcar (lambda (e)
+                             (analyze :expression (macroexpand e)))
+                           (rest place))))
+        (ccase (@ :type name)
+          ((:keyword :accessor :global-binding)
+           (newobj :type :set
+                   :name name
+                   :args args
+                   :val val)))))))
+
+(defun emit-set (context expr)
+  (if (eql context :return)
+      (emit-return expr)
+    (progn
+      (when (member context '(:expression :fn))
+        (format t "("))
+      (let ((val (@ :val expr))
+            (name (@ :name expr)))
+        (if name ;must be a place
+            (ccase (@ :type name)
+              ((:keyword :accessor)
+               (emit :expression name)
+               (format t ".invoke(__tld, ")
+               (emit :expression (first (@ :args expr)))
+               (format t ", ")
+               (emit :expression val)
+               (format t ")"))
+              (:global-binding
+               (emit :expression name)
+               (format t ".setfn.invoke(__tld, ")
+               (emit :expression val)
+               (format t "~{, ~A~}"
+                       (mapcar (lambda (e)
+                                 (emit-to-string (emit :expression e)))
+                               (@ :args expr)))
+               (format t ")")))
+          (let ((target (@ :target expr)))
+            (ccase (@ :type target)
+              (:binding
+               (emit :expression target)
+               (format t " = ")
+               (emit :expression val))
+              (:global-binding
+               (emit :expression target)
+               (format t ".setValue(__tld, ")
+               (emit :expression val)
+               (format t ")"))))))
+      (when (member context '(:expression :fn))
+        (format t ")"))
+      (when (eql context :statement)
+        (format t ";~%")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; if ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

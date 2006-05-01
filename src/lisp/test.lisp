@@ -65,3 +65,10 @@
       (if (and x y)
           x
         (and x y z)))
+
+(defn fset (x y z)
+      (set x a)
+      (set b y)
+      (if (set (:foo x) z)
+          (set (.bar y) z)
+        (set (foo x y) z)))
