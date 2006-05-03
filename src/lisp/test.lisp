@@ -85,3 +85,22 @@
 
 (defn fg (x)
       y)
+
+(defn ftry (x)
+      (try
+       (foo x)
+       nil
+       (bar x))
+      (try
+       (let ((ex x))
+         (try
+          (foo x)
+          (fred ex)
+          (bar x)))
+       (foo x)
+       (fred ex)
+       (bar x))
+      (try
+       (foo x)
+       (fred ex)
+       (bar x)))

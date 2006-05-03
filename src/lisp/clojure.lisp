@@ -15,7 +15,8 @@
    "defn*" "def" "defn" "fn"
    "if" "and" "or" "not" "when" "unless"
    "block" "let" "let*" "letfn"
-   "set" "pset" "set*" "do"))
+   "set" "pset" "set*" "do"
+   "try" "ex"))
 
 (in-package "clojure")
 
@@ -415,7 +416,8 @@
         (:and (emit-and context expr))
         (:set (emit-set context expr))
         (:loop (emit-loop context expr))
-        (:break (emit-break context expr))))))
+        (:break (emit-break context expr))
+        (:try (emit-try context expr))))))
 
 (defun emit-return (expr)
   (format t "return ")
@@ -881,6 +883,53 @@
     (:return
      (emit :return (@ :result expr)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; try ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#|
+(try
+ (body 1 2 3)
+ (some-catch-code-presuming-ex-bound-to-exception ...)
+ (do-something-finally))
+|#
+
+(defun analyze-try (context form)
+  (ccase context
+    ((:expression :fn)
+     (analyze :expression `((|fn*| (() ,form)))))
+    ((:statement :return)
+     (let* ((catch-clause (macroexpand (third form)))
+            (ex-binding (when catch-clause
+                          (newobj :type :binding
+                                  :symbol '|ex|
+                                  :ex-name? t))))
+       (newobj :type :try
+               :body (analyze context (macroexpand (second form)))
+               :catch (when catch-clause
+                        (let ((*var-env* *var-env*))
+                          (register-local-binding ex-binding)
+                          (add-to-var-env ex-binding)
+                          (analyze context catch-clause)))
+               :ex ex-binding
+               :finally (analyze :statement (macroexpand (fourth form))))))))
+
+(defun emit-try (context expr)
+  (ccase context
+    ((:statement :return)
+     (let ((body (@ :body expr))
+           (catch-clause (@ :catch expr))
+           (ex (@ :ex expr))
+           (finally-clause (@ :finally expr)))
+       (format t "try{~%")
+       (emit context body)
+       (format t "}~%")
+       (when catch-clause
+         (format t "catch (Exception ~A){~%" (binding-name ex))
+         (emit context catch-clause)
+         (format t "}~%"))
+       (format t "finally{~%")
+       (emit :statement finally-clause)
+       (format t "}~%")))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; defn ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun analyze-defn* (context form)
@@ -1123,6 +1172,7 @@
         (unless (@ :param? b)
           (setf (@ :id b) (get-next-id))
           (unless (or (@ :anonymous-lambda? b)
+                      (@ :ex-name? b)
                       (will-be-static-method b))
             (emit-binding-declaration b))))
 
