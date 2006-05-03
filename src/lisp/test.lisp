@@ -104,3 +104,11 @@
        (foo x)
        (fred ex)
        (bar x)))
+
+(defn fbind (a b c x)
+      (bind ((x a)
+             (y b))
+            c)
+      (bind ((x a)
+             (y b))
+            c))

@@ -390,6 +390,7 @@
     (|loop| (analyze-loop context form))
     (|break| (analyze-break context form))
     (|try| (analyze-try context form))
+    (|bind| (analyze-bind context form))
     (t (analyze-invoke context op form))))
 
 (defmacro emit-to-string (&body body)
@@ -417,7 +418,8 @@
         (:set (emit-set context expr))
         (:loop (emit-loop context expr))
         (:break (emit-break context expr))
-        (:try (emit-try context expr))))))
+        (:try (emit-try context expr))
+        (:bind(emit-bind context expr))))))
 
 (defun emit-return (expr)
   (format t "return ")
@@ -831,13 +833,51 @@
          (dolist (e body)
            (emit :statement e)))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; bind ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze-bind (context form)
+  (let ((bindings (normalize-let-bindings (second form)))
+        (body (rest (rest form))))
+    (ccase context
+      ((:expression :fn)
+       (analyze :expression `((|fn*| (() ,form)))))
+      ((:statement :return)
+       (let* ((binding-inits
+               (mapcar (lambda (b)
+                         (register-var-reference (first b))
+                         (newobj :binding (newobj :type :global-binding :symbol (first b))
+                                 :init (analyze :expression (second b))))
+                       bindings)))
+         (register-needs-tls)
+         (newobj :type :bind
+                 :binding-inits binding-inits
+                 :body (analyze-body context (macroexpand body))))))))
+
+(defun emit-bind (context expr)
+  (ccase context
+    ((:statement :return)
+       (let ((binding-inits (@ :binding-inits expr))
+             (body (@ :body expr)))
+         (format t "try {~%")
+         (dolist (bi binding-inits)
+           (format t "~A.pushDynamicBinding(__tld, " (var-member-name (@ :symbol (@ :binding bi))))
+           (emit :expression (@ :init bi))
+           (format t ");~%"))
+         (emit-body context body)
+         (format t "}~%finally {~%")
+         (dolist (bi binding-inits)
+           (format t "~A.popDynamicBinding(__tld);~%" (var-member-name (@ :symbol (@ :binding bi)))))
+         (format t "}~%")))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; block ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun emit-block (context expr)
   (when (@ :body expr)
-    (format t "{~%")
+    ;(format t "{~%")
     (emit-body context (@ :body expr))
-    (format t "}~%")))
+    ;(format t "}~%")
+    ))
 
 (defun analyze-block (context form)
   (cond 
