@@ -471,8 +471,7 @@
                (emit :expression val)
                (format t ")"))
               (:global-binding
-               (emit :expression name)
-               (format t ".setfn.invoke(__tld, ")
+               (format t "~A.setfn.invoke(__tld, " (var-member-name (@ :symbol name)))
                (emit :expression val)
                (format t "~{, ~A~}"
                        (mapcar (lambda (e)
@@ -486,8 +485,7 @@
                (format t " = ")
                (emit :expression val))
               (:global-binding
-               (emit :expression target)
-               (format t ".setValue(__tld, ")
+               (format t "~A.setValue(__tld, " (var-member-name (@ :symbol target)))
                (emit :expression val)
                (format t ")"))))))
       (when (member context '(:expression :fn))
@@ -647,11 +645,9 @@
             (args (@ :args expr)))
        (when (not (or global-binding? static-method?))
          (format t "((IFn)"))
-       (emit :expression fexpr)        
-       (if global-binding?
-           (format t ".fn")
-         (unless static-method?
-           (format t ")")))
+       (emit :fn fexpr)        
+       (when (not (or global-binding? static-method?))
+         (format t ")"))
        (unless static-method?
          (format t ".invoke"))
        (format t "(__tld")
@@ -677,8 +673,14 @@
 
 
 (defun emit-global-binding (context expr)
-  (declare (ignore context))
-  (format t "~A" (var-member-name (@ :symbol expr))))
+  (ccase context
+    (:return
+     (emit-return expr))
+    ((:expression :return)
+     (format t "~A.getValue(__tld)" (var-member-name (@ :symbol expr))))
+    (:fn
+     (format t "~A.fn" (var-member-name (@ :symbol expr))))
+    (:statement)))
 
 (defun emit-accessor (context expr)
   (declare (ignore context))
@@ -698,7 +700,7 @@
 (defun emit-binding (context expr)
   (ccase context
     (:statement) ;var statement is a no-op
-    (:expression
+    ((:expression :fn)
      (if (and (@ :anonymous-fn? expr) (not (will-be-static-method expr)))
          (emit-new-closure-instance expr)
        (format t "~A~:[~;.val~]" (binding-name expr) (needs-box expr))))

@@ -82,3 +82,6 @@
            (b c b))
           (c b)
         a b c))
+
+(defn fg (x)
+      y)
