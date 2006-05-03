@@ -72,3 +72,13 @@
       (if (set (:foo x) z)
           (set (.bar y) z)
         (set (foo x y) z)))
+
+(defn fdo (a b c)
+      (do ((a b a)
+           (b c b))
+          (c)
+        a b c)
+      (do ((a b a)
+           (b c b))
+          (c b)
+        a b c))

@@ -13,8 +13,9 @@
    :newobj :@ :compile-to :*clojure-source-path* :*clojure-target-path*
    "in-module"
    "defn*" "def" "defn" "fn"
-   "if" "and" "or" "not"
-   "block" "let" "let*" "letfn"))
+   "if" "and" "or" "not" "when" "unless"
+   "block" "let" "let*" "letfn"
+   "set" "pset" "set*" "do"))
 
 (in-package "clojure")
 
@@ -312,11 +313,60 @@
    ((symbolp form) (analyze-symbol context form))
    (t (newobj :type :literal :val form))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; macros ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defmacro |defn| (name params &body body)
   `(|defn*| ,name (,params ,@body)))
 
 (defmacro |fn| (params &body body)
   `(|fn*| (,params ,@body)))
+
+(defmacro |when| (test &rest result)
+  `(|if| ,test (|block| ,@result)))
+
+(defmacro |unless| (test &rest result)
+  `(|if| ,test nil (|block| ,@result)))
+
+(defun pairize (lst)
+  (if (null lst)
+      nil
+    (cons (cons (first lst) (second lst))
+          (pairize (rest (rest lst))))))
+
+(defmacro |set*| (&rest args)
+  (unless (evenp (length args))
+    (error "odd number of arguments"))
+  (labels ((recurse (sets)
+             (when sets
+                 (cons (list '|set| (first sets) (second sets))
+                       (recurse (rest (rest sets)))))))
+    (when args
+      `(|block| ,@(recurse args)))))
+
+(defmacro |pset| (&rest args)
+  (unless (evenp (length args))
+    (error "odd number of arguments"))
+  (let* ((pairs (pairize args))
+         (syms (mapcar #'(lambda (x) (declare (ignore x))(gensym))
+                       pairs)))
+    `(|let| ,(mapcar #'list
+                     syms
+                     (mapcar #'rest pairs))
+            (|set*| ,@(mapcan #'list
+                              (mapcar #'first pairs)
+                              syms)))))
+
+(defmacro |do| (binds (test &optional result) &rest body)
+  `(|let| ,(mapcar #'list (mapcar #'first binds) (mapcar #'second binds))
+     (|loop| 
+      (|when| ,test
+              (|break| ,result))
+      ,@body
+      (|pset| ,@(mapcan #'list
+                        (mapcar #'first binds)
+                        (mapcar #'third binds))))))
+
+
 
 ;(defmacro |block| (&body body)
 ;  `(|let| nil ,@body))
@@ -337,6 +387,7 @@
     (|letfn| (analyze-letfn context form))
     (|let*| (analyze-let* context form))
     (|loop| (analyze-loop context form))
+    (|break| (analyze-break context form))
     (|try| (analyze-try context form))
     (t (analyze-invoke context op form))))
 
@@ -362,7 +413,9 @@
         (:not (emit-not context expr))
         (:or (emit-or context expr))
         (:and (emit-and context expr))
-        (:set (emit-set context expr))))))
+        (:set (emit-set context expr))
+        (:loop (emit-loop context expr))
+        (:break (emit-break context expr))))))
 
 (defun emit-return (expr)
   (format t "return ")
@@ -792,6 +845,39 @@
         (:expression (analyze context `((|fn*| (() ,@(rest form))))))
         ((:statement :return) (newobj :type :block
                                       :body (analyze-body context (rest form))))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; loop/break ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar *loop-context*)
+
+(defun analyze-loop (context form)
+  (ccase context 
+    ((:expression :fn)
+     (analyze :expression `((|fn*| (() ,form)))))
+    ((:statement :return)
+     (newobj :type :loop
+             :body (analyze-body context (rest form))))))
+
+(defun emit-loop (context expr)
+  (let ((*loop-context* context))
+    (format t "for(;;)~%{~%")
+    (emit-body :statement (@ :body expr))
+    (format t "}~%")))
+
+(defun analyze-break (context form)
+  (ccase context
+    ((:statement :return)
+     (newobj :type :break
+             :result (analyze context (macroexpand (second form)))))))
+
+(defun emit-break (context expr)
+  (declare (ignore context))
+  (ccase *loop-context*
+    (:statement
+     (emit :statement (@ :result expr))
+     (format t "break;~%"))
+    (:return
+     (emit :return (@ :result expr)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; defn ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
