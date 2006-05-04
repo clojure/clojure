@@ -303,16 +303,7 @@
 (defun get-next-id ()
   (incf *next-id*))
 
-(defvar *texpr* (newobj :type :t))
 
-(defun analyze (context form)
-  "context - one of :top :return :statement :expression :fn"
-  (cond
-   ((consp form) (analyze-op context (first form) form))
-   ((or (null form)(eql '|nil| form)) nil)
-   ((eql '|t| form) *texpr*)
-   ((symbolp form) (analyze-symbol context form))
-   (t (newobj :type :literal :val form))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; macros ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -372,6 +363,17 @@
 ;(defmacro |block| (&body body)
 ;  `(|let| nil ,@body))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; analyze and emit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze (context form)
+  "context - one of :top :return :statement :expression :fn"
+  (cond
+   ((consp form) (analyze-op context (first form) form))
+   ((or (null form)(eql '|nil| form)) nil)
+   ((eql '|t| form) t)
+   ((symbolp form) (analyze-symbol context form))
+   (t form)))
+
 (defun analyze-op (context op form)
   (case op
     (|quote| (analyze-quote context form))
@@ -401,7 +403,8 @@
 (defun emit (context expr)
   (cond
    ((null expr) (emit-nil context))
-   (t (ccase (@ :type expr)
+   ((typep expr 'hash-table) ;objs
+    (ccase (@ :type expr)
         (:defn* (emit-defn* context expr))
         (:fn* (emit-fn* context expr))
         (:binding (emit-binding context expr))
@@ -419,7 +422,24 @@
         (:loop (emit-loop context expr))
         (:break (emit-break context expr))
         (:try (emit-try context expr))
-        (:bind(emit-bind context expr))))))
+        (:bind(emit-bind context expr))))
+   (t (emit-other context expr))))
+
+(defun emit-other (context expr)
+  (ccase context
+    (:statement);no-op
+    (:return (emit-return expr))
+    (:expression
+     (cond
+      ((null expr) (emit-nil context))
+      ((eql t expr) (format t "RT.T"))
+      ((stringp expr) (format t "~S" expr))
+      ((characterp expr) (format t "RT.ch('~A')" expr))
+      ((numberp expr)
+       (case expr
+         (0 (format t "Num.ZERO"))
+         (1 (format t "Num.ONE"))
+         (t (format t "Num.from(~A)" expr))))))))
 
 (defun emit-return (expr)
   (format t "return ")

@@ -67,6 +67,11 @@ static public Iter iter(Object coll)
 	}
 
 
+static public Character ch(char c)
+    {
+    return new Character(c);
+    }
+
 static public Cons cons(Object x, Cons y)
 	{
 	return new Cons(x, y);

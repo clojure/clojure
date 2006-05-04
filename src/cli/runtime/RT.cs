@@ -71,7 +71,12 @@ public class RT
             }
 
         }
-                    
+
+static public Object ch(char c)
+    {
+        return c;
+    }
+
 static public Cons cons(Object x, Cons y)
 	{
 	return new Cons(x, y);

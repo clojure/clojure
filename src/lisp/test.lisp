@@ -44,7 +44,7 @@
 (defn fif (a b x y z)
       (if a
            (if (if x y z)
-               y
+               0
              z)
          b))
 
@@ -67,8 +67,8 @@
         (and x y z)))
 
 (defn fset (x y z)
-      (set x a)
-      (set b y)
+      (set x 1)
+      (set b #\y)
       (if (set (:foo x) z)
           (set (.bar y) z)
         (set (foo x y) z)))
@@ -94,8 +94,8 @@
       (try
        (let ((ex x))
          (try
-          (foo x)
-          (fred ex)
+          (foo x 2)
+          (fred ex "string")
           (bar x)))
        (foo x)
        (fred ex)
@@ -103,12 +103,13 @@
       (try
        (foo x)
        (fred ex)
-       (bar x)))
+       (bar x)
+       "foo"))
 
 (defn fbind (a b c x)
-      (bind ((x a)
-             (y b))
+      (bind ((x t)
+             (y 17))
             c)
-      (bind ((x a)
+      (bind ((x nil)
              (y b))
             c))
