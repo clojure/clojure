@@ -113,3 +113,9 @@
       (bind ((x nil)
              (y b))
             c))
+
+(defn fq (x)
+      (if ':key '.foo 'a))
+
+(defn fql ()
+      '(1 2 3 (4 5)))

@@ -35,7 +35,7 @@
 (defvar *accessors*)
 (defvar *defvars*)
 (defvar *defns*)
-(defvar *quoted-aggregates*)
+(defvar *quoted-aggregates* nil)
 (defvar *nested-fn-bindings*)
 (defvar *var-env* nil)
 (defvar *frame* nil)
@@ -376,7 +376,7 @@
 
 (defun analyze-op (context op form)
   (case op
-    (|quote| (analyze-quote context form))
+    (quote (analyze-quote context form))
     (|defn*| (analyze-defn* context form))
     (|def| (analyze-def context form))
     (|block| (analyze-block context form))
@@ -422,7 +422,8 @@
         (:loop (emit-loop context expr))
         (:break (emit-break context expr))
         (:try (emit-try context expr))
-        (:bind(emit-bind context expr))))
+        (:bind(emit-bind context expr))
+        (:quoted-aggregate (emit-quoted-aggregate context expr))))
    (t (emit-other context expr))))
 
 (defun emit-other (context expr)
@@ -439,12 +440,51 @@
        (case expr
          (0 (format t "Num.ZERO"))
          (1 (format t "Num.ONE"))
-         (t (format t "Num.from(~A)" expr))))))))
+         (t (format t "Num.from(~A)" expr))))
+      ((symbolp expr)
+       (cond
+        ((keywordp expr)
+         (format t "~A" (keyword-member-name expr)))
+        ((accessor? expr)
+         (format t "~A" (accessor-member-name expr)))
+        (t (format t "~A" (var-member-name expr)))))
+      ((consp expr)
+       (format t "RT.arrayToList(new Object[]{~{~A~^, ~}})"
+                 (mapcar (lambda (e)
+                           (emit-to-string (emit :expression e)))
+                         expr)))))))
 
 (defun emit-return (expr)
   (format t "return ")
   (emit :expression expr)
   (format t ";~%"))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; quote ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze-quote (context form)
+  (let ((q (second form)))
+    (cond
+     ((symbolp q)
+      (cond
+       ((keywordp q)
+        (register-keyword-reference q))
+       ((host-symbol? q) (error "Can't quote host symbols"))
+       ((accessor? q)
+        (register-accessor-reference q))
+       (t (register-var-reference q)))
+      q)
+     ((atom q) q)
+     (t
+      (let* ((ql (newobj :type :quoted-aggregate :symbol (gensym "QA__") :form q)))
+        (register-quoted-aggregate ql)
+        ql)))))
+
+(defun emit-quoted-aggregate (context expr)
+  (ccase context
+    (:return (emit-return expr))
+    (:expression
+     (format t "~A" (munge-name (@ :symbol expr))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; set ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -524,7 +564,7 @@
       ;optimize macro-generated (if t ...) forms
       (analyze context (macroexpand (third form)))
     (let* ((test (analyze :expression (macroexpand (second form))))
-           (negate (eql :not (@ :type test))))
+           (negate (and (hash-table-p test)(eql :not (@ :type test)))))
       (newobj :type :if
               :test (if negate (@ :expr test) test)
               :comp (if negate "==" "!=")
@@ -1265,6 +1305,9 @@
 
 (defun register-var-reference (sym)
   (pushnew sym *vars*))
+
+(defun register-quoted-aggregate (qa)
+  (pushnew qa *quoted-aggregates*))
 
 (defun register-accessor-reference (sym)
   (pushnew sym *accessors*))

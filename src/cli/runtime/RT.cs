@@ -137,6 +137,14 @@ static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, 
 	return cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
 	}
 
+static public Cons arrayToList(Object[] a)
+    {
+        Cons ret = null;
+        for (int i = a.Length - 1; i >= 0; --i)
+            ret = cons(a[i], ret);
+        return ret;
+    }
+
 static public int length(Cons list)
 	{
 	int i = 0;
