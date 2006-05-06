@@ -67,10 +67,46 @@ static public Iter iter(Object coll)
 	}
 
 
-static public Character ch(char c)
+static public Character box(char x)
     {
-    return new Character(c);
+    return new Character(x);
     }
+
+static public Boolean box(boolean x)
+    {
+    return Boolean.valueOf(x);
+    }
+
+static public Byte box(byte x)
+	{
+	return new Byte(x);
+	}
+
+static public Short box(short x)
+	{
+	return new Short(x);
+	}
+
+static public Integer box(int x)
+	{
+	return new Integer(x);
+	}
+
+static public Long box(long x)
+	{
+	return new Long(x);
+	}
+
+static public Float box(float x)
+	{
+	return new Float(x);
+	}
+
+static public Double box(double x)
+	{
+	return new Double(x);
+	}
+
 
 static public Cons cons(Object x, Cons y)
 	{
