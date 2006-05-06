@@ -17,6 +17,7 @@ import java.util.Iterator;
 public class RT{
 
 	static public Symbol T = Symbol.intern("t");
+    static public final Object[] EMPTY_ARRAY = new Object[]{};
 
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?Boolean.TRUE:null;
