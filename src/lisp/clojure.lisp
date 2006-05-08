@@ -16,7 +16,8 @@
    "if" "and" "or" "not" "when" "unless"
    "block" "let" "let*" "letfn"
    "set" "pset" "set*" "do"
-   "try" "ex"))
+   "try" "ex"
+   "char" "boolean" "byte" "short" "int" "long" "float" "double"))
 
 (in-package "clojure")
 
@@ -393,6 +394,8 @@
     (|break| (analyze-break context form))
     (|try| (analyze-try context form))
     (|bind| (analyze-bind context form))
+    ((|char| |boolean| |byte| |short| |int| |long| |float| |double|)
+     (analyze-cast context form))
     (t (analyze-invoke context op form))))
 
 (defmacro emit-to-string (&body body)
@@ -423,7 +426,8 @@
         (:break (emit-break context expr))
         (:try (emit-try context expr))
         (:bind(emit-bind context expr))
-        (:quoted-aggregate (emit-quoted-aggregate context expr))))
+        (:quoted-aggregate (emit-quoted-aggregate context expr))
+        (:cast (emit-cast context expr))))
    (t (emit-other context expr))))
 
 (defun emit-other (context expr)
@@ -485,6 +489,23 @@
     (:return (emit-return expr))
     (:expression
      (format t "~A" (munge-name (@ :symbol expr))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cast ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun analyze-cast (context form)
+  (declare (ignore context))
+  (newobj :type :cast
+          :to (first form)
+          :expr (analyze :expression (macroexpand (second form)))))
+
+(defun emit-cast (context expr)
+  (ccase context
+    (:return (emit-return expr))
+    (:expression
+     (format t "RT.box(RT.~ACast(" (symbol-name (@ :to expr)))
+     (emit :expression (@ :expr expr))
+     (format t "))"))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; set ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

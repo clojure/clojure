@@ -119,3 +119,6 @@
 
 (defn fql ()
       '(1 2 3 (4 5)))
+
+(defn fcast ()
+      (if (int 7) (char 17) (long 29999)))
