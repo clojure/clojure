@@ -68,6 +68,11 @@ static public Iter iter(Object coll)
 	}
 
 
+static public Object box(Object x)
+    {
+    return x;
+    }
+
 static public Character box(char x)
     {
     return new Character(x);
