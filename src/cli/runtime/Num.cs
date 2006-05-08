@@ -16,7 +16,7 @@ using java.math;
 namespace org.clojure.runtime
 {
 
-public abstract class Num : IComparable /* TODO: , IConvertible*/
+public abstract class Num : IComparable , IConvertible
 										 {
 
 public static Num ZERO = from(0);
@@ -248,5 +248,94 @@ public int CompareTo(Object obj)
 	else
 		return 1;
 	}
-}
+
+#region IConvertible Members
+
+public TypeCode GetTypeCode()
+    {
+throw new Exception("The method or operation is not implemented.");
+    }
+
+public bool ToBoolean(IFormatProvider provider)
+    {
+    return true;
+    }
+
+public byte ToByte(IFormatProvider provider)
+    {
+    return checked((byte)intValue());
+    }
+
+public char ToChar(IFormatProvider provider)
+    {
+    return checked((char)intValue());
+    }
+
+public DateTime ToDateTime(IFormatProvider provider)
+    {
+throw new Exception("The method or operation is not implemented.");
+    }
+
+public decimal ToDecimal(IFormatProvider provider)
+    {
+throw new Exception("The method or operation is not implemented.");
+    }
+
+public double ToDouble(IFormatProvider provider)
+    {
+    return doubleValue();
+    }
+
+public short ToInt16(IFormatProvider provider)
+    {
+    return checked((short)intValue());
+    }
+
+public int ToInt32(IFormatProvider provider)
+    {
+    return intValue();
+    }
+
+public long ToInt64(IFormatProvider provider)
+    {
+    return longValue();
+    }
+
+public sbyte ToSByte(IFormatProvider provider)
+    {
+    return checked((sbyte)intValue());
+    }
+
+public float ToSingle(IFormatProvider provider)
+    {
+    return floatValue();
+    }
+
+public string ToString(IFormatProvider provider)
+    {
+    return ToString();
+    }
+
+public object ToType(Type conversionType, IFormatProvider provider)
+    {
+throw new Exception("The method or operation is not implemented.");
+    }
+
+public ushort ToUInt16(IFormatProvider provider)
+    {
+throw new Exception("The method or operation is not implemented.");
+    }
+
+public uint ToUInt32(IFormatProvider provider)
+    {
+throw new Exception("The method or operation is not implemented.");
+    }
+
+public ulong ToUInt64(IFormatProvider provider)
+    {
+throw new Exception("The method or operation is not implemented.");
+    }
+
+#endregion
+    }
 }
