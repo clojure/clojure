@@ -116,7 +116,8 @@ static public Field getField(Class c, String name)
 	Field[] allfields = c.getFields();
 	for(int i = 0; i < allfields.length; i++)
 		{
-		if(name.equals(allfields[i].getName()))
+		if(name.equals(allfields[i].getName())
+		   && !Modifier.isStatic(allfields[i].getModifiers()))
 			return allfields[i];
 		}
 	return null;
