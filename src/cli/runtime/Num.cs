@@ -86,6 +86,16 @@ static public Num from(Object x)
 	}
 
 
+    virtual public byte byteValue()
+        {
+        return checked((byte)intValue());
+        }
+
+    virtual public short shortValue()
+        {
+        return checked((short)intValue());
+        }
+
 	abstract public double doubleValue();
 
 	abstract public float floatValue();
