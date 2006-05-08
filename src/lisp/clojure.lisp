@@ -435,7 +435,7 @@
       ((null expr) (emit-nil context))
       ((eql t expr) (format t "RT.T"))
       ((stringp expr) (format t "~S" expr))
-      ((characterp expr) (format t "RT.ch('~A')" expr))
+      ((characterp expr) (format t "RT.box('~A')" expr))
       ((numberp expr)
        (case expr
          (0 (format t "Num.ZERO"))
