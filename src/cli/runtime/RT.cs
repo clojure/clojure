@@ -20,6 +20,7 @@ public class RT
 {
 
     public static Symbol T = Symbol.intern("t");
+    public static Object[] EMPTY_ARRAY = new Object[0];
 
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?T:null;
