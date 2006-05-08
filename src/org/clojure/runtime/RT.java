@@ -67,7 +67,7 @@ static public Iter iter(Object coll)
 		throw new IllegalArgumentException("Don't know how to create Iter from arg");
 	}
 
-
+/************************ Boxing/casts *******************************/
 static public Object box(Object x)
     {
     return x;
@@ -113,7 +113,52 @@ static public Double box(double x)
 	return new Double(x);
 	}
 
+static public char charCast(Object x)
+	{
+	if(x instanceof Character)
+		return ((Character)x).charValue();
+	return (char) ((Number)x).intValue();
+	}
 
+static public boolean booleanCast(Object x)
+	{
+	if(x instanceof Boolean)
+		return ((Boolean)x).booleanValue();
+	return x != null;
+	}
+
+static public byte byteCast(Object x)
+	{
+	return ((Number)x).byteValue();
+	}
+
+static public short shortCast(Object x)
+	{
+	return ((Number)x).shortValue();
+	}
+
+static public int intCast(Object x)
+	{
+	return ((Number)x).intValue();
+	}
+
+static public long longCast(Object x)
+	{
+	return ((Number)x).longValue();
+	}
+
+static public float floatCast(Object x)
+	{
+	return ((Number)x).floatValue();
+	}
+
+static public double doubleCast(Object x)
+	{
+	return ((Number)x).doubleValue();
+	}
+
+
+/******************************************* list support ********************************/
 static public Cons cons(Object x, Cons y)
 	{
 	return new Cons(x, y);
