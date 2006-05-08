@@ -16,42 +16,106 @@ namespace org.clojure.runtime
 {
 public class Reflector{
     
-public static Object invokeInstanceMethod(String name, Object target, Object[] args) //throws Exception	{	Type t = target.GetType();	IList methods = getMethods(t, args.Length, name);	if(methods.Count == 0)		{
-        throw new InvalidOperationException("No matching field or method found");		}	else if(methods.Count == 1)		{		MethodInfo m = (MethodInfo) methods[0];		return m.Invoke(target, boxArgs(m.GetParameters(), args));		}	else //overloaded w/same arity, let reflection choose most specific match		{
-        return t.InvokeMember(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod,                                 null, target, args);		}	}
+public static Object invokeInstanceMethod(String name, Object target, Object[] args) //throws Exception	{	Type t = target.GetType();	IList methods = getMethods(t, args.Length, name,false);
+    return invokeMatchingMethod(name, target, args, t, methods,false);
+	}
 
-public static Object invokeInstanceMember(String name, Object target) //throws Exception	{	//check for field first	Type t = target.GetType();	FieldInfo f = getField(t, name);	if(f != null)  //field get		{		return f.GetValue(target);		}
-    PropertyInfo p = getProperty(t, name);
+    private static object invokeMatchingMethod(String name, Object target, Object[] args, Type t, IList methods, bool statics)
+        {
+        if (methods.Count == 0)
+            {
+            throw new InvalidOperationException("No matching field or method found");
+            }
+        else if (methods.Count == 1)
+            {
+            MethodInfo m = (MethodInfo)methods[0];
+            return m.Invoke(target, boxArgs(m.GetParameters(), args));
+            }
+        else //overloaded w/same arity, let reflection choose most specific match
+            {
+            return t.InvokeMember(name, BindingFlags.Public | (statics ? BindingFlags.Static : BindingFlags.Instance) 
+                                        | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod,
+                                    null, target, args);
+            }
+        }
+
+public static Object invokeStaticMethod(String name, String className, Object[] args) //throws Exception
+    {
+    Type t = Type.GetType(className);
+    IList methods = getMethods(t, args.Length, name, true);
+    return invokeMatchingMethod(name, null, args, t, methods,true);
+    }
+
+public static Object getStaticField(String name, String className) //throws Exception
+    {
+    //check for field first
+    Type t = Type.GetType(className);
+    FieldInfo f = getField(t, name, true);
+    if (f != null)  //field get
+        {
+        return f.GetValue(null);
+        }
+    PropertyInfo p = getProperty(t, name, true);
+    if (p != null)
+        {
+        return p.GetValue(null, null);
+        }
+    throw new InvalidOperationException("No matching field or property found");
+    }
+
+public static Object setStaticField(String name, String className, Object arg1) //throws Exception
+    {
+    //check for field first
+    Type t = Type.GetType(className);
+    FieldInfo f = getField(t, name, true);
+    if (f != null)  //field get
+        {
+        f.SetValue(null, boxArg(f.FieldType, arg1));
+        return arg1;
+        }
+    PropertyInfo p = getProperty(t, name, true);
+    if (p != null)
+        {
+        p.SetValue(null, boxArg(p.PropertyType, arg1), null);
+        return arg1;
+        }
+    throw new InvalidOperationException("No matching field or property found");
+    }
+
+public static Object invokeInstanceMember(String name, Object target) //throws Exception	{	//check for field first	Type t = target.GetType();	FieldInfo f = getField(t, name,false);	if(f != null)  //field get		{		return f.GetValue(target);		}
+    PropertyInfo p = getProperty(t, name,false);
     if (p != null)
         {
         return p.GetValue(target, null);
-        }	return invokeInstanceMethod(name, target, RT.EMPTY_ARRAY);	}public static Object invokeInstanceMember(String name, Object target, Object arg1) //throws Exception	{	//check for field first	Type t = target.GetType();    FieldInfo f = getField(t, name);
+        }	return invokeInstanceMethod(name, target, RT.EMPTY_ARRAY);	}public static Object invokeInstanceMember(String name, Object target, Object arg1) //throws Exception	{	//check for field first	Type t = target.GetType();    FieldInfo f = getField(t, name,false);
     if (f != null)  //field get
         {
         f.SetValue(target,boxArg(f.FieldType,arg1));
         return arg1;
         }
-    PropertyInfo p = getProperty(t, name);
+    PropertyInfo p = getProperty(t, name,false);
     if (p != null)
         {
         //could be indexed property, which we otherwise aren't dealing with yet
         if(p.GetIndexParameters() != null && p.GetIndexParameters().Length == 1)
             return p.GetValue(target, new Object[]{boxArg(p.GetIndexParameters()[0].ParameterType,arg1)});
         p.SetValue(target,boxArg(p.PropertyType,arg1),null);
+        return arg1;
         }	return invokeInstanceMethod(name, target, new Object[]{arg1});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2) //throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3)		//throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,                                          Object arg4)		//throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3, arg4});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,                                          Object arg4,                                          Cons arglist)		//throws Exception	{	Object[] args = new Object[4 + RT.length(arglist)];	args[0] = arg1;	args[1] = arg2;	args[2] = arg3;	args[3] = arg4;	for(int i = 4; arglist != null; i++, arglist = arglist.rest)		args[i] = arglist.first;	return invokeInstanceMethod(name, target, args);	}
 
-    public static FieldInfo getField(Type t, string name)
+    public static FieldInfo getField(Type t, string name,bool statics)
         {
-        return t.GetField(name, BindingFlags.Public | BindingFlags.Instance |BindingFlags.FlattenHierarchy);
+        return t.GetField(name, BindingFlags.Public | (statics ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.FlattenHierarchy);
         }
-    public static PropertyInfo getProperty(Type t, string name)
+    public static PropertyInfo getProperty(Type t, string name, bool statics)
         {
-        return t.GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+        return t.GetProperty(name, BindingFlags.Public | (statics ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.FlattenHierarchy);
         }
 
-    static public IList getMethods(Type t, int arity, String name)
+    static public IList getMethods(Type t, int arity, String name, bool getStatics)
         {
-        MethodInfo[] allmethods = t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+        MethodInfo[] allmethods = t.GetMethods(BindingFlags.Public | (getStatics?BindingFlags.Static : BindingFlags.Instance) 
+                                                | BindingFlags.FlattenHierarchy);
         ArrayList methods = new ArrayList();
         for (int i = 0; i < allmethods.Length; i++)
             {

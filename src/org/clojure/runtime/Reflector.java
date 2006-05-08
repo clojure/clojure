@@ -15,6 +15,7 @@ package org.clojure.runtime;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,39 +25,74 @@ public class Reflector{
 public static Object invokeInstanceMethod(String name, Object target, Object[] args) throws Exception
 	{
 	Class c = target.getClass();
-	List methods = getMethods(c, args.length, name);
-	if(methods.isEmpty())
-		{
-		throw new IllegalArgumentException("No matching field or method found");
-		}
-	else if(methods.size() == 1)
-		{
-		Method m = (Method) methods.get(0);
-		return m.invoke(target, boxArgs(m.getParameterTypes(), args));
-		}
-	else //overloaded w/same arity
-		{
-		for(Iterator i = methods.iterator(); i.hasNext();)
-			{
-			Method m = (Method) i.next();
+	List methods = getMethods(c, args.length, name,false);
+        return invokeMatchingMethod(methods, target, args);
+    }
 
-			Class[] params = m.getParameterTypes();
-			if(isCongruent(params, args))
-				{
-				Object[] boxedArgs = boxArgs(params, args);
-				return m.invoke(target, boxedArgs);
-				}
-			}
-		throw new IllegalArgumentException("No matching field or method found");
+private static Object invokeMatchingMethod(List methods, Object target, Object[] args)
+        throws IllegalAccessException, InvocationTargetException {
+    if(methods.isEmpty())
+        {
+        throw new IllegalArgumentException("No matching field or method found");
+        }
+    else if(methods.size() == 1)
+        {
+        Method m = (Method) methods.get(0);
+        return m.invoke(target, boxArgs(m.getParameterTypes(), args));
+        }
+    else //overloaded w/same arity
+        {
+        for(Iterator i = methods.iterator(); i.hasNext();)
+            {
+            Method m = (Method) i.next();
 
+            Class[] params = m.getParameterTypes();
+            if(isCongruent(params, args))
+                {
+                Object[] boxedArgs = boxArgs(params, args);
+                return m.invoke(target, boxedArgs);
+                }
+            }
+        throw new IllegalArgumentException("No matching field or method found");
+
+        }
+}
+
+public static Object invokeStaticMethod(String name, String className, Object[] args) throws Exception
+    {
+    Class c = Class.forName(className);
+    List methods = getMethods(c, args.length, name,true);
+    return invokeMatchingMethod(methods, null, args);
+    }
+
+public static Object getStaticField(String name, String className) throws Exception
+	{
+    Class c = Class.forName(className);
+	Field f = getField(c, name,true);
+	if(f != null)
+		{
+		return f.get(null);
 		}
+    throw new IllegalArgumentException("No matching field found");
+	}
+
+ public static Object setStaticField(String name, String className, Object arg1) throws Exception
+	{
+    Class c = Class.forName(className);
+	Field f = getField(c, name,true);
+	if(f != null)
+		{
+		f.set(null, boxArg(f.getType(), arg1));
+		return arg1;
+		}
+    throw new IllegalArgumentException("No matching field found");
 	}
 
 public static Object invokeInstanceMember(String name, Object target) throws Exception
 	{
 	//check for field first
 	Class c = target.getClass();
-	Field f = getField(c, name);
+	Field f = getField(c, name,false);
 	if(f != null)  //field get
 		{
 		return f.get(target);
@@ -68,7 +104,7 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 	{
 	//check for field first
 	Class c = target.getClass();
-	Field f = getField(c, name);
+	Field f = getField(c, name,false);
 	if(f != null)  //field set
 		{
 		f.set(target, boxArg(f.getType(), arg1));
@@ -111,26 +147,26 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 	}
 
 
-static public Field getField(Class c, String name)
+static public Field getField(Class c, String name, boolean getStatics)
 	{
 	Field[] allfields = c.getFields();
 	for(int i = 0; i < allfields.length; i++)
 		{
 		if(name.equals(allfields[i].getName())
-		   && !Modifier.isStatic(allfields[i].getModifiers()))
+		   && Modifier.isStatic(allfields[i].getModifiers()) == getStatics)
 			return allfields[i];
 		}
 	return null;
 	}
 
-static public List getMethods(Class c, int arity, String name)
+static public List getMethods(Class c, int arity, String name, boolean getStatics)
 	{
 	Method[] allmethods = c.getMethods();
 	ArrayList methods = new ArrayList();
 	for(int i = 0; i < allmethods.length; i++)
 		{
 		if(name.equals(allmethods[i].getName())
-		   && !Modifier.isStatic(allmethods[i].getModifiers())
+		   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
 		   && allmethods[i].getParameterTypes().length == arity)
 			{
 			methods.add(allmethods[i]);
