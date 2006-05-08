@@ -72,11 +72,84 @@ public class RT
 
         }
 
-static public Object ch(char c)
+    static public Object box(Object x)
+        {
+            return x;
+        }
+
+    static public Object box(char x)
+        {
+            return x;
+        }
+
+    static public Object box(bool x)
+        {
+            return x;
+        }
+
+    static public Object box(byte x)
+        {
+            return x;
+        }
+
+    static public Object box(short x)
+        {
+            return x;
+        }
+
+    static public Object box(int x)
+        {
+            return x;
+        }
+
+    static public Object box(long x)
+        {
+            return x;
+        }
+
+    static public Object box(float x)
+        {
+            return x;
+        }
+
+    static public Object box(double x)
+        {
+            return x;
+        }
+
+    static public char charCast(Object x)	{    return Convert.ToChar(x);	}
+
+    static public bool booleanCast(Object x)	{	if(x is Boolean)
+        return (bool)x; ;	return x != null;	}
+
+    static public byte byteCast(Object x)
     {
-        return c;
+        return Convert.ToByte(x);
     }
 
+    static public short shortCast(Object x)
+    {
+    return Convert.ToInt16(x);    }
+
+    static public int intCast(Object x)
+    {
+        return Convert.ToInt32(x);
+    }
+
+    static public long longCast(Object x)
+    {
+        return Convert.ToInt64(x);
+    }
+
+    static public float floatCast(Object x)
+    {
+        return Convert.ToSingle(x);
+    }
+
+    static public double doubleCast(Object x)
+    {
+        return Convert.ToDouble(x);
+    }
 static public Cons cons(Object x, Cons y)
 	{
 	return new Cons(x, y);
