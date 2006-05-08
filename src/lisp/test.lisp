@@ -1,7 +1,7 @@
 (in-module "clojure")
 
-#+:JVM(import "java.lang" '(String Class))
-#+:CLI(import "System, mscorlib" '(String Type))
+#+:JVM(import "java.lang" '(String Class Math))
+#+:CLI(import "System, mscorlib" '(String Type Math))
 
 (defn f0 ())
 
@@ -128,8 +128,11 @@
 
 (defn fmem ()
       #+:JVM
-      (when (Class.forName "Object")
-        (String.valueOf 7))
+      (if (Class.forName "Object")
+          (String.valueOf 7)
+        Math.PI)
       #+:CLI
-      (when (Type.GetType "Object")
-        (String.Intern "fred")))
+      (if (Type.GetType "Object")
+          (String.Intern "fred")
+        Math.PI)
+      (set Math.PI 3.14))

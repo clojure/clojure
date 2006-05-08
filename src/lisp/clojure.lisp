@@ -450,6 +450,7 @@
         (:try (emit-try context expr))
         (:bind(emit-bind context expr))
         (:quoted-aggregate (emit-quoted-aggregate context expr))
+        (:host-symbol (emit-host-static-member context expr))
         (:cast (emit-cast context expr))))
    (t (emit-other context expr))))
 
@@ -474,12 +475,25 @@
          (format t "~A" (keyword-member-name expr)))
         ((accessor? expr)
          (format t "~A" (accessor-member-name expr)))
+        ((host-symbol? expr)
+         (multiple-value-bind (class-name member-name)
+             (host-class-and-member-strings expr)
+           (format t "Reflector.getStaticField(~S,~S)" member-name class-name)))
         (t (format t "~A" (var-member-name expr)))))
       ((consp expr)
        (format t "RT.arrayToList(new Object[]{~{~A~^, ~}})"
                  (mapcar (lambda (e)
                            (emit-to-string (emit :expression e)))
                          expr)))))))
+
+(defun emit-host-static-member (context expr)
+  (ccase context
+    (:statement);no-op
+    (:return (emit-return expr))
+    (:expression
+     (multiple-value-bind (class-name member-name)
+         (host-class-and-member-strings (@ :symbol expr))
+       (format t "Reflector.getStaticField(~S,~S)" member-name class-name)))))
 
 (defun emit-return (expr)
   (format t "return ")
@@ -537,6 +551,7 @@
   ;expecting one of
   ;(set local val) => local = val;
   ;(set var val) => var.setValue(val);
+  ;(set class.member val) => Reflector.setStaticField("member","java.lang.Class",val);
   ;(set (:key x) val) => key.invoke(x,val);
   ;(set (.accessor x) val) => accessor.invoke(x, val);
   ;(set (global x y z ...) val)) => global.setfn.invoke(val, x, y, z)
@@ -595,7 +610,13 @@
               (:global-binding
                (format t "~A.setValue(__tld, " (var-member-name (@ :symbol target)))
                (emit :expression val)
-               (format t ")"))))))
+               (format t ")"))
+              (:host-symbol
+               (multiple-value-bind (class-name member-name)
+                   (host-class-and-member-strings (@ :symbol target))
+                 (format t "Reflector.setStaticField(~S, ~S, " member-name class-name)
+                 (emit :expression val)
+                 (format t ")")))))))
       (when (member context '(:expression :fn))
         (format t ")"))
       (when (eql context :statement)
@@ -754,13 +775,11 @@
             (args (@ :args expr)))
        (cond
         (host-symbol?
-         (let* ((host-name (symbol-name (@ :symbol fexpr)))
-                (dot-pos (position #\. host-name :from-end t ))
-                (class-name (subseq host-name 0 dot-pos))
-                (member-name (subseq host-name (1+ dot-pos))))
+         (multiple-value-bind (class-name member-name)
+             (host-class-and-member-strings (@ :symbol fexpr))
            (format t "Reflector.invokeStaticMethod(~S,~S,new Object[]{~{~A~^,~}})"
                    member-name
-                   (fully-qualified-class-name class-name)
+                   class-name
                    (mapcar (lambda (e)
                              (emit-to-string
                                (emit :expression e)))
@@ -1382,6 +1401,13 @@
 
 (defun host-symbol? (sym)
   (find #\. (string sym) :start 1))
+
+(defun host-class-and-member-strings (host-symbol)
+  (let* ((host-name (symbol-name host-symbol))
+         (dot-pos (position #\. host-name :from-end t ))
+         (class-name (subseq host-name 0 dot-pos))
+         (member-name (subseq host-name (1+ dot-pos))))
+    (values (fully-qualified-class-name class-name) member-name)))
 
 (defun accessor? (sym)
   (eql (char (string sym) 0) #\.))
