@@ -1,5 +1,8 @@
 (in-module "clojure")
 
+#+:JVM(import "java.lang" '(String Class))
+#+:CLI(import "System, mscorlib" '(String Type))
+
 (defn f0 ())
 
 (defn f1 (x) x)
@@ -122,3 +125,11 @@
 
 (defn fcast ()
       (if (int 7) (char 17) (long 29999)))
+
+(defn fmem ()
+      #+:JVM
+      (when (Class.forName "Object")
+        (String.valueOf 7))
+      #+:CLI
+      (when (Type.GetType "Object")
+        (String.Intern "fred")))

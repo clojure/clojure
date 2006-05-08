@@ -749,34 +749,49 @@
     (:expression
      (let* ((fexpr (@ :fexpr expr))
             (global-binding? (eql :global-binding (@ :type fexpr)))
+            (host-symbol? (eql :host-symbol (@ :type fexpr)))
             (static-method? (will-be-static-method fexpr))
             (args (@ :args expr)))
-       (when (not (or global-binding? static-method?))
-         (format t "((IFn)"))
-       (emit :fn fexpr)        
-       (when (not (or global-binding? static-method?))
-         (format t ")"))
-       (unless static-method?
-         (format t ".invoke"))
-       (format t "(__tld")
-       (when static-method?
-         (let ((closes (@ :closes (first (@ :methods (@ :fn fexpr))))))
-           (format t "~{, ~A~}"
-                   (mapcar (lambda (b)
-                             (binding-name b))
-                           closes))))
-       (format t "~{, ~A~}"
-               (mapcar (lambda (e)
-                         (emit-to-string
-                          (emit :expression e)))
-                       (ldiff args (nthcdr +MAX-POSITIONAL-ARITY+ args))))
-       (when (nthcdr +MAX-POSITIONAL-ARITY+ args)
-         (format t ",new Object[]{~{~A~^,~}}"
+       (cond
+        (host-symbol?
+         (let* ((host-name (symbol-name (@ :symbol fexpr)))
+                (dot-pos (position #\. host-name :from-end t ))
+                (class-name (subseq host-name 0 dot-pos))
+                (member-name (subseq host-name (1+ dot-pos))))
+           (format t "Reflector.invokeStaticMethod(~S,~S,new Object[]{~{~A~^,~}})"
+                   member-name
+                   (fully-qualified-class-name class-name)
+                   (mapcar (lambda (e)
+                             (emit-to-string
+                               (emit :expression e)))
+                           args))))
+        (t
+         (when (not (or global-binding? static-method?))
+           (format t "((IFn)"))
+         (emit :fn fexpr)        
+         (when (not (or global-binding? static-method?))
+           (format t ")"))
+         (unless static-method?
+           (format t ".invoke"))
+         (format t "(__tld")
+         (when static-method?
+           (let ((closes (@ :closes (first (@ :methods (@ :fn fexpr))))))
+             (format t "~{, ~A~}"
+                     (mapcar (lambda (b)
+                               (binding-name b))
+                             closes))))
+         (format t "~{, ~A~}"
                  (mapcar (lambda (e)
                            (emit-to-string
-                            (emit :expression e)))
-                         (nthcdr +MAX-POSITIONAL-ARITY+ args))))
-       (format t ")")))))
+                             (emit :expression e)))
+                         (ldiff args (nthcdr +MAX-POSITIONAL-ARITY+ args))))
+         (when (nthcdr +MAX-POSITIONAL-ARITY+ args)
+           (format t ",new Object[]{~{~A~^,~}}"
+                   (mapcar (lambda (e)
+                             (emit-to-string
+                               (emit :expression e)))
+                           (nthcdr +MAX-POSITIONAL-ARITY+ args))))
+         (format t ")")))))))
 
 
 
