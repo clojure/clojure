@@ -17,7 +17,8 @@
    "block" "let" "let*" "letfn"
    "set" "pset" "set*" "do"
    "try" "ex"
-   "char" "boolean" "byte" "short" "int" "long" "float" "double"))
+   "char" "boolean" "byte" "short" "int" "long" "float" "double"
+   "import"))
 
 (in-package "clojure")
 
@@ -41,6 +42,8 @@
 (defvar *var-env* nil)
 (defvar *frame* nil)
 (defvar *next-id*)
+
+(defvar *imports*)
 
 ;dynamic functions
 (defvar *reference-var*)
@@ -235,6 +238,7 @@
                   ((process-form (form)
                      (case (first form)
                        (|in-module| (setf *package* (find-package (second form))))
+                       (|import| (|import| (second form) (second (third form))))
                        ((|block|) (mapc #'process-form (rest form)))
                        ((|defn*| |def| |defparameter| |defmain|)
                         (let* ((target-sym (second form)))
@@ -246,7 +250,8 @@
                         (if (macro-function (car form))
                             (process-form (macroexpand-1 form))
                           (error "Unsupported form ~A" form))))))
-                (let ((*readtable* (copy-readtable nil)))
+                (let ((*readtable* (copy-readtable nil))
+                      (*imports* (make-hash-table :test #'equal)))
                   (setf (readtable-case *readtable*) :preserve)
                   (do ((form (read source nil 'eof) (read source nil 'eof)))
                       ((eql form 'eof))
@@ -304,7 +309,25 @@
 (defun get-next-id ()
   (incf *next-id*))
 
+(defun listize (x)
+  (if (listp x)
+      x
+    (list x)))
 
+(defun |import| (package-string class-symbols)
+  (dolist (c (listize class-symbols))
+    (when (gethash (symbol-name c) *imports*)
+      (error "Class ~A already imported from ~A" (symbol-name c) (gethash (symbol-name c) *imports*)))
+    (setf (gethash (symbol-name c) *imports*) package-string)))
+
+(defun fully-qualified-class-name (class-name)
+  (let ((package-string (gethash class-name *imports*)))
+    (if package-string
+        (let* ((assembly-point (position #\, package-string))
+               (package (subseq package-string 0 assembly-point)))
+          (concatenate 'string package "." class-name
+                       (when assembly-point (subseq package-string assembly-point))))
+      (error "Can't find class ~A in imports" class-name))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; macros ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
