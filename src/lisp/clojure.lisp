@@ -157,7 +157,7 @@
 (defun accessor-member-name (symbol)
   (format nil "ACC__~A__~A"
           (munge-name (package-name (symbol-package symbol)))
-          (munge-name (symbol-name symbol))))
+          (munge-name (subseq (symbol-name symbol) 1))))
 
 (defun symbol-member-name (symbol)
   (format nil "SYM__~A"
@@ -274,7 +274,7 @@
         (format target "static Accessor ~A = Namespace.internAccessor(~S,~S);~%"
                 (accessor-member-name accessor)
                 (munge-name (package-name (symbol-package accessor)))
-                (munge-name (symbol-name accessor))))
+                (munge-name (subseq (symbol-name accessor) 1))))
       (format target "~Atry{~%" (begin-static-block class-name))
         ;(format target "~%static public void __load() ~A{~%" (exception-declaration-string lang))
       (dolist (var *defns*)
@@ -403,6 +403,7 @@
     (quote (analyze-quote context form))
     (|defn*| (analyze-defn* context form))
     (|def| (analyze-def context form))
+    (|defmain| (analyze-defmain context form))
     (|block| (analyze-block context form))
     (|fn*| (analyze-fn* context form))
     (|if| (analyze-if context form))
@@ -432,6 +433,7 @@
    ((typep expr 'hash-table) ;objs
     (ccase (@ :type expr)
         (:defn* (emit-defn* context expr))
+        (:main (emit-main context expr))
         (:fn* (emit-fn* context expr))
         (:binding (emit-binding context expr))
         (:accessor (emit-accessor context expr))
@@ -1107,6 +1109,26 @@
        (format t "finally{~%")
        (emit :statement finally-clause)
        (format t "}~%")))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; defmain ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun analyze-defmain (context form)
+  (ccase context
+    (:top 
+     (register-var-reference (second form))
+     (newobj :type :main
+                  :fname (second form)))))
+
+(defun emit-main (context expr)
+  (ccase context
+    (:top
+     (format t "static public void ~A(String[] args){~%try{~%~A.fn.invoke(ThreadLocalData.get(),args);~%}~%catch(Exception ex){}~%}~%"
+             (main-string) (var-member-name (@ :fname expr))))))
+
+(defun main-string ()
+  (ccase *host*
+    (:jvm "main")
+    (:cli "Main")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; defn ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

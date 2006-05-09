@@ -40,7 +40,12 @@ public Var bind(Object val)
 	else
 		binding.first = val;
 
-	return this;
+	if(val instanceof IFn)
+		this.fn = (IFn) val;
+	else
+		this.fn = null; //todo, bind to throw stub?
+        
+    return this;
 	}
 
 public Cons getBinding(ThreadLocalData tld)

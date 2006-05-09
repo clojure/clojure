@@ -1,7 +1,7 @@
 (in-module "clojure")
 
-#+:JVM(import "java.lang" '(String Class Math))
-#+:CLI(import "System, mscorlib" '(String Type Math))
+#+:JVM(import "java.lang" '(String Class Math System))
+#+:CLI(import "System, mscorlib" '(String Type Math Console))
 
 (defn f0 ())
 
@@ -136,3 +136,12 @@
           (String.Intern "fred")
         Math.PI)
       (set Math.PI 3.14))
+
+(defn prn (x)
+      #+:JVM (.println System.out x)
+      #+:CLI (Console.WriteLine x))
+
+(defn fmain (args)
+      (prn "Hello World!"))
+
+(defmain fmain)
