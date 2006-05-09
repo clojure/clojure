@@ -39,9 +39,35 @@ public static Object invokeInstanceMethod(String name, Object target, Object[] a
             }
         }
 
+public static Object invokeConstructor(Type t, Object[] args)  //throws Exception
+    {
+    ConstructorInfo[] allctors = t.GetConstructors();
+    ArrayList ctors = new ArrayList();
+    foreach (ConstructorInfo ctor in allctors)
+        {
+        if (ctor.GetParameters().Length == args.Length)
+            ctors.Add(ctor);
+        }
+    if (ctors.Count == 0)
+        {
+        throw new InvalidOperationException("No matching ctor found");
+        }
+    else if (ctors.Count == 1)
+        {
+        ConstructorInfo ctor = (ConstructorInfo)ctors[0];
+        return ctor.Invoke(boxArgs(ctor.GetParameters(), args));
+        }
+    else //overloaded w/same arity, let reflection choose most specific match
+        {
+        return t.InvokeMember(null, BindingFlags.Public | BindingFlags.Instance | BindingFlags.CreateInstance,
+                            null, null, args);
+        }
+    }
 public static Object invokeStaticMethod(String name, String className, Object[] args) //throws Exception
     {
     Type t = Type.GetType(className);
+    if (name.Equals("new"))
+        return invokeConstructor(t, args);
     IList methods = getMethods(t, args.Length, name, true);
     return invokeMatchingMethod(name, null, args, t, methods,true);
     }
