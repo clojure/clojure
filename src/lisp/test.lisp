@@ -137,6 +137,11 @@
         Math.PI)
       (set Math.PI 3.14))
 
+(defn finst (x)
+      (if (instance? x String.)
+          1 
+        2))
+
 (defn prn (x)
       #+:JVM (.println System.out x)
       #+:CLI (Console.WriteLine x))

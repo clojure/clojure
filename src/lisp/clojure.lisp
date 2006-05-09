@@ -418,6 +418,7 @@
     (|break| (analyze-break context form))
     (|try| (analyze-try context form))
     (|bind| (analyze-bind context form))
+    (|instance?| (analyze-instance? context form))
     ((|char| |boolean| |byte| |short| |int| |long| |float| |double|)
      (analyze-cast context form))
     (t (analyze-invoke context op form))))
@@ -453,7 +454,8 @@
         (:bind(emit-bind context expr))
         (:quoted-aggregate (emit-quoted-aggregate context expr))
         (:host-symbol (emit-host-static-member context expr))
-        (:cast (emit-cast context expr))))
+        (:cast (emit-cast context expr))
+        (:instance? (emit-instance? context expr))))
    (t (emit-other context expr))))
 
 (defun emit-other (context expr)
@@ -530,7 +532,7 @@
      (format t "~A" (munge-name (@ :symbol expr))))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cast ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cast/instance? ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun analyze-cast (context form)
   (declare (ignore context))
@@ -546,6 +548,30 @@
      (emit :expression (@ :expr expr))
      (format t "))"))))
 
+(defun analyze-instance? (context form)
+  (declare (ignore context))
+  (assert (host-type-symbol? (third form)))
+  (newobj :type :instance?
+          :expr (analyze :expression (macroexpand (second form)))
+          :sym (analyze-symbol :statement (third form))))
+
+(defun emit-instance? (context expr)
+  (ccase context
+    (:return (emit-return expr))
+    (:expression
+     (format t "(")
+     (emit :expression (@ :expr expr))
+     (format t" ~A ~A?RT.T:null)"
+             (instanceof-string)
+             (multiple-value-bind (class-name member-name)
+                 (host-class-and-member-strings (@ :symbol (@ :sym expr)))
+               ;trim off any assembly cruft
+               (subseq class-name 0 (position #\, class-name)))))))
+
+(defun instanceof-string ()
+  (ccase *host*
+    (:jvm "instanceof")
+    (:cli "is")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; set ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1423,6 +1449,10 @@
 
 (defun host-symbol? (sym)
   (find #\. (string sym) :start 1))
+
+(defun host-type-symbol? (sym)
+  (and (host-symbol? sym)
+       (= 1 (length (subseq (string sym) (position  #\. (string sym) :from-end t))))))
 
 (defun host-class-and-member-strings (host-symbol)
   (let* ((host-name (symbol-name host-symbol))
