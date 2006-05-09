@@ -12,10 +12,7 @@
 
 package org.clojure.runtime;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,9 +55,46 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
         }
 }
 
+public static Object invokeConstructor(Class c, Object[] args)  throws Exception
+	{
+	Constructor[] allctors = c.getConstructors();
+	ArrayList ctors = new ArrayList();
+	for(int i = 0; i < allctors.length; i++)
+		{
+		Constructor ctor = allctors[i];
+		if(ctor.getParameterTypes().length == args.length)
+			ctors.add(ctor);
+		}
+	if(ctors.isEmpty())
+	    {
+	    throw new IllegalArgumentException("No matching ctor found");
+	    }
+	else if(ctors.size() == 1)
+	    {
+	    Constructor ctor = (Constructor) ctors.get(0);
+	    return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
+	    }
+	else //overloaded w/same arity
+	    {
+	    for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
+		    {
+		    Constructor ctor = (Constructor) iterator.next();
+		    Class[] params = ctor.getParameterTypes();
+		    if(isCongruent(params, args))
+		        {
+		        Object[] boxedArgs = boxArgs(params, args);
+		        return ctor.newInstance(boxedArgs);
+		        }
+		    }
+	    throw new IllegalArgumentException("No matching ctor found");
+	    }
+	}
+
 public static Object invokeStaticMethod(String name, String className, Object[] args) throws Exception
     {
     Class c = Class.forName(className);
+    if(name.equals("new"))
+	    return invokeConstructor(c, args);
     List methods = getMethods(c, args.length, name,true);
     return invokeMatchingMethod(methods, null, args);
     }
