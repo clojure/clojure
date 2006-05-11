@@ -42,7 +42,9 @@ public Object invoke(ThreadLocalData tld, Object obj) throws Exception
 	{
 	if(obj instanceof AMap)
 		return ((AMap)obj).get(this);
-	return Reflector.invokeInstanceMember(name,obj);
+    else if (obj == null)
+        return null;
+    return Reflector.invokeInstanceMember(name,obj);
 	}
 
 /**

@@ -57,6 +57,8 @@ public String toString()
  */
 public Object invoke(ThreadLocalData tld, Object obj) throws Exception
 	{
+    if (obj == null)
+        return null;
 	return ((AMap)obj).get(this);
 	}
 
