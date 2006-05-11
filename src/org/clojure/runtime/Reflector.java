@@ -23,7 +23,7 @@ public static Object invokeInstanceMethod(String name, Object target, Object[] a
 	{
 	Class c = target.getClass();
 	List methods = getMethods(c, args.length, name,false);
-        return invokeMatchingMethod(methods, target, args);
+        return prepRet(invokeMatchingMethod(methods, target, args));
     }
 
 private static Object invokeMatchingMethod(List methods, Object target, Object[] args)
@@ -35,7 +35,7 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
     else if(methods.size() == 1)
         {
         Method m = (Method) methods.get(0);
-        return m.invoke(target, boxArgs(m.getParameterTypes(), args));
+        return prepRet(m.invoke(target, boxArgs(m.getParameterTypes(), args)));
         }
     else //overloaded w/same arity
         {
@@ -47,7 +47,7 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
             if(isCongruent(params, args))
                 {
                 Object[] boxedArgs = boxArgs(params, args);
-                return m.invoke(target, boxedArgs);
+                return prepRet(m.invoke(target, boxedArgs));
                 }
             }
         throw new IllegalArgumentException("No matching field or method found");
@@ -105,7 +105,7 @@ public static Object getStaticField(String name, String className) throws Except
 	Field f = getField(c, name,true);
 	if(f != null)
 		{
-		return f.get(null);
+		return prepRet(f.get(null));
 		}
     throw new IllegalArgumentException("No matching field found");
 	}
@@ -128,9 +128,9 @@ public static Object invokeInstanceMember(String name, Object target) throws Exc
 	Class c = target.getClass();
 	Field f = getField(c, name,false);
 	if(f != null)  //field get
-		{
-		return f.get(target);
-		}
+    {
+        return prepRet(f.get(target));
+    }
 	return invokeInstanceMethod(name, target, RT.EMPTY_ARRAY);
 	}
 
@@ -310,4 +310,11 @@ static boolean isCongruent(Class[] params, Object[] args)
 		}
 	return ret;
 	}
+
+static Object prepRet(Object x)
+   {
+    if(x instanceof Boolean)
+        return ((Boolean)x).booleanValue()?RT.T:null;
+    return x;
+   }
 }

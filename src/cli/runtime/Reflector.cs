@@ -29,13 +29,13 @@ public static Object invokeInstanceMethod(String name, Object target, Object[] a
         else if (methods.Count == 1)
             {
             MethodInfo m = (MethodInfo)methods[0];
-            return m.Invoke(target, boxArgs(m.GetParameters(), args));
+            return prepRet(m.Invoke(target, boxArgs(m.GetParameters(), args)));
             }
         else //overloaded w/same arity, let reflection choose most specific match
             {
-            return t.InvokeMember(name, BindingFlags.Public | (statics ? BindingFlags.Static : BindingFlags.Instance) 
+            return prepRet(t.InvokeMember(name, BindingFlags.Public | (statics ? BindingFlags.Static : BindingFlags.Instance) 
                                         | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod,
-                                    null, target, args);
+                                    null, target, args));
             }
         }
 
@@ -79,12 +79,12 @@ public static Object getStaticField(String name, String className) //throws Exce
     FieldInfo f = getField(t, name, true);
     if (f != null)  //field get
         {
-        return f.GetValue(null);
+        return prepRet(f.GetValue(null));
         }
     PropertyInfo p = getProperty(t, name, true);
     if (p != null)
         {
-        return p.GetValue(null, null);
+        return prepRet(p.GetValue(null, null));
         }
     throw new InvalidOperationException("No matching field or property found");
     }
@@ -108,11 +108,11 @@ public static Object setStaticField(String name, String className, Object arg1) 
     throw new InvalidOperationException("No matching field or property found");
     }
 
-public static Object invokeInstanceMember(String name, Object target) //throws Exception	{	//check for field first	Type t = target.GetType();	FieldInfo f = getField(t, name,false);	if(f != null)  //field get		{		return f.GetValue(target);		}
+public static Object invokeInstanceMember(String name, Object target) //throws Exception	{	//check for field first	Type t = target.GetType();	FieldInfo f = getField(t, name,false);	if(f != null)  //field get		{		return prepRet(f.GetValue(target));		}
     PropertyInfo p = getProperty(t, name,false);
     if (p != null)
         {
-        return p.GetValue(target, null);
+        return prepRet(p.GetValue(target, null));
         }	return invokeInstanceMethod(name, target, RT.EMPTY_ARRAY);	}public static Object invokeInstanceMember(String name, Object target, Object arg1) //throws Exception	{	//check for field first	Type t = target.GetType();    FieldInfo f = getField(t, name,false);
     if (f != null)  //field get
         {
@@ -124,7 +124,7 @@ public static Object invokeInstanceMember(String name, Object target) //throws E
         {
         //could be indexed property, which we otherwise aren't dealing with yet
         if(p.GetIndexParameters() != null && p.GetIndexParameters().Length == 1)
-            return p.GetValue(target, new Object[]{boxArg(p.GetIndexParameters()[0].ParameterType,arg1)});
+            return prepRet(p.GetValue(target, new Object[]{boxArg(p.GetIndexParameters()[0].ParameterType,arg1)}));
         p.SetValue(target,boxArg(p.PropertyType,arg1),null);
         return arg1;
         }	return invokeInstanceMethod(name, target, new Object[]{arg1});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2) //throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3)		//throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,                                          Object arg4)		//throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3, arg4});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,                                          Object arg4,                                          Cons arglist)		//throws Exception	{	Object[] args = new Object[4 + RT.length(arglist)];	args[0] = arg1;	args[1] = arg2;	args[2] = arg3;	args[3] = arg4;	for(int i = 4; arglist != null; i++, arglist = arglist.rest)		args[i] = arglist.first;	return invokeInstanceMethod(name, target, args);	}
@@ -156,6 +156,12 @@ public static Object invokeInstanceMember(String name, Object target) //throws E
 
 static Object boxArg(Type paramType, Object arg)	{	Type argType = arg.GetType();	if(paramType == argType)		return arg;	if(paramType == typeof(bool))		{		return arg != null;		}	else if(paramType.IsPrimitive && arg is Num)		{		Num n = (Num) arg;		if(paramType == typeof(int))			return RT.box(n.intValue());		else if(paramType == typeof(float))			return RT.box(n.floatValue());		else if(paramType == typeof(double))			return RT.box(n.doubleValue());		else if(paramType == typeof(long))			return RT.box(n.longValue());		else if(paramType == typeof(char))			return RT.box((char) n.intValue());		else if(paramType == typeof(short))			return RT.box(n.shortValue());		else if(paramType == typeof(byte))			return RT.box(n.byteValue());        else            throw new ArgumentException("Cannot convert to primitive type: " + paramType.Name);		}	else		return arg;	}static Object[] boxArgs(ParameterInfo[] parms, Object[] args)	{	if(parms.Length == 0)		return null;	Object[] ret = new Object[parms.Length];	for(int i = 0; i < parms.Length; i++)		{		Object arg = args[i];		Type paramType = parms[i].ParameterType;		ret[i] = boxArg(paramType, arg);		}	return ret;	}
 
+static Object prepRet(Object x)
+   {
+    if(x is Boolean)
+        return ((Boolean)x)?RT.T:null;
+    return x;
+   }
 
 
  }
