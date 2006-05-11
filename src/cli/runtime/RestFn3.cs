@@ -21,13 +21,28 @@ public abstract class RestFn3 : AFn{
 
 override public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Exception*/
 	{
-	if(RT.boundedLength(arglist, 3) < 3)
-		throwArity();
-	return doInvoke(tld, arglist.first
-			, (arglist = arglist.rest).first
-			, (arglist = arglist.rest).first
-			, arglist.rest);
+    switch (RT.boundedLength(arglist, 3))
+        {
+        case 0:
+            return invoke(tld);
+        case 1:
+            return invoke(tld, arglist.first);
+        case 2:
+            return invoke(tld, arglist.first
+                    , (arglist = arglist.rest).first
+            );
+        case 3:
+            return invoke(tld, arglist.first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+            );
+        default:
+            return doInvoke(tld, arglist.first
+                , (arglist = arglist.rest).first
+                , (arglist = arglist.rest).first
+            , arglist.rest);
 
+        }
 	}
 
 

@@ -20,15 +20,43 @@ protected abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2
 
 public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception
 	{
-	if(RT.boundedLength(arglist, 5) < 5)
-		throwArity();
-	return doInvoke(tld, arglist.first
-			, (arglist = arglist.rest).first
-			, (arglist = arglist.rest).first
-			, (arglist = arglist.rest).first
-			, (arglist = arglist.rest).first
+    switch(RT.boundedLength(arglist, 5))
+        {
+        case 0:
+            return invoke(tld);
+        case 1:
+            return invoke(tld,arglist.first);
+        case 2:
+            return invoke(tld,arglist.first
+                    , (arglist = arglist.rest).first
+            );
+        case 3:
+            return invoke(tld,arglist.first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+            );
+        case 4:
+            return invoke(tld,arglist.first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+            );
+        case 5:
+            return invoke(tld,arglist.first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+            );
+        default:
+    	    return doInvoke(tld, arglist.first
+                , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
+                    , (arglist = arglist.rest).first
 			, arglist.rest);
 
+        }
 	}
 
 public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)

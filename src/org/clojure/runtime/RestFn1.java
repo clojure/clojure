@@ -18,11 +18,17 @@ protected abstract Object doInvoke(ThreadLocalData tld, Object arg1, Cons rest) 
 
 public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception
 	{
-	if(arglist == null)
-		throwArity();
-	return doInvoke(tld, arglist.first
+    switch(RT.boundedLength(arglist, 1))
+        {
+        case 0:
+            return invoke(tld);
+        case 1:
+            return invoke(tld,arglist.first);
+        default:
+    	return doInvoke(tld, arglist.first
 			, arglist.rest);
-	}
+        }
+    }
 
 public Object invoke(ThreadLocalData tld, Object arg1) throws Exception
 	{

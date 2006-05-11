@@ -21,11 +21,17 @@ public abstract Object doInvoke(ThreadLocalData tld, Object arg1, Cons rest) /*t
 
 override public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Exception*/
 	{
-	if(arglist == null)
-		throwArity();
-	return doInvoke(tld, arglist.first
-			, arglist.rest);
-	}
+    switch (RT.boundedLength(arglist, 1))
+        {
+        case 0:
+            return invoke(tld);
+        case 1:
+            return invoke(tld, arglist.first);
+        default:
+            return doInvoke(tld, arglist.first
+                , arglist.rest);
+        }
+    }
 
 override public Object invoke(ThreadLocalData tld, Object arg1) /*throws Exception*/
 	{
