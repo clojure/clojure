@@ -52,11 +52,11 @@
 (let ((*clojure-source-path* #p"/dev/clojure/src/lisp/")
       (*clojure-target-path* #p"/dev/clojure/classes/"))
   (compile-to :jvm "org.clojure" "Clojure"
-              "test.lisp"))
+              "lib.lisp"))
 (let ((*clojure-source-path* #p"/dev/clojure/src/lisp/")
       (*clojure-target-path* #p"/dev/clojure/classes/test/"))
   (compile-to :cli "org.clojure" "Clojure"
-              "test.lisp"))
+              "lib.lisp"))
 ;build the library
 (let ((*clojure-source-path* #p"/dev/clojure/")
       (*clojure-target-path* #p"/dev/gen/clojure/"))
@@ -343,6 +343,17 @@
 (defmacro |unless| (test &rest result)
   `(|if| ,test nil (|block| ,@result)))
 
+(defmacro |cond| (&rest args)
+  (if (null args)
+      nil
+    (let ((clause (first args)))
+      (if (rest clause)
+          `(|if| ,(first clause)
+               (|block| ,@(rest clause))
+             (|cond| ,@(rest args)))
+        `(|or| ,(first clause)
+             (|cond| ,@(rest args)))))))
+
 (defun pairize (lst)
   (if (null lst)
       nil
@@ -383,6 +394,15 @@
                         (mapcar #'third binds))))))
 
 
+
+(defmacro |defcomparator| (op prim)
+  `(|defn*| ,op
+       ((x) t)
+       ((x y)
+        (,prim x y))
+       ((x y & rest)
+        (|and| (,prim x y)
+             (|apply| ,op y rest)))))
 
 ;(defmacro |block| (&body body)
 ;  `(|let| nil ,@body))
@@ -795,7 +815,7 @@
      (format t ";~%"))
     (:return
      (emit-return expr))
-    (:expression
+    ((:expression :fn)
      (let* ((fexpr (@ :fexpr expr))
             (global-binding? (eql :global-binding (@ :type fexpr)))
             (host-symbol? (eql :host-symbol (@ :type fexpr)))
