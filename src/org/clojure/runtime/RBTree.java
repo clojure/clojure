@@ -19,20 +19,20 @@ import java.util.*;
  * Note that instances of this class are constant values
  * i.e. add/remove etc return new values
  * <p/>
- * See Okasaki, Kahrs, Larsen
+ * See Okasaki, Kahrs, Larsen et al
  */
 
-public class RBSet{
+public class RBTree{
 
 public final Comparator comp;
 public final Node tree;
 public final int count;
 
-public RBSet(){
+public RBTree(){
 	this(null);
 }
 
-public RBSet(Comparator comp){
+public RBTree(Comparator comp){
 	this.comp = comp;
 	tree = null;
 	count = 0;
@@ -42,11 +42,11 @@ public boolean contains(Object key){
 	return find(key) != null;
 }
 
-public RBSet add(Object key){
+public RBTree add(Object key){
 	return put(key, null);
 }
 
-public RBSet put(Object key, Object val){
+public RBTree put(Object key, Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -54,13 +54,13 @@ public RBSet put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new RBSet(comp, replace(tree, key, val), count);
+		return new RBTree(comp, replace(tree, key, val), count);
 		}
-	return new RBSet(comp, t.blacken(), count + 1);
+	return new RBTree(comp, t.blacken(), count + 1);
 }
 
 
-public RBSet remove(Object key){
+public RBTree remove(Object key){
 	Box found = new Box(null);
 	Node t = remove(tree, key, found);
 	if(t == null)
@@ -68,9 +68,9 @@ public RBSet remove(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new RBSet(comp);
+		return new RBTree(comp);
 		}
-	return new RBSet(comp, t.blacken(), count - 1);
+	return new RBTree(comp, t.blacken(), count - 1);
 }
 
 
@@ -138,7 +138,12 @@ int depth(Node t){
 	return 1 + Math.max(depth(t.left()), depth(t.right()));
 }
 
-Node find(Object key){
+public Object get(Object key){
+	Node n = find(key);
+	return (n != null) ? n.val() : null;
+}
+
+public Node find(Object key){
 	Node t = tree;
 	while(t != null)
 		{
@@ -297,7 +302,7 @@ Node replace(Node t, Object key, Object val){
 	                 c > 0 ? replace(t.right(), key, val) : t.right());
 }
 
-RBSet(Comparator comp, Node tree, int count){
+RBTree(Comparator comp, Node tree, int count){
 	this.comp = comp;
 	this.tree = tree;
 	this.count = count;
@@ -654,7 +659,7 @@ static class ValIterator implements Iterator{
 
 static public void main(String args[]){
 	if(args.length != 1)
-		System.err.println("Usage: RBSet n");
+		System.err.println("Usage: RBTree n");
 	int n = Integer.parseInt(args[0]);
 	Integer[] ints = new Integer[n];
 	for(int i = 0; i < ints.length; i++)
@@ -663,7 +668,7 @@ static public void main(String args[]){
 		}
 	Collections.shuffle(Arrays.asList(ints));
 	System.out.println("Building set");
-	RBSet set = new RBSet();
+	RBTree set = new RBTree();
 	for(int i = 0; i < ints.length; i++)
 		{
 		Integer anInt = ints[i];
@@ -685,12 +690,13 @@ static public void main(String args[]){
 		else if(n < 2000)
 			System.out.print(o.toString() + ",");
 		}
-	it = set.keys();
-	while(it.hasNext())
+
+	for(int i = 0; i < ints.length/2; i++)
 		{
-		Object o = it.next();
-		set = set.remove(o);
+		Integer anInt = ints[i];
+		set = set.remove(anInt);
 		}
+
 	System.out.println();
 	System.out.println("count = " + set.count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 	                   + ", depth: " + set.depth());
