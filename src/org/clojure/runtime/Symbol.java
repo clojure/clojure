@@ -36,7 +36,13 @@ public static Symbol intern(String name)
         {
         Symbol sym = (Symbol) table.get(name);
         if(sym == null)
-            table.put(name, sym = new Symbol(name));
+            {
+            if(name.charAt(0) == ':')
+                sym = new Keyword(name);
+            else
+                sym = new Symbol(name);
+            table.put(name, sym);
+            }
         return sym;
         }
     }

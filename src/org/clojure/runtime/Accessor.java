@@ -40,10 +40,7 @@ public String toString()
  */
 public Object invoke(ThreadLocalData tld, Object obj) throws Exception
 	{
-	if(obj instanceof AMap)
-		return ((AMap)obj).get(this);
-    else if (obj == null)
-        return null;
+
     return Reflector.invokeInstanceMember(name,obj);
 	}
 
@@ -58,8 +55,7 @@ public Object invoke(ThreadLocalData tld, Object obj) throws Exception
  */
 public Object invoke(ThreadLocalData tld, Object obj, Object val) throws Exception
 	{
-	if(obj instanceof AMap)
-		return ((AMap)obj).put(this,val);
+
 	return Reflector.invokeInstanceMember(name,obj,val);
 	}
 

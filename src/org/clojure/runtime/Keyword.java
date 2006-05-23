@@ -12,40 +12,25 @@
 
 package org.clojure.runtime;
 
-import java.util.HashMap;
 
-public class Keyword extends Indexer{
+public class Keyword extends Symbol implements IFn{
 
 
-final public static HashMap table = new HashMap();
-
-public final String name;
-
-public static Keyword intern(String name)
-	{
-	synchronized(table)
-		{
-		Keyword sym = (Keyword) table.get(name);
-		if(sym == null)
-			table.put(name, sym = new Keyword(name));
-		return sym;
-		}
-	}
 /**
- * Used by Namespace.intern()
+ * Used by intern()
  *
  * @param name
 
  */
 Keyword(String name)
 	{
-	this.name = name;
+	super(name);
 	}
 
-public String toString()
-	{
-	return ":" + name;
-	}
+
+public Object invoke(ThreadLocalData tld) throws Exception {
+    return AFn.throwArity();
+}
 
 /**
  *  Indexer implements IFn for attr access
@@ -56,11 +41,11 @@ public String toString()
  * @throws Exception
  */
 public Object invoke(ThreadLocalData tld, Object obj) throws Exception
-	{
+    {
     if (obj == null)
         return null;
-	return ((AMap)obj).get(this);
-	}
+    return ((AMap)obj).get(this);
+    }
 
 /**
  *  Indexer implements IFn for attr access
@@ -75,4 +60,30 @@ public Object invoke(ThreadLocalData tld, Object obj, Object val) throws Excepti
 	{
 	return ((AMap)obj).put(this,val);
 	}
+
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) throws Exception
+	{
+	return AFn.throwArity();
+	}
+
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
+	{
+	return AFn.throwArity();
+	}
+
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+		throws Exception
+	{
+	return AFn.throwArity();
+	}
+
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+		throws Exception
+	{
+	return AFn.throwArity();
+	}
+
+public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception {
+    return AFn.applyToHelper(this, tld, arglist);
+}
 }

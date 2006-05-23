@@ -11,24 +11,45 @@
 /* rich Mar 29, 2006 10:39:05 AM */
 
 using System;
-using System.Collections.Specialized;
+
 
 namespace org.clojure.runtime
 {
 
-public class Keyword : Indexer
-					 {
-static public HybridDictionary table = new HybridDictionary();
+public class Keyword : Symbol, IFn{
 
 
-public String name;override public String ToString()
-	{
-	return ":" + name;
-	}
-public static Keyword intern(String name)	{	lock(table)		{		Keyword sym = (Keyword) table[name];		if(sym == null)			table.Add(name, sym = new Keyword(name));		return sym;		}	}/** * Used by Namespace.intern() * * @param name */Keyword(String name)	{	this.name = name;	}/** *  Indexer implements IFn for attr access *  This single arg version is the getter * @param tld * @param obj - must be AMap * @return the value of the attr or nil if not found */override public Object invoke(ThreadLocalData tld, Object obj) /*throws Exception*/	{
+internal Keyword(String name):base(name)	{	}public Object invoke(ThreadLocalData tld) /*throws Exception*/ {
+    return AFn.throwArity();
+}/** *  Indexer implements IFn for attr access *  This single arg version is the getter * @param tld * @param obj - must be AMap * @return the value of the attr or nil if not found */public Object invoke(ThreadLocalData tld, Object obj) /*throws Exception*/	{
     if (obj == null)
         return null;
-    return ((AMap)obj).get(this);	}/** *  Indexer implements IFn for attr access *  This two arg version is the setter * @param tld * @param obj - must be AMap * @param val * @return val */override public Object invoke(ThreadLocalData tld, Object obj, Object val) /*throws Exception*/	{	return ((AMap)obj).put(this,val);	}
+    return ((AMap)obj).get(this);	}/** *  Indexer implements IFn for attr access *  This two arg version is the setter * @param tld * @param obj - must be AMap * @param val * @return val */public Object invoke(ThreadLocalData tld, Object obj, Object val) /*throws Exception*/	{	return ((AMap)obj).put(this,val);	}
 
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) /*throws Exception*/
+	{
+	return AFn.throwArity();
+	}
+
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/
+	{
+	return AFn.throwArity();
+	}
+
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+		/*throws Exception*/
+	{
+	return AFn.throwArity();
+	}
+
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+		/*throws Exception*/
+	{
+	return AFn.throwArity();
+	}
+
+public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Exception*/ {
+    return AFn.applyToHelper(this, tld, arglist);
+}
 }
 }

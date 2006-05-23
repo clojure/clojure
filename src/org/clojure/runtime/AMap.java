@@ -19,7 +19,7 @@ public class AMap{
 IdentityHashMap attrs;
 public static final int INITIAL_SIZE = 7;
 
-public Object put(Indexer key, Object val)
+public Object put(Keyword key, Object val)
 	{
 	if(attrs == null)
 		attrs = new IdentityHashMap(INITIAL_SIZE);
@@ -27,7 +27,7 @@ public Object put(Indexer key, Object val)
 	return val;
 	}
 
-public Object get(Indexer key)
+public Object get(Keyword key)
 	{
 	if(attrs == null)
 		return null;

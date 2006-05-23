@@ -56,37 +56,42 @@ virtual public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Obje
 	}
 
 virtual public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Exception*/
+{
+return  applyToHelper(this,tld,arglist);
+}
+
+static public Object applyToHelper(IFn ifn,ThreadLocalData tld, Cons arglist) /*throws Exception*/
 	{
 	switch(RT.boundedLength(arglist, 5))
 		{
 		case 0:
-			return invoke(tld);
+            return ifn.invoke(tld);
 		case 1:
-			return invoke(tld, arglist.first);
+            return ifn.invoke(tld, arglist.first);
 		case 2:
-			return invoke(tld, arglist.first
+            return ifn.invoke(tld, arglist.first
 					, (arglist = arglist.rest).first
 			);
 		case 3:
-			return invoke(tld, arglist.first
+            return ifn.invoke(tld, arglist.first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
 			);
 		case 4:
-			return invoke(tld, arglist.first
+            return ifn.invoke(tld, arglist.first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
 			);
 		case 5:
-			return invoke(tld, arglist.first
+            return ifn.invoke(tld, arglist.first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
 			);
 		default:
-			return invoke(tld, arglist.first
+            return ifn.invoke(tld, arglist.first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
 					, (arglist = arglist.rest).first
@@ -95,7 +100,7 @@ virtual public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Except
 		}
 	}
 
-protected Object throwArity()
+static public Object throwArity()
 	{
 	throw new Exception("Wrong number of args passed");
 	}
