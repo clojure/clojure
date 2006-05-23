@@ -12,9 +12,9 @@ using System;
 
 namespace org.clojure.runtime
 {
-public class Var :  Indexer
+public class Var :  AFn
     {
-public String name;public Namespace ns;public Cons binding;public IFn fn;  //todo, bind to throw stub?public IFn setfn;internal Var(String name, Namespace ns)	{	this.ns = ns;	this.name = name;	}public String toString()	{	if(ns == null)		return "#:" + name;	return ns.name + ":" + name;	}public Var bind(Object val)	{	if(binding == null)		binding = new Cons(val,null);	else		binding.first = val;
+public readonly Symbol sym;public Namespace ns;public Cons binding;public IFn fn;  //todo, bind to throw stub?public IFn setfn;internal Var(Symbol sym, Namespace ns)	{	if(sym.GetType() != typeof(Symbol))	    throw new ArgumentException("Only simple symbols can be vars");	this.ns = ns;	this.sym = sym;	}public String toString()	{	if(ns == null)		return "#:" + sym;	return ns.name + ":" + sym;	}public Var bind(Object val)	{	if(binding == null)		binding = new Cons(val,null);	else		binding.first = val;
 
     if (val is IFn)
         this.fn = (IFn)val;

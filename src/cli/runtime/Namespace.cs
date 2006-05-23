@@ -25,7 +25,7 @@ public class Namespace
 static public HybridDictionary table = new HybridDictionary();
 
 /**
- * String->Symbol
+ * Symbol->Var
  */
 public HybridDictionary vars = new HybridDictionary();
 public String name;
@@ -53,11 +53,11 @@ static public Namespace findOrCreate(String name)
 		}
 	}
 
-static public Var internVar(String ns, String var)
+static public Var intern(String ns, String name)
     {
-        return findOrCreate(ns).internVar(var);
+        return findOrCreate(ns).intern(Symbol.intern(name));
     }
 
-public Var internVar(String name)	{	lock(vars)		{		Var var = (Var) vars[name];		if(var == null)			vars.Add(name,var = new Var(name, this));		return var;		}	}
+public Var intern(Symbol sym)	{	lock(vars)		{		Var var = (Var) vars[sym];		if(var == null)			vars.Add(sym,var = new Var(sym, this));		return var;		}	}
 }
 }

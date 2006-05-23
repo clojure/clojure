@@ -13,6 +13,7 @@
 package org.clojure.runtime;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 
 public class Namespace{
 
@@ -22,48 +23,48 @@ public class Namespace{
 static final public HashMap table = new HashMap();
 
 /**
- * String->Symbol
+ * Symbol->Var
  */
-final public HashMap vars = new HashMap();
+final public IdentityHashMap vars = new IdentityHashMap();
 final public String name;
 
 Namespace(String name)
-	{
-	this.name = name;
-	table.put(name, this);
-	}
+    {
+    this.name = name;
+    table.put(name, this);
+    }
 
 static public Namespace find(String name)
-	{
-	return (Namespace) table.get(name);
-	}
+    {
+    return (Namespace) table.get(name);
+    }
 
 static public Namespace findOrCreate(String name)
-	{
-	synchronized(table)
-		{
-		Namespace ns = find(name);
-		if(ns == null)
-			ns = new Namespace(name);
-		return ns;
-		}
-	}
+    {
+    synchronized(table)
+        {
+        Namespace ns = find(name);
+        if(ns == null)
+            ns = new Namespace(name);
+        return ns;
+        }
+    }
 
-static public Var internVar(String ns,String var)
-	{
-	return findOrCreate(ns).internVar(var);
-	}
+static public Var intern(String ns,String name)
+    {
+    return findOrCreate(ns).intern(Symbol.intern(name));
+    }
 
 
-public Var internVar(String name)
-	{
-	synchronized(vars)
-		{
-		Var var = (Var) vars.get(name);
-		if(var == null)
-			vars.put(name, var = new Var(name, this));
-		return var;
-		}
-	}
+public Var intern(Symbol sym)
+    {
+    synchronized(vars)
+        {
+        Var var = (Var) vars.get(sym);
+        if(var == null)
+            vars.put(sym, var = new Var(sym, this));
+        return var;
+        }
+    }
 
 }

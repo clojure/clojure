@@ -14,23 +14,25 @@ package org.clojure.runtime;
 
 public class Var extends AFn{
 
-public final String name;
+public final Symbol sym;
 public Namespace namespace;
 public Cons binding;
 public IFn fn;  //todo, bind to throw stub?
 public IFn setfn;
 
-Var(String name, Namespace ns)
+Var(Symbol sym, Namespace ns)
 	{
-	this.namespace = ns;
-	this.name = name;
+    if(!(sym.getClass() == Symbol.class))
+        throw new IllegalArgumentException("Only simple symbols can be vars");
+    this.namespace = ns;
+	this.sym = sym;
 	}
 
 public String toString()
 	{
 	if(namespace == null)
-		return "#:" + name;
-	return namespace.name + ":" + name;
+		return "#:" + sym;
+	return namespace.name + ":" + sym;
 	}
 
 public Var bind(Object val)
