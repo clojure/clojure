@@ -16,7 +16,7 @@ public class Var extends AFn{
 
 public final Symbol sym;
 public Namespace namespace;
-public Cons binding;
+public Box binding;
 public IFn fn;  //todo, bind to throw stub?
 public IFn setfn;
 
@@ -38,9 +38,9 @@ public String toString()
 public Var bind(Object val)
 	{
 	if(binding == null)
-		binding = new Cons(val,null);
+		binding = new Box(val);
 	else
-		binding.first = val;
+		binding.val = val;
 
 	if(val instanceof IFn)
 		this.fn = (IFn) val;
@@ -50,9 +50,9 @@ public Var bind(Object val)
     return this;
 	}
 
-public Cons getBinding(ThreadLocalData tld)
+public Box getBinding(ThreadLocalData tld)
 	{
-	Cons b = getDynamicBinding(tld);
+	Box b = getDynamicBinding(tld);
 	if(b != null)
 		return b;
 	return binding;
@@ -60,17 +60,17 @@ public Cons getBinding(ThreadLocalData tld)
 
 public Object getValue(ThreadLocalData tld)
 	{
-	Cons binding = getBinding(tld);
+	Box binding = getBinding(tld);
 	if(binding != null)
-		return binding.first;
+		return binding.val;
 	throw new IllegalStateException(this.toString() + " is unbound.");
 	}
 
 public Object setValue(ThreadLocalData tld, Object val)
 	{
-	Cons b = getDynamicBinding(tld);
+	Box b = getDynamicBinding(tld);
 	if(b != null)
-		return b.first = val;
+		return b.val = val;
 	//allow global set to create binding like this?
 	if(binding == null)
 		throw new IllegalStateException(this.toString() + " is unbound.");
@@ -80,24 +80,24 @@ public Object setValue(ThreadLocalData tld, Object val)
 	else
 		this.fn = null; //todo, bind to throw stub?
 
-	return binding.first = val;
+	return binding.val = val;
 	}
 
-final public Cons getDynamicBinding(ThreadLocalData tld)
+final public Box getDynamicBinding(ThreadLocalData tld)
 	{
-	return (Cons) tld.dynamicBindings.get(this);
+	return (Box) tld.dynamicBindings.get(this);
 	}
 
-final public Cons pushDynamicBinding(ThreadLocalData tld, Object val)
+final public Box establishDynamicBinding(ThreadLocalData tld, Object val)
 	{
-	Cons ret = new Cons(val, getDynamicBinding(tld));
-	tld.dynamicBindings.put(this, ret);
+	Box ret = getDynamicBinding(tld);
+	tld.dynamicBindings.put(this, new Box(val));
 	return ret;
 	}
 
-final public Cons popDynamicBinding(ThreadLocalData tld)
+final public void restoreDynamicBinding(ThreadLocalData tld, Box old)
 	{
-	return (Cons) tld.dynamicBindings.put(this, getDynamicBinding(tld).rest);
+	tld.dynamicBindings.put(this, old);
 	}
 
 public Object invoke(ThreadLocalData tld) throws Exception

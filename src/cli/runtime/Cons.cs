@@ -18,8 +18,8 @@ namespace org.clojure.runtime
 public class Cons : AMap,Iter
 				  {
 
-public Object first;
-public Cons rest;
+public readonly Object first;
+public readonly Cons rest;
 
 public Cons(Object first, Cons rest)
 	{

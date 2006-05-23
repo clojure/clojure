@@ -14,8 +14,8 @@ package org.clojure.runtime;
 
 public class Cons extends AMap implements Iter{
 
-public Object first;
-public Cons rest;
+public final Object first;
+public final Cons rest;
 
 public Cons(Object first, Cons rest)
 	{
