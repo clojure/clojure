@@ -28,7 +28,6 @@ static public HybridDictionary table = new HybridDictionary();
  * String->Symbol
  */
 public HybridDictionary vars = new HybridDictionary();
-public HybridDictionary accessors = new HybridDictionary();
 public String name;
 
 
@@ -59,13 +58,6 @@ static public Var internVar(String ns, String var)
         return findOrCreate(ns).internVar(var);
     }
 
-static public Accessor internAccessor(String ns, String name)
-    {
-        return findOrCreate(ns).internAccessor(name);
-    }
-
 public Var internVar(String name)	{	lock(vars)		{		Var var = (Var) vars[name];		if(var == null)			vars.Add(name,var = new Var(name, this));		return var;		}	}
-
-public Accessor internAccessor(String name)	{	lock(accessors)		{		Accessor acc = (Accessor) accessors[name];		if(acc == null)			accessors.Add(name, acc = new Accessor(name, this));		return acc;		}	}
 }
 }

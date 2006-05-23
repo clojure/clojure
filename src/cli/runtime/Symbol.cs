@@ -30,7 +30,10 @@ public String toString()
 	return name;
 	}
 
-public static Symbol intern(String name)	{	lock(table)		{		Symbol sym = (Symbol) table[name];		if(sym == null)		    {		    if(name[0] == ':')		        sym = new Keyword(name);		    else		        sym = new Symbol(name);			table.Add(name, sym);			}		return sym;		}	}
+public static Symbol intern(String name)	{	lock(table)		{		Symbol sym = (Symbol) table[name];		if(sym == null)		    {		    if(name[0] == ':')		        sym = new Keyword(name);
+            else if (name[0] == '.')
+                sym = new Accessor(name);
+            else		        sym = new Symbol(name);			table.Add(name, sym);			}		return sym;		}	}
 /**
  * Used by Namespace.intern()
  * @param name

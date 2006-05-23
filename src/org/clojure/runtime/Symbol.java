@@ -39,6 +39,8 @@ public static Symbol intern(String name)
             {
             if(name.charAt(0) == ':')
                 sym = new Keyword(name);
+            else if(name.charAt(0) == '.')
+                sym = new Accessor(name);
             else
                 sym = new Symbol(name);
             table.put(name, sym);

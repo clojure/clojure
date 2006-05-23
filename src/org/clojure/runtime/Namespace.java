@@ -24,7 +24,6 @@ static final public HashMap table = new HashMap();
 /**
  * String->Symbol
  */
-final public HashMap accessors = new HashMap();
 final public HashMap vars = new HashMap();
 final public String name;
 
@@ -55,10 +54,6 @@ static public Var internVar(String ns,String var)
 	return findOrCreate(ns).internVar(var);
 	}
 
-static public Accessor internAccessor(String ns,String name)
-	{
-	return findOrCreate(ns).internAccessor(name);
-	}
 
 public Var internVar(String name)
 	{
@@ -71,14 +66,4 @@ public Var internVar(String name)
 		}
 	}
 
-public Accessor internAccessor(String name)
-	{
-	synchronized(accessors)
-		{
-		Accessor acc = (Accessor) accessors.get(name);
-		if(acc == null)
-			accessors.put(name, acc = new Accessor(name, this));
-		return acc;
-		}
-	}
 }

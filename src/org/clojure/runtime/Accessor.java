@@ -12,24 +12,18 @@
 
 package org.clojure.runtime;
 
-public class Accessor extends Indexer{
+public class Accessor extends Symbol implements IFn{
 
-public final String name;
-public Namespace namespace;
 
-Accessor(String name, Namespace ns)
+Accessor(String name)
 	{
-	this.namespace = ns;
-	this.name = name;
+        super(name);
 	}
 
-public String toString()
-	{
-	if(namespace == null)
-		return "#:." + name;
-	return namespace.name + ":." + name;
-	}
 
+public Object invoke(ThreadLocalData tld) throws Exception {
+    return AFn.throwArity();
+}
 /**
  *  Indexer implements IFn for attr access
  *  This single arg version is the getter
@@ -80,5 +74,9 @@ public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3,
 	{
 	return Reflector.invokeInstanceMember(name,arg1,arg2,arg3,arg4,arg5,args);
 	}
+
+public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception {
+    return AFn.applyToHelper(this, tld, arglist);
+}
 
 }
