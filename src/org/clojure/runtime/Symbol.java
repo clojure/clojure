@@ -13,39 +13,64 @@
 package org.clojure.runtime;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
 
-public class Symbol extends AMap{
+public class Symbol extends AMap implements Comparable{
 
 final public static HashMap table = new HashMap();
+final public static HashSet hashes = new HashSet();
+final static Random rand = new Random(42);
 
 public final String name;
+int hash = 0;
 
 public String toString()
-	{
-	return name;
-	}
+    {
+    return name;
+    }
 
 public static Symbol intern(String name)
-	{
-	synchronized(table)
-		{
-		Symbol sym = (Symbol) table.get(name);
-		if(sym == null)
-			table.put(name, sym = new Symbol(name));
-		return sym;
-		}
-	}
+    {
+    synchronized(table)
+        {
+        Symbol sym = (Symbol) table.get(name);
+        if(sym == null)
+            table.put(name, sym = new Symbol(name));
+        return sym;
+        }
+    }
 
 /**
  * Used by intern()
  * @param name
  */
 Symbol(String name)
-	{
-	this.name = name;
-	}
+    {
+    this.name = name;
+    }
+
+ public int hashCode(){
+     if(hash == 0)
+         {
+         synchronized (hashes)
+             {
+             while (hash == 0)
+                 {
+                 Integer h = new Integer(rand.nextInt());
+                 if (h.intValue() != 0 && !hashes.contains(h))
+                     {
+                     hash = h.intValue();
+                     hashes.add(h);
+                     }
+                 }
+             }
+         }
+     return hash;
+ }
 
 
-
-
+public int compareTo(Object o) {
+    return hashCode() - ((Symbol)o).hashCode();
+}
 }

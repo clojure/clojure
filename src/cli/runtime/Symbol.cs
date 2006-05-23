@@ -11,16 +11,19 @@
 /* rich Mar 25, 2006 11:42:47 AM */
 
 using System;
-using System.Collections.Specialized;
+using System.Collections;
 
 namespace org.clojure.runtime
 {
-public class Symbol : AMap{
+public class Symbol : AMap, IComparable{
 
-static public HybridDictionary table = new HybridDictionary();
+static public readonly Hashtable table = new Hashtable(1001);
+static public readonly Hashtable hashes = new Hashtable(1001);
+static readonly Random rand = new Random(42);
 
 
-public String name; //const is not equivalent to Java final with init elsewhere
+public readonly String name;
+int hash = 0;
 
 public String toString()
 	{
@@ -39,5 +42,34 @@ internal Symbol(String name)
 	}
 
 
-}
+public override int GetHashCode()
+    {
+     if(hash == 0)
+         {
+         lock (hashes)
+             {
+             while (hash == 0)
+                 {
+                 int h = rand.Next();
+                 if (h != 0 && !hashes.ContainsKey(h))
+                     {
+                     hash = h;
+                     hashes.Add(h,null);
+                     }
+                 }
+             }
+         }
+     return hash;
+    }
+
+
+#region IComparable Members
+
+public int CompareTo(object obj)
+    {
+    return GetHashCode() - ((Symbol)obj).GetHashCode();
+    }
+
+#endregion
+    }
 }
