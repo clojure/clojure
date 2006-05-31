@@ -21,6 +21,13 @@ public int mvCount = 0;
 public Object[] mvArray = new Object[MULTIPLE_VALUES_LIMIT];
 
 IdentityHashMap dynamicBindings = new IdentityHashMap();
+Transaction transaction;
+
+public Transaction getTransaction() throws Exception{
+	if(transaction == null)
+		throw new Exception("No active transaction");
+	return transaction;
+}
 
 public ThreadLocalData(IdentityHashMap dynamicBindings)
 	{
