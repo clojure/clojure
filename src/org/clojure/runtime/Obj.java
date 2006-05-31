@@ -14,7 +14,7 @@ package org.clojure.runtime;
 
 import java.util.IdentityHashMap;
 
-public class Obj {
+public class Obj implements IObj {
 
 IdentityHashMap attrs;
 public static final int INITIAL_SIZE = 7;

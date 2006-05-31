@@ -16,7 +16,7 @@ using System.Collections.Specialized;
 namespace org.clojure.runtime
 {
 
-public class Obj
+public class Obj : IObj
 {
 
 HybridDictionary attrs;
