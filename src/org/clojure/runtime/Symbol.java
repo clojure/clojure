@@ -65,10 +65,10 @@ Symbol(String name)
              {
              while (hash == 0)
                  {
-                 Integer h = new Integer(rand.nextInt());
-                 if (h.intValue() != 0 && !hashes.contains(h))
+                 int h = rand.nextInt();
+                 if (h != 0 && !hashes.contains(h))
                      {
-                     hash = h.intValue();
+                     hash = h;
                      hashes.add(h);
                      }
                  }
