@@ -18,7 +18,8 @@ volatile Transaction.Info tinfo;
 volatile TVal prior;
 
 void push(Object val,Transaction.Info tinfo) throws Exception{
-	this.prior = (TVal) this.clone();
+	if(tinfo != null) //not newly created
+		this.prior = (TVal) this.clone();
 	this.tinfo = tinfo;
 	this.val = val;
 }

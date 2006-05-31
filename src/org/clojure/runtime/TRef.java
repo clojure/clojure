@@ -22,26 +22,9 @@ static AtomicInteger nextSeq = new AtomicInteger(1);
 final int lockSeq;
 Lock lock;
 
-public TRef(ThreadLocalData tld, Object val) throws Exception{
+public TRef() {
 	this.lockSeq = nextSeq.getAndIncrement();
 	this.lock = new ReentrantLock();
-	set(tld, val);
-}
-
-public Object get(ThreadLocalData tld) throws Exception{
-	 return tld.getTransaction().get(this);
-}
-
-public Object set(ThreadLocalData tld, Object val) throws Exception{
-	 return tld.getTransaction().set(this,val);
-}
-
-public void touch(ThreadLocalData tld) throws Exception{
-	tld.getTransaction().touch(this);
-}
-
-public void commutate(ThreadLocalData tld, IFn fn) throws Exception{
-	tld.getTransaction().commutate(this, fn);
 }
 
 public int compareTo(Object o){
