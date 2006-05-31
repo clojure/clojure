@@ -23,6 +23,14 @@ public Object[] mvArray = new Object[MULTIPLE_VALUES_LIMIT];
 
 internal HybridDictionary dynamicBindings = new HybridDictionary();
 
+internal Transaction transaction;
+
+public Transaction getTransaction() {
+	if(transaction == null)
+		throw new Exception("No active transaction");
+	return transaction;
+}
+
 public ThreadLocalData(HybridDictionary dynamicBindings)
 	{
 	this.mvCount = 0;
