@@ -28,7 +28,7 @@ public Object invoke(ThreadLocalData tld) throws Exception {
  *  Indexer implements IFn for attr access
  *  This single arg version is the getter
  * @param tld
- * @param obj - must be AMap
+ * @param obj - must be Obj
  * @return the value of the attr or nil if not found
  * @throws Exception
  */
@@ -42,7 +42,7 @@ public Object invoke(ThreadLocalData tld, Object obj) throws Exception
  *  Indexer implements IFn for attr access
  *  This two arg version is the setter
  * @param tld
- * @param obj - must be AMap
+ * @param obj - must be Obj
  * @param val
  * @return val
  * @throws Exception

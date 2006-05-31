@@ -12,7 +12,7 @@
 
 package org.clojure.runtime;
 
-public class Cons extends AMap implements Iter{
+public class Cons extends Obj implements Iter{
 
 public final Object first;
 public final Cons rest;

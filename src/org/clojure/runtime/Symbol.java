@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-public class Symbol extends AMap implements Comparable{
+public class Symbol extends Obj implements Comparable{
 
 final public static HashMap table = new HashMap();
 final public static HashSet hashes = new HashSet();

@@ -15,7 +15,7 @@ using System.Collections;
 
 namespace org.clojure.runtime
 {
-public class Symbol : AMap, IComparable{
+public class Symbol : Obj, IComparable{
 
 static public readonly Hashtable table = new Hashtable(1001);
 static public readonly Hashtable hashes = new Hashtable(1001);

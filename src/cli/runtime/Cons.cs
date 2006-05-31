@@ -15,7 +15,7 @@ using System;
 namespace org.clojure.runtime
 {
 
-public class Cons : AMap,Iter
+public class Cons : Obj,Iter
 				  {
 
 public readonly Object first;

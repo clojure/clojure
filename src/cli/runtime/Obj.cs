@@ -10,20 +10,23 @@
 
 /* rich Mar 25, 2006 3:44:58 PM */
 
-package org.clojure.runtime;
+using System;
+using System.Collections.Specialized;
 
-import java.util.IdentityHashMap;
+namespace org.clojure.runtime
+{
 
-public class AMap{
+public class Obj
+{
 
-IdentityHashMap attrs;
-public static final int INITIAL_SIZE = 7;
+HybridDictionary attrs;
+public static int INITIAL_SIZE = 7;
 
 public Object put(Keyword key, Object val)
 	{
 	if(attrs == null)
-		attrs = new IdentityHashMap(INITIAL_SIZE);
-	attrs.put(key, val);
+		attrs = new HybridDictionary(INITIAL_SIZE);
+	attrs[key] = val;
 	return val;
 	}
 
@@ -31,6 +34,7 @@ public Object get(Keyword key)
 	{
 	if(attrs == null)
 		return null;
-	return attrs.get(key);
+	return attrs[key];
 	}
+}
 }

@@ -12,7 +12,7 @@
 
 package org.clojure.runtime;
 
-public class AFn extends AMap implements IFn{
+public class AFn extends Obj implements IFn{
 
 public Object invoke(ThreadLocalData tld) throws Exception
 	{

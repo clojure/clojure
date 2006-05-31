@@ -15,7 +15,7 @@ using System;
 namespace org.clojure.runtime
 {
 
-public class AFn : AMap , IFn
+public class AFn : Obj , IFn
 							  {
 
 virtual public Object invoke(ThreadLocalData tld) /*throws Exception*/
