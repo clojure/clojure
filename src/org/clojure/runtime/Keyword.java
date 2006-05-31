@@ -44,7 +44,7 @@ public Object invoke(ThreadLocalData tld, Object obj) throws Exception
     {
     if (obj == null)
         return null;
-    return ((IObj)obj).get(this);
+    return ((IObj)obj).get(tld,this);
     }
 
 /**
@@ -58,7 +58,7 @@ public Object invoke(ThreadLocalData tld, Object obj) throws Exception
  */
 public Object invoke(ThreadLocalData tld, Object obj, Object val) throws Exception
 	{
-	return ((IObj)obj).put(this,val);
+	return ((IObj)obj).put(tld,this,val);
 	}
 
 public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) throws Exception

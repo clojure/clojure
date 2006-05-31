@@ -19,7 +19,7 @@ public class Obj implements IObj {
 IdentityHashMap attrs;
 public static final int INITIAL_SIZE = 7;
 
-public Object put(Comparable key, Object val)
+public Object put(ThreadLocalData tld, Comparable key, Object val)
 	{
 	if(attrs == null)
 		attrs = new IdentityHashMap(INITIAL_SIZE);
@@ -27,14 +27,14 @@ public Object put(Comparable key, Object val)
 	return val;
 	}
 
-public Object get(Comparable key)
+public Object get(ThreadLocalData tld, Comparable key)
 	{
 	if(attrs == null)
 		return null;
 	return attrs.get(key);
 	}
 
-public boolean has(Comparable key){
+public boolean has(ThreadLocalData tld, Comparable key){
     if(attrs == null)
         return false;
     return attrs.containsKey(key);
