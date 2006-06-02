@@ -13,11 +13,21 @@
 package org.clojure.runtime;
 
 import java.util.Iterator;
+import java.io.Reader;
+import java.io.PushbackReader;
 
 public class RT{
 
-	static public Symbol T = Symbol.intern("t");
+    static public Symbol T = Symbol.intern("t");
     static public final Object[] EMPTY_ARRAY = new Object[]{};
+    static public final Character[] chars;
+
+    static {
+        chars = new Character[256];
+        for(int i=0;i<chars.length;i++)
+            chars[i] = new Character((char)i);
+        }
+
 
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?Boolean.TRUE:null;
@@ -25,47 +35,47 @@ public class RT{
 
     static public Object eql(Object arg1, Object arg2) {
         if(arg1 == arg2)
-	        return Boolean.TRUE;
+            return Boolean.TRUE;
         if(arg1 == null || arg2 == null)
-	        return null;
+            return null;
         if(arg1 instanceof Num
            && arg1.getClass() == arg2.getClass()
            && arg1.equals(arg2))
-	        return Boolean.TRUE;
+            return Boolean.TRUE;
         if(arg1.getClass() == Character.class
            && arg2.getClass() == Character.class
            && arg1.equals(arg2))
-	        return Boolean.TRUE;
+            return Boolean.TRUE;
         return null;
         }
 
     static public Object equal(Object arg1, Object arg2) {
         if(arg1 == null)
-	        return arg2 == null ? Boolean.TRUE : null;
+            return arg2 == null ? Boolean.TRUE : null;
         else if(arg2 == null)
             return null;
-	    return (eql(arg1,arg2) != null
-	            || (arg1.getClass() == Cons.class
-	                && arg2.getClass() == Cons.class
-	                && equal(((Cons)arg1).first,((Cons)arg2).first)!=null
-	                && equal(((Cons)arg1).rest,((Cons)arg2).rest)!=null))
-	           ?Boolean.TRUE:null;
-	    }
+        return (eql(arg1,arg2) != null
+                || (arg1.getClass() == Cons.class
+                    && arg2.getClass() == Cons.class
+                    && equal(((Cons)arg1).first,((Cons)arg2).first)!=null
+                    && equal(((Cons)arg1).rest,((Cons)arg2).rest)!=null))
+               ?Boolean.TRUE:null;
+        }
 
 static public Iter iter(Object coll)
-	{
-	if(coll == null || coll instanceof Iter)
-		return (Iter) coll;
-	else if(coll instanceof Iterator)
-		{
-		Iterator i = (Iterator) coll;
-		if(i.hasNext())
-			return new IteratorIter(i);
-		return null;
-		}
-	else
-		throw new IllegalArgumentException("Don't know how to create Iter from arg");
-	}
+    {
+    if(coll == null || coll instanceof Iter)
+        return (Iter) coll;
+    else if(coll instanceof Iterator)
+        {
+        Iterator i = (Iterator) coll;
+        if(i.hasNext())
+            return new IteratorIter(i);
+        return null;
+        }
+    else
+        throw new IllegalArgumentException("Don't know how to create Iter from arg");
+    }
 
 /************************ Boxing/casts *******************************/
 static public Object box(Object x)
@@ -75,6 +85,8 @@ static public Object box(Object x)
 
 static public Character box(char x)
     {
+    if(x < chars.length)
+        return chars[x];
     return new Character(x);
     }
 
@@ -84,140 +96,140 @@ static public Boolean box(boolean x)
     }
 
 static public Byte box(byte x)
-	{
-	return new Byte(x);
-	}
+    {
+    return new Byte(x);
+    }
 
 static public Short box(short x)
-	{
-	return new Short(x);
-	}
+    {
+    return new Short(x);
+    }
 
 static public Integer box(int x)
-	{
-	return new Integer(x);
-	}
+    {
+    return new Integer(x);
+    }
 
 static public Long box(long x)
-	{
-	return new Long(x);
-	}
+    {
+    return new Long(x);
+    }
 
 static public Float box(float x)
-	{
-	return new Float(x);
-	}
+    {
+    return new Float(x);
+    }
 
 static public Double box(double x)
-	{
-	return new Double(x);
-	}
+    {
+    return new Double(x);
+    }
 
 static public char charCast(Object x)
-	{
-	if(x instanceof Character)
-		return ((Character)x).charValue();
-	return (char) ((Number)x).intValue();
-	}
+    {
+    if(x instanceof Character)
+        return ((Character)x).charValue();
+    return (char) ((Number)x).intValue();
+    }
 
 static public boolean booleanCast(Object x)
-	{
-	if(x instanceof Boolean)
-		return ((Boolean)x).booleanValue();
-	return x != null;
-	}
+    {
+    if(x instanceof Boolean)
+        return ((Boolean)x).booleanValue();
+    return x != null;
+    }
 
 static public byte byteCast(Object x)
-	{
-	return ((Number)x).byteValue();
-	}
+    {
+    return ((Number)x).byteValue();
+    }
 
 static public short shortCast(Object x)
-	{
-	return ((Number)x).shortValue();
-	}
+    {
+    return ((Number)x).shortValue();
+    }
 
 static public int intCast(Object x)
-	{
-	return ((Number)x).intValue();
-	}
+    {
+    return ((Number)x).intValue();
+    }
 
 static public long longCast(Object x)
-	{
-	return ((Number)x).longValue();
-	}
+    {
+    return ((Number)x).longValue();
+    }
 
 static public float floatCast(Object x)
-	{
-	return ((Number)x).floatValue();
-	}
+    {
+    return ((Number)x).floatValue();
+    }
 
 static public double doubleCast(Object x)
-	{
-	return ((Number)x).doubleValue();
-	}
+    {
+    return ((Number)x).doubleValue();
+    }
 
 
 /******************************************* list support ********************************/
 static public Cons cons(Object x, Cons y)
-	{
-	return new Cons(x, y);
-	}
+    {
+    return new Cons(x, y);
+    }
 
 static public Cons list()
-	{
-	return null;
-	}
+    {
+    return null;
+    }
 
 static public Cons list(Object arg1)
-	{
-	return cons(arg1, null);
-	}
+    {
+    return cons(arg1, null);
+    }
 
 static public Cons list(Object arg1, Object arg2)
-	{
-	return listStar(arg1, arg2, null);
-	}
+    {
+    return listStar(arg1, arg2, null);
+    }
 
 static public Cons list(Object arg1, Object arg2, Object arg3)
-	{
-	return listStar(arg1, arg2, arg3, null);
-	}
+    {
+    return listStar(arg1, arg2, arg3, null);
+    }
 
 static public Cons list(Object arg1, Object arg2, Object arg3, Object arg4)
-	{
-	return listStar(arg1, arg2, arg3, arg4, null);
-	}
+    {
+    return listStar(arg1, arg2, arg3, arg4, null);
+    }
 
 static public Cons list(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
-	{
-	return listStar(arg1, arg2, arg3, arg4, arg5, null);
-	}
+    {
+    return listStar(arg1, arg2, arg3, arg4, arg5, null);
+    }
 
 static public Cons listStar(Object arg1, Cons rest)
-	{
-	return cons(arg1, rest);
-	}
+    {
+    return cons(arg1, rest);
+    }
 
 static public Cons listStar(Object arg1, Object arg2, Cons rest)
-	{
-	return cons(arg1, cons(arg2, rest));
-	}
+    {
+    return cons(arg1, cons(arg2, rest));
+    }
 
 static public Cons listStar(Object arg1, Object arg2, Object arg3, Cons rest)
-	{
-	return cons(arg1, cons(arg2, cons(arg3, rest)));
-	}
+    {
+    return cons(arg1, cons(arg2, cons(arg3, rest)));
+    }
 
 static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, Cons rest)
-	{
-	return cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
-	}
+    {
+    return cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
+    }
 
 static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons rest)
-	{
-	return cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
-	}
+    {
+    return cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
+    }
 
 static public Cons arrayToList(Object[] a){
     Cons ret = null;
@@ -227,99 +239,148 @@ static public Cons arrayToList(Object[] a){
 }
 
 static public int length(Cons list)
-	{
-	int i = 0;
-	for(Cons c = list; c != null; c = c.rest)
-		{
-		i++;
-		}
-	return i;
-	}
+    {
+    int i = 0;
+    for(Cons c = list; c != null; c = c.rest)
+        {
+        i++;
+        }
+    return i;
+    }
 
 static public int boundedLength(Cons list, int limit)
-	{
-	int i = 0;
-	for(Cons c = list; c != null && i <= limit; c = c.rest)
-		{
-		i++;
-		}
-	return i;
-	}
+    {
+    int i = 0;
+    for(Cons c = list; c != null && i <= limit; c = c.rest)
+        {
+        i++;
+        }
+    return i;
+    }
+
+
+///////////////////////////////// reader support ////////////////////////////////
+
+static Object readRet(int ret){
+    if(ret == -1)
+        return null;
+    return box((char) ret);
+}
+
+static public Object readChar(Reader r) throws Exception {
+    int ret = r.read();
+    return readRet(ret);
+}
+
+static public Object peekChar(Reader r) throws Exception {
+    int ret;
+    if(r instanceof PushbackReader)
+        {
+        ret = r.read();
+        ((PushbackReader) r).unread(ret);
+        }
+    else
+        {
+        r.mark(1);
+        ret = r.read();
+        r.reset();
+        }
+
+    return readRet(ret);
+}
+
+static public int getLineNumber(Reader r){
+    if(r instanceof LineNumberingPushbackReader)
+        return ((LineNumberingPushbackReader)r).getLineNumber();
+    return 0;
+}
+
+static public Reader getLineNumberingReader(Reader r) {
+    if(isLineNumberingReader(r))
+        return r;
+    return new LineNumberingPushbackReader(r);
+}
+
+static public boolean isLineNumberingReader(Reader r) {
+    return r instanceof LineNumberingPushbackReader;
+}
+
+///////////////////////////////// values //////////////////////////
 
 static public Object setValues(ThreadLocalData tld, Object arg1)
-	{
-	if(tld == null)
-		tld = ThreadLocalData.get();
-	tld.mvCount = 1;
-	tld.mvArray[0] = arg1;
-	return arg1;
-	}
+    {
+    if(tld == null)
+        tld = ThreadLocalData.get();
+    tld.mvCount = 1;
+    tld.mvArray[0] = arg1;
+    return arg1;
+    }
 
 static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2)
-	{
-	if(tld == null)
-		tld = ThreadLocalData.get();
-	tld.mvCount = 2;
-	tld.mvArray[0] = arg1;
-	tld.mvArray[1] = arg2;
-	return arg1;
-	}
+    {
+    if(tld == null)
+        tld = ThreadLocalData.get();
+    tld.mvCount = 2;
+    tld.mvArray[0] = arg1;
+    tld.mvArray[1] = arg2;
+    return arg1;
+    }
 
 static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3)
-	{
-	if(tld == null)
-		tld = ThreadLocalData.get();
-	tld.mvCount = 3;
-	tld.mvArray[0] = arg1;
-	tld.mvArray[1] = arg2;
-	tld.mvArray[2] = arg3;
-	return arg1;
-	}
+    {
+    if(tld == null)
+        tld = ThreadLocalData.get();
+    tld.mvCount = 3;
+    tld.mvArray[0] = arg1;
+    tld.mvArray[1] = arg2;
+    tld.mvArray[2] = arg3;
+    return arg1;
+    }
 
 static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4)
-	{
-	if(tld == null)
-		tld = ThreadLocalData.get();
-	tld.mvCount = 4;
-	tld.mvArray[0] = arg1;
-	tld.mvArray[1] = arg2;
-	tld.mvArray[2] = arg3;
-	tld.mvArray[3] = arg4;
-	return arg1;
-	}
+    {
+    if(tld == null)
+        tld = ThreadLocalData.get();
+    tld.mvCount = 4;
+    tld.mvArray[0] = arg1;
+    tld.mvArray[1] = arg2;
+    tld.mvArray[2] = arg3;
+    tld.mvArray[3] = arg4;
+    return arg1;
+    }
 
 static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4,
                                Object arg5)
-	{
-	if(tld == null)
-		tld = ThreadLocalData.get();
-	tld.mvCount = 5;
-	tld.mvArray[0] = arg1;
-	tld.mvArray[1] = arg2;
-	tld.mvArray[2] = arg3;
-	tld.mvArray[3] = arg4;
-	tld.mvArray[4] = arg5;
-	return arg1;
-	}
+    {
+    if(tld == null)
+        tld = ThreadLocalData.get();
+    tld.mvCount = 5;
+    tld.mvArray[0] = arg1;
+    tld.mvArray[1] = arg2;
+    tld.mvArray[2] = arg3;
+    tld.mvArray[3] = arg4;
+    tld.mvArray[4] = arg5;
+    return arg1;
+    }
 
 static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4,
                                Object arg5, Cons args) throws Exception
-	{
-	if(tld == null)
-		tld = ThreadLocalData.get();
-	tld.mvCount = 5;
-	tld.mvArray[0] = arg1;
-	tld.mvArray[1] = arg2;
-	tld.mvArray[2] = arg3;
-	tld.mvArray[3] = arg4;
-	tld.mvArray[4] = arg5;
-	for(int i = 5; args != null && i < ThreadLocalData.MULTIPLE_VALUES_LIMIT; i++, args = args.rest)
-		{
-		tld.mvArray[i] = args.first;
-		}
-	if(args != null)
-		throw new IllegalArgumentException("Too many arguments to values (> ThreadLocalData.MULTIPLE_VALUES_LIMIT)");
-	return arg1;
-	}
+    {
+    if(tld == null)
+        tld = ThreadLocalData.get();
+    tld.mvCount = 5;
+    tld.mvArray[0] = arg1;
+    tld.mvArray[1] = arg2;
+    tld.mvArray[2] = arg3;
+    tld.mvArray[3] = arg4;
+    tld.mvArray[4] = arg5;
+    for(int i = 5; args != null && i < ThreadLocalData.MULTIPLE_VALUES_LIMIT; i++, args = args.rest)
+        {
+        tld.mvArray[i] = args.first;
+        }
+    if(args != null)
+        throw new IllegalArgumentException("Too many arguments to values (> ThreadLocalData.MULTIPLE_VALUES_LIMIT)");
+    return arg1;
+    }
 
 }

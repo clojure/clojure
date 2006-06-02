@@ -12,6 +12,7 @@
 
 using System;
 using System.Collections;
+using System.IO;
 
 namespace org.clojure.runtime
 {
@@ -21,6 +22,15 @@ public class RT
 
     public static Symbol T = Symbol.intern("t");
     public static Object[] EMPTY_ARRAY = new Object[0];
+
+
+    static public readonly Object[] chars;
+
+	static RT(){
+		chars = new Object[256];
+        for(int i=0;i<chars.Length;i++)
+			chars[i] = (char)i;
+        }
 
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?T:null;
@@ -80,7 +90,9 @@ public class RT
 
     static public Object box(char x)
         {
-            return x;
+		if (x < chars.Length)
+			return chars[x]; 
+		return x;
         }
 
     static public Object box(bool x)
@@ -239,6 +251,45 @@ static public int boundedLength(Cons list, int limit)
 	return i;
 	}
 
+
+///////////////////////////////// reader support ////////////////////////////////
+
+static Object readRet(int ret){
+    if(ret == -1)
+        return null;
+    return box((char) ret);
+}
+
+static public Object readChar(TextReader r)  {
+    int ret = r.Read();
+    return readRet(ret);
+}
+
+static public Object peekChar(TextReader r)  {
+    return readRet(r.Peek());
+}
+
+static public int getLineNumber(TextReader r)
+    {
+	if (r is LineNumberingTextReader)
+		return ((LineNumberingTextReader)r).getLineNumber();
+    return 0;
+    }
+
+static public TextReader getLineNumberingReader(TextReader r)
+    {
+	if (isLineNumberingReader(r))
+        return r;
+	return new LineNumberingTextReader(r);
+    }
+
+static public bool isLineNumberingReader(TextReader r)
+    {
+	return r is LineNumberingTextReader;
+    }
+
+/*-------------------------------- values --------------*/
+
 static public Object setValues(ThreadLocalData tld, Object arg1)
 	{
 	if(tld == null)
@@ -296,7 +347,7 @@ static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Ob
 	}
 
 static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4,
-                               Object arg5, Cons args) /*throws Exception*/
+                               Object arg5, Cons args) /**/
 	{
 	if(tld == null)
 		tld = ThreadLocalData.get();
