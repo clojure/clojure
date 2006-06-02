@@ -25,7 +25,7 @@ import java.util.Random;
  * See Cohen for basic idea
  */
 
-public class PersistentArray implements Cloneable, Iterable{
+public class PersistentArray implements Iterable{
 
 public Iterator iterator(){
 	return new ValIter(this);
