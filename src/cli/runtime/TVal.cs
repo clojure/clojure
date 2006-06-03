@@ -19,10 +19,22 @@ internal volatile Object val;
 internal volatile Transaction.Info tinfo;
 internal volatile TVal prior;
 
+internal TVal(){
+    
+}
+
+internal TVal(Object val, Transaction.Info tinfo, TVal prior) {
+    this.val = val;
+    this.tinfo = tinfo;
+    this.prior = prior;
+}
+
 internal void push(Object val,Transaction.Info tinfo) {
-	if(tinfo != null) //not newly created
-		this.prior = (TVal) this.MemberwiseClone();
-	this.tinfo = tinfo;
+	if(tinfo != null) //not newly created, clone tval part
+        {
+        this.prior = new TVal(this.val,this.tinfo,this.prior);
+        }
+    this.tinfo = tinfo;
 	this.val = val;
 }
 

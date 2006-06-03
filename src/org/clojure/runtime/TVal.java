@@ -17,10 +17,22 @@ volatile Object val;
 volatile Transaction.Info tinfo;
 volatile TVal prior;
 
+TVal(){
+
+}
+
+TVal(Object val, Transaction.Info tinfo, TVal prior) {
+    this.val = val;
+    this.tinfo = tinfo;
+    this.prior = prior;
+}
+
 void push(Object val,Transaction.Info tinfo) throws Exception{
-	if(tinfo != null) //not newly created
-		this.prior = (TVal) this.clone();
-	this.tinfo = tinfo;
+	if(tinfo != null) //not newly created, clone tval part
+        {
+        this.prior = new TVal(this.val,this.tinfo,this.prior);
+        }
+    this.tinfo = tinfo;
 	this.val = val;
 }
 
