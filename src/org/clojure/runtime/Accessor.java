@@ -14,11 +14,12 @@ package org.clojure.runtime;
 
 public class Accessor extends Symbol implements IFn{
 
-
+String memberName;
 Accessor(String name)
 	{
         super(name);
-	}
+        memberName = name.substring(1);
+    }
 
 
 public Object invoke(ThreadLocalData tld) throws Exception {
@@ -35,7 +36,7 @@ public Object invoke(ThreadLocalData tld) throws Exception {
 public Object invoke(ThreadLocalData tld, Object obj) throws Exception
 	{
 
-    return Reflector.invokeInstanceMember(name,obj);
+    return Reflector.invokeInstanceMember(memberName,obj);
 	}
 
 /**
@@ -50,29 +51,29 @@ public Object invoke(ThreadLocalData tld, Object obj) throws Exception
 public Object invoke(ThreadLocalData tld, Object obj, Object val) throws Exception
 	{
 
-	return Reflector.invokeInstanceMember(name,obj,val);
+	return Reflector.invokeInstanceMember(memberName,obj,val);
 	}
 
 public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) throws Exception
 	{
-	return Reflector.invokeInstanceMember(name,arg1,arg2,arg3);
+	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3);
 	}
 
 public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
 	{
-	return Reflector.invokeInstanceMember(name,arg1,arg2,arg3,arg4);
+	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4);
 	}
 
 public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		throws Exception
 	{
-	return Reflector.invokeInstanceMember(name,arg1,arg2,arg3,arg4,arg5);
+	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4,arg5);
 	}
 
 public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
 		throws Exception
 	{
-	return Reflector.invokeInstanceMember(name,arg1,arg2,arg3,arg4,arg5,args);
+	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4,arg5,args);
 	}
 
 public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception {

@@ -49,6 +49,7 @@
 (defvar *reference-var*)
 
 #|
+;build the library
 (let ((*clojure-source-path* #p"/dev/clojure/src/lisp/")
       (*clojure-target-path* #p"/dev/clojure/classes/"))
   (compile-to :jvm "org.clojure" "Clojure"
@@ -57,30 +58,7 @@
       (*clojure-target-path* #p"/dev/clojure/classes/test/"))
   (compile-to :cli "org.clojure" "Clojure"
               "lib.lisp"))
-;build the library
-(let ((*clojure-source-path* #p"/dev/clojure/")
-      (*clojure-target-path* #p"/dev/gen/clojure/"))
-  (compile-to :jvm "org.clojure" "Clojure"
-              "arrays.lisp"
-            "conditions.lisp"
-            "conses.lisp"
-            "data-and-control-flow.lisp"
-            "hash-tables.lisp"
-            "numbers.lisp"
-            "printer.lisp"
-            "sequences.lisp"
-            "symbols.lisp"
-            "impl.lisp"))
 
-(let ((*clojure-source-path* #p"/dev/")
-      (*clojure-target-path* #p"/dev/clojure/"))
-  (compile-to :java "org.clojure.user" "TestArrays"
-              "test-arrays.lisp"))
-
-(let ((*clojure-source-path* #p"/dev/")
-      (*clojure-target-path* #p"/dev/clojure/"))
-  (compile-to :java "org.clojure.user" "TestHash"
-              "test-hash.lisp"))
 |#
 
 
@@ -155,9 +133,8 @@
           (munge-name (symbol-name symbol))))
 
 (defun accessor-member-name (symbol)
-  (format nil "ACC__~A__~A"
-          (munge-name (package-name (symbol-package symbol)))
-          (munge-name (subseq (symbol-name symbol) 1))))
+  (format nil "ACC__~A"
+          (subseq (symbol-name symbol) 1)))
 
 (defun symbol-member-name (symbol)
   (format nil "SYM__~A"
@@ -262,23 +239,22 @@
                 (symbol-member-name sym)
                 (munge-name (symbol-name sym))))
       (dolist (keyword  *keywords*)
-        (format target "static Keyword ~A = Keyword.intern(~S);~%"
+        (format target "static Keyword ~A = (Keyword)Symbol.intern(~S);~%"
                 (keyword-member-name keyword)
-                (munge-name (symbol-name keyword))))
+                (concatenate 'string ":" (munge-name (symbol-name keyword)))))
       (dolist (var *vars*)
-        (format target "static Var ~A = Namespace.internVar(~S,~S);~%"
+        (format target "static Var ~A = Namespace.intern(~S,~S);~%"
                 (var-member-name var)
                 (munge-name (package-name (symbol-package var)))
                 (munge-name (symbol-name var))))
       (dolist (accessor *accessors*)
-        (format target "static Accessor ~A = Namespace.internAccessor(~S,~S);~%"
+        (format target "static Accessor ~A = (Accessor)Symbol.intern(~S);~%"
                 (accessor-member-name accessor)
-                (munge-name (package-name (symbol-package accessor)))
-                (munge-name (subseq (symbol-name accessor) 1))))
+                (symbol-name accessor)))
       (format target "~Atry{~%" (begin-static-block class-name))
         ;(format target "~%static public void __load() ~A{~%" (exception-declaration-string lang))
       (dolist (var *defns*)
-        (format target "Namespace.internVar(~S,~S).bind(new ~A());~%"
+        (format target "Namespace.intern(~S,~S).bind(new ~A());~%"
                 (munge-name (package-name (symbol-package var)))
                 (munge-name (symbol-name var))
                 (munge-name var)))
