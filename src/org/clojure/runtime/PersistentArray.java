@@ -21,6 +21,12 @@ import java.util.Random;
 
 /**
  * Hybrid range/bitset, multi-thread-safe
+ * Multiple versions (thread-safely) share the same master array
+ *
+ * By default, all old values are retained, even if the array revisions aren't
+ * you can determine how many values are in the shared master by calling load()
+ * and can trim them by calling isolate() or resize(), which yield a new array with no
+ * sharing and no old values
  * 
  * See Cohen for basic idea
  */
@@ -34,12 +40,14 @@ public Iterator iterator(){
 static class Master{
 	final AtomicReferenceArray array;
 	final Object defaultVal;
-	final AtomicInteger rev;
+    final AtomicInteger rev;
+    final AtomicInteger load;
 
 	Master(int size,Object defaultVal){
 		this.array = new AtomicReferenceArray(size);
 		this.defaultVal = defaultVal;
-		this.rev = new AtomicInteger(0);
+        this.rev = new AtomicInteger(0);
+        this.load = new AtomicInteger(0);
 		}
 }
 
@@ -104,17 +112,58 @@ public int length(){
 	return master.array.length();
 }
 
-public Object get(int i){
+public Object get(int i) {
+    Entry e = getEntry(i);
+    if(e != null)
+        return e.val;
+    return master.defaultVal;
+}
+
+public boolean has(int i){
+    return getEntry(i) != null;
+}
+
+public PersistentArray resize(int newLength) {
+    PersistentArray ret = new PersistentArray(newLength, master.defaultVal);
+    int load = 0;
+    for(int i=0;i< Math.min(length(),newLength);i++)
+        {
+        Entry e = getEntry(i);
+        if(e != null)
+            {
+            ret.master.array.set(i,new Entry(0,e.val, null));
+            ++load;
+            }
+        }
+
+    ret.master.load.set(load);
+
+    return ret;
+}
+
+/**
+ *
+ * @return number of values (of all revisions) stored in shared array
+ */
+public int load(){
+    return master.load.get();
+}
+
+public PersistentArray isolate() {
+    return resize(length());
+}
+
+Entry getEntry(int i){
 	for(Entry e = (Entry) master.array.get(i);e != null;e = e.rest)
 		{
 		if(e.rev <= rev)
 			{
 			if(e.rev >= baseline
 			   || (history != null && history.get(e.rev)))
-				return e.val;
+				return e;
 			}
 		}
-	return master.defaultVal;
+    return null;
 }
 
 public PersistentArray set(int i,Object val) {
@@ -130,6 +179,7 @@ void doSet(int i, Object val){
 		oldEntry = (Entry) master.array.get(i);
 		newEntry = new Entry(rev, val, oldEntry);
 		} while(!master.array.compareAndSet(i, oldEntry, newEntry));
+    master.load.incrementAndGet();
 }
 
 PersistentArray getSetArray(){
@@ -150,7 +200,7 @@ PersistentArray getSetArray(){
 		if(history != null)
 			nextHistory = (BitSet) history.clone();
 		else
-			nextHistory = new BitSet(rev);
+			nextHistory = new BitSet(rev+1);
 		nextHistory.set(baseline,rev+1);
 		}
 

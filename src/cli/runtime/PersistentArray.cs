@@ -37,12 +37,14 @@ internal class Master{
 	internal readonly Entry[] array;
 	internal readonly Object defaultVal;
 	internal int rev;
+	internal int load;
 
 	internal Master(int size, Object defaultVal)
 		{
 		this.array = new Entry[size];
 		this.defaultVal = defaultVal;
 		this.rev = 0;
+		this.load = 0;
 		}
 }
 
@@ -122,16 +124,51 @@ public int length(){
 }
 
 public Object get(int i){
+	Entry e = getEntry(i);
+		if(e != null)
+				return e.val;
+	return master.defaultVal;
+}
+
+public bool has(int i){
+    return getEntry(i) != null;
+}
+
+public PersistentArray resize(int newLength)
+	{
+	PersistentArray ret = new PersistentArray(newLength, master.defaultVal);
+	for (int i = 0; i < Math.Min(length(), newLength); i++)
+		{
+		Entry e = getEntry(i);
+		if (e != null)
+			{
+			ret.master.array[i] = new Entry(0, e.val, null);
+			++ret.master.load;
+			}
+		}
+	return ret;
+	}
+
+public int load(){
+    return master.load;
+}
+
+public PersistentArray isolate()
+	{
+	return resize(length());
+	}
+	
+Entry getEntry(int i){
 	for(Entry e = (Entry) master.array[i];e != null;e = e.rest)
 		{
 		if(e.rev <= rev)
 			{
 			if(e.rev >= baseline
 			   || (history != null && e.rev < history.Length && history.Get(e.rev)))
-				return e.val;
+				return e;
 			}
 		}
-	return master.defaultVal;
+	return null;
 }
 
 public PersistentArray set(int i,Object val) {
@@ -148,6 +185,7 @@ void doSet(int i, Object val){
 		newEntry = new Entry(rev, val, oldEntry);
 		master.array[i] = newEntry;
 		}
+	Interlocked.Increment(ref master.load);
 }
 
 PersistentArray getSetArray(){
