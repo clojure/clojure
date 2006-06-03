@@ -127,7 +127,7 @@ public Object get(int i){
 		if(e.rev <= rev)
 			{
 			if(e.rev >= baseline
-			   || (history != null && history.Get(e.rev)))
+			   || (history != null && e.rev < history.Length && history.Get(e.rev)))
 				return e.val;
 			}
 		}
@@ -166,9 +166,12 @@ PersistentArray getSetArray(){
 		nextRev = Interlocked.Increment(ref master.rev);
 		nextBaseline = nextRev;
 		if(history != null)
+			{
 			nextHistory = (BitArray) history.Clone();
+			nextHistory.Length = rev+1;
+			}
 		else
-			nextHistory = new BitArray(rev);
+			nextHistory = new BitArray(rev+1);
 		for(int i=baseline;i<=rev;i++)
 			nextHistory.Set(i,true);
 		}
