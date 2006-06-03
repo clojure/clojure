@@ -73,6 +73,9 @@ static public Iter iter(Object coll)
             return new IteratorIter(i);
         return null;
         }
+    else if(coll instanceof Iterable)
+        return new IteratorIter(((Iterable) coll).iterator());
+
     else
         throw new IllegalArgumentException("Don't know how to create Iter from arg");
     }

@@ -33,8 +33,4 @@ public Iter iterate()
 	return rest;
 	}
 
-public Iter iter()
-	{
-	return this;
-	}
 }
