@@ -72,8 +72,10 @@ public IMap put(Object key, Object val) {
     else //didn't have key, grow
         {
         newArray = new Object[array.length + 2];
-        newArray[array.length] = key;
-        newArray[array.length + 1] = val;
+        if(array.length > 0)
+            System.arraycopy(array,0,newArray,2,array.length);
+        newArray[0] = key;
+        newArray[1] = val;
         }
     return new ArrayMap(newArray);
 }
