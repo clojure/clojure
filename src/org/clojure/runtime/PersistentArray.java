@@ -59,14 +59,16 @@ static class Master{
     final AtomicInteger rev;
     final AtomicInteger load;
 	final int maxLoad;
+    final float loadFactor;
 
-	Master(int size,Object defaultVal, double loadFactor){
+    Master(int size,Object defaultVal, float loadFactor){
 		this.array = new AtomicReferenceArray(size);
 		this.defaultVal = defaultVal;
         this.rev = new AtomicInteger(0);
         this.load = new AtomicInteger(0);
 		this.maxLoad = (int) (size * loadFactor);
-		}
+        this.loadFactor = loadFactor;
+        }
 }
 
 static class Entry{
@@ -113,10 +115,10 @@ public PersistentArray(int size){
 }
 
 public PersistentArray(int size, Object defaultVal){
-	this(size,defaultVal,2.1);
+	this(size,defaultVal,2.1f);
 }
 
-public PersistentArray(int size, Object defaultVal, double loadFactor){
+public PersistentArray(int size, Object defaultVal, float loadFactor){
 	this.master = new Master(size, defaultVal,loadFactor);
 	this.rev = 0;
 	this.baseline = 0;
@@ -148,7 +150,7 @@ public boolean has(int i){
 }
 
 public PersistentArray resize(int newLength) {
-    PersistentArray ret = new PersistentArray(newLength, master.defaultVal, ((double)master.maxLoad)/length());
+    PersistentArray ret = new PersistentArray(newLength, master.defaultVal, master.loadFactor);
     int load = 0;
     for(int i=0;i< Math.min(length(),newLength);i++)
         {

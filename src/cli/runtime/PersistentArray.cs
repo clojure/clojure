@@ -61,13 +61,15 @@ internal class Master{
 	internal int rev;
 	internal int load;
 	internal readonly int maxLoad;
+	internal readonly float loadFactor;
 
-	internal Master(int size,Object defaultVal, double loadFactor){
+	internal Master(int size,Object defaultVal, float loadFactor){
 		this.array = new Entry[size];
 		this.defaultVal = defaultVal;
 		this.rev = 0;
 		this.load = 0;
 		this.maxLoad = (int)(size * loadFactor);
+		this.loadFactor = loadFactor;
 		}
 }
 
@@ -128,11 +130,11 @@ public PersistentArray(int size)
 		}
 		
 public PersistentArray(int size, Object defaultVal)
-	:this(size,defaultVal,2.1)
+	:this(size,defaultVal,2.1f)
 	{
 	}
 
-public PersistentArray(int size, Object defaultVal, double loadFactor){
+public PersistentArray(int size, Object defaultVal, float loadFactor){
 	this.master = new Master(size, defaultVal, loadFactor);
 	this.rev = 0;
 	this.baseline = 0;
@@ -166,7 +168,7 @@ public bool has(int i){
 
 public PersistentArray resize(int newLength)
 	{
-	PersistentArray ret = new PersistentArray(newLength, master.defaultVal, ((double)master.maxLoad) / length());
+	PersistentArray ret = new PersistentArray(newLength, master.defaultVal, master.loadFactor);
 	for (int i = 0; i < Math.Min(length(), newLength); i++)
 		{
 		Entry e = getEntry(i);
