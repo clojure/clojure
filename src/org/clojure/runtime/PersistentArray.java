@@ -20,15 +20,31 @@ import java.util.Vector;
 import java.util.Random;
 
 /**
- * Hybrid range/bitset, multi-thread-safe
- * Multiple versions (thread-safely) share the same master array
+ * Note that instances of this class are constant values
+ * i.e. set() returns a new array, old one is intact
  *
- * By default, all old values are retained, even if the array revisions aren't
- * you can determine how many values are in the shared master by calling load()
+ * Multiple revisions (thread-safely) share the same master array
+ *
+ * Constant time most-recent-revision lookups
+ * Amortized constant-time sequential revisions (when loadFactor > 1)
+ * where a sequential revision is a revision of the most recent revision
+ *
+ * Non-sequential revisions are O(length), but with a small constant multiplier of .03
+ * Worst-case O(r) lookups for oldest revs where r is number of revisions
+ * at index i since last (automatic or manual) isolate. If set()s are roughly evenly
+ * distributed, r should be approximately == loadFactor, i.e. constant
+ * In pathological case (all mods to same index), r == (loadFactor * length)
+ *
+ * (loadFactor * length) old values are retained, even if the array revisions aren't
+ * Default loadFactor is 2.1
+ * When the load exceeds (loadFactor * length) the next revision is automatically isolated
+ * You can determine how many values are in the shared master by calling load()
  * and can trim them by calling isolate() or resize(), which yield a new array with no
  * sharing and no old values
- * 
+ *
  * See Cohen for basic idea
+ * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
+ * Java implementation is lock-free
  */
 
 public class PersistentArray implements Iterable{
@@ -42,12 +58,14 @@ static class Master{
 	final Object defaultVal;
     final AtomicInteger rev;
     final AtomicInteger load;
+	final int maxLoad;
 
-	Master(int size,Object defaultVal){
+	Master(int size,Object defaultVal, double loadFactor){
 		this.array = new AtomicReferenceArray(size);
 		this.defaultVal = defaultVal;
         this.rev = new AtomicInteger(0);
         this.load = new AtomicInteger(0);
+		this.maxLoad = (int) (size * loadFactor);
 		}
 }
 
@@ -90,8 +108,16 @@ final int rev;
 final int baseline;
 final BitSet history;
 
-public PersistentArray(int size,Object defaultVal){
-	this.master = new Master(size, defaultVal);
+public PersistentArray(int size){
+	this(size, null);
+}
+
+public PersistentArray(int size, Object defaultVal){
+	this(size,defaultVal,2.1);
+}
+
+public PersistentArray(int size, Object defaultVal, double loadFactor){
+	this.master = new Master(size, defaultVal,loadFactor);
 	this.rev = 0;
 	this.baseline = 0;
 	this.history = null;
@@ -104,9 +130,7 @@ PersistentArray(Master master,int rev,int baseline, BitSet history){
 	this.history = history;
 }
 
-public PersistentArray(int size){
-	this(size, null);
-}
+
 
 public int length(){
 	return master.array.length();
@@ -124,7 +148,7 @@ public boolean has(int i){
 }
 
 public PersistentArray resize(int newLength) {
-    PersistentArray ret = new PersistentArray(newLength, master.defaultVal);
+    PersistentArray ret = new PersistentArray(newLength, master.defaultVal, ((double)master.maxLoad)/length());
     int load = 0;
     for(int i=0;i< Math.min(length(),newLength);i++)
         {
@@ -167,6 +191,8 @@ Entry getEntry(int i){
 }
 
 public PersistentArray set(int i,Object val) {
+	if(master.load.get() >= master.maxLoad)
+		return isolate().set(i,val);
 	PersistentArray ret = getSetArray();
 	ret.doSet(i, val);
 	return ret;
@@ -247,7 +273,7 @@ static public void main(String[] args){
 		{
 		p =	p.set(rand.nextInt(size), i);
 		//dummy set to force perverse branching
-		p.set(i%size, i);
+		//p.set(i%size, i);
 		}
 	for(int i = 0; i < reads; i++)
 		{
