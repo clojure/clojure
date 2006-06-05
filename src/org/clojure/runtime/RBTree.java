@@ -22,11 +22,11 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class RBTree implements Iterable{
+public class RBTree implements Iterable, IMap {
 
 public final Comparator comp;
 public final Node tree;
-public final int count;
+public final int _count;
 
 public RBTree(){
 	this(null);
@@ -35,7 +35,7 @@ public RBTree(){
 public RBTree(Comparator comp){
 	this.comp = comp;
 	tree = null;
-	count = 0;
+	_count = 0;
 }
 
 public boolean contains(Object key){
@@ -54,9 +54,9 @@ public RBTree put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new RBTree(comp, replace(tree, key, val), count);
+		return new RBTree(comp, replace(tree, key, val), _count);
 		}
-	return new RBTree(comp, t.blacken(), count + 1);
+	return new RBTree(comp, t.blacken(), _count + 1);
 }
 
 
@@ -70,7 +70,7 @@ public RBTree remove(Object key){
 		//empty
 		return new RBTree(comp);
 		}
-	return new RBTree(comp, t.blacken(), count - 1);
+	return new RBTree(comp, t.blacken(), _count - 1);
 }
 
 
@@ -143,19 +143,23 @@ public Object get(Object key){
 	return (n != null) ? n.val() : null;
 }
 
+public int count() {
+    return _count;
+}
+
 public Node find(Object key){
-	Node t = tree;
-	while(t != null)
-		{
-		int c = compare(key, t.key);
-		if(c == 0)
-			return t;
-		else if(c < 0)
-			t = t.left();
-		else
-			t = t.right();
-		}
-	return t;
+    Node t = tree;
+    while(t != null)
+        {
+        int c = compare(key, t.key);
+        if(c == 0)
+            return t;
+        else if(c < 0)
+            t = t.left();
+        else
+            t = t.right();
+        }
+    return t;
 }
 
 int compare(Object k1, Object k2){
@@ -305,7 +309,7 @@ Node replace(Node t, Object key, Object val){
 RBTree(Comparator comp, Node tree, int count){
 	this.comp = comp;
 	this.tree = tree;
-	this.count = count;
+	this._count = count;
 }
 
 static Red red(Object key, Object val, Node left, Node right){
@@ -333,7 +337,7 @@ static Black black(Object key, Object val, Node left, Node right){
 }
 
 
-static abstract class Node{
+static abstract class Node implements IMapEntry {
 	final Object key;
 
 	Node(Object key){
@@ -679,7 +683,7 @@ static public void main(String args[]){
 		Integer anInt = ints[i];
 		set = set.put(anInt, anInt);
 		}
-	System.out.println("count = " + set.count + ", min: " + set.minKey() + ", max: " + set.maxKey()
+	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 	                   + ", depth: " + set.depth());
 	Iterator it = set.keys();
 	while(it.hasNext())
@@ -698,7 +702,7 @@ static public void main(String args[]){
 		}
 
 	System.out.println();
-	System.out.println("count = " + set.count + ", min: " + set.minKey() + ", max: " + set.maxKey()
+	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 	                   + ", depth: " + set.depth());
 }
 }
