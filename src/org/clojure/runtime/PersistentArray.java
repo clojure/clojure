@@ -29,7 +29,7 @@ import java.util.Random;
  * Amortized constant-time sequential revisions (when loadFactor > 1)
  * where a sequential revision is a revision of the most recent revision
  *
- * Non-sequential revisions are O(length), but with a small constant multiplier of .03
+ * Non-sequential revisions are O(length), but with a small constant multiplier of 1/32
  * Worst-case O(r) lookups for oldest revs where r is number of revisions
  * at index i since last (automatic or manual) isolate. If set()s are roughly evenly
  * distributed, r should be approximately == loadFactor, i.e. constant
