@@ -74,13 +74,34 @@ static class Master{
 static class Entry{
 	final int rev;
 	final Object val;
-	final Entry rest;
 
-	Entry(int rev,Object val,Entry rest){
+	Entry(int rev,Object val){
 		this.rev = rev;
 		this.val = val;
-		this.rest = rest;
 		}
+
+    Entry rest(){
+        return null;
+    }
+
+    static Entry create(int rev,Object val,Entry rest){
+        if(rest == null)
+            return new Entry(rev,val);
+        return new EntryLink(rev, val, rest);
+    }
+}
+
+static class EntryLink extends Entry{
+	final Entry _rest;
+
+	EntryLink(int rev,Object val,Entry rest){
+        super(rev,val);
+		this._rest = rest;
+		}
+
+    Entry rest(){
+        return _rest;
+    }
 }
 
 static class ValIter implements Iterator{
@@ -157,7 +178,7 @@ public PersistentArray resize(int newLength) {
         Entry e = getEntry(i);
         if(e != null)
             {
-            ret.master.array.set(i,new Entry(0,e.val, null));
+            ret.master.array.set(i,Entry.create(0,e.val, null));
             ++load;
             }
         }
@@ -180,7 +201,7 @@ public PersistentArray isolate() {
 }
 
 Entry getEntry(int i){
-	for(Entry e = (Entry) master.array.get(i);e != null;e = e.rest)
+	for(Entry e = (Entry) master.array.get(i);e != null;e = e.rest())
 		{
 		if(e.rev <= rev)
 			{
@@ -205,7 +226,7 @@ void doSet(int i, Object val){
 	do
 		{
 		oldEntry = (Entry) master.array.get(i);
-		newEntry = new Entry(rev, val, oldEntry);
+		newEntry = Entry.create(rev, val, oldEntry);
 		} while(!master.array.compareAndSet(i, oldEntry, newEntry));
     master.load.incrementAndGet();
 }

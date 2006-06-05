@@ -73,30 +73,54 @@ internal class Master{
 		}
 }
 
-	internal class Entry
-		{
-		internal readonly int rev;
-		internal readonly Object val;
-		internal readonly Entry rest;
+internal class Entry
+	{
+	internal readonly int rev;
+	internal readonly Object val;
 
-		internal Entry(int rev, Object val, Entry rest)
-			{
-			this.rev = rev;
-			this.val = val;
-			this.rest = rest;
-			}
+	internal Entry(int rev, Object val)
+		{
+		this.rev = rev;
+		this.val = val;
+		}
+
+	internal virtual Entry rest()
+		{
+		return null;
+		}
+
+	internal static Entry create(int rev, Object val, Entry rest)
+		{
+		if (rest == null)
+			return new Entry(rev, val);
+		return new EntryLink(rev, val, rest);
+		}
+	}
+
+internal class EntryLink : Entry
+	{
+	internal readonly Entry _rest;
+
+	internal EntryLink(int rev, Object val, Entry rest) :base(rev,val)
+		{
+		this._rest = rest;
+		}
+		
+	override internal Entry rest(){
+		return _rest;
+	}
 }
 
-	internal class ValIter : IEnumerator
-		{
-		internal PersistentArray p;
-		internal int i;
+internal class ValIter : IEnumerator
+	{
+	internal PersistentArray p;
+	internal int i;
 
-		internal ValIter(PersistentArray p)
-			{
-		this.p = p;
-		this.i = -1;
-	}
+	internal ValIter(PersistentArray p)
+		{
+	this.p = p;
+	this.i = -1;
+}
 
 #region IEnumerator Members
 
@@ -174,7 +198,7 @@ public PersistentArray resize(int newLength)
 		Entry e = getEntry(i);
 		if (e != null)
 			{
-			ret.master.array[i] = new Entry(0, e.val, null);
+			ret.master.array[i] = Entry.create(0, e.val, null);
 			++ret.master.load;
 			}
 		}
@@ -191,7 +215,7 @@ public PersistentArray isolate()
 	}
 	
 Entry getEntry(int i){
-	for(Entry e = (Entry) master.array[i];e != null;e = e.rest)
+	for(Entry e = (Entry) master.array[i];e != null;e = e.rest())
 		{
 		if(e.rev <= rev)
 			{
@@ -216,7 +240,7 @@ void doSet(int i, Object val){
 	lock(master.array)
 		{
 		oldEntry = (Entry) master.array[i];
-		newEntry = new Entry(rev, val, oldEntry);
+		newEntry = Entry.create(rev, val, oldEntry);
 		master.array[i] = newEntry;
 		}
 	Interlocked.Increment(ref master.load);
