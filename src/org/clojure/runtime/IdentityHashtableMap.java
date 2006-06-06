@@ -10,18 +10,29 @@
 
 package org.clojure.runtime;
 
-/**
- * ArrayMap using identity (==) comparison instead of equals
- */
-public class IdentityArrayMap extends ArrayMap{
-public IdentityArrayMap() {
+public class IdentityHashtableMap extends HashtableMap{
+
+public IdentityHashtableMap(int initialCapacity) {
+    super(initialCapacity);
 }
 
-public IdentityArrayMap(Object[] init) {
+public IdentityHashtableMap(Object[] init) {
     super(init);
 }
 
-boolean equalKey(Object k1, Object k2) {
-    return k1 == k2;
+IdentityHashtableMap(int count, PersistentArray array) {
+    super(count, array);
+}
+
+IMap create(int capacity) {
+    return new IdentityHashtableMap(capacity);
+}
+
+IMap create(int count, PersistentArray array) {
+    return new IdentityHashtableMap(count, array);
+}
+
+IMap createArrayMap(Object[] init) {
+    return new IdentityArrayMap(init);
 }
 }

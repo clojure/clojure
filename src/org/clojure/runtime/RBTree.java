@@ -143,6 +143,10 @@ public Object get(Object key){
 	return (n != null) ? n.val() : null;
 }
 
+public int capacity() {
+    return _count;
+}
+
 public int count() {
     return _count;
 }
@@ -672,7 +676,7 @@ static public void main(String args[]){
 		}
 	Collections.shuffle(Arrays.asList(ints));
 	System.out.println("Building set");
-	RBTree set = new RBTree();
+	IMap set = new HashtableMap(1001);
 	for(int i = 0; i < ints.length; i++)
 		{
 		Integer anInt = ints[i];
@@ -683,16 +687,17 @@ static public void main(String args[]){
 		Integer anInt = ints[i];
 		set = set.put(anInt, anInt);
 		}
-	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
-	                   + ", depth: " + set.depth());
-	Iterator it = set.keys();
+    System.out.println("_count = " + set.count());
+//	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
+//	                   + ", depth: " + set.depth());
+	Iterator it = set.iterator();
 	while(it.hasNext())
 		{
-		Object o = it.next();
-		if(!set.contains(o))
+		IMapEntry o = (IMapEntry) it.next();
+		if(!set.contains(o.key()))
 			System.err.println("Can't find: " + o);
 		else if(n < 2000)
-			System.out.print(o.toString() + ",");
+			System.out.print(o.key().toString() + ",");
 		}
 
 	for(int i = 0; i < ints.length/2; i++)
@@ -702,7 +707,8 @@ static public void main(String args[]){
 		}
 
 	System.out.println();
-	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
-	                   + ", depth: " + set.depth());
+	System.out.println("_count = " + set.count());
+//	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
+//	                   + ", depth: " + set.depth());
 }
 }

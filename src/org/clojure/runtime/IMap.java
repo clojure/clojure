@@ -11,7 +11,7 @@
 package org.clojure.runtime;
 
 
-public interface IMap {
+public interface IMap extends Iterable {
 
 int count();
 
@@ -26,4 +26,6 @@ IMap put(Object key, Object val);
 IMap remove(Object key);
 
 Object get(Object key);
+
+int capacity();
 }

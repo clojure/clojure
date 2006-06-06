@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 public class ArrayMap implements IMap, Iterable{
 
-Object[] array;
+final Object[] array;
 
 public ArrayMap(){
     this.array = RT.EMPTY_ARRAY;
@@ -107,6 +107,10 @@ public Object get(Object key) {
     return null;
 }
 
+public int capacity() {
+    return count();
+}
+
 int indexOf(Object key){
     for(int i=0;i<array.length;i+=2)
         {
@@ -133,7 +137,6 @@ static class Iter implements Iterator,IMapEntry{
     //for iterator
     Iter(Object[] array){
         this(array,-2);
-
     }
 
     //for find
