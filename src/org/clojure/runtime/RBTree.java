@@ -676,7 +676,10 @@ static public void main(String args[]){
 		}
 	Collections.shuffle(Arrays.asList(ints));
 	System.out.println("Building set");
+	//IMap set = new PersistentHashMap(1);
 	IMap set = new HashtableMap(1001);
+	//IMap set = new ListMap();
+	//IMap set = new RBTree();
 	for(int i = 0; i < ints.length; i++)
 		{
 		Integer anInt = ints[i];

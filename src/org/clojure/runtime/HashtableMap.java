@@ -48,6 +48,12 @@ HashtableMap(int count,PersistentArray array) {
     this.growAtCount = (int) (this.array.length()*FILL_FACTOR);
 }
 
+HashtableMap(int count,PersistentArray array,int growAt) {
+    this._count = count;
+    this.array = array;
+    this.growAtCount = growAt;
+}
+
 int calcPrimeCapacity(int capacity) {
     return BigInteger.valueOf((long) (capacity/FILL_FACTOR)).nextProbablePrime().intValue();
 }
@@ -82,7 +88,7 @@ public IMap put(Object key, Object val) {
         return this;
     if(array.get(i) != null && ((IMap)newArray.get(i)).count() == ((IMap)array.get(i)).count()) //key already there, no growth
         incr = 0;
-    return create(_count + incr, newArray);
+    return create(_count + incr, newArray, growAtCount);
 }
 
 PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
@@ -95,7 +101,8 @@ PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
             return array;
         }
     else
-        newEntries = createArrayMap(new Object[]{key, val});
+	    newEntries = createListMap(key, val);
+		//newEntries = createArrayMap(new Object[]{key, val});
 
     return array.set(i, newEntries);
 }
@@ -139,22 +146,27 @@ IMap grow(){
     return create(_count,newArray);
 }
 
+/*
 static class Iter implements Iterator, IMapEntry{
-    PersistentArray buckets;
-    int b;
-    Object[] nextEntries;
-    int nextE;
+	PersistentArray buckets;
 
-    Object[] entries;
-    int e;
+	int b;
 
-    Iter(PersistentArray buckets){
+	Object[] nextEntries;
+
+	int nextE;
+
+	Object[] entries;
+
+	int e;
+
+	Iter(PersistentArray buckets){
         this.buckets = buckets;
         this.b = -1;
         nextBucket();
     }
 
-    private void nextBucket() {
+	private void nextBucket() {
         nextEntries = null;
         nextE = 0;
         for(b = b+1;b<buckets.length();b++)
@@ -168,11 +180,11 @@ static class Iter implements Iterator, IMapEntry{
             }
     }
 
-    public boolean hasNext() {
+	public boolean hasNext() {
         return nextEntries != null;
     }
 
-    public Object next() {
+	public Object next() {
         entries = nextEntries;
         e = nextE;
         nextE += 2;
@@ -181,16 +193,58 @@ static class Iter implements Iterator, IMapEntry{
         return this;
     }
 
-    public void remove() {
+	public void remove() {
         throw new UnsupportedOperationException();
     }
 
-    public Object key() {
+	public Object key() {
         return entries[e];
     }
 
-    public Object val() {
+	public Object val() {
         return entries[e+1];
+    }
+
+}
+*/
+static class Iter implements Iterator{
+	PersistentArray buckets;
+	int b;
+	ListMap.Entry e;
+
+		Iter(PersistentArray buckets){
+        this.buckets = buckets;
+        this.b = -1;
+        nextBucket();
+    }
+
+	private void nextBucket() {
+        e = null;
+        for(b = b+1;b<buckets.length();b++)
+            {
+            ListMap a = (ListMap) buckets.get(b);
+            if(a != null)
+                {
+                e = a.entries;
+                break;
+                }
+            }
+    }
+
+	public boolean hasNext() {
+        return e != null;
+    }
+
+	public Object next() {
+		ListMap.Entry ret = e;
+        e = e.rest();
+        if(e == null)
+            nextBucket();
+        return ret;
+    }
+
+	public void remove() {
+        throw new UnsupportedOperationException();
     }
 }
 
@@ -210,8 +264,17 @@ IMap create(int count,PersistentArray array) {
     return new HashtableMap(count, array);
 }
 
+private IMap create(int i, PersistentArray newArray, int growAtCount){
+	return new HashtableMap(i, newArray, growAtCount);
+}
+
+
 IMap createArrayMap(Object[] init) {
     return new ArrayMap(init);
+}
+
+private IMap createListMap(Object key, Object val){
+	return new ListMap(key,val);
 }
 
 }

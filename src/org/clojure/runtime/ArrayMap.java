@@ -23,7 +23,7 @@ import java.util.Iterator;
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class ArrayMap implements IMap, Iterable{
+public class ArrayMap implements IMap {
 
 final Object[] array;
 
