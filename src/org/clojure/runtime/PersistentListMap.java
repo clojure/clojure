@@ -21,7 +21,7 @@ import java.util.Iterator;
  * i.e. add/remove etc return new values
  *
  * Lookups/changes are linear, so only appropriate for _very_small_ maps
- * ArrayMap is generally faster, but this class avoids the double allocation,
+ * PersistentArrayMap is generally faster, but this class avoids the double allocation,
  * and so is better/faster as a bucket for hash tables
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find

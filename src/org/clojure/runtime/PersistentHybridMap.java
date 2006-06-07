@@ -86,15 +86,15 @@ public PersistentArrayMap createArrayMap(Object[] init) {
     return new PersistentArrayMap(init);
 }
 
-private IPersistentMap createArrayMap() {
+IPersistentMap createArrayMap() {
     return new PersistentArrayMap();
 }
 
-private IPersistentMap createHashtableMap(Object[] init) {
+IPersistentMap createHashtableMap(Object[] init) {
     return new PersistentHashtableMap(init);
 }
 
-private IPersistentMap createHashtableMap(int initialCapacity) {
+IPersistentMap createHashtableMap(int initialCapacity) {
     return new PersistentHashtableMap(initialCapacity);
 }
 

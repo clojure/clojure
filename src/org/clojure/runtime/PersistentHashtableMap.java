@@ -131,11 +131,6 @@ public int capacity() {
     return array.length();
 }
 
-public Iterator<IMapEntry> iterator() {
-    return new Iter(array);
-}
-
-
 IPersistentMap grow(){
     PersistentArray newArray = new PersistentArray(calcPrimeCapacity(_count * 2));
     for (Object o : this)
@@ -146,67 +141,11 @@ IPersistentMap grow(){
     return create(_count,newArray);
 }
 
-/*
-static class Iter implements Iterator, IMapEntry{
-	PersistentArray buckets;
-
-	int b;
-
-	Object[] nextEntries;
-
-	int nextE;
-
-	Object[] entries;
-
-	int e;
-
-	Iter(PersistentArray buckets){
-        this.buckets = buckets;
-        this.b = -1;
-        nextBucket();
-    }
-
-	private void nextBucket() {
-        nextEntries = null;
-        nextE = 0;
-        for(b = b+1;b<buckets.length();b++)
-            {
-            ArrayMap a = (ArrayMap) buckets.get(b);
-            if(a != null)
-                {
-                nextEntries = a.array;
-                break;
-                }
-            }
-    }
-
-	public boolean hasNext() {
-        return nextEntries != null;
-    }
-
-	public Object next() {
-        entries = nextEntries;
-        e = nextE;
-        nextE += 2;
-        if(nextE >= nextEntries.length)
-            nextBucket();
-        return this;
-    }
-
-	public void remove() {
-        throw new UnsupportedOperationException();
-    }
-
-	public Object key() {
-        return entries[e];
-    }
-
-	public Object val() {
-        return entries[e+1];
-    }
-
+public Iterator<IMapEntry> iterator() {
+    return new Iter(array);
 }
-*/
+
+
 static class Iter implements Iterator{
 	PersistentArray buckets;
 	int b;
@@ -264,16 +203,12 @@ IPersistentMap create(int count,PersistentArray array) {
     return new PersistentHashtableMap(count, array);
 }
 
-private IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
+IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
 	return new PersistentHashtableMap(i, newArray, growAtCount);
 }
 
 
-IPersistentMap createArrayMap(Object[] init) {
-    return new PersistentArrayMap(init);
-}
-
-private IPersistentMap createListMap(Object key, Object val){
+IPersistentMap createListMap(Object key, Object val){
 	return PersistentListMap.create(key,val);
 }
 
