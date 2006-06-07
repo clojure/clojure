@@ -25,16 +25,16 @@ namespace org.clojure.runtime
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class RBTree : IPersistentMap{
+public class PersistentTree : IPersistentMap{
 
 public readonly IComparer comp;
 public readonly Node tree;
 public readonly int _count;
 
-public RBTree():this(null){
+public PersistentTree():this(null){
 }
 
-public RBTree(IComparer comp){
+public PersistentTree(IComparer comp){
 	this.comp = comp;
 	tree = null;
 	_count = 0;
@@ -65,9 +65,9 @@ public IPersistentMap put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new RBTree(comp, replace(tree, key, val), _count);
+		return new PersistentTree(comp, replace(tree, key, val), _count);
 		}
-	return new RBTree(comp, t.blacken(), _count + 1);
+	return new PersistentTree(comp, t.blacken(), _count + 1);
 }
 
 
@@ -79,9 +79,9 @@ public IPersistentMap remove(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new RBTree(comp);
+		return new PersistentTree(comp);
 		}
-	return new RBTree(comp, t.blacken(), _count - 1);
+	return new PersistentTree(comp, t.blacken(), _count - 1);
 }
 
 
@@ -313,7 +313,7 @@ Node replace(Node t, Object key, Object val){
 	                 c > 0 ? replace(t.right(), key, val) : t.right());
 }
 
-RBTree(IComparer comp, Node tree, int count){
+PersistentTree(IComparer comp, Node tree, int count){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;

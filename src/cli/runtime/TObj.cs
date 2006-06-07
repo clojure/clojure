@@ -17,23 +17,23 @@ public class TObj : IObj{
 TRef attrs;
 
 public TObj(ThreadLocalData tld) {
-    this.attrs = Transaction.tref(tld,new RBTree());
+    this.attrs = Transaction.tref(tld,new PersistentTree());
 }
 
 public Object put(ThreadLocalData tld, IComparable key, Object val)  {
-    RBTree t = (RBTree) Transaction.get(tld, attrs);
-	t = (RBTree) t.put(key, val);
+    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
+	t = (PersistentTree) t.put(key, val);
     Transaction.set(tld,attrs,t);
     return val;
 }
 
 public Object get(ThreadLocalData tld, IComparable key)  {
-    RBTree t = (RBTree) Transaction.get(tld, attrs);
+    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
     return t.get(key);
 }
 
 public bool has(ThreadLocalData tld, IComparable key)  {
-    RBTree t = (RBTree) Transaction.get(tld, attrs);
+    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
     return t.contains(key);
 }
 }
