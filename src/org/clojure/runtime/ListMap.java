@@ -14,83 +14,36 @@ package org.clojure.runtime;
 
 import java.util.Iterator;
 
-public class ListMap implements IMap
+public class ListMap implements IMap, IMapEntry
 {
-final Entry entries;
-final int _count;
 
-public ListMap(){
-	this.entries = null;
-	this._count = 0;
+static public ListMap EMPTY = new ListMap();
+
+static public ListMap create(Object key, Object val){
+	return new Tail(key, val);
 }
 
-public ListMap(Object key, Object val){
-	this.entries = Entry.create(key, val, null);
-	this._count = 1;
+public Object key(){
+	return null;
 }
 
-ListMap(int count, Entry entries){
-	this._count = count;
-	this.entries = entries;
+public Object val(){
+	return null;
 }
 
-
-
-static class Entry implements IMapEntry{
-	final Object _key;
-	final Object _val;
-
-	Entry(Object key,Object val){
-		this._key = key;
-		this._val = val;
-		}
-
-    Entry rest(){
-        return null;
+ListMap rest(){
+    return this;
     }
-
-    static Entry create(Object key,Object val,Entry rest){
-        if(rest == null)
-            return new Entry(key,val);
-        return new EntryLink(key, val, rest);
-    }
-
-	public Object key(){
-		return _key;
-	}
-
-	public Object val(){
-		return _val;
-	}
-}
-
-static class EntryLink extends Entry{
-	final Entry _rest;
-
-	EntryLink(Object key,Object val,Entry rest){
-        super(key,val);
-		this._rest = rest;
-		}
-
-    Entry rest(){
-        return _rest;
-    }
-}
 
 public int count(){
-	return _count;
+	return 0;
 }
 
 public boolean contains(Object key){
-	return find(key) != null;
+	return false;
 }
 
-public Entry find(Object key){
-	for(Entry e = entries;e != null;e = e.rest())
-		{
-		if(equalKey(key,e._key))
-			return e;
-		}
+public IMapEntry find(Object key){
 	return null;
 }
 
@@ -98,60 +51,36 @@ public IMap add(Object key){
 	return put(key, null);
 }
 
-public IMap put(Object key, Object val){
-	Entry remEntries = doRemove(entries, key);
-	int incr = (remEntries == entries) ? 1 : 0;
-	return new ListMap(_count + incr, Entry.create(key, val, remEntries));
+public ListMap put(Object key, Object val){
+	return new Tail(key, val);
 }
 
-Entry doRemove(Entry e, Object key){
-	if(e == null)
-		return null;
-	else if(equalKey(key,e._key))
-		{
-		return e.rest();
-		}
-	else
-		{
-		Entry er = doRemove(e.rest(), key);
-		if(er != e.rest()) //removed in tail
-			return Entry.create(e._key, e._val, er);
-		return e;
-		}
-}
-
-public IMap remove(Object key){
-	Entry remEntries = doRemove(entries, key);
-	if(remEntries == entries) //didn't have key
-		return this;
-	return new ListMap(_count - 1, remEntries);
+public ListMap remove(Object key){
+	return this;
 }
 
 public Object get(Object key){
-	Entry e = find(key);
-	if(e != null)
-		return e._val;
 	return null;
 }
 
 public int capacity(){
-	return count();
+	return 0;
 }
 
 static class Iter implements Iterator{
-	Entry e;
+	ListMap e;
 
-	Iter(Entry e)
+	Iter(ListMap e)
 	{
 	this.e = e;
 	}
 
 	public boolean hasNext(){
-		return e != null;
+		return e != EMPTY;
 	}
 
 	public Object next(){
-		Entry ret = e;
+		ListMap ret = e;
 		e = e.rest();
 		return ret;
 	}
@@ -162,7 +91,143 @@ static class Iter implements Iterator{
 }
 
 public Iterator iterator(){
-	return new Iter(entries);
+	return new Iter(this);
+}
+
+static class Tail extends ListMap{
+	final Object _key;
+	final Object _val;
+
+	Tail(Object key,Object val){
+		this._key = key;
+		this._val = val;
+		}
+
+    ListMap rest(){
+        return EMPTY;
+    }
+
+	public int count(){
+		return 1;
+	}
+
+	public Object get(Object key){
+		if(equalKey(key,_key))
+			return _val;
+		return null;
+	}
+
+	public int capacity(){
+		return 1;
+	}
+
+	public Object key(){
+		return _key;
+	}
+
+	public Object val(){
+		return _val;
+	}
+
+	public boolean contains(Object key){
+		return equalKey(key,_key);
+	}
+
+	public IMapEntry find(Object key){
+		if(equalKey(key,_key))
+			return this;
+		return null;
+	}
+
+	public ListMap put(Object key, Object val){
+		if(equalKey(key,_key))  //replace
+			{
+			if(val == _val)
+				return this;
+			return new Tail(key,val);
+			}
+		return new Link(key,val,this);
+	}
+
+	public ListMap remove(Object key){
+		if(equalKey(key,_key))
+			return EMPTY;
+		return this;
+	}
+}
+
+static class Link extends ListMap{
+	final Object _key;
+	final Object _val;
+	final ListMap _rest;
+
+	Link(Object key,Object val,ListMap rest){
+		this._key = key;
+		this._val = val;
+		this._rest = rest;
+		}
+
+	public Object key(){
+		return _key;
+	}
+
+	public Object val(){
+		return _val;
+	}
+
+	ListMap rest(){
+        return _rest;
+        }
+
+	public int count(){
+		return 1 + _rest.count();
+	}
+
+	public boolean contains(Object key){
+		return find(key) != null;
+	}
+
+	public IMapEntry find(Object key){
+		if(equalKey(key,_key))
+			return this;
+		return _rest.find(key);
+	}
+
+	public ListMap put(Object key, Object val){
+		if(equalKey(key,_key))
+			{
+			if(val == _val)
+				return this;
+			return new Link(key,val,_rest);
+			}
+		ListMap r = _rest.put(key,val);
+		if(r == _rest)  //already there with same value
+			return this;
+		return new Link(_key,_val,r);
+	}
+
+	public ListMap remove(Object key){
+		if(equalKey(key,_key))
+			return _rest;
+		ListMap r = _rest.remove(key);
+		if(r == _rest)  //not there
+			return this;
+		if(r == EMPTY)
+			return new Tail(_key,_val);
+		return new Link(_key, _val, r);
+	}
+
+	public Object get(Object key){
+		IMapEntry e = find(key);
+		if(e != null)
+			return e.val();
+		return null;
+	}
+
+	public int capacity(){
+		return count();
+	}
+
 }
 
 boolean equalKey(Object k1,Object k2){

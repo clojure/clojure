@@ -12,8 +12,8 @@
 
 package org.clojure.runtime;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceArray;
+//import java.util.concurrent.atomic.AtomicInteger;
+//import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Vector;
@@ -54,18 +54,18 @@ public Iterator iterator(){
 }
 
 static class Master{
-	final AtomicReferenceArray array;
+	final Entry[] array;
 	final Object defaultVal;
-    final AtomicInteger rev;
-    final AtomicInteger load;
+    int rev;
+    int load;
 	final int maxLoad;
     final float loadFactor;
 
     Master(int size,Object defaultVal, float loadFactor){
-		this.array = new AtomicReferenceArray(size);
+		this.array = new Entry[size];//new AtomicReferenceArray(size);
 		this.defaultVal = defaultVal;
-        this.rev = new AtomicInteger(0);
-        this.load = new AtomicInteger(0);
+        this.rev = 0;//new AtomicInteger(0);
+        this.load = 0;//new AtomicInteger(0);
 		this.maxLoad = (int) (size * loadFactor);
         this.loadFactor = loadFactor;
         }
@@ -155,22 +155,23 @@ PersistentArray(Master master,int rev,int baseline, BitSet history){
 
 
 
-public int length(){
-	return master.array.length();
+final public int length(){
+	return master.array.length;
+	//return master.array.length();
 }
 
-public Object get(int i) {
+final public Object get(int i) {
     Entry e = getEntry(i);
     if(e != null)
         return e.val;
     return master.defaultVal;
 }
 
-public boolean has(int i){
+final public boolean has(int i){
     return getEntry(i) != null;
 }
 
-public PersistentArray resize(int newLength) {
+final public PersistentArray resize(int newLength) {
     PersistentArray ret = new PersistentArray(newLength, master.defaultVal, master.loadFactor);
     int load = 0;
     for(int i=0;i< Math.min(length(),newLength);i++)
@@ -178,12 +179,14 @@ public PersistentArray resize(int newLength) {
         Entry e = getEntry(i);
         if(e != null)
             {
-            ret.master.array.set(i,Entry.create(0,e.val, null));
+            ret.master.array[i] = new Entry(0,e.val);
+            //ret.master.array.set(i,Entry.create(0,e.val, null));
             ++load;
             }
         }
 
-    ret.master.load.set(load);
+	ret.master.load = load;
+	//ret.master.load.set(load);
 
     return ret;
 }
@@ -192,16 +195,18 @@ public PersistentArray resize(int newLength) {
  *
  * @return number of values (of all revisions) stored in shared array
  */
-public int load(){
-    return master.load.get();
+final public int load(){
+	return master.load;
+	//return master.load.get();
 }
 
-public PersistentArray isolate() {
+final public PersistentArray isolate() {
     return resize(length());
 }
 
-Entry getEntry(int i){
-	for(Entry e = (Entry) master.array.get(i);e != null;e = e.rest())
+final Entry getEntry(int i){
+	for(Entry e = master.array[i];e != null;e = e.rest())
+	//	for(Entry e = (Entry) master.array.get(i);e != null;e = e.rest())
 		{
 		if(e.rev <= rev)
 			{
@@ -213,47 +218,52 @@ Entry getEntry(int i){
     return null;
 }
 
-public PersistentArray set(int i,Object val) {
-	if(master.load.get() >= master.maxLoad)
-		return isolate().set(i,val);
-	PersistentArray ret = getSetArray();
-	ret.doSet(i, val);
-	return ret;
+final public PersistentArray set(int i,Object val) {
+	if(master.load >= master.maxLoad)
+		//if(master.load.get() >= master.maxLoad)
+			return isolate().set(i,val);
+	synchronized(master){
+		PersistentArray ret = getSetArray();
+		ret.doSet(i, val);
+		return ret;
+	}
 }
 
-void doSet(int i, Object val){
-	Entry oldEntry, newEntry;
-	do
-		{
-		oldEntry = (Entry) master.array.get(i);
-		newEntry = Entry.create(rev, val, oldEntry);
-		} while(!master.array.compareAndSet(i, oldEntry, newEntry));
-    master.load.incrementAndGet();
+final void doSet(int i, Object val){
+//	Entry oldEntry, newEntry;
+//	do
+//		{
+//		oldEntry = (Entry) master.array.get(i);
+//		newEntry = Entry.create(rev, val, oldEntry);
+//		} while(!master.array.compareAndSet(i, oldEntry, newEntry));
+
+	//must now be called inside lock of master
+	master.array[i] = Entry.create(rev, val, master.array[i]);
+	//master.load.incrementAndGet();
+	++master.load;
 }
 
-PersistentArray getSetArray(){
-	int nextRev;
-	int nextBaseline;
-	BitSet nextHistory;
+final PersistentArray getSetArray(){
+	//must now be called inside lock of master
 	//is this a sequential update?
-	if(master.rev.compareAndSet(rev, rev + 1))
+	if(master.rev == rev)
+		//if(master.rev.compareAndSet(rev, rev + 1))
 		{
-		nextRev = rev + 1;
-		nextBaseline = baseline;
-		nextHistory = history;
+		return new PersistentArray(master, ++master.rev, baseline, history);
 		}
 	else //gap
 		{
-		nextRev = master.rev.incrementAndGet();
-		nextBaseline = nextRev;
+		//nextRev = master.rev.incrementAndGet();
+		int nextRev = ++master.rev;
+		BitSet nextHistory;
 		if(history != null)
 			nextHistory = (BitSet) history.clone();
 		else
 			nextHistory = new BitSet(rev+1);
 		nextHistory.set(baseline,rev+1);
+		return new PersistentArray(master, nextRev, nextRev, nextHistory);
 		}
 
-	return new PersistentArray(master, nextRev, nextBaseline, nextHistory);
 }
 
 
@@ -281,6 +291,7 @@ static public void main(String[] args){
 	rand = new Random(42);
 	long tv = 0;
 	System.out.println("Vector");
+	long startTime = System.nanoTime();
 	for(int i = 0; i < writes; i++)
 		{
 		v.set(rand.nextInt(size), i);
@@ -289,8 +300,11 @@ static public void main(String[] args){
 		{
 		tv += (Integer)v.get(rand.nextInt(size));
 		}
+	long estimatedTime = System.nanoTime() - startTime;
+	System.out.println("time: " + estimatedTime/1000000);
 	System.out.println("PersistentArray");
 	rand = new Random(42);
+	startTime = System.nanoTime();
 	long tp = 0;
 	for(int i = 0; i < writes; i++)
 		{
@@ -302,6 +316,8 @@ static public void main(String[] args){
 		{
 		tp += (Integer)p.get(rand.nextInt(size));
 		}
+	estimatedTime = System.nanoTime() - startTime;
+	System.out.println("time: " + estimatedTime/1000000);
 	System.out.println("Done: " + tv + ", " + tp);
 
 

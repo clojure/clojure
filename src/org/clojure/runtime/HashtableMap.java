@@ -210,9 +210,9 @@ static class Iter implements Iterator, IMapEntry{
 static class Iter implements Iterator{
 	PersistentArray buckets;
 	int b;
-	ListMap.Entry e;
+	ListMap e;
 
-		Iter(PersistentArray buckets){
+	Iter(PersistentArray buckets){
         this.buckets = buckets;
         this.b = -1;
         nextBucket();
@@ -223,9 +223,9 @@ static class Iter implements Iterator{
         for(b = b+1;b<buckets.length();b++)
             {
             ListMap a = (ListMap) buckets.get(b);
-            if(a != null)
+            if(a != null && a != ListMap.EMPTY)
                 {
-                e = a.entries;
+                e = a;
                 break;
                 }
             }
@@ -236,9 +236,9 @@ static class Iter implements Iterator{
     }
 
 	public Object next() {
-		ListMap.Entry ret = e;
+		ListMap ret = e;
         e = e.rest();
-        if(e == null)
+        if(e == ListMap.EMPTY)
             nextBucket();
         return ret;
     }
@@ -248,7 +248,7 @@ static class Iter implements Iterator{
     }
 }
 
-IMap entriesFor(Object key){
+final IMap entriesFor(Object key){
     return (IMap) array.get(bucketFor(key,array));
 }
 
@@ -274,7 +274,7 @@ IMap createArrayMap(Object[] init) {
 }
 
 private IMap createListMap(Object key, Object val){
-	return new ListMap(key,val);
+	return ListMap.create(key,val);
 }
 
 }
