@@ -675,23 +675,26 @@ static public void main(String args[]){
 		ints[i] = new Integer(i);
 		}
 	Collections.shuffle(Arrays.asList(ints));
+	//force the ListMap class loading now
+	ListMap.EMPTY.add(1).add(2).add(3);
 	System.out.println("Building set");
-	  long startTime = System.nanoTime();
-	//IMap set = new PersistentHashMap(1);
-	IMap set = new HashtableMap(1001);
+	IMap set = new PersistentHashMap(1001);
+	//IMap set = new HashtableMap(1001);
 	//IMap set = new ListMap();
+	//IMap set = new ArrayMap();
 	//IMap set = new RBTree();
 //	for(int i = 0; i < ints.length; i++)
 //		{
 //		Integer anInt = ints[i];
 //		set = set.add(anInt);
 //		}
+	long startTime = System.nanoTime();
 	for(int i = 0; i < ints.length; i++)
 		{
 		Integer anInt = ints[i];
 		set = set.put(anInt, anInt);
 		}
-    System.out.println("_count = " + set.count());
+    //System.out.println("_count = " + set.count());
 
 
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
@@ -702,8 +705,8 @@ static public void main(String args[]){
 		IMapEntry o = (IMapEntry) it.next();
 		if(!set.contains(o.key()))
 			System.err.println("Can't find: " + o);
-		else if(n < 2000)
-			System.out.print(o.key().toString() + ",");
+		//else if(n < 2000)
+		//	System.out.print(o.key().toString() + ",");
 		}
 
 	for(int i = 0; i < ints.length/2; i++)
@@ -712,10 +715,10 @@ static public void main(String args[]){
 		set = set.remove(anInt);
 		}
 
-	System.out.println();
 	long estimatedTime = System.nanoTime() - startTime;
+	System.out.println();
 
-	System.out.println("_count = " + set.count() + ", time: " + estimatedTime/1000000);
+	System.out.println("_count = " + set.count() + ", time: " + estimatedTime/10000);
 
 	System.out.println("Building ht");
 	Hashtable ht = new Hashtable(1001);
@@ -730,15 +733,15 @@ static public void main(String args[]){
 		Integer anInt = ints[i];
 		ht.put(anInt, anInt);
 		}
-    System.out.println("size = " + ht.size());
-	Enumeration e = ht.keys();
-	while(e.hasMoreElements())
+    //System.out.println("size = " + ht.size());
+	it = ht.entrySet().iterator();
+	while(it.hasNext())
 		{
-		Integer o = (Integer) e.nextElement();
-		if(!ht.containsKey(o))
+		Map.Entry o = (Map.Entry) it.next();
+		if(!ht.containsKey(o.getKey()))
 			System.err.println("Can't find: " + o);
-		else if(n < 2000)
-			System.out.print(o.toString() + ",");
+		//else if(n < 2000)
+		//	System.out.print(o.toString() + ",");
 		}
 
 	for(int i = 0; i < ints.length/2; i++)
@@ -747,7 +750,8 @@ static public void main(String args[]){
 		ht.remove(anInt);
 		}
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("size = " + ht.size() + ", time: " + estimatedTime/1000000);
+	System.out.println();
+	System.out.println("size = " + ht.size() + ", time: " + estimatedTime/10000);
 
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 //	                   + ", depth: " + set.depth());

@@ -14,6 +14,18 @@ package org.clojure.runtime;
 
 import java.util.Iterator;
 
+/**
+ * Immplementation of persistent map on a linked list
+
+ * Note that instances of this class are constant values
+ * i.e. add/remove etc return new values
+ *
+ * Lookups/changes are linear, so only appropriate for _very_small_ maps
+ * ArrayMap is generally faster, but this class avoids the double allocation,
+ * and so is better/faster as a bucket for hash tables
+ *
+ * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
+ */
 public class ListMap implements IMap, IMapEntry
 {
 
@@ -194,16 +206,14 @@ static class Link extends ListMap{
 	}
 
 	public ListMap put(Object key, Object val){
-		if(equalKey(key,_key))
+		IMapEntry e = find(key);
+		if(e != null)
 			{
-			if(val == _val)
+			if(e.val() == val)
 				return this;
-			return new Link(key,val,_rest);
+			return create(_key,_val,remove(key));
 			}
-		ListMap r = _rest.put(key,val);
-		if(r == _rest)  //already there with same value
-			return this;
-		return new Link(_key,_val,r);
+		return new Link(key,val,this);
 	}
 
 	public ListMap remove(Object key){
@@ -212,9 +222,7 @@ static class Link extends ListMap{
 		ListMap r = _rest.remove(key);
 		if(r == _rest)  //not there
 			return this;
-		if(r == EMPTY)
-			return new Tail(_key,_val);
-		return new Link(_key, _val, r);
+		return create(_key,_val,r);
 	}
 
 	public Object get(Object key){
@@ -226,6 +234,12 @@ static class Link extends ListMap{
 
 	public int capacity(){
 		return count();
+	}
+
+	ListMap create(Object k,Object v,ListMap r){
+		if(r == EMPTY)
+			return new Tail(k,v);
+		return new Link(k, v, r);
 	}
 
 }

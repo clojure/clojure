@@ -15,7 +15,7 @@ import java.util.Iterator;
 public class PersistentHashMap implements IMap, Iterable{
 
 IMap impl;
-static final int CAPACITY_THRESHOLD = 10;
+static final int CAPACITY_THRESHOLD = 42;
 
 public PersistentHashMap(Object[] init){
     if(init.length/2 < CAPACITY_THRESHOLD)
@@ -26,7 +26,8 @@ public PersistentHashMap(Object[] init){
 public PersistentHashMap(int initialCapacity){
     if(initialCapacity < CAPACITY_THRESHOLD)
         impl = createArrayMap();
-    impl = createHashtableMap(initialCapacity);
+	else
+        impl = createHashtableMap(initialCapacity);
 }
 
 PersistentHashMap(IMap impl){

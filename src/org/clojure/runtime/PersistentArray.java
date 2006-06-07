@@ -44,7 +44,6 @@ import java.util.Random;
  *
  * See Cohen for basic idea
  * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
- * Java implementation is lock-free
  */
 
 public class PersistentArray implements Iterable{
