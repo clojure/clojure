@@ -12,17 +12,17 @@ package org.clojure.runtime;
 
 import java.util.Iterator;
 
-public class PersistentIdentityHashtableMap extends PersistentHashtableMap {
+public class PersistentHashtableIdentityMap extends PersistentHashtableMap {
 
-public PersistentIdentityHashtableMap(int initialCapacity) {
+public PersistentHashtableIdentityMap(int initialCapacity) {
     super(initialCapacity);
 }
 
-public PersistentIdentityHashtableMap(Object[] init) {
+public PersistentHashtableIdentityMap(Object[] init) {
     super(init);
 }
 
-PersistentIdentityHashtableMap(int count, PersistentArray array) {
+PersistentHashtableIdentityMap(int count, PersistentArray array) {
     super(count, array);
 }
 
@@ -35,7 +35,7 @@ public Iterator<IMapEntry> iterator() {
 static class Iter implements Iterator{
     PersistentArray buckets;
     int b;
-    PersistentIdentityListMap e;
+    PersistentListIdentityMap e;
 
     Iter(PersistentArray buckets){
         this.buckets = buckets;
@@ -47,8 +47,8 @@ static class Iter implements Iterator{
         e = null;
         for(b = b+1;b<buckets.length();b++)
             {
-            PersistentIdentityListMap a = (PersistentIdentityListMap) buckets.get(b);
-            if(a != null && a != PersistentIdentityListMap.EMPTY)
+            PersistentListIdentityMap a = (PersistentListIdentityMap) buckets.get(b);
+            if(a != null && a != PersistentListIdentityMap.EMPTY)
                 {
                 e = a;
                 break;
@@ -61,9 +61,9 @@ static class Iter implements Iterator{
     }
 
     public Object next() {
-        PersistentIdentityListMap ret = e;
+        PersistentListIdentityMap ret = e;
         e = e.rest();
-        if(e == PersistentIdentityListMap.EMPTY)
+        if(e == PersistentListIdentityMap.EMPTY)
             nextBucket();
         return ret;
     }
@@ -74,15 +74,15 @@ static class Iter implements Iterator{
 }
 
 IPersistentMap create(int capacity) {
-    return new PersistentIdentityHashtableMap(capacity);
+    return new PersistentHashtableIdentityMap(capacity);
 }
 
 IPersistentMap create(int count, PersistentArray array) {
-    return new PersistentIdentityHashtableMap(count, array);
+    return new PersistentHashtableIdentityMap(count, array);
 }
 
 IPersistentMap createListMap(Object key, Object val){
-    return PersistentIdentityListMap.create(key,val);
+    return PersistentListIdentityMap.create(key,val);
 }
 
 }

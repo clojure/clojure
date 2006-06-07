@@ -28,12 +28,12 @@ import java.util.Iterator;
  * code duplication here is kind of gross, but most efficient
  */
 
-public class PersistentIdentityListMap implements IPersistentMap, IMapEntry
+public class PersistentListIdentityMap implements IPersistentMap, IMapEntry
 {
 
-static public PersistentIdentityListMap EMPTY = new PersistentIdentityListMap();
+static public PersistentListIdentityMap EMPTY = new PersistentListIdentityMap();
 
-static public PersistentIdentityListMap create(Object key, Object val){
+static public PersistentListIdentityMap create(Object key, Object val){
 	return new Tail(key, val);
 }
 
@@ -45,7 +45,7 @@ public Object val(){
 	return null;
 }
 
-PersistentIdentityListMap rest(){
+PersistentListIdentityMap rest(){
     return this;
     }
 
@@ -65,11 +65,11 @@ public IPersistentMap add(Object key){
 	return put(key, null);
 }
 
-public PersistentIdentityListMap put(Object key, Object val){
+public PersistentListIdentityMap put(Object key, Object val){
 	return new Tail(key, val);
 }
 
-public PersistentIdentityListMap remove(Object key){
+public PersistentListIdentityMap remove(Object key){
 	return this;
 }
 
@@ -82,9 +82,9 @@ public int capacity(){
 }
 
 static class Iter implements Iterator{
-	PersistentIdentityListMap e;
+	PersistentListIdentityMap e;
 
-	Iter(PersistentIdentityListMap e)
+	Iter(PersistentListIdentityMap e)
 	{
 	this.e = e;
 	}
@@ -94,7 +94,7 @@ static class Iter implements Iterator{
 	}
 
 	public Object next(){
-		PersistentIdentityListMap ret = e;
+		PersistentListIdentityMap ret = e;
 		e = e.rest();
 		return ret;
 	}
@@ -108,7 +108,7 @@ public Iterator iterator(){
 	return new Iter(this);
 }
 
-static class Tail extends PersistentIdentityListMap {
+static class Tail extends PersistentListIdentityMap {
 	final Object _key;
 	final Object _val;
 
@@ -117,7 +117,7 @@ static class Tail extends PersistentIdentityListMap {
 		this._val = val;
 		}
 
-    PersistentIdentityListMap rest(){
+    PersistentListIdentityMap rest(){
         return EMPTY;
     }
 
@@ -153,7 +153,7 @@ static class Tail extends PersistentIdentityListMap {
 		return null;
 	}
 
-	public PersistentIdentityListMap put(Object key, Object val){
+	public PersistentListIdentityMap put(Object key, Object val){
 		if(key == _key)  //replace
 			{
 			if(val == _val)
@@ -163,19 +163,19 @@ static class Tail extends PersistentIdentityListMap {
 		return new Link(key,val,this);
 	}
 
-	public PersistentIdentityListMap remove(Object key){
+	public PersistentListIdentityMap remove(Object key){
 		if(key == _key)
 			return EMPTY;
 		return this;
 	}
 }
 
-static class Link extends PersistentIdentityListMap {
+static class Link extends PersistentListIdentityMap {
 	final Object _key;
 	final Object _val;
-	final PersistentIdentityListMap _rest;
+	final PersistentListIdentityMap _rest;
 
-	Link(Object key,Object val,PersistentIdentityListMap rest){
+	Link(Object key,Object val,PersistentListIdentityMap rest){
 		this._key = key;
 		this._val = val;
 		this._rest = rest;
@@ -189,7 +189,7 @@ static class Link extends PersistentIdentityListMap {
 		return _val;
 	}
 
-	PersistentIdentityListMap rest(){
+	PersistentListIdentityMap rest(){
         return _rest;
         }
 
@@ -207,7 +207,7 @@ static class Link extends PersistentIdentityListMap {
 		return _rest.find(key);
 	}
 
-	public PersistentIdentityListMap put(Object key, Object val){
+	public PersistentListIdentityMap put(Object key, Object val){
 		IMapEntry e = find(key);
 		if(e != null)
 			{
@@ -218,10 +218,10 @@ static class Link extends PersistentIdentityListMap {
 		return new Link(key,val,this);
 	}
 
-	public PersistentIdentityListMap remove(Object key){
+	public PersistentListIdentityMap remove(Object key){
 		if(key == _key)
 			return _rest;
-		PersistentIdentityListMap r = _rest.remove(key);
+		PersistentListIdentityMap r = _rest.remove(key);
 		if(r == _rest)  //not there
 			return this;
 		return create(_key,_val,r);
@@ -238,7 +238,7 @@ static class Link extends PersistentIdentityListMap {
 		return count();
 	}
 
-	PersistentIdentityListMap create(Object k,Object v,PersistentIdentityListMap r){
+	PersistentListIdentityMap create(Object k,Object v,PersistentListIdentityMap r){
 		if(r == EMPTY)
 			return new Tail(k,v);
 		return new Link(k, v, r);

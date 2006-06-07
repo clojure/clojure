@@ -29,19 +29,19 @@ public IPersistentMap create(IPersistentMap impl) {
 }
 
 public PersistentArrayMap createArrayMap(Object[] init) {
-    return new PersistentIdentityArrayMap(init);
+    return new PersistentArrayIdentityMap(init);
 }
 
 IPersistentMap createArrayMap() {
-    return new PersistentIdentityArrayMap();
+    return new PersistentArrayIdentityMap();
 }
 
 IPersistentMap createHashtableMap(Object[] init) {
-    return new PersistentIdentityHashtableMap(init);
+    return new PersistentHashtableIdentityMap(init);
 }
 
 IPersistentMap createHashtableMap(int initialCapacity) {
-    return new PersistentIdentityHashtableMap(initialCapacity);
+    return new PersistentHashtableIdentityMap(initialCapacity);
 }
 
 }
