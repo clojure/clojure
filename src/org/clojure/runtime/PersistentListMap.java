@@ -26,12 +26,12 @@ import java.util.Iterator;
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class ListMap implements IMap, IMapEntry
+public class PersistentListMap implements IPersistentMap, IMapEntry
 {
 
-static public ListMap EMPTY = new ListMap();
+static public PersistentListMap EMPTY = new PersistentListMap();
 
-static public ListMap create(Object key, Object val){
+static public PersistentListMap create(Object key, Object val){
 	return new Tail(key, val);
 }
 
@@ -43,7 +43,7 @@ public Object val(){
 	return null;
 }
 
-ListMap rest(){
+PersistentListMap rest(){
     return this;
     }
 
@@ -59,15 +59,15 @@ public IMapEntry find(Object key){
 	return null;
 }
 
-public IMap add(Object key){
+public IPersistentMap add(Object key){
 	return put(key, null);
 }
 
-public ListMap put(Object key, Object val){
+public PersistentListMap put(Object key, Object val){
 	return new Tail(key, val);
 }
 
-public ListMap remove(Object key){
+public PersistentListMap remove(Object key){
 	return this;
 }
 
@@ -80,9 +80,9 @@ public int capacity(){
 }
 
 static class Iter implements Iterator{
-	ListMap e;
+	PersistentListMap e;
 
-	Iter(ListMap e)
+	Iter(PersistentListMap e)
 	{
 	this.e = e;
 	}
@@ -92,7 +92,7 @@ static class Iter implements Iterator{
 	}
 
 	public Object next(){
-		ListMap ret = e;
+		PersistentListMap ret = e;
 		e = e.rest();
 		return ret;
 	}
@@ -106,7 +106,7 @@ public Iterator iterator(){
 	return new Iter(this);
 }
 
-static class Tail extends ListMap{
+static class Tail extends PersistentListMap {
 	final Object _key;
 	final Object _val;
 
@@ -115,7 +115,7 @@ static class Tail extends ListMap{
 		this._val = val;
 		}
 
-    ListMap rest(){
+    PersistentListMap rest(){
         return EMPTY;
     }
 
@@ -151,7 +151,7 @@ static class Tail extends ListMap{
 		return null;
 	}
 
-	public ListMap put(Object key, Object val){
+	public PersistentListMap put(Object key, Object val){
 		if(equalKey(key,_key))  //replace
 			{
 			if(val == _val)
@@ -161,19 +161,19 @@ static class Tail extends ListMap{
 		return new Link(key,val,this);
 	}
 
-	public ListMap remove(Object key){
+	public PersistentListMap remove(Object key){
 		if(equalKey(key,_key))
 			return EMPTY;
 		return this;
 	}
 }
 
-static class Link extends ListMap{
+static class Link extends PersistentListMap {
 	final Object _key;
 	final Object _val;
-	final ListMap _rest;
+	final PersistentListMap _rest;
 
-	Link(Object key,Object val,ListMap rest){
+	Link(Object key,Object val,PersistentListMap rest){
 		this._key = key;
 		this._val = val;
 		this._rest = rest;
@@ -187,7 +187,7 @@ static class Link extends ListMap{
 		return _val;
 	}
 
-	ListMap rest(){
+	PersistentListMap rest(){
         return _rest;
         }
 
@@ -205,7 +205,7 @@ static class Link extends ListMap{
 		return _rest.find(key);
 	}
 
-	public ListMap put(Object key, Object val){
+	public PersistentListMap put(Object key, Object val){
 		IMapEntry e = find(key);
 		if(e != null)
 			{
@@ -216,10 +216,10 @@ static class Link extends ListMap{
 		return new Link(key,val,this);
 	}
 
-	public ListMap remove(Object key){
+	public PersistentListMap remove(Object key){
 		if(equalKey(key,_key))
 			return _rest;
-		ListMap r = _rest.remove(key);
+		PersistentListMap r = _rest.remove(key);
 		if(r == _rest)  //not there
 			return this;
 		return create(_key,_val,r);
@@ -236,7 +236,7 @@ static class Link extends ListMap{
 		return count();
 	}
 
-	ListMap create(Object k,Object v,ListMap r){
+	PersistentListMap create(Object k,Object v,PersistentListMap r){
 		if(r == EMPTY)
 			return new Tail(k,v);
 		return new Link(k, v, r);

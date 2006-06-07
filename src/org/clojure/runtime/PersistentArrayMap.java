@@ -23,11 +23,11 @@ import java.util.Iterator;
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class ArrayMap implements IMap {
+public class PersistentArrayMap implements IPersistentMap {
 
 final Object[] array;
 
-public ArrayMap(){
+public PersistentArrayMap(){
     this.array = RT.EMPTY_ARRAY;
 }
 
@@ -35,7 +35,7 @@ public ArrayMap(){
  * This ctor captures/aliases the passed array, so do not modify later
  * @param init {key1,val1,key2,val2,...}
  */
-public ArrayMap(Object[] init){
+public PersistentArrayMap(Object[] init){
     this.array = init;
 }
 
@@ -54,12 +54,12 @@ public IMapEntry find(Object key) {
     return null;
 }
 
-public IMap add(Object key) {
+public IPersistentMap add(Object key) {
 
     return put(key,null);
 }
 
-public IMap put(Object key, Object val) {
+public IPersistentMap put(Object key, Object val) {
     int i = indexOf(key);
     Object[] newArray;
     if(i >= 0) //already have key, same-sized replacement
@@ -77,10 +77,10 @@ public IMap put(Object key, Object val) {
         newArray[0] = key;
         newArray[1] = val;
         }
-    return new ArrayMap(newArray);
+    return new PersistentArrayMap(newArray);
 }
 
-public IMap remove(Object key) {
+public IPersistentMap remove(Object key) {
     int i = indexOf(key);
     if(i >= 0) //have key, will remove
         {
@@ -94,7 +94,7 @@ public IMap remove(Object key) {
                 d += 2;
                 }
             }
-        return new ArrayMap(newArray);
+        return new PersistentArrayMap(newArray);
         }
     //don't have key, no op
     return this;

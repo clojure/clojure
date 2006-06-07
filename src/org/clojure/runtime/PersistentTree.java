@@ -22,17 +22,17 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class RBTree implements Iterable, IMap {
+public class PersistentTree implements IPersistentMap {
 
 public final Comparator comp;
 public final Node tree;
 public final int _count;
 
-public RBTree(){
+public PersistentTree(){
 	this(null);
 }
 
-public RBTree(Comparator comp){
+public PersistentTree(Comparator comp){
 	this.comp = comp;
 	tree = null;
 	_count = 0;
@@ -42,11 +42,11 @@ public boolean contains(Object key){
 	return find(key) != null;
 }
 
-public RBTree add(Object key){
+public PersistentTree add(Object key){
 	return put(key, null);
 }
 
-public RBTree put(Object key, Object val){
+public PersistentTree put(Object key, Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -54,13 +54,13 @@ public RBTree put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new RBTree(comp, replace(tree, key, val), _count);
+		return new PersistentTree(comp, replace(tree, key, val), _count);
 		}
-	return new RBTree(comp, t.blacken(), _count + 1);
+	return new PersistentTree(comp, t.blacken(), _count + 1);
 }
 
 
-public RBTree remove(Object key){
+public PersistentTree remove(Object key){
 	Box found = new Box(null);
 	Node t = remove(tree, key, found);
 	if(t == null)
@@ -68,9 +68,9 @@ public RBTree remove(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new RBTree(comp);
+		return new PersistentTree(comp);
 		}
-	return new RBTree(comp, t.blacken(), _count - 1);
+	return new PersistentTree(comp, t.blacken(), _count - 1);
 }
 
 
@@ -310,7 +310,7 @@ Node replace(Node t, Object key, Object val){
 	                 c > 0 ? replace(t.right(), key, val) : t.right());
 }
 
-RBTree(Comparator comp, Node tree, int count){
+PersistentTree(Comparator comp, Node tree, int count){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
@@ -676,9 +676,9 @@ static public void main(String args[]){
 		}
 	Collections.shuffle(Arrays.asList(ints));
 	//force the ListMap class loading now
-	ListMap.EMPTY.add(1).add(2).add(3);
+	PersistentListMap.EMPTY.add(1).add(2).add(3);
 	System.out.println("Building set");
-	IMap set = new PersistentHashMap(1001);
+	IPersistentMap set = new PersistentHybridMap(1001);
 	//IMap set = new HashtableMap(1001);
 	//IMap set = new ListMap();
 	//IMap set = new ArrayMap();

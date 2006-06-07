@@ -14,23 +14,23 @@ public class TObj implements IObj{
 TRef attrs;
 
 public TObj(ThreadLocalData tld) throws Exception{
-    this.attrs = Transaction.tref(tld,new RBTree());
+    this.attrs = Transaction.tref(tld,new PersistentTree());
 }
 
 public Object put(ThreadLocalData tld, Comparable key, Object val) throws Exception {
-    RBTree t = (RBTree) Transaction.get(tld, attrs);
+    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
     t = t.put(key, val);
     Transaction.set(tld,attrs,t);
     return val;
 }
 
 public Object get(ThreadLocalData tld, Comparable key) throws Exception {
-    RBTree t = (RBTree) Transaction.get(tld, attrs);
+    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
     return t.get(key);
 }
 
 public boolean has(ThreadLocalData tld, Comparable key) throws Exception {
-    RBTree t = (RBTree) Transaction.get(tld, attrs);
+    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
     return t.contains(key);
 }
 }

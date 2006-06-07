@@ -10,29 +10,29 @@
 
 package org.clojure.runtime;
 
-public class IdentityHashtableMap extends HashtableMap{
+public class PersistentIdentityHashtableMap extends PersistentHashtableMap {
 
-public IdentityHashtableMap(int initialCapacity) {
+public PersistentIdentityHashtableMap(int initialCapacity) {
     super(initialCapacity);
 }
 
-public IdentityHashtableMap(Object[] init) {
+public PersistentIdentityHashtableMap(Object[] init) {
     super(init);
 }
 
-IdentityHashtableMap(int count, PersistentArray array) {
+PersistentIdentityHashtableMap(int count, PersistentArray array) {
     super(count, array);
 }
 
-IMap create(int capacity) {
-    return new IdentityHashtableMap(capacity);
+IPersistentMap create(int capacity) {
+    return new PersistentIdentityHashtableMap(capacity);
 }
 
-IMap create(int count, PersistentArray array) {
-    return new IdentityHashtableMap(count, array);
+IPersistentMap create(int count, PersistentArray array) {
+    return new PersistentIdentityHashtableMap(count, array);
 }
 
-IMap createArrayMap(Object[] init) {
-    return new IdentityArrayMap(init);
+IPersistentMap createArrayMap(Object[] init) {
+    return new PersistentIdentityArrayMap(init);
 }
 }

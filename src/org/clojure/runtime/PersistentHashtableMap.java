@@ -13,7 +13,7 @@ package org.clojure.runtime;
 import java.util.Iterator;
 import java.math.BigInteger;
 
-public class HashtableMap implements IMap, Iterable {
+public class PersistentHashtableMap implements IPersistentMap {
 
 static final float FILL_FACTOR = 0.75f;
 
@@ -21,7 +21,7 @@ final PersistentArray array;
 final int _count;
 final int growAtCount;
 
-public HashtableMap(int initialCapacity) {
+public PersistentHashtableMap(int initialCapacity) {
     array = new PersistentArray(calcPrimeCapacity(initialCapacity));
     _count = 0;
     this.growAtCount = (int) (this.array.length()*FILL_FACTOR);
@@ -30,7 +30,7 @@ public HashtableMap(int initialCapacity) {
 /**
  * @param init {key1,val1,key2,val2,...}
  */
-public HashtableMap(Object[] init){
+public PersistentHashtableMap(Object[] init){
     //start halfway to a rehash
     PersistentArray narray = new PersistentArray(calcPrimeCapacity(init.length));
     for(int i=0;i<init.length;i+=2)
@@ -42,13 +42,13 @@ public HashtableMap(Object[] init){
     this.growAtCount = (int) (this.array.length()*FILL_FACTOR);
 }
 
-HashtableMap(int count,PersistentArray array) {
+PersistentHashtableMap(int count,PersistentArray array) {
     this._count = count;
     this.array = array;
     this.growAtCount = (int) (this.array.length()*FILL_FACTOR);
 }
 
-HashtableMap(int count,PersistentArray array,int growAt) {
+PersistentHashtableMap(int count,PersistentArray array,int growAt) {
     this._count = count;
     this.array = array;
     this.growAtCount = growAt;
@@ -63,22 +63,22 @@ public int count() {
 }
 
 public boolean contains(Object key) {
-    IMap entries = entriesFor(key);
+    IPersistentMap entries = entriesFor(key);
     return entries != null && entries.contains(key);
 }
 
 public IMapEntry find(Object key) {
-    IMap entries = entriesFor(key);
+    IPersistentMap entries = entriesFor(key);
     if(entries != null)
         return entries.find(key);
     return null;
 }
 
-public IMap add(Object key) {
+public IPersistentMap add(Object key) {
     return put(key, null);
 }
 
-public IMap put(Object key, Object val) {
+public IPersistentMap put(Object key, Object val) {
     if(_count > growAtCount)
         return grow().put(key, val);
     int i = bucketFor(key,array);
@@ -86,14 +86,14 @@ public IMap put(Object key, Object val) {
     PersistentArray newArray = doPut(i, key, val, array);
     if(newArray == array)
         return this;
-    if(array.get(i) != null && ((IMap)newArray.get(i)).count() == ((IMap)array.get(i)).count()) //key already there, no growth
+    if(array.get(i) != null && ((IPersistentMap)newArray.get(i)).count() == ((IPersistentMap)array.get(i)).count()) //key already there, no growth
         incr = 0;
     return create(_count + incr, newArray, growAtCount);
 }
 
 PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
-    IMap entries = (IMap) array.get(i);
-    IMap newEntries;
+    IPersistentMap entries = (IPersistentMap) array.get(i);
+    IPersistentMap newEntries;
     if (entries != null)
         {
         newEntries = entries.put(key, val);
@@ -107,12 +107,12 @@ PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
     return array.set(i, newEntries);
 }
 
-public IMap remove(Object key) {
+public IPersistentMap remove(Object key) {
     int i = bucketFor(key,array);
-    IMap entries = (IMap) array.get(i);
+    IPersistentMap entries = (IPersistentMap) array.get(i);
     if (entries != null)
         {
-        IMap newEntries = entries.remove(key);
+        IPersistentMap newEntries = entries.remove(key);
         if (newEntries != entries)
             return create(_count - 1, array.set(i, newEntries));
         }
@@ -121,7 +121,7 @@ public IMap remove(Object key) {
 }
 
 public Object get(Object key) {
-    IMap entries = entriesFor(key);
+    IPersistentMap entries = entriesFor(key);
     if(entries != null)
         return entries.get(key);
     return null;
@@ -136,7 +136,7 @@ public Iterator<IMapEntry> iterator() {
 }
 
 
-IMap grow(){
+IPersistentMap grow(){
     PersistentArray newArray = new PersistentArray(calcPrimeCapacity(_count * 2));
     for (Object o : this)
         {
@@ -210,7 +210,7 @@ static class Iter implements Iterator, IMapEntry{
 static class Iter implements Iterator{
 	PersistentArray buckets;
 	int b;
-	ListMap e;
+	PersistentListMap e;
 
 	Iter(PersistentArray buckets){
         this.buckets = buckets;
@@ -222,8 +222,8 @@ static class Iter implements Iterator{
         e = null;
         for(b = b+1;b<buckets.length();b++)
             {
-            ListMap a = (ListMap) buckets.get(b);
-            if(a != null && a != ListMap.EMPTY)
+            PersistentListMap a = (PersistentListMap) buckets.get(b);
+            if(a != null && a != PersistentListMap.EMPTY)
                 {
                 e = a;
                 break;
@@ -236,9 +236,9 @@ static class Iter implements Iterator{
     }
 
 	public Object next() {
-		ListMap ret = e;
+		PersistentListMap ret = e;
         e = e.rest();
-        if(e == ListMap.EMPTY)
+        if(e == PersistentListMap.EMPTY)
             nextBucket();
         return ret;
     }
@@ -248,33 +248,33 @@ static class Iter implements Iterator{
     }
 }
 
-final IMap entriesFor(Object key){
-    return (IMap) array.get(bucketFor(key,array));
+final IPersistentMap entriesFor(Object key){
+    return (IPersistentMap) array.get(bucketFor(key,array));
 }
 
 static int bucketFor(Object key, PersistentArray array) {
     return (key.hashCode() & 0x7fffffff)%array.length();
 }
 
-IMap create(int capacity) {
-    return new HashtableMap(capacity);
+IPersistentMap create(int capacity) {
+    return new PersistentHashtableMap(capacity);
 }
 
-IMap create(int count,PersistentArray array) {
-    return new HashtableMap(count, array);
+IPersistentMap create(int count,PersistentArray array) {
+    return new PersistentHashtableMap(count, array);
 }
 
-private IMap create(int i, PersistentArray newArray, int growAtCount){
-	return new HashtableMap(i, newArray, growAtCount);
+private IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
+	return new PersistentHashtableMap(i, newArray, growAtCount);
 }
 
 
-IMap createArrayMap(Object[] init) {
-    return new ArrayMap(init);
+IPersistentMap createArrayMap(Object[] init) {
+    return new PersistentArrayMap(init);
 }
 
-private IMap createListMap(Object key, Object val){
-	return ListMap.create(key,val);
+private IPersistentMap createListMap(Object key, Object val){
+	return PersistentListMap.create(key,val);
 }
 
 }

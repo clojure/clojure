@@ -13,11 +13,11 @@ package org.clojure.runtime;
 /**
  * ArrayMap using identity (==) comparison instead of equals
  */
-public class IdentityArrayMap extends ArrayMap{
-public IdentityArrayMap() {
+public class PersistentIdentityArrayMap extends PersistentArrayMap {
+public PersistentIdentityArrayMap() {
 }
 
-public IdentityArrayMap(Object[] init) {
+public PersistentIdentityArrayMap(Object[] init) {
     super(init);
 }
 

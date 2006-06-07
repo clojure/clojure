@@ -11,7 +11,7 @@
 package org.clojure.runtime;
 
 
-public interface IMap extends Iterable {
+public interface IPersistentMap extends Iterable {
 
 int count();
 
@@ -19,11 +19,11 @@ boolean contains(Object key);
 
 IMapEntry find(Object key);
 
-IMap add(Object key);
+IPersistentMap add(Object key);
 
-IMap put(Object key, Object val);
+IPersistentMap put(Object key, Object val);
 
-IMap remove(Object key);
+IPersistentMap remove(Object key);
 
 Object get(Object key);
 

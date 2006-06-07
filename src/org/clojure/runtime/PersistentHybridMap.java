@@ -12,25 +12,25 @@ package org.clojure.runtime;
 
 import java.util.Iterator;
 
-public class PersistentHashMap implements IMap, Iterable{
+public class PersistentHybridMap implements IPersistentMap{
 
-IMap impl;
+IPersistentMap impl;
 static final int CAPACITY_THRESHOLD = 42;
 
-public PersistentHashMap(Object[] init){
+public PersistentHybridMap(Object[] init){
     if(init.length/2 < CAPACITY_THRESHOLD)
         impl = createArrayMap(init);
     impl = createHashtableMap(init);
 }
 
-public PersistentHashMap(int initialCapacity){
+public PersistentHybridMap(int initialCapacity){
     if(initialCapacity < CAPACITY_THRESHOLD)
         impl = createArrayMap();
 	else
         impl = createHashtableMap(initialCapacity);
 }
 
-PersistentHashMap(IMap impl){
+PersistentHybridMap(IPersistentMap impl){
     this.impl = impl;
 }
 
@@ -46,21 +46,21 @@ public IMapEntry find(Object key) {
     return impl.find(key);
 }
 
-public IMap add(Object key) {
+public IPersistentMap add(Object key) {
     return put(key, null);
 }
 
-public IMap put(Object key, Object val) {
-    IMap newImpl = impl.put(key,val);
+public IPersistentMap put(Object key, Object val) {
+    IPersistentMap newImpl = impl.put(key,val);
     if(newImpl.capacity() == CAPACITY_THRESHOLD)
         {
-        newImpl = createHashtableMap(((ArrayMap)newImpl).array);
+        newImpl = createHashtableMap(((PersistentArrayMap)newImpl).array);
         }
     return create(newImpl);
 }
 
-public IMap remove(Object key) {
-    IMap newImpl = impl.remove(key);
+public IPersistentMap remove(Object key) {
+    IPersistentMap newImpl = impl.remove(key);
     if(newImpl != impl)
         return create(newImpl);
     return this;
@@ -78,24 +78,24 @@ public Iterator iterator() {
     return ((Iterable)impl).iterator();
 }
 
-public IMap create(IMap impl) {
-    return new PersistentHashMap(impl);
+public IPersistentMap create(IPersistentMap impl) {
+    return new PersistentHybridMap(impl);
 }
 
-public ArrayMap createArrayMap(Object[] init) {
-    return new ArrayMap(init);
+public PersistentArrayMap createArrayMap(Object[] init) {
+    return new PersistentArrayMap(init);
 }
 
-private IMap createArrayMap() {
-    return new ArrayMap();
+private IPersistentMap createArrayMap() {
+    return new PersistentArrayMap();
 }
 
-private IMap createHashtableMap(Object[] init) {
-    return new HashtableMap(init);
+private IPersistentMap createHashtableMap(Object[] init) {
+    return new PersistentHashtableMap(init);
 }
 
-private IMap createHashtableMap(int initialCapacity) {
-    return new HashtableMap(initialCapacity);
+private IPersistentMap createHashtableMap(int initialCapacity) {
+    return new PersistentHashtableMap(initialCapacity);
 }
 
 }
