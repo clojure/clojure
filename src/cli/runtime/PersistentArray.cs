@@ -230,38 +230,32 @@ Entry getEntry(int i){
 public PersistentArray set(int i,Object val) {
 	if(master.load >= master.maxLoad)
 		return isolate().set(i,val);
-	PersistentArray ret = getSetArray();
-	ret.doSet(i, val);
-	return ret;
+	lock(master){
+		PersistentArray ret = getSetArray();
+		ret.doSet(i, val);
+		return ret;
+	}
 }
 
 void doSet(int i, Object val){
-	Entry oldEntry, newEntry;
-	lock(master.array)
-		{
-		oldEntry = (Entry) master.array[i];
-		newEntry = Entry.create(rev, val, oldEntry);
-		master.array[i] = newEntry;
-		}
-	Interlocked.Increment(ref master.load);
+	//must now be called inside lock of master
+	master.array[i] = Entry.create(rev, val, master.array[i]);
+	++master.load;
 }
 
 PersistentArray getSetArray(){
-	int nextRev;
-	int nextBaseline;
-	BitArray nextHistory;
+	//must now be called inside lock of master
 	//is this a sequential update?
-	if(Interlocked.CompareExchange(ref master.rev,rev + 1,rev) == rev)
+	if (master.rev == rev)
 		{
-		nextRev = rev + 1;
-		nextBaseline = baseline;
-		nextHistory = history;
+		return new PersistentArray(master, ++master.rev, baseline, history);
 		}
 	else //gap
 		{
-		nextRev = Interlocked.Increment(ref master.rev);
-		nextBaseline = nextRev;
-		if(history != null)
+
+		int nextRev = ++master.rev;
+		BitArray nextHistory;
+		if (history != null)
 			{
 			nextHistory = (BitArray) history.Clone();
 			nextHistory.Length = rev+1;
@@ -270,9 +264,8 @@ PersistentArray getSetArray(){
 			nextHistory = new BitArray(rev+1);
 		for(int i=baseline;i<=rev;i++)
 			nextHistory.Set(i,true);
+		return new PersistentArray(master, nextRev, nextRev, nextHistory);
 		}
-
-	return new PersistentArray(master, nextRev, nextBaseline, nextHistory);
 }
 
 //*
@@ -301,6 +294,7 @@ static public void Main(String[] args){
 	rand = new Random(42);
 	long tv = 0;
 	Console.WriteLine("ArrayList");
+	DateTime start = DateTime.Now;
 	for(int i = 0; i < writes; i++)
 		{
 		v[rand.Next(size)] = i;
@@ -309,19 +303,24 @@ static public void Main(String[] args){
 		{
 		tv += (int)v[rand.Next(size)];
 		}
+
+	Console.WriteLine("Time: " + (DateTime.Now - start));
+	
 	Console.WriteLine("PersistentArray");
 	rand = new Random(42);
 	long tp = 0;
-	for(int i = 0; i < writes; i++)
+	start = DateTime.Now;
+	for (int i = 0; i < writes; i++)
 		{
 		p =	p.set(rand.Next(size), i);
 		//dummy set to force perverse branching
-		p.set(i%size, i);
+		//p.set(i%size, i);
 		}
 	for(int i = 0; i < reads; i++)
 		{
 		tp += (int)p.get(rand.Next(size));
 		}
+	Console.WriteLine("Time: " + (DateTime.Now - start));
 	Console.WriteLine("Done: " + tv + ", " + tp);
 
 
