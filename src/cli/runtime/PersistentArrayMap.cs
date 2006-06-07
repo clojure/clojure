@@ -27,7 +27,7 @@ namespace org.clojure.runtime
 
 public class PersistentArrayMap : IPersistentMap {
 
-readonly Object[] array;
+internal readonly Object[] array;
 
 public PersistentArrayMap(){
     this.array = RT.EMPTY_ARRAY;
@@ -122,7 +122,7 @@ int indexOf(Object key){
     return -1;
 }
 
-bool equalKey(Object k1,Object k2){
+internal virtual bool equalKey(Object k1,Object k2){
     if(k1 == null)
         return k2 == null;
     return k1.Equals(k2);

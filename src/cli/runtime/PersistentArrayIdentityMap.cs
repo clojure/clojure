@@ -22,7 +22,7 @@ public PersistentArrayIdentityMap() {
 public PersistentArrayIdentityMap(Object[] init) :base(init) {
 }
 
-bool equalKey(Object k1, Object k2) {
+internal override bool equalKey(Object k1, Object k2) {
     return k1 == k2;
 }
 }

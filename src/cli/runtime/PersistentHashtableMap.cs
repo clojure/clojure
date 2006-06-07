@@ -206,20 +206,20 @@ static int bucketFor(Object key, PersistentArray array) {
     return (key.GetHashCode() & 0x7fffffff) % array.length();
 }
 
-IPersistentMap create(int capacity) {
+virtual internal IPersistentMap create(int capacity) {
     return new PersistentHashtableMap(capacity);
 }
 
-IPersistentMap create(int count,PersistentArray array) {
+virtual internal IPersistentMap create(int count,PersistentArray array) {
     return new PersistentHashtableMap(count, array);
 }
 
-IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
+virtual internal IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
 	return new PersistentHashtableMap(i, newArray, growAtCount);
 }
 
 
-IPersistentMap createListMap(Object key, Object val){
+virtual internal IPersistentMap createListMap(Object key, Object val){
 	return PersistentListMap.create(key,val);
 }
 

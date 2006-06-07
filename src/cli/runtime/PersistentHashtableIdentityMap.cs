@@ -25,6 +25,9 @@ public PersistentHashtableIdentityMap(Object[] init) : base(init){
 PersistentHashtableIdentityMap(int count, PersistentArray array) : base(count, array) {
 }
 
+PersistentHashtableIdentityMap(int i, PersistentArray newArray, int growAtCount):base(i,newArray,growAtCount){
+}
+
 
 override public IEnumerator GetEnumerator()
 	{
@@ -81,15 +84,19 @@ internal class Iter2 : IEnumerator
 	}
 
 
-IPersistentMap create(int capacity) {
+internal override IPersistentMap create(int capacity) {
     return new PersistentHashtableIdentityMap(capacity);
 }
 
-IPersistentMap create(int count, PersistentArray array) {
+internal override IPersistentMap create(int count, PersistentArray array) {
     return new PersistentHashtableIdentityMap(count, array);
 }
 
-IPersistentMap createListMap(Object key, Object val){
+internal override IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
+return new PersistentHashtableIdentityMap(i, newArray, growAtCount);
+}
+
+internal override IPersistentMap createListMap(Object key, Object val){
     return PersistentListIdentityMap.create(key,val);
 }
 
