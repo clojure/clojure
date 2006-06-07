@@ -22,7 +22,7 @@ public TObj(ThreadLocalData tld) {
 
 public Object put(ThreadLocalData tld, IComparable key, Object val)  {
     RBTree t = (RBTree) Transaction.get(tld, attrs);
-    t = t.put(key, val);
+	t = (RBTree) t.put(key, val);
     Transaction.set(tld,attrs,t);
     return val;
 }

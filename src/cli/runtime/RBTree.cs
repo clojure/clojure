@@ -25,11 +25,11 @@ namespace org.clojure.runtime
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class RBTree{
+public class RBTree : IPersistentMap{
 
 public readonly IComparer comp;
 public readonly Node tree;
-public readonly int count;
+public readonly int _count;
 
 public RBTree():this(null){
 }
@@ -37,18 +37,27 @@ public RBTree():this(null){
 public RBTree(IComparer comp){
 	this.comp = comp;
 	tree = null;
-	count = 0;
+	_count = 0;
 }
 
+public int count(){
+	return _count;
+	}
+
+public int capacity(){
+	return _count;
+	}
+	
 public bool contains(Object key){
 	return find(key) != null;
 }
 
-public RBTree add(Object key){
+	public IPersistentMap add(Object key)
+		{
 	return put(key, null);
 }
 
-public RBTree put(Object key, Object val){
+public IPersistentMap put(Object key, Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -56,13 +65,13 @@ public RBTree put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new RBTree(comp, replace(tree, key, val), count);
+		return new RBTree(comp, replace(tree, key, val), _count);
 		}
-	return new RBTree(comp, t.blacken(), count + 1);
+	return new RBTree(comp, t.blacken(), _count + 1);
 }
 
 
-public RBTree remove(Object key){
+public IPersistentMap remove(Object key){
 	Box found = new Box(null);
 	Node t = remove(tree, key, found);
 	if(t == null)
@@ -72,11 +81,11 @@ public RBTree remove(Object key){
 		//empty
 		return new RBTree(comp);
 		}
-	return new RBTree(comp, t.blacken(), count - 1);
+	return new RBTree(comp, t.blacken(), _count - 1);
 }
 
 
-public NodeIEnumerator IEnumerator(){
+public IEnumerator GetEnumerator(){
 	return new NodeIEnumerator(tree, true);
 }
 
@@ -85,11 +94,11 @@ public NodeIEnumerator reverseIEnumerator(){
 }
 
 public IEnumerator keys(){
-	return keys(IEnumerator());
+return keys((NodeIEnumerator)GetEnumerator());
 }
 
 public IEnumerator vals(){
-	return vals(IEnumerator());
+return vals((NodeIEnumerator)GetEnumerator());
 }
 
 public IEnumerator keys(NodeIEnumerator it){
@@ -141,11 +150,11 @@ int depth(Node t){
 }
 
 public Object get(Object key){
-	Node n = find(key);
+	Node n = (Node)find(key);
 	return (n != null) ? n.val() : null;
 }
 
-public Node find(Object key){
+public IMapEntry find(Object key){
 	Node t = tree;
 	while(t != null)
 		{
@@ -307,7 +316,7 @@ Node replace(Node t, Object key, Object val){
 RBTree(IComparer comp, Node tree, int count){
 	this.comp = comp;
 	this.tree = tree;
-	this.count = count;
+	this._count = count;
 }
 
 static Red red(Object key, Object val, Node left, Node right){
@@ -335,7 +344,7 @@ static Black black(Object key, Object val, Node left, Node right){
 }
 
 
-public abstract class Node{
+public abstract class Node : IMapEntry{
 	internal readonly Object _key;
 
 	internal Node(Object key){
