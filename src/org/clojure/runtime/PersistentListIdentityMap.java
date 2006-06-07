@@ -13,7 +13,7 @@ package org.clojure.runtime;
 import java.util.Iterator;
 
 /**
- * Immplementation of persistent map on a linked list
+ * Implementation of persistent map on a linked list
  * Uses identity (==) comparison, vs equals() of PersistentListMap
 
  * Note that instances of this class are constant values

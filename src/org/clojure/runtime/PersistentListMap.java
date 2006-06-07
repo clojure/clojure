@@ -15,7 +15,7 @@ package org.clojure.runtime;
 import java.util.Iterator;
 
 /**
- * Immplementation of persistent map on a linked list
+ * Implementation of persistent map on a linked list
 
  * Note that instances of this class are constant values
  * i.e. add/remove etc return new values
