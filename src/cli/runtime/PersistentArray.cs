@@ -268,7 +268,7 @@ PersistentArray getSetArray(){
 		}
 }
 
-//*
+/*
 [STAThread] 
 static public void Main(String[] args){
 	if(args.Length != 3)

@@ -733,7 +733,7 @@ public void Reset()
 	[STAThread]
 static public void Main(String[] args){
 	if(args.Length != 1)
-		Console.Error.WriteLine("Usage: RBTree n");
+		Console.Error.WriteLine("Usage: PersistentTree n");
 	int n = Int32.Parse(args[0]);
 	Object[] ints = new Object[n];
 	for(int i = 0; i < ints.Length; i++)
@@ -743,35 +743,29 @@ static public void Main(String[] args){
 	//Collections.shuffle(Arrays.asList(ints));
     Array.Reverse(ints);
 	Console.WriteLine("Building set");
-	RBTree set = new RBTree();
+	//IPersistentMap set = new PersistentTree();
+	//IPersistentMap set = new PersistentArrayMap();
+	//IPersistentMap set = new PersistentListMap();
+	//IPersistentMap set = new PersistentHashtableMap(1001);
+	IPersistentMap set = new PersistentHybridMap(1001);
     //for(int i = 0; i < ints.Length; i++)
     //    {
     //    Object anInt = ints[i];
     //    set = set.add(anInt);
     //    }
-	for(int i = 0; i < ints.Length; i++)
+	DateTime start = DateTime.Now;
+	for (int i = 0; i < ints.Length; i++)
 		{
 		Object anInt = ints[i];
 		set = set.put(anInt, anInt);
 		}
-    Console.WriteLine("Building SortedList");
-    SortedList od = new SortedList();
-    for (int i = 0; i < ints.Length; i++)
-        {
-        Object anInt = ints[i];
-        od.Add(anInt, anInt);
-        }
 
-	Console.Error.WriteLine("count = " + set.count + ", min: " + set.minKey() + ", max: " + set.maxKey()
-	                   + ", depth: " + set.depth());
-	IEnumerator it = set.keys();
-	while(it.MoveNext())
+	foreach(IMapEntry e in set)
 		{
-		Object o = it.Current;
-		if(!set.contains(o))
-			Console.Error.WriteLine("Can't find: " + o);
-		else if(n < 2000)
-			Console.Write(o.ToString() + ",");
+		if(!set.contains(e.key()))
+			Console.Error.WriteLine("Can't find: " + e.key());
+		//else if(n < 2000)
+		//	Console.Write(e.key().ToString() + ",");
 		}
 
 	for(int i = 0; i < ints.Length/2; i++)
@@ -780,9 +774,35 @@ static public void Main(String[] args){
 		set = set.remove(anInt);
 		}
 
-	Console.Error.WriteLine();
-	Console.Error.WriteLine("count = " + set.count + ", min: " + set.minKey() + ", max: " + set.maxKey()
-	                   + ", depth: " + set.depth());
+	Console.WriteLine("Time: " + (DateTime.Now - start));
+	Console.Error.WriteLine("count = " + set.count());
+
+	Console.WriteLine("Building Hashtable");
+	Hashtable od = new Hashtable(1001);
+	start = DateTime.Now;
+	for (int i = 0; i < ints.Length; i++)
+		{
+		Object anInt = ints[i];
+		od.Add(anInt, anInt);
+		}
+
+	foreach (DictionaryEntry e in od)
+		{
+		if (!od.Contains(e.Key))
+			Console.Error.WriteLine("Can't find: " + e.Key);
+		//else if (n < 2000)
+		//	Console.Write(e.key().ToString() + ",");
+		}
+
+	for (int i = 0; i < ints.Length / 2; i++)
+		{
+		Object anInt = ints[i];
+		od.Remove(anInt);
+		}
+
+	Console.WriteLine("Time: " + (DateTime.Now - start));
+	Console.Error.WriteLine("count = " + od.Count);
+
 }
      //*/
 }
