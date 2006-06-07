@@ -141,7 +141,7 @@ IPersistentMap grow(){
     return create(_count,newArray);
 }
 
-public Iterator<IMapEntry> iterator() {
+public Iterator iterator() {
     return new Iter(array);
 }
 

@@ -678,11 +678,11 @@ static public void main(String args[]){
 	//force the ListMap class loading now
 	PersistentListMap.EMPTY.add(1).add(2).add(3);
 	System.out.println("Building set");
-	IPersistentMap set = new PersistentHybridMap(1001);
-	//IMap set = new HashtableMap(1001);
-	//IMap set = new ListMap();
-	//IMap set = new ArrayMap();
-	//IMap set = new RBTree();
+	//IPersistentMap set = new PersistentHybridMap(1001);
+	IPersistentMap set = new PersistentHashtableMap(1001);
+	//IPersistentMap set = new ListMap();
+	//IPersistentMap set = new ArrayMap();
+	//IPersistentMap set = new RBTree();
 //	for(int i = 0; i < ints.length; i++)
 //		{
 //		Integer anInt = ints[i];

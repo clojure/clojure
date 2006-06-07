@@ -26,6 +26,10 @@ PersistentHashtableIdentityMap(int count, PersistentArray array) {
     super(count, array);
 }
 
+PersistentHashtableIdentityMap(int i, PersistentArray newArray, int growAtCount) {
+    super(i, newArray, growAtCount);
+}
+
 
 public Iterator<IMapEntry> iterator() {
     return new Iter(array);
@@ -79,6 +83,10 @@ IPersistentMap create(int capacity) {
 
 IPersistentMap create(int count, PersistentArray array) {
     return new PersistentHashtableIdentityMap(count, array);
+}
+
+IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
+	return new PersistentHashtableIdentityMap(i, newArray, growAtCount);
 }
 
 IPersistentMap createListMap(Object key, Object val){
