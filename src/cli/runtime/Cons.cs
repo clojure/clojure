@@ -15,33 +15,42 @@ using System;
 namespace org.clojure.runtime
 {
 
-public class Cons : Obj,Iter
+public class Cons : ISeq, ISequential
 				  {
 
-public readonly Object first;
-public readonly Cons rest;
+private readonly Object _first;
+private readonly ISeq _rest;
 
-public Cons(Object first, Cons rest)
+public Cons(Object first, ISeq rest)
 	{
-	this.first = first;
-	this.rest = rest;
+	this._first = first;
+	this._rest = rest;
 	}
 
 
-#region Iter Members
+#region ISeq Members
 
-public object get()
+public object first()
     {
-    return first;
+    return _first;
     }
 
-public Iter iterate()
+public ISeq rest()
     {
-    return rest;
+    return _rest;
     }
 
 #endregion
 
-    }
+
+#region ISequential Members
+
+public ISeq seq()
+	{
+	return this;
+	}
+
+#endregion
+	}
 
 }

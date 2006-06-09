@@ -42,13 +42,13 @@ public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3,
 	return AFn.throwArity();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		/*throws Exception*/
 	{
 	return AFn.throwArity();
 	}
 
-public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Exception*/ {
+public Object applyTo(ThreadLocalData tld, ISeq arglist) /*throws Exception*/ {
     return AFn.applyToHelper(this, tld, arglist);
 }
 }

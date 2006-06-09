@@ -18,9 +18,9 @@ namespace org.clojure.runtime
 public abstract class RestFn0 : AFn
 							  {
 
-public abstract Object doInvoke(ThreadLocalData tld, Cons rest) /*throws Exception*/;
+public abstract Object doInvoke(ThreadLocalData tld, ISeq rest) /*throws Exception*/;
 
-override public Object applyTo(ThreadLocalData tld, Cons arglist) /*throws Exception*/
+override public Object applyTo(ThreadLocalData tld, ISeq arglist) /*throws Exception*/
 	{
 	return doInvoke(tld, arglist);
 	}
@@ -56,7 +56,7 @@ override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Obj
 	return doInvoke(tld, RT.list(arg1, arg2, arg3, arg4, arg5));
 	}
 
-override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		/*throws Exception*/
 	{
 	return doInvoke(tld, RT.listStar(arg1, arg2, arg3, arg4, arg5, args));

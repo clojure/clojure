@@ -14,30 +14,30 @@ package org.clojure.runtime;
 
 public abstract class RestFn3 extends AFn{
 
-protected abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Cons rest) throws Exception;
+protected abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, ISeq rest) throws Exception;
 
-public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception
+public Object applyTo(ThreadLocalData tld, ISeq arglist) throws Exception
 	{
     switch(RT.boundedLength(arglist, 3))
         {
         case 0:
             return invoke(tld);
         case 1:
-            return invoke(tld,arglist.first);
+            return invoke(tld,arglist.first());
         case 2:
-            return invoke(tld,arglist.first
-                    , (arglist = arglist.rest).first
+            return invoke(tld,arglist.first()
+                    , (arglist = arglist.rest()).first()
             );
         case 3:
-            return invoke(tld,arglist.first
-                    , (arglist = arglist.rest).first
-                    , (arglist = arglist.rest).first
+            return invoke(tld,arglist.first()
+                    , (arglist = arglist.rest()).first()
+                    , (arglist = arglist.rest()).first()
             );
         default:
-    	    return doInvoke(tld, arglist.first
-                , (arglist = arglist.rest).first
-                , (arglist = arglist.rest).first
-			, arglist.rest);
+    	    return doInvoke(tld, arglist.first()
+                , (arglist = arglist.rest()).first()
+                , (arglist = arglist.rest()).first()
+			, arglist.rest());
 
         }
 	}
@@ -59,7 +59,7 @@ public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3,
 	return doInvoke(tld, arg1, arg2, arg3, RT.list(arg4, arg5));
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		throws Exception
 	{
 	return doInvoke(tld, arg1, arg2, arg3, RT.listStar(arg4, arg5, args));

@@ -47,7 +47,7 @@ Info info;
 int startSeq;
 
 Dictionary<TRef,Object> sets;
-Dictionary<TRef,Cons> commutates;
+Dictionary<TRef,ISeq> commutates;
 
 
 static public Object runInTransaction(ThreadLocalData tld,IFn fn) {
@@ -125,14 +125,14 @@ Object run(ThreadLocalData tld, IFn fn) {
 
 			//at this point all write targets are locked
 			//turn commutates into sets
-			foreach(KeyValuePair<TRef, Cons> e in commutates)
+			foreach(KeyValuePair<TRef, ISeq> e in commutates)
 				{
 				TRef tref = e.Key;
 				//note this will npe if tref has never been set, as designed
 				Object val = getCurrent(tref).val;
-				for(Cons c = e.Value;c!=null;c = c.rest)
+				for(ISeq c = e.Value;c!=null;c = c.rest())
 					{
-					IFn f = (IFn) c.first;
+					IFn f = (IFn) c.first();
 					val = f.invoke(tld, val);
 					}
 				sets[tref] =  val;
@@ -229,7 +229,7 @@ void touch(TRef tref) {
 
 void commutate(TRef tref, IFn fn) {
 	if(commutates == null)
-		commutates = new Dictionary<TRef,Cons>();
+		commutates = new Dictionary<TRef,ISeq>();
 	if(sets != null && sets.ContainsKey(tref))
 		throw new Exception("Can't commutate and set a TRef in the same transaction");
 	commutates[tref] = RT.cons(fn, commutates[tref]);

@@ -14,9 +14,9 @@ package org.clojure.runtime;
 
 public abstract class RestFn0 extends AFn{
 
-protected abstract Object doInvoke(ThreadLocalData tld, Cons rest) throws Exception;
+protected abstract Object doInvoke(ThreadLocalData tld, ISeq rest) throws Exception;
 
-public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception
+public Object applyTo(ThreadLocalData tld, ISeq arglist) throws Exception
 	{
 	return doInvoke(tld, arglist);
 	}
@@ -52,7 +52,7 @@ public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3,
 	return doInvoke(tld, RT.list(arg1, arg2, arg3, arg4, arg5));
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		throws Exception
 	{
 	return doInvoke(tld, RT.listStar(arg1, arg2, arg3, arg4, arg5, args));

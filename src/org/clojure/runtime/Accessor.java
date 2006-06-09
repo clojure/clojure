@@ -70,13 +70,13 @@ public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3,
 	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4,arg5);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		throws Exception
 	{
 	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4,arg5,args);
 	}
 
-public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception {
+public Object applyTo(ThreadLocalData tld, ISeq arglist) throws Exception {
     return AFn.applyToHelper(this, tld, arglist);
 }
 

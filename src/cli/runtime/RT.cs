@@ -52,18 +52,18 @@ public class RT
         return null;
         }
 
-    static public Object equal(Object arg1, Object arg2) {
-        if(arg1 == null)
-        	return arg2 == null ? T : null;
-        else if(arg2 == null)
-            return null;
-    	return (eql(arg1,arg2) != null
-    			|| (arg1 is Cons
-    					&& arg2 is Cons
-						&& equal(((Cons)arg1).first,((Cons)arg2).first)!=null
-						&& equal(((Cons)arg1).rest,((Cons)arg2).rest)!=null))
-		?T:null;
-    	}
+	//static public Object equal(Object arg1, Object arg2) {
+	//    if(arg1 == null)
+	//        return arg2 == null ? T : null;
+	//    else if(arg2 == null)
+	//        return null;
+	//    return (eql(arg1,arg2) != null
+	//            || (arg1 is Cons
+	//                    && arg2 is Cons
+	//                    && equal(((Cons)arg1).first(),((Cons)arg2).first())!=null
+	//                    && equal(((Cons)arg1).rest(),((Cons)arg2).rest())!=null))
+	//    ?T:null;
+	//    }
 
     static public Iter iter(Object coll)
         {
@@ -163,7 +163,7 @@ public class RT
     {
         return Convert.ToDouble(x);
     }
-static public Cons cons(Object x, Cons y)
+static public Cons cons(Object x, ISeq y)
 	{
 	return new Cons(x, y);
 	}
@@ -198,27 +198,27 @@ static public Cons list(Object arg1, Object arg2, Object arg3, Object arg4, Obje
 	return listStar(arg1, arg2, arg3, arg4, arg5, null);
 	}
 
-static public Cons listStar(Object arg1, Cons rest)
+static public Cons listStar(Object arg1, ISeq rest)
 	{
 	return cons(arg1, rest);
 	}
 
-static public Cons listStar(Object arg1, Object arg2, Cons rest)
+static public Cons listStar(Object arg1, Object arg2, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, rest));
 	}
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, Cons rest)
+static public Cons listStar(Object arg1, Object arg2, Object arg3, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, cons(arg3, rest)));
 	}
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, Cons rest)
+static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
 	}
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons rest)
+static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
 	}
@@ -231,20 +231,20 @@ static public Cons arrayToList(Object[] a)
         return ret;
     }
 
-static public int length(Cons list)
+static public int length(ISeq list)
 	{
 	int i = 0;
-	for(Cons c = list; c != null; c = c.rest)
+	for(ISeq c = list; c != null; c = c.rest())
 		{
 		i++;
 		}
 	return i;
 	}
 
-static public int boundedLength(Cons list, int limit)
+static public int boundedLength(ISeq list, int limit)
 	{
 	int i = 0;
-	for(Cons c = list; c != null && i <= limit; c = c.rest)
+	for(ISeq c = list; c != null && i <= limit; c = c.rest())
 		{
 		i++;
 		}
@@ -347,7 +347,7 @@ static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Ob
 	}
 
 static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4,
-                               Object arg5, Cons args) /**/
+                               Object arg5, ISeq args) /**/
 	{
 	if(tld == null)
 		tld = ThreadLocalData.get();
@@ -357,9 +357,9 @@ static public Object setValues(ThreadLocalData tld, Object arg1, Object arg2, Ob
 	tld.mvArray[2] = arg3;
 	tld.mvArray[3] = arg4;
 	tld.mvArray[4] = arg5;
-	for(int i = 5; args != null && i < ThreadLocalData.MULTIPLE_VALUES_LIMIT; i++, args = args.rest)
+	for(int i = 5; args != null && i < ThreadLocalData.MULTIPLE_VALUES_LIMIT; i++, args = args.rest())
 		{
-		tld.mvArray[i] = args.first;
+		tld.mvArray[i] = args.first();
 		}
 	if(args != null)
 		throw new ArgumentException("Too many arguments to values (> ThreadLocalData.MULTIPLE_VALUES_LIMIT)");

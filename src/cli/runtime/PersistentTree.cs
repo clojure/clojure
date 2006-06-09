@@ -729,7 +729,7 @@ public void Reset()
 #endregion
     }
 
-    /*
+    //*
 	[STAThread]
 static public void Main(String[] args){
 	if(args.Length != 1)
@@ -778,7 +778,7 @@ static public void Main(String[] args){
 	Console.Error.WriteLine("count = " + set.count());
 
 	Console.WriteLine("Building Hashtable");
-	Hashtable od = new Hashtable(1001);
+	Hashtable od = Hashtable.Synchronized(new Hashtable(1001));
 	start = DateTime.Now;
 	for (int i = 0; i < ints.Length; i++)
 		{

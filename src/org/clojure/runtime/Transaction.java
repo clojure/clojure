@@ -44,7 +44,7 @@ Info info;
 int startSeq;
 
 IdentityHashMap<TRef,Object> sets;
-IdentityHashMap<TRef,Cons> commutates;
+IdentityHashMap<TRef,ISeq> commutates;
 
 
 static public Object runInTransaction(ThreadLocalData tld,IFn fn) throws Exception{
@@ -123,14 +123,14 @@ Object run(ThreadLocalData tld, IFn fn) throws Exception{
 
 			//at this point all write targets are locked
 			//turn commutates into sets
-			for(Map.Entry<TRef, Cons> e : commutates.entrySet())
+			for(Map.Entry<TRef, ISeq> e : commutates.entrySet())
 				{
 				TRef tref = e.getKey();
 				//note this will npe if tref has never been set, as designed
 				Object val = getCurrent(tref).val;
-				for(Cons c = e.getValue();c!=null;c = c.rest)
+				for(ISeq c = e.getValue();c!=null;c = c.rest())
 					{
-					IFn f = (IFn) c.first;
+					IFn f = (IFn) c.first();
 					val = f.invoke(tld, val);
 					}
 				sets.put(tref, val);
@@ -225,7 +225,7 @@ void touch(TRef tref) throws Exception{
 
 void commutate(TRef tref, IFn fn) throws Exception{
 	if(commutates == null)
-		commutates = new IdentityHashMap<TRef,Cons>();
+		commutates = new IdentityHashMap<TRef,ISeq>();
 	if(sets != null && sets.containsKey(tref))
 		throw new Exception("Can't commutate and set a TRef in the same transaction");
 	commutates.put(tref, RT.cons(fn, commutates.get(tref)));

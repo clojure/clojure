@@ -131,7 +131,7 @@ public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3,
 	return fn.invoke(tld,arg1,arg2,arg3,arg4,arg5);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		throws Exception
 	{
 	return fn.invoke(tld,arg1,arg2,arg3,arg4,arg5,args);
