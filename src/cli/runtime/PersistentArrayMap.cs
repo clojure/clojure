@@ -25,7 +25,7 @@ namespace org.clojure.runtime
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class PersistentArrayMap : IPersistentMap {
+public class PersistentArrayMap : IPersistentMap, ISequential {
 
 internal readonly Object[] array;
 
@@ -132,6 +132,39 @@ public IEnumerator GetEnumerator() {
     return new Iter(array);
 }
 
+public ISeq seq() {
+    if(array.Length > 0)
+        return new Seq(array,0);
+    return null;
+}
+
+internal class Seq : ISeq, IMapEntry{
+    readonly Object[] array;
+	readonly int i;
+
+    internal Seq(Object[] array, int i){
+        this.array = array;
+        this.i = i;
+    }
+
+    public Object key() {
+        return array[i];
+    }
+
+    public Object val() {
+        return array[i+1];
+    }
+
+    public Object first() {
+        return this;
+    }
+
+    public ISeq rest() {
+        if(i+2 < array.Length)
+            return new Seq(array, i + 2);
+        return null;
+    }
+}
 internal class Iter : IEnumerator,IMapEntry{
     Object[] array;
     int i;

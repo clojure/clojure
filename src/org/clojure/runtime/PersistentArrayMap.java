@@ -23,7 +23,7 @@ import java.util.Iterator;
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class PersistentArrayMap implements IPersistentMap {
+public class PersistentArrayMap implements IPersistentMap, ISequential {
 
 final Object[] array;
 
@@ -128,6 +128,40 @@ boolean equalKey(Object k1,Object k2){
 
 public Iterator iterator() {
     return new Iter(array);
+}
+
+public ISeq seq() {
+    if(array.length > 0)
+        return new Seq(array,0);
+    return null;
+}
+
+static class Seq implements ISeq, IMapEntry{
+    final Object[] array;
+    final int i;
+
+    Seq(Object[] array, int i){
+        this.array = array;
+        this.i = i;
+    }
+
+    public Object key() {
+        return array[i];
+    }
+
+    public Object val() {
+        return array[i+1];
+    }
+
+    public Object first() {
+        return this;
+    }
+
+    public ISeq rest() {
+        if(i+2 < array.length)
+            return new Seq(array, i + 2);
+        return null;
+    }
 }
 
 static class Iter implements Iterator,IMapEntry{
