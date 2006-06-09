@@ -28,7 +28,7 @@ import java.util.Iterator;
  * code duplication here is kind of gross, but most efficient
  */
 
-public class PersistentListIdentityMap implements IPersistentMap, IMapEntry
+public class PersistentListIdentityMap implements IPersistentMap, IMapEntry, ISeq, ISequential
 {
 
 static public PersistentListIdentityMap EMPTY = new PersistentListIdentityMap();
@@ -80,6 +80,19 @@ public Object get(Object key){
 public int capacity(){
 	return 0;
 }
+
+public Object first() {
+    return null;
+}
+
+public ISeq rest() {
+    return null;
+}
+
+public ISeq seq() {
+    return null;
+}
+
 
 static class Iter implements Iterator{
 	PersistentListIdentityMap e;
@@ -168,6 +181,18 @@ static class Tail extends PersistentListIdentityMap {
 			return EMPTY;
 		return this;
 	}
+
+    public Object first() {
+        return this;
+    }
+
+    public ISeq rest() {
+        return null;
+    }
+
+    public ISeq seq() {
+        return this;
+    }
 }
 
 static class Link extends PersistentListIdentityMap {
@@ -238,7 +263,19 @@ static class Link extends PersistentListIdentityMap {
 		return count();
 	}
 
-	PersistentListIdentityMap create(Object k,Object v,PersistentListIdentityMap r){
+    public Object first() {
+        return this;
+    }
+
+    public ISeq rest() {
+        return _rest;
+    }
+
+    public ISeq seq() {
+        return this;
+    }
+
+    PersistentListIdentityMap create(Object k,Object v,PersistentListIdentityMap r){
 		if(r == EMPTY)
 			return new Tail(k,v);
 		return new Link(k, v, r);

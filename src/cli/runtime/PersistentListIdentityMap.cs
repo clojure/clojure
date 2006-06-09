@@ -31,7 +31,7 @@ namespace org.clojure.runtime
 	 * code duplication here is kind of gross, but most efficient
 	 */
 	 
-	public class PersistentListIdentityMap : IPersistentMap, IMapEntry
+	public class PersistentListIdentityMap : IPersistentMap, IMapEntry, ISeq, ISequential
 		{
 
 		static public PersistentListIdentityMap EMPTY = new PersistentListIdentityMap();
@@ -94,6 +94,21 @@ namespace org.clojure.runtime
 		public virtual int capacity()
 			{
 			return 0;
+			}
+
+		virtual public Object first()
+			{
+			return null;
+			}
+
+		virtual public ISeq rest()
+			{
+			return null;
+			}
+
+		virtual public ISeq seq()
+			{
+			return null;
 			}
 
 		internal class Iter : IEnumerator
@@ -207,6 +222,21 @@ namespace org.clojure.runtime
 					return EMPTY;
 				return this;
 				}
+				
+			override public Object first()
+				{
+				return this;
+				}
+
+			override public ISeq rest()
+				{
+				return null;
+				}
+
+			override public ISeq seq()
+				{
+				return this;
+				}				
 			}
 
 		internal class Link : PersistentListIdentityMap
@@ -289,6 +319,21 @@ namespace org.clojure.runtime
 				return count();
 				}
 
+			override public Object first()
+				{
+				return this;
+				}
+
+			override public ISeq rest()
+				{
+				return _rest;
+				}
+
+			override public ISeq seq()
+				{
+				return this;
+				}
+				
 			PersistentListIdentityMap create(Object k, Object v, IPersistentMap r)
 				{
 				if (r == EMPTY)

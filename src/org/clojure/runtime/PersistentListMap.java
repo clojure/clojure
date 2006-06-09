@@ -26,7 +26,7 @@ import java.util.Iterator;
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap implements IPersistentMap, IMapEntry
+public class PersistentListMap implements IPersistentMap, IMapEntry, ISeq, ISequential
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
@@ -34,6 +34,7 @@ static public PersistentListMap EMPTY = new PersistentListMap();
 static public PersistentListMap create(Object key, Object val){
 	return new Tail(key, val);
 }
+
 
 public Object key(){
 	return null;
@@ -79,27 +80,39 @@ public int capacity(){
 	return 0;
 }
 
+public Object first() {
+    return null;
+}
+
+public ISeq rest() {
+    return null;
+}
+
+public ISeq seq() {
+    return null;
+}
+
 static class Iter implements Iterator{
-	PersistentListMap e;
+    PersistentListMap e;
 
-	Iter(PersistentListMap e)
-	{
-	this.e = e;
-	}
+    Iter(PersistentListMap e)
+    {
+    this.e = e;
+    }
 
-	public boolean hasNext(){
-		return e != EMPTY;
-	}
+    public boolean hasNext(){
+        return e != EMPTY;
+    }
 
-	public Object next(){
-		PersistentListMap ret = e;
-		e = e.next();
-		return ret;
-	}
+    public Object next(){
+        PersistentListMap ret = e;
+        e = e.next();
+        return ret;
+    }
 
-	public void remove(){
-		throw new UnsupportedOperationException();
-	}
+    public void remove(){
+        throw new UnsupportedOperationException();
+    }
 }
 
 public Iterator iterator(){
@@ -166,6 +179,19 @@ static class Tail extends PersistentListMap {
 			return EMPTY;
 		return this;
 	}
+
+    public Object first() {
+        return this;
+    }
+
+    public ISeq rest() {
+        return null;
+    }
+
+    public ISeq seq() {
+        return this;
+    }
+
 }
 
 static class Link extends PersistentListMap {
@@ -236,7 +262,19 @@ static class Link extends PersistentListMap {
 		return count();
 	}
 
-	PersistentListMap create(Object k,Object v,PersistentListMap r){
+    public Object first() {
+        return this;
+    }
+
+    public ISeq rest() {
+        return _rest;
+    }
+
+    public ISeq seq() {
+        return this;
+    }
+
+    PersistentListMap create(Object k,Object v,PersistentListMap r){
 		if(r == EMPTY)
 			return new Tail(k,v);
 		return new Link(k, v, r);

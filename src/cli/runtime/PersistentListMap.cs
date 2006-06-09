@@ -27,7 +27,7 @@ namespace org.clojure.runtime
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap : IPersistentMap, IMapEntry
+public class PersistentListMap : IPersistentMap, IMapEntry, ISeq, ISequential
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
@@ -79,6 +79,22 @@ public virtual Object get(Object key){
 public virtual int capacity(){
 	return 0;
 }
+
+virtual public Object first()
+	{
+	return null;
+	}
+
+virtual public ISeq rest()
+	{
+	return null;
+	}
+
+virtual public ISeq seq()
+	{
+	return null;
+	}
+
 
 internal class Iter : IEnumerator{
 	PersistentListMap e;
@@ -185,6 +201,21 @@ internal class Tail : PersistentListMap {
 			return EMPTY;
 		return this;
 	}
+
+	override public Object first()
+	{
+	return this;
+	}
+
+	override public ISeq rest()
+	{
+	return null;
+	}
+
+	override public ISeq seq()
+	{
+	return this;
+	}
 }
 
 internal class Link : PersistentListMap {
@@ -257,6 +288,21 @@ internal class Link : PersistentListMap {
 		return count();
 	}
 
+	override public Object first()
+	{
+	return this;
+	}
+
+	override public ISeq rest()
+	{
+	return _rest;
+	}
+
+	override public ISeq seq()
+	{
+	return this;
+	}
+	
 	PersistentListMap create(Object k, Object v, IPersistentMap r)
 		{
 		if(r == EMPTY)
