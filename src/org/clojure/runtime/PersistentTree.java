@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTree implements IPersistentMap {
+public class PersistentTree implements IPersistentMap, ISequential {
 
 public final Comparator comp;
 public final Node tree;
@@ -71,6 +71,18 @@ public PersistentTree remove(Object key){
 		return new PersistentTree(comp);
 		}
 	return new PersistentTree(comp, t.blacken(), _count - 1);
+}
+
+public ISeq seq() {
+    if(_count > 0)
+        return Seq.create(tree, true);
+    return null;
+}
+
+public ISeq rseq() {
+    if(_count > 0)
+        return Seq.create(tree, false);
+    return null;
 }
 
 
@@ -340,217 +352,215 @@ static Black black(Object key, Object val, Node left, Node right){
 	return new BlackBranchVal(key, val, left, right);
 }
 
-
 static abstract class Node implements IMapEntry {
-	final Object key;
+    final Object key;
 
-	Node(Object key){
-		this.key = key;
-	}
+    Node(Object key){
+        this.key = key;
+    }
 
-	public Object key(){
-		return key;
-	}
+    public Object key(){
+        return key;
+    }
 
-	public Object val(){
-		return null;
-	}
+    public Object val(){
+        return null;
+    }
 
-	Node left(){
-		return null;
-	}
+    Node left(){
+        return null;
+    }
 
-	Node right(){
-		return null;
-	}
+    Node right(){
+        return null;
+    }
 
-	abstract Node addLeft(Node ins);
+    abstract Node addLeft(Node ins);
 
-	abstract Node addRight(Node ins);
+    abstract Node addRight(Node ins);
 
-	abstract Node removeLeft(Node del);
+    abstract Node removeLeft(Node del);
 
-	abstract Node removeRight(Node del);
+    abstract Node removeRight(Node del);
 
-	abstract Node blacken();
+    abstract Node blacken();
 
-	abstract Node redden();
+    abstract Node redden();
 
-	Node balanceLeft(Node parent){
-		return black(parent.key, parent.val(), this, parent.right());
-	}
+    Node balanceLeft(Node parent){
+        return black(parent.key, parent.val(), this, parent.right());
+    }
 
-	Node balanceRight(Node parent){
-		return black(parent.key, parent.val(), parent.left(), this);
-	}
+    Node balanceRight(Node parent){
+        return black(parent.key, parent.val(), parent.left(), this);
+    }
 
-	abstract Node replace(Object key, Object val, Node left, Node right);
+    abstract Node replace(Object key, Object val, Node left, Node right);
+
 }
-
 static class Black extends Node{
-	public Black(Object key){
+    public Black(Object key){
 		super(key);
 	}
 
-	Node addLeft(Node ins){
+    Node addLeft(Node ins){
 		return ins.balanceLeft(this);
 	}
 
-	Node addRight(Node ins){
+    Node addRight(Node ins){
 		return ins.balanceRight(this);
 	}
 
-	Node removeLeft(Node del){
+    Node removeLeft(Node del){
 		return balanceLeftDel(key, val(), del, right());
 	}
 
-	Node removeRight(Node del){
+    Node removeRight(Node del){
 		return balanceRightDel(key, val(), left(), del);
 	}
 
-	Node blacken(){
+    Node blacken(){
 		return this;
 	}
 
-	Node redden(){
+    Node redden(){
 		return new Red(key);
 	}
 
-	Node replace(Object key, Object val, Node left, Node right){
+    Node replace(Object key, Object val, Node left, Node right){
 		return black(key, val, left, right);
 	}
+
 }
-
 static class BlackVal extends Black{
-	final Object val;
+    final Object val;
 
-	public BlackVal(Object key, Object val){
+    public BlackVal(Object key, Object val){
 		super(key);
 		this.val = val;
 	}
 
-	public Object val(){
+    public Object val(){
 		return val;
 	}
 
-	Node redden(){
+    Node redden(){
 		return new RedVal(key, val);
 	}
 
 }
-
 static class BlackBranch extends Black{
-	final Node left;
-	final Node right;
+    final Node left;
 
-	public BlackBranch(Object key, Node left, Node right){
+    final Node right;
+
+    public BlackBranch(Object key, Node left, Node right){
 		super(key);
 		this.left = left;
 		this.right = right;
 	}
 
-	public Node left(){
+    public Node left(){
 		return left;
 	}
 
-	public Node right(){
+    public Node right(){
 		return right;
 	}
 
-	Node redden(){
+    Node redden(){
 		return new RedBranch(key, left, right);
 	}
 
 }
-
 static class BlackBranchVal extends BlackBranch{
-	final Object val;
+    final Object val;
 
-	public BlackBranchVal(Object key, Object val, Node left, Node right){
+    public BlackBranchVal(Object key, Object val, Node left, Node right){
 		super(key, left, right);
 		this.val = val;
 	}
 
-	public Object val(){
+    public Object val(){
 		return val;
 	}
 
-	Node redden(){
+    Node redden(){
 		return new RedBranchVal(key, val, left, right);
 	}
 
 }
-
 static class Red extends Node{
-	public Red(Object key){
+    public Red(Object key){
 		super(key);
 	}
 
-	Node addLeft(Node ins){
+    Node addLeft(Node ins){
 		return red(key, val(), ins, right());
 	}
 
-	Node addRight(Node ins){
+    Node addRight(Node ins){
 		return red(key, val(), left(), ins);
 	}
 
-	Node removeLeft(Node del){
+    Node removeLeft(Node del){
 		return red(key, val(), del, right());
 	}
 
-	Node removeRight(Node del){
+    Node removeRight(Node del){
 		return red(key, val(), left(), del);
 	}
 
-	Node blacken(){
+    Node blacken(){
 		return new Black(key);
 	}
 
-	Node redden(){
+    Node redden(){
 		throw new UnsupportedOperationException("Invariant violation");
 	}
 
-	Node replace(Object key, Object val, Node left, Node right){
+    Node replace(Object key, Object val, Node left, Node right){
 		return red(key, val, left, right);
 	}
+
 }
-
 static class RedVal extends Red{
-	final Object val;
+    final Object val;
 
-	public RedVal(Object key, Object val){
+    public RedVal(Object key, Object val){
 		super(key);
 		this.val = val;
 	}
 
-	public Object val(){
+    public Object val(){
 		return val;
 	}
 
-	Node blacken(){
+    Node blacken(){
 		return new BlackVal(key, val);
 	}
+
 }
-
 static class RedBranch extends Red{
-	final Node left;
-	final Node right;
+    final Node left;
 
-	public RedBranch(Object key, Node left, Node right){
+    final Node right;
+
+    public RedBranch(Object key, Node left, Node right){
 		super(key);
 		this.left = left;
 		this.right = right;
 	}
 
-	public Node left(){
+    public Node left(){
 		return left;
 	}
 
-	public Node right(){
+    public Node right(){
 		return right;
 	}
 
-	Node balanceLeft(Node parent){
+    Node balanceLeft(Node parent){
 		if(left instanceof Red)
 			return red(key, val(), left.blacken(), black(parent.key, parent.val(), right, parent.right()));
 		else if(right instanceof Red)
@@ -561,7 +571,7 @@ static class RedBranch extends Red{
 
 	}
 
-	Node balanceRight(Node parent){
+    Node balanceRight(Node parent){
 		if(right instanceof Red)
 			return red(key, val(), black(parent.key, parent.val(), parent.left(), left), right.blacken());
 		else if(left instanceof Red)
@@ -571,10 +581,12 @@ static class RedBranch extends Red{
 			return super.balanceRight(parent);
 	}
 
-	Node blacken(){
+    Node blacken(){
 		return new BlackBranch(key, left, right);
 	}
+
 }
+
 
 static class RedBranchVal extends RedBranch{
 	final Object val;
@@ -591,6 +603,44 @@ static class RedBranchVal extends RedBranch{
 	Node blacken(){
 		return new BlackBranchVal(key, val, left, right);
 	}
+}
+
+
+static public class Seq implements ISeq{
+	final ISeq stack;
+	final boolean asc;
+
+    public Seq(ISeq stack, boolean asc) {
+        this.stack = stack;
+        this.asc = asc;
+    }
+
+    static Seq create(Node t, boolean asc){
+		return new Seq(push(t,asc,null),asc);
+	}
+
+	static ISeq push(Node t, boolean asc, ISeq stack){
+		while(t != null)
+			{
+			stack = RT.cons(t,stack);
+			t = asc ? t.left() : t.right();
+			}
+        return stack;
+    }
+
+    public Object first() {
+        return stack.first();
+    }
+
+    public ISeq rest() {
+        Node t = (Node)stack.first();
+        ISeq nextstack = push(asc ? t.right() : t.left(),asc,stack.rest());
+        if(nextstack != null)
+            {
+            return new Seq(nextstack,asc);
+            }
+        return null;
+    }
 }
 
 static public class NodeIterator implements Iterator{

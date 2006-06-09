@@ -25,7 +25,7 @@ namespace org.clojure.runtime
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTree : IPersistentMap{
+public class PersistentTree : IPersistentMap, ISequential{
 
 public readonly IComparer comp;
 public readonly Node tree;
@@ -84,6 +84,17 @@ public IPersistentMap remove(Object key){
 	return new PersistentTree(comp, t.blacken(), _count - 1);
 }
 
+public ISeq seq() {
+    if(_count > 0)
+        return Seq.create(tree, true);
+    return null;
+}
+
+public ISeq rseq() {
+    if(_count > 0)
+        return Seq.create(tree, false);
+    return null;
+}
 
 public IEnumerator GetEnumerator(){
 	return new NodeIEnumerator(tree, true);
@@ -617,6 +628,44 @@ class RedBranchVal : RedBranch{
 		return new BlackBranchVal(_key, _val, _left, _right);
 	}
 }
+
+public class Seq : ISeq{
+	readonly ISeq stack;
+	readonly bool asc;
+
+    Seq(ISeq stack, bool asc) {
+        this.stack = stack;
+        this.asc = asc;
+    }
+
+    internal static Seq create(Node t, bool asc){
+		return new Seq(push(t,asc,null),asc);
+	}
+
+	static ISeq push(Node t, bool asc, ISeq stack){
+		while(t != null)
+			{
+			stack = RT.cons(t,stack);
+			t = asc ? t.left() : t.right();
+			}
+        return stack;
+    }
+
+    public Object first() {
+        return stack.first();
+    }
+
+    public ISeq rest() {
+        Node t = (Node)stack.first();
+        ISeq nextstack = push(asc ? t.right() : t.left(),asc,stack.rest());
+        if(nextstack != null)
+            {
+            return new Seq(nextstack,asc);
+            }
+        return null;
+    }
+}
+
 
 public class NodeIEnumerator : IEnumerator{
 	Stack stack = new Stack();
