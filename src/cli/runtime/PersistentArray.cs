@@ -119,8 +119,8 @@ internal class EntryLink : Entry
 }
 
 internal class Seq : ISeq{
-	PersistentArray p;
-	int i;
+	readonly PersistentArray p;
+	readonly int i;
 
 	internal Seq(PersistentArray p, int i){
 		this.p = p;

@@ -110,8 +110,8 @@ static class EntryLink extends Entry{
 }
 
 static class Seq implements ISeq{
-	PersistentArray p;
-	int i;
+	final PersistentArray p;
+	final int i;
 
 	Seq(PersistentArray p, int i){
 		this.p = p;
