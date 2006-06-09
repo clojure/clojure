@@ -44,7 +44,7 @@ public virtual Object val(){
 	return null;
 }
 
-internal virtual PersistentListMap rest(){
+internal virtual PersistentListMap next(){
     return this;
     }
 
@@ -101,7 +101,7 @@ public bool MoveNext()
 	if(first)
 		first = false;
 	else
-		e = e.rest();
+		e = e.next();
 	return e != EMPTY;
 	}
 
@@ -126,7 +126,7 @@ internal class Tail : PersistentListMap {
 		this._val = val;
 		}
 
-    override internal PersistentListMap rest(){
+    override internal PersistentListMap next(){
         return EMPTY;
     }
 
@@ -192,10 +192,10 @@ internal class Link : PersistentListMap {
 	readonly Object _val;
 	readonly PersistentListMap _rest;
 
-	internal Link(Object key,Object val,PersistentListMap rest){
+	internal Link(Object key,Object val,PersistentListMap next){
 		this._key = key;
 		this._val = val;
-		this._rest = rest;
+		this._rest = next;
 		}
 
 	override public Object key(){
@@ -206,7 +206,7 @@ internal class Link : PersistentListMap {
 		return _val;
 	}
 
-	override internal PersistentListMap rest(){
+	override internal PersistentListMap next(){
         return _rest;
         }
 

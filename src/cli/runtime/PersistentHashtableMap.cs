@@ -185,7 +185,7 @@ public object Current
 
 public bool MoveNext()
 	{
-	if (e == null || (e = ((PersistentListMap)e).rest()) == PersistentListMap.EMPTY)
+	if (e == null || (e = ((PersistentListMap)e).next()) == PersistentListMap.EMPTY)
 		nextBucket();
 	return e != null;
 	}

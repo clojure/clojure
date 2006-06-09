@@ -176,7 +176,7 @@ static class Iter implements Iterator{
 
 	public Object next() {
 		PersistentListMap ret = e;
-        e = e.rest();
+        e = e.next();
         if(e == PersistentListMap.EMPTY)
             nextBucket();
         return ret;

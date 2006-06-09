@@ -45,7 +45,7 @@ public Object val(){
 	return null;
 }
 
-PersistentListIdentityMap rest(){
+PersistentListIdentityMap next(){
     return this;
     }
 
@@ -95,7 +95,7 @@ static class Iter implements Iterator{
 
 	public Object next(){
 		PersistentListIdentityMap ret = e;
-		e = e.rest();
+		e = e.next();
 		return ret;
 	}
 
@@ -117,7 +117,7 @@ static class Tail extends PersistentListIdentityMap {
 		this._val = val;
 		}
 
-    PersistentListIdentityMap rest(){
+    PersistentListIdentityMap next(){
         return EMPTY;
     }
 
@@ -175,10 +175,10 @@ static class Link extends PersistentListIdentityMap {
 	final Object _val;
 	final PersistentListIdentityMap _rest;
 
-	Link(Object key,Object val,PersistentListIdentityMap rest){
+	Link(Object key,Object val,PersistentListIdentityMap next){
 		this._key = key;
 		this._val = val;
-		this._rest = rest;
+		this._rest = next;
 		}
 
 	public Object key(){
@@ -189,7 +189,7 @@ static class Link extends PersistentListIdentityMap {
 		return _val;
 	}
 
-	PersistentListIdentityMap rest(){
+	PersistentListIdentityMap next(){
         return _rest;
         }
 

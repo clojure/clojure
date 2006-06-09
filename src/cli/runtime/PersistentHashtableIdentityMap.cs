@@ -70,7 +70,7 @@ internal class Iter2 : IEnumerator
 
 	public bool MoveNext()
 		{
-		if (e == null || (e = ((PersistentListIdentityMap)e).rest()) == PersistentListIdentityMap.EMPTY)
+		if (e == null || (e = ((PersistentListIdentityMap)e).next()) == PersistentListIdentityMap.EMPTY)
 			nextBucket();
 		return e != null;
 		}

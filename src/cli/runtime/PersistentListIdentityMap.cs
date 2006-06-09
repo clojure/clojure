@@ -51,7 +51,7 @@ namespace org.clojure.runtime
 			return null;
 			}
 
-		internal virtual PersistentListIdentityMap rest()
+		internal virtual PersistentListIdentityMap next()
 			{
 			return this;
 			}
@@ -118,7 +118,7 @@ namespace org.clojure.runtime
 				if (first)
 					first = false;
 				else
-					e = e.rest();
+					e = e.next();
 				return e != EMPTY;
 				}
 
@@ -146,7 +146,7 @@ namespace org.clojure.runtime
 				this._val = val;
 				}
 
-			override internal PersistentListIdentityMap rest()
+			override internal PersistentListIdentityMap next()
 				{
 				return EMPTY;
 				}
@@ -215,11 +215,11 @@ namespace org.clojure.runtime
 			readonly Object _val;
 			readonly PersistentListIdentityMap _rest;
 
-			internal Link(Object key, Object val, PersistentListIdentityMap rest)
+			internal Link(Object key, Object val, PersistentListIdentityMap next)
 				{
 				this._key = key;
 				this._val = val;
-				this._rest = rest;
+				this._rest = next;
 				}
 
 			override public Object key()
@@ -232,7 +232,7 @@ namespace org.clojure.runtime
 				return _val;
 				}
 
-			override internal PersistentListIdentityMap rest()
+			override internal PersistentListIdentityMap next()
 				{
 				return _rest;
 				}
