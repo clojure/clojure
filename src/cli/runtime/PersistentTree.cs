@@ -639,10 +639,10 @@ public class Seq : ISeq{
     }
 
     internal static Seq create(Node t, bool asc){
-		return new Seq(push(t,asc,null),asc);
+		return new Seq(push(t, null, asc),asc);
 	}
 
-	static ISeq push(Node t, bool asc, ISeq stack){
+	static ISeq push(Node t, ISeq stack, bool asc){
 		while(t != null)
 			{
 			stack = RT.cons(t,stack);
@@ -657,7 +657,7 @@ public class Seq : ISeq{
 
     public ISeq rest() {
         Node t = (Node)stack.first();
-        ISeq nextstack = push(asc ? t.right() : t.left(),asc,stack.rest());
+        ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
         if(nextstack != null)
             {
             return new Seq(nextstack,asc);
