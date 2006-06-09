@@ -46,26 +46,32 @@ import java.util.Random;
  * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
  */
 
-public class PersistentArray implements Iterable{
+public class PersistentArray implements Iterable, ISequential{
 
 public Iterator iterator(){
 	return new ValIter(this);
 }
 
+public ISeq seq() {
+    if(length() > 0)
+        return new Seq(this, 0);
+    return null;
+}
+
 static class Master{
-	final Entry[] array;
-	final Object defaultVal;
+    final Entry[] array;
+    final Object defaultVal;
     int rev;
     int load;
-	final int maxLoad;
+    final int maxLoad;
     final float loadFactor;
 
     Master(int size,Object defaultVal, float loadFactor){
-		this.array = new Entry[size];//new AtomicReferenceArray(size);
-		this.defaultVal = defaultVal;
+        this.array = new Entry[size];//new AtomicReferenceArray(size);
+        this.defaultVal = defaultVal;
         this.rev = 0;//new AtomicInteger(0);
         this.load = 0;//new AtomicInteger(0);
-		this.maxLoad = (int) (size * loadFactor);
+        this.maxLoad = (int) (size * loadFactor);
         this.loadFactor = loadFactor;
         }
 }
@@ -100,6 +106,26 @@ static class EntryLink extends Entry{
 
     Entry rest(){
         return _rest;
+    }
+}
+
+static class Seq implements ISeq{
+	PersistentArray p;
+	int i;
+
+	Seq(PersistentArray p, int i){
+		this.p = p;
+		this.i = i;
+	}
+
+    public Object first() {
+        return p.get(i);
+    }
+
+    public ISeq rest() {
+        if(i+1 < p.length())
+            return new Seq(p, i + 1);
+        return null;
     }
 }
 

@@ -44,7 +44,7 @@ namespace org.clojure.runtime
  * Java implementation is lock-free
  */
 
-public class PersistentArray : IEnumerable{
+public class PersistentArray : IEnumerable, ISequential{
 
 	#region IEnumerable Members
 
@@ -54,7 +54,14 @@ public class PersistentArray : IEnumerable{
 		}
 
 	#endregion
-	
+
+	public ISeq seq()
+		{
+		if (length() > 0)
+			return new Seq(this, 0);
+		return null;
+		}
+		
 internal class Master{
 	internal readonly Entry[] array;
 	internal readonly Object defaultVal;
@@ -109,6 +116,26 @@ internal class EntryLink : Entry
 	override internal Entry rest(){
 		return _rest;
 	}
+}
+
+internal class Seq : ISeq{
+	PersistentArray p;
+	int i;
+
+	internal Seq(PersistentArray p, int i){
+		this.p = p;
+		this.i = i;
+	}
+
+    public Object first() {
+        return p.get(i);
+    }
+
+    public ISeq rest() {
+        if(i+1 < p.length())
+            return new Seq(p, i + 1);
+        return null;
+    }
 }
 
 internal class ValIter : IEnumerator
