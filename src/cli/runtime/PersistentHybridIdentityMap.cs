@@ -34,7 +34,7 @@ override public PersistentArrayMap createArrayMap(Object[] init) {
 }
 
 override internal IPersistentMap createArrayMap() {
-    return new PersistentArrayIdentityMap();
+    return PersistentArrayIdentityMap.EMPTY;
 }
 
 override internal IPersistentMap createHashtableMap(Object[] init) {

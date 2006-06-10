@@ -13,6 +13,6 @@ package org.clojure.runtime;
 
 public interface ISequential {
 
-ISeq seq();
+ISeq seq() throws Exception;
 
 }

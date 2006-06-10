@@ -87,7 +87,7 @@ public PersistentArrayMap createArrayMap(Object[] init) {
 }
 
 IPersistentMap createArrayMap() {
-    return new PersistentArrayMap();
+    return PersistentArrayMap.EMPTY;
 }
 
 IPersistentMap createHashtableMap(Object[] init) {
@@ -98,7 +98,7 @@ IPersistentMap createHashtableMap(int initialCapacity) {
     return new PersistentHashtableMap(initialCapacity);
 }
 
-public ISeq seq() {
+public ISeq seq() throws Exception {
     return impl.seq();
 }
 }

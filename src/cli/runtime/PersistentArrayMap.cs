@@ -29,7 +29,9 @@ public class PersistentArrayMap : IPersistentMap, ISequential {
 
 internal readonly Object[] array;
 
-public PersistentArrayMap(){
+	public static PersistentArrayMap EMPTY = new PersistentArrayMap();
+
+protected PersistentArrayMap(){
     this.array = RT.EMPTY_ARRAY;
 }
 
@@ -86,7 +88,10 @@ public IPersistentMap remove(Object key) {
     int i = indexOf(key);
     if(i >= 0) //have key, will remove
         {
-        Object[] newArray = new Object[array.Length - 2];
+		int newlen = array.Length - 2;
+		if (newlen == 0)
+			return empty();
+		Object[] newArray = new Object[newlen];
         for(int s=0,d=0;s<array.Length;s += 2)
             {
             if(!equalKey(array[s],key)) //skip removal key
@@ -100,6 +105,10 @@ public IPersistentMap remove(Object key) {
         }
     //don't have key, no op
     return this;
+}
+
+virtual public IPersistentMap empty() {
+    return EMPTY;
 }
 
 public Object get(Object key) {

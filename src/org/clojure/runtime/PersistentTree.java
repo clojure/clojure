@@ -628,11 +628,11 @@ static public class Seq implements ISeq{
         return stack;
     }
 
-    public Object first() {
+    public Object first() throws Exception {
         return stack.first();
     }
 
-    public ISeq rest() {
+    public ISeq rest() throws Exception {
         Node t = (Node)stack.first();
         ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
         if(nextstack != null)

@@ -18,7 +18,7 @@ package org.clojure.runtime;
  */
 public interface ISeq {
 
-Object first();
+Object first() throws Exception;
 
-ISeq rest();
+ISeq rest() throws Exception;
 }

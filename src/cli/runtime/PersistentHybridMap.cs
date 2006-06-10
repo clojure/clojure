@@ -89,7 +89,7 @@ virtual public PersistentArrayMap createArrayMap(Object[] init) {
 }
 
 virtual internal IPersistentMap createArrayMap() {
-    return new PersistentArrayMap();
+    return PersistentArrayMap.EMPTY;
 }
 
 virtual internal IPersistentMap createHashtableMap(Object[] init) {

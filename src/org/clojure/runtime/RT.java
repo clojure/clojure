@@ -241,25 +241,23 @@ static public Cons arrayToList(Object[] a){
     return ret;
 }
 
-static public int length(ISeq list)
+static public int length(ISeq list) throws Exception {
+int i = 0;
+for(ISeq c = list; c != null; c = c.rest())
     {
-    int i = 0;
-    for(ISeq c = list; c != null; c = c.rest())
-        {
-        i++;
-        }
-    return i;
+    i++;
     }
+return i;
+}
 
-static public int boundedLength(ISeq list, int limit)
+static public int boundedLength(ISeq list, int limit) throws Exception {
+int i = 0;
+for(ISeq c = list; c != null && i <= limit; c = c.rest())
     {
-    int i = 0;
-    for(ISeq c = list; c != null && i <= limit; c = c.rest())
-        {
-        i++;
-        }
-    return i;
+    i++;
     }
+return i;
+}
 
 
 ///////////////////////////////// reader support ////////////////////////////////

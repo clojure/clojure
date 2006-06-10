@@ -33,7 +33,7 @@ public PersistentArrayMap createArrayMap(Object[] init) {
 }
 
 IPersistentMap createArrayMap() {
-    return new PersistentArrayIdentityMap();
+    return PersistentArrayIdentityMap.EMPTY;
 }
 
 IPersistentMap createHashtableMap(Object[] init) {

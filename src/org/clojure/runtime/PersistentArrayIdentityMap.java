@@ -14,7 +14,15 @@ package org.clojure.runtime;
  * ArrayMap using identity (==) comparison instead of equals
  */
 public class PersistentArrayIdentityMap extends PersistentArrayMap {
-public PersistentArrayIdentityMap() {
+
+public static PersistentArrayIdentityMap EMPTY = new PersistentArrayIdentityMap();
+
+
+private PersistentArrayIdentityMap() {
+}
+
+IPersistentMap empty() {
+    return EMPTY;
 }
 
 public PersistentArrayIdentityMap(Object[] init) {
