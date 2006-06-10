@@ -100,6 +100,15 @@ virtual internal IPersistentMap createHashtableMap(int initialCapacity) {
     return new PersistentHashtableMap(initialCapacity);
 }
 
-}
+
+#region ISequential Members
+
+public ISeq seq()
+	{
+	return impl.seq();
+	}
+
+#endregion
+	}
 
 }

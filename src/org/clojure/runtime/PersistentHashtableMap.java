@@ -145,6 +145,46 @@ public Iterator iterator() {
     return new Iter(array);
 }
 
+public ISeq seq() {
+    return Seq.create(array);
+}
+
+static class Seq implements ISeq{
+    PersistentArray buckets;
+    int b;
+    ISeq e;
+
+
+    static public Seq create(PersistentArray buckets) {
+        return next(buckets, -1, null);
+    }
+
+    static Seq next(PersistentArray buckets, int b, ISeq e) {
+        if(e != null && e.rest() != null)
+            return new Seq(buckets,b,e.rest());
+        for(b = b+1;b<buckets.length();b++)
+            {
+            ISequential a = (ISequential) buckets.get(b);
+            if(a != null && a.seq() != null)
+                return new Seq(buckets,b,a.seq());
+            }
+        return null;
+    }
+
+    Seq(PersistentArray buckets, int b, ISeq e) {
+        this.buckets = buckets;
+        this.b = b;
+        this.e = e;
+    }
+
+    public Object first() {
+        return e.first();
+    }
+
+    public ISeq rest() {
+        return next(buckets,b,e);
+    }
+}
 
 static class Iter implements Iterator{
 	PersistentArray buckets;

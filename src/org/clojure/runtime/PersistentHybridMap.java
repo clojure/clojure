@@ -98,4 +98,7 @@ IPersistentMap createHashtableMap(int initialCapacity) {
     return new PersistentHashtableMap(initialCapacity);
 }
 
+public ISeq seq() {
+    return impl.seq();
+}
 }
