@@ -17,58 +17,27 @@ namespace org.clojure.runtime
 {
 public class ThreadLocalData{
 
-public const int MULTIPLE_VALUES_LIMIT = 20;
-public int mvCount = 0;
-public Object[] mvArray = new Object[MULTIPLE_VALUES_LIMIT];
+[ThreadStatic]
+private static Transaction transaction;
+[ThreadStatic]
+private static Object[] values;
 
-internal HybridDictionary dynamicBindings = new HybridDictionary();
-
-internal Transaction transaction;
-
-public Transaction getTransaction() {
-	if(transaction == null)
-		throw new Exception("No active transaction");
-	return transaction;
+static public Object[] getValues(){
+     return values;
 }
 
-public ThreadLocalData(HybridDictionary dynamicBindings)
-	{
-	this.mvCount = 0;
-	this.mvArray = new Object[MULTIPLE_VALUES_LIMIT];
-	this.dynamicBindings = dynamicBindings;
-	}
+static public void setValues(Object[] vals) {
+    values = vals;
+}
 
-public ThreadLocalData():
-	this(new HybridDictionary())
-	{
-	}
+static public Transaction getTransaction() {
+    return transaction;
+}
 
-public static ThreadLocalData get()
-	{
-	if(tld == null)
-		tld = new ThreadLocalData();
-	return tld;
-	}
+static public void setTransaction(Transaction t){
+    transaction = t;
+}
 
-/*
-note this is not the same semantics as InheritableThreadLocal - aargh
-might need to make Java side non-inheritable
-*/
-[ThreadStatic]
-	static ThreadLocalData tld;
-	/* was this in Java
-static InheritableThreadLocal tld = new InheritableThreadLocal(){
-	protected Object childValue(Object object)
-		{
-		return new ThreadLocalData((HybridDictionary) ((ThreadLocalData) object).dynamicBindings.clone());
-		}
-
-	protected Object initialValue()
-		{
-		return new ThreadLocalData();
-		}
-};
-*/
 
 }
 }

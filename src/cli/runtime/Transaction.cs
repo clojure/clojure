@@ -51,42 +51,43 @@ Dictionary<TRef,ISeq> commutates;
 
 
 static public Object runInTransaction(ThreadLocalData tld,IFn fn) {
-	if(tld.transaction != null)
+	if(ThreadLocalData.getTransaction() != null)
 		return fn.invoke(tld);
-	tld.transaction = new Transaction();
+	Transaction t = new Transaction();
+	ThreadLocalData.setTransaction(t);
 	try{
-		return tld.transaction.run(tld, fn);
+		return t.run(fn);
 		}
 	finally{
-		tld.transaction = null;
+		ThreadLocalData.setTransaction(null);
 		}
 }
 
 static public TRef tref(Object val) {
-	Transaction trans = ThreadLocalData.get().getTransaction();
+	Transaction trans = ThreadLocalData.getTransaction();
 	TRef tref = new TRef();
 	trans.set(tref, val);
 	return tref;
 }
 
 static public Object get2(TRef tref) {
-	 return ThreadLocalData.get().getTransaction().get(tref);
+	 return ThreadLocalData.getTransaction().get(tref);
 }
 
 static public Object set2(TRef tref, Object val) {
-	 return ThreadLocalData.get().getTransaction().set(tref,val);
+	 return ThreadLocalData.getTransaction().set(tref,val);
 }
 
 static public void touch2(TRef tref) {
-	ThreadLocalData.get().getTransaction().touch(tref);
+	ThreadLocalData.getTransaction().touch(tref);
 }
 
 static public void commutate2(TRef tref, IFn fn) {
-	ThreadLocalData.get().getTransaction().commutate(tref, fn);
+	ThreadLocalData.getTransaction().commutate(tref, fn);
 }
 
 
-Object run(ThreadLocalData tld, IFn fn) {
+Object run(IFn fn) {
 	bool done = false;
 	Object ret = null;
 	List<TRef> locks = null;
@@ -95,7 +96,7 @@ Object run(ThreadLocalData tld, IFn fn) {
 	while(!done){
 		try
 			{
-			ret = fn.invoke(tld);
+			ret = fn.invoke();
 			if(locks == null && (sets != null || commutates != null))
 				locks = new List<TRef>();
 			if(sets != null)
@@ -133,7 +134,7 @@ Object run(ThreadLocalData tld, IFn fn) {
 				for(ISeq c = e.Value;c!=null;c = c.rest())
 					{
 					IFn f = (IFn) c.first();
-					val = f.invoke(tld, val);
+					val = f.invoke(val);
 					}
 				sets[tref] =  val;
 				}

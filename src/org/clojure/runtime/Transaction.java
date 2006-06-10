@@ -47,20 +47,21 @@ IdentityHashMap<TRef,Object> sets;
 IdentityHashMap<TRef,ISeq> commutates;
 
 
-static public Object runInTransaction(ThreadLocalData tld,IFn fn) throws Exception{
-	if(tld.transaction != null)
-		return fn.invoke(tld);
-	tld.transaction = new Transaction();
+static public Object runInTransaction(IFn fn) throws Exception{
+	if(ThreadLocalData.getTransaction() != null)
+		return fn.invoke();
+    Transaction t = new Transaction();
+    ThreadLocalData.setTransaction(t);
 	try{
-		return tld.transaction.run(tld, fn);
+		return t.run(fn);
 		}
 	finally{
-		tld.transaction = null;
+        ThreadLocalData.setTransaction(null);
 		}
 }
 
 static public TRef tref(Object val) throws Exception{
-	Transaction trans = ThreadLocalData.get().getTransaction();
+	Transaction trans = ThreadLocalData.getTransaction();
 	TRef tref = new TRef();
 	trans.set(tref, val);
 	return tref;
@@ -68,23 +69,23 @@ static public TRef tref(Object val) throws Exception{
 
 //*
 static public Object get2(TRef tref) throws Exception{
-	 return ThreadLocalData.get().getTransaction().get(tref);
+	 return ThreadLocalData.getTransaction().get(tref);
 }
 
 static public Object set2(TRef tref, Object val) throws Exception{
-	 return ThreadLocalData.get().getTransaction().set(tref,val);
+	 return ThreadLocalData.getTransaction().set(tref,val);
 }
 
 static public void touch2(TRef tref) throws Exception{
-	ThreadLocalData.get().getTransaction().touch(tref);
+	ThreadLocalData.getTransaction().touch(tref);
 }
 
 static public void commutate2(TRef tref, IFn fn) throws Exception{
-	ThreadLocalData.get().getTransaction().commutate(tref, fn);
+	ThreadLocalData.getTransaction().commutate(tref, fn);
 }
 //*/
 
-Object run(ThreadLocalData tld, IFn fn) throws Exception{
+Object run(IFn fn) throws Exception{
 	boolean done = false;
 	Object ret = null;
 	ArrayList<TRef> locks = null;
@@ -94,7 +95,7 @@ Object run(ThreadLocalData tld, IFn fn) throws Exception{
 	while(!done){
 		try
 			{
-			ret = fn.invoke(tld);
+			ret = fn.invoke();
 			if(locks == null && (sets != null || commutates != null))
 				locks = new ArrayList<TRef>();
 			if(sets != null)
@@ -132,7 +133,7 @@ Object run(ThreadLocalData tld, IFn fn) throws Exception{
 				for(ISeq c = e.getValue();c!=null;c = c.rest())
 					{
 					IFn f = (IFn) c.first();
-					val = f.invoke(tld, val);
+					val = f.invoke(val);
 					}
 				sets.put(tref, val);
 				}
