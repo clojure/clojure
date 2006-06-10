@@ -160,40 +160,40 @@ override public Num divide(RatioNum x)
 	return Num.from(x.doubleValue() / val);
 	}
 
-static Object truncate(ThreadLocalData tld, double n, double d)
+static Object truncate( double n, double d)
 	{
 	double q = n / d;
 	if(q <= Int32.MaxValue && q >= Int32.MinValue)
 		{
-		return RT.setValues(tld, Num.from((int) q),
+		return RT.setValues( Num.from((int) q),
 		                    Num.from(n - ((int) q) * d));
 		}
 	else
 		{ //bigint quotient
 		Num bq = Num.from(new BigDecimal(q).toBigInteger());
-		return RT.setValues(tld, bq,
+		return RT.setValues( bq,
 		                    Num.from(n - bq.doubleValue() * d));
 		}
 	}
 
-override public Object truncateBy(ThreadLocalData tld, BigInteger x)
+override public Object truncateBy( BigInteger x)
 	{
-	return truncate(tld, val, x.doubleValue());
+	return truncate( val, x.doubleValue());
 	}
 
-override public Object truncateBy(ThreadLocalData tld, int x)
+override public Object truncateBy( int x)
 	{
-	return truncate(tld, val, x);
+	return truncate( val, x);
 	}
 
-override public Object truncateBy(ThreadLocalData tld, RatioNum x)
+override public Object truncateBy( RatioNum x)
 	{
-	return truncate(tld, val, x.doubleValue());
+	return truncate( val, x.doubleValue());
 	}
 
-override public Object truncateDivide(ThreadLocalData tld, Num num)
+override public Object truncateDivide( Num num)
 	{
-	return truncate(tld, num.doubleValue(), val);
+	return truncate( num.doubleValue(), val);
 	}
 
 override public Num negate()

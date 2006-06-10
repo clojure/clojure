@@ -146,25 +146,25 @@ public Num multiply(RatioNum x)
 	return x.multiply(val);
 	}
 
-public Object truncateDivide(ThreadLocalData tld, Num num)
+public Object truncateDivide( Num num)
 	{
-	return num.truncateBy(tld, val);
+	return num.truncateBy( val);
 	}
 
-public Object truncateBy(ThreadLocalData tld, int div)
+public Object truncateBy( int div)
 	{
-	return RT.setValues(tld, Num.from(val / div), Num.from(val % div));
+	return RT.setValues( Num.from(val / div), Num.from(val % div));
 	}
 
-public Object truncateBy(ThreadLocalData tld, BigInteger div)
+public Object truncateBy( BigInteger div)
 	{
-	return Num.truncateBigints(tld, BigInteger.valueOf(val), div);
+	return Num.truncateBigints( BigInteger.valueOf(val), div);
 	}
 
-public Object truncateBy(ThreadLocalData tld, RatioNum div)
+public Object truncateBy( RatioNum div)
 	{
-	Num q = (Num) Num.truncate(tld, div.denominator.multiply(val), div.numerator);
-	return RT.setValues(tld, q, q.multiplyBy(div).subtractFrom(this));
+	Num q = (Num) Num.truncate( div.denominator.multiply(val), div.numerator);
+	return RT.setValues( q, q.multiplyBy(div).subtractFrom(this));
 	}
 
 public Num divideBy(Num rhs)

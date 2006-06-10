@@ -153,23 +153,23 @@ abstract public Num divide(BigInteger x);
 
 abstract public Num divide(RatioNum x);
 
-static public Object truncate(ThreadLocalData tld, Object num, Object div)
+static public Object truncate( Object num, Object div)
 	{
-	return Num.from(div).truncateDivide(tld, Num.from(num));
+	return Num.from(div).truncateDivide( Num.from(num));
 	}
 
-abstract public Object truncateDivide(ThreadLocalData tld, Num rhs);
+abstract public Object truncateDivide( Num rhs);
 
-abstract public Object truncateBy(ThreadLocalData tld, int x);
+abstract public Object truncateBy( int x);
 
-abstract public Object truncateBy(ThreadLocalData tld, BigInteger x);
+abstract public Object truncateBy( BigInteger x);
 
-abstract public Object truncateBy(ThreadLocalData tld, RatioNum x);
+abstract public Object truncateBy( RatioNum x);
 
-static public Object truncateBigints(ThreadLocalData tld, BigInteger n, BigInteger d)
+static public Object truncateBigints( BigInteger n, BigInteger d)
 	{
 	BigInteger[] result = n.divideAndRemainder(d);
-	return RT.setValues(tld, Num.from(result[0]), Num.from(result[1]));
+	return RT.setValues( Num.from(result[0]), Num.from(result[1]));
 	}
 
 	internal static BigInteger BIG_ONE = BigInteger.valueOf(1);

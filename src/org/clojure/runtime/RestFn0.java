@@ -21,7 +21,7 @@ public Object applyTo( ISeq arglist) throws Exception
 	return doInvoke( arglist);
 	}
 
-public Object invoke(ThreadLocalData tld) throws Exception
+public Object invoke() throws Exception
 	{
 	return doInvoke( null);
 	}

@@ -174,25 +174,25 @@ override public Num divide(RatioNum x)
 	return Num.divide(x.numerator, x.denominator.multiply(val));
 	}
 
-override public Object truncateDivide(ThreadLocalData tld, Num num)
+override public Object truncateDivide( Num num)
 	{
-	return num.truncateBy(tld, val);
+	return num.truncateBy( val);
 	}
 
-override public Object truncateBy(ThreadLocalData tld, int div)
+override public Object truncateBy( int div)
 	{
-	return Num.truncateBigints(tld, val, BigInteger.valueOf(div));
+	return Num.truncateBigints( val, BigInteger.valueOf(div));
 	}
 
-override public Object truncateBy(ThreadLocalData tld, BigInteger div)
+override public Object truncateBy( BigInteger div)
 	{
-	return Num.truncateBigints(tld, val, div);
+	return Num.truncateBigints( val, div);
 	}
 
-override public Object truncateBy(ThreadLocalData tld, RatioNum div)
+override public Object truncateBy( RatioNum div)
 	{
-	Num q = (Num) Num.truncate(tld, div.denominator.multiply(val), div.numerator);
-	return RT.setValues(tld, q, q.multiplyBy(div).subtractFrom(this));
+	Num q = (Num) Num.truncate( div.denominator.multiply(val), div.numerator);
+	return RT.setValues( q, q.multiplyBy(div).subtractFrom(this));
 	}
 
 override public Num negate()
