@@ -100,41 +100,41 @@ final public void restoreDynamicBinding(ThreadLocalData tld, Box old)
 	tld.dynamicBindings.put(this, old);
 	}
 
-public Object invoke(ThreadLocalData tld) throws Exception
+public Object invoke() throws Exception
 	{
-	return fn.invoke(tld);
+	return fn.invoke();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1) throws Exception
+public Object invoke( Object arg1) throws Exception
 	{
-	return fn.invoke(tld,arg1);
+	return fn.invoke(arg1);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2) throws Exception
+public Object invoke( Object arg1, Object arg2) throws Exception
 	{
-	return fn.invoke(tld,arg1,arg2);
+	return fn.invoke(arg1,arg2);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) throws Exception
+public Object invoke( Object arg1, Object arg2, Object arg3) throws Exception
 	{
-	return fn.invoke(tld,arg1,arg2,arg3);
+	return fn.invoke(arg1,arg2,arg3);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
 	{
-	return fn.invoke(tld,arg1,arg2,arg3,arg4);
+	return fn.invoke(arg1,arg2,arg3,arg4);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		throws Exception
 	{
-	return fn.invoke(tld,arg1,arg2,arg3,arg4,arg5);
+	return fn.invoke(arg1,arg2,arg3,arg4,arg5);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		throws Exception
 	{
-	return fn.invoke(tld,arg1,arg2,arg3,arg4,arg5,args);
+	return fn.invoke(arg1,arg2,arg3,arg4,arg5,args);
 	}
 
 }

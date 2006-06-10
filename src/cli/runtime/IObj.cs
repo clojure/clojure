@@ -13,8 +13,8 @@ namespace org.clojure.runtime
     {
     interface IObj
         {
-        object put(ThreadLocalData tld, IComparable key, object val);
-        object get(ThreadLocalData tld, IComparable key);
-        bool has(ThreadLocalData tld, IComparable key);
+        object put( IComparable key, object val);
+        object get( IComparable key);
+        bool has( IComparable key);
         }
     }

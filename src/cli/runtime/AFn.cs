@@ -18,80 +18,80 @@ namespace org.clojure.runtime
 public class AFn : Obj , IFn
 							  {
 
-virtual public Object invoke(ThreadLocalData tld) /*throws Exception*/
+virtual public Object invoke() /*throws Exception*/
 	{
 	return throwArity();
 	}
 
-virtual public Object invoke(ThreadLocalData tld, Object arg1) /*throws Exception*/
+virtual public Object invoke( Object arg1) /*throws Exception*/
 	{
 	return throwArity();
 	}
 
-virtual public Object invoke(ThreadLocalData tld, Object arg1, Object arg2) /*throws Exception*/
+virtual public Object invoke( Object arg1, Object arg2) /*throws Exception*/
 	{
 	return throwArity();
 	}
 
-virtual public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) /*throws Exception*/
+virtual public Object invoke( Object arg1, Object arg2, Object arg3) /*throws Exception*/
 	{
 	return throwArity();
 	}
 
-virtual public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/
+virtual public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/
 	{
 	return throwArity();
 	}
 
-virtual public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+virtual public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		/*throws Exception*/
 	{
 	return throwArity();
 	}
 
-virtual public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
+virtual public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		/*throws Exception*/
 	{
 	return throwArity();
 	}
 
-virtual public Object applyTo(ThreadLocalData tld, ISeq arglist) /*throws Exception*/
+virtual public Object applyTo( ISeq arglist) /*throws Exception*/
 {
-return  applyToHelper(this,tld,arglist);
+return  applyToHelper(this,arglist);
 }
 
-static public Object applyToHelper(IFn ifn,ThreadLocalData tld, ISeq arglist) /*throws Exception*/
+static public Object applyToHelper(IFn ifn, ISeq arglist) /*throws Exception*/
 	{
 	switch(RT.boundedLength(arglist, 5))
 		{
 		case 0:
-            return ifn.invoke(tld);
+            return ifn.invoke();
 		case 1:
-            return ifn.invoke(tld, arglist.first());
+            return ifn.invoke( arglist.first());
 		case 2:
-            return ifn.invoke(tld, arglist.first()
+            return ifn.invoke( arglist.first()
 					, (arglist = arglist.rest()).first()
 			);
 		case 3:
-            return ifn.invoke(tld, arglist.first()
+            return ifn.invoke( arglist.first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 			);
 		case 4:
-            return ifn.invoke(tld, arglist.first()
+            return ifn.invoke( arglist.first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 			);
 		case 5:
-            return ifn.invoke(tld, arglist.first()
+            return ifn.invoke( arglist.first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 			);
 		default:
-            return ifn.invoke(tld, arglist.first()
+            return ifn.invoke( arglist.first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()

@@ -13,24 +13,25 @@ package org.clojure.runtime;
 public class TObj implements IObj{
 TRef attrs;
 
-public TObj(ThreadLocalData tld) throws Exception{
-    this.attrs = Transaction.tref(tld,new PersistentTree());
+public TObj() throws Exception{
+    this.attrs = Transaction.tref(new PersistentTree());
 }
 
-public Object put(ThreadLocalData tld, Comparable key, Object val) throws Exception {
-    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
+
+public Object put( Comparable key, Object val) throws Exception {
+    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
     t = t.put(key, val);
-    Transaction.set(tld,attrs,t);
+    Transaction.set2(attrs,t);
     return val;
 }
 
-public Object get(ThreadLocalData tld, Comparable key) throws Exception {
-    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
+public Object get( Comparable key) throws Exception {
+    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
     return t.get(key);
 }
 
-public boolean has(ThreadLocalData tld, Comparable key) throws Exception {
-    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
+public boolean has( Comparable key) throws Exception {
+    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
     return t.contains(key);
 }
 }

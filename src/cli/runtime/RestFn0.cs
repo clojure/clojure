@@ -18,48 +18,48 @@ namespace org.clojure.runtime
 public abstract class RestFn0 : AFn
 							  {
 
-public abstract Object doInvoke(ThreadLocalData tld, ISeq rest) /*throws Exception*/;
+public abstract Object doInvoke( ISeq rest) /*throws Exception*/;
 
-override public Object applyTo(ThreadLocalData tld, ISeq arglist) /*throws Exception*/
+override public Object applyTo( ISeq arglist) /*throws Exception*/
 	{
-	return doInvoke(tld, arglist);
+	return doInvoke( arglist);
 	}
 
-override public Object invoke(ThreadLocalData tld) /*throws Exception*/
+override public Object invoke() /*throws Exception*/
 	{
-	return doInvoke(tld, null);
+	return doInvoke( null);
 	}
 
-override public Object invoke(ThreadLocalData tld, Object arg1) /*throws Exception*/
+override public Object invoke( Object arg1) /*throws Exception*/
 	{
-	return doInvoke(tld, RT.list(arg1));
+	return doInvoke( RT.list(arg1));
 	}
 
-override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2) /*throws Exception*/
+override public Object invoke( Object arg1, Object arg2) /*throws Exception*/
 	{
-	return doInvoke(tld, RT.list(arg1, arg2));
+	return doInvoke( RT.list(arg1, arg2));
 	}
 
-override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) /*throws Exception*/
+override public Object invoke( Object arg1, Object arg2, Object arg3) /*throws Exception*/
 	{
-	return doInvoke(tld, RT.list(arg1, arg2, arg3));
+	return doInvoke( RT.list(arg1, arg2, arg3));
 	}
 
-override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/
+override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/
 	{
-	return doInvoke(tld, RT.list(arg1, arg2, arg3, arg4));
+	return doInvoke( RT.list(arg1, arg2, arg3, arg4));
 	}
 
-override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		/*throws Exception*/
 	{
-	return doInvoke(tld, RT.list(arg1, arg2, arg3, arg4, arg5));
+	return doInvoke( RT.list(arg1, arg2, arg3, arg4, arg5));
 	}
 
-override public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
+override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		/*throws Exception*/
 	{
-	return doInvoke(tld, RT.listStar(arg1, arg2, arg3, arg4, arg5, args));
+	return doInvoke( RT.listStar(arg1, arg2, arg3, arg4, arg5, args));
 	}
 }
 }

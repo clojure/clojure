@@ -22,7 +22,7 @@ public class Obj : IObj
 HybridDictionary attrs;
 public static int INITIAL_SIZE = 7;
 
-public Object put(ThreadLocalData tld, IComparable key, Object val)
+public Object put( IComparable key, Object val)
 	{
 	if(attrs == null)
 		attrs = new HybridDictionary(INITIAL_SIZE);
@@ -30,14 +30,14 @@ public Object put(ThreadLocalData tld, IComparable key, Object val)
 	return val;
 	}
 
-public Object get(ThreadLocalData tld, IComparable key)
+public Object get( IComparable key)
 	{
 	if(attrs == null)
 		return null;
 	return attrs[key];
 	}
 
-public bool has(ThreadLocalData tld, IComparable key)
+public bool has( IComparable key)
     {
     if (attrs == null)
         return false;

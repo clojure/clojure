@@ -16,22 +16,22 @@ namespace org.clojure.runtime
 {
 public interface IFn{
 
-Object invoke(ThreadLocalData tld) /*throws Exception*/;
+Object invoke() /*throws Exception*/;
 
-Object invoke(ThreadLocalData tld, Object arg1) /*throws Exception*/;
+Object invoke( Object arg1) /*throws Exception*/;
 
-Object invoke(ThreadLocalData tld, Object arg1, Object arg2) /*throws Exception*/;
+Object invoke( Object arg1, Object arg2) /*throws Exception*/;
 
-Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) /*throws Exception*/;
+Object invoke( Object arg1, Object arg2, Object arg3) /*throws Exception*/;
 
-Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/;
+Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/;
 
-Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		/*throws Exception*/;
 
-Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
+Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
                      ISeq args) /*throws Exception*/;
 
-Object applyTo(ThreadLocalData tld, ISeq arglist) /*throws Exception*/;
+Object applyTo( ISeq arglist) /*throws Exception*/;
 }
 }

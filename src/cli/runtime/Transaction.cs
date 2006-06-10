@@ -62,27 +62,27 @@ static public Object runInTransaction(ThreadLocalData tld,IFn fn) {
 		}
 }
 
-static public TRef tref(ThreadLocalData tld, Object val) {
-	Transaction trans = tld.getTransaction();
+static public TRef tref(Object val) {
+	Transaction trans = ThreadLocalData.get().getTransaction();
 	TRef tref = new TRef();
 	trans.set(tref, val);
 	return tref;
 }
 
-static public Object get(ThreadLocalData tld, TRef tref) {
-	 return tld.getTransaction().get(tref);
+static public Object get2(TRef tref) {
+	 return ThreadLocalData.get().getTransaction().get(tref);
 }
 
-static public Object set(ThreadLocalData tld, TRef tref, Object val) {
-	 return tld.getTransaction().set(tref,val);
+static public Object set2(TRef tref, Object val) {
+	 return ThreadLocalData.get().getTransaction().set(tref,val);
 }
 
-static public void touch(ThreadLocalData tld, TRef tref) {
-	tld.getTransaction().touch(tref);
+static public void touch2(TRef tref) {
+	ThreadLocalData.get().getTransaction().touch(tref);
 }
 
-static public void commutate(ThreadLocalData tld, TRef tref, IFn fn) {
-	tld.getTransaction().commutate(tref, fn);
+static public void commutate2(TRef tref, IFn fn) {
+	ThreadLocalData.get().getTransaction().commutate(tref, fn);
 }
 
 

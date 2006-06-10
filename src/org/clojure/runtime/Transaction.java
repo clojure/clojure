@@ -59,29 +59,30 @@ static public Object runInTransaction(ThreadLocalData tld,IFn fn) throws Excepti
 		}
 }
 
-static public TRef tref(ThreadLocalData tld, Object val) throws Exception{
-	Transaction trans = tld.getTransaction();
+static public TRef tref(Object val) throws Exception{
+	Transaction trans = ThreadLocalData.get().getTransaction();
 	TRef tref = new TRef();
 	trans.set(tref, val);
 	return tref;
 }
 
-static public Object get(ThreadLocalData tld, TRef tref) throws Exception{
-	 return tld.getTransaction().get(tref);
+//*
+static public Object get2(TRef tref) throws Exception{
+	 return ThreadLocalData.get().getTransaction().get(tref);
 }
 
-static public Object set(ThreadLocalData tld, TRef tref, Object val) throws Exception{
-	 return tld.getTransaction().set(tref,val);
+static public Object set2(TRef tref, Object val) throws Exception{
+	 return ThreadLocalData.get().getTransaction().set(tref,val);
 }
 
-static public void touch(ThreadLocalData tld, TRef tref) throws Exception{
-	tld.getTransaction().touch(tref);
+static public void touch2(TRef tref) throws Exception{
+	ThreadLocalData.get().getTransaction().touch(tref);
 }
 
-static public void commutate(ThreadLocalData tld, TRef tref, IFn fn) throws Exception{
-	tld.getTransaction().commutate(tref, fn);
+static public void commutate2(TRef tref, IFn fn) throws Exception{
+	ThreadLocalData.get().getTransaction().commutate(tref, fn);
 }
-
+//*/
 
 Object run(ThreadLocalData tld, IFn fn) throws Exception{
 	boolean done = false;

@@ -16,24 +16,24 @@ namespace org.clojure.runtime
 public class TObj : IObj{
 TRef attrs;
 
-public TObj(ThreadLocalData tld) {
-    this.attrs = Transaction.tref(tld,new PersistentTree());
+public TObj() {
+    this.attrs = Transaction.tref(new PersistentTree());
 }
 
-public Object put(ThreadLocalData tld, IComparable key, Object val)  {
-    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
+public Object put( IComparable key, Object val)  {
+    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
 	t = (PersistentTree) t.put(key, val);
-    Transaction.set(tld,attrs,t);
+    Transaction.set2(attrs,t);
     return val;
 }
 
-public Object get(ThreadLocalData tld, IComparable key)  {
-    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
+public Object get( IComparable key)  {
+    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
     return t.get(key);
 }
 
-public bool has(ThreadLocalData tld, IComparable key)  {
-    PersistentTree t = (PersistentTree) Transaction.get(tld, attrs);
+public bool has( IComparable key)  {
+    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
     return t.contains(key);
 }
 }

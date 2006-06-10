@@ -18,9 +18,9 @@ package org.clojure.runtime;
  * To change this template use File | Settings | File Templates.
  */
 public interface IObj {
-Object put(ThreadLocalData tld, Comparable key, Object val) throws Exception;
+Object put( Comparable key, Object val) throws Exception;
 
-Object get(ThreadLocalData tld, Comparable key) throws Exception;
+Object get( Comparable key) throws Exception;
 
-boolean has(ThreadLocalData tld, Comparable key) throws Exception;
+boolean has( Comparable key) throws Exception;
 }
