@@ -1,3 +1,5 @@
+package clojure.runtime;
+
 /**
  * Copyright (c) Rich Hickey. All rights reserved.
  * The use and distribution terms for this software are covered by the
@@ -8,10 +10,15 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-package clojure.runtime;
+/**
+ * A persistent, functional, sequence interface
+ * 
+ * ISeqs are immutable values, i.e. neither first(), nor rest() changes
+ * or invalidates the ISeq
+ */
+public interface ISeq {
 
-public interface IMapEntry {
-Object key();
+Object first() throws Exception;
 
-Object val();
+ISeq rest() throws Exception;
 }

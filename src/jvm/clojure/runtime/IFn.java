@@ -10,25 +10,25 @@
 
 /* rich Mar 25, 2006 3:54:03 PM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public interface IFn{
 
-public Object invoke(ThreadLocalData tld) throws Exception;
+public Object invoke() throws Exception;
 
-public Object invoke(ThreadLocalData tld, Object arg1) throws Exception;
+public Object invoke(Object arg1) throws Exception;
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2) throws Exception;
+public Object invoke(Object arg1, Object arg2) throws Exception;
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) throws Exception;
+public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception;
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception;
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception;
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		throws Exception;
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
-                     Cons args) throws Exception;
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
+                     ISeq args) throws Exception;
 
-public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception;
+public Object applyTo(ISeq arglist) throws Exception;
 }

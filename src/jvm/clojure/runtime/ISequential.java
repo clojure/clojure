@@ -1,3 +1,5 @@
+package clojure.runtime;
+
 /**
  * Copyright (c) Rich Hickey. All rights reserved.
  * The use and distribution terms for this software are covered by the
@@ -8,10 +10,9 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-package clojure.runtime;
 
-public interface IMapEntry {
-Object key();
+public interface ISequential {
 
-Object val();
+ISeq seq() throws Exception;
+
 }

@@ -10,7 +10,7 @@
 
 /* rich Mar 28, 2006 10:17:21 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public abstract class FloatNum extends RealNum {
 

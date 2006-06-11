@@ -10,7 +10,7 @@
 
 /* rich Apr 3, 2006 10:54:14 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 
 /**

@@ -10,7 +10,7 @@
 
 /* rich Mar 28, 2006 10:13:00 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public abstract class RealNum extends Num {
 

@@ -10,7 +10,7 @@
 
 /* rich May 30, 2006 */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

@@ -10,7 +10,7 @@
 
 /* rich Mar 28, 2006 10:08:33 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 import java.math.BigInteger;
 
@@ -171,25 +171,25 @@ public Num divide(RatioNum x)
 	return Num.divide(x.numerator, x.denominator.multiply(val));
 	}
 
-public Object truncateDivide(ThreadLocalData tld, Num num)
+public Object truncateDivide( Num num)
 	{
-	return num.truncateBy(tld, val);
+	return num.truncateBy( val);
 	}
 
-public Object truncateBy(ThreadLocalData tld, int div)
+public Object truncateBy( int div)
 	{
-	return Num.truncateBigints(tld, val, BigInteger.valueOf(div));
+	return Num.truncateBigints( val, BigInteger.valueOf(div));
 	}
 
-public Object truncateBy(ThreadLocalData tld, BigInteger div)
+public Object truncateBy( BigInteger div)
 	{
-	return Num.truncateBigints(tld, val, div);
+	return Num.truncateBigints( val, div);
 	}
 
-public Object truncateBy(ThreadLocalData tld, RatioNum div)
+public Object truncateBy( RatioNum div)
 	{
-	Num q = (Num) Num.truncate(tld, div.denominator.multiply(val), div.numerator);
-	return RT.setValues(tld, q, q.multiplyBy(div).subtractFrom(this));
+	Num q = (Num) Num.truncate( div.denominator.multiply(val), div.numerator);
+	return RT.setValues( q, q.multiplyBy(div).subtractFrom(this));
 	}
 
 public Num negate()

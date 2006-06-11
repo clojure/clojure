@@ -10,7 +10,7 @@
 
 /* rich Mar 27, 2006 8:40:19 PM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public class Box{
 

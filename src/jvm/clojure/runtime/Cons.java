@@ -10,27 +10,28 @@
 
 /* rich Mar 25, 2006 11:01:29 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
-public class Cons extends Obj implements Iter{
+public class Cons implements ISeq, ISequential{
 
-public final Object first;
-public final Cons rest;
+private final Object _first;
+private final ISeq _rest;
 
-public Cons(Object first, Cons rest)
+public Cons(Object first, ISeq rest)
 	{
-	this.first = first;
-	this.rest = rest;
+	this._first = first;
+	this._rest = rest;
 	}
 
-public Object get()
-	{
-	return first;
-	}
+public Object first() {
+    return _first;
+}
 
-public Iter iterate()
-	{
-	return rest;
-	}
+public ISeq rest() {
+    return _rest;
+}
 
+public ISeq seq() {
+    return this;
+}
 }

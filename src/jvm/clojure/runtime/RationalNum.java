@@ -10,7 +10,7 @@
 
 /* rich Mar 28, 2006 10:12:30 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public abstract class RationalNum extends RealNum {
 

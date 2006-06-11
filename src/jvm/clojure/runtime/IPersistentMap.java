@@ -10,8 +10,22 @@
 
 package clojure.runtime;
 
-public interface IMapEntry {
-Object key();
 
-Object val();
+public interface IPersistentMap extends Iterable, ISequential {
+
+int count();
+
+boolean contains(Object key);
+
+IMapEntry find(Object key);
+
+IPersistentMap add(Object key);
+
+IPersistentMap put(Object key, Object val);
+
+IPersistentMap remove(Object key);
+
+Object get(Object key);
+
+int capacity();
 }

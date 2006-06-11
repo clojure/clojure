@@ -10,57 +10,57 @@
 
 /* rich Mar 27, 2006 8:05:10 PM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public abstract class RestFn2 extends AFn{
 
-protected abstract Object doInvoke(ThreadLocalData tld, Object arg1, Object arg2, Cons rest) throws Exception;
+protected abstract Object doInvoke( Object arg1, Object arg2, ISeq rest) throws Exception;
 
-public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception
+public Object applyTo( ISeq arglist) throws Exception
 	{
     switch(RT.boundedLength(arglist, 2))
         {
         case 0:
-            return invoke(tld);
+            return invoke();
         case 1:
-            return invoke(tld,arglist.first);
+            return invoke(arglist.first());
         case 2:
-            return invoke(tld,arglist.first
-                    , (arglist = arglist.rest).first
+            return invoke(arglist.first()
+                    , (arglist = arglist.rest()).first()
             );
         default:
-    	return doInvoke(tld, arglist.first
-			, (arglist = arglist.rest).first
-			, arglist.rest);
+    	return doInvoke( arglist.first()
+			, (arglist = arglist.rest()).first()
+			, arglist.rest());
 
         }
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2) throws Exception
+public Object invoke( Object arg1, Object arg2) throws Exception
 	{
-	return doInvoke(tld, arg1, arg2, null);
+	return doInvoke( arg1, arg2, null);
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) throws Exception
+public Object invoke( Object arg1, Object arg2, Object arg3) throws Exception
 	{
-	return doInvoke(tld, arg1, arg2, RT.list(arg3));
+	return doInvoke( arg1, arg2, RT.list(arg3));
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
 	{
-	return doInvoke(tld, arg1, arg2, RT.list(arg3, arg4));
+	return doInvoke( arg1, arg2, RT.list(arg3, arg4));
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		throws Exception
 	{
-	return doInvoke(tld, arg1, arg2, RT.list(arg3, arg4, arg5));
+	return doInvoke( arg1, arg2, RT.list(arg3, arg4, arg5));
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		throws Exception
 	{
-	return doInvoke(tld, arg1, arg2, RT.listStar(arg3, arg4, arg5, args));
+	return doInvoke( arg1, arg2, RT.listStar(arg3, arg4, arg5, args));
 	}
 }
 

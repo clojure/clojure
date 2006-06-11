@@ -10,7 +10,7 @@
 
 /* rich Mar 28, 2006 10:14:44 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 import java.math.BigInteger;
 
@@ -172,28 +172,28 @@ public Num divide(RatioNum n)
 	}
 
 
-public Object truncateDivide(ThreadLocalData tld, Num num)
+public Object truncateDivide( Num num)
 	{
-	return num.truncateBy(tld, this);
+	return num.truncateBy( this);
 	}
 
-public Object truncateBy(ThreadLocalData tld, int div)
+public Object truncateBy( int div)
 	{
-	Num q = (Num) Num.truncate(tld, numerator, denominator.multiply(div));
-	return RT.setValues(tld, q, q.multiply(div).subtractFrom(this));
+	Num q = (Num) Num.truncate( numerator, denominator.multiply(div));
+	return RT.setValues( q, q.multiply(div).subtractFrom(this));
 	}
 
-public Object truncateBy(ThreadLocalData tld, BigInteger div)
+public Object truncateBy( BigInteger div)
 	{
-	Num q = (Num) Num.truncate(tld, numerator, denominator.multiply(div));
-	return RT.setValues(tld, q, q.multiply(div).subtractFrom(this));
+	Num q = (Num) Num.truncate( numerator, denominator.multiply(div));
+	return RT.setValues( q, q.multiply(div).subtractFrom(this));
 	}
 
-public Object truncateBy(ThreadLocalData tld, RatioNum div)
+public Object truncateBy( RatioNum div)
 	{
-	Num q = (Num) Num.truncate(tld, numerator.multiplyBy(div.denominator),
+	Num q = (Num) Num.truncate( numerator.multiplyBy(div.denominator),
 	                           denominator.multiplyBy(div.numerator));
-	return RT.setValues(tld, q, q.multiplyBy(div).subtractFrom(this));
+	return RT.setValues( q, q.multiplyBy(div).subtractFrom(this));
 	}
 
 

@@ -10,17 +10,21 @@
 
 package clojure.runtime;
 
-/**
- * Created by IntelliJ IDEA.
- * User: rich
- * Date: May 31, 2006
- * Time: 3:41:10 PM
- * To change this template use File | Settings | File Templates.
- */
-public interface IObj {
-Object put( Comparable key, Object val) throws Exception;
+public class FnSeq implements ISeq{
 
-Object get( Comparable key) throws Exception;
+Object _first;
+IFn restFn;
 
-boolean has( Comparable key) throws Exception;
+public FnSeq(Object first, IFn restFn) {
+    this._first = first;
+    this.restFn = restFn;
+}
+
+public Object first() {
+    return _first;
+}
+
+public ISeq rest() throws Exception {
+    return (ISeq) restFn.invoke();
+}
 }

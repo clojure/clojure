@@ -10,7 +10,7 @@
 
 /* rich Apr 3, 2006 */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public abstract class AGenerator implements Iter{
 

@@ -10,87 +10,87 @@
 
 /* rich Mar 25, 2006 4:05:37 PM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public class AFn extends Obj implements IFn{
 
-public Object invoke(ThreadLocalData tld) throws Exception
+public Object invoke() throws Exception
 	{
 	return throwArity();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1) throws Exception
+public Object invoke( Object arg1) throws Exception
 	{
 	return throwArity();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2) throws Exception
+public Object invoke( Object arg1, Object arg2) throws Exception
 	{
 	return throwArity();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3) throws Exception
+public Object invoke( Object arg1, Object arg2, Object arg3) throws Exception
 	{
 	return throwArity();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
 	{
 	return throwArity();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		throws Exception
 	{
 	return throwArity();
 	}
 
-public Object invoke(ThreadLocalData tld, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Cons args)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
 		throws Exception
 	{
 	return throwArity();
 	}
 
-public Object applyTo(ThreadLocalData tld, Cons arglist) throws Exception {
-    return applyToHelper(this, tld, arglist);
+public Object applyTo( ISeq arglist) throws Exception {
+    return applyToHelper(this,  arglist);
 }
-static public Object applyToHelper(IFn ifn,ThreadLocalData tld, Cons arglist) throws Exception
+static public Object applyToHelper(IFn ifn, ISeq arglist) throws Exception
 	{
 	switch(RT.boundedLength(arglist, 5))
 		{
 		case 0:
-			return ifn.invoke(tld);
+			return ifn.invoke();
 		case 1:
-			return ifn.invoke(tld, arglist.first);
+			return ifn.invoke( arglist.first());
 		case 2:
-			return ifn.invoke(tld, arglist.first
-					, (arglist = arglist.rest).first
+			return ifn.invoke( arglist.first()
+					, (arglist = arglist.rest()).first()
 			);
 		case 3:
-			return ifn.invoke(tld, arglist.first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
+			return ifn.invoke( arglist.first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
 			);
 		case 4:
-			return ifn.invoke(tld, arglist.first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
+			return ifn.invoke( arglist.first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
 			);
 		case 5:
-			return ifn.invoke(tld, arglist.first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
+			return ifn.invoke( arglist.first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
 			);
 		default:
-			return ifn.invoke(tld, arglist.first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
-					, (arglist = arglist.rest).first
-					, arglist.rest);
+			return ifn.invoke( arglist.first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
+					, (arglist = arglist.rest()).first()
+					, arglist.rest());
 		}
 	}
 

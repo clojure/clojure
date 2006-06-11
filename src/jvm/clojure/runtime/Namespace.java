@@ -10,7 +10,7 @@
 
 /* rich Mar 27, 2006 1:29:39 PM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;

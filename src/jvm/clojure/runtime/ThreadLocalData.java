@@ -10,52 +10,28 @@
 
 /* rich Mar 25, 2006 11:45:22 AM */
 
-package org.clojure.runtime;
-
-import java.util.IdentityHashMap;
+package clojure.runtime;
 
 public class ThreadLocalData{
 
-final public static int MULTIPLE_VALUES_LIMIT = 20;
-public int mvCount = 0;
-public Object[] mvArray = new Object[MULTIPLE_VALUES_LIMIT];
+private static ThreadLocal<Transaction> transaction = new ThreadLocal<Transaction>();
+private static ThreadLocal<Object[]> values = new ThreadLocal<Object[]>();
 
-IdentityHashMap dynamicBindings = new IdentityHashMap();
-Transaction transaction;
-
-public Transaction getTransaction() throws Exception{
-	if(transaction == null)
-		throw new Exception("No active transaction");
-	return transaction;
+static public Object[] getValues(){
+     return values.get();
 }
 
-public ThreadLocalData(IdentityHashMap dynamicBindings)
-	{
-	this.mvCount = 0;
-	this.mvArray = new Object[MULTIPLE_VALUES_LIMIT];
-	this.dynamicBindings = dynamicBindings;
-	}
+static public void setValues(Object[] vals) {
+    values.set(vals);
+}
 
-public ThreadLocalData()
-	{
-	this(new IdentityHashMap());
-	}
+static public Transaction getTransaction() {
+    return transaction.get();
 
-public static ThreadLocalData get()
-	{
-	return (ThreadLocalData) tld.get();
-	}
+}
 
-static InheritableThreadLocal tld = new InheritableThreadLocal(){
-	protected Object childValue(Object object)
-		{
-		return new ThreadLocalData((IdentityHashMap) ((ThreadLocalData) object).dynamicBindings.clone());
-		}
-
-	protected Object initialValue()
-		{
-		return new ThreadLocalData();
-		}
-};
+static public void setTransaction(Transaction t){
+    transaction.set(t);
+}
 
 }

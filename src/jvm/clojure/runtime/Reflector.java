@@ -10,7 +10,7 @@
 
 /* rich Apr 19, 2006 */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -167,7 +167,7 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 
 public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,
                                           Object arg4,
-                                          Cons arglist)
+                                          ISeq arglist)
 		throws Exception
 	{
 	Object[] args = new Object[4 + RT.length(arglist)];
@@ -175,8 +175,8 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 	args[1] = arg2;
 	args[2] = arg3;
 	args[3] = arg4;
-	for(int i = 4; arglist != null; i++, arglist = arglist.rest)
-		args[i] = arglist.first;
+	for(int i = 4; arglist != null; i++, arglist = arglist.rest())
+		args[i] = arglist.first();
 	return invokeInstanceMethod(name, target, args);
 	}
 

@@ -11,16 +11,25 @@
 package clojure.runtime;
 
 /**
- * Created by IntelliJ IDEA.
- * User: rich
- * Date: May 31, 2006
- * Time: 3:41:10 PM
- * To change this template use File | Settings | File Templates.
+ * ArrayMap using identity (==) comparison instead of equals
  */
-public interface IObj {
-Object put( Comparable key, Object val) throws Exception;
+public class PersistentArrayIdentityMap extends PersistentArrayMap {
 
-Object get( Comparable key) throws Exception;
+public static PersistentArrayIdentityMap EMPTY = new PersistentArrayIdentityMap();
 
-boolean has( Comparable key) throws Exception;
+
+private PersistentArrayIdentityMap() {
+}
+
+IPersistentMap empty() {
+    return EMPTY;
+}
+
+public PersistentArrayIdentityMap(Object[] init) {
+    super(init);
+}
+
+boolean equalKey(Object k1, Object k2) {
+    return k1 == k2;
+}
 }

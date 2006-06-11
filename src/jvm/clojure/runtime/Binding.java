@@ -10,17 +10,16 @@
 
 package clojure.runtime;
 
-/**
- * Created by IntelliJ IDEA.
- * User: rich
- * Date: May 31, 2006
- * Time: 3:41:10 PM
- * To change this template use File | Settings | File Templates.
- */
-public interface IObj {
-Object put( Comparable key, Object val) throws Exception;
+public class Binding {
+public Object val;
+public Binding rest;
 
-Object get( Comparable key) throws Exception;
+public Binding(Object val) {
+    this.val = val;
+}
 
-boolean has( Comparable key) throws Exception;
+public Binding(Object val, Binding rest) {
+    this.val = val;
+    this.rest = rest;
+}
 }

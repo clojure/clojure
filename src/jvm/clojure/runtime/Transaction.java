@@ -10,7 +10,7 @@
 
 /* rich May 30, 2006 */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 import java.util.*;
 
@@ -44,46 +44,48 @@ Info info;
 int startSeq;
 
 IdentityHashMap<TRef,Object> sets;
-IdentityHashMap<TRef,Cons> commutates;
+IdentityHashMap<TRef,ISeq> commutates;
 
 
-static public Object runInTransaction(ThreadLocalData tld,IFn fn) throws Exception{
-	if(tld.transaction != null)
-		return fn.invoke(tld);
-	tld.transaction = new Transaction();
+static public Object runInTransaction(IFn fn) throws Exception{
+	if(ThreadLocalData.getTransaction() != null)
+		return fn.invoke();
+    Transaction t = new Transaction();
+    ThreadLocalData.setTransaction(t);
 	try{
-		return tld.transaction.run(tld, fn);
+		return t.run(fn);
 		}
 	finally{
-		tld.transaction = null;
+        ThreadLocalData.setTransaction(null);
 		}
 }
 
-static public TRef tref(ThreadLocalData tld, Object val) throws Exception{
-	Transaction trans = tld.getTransaction();
+static public TRef tref(Object val) throws Exception{
+	Transaction trans = ThreadLocalData.getTransaction();
 	TRef tref = new TRef();
 	trans.set(tref, val);
 	return tref;
 }
 
-static public Object get(ThreadLocalData tld, TRef tref) throws Exception{
-	 return tld.getTransaction().get(tref);
+//*
+static public Object get2(TRef tref) throws Exception{
+	 return ThreadLocalData.getTransaction().get(tref);
 }
 
-static public Object set(ThreadLocalData tld, TRef tref, Object val) throws Exception{
-	 return tld.getTransaction().set(tref,val);
+static public Object set2(TRef tref, Object val) throws Exception{
+	 return ThreadLocalData.getTransaction().set(tref,val);
 }
 
-static public void touch(ThreadLocalData tld, TRef tref) throws Exception{
-	tld.getTransaction().touch(tref);
+static public void touch2(TRef tref) throws Exception{
+	ThreadLocalData.getTransaction().touch(tref);
 }
 
-static public void commutate(ThreadLocalData tld, TRef tref, IFn fn) throws Exception{
-	tld.getTransaction().commutate(tref, fn);
+static public void commutate2(TRef tref, IFn fn) throws Exception{
+	ThreadLocalData.getTransaction().commutate(tref, fn);
 }
+//*/
 
-
-Object run(ThreadLocalData tld, IFn fn) throws Exception{
+Object run(IFn fn) throws Exception{
 	boolean done = false;
 	Object ret = null;
 	ArrayList<TRef> locks = null;
@@ -93,7 +95,7 @@ Object run(ThreadLocalData tld, IFn fn) throws Exception{
 	while(!done){
 		try
 			{
-			ret = fn.invoke(tld);
+			ret = fn.invoke();
 			if(locks == null && (sets != null || commutates != null))
 				locks = new ArrayList<TRef>();
 			if(sets != null)
@@ -123,15 +125,15 @@ Object run(ThreadLocalData tld, IFn fn) throws Exception{
 
 			//at this point all write targets are locked
 			//turn commutates into sets
-			for(Map.Entry<TRef, Cons> e : commutates.entrySet())
+			for(Map.Entry<TRef, ISeq> e : commutates.entrySet())
 				{
 				TRef tref = e.getKey();
 				//note this will npe if tref has never been set, as designed
 				Object val = getCurrent(tref).val;
-				for(Cons c = e.getValue();c!=null;c = c.rest)
+				for(ISeq c = e.getValue();c!=null;c = c.rest())
 					{
-					IFn f = (IFn) c.first;
-					val = f.invoke(tld, val);
+					IFn f = (IFn) c.first();
+					val = f.invoke(val);
 					}
 				sets.put(tref, val);
 				}
@@ -225,7 +227,7 @@ void touch(TRef tref) throws Exception{
 
 void commutate(TRef tref, IFn fn) throws Exception{
 	if(commutates == null)
-		commutates = new IdentityHashMap<TRef,Cons>();
+		commutates = new IdentityHashMap<TRef,ISeq>();
 	if(sets != null && sets.containsKey(tref))
 		throw new Exception("Can't commutate and set a TRef in the same transaction");
 	commutates.put(tref, RT.cons(fn, commutates.get(tref)));

@@ -8,7 +8,7 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 import java.io.PushbackReader;
 import java.io.Reader;

@@ -10,7 +10,7 @@
 
 /* rich Mar 28, 2006 10:11:55 AM */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public abstract class IntegerNum extends RationalNum {
 

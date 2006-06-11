@@ -10,7 +10,7 @@
 
 /* rich May 30, 2006 */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public class TVal{
 volatile Object val;

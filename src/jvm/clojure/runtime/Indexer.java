@@ -10,7 +10,7 @@
 
 /* rich Apr 19, 2006 */
 
-package org.clojure.runtime;
+package clojure.runtime;
 
 public class Indexer extends AFn{
 }
