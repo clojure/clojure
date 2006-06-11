@@ -69,7 +69,10 @@ static public TRef tref(Object val) throws Exception{
 
 //*
 static public Object get2(TRef tref) throws Exception{
-	 return ThreadLocalData.getTransaction().get(tref);
+    Transaction trans = ThreadLocalData.getTransaction();
+    if(trans != null)
+        return trans.get(tref);
+    return getCurrent(tref).val;
 }
 
 static public Object set2(TRef tref, Object val) throws Exception{

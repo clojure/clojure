@@ -14,27 +14,38 @@ namespace clojure.lang
     {
 
 public class TObj : IObj{
-TRef attrs;
+TRef _attrs;
 
-public TObj() {
-    this.attrs = Transaction.tref(new PersistentTree());
+public TObj(){
+    this._attrs = Transaction.tref(PersistentArrayIdentityMap.EMPTY);
 }
 
-public Object put( IComparable key, Object val)  {
-    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
-	t = (PersistentTree) t.put(key, val);
-    Transaction.set2(attrs,t);
+
+public Object put( Object key, Object val) {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
+    t = t.put(key, val);
+    Transaction.set2(_attrs,t);
     return val;
 }
 
-public Object get( IComparable key)  {
-    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
+public Object get( Object key) {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
     return t.get(key);
 }
 
-public bool has( IComparable key)  {
-    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
+public bool has( Object key) {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
     return t.contains(key);
+}
+
+public IPersistentMap attrs() {
+    return (IPersistentMap) Transaction.get2(_attrs);
+}
+
+public void remove(Object key) {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
+    t = t.remove(key);
+    Transaction.set2(_attrs,t);
 }
 }
 }

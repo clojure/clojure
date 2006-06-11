@@ -11,37 +11,38 @@
 /* rich Mar 25, 2006 3:44:58 PM */
 
 using System;
-using System.Collections.Specialized;
 
 namespace clojure.lang
 {
 
 public class Obj : IObj
 {
+volatile IPersistentMap _attrs = PersistentArrayIdentityMap.EMPTY;
 
-HybridDictionary attrs;
-public static int INITIAL_SIZE = 7;
-
-public Object put( IComparable key, Object val)
+public Object put( Object key, Object val)
 	{
-	if(attrs == null)
-		attrs = new HybridDictionary(INITIAL_SIZE);
-	attrs[key] = val;
+	_attrs = _attrs.put(key, val);
 	return val;
 	}
 
-public Object get( IComparable key)
+public Object get( Object key)
 	{
-	if(attrs == null)
-		return null;
-	return attrs[key];
+	return _attrs.get(key);
 	}
 
-public bool has( IComparable key)
-    {
-    if (attrs == null)
-        return false;
-    return attrs.Contains(key);
+public bool has( Object key){
+    return _attrs.contains(key);
     }
+
+
+public IPersistentMap attrs() {
+    return _attrs;
 }
+
+public void remove(Object key) {
+    _attrs = _attrs.remove(key);
+}
+
+}
+
 }

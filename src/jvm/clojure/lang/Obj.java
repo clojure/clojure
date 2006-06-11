@@ -12,33 +12,31 @@
 
 package clojure.lang;
 
-import java.util.IdentityHashMap;
-
 public class Obj implements IObj {
 
-IdentityHashMap attrs;
-public static final int INITIAL_SIZE = 7;
+volatile IPersistentMap _attrs = PersistentArrayIdentityMap.EMPTY;
 
-public Object put( Comparable key, Object val)
+public Object put( Object key, Object val)
 	{
-	if(attrs == null)
-		attrs = new IdentityHashMap(INITIAL_SIZE);
-	attrs.put(key, val);
+	_attrs = _attrs.put(key, val);
 	return val;
 	}
 
-public Object get( Comparable key)
+public Object get( Object key)
 	{
-	if(attrs == null)
-		return null;
-	return attrs.get(key);
+	return _attrs.get(key);
 	}
 
-public boolean has( Comparable key){
-    if(attrs == null)
-        return false;
-    return attrs.containsKey(key);
+public boolean has( Object key){
+    return _attrs.contains(key);
     }
 
 
+public IPersistentMap attrs() {
+    return _attrs;
+}
+
+public void remove(Object key) {
+    _attrs = _attrs.remove(key);
+}
 }

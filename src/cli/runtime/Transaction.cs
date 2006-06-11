@@ -71,8 +71,11 @@ static public TRef tref(Object val) {
 }
 
 static public Object get2(TRef tref) {
-	 return ThreadLocalData.getTransaction().get(tref);
-}
+    Transaction trans = ThreadLocalData.getTransaction();
+    if(trans != null)
+        return trans.get(tref);
+    return getCurrent(tref).val;
+    }
 
 static public Object set2(TRef tref, Object val) {
 	 return ThreadLocalData.getTransaction().set(tref,val);

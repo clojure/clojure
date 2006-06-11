@@ -11,27 +11,37 @@
 package clojure.lang;
 
 public class TObj implements IObj{
-TRef attrs;
+TRef _attrs;
 
 public TObj() throws Exception{
-    this.attrs = Transaction.tref(new PersistentTree());
+    this._attrs = Transaction.tref(PersistentArrayIdentityMap.EMPTY);
 }
 
 
-public Object put( Comparable key, Object val) throws Exception {
-    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
+public Object put( Object key, Object val) throws Exception {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
     t = t.put(key, val);
-    Transaction.set2(attrs,t);
+    Transaction.set2(_attrs,t);
     return val;
 }
 
-public Object get( Comparable key) throws Exception {
-    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
+public Object get( Object key) throws Exception {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
     return t.get(key);
 }
 
-public boolean has( Comparable key) throws Exception {
-    PersistentTree t = (PersistentTree) Transaction.get2( attrs);
+public boolean has( Object key) throws Exception {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
     return t.contains(key);
+}
+
+public IPersistentMap attrs() throws Exception {
+    return (IPersistentMap) Transaction.get2(_attrs);
+}
+
+public void remove(Object key) throws Exception {
+    IPersistentMap t = (IPersistentMap) Transaction.get2( _attrs);
+    t = t.remove(key);
+    Transaction.set2(_attrs,t);
 }
 }

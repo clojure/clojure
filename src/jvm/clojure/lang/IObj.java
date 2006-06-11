@@ -10,17 +10,15 @@
 
 package clojure.lang;
 
-/**
- * Created by IntelliJ IDEA.
- * User: rich
- * Date: May 31, 2006
- * Time: 3:41:10 PM
- * To change this template use File | Settings | File Templates.
- */
+
 public interface IObj {
-Object put( Comparable key, Object val) throws Exception;
+Object put( Object key, Object val) throws Exception;
 
-Object get( Comparable key) throws Exception;
+Object get( Object key) throws Exception;
 
-boolean has( Comparable key) throws Exception;
+boolean has( Object key) throws Exception;
+
+IPersistentMap attrs() throws Exception;
+
+void remove(Object key) throws Exception;
 }

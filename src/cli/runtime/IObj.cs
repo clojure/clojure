@@ -10,11 +10,17 @@
 
 using System;
 namespace clojure.lang
-    {
-    interface IObj
-        {
-        object put( IComparable key, object val);
-        object get( IComparable key);
-        bool has( IComparable key);
-        }
-    }
+	{
+	interface IObj
+		{
+		Object put(Object key, Object val);
+
+		Object get(Object key);
+
+		bool has(Object key);
+
+		IPersistentMap attrs();
+
+		void remove(Object key);
+		}
+	}
