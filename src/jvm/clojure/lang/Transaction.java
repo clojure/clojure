@@ -63,28 +63,28 @@ static public Object runInTransaction(IFn fn) throws Exception{
 static public TRef tref(Object val) throws Exception{
 	Transaction trans = ThreadLocalData.getTransaction();
 	TRef tref = new TRef();
-	trans.set(tref, val);
+	trans.doSet(tref, val);
 	return tref;
 }
 
 //*
-static public Object get2(TRef tref) throws Exception{
+static public Object get(TRef tref) throws Exception{
     Transaction trans = ThreadLocalData.getTransaction();
     if(trans != null)
-        return trans.get(tref);
+        return trans.doGet(tref);
     return getCurrent(tref).val;
 }
 
-static public Object set2(TRef tref, Object val) throws Exception{
-	 return ThreadLocalData.getTransaction().set(tref,val);
+static public Object set(TRef tref, Object val) throws Exception{
+	 return ThreadLocalData.getTransaction().doSet(tref,val);
 }
 
-static public void touch2(TRef tref) throws Exception{
-	ThreadLocalData.getTransaction().touch(tref);
+static public void touch(TRef tref) throws Exception{
+	ThreadLocalData.getTransaction().doTouch(tref);
 }
 
-static public void commutate2(TRef tref, IFn fn) throws Exception{
-	ThreadLocalData.getTransaction().commutate(tref, fn);
+static public void commutate(TRef tref, IFn fn) throws Exception{
+	ThreadLocalData.getTransaction().doCommutate(tref, fn);
 }
 //*/
 
@@ -190,7 +190,7 @@ Transaction(){
 	}
 }
 
-Object get(TRef tref) throws Exception{
+Object doGet(TRef tref) throws Exception{
 	if(sets != null && sets.containsKey(tref))
 		return sets.get(tref);
 
@@ -214,7 +214,7 @@ static TVal getCurrent(TRef tref) throws Exception{
 	return null;
 }
 
-Object set(TRef tref, Object val) throws Exception{
+Object doSet(TRef tref, Object val) throws Exception{
 	if(sets == null)
 		sets = new IdentityHashMap<TRef,Object>();
 	if(commutates != null && commutates.containsKey(tref))
@@ -224,11 +224,11 @@ Object set(TRef tref, Object val) throws Exception{
 	return val;
 	}
 
-void touch(TRef tref) throws Exception{
-	set(tref, get(tref));
+void doTouch(TRef tref) throws Exception{
+	doSet(tref, doGet(tref));
 	}
 
-void commutate(TRef tref, IFn fn) throws Exception{
+void doCommutate(TRef tref, IFn fn) throws Exception{
 	if(commutates == null)
 		commutates = new IdentityHashMap<TRef,ISeq>();
 	if(sets != null && sets.containsKey(tref))

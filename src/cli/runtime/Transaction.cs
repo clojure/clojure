@@ -66,27 +66,27 @@ static public Object runInTransaction(ThreadLocalData tld,IFn fn) {
 static public TRef tref(Object val) {
 	Transaction trans = ThreadLocalData.getTransaction();
 	TRef tref = new TRef();
-	trans.set(tref, val);
+	trans.doSet(tref, val);
 	return tref;
 }
 
-static public Object get2(TRef tref) {
+static public Object get(TRef tref) {
     Transaction trans = ThreadLocalData.getTransaction();
     if(trans != null)
-        return trans.get(tref);
+        return trans.doGet(tref);
     return getCurrent(tref).val;
     }
 
-static public Object set2(TRef tref, Object val) {
-	 return ThreadLocalData.getTransaction().set(tref,val);
+static public Object set(TRef tref, Object val) {
+	 return ThreadLocalData.getTransaction().doSet(tref,val);
 }
 
-static public void touch2(TRef tref) {
-	ThreadLocalData.getTransaction().touch(tref);
+static public void touch(TRef tref) {
+	ThreadLocalData.getTransaction().doTouch(tref);
 }
 
-static public void commutate2(TRef tref, IFn fn) {
-	ThreadLocalData.getTransaction().commutate(tref, fn);
+static public void commutate(TRef tref, IFn fn) {
+	ThreadLocalData.getTransaction().doCommutate(tref, fn);
 }
 
 
@@ -193,7 +193,7 @@ Transaction(){
 	}
 }
 
-Object get(TRef tref) {
+Object doGet(TRef tref) {
 	if(sets != null && sets.ContainsKey(tref))
 		return sets[tref];
 
@@ -217,7 +217,7 @@ static TVal getCurrent(TRef tref) {
 	return null;
 }
 
-Object set(TRef tref, Object val) {
+Object doSet(TRef tref, Object val) {
 	if(sets == null)
 		sets = new Dictionary<TRef,Object>();
 	if(commutates != null && commutates.ContainsKey(tref))
@@ -227,11 +227,11 @@ Object set(TRef tref, Object val) {
 	return val;
 	}
 
-void touch(TRef tref) {
-	set(tref, get(tref));
+void doTouch(TRef tref) {
+	doSet(tref, doGet(tref));
 	}
 
-void commutate(TRef tref, IFn fn) {
+void doCommutate(TRef tref, IFn fn) {
 	if(commutates == null)
 		commutates = new Dictionary<TRef,ISeq>();
 	if(sets != null && sets.ContainsKey(tref))
