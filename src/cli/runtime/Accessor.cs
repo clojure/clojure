@@ -10,7 +10,7 @@
 
 using System;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 public class Accessor :Symbol, IFn
     {

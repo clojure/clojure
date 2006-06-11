@@ -13,7 +13,7 @@
 using System;
 using System.Collections;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 public class Symbol : Obj, IComparable{
 

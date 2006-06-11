@@ -11,7 +11,7 @@
 using System;
 using System.IO;
 
-namespace org.clojure.runtime
+namespace clojure.lang
     {
 
 

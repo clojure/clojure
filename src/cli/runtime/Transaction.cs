@@ -14,7 +14,7 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 public class Transaction{
 

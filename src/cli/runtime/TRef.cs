@@ -13,7 +13,7 @@
 using System;
 using System.Threading;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 
 public class TRef : TVal, IComparable{

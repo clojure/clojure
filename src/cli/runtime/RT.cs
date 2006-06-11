@@ -14,7 +14,7 @@ using System;
 using System.Collections;
 using System.IO;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 
 public class RT

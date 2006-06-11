@@ -12,7 +12,7 @@
 
 using System;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 public class TVal{
 internal volatile Object val;

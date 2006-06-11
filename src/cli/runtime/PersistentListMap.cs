@@ -13,7 +13,7 @@
 using System;
 using System.Collections;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 /**
  * Implementation of persistent map on a linked list

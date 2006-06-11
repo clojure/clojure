@@ -13,7 +13,7 @@
 using System;
 using java.math;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 
 public abstract class Num : IComparable , IConvertible

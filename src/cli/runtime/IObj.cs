@@ -9,7 +9,7 @@
  **/
 
 using System;
-namespace org.clojure.runtime
+namespace clojure.lang
     {
     interface IObj
         {

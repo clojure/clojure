@@ -11,7 +11,7 @@
 using System;
 using System.Threading;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 public class Var :  AFn
     {

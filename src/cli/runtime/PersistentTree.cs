@@ -14,7 +14,7 @@ using System;
 using System.Collections;
 using System.Collections.Specialized;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 
 /**

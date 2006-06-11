@@ -14,7 +14,7 @@ using System;
 using System.Threading;
 using System.Collections;
 
-namespace org.clojure.runtime
+namespace clojure.lang
 {
 /**
  * Note that instances of this class are constant values
