@@ -19,18 +19,18 @@ public class Obj : IObj
 {
 volatile IPersistentMap _attrs = PersistentArrayIdentityMap.EMPTY;
 
-public Object put( Object key, Object val)
+public Object putAttr( Object key, Object val)
 	{
 	_attrs = _attrs.put(key, val);
 	return val;
 	}
 
-public Object get( Object key)
+public Object getAttr( Object key)
 	{
 	return _attrs.get(key);
 	}
 
-public bool has( Object key){
+public bool hasAttr( Object key){
     return _attrs.contains(key);
     }
 
@@ -39,7 +39,7 @@ public IPersistentMap attrs() {
     return _attrs;
 }
 
-public void remove(Object key) {
+public void removeAttr(Object key) {
     _attrs = _attrs.remove(key);
 }
 

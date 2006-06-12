@@ -18,19 +18,19 @@ public TObj() throws Exception{
 }
 
 
-public Object put( Object key, Object val) throws Exception {
+public Object putAttr( Object key, Object val) throws Exception {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     t = t.put(key, val);
     Transaction.set(_attrs,t);
     return val;
 }
 
-public Object get( Object key) throws Exception {
+public Object getAttr( Object key) throws Exception {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     return t.get(key);
 }
 
-public boolean has( Object key) throws Exception {
+public boolean hasAttr( Object key) throws Exception {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     return t.contains(key);
 }
@@ -39,7 +39,7 @@ public IPersistentMap attrs() throws Exception {
     return (IPersistentMap) Transaction.get(_attrs);
 }
 
-public void remove(Object key) throws Exception {
+public void removeAttr(Object key) throws Exception {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     t = t.remove(key);
     Transaction.set(_attrs,t);

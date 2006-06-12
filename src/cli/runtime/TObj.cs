@@ -21,19 +21,19 @@ public TObj(){
 }
 
 
-public Object put( Object key, Object val) {
+public Object putAttr( Object key, Object val) {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     t = t.put(key, val);
     Transaction.set(_attrs,t);
     return val;
 }
 
-public Object get( Object key) {
+public Object getAttr( Object key) {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     return t.get(key);
 }
 
-public bool has( Object key) {
+public bool hasAttr( Object key) {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     return t.contains(key);
 }
@@ -42,7 +42,7 @@ public IPersistentMap attrs() {
     return (IPersistentMap) Transaction.get(_attrs);
 }
 
-public void remove(Object key) {
+public void removeAttr(Object key) {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
     t = t.remove(key);
     Transaction.set(_attrs,t);

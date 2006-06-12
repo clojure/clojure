@@ -24,7 +24,7 @@ internal Keyword(String name):base(name)	{	}public Object invoke() /*throws 
 }/** *  Indexer implements IFn for attr access *  This single arg version is the getter * @param tld * @param obj - must be AMap * @return the value of the attr or nil if not found */public Object invoke( Object obj) /*throws Exception*/	{
     if (obj == null)
         return null;
-    return ((IObj)obj).get(this);	}/** *  Indexer implements IFn for attr access *  This two arg version is the setter * @param tld * @param obj - must be AMap * @param val * @return val */public Object invoke( Object obj, Object val) /*throws Exception*/	{	return ((IObj)obj).put(this,val);	}
+    return ((IObj)obj).getAttr(this);	}/** *  Indexer implements IFn for attr access *  This two arg version is the setter * @param tld * @param obj - must be AMap * @param val * @return val */public Object invoke( Object obj, Object val) /*throws Exception*/	{	return ((IObj)obj).putAttr(this,val);	}
 
 public Object invoke( Object arg1, Object arg2, Object arg3) /*throws Exception*/
 	{

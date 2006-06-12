@@ -12,13 +12,13 @@ package clojure.lang;
 
 
 public interface IObj {
-Object put( Object key, Object val) throws Exception;
+Object putAttr( Object key, Object val) throws Exception;
 
-Object get( Object key) throws Exception;
+Object getAttr( Object key) throws Exception;
 
-boolean has( Object key) throws Exception;
+boolean hasAttr( Object key) throws Exception;
 
 IPersistentMap attrs() throws Exception;
 
-void remove(Object key) throws Exception;
+void removeAttr(Object key) throws Exception;
 }

@@ -13,14 +13,14 @@ namespace clojure.lang
 	{
 	interface IObj
 		{
-		Object put(Object key, Object val);
+		Object putAttr(Object key, Object val);
 
-		Object get(Object key);
+		Object getAttr(Object key);
 
-		bool has(Object key);
+		bool hasAttr(Object key);
 
 		IPersistentMap attrs();
 
-		void remove(Object key);
+		void removeAttr(Object key);
 		}
 	}
