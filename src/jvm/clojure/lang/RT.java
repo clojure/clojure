@@ -262,18 +262,18 @@ return i;
 
 ///////////////////////////////// reader support ////////////////////////////////
 
-static Object readRet(int ret){
+static Character readRet(int ret){
     if(ret == -1)
         return null;
     return box((char) ret);
 }
 
-static public Object readChar(Reader r) throws Exception {
+static public Character readChar(Reader r) throws Exception {
     int ret = r.read();
     return readRet(ret);
 }
 
-static public Object peekChar(Reader r) throws Exception {
+static public Character peekChar(Reader r) throws Exception {
     int ret;
     if(r instanceof PushbackReader)
         {
@@ -296,9 +296,9 @@ static public int getLineNumber(Reader r){
     return 0;
 }
 
-static public Reader getLineNumberingReader(Reader r) {
+static public LineNumberingPushbackReader getLineNumberingReader(Reader r) {
     if(isLineNumberingReader(r))
-        return r;
+        return (LineNumberingPushbackReader) r;
     return new LineNumberingPushbackReader(r);
 }
 
