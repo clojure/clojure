@@ -306,6 +306,16 @@ static public boolean isLineNumberingReader(Reader r) {
     return r instanceof LineNumberingPushbackReader;
 }
 
+static public String resolveClassNameInContext(String className) {
+    //todo - look up in context var
+    return className;
+}
+
+static public boolean suppressRead(){
+    //todo - look up in suppress-read var
+    return false;
+}
+
 ///////////////////////////////// values //////////////////////////
 
 static public Object setValues(Object... vals)
