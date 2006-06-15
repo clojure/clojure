@@ -25,7 +25,7 @@ static readonly Random rand = new Random(42);
 public readonly String name;
 int hash = 0;
 
-public String toString()
+override public String ToString()
 	{
 	return name;
 	}

@@ -288,6 +288,59 @@ static public bool isLineNumberingReader(TextReader r)
 	return r is LineNumberingTextReader;
     }
 
+
+static public String resolveClassNameInContext(String className) {
+    //todo - look up in context var
+    return className;
+}
+
+static public bool suppressRead(){
+    //todo - look up in suppress-read var
+    return false;
+}
+
+static public void print(Object x, TextWriter w) {
+    //todo - make extensible
+    if(x == null)
+        w.Write("null");
+    else if(x is ISeq)
+        {
+        w.Write('(');
+        for(ISeq s = (ISeq)x;s != null;s = s.rest())
+            {
+            print(s.first(), w);
+            if(s.rest()!=null)
+                w.Write(' ');
+            }
+        w.Write(')');
+        }
+    else if(x is String)
+        {
+        w.Write('"');
+        w.Write(x.ToString());
+        w.Write('"');
+        }
+    else if(x is Char)
+        {
+        w.Write('\\');
+        char c = (char)x;
+        switch(c){
+            case '\n':
+                w.Write("newline");
+                break;
+            case '\t':
+                w.Write("tab");
+                break;
+            case ' ':
+                w.Write("space");
+                break;
+            default:
+                w.Write(c);
+                break;
+            }
+        }
+    else w.Write(x.ToString());
+}
 /*-------------------------------- values --------------*/
 
 static public Object setValues(params Object[] vals)

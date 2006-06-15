@@ -15,6 +15,8 @@ package clojure.lang;
 import java.util.Iterator;
 import java.io.Reader;
 import java.io.PushbackReader;
+import java.io.Writer;
+import java.io.IOException;
 
 public class RT{
 
@@ -316,6 +318,47 @@ static public boolean suppressRead(){
     return false;
 }
 
+static public void print(Object x, Writer w) throws Exception {
+    //todo - make extensible
+    if(x == null)
+        w.write("null");
+    else if(x instanceof ISeq)
+        {
+        w.write('(');
+        for(ISeq s = (ISeq)x;s != null;s = s.rest())
+            {
+            print(s.first(), w);
+            if(s.rest()!=null)
+                w.write(' ');
+            }
+        w.write(')');
+        }
+    else if(x instanceof String)
+        {
+        w.write('"');
+        w.write(x.toString());
+        w.write('"');
+        }
+    else if(x instanceof Character)
+        {
+        w.write('\\');
+        char c = ((Character)x).charValue();
+        switch(c){
+            case '\n':
+                w.write("newline");
+                break;
+            case '\t':
+                w.write("tab");
+                break;
+            case ' ':
+                w.write("space");
+                break;
+            default:
+                w.write(c);
+            }
+        }
+    else w.write(x.toString());
+}
 ///////////////////////////////// values //////////////////////////
 
 static public Object setValues(Object... vals)

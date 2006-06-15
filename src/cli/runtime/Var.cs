@@ -15,16 +15,16 @@ namespace clojure.lang
 {
 public class Var :  AFn
     {
-public readonly Symbol sym;public Namespace ns;public Binding binding;public IFn fn;  //todo, bind to throw stub?public IFn setfn;volatile IPersistentMap threadBindings = PersistentArrayIdentityMap.EMPTY;internal Var(Symbol sym, Namespace ns)	{	if(sym.GetType() != typeof(Symbol))	    throw new ArgumentException("Only simple symbols can be vars");	this.ns = ns;	this.sym = sym;	}public String toString()	{	if(ns == null)		return "#:" + sym;	return ns.name + ":" + sym;	}public Var bind(Object val)	{	if(binding == null)
+public readonly Symbol sym;public Namespace ns;public Binding binding;public IFn fn;  //todo, bind to throw stub?public IFn setfn;volatile IPersistentMap threadBindings = PersistentArrayIdentityMap.EMPTY;internal Var(Symbol sym, Namespace ns)	{	if(sym.GetType() != typeof(Symbol))	    throw new ArgumentException("Only simple symbols can be vars");	this.ns = ns;	this.sym = sym;	}override public String ToString()	{	if(ns == null)		return "#:" + sym;	return ns.name + ":" + sym;	}public Var bind(Object val)	{	if(binding == null)
 		binding = new Binding(val);	else		binding.val = val;
 
     if (val is IFn)
         this.fn = (IFn)val;
     else
         this.fn = null; //todo, bind to throw stub?	return this;	}public Object getValue()	{
-	Binding binding = getBinding();	if(binding != null)		return binding.val;	throw new InvalidOperationException(this.toString() + " is unbound.");	}public Object setValue(Object val)	{
+	Binding binding = getBinding();	if(binding != null)		return binding.val;	throw new InvalidOperationException(this.ToString() + " is unbound.");	}public Object setValue(Object val)	{
 	Binding b = getThreadBinding();	if(b != null)		return b.val = val;	if(binding == null)
-        throw new InvalidOperationException(this.toString() + " is unbound.");	if(val is IFn)		this.fn = (IFn) val;	else		this.fn = null; //todo, bind to throw stub?	return binding.val = val;	}
+        throw new InvalidOperationException(this.ToString() + " is unbound.");	if(val is IFn)		this.fn = (IFn) val;	else		this.fn = null; //todo, bind to throw stub?	return binding.val = val;	}
 
 public Binding pushThreadBinding(Object val) {
     Binding ret = new Binding(val, getThreadBinding());

@@ -19,6 +19,8 @@ public class LineNumberingTextReader : TextReader, IDisposable
     {
     TextReader impl;
     int line = 0;
+    int unreadChar;
+    bool haveUnread = false;
     
     public LineNumberingTextReader(TextReader r){
         this.impl = r;
@@ -29,11 +31,27 @@ public class LineNumberingTextReader : TextReader, IDisposable
 		}
 
     override public int Read(){
-        int ret = impl.Read();
+        int ret;
+        if(haveUnread)
+			{
+			ret = unreadChar;
+			haveUnread = false;
+			}
+		else
+			ret = impl.Read();
         if(ret == '\n')
             ++line;
         return ret;
         }
+        
+    public void unread(int ch){
+		if(haveUnread)
+			throw new InvalidOperationException("Can't unread more than once in a row");
+		unreadChar = ch;
+		haveUnread = true;
+		if (ch == '\n')
+			--line;
+		}
 
     override public int Peek(){
         return impl.Peek();

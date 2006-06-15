@@ -778,7 +778,7 @@ public void Reset()
 #endregion
     }
 
-    //*
+    /*
 	[STAThread]
 static public void Main(String[] args){
 	if(args.Length != 1)

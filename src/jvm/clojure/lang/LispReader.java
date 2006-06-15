@@ -10,10 +10,10 @@
 
 package clojure.lang;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.ArrayList;
 import java.math.BigInteger;
 
 public class LispReader {
@@ -33,8 +33,11 @@ static Pattern classNamePat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.");
 static{
 macros['"'] = new StringReader();
 macros[';'] = new CommentReader();
+macros['('] = new ListReader();
+macros[')'] = new UnmatchedDelimiterReader();
+macros['\\'] = new CharacterReader();
 }
-static public Object read(LineNumberingPushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
+static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
         throws Exception {
 
     for (; ;)
@@ -54,7 +57,7 @@ static public Object read(LineNumberingPushbackReader r, boolean eofIsError, Obj
         IFn macroFn = getMacro(ch);
         if (macroFn != null)
             {
-            Object ret = macroFn.invoke(r, ch);
+            Object ret = macroFn.invoke(r, (char)ch);
             if(RT.suppressRead())
                 return null;
             //no op macros return the reader
@@ -63,16 +66,16 @@ static public Object read(LineNumberingPushbackReader r, boolean eofIsError, Obj
             return ret;
             }
 
-        String token = readToken(r,ch);
+        String token = readToken(r,(char)ch);
         if(RT.suppressRead())
             return null;
         return interpretToken(token);
         }
 }
 
-static private String readToken(LineNumberingPushbackReader r, int initch) throws Exception {
+static private String readToken(PushbackReader r, char initch) throws Exception {
     StringBuilder sb = new StringBuilder();
-    sb.append((char)initch);
+    sb.append(initch);
 
     for(;;)
         {
@@ -166,22 +169,6 @@ static private boolean isMacro(int ch) {
 }
 
 
-public static void main(String[] args){
-    LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in));
-    Object ret = null;
-    try{
-        for(;;){
-        ret = LispReader.read(r, true, null, false);
-        System.out.println(ret.getClass().getName());
-        System.out.println(ret.toString());
-        }
-    }
-    catch(Exception e)
-        {
-        e.printStackTrace();
-        }
-}
-
 static class StringReader extends AFn{
     public Object invoke(Object reader, Object doublequote) throws Exception {
         StringBuilder sb = new StringBuilder();
@@ -219,8 +206,8 @@ static class StringReader extends AFn{
 			}
         return sb.toString();
     }
-}
 
+}
 static class CommentReader extends AFn{
     public Object invoke(Object reader, Object semicolon) throws Exception {
         Reader r = (Reader) reader;
@@ -231,6 +218,99 @@ static class CommentReader extends AFn{
             } while (ch != -1 && ch != '\n' && ch != '\r');
         return r;
     }
+
 }
+static class CharacterReader extends AFn{
+    public Object invoke(Object reader, Object backslash) throws Exception {
+        PushbackReader r = (PushbackReader) reader;
+        int ch = r.read();
+        if(ch == -1)
+            throw new Exception("EOF while reading character");
+        String token = readToken(r,(char)ch);
+        if(token.length() == 1)
+            return token.charAt(0);
+        else if(token.equals("newline"))
+            return '\n';
+        else if(token.equals("space"))
+            return ' ';
+        else if(token.equals("tab"))
+            return '\t';
+        throw new Exception("Unsupported character: \\" + token);
+    }
+
+}
+static class ListReader extends AFn{
+    public Object invoke(Object reader, Object leftparen) throws Exception {
+        PushbackReader r = (PushbackReader) reader;
+        return readDelimitedList(')', r, true);
+    }
+
+}
+static class UnmatchedDelimiterReader extends AFn{
+    public Object invoke(Object reader, Object rightdelim) throws Exception {
+        throw new Exception("Unmatched delimiter: " + rightdelim);
+    }
+
+}
+public static ISeq readDelimitedList(char delim, PushbackReader r, boolean isRecursive) throws Exception {
+    ArrayList a = new ArrayList();
+
+    for (; ;)
+        {
+        int ch = r.read();
+
+        while (Character.isWhitespace(ch))
+            ch = r.read();
+
+        if (ch == -1)
+            throw new Exception("EOF while reading");
+
+        if(ch == delim)
+            break;
+
+        IFn macroFn = getMacro(ch);
+        if (macroFn != null)
+            {
+            Object mret = macroFn.invoke(r, (char)ch);
+            //no op macros return the reader
+            if (mret != r)
+                a.add(mret);
+            }
+        else
+            {
+            r.unread(ch);
+
+            Object o = read(r, true, null, isRecursive);
+            if (o != r)
+                a.add(o);
+            }
+        }
+
+    ISeq ret = null;
+    for(int i=a.size()-1;i>=0;--i)
+        ret = RT.cons(a.get(i), ret);
+    return ret;
+}
+
+public static void main(String[] args){
+    LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in));
+    OutputStreamWriter w = new OutputStreamWriter(System.out);
+    Object ret = null;
+    try{
+        for(;;)
+            {
+            ret = LispReader.read(r, true, null, false);
+            RT.print(ret, w);
+            w.write('\n');
+            w.flush();
+            }
+        }
+    catch(Exception e)
+        {
+        e.printStackTrace();
+        }
+}
+
+
 }
 
