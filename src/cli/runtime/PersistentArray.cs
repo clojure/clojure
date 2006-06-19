@@ -69,7 +69,9 @@ internal class Master{
 	internal int load;
 	internal readonly int maxLoad;
 	internal readonly float loadFactor;
-
+    internal readonly int[] basis;
+    internal volatile Master next;
+    
 	internal Master(int size,Object defaultVal, float loadFactor){
 		this.array = new Entry[size];
 		this.defaultVal = defaultVal;
@@ -78,7 +80,19 @@ internal class Master{
 		this.maxLoad = (int)(size * loadFactor);
 		this.loadFactor = loadFactor;
 		}
-}
+	internal Master(Master parent)
+		{
+		this.array = new Entry[parent.array.Length];
+		this.defaultVal = parent.defaultVal;
+		this.rev = 0;
+		this.load = 0;
+		this.maxLoad = parent.maxLoad;
+		this.loadFactor = parent.loadFactor;
+		this.next = null;
+
+		this.basis = new int[parent.array.Length];
+		}
+	}
 
 internal class Entry
 	{
@@ -179,10 +193,21 @@ public void Reset()
 #endregion
 	}
 
+internal class Data{
 	internal readonly Master master;
 	internal readonly int rev;
 	internal readonly int baseline;
 	internal readonly BitArray history;
+	public Data(Master master, int rev, int baseline, BitArray history)
+		{
+		this.master = master;
+		this.rev = rev;
+		this.baseline = baseline;
+		this.history = history;
+		}	
+	}
+
+volatile Data data;
 
 public PersistentArray(int size)
 		: this(size, (Object)null)
@@ -195,51 +220,45 @@ public PersistentArray(int size, Object defaultVal)
 	}
 
 public PersistentArray(int size, Object defaultVal, float loadFactor){
-	this.master = new Master(size, defaultVal, loadFactor);
-	this.rev = 0;
-	this.baseline = 0;
-	this.history = null;
+	this.data = new Data(new Master(size, defaultVal, loadFactor), 0, 0, null);
 }
 
 	internal PersistentArray(Master master, int rev, int baseline, BitArray history)
 		{
-	this.master = master;
-	this.rev = rev;
-	this.baseline = baseline;
-	this.history = history;
+		this.data = new Data(master, rev, baseline, history);
 }
 
 public PersistentArray(int size, ISeq seq) : this(size){
     int load = 0;
     for(int i=0;seq != null && i < size;i++, seq=seq.rest())
         {
-        master.array[i] = new Entry(0,seq.first());
+        data.master.array[i] = new Entry(0,seq.first());
         ++load;
         }
 
-    master.load = load;
+	data.master.load = load;
 }
 
 public PersistentArray(IArray init) :this(init.length()) {
     int load = 0;
     for(int i=0;i < init.length();i++)
         {
-        master.array[i] = new Entry(0,init.get(i));
+		data.master.array[i] = new Entry(0, init.get(i));
         ++load;
         }
 
-    master.load = load;
+	data.master.load = load;
 }
 
 public int length(){
-	return master.array.Length;
+return data.master.array.Length;
 }
 
 public Object get(int i){
 	Entry e = getEntry(i);
 		if(e != null)
 				return e.val;
-	return master.defaultVal;
+			return data.master.defaultVal;
 }
 
 public bool has(int i){
@@ -248,35 +267,50 @@ public bool has(int i){
 
 public PersistentArray resize(int newLength)
 	{
-	PersistentArray ret = new PersistentArray(newLength, master.defaultVal, master.loadFactor);
+	PersistentArray ret = new PersistentArray(newLength, data.master.defaultVal, data.master.loadFactor);
 	for (int i = 0; i < Math.Min(length(), newLength); i++)
 		{
 		Entry e = getEntry(i);
 		if (e != null)
 			{
-			ret.master.array[i] = Entry.create(0, e.val, null);
-			++ret.master.load;
+			ret.data.master.array[i] = Entry.create(0, e.val, null);
+			++ret.data.master.load;
 			}
 		}
 	return ret;
 	}
 
 public int load(){
-    return master.load;
+return data.master.load;
 }
 
-public PersistentArray isolate()
+public void isolate()
 	{
-	return resize(length());
+    lock(data.master)
+        {
+        Master nextMaster = new Master(data.master);
+        int load = 0;
+        for(int i=0;i<length();i++)
+            {
+            Entry entry = getEntry(i);
+            if(entry != null)
+                {
+                nextMaster.array[i] = new Entry(0,entry.val);
+                ++load;
+                }
+            }
+        nextMaster.load = load;
+        this.data = new Data(nextMaster, 0, 0, null);
+        }
 	}
 	
 Entry getEntry(int i){
-	for(Entry e = (Entry) master.array[i];e != null;e = e.rest())
+for (Entry e = (Entry)data.master.array[i]; e != null; e = e.rest())
 		{
-		if(e.rev <= rev)
+		if (e.rev <= data.rev)
 			{
-			if(e.rev >= baseline
-			   || (history != null && e.rev < history.Length && history.Get(e.rev)))
+			if (e.rev >= data.baseline
+			   || (data.history != null && e.rev < data.history.Length && data.history.Get(e.rev)))
 				return e;
 			}
 		}
@@ -284,15 +318,77 @@ Entry getEntry(int i){
 }
 
 public IArray set(int i,Object val) {
-	if(master.load >= master.maxLoad)
-		return isolate().set(i,val);
-	lock(master){
+//if (data.master.load >= data.master.maxLoad)
+//		{
+//		isolate();
+//		//set(i,val);
+//		}
+	lock (data.master)
+		{
+		if (data.master.load >= data.master.maxLoad)
+			//isolate();
+			trim();
 		PersistentArray ret = getSetArray();
 		ret.doSet(i, val);
 		return ret;
 	}
 }
 
+private void trim(){
+    //must be called inside lock of master
+	if (data.master.next == null) //this master has never been trimmed
+        {
+		Master nextMaster = new Master(data.master);
+		int load = 0;
+		for(int i=0;i<length();i++)
+		    {
+		    Entry entry = getEntry(i);
+		    if(entry != null)
+		        {
+		        nextMaster.array[i] = new Entry(0,entry.val);
+		        nextMaster.basis[i] = entry.rev;
+		        ++load;
+		        }
+		    }
+		nextMaster.load = load;
+		Data nextData = new Data(nextMaster, 0, 0, null);
+		data.master.next = nextMaster;
+		data = nextData;
+		}
+    else //this master has been trimmed, but this rev is not yet propagated
+        {
+        Master nextMaster = data.master.next;
+        int diff = 0;
+        for(int i=0;diff+i<length();i++)
+            {
+            Entry e = getEntry(i);
+            if(e != null && e.rev != nextMaster.basis[i])
+                ++diff;
+            }
+        if(diff >= length()/2 || nextMaster.load + diff > nextMaster.maxLoad)
+            isolate();
+        else
+            {
+            Data nextData;
+            lock(nextMaster){
+                int rev = ++nextMaster.rev;
+                for(int i=0;i<length();i++)
+                    {
+                    Entry e = getEntry(i);
+                    if(e != null && e.rev != nextMaster.basis[i])
+                        {
+                        nextMaster.array[i] = Entry.create(rev, e.val, nextMaster.array[i]);
+                        ++nextMaster.load;
+                        }
+                    }
+                BitArray history = new BitArray(rev);
+                history.Set(0,true);
+                nextData = new Data(nextMaster,rev,rev,history);
+                }
+            this.data = nextData;
+            }
+        }
+}
 
 override public bool Equals(Object key){
     if(this == key) return true;
@@ -333,32 +429,32 @@ private bool equalKey(Object k1, Object k2)
 	
 void doSet(int i, Object val){
 	//must now be called inside lock of master
-	master.array[i] = Entry.create(rev, val, master.array[i]);
-	++master.load;
+data.master.array[i] = Entry.create(data.rev, val, data.master.array[i]);
+++data.master.load;
 }
 
 PersistentArray getSetArray(){
 	//must now be called inside lock of master
 	//is this a sequential update?
-	if (master.rev == rev)
+if (data.master.rev == data.rev)
 		{
-		return new PersistentArray(master, ++master.rev, baseline, history);
+		return new PersistentArray(data.master, ++data.master.rev, data.baseline, data.history);
 		}
 	else //gap
 		{
 
-		int nextRev = ++master.rev;
+		int nextRev = ++data.master.rev;
 		BitArray nextHistory;
-		if (history != null)
+		if (data.history != null)
 			{
-			nextHistory = (BitArray) history.Clone();
-			nextHistory.Length = rev+1;
+			nextHistory = (BitArray)data.history.Clone();
+			nextHistory.Length = data.rev + 1;
 			}
 		else
-			nextHistory = new BitArray(rev+1);
-		for(int i=baseline;i<=rev;i++)
+			nextHistory = new BitArray(data.rev + 1);
+		for (int i = data.baseline; i <= data.rev; i++)
 			nextHistory.Set(i,true);
-		return new PersistentArray(master, nextRev, nextRev, nextHistory);
+		return new PersistentArray(data.master, nextRev, nextRev, nextHistory);
 		}
 }
 
@@ -375,7 +471,7 @@ static public void Main(String[] args){
 	int reads = Int32.Parse(args[2]);
 	ArrayList v = ArrayList.Synchronized(new ArrayList(size));
 	//v.setSize(size);
-	PersistentArray p = new PersistentArray(size);
+	IArray p = new PersistentArray(size);
 
 	for(int i = 0; i < size; i++)
 		{
@@ -404,10 +500,12 @@ static public void Main(String[] args){
 	rand = new Random(42);
 	long tp = 0;
 	start = DateTime.Now;
+	IArray oldp = p;
 	for (int i = 0; i < writes; i++)
 		{
 		p =	p.set(rand.Next(size), i);
 		//dummy set to force perverse branching
+		oldp = oldp.set(i%size, i);
 		//p.set(i%size, i);
 		}
 	for(int i = 0; i < reads; i++)

@@ -65,6 +65,8 @@ static class Master{
     int load;
     final int maxLoad;
     final float loadFactor;
+    final int[] basis;
+    volatile Master next;
 
     Master(int size,Object defaultVal, float loadFactor){
         this.array = new Entry[size];//new AtomicReferenceArray(size);
@@ -73,6 +75,20 @@ static class Master{
         this.load = 0;//new AtomicInteger(0);
         this.maxLoad = (int) (size * loadFactor);
         this.loadFactor = loadFactor;
+        basis = null;
+        next = null;
+        }
+
+    Master(Master parent){
+        this.array = new Entry[parent.array.length];
+        this.defaultVal = parent.defaultVal;
+        this.rev = 0;
+        this.load = 0;
+        this.maxLoad = parent.maxLoad;
+        this.loadFactor = parent.loadFactor;
+        this.next = null;
+
+        this.basis = new int[parent.array.length];
         }
 }
 
@@ -155,10 +171,21 @@ static class ValIter implements Iterator{
 	}
 }
 
+static class Data{
 final Master master;
 final int rev;
 final int baseline;
 final BitSet history;
+
+    public Data(Master master, int rev, int baseline, BitSet history) {
+        this.master = master;
+        this.rev = rev;
+        this.baseline = baseline;
+        this.history = history;
+    }
+}
+
+volatile Data data;
 
 public PersistentArray(int size){
 	this(size, (Object)null);
@@ -169,17 +196,11 @@ public PersistentArray(int size, Object defaultVal){
 }
 
 public PersistentArray(int size, Object defaultVal, float loadFactor){
-	this.master = new Master(size, defaultVal,loadFactor);
-	this.rev = 0;
-	this.baseline = 0;
-	this.history = null;
+	this.data = new Data(new Master(size, defaultVal,loadFactor),0,0,null);
 }
 
 PersistentArray(Master master,int rev,int baseline, BitSet history){
-	this.master = master;
-	this.rev = rev;
-	this.baseline = baseline;
-	this.history = history;
+    this.data = new Data(master,rev,baseline,history);
 }
 
 public PersistentArray(int size, ISeq seq) throws Exception {
@@ -187,11 +208,11 @@ public PersistentArray(int size, ISeq seq) throws Exception {
     int load = 0;
     for(int i=0;seq != null && i < size;i++, seq=seq.rest())
         {
-        master.array[i] = new Entry(0,seq.first());
+        data.master.array[i] = new Entry(0,seq.first());
         ++load;
         }
 
-    master.load = load;
+    data.master.load = load;
 }
 
 public PersistentArray(IArray init)  {
@@ -199,23 +220,22 @@ public PersistentArray(IArray init)  {
     int load = 0;
     for(int i=0;i < init.length();i++)
         {
-        master.array[i] = new Entry(0,init.get(i));
+        data.master.array[i] = new Entry(0,init.get(i));
         ++load;
         }
 
-    master.load = load;
+    data.master.load = load;
 }
 
 final public int length(){
-	return master.array.length;
-	//return master.array.length();
+	return data.master.array.length;
 }
 
 final public Object get(int i) {
     Entry e = getEntry(i);
     if(e != null)
         return e.val;
-    return master.defaultVal;
+    return data.master.defaultVal;
 }
 
 final public boolean has(int i){
@@ -223,21 +243,19 @@ final public boolean has(int i){
 }
 
 final public PersistentArray resize(int newLength) {
-    PersistentArray ret = new PersistentArray(newLength, master.defaultVal, master.loadFactor);
+    PersistentArray ret = new PersistentArray(newLength, data.master.defaultVal, data.master.loadFactor);
     int load = 0;
     for(int i=0;i< Math.min(length(),newLength);i++)
         {
         Entry e = getEntry(i);
         if(e != null)
             {
-            ret.master.array[i] = new Entry(0,e.val);
-            //ret.master.array.set(i,Entry.create(0,e.val, null));
+            ret.data.master.array[i] = new Entry(0,e.val);
             ++load;
             }
         }
 
-	ret.master.load = load;
-	//ret.master.load.set(load);
+	ret.data.master.load = load;
 
     return ret;
 }
@@ -247,22 +265,35 @@ final public PersistentArray resize(int newLength) {
  * @return number of values (of all revisions) stored in shared array
  */
 final public int load(){
-	return master.load;
-	//return master.load.get();
+	return data.master.load;
 }
 
-final public PersistentArray isolate() {
-    return resize(length());
+final public void isolate() {
+    synchronized(data.master)
+        {
+        Master nextMaster = new Master(data.master);
+        int load = 0;
+        for(int i=0;i<length();i++)
+            {
+            Entry entry = getEntry(i);
+            if(entry != null)
+                {
+                nextMaster.array[i] = new Entry(0,entry.val);
+                ++load;
+                }
+            }
+        nextMaster.load = load;
+        this.data = new Data(nextMaster, 0, 0, null);
+        }
 }
 
-final Entry getEntry(int i){
-	for(Entry e = master.array[i];e != null;e = e.rest())
-	//	for(Entry e = (Entry) master.array.get(i);e != null;e = e.rest())
+private Entry getEntry(int i){
+	for(Entry e = data.master.array[i];e != null;e = e.rest())
 		{
-		if(e.rev <= rev)
+		if(e.rev <= data.rev)
 			{
-			if(e.rev >= baseline
-			   || (history != null && history.get(e.rev)))
+			if(e.rev >= data.baseline
+			   || (data.history != null && data.history.get(e.rev)))
 				return e;
 			}
 		}
@@ -270,16 +301,70 @@ final Entry getEntry(int i){
 }
 
 final public PersistentArray set(int i,Object val) {
-	if(master.load >= master.maxLoad)
-		//if(master.load.get() >= master.maxLoad)
-			return isolate().set(i,val);
-	synchronized(master){
+    synchronized(data.master){
+        if(data.master.load >= data.master.maxLoad)
+            trim();
 		PersistentArray ret = getSetArray();
 		ret.doSet(i, val);
 		return ret;
 	}
 }
 
+private void trim(){
+    //must be called inside lock of master
+    if(data.master.next == null) //this master has never been trimmed
+        {
+        Master nextMaster = new Master(data.master);
+        int load = 0;
+        for(int i=0;i<length();i++)
+            {
+            Entry entry = getEntry(i);
+            if(entry != null)
+                {
+                nextMaster.array[i] = new Entry(0,entry.val);
+                nextMaster.basis[i] = entry.rev;
+                ++load;
+                }
+            }
+        nextMaster.load = load;
+        Data nextData = new Data(nextMaster, 0, 0, null);
+        data.master.next = nextMaster;
+        data = nextData;
+        }
+    else //this master has been trimmed, but this rev is not yet propagated
+        {
+        Master nextMaster = data.master.next;
+        int diff = 0;
+        for(int i=0;diff+i<length();i++)
+            {
+            Entry e = getEntry(i);
+            if(e != null && e.rev != nextMaster.basis[i])
+                ++diff;
+            }
+        if(diff >= length()/2 || nextMaster.load + diff > nextMaster.maxLoad)
+            isolate();
+        else
+            {
+            Data nextData;
+            synchronized(nextMaster){
+                int rev = ++nextMaster.rev;
+                for(int i=0;i<length();i++)
+                    {
+                    Entry e = getEntry(i);
+                    if(e != null && e.rev != nextMaster.basis[i])
+                        {
+                        nextMaster.array[i] = Entry.create(rev, e.val, nextMaster.array[i]);
+                        ++nextMaster.load;
+                        }
+                    }
+                BitSet history = new BitSet(rev);
+                history.set(0);
+                nextData = new Data(nextMaster,rev,rev,history);
+                }
+            this.data = nextData;
+            }
+        }
+}
 
 public boolean equals(Object key){
     if(this == key) return true;
@@ -316,39 +401,29 @@ private boolean equalKey(Object k1,Object k2){
     return k1.equals(k2);
 }
 
-final void doSet(int i, Object val){
-//	Entry oldEntry, newEntry;
-//	do
-//		{
-//		oldEntry = (Entry) master.array.get(i);
-//		newEntry = Entry.create(rev, val, oldEntry);
-//		} while(!master.array.compareAndSet(i, oldEntry, newEntry));
-
-	//must now be called inside lock of master
-	master.array[i] = Entry.create(rev, val, master.array[i]);
-	//master.load.incrementAndGet();
-	++master.load;
+private  void doSet(int i, Object val){
+	//must be called inside lock of master
+	data.master.array[i] = Entry.create(data.rev, val, data.master.array[i]);
+	++data.master.load;
 }
 
-final PersistentArray getSetArray(){
-	//must now be called inside lock of master
+private PersistentArray getSetArray(){
+	//must be called inside lock of master
 	//is this a sequential update?
-	if(master.rev == rev)
-		//if(master.rev.compareAndSet(rev, rev + 1))
+	if(data.master.rev == data.rev)
 		{
-		return new PersistentArray(master, ++master.rev, baseline, history);
+		return new PersistentArray(data.master, ++data.master.rev, data.baseline, data.history);
 		}
 	else //gap
 		{
-		//nextRev = master.rev.incrementAndGet();
-		int nextRev = ++master.rev;
+		int nextRev = ++data.master.rev;
 		BitSet nextHistory;
-		if(history != null)
-			nextHistory = (BitSet) history.clone();
+		if(data.history != null)
+			nextHistory = (BitSet) data.history.clone();
 		else
-			nextHistory = new BitSet(rev+1);
-		nextHistory.set(baseline,rev+1);
-		return new PersistentArray(master, nextRev, nextRev, nextHistory);
+			nextHistory = new BitSet(data.rev+1);
+		nextHistory.set(data.baseline,data.rev+1);
+		return new PersistentArray(data.master, nextRev, nextRev, nextHistory);
 		}
 
 }
@@ -393,11 +468,14 @@ static public void main(String[] args){
 	rand = new Random(42);
 	startTime = System.nanoTime();
 	long tp = 0;
-	for(int i = 0; i < writes; i++)
+
+    PersistentArray oldp = p;
+
+    for(int i = 0; i < writes; i++)
 		{
 		p =	p.set(rand.nextInt(size), i);
 		//dummy set to force perverse branching
-		//p.set(i%size, i);
+        //oldp =	oldp.set(rand.nextInt(size), i);
 		}
 	for(int i = 0; i < reads; i++)
 		{
