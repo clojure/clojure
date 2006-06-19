@@ -44,7 +44,7 @@ namespace clojure.lang
  * Java implementation is lock-free
  */
 
-public class PersistentArray : IEnumerable, ISequential{
+public class PersistentArray : IEnumerable, IArray{
 
 	#region IEnumerable Members
 
@@ -118,7 +118,7 @@ internal class EntryLink : Entry
 	}
 }
 
-internal class Seq : ISeq{
+internal class Seq : IndexedSeq{
 	readonly PersistentArray p;
 	readonly int i;
 
@@ -136,7 +136,16 @@ internal class Seq : ISeq{
             return new Seq(p, i + 1);
         return null;
     }
-}
+
+#region IndexedSeq Members
+
+public int index()
+	{
+	return i;
+	}
+
+#endregion
+	}
 
 internal class ValIter : IEnumerator
 	{
@@ -176,7 +185,7 @@ public void Reset()
 	internal readonly BitArray history;
 
 public PersistentArray(int size)
-		: this(size, null)
+		: this(size, (Object)null)
 		{
 		}
 		
@@ -200,7 +209,27 @@ public PersistentArray(int size, Object defaultVal, float loadFactor){
 	this.history = history;
 }
 
+public PersistentArray(int size, ISeq seq) : this(size){
+    int load = 0;
+    for(int i=0;seq != null && i < size;i++, seq=seq.rest())
+        {
+        master.array[i] = new Entry(0,seq.first());
+        ++load;
+        }
 
+    master.load = load;
+}
+
+public PersistentArray(IArray init) :this(init.length()) {
+    int load = 0;
+    for(int i=0;i < init.length();i++)
+        {
+        master.array[i] = new Entry(0,init.get(i));
+        ++load;
+        }
+
+    master.load = load;
+}
 
 public int length(){
 	return master.array.Length;
@@ -254,7 +283,7 @@ Entry getEntry(int i){
 	return null;
 }
 
-public PersistentArray set(int i,Object val) {
+public IArray set(int i,Object val) {
 	if(master.load >= master.maxLoad)
 		return isolate().set(i,val);
 	lock(master){
@@ -264,6 +293,44 @@ public PersistentArray set(int i,Object val) {
 	}
 }
 
+
+override public bool Equals(Object key){
+    if(this == key) return true;
+    if(key == null || !(key is IArray)) return false;
+
+    IArray a = (IArray) key;
+
+    if(a.length() != length())
+        return false;
+
+    for(int i = 0; i < length(); i++)
+        {
+        if(!equalKey(get(i),a.get(i)))
+            return false;
+        }
+
+    return true;
+}
+
+override public int GetHashCode()
+	{
+	int ret = 0;
+	for (int i = 0; i < length(); i++)
+		{
+		Object o = get(i);
+		if (o != null)
+			ret ^= o.GetHashCode();
+		}
+	return ret;
+	}
+
+private bool equalKey(Object k1, Object k2)
+	{
+	if (k1 == null)
+		return k2 == null;
+	return k1.Equals(k2);
+	}
+	
 void doSet(int i, Object val){
 	//must now be called inside lock of master
 	master.array[i] = Entry.create(rev, val, master.array[i]);

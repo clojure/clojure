@@ -64,6 +64,17 @@ public class RT{
 //               ?Boolean.TRUE:null;
 //        }
 
+static public ISeq seq(Object coll) throws Exception {
+    if(coll == null || coll instanceof ISeq)
+        return (ISeq) coll;
+    else if(coll instanceof ISequential)
+        return ((ISequential) coll).seq();
+    else if(coll instanceof Object[])
+        return ArraySeq.create((Object[]) coll);
+    else
+        throw new IllegalArgumentException("Don't know how to create ISeq from arg");
+}
+
 static public Iter iter(Object coll)
     {
     if(coll == null || coll instanceof Iter)

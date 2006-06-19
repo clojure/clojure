@@ -8,29 +8,40 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
+/* rich Jun 19, 2006 */
+
 using System;
 
 namespace clojure.lang
 {
-/**
- * ArrayMap using identity (==) comparison instead of equals
- */
-public class PersistentArrayIdentityMap : PersistentArrayMap {
 
-new public static PersistentArrayIdentityMap EMPTY = new PersistentArrayIdentityMap();
+public class ArraySeq : IndexedSeq{
+readonly Object[] array;
+readonly int i;
 
-override public IPersistentMap empty() {
-    return EMPTY;
+static public ArraySeq create(Object[] array){
+	if(array.Length == 0)
+		return null;
+	return new ArraySeq(array, 0);
 }
 
-PersistentArrayIdentityMap() {
+ArraySeq(Object[] array, int i){
+	this.array = array;
+	this.i = i;
 }
 
-public PersistentArrayIdentityMap(params Object[] init) :base(init) {
+public Object first() {
+	return array[i];
 }
 
-internal override bool equalKey(Object k1, Object k2) {
-    return k1 == k2;
+public ISeq rest() {
+	if(i+1 < array.Length)
+		return new ArraySeq(array, i + 1);
+	return null;
+}
+
+public int index(){
+	return i;
 }
 }
 

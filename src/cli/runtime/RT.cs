@@ -65,6 +65,17 @@ public class RT
 	//    ?T:null;
 	//    }
 
+static public ISeq seq(Object coll) {
+    if(coll == null || coll is ISeq)
+        return (ISeq) coll;
+    else if(coll is ISequential)
+        return ((ISequential) coll).seq();
+    else if(coll is Object[])
+        return ArraySeq.create((Object[]) coll);
+    else
+        throw new ArgumentException("Don't know how to create ISeq from arg");
+}
+
     static public Iter iter(Object coll)
         {
         if (coll == null || coll is Iter)

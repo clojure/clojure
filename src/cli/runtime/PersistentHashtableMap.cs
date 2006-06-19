@@ -112,7 +112,7 @@ PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
 	    newEntries = createListMap(key, val);
 		//newEntries = createArrayMap(new Object[]{key, val});
 
-    return array.set(i, newEntries);
+	return (PersistentArray)array.set(i, newEntries);
 }
 
 public IPersistentMap remove(Object key) {
@@ -122,7 +122,7 @@ public IPersistentMap remove(Object key) {
         {
         IPersistentMap newEntries = entries.remove(key);
         if (newEntries != entries)
-            return create(_count - 1, array.set(i, newEntries));
+			return create(_count - 1, (PersistentArray)array.set(i, newEntries));
         }
     //not there, no op
     return this;

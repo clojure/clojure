@@ -25,7 +25,7 @@ IPersistentMap empty() {
     return EMPTY;
 }
 
-public PersistentArrayIdentityMap(Object[] init) {
+public PersistentArrayIdentityMap(Object... init) {
     super(init);
 }
 

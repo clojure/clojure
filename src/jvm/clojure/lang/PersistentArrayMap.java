@@ -37,7 +37,7 @@ protected PersistentArrayMap(){
  * This ctor captures/aliases the passed array, so do not modify later
  * @param init {key1,val1,key2,val2,...}
  */
-public PersistentArrayMap(Object[] init){
+public PersistentArrayMap(Object... init){
     this.array = init;
 }
 

@@ -12,15 +12,12 @@
 
 package clojure.lang;
 
-public class Tuple implements ISequential{
+public class Tuple implements IArray{
 
 final Object[] array;
 
 final public static Tuple EMPTY = new Tuple();
 
-static public Tuple create(Object... init){
-	return new Tuple(init);
-}
 /**
  * This ctor captures/aliases the passed array, so do not modify later !
  * @param init {key1,val1,key2,val2,...}
@@ -29,26 +26,40 @@ public Tuple(Object... init){
 	this.array = init;
 }
 
+public int length() {
+    return array.length;
+}
+
 public Object get(int i){
-	return array[i];
+    return array[i];
+}
+
+/**
+ *
+ * @param i
+ * @param val
+ * @return  a PersistentArray
+ */
+public IArray set(int i, Object val) {
+    return (new PersistentArray(this)).set(i, val);
 }
 
 public boolean equals(Object key){
-	if(this == key) return true;
-	if(key == null || getClass() != key.getClass()) return false;
+    if(this == key) return true;
+    if(key == null || !(key instanceof IArray)) return false;
 
-	final Tuple tuple = (Tuple) key;
+    final IArray a = (IArray) key;
 
-	if(tuple.array.length != array.length)
-		return false;
+    if(a.length() != array.length)
+        return false;
 
-	for(int i = 0; i < array.length; i++)
-		{
-		if(!equalKey(array[i],tuple.array[i]))
-			return false;
-		}
+    for(int i = 0; i < array.length; i++)
+        {
+        if(!equalKey(array[i],a.get(i)))
+            return false;
+        }
 
-	return true;
+    return true;
 }
 
 public int hashCode(){

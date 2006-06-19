@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class ArraySeq implements ISeq{
+public class ArraySeq implements IndexedSeq{
 final Object[] array;
 final int i;
 

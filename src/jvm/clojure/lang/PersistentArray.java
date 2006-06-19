@@ -46,7 +46,7 @@ import java.util.Random;
  * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
  */
 
-public class PersistentArray implements Iterable, ISequential{
+public class PersistentArray implements Iterable, IArray {
 
 public Iterator iterator(){
 	return new ValIter(this);
@@ -109,7 +109,7 @@ static class EntryLink extends Entry{
     }
 }
 
-static class Seq implements ISeq{
+static class Seq implements IndexedSeq{
 	final PersistentArray p;
 	final int i;
 
@@ -126,6 +126,10 @@ static class Seq implements ISeq{
         if(i+1 < p.length())
             return new Seq(p, i + 1);
         return null;
+    }
+
+    public int index() {
+        return i;
     }
 }
 
@@ -157,7 +161,7 @@ final int baseline;
 final BitSet history;
 
 public PersistentArray(int size){
-	this(size, null);
+	this(size, (Object)null);
 }
 
 public PersistentArray(int size, Object defaultVal){
@@ -178,7 +182,29 @@ PersistentArray(Master master,int rev,int baseline, BitSet history){
 	this.history = history;
 }
 
+public PersistentArray(int size, ISeq seq) throws Exception {
+    this(size);
+    int load = 0;
+    for(int i=0;seq != null && i < size;i++, seq=seq.rest())
+        {
+        master.array[i] = new Entry(0,seq.first());
+        ++load;
+        }
 
+    master.load = load;
+}
+
+public PersistentArray(IArray init)  {
+    this(init.length());
+    int load = 0;
+    for(int i=0;i < init.length();i++)
+        {
+        master.array[i] = new Entry(0,init.get(i));
+        ++load;
+        }
+
+    master.load = load;
+}
 
 final public int length(){
 	return master.array.length;
@@ -252,6 +278,42 @@ final public PersistentArray set(int i,Object val) {
 		ret.doSet(i, val);
 		return ret;
 	}
+}
+
+
+public boolean equals(Object key){
+    if(this == key) return true;
+    if(key == null || !(key instanceof IArray)) return false;
+
+    final IArray a = (IArray) key;
+
+    if(a.length() != length())
+        return false;
+
+    for(int i = 0; i < length(); i++)
+        {
+        if(!equalKey(get(i),a.get(i)))
+            return false;
+        }
+
+    return true;
+}
+
+public int hashCode(){
+	int ret = 0;
+	for(int i = 0; i < length(); i++)
+		{
+		Object o = get(i);
+		if(o != null)
+			ret ^= o.hashCode();
+		}
+	return ret;
+}
+
+private boolean equalKey(Object k1,Object k2){
+    if(k1 == null)
+        return k2 == null;
+    return k1.equals(k2);
 }
 
 final void doSet(int i, Object val){
