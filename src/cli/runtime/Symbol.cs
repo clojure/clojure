@@ -33,7 +33,8 @@ override public String ToString()
 public static Symbol intern(String name)	{	lock(table)		{		Symbol sym = (Symbol) table[name];		if(sym == null)		    {		    if(name[0] == ':')		        sym = new Keyword(name);
             else if (name[0] == '.')
                 sym = new Accessor(name);
-            else		        sym = new Symbol(name);			table.Add(name, sym);			}		return sym;		}	}
+            else		        sym = new Symbol(name);		    if(table[name] != null) //defend against recursive static init
+				return (Symbol)table[name];			table.Add(name, sym);			}		return sym;		}	}
 /**
  * Used by Namespace.intern()
  * @param name

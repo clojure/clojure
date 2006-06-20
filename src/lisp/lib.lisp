@@ -9,7 +9,7 @@
 ; **/
 
 (in-module "clojure")
-(import "org.clojure.runtime" '(Num RT IntegerNum Cons))
+(import "clojure.lang" '(Num RT IntegerNum Cons))
 #+:JVM(import "java.lang" '(System))
 #+:CLI(import "System" '(Console))
 

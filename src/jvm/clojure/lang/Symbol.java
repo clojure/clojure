@@ -43,6 +43,8 @@ public static Symbol intern(String name)
                 sym = new Accessor(name);
             else
                 sym = new Symbol(name);
+            if(table.get(name) != null) //defend against recursive static init
+                return (Symbol) table.get(name);
             table.put(name, sym);
             }
         return sym;
