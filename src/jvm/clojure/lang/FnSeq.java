@@ -14,10 +14,12 @@ public class FnSeq implements ISeq{
 
 Object _first;
 IFn restFn;
+volatile ISeq _rest;
 
 public FnSeq(Object first, IFn restFn) {
     this._first = first;
     this.restFn = restFn;
+    this._rest = this;
 }
 
 public Object first() {
@@ -25,6 +27,15 @@ public Object first() {
 }
 
 public ISeq rest() throws Exception {
-    return (ISeq) restFn.invoke();
+    if(_rest != this)
+        return _rest;
+    synchronized(this){
+        if(_rest == this)
+            {
+            _rest = (ISeq) restFn.invoke();
+            restFn = null;
+            }
+        return _rest;
+    }
 }
 }

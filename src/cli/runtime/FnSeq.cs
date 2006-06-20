@@ -17,19 +17,30 @@ public class FnSeq : ISeq{
 
 Object _first;
 IFn restFn;
+volatile ISeq _rest;
 
 public FnSeq(Object first, IFn restFn) {
     this._first = first;
     this.restFn = restFn;
-}
+	this._rest = this;
+	}
 
 public Object first() {
     return _first;
 }
 
 public ISeq rest() {
-    return (ISeq) restFn.invoke();
-}
+    if(_rest != this)
+        return _rest;
+    lock(this){
+        if(_rest == this)
+            {
+            _rest = (ISeq) restFn.invoke();
+            restFn = null;
+            }
+        return _rest;
+		}
+    }
 }
 
 }
