@@ -174,10 +174,17 @@ static public ISeq seq(Object coll) {
     {
         return Convert.ToDouble(x);
     }
-static public Cons cons(Object x, ISeq y)
-	{
-	return new Cons(x, y);
-	}
+static public Cons cons(Object x, Object y) {
+return new Cons(x, seq(y));
+}
+
+static public Object first(Object x) {
+    return seq(x).first();
+}
+
+static public ISeq rest(Object x) {
+    return seq(x).rest();
+}
 
 static public Cons list()
 	{

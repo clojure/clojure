@@ -73,13 +73,13 @@ public PersistentTree remove(Object key){
 	return new PersistentTree(comp, t.blacken(), _count - 1);
 }
 
-public ISeq seq() {
+public ISeq seq() throws Exception {
     if(_count > 0)
         return Seq.create(tree, true);
     return null;
 }
 
-public ISeq rseq() {
+public ISeq rseq() throws Exception {
     if(_count > 0)
         return Seq.create(tree, false);
     return null;
@@ -615,16 +615,16 @@ static public class Seq implements ISeq{
         this.asc = asc;
     }
 
-    static Seq create(Node t, boolean asc){
-		return new Seq(push(t, null, asc),asc);
-	}
+    static Seq create(Node t, boolean asc) throws Exception {
+        return new Seq(push(t, null, asc),asc);
+    }
 
-	static ISeq push(Node t, ISeq stack, boolean asc){
-		while(t != null)
-			{
-			stack = RT.cons(t,stack);
-			t = asc ? t.left() : t.right();
-			}
+	static ISeq push(Node t, ISeq stack, boolean asc) throws Exception {
+        while(t != null)
+            {
+            stack = RT.cons(t,stack);
+            t = asc ? t.left() : t.right();
+            }
         return stack;
     }
 
