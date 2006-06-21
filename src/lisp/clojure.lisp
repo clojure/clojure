@@ -52,11 +52,11 @@
 ;build the library
 (let ((*clojure-source-path* #p"/dev/clojure/src/lisp/")
       (*clojure-target-path* #p"/dev/clojure/classes/"))
-  (compile-to :jvm "org.clojure" "Clojure"
+  (compile-to :jvm "clojure.lib" "Clojure"
               "lib.lisp"))
 (let ((*clojure-source-path* #p"/dev/clojure/src/lisp/")
       (*clojure-target-path* #p"/dev/clojure/classes/test/"))
-  (compile-to :cli "org.clojure" "Clojure"
+  (compile-to :cli "clojure.lib" "Clojure"
               "lib.lisp"))
 
 |#
@@ -827,13 +827,7 @@
                  (mapcar (lambda (e)
                            (emit-to-string
                              (emit :expression e)))
-                         (ldiff args (nthcdr +MAX-POSITIONAL-ARITY+ args))))
-         (when (nthcdr +MAX-POSITIONAL-ARITY+ args)
-           (format t ",new Object[]{~{~A~^,~}}"
-                   (mapcar (lambda (e)
-                             (emit-to-string
-                               (emit :expression e)))
-                           (nthcdr +MAX-POSITIONAL-ARITY+ args))))
+                         args))
          (format t ")")))))))
 
 
@@ -1011,7 +1005,7 @@
                          (newobj :binding (newobj :type :global-binding :symbol (first b))
                                  :init (analyze :expression (second b))))
                        bindings)))
-         (register-needs-tls)
+         ;(register-needs-tls)
          (newobj :type :bind
                  :binding-inits binding-inits
                  :body (analyze-body context (macroexpand body))))))))
@@ -1439,8 +1433,8 @@
 (defun register-keyword-reference (sym)
   (pushnew sym *keywords*))
 
-(defun register-needs-tls ()
-  (setf (@ :needs-tls *frame*) t))
+;(defun register-needs-tls ()
+;  (setf (@ :needs-tls *frame*) t))
 
 (defun register-local-binding (b)
   (push b (@ :local-bindings *frame*)))
@@ -1475,8 +1469,8 @@
           ;not a local var
           (progn
             (register-var-reference sym)
-            (unless (eql context :fn)
-              (register-needs-tls))
+            ;(unless (eql context :fn)
+            ;  (register-needs-tls))
             (newobj :type :global-binding :symbol sym)
             )))))
 
