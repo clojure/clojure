@@ -335,7 +335,7 @@ private void trim(){
         {
         Master nextMaster = data.master.next;
         int diff = 0;
-        for(int i=0;diff+i<length();i++)
+        for(int i=0;i<length()/2;i++)
             {
             Entry e = getEntry(i);
             if(e != null && e.rev != nextMaster.basis[i])
