@@ -28,7 +28,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		throws Exception;
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
-                     ISeq args) throws Exception;
+                     Object... args) throws Exception;
 
 public Object applyTo(ISeq arglist) throws Exception;
 }

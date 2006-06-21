@@ -167,17 +167,17 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 
 public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,
                                           Object arg4,
-                                          ISeq arglist)
+                                          Object... args)
 		throws Exception
 	{
-	Object[] args = new Object[4 + RT.length(arglist)];
-	args[0] = arg1;
-	args[1] = arg2;
-	args[2] = arg3;
-	args[3] = arg4;
-	for(int i = 4; arglist != null; i++, arglist = arglist.rest())
-		args[i] = arglist.first();
-	return invokeInstanceMethod(name, target, args);
+	Object[] arguments = new Object[4 + args.length];
+	arguments[0] = arg1;
+	arguments[1] = arg2;
+	arguments[2] = arg3;
+	arguments[3] = arg4;
+    if(args.length > 0)
+        System.arraycopy(args, 0, arguments, 4, args.length);
+	return invokeInstanceMethod(name, target, arguments);
 	}
 
 

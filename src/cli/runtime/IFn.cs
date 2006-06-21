@@ -30,7 +30,7 @@ Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 		/*throws Exception*/;
 
 Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5,
-                     ISeq args) /*throws Exception*/;
+                     params Object[] args) /*throws Exception*/;
 
 Object applyTo( ISeq arglist) /*throws Exception*/;
 }

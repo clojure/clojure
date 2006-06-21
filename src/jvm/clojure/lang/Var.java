@@ -134,7 +134,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
     return fn.invoke(arg1, arg2, arg3, arg4, arg5);
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object... args)
         throws Exception {
     return fn.invoke(arg1, arg2, arg3, arg4, arg5, args);
 }

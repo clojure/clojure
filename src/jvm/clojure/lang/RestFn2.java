@@ -57,10 +57,10 @@ public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object
 	return doInvoke( arg1, arg2, RT.list(arg3, arg4, arg5));
 	}
 
-public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object... args)
 		throws Exception
 	{
-	return doInvoke( arg1, arg2, RT.listStar(arg3, arg4, arg5, args));
+	return doInvoke( arg1, arg2, RT.listStar(arg3, arg4, arg5, RT.seq(args)));
 	}
 }
 

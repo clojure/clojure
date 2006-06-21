@@ -60,10 +60,10 @@ override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg
 	return doInvoke( arg1, arg2, RT.list(arg3, arg4, arg5));
 	}
 
-override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
+override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, params Object[] args)
 		/*throws Exception*/
 	{
-	return doInvoke( arg1, arg2, RT.listStar(arg3, arg4, arg5, args));
+	return doInvoke( arg1, arg2, RT.listStar(arg3, arg4, arg5, RT.seq(args)));
 	}
 }
 }

@@ -249,6 +249,14 @@ static public Cons arrayToList(Object[] a)
         return ret;
     }
 
+static public Object[] seqToArray(ISeq seq) {
+    int len = length(seq);
+    Object[] ret = new Object[len];
+    for(int i=0;seq != null;++i, seq = seq.rest())
+        ret[i] = seq.first();
+    return ret;
+}
+
 static public int length(ISeq list)
 	{
 	int i = 0;

@@ -45,7 +45,7 @@ public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object
 	return throwArity();
 	}
 
-public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq args)
+public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object... args)
 		throws Exception
 	{
 	return throwArity();
@@ -90,7 +90,7 @@ static public Object applyToHelper(IFn ifn, ISeq arglist) throws Exception
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
 					, (arglist = arglist.rest()).first()
-					, arglist.rest());
+					, RT.seqToArray(arglist.rest()));
 		}
 	}
 

@@ -251,6 +251,14 @@ static public Cons arrayToList(Object[] a) throws Exception {
     return ret;
 }
 
+static public Object[] seqToArray(ISeq seq) throws Exception {
+    int len = length(seq);
+    Object[] ret = new Object[len];
+    for(int i=0;seq != null;++i, seq = seq.rest())
+        ret[i] = seq.first();
+    return ret;
+}
+
 static public int length(ISeq list) throws Exception {
 int i = 0;
 for(ISeq c = list; c != null; c = c.rest())
