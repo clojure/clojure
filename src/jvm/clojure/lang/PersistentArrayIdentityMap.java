@@ -21,6 +21,10 @@ public static PersistentArrayIdentityMap EMPTY = new PersistentArrayIdentityMap(
 private PersistentArrayIdentityMap() {
 }
 
+PersistentArrayMap create(Object... init){
+    return new PersistentArrayIdentityMap(init);
+}
+
 IPersistentMap empty() {
     return EMPTY;
 }

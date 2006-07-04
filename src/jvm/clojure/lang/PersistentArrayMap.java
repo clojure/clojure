@@ -33,6 +33,10 @@ protected PersistentArrayMap(){
     this.array = RT.EMPTY_ARRAY;
 }
 
+PersistentArrayMap create(Object... init){
+    return new PersistentArrayMap(init);
+}
+
 /**
  * This ctor captures/aliases the passed array, so do not modify later
  * @param init {key1,val1,key2,val2,...}
@@ -79,7 +83,7 @@ public IPersistentMap put(Object key, Object val) {
         newArray[0] = key;
         newArray[1] = val;
         }
-    return new PersistentArrayMap(newArray);
+    return create(newArray);
 }
 
 public IPersistentMap remove(Object key) {
@@ -99,7 +103,7 @@ public IPersistentMap remove(Object key) {
                 d += 2;
                 }
             }
-        return new PersistentArrayMap(newArray);
+        return create(newArray);
         }
     //don't have key, no op
     return this;
@@ -109,7 +113,7 @@ IPersistentMap empty() {
     return EMPTY;
 }
 
-public Object get(Object key) {
+final public Object get(Object key) {
     int i = indexOf(key);
     if(i >= 0)
         return array[i + 1];
@@ -120,7 +124,7 @@ public int capacity() {
     return count();
 }
 
-int indexOf(Object key){
+private int indexOf(Object key){
     for(int i=0;i<array.length;i+=2)
         {
         if(equalKey(array[i],key))
