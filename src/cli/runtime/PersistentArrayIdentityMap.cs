@@ -26,6 +26,11 @@ override public IPersistentMap empty() {
 PersistentArrayIdentityMap() {
 }
 
+override internal PersistentArrayMap create(params Object[] init)
+		{
+		return new PersistentArrayIdentityMap(init);
+		}
+
 public PersistentArrayIdentityMap(params Object[] init) :base(init) {
 }
 

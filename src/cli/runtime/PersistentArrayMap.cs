@@ -35,6 +35,10 @@ protected PersistentArrayMap(){
     this.array = RT.EMPTY_ARRAY;
 }
 
+virtual internal PersistentArrayMap create(params Object[] init){
+    return new PersistentArrayMap(init);
+}
+
 /**
  * This ctor captures/aliases the passed array, so do not modify later
  * @param init {key1,val1,key2,val2,...}
@@ -81,7 +85,7 @@ public IPersistentMap put(Object key, Object val) {
         newArray[0] = key;
         newArray[1] = val;
         }
-    return new PersistentArrayMap(newArray);
+    return create(newArray);
 }
 
 public IPersistentMap remove(Object key) {
@@ -101,7 +105,7 @@ public IPersistentMap remove(Object key) {
                 d += 2;
                 }
             }
-        return new PersistentArrayMap(newArray);
+        return create(newArray);
         }
     //don't have key, no op
     return this;
