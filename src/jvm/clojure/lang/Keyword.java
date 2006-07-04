@@ -43,7 +43,7 @@ public Object invoke(Object obj) throws Exception
     {
     if (obj == null)
         return null;
-    return ((IObj)obj).getAttr(this);
+    return ((IPersistentMap)obj).get(this);
     }
 
 /**
@@ -56,7 +56,7 @@ public Object invoke(Object obj) throws Exception
  */
 public Object invoke(Object obj, Object val) throws Exception
 	{
-	return ((IObj)obj).putAttr(this,val);
+	return ((IPersistentMap)obj).put(this,val);
 	}
 
 public Object invoke( Object arg1, Object arg2, Object arg3) throws Exception
