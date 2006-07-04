@@ -26,6 +26,7 @@ import java.util.Iterator;
 public class PersistentArrayMap implements IPersistentMap, ISequential {
 
 final Object[] array;
+static final int HASHTABLE_THRESHOLD = 42;
 
 public static PersistentArrayMap EMPTY = new PersistentArrayMap();
 
@@ -35,6 +36,10 @@ protected PersistentArrayMap(){
 
 PersistentArrayMap create(Object... init){
     return new PersistentArrayMap(init);
+}
+
+IPersistentMap createHT(Object[] init){
+    return new PersistentHashtableMap(init);
 }
 
 /**
@@ -69,13 +74,16 @@ public IPersistentMap add(Object key, Object val) throws Exception {
         }
     else //didn't have key, grow
         {
+        if(array.length > HASHTABLE_THRESHOLD)
+            return createHT(array).add(key, val);
         newArray = new Object[array.length + 2];
         if(array.length > 0)
             System.arraycopy(array,0,newArray,2,array.length);
         newArray[0] = key;
         newArray[1] = val;
         }
-    return create(newArray);}
+    return create(newArray);
+}
 
 public IPersistentMap put(Object key, Object val) {
     int i = indexOf(key);
@@ -89,6 +97,8 @@ public IPersistentMap put(Object key, Object val) {
         }
     else //didn't have key, grow
         {
+        if(array.length > HASHTABLE_THRESHOLD)
+            return createHT(array).put(key, val);
         newArray = new Object[array.length + 2];
         if(array.length > 0)
             System.arraycopy(array,0,newArray,2,array.length);

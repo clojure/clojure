@@ -31,6 +31,10 @@ override internal PersistentArrayMap create(params Object[] init)
 		return new PersistentArrayIdentityMap(init);
 		}
 
+override internal IPersistentMap createHT(Object[] init){
+    return new PersistentHashtableIdentityMap(init);
+}
+
 public PersistentArrayIdentityMap(params Object[] init) :base(init) {
 }
 

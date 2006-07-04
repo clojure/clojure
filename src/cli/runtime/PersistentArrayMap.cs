@@ -30,6 +30,8 @@ public class PersistentArrayMap : IPersistentMap, ISequential {
 internal readonly Object[] array;
 
 	public static PersistentArrayMap EMPTY = new PersistentArrayMap();
+	
+	internal const int HASHTABLE_THRESHOLD = 42;
 
 protected PersistentArrayMap(){
     this.array = RT.EMPTY_ARRAY;
@@ -39,6 +41,9 @@ virtual internal PersistentArrayMap create(params Object[] init){
     return new PersistentArrayMap(init);
 }
 
+virtual internal IPersistentMap createHT(Object[] init){
+    return new PersistentHashtableMap(init);
+}
 /**
  * This ctor captures/aliases the passed array, so do not modify later
  * @param init {key1,val1,key2,val2,...}
@@ -71,7 +76,9 @@ public IPersistentMap add(Object key, Object val) {
         }
     else //didn't have key, grow
         {
-        newArray = new Object[array.Length + 2];
+		if (array.Length > HASHTABLE_THRESHOLD)
+			return createHT(array).add(key, val);
+		newArray = new Object[array.Length + 2];
         if(array.Length > 0)
             Array.Copy(array,0,newArray,2,array.Length);
         newArray[0] = key;
@@ -92,7 +99,9 @@ public IPersistentMap put(Object key, Object val) {
         }
     else //didn't have key, grow
         {
-        newArray = new Object[array.Length + 2];
+		if (array.Length > HASHTABLE_THRESHOLD)
+			return createHT(array).put(key, val);
+		newArray = new Object[array.Length + 2];
         if(array.Length > 0)
             Array.Copy(array,0,newArray,2,array.Length);
         newArray[0] = key;

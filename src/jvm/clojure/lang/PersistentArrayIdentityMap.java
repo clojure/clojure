@@ -25,6 +25,9 @@ PersistentArrayMap create(Object... init){
     return new PersistentArrayIdentityMap(init);
 }
 
+IPersistentMap createHT(Object[] init){
+    return new PersistentHashtableIdentityMap(init);
+}
 IPersistentMap empty() {
     return EMPTY;
 }
