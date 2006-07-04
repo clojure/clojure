@@ -14,7 +14,6 @@ package clojure.lang;
 
 public class ThreadLocalData{
 
-private static ThreadLocal<Transaction> transaction = new ThreadLocal<Transaction>();
 private static ThreadLocal<Object[]> values = new ThreadLocal<Object[]>();
 
 static public Object[] getValues(){
@@ -25,14 +24,7 @@ static public void setValues(Object[] vals) {
     values.set(vals);
 }
 
-static public Transaction getTransaction() {
-    return transaction.get();
 
-}
-
-static public void setTransaction(Transaction t){
-    transaction.set(t);
-}
 
 
 private static ThreadLocal<Integer> tltest = new ThreadLocal<Integer>();

@@ -21,6 +21,23 @@ public class Transaction{
 public const int COMMITTED = 0;
 public const int WORKING = 1;
 static readonly Object lockObj = new Object();
+[ThreadStatic]
+private static Transaction transaction;
+
+static volatile int tcount = 0;
+
+static Transaction getTransaction()
+	{
+	if(tcount == 0)
+		return null;
+	return transaction;
+	}
+
+static void setTransaction(Transaction t)
+	{
+	transaction = t;
+	}
+
 
 volatile static int nextSeq = 1;
 
@@ -42,6 +59,7 @@ internal Info(int seq,int status){
 }
 }
 
+static Info bigbang = new Info(0,COMMITTED);
 
 Info info;
 int startSeq;
@@ -51,42 +69,48 @@ Dictionary<TRef,ISeq> commutates;
 
 
 static public Object runInTransaction(ThreadLocalData tld,IFn fn) {
-	if(ThreadLocalData.getTransaction() != null)
+	if(getTransaction() != null)
 		return fn.invoke(tld);
 	Transaction t = new Transaction();
-	ThreadLocalData.setTransaction(t);
-	try{
+	setTransaction(t);
+	Interlocked.Increment(ref tcount);
+	try
+		{
 		return t.run(fn);
 		}
 	finally{
-		ThreadLocalData.setTransaction(null);
+		setTransaction(null);
+		Interlocked.Decrement(ref tcount);
 		}
 }
 
 static public TRef tref(Object val) {
-	Transaction trans = ThreadLocalData.getTransaction();
+	Transaction trans = getTransaction();
 	TRef tref = new TRef();
-	trans.doSet(tref, val);
+	if(trans == null)
+		tref.push(val,bigbang);
+	else
+		trans.doSet(tref, val);
 	return tref;
 }
 
 static public Object get(TRef tref) {
-    Transaction trans = ThreadLocalData.getTransaction();
+    Transaction trans = getTransaction();
     if(trans != null)
         return trans.doGet(tref);
     return getCurrent(tref).val;
     }
 
 static public Object set(TRef tref, Object val) {
-	 return ThreadLocalData.getTransaction().doSet(tref,val);
+	 return getTransaction().doSet(tref,val);
 }
 
 static public void touch(TRef tref) {
-	ThreadLocalData.getTransaction().doTouch(tref);
+	getTransaction().doTouch(tref);
 }
 
 static public void commutate(TRef tref, IFn fn) {
-	ThreadLocalData.getTransaction().doCommutate(tref, fn);
+	getTransaction().doCommutate(tref, fn);
 }
 
 

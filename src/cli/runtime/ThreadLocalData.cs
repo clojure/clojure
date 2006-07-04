@@ -18,8 +18,6 @@ namespace clojure.lang
 public class ThreadLocalData{
 
 [ThreadStatic]
-private static Transaction transaction;
-[ThreadStatic]
 private static Object[] values;
 
 static public Object[] getValues(){
@@ -30,13 +28,6 @@ static public void setValues(Object[] vals) {
     values = vals;
 }
 
-static public Transaction getTransaction() {
-    return transaction;
-}
-
-static public void setTransaction(Transaction t){
-    transaction = t;
-}
 
 
 }
