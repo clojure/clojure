@@ -48,9 +48,14 @@ public IMapEntry find(Object key) {
     return impl.find(key);
 }
 
-public IPersistentMap add(Object key) {
-    return put(key, null);
-}
+public IPersistentMap add(Object key,Object val) {
+    IPersistentMap newImpl = impl.add(key,val);
+    if(newImpl.capacity() == CAPACITY_THRESHOLD)
+        {
+        newImpl = createHashtableMap(((PersistentArrayMap)newImpl).array);
+        }
+    return create(newImpl);
+    }
 
 public IPersistentMap put(Object key, Object val) {
     IPersistentMap newImpl = impl.put(key,val);

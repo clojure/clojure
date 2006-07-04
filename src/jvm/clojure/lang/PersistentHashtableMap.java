@@ -74,8 +74,13 @@ public IMapEntry find(Object key) {
     return null;
 }
 
-public IPersistentMap add(Object key) {
-    return put(key, null);
+public IPersistentMap add(Object key, Object val) throws Exception {
+    if(_count > growAtCount)
+        return grow().add(key, val);
+    int i = bucketFor(key,array);
+    int incr = 1;
+    PersistentArray newArray = doAdd(i, key, val, array);
+    return create(_count + incr, newArray, growAtCount);
 }
 
 public IPersistentMap put(Object key, Object val) {
@@ -102,7 +107,19 @@ PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
         }
     else
 	    newEntries = createListMap(key, val);
-		//newEntries = createArrayMap(new Object[]{key, val});
+
+    return array.set(i, newEntries);
+}
+
+PersistentArray doAdd(int i,Object key,Object val,PersistentArray array) throws Exception{
+    IPersistentMap entries = (IPersistentMap) array.get(i);
+    IPersistentMap newEntries;
+    if (entries != null)
+        {
+        newEntries = entries.add(key, val);
+        }
+    else
+	    newEntries = createListMap(key, val);
 
     return array.set(i, newEntries);
 }

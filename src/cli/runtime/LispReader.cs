@@ -298,6 +298,7 @@ public static ISeq readDelimitedList(char delim, LineNumberingTextReader r, bool
     return ret;
 }
 
+/*
 public static void Main(String[] args){
     LineNumberingTextReader r = new LineNumberingTextReader(Console.In);
     TextWriter w = Console.Out;
@@ -317,7 +318,7 @@ public static void Main(String[] args){
         Console.Error.WriteLine(e.StackTrace);
         }
 }
-
+//*/
 
 }
 

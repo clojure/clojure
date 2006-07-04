@@ -52,9 +52,14 @@ public bool contains(Object key){
 	return find(key) != null;
 }
 
-	public IPersistentMap add(Object key)
+public IPersistentMap add(Object key,Object val){
+	Box found = new Box(null);
+	Node t = add(tree, key, val, found);
+	if(t == null)   //null == already contains key
 		{
-	return put(key, null);
+		throw new Exception("Key already present");
+		}
+	return new PersistentTree(comp, t.blacken(), _count + 1);
 }
 
 public IPersistentMap put(Object key, Object val){
@@ -778,7 +783,7 @@ public void Reset()
 #endregion
     }
 
-    /*
+    //*
 	[STAThread]
 static public void Main(String[] args){
 	if(args.Length != 1)

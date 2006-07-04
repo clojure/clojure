@@ -60,8 +60,8 @@ public virtual IMapEntry find(Object key){
 	return null;
 }
 
-public virtual IPersistentMap add(Object key){
-	return put(key, null);
+public virtual IPersistentMap add(Object key, Object val){
+	return put(key, val);
 }
 
 public virtual IPersistentMap put(Object key, Object val){
@@ -185,6 +185,15 @@ internal class Tail : PersistentListMap {
 		return null;
 	}
 
+	override public IPersistentMap add(Object key, Object val)
+		{
+		if (equalKey(key, _key))
+			{
+			throw new Exception("Key already present");
+			}
+		return new Link(key, val, this);
+		}
+
 	override public IPersistentMap put(Object key, Object val)
 		{
 		if(equalKey(key,_key))  //replace
@@ -255,6 +264,16 @@ internal class Link : PersistentListMap {
 		return _rest.find(key);
 	}
 
+	override public IPersistentMap add(Object key, Object val)
+		{
+		IMapEntry e = find(key);
+		if(e != null)
+			{
+			throw new Exception("Key already present");
+			}
+		return new Link(key,val,this);
+	}
+	
 	override public IPersistentMap put(Object key, Object val)
 		{
 		IMapEntry e = find(key);

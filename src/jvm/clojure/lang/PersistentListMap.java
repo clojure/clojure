@@ -60,8 +60,8 @@ public IMapEntry find(Object key){
 	return null;
 }
 
-public IPersistentMap add(Object key){
-	return put(key, null);
+public IPersistentMap add(Object key, Object val) throws Exception {
+    return put(key, val);
 }
 
 public PersistentListMap put(Object key, Object val){
@@ -164,6 +164,14 @@ static class Tail extends PersistentListMap {
 		return null;
 	}
 
+    public PersistentListMap add(Object key, Object val) throws Exception {
+        if(equalKey(key,_key))  //replace
+            {
+            throw new Exception("Key already present");
+            }
+        return new Link(key,val,this);
+    }
+
 	public PersistentListMap put(Object key, Object val){
 		if(equalKey(key,_key))  //replace
 			{
@@ -231,7 +239,16 @@ static class Link extends PersistentListMap {
 		return _rest.find(key);
 	}
 
-	public PersistentListMap put(Object key, Object val){
+    public PersistentListMap add(Object key, Object val) throws Exception {
+        IMapEntry e = find(key);
+        if(e != null)
+            {
+            throw new Exception("Key already present");
+            }
+        return new Link(key,val,this);
+    }
+
+    public PersistentListMap put(Object key, Object val){
 		IMapEntry e = find(key);
 		if(e != null)
 			{

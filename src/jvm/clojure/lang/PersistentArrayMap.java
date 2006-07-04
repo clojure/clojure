@@ -60,10 +60,22 @@ public IMapEntry find(Object key) {
     return null;
 }
 
-public IPersistentMap add(Object key) {
-
-    return put(key,null);
-}
+public IPersistentMap add(Object key, Object val) throws Exception {
+    int i = indexOf(key);
+    Object[] newArray;
+    if(i >= 0)
+        {
+        throw new Exception("Key already present");
+        }
+    else //didn't have key, grow
+        {
+        newArray = new Object[array.length + 2];
+        if(array.length > 0)
+            System.arraycopy(array,0,newArray,2,array.length);
+        newArray[0] = key;
+        newArray[1] = val;
+        }
+    return create(newArray);}
 
 public IPersistentMap put(Object key, Object val) {
     int i = indexOf(key);

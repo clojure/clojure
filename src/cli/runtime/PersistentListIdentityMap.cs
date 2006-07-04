@@ -71,9 +71,9 @@ namespace clojure.lang
 			return null;
 			}
 
-		public virtual IPersistentMap add(Object key)
+		public virtual IPersistentMap add(Object key, Object val)
 			{
-			return put(key, null);
+			return put(key, val);
 			}
 
 		public virtual IPersistentMap put(Object key, Object val)
@@ -205,6 +205,15 @@ namespace clojure.lang
 				return null;
 				}
 
+			override public IPersistentMap add(Object key, Object val)
+				{
+				if ((key == _key))
+					{
+					throw new Exception("Key already present");
+					}
+				return new Link(key, val, this);
+				}
+
 			override public IPersistentMap put(Object key, Object val)
 				{
 				if ((key == _key))  //replace
@@ -284,6 +293,16 @@ namespace clojure.lang
 				return _rest.find(key);
 				}
 
+			override public IPersistentMap add(Object key, Object val)
+				{
+				IMapEntry e = find(key);
+				if (e != null)
+					{
+					throw new Exception("Key already present");
+					}
+				return new Link(key, val, this);
+				}
+			
 			override public IPersistentMap put(Object key, Object val)
 				{
 				IMapEntry e = find(key);

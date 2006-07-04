@@ -22,7 +22,7 @@ bool contains(Object key);
 
 IMapEntry find(Object key);
 
-IPersistentMap add(Object key);
+IPersistentMap add(Object key, Object val);
 
 IPersistentMap put(Object key, Object val);
 

@@ -42,8 +42,14 @@ public boolean contains(Object key){
 	return find(key) != null;
 }
 
-public PersistentTree add(Object key){
-	return put(key, null);
+public PersistentTree add(Object key, Object val) throws Exception {
+    Box found = new Box(null);
+    Node t = add(tree, key, val, found);
+    if(t == null)   //null == already contains key
+        {
+        throw new Exception("Key already present");
+        }
+    return new PersistentTree(comp, t.blacken(), _count + 1);
 }
 
 public PersistentTree put(Object key, Object val){
@@ -726,8 +732,13 @@ static public void main(String args[]){
 		}
 	Collections.shuffle(Arrays.asList(ints));
 	//force the ListMap class loading now
-	PersistentListMap.EMPTY.add(1).add(2).add(3);
-	System.out.println("Building set");
+    try {
+    PersistentListMap.EMPTY.add(1, null).add(2,null).add(3,null);
+    } catch (Exception e)
+        {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    System.out.println("Building set");
 	//IPersistentMap set = new PersistentHybridMap(1001);
 	IPersistentMap set = new PersistentHashtableMap(1001);
 	//IPersistentMap set = new ListMap();
