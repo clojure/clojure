@@ -12,15 +12,14 @@
 
 package clojure.lang;
 
-public class Obj implements IObj {
+public class Obj {
 
 volatile IPersistentMap _attrs = PersistentArrayIdentityMap.EMPTY;
 
-public Object putAttr( Object key, Object val)
-	{
-	_attrs = _attrs.put(key, val);
-	return val;
-	}
+public Object addAttr( Object key, Object val) throws Exception {
+    _attrs = _attrs.add(key, val);
+    return val;
+    }
 
 public Object getAttr( Object key)
 	{
@@ -36,7 +35,4 @@ public IPersistentMap attrs() {
     return _attrs;
 }
 
-public void removeAttr(Object key) {
-    _attrs = _attrs.remove(key);
-}
 }

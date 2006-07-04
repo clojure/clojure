@@ -15,13 +15,13 @@ using System;
 namespace clojure.lang
 {
 
-public class Obj : IObj
-{
+public class Obj{
+
 volatile IPersistentMap _attrs = PersistentArrayIdentityMap.EMPTY;
 
-public Object putAttr( Object key, Object val)
+public Object addAttr( Object key, Object val)
 	{
-	_attrs = _attrs.put(key, val);
+	_attrs = _attrs.add(key, val);
 	return val;
 	}
 
@@ -37,10 +37,6 @@ public bool hasAttr( Object key){
 
 public IPersistentMap attrs() {
     return _attrs;
-}
-
-public void removeAttr(Object key) {
-    _attrs = _attrs.remove(key);
 }
 
 }
