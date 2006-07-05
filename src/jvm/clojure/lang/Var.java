@@ -13,14 +13,15 @@
 package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Random;
 
 public class Var extends AFn {
 
 public final Symbol sym;
 public Namespace namespace;
 public Binding binding;
-public IFn fn;  //todo, bind to throw stub?
-public IFn setfn;
+AtomicInteger tcount = new AtomicInteger(0);
 AtomicReference<IPersistentMap> threadBindings = new AtomicReference(PersistentArrayIdentityMap.EMPTY);
 
 Var(Symbol sym, Namespace ns) {
@@ -42,11 +43,6 @@ public Var bind(Object val) {
     else
         binding.val = val;
 
-    if (val instanceof IFn)
-        this.fn = (IFn) val;
-    else
-        this.fn = null; //todo, bind to throw stub?
-
     return this;
 }
 
@@ -64,26 +60,23 @@ public Object setValue(Object val) {
     if (binding == null)
         throw new IllegalStateException(this.toString() + " is unbound.");
 
-    if (val instanceof IFn)
-        this.fn = (IFn) val;
-    else
-        this.fn = null; //todo, bind to throw stub?
-
     return binding.val = val;
 }
 
 public Binding pushThreadBinding(Object val) {
     Binding ret = new Binding(val, getThreadBinding());
     setThreadBinding(ret);
+    tcount.incrementAndGet();
     return ret;
 }
 
 public void popThreadBinding() {
     setThreadBinding(getThreadBinding().rest);
+    tcount.decrementAndGet();
 }
 
 private Binding getThreadBinding() {
-    if (threadBindings.get().count() > 0)
+    if (tcount.get() != 0)
         return (Binding) threadBindings.get().get(Thread.currentThread());
     return null;
 }
@@ -109,34 +102,90 @@ private void setThreadBinding(Binding b) {
         } while (!threadBindings.compareAndSet(tb, newtb));
 }
 
+private IFn fn(){
+    return (IFn)getValue();
+}
+
 public Object invoke() throws Exception {
-    return fn.invoke();
+    return fn().invoke();
 }
 
 public Object invoke(Object arg1) throws Exception {
-    return fn.invoke(arg1);
+    return fn().invoke(arg1);
 }
 
 public Object invoke(Object arg1, Object arg2) throws Exception {
-    return fn.invoke(arg1, arg2);
+    return fn().invoke(arg1, arg2);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception {
-    return fn.invoke(arg1, arg2, arg3);
+    return fn().invoke(arg1, arg2, arg3);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception {
-    return fn.invoke(arg1, arg2, arg3, arg4);
+    return fn().invoke(arg1, arg2, arg3, arg4);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
         throws Exception {
-    return fn.invoke(arg1, arg2, arg3, arg4, arg5);
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object... args)
         throws Exception {
-    return fn.invoke(arg1, arg2, arg3, arg4, arg5, args);
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, args);
 }
 
+static volatile Integer o = 1;
+
+public static void main(String[] args){
+
+    try
+        {
+        int n = Integer.parseInt(args[0]);
+        class Test extends AFn{
+            int x = 0;
+            public Object invoke(Object arg1) throws Exception {
+                x += o.intValue();
+                return this;
+            }
+
+            public String toString() {
+                return Integer.toString(x);
+            }
+
+        }
+
+        Var test = Namespace.intern("test", "test");
+
+        test.bind(new Test());
+
+        Random rand;
+
+        Object result = 0;
+
+        rand = new Random(42);
+        long startTime = System.nanoTime();
+
+        for(int i=0;i<n;i++)
+            result = test.invoke(result);
+        long estimatedTime = System.nanoTime() - startTime;
+        System.out.println("val:" + result + ", time: " + estimatedTime/1000000);
+
+        rand = new Random(42);
+        startTime = System.nanoTime();
+
+        for(int i=0;i<n;i++)
+            result = ((IFn)test.getValue()).invoke(result);
+        estimatedTime = System.nanoTime() - startTime;
+        System.out.println("val:" + result + ", time: " + estimatedTime/1000000);
+
+        }
+
+    catch (Exception e)
+        {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+}
 }
