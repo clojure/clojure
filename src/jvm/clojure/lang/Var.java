@@ -102,7 +102,7 @@ private void setThreadBinding(Binding b) {
         } while (!threadBindings.compareAndSet(tb, newtb));
 }
 
-private IFn fn(){
+final public IFn fn(){
     return (IFn)getValue();
 }
 

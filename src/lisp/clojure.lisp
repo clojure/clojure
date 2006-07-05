@@ -839,7 +839,7 @@
     ((:expression :return)
      (format t "~A.getValue()" (var-member-name (@ :symbol expr))))
     (:fn
-     (format t "~A.fn" (var-member-name (@ :symbol expr))))
+     (format t "~A.fn()" (var-member-name (@ :symbol expr))))
     (:statement)))
 
 (defun emit-accessor (context expr)
@@ -1138,7 +1138,7 @@
 (defun emit-main (context expr)
   (ccase context
     (:top
-     (format t "static public void ~A(String[] args){~%try{~%~A.fn.invoke(args);~%}~%catch(Exception ex){}~%}~%"
+     (format t "static public void ~A(String[] args){~%try{~%~A.fn().invoke(args);~%}~%catch(Exception ex){}~%}~%"
              (main-string) (var-member-name (@ :fname expr))))))
 
 (defun main-string ()
