@@ -37,14 +37,11 @@ public Object get(int i){
     return array[i];
 }
 
-/**
- *
- * @param i
- * @param val
- * @return  a PersistentArray
- */
+
 public IArray set(int i, Object val) {
-    return (new PersistentArray(this)).set(i, val);
+	Object[] newArray = (Object[])array.Clone();
+	newArray[i] = val;
+    return new Tuple(newArray);
 }
 
 override public bool Equals(Object key){
