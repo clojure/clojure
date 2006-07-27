@@ -69,7 +69,7 @@ internal class Master{
 	internal int load;
 	internal readonly int maxLoad;
 	internal readonly float loadFactor;
-    internal readonly int[] basis;
+    internal int[] basis;
     internal volatile Master next;
     
 	internal Master(int size,Object defaultVal, float loadFactor){
@@ -194,7 +194,7 @@ public void Reset()
 	}
 
 internal class Data{
-	internal readonly Master master;
+	internal Master master;
 	internal readonly int rev;
 	internal readonly int baseline;
 	internal readonly BitArray history;
@@ -207,7 +207,7 @@ internal class Data{
 		}	
 	}
 
-volatile Data data;
+internal volatile Data data;
 
 public PersistentArray(int size)
 		: this(size, (Object)null)
@@ -250,11 +250,11 @@ public PersistentArray(IArray init) :this(init.length()) {
 	data.master.load = load;
 }
 
-public int length(){
+virtual public int length(){
 return data.master.array.Length;
 }
 
-public Object get(int i){
+virtual public Object get(int i){
 	Entry e = getEntry(i);
 		if(e != null)
 				return e.val;
@@ -267,7 +267,7 @@ public bool has(int i){
 
 public PersistentArray resize(int newLength)
 	{
-	PersistentArray ret = new PersistentArray(newLength, data.master.defaultVal, data.master.loadFactor);
+	PersistentArray ret = create(newLength, data.master.defaultVal, data.master.loadFactor);
 	for (int i = 0; i < Math.Min(length(), newLength); i++)
 		{
 		Entry e = getEntry(i);
@@ -317,7 +317,7 @@ for (Entry e = (Entry)data.master.array[i]; e != null; e = e.rest())
 	return null;
 }
 
-public IArray set(int i,Object val) {
+virtual public IArray set(int i,Object val) {
 //if (data.master.load >= data.master.maxLoad)
 //		{
 //		isolate();
@@ -334,7 +334,7 @@ public IArray set(int i,Object val) {
 	}
 }
 
-private void trim(){
+protected void trim(){
     //must be called inside lock of master
 	if (data.master.next == null) //this master has never been trimmed
         {
@@ -438,7 +438,7 @@ PersistentArray getSetArray(){
 	//is this a sequential update?
 if (data.master.rev == data.rev)
 		{
-		return new PersistentArray(data.master, ++data.master.rev, data.baseline, data.history);
+		return create(data.master, ++data.master.rev, data.baseline, data.history);
 		}
 	else //gap
 		{
@@ -454,9 +454,20 @@ if (data.master.rev == data.rev)
 			nextHistory = new BitArray(data.rev + 1);
 		for (int i = data.baseline; i <= data.rev; i++)
 			nextHistory.Set(i,true);
-		return new PersistentArray(data.master, nextRev, nextRev, nextHistory);
+		return create(data.master, nextRev, nextRev, nextHistory);
 		}
 }
+
+internal  virtual PersistentArray create(Master master, int rev, int baseline, BitArray history)
+	{
+	return new PersistentArray(data.master, rev, baseline, history);
+	}
+
+internal virtual PersistentArray create(int size, Object defaultVal, float loadFactor)
+	{
+	return new PersistentArray(size, defaultVal, loadFactor);
+	}
+
 
 /*
 [STAThread] 
@@ -471,12 +482,14 @@ static public void Main(String[] args){
 	int reads = Int32.Parse(args[2]);
 	ArrayList v = ArrayList.Synchronized(new ArrayList(size));
 	//v.setSize(size);
-	IArray p = new PersistentArray(size);
+	//IArray p = new PersistentArray(size);
+	IArray p = new PersistentArrayList(size);
 
 	for(int i = 0; i < size; i++)
 		{
 		v.Add(0);
-		p = p.set(i, 0);
+		//p = p.set(i, 0);
+		p = ((PersistentArrayList)p).add(0);
 		}
 
 	Random rand;

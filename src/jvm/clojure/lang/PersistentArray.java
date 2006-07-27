@@ -65,7 +65,7 @@ static class Master{
     int load;
     final int maxLoad;
     final float loadFactor;
-    final int[] basis;
+    int[] basis;
     volatile Master next;
 
     Master(int size,Object defaultVal, float loadFactor){
@@ -172,7 +172,7 @@ static class ValIter implements Iterator{
 }
 
 static class Data{
-final Master master;
+Master master;
 final int rev;
 final int baseline;
 final BitSet history;
@@ -227,11 +227,11 @@ public PersistentArray(IArray init)  {
     data.master.load = load;
 }
 
-final public int length(){
+public int length(){
 	return data.master.array.length;
 }
 
-final public Object get(int i) {
+public Object get(int i) {
     Entry e = getEntry(i);
     if(e != null)
         return e.val;
@@ -243,7 +243,7 @@ final public boolean has(int i){
 }
 
 final public PersistentArray resize(int newLength) {
-    PersistentArray ret = new PersistentArray(newLength, data.master.defaultVal, data.master.loadFactor);
+    PersistentArray ret = create(newLength, data.master.defaultVal, data.master.loadFactor);
     int load = 0;
     for(int i=0;i< Math.min(length(),newLength);i++)
         {
@@ -300,7 +300,7 @@ private Entry getEntry(int i){
     return null;
 }
 
-final public PersistentArray set(int i,Object val) {
+public PersistentArray set(int i,Object val) {
     synchronized(data.master){
         if(data.master.load >= data.master.maxLoad)
             trim();
@@ -310,7 +310,7 @@ final public PersistentArray set(int i,Object val) {
 	}
 }
 
-private void trim(){
+protected void trim(){
     //must be called inside lock of master
     if(data.master.next == null) //this master has never been trimmed
         {
@@ -412,7 +412,7 @@ private PersistentArray getSetArray(){
 	//is this a sequential update?
 	if(data.master.rev == data.rev)
 		{
-		return new PersistentArray(data.master, ++data.master.rev, data.baseline, data.history);
+		return create(data.master, ++data.master.rev, data.baseline, data.history);
 		}
 	else //gap
 		{
@@ -423,11 +423,18 @@ private PersistentArray getSetArray(){
 		else
 			nextHistory = new BitSet(data.rev+1);
 		nextHistory.set(data.baseline,data.rev+1);
-		return new PersistentArray(data.master, nextRev, nextRev, nextHistory);
+		return create(data.master, nextRev, nextRev, nextHistory);
 		}
 
 }
 
+protected PersistentArray create(Master master,int rev,int baseline, BitSet history){
+    return new PersistentArray(data.master, rev, baseline, history);
+}
+
+protected PersistentArray create(int size, Object defaultVal, float loadFactor) {
+    return new PersistentArray(size, defaultVal, loadFactor);
+}
 
 static public void main(String[] args){
 	if(args.length != 3)
@@ -440,13 +447,15 @@ static public void main(String[] args){
 	int reads = Integer.parseInt(args[2]);
 	Vector v = new Vector(size);
 	v.setSize(size);
-	PersistentArray p = new PersistentArray(size);
+    //PersistentArray p = new PersistentArray(size);
+    PersistentArrayList p = new PersistentArrayList(size);
 
 	for(int i = 0; i < size; i++)
 		{
 		v.set(i, 0);
-		p = p.set(i, 0);
-		}
+		//p = p.set(i, 0);
+        p = p.add(0);
+        }
 
 	Random rand;
 
@@ -470,12 +479,13 @@ static public void main(String[] args){
 	long tp = 0;
 
     PersistentArray oldp = p;
+    Random rand2 = new Random(42);
 
     for(int i = 0; i < writes; i++)
 		{
 		p =	p.set(rand.nextInt(size), i);
 		//dummy set to force perverse branching
-        //oldp =	oldp.set(rand.nextInt(size), i);
+        oldp =	oldp.set(rand2.nextInt(size), i);
 		}
 	for(int i = 0; i < reads; i++)
 		{
