@@ -75,7 +75,9 @@ public PersistentArrayList add(Object val) {
 public PersistentArrayList remove() {
     if(_count == 0)
         throw new InvalidOperationException();
-    return new PersistentArrayList(data.master, data.rev, data.baseline, data.history, _count - 1);
+    PersistentArrayList ret = new PersistentArrayList(data.master, data.rev, data.baseline, data.history, _count - 1);
+	ret._meta = _meta;
+	return ret;
 }
 
 
@@ -94,12 +96,16 @@ private void grow() {
 }
 
 override internal PersistentArray create(Master master,int rev,int baseline, BitArray history){
-    return new PersistentArrayList(data.master, rev, baseline, history,_count);
-}
+    PersistentArray ret = new PersistentArrayList(data.master, rev, baseline, history,_count);
+    ret._meta = _meta;
+    return ret;
+    }
 
 override internal PersistentArray create(int size, Object defaultVal, float loadFactor) {
-    return new PersistentArrayList(size, defaultVal, loadFactor,_count);
-}
+    PersistentArray ret =  new PersistentArrayList(size, defaultVal, loadFactor,_count);
+    ret._meta = _meta;
+    return ret;
+    }
 
 }
 }

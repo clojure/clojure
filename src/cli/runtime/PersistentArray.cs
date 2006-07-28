@@ -44,7 +44,7 @@ namespace clojure.lang
  * Java implementation is lock-free
  */
 
-public class PersistentArray : IEnumerable, IArray{
+public class PersistentArray : Obj, IEnumerable, IArray{
 
 	#region IEnumerable Members
 
@@ -61,6 +61,13 @@ public class PersistentArray : IEnumerable, IArray{
 			return new Seq(this, 0);
 		return null;
 		}
+
+	public override Obj withMeta(IPersistentMap meta)
+		{
+		Obj ret = (Obj)MemberwiseClone();
+		ret._meta = meta;
+		return ret;
+		} 
 		
 internal class Master{
 	internal readonly Entry[] array;
@@ -460,16 +467,20 @@ if (data.master.rev == data.rev)
 
 internal  virtual PersistentArray create(Master master, int rev, int baseline, BitArray history)
 	{
-	return new PersistentArray(data.master, rev, baseline, history);
+	PersistentArray ret = new PersistentArray(data.master, rev, baseline, history);
+	ret._meta = _meta;
+	return ret;
 	}
 
 internal virtual PersistentArray create(int size, Object defaultVal, float loadFactor)
 	{
-	return new PersistentArray(size, defaultVal, loadFactor);
+	PersistentArray ret = new PersistentArray(size, defaultVal, loadFactor);
+	ret._meta = _meta;
+	return ret;
 	}
 
 
-/*
+//*
 [STAThread] 
 static public void Main(String[] args){
 	if(args.Length != 3)

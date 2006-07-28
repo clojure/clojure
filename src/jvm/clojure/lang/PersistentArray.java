@@ -46,7 +46,7 @@ import java.util.Random;
  * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
  */
 
-public class PersistentArray implements Iterable, IArray {
+public class PersistentArray extends Obj implements Iterable, IArray, Cloneable {
 
 public Iterator iterator(){
 	return new ValIter(this);
@@ -56,6 +56,12 @@ public ISeq seq() {
     if(length() > 0)
         return new Seq(this, 0);
     return null;
+}
+
+public Obj withMeta(IPersistentMap meta) throws Exception {
+    Obj ret = (Obj) clone();
+    ret._meta = meta;
+    return ret;
 }
 
 static class Master{
@@ -429,11 +435,15 @@ private PersistentArray getSetArray(){
 }
 
 protected PersistentArray create(Master master,int rev,int baseline, BitSet history){
-    return new PersistentArray(data.master, rev, baseline, history);
+    PersistentArray ret = new PersistentArray(data.master, rev, baseline, history);
+    ret._meta = _meta;
+    return ret;
 }
 
 protected PersistentArray create(int size, Object defaultVal, float loadFactor) {
-    return new PersistentArray(size, defaultVal, loadFactor);
+    PersistentArray ret =  new PersistentArray(size, defaultVal, loadFactor);
+    ret._meta = _meta;
+    return ret;
 }
 
 static public void main(String[] args){
