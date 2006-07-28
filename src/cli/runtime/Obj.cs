@@ -15,29 +15,17 @@ using System;
 namespace clojure.lang
 {
 
-public class Obj{
+public abstract class Obj{
 
-volatile IPersistentMap _attrs = PersistentArrayIdentityMap.EMPTY;
-
-public Object addAttr( Object key, Object val)
-	{
-	_attrs = _attrs.add(key, val);
-	return val;
-	}
-
-public Object getAttr( Object key)
-	{
-	return _attrs.get(key);
-	}
-
-public bool hasAttr( Object key){
-    return _attrs.contains(key);
-    }
+internal volatile IPersistentMap _meta = null;
 
 
-public IPersistentMap attrs() {
-    return _attrs;
+public IPersistentMap meta() {
+    return _meta;
 }
+
+abstract public Obj withMeta(IPersistentMap meta);
+
 
 }
 

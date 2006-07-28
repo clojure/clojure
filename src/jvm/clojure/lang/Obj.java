@@ -12,27 +12,15 @@
 
 package clojure.lang;
 
-public class Obj {
+public abstract class Obj {
 
-volatile IPersistentMap _attrs = PersistentArrayIdentityMap.EMPTY;
-
-public Object addAttr( Object key, Object val) throws Exception {
-    _attrs = _attrs.add(key, val);
-    return val;
-    }
-
-public Object getAttr( Object key)
-	{
-	return _attrs.get(key);
-	}
-
-public boolean hasAttr( Object key){
-    return _attrs.contains(key);
-    }
+volatile IPersistentMap _meta = null;
 
 
-public IPersistentMap attrs() {
-    return _attrs;
+public IPersistentMap meta() {
+    return _meta;
 }
+
+abstract public Obj withMeta(IPersistentMap meta) throws Exception;
 
 }

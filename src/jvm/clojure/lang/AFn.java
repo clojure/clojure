@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class AFn extends Obj implements IFn{
+public class AFn extends Obj implements IFn, Cloneable{
 
 public Object invoke() throws Exception
 	{
@@ -98,4 +98,10 @@ public static  Object throwArity()
 	{
 	throw new IllegalArgumentException("Wrong number of args passed");
 	}
+
+public Obj withMeta(IPersistentMap meta) throws Exception {
+    Obj ret = (Obj) clone();
+    ret._meta = meta;
+    return ret;
+}
 }

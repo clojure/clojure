@@ -104,5 +104,10 @@ static public Object throwArity()
 	{
 	throw new Exception("Wrong number of args passed");
 	}
+	
+public override Obj withMeta(IPersistentMap meta){
+    Obj ret = (Obj) MemberwiseClone();
+    ret._meta = meta;
+    return ret;    }
 }
 }

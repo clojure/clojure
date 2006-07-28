@@ -75,5 +75,11 @@ public int CompareTo(object obj)
     }
 
 #endregion
+
+override public Obj withMeta(IPersistentMap meta) {
+    this._meta = meta;
+    return this;
+}
+
     }
 }
