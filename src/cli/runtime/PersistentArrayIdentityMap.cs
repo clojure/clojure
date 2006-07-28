@@ -28,11 +28,15 @@ PersistentArrayIdentityMap() {
 
 override internal PersistentArrayMap create(params Object[] init)
 		{
-		return new PersistentArrayIdentityMap(init);
+		PersistentArrayIdentityMap ret = new PersistentArrayIdentityMap(init);
+		ret._meta = _meta;
+		return ret;
 		}
 
 override internal IPersistentMap createHT(Object[] init){
-    return new PersistentHashtableIdentityMap(init);
+    PersistentHashtableIdentityMap ret = new PersistentHashtableIdentityMap(init);
+    ret._meta = _meta;
+    return ret;
 }
 
 public PersistentArrayIdentityMap(params Object[] init) :base(init) {

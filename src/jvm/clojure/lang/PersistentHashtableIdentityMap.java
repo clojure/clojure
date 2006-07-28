@@ -78,15 +78,21 @@ static class Iter implements Iterator{
 }
 
 IPersistentMap create(int capacity) {
-    return new PersistentHashtableIdentityMap(capacity);
+    PersistentHashtableIdentityMap ret = new PersistentHashtableIdentityMap(capacity);
+    ret._meta = _meta;
+    return ret;
 }
 
 IPersistentMap create(int count, PersistentArray array) {
-    return new PersistentHashtableIdentityMap(count, array);
+    PersistentHashtableIdentityMap ret =  new PersistentHashtableIdentityMap(count, array);
+    ret._meta = _meta;
+    return ret;
 }
 
 IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
-	return new PersistentHashtableIdentityMap(i, newArray, growAtCount);
+	PersistentHashtableIdentityMap ret =  new PersistentHashtableIdentityMap(i, newArray, growAtCount);
+    ret._meta = _meta;
+    return ret;
 }
 
 IPersistentMap createListMap(Object key, Object val){

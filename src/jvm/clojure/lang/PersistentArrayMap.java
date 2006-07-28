@@ -23,7 +23,7 @@ import java.util.Iterator;
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class PersistentArrayMap implements IPersistentMap, ISequential {
+public class PersistentArrayMap extends Obj implements IPersistentMap, ISequential, Cloneable {
 
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 42;
@@ -35,11 +35,21 @@ protected PersistentArrayMap(){
 }
 
 PersistentArrayMap create(Object... init){
-    return new PersistentArrayMap(init);
+    PersistentArrayMap ret = new PersistentArrayMap(init);
+    ret._meta = _meta;
+    return ret;
 }
 
 IPersistentMap createHT(Object[] init){
-    return new PersistentHashtableMap(init);
+    PersistentHashtableMap ret = new PersistentHashtableMap(init);
+    ret._meta = _meta;
+    return ret;
+}
+
+public Obj withMeta(IPersistentMap meta) throws Exception {
+    Obj ret = (Obj) clone();
+    ret._meta = meta;
+    return ret;
 }
 
 /**
@@ -132,7 +142,11 @@ public IPersistentMap remove(Object key) {
 }
 
 IPersistentMap empty() {
-    return EMPTY;
+    if(_meta == null)
+        return EMPTY;
+    PersistentArrayMap ret = new PersistentArrayMap();
+    ret._meta = _meta;
+    return ret;
 }
 
 final public Object get(Object key) {

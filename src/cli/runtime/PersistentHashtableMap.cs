@@ -16,7 +16,7 @@ namespace clojure.lang
 	{
 	
 	
-public class PersistentHashtableMap : IPersistentMap {
+public class PersistentHashtableMap : Obj, IPersistentMap {
 
 static readonly float FILL_FACTOR = 0.75f;
 
@@ -57,6 +57,13 @@ internal PersistentHashtableMap(int count,PersistentArray array,int growAt) {
     this.growAtCount = growAt;
 }
 
+public override Obj withMeta(IPersistentMap meta)
+	{
+	Obj ret = (Obj)MemberwiseClone();
+	ret._meta = meta;
+	return ret;
+	} 
+	
 int calcPrimeCapacity(int capacity) {
 	// No .Net equivalent
     //return BigInteger.valueOf((long) (capacity/FILL_FACTOR)).nextProbablePrime().intValue();
@@ -264,16 +271,22 @@ static int bucketFor(Object key, PersistentArray array) {
 }
 
 virtual internal IPersistentMap create(int capacity) {
-    return new PersistentHashtableMap(capacity);
+    PersistentHashtableMap ret = new PersistentHashtableMap(capacity);
+    ret._meta = _meta;
+    return ret;
 }
 
 virtual internal IPersistentMap create(int count,PersistentArray array) {
-    return new PersistentHashtableMap(count, array);
-}
+	PersistentHashtableMap ret = new PersistentHashtableMap(count, array);
+	ret._meta = _meta;
+	return ret;
+	}
 
 virtual internal IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
-	return new PersistentHashtableMap(i, newArray, growAtCount);
-}
+	PersistentHashtableMap ret = new PersistentHashtableMap(i, newArray, growAtCount);
+	ret._meta = _meta;
+	return ret;
+	}
 
 
 virtual internal IPersistentMap createListMap(Object key, Object val){

@@ -25,7 +25,7 @@ namespace clojure.lang
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class PersistentArrayMap : IPersistentMap, ISequential {
+public class PersistentArrayMap : Obj, IPersistentMap, ISequential {
 
 internal readonly Object[] array;
 
@@ -38,12 +38,23 @@ protected PersistentArrayMap(){
 }
 
 virtual internal PersistentArrayMap create(params Object[] init){
-    return new PersistentArrayMap(init);
+	PersistentArrayMap ret = new PersistentArrayMap(init);
+	ret._meta = _meta;
+	return ret;
 }
 
 virtual internal IPersistentMap createHT(Object[] init){
-    return new PersistentHashtableMap(init);
-}
+	PersistentHashtableMap ret = new PersistentHashtableMap(init);
+	ret._meta = _meta;
+	return ret;
+	}
+	
+public override Obj withMeta(IPersistentMap meta)
+	{
+	Obj ret = (Obj)MemberwiseClone();
+	ret._meta = meta;
+	return ret;
+	} 
 /**
  * This ctor captures/aliases the passed array, so do not modify later
  * @param init {key1,val1,key2,val2,...}
@@ -134,7 +145,11 @@ public IPersistentMap remove(Object key) {
 }
 
 virtual public IPersistentMap empty() {
-    return EMPTY;
+    if(_meta == null)
+        return EMPTY;
+    PersistentArrayMap ret = new PersistentArrayMap();
+    ret._meta = _meta;
+    return ret;
 }
 
 public Object get(Object key) {
