@@ -25,16 +25,16 @@ namespace clojure.lang
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTree : IPersistentMap, ISequential{
+public class PersistentTreeMap : IPersistentMap, ISequential{
 
 public readonly IComparer comp;
 public readonly Node tree;
 public readonly int _count;
 
-public PersistentTree():this(null){
+public PersistentTreeMap():this(null){
 }
 
-public PersistentTree(IComparer comp){
+public PersistentTreeMap(IComparer comp){
 	this.comp = comp;
 	tree = null;
 	_count = 0;
@@ -59,7 +59,7 @@ public IPersistentMap add(Object key,Object val){
 		{
 		throw new Exception("Key already present");
 		}
-	return new PersistentTree(comp, t.blacken(), _count + 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1);
 }
 
 public IPersistentMap put(Object key, Object val){
@@ -70,9 +70,9 @@ public IPersistentMap put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new PersistentTree(comp, replace(tree, key, val), _count);
+		return new PersistentTreeMap(comp, replace(tree, key, val), _count);
 		}
-	return new PersistentTree(comp, t.blacken(), _count + 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1);
 }
 
 
@@ -84,9 +84,9 @@ public IPersistentMap remove(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new PersistentTree(comp);
+		return new PersistentTreeMap(comp);
 		}
-	return new PersistentTree(comp, t.blacken(), _count - 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count - 1);
 }
 
 public ISeq seq() {
@@ -329,7 +329,7 @@ Node replace(Node t, Object key, Object val){
 	                 c > 0 ? replace(t.right(), key, val) : t.right());
 }
 
-PersistentTree(IComparer comp, Node tree, int count){
+PersistentTreeMap(IComparer comp, Node tree, int count){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
@@ -783,7 +783,7 @@ public void Reset()
 #endregion
     }
 
-    //*
+    /*
 	[STAThread]
 static public void Main(String[] args){
 	if(args.Length != 1)
@@ -798,10 +798,10 @@ static public void Main(String[] args){
     Array.Reverse(ints);
 	Console.WriteLine("Building set");
 	//IPersistentMap set = new PersistentTree();
-	//IPersistentMap set = new PersistentArrayMap();
+	IPersistentMap set = new PersistentArrayMap();
 	//IPersistentMap set = new PersistentListMap();
 	//IPersistentMap set = new PersistentHashtableMap(1001);
-	IPersistentMap set = new PersistentHybridMap(1001);
+	//IPersistentMap set = new PersistentHybridMap(1001);
     //for(int i = 0; i < ints.Length; i++)
     //    {
     //    Object anInt = ints[i];

@@ -22,17 +22,17 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTree implements IPersistentMap, ISequential {
+public class PersistentTreeMap implements IPersistentMap, ISequential {
 
 public final Comparator comp;
 public final Node tree;
 public final int _count;
 
-public PersistentTree(){
+public PersistentTreeMap(){
 	this(null);
 }
 
-public PersistentTree(Comparator comp){
+public PersistentTreeMap(Comparator comp){
 	this.comp = comp;
 	tree = null;
 	_count = 0;
@@ -42,17 +42,17 @@ public boolean contains(Object key){
 	return find(key) != null;
 }
 
-public PersistentTree add(Object key, Object val) throws Exception {
+public PersistentTreeMap add(Object key, Object val) throws Exception {
     Box found = new Box(null);
     Node t = add(tree, key, val, found);
     if(t == null)   //null == already contains key
         {
         throw new Exception("Key already present");
         }
-    return new PersistentTree(comp, t.blacken(), _count + 1);
+    return new PersistentTreeMap(comp, t.blacken(), _count + 1);
 }
 
-public PersistentTree put(Object key, Object val){
+public PersistentTreeMap put(Object key, Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -60,13 +60,13 @@ public PersistentTree put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new PersistentTree(comp, replace(tree, key, val), _count);
+		return new PersistentTreeMap(comp, replace(tree, key, val), _count);
 		}
-	return new PersistentTree(comp, t.blacken(), _count + 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1);
 }
 
 
-public PersistentTree remove(Object key){
+public PersistentTreeMap remove(Object key){
 	Box found = new Box(null);
 	Node t = remove(tree, key, found);
 	if(t == null)
@@ -74,9 +74,9 @@ public PersistentTree remove(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new PersistentTree(comp);
+		return new PersistentTreeMap(comp);
 		}
-	return new PersistentTree(comp, t.blacken(), _count - 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count - 1);
 }
 
 public ISeq seq() throws Exception {
@@ -328,7 +328,7 @@ Node replace(Node t, Object key, Object val){
 	                 c > 0 ? replace(t.right(), key, val) : t.right());
 }
 
-PersistentTree(Comparator comp, Node tree, int count){
+PersistentTreeMap(Comparator comp, Node tree, int count){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
@@ -739,8 +739,8 @@ static public void main(String args[]){
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     System.out.println("Building set");
-	//IPersistentMap set = new PersistentHybridMap(1001);
-	IPersistentMap set = new PersistentHashtableMap(1001);
+	IPersistentMap set = new PersistentArrayMap();
+	//IPersistentMap set = new PersistentHashtableMap(1001);
 	//IPersistentMap set = new ListMap();
 	//IPersistentMap set = new ArrayMap();
 	//IPersistentMap set = new RBTree();
