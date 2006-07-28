@@ -21,6 +21,6 @@ public IPersistentMap meta() {
     return _meta;
 }
 
-abstract public Obj withMeta(IPersistentMap meta) throws Exception;
+abstract public Obj withMeta(IPersistentMap meta);
 
 }

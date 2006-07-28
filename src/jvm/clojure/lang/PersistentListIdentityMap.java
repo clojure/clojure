@@ -28,13 +28,25 @@ import java.util.Iterator;
  * code duplication here is kind of gross, but most efficient
  */
 
-public class PersistentListIdentityMap implements IPersistentMap, IMapEntry, ISeq, ISequential
+public class PersistentListIdentityMap extends Obj implements IPersistentMap, IMapEntry, ISeq, ISequential,Cloneable
 {
 
 static public PersistentListIdentityMap EMPTY = new PersistentListIdentityMap();
 
 static public PersistentListIdentityMap create(Object key, Object val){
-	return new Tail(key, val);
+	return new Tail(key, val,null);
+}
+
+public Obj withMeta(IPersistentMap meta) {
+    try{
+    Obj ret = (Obj) clone();
+    ret._meta = meta;
+    return ret;
+    }
+    catch(CloneNotSupportedException ignore)
+        {
+        return null;
+        }
 }
 
 public Object key(){
@@ -66,7 +78,7 @@ public IPersistentMap add(Object key, Object val) throws Exception {
 }
 
 public PersistentListIdentityMap put(Object key, Object val){
-	return new Tail(key, val);
+	return new Tail(key, val,_meta);
 }
 
 public PersistentListIdentityMap remove(Object key){
@@ -103,7 +115,7 @@ static class Iter implements Iterator{
 	}
 
 	public boolean hasNext(){
-		return e != EMPTY;
+		return e.count() > 0;
 	}
 
 	public Object next(){
@@ -125,10 +137,11 @@ static class Tail extends PersistentListIdentityMap {
 	final Object _key;
 	final Object _val;
 
-	Tail(Object key,Object val){
+	Tail(Object key,Object val,IPersistentMap meta){
 		this._key = key;
 		this._val = val;
-		}
+        this._meta = meta;
+        }
 
     PersistentListIdentityMap next(){
         return EMPTY;
@@ -171,7 +184,7 @@ static class Tail extends PersistentListIdentityMap {
 			{
             throw new Exception("Key already present");
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 
     public PersistentListIdentityMap put(Object key, Object val){
@@ -179,15 +192,18 @@ static class Tail extends PersistentListIdentityMap {
 			{
 			if(val == _val)
 				return this;
-			return new Tail(key,val);
+			return new Tail(key,val,_meta);
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 
 	public PersistentListIdentityMap remove(Object key){
 		if(key == _key)
-			return EMPTY;
-		return this;
+            {
+            if(_meta == null)
+                return EMPTY;
+            return (PersistentListIdentityMap) EMPTY.withMeta(_meta);
+            }		return this;
 	}
 
     public Object first() {
@@ -208,11 +224,12 @@ static class Link extends PersistentListIdentityMap {
 	final Object _val;
 	final PersistentListIdentityMap _rest;
 
-	Link(Object key,Object val,PersistentListIdentityMap next){
+	Link(Object key,Object val,PersistentListIdentityMap next,IPersistentMap meta){
 		this._key = key;
 		this._val = val;
 		this._rest = next;
-		}
+        this._meta = meta;
+        }
 
 	public Object key(){
 		return _key;
@@ -246,7 +263,7 @@ static class Link extends PersistentListIdentityMap {
 			{
             throw new Exception("Key already present");
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 
     public PersistentListIdentityMap put(Object key, Object val){
@@ -257,12 +274,16 @@ static class Link extends PersistentListIdentityMap {
 				return this;
 			return create(_key,_val,remove(key));
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 
 	public PersistentListIdentityMap remove(Object key){
 		if(key == _key)
-			return _rest;
+            {
+            if(_rest._meta == _meta)
+                return _rest;
+            return (PersistentListIdentityMap) _rest.withMeta(_meta);
+            }
 		PersistentListIdentityMap r = _rest.remove(key);
 		if(r == _rest)  //not there
 			return this;
@@ -293,9 +314,9 @@ static class Link extends PersistentListIdentityMap {
     }
 
     PersistentListIdentityMap create(Object k,Object v,PersistentListIdentityMap r){
-		if(r == EMPTY)
-			return new Tail(k,v);
-		return new Link(k, v, r);
+		if(r.count() == 0)
+			return new Tail(k,v,_meta);
+		return new Link(k, v, r,_meta);
 	}
 
 }

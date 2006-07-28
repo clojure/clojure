@@ -31,16 +31,23 @@ namespace clojure.lang
 	 * code duplication here is kind of gross, but most efficient
 	 */
 	 
-	public class PersistentListIdentityMap : IPersistentMap, IMapEntry, ISeq, ISequential
+	public class PersistentListIdentityMap : Obj, IPersistentMap, IMapEntry, ISeq, ISequential
 		{
 
 		static public PersistentListIdentityMap EMPTY = new PersistentListIdentityMap();
 
 		static public PersistentListIdentityMap create(Object key, Object val)
 			{
-			return new Tail(key, val);
+			return new Tail(key, val,null);
 			}
 
+		public override Obj withMeta(IPersistentMap meta)
+			{
+			Obj ret = (Obj)MemberwiseClone();
+			ret._meta = meta;
+			return ret;
+			}
+			
 		public virtual Object key()
 			{
 			return null;
@@ -78,7 +85,7 @@ namespace clojure.lang
 
 		public virtual IPersistentMap put(Object key, Object val)
 			{
-			return new Tail(key, val);
+			return new Tail(key, val, _meta);
 			}
 
 		public virtual IPersistentMap remove(Object key)
@@ -134,7 +141,7 @@ namespace clojure.lang
 					first = false;
 				else
 					e = e.next();
-				return e != EMPTY;
+				return e.count() > 0;
 				}
 
 			public void Reset()
@@ -155,10 +162,11 @@ namespace clojure.lang
 			readonly Object _key;
 			readonly Object _val;
 
-			internal Tail(Object key, Object val)
+			internal Tail(Object key, Object val, IPersistentMap meta)
 				{
 				this._key = key;
 				this._val = val;
+				this._meta = meta;
 				}
 
 			override internal PersistentListIdentityMap next()
@@ -211,7 +219,7 @@ namespace clojure.lang
 					{
 					throw new Exception("Key already present");
 					}
-				return new Link(key, val, this);
+				return new Link(key, val, this, _meta);
 				}
 
 			override public IPersistentMap put(Object key, Object val)
@@ -220,15 +228,19 @@ namespace clojure.lang
 					{
 					if (val == _val)
 						return this;
-					return new Tail(key, val);
+					return new Tail(key, val, _meta);
 					}
-				return new Link(key, val, this);
+				return new Link(key, val, this, _meta);
 				}
 
 			override public IPersistentMap remove(Object key)
 				{
 				if ((key == _key))
-					return EMPTY;
+					{
+					if (_meta == null)
+						return EMPTY;
+					return (IPersistentMap)EMPTY.withMeta(_meta);
+					}
 				return this;
 				}
 				
@@ -254,11 +266,12 @@ namespace clojure.lang
 			readonly Object _val;
 			readonly PersistentListIdentityMap _rest;
 
-			internal Link(Object key, Object val, PersistentListIdentityMap next)
+			internal Link(Object key, Object val, PersistentListIdentityMap next, IPersistentMap meta)
 				{
 				this._key = key;
 				this._val = val;
 				this._rest = next;
+				this._meta = meta;
 				}
 
 			override public Object key()
@@ -300,7 +313,7 @@ namespace clojure.lang
 					{
 					throw new Exception("Key already present");
 					}
-				return new Link(key, val, this);
+				return new Link(key, val, this, _meta);
 				}
 			
 			override public IPersistentMap put(Object key, Object val)
@@ -312,13 +325,17 @@ namespace clojure.lang
 						return this;
 					return create(_key, _val, remove(key));
 					}
-				return new Link(key, val, this);
+				return new Link(key, val, this, _meta);
 				}
 
 			override public IPersistentMap remove(Object key)
 				{
 				if ((key == _key))
-					return _rest;
+					{
+					if (_rest._meta == _meta)
+						return _rest;
+					return (IPersistentMap)_rest.withMeta(_meta);
+					}
 				PersistentListIdentityMap r = (PersistentListIdentityMap)_rest.remove(key);
 				if (r == _rest)  //not there
 					return this;
@@ -356,8 +373,8 @@ namespace clojure.lang
 			PersistentListIdentityMap create(Object k, Object v, IPersistentMap r)
 				{
 				if (r == EMPTY)
-					return new Tail(k, v);
-				return new Link(k, v, (PersistentListIdentityMap)r);
+					return new Tail(k, v, _meta);
+				return new Link(k, v, (PersistentListIdentityMap)r, _meta);
 				}
 
 			}

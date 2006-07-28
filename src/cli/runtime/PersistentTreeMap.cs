@@ -25,7 +25,7 @@ namespace clojure.lang
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap : IPersistentMap, ISequential{
+public class PersistentTreeMap : Obj, IPersistentMap, ISequential{
 
 public readonly IComparer comp;
 public readonly Node tree;
@@ -39,6 +39,13 @@ public PersistentTreeMap(IComparer comp){
 	tree = null;
 	_count = 0;
 }
+
+public override Obj withMeta(IPersistentMap meta)
+	{
+	Obj ret = (Obj)MemberwiseClone();
+	ret._meta = meta;
+	return ret;
+	} 
 
 public int count(){
 	return _count;
@@ -59,7 +66,7 @@ public IPersistentMap add(Object key,Object val){
 		{
 		throw new Exception("Key already present");
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count + 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
 public IPersistentMap put(Object key, Object val){
@@ -70,9 +77,9 @@ public IPersistentMap put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new PersistentTreeMap(comp, replace(tree, key, val), _count);
+		return new PersistentTreeMap(comp, replace(tree, key, val), _count, _meta);
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count + 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
 
@@ -84,9 +91,11 @@ public IPersistentMap remove(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new PersistentTreeMap(comp);
+		PersistentTreeMap ret = new PersistentTreeMap(comp);
+		ret._meta = _meta;
+		return ret;
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count - 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count - 1, _meta);
 }
 
 public ISeq seq() {
@@ -329,10 +338,11 @@ Node replace(Node t, Object key, Object val){
 	                 c > 0 ? replace(t.right(), key, val) : t.right());
 }
 
-PersistentTreeMap(IComparer comp, Node tree, int count){
+PersistentTreeMap(IComparer comp, Node tree, int count,IPersistentMap meta){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
+	this._meta = meta;
 }
 
 static Red red(Object key, Object val, Node left, Node right){

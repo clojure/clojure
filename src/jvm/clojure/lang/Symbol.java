@@ -84,7 +84,7 @@ public int compareTo(Object o) {
     return hashCode() - ((Symbol)o).hashCode();
 }
 
-public Obj withMeta(IPersistentMap meta) throws Exception {
+public Obj withMeta(IPersistentMap meta) {
     this._meta = meta;
     return this;
 }

@@ -26,15 +26,26 @@ import java.util.Iterator;
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap implements IPersistentMap, IMapEntry, ISeq, ISequential
+public class PersistentListMap extends Obj implements IPersistentMap, IMapEntry, ISeq, ISequential, Cloneable
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
 
 static public PersistentListMap create(Object key, Object val){
-	return new Tail(key, val);
+	return new Tail(key, val,null);
 }
 
+public Obj withMeta(IPersistentMap meta) {
+    try{
+    Obj ret = (Obj) clone();
+    ret._meta = meta;
+    return ret;
+    }
+    catch(CloneNotSupportedException ignore)
+        {
+        return null;
+        }
+}
 
 public Object key(){
 	return null;
@@ -64,12 +75,12 @@ public IPersistentMap add(Object key, Object val) throws Exception {
     return put(key, val);
 }
 
-public PersistentListMap put(Object key, Object val){
-	return new Tail(key, val);
+public PersistentListMap put(Object key, Object val) {
+    return new Tail(key, val,_meta);
 }
 
-public PersistentListMap remove(Object key){
-	return this;
+public PersistentListMap remove(Object key) {
+    return this;
 }
 
 public Object get(Object key){
@@ -101,7 +112,7 @@ static class Iter implements Iterator{
     }
 
     public boolean hasNext(){
-        return e != EMPTY;
+        return e.count() != 0;
     }
 
     public Object next(){
@@ -123,10 +134,11 @@ static class Tail extends PersistentListMap {
 	final Object _key;
 	final Object _val;
 
-	Tail(Object key,Object val){
+	Tail(Object key,Object val, IPersistentMap meta){
 		this._key = key;
 		this._val = val;
-		}
+        this._meta = meta;
+        }
 
     PersistentListMap next(){
         return EMPTY;
@@ -169,7 +181,7 @@ static class Tail extends PersistentListMap {
             {
             throw new Exception("Key already present");
             }
-        return new Link(key,val,this);
+        return new Link(key,val,this,_meta);
     }
 
 	public PersistentListMap put(Object key, Object val){
@@ -177,16 +189,20 @@ static class Tail extends PersistentListMap {
 			{
 			if(val == _val)
 				return this;
-			return new Tail(key,val);
+			return new Tail(key,val,_meta);
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 
-	public PersistentListMap remove(Object key){
-		if(equalKey(key,_key))
-			return EMPTY;
-		return this;
-	}
+	public PersistentListMap remove(Object key) {
+        if(equalKey(key,_key))
+            {
+            if(_meta == null)
+                return EMPTY;
+            return (PersistentListMap) EMPTY.withMeta(_meta);
+            }
+        return this;
+    }
 
     public Object first() {
         return this;
@@ -207,11 +223,12 @@ static class Link extends PersistentListMap {
 	final Object _val;
 	final PersistentListMap _rest;
 
-	Link(Object key,Object val,PersistentListMap next){
+	Link(Object key,Object val,PersistentListMap next,IPersistentMap meta){
 		this._key = key;
 		this._val = val;
 		this._rest = next;
-		}
+        this._meta = meta;
+        }
 
 	public Object key(){
 		return _key;
@@ -245,28 +262,32 @@ static class Link extends PersistentListMap {
             {
             throw new Exception("Key already present");
             }
-        return new Link(key,val,this);
+        return new Link(key,val,this,_meta);
     }
 
-    public PersistentListMap put(Object key, Object val){
-		IMapEntry e = find(key);
-		if(e != null)
-			{
-			if(e.val() == val)
-				return this;
-			return create(_key,_val,remove(key));
-			}
-		return new Link(key,val,this);
-	}
+    public PersistentListMap put(Object key, Object val) {
+        IMapEntry e = find(key);
+        if(e != null)
+            {
+            if(e.val() == val)
+                return this;
+            return create(_key,_val,remove(key));
+            }
+        return new Link(key,val,this,_meta);
+    }
 
-	public PersistentListMap remove(Object key){
-		if(equalKey(key,_key))
-			return _rest;
-		PersistentListMap r = _rest.remove(key);
-		if(r == _rest)  //not there
-			return this;
-		return create(_key,_val,r);
-	}
+	public PersistentListMap remove(Object key) {
+        if(equalKey(key,_key))
+            {
+            if(_rest._meta == _meta)
+                return _rest;
+            return (PersistentListMap) _rest.withMeta(_meta);
+            }
+        PersistentListMap r = _rest.remove(key);
+        if(r == _rest)  //not there
+            return this;
+        return create(_key,_val,r);
+    }
 
 	public Object get(Object key){
 		IMapEntry e = find(key);
@@ -292,9 +313,9 @@ static class Link extends PersistentListMap {
     }
 
     PersistentListMap create(Object k,Object v,PersistentListMap r){
-		if(r == EMPTY)
-			return new Tail(k,v);
-		return new Link(k, v, r);
+		if(r.count() == 0)
+			return new Tail(k,v,_meta);
+		return new Link(k, v, r,_meta);
 	}
 
 }

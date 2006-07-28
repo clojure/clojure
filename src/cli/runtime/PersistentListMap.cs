@@ -27,15 +27,22 @@ namespace clojure.lang
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap : IPersistentMap, IMapEntry, ISeq, ISequential
+public class PersistentListMap : Obj, IPersistentMap, IMapEntry, ISeq, ISequential
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
 
 static public PersistentListMap create(Object key, Object val){
-	return new Tail(key, val);
+	return new Tail(key, val,null);
 }
 
+public override Obj withMeta(IPersistentMap meta)
+	{
+	Obj ret = (Obj)MemberwiseClone();
+	ret._meta = meta;
+	return ret;
+	} 
+	
 public virtual Object key(){
 	return null;
 }
@@ -65,7 +72,7 @@ public virtual IPersistentMap add(Object key, Object val){
 }
 
 public virtual IPersistentMap put(Object key, Object val){
-	return new Tail(key, val);
+	return new Tail(key, val, _meta);
 }
 
 public virtual IPersistentMap remove(Object key){
@@ -118,7 +125,7 @@ public bool MoveNext()
 		first = false;
 	else
 		e = e.next();
-	return e != EMPTY;
+	return e.count() > 0;
 	}
 
 public void Reset()
@@ -137,9 +144,10 @@ internal class Tail : PersistentListMap {
 	readonly Object _key;
 	readonly Object _val;
 
-	internal Tail(Object key,Object val){
+	internal Tail(Object key,Object val,IPersistentMap meta){
 		this._key = key;
 		this._val = val;
+		this._meta = meta;
 		}
 
     override internal PersistentListMap next(){
@@ -191,7 +199,7 @@ internal class Tail : PersistentListMap {
 			{
 			throw new Exception("Key already present");
 			}
-		return new Link(key, val, this);
+		return new Link(key, val, this,_meta);
 		}
 
 	override public IPersistentMap put(Object key, Object val)
@@ -200,14 +208,18 @@ internal class Tail : PersistentListMap {
 			{
 			if(val == _val)
 				return this;
-			return new Tail(key,val);
+			return new Tail(key,val,_meta);
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 
 	override public IPersistentMap remove(Object key){
 		if(equalKey(key,_key))
-			return EMPTY;
+			{
+			if(_meta == null)
+				return EMPTY;
+			return (IPersistentMap)EMPTY.withMeta(_meta);
+			}
 		return this;
 	}
 
@@ -232,10 +244,11 @@ internal class Link : PersistentListMap {
 	readonly Object _val;
 	readonly PersistentListMap _rest;
 
-	internal Link(Object key,Object val,PersistentListMap next){
+	internal Link(Object key,Object val,PersistentListMap next,IPersistentMap meta){
 		this._key = key;
 		this._val = val;
 		this._rest = next;
+		this._meta = meta;
 		}
 
 	override public Object key(){
@@ -271,7 +284,7 @@ internal class Link : PersistentListMap {
 			{
 			throw new Exception("Key already present");
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 	
 	override public IPersistentMap put(Object key, Object val)
@@ -283,13 +296,17 @@ internal class Link : PersistentListMap {
 				return this;
 			return create(_key,_val,remove(key));
 			}
-		return new Link(key,val,this);
+		return new Link(key,val,this,_meta);
 	}
 
 	override public IPersistentMap remove(Object key)
 		{
 		if(equalKey(key,_key))
-			return _rest;
+			{
+			if(_rest._meta == _meta)
+				return _rest;
+			return (IPersistentMap)_rest.withMeta(_meta);
+			}
 		PersistentListMap r = (PersistentListMap)_rest.remove(key);
 		if(r == _rest)  //not there
 			return this;
@@ -324,9 +341,9 @@ internal class Link : PersistentListMap {
 	
 	PersistentListMap create(Object k, Object v, IPersistentMap r)
 		{
-		if(r == EMPTY)
-			return new Tail(k,v);
-		return new Link(k, v, (PersistentListMap)r);
+		if(r.count() == 0)
+			return new Tail(k,v,_meta);
+		return new Link(k, v, (PersistentListMap)r,_meta);
 	}
 
 }

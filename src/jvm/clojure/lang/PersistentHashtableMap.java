@@ -54,10 +54,16 @@ PersistentHashtableMap(int count,PersistentArray array,int growAt) {
     this.growAtCount = growAt;
 }
 
-public Obj withMeta(IPersistentMap meta) throws Exception {
+public Obj withMeta(IPersistentMap meta) {
+    try{
     Obj ret = (Obj) clone();
     ret._meta = meta;
     return ret;
+    }
+    catch(CloneNotSupportedException ignore)
+        {
+        return null;
+        }
 }
 
 int calcPrimeCapacity(int capacity) {

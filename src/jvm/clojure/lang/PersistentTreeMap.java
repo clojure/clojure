@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap implements IPersistentMap, ISequential {
+public class PersistentTreeMap extends Obj implements IPersistentMap, ISequential, Cloneable {
 
 public final Comparator comp;
 public final Node tree;
@@ -38,6 +38,18 @@ public PersistentTreeMap(Comparator comp){
 	_count = 0;
 }
 
+public Obj withMeta(IPersistentMap meta) {
+    try{
+    Obj ret = (Obj) clone();
+    ret._meta = meta;
+    return ret;
+    }
+    catch(CloneNotSupportedException ignore)
+        {
+        return null;
+        }
+}
+
 public boolean contains(Object key){
 	return find(key) != null;
 }
@@ -49,7 +61,7 @@ public PersistentTreeMap add(Object key, Object val) throws Exception {
         {
         throw new Exception("Key already present");
         }
-    return new PersistentTreeMap(comp, t.blacken(), _count + 1);
+    return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
 public PersistentTreeMap put(Object key, Object val){
@@ -60,9 +72,9 @@ public PersistentTreeMap put(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new PersistentTreeMap(comp, replace(tree, key, val), _count);
+		return new PersistentTreeMap(comp, replace(tree, key, val), _count,_meta);
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count + 1);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1,_meta);
 }
 
 
@@ -74,9 +86,11 @@ public PersistentTreeMap remove(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new PersistentTreeMap(comp);
-		}
-	return new PersistentTreeMap(comp, t.blacken(), _count - 1);
+        PersistentTreeMap ret = new PersistentTreeMap(comp);
+        ret._meta = _meta;
+        return ret;
+        }
+	return new PersistentTreeMap(comp, t.blacken(), _count - 1,_meta);
 }
 
 public ISeq seq() throws Exception {
@@ -328,10 +342,11 @@ Node replace(Node t, Object key, Object val){
 	                 c > 0 ? replace(t.right(), key, val) : t.right());
 }
 
-PersistentTreeMap(Comparator comp, Node tree, int count){
+PersistentTreeMap(Comparator comp, Node tree, int count, IPersistentMap meta){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
+    this._meta = meta;
 }
 
 static Red red(Object key, Object val, Node left, Node right){
