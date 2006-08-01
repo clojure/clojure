@@ -147,37 +147,9 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 	return invokeInstanceMethod(name, target, new Object[]{arg1});
 	}
 
-public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2) throws Exception
+public static Object invokeInstanceMember(String name, Object target, Object... args) throws Exception
 	{
-	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2});
-	}
-
-public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3)
-		throws Exception
-	{
-	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3});
-	}
-
-public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,
-                                          Object arg4)
-		throws Exception
-	{
-	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3, arg4});
-	}
-
-public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,
-                                          Object arg4,
-                                          Object... args)
-		throws Exception
-	{
-	Object[] arguments = new Object[4 + args.length];
-	arguments[0] = arg1;
-	arguments[1] = arg2;
-	arguments[2] = arg3;
-	arguments[3] = arg4;
-    if(args.length > 0)
-        System.arraycopy(args, 0, arguments, 4, args.length);
-	return invokeInstanceMethod(name, target, arguments);
+	return invokeInstanceMethod(name, target, args);
 	}
 
 

@@ -51,5 +51,72 @@ Binding getThreadBinding()	{
         else
             newtb = tb.put(thread, b);
 		} while (tb != Interlocked.CompareExchange(ref threadBindings, newtb, tb));
-}public IFn fn(){	return (IFn)getValue();}override public Object invoke() /*throws Exception*/	{	return fn().invoke();	}override public Object invoke( Object arg1) /*throws Exception*/	{	return fn().invoke(arg1);	}override public Object invoke( Object arg1, Object arg2) /*throws Exception*/	{	return fn().invoke(arg1,arg2);	}override public Object invoke( Object arg1, Object arg2, Object arg3) /*throws Exception*/	{	return fn().invoke(arg1,arg2,arg3);	}override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) /*throws Exception*/	{	return fn().invoke(arg1,arg2,arg3,arg4);	}override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)		/*throws Exception*/	{	return fn().invoke(arg1,arg2,arg3,arg4,arg5);	}override public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, params Object[] args)		/*throws Exception*/	{	return fn().invoke(arg1,arg2,arg3,arg4,arg5,args);	}    }
+}public IFn fn(){	return (IFn)getValue();}override public Object invoke(){
+    return fn().invoke();
+}
+override public Object invoke(Object arg1){
+    return fn().invoke(arg1);
+}
+override public Object invoke(Object arg1, Object arg2){
+    return fn().invoke(arg1, arg2);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3){
+    return fn().invoke(arg1, arg2, arg3);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4){
+    return fn().invoke(arg1, arg2, arg3, arg4);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14, Object arg15){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14, Object arg15, Object arg16){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14, Object arg15, Object arg16, Object arg17){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14, Object arg15, Object arg16, Object arg17, Object arg18){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14, Object arg15, Object arg16, Object arg17, Object arg18, Object arg19){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14, Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
+}
+override public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7, Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14, Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20
+							, params Object[] args){
+    return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20,args);
+}
+    }
 }

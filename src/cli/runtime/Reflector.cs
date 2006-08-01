@@ -127,11 +127,7 @@ public static Object invokeInstanceMember(String name, Object target) //throws E
             return prepRet(p.GetValue(target, new Object[]{boxArg(p.GetIndexParameters()[0].ParameterType,arg1)}));
         p.SetValue(target,boxArg(p.PropertyType,arg1),null);
         return arg1;
-        }	return invokeInstanceMethod(name, target, new Object[]{arg1});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2) //throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3)		//throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,                                          Object arg4)		//throws Exception	{	return invokeInstanceMethod(name, target, new Object[]{arg1, arg2, arg3, arg4});	}public static Object invokeInstanceMember(String name, Object target, Object arg1, Object arg2, Object arg3,                                          Object arg4,
-										  params Object[] arglist)		//throws Exception	{	Object[] args = new Object[4 + arglist.Length];	args[0] = arg1;	args[1] = arg2;	args[2] = arg3;	args[3] = arg4;
-	if (arglist.Length > 0)
-		Array.Copy(arglist, 0, args, 4, arglist.Length);
-	return invokeInstanceMethod(name, target, args);	}
+        }	return invokeInstanceMethod(name, target, new Object[]{arg1});	}public static Object invokeInstanceMember(String name, Object target, params Object[] args) //throws Exception	{	return invokeInstanceMethod(name, target, args);	}
 
     public static FieldInfo getField(Type t, string name,bool statics)
         {

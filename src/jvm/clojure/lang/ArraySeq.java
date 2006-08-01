@@ -15,8 +15,9 @@ package clojure.lang;
 public class ArraySeq implements IndexedSeq{
 final Object[] array;
 final int i;
+ISeq _rest;
 
-static public ArraySeq create(Object[] array){
+static public ArraySeq create(Object... array){
 	if(array.length == 0)
 		return null;
 	return new ArraySeq(array, 0);
@@ -25,6 +26,7 @@ static public ArraySeq create(Object[] array){
 ArraySeq(Object[] array, int i){
 	this.array = array;
 	this.i = i;
+    this._rest = this;
 }
 
 public Object first() {
@@ -32,9 +34,13 @@ public Object first() {
 }
 
 public ISeq rest() {
-	if(i+1 < array.length)
-		return new ArraySeq(array, i + 1);
-	return null;
+    if(_rest == this)
+        {
+        if(i+1 < array.length)
+		    _rest = new ArraySeq(array, i + 1);
+	    _rest = null;
+        }
+    return _rest;
 }
 
 public int index(){

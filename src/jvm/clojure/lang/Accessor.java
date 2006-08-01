@@ -12,69 +12,162 @@
 
 package clojure.lang;
 
-public class Accessor extends Symbol implements IFn{
+public class Accessor extends Symbol implements IFn {
 
 String memberName;
-Accessor(String name)
-	{
-        super(name);
-        memberName = name.substring(1);
-    }
+
+Accessor(String name) {
+    super(name);
+    memberName = name.substring(1);
+}
 
 
 public Object invoke() throws Exception {
     return AFn.throwArity();
 }
+
 /**
- *  Indexer implements IFn for attr access
- *  This single arg version is the getter
+ * Indexer implements IFn for attr access
+ * This single arg version is the getter
+ *
  * @param obj - must be Obj
  * @return the value of the attr or nil if not found
  * @throws Exception
  */
-public Object invoke( Object obj) throws Exception
-	{
+public Object invoke(Object obj) throws Exception {
 
-    return Reflector.invokeInstanceMember(memberName,obj);
-	}
+    return Reflector.invokeInstanceMember(memberName, obj);
+}
 
 /**
- *  Indexer implements IFn for attr access
- *  This two arg version is the setter
+ * Indexer implements IFn for attr access
+ * This two arg version is the setter
+ *
  * @param obj - must be Obj
  * @param val
  * @return val
  * @throws Exception
  */
-public Object invoke( Object obj, Object val) throws Exception
-	{
+public Object invoke(Object obj, Object val) throws Exception {
 
-	return Reflector.invokeInstanceMember(memberName,obj,val);
-	}
+    return Reflector.invokeInstanceMember(memberName, obj, val);
+}
 
-public Object invoke( Object arg1, Object arg2, Object arg3) throws Exception
-	{
-	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3);
-	}
+public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3);
+}
 
-public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4) throws Exception
-	{
-	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4);
-	}
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4);
+}
 
-public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
-		throws Exception
-	{
-	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4,arg5);
-	}
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5);
+}
 
-public Object invoke( Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object... args)
-		throws Exception
-	{
-	return Reflector.invokeInstanceMember(memberName,arg1,arg2,arg3,arg4,arg5,args);
-	}
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6);
+}
 
-public Object applyTo( ISeq arglist) throws Exception {
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
+        throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11) throws Exception {
+    return Reflector
+            .invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
+        throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
+        throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13, arg14);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
+                     Object arg15) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13, arg14, arg15);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
+                     Object arg15, Object arg16) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13, arg14, arg15, arg16);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
+                     Object arg15, Object arg16, Object arg17) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13, arg14, arg15, arg16, arg17);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
+                     Object arg15, Object arg16, Object arg17, Object arg18) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
+                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
+                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
+        throws Exception {
+    return Reflector.invokeInstanceMember(memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                          arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
+}
+
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
+                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20
+        , Object... args)
+        throws Exception {
+    throw new IllegalArgumentException("Can't call functions of more than 20 arguments");
+}
+
+public Object applyTo(ISeq arglist) throws Exception {
     return AFn.applyToHelper(this, arglist);
 }
 
