@@ -70,6 +70,8 @@ static public ISeq seq(Object coll) {
         return (ISeq) coll;
     else if(coll is ISequential)
         return ((ISequential) coll).seq();
+    else if(coll is IEnumerable)
+        return EnumeratorSeq.create(((IEnumerable) coll).GetEnumerator());
     else if(coll is Object[])
         return ArraySeq.create((Object[]) coll);
     else

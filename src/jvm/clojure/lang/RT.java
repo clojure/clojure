@@ -69,6 +69,8 @@ static public ISeq seq(Object coll) throws Exception {
         return (ISeq) coll;
     else if(coll instanceof ISequential)
         return ((ISequential) coll).seq();
+    else if(coll instanceof Iterable)
+        return IteratorSeq.create(((Iterable) coll).iterator());
     else if(coll instanceof Object[])
         return ArraySeq.create((Object[]) coll);
     else
