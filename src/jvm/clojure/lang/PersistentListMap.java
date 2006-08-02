@@ -222,12 +222,14 @@ static class Link extends PersistentListMap {
 	final Object _key;
 	final Object _val;
 	final PersistentListMap _rest;
+    final int _count;
 
-	Link(Object key,Object val,PersistentListMap next,IPersistentMap meta){
+    Link(Object key,Object val,PersistentListMap next,IPersistentMap meta){
 		this._key = key;
 		this._val = val;
 		this._rest = next;
         this._meta = meta;
+        this._count = 1 + next.count();
         }
 
 	public Object key(){
@@ -243,7 +245,7 @@ static class Link extends PersistentListMap {
         }
 
 	public int count(){
-		return 1 + _rest.count();
+		return _count;
 	}
 
 	public boolean contains(Object key){

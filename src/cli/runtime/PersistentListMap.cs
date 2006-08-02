@@ -243,12 +243,14 @@ internal class Link : PersistentListMap {
 	readonly Object _key;
 	readonly Object _val;
 	readonly PersistentListMap _rest;
+	readonly int _count;
 
 	internal Link(Object key,Object val,PersistentListMap next,IPersistentMap meta){
 		this._key = key;
 		this._val = val;
 		this._rest = next;
 		this._meta = meta;
+		this._count = 1 + next.count();
 		}
 
 	override public Object key(){
@@ -264,7 +266,7 @@ internal class Link : PersistentListMap {
         }
 
 	override public int count(){
-		return 1 + _rest.count();
+		return _count;
 	}
 
 	override public bool contains(Object key){
