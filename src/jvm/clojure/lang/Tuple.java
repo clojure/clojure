@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class Tuple implements IArray{
+public class Tuple extends AnArray{
 
 final Object[] array;
 

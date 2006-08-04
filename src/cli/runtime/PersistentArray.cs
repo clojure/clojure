@@ -44,7 +44,8 @@ namespace clojure.lang
  * Java implementation is lock-free
  */
 
-public class PersistentArray : Obj, IEnumerable, IArray{
+	public class PersistentArray : AnArray, IEnumerable
+		{
 
 	#region IEnumerable Members
 
@@ -55,19 +56,14 @@ public class PersistentArray : Obj, IEnumerable, IArray{
 
 	#endregion
 
-	public ISeq seq()
+	override public ISeq seq()
 		{
 		if (length() > 0)
 			return new Seq(this, 0);
 		return null;
 		}
 
-	public override Obj withMeta(IPersistentMap meta)
-		{
-		Obj ret = (Obj)MemberwiseClone();
-		ret._meta = meta;
-		return ret;
-		} 
+
 		
 internal class Master{
 	internal readonly Entry[] array;
@@ -257,15 +253,15 @@ public PersistentArray(IArray init) :this(init.length()) {
 	data.master.load = load;
 }
 
-virtual public int count(){
+override public int count(){
 return data.master.array.Length;
 }
 
-virtual public int length(){
+override public int length(){
 return data.master.array.Length;
 }
 
-virtual public Object nth(int i){
+override public Object nth(int i){
 	Entry e = getEntry(i);
 		if(e != null)
 				return e.val;
@@ -328,7 +324,7 @@ for (Entry e = (Entry)data.master.array[i]; e != null; e = e.rest())
 	return null;
 }
 
-virtual public IArray assocN(int i,Object val) {
+override public IArray assocN(int i,Object val) {
 //if (data.master.load >= data.master.maxLoad)
 //		{
 //		isolate();

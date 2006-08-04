@@ -46,7 +46,7 @@ import java.util.Random;
  * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
  */
 
-public class PersistentArray extends Obj implements Iterable, IArray, Cloneable {
+public class PersistentArray extends AnArray implements Iterable {
 
 public Iterator iterator(){
 	return new ValIter(this);
@@ -58,17 +58,7 @@ public ISeq seq() {
     return null;
 }
 
-public Obj withMeta(IPersistentMap meta) {
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
-}
+
 
 static class Master{
     final Entry[] array;

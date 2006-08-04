@@ -15,7 +15,7 @@ using System;
 namespace clojure.lang
 {
 
-public class Tuple : IArray{
+public class Tuple : AnArray{
 
 readonly Object[] array;
 
@@ -29,20 +29,20 @@ public Tuple(params Object[] init){
 	this.array = init;
 }
 
-public int count() {
+override public int count() {
     return array.Length;
 }
 
-public int length() {
+override public int length() {
     return array.Length;
 }
 
-public Object nth(int i){
+override public Object nth(int i){
     return array[i];
 }
 
 
-public IArray assocN(int i, Object val) {
+override public IArray assocN(int i, Object val) {
 	Object[] newArray = (Object[])array.Clone();
 	newArray[i] = val;
     return new Tuple(newArray);
@@ -83,7 +83,7 @@ private bool equalKey(Object k1,Object k2){
     return k1.Equals(k2);
 }
 
-public ISeq seq() {
+override public ISeq seq() {
 	return ArraySeq.create(array);
 }
 }
