@@ -51,7 +51,7 @@ override public int length(){
     return _count;
 }
 
-public int count(){
+override public int count(){
     return _count;
 }
 

@@ -22,7 +22,7 @@ public final Symbol sym;
 public Namespace namespace;
 public Binding binding;
 AtomicInteger tcount = new AtomicInteger(0);
-AtomicReference<IPersistentMap> threadBindings = new AtomicReference(PersistentArrayIdentityMap.EMPTY);
+AtomicReference<IPersistentMap> threadBindings = new AtomicReference(PersistentArrayMap.EMPTY);
 
 Var(Symbol sym, Namespace ns) {
     if (!(sym.getClass() == Symbol.class))

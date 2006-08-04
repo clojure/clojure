@@ -14,7 +14,7 @@ public class TObj implements IObj{
 TRef _attrs;
 
 public TObj() throws Exception{
-    this._attrs = Transaction.tref(PersistentArrayIdentityMap.EMPTY);
+    this._attrs = Transaction.tref(PersistentArrayMap.EMPTY);
 }
 
 

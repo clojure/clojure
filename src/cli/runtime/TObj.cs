@@ -17,7 +17,7 @@ public class TObj : IObj{
 TRef _attrs;
 
 public TObj(){
-    this._attrs = Transaction.tref(PersistentArrayIdentityMap.EMPTY);
+    this._attrs = Transaction.tref(PersistentArrayMap.EMPTY);
 }
 
 
