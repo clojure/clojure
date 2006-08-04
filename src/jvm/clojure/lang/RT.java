@@ -386,4 +386,9 @@ static public Object setValues(Object... vals)
     return null;
     }
 
+public static int count(Object o) {
+    if(o == null)
+        return 0;
+    return ((IPersistentCollection)o).count();
+}
 }

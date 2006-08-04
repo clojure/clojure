@@ -14,21 +14,12 @@ using System.Collections;
 namespace clojure.lang
 {
 
-public interface IPersistentMap :  IEnumerable, IPersistentCollection{
+public interface IPersistentMap :  Associative, IEnumerable, IPersistentCollection{
 
-int count();
-
-bool contains(Object key);
-
-IMapEntry find(Object key);
 
 IPersistentMap add(Object key, Object val);
 
-IPersistentMap put(Object key, Object val);
-
 IPersistentMap remove(Object key);
-
-Object get(Object key);
 
 int capacity();
 }

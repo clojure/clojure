@@ -239,6 +239,10 @@ public PersistentArray(IArray init)  {
     data.master.load = load;
 }
 
+public int count(){
+    return data.master.array.length;
+}
+
 public int length(){
 	return data.master.array.length;
 }

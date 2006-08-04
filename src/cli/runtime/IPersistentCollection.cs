@@ -16,6 +16,8 @@ namespace clojure.lang
 	public interface IPersistentCollection
 		{
 
+		int count();
+
 		ISeq seq();
 
 		}

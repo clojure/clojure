@@ -1,3 +1,5 @@
+package clojure.lang;
+
 /**
  * Copyright (c) Rich Hickey. All rights reserved.
  * The use and distribution terms for this software are covered by the
@@ -7,16 +9,5 @@
  * the terms of this license.
  * You must not remove this notice, or any other, from this software.
  */
-
-package clojure.lang;
-
-
-public interface IPersistentMap extends Iterable, IPersistentCollection, Associative {
-
-
-IPersistentMap add(Object key, Object val) throws Exception;
-
-IPersistentMap remove(Object key);
-
-int capacity();
+public interface Sequential {
 }

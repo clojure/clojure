@@ -1,3 +1,5 @@
+package clojure.lang;
+
 /**
  * Copyright (c) Rich Hickey. All rights reserved.
  * The use and distribution terms for this software are covered by the
@@ -7,16 +9,12 @@
  * the terms of this license.
  * You must not remove this notice, or any other, from this software.
  */
+public interface Associative {
+boolean contains(Object key);
 
-package clojure.lang;
+IMapEntry find(Object key);
 
+IPersistentMap put(Object key, Object val);
 
-public interface IPersistentMap extends Iterable, IPersistentCollection, Associative {
-
-
-IPersistentMap add(Object key, Object val) throws Exception;
-
-IPersistentMap remove(Object key);
-
-int capacity();
+Object get(Object key);
 }

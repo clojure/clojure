@@ -8,15 +8,11 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-package clojure.lang;
+namespace clojure.lang
+{
 
 
-public interface IPersistentMap extends Iterable, IPersistentCollection, Associative {
+public interface Sequential {
+}
 
-
-IPersistentMap add(Object key, Object val) throws Exception;
-
-IPersistentMap remove(Object key);
-
-int capacity();
 }

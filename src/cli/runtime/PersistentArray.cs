@@ -257,6 +257,10 @@ public PersistentArray(IArray init) :this(init.length()) {
 	data.master.load = load;
 }
 
+virtual public int count(){
+return data.master.array.Length;
+}
+
 virtual public int length(){
 return data.master.array.Length;
 }

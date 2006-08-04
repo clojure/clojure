@@ -26,6 +26,10 @@ public Tuple(Object... init){
 	this.array = init;
 }
 
+public int count() {
+    return array.length;
+}
+
 public int length() {
     return array.length;
 }

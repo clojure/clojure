@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) Rich Hickey. All rights reserved.
  * The use and distribution terms for this software are covered by the
  * Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
@@ -8,15 +8,14 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-package clojure.lang;
-
-
-public interface IPersistentMap extends Iterable, IPersistentCollection, Associative {
-
-
-IPersistentMap add(Object key, Object val) throws Exception;
-
-IPersistentMap remove(Object key);
-
-int capacity();
-}
+using System;
+namespace clojure.lang
+	{
+	public interface Associative
+		{
+		bool contains(object key);
+		IMapEntry find(object key);
+		object get(object key);
+		IPersistentMap put(object key, object val);
+		}
+	}

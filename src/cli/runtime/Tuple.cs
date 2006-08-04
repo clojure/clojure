@@ -29,6 +29,10 @@ public Tuple(params Object[] init){
 	this.array = init;
 }
 
+public int count() {
+    return array.Length;
+}
+
 public int length() {
     return array.Length;
 }

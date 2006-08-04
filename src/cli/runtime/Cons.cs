@@ -43,12 +43,16 @@ public ISeq rest()
 #endregion
 
 
-#region ISequential Members
+#region IPersistentCollection Members
 
 public ISeq seq()
 	{
 	return this;
 	}
+
+public int count() {
+    return 1 + RT.count(_rest);
+}
 
 #endregion
 	}
