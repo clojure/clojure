@@ -25,7 +25,7 @@ namespace clojure.lang
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class PersistentArrayMap : Obj, IPersistentMap, ISequential {
+public class PersistentArrayMap : Obj, IPersistentMap, IPersistentCollection {
 
 internal readonly Object[] array;
 

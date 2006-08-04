@@ -1,3 +1,5 @@
+package clojure.lang;
+
 /**
  * Copyright (c) Rich Hickey. All rights reserved.
  * The use and distribution terms for this software are covered by the
@@ -7,16 +9,10 @@
  * the terms of this license.
  * You must not remove this notice, or any other, from this software.
  */
-using System;
 
 
-namespace clojure.lang
-	{
+public interface IPersistentCollection {
 
-	public interface ISequential
-		{
+ISeq seq() throws Exception;
 
-		ISeq seq();
-
-		}
-	}
+}

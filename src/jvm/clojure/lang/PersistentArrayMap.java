@@ -23,7 +23,7 @@ import java.util.Iterator;
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class PersistentArrayMap extends Obj implements IPersistentMap, ISequential, Cloneable {
+public class PersistentArrayMap extends Obj implements IPersistentMap, IPersistentCollection, Cloneable {
 
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 42;

@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap extends Obj implements IPersistentMap, ISequential, Cloneable {
+public class PersistentTreeMap extends Obj implements IPersistentMap, IPersistentCollection, Cloneable {
 
 public final Comparator comp;
 public final Node tree;

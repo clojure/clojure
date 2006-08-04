@@ -27,7 +27,7 @@ namespace clojure.lang
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap : Obj, IPersistentMap, IMapEntry, ISeq, ISequential
+public class PersistentListMap : Obj, IPersistentMap, IMapEntry, ISeq, IPersistentCollection
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();

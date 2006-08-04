@@ -11,7 +11,7 @@
 package clojure.lang;
 
 
-public interface IPersistentMap extends Iterable, ISequential {
+public interface IPersistentMap extends Iterable, IPersistentCollection {
 
 int count();
 

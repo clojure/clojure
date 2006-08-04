@@ -14,7 +14,7 @@ using System.Collections;
 namespace clojure.lang
 {
 
-public interface IPersistentMap :  IEnumerable, ISequential{
+public interface IPersistentMap :  IEnumerable, IPersistentCollection{
 
 int count();
 

@@ -13,7 +13,7 @@ using System;
 namespace clojure.lang
 {
 
-public interface IArray : ISequential {
+public interface IArray : IPersistentCollection {
 int length();
 
 Object get(int i);

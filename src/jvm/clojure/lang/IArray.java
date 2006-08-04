@@ -10,7 +10,7 @@ package clojure.lang;
  * You must not remove this notice, or any other, from this software.
  */
 
-public interface IArray extends ISequential {
+public interface IArray extends IPersistentCollection {
 int length();
 
 Object get(int i);

@@ -28,7 +28,7 @@ import java.util.Iterator;
  * code duplication here is kind of gross, but most efficient
  */
 
-public class PersistentListIdentityMap extends Obj implements IPersistentMap, IMapEntry, ISeq, ISequential,Cloneable
+public class PersistentListIdentityMap extends Obj implements IPersistentMap, IMapEntry, ISeq, IPersistentCollection,Cloneable
 {
 
 static public PersistentListIdentityMap EMPTY = new PersistentListIdentityMap();

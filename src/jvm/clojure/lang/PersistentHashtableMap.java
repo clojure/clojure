@@ -193,7 +193,7 @@ static class Seq implements ISeq{
             return new Seq(buckets,b,e.rest());
         for(b = b+1;b<buckets.length();b++)
             {
-            ISequential a = (ISequential) buckets.get(b);
+            IPersistentCollection a = (IPersistentCollection) buckets.get(b);
             if(a != null && a.seq() != null)
                 return new Seq(buckets,b,a.seq());
             }

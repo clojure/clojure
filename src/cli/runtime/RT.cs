@@ -68,8 +68,8 @@ public class RT
 static public ISeq seq(Object coll) {
     if(coll == null || coll is ISeq)
         return (ISeq) coll;
-    else if(coll is ISequential)
-        return ((ISequential) coll).seq();
+    else if(coll is IPersistentCollection)
+        return ((IPersistentCollection) coll).seq();
     else if(coll is IEnumerable)
         return EnumeratorSeq.create(((IEnumerable) coll).GetEnumerator());
     else if(coll is Object[])

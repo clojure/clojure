@@ -31,7 +31,7 @@ namespace clojure.lang
 	 * code duplication here is kind of gross, but most efficient
 	 */
 	 
-	public class PersistentListIdentityMap : Obj, IPersistentMap, IMapEntry, ISeq, ISequential
+	public class PersistentListIdentityMap : Obj, IPersistentMap, IMapEntry, ISeq, IPersistentCollection
 		{
 
 		static public PersistentListIdentityMap EMPTY = new PersistentListIdentityMap();

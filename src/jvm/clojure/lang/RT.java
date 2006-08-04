@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.io.Reader;
 import java.io.PushbackReader;
 import java.io.Writer;
-import java.io.IOException;
 
 public class RT{
 
@@ -67,8 +66,8 @@ public class RT{
 static public ISeq seq(Object coll) throws Exception {
     if(coll == null || coll instanceof ISeq)
         return (ISeq) coll;
-    else if(coll instanceof ISequential)
-        return ((ISequential) coll).seq();
+    else if(coll instanceof IPersistentCollection)
+        return ((IPersistentCollection) coll).seq();
     else if(coll instanceof Iterable)
         return IteratorSeq.create(((Iterable) coll).iterator());
     else if(coll instanceof Object[])

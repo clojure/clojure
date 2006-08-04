@@ -25,7 +25,7 @@ namespace clojure.lang
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap : Obj, IPersistentMap, ISequential{
+public class PersistentTreeMap : Obj, IPersistentMap, IPersistentCollection{
 
 public readonly IComparer comp;
 public readonly Node tree;
