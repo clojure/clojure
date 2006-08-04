@@ -98,7 +98,7 @@ public IPersistentMap add(Object key, Object val) {
     return create(newArray);
     }
 
-public IPersistentMap put(Object key, Object val) {
+public IPersistentMap assoc(Object key, Object val) {
     int i = indexOf(key);
     Object[] newArray;
     if(i >= 0) //already have key, same-sized replacement
@@ -111,7 +111,7 @@ public IPersistentMap put(Object key, Object val) {
     else //didn't have key, grow
         {
 		if (array.Length > HASHTABLE_THRESHOLD)
-			return createHT(array).put(key, val);
+			return createHT(array).assoc(key, val);
 		newArray = new Object[array.Length + 2];
         if(array.Length > 0)
             Array.Copy(array,0,newArray,2,array.Length);

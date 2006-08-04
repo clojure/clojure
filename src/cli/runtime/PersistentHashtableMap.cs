@@ -98,25 +98,25 @@ public IPersistentMap add(Object key, Object val) {
     return create(_count + incr, newArray, growAtCount);
 }
 
-public IPersistentMap put(Object key, Object val) {
+public IPersistentMap assoc(Object key, Object val) {
     if(_count > growAtCount)
-        return grow().put(key, val);
+        return grow().assoc(key, val);
     int i = bucketFor(key,array);
     int incr = 1;
     PersistentArray newArray = doPut(i, key, val, array);
     if(newArray == array)
         return this;
-    if(array.get(i) != null && ((IPersistentMap)newArray.get(i)).count() == ((IPersistentMap)array.get(i)).count()) //key already there, no growth
+    if(array.nth(i) != null && ((IPersistentMap)newArray.nth(i)).count() == ((IPersistentMap)array.nth(i)).count()) //key already there, no growth
         incr = 0;
     return create(_count + incr, newArray, growAtCount);
 }
 
 PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
-    IPersistentMap entries = (IPersistentMap) array.get(i);
+    IPersistentMap entries = (IPersistentMap) array.nth(i);
     IPersistentMap newEntries;
     if (entries != null)
         {
-        newEntries = entries.put(key, val);
+        newEntries = entries.assoc(key, val);
         if(newEntries == entries) //already there with same value, no op
             return array;
         }
@@ -124,11 +124,11 @@ PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
 	    newEntries = createListMap(key, val);
 		//newEntries = createArrayMap(new Object[]{key, val});
 
-	return (PersistentArray)array.set(i, newEntries);
+	return (PersistentArray)array.assocN(i, newEntries);
 }
 
 PersistentArray doAdd(int i,Object key,Object val,PersistentArray array) {
-    IPersistentMap entries = (IPersistentMap) array.get(i);
+    IPersistentMap entries = (IPersistentMap) array.nth(i);
     IPersistentMap newEntries;
     if (entries != null)
         {
@@ -137,16 +137,16 @@ PersistentArray doAdd(int i,Object key,Object val,PersistentArray array) {
     else
 	    newEntries = createListMap(key, val);
 
-	return (PersistentArray)array.set(i, newEntries);
+	return (PersistentArray)array.assocN(i, newEntries);
 }
 public IPersistentMap remove(Object key) {
     int i = bucketFor(key,array);
-    IPersistentMap entries = (IPersistentMap) array.get(i);
+    IPersistentMap entries = (IPersistentMap) array.nth(i);
     if (entries != null)
         {
         IPersistentMap newEntries = entries.remove(key);
         if (newEntries != entries)
-			return create(_count - 1, (PersistentArray)array.set(i, newEntries));
+			return create(_count - 1, (PersistentArray)array.assocN(i, newEntries));
         }
     //not there, no op
     return this;
@@ -195,7 +195,7 @@ class Seq : ISeq{
             return new Seq(buckets,b,e.rest());
         for(b = b+1;b<buckets.length();b++)
             {
-            IPersistentCollection a = (IPersistentCollection) buckets.get(b);
+            IPersistentCollection a = (IPersistentCollection) buckets.nth(b);
             if(a != null && a.seq() != null)
                 return new Seq(buckets,b,a.seq());
             }
@@ -231,7 +231,7 @@ internal class Iter : IEnumerator{
         e = null;
         for(b = b+1;b<buckets.length();b++)
             {
-            Object a =  buckets.get(b);
+            Object a =  buckets.nth(b);
             if(a != null && a != PersistentListMap.EMPTY)
                 {
                 e = a;
@@ -263,7 +263,7 @@ public void Reset()
 	}
 
 IPersistentMap entriesFor(Object key){
-    return (IPersistentMap) array.get(bucketFor(key,array));
+    return (IPersistentMap) array.nth(bucketFor(key,array));
 }
 
 static int bucketFor(Object key, PersistentArray array) {

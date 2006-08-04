@@ -13,7 +13,7 @@ package clojure.lang;
 public interface IArray extends IPersistentCollection {
 int length();
 
-Object get(int i);
+Object nth(int i);
 
-IArray set(int i,Object val) throws Exception;
+IArray assocN(int i,Object val) throws Exception;
 }

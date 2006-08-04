@@ -149,7 +149,7 @@ internal class Seq : IndexedSeq{
 	}
 
     public Object first() {
-        return p.get(i);
+        return p.nth(i);
     }
 
     public ISeq rest() {
@@ -183,7 +183,7 @@ internal class ValIter : IEnumerator
 
 public object Current
 	{
-	get { return p.get(i); }
+	get { return p.nth(i); }
 	}
 
 public bool MoveNext()
@@ -250,7 +250,7 @@ public PersistentArray(IArray init) :this(init.length()) {
     int load = 0;
     for(int i=0;i < init.length();i++)
         {
-		data.master.array[i] = new Entry(0, init.get(i));
+		data.master.array[i] = new Entry(0, init.nth(i));
         ++load;
         }
 
@@ -265,7 +265,7 @@ virtual public int length(){
 return data.master.array.Length;
 }
 
-virtual public Object get(int i){
+virtual public Object nth(int i){
 	Entry e = getEntry(i);
 		if(e != null)
 				return e.val;
@@ -328,7 +328,7 @@ for (Entry e = (Entry)data.master.array[i]; e != null; e = e.rest())
 	return null;
 }
 
-virtual public IArray set(int i,Object val) {
+virtual public IArray assocN(int i,Object val) {
 //if (data.master.load >= data.master.maxLoad)
 //		{
 //		isolate();
@@ -412,7 +412,7 @@ override public bool Equals(Object key){
 
     for(int i = 0; i < length(); i++)
         {
-        if(!equalKey(get(i),a.get(i)))
+        if(!equalKey(nth(i),a.nth(i)))
             return false;
         }
 
@@ -424,7 +424,7 @@ override public int GetHashCode()
 	int ret = 0;
 	for (int i = 0; i < length(); i++)
 		{
-		Object o = get(i);
+		Object o = nth(i);
 		if (o != null)
 			ret ^= o.GetHashCode();
 		}
@@ -531,14 +531,14 @@ static public void Main(String[] args){
 	IArray oldp = p;
 	for (int i = 0; i < writes; i++)
 		{
-		p =	p.set(rand.Next(size), i);
+		p =	p.assocN(rand.Next(size), i);
 		//dummy set to force perverse branching
-		oldp = oldp.set(i%size, i);
+		oldp = oldp.assocN(i%size, i);
 		//p.set(i%size, i);
 		}
 	for(int i = 0; i < reads; i++)
 		{
-		tp += (int)p.get(rand.Next(size));
+		tp += (int)p.nth(rand.Next(size));
 		}
 	Console.WriteLine("Time: " + (DateTime.Now - start));
 	Console.WriteLine("Done: " + tv + ", " + tp);

@@ -16,9 +16,9 @@ namespace clojure.lang
 public interface IArray : IPersistentCollection {
 int length();
 
-Object get(int i);
+Object nth(int i);
 
-IArray set(int i,Object val);
+IArray assocN(int i,Object val);
 }
 
 }

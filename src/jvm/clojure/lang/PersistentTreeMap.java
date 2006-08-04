@@ -64,7 +64,7 @@ public PersistentTreeMap add(Object key, Object val) throws Exception {
     return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
-public PersistentTreeMap put(Object key, Object val){
+public PersistentTreeMap assoc(Object key, Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -768,7 +768,7 @@ static public void main(String args[]){
 	for(int i = 0; i < ints.length; i++)
 		{
 		Integer anInt = ints[i];
-		set = set.put(anInt, anInt);
+		set = set.assoc(anInt, anInt);
 		}
     //System.out.println("_count = " + set.count());
 

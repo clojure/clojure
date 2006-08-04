@@ -101,7 +101,7 @@ public IPersistentMap add(Object key, Object val) throws Exception {
     return create(newArray);
 }
 
-public IPersistentMap put(Object key, Object val) {
+public IPersistentMap assoc(Object key, Object val) {
     int i = indexOf(key);
     Object[] newArray;
     if(i >= 0) //already have key, same-sized replacement
@@ -114,7 +114,7 @@ public IPersistentMap put(Object key, Object val) {
     else //didn't have key, grow
         {
         if(array.length > HASHTABLE_THRESHOLD)
-            return createHT(array).put(key, val);
+            return createHT(array).assoc(key, val);
         newArray = new Object[array.length + 2];
         if(array.length > 0)
             System.arraycopy(array,0,newArray,2,array.length);

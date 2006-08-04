@@ -68,10 +68,10 @@ public virtual IMapEntry find(Object key){
 }
 
 public virtual IPersistentMap add(Object key, Object val){
-	return put(key, val);
+	return assoc(key, val);
 }
 
-public virtual IPersistentMap put(Object key, Object val){
+public virtual IPersistentMap assoc(Object key, Object val){
 	return new Tail(key, val, _meta);
 }
 
@@ -202,7 +202,7 @@ internal class Tail : PersistentListMap {
 		return new Link(key, val, this,_meta);
 		}
 
-	override public IPersistentMap put(Object key, Object val)
+	override public IPersistentMap assoc(Object key, Object val)
 		{
 		if(equalKey(key,_key))  //replace
 			{
@@ -289,7 +289,7 @@ internal class Link : PersistentListMap {
 		return new Link(key,val,this,_meta);
 	}
 	
-	override public IPersistentMap put(Object key, Object val)
+	override public IPersistentMap assoc(Object key, Object val)
 		{
 		IMapEntry e = find(key);
 		if(e != null)

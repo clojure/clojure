@@ -34,12 +34,12 @@ public int length() {
     return array.length;
 }
 
-public Object get(int i){
+public Object nth(int i){
     return array[i];
 }
 
 
-public IArray set(int i, Object val) {
+public IArray assocN(int i, Object val) {
     Object[] newArray = array.clone();
     newArray[i] = val;
     return new Tuple(newArray);
@@ -56,7 +56,7 @@ public boolean equals(Object key){
 
     for(int i = 0; i < array.length; i++)
         {
-        if(!equalKey(array[i],a.get(i)))
+        if(!equalKey(array[i],a.nth(i)))
             return false;
         }
 

@@ -72,10 +72,10 @@ public IMapEntry find(Object key){
 }
 
 public IPersistentMap add(Object key, Object val) throws Exception {
-    return put(key, val);
+    return assoc(key, val);
 }
 
-public PersistentListMap put(Object key, Object val) {
+public PersistentListMap assoc(Object key, Object val) {
     return new Tail(key, val,_meta);
 }
 
@@ -184,7 +184,7 @@ static class Tail extends PersistentListMap {
         return new Link(key,val,this,_meta);
     }
 
-	public PersistentListMap put(Object key, Object val){
+	public PersistentListMap assoc(Object key, Object val){
 		if(equalKey(key,_key))  //replace
 			{
 			if(val == _val)
@@ -267,7 +267,7 @@ static class Link extends PersistentListMap {
         return new Link(key,val,this,_meta);
     }
 
-    public PersistentListMap put(Object key, Object val) {
+    public PersistentListMap assoc(Object key, Object val) {
         IMapEntry e = find(key);
         if(e != null)
             {

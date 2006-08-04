@@ -147,7 +147,7 @@ static class Seq implements IndexedSeq{
 	}
 
     public Object first() {
-        return p.get(i);
+        return p.nth(i);
     }
 
     public ISeq rest() {
@@ -175,7 +175,7 @@ static class ValIter implements Iterator{
 	}
 
 	public Object next(){
-		return p.get(i++);
+		return p.nth(i++);
 	}
 
 	public void remove(){
@@ -232,7 +232,7 @@ public PersistentArray(IArray init)  {
     int load = 0;
     for(int i=0;i < init.length();i++)
         {
-        data.master.array[i] = new Entry(0,init.get(i));
+        data.master.array[i] = new Entry(0,init.nth(i));
         ++load;
         }
 
@@ -247,7 +247,7 @@ public int length(){
 	return data.master.array.length;
 }
 
-public Object get(int i) {
+public Object nth(int i) {
     Entry e = getEntry(i);
     if(e != null)
         return e.val;
@@ -316,7 +316,7 @@ private Entry getEntry(int i){
     return null;
 }
 
-public PersistentArray set(int i,Object val) {
+public PersistentArray assocN(int i,Object val) {
     synchronized(data.master){
         if(data.master.load >= data.master.maxLoad)
             trim();
@@ -393,7 +393,7 @@ public boolean equals(Object key){
 
     for(int i = 0; i < length(); i++)
         {
-        if(!equalKey(get(i),a.get(i)))
+        if(!equalKey(nth(i),a.nth(i)))
             return false;
         }
 
@@ -404,7 +404,7 @@ public int hashCode(){
 	int ret = 0;
 	for(int i = 0; i < length(); i++)
 		{
-		Object o = get(i);
+		Object o = nth(i);
 		if(o != null)
 			ret ^= o.hashCode();
 		}
@@ -503,13 +503,13 @@ static public void main(String[] args){
 
     for(int i = 0; i < writes; i++)
 		{
-		p =	p.set(rand.nextInt(size), i);
+		p =	p.assocN(rand.nextInt(size), i);
 		//dummy set to force perverse branching
-        oldp =	oldp.set(rand2.nextInt(size), i);
+        oldp =	oldp.assocN(rand2.nextInt(size), i);
 		}
 	for(int i = 0; i < reads; i++)
 		{
-		tp += (Integer)p.get(rand.nextInt(size));
+		tp += (Integer)p.nth(rand.nextInt(size));
 		}
 	estimatedTime = System.nanoTime() - startTime;
 	System.out.println("time: " + estimatedTime/1000000);

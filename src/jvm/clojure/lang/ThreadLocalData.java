@@ -40,7 +40,7 @@ static public void main(String[] args){
 //	testmap = (PersistentArrayIdentityMap) testmap.put(Thread.currentThread(), 17);
 
 	IPersistentMap testmap = PersistentArrayMap.EMPTY;
-	testmap = testmap.put(Thread.currentThread(), 17);
+	testmap = testmap.assoc(Thread.currentThread(), 17);
 //	testmap = testmap.put(42, 42);
 //	testmap = testmap.put(43, 42);
 //	testmap = testmap.put(44, 42);

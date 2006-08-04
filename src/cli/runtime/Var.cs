@@ -49,7 +49,7 @@ Binding getThreadBinding()	{
         if (b == null)
             newtb = tb.remove(thread);
         else
-            newtb = tb.put(thread, b);
+            newtb = tb.assoc(thread, b);
 		} while (tb != Interlocked.CompareExchange(ref threadBindings, newtb, tb));
 }public IFn fn(){	return (IFn)getValue();}override public Object invoke(){
     return fn().invoke();

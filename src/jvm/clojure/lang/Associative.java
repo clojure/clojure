@@ -14,7 +14,7 @@ boolean contains(Object key);
 
 IMapEntry find(Object key);
 
-IPersistentMap put(Object key, Object val);
+IPersistentMap assoc(Object key, Object val);
 
 Object get(Object key);
 }

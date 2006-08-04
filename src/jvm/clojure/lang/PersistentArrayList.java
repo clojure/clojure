@@ -31,18 +31,18 @@ PersistentArrayList(int size, Object defaultVal, float loadFactor, int count) {
     this._count = count;
 }
 
-public Object get(int i) {
+public Object nth(int i) {
     if(i >= _count)
         throw new IndexOutOfBoundsException();
 
-    return super.get(i);
+    return super.nth(i);
 }
 
-public PersistentArrayList set(int i,Object val) {
+public PersistentArrayList assocN(int i,Object val) {
     if(i >= _count)
         throw new IndexOutOfBoundsException();
 
-    return (PersistentArrayList) super.set(i, val);
+    return (PersistentArrayList) super.assocN(i, val);
 }
 
 public int length(){
@@ -65,7 +65,7 @@ public PersistentArrayList add(Object val) {
                 grow();
             }
         }
-    PersistentArrayList ret =  (PersistentArrayList) super.set(_count, val);
+    PersistentArrayList ret =  (PersistentArrayList) super.assocN(_count, val);
     ret._count = _count + 1;
     return ret;
 }

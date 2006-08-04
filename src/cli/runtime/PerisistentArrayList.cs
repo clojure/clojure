@@ -33,18 +33,18 @@ PersistentArrayList(int size, Object defaultVal, float loadFactor, int count):ba
     this._count = count;
 }
 
-override public Object get(int i) {
+override public Object nth(int i) {
     if(i >= _count)
         throw new IndexOutOfRangeException();
 
-    return base.get(i);
+    return base.nth(i);
 }
 
-override public IArray set(int i,Object val) {
+override public IArray assocN(int i,Object val) {
     if(i >= _count)
 		throw new IndexOutOfRangeException();
 
-    return (PersistentArrayList) base.set(i, val);
+    return (PersistentArrayList) base.assocN(i, val);
 }
 
 override public int length(){
@@ -67,7 +67,7 @@ public PersistentArrayList add(Object val) {
                 grow();
             }
         }
-    PersistentArrayList ret =  (PersistentArrayList) base.set(_count, val);
+    PersistentArrayList ret =  (PersistentArrayList) base.assocN(_count, val);
     ret._count = _count + 1;
     return ret;
 }

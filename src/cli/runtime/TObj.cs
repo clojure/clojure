@@ -23,7 +23,7 @@ public TObj(){
 
 public Object putAttr( Object key, Object val) {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
-    t = t.put(key, val);
+    t = t.assoc(key, val);
     Transaction.set(_attrs,t);
     return val;
 }
