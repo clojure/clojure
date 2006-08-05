@@ -11,7 +11,7 @@
 using System;
 namespace clojure.lang
 	{
-	public interface Associative
+	public interface Associative : IPersistentCollection
 		{
 		bool contains(object key);
 		IMapEntry find(object key);

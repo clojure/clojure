@@ -11,7 +11,7 @@
 package clojure.lang;
 
 
-public interface IPersistentMap extends Iterable, IPersistentCollection, Associative {
+public interface IPersistentMap extends Iterable, Associative {
 
 
 IPersistentMap assoc(Object key, Object val);

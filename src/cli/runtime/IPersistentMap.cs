@@ -14,7 +14,7 @@ using System.Collections;
 namespace clojure.lang
 {
 
-public interface IPersistentMap :  Associative, IEnumerable, IPersistentCollection{
+public interface IPersistentMap :  Associative, IEnumerable{
 
 
 IPersistentMap assocEx(Object key, Object val);
