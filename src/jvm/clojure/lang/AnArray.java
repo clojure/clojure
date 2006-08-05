@@ -13,6 +13,8 @@ package clojure.lang;
 public abstract class AnArray extends Obj implements IArray, Cloneable {
 
 public Obj withMeta(IPersistentMap meta) {
+    if(_meta == meta)
+        return this;
     try{
     Obj ret = (Obj) clone();
     ret._meta = meta;
@@ -24,4 +26,39 @@ public Obj withMeta(IPersistentMap meta) {
         }
 }
 
+public boolean contains(Object key) {
+    if(!(key instanceof Number))
+        return false;
+    int i = ((Number)key).intValue();
+    return i >= 0 && i < count();
+}
+
+public IMapEntry find(Object key) {
+    if(key instanceof Number)
+        {
+        int i = ((Number)key).intValue();
+        if(i >= 0 && i < count())
+            return new MapEntry(key,nth(i));
+        }
+    return null;
+}
+
+public IPersistentMap assoc(Object key, Object val) {
+    if(key instanceof Number)
+        {
+        int i = ((Number)key).intValue();
+        return (IPersistentMap) assocN(i,val);
+        }
+    throw new IllegalAccessError("Key must be integer");
+}
+
+public Object get(Object key) {
+    if(key instanceof Number)
+        {
+        int i = ((Number)key).intValue();
+        if(i >= 0 && i < count())
+            return nth(i);
+        }
+    return null;
+}
 }

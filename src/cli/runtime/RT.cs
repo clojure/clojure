@@ -32,6 +32,10 @@ public class RT
 			chars[i] = (char)i;
         }
 
+static public bool equal(Object k1,Object k2){
+    return k1 == k2 ||
+           (k1 != null && k1.Equals(k2));
+}
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?T:null;
         }

@@ -13,7 +13,7 @@ using System;
 namespace clojure.lang
 {
 
-public interface IArray : IPersistentCollection {
+public interface IArray : IPersistentCollection, Associative {
 int length();
 
 Object nth(int i);

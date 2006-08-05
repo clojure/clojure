@@ -30,6 +30,11 @@ public class RT{
         }
 
 
+static public boolean equal(Object k1,Object k2){
+    return k1 == k2 ||
+           (k1 != null && k1.equals(k2));
+}
+
     static public Object eq(Object arg1, Object arg2) {
         return (arg1 == arg2)?Boolean.TRUE:null;
         }

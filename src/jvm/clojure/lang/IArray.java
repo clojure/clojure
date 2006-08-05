@@ -10,10 +10,10 @@ package clojure.lang;
  * You must not remove this notice, or any other, from this software.
  */
 
-public interface IArray extends IPersistentCollection {
+public interface IArray extends IPersistentCollection, Associative {
 int length();
 
 Object nth(int i);
 
-IArray assocN(int i,Object val) throws Exception;
+IArray assocN(int i,Object val);
 }

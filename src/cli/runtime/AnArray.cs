@@ -17,6 +17,8 @@ public abstract class AnArray : Obj, IArray {
 
 	public override Obj withMeta(IPersistentMap meta)
 		{
+		if(_meta == meta)
+			return this;
 		Obj ret = (Obj)MemberwiseClone();
 		ret._meta = meta;
 		return ret;
@@ -40,6 +42,49 @@ public abstract class AnArray : Obj, IArray {
 	abstract public ISeq seq();
 
 	#endregion
+	
+public bool contains(Object key) {
+     try{
+		int i = Convert.ToInt32(key);
+		return i >= 0 && i < count();
+		}
+	catch(Exception)
+		{
+		return false;
+		}
+}
+
+public IMapEntry find(Object key) {
+    try
+        {
+		int i = Convert.ToInt32(key);
+        if(i >= 0 && i < count())
+            return new MapEntry(key,nth(i));
+        }
+	catch(Exception)
+		{
+		}
+    return null;
+}
+
+public IPersistentMap assoc(Object key, Object val) {
+		int i = Convert.ToInt32(key);
+        return (IPersistentMap) assocN(i,val);
+}
+
+public Object get(Object key) {
+    try
+        {
+		int i = Convert.ToInt32(key);
+        if(i >= 0 && i < count())
+            return nth(i);
+        }
+	catch (Exception)
+		{
+		} 
+	return null;
 	}
+
+}
 
 }

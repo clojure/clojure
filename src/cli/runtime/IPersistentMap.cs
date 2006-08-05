@@ -21,7 +21,6 @@ IPersistentMap add(Object key, Object val);
 
 IPersistentMap remove(Object key);
 
-int capacity();
 }
 
 }

@@ -17,6 +17,4 @@ public interface IPersistentMap extends Iterable, IPersistentCollection, Associa
 IPersistentMap add(Object key, Object val) throws Exception;
 
 IPersistentMap remove(Object key);
-
-int capacity();
 }
