@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class Cons implements ISeq, IPersistentCollection {
+public class Cons implements ISeq {
 
 private final Object _first;
 private final ISeq _rest;

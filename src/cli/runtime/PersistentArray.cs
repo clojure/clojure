@@ -253,6 +253,17 @@ public PersistentArray(IArray init) :this(init.length()) {
 	data.master.load = load;
 }
 
+public PersistentArray(IArray init, int size) :this(size) {
+    int load = 0;
+    for(int i=0;i < init.length() && i < size;i++)
+        {
+        data.master.array[i] = new Entry(0,init.nth(i));
+        ++load;
+        }
+
+    data.master.load = load;
+}
+
 override public int count(){
 return data.master.array.Length;
 }
@@ -500,7 +511,7 @@ static public void Main(String[] args){
 		{
 		v.Add(0);
 		//p = p.set(i, 0);
-		p = ((PersistentArrayList)p).add(0);
+		p = (IArray)((PersistentArrayList)p).cons(0);
 		}
 
 	Random rand;

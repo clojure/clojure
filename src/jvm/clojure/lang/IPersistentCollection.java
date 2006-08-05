@@ -14,6 +14,8 @@ package clojure.lang;
 public interface IPersistentCollection {
 
 int count();
+
 ISeq seq() throws Exception;
 
+IPersistentCollection cons(Object o);
 }

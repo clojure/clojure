@@ -25,7 +25,7 @@ namespace clojure.lang
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
 
-public class PersistentArrayMap : Obj, IPersistentMap, IPersistentCollection {
+public class PersistentArrayMap : APersistentMap {
 
 internal readonly Object[] array;
 
@@ -49,12 +49,6 @@ virtual internal IPersistentMap createHT(Object[] init){
 	return ret;
 	}
 	
-public override Obj withMeta(IPersistentMap meta)
-	{
-	Obj ret = (Obj)MemberwiseClone();
-	ret._meta = meta;
-	return ret;
-	} 
 /**
  * This ctor captures/aliases the passed array, so do not modify later
  * @param init {key1,val1,key2,val2,...}
@@ -63,22 +57,22 @@ public PersistentArrayMap(params Object[] init){
     this.array = init;
 }
 
-public int count() {
+override public int count() {
     return array.Length/2;
 }
 
-public bool contains(Object key){
+override public bool contains(Object key){
 	return indexOf(key) >= 0;
 }
 
-public IMapEntry find(Object key) {
+override public IMapEntry find(Object key) {
     int i = indexOf(key);
     if(i >= 0)
         return new Iter(array,i);
     return null;
 }
 
-public IPersistentMap assocEx(Object key, Object val) {
+override public IPersistentMap assocEx(Object key, Object val) {
     int i = indexOf(key);
     Object[] newArray;
     if(i >= 0)
@@ -98,7 +92,7 @@ public IPersistentMap assocEx(Object key, Object val) {
     return create(newArray);
     }
 
-public Associative assoc(Object key, Object val) {
+override public Associative assoc(Object key, Object val) {
     int i = indexOf(key);
     Object[] newArray;
     if(i >= 0) //already have key, same-sized replacement
@@ -121,7 +115,7 @@ public Associative assoc(Object key, Object val) {
     return create(newArray);
 }
 
-public IPersistentMap without(Object key) {
+override public IPersistentMap without(Object key) {
     int i = indexOf(key);
     if(i >= 0) //have key, will remove
         {
@@ -152,7 +146,7 @@ virtual public IPersistentMap empty() {
     return ret;
 }
 
-public Object get(Object key) {
+override public Object get(Object key) {
     int i = indexOf(key);
     if(i >= 0)
         return array[i + 1];
@@ -178,11 +172,11 @@ internal virtual bool equalKey(Object k1,Object k2){
     return k1.Equals(k2);
 }
 
-public IEnumerator GetEnumerator() {
+override public IEnumerator GetEnumerator() {
     return new Iter(array);
 }
 
-public ISeq seq() {
+override public ISeq seq() {
     if(array.Length > 0)
         return new Seq(array,0);
     return null;

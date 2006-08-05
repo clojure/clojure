@@ -83,4 +83,6 @@ private boolean equalKey(Object k1,Object k2){
 public ISeq seq() {
 	return ArraySeq.create(array);
 }
+
+
 }

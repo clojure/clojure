@@ -13,7 +13,7 @@ package clojure.lang;
 import java.util.Iterator;
 import java.math.BigInteger;
 
-public class PersistentHashtableMap extends Obj implements IPersistentMap, Cloneable {
+public class PersistentHashtableMap extends APersistentMap {
 
 static final float FILL_FACTOR = 0.75f;
 
@@ -52,18 +52,6 @@ PersistentHashtableMap(int count,PersistentArray array,int growAt) {
     this._count = count;
     this.array = array;
     this.growAtCount = growAt;
-}
-
-public Obj withMeta(IPersistentMap meta) {
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
 }
 
 int calcPrimeCapacity(int capacity) {

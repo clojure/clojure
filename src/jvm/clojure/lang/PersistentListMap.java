@@ -26,25 +26,13 @@ import java.util.Iterator;
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap extends Obj implements IPersistentMap, IMapEntry, ISeq, IPersistentCollection, Cloneable
+public class PersistentListMap extends APersistentMap implements IMapEntry, ISeq
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
 
 static public PersistentListMap create(Object key, Object val){
 	return new Tail(key, val,null);
-}
-
-public Obj withMeta(IPersistentMap meta) {
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
 }
 
 public Object key(){

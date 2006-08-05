@@ -25,7 +25,7 @@ namespace clojure.lang
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap : Obj, IPersistentMap, IPersistentCollection{
+public class PersistentTreeMap : APersistentMap{
 
 public readonly IComparer comp;
 public readonly Node tree;
@@ -40,26 +40,15 @@ public PersistentTreeMap(IComparer comp){
 	_count = 0;
 }
 
-public override Obj withMeta(IPersistentMap meta)
-	{
-	Obj ret = (Obj)MemberwiseClone();
-	ret._meta = meta;
-	return ret;
-	} 
-
-public int count(){
-	return _count;
-	}
-
-public int capacity(){
+override public int count(){
 	return _count;
 	}
 	
-public bool contains(Object key){
+override public bool contains(Object key){
 	return find(key) != null;
 }
 
-public IPersistentMap assocEx(Object key,Object val){
+override public IPersistentMap assocEx(Object key,Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -69,7 +58,7 @@ public IPersistentMap assocEx(Object key,Object val){
 	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
-public Associative assoc(Object key, Object val){
+override public Associative assoc(Object key, Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -83,7 +72,7 @@ public Associative assoc(Object key, Object val){
 }
 
 
-public IPersistentMap without(Object key){
+override public IPersistentMap without(Object key){
 	Box found = new Box(null);
 	Node t = remove(tree, key, found);
 	if(t == null)
@@ -98,7 +87,7 @@ public IPersistentMap without(Object key){
 	return new PersistentTreeMap(comp, t.blacken(), _count - 1, _meta);
 }
 
-public ISeq seq() {
+override public ISeq seq() {
     if(_count > 0)
         return Seq.create(tree, true);
     return null;
@@ -110,7 +99,7 @@ public ISeq rseq() {
     return null;
 }
 
-public IEnumerator GetEnumerator(){
+override public IEnumerator GetEnumerator(){
 	return new NodeIEnumerator(tree, true);
 }
 
@@ -174,12 +163,12 @@ int depth(Node t){
 	return 1 + Math.Max(depth(t.left()), depth(t.right()));
 }
 
-public Object get(Object key){
+override public Object get(Object key){
 	Node n = (Node)find(key);
 	return (n != null) ? n.val() : null;
 }
 
-public IMapEntry find(Object key){
+override public IMapEntry find(Object key){
 	Node t = tree;
 	while(t != null)
 		{

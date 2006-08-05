@@ -61,6 +61,12 @@ public abstract class APersistentMap : Obj, IPersistentMap{
 
 	abstract public ISeq seq();
 
+	public IPersistentCollection cons(Object o)
+		{
+		IMapEntry e = (IMapEntry)o;
+		return (IPersistentCollection)assoc(e.key(), e.val());
+		}
+		
 	#endregion
 	}
 

@@ -27,7 +27,7 @@ namespace clojure.lang
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap : Obj, IPersistentMap, IMapEntry, ISeq, IPersistentCollection
+public class PersistentListMap : APersistentMap, IMapEntry, ISeq
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
@@ -35,13 +35,7 @@ static public PersistentListMap EMPTY = new PersistentListMap();
 static public PersistentListMap create(Object key, Object val){
 	return new Tail(key, val,null);
 }
-
-public override Obj withMeta(IPersistentMap meta)
-	{
-	Obj ret = (Obj)MemberwiseClone();
-	ret._meta = meta;
-	return ret;
-	} 
+ 
 	
 public virtual Object key(){
 	return null;
@@ -55,36 +49,32 @@ internal virtual PersistentListMap next(){
     return this;
     }
 
-public virtual int count(){
+override public  int count(){
 	return 0;
 }
 
-public virtual bool contains(Object key){
+override public  bool contains(Object key){
 	return false;
 }
 
-public virtual IMapEntry find(Object key){
+override public  IMapEntry find(Object key){
 	return null;
 }
 
-public virtual IPersistentMap assocEx(Object key, Object val){
+override public  IPersistentMap assocEx(Object key, Object val){
 	return (IPersistentMap)assoc(key, val);
 }
 
-public virtual Associative assoc(Object key, Object val){
+override public  Associative assoc(Object key, Object val){
 	return new Tail(key, val, _meta);
 }
 
-public virtual IPersistentMap without(Object key){
+override public  IPersistentMap without(Object key){
 	return this;
 }
 
-public virtual Object get(Object key){
+override public  Object get(Object key){
 	return null;
-}
-
-public virtual int capacity(){
-	return 0;
 }
 
 virtual public Object first()
@@ -97,7 +87,7 @@ virtual public ISeq rest()
 	return null;
 	}
 
-virtual public ISeq seq()
+override  public ISeq seq()
 	{
 	return null;
 	}
@@ -136,7 +126,7 @@ public void Reset()
 #endregion
 	}
 
-public IEnumerator GetEnumerator(){
+override public IEnumerator GetEnumerator(){
 	return new Iter(this);
 }
 
@@ -164,11 +154,6 @@ internal class Tail : PersistentListMap {
 		if(equalKey(key,_key))
 			return _val;
 		return null;
-	}
-
-	override public int capacity()
-		{
-		return 1;
 	}
 
 	override public Object key()
@@ -322,9 +307,6 @@ internal class Link : PersistentListMap {
 		return null;
 	}
 
-	override public int capacity(){
-		return count();
-	}
 
 	override public Object first()
 	{

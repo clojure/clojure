@@ -229,6 +229,18 @@ public PersistentArray(IArray init)  {
     data.master.load = load;
 }
 
+public PersistentArray(IArray init, int size)  {
+    this(size);
+    int load = 0;
+    for(int i=0;i < init.length() && i < size;i++)
+        {
+        data.master.array[i] = new Entry(0,init.nth(i));
+        ++load;
+        }
+
+    data.master.load = load;
+}
+
 public int count(){
     return data.master.array.length;
 }
@@ -464,7 +476,7 @@ static public void main(String[] args){
 		{
 		v.set(i, 0);
 		//p = p.set(i, 0);
-        p = p.add(0);
+        p = p.cons(0);
         }
 
 	Random rand;

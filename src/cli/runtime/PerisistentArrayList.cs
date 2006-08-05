@@ -33,6 +33,10 @@ PersistentArrayList(int size, Object defaultVal, float loadFactor, int count):ba
     this._count = count;
 }
 
+public PersistentArrayList(IArray init, int initialCapacity):base(init,initialCapacity){
+    _count = Math.Min(init.count(),initialCapacity);
+}
+
 override public Object nth(int i) {
     if(i >= _count)
         throw new IndexOutOfRangeException();
@@ -55,11 +59,7 @@ override public int count(){
     return _count;
 }
 
-public int capacity(){
-	return data.master.array.Length;
-}
-
-public PersistentArrayList add(Object val) {
+override public IPersistentCollection cons(Object val) {
     if(_count == data.master.array.Length) //full
         {
         lock(data.master){

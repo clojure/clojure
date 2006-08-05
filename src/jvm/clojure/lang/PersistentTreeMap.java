@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap extends Obj implements IPersistentMap, IPersistentCollection, Cloneable {
+public class PersistentTreeMap extends APersistentMap  {
 
 public final Comparator comp;
 public final Node tree;
@@ -38,17 +38,6 @@ public PersistentTreeMap(Comparator comp){
 	_count = 0;
 }
 
-public Obj withMeta(IPersistentMap meta) {
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
-}
 
 public boolean contains(Object key){
 	return find(key) != null;

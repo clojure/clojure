@@ -12,6 +12,13 @@ package clojure.lang;
 
 public abstract class AnArray extends Obj implements IArray, Cloneable {
 
+public IPersistentCollection cons(Object o) {
+    PersistentArrayList ret = new PersistentArrayList(this, this.count() + 10);
+    ret = ret.cons(o);
+    ret._meta = _meta;
+    return ret;
+}
+
 public Obj withMeta(IPersistentMap meta) {
     if(_meta == meta)
         return this;

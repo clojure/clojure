@@ -15,7 +15,7 @@ using System;
 namespace clojure.lang
 {
 
-public class Cons : ISeq, IPersistentCollection
+public class Cons : ISeq
 				  {
 
 private readonly Object _first;

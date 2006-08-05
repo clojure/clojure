@@ -31,6 +31,11 @@ PersistentArrayList(int size, Object defaultVal, float loadFactor, int count) {
     this._count = count;
 }
 
+public PersistentArrayList(IArray init, int initialCapacity){
+    super(init,initialCapacity);
+    _count = Math.min(init.count(),initialCapacity);
+}
+
 public Object nth(int i) {
     if(i >= _count)
         throw new IndexOutOfBoundsException();
@@ -57,7 +62,7 @@ public int capacity(){
 	return data.master.array.length;
 }
 
-public PersistentArrayList add(Object val) {
+public PersistentArrayList cons(Object val) {
     if(_count == data.master.array.length) //full
         {
         synchronized(data.master){

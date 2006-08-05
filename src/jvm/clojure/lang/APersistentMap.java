@@ -26,4 +26,8 @@ public Obj withMeta(IPersistentMap meta) {
         }
 }
 
+public IPersistentCollection cons(Object o) {
+    IMapEntry e = (IMapEntry)o;
+    return assoc(e.key(), e.val());
+}
 }

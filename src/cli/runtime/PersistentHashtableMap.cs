@@ -16,7 +16,7 @@ namespace clojure.lang
 	{
 	
 	
-public class PersistentHashtableMap : Obj, IPersistentMap {
+public class PersistentHashtableMap : APersistentMap {
 
 static readonly float FILL_FACTOR = 0.75f;
 
@@ -55,14 +55,7 @@ internal PersistentHashtableMap(int count,PersistentArray array,int growAt) {
     this._count = count;
     this.array = array;
     this.growAtCount = growAt;
-}
-
-public override Obj withMeta(IPersistentMap meta)
-	{
-	Obj ret = (Obj)MemberwiseClone();
-	ret._meta = meta;
-	return ret;
-	} 
+} 
 	
 int calcPrimeCapacity(int capacity) {
 	// No .Net equivalent
@@ -73,23 +66,23 @@ int calcPrimeCapacity(int capacity) {
 	return ret;
 }
 
-public int count() {
+override public int count() {
     return _count;
 }
 
-public bool contains(Object key) {
+override public bool contains(Object key) {
     IPersistentMap entries = entriesFor(key);
     return entries != null && entries.contains(key);
 }
 
-public IMapEntry find(Object key) {
+override public IMapEntry find(Object key) {
     IPersistentMap entries = entriesFor(key);
     if(entries != null)
         return entries.find(key);
     return null;
 }
 
-public IPersistentMap assocEx(Object key, Object val) {
+override public IPersistentMap assocEx(Object key, Object val) {
     if(_count > growAtCount)
         return grow().assocEx(key, val);
     int i = bucketFor(key,array);
@@ -98,7 +91,7 @@ public IPersistentMap assocEx(Object key, Object val) {
     return create(_count + incr, newArray, growAtCount);
 }
 
-public Associative assoc(Object key, Object val) {
+override public Associative assoc(Object key, Object val) {
     if(_count > growAtCount)
         return grow().assoc(key, val);
     int i = bucketFor(key,array);
@@ -139,7 +132,7 @@ PersistentArray doAdd(int i,Object key,Object val,PersistentArray array) {
 
 	return (PersistentArray)array.assocN(i, newEntries);
 }
-public IPersistentMap without(Object key) {
+override public IPersistentMap without(Object key) {
     int i = bucketFor(key,array);
     IPersistentMap entries = (IPersistentMap) array.nth(i);
     if (entries != null)
@@ -152,7 +145,7 @@ public IPersistentMap without(Object key) {
     return this;
 }
 
-public Object get(Object key) {
+override public Object get(Object key) {
     IPersistentMap entries = entriesFor(key);
     if(entries != null)
         return entries.get(key);
@@ -172,11 +165,11 @@ IPersistentMap grow(){
     return create(_count,newArray);
 }
 
-public virtual IEnumerator GetEnumerator() {
+override public IEnumerator GetEnumerator() {
     return new Iter(array);
 }
 
-public ISeq seq() {
+override public ISeq seq() {
     return Seq.create(array);
 }
 

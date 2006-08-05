@@ -15,6 +15,13 @@ namespace clojure.lang
 {
 public abstract class AnArray : Obj, IArray {
 
+public virtual IPersistentCollection cons(Object o) {
+    PersistentArrayList ret = new PersistentArrayList(this, this.count() + 10);
+    ret = (PersistentArrayList)ret.cons(o);
+    ret._meta = _meta;
+    return ret;
+}
+
 	public override Obj withMeta(IPersistentMap meta)
 		{
 		if(_meta == meta)

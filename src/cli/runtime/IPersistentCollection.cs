@@ -20,5 +20,6 @@ namespace clojure.lang
 
 		ISeq seq();
 
+		IPersistentCollection cons(Object o);
 		}
 	}
