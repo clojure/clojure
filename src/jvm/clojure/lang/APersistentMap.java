@@ -11,6 +11,7 @@
 package clojure.lang;
 
 public abstract class APersistentMap extends Obj implements IPersistentMap, Cloneable{
+int _hash = -1;
 
 public Obj withMeta(IPersistentMap meta) {
     if(_meta == meta)
@@ -30,4 +31,39 @@ public IPersistentCollection cons(Object o) {
     IMapEntry e = (IMapEntry)o;
     return assoc(e.key(), e.val());
 }
+
+public boolean equals(Object obj) {
+    if(!(obj instanceof IPersistentMap))
+        return false;
+    IPersistentMap m = (IPersistentMap)obj;
+
+    if(m.count() != count())
+        return false;
+
+    for(ISeq s = seq();s!=null;s = s.rest())
+        {
+        IMapEntry e = (IMapEntry) s.first();
+        IMapEntry me = m.find(e.key());
+
+        if(me == null || !RT.equal(e.val(),me.val()))
+            return false;
+        }
+
+    return true;
+}
+
+public int hashCode() {
+    if(_hash == -1)
+        {
+        int hash = count();
+        for(ISeq s = seq();s!=null;s = s.rest())
+            {
+            IMapEntry e = (IMapEntry) s.first();
+            hash ^= RT.hashCombine(RT.hash(e.key()), RT.hash(e.val()));
+            }
+        this._hash = hash;
+        }
+    return _hash;
+}
+
 }

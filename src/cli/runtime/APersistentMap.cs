@@ -15,6 +15,7 @@ using System.Collections;
 namespace clojure.lang
 {
 public abstract class APersistentMap : Obj, IPersistentMap{
+	int _hash = -1;
 
 	public override Obj withMeta(IPersistentMap meta)
 		{
@@ -25,7 +26,39 @@ public abstract class APersistentMap : Obj, IPersistentMap{
 		return ret;
 		}
 
+override public bool Equals(Object obj) {
+    IPersistentMap m = obj as IPersistentMap;
+    if(obj == null)
+        return false;
+        
+    if(m.count() != count())
+        return false;
 
+    for(ISeq s = seq();s!=null;s = s.rest())
+        {
+        IMapEntry e = (IMapEntry) s.first();
+        IMapEntry me = m.find(e.key());
+
+        if(me == null || !RT.equal(e.val(),me.val()))
+            return false;
+        }
+
+    return true;
+}
+
+override public int GetHashCode() {
+    if(_hash == -1)
+        {
+        int hash = count();
+        for(ISeq s = seq();s!=null;s = s.rest())
+            {
+            IMapEntry e = (IMapEntry) s.first();
+            hash ^= RT.hashCombine(RT.hash(e.key()), RT.hash(e.val()));
+            }
+        this._hash = hash;
+        }
+    return _hash;
+}
 	#region IPersistentMap Members
 
 	abstract public IPersistentMap assocEx(object key, object val);

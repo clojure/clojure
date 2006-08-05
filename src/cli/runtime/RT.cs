@@ -69,6 +69,18 @@ static public bool equal(Object k1,Object k2){
 	//    ?T:null;
 	//    }
 
+static public int hash(Object o){
+    if(o == null)
+        return 0;
+    return o.GetHashCode();
+}
+
+static public int hashCombine(int seed, int hash){
+    //a la boost
+    seed ^= (int)(hash + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+    return seed;
+}
+
 static public ISeq seq(Object coll) {
     if(coll == null || coll is ISeq)
         return (ISeq) coll;
