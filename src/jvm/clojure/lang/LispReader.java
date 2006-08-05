@@ -286,10 +286,8 @@ public static ISeq readDelimitedList(char delim, PushbackReader r, boolean isRec
             }
         }
 
-    ISeq ret = null;
-    for(int i=a.size()-1;i>=0;--i)
-        ret = RT.cons(a.get(i), ret);
-    return ret;
+
+    return RT.seq(a);
 }
 
 public static void main(String[] args){

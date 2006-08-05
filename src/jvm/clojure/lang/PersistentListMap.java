@@ -26,7 +26,7 @@ import java.util.Iterator;
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap extends APersistentMap implements IMapEntry, ISeq
+public class PersistentListMap extends APersistentMap implements IMapEntry
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
@@ -150,10 +150,6 @@ static class Tail extends PersistentListMap {
 		return null;
 	}
 
-	public int capacity(){
-		return 1;
-	}
-
 	public Object key(){
 		return _key;
 	}
@@ -199,17 +195,24 @@ static class Tail extends PersistentListMap {
             }
         return this;
     }
+ static class Seq extends ASeq{
+     Tail t;
 
-    public Object first() {
-        return this;
+     public Seq(Tail t) {
+         this.t = t;
+     }
+
+     public Object first() {
+        return t;
     }
 
     public ISeq rest() {
         return null;
     }
+ }
 
     public ISeq seq() {
-        return this;
+        return new Seq(this);
     }
 
 }
@@ -294,20 +297,24 @@ static class Link extends PersistentListMap {
 		return null;
 	}
 
-	public int capacity(){
-		return count();
-	}
+    static class Seq extends ASeq{
+        Link lnk;
 
-    public Object first() {
-        return this;
-    }
+        public Seq(Link lnk) {
+            this.lnk = lnk;
+        }
 
-    public ISeq rest() {
-        return _rest;
+        public Object first() {
+         return lnk;
+        }
+
+        public ISeq rest() {
+            return lnk._rest.seq();
+        }
     }
 
     public ISeq seq() {
-        return this;
+        return new Seq(this);
     }
 
     PersistentListMap create(Object k,Object v,PersistentListMap r){

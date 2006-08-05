@@ -292,10 +292,7 @@ public static ISeq readDelimitedList(char delim, LineNumberingTextReader r, bool
             }
         }
 
-    ISeq ret = null;
-    for(int i=a.Count-1;i>=0;--i)
-        ret = RT.cons(a[i], ret);
-    return ret;
+    return RT.seq(a);
 }
 
 /*

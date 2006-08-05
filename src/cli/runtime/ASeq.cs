@@ -13,25 +13,34 @@ using System;
 namespace clojure.lang
 	{
 	
-public abstract class ASeq : ISeq{
-
-public Object peek() {
+public abstract class ASeq : Obj, ISeq{
+	
+	public override Obj withMeta(IPersistentMap meta)
+		{
+		if(_meta == meta)
+			return this;
+		Obj ret = (Obj)MemberwiseClone();
+		ret._meta = meta;
+		return ret;
+		}
+		
+public virtual Object peek() {
     return first();
 }
 
-public IPersistentList pop() {
+public virtual IPersistentList pop() {
     return rest();
 }
 
-public int count() {
+public virtual int count() {
     return 1 + RT.count(rest());
 }
 
-public ISeq seq() {
+public virtual ISeq seq() {
     return this;
 }
 
-public IPersistentCollection cons(Object o) {
+public virtual IPersistentCollection cons(Object o) {
     return new Cons(o, this);
 }
 

@@ -193,8 +193,16 @@ static public double doubleCast(Object x)
 
 
 /******************************************* list support ********************************/
-static public Cons cons(Object x, Object y) {
-return new Cons(x, seq(y));
+static public IPersistentCollection cons(Object x, IPersistentCollection y) {
+    if(y == null)
+        return new PersistentList(x);
+    return y.cons(x);
+}
+
+static public ISeq cons(Object x, ISeq y) {
+    if(y == null)
+        return new PersistentList(x);
+    return y.cons(x);
 }
 
 static public Object first(Object x) {
@@ -205,55 +213,55 @@ static public ISeq rest(Object x) {
     return seq(x).rest();
 }
 
-static public Cons list()
+static public ISeq list()
     {
     return null;
     }
 
-static public Cons list(Object arg1) throws Exception {
-return cons(arg1, null);
+static public ISeq list(Object arg1) throws Exception {
+    return new PersistentList(arg1);
 }
 
-static public Cons list(Object arg1, Object arg2) throws Exception {
+static public ISeq list(Object arg1, Object arg2) throws Exception {
 return listStar(arg1, arg2, null);
 }
 
-static public Cons list(Object arg1, Object arg2, Object arg3) throws Exception {
+static public ISeq list(Object arg1, Object arg2, Object arg3) throws Exception {
 return listStar(arg1, arg2, arg3, null);
 }
 
-static public Cons list(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception {
+static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception {
 return listStar(arg1, arg2, arg3, arg4, null);
 }
 
-static public Cons list(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception {
+static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception {
 return listStar(arg1, arg2, arg3, arg4, arg5, null);
 }
 
-static public Cons listStar(Object arg1, ISeq rest) throws Exception {
-return cons(arg1, rest);
+static public ISeq listStar(Object arg1, ISeq rest) throws Exception {
+return (ISeq) cons(arg1, rest);
 }
 
-static public Cons listStar(Object arg1, Object arg2, ISeq rest) throws Exception {
-return cons(arg1, cons(arg2, rest));
+static public ISeq listStar(Object arg1, Object arg2, ISeq rest) throws Exception {
+return (ISeq) cons(arg1, cons(arg2, rest));
 }
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, ISeq rest) throws Exception {
-return cons(arg1, cons(arg2, cons(arg3, rest)));
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, ISeq rest) throws Exception {
+return (ISeq) cons(arg1, cons(arg2, cons(arg3, rest)));
 }
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, ISeq rest) throws Exception {
-return cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, ISeq rest) throws Exception {
+return (ISeq) cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
 }
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq rest) throws Exception {
-return cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq rest) throws Exception {
+return (ISeq) cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
 }
 
-static public Cons arrayToList(Object[] a) throws Exception {
-    Cons ret = null;
+static public ISeq arrayToList(Object[] a) throws Exception {
+    ISeq ret = null;
     for(int i=a.length-1;i>=0;--i)
-        ret = cons(a[i], ret);
+        ret = (ISeq) cons(a[i], ret);
     return ret;
 }
 

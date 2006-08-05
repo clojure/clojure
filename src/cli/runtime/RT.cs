@@ -179,10 +179,22 @@ static public ISeq seq(Object coll) {
     static public double doubleCast(Object x)
     {
         return Convert.ToDouble(x);
-    }
-static public Cons cons(Object x, Object y) {
-return new Cons(x, seq(y));
-}
+    }
+
+static public IPersistentCollection cons(Object x, IPersistentCollection y)
+	{
+	if (y == null)
+		return new PersistentList(x);
+	return y.cons(x);
+	}
+
+static public ISeq cons(Object x, ISeq y)
+	{
+	if (y == null)
+		return new PersistentList(x);
+	return (ISeq)y.cons(x);
+	}
+	
 
 static public Object first(Object x) {
     return seq(x).first();
@@ -192,64 +204,64 @@ static public ISeq rest(Object x) {
     return seq(x).rest();
 }
 
-static public Cons list()
+static public ISeq list()
 	{
 	return null;
 	}
 
-static public Cons list(Object arg1)
+static public ISeq list(Object arg1)
 	{
 	return cons(arg1, null);
 	}
 
-static public Cons list(Object arg1, Object arg2)
+static public ISeq list(Object arg1, Object arg2)
 	{
 	return listStar(arg1, arg2, null);
 	}
 
-static public Cons list(Object arg1, Object arg2, Object arg3)
+static public ISeq list(Object arg1, Object arg2, Object arg3)
 	{
 	return listStar(arg1, arg2, arg3, null);
 	}
 
-static public Cons list(Object arg1, Object arg2, Object arg3, Object arg4)
+static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4)
 	{
 	return listStar(arg1, arg2, arg3, arg4, null);
 	}
 
-static public Cons list(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
 	{
 	return listStar(arg1, arg2, arg3, arg4, arg5, null);
 	}
 
-static public Cons listStar(Object arg1, ISeq rest)
+static public ISeq listStar(Object arg1, ISeq rest)
 	{
 	return cons(arg1, rest);
 	}
 
-static public Cons listStar(Object arg1, Object arg2, ISeq rest)
+static public ISeq listStar(Object arg1, Object arg2, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, rest));
 	}
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, ISeq rest)
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, cons(arg3, rest)));
 	}
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, ISeq rest)
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
 	}
 
-static public Cons listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq rest)
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq rest)
 	{
 	return cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
 	}
 
-static public Cons arrayToList(Object[] a)
+static public ISeq arrayToList(Object[] a)
     {
-        Cons ret = null;
+        ISeq ret = null;
         for (int i = a.Length - 1; i >= 0; --i)
             ret = cons(a[i], ret);
         return ret;

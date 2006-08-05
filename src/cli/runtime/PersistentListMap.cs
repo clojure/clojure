@@ -27,7 +27,7 @@ namespace clojure.lang
  *
  * null keys and values are ok, but you won't be able to distinguish a null value via get - use contains/find
  */
-public class PersistentListMap : APersistentMap, IMapEntry, ISeq
+public class PersistentListMap : APersistentMap, IMapEntry
 {
 
 static public PersistentListMap EMPTY = new PersistentListMap();
@@ -218,19 +218,25 @@ internal class Tail : PersistentListMap {
 		return this;
 	}
 
-	override public Object first()
-	{
-	return this;
-	}
+	class Seq : ASeq{
+	     Tail t;
 
-	override public ISeq rest()
-	{
-	return null;
-	}
+	    public Seq(Tail t) {
+		     this.t = t;
+			}	
+		override public Object first()
+		{
+		return t;
+		}
 
+		override public ISeq rest()
+		{
+		return null;
+		}
+	}
 	override public ISeq seq()
 	{
-	return this;
+	return new Seq(this);
 	}
 }
 
@@ -317,20 +323,25 @@ internal class Link : PersistentListMap {
 		return null;
 	}
 
+	class Seq : ASeq{
+        Link lnk;
 
-	override public Object first()
-	{
-	return this;
-	}
+        public Seq(Link lnk) {
+            this.lnk = lnk;
+        }
 
-	override public ISeq rest()
-	{
-	return _rest;
+        override public Object first() {
+         return lnk;
+        }
+
+        override public ISeq rest() {
+            return lnk._rest.seq();
+        }
 	}
 
 	override public ISeq seq()
 	{
-	return this;
+	return new Seq(this);
 	}
 	
 	PersistentListMap create(Object k, Object v, IPersistentMap r)

@@ -21,4 +21,7 @@ public interface ISeq extends IPersistentList{
 Object first() ;
 
 ISeq rest() ;
+
+ISeq cons(Object o);
+
 }
