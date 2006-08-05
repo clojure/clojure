@@ -98,7 +98,7 @@ public IPersistentMap assocEx(Object key, Object val) {
     return create(newArray);
     }
 
-public IPersistentMap assoc(Object key, Object val) {
+public Associative assoc(Object key, Object val) {
     int i = indexOf(key);
     Object[] newArray;
     if(i >= 0) //already have key, same-sized replacement

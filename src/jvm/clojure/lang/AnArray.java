@@ -43,11 +43,11 @@ public IMapEntry find(Object key) {
     return null;
 }
 
-public IPersistentMap assoc(Object key, Object val) {
+public Associative assoc(Object key, Object val) {
     if(key instanceof Number)
         {
         int i = ((Number)key).intValue();
-        return (IPersistentMap) assocN(i,val);
+        return (Associative) assocN(i,val);
         }
     throw new IllegalAccessError("Key must be integer");
 }

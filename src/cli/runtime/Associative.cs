@@ -16,6 +16,6 @@ namespace clojure.lang
 		bool contains(object key);
 		IMapEntry find(object key);
 		object get(object key);
-		IPersistentMap assoc(object key, object val);
+		Associative assoc(object key, object val);
 		}
 	}

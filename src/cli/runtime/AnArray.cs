@@ -67,9 +67,9 @@ public IMapEntry find(Object key) {
     return null;
 }
 
-public IPersistentMap assoc(Object key, Object val) {
+public Associative assoc(Object key, Object val) {
 		int i = Convert.ToInt32(key);
-        return (IPersistentMap) assocN(i,val);
+		return (Associative)assocN(i, val);
 }
 
 public Object get(Object key) {

@@ -69,7 +69,7 @@ public IPersistentMap assocEx(Object key,Object val){
 	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
-public IPersistentMap assoc(Object key, Object val){
+public Associative assoc(Object key, Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key

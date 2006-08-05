@@ -98,7 +98,7 @@ public IPersistentMap assocEx(Object key, Object val) {
     return create(_count + incr, newArray, growAtCount);
 }
 
-public IPersistentMap assoc(Object key, Object val) {
+public Associative assoc(Object key, Object val) {
     if(_count > growAtCount)
         return grow().assoc(key, val);
     int i = bucketFor(key,array);
@@ -116,7 +116,7 @@ PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
     IPersistentMap newEntries;
     if (entries != null)
         {
-        newEntries = entries.assoc(key, val);
+		newEntries = (IPersistentMap)entries.assoc(key, val);
         if(newEntries == entries) //already there with same value, no op
             return array;
         }

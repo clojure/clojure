@@ -38,7 +38,7 @@ override public IMapEntry find(Object key) {
     return RT.equal(_key, key)?this:null;
 }
 
-override public IPersistentMap assoc(Object key, Object val) {
+override public Associative assoc(Object key, Object val) {
     if(RT.equal(_key, key))
         {
         if(_val == val)
@@ -55,7 +55,7 @@ override public Object get(Object key) {
 override public IPersistentMap assocEx(Object key, Object val) {
     if(RT.equal(_key, key))
         throw new Exception("Key already present");
-    return assoc(key, val);
+	return (IPersistentMap)assoc(key, val);
 }
 
 override public IPersistentMap without(Object key) {

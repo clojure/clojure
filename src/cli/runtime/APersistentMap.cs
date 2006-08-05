@@ -45,7 +45,7 @@ public abstract class APersistentMap : Obj, IPersistentMap{
 
 	abstract public object get(object key);
 
-	abstract public IPersistentMap assoc(object key, object val);
+	abstract public Associative assoc(object key, object val);
 
 	#endregion
 
