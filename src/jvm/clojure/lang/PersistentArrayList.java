@@ -12,7 +12,7 @@ package clojure.lang;
 
 import java.util.BitSet;
 
-public class PersistentArrayList extends PersistentArray{
+public class PersistentArrayList extends PersistentArray implements IPersistentList{
 
 int _count;
 
@@ -75,7 +75,13 @@ public PersistentArrayList cons(Object val) {
     return ret;
 }
 
-public PersistentArrayList remove() {
+public Object peek(){
+    if(_count > 0)
+        return nth(_count - 1);
+    return null;
+}
+
+public PersistentArrayList pop() {
     if(_count == 0)
         throw new IllegalAccessError();
     PersistentArrayList ret = new PersistentArrayList(data.master, data.rev, data.baseline, data.history, _count - 1);
@@ -93,8 +99,7 @@ private void grow() {
     newMaster.rev = data.master.rev;
     newMaster.load = data.master.load;
     newMaster.basis = data.master.basis;
-    for(int i=0;i<data.master.array.length;i++)
-        newMaster.array[i] = data.master.array[i];
+    System.arraycopy(data.master.array, 0, newMaster.array, 0, data.master.array.length);
     data.master = newMaster;
 }
 

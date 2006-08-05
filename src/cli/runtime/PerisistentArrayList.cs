@@ -14,7 +14,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
-public class PersistentArrayList : PersistentArray{
+public class PersistentArrayList : PersistentArray, IPersistentList{
 
 int _count;
 
@@ -72,7 +72,13 @@ override public IPersistentCollection cons(Object val) {
     return ret;
 }
 
-public PersistentArrayList remove() {
+public Object peek(){
+    if(_count > 0)
+        return nth(_count - 1);
+    return null;
+}
+
+public IPersistentList pop() {
     if(_count == 0)
         throw new InvalidOperationException();
     PersistentArrayList ret = new PersistentArrayList(data.master, data.rev, data.baseline, data.history, _count - 1);
