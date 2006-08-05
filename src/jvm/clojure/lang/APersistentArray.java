@@ -10,7 +10,7 @@
 
 package clojure.lang;
 
-public abstract class AnArray extends Obj implements IArray, Cloneable {
+public abstract class APersistentArray extends Obj implements IPersistentArray, Cloneable {
 
 public IPersistentCollection cons(Object o) {
     PersistentArrayList ret = new PersistentArrayList(this, this.count() + 10);

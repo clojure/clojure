@@ -31,7 +31,7 @@ PersistentArrayList(int size, Object defaultVal, float loadFactor, int count) {
     this._count = count;
 }
 
-public PersistentArrayList(IArray init, int initialCapacity){
+public PersistentArrayList(IPersistentArray init, int initialCapacity){
     super(init,initialCapacity);
     _count = Math.min(init.count(),initialCapacity);
 }

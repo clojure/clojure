@@ -13,7 +13,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
-public abstract class AnArray : Obj, IArray {
+public abstract class APersistentArray : Obj, IPersistentArray {
 
 public virtual IPersistentCollection cons(Object o) {
     PersistentArrayList ret = new PersistentArrayList(this, this.count() + 10);
@@ -38,7 +38,7 @@ public virtual IPersistentCollection cons(Object o) {
 
 	abstract public object nth(int i);
 
-	abstract public IArray assocN(int i, object val);
+	abstract public IPersistentArray assocN(int i, object val);
 
 	#endregion
 

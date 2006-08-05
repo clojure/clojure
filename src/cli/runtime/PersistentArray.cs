@@ -44,7 +44,7 @@ namespace clojure.lang
  * Java implementation is lock-free
  */
 
-	public class PersistentArray : AnArray, IEnumerable
+	public class PersistentArray : APersistentArray, IEnumerable
 		{
 
 	#region IEnumerable Members
@@ -242,7 +242,7 @@ public PersistentArray(int size, ISeq seq) : this(size){
 	data.master.load = load;
 }
 
-public PersistentArray(IArray init) :this(init.length()) {
+public PersistentArray(IPersistentArray init) :this(init.length()) {
     int load = 0;
     for(int i=0;i < init.length();i++)
         {
@@ -253,7 +253,7 @@ public PersistentArray(IArray init) :this(init.length()) {
 	data.master.load = load;
 }
 
-public PersistentArray(IArray init, int size) :this(size) {
+public PersistentArray(IPersistentArray init, int size) :this(size) {
     int load = 0;
     for(int i=0;i < init.length() && i < size;i++)
         {
@@ -335,7 +335,7 @@ for (Entry e = (Entry)data.master.array[i]; e != null; e = e.rest())
 	return null;
 }
 
-override public IArray assocN(int i,Object val) {
+override public IPersistentArray assocN(int i,Object val) {
 //if (data.master.load >= data.master.maxLoad)
 //		{
 //		isolate();
@@ -410,9 +410,9 @@ protected void trim(){
 
 override public bool Equals(Object key){
     if(this == key) return true;
-    if(key == null || !(key is IArray)) return false;
+    if(key == null || !(key is IPersistentArray)) return false;
 
-    IArray a = (IArray) key;
+    IPersistentArray a = (IPersistentArray) key;
 
     if(a.length() != length())
         return false;
@@ -505,13 +505,13 @@ static public void Main(String[] args){
 	ArrayList v = ArrayList.Synchronized(new ArrayList(size));
 	//v.setSize(size);
 	//IArray p = new PersistentArray(size);
-	IArray p = new PersistentArrayList(size);
+	IPersistentArray p = new PersistentArrayList(size);
 
 	for(int i = 0; i < size; i++)
 		{
 		v.Add(0);
 		//p = p.set(i, 0);
-		p = (IArray)((PersistentArrayList)p).cons(0);
+		p = (IPersistentArray)((PersistentArrayList)p).cons(0);
 		}
 
 	Random rand;
@@ -535,7 +535,7 @@ static public void Main(String[] args){
 	rand = new Random(42);
 	long tp = 0;
 	start = DateTime.Now;
-	IArray oldp = p;
+	IPersistentArray oldp = p;
 	for (int i = 0; i < writes; i++)
 		{
 		p =	p.assocN(rand.Next(size), i);

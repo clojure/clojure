@@ -46,7 +46,7 @@ import java.util.Random;
  * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
  */
 
-public class PersistentArray extends AnArray implements Iterable {
+public class PersistentArray extends APersistentArray implements Iterable {
 
 public Iterator iterator(){
 	return new ValIter(this);
@@ -217,7 +217,7 @@ public PersistentArray(int size, ISeq seq) throws Exception {
     data.master.load = load;
 }
 
-public PersistentArray(IArray init)  {
+public PersistentArray(IPersistentArray init)  {
     this(init.length());
     int load = 0;
     for(int i=0;i < init.length();i++)
@@ -229,7 +229,7 @@ public PersistentArray(IArray init)  {
     data.master.load = load;
 }
 
-public PersistentArray(IArray init, int size)  {
+public PersistentArray(IPersistentArray init, int size)  {
     this(size);
     int load = 0;
     for(int i=0;i < init.length() && i < size;i++)
@@ -386,9 +386,9 @@ protected void trim(){
 
 public boolean equals(Object key){
     if(this == key) return true;
-    if(key == null || !(key instanceof IArray)) return false;
+    if(key == null || !(key instanceof IPersistentArray)) return false;
 
-    final IArray a = (IArray) key;
+    final IPersistentArray a = (IPersistentArray) key;
 
     if(a.length() != length())
         return false;

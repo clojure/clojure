@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class Tuple extends AnArray{
+public class Tuple extends APersistentArray {
 
 final Object[] array;
 
@@ -39,7 +39,7 @@ public Object nth(int i){
 }
 
 
-public IArray assocN(int i, Object val) {
+public IPersistentArray assocN(int i, Object val) {
     Object[] newArray = array.clone();
     newArray[i] = val;
     return new Tuple(newArray);
@@ -47,9 +47,9 @@ public IArray assocN(int i, Object val) {
 
 public boolean equals(Object key){
     if(this == key) return true;
-    if(key == null || !(key instanceof IArray)) return false;
+    if(key == null || !(key instanceof IPersistentArray)) return false;
 
-    final IArray a = (IArray) key;
+    final IPersistentArray a = (IPersistentArray) key;
 
     if(a.length() != array.length)
         return false;

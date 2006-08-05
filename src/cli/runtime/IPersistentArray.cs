@@ -1,5 +1,3 @@
-package clojure.lang;
-
 /**
  * Copyright (c) Rich Hickey. All rights reserved.
  * The use and distribution terms for this software are covered by the
@@ -10,10 +8,17 @@ package clojure.lang;
  * You must not remove this notice, or any other, from this software.
  */
 
-public interface IArray extends IPersistentCollection, Associative, Sequential {
+using System;
+
+namespace clojure.lang
+{
+
+public interface IPersistentArray : Associative, Sequential {
 int length();
 
 Object nth(int i);
 
-IArray assocN(int i,Object val);
+IPersistentArray assocN(int i,Object val);
+}
+
 }

@@ -15,7 +15,7 @@ using System;
 namespace clojure.lang
 {
 
-public class Tuple : AnArray{
+public class Tuple : APersistentArray{
 
 readonly Object[] array;
 
@@ -42,7 +42,7 @@ override public Object nth(int i){
 }
 
 
-override public IArray assocN(int i, Object val) {
+override public IPersistentArray assocN(int i, Object val) {
 	Object[] newArray = (Object[])array.Clone();
 	newArray[i] = val;
     return new Tuple(newArray);
@@ -50,9 +50,9 @@ override public IArray assocN(int i, Object val) {
 
 override public bool Equals(Object key){
     if(this == key) return true;
-    if(key == null || !(key is IArray)) return false;
+    if(key == null || !(key is IPersistentArray)) return false;
 
-    IArray a = (IArray) key;
+    IPersistentArray a = (IPersistentArray) key;
 
     if(a.length() != array.Length)
         return false;
