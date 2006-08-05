@@ -14,7 +14,7 @@ package clojure.lang;
 public interface IPersistentMap extends Iterable, IPersistentCollection, Associative {
 
 
-IPersistentMap add(Object key, Object val) throws Exception;
+IPersistentMap assocEx(Object key, Object val) throws Exception;
 
-IPersistentMap remove(Object key);
+IPersistentMap without(Object key);
 }

@@ -28,10 +28,10 @@ public abstract class APersistentMap : Obj, IPersistentMap{
 
 	#region IPersistentMap Members
 
-	abstract public IPersistentMap add(object key, object val);
+	abstract public IPersistentMap assocEx(object key, object val);
 
 
-	abstract public IPersistentMap remove(object key);
+	abstract public IPersistentMap without(object key);
 
 
 

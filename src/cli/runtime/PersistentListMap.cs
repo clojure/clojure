@@ -67,7 +67,7 @@ public virtual IMapEntry find(Object key){
 	return null;
 }
 
-public virtual IPersistentMap add(Object key, Object val){
+public virtual IPersistentMap assocEx(Object key, Object val){
 	return assoc(key, val);
 }
 
@@ -75,7 +75,7 @@ public virtual IPersistentMap assoc(Object key, Object val){
 	return new Tail(key, val, _meta);
 }
 
-public virtual IPersistentMap remove(Object key){
+public virtual IPersistentMap without(Object key){
 	return this;
 }
 
@@ -193,7 +193,7 @@ internal class Tail : PersistentListMap {
 		return null;
 	}
 
-	override public IPersistentMap add(Object key, Object val)
+	override public IPersistentMap assocEx(Object key, Object val)
 		{
 		if (equalKey(key, _key))
 			{
@@ -213,7 +213,7 @@ internal class Tail : PersistentListMap {
 		return new Link(key,val,this,_meta);
 	}
 
-	override public IPersistentMap remove(Object key){
+	override public IPersistentMap without(Object key){
 		if(equalKey(key,_key))
 			{
 			if(_meta == null)
@@ -279,7 +279,7 @@ internal class Link : PersistentListMap {
 		return _rest.find(key);
 	}
 
-	override public IPersistentMap add(Object key, Object val)
+	override public IPersistentMap assocEx(Object key, Object val)
 		{
 		IMapEntry e = find(key);
 		if(e != null)
@@ -296,12 +296,12 @@ internal class Link : PersistentListMap {
 			{
 			if(e.val() == val)
 				return this;
-			return create(_key,_val,remove(key));
+			return create(_key,_val,without(key));
 			}
 		return new Link(key,val,this,_meta);
 	}
 
-	override public IPersistentMap remove(Object key)
+	override public IPersistentMap without(Object key)
 		{
 		if(equalKey(key,_key))
 			{
@@ -309,7 +309,7 @@ internal class Link : PersistentListMap {
 				return _rest;
 			return (IPersistentMap)_rest.withMeta(_meta);
 			}
-		PersistentListMap r = (PersistentListMap)_rest.remove(key);
+		PersistentListMap r = (PersistentListMap)_rest.without(key);
 		if(r == _rest)  //not there
 			return this;
 		return create(_key,_val,r);

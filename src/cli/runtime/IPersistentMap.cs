@@ -17,9 +17,9 @@ namespace clojure.lang
 public interface IPersistentMap :  Associative, IEnumerable, IPersistentCollection{
 
 
-IPersistentMap add(Object key, Object val);
+IPersistentMap assocEx(Object key, Object val);
 
-IPersistentMap remove(Object key);
+IPersistentMap without(Object key);
 
 }
 

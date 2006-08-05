@@ -51,13 +51,13 @@ public Object get(Object key) {
     return RT.equal(_key, key)?_val:null;
 }
 
-public IPersistentMap add(Object key, Object val) throws Exception {
+public IPersistentMap assocEx(Object key, Object val) throws Exception {
     if(RT.equal(_key, key))
         throw new Exception("Key already present");
     return assoc(key, val);
 }
 
-public IPersistentMap remove(Object key) {
+public IPersistentMap without(Object key) {
     if(RT.equal(_key, key))
         return (IPersistentMap) PersistentArrayMap.EMPTY.withMeta(_meta);
     return this;

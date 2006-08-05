@@ -71,7 +71,7 @@ public IMapEntry find(Object key){
 	return null;
 }
 
-public IPersistentMap add(Object key, Object val) throws Exception {
+public IPersistentMap assocEx(Object key, Object val) throws Exception {
     return assoc(key, val);
 }
 
@@ -79,7 +79,7 @@ public PersistentListMap assoc(Object key, Object val) {
     return new Tail(key, val,_meta);
 }
 
-public PersistentListMap remove(Object key) {
+public PersistentListMap without(Object key) {
     return this;
 }
 
@@ -176,7 +176,7 @@ static class Tail extends PersistentListMap {
 		return null;
 	}
 
-    public PersistentListMap add(Object key, Object val) throws Exception {
+    public PersistentListMap assocEx(Object key, Object val) throws Exception {
         if(equalKey(key,_key))  //replace
             {
             throw new Exception("Key already present");
@@ -194,7 +194,7 @@ static class Tail extends PersistentListMap {
 		return new Link(key,val,this,_meta);
 	}
 
-	public PersistentListMap remove(Object key) {
+	public PersistentListMap without(Object key) {
         if(equalKey(key,_key))
             {
             if(_meta == null)
@@ -258,7 +258,7 @@ static class Link extends PersistentListMap {
 		return _rest.find(key);
 	}
 
-    public PersistentListMap add(Object key, Object val) throws Exception {
+    public PersistentListMap assocEx(Object key, Object val) throws Exception {
         IMapEntry e = find(key);
         if(e != null)
             {
@@ -273,19 +273,19 @@ static class Link extends PersistentListMap {
             {
             if(e.val() == val)
                 return this;
-            return create(_key,_val,remove(key));
+            return create(_key,_val,without(key));
             }
         return new Link(key,val,this,_meta);
     }
 
-	public PersistentListMap remove(Object key) {
+	public PersistentListMap without(Object key) {
         if(equalKey(key,_key))
             {
             if(_rest._meta == _meta)
                 return _rest;
             return (PersistentListMap) _rest.withMeta(_meta);
             }
-        PersistentListMap r = _rest.remove(key);
+        PersistentListMap r = _rest.without(key);
         if(r == _rest)  //not there
             return this;
         return create(_key,_val,r);

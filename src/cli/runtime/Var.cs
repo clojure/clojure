@@ -47,7 +47,7 @@ Binding getThreadBinding()	{
         {
         tb = threadBindings;
         if (b == null)
-            newtb = tb.remove(thread);
+            newtb = tb.without(thread);
         else
             newtb = tb.assoc(thread, b);
 		} while (tb != Interlocked.CompareExchange(ref threadBindings, newtb, tb));

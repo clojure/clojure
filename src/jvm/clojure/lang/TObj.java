@@ -41,7 +41,7 @@ public IPersistentMap attrs() throws Exception {
 
 public void removeAttr(Object key) throws Exception {
     IPersistentMap t = (IPersistentMap) Transaction.get( _attrs);
-    t = t.remove(key);
+    t = t.without(key);
     Transaction.set(_attrs,t);
 }
 }

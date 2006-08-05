@@ -52,13 +52,13 @@ override public Object get(Object key) {
     return RT.equal(_key, key)?_val:null;
 }
 
-override public IPersistentMap add(Object key, Object val) {
+override public IPersistentMap assocEx(Object key, Object val) {
     if(RT.equal(_key, key))
         throw new Exception("Key already present");
     return assoc(key, val);
 }
 
-override public IPersistentMap remove(Object key) {
+override public IPersistentMap without(Object key) {
     if(RT.equal(_key, key))
         return (IPersistentMap) PersistentArrayMap.EMPTY.withMeta(_meta);
     return this;

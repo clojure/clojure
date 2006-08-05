@@ -59,7 +59,7 @@ public bool contains(Object key){
 	return find(key) != null;
 }
 
-public IPersistentMap add(Object key,Object val){
+public IPersistentMap assocEx(Object key,Object val){
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
@@ -83,7 +83,7 @@ public IPersistentMap assoc(Object key, Object val){
 }
 
 
-public IPersistentMap remove(Object key){
+public IPersistentMap without(Object key){
 	Box found = new Box(null);
 	Node t = remove(tree, key, found);
 	if(t == null)

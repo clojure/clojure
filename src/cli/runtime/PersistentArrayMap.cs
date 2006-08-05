@@ -78,7 +78,7 @@ public IMapEntry find(Object key) {
     return null;
 }
 
-public IPersistentMap add(Object key, Object val) {
+public IPersistentMap assocEx(Object key, Object val) {
     int i = indexOf(key);
     Object[] newArray;
     if(i >= 0)
@@ -88,7 +88,7 @@ public IPersistentMap add(Object key, Object val) {
     else //didn't have key, grow
         {
 		if (array.Length > HASHTABLE_THRESHOLD)
-			return createHT(array).add(key, val);
+			return createHT(array).assocEx(key, val);
 		newArray = new Object[array.Length + 2];
         if(array.Length > 0)
             Array.Copy(array,0,newArray,2,array.Length);
@@ -121,7 +121,7 @@ public IPersistentMap assoc(Object key, Object val) {
     return create(newArray);
 }
 
-public IPersistentMap remove(Object key) {
+public IPersistentMap without(Object key) {
     int i = indexOf(key);
     if(i >= 0) //have key, will remove
         {

@@ -54,7 +54,7 @@ public boolean contains(Object key){
 	return find(key) != null;
 }
 
-public PersistentTreeMap add(Object key, Object val) throws Exception {
+public PersistentTreeMap assocEx(Object key, Object val) throws Exception {
     Box found = new Box(null);
     Node t = add(tree, key, val, found);
     if(t == null)   //null == already contains key
@@ -78,7 +78,7 @@ public PersistentTreeMap assoc(Object key, Object val){
 }
 
 
-public PersistentTreeMap remove(Object key){
+public PersistentTreeMap without(Object key){
 	Box found = new Box(null);
 	Node t = remove(tree, key, found);
 	if(t == null)
@@ -748,7 +748,7 @@ static public void main(String args[]){
 	Collections.shuffle(Arrays.asList(ints));
 	//force the ListMap class loading now
     try {
-    PersistentListMap.EMPTY.add(1, null).add(2,null).add(3,null);
+    PersistentListMap.EMPTY.assocEx(1, null).assocEx(2,null).assocEx(3,null);
     } catch (Exception e)
         {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -788,7 +788,7 @@ static public void main(String args[]){
 	for(int i = 0; i < ints.length/2; i++)
 		{
 		Integer anInt = ints[i];
-		set = set.remove(anInt);
+		set = set.without(anInt);
 		}
 
 	long estimatedTime = System.nanoTime() - startTime;

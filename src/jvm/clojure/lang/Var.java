@@ -96,7 +96,7 @@ private void setThreadBinding(Binding b) {
         {
         tb = threadBindings.get();
         if (b == null)
-            newtb = tb.remove(thread);
+            newtb = tb.without(thread);
         else
             newtb = tb.assoc(thread, b);
         } while (!threadBindings.compareAndSet(tb, newtb));

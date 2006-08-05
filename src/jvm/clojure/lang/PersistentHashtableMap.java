@@ -86,9 +86,9 @@ public IMapEntry find(Object key) {
     return null;
 }
 
-public IPersistentMap add(Object key, Object val) throws Exception {
+public IPersistentMap assocEx(Object key, Object val) throws Exception {
     if(_count > growAtCount)
-        return grow().add(key, val);
+        return grow().assocEx(key, val);
     int i = bucketFor(key,array);
     int incr = 1;
     PersistentArray newArray = doAdd(i, key, val, array);
@@ -128,7 +128,7 @@ PersistentArray doAdd(int i,Object key,Object val,PersistentArray array) throws 
     IPersistentMap newEntries;
     if (entries != null)
         {
-        newEntries = entries.add(key, val);
+        newEntries = entries.assocEx(key, val);
         }
     else
 	    newEntries = createListMap(key, val);
@@ -136,12 +136,12 @@ PersistentArray doAdd(int i,Object key,Object val,PersistentArray array) throws 
     return array.assocN(i, newEntries);
 }
 
-public IPersistentMap remove(Object key) {
+public IPersistentMap without(Object key) {
     int i = bucketFor(key,array);
     IPersistentMap entries = (IPersistentMap) array.nth(i);
     if (entries != null)
         {
-        IPersistentMap newEntries = entries.remove(key);
+        IPersistentMap newEntries = entries.without(key);
         if (newEntries != entries)
             return create(_count - 1, array.assocN(i, newEntries));
         }
