@@ -14,6 +14,7 @@ namespace clojure.lang
 	{
 	
 public abstract class ASeq : Obj, ISeq{
+int _hash = -1;
 	
 	public override Obj withMeta(IPersistentMap meta)
 		{
@@ -23,6 +24,31 @@ public abstract class ASeq : Obj, ISeq{
 		ret._meta = meta;
 		return ret;
 		}
+
+override public bool Equals(Object obj) {
+    if(!(obj is Sequential))
+        return false;
+    for(ISeq s = seq(), ms = ((IPersistentCollection)obj).seq();s!=null;s = s.rest(), ms = ms.rest())
+        {
+        if(ms == null || !RT.equal(s.first(),ms.first()))
+            return false;
+        }
+
+    return true;
+}
+
+override public int GetHashCode() {
+    if(_hash == -1)
+        {
+        int hash = 0;
+        for(ISeq s = seq();s!=null;s = s.rest())
+            {
+            hash = RT.hashCombine(hash, RT.hash(s.first()));
+            }
+        this._hash = hash;
+        }
+    return _hash;
+}
 		
 public virtual Object peek() {
     return first();

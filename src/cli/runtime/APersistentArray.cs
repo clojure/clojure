@@ -14,6 +14,7 @@ using System.Collections;
 namespace clojure.lang
 {
 public abstract class APersistentArray : Obj, IPersistentArray {
+int _hash = -1;
 
 public virtual IPersistentCollection cons(Object o) {
     PersistentArrayList ret = new PersistentArrayList(this, this.count() + 10);
@@ -31,6 +32,44 @@ public virtual IPersistentCollection cons(Object o) {
 		return ret;
 		}
 
+override public bool Equals(Object obj) {
+    if(obj is IPersistentArray)
+        {
+        IPersistentArray ma = (IPersistentArray) obj;
+        if(ma.count() != count())
+            return false;
+        for(int i=0;i<count();i++)
+            {
+            if(!RT.equal(nth(i),ma.nth(i)))
+                return false;
+            }
+        }
+    else
+        {
+        if(!(obj is Sequential))
+            return false;
+        for(ISeq s = seq(), ms = ((IPersistentCollection)obj).seq();s!=null;s = s.rest(), ms = ms.rest())
+            {
+            if(ms == null || !RT.equal(s.first(),ms.first()))
+                return false;
+            }
+        }
+
+    return true;
+}
+
+override public int GetHashCode() {
+    if(_hash == -1)
+        {
+        int hash = 0;
+        for(int i=0;i<count();i++)
+            {
+            hash = RT.hashCombine(hash, RT.hash(nth(i)));
+            }
+        this._hash = hash;
+        }
+    return _hash;
+}
 
 	#region IArray Members
 
