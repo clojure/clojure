@@ -179,7 +179,7 @@ public ISeq seq() {
     return null;
 }
 
-static class Seq implements ISeq, IMapEntry{
+static class Seq extends ASeq implements IMapEntry{
     final Object[] array;
     final int i;
 

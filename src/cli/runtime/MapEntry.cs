@@ -110,18 +110,18 @@ override public ISeq seq()  {
     return new Seq(this);
 }
 
-class Seq : ISeq{
+class Seq : ASeq{
     MapEntry e;
 
     public Seq(MapEntry e) {
         this.e = e;
     }
 
-    public Object first() {
+    override public Object first() {
         return e;
     }
 
-    public ISeq rest() {
+    override public ISeq rest() {
         return null;
     }
 }

@@ -162,21 +162,21 @@ public Iterator iterator() {
     return new Iter(array);
 }
 
-public ISeq seq() throws Exception {
+public ISeq seq() {
     return Seq.create(array);
 }
 
-static class Seq implements ISeq{
+static class Seq extends ASeq{
     PersistentArray buckets;
     int b;
     ISeq e;
 
 
-    static public Seq create(PersistentArray buckets) throws Exception {
+    static public Seq create(PersistentArray buckets)  {
         return next(buckets, -1, null);
     }
 
-    static Seq next(PersistentArray buckets, int b, ISeq e) throws Exception {
+    static Seq next(PersistentArray buckets, int b, ISeq e) {
         if(e != null && e.rest() != null)
             return new Seq(buckets,b,e.rest());
         for(b = b+1;b<buckets.length();b++)
@@ -194,11 +194,11 @@ static class Seq implements ISeq{
         this.e = e;
     }
 
-    public Object first() throws Exception {
+    public Object first() {
         return e.first();
     }
 
-    public ISeq rest() throws Exception {
+    public ISeq rest() {
         return next(buckets,b,e);
     }
 }

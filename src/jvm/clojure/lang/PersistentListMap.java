@@ -47,6 +47,14 @@ PersistentListMap next(){
     return this;
     }
 
+public Object peek() {
+    return first();
+}
+
+public IPersistentList pop() {
+    return rest();
+}
+
 public int count(){
 	return 0;
 }

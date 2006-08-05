@@ -10,7 +10,7 @@
 
 package clojure.lang;
 
-public class FnSeq implements ISeq{
+public class FnSeq extends ASeq{
 
 Object _first;
 IFn restFn;
@@ -26,13 +26,19 @@ public Object first() {
     return _first;
 }
 
-public ISeq rest() throws Exception {
+public ISeq rest() {
     if(_rest != this)
         return _rest;
     synchronized(this){
         if(_rest == this)
             {
-            _rest = (ISeq) restFn.invoke();
+            try{
+                _rest = (ISeq) restFn.invoke();
+            }
+            catch(Exception ex)
+                {
+                throw new Error(ex.toString());
+                }
             restFn = null;
             }
         return _rest;

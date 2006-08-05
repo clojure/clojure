@@ -16,9 +16,9 @@ package clojure.lang;
  * ISeqs are immutable values, i.e. neither first(), nor rest() changes
  * or invalidates the ISeq
  */
-public interface ISeq {
+public interface ISeq extends IPersistentList{
 
-Object first() throws Exception;
+Object first() ;
 
-ISeq rest() throws Exception;
+ISeq rest() ;
 }

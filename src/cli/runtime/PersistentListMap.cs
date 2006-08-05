@@ -49,6 +49,16 @@ internal virtual PersistentListMap next(){
     return this;
     }
 
+public Object peek()
+	{
+	return first();
+	}
+
+public IPersistentList pop()
+	{
+	return rest();
+	}
+	
 override public  int count(){
 	return 0;
 }

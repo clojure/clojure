@@ -633,7 +633,7 @@ class RedBranchVal : RedBranch{
 	}
 }
 
-public class Seq : ISeq{
+public class Seq : ASeq{
 	readonly ISeq stack;
 	readonly bool asc;
 
@@ -655,11 +655,11 @@ public class Seq : ISeq{
         return stack;
     }
 
-    public Object first() {
+    override public Object first() {
         return stack.first();
     }
 
-    public ISeq rest() {
+    override public ISeq rest() {
         Node t = (Node)stack.first();
         ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
         if(nextstack != null)

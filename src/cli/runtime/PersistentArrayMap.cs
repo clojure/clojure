@@ -182,7 +182,7 @@ override public ISeq seq() {
     return null;
 }
 
-internal class Seq : ISeq, IMapEntry{
+internal class Seq : ASeq, IMapEntry{
     readonly Object[] array;
 	readonly int i;
 
@@ -199,11 +199,11 @@ internal class Seq : ISeq, IMapEntry{
         return array[i+1];
     }
 
-    public Object first() {
+    override public Object first() {
         return this;
     }
 
-    public ISeq rest() {
+    override public ISeq rest() {
         if(i+2 < array.Length)
             return new Seq(array, i + 2);
         return null;

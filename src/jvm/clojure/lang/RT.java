@@ -68,7 +68,7 @@ static public boolean equal(Object k1,Object k2){
 //               ?Boolean.TRUE:null;
 //        }
 
-static public ISeq seq(Object coll) throws Exception {
+static public ISeq seq(Object coll)  {
     if(coll == null || coll instanceof ISeq)
         return (ISeq) coll;
     else if(coll instanceof IPersistentCollection)
@@ -78,7 +78,7 @@ static public ISeq seq(Object coll) throws Exception {
     else if(coll instanceof Object[])
         return ArraySeq.create((Object[]) coll);
     else
-        throw new IllegalArgumentException("Don't know how to create ISeq from arg");
+        throw new IllegalAccessError("Don't know how to create ISeq from arg");
 }
 
 static public Iter iter(Object coll)
@@ -193,15 +193,15 @@ static public double doubleCast(Object x)
 
 
 /******************************************* list support ********************************/
-static public Cons cons(Object x, Object y) throws Exception {
+static public Cons cons(Object x, Object y) {
 return new Cons(x, seq(y));
 }
 
-static public Object first(Object x) throws Exception {
+static public Object first(Object x) {
     return seq(x).first();
 }
 
-static public ISeq rest(Object x) throws Exception {
+static public ISeq rest(Object x) {
     return seq(x).rest();
 }
 

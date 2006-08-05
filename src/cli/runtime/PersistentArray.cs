@@ -135,7 +135,7 @@ internal class EntryLink : Entry
 	}
 }
 
-internal class Seq : IndexedSeq{
+internal class Seq : ASeq, IndexedSeq{
 	readonly PersistentArray p;
 	readonly int i;
 
@@ -144,11 +144,11 @@ internal class Seq : IndexedSeq{
 		this.i = i;
 	}
 
-    public Object first() {
+    override public Object first() {
         return p.nth(i);
     }
 
-    public ISeq rest() {
+    override public ISeq rest() {
         if(i+1 < p.length())
             return new Seq(p, i + 1);
         return null;

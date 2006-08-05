@@ -82,7 +82,7 @@ public PersistentTreeMap without(Object key){
 	return new PersistentTreeMap(comp, t.blacken(), _count - 1,_meta);
 }
 
-public ISeq seq() throws Exception {
+public ISeq seq() {
     if(_count > 0)
         return Seq.create(tree, true);
     return null;
@@ -616,7 +616,7 @@ static class RedBranchVal extends RedBranch{
 }
 
 
-static public class Seq implements ISeq{
+static public class Seq extends ASeq{
 	final ISeq stack;
 	final boolean asc;
 
@@ -625,11 +625,11 @@ static public class Seq implements ISeq{
         this.asc = asc;
     }
 
-    static Seq create(Node t, boolean asc) throws Exception {
+    static Seq create(Node t, boolean asc)  {
         return new Seq(push(t, null, asc),asc);
     }
 
-	static ISeq push(Node t, ISeq stack, boolean asc) throws Exception {
+	static ISeq push(Node t, ISeq stack, boolean asc) {
         while(t != null)
             {
             stack = RT.cons(t,stack);
@@ -638,11 +638,11 @@ static public class Seq implements ISeq{
         return stack;
     }
 
-    public Object first() throws Exception {
+    public Object first() {
         return stack.first();
     }
 
-    public ISeq rest() throws Exception {
+    public ISeq rest() {
         Node t = (Node)stack.first();
         ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
         if(nextstack != null)

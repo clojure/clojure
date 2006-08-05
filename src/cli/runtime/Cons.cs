@@ -15,7 +15,7 @@ using System;
 namespace clojure.lang
 {
 
-public class Cons : ISeq
+public class Cons : ASeq
 				  {
 
 private readonly Object _first;
@@ -30,31 +30,18 @@ public Cons(Object first, ISeq rest)
 
 #region ISeq Members
 
-public object first()
+override public object first()
     {
     return _first;
     }
 
-public ISeq rest()
+override public ISeq rest()
     {
     return _rest;
     }
 
 #endregion
 
-
-#region IPersistentCollection Members
-
-public ISeq seq()
-	{
-	return this;
-	}
-
-public int count() {
-    return 1 + RT.count(_rest);
-}
-
-#endregion
 	}
 
 }

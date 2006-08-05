@@ -12,7 +12,7 @@ package clojure.lang;
 
 import java.util.Iterator;
 
-public class IteratorSeq implements ISeq{
+public class IteratorSeq extends ASeq{
 Iterator iter;
 volatile Object val;
 volatile ISeq _rest;

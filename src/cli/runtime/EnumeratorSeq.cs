@@ -13,7 +13,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
-public class EnumeratorSeq : ISeq{
+public class EnumeratorSeq : ASeq{
 IEnumerator e;
 volatile ISeq _rest;
 
@@ -28,11 +28,11 @@ EnumeratorSeq(IEnumerator e){
     this._rest = this;
 }
 
-public Object first() {
+override public Object first() {
     return e.Current;
 }
 
-public ISeq rest() {
+override public ISeq rest() {
     if(_rest == this)
         {
         lock(this){

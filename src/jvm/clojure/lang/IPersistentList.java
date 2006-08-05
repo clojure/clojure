@@ -8,15 +8,13 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-using System;
+package clojure.lang;
 
-namespace clojure.lang
-	{
-	public interface ISeq : IPersistentList
-		{
 
-		Object first();
+public interface IPersistentList extends IPersistentCollection, Sequential {
 
-		ISeq rest();
-		}
-	}
+    Object peek();
+
+    IPersistentList pop();
+
+}

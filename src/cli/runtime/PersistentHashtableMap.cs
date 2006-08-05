@@ -173,7 +173,7 @@ override public ISeq seq() {
     return Seq.create(array);
 }
 
-class Seq : ISeq{
+class Seq : ASeq{
     PersistentArray buckets;
     int b;
     ISeq e;
@@ -201,11 +201,11 @@ class Seq : ISeq{
         this.e = e;
     }
 
-    public Object first() {
+    override public Object first() {
         return e.first();
     }
 
-    public ISeq rest() {
+    override public ISeq rest() {
         return next(buckets,b,e);
     }
 }

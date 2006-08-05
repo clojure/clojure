@@ -15,7 +15,7 @@ using System;
 namespace clojure.lang
 {
 
-public class ArraySeq : IndexedSeq{
+public class ArraySeq : ASeq, IndexedSeq{
 readonly Object[] array;
 readonly int i;
 ISeq _rest;
@@ -32,11 +32,11 @@ ArraySeq(Object[] array, int i){
     this._rest = this;
 }
 
-public Object first() {
+override public Object first() {
 	return array[i];
 }
 
-public ISeq rest() {
+override public ISeq rest() {
     if(_rest == this)
         {
         if(i+1 < array.Length)

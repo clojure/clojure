@@ -127,7 +127,7 @@ static class EntryLink extends Entry{
     }
 }
 
-static class Seq implements IndexedSeq{
+static class Seq extends ASeq implements IndexedSeq{
 	final PersistentArray p;
 	final int i;
 

@@ -15,7 +15,7 @@ public interface IPersistentCollection {
 
 int count();
 
-ISeq seq() throws Exception;
+ISeq seq();
 
 IPersistentCollection cons(Object o);
 }

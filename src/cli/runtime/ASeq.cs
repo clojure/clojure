@@ -11,36 +11,37 @@
 using System;
 
 namespace clojure.lang
-{
+	{
+	
+public abstract class ASeq : ISeq{
 
-public class FnSeq : ASeq{
+public Object peek() {
+    return first();
+}
 
-Object _first;
-IFn restFn;
-volatile ISeq _rest;
+public IPersistentList pop() {
+    return rest();
+}
 
-public FnSeq(Object first, IFn restFn) {
-    this._first = first;
-    this.restFn = restFn;
-	this._rest = this;
+public int count() {
+    return 1 + RT.count(rest());
+}
+
+public ISeq seq() {
+    return this;
+}
+
+public IPersistentCollection cons(Object o) {
+    return new Cons(o, this);
+}
+
+#region ISeq Members
+
+abstract public object first();
+
+abstract public ISeq rest();
+
+#endregion
 	}
-
-override public Object first() {
-    return _first;
-}
-
-override public ISeq rest() {
-    if(_rest != this)
-        return _rest;
-    lock(this){
-        if(_rest == this)
-            {
-            _rest = (ISeq) restFn.invoke();
-            restFn = null;
-            }
-        return _rest;
-		}
-    }
-}
 
 }

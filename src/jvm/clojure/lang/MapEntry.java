@@ -94,11 +94,11 @@ static class Iter implements Iterator{
 }
 
 
-public ISeq seq() throws Exception {
+public ISeq seq()  {
     return new Seq(this);
 }
 
-static class Seq implements ISeq{
+static class Seq extends ASeq{
     MapEntry e;
 
     public Seq(MapEntry e) {

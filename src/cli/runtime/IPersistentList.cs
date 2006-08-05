@@ -11,12 +11,13 @@
 using System;
 
 namespace clojure.lang
-	{
-	public interface ISeq : IPersistentList
-		{
+{
+public interface IPersistentList : IPersistentCollection, Sequential {
 
-		Object first();
+    Object peek();
 
-		ISeq rest();
-		}
-	}
+    IPersistentList pop();
+
+}
+
+}
