@@ -68,6 +68,9 @@ static public boolean equal(Object k1,Object k2){
 //               ?Boolean.TRUE:null;
 //        }
 
+
+////////////// Collections support /////////////////////////////////
+
 static public int hash(Object o){
     if(o == null)
         return 0;
@@ -81,8 +84,8 @@ static public int hashCombine(int seed, int hash){
 }
 
 static public ISeq seq(Object coll)  {
-    if(coll == null || coll instanceof ISeq)
-        return (ISeq) coll;
+    if(coll == null)
+        return null;
     else if(coll instanceof IPersistentCollection)
         return ((IPersistentCollection) coll).seq();
     else if(coll instanceof Iterable)
@@ -91,6 +94,121 @@ static public ISeq seq(Object coll)  {
         return ArraySeq.create((Object[]) coll);
     else
         throw new IllegalAccessError("Don't know how to create ISeq from arg");
+}
+
+static public Object meta(Object x) {
+    if(x == null)
+        return null;
+    return ((Obj)x).meta();
+}
+
+public static int count(Object o) {
+    if(o == null)
+        return 0;
+    return ((IPersistentCollection)o).count();
+}
+
+static public IPersistentCollection cons(Object x, IPersistentCollection y) {
+    if(y == null)
+        return new PersistentList(x);
+    return y.cons(x);
+}
+
+static public ISeq cons(Object x, ISeq y) {
+    if(y == null)
+        return new PersistentList(x);
+    return y.cons(x);
+}
+
+static public Object first(Object x) {
+    if(x == null)
+        return null;
+    return seq(x).first();
+}
+
+static public ISeq rest(Object x) {
+    if(x == null)
+        return null;
+    return seq(x).rest();
+}
+
+static public Object peek(Object x) {
+    if(x == null)
+        return null;
+    return ((IPersistentList)x).peek();
+}
+
+static public Object pop(Object x) {
+    if(x == null)
+        return null;
+    return ((IPersistentList)x).pop();
+}
+
+static public Object get(Object key, Object coll) {
+    if(coll == null)
+        return null;
+    return ((Associative)coll).get(key);
+}
+
+static public Object assoc(Object key, Object val, Object coll) {
+    if(coll == null)
+        return new MapEntry(key,val);
+    return ((Associative)coll).assoc(key,val);
+}
+
+static public Object contains(Object key, Object coll) {
+    if(coll == null)
+        return false;
+    return ((Associative)coll).contains(key);
+}
+
+static public Object find(Object key, Object coll) {
+    if(coll == null)
+        return null;
+    return ((Associative)coll).find(key);
+}
+
+static public Object without(Object key, Object coll) {
+    if(coll == null)
+        return null;
+    return ((IPersistentMap)coll).without(key);
+}
+
+static public Object nth(int n, Object coll) {
+    if(coll == null)
+        return null;
+    else if(coll instanceof IPersistentArray)
+        return ((IPersistentArray)coll).nth(n);
+    else if(coll instanceof Object[])
+        return ((Object[])coll)[n];
+    else if(coll instanceof Sequential)
+        {
+        ISeq seq = ((IPersistentCollection) coll).seq();
+        for(int i=0;i<=n && seq != null;++i, seq = seq.rest())
+            {
+            if(i == n)
+                return seq.first();
+            }
+        return null;
+        }
+    else
+        return null;
+}
+
+static public Object assocN(int n, Object val, Object coll) {
+    if(coll == null)
+        return null;
+    else if(coll instanceof IPersistentArray)
+        return ((IPersistentArray)coll).assocN(n,val);
+    else if(coll instanceof Object[])
+        {
+        //hmm... this is not persistent
+        Object[] array = ((Object[])coll);
+        array[n] = val;
+        return array;
+        }
+    else
+        return null;
 }
 
 static public Iter iter(Object coll)
@@ -205,25 +323,9 @@ static public double doubleCast(Object x)
 
 
 /******************************************* list support ********************************/
-static public IPersistentCollection cons(Object x, IPersistentCollection y) {
-    if(y == null)
-        return new PersistentList(x);
-    return y.cons(x);
-}
 
-static public ISeq cons(Object x, ISeq y) {
-    if(y == null)
-        return new PersistentList(x);
-    return y.cons(x);
-}
 
-static public Object first(Object x) {
-    return seq(x).first();
-}
 
-static public ISeq rest(Object x) {
-    return seq(x).rest();
-}
 
 static public ISeq list()
     {
@@ -411,9 +513,4 @@ static public Object setValues(Object... vals)
     return null;
     }
 
-public static int count(Object o) {
-    if(o == null)
-        return 0;
-    return ((IPersistentCollection)o).count();
-}
 }
