@@ -332,7 +332,7 @@ static public ISeq list()
     return null;
     }
 
-static public ISeq list(Object arg1) throws Exception {
+static public ISeq list(Object arg1) {
     return new PersistentList(arg1);
 }
 
