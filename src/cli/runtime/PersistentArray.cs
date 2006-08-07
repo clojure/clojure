@@ -63,7 +63,12 @@ namespace clojure.lang
 		return null;
 		}
 
-
+		public ISeq rseq()
+			{
+			if (count() > 0)
+				return new RSeq(this, count() - 1);
+			return null;
+			}
 		
 internal class Master{
 	internal readonly Entry[] array;
@@ -154,6 +159,10 @@ internal class Seq : ASeq, IndexedSeq{
         return null;
     }
 
+	public override int count() {
+        return p.count() - i;
+    }
+	
 #region IndexedSeq Members
 
 public int index()
@@ -164,6 +173,33 @@ public int index()
 #endregion
 	}
 
+class RSeq : ASeq, IndexedSeq{
+	readonly PersistentArray p;
+	readonly int i;
+
+	internal RSeq(PersistentArray p, int i){
+		this.p = p;
+		this.i = i;
+	}
+
+    public override Object first() {
+        return p.nth(i);
+    }
+
+    public override ISeq rest() {
+        if(i > 0)
+            return new RSeq(p, i - 1);
+        return null;
+    }
+
+    public int index() {
+        return i;
+    }
+
+    public override int count() {
+        return i + 1;
+    }
+}
 internal class ValIter : IEnumerator
 	{
 	internal PersistentArray p;
@@ -491,7 +527,7 @@ internal virtual PersistentArray create(int size, Object defaultVal, float loadF
 	}
 
 
-//*
+/*
 [STAThread] 
 static public void Main(String[] args){
 	if(args.Length != 3)

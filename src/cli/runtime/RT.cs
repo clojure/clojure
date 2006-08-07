@@ -328,7 +328,7 @@ static public ISeq list()
 
 static public ISeq list(Object arg1)
 	{
-	return cons(arg1, null);
+	return new PersistentList(arg1);
 	}
 
 static public ISeq list(Object arg1, Object arg2)

@@ -58,7 +58,11 @@ public ISeq seq() {
     return null;
 }
 
-
+public ISeq rseq() {
+    if(count() > 0)
+        return new RSeq(this, count()-1);
+    return null;
+}
 
 static class Master{
     final Entry[] array;
@@ -148,6 +152,38 @@ static class Seq extends ASeq implements IndexedSeq{
 
     public int index() {
         return i;
+    }
+
+    public int count() {
+        return p.count() - i;
+    }
+}
+
+static class RSeq extends ASeq implements IndexedSeq{
+	final PersistentArray p;
+	final int i;
+
+	RSeq(PersistentArray p, int i){
+		this.p = p;
+		this.i = i;
+	}
+
+    public Object first() {
+        return p.nth(i);
+    }
+
+    public ISeq rest() {
+        if(i > 0)
+            return new RSeq(p, i - 1);
+        return null;
+    }
+
+    public int index() {
+        return i;
+    }
+
+    public int count() {
+        return i + 1;
     }
 }
 

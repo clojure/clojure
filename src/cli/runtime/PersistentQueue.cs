@@ -8,12 +8,12 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-package clojure.lang;
+using System;
+using System.Collections;
 
-import java.util.Queue;
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
+namespace clojure.lang
+	{
+	
 /**
  * conses onto rear, peeks/pops from front
  * See Okasaki's Batched Queues
@@ -21,14 +21,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * so no reversing or suspensions required for persistent use
  */
 
-public class PersistentQueue extends Obj implements IPersistentList {
+public class PersistentQueue : Obj, IPersistentList {
 
-final public static PersistentQueue EMPTY = new PersistentQueue(null,null);
+readonly public static PersistentQueue EMPTY = new PersistentQueue(null,null);
 
-//*
-final ISeq f;
-final PersistentArrayList r;
-static final int INITIAL_REAR_SIZE = 4;
+readonly ISeq f;
+readonly PersistentArrayList r;
+static readonly int INITIAL_REAR_SIZE = 4;
 
 
 PersistentQueue(ISeq f, PersistentArrayList r) {
@@ -40,7 +39,7 @@ public Object peek() {
     return RT.first(f);
 }
 
-public PersistentQueue pop() {
+public IPersistentList pop() {
     if(f == null)  //hmmm... pop of empty queue -> empty queue?
         return this;
         //throw new IllegalStateException("popping empty queue");
@@ -66,7 +65,7 @@ public ISeq seq() {
     return new Seq(f, RT.seq(r));
 }
 
-public PersistentQueue cons(Object o) {
+public IPersistentCollection cons(Object o) {
     PersistentQueue ret;
     if(f == null)     //empty
         ret = new PersistentQueue(RT.list(o), null);
@@ -77,34 +76,29 @@ public PersistentQueue cons(Object o) {
     return ret;
 }
 
-public Obj withMeta(IPersistentMap meta) {
-    if(_meta == meta)
-        return this;
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
-}
+public override Obj withMeta(IPersistentMap meta)
+	{
+	if(_meta == meta)
+		return this;
+	Obj ret = (Obj)MemberwiseClone();
+	ret._meta = meta;
+	return ret;
+	}
 
-static class Seq extends ASeq {
-    final ISeq f;
-    final ISeq rseq;
+class Seq : ASeq {
+    readonly ISeq f;
+    readonly ISeq rseq;
 
-    Seq(ISeq f, ISeq rseq) {
+    internal Seq(ISeq f, ISeq rseq) {
         this.f = f;
         this.rseq = rseq;
     }
 
-    public Object first() {
+    public override Object first() {
         return f.first();
     }
 
-    public ISeq rest() {
+    public override ISeq rest() {
         ISeq f1 = f.rest();
         ISeq r1 = rseq;
         if (f1 == null)
@@ -118,47 +112,50 @@ static class Seq extends ASeq {
     }
 }
 
-public static void main(String[] args) {
-    if (args.length != 1)
+/*
+public static void Main(String[] args) {
+    if (args.Length != 1)
         {
-        System.err.println("Usage: PersistentQueue n");
+        Console.Error.WriteLine("Usage: PersistentQueue n");
         return;
         }
-    int n = Integer.parseInt(args[0]);
+	int n = Int32.Parse(args[0]);
 
 
-    long startTime, estimatedTime;
+    Random rand;
 
-    //*
+    rand = new Random(42);
+
+    DateTime startTime;
+    TimeSpan estimatedTime;
+
     //Queue list = new LinkedList();
-    Queue list = new ConcurrentLinkedQueue();
-    System.out.println("Queue");
-    startTime = System.nanoTime();
+    Queue list = Queue.Synchronized(new Queue());
+    Console.WriteLine("Queue");
+    startTime = DateTime.Now;
     for (int i = 0; i < n; i++)
         {
-        list.add(i);
-        list.add(i);
-        list.remove();
+        list.Enqueue(i);
+		list.Enqueue(i);
+        list.Dequeue();
         }
     for (int i = 0; i < n - 10; i++)
         {
-        list.remove();
+        list.Dequeue();
         }
-    estimatedTime = System.nanoTime() - startTime;
-    System.out.println("time: " + estimatedTime / 1000000);
-    System.out.println("peek: " + list.peek());
+	estimatedTime = DateTime.Now - startTime;
+    Console.WriteLine("time: " + estimatedTime.Ticks / 10000);
+    Console.WriteLine("peek: " + list.Peek());
 
-//*/
 
-//*
     PersistentQueue q = PersistentQueue.EMPTY;
-    System.out.println("PersistentQueue");
-    startTime = System.nanoTime();
-    for (int i = 0; i < n; i++)
+    Console.WriteLine("PersistentQueue");
+	startTime = DateTime.Now;
+	for (int i = 0; i < n; i++)
         {
-        q = q.cons(i);
-        q = q.cons(i);
-        q = q.pop();
+        q = (PersistentQueue) q.cons(i);
+        q = (PersistentQueue) q.cons(i);
+        q = (PersistentQueue) q.pop();
         }
     IPersistentList lastq = null;
     IPersistentList lastq2;
@@ -166,24 +163,24 @@ public static void main(String[] args) {
         {
         //lastq2 = lastq;
         //lastq = q;
-        q = q.pop();
+        q = (PersistentQueue) q.pop();
         }
-    estimatedTime = System.nanoTime() - startTime;
-    System.out.println("time: " + estimatedTime / 1000000);
-    System.out.println("peek: " + q.peek());
-    //*/
+	estimatedTime = DateTime.Now - startTime;
+	Console.WriteLine("time: " + estimatedTime.Ticks / 10000);
+    Console.WriteLine("peek: " + q.peek());
 
     IPersistentList q2 = q;
     for (int i = 0; i < 10; i++)
         {
         q2 = (IPersistentList) q2.cons(i);
         }
-/*
-    for(ISeq s = q.seq();s != null;s = s.rest())
-        System.out.println("q: " + s.first().toString());
-    for(ISeq s = q2.seq();s != null;s = s.rest())
-        System.out.println("q2: " + s.first().toString());
-//*/
+//    for(ISeq s = q.seq();s != null;s = s.rest())
+//        Console.WriteLine("q: " + s.first());
+//    for(ISeq s = q2.seq();s != null;s = s.rest())
+//        Console.WriteLine("q2: " + s.first());
 }
+//*/
 
 }
+		
+		}
