@@ -139,6 +139,11 @@ static class Seq extends ASeq {
             }
         return new Seq(f1, r1);
     }
+
+    public int count() {
+        return RT.count(f) + RT.count(rseq);
+    }
+
 }
 
 public static void main(String[] args) {

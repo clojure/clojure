@@ -50,6 +50,10 @@ override public ISeq rest() {
 //    return _rest;
 }
 
+public override int count() {
+    return array.Length - i;
+}
+	
 public int index(){
 	return i;
 }

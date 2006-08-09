@@ -111,7 +111,7 @@ override public ISeq seq()  {
 }
 
 class Seq : ASeq{
-    MapEntry e;
+    readonly MapEntry e;
 
     public Seq(MapEntry e) {
         this.e = e;
@@ -124,6 +124,11 @@ class Seq : ASeq{
     override public ISeq rest() {
         return null;
     }
+
+	override public int count(){
+		return 1;
+	}
+	
 }
 }
 

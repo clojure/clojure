@@ -163,35 +163,39 @@ public Iterator iterator() {
 }
 
 public ISeq seq() {
-    return Seq.create(array);
+    if(count() == 0)
+        return null;
+    return Seq.create(array,count());
 }
 
 static class Seq extends ASeq{
-    PersistentArray buckets;
-    int b;
-    ISeq e;
+    final PersistentArray buckets;
+    final int b;
+    final ISeq e;
+    final int cnt;
 
 
-    static public Seq create(PersistentArray buckets)  {
-        return next(buckets, -1, null);
+    static public Seq create(PersistentArray buckets, int cnt)  {
+        return next(buckets, -1, null,cnt);
     }
 
-    static Seq next(PersistentArray buckets, int b, ISeq e) {
+    static Seq next(PersistentArray buckets, int b, ISeq e,int cnt) {
         if(e != null && e.rest() != null)
-            return new Seq(buckets,b,e.rest());
+            return new Seq(buckets,b,e.rest(),cnt);
         for(b = b+1;b<buckets.length();b++)
             {
             IPersistentCollection a = (IPersistentCollection) buckets.nth(b);
             if(a != null && a.seq() != null)
-                return new Seq(buckets,b,a.seq());
+                return new Seq(buckets,b,a.seq(),cnt);
             }
         return null;
     }
 
-    Seq(PersistentArray buckets, int b, ISeq e) {
+    Seq(PersistentArray buckets, int b, ISeq e, int cnt) {
         this.buckets = buckets;
         this.b = b;
         this.e = e;
+        this.cnt = cnt;
     }
 
     public Object first() {
@@ -199,7 +203,11 @@ static class Seq extends ASeq{
     }
 
     public ISeq rest() {
-        return next(buckets,b,e);
+        return next(buckets,b,e,cnt-1);
+    }
+
+    public int count() {
+        return cnt;
     }
 }
 

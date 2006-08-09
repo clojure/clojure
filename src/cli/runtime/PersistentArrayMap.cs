@@ -208,6 +208,9 @@ internal class Seq : ASeq, IMapEntry{
             return new Seq(array, i + 2);
         return null;
     }
+    override public int count() {
+        return (array.Length - i)/2;
+    }
 }
 internal class Iter : IEnumerator,IMapEntry{
     Object[] array;

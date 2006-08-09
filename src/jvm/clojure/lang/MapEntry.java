@@ -99,7 +99,7 @@ public ISeq seq()  {
 }
 
 static class Seq extends ASeq{
-    MapEntry e;
+    final MapEntry e;
 
     public Seq(MapEntry e) {
         this.e = e;
@@ -111,6 +111,9 @@ static class Seq extends ASeq{
 
     public ISeq rest() {
         return null;
+    }
+    public int count() {
+        return 1;
     }
 }
 }

@@ -205,6 +205,9 @@ static class Seq extends ASeq implements IMapEntry{
             return new Seq(array, i + 2);
         return null;
     }
+    public int count() {
+        return (array.length - i)/2;
+    }
 }
 
 static class Iter implements Iterator,IMapEntry{

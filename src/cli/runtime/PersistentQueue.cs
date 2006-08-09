@@ -135,6 +135,9 @@ class Seq : ASeq {
             }
         return new Seq(f1, r1);
     }
+    public override int count() {
+        return RT.count(f) + RT.count(rseq);
+    }
 }
 
 //*

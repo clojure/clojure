@@ -26,7 +26,7 @@ public PersistentList(Object first) {
     this._count = 1;
 }
 
-private PersistentList(Object first, PersistentList rest) {
+internal PersistentList(Object first, PersistentList rest) {
     this._first = first;
     this._rest = rest;
 

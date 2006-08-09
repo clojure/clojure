@@ -46,6 +46,10 @@ public ISeq rest() {
 //    return _rest;
 }
 
+public int count() {
+    return array.length - i;
+    }
+
 public int index(){
 	return i;
 }

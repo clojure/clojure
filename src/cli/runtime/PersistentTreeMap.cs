@@ -89,13 +89,13 @@ override public IPersistentMap without(Object key){
 
 override public ISeq seq() {
     if(_count > 0)
-        return Seq.create(tree, true);
+        return Seq.create(tree, true,_count);
     return null;
 }
 
 public ISeq rseq() {
     if(_count > 0)
-        return Seq.create(tree, false);
+        return Seq.create(tree, false,_count);
     return null;
 }
 
@@ -636,14 +636,16 @@ class RedBranchVal : RedBranch{
 public class Seq : ASeq{
 	readonly ISeq stack;
 	readonly bool asc;
+	readonly int cnt;
 
-    Seq(ISeq stack, bool asc) {
+    Seq(ISeq stack, bool asc, int cnt) {
         this.stack = stack;
         this.asc = asc;
+    	this.cnt = cnt;
     }
 
-    internal static Seq create(Node t, bool asc){
-		return new Seq(push(t, null, asc),asc);
+    internal static Seq create(Node t, bool asc,int cnt){
+		return new Seq(push(t, null, asc),asc,cnt);
 	}
 
 	static ISeq push(Node t, ISeq stack, bool asc){
@@ -664,10 +666,15 @@ public class Seq : ASeq{
         ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
         if(nextstack != null)
             {
-            return new Seq(nextstack,asc);
+            return new Seq(nextstack,asc,cnt-1);
             }
         return null;
     }
+
+	public override int count()
+	{
+		return cnt;
+	}
 }
 
 

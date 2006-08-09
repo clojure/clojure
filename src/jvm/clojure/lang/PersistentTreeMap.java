@@ -84,13 +84,13 @@ public PersistentTreeMap without(Object key){
 
 public ISeq seq() {
     if(_count > 0)
-        return Seq.create(tree, true);
+        return Seq.create(tree, true,_count);
     return null;
 }
 
 public ISeq rseq() throws Exception {
     if(_count > 0)
-        return Seq.create(tree, false);
+        return Seq.create(tree, false,_count);
     return null;
 }
 
@@ -619,14 +619,16 @@ static class RedBranchVal extends RedBranch{
 static public class Seq extends ASeq{
 	final ISeq stack;
 	final boolean asc;
+    final int cnt;
 
-    public Seq(ISeq stack, boolean asc) {
+    public Seq(ISeq stack, boolean asc,int cnt) {
         this.stack = stack;
         this.asc = asc;
+        this.cnt = cnt;
     }
 
-    static Seq create(Node t, boolean asc)  {
-        return new Seq(push(t, null, asc),asc);
+    static Seq create(Node t, boolean asc,int cnt)  {
+        return new Seq(push(t, null, asc),asc,cnt);
     }
 
 	static ISeq push(Node t, ISeq stack, boolean asc) {
@@ -647,9 +649,13 @@ static public class Seq extends ASeq{
         ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
         if(nextstack != null)
             {
-            return new Seq(nextstack,asc);
+            return new Seq(nextstack,asc,cnt-1);
             }
         return null;
+    }
+
+    public int count() {
+        return cnt;
     }
 }
 
