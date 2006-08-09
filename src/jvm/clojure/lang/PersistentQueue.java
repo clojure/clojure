@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PersistentQueue extends Obj implements IPersistentList {
 
-final public static PersistentQueue EMPTY = new PersistentQueue(null,null);
+final public static PersistentQueue EMPTY = new PersistentQueue(null,null,null);
 
 //*
 final ISeq f;
@@ -31,9 +31,10 @@ final PersistentArrayList r;
 static final int INITIAL_REAR_SIZE = 4;
 
 
-PersistentQueue(ISeq f, PersistentArrayList r) {
+PersistentQueue(ISeq f, PersistentArrayList r, IPersistentMap meta) {
     this.f = f;
     this.r = r;
+	this._meta = meta;
 }
 
 public Object peek() {
@@ -51,9 +52,7 @@ public PersistentQueue pop() {
         f1 = RT.seq(r);
         r1 = null;
         }
-    PersistentQueue ret = new PersistentQueue(f1, r1);
-    ret._meta = _meta;
-    return ret;
+    return new PersistentQueue(f1, r1,_meta);
 }
 
 public int count() {
@@ -69,12 +68,10 @@ public ISeq seq() {
 public PersistentQueue cons(Object o) {
     PersistentQueue ret;
     if(f == null)     //empty
-        ret = new PersistentQueue(RT.list(o), null);
+        return new PersistentQueue(RT.list(o), null,_meta);
     else
-        ret= new PersistentQueue(f,
-                (PersistentArrayList) (r != null ? r : new PersistentArrayList(INITIAL_REAR_SIZE)).cons(o));
-    ret._meta = _meta;
-    return ret;
+        return new PersistentQueue(f,
+                (PersistentArrayList) (r != null ? r : new PersistentArrayList(INITIAL_REAR_SIZE)).cons(o),_meta);
 }
 
 public Obj withMeta(IPersistentMap meta) {
