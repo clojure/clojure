@@ -23,16 +23,17 @@ namespace clojure.lang
 
 public class PersistentQueue : Obj, IPersistentList {
 
-readonly public static PersistentQueue EMPTY = new PersistentQueue(null,null);
+readonly public static PersistentQueue EMPTY = new PersistentQueue(null,null,null);
 
 readonly ISeq f;
 readonly PersistentArrayList r;
 static readonly int INITIAL_REAR_SIZE = 4;
 
 
-PersistentQueue(ISeq f, PersistentArrayList r) {
+PersistentQueue(ISeq f, PersistentArrayList r, IPersistentMap meta) {
     this.f = f;
     this.r = r;
+	this._meta = meta;
 }
 
 public Object peek() {
@@ -50,9 +51,7 @@ public IPersistentList pop() {
         f1 = RT.seq(r);
         r1 = null;
         }
-    PersistentQueue ret = new PersistentQueue(f1, r1);
-    ret._meta = _meta;
-    return ret;
+    return new PersistentQueue(f1, r1,_meta);
 }
 
 public int count() {
@@ -68,12 +67,11 @@ public ISeq seq() {
 public IPersistentCollection cons(Object o) {
     PersistentQueue ret;
     if(f == null)     //empty
-        ret = new PersistentQueue(RT.list(o), null);
+        return new PersistentQueue(RT.list(o), null,_meta);
     else
-        ret= new PersistentQueue(f,
-                (PersistentArrayList) (r != null ? r : new PersistentArrayList(INITIAL_REAR_SIZE)).cons(o));
-    ret._meta = _meta;
-    return ret;
+        return new PersistentQueue(f,
+                (PersistentArrayList) (r != null ? r : new PersistentArrayList(INITIAL_REAR_SIZE)).cons(o),
+        		_meta);
 }
 
 public override Obj withMeta(IPersistentMap meta)
@@ -112,7 +110,7 @@ class Seq : ASeq {
     }
 }
 
-/*
+//*
 public static void Main(String[] args) {
     if (args.Length != 1)
         {

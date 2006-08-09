@@ -18,7 +18,7 @@ namespace clojure.lang
 public class ArraySeq : ASeq, IndexedSeq{
 readonly Object[] array;
 readonly int i;
-ISeq _rest;
+//ISeq _rest;
 
 static public ArraySeq create(params Object[] array){
 	if(array.Length == 0)
@@ -29,7 +29,7 @@ static public ArraySeq create(params Object[] array){
 ArraySeq(Object[] array, int i){
 	this.array = array;
 	this.i = i;
-    this._rest = this;
+//    this._rest = this;
 }
 
 override public Object first() {
@@ -37,13 +37,17 @@ override public Object first() {
 }
 
 override public ISeq rest() {
-    if(_rest == this)
-        {
-        if(i+1 < array.Length)
-		    _rest = new ArraySeq(array, i + 1);
-	    _rest = null;
-        }
-    return _rest;
+	if (i + 1 < array.Length)
+		return new ArraySeq(array, i + 1);
+	return null;
+
+//    if(_rest == this)
+//        {
+//        if(i+1 < array.Length)
+//		    _rest = new ArraySeq(array, i + 1);
+//	    _rest = null;
+//        }
+//    return _rest;
 }
 
 public int index(){
