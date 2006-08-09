@@ -31,7 +31,7 @@ override public bool Equals(Object obj) {
     if(obj == null)
         return false;
         
-    if(m.count() != count())
+    if(m.count() != count() || m.GetHashCode() != GetHashCode())
         return false;
 
     for(ISeq s = seq();s!=null;s = s.rest())

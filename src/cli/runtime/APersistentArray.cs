@@ -36,7 +36,7 @@ override public bool Equals(Object obj) {
     if(obj is IPersistentArray)
         {
         IPersistentArray ma = (IPersistentArray) obj;
-        if(ma.count() != count())
+		if (ma.count() != count() || ma.GetHashCode() != GetHashCode())
             return false;
         for(int i=0;i<count();i++)
             {
@@ -48,11 +48,14 @@ override public bool Equals(Object obj) {
         {
         if(!(obj is Sequential))
             return false;
-        for(ISeq s = seq(), ms = ((IPersistentCollection)obj).seq();s!=null;s = s.rest(), ms = ms.rest())
-            {
-            if(ms == null || !RT.equal(s.first(),ms.first()))
-                return false;
-            }
+        ISeq ms  = ((IPersistentCollection)obj).seq();
+		for (int i = 0; i < count(); i++, ms = ms.rest())
+			{
+			if (ms == null || !RT.equal(nth(i), ms.first()))
+				return false;
+			}
+        if(ms.rest() != null)
+            return false;
         }
 
     return true;

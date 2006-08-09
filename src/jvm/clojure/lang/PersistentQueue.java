@@ -29,12 +29,39 @@ final public static PersistentQueue EMPTY = new PersistentQueue(null,null,null);
 final ISeq f;
 final PersistentArrayList r;
 static final int INITIAL_REAR_SIZE = 4;
-
+int _hash = -1;
 
 PersistentQueue(ISeq f, PersistentArrayList r, IPersistentMap meta) {
     this.f = f;
     this.r = r;
 	this._meta = meta;
+}
+
+public boolean equals(Object obj) {
+
+        if(!(obj instanceof Sequential))
+            return false;
+        ISeq ms  = ((IPersistentCollection)obj).seq();
+        for(ISeq s = seq();s!=null;s = s.rest(), ms = ms.rest())
+            {
+            if(ms == null || !RT.equal(s.first(),ms.first()))
+                return false;
+            }
+        return ms.rest() == null;
+
+}
+
+public int hashCode() {
+    if(_hash == -1)
+        {
+        int hash = 0;
+        for(ISeq s = seq();s!=null;s = s.rest())
+            {
+            hash = RT.hashCombine(hash, RT.hash(s.first()));
+            }
+        this._hash = hash;
+        }
+    return _hash;
 }
 
 public Object peek() {
@@ -66,7 +93,6 @@ public ISeq seq() {
 }
 
 public PersistentQueue cons(Object o) {
-    PersistentQueue ret;
     if(f == null)     //empty
         return new PersistentQueue(RT.list(o), null,_meta);
     else

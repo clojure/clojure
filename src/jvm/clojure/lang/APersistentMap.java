@@ -37,7 +37,7 @@ public boolean equals(Object obj) {
         return false;
     IPersistentMap m = (IPersistentMap)obj;
 
-    if(m.count() != count())
+    if(m.count() != count() || m.hashCode() != hashCode())
         return false;
 
     for(ISeq s = seq();s!=null;s = s.rest())

@@ -28,6 +28,7 @@ readonly public static PersistentQueue EMPTY = new PersistentQueue(null,null,nul
 readonly ISeq f;
 readonly PersistentArrayList r;
 static readonly int INITIAL_REAR_SIZE = 4;
+int _hash = -1;
 
 
 PersistentQueue(ISeq f, PersistentArrayList r, IPersistentMap meta) {
@@ -36,6 +37,33 @@ PersistentQueue(ISeq f, PersistentArrayList r, IPersistentMap meta) {
 	this._meta = meta;
 }
 
+override public bool Equals(Object obj)
+	{
+	if (!(obj is Sequential))
+		return false;
+	ISeq ms = ((IPersistentCollection)obj).seq();
+	for (ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+		{
+		if (ms == null || !RT.equal(s.first(), ms.first()))
+			return false;
+		}
+	return ms.rest() == null;
+	}
+
+override public int GetHashCode()
+	{
+	if (_hash == -1)
+		{
+		int hash = 0;
+		for (ISeq s = seq(); s != null; s = s.rest())
+			{
+			hash = RT.hashCombine(hash, RT.hash(s.first()));
+			}
+		this._hash = hash;
+		}
+	return _hash;
+	}
+	
 public Object peek() {
     return RT.first(f);
 }
@@ -65,7 +93,6 @@ public ISeq seq() {
 }
 
 public IPersistentCollection cons(Object o) {
-    PersistentQueue ret;
     if(f == null)     //empty
         return new PersistentQueue(RT.list(o), null,_meta);
     else
