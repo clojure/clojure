@@ -9,7 +9,6 @@
  **/
 
 using System;
-using System.Threading;
 using System.Collections;
 
 namespace clojure.lang
@@ -48,7 +47,7 @@ override public IPersistentArray assocN(int i,Object val) {
     if(i >= _count)
 		throw new IndexOutOfRangeException();
 
-    return (PersistentArrayList) base.assocN(i, val);
+    return base.assocN(i, val);
 }
 
 override public int length(){
@@ -92,13 +91,12 @@ private void grow() {
     if(data.master.next != null) //this master has been trimmed, but this rev is not yet propagated
         trim();
 
-    Master newMaster = new Master(data.master.array.Length * 2, data.master.defaultVal, data.master.loadFactor);
+	Master newMaster = new Master(data.master.array.Length * 2, data.master.defaultVal, data.master.loadFactor, data.master.basis);
     newMaster.rev = data.master.rev;
     newMaster.load = data.master.load;
-    newMaster.basis = data.master.basis;
     for(int i=0;i<data.master.array.Length;i++)
         newMaster.array[i] = data.master.array[i];
-    data.master = newMaster;
+	this.data = new Data(newMaster, data.rev, data.baseline, data.history);
 }
 
 override internal PersistentArray create(Master master,int rev,int baseline, BitArray history){

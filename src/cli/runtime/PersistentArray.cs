@@ -11,7 +11,6 @@
 /* rich Jun 2, 2006 */
 
 using System;
-using System.Threading;
 using System.Collections;
 
 namespace clojure.lang
@@ -41,7 +40,6 @@ namespace clojure.lang
  *
  * See Cohen for basic idea
  * I added hybrid most-recent-sequential-range + shared-bitset idea, multi-thread-safety
- * Java implementation is lock-free
  */
 
 	public class PersistentArray : APersistentArray, IEnumerable
@@ -77,15 +75,17 @@ internal class Master{
 	internal int load;
 	internal readonly int maxLoad;
 	internal readonly float loadFactor;
-    internal int[] basis;
-    internal volatile Master next;
-    
-	internal Master(int size,Object defaultVal, float loadFactor){
+	internal readonly int[] basis;
+    internal Master next;
+
+	internal Master(int size, Object defaultVal, float loadFactor, int[] basis)
+		{
 		this.array = new Entry[size];
 		this.defaultVal = defaultVal;
 		this.rev = 0;
 		this.load = 0;
 		this.maxLoad = (int)(size * loadFactor);
+		this.basis = basis;
 		this.loadFactor = loadFactor;
 		}
 	internal Master(Master parent)
@@ -233,10 +233,11 @@ public void Reset()
 	}
 
 internal class Data{
-	internal Master master;
+	internal readonly Master master;
 	internal readonly int rev;
 	internal readonly int baseline;
 	internal readonly BitArray history;
+	
 	public Data(Master master, int rev, int baseline, BitArray history)
 		{
 		this.master = master;
@@ -259,7 +260,7 @@ public PersistentArray(int size, Object defaultVal)
 	}
 
 public PersistentArray(int size, Object defaultVal, float loadFactor){
-	this.data = new Data(new Master(size, defaultVal, loadFactor), 0, 0, null);
+	this.data = new Data(new Master(size, defaultVal, loadFactor,null), 0, 0, null);
 }
 
 	internal PersistentArray(Master master, int rev, int baseline, BitArray history)
@@ -359,7 +360,7 @@ public void isolate()
 	}
 	
 Entry getEntry(int i){
-for (Entry e = (Entry)data.master.array[i]; e != null; e = e.rest())
+for (Entry e = data.master.array[i]; e != null; e = e.rest())
 		{
 		if (e.rev <= data.rev)
 			{
