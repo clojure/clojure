@@ -95,12 +95,13 @@ private void grow() {
     if(data.master.next != null) //this master has been trimmed, but this rev is not yet propagated
         trim();
 
-    Master newMaster = new Master(data.master.array.length * 2, data.master.defaultVal, data.master.loadFactor);
+    Master newMaster = new Master(data.master.array.length * 2, data.master.defaultVal, data.master.loadFactor
+		                        ,data.master.basis);
     newMaster.rev = data.master.rev;
     newMaster.load = data.master.load;
-    newMaster.basis = data.master.basis;
     System.arraycopy(data.master.array, 0, newMaster.array, 0, data.master.array.length);
-    data.master = newMaster;
+	this.data = new Data(newMaster,data.rev,data.baseline,data.history);
+    //data.master = newMaster;
 }
 
 protected PersistentArray create(Master master,int rev,int baseline, BitSet history){

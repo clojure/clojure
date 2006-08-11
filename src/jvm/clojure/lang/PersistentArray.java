@@ -71,17 +71,17 @@ static class Master{
     int load;
     final int maxLoad;
     final float loadFactor;
-    int[] basis;
-    volatile Master next;
+    final int[] basis;
+    Master next;
 
-    Master(int size,Object defaultVal, float loadFactor){
+    Master(int size,Object defaultVal, float loadFactor, int[] basis){
         this.array = new Entry[size];//new AtomicReferenceArray(size);
         this.defaultVal = defaultVal;
         this.rev = 0;//new AtomicInteger(0);
         this.load = 0;//new AtomicInteger(0);
         this.maxLoad = (int) (size * loadFactor);
         this.loadFactor = loadFactor;
-        basis = null;
+        this.basis = basis;
         next = null;
         }
 
@@ -210,7 +210,7 @@ static class ValIter implements Iterator{
 }
 
 static class Data{
-Master master;
+final Master master;
 final int rev;
 final int baseline;
 final BitSet history;
@@ -234,7 +234,7 @@ public PersistentArray(int size, Object defaultVal){
 }
 
 public PersistentArray(int size, Object defaultVal, float loadFactor){
-	this.data = new Data(new Master(size, defaultVal,loadFactor),0,0,null);
+	this.data = new Data(new Master(size, defaultVal,loadFactor,null),0,0,null);
 }
 
 PersistentArray(Master master,int rev,int baseline, BitSet history){
