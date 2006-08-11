@@ -140,7 +140,7 @@ class Seq : ASeq {
     }
 }
 
-//*
+/*
 public static void Main(String[] args) {
     if (args.Length != 1)
         {

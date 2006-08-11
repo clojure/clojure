@@ -106,7 +106,7 @@ PersistentArray doPut(int i,Object key,Object val,PersistentArray array){
             return array;
         }
     else
-	    newEntries = createListMap(key, val);
+	    newEntries = createEntryMap(key, val);
 
     return array.assocN(i, newEntries);
 }
@@ -119,7 +119,7 @@ PersistentArray doAdd(int i,Object key,Object val,PersistentArray array) throws 
         newEntries = entries.assocEx(key, val);
         }
     else
-	    newEntries = createListMap(key, val);
+	    newEntries = createEntryMap(key, val);
 
     return array.assocN(i, newEntries);
 }
@@ -214,7 +214,7 @@ static class Seq extends ASeq{
 static class Iter implements Iterator{
 	PersistentArray buckets;
 	int b;
-	PersistentListMap e;
+    ISeq e;
 
 	Iter(PersistentArray buckets){
         this.buckets = buckets;
@@ -226,10 +226,10 @@ static class Iter implements Iterator{
         e = null;
         for(b = b+1;b<buckets.length();b++)
             {
-            PersistentListMap a = (PersistentListMap) buckets.nth(b);
-            if(a != null && a != PersistentListMap.EMPTY)
+            IPersistentCollection a = (IPersistentCollection) buckets.nth(b);
+            if(a != null && a.seq() != null)
                 {
-                e = a;
+                e = a.seq();
                 break;
                 }
             }
@@ -240,11 +240,11 @@ static class Iter implements Iterator{
     }
 
 	public Object next() {
-		PersistentListMap ret = e;
-        e = e.next();
-        if(e == PersistentListMap.EMPTY)
+		ISeq ret = e;
+        e = e.rest();
+        if(e == null)
             nextBucket();
-        return ret;
+        return ret.first();
     }
 
 	public void remove() {
@@ -257,7 +257,7 @@ final IPersistentMap entriesFor(Object key){
 }
 
 static int bucketFor(Object key, PersistentArray array) {
-    return (key.hashCode() & 0x7fffffff)%array.length();
+    return (RT.hash(key) & 0x7fffffff)%array.length();
 }
 
 IPersistentMap create(int capacity) {
@@ -279,8 +279,10 @@ IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
 }
 
 
-IPersistentMap createListMap(Object key, Object val){
-	return PersistentListMap.create(key,val);
+IPersistentMap createEntryMap(Object key, Object val){
+    return new MapEntry(key,val);
+//    return PersistentListMap.create(key,val);
+//    return new PersistentArrayMap(key,val);
 }
 
 }

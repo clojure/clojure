@@ -743,14 +743,14 @@ static public void main(String args[]){
 	Collections.shuffle(Arrays.asList(ints));
 	//force the ListMap class loading now
     try {
-    PersistentListMap.EMPTY.assocEx(1, null).assocEx(2,null).assocEx(3,null);
+    //PersistentListMap.EMPTY.assocEx(1, null).assocEx(2,null).assocEx(3,null);
     } catch (Exception e)
         {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     System.out.println("Building set");
-	IPersistentMap set = new PersistentArrayMap();
-	//IPersistentMap set = new PersistentHashtableMap(1001);
+	//IPersistentMap set = new PersistentArrayMap();
+	IPersistentMap set = new PersistentHashtableMap(1001);
 	//IPersistentMap set = new ListMap();
 	//IPersistentMap set = new ArrayMap();
 	//IPersistentMap set = new RBTree();

@@ -789,7 +789,7 @@ public void Reset()
 #endregion
     }
 
-    /*
+    //*
 	[STAThread]
 static public void Main(String[] args){
 	if(args.Length != 1)
@@ -804,9 +804,9 @@ static public void Main(String[] args){
     Array.Reverse(ints);
 	Console.WriteLine("Building set");
 	//IPersistentMap set = new PersistentTree();
-	IPersistentMap set = new PersistentArrayMap();
+	//IPersistentMap set = new PersistentArrayMap();
 	//IPersistentMap set = new PersistentListMap();
-	//IPersistentMap set = new PersistentHashtableMap(1001);
+	IPersistentMap set = new PersistentHashtableMap(1001);
 	//IPersistentMap set = new PersistentHybridMap(1001);
     //for(int i = 0; i < ints.Length; i++)
     //    {
@@ -817,7 +817,7 @@ static public void Main(String[] args){
 	for (int i = 0; i < ints.Length; i++)
 		{
 		Object anInt = ints[i];
-		set = set.put(anInt, anInt);
+		set = (IPersistentMap) set.assoc(anInt, anInt);
 		}
 
 	foreach(IMapEntry e in set)
@@ -831,7 +831,7 @@ static public void Main(String[] args){
 	for(int i = 0; i < ints.Length/2; i++)
 		{
 		Object anInt = ints[i];
-		set = set.remove(anInt);
+		set = set.without(anInt);
 		}
 
 	Console.WriteLine("Time: " + (DateTime.Now - start));
