@@ -502,6 +502,102 @@ static public void print(Object x, TextWriter w) {
         }
     else w.Write(x.ToString());
 }
+
+static public void formatAesthetic(TextWriter w, Object obj) {
+    if(obj == null)
+        w.Write("null");
+    else
+        w.Write(obj.ToString());
+}
+
+static public void formatStandard(TextWriter w,Object obj) {
+    if(obj == null)
+		w.Write("null");
+    else if(obj is String)
+        {
+		w.Write('"');
+		w.Write((String)obj);
+		w.Write('"');
+        }
+    else if(obj is Char)
+        {
+		w.Write('\\');
+		char c = (Char)obj;
+        switch(c){
+            case '\n':
+				w.Write("newline");
+                break;
+            case '\t':
+				w.Write("tab");
+                break;
+            case ' ':
+				w.Write("space");
+                break;
+            default:
+				w.Write(c);
+        		break;
+            }
+        }
+    else
+		w.Write(obj.ToString());
+}
+
+static public void format(TextWriter w, String s, ISeq args) {
+    for (int i = 0; i < s.Length;)
+        {
+        char c = s[i++];
+        switch (Char.ToLower(c))
+            {
+            case '~':
+                char d = s[i++];
+                switch (Char.ToLower(d))
+                    {
+                    case '%':
+                        w.Write('\n');
+                        break;
+                    case 't':
+                        w.Write('\t');
+                        break;
+                    case 'a':
+                        if(args == null)
+                            throw new Exception("Missing argument");
+                        RT.formatAesthetic(w, RT.first(args));
+                        args = RT.rest(args);
+                        break;
+                    case 's':
+                        if(args == null)
+							throw new Exception("Missing argument");
+                        RT.formatStandard(w, RT.first(args));
+                        args = RT.rest(args);
+                        break;
+                    case '{':
+                        int j = s.IndexOf("~}", i);    //note - does not nest
+                        if(j == -1)
+							throw new Exception("Missing ~}");
+                        String subs = s.Substring(i, j-i);
+                        format(w, subs, RT.seq(RT.first(args)));
+                        args = RT.rest(args);
+                        i = j+2; //skip ~}
+                        break;
+                    case '^':
+                        if(args == null)
+                            return;
+                        break;
+                    case '~':
+                        w.Write('~');
+                        break;
+                    default:
+						throw new Exception("Unsupported ~ directive: " + d);
+                    	break;
+                    }
+                break;
+            default:
+                w.Write(c);
+            	break;
+            }
+        }
+}
+
 /*-------------------------------- values --------------*/
 
 static public Object setValues(params Object[] vals)

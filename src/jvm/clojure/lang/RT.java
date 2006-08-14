@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.io.Reader;
 import java.io.PushbackReader;
 import java.io.Writer;
+import java.io.IOException;
 
 public class RT{
 
@@ -502,6 +503,98 @@ static public void print(Object x, Writer w) throws Exception {
             }
         }
     else w.write(x.toString());
+}
+
+static public void formatAesthetic(Writer w,Object obj) throws IOException {
+    if(obj == null)
+        w.write("null");
+    else
+        w.write(obj.toString());
+}
+
+static public void formatStandard(Writer w,Object obj) throws IOException {
+    if(obj == null)
+        w.write("null");
+    else if(obj instanceof String)
+        {
+        w.write('"');
+        w.write((String) obj);
+        w.write('"');
+        }
+    else if(obj instanceof Character)
+        {
+        w.write('\\');
+        char c = ((Character)obj).charValue();
+        switch(c){
+            case '\n':
+                w.write("newline");
+                break;
+            case '\t':
+                w.write("tab");
+                break;
+            case ' ':
+                w.write("space");
+                break;
+            default:
+                w.write(c);
+            }
+        }
+    else
+        w.write(obj.toString());
+}
+
+static public void format(Writer w, String s, ISeq args) throws Exception {
+    for (int i = 0; i < s.length();)
+        {
+        char c = s.charAt(i++);
+        switch (Character.toLowerCase(c))
+            {
+            case '~':
+                char d = s.charAt(i++);
+                switch (Character.toLowerCase(d))
+                    {
+                    case '%':
+                        w.write('\n');
+                        break;
+                    case 't':
+                        w.write('\t');
+                        break;
+                    case 'a':
+                        if(args == null)
+                            throw new IllegalArgumentException("Missing argument");
+                        RT.formatAesthetic(w, RT.first(args));
+                        args = RT.rest(args);
+                        break;
+                    case 's':
+                        if(args == null)
+                            throw new IllegalArgumentException("Missing argument");
+                        RT.formatStandard(w, RT.first(args));
+                        args = RT.rest(args);
+                        break;
+                    case '{':
+                        int j = s.indexOf("~}", i);    //note - does not nest
+                        if(j == -1)
+                            throw new IllegalArgumentException("Missing ~}");
+                        String subs = s.substring(i, j);
+                        format(w, subs, RT.seq(RT.first(args)));
+                        args = RT.rest(args);
+                        i = j+2; //skip ~}
+                        break;
+                    case '^':
+                        if(args == null)
+                            return;
+                        break;
+                    case '~':
+                        w.write('~');
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported ~ directive: " + d);
+                    }
+                break;
+            default:
+                w.write(c);
+            }
+        }
 }
 ///////////////////////////////// values //////////////////////////
 
