@@ -20,6 +20,10 @@ readonly Object[] array;
 readonly int i;
 //ISeq _rest;
 
+static public ArraySeq create(){
+	return null;
+}
+	
 static public ArraySeq create(params Object[] array){
 	if(array.Length == 0)
 		return null;

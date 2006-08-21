@@ -17,6 +17,10 @@ final Object[] array;
 final int i;
 //ISeq _rest;
 
+static public ArraySeq create(){
+		return null;
+}
+
 static public ArraySeq create(Object... array){
 	if(array.length == 0)
 		return null;
