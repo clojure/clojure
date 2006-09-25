@@ -223,7 +223,7 @@ private static Object matchSymbol(String s) {
 private static Object matchVar(String s) {
     Match m = varPat.Match(s);
     if(m.Success && m.Length == s.Length)
-        return Namespace.intern(m.Groups[1].Value,m.Groups[2].Value);
+        return Module.intern(m.Groups[1].Value,m.Groups[2].Value);
     return null;
 }
 

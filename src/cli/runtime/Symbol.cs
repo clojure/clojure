@@ -36,7 +36,7 @@ public static Symbol intern(String name)	{	lock(table)		{		Symbol sym = (Sym
             else		        sym = new Symbol(name);		    if(table[name] != null) //defend against recursive static init
 				return (Symbol)table[name];			table.Add(name, sym);			}		return sym;		}	}
 /**
- * Used by Namespace.intern()
+ * Used by Module.intern()
  * @param name
  * @param ns
  */

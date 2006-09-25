@@ -21,7 +21,7 @@ public class RT
 {
 
     public static Symbol T = Symbol.intern("t");
-	static public Var OUT = Namespace.intern("clojure", "^out");
+	static public Var OUT = Module.intern("clojure", "^out");
 	public static Object[] EMPTY_ARRAY = new Object[0];
 
 

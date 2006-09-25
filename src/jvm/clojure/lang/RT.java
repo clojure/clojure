@@ -18,7 +18,7 @@ import java.io.*;
 public class RT{
 
     static public Symbol T = Symbol.intern("t");
-	static public Var OUT = Namespace.intern("clojure","^out");
+	static public Var OUT = Module.intern("clojure","^out");
     static public final Object[] EMPTY_ARRAY = new Object[]{};
     static public final Character[] chars;
 

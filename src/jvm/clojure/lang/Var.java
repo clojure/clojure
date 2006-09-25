@@ -18,38 +18,41 @@ import java.util.Random;
 
 public class Var extends AFn {
 
-public final Symbol sym;
-public Namespace namespace;
+public final Symbol name;
+public Module module;
 public Binding binding;
 AtomicInteger tcount = new AtomicInteger(0);
 AtomicReference<IPersistentMap> threadBindings = new AtomicReference(PersistentArrayMap.EMPTY);
 
-Var(Symbol sym, Namespace ns) {
+
+Var(Symbol sym, Module ns) {
     if (!(sym.getClass() == Symbol.class))
-        throw new IllegalArgumentException("Only simple symbols can be vars");
-    this.namespace = ns;
-    this.sym = sym;
+        throw new IllegalArgumentException("Only simple symbols can be var names");
+    this.module = ns;
+    this.name = sym;
 }
 
 public String toString() {
-    if (namespace == null)
-        return "#:" + sym;
-    return namespace.name + ":" + sym;
+    if (module == null)
+        return "#:" + name;
+    return module.name + ":" + name;
 }
 
 public Var bind(Object val) {
+    synchronized(this){
     if (binding == null)
         binding = new Binding(val);
     else
         binding.val = val;
 
     return this;
+    }
 }
 
 public Object getValue() {
-    Binding binding = getBinding();
-    if (binding != null)
-        return binding.val;
+    Binding b = getBinding();
+    if (b != null)
+        return b.val;
     throw new IllegalStateException(this.toString() + " is unbound.");
 }
 
@@ -249,7 +252,7 @@ public static void main(String[] args) {
 
         }
 
-        Var test = Namespace.intern("test", "test");
+        Var test = Module.intern("test", "test");
 
         test.bind(new Test());
 

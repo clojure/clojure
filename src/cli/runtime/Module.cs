@@ -16,11 +16,11 @@ using System.Collections.Specialized;
 namespace clojure.lang
 {
 
-public class Namespace
+public class Module
 {
 
 /**
- * String->Namespace
+ * String->Module
  */
 static public HybridDictionary table = new HybridDictionary();
 
@@ -31,24 +31,24 @@ public HybridDictionary vars = new HybridDictionary();
 public String name;
 
 
-Namespace(String name)
+Module(String name)
 	{
 	this.name = name;
 	table.Add(name, this);
 	}
 
-static public Namespace find(String name)
+static public Module find(String name)
 	{
-	return (Namespace) table[name];
+	return (Module) table[name];
 	}
 
-static public Namespace findOrCreate(String name)
+static public Module findOrCreate(String name)
 	{
 	lock(table)
 		{
-		Namespace ns = find(name);
+		Module ns = find(name);
 		if(ns == null)
-			ns = new Namespace(name);
+			table.Add(name,ns = new Module(name));
 		return ns;
 		}
 	}

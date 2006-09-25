@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 
-public class Namespace{
+public class Module {
 
 /**
  * String->Namespace
@@ -28,24 +28,24 @@ static final public HashMap table = new HashMap();
 final public IdentityHashMap vars = new IdentityHashMap();
 final public String name;
 
-Namespace(String name)
+Module(String name)
     {
     this.name = name;
     table.put(name, this);
     }
 
-static public Namespace find(String name)
+static public Module find(String name)
     {
-    return (Namespace) table.get(name);
+    return (Module) table.get(name);
     }
 
-static public Namespace findOrCreate(String name)
+static public Module findOrCreate(String name)
     {
     synchronized(table)
         {
-        Namespace ns = find(name);
+        Module ns = find(name);
         if(ns == null)
-            ns = new Namespace(name);
+            table.put(name,ns = new Module(name));
         return ns;
         }
     }

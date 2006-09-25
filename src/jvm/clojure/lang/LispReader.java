@@ -251,7 +251,7 @@ private static Object matchSymbol(String s) {
 private static Object matchVar(String s) {
     Matcher m = varPat.matcher(s);
     if(m.matches())
-        return Namespace.intern(m.group(1),m.group(2));
+        return Module.intern(m.group(1),m.group(2));
     return null;
 }
 
