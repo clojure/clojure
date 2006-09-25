@@ -13,13 +13,14 @@ using System;
 namespace clojure.lang
 {
 
-public class StaticMemberName {
+public class StaticMemberSymbol : HostSymbol{
 readonly public String className;
 readonly public String memberName;
 
-public StaticMemberName(String className, String memberName) {
-    this.className = className;
-    this.memberName = memberName;
+public StaticMemberSymbol(String name) : base(name) {
+    int lastDot = name.LastIndexOf('.');
+    this.className = name.Substring(0,lastDot);
+    this.memberName = name.Substring(lastDot + 1);
 }
 
 }

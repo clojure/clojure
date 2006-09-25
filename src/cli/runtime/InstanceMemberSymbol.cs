@@ -8,14 +8,23 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-package clojure.lang;
+using System;
 
-public class InstanceMemberName {
-final public String className;
-final public String memberName;
+namespace clojure.lang
+{
 
-public InstanceMemberName(String className, String memberName) {
-    this.className = className;
-    this.memberName = memberName;
+public class InstanceMemberSymbol :HostSymbol {
+readonly public String className;
+readonly public String memberName;
+
+public InstanceMemberSymbol(String name) : base(name) {
+int lastDot = name.LastIndexOf('.');
+if (lastDot == 0)
+	this.className = null;
+else
+	this.className = name.Substring(1, lastDot-1);
+this.memberName = name.Substring(lastDot + 1);
 }
+}
+
 }

@@ -10,13 +10,9 @@
 
 package clojure.lang;
 
-public class StaticMemberName {
-final public String className;
-final public String memberName;
+public class HostSymbol extends Symbol{
 
-public StaticMemberName(String className, String memberName) {
-    this.className = className;
-    this.memberName = memberName;
+HostSymbol(String name) {
+    super(name);
 }
-
 }

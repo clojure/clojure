@@ -8,12 +8,17 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-package clojure.lang;
+using System;
 
-public class ClassName {
-final public String className;
+namespace clojure.lang
+{
 
-public ClassName(String className) {
-    this.className = className;
+public class ClassSymbol :HostSymbol {
+readonly public String className;
+
+public ClassSymbol(String className) : base(className) {
+this.className = className.Substring(0, className.Length - 2);  //strip trailing dot
 }
+}
+
 }

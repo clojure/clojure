@@ -8,17 +8,13 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-using System;
+package clojure.lang;
 
-namespace clojure.lang
-{
+public class ClassSymbol extends HostSymbol{
+final public String className;
 
-public class ClassName {
-readonly public String className;
-
-public ClassName(String className) {
-    this.className = className;
+public ClassSymbol(String className) {
+    super(className);
+    this.className = className.substring(0,className.length()-1);  //strip trailing dot
 }
-}
-
 }

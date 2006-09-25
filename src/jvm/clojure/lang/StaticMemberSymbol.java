@@ -8,19 +8,17 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-using System;
+package clojure.lang;
 
-namespace clojure.lang
-{
+public class StaticMemberSymbol extends HostSymbol{
+final public String className;
+final public String memberName;
 
-public class InstanceMemberName {
-readonly public String className;
-readonly public String memberName;
-
-public InstanceMemberName(String className, String memberName) {
-    this.className = className;
-    this.memberName = memberName;
-}
+public StaticMemberSymbol(String name) {
+    super(name);
+    int lastDot = name.lastIndexOf('.');
+    this.className = name.substring(0,lastDot);
+    this.memberName = name.substring(lastDot + 1);
 }
 
 }

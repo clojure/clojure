@@ -13,17 +13,17 @@
 package clojure.lang;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
 
-public class Symbol extends Obj implements Comparable{
+public class Symbol
+        //extends Obj implements Comparable
+{
 
 final public static HashMap table = new HashMap();
-final public static HashSet hashes = new HashSet();
-final static Random rand = new Random(42);
+//final public static HashSet hashes = new HashSet();
+//final static Random rand = new Random(42);
 
 public final String name;
-int hash = 0;
+//int hash = 0;
 
 public String toString()
     {
@@ -35,12 +35,20 @@ public static Symbol intern(String name)
     synchronized(table)
         {
         Symbol sym = (Symbol) table.get(name);
+        int dot = 0;
         if(sym == null)
             {
             if(name.charAt(0) == ':')
                 sym = new Keyword(name);
-            else if(name.charAt(0) == '.')
-                sym = new Accessor(name);
+            else if((dot = name.indexOf('.')) != -1)
+                {
+                if(dot == 0)
+                    sym = new InstanceMemberSymbol(name);
+                else if(name.lastIndexOf('.') == name.length() - 1)
+                    sym = new ClassSymbol(name);
+                else
+                    sym = new StaticMemberSymbol(name);
+                }
             else
                 sym = new Symbol(name);
             if(table.get(name) != null) //defend against recursive static init
@@ -59,7 +67,7 @@ Symbol(String name)
     {
     this.name = name;
     }
-
+ /*
  public int hashCode(){
      if(hash == 0)
          {
@@ -88,4 +96,6 @@ public Obj withMeta(IPersistentMap meta) {
     this._meta = meta;
     return this;
 }
+*/
+
 }
