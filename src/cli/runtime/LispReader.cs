@@ -20,6 +20,11 @@ namespace clojure.lang
 
 
 public class LispReader {
+	
+static Symbol QUOTE = Symbol.intern("quote");
+static Symbol BACKQUOTE = Symbol.intern("backquote");
+static Symbol UNQUOTE = Symbol.intern("unquote");
+static Symbol UNQUOTE_SPLICING = Symbol.intern("unquote-splicing");
 
 static IFn[] macros = new IFn[256];
 static Regex symbolPat = new Regex("[:]?[\\D-[:\\.]][^:\\.]*",RegexOptions.Compiled);
@@ -36,6 +41,9 @@ static Regex symbolPat = new Regex("[:]?[\\D-[:\\.]][^:\\.]*",RegexOptions.Compi
 static LispReader(){
 macros['"'] = new StringReader();
 macros[';'] = new CommentReader();
+macros['\''] = new QuoteReader();
+macros['`'] = new BackquoteReader();
+macros[','] = new UnquoteReader();
 macros['('] = new ListReader();
 macros[')'] = new UnmatchedDelimiterReader();
 macros['\\'] = new CharacterReader();
@@ -58,6 +66,14 @@ static public Object read(LineNumberingTextReader r, bool eofIsError, Object eof
             return eofValue;
             }
 
+		if (Char.IsDigit((char)ch))
+			{
+			Object n = readNumber(r, (char)ch);
+			if (RT.suppressRead())
+				return null;
+			return n;
+			}
+        	
         IFn macroFn = getMacro(ch);
         if (macroFn != null)
             {
@@ -70,11 +86,25 @@ static public Object read(LineNumberingTextReader r, bool eofIsError, Object eof
             return ret;
             }
 
-        String token = readToken(r,(char)ch);
-        if(RT.suppressRead())
-            return null;
-        return interpretToken(token);
-        }
+		if (ch == '+' || ch == '-')
+			{
+			int ch2 = r.Read();
+			if (Char.IsDigit((char)ch2))
+				{
+				r.unread(ch2);
+				Object n = readNumber(r, (char)ch);
+				if (RT.suppressRead())
+					return null;
+				return n;
+				}
+			r.unread(ch2);
+			}
+
+		String token = readToken(r,(char)ch);
+		if (RT.suppressRead())
+			return null;
+		return interpretToken(token);
+		}
 }
 
 static private String readToken(LineNumberingTextReader r, char initch) {
@@ -93,29 +123,78 @@ static private String readToken(LineNumberingTextReader r, char initch) {
         }
 }
 
+static private Object readNumber(LineNumberingTextReader r, char initch){
+    StringBuilder sb = new StringBuilder();
+    sb.Append(initch);
+
+    for(;;)
+        {
+        int ch = r.Read();
+        if(ch == -1 || Char.IsWhiteSpace((char)ch) || isMacro(ch))
+            {
+            r.unread(ch);
+            break;
+            }
+        sb.Append((char)ch);
+        }
+
+	String s = sb.ToString();
+	Object n = matchNumber(s);
+	if(n == null)
+		throw new InvalidDataException("Invalid number: " + s);
+	return n;
+}
+
+/*
+static private Object readSymbol(LineNumberingTextReader r, char initch) {
+    StringBuilder sb = new StringBuilder();
+    sb.Append(initch);
+
+    for(;;)
+        {
+        int ch = r.Read();
+        if(ch == -1 || Char.IsWhiteSpace((char)ch) || isMacro(ch))
+            {
+            r.unread(ch);
+            return Symbol.intern(sb.ToString());
+            }
+        else if(ch == '.')
+	        {
+	        r.unread(ch);
+	        Object ret = Symbol.intern(sb.ToString());
+	        Object mem = null;
+	        while((mem = readMember(r)) != null)
+		        {
+		        //x.foo ==> (.foo  x)
+		        if(mem is Symbol)
+			        ret = RT.list(mem, ret);
+		        else  //x.foo(y z) ==> (.foo x y z)
+			        {
+			        ISeq rseq = RT.seq(mem);
+			        ret = RT.cons(rseq.first(), RT.cons(ret, RT.rest(rseq)));
+			        }
+		        }
+	        return ret;
+	        }
+        sb.Append((char)ch);
+        }
+}
+*/	
 static private Object interpretToken(String s) {
     if (s.Equals("null"))
         {
         return null;
         }
     Object ret = null;
-    ret = matchSymbol(s);
-    if(ret != null)
-        return ret;
+
     ret = matchVar(s);
     if(ret != null)
         return ret;
-    ret = matchNumber(s);
-    if(ret != null)
-        return ret;
-    ret = matchHostName(s);
-    if(ret != null)
-        return ret;
 
-
-    throw new InvalidDataException("Invalid syntax: " + s);
+	return Symbol.intern(s);
 }
 
+/*
 private static Object matchHostName(String s) {
     Match m = accessorPat.Match(s);
     if(m.Success && m.Length == s.Length)
@@ -139,7 +218,8 @@ private static Object matchSymbol(String s) {
         return Symbol.intern(s);
     return null;
 }
-
+*/
+	
 private static Object matchVar(String s) {
     Match m = varPat.Match(s);
     if(m.Success && m.Length == s.Length)
@@ -224,6 +304,42 @@ class CommentReader : AFn{
         return r;
     }
 
+}
+	
+class QuoteReader : AFn{
+    override public Object invoke(Object reader, Object quote)  {
+	LineNumberingTextReader r = (LineNumberingTextReader)reader;
+	    Object o = read(r, true, null, true);
+	    return RT.list(QUOTE, o);
+    }
+}
+
+class BackquoteReader : AFn{
+    override public Object invoke(Object reader, Object backquote)  {
+	LineNumberingTextReader r = (LineNumberingTextReader)reader;
+	    Object o = read(r, true, null, true);
+	    return RT.list(BACKQUOTE, o);
+    }
+}
+
+class UnquoteReader : AFn{
+    override public Object invoke(Object reader, Object comma)  {
+	LineNumberingTextReader r = (LineNumberingTextReader)reader;
+	    int ch = r.Read();
+	    if(ch == -1)
+	        throw new Exception("EOF while reading character");
+		if(ch == '^')
+			{
+	        Object o = read(r, true, null, true);
+	        return RT.list(UNQUOTE_SPLICING, o);
+			}
+	    else
+			{
+			r.unread(ch);
+			Object o = read(r, true, null, true);
+			return RT.list(UNQUOTE, o);
+			}
+    }
 }
 class CharacterReader : AFn{
 	override public Object invoke(Object reader, Object backslash)
