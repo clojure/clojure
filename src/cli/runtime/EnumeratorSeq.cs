@@ -13,37 +13,35 @@ using System.Collections;
 
 namespace clojure.lang
 {
-public class EnumeratorSeq : ASeq{
-IEnumerator e;
-volatile ISeq _rest;
+	public class EnumeratorSeq : ASeq
+	{
+		IEnumerator e;
+		ISeq _rest;
 
-public static EnumeratorSeq create(IEnumerator e){
-    if(e.MoveNext())
-        return new EnumeratorSeq(e);
-    return null;
-}
+		public static EnumeratorSeq create(IEnumerator e) {
+			if (e.MoveNext())
+				return new EnumeratorSeq(e);
+			return null;
+		}
 
-EnumeratorSeq(IEnumerator e){
-    this.e = e;
-    this._rest = this;
-}
+		EnumeratorSeq(IEnumerator e) {
+			this.e = e;
+			this._rest = this;
+		}
 
-override public Object first() {
-    return e.Current;
-}
+		override public Object first() {
+			return e.Current;
+		}
 
-override public ISeq rest() {
-    if(_rest == this)
-        {
-        lock(this){
-            if(_rest == this)
-                {
-                _rest = create(e);
-                }
-            }
-        }
-    return _rest;
-}
-}
-
+		override public ISeq rest() {
+			lock (this)
+			{
+				if (_rest == this)
+				{
+					_rest = create(e);
+				}
+				return _rest;
+			}
+		}
+	}
 }
