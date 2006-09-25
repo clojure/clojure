@@ -63,7 +63,7 @@ public static Object invokeConstructor(Type t, Object[] args)  //throws Exceptio
                             null, null, args);
         }
     }
-public static Object invokeStaticMethod(String name, String className, Object[] args) //throws Exception
+public static Object invokeStaticMethod(String name, String className, params Object[] args) //throws Exception
     {
     Type t = Type.GetType(className);
     if (name.Equals("new"))

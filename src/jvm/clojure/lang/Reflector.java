@@ -90,7 +90,7 @@ public static Object invokeConstructor(Class c, Object[] args)  throws Exception
 	    }
 	}
 
-public static Object invokeStaticMethod(String name, String className, Object[] args) throws Exception
+public static Object invokeStaticMethod(String name, String className, Object... args) throws Exception
     {
     Class c = Class.forName(className);
     if(name.equals("new"))
