@@ -13,14 +13,12 @@
 package clojure.lang;
 
 import java.util.Iterator;
-import java.io.Reader;
-import java.io.PushbackReader;
-import java.io.Writer;
-import java.io.IOException;
+import java.io.*;
 
 public class RT{
 
     static public Symbol T = Symbol.intern("t");
+	static public Var OUT = Namespace.intern("clojure","^out");
     static public final Object[] EMPTY_ARRAY = new Object[]{};
     static public final Character[] chars;
 
@@ -543,7 +541,21 @@ static public void formatStandard(Writer w,Object obj) throws IOException {
         w.write(obj.toString());
 }
 
-static public void format(Writer w, String s, ISeq args) throws Exception {
+static public Object format(Object o, String s, Object... args) throws Exception {
+	Writer w;
+	if(o == null)
+		w = new StringWriter();
+	else if(equal(o,T))
+		w = (Writer)OUT.getValue();
+	else
+		w = (Writer)o;
+	doFormat(w,s,ArraySeq.create(args));
+	if(o == null)
+		return w.toString();
+	return null;
+}
+
+static public void doFormat(Writer w, String s, ISeq args) throws Exception {
     for (int i = 0; i < s.length();)
         {
         char c = s.charAt(i++);
