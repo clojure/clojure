@@ -18,6 +18,11 @@ import java.math.BigInteger;
 
 public class LispReader {
 
+static Symbol QUOTE = Symbol.intern("quote");
+static Symbol BACKQUOTE = Symbol.intern("backquote");
+static Symbol UNQUOTE = Symbol.intern("unquote");
+static Symbol UNQUOTE_SPLICING = Symbol.intern("unquote-splicing");
+
 static IFn[] macros = new IFn[256];
 static Pattern symbolPat = Pattern.compile("[:]?[\\D&&[^:\\.]][^:\\.]*");
 static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
@@ -33,6 +38,9 @@ static Pattern classNamePat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.");
 static{
 macros['"'] = new StringReader();
 macros[';'] = new CommentReader();
+macros['\''] = new QuoteReader();
+macros['`'] = new BackquoteReader();
+macros[','] = new UnquoteReader();
 macros['('] = new ListReader();
 macros[')'] = new UnmatchedDelimiterReader();
 macros['\\'] = new CharacterReader();
@@ -54,6 +62,14 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
             return eofValue;
             }
 
+        if(Character.isDigit(ch))
+	        {
+	        Object n = readNumber(r,(char) ch);
+            if(RT.suppressRead())
+              return null;
+	        return n;
+	        }
+
         IFn macroFn = getMacro(ch);
         if (macroFn != null)
             {
@@ -65,6 +81,20 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
                 continue;
             return ret;
             }
+
+        if(ch == '+' || ch == '-')
+	        {
+	        int ch2 = r.read();
+	        if(Character.isDigit(ch2))
+		        {
+		        r.unread(ch2);
+		        Object n = readNumber(r,(char) ch);
+	            if(RT.suppressRead())
+	              return null;
+		        return n;
+		        }
+	        r.unread(ch2);
+	        }
 
         String token = readToken(r,(char)ch);
         if(RT.suppressRead())
@@ -89,29 +119,110 @@ static private String readToken(PushbackReader r, char initch) throws Exception 
         }
 }
 
+static private Object readNumber(PushbackReader r, char initch) throws Exception {
+    StringBuilder sb = new StringBuilder();
+    sb.append(initch);
+
+    for(;;)
+        {
+        int ch = r.read();
+        if(ch == -1 || Character.isWhitespace(ch) || isMacro(ch))
+            {
+            r.unread(ch);
+            break;
+            }
+        sb.append((char)ch);
+        }
+
+	String s = sb.toString();
+	Object n = matchNumber(s);
+	if(n == null)
+		throw new IllegalArgumentException("Invalid number: " + s);
+	return n;
+}
+
+/*
+static private Object readSymbol(PushbackReader r, char initch) throws Exception {
+    StringBuilder sb = new StringBuilder();
+    sb.append(initch);
+
+    for(;;)
+        {
+        int ch = r.read();
+        if(ch == -1 || Character.isWhitespace(ch) || isMacro(ch))
+            {
+            r.unread(ch);
+            return Symbol.intern(sb.toString());
+            }
+        else if(ch == '.')
+	        {
+	        r.unread(ch);
+	        Object ret = Symbol.intern(sb.toString());
+	        Object mem = null;
+	        while((mem = readMember(r)) != null)
+		        {
+		        //x.foo ==> (.foo  x)
+		        if(mem instanceof Symbol)
+			        ret = RT.list(mem, ret);
+		        else  //x.foo(y z) ==> (.foo x y z)
+			        {
+			        ISeq rseq = RT.seq(mem);
+			        ret = RT.cons(rseq.first(), RT.cons(ret, RT.rest(rseq)));
+			        }
+		        }
+	        return ret;
+	        }
+        sb.append((char)ch);
+        }
+}
+
+static private Object readMember(PushbackReader r) throws Exception {
+    StringBuilder sb = new StringBuilder();
+	int ch = r.read();
+	if(ch != '.')
+		{
+		r.unread(ch);
+		return null;
+		}
+	sb.append((char)ch);
+	boolean first = true;
+    for(;;)
+        {
+        ch = r.read();
+        if(ch == '(')
+	        {
+	        //r.unread(ch);
+	        ISeq args = readDelimitedList(')', r, true);
+	        return RT.cons(Symbol.intern(sb.toString()),args);
+	        }
+        else if(ch == -1 || ch == '.' || Character.isWhitespace(ch) || isMacro(ch))
+            {
+            r.unread(ch);
+            return Symbol.intern(sb.toString());
+            }
+        sb.append((char)ch);
+        if((first && !Character.isJavaIdentifierStart(ch))
+	        || !Character.isJavaIdentifierPart(ch))
+	        throw new IllegalArgumentException("Invalid member name component: " + sb.toString());
+        first = false;
+        }
+}
+*/
+
 static private Object interpretToken(String s) {
     if (s.equals("null"))
         {
         return null;
         }
     Object ret = null;
-    ret = matchSymbol(s);
-    if(ret != null)
-        return ret;
+
     ret = matchVar(s);
     if(ret != null)
         return ret;
-    ret = matchNumber(s);
-    if(ret != null)
-        return ret;
-    ret = matchHostName(s);
-    if(ret != null)
-        return ret;
 
-
-    throw new IllegalArgumentException("Invalid syntax: " + s);
+	return Symbol.intern(s);
 }
-
+/*
 private static Object matchHostName(String s) {
     Matcher m = accessorPat.matcher(s);
     if(m.matches())
@@ -135,6 +246,7 @@ private static Object matchSymbol(String s) {
         return Symbol.intern(s);
     return null;
 }
+*/
 
 private static Object matchVar(String s) {
     Matcher m = varPat.matcher(s);
@@ -220,6 +332,43 @@ static class CommentReader extends AFn{
     }
 
 }
+
+static class QuoteReader extends AFn{
+    public Object invoke(Object reader, Object quote) throws Exception {
+        PushbackReader r = (PushbackReader) reader;
+	    Object o = read(r, true, null, true);
+	    return RT.list(QUOTE, o);
+    }
+}
+
+static class BackquoteReader extends AFn{
+    public Object invoke(Object reader, Object backquote) throws Exception {
+        PushbackReader r = (PushbackReader) reader;
+	    Object o = read(r, true, null, true);
+	    return RT.list(BACKQUOTE, o);
+    }
+}
+
+static class UnquoteReader extends AFn{
+    public Object invoke(Object reader, Object comma) throws Exception {
+        PushbackReader r = (PushbackReader) reader;
+	    int ch = r.read();
+	    if(ch == -1)
+	        throw new Exception("EOF while reading character");
+		if(ch == '^')
+			{
+	        Object o = read(r, true, null, true);
+	        return RT.list(UNQUOTE_SPLICING, o);
+			}
+	    else
+			{
+			r.unread(ch);
+			Object o = read(r, true, null, true);
+			return RT.list(UNQUOTE, o);
+			}
+    }
+}
+
 static class CharacterReader extends AFn{
     public Object invoke(Object reader, Object backslash) throws Exception {
         PushbackReader r = (PushbackReader) reader;
@@ -299,6 +448,8 @@ public static void main(String[] args){
             {
             ret = LispReader.read(r, true, null, false);
             RT.print(ret, w);
+            w.write('\n');
+            w.write(ret.getClass().toString());
             w.write('\n');
             w.flush();
             }
