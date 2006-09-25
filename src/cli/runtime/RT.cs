@@ -21,7 +21,8 @@ public class RT
 {
 
     public static Symbol T = Symbol.intern("t");
-    public static Object[] EMPTY_ARRAY = new Object[0];
+	static public Var OUT = Namespace.intern("clojure", "^out");
+	public static Object[] EMPTY_ARRAY = new Object[0];
 
 
     static public readonly Object[] chars;
@@ -542,7 +543,21 @@ static public void formatStandard(TextWriter w,Object obj) {
 		w.Write(obj.ToString());
 }
 
-static public void format(TextWriter w, String s, ISeq args) {
+static public Object format(Object o, String s, params Object[] args) {
+	TextWriter w;
+	if(o == null)
+		w = new StringWriter();
+	else if(equal(o,T))
+		w = (TextWriter)OUT.getValue();
+	else
+		w = (TextWriter)o;
+	doFormat(w,s,ArraySeq.create(args));
+	if(o == null)
+		return w.ToString();
+	return null;
+}
+
+static public void doFormat(TextWriter w, String s, ISeq args) {
     for (int i = 0; i < s.Length;)
         {
         char c = s[i++];
