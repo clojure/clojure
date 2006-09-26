@@ -12,115 +12,149 @@
 
 package clojure.lang;
 
+import java.util.HashMap;
+
 public class Compiler{
-/*
-static Symbol DEFN = Symbol.intern("defn");
-static Symbol T = Symbol.intern("t");
-static public Var OUT = Namespace.intern("clojure", "^out");
+///*
+static Symbol DEF = Symbol.intern("def");
+static public Var OUT = Module.intern("clojure", "^out");
+static public Var IMPORT_MAP = Module.intern("clojure", "^import-map");
 static NilExpr NIL_EXPR = new NilExpr();
-static TExpr T_EXPR = new TExpr();
 
-enum C{
-	STATEMENT,EXPRESSION,RETURN,TOP}
-
-;
+enum C{STATEMENT,EXPRESSION,RETURN}
 
 interface Expr{
-	public void emit(C context) throws Exception;
 
+    void emitReturn() throws Exception;
+
+    void emitStatement() throws Exception;
+
+    void emitExpression() throws Exception;
+}
+
+static void format(String str,Object... args) throws Exception {
+    RT.format(RT.T, str, args);
 }
 
 static class AnExpr implements Expr{
 
-	public void emit(C context) throws Exception{
-		if(context == C.RETURN)
-			emitReturn();
-		else if(context == C.STATEMENT)
-			emitStatement();
-		else if(context == C.EXPRESSION)
-			emitExpression();
-		else
-			throw new UnsupportedOperationException();
-	}
+    public void emitReturn() throws Exception{
+        format("return ");
+        emitExpression();
+        format(";~%");
+    }
 
-	void emitReturn() throws Exception{
-		RT.format(T, "return ");
-		emitExpression();
-		RT.format(T, ";~%");
-	}
+    public void emitStatement() throws Exception{
+        //no op
+    }
 
-	void emitStatement() throws Exception{
-		//no op
-	}
-
-	void emitExpression() throws Exception{
-		throw new UnsupportedOperationException();
-	}
+    public void emitExpression() throws Exception{
+        throw new UnsupportedOperationException();
+    }
 }
 
-public static Object processForm(Object form) throws Exception{
-	if(RT.equal(RT.first(form), DEFN))
-		{
-		return convert(form);
-		}
+public static void processForm(Object form) throws Exception{
+    if(RT.first(form) == DEF)
+        {
+        convert(form);
+        }
+    else
+        throw new UnsupportedOperationException();
 }
 
-private static Object convert(Object form) throws Exception{
-	Expr e = analyze(C.TOP, form);
-	emit(C.TOP, e);
-}
-
-private static void emit(C context, Object e) throws Exception{
-	if(e instanceof Expr)
-		((Expr) e).emit(context);
-	else
-		emitLiteral(context, e);
-}
-
-private static void emitLiteral(C context, Object e) throws Exception{
-	if(context == C.RETURN)
-		emitReturn(e);
-	else if(context == C.STATEMENT)
-		return;
-	else if(context == C.EXPRESSION)
-		{
-		if(e == null)
-			RT.format(T, "null");
-		else if(RT.equal(e, T))
-			RT.format(T, "RT.T");
-		}
-}
-
-private static void emitReturn(Object e) throws Exception{
-	RT.format(T, "return ");
-	emit(C.EXPRESSION, e);
-	RT.format(T, ";~%");
+private static void convert(Object form) throws Exception{
+    Expr e = analyze(C.STATEMENT, form);
 }
 
 private static Expr analyze(C context, Object form){
-	if(form == null)
-		return NIL_EXPR;
-	else if(RT.equal(form, T))
-		return T_EXPR;
-	else if(form instanceof Symbol)
-		return analyzeSymbol(context, (Symbol) form);
+    if(form == null)
+        return NIL_EXPR;
+    else if(form instanceof Symbol)
+        return analyzeSymbol((Symbol) form);
+    else if(form instanceof ISeq)
+        return analyzeSeq(context, (ISeq) form);
+    else if(form instanceof Num || form instanceof String || form instanceof Character)
+        return new LiteralExpr(form);
+    else
+        throw new UnsupportedOperationException();
 }
 
-private static Expr analyzeSymbol(C context, Symbol sym){
+private static Expr analyzeSeq(C context, ISeq form) {
+    return null;
+}
 
+private static Expr analyzeSymbol(Symbol sym){
+    if(sym instanceof HostSymbol)
+        return new HostExpr((HostSymbol)sym);
+    else
+        {
+        int slash = sym.name.indexOf('/');
+        String typehint = null;
+        if(slash > 0)
+            {
+            typehint = sym.name.substring(slash + 1);
+            sym = Symbol.intern(sym.name.substring(0, slash));
+            }
+        return new SymExpr(sym, typehint);
+        }
 }
 
 
 static class NilExpr extends AnExpr{
-	void emitExpression() throws Exception{
-		RT.format(T, "null");
-	}
+    public void emitExpression() throws Exception{
+        format("null");
+    }
 }
-static class TExpr extends AnExpr{
-	void emitExpression() throws Exception{
-		RT.format(T, "RT.T");
-	}
+
+static class LiteralExpr extends AnExpr{
+    Object val;
+
+    public LiteralExpr(Object val){
+        this.val = val;
+    }
+
+    public void emitExpression() throws Exception{
+        format("%S",val);
+    }
+}
+
+static String resolveHostClassname(String classname) throws Exception {
+    if(classname.indexOf('.') != -1)    //presume fully qualified if contains .
+        return classname;
+    HashMap importMap = (HashMap) IMPORT_MAP.getValue();
+    String fullyQualifiedName = (String) importMap.get(classname);
+    if(fullyQualifiedName == null)
+        throw new Exception("Can't resolve type name: " + classname);
+    return fullyQualifiedName;
+}
+
+static class HostExpr extends AnExpr{
+    HostSymbol sym;
+
+    public HostExpr(HostSymbol sym){
+        this.sym = sym;
+    }
+
+    public void emitExpression() throws Exception{
+        format("%S",sym);
+    }
+}
+
+static class SymExpr extends AnExpr{
+    Symbol sym;
+    String typehint;
+
+    public SymExpr(Symbol sym, String typehint){
+        this.sym = sym;
+        this.typehint = typehint;
+    }
+
+    public void emitExpression() throws Exception{
+        format("%S",sym);
+    }
+}
+
 }
 //*/
 
-}
+
