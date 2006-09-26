@@ -52,7 +52,14 @@ static public Module findOrCreate(String name)
 		return ns;
 		}
 	}
-
+	
+public Var find(Symbol sym){
+    lock(vars)
+        {
+        return (Var) vars[sym];
+        }
+}
+	
 static public Var intern(String ns, String name)
     {
         return findOrCreate(ns).intern(Symbol.intern(name));

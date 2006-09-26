@@ -15,7 +15,8 @@ namespace clojure.lang
 {
 public class Var :  AFn
     {
-public readonly Symbol name;public Module module;public Binding binding;IPersistentMap threadBindings = PersistentArrayMap.EMPTY;int tcount = 0;internal Var(Symbol sym, Module ns)	{	if(sym.GetType() != typeof(Symbol))	    throw new ArgumentException("Only simple symbols can be var names");	this.module = ns;	this.name = sym;	}override public String ToString()	{	if(module == null)		return "#:" + name;	return module.name + ":" + name;	}public Var bind(Object val)	{	lock(this){	if(binding == null)
+public readonly Symbol name;public Module module;public Binding binding;
+public bool hidden = false; IPersistentMap threadBindings = PersistentArrayMap.EMPTY;int tcount = 0;internal Var(Symbol sym, Module ns)	{	if(sym.GetType() != typeof(Symbol))	    throw new ArgumentException("Only simple symbols can be var names");	this.module = ns;	this.name = sym;	}override public String ToString()	{	if(module == null)		return "#:" + name;	return module.name + ":" + name;	}public Var bind(Object val)	{	lock(this){	if(binding == null)
 		binding = new Binding(val);	else		binding.val = val;
 
 	return this;		}	}public Object getValue()	{

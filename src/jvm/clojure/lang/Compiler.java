@@ -12,7 +12,6 @@
 
 package clojure.lang;
 
-import java.io.Writer;
 import java.io.StringWriter;
 
 public class Compiler{
@@ -26,10 +25,14 @@ static NilExpr NIL_EXPR = new NilExpr();
 static public Var IMPORTS = Module.intern("clojure", "^compiler-imports");
 //keyword->keywordexpr
 static public Var KEYWORDS = Module.intern("clojure", "^compiler-keywords");
-//var->varexpr
+//var->var
 static public Var VARS = Module.intern("clojure", "^compiler-vars");
-//symbol->localbindingexpr
-static public Var LOCALS = Module.intern("clojure", "^compiler-locals");
+//symbol->localbinding
+static public Var LOCAL_ENV = Module.intern("clojure", "^compiler-local-env");
+//FnFrame
+static public Var FRAME = Module.intern("clojure", "^compiler-frame");
+//module->module
+static public Var USES = Module.intern("clojure", "^compiler-uses");
 
 static public  IPersistentMap CHAR_MAP =
         new PersistentArrayMap('-', "_HY_",
@@ -129,7 +132,7 @@ private static void convert(Object form) throws Exception{
     Expr e = analyze(C.STATEMENT, form);
 }
 
-private static Expr analyze(C context, Object form){
+private static Expr analyze(C context, Object form) throws Exception {
     if(form == null)
         return NIL_EXPR;
     else if(form instanceof Symbol)
@@ -144,7 +147,7 @@ private static Expr analyze(C context, Object form){
         throw new UnsupportedOperationException();
 }
 
-private static Expr analyzeSeq(C context, ISeq form) {
+private static Expr analyzeSeq(C context, ISeq form) throws Exception {
     Object op = RT.first(form);
     if(op == DEF)
         return analyzeDef(context, form);
@@ -152,15 +155,41 @@ private static Expr analyzeSeq(C context, ISeq form) {
         throw new UnsupportedOperationException();
 }
 
-private static Expr analyzeDef(C context, ISeq form) {
+private static Expr analyzeDef(C context, ISeq form) throws Exception {
     //(def x) or (def x initexpr)
-    Symbol name = (Symbol) RT.nth(1, form);
+    Symbol sym = (Symbol) RT.nth(1, form);
     Module module = (Module) MODULE.getValue();
-    Var var = module.intern(name);
+    Var var = module.intern(baseSymbol(sym));
+    registerVar(var);
+    VarExpr ve = new VarExpr(var, typeHint(sym));
     Expr init = analyze(C.EXPRESSION, macroexpand(RT.nth(2, form)));
+    return new DefExpr(ve, init);
 }
 
-private static Expr analyzeSymbol(Symbol sym){
+static Symbol baseSymbol(Symbol sym) {
+    String base = baseName(sym);
+
+    if(base == sym.name) //no typeHint
+        return sym;
+
+    return Symbol.intern(base);
+}
+
+static String baseName(Symbol sym){
+    int slash = sym.name.indexOf('/');
+    if(slash > 0)
+       return sym.name.substring(0, slash);
+    return sym.name;
+}
+
+static String typeHint(Symbol sym){
+    int slash = sym.name.indexOf('/');
+    if(slash > 0)
+       return sym.name.substring(slash + 1);
+    return null;
+}
+
+private static Expr analyzeSymbol(Symbol sym) throws Exception {
     if(sym instanceof Keyword)
         return registerKeyword((Keyword)sym);
     else if(sym instanceof HostSymbol)
@@ -174,20 +203,62 @@ private static Expr analyzeSymbol(Symbol sym){
             typeHint = sym.name.substring(slash + 1);
             sym = Symbol.intern(sym.name.substring(0, slash));
             }
-        return new SymExpr(sym, typeHint);
+        LocalBinding b = referenceLocal(sym);
+        if(b != null)
+            return new LocalBindingExpr(b, typeHint);
+        Var v = lookupVar(sym);
+        if(v != null)
+            return new VarExpr(v, typeHint);
+        throw new Exception("Unable to resolve symbol: " + sym.name + " in this context");
         }
+}
+
+static Var lookupVar(Symbol sym){
+    Module module = (Module) MODULE.getValue();
+    Var v = module.find(sym);
+    if(v != null)
+        return v;
+    for(ISeq seq = RT.seq(USES.getValue());seq != null;seq = RT.rest(seq))
+        {
+        module = (Module) ((MapEntry)RT.first(seq)).key();
+        v = module.find(sym);
+        if(v != null && !v.hidden)
+            return v;
+        }
+    return null;
 }
 
 static Object macroexpand(Object x){
     return x; //placeholder
 }
 
-private static Expr registerKeyword(Keyword keyword) {
+private static KeywordExpr registerKeyword(Keyword keyword) {
     IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.getValue();
     KeywordExpr ke = (KeywordExpr) RT.get(keyword,keywordsMap);
     if(ke == null)
         KEYWORDS.setValue(RT.assoc(keyword, ke = new KeywordExpr(keyword),keywordsMap));
     return ke;
+}
+
+private static void registerVar(Var var) {
+    IPersistentMap varsMap = (IPersistentMap) VARS.getValue();
+    if(RT.get(var,varsMap) == null)
+        VARS.setValue(RT.assoc(var, var, varsMap));
+}
+
+static void closeOver(LocalBinding b,FnFrame frame){
+    if(b != null && frame != null && RT.get(b,frame.locals) == null)
+        {
+        b.closed = true;
+        frame.closes = (IPersistentMap)RT.assoc(b, b, frame.closes);
+        closeOver(b,frame.parent);
+        }
+}
+
+static LocalBinding referenceLocal(Symbol sym) {
+    LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
+    closeOver(b,(FnFrame) FRAME.getValue());
+    return b;
 }
 /*
 (defun reference-var (sym)
@@ -214,6 +285,13 @@ static String resolveHostClassname(String classname) throws Exception {
     return fullyQualifiedName;
 }
 
+static class FnFrame{
+    FnFrame parent = null;
+    IPersistentMap locals = null;
+    IPersistentMap closes = null;
+
+}
+
 static class NilExpr extends AnExpr{
     public void emitExpression() throws Exception{
         format("null");
@@ -221,7 +299,7 @@ static class NilExpr extends AnExpr{
 }
 
 static class LiteralExpr extends AnExpr{
-    Object val;
+    final Object val;
 
     public LiteralExpr(Object val){
         this.val = val;
@@ -233,7 +311,7 @@ static class LiteralExpr extends AnExpr{
 }
 
 static class CharExpr extends AnExpr{
-    Character val;
+    final Character val;
 
     public CharExpr(Character val){
         this.val = val;
@@ -246,7 +324,7 @@ static class CharExpr extends AnExpr{
 
 
 static class HostExpr extends AnExpr{
-    HostSymbol sym;
+    final HostSymbol sym;
 
     public HostExpr(HostSymbol sym){
         this.sym = sym;
@@ -257,7 +335,7 @@ static class HostExpr extends AnExpr{
             format("%A.class", resolveHostClassname(((ClassSymbol) sym).className));
     }
 }
-
+/*
 static class SymExpr extends AnExpr{
     Symbol sym;
     String typeHint;
@@ -271,9 +349,9 @@ static class SymExpr extends AnExpr{
         format("%A", munge(sym.name));
     }
 }
-
+*/
 static class KeywordExpr extends AnExpr{
-    Symbol sym;
+    final Symbol sym;
 
     public KeywordExpr(Symbol sym){
         this.sym = sym;
@@ -284,25 +362,49 @@ static class KeywordExpr extends AnExpr{
     }
 }
 
-static class LocalBindingExpr extends AnExpr{
-    Symbol sym;
-    String typeHint;
+static class LocalBinding{
+    final Symbol sym;
+    boolean closed = false;
+    final int id = RT.nextID();
 
-    public LocalBindingExpr(Symbol sym, String typeHint){
+    public LocalBinding(Symbol sym) {
         this.sym = sym;
+    }
+}
+
+static class LocalBindingExpr extends AnExpr{
+    final LocalBinding b;
+    final String typeHint;
+
+    public LocalBindingExpr(LocalBinding b, String typeHint){
+        this.b = b;
         this.typeHint = typeHint;
     }
 
     public void emitExpression() throws Exception{
-        format("%A", munge(sym.name));
+        format("%A", munge(b.sym.name));
     }
 }
 
 static class VarExpr extends AnExpr{
-    VarExpr var;
-    Expr init;
+    final Var var;
+    final String typeHint;
 
-    public VarExpr(VarExpr var, Expr init){
+    public VarExpr(Var var, String typeHint){
+        this.var = var;
+        this.typeHint = typeHint;
+    }
+
+    public void emitExpression() throws Exception{
+        format("%A", munge(var.toString()));
+    }
+}
+
+static class DefExpr extends AnExpr{
+    final VarExpr var;
+    final Expr init;
+
+    public DefExpr(VarExpr var, Expr init){
         this.var = var;
         this.init = init;
     }

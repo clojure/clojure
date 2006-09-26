@@ -55,6 +55,12 @@ static public Var intern(String ns,String name)
     return findOrCreate(ns).intern(Symbol.intern(name));
     }
 
+public Var find(Symbol sym){
+    synchronized(vars)
+        {
+        return (Var) vars.get(sym);
+        }
+}
 
 public Var intern(Symbol sym)
     {

@@ -13,6 +13,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -27,6 +28,12 @@ public class RT
 
     static public readonly Object[] chars;
 
+	static int id = 1;
+	static public int nextID()
+		{
+		return Interlocked.Increment(ref id);
+		}	
+	
 	static RT(){
 		chars = new Object[256];
         for(int i=0;i<chars.Length;i++)

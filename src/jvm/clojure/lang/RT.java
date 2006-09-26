@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.io.*;
 
 public class RT{
@@ -21,6 +22,7 @@ public class RT{
 	static public Var OUT = Module.intern("clojure","^out");
     static public final Object[] EMPTY_ARRAY = new Object[]{};
     static public final Character[] chars;
+    static AtomicInteger id = new AtomicInteger(1);
 
     static {
         chars = new Character[256];
@@ -28,6 +30,9 @@ public class RT{
             chars[i] = new Character((char)i);
         }
 
+    static public int nextID(){
+        return id.getAndIncrement();
+    }
 
 static public boolean equal(Object k1,Object k2){
     return k1 == k2 ||

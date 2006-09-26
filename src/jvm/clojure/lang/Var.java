@@ -21,6 +21,7 @@ public class Var extends AFn {
 public final Symbol name;
 public Module module;
 public Binding binding;
+public boolean hidden = false;
 AtomicInteger tcount = new AtomicInteger(0);
 AtomicReference<IPersistentMap> threadBindings = new AtomicReference(PersistentArrayMap.EMPTY);
 
