@@ -130,6 +130,14 @@ static public Object first(Object x) {
     return seq(x).first();
 }
 
+static public Object second(Object x) {
+    return first(rest(x));
+}
+
+static public Object third(Object x) {
+    return first(rest(rest(x)));
+}
+
 static public ISeq rest(Object x) {
     if(x == null)
         return null;

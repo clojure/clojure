@@ -17,6 +17,9 @@ import java.io.StringWriter;
 public class Compiler{
 ///*
 static Symbol DEF = Symbol.intern("def");
+static Symbol FN = Symbol.intern("fn");
+static Symbol AMP_KEY = Symbol.intern("&key");
+static Symbol AMP_REST = Symbol.intern("&rest");
 static public Var OUT = Module.intern("clojure", "^out");
 static public Var MODULE = Module.intern("clojure", "^module");
 static NilExpr NIL_EXPR = new NilExpr();
@@ -151,18 +154,87 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
     Object op = RT.first(form);
     if(op == DEF)
         return analyzeDef(context, form);
+    if(op == FN)
+        return analyzeFn(context, form);
     else
         throw new UnsupportedOperationException();
 }
 
+private static Expr analyzeFn(C context, ISeq form) throws Exception {
+    //(fn (args) body) or (fn ((args) body) ((args2) body2) ...)
+    //turn former into latter
+    if(RT.first(RT.second(form)) instanceof ISeq)
+        return analyzeFn(context, RT.list(FN, RT.rest(form)));
+
+    IPersistentCollection methods = null;
+    for(ISeq s = RT.rest(form);s != null;s = RT.rest(s))
+        methods = RT.cons(analyzeMethod((ISeq) RT.first(s)),methods);
+}
+
+enum PSTATE{REQ,REST,KEY,DONE}
+
+private static FnFrame analyzeMethod(ISeq form) throws Exception {
+    ISeq parms = (ISeq) RT.first(form);
+    ISeq body = RT.rest(form);
+    try
+        {
+        FnFrame frame = new FnFrame((FnFrame) FRAME.getValue());
+        FRAME.pushThreadBinding(frame);
+        LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+        PSTATE state = PSTATE.REQ;
+        for (ISeq ps = RT.rest(form); ps != null; ps = ps.rest())
+            {
+            Symbol p = (Symbol) ps.first();
+            if (p == AMP_REST)
+                {
+                if (state == PSTATE.REQ)
+                    state = PSTATE.REST;
+                else
+                    throw new Exception("Invalid argument list");
+                }
+            else if (p == AMP_KEY)
+                {
+                if (state == PSTATE.REQ)
+                    state = PSTATE.KEY;
+                else
+                    throw new Exception("Invalid argument list");
+                }
+            else
+                {
+                switch (state)
+                    {
+                    case REQ:
+                        break;
+                    }
+                }
+            }
+
+        return (FnFrame) FRAME.getValue();
+        }
+    finally{
+        FRAME.popThreadBinding();
+        LOCAL_ENV.popThreadBinding();
+    }
+}
+
+static LocalBindingExpr createParamBinding(Symbol p) {
+    Symbol basep = baseSymbol(p);
+    LocalBinding b = new LocalBinding(basep);
+    b.isParam = true;
+    String typeHint = typeHint(p);
+    b.typeHint = typeHint;
+    registerLocal(b);
+    return new LocalBindingExpr(b, typeHint);
+}
+
 private static Expr analyzeDef(C context, ISeq form) throws Exception {
     //(def x) or (def x initexpr)
-    Symbol sym = (Symbol) RT.nth(1, form);
+    Symbol sym = (Symbol) RT.second(form);
     Module module = (Module) MODULE.getValue();
     Var var = module.intern(baseSymbol(sym));
     registerVar(var);
     VarExpr ve = new VarExpr(var, typeHint(sym));
-    Expr init = analyze(C.EXPRESSION, macroexpand(RT.nth(2, form)));
+    Expr init = analyze(C.EXPRESSION, macroexpand(RT.third(form)));
     return new DefExpr(ve, init);
 }
 
@@ -196,13 +268,8 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception {
         return new HostExpr((HostSymbol)sym);
     else
         {
-        int slash = sym.name.indexOf('/');
-        String typeHint = null;
-        if(slash > 0)
-            {
-            typeHint = sym.name.substring(slash + 1);
-            sym = Symbol.intern(sym.name.substring(0, slash));
-            }
+        String typeHint = typeHint(sym);
+        sym = baseSymbol(sym);
         LocalBinding b = referenceLocal(sym);
         if(b != null)
             return new LocalBindingExpr(b, typeHint);
@@ -249,7 +316,7 @@ private static void registerVar(Var var) {
 static void closeOver(LocalBinding b,FnFrame frame){
     if(b != null && frame != null && RT.get(b,frame.locals) == null)
         {
-        b.closed = true;
+        b.isClosed = true;
         frame.closes = (IPersistentMap)RT.assoc(b, b, frame.closes);
         closeOver(b,frame.parent);
         }
@@ -259,6 +326,13 @@ static LocalBinding referenceLocal(Symbol sym) {
     LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
     closeOver(b,(FnFrame) FRAME.getValue());
     return b;
+}
+
+private static void registerLocal(LocalBinding b) {
+    IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.getValue();
+    LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
+    FnFrame frame = (FnFrame) FRAME.getValue();
+    frame.locals = (IPersistentMap) RT.assoc(b, b, frame.locals);
 }
 /*
 (defun reference-var (sym)
@@ -287,9 +361,14 @@ static String resolveHostClassname(String classname) throws Exception {
 
 static class FnFrame{
     FnFrame parent = null;
+    //localbinding->localbinding
     IPersistentMap locals = null;
+    //localbinding->localbinding
     IPersistentMap closes = null;
 
+    public FnFrame(FnFrame parent) {
+        this.parent = parent;
+    }
 }
 
 static class NilExpr extends AnExpr{
@@ -364,8 +443,10 @@ static class KeywordExpr extends AnExpr{
 
 static class LocalBinding{
     final Symbol sym;
-    boolean closed = false;
+    boolean isClosed = false;
+    boolean isParam = false;
     final int id = RT.nextID();
+    String typeHint;
 
     public LocalBinding(Symbol sym) {
         this.sym = sym;
