@@ -177,7 +177,7 @@ private static Expr analyzeFn(C context, ISeq form) throws Exception {
     for(ISeq s = RT.rest(form);s != null;s = RT.rest(s))
         {
         FnMethod f = analyzeMethod(fn,(ISeq) RT.first(s));
-        if(f.restParm != null || f.keyParms != null)
+        if(f.isVariadic())
             {
             if(variadicMethod == null)
                 variadicMethod = f;
@@ -277,8 +277,64 @@ static class FnExpr extends AnExpr{
         else
             {
             format("static public Object ~A(~{~A ~A~^, ~}",
-s                   getName(),
+                   getName(),
                    closesDecls);
+            }
+
+        for(ISeq methods = RT.seq(this.methods);methods != null;methods = methods.rest())
+            {
+            FnMethod m = (FnMethod) methods.first();
+            if(!willBeStaticMethod())
+                 format("public Object ~A(", m.isVariadic()?"doInvoke":"invoke");
+            for(ISeq reqs = RT.seq(m.reqParms);reqs != null;reqs = reqs.rest())
+                {
+                LocalBindingExpr be = (LocalBindingExpr) reqs.first();
+                format("Object ~A", be.b.getName());
+                if(be.b.needsBox())
+                    format("__arg");
+                if(reqs.rest() != null)
+                    format(",");
+                }
+            if(m.isVariadic())
+                {
+                if(m.reqParms.count() > 0)
+                    format(",");
+                format("ISeq ");
+                if(m.restParm != null)
+                    {
+                    format("~A", m.restParm.b.getName());
+                    if(m.restParm.b.needsBox())
+                        format("__arg");
+                    }
+                else
+                    format("__keys");
+                }
+            format(") throws Exception{~%");
+
+            //emit declarations for any boxed args
+            for(ISeq reqs = RT.seq(m.reqParms);reqs != null;reqs = reqs.rest())
+                {
+                LocalBindingExpr be = (LocalBindingExpr) reqs.first();
+                if(be.b.needsBox())
+                    be.b.emitDeclaration(be.b.getName() + "__arg");
+                }
+            //emit declaration for any boxed rest arg
+            if(m.restParm != null && m.restParm.b.needsBox())
+                m.restParm.b.emitDeclaration(m.restParm.b.getName() + "__arg");
+            //keys are locals, plucked out of rest arg
+            if(m.keyParms != null)
+                {
+                format("ISeq __valseq = null;~%");
+                for (ISeq keys = RT.seq(m.keyParms); keys != null; keys = keys.rest())
+                    {
+                    KeyParam key = (KeyParam) keys.first();
+                    KeywordExpr kw = registerKeyword((Keyword) Symbol.intern(":" + key.bindingExpression.b.sym.name));
+                    format("__valseq = RT.findKey(~A,__keys);", kw.emitExpressionString());
+                    key.bindingExpression.b.emitDeclaration(
+                            (String) RT.format(null, "(__valseq!=null)?clojure.lang.RT.first(__valseq):~A"
+                                    , key.init.emitExpressionString()));
+                    }
+                }
             }
     }
 
@@ -308,6 +364,10 @@ static class FnMethod {
     public FnMethod(FnExpr fn,FnMethod parent) {
         this.parent = parent;
         this.fn = fn;
+    }
+
+    boolean isVariadic(){
+        return keyParms != null || restParm != null;
     }
 }
 
@@ -532,16 +592,16 @@ static String resolveHostClassname(String classname) throws Exception {
 
 static class KeyParam{
     public KeyParam(LocalBindingExpr b, Expr init) {
-        this.b = b;
+        this.bindingExpression = b;
         this.init = init;
     }
 
     public KeyParam(LocalBindingExpr b) {
-        this.b = b;
+        this.bindingExpression = b;
         this.init = NIL_EXPR;
     }
 
-    LocalBindingExpr b;
+    LocalBindingExpr bindingExpression;
     Expr init;
 }
 
@@ -631,7 +691,7 @@ static class LocalBinding{
     }
 
     public String getName(){
-        return munge(sym.name) + "__" + id;
+        return munge(sym.name) + (isParam?"":("__" + id));
     }
 
     boolean needsBox(){
@@ -642,6 +702,14 @@ static class LocalBinding{
         if(needsBox())
             return "clojure.lang.Box";
         return "Object";
+    }
+
+    void emitDeclaration(String init) throws Exception {
+        format("~A ~A = ", typeDeclaration(), getName());
+        if(needsBox())
+            format("new clojure.lang.Box(~A);~%", init);
+        else
+            format("~A;~%", init);
     }
 }
 
