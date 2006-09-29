@@ -212,25 +212,25 @@ private static Expr analyzeFn(C context, ISeq form) throws Exception {
 static class FnExpr extends AnExpr{
     IPersistentCollection methods;
     boolean isVariadic;
-    LocalBinding b;
-    private String className = null;
+    LocalBinding binding;
+    String name = null;
     boolean isCalledDirectly = false;
     //localbinding->itself
     IPersistentMap closes = null;
 
-    String getClassName(){
-        if(className == null)
+    String getName(){
+        if(name == null)
             {
-            if(b != null)
-                className = "FN__" + b.sym.name + "__" + RT.nextID();
+            if(binding != null)
+                name = "FN__" + binding.sym.name + "__" + RT.nextID();
             else
-                className = "FN__" + RT.nextID();
+                name = "FN__" + RT.nextID();
             }
-        return className;
+        return name;
     }
 
     public void emitExpression() throws Exception{
-        format("(new ~A(", getClassName());
+        format("(new ~A(", getName());
         for(ISeq s = RT.seq(closes);s!=null;s=s.rest())
             {
             LocalBinding b = (LocalBinding) ((MapEntry) s.first()).key();
@@ -240,7 +240,59 @@ static class FnExpr extends AnExpr{
             }
         format("))");
     }
-}                      s
+
+    public void emitDeclaration() throws Exception {
+        PersistentArrayList closesDecls = null;
+        if(closes != null)
+            {
+            closesDecls = new PersistentArrayList(closes.count() * 2);
+            for (ISeq s = RT.seq(closes); s != null; s = s.rest())
+                {
+                LocalBinding b = (LocalBinding) ((MapEntry) s.first()).key();
+                closesDecls.cons(b.typeDeclaration());
+                closesDecls.cons(b.getName());
+                }
+            }
+        if(!willBeStaticMethod())
+            {
+            //emit class declaration
+            format("static public class ~A extends ~A{~%",
+                   getName(),
+                   isVariadic ? "clojure.lang.RestFn" : "AFn");
+            if(closes != null)
+                {
+                //emit members and ctor if closure
+                format("~{~A ~A;~%~}", closesDecls);
+                format("public ~A (~{~A ~A~^, ~}){~%", getName(), closesDecls);
+                for (ISeq s = RT.seq(closes); s != null; s = s.rest())
+                    {
+                    LocalBinding b = (LocalBinding) ((MapEntry) s.first()).key();
+                    format("this.~A = ~A;~%", b.getName(), b.getName());
+                    if (s.rest() != null)
+                        format(",");
+                    }
+                format("}~%");
+                }
+            }
+        else
+            {
+            format("static public Object ~A(~{~A ~A~^, ~}",
+s                   getName(),
+                   closesDecls);
+            }
+    }
+
+    boolean willBeStaticMethod() {
+        return !isVariadic
+               && methods.count() == 1
+               &&
+               (
+                       isCalledDirectly
+                       ||
+                       (binding != null && !binding.isClosed && !binding.valueTaken)
+               );
+    }
+}
 
 static class FnMethod {
     FnMethod parent = null;
@@ -327,6 +379,8 @@ private static FnMethod analyzeMethod(FnExpr fn,ISeq form) throws Exception {
         LOCAL_ENV.popThreadBinding();
     }
 }
+
+
 
 static LocalBindingExpr createParamBinding(Symbol p) {
     Symbol basep = baseSymbol(p);
@@ -568,6 +622,9 @@ static class LocalBinding{
     boolean isParam = false;
     final int id = RT.nextID();
     String typeHint;
+    public boolean valueTaken = false;
+    boolean isAssigned = false;
+
 
     public LocalBinding(Symbol sym) {
         this.sym = sym;
@@ -575,6 +632,16 @@ static class LocalBinding{
 
     public String getName(){
         return munge(sym.name) + "__" + id;
+    }
+
+    boolean needsBox(){
+        return isClosed && isAssigned;
+    }
+
+    String typeDeclaration(){
+        if(needsBox())
+            return "clojure.lang.Box";
+        return "Object";
     }
 }
 
