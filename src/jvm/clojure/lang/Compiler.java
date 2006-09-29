@@ -18,8 +18,9 @@ public class Compiler{
 ///*
 static Symbol DEF = Symbol.intern("def");
 static Symbol FN = Symbol.intern("fn");
-static Symbol AMP_KEY = Symbol.intern("&key");
-static Symbol AMP_REST = Symbol.intern("&rest");
+static Symbol DO = Symbol.intern("do");
+static Symbol _AM_KEY = Symbol.intern("&key");
+static Symbol _AM_REST = Symbol.intern("&rest");
 static public Var OUT = Module.intern("clojure", "^out");
 static public Var MODULE = Module.intern("clojure", "^module");
 static NilExpr NIL_EXPR = new NilExpr();
@@ -33,9 +34,11 @@ static public Var VARS = Module.intern("clojure", "^compiler-vars");
 //symbol->localbinding
 static public Var LOCAL_ENV = Module.intern("clojure", "^compiler-local-env");
 //FnFrame
-static public Var FRAME = Module.intern("clojure", "^compiler-frame");
+static public Var METHOD = Module.intern("clojure", "^compiler-method");
 //module->module
 static public Var USES = Module.intern("clojure", "^compiler-uses");
+//ISeq FnExprs
+static public Var FNS = Module.intern("clojure", "^compiler-fns");
 
 static public  IPersistentMap CHAR_MAP =
         new PersistentArrayMap('-', "_HY_",
@@ -61,6 +64,8 @@ static public  IPersistentMap CHAR_MAP =
                                '/', "_SL_",
                                '\\',"_BS_",
                                '?', "_QM_");
+
+private static final int MAX_POSITIONAL_ARITY = 20;
 
 static String munge(String name){
     StringBuilder sb = new StringBuilder();
@@ -163,56 +168,162 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
 private static Expr analyzeFn(C context, ISeq form) throws Exception {
     //(fn (args) body) or (fn ((args) body) ((args2) body2) ...)
     //turn former into latter
-    if(RT.first(RT.second(form)) instanceof ISeq)
+    if(!(RT.first(RT.second(form)) instanceof ISeq))
         return analyzeFn(context, RT.list(FN, RT.rest(form)));
 
-    IPersistentCollection methods = null;
+    FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY+1];
+    FnMethod variadicMethod = null;
+    FnExpr fn = new FnExpr();
     for(ISeq s = RT.rest(form);s != null;s = RT.rest(s))
-        methods = RT.cons(analyzeMethod((ISeq) RT.first(s)),methods);
+        {
+        FnMethod f = analyzeMethod(fn,(ISeq) RT.first(s));
+        if(f.restParm != null || f.keyParms != null)
+            {
+            if(variadicMethod == null)
+                variadicMethod = f;
+            else
+                throw new Exception("Can't have more than 1 variadic overload");
+            }
+        else if(methodArray[f.reqParms.count()] == null)
+            methodArray[f.reqParms.count()] = f;
+        else
+            throw new Exception("Can't have 2 overloads with same arity");
+        }
+    if(variadicMethod != null)
+        {
+        for(int i = variadicMethod.reqParms.count() + 1;i<=MAX_POSITIONAL_ARITY;i++)
+            if(methodArray[i] != null)
+                throw new Exception("Can't have fixed arity function with more params than variadic function");
+        }
+
+    IPersistentCollection methods = null;
+    for(int i = 0;i<methodArray.length;i++)
+        if(methodArray[i] != null)
+            methods = RT.cons(methodArray[i], methods);
+    if(variadicMethod != null)
+        methods = RT.cons(variadicMethod, methods);
+
+    fn.methods = methods;
+    fn.isVariadic = variadicMethod != null;
+    registerFn(fn);
+    return fn;
+}
+
+static class FnExpr extends AnExpr{
+    IPersistentCollection methods;
+    boolean isVariadic;
+    LocalBinding b;
+    private String className = null;
+    boolean isCalledDirectly = false;
+    //localbinding->itself
+    IPersistentMap closes = null;
+
+    String getClassName(){
+        if(className == null)
+            {
+            if(b != null)
+                className = "FN__" + b.sym.name + "__" + RT.nextID();
+            else
+                className = "FN__" + RT.nextID();
+            }
+        return className;
+    }
+
+    public void emitExpression() throws Exception{
+        format("(new ~A(", getClassName());
+        for(ISeq s = RT.seq(closes);s!=null;s=s.rest())
+            {
+            LocalBinding b = (LocalBinding) ((MapEntry) s.first()).key();
+            format("~A", b.getName());
+            if (s.rest() != null)
+                format(",");
+            }
+        format("))");
+    }
+}                      s
+
+static class FnMethod {
+    FnMethod parent = null;
+    //localbinding->localbinding
+    IPersistentMap locals = null;
+    //localbinding->localbinding
+    PersistentArrayList reqParms = new PersistentArrayList(4);
+    PersistentArrayList keyParms = null;
+    LocalBindingExpr restParm = null;
+    Expr body = null;
+    FnExpr fn;
+
+    public FnMethod(FnExpr fn,FnMethod parent) {
+        this.parent = parent;
+        this.fn = fn;
+    }
 }
 
 enum PSTATE{REQ,REST,KEY,DONE}
 
-private static FnFrame analyzeMethod(ISeq form) throws Exception {
+private static FnMethod analyzeMethod(FnExpr fn,ISeq form) throws Exception {
+    //((args) body)
     ISeq parms = (ISeq) RT.first(form);
     ISeq body = RT.rest(form);
     try
         {
-        FnFrame frame = new FnFrame((FnFrame) FRAME.getValue());
-        FRAME.pushThreadBinding(frame);
+        FnMethod method = new FnMethod(fn,(FnMethod) METHOD.getValue());
+        METHOD.pushThreadBinding(method);
         LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
         PSTATE state = PSTATE.REQ;
-        for (ISeq ps = RT.rest(form); ps != null; ps = ps.rest())
+        for (ISeq ps = parms; ps != null; ps = ps.rest())
             {
-            Symbol p = (Symbol) ps.first();
-            if (p == AMP_REST)
+            Object p = ps.first();
+            if (p == _AM_REST)
                 {
                 if (state == PSTATE.REQ)
                     state = PSTATE.REST;
                 else
-                    throw new Exception("Invalid argument list");
+                    throw new Exception("Invalid parameter list");
                 }
-            else if (p == AMP_KEY)
+            else if (p == _AM_KEY)
                 {
                 if (state == PSTATE.REQ)
+                    {
                     state = PSTATE.KEY;
+                    method.keyParms = new PersistentArrayList(4);
+                    }
                 else
-                    throw new Exception("Invalid argument list");
+                    throw new Exception("Invalid parameter list");
                 }
             else
                 {
                 switch (state)
                     {
                     case REQ:
+                        method.reqParms = method.reqParms.cons(createParamBinding((Symbol) p));
                         break;
+                    case REST:
+                        method.restParm = createParamBinding((Symbol) p);
+                        state = PSTATE.DONE;
+                        break;
+                    case KEY:
+                        if(p instanceof ISeq)
+                            method.keyParms = method.keyParms.cons(
+                                        new KeyParam(createParamBinding((Symbol) RT.first(p)),
+                                            analyze(C.EXPRESSION, RT.second(p))));
+                        else
+                            method.keyParms = method.keyParms.cons(
+                                        new KeyParam(createParamBinding((Symbol) p)));
+
+                        break;
+                    default:
+                        throw new Exception("Unexpected parameter");
                     }
                 }
             }
-
-        return (FnFrame) FRAME.getValue();
+        if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
+            throw new Exception("Sorry, can't specify more than " + MAX_POSITIONAL_ARITY + " params");
+        method.body = analyze(C.RETURN, RT.cons(DO, body));
+        return method;
         }
     finally{
-        FRAME.popThreadBinding();
+        METHOD.popThreadBinding();
         LOCAL_ENV.popThreadBinding();
     }
 }
@@ -313,26 +424,30 @@ private static void registerVar(Var var) {
         VARS.setValue(RT.assoc(var, var, varsMap));
 }
 
-static void closeOver(LocalBinding b,FnFrame frame){
-    if(b != null && frame != null && RT.get(b,frame.locals) == null)
+private static void registerFn(FnExpr fn) {
+    FNS.setValue(RT.cons(fn, (ISeq)FNS.getValue()));
+}
+
+static void closeOver(LocalBinding b,FnMethod method){
+    if(b != null && method != null && RT.get(b,method.locals) == null)
         {
         b.isClosed = true;
-        frame.closes = (IPersistentMap)RT.assoc(b, b, frame.closes);
-        closeOver(b,frame.parent);
+        method.fn.closes = (IPersistentMap)RT.assoc(b, b, method.fn.closes);
+        closeOver(b,method.parent);
         }
 }
 
 static LocalBinding referenceLocal(Symbol sym) {
     LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
-    closeOver(b,(FnFrame) FRAME.getValue());
+    closeOver(b,(FnMethod) METHOD.getValue());
     return b;
 }
 
 private static void registerLocal(LocalBinding b) {
     IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.getValue();
     LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
-    FnFrame frame = (FnFrame) FRAME.getValue();
-    frame.locals = (IPersistentMap) RT.assoc(b, b, frame.locals);
+    FnMethod method = (FnMethod) METHOD.getValue();
+    method.locals = (IPersistentMap) RT.assoc(b, b, method.locals);
 }
 /*
 (defun reference-var (sym)
@@ -359,17 +474,23 @@ static String resolveHostClassname(String classname) throws Exception {
     return fullyQualifiedName;
 }
 
-static class FnFrame{
-    FnFrame parent = null;
-    //localbinding->localbinding
-    IPersistentMap locals = null;
-    //localbinding->localbinding
-    IPersistentMap closes = null;
 
-    public FnFrame(FnFrame parent) {
-        this.parent = parent;
+
+static class KeyParam{
+    public KeyParam(LocalBindingExpr b, Expr init) {
+        this.b = b;
+        this.init = init;
     }
+
+    public KeyParam(LocalBindingExpr b) {
+        this.b = b;
+        this.init = NIL_EXPR;
+    }
+
+    LocalBindingExpr b;
+    Expr init;
 }
+
 
 static class NilExpr extends AnExpr{
     public void emitExpression() throws Exception{
@@ -451,6 +572,10 @@ static class LocalBinding{
     public LocalBinding(Symbol sym) {
         this.sym = sym;
     }
+
+    public String getName(){
+        return munge(sym.name) + "__" + id;
+    }
 }
 
 static class LocalBindingExpr extends AnExpr{
@@ -463,7 +588,7 @@ static class LocalBindingExpr extends AnExpr{
     }
 
     public void emitExpression() throws Exception{
-        format("%A", munge(b.sym.name));
+        format("%A", b.getName());
     }
 }
 
