@@ -283,6 +283,7 @@ static class FnExpr extends AnExpr{
 
         for(ISeq methods = RT.seq(this.methods);methods != null;methods = methods.rest())
             {
+            //this will run once if static method
             FnMethod m = (FnMethod) methods.first();
             if(!willBeStaticMethod())
                  format("public Object ~A(", m.isVariadic()?"doInvoke":"invoke");
@@ -335,7 +336,23 @@ static class FnExpr extends AnExpr{
                                     , key.init.emitExpressionString()));
                     }
                 }
+
+            //local variables
+            for (ISeq locals = RT.seq(m.locals); locals != null; locals = locals.rest())
+                {
+                LocalBinding b = (LocalBinding) ((MapEntry) locals.first()).key();
+                if(!b.isParam)
+                    b.emitDeclaration("null");
+                }
+
+            m.body.emitReturn();
+            //end of function
+            format("}~%");
             }
+
+        //end of class
+        if(!willBeStaticMethod())
+            format("}~%");
     }
 
     boolean willBeStaticMethod() {
