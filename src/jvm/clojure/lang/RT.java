@@ -180,6 +180,21 @@ static public Object find(Object key, Object coll) {
     return ((Associative)coll).find(key);
 }
 
+//takes a seq of key,val,key,val
+//returns tail starting at val of matching key if found, else null
+static public ISeq findKey(Keyword key,ISeq keyvals) throws Exception {
+    while(keyvals != null)
+        {
+        ISeq r = keyvals.rest();
+        if (r == null)
+            throw new Exception("Malformed keyword argslist");
+        if (keyvals.first() == key)
+            return r;
+        keyvals = r.rest();
+        }
+    return null;
+}
+
 static public Object without(Object key, Object coll) {
     if(coll == null)
         return null;
