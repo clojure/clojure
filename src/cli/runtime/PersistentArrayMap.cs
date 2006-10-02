@@ -34,7 +34,7 @@ internal readonly Object[] array;
 	internal const int HASHTABLE_THRESHOLD = 42;
 
 protected PersistentArrayMap(){
-    this.array = RT.EMPTY_ARRAY;
+    this.array = new object[]{};
 }
 
 virtual internal PersistentArrayMap create(params Object[] init){

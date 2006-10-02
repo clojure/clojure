@@ -18,8 +18,9 @@ import java.io.*;
 
 public class RT{
 
-    static public Symbol T = Symbol.intern("t");
+    static public Symbol T = Symbol.intern(":t");
 	static public Var OUT = Module.intern("clojure","^out");
+    static public Var _CT_MODULE = Module.intern("clojure", "^module");
     static public final Object[] EMPTY_ARRAY = new Object[]{};
     static public final Character[] chars;
     static AtomicInteger id = new AtomicInteger(1);
@@ -28,6 +29,9 @@ public class RT{
         chars = new Character[256];
         for(int i=0;i<chars.length;i++)
             chars[i] = new Character((char)i);
+
+        OUT.bind(new OutputStreamWriter(System.out));
+        _CT_MODULE.bind((Module.findOrCreate("clj-user")));
         }
 
     static public int nextID(){

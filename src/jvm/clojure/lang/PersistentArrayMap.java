@@ -31,7 +31,7 @@ static final int HASHTABLE_THRESHOLD = 42;
 public static PersistentArrayMap EMPTY = new PersistentArrayMap();
 
 protected PersistentArrayMap(){
-    this.array = RT.EMPTY_ARRAY;
+    this.array = new Object[]{};
 }
 
 PersistentArrayMap create(Object... init){
