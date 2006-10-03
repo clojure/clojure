@@ -24,12 +24,16 @@ static Symbol DO = Symbol.intern("do");
 static Symbol IF = Symbol.intern("if");
 static Symbol OR = Symbol.intern("or");
 static Symbol AND = Symbol.intern("and");
+static Symbol LET = Symbol.intern("let");
+static Symbol LET_STAR_ = Symbol.intern("let*");
+static Symbol LETFN = Symbol.intern("letfn");
 static Symbol NOT = Symbol.intern("not");
 static Symbol NULL_QM_ = Symbol.intern("null?");
+
 static Symbol IMPORT = Symbol.intern("import");
 static Symbol USE = Symbol.intern("use");
-static Symbol _AM_KEY = Symbol.intern("&key");
-static Symbol _AM_REST = Symbol.intern("&rest");
+static Symbol _AMP_KEY = Symbol.intern("&key");
+static Symbol _AMP_REST = Symbol.intern("&rest");
 
 static public Var _CRT_OUT = RT.OUT;
 static public Var _CRT_MODULE = RT._CT_MODULE;
@@ -67,7 +71,7 @@ static public  IPersistentMap CHAR_MAP =
                                '%', "_PCT_",
                                '^', "_CRT_",
                                '&', "_AMP_",
-                               '*', "_STR_",
+                               '*', "_STAR_",
                                '{', "_LBC_",
                                '}', "_RBC_",
                                '[', "_LBK_",
@@ -298,10 +302,82 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
         return analyzeOr(context, form);
     else if(op == AND)
         return analyzeAnd(context, form);
+    else if(op == LET)
+        return analyzeLet(context, form);
     else if(op == NOT || op == NULL_QM_)
         return analyzeNot(context, form);
     else
         throw new UnsupportedOperationException();
+}
+
+private static Expr analyzeLet(C context, ISeq form) throws Exception {
+    //(let (var val var2 val2 ...) body...)
+    ISeq bindings = (ISeq) RT.second(form);
+    //special case (let () expr) ==> expr
+    if(bindings == null && form.count() < 4)
+        return analyze(context, macroexpand(RT.third(form)));
+    ISeq body = RT.rest(RT.rest(form));
+
+    if(context == C.EXPRESSION)
+        {
+        //(let (a b) c) -> ((fn (a) c) b)
+        PersistentArrayList parms = new PersistentArrayList(4);
+        PersistentArrayList args = new PersistentArrayList(4);
+        for (ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
+            {
+            parms = parms.cons(RT.first(bs));
+            args = args.cons(RT.second(bs));
+            }
+        return analyze(context, RT.cons(RT.listStar(FN, RT.seq(parms), body),RT.seq(args)));
+        }
+
+    PersistentArrayList bindingInits = new PersistentArrayList(4);
+    //analyze inits before adding bindings to env
+    for (ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
+        {
+        LocalBinding lb = new LocalBinding(baseSymbol((Symbol) RT.first(bs)));
+        lb.typeHint = typeHint((Symbol) RT.first(bs));
+        bindingInits = bindingInits.cons(new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs))));
+        }
+     try
+        {
+        LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+        for(int i=0;i<bindingInits.count();i++)
+            {
+            BindingInit bi = (BindingInit) bindingInits.nth(i);
+            registerLocal(bi.binding);
+            }
+        return new LetExpr(bindingInits, analyzeBody(context, body));
+        }
+     finally
+         {
+         LOCAL_ENV.popThreadBinding();
+         }
+
+}
+
+static class LetExpr extends AnExpr{
+    PersistentArrayList bindingInits;
+    Expr body;
+
+    public LetExpr(PersistentArrayList bindingInits, Expr body) {
+        this.bindingInits = bindingInits;
+        this.body = body;
+    }
+
+    public void emitExpression() throws Exception {
+    }
+
+}
+
+static class BindingInit{
+    LocalBinding binding;
+    Expr init;
+
+    public BindingInit(LocalBinding binding, Expr init) {
+        this.binding = binding;
+        this.init = init;
+    }
 }
 
 private static Expr analyzeAnd(C context, ISeq form) throws Exception {
@@ -433,7 +509,7 @@ private static Expr analyzeDo(C context, ISeq form) throws Exception {
     else if(RT.rest(RT.rest(form)) == null) //(do x) == x
         return analyze(context, macroexpand(RT.second(form)));
     else if(context == C.EXPRESSION)
-        return analyzeFn(context, RT.list(RT.cons(FN, RT.cons(null, RT.rest(form)))));
+        return analyze(context, RT.list(RT.cons(FN, RT.cons(null, RT.rest(form)))));
     else
         return analyzeBody(context, RT.rest(form));
 
@@ -772,14 +848,14 @@ private static FnMethod analyzeMethod(FnExpr fn,ISeq form) throws Exception {
         for (ISeq ps = parms; ps != null; ps = ps.rest())
             {
             Object p = ps.first();
-            if (p == _AM_REST)
+            if (p == _AMP_REST)
                 {
                 if (state == PSTATE.REQ)
                     state = PSTATE.REST;
                 else
                     throw new Exception("Invalid parameter list");
                 }
-            else if (p == _AM_KEY)
+            else if (p == _AMP_KEY)
                 {
                 if (state == PSTATE.REQ)
                     {
