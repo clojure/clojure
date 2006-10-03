@@ -13,7 +13,7 @@ public abstract class RestFn extends AFn {
 
 protected int reqArity;
 
-RestFn(int reqArity) {
+public RestFn(int reqArity) {
     this.reqArity = reqArity;
 }
 

@@ -142,6 +142,10 @@ static public Object third(Object x) {
     return first(rest(rest(x)));
 }
 
+static public Object fourth(Object x) {
+    return first(rest(rest(rest(x))));
+}
+
 static public ISeq rest(Object x) {
     if(x == null)
         return null;
