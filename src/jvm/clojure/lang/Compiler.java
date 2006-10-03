@@ -307,7 +307,7 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
     else if(op == NOT || op == NULL_QM_)
         return analyzeNot(context, form);
     else
-        throw new UnsupportedOperationException();
+        throw new Exception("Unsupported op: " + op);
 }
 
 private static Expr analyzeLet(C context, ISeq form) throws Exception {
@@ -365,7 +365,23 @@ static class LetExpr extends AnExpr{
         this.body = body;
     }
 
-    public void emitExpression() throws Exception {
+    public void emitStatement() throws Exception {
+        emitBindings();
+        body.emitStatement();
+    }
+
+    private void emitBindings() throws Exception {
+        for(int i=0;i<bindingInits.count();i++)
+            {
+            BindingInit bi = (BindingInit) bindingInits.nth(i);
+            if(!(bi.init instanceof FnExpr && ((FnExpr)bi.init).willBeStaticMethod()))
+                bi.binding.emitDeclaration(bi.init.emitExpressionString());
+            }
+    }
+
+    public void emitReturn() throws Exception {
+        emitBindings();
+        body.emitReturn();
     }
 
 }
