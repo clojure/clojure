@@ -15,7 +15,6 @@ package clojure.lang;
 import java.io.StringWriter;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 public class Compiler{
 ///*
@@ -23,13 +22,17 @@ static Symbol DEF = Symbol.intern("def");
 static Symbol FN = Symbol.intern("fn");
 static Symbol DO = Symbol.intern("do");
 static Symbol IF = Symbol.intern("if");
+static Symbol OR = Symbol.intern("or");
+static Symbol AND = Symbol.intern("and");
+static Symbol NOT = Symbol.intern("not");
+static Symbol NULL_QM_ = Symbol.intern("null?");
 static Symbol IMPORT = Symbol.intern("import");
 static Symbol USE = Symbol.intern("use");
 static Symbol _AM_KEY = Symbol.intern("&key");
 static Symbol _AM_REST = Symbol.intern("&rest");
 
-static public Var _CT_OUT = RT.OUT;
-static public Var _CT_MODULE = RT._CT_MODULE;
+static public Var _CRT_OUT = RT.OUT;
+static public Var _CRT_MODULE = RT._CT_MODULE;
 
 static NilExpr NIL_EXPR = new NilExpr();
 
@@ -49,28 +52,28 @@ static public Var USES = Module.intern("clojure", "^compiler-uses");
 static public Var FNS = Module.intern("clojure", "^compiler-fns");
 
 static public  IPersistentMap CHAR_MAP =
-        new PersistentArrayMap('-', "_HY_",
-                               '.', "_DT_",
-                               ':', "_CL_",
-                               '+', "_PL_",
+        new PersistentArrayMap('-', "_DSH_",
+                               '.', "_DOT_",
+                               ':', "_CLN_",
+                               '+', "_PLS_",
                                '>', "_GT_",
                                '<', "_LT_",
                                '=', "_EQ_",
-                               '~', "_TL_",
-                               '!', "_EP_",
+                               '~', "_TLD_",
+                               '!', "_EXC_",
                                '@', "_AT_",
-                               '#', "_SH_",
+                               '#', "_SHP_",
                                '$', "_DS_",
-                               '%', "_PT_",
-                               '^', "_CT_",
-                               '&', "_AM_",
-                               '*', "_ST_",
-                               '{', "_LB_",
-                               '}', "_RB_",
-                               '[', "_LK_",
-                               ']', "_RK_",
-                               '/', "_SL_",
-                               '\\',"_BS_",
+                               '%', "_PCT_",
+                               '^', "_CRT_",
+                               '&', "_AMP_",
+                               '*', "_STR_",
+                               '{', "_LBC_",
+                               '}', "_RBC_",
+                               '[', "_LBK_",
+                               ']', "_RBK_",
+                               '/', "_FSL_",
+                               '\\',"_BSL_",
                                '?', "_QM_");
 
 private static final int MAX_POSITIONAL_ARITY = 20;
@@ -80,7 +83,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
     StringWriter w = new StringWriter();
     try
         {
-        _CT_OUT.pushThreadBinding(w);
+        _CRT_OUT.pushThreadBinding(w);
         KEYWORDS.pushThreadBinding(null);
         VARS.pushThreadBinding(null);
         METHOD.pushThreadBinding(null);
@@ -183,7 +186,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
         }
     finally
         {
-        _CT_OUT.popThreadBinding();
+        _CRT_OUT.popThreadBinding();
         KEYWORDS.popThreadBinding();
         VARS.popThreadBinding();
         METHOD.popThreadBinding();
@@ -243,12 +246,12 @@ static class AnExpr implements Expr{
     public String emitExpressionString() throws Exception {
         StringWriter w = new StringWriter();
         try{
-            _CT_OUT.pushThreadBinding(w);
+            _CRT_OUT.pushThreadBinding(w);
             emitExpression();
             return w.toString();
         }
         finally{
-            _CT_OUT.popThreadBinding();
+            _CRT_OUT.popThreadBinding();
         }
     }
 }
@@ -291,8 +294,117 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
         return analyzeDo(context, form);
     else if(op == IF)
         return analyzeIf(context, form);
+    else if(op == OR)
+        return analyzeOr(context, form);
+    else if(op == AND)
+        return analyzeAnd(context, form);
+    else if(op == NOT || op == NULL_QM_)
+        return analyzeNot(context, form);
     else
         throw new UnsupportedOperationException();
+}
+
+private static Expr analyzeAnd(C context, ISeq form) throws Exception {
+    //(and) (and x) (and x y ...)
+    //(or)  (or X) (or x y ...)
+    if(RT.count(form) == 1)
+        return analyze(context,RT.T);
+    else if(RT.count(form) == 2)
+        return analyze(context, macroexpand(RT.second(form)));
+
+    PersistentArrayList exprs = new PersistentArrayList(2);
+    for(ISeq es = RT.rest(form);es!=null;es = es.rest())
+        exprs = exprs.cons(analyze(C.EXPRESSION, macroexpand(es.first())));
+    return new AndExpr(exprs);
+}
+
+static class AndExpr extends AnExpr{
+    final PersistentArrayList exprs;
+
+    public AndExpr(PersistentArrayList exprs){
+        this.exprs = exprs;
+    }
+
+    public void emitStatement() throws Exception{
+        format("if(");
+        for(int i=0;i<exprs.count();i++)
+            {
+            format("~A != null",((Expr)exprs.nth(i)).emitExpressionString());
+            if(i < exprs.count()-1)
+                format(" && ");
+            }
+        format(")~%;~%");
+    }
+    public void emitExpression() throws Exception{
+        format("((");
+        for(int i=0;i<exprs.count();i++)
+            {
+            if(i < exprs.count()-1)
+                format("~A != null",((Expr)exprs.nth(i)).emitExpressionString());
+            if(i < exprs.count()-2)
+                format(" && ");
+            if(i == exprs.count()-1)
+                format(")?~A:null)",((Expr)exprs.nth(i)).emitExpressionString());
+            }
+    }
+}
+
+private static Expr analyzeOr(C context, ISeq form) throws Exception {
+    //(or)  (or X) (or x y ...)
+    if(RT.count(form) == 1)
+        return NIL_EXPR;
+    else if(RT.count(form) == 2)
+        return analyze(context, macroexpand(RT.second(form)));
+
+    LocalBinding tb = null;
+    if(context != C.STATEMENT)
+        {
+        //we'll need a temp var
+        tb = new LocalBinding(Symbol.intern("OR_TEMP"));
+        registerLocal(tb);
+        }
+
+    PersistentArrayList exprs = new PersistentArrayList(2);
+    for(ISeq es = RT.rest(form);es!=null;es = es.rest())
+        exprs = exprs.cons(analyze(C.EXPRESSION, macroexpand(es.first())));
+    return new OrExpr(exprs, tb);
+}
+
+static class OrExpr extends AnExpr{
+    final PersistentArrayList exprs;
+    final LocalBinding tb;
+
+    public OrExpr(PersistentArrayList exprs, LocalBinding tb){
+        this.exprs = exprs;
+        this.tb = tb;
+    }
+
+    public void emitStatement() throws Exception{
+        format("if(");
+        for(int i=0;i<exprs.count();i++)
+            {
+            format("~A != null",((Expr)exprs.nth(i)).emitExpressionString());
+            if(i < exprs.count()-1)
+                format(" || ");
+            }
+        format(")~%;~%");
+    }
+    public void emitExpression() throws Exception{
+        format("((");
+        for(int i=0;i<exprs.count();i++)
+            {
+            format("(~A = ~A) != null",tb.getName(),((Expr)exprs.nth(i)).emitExpressionString());
+            if(i < exprs.count()-1)
+                format(" || ");
+            }
+        format(")?~A:null)",tb.getName());
+    }
+}
+private static Expr analyzeNot(C context, ISeq form) throws Exception {
+    //(not x) or (null? x)
+    //hmmm - will these be the same with host boolean arg?
+    return new NotExpr(analyze(C.EXPRESSION, macroexpand(RT.second(form))));
+
 }
 
 private static Expr analyzeIf(C context, ISeq form) throws Exception {
@@ -352,7 +464,7 @@ static class IfExpr extends AnExpr{
         thenExpr.emitStatement();
         if(!(elseExpr instanceof NilExpr))
             {
-            format("~%else~%");
+            format("else~%");
             elseExpr.emitStatement();
             }
     }
@@ -371,8 +483,8 @@ private static Expr analyzeBody(C context, ISeq forms) throws Exception {
         {
         Expr e = (context == C.STATEMENT || RT.rest(forms) != null) ?
                  analyze(C.STATEMENT, macroexpand(forms.first()))
-                :
-                analyze(C.RETURN, macroexpand(forms.first()));
+                 :
+                 analyze(C.RETURN, macroexpand(forms.first()));
         exprs = exprs.cons(e);
         }
     return new BodyExpr(exprs);
@@ -386,14 +498,19 @@ static class BodyExpr extends AnExpr{
     }
 
     public void emitStatement() throws Exception{
+        if(exprs.count() == 0)
+            return;
+        format("{~%");
         for(int i=0;i<exprs.count();i++)
             ((Expr)exprs.nth(i)).emitStatement();
+        format("}~%");
     }
     public void emitReturn() throws Exception{
         if(exprs.count() == 0)
             NIL_EXPR.emitReturn();
         else
             {
+            format("{~%");
             for(int i=0;i<exprs.count();i++)
                 {
                 if(i < exprs.count()-1)
@@ -401,6 +518,7 @@ static class BodyExpr extends AnExpr{
                 else
                     ((Expr)exprs.nth(i)).emitReturn();
                 }
+            format("}~%");
             }
     }
 }
@@ -409,7 +527,7 @@ private static Expr analyzeFn(C context, ISeq form) throws Exception {
     //(fn (args) body) or (fn ((args) body) ((args2) body2) ...)
     //turn former into latter
     if(RT.second(form) == null ||
-                 !(RT.first(RT.second(form)) == null || RT.first(RT.second(form)) instanceof ISeq))
+       !(RT.first(RT.second(form)) == null || RT.first(RT.second(form)) instanceof ISeq))
         form = RT.list(FN, RT.rest(form));
 
     FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY+1];
@@ -725,7 +843,7 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception {
     if(form.count() > 3)
         throw new Exception("Too many arguments to def");
     Symbol sym = (Symbol) RT.second(form);
-    Module module = (Module) _CT_MODULE.getValue();
+    Module module = (Module) _CRT_MODULE.getValue();
     Var var = module.intern(baseSymbol(sym));
     registerVar(var);
     VarExpr ve = new VarExpr(var, typeHint(sym));
@@ -779,7 +897,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception {
 }
 
 static Var lookupVar(Symbol sym){
-    Module module = (Module) _CT_MODULE.getValue();
+    Module module = (Module) _CRT_MODULE.getValue();
     Var v = module.find(sym);
     if(v != null)
         return v;
@@ -903,6 +1021,17 @@ static class NotExpr extends AnExpr{
 
     public NotExpr(Expr expr){
         this.expr = expr;
+    }
+
+    public void emitStatement() throws Exception {
+        //just execute expr for side effects - no negation
+        expr.emitStatement();
+    }
+
+    public void emitExpression() throws Exception {
+        format("((");
+        expr.emitExpression();
+        format("==null)?RT.T:null)");
     }
 
 }
