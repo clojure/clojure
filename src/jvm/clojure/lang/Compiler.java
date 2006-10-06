@@ -304,6 +304,10 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
         return analyzeAnd(context, form);
     else if(op == LET)
         return analyzeLet(context, form);
+    else if(op == LET_STAR_)
+        return analyzeLetStar(context, form);
+    else if(op == LETFN)
+        return analyzeLetFn(context, form);
     else if(op == NOT || op == NULL_QM_)
         return analyzeNot(context, form);
     else
@@ -356,6 +360,79 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception {
 
 }
 
+private static Expr analyzeLetFn(C context, ISeq form) throws Exception {
+    //(letfn ((foo [what can occur after fn]) (bar [what can occur after fn])) body ...)
+    if(context == C.EXPRESSION)
+        return analyze(context, RT.list(RT.list(FN, null, form)));
+    try
+       {
+       LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+       ISeq bindings = (ISeq) RT.second(form);
+       ISeq body = RT.rest(RT.rest(form));
+       PersistentArrayList bindingPairs = new PersistentArrayList(4);
+       //add all fn names to env before analyzing bodies
+       for (ISeq bs = bindings; bs != null; bs = RT.rest(bs))
+           {
+           Object bform = RT.first(bs);
+           Symbol fsym = (Symbol) RT.first(bform);
+           LocalBinding lb = new LocalBinding(baseSymbol(fsym));
+           lb.typeHint = typeHint(fsym);
+           registerLocal(lb);
+           bindingPairs = bindingPairs.cons(new Tuple(lb, RT.cons(FN, RT.rest(bform))));
+           }
+
+       PersistentArrayList bindingInits = new PersistentArrayList(4);
+       for(int i=0;i<bindingPairs.count();i++)
+           {
+           Tuple bpair = (Tuple) bindingPairs.nth(i);
+           LocalBinding lb = (LocalBinding) bpair.nth(0);
+           FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, bpair.nth(1));
+           fexpr.binding = lb;
+           lb.letfn = fexpr;
+           bindingInits = bindingInits.cons(new BindingInit(lb, fexpr));
+           }
+       return new LetExpr(bindingInits, analyzeBody(context, body));
+       }
+    finally
+        {
+        LOCAL_ENV.popThreadBinding();
+        }
+
+}
+
+private static Expr analyzeLetStar(C context, ISeq form) throws Exception {
+    //(let* (var val var2 val2 ...) body...)
+    ISeq bindings = (ISeq) RT.second(form);
+    //special case (let* () expr) ==> expr
+    if(bindings == null && form.count() < 4)
+        return analyze(context, macroexpand(RT.third(form)));
+    ISeq body = RT.rest(RT.rest(form));
+
+    if(context == C.EXPRESSION)
+        return analyze(context, RT.list(RT.list(FN, null, form)));
+
+    try
+       {
+       LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+       PersistentArrayList bindingInits = new PersistentArrayList(4);
+       for (ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
+           {
+           LocalBinding lb = new LocalBinding(baseSymbol((Symbol) RT.first(bs)));
+           lb.typeHint = typeHint((Symbol) RT.first(bs));
+           bindingInits = bindingInits.cons(new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs))));
+           //sequential enhancement of env
+           registerLocal(lb);
+           }
+
+       return new LetExpr(bindingInits, analyzeBody(context, body));
+       }
+    finally
+        {
+        LOCAL_ENV.popThreadBinding();
+        }
+
+}
+
 static class LetExpr extends AnExpr{
     PersistentArrayList bindingInits;
     Expr body;
@@ -375,7 +452,7 @@ static class LetExpr extends AnExpr{
             {
             BindingInit bi = (BindingInit) bindingInits.nth(i);
             if(!(bi.init instanceof FnExpr && ((FnExpr)bi.init).willBeStaticMethod()))
-                bi.binding.emitDeclaration(bi.init.emitExpressionString());
+                format("~A = ~A;~%", bi.binding.getExpr(), bi.init.emitExpressionString());
             }
     }
 
@@ -546,18 +623,26 @@ static class IfExpr extends AnExpr{
 
     public void emitReturn() throws Exception {
         format("if(~A ~A null)~%", testExpr.emitExpressionString(),compare);
+        format("{~%");
         thenExpr.emitReturn();
+        format("}~%");
         format("else~%");
+        format("{~%");
         elseExpr.emitReturn();
+        format("}~%");
     }
 
     public void emitStatement() throws Exception {
         format("if(~A ~A null)~%", testExpr.emitExpressionString(),compare);
+        format("{~%");
         thenExpr.emitStatement();
+        format("}~%");
         if(!(elseExpr instanceof NilExpr))
             {
             format("else~%");
+            format("{~%");
             elseExpr.emitStatement();
+            format("}~%");
             }
     }
 
@@ -592,17 +677,14 @@ static class BodyExpr extends AnExpr{
     public void emitStatement() throws Exception{
         if(exprs.count() == 0)
             return;
-        format("{~%");
         for(int i=0;i<exprs.count();i++)
             ((Expr)exprs.nth(i)).emitStatement();
-        format("}~%");
     }
     public void emitReturn() throws Exception{
         if(exprs.count() == 0)
             NIL_EXPR.emitReturn();
         else
             {
-            format("{~%");
             for(int i=0;i<exprs.count();i++)
                 {
                 if(i < exprs.count()-1)
@@ -610,7 +692,6 @@ static class BodyExpr extends AnExpr{
                 else
                     ((Expr)exprs.nth(i)).emitReturn();
                 }
-            format("}~%");
             }
     }
 }
@@ -700,8 +781,11 @@ static class FnExpr extends AnExpr{
             for (ISeq s = RT.seq(closes); s != null; s = s.rest())
                 {
                 LocalBinding b = (LocalBinding) ((IMapEntry) s.first()).key();
-                closesDecls.cons(b.typeDeclaration());
-                closesDecls.cons(b.getName());
+                if(!b.bindsToStaticFn())
+                    {
+                    closesDecls = closesDecls.cons(b.typeDeclaration());
+                    closesDecls = closesDecls.cons(b.getName());
+                    }
                 }
             }
         if(!willBeStaticMethod())
@@ -721,9 +805,12 @@ static class FnExpr extends AnExpr{
                 for (ISeq s = RT.seq(closes); s != null; s = s.rest())
                     {
                     LocalBinding b = (LocalBinding) ((IMapEntry) s.first()).key();
-                    format("this.~A = ~A;~%", b.getName(), b.getName());
-                    if (s.rest() != null)
-                        format(",");
+                    if(!b.bindsToStaticFn())
+                        {
+                        format("this.~A = ~A;~%", b.getName(), b.getName());
+                        if (s.rest() != null)
+                            format(",");
+                        }
                     }
                 format("}~%");
                 }
@@ -802,7 +889,7 @@ static class FnExpr extends AnExpr{
             for (ISeq locals = RT.seq(m.locals); locals != null; locals = locals.rest())
                 {
                 LocalBinding b = (LocalBinding) ((IMapEntry) locals.first()).key();
-                if(!b.isParam)
+                if(!b.isParam && !b.bindsToStaticFn())
                     b.emitDeclaration("null");
                 }
 
@@ -823,7 +910,7 @@ static class FnExpr extends AnExpr{
                (
                        isCalledDirectly
                        ||
-                       (binding != null && !binding.isClosed && !binding.valueTaken)
+                       (binding != null && !binding.isAssigned && !binding.valueTaken)
                );
     }
 }
@@ -1036,7 +1123,11 @@ static void closeOver(LocalBinding b,FnMethod method){
 
 static LocalBinding referenceLocal(Symbol sym) {
     LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
-    closeOver(b,(FnMethod) METHOD.getValue());
+    if(b != null)
+        {
+        b.valueTaken = true;
+        closeOver(b,(FnMethod) METHOD.getValue());
+        }
     return b;
 }
 
@@ -1188,6 +1279,7 @@ static class LocalBinding{
     String typeHint;
     public boolean valueTaken = false;
     boolean isAssigned = false;
+    FnExpr letfn = null;
 
 
     public LocalBinding(Symbol sym) {
@@ -1199,13 +1291,25 @@ static class LocalBinding{
     }
 
     boolean needsBox(){
-        return isClosed && isAssigned;
+        return (isClosed && isAssigned)
+                ||
+                letfn != null && isClosed && valueTaken;
+    }
+
+    boolean bindsToStaticFn() {
+        return letfn != null && letfn.willBeStaticMethod();
     }
 
     String typeDeclaration(){
         if(needsBox())
             return "clojure.lang.Box";
         return "Object";
+    }
+
+    String getExpr(){
+        if(needsBox())
+            return getName() + ".val";
+        return getName();
     }
 
     void emitDeclaration(String init) throws Exception {
@@ -1227,7 +1331,7 @@ static class LocalBindingExpr extends AnExpr{
     }
 
     public void emitExpression() throws Exception{
-        format("~A", b.getName());
+        format("~A", b.getExpr());
     }
 }
 
