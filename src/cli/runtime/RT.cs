@@ -596,7 +596,7 @@ static public Object format(Object o, String s, params Object[] args) {
 	return null;
 }
 
-static public void doFormat(TextWriter w, String s, ISeq args) {
+static public ISeq doFormat(TextWriter w, String s, ISeq args) {
     for (int i = 0; i < s.Length;)
         {
         char c = s[i++];
@@ -629,13 +629,14 @@ static public void doFormat(TextWriter w, String s, ISeq args) {
                         if(j == -1)
 							throw new Exception("Missing ~}");
                         String subs = s.Substring(i, j-i);
-                        format(w, subs, RT.seq(RT.first(args)));
-                        args = RT.rest(args);
+						for (ISeq sargs = RT.seq(RT.first(args)); sargs != null; )
+							sargs = doFormat(w, subs, sargs);
+						args = RT.rest(args);
                         i = j+2; //skip ~}
                         break;
                     case '^':
                         if(args == null)
-                            return;
+                            return null;
                         break;
                     case '~':
                         w.Write('~');
@@ -650,6 +651,7 @@ static public void doFormat(TextWriter w, String s, ISeq args) {
             	break;
             }
         }
+	return args;
 }
 
 /*-------------------------------- values --------------*/

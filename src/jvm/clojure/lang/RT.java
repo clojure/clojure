@@ -591,7 +591,7 @@ static public Object format(Object o, String s, Object... args) throws Exception
 	return null;
 }
 
-static public void doFormat(Writer w, String s, ISeq args) throws Exception {
+static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception {
     for (int i = 0; i < s.length();)
         {
         char c = s.charAt(i++);
@@ -624,13 +624,14 @@ static public void doFormat(Writer w, String s, ISeq args) throws Exception {
                         if(j == -1)
                             throw new IllegalArgumentException("Missing ~}");
                         String subs = s.substring(i, j);
-                        format(w, subs, RT.seq(RT.first(args)));
+                        for(ISeq sargs = RT.seq(RT.first(args));sargs != null;)
+                            sargs = doFormat(w, subs, sargs);
                         args = RT.rest(args);
                         i = j+2; //skip ~}
                         break;
                     case '^':
                         if(args == null)
-                            return;
+                            return null;
                         break;
                     case '~':
                         w.write('~');
@@ -643,6 +644,7 @@ static public void doFormat(Writer w, String s, ISeq args) throws Exception {
                 w.write(c);
             }
         }
+    return args;
 }
 ///////////////////////////////// values //////////////////////////
 
