@@ -66,4 +66,48 @@ public int hashCode() {
     return _hash;
 }
 
+static public class KeySeq extends ASeq{
+    ISeq seq;
+
+    static public KeySeq create(ISeq seq){
+        if(seq == null)
+            return null;
+        return new KeySeq(seq);
+    }
+
+    private KeySeq(ISeq seq) {
+        this.seq = seq;
+    }
+
+    public Object first() {
+        return ((IMapEntry)seq.first()).key();
+    }
+
+    public ISeq rest() {
+        return create(seq.rest());
+    }
+}
+
+static public class ValSeq extends ASeq{
+    ISeq seq;
+
+    static public ValSeq create(ISeq seq){
+        if(seq == null)
+            return null;
+        return new ValSeq(seq);
+    }
+
+    private ValSeq(ISeq seq) {
+        this.seq = seq;
+    }
+
+    public Object first() {
+        return ((IMapEntry)seq.first()).val();
+    }
+
+    public ISeq rest() {
+        return create(seq.rest());
+    }
+}
+
 }

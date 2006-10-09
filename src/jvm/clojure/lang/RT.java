@@ -104,6 +104,14 @@ static public ISeq seq(Object coll)  {
         throw new IllegalAccessError("Don't know how to create ISeq from arg");
 }
 
+static public ISeq keys(Object coll) {
+    return APersistentMap.KeySeq.create(seq(coll));
+}
+
+static public ISeq vals(Object coll) {
+    return APersistentMap.ValSeq.create(seq(coll));
+}
+
 static public Object meta(Object x) {
     if(x == null)
         return null;

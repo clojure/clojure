@@ -67,6 +67,49 @@ override public int GetHashCode() {
 	abstract public IPersistentMap without(object key);
 
 
+	public class KeySeq : ASeq{
+    ISeq _seq;
+
+    static public KeySeq create(ISeq seq){
+        if(seq == null)
+            return null;
+        return new KeySeq(seq);
+    }
+
+    private KeySeq(ISeq seq) {
+        this._seq = seq;
+    }
+
+    public override Object first() {
+        return ((IMapEntry)_seq.first()).key();
+    }
+
+    public override ISeq rest() {
+        return create(_seq.rest());
+    }
+}
+
+public class ValSeq : ASeq{
+    ISeq _seq;
+
+    static public ValSeq create(ISeq seq){
+        if(seq == null)
+            return null;
+        return new ValSeq(seq);
+    }
+
+    private ValSeq(ISeq seq) {
+        this._seq = seq;
+    }
+
+    public override Object first() {
+        return ((IMapEntry)_seq.first()).val();
+    }
+
+    public override ISeq rest() {
+        return create(_seq.rest());
+    }
+}
 
 	#endregion
 
