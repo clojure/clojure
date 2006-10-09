@@ -213,7 +213,7 @@ static String munge(String name){
     return sb.toString();
 }
 
-enum C{STATEMENT,EXPRESSION,RETURN}
+enum C{STATEMENT,EXPRESSION,RETURN,FN}
 
 interface Expr{
 
@@ -290,7 +290,7 @@ private static Expr analyze(C context, Object form) throws Exception {
     if(form == null)
         return NIL_EXPR;
     else if(form instanceof Symbol)
-        return analyzeSymbol((Symbol) form);
+        return analyzeSymbol((Symbol) form, false);
     else if(form instanceof ISeq)
         return analyzeSeq(context, (ISeq) form);
     else if(form instanceof Num || form instanceof String)
@@ -325,7 +325,7 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
         return analyzeNot(context, form);
     else
         {
-        Expr fexpr = analyze(C.EXPRESSION, op);
+        Expr fexpr = (op instanceof Symbol)?analyzeSymbol((Symbol)op, true):analyze(C.EXPRESSION, op);
         PersistentArrayList args = new PersistentArrayList(4);
         for(ISeq s = RT.rest(form);s != null;s=s.rest())
             args = args.cons(analyze(C.EXPRESSION, macroexpand(s.first())));
@@ -356,8 +356,8 @@ static class InvokeExpr extends AnExpr{
             staticMethod = ((LocalBindingExpr) fexpr).b.letfn;
         if(staticMethod != null)
             {
-            ISeq closes  = RT.seq(staticMethod.closes);
-            format("~A(~{~A~^, ~}",staticMethod.getName(),RT.seq(staticMethod.closes));
+            ISeq closes  = RT.keys(staticMethod.closes);
+            format("~A(~{~A~^, ~}",staticMethod.getName(),closes);
             if(closes != null && argseq != null)
                 format(",");
             format("~{~A~^, ~})", argseq);
@@ -830,7 +830,7 @@ static class FnExpr extends AnExpr{
         if(name == null)
             {
             if(binding != null)
-                name = "FN__" + munge(binding.sym.name) + "__" + RT.nextID();
+                name = "FN__" + binding.getName();//munge(binding.sym.name) + "__" + RT.nextID();
             else
                 name = "FN__" + RT.nextID();
             }
@@ -1132,7 +1132,7 @@ static String typeHint(Symbol sym){
     return null;
 }
 
-private static Expr analyzeSymbol(Symbol sym) throws Exception {
+private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Exception {
     if(sym instanceof Keyword)
         return registerKeyword((Keyword)sym);
     else if(sym instanceof HostSymbol)
@@ -1143,7 +1143,11 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception {
         sym = baseSymbol(sym);
         LocalBinding b = referenceLocal(sym);
         if(b != null)
+            {
+            if(!inFnPosition)
+                b.valueTaken = true;
             return new LocalBindingExpr(b, typeHint);
+            }
         Var v = lookupVar(sym);
         if(v != null)
             return new VarExpr(v, typeHint);
@@ -1201,7 +1205,6 @@ static LocalBinding referenceLocal(Symbol sym) {
     LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
     if(b != null)
         {
-        b.valueTaken = true;
         closeOver(b,(FnMethod) METHOD.getValue());
         }
     return b;
@@ -1364,6 +1367,10 @@ static class LocalBinding{
 
     public String getName(){
         return munge(sym.name) + (isParam?"":("__" + id));
+    }
+
+    public String toString() {
+        return getName();
     }
 
     boolean needsBox(){
