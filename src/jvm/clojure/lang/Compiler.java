@@ -258,6 +258,19 @@ static class AnExpr implements Expr{
             _CRT_OUT.popThreadBinding();
         }
     }
+
+    public String toString() {
+        try
+            {
+            return emitExpressionString();
+            }
+        catch (Exception e)
+            {
+            //declared exceptions are an incredibly bad idea !!!
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return e.toString();
+            }
+    }
 }
 
 public static void processForm(Object form) throws Exception{
@@ -311,7 +324,59 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
     else if(op == NOT || op == NULL_QM_)
         return analyzeNot(context, form);
     else
-        throw new Exception("Unsupported op: " + op);
+        {
+        Expr fexpr = analyze(C.EXPRESSION, op);
+        PersistentArrayList args = new PersistentArrayList(4);
+        for(ISeq s = RT.rest(form);s != null;s=s.rest())
+            args = args.cons(analyze(C.EXPRESSION, macroexpand(s.first())));
+        if(fexpr instanceof FnExpr)
+            ((FnExpr)fexpr).isCalledDirectly = true;
+        if(fexpr instanceof HostExpr)
+            return new InvokeHostExpr((HostExpr) fexpr, args);
+        else
+            return new InvokeExpr(fexpr, args);
+        }
+}
+
+static class InvokeExpr extends AnExpr{
+    Expr fexpr;
+    PersistentArrayList args;
+
+    public InvokeExpr(Expr fexpr, PersistentArrayList args) {
+        this.fexpr = fexpr;
+        this.args = args;
+    }
+
+    public void emitExpression() throws Exception {
+        FnExpr staticMethod = null;
+        ISeq argseq = RT.seq(args);
+        if(fexpr instanceof FnExpr && ((FnExpr)fexpr).willBeStaticMethod())
+            staticMethod = (FnExpr) fexpr;
+        else if(fexpr instanceof LocalBindingExpr && ((LocalBindingExpr)fexpr).b.bindsToStaticFn())
+            staticMethod = ((LocalBindingExpr) fexpr).b.letfn;
+        if(staticMethod != null)
+            {
+            ISeq closes  = RT.seq(staticMethod.closes);
+            format("~A(~{~A~^, ~}",staticMethod.getName(),RT.seq(staticMethod.closes));
+            if(closes != null && argseq != null)
+                format(",");
+            format("~{~A~^, ~})", argseq);
+            }
+        else
+            {
+            format("((IFn)~A).invoke(~{~A~^, ~})", fexpr, argseq);
+            }
+    }
+}
+
+static class InvokeHostExpr extends AnExpr{
+    HostExpr fexpr;
+    PersistentArrayList args;
+
+    public InvokeHostExpr(HostExpr fexpr, PersistentArrayList args) {
+        this.fexpr = fexpr;
+        this.args = args;
+    }
 }
 
 private static Expr analyzeLet(C context, ISeq form) throws Exception {
@@ -349,6 +414,11 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception {
         for(int i=0;i<bindingInits.count();i++)
             {
             BindingInit bi = (BindingInit) bindingInits.nth(i);
+            if(bi.init instanceof FnExpr)
+                {
+                bi.binding.letfn = (FnExpr) bi.init;
+                ((FnExpr) bi.init).binding = bi.binding;
+                }
             registerLocal(bi.binding);
             }
         return new LetExpr(bindingInits, analyzeBody(context, body));
@@ -419,7 +489,13 @@ private static Expr analyzeLetStar(C context, ISeq form) throws Exception {
            {
            LocalBinding lb = new LocalBinding(baseSymbol((Symbol) RT.first(bs)));
            lb.typeHint = typeHint((Symbol) RT.first(bs));
-           bindingInits = bindingInits.cons(new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs))));
+           BindingInit bi = new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs)));
+           bindingInits = bindingInits.cons(bi);
+          if(bi.init instanceof FnExpr)
+            {
+            bi.binding.letfn = (FnExpr) bi.init;
+            ((FnExpr) bi.init).binding = bi.binding;
+            }
            //sequential enhancement of env
            registerLocal(lb);
            }
@@ -1344,8 +1420,12 @@ static class VarExpr extends AnExpr{
         this.typeHint = typeHint;
     }
 
+    public String getName() {
+        return munge(var.toString());
+    }
+
     public void emitExpression() throws Exception{
-        format("~A", munge(var.toString()));
+        format("~A.getValue()", getName());
     }
 }
 
@@ -1359,7 +1439,7 @@ static class DefExpr extends AnExpr{
     }
 
     public void emitExpression() throws Exception{
-        format("~A.bind(~A)", var.emitExpressionString(),init.emitExpressionString());
+        format("~A.bind(~A)", var.getName(),init.emitExpressionString());
     }
 }
 
