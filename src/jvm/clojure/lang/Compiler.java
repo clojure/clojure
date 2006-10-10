@@ -17,7 +17,6 @@ import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Compiler {
@@ -232,7 +231,6 @@ interface Expr {
 
     Class getHostType() throws Exception;
 
-    boolean isHostExpr();
 }
 
 static void format(String str, Object... args) throws Exception {
@@ -274,9 +272,6 @@ static class AnExpr implements Expr {
         return null;
     }
 
-    public boolean isHostExpr() {
-        return false;
-    }
 
     public String toString() {
         try
@@ -359,16 +354,16 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
         return analyzeNot(context, form);
     else
         {
-        Expr fexpr = (op instanceof Symbol) ? analyzeSymbol((Symbol) op, true) : analyze(C.EXPRESSION, op);
         PersistentArrayList args = new PersistentArrayList(4);
         for (ISeq s = RT.rest(form); s != null; s = s.rest())
             args = args.cons(analyze(C.EXPRESSION, macroexpand(s.first())));
+
+        if(op instanceof ClassSymbol)
+            return new InvokeConstructorExpr((ClassSymbol) op, args);
+        Expr fexpr = (op instanceof Symbol) ? analyzeSymbol((Symbol) op, true) : analyze(C.EXPRESSION, op);
         if (fexpr instanceof FnExpr)
             ((FnExpr) fexpr).isCalledDirectly = true;
-        if (fexpr instanceof HostClassExpr)
-            return new InvokeHostClassExpr((HostClassExpr) fexpr, args);
-        else
-            return new InvokeExpr(fexpr, args);
+        return new InvokeExpr(fexpr, args);
         }
 }
 
@@ -403,12 +398,12 @@ static class InvokeExpr extends AnExpr {
     }
 }
 
-static class InvokeHostClassExpr extends AHostExpr {
+static class InvokeConstructorExpr extends AHostExpr {
     HostClassExpr fexpr;
     PersistentArrayList args;
 
-    public InvokeHostClassExpr(HostClassExpr fexpr, PersistentArrayList args) {
-        this.fexpr = fexpr;
+    public InvokeConstructorExpr(ClassSymbol fexpr, PersistentArrayList args) throws Exception {
+        this.fexpr = new HostClassExpr(fexpr);
         this.args = args;
     }
 
@@ -417,55 +412,97 @@ static class InvokeHostClassExpr extends AHostExpr {
     }
 
     void emitHostExpr() throws Exception {
-        format("(new ~A(~{~A~^, ~}))", fexpr.resolvedClassName, RT.seq(args));
+        Constructor ctor = findSingleConstructor(fexpr.type, args);
+
+        format("(new ~A(",fexpr.resolvedClassName);
+        if(ctor != null)
+            emitTypedArgs(ctor.getParameterTypes(), args);
+        else
+            emitHostArgs(args);
+        format("))");
     }
 }
 
-public static Constructor findConstructor(Class c, PersistentArrayList args)  throws Exception
+static void emitHostArgs(PersistentArrayList args) throws Exception {
+    for(int i = 0; i < args.count(); i++)
+        {
+        Expr arg = (Expr) args.nth(i);
+        if(arg instanceof AHostExpr)
+            ((AHostExpr)arg).emitHostExpr();
+        else if(arg.getHostType() != null)
+            emitConvert(arg.getHostType(), arg);
+        else
+            arg.emitExpression();
+        if(i < args.count()-1)
+            format(",");
+        }
+
+}
+
+static void emitTypedArgs(Class[] parameterTypes, PersistentArrayList args) throws Exception {
+    //todo - variadic support
+    for(int i = 0; i < args.count(); i++)
+        {
+        Expr arg = (Expr) args.nth(i);
+        if(arg instanceof AHostExpr)
+            emitCast(parameterTypes[i], (AHostExpr) arg);
+        else
+            emitConvert(parameterTypes[i], arg);
+        if(i < args.count()-1)
+            format(",");
+        }
+    }
+
+static void emitConvert(Class parameterType, Expr arg) throws Exception {
+    if (parameterType == Object.class)
+        arg.emitExpression();
+    else if(parameterType == boolean.class || parameterType == Boolean.class)
+        format("(~A!=null)", arg);
+    else if (parameterType == int.class || parameterType == Integer.class)
+        format("((Number)~A).intValue()", arg);
+    else if (parameterType == double.class || parameterType == Double.class)
+        format("((Number)~A).doubleValue()", arg);
+    else if (parameterType == float.class || parameterType == Float.class)
+        format("((Number)~A).floatValue()", arg);
+    else if (parameterType == long.class || parameterType == Long.class)
+        format("((Number)~A).longValue()", arg);
+    else if (parameterType == short.class || parameterType == Short.class)
+        format("((Number)~A).shortValue()", arg);
+    else if (parameterType == byte.class || parameterType == Byte.class)
+        format("((Number)~A).byteValue()", arg);
+    else
+        format("((~A)~A)", parameterType.getName(), arg);
+}
+
+static void emitCast(Class parameterType, AHostExpr arg) throws Exception {
+    boolean needsCast = arg.getHostType() == null || !parameterType.isAssignableFrom(arg.getHostType());
+    if(needsCast)
+        format("((~A)",parameterType.getName());
+    arg.emitHostExpr();
+    if(needsCast)
+        format(")");
+}
+
+/*returns null unless single ctor with matching arity*/
+public static Constructor findSingleConstructor(Class c, PersistentArrayList args)  throws Exception
     {
     Constructor[] allctors = c.getConstructors();
-    PersistentArrayList ctors = new PersistentArrayList(allctors.length);
+    Constructor found = null;
     for(int i = 0; i < allctors.length; i++)
         {
         Constructor ctor = allctors[i];
         if(ctor.getParameterTypes().length == args.count())
-            ctors = ctors.cons(ctor);
-        }
-    if(ctors.count() == 0)
-        {
-        throw new IllegalArgumentException("No matching ctor found");
-        }
-    else if(ctors.count() == 1)
-        {
-        Constructor ctor = (Constructor) ctors.nth(0);
-        if(isCompatible(ctor.getParameterTypes(),args))
-            return ctor;
-        throw new Exception("No compatible constructor found");
-        }
-    else //overloaded w/same arity
-        {
-        for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
             {
-            Constructor ctor = (Constructor) iterator.next();
-            Class[] params = ctor.getParameterTypes();
-            if(isCompatible(params, args))
-                {
-                Object[] boxedArgs = boxArgs(params, args);
-                return ctor.newInstance(boxedArgs);
-                }
+            if(found == null)
+                found = ctor;
+            else
+                return null; //more than one matching
             }
-        throw new IllegalArgumentException("No matching ctor found");
         }
+    //todo - verify that at least one ctor can handle arity (requires variadic detection)
+    return found;
     }
 
-private static boolean isCompatible(Class[] parameterTypes, PersistentArrayList args) {
-    if(parameterTypes.length != args.count())
-        return false;
-    for(int i=0;i<parameterTypes.length;i++)
-        {
-        Expr e = (Expr) args.nth(i);
-        }
-}
 
 private static Expr analyzeLet(C context, ISeq form) throws Exception {
     //(let (var val var2 val2 ...) body...)
@@ -1231,6 +1268,9 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
         return registerKeyword((Keyword) sym);
     else if (sym instanceof ClassSymbol)
         return new HostClassExpr((ClassSymbol) sym);
+    else if (sym instanceof StaticMemberSymbol)
+        return new HostStaticFieldExpr((StaticMemberSymbol) sym);
+    //todo have InstanceMemberSymbol yield accessor when expression
     else
         {
         String typeHint = typeHint(sym);
@@ -1470,13 +1510,13 @@ static class HostClassExpr extends AHostExpr {
 
 }
 
-static class HostStaticExpr extends AHostExpr {
+static class HostStaticFieldExpr extends AHostExpr {
     final StaticMemberSymbol sym;
     final String resolvedClassName;
     final Class type;
-    final Class membertype;
+    final Class fieldType;
 
-    public HostStaticExpr(StaticMemberSymbol sym) throws Exception {
+    public HostStaticFieldExpr(StaticMemberSymbol sym) throws Exception {
         this.sym = sym;
         this.resolvedClassName = resolveHostClassname(sym.className);
         this.type = getTypeNamed(resolvedClassName);
@@ -1484,7 +1524,7 @@ static class HostStaticExpr extends AHostExpr {
         if (f == null)
             throw new Exception(String.format("Can't find field %1$ in class %2$",
                                               sym.memberName, resolvedClassName));
-        membertype = f.getType();
+        fieldType = f.getType();
     }
 
     public void emitHostExpr() throws Exception {
@@ -1492,7 +1532,7 @@ static class HostStaticExpr extends AHostExpr {
     }
 
     public Class getHostType() throws Exception {
-        return membertype;
+        return fieldType;
     }
 
 }
@@ -1590,6 +1630,15 @@ static class LocalBindingExpr extends AnExpr {
     public void emitExpression() throws Exception {
         format("~A", b.getExpr());
     }
+
+    public Class getHostType() throws Exception {
+        String th = typeHint;
+        if(th == null)
+            th = b.typeHint;
+        if(th == null)
+            return null;
+        return getTypeNamed(resolveHostClassname(th));
+    }
 }
 
 static class VarExpr extends AnExpr {
@@ -1608,6 +1657,14 @@ static class VarExpr extends AnExpr {
     public void emitExpression() throws Exception {
         format("~A.getValue()", getName());
     }
+
+    public Class getHostType() throws Exception {
+        if(typeHint == null)
+            return null;
+        return getTypeNamed(resolveHostClassname(typeHint));
+    }
+
+
 }
 
 static class DefExpr extends AnExpr {
