@@ -197,19 +197,19 @@ static Object boxArg(Class paramType, Object arg)
 		{
 		Num n = (Num) arg;
 		if(paramType == int.class)
-			return RT.box(n.intValue());
+			return n.intValue();
 		else if(paramType == float.class)
-			return RT.box(n.floatValue());
+			return n.floatValue();
 		else if(paramType == double.class)
-			return RT.box(n.doubleValue());
+			return n.doubleValue();
 		else if(paramType == long.class)
-			return RT.box(n.longValue());
+			return n.longValue();
 		else if(paramType == char.class)
-			return RT.box((char) n.intValue());
+			return (char) n.intValue();
 		else if(paramType == short.class)
-			return RT.box(n.shortValue());
+			return n.shortValue();
 		else
-			return RT.box(n.byteValue());
+			return n.byteValue();
 		}
 	else
 		return arg;

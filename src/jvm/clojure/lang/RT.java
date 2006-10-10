@@ -285,39 +285,44 @@ static public Character box(char x)
     return new Character(x);
     }
 
-static public Boolean box(boolean x)
+static public Object box(boolean x)
     {
-    return Boolean.valueOf(x);
+    return x?T:null;
     }
 
-static public Byte box(byte x)
+static public Object box(Boolean x)
     {
-    return new Byte(x);
+    return x?T:null;
     }
 
-static public Short box(short x)
+static public Num box(byte x)
     {
-    return new Short(x);
+    return Num.from(x);
     }
 
-static public Integer box(int x)
+static public Num box(short x)
     {
-    return new Integer(x);
+    return Num.from(x);
     }
 
-static public Long box(long x)
+static public Num box(int x)
     {
-    return new Long(x);
+        return Num.from(x);
     }
 
-static public Float box(float x)
+static public Num box(long x)
     {
-    return new Float(x);
+        return Num.from(x);
     }
 
-static public Double box(double x)
+static public Num box(float x)
     {
-    return new Double(x);
+        return Num.from(x);
+    }
+
+static public Num box(double x)
+    {
+        return Num.from(x);
     }
 
 static public char charCast(Object x)

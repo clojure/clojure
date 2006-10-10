@@ -302,41 +302,41 @@ static public Object assocN(int n, Object val, Object coll) {
 		return x;
         }
 
-    static public Object box(bool x)
-        {
-            return x;
-        }
+	static public Object box(bool x)
+		{
+		return x ? T : null;
+		}
 
-    static public Object box(byte x)
-        {
-            return x;
-        }
+	static public Num box(byte x)
+		{
+		return Num.from(x);
+		}
 
-    static public Object box(short x)
-        {
-            return x;
-        }
+	static public Num box(short x)
+		{
+		return Num.from(x);
+		}
 
-    static public Object box(int x)
-        {
-            return x;
-        }
+	static public Num box(int x)
+		{
+		return Num.from(x);
+		}
 
-    static public Object box(long x)
-        {
-            return x;
-        }
+	static public Num box(long x)
+		{
+		return Num.from(x);
+		}
 
-    static public Object box(float x)
-        {
-            return x;
-        }
+	static public Num box(float x)
+		{
+		return Num.from(x);
+		}
 
-    static public Object box(double x)
-        {
-            return x;
-        }
-
+	static public Num box(double x)
+		{
+		return Num.from(x);
+		}
+	
     static public char charCast(Object x)	{    return Convert.ToChar(x);	}
 
     static public bool booleanCast(Object x)	{	if(x is Boolean)
