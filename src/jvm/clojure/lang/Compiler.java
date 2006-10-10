@@ -15,8 +15,12 @@ package clojure.lang;
 import java.io.StringWriter;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-public class Compiler{
+public class Compiler {
 ///*
 static Symbol DEF = Symbol.intern("def");
 static Symbol FN = Symbol.intern("fn");
@@ -55,7 +59,7 @@ static public Var USES = Module.intern("clojure", "^compiler-uses");
 //ISeq FnExprs
 static public Var FNS = Module.intern("clojure", "^compiler-fns");
 
-static public  IPersistentMap CHAR_MAP =
+static public IPersistentMap CHAR_MAP =
         new PersistentArrayMap('-', "_DSH_",
                                '.', "_DOT_",
                                ':', "_CLN_",
@@ -77,7 +81,7 @@ static public  IPersistentMap CHAR_MAP =
                                '[', "_LBK_",
                                ']', "_RBK_",
                                '/', "_FSL_",
-                               '\\',"_BSL_",
+                               '\\', "_BSL_",
                                '?', "_QM_");
 
 private static final int MAX_POSITIONAL_ARITY = 20;
@@ -100,7 +104,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
         format("public class ~A{~%", className);
 
         PersistentArrayList forms = new PersistentArrayList(20);
-        for(LineNumberingPushbackReader reader : files)
+        for (LineNumberingPushbackReader reader : files)
             {
             try
                 {
@@ -110,19 +114,19 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
                 Object eof = new Object();
                 Object form = null;
 
-                while((form = LispReader.read(reader,false,eof,false)) != eof)
+                while ((form = LispReader.read(reader, false, eof, false)) != eof)
                     {
                     form = macroexpand(form);
-                    if(!(form instanceof ISeq))
+                    if (!(form instanceof ISeq))
                         throw new Exception("No atoms allowed at top level");
                     Object op = RT.first(form);
 
                     //enact import and use at compile-time
-                    if(op == IMPORT)
+                    if (op == IMPORT)
                         {
                         //todo implement import
                         }
-                    else if(op == USE)
+                    else if (op == USE)
                         {
                         //todo implement use
                         }
@@ -137,12 +141,12 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
                 }
             }
         //declare static members for keywords, vars
-        for(ISeq keys = RT.seq(KEYWORDS.getValue());keys != null;keys = keys.rest())
+        for (ISeq keys = RT.seq(KEYWORDS.getValue()); keys != null; keys = keys.rest())
             {
             KeywordExpr k = (KeywordExpr) ((IMapEntry) keys.first()).val();
             format("static Keyword ~A;~%", k.emitExpressionString());
             }
-        for(ISeq vars = RT.seq(VARS.getValue());vars != null;vars = vars.rest())
+        for (ISeq vars = RT.seq(VARS.getValue()); vars != null; vars = vars.rest())
             {
             Var v = (Var) ((IMapEntry) vars.first()).val();
             format("static Var ~A;~%", munge(v.toString()));
@@ -151,8 +155,8 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
         //todo declare static members for syms, quoted aggregates
 
         //emit nested static class/method declarations for nested fns
-        PersistentArrayList fns = (PersistentArrayList)FNS.getValue();
-        for(int f =0;f<fns.count();f++)
+        PersistentArrayList fns = (PersistentArrayList) FNS.getValue();
+        for (int f = 0; f < fns.count(); f++)
             {
             FnExpr fn = (FnExpr) fns.nth(f);
             fn.emitDeclaration();
@@ -160,31 +164,31 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 
         //define the load function
         format("public void load() throws Exception{~%");
-            //init the keywords and vars
-            for(ISeq keys = RT.seq(KEYWORDS.getValue());keys != null;keys = keys.rest())
-                {
-                KeywordExpr k = (KeywordExpr) ((IMapEntry) keys.first()).val();
-                format("~A = (Keyword)Symbol.intern(~S);~%", k.emitExpressionString(), k.sym.name);
-                }
-            for(ISeq vars = RT.seq(VARS.getValue());vars != null;vars = vars.rest())
-                {
-                Var v = (Var) ((IMapEntry) vars.first()).val();
-                format("~A = Module.intern(~S,~S);~%", munge(v.toString()), v.module.name,v.name.name);
-                }
-            //todo init syms and quoted aggregates
-            //emit the top level forms
-            for(int i = 0;i<forms.count();i++)
-                {
-                Expr e = (Expr) forms.nth(i);
-                e.emitStatement();
-                }
+        //init the keywords and vars
+        for (ISeq keys = RT.seq(KEYWORDS.getValue()); keys != null; keys = keys.rest())
+            {
+            KeywordExpr k = (KeywordExpr) ((IMapEntry) keys.first()).val();
+            format("~A = (Keyword)Symbol.intern(~S);~%", k.emitExpressionString(), k.sym.name);
+            }
+        for (ISeq vars = RT.seq(VARS.getValue()); vars != null; vars = vars.rest())
+            {
+            Var v = (Var) ((IMapEntry) vars.first()).val();
+            format("~A = Module.intern(~S,~S);~%", munge(v.toString()), v.module.name, v.name.name);
+            }
+        //todo init syms and quoted aggregates
+        //emit the top level forms
+        for (int i = 0; i < forms.count(); i++)
+            {
+            Expr e = (Expr) forms.nth(i);
+            e.emitStatement();
+            }
         //close load function
         format("}~%");
 
         //close class def
         format("}~%");
         }
-    catch(Exception e)
+    catch (Exception e)
         {
         e.printStackTrace();
         }
@@ -200,12 +204,12 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
     return w.toString();
 }
 
-static String munge(String name){
+static String munge(String name) {
     StringBuilder sb = new StringBuilder();
-    for(char c : name.toCharArray())
+    for (char c : name.toCharArray())
         {
         String sub = (String) CHAR_MAP.get(c);
-        if(sub != null)
+        if (sub != null)
             sb.append(sub);
         else
             sb.append(c);
@@ -213,9 +217,10 @@ static String munge(String name){
     return sb.toString();
 }
 
-enum C{STATEMENT,EXPRESSION,RETURN,FN}
+enum C {
+    STATEMENT,EXPRESSION,RETURN,FN}
 
-interface Expr{
+interface Expr {
 
     void emitReturn() throws Exception;
 
@@ -224,39 +229,53 @@ interface Expr{
     void emitExpression() throws Exception;
 
     String emitExpressionString() throws Exception;
+
+    Class getHostType() throws Exception;
+
+    boolean isHostExpr();
 }
 
-static void format(String str,Object... args) throws Exception {
+static void format(String str, Object... args) throws Exception {
     RT.format(RT.T, str, args);
 }
 
-static class AnExpr implements Expr{
+static class AnExpr implements Expr {
 
-    public void emitReturn() throws Exception{
+    public void emitReturn() throws Exception {
         format("return ");
         emitExpression();
         format(";~%");
     }
 
-    public void emitStatement() throws Exception{
+    public void emitStatement() throws Exception {
         emitExpression();
         format(";~%");
     }
 
-    public void emitExpression() throws Exception{
+    public void emitExpression() throws Exception {
         throw new UnsupportedOperationException();
     }
 
     public String emitExpressionString() throws Exception {
         StringWriter w = new StringWriter();
-        try{
+        try
+            {
             _CRT_OUT.pushThreadBinding(w);
             emitExpression();
             return w.toString();
-        }
-        finally{
+            }
+        finally
+            {
             _CRT_OUT.popThreadBinding();
-        }
+            }
+    }
+
+    public Class getHostType() throws Exception {
+        return null;
+    }
+
+    public boolean isHostExpr() {
+        return false;
     }
 
     public String toString() {
@@ -267,14 +286,29 @@ static class AnExpr implements Expr{
         catch (Exception e)
             {
             //declared exceptions are an incredibly bad idea !!!
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
             return e.toString();
             }
     }
 }
 
-public static void processForm(Object form) throws Exception{
-    if(RT.first(form) == DEF)
+static abstract class AHostExpr extends AnExpr{
+
+    public boolean isHostExpr() {
+        return false;
+    }
+
+     public void emitExpression() throws Exception {
+         format("RT.box(");
+         emitHostExpr();
+         format(")");
+     }
+
+     abstract void emitHostExpr() throws Exception;
+}
+
+public static void processForm(Object form) throws Exception {
+    if (RT.first(form) == DEF)
         {
         convert(form);
         }
@@ -282,63 +316,63 @@ public static void processForm(Object form) throws Exception{
         throw new UnsupportedOperationException();
 }
 
-private static void convert(Object form) throws Exception{
+private static void convert(Object form) throws Exception {
     Expr e = analyze(C.STATEMENT, form);
 }
 
 private static Expr analyze(C context, Object form) throws Exception {
-    if(form == null)
+    if (form == null)
         return NIL_EXPR;
-    else if(form instanceof Symbol)
+    else if (form instanceof Symbol)
         return analyzeSymbol((Symbol) form, false);
-    else if(form instanceof ISeq)
+    else if (form instanceof ISeq)
         return analyzeSeq(context, (ISeq) form);
-    else if(form instanceof Num || form instanceof String)
+    else if (form instanceof Num || form instanceof String)
         return new LiteralExpr(form);
-    else if(form instanceof Character)
-        return new CharExpr((Character)form);
+    else if (form instanceof Character)
+        return new CharExpr((Character) form);
     else
         throw new UnsupportedOperationException();
 }
 
 private static Expr analyzeSeq(C context, ISeq form) throws Exception {
     Object op = RT.first(form);
-    if(op == DEF)
+    if (op == DEF)
         return analyzeDef(context, form);
-    else if(op == FN)
+    else if (op == FN)
         return analyzeFn(context, form);
-    else if(op == DO)
+    else if (op == DO)
         return analyzeDo(context, form);
-    else if(op == IF)
+    else if (op == IF)
         return analyzeIf(context, form);
-    else if(op == OR)
+    else if (op == OR)
         return analyzeOr(context, form);
-    else if(op == AND)
+    else if (op == AND)
         return analyzeAnd(context, form);
-    else if(op == LET)
+    else if (op == LET)
         return analyzeLet(context, form);
-    else if(op == LET_STAR_)
+    else if (op == LET_STAR_)
         return analyzeLetStar(context, form);
-    else if(op == LETFN)
+    else if (op == LETFN)
         return analyzeLetFn(context, form);
-    else if(op == NOT || op == NULL_QM_)
+    else if (op == NOT || op == NULL_QM_)
         return analyzeNot(context, form);
     else
         {
-        Expr fexpr = (op instanceof Symbol)?analyzeSymbol((Symbol)op, true):analyze(C.EXPRESSION, op);
+        Expr fexpr = (op instanceof Symbol) ? analyzeSymbol((Symbol) op, true) : analyze(C.EXPRESSION, op);
         PersistentArrayList args = new PersistentArrayList(4);
-        for(ISeq s = RT.rest(form);s != null;s=s.rest())
+        for (ISeq s = RT.rest(form); s != null; s = s.rest())
             args = args.cons(analyze(C.EXPRESSION, macroexpand(s.first())));
-        if(fexpr instanceof FnExpr)
-            ((FnExpr)fexpr).isCalledDirectly = true;
-        if(fexpr instanceof HostExpr)
-            return new InvokeHostExpr((HostExpr) fexpr, args);
+        if (fexpr instanceof FnExpr)
+            ((FnExpr) fexpr).isCalledDirectly = true;
+        if (fexpr instanceof HostClassExpr)
+            return new InvokeHostClassExpr((HostClassExpr) fexpr, args);
         else
             return new InvokeExpr(fexpr, args);
         }
 }
 
-static class InvokeExpr extends AnExpr{
+static class InvokeExpr extends AnExpr {
     Expr fexpr;
     PersistentArrayList args;
 
@@ -350,15 +384,15 @@ static class InvokeExpr extends AnExpr{
     public void emitExpression() throws Exception {
         FnExpr staticMethod = null;
         ISeq argseq = RT.seq(args);
-        if(fexpr instanceof FnExpr && ((FnExpr)fexpr).willBeStaticMethod())
+        if (fexpr instanceof FnExpr && ((FnExpr) fexpr).willBeStaticMethod())
             staticMethod = (FnExpr) fexpr;
-        else if(fexpr instanceof LocalBindingExpr && ((LocalBindingExpr)fexpr).b.bindsToStaticFn())
+        else if (fexpr instanceof LocalBindingExpr && ((LocalBindingExpr) fexpr).b.bindsToStaticFn())
             staticMethod = ((LocalBindingExpr) fexpr).b.letfn;
-        if(staticMethod != null)
+        if (staticMethod != null)
             {
-            ISeq closes  = RT.keys(staticMethod.closes);
-            format("~A(~{~A~^, ~}",staticMethod.getName(),closes);
-            if(closes != null && argseq != null)
+            ISeq closes = RT.keys(staticMethod.closes);
+            format("~A(~{~A~^, ~}", staticMethod.getName(), closes);
+            if (closes != null && argseq != null)
                 format(",");
             format("~{~A~^, ~})", argseq);
             }
@@ -369,25 +403,79 @@ static class InvokeExpr extends AnExpr{
     }
 }
 
-static class InvokeHostExpr extends AnExpr{
-    HostExpr fexpr;
+static class InvokeHostClassExpr extends AHostExpr {
+    HostClassExpr fexpr;
     PersistentArrayList args;
 
-    public InvokeHostExpr(HostExpr fexpr, PersistentArrayList args) {
+    public InvokeHostClassExpr(HostClassExpr fexpr, PersistentArrayList args) {
         this.fexpr = fexpr;
         this.args = args;
     }
+
+    public Class getHostType() throws Exception {
+        return fexpr.type;
+    }
+
+    void emitHostExpr() throws Exception {
+        format("(new ~A(~{~A~^, ~}))", fexpr.resolvedClassName, RT.seq(args));
+    }
+}
+
+public static Constructor findConstructor(Class c, PersistentArrayList args)  throws Exception
+    {
+    Constructor[] allctors = c.getConstructors();
+    PersistentArrayList ctors = new PersistentArrayList(allctors.length);
+    for(int i = 0; i < allctors.length; i++)
+        {
+        Constructor ctor = allctors[i];
+        if(ctor.getParameterTypes().length == args.count())
+            ctors = ctors.cons(ctor);
+        }
+    if(ctors.count() == 0)
+        {
+        throw new IllegalArgumentException("No matching ctor found");
+        }
+    else if(ctors.count() == 1)
+        {
+        Constructor ctor = (Constructor) ctors.nth(0);
+        if(isCompatible(ctor.getParameterTypes(),args))
+            return ctor;
+        throw new Exception("No compatible constructor found");
+        }
+    else //overloaded w/same arity
+        {
+        for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
+            {
+            Constructor ctor = (Constructor) iterator.next();
+            Class[] params = ctor.getParameterTypes();
+            if(isCompatible(params, args))
+                {
+                Object[] boxedArgs = boxArgs(params, args);
+                return ctor.newInstance(boxedArgs);
+                }
+            }
+        throw new IllegalArgumentException("No matching ctor found");
+        }
+    }
+
+private static boolean isCompatible(Class[] parameterTypes, PersistentArrayList args) {
+    if(parameterTypes.length != args.count())
+        return false;
+    for(int i=0;i<parameterTypes.length;i++)
+        {
+        Expr e = (Expr) args.nth(i);
+        }
 }
 
 private static Expr analyzeLet(C context, ISeq form) throws Exception {
     //(let (var val var2 val2 ...) body...)
     ISeq bindings = (ISeq) RT.second(form);
     //special case (let () expr) ==> expr
-    if(bindings == null && form.count() < 4)
+    if (bindings == null && form.count() < 4)
         return analyze(context, macroexpand(RT.third(form)));
     ISeq body = RT.rest(RT.rest(form));
 
-    if(context == C.EXPRESSION)
+    if (context == C.EXPRESSION)
         {
         //(let (a b) c) -> ((fn (a) c) b)
         PersistentArrayList parms = new PersistentArrayList(4);
@@ -397,7 +485,7 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception {
             parms = parms.cons(RT.first(bs));
             args = args.cons(RT.second(bs));
             }
-        return analyze(context, RT.cons(RT.listStar(FN, RT.seq(parms), body),RT.seq(args)));
+        return analyze(context, RT.cons(RT.listStar(FN, RT.seq(parms), body), RT.seq(args)));
         }
 
     PersistentArrayList bindingInits = new PersistentArrayList(4);
@@ -408,13 +496,13 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception {
         lb.typeHint = typeHint((Symbol) RT.first(bs));
         bindingInits = bindingInits.cons(new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs))));
         }
-     try
+    try
         {
         LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
-        for(int i=0;i<bindingInits.count();i++)
+        for (int i = 0; i < bindingInits.count(); i++)
             {
             BindingInit bi = (BindingInit) bindingInits.nth(i);
-            if(bi.init instanceof FnExpr)
+            if (bi.init instanceof FnExpr)
                 {
                 bi.binding.letfn = (FnExpr) bi.init;
                 ((FnExpr) bi.init).binding = bi.binding;
@@ -423,46 +511,46 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception {
             }
         return new LetExpr(bindingInits, analyzeBody(context, body));
         }
-     finally
-         {
-         LOCAL_ENV.popThreadBinding();
-         }
+    finally
+        {
+        LOCAL_ENV.popThreadBinding();
+        }
 
 }
 
 private static Expr analyzeLetFn(C context, ISeq form) throws Exception {
     //(letfn ((foo [what can occur after fn]) (bar [what can occur after fn])) body ...)
-    if(context == C.EXPRESSION)
+    if (context == C.EXPRESSION)
         return analyze(context, RT.list(RT.list(FN, null, form)));
     try
-       {
-       LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
-       ISeq bindings = (ISeq) RT.second(form);
-       ISeq body = RT.rest(RT.rest(form));
-       PersistentArrayList bindingPairs = new PersistentArrayList(4);
-       //add all fn names to env before analyzing bodies
-       for (ISeq bs = bindings; bs != null; bs = RT.rest(bs))
-           {
-           Object bform = RT.first(bs);
-           Symbol fsym = (Symbol) RT.first(bform);
-           LocalBinding lb = new LocalBinding(baseSymbol(fsym));
-           lb.typeHint = typeHint(fsym);
-           registerLocal(lb);
-           bindingPairs = bindingPairs.cons(new Tuple(lb, RT.cons(FN, RT.rest(bform))));
-           }
+        {
+        LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+        ISeq bindings = (ISeq) RT.second(form);
+        ISeq body = RT.rest(RT.rest(form));
+        PersistentArrayList bindingPairs = new PersistentArrayList(4);
+        //add all fn names to env before analyzing bodies
+        for (ISeq bs = bindings; bs != null; bs = RT.rest(bs))
+            {
+            Object bform = RT.first(bs);
+            Symbol fsym = (Symbol) RT.first(bform);
+            LocalBinding lb = new LocalBinding(baseSymbol(fsym));
+            lb.typeHint = typeHint(fsym);
+            registerLocal(lb);
+            bindingPairs = bindingPairs.cons(new Tuple(lb, RT.cons(FN, RT.rest(bform))));
+            }
 
-       PersistentArrayList bindingInits = new PersistentArrayList(4);
-       for(int i=0;i<bindingPairs.count();i++)
-           {
-           Tuple bpair = (Tuple) bindingPairs.nth(i);
-           LocalBinding lb = (LocalBinding) bpair.nth(0);
-           FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, bpair.nth(1));
-           fexpr.binding = lb;
-           lb.letfn = fexpr;
-           bindingInits = bindingInits.cons(new BindingInit(lb, fexpr));
-           }
-       return new LetExpr(bindingInits, analyzeBody(context, body));
-       }
+        PersistentArrayList bindingInits = new PersistentArrayList(4);
+        for (int i = 0; i < bindingPairs.count(); i++)
+            {
+            Tuple bpair = (Tuple) bindingPairs.nth(i);
+            LocalBinding lb = (LocalBinding) bpair.nth(0);
+            FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, bpair.nth(1));
+            fexpr.binding = lb;
+            lb.letfn = fexpr;
+            bindingInits = bindingInits.cons(new BindingInit(lb, fexpr));
+            }
+        return new LetExpr(bindingInits, analyzeBody(context, body));
+        }
     finally
         {
         LOCAL_ENV.popThreadBinding();
@@ -474,34 +562,34 @@ private static Expr analyzeLetStar(C context, ISeq form) throws Exception {
     //(let* (var val var2 val2 ...) body...)
     ISeq bindings = (ISeq) RT.second(form);
     //special case (let* () expr) ==> expr
-    if(bindings == null && form.count() < 4)
+    if (bindings == null && form.count() < 4)
         return analyze(context, macroexpand(RT.third(form)));
     ISeq body = RT.rest(RT.rest(form));
 
-    if(context == C.EXPRESSION)
+    if (context == C.EXPRESSION)
         return analyze(context, RT.list(RT.list(FN, null, form)));
 
     try
-       {
-       LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
-       PersistentArrayList bindingInits = new PersistentArrayList(4);
-       for (ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
-           {
-           LocalBinding lb = new LocalBinding(baseSymbol((Symbol) RT.first(bs)));
-           lb.typeHint = typeHint((Symbol) RT.first(bs));
-           BindingInit bi = new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs)));
-           bindingInits = bindingInits.cons(bi);
-          if(bi.init instanceof FnExpr)
+        {
+        LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+        PersistentArrayList bindingInits = new PersistentArrayList(4);
+        for (ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
             {
-            bi.binding.letfn = (FnExpr) bi.init;
-            ((FnExpr) bi.init).binding = bi.binding;
+            LocalBinding lb = new LocalBinding(baseSymbol((Symbol) RT.first(bs)));
+            lb.typeHint = typeHint((Symbol) RT.first(bs));
+            BindingInit bi = new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs)));
+            bindingInits = bindingInits.cons(bi);
+            if (bi.init instanceof FnExpr)
+                {
+                bi.binding.letfn = (FnExpr) bi.init;
+                ((FnExpr) bi.init).binding = bi.binding;
+                }
+            //sequential enhancement of env
+            registerLocal(lb);
             }
-           //sequential enhancement of env
-           registerLocal(lb);
-           }
 
-       return new LetExpr(bindingInits, analyzeBody(context, body));
-       }
+        return new LetExpr(bindingInits, analyzeBody(context, body));
+        }
     finally
         {
         LOCAL_ENV.popThreadBinding();
@@ -509,7 +597,7 @@ private static Expr analyzeLetStar(C context, ISeq form) throws Exception {
 
 }
 
-static class LetExpr extends AnExpr{
+static class LetExpr extends AnExpr {
     PersistentArrayList bindingInits;
     Expr body;
 
@@ -524,10 +612,10 @@ static class LetExpr extends AnExpr{
     }
 
     private void emitBindings() throws Exception {
-        for(int i=0;i<bindingInits.count();i++)
+        for (int i = 0; i < bindingInits.count(); i++)
             {
             BindingInit bi = (BindingInit) bindingInits.nth(i);
-            if(!(bi.init instanceof FnExpr && ((FnExpr)bi.init).willBeStaticMethod()))
+            if (!(bi.init instanceof FnExpr && ((FnExpr) bi.init).willBeStaticMethod()))
                 format("~A = ~A;~%", bi.binding.getExpr(), bi.init.emitExpressionString());
             }
     }
@@ -539,7 +627,7 @@ static class LetExpr extends AnExpr{
 
 }
 
-static class BindingInit{
+static class BindingInit {
     LocalBinding binding;
     Expr init;
 
@@ -552,57 +640,58 @@ static class BindingInit{
 private static Expr analyzeAnd(C context, ISeq form) throws Exception {
     //(and) (and x) (and x y ...)
     //(or)  (or X) (or x y ...)
-    if(RT.count(form) == 1)
-        return analyze(context,RT.T);
-    else if(RT.count(form) == 2)
+    if (RT.count(form) == 1)
+        return analyze(context, RT.T);
+    else if (RT.count(form) == 2)
         return analyze(context, macroexpand(RT.second(form)));
 
     PersistentArrayList exprs = new PersistentArrayList(2);
-    for(ISeq es = RT.rest(form);es!=null;es = es.rest())
+    for (ISeq es = RT.rest(form); es != null; es = es.rest())
         exprs = exprs.cons(analyze(C.EXPRESSION, macroexpand(es.first())));
     return new AndExpr(exprs);
 }
 
-static class AndExpr extends AnExpr{
+static class AndExpr extends AnExpr {
     final PersistentArrayList exprs;
 
-    public AndExpr(PersistentArrayList exprs){
+    public AndExpr(PersistentArrayList exprs) {
         this.exprs = exprs;
     }
 
-    public void emitStatement() throws Exception{
+    public void emitStatement() throws Exception {
         format("if(");
-        for(int i=0;i<exprs.count();i++)
+        for (int i = 0; i < exprs.count(); i++)
             {
-            format("~A != null",((Expr)exprs.nth(i)).emitExpressionString());
-            if(i < exprs.count()-1)
+            format("~A != null", ((Expr) exprs.nth(i)).emitExpressionString());
+            if (i < exprs.count() - 1)
                 format(" && ");
             }
         format(")~%;~%");
     }
-    public void emitExpression() throws Exception{
+
+    public void emitExpression() throws Exception {
         format("((");
-        for(int i=0;i<exprs.count();i++)
+        for (int i = 0; i < exprs.count(); i++)
             {
-            if(i < exprs.count()-1)
-                format("~A != null",((Expr)exprs.nth(i)).emitExpressionString());
-            if(i < exprs.count()-2)
+            if (i < exprs.count() - 1)
+                format("~A != null", ((Expr) exprs.nth(i)).emitExpressionString());
+            if (i < exprs.count() - 2)
                 format(" && ");
-            if(i == exprs.count()-1)
-                format(")?~A:null)",((Expr)exprs.nth(i)).emitExpressionString());
+            if (i == exprs.count() - 1)
+                format(")?~A:null)", ((Expr) exprs.nth(i)).emitExpressionString());
             }
     }
 }
 
 private static Expr analyzeOr(C context, ISeq form) throws Exception {
     //(or)  (or X) (or x y ...)
-    if(RT.count(form) == 1)
+    if (RT.count(form) == 1)
         return NIL_EXPR;
-    else if(RT.count(form) == 2)
+    else if (RT.count(form) == 2)
         return analyze(context, macroexpand(RT.second(form)));
 
     LocalBinding tb = null;
-    if(context != C.STATEMENT)
+    if (context != C.STATEMENT)
         {
         //we'll need a temp var
         tb = new LocalBinding(Symbol.intern("OR_TEMP"));
@@ -610,41 +699,43 @@ private static Expr analyzeOr(C context, ISeq form) throws Exception {
         }
 
     PersistentArrayList exprs = new PersistentArrayList(2);
-    for(ISeq es = RT.rest(form);es!=null;es = es.rest())
+    for (ISeq es = RT.rest(form); es != null; es = es.rest())
         exprs = exprs.cons(analyze(C.EXPRESSION, macroexpand(es.first())));
     return new OrExpr(exprs, tb);
 }
 
-static class OrExpr extends AnExpr{
+static class OrExpr extends AnExpr {
     final PersistentArrayList exprs;
     final LocalBinding tb;
 
-    public OrExpr(PersistentArrayList exprs, LocalBinding tb){
+    public OrExpr(PersistentArrayList exprs, LocalBinding tb) {
         this.exprs = exprs;
         this.tb = tb;
     }
 
-    public void emitStatement() throws Exception{
+    public void emitStatement() throws Exception {
         format("if(");
-        for(int i=0;i<exprs.count();i++)
+        for (int i = 0; i < exprs.count(); i++)
             {
-            format("~A != null",((Expr)exprs.nth(i)).emitExpressionString());
-            if(i < exprs.count()-1)
+            format("~A != null", ((Expr) exprs.nth(i)).emitExpressionString());
+            if (i < exprs.count() - 1)
                 format(" || ");
             }
         format(")~%;~%");
     }
-    public void emitExpression() throws Exception{
+
+    public void emitExpression() throws Exception {
         format("((");
-        for(int i=0;i<exprs.count();i++)
+        for (int i = 0; i < exprs.count(); i++)
             {
-            format("(~A = ~A) != null",tb.getName(),((Expr)exprs.nth(i)).emitExpressionString());
-            if(i < exprs.count()-1)
+            format("(~A = ~A) != null", tb.getName(), ((Expr) exprs.nth(i)).emitExpressionString());
+            if (i < exprs.count() - 1)
                 format(" || ");
             }
-        format(")?~A:null)",tb.getName());
+        format(")?~A:null)", tb.getName());
     }
 }
+
 private static Expr analyzeNot(C context, ISeq form) throws Exception {
     //(not x) or (null? x)
     //hmmm - will these be the same with host boolean arg?
@@ -654,16 +745,16 @@ private static Expr analyzeNot(C context, ISeq form) throws Exception {
 
 private static Expr analyzeIf(C context, ISeq form) throws Exception {
     //(if test then) or (if test then else)
-    if(RT.second(form) == RT.T) //optimize macro-generated (if :t ...) forms
-        return analyze(context,macroexpand(RT.third(form)));
-    else if(RT.second(form) == null)
-        return analyze(context,macroexpand(RT.fourth(form)));
+    if (RT.second(form) == RT.T) //optimize macro-generated (if :t ...) forms
+        return analyze(context, macroexpand(RT.third(form)));
+    else if (RT.second(form) == null)
+        return analyze(context, macroexpand(RT.fourth(form)));
     Expr testExpr = analyze(C.EXPRESSION, macroexpand(RT.second(form)));
     String compare = "!=";
     //lift tests that are not exprs by taking value as test and inverting compare
-    if(testExpr instanceof NotExpr)
+    if (testExpr instanceof NotExpr)
         {
-        testExpr = ((NotExpr)testExpr).expr;
+        testExpr = ((NotExpr) testExpr).expr;
         compare = "==";
         }
     return new IfExpr(testExpr, compare, analyze(context, macroexpand(RT.third(form))),
@@ -673,18 +764,18 @@ private static Expr analyzeIf(C context, ISeq form) throws Exception {
 private static Expr analyzeDo(C context, ISeq form) throws Exception {
     //(do ...)
     //(do) == null
-    if(RT.rest(form) == null)
+    if (RT.rest(form) == null)
         return NIL_EXPR;
-    else if(RT.rest(RT.rest(form)) == null) //(do x) == x
+    else if (RT.rest(RT.rest(form)) == null) //(do x) == x
         return analyze(context, macroexpand(RT.second(form)));
-    else if(context == C.EXPRESSION)
+    else if (context == C.EXPRESSION)
         return analyze(context, RT.list(RT.cons(FN, RT.cons(null, RT.rest(form)))));
     else
         return analyzeBody(context, RT.rest(form));
 
 }
 
-static class IfExpr extends AnExpr{
+static class IfExpr extends AnExpr {
     final Expr testExpr;
     final String compare;
     final Expr thenExpr;
@@ -698,7 +789,7 @@ static class IfExpr extends AnExpr{
     }
 
     public void emitReturn() throws Exception {
-        format("if(~A ~A null)~%", testExpr.emitExpressionString(),compare);
+        format("if(~A ~A null)~%", testExpr.emitExpressionString(), compare);
         format("{~%");
         thenExpr.emitReturn();
         format("}~%");
@@ -709,11 +800,11 @@ static class IfExpr extends AnExpr{
     }
 
     public void emitStatement() throws Exception {
-        format("if(~A ~A null)~%", testExpr.emitExpressionString(),compare);
+        format("if(~A ~A null)~%", testExpr.emitExpressionString(), compare);
         format("{~%");
         thenExpr.emitStatement();
         format("}~%");
-        if(!(elseExpr instanceof NilExpr))
+        if (!(elseExpr instanceof NilExpr))
             {
             format("else~%");
             format("{~%");
@@ -723,16 +814,17 @@ static class IfExpr extends AnExpr{
     }
 
     public void emitExpression() throws Exception {
-        format("(~A ~A null?", testExpr.emitExpressionString(),compare);
+        format("(~A ~A null?", testExpr.emitExpressionString(), compare);
         thenExpr.emitExpression();
         format(":");
         elseExpr.emitExpression();
         format(")");
     }
 }
+
 private static Expr analyzeBody(C context, ISeq forms) throws Exception {
     PersistentArrayList exprs = new PersistentArrayList(4);
-    for(;forms != null;forms = forms.rest())
+    for (; forms != null; forms = forms.rest())
         {
         Expr e = (context == C.STATEMENT || RT.rest(forms) != null) ?
                  analyze(C.STATEMENT, macroexpand(forms.first()))
@@ -743,30 +835,31 @@ private static Expr analyzeBody(C context, ISeq forms) throws Exception {
     return new BodyExpr(exprs);
 }
 
-static class BodyExpr extends AnExpr{
+static class BodyExpr extends AnExpr {
     PersistentArrayList exprs;
 
-    public BodyExpr(PersistentArrayList exprs){
+    public BodyExpr(PersistentArrayList exprs) {
         this.exprs = exprs;
     }
 
-    public void emitStatement() throws Exception{
-        if(exprs.count() == 0)
+    public void emitStatement() throws Exception {
+        if (exprs.count() == 0)
             return;
-        for(int i=0;i<exprs.count();i++)
-            ((Expr)exprs.nth(i)).emitStatement();
+        for (int i = 0; i < exprs.count(); i++)
+            ((Expr) exprs.nth(i)).emitStatement();
     }
-    public void emitReturn() throws Exception{
-        if(exprs.count() == 0)
+
+    public void emitReturn() throws Exception {
+        if (exprs.count() == 0)
             NIL_EXPR.emitReturn();
         else
             {
-            for(int i=0;i<exprs.count();i++)
+            for (int i = 0; i < exprs.count(); i++)
                 {
-                if(i < exprs.count()-1)
-                    ((Expr)exprs.nth(i)).emitStatement();
+                if (i < exprs.count() - 1)
+                    ((Expr) exprs.nth(i)).emitStatement();
                 else
-                    ((Expr)exprs.nth(i)).emitReturn();
+                    ((Expr) exprs.nth(i)).emitReturn();
                 }
             }
     }
@@ -775,40 +868,40 @@ static class BodyExpr extends AnExpr{
 private static Expr analyzeFn(C context, ISeq form) throws Exception {
     //(fn (args) body) or (fn ((args) body) ((args2) body2) ...)
     //turn former into latter
-    if(RT.second(form) == null ||
-       !(RT.first(RT.second(form)) == null || RT.first(RT.second(form)) instanceof ISeq))
+    if (RT.second(form) == null ||
+        !(RT.first(RT.second(form)) == null || RT.first(RT.second(form)) instanceof ISeq))
         form = RT.list(FN, RT.rest(form));
 
-    FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY+1];
+    FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
     FnMethod variadicMethod = null;
     FnExpr fn = new FnExpr();
-    for(ISeq s = RT.rest(form);s != null;s = RT.rest(s))
+    for (ISeq s = RT.rest(form); s != null; s = RT.rest(s))
         {
-        FnMethod f = analyzeMethod(fn,(ISeq) RT.first(s));
-        if(f.isVariadic())
+        FnMethod f = analyzeMethod(fn, (ISeq) RT.first(s));
+        if (f.isVariadic())
             {
-            if(variadicMethod == null)
+            if (variadicMethod == null)
                 variadicMethod = f;
             else
                 throw new Exception("Can't have more than 1 variadic overload");
             }
-        else if(methodArray[f.reqParms.count()] == null)
+        else if (methodArray[f.reqParms.count()] == null)
             methodArray[f.reqParms.count()] = f;
         else
             throw new Exception("Can't have 2 overloads with same arity");
         }
-    if(variadicMethod != null)
+    if (variadicMethod != null)
         {
-        for(int i = variadicMethod.reqParms.count() + 1;i<=MAX_POSITIONAL_ARITY;i++)
-            if(methodArray[i] != null)
+        for (int i = variadicMethod.reqParms.count() + 1; i <= MAX_POSITIONAL_ARITY; i++)
+            if (methodArray[i] != null)
                 throw new Exception("Can't have fixed arity function with more params than variadic function");
         }
 
     IPersistentCollection methods = null;
-    for(int i = 0;i<methodArray.length;i++)
-        if(methodArray[i] != null)
+    for (int i = 0; i < methodArray.length; i++)
+        if (methodArray[i] != null)
             methods = RT.cons(methodArray[i], methods);
-    if(variadicMethod != null)
+    if (variadicMethod != null)
         methods = RT.cons(variadicMethod, methods);
 
     fn.methods = methods;
@@ -817,7 +910,7 @@ private static Expr analyzeFn(C context, ISeq form) throws Exception {
     return fn;
 }
 
-static class FnExpr extends AnExpr{
+static class FnExpr extends AnExpr {
     IPersistentCollection methods;
     FnMethod variadicMethod;
     LocalBinding binding;
@@ -826,10 +919,10 @@ static class FnExpr extends AnExpr{
     //localbinding->itself
     IPersistentMap closes = null;
 
-    String getName(){
-        if(name == null)
+    String getName() {
+        if (name == null)
             {
-            if(binding != null)
+            if (binding != null)
                 name = "FN__" + binding.getName();//munge(binding.sym.name) + "__" + RT.nextID();
             else
                 name = "FN__" + RT.nextID();
@@ -837,9 +930,9 @@ static class FnExpr extends AnExpr{
         return name;
     }
 
-    public void emitExpression() throws Exception{
+    public void emitExpression() throws Exception {
         format("(new ~A(", getName());
-        for(ISeq s = RT.seq(closes);s!=null;s=s.rest())
+        for (ISeq s = RT.seq(closes); s != null; s = s.rest())
             {
             LocalBinding b = (LocalBinding) ((IMapEntry) s.first()).key();
             format("~A", b.getName());
@@ -851,37 +944,37 @@ static class FnExpr extends AnExpr{
 
     public void emitDeclaration() throws Exception {
         PersistentArrayList closesDecls = null;
-        if(closes != null)
+        if (closes != null)
             {
             closesDecls = new PersistentArrayList(closes.count() * 2);
             for (ISeq s = RT.seq(closes); s != null; s = s.rest())
                 {
                 LocalBinding b = (LocalBinding) ((IMapEntry) s.first()).key();
-                if(!b.bindsToStaticFn())
+                if (!b.bindsToStaticFn())
                     {
                     closesDecls = closesDecls.cons(b.typeDeclaration());
                     closesDecls = closesDecls.cons(b.getName());
                     }
                 }
             }
-        if(!willBeStaticMethod())
+        if (!willBeStaticMethod())
             {
             //emit class declaration
             format("static public class ~A extends ~A{~%",
                    getName(),
                    variadicMethod != null ? "clojure.lang.RestFn" : "AFn");
 
-            if(closes != null)
+            if (closes != null)
                 {
                 //emit members and ctor if closure
                 format("~{~A ~A;~%~}", closesDecls);
                 format("public ~A (~{~A ~A~^, ~}){~%", getName(), closesDecls);
-                if(variadicMethod != null) //must call base ctor
+                if (variadicMethod != null) //must call base ctor
                     format("super(~A);~%", variadicMethod.reqParms.count());
                 for (ISeq s = RT.seq(closes); s != null; s = s.rest())
                     {
                     LocalBinding b = (LocalBinding) ((IMapEntry) s.first()).key();
-                    if(!b.bindsToStaticFn())
+                    if (!b.bindsToStaticFn())
                         {
                         format("this.~A = ~A;~%", b.getName(), b.getName());
                         if (s.rest() != null)
@@ -890,7 +983,7 @@ static class FnExpr extends AnExpr{
                     }
                 format("}~%");
                 }
-            else if(variadicMethod != null) //must create ctor in order to call base ctor
+            else if (variadicMethod != null) //must create ctor in order to call base ctor
                 {
                 format("public ~A (){~%", getName());
                 format("super(~A);~%", variadicMethod.reqParms.count());
@@ -905,30 +998,30 @@ static class FnExpr extends AnExpr{
                    closesDecls);
             }
 
-        for(ISeq methods = RT.seq(this.methods);methods != null;methods = methods.rest())
+        for (ISeq methods = RT.seq(this.methods); methods != null; methods = methods.rest())
             {
             //this will run once if static method
             FnMethod m = (FnMethod) methods.first();
-            if(!willBeStaticMethod())
-                 format("public Object ~A(", m.isVariadic()?"doInvoke":"invoke");
-            for(ISeq reqs = RT.seq(m.reqParms);reqs != null;reqs = reqs.rest())
+            if (!willBeStaticMethod())
+                format("public Object ~A(", m.isVariadic() ? "doInvoke" : "invoke");
+            for (ISeq reqs = RT.seq(m.reqParms); reqs != null; reqs = reqs.rest())
                 {
                 LocalBindingExpr be = (LocalBindingExpr) reqs.first();
                 format("Object ~A", be.b.getName());
-                if(be.b.needsBox())
+                if (be.b.needsBox())
                     format("__arg");
-                if(reqs.rest() != null)
+                if (reqs.rest() != null)
                     format(",");
                 }
-            if(m.isVariadic())
+            if (m.isVariadic())
                 {
-                if(m.reqParms.count() > 0)
+                if (m.reqParms.count() > 0)
                     format(",");
                 format("ISeq ");
-                if(m.restParm != null)
+                if (m.restParm != null)
                     {
                     format("~A", m.restParm.b.getName());
-                    if(m.restParm.b.needsBox())
+                    if (m.restParm.b.needsBox())
                         format("__arg");
                     }
                 else
@@ -937,17 +1030,17 @@ static class FnExpr extends AnExpr{
             format(") throws Exception{~%");
 
             //emit declarations for any boxed args
-            for(ISeq reqs = RT.seq(m.reqParms);reqs != null;reqs = reqs.rest())
+            for (ISeq reqs = RT.seq(m.reqParms); reqs != null; reqs = reqs.rest())
                 {
                 LocalBindingExpr be = (LocalBindingExpr) reqs.first();
-                if(be.b.needsBox())
+                if (be.b.needsBox())
                     be.b.emitDeclaration(be.b.getName() + "__arg");
                 }
             //emit declaration for any boxed rest arg
-            if(m.restParm != null && m.restParm.b.needsBox())
+            if (m.restParm != null && m.restParm.b.needsBox())
                 m.restParm.b.emitDeclaration(m.restParm.b.getName() + "__arg");
             //keys are locals, plucked out of rest arg
-            if(m.keyParms != null)
+            if (m.keyParms != null)
                 {
                 format("ISeq __valseq = null;~%");
                 for (ISeq keys = RT.seq(m.keyParms); keys != null; keys = keys.rest())
@@ -965,7 +1058,7 @@ static class FnExpr extends AnExpr{
             for (ISeq locals = RT.seq(m.locals); locals != null; locals = locals.rest())
                 {
                 LocalBinding b = (LocalBinding) ((IMapEntry) locals.first()).key();
-                if(!b.isParam && !b.bindsToStaticFn())
+                if (!b.isParam && !b.bindsToStaticFn())
                     b.emitDeclaration("null");
                 }
 
@@ -975,7 +1068,7 @@ static class FnExpr extends AnExpr{
             }
 
         //end of class
-        if(!willBeStaticMethod())
+        if (!willBeStaticMethod())
             format("}~%");
     }
 
@@ -1002,25 +1095,26 @@ static class FnMethod {
     Expr body = null;
     FnExpr fn;
 
-    public FnMethod(FnExpr fn,FnMethod parent) {
+    public FnMethod(FnExpr fn, FnMethod parent) {
         this.parent = parent;
         this.fn = fn;
     }
 
-    boolean isVariadic(){
+    boolean isVariadic() {
         return keyParms != null || restParm != null;
     }
 }
 
-enum PSTATE{REQ,REST,KEY,DONE}
+enum PSTATE {
+    REQ,REST,KEY,DONE}
 
-private static FnMethod analyzeMethod(FnExpr fn,ISeq form) throws Exception {
+private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception {
     //((args) body)
     ISeq parms = (ISeq) RT.first(form);
     ISeq body = RT.rest(form);
     try
         {
-        FnMethod method = new FnMethod(fn,(FnMethod) METHOD.getValue());
+        FnMethod method = new FnMethod(fn, (FnMethod) METHOD.getValue());
         METHOD.pushThreadBinding(method);
         LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
         PSTATE state = PSTATE.REQ;
@@ -1056,13 +1150,13 @@ private static FnMethod analyzeMethod(FnExpr fn,ISeq form) throws Exception {
                         state = PSTATE.DONE;
                         break;
                     case KEY:
-                        if(p instanceof ISeq)
+                        if (p instanceof ISeq)
                             method.keyParms = method.keyParms.cons(
-                                        new KeyParam(createParamBinding((Symbol) RT.first(p)),
-                                                     analyze(C.EXPRESSION, RT.second(p))));
+                                    new KeyParam(createParamBinding((Symbol) RT.first(p)),
+                                                 analyze(C.EXPRESSION, RT.second(p))));
                         else
                             method.keyParms = method.keyParms.cons(
-                                        new KeyParam(createParamBinding((Symbol) p)));
+                                    new KeyParam(createParamBinding((Symbol) p)));
 
                         break;
                     default:
@@ -1070,17 +1164,17 @@ private static FnMethod analyzeMethod(FnExpr fn,ISeq form) throws Exception {
                     }
                 }
             }
-        if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
+        if (method.reqParms.count() > MAX_POSITIONAL_ARITY)
             throw new Exception("Sorry, can't specify more than " + MAX_POSITIONAL_ARITY + " params");
         method.body = analyze(C.RETURN, RT.cons(DO, body));
         return method;
         }
-    finally{
+    finally
+        {
         METHOD.popThreadBinding();
         LOCAL_ENV.popThreadBinding();
-    }
+        }
 }
-
 
 
 static LocalBindingExpr createParamBinding(Symbol p) {
@@ -1095,7 +1189,7 @@ static LocalBindingExpr createParamBinding(Symbol p) {
 
 private static Expr analyzeDef(C context, ISeq form) throws Exception {
     //(def x) or (def x initexpr)
-    if(form.count() > 3)
+    if (form.count() > 3)
         throw new Exception("Too many arguments to def");
     Symbol sym = (Symbol) RT.second(form);
     Module module = (Module) _CRT_MODULE.getValue();
@@ -1103,8 +1197,8 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception {
     registerVar(var);
     VarExpr ve = new VarExpr(var, typeHint(sym));
     Expr init = analyze(C.EXPRESSION, macroexpand(RT.third(form)));
-    if(init instanceof FnExpr)
-        ((FnExpr)init).name = "FN__" + munge(var.name.toString()) + "__" + RT.nextID();
+    if (init instanceof FnExpr)
+        ((FnExpr) init).name = "FN__" + munge(var.name.toString()) + "__" + RT.nextID();
 
     return new DefExpr(ve, init);
 }
@@ -1112,79 +1206,79 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception {
 static Symbol baseSymbol(Symbol sym) {
     String base = baseName(sym);
 
-    if(base == sym.name) //no typeHint
+    if (base == sym.name) //no typeHint
         return sym;
 
     return Symbol.intern(base);
 }
 
-static String baseName(Symbol sym){
+static String baseName(Symbol sym) {
     int slash = sym.name.indexOf('/');
-    if(slash > 0)
-       return sym.name.substring(0, slash);
+    if (slash > 0)
+        return sym.name.substring(0, slash);
     return sym.name;
 }
 
-static String typeHint(Symbol sym){
+static String typeHint(Symbol sym) {
     int slash = sym.name.indexOf('/');
-    if(slash > 0)
-       return sym.name.substring(slash + 1);
+    if (slash > 0)
+        return sym.name.substring(slash + 1);
     return null;
 }
 
 private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Exception {
-    if(sym instanceof Keyword)
-        return registerKeyword((Keyword)sym);
-    else if(sym instanceof HostSymbol)
-        return new HostExpr((HostSymbol)sym);
+    if (sym instanceof Keyword)
+        return registerKeyword((Keyword) sym);
+    else if (sym instanceof ClassSymbol)
+        return new HostClassExpr((ClassSymbol) sym);
     else
         {
         String typeHint = typeHint(sym);
         sym = baseSymbol(sym);
         LocalBinding b = referenceLocal(sym);
-        if(b != null)
+        if (b != null)
             {
-            if(!inFnPosition)
+            if (!inFnPosition)
                 b.valueTaken = true;
             return new LocalBindingExpr(b, typeHint);
             }
         Var v = lookupVar(sym);
-        if(v != null)
+        if (v != null)
             return new VarExpr(v, typeHint);
         throw new Exception("Unable to resolve symbol: " + sym.name + " in this context");
         }
 }
 
-static Var lookupVar(Symbol sym){
+static Var lookupVar(Symbol sym) {
     Module module = (Module) _CRT_MODULE.getValue();
     Var v = module.find(sym);
-    if(v != null)
+    if (v != null)
         return v;
-    for(ISeq seq = RT.seq(USES.getValue());seq != null;seq = RT.rest(seq))
+    for (ISeq seq = RT.seq(USES.getValue()); seq != null; seq = RT.rest(seq))
         {
-        module = (Module) ((IMapEntry)RT.first(seq)).key();
+        module = (Module) ((IMapEntry) RT.first(seq)).key();
         v = module.find(sym);
-        if(v != null && !v.hidden)
+        if (v != null && !v.hidden)
             return v;
         }
     return null;
 }
 
-static Object macroexpand(Object x){
+static Object macroexpand(Object x) {
     return x; //placeholder
 }
 
 private static KeywordExpr registerKeyword(Keyword keyword) {
     IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.getValue();
-    KeywordExpr ke = (KeywordExpr) RT.get(keyword,keywordsMap);
-    if(ke == null)
-        KEYWORDS.setValue(RT.assoc(keyword, ke = new KeywordExpr(keyword),keywordsMap));
+    KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
+    if (ke == null)
+        KEYWORDS.setValue(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
     return ke;
 }
 
 private static void registerVar(Var var) {
     IPersistentMap varsMap = (IPersistentMap) VARS.getValue();
-    if(RT.get(var,varsMap) == null)
+    if (RT.get(var, varsMap) == null)
         VARS.setValue(RT.assoc(var, var, varsMap));
 }
 
@@ -1192,20 +1286,20 @@ private static void registerFn(FnExpr fn) {
     FNS.setValue(RT.cons(fn, (IPersistentCollection) FNS.getValue()));
 }
 
-static void closeOver(LocalBinding b,FnMethod method){
-    if(b != null && method != null && RT.get(b,method.locals) == null)
+static void closeOver(LocalBinding b, FnMethod method) {
+    if (b != null && method != null && RT.get(b, method.locals) == null)
         {
         b.isClosed = true;
-        method.fn.closes = (IPersistentMap)RT.assoc(b, b, method.fn.closes);
-        closeOver(b,method.parent);
+        method.fn.closes = (IPersistentMap) RT.assoc(b, b, method.fn.closes);
+        closeOver(b, method.parent);
         }
 }
 
 static LocalBinding referenceLocal(Symbol sym) {
     LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
-    if(b != null)
+    if (b != null)
         {
-        closeOver(b,(FnMethod) METHOD.getValue());
+        closeOver(b, (FnMethod) METHOD.getValue());
         }
     return b;
 }
@@ -1232,18 +1326,50 @@ private static void registerLocal(LocalBinding b) {
     */
 
 static String resolveHostClassname(String classname) throws Exception {
-    if(classname.indexOf('.') != -1)    //presume fully qualified if contains .
+    if (classname.indexOf('.') != -1)    //presume fully qualified if contains .
+        return classname;
+    if (isPrimitive(classname))
         return classname;
     IPersistentMap importMap = (IPersistentMap) IMPORTS.getValue();
-    String fullyQualifiedName = (String) RT.get(classname,importMap);
-    if(fullyQualifiedName == null)
+    String fullyQualifiedName = (String) RT.get(classname, importMap);
+    if (fullyQualifiedName == null)
         throw new Exception("Can't resolve type name: " + classname);
     return fullyQualifiedName;
 }
 
+static boolean isPrimitive(String classname) {
+    return classname.equals("int")
+           || classname.equals("double")
+           || classname.equals("float")
+           || classname.equals("long")
+           || classname.equals("boolean")
+           || classname.equals("char")
+           || classname.equals("short")
+           || classname.equals("byte");
+}
+
+static Class getTypeNamed(String classname) throws ClassNotFoundException {
+    if (classname.equals("int"))
+        return Integer.TYPE;
+    if (classname.equals("double"))
+        return Double.TYPE;
+    if (classname.equals("float"))
+        return Float.TYPE;
+    if (classname.equals("long"))
+        return Long.TYPE;
+    if (classname.equals("boolean"))
+        return Boolean.TYPE;
+    if (classname.equals("char"))
+        return Character.TYPE;
+    if (classname.equals("short"))
+        return Short.TYPE;
+    if (classname.equals("byte"))
+        return Byte.TYPE;
+    return Class.forName(classname);
+}
 
 
-static class KeyParam{
+static class KeyParam {
     public KeyParam(LocalBindingExpr b, Expr init) {
         this.bindingExpression = b;
         this.init = init;
@@ -1251,7 +1377,7 @@ static class KeyParam{
     }
 
     public KeyParam(LocalBindingExpr b) {
-        this(b,NIL_EXPR);
+        this(b, NIL_EXPR);
     }
 
     LocalBindingExpr bindingExpression;
@@ -1260,28 +1386,36 @@ static class KeyParam{
 }
 
 
-static class NilExpr extends AnExpr{
-    public void emitExpression() throws Exception{
+static class NilExpr extends AnExpr {
+    public void emitExpression() throws Exception {
         format("null");
     }
 }
 
-static class LiteralExpr extends AnExpr{
+static class LiteralExpr extends AnExpr {
     final Object val;
 
-    public LiteralExpr(Object val){
+    public LiteralExpr(Object val) {
         this.val = val;
     }
 
-    public void emitExpression() throws Exception{
-        format("~S",val);
+    public void emitExpression() throws Exception {
+        format("~S", val);
+    }
+
+    public Class getHostType() throws Exception {
+        if (val instanceof DoubleNum)
+            return Double.TYPE;
+        if (val instanceof FixNum)
+            return Integer.TYPE;
+        return val.getClass();
     }
 }
 
-static class NotExpr extends AnExpr{
+static class NotExpr extends AnExpr {
     final Expr expr;
 
-    public NotExpr(Expr expr){
+    public NotExpr(Expr expr) {
         this.expr = expr;
     }
 
@@ -1298,30 +1432,69 @@ static class NotExpr extends AnExpr{
 
 }
 
-static class CharExpr extends AnExpr{
+static class CharExpr extends AnExpr {
     final Character val;
 
-    public CharExpr(Character val){
+    public CharExpr(Character val) {
         this.val = val;
     }
 
-    public void emitExpression() throws Exception{
-        format("'~A'",val);
+    public void emitExpression() throws Exception {
+        format("'~A'", val);
+    }
+
+    public Class getHostType() throws Exception {
+        return Character.TYPE;
     }
 }
 
 
-static class HostExpr extends AnExpr{
-    final HostSymbol sym;
+static class HostClassExpr extends AHostExpr {
+    final ClassSymbol sym;
+    final String resolvedClassName;
+    final Class type;
 
-    public HostExpr(HostSymbol sym){
+    public HostClassExpr(ClassSymbol sym) throws Exception {
         this.sym = sym;
+        this.resolvedClassName = resolveHostClassname(sym.className);
+        this.type = getTypeNamed(resolvedClassName);
     }
 
-    public void emitExpression() throws Exception{
-        if(sym instanceof ClassSymbol)
-            format("~A.class", resolveHostClassname(((ClassSymbol) sym).className));
+    public void emitHostExpr() throws Exception {
+        format("~A.class", resolvedClassName);
     }
+
+    public Class getHostType() throws Exception {
+        return type;
+    }
+
+}
+
+static class HostStaticExpr extends AHostExpr {
+    final StaticMemberSymbol sym;
+    final String resolvedClassName;
+    final Class type;
+    final Class membertype;
+
+    public HostStaticExpr(StaticMemberSymbol sym) throws Exception {
+        this.sym = sym;
+        this.resolvedClassName = resolveHostClassname(sym.className);
+        this.type = getTypeNamed(resolvedClassName);
+        Field f = Reflector.getField(type, sym.memberName, true);
+        if (f == null)
+            throw new Exception(String.format("Can't find field %1$ in class %2$",
+                                              sym.memberName, resolvedClassName));
+        membertype = f.getType();
+    }
+
+    public void emitHostExpr() throws Exception {
+        format("~A.~A", resolvedClassName,sym.memberName);
+    }
+
+    public Class getHostType() throws Exception {
+        return membertype;
+    }
+
 }
 /*
 static class SymExpr extends AnExpr{
@@ -1338,10 +1511,11 @@ static class SymExpr extends AnExpr{
     }
 }
 */
-static class KeywordExpr extends AnExpr{
+
+static class KeywordExpr extends AnExpr {
     final Symbol sym;
 
-    public KeywordExpr(Symbol sym){
+    public KeywordExpr(Symbol sym) {
         this.sym = sym;
     }
 
@@ -1350,7 +1524,7 @@ static class KeywordExpr extends AnExpr{
     }
 }
 
-static class LocalBinding{
+static class LocalBinding {
     final Symbol sym;
     boolean isClosed = false;
     boolean isParam = false;
@@ -1365,64 +1539,64 @@ static class LocalBinding{
         this.sym = sym;
     }
 
-    public String getName(){
-        return munge(sym.name) + (isParam?"":("__" + id));
+    public String getName() {
+        return munge(sym.name) + (isParam ? "" : ("__" + id));
     }
 
     public String toString() {
         return getName();
     }
 
-    boolean needsBox(){
+    boolean needsBox() {
         return (isClosed && isAssigned)
-                ||
-                letfn != null && isClosed && valueTaken;
+               ||
+               letfn != null && isClosed && valueTaken;
     }
 
     boolean bindsToStaticFn() {
         return letfn != null && letfn.willBeStaticMethod();
     }
 
-    String typeDeclaration(){
-        if(needsBox())
+    String typeDeclaration() {
+        if (needsBox())
             return "clojure.lang.Box";
         return "Object";
     }
 
-    String getExpr(){
-        if(needsBox())
+    String getExpr() {
+        if (needsBox())
             return getName() + ".val";
         return getName();
     }
 
     void emitDeclaration(String init) throws Exception {
         format("~A ~A = ", typeDeclaration(), getName());
-        if(needsBox())
+        if (needsBox())
             format("new clojure.lang.Box(~A);~%", init);
         else
             format("~A;~%", init);
     }
 }
 
-static class LocalBindingExpr extends AnExpr{
+static class LocalBindingExpr extends AnExpr {
     final LocalBinding b;
     final String typeHint;
 
-    public LocalBindingExpr(LocalBinding b, String typeHint){
+    public LocalBindingExpr(LocalBinding b, String typeHint) {
         this.b = b;
         this.typeHint = typeHint;
     }
 
-    public void emitExpression() throws Exception{
+    public void emitExpression() throws Exception {
         format("~A", b.getExpr());
     }
 }
 
-static class VarExpr extends AnExpr{
+static class VarExpr extends AnExpr {
     final Var var;
     final String typeHint;
 
-    public VarExpr(Var var, String typeHint){
+    public VarExpr(Var var, String typeHint) {
         this.var = var;
         this.typeHint = typeHint;
     }
@@ -1431,27 +1605,27 @@ static class VarExpr extends AnExpr{
         return munge(var.toString());
     }
 
-    public void emitExpression() throws Exception{
+    public void emitExpression() throws Exception {
         format("~A.getValue()", getName());
     }
 }
 
-static class DefExpr extends AnExpr{
+static class DefExpr extends AnExpr {
     final VarExpr var;
     final Expr init;
 
-    public DefExpr(VarExpr var, Expr init){
+    public DefExpr(VarExpr var, Expr init) {
         this.var = var;
         this.init = init;
     }
 
-    public void emitExpression() throws Exception{
-        format("~A.bind(~A)", var.getName(),init.emitExpressionString());
+    public void emitExpression() throws Exception {
+        format("~A.bind(~A)", var.getName(), init.emitExpressionString());
     }
 }
 
 public static void main(String[] args) throws Exception {
-    if(!(args.length >= 3 ))
+    if (!(args.length >= 3))
         System.err.println("Usage: clojure.lang.Compiler package class file1 [file2 ...]");
     String pkg = args[0];
     String classname = args[1];
@@ -1459,7 +1633,7 @@ public static void main(String[] args) throws Exception {
     String ret;
     try
         {
-        for(int i=0;i<rs.length;i++)
+        for (int i = 0; i < rs.length; i++)
             {
             rs[i] = new LineNumberingPushbackReader(new InputStreamReader(new FileInputStream(args[i + 2])));
             }
@@ -1470,7 +1644,7 @@ public static void main(String[] args) throws Exception {
         {
         for (LineNumberingPushbackReader r : rs)
             {
-            if(r != null)
+            if (r != null)
                 r.close();
             }
         }
