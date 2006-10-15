@@ -18,7 +18,7 @@ import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Iterator;
+import java.lang.reflect.Modifier;
 
 public class Compiler {
 ///*
@@ -390,18 +390,36 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception {
     else
         {
         PersistentArrayList args = new PersistentArrayList(4);
-        for (ISeq s = RT.rest(form); s != null; s = s.rest())
+        for (ISeq s = op instanceof InstanceMemberSymbol ? RT.rrest(form) : RT.rest(form); s != null; s = s.rest())
             args = args.cons(analyze(C.EXPRESSION, macroexpand(s.first())));
 
         if (op instanceof ClassSymbol)
             return new InvokeConstructorExpr((ClassSymbol) op, args);
         else if (op instanceof StaticMemberSymbol)
             return new InvokeStaticMethodExpr((StaticMemberSymbol) op, args);
+        else if (op instanceof InstanceMemberSymbol)
+            return analyzeInstanceInvoke((InstanceMemberSymbol) op,
+                                         analyze(C.EXPRESSION, macroexpand(RT.second(form))),
+                                         args);
+
+
         Expr fexpr = (op instanceof Symbol) ? analyzeSymbol((Symbol) op, true) : analyze(C.EXPRESSION, op);
         if (fexpr instanceof FnExpr)
             ((FnExpr) fexpr).isCalledDirectly = true;
         return new InvokeExpr(fexpr, args);
         }
+}
+
+private static Expr analyzeInstanceInvoke(InstanceMemberSymbol sym, Expr target, PersistentArrayList args)
+        throws Exception {
+    Class targetClass = null;
+    if (sym.className != null)
+        targetClass = getTypeNamed(resolveHostClassname(sym.className));
+    else if (target.getHostType() != null)
+        targetClass = target.getHostType();
+    else //must make reflection-based call
+        return new InvokeUntypedInstanceMemberExpr(sym.memberName, target, args);
+    return new InvokeInstanceMemberExpr(targetClass, sym.memberName, target, args);
 }
 
 static class InvokeExpr extends AnExpr {
@@ -465,20 +483,34 @@ static class InvokeStaticMethodExpr extends AHostExpr {
     final String resolvedClassName;
     final Class type;
     PersistentArrayList args;
-    Method method;
+    final Method method;
+    final Class returnType;
 
     public InvokeStaticMethodExpr(StaticMemberSymbol sym, PersistentArrayList args) throws Exception {
         this.sym = sym;
         this.args = args;
         this.resolvedClassName = resolveHostClassname(sym.className);
         this.type = getTypeNamed(resolvedClassName);
-        this.method = findSingleStaticMethod(type, sym.memberName, args);
+        Object sm = findSingleMethod(type, sym.memberName, args, true);
+        if(sm instanceof Method)
+            {
+            method = (Method) sm;
+            returnType = method.getReturnType();
+            }
+        else if(sm instanceof Class)
+            {
+            method = null;
+            returnType = (Class) sm;
+            }
+        else
+            {
+            method = null;
+            returnType = null;
+            }
     }
 
     public Class getHostType() throws Exception {
-        if (method != null)
-            return method.getReturnType();
-        return null;
+        return returnType;
     }
 
     public void emitHostExpr() throws Exception {
@@ -489,6 +521,91 @@ static class InvokeStaticMethodExpr extends AHostExpr {
             emitHostArgs(args);
         format(")");
     }
+}
+
+static class InvokeUntypedInstanceMemberExpr extends AnExpr {
+    final String name;
+    final Expr target;
+    PersistentArrayList args;
+
+    public InvokeUntypedInstanceMemberExpr(String name, Expr target, PersistentArrayList args) throws Exception {
+        this.name = name;
+        this.args = args;
+        this.target = target;
+    }
+
+    public void emitExpression() throws Exception {
+        format("Reflector.invokeInstanceMember(~S,~A~{,~A~})", name, target, RT.seq(args));
+    }
+
+}
+
+static class InvokeInstanceMemberExpr extends AHostExpr {
+    final String name;
+    final Expr target;
+    PersistentArrayList args;
+    final Class targetType;
+    final Field field;
+    final Method method;
+    final Class returnType;
+
+    public InvokeInstanceMemberExpr(Class targetClass, String name, Expr target, PersistentArrayList args)
+            throws Exception {
+        this.name = name;
+        this.args = args;
+        this.target = target;
+        this.targetType = targetClass;
+        field = Reflector.getField(targetClass, name, false);
+        if (field != null)
+            {
+            method = null;
+            returnType = field.getType();
+            }
+        else
+            {
+            Object sm = findSingleMethod(targetClass, name, args, false);
+            if(sm instanceof Method)
+                {
+                method = (Method) sm;
+                returnType = method.getReturnType();
+                }
+            else if(sm instanceof Class)
+                {
+                method = null;
+                returnType = (Class) sm;
+                }
+            else
+                {
+                method = null;
+                returnType = null;
+                }
+            }
+    }
+
+    public Class getHostType() throws Exception {
+        return returnType;
+    }
+
+    public void emitHostExpr() throws Exception {
+        if(target.canEmitHostExpr())
+            target.emitHostExpr();
+        else
+            emitConvert(targetType, target);
+        if(field != null)
+            {
+            format(".~A", name);
+            }
+        else
+            {
+            format(".~A(", name);
+            if (method != null)
+                emitTypedArgs(method.getParameterTypes(), args, method.isVarArgs());
+            else
+                emitHostArgs(args);
+            format(")");
+            }
+    }
+
 }
 
 static void emitHostArgs(PersistentArrayList args) throws Exception {
@@ -512,7 +629,6 @@ static void emitTypedArgs(Class[] parameterTypes, PersistentArrayList args, bool
         {
         Expr arg = (Expr) args.nth(i);
         if (arg.canEmitHostExpr())
-            //emitCast(parameterTypes[i], arg);
             arg.emitHostExpr();
         else
             emitConvert(parameterTypes[i], arg);
@@ -528,7 +644,6 @@ static void emitTypedArgs(Class[] parameterTypes, PersistentArrayList args, bool
             Expr arg = (Expr) args.nth(i);
             if (arg.canEmitHostExpr())
                 arg.emitHostExpr();
-               // emitCast(vtype, arg);
             else
                 emitConvert(vtype, arg);
             if (i < args.count() - 1)
@@ -594,28 +709,45 @@ public static Constructor findSingleConstructor(Class c, PersistentArrayList arg
     return found;
 }
 
-/*returns null unless single method with matching arity, throws if no method can handle arity*/
+/*returns Method if single method with matching arity,
+ returns Class of return type if all methods with same arity have same return type
+ else returns null
+ throws if no method can handle arity*/
 
-public static Method findSingleStaticMethod(Class c, String methodName, PersistentArrayList args) throws Exception {
+public static Object findSingleMethod(Class c, String methodName, PersistentArrayList args, boolean isStatic) throws Exception {
     Method[] allmethods = c.getMethods();
     Method found = null;
+    int foundCount = 0;
+    boolean returnsMatch = true;
     for (int i = 0; i < allmethods.length; i++)
         {
         Method method = allmethods[i];
-        if (method.getName().equals(methodName) &&
-            (method.getParameterTypes().length == args.count()
-             || (method.isVarArgs() && method.getParameterTypes().length <= args.count())))
+        if (Modifier.isStatic(method.getModifiers()) == isStatic
+            && method.getName().equals(methodName)
+            && (method.getParameterTypes().length == args.count()
+                || (method.isVarArgs() && method.getParameterTypes().length <= args.count())))
             {
             if (found == null)
+                {
                 found = method;
+                foundCount = 1;
+                }
             else
-                return null; //more than one matching
+                {
+                ++foundCount;
+                if (method.getReturnType() != found.getReturnType())
+                    returnsMatch = false;
+                }
             }
         }
-    //verify that at least one ctor can handle arity (requires variadic detection)
-    if (found == null)
+    //verify that at least one method can handle arity (requires variadic detection)
+    if (foundCount == 0)
         throw new Exception("No method that can handle arity");
-    return found;
+    else if(foundCount == 1)
+        return found;
+    else if(returnsMatch)
+        return found.getReturnType();
+    return null;
 }
 
 private static Expr analyzeLet(C context, ISeq form) throws Exception {

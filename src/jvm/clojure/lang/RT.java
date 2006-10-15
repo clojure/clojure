@@ -160,6 +160,10 @@ static public ISeq rest(Object x) {
     return seq(x).rest();
 }
 
+static public ISeq rrest(Object x) {
+    return rest(rest(x));
+}
+
 static public Object peek(Object x) {
     if(x == null)
         return null;
