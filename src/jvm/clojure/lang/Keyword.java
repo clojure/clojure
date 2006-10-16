@@ -54,7 +54,7 @@ public Object invoke(Object obj) throws Exception {
  * @throws Exception
  */
 public Object invoke(Object obj, Object val) throws Exception {
-    return ((IPersistentMap) obj).assoc(this, val);
+    return RT.assoc(this, val, obj);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception {

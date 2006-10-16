@@ -25,7 +25,7 @@ internal Keyword(String name):base(name)	{	}public Object invoke() /*throws 
     if (obj == null)
         return null;
 	return ((IPersistentMap)obj).get(this);	}/** *  Indexer implements IFn for attr access *  This two arg version is the setter * @param tld * @param obj - must be AMap * @param val * @return val */public Object invoke( Object obj, Object val) /*throws Exception*/	{
-	return ((IPersistentMap)obj).assoc(this, val);	}
+	return RT.assoc(this, val,obj);	}
 
 public Object invoke(Object arg1, Object arg2, Object arg3)
 	{
