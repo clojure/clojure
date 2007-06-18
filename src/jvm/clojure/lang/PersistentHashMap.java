@@ -112,6 +112,12 @@ final static class Leaf implements INode{
 	}
 
 	public INode assoc(int level, int hash, Object key, Object val){
+		if(hash == this.hash)
+			{
+			if(key.equals(this.key))
+				return this;
+			//hash collision
+			}
 	}
 
 	public INode without(int hash, Object key){
