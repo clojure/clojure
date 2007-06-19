@@ -13,9 +13,9 @@ package clojure.lang;
 import java.util.Iterator;
 
 public class IteratorSeq extends ASeq{
-Iterator iter;
-Object val;
-ISeq _rest;
+final Iterator iter;
+volatile Object val;
+volatile ISeq _rest;
 
 public static IteratorSeq create(Iterator iter){
 	if(iter.hasNext())
@@ -30,23 +30,25 @@ IteratorSeq(Iterator iter){
 }
 
 public Object first(){
-	synchronized(this)
-		{
-		if(val == this)
-			val = iter.next();
-		return val;
-		}
+	if(val == this)
+		synchronized(this)
+			{
+			if(val == this)
+				val = iter.next();
+			}
+	return val;
 }
 
 public ISeq rest(){
-	synchronized(this)
-		{
-		if(_rest == this)
+	if(_rest == this)
+		synchronized(this)
 			{
-			first();
-			_rest = create(iter);
+			if(_rest == this)
+				{
+				first();
+				_rest = create(iter);
+				}
 			}
-		return _rest;
-		}
+	return _rest;
 }
 }
