@@ -12,7 +12,21 @@
 
 package clojure.lang;
 
-import java.util.Iterator;
+import java.util.*;
+//this stuff is just for the test main()
+import java.util.regex.Pattern;
+import java.io.File;
+import java.io.FileNotFoundException;
+
+/*
+ A persistent rendition of Phil Bagwell's Ideal Hash Trees
+
+ Uses path copying for persistence
+ HashCollision leaves vs. extended hashing
+ Node polymorphism vs. conditionals
+ No sub-tree pools or root-resizing
+ Any errors are my own
+ */
 
 public class PersistentHashMap extends APersistentMap{
 
@@ -170,10 +184,18 @@ final static class Node implements INode{
 			INode n = nodes[idx].without(hash, key);
 			if(n != nodes[idx])
 				{
-				if(n == null && bitmap == bit)
+				if(n == null)
 					{
-					return null;
+					if(bitmap == bit)
+						return null;
+					INode[] newnodes = new INode[nodes.length - 1];
+					System.arraycopy(nodes, 0, newnodes, 0, idx);
+					System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
+					return new Node(bitmap & ~bit, newnodes, shift);
 					}
+				INode[] newnodes = nodes.clone();
+				newnodes[idx] = n;
+				return new Node(bitmap, newnodes, shift);
 				}
 			}
 		return this;
@@ -190,7 +212,7 @@ final static class Node implements INode{
 	}
 
 	public ISeq seq(){
-		return Seq.create(this,0);
+		return Seq.create(this, 0);
 	}
 
 	static class Seq extends ASeq{
@@ -222,6 +244,7 @@ final static class Node implements INode{
 			return create(node, i + 1);
 		}
 	}
+
 
 }
 
@@ -309,7 +332,7 @@ final static class HashCollisionLeaf implements ILeaf{
 			return idx == 0 ? leaves[1] : leaves[0];
 		Leaf[] newLeaves = new Leaf[leaves.length - 1];
 		System.arraycopy(leaves, 0, newLeaves, 0, idx);
-		System.arraycopy(leaves, idx + 1, newLeaves, idx + 1 - 1, leaves.length - idx + 1);
+		System.arraycopy(leaves, idx + 1, newLeaves, idx, leaves.length - (idx + 1));
 		return new HashCollisionLeaf(hash, newLeaves);
 	}
 
@@ -338,5 +361,89 @@ final static class HashCollisionLeaf implements ILeaf{
 	}
 }
 
+public static void main(String[] args){
+	try
+		{
+		ArrayList words = new ArrayList();
+		Scanner s = new Scanner(new File(args[0]));
+		s.useDelimiter(Pattern.compile("\\W"));
+		while(s.hasNext())
+			{
+			String word = s.next();
+			words.add(word);
+			}
+		System.out.println("words: " + words.size());
+		IPersistentMap map = PersistentHashMap.EMPTY;
+		//IPersistentMap map = new PersistentTreeMap();
+		//Map ht = new Hashtable();
+		Map ht = new HashMap();
+		Random rand;
+
+		System.out.println("Building map");
+		long startTime = System.nanoTime();
+		for(int i = 0; i < words.size(); i++)
+			{
+			map = map.assoc(words.get(i), words.get(i));
+			}
+		rand = new Random(42);
+		IPersistentMap snapshotMap = map;
+		for(int i = 0; i < words.size() / 200; i++)
+			{
+			map = map.without(words.get(rand.nextInt(words.size()/2)));
+			}
+		long estimatedTime = System.nanoTime() - startTime;
+		System.out.println("count = " + map.count() + ", time: " + estimatedTime / 1000000);
+
+		System.out.println("Building ht");
+		startTime = System.nanoTime();
+		for(int i = 0; i < words.size(); i++)
+			{
+			ht.put(words.get(i), words.get(i));
+			}
+		rand = new Random(42);
+		for(int i = 0; i < words.size() / 200; i++)
+			{
+			ht.remove(words.get(rand.nextInt(words.size()/2)));
+			}
+		estimatedTime = System.nanoTime() - startTime;
+		System.out.println("count = " + ht.size() + ", time: " + estimatedTime / 1000000);
+
+		System.out.println("map lookup");
+		startTime = System.nanoTime();
+		int c = 0;
+		for(int i = 0; i < words.size(); i++)
+			{
+			if(!map.contains(words.get(i)))
+				++c;
+			}
+		estimatedTime = System.nanoTime() - startTime;
+		System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+		System.out.println("ht lookup");
+		startTime = System.nanoTime();
+		c = 0;
+		for(int i = 0; i < words.size(); i++)
+			{
+			if(!ht.containsKey(words.get(i)))
+				++c;
+			}
+		estimatedTime = System.nanoTime() - startTime;
+		System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+		System.out.println("snapshotMap lookup");
+		startTime = System.nanoTime();
+		c = 0;
+		for(int i = 0; i < words.size(); i++)
+			{
+			if(!snapshotMap.contains(words.get(i)))
+				++c;
+			}
+		estimatedTime = System.nanoTime() - startTime;
+		System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+		}
+	catch(FileNotFoundException e)
+		{
+		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
+
+}
 }
 
