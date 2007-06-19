@@ -750,10 +750,11 @@ static public void main(String args[]){
         }
     System.out.println("Building set");
 	//IPersistentMap set = new PersistentArrayMap();
-	IPersistentMap set = new PersistentHashtableMap(1001);
+	//IPersistentMap set = new PersistentHashtableMap(1001);
+	IPersistentMap set = PersistentHashMap.EMPTY;
 	//IPersistentMap set = new ListMap();
 	//IPersistentMap set = new ArrayMap();
-	//IPersistentMap set = new RBTree();
+	//IPersistentMap set = new PersistentTreeMap();
 //	for(int i = 0; i < ints.length; i++)
 //		{
 //		Integer anInt = ints[i];
@@ -780,9 +781,10 @@ static public void main(String args[]){
 		//	System.out.print(o.key().toString() + ",");
 		}
 
+	Random rand = new Random(42);
 	for(int i = 0; i < ints.length/2; i++)
 		{
-		Integer anInt = ints[i];
+		Integer anInt = ints[rand.nextInt(n)];
 		set = set.without(anInt);
 		}
 
@@ -815,14 +817,39 @@ static public void main(String args[]){
 		//	System.out.print(o.toString() + ",");
 		}
 
+	rand = new Random(42);
 	for(int i = 0; i < ints.length/2; i++)
 		{
-		Integer anInt = ints[i];
+		Integer anInt = ints[rand.nextInt(n)];
 		ht.remove(anInt);
 		}
 	estimatedTime = System.nanoTime() - startTime;
 	System.out.println();
 	System.out.println("size = " + ht.size() + ", time: " + estimatedTime/10000);
+
+	System.out.println("set lookup");
+	startTime = System.nanoTime();
+	int c = 0;
+	for(int i = 0; i < ints.length; i++)
+		{
+		Integer anInt = ints[i];
+		if(!set.contains(anInt))
+			++c;
+		}
+	estimatedTime = System.nanoTime() - startTime;
+	System.out.println("notfound = " + c + ", time: " + estimatedTime/10000);
+
+	System.out.println("ht lookup");
+	startTime = System.nanoTime();
+	c = 0;
+	for(int i = 0; i < ints.length; i++)
+		{
+		Integer anInt = ints[i];
+		if(!ht.containsKey(anInt))
+			++c;
+		}
+	estimatedTime = System.nanoTime() - startTime;
+	System.out.println("notfound = " + c + ", time: " + estimatedTime/10000);
 
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 //	                   + ", depth: " + set.depth());

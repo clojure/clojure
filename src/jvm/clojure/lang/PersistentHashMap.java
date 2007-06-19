@@ -389,7 +389,7 @@ public static void main(String[] args){
 		IPersistentMap snapshotMap = map;
 		for(int i = 0; i < words.size() / 200; i++)
 			{
-			map = map.without(words.get(rand.nextInt(words.size()/2)));
+			map = map.without(words.get(rand.nextInt(words.size() / 2)));
 			}
 		long estimatedTime = System.nanoTime() - startTime;
 		System.out.println("count = " + map.count() + ", time: " + estimatedTime / 1000000);
@@ -403,7 +403,7 @@ public static void main(String[] args){
 		rand = new Random(42);
 		for(int i = 0; i < words.size() / 200; i++)
 			{
-			ht.remove(words.get(rand.nextInt(words.size()/2)));
+			ht.remove(words.get(rand.nextInt(words.size() / 2)));
 			}
 		estimatedTime = System.nanoTime() - startTime;
 		System.out.println("count = " + ht.size() + ", time: " + estimatedTime / 1000000);
@@ -417,7 +417,7 @@ public static void main(String[] args){
 				++c;
 			}
 		estimatedTime = System.nanoTime() - startTime;
-		System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+		System.out.println("notfound = " + c + ", time: " + estimatedTime / 1000000);
 		System.out.println("ht lookup");
 		startTime = System.nanoTime();
 		c = 0;
@@ -427,7 +427,7 @@ public static void main(String[] args){
 				++c;
 			}
 		estimatedTime = System.nanoTime() - startTime;
-		System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+		System.out.println("notfound = " + c + ", time: " + estimatedTime / 1000000);
 		System.out.println("snapshotMap lookup");
 		startTime = System.nanoTime();
 		c = 0;
@@ -437,11 +437,11 @@ public static void main(String[] args){
 				++c;
 			}
 		estimatedTime = System.nanoTime() - startTime;
-		System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+		System.out.println("notfound = " + c + ", time: " + estimatedTime / 1000000);
 		}
 	catch(FileNotFoundException e)
 		{
-		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		e.printStackTrace();
 		}
 
 }
