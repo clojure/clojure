@@ -23,10 +23,19 @@ static interface INode{
 	Leaf find(int hash, Object key);
 }
 
+static interface ILeaf extends INode{
+	int getHash();
+}
+
 final static class Node implements INode{
 	final int bitmap;
 	final INode[] nodes;
 	final int level;
+
+	public Node(ILeaf leaf1, ILeaf leaf2){
+		//presumes will have different hashes
+		//but not necessarily at this level
+	}
 
 	final int mask(int hash)
 	{
@@ -100,7 +109,7 @@ final static class Node implements INode{
 	}
 }
 
-final static class Leaf implements INode{
+final static class Leaf implements ILeaf{
 	final int hash;
 	final Object key;
 	final Object val;
@@ -117,6 +126,7 @@ final static class Leaf implements INode{
 			if(key.equals(this.key))
 				return this;
 			//hash collision
+			return new MultiLeaf(hash, this, new Leaf(hash, key, val));
 			}
 	}
 
@@ -130,6 +140,70 @@ final static class Leaf implements INode{
 		if(hash == this.hash && key.equals(this.key))
 			return this;
 		return null;
+	}
+
+	public int getHash(){
+		return hash;
+	}
+}
+
+final static class MultiLeaf implements ILeaf{
+
+	final int hash;
+	final Leaf[] leaves;
+
+	public MultiLeaf(int hash, Leaf... leaves) {
+		this.hash = hash;
+		this.leaves = leaves;
+	}
+
+	public INode assoc(int level, int hash, Object key, Object val){
+		if(hash == this.hash)
+			{
+			int idx = findIndex(hash, key);
+			if(idx != -1)
+				return this;
+			Leaf[] newLeaves = new Leaf[leaves.length + 1];
+			for(int i=0;i<leaves.length;i++)
+				newLeaves[i] = leaves[i];
+			newLeaves[leaves.length]  = new Leaf(hash,key,val);
+			return new MultiLeaf(hash, newLeaves);
+			}
+		return new Node(this,new Leaf(hash,key,val));
+	}
+
+	public INode without(int hash, Object key){
+		int idx = findIndex(hash, key);
+		if(idx == -1)
+			return this;
+		if(leaves.length == 2)
+			return idx == 0?leaves[1]:leaves[0];
+		Leaf[] newLeaves = new Leaf[leaves.length - 1];
+		for(int i=0;i<idx;i++)
+			newLeaves[i] = leaves[i];
+		for(int i=idx+1;i<leaves.length;i++)
+			newLeaves[i-1] = leaves[i];
+		return new MultiLeaf(hash, newLeaves);
+	}
+
+	public Leaf find(int hash, Object key){
+		int idx = findIndex(hash, key);
+		if(idx != -1)
+			return leaves[idx];
+		return null;
+	}
+
+	int findIndex(int hash, Object key){
+		for(int i=0;i<leaves.length;i++)
+			{
+			if(leaves[i].find(hash,key) != null)
+				return i;
+			}
+		return -1;
+	}
+
+	public int getHash(){
+		return hash;
 	}
 }
 
