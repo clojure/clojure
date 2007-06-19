@@ -12,77 +12,158 @@
 
 package clojure.lang;
 
-public class PersistentHashMap {
+import java.util.Iterator;
+
+public class PersistentHashMap extends APersistentMap{
 
 final int count;
 final INode root;
 
+final public static PersistentHashMap EMPTY = new PersistentHashMap(0, new EmptyNode());
+
+PersistentHashMap(int count, INode root){
+	this.count = count;
+	this.root = root;
+}
+
+public boolean contains(Object key){
+	return find(key) != null;
+}
+
+public IMapEntry find(Object key){
+	return root.find(RT.hash(key), key);
+}
+
+public IPersistentMap assoc(Object key, Object val){
+	INode newroot = root.assoc(0, RT.hash(key), key, val);
+	if(newroot == root)
+		return this;
+	PersistentHashMap ret = new PersistentHashMap(count + 1, newroot);
+	ret._meta = this._meta;
+	return ret;
+}
+
+public Object get(Object key){
+	IMapEntry e = find(key);
+	if(e != null)
+		return e.val();
+	return null;
+}
+
+public IPersistentMap assocEx(Object key, Object val) throws Exception{
+	if(contains(key))
+		throw new Exception("Key already present");
+	return assoc(key, val);
+}
+
+public IPersistentMap without(Object key){
+	INode newroot = root.without(RT.hash(key), key);
+	if(newroot == root)
+		return this;
+	if(newroot == null)
+		return (IPersistentMap) EMPTY.withMeta(this._meta);
+	PersistentHashMap ret = new PersistentHashMap(count - 1, newroot);
+	ret._meta = this._meta;
+	return ret;
+}
+
+public Iterator iterator(){
+	return new SeqIterator(seq());
+}
+
+public int count(){
+	return count;
+}
+
+public ISeq seq(){
+	return root.seq();
+}
+
 static interface INode{
-	INode assoc(int level, int hash, Object key, Object val);
+	INode assoc(int shift, int hash, Object key, Object val);
+
 	INode without(int hash, Object key);
+
 	Leaf find(int hash, Object key);
+
+	ISeq seq();
 }
 
 static interface ILeaf extends INode{
 	int getHash();
 }
 
+final static class EmptyNode implements INode{
+
+	public INode assoc(int shift, int hash, Object key, Object val){
+		return new Leaf(hash, key, val);
+	}
+
+	public INode without(int hash, Object key){
+		return this;
+	}
+
+	public Leaf find(int hash, Object key){
+		return null;
+	}
+
+	public ISeq seq(){
+		return null;
+	}
+}
+
 final static class Node implements INode{
 	final int bitmap;
 	final INode[] nodes;
-	final int level;
+	final int shift;
 
-	public Node(ILeaf leaf1, ILeaf leaf2){
-		//presumes will have different hashes
-		//but not necessarily at this level
+	static int mask(int hash, int shift){
+		return 1 << ((hash >>> shift) & 0x01f);
 	}
 
-	final int mask(int hash)
-	{
-		return (hash >>> (5 * level))&0x01f;
-	}
-
-	final int index(int bit)
-	{
-		return Integer.bitCount(bitmap & (bit-1));
+	final int index(int bit){
+		return Integer.bitCount(bitmap & (bit - 1));
 	}
 
 
-	Node(int bitmap, INode[] nodes, int level){
+	Node(int bitmap, INode[] nodes, int shift){
 		this.bitmap = bitmap;
 		this.nodes = nodes;
-		this.level = level;
+		this.shift = shift;
 	}
 
-	public INode assoc(int level, int hash, Object key, Object val){
-		int bit = 1 << mask(hash);
+	static INode create(int shift, ILeaf leaf, int hash, Object key, Object val){
+		return (new Node(mask(leaf.getHash(), shift), new INode[]{leaf}, shift))
+				.assoc(shift, hash, key, val);
+	}
+
+	public INode assoc(int shift, int hash, Object key, Object val){
+		int bit = mask(hash, shift);
 		int idx = index(bit);
 		if((bitmap & bit) != 0)
 			{
-			INode n = nodes[idx].assoc(level+1, hash, key, val);
+			INode n = nodes[idx].assoc(shift + 5, hash, key, val);
 			if(n == nodes[idx])
 				return this;
 			else
 				{
 				INode[] newnodes = nodes.clone();
 				newnodes[idx] = n;
-				return new Node(bitmap, newnodes, level);
+				return new Node(bitmap, newnodes, shift);
 				}
 			}
 		else
 			{
 			INode[] newnodes = new INode[nodes.length + 1];
-			for(int i=0;i<idx;++i)
-				newnodes[i] = nodes[i];
-			newnodes[idx] =	new Leaf(hash, key, val);
-			for(int i=idx;i<nodes.length;++i)
-				newnodes[i+1] = nodes[i];
-			return new Node(bitmap | bit, newnodes, level);
+			System.arraycopy(nodes, 0, newnodes, 0, idx);
+			newnodes[idx] = new Leaf(hash, key, val);
+			System.arraycopy(nodes, idx, newnodes, idx + 1, nodes.length - idx);
+			return new Node(bitmap | bit, newnodes, shift);
 			}
 	}
 
 	public INode without(int hash, Object key){
-		int bit = 1 << mask(hash);
+		int bit = mask(hash, shift);
 		if((bitmap & bit) != 0)
 			{
 			int idx = index(bit);
@@ -99,17 +180,52 @@ final static class Node implements INode{
 	}
 
 	public Leaf find(int hash, Object key){
-		int bit = 1 << mask(hash);
+		int bit = mask(hash, shift);
 		if((bitmap & bit) != 0)
 			{
-			return nodes[index(bit)].find(hash,key);
+			return nodes[index(bit)].find(hash, key);
 			}
 		else
 			return null;
 	}
+
+	public ISeq seq(){
+		return Seq.create(this,0);
+	}
+
+	static class Seq extends ASeq{
+		final ISeq s;
+		final int i;
+		final Node node;
+
+
+		Seq(ISeq s, int i, Node node){
+			this.s = s;
+			this.i = i;
+			this.node = node;
+		}
+
+		static ISeq create(Node node, int i){
+			if(i >= node.nodes.length)
+				return null;
+			return new Seq(node.nodes[i].seq(), i, node);
+		}
+
+		public Object first(){
+			return s.first();
+		}
+
+		public ISeq rest(){
+			ISeq nexts = s.rest();
+			if(nexts != null)
+				return new Seq(nexts, i, node);
+			return create(node, i + 1);
+		}
+	}
+
 }
 
-final static class Leaf implements ILeaf{
+final static class Leaf implements ILeaf, IMapEntry{
 	final int hash;
 	final Object key;
 	final Object val;
@@ -120,56 +236,69 @@ final static class Leaf implements ILeaf{
 		this.val = val;
 	}
 
-	public INode assoc(int level, int hash, Object key, Object val){
+	public INode assoc(int shift, int hash, Object key, Object val){
 		if(hash == this.hash)
 			{
-			if(key.equals(this.key))
+			if(RT.equal(key, this.key))
 				return this;
-			//hash collision
-			return new MultiLeaf(hash, this, new Leaf(hash, key, val));
+			//hash collision - same hash, different keys
+			return new HashCollisionLeaf(hash, this, new Leaf(hash, key, val));
 			}
+		return Node.create(shift, this, hash, key, val);
 	}
 
 	public INode without(int hash, Object key){
-		if(hash == this.hash && key.equals(this.key))
+		if(hash == this.hash && RT.equal(key, this.key))
 			return null;
 		return this;
 	}
 
 	public Leaf find(int hash, Object key){
-		if(hash == this.hash && key.equals(this.key))
+		if(hash == this.hash && RT.equal(key, this.key))
 			return this;
 		return null;
+	}
+
+	public ISeq seq(){
+		return RT.cons(this, null);
 	}
 
 	public int getHash(){
 		return hash;
 	}
+
+	public Object key(){
+		return this.key;
+	}
+
+	public Object val(){
+		return this.val;
+	}
+
 }
 
-final static class MultiLeaf implements ILeaf{
+final static class HashCollisionLeaf implements ILeaf{
 
 	final int hash;
 	final Leaf[] leaves;
 
-	public MultiLeaf(int hash, Leaf... leaves) {
+	public HashCollisionLeaf(int hash, Leaf... leaves){
 		this.hash = hash;
 		this.leaves = leaves;
 	}
 
-	public INode assoc(int level, int hash, Object key, Object val){
+	public INode assoc(int shift, int hash, Object key, Object val){
 		if(hash == this.hash)
 			{
 			int idx = findIndex(hash, key);
 			if(idx != -1)
 				return this;
 			Leaf[] newLeaves = new Leaf[leaves.length + 1];
-			for(int i=0;i<leaves.length;i++)
-				newLeaves[i] = leaves[i];
-			newLeaves[leaves.length]  = new Leaf(hash,key,val);
-			return new MultiLeaf(hash, newLeaves);
+			System.arraycopy(leaves, 0, newLeaves, 0, leaves.length);
+			newLeaves[leaves.length] = new Leaf(hash, key, val);
+			return new HashCollisionLeaf(hash, newLeaves);
 			}
-		return new Node(this,new Leaf(hash,key,val));
+		return Node.create(shift, this, hash, key, val);
 	}
 
 	public INode without(int hash, Object key){
@@ -177,13 +306,11 @@ final static class MultiLeaf implements ILeaf{
 		if(idx == -1)
 			return this;
 		if(leaves.length == 2)
-			return idx == 0?leaves[1]:leaves[0];
+			return idx == 0 ? leaves[1] : leaves[0];
 		Leaf[] newLeaves = new Leaf[leaves.length - 1];
-		for(int i=0;i<idx;i++)
-			newLeaves[i] = leaves[i];
-		for(int i=idx+1;i<leaves.length;i++)
-			newLeaves[i-1] = leaves[i];
-		return new MultiLeaf(hash, newLeaves);
+		System.arraycopy(leaves, 0, newLeaves, 0, idx);
+		System.arraycopy(leaves, idx + 1, newLeaves, idx + 1 - 1, leaves.length - idx + 1);
+		return new HashCollisionLeaf(hash, newLeaves);
 	}
 
 	public Leaf find(int hash, Object key){
@@ -193,10 +320,14 @@ final static class MultiLeaf implements ILeaf{
 		return null;
 	}
 
+	public ISeq seq(){
+		return ArraySeq.create(leaves);
+	}
+
 	int findIndex(int hash, Object key){
-		for(int i=0;i<leaves.length;i++)
+		for(int i = 0; i < leaves.length; i++)
 			{
-			if(leaves[i].find(hash,key) != null)
+			if(leaves[i].find(hash, key) != null)
 				return i;
 			}
 		return -1;
