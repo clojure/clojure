@@ -8,20 +8,17 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich May 30, 2006 */
+/* rich Jun 22, 2007 */
 
 package clojure.lang;
 
-public class TVal{
-
-public final Object val;
-public final TStamp tstamp;
-volatile TVal prior;
+public class TStamp{
+final int tpoint;
+final long msecs;
 
 
-TVal(Object val, TStamp tstamp) {
-    this.val = val;
-	this.tstamp = tstamp;
-	this.prior = null;
+public TStamp(int tpoint, long msecs){
+	this.tpoint = tpoint;
+	this.msecs = msecs;
 }
 }

@@ -12,22 +12,34 @@
 
 package clojure.lang;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TRef extends TVal implements Comparable{
-static AtomicInteger nextSeq = new AtomicInteger(1);
+public class TRef implements Comparable{
+final static AtomicInteger nextSeq = new AtomicInteger(1);
 
 final int lockSeq;
-Lock lock;
+final AtomicInteger lockedBy;
+final TPool pool;
+volatile TVal tval;
 
-public TRef() {
+public TRef(TPool pool) {
+	this.pool = pool;
 	this.lockSeq = nextSeq.getAndIncrement();
-	this.lock = new ReentrantLock();
+	this.lockedBy = new AtomicInteger();
+	this.tval = null;
 }
 
+void push(TVal tval){
+	pool.pushVal(this,tval);
+	this.tval = tval;
+}
 public int compareTo(Object o){
 	return lockSeq - ((TRef) o).lockSeq;
 }
+
+public Object getLatestVal(){
+	//will NPE if never been set
+	return tval.val;
+}
+
 }
