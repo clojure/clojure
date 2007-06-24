@@ -791,7 +791,7 @@ static public void main(String args[]){
 	long estimatedTime = System.nanoTime() - startTime;
 	System.out.println();
 
-	System.out.println("_count = " + set.count() + ", time: " + estimatedTime/10000);
+	System.out.println("_count = " + set.count() + ", time: " + estimatedTime/1000000);
 
 	System.out.println("Building ht");
 	Hashtable ht = new Hashtable(1001);
@@ -825,7 +825,7 @@ static public void main(String args[]){
 		}
 	estimatedTime = System.nanoTime() - startTime;
 	System.out.println();
-	System.out.println("size = " + ht.size() + ", time: " + estimatedTime/10000);
+	System.out.println("size = " + ht.size() + ", time: " + estimatedTime/1000000);
 
 	System.out.println("set lookup");
 	startTime = System.nanoTime();
@@ -837,7 +837,7 @@ static public void main(String args[]){
 			++c;
 		}
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("notfound = " + c + ", time: " + estimatedTime/10000);
+	System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
 
 	System.out.println("ht lookup");
 	startTime = System.nanoTime();
@@ -849,7 +849,7 @@ static public void main(String args[]){
 			++c;
 		}
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("notfound = " + c + ", time: " + estimatedTime/10000);
+	System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
 
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 //	                   + ", depth: " + set.depth());

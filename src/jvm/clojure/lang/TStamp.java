@@ -13,12 +13,16 @@
 package clojure.lang;
 
 public class TStamp{
-final int tpoint;
-final long msecs;
+
+public static enum Status {RUNNING,COMMITTED,ABORTED,RETRY}
+
+Status status;
+long tpoint;
+long msecs;
 
 
-public TStamp(int tpoint, long msecs){
+public TStamp(long tpoint){
+	this.status = Status.RUNNING;
 	this.tpoint = tpoint;
-	this.msecs = msecs;
 }
 }

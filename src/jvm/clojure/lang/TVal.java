@@ -14,14 +14,13 @@ package clojure.lang;
 
 public class TVal{
 
-public final Object val;
+volatile Object val;
 public final TStamp tstamp;
 volatile TVal prior;
 
-
-TVal(Object val, TStamp tstamp) {
+TVal(Object val, TStamp tstamp, TVal prior) {
     this.val = val;
 	this.tstamp = tstamp;
-	this.prior = null;
+	this.prior = prior;
 }
 }

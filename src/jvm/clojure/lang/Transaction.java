@@ -12,31 +12,115 @@
 
 package clojure.lang;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class Transaction{
 
+public static int RETRY_LIMIT = 100;
+public static int LOCK_WAIT_MSECS = 100;
+
 final static ThreadLocal<Transaction> transaction = new ThreadLocal<Transaction>();
 
+static class RetryException extends Exception{
+}
+
+static class AbortException extends Exception{
+}
+
 //total order on transactions
-//transactions will consume a point on init, and another on commit if writing
-final static AtomicInteger nextPoint = new AtomicInteger(1);
+//transactions will consume a point for init, for each retry, and on commit if writing
+final static AtomicLong nextPoint = new AtomicLong(1);
 
-final static ConcurrentSkipListSet<Integer> completedPoints = new ConcurrentSkipListSet<Integer>();
+static long getNextPoint(){
+	return nextPoint.getAndIncrement();
+}
 
-static int completedThroughPoint(){
-	Iterator<Integer> i = completedPoints.iterator();
-	if(!i.hasNext())
-		return 0;
-	int base, tp;
-	base = tp = i.next();
-	while(i.hasNext() && i.next() == tp + 1)
-		++tp;
-	if(tp != base)
-		completedPoints.removeAll(completedPoints.headSet(tp));
-	return tp;
+static class PointNode{
+	final long tpoint;
+	volatile PointNode next;
+
+	public PointNode(long tpoint, PointNode next){
+		this.tpoint = tpoint;
+		this.next = next;
+	}
+   static final AtomicReferenceFieldUpdater<PointNode, PointNode> nextUpdater =
+     AtomicReferenceFieldUpdater.newUpdater(PointNode.class, PointNode.class, "next");
+}
+
+volatile static PointNode completedPoints = new PointNode(0, null);
+
+static long completedThroughPoint(){
+	return completedPoints.tpoint;
+}
+
+static void relinquish(long tpoint){
+	PointNode p = completedPoints;
+	//update completedThroughPoint
+	while(p.next != null && p.next.tpoint == p.tpoint+1)
+		p = p.next;
+	completedPoints = p;
+
+	//splice in
+	PointNode n;
+	do{
+	  for(n=p.next;n != null && n.tpoint < tpoint;p = n, n = p.next)
+		  ;
+	}while(!PointNode.nextUpdater.compareAndSet(p,n,new PointNode(tpoint,n)));
+}
+
+static void statusTransition(TStamp tstamp, TStamp.Status newStatus){
+	synchronized(tstamp)
+		{
+		tstamp.status = newStatus;
+		tstamp.notifyAll();
+		}
+}
+
+
+TStamp tstamp;
+
+void lock(TRef tref, boolean ensurePoint) throws Exception{
+	TVal head = tref.tvals.get();
+	//already locked by this transaction
+	if(head != null && head.tstamp == tstamp)
+		return;
+	boolean locked;
+	if(head != null && head.tstamp.status == TStamp.Status.RUNNING)
+		{
+		//already locked by another transaction, block a bit
+		synchronized(head.tstamp)
+			{
+			if(head.tstamp.status == TStamp.Status.RUNNING)
+				head.tstamp.wait(LOCK_WAIT_MSECS);
+			}
+
+		locked = false;
+		}
+	else
+		{
+		TVal prior;
+		if(head == null || head.tstamp.status == TStamp.Status.COMMITTED)
+			prior = head;
+		else  //aborted/retried at head, skip over
+			prior = head.prior;
+
+		if(ensurePoint && prior != null && prior.tstamp.tpoint > tstamp.tpoint)
+			locked = false;
+		else
+			locked = tref.tvals.compareAndSet(head, new TVal(prior == null ? null : prior.val, tstamp, prior));
+		}
+
+	if(!locked)
+		{
+		statusTransition(tstamp,TStamp.Status.RETRY);
+		throw new RetryException();
+		}
+}
+
+void abort() throws AbortException{
+	statusTransition(tstamp,TStamp.Status.ABORTED);
+	throw new AbortException();
 }
 
 static Transaction getTransaction(){
@@ -59,16 +143,84 @@ static public Object runInTransaction(IFn fn) throws Exception{
 		}
 	finally
 		{
-		if(!t.asOf)
-			{
-			completedPoints.add(t.readPoint);
-			if(t.writePoint > 0)
-				completedPoints.add(t.writePoint);
-			}
 		setTransaction(null);
 		}
 }
 
+Object run(IFn fn) throws Exception{
+	boolean done = false;
+	Object ret = null;
+
+	for(int i = 0; !done && i < RETRY_LIMIT; i++)
+		{
+		try
+			{
+			tstamp = new TStamp(getNextPoint());
+			ret = fn.invoke();
+			done = true;
+			//save the read point
+			long readPoint = tstamp.tpoint;
+			//get a commit point and time
+			tstamp.tpoint = getNextPoint();
+			tstamp.msecs = System.currentTimeMillis();
+			//commit!
+			statusTransition(tstamp, TStamp.Status.COMMITTED);
+
+			relinquish(readPoint);
+			relinquish(tstamp.tpoint);
+			}
+		catch(RetryException retry)
+			{
+			//eat this so we retry rather than fall out
+			}
+		finally
+			{
+			if(!done)
+				{
+				statusTransition(tstamp,TStamp.Status.ABORTED);
+				relinquish(tstamp.tpoint);
+				}
+			}
+		}
+	if(!done)
+		throw new Exception("Transaction failed after reaching retry limit");
+	return ret;
+}
+
+
+
+Object doGet(TRef tref) throws Exception{
+	TVal head = tref.tvals.get();
+	if(head == null)
+		return null;
+	if(head.tstamp == tstamp)
+		return head.val;
+	for(TVal ver = head.tstamp.status == TStamp.Status.COMMITTED?head:head.prior; ver != null; ver = ver.prior)
+		{
+		if(ver.tstamp.tpoint <= tstamp.tpoint)
+			return ver.val;
+		}
+	return null;
+}
+
+Object doSet(TRef tref, Object val) throws Exception{
+	lock(tref,true);
+	tref.tvals.get().val = val;
+	return val;
+}
+
+void doTouch(TRef tref) throws Exception{
+		lock(tref,true);
+}
+
+void doCommute(TRef tref, IFn fn) throws Exception{
+	lock(tref,false);
+	TVal head = tref.tvals.get();
+	head.val = fn.invoke(head.val);
+}
+
+
+/*
 static public Object runInAsOfTransaction(IFn fn, int tpoint) throws Exception{
 	if(getTransaction() != null)
 		throw new Exception("As-of transactions cannot be nested");
@@ -77,7 +229,7 @@ static public Object runInAsOfTransaction(IFn fn, int tpoint) throws Exception{
 	setTransaction(t);
 	try
 		{
-		return t.run(fn);
+		return fn.invoke();//t.run(fn);
 		}
 	finally
 		{
@@ -93,221 +245,13 @@ static public Object runInAsOfTransaction(IFn fn, long msecs) throws Exception{
 	setTransaction(t);
 	try
 		{
-		return t.run(fn);
+		return fn.invoke();//t.run(fn);
 		}
 	finally
 		{
 		setTransaction(null);
 		}
 }
-/*
-static public Object get(TRef tref) throws Exception{
-    Transaction trans = getTransaction();
-    if(trans != null)
-        return trans.doGet(tref);
-    return getCurrent(tref).val;
-}
 
-static public Object set(TRef tref, Object val) throws Exception{
-     return getTransaction().doSet(tref,val);
-}
-
-static public void touch(TRef tref) throws Exception{
-    getTransaction().doTouch(tref);
-}
-
-static public void commute(TRef tref, IFn fn) throws Exception{
-    getTransaction().doCommutate(tref, fn);
-}
-//*/
-
-boolean asOf;
-int readPoint;
-long readTimeMsecs = 0;
-int writePoint = 0;
-
-IdentityHashMap<TRef, Object> sets;
-IdentityHashMap<TRef, LinkedList<IFn>> commutes;
-
-Transaction(boolean asOf, int readPoint, long readTimeMsecs){
-	this.asOf = asOf;
-	this.readPoint = readPoint;
-	this.readTimeMsecs = readTimeMsecs;
-}
-
-Transaction(){
-	this(false, nextPoint.getAndIncrement(), 0);
-}
-
-Transaction(int readPoint){
-	this(true, readPoint, 0);
-}
-
-Transaction(long readTimeMsecs){
-	this(true, 0, readTimeMsecs);
-}
-
-boolean casLock(TRef tref) throws Exception{
-	//todo - create user-controllable policy
-	for(int i = 0; i < 100; ++i)
-		{
-		if(tref.lockedBy.compareAndSet(0, readPoint))
-			return true;
-		Thread.sleep(10);
-		}
-	return false;
-}
-
-Object run(IFn fn) throws Exception{
-	boolean done = false;
-	Object ret = null;
-	ArrayList<TRef> locks = null;
-	ArrayList<TRef> locked = null;
-
-	loop:
-	//todo - create user-controllable policy
-	for(int i=0;!done && i<100;i++)
-		{
-		try
-			{
-			ret = fn.invoke();
-			//read-only trans, return right away
-			if((sets == null || sets.isEmpty()) && (commutes == null || commutes.isEmpty()))
-				{
-				done = true;
-				return ret;
-				}
-
-			if(locks == null && (sets != null || commutes != null))
-				locks = new ArrayList<TRef>();
-			if(sets != null)
-				locks.addAll(sets.keySet());
-			if(locks != null)
-				{
-				if(locked == null)
-					locked = new ArrayList<TRef>(locks.size());
-				//lock in order
-				Collections.sort(locks);
-				for(TRef tref : locks)
-					{
-					if(!casLock(tref))
-						continue loop;
-					locked.add(tref);
-					if(!commutes.containsKey(tref))
-						{
-						//try again if the thing we are trying to set has changed since we started
-						TVal curr = getCurrent(tref);
-						if(curr != null && curr.tstamp.tpoint > readPoint)
-							continue loop;
-						}
-					}
-				}
-
-			//at this point all write targets are locked
-
-			//turn commutes into sets
-			for(Map.Entry<TRef, LinkedList<IFn>> e : commutes.entrySet())
-				{
-				TRef tref = e.getKey();
-				//note this will npe if tref has never been set, as designed
-				Object val = getCurrent(tref).val;
-				for(IFn f : e.getValue())
-					{
-					val = f.invoke(val);
-					}
-				sets.put(tref, val);
-				}
-
-			//we presume we won't throw an exception after this
-			writePoint = nextPoint.getAndIncrement();
-			TStamp ts = new TStamp(writePoint, System.currentTimeMillis());
-
-			//set the new vals, unlock as we go
-			for(Map.Entry<TRef, Object> entry : sets.entrySet())
-				{
-				TRef tref = entry.getKey();
-				tref.push(new TVal(entry.getValue(), ts));
-				tref.lockedBy.set(0);
-				}
-			done = true;
-			}
-		finally
-			{
-			if(!done)
-				{
-				if(locked != null)
-					{
-					for(TRef tref : locked)
-						{
-						tref.lockedBy.set(0);
-						}
-					locked.clear();
-					}
-				if(sets != null)
-					sets.clear();
-				if(commutes != null)
-					commutes.clear();
-				if(locks != null)
-					locks.clear();
-				}
-			}
-		}
-	if(!done)
-		throw new Exception("Transaction failed after reaching retry limit");
-	return ret;
-}
-
-
-Object doGet(TRef tref) throws Exception{
-	if(sets != null && sets.containsKey(tref))
-		return sets.get(tref);
-
-	for(TVal ver = tref.tval; ver != null; ver = ver.prior)
-		{
-		//note this will npe if tref has never been set, as designed
-		if(readPoint > 0 && ver.tstamp.tpoint <= readPoint
-		   ||
-		   readTimeMsecs > 0 && ver.tstamp.msecs <= readTimeMsecs)
-			return ver.val;
-		}
-	throw new Exception("Version not found");
-}
-
-static TVal getCurrent(TRef tref) throws Exception{
-	return tref.tval;
-}
-
-Object doSet(TRef tref, Object val) throws Exception{
-	if(asOf)
-		throw new Exception("Can't set during as-of transaction");
-	if(sets == null)
-		sets = new IdentityHashMap<TRef, Object>();
-	if(commutes != null && commutes.containsKey(tref))
-		throw new Exception("Can't commute and set a TRef in the same transaction");
-
-	sets.put(tref, val);
-	return val;
-}
-
-void doTouch(TRef tref) throws Exception{
-	doSet(tref, doGet(tref));
-}
-
-void doCommute(TRef tref, IFn fn) throws Exception{
-	if(asOf)
-		throw new Exception("Can't commute during as-of transaction");
-	if(commutes == null)
-		commutes = new IdentityHashMap<TRef, LinkedList<IFn>>();
-	LinkedList<IFn> cs = commutes.get(tref);
-	if(cs == null)
-		{
-		if(sets != null && sets.containsKey(tref))
-			throw new Exception("Can't commute and set a TRef in the same transaction");
-		cs = new LinkedList<IFn>();
-		commutes.put(tref, cs);
-		}
-	cs.addLast(fn);
-	sets.put(tref, fn.invoke(doGet(tref)));
-}
-
+ */
 }

@@ -12,34 +12,76 @@
 
 package clojure.lang;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class TRef implements Comparable{
-final static AtomicInteger nextSeq = new AtomicInteger(1);
+public class TRef{
+//reference to a chain of TVals, only the head of which may be non-committed
+AtomicReference<TVal> tvals;
 
-final int lockSeq;
-final AtomicInteger lockedBy;
-final TPool pool;
-volatile TVal tval;
-
-public TRef(TPool pool) {
-	this.pool = pool;
-	this.lockSeq = nextSeq.getAndIncrement();
-	this.lockedBy = new AtomicInteger();
-	this.tval = null;
+public TRef() {
+	this.tvals = new AtomicReference<TVal>();
 }
 
-void push(TVal tval){
-	pool.pushVal(this,tval);
-	this.tval = tval;
-}
-public int compareTo(Object o){
-	return lockSeq - ((TRef) o).lockSeq;
+public Object getCurrentVal(){
+	TVal current = getCurrentTVal();
+	if(current != null)
+		return current.val;
+	return null;
 }
 
-public Object getLatestVal(){
-	//will NPE if never been set
-	return tval.val;
+TVal getCurrentTVal(){
+	TVal head = tvals.get();
+	if(head == null || head.tstamp.status == TStamp.Status.COMMITTED)
+		return head;
+	return head.prior;
+}
+
+TVal valAsOfPoint(TRef tref, int tpoint){
+	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+		{
+		if(tv.tstamp.tpoint <= tpoint)
+			return tv;
+		}
+	return null;
+}
+
+TVal valAsOfTime(TRef tref,long msecs){
+	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+		{
+		if(tv.tstamp.msecs <= msecs)
+			return tv;
+		}
+	return null;
+}
+
+void trimHistory(){
+	long ctp = Transaction.completedThroughPoint();
+	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+		{
+		while(tv.tstamp.tpoint > ctp)
+			tv = tv.prior;
+		tv.prior = null;
+		}
+}
+
+void trimHistoryPriorToPoint(int tpoint){
+	long ctp = Transaction.completedThroughPoint();
+	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+		{
+		while(tv.tstamp.tpoint > tpoint || tv.tstamp.tpoint > ctp)
+			tv = tv.prior;
+		tv.prior = null;
+		}
+}
+
+void trimHistoryPriorToTime(long msecs){
+	long ctp = Transaction.completedThroughPoint();
+	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+		{
+		while(tv.tstamp.msecs > msecs || tv.tstamp.tpoint > ctp)
+			tv = tv.prior;
+		tv.prior = null;
+		}
 }
 
 }
