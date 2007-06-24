@@ -22,6 +22,11 @@ public TRef() {
 	this.tvals = new AtomicReference<TVal>();
 }
 
+public TRef(Object initVal) {
+	this.tvals = new AtomicReference<TVal>();
+	tvals.set(new TVal(initVal, Transaction.ZERO_POINT, null));
+}
+
 public Object getCurrentVal(){
 	TVal current = getCurrentTVal();
 	if(current != null)

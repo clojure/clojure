@@ -10,9 +10,9 @@
 
 package clojure.lang;
 
-public class TObj implements IObj{
+abstract public class TObj implements IObj{
 TRef _attrs;
-
+ /*
 public TObj() throws Exception{
     this._attrs = Transaction.tref(PersistentArrayMap.EMPTY);
 }
@@ -44,4 +44,5 @@ public void removeAttr(Object key) throws Exception {
     t = t.without(key);
     Transaction.set(_attrs,t);
 }
+*/
 }

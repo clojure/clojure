@@ -16,13 +16,13 @@ public class TStamp{
 
 public static enum Status {RUNNING,COMMITTED,ABORTED,RETRY}
 
-Status status;
-long tpoint;
-long msecs;
+volatile Status status;
+volatile long tpoint;
+volatile long msecs;
 
 
-public TStamp(long tpoint){
-	this.status = Status.RUNNING;
+public TStamp(long tpoint, Status status){
+	this.status = status;
 	this.tpoint = tpoint;
 }
 }
