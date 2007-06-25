@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class TRef{
 //reference to a chain of TVals, only the head of which may be non-committed
-AtomicReference<TVal> tvals;
+final AtomicReference<TVal> tvals;
 
 public TRef() {
 	this.tvals = new AtomicReference<TVal>();
