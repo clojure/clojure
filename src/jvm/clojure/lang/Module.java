@@ -52,7 +52,7 @@ static public Module findOrCreate(String name)
 
 static public Var intern(String ns,String name)
     {
-    return findOrCreate(ns).intern(Symbol.intern(name));
+    return findOrCreate(ns).intern(new Symbol(name));
     }
 
 public Var find(Symbol sym){

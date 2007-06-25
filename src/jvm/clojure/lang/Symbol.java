@@ -12,24 +12,39 @@
 
 package clojure.lang;
 
-import java.util.HashMap;
 
 public class Symbol
-        //extends Obj implements Comparable
 {
-
-final public static HashMap table = new HashMap();
-//final public static HashSet hashes = new HashSet();
-//final static Random rand = new Random(42);
-
+//this must be an interned string!
 public final String name;
-//int hash = 0;
 
 public String toString()
     {
     return name;
     }
 
+public Symbol(String name)
+    {
+    this.name = name.intern();
+    }
+
+public boolean equals(Object o){
+	if(this == o)
+		return true;
+	if(o == null || getClass() != o.getClass())
+		return false;
+
+	Symbol symbol = (Symbol) o;
+
+	//identity compare ok, names are interned
+	return name == symbol.name;
+}
+
+public int hashCode(){
+	return name.hashCode();
+}
+
+/*
 public static Symbol intern(String name)
     {
     synchronized(table)
@@ -59,43 +74,6 @@ public static Symbol intern(String name)
         }
     }
 
-/**
- * Used by intern()
- * @param name
+
  */
-Symbol(String name)
-    {
-    this.name = name;
-    }
- /*
- public int hashCode(){
-     if(hash == 0)
-         {
-         synchronized (hashes)
-             {
-             while (hash == 0)
-                 {
-                 int h = rand.nextInt();
-                 if (h != 0 && !hashes.contains(h))
-                     {
-                     hash = h;
-                     hashes.add(h);
-                     }
-                 }
-             }
-         }
-     return hash;
- }
-
-
-public int compareTo(Object o) {
-    return hashCode() - ((Symbol)o).hashCode();
-}
-
-public Obj withMeta(IPersistentMap meta) {
-    this._meta = meta;
-    return this;
-}
-*/
-
 }
