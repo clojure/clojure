@@ -380,8 +380,9 @@ public static void main(String[] args){
 				for(TRef tref : items)
 					{
 					//Transaction.getTransaction().doTouch(tref);
-					int val = (Integer) Transaction.getTransaction().doGet(tref);
-					Transaction.getTransaction().doSet(tref, val + 1);
+					Transaction t =  Transaction.getTransaction();
+					int val = (Integer) t.doGet(tref);
+					t.doSet(tref, val + 1);
 					}
 				return null;
 			}
