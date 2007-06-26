@@ -15,62 +15,50 @@ package clojure.lang;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 
-public class Module {
+public class Module{
 
 /**
- * String->Namespace
+ * String->Module
  */
-static final public HashMap table = new HashMap();
+static final public TRef<IPersistentMap> table = new TRef(PersistentHashMap.EMPTY);
 
 /**
  * Symbol->Var
  */
-final public IdentityHashMap vars = new IdentityHashMap();
+final public TRef<IPersistentMap> vars = new TRef(PersistentHashMap.EMPTY);
 final public String name;
 
-Module(String name)
-    {
-    this.name = name;
-    table.put(name, this);
-    }
-
-static public Module find(String name)
-    {
-    return (Module) table.get(name);
-    }
-
-static public Module findOrCreate(String name)
-    {
-    synchronized(table)
-        {
-        Module ns = find(name);
-        if(ns == null)
-            table.put(name,ns = new Module(name));
-        return ns;
-        }
-    }
-
-static public Var intern(String ns,String name)
-    {
-    return findOrCreate(ns).intern(new Symbol(name));
-    }
-
-public Var find(Symbol sym){
-    synchronized(vars)
-        {
-        return (Var) vars.get(sym);
-        }
+Module(String name){
+	this.name = name;
 }
 
-public Var intern(Symbol sym)
-    {
-    synchronized(vars)
-        {
-        Var var = (Var) vars.get(sym);
-        if(var == null)
-            vars.put(sym, var = new Var(sym, this));
-        return var;
-        }
-    }
+static public Module find(String name) throws Exception{
+	return (Module) table.get().get(name);
+}
+
+static public Module findOrCreate(String name) throws Exception{
+	//must be called in transaction
+	Module ns = find(name);
+	if(ns == null)
+		table.set(table.get().assoc(name, ns = new Module(name)));
+	return ns;
+}
+
+static public Var intern(String ns, String name) throws Exception{
+	return findOrCreate(ns).intern(new Symbol(name));
+}
+
+public Var find(Symbol sym) throws Exception{
+	return (Var) vars.get().get(sym);
+}
+
+public Var intern(Symbol sym) throws Exception{
+	//must be called in transaction
+	IPersistentMap varmap = vars.get();
+	Var var = (Var) varmap.get(sym);
+	if(var == null)
+		vars.set(varmap.assoc(sym, var = new Var(sym, this)));
+	return var;
+}
 
 }

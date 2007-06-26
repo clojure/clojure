@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Iterator;
 import java.util.Collections;
 
 public class Transaction{
@@ -130,8 +129,15 @@ void abort() throws AbortException{
 	throw new AbortException();
 }
 
-static Transaction getTransaction(){
+static Transaction get(){
 	return transaction.get();
+}
+
+static Transaction getEx() throws Exception{
+	Transaction t = transaction.get();
+	if(t == null)
+		throw new Exception("No transaction running");
+	return t;
 }
 
 static void setTransaction(Transaction t){
@@ -139,7 +145,7 @@ static void setTransaction(Transaction t){
 }
 
 static public Object runInTransaction(IFn fn) throws Exception{
-	if(getTransaction() != null)
+	if(get() != null)
 		return fn.invoke();
 
 	Transaction t = new Transaction();
@@ -240,15 +246,15 @@ void doTouch(TRef tref) throws Exception{
 	lock(tref, true);
 }
 
-void doCommute(TRef tref, IFn fn) throws Exception{
+Object doCommute(TRef tref, IFn fn) throws Exception{
 	TVal head = lock(tref, false);
-	head.val = fn.invoke(head.val);
+	return head.val = fn.invoke(head.val);
 }
 
 
 /*
 static public Object runInAsOfTransaction(IFn fn, int tpoint) throws Exception{
-	if(getTransaction() != null)
+	if(get() != null)
 		throw new Exception("As-of transactions cannot be nested");
 
 	Transaction t = new Transaction(tpoint);
@@ -264,7 +270,7 @@ static public Object runInAsOfTransaction(IFn fn, int tpoint) throws Exception{
 }
 
 static public Object runInAsOfTransaction(IFn fn, long msecs) throws Exception{
-	if(getTransaction() != null)
+	if(get() != null)
 		throw new Exception("As-of transactions cannot be nested");
 
 	Transaction t = new Transaction(msecs);
@@ -348,7 +354,7 @@ public static void main(String[] args){
 			public Object invoke() throws Exception{
 				for(TRef tref : items)
 					{
-					Transaction.getTransaction().doCommute(tref, incr);
+					Transaction.get().doCommute(tref, incr);
 					}
 				return null;
 			}
@@ -379,8 +385,8 @@ public static void main(String[] args){
 			public Object invoke() throws Exception{
 				for(TRef tref : items)
 					{
-					//Transaction.getTransaction().doTouch(tref);
-					Transaction t =  Transaction.getTransaction();
+					//Transaction.get().doTouch(tref);
+					Transaction t =  Transaction.get();
 					int val = (Integer) t.doGet(tref);
 					t.doSet(tref, val + 1);
 					}

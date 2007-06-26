@@ -13,25 +13,22 @@
 package clojure.lang;
 
 
-public class Symbol
-{
+public class Symbol{
 //this must be an interned string!
 public final String name;
 
-public String toString()
-    {
-    return name;
-    }
+public String toString(){
+	return name;
+}
 
-public Symbol(String name)
-    {
-    this.name = name.intern();
-    }
+Symbol(String name){
+	this.name = name.intern();
+}
 
 public boolean equals(Object o){
 	if(this == o)
 		return true;
-	if(o == null || getClass() != o.getClass())
+	if(o == null || !(o instanceof Symbol))
 		return false;
 
 	Symbol symbol = (Symbol) o;
@@ -44,36 +41,25 @@ public int hashCode(){
 	return name.hashCode();
 }
 
-/*
-public static Symbol intern(String name)
-    {
-    synchronized(table)
-        {
-        Symbol sym = (Symbol) table.get(name);
-        int dot = 0;
-        if(sym == null)
-            {
-            if(name.charAt(0) == ':')
-                sym = new Keyword(name);
-            else if((dot = name.indexOf('.')) != -1)
-                {
-                if(dot == 0)
-                    sym = new InstanceMemberSymbol(name);
-                else if(name.lastIndexOf('.') == name.length() - 1)
-                    sym = new ClassSymbol(name);
-                else
-                    sym = new StaticMemberSymbol(name);
-                }
-            else
-                sym = new Symbol(name);
-            if(table.get(name) != null) //defend against recursive static init
-                return (Symbol) table.get(name);
-            table.put(name, sym);
-            }
-        return sym;
-        }
-    }
+//*
+public static Symbol intern(String name){
+	int dot = 0;
+	Symbol sym;
+	if(name.charAt(0) == ':')
+		sym = new Keyword(name);
+	else if((dot = name.indexOf('.')) != -1)
+		{
+		if(dot == 0)
+			sym = new InstanceMemberSymbol(name);
+		else if(name.lastIndexOf('.') == name.length() - 1)
+			sym = new ClassSymbol(name);
+		else
+			sym = new StaticMemberSymbol(name);
+		}
+	else
+		sym = new Symbol(name);
+	return sym;
+}
 
-
- */
+//*/
 }

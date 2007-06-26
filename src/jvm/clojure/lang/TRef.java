@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TRef{
+public class TRef<T>{
 //reference to a chain of TVals, only the head of which may be non-committed
 final AtomicReference<TVal> tvals;
 
@@ -22,16 +22,35 @@ public TRef() {
 	this.tvals = new AtomicReference<TVal>();
 }
 
-public TRef(Object initVal) {
+public TRef(T initVal) {
 	this.tvals = new AtomicReference<TVal>();
 	tvals.set(new TVal(initVal, Transaction.ZERO_POINT, null));
 }
 
-public Object getCurrentVal(){
+public T getCurrentVal(){
 	TVal current = getCurrentTVal();
 	if(current != null)
-		return current.val;
+		return (T)current.val;
 	return null;
+}
+
+public T get() throws Exception{
+	Transaction t = Transaction.get();
+	if(t != null)
+		return (T) t.doGet(this);
+	return getCurrentVal();
+}
+
+public T set(T val) throws Exception{
+	return (T) Transaction.getEx().doSet(this,val);
+}
+
+public T commute(T val,IFn fn) throws Exception{
+	return (T) Transaction.getEx().doCommute(this,fn);
+}
+
+public void touch() throws Exception{
+	Transaction.getEx().doTouch(this);
 }
 
 TVal getCurrentTVal(){
