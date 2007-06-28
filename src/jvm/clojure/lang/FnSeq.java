@@ -12,14 +12,12 @@ package clojure.lang;
 
 public class FnSeq extends ASeq{
 
-Object _first;
-IFn restFn;
-volatile ISeq _rest;
+final Object _first;
+final Delay _rest;
 
-public FnSeq(Object first, IFn restFn) {
+public FnSeq(Object first, Delay rest) {
     this._first = first;
-    this.restFn = restFn;
-    this._rest = this;
+    this._rest = rest;
 }
 
 public Object first() {
@@ -27,21 +25,13 @@ public Object first() {
 }
 
 public ISeq rest() {
-    if(_rest != this)
-        return _rest;
-    synchronized(this){
-        if(_rest == this)
-            {
-            try{
-                _rest = (ISeq) restFn.invoke();
-            }
-            catch(Exception ex)
-                {
-                throw new Error(ex.toString());
-                }
-            restFn = null;
-            }
-        return _rest;
-    }
+	try
+		{
+		return (ISeq) _rest.force();
+		}
+	catch(Exception e)
+		{
+		throw new Error(e.toString());
+		}
 }
 }
