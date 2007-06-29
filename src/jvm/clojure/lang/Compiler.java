@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class Compiler {
-///*
+//*
 static Symbol DEF = Symbol.intern("def");
 static Symbol FN = Symbol.intern("fn");
 static Symbol DO = Symbol.intern("do");
@@ -45,19 +45,45 @@ static public Var _CRT_MODULE = RT._CT_MODULE;
 static NilExpr NIL_EXPR = new NilExpr();
 
 //short-name-string->full-name-string
-static public Var IMPORTS = Module.intern("clojure", "^compiler-imports");
+static public Var IMPORTS;
+
+static
+	{
+	try
+		{
+		IMPORTS = Module.intern("clojure", "^compiler-imports");
+		KEYWORDS = Module.intern("clojure", "^compiler-keywords");
+		VARS = Module.intern("clojure", "^compiler-vars");
+		LOCAL_ENV = Module.intern("clojure", "^compiler-local-env");
+		METHOD = Module.intern("clojure", "^compiler-method");
+		USES = Module.intern("clojure", "^compiler-uses");
+		FNS = Module.intern("clojure", "^compiler-fns");
+		}
+	catch(Exception e)
+		{
+		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
+	}
+
 //keyword->keywordexpr
-static public Var KEYWORDS = Module.intern("clojure", "^compiler-keywords");
+static public Var KEYWORDS;
+
 //var->var
-static public Var VARS = Module.intern("clojure", "^compiler-vars");
+static public Var VARS;
+
 //symbol->localbinding
-static public Var LOCAL_ENV = Module.intern("clojure", "^compiler-local-env");
+static public Var LOCAL_ENV;
+
+
 //FnFrame
-static public Var METHOD = Module.intern("clojure", "^compiler-method");
+static public Var METHOD;
+
 //module->module
-static public Var USES = Module.intern("clojure", "^compiler-uses");
+static public Var USES;
+
+
 //ISeq FnExprs
-static public Var FNS = Module.intern("clojure", "^compiler-fns");
+static public Var FNS;
 
 static public IPersistentMap CHAR_MAP =
         new PersistentArrayMap('-', "_DSH_",
@@ -1460,7 +1486,7 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception {
 }
 
 
-static LocalBindingExpr createParamBinding(Symbol p) {
+static LocalBindingExpr createParamBinding(Symbol p) throws Exception{
     Symbol basep = baseSymbol(p);
     LocalBinding b = new LocalBinding(basep);
     b.isParam = true;
@@ -1535,7 +1561,7 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
         }
 }
 
-static Var lookupVar(Symbol sym) {
+static Var lookupVar(Symbol sym) throws Exception{
     Module module = (Module) _CRT_MODULE.getValue();
     Var v = module.find(sym);
     if (v != null)
@@ -1544,7 +1570,7 @@ static Var lookupVar(Symbol sym) {
         {
         module = (Module) ((IMapEntry) RT.first(seq)).key();
         v = module.find(sym);
-        if (v != null && !v.hidden)
+        if (v != null && !v.exported)
             return v;
         }
     return null;
@@ -1554,7 +1580,7 @@ static Object macroexpand(Object x) {
     return x; //placeholder
 }
 
-private static KeywordExpr registerKeyword(Keyword keyword) {
+private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
     IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.getValue();
     KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
     if (ke == null)
@@ -1562,13 +1588,13 @@ private static KeywordExpr registerKeyword(Keyword keyword) {
     return ke;
 }
 
-private static void registerVar(Var var) {
+private static void registerVar(Var var) throws Exception{
     IPersistentMap varsMap = (IPersistentMap) VARS.getValue();
     if (RT.get(var, varsMap) == null)
         VARS.setValue(RT.assoc(var, var, varsMap));
 }
 
-private static void registerFn(FnExpr fn) {
+private static void registerFn(FnExpr fn) throws Exception{
     FNS.setValue(RT.cons(fn, (IPersistentCollection) FNS.getValue()));
 }
 
@@ -1581,7 +1607,7 @@ static void closeOver(LocalBinding b, FnMethod method) {
         }
 }
 
-static LocalBinding referenceLocal(Symbol sym) {
+static LocalBinding referenceLocal(Symbol sym) throws Exception{
     LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
     if (b != null)
         {
@@ -1590,7 +1616,7 @@ static LocalBinding referenceLocal(Symbol sym) {
     return b;
 }
 
-private static void registerLocal(LocalBinding b) {
+private static void registerLocal(LocalBinding b) throws Exception{
     IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.getValue();
     LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
     FnMethod method = (FnMethod) METHOD.getValue();
@@ -1656,13 +1682,13 @@ static Class getTypeNamed(String classname) throws ClassNotFoundException {
 
 
 static class KeyParam {
-    public KeyParam(LocalBindingExpr b, Expr init) {
+    public KeyParam(LocalBindingExpr b, Expr init) throws Exception{
         this.bindingExpression = b;
         this.init = init;
         kw = registerKeyword((Keyword) Symbol.intern(":" + bindingExpression.b.sym.name));
     }
 
-    public KeyParam(LocalBindingExpr b) {
+    public KeyParam(LocalBindingExpr b) throws Exception{
         this(b, NIL_EXPR);
     }
 

@@ -88,7 +88,7 @@ static void statusTransition(TStamp tstamp, TStamp.Status newStatus){
 TStamp tstamp;
 
 TVal lock(TRef tref, boolean ensurePoint) throws Exception{
-	TVal head = tref.tvals.get();
+	TVal head = (TVal)tref.tvals.get();
 	//already locked by this transaction
 	if(head != null && head.tstamp == tstamp)
 		return head;
@@ -204,7 +204,7 @@ Object run(IFn fn) throws Exception{
 
 
 Object doGet(TRef tref) throws Exception{
-	TVal head = tref.tvals.get();
+	TVal head = (TVal)tref.tvals.get();
 	if(head == null)
 		return null;
 	if(head.tstamp == tstamp)

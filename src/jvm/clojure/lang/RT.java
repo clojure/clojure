@@ -19,20 +19,31 @@ import java.io.*;
 public class RT{
 
     static public Symbol T = Symbol.intern(":t");
-	static public Var OUT = Module.intern("clojure","^out");
-    static public Var _CT_MODULE = Module.intern("clojure", "^module");
-    static public final Object[] EMPTY_ARRAY = new Object[]{};
-    static public final Character[] chars;
-    static AtomicInteger id = new AtomicInteger(1);
+static public Var OUT;
+
+static public Var _CT_MODULE;
+
+static public final Object[] EMPTY_ARRAY = new Object[]{};
+static public final Character[] chars;
+static AtomicInteger id = new AtomicInteger(1);
 
     static {
-        chars = new Character[256];
-        for(int i=0;i<chars.length;i++)
-            chars[i] = new Character((char)i);
+	    chars = new Character[256];
+	    for(int i=0;i<chars.length;i++)
+	        chars[i] = new Character((char)i);    try
+	    {
+	    OUT = Module.intern("clojure", "^out");
+	    _CT_MODULE = Module.intern("clojure", "^module");
 
-        OUT.bind(new OutputStreamWriter(System.out));
-        _CT_MODULE.bind((Module.findOrCreate("clj-user")));
-        }
+
+	    OUT.bind(new OutputStreamWriter(System.out));
+	    _CT_MODULE.bind((Module.findOrCreate("clj-user")));
+	    }
+    catch(Exception e)
+	    {
+	    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+	    }
+    }
 
     static public int nextID(){
         return id.getAndIncrement();

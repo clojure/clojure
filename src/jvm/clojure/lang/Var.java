@@ -20,17 +20,15 @@ public class Var extends AFn {
 
 public final Symbol name;
 public Module module;
-public Binding binding;
-public boolean hidden = false;
-AtomicInteger tcount = new AtomicInteger(0);
-AtomicReference<IPersistentMap> threadBindings = new AtomicReference(PersistentArrayMap.EMPTY);
-
+public final TRef binding;
+public boolean exported = false;
 
 Var(Symbol sym, Module ns) {
     if (!(sym.getClass() == Symbol.class))
         throw new IllegalArgumentException("Only simple symbols can be var names");
     this.module = ns;
     this.name = sym;
+	this.binding = new TRef();
 }
 
 public String toString() {
@@ -39,75 +37,37 @@ public String toString() {
     return module.name + ":" + name;
 }
 
-public Var bind(Object val) {
-    synchronized(this){
-    if (binding == null)
-        binding = new Binding(val);
-    else
-        binding.val = val;
+public Var bind(Object val) throws Exception{
+	//must be called in transaction
+	binding.set(val);
 
-    return this;
-    }
+	return this;
 }
 
-public Object getValue() {
-    Binding b = getBinding();
-    if (b != null)
-        return b.val;
+public Object getValue() throws Exception{
+	if(binding.isBound())
+		return binding.get();
     throw new IllegalStateException(this.toString() + " is unbound.");
 }
 
-public Object setValue(Object val) {
-    Binding b = getThreadBinding();
-    if (b != null)
-        return b.val = val;
-    if (binding == null)
-        throw new IllegalStateException(this.toString() + " is unbound.");
-
-    return binding.val = val;
+public Object setValue(Object val) throws Exception{
+	//must be called in transaction
+	return binding.set(val);
 }
 
-public Binding pushThreadBinding(Object val) {
-    Binding ret = new Binding(val, getThreadBinding());
-    setThreadBinding(ret);
-    tcount.incrementAndGet();
-    return ret;
+void pushThreadBinding(Object val) {
+
 }
 
 public void popThreadBinding() {
-    setThreadBinding(getThreadBinding().rest);
-    tcount.decrementAndGet();
+
 }
 
-private Binding getThreadBinding() {
-    if (tcount.get() != 0)
-        return (Binding) threadBindings.get().get(Thread.currentThread());
-    return null;
-}
-
-private Binding getBinding() {
-    Binding b = getThreadBinding();
-    if (b != null)
-        return b;
-    return binding;
-}
-
-private void setThreadBinding(Binding b) {
-    Thread thread = Thread.currentThread();
-    IPersistentMap tb;
-    IPersistentMap newtb;
-    do
-        {
-        tb = threadBindings.get();
-        if (b == null)
-            newtb = tb.without(thread);
-        else
-            newtb = tb.assoc(thread, b);
-        } while (!threadBindings.compareAndSet(tb, newtb));
-}
 
 final public IFn fn() {
-    return (IFn) getValue();
+	if(binding.isBound())
+		return (IFn) binding.getCurrentVal();
+    throw new IllegalStateException(this.toString() + " is unbound.");
 }
 
 public Object invoke() throws Exception {

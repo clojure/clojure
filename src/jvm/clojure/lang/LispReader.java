@@ -209,7 +209,7 @@ static private Object readMember(PushbackReader r) throws Exception {
 }
 */
 
-static private Object interpretToken(String s) {
+static private Object interpretToken(String s) throws Exception{
     if (s.equals("null"))
         {
         return null;
@@ -248,7 +248,7 @@ private static Object matchSymbol(String s) {
 }
 */
 
-private static Object matchVar(String s) {
+private static Object matchVar(String s) throws Exception{
     Matcher m = varPat.matcher(s);
     if(m.matches())
         return Module.intern(m.group(1),m.group(2));

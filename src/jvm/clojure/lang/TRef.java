@@ -42,6 +42,12 @@ public T get() throws Exception{
 }
 
 public T set(T val) throws Exception{
+	//allow out-of-transaction inits
+	if(!isBound())
+		{
+		tvals.set(new TVal(val, Transaction.ZERO_POINT, null));
+		return val;
+		}
 	return (T) Transaction.getEx().doSet(this,val);
 }
 
@@ -51,6 +57,10 @@ public T commute(T val,IFn fn) throws Exception{
 
 public void touch() throws Exception{
 	Transaction.getEx().doTouch(this);
+}
+
+boolean isBound(){
+	return tvals.get() != null;
 }
 
 TVal getCurrentTVal(){
