@@ -17,9 +17,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TRef<T>{
 //reference to a chain of TVals, only the head of which may be non-committed
 final AtomicReference<TVal> tvals;
+volatile InheritableThreadLocal dvals;
 
 public TRef() {
 	this.tvals = new AtomicReference<TVal>();
+	this.dvals = null;
 }
 
 public TRef(T initVal) {
@@ -28,6 +30,9 @@ public TRef(T initVal) {
 }
 
 public T getCurrentVal(){
+	Binding b = getThreadBinding();
+	if(b != null)
+		return (T) b.val;
 	TVal current = getCurrentTVal();
 	if(current != null)
 		return (T)current.val;
@@ -35,13 +40,50 @@ public T getCurrentVal(){
 }
 
 public T get() throws Exception{
+	Binding b = getThreadBinding();
+	if(b != null)
+		return (T) b.val;
 	Transaction t = Transaction.get();
 	if(t != null)
 		return (T) t.doGet(this);
 	return getCurrentVal();
 }
 
+Binding getThreadBinding(){
+	if(dvals != null)
+		{
+		Binding b;
+		if((b = (Binding) dvals.get()) != null)
+			{
+			return b;
+			}
+		}
+	return null;
+}
+
+public void pushThreadBinding(T val){
+	if(dvals == null)
+		{
+		synchronized(this)
+			{
+			if(dvals == null)
+				dvals = new InheritableThreadLocal();
+			}
+		}
+	dvals.set(new Binding(val, (Binding) dvals.get()));
+}
+
+public void popThreadBinding() throws Exception{
+	Binding b;
+	if(dvals == null || (b = (Binding) dvals.get()) == null)
+		 throw new Exception("Can't pop unbound ref");
+	dvals.set(b.rest);
+}
+
 public T set(T val) throws Exception{
+	Binding b = getThreadBinding();
+	if(b != null)
+		return (T) (b.val = val);
 	//allow out-of-transaction inits
 	if(!isBound())
 		{
@@ -51,7 +93,10 @@ public T set(T val) throws Exception{
 	return (T) Transaction.getEx().doSet(this,val);
 }
 
-public T commute(T val,IFn fn) throws Exception{
+public T commute(IFn fn) throws Exception{
+	Binding b = getThreadBinding();
+	if(b != null)
+		return (T) (b.val = fn.invoke(b.val));
 	return (T) Transaction.getEx().doCommute(this,fn);
 }
 
@@ -60,7 +105,8 @@ public void touch() throws Exception{
 }
 
 boolean isBound(){
-	return tvals.get() != null;
+	return (dvals != null && dvals.get() != null)
+	       || tvals.get() != null;
 }
 
 TVal getCurrentTVal(){
