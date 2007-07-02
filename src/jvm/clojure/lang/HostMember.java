@@ -12,7 +12,7 @@ package clojure.lang;
 
 public class HostSymbol extends Symbol{
 
-HostSymbol(String name) {
-    super(name);
+HostSymbol(String name){
+	super(name);
 }
 }
