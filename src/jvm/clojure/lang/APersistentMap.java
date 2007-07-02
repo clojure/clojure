@@ -13,101 +13,102 @@ package clojure.lang;
 public abstract class APersistentMap extends Obj implements IPersistentMap, Cloneable{
 int _hash = -1;
 
-public Obj withMeta(IPersistentMap meta) {
-    if(_meta == meta)
-        return this;
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
+public Obj withMeta(IPersistentMap meta){
+	if(_meta == meta)
+		return this;
+	try
+		{
+		Obj ret = (Obj) clone();
+		ret._meta = meta;
+		return ret;
+		}
+	catch(CloneNotSupportedException ignore)
+		{
+		return null;
+		}
 }
 
-public IPersistentCollection cons(Object o) {
-    IMapEntry e = (IMapEntry)o;
-    return assoc(e.key(), e.val());
+public IPersistentCollection cons(Object o){
+	IMapEntry e = (IMapEntry) o;
+	return assoc(e.key(), e.val());
 }
 
-public boolean equals(Object obj) {
-    if(!(obj instanceof IPersistentMap))
-        return false;
-    IPersistentMap m = (IPersistentMap)obj;
+public boolean equals(Object obj){
+	if(!(obj instanceof IPersistentMap))
+		return false;
+	IPersistentMap m = (IPersistentMap) obj;
 
-    if(m.count() != count() || m.hashCode() != hashCode())
-        return false;
+	if(m.count() != count() || m.hashCode() != hashCode())
+		return false;
 
-    for(ISeq s = seq();s!=null;s = s.rest())
-        {
-        IMapEntry e = (IMapEntry) s.first();
-        IMapEntry me = m.find(e.key());
+	for(ISeq s = seq(); s != null; s = s.rest())
+		{
+		IMapEntry e = (IMapEntry) s.first();
+		IMapEntry me = m.entryAt(e.key());
 
-        if(me == null || !RT.equal(e.val(),me.val()))
-            return false;
-        }
+		if(me == null || !RT.equal(e.val(), me.val()))
+			return false;
+		}
 
-    return true;
+	return true;
 }
 
-public int hashCode() {
-    if(_hash == -1)
-        {
-        int hash = count();
-        for(ISeq s = seq();s!=null;s = s.rest())
-            {
-            IMapEntry e = (IMapEntry) s.first();
-            hash ^= RT.hashCombine(RT.hash(e.key()), RT.hash(e.val()));
-            }
-        this._hash = hash;
-        }
-    return _hash;
+public int hashCode(){
+	if(_hash == -1)
+		{
+		int hash = count();
+		for(ISeq s = seq(); s != null; s = s.rest())
+			{
+			IMapEntry e = (IMapEntry) s.first();
+			hash ^= RT.hashCombine(RT.hash(e.key()), RT.hash(e.val()));
+			}
+		this._hash = hash;
+		}
+	return _hash;
 }
 
 static public class KeySeq extends ASeq{
-    ISeq seq;
+	ISeq seq;
 
-    static public KeySeq create(ISeq seq){
-        if(seq == null)
-            return null;
-        return new KeySeq(seq);
-    }
+	static public KeySeq create(ISeq seq){
+		if(seq == null)
+			return null;
+		return new KeySeq(seq);
+	}
 
-    private KeySeq(ISeq seq) {
-        this.seq = seq;
-    }
+	private KeySeq(ISeq seq){
+		this.seq = seq;
+	}
 
-    public Object first() {
-        return ((IMapEntry)seq.first()).key();
-    }
+	public Object first(){
+		return ((IMapEntry) seq.first()).key();
+	}
 
-    public ISeq rest() {
-        return create(seq.rest());
-    }
+	public ISeq rest(){
+		return create(seq.rest());
+	}
 }
 
 static public class ValSeq extends ASeq{
-    ISeq seq;
+	ISeq seq;
 
-    static public ValSeq create(ISeq seq){
-        if(seq == null)
-            return null;
-        return new ValSeq(seq);
-    }
+	static public ValSeq create(ISeq seq){
+		if(seq == null)
+			return null;
+		return new ValSeq(seq);
+	}
 
-    private ValSeq(ISeq seq) {
-        this.seq = seq;
-    }
+	private ValSeq(ISeq seq){
+		this.seq = seq;
+	}
 
-    public Object first() {
-        return ((IMapEntry)seq.first()).val();
-    }
+	public Object first(){
+		return ((IMapEntry) seq.first()).val();
+	}
 
-    public ISeq rest() {
-        return create(seq.rest());
-    }
+	public ISeq rest(){
+		return create(seq.rest());
+	}
 }
 
 }

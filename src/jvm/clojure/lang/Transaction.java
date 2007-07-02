@@ -88,7 +88,7 @@ static void statusTransition(TStamp tstamp, TStamp.Status newStatus){
 TStamp tstamp;
 
 TVal lock(TRef tref, boolean ensurePoint) throws Exception{
-	TVal head = (TVal)tref.tvals.get();
+	TVal head = (TVal) tref.tvals.get();
 	//already locked by this transaction
 	if(head != null && head.tstamp == tstamp)
 		return head;
@@ -204,7 +204,7 @@ Object run(IFn fn) throws Exception{
 
 
 Object doGet(TRef tref) throws Exception{
-	TVal head = (TVal)tref.tvals.get();
+	TVal head = (TVal) tref.tvals.get();
 	if(head == null)
 		return null;
 	if(head.tstamp == tstamp)
@@ -386,7 +386,7 @@ public static void main(String[] args){
 				for(TRef tref : items)
 					{
 					//Transaction.get().doTouch(tref);
-					Transaction t =  Transaction.get();
+					Transaction t = Transaction.get();
 					int val = (Integer) t.doGet(tref);
 					t.doSet(tref, val + 1);
 					}
@@ -417,7 +417,7 @@ public static void main(String[] args){
 		System.out.println();
 		for(TRef item : items)
 			{
-			System.out.printf("%d, ", (Integer) item.getCurrentVal());
+			System.out.printf("%d, ", (Integer) item.currentVal());
 			}
 		}
 	catch(Exception ex)

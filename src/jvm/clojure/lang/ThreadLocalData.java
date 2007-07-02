@@ -17,14 +17,12 @@ public class ThreadLocalData{
 private static ThreadLocal<Object[]> values = new ThreadLocal<Object[]>();
 
 static public Object[] getValues(){
-     return values.get();
+	return values.get();
 }
 
-static public void setValues(Object[] vals) {
-    values.set(vals);
+static public void setValues(Object[] vals){
+	values.set(vals);
 }
-
-
 
 
 private static ThreadLocal<Integer> tltest = new ThreadLocal<Integer>();
@@ -50,46 +48,46 @@ static public void main(String[] args){
 
 	long startTime = System.nanoTime();
 	sum = 0;
-	for(int i=0;i<n;i++)
+	for(int i = 0; i < n; i++)
 		{
-		sum  += test.intValue();
+		sum += test.intValue();
 		}
 
 	long estimatedTime = System.nanoTime() - startTime;
-	System.out.println("sum = " + sum + ", time: " + estimatedTime/1000000);
+	System.out.println("sum = " + sum + ", time: " + estimatedTime / 1000000);
 
 	startTime = System.nanoTime();
 	sum = 0;
-	for(int i=0;i<n;i++)
+	for(int i = 0; i < n; i++)
 		{
 		sum += tltest.get().intValue();
 		}
 
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("sum = " + sum + ", time: " + estimatedTime/1000000);
+	System.out.println("sum = " + sum + ", time: " + estimatedTime / 1000000);
 
 	startTime = System.nanoTime();
 	sum = 0;
-	for(int i=0;i<n;i++)
+	for(int i = 0; i < n; i++)
 		{
-		sum += ((Integer)testmap.get(Thread.currentThread())).intValue();
+		sum += ((Integer) testmap.valAt(Thread.currentThread())).intValue();
 		}
 
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("sum = " + sum + ", time: " + estimatedTime/1000000);
+	System.out.println("sum = " + sum + ", time: " + estimatedTime / 1000000);
 
 	startTime = System.nanoTime();
 	sum = 0;
-	for(int i=0;i<n;i++)
+	for(int i = 0; i < n; i++)
 		{
 		if(fred != null)
-			sum += ((Integer)testmap.get(Thread.currentThread())).intValue();
+			sum += ((Integer) testmap.valAt(Thread.currentThread())).intValue();
 		else
-			sum  += test.intValue();
+			sum += test.intValue();
 		}
 
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("sum = " + sum + ", time: " + estimatedTime/1000000);
+	System.out.println("sum = " + sum + ", time: " + estimatedTime / 1000000);
 
 }
 }

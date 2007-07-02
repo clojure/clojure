@@ -16,104 +16,105 @@ public class MapEntry extends APersistentMap implements IMapEntry{
 final Object _key;
 final Object _val;
 
-public MapEntry(Object key, Object val) {
-    this._key = key;
-    this._val = val;
+public MapEntry(Object key, Object val){
+	this._key = key;
+	this._val = val;
 }
 
-public Object key() {
-    return _key;
+public Object key(){
+	return _key;
 }
 
-public Object val() {
-    return _val;
+public Object val(){
+	return _val;
 }
 
-public boolean contains(Object key) {
-    return RT.equal(_key, key);
+public boolean contains(Object key){
+	return RT.equal(_key, key);
 }
 
-public IMapEntry find(Object key) {
-    return RT.equal(_key, key)?this:null;
+public IMapEntry entryAt(Object key){
+	return RT.equal(_key, key) ? this : null;
 }
 
-public IPersistentMap assoc(Object key, Object val) {
-    if(RT.equal(_key, key))
-        {
-        if(_val == val)
-            return this;
-        return (MapEntry) new MapEntry(key, val).withMeta(_meta);
-        }
-    return (IPersistentMap) new PersistentArrayMap(_key,_val,key,val).withMeta(_meta);
+public IPersistentMap assoc(Object key, Object val){
+	if(RT.equal(_key, key))
+		{
+		if(_val == val)
+			return this;
+		return (MapEntry) new MapEntry(key, val).withMeta(_meta);
+		}
+	return (IPersistentMap) new PersistentArrayMap(_key, _val, key, val).withMeta(_meta);
 }
 
-public Object get(Object key) {
-    return RT.equal(_key, key)?_val:null;
+public Object valAt(Object key){
+	return RT.equal(_key, key) ? _val : null;
 }
 
-public IPersistentMap assocEx(Object key, Object val) throws Exception {
-    if(RT.equal(_key, key))
-        throw new Exception("Key already present");
-    return assoc(key, val);
+public IPersistentMap assocEx(Object key, Object val) throws Exception{
+	if(RT.equal(_key, key))
+		throw new Exception("Key already present");
+	return assoc(key, val);
 }
 
-public IPersistentMap without(Object key) {
-    if(RT.equal(_key, key))
-        return (IPersistentMap) PersistentArrayMap.EMPTY.withMeta(_meta);
-    return this;
+public IPersistentMap without(Object key){
+	if(RT.equal(_key, key))
+		return (IPersistentMap) PersistentArrayMap.EMPTY.withMeta(_meta);
+	return this;
 }
 
-public int count() {
-    return 1;
+public int count(){
+	return 1;
 }
 
-public Iterator iterator() {
-    return new Iter(this);
+public Iterator iterator(){
+	return new Iter(this);
 }
 
 static class Iter implements Iterator{
-    MapEntry e;
+	MapEntry e;
 
-    public Iter(MapEntry e) {
-        this.e = e;
-    }
+	public Iter(MapEntry e){
+		this.e = e;
+	}
 
-    public boolean hasNext() {
-        return e != null;
-    }
+	public boolean hasNext(){
+		return e != null;
+	}
 
-    public Object next() {
-        Object ret = e;
-        e = null;
-        return ret;
-    }
+	public Object next(){
+		Object ret = e;
+		e = null;
+		return ret;
+	}
 
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
+	public void remove(){
+		throw new UnsupportedOperationException();
+	}
 }
 
 
-public ISeq seq()  {
-    return new Seq(this);
+public ISeq seq(){
+	return new Seq(this);
 }
 
 static class Seq extends ASeq{
-    final MapEntry e;
+	final MapEntry e;
 
-    public Seq(MapEntry e) {
-        this.e = e;
-    }
+	public Seq(MapEntry e){
+		this.e = e;
+	}
 
-    public Object first() {
-        return e;
-    }
+	public Object first(){
+		return e;
+	}
 
-    public ISeq rest() {
-        return null;
-    }
-    public int count() {
-        return 1;
-    }
+	public ISeq rest(){
+		return null;
+	}
+
+	public int count(){
+		return 1;
+	}
 }
 }

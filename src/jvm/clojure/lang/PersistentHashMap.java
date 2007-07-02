@@ -41,10 +41,10 @@ PersistentHashMap(int count, INode root){
 }
 
 public boolean contains(Object key){
-	return find(key) != null;
+	return entryAt(key) != null;
 }
 
-public IMapEntry find(Object key){
+public IMapEntry entryAt(Object key){
 	return root.find(RT.hash(key), key);
 }
 
@@ -58,8 +58,8 @@ public IPersistentMap assoc(Object key, Object val){
 	return ret;
 }
 
-public Object get(Object key){
-	IMapEntry e = find(key);
+public Object valAt(Object key){
+	IMapEntry e = entryAt(key);
 	if(e != null)
 		return e.val();
 	return null;

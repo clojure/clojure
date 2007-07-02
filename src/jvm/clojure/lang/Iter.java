@@ -18,20 +18,22 @@ package clojure.lang;
  * <pre>
  * for(Iter i = getAnIter();i!=null;i = i.iterate())
  *  {
- *  //use i.get()
+ *  //use i.valAt()
  *  }
  * </pre>
  */
 public interface Iter{
 /**
  * Multiple calls to get() are allowed prior to calling iterate()
- * @return  the currently referenced item/element/value
+ *
+ * @return the currently referenced item/element/value
  */
 public Object get();
 
 /**
  * This may destroy or otherwise invalidate the object it is called upon
  * so always capture and use the return value (even though sometimes you may find it is the same object)
+ *
  * @return The next iter to use, or null if at end of sequence
  */
 public Iter iterate();

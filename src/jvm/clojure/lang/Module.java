@@ -12,15 +12,14 @@
 
 package clojure.lang;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Module{
 
 /**
  * String->Module
  */
-static final public TRef<IPersistentMap> table = new TRef(PersistentHashMap.EMPTY);
+static final public ConcurrentHashMap<String, Module> table = new ConcurrentHashMap();
 
 /**
  * Symbol->Var
@@ -32,32 +31,34 @@ Module(String name){
 	this.name = name;
 }
 
-static public Module find(String name) throws Exception{
-	return (Module) table.get().get(name);
+static public Module findModule(String name) throws Exception{
+	return table.get(name);
 }
 
-static public Module findOrCreate(String name) throws Exception{
+static public Module findOrCreateModule(String name) throws Exception{
+	Module module = findModule(name);
+	if(module == null)
+		module = table.putIfAbsent(name, new Module(name));
+	return module;
+}
+
+public TRef findRef(String name) throws Exception{
+	return (TRef) vars.val().valAt(name);
+}
+
+public static TRef intern(String moduleName, String name) throws Exception{
+	Module module = findModule(name);
+	if(module == null)
+		throw new Exception(String.format("Module %s not found", moduleName));
+	return module.intern(name);
+}
+
+public TRef intern(String name) throws Exception{
 	//must be called in transaction
-	Module ns = find(name);
-	if(ns == null)
-		table.set(table.get().assoc(name, ns = new Module(name)));
-	return ns;
-}
-
-static public Var intern(String ns, String name) throws Exception{
-	return findOrCreate(ns).intern(new Symbol(name));
-}
-
-public Var find(Symbol sym) throws Exception{
-	return (Var) vars.get().get(sym);
-}
-
-public Var intern(Symbol sym) throws Exception{
-	//must be called in transaction
-	IPersistentMap varmap = vars.get();
-	Var var = (Var) varmap.get(sym);
+	IPersistentMap varmap = vars.val();
+	TRef var = (TRef) varmap.valAt(name);
 	if(var == null)
-		vars.set(varmap.assoc(sym, var = new Var(sym, this)));
+		vars.set(varmap.assoc(name, var = new TRef()));
 	return var;
 }
 

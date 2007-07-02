@@ -19,34 +19,34 @@ public class TRef<T>{
 final AtomicReference<TVal> tvals;
 volatile InheritableThreadLocal dvals;
 
-public TRef() {
+public TRef(){
 	this.tvals = new AtomicReference<TVal>();
 	this.dvals = null;
 }
 
-public TRef(T initVal) {
+public TRef(T initVal){
 	this.tvals = new AtomicReference<TVal>();
 	tvals.set(new TVal(initVal, Transaction.ZERO_POINT, null));
 }
 
-public T getCurrentVal(){
+public T currentVal(){
 	Binding b = getThreadBinding();
 	if(b != null)
 		return (T) b.val;
 	TVal current = getCurrentTVal();
 	if(current != null)
-		return (T)current.val;
+		return (T) current.val;
 	return null;
 }
 
-public T get() throws Exception{
+public T val() throws Exception{
 	Binding b = getThreadBinding();
 	if(b != null)
 		return (T) b.val;
 	Transaction t = Transaction.get();
 	if(t != null)
 		return (T) t.doGet(this);
-	return getCurrentVal();
+	return currentVal();
 }
 
 final Binding getThreadBinding(){
@@ -70,7 +70,7 @@ public void pushThreadBinding(T val){
 public void popThreadBinding() throws Exception{
 	Binding b;
 	if(dvals == null || (b = (Binding) dvals.get()) == null)
-		 throw new Exception("Can't pop unbound ref");
+		throw new Exception("Can't pop unbound ref");
 	dvals.set(b.rest);
 }
 
@@ -84,14 +84,14 @@ public T set(T val) throws Exception{
 		tvals.set(new TVal(val, Transaction.ZERO_POINT, null));
 		return val;
 		}
-	return (T) Transaction.getEx().doSet(this,val);
+	return (T) Transaction.getEx().doSet(this, val);
 }
 
 public T commute(IFn fn) throws Exception{
 	Binding b = getThreadBinding();
 	if(b != null)
 		return (T) (b.val = fn.invoke(b.val));
-	return (T) Transaction.getEx().doCommute(this,fn);
+	return (T) Transaction.getEx().doCommute(this, fn);
 }
 
 public void touch() throws Exception{
@@ -99,7 +99,7 @@ public void touch() throws Exception{
 }
 
 boolean isBound(){
-	return (dvals != null && dvals.get() != null )
+	return (dvals != null && dvals.get() != null)
 	       ||
 	       getCurrentTVal() != null;
 }
@@ -112,7 +112,7 @@ TVal getCurrentTVal(){
 }
 
 TVal valAsOfPoint(TRef tref, int tpoint){
-	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+	for(TVal tv = getCurrentTVal(); tv != null; tv = tv.prior)
 		{
 		if(tv.tstamp.tpoint <= tpoint)
 			return tv;
@@ -120,8 +120,8 @@ TVal valAsOfPoint(TRef tref, int tpoint){
 	return null;
 }
 
-TVal valAsOfTime(TRef tref,long msecs){
-	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+TVal valAsOfTime(TRef tref, long msecs){
+	for(TVal tv = getCurrentTVal(); tv != null; tv = tv.prior)
 		{
 		if(tv.tstamp.msecs <= msecs)
 			return tv;
@@ -131,7 +131,7 @@ TVal valAsOfTime(TRef tref,long msecs){
 
 void trimHistory(){
 	long ctp = Transaction.completedThroughPoint();
-	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+	for(TVal tv = getCurrentTVal(); tv != null; tv = tv.prior)
 		{
 		while(tv.tstamp.tpoint > ctp)
 			tv = tv.prior;
@@ -141,7 +141,7 @@ void trimHistory(){
 
 void trimHistoryPriorToPoint(int tpoint){
 	long ctp = Transaction.completedThroughPoint();
-	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+	for(TVal tv = getCurrentTVal(); tv != null; tv = tv.prior)
 		{
 		while(tv.tstamp.tpoint > tpoint || tv.tstamp.tpoint > ctp)
 			tv = tv.prior;
@@ -151,7 +151,7 @@ void trimHistoryPriorToPoint(int tpoint){
 
 void trimHistoryPriorToTime(long msecs){
 	long ctp = Transaction.completedThroughPoint();
-	for(TVal tv = getCurrentTVal();tv != null;tv = tv.prior)
+	for(TVal tv = getCurrentTVal(); tv != null; tv = tv.prior)
 		{
 		while(tv.tstamp.msecs > msecs || tv.tstamp.tpoint > ctp)
 			tv = tv.prior;

@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap extends APersistentMap  {
+public class PersistentTreeMap extends APersistentMap{
 
 public final Comparator comp;
 public final Node tree;
@@ -40,17 +40,17 @@ public PersistentTreeMap(Comparator comp){
 
 
 public boolean contains(Object key){
-	return find(key) != null;
+	return entryAt(key) != null;
 }
 
-public PersistentTreeMap assocEx(Object key, Object val) throws Exception {
-    Box found = new Box(null);
-    Node t = add(tree, key, val, found);
-    if(t == null)   //null == already contains key
-        {
-        throw new Exception("Key already present");
-        }
-    return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
+public PersistentTreeMap assocEx(Object key, Object val) throws Exception{
+	Box found = new Box(null);
+	Node t = add(tree, key, val, found);
+	if(t == null)   //null == already contains key
+		{
+		throw new Exception("Key already present");
+		}
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
 public PersistentTreeMap assoc(Object key, Object val){
@@ -61,9 +61,9 @@ public PersistentTreeMap assoc(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new PersistentTreeMap(comp, replace(tree, key, val), _count,_meta);
+		return new PersistentTreeMap(comp, replace(tree, key, val), _count, _meta);
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count + 1,_meta);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
 }
 
 
@@ -75,23 +75,23 @@ public PersistentTreeMap without(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-        PersistentTreeMap ret = new PersistentTreeMap(comp);
-        ret._meta = _meta;
-        return ret;
-        }
-	return new PersistentTreeMap(comp, t.blacken(), _count - 1,_meta);
+		PersistentTreeMap ret = new PersistentTreeMap(comp);
+		ret._meta = _meta;
+		return ret;
+		}
+	return new PersistentTreeMap(comp, t.blacken(), _count - 1, _meta);
 }
 
-public ISeq seq() {
-    if(_count > 0)
-        return Seq.create(tree, true,_count);
-    return null;
+public ISeq seq(){
+	if(_count > 0)
+		return Seq.create(tree, true, _count);
+	return null;
 }
 
-public ISeq rseq() throws Exception {
-    if(_count > 0)
-        return Seq.create(tree, false,_count);
-    return null;
+public ISeq rseq() throws Exception{
+	if(_count > 0)
+		return Seq.create(tree, false, _count);
+	return null;
 }
 
 
@@ -121,7 +121,7 @@ public Iterator vals(NodeIterator it){
 
 public Object minKey(){
 	Node t = min();
-	return t!=null?t.key:null;
+	return t != null ? t.key : null;
 }
 
 public Node min(){
@@ -136,7 +136,7 @@ public Node min(){
 
 public Object maxKey(){
 	Node t = max();
-	return t!=null?t.key:null;
+	return t != null ? t.key : null;
 }
 
 public Node max(){
@@ -159,32 +159,32 @@ int depth(Node t){
 	return 1 + Math.max(depth(t.left()), depth(t.right()));
 }
 
-public Object get(Object key){
-	Node n = find(key);
+public Object valAt(Object key){
+	Node n = entryAt(key);
 	return (n != null) ? n.val() : null;
 }
 
-public int capacity() {
-    return _count;
+public int capacity(){
+	return _count;
 }
 
-public int count() {
-    return _count;
+public int count(){
+	return _count;
 }
 
-public Node find(Object key){
-    Node t = tree;
-    while(t != null)
-        {
-        int c = compare(key, t.key);
-        if(c == 0)
-            return t;
-        else if(c < 0)
-            t = t.left();
-        else
-            t = t.right();
-        }
-    return t;
+public Node entryAt(Object key){
+	Node t = tree;
+	while(t != null)
+		{
+		int c = compare(key, t.key);
+		if(c == 0)
+			return t;
+		else if(c < 0)
+			t = t.left();
+		else
+			t = t.right();
+		}
+	return t;
 }
 
 int compare(Object k1, Object k2){
@@ -335,7 +335,7 @@ PersistentTreeMap(Comparator comp, Node tree, int count, IPersistentMap meta){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
-    this._meta = meta;
+	this._meta = meta;
 }
 
 static Red red(Object key, Object val, Node left, Node right){
@@ -362,215 +362,222 @@ static Black black(Object key, Object val, Node left, Node right){
 	return new BlackBranchVal(key, val, left, right);
 }
 
-static abstract class Node implements IMapEntry {
-    final Object key;
+static abstract class Node implements IMapEntry{
+	final Object key;
 
-    Node(Object key){
-        this.key = key;
-    }
+	Node(Object key){
+		this.key = key;
+	}
 
-    public Object key(){
-        return key;
-    }
+	public Object key(){
+		return key;
+	}
 
-    public Object val(){
-        return null;
-    }
+	public Object val(){
+		return null;
+	}
 
-    Node left(){
-        return null;
-    }
+	Node left(){
+		return null;
+	}
 
-    Node right(){
-        return null;
-    }
+	Node right(){
+		return null;
+	}
 
-    abstract Node addLeft(Node ins);
+	abstract Node addLeft(Node ins);
 
-    abstract Node addRight(Node ins);
+	abstract Node addRight(Node ins);
 
-    abstract Node removeLeft(Node del);
+	abstract Node removeLeft(Node del);
 
-    abstract Node removeRight(Node del);
+	abstract Node removeRight(Node del);
 
-    abstract Node blacken();
+	abstract Node blacken();
 
-    abstract Node redden();
+	abstract Node redden();
 
-    Node balanceLeft(Node parent){
-        return black(parent.key, parent.val(), this, parent.right());
-    }
+	Node balanceLeft(Node parent){
+		return black(parent.key, parent.val(), this, parent.right());
+	}
 
-    Node balanceRight(Node parent){
-        return black(parent.key, parent.val(), parent.left(), this);
-    }
+	Node balanceRight(Node parent){
+		return black(parent.key, parent.val(), parent.left(), this);
+	}
 
-    abstract Node replace(Object key, Object val, Node left, Node right);
+	abstract Node replace(Object key, Object val, Node left, Node right);
 
 }
+
 static class Black extends Node{
-    public Black(Object key){
+	public Black(Object key){
 		super(key);
 	}
 
-    Node addLeft(Node ins){
+	Node addLeft(Node ins){
 		return ins.balanceLeft(this);
 	}
 
-    Node addRight(Node ins){
+	Node addRight(Node ins){
 		return ins.balanceRight(this);
 	}
 
-    Node removeLeft(Node del){
+	Node removeLeft(Node del){
 		return balanceLeftDel(key, val(), del, right());
 	}
 
-    Node removeRight(Node del){
+	Node removeRight(Node del){
 		return balanceRightDel(key, val(), left(), del);
 	}
 
-    Node blacken(){
+	Node blacken(){
 		return this;
 	}
 
-    Node redden(){
+	Node redden(){
 		return new Red(key);
 	}
 
-    Node replace(Object key, Object val, Node left, Node right){
+	Node replace(Object key, Object val, Node left, Node right){
 		return black(key, val, left, right);
 	}
 
 }
-static class BlackVal extends Black{
-    final Object val;
 
-    public BlackVal(Object key, Object val){
+static class BlackVal extends Black{
+	final Object val;
+
+	public BlackVal(Object key, Object val){
 		super(key);
 		this.val = val;
 	}
 
-    public Object val(){
+	public Object val(){
 		return val;
 	}
 
-    Node redden(){
+	Node redden(){
 		return new RedVal(key, val);
 	}
 
 }
+
 static class BlackBranch extends Black{
-    final Node left;
+	final Node left;
 
-    final Node right;
+	final Node right;
 
-    public BlackBranch(Object key, Node left, Node right){
+	public BlackBranch(Object key, Node left, Node right){
 		super(key);
 		this.left = left;
 		this.right = right;
 	}
 
-    public Node left(){
+	public Node left(){
 		return left;
 	}
 
-    public Node right(){
+	public Node right(){
 		return right;
 	}
 
-    Node redden(){
+	Node redden(){
 		return new RedBranch(key, left, right);
 	}
 
 }
-static class BlackBranchVal extends BlackBranch{
-    final Object val;
 
-    public BlackBranchVal(Object key, Object val, Node left, Node right){
+static class BlackBranchVal extends BlackBranch{
+	final Object val;
+
+	public BlackBranchVal(Object key, Object val, Node left, Node right){
 		super(key, left, right);
 		this.val = val;
 	}
 
-    public Object val(){
+	public Object val(){
 		return val;
 	}
 
-    Node redden(){
+	Node redden(){
 		return new RedBranchVal(key, val, left, right);
 	}
 
 }
+
 static class Red extends Node{
-    public Red(Object key){
+	public Red(Object key){
 		super(key);
 	}
 
-    Node addLeft(Node ins){
+	Node addLeft(Node ins){
 		return red(key, val(), ins, right());
 	}
 
-    Node addRight(Node ins){
+	Node addRight(Node ins){
 		return red(key, val(), left(), ins);
 	}
 
-    Node removeLeft(Node del){
+	Node removeLeft(Node del){
 		return red(key, val(), del, right());
 	}
 
-    Node removeRight(Node del){
+	Node removeRight(Node del){
 		return red(key, val(), left(), del);
 	}
 
-    Node blacken(){
+	Node blacken(){
 		return new Black(key);
 	}
 
-    Node redden(){
+	Node redden(){
 		throw new UnsupportedOperationException("Invariant violation");
 	}
 
-    Node replace(Object key, Object val, Node left, Node right){
+	Node replace(Object key, Object val, Node left, Node right){
 		return red(key, val, left, right);
 	}
 
 }
-static class RedVal extends Red{
-    final Object val;
 
-    public RedVal(Object key, Object val){
+static class RedVal extends Red{
+	final Object val;
+
+	public RedVal(Object key, Object val){
 		super(key);
 		this.val = val;
 	}
 
-    public Object val(){
+	public Object val(){
 		return val;
 	}
 
-    Node blacken(){
+	Node blacken(){
 		return new BlackVal(key, val);
 	}
 
 }
+
 static class RedBranch extends Red{
-    final Node left;
+	final Node left;
 
-    final Node right;
+	final Node right;
 
-    public RedBranch(Object key, Node left, Node right){
+	public RedBranch(Object key, Node left, Node right){
 		super(key);
 		this.left = left;
 		this.right = right;
 	}
 
-    public Node left(){
+	public Node left(){
 		return left;
 	}
 
-    public Node right(){
+	public Node right(){
 		return right;
 	}
 
-    Node balanceLeft(Node parent){
+	Node balanceLeft(Node parent){
 		if(left instanceof Red)
 			return red(key, val(), left.blacken(), black(parent.key, parent.val(), right, parent.right()));
 		else if(right instanceof Red)
@@ -581,7 +588,7 @@ static class RedBranch extends Red{
 
 	}
 
-    Node balanceRight(Node parent){
+	Node balanceRight(Node parent){
 		if(right instanceof Red)
 			return red(key, val(), black(parent.key, parent.val(), parent.left(), left), right.blacken());
 		else if(left instanceof Red)
@@ -591,7 +598,7 @@ static class RedBranch extends Red{
 			return super.balanceRight(parent);
 	}
 
-    Node blacken(){
+	Node blacken(){
 		return new BlackBranch(key, left, right);
 	}
 
@@ -619,44 +626,44 @@ static class RedBranchVal extends RedBranch{
 static public class Seq extends ASeq{
 	final ISeq stack;
 	final boolean asc;
-    final int cnt;
+	final int cnt;
 
-    public Seq(ISeq stack, boolean asc,int cnt) {
-        this.stack = stack;
-        this.asc = asc;
-        this.cnt = cnt;
-    }
+	public Seq(ISeq stack, boolean asc, int cnt){
+		this.stack = stack;
+		this.asc = asc;
+		this.cnt = cnt;
+	}
 
-    static Seq create(Node t, boolean asc,int cnt)  {
-        return new Seq(push(t, null, asc),asc,cnt);
-    }
+	static Seq create(Node t, boolean asc, int cnt){
+		return new Seq(push(t, null, asc), asc, cnt);
+	}
 
-	static ISeq push(Node t, ISeq stack, boolean asc) {
-        while(t != null)
-            {
-            stack = RT.cons(t,stack);
-            t = asc ? t.left() : t.right();
-            }
-        return stack;
-    }
+	static ISeq push(Node t, ISeq stack, boolean asc){
+		while(t != null)
+			{
+			stack = RT.cons(t, stack);
+			t = asc ? t.left() : t.right();
+			}
+		return stack;
+	}
 
-    public Object first() {
-        return stack.first();
-    }
+	public Object first(){
+		return stack.first();
+	}
 
-    public ISeq rest() {
-        Node t = (Node)stack.first();
-        ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
-        if(nextstack != null)
-            {
-            return new Seq(nextstack,asc,cnt-1);
-            }
-        return null;
-    }
+	public ISeq rest(){
+		Node t = (Node) stack.first();
+		ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
+		if(nextstack != null)
+			{
+			return new Seq(nextstack, asc, cnt - 1);
+			}
+		return null;
+	}
 
-    public int count() {
-        return cnt;
-    }
+	public int count(){
+		return cnt;
+	}
 }
 
 static public class NodeIterator implements Iterator{
@@ -742,13 +749,15 @@ static public void main(String args[]){
 		}
 	Collections.shuffle(Arrays.asList(ints));
 	//force the ListMap class loading now
-    try {
-    //PersistentListMap.EMPTY.assocEx(1, null).assocEx(2,null).assocEx(3,null);
-    } catch (Exception e)
-        {
-        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-    System.out.println("Building set");
+	try
+		{
+		//PersistentListMap.EMPTY.assocEx(1, null).assocEx(2,null).assocEx(3,null);
+		}
+	catch(Exception e)
+		{
+		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
+	System.out.println("Building set");
 	//IPersistentMap set = new PersistentArrayMap();
 	//IPersistentMap set = new PersistentHashtableMap(1001);
 	IPersistentMap set = PersistentHashMap.EMPTY;
@@ -766,8 +775,7 @@ static public void main(String args[]){
 		Integer anInt = ints[i];
 		set = set.assoc(anInt, anInt);
 		}
-    //System.out.println("_count = " + set.count());
-
+	//System.out.println("_count = " + set.count());
 
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 //	                   + ", depth: " + set.depth());
@@ -782,7 +790,7 @@ static public void main(String args[]){
 		}
 
 	Random rand = new Random(42);
-	for(int i = 0; i < ints.length/2; i++)
+	for(int i = 0; i < ints.length / 2; i++)
 		{
 		Integer anInt = ints[rand.nextInt(n)];
 		set = set.without(anInt);
@@ -791,7 +799,7 @@ static public void main(String args[]){
 	long estimatedTime = System.nanoTime() - startTime;
 	System.out.println();
 
-	System.out.println("_count = " + set.count() + ", time: " + estimatedTime/1000000);
+	System.out.println("_count = " + set.count() + ", time: " + estimatedTime / 1000000);
 
 	System.out.println("Building ht");
 	Hashtable ht = new Hashtable(1001);
@@ -806,7 +814,7 @@ static public void main(String args[]){
 		Integer anInt = ints[i];
 		ht.put(anInt, anInt);
 		}
-    //System.out.println("size = " + ht.size());
+	//System.out.println("size = " + ht.size());
 	it = ht.entrySet().iterator();
 	while(it.hasNext())
 		{
@@ -818,14 +826,14 @@ static public void main(String args[]){
 		}
 
 	rand = new Random(42);
-	for(int i = 0; i < ints.length/2; i++)
+	for(int i = 0; i < ints.length / 2; i++)
 		{
 		Integer anInt = ints[rand.nextInt(n)];
 		ht.remove(anInt);
 		}
 	estimatedTime = System.nanoTime() - startTime;
 	System.out.println();
-	System.out.println("size = " + ht.size() + ", time: " + estimatedTime/1000000);
+	System.out.println("size = " + ht.size() + ", time: " + estimatedTime / 1000000);
 
 	System.out.println("set lookup");
 	startTime = System.nanoTime();
@@ -837,7 +845,7 @@ static public void main(String args[]){
 			++c;
 		}
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+	System.out.println("notfound = " + c + ", time: " + estimatedTime / 1000000);
 
 	System.out.println("ht lookup");
 	startTime = System.nanoTime();
@@ -849,7 +857,7 @@ static public void main(String args[]){
 			++c;
 		}
 	estimatedTime = System.nanoTime() - startTime;
-	System.out.println("notfound = " + c + ", time: " + estimatedTime/1000000);
+	System.out.println("notfound = " + c + ", time: " + estimatedTime / 1000000);
 
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 //	                   + ", depth: " + set.depth());
