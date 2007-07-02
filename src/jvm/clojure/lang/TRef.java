@@ -49,15 +49,9 @@ public T get() throws Exception{
 	return getCurrentVal();
 }
 
-Binding getThreadBinding(){
+final Binding getThreadBinding(){
 	if(dvals != null)
-		{
-		Binding b;
-		if((b = (Binding) dvals.get()) != null)
-			{
-			return b;
-			}
-		}
+		return (Binding) dvals.get();
 	return null;
 }
 
@@ -84,7 +78,7 @@ public T set(T val) throws Exception{
 	Binding b = getThreadBinding();
 	if(b != null)
 		return (T) (b.val = val);
-	//allow out-of-transaction inits
+	//allow out-of-transaction inits?
 	if(!isBound())
 		{
 		tvals.set(new TVal(val, Transaction.ZERO_POINT, null));
@@ -105,8 +99,9 @@ public void touch() throws Exception{
 }
 
 boolean isBound(){
-	return (dvals != null && dvals.get() != null)
-	       || tvals.get() != null;
+	return (dvals != null && dvals.get() != null )
+	       ||
+	       getCurrentTVal() != null;
 }
 
 TVal getCurrentTVal(){

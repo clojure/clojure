@@ -13,7 +13,7 @@
 package clojure.lang;
 
 
-public class Keyword extends Symbol implements IFn {
+public class Keyword implements IFn {
 
 
 /**
@@ -21,10 +21,39 @@ public class Keyword extends Symbol implements IFn {
  *
  * @param name
  */
-Keyword(String name) {
-    super(name);
+
+public final Symbol sym;
+final int hash;
+
+public Keyword(Symbol sym){
+	this.sym = sym;
+	this.hash =  RT.hashCombine(":".hashCode(), sym.hashCode());
 }
 
+public Keyword(String name,String ns){
+	this(new Symbol(name,ns));
+}
+
+public boolean equals(Object o){
+	if(this == o)
+		return true;
+	if(o == null || !(o instanceof Keyword))
+		return false;
+
+	Keyword keyword = (Keyword) o;
+
+	//identity compares ok, names are interned
+	return sym.equals(keyword.sym);
+}
+
+public int hashCode(){
+	return hash;
+}
+
+
+public String toString(){
+	return ":" + sym;
+}
 
 public Object invoke() throws Exception {
     return AFn.throwArity();
@@ -32,10 +61,9 @@ public Object invoke() throws Exception {
 
 /**
  * Indexer implements IFn for attr access
- * This single arg version is the getter
  *
- * @param obj - must be Obj
- * @return the value of the attr or nil if not found
+ * @param obj - must be IPersistentMap
+ * @return the value at the key or nil if not found
  * @throws Exception
  */
 public Object invoke(Object obj) throws Exception {
@@ -44,17 +72,8 @@ public Object invoke(Object obj) throws Exception {
     return ((IPersistentMap) obj).get(this);
 }
 
-/**
- * Indexer implements IFn for attr access
- * This two arg version is the setter
- *
- * @param obj - must be Obj
- * @param val
- * @return val
- * @throws Exception
- */
 public Object invoke(Object obj, Object val) throws Exception {
-    return RT.assoc(this, val, obj);
+	return AFn.throwArity();
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception {

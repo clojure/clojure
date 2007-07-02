@@ -14,15 +14,22 @@ package clojure.lang;
 
 
 public class Symbol{
-//this must be an interned string!
+//these must be interned strings!
 public final String name;
+public final String ns;
 
 public String toString(){
+	if(ns != null)
+		return ns + "/" + name;
 	return name;
 }
 
-Symbol(String name){
+public Symbol(String name,String ns){
 	this.name = name.intern();
+	if(ns != null)
+		this.ns = ns.intern();
+	else
+		this.ns = null;
 }
 
 public boolean equals(Object o){
@@ -33,33 +40,12 @@ public boolean equals(Object o){
 
 	Symbol symbol = (Symbol) o;
 
-	//identity compare ok, names are interned
-	return name == symbol.name;
+	//identity compares intended, names are interned
+	return name == symbol.name && ns == symbol.ns;
 }
 
 public int hashCode(){
-	return name.hashCode();
+	return RT.hashCombine(name.hashCode(),RT.hash(ns));
 }
 
-//*
-public static Symbol intern(String name){
-	int dot = 0;
-	Symbol sym;
-	if(name.charAt(0) == ':')
-		sym = new Keyword(name);
-	else if((dot = name.indexOf('.')) != -1)
-		{
-		if(dot == 0)
-			sym = new InstanceMemberSymbol(name);
-		else if(name.lastIndexOf('.') == name.length() - 1)
-			sym = new ClassSymbol(name);
-		else
-			sym = new StaticMemberSymbol(name);
-		}
-	else
-		sym = new Symbol(name);
-	return sym;
-}
-
-//*/
 }
