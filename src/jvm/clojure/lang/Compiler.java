@@ -22,68 +22,50 @@ import java.lang.reflect.Modifier;
 
 public class Compiler{
 //*
-static Symbol DEF = Symbol.intern("def");
-static Symbol FN = Symbol.intern("fn");
-static Symbol DO = Symbol.intern("do");
-static Symbol IF = Symbol.intern("if");
-static Symbol OR = Symbol.intern("or");
-static Symbol AND = Symbol.intern("and");
-static Symbol LET = Symbol.intern("let");
-static Symbol LET_STAR_ = Symbol.intern("let*");
-static Symbol LETFN = Symbol.intern("letfn");
-static Symbol NOT = Symbol.intern("not");
-static Symbol NULL_QM_ = Symbol.intern("null?");
+static Symbol DEF = new Symbol("def");
+static Symbol FN = new Symbol("fn");
+static Symbol DO = new Symbol("do");
+static Symbol IF = new Symbol("if");
+static Symbol OR = new Symbol("or");
+static Symbol AND = new Symbol("and");
+static Symbol LET = new Symbol("let");
+static Symbol LET_STAR_ = new Symbol("let*");
+static Symbol LETFN = new Symbol("letfn");
+static Symbol NOT = new Symbol("not");
+static Symbol NULL_QM_ = new Symbol("null?");
 
-static Symbol IMPORT = Symbol.intern("import");
-static Symbol USE = Symbol.intern("use");
-static Symbol _AMP_KEY = Symbol.intern("&key");
-static Symbol _AMP_REST = Symbol.intern("&rest");
+static Symbol IMPORT = new Symbol("import");
+static Symbol USE = new Symbol("use");
+static Symbol _AMP_KEY = new Symbol("&key");
+static Symbol _AMP_REST = new Symbol("&rest");
 
-static public Var _CRT_OUT = RT.OUT;
-static public Var _CRT_MODULE = RT._CT_MODULE;
+static public TRef _CRT_OUT = RT.OUT;
+static public TRef _CRT_MODULE = RT.CURRENT_MODULE;
 
 static NilExpr NIL_EXPR = new NilExpr();
 
 //short-name-string->full-name-string
-static public Var IMPORTS;
-
-static
-	{
-	try
-		{
-		IMPORTS = Module.intern("clojure", "^compiler-imports");
-		KEYWORDS = Module.intern("clojure", "^compiler-keywords");
-		VARS = Module.intern("clojure", "^compiler-vars");
-		LOCAL_ENV = Module.intern("clojure", "^compiler-local-env");
-		METHOD = Module.intern("clojure", "^compiler-method");
-		USES = Module.intern("clojure", "^compiler-uses");
-		FNS = Module.intern("clojure", "^compiler-fns");
-		}
-	catch(Exception e)
-		{
-		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-		}
-	}
+static public TRef IMPORTS = new TRef();
 
 //keyword->keywordexpr
-static public Var KEYWORDS;
+static public TRef KEYWORDS = new TRef();
 
 //var->var
-static public Var VARS;
+static public TRef VARS = new TRef();
 
 //symbol->localbinding
-static public Var LOCAL_ENV;
+static public TRef LOCAL_ENV = new TRef();
 
 
 //FnFrame
-static public Var METHOD;
+static public TRef METHOD = new TRef();
 
 //module->module
-static public Var USES;
+static public TRef USES = new TRef();
 
 
 //ISeq FnExprs
-static public Var FNS;
+static public TRef FNS = new TRef();
 
 static public IPersistentMap CHAR_MAP =
 		new PersistentArrayMap('-', "_DSH_",
@@ -154,14 +136,14 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 						//makes entries in IMPORTS for:
 						//"ThisClass"->"org.package.ThisClass"
 						//"ThatClass"->"org.package.ThatClass"
-						IPersistentMap importMap = (IPersistentMap) IMPORTS.getValue();
+						IPersistentMap importMap = (IPersistentMap) IMPORTS.currentVal();
 						String pkg = RT.second(form).toString();
 						for(ISeq classes = RT.rest(RT.rest(form)); classes != null; classes = classes.rest())
 							{
 							String iclassName = classes.first().toString();
 							importMap = (IPersistentMap) RT.assoc(iclassName, pkg + "." + iclassName, importMap);
 							}
-						IMPORTS.setValue(importMap);
+						IMPORTS.set(importMap);
 						}
 					else if(op == USE)
 						{
@@ -178,12 +160,12 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 				}
 			}
 		//declare static members for keywords, vars
-		for(ISeq keys = RT.seq(KEYWORDS.getValue()); keys != null; keys = keys.rest())
+		for(ISeq keys = RT.seq(KEYWORDS.currentVal()); keys != null; keys = keys.rest())
 			{
 			KeywordExpr k = (KeywordExpr) ((IMapEntry) keys.first()).val();
 			format("static Keyword ~A;~%", k.emitExpressionString());
 			}
-		for(ISeq vars = RT.seq(VARS.getValue()); vars != null; vars = vars.rest())
+		for(ISeq vars = RT.seq(VARS.currentVal()); vars != null; vars = vars.rest())
 			{
 			Var v = (Var) ((IMapEntry) vars.first()).val();
 			format("static Var ~A;~%", munge(v.toString()));
@@ -192,7 +174,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 		//todo declare static members for syms, quoted aggregates
 
 		//emit nested static class/method declarations for nested fns
-		PersistentArrayList fns = (PersistentArrayList) FNS.getValue();
+		PersistentArrayList fns = (PersistentArrayList) FNS.currentVal();
 		for(int f = 0; f < fns.count(); f++)
 			{
 			FnExpr fn = (FnExpr) fns.nth(f);
@@ -202,12 +184,12 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 		//define the load function
 		format("public void load() throws Exception{~%");
 		//init the keywords and vars
-		for(ISeq keys = RT.seq(KEYWORDS.getValue()); keys != null; keys = keys.rest())
+		for(ISeq keys = RT.seq(KEYWORDS.currentVal()); keys != null; keys = keys.rest())
 			{
 			KeywordExpr k = (KeywordExpr) ((IMapEntry) keys.first()).val();
 			format("~A = (Keyword)Symbol.intern(~S);~%", k.emitExpressionString(), k.sym.name);
 			}
-		for(ISeq vars = RT.seq(VARS.getValue()); vars != null; vars = vars.rest())
+		for(ISeq vars = RT.seq(VARS.currentVal()); vars != null; vars = vars.rest())
 			{
 			Var v = (Var) ((IMapEntry) vars.first()).val();
 			format("~A = Module.intern(~S,~S);~%", munge(v.toString()), v.module.name, v.name.name);
@@ -420,9 +402,10 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception{
 		for(ISeq s = op instanceof InstanceMemberInvoker ? RT.rrest(form) : RT.rest(form); s != null; s = s.rest())
 			args = args.cons(analyze(C.EXPRESSION, macroexpand(s.first())));
 
-		if(op instanceof ClassSymbol)
-			return new InvokeConstructorExpr((ClassSymbol) op, args);
-		else if(op instanceof StaticMemberInvoker)
+		//if(op instanceof ClassSymbol)
+		//	return new InvokeConstructorExpr((ClassSymbol) op, args);
+		//else
+		if(op instanceof StaticMemberInvoker)
 			return new InvokeStaticMethodExpr((StaticMemberInvoker) op, args);
 		else if(op instanceof InstanceMemberInvoker)
 			return analyzeInstanceInvoke((InstanceMemberInvoker) op,
@@ -480,6 +463,7 @@ static class InvokeExpr extends AnExpr{
 	}
 }
 
+/*
 static class InvokeConstructorExpr extends AHostExpr{
 	HostClassExpr fexpr;
 	PersistentArrayList args;
@@ -504,6 +488,7 @@ static class InvokeConstructorExpr extends AHostExpr{
 		format("))");
 	}
 }
+*/
 
 static class InvokeStaticMethodExpr extends AHostExpr{
 	final StaticMemberInvoker sym;
@@ -809,7 +794,7 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception{
 		}
 	try
 		{
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
@@ -835,7 +820,7 @@ private static Expr analyzeLetFn(C context, ISeq form) throws Exception{
 		return analyze(context, RT.list(RT.list(FN, null, form)));
 	try
 		{
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
 		ISeq bindings = (ISeq) RT.second(form);
 		ISeq body = RT.rest(RT.rest(form));
 		PersistentArrayList bindingPairs = new PersistentArrayList(4);
@@ -882,7 +867,7 @@ private static Expr analyzeLetStar(C context, ISeq form) throws Exception{
 
 	try
 		{
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
 		PersistentArrayList bindingInits = new PersistentArrayList(4);
 		for(ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
 			{
@@ -1005,7 +990,7 @@ private static Expr analyzeOr(C context, ISeq form) throws Exception{
 	if(context != C.STATEMENT)
 		{
 		//we'll need a temp var
-		tb = new LocalBinding(Symbol.intern("OR_TEMP"));
+		tb = new LocalBinding(new Symbol("OR_TEMP"));
 		registerLocal(tb);
 		}
 
@@ -1426,9 +1411,9 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 	ISeq body = RT.rest(form);
 	try
 		{
-		FnMethod method = new FnMethod(fn, (FnMethod) METHOD.getValue());
+		FnMethod method = new FnMethod(fn, (FnMethod) METHOD.currentVal());
 		METHOD.pushThreadBinding(method);
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.getValue());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
 		PSTATE state = PSTATE.REQ;
 		for(ISeq ps = parms; ps != null; ps = ps.rest())
 			{
@@ -1504,7 +1489,7 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception{
 	if(form.count() > 3)
 		throw new Exception("Too many arguments to def");
 	Symbol sym = (Symbol) RT.second(form);
-	Module module = (Module) _CRT_MODULE.getValue();
+	Module module = (Module) _CRT_MODULE.currentVal();
 	Var var = module.intern(baseSymbol(sym));
 	registerVar(var);
 	VarExpr ve = new VarExpr(var, typeHint(sym));
@@ -1565,11 +1550,11 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
 }
 
 static Var lookupVar(Symbol sym) throws Exception{
-	Module module = (Module) _CRT_MODULE.getValue();
+	Module module = (Module) _CRT_MODULE.currentVal();
 	Var v = module.find(sym);
 	if(v != null)
 		return v;
-	for(ISeq seq = RT.seq(USES.getValue()); seq != null; seq = RT.rest(seq))
+	for(ISeq seq = RT.seq(USES.currentVal()); seq != null; seq = RT.rest(seq))
 		{
 		module = (Module) ((IMapEntry) RT.first(seq)).key();
 		v = module.find(sym);
@@ -1584,7 +1569,7 @@ static Object macroexpand(Object x){
 }
 
 private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
-	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.getValue();
+	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.currentVal();
 	KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
 	if(ke == null)
 		KEYWORDS.setValue(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
@@ -1592,13 +1577,13 @@ private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
 }
 
 private static void registerVar(Var var) throws Exception{
-	IPersistentMap varsMap = (IPersistentMap) VARS.getValue();
+	IPersistentMap varsMap = (IPersistentMap) VARS.currentVal();
 	if(RT.get(var, varsMap) == null)
 		VARS.setValue(RT.assoc(var, var, varsMap));
 }
 
 private static void registerFn(FnExpr fn) throws Exception{
-	FNS.setValue(RT.cons(fn, (IPersistentCollection) FNS.getValue()));
+	FNS.setValue(RT.cons(fn, (IPersistentCollection) FNS.currentVal()));
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
@@ -1611,18 +1596,18 @@ static void closeOver(LocalBinding b, FnMethod method){
 }
 
 static LocalBinding referenceLocal(Symbol sym) throws Exception{
-	LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.getValue());
+	LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.currentVal());
 	if(b != null)
 		{
-		closeOver(b, (FnMethod) METHOD.getValue());
+		closeOver(b, (FnMethod) METHOD.currentVal());
 		}
 	return b;
 }
 
 private static void registerLocal(LocalBinding b) throws Exception{
-	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.getValue();
+	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.currentVal();
 	LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
-	FnMethod method = (FnMethod) METHOD.getValue();
+	FnMethod method = (FnMethod) METHOD.currentVal();
 	method.locals = (IPersistentMap) RT.assoc(b, b, method.locals);
 }
 /*
@@ -1645,7 +1630,7 @@ static String resolveHostClassname(String classname) throws Exception{
 		return classname;
 	if(isPrimitive(classname))
 		return classname;
-	IPersistentMap importMap = (IPersistentMap) IMPORTS.getValue();
+	IPersistentMap importMap = (IPersistentMap) IMPORTS.currentVal();
 	String fullyQualifiedName = (String) RT.get(classname, importMap);
 	if(fullyQualifiedName == null)
 		throw new Exception("Can't resolve type name: " + classname);
@@ -1957,7 +1942,7 @@ static class VarExpr extends AnExpr{
 	}
 
 	public void emitExpression() throws Exception{
-		format("~A.getValue()", getName());
+		format("~A.currentVal()", getName());
 	}
 
 	public Class getHostType() throws Exception{
