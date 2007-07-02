@@ -18,10 +18,10 @@ import java.io.*;
 
 public class RT{
 
-static public Symbol T = new Symbol("t", null);
-static public Var OUT;
+static public Symbol T = new Symbol("t");
+final static public TRef OUT = new TRef(new OutputStreamWriter(System.out));
 
-static public Var _CT_MODULE;
+final static public TRef CURRENT_MODULE = new TRef(Module.findOrCreateModule("clojure/user"));
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Character[] chars;
@@ -32,19 +32,6 @@ static
 	chars = new Character[256];
 	for(int i = 0; i < chars.length; i++)
 		chars[i] = new Character((char) i);
-	try
-		{
-		OUT = Module.intern("clojure", "^out");
-		_CT_MODULE = Module.intern("clojure", "^module");
-
-
-		OUT.bind(new OutputStreamWriter(System.out));
-		_CT_MODULE.bind((Module.findOrCreate("clj-user")));
-		}
-	catch(Exception e)
-		{
-		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-		}
 	}
 
 static public int nextID(){
@@ -596,7 +583,7 @@ static public Object format(Object o, String s, Object... args) throws Exception
 	if(o == null)
 		w = new StringWriter();
 	else if(equal(o, T))
-		w = (Writer) OUT.getValue();
+		w = (Writer) OUT.currentVal();
 	else
 		w = (Writer) o;
 	doFormat(w, s, ArraySeq.create(args));

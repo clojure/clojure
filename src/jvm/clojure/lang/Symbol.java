@@ -24,12 +24,16 @@ public String toString(){
 	return name;
 }
 
-public Symbol(String name,String ns){
+public Symbol(String name, String ns){
 	this.name = name.intern();
 	if(ns != null)
 		this.ns = ns.intern();
 	else
 		this.ns = null;
+}
+
+public Symbol(String name){
+	this(name, null);
 }
 
 public boolean equals(Object o){
@@ -45,7 +49,7 @@ public boolean equals(Object o){
 }
 
 public int hashCode(){
-	return RT.hashCombine(name.hashCode(),RT.hash(ns));
+	return RT.hashCombine(name.hashCode(), RT.hash(ns));
 }
 
 }

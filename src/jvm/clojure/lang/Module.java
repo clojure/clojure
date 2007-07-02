@@ -31,11 +31,11 @@ Module(String name){
 	this.name = name;
 }
 
-static public Module findModule(String name) throws Exception{
+static public Module findModule(String name){
 	return table.get(name);
 }
 
-static public Module findOrCreateModule(String name) throws Exception{
+static public Module findOrCreateModule(String name){
 	Module module = findModule(name);
 	if(module == null)
 		module = table.putIfAbsent(name, new Module(name));
