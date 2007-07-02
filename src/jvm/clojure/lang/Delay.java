@@ -13,12 +13,13 @@
 package clojure.lang;
 
 public class Delay{
-volatile Object val;
+public volatile Object val;
 IFn fn;
 
 
 public Delay(IFn fn){
 	this.fn = fn;
+	this.val = this;
 }
 
 public Object force() throws Exception{
