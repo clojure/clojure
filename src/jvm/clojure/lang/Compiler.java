@@ -417,15 +417,15 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception{
 	else
 		{
 		PersistentArrayList args = new PersistentArrayList(4);
-		for(ISeq s = op instanceof InstanceMemberSymbol ? RT.rrest(form) : RT.rest(form); s != null; s = s.rest())
+		for(ISeq s = op instanceof InstanceMemberInvoker ? RT.rrest(form) : RT.rest(form); s != null; s = s.rest())
 			args = args.cons(analyze(C.EXPRESSION, macroexpand(s.first())));
 
 		if(op instanceof ClassSymbol)
 			return new InvokeConstructorExpr((ClassSymbol) op, args);
-		else if(op instanceof StaticMemberSymbol)
-			return new InvokeStaticMethodExpr((StaticMemberSymbol) op, args);
-		else if(op instanceof InstanceMemberSymbol)
-			return analyzeInstanceInvoke((InstanceMemberSymbol) op,
+		else if(op instanceof StaticMemberInvoker)
+			return new InvokeStaticMethodExpr((StaticMemberInvoker) op, args);
+		else if(op instanceof InstanceMemberInvoker)
+			return analyzeInstanceInvoke((InstanceMemberInvoker) op,
 			                             analyze(C.EXPRESSION, macroexpand(RT.second(form))),
 			                             args);
 
@@ -437,7 +437,7 @@ private static Expr analyzeSeq(C context, ISeq form) throws Exception{
 		}
 }
 
-private static Expr analyzeInstanceInvoke(InstanceMemberSymbol sym, Expr target, PersistentArrayList args)
+private static Expr analyzeInstanceInvoke(InstanceMemberInvoker sym, Expr target, PersistentArrayList args)
 		throws Exception{
 	Class targetClass = null;
 	if(sym.className != null)
@@ -506,14 +506,14 @@ static class InvokeConstructorExpr extends AHostExpr{
 }
 
 static class InvokeStaticMethodExpr extends AHostExpr{
-	final StaticMemberSymbol sym;
+	final StaticMemberInvoker sym;
 	final String resolvedClassName;
 	final Class type;
 	PersistentArrayList args;
 	final Method method;
 	final Class returnType;
 
-	public InvokeStaticMethodExpr(StaticMemberSymbol sym, PersistentArrayList args) throws Exception{
+	public InvokeStaticMethodExpr(StaticMemberInvoker sym, PersistentArrayList args) throws Exception{
 		this.sym = sym;
 		this.args = args;
 		this.resolvedClassName = resolveHostClassname(sym.className);
@@ -1543,8 +1543,8 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
 		return registerKeyword((Keyword) sym);
 	else if(sym instanceof ClassSymbol)
 		return new HostClassExpr((ClassSymbol) sym);
-	else if(sym instanceof StaticMemberSymbol)
-		return new HostStaticFieldExpr((StaticMemberSymbol) sym);
+	else if(sym instanceof StaticMemberInvoker)
+		return new HostStaticFieldExpr((StaticMemberInvoker) sym);
 	//todo have InstanceMemberSymbol yield accessor when expression
 	else
 		{
@@ -1809,12 +1809,12 @@ static class HostClassExpr extends AHostExpr{
 }
 
 static class HostStaticFieldExpr extends AHostExpr{
-	final StaticMemberSymbol sym;
+	final StaticMemberInvoker sym;
 	final String resolvedClassName;
 	final Class type;
 	final Class fieldType;
 
-	public HostStaticFieldExpr(StaticMemberSymbol sym) throws Exception{
+	public HostStaticFieldExpr(StaticMemberInvoker sym) throws Exception{
 		this.sym = sym;
 		this.resolvedClassName = resolveHostClassname(sym.className);
 		this.type = getTypeNamed(resolvedClassName);
