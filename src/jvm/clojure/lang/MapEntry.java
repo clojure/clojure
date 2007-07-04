@@ -21,6 +21,13 @@ public MapEntry(Object key, Object val){
 	this._val = val;
 }
 
+
+public MapEntry(IPersistentMap meta, Object _key, Object _val){
+	super(meta);
+	this._key = _key;
+	this._val = _val;
+}
+
 public Object key(){
 	return _key;
 }
@@ -42,9 +49,9 @@ public IPersistentMap assoc(Object key, Object val){
 		{
 		if(_val == val)
 			return this;
-		return (MapEntry) new MapEntry(key, val).withMeta(_meta);
+		return (MapEntry) new MapEntry(meta(),key, val);
 		}
-	return (IPersistentMap) new PersistentArrayMap(_key, _val, key, val).withMeta(_meta);
+	return new PersistentArrayMap(meta(),_key, _val, key, val);
 }
 
 public Object valAt(Object key){
@@ -59,7 +66,7 @@ public IPersistentMap assocEx(Object key, Object val) throws Exception{
 
 public IPersistentMap without(Object key){
 	if(RT.equal(_key, key))
-		return (IPersistentMap) PersistentArrayMap.EMPTY.withMeta(_meta);
+		return (IPersistentMap) PersistentArrayMap.EMPTY.withMeta(meta());
 	return this;
 }
 

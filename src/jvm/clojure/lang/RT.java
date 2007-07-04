@@ -34,6 +34,8 @@ static
 		chars[i] = new Character((char) i);
 	}
 
+
+
 static public int nextID(){
 	return id.getAndIncrement();
 }

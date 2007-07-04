@@ -10,22 +10,16 @@
 
 package clojure.lang;
 
-public abstract class APersistentMap extends Obj implements IPersistentMap, Cloneable{
+public abstract class APersistentMap extends Obj implements IPersistentMap{
 int _hash = -1;
 
-public Obj withMeta(IPersistentMap meta){
-	if(_meta == meta)
-		return this;
-	try
-		{
-		Obj ret = (Obj) clone();
-		ret._meta = meta;
-		return ret;
-		}
-	catch(CloneNotSupportedException ignore)
-		{
-		return null;
-		}
+
+protected APersistentMap(IPersistentMap meta){
+	super(meta);
+}
+
+
+protected APersistentMap(){
 }
 
 public IPersistentCollection cons(Object o){

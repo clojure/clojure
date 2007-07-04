@@ -1342,11 +1342,11 @@ static class FnExpr extends AnExpr{
 				for(ISeq keys = RT.seq(m.keyParms); keys != null; keys = keys.rest())
 					{
 					KeyParam key = (KeyParam) keys.first();
-					KeywordExpr kw = registerKeyword((Keyword) Symbol.intern(":" + key.bindingExpression.b.sym.name));
-					format("__valseq = RT.findKey(~A,__keys);~%", kw.emitExpressionString());
-					key.bindingExpression.b.emitDeclaration(
-							(String) RT.format(null, "(__valseq!=null)?clojure.lang.RT.first(__valseq):~A"
-									, key.init.emitExpressionString()));
+//					KeywordExpr kw = registerKeyword((Keyword) Symbol.intern(":" + key.bindingExpression.b.sym.name));
+//					format("__valseq = RT.findKey(~A,__keys);~%", kw.emitExpressionString());
+//					key.bindingExpression.b.emitDeclaration(
+//							(String) RT.format(null, "(__valseq!=null)?clojure.lang.RT.first(__valseq):~A"
+//									, key.init.emitExpressionString()));
 					}
 				}
 
@@ -1490,7 +1490,7 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception{
 		throw new Exception("Too many arguments to def");
 	Symbol sym = (Symbol) RT.second(form);
 	Module module = (Module) _CRT_MODULE.currentVal();
-	Var var = module.intern(baseSymbol(sym));
+	Var var = null;//!module.intern(baseSymbol(sym));
 	registerVar(var);
 	VarExpr ve = new VarExpr(var, typeHint(sym));
 	Expr init = analyze(C.EXPRESSION, macroexpand(RT.third(form)));
@@ -1506,7 +1506,7 @@ static Symbol baseSymbol(Symbol sym){
 	if(base == sym.name) //no typeHint
 		return sym;
 
-	return Symbol.intern(base);
+	return new Symbol(base);
 }
 
 static String baseName(Symbol sym){
@@ -1524,14 +1524,14 @@ static String typeHint(Symbol sym){
 }
 
 private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Exception{
-	if(sym instanceof Keyword)
-		return registerKeyword((Keyword) sym);
-	else if(sym instanceof ClassSymbol)
-		return new HostClassExpr((ClassSymbol) sym);
-	else if(sym instanceof StaticMemberInvoker)
-		return new HostStaticFieldExpr((StaticMemberInvoker) sym);
-	//todo have InstanceMemberSymbol yield accessor when expression
-	else
+//	if(sym instanceof Keyword)
+//		return registerKeyword((Keyword) sym);
+//	else if(sym instanceof ClassSymbol)
+//		return new HostClassExpr((ClassSymbol) sym);
+//	else if(sym instanceof StaticMemberInvoker)
+//		return new HostStaticFieldExpr((StaticMemberInvoker) sym);
+//	//todo have InstanceMemberSymbol yield accessor when expression
+//	else
 		{
 		String typeHint = typeHint(sym);
 		sym = baseSymbol(sym);
@@ -1551,16 +1551,16 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
 
 static Var lookupVar(Symbol sym) throws Exception{
 	Module module = (Module) _CRT_MODULE.currentVal();
-	Var v = module.find(sym);
-	if(v != null)
-		return v;
-	for(ISeq seq = RT.seq(USES.currentVal()); seq != null; seq = RT.rest(seq))
-		{
-		module = (Module) ((IMapEntry) RT.first(seq)).key();
-		v = module.find(sym);
-		if(v != null && !v.exported)
-			return v;
-		}
+//	Var v = module.find(sym);
+//	if(v != null)
+//		return v;
+//	for(ISeq seq = RT.seq(USES.currentVal()); seq != null; seq = RT.rest(seq))
+//		{
+//		module = (Module) ((IMapEntry) RT.first(seq)).key();
+//		v = module.find(sym);
+//		if(v != null && !v.exported)
+//			return v;
+//		}
 	return null;
 }
 
@@ -1571,19 +1571,19 @@ static Object macroexpand(Object x){
 private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
 	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.currentVal();
 	KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
-	if(ke == null)
-		KEYWORDS.setValue(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
+//!	if(ke == null)
+//!		KEYWORDS.set(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
 	return ke;
 }
 
 private static void registerVar(Var var) throws Exception{
 	IPersistentMap varsMap = (IPersistentMap) VARS.currentVal();
 	if(RT.get(var, varsMap) == null)
-		VARS.setValue(RT.assoc(var, var, varsMap));
+		VARS.set(RT.assoc(var, var, varsMap));
 }
 
 private static void registerFn(FnExpr fn) throws Exception{
-	FNS.setValue(RT.cons(fn, (IPersistentCollection) FNS.currentVal()));
+	FNS.set(RT.cons(fn, (IPersistentCollection) FNS.currentVal()));
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
@@ -1606,7 +1606,7 @@ static LocalBinding referenceLocal(Symbol sym) throws Exception{
 
 private static void registerLocal(LocalBinding b) throws Exception{
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.currentVal();
-	LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
+	//!LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
 	FnMethod method = (FnMethod) METHOD.currentVal();
 	method.locals = (IPersistentMap) RT.assoc(b, b, method.locals);
 }
@@ -1673,7 +1673,7 @@ static class KeyParam{
 	public KeyParam(LocalBindingExpr b, Expr init) throws Exception{
 		this.bindingExpression = b;
 		this.init = init;
-		kw = registerKeyword((Keyword) Symbol.intern(":" + bindingExpression.b.sym.name));
+	//!	kw = registerKeyword((Keyword) Symbol.intern(":" + bindingExpression.b.sym.name));
 	}
 
 	public KeyParam(LocalBindingExpr b) throws Exception{
@@ -1771,7 +1771,7 @@ static class CharExpr extends AnExpr{
 	}
 }
 
-
+/*
 static class HostClassExpr extends AHostExpr{
 	final ClassSymbol sym;
 	final String resolvedClassName;
@@ -1792,7 +1792,7 @@ static class HostClassExpr extends AHostExpr{
 	}
 
 }
-
+*/
 static class HostStaticFieldExpr extends AHostExpr{
 	final StaticMemberInvoker sym;
 	final String resolvedClassName;

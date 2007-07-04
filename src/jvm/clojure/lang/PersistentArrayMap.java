@@ -35,15 +35,11 @@ protected PersistentArrayMap(){
 }
 
 PersistentArrayMap create(Object... init){
-	PersistentArrayMap ret = new PersistentArrayMap(init);
-	ret._meta = _meta;
-	return ret;
+	return new PersistentArrayMap(meta(),init);
 }
 
 IPersistentMap createHT(Object[] init){
-	PersistentHashtableMap ret = new PersistentHashtableMap(init);
-	ret._meta = _meta;
-	return ret;
+	return PersistentHashMap.create(meta(),init);
 }
 
 /**
@@ -52,6 +48,12 @@ IPersistentMap createHT(Object[] init){
  * @param init {key1,val1,key2,val2,...}
  */
 public PersistentArrayMap(Object... init){
+	this.array = init;
+}
+
+
+public PersistentArrayMap(IPersistentMap meta, Object... init){
+	super(meta);
 	this.array = init;
 }
 
@@ -137,11 +139,7 @@ public IPersistentMap without(Object key){
 }
 
 IPersistentMap empty(){
-	if(_meta == null)
-		return EMPTY;
-	PersistentArrayMap ret = new PersistentArrayMap();
-	ret._meta = _meta;
-	return ret;
+	return (IPersistentMap) EMPTY.withMeta(meta());
 }
 
 final public Object valAt(Object key){

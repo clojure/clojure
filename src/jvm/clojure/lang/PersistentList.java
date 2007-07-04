@@ -28,7 +28,7 @@ PersistentList(Object first, PersistentList rest) {
     this._rest = rest;
 
     this._count = 1 + rest.count();
-    this._meta = rest._meta;
+    //this._meta = rest._meta;
 }
 
 public Object first() {

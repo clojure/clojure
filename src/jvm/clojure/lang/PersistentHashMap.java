@@ -35,7 +35,37 @@ final INode root;
 
 final public static PersistentHashMap EMPTY = new PersistentHashMap(0, new EmptyNode());
 
+/**
+ * @param init {key1,val1,key2,val2,...}
+ */
+public static IPersistentMap create(Object... init){
+	IPersistentMap ret = EMPTY;
+	for(int i = 0; i < init.length; i += 2)
+		{
+		ret = ret.assoc(init[i],init[i + 1]);
+		}
+	return ret;
+}
+
+/**
+ * @param init {key1,val1,key2,val2,...}
+ */
+public static IPersistentMap create(IPersistentMap meta,Object... init){
+	IPersistentMap ret = (IPersistentMap) EMPTY.withMeta(meta);
+	for(int i = 0; i < init.length; i += 2)
+		{
+		ret = ret.assoc(init[i],init[i + 1]);
+		}
+	return ret;
+}
 PersistentHashMap(int count, INode root){
+	this.count = count;
+	this.root = root;
+}
+
+
+public PersistentHashMap(IPersistentMap meta, int count, INode root){
+	super(meta);
 	this.count = count;
 	this.root = root;
 }
@@ -53,9 +83,7 @@ public IPersistentMap assoc(Object key, Object val){
 	INode newroot = root.assoc(0, RT.hash(key), key, val, addedLeaf);
 	if(newroot == root)
 		return this;
-	PersistentHashMap ret = new PersistentHashMap(addedLeaf.val == null ? count : count + 1, newroot);
-	ret._meta = this._meta;
-	return ret;
+	return new PersistentHashMap(meta(),addedLeaf.val == null ? count : count + 1, newroot);
 }
 
 public Object valAt(Object key){
@@ -76,10 +104,8 @@ public IPersistentMap without(Object key){
 	if(newroot == root)
 		return this;
 	if(newroot == null)
-		return (IPersistentMap) EMPTY.withMeta(this._meta);
-	PersistentHashMap ret = new PersistentHashMap(count - 1, newroot);
-	ret._meta = this._meta;
-	return ret;
+		return (IPersistentMap) EMPTY.withMeta(meta());
+	return new PersistentHashMap(meta(),count - 1, newroot);
 }
 
 public Iterator iterator(){
@@ -463,7 +489,7 @@ final static class HashCollisionNode implements ILeaf{
 	}
 
 	public ISeq seq(){
-		return ArraySeq.create(leaves);
+		return ArraySeq.create((Object[])leaves);
 	}
 
 	int findIndex(int hash, Object key){

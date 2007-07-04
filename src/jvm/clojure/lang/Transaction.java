@@ -233,7 +233,7 @@ Object doGet(TRef tref) throws Exception{
 		if(ver.tstamp.tpoint <= tstamp.tpoint)
 			return ver.val;
 		}
-	return null;
+	throw new IllegalStateException(tref.toString() + " is unbound.");
 }
 
 Object doSet(TRef tref, Object val) throws Exception{

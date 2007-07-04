@@ -33,11 +33,16 @@ public PersistentTreeMap(){
 }
 
 public PersistentTreeMap(Comparator comp){
+	this(null,comp);
+}
+
+
+public PersistentTreeMap(IPersistentMap meta, Comparator comp){
+	super(meta);
 	this.comp = comp;
 	tree = null;
 	_count = 0;
 }
-
 
 public boolean contains(Object key){
 	return entryAt(key) != null;
@@ -50,7 +55,7 @@ public PersistentTreeMap assocEx(Object key, Object val) throws Exception{
 		{
 		throw new Exception("Key already present");
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1, meta());
 }
 
 public PersistentTreeMap assoc(Object key, Object val){
@@ -61,9 +66,9 @@ public PersistentTreeMap assoc(Object key, Object val){
 		Node foundNode = (Node) found.val;
 		if(foundNode.val() == val)  //note only get same collection on identity of val, not equals()
 			return this;
-		return new PersistentTreeMap(comp, replace(tree, key, val), _count, _meta);
+		return new PersistentTreeMap(comp, replace(tree, key, val), _count, meta());
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count + 1, _meta);
+	return new PersistentTreeMap(comp, t.blacken(), _count + 1, meta());
 }
 
 
@@ -75,11 +80,9 @@ public PersistentTreeMap without(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		PersistentTreeMap ret = new PersistentTreeMap(comp);
-		ret._meta = _meta;
-		return ret;
+		return new PersistentTreeMap(meta(),comp);
 		}
-	return new PersistentTreeMap(comp, t.blacken(), _count - 1, _meta);
+	return new PersistentTreeMap(comp, t.blacken(), _count - 1, meta());
 }
 
 public ISeq seq(){
@@ -332,10 +335,10 @@ Node replace(Node t, Object key, Object val){
 }
 
 PersistentTreeMap(Comparator comp, Node tree, int count, IPersistentMap meta){
+	super(meta);
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
-	this._meta = meta;
 }
 
 static Red red(Object key, Object val, Node left, Node right){

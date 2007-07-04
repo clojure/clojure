@@ -62,19 +62,4 @@ public ISeq cons(Object o) {
     return new Cons(o, this);
 }
 
-
-public Obj withMeta(IPersistentMap meta) {
-    if(_meta == meta)
-        return this;
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
-}
-
 }

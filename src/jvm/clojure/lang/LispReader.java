@@ -222,7 +222,7 @@ static private Object interpretToken(String s) throws Exception{
 	if(ret != null)
 		return ret;
 
-	return Symbol.intern(s);
+	return new Symbol(s);
 }
 /*
 private static Object matchHostName(String s) {

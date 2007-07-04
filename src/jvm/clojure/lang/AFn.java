@@ -416,17 +416,4 @@ static public Object applyToHelper(IFn ifn, ISeq arglist) throws Exception {
 public static Object throwArity() {
     throw new IllegalArgumentException("Wrong number of args passed");
 }
-
-public Obj withMeta(IPersistentMap meta) {
-    try
-        {
-        Obj ret = (Obj) clone();
-        ret._meta = meta;
-        return ret;
-        }
-    catch (CloneNotSupportedException ignore)
-        {
-        return null;
-        }
-}
 }
