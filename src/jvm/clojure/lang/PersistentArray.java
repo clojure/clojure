@@ -484,13 +484,13 @@ private PersistentArray getSetArray(){
 
 protected PersistentArray create(Master master,int rev,int baseline, BitSet history){
     PersistentArray ret = new PersistentArray(data.master, rev, baseline, history);
-    ret._meta = _meta;
+    //!ret._meta = _meta;
     return ret;
 }
 
 protected PersistentArray create(int size, Object defaultVal, float loadFactor) {
     PersistentArray ret =  new PersistentArray(size, defaultVal, loadFactor);
-    ret._meta = _meta;
+    //!ret._meta = _meta;
     return ret;
 }
 

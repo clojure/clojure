@@ -167,8 +167,8 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 			}
 		for(ISeq vars = RT.seq(VARS.currentVal()); vars != null; vars = vars.rest())
 			{
-			Var v = (Var) ((IMapEntry) vars.first()).val();
-			format("static Var ~A;~%", munge(v.toString()));
+			TRef v = (TRef) ((IMapEntry) vars.first()).val();
+			format("static TRef ~A;~%", munge(v.toString()));
 			}
 
 		//todo declare static members for syms, quoted aggregates
@@ -191,8 +191,8 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 			}
 		for(ISeq vars = RT.seq(VARS.currentVal()); vars != null; vars = vars.rest())
 			{
-			Var v = (Var) ((IMapEntry) vars.first()).val();
-			format("~A = Module.intern(~S,~S);~%", munge(v.toString()), v.module.name, v.name.name);
+			TRef v = (TRef) ((IMapEntry) vars.first()).val();
+			//!format("~A = Module.intern(~S,~S);~%", munge(v.toString()), v.module.name, v.name.name);
 			}
 		//todo init syms and quoted aggregates
 		//emit the top level forms
@@ -1490,12 +1490,12 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception{
 		throw new Exception("Too many arguments to def");
 	Symbol sym = (Symbol) RT.second(form);
 	Module module = (Module) _CRT_MODULE.currentVal();
-	Var var = null;//!module.intern(baseSymbol(sym));
+	TRef var = null;//!module.intern(baseSymbol(sym));
 	registerVar(var);
 	VarExpr ve = new VarExpr(var, typeHint(sym));
 	Expr init = analyze(C.EXPRESSION, macroexpand(RT.third(form)));
-	if(init instanceof FnExpr)
-		((FnExpr) init).name = "FN__" + munge(var.name.toString()) + "__" + RT.nextID();
+//!	if(init instanceof FnExpr)
+//		((FnExpr) init).name = "FN__" + munge(var.name.toString()) + "__" + RT.nextID();
 
 	return new DefExpr(ve, init);
 }
@@ -1542,14 +1542,14 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
 				b.valueTaken = true;
 			return new LocalBindingExpr(b, typeHint);
 			}
-		Var v = lookupVar(sym);
+		TRef v = lookupVar(sym);
 		if(v != null)
 			return new VarExpr(v, typeHint);
 		throw new Exception("Unable to resolve symbol: " + sym.name + " in this context");
 		}
 }
 
-static Var lookupVar(Symbol sym) throws Exception{
+static TRef lookupVar(Symbol sym) throws Exception{
 	Module module = (Module) _CRT_MODULE.currentVal();
 //	Var v = module.find(sym);
 //	if(v != null)
@@ -1576,7 +1576,7 @@ private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
 	return ke;
 }
 
-private static void registerVar(Var var) throws Exception{
+private static void registerVar(TRef var) throws Exception{
 	IPersistentMap varsMap = (IPersistentMap) VARS.currentVal();
 	if(RT.get(var, varsMap) == null)
 		VARS.set(RT.assoc(var, var, varsMap));
@@ -1929,10 +1929,10 @@ static class LocalBindingExpr extends AnExpr{
 }
 
 static class VarExpr extends AnExpr{
-	final Var var;
+	final TRef var;
 	final String typeHint;
 
-	public VarExpr(Var var, String typeHint){
+	public VarExpr(TRef var, String typeHint){
 		this.var = var;
 		this.typeHint = typeHint;
 	}

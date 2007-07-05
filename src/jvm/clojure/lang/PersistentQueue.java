@@ -34,7 +34,7 @@ int _hash = -1;
 PersistentQueue(ISeq f, PersistentArrayList r, IPersistentMap meta) {
     this.f = f;
     this.r = r;
-	this._meta = meta;
+	//!this._meta = meta;
 }
 
 public boolean equals(Object obj) {
@@ -79,7 +79,7 @@ public PersistentQueue pop() {
         f1 = RT.seq(r);
         r1 = null;
         }
-    return new PersistentQueue(f1, r1,_meta);
+    return new PersistentQueue(f1, r1,meta());
 }
 
 public int count() {
@@ -94,24 +94,10 @@ public ISeq seq() {
 
 public PersistentQueue cons(Object o) {
     if(f == null)     //empty
-        return new PersistentQueue(RT.list(o), null,_meta);
+        return new PersistentQueue(RT.list(o), null,meta());
     else
         return new PersistentQueue(f,
-                (PersistentArrayList) (r != null ? r : new PersistentArrayList(INITIAL_REAR_SIZE)).cons(o),_meta);
-}
-
-public Obj withMeta(IPersistentMap meta) {
-    if(_meta == meta)
-        return this;
-    try{
-    Obj ret = (Obj) clone();
-    ret._meta = meta;
-    return ret;
-    }
-    catch(CloneNotSupportedException ignore)
-        {
-        return null;
-        }
+                (PersistentArrayList) (r != null ? r : new PersistentArrayList(INITIAL_REAR_SIZE)).cons(o),meta());
 }
 
 static class Seq extends ASeq {

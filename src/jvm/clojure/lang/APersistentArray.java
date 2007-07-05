@@ -16,24 +16,10 @@ int _hash = -1;
 public IPersistentCollection cons(Object o){
 	PersistentArrayList ret = new PersistentArrayList(this, this.count() + 10);
 	ret = ret.cons(o);
-	ret._meta = _meta;
+	//!ret._meta = _meta;
 	return ret;
 }
 
-public Obj withMeta(IPersistentMap meta){
-	if(_meta == meta)
-		return this;
-	try
-		{
-		Obj ret = (Obj) clone();
-		ret._meta = meta;
-		return ret;
-		}
-	catch(CloneNotSupportedException ignore)
-		{
-		return null;
-		}
-}
 
 public boolean equals(Object obj){
 	if(obj instanceof IPersistentArray)

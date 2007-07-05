@@ -787,7 +787,7 @@ static public void main(String args[]){
 		{
 		IMapEntry o = (IMapEntry) it.next();
 		if(!set.contains(o.key()))
-			System.err.println("Can't find: " + o);
+			System.err.println("Can't find: " + o.key());
 		//else if(n < 2000)
 		//	System.out.print(o.key().toString() + ",");
 		}

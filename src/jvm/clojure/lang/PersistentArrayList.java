@@ -85,7 +85,7 @@ public PersistentArrayList pop() {
     if(_count == 0)
         throw new IllegalAccessError();
     PersistentArrayList ret = new PersistentArrayList(data.master, data.rev, data.baseline, data.history, _count - 1);
-	ret._meta = _meta;
+	//! ret._meta = _meta;
 	return ret;
 }
 
@@ -106,13 +106,13 @@ private void grow() {
 
 protected PersistentArray create(Master master,int rev,int baseline, BitSet history){
     PersistentArray ret = new PersistentArrayList(data.master, rev, baseline, history,_count);
-    ret._meta = _meta;
+    //!ret._meta = _meta;
     return ret;
 }
 
 protected PersistentArray create(int size, Object defaultVal, float loadFactor) {
     PersistentArray ret =  new PersistentArrayList(size, defaultVal, loadFactor,_count);
-    ret._meta = _meta;
+    //!ret._meta = _meta;
     return ret;
 }
 

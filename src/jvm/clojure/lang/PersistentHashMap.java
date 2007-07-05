@@ -42,7 +42,7 @@ public static IPersistentMap create(Object... init){
 	IPersistentMap ret = EMPTY;
 	for(int i = 0; i < init.length; i += 2)
 		{
-		ret = ret.assoc(init[i],init[i + 1]);
+		ret = ret.assoc(init[i], init[i + 1]);
 		}
 	return ret;
 }
@@ -50,14 +50,15 @@ public static IPersistentMap create(Object... init){
 /**
  * @param init {key1,val1,key2,val2,...}
  */
-public static IPersistentMap create(IPersistentMap meta,Object... init){
+public static IPersistentMap create(IPersistentMap meta, Object... init){
 	IPersistentMap ret = (IPersistentMap) EMPTY.withMeta(meta);
 	for(int i = 0; i < init.length; i += 2)
 		{
-		ret = ret.assoc(init[i],init[i + 1]);
+		ret = ret.assoc(init[i], init[i + 1]);
 		}
 	return ret;
 }
+
 PersistentHashMap(int count, INode root){
 	this.count = count;
 	this.root = root;
@@ -83,7 +84,7 @@ public IPersistentMap assoc(Object key, Object val){
 	INode newroot = root.assoc(0, RT.hash(key), key, val, addedLeaf);
 	if(newroot == root)
 		return this;
-	return new PersistentHashMap(meta(),addedLeaf.val == null ? count : count + 1, newroot);
+	return new PersistentHashMap(meta(), addedLeaf.val == null ? count : count + 1, newroot);
 }
 
 public Object valAt(Object key){
@@ -105,7 +106,7 @@ public IPersistentMap without(Object key){
 		return this;
 	if(newroot == null)
 		return (IPersistentMap) EMPTY.withMeta(meta());
-	return new PersistentHashMap(meta(),count - 1, newroot);
+	return new PersistentHashMap(meta(), count - 1, newroot);
 }
 
 public Iterator iterator(){
@@ -120,6 +121,28 @@ public ISeq seq(){
 	return root.seq();
 }
 
+static int mask(int hash, int shift){
+	//return ((hash << shift) >>> 27);// & 0x01f;
+	return (hash >>> shift) & 0x01f;
+}
+
+/*
+final static int[] pathmasks = new int[32];
+static{
+	pathmasks[0] = 0;
+	for(int i=1;i<32;i++)
+		pathmasks[i] = 0x80000000 >> (i - 1);
+}
+//final static int pathmask(int hash, int shift){
+//	//return hash & (0x80000000 >> (shift - 1));
+//	return hash & pathmasks[shift];
+//	}
+
+static boolean diffPath(int shift, int hash1, int hash2){
+	return shift > 0 && ((hash1^hash2) & pathmasks[shift]) != 0;
+	//return shift > 0 && pathmask(hash1^hash2,shift) != 0;
+}
+*/
 static interface INode{
 	INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf);
 
@@ -128,11 +151,15 @@ static interface INode{
 	LeafNode find(int hash, Object key);
 
 	ISeq seq();
+
+	int getHash();
 }
 
+/*
 static interface ILeaf extends INode{
 	int getHash();
 }
+*/
 
 final static class EmptyNode implements INode{
 
@@ -153,15 +180,19 @@ final static class EmptyNode implements INode{
 	public ISeq seq(){
 		return null;
 	}
+
+	public int getHash(){
+		return 0;
+	}
 }
 
 final static class FullNode implements INode{
 	final INode[] nodes;
 	final int shift;
+	final int _hash;
 
-	static int mask(int hash, int shift){
-		return (hash >>> shift) & 0x01f;
-	}
+
+
 
 	static int bitpos(int hash, int shift){
 		return 1 << mask(hash, shift);
@@ -170,9 +201,12 @@ final static class FullNode implements INode{
 	FullNode(INode[] nodes, int shift){
 		this.nodes = nodes;
 		this.shift = shift;
+		this._hash = nodes[0].getHash();
 	}
 
-	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
+	public INode assoc(int levelShift, int hash, Object key, Object val, Box addedLeaf){
+//		if(levelShift < shift && diffPath(shift,hash,_hash))
+//			return BitmapIndexedNode.create(levelShift, this, hash, key, val, addedLeaf);
 		int idx = mask(hash, shift);
 
 		INode n = nodes[idx].assoc(shift + 5, hash, key, val, addedLeaf);
@@ -187,7 +221,8 @@ final static class FullNode implements INode{
 	}
 
 	public INode without(int hash, Object key){
-
+//		if(diffPath(shift,hash,_hash))
+//			return this;
 		int idx = mask(hash, shift);
 		INode n = nodes[idx].without(hash, key);
 		if(n != nodes[idx])
@@ -207,11 +242,17 @@ final static class FullNode implements INode{
 	}
 
 	public LeafNode find(int hash, Object key){
+//		if(diffPath(shift,hash,_hash))
+//			return null;
 		return nodes[mask(hash, shift)].find(hash, key);
 	}
 
 	public ISeq seq(){
 		return Seq.create(this, 0);
+	}
+
+	public int getHash(){
+		return _hash;
 	}
 
 	static class Seq extends ASeq{
@@ -251,10 +292,7 @@ final static class BitmapIndexedNode implements INode{
 	final int bitmap;
 	final INode[] nodes;
 	final int shift;
-
-	static int mask(int hash, int shift){
-		return (hash >>> shift) & 0x01f;
-	}
+	final int _hash;
 
 	static int bitpos(int hash, int shift){
 		return 1 << mask(hash, shift);
@@ -269,6 +307,7 @@ final static class BitmapIndexedNode implements INode{
 		this.bitmap = bitmap;
 		this.nodes = nodes;
 		this.shift = shift;
+		this._hash = nodes[0].getHash();
 	}
 
 	static INode create(int bitmap, INode[] nodes, int shift){
@@ -277,12 +316,19 @@ final static class BitmapIndexedNode implements INode{
 		return new BitmapIndexedNode(bitmap, nodes, shift);
 	}
 
-	static INode create(int shift, ILeaf leaf, int hash, Object key, Object val, Box addedLeaf){
-		return (new BitmapIndexedNode(bitpos(leaf.getHash(), shift), new INode[]{leaf}, shift))
+	static INode create(int shift, INode branch, int hash, Object key, Object val, Box addedLeaf){
+//		int hx = branch.getHash()^hash;
+//		while(mask(hx,shift) == 0)
+//			shift += 5;
+//		if(mask(branch.getHash(),shift) == mask(hash,shift))
+//			return create(shift+5,branch,hash,key,val,addedLeaf);
+		return (new BitmapIndexedNode(bitpos(branch.getHash(), shift), new INode[]{branch}, shift))
 				.assoc(shift, hash, key, val, addedLeaf);
 	}
 
-	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
+	public INode assoc(int levelShift, int hash, Object key, Object val, Box addedLeaf){
+//		if(levelShift < shift && diffPath(shift,hash,_hash))
+//			return create(levelShift, this, hash, key, val, addedLeaf);
 		int bit = bitpos(hash, shift);
 		int idx = index(bit);
 		if((bitmap & bit) != 0)
@@ -308,6 +354,8 @@ final static class BitmapIndexedNode implements INode{
 	}
 
 	public INode without(int hash, Object key){
+//		if(diffPath(shift,hash,_hash))
+//			return this;
 		int bit = bitpos(hash, shift);
 		if((bitmap & bit) != 0)
 			{
@@ -319,6 +367,8 @@ final static class BitmapIndexedNode implements INode{
 					{
 					if(bitmap == bit)
 						return null;
+//					if(nodes.length == 2)
+//						return nodes[idx == 0?1:0];
 					INode[] newnodes = new INode[nodes.length - 1];
 					System.arraycopy(nodes, 0, newnodes, 0, idx);
 					System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
@@ -333,6 +383,8 @@ final static class BitmapIndexedNode implements INode{
 	}
 
 	public LeafNode find(int hash, Object key){
+//		if(diffPath(shift,hash,_hash))
+//			return null;
 		int bit = bitpos(hash, shift);
 		if((bitmap & bit) != 0)
 			{
@@ -340,6 +392,10 @@ final static class BitmapIndexedNode implements INode{
 			}
 		else
 			return null;
+	}
+
+	public int getHash(){
+		return _hash;
 	}
 
 	public ISeq seq(){
@@ -379,7 +435,7 @@ final static class BitmapIndexedNode implements INode{
 
 }
 
-final static class LeafNode implements ILeaf, IMapEntry{
+final static class LeafNode implements INode, IMapEntry{
 	final int hash;
 	final Object key;
 	final Object val;
@@ -438,7 +494,7 @@ final static class LeafNode implements ILeaf, IMapEntry{
 
 }
 
-final static class HashCollisionNode implements ILeaf{
+final static class HashCollisionNode implements INode{
 
 	final int hash;
 	final LeafNode[] leaves;
@@ -489,7 +545,7 @@ final static class HashCollisionNode implements ILeaf{
 	}
 
 	public ISeq seq(){
-		return ArraySeq.create((Object[])leaves);
+		return ArraySeq.create((Object[]) leaves);
 	}
 
 	int findIndex(int hash, Object key){

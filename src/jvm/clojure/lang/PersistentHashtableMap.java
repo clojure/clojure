@@ -263,19 +263,19 @@ static int bucketFor(Object key, PersistentArray array){
 
 IPersistentMap create(int capacity){
 	PersistentHashtableMap ret = new PersistentHashtableMap(capacity);
-	ret._meta = _meta;
+	//!ret._meta = _meta;
 	return ret;
 }
 
 IPersistentMap create(int count, PersistentArray array){
 	PersistentHashtableMap ret = new PersistentHashtableMap(count, array);
-	ret._meta = _meta;
+	//!ret._meta = _meta;
 	return ret;
 }
 
 IPersistentMap create(int i, PersistentArray newArray, int growAtCount){
 	PersistentHashtableMap ret = new PersistentHashtableMap(i, newArray, growAtCount);
-	ret._meta = _meta;
+	//!ret._meta = _meta;
 	return ret;
 }
 
