@@ -12,7 +12,7 @@ package clojure.lang;
 
 import java.util.Queue;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentLinkedQueue;
+//import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * conses onto rear, peeks/pops from front
@@ -27,14 +27,14 @@ final public static PersistentQueue EMPTY = new PersistentQueue(null,null,null);
 
 //*
 final ISeq f;
-final PersistentArrayList r;
-static final int INITIAL_REAR_SIZE = 4;
+final PersistentVector r;
+//static final int INITIAL_REAR_SIZE = 4;
 int _hash = -1;
 
-PersistentQueue(ISeq f, PersistentArrayList r, IPersistentMap meta) {
-    this.f = f;
-    this.r = r;
-	//!this._meta = meta;
+PersistentQueue(ISeq f, PersistentVector r, IPersistentMap meta){
+	super(meta);
+	this.f = f;
+	this.r = r;
 }
 
 public boolean equals(Object obj) {
@@ -73,7 +73,7 @@ public PersistentQueue pop() {
         return this;
         //throw new IllegalStateException("popping empty queue");
     ISeq f1 = f.rest();
-    PersistentArrayList r1 = r;
+    PersistentVector r1 = r;
     if(f1 == null)
         {
         f1 = RT.seq(r);
@@ -96,8 +96,7 @@ public PersistentQueue cons(Object o) {
     if(f == null)     //empty
         return new PersistentQueue(RT.list(o), null,meta());
     else
-        return new PersistentQueue(f,
-                (PersistentArrayList) (r != null ? r : new PersistentArrayList(INITIAL_REAR_SIZE)).cons(o),meta());
+        return new PersistentQueue(f,(r != null ? r : PersistentVector.EMPTY).cons(o),meta());
 }
 
 static class Seq extends ASeq {
@@ -144,8 +143,8 @@ public static void main(String[] args) {
     long startTime, estimatedTime;
 
     //*
-    //Queue list = new LinkedList();
-    Queue list = new ConcurrentLinkedQueue();
+    Queue list = new LinkedList();
+    //Queue list = new ConcurrentLinkedQueue();
     System.out.println("Queue");
     startTime = System.nanoTime();
     for (int i = 0; i < n; i++)
@@ -174,8 +173,8 @@ public static void main(String[] args) {
         q = q.cons(i);
         q = q.pop();
         }
-    IPersistentList lastq = null;
-    IPersistentList lastq2;
+//    IPersistentList lastq = null;
+//    IPersistentList lastq2;
     for (int i = 0; i < n - 10; i++)
         {
         //lastq2 = lastq;

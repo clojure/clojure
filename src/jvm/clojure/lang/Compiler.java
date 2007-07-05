@@ -832,13 +832,13 @@ private static Expr analyzeLetFn(C context, ISeq form) throws Exception{
 			LocalBinding lb = new LocalBinding(baseSymbol(fsym));
 			lb.typeHint = typeHint(fsym);
 			registerLocal(lb);
-			bindingPairs = bindingPairs.cons(new Tuple(lb, RT.cons(FN, RT.rest(bform))));
+			bindingPairs = bindingPairs.cons(PersistentVector.create(lb, RT.cons(FN, RT.rest(bform))));
 			}
 
 		PersistentArrayList bindingInits = new PersistentArrayList(4);
 		for(int i = 0; i < bindingPairs.count(); i++)
 			{
-			Tuple bpair = (Tuple) bindingPairs.nth(i);
+			IPersistentArray bpair = (IPersistentArray) bindingPairs.nth(i);
 			LocalBinding lb = (LocalBinding) bpair.nth(0);
 			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, bpair.nth(1));
 			fexpr.binding = lb;

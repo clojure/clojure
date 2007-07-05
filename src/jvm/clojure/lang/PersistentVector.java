@@ -19,8 +19,10 @@ public class PersistentVector extends Obj implements IPersistentArray, IPersiste
 final int cnt;
 final int shift;
 final Object[] root;
+int _hash = -1;
 
 public final static PersistentVector EMPTY = new PersistentVector(0, 0, RT.EMPTY_ARRAY);
+
 
 static public PersistentVector create(ISeq items){
 	//todo - consider building tree directly
@@ -30,10 +32,13 @@ static public PersistentVector create(ISeq items){
 	return ret;
 }
 
+/**
+ * This ctor may capture/alias the passed array, so do not modify later !
+ */
 static public PersistentVector create(Object... items){
 	//todo - consider building tree directly
 	if(items.length <= 32)
-		return new PersistentVector(items.length, 0, items.clone());
+		return new PersistentVector(items.length, 0, items);
 	return create(ArraySeq.create((Object[])items));
 }
 PersistentVector(int cnt, int shift, Object[] root){
@@ -101,6 +106,48 @@ public ISeq rseq(){
 	if(cnt > 0)
 		return new RSeq(this, count() - 1);
 	return null;
+}
+
+public boolean equals(Object obj){
+	if(obj instanceof IPersistentArray)
+		{
+		IPersistentArray ma = (IPersistentArray) obj;
+		if(ma.count() != count() || ma.hashCode() != hashCode())
+			return false;
+		for(int i = 0; i < count(); i++)
+			{
+			if(!RT.equal(nth(i), ma.nth(i)))
+				return false;
+			}
+		}
+	else
+		{
+		if(!(obj instanceof Sequential))
+			return false;
+		ISeq ms = ((IPersistentCollection) obj).seq();
+		for(int i = 0; i < count(); i++, ms = ms.rest())
+			{
+			if(ms == null || !RT.equal(nth(i), ms.first()))
+				return false;
+			}
+		if(ms.rest() != null)
+			return false;
+		}
+
+	return true;
+}
+
+public int hashCode(){
+	if(_hash == -1)
+		{
+		int hash = 0;
+		for(int i = 0; i < cnt; i++)
+			{
+			hash = RT.hashCombine(hash, RT.hash(nth(i)));
+			}
+		this._hash = hash;
+		}
+	return _hash;
 }
 
 static class Seq extends ASeq implements IndexedSeq{
