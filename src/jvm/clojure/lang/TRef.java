@@ -19,6 +19,7 @@ public class TRef<T> extends AFn{
 final AtomicReference<TVal> tvals;
 final AtomicReference<InheritableThreadLocal> dvals;
 
+
 public TRef(){
 	this.tvals = new AtomicReference<TVal>();
 	this.dvals = new AtomicReference<InheritableThreadLocal>();
@@ -27,6 +28,19 @@ public TRef(){
 public TRef(T initVal){
 	this();
 	tvals.set(new TVal(initVal, Transaction.ZERO_POINT, null));
+}
+
+public boolean equals(Object o){
+	if(this == o) return true;
+	if(o == null || TRef.class != o.getClass()) return false;
+
+	TRef other = (TRef) o;
+
+	return dvals == other.dvals && tvals == other.tvals;
+}
+
+public int hashCode(){
+	return RT.hashCombine(dvals.hashCode(), tvals.hashCode());
 }
 
 public T currentVal(){
