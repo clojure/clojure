@@ -74,12 +74,21 @@ static public class KeySeq extends ASeq{
 		this.seq = seq;
 	}
 
+	private KeySeq(IPersistentMap meta, ISeq seq){
+		super(meta);
+		this.seq = seq;
+	}
+
 	public Object first(){
 		return ((IMapEntry) seq.first()).key();
 	}
 
 	public ISeq rest(){
 		return create(seq.rest());
+	}
+
+	public KeySeq withMeta(IPersistentMap meta){
+		return new KeySeq(meta, seq);
 	}
 }
 
@@ -96,12 +105,21 @@ static public class ValSeq extends ASeq{
 		this.seq = seq;
 	}
 
+	private ValSeq(IPersistentMap meta, ISeq seq){
+		super(meta);
+		this.seq = seq;
+	}
+
 	public Object first(){
 		return ((IMapEntry) seq.first()).val();
 	}
 
 	public ISeq rest(){
 		return create(seq.rest());
+	}
+
+	public ValSeq withMeta(IPersistentMap meta){
+		return new ValSeq(meta, seq);
 	}
 }
 

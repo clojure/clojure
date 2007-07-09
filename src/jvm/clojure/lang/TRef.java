@@ -25,6 +25,17 @@ public TRef(){
 	this.dvals = new AtomicReference<InheritableThreadLocal>();
 }
 
+public Obj withMeta(IPersistentMap meta){
+	return new TRef(meta, tvals, dvals);
+}
+
+
+private TRef(IPersistentMap meta, AtomicReference<TVal> tvals, AtomicReference<InheritableThreadLocal> dvals){
+	super(meta);
+	this.tvals = tvals;
+	this.dvals = dvals;
+}
+
 public TRef(T initVal){
 	this();
 	tvals.set(new TVal(initVal, Transaction.ZERO_POINT, null));

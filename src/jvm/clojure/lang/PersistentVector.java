@@ -39,8 +39,9 @@ static public PersistentVector create(Object... items){
 	//todo - consider building tree directly
 	if(items.length <= 32)
 		return new PersistentVector(items.length, 0, items);
-	return create(ArraySeq.create((Object[])items));
+	return create(ArraySeq.create((Object[]) items));
 }
+
 PersistentVector(int cnt, int shift, Object[] root){
 	this.cnt = cnt;
 	this.shift = shift;
@@ -150,12 +151,22 @@ public int hashCode(){
 	return _hash;
 }
 
+public PersistentVector withMeta(IPersistentMap meta){
+	return new PersistentVector(meta, cnt, shift, root);
+}
+
 static class Seq extends ASeq implements IndexedSeq{
 	final PersistentVector v;
 	final int i;
 
 
 	public Seq(PersistentVector v, int i){
+		this.v = v;
+		this.i = i;
+	}
+
+	Seq(IPersistentMap meta, PersistentVector v, int i){
+		super(meta);
 		this.v = v;
 		this.i = i;
 	}
@@ -177,6 +188,10 @@ static class Seq extends ASeq implements IndexedSeq{
 	public int count(){
 		return v.cnt - i;
 	}
+
+	public Seq withMeta(IPersistentMap meta){
+		return new Seq(meta, v, i);
+	}
 }
 
 static class RSeq extends ASeq implements IndexedSeq{
@@ -185,6 +200,12 @@ static class RSeq extends ASeq implements IndexedSeq{
 
 	RSeq(PersistentVector vector, int i){
 		this.v = vector;
+		this.i = i;
+	}
+
+	RSeq(IPersistentMap meta, PersistentVector v, int i){
+		super(meta);
+		this.v = v;
 		this.i = i;
 	}
 
@@ -204,6 +225,10 @@ static class RSeq extends ASeq implements IndexedSeq{
 
 	public int count(){
 		return i + 1;
+	}
+
+	public RSeq withMeta(IPersistentMap meta){
+		return new RSeq(meta, v, i);
 	}
 }
 

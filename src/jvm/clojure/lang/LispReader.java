@@ -321,6 +321,9 @@ static class StringReader extends AFn{
 		return sb.toString();
 	}
 
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+	}
 }
 
 static class CommentReader extends AFn{
@@ -334,6 +337,9 @@ static class CommentReader extends AFn{
 		return r;
 	}
 
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+	}
 }
 
 static class QuoteReader extends AFn{
@@ -342,6 +348,10 @@ static class QuoteReader extends AFn{
 		Object o = read(r, true, null, true);
 		return RT.list(QUOTE, o);
 	}
+
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+	}
 }
 
 static class BackquoteReader extends AFn{
@@ -349,6 +359,11 @@ static class BackquoteReader extends AFn{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
 		return RT.list(BACKQUOTE, o);
+	}
+
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+
 	}
 }
 
@@ -370,6 +385,11 @@ static class UnquoteReader extends AFn{
 			return RT.list(UNQUOTE, o);
 			}
 	}
+
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+
+	}
 }
 
 static class CharacterReader extends AFn{
@@ -390,6 +410,10 @@ static class CharacterReader extends AFn{
 		throw new Exception("Unsupported character: \\" + token);
 	}
 
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+
+	}
 }
 
 static class ListReader extends AFn{
@@ -398,6 +422,10 @@ static class ListReader extends AFn{
 		return readDelimitedList(')', r, true);
 	}
 
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+
+	}
 }
 
 static class UnmatchedDelimiterReader extends AFn{
@@ -405,6 +433,10 @@ static class UnmatchedDelimiterReader extends AFn{
 		throw new Exception("Unmatched delimiter: " + rightdelim);
 	}
 
+	public Obj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+
+	}
 }
 
 public static ISeq readDelimitedList(char delim, PushbackReader r, boolean isRecursive) throws Exception{

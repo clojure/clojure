@@ -11,55 +11,64 @@
 package clojure.lang;
 
 public abstract class ASeq extends Obj implements ISeq{
-int _hash = -1;
+transient int _hash = -1;
 
-public boolean equals(Object obj) {
 
-        if(!(obj instanceof Sequential))
-            return false;
-        ISeq ms  = ((IPersistentCollection)obj).seq();
-        for(ISeq s = seq();s!=null;s = s.rest(), ms = ms.rest())
-            {
-            if(ms == null || !RT.equal(s.first(),ms.first()))
-                return false;
-            }
-        if(ms.rest() != null)
-            return false;
-
-    return true;
+protected ASeq(IPersistentMap meta){
+	super(meta);
 }
 
-public int hashCode() {
-    if(_hash == -1)
-        {
-        int hash = 0;
-        for(ISeq s = seq();s!=null;s = s.rest())
-            {
-            hash = RT.hashCombine(hash, RT.hash(s.first()));
-            }
-        this._hash = hash;
-        }
-    return _hash;
+
+protected ASeq(){
 }
 
-public Object peek() {
-    return first();
+public boolean equals(Object obj){
+
+	if(!(obj instanceof Sequential))
+		return false;
+	ISeq ms = ((IPersistentCollection) obj).seq();
+	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+		{
+		if(ms == null || !RT.equal(s.first(), ms.first()))
+			return false;
+		}
+	if(ms.rest() != null)
+		return false;
+
+	return true;
 }
 
-public IPersistentList pop() {
-    return rest();
+public int hashCode(){
+	if(_hash == -1)
+		{
+		int hash = 0;
+		for(ISeq s = seq(); s != null; s = s.rest())
+			{
+			hash = RT.hashCombine(hash, RT.hash(s.first()));
+			}
+		this._hash = hash;
+		}
+	return _hash;
 }
 
-public int count() {
-    return 1 + RT.count(rest());
+public Object peek(){
+	return first();
 }
 
-public ISeq seq() {
-    return this;
+public IPersistentList pop(){
+	return rest();
 }
 
-public ISeq cons(Object o) {
-    return new Cons(o, this);
+public int count(){
+	return 1 + RT.count(rest());
+}
+
+public ISeq seq(){
+	return this;
+}
+
+public ISeq cons(Object o){
+	return new Cons(o, this);
 }
 
 }

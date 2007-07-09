@@ -34,12 +34,16 @@ protected PersistentArrayMap(){
 	this.array = new Object[]{};
 }
 
+public PersistentArrayMap withMeta(IPersistentMap meta){
+	return new PersistentArrayMap(meta, array);
+}
+
 PersistentArrayMap create(Object... init){
-	return new PersistentArrayMap(meta(),init);
+	return new PersistentArrayMap(meta(), init);
 }
 
 IPersistentMap createHT(Object[] init){
-	return PersistentHashMap.create(meta(),init);
+	return PersistentHashMap.create(meta(), init);
 }
 
 /**
@@ -47,12 +51,12 @@ IPersistentMap createHT(Object[] init){
  *
  * @param init {key1,val1,key2,val2,...}
  */
-public PersistentArrayMap(Object... init){
+public PersistentArrayMap(Object[] init){
 	this.array = init;
 }
 
 
-public PersistentArrayMap(IPersistentMap meta, Object... init){
+public PersistentArrayMap(IPersistentMap meta, Object[] init){
 	super(meta);
 	this.array = init;
 }
@@ -187,6 +191,12 @@ static class Seq extends ASeq implements IMapEntry{
 		this.i = i;
 	}
 
+	public Seq(IPersistentMap meta, Object[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
+
 	public Object key(){
 		return array[i];
 	}
@@ -207,6 +217,10 @@ static class Seq extends ASeq implements IMapEntry{
 
 	public int count(){
 		return (array.length - i) / 2;
+	}
+
+	public Obj withMeta(IPersistentMap meta){
+		return new Seq(meta, array, i);
 	}
 }
 

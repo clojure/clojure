@@ -35,7 +35,7 @@ final INode root;
 
 final public static PersistentHashMap EMPTY = new PersistentHashMap(0, new EmptyNode());
 
-/**
+/*
  * @param init {key1,val1,key2,val2,...}
  */
 public static IPersistentMap create(Object... init){
@@ -47,11 +47,11 @@ public static IPersistentMap create(Object... init){
 	return ret;
 }
 
-/**
+/*
  * @param init {key1,val1,key2,val2,...}
  */
 public static IPersistentMap create(IPersistentMap meta, Object... init){
-	IPersistentMap ret = (IPersistentMap) EMPTY.withMeta(meta);
+	IPersistentMap ret = EMPTY.withMeta(meta);
 	for(int i = 0; i < init.length; i += 2)
 		{
 		ret = ret.assoc(init[i], init[i + 1]);
@@ -105,7 +105,7 @@ public IPersistentMap without(Object key){
 	if(newroot == root)
 		return this;
 	if(newroot == null)
-		return (IPersistentMap) EMPTY.withMeta(meta());
+		return EMPTY.withMeta(meta());
 	return new PersistentHashMap(meta(), count - 1, newroot);
 }
 
@@ -124,6 +124,10 @@ public ISeq seq(){
 static int mask(int hash, int shift){
 	//return ((hash << shift) >>> 27);// & 0x01f;
 	return (hash >>> shift) & 0x01f;
+}
+
+public PersistentHashMap withMeta(IPersistentMap meta){
+	return new PersistentHashMap(meta, count, root);
 }
 
 /*
@@ -190,8 +194,6 @@ final static class FullNode implements INode{
 	final INode[] nodes;
 	final int shift;
 	final int _hash;
-
-
 
 
 	static int bitpos(int hash, int shift){
@@ -267,6 +269,13 @@ final static class FullNode implements INode{
 			this.node = node;
 		}
 
+		Seq(IPersistentMap meta, ISeq s, int i, FullNode node){
+			super(meta);
+			this.s = s;
+			this.i = i;
+			this.node = node;
+		}
+
 		static ISeq create(FullNode node, int i){
 			if(i >= node.nodes.length)
 				return null;
@@ -282,6 +291,10 @@ final static class FullNode implements INode{
 			if(nexts != null)
 				return new Seq(nexts, i, node);
 			return create(node, i + 1);
+		}
+
+		public Seq withMeta(IPersistentMap meta){
+			return new Seq(meta, s, i, node);
 		}
 	}
 
@@ -414,6 +427,13 @@ final static class BitmapIndexedNode implements INode{
 			this.node = node;
 		}
 
+		Seq(IPersistentMap meta, ISeq s, int i, BitmapIndexedNode node){
+			super(meta);
+			this.s = s;
+			this.i = i;
+			this.node = node;
+		}
+
 		static ISeq create(BitmapIndexedNode node, int i){
 			if(i >= node.nodes.length)
 				return null;
@@ -429,6 +449,10 @@ final static class BitmapIndexedNode implements INode{
 			if(nexts != null)
 				return new Seq(nexts, i, node);
 			return create(node, i + 1);
+		}
+
+		public Seq withMeta(IPersistentMap meta){
+			return new Seq(meta, s, i, node);
 		}
 	}
 
@@ -582,9 +606,9 @@ public static void main(String[] args){
 
 		System.out.println("Building map");
 		long startTime = System.nanoTime();
-		for(int i = 0; i < words.size(); i++)
+		for(Object word5 : words)
 			{
-			map = map.assoc(words.get(i), words.get(i));
+			map = map.assoc(word5, word5);
 			}
 		rand = new Random(42);
 		IPersistentMap snapshotMap = map;
@@ -597,9 +621,9 @@ public static void main(String[] args){
 
 		System.out.println("Building ht");
 		startTime = System.nanoTime();
-		for(int i = 0; i < words.size(); i++)
+		for(Object word1 : words)
 			{
-			ht.put(words.get(i), words.get(i));
+			ht.put(word1, word1);
 			}
 		rand = new Random(42);
 		for(int i = 0; i < words.size() / 200; i++)
@@ -612,9 +636,9 @@ public static void main(String[] args){
 		System.out.println("map lookup");
 		startTime = System.nanoTime();
 		int c = 0;
-		for(int i = 0; i < words.size(); i++)
+		for(Object word2 : words)
 			{
-			if(!map.contains(words.get(i)))
+			if(!map.contains(word2))
 				++c;
 			}
 		estimatedTime = System.nanoTime() - startTime;
@@ -622,9 +646,9 @@ public static void main(String[] args){
 		System.out.println("ht lookup");
 		startTime = System.nanoTime();
 		c = 0;
-		for(int i = 0; i < words.size(); i++)
+		for(Object word3 : words)
 			{
-			if(!ht.containsKey(words.get(i)))
+			if(!ht.containsKey(word3))
 				++c;
 			}
 		estimatedTime = System.nanoTime() - startTime;
@@ -632,9 +656,9 @@ public static void main(String[] args){
 		System.out.println("snapshotMap lookup");
 		startTime = System.nanoTime();
 		c = 0;
-		for(int i = 0; i < words.size(); i++)
+		for(Object word4 : words)
 			{
-			if(!snapshotMap.contains(words.get(i)))
+			if(!snapshotMap.contains(word4))
 				++c;
 			}
 		estimatedTime = System.nanoTime() - startTime;

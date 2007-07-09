@@ -12,9 +12,9 @@
 
 package clojure.lang;
 
-public class Obj implements Cloneable{
+public abstract class Obj implements IObj{
 
-private IPersistentMap _meta;
+final IPersistentMap _meta;
 
 public Obj(IPersistentMap meta){
 	this._meta = meta;
@@ -28,18 +28,6 @@ final public IPersistentMap meta(){
 	return _meta;
 }
 
-final public Obj withMeta(IPersistentMap meta){
-	if(_meta == meta)
-		return this;
-	try
-		{
-		Obj ret = (Obj) clone();
-		ret._meta = meta;
-		return ret;
-		}
-	catch(CloneNotSupportedException ignore)
-		{
-		return null;
-		}
-}
+abstract public Obj withMeta(IPersistentMap meta);
+
 }

@@ -12,30 +12,40 @@
 
 package clojure.lang;
 
-public class Cons extends ASeq {
+public class Cons extends ASeq{
 
 private final Object _first;
 private final ISeq _rest;
 
-public Cons(Object first, ISeq rest)
-	{
+public Cons(Object first, ISeq rest){
 	this._first = first;
 	this._rest = rest;
-	}
-
-public Object first() {
-    return _first;
 }
 
-public ISeq rest() {
-    return _rest;
+
+public Cons(IPersistentMap meta, Object _first, ISeq _rest){
+	super(meta);
+	this._first = _first;
+	this._rest = _rest;
 }
 
-public int count() {
-    return 1 + RT.count(_rest);
+public Object first(){
+	return _first;
 }
 
-public ISeq seq() {
-    return this;
+public ISeq rest(){
+	return _rest;
+}
+
+public int count(){
+	return 1 + RT.count(_rest);
+}
+
+public ISeq seq(){
+	return this;
+}
+
+public Cons withMeta(IPersistentMap meta){
+	return new Cons(meta, _first, _rest);
 }
 }

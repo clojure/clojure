@@ -325,6 +325,11 @@ public static void main(String[] args){
 				Integer i = (Integer) arg1;
 				return i + 1;
 			}
+
+			public Obj withMeta(IPersistentMap meta){
+				throw new UnsupportedOperationException();
+
+			}
 		}
 
 		class Commuter extends AFn implements Callable{
@@ -357,6 +362,11 @@ public static void main(String[] args){
 					Transaction.get().doCommute(tref, incr);
 					}
 				return null;
+			}
+
+			public Obj withMeta(IPersistentMap meta){
+				throw new UnsupportedOperationException();
+
 			}
 		}
 
@@ -391,6 +401,11 @@ public static void main(String[] args){
 					t.doSet(tref, val + 1);
 					}
 				return null;
+			}
+
+			public Obj withMeta(IPersistentMap meta){
+				throw new UnsupportedOperationException();
+
 			}
 		}
 

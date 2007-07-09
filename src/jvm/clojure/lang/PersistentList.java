@@ -10,41 +10,50 @@
 
 package clojure.lang;
 
-public class PersistentList extends ASeq {
+public class PersistentList extends ASeq{
 
 private final Object _first;
 private final PersistentList _rest;
 private final int _count;
 
-public PersistentList(Object first) {
-    this._first = first;
-    this._rest = null;
+public PersistentList(Object first){
+	this._first = first;
+	this._rest = null;
 
-    this._count = 1;
+	this._count = 1;
 }
 
-PersistentList(Object first, PersistentList rest) {
-    this._first = first;
-    this._rest = rest;
+PersistentList(Object first, PersistentList rest){
+	this._first = first;
+	this._rest = rest;
 
-    this._count = 1 + rest.count();
-    //this._meta = rest._meta;
+	this._count = 1 + rest.count();
 }
 
-public Object first() {
-    return _first;
+PersistentList(IPersistentMap meta, Object _first, PersistentList _rest, int _count){
+	super(meta);
+	this._first = _first;
+	this._rest = _rest;
+	this._count = _count;
 }
 
-public ISeq rest() {
-    return _rest;
+public Object first(){
+	return _first;
 }
 
-public int count() {
-    return _count;
+public ISeq rest(){
+	return _rest;
 }
 
-public ISeq cons(Object o) {
-    return new PersistentList(o,this);
+public int count(){
+	return _count;
 }
 
+public ISeq cons(Object o){
+	return new PersistentList(o, this);
+}
+
+public PersistentList withMeta(IPersistentMap meta){
+	return new PersistentList(meta, _first, _rest, _count);
+}
 }

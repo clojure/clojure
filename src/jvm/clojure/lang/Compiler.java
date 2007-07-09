@@ -68,29 +68,29 @@ static public TRef USES = new TRef();
 static public TRef FNS = new TRef();
 
 static public IPersistentMap CHAR_MAP =
-		new PersistentArrayMap('-', "_DSH_",
-		                       '.', "_DOT_",
-		                       ':', "_CLN_",
-		                       '+', "_PLS_",
-		                       '>', "_GT_",
-		                       '<', "_LT_",
-		                       '=', "_EQ_",
-		                       '~', "_TLD_",
-		                       '!', "_EXC_",
-		                       '@', "_AT_",
-		                       '#', "_SHP_",
-		                       '$', "_DS_",
-		                       '%', "_PCT_",
-		                       '^', "_CRT_",
-		                       '&', "_AMP_",
-		                       '*', "_STAR_",
-		                       '{', "_LBC_",
-		                       '}', "_RBC_",
-		                       '[', "_LBK_",
-		                       ']', "_RBK_",
-		                       '/', "_FSL_",
-		                       '\\', "_BSL_",
-		                       '?', "_QM_");
+		new PersistentArrayMap(new Object[]{'-', "_DSH_",
+		                                    '.', "_DOT_",
+		                                    ':', "_CLN_",
+		                                    '+', "_PLS_",
+		                                    '>', "_GT_",
+		                                    '<', "_LT_",
+		                                    '=', "_EQ_",
+		                                    '~', "_TLD_",
+		                                    '!', "_EXC_",
+		                                    '@', "_AT_",
+		                                    '#', "_SHP_",
+		                                    '$', "_DS_",
+		                                    '%', "_PCT_",
+		                                    '^', "_CRT_",
+		                                    '&', "_AMP_",
+		                                    '*', "_STAR_",
+		                                    '{', "_LBC_",
+		                                    '}', "_RBC_",
+		                                    '[', "_LBK_",
+		                                    ']', "_RBK_",
+		                                    '/', "_FSL_",
+		                                    '\\', "_BSL_",
+		                                    '?', "_QM_"});
 
 private static final int MAX_POSITIONAL_ARITY = 20;
 
@@ -1532,21 +1532,21 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
 //		return new HostStaticFieldExpr((StaticMemberInvoker) sym);
 //	//todo have InstanceMemberSymbol yield accessor when expression
 //	else
+	{
+	String typeHint = typeHint(sym);
+	sym = baseSymbol(sym);
+	LocalBinding b = referenceLocal(sym);
+	if(b != null)
 		{
-		String typeHint = typeHint(sym);
-		sym = baseSymbol(sym);
-		LocalBinding b = referenceLocal(sym);
-		if(b != null)
-			{
-			if(!inFnPosition)
-				b.valueTaken = true;
-			return new LocalBindingExpr(b, typeHint);
-			}
-		TRef v = lookupVar(sym);
-		if(v != null)
-			return new VarExpr(v, typeHint);
-		throw new Exception("Unable to resolve symbol: " + sym.name + " in this context");
+		if(!inFnPosition)
+			b.valueTaken = true;
+		return new LocalBindingExpr(b, typeHint);
 		}
+	TRef v = lookupVar(sym);
+	if(v != null)
+		return new VarExpr(v, typeHint);
+	throw new Exception("Unable to resolve symbol: " + sym.name + " in this context");
+	}
 }
 
 static TRef lookupVar(Symbol sym) throws Exception{
@@ -1673,7 +1673,7 @@ static class KeyParam{
 	public KeyParam(LocalBindingExpr b, Expr init) throws Exception{
 		this.bindingExpression = b;
 		this.init = init;
-	//!	kw = registerKeyword((Keyword) Symbol.intern(":" + bindingExpression.b.sym.name));
+		//!	kw = registerKeyword((Keyword) Symbol.intern(":" + bindingExpression.b.sym.name));
 	}
 
 	public KeyParam(LocalBindingExpr b) throws Exception{

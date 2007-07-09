@@ -11,14 +11,10 @@
 package clojure.lang;
 
 
-public interface IObj {
-Object putAttr( Object key, Object val) throws Exception;
+public interface IObj{
 
-Object getAttr( Object key) throws Exception;
+public IPersistentMap meta();
 
-boolean hasAttr( Object key) throws Exception;
+public IObj withMeta(IPersistentMap meta);
 
-IPersistentMap attrs() throws Exception;
-
-void removeAttr(Object key) throws Exception;
 }

@@ -15,16 +15,22 @@ public class FnSeq extends ASeq{
 final Object _first;
 final Delay _rest;
 
-public FnSeq(Object first, Delay rest) {
-    this._first = first;
-    this._rest = rest;
+public FnSeq(Object first, Delay rest){
+	this._first = first;
+	this._rest = rest;
 }
 
-public Object first() {
-    return _first;
+public FnSeq(IPersistentMap meta, Object first, Delay rest){
+	super(meta);
+	this._first = first;
+	this._rest = rest;
 }
 
-public ISeq rest() {
+public Object first(){
+	return _first;
+}
+
+public ISeq rest(){
 	try
 		{
 		return (ISeq) _rest.force();
@@ -33,5 +39,9 @@ public ISeq rest() {
 		{
 		throw new Error(e.toString());
 		}
+}
+
+public FnSeq withMeta(IPersistentMap meta){
+	return new FnSeq(meta, _first, _rest);
 }
 }

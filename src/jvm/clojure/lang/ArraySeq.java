@@ -18,7 +18,7 @@ final int i;
 //ISeq _rest;
 
 static public ArraySeq create(){
-		return null;
+	return null;
 }
 
 static public ArraySeq create(Object... array){
@@ -33,12 +33,18 @@ ArraySeq(Object[] array, int i){
 //    this._rest = this;
 }
 
-public Object first() {
+ArraySeq(IPersistentMap meta, Object[] array, int i){
+	super(meta);
+	this.array = array;
+	this.i = i;
+}
+
+public Object first(){
 	return array[i];
 }
 
-public ISeq rest() {
-	if(i+1 < array.length)
+public ISeq rest(){
+	if(i + 1 < array.length)
 		return new ArraySeq(array, i + 1);
 	return null;
 //    if(_rest == this)
@@ -50,11 +56,15 @@ public ISeq rest() {
 //    return _rest;
 }
 
-public int count() {
-    return array.length - i;
-    }
+public int count(){
+	return array.length - i;
+}
 
 public int index(){
 	return i;
+}
+
+public ArraySeq withMeta(IPersistentMap meta){
+	return new ArraySeq(meta, array, i);
 }
 }

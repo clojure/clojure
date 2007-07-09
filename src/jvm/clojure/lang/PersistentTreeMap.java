@@ -32,8 +32,12 @@ public PersistentTreeMap(){
 	this(null);
 }
 
+public PersistentTreeMap withMeta(IPersistentMap meta){
+	return new PersistentTreeMap(meta, comp, tree, _count);
+}
+
 public PersistentTreeMap(Comparator comp){
-	this(null,comp);
+	this(null, comp);
 }
 
 
@@ -42,6 +46,13 @@ public PersistentTreeMap(IPersistentMap meta, Comparator comp){
 	this.comp = comp;
 	tree = null;
 	_count = 0;
+}
+
+PersistentTreeMap(IPersistentMap meta, Comparator comp, Node tree, int _count){
+	super(meta);
+	this.comp = comp;
+	this.tree = tree;
+	this._count = _count;
 }
 
 public boolean contains(Object key){
@@ -80,7 +91,7 @@ public PersistentTreeMap without(Object key){
 		if(found.val == null)//null == doesn't contain key
 			return this;
 		//empty
-		return new PersistentTreeMap(meta(),comp);
+		return new PersistentTreeMap(meta(), comp);
 		}
 	return new PersistentTreeMap(comp, t.blacken(), _count - 1, meta());
 }
@@ -637,6 +648,13 @@ static public class Seq extends ASeq{
 		this.cnt = cnt;
 	}
 
+	Seq(IPersistentMap meta, ISeq stack, boolean asc, int cnt){
+		super(meta);
+		this.stack = stack;
+		this.asc = asc;
+		this.cnt = cnt;
+	}
+
 	static Seq create(Node t, boolean asc, int cnt){
 		return new Seq(push(t, null, asc), asc, cnt);
 	}
@@ -666,6 +684,10 @@ static public class Seq extends ASeq{
 
 	public int count(){
 		return cnt;
+	}
+
+	public Obj withMeta(IPersistentMap meta){
+		return new Seq(meta, stack, asc, cnt);
 	}
 }
 
@@ -748,18 +770,19 @@ static public void main(String args[]){
 	Integer[] ints = new Integer[n];
 	for(int i = 0; i < ints.length; i++)
 		{
-		ints[i] = new Integer(i);
+		ints[i] = i;
 		}
 	Collections.shuffle(Arrays.asList(ints));
 	//force the ListMap class loading now
-	try
-		{
-		//PersistentListMap.EMPTY.assocEx(1, null).assocEx(2,null).assocEx(3,null);
-		}
-	catch(Exception e)
-		{
-		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-		}
+//	try
+//		{
+//
+//		//PersistentListMap.EMPTY.assocEx(1, null).assocEx(2,null).assocEx(3,null);
+//		}
+//	catch(Exception e)
+//		{
+//		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//		}
 	System.out.println("Building set");
 	//IPersistentMap set = new PersistentArrayMap();
 	//IPersistentMap set = new PersistentHashtableMap(1001);
@@ -773,19 +796,17 @@ static public void main(String args[]){
 //		set = set.add(anInt);
 //		}
 	long startTime = System.nanoTime();
-	for(int i = 0; i < ints.length; i++)
+	for(Integer anInt : ints)
 		{
-		Integer anInt = ints[i];
 		set = set.assoc(anInt, anInt);
 		}
 	//System.out.println("_count = " + set.count());
 
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 //	                   + ", depth: " + set.depth());
-	Iterator it = set.iterator();
-	while(it.hasNext())
+	for(Object aSet : set)
 		{
-		IMapEntry o = (IMapEntry) it.next();
+		IMapEntry o = (IMapEntry) aSet;
 		if(!set.contains(o.key()))
 			System.err.println("Can't find: " + o.key());
 		//else if(n < 2000)
@@ -812,16 +833,15 @@ static public void main(String args[]){
 //		Integer anInt = ints[i];
 //		ht.put(anInt,null);
 //		}
-	for(int i = 0; i < ints.length; i++)
+	for(Integer anInt : ints)
 		{
-		Integer anInt = ints[i];
 		ht.put(anInt, anInt);
 		}
 	//System.out.println("size = " + ht.size());
-	it = ht.entrySet().iterator();
-	while(it.hasNext())
+	//Iterator it = ht.entrySet().iterator();
+	for(Object o1 : ht.entrySet())
 		{
-		Map.Entry o = (Map.Entry) it.next();
+		Map.Entry o = (Map.Entry) o1;
 		if(!ht.containsKey(o.getKey()))
 			System.err.println("Can't find: " + o);
 		//else if(n < 2000)
@@ -841,9 +861,8 @@ static public void main(String args[]){
 	System.out.println("set lookup");
 	startTime = System.nanoTime();
 	int c = 0;
-	for(int i = 0; i < ints.length; i++)
+	for(Integer anInt : ints)
 		{
-		Integer anInt = ints[i];
 		if(!set.contains(anInt))
 			++c;
 		}
@@ -853,9 +872,8 @@ static public void main(String args[]){
 	System.out.println("ht lookup");
 	startTime = System.nanoTime();
 	c = 0;
-	for(int i = 0; i < ints.length; i++)
+	for(Integer anInt : ints)
 		{
-		Integer anInt = ints[i];
 		if(!ht.containsKey(anInt))
 			++c;
 		}

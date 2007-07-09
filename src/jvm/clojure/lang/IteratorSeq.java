@@ -14,8 +14,12 @@ import java.util.Iterator;
 
 public class IteratorSeq extends ASeq{
 final Iterator iter;
-volatile Object val;
-volatile ISeq _rest;
+final State state;
+
+static class State{
+	volatile Object val;
+	volatile Object _rest;
+}
 
 public static IteratorSeq create(Iterator iter){
 	if(iter.hasNext())
@@ -25,30 +29,41 @@ public static IteratorSeq create(Iterator iter){
 
 IteratorSeq(Iterator iter){
 	this.iter = iter;
-	this.val = this;
-	this._rest = this;
+	state = new State();
+	this.state.val = state;
+	this.state._rest = state;
+}
+
+IteratorSeq(IPersistentMap meta, Iterator iter, State state){
+	super(meta);
+	this.iter = iter;
+	this.state = state;
 }
 
 public Object first(){
-	if(val == this)
-		synchronized(this)
+	if(state.val == state)
+		synchronized(state)
 			{
-			if(val == this)
-				val = iter.next();
+			if(state.val == state)
+				state.val = iter.next();
 			}
-	return val;
+	return state.val;
 }
 
 public ISeq rest(){
-	if(_rest == this)
-		synchronized(this)
+	if(state._rest == state)
+		synchronized(state)
 			{
-			if(_rest == this)
+			if(state._rest == state)
 				{
 				first();
-				_rest = create(iter);
+				state._rest = create(iter);
 				}
 			}
-	return _rest;
+	return (ISeq) state._rest;
+}
+
+public IteratorSeq withMeta(IPersistentMap meta){
+	return new IteratorSeq(meta, iter, state);
 }
 }

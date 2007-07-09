@@ -49,9 +49,9 @@ public IPersistentMap assoc(Object key, Object val){
 		{
 		if(_val == val)
 			return this;
-		return (MapEntry) new MapEntry(meta(),key, val);
+		return new MapEntry(meta(), key, val);
 		}
-	return new PersistentArrayMap(meta(),_key, _val, key, val);
+	return new PersistentArrayMap(meta(), new Object[]{_key, _val, key, val});
 }
 
 public Object valAt(Object key){
@@ -76,6 +76,10 @@ public int count(){
 
 public Iterator iterator(){
 	return new Iter(this);
+}
+
+public MapEntry withMeta(IPersistentMap meta){
+	return new MapEntry(meta, _key, _val);
 }
 
 static class Iter implements Iterator{
@@ -112,6 +116,11 @@ static class Seq extends ASeq{
 		this.e = e;
 	}
 
+	public Seq(IPersistentMap meta, MapEntry e){
+		super(meta);
+		this.e = e;
+	}
+
 	public Object first(){
 		return e;
 	}
@@ -122,6 +131,10 @@ static class Seq extends ASeq{
 
 	public int count(){
 		return 1;
+	}
+
+	public Obj withMeta(IPersistentMap meta){
+		return new Seq(meta, e);
 	}
 }
 }
