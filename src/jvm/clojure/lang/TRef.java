@@ -17,11 +17,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TRef<T> extends AFn{
 //reference to a chain of TVals, only the head of which may be non-committed
 final AtomicReference<TVal> tvals;
-volatile InheritableThreadLocal dvals;
+final AtomicReference<InheritableThreadLocal> dvals;
 
 public TRef(){
 	this.tvals = new AtomicReference<TVal>();
-	this.dvals = null;
+	this.dvals = new AtomicReference<InheritableThreadLocal>();
 }
 
 public TRef(T initVal){
@@ -50,28 +50,28 @@ public T val() throws Exception{
 }
 
 final Binding getThreadBinding(){
-	if(dvals != null)
-		return (Binding) dvals.get();
+	InheritableThreadLocal dv = dvals.get();
+	if(dv != null)
+		return (Binding) dv.get();
 	return null;
 }
 
 public void pushThreadBinding(T val){
-	if(dvals == null)
+	InheritableThreadLocal dv = dvals.get();
+	if(dv == null)
 		{
-		synchronized(this)
-			{
-			if(dvals == null)
-				dvals = new InheritableThreadLocal();
-			}
+		dvals.compareAndSet(null, new InheritableThreadLocal());
+		dv = dvals.get();
 		}
-	dvals.set(new Binding(val, (Binding) dvals.get()));
+	dv.set(new Binding(val, (Binding) dv.get()));
 }
 
 public void popThreadBinding() throws Exception{
+	InheritableThreadLocal dv = dvals.get();
 	Binding b;
-	if(dvals == null || (b = (Binding) dvals.get()) == null)
+	if(dv == null || (b = (Binding) dv.get()) == null)
 		throw new Exception("Can't pop unbound ref");
-	dvals.set(b.rest);
+	dv.set(b.rest);
 }
 
 public T set(T val) throws Exception{
@@ -99,7 +99,8 @@ public void touch() throws Exception{
 }
 
 boolean isBound(){
-	return (dvals != null && dvals.get() != null)
+	InheritableThreadLocal dv = dvals.get();
+	return (dv != null && dv.get() != null)
 	       ||
 	       getCurrentTVal() != null;
 }
