@@ -47,7 +47,7 @@ public TRef findRef(String name) throws Exception{
 }
 
 public static TRef intern(String moduleName, String name) throws Exception{
-	Module module = findModule(name);
+	Module module = findModule(moduleName);
 	if(module == null)
 		throw new Exception(String.format("Module %s not found", moduleName));
 	return module.intern(name);
