@@ -16,6 +16,8 @@ private final Object _first;
 private final PersistentList _rest;
 private final int _count;
 
+final public static PersistentList EMPTY = new EmptyList(null);
+
 public PersistentList(Object first){
 	this._first = first;
 	this._rest = null;
@@ -56,4 +58,26 @@ public ISeq cons(Object o){
 public PersistentList withMeta(IPersistentMap meta){
 	return new PersistentList(meta, _first, _rest, _count);
 }
+
+static class EmptyList extends PersistentList{
+
+	EmptyList(IPersistentMap meta){
+		super(meta, null, null, 0);
+	}
+
+	public ISeq cons(Object o){
+		return new PersistentList(o, null);
+	}
+
+	public PersistentList withMeta(IPersistentMap meta){
+		if(meta != meta())
+			return new EmptyList(meta);
+		return this;
+	}
+
+	public ISeq seq(){
+		return null;
+	}
+}
+
 }

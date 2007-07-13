@@ -13,10 +13,10 @@
 package clojure.lang;
 
 
-public class Symbol{
+public class Symbol extends Obj{
 //these must be interned strings!
-public final String name;
 public final String ns;
+public final String name;
 
 public String toString(){
 	if(ns != null)
@@ -24,7 +24,7 @@ public String toString(){
 	return name;
 }
 
-public Symbol(String name, String ns){
+public Symbol(String ns, String name){
 	this.name = name.intern();
 	if(ns != null)
 		this.ns = ns.intern();
@@ -33,7 +33,14 @@ public Symbol(String name, String ns){
 }
 
 public Symbol(String name){
-	this(name, null);
+	this(null, name);
+}
+
+
+private Symbol(IPersistentMap meta, String ns, String name){
+	super(meta);
+	this.name = name;
+	this.ns = ns;
 }
 
 public boolean equals(Object o){
@@ -52,4 +59,7 @@ public int hashCode(){
 	return RT.hashCombine(name.hashCode(), RT.hash(ns));
 }
 
+public Obj withMeta(IPersistentMap meta){
+	return new Symbol(meta, ns, name);
+}
 }

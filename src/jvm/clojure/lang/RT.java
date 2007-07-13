@@ -20,6 +20,7 @@ public class RT{
 
 static public Symbol T = new Symbol("t");
 final static public TRef OUT = new TRef(new OutputStreamWriter(System.out));
+final static Keyword TAG_KEY = new Keyword("clojure", "tag");
 
 final static public TRef CURRENT_MODULE = new TRef(Module.findOrCreateModule("clojure/user"));
 
@@ -33,7 +34,6 @@ static
 	for(int i = 0; i < chars.length; i++)
 		chars[i] = new Character((char) i);
 	}
-
 
 
 static public int nextID(){
@@ -183,19 +183,19 @@ static public Object get(Object key, Object coll){
 	return ((Associative) coll).valAt(key);
 }
 
-static public Object assoc(Object key, Object val, Object coll){
+static public Associative assoc(Object coll, Object key, Object val){
 	if(coll == null)
 		return new MapEntry(key, val);
 	return ((Associative) coll).assoc(key, val);
 }
 
-static public Object contains(Object key, Object coll){
+static public Object contains(Object coll, Object key){
 	if(coll == null)
 		return false;
 	return ((Associative) coll).contains(key);
 }
 
-static public Object find(Object key, Object coll){
+static public Object find(Object coll, Object key){
 	if(coll == null)
 		return null;
 	return ((Associative) coll).entryAt(key);
@@ -359,6 +359,14 @@ static public double doubleCast(Object x){
 }
 
 
+static public IPersistentMap map(Object... init){
+	return new PersistentArrayMap(init);
+}
+
+static public IPersistentArray tuple(Object... init){
+	return PersistentVector.create(init);
+}
+
 /**
  * **************************************** list support *******************************
  */
@@ -388,24 +396,23 @@ static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4, Obje
 	return listStar(arg1, arg2, arg3, arg4, arg5, null);
 }
 
-static public ISeq listStar(Object arg1, ISeq rest) throws Exception{
+static public ISeq listStar(Object arg1, ISeq rest){
 	return (ISeq) cons(arg1, rest);
 }
 
-static public ISeq listStar(Object arg1, Object arg2, ISeq rest) throws Exception{
+static public ISeq listStar(Object arg1, Object arg2, ISeq rest){
 	return (ISeq) cons(arg1, cons(arg2, rest));
 }
 
-static public ISeq listStar(Object arg1, Object arg2, Object arg3, ISeq rest) throws Exception{
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, ISeq rest){
 	return (ISeq) cons(arg1, cons(arg2, cons(arg3, rest)));
 }
 
-static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, ISeq rest) throws Exception{
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, ISeq rest){
 	return (ISeq) cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
 }
 
-static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq rest)
-		throws Exception{
+static public ISeq listStar(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, ISeq rest){
 	return (ISeq) cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
 }
 
@@ -498,19 +505,29 @@ static public boolean suppressRead(){
 	return false;
 }
 
+
 static public void print(Object x, Writer w) throws Exception{
 	//todo - make extensible
+	if(x instanceof Obj)
+		{
+		Obj o = (Obj) x;
+		if(o.meta() != null)
+			{
+			IPersistentMap meta = o.meta();
+			w.write("#^");
+			if(meta.count() == 1 && meta.contains(TAG_KEY))
+				print(meta.valAt(TAG_KEY), w);
+			else
+				print(meta, w);
+			w.write(' ');
+			}
+		}
 	if(x == null)
 		w.write("null");
 	else if(x instanceof ISeq)
 		{
 		w.write('(');
-		for(ISeq s = (ISeq) x; s != null; s = s.rest())
-			{
-			print(s.first(), w);
-			if(s.rest() != null)
-				w.write(' ');
-			}
+		printInnerSeq(seq(x), w);
 		w.write(')');
 		}
 	else if(x instanceof String)
@@ -518,6 +535,32 @@ static public void print(Object x, Writer w) throws Exception{
 		w.write('"');
 		w.write(x.toString());
 		w.write('"');
+		}
+	else if(x instanceof IPersistentMap)
+		{
+		w.write('{');
+		for(ISeq s = seq(x); s != null; s = s.rest())
+			{
+			IMapEntry e = (IMapEntry) s.first();
+			print(e.key(), w);
+			w.write(' ');
+			print(e.val(), w);
+			if(s.rest() != null)
+				w.write(' ');
+			}
+		w.write('}');
+		}
+	else if(x instanceof IPersistentArray)
+		{
+		IPersistentArray a = (IPersistentArray) x;
+		w.write('[');
+		for(int i = 0; i < a.count(); i++)
+			{
+			print(a.nth(i), w);
+			if(i < a.count() - 1)
+				w.write(' ');
+			}
+		w.write(']');
 		}
 	else if(x instanceof Character)
 		{
@@ -539,6 +582,15 @@ static public void print(Object x, Writer w) throws Exception{
 			}
 		}
 	else w.write(x.toString());
+}
+
+private static void printInnerSeq(ISeq x, Writer w) throws Exception{
+	for(ISeq s = x; s != null; s = s.rest())
+		{
+		print(s.first(), w);
+		if(s.rest() != null)
+			w.write(' ');
+		}
 }
 
 static public void formatAesthetic(Writer w, Object obj) throws IOException{

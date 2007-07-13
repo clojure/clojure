@@ -141,7 +141,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 						for(ISeq classes = RT.rest(RT.rest(form)); classes != null; classes = classes.rest())
 							{
 							String iclassName = classes.first().toString();
-							importMap = (IPersistentMap) RT.assoc(iclassName, pkg + "." + iclassName, importMap);
+							importMap = (IPersistentMap) RT.assoc(importMap, iclassName, pkg + "." + iclassName);
 							}
 						IMPORTS.set(importMap);
 						}
@@ -1579,7 +1579,7 @@ private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
 private static void registerVar(TRef var) throws Exception{
 	IPersistentMap varsMap = (IPersistentMap) VARS.currentVal();
 	if(RT.get(var, varsMap) == null)
-		VARS.set(RT.assoc(var, var, varsMap));
+		VARS.set(RT.assoc(varsMap, var, var));
 }
 
 private static void registerFn(FnExpr fn) throws Exception{
@@ -1590,7 +1590,7 @@ static void closeOver(LocalBinding b, FnMethod method){
 	if(b != null && method != null && RT.get(b, method.locals) == null)
 		{
 		b.isClosed = true;
-		method.fn.closes = (IPersistentMap) RT.assoc(b, b, method.fn.closes);
+		method.fn.closes = (IPersistentMap) RT.assoc(method.fn.closes, b, b);
 		closeOver(b, method.parent);
 		}
 }
@@ -1608,7 +1608,7 @@ private static void registerLocal(LocalBinding b) throws Exception{
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.currentVal();
 	//!LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
 	FnMethod method = (FnMethod) METHOD.currentVal();
-	method.locals = (IPersistentMap) RT.assoc(b, b, method.locals);
+	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
 }
 /*
 (defun reference-var (sym)

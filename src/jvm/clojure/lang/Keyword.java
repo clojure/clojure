@@ -30,8 +30,8 @@ public Keyword(Symbol sym){
 	this.hash = RT.hashCombine(":".hashCode(), sym.hashCode());
 }
 
-public Keyword(String name, String ns){
-	this(new Symbol(name, ns));
+public Keyword(String ns, String name){
+	this(new Symbol(ns, name));
 }
 
 public boolean equals(Object o){
@@ -42,7 +42,7 @@ public boolean equals(Object o){
 
 	Keyword keyword = (Keyword) o;
 
-	//identity compares ok, names are interned
+	//identity compares intended, names are interned
 	return sym.equals(keyword.sym);
 }
 

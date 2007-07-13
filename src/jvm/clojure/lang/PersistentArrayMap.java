@@ -26,7 +26,7 @@ import java.util.Iterator;
 public class PersistentArrayMap extends APersistentMap{
 
 final Object[] array;
-static final int HASHTABLE_THRESHOLD = 42;
+static final int HASHTABLE_THRESHOLD = 16;
 
 public static PersistentArrayMap EMPTY = new PersistentArrayMap();
 
