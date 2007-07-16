@@ -33,7 +33,17 @@ public Symbol(String ns, String name){
 }
 
 public Symbol(String name){
-	this(null, name);
+	int i = name.indexOf('/');
+	if(i == -1)
+		{
+		this.name = name.intern();
+		this.ns = null;
+		}
+	else
+		{
+		this.ns = name.substring(0, i).intern();
+		this.name = name.substring(i + 1).intern();
+		}
 }
 
 

@@ -1,6 +1,14 @@
-// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-07-13 12:56:20
+// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-07-16 11:13:35
 
-
+/**
+ *   Copyright (c) Rich Hickey. All rights reserved.
+ *   The use and distribution terms for this software are covered by the
+ *   Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+ *   which can be found in the file CPL.TXT at the root of this distribution.
+ *   By using this software in any fashion, you are agreeing to be bound by
+ * 	 the terms of this license.
+ *   You must not remove this notice, or any other, from this software.
+ **/
 package clojure.lang;
 
 
@@ -11,42 +19,44 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class ReaderLexer extends Lexer{
-public static final int TrueToken = 10;
+public static final int TrueToken = 11;
 public static final int T29 = 29;
-public static final int Exponent = 18;
-public static final int OctalLiteral = 14;
+public static final int Exponent = 19;
+public static final int OctalLiteral = 15;
 public static final int T33 = 33;
 public static final int Identifier = 4;
-public static final int HexDigit = 17;
+public static final int HexDigit = 18;
 public static final int T36 = 36;
-public static final int WS = 25;
-public static final int CharacterLiteral = 8;
-public static final int MethodIdentifier = 15;
-public static final int T28 = 28;
+public static final int WS = 26;
+public static final int CharacterLiteral = 9;
+public static final int MethodIdentifier = 16;
+public static final int NSIdentifier = 5;
 public static final int T35 = 35;
-public static final int COMMENT = 26;
-public static final int StringLiteral = 9;
-public static final int LINE_COMMENT = 27;
+public static final int COMMENT = 27;
+public static final int KeywordIdentifier = 7;
+public static final int StringLiteral = 10;
+public static final int LINE_COMMENT = 28;
 public static final int DotDot = 6;
 public static final int T34 = 34;
-public static final int JavaIDDigit = 24;
-public static final int Letter = 23;
-public static final int UnicodeEscape = 21;
-public static final int Comma = 16;
-public static final int HexLiteral = 13;
+public static final int JavaIDDigit = 25;
+public static final int Letter = 24;
+public static final int UnicodeEscape = 22;
+public static final int Comma = 17;
+public static final int HexLiteral = 14;
 public static final int T37 = 37;
-public static final int EscapeSequence = 20;
-public static final int NullToken = 11;
+public static final int EscapeSequence = 21;
+public static final int NullToken = 12;
 public static final int EOF = -1;
-public static final int DecimalLiteral = 12;
+public static final int DecimalLiteral = 13;
 public static final int T32 = 32;
-public static final int Tokens = 38;
+public static final int Tokens = 40;
 public static final int T31 = 31;
-public static final int OctalEscape = 22;
-public static final int FloatingPointLiteral = 7;
+public static final int OctalEscape = 23;
+public static final int T38 = 38;
+public static final int FloatingPointLiteral = 8;
 public static final int T30 = 30;
-public static final int FloatTypeSuffix = 19;
-public static final int JavaIdentifier = 5;
+public static final int FloatTypeSuffix = 20;
+public static final int T39 = 39;
 
 RecognitionException rex = null;
 
@@ -73,36 +83,15 @@ public String getGrammarFileName(){
 	return "/Users/rich/dev/clojure/src/jvm/Reader.g";
 }
 
-// $ANTLR start T28
-public final void mT28() throws RecognitionException{
-	try
-		{
-		int _type = T28;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:25:7: ( '(' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:25:7: '('
-		{
-		match('(');
-
-		}
-
-		this.type = _type;
-		}
-	finally
-		{
-		}
-}
-// $ANTLR end T28
-
 // $ANTLR start T29
-
 public final void mT29() throws RecognitionException{
 	try
 		{
 		int _type = T29;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:26:7: ( ')' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:26:7: ')'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:33:7: ( '(' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:33:7: '('
 		{
-		match(')');
+		match('(');
 
 		}
 
@@ -120,10 +109,10 @@ public final void mT30() throws RecognitionException{
 	try
 		{
 		int _type = T30;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:27:7: ( '[' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:27:7: '['
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:34:7: ( ')' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:34:7: ')'
 		{
-		match('[');
+		match(')');
 
 		}
 
@@ -141,10 +130,10 @@ public final void mT31() throws RecognitionException{
 	try
 		{
 		int _type = T31;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:28:7: ( ']' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:28:7: ']'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:35:7: ( '[' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:35:7: '['
 		{
-		match(']');
+		match('[');
 
 		}
 
@@ -162,10 +151,10 @@ public final void mT32() throws RecognitionException{
 	try
 		{
 		int _type = T32;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:29:7: ( '{' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:29:7: '{'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:36:7: ( ']' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:36:7: ']'
 		{
-		match('{');
+		match(']');
 
 		}
 
@@ -183,10 +172,10 @@ public final void mT33() throws RecognitionException{
 	try
 		{
 		int _type = T33;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:30:7: ( '}' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:30:7: '}'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:37:7: ( '{' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:37:7: '{'
 		{
-		match('}');
+		match('{');
 
 		}
 
@@ -204,10 +193,10 @@ public final void mT34() throws RecognitionException{
 	try
 		{
 		int _type = T34;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:31:7: ( '/' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:31:7: '/'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:38:7: ( '}' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:38:7: '}'
 		{
-		match('/');
+		match('}');
 
 		}
 
@@ -225,10 +214,10 @@ public final void mT35() throws RecognitionException{
 	try
 		{
 		int _type = T35;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:32:7: ( ':' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:32:7: ':'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:39:7: ( '/' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:39:7: '/'
 		{
-		match(':');
+		match('/');
 
 		}
 
@@ -246,8 +235,8 @@ public final void mT36() throws RecognitionException{
 	try
 		{
 		int _type = T36;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:33:7: ( '#^' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:33:7: '#^'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:40:7: ( '#^' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:40:7: '#^'
 		{
 		match("#^");
 
@@ -268,8 +257,8 @@ public final void mT37() throws RecognitionException{
 	try
 		{
 		int _type = T37;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:34:7: ( '.' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:34:7: '.'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:41:7: ( '.' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:41:7: '.'
 		{
 		match('.');
 
@@ -283,14 +272,56 @@ public final void mT37() throws RecognitionException{
 }
 // $ANTLR end T37
 
+// $ANTLR start T38
+
+public final void mT38() throws RecognitionException{
+	try
+		{
+		int _type = T38;
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:42:7: ( '\\'' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:42:7: '\\''
+		{
+		match('\'');
+
+		}
+
+		this.type = _type;
+		}
+	finally
+		{
+		}
+}
+// $ANTLR end T38
+
+// $ANTLR start T39
+
+public final void mT39() throws RecognitionException{
+	try
+		{
+		int _type = T39;
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:43:7: ( '^' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:43:7: '^'
+		{
+		match('^');
+
+		}
+
+		this.type = _type;
+		}
+	finally
+		{
+		}
+}
+// $ANTLR end T39
+
 // $ANTLR start Comma
 
 public final void mComma() throws RecognitionException{
 	try
 		{
 		int _type = Comma;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:212:10: ( ',' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:212:10: ','
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:237:10: ( ',' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:237:10: ','
 		{
 		match(',');
 
@@ -310,8 +341,8 @@ public final void mTrueToken() throws RecognitionException{
 	try
 		{
 		int _type = TrueToken;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:213:16: ( 'true' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:213:16: 'true'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:239:16: ( 'true' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:239:16: 'true'
 		{
 		match("true");
 
@@ -332,8 +363,8 @@ public final void mNullToken() throws RecognitionException{
 	try
 		{
 		int _type = NullToken;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:215:16: ( 'null' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:215:16: 'null'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:241:16: ( 'null' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:241:16: 'null'
 		{
 		match("null");
 
@@ -354,8 +385,8 @@ public final void mDotDot() throws RecognitionException{
 	try
 		{
 		int _type = DotDot;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:217:10: ( '..' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:217:10: '..'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:243:10: ( '..' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:243:10: '..'
 		{
 		match("..");
 
@@ -376,8 +407,8 @@ public final void mHexLiteral() throws RecognitionException{
 	try
 		{
 		int _type = HexLiteral;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:219:14: ( '0' ( 'x' | 'X' ) ( HexDigit )+ )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:219:14: '0' ( 'x' | 'X' ) ( HexDigit )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:245:14: ( '0' ( 'x' | 'X' ) ( HexDigit )+ )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:245:14: '0' ( 'x' | 'X' ) ( HexDigit )+
 		{
 		match('0');
 		if(input.LA(1) == 'X' || input.LA(1) == 'x')
@@ -393,7 +424,7 @@ public final void mHexLiteral() throws RecognitionException{
 			throw mse;
 			}
 
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:219:28: ( HexDigit )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:245:28: ( HexDigit )+
 		int cnt1 = 0;
 		loop1:
 		do
@@ -410,7 +441,7 @@ public final void mHexLiteral() throws RecognitionException{
 			switch(alt1)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:219:28: HexDigit
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:245:28: HexDigit
 				{
 				mHexDigit();
 
@@ -443,10 +474,10 @@ public final void mDecimalLiteral() throws RecognitionException{
 	try
 		{
 		int _type = DecimalLiteral;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:221:18: ( ( '0' | '1' .. '9' ( '0' .. '9' )* ) )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:221:18: ( '0' | '1' .. '9' ( '0' .. '9' )* )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:247:18: ( ( '0' | '1' .. '9' ( '0' .. '9' )* ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:247:18: ( '0' | '1' .. '9' ( '0' .. '9' )* )
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:221:18: ( '0' | '1' .. '9' ( '0' .. '9' )* )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:247:18: ( '0' | '1' .. '9' ( '0' .. '9' )* )
 		int alt3 = 2;
 		int LA3_0 = input.LA(1);
 
@@ -461,24 +492,24 @@ public final void mDecimalLiteral() throws RecognitionException{
 		else
 			{
 			NoViableAltException nvae =
-					new NoViableAltException("221:18: ( '0' | '1' .. '9' ( '0' .. '9' )* )", 3, 0, input);
+					new NoViableAltException("247:18: ( '0' | '1' .. '9' ( '0' .. '9' )* )", 3, 0, input);
 
 			throw nvae;
 			}
 		switch(alt3)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:221:19: '0'
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:247:19: '0'
 			{
 			match('0');
 
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:221:25: '1' .. '9' ( '0' .. '9' )*
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:247:25: '1' .. '9' ( '0' .. '9' )*
 			{
 			matchRange('1', '9');
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:221:34: ( '0' .. '9' )*
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:247:34: ( '0' .. '9' )*
 			loop2:
 			do
 				{
@@ -494,7 +525,7 @@ public final void mDecimalLiteral() throws RecognitionException{
 				switch(alt2)
 					{
 					case 1:
-						// /Users/rich/dev/clojure/src/jvm/Reader.g:221:34: '0' .. '9'
+						// /Users/rich/dev/clojure/src/jvm/Reader.g:247:34: '0' .. '9'
 					{
 					matchRange('0', '9');
 
@@ -529,11 +560,11 @@ public final void mOctalLiteral() throws RecognitionException{
 	try
 		{
 		int _type = OctalLiteral;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:223:16: ( '0' ( '0' .. '7' )+ )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:223:16: '0' ( '0' .. '7' )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:249:16: ( '0' ( '0' .. '7' )+ )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:249:16: '0' ( '0' .. '7' )+
 		{
 		match('0');
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:223:20: ( '0' .. '7' )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:249:20: ( '0' .. '7' )+
 		int cnt4 = 0;
 		loop4:
 		do
@@ -550,7 +581,7 @@ public final void mOctalLiteral() throws RecognitionException{
 			switch(alt4)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:223:21: '0' .. '7'
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:249:21: '0' .. '7'
 				{
 				matchRange('0', '7');
 
@@ -582,8 +613,8 @@ public final void mOctalLiteral() throws RecognitionException{
 public final void mHexDigit() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:226:12: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:226:12: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:252:12: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:252:12: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
 		{
 		if((input.LA(1) >= '0' && input.LA(1) <= '9') || (input.LA(1) >= 'A' && input.LA(1) <= 'F') ||
 		   (input.LA(1) >= 'a' && input.LA(1) <= 'f'))
@@ -615,15 +646,15 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 	try
 		{
 		int _type = FloatingPointLiteral;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:229:9: ( ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( Exponent )? ( FloatTypeSuffix )? | '.' ( '0' .. '9' )+ ( Exponent )? ( FloatTypeSuffix )? | ( '0' .. '9' )+ Exponent ( FloatTypeSuffix )? | ( '0' .. '9' )+ ( Exponent )? FloatTypeSuffix )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:255:9: ( ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( Exponent )? ( FloatTypeSuffix )? | '.' ( '0' .. '9' )+ ( Exponent )? ( FloatTypeSuffix )? | ( '0' .. '9' )+ Exponent ( FloatTypeSuffix )? | ( '0' .. '9' )+ ( Exponent )? FloatTypeSuffix )
 		int alt16 = 4;
 		alt16 = dfa16.predict(input);
 		switch(alt16)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:229:9: ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( Exponent )? ( FloatTypeSuffix )?
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:255:9: ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( Exponent )? ( FloatTypeSuffix )?
 			{
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:229:9: ( '0' .. '9' )+
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:255:9: ( '0' .. '9' )+
 			int cnt5 = 0;
 			loop5:
 			do
@@ -640,7 +671,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				switch(alt5)
 					{
 					case 1:
-						// /Users/rich/dev/clojure/src/jvm/Reader.g:229:10: '0' .. '9'
+						// /Users/rich/dev/clojure/src/jvm/Reader.g:255:10: '0' .. '9'
 					{
 					matchRange('0', '9');
 
@@ -657,7 +688,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				} while(true);
 
 			match('.');
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:229:25: ( '0' .. '9' )*
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:255:25: ( '0' .. '9' )*
 			loop6:
 			do
 				{
@@ -673,7 +704,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				switch(alt6)
 					{
 					case 1:
-						// /Users/rich/dev/clojure/src/jvm/Reader.g:229:26: '0' .. '9'
+						// /Users/rich/dev/clojure/src/jvm/Reader.g:255:26: '0' .. '9'
 					{
 					matchRange('0', '9');
 
@@ -685,7 +716,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 					}
 				} while(true);
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:229:37: ( Exponent )?
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:255:37: ( Exponent )?
 			int alt7 = 2;
 			int LA7_0 = input.LA(1);
 
@@ -696,7 +727,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			switch(alt7)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:229:37: Exponent
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:255:37: Exponent
 				{
 				mExponent();
 
@@ -705,7 +736,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 
 				}
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:229:47: ( FloatTypeSuffix )?
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:255:47: ( FloatTypeSuffix )?
 			int alt8 = 2;
 			int LA8_0 = input.LA(1);
 
@@ -716,7 +747,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			switch(alt8)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:229:47: FloatTypeSuffix
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:255:47: FloatTypeSuffix
 				{
 				mFloatTypeSuffix();
 
@@ -729,10 +760,10 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:230:9: '.' ( '0' .. '9' )+ ( Exponent )? ( FloatTypeSuffix )?
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:256:9: '.' ( '0' .. '9' )+ ( Exponent )? ( FloatTypeSuffix )?
 			{
 			match('.');
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:230:13: ( '0' .. '9' )+
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:256:13: ( '0' .. '9' )+
 			int cnt9 = 0;
 			loop9:
 			do
@@ -749,7 +780,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				switch(alt9)
 					{
 					case 1:
-						// /Users/rich/dev/clojure/src/jvm/Reader.g:230:14: '0' .. '9'
+						// /Users/rich/dev/clojure/src/jvm/Reader.g:256:14: '0' .. '9'
 					{
 					matchRange('0', '9');
 
@@ -765,7 +796,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				cnt9++;
 				} while(true);
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:230:25: ( Exponent )?
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:256:25: ( Exponent )?
 			int alt10 = 2;
 			int LA10_0 = input.LA(1);
 
@@ -776,7 +807,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			switch(alt10)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:230:25: Exponent
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:256:25: Exponent
 				{
 				mExponent();
 
@@ -785,7 +816,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 
 				}
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:230:35: ( FloatTypeSuffix )?
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:256:35: ( FloatTypeSuffix )?
 			int alt11 = 2;
 			int LA11_0 = input.LA(1);
 
@@ -796,7 +827,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			switch(alt11)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:230:35: FloatTypeSuffix
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:256:35: FloatTypeSuffix
 				{
 				mFloatTypeSuffix();
 
@@ -809,9 +840,9 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:231:9: ( '0' .. '9' )+ Exponent ( FloatTypeSuffix )?
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:257:9: ( '0' .. '9' )+ Exponent ( FloatTypeSuffix )?
 			{
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:231:9: ( '0' .. '9' )+
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:257:9: ( '0' .. '9' )+
 			int cnt12 = 0;
 			loop12:
 			do
@@ -828,7 +859,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				switch(alt12)
 					{
 					case 1:
-						// /Users/rich/dev/clojure/src/jvm/Reader.g:231:10: '0' .. '9'
+						// /Users/rich/dev/clojure/src/jvm/Reader.g:257:10: '0' .. '9'
 					{
 					matchRange('0', '9');
 
@@ -845,7 +876,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				} while(true);
 
 			mExponent();
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:231:30: ( FloatTypeSuffix )?
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:257:30: ( FloatTypeSuffix )?
 			int alt13 = 2;
 			int LA13_0 = input.LA(1);
 
@@ -856,7 +887,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			switch(alt13)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:231:30: FloatTypeSuffix
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:257:30: FloatTypeSuffix
 				{
 				mFloatTypeSuffix();
 
@@ -869,9 +900,9 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			}
 			break;
 			case 4:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:232:9: ( '0' .. '9' )+ ( Exponent )? FloatTypeSuffix
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:258:9: ( '0' .. '9' )+ ( Exponent )? FloatTypeSuffix
 			{
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:232:9: ( '0' .. '9' )+
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:9: ( '0' .. '9' )+
 			int cnt14 = 0;
 			loop14:
 			do
@@ -888,7 +919,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				switch(alt14)
 					{
 					case 1:
-						// /Users/rich/dev/clojure/src/jvm/Reader.g:232:10: '0' .. '9'
+						// /Users/rich/dev/clojure/src/jvm/Reader.g:258:10: '0' .. '9'
 					{
 					matchRange('0', '9');
 
@@ -904,7 +935,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 				cnt14++;
 				} while(true);
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:232:21: ( Exponent )?
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:21: ( Exponent )?
 			int alt15 = 2;
 			int LA15_0 = input.LA(1);
 
@@ -915,7 +946,7 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 			switch(alt15)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:232:21: Exponent
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:258:21: Exponent
 				{
 				mExponent();
 
@@ -943,8 +974,8 @@ public final void mFloatingPointLiteral() throws RecognitionException{
 public final void mExponent() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:236:12: ( ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+ )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:236:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:262:12: ( ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+ )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:262:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
 		{
 		if(input.LA(1) == 'E' || input.LA(1) == 'e')
 			{
@@ -959,7 +990,7 @@ public final void mExponent() throws RecognitionException{
 			throw mse;
 			}
 
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:236:22: ( '+' | '-' )?
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:262:22: ( '+' | '-' )?
 		int alt17 = 2;
 		int LA17_0 = input.LA(1);
 
@@ -991,7 +1022,7 @@ public final void mExponent() throws RecognitionException{
 
 			}
 
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:236:33: ( '0' .. '9' )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:262:33: ( '0' .. '9' )+
 		int cnt18 = 0;
 		loop18:
 		do
@@ -1008,7 +1039,7 @@ public final void mExponent() throws RecognitionException{
 			switch(alt18)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:236:34: '0' .. '9'
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:262:34: '0' .. '9'
 				{
 				matchRange('0', '9');
 
@@ -1039,8 +1070,8 @@ public final void mExponent() throws RecognitionException{
 public final void mFloatTypeSuffix() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:239:19: ( ( 'f' | 'F' | 'd' | 'D' ) )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:239:19: ( 'f' | 'F' | 'd' | 'D' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:265:19: ( ( 'f' | 'F' | 'd' | 'D' ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:265:19: ( 'f' | 'F' | 'd' | 'D' )
 		{
 		if(input.LA(1) == 'D' || input.LA(1) == 'F' || input.LA(1) == 'd' || input.LA(1) == 'f')
 			{
@@ -1071,11 +1102,11 @@ public final void mCharacterLiteral() throws RecognitionException{
 	try
 		{
 		int _type = CharacterLiteral;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:242:9: ( '\\\\' ( EscapeSequence | ~ ( '\\\\' ) ) )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:242:9: '\\\\' ( EscapeSequence | ~ ( '\\\\' ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:268:9: ( '\\\\' ( EscapeSequence | ~ ( '\\\\' ) ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:268:9: '\\\\' ( EscapeSequence | ~ ( '\\\\' ) )
 		{
 		match('\\');
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:242:14: ( EscapeSequence | ~ ( '\\\\' ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:268:14: ( EscapeSequence | ~ ( '\\\\' ) )
 		int alt19 = 2;
 		int LA19_0 = input.LA(1);
 
@@ -1090,21 +1121,21 @@ public final void mCharacterLiteral() throws RecognitionException{
 		else
 			{
 			NoViableAltException nvae =
-					new NoViableAltException("242:14: ( EscapeSequence | ~ ( '\\\\' ) )", 19, 0, input);
+					new NoViableAltException("268:14: ( EscapeSequence | ~ ( '\\\\' ) )", 19, 0, input);
 
 			throw nvae;
 			}
 		switch(alt19)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:242:16: EscapeSequence
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:268:16: EscapeSequence
 			{
 			mEscapeSequence();
 
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:242:33: ~ ( '\\\\' )
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:268:33: ~ ( '\\\\' )
 			{
 			if((input.LA(1) >= '\u0000' && input.LA(1) <= '[') || (input.LA(1) >= ']' && input.LA(1) <= '\uFFFE'))
 				{
@@ -1142,11 +1173,11 @@ public final void mStringLiteral() throws RecognitionException{
 	try
 		{
 		int _type = StringLiteral;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:246:8: ( '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:246:8: '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:272:8: ( '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:272:8: '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"'
 		{
 		match('\"');
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:246:12: ( EscapeSequence | ~ ( '\\\\' | '\"' ) )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:272:12: ( EscapeSequence | ~ ( '\\\\' | '\"' ) )*
 		loop20:
 		do
 			{
@@ -1167,14 +1198,14 @@ public final void mStringLiteral() throws RecognitionException{
 			switch(alt20)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:246:14: EscapeSequence
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:272:14: EscapeSequence
 				{
 				mEscapeSequence();
 
 				}
 				break;
 				case 2:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:246:31: ~ ( '\\\\' | '\"' )
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:272:31: ~ ( '\\\\' | '\"' )
 				{
 				if((input.LA(1) >= '\u0000' && input.LA(1) <= '!') || (input.LA(1) >= '#' && input.LA(1) <= '[') ||
 				   (input.LA(1) >= ']' && input.LA(1) <= '\uFFFE'))
@@ -1216,7 +1247,7 @@ public final void mStringLiteral() throws RecognitionException{
 public final void mEscapeSequence() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:251:9: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:277:9: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape )
 		int alt21 = 3;
 		int LA21_0 = input.LA(1);
 
@@ -1224,11 +1255,6 @@ public final void mEscapeSequence() throws RecognitionException{
 			{
 			switch(input.LA(2))
 				{
-				case'u':
-				{
-				alt21 = 2;
-				}
-				break;
 				case'\"':
 				case'\'':
 				case'\\':
@@ -1239,6 +1265,11 @@ public final void mEscapeSequence() throws RecognitionException{
 				case't':
 				{
 				alt21 = 1;
+				}
+				break;
+				case'u':
+				{
+				alt21 = 2;
 				}
 				break;
 				case'0':
@@ -1256,7 +1287,7 @@ public final void mEscapeSequence() throws RecognitionException{
 				default:
 					NoViableAltException nvae =
 							new NoViableAltException(
-									"249:1: fragment EscapeSequence : ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape );",
+									"275:1: fragment EscapeSequence : ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape );",
 									21, 1, input);
 
 					throw nvae;
@@ -1267,7 +1298,7 @@ public final void mEscapeSequence() throws RecognitionException{
 			{
 			NoViableAltException nvae =
 					new NoViableAltException(
-							"249:1: fragment EscapeSequence : ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape );",
+							"275:1: fragment EscapeSequence : ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape );",
 							21, 0, input);
 
 			throw nvae;
@@ -1275,7 +1306,7 @@ public final void mEscapeSequence() throws RecognitionException{
 		switch(alt21)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:251:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:277:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
 			{
 			match('\\');
 			if(input.LA(1) == '\"' || input.LA(1) == '\'' || input.LA(1) == '\\' || input.LA(1) == 'b' ||
@@ -1296,14 +1327,14 @@ public final void mEscapeSequence() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:252:9: UnicodeEscape
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:278:9: UnicodeEscape
 			{
 			mUnicodeEscape();
 
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:253:9: OctalEscape
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:279:9: OctalEscape
 			{
 			mOctalEscape();
 
@@ -1323,7 +1354,7 @@ public final void mEscapeSequence() throws RecognitionException{
 public final void mOctalEscape() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:258:9: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:284:9: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
 		int alt22 = 3;
 		int LA22_0 = input.LA(1);
 
@@ -1370,7 +1401,7 @@ public final void mOctalEscape() throws RecognitionException{
 				{
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"256:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );",
+								"282:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );",
 								22, 1, input);
 
 				throw nvae;
@@ -1380,7 +1411,7 @@ public final void mOctalEscape() throws RecognitionException{
 			{
 			NoViableAltException nvae =
 					new NoViableAltException(
-							"256:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );",
+							"282:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );",
 							22, 0, input);
 
 			throw nvae;
@@ -1388,25 +1419,25 @@ public final void mOctalEscape() throws RecognitionException{
 		switch(alt22)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:258:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:284:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
 			{
 			match('\\');
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:14: ( '0' .. '3' )
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:15: '0' .. '3'
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:284:14: ( '0' .. '3' )
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:284:15: '0' .. '3'
 			{
 			matchRange('0', '3');
 
 			}
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:25: ( '0' .. '7' )
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:26: '0' .. '7'
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:284:25: ( '0' .. '7' )
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:284:26: '0' .. '7'
 			{
 			matchRange('0', '7');
 
 			}
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:36: ( '0' .. '7' )
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:258:37: '0' .. '7'
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:284:36: ( '0' .. '7' )
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:284:37: '0' .. '7'
 			{
 			matchRange('0', '7');
 
@@ -1416,18 +1447,18 @@ public final void mOctalEscape() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:259:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:285:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
 			{
 			match('\\');
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:259:14: ( '0' .. '7' )
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:259:15: '0' .. '7'
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:285:14: ( '0' .. '7' )
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:285:15: '0' .. '7'
 			{
 			matchRange('0', '7');
 
 			}
 
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:259:25: ( '0' .. '7' )
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:259:26: '0' .. '7'
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:285:25: ( '0' .. '7' )
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:285:26: '0' .. '7'
 			{
 			matchRange('0', '7');
 
@@ -1437,11 +1468,11 @@ public final void mOctalEscape() throws RecognitionException{
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:260:9: '\\\\' ( '0' .. '7' )
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:286:9: '\\\\' ( '0' .. '7' )
 			{
 			match('\\');
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:260:14: ( '0' .. '7' )
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:260:15: '0' .. '7'
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:286:14: ( '0' .. '7' )
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:286:15: '0' .. '7'
 			{
 			matchRange('0', '7');
 
@@ -1464,8 +1495,8 @@ public final void mOctalEscape() throws RecognitionException{
 public final void mUnicodeEscape() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:265:9: ( '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:265:9: '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:291:9: ( '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:291:9: '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit
 		{
 		match('\\');
 		match('u');
@@ -1483,29 +1514,29 @@ public final void mUnicodeEscape() throws RecognitionException{
 }
 // $ANTLR end UnicodeEscape
 
-// $ANTLR start JavaIdentifier
+// $ANTLR start Identifier
 
-public final void mJavaIdentifier() throws RecognitionException{
+public final void mIdentifier() throws RecognitionException{
 	try
 		{
-		int _type = JavaIdentifier;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:269:9: ( Letter ( Letter | JavaIDDigit )* )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:269:9: Letter ( Letter | JavaIDDigit )*
+		int _type = Identifier;
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:301:6: ( Letter ( '-' | Letter | JavaIDDigit )* )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:301:6: Letter ( '-' | Letter | JavaIDDigit )*
 		{
 		mLetter();
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:269:16: ( Letter | JavaIDDigit )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:301:13: ( '-' | Letter | JavaIDDigit )*
 		loop23:
 		do
 			{
 			int alt23 = 2;
 			int LA23_0 = input.LA(1);
 
-			if((LA23_0 == '$' || (LA23_0 >= '0' && LA23_0 <= '9') || (LA23_0 >= 'A' && LA23_0 <= 'Z') ||
-			    LA23_0 == '_' || (LA23_0 >= 'a' && LA23_0 <= 'z') || (LA23_0 >= '\u00C0' && LA23_0 <= '\u00D6') ||
-			    (LA23_0 >= '\u00D8' && LA23_0 <= '\u00F6') || (LA23_0 >= '\u00F8' && LA23_0 <= '\u1FFF') ||
-			    (LA23_0 >= '\u3040' && LA23_0 <= '\u318F') || (LA23_0 >= '\u3300' && LA23_0 <= '\u337F') ||
-			    (LA23_0 >= '\u3400' && LA23_0 <= '\u3D2D') || (LA23_0 >= '\u4E00' && LA23_0 <= '\u9FFF') ||
-			    (LA23_0 >= '\uF900' && LA23_0 <= '\uFAFF')))
+			if((LA23_0 == '$' || LA23_0 == '-' || (LA23_0 >= '0' && LA23_0 <= '9') ||
+			    (LA23_0 >= 'A' && LA23_0 <= 'Z') || LA23_0 == '_' || (LA23_0 >= 'a' && LA23_0 <= 'z') ||
+			    (LA23_0 >= '\u00C0' && LA23_0 <= '\u00D6') || (LA23_0 >= '\u00D8' && LA23_0 <= '\u00F6') ||
+			    (LA23_0 >= '\u00F8' && LA23_0 <= '\u1FFF') || (LA23_0 >= '\u3040' && LA23_0 <= '\u318F') ||
+			    (LA23_0 >= '\u3300' && LA23_0 <= '\u337F') || (LA23_0 >= '\u3400' && LA23_0 <= '\u3D2D') ||
+			    (LA23_0 >= '\u4E00' && LA23_0 <= '\u9FFF') || (LA23_0 >= '\uF900' && LA23_0 <= '\uFAFF')))
 				{
 				alt23 = 1;
 				}
@@ -1516,7 +1547,7 @@ public final void mJavaIdentifier() throws RecognitionException{
 				case 1:
 					// /Users/rich/dev/clojure/src/jvm/Reader.g:
 				{
-				if(input.LA(1) == '$' || (input.LA(1) >= '0' && input.LA(1) <= '9') ||
+				if(input.LA(1) == '$' || input.LA(1) == '-' || (input.LA(1) >= '0' && input.LA(1) <= '9') ||
 				   (input.LA(1) >= 'A' && input.LA(1) <= 'Z') || input.LA(1) == '_' ||
 				   (input.LA(1) >= 'a' && input.LA(1) <= 'z') || (input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6') ||
 				   (input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6') ||
@@ -1556,72 +1587,20 @@ public final void mJavaIdentifier() throws RecognitionException{
 		{
 		}
 }
-// $ANTLR end JavaIdentifier
+// $ANTLR end Identifier
 
-// $ANTLR start Identifier
+// $ANTLR start NSIdentifier
 
-public final void mIdentifier() throws RecognitionException{
+public final void mNSIdentifier() throws RecognitionException{
 	try
 		{
-		int _type = Identifier;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:273:9: ( Letter ( '-' | Letter | JavaIDDigit )* )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:273:9: Letter ( '-' | Letter | JavaIDDigit )*
+		int _type = NSIdentifier;
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:305:3: ( Identifier '/' Identifier )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:305:3: Identifier '/' Identifier
 		{
-		mLetter();
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:273:16: ( '-' | Letter | JavaIDDigit )*
-		loop24:
-		do
-			{
-			int alt24 = 2;
-			int LA24_0 = input.LA(1);
-
-			if((LA24_0 == '$' || LA24_0 == '-' || (LA24_0 >= '0' && LA24_0 <= '9') ||
-			    (LA24_0 >= 'A' && LA24_0 <= 'Z') || LA24_0 == '_' || (LA24_0 >= 'a' && LA24_0 <= 'z') ||
-			    (LA24_0 >= '\u00C0' && LA24_0 <= '\u00D6') || (LA24_0 >= '\u00D8' && LA24_0 <= '\u00F6') ||
-			    (LA24_0 >= '\u00F8' && LA24_0 <= '\u1FFF') || (LA24_0 >= '\u3040' && LA24_0 <= '\u318F') ||
-			    (LA24_0 >= '\u3300' && LA24_0 <= '\u337F') || (LA24_0 >= '\u3400' && LA24_0 <= '\u3D2D') ||
-			    (LA24_0 >= '\u4E00' && LA24_0 <= '\u9FFF') || (LA24_0 >= '\uF900' && LA24_0 <= '\uFAFF')))
-				{
-				alt24 = 1;
-				}
-
-
-			switch(alt24)
-				{
-				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:
-				{
-				if(input.LA(1) == '$' || input.LA(1) == '-' || (input.LA(1) >= '0' && input.LA(1) <= '9') ||
-				   (input.LA(1) >= 'A' && input.LA(1) <= 'Z') || input.LA(1) == '_' ||
-				   (input.LA(1) >= 'a' && input.LA(1) <= 'z') || (input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6') ||
-				   (input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6') ||
-				   (input.LA(1) >= '\u00F8' && input.LA(1) <= '\u1FFF') ||
-				   (input.LA(1) >= '\u3040' && input.LA(1) <= '\u318F') ||
-				   (input.LA(1) >= '\u3300' && input.LA(1) <= '\u337F') ||
-				   (input.LA(1) >= '\u3400' && input.LA(1) <= '\u3D2D') ||
-				   (input.LA(1) >= '\u4E00' && input.LA(1) <= '\u9FFF') ||
-				   (input.LA(1) >= '\uF900' && input.LA(1) <= '\uFAFF'))
-					{
-					input.consume();
-
-					}
-				else
-					{
-					MismatchedSetException mse =
-							new MismatchedSetException(null, input);
-					recover(mse);
-					throw mse;
-					}
-
-
-				}
-				break;
-
-				default:
-					break loop24;
-				}
-			} while(true);
-
+		mIdentifier();
+		match('/');
+		mIdentifier();
 
 		}
 
@@ -1631,7 +1610,46 @@ public final void mIdentifier() throws RecognitionException{
 		{
 		}
 }
-// $ANTLR end Identifier
+// $ANTLR end NSIdentifier
+
+// $ANTLR start KeywordIdentifier
+
+public final void mKeywordIdentifier() throws RecognitionException{
+	try
+		{
+		int _type = KeywordIdentifier;
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:309:3: ( ':' Identifier '/' Identifier | ':' Identifier )
+		int alt24 = 2;
+		alt24 = dfa24.predict(input);
+		switch(alt24)
+			{
+			case 1:
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:309:3: ':' Identifier '/' Identifier
+			{
+			match(':');
+			mIdentifier();
+			match('/');
+			mIdentifier();
+
+			}
+			break;
+			case 2:
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:310:3: ':' Identifier
+			{
+			match(':');
+			mIdentifier();
+
+			}
+			break;
+
+			}
+		this.type = _type;
+		}
+	finally
+		{
+		}
+}
+// $ANTLR end KeywordIdentifier
 
 // $ANTLR start MethodIdentifier
 
@@ -1639,11 +1657,11 @@ public final void mMethodIdentifier() throws RecognitionException{
 	try
 		{
 		int _type = MethodIdentifier;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:277:9: ( Letter ( Letter | JavaIDDigit )* '(' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:277:9: Letter ( Letter | JavaIDDigit )* '('
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:314:9: ( Letter ( Letter | JavaIDDigit )* '(' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:314:9: Letter ( Letter | JavaIDDigit )* '('
 		{
 		mLetter();
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:277:16: ( Letter | JavaIDDigit )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:314:16: ( Letter | JavaIDDigit )*
 		loop25:
 		do
 			{
@@ -1714,7 +1732,7 @@ public final void mMethodIdentifier() throws RecognitionException{
 public final void mLetter() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:284:8: ( '\\u0024' | '\\u0041' .. '\\u005a' | '\\u005f' | '\\u0061' .. '\\u007a' | '\\u00c0' .. '\\u00d6' | '\\u00d8' .. '\\u00f6' | '\\u00f8' .. '\\u00ff' | '\\u0100' .. '\\u1fff' | '\\u3040' .. '\\u318f' | '\\u3300' .. '\\u337f' | '\\u3400' .. '\\u3d2d' | '\\u4e00' .. '\\u9fff' | '\\uf900' .. '\\ufaff' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:321:8: ( '\\u0024' | '\\u0041' .. '\\u005a' | '\\u005f' | '\\u0061' .. '\\u007a' | '\\u00c0' .. '\\u00d6' | '\\u00d8' .. '\\u00f6' | '\\u00f8' .. '\\u00ff' | '\\u0100' .. '\\u1fff' | '\\u3040' .. '\\u318f' | '\\u3300' .. '\\u337f' | '\\u3400' .. '\\u3d2d' | '\\u4e00' .. '\\u9fff' | '\\uf900' .. '\\ufaff' )
 		// /Users/rich/dev/clojure/src/jvm/Reader.g:
 		{
 		if(input.LA(1) == '$' || (input.LA(1) >= 'A' && input.LA(1) <= 'Z') || input.LA(1) == '_' ||
@@ -1752,7 +1770,7 @@ public final void mLetter() throws RecognitionException{
 public final void mJavaIDDigit() throws RecognitionException{
 	try
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:302:6: ( '\\u0030' .. '\\u0039' | '\\u0660' .. '\\u0669' | '\\u06f0' .. '\\u06f9' | '\\u0966' .. '\\u096f' | '\\u09e6' .. '\\u09ef' | '\\u0a66' .. '\\u0a6f' | '\\u0ae6' .. '\\u0aef' | '\\u0b66' .. '\\u0b6f' | '\\u0be7' .. '\\u0bef' | '\\u0c66' .. '\\u0c6f' | '\\u0ce6' .. '\\u0cef' | '\\u0d66' .. '\\u0d6f' | '\\u0e50' .. '\\u0e59' | '\\u0ed0' .. '\\u0ed9' | '\\u1040' .. '\\u1049' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:339:6: ( '\\u0030' .. '\\u0039' | '\\u0660' .. '\\u0669' | '\\u06f0' .. '\\u06f9' | '\\u0966' .. '\\u096f' | '\\u09e6' .. '\\u09ef' | '\\u0a66' .. '\\u0a6f' | '\\u0ae6' .. '\\u0aef' | '\\u0b66' .. '\\u0b6f' | '\\u0be7' .. '\\u0bef' | '\\u0c66' .. '\\u0c6f' | '\\u0ce6' .. '\\u0cef' | '\\u0d66' .. '\\u0d6f' | '\\u0e50' .. '\\u0e59' | '\\u0ed0' .. '\\u0ed9' | '\\u1040' .. '\\u1049' )
 		// /Users/rich/dev/clojure/src/jvm/Reader.g:
 		{
 		if((input.LA(1) >= '0' && input.LA(1) <= '9') || (input.LA(1) >= '\u0660' && input.LA(1) <= '\u0669') ||
@@ -1796,8 +1814,8 @@ public final void mWS() throws RecognitionException{
 	try
 		{
 		int _type = WS;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:319:8: ( ( ' ' | '\\r' | '\\t' | '\\u000C' | '\\n' ) )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:319:8: ( ' ' | '\\r' | '\\t' | '\\u000C' | '\\n' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:356:8: ( ( ' ' | '\\r' | '\\t' | '\\u000C' | '\\n' ) )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:356:8: ( ' ' | '\\r' | '\\t' | '\\u000C' | '\\n' )
 		{
 		if((input.LA(1) >= '\t' && input.LA(1) <= '\n') || (input.LA(1) >= '\f' && input.LA(1) <= '\r') ||
 		   input.LA(1) == ' ')
@@ -1831,12 +1849,12 @@ public final void mCOMMENT() throws RecognitionException{
 	try
 		{
 		int _type = COMMENT;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:323:9: ( '#|' ( options {greedy=false; } : . )* '|#' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:323:9: '#|' ( options {greedy=false; } : . )* '|#'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:360:9: ( '#|' ( options {greedy=false; } : . )* '|#' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:360:9: '#|' ( options {greedy=false; } : . )* '|#'
 		{
 		match("#|");
 
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:323:14: ( options {greedy=false; } : . )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:360:14: ( options {greedy=false; } : . )*
 		loop26:
 		do
 			{
@@ -1867,7 +1885,7 @@ public final void mCOMMENT() throws RecognitionException{
 			switch(alt26)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:323:42: .
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:360:42: .
 				{
 				matchAny();
 
@@ -1899,11 +1917,11 @@ public final void mLINE_COMMENT() throws RecognitionException{
 	try
 		{
 		int _type = LINE_COMMENT;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:327:7: ( ';' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:327:7: ';' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:364:7: ( ';' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:364:7: ';' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
 		{
 		match(';');
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:327:11: (~ ( '\\n' | '\\r' ) )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:364:11: (~ ( '\\n' | '\\r' ) )*
 		loop27:
 		do
 			{
@@ -1920,7 +1938,7 @@ public final void mLINE_COMMENT() throws RecognitionException{
 			switch(alt27)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:327:11: ~ ( '\\n' | '\\r' )
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:364:11: ~ ( '\\n' | '\\r' )
 				{
 				if((input.LA(1) >= '\u0000' && input.LA(1) <= '\t') ||
 				   (input.LA(1) >= '\u000B' && input.LA(1) <= '\f') ||
@@ -1946,7 +1964,7 @@ public final void mLINE_COMMENT() throws RecognitionException{
 				}
 			} while(true);
 
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:327:25: ( '\\r' )?
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:364:25: ( '\\r' )?
 		int alt28 = 2;
 		int LA28_0 = input.LA(1);
 
@@ -1957,7 +1975,7 @@ public final void mLINE_COMMENT() throws RecognitionException{
 		switch(alt28)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:327:25: '\\r'
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:364:25: '\\r'
 			{
 			match('\r');
 
@@ -1980,188 +1998,202 @@ public final void mLINE_COMMENT() throws RecognitionException{
 // $ANTLR end LINE_COMMENT
 
 public void mTokens() throws RecognitionException{
-	// /Users/rich/dev/clojure/src/jvm/Reader.g:1:10: ( T28 | T29 | T30 | T31 | T32 | T33 | T34 | T35 | T36 | T37 | Comma | TrueToken | NullToken | DotDot | HexLiteral | DecimalLiteral | OctalLiteral | FloatingPointLiteral | CharacterLiteral | StringLiteral | JavaIdentifier | Identifier | MethodIdentifier | WS | COMMENT | LINE_COMMENT )
-	int alt29 = 26;
+	// /Users/rich/dev/clojure/src/jvm/Reader.g:1:10: ( T29 | T30 | T31 | T32 | T33 | T34 | T35 | T36 | T37 | T38 | T39 | Comma | TrueToken | NullToken | DotDot | HexLiteral | DecimalLiteral | OctalLiteral | FloatingPointLiteral | CharacterLiteral | StringLiteral | Identifier | NSIdentifier | KeywordIdentifier | MethodIdentifier | WS | COMMENT | LINE_COMMENT )
+	int alt29 = 28;
 	alt29 = dfa29.predict(input);
 	switch(alt29)
 		{
 		case 1:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:10: T28
-		{
-		mT28();
-
-		}
-		break;
-		case 2:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:14: T29
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:10: T29
 		{
 		mT29();
 
 		}
 		break;
-		case 3:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:18: T30
+		case 2:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:14: T30
 		{
 		mT30();
 
 		}
 		break;
-		case 4:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:22: T31
+		case 3:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:18: T31
 		{
 		mT31();
 
 		}
 		break;
-		case 5:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:26: T32
+		case 4:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:22: T32
 		{
 		mT32();
 
 		}
 		break;
-		case 6:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:30: T33
+		case 5:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:26: T33
 		{
 		mT33();
 
 		}
 		break;
-		case 7:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:34: T34
+		case 6:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:30: T34
 		{
 		mT34();
 
 		}
 		break;
-		case 8:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:38: T35
+		case 7:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:34: T35
 		{
 		mT35();
 
 		}
 		break;
-		case 9:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:42: T36
+		case 8:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:38: T36
 		{
 		mT36();
 
 		}
 		break;
-		case 10:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:46: T37
+		case 9:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:42: T37
 		{
 		mT37();
 
 		}
 		break;
+		case 10:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:46: T38
+		{
+		mT38();
+
+		}
+		break;
 		case 11:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:50: Comma
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:50: T39
+		{
+		mT39();
+
+		}
+		break;
+		case 12:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:54: Comma
 		{
 		mComma();
 
 		}
 		break;
-		case 12:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:56: TrueToken
+		case 13:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:60: TrueToken
 		{
 		mTrueToken();
 
 		}
 		break;
-		case 13:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:66: NullToken
+		case 14:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:70: NullToken
 		{
 		mNullToken();
 
 		}
 		break;
-		case 14:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:76: DotDot
+		case 15:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:80: DotDot
 		{
 		mDotDot();
 
 		}
 		break;
-		case 15:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:83: HexLiteral
+		case 16:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:87: HexLiteral
 		{
 		mHexLiteral();
 
 		}
 		break;
-		case 16:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:94: DecimalLiteral
+		case 17:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:98: DecimalLiteral
 		{
 		mDecimalLiteral();
 
 		}
 		break;
-		case 17:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:109: OctalLiteral
+		case 18:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:113: OctalLiteral
 		{
 		mOctalLiteral();
 
 		}
 		break;
-		case 18:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:122: FloatingPointLiteral
+		case 19:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:126: FloatingPointLiteral
 		{
 		mFloatingPointLiteral();
 
 		}
 		break;
-		case 19:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:143: CharacterLiteral
+		case 20:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:147: CharacterLiteral
 		{
 		mCharacterLiteral();
 
 		}
 		break;
-		case 20:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:160: StringLiteral
+		case 21:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:164: StringLiteral
 		{
 		mStringLiteral();
 
 		}
 		break;
-		case 21:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:174: JavaIdentifier
-		{
-		mJavaIdentifier();
-
-		}
-		break;
 		case 22:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:189: Identifier
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:178: Identifier
 		{
 		mIdentifier();
 
 		}
 		break;
 		case 23:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:200: MethodIdentifier
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:189: NSIdentifier
+		{
+		mNSIdentifier();
+
+		}
+		break;
+		case 24:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:202: KeywordIdentifier
+		{
+		mKeywordIdentifier();
+
+		}
+		break;
+		case 25:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:220: MethodIdentifier
 		{
 		mMethodIdentifier();
 
 		}
 		break;
-		case 24:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:217: WS
+		case 26:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:237: WS
 		{
 		mWS();
 
 		}
 		break;
-		case 25:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:220: COMMENT
+		case 27:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:240: COMMENT
 		{
 		mCOMMENT();
 
 		}
 		break;
-		case 26:
-			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:228: LINE_COMMENT
+		case 28:
+			// /Users/rich/dev/clojure/src/jvm/Reader.g:1:248: LINE_COMMENT
 		{
 		mLINE_COMMENT();
 
@@ -2174,6 +2206,7 @@ public void mTokens() throws RecognitionException{
 
 
 protected DFA16 dfa16 = new DFA16(this);
+protected DFA24 dfa24 = new DFA24(this);
 protected DFA29 dfa29 = new DFA29(this);
 static final String DFA16_eotS =
 		"\7\uffff\1\10\2\uffff";
@@ -2184,12 +2217,12 @@ static final String DFA16_minS =
 static final String DFA16_maxS =
 		"\1\71\1\146\1\uffff\1\71\2\uffff\1\71\1\146\2\uffff";
 static final String DFA16_acceptS =
-		"\2\uffff\1\2\1\uffff\1\4\1\1\2\uffff\2\3";
+		"\2\uffff\1\2\1\uffff\1\1\1\4\2\uffff\2\3";
 static final String DFA16_specialS =
 		"\12\uffff}>";
 static final String[] DFA16_transitionS = {
 		"\1\2\1\uffff\12\1",
-		"\1\5\1\uffff\12\1\12\uffff\1\4\1\3\1\4\35\uffff\1\4\1\3\1\4",
+		"\1\4\1\uffff\12\1\12\uffff\1\5\1\3\1\5\35\uffff\1\5\1\3\1\5",
 		"",
 		"\1\6\1\uffff\1\6\2\uffff\12\7",
 		"",
@@ -2233,39 +2266,138 @@ class DFA16 extends DFA{
 	}
 
 	public String getDescription(){
-		return "228:1: FloatingPointLiteral : ( ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( Exponent )? ( FloatTypeSuffix )? | '.' ( '0' .. '9' )+ ( Exponent )? ( FloatTypeSuffix )? | ( '0' .. '9' )+ Exponent ( FloatTypeSuffix )? | ( '0' .. '9' )+ ( Exponent )? FloatTypeSuffix );";
+		return "254:1: FloatingPointLiteral : ( ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( Exponent )? ( FloatTypeSuffix )? | '.' ( '0' .. '9' )+ ( Exponent )? ( FloatTypeSuffix )? | ( '0' .. '9' )+ Exponent ( FloatTypeSuffix )? | ( '0' .. '9' )+ ( Exponent )? FloatTypeSuffix );";
+	}
+}
+
+static final String DFA24_eotS =
+		"\2\uffff\1\3\1\uffff\1\3\1\uffff";
+static final String DFA24_eofS =
+		"\6\uffff";
+static final String DFA24_minS =
+		"\1\72\2\44\1\uffff\1\44\1\uffff";
+static final String DFA24_maxS =
+		"\1\72\2\ufaff\1\uffff\1\ufaff\1\uffff";
+static final String DFA24_acceptS =
+		"\3\uffff\1\2\1\uffff\1\1";
+static final String DFA24_specialS =
+		"\6\uffff}>";
+static final String[] DFA24_transitionS = {
+		"\1\1",
+		"\1\2\34\uffff\32\2\4\uffff\1\2\1\uffff\32\2\105\uffff\27\2\1" +
+		"\uffff\37\2\1\uffff\u1f08\2\u1040\uffff\u0150\2\u0170\uffff" +
+		"\u0080\2\u0080\uffff\u092e\2\u10d2\uffff\u5200\2\u5900\uffff" +
+		"\u0200\2",
+		"\1\4\10\uffff\1\4\1\uffff\1\5\12\4\7\uffff\32\4\4\uffff\1\4" +
+		"\1\uffff\32\4\105\uffff\27\4\1\uffff\37\4\1\uffff\u1f08\4\u1040" +
+		"\uffff\u0150\4\u0170\uffff\u0080\4\u0080\uffff\u092e\4\u10d2" +
+		"\uffff\u5200\4\u5900\uffff\u0200\4",
+		"",
+		"\1\4\10\uffff\1\4\1\uffff\1\5\12\4\7\uffff\32\4\4\uffff\1\4" +
+		"\1\uffff\32\4\105\uffff\27\4\1\uffff\37\4\1\uffff\u1f08\4\u1040" +
+		"\uffff\u0150\4\u0170\uffff\u0080\4\u0080\uffff\u092e\4\u10d2" +
+		"\uffff\u5200\4\u5900\uffff\u0200\4",
+		""
+};
+
+static final short[] DFA24_eot = DFA.unpackEncodedString(DFA24_eotS);
+static final short[] DFA24_eof = DFA.unpackEncodedString(DFA24_eofS);
+static final char[] DFA24_min = DFA.unpackEncodedStringToUnsignedChars(DFA24_minS);
+static final char[] DFA24_max = DFA.unpackEncodedStringToUnsignedChars(DFA24_maxS);
+static final short[] DFA24_accept = DFA.unpackEncodedString(DFA24_acceptS);
+static final short[] DFA24_special = DFA.unpackEncodedString(DFA24_specialS);
+static final short[][] DFA24_transition;
+
+static
+	{
+	int numStates = DFA24_transitionS.length;
+	DFA24_transition = new short[numStates][];
+	for(int i = 0; i < numStates; i++)
+		{
+		DFA24_transition[i] = DFA.unpackEncodedString(DFA24_transitionS[i]);
+		}
+	}
+
+class DFA24 extends DFA{
+
+	public DFA24(BaseRecognizer recognizer){
+		this.recognizer = recognizer;
+		this.decisionNumber = 24;
+		this.eot = DFA24_eot;
+		this.eof = DFA24_eof;
+		this.min = DFA24_min;
+		this.max = DFA24_max;
+		this.accept = DFA24_accept;
+		this.special = DFA24_special;
+		this.transition = DFA24_transition;
+	}
+
+	public String getDescription(){
+		return "308:1: KeywordIdentifier : ( ':' Identifier '/' Identifier | ':' Identifier );";
 	}
 }
 
 static final String DFA29_eotS =
-		"\12\uffff\1\31\1\uffff\2\33\2\42\2\uffff\1\33\7\uffff\1\33\1\uffff" +
-		"\1\33\2\uffff\1\33\1\uffff\1\46\1\uffff\1\42\2\33\1\uffff\1\51\1" +
-		"\52\2\uffff";
+		"\11\uffff\1\32\3\uffff\2\35\2\45\2\uffff\1\35\10\uffff\1\35\1\uffff" +
+		"\1\35\1\uffff\1\35\1\uffff\1\35\1\uffff\1\51\1\uffff\1\45\2\35\1" +
+		"\uffff\1\54\1\55\2\uffff";
 static final String DFA29_eofS =
-		"\53\uffff";
+		"\56\uffff";
 static final String DFA29_minS =
-		"\1\11\10\uffff\1\136\1\56\1\uffff\2\44\2\56\2\uffff\1\44\7\uffff" +
-		"\1\44\1\uffff\1\44\2\uffff\1\44\1\uffff\1\56\1\uffff\1\56\2\44\1" +
-		"\uffff\2\44\2\uffff";
+		"\1\11\7\uffff\1\136\1\56\3\uffff\2\44\2\56\2\uffff\1\44\10\uffff" +
+		"\1\44\1\uffff\1\44\1\uffff\1\44\1\uffff\1\44\1\uffff\1\56\1\uffff" +
+		"\1\56\2\44\1\uffff\2\44\2\uffff";
 static final String DFA29_maxS =
-		"\1\ufaff\10\uffff\1\174\1\71\1\uffff\2\ufaff\1\170\1\146\2\uffff" +
-		"\1\ufaff\7\uffff\1\ufaff\1\uffff\1\ufaff\2\uffff\1\ufaff\1\uffff" +
-		"\1\146\1\uffff\1\146\2\ufaff\1\uffff\2\ufaff\2\uffff";
+		"\1\ufaff\7\uffff\1\174\1\71\3\uffff\2\ufaff\1\170\1\146\2\uffff" +
+		"\1\ufaff\10\uffff\1\ufaff\1\uffff\1\ufaff\1\uffff\1\ufaff\1\uffff" +
+		"\1\ufaff\1\uffff\1\146\1\uffff\1\146\2\ufaff\1\uffff\2\ufaff\2\uffff";
 static final String DFA29_acceptS =
-		"\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\10\2\uffff\1\13\4\uffff\1" +
-		"\23\1\24\1\uffff\1\30\1\32\1\31\1\11\1\16\1\22\1\12\1\uffff\1\25" +
-		"\1\uffff\1\27\1\26\1\uffff\1\17\1\uffff\1\20\3\uffff\1\21\2\uffff" +
-		"\1\14\1\15";
+		"\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\2\uffff\1\12\1\13\1\14\4\uffff" +
+		"\1\24\1\25\1\uffff\1\30\1\32\1\34\1\10\1\33\1\17\1\11\1\23\1\uffff" +
+		"\1\26\1\uffff\1\31\1\uffff\1\27\1\uffff\1\20\1\uffff\1\21\3\uffff" +
+		"\1\22\2\uffff\1\15\1\16";
 static final String DFA29_specialS =
-		"\53\uffff}>";
+		"\56\uffff}>";
 static final String[] DFA29_transitionS = {
-		"\2\23\1\uffff\2\23\22\uffff\1\23\1\uffff\1\21\1\11\1\22\3\uffff" +
-		"\1\1\1\2\2\uffff\1\13\1\uffff\1\12\1\7\1\16\11\17\1\10\1\24" +
-		"\5\uffff\32\22\1\3\1\20\1\4\1\uffff\1\22\1\uffff\15\22\1\15" +
-		"\5\22\1\14\6\22\1\5\1\uffff\1\6\102\uffff\27\22\1\uffff\37\22" +
-		"\1\uffff\u1f08\22\u1040\uffff\u0150\22\u0170\uffff\u0080\22" +
-		"\u0080\uffff\u092e\22\u10d2\uffff\u5200\22\u5900\uffff\u0200" +
-		"\22",
+		"\2\25\1\uffff\2\25\22\uffff\1\25\1\uffff\1\22\1\10\1\23\2\uffff" +
+		"\1\12\1\1\1\2\2\uffff\1\14\1\uffff\1\11\1\7\1\17\11\20\1\24" +
+		"\1\26\5\uffff\32\23\1\3\1\21\1\4\1\13\1\23\1\uffff\15\23\1\16" +
+		"\5\23\1\15\6\23\1\5\1\uffff\1\6\102\uffff\27\23\1\uffff\37\23" +
+		"\1\uffff\u1f08\23\u1040\uffff\u0150\23\u0170\uffff\u0080\23" +
+		"\u0080\uffff\u092e\23\u10d2\uffff\u5200\23\u5900\uffff\u0200" +
+		"\23",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"\1\27\35\uffff\1\30",
+		"\1\31\1\uffff\12\33",
+		"",
+		"",
+		"",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\21\36\1\34\10\36\105\uffff\27\36\1" +
+		"\uffff\37\36\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff" +
+		"\u0080\36\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff" +
+		"\u0200\36",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\24\36\1\42\5\36\105\uffff\27\36\1\uffff" +
+		"\37\36\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff\u0080" +
+		"\36\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff\u0200" +
+		"\36",
+		"\1\33\1\uffff\10\44\2\33\12\uffff\3\33\21\uffff\1\43\13\uffff" +
+		"\3\33\21\uffff\1\43",
+		"\1\33\1\uffff\12\46\12\uffff\3\33\35\uffff\3\33",
+		"",
+		"",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\32\36\105\uffff\27\36\1\uffff\37\36" +
+		"\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff\u0080\36" +
+		"\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff\u0200" +
+		"\36",
 		"",
 		"",
 		"",
@@ -2274,75 +2406,53 @@ static final String[] DFA29_transitionS = {
 		"",
 		"",
 		"",
-		"\1\26\35\uffff\1\25",
-		"\1\27\1\uffff\12\30",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\24\36\1\47\5\36\105\uffff\27\36\1\uffff" +
+		"\37\36\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff\u0080" +
+		"\36\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff\u0200" +
+		"\36",
 		"",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\21\34\1\32\10\34\105\uffff\27\34\1\uffff" +
-		"\37\34\1\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080" +
-		"\34\u0080\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200" +
-		"\34",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\24\34\1\37\5\34\105\uffff\27\34\1\uffff" +
-		"\37\34\1\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080" +
-		"\34\u0080\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200" +
-		"\34",
-		"\1\30\1\uffff\10\41\2\30\12\uffff\3\30\21\uffff\1\40\13\uffff" +
-		"\3\30\21\uffff\1\40",
-		"\1\30\1\uffff\12\43\12\uffff\3\30\35\uffff\3\30",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\32\36\105\uffff\27\36\1\uffff\37\36" +
+		"\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff\u0080\36" +
+		"\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff\u0200" +
+		"\36",
 		"",
+		"\1\40\10\uffff\1\40\1\uffff\1\41\12\40\7\uffff\32\40\4\uffff" +
+		"\1\40\1\uffff\32\40\105\uffff\27\40\1\uffff\37\40\1\uffff\u1f08" +
+		"\40\u1040\uffff\u0150\40\u0170\uffff\u0080\40\u0080\uffff\u092e" +
+		"\40\u10d2\uffff\u5200\40\u5900\uffff\u0200\40",
 		"",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\32\34\105\uffff\27\34\1\uffff\37\34\1" +
-		"\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080\34\u0080" +
-		"\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200\34",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\13\36\1\50\16\36\105\uffff\27\36\1" +
+		"\uffff\37\36\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff" +
+		"\u0080\36\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff" +
+		"\u0200\36",
 		"",
+		"\1\33\1\uffff\10\44\2\33\12\uffff\3\33\35\uffff\3\33",
 		"",
+		"\1\33\1\uffff\12\46\12\uffff\3\33\35\uffff\3\33",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\4\36\1\52\25\36\105\uffff\27\36\1\uffff" +
+		"\37\36\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff\u0080" +
+		"\36\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff\u0200" +
+		"\36",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\13\36\1\53\16\36\105\uffff\27\36\1" +
+		"\uffff\37\36\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff" +
+		"\u0080\36\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff" +
+		"\u0200\36",
 		"",
-		"",
-		"",
-		"",
-		"",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\24\34\1\44\5\34\105\uffff\27\34\1\uffff" +
-		"\37\34\1\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080" +
-		"\34\u0080\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200" +
-		"\34",
-		"",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\32\34\105\uffff\27\34\1\uffff\37\34\1" +
-		"\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080\34\u0080" +
-		"\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200\34",
-		"",
-		"",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\13\34\1\45\16\34\105\uffff\27\34\1\uffff" +
-		"\37\34\1\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080" +
-		"\34\u0080\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200" +
-		"\34",
-		"",
-		"\1\30\1\uffff\10\41\2\30\12\uffff\3\30\35\uffff\3\30",
-		"",
-		"\1\30\1\uffff\12\43\12\uffff\3\30\35\uffff\3\30",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\4\34\1\47\25\34\105\uffff\27\34\1\uffff" +
-		"\37\34\1\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080" +
-		"\34\u0080\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200" +
-		"\34",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\13\34\1\50\16\34\105\uffff\27\34\1\uffff" +
-		"\37\34\1\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080" +
-		"\34\u0080\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200" +
-		"\34",
-		"",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\32\34\105\uffff\27\34\1\uffff\37\34\1" +
-		"\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080\34\u0080" +
-		"\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200\34",
-		"\1\34\3\uffff\1\35\4\uffff\1\36\2\uffff\12\34\7\uffff\32\34" +
-		"\4\uffff\1\34\1\uffff\32\34\105\uffff\27\34\1\uffff\37\34\1" +
-		"\uffff\u1f08\34\u1040\uffff\u0150\34\u0170\uffff\u0080\34\u0080" +
-		"\uffff\u092e\34\u10d2\uffff\u5200\34\u5900\uffff\u0200\34",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\32\36\105\uffff\27\36\1\uffff\37\36" +
+		"\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff\u0080\36" +
+		"\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff\u0200" +
+		"\36",
+		"\1\36\3\uffff\1\37\4\uffff\1\40\1\uffff\1\41\12\36\7\uffff\32" +
+		"\36\4\uffff\1\36\1\uffff\32\36\105\uffff\27\36\1\uffff\37\36" +
+		"\1\uffff\u1f08\36\u1040\uffff\u0150\36\u0170\uffff\u0080\36" +
+		"\u0080\uffff\u092e\36\u10d2\uffff\u5200\36\u5900\uffff\u0200" +
+		"\36",
 		"",
 		""
 };
@@ -2380,7 +2490,7 @@ class DFA29 extends DFA{
 	}
 
 	public String getDescription(){
-		return "1:1: Tokens : ( T28 | T29 | T30 | T31 | T32 | T33 | T34 | T35 | T36 | T37 | Comma | TrueToken | NullToken | DotDot | HexLiteral | DecimalLiteral | OctalLiteral | FloatingPointLiteral | CharacterLiteral | StringLiteral | JavaIdentifier | Identifier | MethodIdentifier | WS | COMMENT | LINE_COMMENT );";
+		return "1:1: Tokens : ( T29 | T30 | T31 | T32 | T33 | T34 | T35 | T36 | T37 | T38 | T39 | Comma | TrueToken | NullToken | DotDot | HexLiteral | DecimalLiteral | OctalLiteral | FloatingPointLiteral | CharacterLiteral | StringLiteral | Identifier | NSIdentifier | KeywordIdentifier | MethodIdentifier | WS | COMMENT | LINE_COMMENT );";
 	}
 }
 

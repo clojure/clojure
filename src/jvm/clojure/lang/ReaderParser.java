@@ -1,4 +1,4 @@
-// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-07-13 12:56:20
+// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-07-16 11:13:34
 
 package clojure.lang;
 
@@ -26,41 +26,42 @@ import java.util.HashMap;
  */
 public class ReaderParser extends Parser{
 public static final String[] tokenNames = new String[]{
-		"<invalid>", "<EOR>", "<DOWN>", "<UP>", "Identifier", "JavaIdentifier", "DotDot", "FloatingPointLiteral",
-		"CharacterLiteral", "StringLiteral", "TrueToken", "NullToken", "DecimalLiteral", "HexLiteral", "OctalLiteral",
-		"MethodIdentifier", "Comma", "HexDigit", "Exponent", "FloatTypeSuffix", "EscapeSequence", "UnicodeEscape",
-		"OctalEscape", "Letter", "JavaIDDigit", "WS", "COMMENT", "LINE_COMMENT", "'('", "')'", "'['", "']'", "'{'",
-		"'}'", "'/'", "':'", "'#^'", "'.'"
+		"<invalid>", "<EOR>", "<DOWN>", "<UP>", "Identifier", "NSIdentifier", "DotDot", "KeywordIdentifier",
+		"FloatingPointLiteral", "CharacterLiteral", "StringLiteral", "TrueToken", "NullToken", "DecimalLiteral",
+		"HexLiteral", "OctalLiteral", "MethodIdentifier", "Comma", "HexDigit", "Exponent", "FloatTypeSuffix",
+		"EscapeSequence", "UnicodeEscape", "OctalEscape", "Letter", "JavaIDDigit", "WS", "COMMENT", "LINE_COMMENT",
+		"'('", "')'", "'['", "']'", "'{'", "'}'", "'/'", "'#^'", "'.'", "'\\''", "'^'"
 };
-public static final int TrueToken = 10;
-public static final int Exponent = 18;
-public static final int OctalLiteral = 14;
+public static final int TrueToken = 11;
+public static final int Exponent = 19;
+public static final int OctalLiteral = 15;
 public static final int Identifier = 4;
-public static final int HexDigit = 17;
-public static final int WS = 25;
-public static final int CharacterLiteral = 8;
-public static final int MethodIdentifier = 15;
-public static final int COMMENT = 26;
-public static final int StringLiteral = 9;
-public static final int LINE_COMMENT = 27;
+public static final int HexDigit = 18;
+public static final int WS = 26;
+public static final int CharacterLiteral = 9;
+public static final int MethodIdentifier = 16;
+public static final int NSIdentifier = 5;
+public static final int COMMENT = 27;
+public static final int KeywordIdentifier = 7;
+public static final int StringLiteral = 10;
+public static final int LINE_COMMENT = 28;
 public static final int DotDot = 6;
-public static final int JavaIDDigit = 24;
-public static final int Letter = 23;
-public static final int UnicodeEscape = 21;
-public static final int HexLiteral = 13;
-public static final int Comma = 16;
-public static final int EscapeSequence = 20;
+public static final int JavaIDDigit = 25;
+public static final int Letter = 24;
+public static final int UnicodeEscape = 22;
+public static final int HexLiteral = 14;
+public static final int Comma = 17;
+public static final int EscapeSequence = 21;
 public static final int EOF = -1;
-public static final int NullToken = 11;
-public static final int DecimalLiteral = 12;
-public static final int OctalEscape = 22;
-public static final int FloatingPointLiteral = 7;
-public static final int JavaIdentifier = 5;
-public static final int FloatTypeSuffix = 19;
+public static final int NullToken = 12;
+public static final int DecimalLiteral = 13;
+public static final int OctalEscape = 23;
+public static final int FloatingPointLiteral = 8;
+public static final int FloatTypeSuffix = 20;
 
 public ReaderParser(TokenStream input){
 	super(input);
-	ruleMemo = new HashMap[47 + 1];
+	ruleMemo = new HashMap[48 + 1];
 }
 
 
@@ -77,17 +78,23 @@ public String getGrammarFileName(){
 //after:
 //            	    if (failed) return val;
 
-/*WARNING- HAND MODIFIED!
-	if(es == null) es = new ArrayList();
-	es.add(e);
-	// END HAND MODIFIED*/
+/*
+		//WARNING- HAND MODIFIED!
+		if(es == null) es = new ArrayList();
+		es.add(e);
+		// END HAND MODIFIED
+		*/
 
 //add this to mapexpr:
-/*WARNING- HAND MODIFIED!
-						val = val.assoc(k, v);
-	// END HAND MODIFIED*/
+/*
+		//WARNING- HAND MODIFIED!
+							val = val.assoc(k, v);
+		// END HAND MODIFIED
+		*/
 
 final static Symbol DOTDOT = new Symbol("..");
+final static Symbol QUOTE = new Symbol("quote");
+final static Symbol META = new Symbol("meta");
 
 public static void main(String[] args) throws Exception{
 	Writer w = new PrintWriter(System.out);
@@ -104,7 +111,7 @@ public static void main(String[] args) throws Exception{
 		{
 		if(lexer.rex != null)
 			throw lexer.rex;
-		for(int i = 0; i < 10; i++)
+		for(int i = 0; i < 20; i++)
 			{
 			Object e = parser.expression();
 			RT.print(e, w);
@@ -132,7 +139,7 @@ public void recoverFromMismatchedSet(IntStream input,
 
 
 // $ANTLR start expression
-// /Users/rich/dev/clojure/src/jvm/Reader.g:106:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression );
+// /Users/rich/dev/clojure/src/jvm/Reader.g:121:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression | q= quotedExpression | ct= caretExpression );
 public final Object expression() throws RecognitionException{
 	Object val = null;
 	int expression_StartIndex = input.index();
@@ -152,6 +159,10 @@ public final Object expression() throws RecognitionException{
 
 	Object g = null;
 
+	Object q = null;
+
+	Object ct = null;
+
 
 	try
 		{
@@ -159,8 +170,8 @@ public final Object expression() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:107:4: (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression )
-		int alt1 = 8;
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:122:4: (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression | q= quotedExpression | ct= caretExpression )
+		int alt1 = 10;
 		switch(input.LA(1))
 			{
 			case FloatingPointLiteral:
@@ -176,116 +187,17 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case Identifier:
-			case JavaIdentifier:
 			{
-			switch(input.LA(2))
-				{
-				case 34:
-				{
-				int LA1_9 = input.LA(3);
+			int LA1_2 = input.LA(2);
 
-				if(((LA1_9 >= Identifier && LA1_9 <= JavaIdentifier)))
-					{
-					int LA1_12 = input.LA(4);
-
-					if((LA1_12 == 37))
-						{
-						alt1 = 8;
-						}
-					else if((LA1_12 == EOF || (LA1_12 >= Identifier && LA1_12 <= OctalLiteral) || LA1_12 == Comma ||
-					         (LA1_12 >= 28 && LA1_12 <= 33) || (LA1_12 >= 35 && LA1_12 <= 36)))
-						{
-						alt1 = 2;
-						}
-					else
-						{
-						if(backtracking > 0)
-							{
-							failed = true;
-							return val;
-							}
-						NoViableAltException nvae =
-								new NoViableAltException(
-										"106:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression );",
-										1, 12, input);
-
-						throw nvae;
-						}
-					}
-				else
-					{
-					if(backtracking > 0)
-						{
-						failed = true;
-						return val;
-						}
-					NoViableAltException nvae =
-							new NoViableAltException(
-									"106:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression );",
-									1, 9, input);
-
-					throw nvae;
-					}
-				}
-				break;
-				case 37:
-				{
-				alt1 = 8;
-				}
-				break;
-				case EOF:
-				case Identifier:
-				case JavaIdentifier:
-				case DotDot:
-				case FloatingPointLiteral:
-				case CharacterLiteral:
-				case StringLiteral:
-				case TrueToken:
-				case NullToken:
-				case DecimalLiteral:
-				case HexLiteral:
-				case OctalLiteral:
-				case Comma:
-				case 28:
-				case 29:
-				case 30:
-				case 31:
-				case 32:
-				case 33:
-				case 35:
-				case 36:
+			if((LA1_2 == EOF || (LA1_2 >= Identifier && LA1_2 <= OctalLiteral) || LA1_2 == Comma ||
+			    (LA1_2 >= 29 && LA1_2 <= 34) || LA1_2 == 36 || (LA1_2 >= 38 && LA1_2 <= 39)))
 				{
 				alt1 = 2;
 				}
-				break;
-				default:
-					if(backtracking > 0)
-						{
-						failed = true;
-						return val;
-						}
-					NoViableAltException nvae =
-							new NoViableAltException(
-									"106:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression );",
-									1, 2, input);
-
-					throw nvae;
-				}
-
-			}
-			break;
-			case DotDot:
-			{
-			int LA1_3 = input.LA(2);
-
-			if((LA1_3 == 37))
+			else if((LA1_2 == 37))
 				{
 				alt1 = 8;
-				}
-			else if((LA1_3 == EOF || (LA1_3 >= Identifier && LA1_3 <= OctalLiteral) || LA1_3 == Comma ||
-			         (LA1_3 >= 28 && LA1_3 <= 33) || (LA1_3 >= 35 && LA1_3 <= 36)))
-				{
-				alt1 = 2;
 				}
 			else
 				{
@@ -296,29 +208,87 @@ public final Object expression() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"106:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression );",
+								"121:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression | q= quotedExpression | ct= caretExpression );",
+								1, 2, input);
+
+				throw nvae;
+				}
+			}
+			break;
+			case NSIdentifier:
+			{
+			int LA1_3 = input.LA(2);
+
+			if((LA1_3 == EOF || (LA1_3 >= Identifier && LA1_3 <= OctalLiteral) || LA1_3 == Comma ||
+			    (LA1_3 >= 29 && LA1_3 <= 34) || LA1_3 == 36 || (LA1_3 >= 38 && LA1_3 <= 39)))
+				{
+				alt1 = 2;
+				}
+			else if((LA1_3 == 37))
+				{
+				alt1 = 8;
+				}
+			else
+				{
+				if(backtracking > 0)
+					{
+					failed = true;
+					return val;
+					}
+				NoViableAltException nvae =
+						new NoViableAltException(
+								"121:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression | q= quotedExpression | ct= caretExpression );",
 								1, 3, input);
 
 				throw nvae;
 				}
 			}
 			break;
-			case 35:
+			case DotDot:
+			{
+			int LA1_4 = input.LA(2);
+
+			if((LA1_4 == EOF || (LA1_4 >= Identifier && LA1_4 <= OctalLiteral) || LA1_4 == Comma ||
+			    (LA1_4 >= 29 && LA1_4 <= 34) || LA1_4 == 36 || (LA1_4 >= 38 && LA1_4 <= 39)))
+				{
+				alt1 = 2;
+				}
+			else if((LA1_4 == 37))
+				{
+				alt1 = 8;
+				}
+			else
+				{
+				if(backtracking > 0)
+					{
+					failed = true;
+					return val;
+					}
+				NoViableAltException nvae =
+						new NoViableAltException(
+								"121:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression | q= quotedExpression | ct= caretExpression );",
+								1, 4, input);
+
+				throw nvae;
+				}
+			}
+			break;
+			case KeywordIdentifier:
 			{
 			alt1 = 3;
 			}
 			break;
-			case 28:
+			case 29:
 			{
 			alt1 = 4;
 			}
 			break;
-			case 30:
+			case 31:
 			{
 			alt1 = 5;
 			}
 			break;
-			case 32:
+			case 33:
 			{
 			alt1 = 6;
 			}
@@ -326,6 +296,16 @@ public final Object expression() throws RecognitionException{
 			case 36:
 			{
 			alt1 = 7;
+			}
+			break;
+			case 38:
+			{
+			alt1 = 9;
+			}
+			break;
+			case 39:
+			{
+			alt1 = 10;
 			}
 			break;
 			default:
@@ -336,7 +316,7 @@ public final Object expression() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"106:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression );",
+								"121:1: expression returns [Object val] : (lt= literal | s= symbol | k= keyword | le= listExpression | ve= vectorExpression | me= mapExpression | mx= metaExpression | g= dotExpression | q= quotedExpression | ct= caretExpression );",
 								1, 0, input);
 
 				throw nvae;
@@ -345,7 +325,7 @@ public final Object expression() throws RecognitionException{
 		switch(alt1)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:107:4: lt= literal
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:122:4: lt= literal
 			{
 			pushFollow(FOLLOW_literal_in_expression73);
 			lt = literal();
@@ -359,7 +339,7 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:108:3: s= symbol
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:123:3: s= symbol
 			{
 			pushFollow(FOLLOW_symbol_in_expression83);
 			s = symbol();
@@ -373,7 +353,7 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:109:3: k= keyword
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:124:3: k= keyword
 			{
 			pushFollow(FOLLOW_keyword_in_expression93);
 			k = keyword();
@@ -387,7 +367,7 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case 4:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:110:3: le= listExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:125:3: le= listExpression
 			{
 			pushFollow(FOLLOW_listExpression_in_expression103);
 			le = listExpression();
@@ -401,7 +381,7 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case 5:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:111:3: ve= vectorExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:126:3: ve= vectorExpression
 			{
 			pushFollow(FOLLOW_vectorExpression_in_expression113);
 			ve = vectorExpression();
@@ -415,7 +395,7 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case 6:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:112:3: me= mapExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:127:3: me= mapExpression
 			{
 			pushFollow(FOLLOW_mapExpression_in_expression123);
 			me = mapExpression();
@@ -429,7 +409,7 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case 7:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:113:3: mx= metaExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:128:3: mx= metaExpression
 			{
 			pushFollow(FOLLOW_metaExpression_in_expression133);
 			mx = metaExpression();
@@ -443,7 +423,7 @@ public final Object expression() throws RecognitionException{
 			}
 			break;
 			case 8:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:114:3: g= dotExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:129:3: g= dotExpression
 			{
 			pushFollow(FOLLOW_dotExpression_in_expression143);
 			g = dotExpression();
@@ -452,6 +432,34 @@ public final Object expression() throws RecognitionException{
 			if(backtracking == 0)
 				{
 				val = g;
+				}
+
+			}
+			break;
+			case 9:
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:130:3: q= quotedExpression
+			{
+			pushFollow(FOLLOW_quotedExpression_in_expression153);
+			q = quotedExpression();
+			_fsp--;
+			if(failed) return val;
+			if(backtracking == 0)
+				{
+				val = q;
+				}
+
+			}
+			break;
+			case 10:
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:131:3: ct= caretExpression
+			{
+			pushFollow(FOLLOW_caretExpression_in_expression163);
+			ct = caretExpression();
+			_fsp--;
+			if(failed) return val;
+			if(backtracking == 0)
+				{
+				val = ct;
 				}
 
 			}
@@ -476,7 +484,7 @@ public final Object expression() throws RecognitionException{
 // $ANTLR end expression
 
 // $ANTLR start listExpression
-// /Users/rich/dev/clojure/src/jvm/Reader.g:117:1: listExpression returns [ISeq val] : '(' es= expressions ')' ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:134:1: listExpression returns [ISeq val] : '(' es= expressions ')' ;
 
 public final ISeq listExpression() throws RecognitionException{
 	ISeq val = null;
@@ -490,16 +498,16 @@ public final ISeq listExpression() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:118:4: ( '(' es= expressions ')' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:118:4: '(' es= expressions ')'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:135:4: ( '(' es= expressions ')' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:135:4: '(' es= expressions ')'
 		{
-		match(input, 28, FOLLOW_28_in_listExpression160);
+		match(input, 29, FOLLOW_29_in_listExpression180);
 		if(failed) return val;
-		pushFollow(FOLLOW_expressions_in_listExpression167);
+		pushFollow(FOLLOW_expressions_in_listExpression187);
 		es = expressions();
 		_fsp--;
 		if(failed) return val;
-		match(input, 29, FOLLOW_29_in_listExpression169);
+		match(input, 30, FOLLOW_30_in_listExpression189);
 		if(failed) return val;
 		if(backtracking == 0)
 			{
@@ -526,7 +534,7 @@ public final ISeq listExpression() throws RecognitionException{
 // $ANTLR end listExpression
 
 // $ANTLR start expressions
-// /Users/rich/dev/clojure/src/jvm/Reader.g:121:10: fragment expressions returns [List es] : (e= expression )* ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:138:10: fragment expressions returns [List es] : (e= expression )* ;
 
 public final List expressions() throws RecognitionException{
 	List es = null;
@@ -540,18 +548,18 @@ public final List expressions() throws RecognitionException{
 			{
 			return es;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:122:4: ( (e= expression )* )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:122:4: (e= expression )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:139:4: ( (e= expression )* )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:139:4: (e= expression )*
 		{
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:122:6: (e= expression )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:139:6: (e= expression )*
 		loop2:
 		do
 			{
 			int alt2 = 2;
 			int LA2_0 = input.LA(1);
 
-			if(((LA2_0 >= Identifier && LA2_0 <= OctalLiteral) || LA2_0 == 28 || LA2_0 == 30 || LA2_0 == 32 ||
-			    (LA2_0 >= 35 && LA2_0 <= 36)))
+			if(((LA2_0 >= Identifier && LA2_0 <= OctalLiteral) || LA2_0 == 29 || LA2_0 == 31 || LA2_0 == 33 ||
+			    LA2_0 == 36 || (LA2_0 >= 38 && LA2_0 <= 39)))
 				{
 				alt2 = 1;
 				}
@@ -562,14 +570,10 @@ public final List expressions() throws RecognitionException{
 				case 1:
 					// /Users/rich/dev/clojure/src/jvm/Reader.g:0:0: e= expression
 				{
-				pushFollow(FOLLOW_expression_in_expressions191);
+				pushFollow(FOLLOW_expression_in_expressions211);
 				e = expression();
 				_fsp--;
 				if(failed) return es;
-				//*WARNING- HAND MODIFIED!
-				if(es == null) es = new ArrayList();
-				es.add(e);
-				// END HAND MODIFIED*/
 
 				}
 				break;
@@ -600,7 +604,7 @@ public final List expressions() throws RecognitionException{
 // $ANTLR end expressions
 
 // $ANTLR start vectorExpression
-// /Users/rich/dev/clojure/src/jvm/Reader.g:125:1: vectorExpression returns [IPersistentArray val] : '[' es= expressions ']' ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:142:1: vectorExpression returns [IPersistentArray val] : '[' es= expressions ']' ;
 
 public final IPersistentArray vectorExpression() throws RecognitionException{
 	IPersistentArray val = null;
@@ -614,16 +618,16 @@ public final IPersistentArray vectorExpression() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:126:4: ( '[' es= expressions ']' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:126:4: '[' es= expressions ']'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:143:4: ( '[' es= expressions ']' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:143:4: '[' es= expressions ']'
 		{
-		match(input, 30, FOLLOW_30_in_vectorExpression208);
+		match(input, 31, FOLLOW_31_in_vectorExpression228);
 		if(failed) return val;
-		pushFollow(FOLLOW_expressions_in_vectorExpression214);
+		pushFollow(FOLLOW_expressions_in_vectorExpression234);
 		es = expressions();
 		_fsp--;
 		if(failed) return val;
-		match(input, 31, FOLLOW_31_in_vectorExpression216);
+		match(input, 32, FOLLOW_32_in_vectorExpression236);
 		if(failed) return val;
 		if(backtracking == 0)
 			{
@@ -650,7 +654,7 @@ public final IPersistentArray vectorExpression() throws RecognitionException{
 // $ANTLR end vectorExpression
 
 // $ANTLR start mapExpression
-// /Users/rich/dev/clojure/src/jvm/Reader.g:129:1: mapExpression returns [IPersistentMap val] : '{' (k= expression v= expression )* '}' ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:146:1: mapExpression returns [IPersistentMap val] : '{' (k= expression v= expression )* '}' ;
 
 public final IPersistentMap mapExpression() throws RecognitionException{
 	IPersistentMap val = null;
@@ -668,20 +672,20 @@ public final IPersistentMap mapExpression() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:133:4: ( '{' (k= expression v= expression )* '}' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:133:4: '{' (k= expression v= expression )* '}'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:150:4: ( '{' (k= expression v= expression )* '}' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:150:4: '{' (k= expression v= expression )* '}'
 		{
-		match(input, 32, FOLLOW_32_in_mapExpression236);
+		match(input, 33, FOLLOW_33_in_mapExpression256);
 		if(failed) return val;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:133:8: (k= expression v= expression )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:150:8: (k= expression v= expression )*
 		loop3:
 		do
 			{
 			int alt3 = 2;
 			int LA3_0 = input.LA(1);
 
-			if(((LA3_0 >= Identifier && LA3_0 <= OctalLiteral) || LA3_0 == 28 || LA3_0 == 30 || LA3_0 == 32 ||
-			    (LA3_0 >= 35 && LA3_0 <= 36)))
+			if(((LA3_0 >= Identifier && LA3_0 <= OctalLiteral) || LA3_0 == 29 || LA3_0 == 31 || LA3_0 == 33 ||
+			    LA3_0 == 36 || (LA3_0 >= 38 && LA3_0 <= 39)))
 				{
 				alt3 = 1;
 				}
@@ -690,19 +694,16 @@ public final IPersistentMap mapExpression() throws RecognitionException{
 			switch(alt3)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:133:9: k= expression v= expression
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:150:9: k= expression v= expression
 				{
-				pushFollow(FOLLOW_expression_in_mapExpression241);
+				pushFollow(FOLLOW_expression_in_mapExpression261);
 				k = expression();
 				_fsp--;
 				if(failed) return val;
-				pushFollow(FOLLOW_expression_in_mapExpression245);
+				pushFollow(FOLLOW_expression_in_mapExpression265);
 				v = expression();
 				_fsp--;
 				if(failed) return val;
-				//*WARNING- HAND MODIFIED!
-				val = val.assoc(k, v);
-				// END HAND MODIFIED*/
 
 				}
 				break;
@@ -712,7 +713,7 @@ public final IPersistentMap mapExpression() throws RecognitionException{
 				}
 			} while(true);
 
-		match(input, 33, FOLLOW_33_in_mapExpression249);
+		match(input, 34, FOLLOW_34_in_mapExpression269);
 		if(failed) return val;
 
 		}
@@ -735,14 +736,12 @@ public final IPersistentMap mapExpression() throws RecognitionException{
 // $ANTLR end mapExpression
 
 // $ANTLR start symbol
-// /Users/rich/dev/clojure/src/jvm/Reader.g:136:1: symbol returns [Symbol val] : (n= ( Identifier | JavaIdentifier ) | ns= ( Identifier | JavaIdentifier ) '/' nn= ( Identifier | JavaIdentifier ) | dd= DotDot );
+// /Users/rich/dev/clojure/src/jvm/Reader.g:153:1: symbol returns [Symbol val] : (n= Identifier | n= NSIdentifier | dd= DotDot );
 
 public final Symbol symbol() throws RecognitionException{
 	Symbol val = null;
 	int symbol_StartIndex = input.index();
 	Token n = null;
-	Token ns = null;
-	Token nn = null;
 	Token dd = null;
 
 	try
@@ -751,25 +750,26 @@ public final Symbol symbol() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:137:3: (n= ( Identifier | JavaIdentifier ) | ns= ( Identifier | JavaIdentifier ) '/' nn= ( Identifier | JavaIdentifier ) | dd= DotDot )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:154:3: (n= Identifier | n= NSIdentifier | dd= DotDot )
 		int alt4 = 3;
-		int LA4_0 = input.LA(1);
-
-		if(((LA4_0 >= Identifier && LA4_0 <= JavaIdentifier)))
+		switch(input.LA(1))
 			{
-			int LA4_1 = input.LA(2);
-
-			if((LA4_1 == 34))
-				{
-				alt4 = 2;
-				}
-			else if((LA4_1 == EOF || (LA4_1 >= Identifier && LA4_1 <= OctalLiteral) || LA4_1 == Comma ||
-			         (LA4_1 >= 28 && LA4_1 <= 33) || (LA4_1 >= 35 && LA4_1 <= 37)))
-				{
-				alt4 = 1;
-				}
-			else
-				{
+			case Identifier:
+			{
+			alt4 = 1;
+			}
+			break;
+			case NSIdentifier:
+			{
+			alt4 = 2;
+			}
+			break;
+			case DotDot:
+			{
+			alt4 = 3;
+			}
+			break;
+			default:
 				if(backtracking > 0)
 					{
 					failed = true;
@@ -777,55 +777,20 @@ public final Symbol symbol() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"136:1: symbol returns [Symbol val] : (n= ( Identifier | JavaIdentifier ) | ns= ( Identifier | JavaIdentifier ) '/' nn= ( Identifier | JavaIdentifier ) | dd= DotDot );",
-								4, 1, input);
+								"153:1: symbol returns [Symbol val] : (n= Identifier | n= NSIdentifier | dd= DotDot );",
+								4, 0, input);
 
 				throw nvae;
-				}
 			}
-		else if((LA4_0 == DotDot))
-			{
-			alt4 = 3;
-			}
-		else
-			{
-			if(backtracking > 0)
-				{
-				failed = true;
-				return val;
-				}
-			NoViableAltException nvae =
-					new NoViableAltException(
-							"136:1: symbol returns [Symbol val] : (n= ( Identifier | JavaIdentifier ) | ns= ( Identifier | JavaIdentifier ) '/' nn= ( Identifier | JavaIdentifier ) | dd= DotDot );",
-							4, 0, input);
 
-			throw nvae;
-			}
 		switch(alt4)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:137:3: n= ( Identifier | JavaIdentifier )
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:154:3: n= Identifier
 			{
 			n = (Token) input.LT(1);
-			if((input.LA(1) >= Identifier && input.LA(1) <= JavaIdentifier))
-				{
-				input.consume();
-				errorRecovery = false;
-				failed = false;
-				}
-			else
-				{
-				if(backtracking > 0)
-					{
-					failed = true;
-					return val;
-					}
-				MismatchedSetException mse =
-						new MismatchedSetException(null, input);
-				recoverFromMismatchedSet(input, mse, FOLLOW_set_in_symbol266);
-				throw mse;
-				}
-
+			match(input, Identifier, FOLLOW_Identifier_in_symbol286);
+			if(failed) return val;
 			if(backtracking == 0)
 				{
 				val = new Symbol(n.getText());
@@ -834,59 +799,20 @@ public final Symbol symbol() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:138:3: ns= ( Identifier | JavaIdentifier ) '/' nn= ( Identifier | JavaIdentifier )
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:155:3: n= NSIdentifier
 			{
-			ns = (Token) input.LT(1);
-			if((input.LA(1) >= Identifier && input.LA(1) <= JavaIdentifier))
-				{
-				input.consume();
-				errorRecovery = false;
-				failed = false;
-				}
-			else
-				{
-				if(backtracking > 0)
-					{
-					failed = true;
-					return val;
-					}
-				MismatchedSetException mse =
-						new MismatchedSetException(null, input);
-				recoverFromMismatchedSet(input, mse, FOLLOW_set_in_symbol280);
-				throw mse;
-				}
-
-			match(input, 34, FOLLOW_34_in_symbol286);
+			n = (Token) input.LT(1);
+			match(input, NSIdentifier, FOLLOW_NSIdentifier_in_symbol296);
 			if(failed) return val;
-			nn = (Token) input.LT(1);
-			if((input.LA(1) >= Identifier && input.LA(1) <= JavaIdentifier))
-				{
-				input.consume();
-				errorRecovery = false;
-				failed = false;
-				}
-			else
-				{
-				if(backtracking > 0)
-					{
-					failed = true;
-					return val;
-					}
-				MismatchedSetException mse =
-						new MismatchedSetException(null, input);
-				recoverFromMismatchedSet(input, mse, FOLLOW_set_in_symbol292);
-				throw mse;
-				}
-
 			if(backtracking == 0)
 				{
-				val = new Symbol(ns.getText(), nn.getText());
+				val = new Symbol(n.getText());
 				}
 
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:139:3: dd= DotDot
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:156:3: dd= DotDot
 			{
 			dd = (Token) input.LT(1);
 			match(input, DotDot, FOLLOW_DotDot_in_symbol306);
@@ -918,13 +844,12 @@ public final Symbol symbol() throws RecognitionException{
 // $ANTLR end symbol
 
 // $ANTLR start keyword
-// /Users/rich/dev/clojure/src/jvm/Reader.g:142:1: keyword returns [Keyword val] : ':' s= symbol ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:159:1: keyword returns [Keyword val] : k= KeywordIdentifier ;
 
 public final Keyword keyword() throws RecognitionException{
 	Keyword val = null;
 	int keyword_StartIndex = input.index();
-	Symbol s = null;
-
+	Token k = null;
 
 	try
 		{
@@ -932,18 +857,15 @@ public final Keyword keyword() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:143:3: ( ':' s= symbol )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:143:3: ':' s= symbol
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:160:3: (k= KeywordIdentifier )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:160:3: k= KeywordIdentifier
 		{
-		match(input, 35, FOLLOW_35_in_keyword322);
-		if(failed) return val;
-		pushFollow(FOLLOW_symbol_in_keyword328);
-		s = symbol();
-		_fsp--;
+		k = (Token) input.LT(1);
+		match(input, KeywordIdentifier, FOLLOW_KeywordIdentifier_in_keyword326);
 		if(failed) return val;
 		if(backtracking == 0)
 			{
-			val = new Keyword(s);
+			val = new Keyword(k.getText().substring(1));
 			}
 
 		}
@@ -966,7 +888,7 @@ public final Keyword keyword() throws RecognitionException{
 // $ANTLR end keyword
 
 // $ANTLR start literal
-// /Users/rich/dev/clojure/src/jvm/Reader.g:147:1: literal returns [Object val] : (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral );
+// /Users/rich/dev/clojure/src/jvm/Reader.g:164:1: literal returns [Object val] : (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral );
 
 public final Object literal() throws RecognitionException{
 	Object val = null;
@@ -985,7 +907,7 @@ public final Object literal() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:148:6: (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:165:6: (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral )
 		int alt5 = 7;
 		switch(input.LA(1))
 			{
@@ -999,12 +921,12 @@ public final Object literal() throws RecognitionException{
 			{
 			int LA5_2 = input.LA(2);
 
-			if((LA5_2 == 34))
+			if((LA5_2 == 35))
 				{
 				alt5 = 7;
 				}
 			else if((LA5_2 == EOF || (LA5_2 >= Identifier && LA5_2 <= OctalLiteral) || LA5_2 == Comma ||
-			         (LA5_2 >= 28 && LA5_2 <= 33) || (LA5_2 >= 35 && LA5_2 <= 36)))
+			         (LA5_2 >= 29 && LA5_2 <= 34) || LA5_2 == 36 || (LA5_2 >= 38 && LA5_2 <= 39)))
 				{
 				alt5 = 1;
 				}
@@ -1017,7 +939,7 @@ public final Object literal() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"147:1: literal returns [Object val] : (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral );",
+								"164:1: literal returns [Object val] : (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral );",
 								5, 2, input);
 
 				throw nvae;
@@ -1057,7 +979,7 @@ public final Object literal() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"147:1: literal returns [Object val] : (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral );",
+								"164:1: literal returns [Object val] : (i= integerLiteral | fp= FloatingPointLiteral | c= CharacterLiteral | s= StringLiteral | TrueToken | NullToken | r= ratioLiteral );",
 								5, 0, input);
 
 				throw nvae;
@@ -1066,9 +988,9 @@ public final Object literal() throws RecognitionException{
 		switch(alt5)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:148:6: i= integerLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:165:6: i= integerLiteral
 			{
-			pushFollow(FOLLOW_integerLiteral_in_literal355);
+			pushFollow(FOLLOW_integerLiteral_in_literal353);
 			i = integerLiteral();
 			_fsp--;
 			if(failed) return val;
@@ -1080,10 +1002,10 @@ public final Object literal() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:149:6: fp= FloatingPointLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:166:6: fp= FloatingPointLiteral
 			{
 			fp = (Token) input.LT(1);
-			match(input, FloatingPointLiteral, FOLLOW_FloatingPointLiteral_in_literal368);
+			match(input, FloatingPointLiteral, FOLLOW_FloatingPointLiteral_in_literal366);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1093,10 +1015,10 @@ public final Object literal() throws RecognitionException{
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:150:6: c= CharacterLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:167:6: c= CharacterLiteral
 			{
 			c = (Token) input.LT(1);
-			match(input, CharacterLiteral, FOLLOW_CharacterLiteral_in_literal381);
+			match(input, CharacterLiteral, FOLLOW_CharacterLiteral_in_literal379);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1106,10 +1028,10 @@ public final Object literal() throws RecognitionException{
 			}
 			break;
 			case 4:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:151:6: s= StringLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:168:6: s= StringLiteral
 			{
 			s = (Token) input.LT(1);
-			match(input, StringLiteral, FOLLOW_StringLiteral_in_literal394);
+			match(input, StringLiteral, FOLLOW_StringLiteral_in_literal392);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1119,9 +1041,9 @@ public final Object literal() throws RecognitionException{
 			}
 			break;
 			case 5:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:152:6: TrueToken
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:169:6: TrueToken
 			{
-			match(input, TrueToken, FOLLOW_TrueToken_in_literal403);
+			match(input, TrueToken, FOLLOW_TrueToken_in_literal401);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1131,9 +1053,9 @@ public final Object literal() throws RecognitionException{
 			}
 			break;
 			case 6:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:153:6: NullToken
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:170:6: NullToken
 			{
-			match(input, NullToken, FOLLOW_NullToken_in_literal412);
+			match(input, NullToken, FOLLOW_NullToken_in_literal410);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1143,9 +1065,9 @@ public final Object literal() throws RecognitionException{
 			}
 			break;
 			case 7:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:154:6: r= ratioLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:171:6: r= ratioLiteral
 			{
-			pushFollow(FOLLOW_ratioLiteral_in_literal425);
+			pushFollow(FOLLOW_ratioLiteral_in_literal423);
 			r = ratioLiteral();
 			_fsp--;
 			if(failed) return val;
@@ -1176,7 +1098,7 @@ public final Object literal() throws RecognitionException{
 // $ANTLR end literal
 
 // $ANTLR start ratioLiteral
-// /Users/rich/dev/clojure/src/jvm/Reader.g:157:1: ratioLiteral returns [Num val] : n= DecimalLiteral '/' d= DecimalLiteral ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:174:1: ratioLiteral returns [Num val] : n= DecimalLiteral '/' d= DecimalLiteral ;
 
 public final Num ratioLiteral() throws RecognitionException{
 	Num val = null;
@@ -1190,16 +1112,16 @@ public final Num ratioLiteral() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:158:4: (n= DecimalLiteral '/' d= DecimalLiteral )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:158:4: n= DecimalLiteral '/' d= DecimalLiteral
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:175:4: (n= DecimalLiteral '/' d= DecimalLiteral )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:175:4: n= DecimalLiteral '/' d= DecimalLiteral
 		{
 		n = (Token) input.LT(1);
-		match(input, DecimalLiteral, FOLLOW_DecimalLiteral_in_ratioLiteral448);
+		match(input, DecimalLiteral, FOLLOW_DecimalLiteral_in_ratioLiteral446);
 		if(failed) return val;
-		match(input, 34, FOLLOW_34_in_ratioLiteral450);
+		match(input, 35, FOLLOW_35_in_ratioLiteral448);
 		if(failed) return val;
 		d = (Token) input.LT(1);
-		match(input, DecimalLiteral, FOLLOW_DecimalLiteral_in_ratioLiteral456);
+		match(input, DecimalLiteral, FOLLOW_DecimalLiteral_in_ratioLiteral454);
 		if(failed) return val;
 		if(backtracking == 0)
 			{
@@ -1226,7 +1148,7 @@ public final Num ratioLiteral() throws RecognitionException{
 // $ANTLR end ratioLiteral
 
 // $ANTLR start integerLiteral
-// /Users/rich/dev/clojure/src/jvm/Reader.g:161:1: integerLiteral returns [Num val] : (hn= HexLiteral | on= OctalLiteral | nn= DecimalLiteral );
+// /Users/rich/dev/clojure/src/jvm/Reader.g:178:1: integerLiteral returns [Num val] : (hn= HexLiteral | on= OctalLiteral | nn= DecimalLiteral );
 
 public final Num integerLiteral() throws RecognitionException{
 	Num val = null;
@@ -1241,7 +1163,7 @@ public final Num integerLiteral() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:162:9: (hn= HexLiteral | on= OctalLiteral | nn= DecimalLiteral )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:179:9: (hn= HexLiteral | on= OctalLiteral | nn= DecimalLiteral )
 		int alt6 = 3;
 		switch(input.LA(1))
 			{
@@ -1268,7 +1190,7 @@ public final Num integerLiteral() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"161:1: integerLiteral returns [Num val] : (hn= HexLiteral | on= OctalLiteral | nn= DecimalLiteral );",
+								"178:1: integerLiteral returns [Num val] : (hn= HexLiteral | on= OctalLiteral | nn= DecimalLiteral );",
 								6, 0, input);
 
 				throw nvae;
@@ -1277,10 +1199,10 @@ public final Num integerLiteral() throws RecognitionException{
 		switch(alt6)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:162:9: hn= HexLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:179:9: hn= HexLiteral
 			{
 			hn = (Token) input.LT(1);
-			match(input, HexLiteral, FOLLOW_HexLiteral_in_integerLiteral482);
+			match(input, HexLiteral, FOLLOW_HexLiteral_in_integerLiteral480);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1290,10 +1212,10 @@ public final Num integerLiteral() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:163:9: on= OctalLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:180:9: on= OctalLiteral
 			{
 			on = (Token) input.LT(1);
-			match(input, OctalLiteral, FOLLOW_OctalLiteral_in_integerLiteral501);
+			match(input, OctalLiteral, FOLLOW_OctalLiteral_in_integerLiteral499);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1303,10 +1225,10 @@ public final Num integerLiteral() throws RecognitionException{
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:164:9: nn= DecimalLiteral
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:181:9: nn= DecimalLiteral
 			{
 			nn = (Token) input.LT(1);
-			match(input, DecimalLiteral, FOLLOW_DecimalLiteral_in_integerLiteral519);
+			match(input, DecimalLiteral, FOLLOW_DecimalLiteral_in_integerLiteral517);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1335,7 +1257,7 @@ public final Num integerLiteral() throws RecognitionException{
 // $ANTLR end integerLiteral
 
 // $ANTLR start metaTag
-// /Users/rich/dev/clojure/src/jvm/Reader.g:169:1: fragment metaTag returns [IPersistentMap val] : ( '#^' s= symbol | '#^' m= mapExpression );
+// /Users/rich/dev/clojure/src/jvm/Reader.g:186:1: fragment metaTag returns [IPersistentMap val] : ( '#^' s= symbol | '#^' m= mapExpression );
 
 public final IPersistentMap metaTag() throws RecognitionException{
 	IPersistentMap val = null;
@@ -1351,7 +1273,7 @@ public final IPersistentMap metaTag() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:171:3: ( '#^' s= symbol | '#^' m= mapExpression )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:188:3: ( '#^' s= symbol | '#^' m= mapExpression )
 		int alt7 = 2;
 		int LA7_0 = input.LA(1);
 
@@ -1359,7 +1281,7 @@ public final IPersistentMap metaTag() throws RecognitionException{
 			{
 			int LA7_1 = input.LA(2);
 
-			if((LA7_1 == 32))
+			if((LA7_1 == 33))
 				{
 				alt7 = 2;
 				}
@@ -1376,7 +1298,7 @@ public final IPersistentMap metaTag() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"169:1: fragment metaTag returns [IPersistentMap val] : ( '#^' s= symbol | '#^' m= mapExpression );",
+								"186:1: fragment metaTag returns [IPersistentMap val] : ( '#^' s= symbol | '#^' m= mapExpression );",
 								7, 1, input);
 
 				throw nvae;
@@ -1391,7 +1313,7 @@ public final IPersistentMap metaTag() throws RecognitionException{
 				}
 			NoViableAltException nvae =
 					new NoViableAltException(
-							"169:1: fragment metaTag returns [IPersistentMap val] : ( '#^' s= symbol | '#^' m= mapExpression );",
+							"186:1: fragment metaTag returns [IPersistentMap val] : ( '#^' s= symbol | '#^' m= mapExpression );",
 							7, 0, input);
 
 			throw nvae;
@@ -1399,11 +1321,11 @@ public final IPersistentMap metaTag() throws RecognitionException{
 		switch(alt7)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:171:3: '#^' s= symbol
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:188:3: '#^' s= symbol
 			{
-			match(input, 36, FOLLOW_36_in_metaTag542);
+			match(input, 36, FOLLOW_36_in_metaTag540);
 			if(failed) return val;
-			pushFollow(FOLLOW_symbol_in_metaTag548);
+			pushFollow(FOLLOW_symbol_in_metaTag546);
 			s = symbol();
 			_fsp--;
 			if(failed) return val;
@@ -1415,11 +1337,11 @@ public final IPersistentMap metaTag() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:172:3: '#^' m= mapExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:189:3: '#^' m= mapExpression
 			{
-			match(input, 36, FOLLOW_36_in_metaTag554);
+			match(input, 36, FOLLOW_36_in_metaTag552);
 			if(failed) return val;
-			pushFollow(FOLLOW_mapExpression_in_metaTag560);
+			pushFollow(FOLLOW_mapExpression_in_metaTag558);
 			m = mapExpression();
 			_fsp--;
 			if(failed) return val;
@@ -1450,7 +1372,7 @@ public final IPersistentMap metaTag() throws RecognitionException{
 // $ANTLR end metaTag
 
 // $ANTLR start objExpression
-// /Users/rich/dev/clojure/src/jvm/Reader.g:175:1: fragment objExpression returns [Obj val] : (s= symbol | le= listExpression | me= mapExpression | ve= vectorExpression );
+// /Users/rich/dev/clojure/src/jvm/Reader.g:192:1: fragment objExpression returns [Obj val] : (s= symbol | le= listExpression | me= mapExpression | ve= vectorExpression );
 
 public final Obj objExpression() throws RecognitionException{
 	Obj val = null;
@@ -1470,28 +1392,28 @@ public final Obj objExpression() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:177:3: (s= symbol | le= listExpression | me= mapExpression | ve= vectorExpression )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:194:3: (s= symbol | le= listExpression | me= mapExpression | ve= vectorExpression )
 		int alt8 = 4;
 		switch(input.LA(1))
 			{
 			case Identifier:
-			case JavaIdentifier:
+			case NSIdentifier:
 			case DotDot:
 			{
 			alt8 = 1;
 			}
 			break;
-			case 28:
+			case 29:
 			{
 			alt8 = 2;
 			}
 			break;
-			case 32:
+			case 33:
 			{
 			alt8 = 3;
 			}
 			break;
-			case 30:
+			case 31:
 			{
 			alt8 = 4;
 			}
@@ -1504,7 +1426,7 @@ public final Obj objExpression() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"175:1: fragment objExpression returns [Obj val] : (s= symbol | le= listExpression | me= mapExpression | ve= vectorExpression );",
+								"192:1: fragment objExpression returns [Obj val] : (s= symbol | le= listExpression | me= mapExpression | ve= vectorExpression );",
 								8, 0, input);
 
 				throw nvae;
@@ -1513,9 +1435,9 @@ public final Obj objExpression() throws RecognitionException{
 		switch(alt8)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:177:3: s= symbol
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:194:3: s= symbol
 			{
-			pushFollow(FOLLOW_symbol_in_objExpression583);
+			pushFollow(FOLLOW_symbol_in_objExpression581);
 			s = symbol();
 			_fsp--;
 			if(failed) return val;
@@ -1527,9 +1449,9 @@ public final Obj objExpression() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:178:3: le= listExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:195:3: le= listExpression
 			{
-			pushFollow(FOLLOW_listExpression_in_objExpression593);
+			pushFollow(FOLLOW_listExpression_in_objExpression591);
 			le = listExpression();
 			_fsp--;
 			if(failed) return val;
@@ -1541,9 +1463,9 @@ public final Obj objExpression() throws RecognitionException{
 			}
 			break;
 			case 3:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:179:3: me= mapExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:196:3: me= mapExpression
 			{
-			pushFollow(FOLLOW_mapExpression_in_objExpression603);
+			pushFollow(FOLLOW_mapExpression_in_objExpression601);
 			me = mapExpression();
 			_fsp--;
 			if(failed) return val;
@@ -1555,9 +1477,9 @@ public final Obj objExpression() throws RecognitionException{
 			}
 			break;
 			case 4:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:180:3: ve= vectorExpression
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:197:3: ve= vectorExpression
 			{
-			pushFollow(FOLLOW_vectorExpression_in_objExpression613);
+			pushFollow(FOLLOW_vectorExpression_in_objExpression611);
 			ve = vectorExpression();
 			_fsp--;
 			if(failed) return val;
@@ -1588,7 +1510,7 @@ public final Obj objExpression() throws RecognitionException{
 // $ANTLR end objExpression
 
 // $ANTLR start metaExpression
-// /Users/rich/dev/clojure/src/jvm/Reader.g:183:1: metaExpression returns [Obj val] : m= metaTag e= objExpression ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:200:1: metaExpression returns [Obj val] : m= metaTag e= objExpression ;
 
 public final Obj metaExpression() throws RecognitionException{
 	Obj val = null;
@@ -1604,14 +1526,14 @@ public final Obj metaExpression() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:184:3: (m= metaTag e= objExpression )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:184:3: m= metaTag e= objExpression
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:201:3: (m= metaTag e= objExpression )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:201:3: m= metaTag e= objExpression
 		{
-		pushFollow(FOLLOW_metaTag_in_metaExpression635);
+		pushFollow(FOLLOW_metaTag_in_metaExpression633);
 		m = metaTag();
 		_fsp--;
 		if(failed) return val;
-		pushFollow(FOLLOW_objExpression_in_metaExpression641);
+		pushFollow(FOLLOW_objExpression_in_metaExpression639);
 		e = objExpression();
 		_fsp--;
 		if(failed) return val;
@@ -1640,7 +1562,7 @@ public final Obj metaExpression() throws RecognitionException{
 // $ANTLR end metaExpression
 
 // $ANTLR start member
-// /Users/rich/dev/clojure/src/jvm/Reader.g:187:1: fragment member returns [Object val] : ( '.' i= JavaIdentifier | '.' m= method );
+// /Users/rich/dev/clojure/src/jvm/Reader.g:204:1: fragment member returns [Object val] : ( '.' i= Identifier | '.' m= method );
 
 public final Object member() throws RecognitionException{
 	Object val = null;
@@ -1655,7 +1577,7 @@ public final Object member() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:189:4: ( '.' i= JavaIdentifier | '.' m= method )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:206:4: ( '.' i= Identifier | '.' m= method )
 		int alt9 = 2;
 		int LA9_0 = input.LA(1);
 
@@ -1663,7 +1585,7 @@ public final Object member() throws RecognitionException{
 			{
 			int LA9_1 = input.LA(2);
 
-			if((LA9_1 == JavaIdentifier))
+			if((LA9_1 == Identifier))
 				{
 				alt9 = 1;
 				}
@@ -1680,7 +1602,7 @@ public final Object member() throws RecognitionException{
 					}
 				NoViableAltException nvae =
 						new NoViableAltException(
-								"187:1: fragment member returns [Object val] : ( '.' i= JavaIdentifier | '.' m= method );",
+								"204:1: fragment member returns [Object val] : ( '.' i= Identifier | '.' m= method );",
 								9, 1, input);
 
 				throw nvae;
@@ -1695,20 +1617,20 @@ public final Object member() throws RecognitionException{
 				}
 			NoViableAltException nvae =
 					new NoViableAltException(
-							"187:1: fragment member returns [Object val] : ( '.' i= JavaIdentifier | '.' m= method );",
-							9, 0, input);
+							"204:1: fragment member returns [Object val] : ( '.' i= Identifier | '.' m= method );", 9,
+							0, input);
 
 			throw nvae;
 			}
 		switch(alt9)
 			{
 			case 1:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:189:4: '.' i= JavaIdentifier
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:206:4: '.' i= Identifier
 			{
-			match(input, 37, FOLLOW_37_in_member661);
+			match(input, 37, FOLLOW_37_in_member659);
 			if(failed) return val;
 			i = (Token) input.LT(1);
-			match(input, JavaIdentifier, FOLLOW_JavaIdentifier_in_member667);
+			match(input, Identifier, FOLLOW_Identifier_in_member665);
 			if(failed) return val;
 			if(backtracking == 0)
 				{
@@ -1718,11 +1640,11 @@ public final Object member() throws RecognitionException{
 			}
 			break;
 			case 2:
-				// /Users/rich/dev/clojure/src/jvm/Reader.g:190:4: '.' m= method
+				// /Users/rich/dev/clojure/src/jvm/Reader.g:207:4: '.' m= method
 			{
-			match(input, 37, FOLLOW_37_in_member674);
+			match(input, 37, FOLLOW_37_in_member672);
 			if(failed) return val;
-			pushFollow(FOLLOW_method_in_member680);
+			pushFollow(FOLLOW_method_in_member678);
 			m = method();
 			_fsp--;
 			if(failed) return val;
@@ -1753,7 +1675,7 @@ public final Object member() throws RecognitionException{
 // $ANTLR end member
 
 // $ANTLR start method
-// /Users/rich/dev/clojure/src/jvm/Reader.g:193:1: fragment method returns [Object val] : i= MethodIdentifier (es= args )? ')' ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:210:1: fragment method returns [Object val] : i= MethodIdentifier (es= args )? ')' ;
 
 public final Object method() throws RecognitionException{
 	Object val = null;
@@ -1768,18 +1690,18 @@ public final Object method() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:195:4: (i= MethodIdentifier (es= args )? ')' )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:195:4: i= MethodIdentifier (es= args )? ')'
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:212:4: (i= MethodIdentifier (es= args )? ')' )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:212:4: i= MethodIdentifier (es= args )? ')'
 		{
 		i = (Token) input.LT(1);
-		match(input, MethodIdentifier, FOLLOW_MethodIdentifier_in_method705);
+		match(input, MethodIdentifier, FOLLOW_MethodIdentifier_in_method703);
 		if(failed) return val;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:195:28: (es= args )?
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:212:28: (es= args )?
 		int alt10 = 2;
 		int LA10_0 = input.LA(1);
 
-		if(((LA10_0 >= Identifier && LA10_0 <= OctalLiteral) || LA10_0 == 28 || LA10_0 == 30 || LA10_0 == 32 ||
-		    (LA10_0 >= 35 && LA10_0 <= 36)))
+		if(((LA10_0 >= Identifier && LA10_0 <= OctalLiteral) || LA10_0 == 29 || LA10_0 == 31 || LA10_0 == 33 ||
+		    LA10_0 == 36 || (LA10_0 >= 38 && LA10_0 <= 39)))
 			{
 			alt10 = 1;
 			}
@@ -1788,7 +1710,7 @@ public final Object method() throws RecognitionException{
 			case 1:
 				// /Users/rich/dev/clojure/src/jvm/Reader.g:0:0: es= args
 			{
-			pushFollow(FOLLOW_args_in_method711);
+			pushFollow(FOLLOW_args_in_method709);
 			es = args();
 			_fsp--;
 			if(failed) return val;
@@ -1798,7 +1720,7 @@ public final Object method() throws RecognitionException{
 
 			}
 
-		match(input, 29, FOLLOW_29_in_method714);
+		match(input, 30, FOLLOW_30_in_method712);
 		if(failed) return val;
 		if(backtracking == 0)
 			{
@@ -1825,7 +1747,7 @@ public final Object method() throws RecognitionException{
 // $ANTLR end method
 
 // $ANTLR start args
-// /Users/rich/dev/clojure/src/jvm/Reader.g:198:10: fragment args returns [ISeq val] : e1= expression ( Comma e= expression )* ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:215:10: fragment args returns [ISeq val] : e1= expression ( Comma e= expression )* ;
 
 public final ISeq args() throws RecognitionException{
 	ISeq val = null;
@@ -1843,14 +1765,14 @@ public final ISeq args() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:202:4: (e1= expression ( Comma e= expression )* )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:202:4: e1= expression ( Comma e= expression )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:219:4: (e1= expression ( Comma e= expression )* )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:219:4: e1= expression ( Comma e= expression )*
 		{
-		pushFollow(FOLLOW_expression_in_args740);
+		pushFollow(FOLLOW_expression_in_args738);
 		e1 = expression();
 		_fsp--;
 		if(failed) return val;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:202:21: ( Comma e= expression )*
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:219:21: ( Comma e= expression )*
 		loop11:
 		do
 			{
@@ -1866,18 +1788,14 @@ public final ISeq args() throws RecognitionException{
 			switch(alt11)
 				{
 				case 1:
-					// /Users/rich/dev/clojure/src/jvm/Reader.g:202:22: Comma e= expression
+					// /Users/rich/dev/clojure/src/jvm/Reader.g:219:22: Comma e= expression
 				{
-				match(input, Comma, FOLLOW_Comma_in_args744);
+				match(input, Comma, FOLLOW_Comma_in_args742);
 				if(failed) return val;
-				pushFollow(FOLLOW_expression_in_args750);
+				pushFollow(FOLLOW_expression_in_args748);
 				e = expression();
 				_fsp--;
 				if(failed) return val;
-				//*WARNING- HAND MODIFIED!
-				if(es == null) es = new ArrayList();
-				es.add(e);
-				// END HAND MODIFIED*/
 
 				}
 				break;
@@ -1912,7 +1830,7 @@ public final ISeq args() throws RecognitionException{
 // $ANTLR end args
 
 // $ANTLR start dotExpression
-// /Users/rich/dev/clojure/src/jvm/Reader.g:205:1: dotExpression returns [Object val] : s= symbol (e= member )+ ;
+// /Users/rich/dev/clojure/src/jvm/Reader.g:222:1: dotExpression returns [Object val] : s= symbol (e= member )+ ;
 
 public final Object dotExpression() throws RecognitionException{
 	Object val = null;
@@ -1930,14 +1848,14 @@ public final Object dotExpression() throws RecognitionException{
 			{
 			return val;
 			}
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:209:3: (s= symbol (e= member )+ )
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:209:3: s= symbol (e= member )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:226:3: (s= symbol (e= member )+ )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:226:3: s= symbol (e= member )+
 		{
-		pushFollow(FOLLOW_symbol_in_dotExpression779);
+		pushFollow(FOLLOW_symbol_in_dotExpression777);
 		s = symbol();
 		_fsp--;
 		if(failed) return val;
-		// /Users/rich/dev/clojure/src/jvm/Reader.g:209:16: (e= member )+
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:226:16: (e= member )+
 		int cnt12 = 0;
 		loop12:
 		do
@@ -1956,14 +1874,10 @@ public final Object dotExpression() throws RecognitionException{
 				case 1:
 					// /Users/rich/dev/clojure/src/jvm/Reader.g:0:0: e= member
 				{
-				pushFollow(FOLLOW_member_in_dotExpression785);
+				pushFollow(FOLLOW_member_in_dotExpression783);
 				e = member();
 				_fsp--;
 				if(failed) return val;
-				//*WARNING- HAND MODIFIED!
-				if(es == null) es = new ArrayList();
-				es.add(e);
-				// END HAND MODIFIED*/
 
 				}
 				break;
@@ -2006,6 +1920,102 @@ public final Object dotExpression() throws RecognitionException{
 }
 // $ANTLR end dotExpression
 
+// $ANTLR start quotedExpression
+// /Users/rich/dev/clojure/src/jvm/Reader.g:229:1: quotedExpression returns [Object val] : '\\'' e= expression ;
+
+public final Object quotedExpression() throws RecognitionException{
+	Object val = null;
+	int quotedExpression_StartIndex = input.index();
+	Object e = null;
+
+
+	try
+		{
+		if(backtracking > 0 && alreadyParsedRule(input, 18))
+			{
+			return val;
+			}
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:230:3: ( '\\'' e= expression )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:230:3: '\\'' e= expression
+		{
+		match(input, 38, FOLLOW_38_in_quotedExpression801);
+		if(failed) return val;
+		pushFollow(FOLLOW_expression_in_quotedExpression807);
+		e = expression();
+		_fsp--;
+		if(failed) return val;
+		if(backtracking == 0)
+			{
+			val = RT.list(QUOTE, e);
+			}
+
+		}
+
+		}
+
+	catch(RecognitionException exc)
+		{
+		throw exc;
+		}
+	finally
+		{
+		if(backtracking > 0)
+			{
+			memoize(input, 18, quotedExpression_StartIndex);
+			}
+		}
+	return val;
+}
+// $ANTLR end quotedExpression
+
+// $ANTLR start caretExpression
+// /Users/rich/dev/clojure/src/jvm/Reader.g:233:1: caretExpression returns [Object val] : '^' e= expression ;
+
+public final Object caretExpression() throws RecognitionException{
+	Object val = null;
+	int caretExpression_StartIndex = input.index();
+	Object e = null;
+
+
+	try
+		{
+		if(backtracking > 0 && alreadyParsedRule(input, 19))
+			{
+			return val;
+			}
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:234:3: ( '^' e= expression )
+		// /Users/rich/dev/clojure/src/jvm/Reader.g:234:3: '^' e= expression
+		{
+		match(input, 39, FOLLOW_39_in_caretExpression825);
+		if(failed) return val;
+		pushFollow(FOLLOW_expression_in_caretExpression831);
+		e = expression();
+		_fsp--;
+		if(failed) return val;
+		if(backtracking == 0)
+			{
+			val = RT.list(META, e);
+			}
+
+		}
+
+		}
+
+	catch(RecognitionException exc)
+		{
+		throw exc;
+		}
+	finally
+		{
+		if(backtracking > 0)
+			{
+			memoize(input, 19, caretExpression_StartIndex);
+			}
+		}
+	return val;
+}
+// $ANTLR end caretExpression
+
 
 public static final BitSet FOLLOW_literal_in_expression73 = new BitSet(new long[]{0x0000000000000002L});
 public static final BitSet FOLLOW_symbol_in_expression83 = new BitSet(new long[]{0x0000000000000002L});
@@ -2015,58 +2025,61 @@ public static final BitSet FOLLOW_vectorExpression_in_expression113 = new BitSet
 public static final BitSet FOLLOW_mapExpression_in_expression123 = new BitSet(new long[]{0x0000000000000002L});
 public static final BitSet FOLLOW_metaExpression_in_expression133 = new BitSet(new long[]{0x0000000000000002L});
 public static final BitSet FOLLOW_dotExpression_in_expression143 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_28_in_listExpression160 = new BitSet(new long[]{0x0000001970007FF0L});
-public static final BitSet FOLLOW_expressions_in_listExpression167 = new BitSet(new long[]{0x0000000020000000L});
-public static final BitSet FOLLOW_29_in_listExpression169 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_expression_in_expressions191 = new BitSet(new long[]{0x0000001950007FF2L});
-public static final BitSet FOLLOW_30_in_vectorExpression208 = new BitSet(new long[]{0x00000019D0007FF0L});
-public static final BitSet FOLLOW_expressions_in_vectorExpression214 = new BitSet(new long[]{0x0000000080000000L});
-public static final BitSet FOLLOW_31_in_vectorExpression216 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_32_in_mapExpression236 = new BitSet(new long[]{0x0000001B50007FF0L});
-public static final BitSet FOLLOW_expression_in_mapExpression241 = new BitSet(new long[]{0x0000001950007FF0L});
-public static final BitSet FOLLOW_expression_in_mapExpression245 = new BitSet(new long[]{0x0000001B50007FF0L});
-public static final BitSet FOLLOW_33_in_mapExpression249 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_set_in_symbol266 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_set_in_symbol280 = new BitSet(new long[]{0x0000000400000000L});
-public static final BitSet FOLLOW_34_in_symbol286 = new BitSet(new long[]{0x0000000000000030L});
-public static final BitSet FOLLOW_set_in_symbol292 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_quotedExpression_in_expression153 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_caretExpression_in_expression163 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_29_in_listExpression180 = new BitSet(new long[]{0x000000D2E000FFF0L});
+public static final BitSet FOLLOW_expressions_in_listExpression187 = new BitSet(new long[]{0x0000000040000000L});
+public static final BitSet FOLLOW_30_in_listExpression189 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_expression_in_expressions211 = new BitSet(new long[]{0x000000D2A000FFF2L});
+public static final BitSet FOLLOW_31_in_vectorExpression228 = new BitSet(new long[]{0x000000D3A000FFF0L});
+public static final BitSet FOLLOW_expressions_in_vectorExpression234 = new BitSet(new long[]{0x0000000100000000L});
+public static final BitSet FOLLOW_32_in_vectorExpression236 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_33_in_mapExpression256 = new BitSet(new long[]{0x000000D6A000FFF0L});
+public static final BitSet FOLLOW_expression_in_mapExpression261 = new BitSet(new long[]{0x000000D2A000FFF0L});
+public static final BitSet FOLLOW_expression_in_mapExpression265 = new BitSet(new long[]{0x000000D6A000FFF0L});
+public static final BitSet FOLLOW_34_in_mapExpression269 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_Identifier_in_symbol286 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_NSIdentifier_in_symbol296 = new BitSet(new long[]{0x0000000000000002L});
 public static final BitSet FOLLOW_DotDot_in_symbol306 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_35_in_keyword322 = new BitSet(new long[]{0x0000000000000070L});
-public static final BitSet FOLLOW_symbol_in_keyword328 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_integerLiteral_in_literal355 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_FloatingPointLiteral_in_literal368 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_CharacterLiteral_in_literal381 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_StringLiteral_in_literal394 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_TrueToken_in_literal403 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_NullToken_in_literal412 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_ratioLiteral_in_literal425 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_DecimalLiteral_in_ratioLiteral448 = new BitSet(new long[]{0x0000000400000000L});
-public static final BitSet FOLLOW_34_in_ratioLiteral450 = new BitSet(new long[]{0x0000000000001000L});
-public static final BitSet FOLLOW_DecimalLiteral_in_ratioLiteral456 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_HexLiteral_in_integerLiteral482 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_OctalLiteral_in_integerLiteral501 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_DecimalLiteral_in_integerLiteral519 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_36_in_metaTag542 = new BitSet(new long[]{0x0000000000000070L});
-public static final BitSet FOLLOW_symbol_in_metaTag548 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_36_in_metaTag554 = new BitSet(new long[]{0x0000000100000000L});
-public static final BitSet FOLLOW_mapExpression_in_metaTag560 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_symbol_in_objExpression583 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_listExpression_in_objExpression593 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_mapExpression_in_objExpression603 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_vectorExpression_in_objExpression613 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_metaTag_in_metaExpression635 = new BitSet(new long[]{0x0000000150000070L});
-public static final BitSet FOLLOW_objExpression_in_metaExpression641 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_37_in_member661 = new BitSet(new long[]{0x0000000000000020L});
-public static final BitSet FOLLOW_JavaIdentifier_in_member667 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_37_in_member674 = new BitSet(new long[]{0x0000000000008000L});
-public static final BitSet FOLLOW_method_in_member680 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_MethodIdentifier_in_method705 = new BitSet(new long[]{0x0000001970007FF0L});
-public static final BitSet FOLLOW_args_in_method711 = new BitSet(new long[]{0x0000000020000000L});
-public static final BitSet FOLLOW_29_in_method714 = new BitSet(new long[]{0x0000000000000002L});
-public static final BitSet FOLLOW_expression_in_args740 = new BitSet(new long[]{0x0000000000010002L});
-public static final BitSet FOLLOW_Comma_in_args744 = new BitSet(new long[]{0x0000001950007FF0L});
-public static final BitSet FOLLOW_expression_in_args750 = new BitSet(new long[]{0x0000000000010002L});
-public static final BitSet FOLLOW_symbol_in_dotExpression779 = new BitSet(new long[]{0x0000002000000000L});
-public static final BitSet FOLLOW_member_in_dotExpression785 = new BitSet(new long[]{0x0000002000000002L});
+public static final BitSet FOLLOW_KeywordIdentifier_in_keyword326 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_integerLiteral_in_literal353 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_FloatingPointLiteral_in_literal366 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_CharacterLiteral_in_literal379 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_StringLiteral_in_literal392 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_TrueToken_in_literal401 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_NullToken_in_literal410 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_ratioLiteral_in_literal423 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_DecimalLiteral_in_ratioLiteral446 = new BitSet(new long[]{0x0000000800000000L});
+public static final BitSet FOLLOW_35_in_ratioLiteral448 = new BitSet(new long[]{0x0000000000002000L});
+public static final BitSet FOLLOW_DecimalLiteral_in_ratioLiteral454 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_HexLiteral_in_integerLiteral480 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_OctalLiteral_in_integerLiteral499 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_DecimalLiteral_in_integerLiteral517 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_36_in_metaTag540 = new BitSet(new long[]{0x0000000000000070L});
+public static final BitSet FOLLOW_symbol_in_metaTag546 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_36_in_metaTag552 = new BitSet(new long[]{0x0000000200000000L});
+public static final BitSet FOLLOW_mapExpression_in_metaTag558 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_symbol_in_objExpression581 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_listExpression_in_objExpression591 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_mapExpression_in_objExpression601 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_vectorExpression_in_objExpression611 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_metaTag_in_metaExpression633 = new BitSet(new long[]{0x00000002A0000070L});
+public static final BitSet FOLLOW_objExpression_in_metaExpression639 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_37_in_member659 = new BitSet(new long[]{0x0000000000000010L});
+public static final BitSet FOLLOW_Identifier_in_member665 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_37_in_member672 = new BitSet(new long[]{0x0000000000010000L});
+public static final BitSet FOLLOW_method_in_member678 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_MethodIdentifier_in_method703 = new BitSet(new long[]{0x000000D2E000FFF0L});
+public static final BitSet FOLLOW_args_in_method709 = new BitSet(new long[]{0x0000000040000000L});
+public static final BitSet FOLLOW_30_in_method712 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_expression_in_args738 = new BitSet(new long[]{0x0000000000020002L});
+public static final BitSet FOLLOW_Comma_in_args742 = new BitSet(new long[]{0x000000D2A000FFF0L});
+public static final BitSet FOLLOW_expression_in_args748 = new BitSet(new long[]{0x0000000000020002L});
+public static final BitSet FOLLOW_symbol_in_dotExpression777 = new BitSet(new long[]{0x0000002000000000L});
+public static final BitSet FOLLOW_member_in_dotExpression783 = new BitSet(new long[]{0x0000002000000002L});
+public static final BitSet FOLLOW_38_in_quotedExpression801 = new BitSet(new long[]{0x000000D2A000FFF0L});
+public static final BitSet FOLLOW_expression_in_quotedExpression807 = new BitSet(new long[]{0x0000000000000002L});
+public static final BitSet FOLLOW_39_in_caretExpression825 = new BitSet(new long[]{0x000000D2A000FFF0L});
+public static final BitSet FOLLOW_expression_in_caretExpression831 = new BitSet(new long[]{0x0000000000000002L});
 
 }

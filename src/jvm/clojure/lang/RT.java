@@ -380,19 +380,19 @@ static public ISeq list(Object arg1){
 	return new PersistentList(arg1);
 }
 
-static public ISeq list(Object arg1, Object arg2) throws Exception{
+static public ISeq list(Object arg1, Object arg2){
 	return listStar(arg1, arg2, null);
 }
 
-static public ISeq list(Object arg1, Object arg2, Object arg3) throws Exception{
+static public ISeq list(Object arg1, Object arg2, Object arg3){
 	return listStar(arg1, arg2, arg3, null);
 }
 
-static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception{
+static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4){
 	return listStar(arg1, arg2, arg3, arg4, null);
 }
 
-static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception{
+static public ISeq list(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5){
 	return listStar(arg1, arg2, arg3, arg4, arg5, null);
 }
 

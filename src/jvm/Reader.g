@@ -17,7 +17,15 @@ import java.io.Writer;
 import java.io.PrintWriter;
 } 
 @lexer::header { 
-
+/**
+ *   Copyright (c) Rich Hickey. All rights reserved.
+ *   The use and distribution terms for this software are covered by the
+ *   Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+ *   which can be found in the file CPL.TXT at the root of this distribution.
+ *   By using this software in any fashion, you are agreeing to be bound by
+ * 	 the terms of this license.
+ *   You must not remove this notice, or any other, from this software.
+ **/
  package clojure.lang; 
 } 
 @lexer::members{
@@ -41,17 +49,24 @@ import java.io.PrintWriter;
 //after:
 //            	    if (failed) return val;
 
-/*WARNING- HAND MODIFIED!
-if(es == null) es = new ArrayList();
-es.add(e);
-// END HAND MODIFIED*/	
+    /*
+    //WARNING- HAND MODIFIED!
+    if(es == null) es = new ArrayList();
+    es.add(e);
+    // END HAND MODIFIED
+    */	
+
 
 //add this to mapexpr:
-/*WARNING- HAND MODIFIED!
-	                val = val.assoc(k, v);
-// END HAND MODIFIED*/
+    /*
+    //WARNING- HAND MODIFIED!
+    	                val = val.assoc(k, v);
+    // END HAND MODIFIED
+    */
 
 final static Symbol DOTDOT = new Symbol("..");
+final static Symbol QUOTE = new Symbol("quote");
+final static Symbol META = new Symbol("meta");
 
 public static void main(String[] args) throws Exception { 
 Writer w = new PrintWriter(System.out);
@@ -67,7 +82,7 @@ ReaderParser parser = new ReaderParser(tokens);
 try{
 	if(lexer.rex != null)
 		throw lexer.rex;
-	for(int i=0;i<10;i++)
+	for(int i=0;i<20;i++)
 		{
     		Object e = parser.expression();
     		RT.print(e,w);
@@ -112,6 +127,8 @@ expression returns[Object val]
 	|me = mapExpression {$val = $me.val;}
 	|mx = metaExpression {$val = $mx.val;}
 	|g = dotExpression {$val = $g.val;}
+	|q = quotedExpression {$val = $q.val;}
+	|ct = caretExpression {$val = $ct.val;}
 	;
 	
 listExpression returns[ISeq val]
@@ -134,13 +151,13 @@ val = PersistentHashMap.EMPTY;
 	;
 
 symbol returns[Symbol val]
-	:n = (Identifier|JavaIdentifier) {$val = new Symbol($n.text);}
-	|ns = (Identifier|JavaIdentifier) '/' nn = (Identifier|JavaIdentifier) {$val = new Symbol($ns.text,$nn.text);}
+	:n = Identifier {$val = new Symbol($n.text);}
+	|n = NSIdentifier {$val = new Symbol($n.text);}
 	|dd = DotDot {$val = DOTDOT;}
 	;
 	
 keyword returns[Keyword val]
-	:':' s = symbol	{$val = new Keyword($s.val);}
+	:k = KeywordIdentifier	{$val = new Keyword($k.text.substring(1));}
 	;
 
 			
@@ -186,7 +203,7 @@ metaExpression returns [Obj val]
 
 fragment 
 member returns [Object val]
-	: '.' i = JavaIdentifier {$val = new Symbol($i.text);}
+	: '.' i = Identifier {$val = new Symbol($i.text);}
 	| '.' m = method {$val = $m.val;}
 	;
 
@@ -207,9 +224,18 @@ dotExpression returns [Object val]
 List es = null;
 }
 	:s = symbol e = member+ {$val = RT.listStar(DOTDOT,s,RT.seq(es));}
-	;	  
+	;	
+	
+quotedExpression returns[Object val]
+	:'\'' e = expression {$val = RT.list(QUOTE,e);}
+	;  
+	
+caretExpression returns[Object val]
+	:'^' e = expression {$val = RT.list(META,e);}
+	; 
 // LEXER
 Comma 	:	',';
+
 TrueToken  :   'true';
 
 NullToken  :   'null' ;
@@ -264,15 +290,26 @@ fragment
 UnicodeEscape
     :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
     ;
-	
+
+/*	
 JavaIdentifier 
     :   Letter (Letter|JavaIDDigit)*
     ;
+*/
 
 Identifier 
-    :   Letter ('-' |Letter|JavaIDDigit)*
+    :Letter ('-' |Letter|JavaIDDigit)*
     ;
-    
+  
+NSIdentifier
+	:Identifier '/' Identifier
+	;    
+	
+KeywordIdentifier
+	:':' Identifier '/' Identifier
+	|':' Identifier
+	;
+	
 MethodIdentifier 
     :   Letter (Letter|JavaIDDigit)* '('
     ;
