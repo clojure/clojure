@@ -119,6 +119,12 @@ throw exc;
 }
 
 expression returns[Object val]
+	:d = dotExpression {$val = $d.val;}
+	| e = otherThanDotExpression {$val = $e.val;}
+	;
+	
+fragment
+otherThanDotExpression returns[Object val]
 	: lt = literal {$val = $lt.val;}
 	|s = symbol {$val = $s.val;}
 	|k = keyword {$val = $k.val;}
@@ -126,7 +132,6 @@ expression returns[Object val]
 	|ve = vectorExpression {$val = $ve.val;}
 	|me = mapExpression {$val = $me.val;}
 	|mx = metaExpression {$val = $mx.val;}
-	|g = dotExpression {$val = $g.val;}
 	|q = quotedExpression {$val = $q.val;}
 	|ct = caretExpression {$val = $ct.val;}
 	;
@@ -157,7 +162,7 @@ symbol returns[Symbol val]
 	;
 	
 keyword returns[Keyword val]
-	:k = KeywordIdentifier	{$val = new Keyword($k.text.substring(1));}
+	:k = KeywordIdentifier	{$val = new Keyword(new Symbol($k.text.substring(1)));}
 	;
 
 			
@@ -223,7 +228,7 @@ dotExpression returns [Object val]
 @init{
 List es = null;
 }
-	:s = symbol e = member+ {$val = RT.listStar(DOTDOT,s,RT.seq(es));}
+	:s = otherThanDotExpression e = member+ {$val = RT.listStar(DOTDOT,s,RT.seq(es));}
 	;	
 	
 quotedExpression returns[Object val]
