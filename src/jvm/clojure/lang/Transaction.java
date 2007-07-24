@@ -34,10 +34,16 @@ static class AbortException extends Exception{
 
 //total order on transactions
 //transactions will consume a point for init, for each retry, and on commit if writing
-final static AtomicLong nextPoint = new AtomicLong(1);
+final static Object tlock = new Object();
+static long nextPoint = 1;
+//final static AtomicLong nextPoint = new AtomicLong(1);
 
 static long getNextPoint(){
-	return nextPoint.getAndIncrement();
+//	return nextPoint.getAndIncrement();
+	synchronized(tlock)
+		{
+		return nextPoint++;
+		}
 }
 
 static class PointNode{
@@ -173,11 +179,11 @@ Object run(IFn fn) throws Exception{
 			done = true;
 			//save the read point
 			long readPoint = tstamp.tpoint;
-			//get a commit point and time, bundle with state transition
-			synchronized(tstamp)
+			tstamp.msecs = System.currentTimeMillis();
+			//get a commit point + alter status, atomically
+			synchronized(tlock)
 				{
 				tstamp.tpoint = getNextPoint();
-				tstamp.msecs = System.currentTimeMillis();
 				//commit!
 				statusTransition(tstamp, TStamp.Status.COMMITTED);
 				}
