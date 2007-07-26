@@ -14,15 +14,16 @@ package clojure.lang;
 
 public class TStamp{
 
-public static enum Status {RUNNING,COMMITTED,ABORTED,RETRY}
+public static enum Status{
+	RUNNING, COMMITTED, ABORTED, RETRY
+}
 
 volatile Status status;
 volatile long tpoint;
 volatile long msecs;
 
 
-public TStamp(long tpoint, Status status){
+public TStamp(Status status){
 	this.status = status;
-	this.tpoint = tpoint;
 }
 }

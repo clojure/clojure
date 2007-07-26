@@ -165,7 +165,7 @@ void trimHistory(){
 		}
 }
 
-void trimHistoryPriorToPoint(int tpoint){
+void trimHistoryPriorToPoint(long tpoint){
 	long ctp = Transaction.completedThroughPoint();
 	for(TVal tv = getCurrentTVal(); tv != null; tv = tv.prior)
 		{
