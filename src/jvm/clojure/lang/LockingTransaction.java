@@ -30,7 +30,7 @@ static class AbortException extends Exception{
 
 //total order on transactions
 //transactions will consume a point for init, for each retry, and on commit if writing
-private static long lastPoint = 0;
+private static long lastPoint;
 final static PriorityQueue<Long> points = new PriorityQueue<Long>();
 
 
@@ -76,7 +76,7 @@ void stop(){
 }
 
 
-Ref.TStatus tstatus;
+volatile Ref.TStatus tstatus;
 long completedPriorPoint;
 long readPoint;
 HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
@@ -300,6 +300,7 @@ Object doCommute(Ref ref, IFn fn) throws Exception{
 
 //for test
 static CyclicBarrier barrier;
+static ArrayList<Ref> items;
 
 public static void main(String[] args){
 	try
@@ -311,10 +312,13 @@ public static void main(String[] args){
 		int niters = Integer.parseInt(args[2]);
 		int ninstances = Integer.parseInt(args[3]);
 
-		final ArrayList<Ref> items = new ArrayList(nitems);
-		for(int i = 0; i < nitems; i++)
-			items.add(new Ref(0));
-
+		if(items == null)
+			{
+			ArrayList<Ref> temp = new ArrayList(nitems);
+			for(int i = 0; i < nitems; i++)
+				temp.add(new Ref(0));
+			items = temp;
+			}
 
 		class Incr extends AFn{
 			public Object invoke(Object arg1) throws Exception{
@@ -345,7 +349,7 @@ public static void main(String[] args){
 				for(int i = 0; i < niters; i++)
 					{
 					long start = System.nanoTime();
-					Transaction.runInTransaction(this);
+					LockingTransaction.runInTransaction(this);
 					long dur = System.nanoTime() - start;
 					nanos += dur;
 					}
@@ -408,31 +412,44 @@ public static void main(String[] args){
 		ArrayList<Callable<Long>> tasks = new ArrayList(nthreads);
 		for(int i = 0; i < nthreads; i++)
 			{
-			ArrayList<Ref> si = (ArrayList<Ref>) items.clone();
+			ArrayList<Ref> si;
+			synchronized(items)
+				{
+				si = (ArrayList<Ref>) items.clone();
+				}
 			Collections.shuffle(si);
 			tasks.add(new Incrementer(niters, si));
+			//tasks.add(new Commuter(niters, si));
 			}
 		ExecutorService e = Executors.newFixedThreadPool(nthreads);
 
 		if(barrier == null)
 			barrier = new CyclicBarrier(ninstances);
+		System.out.println("waiting for other instances...");
 		barrier.await();
+		System.out.println("starting");
 		long start = System.nanoTime();
 		List<Future<Long>> results = e.invokeAll(tasks);
 		long estimatedTime = System.nanoTime() - start;
 		System.out.printf("nthreads: %d, nitems: %d, niters: %d, time: %d%n", nthreads, nitems, niters,
 		                  estimatedTime / 1000000);
 		e.shutdown();
-		barrier.await();
 		for(Future<Long> res : results)
 			{
 			System.out.printf("%d, ", res.get() / 1000000);
 			}
 		System.out.println();
-		for(Ref item : items)
+		System.out.println("waiting for other instances...");
+		barrier.await();
+		synchronized(items)
 			{
-			System.out.printf("%d, ", (Integer) item.currentVal());
+			for(Ref item : items)
+				{
+				System.out.printf("%d, ", (Integer) item.currentVal());
+				}
 			}
+		System.out.println("\ndone");
+		System.out.flush();
 		}
 	catch(Exception ex)
 		{

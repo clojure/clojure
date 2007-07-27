@@ -16,7 +16,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class Ref implements IFn{
+public class Ref implements IFn, Comparable<Ref>{
+public int compareTo(Ref o){
+	if(o.id == id)
+		return 0;
+	if(o.id > id)
+		return -1;
+	return 1;
+}
 
 public static class TVal{
 	final Object val;
@@ -115,11 +122,6 @@ public Object set(Object val) throws Exception{
 	Binding b = getThreadBinding();
 	if(b != null)
 		return (b.val = val);
-	//allow out-of-transaction inits via set??
-	if(!isBound())
-		{
-		//no
-		}
 	return LockingTransaction.getEx().doSet(this, val);
 }
 
