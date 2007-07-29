@@ -94,34 +94,31 @@ Object lock(Ref ref) throws Exception{
 	try
 		{
 		ref.lock.writeLock().lock();
+		if(ref.tvals != null && ref.tvals.point > readPoint)
+			throw retryex;
 		Info refinfo = ref.tinfo;
 
-		//write lock conflict?
+		//write lock conflict
 		if(refinfo != null && refinfo != info && refinfo.running())
 			{
+			boolean barged = false;
 			//if this transaction is older, and could continue if it got the lock,
 			//  try to abort the other
-			if(info.startPoint < refinfo.startPoint
-			   && (ref.tvals == null || ref.tvals.point <= readPoint)
-			   && refinfo.status.compareAndSet(RUNNING, KILLED))
+			if(info.startPoint < refinfo.startPoint)
+				barged = refinfo.status.compareAndSet(RUNNING, KILLED);
+			if(!barged)
 				{
-				ref.tinfo = info;
-				return ref.tvals == null ? null : ref.tvals.val;
+				ref.lock.writeLock().unlock();
+				unlocked = true;
+				//stop prior to blocking
+				stop(RETRY);
+				synchronized(refinfo)
+					{
+					if(refinfo.running())
+						refinfo.wait(LOCK_WAIT_MSECS);
+					}
+				throw retryex;
 				}
-			ref.lock.writeLock().unlock();
-			unlocked = true;
-			//stop prior to blocking
-			stop(RETRY);
-			synchronized(refinfo)
-				{
-				if(refinfo.running())
-					refinfo.wait(LOCK_WAIT_MSECS);
-				}
-			throw retryex;
-			}
-		if(ref.tvals != null && ref.tvals.point > readPoint)
-			{
-			throw retryex;
 			}
 		ref.tinfo = info;
 		return ref.tvals == null ? null : ref.tvals.val;
@@ -242,7 +239,8 @@ Object run(IFn fn) throws Exception{
 
 
 Object doGet(Ref ref) throws Exception{
-	if(info.running())
+	if(//true ||
+			info.running())
 		{
 		if(vals.containsKey(ref))
 			return vals.get(ref);
@@ -262,15 +260,16 @@ Object doGet(Ref ref) throws Exception{
 			ref.lock.readLock().unlock();
 			}
 		//no version of val precedes the read point
-		throw retryex;//new RetryException();
+		throw retryex;
 		}
 	else
-		throw retryex;//new RetryException();
+		throw retryex;
 
 }
 
 Object doSet(Ref ref, Object val) throws Exception{
-	if(info.running())
+	if(//true ||
+			info.running())
 		{
 		if(commutes.containsKey(ref))
 			throw new IllegalStateException("Can't set after commute");
@@ -283,18 +282,20 @@ Object doSet(Ref ref, Object val) throws Exception{
 		return val;
 		}
 	else
-		throw retryex;//new RetryException();
+		throw retryex;
 }
 
 void doTouch(Ref ref) throws Exception{
-	if(info.running())
+	if(//true ||
+			info.running())
 		lock(ref);
 	else
-		throw retryex;//new RetryException();
+		throw retryex;
 }
 
 Object doCommute(Ref ref, IFn fn) throws Exception{
-	if(info.running())
+	if(//true ||
+			info.running())
 		{
 		if(!vals.containsKey(ref))
 			{
@@ -319,7 +320,7 @@ Object doCommute(Ref ref, IFn fn) throws Exception{
 		return ret;
 		}
 	else
-		throw retryex;//new RetryException();
+		throw retryex;
 }
 
 
