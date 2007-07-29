@@ -12,11 +12,11 @@
 
 package clojure.lang;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Ref implements IFn, Comparable<Ref>{
+
 public int compareTo(Ref o){
 	if(o.id == id)
 		return 0;
@@ -40,21 +40,18 @@ public static class TVal{
 
 }
 
-public static class TStatus{
-	boolean running = true;
-}
 
 final static AtomicLong ids = new AtomicLong();
 TVal tvals;
 transient volatile InheritableThreadLocal<Binding> dvals;
 final ReentrantReadWriteLock lock;
-TStatus tstatus;
+LockingTransaction.Info tinfo;
 final long id;
 
 public Ref(){
 	this.tvals = null;
 	this.dvals = null;
-	this.tstatus = null;
+	this.tinfo = null;
 	lock = new ReentrantReadWriteLock();
 	id = ids.getAndIncrement();
 }
