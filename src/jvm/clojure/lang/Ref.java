@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Ref implements IFn, Comparable<Ref>{
@@ -26,16 +27,28 @@ public int compareTo(Ref o){
 }
 
 public static class TVal{
-	final Object val;
-	final long point;
+	Object val;
+	long point;
 	long msecs;
 	TVal prior;
+	TVal next;
 
 	TVal(Object val, long point, long msecs, TVal prior){
 		this.val = val;
 		this.point = point;
-		this.prior = prior;
 		this.msecs = msecs;
+		this.prior = prior;
+		this.next = prior.next;
+		this.prior.next = this;
+		this.next.prior = this;
+	}
+
+	TVal(Object val, long point, long msecs){
+		this.val = val;
+		this.point = point;
+		this.msecs = msecs;
+		this.next = this;
+		this.prior = this;
 	}
 
 }
@@ -43,6 +56,9 @@ public static class TVal{
 
 final static AtomicLong ids = new AtomicLong();
 TVal tvals;
+
+AtomicInteger faults;
+
 transient volatile InheritableThreadLocal<Binding> dvals;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
@@ -52,13 +68,14 @@ public Ref(){
 	this.tvals = null;
 	this.dvals = null;
 	this.tinfo = null;
+	faults = new AtomicInteger();
 	lock = new ReentrantReadWriteLock();
 	id = ids.getAndIncrement();
 }
 
 public Ref(Object initVal){
 	this();
-	tvals = new TVal(initVal, 0, System.currentTimeMillis(), null);
+	tvals = new TVal(initVal, 0, System.currentTimeMillis());
 }
 
 //ok out of transaction
@@ -150,15 +167,15 @@ boolean isBound(){
 		}
 }
 
+
 void trimHistory(){
-	long ctp = Transaction.completedThroughPoint();
 	try
 		{
 		lock.writeLock().lock();
-		for(TVal tv = tvals; tv != null; tv = tv.prior)
+		if(tvals != null)
 			{
-			if(tv.point <= ctp)
-				tv.prior = null;
+			tvals.next = tvals;
+			tvals.prior = tvals;
 			}
 		}
 	finally
@@ -166,6 +183,7 @@ void trimHistory(){
 		lock.writeLock().unlock();
 		}
 }
+
 
 final public IFn fn(){
 	return (IFn) currentVal();

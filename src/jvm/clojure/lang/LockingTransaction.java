@@ -203,16 +203,22 @@ Object run(IFn fn) throws Exception{
 				for(Map.Entry<Ref, Object> e : vals.entrySet())
 					{
 					Ref ref = e.getKey();
-//				ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs, null);
-					if(ref.tvals != null)
-						ref.tvals.prior = null;
-					ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs, ref.tvals);
-					//auto-trim
-//				for(Ref.TVal tv = ref.tvals; tv != null; tv = tv.prior)
-//					{
-//					if(tv.msecs <= msecs)
-//						tv.prior = null;
-//					}
+					if(ref.tvals == null)
+						{
+						ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs);
+						}
+					else if(ref.faults.get() > 0)
+						{
+						ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs, ref.tvals);
+						ref.faults.set(0);
+						}
+					else
+						{
+						ref.tvals = ref.tvals.next;
+						ref.tvals.val = e.getValue();
+						ref.tvals.point = commitPoint;
+						ref.tvals.msecs = msecs;
+						}
 					}
 				done = true;
 				info.status.set(COMMITTED);
@@ -239,8 +245,7 @@ Object run(IFn fn) throws Exception{
 
 
 Object doGet(Ref ref) throws Exception{
-	if(//true ||
-			info.running())
+	if(info.running())
 		{
 		if(vals.containsKey(ref))
 			return vals.get(ref);
@@ -249,17 +254,19 @@ Object doGet(Ref ref) throws Exception{
 			ref.lock.readLock().lock();
 			if(ref.tvals == null)
 				throw new IllegalStateException(ref.toString() + " is unbound.");
-			for(Ref.TVal ver = ref.tvals; ver != null; ver = ver.prior)
+			Ref.TVal ver = ref.tvals;
+			do
 				{
 				if(ver.point <= readPoint)
 					return ver.val;
-				}
+				} while((ver = ver.prior) != ref.tvals);
 			}
 		finally
 			{
 			ref.lock.readLock().unlock();
 			}
 		//no version of val precedes the read point
+		ref.faults.incrementAndGet();
 		throw retryex;
 		}
 	else
@@ -268,8 +275,7 @@ Object doGet(Ref ref) throws Exception{
 }
 
 Object doSet(Ref ref, Object val) throws Exception{
-	if(//true ||
-			info.running())
+	if(info.running())
 		{
 		if(commutes.containsKey(ref))
 			throw new IllegalStateException("Can't set after commute");
@@ -286,16 +292,14 @@ Object doSet(Ref ref, Object val) throws Exception{
 }
 
 void doTouch(Ref ref) throws Exception{
-	if(//true ||
-			info.running())
+	if(info.running())
 		lock(ref);
 	else
 		throw retryex;
 }
 
 Object doCommute(Ref ref, IFn fn) throws Exception{
-	if(//true ||
-			info.running())
+	if(info.running())
 		{
 		if(!vals.containsKey(ref))
 			{
