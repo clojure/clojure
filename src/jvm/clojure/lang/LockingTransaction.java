@@ -76,13 +76,12 @@ void stop(int status){
 
 
 Info info;
-//long completedPriorPoint;
 long readPoint;
 long startPoint;
-RetryException retryex = new RetryException();
-HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
-HashSet<Ref> sets = new HashSet<Ref>();
-TreeMap<Ref, ArrayList<IFn>> commutes = new TreeMap<Ref, ArrayList<IFn>>();
+final RetryException retryex = new RetryException();
+final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
+final HashSet<Ref> sets = new HashSet<Ref>();
+final TreeMap<Ref, ArrayList<IFn>> commutes = new TreeMap<Ref, ArrayList<IFn>>();
 
 void getReadPoint(){
 	readPoint = lastPoint.incrementAndGet();
@@ -102,10 +101,17 @@ Object lock(Ref ref) throws Exception{
 		if(refinfo != null && refinfo != info && refinfo.running())
 			{
 			boolean barged = false;
-			//if this transaction is older, and could continue if it got the lock,
+			//if this transaction is older
 			//  try to abort the other
 			if(info.startPoint < refinfo.startPoint)
-				barged = refinfo.status.compareAndSet(RUNNING, KILLED);
+				{
+				synchronized(refinfo)
+					{
+					barged = refinfo.status.compareAndSet(RUNNING, KILLED);
+					if(barged)
+						refinfo.notifyAll();
+					}
+				}
 			if(!barged)
 				{
 				ref.lock.writeLock().unlock();
