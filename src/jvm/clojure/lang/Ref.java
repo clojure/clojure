@@ -55,20 +55,21 @@ public static class TVal{
 
 
 final static AtomicLong ids = new AtomicLong();
+
 TVal tvals;
-
-AtomicInteger faults;
-
+final AtomicInteger faults;
 transient volatile InheritableThreadLocal<Binding> dvals;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
 final long id;
+transient volatile Object cached;
 
 public Ref(){
 	this.tvals = null;
 	this.dvals = null;
 	this.tinfo = null;
 	faults = new AtomicInteger();
+	this.cached = faults;  //use faults as magic never-been-set value
 	lock = new ReentrantReadWriteLock();
 	id = ids.getAndIncrement();
 }
@@ -78,7 +79,31 @@ public Ref(Object initVal){
 	tvals = new TVal(initVal, 0, System.currentTimeMillis());
 }
 
-//ok out of transaction
+//not necessarily the latest val
+
+// ok out of transaction
+public Object cachedVal(){
+	Binding b = getThreadBinding();
+	if(b != null)
+		return b.val;
+	if(cached != faults)
+		return cached;
+	try
+		{
+		lock.readLock().lock();
+		if(tvals != null)
+			return cached = tvals.val;
+		throw new IllegalStateException(this.toString() + " is unbound.");
+		}
+	finally
+		{
+		lock.readLock().unlock();
+		}
+}
+
+//the latest val
+
+// ok out of transaction
 public Object currentVal(){
 	Binding b = getThreadBinding();
 	if(b != null)
@@ -87,7 +112,7 @@ public Object currentVal(){
 		{
 		lock.readLock().lock();
 		if(tvals != null)
-			return tvals.val;
+			return cached = tvals.val;
 		throw new IllegalStateException(this.toString() + " is unbound.");
 		}
 	finally
@@ -125,11 +150,11 @@ public void popThreadBinding() throws Exception{
 //*
 
 //must be dynamically bound or transactional read
-public Object val() throws Exception{
+public Object get() throws Exception{
 	Binding b = getThreadBinding();
 	if(b != null)
 		return b.val;
-	return LockingTransaction.getEx().doGet(this);
+	return cached = LockingTransaction.getEx().doGet(this);
 }
 
 public Object set(Object val) throws Exception{
@@ -186,7 +211,7 @@ void trimHistory(){
 
 
 final public IFn fn(){
-	return (IFn) currentVal();
+	return (IFn) cachedVal();
 }
 
 public Object invoke() throws Exception{

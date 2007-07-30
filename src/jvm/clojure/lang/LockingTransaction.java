@@ -437,9 +437,11 @@ public static void main(String[] args){
 				for(Ref tref : items)
 					{
 					//Transaction.get().doTouch(tref);
-					LockingTransaction t = LockingTransaction.getEx();
-					int val = (Integer) t.doGet(tref);
-					t.doSet(tref, val + 1);
+//					LockingTransaction t = LockingTransaction.getEx();
+//					int val = (Integer) t.doGet(tref);
+//					t.doSet(tref, val + 1);
+					int val = (Integer) tref.get();
+					tref.set(val + 1);
 					}
 				return null;
 			}
