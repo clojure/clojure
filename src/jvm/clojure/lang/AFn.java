@@ -21,6 +21,9 @@ public AFn(IPersistentMap meta){
 public AFn(){
 }
 
+public Obj withMeta(IPersistentMap meta){
+	throw new UnsupportedOperationException();
+}
 
 public Object call() throws Exception{
 	return invoke();
