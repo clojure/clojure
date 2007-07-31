@@ -39,33 +39,33 @@ static Symbol USE = new Symbol("use");
 static Symbol _AMP_KEY = new Symbol("&key");
 static Symbol _AMP_REST = new Symbol("&rest");
 
-static public TRef _CRT_OUT = RT.OUT;
-static public TRef _CRT_MODULE = RT.CURRENT_MODULE;
+static public DynamicVar _CRT_OUT = RT.OUT;
+static public DynamicVar _CRT_MODULE = RT.CURRENT_MODULE;
 
 static NilExpr NIL_EXPR = new NilExpr();
 
 //short-name-string->full-name-string
-static public TRef IMPORTS = new TRef();
+static public DynamicVar IMPORTS = new DynamicVar();
 
 //keyword->keywordexpr
-static public TRef KEYWORDS = new TRef();
+static public DynamicVar KEYWORDS = new DynamicVar();
 
 //var->var
-static public TRef VARS = new TRef();
+static public DynamicVar VARS = new DynamicVar();
 
 //symbol->localbinding
-static public TRef LOCAL_ENV = new TRef();
+static public DynamicVar LOCAL_ENV = new DynamicVar();
 
 
 //FnFrame
-static public TRef METHOD = new TRef();
+static public DynamicVar METHOD = new DynamicVar();
 
 //module->module
-static public TRef USES = new TRef();
+static public DynamicVar USES = new DynamicVar();
 
 
 //ISeq FnExprs
-static public TRef FNS = new TRef();
+static public DynamicVar FNS = new DynamicVar();
 
 static public IPersistentMap CHAR_MAP =
 		new PersistentArrayMap(new Object[]{'-', "_DSH_",
@@ -136,7 +136,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 						//makes entries in IMPORTS for:
 						//"ThisClass"->"org.package.ThisClass"
 						//"ThatClass"->"org.package.ThatClass"
-						IPersistentMap importMap = (IPersistentMap) IMPORTS.currentVal();
+						IPersistentMap importMap = (IPersistentMap) IMPORTS.get();
 						String pkg = RT.second(form).toString();
 						for(ISeq classes = RT.rest(RT.rest(form)); classes != null; classes = classes.rest())
 							{
@@ -160,21 +160,21 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 				}
 			}
 		//declare static members for keywords, vars
-		for(ISeq keys = RT.seq(KEYWORDS.currentVal()); keys != null; keys = keys.rest())
+		for(ISeq keys = RT.seq(KEYWORDS.get()); keys != null; keys = keys.rest())
 			{
 			KeywordExpr k = (KeywordExpr) ((IMapEntry) keys.first()).val();
 			format("static Keyword ~A;~%", k.emitExpressionString());
 			}
-		for(ISeq vars = RT.seq(VARS.currentVal()); vars != null; vars = vars.rest())
+		for(ISeq vars = RT.seq(VARS.get()); vars != null; vars = vars.rest())
 			{
-			TRef v = (TRef) ((IMapEntry) vars.first()).val();
-			format("static TRef ~A;~%", munge(v.toString()));
+			DynamicVar v = (DynamicVar) ((IMapEntry) vars.first()).val();
+			format("static DynamicVar ~A;~%", munge(v.toString()));
 			}
 
 		//todo declare static members for syms, quoted aggregates
 
 		//emit nested static class/method declarations for nested fns
-		PersistentVector fns = (PersistentVector) FNS.currentVal();
+		PersistentVector fns = (PersistentVector) FNS.get();
 		for(int f = 0; f < fns.count(); f++)
 			{
 			FnExpr fn = (FnExpr) fns.nth(f);
@@ -184,14 +184,14 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 		//define the load function
 		format("public void load() throws Exception{~%");
 		//init the keywords and vars
-		for(ISeq keys = RT.seq(KEYWORDS.currentVal()); keys != null; keys = keys.rest())
+		for(ISeq keys = RT.seq(KEYWORDS.get()); keys != null; keys = keys.rest())
 			{
 			KeywordExpr k = (KeywordExpr) ((IMapEntry) keys.first()).val();
 			format("~A = (Keyword)Symbol.intern(~S);~%", k.emitExpressionString(), k.sym.name);
 			}
-		for(ISeq vars = RT.seq(VARS.currentVal()); vars != null; vars = vars.rest())
+		for(ISeq vars = RT.seq(VARS.get()); vars != null; vars = vars.rest())
 			{
-			TRef v = (TRef) ((IMapEntry) vars.first()).val();
+			DynamicVar v = (DynamicVar) ((IMapEntry) vars.first()).val();
 			//!format("~A = Module.intern(~S,~S);~%", munge(v.toString()), v.module.name, v.name.name);
 			}
 		//todo init syms and quoted aggregates
@@ -794,7 +794,7 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception{
 		}
 	try
 		{
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.get());
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
@@ -820,7 +820,7 @@ private static Expr analyzeLetFn(C context, ISeq form) throws Exception{
 		return analyze(context, RT.list(RT.list(FN, null, form)));
 	try
 		{
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.get());
 		ISeq bindings = (ISeq) RT.second(form);
 		ISeq body = RT.rest(RT.rest(form));
 		PersistentVector bindingPairs = PersistentVector.EMPTY;
@@ -867,7 +867,7 @@ private static Expr analyzeLetStar(C context, ISeq form) throws Exception{
 
 	try
 		{
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.get());
 		PersistentVector bindingInits = PersistentVector.EMPTY;
 		for(ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
 			{
@@ -1411,9 +1411,9 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 	ISeq body = RT.rest(form);
 	try
 		{
-		FnMethod method = new FnMethod(fn, (FnMethod) METHOD.currentVal());
+		FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
 		METHOD.pushThreadBinding(method);
-		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.currentVal());
+		LOCAL_ENV.pushThreadBinding(LOCAL_ENV.get());
 		PSTATE state = PSTATE.REQ;
 		for(ISeq ps = parms; ps != null; ps = ps.rest())
 			{
@@ -1489,8 +1489,8 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception{
 	if(form.count() > 3)
 		throw new Exception("Too many arguments to def");
 	Symbol sym = (Symbol) RT.second(form);
-	Module module = (Module) _CRT_MODULE.currentVal();
-	TRef var = null;//!module.intern(baseSymbol(sym));
+	Module module = (Module) _CRT_MODULE.get();
+	DynamicVar var = null;//!module.intern(baseSymbol(sym));
 	registerVar(var);
 	VarExpr ve = new VarExpr(var, typeHint(sym));
 	Expr init = analyze(C.EXPRESSION, macroexpand(RT.third(form)));
@@ -1542,19 +1542,19 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
 			b.valueTaken = true;
 		return new LocalBindingExpr(b, typeHint);
 		}
-	TRef v = lookupVar(sym);
+	DynamicVar v = lookupVar(sym);
 	if(v != null)
 		return new VarExpr(v, typeHint);
 	throw new Exception("Unable to resolve symbol: " + sym.name + " in this context");
 	}
 }
 
-static TRef lookupVar(Symbol sym) throws Exception{
-	Module module = (Module) _CRT_MODULE.currentVal();
+static DynamicVar lookupVar(Symbol sym) throws Exception{
+	Module module = (Module) _CRT_MODULE.get();
 //	Var v = module.find(sym);
 //	if(v != null)
 //		return v;
-//	for(ISeq seq = RT.seq(USES.currentVal()); seq != null; seq = RT.rest(seq))
+//	for(ISeq seq = RT.seq(USES.get()); seq != null; seq = RT.rest(seq))
 //		{
 //		module = (Module) ((IMapEntry) RT.first(seq)).key();
 //		v = module.find(sym);
@@ -1569,21 +1569,21 @@ static Object macroexpand(Object x){
 }
 
 private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
-	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.currentVal();
+	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.get();
 	KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
 //!	if(ke == null)
 //!		KEYWORDS.set(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
 	return ke;
 }
 
-private static void registerVar(TRef var) throws Exception{
-	IPersistentMap varsMap = (IPersistentMap) VARS.currentVal();
+private static void registerVar(DynamicVar var) throws Exception{
+	IPersistentMap varsMap = (IPersistentMap) VARS.get();
 	if(RT.get(var, varsMap) == null)
 		VARS.set(RT.assoc(varsMap, var, var));
 }
 
 private static void registerFn(FnExpr fn) throws Exception{
-	FNS.set(RT.cons(fn, (IPersistentCollection) FNS.currentVal()));
+	FNS.set(RT.cons(fn, (IPersistentCollection) FNS.get()));
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
@@ -1596,18 +1596,18 @@ static void closeOver(LocalBinding b, FnMethod method){
 }
 
 static LocalBinding referenceLocal(Symbol sym) throws Exception{
-	LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.currentVal());
+	LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.get());
 	if(b != null)
 		{
-		closeOver(b, (FnMethod) METHOD.currentVal());
+		closeOver(b, (FnMethod) METHOD.get());
 		}
 	return b;
 }
 
 private static void registerLocal(LocalBinding b) throws Exception{
-	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.currentVal();
+	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
 	//!LOCAL_ENV.setValue(RT.assoc(b.sym, b, localsMap));
-	FnMethod method = (FnMethod) METHOD.currentVal();
+	FnMethod method = (FnMethod) METHOD.get();
 	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
 }
 /*
@@ -1630,7 +1630,7 @@ static String resolveHostClassname(String classname) throws Exception{
 		return classname;
 	if(isPrimitive(classname))
 		return classname;
-	IPersistentMap importMap = (IPersistentMap) IMPORTS.currentVal();
+	IPersistentMap importMap = (IPersistentMap) IMPORTS.get();
 	String fullyQualifiedName = (String) RT.get(classname, importMap);
 	if(fullyQualifiedName == null)
 		throw new Exception("Can't resolve type name: " + classname);
@@ -1929,10 +1929,10 @@ static class LocalBindingExpr extends AnExpr{
 }
 
 static class VarExpr extends AnExpr{
-	final TRef var;
+	final DynamicVar var;
 	final String typeHint;
 
-	public VarExpr(TRef var, String typeHint){
+	public VarExpr(DynamicVar var, String typeHint){
 		this.var = var;
 		this.typeHint = typeHint;
 	}
@@ -1942,7 +1942,7 @@ static class VarExpr extends AnExpr{
 	}
 
 	public void emitExpression() throws Exception{
-		format("~A.currentVal()", getName());
+		format("~A.get()", getName());
 	}
 
 	public Class getHostType() throws Exception{

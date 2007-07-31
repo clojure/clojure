@@ -24,7 +24,7 @@ static final public ConcurrentHashMap<String, Module> table = new ConcurrentHash
 /**
  * Symbol->Var
  */
-final public TRef<IPersistentMap> vars = new TRef(PersistentHashMap.EMPTY);
+final public Ref vars = new Ref(PersistentHashMap.EMPTY);
 final public String name;
 
 Module(String name){
@@ -42,23 +42,23 @@ static public Module findOrCreateModule(String name){
 	return module;
 }
 
-public TRef findRef(String name) throws Exception{
-	return (TRef) vars.val().valAt(name);
+public Ref findRef(String name) throws Exception{
+	return (Ref) ((IPersistentMap) vars.get()).valAt(name);
 }
 
-public static TRef intern(String moduleName, String name) throws Exception{
+public static Ref intern(String moduleName, String name) throws Exception{
 	Module module = findModule(moduleName);
 	if(module == null)
 		throw new Exception(String.format("Module %s not found", moduleName));
 	return module.intern(name);
 }
 
-public TRef intern(String name) throws Exception{
+public Ref intern(String name) throws Exception{
 	//must be called in transaction
-	IPersistentMap varmap = vars.val();
-	TRef var = (TRef) varmap.valAt(name);
+	IPersistentMap varmap = (IPersistentMap) vars.get();
+	Ref var = (Ref) varmap.valAt(name);
 	if(var == null)
-		vars.set(varmap.assoc(name, var = new TRef()));
+		vars.set(varmap.assoc(name, var = new Ref()));
 	return var;
 }
 

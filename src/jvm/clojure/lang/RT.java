@@ -19,10 +19,10 @@ import java.io.*;
 public class RT{
 
 static public Symbol T = new Symbol("t");
-final static public TRef OUT = new TRef(new OutputStreamWriter(System.out));
+final static public DynamicVar OUT = new DynamicVar(new OutputStreamWriter(System.out));
 final static Keyword TAG_KEY = new Keyword("clojure", "tag");
 
-final static public TRef CURRENT_MODULE = new TRef(Module.findOrCreateModule("clojure/user"));
+final static public DynamicVar CURRENT_MODULE = new DynamicVar(Module.findOrCreateModule("clojure/user"));
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Character[] chars;
@@ -637,7 +637,7 @@ static public Object format(Object o, String s, Object... args) throws Exception
 	if(o == null)
 		w = new StringWriter();
 	else if(equal(o, T))
-		w = (Writer) OUT.currentVal();
+		w = (Writer) OUT.get();
 	else
 		w = (Writer) o;
 	doFormat(w, s, ArraySeq.create(args));
