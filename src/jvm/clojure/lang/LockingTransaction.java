@@ -32,7 +32,7 @@ static final int COMMITTED = 4;
 
 final static ThreadLocal<LockingTransaction> transaction = new ThreadLocal<LockingTransaction>();
 
-static class RetryException extends Exception{
+static class RetryException extends Error{
 }
 
 static class AbortException extends Exception{
@@ -92,7 +92,7 @@ final TreeMap<Ref, ArrayList<IFn>> commutes = new TreeMap<Ref, ArrayList<IFn>>()
 
 
 //returns the most recent val
-Object lock(Ref ref) throws Exception{
+Object lock(Ref ref){
 	boolean unlocked = false;
 	try
 		{
@@ -113,7 +113,15 @@ Object lock(Ref ref) throws Exception{
 				synchronized(refinfo)
 					{
 					if(refinfo.running())
-						refinfo.wait(LOCK_WAIT_MSECS);
+						{
+						try
+							{
+							refinfo.wait(LOCK_WAIT_MSECS);
+							}
+						catch(InterruptedException e)
+							{
+							}
+						}
 					}
 				throw retryex;
 				}
@@ -153,10 +161,10 @@ private boolean barge(Info refinfo){
 	return barged;
 }
 
-static LockingTransaction getEx() throws Exception{
+static LockingTransaction getEx(){
 	LockingTransaction t = transaction.get();
 	if(t.info == null)
-		throw new Exception("No transaction running");
+		throw new IllegalStateException("No transaction running");
 	return t;
 }
 
@@ -267,7 +275,7 @@ Object run(IFn fn) throws Exception{
 }
 
 
-Object doGet(Ref ref) throws Exception{
+Object doGet(Ref ref){
 	if(!info.running())
 		throw retryex;
 	if(vals.containsKey(ref))
@@ -294,7 +302,7 @@ Object doGet(Ref ref) throws Exception{
 
 }
 
-Object doSet(Ref ref, Object val) throws Exception{
+Object doSet(Ref ref, Object val){
 	if(!info.running())
 		throw retryex;
 	if(commutes.containsKey(ref))
@@ -308,7 +316,7 @@ Object doSet(Ref ref, Object val) throws Exception{
 	return val;
 }
 
-void doTouch(Ref ref) throws Exception{
+void doTouch(Ref ref){
 	if(!info.running())
 		throw retryex;
 	lock(ref);

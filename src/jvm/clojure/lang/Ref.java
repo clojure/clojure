@@ -126,11 +126,11 @@ public Object currentVal(){
 //*
 
 //must be dynamically bound or transactional read
-public Object get() throws Exception{
+public Object get(){
 	return cacheVal = LockingTransaction.getEx().doGet(this);
 }
 
-public Object set(Object val) throws Exception{
+public Object set(Object val){
 	return LockingTransaction.getEx().doSet(this, val);
 }
 
@@ -138,7 +138,7 @@ public Object commute(IFn fn) throws Exception{
 	return LockingTransaction.getEx().doCommute(this, fn);
 }
 
-public void touch() throws Exception{
+public void touch(){
 	LockingTransaction.getEx().doTouch(this);
 }
 
