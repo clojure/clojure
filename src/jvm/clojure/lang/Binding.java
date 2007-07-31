@@ -10,16 +10,17 @@
 
 package clojure.lang;
 
-public class Binding {
+public class Binding{
 public Object val;
-public Binding rest;
+public final Binding rest;
 
-public Binding(Object val) {
-    this.val = val;
+public Binding(Object val){
+	this.val = val;
+	this.rest = null;
 }
 
-public Binding(Object val, Binding rest) {
-    this.val = val;
-    this.rest = rest;
+public Binding(Object val, Binding rest){
+	this.val = val;
+	this.rest = rest;
 }
 }

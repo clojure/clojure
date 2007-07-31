@@ -52,7 +52,6 @@ public static class TVal{
 
 TVal tvals;
 final AtomicInteger faults;
-transient volatile InheritableThreadLocal<Binding> dvals;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
 final UUID uuid;
@@ -60,7 +59,6 @@ transient volatile Object cacheVal;
 
 public Ref(){
 	this.tvals = null;
-	this.dvals = null;
 	this.tinfo = null;
 	this.faults = new AtomicInteger();
 	this.lock = new ReentrantReadWriteLock();
@@ -78,7 +76,6 @@ public Ref(Object initVal){
 //use only with a cache/registry
 public Ref(UUID uuid, Object initVal){
 	tvals = new TVal(initVal, 0, System.currentTimeMillis());
-	this.dvals = null;
 	this.tinfo = null;
 	this.faults = new AtomicInteger();
 	this.lock = new ReentrantReadWriteLock();
@@ -94,9 +91,6 @@ public UUID getUUID(){
 
 // ok out of transaction
 public Object cachedVal(){
-	Binding b = getThreadBinding();
-	if(b != null)
-		return b.val;
 	if(cacheVal != lock)
 		return cacheVal;
 	try
@@ -116,9 +110,6 @@ public Object cachedVal(){
 
 // ok out of transaction
 public Object currentVal(){
-	Binding b = getThreadBinding();
-	if(b != null)
-		return b.val;
 	try
 		{
 		lock.readLock().lock();
@@ -132,66 +123,27 @@ public Object currentVal(){
 		}
 }
 
-
-final Binding getThreadBinding(){
-	if(dvals != null)
-		return dvals.get();
-	return null;
-}
-
-public void pushThreadBinding(Object val){
-	if(dvals == null)
-		{
-		synchronized(this)
-			{
-			if(dvals == null)
-				dvals = new InheritableThreadLocal();
-			}
-		}
-	dvals.set(new Binding(val, dvals.get()));
-}
-
-public void popThreadBinding() throws Exception{
-	Binding b;
-	if(dvals == null || (b = dvals.get()) == null)
-		throw new Exception("Can't pop unbound ref");
-	dvals.set(b.rest);
-}
-
 //*
 
 //must be dynamically bound or transactional read
 public Object get() throws Exception{
-	Binding b = getThreadBinding();
-	if(b != null)
-		return b.val;
 	return cacheVal = LockingTransaction.getEx().doGet(this);
 }
 
 public Object set(Object val) throws Exception{
-	Binding b = getThreadBinding();
-	if(b != null)
-		return (b.val = val);
 	return LockingTransaction.getEx().doSet(this, val);
 }
 
 public Object commute(IFn fn) throws Exception{
-	Binding b = getThreadBinding();
-	if(b != null)
-		return (b.val = fn.invoke(b.val));
 	return LockingTransaction.getEx().doCommute(this, fn);
 }
 
 public void touch() throws Exception{
-	Binding b = getThreadBinding();
-	if(b == null)
-		LockingTransaction.getEx().doTouch(this);
+	LockingTransaction.getEx().doTouch(this);
 }
 
 //*/
 boolean isBound(){
-	if(dvals != null && dvals.get() != null)
-		return true;
 	try
 		{
 		lock.readLock().lock();
