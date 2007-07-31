@@ -459,7 +459,7 @@ final static class BitmapIndexedNode implements INode{
 
 }
 
-final static class LeafNode implements INode, IMapEntry{
+final static class LeafNode implements INode, IMapEntry, Map.Entry{
 	final int hash;
 	final Object key;
 	final Object val;
@@ -516,6 +516,17 @@ final static class LeafNode implements INode, IMapEntry{
 		return this.val;
 	}
 
+	public Object getKey(){
+		return this.key;
+	}
+
+	public Object getValue(){
+		return this.val;
+	}
+
+	public Object setValue(Object value){
+		throw new UnsupportedOperationException();
+	}
 }
 
 final static class HashCollisionNode implements INode{
