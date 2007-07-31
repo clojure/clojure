@@ -461,8 +461,8 @@ public static void main(String[] args){
 				si = (ArrayList<Ref>) items.clone();
 				}
 			Collections.shuffle(si);
-			tasks.add(new Incrementer(niters, si));
-			//tasks.add(new Commuter(niters, si));
+			//tasks.add(new Incrementer(niters, si));
+			tasks.add(new Commuter(niters, si));
 			}
 		ExecutorService e = Executors.newFixedThreadPool(nthreads);
 

@@ -12,18 +12,14 @@
 
 package clojure.lang;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.UUID;
 
 public class Ref implements IFn, Comparable<Ref>{
 
 public int compareTo(Ref o){
-	if(o.id == id)
-		return 0;
-	if(o.id > id)
-		return -1;
-	return 1;
+	return uuid.compareTo(o.uuid);
 }
 
 public static class TVal{
@@ -54,29 +50,44 @@ public static class TVal{
 }
 
 
-final static AtomicLong ids = new AtomicLong();
-
 TVal tvals;
 final AtomicInteger faults;
 transient volatile InheritableThreadLocal<Binding> dvals;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
-final long id;
-transient volatile Object cached;
+final UUID uuid;
+transient volatile Object cacheVal;
 
 public Ref(){
 	this.tvals = null;
 	this.dvals = null;
 	this.tinfo = null;
-	faults = new AtomicInteger();
-	this.cached = faults;  //use faults as magic never-been-set value
-	lock = new ReentrantReadWriteLock();
-	id = ids.getAndIncrement();
+	this.faults = new AtomicInteger();
+	this.lock = new ReentrantReadWriteLock();
+	this.cacheVal = lock;  //use lock as magic never-been-set value
+	this.uuid = UUID.randomUUID();
 }
 
 public Ref(Object initVal){
 	this();
 	tvals = new TVal(initVal, 0, System.currentTimeMillis());
+}
+
+//note - makes no attempt to ensure there is no other Ref with same UUID
+
+//use only with a cache/registry
+public Ref(UUID uuid, Object initVal){
+	tvals = new TVal(initVal, 0, System.currentTimeMillis());
+	this.dvals = null;
+	this.tinfo = null;
+	this.faults = new AtomicInteger();
+	this.lock = new ReentrantReadWriteLock();
+	this.cacheVal = lock;  //use lock as magic never-been-set value
+	this.uuid = uuid;
+}
+
+public UUID getUUID(){
+	return uuid;
 }
 
 //not necessarily the latest val
@@ -86,13 +97,13 @@ public Object cachedVal(){
 	Binding b = getThreadBinding();
 	if(b != null)
 		return b.val;
-	if(cached != faults)
-		return cached;
+	if(cacheVal != lock)
+		return cacheVal;
 	try
 		{
 		lock.readLock().lock();
 		if(tvals != null)
-			return cached = tvals.val;
+			return cacheVal = tvals.val;
 		throw new IllegalStateException(this.toString() + " is unbound.");
 		}
 	finally
@@ -112,7 +123,7 @@ public Object currentVal(){
 		{
 		lock.readLock().lock();
 		if(tvals != null)
-			return cached = tvals.val;
+			return cacheVal = tvals.val;
 		throw new IllegalStateException(this.toString() + " is unbound.");
 		}
 	finally
@@ -154,7 +165,7 @@ public Object get() throws Exception{
 	Binding b = getThreadBinding();
 	if(b != null)
 		return b.val;
-	return cached = LockingTransaction.getEx().doGet(this);
+	return cacheVal = LockingTransaction.getEx().doGet(this);
 }
 
 public Object set(Object val) throws Exception{
