@@ -19,6 +19,10 @@ public InstanceMemberInvoker(String className, String memberName){
 	this.memberName = memberName;
 }
 
+public Object call() throws Exception{
+	return invoke();
+}
+
 public Object invoke() throws Exception{
 	return AFn.throwArity();
 }

@@ -55,6 +55,10 @@ public String toString(){
 	return ":" + sym;
 }
 
+public Object call() throws Exception{
+	return AFn.throwArity();
+}
+
 public Object invoke() throws Exception{
 	return AFn.throwArity();
 }

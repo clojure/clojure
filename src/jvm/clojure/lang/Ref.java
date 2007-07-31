@@ -177,6 +177,10 @@ final public IFn fn(){
 	return (IFn) cachedVal();
 }
 
+public Object call() throws Exception{
+	return invoke();
+}
+
 public Object invoke() throws Exception{
 	return fn().invoke();
 }

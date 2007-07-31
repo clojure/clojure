@@ -21,6 +21,11 @@ public AFn(IPersistentMap meta){
 public AFn(){
 }
 
+
+public Object call() throws Exception{
+	return invoke();
+}
+
 public Object invoke() throws Exception{
 	return throwArity();
 }

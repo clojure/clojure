@@ -57,6 +57,9 @@ public static class Info{
 //transactions will consume a point for init, for each retry, and on commit if writing
 final private static AtomicInteger lastPoint = new AtomicInteger();
 
+void getReadPoint(){
+	readPoint = lastPoint.incrementAndGet();
+}
 
 long getCommitPoint(){
 	return lastPoint.incrementAndGet();
@@ -87,9 +90,6 @@ final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
 final HashSet<Ref> sets = new HashSet<Ref>();
 final TreeMap<Ref, ArrayList<IFn>> commutes = new TreeMap<Ref, ArrayList<IFn>>();
 
-void getReadPoint(){
-	readPoint = lastPoint.incrementAndGet();
-}
 
 //returns the most recent val
 Object lock(Ref ref) throws Exception{

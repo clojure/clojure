@@ -19,6 +19,10 @@ public StaticMemberInvoker(String className, String memberName){
 	this.memberName = memberName;
 }
 
+public Object call() throws Exception{
+	return invoke();
+}
+
 public Object invoke() throws Exception{
 	return Reflector.invokeStaticMethod(memberName, className);
 }
