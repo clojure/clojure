@@ -1,4 +1,4 @@
-// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-07-20 09:22:37
+// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-08-02 16:47:44
 
 package clojure.lang;
 
@@ -92,9 +92,9 @@ public String getGrammarFileName(){
 		// END HAND MODIFIED
 		*/
 
-final static Symbol DOTDOT = new Symbol("..");
-final static Symbol QUOTE = new Symbol("quote");
-final static Symbol META = new Symbol("meta");
+final static Symbol DOTDOT = Symbol.create(null, "..");
+final static Symbol QUOTE = Symbol.create(null, "quote");
+final static Symbol META = Symbol.create(null, "meta");
 
 public static void main(String[] args) throws Exception{
 	Writer w = new PrintWriter(System.out);
@@ -1292,7 +1292,7 @@ public final Symbol symbol() throws RecognitionException{
 			if(failed) return val;
 			if(backtracking == 0)
 				{
-				val = new Symbol(n.getText());
+				val = Symbol.intern(n.getText());
 				}
 
 			}
@@ -1305,7 +1305,7 @@ public final Symbol symbol() throws RecognitionException{
 			if(failed) return val;
 			if(backtracking == 0)
 				{
-				val = new Symbol(n.getText());
+				val = Symbol.intern(n.getText());
 				}
 
 			}
@@ -1364,7 +1364,7 @@ public final Keyword keyword() throws RecognitionException{
 		if(failed) return val;
 		if(backtracking == 0)
 			{
-			val = new Keyword(new Symbol(k.getText().substring(1)));
+			val = new Keyword(Symbol.intern(k.getText().substring(1)));
 			}
 
 		}
@@ -2133,7 +2133,7 @@ public final Object member() throws RecognitionException{
 			if(failed) return val;
 			if(backtracking == 0)
 				{
-				val = new Symbol(i.getText());
+				val = Symbol.intern(i.getText());
 				}
 
 			}
@@ -2223,7 +2223,7 @@ public final Object method() throws RecognitionException{
 		if(failed) return val;
 		if(backtracking == 0)
 			{
-			val = RT.cons(new Symbol(i.getText().substring(0, i.getText().length() - 1)), es);
+			val = RT.cons(Symbol.intern(i.getText().substring(0, i.getText().length() - 1)), es);
 			}
 
 		}

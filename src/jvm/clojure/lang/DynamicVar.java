@@ -30,7 +30,7 @@ boolean isBound(){
 	return root != dvals || dvals.get() != null;
 }
 
-public Object get() throws Exception{
+public Object get(){
 	Binding b = getThreadBinding();
 	if(b != null)
 		return b.val;
@@ -39,7 +39,7 @@ public Object get() throws Exception{
 	throw new IllegalStateException("Var is unbound.");
 }
 
-public Object set(Object val) throws Exception{
+public Object set(Object val){
 	Binding b = getThreadBinding();
 	if(b != null)
 		return (b.val = val);
@@ -58,10 +58,10 @@ public void pushThreadBinding(Object val){
 	dvals.set(new Binding(val, dvals.get()));
 }
 
-public void popThreadBinding() throws Exception{
+public void popThreadBinding(){
 	Binding b = dvals.get();
 	if(b == null)
-		throw new Exception("Can't pop unbound ref");
+		throw new IllegalStateException("Can't pop unbound ref");
 	dvals.set(b.rest);
 }
 

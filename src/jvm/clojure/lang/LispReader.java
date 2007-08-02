@@ -18,10 +18,10 @@ import java.math.BigInteger;
 
 public class LispReader{
 
-static Symbol QUOTE = new Symbol("quote");
-static Symbol BACKQUOTE = new Symbol("backquote");
-static Symbol UNQUOTE = new Symbol("unquote");
-static Symbol UNQUOTE_SPLICING = new Symbol("unquote-splicing");
+static Symbol QUOTE = Symbol.create(null, "quote");
+static Symbol BACKQUOTE = Symbol.create(null, "backquote");
+static Symbol UNQUOTE = Symbol.create(null, "unquote");
+static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 
 static IFn[] macros = new IFn[256];
 static Pattern symbolPat = Pattern.compile("[:]?[\\D&&[^:\\.]][^:\\.]*");
@@ -222,7 +222,7 @@ static private Object interpretToken(String s) throws Exception{
 	if(ret != null)
 		return ret;
 
-	return new Symbol(s);
+	return Symbol.intern(null, s);
 }
 /*
 private static Object matchHostName(String s) {

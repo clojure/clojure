@@ -22,22 +22,22 @@ import java.lang.reflect.Modifier;
 
 public class Compiler{
 //*
-static Symbol DEF = new Symbol("def");
-static Symbol FN = new Symbol("fn");
-static Symbol DO = new Symbol("do");
-static Symbol IF = new Symbol("if");
-static Symbol OR = new Symbol("or");
-static Symbol AND = new Symbol("and");
-static Symbol LET = new Symbol("let");
-static Symbol LET_STAR_ = new Symbol("let*");
-static Symbol LETFN = new Symbol("letfn");
-static Symbol NOT = new Symbol("not");
-static Symbol NULL_QM_ = new Symbol("null?");
+static Symbol DEF = Symbol.create(null, "def");
+static Symbol FN = Symbol.create(null, "fn");
+static Symbol DO = Symbol.create(null, "do");
+static Symbol IF = Symbol.create(null, "if");
+static Symbol OR = Symbol.create(null, "or");
+static Symbol AND = Symbol.create(null, "and");
+static Symbol LET = Symbol.create(null, "let");
+static Symbol LET_STAR_ = Symbol.create(null, "let*");
+static Symbol LETFN = Symbol.create(null, "letfn");
+static Symbol NOT = Symbol.create(null, "not");
+static Symbol NULL_QM_ = Symbol.create(null, "null?");
 
-static Symbol IMPORT = new Symbol("import");
-static Symbol USE = new Symbol("use");
-static Symbol _AMP_KEY = new Symbol("&key");
-static Symbol _AMP_REST = new Symbol("&rest");
+static Symbol IMPORT = Symbol.create(null, "import");
+static Symbol USE = Symbol.create(null, "use");
+static Symbol _AMP_KEY = Symbol.create(null, "&key");
+static Symbol _AMP_REST = Symbol.create(null, "&rest");
 
 static public DynamicVar _CRT_OUT = RT.OUT;
 static public DynamicVar _CRT_MODULE = RT.CURRENT_MODULE;
@@ -990,7 +990,7 @@ private static Expr analyzeOr(C context, ISeq form) throws Exception{
 	if(context != C.STATEMENT)
 		{
 		//we'll need a temp var
-		tb = new LocalBinding(new Symbol("OR_TEMP"));
+		tb = new LocalBinding(Symbol.create(null, "OR_TEMP"));
 		registerLocal(tb);
 		}
 
@@ -1506,7 +1506,7 @@ static Symbol baseSymbol(Symbol sym){
 	if(base == sym.name) //no typeHint
 		return sym;
 
-	return new Symbol(base);
+	return Symbol.intern(null, base);
 }
 
 static String baseName(Symbol sym){

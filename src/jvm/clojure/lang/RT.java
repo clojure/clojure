@@ -18,7 +18,7 @@ import java.io.*;
 
 public class RT{
 
-static public Symbol T = new Symbol("t");
+static public Symbol T = Symbol.create(null, "t");
 final static public DynamicVar OUT = new DynamicVar(new OutputStreamWriter(System.out));
 final static Keyword TAG_KEY = new Keyword("clojure", "tag");
 

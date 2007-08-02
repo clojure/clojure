@@ -17,6 +17,7 @@ public class Symbol extends Obj{
 //these must be interned strings!
 public final String ns;
 public final String name;
+final int hash;
 
 public String toString(){
 	if(ns != null)
@@ -24,39 +25,32 @@ public String toString(){
 	return name;
 }
 
-public Symbol(String ns, String name){
-	this.name = name.intern();
-	if(ns != null)
-		this.ns = ns.intern();
-	else
-		this.ns = null;
+static public Symbol intern(String ns, String name){
+	return new Symbol(ns == null ? null : ns.intern(), name.intern());
 }
 
-public Symbol(String name){
-	int i = name.indexOf('/');
+static public Symbol intern(String nsname){
+	int i = nsname.indexOf('/');
 	if(i == -1)
-		{
-		this.name = name.intern();
-		this.ns = null;
-		}
+		return new Symbol(null, nsname.intern());
 	else
-		{
-		this.ns = name.substring(0, i).intern();
-		this.name = name.substring(i + 1).intern();
-		}
+		return new Symbol(nsname.substring(0, i).intern(), nsname.substring(i + 1).intern());
 }
 
+static public Symbol create(String ns_interned, String name_interned){
+	return new Symbol(ns_interned, name_interned);
+}
 
-private Symbol(IPersistentMap meta, String ns, String name){
-	super(meta);
-	this.name = name;
-	this.ns = ns;
+private Symbol(String ns_interned, String name_interned){
+	this.name = name_interned;
+	this.ns = ns_interned;
+	this.hash = RT.hashCombine(name.hashCode(), RT.hash(ns));
 }
 
 public boolean equals(Object o){
 	if(this == o)
 		return true;
-	if(o == null || !(o instanceof Symbol))
+	if(!(o instanceof Symbol))
 		return false;
 
 	Symbol symbol = (Symbol) o;
@@ -66,10 +60,17 @@ public boolean equals(Object o){
 }
 
 public int hashCode(){
-	return RT.hashCombine(name.hashCode(), RT.hash(ns));
+	return hash;
 }
 
 public Obj withMeta(IPersistentMap meta){
 	return new Symbol(meta, ns, name);
+}
+
+private Symbol(IPersistentMap meta, String ns, String name){
+	super(meta);
+	this.name = name;
+	this.ns = ns;
+	this.hash = RT.hashCombine(name.hashCode(), RT.hash(ns));
 }
 }

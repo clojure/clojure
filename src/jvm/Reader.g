@@ -64,9 +64,9 @@ import java.io.PrintWriter;
     // END HAND MODIFIED
     */
 
-final static Symbol DOTDOT = new Symbol("..");
-final static Symbol QUOTE = new Symbol("quote");
-final static Symbol META = new Symbol("meta");
+final static Symbol DOTDOT = Symbol.create(null,"..");
+final static Symbol QUOTE = Symbol.create(null,"quote");
+final static Symbol META = Symbol.create(null,"meta");
 
 public static void main(String[] args) throws Exception { 
 Writer w = new PrintWriter(System.out);
@@ -156,13 +156,13 @@ val = PersistentHashMap.EMPTY;
 	;
 
 symbol returns[Symbol val]
-	:n = Identifier {$val = new Symbol($n.text);}
-	|n = NSIdentifier {$val = new Symbol($n.text);}
+	:n = Identifier {$val = Symbol.intern($n.text);}
+	|n = NSIdentifier {$val = Symbol.intern($n.text);}
 	|dd = DotDot {$val = DOTDOT;}
 	;
 	
 keyword returns[Keyword val]
-	:k = KeywordIdentifier	{$val = new Keyword(new Symbol($k.text.substring(1)));}
+	:k = KeywordIdentifier	{$val = new Keyword(Symbol.intern($k.text.substring(1)));}
 	;
 
 			
@@ -208,13 +208,13 @@ metaExpression returns [Obj val]
 
 fragment 
 member returns [Object val]
-	: '.' i = Identifier {$val = new Symbol($i.text);}
+	: '.' i = Identifier {$val = Symbol.intern($i.text);}
 	| '.' m = method {$val = $m.val;}
 	;
 
 fragment
 method returns [Object val]		
-	: i = MethodIdentifier es = args? ')' {$val = RT.cons(new Symbol($i.text.substring(0,$i.text.length()-1)), es);}
+	: i = MethodIdentifier es = args? ')' {$val = RT.cons(Symbol.intern($i.text.substring(0,$i.text.length()-1)), es);}
 	;
 
 fragment args returns[ISeq val]

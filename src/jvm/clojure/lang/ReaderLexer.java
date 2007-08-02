@@ -1,4 +1,4 @@
-// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-07-20 09:22:37
+// $ANTLR 3.0 /Users/rich/dev/clojure/src/jvm/Reader.g 2007-08-02 16:47:44
 
 /**
  *   Copyright (c) Rich Hickey. All rights reserved.

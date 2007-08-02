@@ -31,7 +31,7 @@ public Keyword(Symbol sym){
 }
 
 public Keyword(String ns, String name){
-	this(new Symbol(ns, name));
+	this(Symbol.intern(ns, name));
 }
 
 public boolean equals(Object o){
