@@ -12,9 +12,46 @@
 
 package clojure.lang;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public class DynamicVar{
 final InheritableThreadLocal<Binding> dvals;
 Object root;
+static ConcurrentHashMap<Symbol, DynamicVar> table = new ConcurrentHashMap<Symbol, DynamicVar>();
+
+
+public static DynamicVar intern(Symbol sym, Object root, boolean replaceRoot){
+	DynamicVar dvout = table.get(sym);
+	boolean present = dvout != null;
+
+	if(!present)
+		{
+		DynamicVar dvin = new DynamicVar(root);
+		dvout = table.putIfAbsent(sym, dvin);
+		present = dvout != dvin;   //might have snuck in
+		}
+	if(present)
+		{
+		synchronized(dvout)
+			{
+			if(dvout.root == dvout.dvals || replaceRoot)
+				dvout.setRoot(root);
+			}
+		}
+	return dvout;
+}
+
+public static DynamicVar intern(Symbol sym){
+	DynamicVar dvout = table.get(sym);
+	if(dvout != null)
+		return dvout;
+
+	return table.putIfAbsent(sym, new DynamicVar());
+}
+
+public static DynamicVar find(Symbol sym){
+	return table.get(sym);
+}
 
 public DynamicVar(){
 	this.dvals = new InheritableThreadLocal<Binding>();
@@ -50,8 +87,9 @@ public Object getRoot(){
 	return root;
 }
 
-public void setRoot(Object root){
+synchronized public DynamicVar setRoot(Object root){
 	this.root = root;
+	return this;
 }
 
 public void pushThreadBinding(Object val){

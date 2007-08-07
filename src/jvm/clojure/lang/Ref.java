@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 
 public class Ref implements IFn, Comparable<Ref>{
@@ -49,6 +50,7 @@ public static class TVal{
 
 }
 
+static ConcurrentHashMap<Symbol, Ref> table = new ConcurrentHashMap<Symbol, Ref>();
 
 TVal tvals;
 final AtomicInteger faults;
@@ -87,6 +89,37 @@ public UUID getUUID(){
 	return uuid;
 }
 
+public static Ref intern(Symbol sym, Object val, boolean replaceVal){
+	Ref out = table.get(sym);
+	boolean present = out != null;
+
+	if(!present)
+		{
+		Ref in = new Ref(val);
+		out = table.putIfAbsent(sym, in);
+		present = out != in;   //might have snuck in
+		}
+
+	if(present && replaceVal)
+		out.set(val);
+
+	return out;
+}
+
+public static Ref intern(Symbol sym, Ref ref){
+	return table.putIfAbsent(sym, ref);
+}
+
+public static Ref intern(Symbol sym){
+	Ref ref = table.get(sym);
+	if(ref != null)
+		return ref;
+	return table.putIfAbsent(sym, new Ref());
+}
+
+public static Ref find(Symbol sym){
+	return table.get(sym);
+}
 //not necessarily the latest val
 
 // ok out of transaction
