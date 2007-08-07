@@ -37,6 +37,10 @@ static public Symbol intern(String nsname){
 		return new Symbol(nsname.substring(0, i).intern(), nsname.substring(i + 1).intern());
 }
 
+static public Symbol create(String name_interned){
+	return new Symbol(null, name_interned);
+}
+
 static public Symbol create(String ns_interned, String name_interned){
 	return new Symbol(ns_interned, name_interned);
 }

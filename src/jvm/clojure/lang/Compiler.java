@@ -22,22 +22,22 @@ import java.lang.reflect.Modifier;
 
 public class Compiler{
 //*
-static Symbol DEF = Symbol.create(null, "def");
-static Symbol FN = Symbol.create(null, "fn");
-static Symbol DO = Symbol.create(null, "do");
-static Symbol IF = Symbol.create(null, "if");
-static Symbol OR = Symbol.create(null, "or");
-static Symbol AND = Symbol.create(null, "and");
-static Symbol LET = Symbol.create(null, "let");
-static Symbol LET_STAR_ = Symbol.create(null, "let*");
-static Symbol LETFN = Symbol.create(null, "letfn");
-static Symbol NOT = Symbol.create(null, "not");
-static Symbol NULL_QM_ = Symbol.create(null, "null?");
+static Symbol DEF = Symbol.create("def");
+static Symbol FN = Symbol.create("fn");
+static Symbol DO = Symbol.create("do");
+static Symbol IF = Symbol.create("if");
+static Symbol OR = Symbol.create("or");
+static Symbol AND = Symbol.create("and");
+static Symbol LET = Symbol.create("let");
+static Symbol LET_STAR_ = Symbol.create("let*");
+static Symbol LETFN = Symbol.create("letfn");
+static Symbol NOT = Symbol.create("not");
+static Symbol NULL_QM_ = Symbol.create("null?");
 
-static Symbol IMPORT = Symbol.create(null, "import");
-static Symbol USE = Symbol.create(null, "use");
-static Symbol _AMP_KEY = Symbol.create(null, "&key");
-static Symbol _AMP_REST = Symbol.create(null, "&rest");
+static Symbol IMPORT = Symbol.create("import");
+static Symbol USE = Symbol.create("use");
+static Symbol _AMP_KEY = Symbol.create("&key");
+static Symbol _AMP_REST = Symbol.create("&rest");
 
 static public DynamicVar _CRT_OUT = RT.OUT;
 static public DynamicVar _CRT_MODULE = RT.CURRENT_MODULE;
@@ -990,7 +990,7 @@ private static Expr analyzeOr(C context, ISeq form) throws Exception{
 	if(context != C.STATEMENT)
 		{
 		//we'll need a temp var
-		tb = new LocalBinding(Symbol.create(null, "OR_TEMP"));
+		tb = new LocalBinding(Symbol.create("OR_TEMP"));
 		registerLocal(tb);
 		}
 
