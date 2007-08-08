@@ -68,29 +68,29 @@ static public DynamicVar USES = new DynamicVar();
 static public DynamicVar FNS = new DynamicVar();
 
 static public IPersistentMap CHAR_MAP =
-		new PersistentArrayMap(new Object[]{'-', "_DSH_",
+		new PersistentArrayMap(new Object[]{'-', "_DASH_",
 		                                    '.', "_DOT_",
-		                                    ':', "_CLN_",
-		                                    '+', "_PLS_",
+		                                    ':', "_COLON_",
+		                                    '+', "_PLUS_",
 		                                    '>', "_GT_",
 		                                    '<', "_LT_",
 		                                    '=', "_EQ_",
-		                                    '~', "_TLD_",
-		                                    '!', "_EXC_",
-		                                    '@', "_AT_",
-		                                    '#', "_SHP_",
-		                                    '$', "_DS_",
-		                                    '%', "_PCT_",
-		                                    '^', "_CRT_",
-		                                    '&', "_AMP_",
+		                                    '~', "_TILDE_",
+		                                    '!', "_BANG_",
+		                                    '@', "_CIRCA_",
+		                                    '#', "_SHARP_",
+		                                    '$', "_DOLLARSIGN_",
+		                                    '%', "_PERCENT_",
+		                                    '^', "_CARET_",
+		                                    '&', "_AMPERSAND_",
 		                                    '*', "_STAR_",
-		                                    '{', "_LBC_",
-		                                    '}', "_RBC_",
-		                                    '[', "_LBK_",
-		                                    ']', "_RBK_",
-		                                    '/', "_FSL_",
-		                                    '\\', "_BSL_",
-		                                    '?', "_QM_"});
+		                                    '{', "_LBRACE_",
+		                                    '}', "_RBRACE_",
+		                                    '[', "_LBRACK_",
+		                                    ']', "_RBRACK_",
+		                                    '/', "_SLASH_",
+		                                    '\\', "_BSLASH_",
+		                                    '?', "_QMARK_"});
 
 private static final int MAX_POSITIONAL_ARITY = 20;
 
@@ -316,8 +316,7 @@ static class AnExpr implements Expr{
 		catch(Exception e)
 			{
 			//declared exceptions are an incredibly bad idea !!!
-			e.printStackTrace();
-			return e.toString();
+			throw new RuntimeException(e);
 			}
 	}
 }
