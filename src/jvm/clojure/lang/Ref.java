@@ -14,7 +14,6 @@ package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 
 public class Ref implements IFn, Comparable<Ref>{
@@ -50,21 +49,17 @@ public static class TVal{
 
 }
 
-static ConcurrentHashMap<Symbol, Ref> table = new ConcurrentHashMap<Symbol, Ref>();
-
 TVal tvals;
 final AtomicInteger faults;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
 final UUID uuid;
-transient volatile Object cacheVal;
 
 public Ref(){
 	this.tvals = null;
 	this.tinfo = null;
 	this.faults = new AtomicInteger();
 	this.lock = new ReentrantReadWriteLock();
-	this.cacheVal = lock;  //use lock as magic never-been-set value
 	this.uuid = UUID.randomUUID();
 }
 
@@ -81,62 +76,11 @@ public Ref(UUID uuid, Object initVal){
 	this.tinfo = null;
 	this.faults = new AtomicInteger();
 	this.lock = new ReentrantReadWriteLock();
-	this.cacheVal = lock;  //use lock as magic never-been-set value
 	this.uuid = uuid;
 }
 
 public UUID getUUID(){
 	return uuid;
-}
-
-public static Ref intern(Symbol sym, Object val, boolean replaceVal){
-	Ref out = table.get(sym);
-	boolean present = out != null;
-
-	if(!present)
-		{
-		Ref in = new Ref(val);
-		out = table.putIfAbsent(sym, in);
-		present = out != in;   //might have snuck in
-		}
-
-	if(present && replaceVal)
-		out.set(val);
-
-	return out;
-}
-
-public static Ref intern(Symbol sym, Ref ref){
-	return table.putIfAbsent(sym, ref);
-}
-
-public static Ref intern(Symbol sym){
-	Ref ref = table.get(sym);
-	if(ref != null)
-		return ref;
-	return table.putIfAbsent(sym, new Ref());
-}
-
-public static Ref find(Symbol sym){
-	return table.get(sym);
-}
-//not necessarily the latest val
-
-// ok out of transaction
-public Object cachedVal(){
-	if(cacheVal != lock)
-		return cacheVal;
-	try
-		{
-		lock.readLock().lock();
-		if(tvals != null)
-			return cacheVal = tvals.val;
-		throw new IllegalStateException(this.toString() + " is unbound.");
-		}
-	finally
-		{
-		lock.readLock().unlock();
-		}
 }
 
 //the latest val
@@ -147,7 +91,7 @@ public Object currentVal(){
 		{
 		lock.readLock().lock();
 		if(tvals != null)
-			return cacheVal = tvals.val;
+			return tvals.val;
 		throw new IllegalStateException(this.toString() + " is unbound.");
 		}
 	finally
@@ -160,7 +104,7 @@ public Object currentVal(){
 
 //must be dynamically bound or transactional read
 public Object get(){
-	return cacheVal = LockingTransaction.getEx().doGet(this);
+	return LockingTransaction.getEx().doGet(this);
 }
 
 public Object set(Object val){
@@ -207,7 +151,7 @@ void trimHistory(){
 
 
 final public IFn fn(){
-	return (IFn) cachedVal();
+	return (IFn) currentVal();
 }
 
 public Object call() throws Exception{
