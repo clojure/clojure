@@ -60,7 +60,9 @@ public static DynamicVar intern(Symbol sym, Object root, boolean replaceRoot){
 		{
 		DynamicVar dvin = new DynamicVar(sym, root);
 		dvout = table.putIfAbsent(sym, dvin);
-		present = dvout != dvin;   //might have snuck in
+		present = dvout != null;   //might have snuck in
+		if(!present)
+			dvout = dvin;
 		}
 	if(present && (!dvout.hasRoot() || replaceRoot))
 		dvout.bindRoot(root);
