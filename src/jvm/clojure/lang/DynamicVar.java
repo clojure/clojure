@@ -15,8 +15,33 @@ package clojure.lang;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 public class DynamicVar implements IFn{
-volatile InheritableThreadLocal<Binding> dvals;
+
+static class Frame{
+	Associative bmap;
+	Associative bindings;
+	Frame prev;
+
+
+	public Frame(){
+		this(PersistentHashMap.EMPTY, PersistentHashMap.EMPTY, null);
+	}
+
+	public Frame(Associative bindings, Associative bmap, Frame prev){
+		this.bindings = bindings;
+		this.bmap = bmap;
+		this.prev = prev;
+	}
+}
+
+static InheritableThreadLocal<Frame> dvals = new InheritableThreadLocal<Frame>(){
+
+	protected Frame initialValue(){
+		return new Frame();
+	}
+};
+
 Object root;
 final AtomicInteger count;
 final Symbol sym;
@@ -37,14 +62,8 @@ public static DynamicVar intern(Symbol sym, Object root, boolean replaceRoot){
 		dvout = table.putIfAbsent(sym, dvin);
 		present = dvout != dvin;   //might have snuck in
 		}
-	if(present)
-		{
-		synchronized(dvout)
-			{
-			if(dvout.root == dvout.dvals || replaceRoot)
-				dvout.setRoot(root);
-			}
-		}
+	if(present && (dvout.root == dvout.count || replaceRoot))
+		dvout.bindRoot(root);
 	return dvout;
 }
 
@@ -73,7 +92,6 @@ public static DynamicVar create(Object root){
 }
 
 private DynamicVar(Symbol sym){
-	this.dvals = null;
 	this.sym = sym;
 	this.count = new AtomicInteger();
 	this.root = count;  //use count as magic not-bound value
@@ -85,11 +103,11 @@ private DynamicVar(Symbol sym, Object root){
 }
 
 public boolean isBound(){
-	return root != count || dvals.get() != null;
+	return root != count || dvals.get().bmap.contains(this);
 }
 
 final public Object get(){
-	Binding b = getThreadBinding();
+	Box b = getThreadBinding();
 	if(b != null)
 		return b.val;
 	if(root != count)
@@ -98,48 +116,57 @@ final public Object get(){
 }
 
 public Object set(Object val){
-	Binding b = getThreadBinding();
+	Box b = getThreadBinding();
 	if(b != null)
 		return (b.val = val);
 	//can't establish root binding with set, but can change it
 	if(root != count)
 		return root = val;
-	throw new IllegalStateException(String.format("Var %s has no binding in this thread.", sym));
+	throw new IllegalStateException(String.format("Var %s is unbound.", sym));
 }
 
 public Object getRoot(){
 	return root;
 }
 
-public DynamicVar setRoot(Object root){
+public DynamicVar bindRoot(Object root){
 	this.root = root;
 	return this;
 }
 
-public void pushThreadBinding(Object val){
-	if(dvals == null)
+public static void pushThreadBindings(Associative bindings){
+	Frame f = dvals.get();
+	Associative bmap = f.bmap;
+	for(ISeq bs = bindings.seq(); bs != null; bs = bs.rest())
 		{
-		synchronized(this)
-			{
-			if(dvals == null)
-				dvals = new InheritableThreadLocal<Binding>();
-			}
+		IMapEntry e = (IMapEntry) bs.first();
+		DynamicVar v = (DynamicVar) e.key();
+		v.count.incrementAndGet();
+		bmap = bmap.assoc(v, new Box(e.val()));
 		}
-	dvals.set(new Binding(val, dvals.get()));
-	count.incrementAndGet();
+	dvals.set(new Frame(bindings, bmap, f));
 }
 
-public void popThreadBinding(){
-	Binding b;
-	if(dvals == null || (b = dvals.get()) == null)
-		throw new IllegalStateException(String.format("Var %s has no binding in this thread.", sym));
-	dvals.set(b.rest);
-	count.decrementAndGet();
+public static void popThreadBindings(){
+	Frame f = dvals.get();
+	if(f.prev == null)
+		throw new IllegalStateException("Pop without matching push");
+	for(ISeq bs = f.bindings.seq(); bs != null; bs = bs.rest())
+		{
+		IMapEntry e = (IMapEntry) bs.first();
+		DynamicVar v = (DynamicVar) e.key();
+		v.count.decrementAndGet();
+		}
+	dvals.set(f.prev);
 }
 
-final Binding getThreadBinding(){
-	if(dvals != null && count.get() > 0)
-		return dvals.get();
+final Box getThreadBinding(){
+	if(count.get() > 0)
+		{
+		IMapEntry e = dvals.get().bmap.entryAt(this);
+		if(e != null)
+			return (Box) e.val();
+		}
 	return null;
 }
 
