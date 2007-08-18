@@ -19,10 +19,12 @@ import java.io.*;
 public class RT{
 
 static public Symbol T = Symbol.create(null, "t");
-final static public DynamicVar OUT = new DynamicVar(new OutputStreamWriter(System.out));
+final static public DynamicVar OUT =
+		DynamicVar.intern(Symbol.create("clojure", "out"), new OutputStreamWriter(System.out));
 final static Keyword TAG_KEY = new Keyword("clojure", "tag");
 
-final static public DynamicVar CURRENT_MODULE = new DynamicVar(Module.findOrCreateModule("clojure/user"));
+final static public DynamicVar CURRENT_MODULE = DynamicVar.intern(Symbol.create("clojure", "current-module"),
+                                                                  Module.findOrCreateModule("clojure/user"));
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Character[] chars;

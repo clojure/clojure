@@ -45,27 +45,27 @@ static public DynamicVar _CRT_MODULE = RT.CURRENT_MODULE;
 static NilExpr NIL_EXPR = new NilExpr();
 
 //short-name-string->full-name-string
-static public DynamicVar IMPORTS = new DynamicVar();
+static public DynamicVar IMPORTS = DynamicVar.create();
 
 //keyword->keywordexpr
-static public DynamicVar KEYWORDS = new DynamicVar();
+static public DynamicVar KEYWORDS = DynamicVar.create();
 
 //var->var
-static public DynamicVar VARS = new DynamicVar();
+static public DynamicVar VARS = DynamicVar.create();
 
 //symbol->localbinding
-static public DynamicVar LOCAL_ENV = new DynamicVar();
+static public DynamicVar LOCAL_ENV = DynamicVar.create();
 
 
 //FnFrame
-static public DynamicVar METHOD = new DynamicVar();
+static public DynamicVar METHOD = DynamicVar.create();
 
 //module->module
-static public DynamicVar USES = new DynamicVar();
+static public DynamicVar USES = DynamicVar.create();
 
 
 //ISeq FnExprs
-static public DynamicVar FNS = new DynamicVar();
+static public DynamicVar FNS = DynamicVar.create();
 
 static public IPersistentMap CHAR_MAP =
 		new PersistentArrayMap(new Object[]{'-', "_DASH_",
