@@ -138,6 +138,10 @@ public DynamicVar bindRoot(Object root){
 	return this;
 }
 
+public void unbindRoot(){
+	this.root = dvals;
+}
+
 public static void pushThreadBindings(Associative bindings){
 	Frame f = dvals.get();
 	Associative bmap = f.bmap;
