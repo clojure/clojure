@@ -43,7 +43,7 @@ static InheritableThreadLocal<Frame> dvals = new InheritableThreadLocal<Frame>()
 };
 
 Object root;
-final AtomicInteger count;
+transient final AtomicInteger count;
 final Symbol sym;
 
 static ConcurrentHashMap<Symbol, DynamicVar> table = new ConcurrentHashMap<Symbol, DynamicVar>();
@@ -62,7 +62,7 @@ public static DynamicVar intern(Symbol sym, Object root, boolean replaceRoot){
 		dvout = table.putIfAbsent(sym, dvin);
 		present = dvout != dvin;   //might have snuck in
 		}
-	if(present && (dvout.root == dvout.count || replaceRoot))
+	if(present && (!dvout.hasRoot() || replaceRoot))
 		dvout.bindRoot(root);
 	return dvout;
 }
@@ -94,7 +94,7 @@ public static DynamicVar create(Object root){
 private DynamicVar(Symbol sym){
 	this.sym = sym;
 	this.count = new AtomicInteger();
-	this.root = count;  //use count as magic not-bound value
+	this.root = dvals;  //use dvals as magic not-bound value
 }
 
 private DynamicVar(Symbol sym, Object root){
@@ -103,14 +103,14 @@ private DynamicVar(Symbol sym, Object root){
 }
 
 public boolean isBound(){
-	return root != count || dvals.get().bmap.contains(this);
+	return hasRoot() || dvals.get().bmap.contains(this);
 }
 
 final public Object get(){
 	Box b = getThreadBinding();
 	if(b != null)
 		return b.val;
-	if(root != count)
+	if(hasRoot())
 		return root;
 	throw new IllegalStateException(String.format("Var %s is unbound.", sym));
 }
@@ -120,13 +120,17 @@ public Object set(Object val){
 	if(b != null)
 		return (b.val = val);
 	//can't establish root binding with set, but can change it
-	if(root != count)
+	if(hasRoot())
 		return root = val;
 	throw new IllegalStateException(String.format("Var %s is unbound.", sym));
 }
 
 public Object getRoot(){
 	return root;
+}
+
+final public boolean hasRoot(){
+	return root != dvals;
 }
 
 public DynamicVar bindRoot(Object root){
