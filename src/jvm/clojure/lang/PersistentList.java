@@ -10,6 +10,9 @@
 
 package clojure.lang;
 
+import java.util.List;
+import java.util.ListIterator;
+
 public class PersistentList extends ASeq{
 
 private final Object _first;
@@ -37,6 +40,15 @@ PersistentList(IPersistentMap meta, Object _first, PersistentList _rest, int _co
 	this._first = _first;
 	this._rest = _rest;
 	this._count = _count;
+}
+
+public static ISeq create(List init){
+	ISeq ret = EMPTY;
+	for(ListIterator i = init.listIterator(init.size()); i.hasPrevious();)
+		{
+		ret = ret.cons(i.previous());
+		}
+	return ret;
 }
 
 public Object first(){

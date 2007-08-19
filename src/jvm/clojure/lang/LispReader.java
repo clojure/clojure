@@ -42,7 +42,7 @@ static
 	macros[';'] = new CommentReader();
 	macros['\''] = new QuoteReader();
 	macros['`'] = new BackquoteReader();
-	macros[','] = new UnquoteReader();
+	macros['~'] = new UnquoteReader();
 	macros['^'] = new MetaReader();
 	macros['('] = new ListReader();
 	macros[')'] = new UnmatchedDelimiterReader();
@@ -50,8 +50,13 @@ static
 	macros[']'] = new UnmatchedDelimiterReader();
 	macros['{'] = new MapReader();
 	macros['}'] = new UnmatchedDelimiterReader();
+	macros['|'] = new ArgVectorReader();
 	macros['\\'] = new CharacterReader();
 	}
+
+static boolean isWhitespace(int ch){
+	return Character.isWhitespace(ch) || ch == ',';
+}
 
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
 		throws Exception{
@@ -60,7 +65,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 		{
 		int ch = r.read();
 
-		while(Character.isWhitespace(ch))
+		while(isWhitespace(ch))
 			ch = r.read();
 
 		if(ch == -1)
@@ -118,7 +123,7 @@ static private String readToken(PushbackReader r, char initch) throws Exception{
 	for(; ;)
 		{
 		int ch = r.read();
-		if(ch == -1 || Character.isWhitespace(ch) || isMacro(ch))
+		if(ch == -1 || isWhitespace(ch) || isMacro(ch))
 			{
 			r.unread(ch);
 			return sb.toString();
@@ -134,7 +139,7 @@ static private Object readNumber(PushbackReader r, char initch) throws Exception
 	for(; ;)
 		{
 		int ch = r.read();
-		if(ch == -1 || Character.isWhitespace(ch) || isMacro(ch))
+		if(ch == -1 || isWhitespace(ch) || isMacro(ch))
 			{
 			r.unread(ch);
 			break;
@@ -374,10 +379,10 @@ static class MetaReader extends AFn{
 		else if(!(meta instanceof IPersistentMap))
 			throw new IllegalArgumentException("Metadata must be Symbol,Keyword or Map");
 		Object o = read(r, true, null, true);
-		if(o instanceof Obj)
-			return ((Obj) o).withMeta((IPersistentMap) meta);
+		if(o instanceof IObj)
+			return ((IObj) o).withMeta((IPersistentMap) meta);
 		else
-			throw new IllegalArgumentException("Metadata can only be applied to Objs");
+			throw new IllegalArgumentException("Metadata can only be applied to IObjs");
 	}
 
 }
@@ -435,7 +440,18 @@ static class CharacterReader extends AFn{
 static class ListReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		return RT.seq(readDelimitedList(')', r, true));
+		List list = readDelimitedList(')', r, true);
+		if(list.isEmpty())
+			return PersistentList.EMPTY;
+		return RT.seq(list);
+	}
+
+}
+
+static class ArgVectorReader extends AFn{
+	public Object invoke(Object reader, Object leftparen) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		return ArgVector.create(readDelimitedList('|', r, true));
 	}
 
 }
@@ -470,7 +486,7 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 		{
 		int ch = r.read();
 
-		while(Character.isWhitespace(ch))
+		while(isWhitespace(ch))
 			ch = r.read();
 
 		if(ch == -1)
@@ -512,7 +528,8 @@ public static void main(String[] args){
 			ret = LispReader.read(r, true, null, false);
 			RT.print(ret, w);
 			w.write('\n');
-			w.write(ret.getClass().toString());
+			if(ret != null)
+				w.write(ret.getClass().toString());
 			w.write('\n');
 			w.flush();
 			}

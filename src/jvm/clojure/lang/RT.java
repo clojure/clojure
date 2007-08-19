@@ -279,6 +279,13 @@ static public Iter iter(Object coll){
 		throw new IllegalArgumentException("Don't know how to create Iter from arg");
 }
 
+static boolean hasTag(Object o, Object tag){
+	if(!(o instanceof IObj))
+		return false;
+	IPersistentMap meta = ((IObj) o).meta();
+	return RT.equal(tag, RT.get(TAG_KEY, meta));
+}
+
 /**
  * ********************* Boxing/casts ******************************
  */
@@ -538,6 +545,12 @@ static public void print(Object x, Writer w) throws Exception{
 		w.write(x.toString());
 		w.write('"');
 		}
+	else if(x instanceof ArgVector)
+		{
+		w.write('|');
+		printInnerSeq(seq(x), w);
+		w.write('|');
+		}
 	else if(x instanceof IPersistentMap)
 		{
 		w.write('{');
@@ -548,7 +561,7 @@ static public void print(Object x, Writer w) throws Exception{
 			w.write(' ');
 			print(e.val(), w);
 			if(s.rest() != null)
-				w.write(' ');
+				w.write(", ");
 			}
 		w.write('}');
 		}

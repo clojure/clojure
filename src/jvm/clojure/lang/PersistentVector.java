@@ -343,7 +343,7 @@ public IMapEntry entryAt(Object key){
 	return null;
 }
 
-public Associative assoc(Object key, Object val){
+public PersistentVector assoc(Object key, Object val){
 	if(key instanceof Number)
 		{
 		int i = ((Number) key).intValue();
