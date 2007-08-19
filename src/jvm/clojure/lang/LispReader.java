@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
+import java.util.List;
 import java.math.BigInteger;
 
 public class LispReader{
@@ -24,16 +25,16 @@ static Symbol UNQUOTE = Symbol.create(null, "unquote");
 static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 
 static IFn[] macros = new IFn[256];
-static Pattern symbolPat = Pattern.compile("[:]?[\\D&&[^:\\.]][^:\\.]*");
-static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
+static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
+//static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?");
 
-static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
-static Pattern instanceMemberPat = Pattern.compile("\\.([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
-static Pattern staticMemberPat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
-static Pattern classNamePat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.");
+//static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
+//static Pattern instanceMemberPat = Pattern.compile("\\.([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
+//static Pattern staticMemberPat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
+//static Pattern classNamePat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.");
 
 static
 	{
@@ -42,8 +43,13 @@ static
 	macros['\''] = new QuoteReader();
 	macros['`'] = new BackquoteReader();
 	macros[','] = new UnquoteReader();
+	macros['^'] = new MetaReader();
 	macros['('] = new ListReader();
 	macros[')'] = new UnmatchedDelimiterReader();
+	macros['['] = new VectorReader();
+	macros[']'] = new UnmatchedDelimiterReader();
+	macros['{'] = new MapReader();
+	macros['}'] = new UnmatchedDelimiterReader();
 	macros['\\'] = new CharacterReader();
 	}
 
@@ -218,11 +224,11 @@ static private Object interpretToken(String s) throws Exception{
 		}
 	Object ret = null;
 
-	ret = matchVar(s);
+	ret = matchSymbol(s);
 	if(ret != null)
 		return ret;
 
-	return Symbol.intern(null, s);
+	throw new Exception("Invalid token: " + s);
 }
 /*
 private static Object matchHostName(String s) {
@@ -250,12 +256,27 @@ private static Object matchSymbol(String s) {
 }
 */
 
+private static Object matchSymbol(String s){
+	Matcher m = symbolPat.matcher(s);
+	if(m.matches())
+		{
+		boolean isKeyword = s.charAt(0) == ':';
+		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));
+		if(isKeyword)
+			return new Keyword(sym);
+		return sym;
+		}
+	return null;
+}
+
+/*
 private static Object matchVar(String s) throws Exception{
 	Matcher m = varPat.matcher(s);
 	if(m.matches())
 		return Module.intern(m.group(1), m.group(2));
 	return null;
 }
+*/
 
 private static Object matchNumber(String s){
 	Matcher m = intPat.matcher(s);
@@ -320,10 +341,6 @@ static class StringReader extends AFn{
 			}
 		return sb.toString();
 	}
-
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
-	}
 }
 
 static class CommentReader extends AFn{
@@ -337,9 +354,6 @@ static class CommentReader extends AFn{
 		return r;
 	}
 
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
-	}
 }
 
 static class QuoteReader extends AFn{
@@ -349,9 +363,23 @@ static class QuoteReader extends AFn{
 		return RT.list(QUOTE, o);
 	}
 
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
+}
+
+static class MetaReader extends AFn{
+	public Object invoke(Object reader, Object caret) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		Object meta = read(r, true, null, true);
+		if(meta instanceof Symbol || meta instanceof Keyword)
+			meta = RT.map(RT.TAG_KEY, meta);
+		else if(!(meta instanceof IPersistentMap))
+			throw new IllegalArgumentException("Metadata must be Symbol,Keyword or Map");
+		Object o = read(r, true, null, true);
+		if(o instanceof Obj)
+			return ((Obj) o).withMeta((IPersistentMap) meta);
+		else
+			throw new IllegalArgumentException("Metadata can only be applied to Objs");
 	}
+
 }
 
 static class BackquoteReader extends AFn{
@@ -361,10 +389,6 @@ static class BackquoteReader extends AFn{
 		return RT.list(BACKQUOTE, o);
 	}
 
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
-
-	}
 }
 
 static class UnquoteReader extends AFn{
@@ -386,10 +410,6 @@ static class UnquoteReader extends AFn{
 			}
 	}
 
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
-
-	}
 }
 
 static class CharacterReader extends AFn{
@@ -410,22 +430,30 @@ static class CharacterReader extends AFn{
 		throw new Exception("Unsupported character: \\" + token);
 	}
 
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
-
-	}
 }
 
 static class ListReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		return readDelimitedList(')', r, true);
+		return RT.seq(readDelimitedList(')', r, true));
 	}
 
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
+}
 
+static class VectorReader extends AFn{
+	public Object invoke(Object reader, Object leftparen) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		return PersistentVector.create(readDelimitedList(']', r, true));
 	}
+
+}
+
+static class MapReader extends AFn{
+	public Object invoke(Object reader, Object leftparen) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		return PersistentHashMap.create(readDelimitedList('}', r, true));
+	}
+
 }
 
 static class UnmatchedDelimiterReader extends AFn{
@@ -433,13 +461,9 @@ static class UnmatchedDelimiterReader extends AFn{
 		throw new Exception("Unmatched delimiter: " + rightdelim);
 	}
 
-	public Obj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
-
-	}
 }
 
-public static ISeq readDelimitedList(char delim, PushbackReader r, boolean isRecursive) throws Exception{
+public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) throws Exception{
 	ArrayList a = new ArrayList();
 
 	for(; ;)
@@ -474,7 +498,7 @@ public static ISeq readDelimitedList(char delim, PushbackReader r, boolean isRec
 		}
 
 
-	return RT.seq(a);
+	return a;
 }
 
 public static void main(String[] args){

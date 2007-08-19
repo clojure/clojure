@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.util.Vector;
 import java.util.Random;
+import java.util.List;
 
 public class PersistentVector extends Obj implements IPersistentArray, IPersistentList{
 final int cnt;
@@ -29,6 +30,14 @@ static public PersistentVector create(ISeq items){
 	PersistentVector ret = EMPTY;
 	for(; items != null; items = items.rest())
 		ret = ret.cons(items.first());
+	return ret;
+}
+
+static public PersistentVector create(List items){
+	//todo - consider building tree directly
+	PersistentVector ret = EMPTY;
+	for(Object item : items)
+		ret = ret.cons(item);
 	return ret;
 }
 

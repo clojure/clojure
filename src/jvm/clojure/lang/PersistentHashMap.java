@@ -47,6 +47,19 @@ public static IPersistentMap create(Object... init){
 	return ret;
 }
 
+public static IPersistentMap create(List init){
+	IPersistentMap ret = EMPTY;
+	for(Iterator i = init.iterator(); i.hasNext();)
+		{
+		Object key = i.next();
+		if(!i.hasNext())
+			throw new IllegalArgumentException(String.format("No value supplied for key: %s", key));
+		Object val = i.next();
+		ret = ret.assoc(key, val);
+		}
+	return ret;
+}
+
 /*
  * @param init {key1,val1,key2,val2,...}
  */

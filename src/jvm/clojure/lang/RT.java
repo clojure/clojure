@@ -516,7 +516,7 @@ static public void print(Object x, Writer w) throws Exception{
 		if(o.meta() != null)
 			{
 			IPersistentMap meta = o.meta();
-			w.write("#^");
+			w.write("^");
 			if(meta.count() == 1 && meta.contains(TAG_KEY))
 				print(meta.valAt(TAG_KEY), w);
 			else
