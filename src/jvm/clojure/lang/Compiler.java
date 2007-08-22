@@ -235,7 +235,7 @@ static String munge(String name){
 }
 
 enum C{
-	STATEMENT, EXPRESSION, RETURN, FN
+	STATEMENT, EXPRESSION, RETURN//, FN
 }
 
 interface Expr{
@@ -1962,7 +1962,7 @@ static class DefExpr extends AnExpr{
 	}
 
 	public void emitExpression() throws Exception{
-		format("~A.bind(~A)", var.getName(), init.emitExpressionString());
+		format("~A.bindRoot(~A)", var.getName(), init.emitExpressionString());
 	}
 }
 

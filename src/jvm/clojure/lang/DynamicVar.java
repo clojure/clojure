@@ -135,9 +135,9 @@ final public boolean hasRoot(){
 	return root != dvals;
 }
 
-public DynamicVar bindRoot(Object root){
+public Object bindRoot(Object root){
 	this.root = root;
-	return this;
+	return root;
 }
 
 public void unbindRoot(){

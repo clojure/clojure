@@ -26,6 +26,13 @@ final static Keyword TAG_KEY = new Keyword("clojure", "tag");
 final static public DynamicVar CURRENT_MODULE = DynamicVar.intern(Symbol.create("clojure", "current-module"),
                                                                   Module.findOrCreateModule("clojure/user"));
 
+//string
+final static DynamicVar CURRENT_NS = DynamicVar.intern(Symbol.create("clojure", "current-ns"), "clojure-user");
+//simple-symbol->var
+final static DynamicVar USES = DynamicVar.intern(Symbol.create("clojure", "uses"), PersistentHashMap.EMPTY);
+//simple-symbol->fully-qualified-class-name-symbol
+final static DynamicVar IMPORTS = DynamicVar.intern(Symbol.create("clojure", "imports"), PersistentHashMap.EMPTY);
+
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);

@@ -11,6 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="asm-2.2.1" level="application" />
     <orderEntry type="library" name="antlr-3" level="application" />
+    <orderEntry type="library" name="asm-3.0" level="application" />
     <orderEntryProperties />
   </component>
   <component name="VcsManagerConfiguration">
