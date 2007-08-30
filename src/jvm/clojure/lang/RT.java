@@ -21,7 +21,7 @@ public class RT{
 static public Symbol T = Symbol.create(null, "t");
 final static public DynamicVar OUT =
 		DynamicVar.intern(Symbol.create("clojure", "out"), new OutputStreamWriter(System.out));
-final static Keyword TAG_KEY = new Keyword("clojure", "tag");
+final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 
 final static public DynamicVar CURRENT_MODULE = DynamicVar.intern(Symbol.create("clojure", "current-module"),
                                                                   Module.findOrCreateModule("clojure/user"));

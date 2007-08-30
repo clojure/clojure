@@ -268,7 +268,7 @@ private static Object matchSymbol(String s){
 		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));
 		if(isKeyword)
-			return new Keyword(sym);
+			return Keyword.intern(sym);
 		return sym;
 		}
 	return null;

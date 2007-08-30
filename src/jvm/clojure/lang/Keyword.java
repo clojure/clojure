@@ -12,44 +12,27 @@
 
 package clojure.lang;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class Keyword implements IFn{
 
-
-/**
- * Used by intern()
- *
- * @param name
- */
-
+private static ConcurrentHashMap<Symbol, Keyword> table = new ConcurrentHashMap();
 public final Symbol sym;
-final int hash;
 
-public Keyword(Symbol sym){
+public static Keyword intern(Symbol sym){
+	Keyword k = new Keyword(sym);
+	Keyword existingk = table.putIfAbsent(sym, k);
+	return existingk == null ? k : existingk;
+}
+
+public static Keyword intern(String ns, String name){
+	return intern(Symbol.intern(ns, name));
+}
+
+private Keyword(Symbol sym){
 	this.sym = sym;
-	this.hash = RT.hashCombine(":".hashCode(), sym.hashCode());
 }
-
-public Keyword(String ns, String name){
-	this(Symbol.intern(ns, name));
-}
-
-public boolean equals(Object o){
-	if(this == o)
-		return true;
-	if(o == null || !(o instanceof Keyword))
-		return false;
-
-	Keyword keyword = (Keyword) o;
-
-	//identity compares intended, names are interned
-	return sym.equals(keyword.sym);
-}
-
-public int hashCode(){
-	return hash;
-}
-
 
 public String toString(){
 	return ":" + sym;
