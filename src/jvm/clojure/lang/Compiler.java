@@ -235,7 +235,7 @@ static String munge(String name){
 }
 
 enum C{
-	STATEMENT, EXPRESSION, RETURN//, FN
+	STATEMENT, EXPRESSION, RETURN, EVAL
 }
 
 interface Expr{
