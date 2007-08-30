@@ -12,11 +12,9 @@
 
 package clojure.lang;
 
-import java.util.Vector;
-import java.util.Random;
-import java.util.List;
+import java.util.*;
 
-public class PersistentVector extends Obj implements IPersistentArray, IPersistentList{
+public class PersistentVector extends Obj implements IPersistentArray, IPersistentList, Iterable{
 final int cnt;
 final int shift;
 final Object[] root;
@@ -164,7 +162,27 @@ public PersistentVector withMeta(IPersistentMap meta){
 	return new PersistentVector(meta, cnt, shift, root);
 }
 
+public Iterator iterator(){
+	//todo - something more efficient
+	return new Iterator(){
+		int i = 0;
+
+		public boolean hasNext(){
+			return i < cnt;
+		}
+
+		public Object next(){
+			return nth(i++);
+		}
+
+		public void remove(){
+			throw new UnsupportedOperationException();
+		}
+	};
+}
+
 static class Seq extends ASeq implements IndexedSeq{
+	//todo - something more efficient
 	final PersistentVector v;
 	final int i;
 
