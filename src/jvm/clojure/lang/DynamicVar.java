@@ -121,10 +121,7 @@ public Object set(Object val){
 	Box b = getThreadBinding();
 	if(b != null)
 		return (b.val = val);
-	//can't establish root binding with set, but can change it
-	if(hasRoot())
-		return root = val;
-	throw new IllegalStateException(String.format("Var %s is unbound.", sym));
+	throw new IllegalStateException(String.format("Can't change root binding of: %s with set", sym));
 }
 
 public Object getRoot(){
