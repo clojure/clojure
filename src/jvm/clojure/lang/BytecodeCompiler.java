@@ -82,7 +82,7 @@ static class DefExpr implements Expr{
 		DynamicVar v = lookupVar((Symbol) RT.second(form));
 		if(!v.sym.ns.equals(currentNS()))
 			throw new Exception("Can't create defs outside of current ns");
-		return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.toString()));
+		return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name));
 	}
 }
 
@@ -195,6 +195,44 @@ static class IfExpr implements Expr{
 	}
 }
 
+static public IPersistentMap CHAR_MAP =
+		PersistentHashMap.create('-', "_DASH_",
+		                         '.', "_DOT_",
+		                         ':', "_COLON_",
+		                         '+', "_PLUS_",
+		                         '>', "_GT_",
+		                         '<', "_LT_",
+		                         '=', "_EQ_",
+		                         '~', "_TILDE_",
+		                         '!', "_BANG_",
+		                         '@', "_CIRCA_",
+		                         '#', "_SHARP_",
+		                         '$', "_DOLLARSIGN_",
+		                         '%', "_PERCENT_",
+		                         '^', "_CARET_",
+		                         '&', "_AMPERSAND_",
+		                         '*', "_STAR_",
+		                         '{', "_LBRACE_",
+		                         '}', "_RBRACE_",
+		                         '[', "_LBRACK_",
+		                         ']', "_RBRACK_",
+		                         '/', "_SLASH_",
+		                         '\\', "_BSLASH_",
+		                         '?', "_QMARK_");
+
+static String munge(String name){
+	StringBuilder sb = new StringBuilder();
+	for(char c : name.toCharArray())
+		{
+		String sub = (String) CHAR_MAP.valAt(c);
+		if(sub != null)
+			sb.append(sub);
+		else
+			sb.append(c);
+		}
+	return sb.toString();
+}
+
 static class FnExpr implements Expr{
 	IPersistentCollection methods;
 	//if there is a variadic overload (there can only be one) it is stored here
@@ -202,21 +240,32 @@ static class FnExpr implements Expr{
 	String name = null;
 	//localbinding->itself
 	IPersistentMap closes = null;
+	IPersistentMap keywords = null;
+	IPersistentMap vars = null;
+	Class compiledClass;
 
-	static Expr parse(C context, ISeq form) throws Exception{
+	static Expr parse(C context, ISeq form, String name) throws Exception{
+		FnExpr fn = new FnExpr();
+		FnMethod enclosingMethod = (FnMethod) METHOD.get();
+		String basename = enclosingMethod != null ?
+		                  (enclosingMethod.fn.name + "$")
+		                  : (munge(currentNS()) + ".");
+		fn.name = basename + (name != null ?
+		                      munge(name)
+		                      : ("fn__" + RT.nextID()));
 		try
 			{
 			DynamicVar.pushThreadBindings(
 					RT.map(
-							KEYWORDS, null,
-							VARS, null));		//(fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
+							KEYWORDS, PersistentHashMap.EMPTY,
+							VARS, PersistentHashMap.EMPTY));
+			//(fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
 			//turn former into latter
 			if(RT.second(form) instanceof IPersistentArray)
 				form = RT.list(FN, RT.rest(form));
 
 			FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
 			FnMethod variadicMethod = null;
-			FnExpr fn = new FnExpr();
 			for(ISeq s = RT.rest(form); s != null; s = RT.rest(s))
 				{
 				FnMethod f = analyzeMethod(fn, (ISeq) RT.first(s));
@@ -248,20 +297,35 @@ static class FnExpr implements Expr{
 
 			fn.methods = methods;
 			fn.variadicMethod = variadicMethod;
+			fn.keywords = (IPersistentMap) KEYWORDS.get();
+			fn.vars = (IPersistentMap) VARS.get();
 			}
 		finally
 			{
-
+			DynamicVar.popThreadBindings();
 			}
-		registerFn(fn);
+		fn.compile();
 		return fn;
 	}
 
+	boolean isVariadic(){
+		return variadicMethod != null;
+	}
+
+	private void compile(){
+
+		//create bytecode for a class
+		//with name current_ns.defname[$letname]+
+		//anonymous fns get names fn__id
+		//derived from AFn/RestFn
+		//with static fields for keywords and vars
+		//with instance fields for closed-overs
+		//with a ctor that takes closed-overs and inits fields
+		//with an override of invoke/doInvoke for each method
+	}
+
 	public Object eval() throws Exception{
-		//todo - implement
-		//ask the DynamicClassLoader (found through Var?) to load our class
-		//create instance through Class object newInstance()
-		return null;
+		return compiledClass.newInstance();
 	}
 }
 
@@ -276,11 +340,14 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 	try
 		{
 		FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
+		//register as the current method and set up a new env frame
 		DynamicVar.pushThreadBindings(
 				RT.map(
 						METHOD, method,
-						LOCAL_ENV, LOCAL_ENV.get()));
+						LOCAL_ENV, LOCAL_ENV.get(),
+						LOOP_LOCALS, null));
 		PSTATE state = PSTATE.REQ;
+		PersistentVector loopLocals = PersistentVector.EMPTY;
 		for(ISeq ps = parms; ps != null; ps = ps.rest())
 			{
 			Object p = ps.first();
@@ -297,7 +364,9 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 				switch(state)
 					{
 					case REQ:
-						method.reqParms = method.reqParms.cons(createParamBinding((Symbol) p));
+						LocalBinding lb = createParamBinding((Symbol) p);
+						loopLocals = loopLocals.cons(lb);
+						method.reqParms = method.reqParms.cons(lb);
 						break;
 					case REST:
 						method.restParm = createParamBinding((Symbol) p);
@@ -311,7 +380,10 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 			}
 		if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
 			throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
-		method.body = analyze(C.RETURN, RT.cons(DO, body));
+		//only set loop locals if non-variadic
+		if(method.restParm == null)
+			LOOP_LOCALS.set(loopLocals);
+		method.body = BodyExpr.parse(C.RETURN, body);
 		return method;
 		}
 	finally
@@ -452,7 +524,7 @@ static class LetExpr implements Expr{
 				if(bs.rest() == null)
 					throw new IllegalArgumentException("Bad binding form, expected expression following: " + sym);
 				LocalBinding lb = new LocalBinding(sym, tagOf(sym));
-				BindingInit bi = new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs)));
+				BindingInit bi = new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs), sym.name));
 				bindingInits = bindingInits.cons(bi);
 
 				//sequential enhancement of env
@@ -503,18 +575,20 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	else if(fclass == Character.class)
 		return new CharExpr((Character) form);
 	else if(form instanceof ISeq)
-		return analyzeSeq(context, (ISeq) form);
+		return analyzeSeq(context, (ISeq) form, name);
 
 //	else
 	throw new UnsupportedOperationException();
 }
 
-private static Expr analyzeSeq(C context, ISeq form) throws Exception{
+private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Object op = RT.first(form);
 	if(op == DEF)
 		return DefExpr.parse(context, form);
 	else if(op == IF)
 		return IfExpr.parse(context, form);
+	else if(op == FN)
+		return FnExpr.parse(context, form, name);
 	else if(op == DO)
 		return BodyExpr.parse(context, form.rest());
 	else if(op == LET)
@@ -554,15 +628,34 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 }
 
 static DynamicVar lookupVar(Symbol sym) throws Exception{
-	//note - qualified vars must already exist
+	DynamicVar var = null;
+
+	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
-		return DynamicVar.find(sym);
-	IPersistentMap uses = (IPersistentMap) RT.USES.get();
-	DynamicVar var = (DynamicVar) uses.valAt(sym);
+		{
+		var = DynamicVar.find(sym);
+		}
+	else
+		{
+		//is it an alias?
+		IPersistentMap uses = (IPersistentMap) RT.USES.get();
+		var = (DynamicVar) uses.valAt(sym);
+		if(var == null)
+			{
+			//introduce a new var in the current ns
+			String ns = currentNS();
+			var = DynamicVar.intern(Symbol.intern(ns, sym.name));
+			}
+		}
 	if(var != null)
-		return var;
-	String ns = currentNS();
-	return DynamicVar.intern(Symbol.intern(ns, sym.name));
+		registerVar(var);
+	return var;
+}
+
+private static void registerVar(DynamicVar var) throws Exception{
+	IPersistentMap varsMap = (IPersistentMap) VARS.get();
+	if(varsMap != null && RT.get(var, varsMap) == null)
+		VARS.set(RT.assoc(varsMap, var, var));
 }
 
 private static String currentNS(){
