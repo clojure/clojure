@@ -1568,7 +1568,7 @@ static Object macroexpand(Object x){
 
 private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
 	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.get();
-	KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
+	KeywordExpr ke = (KeywordExpr) RT.get(keywordsMap, keyword);
 //!	if(ke == null)
 //!		KEYWORDS.set(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
 	return ke;
@@ -1576,7 +1576,7 @@ private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
 
 private static void registerVar(DynamicVar var) throws Exception{
 	IPersistentMap varsMap = (IPersistentMap) VARS.get();
-	if(RT.get(var, varsMap) == null)
+	if(RT.get(varsMap, var) == null)
 		VARS.set(RT.assoc(varsMap, var, var));
 }
 
@@ -1585,7 +1585,7 @@ private static void registerFn(FnExpr fn) throws Exception{
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
-	if(b != null && method != null && RT.get(b, method.locals) == null)
+	if(b != null && method != null && RT.get(method.locals, b) == null)
 		{
 		b.isClosed = true;
 		method.fn.closes = (IPersistentMap) RT.assoc(method.fn.closes, b, b);
@@ -1594,7 +1594,7 @@ static void closeOver(LocalBinding b, FnMethod method){
 }
 
 static LocalBinding referenceLocal(Symbol sym) throws Exception{
-	LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.get());
+	LocalBinding b = (LocalBinding) RT.get(LOCAL_ENV.get(), sym);
 	if(b != null)
 		{
 		closeOver(b, (FnMethod) METHOD.get());
@@ -1629,7 +1629,7 @@ static String resolveHostClassname(String classname) throws Exception{
 	if(isPrimitive(classname))
 		return classname;
 	IPersistentMap importMap = (IPersistentMap) IMPORTS.get();
-	String fullyQualifiedName = (String) RT.get(classname, importMap);
+	String fullyQualifiedName = (String) RT.get(importMap, classname);
 	if(fullyQualifiedName == null)
 		throw new Exception("Can't resolve type name: " + classname);
 	return fullyQualifiedName;

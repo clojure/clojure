@@ -45,6 +45,9 @@ static Symbol _AMP_ = Symbol.create("&");
 
 private static final int MAX_POSITIONAL_ARITY = 20;
 private static Type OBJECT_TYPE;
+private static Type KEYWORD_TYPE = Type.getType(Keyword.class);
+private static Type VAR_TYPE = Type.getType(DynamicVar.class);
+
 private static Type[][] ARG_TYPES;
 
 static
@@ -62,7 +65,7 @@ static
 
 
 //symbol->localbinding
-static public DynamicVar LOCAL_ENV = DynamicVar.create();
+static public DynamicVar LOCAL_ENV = DynamicVar.create(null);
 
 //vector<localbinding>
 static public DynamicVar LOOP_LOCALS = DynamicVar.create();
@@ -74,13 +77,13 @@ static public DynamicVar KEYWORDS = DynamicVar.create();
 static public DynamicVar VARS = DynamicVar.create();
 
 //FnFrame
-static public DynamicVar METHOD = DynamicVar.create();
+static public DynamicVar METHOD = DynamicVar.create(null);
 
 //String
-static public DynamicVar SOURCE = DynamicVar.create();
+static public DynamicVar SOURCE = DynamicVar.create(null);
 
 //Integer
-static public DynamicVar NEXT_LOCAL_NUM = DynamicVar.create();
+static public DynamicVar NEXT_LOCAL_NUM = DynamicVar.create(0);
 
 //DynamicClassLoader
 static public DynamicVar LOADER = DynamicVar.create();
@@ -234,7 +237,7 @@ static class IfExpr implements Expr{
 }
 
 static public IPersistentMap CHAR_MAP =
-		PersistentHashMap.create('-', "_DASH_",
+		PersistentHashMap.create('-', "_",
 		                         '.', "_DOT_",
 		                         ':', "_COLON_",
 		                         '+', "_PLUS_",
@@ -275,12 +278,13 @@ static class FnExpr implements Expr{
 	IPersistentCollection methods;
 	//if there is a variadic overload (there can only be one) it is stored here
 	FnMethod variadicMethod = null;
-	String name = null;
+	String name;
 	String internalName;
 	//localbinding->itself
-	IPersistentMap closes = null;
-	IPersistentMap keywords = null;
-	IPersistentMap vars = null;
+	IPersistentMap closes = PersistentHashMap.EMPTY;
+	//KeywordExpr->iteself
+	IPersistentMap keywords = PersistentHashMap.EMPTY;
+	IPersistentMap vars = PersistentHashMap.EMPTY;
 	Class compiledClass;
 
 	static Expr parse(C context, ISeq form, String name) throws Exception{
@@ -308,7 +312,7 @@ static class FnExpr implements Expr{
 			FnMethod variadicMethod = null;
 			for(ISeq s = RT.rest(form); s != null; s = RT.rest(s))
 				{
-				FnMethod f = analyzeMethod(fn, (ISeq) RT.first(s));
+				FnMethod f = FnMethod.parse(fn, (ISeq) RT.first(s));
 				if(f.isVariadic())
 					{
 					if(variadicMethod == null)
@@ -360,11 +364,17 @@ static class FnExpr implements Expr{
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		//ClassVisitor cv = cw;
 		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-		cv.visit(V1_5, ACC_PUBLIC, name, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
+		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
 		if(source != null)
 			cv.visitSource(source, null);
 		//todo static fields for keywords and vars
+		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
+			{
+			KeywordExpr k = (KeywordExpr) s.first();
+			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(k.k.sym.toString()),
+			              OBJECT_TYPE.getDescriptor(), null, null);
+			}
 		//todo static init for keywords and vars
 		//instance fields for closed-overs
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
@@ -410,68 +420,6 @@ enum PSTATE{
 	REQ, REST, DONE
 }
 
-private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
-	//([args] body...)
-	ISeq parms = (ISeq) RT.first(form);
-	ISeq body = RT.rest(form);
-	try
-		{
-		FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
-		//register as the current method and set up a new env frame
-		DynamicVar.pushThreadBindings(
-				RT.map(
-						METHOD, method,
-						LOCAL_ENV, LOCAL_ENV.get(),
-						LOOP_LOCALS, null,
-						NEXT_LOCAL_NUM, 0));
-
-		//register 'this' as local 0
-		registerLocal(THISFN, null);
-
-		PSTATE state = PSTATE.REQ;
-		PersistentVector loopLocals = PersistentVector.EMPTY;
-		for(ISeq ps = parms; ps != null; ps = ps.rest())
-			{
-			Symbol p = (Symbol) ps.first();
-			if(p.equals(_AMP_))
-				{
-				if(state == PSTATE.REQ)
-					state = PSTATE.REST;
-				else
-					throw new Exception("Invalid parameter list");
-				}
-
-			else
-				{
-				LocalBinding lb = registerLocal(p, tagOf(p));
-				loopLocals = loopLocals.cons(lb);
-				switch(state)
-					{
-					case REQ:
-						method.reqParms = method.reqParms.cons(lb);
-						break;
-					case REST:
-						method.restParm = lb;
-						state = PSTATE.DONE;
-						break;
-
-					default:
-						throw new Exception("Unexpected parameter");
-					}
-				}
-			}
-		if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
-			throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
-		LOOP_LOCALS.set(loopLocals);
-		method.body = BodyExpr.parse(C.RETURN, body);
-		return method;
-		}
-	finally
-		{
-		DynamicVar.popThreadBindings();
-		}
-}
-
 
 static class FnMethod{
 	//when closures are defined inside other closures,
@@ -481,7 +429,6 @@ static class FnMethod{
 	IPersistentMap locals = null;
 	//localbinding->localbinding
 	PersistentVector reqParms = PersistentVector.EMPTY;
-	PersistentVector keyParms = null;
 	LocalBinding restParm = null;
 	Expr body = null;
 	FnExpr fn;
@@ -492,7 +439,75 @@ static class FnMethod{
 	}
 
 	boolean isVariadic(){
-		return keyParms != null || restParm != null;
+		return restParm != null;
+	}
+
+	int numParams(){
+		return reqParms.count() + (isVariadic() ? 1 : 0);
+	}
+
+	private static FnMethod parse(FnExpr fn, ISeq form) throws Exception{
+		//([args] body...)
+		IPersistentArray parms = (IPersistentArray) RT.first(form);
+		ISeq body = RT.rest(form);
+		try
+			{
+			FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
+			//register as the current method and set up a new env frame
+			DynamicVar.pushThreadBindings(
+					RT.map(
+							METHOD, method,
+							LOCAL_ENV, LOCAL_ENV.get(),
+							LOOP_LOCALS, null,
+							NEXT_LOCAL_NUM, 0));
+
+			//register 'this' as local 0
+			registerLocal(THISFN, null);
+
+			PSTATE state = PSTATE.REQ;
+			PersistentVector loopLocals = PersistentVector.EMPTY;
+			for(int i = 0; i < parms.count(); i++)
+				{
+				if(!(parms.nth(i) instanceof Symbol))
+					throw new IllegalArgumentException("fn params must be Symbols");
+				Symbol p = (Symbol) parms.nth(i);
+				if(p.equals(_AMP_))
+					{
+					if(state == PSTATE.REQ)
+						state = PSTATE.REST;
+					else
+						throw new Exception("Invalid parameter list");
+					}
+
+				else
+					{
+					LocalBinding lb = registerLocal(p, tagOf(p));
+					loopLocals = loopLocals.cons(lb);
+					switch(state)
+						{
+						case REQ:
+							method.reqParms = method.reqParms.cons(lb);
+							break;
+						case REST:
+							method.restParm = lb;
+							state = PSTATE.DONE;
+							break;
+
+						default:
+							throw new Exception("Unexpected parameter");
+						}
+					}
+				}
+			if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
+				throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
+			LOOP_LOCALS.set(loopLocals);
+			method.body = BodyExpr.parse(C.RETURN, body);
+			return method;
+			}
+		finally
+			{
+			DynamicVar.popThreadBindings();
+			}
 	}
 }
 
@@ -578,7 +593,12 @@ static class LetExpr implements Expr{
 
 	static Expr parse(C context, ISeq form, boolean isLoop) throws Exception{
 		//(let [var val var2 val2 ...] body...)
-		ISeq bindings = (ISeq) RT.second(form);
+		if(!(RT.second(form) instanceof IPersistentArray))
+			throw new IllegalArgumentException("Bad binding form, expected vector");
+
+		IPersistentArray bindings = (IPersistentArray) RT.second(form);
+		if((bindings.count() % 2) != 0)
+			throw new IllegalArgumentException("Bad binding form, expected matched symbol expression pairs");
 
 		ISeq body = RT.rest(RT.rest(form));
 
@@ -596,15 +616,13 @@ static class LetExpr implements Expr{
 
 			PersistentVector bindingInits = PersistentVector.EMPTY;
 			PersistentVector loopLocals = PersistentVector.EMPTY;
-			for(ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
+			for(int i = 0; i < bindings.count(); i += 2)
 				{
-				if(!(RT.first(bs) instanceof Symbol))
-					throw new IllegalArgumentException("Bad binding form, expected symbol, got: " + RT.first(bs));
-				Symbol sym = (Symbol) RT.first(bs);
-				if(bs.rest() == null)
-					throw new IllegalArgumentException("Bad binding form, expected expression following: " + sym);
+				if(!(bindings.nth(i) instanceof Symbol))
+					throw new IllegalArgumentException("Bad binding form, expected symbol, got: " + bindings.nth(i));
+				Symbol sym = (Symbol) bindings.nth(i);
 
-				Expr init = analyze(C.EXPRESSION, RT.second(bs), sym.name);
+				Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 				//sequential enhancement of env (like Lisp let*)
 				LocalBinding lb = registerLocal(sym, tagOf(sym));
 				BindingInit bi = new BindingInit(lb, init);
@@ -624,7 +642,7 @@ static class LetExpr implements Expr{
 	}
 
 	public Object eval() throws Exception{
-		throw new UnsupportedOperationException("Can't eval let");
+		throw new UnsupportedOperationException("Can't eval let/loop");
 	}
 }
 
@@ -633,7 +651,7 @@ private static LocalBinding registerLocal(Symbol sym, Symbol tag) throws Excepti
 	LocalBinding b = new LocalBinding(num, sym, tag);
 	NEXT_LOCAL_NUM.set(num + 1);
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
-	LOCAL_ENV.set(RT.assoc(b.sym, b, localsMap));
+	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
 	FnMethod method = (FnMethod) METHOD.get();
 	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
 	return b;
@@ -693,9 +711,9 @@ private static KeywordExpr registerKeyword(Keyword keyword){
 		return new KeywordExpr(keyword);
 
 	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.get();
-	KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
+	KeywordExpr ke = (KeywordExpr) RT.get(keywordsMap, keyword);
 	if(ke == null)
-		KEYWORDS.set(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
+		KEYWORDS.set(RT.assoc(keywordsMap, keyword, ke = new KeywordExpr(keyword)));
 	return ke;
 }
 
@@ -743,7 +761,7 @@ private static void registerVar(DynamicVar var) throws Exception{
 	if(!VARS.isBound())
 		return;
 	IPersistentMap varsMap = (IPersistentMap) VARS.get();
-	if(varsMap != null && RT.get(var, varsMap) == null)
+	if(varsMap != null && RT.get(varsMap, var) == null)
 		VARS.set(RT.assoc(varsMap, var, var));
 }
 
@@ -752,7 +770,7 @@ private static String currentNS(){
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
-	if(b != null && method != null && RT.get(b, method.locals) == null)
+	if(b != null && method != null && RT.get(method.locals, b) == null)
 		{
 		method.fn.closes = (IPersistentMap) RT.assoc(method.fn.closes, b, b);
 		closeOver(b, method.parent);
@@ -763,7 +781,7 @@ static void closeOver(LocalBinding b, FnMethod method){
 static LocalBinding referenceLocal(Symbol sym) throws Exception{
 	if(!LOCAL_ENV.isBound())
 		return null;
-	LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.get());
+	LocalBinding b = (LocalBinding) RT.get(LOCAL_ENV.get(), sym);
 	if(b != null)
 		{
 		closeOver(b, (FnMethod) METHOD.get());
@@ -787,6 +805,8 @@ public static void main(String[] args){
 		{
 		try
 			{
+			DynamicVar.pushThreadBindings(
+					RT.map(LOADER, new DynamicClassLoader()));
 			Object r = LispReader.read(rdr, false, EOF, false);
 			if(r == EOF)
 				break;
@@ -797,6 +817,7 @@ public static void main(String[] args){
 			}
 		catch(Exception e)
 			{
+			DynamicVar.popThreadBindings();
 			e.printStackTrace();
 			}
 		}
