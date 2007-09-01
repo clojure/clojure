@@ -19,19 +19,19 @@ import java.io.*;
 public class RT{
 
 static public Symbol T = Symbol.create(null, "t");
-final static public DynamicVar OUT =
-		DynamicVar.intern(Symbol.create("clojure", "out"), new OutputStreamWriter(System.out));
+final static public Var OUT =
+		Var.intern(Symbol.create("clojure", "out"), new OutputStreamWriter(System.out));
 final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 
-final static public DynamicVar CURRENT_MODULE = DynamicVar.intern(Symbol.create("clojure", "current-module"),
-                                                                  Module.findOrCreateModule("clojure/user"));
+final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
+                                                    Module.findOrCreateModule("clojure/user"));
 
 //string
-final static DynamicVar CURRENT_NS = DynamicVar.intern(Symbol.create("clojure", "current-ns"), "clojure-user");
+final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "current-ns"), "clojure-user");
 //simple-symbol->var
-final static DynamicVar USES = DynamicVar.intern(Symbol.create("clojure", "uses"), PersistentHashMap.EMPTY);
+final static Var USES = Var.intern(Symbol.create("clojure", "uses"), PersistentHashMap.EMPTY);
 //simple-symbol->fully-qualified-class-name-symbol
-final static DynamicVar IMPORTS = DynamicVar.intern(Symbol.create("clojure", "imports"), PersistentHashMap.EMPTY);
+final static Var IMPORTS = Var.intern(Symbol.create("clojure", "imports"), PersistentHashMap.EMPTY);
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Character[] chars;

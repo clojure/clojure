@@ -39,33 +39,33 @@ static Symbol USE = Symbol.create("use");
 static Symbol _AMP_KEY = Symbol.create("&key");
 static Symbol _AMP_REST = Symbol.create("&rest");
 
-static public DynamicVar _CRT_OUT = RT.OUT;
-static public DynamicVar _CRT_MODULE = RT.CURRENT_MODULE;
+static public Var _CRT_OUT = RT.OUT;
+static public Var _CRT_MODULE = RT.CURRENT_MODULE;
 
 static NilExpr NIL_EXPR = new NilExpr();
 
 //short-name-string->full-name-string
-static public DynamicVar IMPORTS = DynamicVar.create();
+static public Var IMPORTS = Var.create();
 
 //keyword->keywordexpr
-static public DynamicVar KEYWORDS = DynamicVar.create();
+static public Var KEYWORDS = Var.create();
 
 //var->var
-static public DynamicVar VARS = DynamicVar.create();
+static public Var VARS = Var.create();
 
 //symbol->localbinding
-static public DynamicVar LOCAL_ENV = DynamicVar.create();
+static public Var LOCAL_ENV = Var.create();
 
 
 //FnFrame
-static public DynamicVar METHOD = DynamicVar.create();
+static public Var METHOD = Var.create();
 
 //module->module
-static public DynamicVar USES = DynamicVar.create();
+static public Var USES = Var.create();
 
 
 //ISeq FnExprs
-static public DynamicVar FNS = DynamicVar.create();
+static public Var FNS = Var.create();
 
 static public IPersistentMap CHAR_MAP =
 		new PersistentArrayMap(new Object[]{'-', "_DASH_",
@@ -99,7 +99,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 	StringWriter w = new StringWriter();
 	try
 		{
-		DynamicVar.pushThreadBindings(
+		Var.pushThreadBindings(
 				RT.map(
 						_CRT_OUT, w,
 						KEYWORDS, null,
@@ -118,7 +118,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 			{
 			try
 				{
-				DynamicVar.pushThreadBindings(
+				Var.pushThreadBindings(
 						RT.map(
 								IMPORTS, null,
 								USES, null));
@@ -159,7 +159,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 				}
 			finally
 				{
-				DynamicVar.popThreadBindings();
+				Var.popThreadBindings();
 				}
 			}
 		//declare static members for keywords, vars
@@ -170,7 +170,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 			}
 		for(ISeq vars = RT.seq(VARS.get()); vars != null; vars = vars.rest())
 			{
-			DynamicVar v = (DynamicVar) ((IMapEntry) vars.first()).val();
+			Var v = (Var) ((IMapEntry) vars.first()).val();
 			format("static DynamicVar ~A;~%", munge(v.toString()));
 			}
 
@@ -194,7 +194,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 			}
 		for(ISeq vars = RT.seq(VARS.get()); vars != null; vars = vars.rest())
 			{
-			DynamicVar v = (DynamicVar) ((IMapEntry) vars.first()).val();
+			Var v = (Var) ((IMapEntry) vars.first()).val();
 			//!format("~A = Module.intern(~S,~S);~%", munge(v.toString()), v.module.name, v.name.name);
 			}
 		//todo init syms and quoted aggregates
@@ -216,7 +216,7 @@ static String compile(String ns, String className, LineNumberingPushbackReader..
 		}
 	finally
 		{
-		DynamicVar.popThreadBindings();
+		Var.popThreadBindings();
 		}
 	return w.toString();
 }
@@ -283,13 +283,13 @@ static class AnExpr implements Expr{
 		StringWriter w = new StringWriter();
 		try
 			{
-			DynamicVar.pushThreadBindings(RT.map(_CRT_OUT, w));
+			Var.pushThreadBindings(RT.map(_CRT_OUT, w));
 			emitExpression();
 			return w.toString();
 			}
 		finally
 			{
-			DynamicVar.popThreadBindings();
+			Var.popThreadBindings();
 			}
 	}
 
@@ -791,7 +791,7 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception{
 		}
 	try
 		{
-		DynamicVar.pushThreadBindings(RT.map(LOCAL_ENV, LOCAL_ENV.get()));
+		Var.pushThreadBindings(RT.map(LOCAL_ENV, LOCAL_ENV.get()));
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
@@ -806,7 +806,7 @@ private static Expr analyzeLet(C context, ISeq form) throws Exception{
 		}
 	finally
 		{
-		DynamicVar.popThreadBindings();
+		Var.popThreadBindings();
 		}
 
 }
@@ -817,7 +817,7 @@ private static Expr analyzeLetFn(C context, ISeq form) throws Exception{
 		return analyze(context, RT.list(RT.list(FN, null, form)));
 	try
 		{
-		DynamicVar.pushThreadBindings(RT.map(LOCAL_ENV, LOCAL_ENV.get()));
+		Var.pushThreadBindings(RT.map(LOCAL_ENV, LOCAL_ENV.get()));
 		ISeq bindings = (ISeq) RT.second(form);
 		ISeq body = RT.rest(RT.rest(form));
 		PersistentVector bindingPairs = PersistentVector.EMPTY;
@@ -846,7 +846,7 @@ private static Expr analyzeLetFn(C context, ISeq form) throws Exception{
 		}
 	finally
 		{
-		DynamicVar.popThreadBindings();
+		Var.popThreadBindings();
 		}
 
 }
@@ -864,7 +864,7 @@ private static Expr analyzeLetStar(C context, ISeq form) throws Exception{
 
 	try
 		{
-		DynamicVar.pushThreadBindings(RT.map(LOCAL_ENV, LOCAL_ENV.get()));
+		Var.pushThreadBindings(RT.map(LOCAL_ENV, LOCAL_ENV.get()));
 		PersistentVector bindingInits = PersistentVector.EMPTY;
 		for(ISeq bs = bindings; bs != null; bs = RT.rest(RT.rest(bs)))
 			{
@@ -885,7 +885,7 @@ private static Expr analyzeLetStar(C context, ISeq form) throws Exception{
 		}
 	finally
 		{
-		DynamicVar.popThreadBindings();
+		Var.popThreadBindings();
 		}
 
 }
@@ -1409,7 +1409,7 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 	try
 		{
 		FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
-		DynamicVar.pushThreadBindings(
+		Var.pushThreadBindings(
 				RT.map(
 						METHOD, method,
 						LOCAL_ENV, LOCAL_ENV.get()));
@@ -1467,7 +1467,7 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 		}
 	finally
 		{
-		DynamicVar.popThreadBindings();
+		Var.popThreadBindings();
 		}
 }
 
@@ -1488,7 +1488,7 @@ private static Expr analyzeDef(C context, ISeq form) throws Exception{
 		throw new Exception("Too many arguments to def");
 	Symbol sym = (Symbol) RT.second(form);
 	Module module = (Module) _CRT_MODULE.get();
-	DynamicVar var = null;//!module.intern(baseSymbol(sym));
+	Var var = null;//!module.intern(baseSymbol(sym));
 	registerVar(var);
 	VarExpr ve = new VarExpr(var, typeHint(sym));
 	Expr init = analyze(C.EXPRESSION, macroexpand(RT.third(form)));
@@ -1540,14 +1540,14 @@ private static Expr analyzeSymbol(Symbol sym, boolean inFnPosition) throws Excep
 			b.valueTaken = true;
 		return new LocalBindingExpr(b, typeHint);
 		}
-	DynamicVar v = lookupVar(sym);
+	Var v = lookupVar(sym);
 	if(v != null)
 		return new VarExpr(v, typeHint);
 	throw new Exception("Unable to resolve symbol: " + sym.name + " in this context");
 	}
 }
 
-static DynamicVar lookupVar(Symbol sym) throws Exception{
+static Var lookupVar(Symbol sym) throws Exception{
 	Module module = (Module) _CRT_MODULE.get();
 //	Var v = module.find(sym);
 //	if(v != null)
@@ -1574,7 +1574,7 @@ private static KeywordExpr registerKeyword(Keyword keyword) throws Exception{
 	return ke;
 }
 
-private static void registerVar(DynamicVar var) throws Exception{
+private static void registerVar(Var var) throws Exception{
 	IPersistentMap varsMap = (IPersistentMap) VARS.get();
 	if(RT.get(varsMap, var) == null)
 		VARS.set(RT.assoc(varsMap, var, var));
@@ -1927,10 +1927,10 @@ static class LocalBindingExpr extends AnExpr{
 }
 
 static class VarExpr extends AnExpr{
-	final DynamicVar var;
+	final Var var;
 	final String typeHint;
 
-	public VarExpr(DynamicVar var, String typeHint){
+	public VarExpr(Var var, String typeHint){
 		this.var = var;
 		this.typeHint = typeHint;
 	}

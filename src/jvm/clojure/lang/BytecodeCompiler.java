@@ -46,7 +46,7 @@ static Symbol _AMP_ = Symbol.create("&");
 private static final int MAX_POSITIONAL_ARITY = 20;
 private static Type OBJECT_TYPE;
 private static Type KEYWORD_TYPE = Type.getType(Keyword.class);
-private static Type VAR_TYPE = Type.getType(DynamicVar.class);
+private static Type VAR_TYPE = Type.getType(Var.class);
 
 private static Type[][] ARG_TYPES;
 
@@ -65,28 +65,28 @@ static
 
 
 //symbol->localbinding
-static public DynamicVar LOCAL_ENV = DynamicVar.create(null);
+static public Var LOCAL_ENV = Var.create(null);
 
 //vector<localbinding>
-static public DynamicVar LOOP_LOCALS = DynamicVar.create();
+static public Var LOOP_LOCALS = Var.create();
 
 //keyword->keywordexpr
-static public DynamicVar KEYWORDS = DynamicVar.create();
+static public Var KEYWORDS = Var.create();
 
 //var->var
-static public DynamicVar VARS = DynamicVar.create();
+static public Var VARS = Var.create();
 
 //FnFrame
-static public DynamicVar METHOD = DynamicVar.create(null);
+static public Var METHOD = Var.create(null);
 
 //String
-static public DynamicVar SOURCE = DynamicVar.create(null);
+static public Var SOURCE = Var.create(null);
 
 //Integer
-static public DynamicVar NEXT_LOCAL_NUM = DynamicVar.create(0);
+static public Var NEXT_LOCAL_NUM = Var.create(0);
 
 //DynamicClassLoader
-static public DynamicVar LOADER = DynamicVar.create();
+static public Var LOADER = Var.create();
 
 enum C{
 	STATEMENT,  //value ignored
@@ -100,10 +100,10 @@ interface Expr{
 }
 
 static class DefExpr implements Expr{
-	final DynamicVar var;
+	final Var var;
 	final Expr init;
 
-	public DefExpr(DynamicVar var, Expr init){
+	public DefExpr(Var var, Expr init){
 		this.var = var;
 		this.init = init;
 	}
@@ -120,7 +120,7 @@ static class DefExpr implements Expr{
 			throw new Exception("Too few arguments to def");
 		else if(!(RT.second(form) instanceof Symbol))
 			throw new Exception("Second argument to def must be a Symbol");
-		DynamicVar v = lookupVar((Symbol) RT.second(form));
+		Var v = lookupVar((Symbol) RT.second(form));
 		if(!v.sym.ns.equals(currentNS()))
 			throw new Exception("Can't create defs outside of current ns");
 		return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name));
@@ -128,10 +128,10 @@ static class DefExpr implements Expr{
 }
 
 static class VarExpr implements Expr{
-	final DynamicVar var;
+	final Var var;
 	final Symbol tag;
 
-	public VarExpr(DynamicVar var, Symbol tag){
+	public VarExpr(Var var, Symbol tag){
 		this.var = var;
 		this.tag = tag;
 	}
@@ -299,7 +299,7 @@ static class FnExpr implements Expr{
 		fn.internalName = fn.name.replace('.', '/');
 		try
 			{
-			DynamicVar.pushThreadBindings(
+			Var.pushThreadBindings(
 					RT.map(
 							KEYWORDS, PersistentHashMap.EMPTY,
 							VARS, PersistentHashMap.EMPTY));
@@ -346,7 +346,7 @@ static class FnExpr implements Expr{
 			}
 		finally
 			{
-			DynamicVar.popThreadBindings();
+			Var.popThreadBindings();
 			}
 		fn.compile();
 		return fn;
@@ -454,7 +454,7 @@ static class FnMethod{
 			{
 			FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
 			//register as the current method and set up a new env frame
-			DynamicVar.pushThreadBindings(
+			Var.pushThreadBindings(
 					RT.map(
 							METHOD, method,
 							LOCAL_ENV, LOCAL_ENV.get(),
@@ -506,7 +506,7 @@ static class FnMethod{
 			}
 		finally
 			{
-			DynamicVar.popThreadBindings();
+			Var.popThreadBindings();
 			}
 	}
 }
@@ -612,7 +612,7 @@ static class LetExpr implements Expr{
 
 		try
 			{
-			DynamicVar.pushThreadBindings(dynamicBindings);
+			Var.pushThreadBindings(dynamicBindings);
 
 			PersistentVector bindingInits = PersistentVector.EMPTY;
 			PersistentVector loopLocals = PersistentVector.EMPTY;
@@ -637,7 +637,7 @@ static class LetExpr implements Expr{
 			}
 		finally
 			{
-			DynamicVar.popThreadBindings();
+			Var.popThreadBindings();
 			}
 	}
 
@@ -725,31 +725,31 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		if(b != null)
 			return new LocalBindingExpr(b, tag);
 		}
-	DynamicVar v = lookupVar(sym);
+	Var v = lookupVar(sym);
 	if(v != null)
 		return new VarExpr(v, tag);
 	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
 
 }
 
-static DynamicVar lookupVar(Symbol sym) throws Exception{
-	DynamicVar var = null;
+static Var lookupVar(Symbol sym) throws Exception{
+	Var var = null;
 
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
-		var = DynamicVar.find(sym);
+		var = Var.find(sym);
 		}
 	else
 		{
 		//is it an alias?
 		IPersistentMap uses = (IPersistentMap) RT.USES.get();
-		var = (DynamicVar) uses.valAt(sym);
+		var = (Var) uses.valAt(sym);
 		if(var == null)
 			{
 			//introduce a new var in the current ns
 			String ns = currentNS();
-			var = DynamicVar.intern(Symbol.intern(ns, sym.name));
+			var = Var.intern(Symbol.intern(ns, sym.name));
 			}
 		}
 	if(var != null)
@@ -757,7 +757,7 @@ static DynamicVar lookupVar(Symbol sym) throws Exception{
 	return var;
 }
 
-private static void registerVar(DynamicVar var) throws Exception{
+private static void registerVar(Var var) throws Exception{
 	if(!VARS.isBound())
 		return;
 	IPersistentMap varsMap = (IPersistentMap) VARS.get();
@@ -805,7 +805,7 @@ public static void main(String[] args){
 		{
 		try
 			{
-			DynamicVar.pushThreadBindings(
+			Var.pushThreadBindings(
 					RT.map(LOADER, new DynamicClassLoader()));
 			Object r = LispReader.read(rdr, false, EOF, false);
 			if(r == EOF)
@@ -817,7 +817,7 @@ public static void main(String[] args){
 			}
 		catch(Exception e)
 			{
-			DynamicVar.popThreadBindings();
+			Var.popThreadBindings();
 			e.printStackTrace();
 			}
 		}

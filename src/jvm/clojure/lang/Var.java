@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class DynamicVar implements IFn{
+public class Var implements IFn{
 
 static class Frame{
 	Associative bmap;
@@ -46,19 +46,19 @@ Object root;
 transient final AtomicInteger count;
 final Symbol sym;
 
-static ConcurrentHashMap<Symbol, DynamicVar> table = new ConcurrentHashMap<Symbol, DynamicVar>();
+static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();
 
-public static DynamicVar intern(Symbol sym, Object root){
+public static Var intern(Symbol sym, Object root){
 	return intern(sym, root, true);
 }
 
-public static DynamicVar intern(Symbol sym, Object root, boolean replaceRoot){
-	DynamicVar dvout = table.get(sym);
+public static Var intern(Symbol sym, Object root, boolean replaceRoot){
+	Var dvout = table.get(sym);
 	boolean present = dvout != null;
 
 	if(!present)
 		{
-		DynamicVar dvin = new DynamicVar(sym, root);
+		Var dvin = new Var(sym, root);
 		dvout = table.putIfAbsent(sym, dvin);
 		present = dvout != null;   //might have snuck in
 		if(!present)
@@ -69,12 +69,12 @@ public static DynamicVar intern(Symbol sym, Object root, boolean replaceRoot){
 	return dvout;
 }
 
-public static DynamicVar intern(Symbol sym){
-	DynamicVar dvout = table.get(sym);
+public static Var intern(Symbol sym){
+	Var dvout = table.get(sym);
 	if(dvout != null)
 		return dvout;
 
-	DynamicVar dvin = table.putIfAbsent(sym, dvout = new DynamicVar(sym));
+	Var dvin = table.putIfAbsent(sym, dvout = new Var(sym));
 	if(dvin != null)
 		return dvin;
 	return dvout;
@@ -84,25 +84,25 @@ public static void unintern(Symbol sym){
 	table.remove(sym);
 }
 
-public static DynamicVar find(Symbol sym){
+public static Var find(Symbol sym){
 	return table.get(sym);
 }
 
-public static DynamicVar create(){
-	return new DynamicVar(null);
+public static Var create(){
+	return new Var(null);
 }
 
-public static DynamicVar create(Object root){
-	return new DynamicVar(null, root);
+public static Var create(Object root){
+	return new Var(null, root);
 }
 
-private DynamicVar(Symbol sym){
+private Var(Symbol sym){
 	this.sym = sym;
 	this.count = new AtomicInteger();
 	this.root = dvals;  //use dvals as magic not-bound value
 }
 
-private DynamicVar(Symbol sym, Object root){
+private Var(Symbol sym, Object root){
 	this(sym);
 	this.root = root;
 }
@@ -150,7 +150,7 @@ public static void pushThreadBindings(Associative bindings){
 	for(ISeq bs = bindings.seq(); bs != null; bs = bs.rest())
 		{
 		IMapEntry e = (IMapEntry) bs.first();
-		DynamicVar v = (DynamicVar) e.key();
+		Var v = (Var) e.key();
 		v.count.incrementAndGet();
 		bmap = bmap.assoc(v, new Box(e.val()));
 		}
@@ -164,7 +164,7 @@ public static void popThreadBindings(){
 	for(ISeq bs = f.bindings.seq(); bs != null; bs = bs.rest())
 		{
 		IMapEntry e = (IMapEntry) bs.first();
-		DynamicVar v = (DynamicVar) e.key();
+		Var v = (Var) e.key();
 		v.count.decrementAndGet();
 		}
 	dvals.set(f.prev);
