@@ -31,13 +31,11 @@ PrintStream p;
 boolean ignore;
 static List packages;
 
-public TypeDump(PrintStream p)
-	{
+public TypeDump(PrintStream p){
 	this.p = p;
-	}
+}
 
-static public void main(String args[])
-	{
+static public void main(String args[]){
 	if(args.length < 2)
 		{
 		System.err.println("Usage: java org.clojure.tools.TypeDump jarfile package [package ...]");
@@ -57,7 +55,7 @@ static public void main(String args[])
 			if(name.endsWith(".class"))
 				{
 				ClassReader cr = new ClassReader(f.getInputStream(e));
-				cr.accept(v, false);
+				//cr.accept(v, false);
 				}
 			}
 		System.out.println(')');
@@ -66,13 +64,12 @@ static public void main(String args[])
 		{
 		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 		}
-	}
+}
 
-public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)
-	{
-	String pkg = name.substring(0,name.lastIndexOf('/')).replace('/','.');
+public void visit(int version, int access, String name, String signature, String superName, String[] interfaces){
+	String pkg = name.substring(0, name.lastIndexOf('/')).replace('/', '.');
 	if((access & Opcodes.ACC_PUBLIC) == 0
-			|| !packages.contains(pkg))
+	   || !packages.contains(pkg))
 		{
 		ignore = true;
 		return;
@@ -93,31 +90,25 @@ public void visit(int version, int access, String name, String signature, String
 			}
 		p.print(')');
 		}
-	}
+}
 
-public void visitSource(String source, String debug)
-	{
-	}
+public void visitSource(String source, String debug){
+}
 
-public void visitOuterClass(String owner, String name, String desc)
-	{
-	}
+public void visitOuterClass(String owner, String name, String desc){
+}
 
-public AnnotationVisitor visitAnnotation(String desc, boolean visible)
-	{
+public AnnotationVisitor visitAnnotation(String desc, boolean visible){
 	return null;
-	}
+}
 
-public void visitAttribute(Attribute attribute)
-	{
-	}
+public void visitAttribute(Attribute attribute){
+}
 
-public void visitInnerClass(String name, String outerName, String innerName, int access)
-	{
-	}
+public void visitInnerClass(String name, String outerName, String innerName, int access){
+}
 
-public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
-	{
+public FieldVisitor visitField(int access, String name, String desc, String signature, Object value){
 	if(!ignore && (access & Opcodes.ACC_PUBLIC) != 0)
 		{
 		p.println();
@@ -143,17 +134,15 @@ public FieldVisitor visitField(int access, String name, String desc, String sign
 		p.print(")");
 		}
 	return null;
-	}
+}
 
-String internalName(Type t)
-	{
+String internalName(Type t){
 	if(t.getSort() == Type.OBJECT)
 		return t.getInternalName();
 	return t.toString();
-	}
+}
 
-public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions)
-	{
+public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions){
 	if(!ignore && (access & Opcodes.ACC_PUBLIC) != 0)
 		{
 		Type args[] = Type.getArgumentTypes(desc);
@@ -163,7 +152,7 @@ public MethodVisitor visitMethod(int access, String name, String desc, String si
 			p.print(" (:ctor ");
 		else
 			p.print(" (:method (:name \"" + name + "\") (:ret \"" +
-		        internalName(Type.getReturnType(desc)) + "\")");
+			        internalName(Type.getReturnType(desc)) + "\")");
 		p.print("(:arity " + args.length + ")");
 		if((access & Opcodes.ACC_STATIC) != 0)
 			{
@@ -189,11 +178,10 @@ public MethodVisitor visitMethod(int access, String name, String desc, String si
 		p.print(')');
 		}
 	return null;
-	}
+}
 
-public void visitEnd()
-	{
+public void visitEnd(){
 	if(!ignore)
 		p.println(')');
-	}
+}
 }
