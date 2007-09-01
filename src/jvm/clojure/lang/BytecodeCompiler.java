@@ -12,7 +12,19 @@
 
 package clojure.lang;
 
-public class BytecodeCompiler{
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.Method;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.util.TraceClassVisitor;
+
+import java.io.PrintWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
+public class BytecodeCompiler implements Opcodes{
 
 static Symbol DEF = Symbol.create("def");
 static Symbol LOOP = Symbol.create("loop");
@@ -24,6 +36,7 @@ static Symbol DO = Symbol.create("do");
 static Symbol FN = Symbol.create("fn");
 static Symbol QUOTE = Symbol.create("quote");
 static Symbol THISFN = Symbol.create("thisfn");
+static Symbol IFN = Symbol.create("clojure.lang", "IFn");
 static Symbol CLASS = Symbol.create("class");
 
 static Symbol IMPORT = Symbol.create("import");
@@ -31,6 +44,22 @@ static Symbol USE = Symbol.create("use");
 static Symbol _AMP_ = Symbol.create("&");
 
 private static final int MAX_POSITIONAL_ARITY = 20;
+private static Type OBJECT_TYPE;
+private static Type[][] ARG_TYPES;
+
+static
+	{
+	OBJECT_TYPE = Type.getType(Object.class);
+	ARG_TYPES = new Type[MAX_POSITIONAL_ARITY][];
+	for(int i = 0; i < MAX_POSITIONAL_ARITY; ++i)
+		{
+		Type[] a = new Type[i];
+		for(int j = 0; j < i; j++)
+			a[j] = OBJECT_TYPE;
+		ARG_TYPES[i] = a;
+		}
+	}
+
 
 //symbol->localbinding
 static public DynamicVar LOCAL_ENV = DynamicVar.create();
@@ -46,6 +75,15 @@ static public DynamicVar VARS = DynamicVar.create();
 
 //FnFrame
 static public DynamicVar METHOD = DynamicVar.create();
+
+//String
+static public DynamicVar SOURCE = DynamicVar.create();
+
+//Integer
+static public DynamicVar NEXT_LOCAL_NUM = DynamicVar.create();
+
+//DynamicClassLoader
+static public DynamicVar LOADER = DynamicVar.create();
 
 enum C{
 	STATEMENT,  //value ignored
@@ -238,6 +276,7 @@ static class FnExpr implements Expr{
 	//if there is a variadic overload (there can only be one) it is stored here
 	FnMethod variadicMethod = null;
 	String name = null;
+	String internalName;
 	//localbinding->itself
 	IPersistentMap closes = null;
 	IPersistentMap keywords = null;
@@ -253,6 +292,7 @@ static class FnExpr implements Expr{
 		fn.name = basename + (name != null ?
 		                      munge(name)
 		                      : ("fn__" + RT.nextID()));
+		fn.internalName = fn.name.replace('.', '/');
 		try
 			{
 			DynamicVar.pushThreadBindings(
@@ -313,15 +353,52 @@ static class FnExpr implements Expr{
 	}
 
 	private void compile(){
-
 		//create bytecode for a class
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
 		//derived from AFn/RestFn
-		//with static fields for keywords and vars
-		//with instance fields for closed-overs
-		//with a ctor that takes closed-overs and inits fields
-		//with an override of invoke/doInvoke for each method
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		//ClassVisitor cv = cw;
+		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
+		cv.visit(V1_5, ACC_PUBLIC, name, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
+		String source = (String) SOURCE.get();
+		if(source != null)
+			cv.visitSource(source, null);
+		//todo static fields for keywords and vars
+		//todo static init for keywords and vars
+		//instance fields for closed-overs
+		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
+			{
+			LocalBinding lb = (LocalBinding) s.first();
+			cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+			}
+		//ctor that takes closed-overs and inits base + fields
+		Method m = new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]);
+		GeneratorAdapter mg = new GeneratorAdapter(ACC_PUBLIC,
+		                                           m,
+		                                           null,
+		                                           null,
+		                                           cw);
+		mg.loadThis();
+		if(isVariadic()) //RestFn ctor takes reqArity arg
+			mg.push(variadicMethod.reqParms.count());
+		mg.invokeConstructor(Type.getType(isVariadic() ? RestFn.class : AFn.class), m);
+		int a = 1;
+		for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
+			{
+			LocalBinding lb = (LocalBinding) s.first();
+			mg.loadLocal(a);
+			mg.putField(Type.getObjectType(internalName), lb.name, OBJECT_TYPE);
+			}
+		mg.returnValue();
+		mg.endMethod();
+
+		//todo override of invoke/doInvoke for each method
+		cv.visitEnd();
+
+		//define class and store
+		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
+		compiledClass = loader.defineClass(name, cw.toByteArray());
 	}
 
 	public Object eval() throws Exception{
@@ -345,13 +422,18 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 				RT.map(
 						METHOD, method,
 						LOCAL_ENV, LOCAL_ENV.get(),
-						LOOP_LOCALS, null));
+						LOOP_LOCALS, null,
+						NEXT_LOCAL_NUM, 0));
+
+		//register 'this' as local 0
+		registerLocal(THISFN, null);
+
 		PSTATE state = PSTATE.REQ;
 		PersistentVector loopLocals = PersistentVector.EMPTY;
 		for(ISeq ps = parms; ps != null; ps = ps.rest())
 			{
-			Object p = ps.first();
-			if(p == _AMP_)
+			Symbol p = (Symbol) ps.first();
+			if(p.equals(_AMP_))
 				{
 				if(state == PSTATE.REQ)
 					state = PSTATE.REST;
@@ -361,15 +443,15 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 
 			else
 				{
+				LocalBinding lb = registerLocal(p, tagOf(p));
+				loopLocals = loopLocals.cons(lb);
 				switch(state)
 					{
 					case REQ:
-						LocalBinding lb = createParamBinding((Symbol) p);
-						loopLocals = loopLocals.cons(lb);
 						method.reqParms = method.reqParms.cons(lb);
 						break;
 					case REST:
-						method.restParm = createParamBinding((Symbol) p);
+						method.restParm = lb;
 						state = PSTATE.DONE;
 						break;
 
@@ -380,9 +462,7 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 			}
 		if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
 			throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
-		//only set loop locals if non-variadic
-		if(method.restParm == null)
-			LOOP_LOCALS.set(loopLocals);
+		LOOP_LOCALS.set(loopLocals);
 		method.body = BodyExpr.parse(C.RETURN, body);
 		return method;
 		}
@@ -392,11 +472,6 @@ private static FnMethod analyzeMethod(FnExpr fn, ISeq form) throws Exception{
 		}
 }
 
-static LocalBinding createParamBinding(Symbol p) throws Exception{
-	LocalBinding b = new LocalBinding(p, tagOf(p));
-	registerLocal(b);
-	return b;
-}
 
 static class FnMethod{
 	//when closures are defined inside other closures,
@@ -424,10 +499,14 @@ static class FnMethod{
 static class LocalBinding{
 	final Symbol sym;
 	final Symbol tag;
+	final int num;
+	final String name;
 
-	public LocalBinding(Symbol sym, Symbol tag){
+	public LocalBinding(int num, Symbol sym, Symbol tag){
+		this.num = num;
 		this.sym = sym;
 		this.tag = tag;
+		name = munge(sym.name);
 	}
 }
 
@@ -506,7 +585,8 @@ static class LetExpr implements Expr{
 		if(context == C.EVAL)
 			return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
-		IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get());
+		IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
+		                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
 		if(isLoop)
 			dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
 
@@ -523,12 +603,12 @@ static class LetExpr implements Expr{
 				Symbol sym = (Symbol) RT.first(bs);
 				if(bs.rest() == null)
 					throw new IllegalArgumentException("Bad binding form, expected expression following: " + sym);
-				LocalBinding lb = new LocalBinding(sym, tagOf(sym));
-				BindingInit bi = new BindingInit(lb, analyze(C.EXPRESSION, RT.second(bs), sym.name));
-				bindingInits = bindingInits.cons(bi);
 
-				//sequential enhancement of env
-				registerLocal(lb);
+				Expr init = analyze(C.EXPRESSION, RT.second(bs), sym.name);
+				//sequential enhancement of env (like Lisp let*)
+				LocalBinding lb = registerLocal(sym, tagOf(sym));
+				BindingInit bi = new BindingInit(lb, init);
+				bindingInits = bindingInits.cons(bi);
 
 				if(isLoop)
 					loopLocals = loopLocals.cons(lb);
@@ -548,11 +628,15 @@ static class LetExpr implements Expr{
 	}
 }
 
-private static void registerLocal(LocalBinding b) throws Exception{
+private static LocalBinding registerLocal(Symbol sym, Symbol tag) throws Exception{
+	int num = ((Number) NEXT_LOCAL_NUM.get()).intValue();
+	LocalBinding b = new LocalBinding(num, sym, tag);
+	NEXT_LOCAL_NUM.set(num + 1);
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
 	LOCAL_ENV.set(RT.assoc(b.sym, b, localsMap));
 	FnMethod method = (FnMethod) METHOD.get();
 	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
+	return b;
 }
 
 private static Expr analyze(C context, Object form) throws Exception{
@@ -583,29 +667,32 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Object op = RT.first(form);
-	if(op == DEF)
+	if(op.equals(DEF))
 		return DefExpr.parse(context, form);
-	else if(op == IF)
+	else if(op.equals(IF))
 		return IfExpr.parse(context, form);
-	else if(op == FN)
+	else if(op.equals(FN))
 		return FnExpr.parse(context, form, name);
-	else if(op == DO)
+	else if(op.equals(DO))
 		return BodyExpr.parse(context, form.rest());
-	else if(op == LET)
+	else if(op.equals(LET))
 		return LetExpr.parse(context, form, false);
-	else if(op == LOOP)
+	else if(op.equals(LOOP))
 		return LetExpr.parse(context, form, true);
+
+	throw new UnsupportedOperationException();
 }
 
-Object eval(Object form) throws Exception{
+static Object eval(Object form) throws Exception{
 	Expr expr = analyze(C.EXPRESSION, form);
 	return expr.eval();
 }
 
 private static KeywordExpr registerKeyword(Keyword keyword){
-	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.get();
-	if(keywordsMap == null) //not bound, no fn context
+	if(!KEYWORDS.isBound())
 		return new KeywordExpr(keyword);
+
+	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.get();
 	KeywordExpr ke = (KeywordExpr) RT.get(keyword, keywordsMap);
 	if(ke == null)
 		KEYWORDS.set(RT.assoc(keyword, ke = new KeywordExpr(keyword), keywordsMap));
@@ -653,6 +740,8 @@ static DynamicVar lookupVar(Symbol sym) throws Exception{
 }
 
 private static void registerVar(DynamicVar var) throws Exception{
+	if(!VARS.isBound())
+		return;
 	IPersistentMap varsMap = (IPersistentMap) VARS.get();
 	if(varsMap != null && RT.get(var, varsMap) == null)
 		VARS.set(RT.assoc(varsMap, var, var));
@@ -672,6 +761,8 @@ static void closeOver(LocalBinding b, FnMethod method){
 
 
 static LocalBinding referenceLocal(Symbol sym) throws Exception{
+	if(!LOCAL_ENV.isBound())
+		return null;
 	LocalBinding b = (LocalBinding) RT.get(sym, LOCAL_ENV.get());
 	if(b != null)
 		{
@@ -686,4 +777,28 @@ private static Symbol tagOf(Symbol sym){
 	return null;
 }
 
+
+public static void main(String[] args){
+	//repl
+	LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
+	OutputStreamWriter w = new OutputStreamWriter(System.out);
+	Object EOF = new Object();
+	for(; ;)
+		{
+		try
+			{
+			Object r = LispReader.read(rdr, false, EOF, false);
+			if(r == EOF)
+				break;
+			Object ret = eval(r);
+			RT.print(ret, w);
+			w.write('\n');
+			w.flush();
+			}
+		catch(Exception e)
+			{
+			e.printStackTrace();
+			}
+		}
+}
 }

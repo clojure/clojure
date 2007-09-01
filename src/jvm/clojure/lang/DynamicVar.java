@@ -74,7 +74,10 @@ public static DynamicVar intern(Symbol sym){
 	if(dvout != null)
 		return dvout;
 
-	return table.putIfAbsent(sym, new DynamicVar(sym));
+	DynamicVar dvin = table.putIfAbsent(sym, dvout = new DynamicVar(sym));
+	if(dvin != null)
+		return dvin;
+	return dvout;
 }
 
 public static void unintern(Symbol sym){

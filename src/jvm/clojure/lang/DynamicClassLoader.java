@@ -28,6 +28,10 @@ public DynamicClassLoader(ClassLoader parent){
 	super(parent);
 }
 
+public Class defineClass(String name, byte[] bytes){
+	return defineClass(name, bytes, 0, bytes.length);
+}
+
 public void addBytecode(String className, byte[] bytes){
 	if(map.containsKey(className))
 		throw new IllegalStateException(String.format("Class %s already present", className));
