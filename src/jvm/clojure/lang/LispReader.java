@@ -425,7 +425,7 @@ static class CharacterReader extends AFn{
 			throw new Exception("EOF while reading character");
 		String token = readToken(r, (char) ch);
 		if(token.length() == 1)
-			return token.charAt(0);
+			return Character.valueOf(token.charAt(0));
 		else if(token.equals("newline"))
 			return '\n';
 		else if(token.equals("space"))
