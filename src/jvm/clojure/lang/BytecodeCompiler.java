@@ -47,6 +47,7 @@ private static final int MAX_POSITIONAL_ARITY = 20;
 private static Type OBJECT_TYPE;
 private static Type KEYWORD_TYPE = Type.getType(Keyword.class);
 private static Type VAR_TYPE = Type.getType(Var.class);
+private static Type SYMBOL_TYPE = Type.getType(Symbol.class);
 
 private static Type[][] ARG_TYPES;
 
@@ -282,7 +283,7 @@ static class FnExpr implements Expr{
 	String internalName;
 	//localbinding->itself
 	IPersistentMap closes = PersistentHashMap.EMPTY;
-	//KeywordExpr->iteself
+	//Keyword->KeywordExpr
 	IPersistentMap keywords = PersistentHashMap.EMPTY;
 	IPersistentMap vars = PersistentHashMap.EMPTY;
 	Class compiledClass;
@@ -368,14 +369,51 @@ static class FnExpr implements Expr{
 		String source = (String) SOURCE.get();
 		if(source != null)
 			cv.visitSource(source, null);
-		//todo static fields for keywords and vars
+
+		Type fntype = Type.getObjectType(internalName);
+		//static fields for keywords
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 			{
-			KeywordExpr k = (KeywordExpr) s.first();
-			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(k.k.sym.toString()),
-			              OBJECT_TYPE.getDescriptor(), null, null);
+			Keyword k = (Keyword) s.first();
+			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(k.sym.toString()),
+			              KEYWORD_TYPE.getDescriptor(), null, null);
+			}
+		//static fields for vars
+		for(ISeq s = RT.keys(vars); s != null; s = s.rest())
+			{
+			Var v = (Var) s.first();
+			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(v.sym.toString()),
+			              VAR_TYPE.getDescriptor(), null, null);
 			}
 		//todo static init for keywords and vars
+		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
+		                                                  Method.getMethod("void <clinit> ()"),
+		                                                  null,
+		                                                  null,
+		                                                  cv);
+		Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
+		Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
+		Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol)");
+		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
+			{
+			Keyword k = (Keyword) s.first();
+			clinitgen.push(k.sym.ns);
+			clinitgen.push(k.sym.name);
+			clinitgen.invokeStatic(KEYWORD_TYPE, kwintern);
+			clinitgen.putStatic(fntype, munge(k.sym.toString()), KEYWORD_TYPE);
+			}
+		for(ISeq s = RT.keys(vars); s != null; s = s.rest())
+			{
+			Var v = (Var) s.first();
+			clinitgen.push(v.sym.ns);
+			clinitgen.push(v.sym.name);
+			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
+			clinitgen.invokeStatic(VAR_TYPE, varintern);
+			clinitgen.putStatic(fntype, munge(v.sym.toString()), VAR_TYPE);
+			}
+		clinitgen.returnValue();
+		clinitgen.visitMaxs(1, 1);
+		clinitgen.endMethod();
 		//instance fields for closed-overs
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
 			{
@@ -384,26 +422,29 @@ static class FnExpr implements Expr{
 			}
 		//ctor that takes closed-overs and inits base + fields
 		Method m = new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]);
-		GeneratorAdapter mg = new GeneratorAdapter(ACC_PUBLIC,
-		                                           m,
-		                                           null,
-		                                           null,
-		                                           cw);
-		mg.loadThis();
+		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
+		                                                m,
+		                                                null,
+		                                                null,
+		                                                cv);
+		ctorgen.loadThis();
 		if(isVariadic()) //RestFn ctor takes reqArity arg
-			mg.push(variadicMethod.reqParms.count());
-		mg.invokeConstructor(Type.getType(isVariadic() ? RestFn.class : AFn.class), m);
+			ctorgen.push(variadicMethod.reqParms.count());
+		ctorgen.invokeConstructor(Type.getType(isVariadic() ? RestFn.class : AFn.class), m);
 		int a = 1;
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			mg.loadLocal(a);
-			mg.putField(Type.getObjectType(internalName), lb.name, OBJECT_TYPE);
+			ctorgen.loadLocal(a);
+			ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
 			}
-		mg.returnValue();
-		mg.endMethod();
+		ctorgen.returnValue();
+		ctorgen.visitMaxs(1, 1);
+		ctorgen.endMethod();
 
 		//todo override of invoke/doInvoke for each method
+
+		//end of class
 		cv.visitEnd();
 
 		//define class and store
