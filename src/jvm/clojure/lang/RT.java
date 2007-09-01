@@ -186,7 +186,7 @@ static public Object pop(Object x){
 	return ((IPersistentList) x).pop();
 }
 
-static public Object get(Object key, Object coll){
+static public Object get(Object coll, Object key){
 	if(coll == null)
 		return null;
 	return ((Associative) coll).valAt(key);
@@ -290,7 +290,7 @@ static boolean hasTag(Object o, Object tag){
 	if(!(o instanceof IObj))
 		return false;
 	IPersistentMap meta = ((IObj) o).meta();
-	return RT.equal(tag, RT.get(TAG_KEY, meta));
+	return RT.equal(tag, RT.get(meta, TAG_KEY));
 }
 
 /**
