@@ -49,6 +49,7 @@ private static final Type VAR_TYPE = Type.getType(Var.class);
 private static final Type SYMBOL_TYPE = Type.getType(Symbol.class);
 private static final Type NUM_TYPE = Type.getType(Num.class);
 private static final Type IFN_TYPE = Type.getType(IFn.class);
+final static Type CLASS_TYPE = Type.getType(Class.class);
 
 private static final Type[][] ARG_TYPES;
 private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -190,6 +191,46 @@ static abstract class LiteralExpr implements Expr{
 
 	public Object eval(){
 		return val();
+	}
+}
+
+static class QuoteExpr extends LiteralExpr{
+	//stuff quoted vals in classloader at compile time, pull out at runtime
+	//this won't work for static compilation...
+	final Object v;
+	final int id;
+	final static Type DYNAMIC_CLASSLOADER_TYPE = Type.getType(DynamicClassLoader.class);
+	final static Method getClassMethod = Method.getMethod("Class getClass()");
+	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
+	final static Method getQuotedValMethod = Method.getMethod("Object getQuotedVal(int)");
+
+	public QuoteExpr(int id, Object v){
+		this.id = id;
+		this.v = v;
+	}
+
+	Object val(){
+		return v;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			gen.loadThis();
+			gen.invokeVirtual(OBJECT_TYPE, getClassMethod);
+			gen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
+			gen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
+			gen.push(id);
+			gen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getQuotedValMethod);
+			}
+	}
+
+	public static Expr parse(C context, ISeq form){
+		Object v = RT.second(form);
+		int id = RT.nextID();
+		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
+		loader.registerQuotedVal(id, v);
+		return new QuoteExpr(id, v);
 	}
 }
 
@@ -1065,6 +1106,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return LetExpr.parse(context, form, true);
 	else if(op.equals(RECUR))
 		return RecurExpr.parse(context, form);
+	else if(op.equals(QUOTE))
+		return QuoteExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
