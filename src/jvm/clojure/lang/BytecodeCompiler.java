@@ -12,10 +12,7 @@
 
 package clojure.lang;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
@@ -23,6 +20,7 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import java.io.PrintWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigInteger;
 
 public class BytecodeCompiler implements Opcodes{
 
@@ -48,6 +46,8 @@ private static Type OBJECT_TYPE;
 private static Type KEYWORD_TYPE = Type.getType(Keyword.class);
 private static Type VAR_TYPE = Type.getType(Var.class);
 private static Type SYMBOL_TYPE = Type.getType(Symbol.class);
+private static Type NUM_TYPE = Type.getType(Num.class);
+private static Type IFN_TYPE = Type.getType(IFn.class);
 
 private static Type[][] ARG_TYPES;
 private static Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -106,6 +106,7 @@ interface Expr{
 static class DefExpr implements Expr{
 	final Var var;
 	final Expr init;
+	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
 
 	public DefExpr(Var var, Expr init){
 		this.var = var;
@@ -118,7 +119,11 @@ static class DefExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-
+		fn.emitVar(gen, var);
+		init.emit(C.EXPRESSION, fn, gen);
+		gen.invokeVirtual(VAR_TYPE, bindRootMethod);
+		if(!(context == C.STATEMENT))
+			fn.emitVar(gen, var);
 	}
 
 	public static Expr parse(C context, ISeq form) throws Exception{
@@ -148,6 +153,11 @@ static class VarExpr implements Expr{
 	public Object eval() throws Exception{
 		return var.get();
 	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			fn.emitVar(gen, var);
+	}
 }
 
 static class KeywordExpr implements Expr{
@@ -159,6 +169,12 @@ static class KeywordExpr implements Expr{
 
 	public Object eval() throws Exception{
 		return k;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			fn.emitKeyword(gen, k);
+
 	}
 }
 
@@ -174,6 +190,11 @@ static class NilExpr extends LiteralExpr{
 	Object val(){
 		return null;
 	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			gen.visitInsn(Opcodes.ACONST_NULL);
+	}
 }
 
 static NilExpr NIL_EXPR = new NilExpr();
@@ -181,6 +202,13 @@ static NilExpr NIL_EXPR = new NilExpr();
 
 static class NumExpr extends LiteralExpr{
 	final Num num;
+	final static Method numFromIntMethod = Method.getMethod("clojure.lang.Num from(int)");
+	final static Method numFromDoubleMethod = Method.getMethod("clojure.lang.Num from(double)");
+	final static Method numFromBigIntMethod = Method.getMethod("clojure.lang.Num from(java.math.BigInteger)");
+	final static Method numDivideMethod =
+			Method.getMethod("clojure.lang.Num divide(java.math.BigInteger,java.math.BigInteger)");
+	final static Type BIGINT_TYPE = Type.getType(BigInteger.class);
+	final static Method bigintFromStringCtor = Method.getMethod("void <init>(String)");
 
 	public NumExpr(Num num){
 		this.num = num;
@@ -188,6 +216,44 @@ static class NumExpr extends LiteralExpr{
 
 	Object val(){
 		return num;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			Class nclass = num.getClass();
+			if(nclass == FixNum.class)
+				{
+				gen.push(num.intValue());
+				gen.invokeStatic(NUM_TYPE, numFromIntMethod);
+				}
+			else if(nclass == DoubleNum.class)
+				{
+				gen.push(num.doubleValue());
+				gen.invokeStatic(NUM_TYPE, numFromDoubleMethod);
+				}
+			else if(nclass == BigNum.class)
+				{
+				emitBigInteger(gen, num);
+				gen.invokeStatic(NUM_TYPE, numFromBigIntMethod);
+				}
+			else if(nclass == RatioNum.class)
+				{
+				RatioNum r = (RatioNum) num;
+				emitBigInteger(gen, r.numerator);
+				emitBigInteger(gen, r.denominator);
+				gen.invokeStatic(NUM_TYPE, numDivideMethod);
+				}
+			else
+				throw new UnsupportedOperationException("Unknown Num type");
+			}
+	}
+
+	static void emitBigInteger(GeneratorAdapter gen, Num num){
+		gen.newInstance(BIGINT_TYPE);
+		gen.dup();
+		gen.push(num.toString());
+		gen.invokeConstructor(BIGINT_TYPE, bigintFromStringCtor);
 	}
 }
 
@@ -201,10 +267,17 @@ static class StringExpr extends LiteralExpr{
 	Object val(){
 		return str;
 	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			gen.push(str);
+	}
 }
 
 static class CharExpr extends LiteralExpr{
 	final Character ch;
+	final static Type CHARACTER_TYPE = Type.getObjectType("java/lang/Character");
+	final static Method charValueOfMethod = Method.getMethod("Character valueOf(char)");
 
 	public CharExpr(Character ch){
 		this.ch = ch;
@@ -212,6 +285,14 @@ static class CharExpr extends LiteralExpr{
 
 	Object val(){
 		return ch;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			gen.push(ch.charValue());
+			gen.invokeStatic(CHARACTER_TYPE, charValueOfMethod);
+			}
 	}
 }
 
@@ -231,6 +312,18 @@ static class IfExpr implements Expr{
 		if(testExpr.eval() != null)
 			return thenExpr.eval();
 		return elseExpr.eval();
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		Label elseLabel = gen.newLabel();
+		Label endLabel = gen.newLabel();
+		testExpr.emit(C.EXPRESSION, fn, gen);
+		gen.ifNull(elseLabel);
+		thenExpr.emit(context, fn, gen);
+		gen.goTo(endLabel);
+		gen.mark(elseLabel);
+		elseExpr.emit(context, fn, gen);
+		gen.mark(endLabel);
 	}
 
 	public static Expr parse(C context, ISeq form) throws Exception{
@@ -283,18 +376,71 @@ static String munge(String name){
 	return sb.toString();
 }
 
+static class InvokeExpr implements Expr{
+	final Expr fexpr;
+	final IPersistentArray args;
+
+
+	public InvokeExpr(Expr fexpr, IPersistentArray args){
+		this.fexpr = fexpr;
+		this.args = args;
+	}
+
+	public Object eval() throws Exception{
+		IFn fn = (IFn) fexpr.eval();
+		PersistentVector argvs = PersistentVector.EMPTY;
+		for(int i = 0; i < args.count(); i++)
+			argvs = argvs.cons(((Expr) args.nth(i)).eval());
+		return fn.applyTo(RT.seq(argvs));
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		fexpr.emit(C.EXPRESSION, fn, gen);
+		gen.checkCast(IFN_TYPE);
+		for(int i = 0; i < args.count(); i++)
+			{
+			Expr e = (Expr) args.nth(i);
+			e.emit(C.EXPRESSION, fn, gen);
+			}
+		gen.invokeVirtual(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[args.count()]));
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		Expr fexpr = analyze(C.EXPRESSION, form.first());
+		PersistentVector args = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
+			{
+			args = args.cons(analyze(C.EXPRESSION, s.first()));
+			}
+		if(args.count() > MAX_POSITIONAL_ARITY)
+			throw new IllegalArgumentException(String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
+		return new InvokeExpr(fexpr, args);
+	}
+}
+
 static class FnExpr implements Expr{
 	IPersistentCollection methods;
 	//if there is a variadic overload (there can only be one) it is stored here
 	FnMethod variadicMethod = null;
 	String name;
 	String internalName;
+	Type fntype;
 	//localbinding->itself
 	IPersistentMap closes = PersistentHashMap.EMPTY;
 	//Keyword->KeywordExpr
 	IPersistentMap keywords = PersistentHashMap.EMPTY;
 	IPersistentMap vars = PersistentHashMap.EMPTY;
 	Class compiledClass;
+
+	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
+	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
+	final static Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol)");
+	final static Method afnctor = Method.getMethod("void <init>()");
+	final static Method restfnctor = Method.getMethod("void <init>(int)");
+	final static Type aFnType = Type.getType(AFn.class);
+	final static Type restFnType = Type.getType(RestFn.class);
 
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr();
@@ -306,6 +452,7 @@ static class FnExpr implements Expr{
 		                      munge(name)
 		                      : ("fn__" + RT.nextID()));
 		fn.internalName = fn.name.replace('.', '/');
+		fn.fntype = Type.getObjectType(fn.internalName);
 		try
 			{
 			Var.pushThreadBindings(
@@ -378,7 +525,6 @@ static class FnExpr implements Expr{
 		if(source != null)
 			cv.visitSource(source, null);
 
-		Type fntype = Type.getObjectType(internalName);
 		//static fields for keywords
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 			{
@@ -399,9 +545,6 @@ static class FnExpr implements Expr{
 		                                                  null,
 		                                                  null,
 		                                                  cv);
-		Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
-		Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
-		Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol)");
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 			{
 			Keyword k = (Keyword) s.first();
@@ -437,13 +580,17 @@ static class FnExpr implements Expr{
 		                                                cv);
 		ctorgen.loadThis();
 		if(isVariadic()) //RestFn ctor takes reqArity arg
+			{
 			ctorgen.push(variadicMethod.reqParms.count());
-		ctorgen.invokeConstructor(Type.getType(isVariadic() ? RestFn.class : AFn.class), m);
+			ctorgen.invokeConstructor(restFnType, restfnctor);
+			}
+		else
+			ctorgen.invokeConstructor(aFnType, afnctor);
 		int a = 1;
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			ctorgen.loadLocal(a);
+			ctorgen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), a);
 			ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
 			}
 		ctorgen.returnValue();
@@ -466,6 +613,38 @@ static class FnExpr implements Expr{
 
 	public Object eval() throws Exception{
 		return compiledClass.newInstance();
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
+		//fn arg is enclosing fn, not this
+		if(context != C.STATEMENT)
+			{
+			gen.newInstance(fntype);
+			gen.dup();
+			for(ISeq s = RT.keys(closes); s != null; s = s.rest())
+				{
+				LocalBinding lb = (LocalBinding) s.first();
+				fn.emitLocal(gen, lb);
+				}
+			gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
+			}
+	}
+
+	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
+		if(closes.contains(lb))
+			gen.getField(fntype, lb.name, OBJECT_TYPE);
+		else
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
+	}
+
+
+	public void emitVar(GeneratorAdapter gen, Var var){
+		gen.getStatic(fntype, munge(var.sym.toString()), VAR_TYPE);
+	}
+
+	public void emitKeyword(GeneratorAdapter gen, Keyword k){
+		gen.getStatic(fntype, munge(k.sym.toString()), KEYWORD_TYPE);
 	}
 }
 
@@ -584,11 +763,11 @@ static class FnMethod{
 static class LocalBinding{
 	final Symbol sym;
 	final Symbol tag;
-	final int num;
+	final int idx;
 	final String name;
 
 	public LocalBinding(int num, Symbol sym, Symbol tag){
-		this.num = num;
+		this.idx = num;
 		this.sym = sym;
 		this.tag = tag;
 		name = munge(sym.name);
@@ -606,6 +785,11 @@ static class LocalBindingExpr implements Expr{
 
 	public Object eval() throws Exception{
 		throw new UnsupportedOperationException("Can't eval locals");
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			fn.emitLocal(gen, b);
 	}
 }
 
@@ -637,6 +821,23 @@ static class BodyExpr implements Expr{
 			ret = e.eval();
 			}
 		return ret;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(exprs.count() > 0)
+			{
+			for(int i = 0; i < exprs.count() - 1; i++)
+				{
+				Expr e = (Expr) exprs.nth(i);
+				e.emit(C.STATEMENT, fn, gen);
+				}
+			Expr last = (Expr) exprs.nth(exprs.count() - 1);
+			last.emit(context, fn, gen);
+			}
+		else if(context != C.STATEMENT)
+			{
+			NIL_EXPR.emit(context, fn, gen);
+			}
 	}
 }
 
@@ -714,6 +915,16 @@ static class LetExpr implements Expr{
 	public Object eval() throws Exception{
 		throw new UnsupportedOperationException("Can't eval let/loop");
 	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		for(int i = 0; i < bindingInits.count(); i++)
+			{
+			BindingInit bi = (BindingInit) bindingInits.nth(i);
+			bi.init.emit(C.EXPRESSION, fn, gen);
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
+			}
+		body.emit(context, fn, gen);
+	}
 }
 
 private static LocalBinding registerLocal(Symbol sym, Symbol tag) throws Exception{
@@ -732,7 +943,7 @@ private static Expr analyze(C context, Object form) throws Exception{
 }
 
 private static Expr analyze(C context, Object form, String name) throws Exception{
-	//todo macro expansion
+	//todo symbol macro expansion
 	if(form == null)
 		return NIL_EXPR;
 	Class fclass = form.getClass();
@@ -755,6 +966,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Object op = RT.first(form);
+	//todo macro expansion
 	if(op.equals(DEF))
 		return DefExpr.parse(context, form);
 	else if(op.equals(IF))
@@ -767,8 +979,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return LetExpr.parse(context, form, false);
 	else if(op.equals(LOOP))
 		return LetExpr.parse(context, form, true);
-
-	throw new UnsupportedOperationException();
+	else
+		return InvokeExpr.parse(context, form);
 }
 
 static Object eval(Object form) throws Exception{
