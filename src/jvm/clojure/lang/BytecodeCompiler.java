@@ -91,6 +91,9 @@ static public Var SOURCE = Var.create(null);
 //Integer
 static public Var NEXT_LOCAL_NUM = Var.create(0);
 
+//Integer
+static public Var RET_LOCAL_NUM = Var.create();
+
 //DynamicClassLoader
 static public Var LOADER = Var.create();
 
@@ -522,8 +525,10 @@ static class FnExpr implements Expr{
 		//anonymous fns get names fn__id
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+//		ClassWriter cw = new ClassWriter(0);
 		//ClassVisitor cv = cw;
-		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
+		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
+//		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
 		if(source != null)
@@ -549,6 +554,7 @@ static class FnExpr implements Expr{
 		                                                  null,
 		                                                  null,
 		                                                  cv);
+		clinitgen.visitCode();
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 			{
 			Keyword k = (Keyword) s.first();
@@ -567,8 +573,8 @@ static class FnExpr implements Expr{
 			clinitgen.putStatic(fntype, munge(v.sym.toString()), VAR_TYPE);
 			}
 		clinitgen.returnValue();
-		clinitgen.visitMaxs(1, 1);
 		clinitgen.endMethod();
+//		clinitgen.visitMaxs(1, 1);
 		//instance fields for closed-overs
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
 			{
@@ -582,6 +588,7 @@ static class FnExpr implements Expr{
 		                                                null,
 		                                                null,
 		                                                cv);
+		ctorgen.visitCode();
 		ctorgen.loadThis();
 		if(isVariadic()) //RestFn ctor takes reqArity arg
 			{
@@ -598,7 +605,7 @@ static class FnExpr implements Expr{
 			ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
 			}
 		ctorgen.returnValue();
-		ctorgen.visitMaxs(1, 1);
+		//	ctorgen.visitMaxs(1, 1);
 		ctorgen.endMethod();
 
 		//override of invoke/doInvoke for each method
@@ -755,7 +762,7 @@ static class FnMethod{
 		                                            null,
 		                                            EXCEPTION_TYPES,
 		                                            cv);
-
+		gen.visitCode();
 		Label loopLabel = gen.mark();
 		try
 			{
@@ -768,7 +775,7 @@ static class FnMethod{
 			}
 
 		gen.returnValue();
-		gen.visitMaxs(1, 1);
+		//gen.visitMaxs(1, 1);
 		gen.endMethod();
 	}
 }
@@ -971,8 +978,6 @@ static class RecurExpr implements Expr{
 		Label loopLabel = (Label) LOOP_LABEL.get();
 		if(loopLabel == null)
 			throw new IllegalStateException();
-		if(context != C.STATEMENT)
-			NIL_EXPR.emit(context, fn, gen);
 		for(int i = 0; i < loopLocals.count(); i++)
 			{
 			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
@@ -1002,14 +1007,19 @@ static class RecurExpr implements Expr{
 }
 
 private static LocalBinding registerLocal(Symbol sym, Symbol tag) throws Exception{
-	int num = ((Number) NEXT_LOCAL_NUM.get()).intValue();
+	int num = getAndIncLocalNum();
 	LocalBinding b = new LocalBinding(num, sym, tag);
-	NEXT_LOCAL_NUM.set(num + 1);
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
 	FnMethod method = (FnMethod) METHOD.get();
 	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
 	return b;
+}
+
+private static int getAndIncLocalNum(){
+	int num = ((Number) NEXT_LOCAL_NUM.get()).intValue();
+	NEXT_LOCAL_NUM.set(num + 1);
+	return num;
 }
 
 private static Expr analyze(C context, Object form) throws Exception{
