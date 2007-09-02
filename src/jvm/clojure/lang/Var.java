@@ -135,9 +135,8 @@ final public boolean hasRoot(){
 	return root != dvals;
 }
 
-public Object bindRoot(Object root){
+public void bindRoot(Object root){
 	this.root = root;
-	return root;
 }
 
 public void unbindRoot(){

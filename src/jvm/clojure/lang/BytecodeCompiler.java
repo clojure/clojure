@@ -50,6 +50,7 @@ private static Type VAR_TYPE = Type.getType(Var.class);
 private static Type SYMBOL_TYPE = Type.getType(Symbol.class);
 
 private static Type[][] ARG_TYPES;
+private static Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
 
 static
 	{
@@ -98,6 +99,8 @@ enum C{
 
 interface Expr{
 	Object eval() throws Exception;
+
+	void emit(C context, FnExpr fn, GeneratorAdapter gen);
 }
 
 static class DefExpr implements Expr{
@@ -110,7 +113,12 @@ static class DefExpr implements Expr{
 	}
 
 	public Object eval() throws Exception{
-		return var.bindRoot(init.eval());
+		var.bindRoot(init.eval());
+		return var;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+
 	}
 
 	public static Expr parse(C context, ISeq form) throws Exception{
@@ -385,7 +393,7 @@ static class FnExpr implements Expr{
 			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(v.sym.toString()),
 			              VAR_TYPE.getDescriptor(), null, null);
 			}
-		//todo static init for keywords and vars
+		//static init for keywords and vars
 		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
 		                                                  Method.getMethod("void <clinit> ()"),
 		                                                  null,
@@ -442,8 +450,12 @@ static class FnExpr implements Expr{
 		ctorgen.visitMaxs(1, 1);
 		ctorgen.endMethod();
 
-		//todo override of invoke/doInvoke for each method
-
+		//override of invoke/doInvoke for each method
+		for(ISeq s = RT.seq(methods); s != null; s = s.rest())
+			{
+			FnMethod method = (FnMethod) s.first();
+			method.emit(this, cv);
+			}
 		//end of class
 		cv.visitEnd();
 
@@ -549,6 +561,23 @@ static class FnMethod{
 			{
 			Var.popThreadBindings();
 			}
+	}
+
+	public void emit(FnExpr fn, ClassVisitor cv){
+		Method m = new Method(isVariadic() ? "doInvoke" : "invoke",
+		                      OBJECT_TYPE, ARG_TYPES[numParams()]);
+
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+		                                            m,
+		                                            null,
+		                                            EXCEPTION_TYPES,
+		                                            cv);
+
+		body.emit(C.RETURN, fn, gen);
+
+		gen.returnValue();
+		gen.visitMaxs(1, 1);
+		gen.endMethod();
 	}
 }
 
