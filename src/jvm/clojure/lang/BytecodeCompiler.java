@@ -16,6 +16,7 @@ import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 import java.io.PrintWriter;
 import java.io.InputStreamReader;
@@ -24,33 +25,33 @@ import java.math.BigInteger;
 
 public class BytecodeCompiler implements Opcodes{
 
-static Symbol DEF = Symbol.create("def");
-static Symbol LOOP = Symbol.create("loop");
-static Symbol RECUR = Symbol.create("recur");
-static Symbol DOT = Symbol.create(".");
-static Symbol IF = Symbol.create("if");
-static Symbol LET = Symbol.create("let");
-static Symbol DO = Symbol.create("do");
-static Symbol FN = Symbol.create("fn");
-static Symbol QUOTE = Symbol.create("quote");
-static Symbol THISFN = Symbol.create("thisfn");
-static Symbol IFN = Symbol.create("clojure.lang", "IFn");
-static Symbol CLASS = Symbol.create("class");
+static final Symbol DEF = Symbol.create("def");
+static final Symbol LOOP = Symbol.create("loop");
+static final Symbol RECUR = Symbol.create("recur");
+static final Symbol DOT = Symbol.create(".");
+static final Symbol IF = Symbol.create("if");
+static final Symbol LET = Symbol.create("let");
+static final Symbol DO = Symbol.create("do");
+static final Symbol FN = Symbol.create("fn");
+static final Symbol QUOTE = Symbol.create("quote");
+static final Symbol THISFN = Symbol.create("thisfn");
+static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
+static final Symbol CLASS = Symbol.create("class");
 
-static Symbol IMPORT = Symbol.create("import");
-static Symbol USE = Symbol.create("use");
-static Symbol _AMP_ = Symbol.create("&");
+static final Symbol IMPORT = Symbol.create("import");
+static final Symbol USE = Symbol.create("use");
+static final Symbol _AMP_ = Symbol.create("&");
 
 private static final int MAX_POSITIONAL_ARITY = 20;
-private static Type OBJECT_TYPE;
-private static Type KEYWORD_TYPE = Type.getType(Keyword.class);
-private static Type VAR_TYPE = Type.getType(Var.class);
-private static Type SYMBOL_TYPE = Type.getType(Symbol.class);
-private static Type NUM_TYPE = Type.getType(Num.class);
-private static Type IFN_TYPE = Type.getType(IFn.class);
+private static final Type OBJECT_TYPE;
+private static final Type KEYWORD_TYPE = Type.getType(Keyword.class);
+private static final Type VAR_TYPE = Type.getType(Var.class);
+private static final Type SYMBOL_TYPE = Type.getType(Symbol.class);
+private static final Type NUM_TYPE = Type.getType(Num.class);
+private static final Type IFN_TYPE = Type.getType(IFn.class);
 
-private static Type[][] ARG_TYPES;
-private static Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
+private static final Type[][] ARG_TYPES;
+private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
 
 static
 	{
@@ -71,6 +72,9 @@ static public Var LOCAL_ENV = Var.create(null);
 
 //vector<localbinding>
 static public Var LOOP_LOCALS = Var.create();
+
+//Label
+static public Var LOOP_LABEL = Var.create();
 
 //keyword->keywordexpr
 static public Var KEYWORDS = Var.create();
@@ -752,7 +756,16 @@ static class FnMethod{
 		                                            EXCEPTION_TYPES,
 		                                            cv);
 
-		body.emit(C.RETURN, fn, gen);
+		Label loopLabel = gen.mark();
+		try
+			{
+			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
+			body.emit(C.RETURN, fn, gen);
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
 
 		gen.returnValue();
 		gen.visitMaxs(1, 1);
@@ -923,7 +936,68 @@ static class LetExpr implements Expr{
 			bi.init.emit(C.EXPRESSION, fn, gen);
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 			}
-		body.emit(context, fn, gen);
+		if(isLoop)
+			{
+			Label loopLabel = gen.mark();
+			try
+				{
+				Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
+				body.emit(context, fn, gen);
+				}
+			finally
+				{
+				Var.popThreadBindings();
+				}
+			}
+		else
+			body.emit(context, fn, gen);
+	}
+}
+
+static class RecurExpr implements Expr{
+	final IPersistentArray args;
+	final IPersistentArray loopLocals;
+
+	public RecurExpr(IPersistentArray loopLocals, IPersistentArray args){
+		this.loopLocals = loopLocals;
+		this.args = args;
+	}
+
+	public Object eval() throws Exception{
+		throw new UnsupportedOperationException("Can't eval recur");
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		Label loopLabel = (Label) LOOP_LABEL.get();
+		if(loopLabel == null)
+			throw new IllegalStateException();
+		if(context != C.STATEMENT)
+			NIL_EXPR.emit(context, fn, gen);
+		for(int i = 0; i < loopLocals.count(); i++)
+			{
+			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
+			Expr arg = (Expr) args.nth(i);
+			arg.emit(C.EXPRESSION, fn, gen);
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
+			}
+
+		gen.goTo(loopLabel);
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		IPersistentArray loopLocals = (IPersistentArray) LOOP_LOCALS.get();
+		if(context != C.RETURN || loopLocals == null)
+			throw new UnsupportedOperationException("Can only recur from tail position");
+		PersistentVector args = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
+			{
+			args = args.cons(analyze(C.EXPRESSION, s.first()));
+			}
+		if(args.count() != loopLocals.count())
+			throw new IllegalArgumentException(
+					String.format("Mismatched argument count to recur, expected: %d args, got: %d",
+					              loopLocals.count(), args.count()));
+		return new RecurExpr(loopLocals, args);
 	}
 }
 
@@ -979,12 +1053,14 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return LetExpr.parse(context, form, false);
 	else if(op.equals(LOOP))
 		return LetExpr.parse(context, form, true);
+	else if(op.equals(RECUR))
+		return RecurExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
 
 static Object eval(Object form) throws Exception{
-	Expr expr = analyze(C.EXPRESSION, form);
+	Expr expr = analyze(C.EVAL, form);
 	return expr.eval();
 }
 
