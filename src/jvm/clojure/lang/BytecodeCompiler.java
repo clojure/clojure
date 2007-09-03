@@ -152,6 +152,34 @@ static class DefExpr implements Expr{
 	}
 }
 
+static class AssignExpr implements Expr{
+	final AssignableExpr target;
+	final Expr val;
+
+
+	public AssignExpr(AssignableExpr target, Expr val){
+		this.target = target;
+		this.val = val;
+	}
+
+	public Object eval() throws Exception{
+		return target.evalAssign(val);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		target.emitAssign(context, fn, gen, val);
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		if(RT.length(form) != 3)
+			throw new IllegalArgumentException("Malformed assignment, expecting (= target val)");
+		Expr target = analyze(C.EXPRESSION, RT.second(form));
+		if(!(target instanceof AssignableExpr))
+			throw new IllegalArgumentException("Invalid assignment target");
+		return new AssignExpr((AssignableExpr) target, analyze(C.EXPRESSION, RT.third(form)));
+	}
+}
+
 static class VarExpr implements Expr, AssignableExpr{
 	final Var var;
 	final Symbol tag;
@@ -180,7 +208,7 @@ static class VarExpr implements Expr, AssignableExpr{
 	}
 
 	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
-	                       Expr val) throws Exception{
+	                       Expr val){
 		fn.emitVar(gen, var);
 		val.emit(C.EXPRESSION, fn, gen);
 		gen.invokeVirtual(VAR_TYPE, setMethod);
@@ -243,7 +271,7 @@ static abstract class LiteralExpr implements Expr{
 static interface AssignableExpr{
 	Object evalAssign(Expr val) throws Exception;
 
-	void emitAssign(C context, FnExpr fn, GeneratorAdapter gen, Expr val) throws Exception;
+	void emitAssign(C context, FnExpr fn, GeneratorAdapter gen, Expr val);
 }
 
 static abstract class HostExpr implements Expr{
@@ -330,7 +358,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
-	                       Expr val) throws Exception{
+	                       Expr val){
 		target.emit(C.EXPRESSION, fn, gen);
 		gen.push(fieldName);
 		val.emit(C.EXPRESSION, fn, gen);
@@ -367,7 +395,7 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
-	                       Expr val) throws Exception{
+	                       Expr val){
 		gen.push(className);
 		gen.push(fieldName);
 		val.emit(C.EXPRESSION, fn, gen);
@@ -1372,6 +1400,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return HostExpr.parse(context, form);
 	else if(op.equals(THE_VAR))
 		return TheVarExpr.parse(context, form);
+	else if(op.equals(ASSIGN))
+		return AssignExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
