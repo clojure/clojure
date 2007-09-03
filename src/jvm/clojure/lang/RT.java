@@ -31,18 +31,74 @@ final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "current-ns"),
 //simple-symbol->var
 final static Var USES = Var.intern(Symbol.create("clojure", "uses"), PersistentHashMap.EMPTY);
 //simple-symbol->fully-qualified-class-name-string
-final static Var IMPORTS = Var.intern(Symbol.create("clojure", "imports"), PersistentHashMap.EMPTY);
+final static Var IMPORTS = Var.intern(Symbol.create("clojure", "imports"),
+                                      map(Symbol.create("Boolean"), "java.lang.Boolean",
+                                          Symbol.create("Byte"), "java.lang.Byte",
+                                          Symbol.create("Character"), "java.lang.Character",
+                                          Symbol.create("Class"), "java.lang.Class",
+                                          Symbol.create("ClassLoader"), "java.lang.ClassLoader",
+                                          Symbol.create("Compiler"), "java.lang.Compiler",
+                                          Symbol.create("Double"), "java.lang.Double",
+                                          Symbol.create("Enum"), "java.lang.Enum",
+                                          Symbol.create("Float"), "java.lang.Float",
+                                          Symbol.create("InheritableThreadLocal"), "java.lang.InheritableThreadLocal",
+                                          Symbol.create("Integer"), "java.lang.Integer",
+                                          Symbol.create("Long"), "java.lang.Long",
+                                          Symbol.create("Math"), "java.lang.Math",
+                                          Symbol.create("Number"), "java.lang.Number",
+                                          Symbol.create("Object"), "java.lang.Object",
+                                          Symbol.create("Package"), "java.lang.Package",
+                                          Symbol.create("Process"), "java.lang.Process",
+                                          Symbol.create("ProcessBuilder"), "java.lang.ProcessBuilder",
+                                          Symbol.create("Runtime"), "java.lang.Runtime",
+                                          Symbol.create("RuntimePermission"), "java.lang.RuntimePermission",
+                                          Symbol.create("SecurityManager"), "java.lang.SecurityManager",
+                                          Symbol.create("Short"), "java.lang.Short",
+                                          Symbol.create("StackTraceElement"), "java.lang.StackTraceElement",
+                                          Symbol.create("StrictMath"), "java.lang.StrictMath",
+                                          Symbol.create("String"), "java.lang.String",
+                                          Symbol.create("StringBuffer"), "java.lang.StringBuffer",
+                                          Symbol.create("StringBuilder"), "java.lang.StringBuilder",
+                                          Symbol.create("System"), "java.lang.System",
+                                          Symbol.create("Thread"), "java.lang.Thread",
+                                          Symbol.create("ThreadGroup"), "java.lang.ThreadGroup",
+                                          Symbol.create("ThreadLocal"), "java.lang.ThreadLocal",
+                                          Symbol.create("Throwable"), "java.lang.Throwable",
+                                          Symbol.create("Void"), "java.lang.Void",
+                                          Symbol.create("Appendable"), "java.lang.Appendable",
+                                          Symbol.create("CharSequence"), "java.lang.CharSequence",
+                                          Symbol.create("Cloneable"), "java.lang.Cloneable",
+                                          Symbol.create("Iterable"), "java.lang.Iterable",
+                                          Symbol.create("Readable"), "java.lang.Readable",
+                                          Symbol.create("Runnable"), "java.lang.Runnable",
+                                          Symbol.create("Collection"), "java.util.Collection",
+                                          Symbol.create("Comparator"), "java.util.Comparator",
+                                          Symbol.create("Enumeration"), "java.util.Enumeration",
+                                          Symbol.create("EventListener"), "java.util.EventListener",
+                                          Symbol.create("Formattable"), "java.util.Formattable",
+                                          Symbol.create("Iterator"), "java.util.Iterator",
+                                          Symbol.create("List"), "java.util.List",
+                                          Symbol.create("ListIterator"), "java.util.ListIterator",
+                                          Symbol.create("Map"), "java.util.Map",
+                                          Symbol.create("Map$Entry"), "java.util.Map$Entry",
+                                          Symbol.create("Observer"), "java.util.Observer",
+                                          Symbol.create("Queue"), "java.util.Queue",
+                                          Symbol.create("RandomAccess"), "java.util.RandomAccess",
+                                          Symbol.create("Set"), "java.util.Set",
+                                          Symbol.create("SortedMap"), "java.util.SortedMap",
+                                          Symbol.create("SortedSet"), "java.util.SortedSet"
+                                      ));
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
-static public final Character[] chars;
+//static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
 
-static
-	{
-	chars = new Character[256];
-	for(int i = 0; i < chars.length; i++)
-		chars[i] = new Character((char) i);
-	}
+//static
+//	{
+//	chars = new Character[256];
+//	for(int i = 0; i < chars.length; i++)
+//		chars[i] = new Character((char) i);
+//	}
 
 
 static public int nextID(){
@@ -54,25 +110,25 @@ static public boolean equal(Object k1, Object k2){
 	       (k1 != null && k1.equals(k2));
 }
 
-static public Object eq(Object arg1, Object arg2){
-	return (arg1 == arg2) ? Boolean.TRUE : null;
-}
-
-static public Object eql(Object arg1, Object arg2){
-	if(arg1 == arg2)
-		return Boolean.TRUE;
-	if(arg1 == null || arg2 == null)
-		return null;
-	if(arg1 instanceof Num
-	   && arg1.getClass() == arg2.getClass()
-	   && arg1.equals(arg2))
-		return Boolean.TRUE;
-	if(arg1.getClass() == Character.class
-	   && arg2.getClass() == Character.class
-	   && arg1.equals(arg2))
-		return Boolean.TRUE;
-	return null;
-}
+//static public Object eq(Object arg1, Object arg2){
+//	return (arg1 == arg2) ? Boolean.TRUE : null;
+//}
+//
+//static public Object eql(Object arg1, Object arg2){
+//	if(arg1 == arg2)
+//		return Boolean.TRUE;
+//	if(arg1 == null || arg2 == null)
+//		return null;
+//	if(arg1 instanceof Num
+//	   && arg1.getClass() == arg2.getClass()
+//	   && arg1.equals(arg2))
+//		return Boolean.TRUE;
+//	if(arg1.getClass() == Character.class
+//	   && arg2.getClass() == Character.class
+//	   && arg1.equals(arg2))
+//		return Boolean.TRUE;
+//	return null;
+//}
 
 //    static public Object equal(Object arg1, Object arg2) {
 //        if(arg1 == null)
@@ -301,9 +357,7 @@ static public Object box(Object x){
 }
 
 static public Character box(char x){
-	if(x < chars.length)
-		return chars[x];
-	return new Character(x);
+	return Character.valueOf(x);
 }
 
 static public Object box(boolean x){
@@ -376,7 +430,7 @@ static public double doubleCast(Object x){
 
 
 static public IPersistentMap map(Object... init){
-	return new PersistentArrayMap(init);
+	return PersistentHashMap.create(init);
 }
 
 static public IPersistentArray tuple(Object... init){
