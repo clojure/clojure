@@ -18,9 +18,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.objectweb.asm.util.CheckClassAdapter;
 
-import java.io.PrintWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.math.BigInteger;
 
 public class BytecodeCompiler implements Opcodes{
@@ -33,6 +31,7 @@ static final Symbol LET = Symbol.create("let");
 static final Symbol DO = Symbol.create("do");
 static final Symbol FN = Symbol.create("fn");
 static final Symbol QUOTE = Symbol.create("quote");
+static final Symbol THE_VAR = Symbol.create("the-var");
 static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("=");
 
@@ -130,11 +129,11 @@ static class DefExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitVar(gen, var);
+		fn.emitVarValue(gen, var);
 		init.emit(C.EXPRESSION, fn, gen);
 		gen.invokeVirtual(VAR_TYPE, bindRootMethod);
 		if(!(context == C.STATEMENT))
-			fn.emitVar(gen, var);
+			fn.emitVarValue(gen, var);
 	}
 
 	public static Expr parse(C context, ISeq form) throws Exception{
@@ -145,7 +144,7 @@ static class DefExpr implements Expr{
 			throw new Exception("Too few arguments to def");
 		else if(!(RT.second(form) instanceof Symbol))
 			throw new Exception("Second argument to def must be a Symbol");
-		Var v = lookupVar((Symbol) RT.second(form));
+		Var v = lookupVar((Symbol) RT.second(form), true);
 		if(!v.sym.ns.equals(currentNS()))
 			throw new Exception("Can't create defs outside of current ns");
 		return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name));
@@ -167,7 +166,32 @@ static class VarExpr implements Expr{
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
+			fn.emitVarValue(gen, var);
+	}
+}
+
+static class TheVarExpr implements Expr{
+	final Var var;
+
+	public TheVarExpr(Var var){
+		this.var = var;
+	}
+
+	public Object eval() throws Exception{
+		return var;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
 			fn.emitVar(gen, var);
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		Symbol sym = (Symbol) RT.second(form);
+		Var v = lookupVar(sym, false);
+		if(v != null)
+			return new TheVarExpr(v);
+		throw new Exception("Unable to resolve var: " + sym + " in this context");
 	}
 }
 
@@ -632,7 +656,7 @@ static class InvokeExpr implements Expr{
 			Expr e = (Expr) args.nth(i);
 			e.emit(C.EXPRESSION, fn, gen);
 			}
-		gen.invokeVirtual(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[args.count()]));
+		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[args.count()]));
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -669,6 +693,7 @@ static class FnExpr implements Expr{
 	final static Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol)");
 	final static Method afnctor = Method.getMethod("void <init>()");
 	final static Method restfnctor = Method.getMethod("void <init>(int)");
+	final static Method getMethod = Method.getMethod("Object get()");
 	final static Type aFnType = Type.getType(AFn.class);
 	final static Type restFnType = Type.getType(RestFn.class);
 
@@ -872,6 +897,11 @@ static class FnExpr implements Expr{
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
 	}
 
+
+	public void emitVarValue(GeneratorAdapter gen, Var var){
+		emitVar(gen, var);
+		gen.invokeVirtual(VAR_TYPE, getMethod);
+	}
 
 	public void emitVar(GeneratorAdapter gen, Var var){
 		gen.getStatic(fntype, munge(var.sym.toString()), VAR_TYPE);
@@ -1292,6 +1322,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return QuoteExpr.parse(context, form);
 	else if(op.equals(DOT))
 		return HostExpr.parse(context, form);
+	else if(op.equals(THE_VAR))
+		return TheVarExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
@@ -1320,14 +1352,14 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		if(b != null)
 			return new LocalBindingExpr(b, tag);
 		}
-	Var v = lookupVar(sym);
+	Var v = lookupVar(sym, false);
 	if(v != null)
 		return new VarExpr(v, tag);
 	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
 
 }
 
-static Var lookupVar(Symbol sym) throws Exception{
+static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	Var var = null;
 
 	//note - ns-qualified vars must already exist
@@ -1340,7 +1372,9 @@ static Var lookupVar(Symbol sym) throws Exception{
 		//is it an alias?
 		IPersistentMap uses = (IPersistentMap) RT.USES.get();
 		var = (Var) uses.valAt(sym);
-		if(var == null)
+		if(var == null && sym.ns == null)
+			var = Var.find(Symbol.intern(currentNS(), sym.name));
+		if(var == null && internNew)
 			{
 			//introduce a new var in the current ns
 			String ns = currentNS();
@@ -1390,6 +1424,28 @@ private static Symbol tagOf(Symbol sym){
 	return null;
 }
 
+public static Object loadFile(String file) throws Exception{
+	return load(new FileInputStream(file));
+}
+
+public static Object load(InputStream s) throws Exception{
+	Object EOF = new Object();
+	try
+		{
+		Var.pushThreadBindings(
+				RT.map(LOADER, new DynamicClassLoader(),
+				       RT.USES, RT.USES.get(),
+				       RT.IMPORTS, RT.IMPORTS.get()));
+		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(s));
+		for(Object r = LispReader.read(rdr, false, EOF, false); r != EOF; r = LispReader.read(rdr, false, EOF, false))
+			eval(r);
+		}
+	finally
+		{
+		Var.popThreadBindings();
+		}
+	return RT.T;
+}
 
 public static void main(String[] args){
 	//repl
@@ -1412,8 +1468,11 @@ public static void main(String[] args){
 			}
 		catch(Exception e)
 			{
-			Var.popThreadBindings();
 			e.printStackTrace();
+			}
+		finally
+			{
+			Var.popThreadBindings();
 			}
 		}
 }
