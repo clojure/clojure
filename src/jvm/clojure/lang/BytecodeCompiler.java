@@ -28,12 +28,14 @@ public class BytecodeCompiler implements Opcodes{
 static final Symbol DEF = Symbol.create("def");
 static final Symbol LOOP = Symbol.create("loop");
 static final Symbol RECUR = Symbol.create("recur");
-static final Symbol DOT = Symbol.create(".");
 static final Symbol IF = Symbol.create("if");
 static final Symbol LET = Symbol.create("let");
 static final Symbol DO = Symbol.create("do");
 static final Symbol FN = Symbol.create("fn");
 static final Symbol QUOTE = Symbol.create("quote");
+static final Symbol DOT = Symbol.create(".");
+static final Symbol ASSIGN = Symbol.create("=");
+
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
 static final Symbol CLASS = Symbol.create("class");
@@ -50,6 +52,7 @@ private static final Type SYMBOL_TYPE = Type.getType(Symbol.class);
 private static final Type NUM_TYPE = Type.getType(Num.class);
 private static final Type IFN_TYPE = Type.getType(IFn.class);
 final static Type CLASS_TYPE = Type.getType(Class.class);
+final static Type REFLECTOR_TYPE = Type.getType(Reflector.class);
 
 private static final Type[][] ARG_TYPES;
 private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -193,6 +196,185 @@ static abstract class LiteralExpr implements Expr{
 		return val();
 	}
 }
+
+static abstract class HostExpr implements Expr{
+	public static Expr parse(C context, ISeq form) throws Exception{
+		//(. x fieldname-sym) or (. x (methodname-sym args...))
+		if(RT.length(form) != 3)
+			throw new IllegalArgumentException("Malformed member expression, expecting (. target member)");
+		//determine static or instance
+		//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
+		String className = null;
+		if(RT.second(form) instanceof Symbol)
+			{
+			Symbol sym = (Symbol) RT.second(form);
+			if(sym.ns == null) //if ns-qualified can't be classname
+				{
+				if(sym.name.indexOf('.') != -1)
+					className = sym.name;
+				else
+					{
+					IPersistentMap imports = (IPersistentMap) RT.IMPORTS.get();
+					className = (String) imports.valAt(sym);
+					}
+				}
+			}
+		//at this point className will be non-null if static
+		Expr instance = null;
+		if(className == null)
+			instance = analyze(C.EXPRESSION, RT.second(form));
+
+		if(RT.third(form) instanceof Symbol)    //field
+			{
+			Symbol sym = (Symbol) RT.third(form);
+			if(className != null)
+				return new StaticFieldExpr(className, sym.name);
+			else
+				return new InstanceFieldExpr(instance, sym.name);
+			}
+		else if(RT.third(form) instanceof ISeq && RT.first(RT.third(form)) instanceof Symbol)
+			{
+			Symbol sym = (Symbol) RT.first(RT.third(form));
+			PersistentVector args = PersistentVector.EMPTY;
+			for(ISeq s = RT.rest(RT.third(form)); s != null; s = s.rest())
+				args = args.cons(analyze(C.EXPRESSION, s.first()));
+			if(className != null)
+				return new StaticMethodExpr(className, sym.name, args);
+			else
+				return new InstanceMethodExpr(instance, sym.name, args);
+			}
+		else
+			throw new IllegalArgumentException("Malformed member expression");
+	}
+}
+
+static abstract class FieldExpr extends HostExpr{
+}
+
+static class InstanceFieldExpr extends FieldExpr{
+	final Expr target;
+	final String fieldName;
+	final static Method getInstanceFieldMethod = Method.getMethod("Object getInstanceField(Object,String)");
+
+
+	public InstanceFieldExpr(Expr target, String fieldName){
+		this.target = target;
+		this.fieldName = fieldName;
+	}
+
+	public Object eval() throws Exception{
+		return Reflector.getInstanceField(target.eval(), fieldName);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.push(fieldName);
+			gen.invokeStatic(REFLECTOR_TYPE, getInstanceFieldMethod);
+			}
+	}
+}
+
+static class StaticFieldExpr extends FieldExpr{
+	final String className;
+	final String fieldName;
+	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
+
+
+	public StaticFieldExpr(String className, String fieldName){
+		this.className = className;
+		this.fieldName = fieldName;
+	}
+
+	public Object eval() throws Exception{
+		return Reflector.getStaticField(className, fieldName);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.push(className);
+		gen.push(fieldName);
+		gen.invokeStatic(REFLECTOR_TYPE, getStaticFieldMethod);
+	}
+}
+
+static abstract class MethodExpr extends HostExpr{
+	static void emitArgsAsArray(IPersistentArray args, FnExpr fn, GeneratorAdapter gen){
+		gen.push(args.count());
+		gen.newArray(OBJECT_TYPE);
+		for(int i = 0; i < args.count(); i++)
+			{
+			gen.dup();
+			gen.push(i);
+			((Expr) args.nth(i)).emit(C.EXPRESSION, fn, gen);
+			gen.arrayStore(OBJECT_TYPE);
+			}
+	}
+}
+
+static class InstanceMethodExpr extends MethodExpr{
+	final Expr target;
+	final String methodName;
+	final IPersistentArray args;
+	final static Method invokeInstanceMethodMethod =
+			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
+
+
+	public InstanceMethodExpr(Expr target, String methodName, IPersistentArray args){
+		this.args = args;
+		this.methodName = methodName;
+		this.target = target;
+	}
+
+	public Object eval() throws Exception{
+		Object targetval = target.eval();
+		Object[] argvals = new Object[args.count()];
+		for(int i = 0; i < args.count(); i++)
+			argvals[i] = ((Expr) args.nth(i)).eval();
+		return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		target.emit(C.EXPRESSION, fn, gen);
+		gen.push(methodName);
+		emitArgsAsArray(args, fn, gen);
+		gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+}
+
+static class StaticMethodExpr extends MethodExpr{
+	final String className;
+	final String methodName;
+	final IPersistentArray args;
+	final static Method invokeStaticMethodMethod =
+			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
+
+
+	public StaticMethodExpr(String className, String methodName, IPersistentArray args){
+		this.className = className;
+		this.methodName = methodName;
+		this.args = args;
+	}
+
+	public Object eval() throws Exception{
+		Object[] argvals = new Object[args.count()];
+		for(int i = 0; i < args.count(); i++)
+			argvals[i] = ((Expr) args.nth(i)).eval();
+		return Reflector.invokeStaticMethod(className, methodName, argvals);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.push(className);
+		gen.push(methodName);
+		emitArgsAsArray(args, fn, gen);
+		gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+}
+
 
 static class QuoteExpr extends LiteralExpr{
 	//stuff quoted vals in classloader at compile time, pull out at runtime
@@ -1108,6 +1290,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return RecurExpr.parse(context, form);
 	else if(op.equals(QUOTE))
 		return QuoteExpr.parse(context, form);
+	else if(op.equals(DOT))
+		return HostExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }

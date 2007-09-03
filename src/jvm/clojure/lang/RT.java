@@ -30,7 +30,7 @@ final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "cu
 final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "current-ns"), "clojure-user");
 //simple-symbol->var
 final static Var USES = Var.intern(Symbol.create("clojure", "uses"), PersistentHashMap.EMPTY);
-//simple-symbol->fully-qualified-class-name-symbol
+//simple-symbol->fully-qualified-class-name-string
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "imports"), PersistentHashMap.EMPTY);
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
