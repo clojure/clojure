@@ -19,44 +19,42 @@ import java.util.List;
 
 public class Reflector{
 
-public static Object invokeInstanceMethod(String name, Object target, Object[] args) throws Exception
-	{
+public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) throws Exception{
 	Class c = target.getClass();
-	List methods = getMethods(c, args.length, name,false);
-        return prepRet(invokeMatchingMethod(methods, target, args));
-    }
-
-private static Object invokeMatchingMethod(List methods, Object target, Object[] args)
-        throws IllegalAccessException, InvocationTargetException {
-    if(methods.isEmpty())
-        {
-        throw new IllegalArgumentException("No matching field or method found");
-        }
-    else if(methods.size() == 1)
-        {
-        Method m = (Method) methods.get(0);
-        return prepRet(m.invoke(target, boxArgs(m.getParameterTypes(), args)));
-        }
-    else //overloaded w/same arity
-        {
-        for(Iterator i = methods.iterator(); i.hasNext();)
-            {
-            Method m = (Method) i.next();
-
-            Class[] params = m.getParameterTypes();
-            if(isCongruent(params, args))
-                {
-                Object[] boxedArgs = boxArgs(params, args);
-                return prepRet(m.invoke(target, boxedArgs));
-                }
-            }
-        throw new IllegalArgumentException("No matching field or method found");
-
-        }
+	List methods = getMethods(c, args.length, methodName, false);
+	return prepRet(invokeMatchingMethod(methods, target, args));
 }
 
-public static Object invokeConstructor(Class c, Object[] args)  throws Exception
-	{
+private static Object invokeMatchingMethod(List methods, Object target, Object[] args)
+		throws IllegalAccessException, InvocationTargetException{
+	if(methods.isEmpty())
+		{
+		throw new IllegalArgumentException("No matching field or method found");
+		}
+	else if(methods.size() == 1)
+		{
+		Method m = (Method) methods.get(0);
+		return prepRet(m.invoke(target, boxArgs(m.getParameterTypes(), args)));
+		}
+	else //overloaded w/same arity
+		{
+		for(Iterator i = methods.iterator(); i.hasNext();)
+			{
+			Method m = (Method) i.next();
+
+			Class[] params = m.getParameterTypes();
+			if(isCongruent(params, args))
+				{
+				Object[] boxedArgs = boxArgs(params, args);
+				return prepRet(m.invoke(target, boxedArgs));
+				}
+			}
+		throw new IllegalArgumentException("No matching field or method found");
+
+		}
+}
+
+public static Object invokeConstructor(Class c, Object[] args) throws Exception{
 	Constructor[] allctors = c.getConstructors();
 	ArrayList ctors = new ArrayList();
 	for(int i = 0; i < allctors.length; i++)
@@ -66,95 +64,114 @@ public static Object invokeConstructor(Class c, Object[] args)  throws Exception
 			ctors.add(ctor);
 		}
 	if(ctors.isEmpty())
-	    {
-	    throw new IllegalArgumentException("No matching ctor found");
-	    }
+		{
+		throw new IllegalArgumentException("No matching ctor found");
+		}
 	else if(ctors.size() == 1)
-	    {
-	    Constructor ctor = (Constructor) ctors.get(0);
-	    return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
-	    }
+		{
+		Constructor ctor = (Constructor) ctors.get(0);
+		return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
+		}
 	else //overloaded w/same arity
-	    {
-	    for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
-		    {
-		    Constructor ctor = (Constructor) iterator.next();
-		    Class[] params = ctor.getParameterTypes();
-		    if(isCongruent(params, args))
-		        {
-		        Object[] boxedArgs = boxArgs(params, args);
-		        return ctor.newInstance(boxedArgs);
-		        }
-		    }
-	    throw new IllegalArgumentException("No matching ctor found");
-	    }
-	}
+		{
+		for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
+			{
+			Constructor ctor = (Constructor) iterator.next();
+			Class[] params = ctor.getParameterTypes();
+			if(isCongruent(params, args))
+				{
+				Object[] boxedArgs = boxArgs(params, args);
+				return ctor.newInstance(boxedArgs);
+				}
+			}
+		throw new IllegalArgumentException("No matching ctor found");
+		}
+}
 
-public static Object invokeStaticMethod(String name, String className, Object... args) throws Exception
-    {
-    Class c = Class.forName(className);
-    if(name.equals("new"))
-	    return invokeConstructor(c, args);
-    List methods = getMethods(c, args.length, name,true);
-    return invokeMatchingMethod(methods, null, args);
-    }
+public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) throws Exception{
+	return invokeStaticMethod(className, methodName, args);
 
-public static Object getStaticField(String name, String className) throws Exception
-	{
-    Class c = Class.forName(className);
-	Field f = getField(c, name,true);
+}
+
+public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception{
+	Class c = Class.forName(className);
+	if(methodName.equals("new"))
+		return invokeConstructor(c, args);
+	List methods = getMethods(c, args.length, methodName, true);
+	return invokeMatchingMethod(methods, null, args);
+}
+
+public static Object getStaticField(String className, String fieldName) throws Exception{
+	Class c = Class.forName(className);
+	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{
 		return prepRet(f.get(null));
 		}
-    throw new IllegalArgumentException("No matching field found");
-	}
+	throw new IllegalArgumentException("No matching field found");
+}
 
- public static Object setStaticField(String name, String className, Object arg1) throws Exception
-	{
-    Class c = Class.forName(className);
-	Field f = getField(c, name,true);
+public static Object setStaticField(String className, String fieldName, Object val) throws Exception{
+	Class c = Class.forName(className);
+	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{
-		f.set(null, boxArg(f.getType(), arg1));
-		return arg1;
+		f.set(null, boxArg(f.getType(), val));
+		return val;
 		}
-    throw new IllegalArgumentException("No matching field found");
-	}
+	throw new IllegalArgumentException("No matching field found");
+}
 
-public static Object invokeInstanceMember(String name, Object target) throws Exception
-	{
+public static Object getInstanceField(Object target, String fieldName) throws Exception{
+	Class c = target.getClass();
+	Field f = getField(c, fieldName, false);
+	if(f != null)
+		{
+		return prepRet(f.get(target));
+		}
+	throw new IllegalArgumentException("No matching field found");
+}
+
+public static Object setInstanceField(Object target, String fieldName, Object val) throws Exception{
+	Class c = target.getClass();
+	Field f = getField(c, fieldName, false);
+	if(f != null)
+		{
+		f.set(target, boxArg(f.getType(), val));
+		return val;
+		}
+	throw new IllegalArgumentException("No matching field found");
+}
+
+public static Object invokeInstanceMember(Object target, String name) throws Exception{
 	//check for field first
 	Class c = target.getClass();
-	Field f = getField(c, name,false);
+	Field f = getField(c, name, false);
 	if(f != null)  //field get
-    {
-        return prepRet(f.get(target));
-    }
-	return invokeInstanceMethod(name, target, RT.EMPTY_ARRAY);
-	}
+		{
+		return prepRet(f.get(target));
+		}
+	return invokeInstanceMethod(target, name, RT.EMPTY_ARRAY);
+}
 
-public static Object invokeInstanceMember(String name, Object target, Object arg1) throws Exception
-	{
+public static Object invokeInstanceMember(String name, Object target, Object arg1) throws Exception{
 	//check for field first
 	Class c = target.getClass();
-	Field f = getField(c, name,false);
+	Field f = getField(c, name, false);
 	if(f != null)  //field set
 		{
 		f.set(target, boxArg(f.getType(), arg1));
 		return arg1;
 		}
-	return invokeInstanceMethod(name, target, new Object[]{arg1});
-	}
+	return invokeInstanceMethod(target, name, new Object[]{arg1});
+}
 
-public static Object invokeInstanceMember(String name, Object target, Object... args) throws Exception
-	{
-	return invokeInstanceMethod(name, target, args);
-	}
+public static Object invokeInstanceMember(String name, Object target, Object... args) throws Exception{
+	return invokeInstanceMethod(target, name, args);
+}
 
 
-static public Field getField(Class c, String name, boolean getStatics)
-	{
+static public Field getField(Class c, String name, boolean getStatics){
 	Field[] allfields = c.getFields();
 	for(int i = 0; i < allfields.length; i++)
 		{
@@ -163,10 +180,9 @@ static public Field getField(Class c, String name, boolean getStatics)
 			return allfields[i];
 		}
 	return null;
-	}
+}
 
-static public List getMethods(Class c, int arity, String name, boolean getStatics)
-	{
+static public List getMethods(Class c, int arity, String name, boolean getStatics){
 	Method[] allmethods = c.getMethods();
 	ArrayList methods = new ArrayList();
 	for(int i = 0; i < allmethods.length; i++)
@@ -179,11 +195,10 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 			}
 		}
 	return methods;
-	}
+}
 
 
-static Object boxArg(Class paramType, Object arg)
-	{
+static Object boxArg(Class paramType, Object arg){
 	Class argType = arg.getClass();
 	if(primBoxTypeMatch(paramType, argType))
 		return arg;
@@ -213,10 +228,9 @@ static Object boxArg(Class paramType, Object arg)
 		}
 	else
 		return arg;
-	}
+}
 
-static Object[] boxArgs(Class[] params, Object[] args)
-	{
+static Object[] boxArgs(Class[] params, Object[] args){
 	if(params.length == 0)
 		return null;
 	Object[] ret = new Object[params.length];
@@ -227,10 +241,9 @@ static Object[] boxArgs(Class[] params, Object[] args)
 		ret[i] = boxArg(paramType, arg);
 		}
 	return ret;
-	}
+}
 
-static public boolean primBoxTypeMatch(Class primType, Class boxType)
-	{
+static public boolean primBoxTypeMatch(Class primType, Class boxType){
 	if(primType == int.class)
 		return boxType == Integer.class;
 	else if(primType == float.class)
@@ -246,10 +259,9 @@ static public boolean primBoxTypeMatch(Class primType, Class boxType)
 	else if(primType == byte.class)
 		return boxType == Byte.class;
 	return false;
-	}
+}
 
-static boolean isCongruent(Class[] params, Object[] args)
-	{
+static boolean isCongruent(Class[] params, Object[] args){
 	boolean ret = false;
 	if(args == null)
 		return params.length == 0;
@@ -281,12 +293,11 @@ static boolean isCongruent(Class[] params, Object[] args)
 			}
 		}
 	return ret;
-	}
+}
 
-static Object prepRet(Object x)
-   {
-    if(x instanceof Boolean)
-        return ((Boolean)x).booleanValue()?RT.T:null;
-    return x;
-   }
+static Object prepRet(Object x){
+	if(x instanceof Boolean)
+		return ((Boolean) x).booleanValue() ? RT.T : null;
+	return x;
+}
 }

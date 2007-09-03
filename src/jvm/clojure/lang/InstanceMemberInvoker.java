@@ -29,7 +29,7 @@ public Object invoke() throws Exception{
 
 public Object invoke(Object obj) throws Exception{
 
-	return Reflector.invokeInstanceMember(memberName, obj);
+	return Reflector.invokeInstanceMember(obj, memberName);
 }
 
 public Object invoke(Object obj, Object val) throws Exception{
