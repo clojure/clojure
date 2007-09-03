@@ -129,11 +129,12 @@ static class DefExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitVarValue(gen, var);
+		fn.emitVar(gen, var);
+		gen.dup();
 		init.emit(C.EXPRESSION, fn, gen);
 		gen.invokeVirtual(VAR_TYPE, bindRootMethod);
-		if(!(context == C.STATEMENT))
-			fn.emitVarValue(gen, var);
+		if(context == C.STATEMENT)
+			gen.pop();
 	}
 
 	public static Expr parse(C context, ISeq form) throws Exception{
@@ -154,6 +155,7 @@ static class DefExpr implements Expr{
 static class VarExpr implements Expr{
 	final Var var;
 	final Symbol tag;
+	final static Method getMethod = Method.getMethod("Object get()");
 
 	public VarExpr(Var var, Symbol tag){
 		this.var = var;
@@ -166,7 +168,10 @@ static class VarExpr implements Expr{
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
-			fn.emitVarValue(gen, var);
+			{
+			fn.emitVar(gen, var);
+			gen.invokeVirtual(VAR_TYPE, getMethod);
+			}
 	}
 }
 
@@ -693,7 +698,6 @@ static class FnExpr implements Expr{
 	final static Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol)");
 	final static Method afnctor = Method.getMethod("void <init>()");
 	final static Method restfnctor = Method.getMethod("void <init>(int)");
-	final static Method getMethod = Method.getMethod("Object get()");
 	final static Type aFnType = Type.getType(AFn.class);
 	final static Type restFnType = Type.getType(RestFn.class);
 
@@ -895,12 +899,6 @@ static class FnExpr implements Expr{
 			gen.getField(fntype, lb.name, OBJECT_TYPE);
 		else
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
-	}
-
-
-	public void emitVarValue(GeneratorAdapter gen, Var var){
-		emitVar(gen, var);
-		gen.invokeVirtual(VAR_TYPE, getMethod);
 	}
 
 	public void emitVar(GeneratorAdapter gen, Var var){
