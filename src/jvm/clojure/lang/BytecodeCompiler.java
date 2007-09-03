@@ -152,10 +152,11 @@ static class DefExpr implements Expr{
 	}
 }
 
-static class VarExpr implements Expr{
+static class VarExpr implements Expr, AssignableExpr{
 	final Var var;
 	final Symbol tag;
 	final static Method getMethod = Method.getMethod("Object get()");
+	final static Method setMethod = Method.getMethod("Object set(Object)");
 
 	public VarExpr(Var var, Symbol tag){
 		this.var = var;
@@ -172,6 +173,19 @@ static class VarExpr implements Expr{
 			fn.emitVar(gen, var);
 			gen.invokeVirtual(VAR_TYPE, getMethod);
 			}
+	}
+
+	public Object evalAssign(Expr val) throws Exception{
+		return var.set(val.eval());
+	}
+
+	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
+	                       Expr val) throws Exception{
+		fn.emitVar(gen, var);
+		val.emit(C.EXPRESSION, fn, gen);
+		gen.invokeVirtual(VAR_TYPE, setMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
 	}
 }
 
@@ -224,6 +238,12 @@ static abstract class LiteralExpr implements Expr{
 	public Object eval(){
 		return val();
 	}
+}
+
+static interface AssignableExpr{
+	Object evalAssign(Expr val) throws Exception;
+
+	void emitAssign(C context, FnExpr fn, GeneratorAdapter gen, Expr val) throws Exception;
 }
 
 static abstract class HostExpr implements Expr{
@@ -280,10 +300,11 @@ static abstract class HostExpr implements Expr{
 static abstract class FieldExpr extends HostExpr{
 }
 
-static class InstanceFieldExpr extends FieldExpr{
+static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	final Expr target;
 	final String fieldName;
 	final static Method getInstanceFieldMethod = Method.getMethod("Object getInstanceField(Object,String)");
+	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
 
 	public InstanceFieldExpr(Expr target, String fieldName){
@@ -303,12 +324,27 @@ static class InstanceFieldExpr extends FieldExpr{
 			gen.invokeStatic(REFLECTOR_TYPE, getInstanceFieldMethod);
 			}
 	}
+
+	public Object evalAssign(Expr val) throws Exception{
+		return Reflector.setInstanceField(target.eval(), fieldName, val.eval());
+	}
+
+	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
+	                       Expr val) throws Exception{
+		target.emit(C.EXPRESSION, fn, gen);
+		gen.push(fieldName);
+		val.emit(C.EXPRESSION, fn, gen);
+		gen.invokeStatic(REFLECTOR_TYPE, setInstanceFieldMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
 }
 
-static class StaticFieldExpr extends FieldExpr{
+static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	final String className;
 	final String fieldName;
 	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
+	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
 
 
 	public StaticFieldExpr(String className, String fieldName){
@@ -324,6 +360,20 @@ static class StaticFieldExpr extends FieldExpr{
 		gen.push(className);
 		gen.push(fieldName);
 		gen.invokeStatic(REFLECTOR_TYPE, getStaticFieldMethod);
+	}
+
+	public Object evalAssign(Expr val) throws Exception{
+		return Reflector.setStaticField(className, fieldName, val.eval());
+	}
+
+	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
+	                       Expr val) throws Exception{
+		gen.push(className);
+		gen.push(fieldName);
+		val.emit(C.EXPRESSION, fn, gen);
+		gen.invokeStatic(REFLECTOR_TYPE, setStaticFieldMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
 	}
 }
 
