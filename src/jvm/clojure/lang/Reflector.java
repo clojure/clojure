@@ -103,6 +103,8 @@ public static Object invokeStaticMethod(String className, String methodName, Obj
 
 public static Object getStaticField(String className, String fieldName) throws Exception{
 	Class c = Class.forName(className);
+	if(fieldName.equals("class"))
+		return c;
 	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{
