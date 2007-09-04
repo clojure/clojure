@@ -1536,28 +1536,39 @@ public static void main(String[] args){
 	LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
 	Object EOF = new Object();
-	for(; ;)
+	try
 		{
-		try
+		Var.pushThreadBindings(
+				RT.map(RT.USES, RT.USES.get(),
+				       RT.IMPORTS, RT.IMPORTS.get()));
+
+		for(; ;)
 			{
-			Var.pushThreadBindings(
-					RT.map(LOADER, new DynamicClassLoader()));
-			Object r = LispReader.read(rdr, false, EOF, false);
-			if(r == EOF)
-				break;
-			Object ret = eval(r);
-			RT.print(ret, w);
-			w.write('\n');
-			w.flush();
+			try
+				{
+				Var.pushThreadBindings(
+						RT.map(LOADER, new DynamicClassLoader()));
+				Object r = LispReader.read(rdr, false, EOF, false);
+				if(r == EOF)
+					break;
+				Object ret = eval(r);
+				RT.print(ret, w);
+				w.write('\n');
+				w.flush();
+				}
+			catch(Exception e)
+				{
+				e.printStackTrace();
+				}
+			finally
+				{
+				Var.popThreadBindings();
+				}
 			}
-		catch(Exception e)
-			{
-			e.printStackTrace();
-			}
-		finally
-			{
-			Var.popThreadBindings();
-			}
+		}
+	finally
+		{
+		Var.popThreadBindings();
 		}
 }
 }
