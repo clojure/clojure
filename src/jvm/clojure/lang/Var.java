@@ -19,8 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Var implements IFn{
 
 static class Frame{
-	Associative bmap;
+	//Var->Box
 	Associative bindings;
+	//Var->val
+	Associative frameBindings;
 	Frame prev;
 
 
@@ -28,14 +30,27 @@ static class Frame{
 		this(PersistentHashMap.EMPTY, PersistentHashMap.EMPTY, null);
 	}
 
-	public Frame(Associative bindings, Associative bmap, Frame prev){
+	public Frame(Associative frameBindings, Associative bindings, Frame prev){
+		this.frameBindings = frameBindings;
 		this.bindings = bindings;
-		this.bmap = bmap;
 		this.prev = prev;
 	}
 }
 
 static InheritableThreadLocal<Frame> dvals = new InheritableThreadLocal<Frame>(){
+
+	protected Frame childValue(Frame parentValue){
+		//increment the entire map since we will share it
+		//note - allows communicating with parent via set() on initial bindings
+		//must be paired with releaseThreadBindings() on thread termination
+		//or else initial vars will have non-zero counts forever (inefficient, not fatal)
+		for(ISeq bs = RT.keys(parentValue.bindings); bs != null; bs = bs.rest())
+			{
+			Var v = (Var) bs.first();
+			v.count.incrementAndGet();
+			}
+		return new Frame(PersistentHashMap.EMPTY, parentValue.bindings, null);
+	}
 
 	protected Frame initialValue(){
 		return new Frame();
@@ -108,7 +123,7 @@ private Var(Symbol sym, Object root){
 }
 
 public boolean isBound(){
-	return hasRoot() || dvals.get().bmap.contains(this);
+	return hasRoot() || dvals.get().bindings.contains(this);
 }
 
 final public Object get(){
@@ -151,7 +166,7 @@ public void unbindRoot(){
 
 public static void pushThreadBindings(Associative bindings){
 	Frame f = dvals.get();
-	Associative bmap = f.bmap;
+	Associative bmap = f.bindings;
 	for(ISeq bs = bindings.seq(); bs != null; bs = bs.rest())
 		{
 		IMapEntry e = (IMapEntry) bs.first();
@@ -166,19 +181,30 @@ public static void popThreadBindings(){
 	Frame f = dvals.get();
 	if(f.prev == null)
 		throw new IllegalStateException("Pop without matching push");
-	for(ISeq bs = f.bindings.seq(); bs != null; bs = bs.rest())
+	for(ISeq bs = RT.keys(f.frameBindings); bs != null; bs = bs.rest())
 		{
-		IMapEntry e = (IMapEntry) bs.first();
-		Var v = (Var) e.key();
+		Var v = (Var) bs.first();
 		v.count.decrementAndGet();
 		}
 	dvals.set(f.prev);
 }
 
+public static void releaseThreadBindings(){
+	Frame f = dvals.get();
+	if(f.prev == null)
+		throw new IllegalStateException("Release without full unwind");
+	for(ISeq bs = RT.keys(f.bindings); bs != null; bs = bs.rest())
+		{
+		Var v = (Var) bs.first();
+		v.count.decrementAndGet();
+		}
+	dvals.set(null);
+}
+
 final Box getThreadBinding(){
 	if(count.get() > 0)
 		{
-		IMapEntry e = dvals.get().bmap.entryAt(this);
+		IMapEntry e = dvals.get().bindings.entryAt(this);
 		if(e != null)
 			return (Box) e.val();
 		}
