@@ -293,7 +293,7 @@ static abstract class HostExpr implements Expr{
 			Symbol sym = (Symbol) RT.second(form);
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				if(sym.name.indexOf('.') != -1)
+				if(sym.name.indexOf('.') > 0)
 					className = sym.name;
 				else
 					{
