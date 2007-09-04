@@ -32,7 +32,9 @@ final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "current-ns"),
 final static Var USES = Var.intern(Symbol.create("clojure", "uses"), PersistentHashMap.EMPTY);
 //simple-symbol->fully-qualified-class-name-string
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "imports"),
-                                      map(Symbol.create("Boolean"), "java.lang.Boolean",
+                                      map(Symbol.create("RT"), "clojure.lang.RT",
+                                          Symbol.create("Num"), "clojure.lang.Num",
+                                          Symbol.create("Boolean"), "java.lang.Boolean",
                                           Symbol.create("Byte"), "java.lang.Byte",
                                           Symbol.create("Character"), "java.lang.Character",
                                           Symbol.create("Class"), "java.lang.Class",
