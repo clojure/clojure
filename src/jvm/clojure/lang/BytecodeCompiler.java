@@ -1385,7 +1385,15 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Object op = RT.first(form);
-	//todo macro expansion
+	//macro expansion
+	if(op instanceof Symbol || op instanceof Var)
+		{
+		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
+		if(v != null && v.isMacro())
+			{
+			return analyze(context, v.applyTo(form.rest()));
+			}
+		}
 	if(op.equals(DEF))
 		return DefExpr.parse(context, form);
 	else if(op.equals(IF))

@@ -60,6 +60,7 @@ static InheritableThreadLocal<Frame> dvals = new InheritableThreadLocal<Frame>()
 Object root;
 transient final AtomicInteger count;
 final Symbol sym;
+boolean macroFlag = false;
 
 static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();
 
@@ -148,6 +149,14 @@ public Object set(Object val){
 	throw new IllegalStateException(String.format("Can't change/establish root binding of: %s with set", sym));
 }
 
+public void setMacro(){
+	macroFlag = true;
+}
+
+public boolean isMacro(){
+	return macroFlag;
+}
+
 public Object getRoot(){
 	return root;
 }
@@ -156,8 +165,10 @@ final public boolean hasRoot(){
 	return root != dvals;
 }
 
+//binding root always clears macro flag
 public void bindRoot(Object root){
 	this.root = root;
+	macroFlag = false;
 }
 
 public void unbindRoot(){
