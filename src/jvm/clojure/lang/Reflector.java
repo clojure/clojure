@@ -201,6 +201,8 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 
 
 static Object boxArg(Class paramType, Object arg){
+	if(arg == null && !paramType.isPrimitive())
+		return arg;
 	Class argType = arg.getClass();
 	if(primBoxTypeMatch(paramType, argType))
 		return arg;
