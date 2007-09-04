@@ -124,12 +124,13 @@ public Object set(Object val){
 	Box b = getThreadBinding();
 	if(b != null)
 		return (b.val = val);
-	if(hasRoot())
-		{
-		bindRoot(val);
-		return val;
-		}
-	throw new IllegalStateException(String.format("Can't establish root binding of: %s with set", sym));
+	//jury still out on this
+//	if(hasRoot())
+//		{
+//		bindRoot(val);
+//		return val;
+//		}
+	throw new IllegalStateException(String.format("Can't change/establish root binding of: %s with set", sym));
 }
 
 public Object getRoot(){

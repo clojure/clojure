@@ -116,39 +116,45 @@ interface Expr{
 static class DefExpr implements Expr{
 	final Var var;
 	final Expr init;
+	final boolean initProvided;
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
 
-	public DefExpr(Var var, Expr init){
+	public DefExpr(Var var, Expr init, boolean initProvided){
 		this.var = var;
 		this.init = init;
+		this.initProvided = initProvided;
 	}
 
 	public Object eval() throws Exception{
-		var.bindRoot(init.eval());
+		if(initProvided)
+			var.bindRoot(init.eval());
 		return var;
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		fn.emitVar(gen, var);
-		gen.dup();
-		init.emit(C.EXPRESSION, fn, gen);
-		gen.invokeVirtual(VAR_TYPE, bindRootMethod);
+		if(initProvided)
+			{
+			gen.dup();
+			init.emit(C.EXPRESSION, fn, gen);
+			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
+			}
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
 
 	public static Expr parse(C context, ISeq form) throws Exception{
 		//(def x) or (def x initexpr)
-		if(form.count() > 3)
+		if(RT.count(form) > 3)
 			throw new Exception("Too many arguments to def");
-		else if(form.count() < 2)
+		else if(RT.count(form) < 2)
 			throw new Exception("Too few arguments to def");
 		else if(!(RT.second(form) instanceof Symbol))
 			throw new Exception("Second argument to def must be a Symbol");
 		Var v = lookupVar((Symbol) RT.second(form), true);
 		if(!v.sym.ns.equals(currentNS()))
 			throw new Exception("Can't create defs outside of current ns");
-		return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name));
+		return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name), RT.count(form) == 3);
 	}
 }
 
