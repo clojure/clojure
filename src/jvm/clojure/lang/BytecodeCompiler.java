@@ -34,6 +34,7 @@ static final Symbol QUOTE = Symbol.create("quote");
 static final Symbol THE_VAR = Symbol.create("the-var");
 static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("=");
+static final Symbol TRY_FINALLY = Symbol.create("try-finally");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
@@ -636,6 +637,52 @@ static class CharExpr extends LiteralExpr{
 			gen.push(ch.charValue());
 			gen.invokeStatic(CHARACTER_TYPE, charValueOfMethod);
 			}
+	}
+}
+
+static class TryFinallyExpr implements Expr{
+	final Expr tryExpr;
+	final Expr finallyExpr;
+
+
+	public TryFinallyExpr(Expr tryExpr, Expr finallyExpr){
+		this.tryExpr = tryExpr;
+		this.finallyExpr = finallyExpr;
+	}
+
+	public Object eval() throws Exception{
+		throw new UnsupportedOperationException("Can't eval try");
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		Label startTry = gen.newLabel();
+		Label endTry = gen.newLabel();
+		Label end = gen.newLabel();
+		Label finallyLabel = gen.newLabel();
+		gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
+		gen.mark(startTry);
+		tryExpr.emit(context, fn, gen);
+		gen.mark(endTry);
+		finallyExpr.emit(C.STATEMENT, fn, gen);
+		gen.goTo(end);
+		gen.mark(finallyLabel);
+		//exception should be on stack
+		finallyExpr.emit(C.STATEMENT, fn, gen);
+		gen.throwException();
+		gen.mark(end);
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		//(try-finally try-expr finally-expr)
+		if(form.count() != 3)
+			throw new IllegalArgumentException(
+					"Wrong number of arguments, expecting: (try-finally try-expr finally-expr) ");
+
+		if(context == C.EVAL)
+			return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+
+		return new TryFinallyExpr(analyze(context, RT.second(form)),
+		                          analyze(C.STATEMENT, RT.third(form)));
 	}
 }
 
@@ -1416,6 +1463,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return TheVarExpr.parse(context, form);
 	else if(op.equals(ASSIGN))
 		return AssignExpr.parse(context, form);
+	else if(op.equals(TRY_FINALLY))
+		return TryFinallyExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
