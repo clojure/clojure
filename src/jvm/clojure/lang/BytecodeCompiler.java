@@ -35,6 +35,7 @@ static final Symbol THE_VAR = Symbol.create("the-var");
 static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("=");
 static final Symbol TRY_FINALLY = Symbol.create("try-finally");
+static final Symbol THROW = Symbol.create("throw");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
@@ -53,6 +54,7 @@ private static final Type NUM_TYPE = Type.getType(Num.class);
 private static final Type IFN_TYPE = Type.getType(IFn.class);
 final static Type CLASS_TYPE = Type.getType(Class.class);
 final static Type REFLECTOR_TYPE = Type.getType(Reflector.class);
+final static Type THROWABLE_TYPE = Type.getType(Throwable.class);
 
 private static final Type[][] ARG_TYPES;
 private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -683,6 +685,29 @@ static class TryFinallyExpr implements Expr{
 
 		return new TryFinallyExpr(analyze(context, RT.second(form)),
 		                          analyze(C.STATEMENT, RT.third(form)));
+	}
+}
+
+static class ThrowExpr implements Expr{
+	final Expr excExpr;
+
+	public ThrowExpr(Expr excExpr){
+		this.excExpr = excExpr;
+	}
+
+
+	public Object eval() throws Exception{
+		throw (Exception) excExpr.eval();
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		excExpr.emit(C.EXPRESSION, fn, gen);
+		gen.checkCast(THROWABLE_TYPE);
+		gen.throwException();
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
 	}
 }
 
@@ -1465,6 +1490,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return AssignExpr.parse(context, form);
 	else if(op.equals(TRY_FINALLY))
 		return TryFinallyExpr.parse(context, form);
+	else if(op.equals(THROW))
+		return ThrowExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
@@ -1501,7 +1528,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 }
 
 static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
-	Var var = null;
+	Var var;
 
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
