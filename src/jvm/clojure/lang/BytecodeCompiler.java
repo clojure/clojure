@@ -1009,6 +1009,7 @@ static class FnExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
 			{
 			LocalBinding lb = (LocalBinding) s.first();
+			ctorgen.loadThis();
 			ctorgen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), a);
 			ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
 			}
@@ -1052,7 +1053,10 @@ static class FnExpr implements Expr{
 
 	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
 		if(closes.contains(lb))
+			{
+			gen.loadThis();
 			gen.getField(fntype, lb.name, OBJECT_TYPE);
+			}
 		else
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
 	}
