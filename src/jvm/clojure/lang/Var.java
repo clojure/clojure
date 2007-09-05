@@ -85,6 +85,11 @@ public static Var intern(Symbol sym, Object root, boolean replaceRoot){
 	return dvout;
 }
 
+
+public String toString(){
+	return "#<Var: " + (sym != null ? sym.toString() : "--unnamed--") + ">";
+}
+
 public static Var intern(Symbol sym){
 	Var dvout = table.get(sym);
 	if(dvout != null)
