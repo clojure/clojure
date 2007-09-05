@@ -33,7 +33,7 @@ public Object first(){
 public ISeq rest(){
 	try
 		{
-		return (ISeq) _rest.force();
+		return (ISeq) _rest.invoke();
 		}
 	catch(Exception e)
 		{

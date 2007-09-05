@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class Delay{
+public class Delay extends AFn{
 public volatile Object val;
 IFn fn;
 
@@ -22,7 +22,7 @@ public Delay(IFn fn){
 	this.val = this;
 }
 
-public Object force() throws Exception{
+public Object invoke() throws Exception{
 	if(val == this)
 		{
 		synchronized(this)
