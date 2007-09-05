@@ -227,6 +227,11 @@ static private Object interpretToken(String s) throws Exception{
 		{
 		return null;
 		}
+
+	else if(s.equals("/"))
+		{
+		return Symbol.create("/");
+		}
 	Object ret = null;
 
 	ret = matchSymbol(s);
