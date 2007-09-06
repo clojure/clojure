@@ -38,6 +38,7 @@ static final Symbol TRY_FINALLY = Symbol.create("try-finally");
 static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
+static final Symbol EQL_REF = Symbol.create("eql-ref?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
@@ -54,6 +55,7 @@ private static final Type VAR_TYPE = Type.getType(Var.class);
 private static final Type SYMBOL_TYPE = Type.getType(Symbol.class);
 private static final Type NUM_TYPE = Type.getType(Num.class);
 private static final Type IFN_TYPE = Type.getType(IFn.class);
+private static final Type RT_TYPE = Type.getType(RT.class);
 final static Type CLASS_TYPE = Type.getType(Class.class);
 final static Type REFLECTOR_TYPE = Type.getType(Reflector.class);
 final static Type THROWABLE_TYPE = Type.getType(Throwable.class);
@@ -752,6 +754,44 @@ static class ThrowExpr implements Expr{
 
 	public static Expr parse(C context, ISeq form) throws Exception{
 		return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
+	}
+}
+
+static class EqlRefExpr implements Expr{
+	final Expr expr1;
+	final Expr expr2;
+
+
+	public EqlRefExpr(Expr expr1, Expr expr2){
+		this.expr1 = expr1;
+		this.expr2 = expr2;
+	}
+
+	public Object eval() throws Exception{
+		return expr1.eval() == expr2.eval() ? RT.T : null;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		expr1.emit(C.EXPRESSION, fn, gen);
+		expr2.emit(C.EXPRESSION, fn, gen);
+		Label eqLabel = gen.newLabel();
+		Label end = gen.newLabel();
+		gen.visitJumpInsn(Opcodes.IF_ACMPEQ, eqLabel);
+		NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+		gen.goTo(end);
+		gen.mark(eqLabel);
+		gen.getStatic(RT_TYPE, "T", SYMBOL_TYPE);
+		gen.mark(end);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		//(eql-ref? x y)
+		if(form.count() != 3)
+			throw new Exception("wrong number of arguments, expecting: (eql-ref? x y)");
+
+		return new EqlRefExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
 	}
 }
 
@@ -1544,6 +1584,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return new MonitorEnterExpr(analyze(C.EXPRESSION, RT.second(form)));
 	else if(op.equals(MONITOR_EXIT))
 		return new MonitorExitExpr(analyze(C.EXPRESSION, RT.second(form)));
+	else if(op.equals(EQL_REF))
+		return EqlRefExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
@@ -1655,7 +1697,9 @@ public static Object load(InputStream s) throws Exception{
 		Var.pushThreadBindings(
 				RT.map(LOADER, new DynamicClassLoader(),
 				       RT.ALIASES, RT.ALIASES.get(),
-				       RT.IMPORTS, RT.IMPORTS.get()));
+				       RT.IMPORTS, RT.IMPORTS.get(),
+				       RT.CURRENT_NS, RT.CURRENT_NS.get()
+				));
 		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(s));
 		for(Object r = LispReader.read(rdr, false, EOF, false); r != EOF; r = LispReader.read(rdr, false, EOF, false))
 			eval(r);
@@ -1676,7 +1720,9 @@ public static void main(String[] args){
 		{
 		Var.pushThreadBindings(
 				RT.map(RT.ALIASES, RT.ALIASES.get(),
-				       RT.IMPORTS, RT.IMPORTS.get()));
+				       RT.IMPORTS, RT.IMPORTS.get(),
+				       RT.CURRENT_NS, RT.CURRENT_NS.get()
+				));
 
 		for(; ;)
 			{
