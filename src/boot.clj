@@ -154,3 +154,9 @@
 
 (defn identity [x] x)
 
+(defmacro locking [x & body]
+  (let [gsym (gensym)]
+    (list 'let (vector gsym x)
+          (list 'try-finally
+                (cons 'do (cons (list 'monitor-enter gsym) body))
+                (list 'monitor-exit gsym)))))
