@@ -36,6 +36,8 @@ static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("=");
 static final Symbol TRY_FINALLY = Symbol.create("try-finally");
 static final Symbol THROW = Symbol.create("throw");
+static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
+static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
@@ -638,6 +640,48 @@ static class CharExpr extends LiteralExpr{
 			{
 			gen.push(ch.charValue());
 			gen.invokeStatic(CHARACTER_TYPE, charValueOfMethod);
+			}
+	}
+}
+
+static class MonitorEnterExpr implements Expr{
+	final Expr target;
+
+	public MonitorEnterExpr(Expr target){
+		this.target = target;
+	}
+
+	public Object eval() throws Exception{
+		throw new UnsupportedOperationException("Can't eval monitor-enter");
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		target.emit(C.EXPRESSION, fn, gen);
+		gen.monitorEnter();
+		if(context != C.STATEMENT)
+			{
+			NIL_EXPR.emit(context, fn, gen);
+			}
+	}
+}
+
+static class MonitorExitExpr implements Expr{
+	final Expr target;
+
+	public MonitorExitExpr(Expr target){
+		this.target = target;
+	}
+
+	public Object eval() throws Exception{
+		throw new UnsupportedOperationException("Can't eval monitor-exit");
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		target.emit(C.EXPRESSION, fn, gen);
+		gen.monitorExit();
+		if(context != C.STATEMENT)
+			{
+			NIL_EXPR.emit(context, fn, gen);
 			}
 	}
 }
@@ -1496,6 +1540,10 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return TryFinallyExpr.parse(context, form);
 	else if(op.equals(THROW))
 		return ThrowExpr.parse(context, form);
+	else if(op.equals(MONITOR_ENTER))
+		return new MonitorEnterExpr(analyze(C.EXPRESSION, RT.second(form)));
+	else if(op.equals(MONITOR_EXIT))
+		return new MonitorExitExpr(analyze(C.EXPRESSION, RT.second(form)));
 	else
 		return InvokeExpr.parse(context, form);
 }
@@ -1542,7 +1590,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	else
 		{
 		//is it an alias?
-		IPersistentMap uses = (IPersistentMap) RT.USES.get();
+		IPersistentMap uses = (IPersistentMap) RT.ALIASES.get();
 		var = (Var) uses.valAt(sym);
 		if(var == null && sym.ns == null)
 			var = Var.find(Symbol.intern(currentNS(), sym.name));
@@ -1606,7 +1654,7 @@ public static Object load(InputStream s) throws Exception{
 		{
 		Var.pushThreadBindings(
 				RT.map(LOADER, new DynamicClassLoader(),
-				       RT.USES, RT.USES.get(),
+				       RT.ALIASES, RT.ALIASES.get(),
 				       RT.IMPORTS, RT.IMPORTS.get()));
 		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(s));
 		for(Object r = LispReader.read(rdr, false, EOF, false); r != EOF; r = LispReader.read(rdr, false, EOF, false))
@@ -1627,7 +1675,7 @@ public static void main(String[] args){
 	try
 		{
 		Var.pushThreadBindings(
-				RT.map(RT.USES, RT.USES.get(),
+				RT.map(RT.ALIASES, RT.ALIASES.get(),
 				       RT.IMPORTS, RT.IMPORTS.get()));
 
 		for(; ;)
