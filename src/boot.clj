@@ -17,7 +17,7 @@
    (list 'if test (cons 'do body)))
 
 (defmacro when-not [test & body]
-   (list 'if test null (cons 'do body)))
+   (list 'if test nil (cons 'do body)))
 
 (def t (. RT T))
 
@@ -26,9 +26,9 @@
       ([& args]
           (. clojure.lang.PersistentVector (create args))))
 
-(defn null? [x] (if x null t))
+(defn nil? [x] (if x nil t))
 
-(defn not [x] (if x null t))
+(defn not [x] (nil? x))
 
 (defn first [x] (. RT (first x)))
 
@@ -36,7 +36,7 @@
 
 (defn second [x] (. RT (second x)))
 
-(defn eql [x y] (. RT (equal x y)))
+(defn eql? [x y] (. RT (equal x y)))
 
 (defn strcat [x y] (. x (concat y)))
 
@@ -58,7 +58,7 @@
   ([x & rest] (list 'if x (cons 'and rest))))
 
 (defmacro or
-  ([] null)
+  ([] nil)
   ([x] x)
   ([x & rest]
       (let [gor (gensym "or__")]
@@ -69,8 +69,8 @@
   ([f & args]
       (let [spread (fn [arglist]
                        (cond
-                        (null? arglist) null
-                        (null? (rest arglist)) (first arglist)
+                        (nil? arglist) nil
+                        (nil? (rest arglist)) (first arglist)
                         :else (cons (first arglist) (thisfn (rest arglist)))))]
         (. f (applyTo (spread args))))))
 

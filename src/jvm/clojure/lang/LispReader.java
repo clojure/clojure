@@ -30,7 +30,7 @@ static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/
 static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?");
-
+static final Symbol SLASH = Symbol.create("/");
 //static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
 //static Pattern instanceMemberPat = Pattern.compile("\\.([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
 //static Pattern staticMemberPat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
@@ -223,14 +223,14 @@ static private Object readMember(PushbackReader r) throws Exception {
 */
 
 static private Object interpretToken(String s) throws Exception{
-	if(s.equals("null"))
+	if(s.equals("nil"))
 		{
 		return null;
 		}
 
 	else if(s.equals("/"))
 		{
-		return Symbol.create("/");
+		return SLASH;
 		}
 	Object ret = null;
 

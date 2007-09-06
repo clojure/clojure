@@ -595,7 +595,7 @@ static public void print(Object x, Writer w) throws Exception{
 			}
 		}
 	if(x == null)
-		w.write("null");
+		w.write("nil");
 	else if(x instanceof ISeq)
 		{
 		w.write('(');
