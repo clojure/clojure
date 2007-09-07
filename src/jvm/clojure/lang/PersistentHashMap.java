@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 /*
- A persistent rendition of Phil Bagwell's Ideal Hash Trees
+ A persistent rendition of Phil Bagwell's Hash Array Mapped Trie
 
  Uses path copying for persistence
  HashCollision leaves vs. extended hashing

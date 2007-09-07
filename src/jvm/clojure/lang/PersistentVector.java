@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public class PersistentVector extends Obj implements IPersistentArray, IPersistentList, Iterable{
+public class PersistentVector extends Obj implements IPersistentVector, IPersistentList, Iterable{
 final int cnt;
 final int shift;
 final Object[] root;
@@ -117,9 +117,9 @@ public ISeq rseq(){
 }
 
 public boolean equals(Object obj){
-	if(obj instanceof IPersistentArray)
+	if(obj instanceof IPersistentVector)
 		{
-		IPersistentArray ma = (IPersistentArray) obj;
+		IPersistentVector ma = (IPersistentVector) obj;
 		if(ma.count() != count() || ma.hashCode() != hashCode())
 			return false;
 		for(int i = 0; i < count(); i++)

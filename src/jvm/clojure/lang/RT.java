@@ -293,8 +293,8 @@ static public Object without(Object key, Object coll){
 static public Object nth(int n, Object coll){
 	if(coll == null)
 		return null;
-	else if(coll instanceof IPersistentArray)
-		return ((IPersistentArray) coll).nth(n);
+	else if(coll instanceof IPersistentVector)
+		return ((IPersistentVector) coll).nth(n);
 	else if(coll instanceof Object[])
 		return ((Object[]) coll)[n];
 	else if(coll instanceof Sequential)
@@ -314,8 +314,8 @@ static public Object nth(int n, Object coll){
 static public Object assocN(int n, Object val, Object coll){
 	if(coll == null)
 		return null;
-	else if(coll instanceof IPersistentArray)
-		return ((IPersistentArray) coll).assocN(n, val);
+	else if(coll instanceof IPersistentVector)
+		return ((IPersistentVector) coll).assocN(n, val);
 	else if(coll instanceof Object[])
 		{
 		//hmm... this is not persistent
@@ -435,7 +435,7 @@ static public IPersistentMap map(Object... init){
 	return PersistentHashMap.create(init);
 }
 
-static public IPersistentArray vector(Object... init){
+static public IPersistentVector vector(Object... init){
 	return PersistentVector.create(init);
 }
 
@@ -628,9 +628,9 @@ static public void print(Object x, Writer w) throws Exception{
 			}
 		w.write('}');
 		}
-	else if(x instanceof IPersistentArray)
+	else if(x instanceof IPersistentVector)
 		{
-		IPersistentArray a = (IPersistentArray) x;
+		IPersistentVector a = (IPersistentVector) x;
 		w.write('[');
 		for(int i = 0; i < a.count(); i++)
 			{

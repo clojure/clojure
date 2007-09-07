@@ -835,7 +835,7 @@ private static Expr analyzeLetFn(C context, ISeq form) throws Exception{
 		PersistentVector bindingInits = PersistentVector.EMPTY;
 		for(int i = 0; i < bindingPairs.count(); i++)
 			{
-			IPersistentArray bpair = (IPersistentArray) bindingPairs.nth(i);
+			IPersistentVector bpair = (IPersistentVector) bindingPairs.nth(i);
 			LocalBinding lb = (LocalBinding) bpair.nth(0);
 			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, bpair.nth(1));
 			fexpr.binding = lb;

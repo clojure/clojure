@@ -10,10 +10,10 @@ package clojure.lang;
  * You must not remove this notice, or any other, from this software.
  */
 
-public interface IPersistentArray extends Associative, Sequential {
+public interface IPersistentVector extends Associative, Sequential{
 int length();
 
 Object nth(int i);
 
-IPersistentArray assocN(int i,Object val);
+IPersistentVector assocN(int i, Object val);
 }

@@ -425,7 +425,7 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 }
 
 static abstract class MethodExpr extends HostExpr{
-	static void emitArgsAsArray(IPersistentArray args, FnExpr fn, GeneratorAdapter gen){
+	static void emitArgsAsArray(IPersistentVector args, FnExpr fn, GeneratorAdapter gen){
 		gen.push(args.count());
 		gen.newArray(OBJECT_TYPE);
 		for(int i = 0; i < args.count(); i++)
@@ -441,12 +441,12 @@ static abstract class MethodExpr extends HostExpr{
 static class InstanceMethodExpr extends MethodExpr{
 	final Expr target;
 	final String methodName;
-	final IPersistentArray args;
+	final IPersistentVector args;
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(Expr target, String methodName, IPersistentArray args){
+	public InstanceMethodExpr(Expr target, String methodName, IPersistentVector args){
 		this.args = args;
 		this.methodName = methodName;
 		this.target = target;
@@ -473,12 +473,12 @@ static class InstanceMethodExpr extends MethodExpr{
 static class StaticMethodExpr extends MethodExpr{
 	final String className;
 	final String methodName;
-	final IPersistentArray args;
+	final IPersistentVector args;
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
 
 
-	public StaticMethodExpr(String className, String methodName, IPersistentArray args){
+	public StaticMethodExpr(String className, String methodName, IPersistentVector args){
 		this.className = className;
 		this.methodName = methodName;
 		this.args = args;
@@ -925,10 +925,10 @@ static String munge(String name){
 
 static class InvokeExpr implements Expr{
 	final Expr fexpr;
-	final IPersistentArray args;
+	final IPersistentVector args;
 
 
-	public InvokeExpr(Expr fexpr, IPersistentArray args){
+	public InvokeExpr(Expr fexpr, IPersistentVector args){
 		this.fexpr = fexpr;
 		this.args = args;
 	}
@@ -1008,7 +1008,7 @@ static class FnExpr implements Expr{
 							VARS, PersistentHashMap.EMPTY));
 			//(fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
 			//turn former into latter
-			if(RT.second(form) instanceof IPersistentArray)
+			if(RT.second(form) instanceof IPersistentVector)
 				form = RT.list(FN, RT.rest(form));
 
 			FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
@@ -1234,7 +1234,7 @@ static class FnMethod{
 
 	private static FnMethod parse(FnExpr fn, ISeq form) throws Exception{
 		//([args] body...)
-		IPersistentArray parms = (IPersistentArray) RT.first(form);
+		IPersistentVector parms = (IPersistentVector) RT.first(form);
 		ISeq body = RT.rest(form);
 		try
 			{
@@ -1427,10 +1427,10 @@ static class LetExpr implements Expr{
 
 	static Expr parse(C context, ISeq form, boolean isLoop) throws Exception{
 		//(let [var val var2 val2 ...] body...)
-		if(!(RT.second(form) instanceof IPersistentArray))
+		if(!(RT.second(form) instanceof IPersistentVector))
 			throw new IllegalArgumentException("Bad binding form, expected vector");
 
-		IPersistentArray bindings = (IPersistentArray) RT.second(form);
+		IPersistentVector bindings = (IPersistentVector) RT.second(form);
 		if((bindings.count() % 2) != 0)
 			throw new IllegalArgumentException("Bad binding form, expected matched symbol expression pairs");
 
@@ -1505,10 +1505,10 @@ static class LetExpr implements Expr{
 }
 
 static class RecurExpr implements Expr{
-	final IPersistentArray args;
-	final IPersistentArray loopLocals;
+	final IPersistentVector args;
+	final IPersistentVector loopLocals;
 
-	public RecurExpr(IPersistentArray loopLocals, IPersistentArray args){
+	public RecurExpr(IPersistentVector loopLocals, IPersistentVector args){
 		this.loopLocals = loopLocals;
 		this.args = args;
 	}
@@ -1533,7 +1533,7 @@ static class RecurExpr implements Expr{
 	}
 
 	public static Expr parse(C context, ISeq form) throws Exception{
-		IPersistentArray loopLocals = (IPersistentArray) LOOP_LOCALS.get();
+		IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
 		if(context != C.RETURN || loopLocals == null)
 			throw new UnsupportedOperationException("Can only recur from tail position");
 		PersistentVector args = PersistentVector.EMPTY;

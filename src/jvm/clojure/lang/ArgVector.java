@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.List;
 
-public class ArgVector extends Obj implements IPersistentArray, IPersistentList{
+public class ArgVector extends Obj implements IPersistentVector, IPersistentList{
 
 final PersistentVector impl;
 
@@ -55,7 +55,7 @@ public Object nth(int i){
 	return impl.nth(i);
 }
 
-public IPersistentArray assocN(int i, Object val){
+public IPersistentVector assocN(int i, Object val){
 	return new ArgVector(meta(), impl.assocN(i, val));
 }
 
