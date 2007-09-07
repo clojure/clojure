@@ -923,6 +923,41 @@ static String munge(String name){
 	return sb.toString();
 }
 
+static class MapExpr implements Expr{
+	final IPersistentVector keyvals;
+	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
+
+
+	public MapExpr(IPersistentVector keyvals){
+		this.keyvals = keyvals;
+	}
+
+	public Object eval() throws Exception{
+		Object[] ret = new Object[keyvals.count()];
+		for(int i = 0; i < keyvals.count(); i++)
+			ret[i] = ((Expr) keyvals.nth(i)).eval();
+		return RT.map(ret);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(keyvals, fn, gen);
+		gen.invokeStatic(RT_TYPE, mapMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public static Expr parse(C context, IPersistentMap form) throws Exception{
+		IPersistentVector keyvals = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+			{
+			IMapEntry e = (IMapEntry) s.first();
+			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.key()));
+			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.val()));
+			}
+		return new MapExpr(keyvals);
+	}
+}
+
 static class VectorExpr implements Expr{
 	final IPersistentVector args;
 	final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
@@ -1619,6 +1654,8 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		return analyzeSeq(context, (ISeq) form, name);
 	else if(form instanceof IPersistentVector)
 		return VectorExpr.parse(context, (IPersistentVector) form);
+	else if(form instanceof IPersistentMap)
+		return MapExpr.parse(context, (IPersistentMap) form);
 
 //	else
 	throw new UnsupportedOperationException();
