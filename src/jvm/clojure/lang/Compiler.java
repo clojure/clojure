@@ -21,7 +21,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 import java.io.*;
 import java.math.BigInteger;
 
-public class BytecodeCompiler implements Opcodes{
+public class Compiler implements Opcodes{
 
 static final Symbol DEF = Symbol.create("def");
 static final Symbol LOOP = Symbol.create("loop");
