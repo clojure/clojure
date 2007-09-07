@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public class PersistentVector extends Obj implements IPersistentVector, IPersistentList, Iterable{
+public class PersistentVector extends Obj implements IPersistentVector, Iterable{
 final int cnt;
 final int shift;
 final Object[] root;

@@ -923,6 +923,36 @@ static String munge(String name){
 	return sb.toString();
 }
 
+static class EmptyExpr implements Expr{
+	final Object coll;
+	final static Type HASHMAP_TYPE = Type.getType(PersistentHashMap.class);
+	final static Type VECTOR_TYPE = Type.getType(PersistentVector.class);
+	final static Type LIST_TYPE = Type.getType(PersistentList.class);
+
+
+	public EmptyExpr(Object coll){
+		this.coll = coll;
+	}
+
+	public Object eval() throws Exception{
+		return coll;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			if(coll instanceof IPersistentList)
+				gen.getStatic(LIST_TYPE, "EMPTY", LIST_TYPE);
+			else if(coll instanceof IPersistentVector)
+				gen.getStatic(VECTOR_TYPE, "EMPTY", VECTOR_TYPE);
+			else if(coll instanceof IPersistentMap)
+				gen.getStatic(HASHMAP_TYPE, "EMPTY", HASHMAP_TYPE);
+			else
+				throw new UnsupportedOperationException("Unknown Collection type");
+			}
+	}
+}
+
 static class MapExpr implements Expr{
 	final IPersistentVector keyvals;
 	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
@@ -1650,6 +1680,8 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		return new StringExpr((String) form);
 	else if(fclass == Character.class)
 		return new CharExpr((Character) form);
+	else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
+		return new EmptyExpr(form);
 	else if(form instanceof ISeq)
 		return analyzeSeq(context, (ISeq) form, name);
 	else if(form instanceof IPersistentVector)
