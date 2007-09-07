@@ -65,14 +65,17 @@
         (list 'let (vector gor x)
               (list 'if gor gor (cons 'or rest))))))
 
-(defn apply
-  ([f & args]
-      (let [spread (fn [arglist]
-                       (cond
-                        (nil? arglist) nil
-                        (nil? (rest arglist)) (first arglist)
-                        :else (cons (first arglist) (thisfn (rest arglist)))))]
-        (. f (applyTo (spread args))))))
+(defn spread [arglist]
+      (cond
+       (nil? arglist) nil
+       (nil? (rest arglist)) (first arglist)
+       :else (cons (first arglist) (thisfn (rest arglist)))))
+ 
+(defn apply [f & args]
+      (. f (applyTo (spread args))))
+
+(defn list* [& args]
+      (spread args))
 
 (defn +
       ([] 0)
@@ -156,7 +159,31 @@
 
 (defmacro locking [x & body]
   (let [gsym (gensym)]
-    (list 'let (vector gsym x)
+    (list 'let [gsym x]
           (list 'try-finally
                 (cons 'do (cons (list 'monitor-enter gsym) body))
                 (list 'monitor-exit gsym)))))
+
+(defmacro delay [& body]
+  (list '. 'clojure.lang.Delay (list 'new (list* 'fn [] body))))
+
+(defmacro lazy-cons [x & body]
+  (list '. 'clojure.lang.FnSeq (list 'new x (list* 'delay body))))
+
+(defn concat
+      ([] nil)
+      ([x & xs]
+          (cond
+           (nil? xs) x
+           (nil? x) (recur (first xs) (rest xs))
+           :else (lazy-cons (first x) (apply concat (rest x) xs)))))
+
+(defn andf [& args]
+      (if (nil? (rest args))
+          (first args)
+        (and (first args) (recur (rest args)))))
+
+(defn orf [& args]
+      (if (nil? args)
+          nil
+        (or (first args) (recur (rest args)))))
