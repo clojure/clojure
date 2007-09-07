@@ -39,6 +39,7 @@ static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
 static final Symbol EQL_REF = Symbol.create("eql-ref?");
+static final Symbol INSTANCE = Symbol.create("instance?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
@@ -294,21 +295,7 @@ static abstract class HostExpr implements Expr{
 			throw new IllegalArgumentException("Malformed member expression, expecting (. target member)");
 		//determine static or instance
 		//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
-		String className = null;
-		if(RT.second(form) instanceof Symbol)
-			{
-			Symbol sym = (Symbol) RT.second(form);
-			if(sym.ns == null) //if ns-qualified can't be classname
-				{
-				if(sym.name.indexOf('.') > 0)
-					className = sym.name;
-				else
-					{
-					IPersistentMap imports = (IPersistentMap) RT.IMPORTS.get();
-					className = (String) imports.valAt(sym);
-					}
-				}
-			}
+		String className = maybeClassName(RT.second(form));
 		//at this point className will be non-null if static
 		Expr instance = null;
 		if(className == null)
@@ -335,6 +322,25 @@ static abstract class HostExpr implements Expr{
 			}
 		else
 			throw new IllegalArgumentException("Malformed member expression");
+	}
+
+	private static String maybeClassName(Object form){
+		String className = null;
+		if(form instanceof Symbol)
+			{
+			Symbol sym = (Symbol) form;
+			if(sym.ns == null) //if ns-qualified can't be classname
+				{
+				if(sym.name.indexOf('.') > 0)
+					className = sym.name;
+				else
+					{
+					IPersistentMap imports = (IPersistentMap) RT.IMPORTS.get();
+					className = (String) imports.valAt(sym);
+					}
+				}
+			}
+		return className;
 	}
 }
 
@@ -754,6 +760,48 @@ static class ThrowExpr implements Expr{
 
 	public static Expr parse(C context, ISeq form) throws Exception{
 		return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
+	}
+}
+
+static class InstanceExpr implements Expr{
+	final Expr expr;
+	final String className;
+
+
+	public InstanceExpr(Expr expr, String className){
+		this.expr = expr;
+		this.className = className;
+	}
+
+	public Object eval() throws Exception{
+		return Class.forName(className).isInstance(expr.eval()) ?
+		       RT.T : null;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			Label not = gen.newLabel();
+			Label end = gen.newLabel();
+			expr.emit(C.EXPRESSION, fn, gen);
+			gen.instanceOf(Type.getObjectType(className.replace('.', '/')));
+			gen.ifZCmp(GeneratorAdapter.EQ, not);
+			gen.getStatic(RT_TYPE, "T", SYMBOL_TYPE);
+			gen.goTo(end);
+			gen.mark(not);
+			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+			gen.mark(end);
+			}
+	}
+
+	public static Expr parse(C context, ISeq form) throws Exception{
+		//(instance? x Classname)
+		if(form.count() != 3)
+			throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
+		String className = HostExpr.maybeClassName(RT.third(form));
+		if(className == null)
+			throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
+		return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), className);
 	}
 }
 
@@ -1586,6 +1634,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		return new MonitorExitExpr(analyze(C.EXPRESSION, RT.second(form)));
 	else if(op.equals(EQL_REF))
 		return EqlRefExpr.parse(context, form);
+	else if(op.equals(INSTANCE))
+		return InstanceExpr.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
