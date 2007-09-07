@@ -20,7 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-public class Compiler{
+public class OldCompiler{
 //*
 static Symbol DEF = Symbol.create("def");
 static Symbol FN = Symbol.create("fn");

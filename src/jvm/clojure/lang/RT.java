@@ -435,7 +435,7 @@ static public IPersistentMap map(Object... init){
 	return PersistentHashMap.create(init);
 }
 
-static public IPersistentArray tuple(Object... init){
+static public IPersistentArray vector(Object... init){
 	return PersistentVector.create(init);
 }
 
