@@ -923,6 +923,37 @@ static String munge(String name){
 	return sb.toString();
 }
 
+static class VectorExpr implements Expr{
+	final IPersistentVector args;
+	final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
+
+
+	public VectorExpr(IPersistentVector args){
+		this.args = args;
+	}
+
+	public Object eval() throws Exception{
+		IPersistentVector ret = PersistentVector.EMPTY;
+		for(int i = 0; i < args.count(); i++)
+			ret = (IPersistentVector) ret.cons(((Expr) args.nth(i)).eval());
+		return ret;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(args, fn, gen);
+		gen.invokeStatic(RT_TYPE, vectorMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public static Expr parse(C context, IPersistentVector form) throws Exception{
+		IPersistentVector args = PersistentVector.EMPTY;
+		for(int i = 0; i < form.count(); i++)
+			args = (IPersistentVector) args.cons(analyze(C.EXPRESSION, form.nth(i)));
+		return new VectorExpr(args);
+	}
+}
+
 static class InvokeExpr implements Expr{
 	final Expr fexpr;
 	final IPersistentVector args;
@@ -1586,6 +1617,8 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		return new CharExpr((Character) form);
 	else if(form instanceof ISeq)
 		return analyzeSeq(context, (ISeq) form, name);
+	else if(form instanceof IPersistentVector)
+		return VectorExpr.parse(context, (IPersistentVector) form);
 
 //	else
 	throw new UnsupportedOperationException();
