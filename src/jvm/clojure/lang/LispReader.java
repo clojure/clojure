@@ -20,7 +20,7 @@ import java.math.BigInteger;
 public class LispReader{
 
 static Symbol QUOTE = Symbol.create(null, "quote");
-static Symbol BACKQUOTE = Symbol.create(null, "backquote");
+static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
 static Symbol UNQUOTE = Symbol.create(null, "unquote");
 static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 
@@ -41,7 +41,7 @@ static
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
 	macros['\''] = new QuoteReader();
-	macros['`'] = new BackquoteReader();
+	macros['`'] = new SyntaxQuoteReader();
 	macros['~'] = new UnquoteReader();
 	macros['^'] = new MetaReader();
 	macros['('] = new ListReader();
@@ -392,11 +392,11 @@ static class MetaReader extends AFn{
 
 }
 
-static class BackquoteReader extends AFn{
+static class SyntaxQuoteReader extends AFn{
 	public Object invoke(Object reader, Object backquote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		return RT.list(BACKQUOTE, o);
+		return RT.list(SYNTAX_QUOTE, o);
 	}
 
 }
@@ -407,7 +407,7 @@ static class UnquoteReader extends AFn{
 		int ch = r.read();
 		if(ch == -1)
 			throw new Exception("EOF while reading character");
-		if(ch == '^')
+		if(ch == '@')
 			{
 			Object o = read(r, true, null, true);
 			return RT.list(UNQUOTE_SPLICING, o);
