@@ -284,7 +284,7 @@ static public ISeq findKey(Keyword key, ISeq keyvals) throws Exception{
 	return null;
 }
 
-static public Object without(Object key, Object coll){
+static public Object dissoc(Object key, Object coll){
 	if(coll == null)
 		return null;
 	return ((IPersistentMap) coll).without(key);
