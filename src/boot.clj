@@ -6,6 +6,21 @@
 
 (. (the-var defn) (setMacro))
 
+(defn contains [coll key]
+ (. RT (contains coll key)))
+
+(defn get [coll key]
+ (. RT (get coll key)))
+
+(defn assoc [coll key val]
+ (. RT (assoc coll key val)))
+
+(defn dissoc [coll key]
+ (. RT (dissoc coll key)))
+
+(defn count [coll]
+ (. RT (count coll)))
+
 (def defmacro (fn [name & args]
                   (list 'do
                         (cons 'defn (cons name args))
@@ -22,7 +37,7 @@
 (def t (. RT T))
 
 (defn vector
-      ([] (. clojure.lang.PersistentVector EMPTY))
+      ([] [])
       ([& args]
           (. clojure.lang.PersistentVector (create args))))
 
@@ -178,12 +193,13 @@
            (nil? x) (recur (first xs) (rest xs))
            :else (lazy-cons (first x) (apply concat (rest x) xs)))))
 
-(defn andf [& args]
+(defn andfn [& args]
       (if (nil? (rest args))
           (first args)
         (and (first args) (recur (rest args)))))
 
-(defn orf [& args]
+(defn orfn [& args]
       (if (nil? args)
           nil
         (or (first args) (recur (rest args)))))
+

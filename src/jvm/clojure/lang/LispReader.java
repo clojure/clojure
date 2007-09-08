@@ -19,10 +19,10 @@ import java.math.BigInteger;
 
 public class LispReader{
 
-static Symbol QUOTE = Symbol.create(null, "quote");
-static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
-static Symbol UNQUOTE = Symbol.create(null, "unquote");
-static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
+//static Symbol QUOTE = Symbol.create(null, "quote");
+//static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
+//static Symbol UNQUOTE = Symbol.create(null, "unquote");
+//static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 
 static IFn[] macros = new IFn[256];
 static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
@@ -370,7 +370,7 @@ static class QuoteReader extends AFn{
 	public Object invoke(Object reader, Object quote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		return RT.list(QUOTE, o);
+		return RT.list(Compiler.QUOTE, o);
 	}
 
 }
@@ -396,7 +396,7 @@ static class SyntaxQuoteReader extends AFn{
 	public Object invoke(Object reader, Object backquote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		return RT.list(SYNTAX_QUOTE, o);
+		return RT.list(Compiler.SYNTAX_QUOTE, o);
 	}
 
 }
@@ -410,13 +410,13 @@ static class UnquoteReader extends AFn{
 		if(ch == '@')
 			{
 			Object o = read(r, true, null, true);
-			return RT.list(UNQUOTE_SPLICING, o);
+			return RT.list(Compiler.UNQUOTE_SPLICING, o);
 			}
 		else
 			{
 			r.unread(ch);
 			Object o = read(r, true, null, true);
-			return RT.list(UNQUOTE, o);
+			return RT.list(Compiler.UNQUOTE, o);
 			}
 	}
 

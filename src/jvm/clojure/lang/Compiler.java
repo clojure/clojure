@@ -42,12 +42,43 @@ static final Symbol EQL_REF = Symbol.create("eql-ref?");
 static final Symbol INSTANCE = Symbol.create("instance?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
-static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
 static final Symbol CLASS = Symbol.create("class");
+static final Symbol UNQUOTE = Symbol.create("unquote");
+static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
+static final Symbol SYNTAX_QUOTE = Symbol.create("syntax-quote");
 
-static final Symbol IMPORT = Symbol.create("import");
-static final Symbol USE = Symbol.create("use");
 static final Symbol _AMP_ = Symbol.create("&");
+
+//static final Symbol IMPORT = Symbol.create("import");
+//static final Symbol USE = Symbol.create("use");
+
+//static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
+
+static IPersistentMap specials = RT.map(
+		DEF, new DefExpr.Parser(),
+		LOOP, new LetExpr.Parser(),
+		RECUR, new RecurExpr.Parser(),
+		IF, new IfExpr.Parser(),
+		LET, new LetExpr.Parser(),
+		DO, new BodyExpr.Parser(),
+		FN, null,
+		QUOTE, new QuoteExpr.Parser(),
+		THE_VAR, new TheVarExpr.Parser(),
+		DOT, new HostExpr.Parser(),
+		ASSIGN, new AssignExpr.Parser(),
+		TRY_FINALLY, new TryFinallyExpr.Parser(),
+		THROW, new ThrowExpr.Parser(),
+		MONITOR_ENTER, new MonitorEnterExpr.Parser(),
+		MONITOR_EXIT, new MonitorExitExpr.Parser(),
+		EQL_REF, new EqlRefExpr.Parser(),
+		INSTANCE, new InstanceExpr.Parser(),
+		THISFN, null,
+		CLASS, null,
+		UNQUOTE, null,
+		UNQUOTE_SPLICING, null,
+		SYNTAX_QUOTE, null,
+		_AMP_, null
+);
 
 private static final int MAX_POSITIONAL_ARITY = 20;
 private static final Type OBJECT_TYPE;
@@ -121,6 +152,10 @@ interface Expr{
 	void emit(C context, FnExpr fn, GeneratorAdapter gen);
 }
 
+interface IParser{
+	Expr parse(C context, Object form) throws Exception;
+}
+
 static class DefExpr implements Expr{
 	final Var var;
 	final Expr init;
@@ -151,18 +186,20 @@ static class DefExpr implements Expr{
 			gen.pop();
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		//(def x) or (def x initexpr)
-		if(RT.count(form) > 3)
-			throw new Exception("Too many arguments to def");
-		else if(RT.count(form) < 2)
-			throw new Exception("Too few arguments to def");
-		else if(!(RT.second(form) instanceof Symbol))
-			throw new Exception("Second argument to def must be a Symbol");
-		Var v = lookupVar((Symbol) RT.second(form), true);
-		if(!v.sym.ns.equals(currentNS()))
-			throw new Exception("Can't create defs outside of current ns");
-		return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name), RT.count(form) == 3);
+	static class Parser implements IParser{
+		public Expr parse(C context, Object form) throws Exception{
+			//(def x) or (def x initexpr)
+			if(RT.count(form) > 3)
+				throw new Exception("Too many arguments to def");
+			else if(RT.count(form) < 2)
+				throw new Exception("Too few arguments to def");
+			else if(!(RT.second(form) instanceof Symbol))
+				throw new Exception("Second argument to def must be a Symbol");
+			Var v = lookupVar((Symbol) RT.second(form), true);
+			if(!v.sym.ns.equals(currentNS()))
+				throw new Exception("Can't create defs outside of current ns");
+			return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name), RT.count(form) == 3);
+		}
 	}
 }
 
@@ -184,13 +221,16 @@ static class AssignExpr implements Expr{
 		target.emitAssign(context, fn, gen, val);
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		if(RT.length(form) != 3)
-			throw new IllegalArgumentException("Malformed assignment, expecting (= target val)");
-		Expr target = analyze(C.EXPRESSION, RT.second(form));
-		if(!(target instanceof AssignableExpr))
-			throw new IllegalArgumentException("Invalid assignment target");
-		return new AssignExpr((AssignableExpr) target, analyze(C.EXPRESSION, RT.third(form)));
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			if(RT.length(form) != 3)
+				throw new IllegalArgumentException("Malformed assignment, expecting (= target val)");
+			Expr target = analyze(C.EXPRESSION, RT.second(form));
+			if(!(target instanceof AssignableExpr))
+				throw new IllegalArgumentException("Invalid assignment target");
+			return new AssignExpr((AssignableExpr) target, analyze(C.EXPRESSION, RT.third(form)));
+		}
 	}
 }
 
@@ -247,12 +287,14 @@ static class TheVarExpr implements Expr{
 			fn.emitVar(gen, var);
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		Symbol sym = (Symbol) RT.second(form);
-		Var v = lookupVar(sym, false);
-		if(v != null)
-			return new TheVarExpr(v);
-		throw new Exception("Unable to resolve var: " + sym + " in this context");
+	static class Parser implements IParser{
+		public Expr parse(C context, Object form) throws Exception{
+			Symbol sym = (Symbol) RT.second(form);
+			Var v = lookupVar(sym, false);
+			if(v != null)
+				return new TheVarExpr(v);
+			throw new Exception("Unable to resolve var: " + sym + " in this context");
+		}
 	}
 }
 
@@ -289,39 +331,42 @@ static interface AssignableExpr{
 }
 
 static abstract class HostExpr implements Expr{
-	public static Expr parse(C context, ISeq form) throws Exception{
-		//(. x fieldname-sym) or (. x (methodname-sym args...))
-		if(RT.length(form) != 3)
-			throw new IllegalArgumentException("Malformed member expression, expecting (. target member)");
-		//determine static or instance
-		//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
-		String className = maybeClassName(RT.second(form));
-		//at this point className will be non-null if static
-		Expr instance = null;
-		if(className == null)
-			instance = analyze(C.EXPRESSION, RT.second(form));
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(. x fieldname-sym) or (. x (methodname-sym args...))
+			if(RT.length(form) != 3)
+				throw new IllegalArgumentException("Malformed member expression, expecting (. target member)");
+			//determine static or instance
+			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
+			String className = maybeClassName(RT.second(form));
+			//at this point className will be non-null if static
+			Expr instance = null;
+			if(className == null)
+				instance = analyze(C.EXPRESSION, RT.second(form));
 
-		if(RT.third(form) instanceof Symbol)    //field
-			{
-			Symbol sym = (Symbol) RT.third(form);
-			if(className != null)
-				return new StaticFieldExpr(className, sym.name);
+			if(RT.third(form) instanceof Symbol)    //field
+				{
+				Symbol sym = (Symbol) RT.third(form);
+				if(className != null)
+					return new StaticFieldExpr(className, sym.name);
+				else
+					return new InstanceFieldExpr(instance, sym.name);
+				}
+			else if(RT.third(form) instanceof ISeq && RT.first(RT.third(form)) instanceof Symbol)
+				{
+				Symbol sym = (Symbol) RT.first(RT.third(form));
+				PersistentVector args = PersistentVector.EMPTY;
+				for(ISeq s = RT.rest(RT.third(form)); s != null; s = s.rest())
+					args = args.cons(analyze(C.EXPRESSION, s.first()));
+				if(className != null)
+					return new StaticMethodExpr(className, sym.name, args);
+				else
+					return new InstanceMethodExpr(instance, sym.name, args);
+				}
 			else
-				return new InstanceFieldExpr(instance, sym.name);
-			}
-		else if(RT.third(form) instanceof ISeq && RT.first(RT.third(form)) instanceof Symbol)
-			{
-			Symbol sym = (Symbol) RT.first(RT.third(form));
-			PersistentVector args = PersistentVector.EMPTY;
-			for(ISeq s = RT.rest(RT.third(form)); s != null; s = s.rest())
-				args = args.cons(analyze(C.EXPRESSION, s.first()));
-			if(className != null)
-				return new StaticMethodExpr(className, sym.name, args);
-			else
-				return new InstanceMethodExpr(instance, sym.name, args);
-			}
-		else
-			throw new IllegalArgumentException("Malformed member expression");
+				throw new IllegalArgumentException("Malformed member expression");
+		}
 	}
 
 	private static String maybeClassName(Object form){
@@ -533,12 +578,14 @@ static class QuoteExpr extends LiteralExpr{
 			}
 	}
 
-	public static Expr parse(C context, ISeq form){
-		Object v = RT.second(form);
-		int id = RT.nextID();
-		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
-		loader.registerQuotedVal(id, v);
-		return new QuoteExpr(id, v);
+	static class Parser implements IParser{
+		public Expr parse(C context, Object form){
+			Object v = RT.second(form);
+			int id = RT.nextID();
+			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
+			loader.registerQuotedVal(id, v);
+			return new QuoteExpr(id, v);
+		}
 	}
 }
 
@@ -671,6 +718,12 @@ static class MonitorEnterExpr implements Expr{
 			NIL_EXPR.emit(context, fn, gen);
 			}
 	}
+
+	static class Parser implements IParser{
+		public Expr parse(C context, Object form) throws Exception{
+			return analyze(C.EXPRESSION, RT.second(form));
+		}
+	}
 }
 
 static class MonitorExitExpr implements Expr{
@@ -692,6 +745,13 @@ static class MonitorExitExpr implements Expr{
 			NIL_EXPR.emit(context, fn, gen);
 			}
 	}
+
+	static class Parser implements IParser{
+		public Expr parse(C context, Object form) throws Exception{
+			return analyze(C.EXPRESSION, RT.second(form));
+		}
+	}
+
 }
 
 static class TryFinallyExpr implements Expr{
@@ -726,17 +786,20 @@ static class TryFinallyExpr implements Expr{
 		gen.mark(end);
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		//(try-finally try-expr finally-expr)
-		if(form.count() != 3)
-			throw new IllegalArgumentException(
-					"Wrong number of arguments, expecting: (try-finally try-expr finally-expr) ");
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(try-finally try-expr finally-expr)
+			if(form.count() != 3)
+				throw new IllegalArgumentException(
+						"Wrong number of arguments, expecting: (try-finally try-expr finally-expr) ");
 
-		if(context == C.EVAL)
-			return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+			if(context == C.EVAL)
+				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
-		return new TryFinallyExpr(analyze(context, RT.second(form)),
-		                          analyze(C.STATEMENT, RT.third(form)));
+			return new TryFinallyExpr(analyze(context, RT.second(form)),
+			                          analyze(C.STATEMENT, RT.third(form)));
+		}
 	}
 }
 
@@ -758,8 +821,10 @@ static class ThrowExpr implements Expr{
 		gen.throwException();
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
+	static class Parser implements IParser{
+		public Expr parse(C context, Object form) throws Exception{
+			return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
+		}
 	}
 }
 
@@ -794,14 +859,17 @@ static class InstanceExpr implements Expr{
 			}
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		//(instance? x Classname)
-		if(form.count() != 3)
-			throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
-		String className = HostExpr.maybeClassName(RT.third(form));
-		if(className == null)
-			throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
-		return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), className);
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(instance? x Classname)
+			if(form.count() != 3)
+				throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
+			String className = HostExpr.maybeClassName(RT.third(form));
+			if(className == null)
+				throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
+			return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), className);
+		}
 	}
 }
 
@@ -834,12 +902,15 @@ static class EqlRefExpr implements Expr{
 			gen.pop();
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		//(eql-ref? x y)
-		if(form.count() != 3)
-			throw new Exception("wrong number of arguments, expecting: (eql-ref? x y)");
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(eql-ref? x y)
+			if(form.count() != 3)
+				throw new Exception("wrong number of arguments, expecting: (eql-ref? x y)");
 
-		return new EqlRefExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
+			return new EqlRefExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
+		}
 	}
 }
 
@@ -873,15 +944,18 @@ static class IfExpr implements Expr{
 		gen.mark(endLabel);
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		//(if test then) or (if test then else)
-		if(form.count() > 4)
-			throw new Exception("Too many arguments to if");
-		else if(form.count() < 3)
-			throw new Exception("Too few arguments to if");
-		return new IfExpr(analyze(C.EXPRESSION, RT.second(form)),
-		                  analyze(context, RT.third(form)),
-		                  analyze(context, RT.fourth(form)));
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(if test then) or (if test then else)
+			if(form.count() > 4)
+				throw new Exception("Too many arguments to if");
+			else if(form.count() < 3)
+				throw new Exception("Too few arguments to if");
+			return new IfExpr(analyze(C.EXPRESSION, RT.second(form)),
+			                  analyze(context, RT.third(form)),
+			                  analyze(context, RT.fourth(form)));
+		}
 	}
 }
 
@@ -976,7 +1050,7 @@ static class MapExpr implements Expr{
 			gen.pop();
 	}
 
-	public static Expr parse(C context, IPersistentMap form) throws Exception{
+	static public Expr parse(C context, IPersistentMap form) throws Exception{
 		IPersistentVector keyvals = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form); s != null; s = s.rest())
 			{
@@ -1011,12 +1085,13 @@ static class VectorExpr implements Expr{
 			gen.pop();
 	}
 
-	public static Expr parse(C context, IPersistentVector form) throws Exception{
+	static public Expr parse(C context, IPersistentVector form) throws Exception{
 		IPersistentVector args = PersistentVector.EMPTY;
 		for(int i = 0; i < form.count(); i++)
 			args = (IPersistentVector) args.cons(analyze(C.EXPRESSION, form.nth(i)));
 		return new VectorExpr(args);
 	}
+
 }
 
 static class InvokeExpr implements Expr{
@@ -1050,7 +1125,7 @@ static class InvokeExpr implements Expr{
 			gen.pop();
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
+	static public Expr parse(C context, ISeq form) throws Exception{
 		Expr fexpr = analyze(C.EXPRESSION, form.first());
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
@@ -1058,7 +1133,8 @@ static class InvokeExpr implements Expr{
 			args = args.cons(analyze(C.EXPRESSION, s.first()));
 			}
 		if(args.count() > MAX_POSITIONAL_ARITY)
-			throw new IllegalArgumentException(String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
+			throw new IllegalArgumentException(
+					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 		return new InvokeExpr(fexpr, args);
 	}
 }
@@ -1128,7 +1204,8 @@ static class FnExpr implements Expr{
 				{
 				for(int i = variadicMethod.reqParms.count() + 1; i <= MAX_POSITIONAL_ARITY; i++)
 					if(methodArray[i] != null)
-						throw new Exception("Can't have fixed arity function with more params than variadic function");
+						throw new Exception(
+								"Can't have fixed arity function with more params than variadic function");
 				}
 
 			IPersistentCollection methods = null;
@@ -1383,7 +1460,7 @@ static class FnMethod{
 			if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
 				throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
 			LOOP_LOCALS.set(loopLocals);
-			method.body = BodyExpr.parse(C.RETURN, body);
+			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
 			return method;
 			}
 		finally
@@ -1459,17 +1536,22 @@ static class BodyExpr implements Expr{
 		this.exprs = exprs;
 	}
 
-	static Expr parse(C context, ISeq forms) throws Exception{
-		PersistentVector exprs = PersistentVector.EMPTY;
-		for(; forms != null; forms = forms.rest())
-			{
-			Expr e = (context == C.STATEMENT || forms.rest() != null) ?
-			         analyze(C.STATEMENT, forms.first())
-			         :
-			         analyze(context, forms.first());
-			exprs = exprs.cons(e);
-			}
-		return new BodyExpr(exprs);
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frms) throws Exception{
+			ISeq forms = (ISeq) frms;
+			if(RT.equal(RT.first(forms), DO))
+				forms = RT.rest(forms);
+			PersistentVector exprs = PersistentVector.EMPTY;
+			for(; forms != null; forms = forms.rest())
+				{
+				Expr e = (context == C.STATEMENT || forms.rest() != null) ?
+				         analyze(C.STATEMENT, forms.first())
+				         :
+				         analyze(context, forms.first());
+				exprs = exprs.cons(e);
+				}
+			return new BodyExpr(exprs);
+		}
 	}
 
 	public Object eval() throws Exception{
@@ -1521,54 +1603,60 @@ static class LetExpr implements Expr{
 		this.isLoop = isLoop;
 	}
 
-	static Expr parse(C context, ISeq form, boolean isLoop) throws Exception{
-		//(let [var val var2 val2 ...] body...)
-		if(!(RT.second(form) instanceof IPersistentVector))
-			throw new IllegalArgumentException("Bad binding form, expected vector");
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(let [var val var2 val2 ...] body...)
+			boolean isLoop = RT.first(form).equals(LOOP);
+			if(!(RT.second(form) instanceof IPersistentVector))
+				throw new IllegalArgumentException("Bad binding form, expected vector");
 
-		IPersistentVector bindings = (IPersistentVector) RT.second(form);
-		if((bindings.count() % 2) != 0)
-			throw new IllegalArgumentException("Bad binding form, expected matched symbol expression pairs");
+			IPersistentVector bindings = (IPersistentVector) RT.second(form);
+			if((bindings.count() % 2) != 0)
+				throw new IllegalArgumentException("Bad binding form, expected matched symbol expression pairs");
 
-		ISeq body = RT.rest(RT.rest(form));
+			ISeq body = RT.rest(RT.rest(form));
 
-		if(context == C.EVAL)
-			return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+			if(context == C.EVAL)
+				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
-		IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
-		                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
-		if(isLoop)
-			dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
-
-		try
-			{
-			Var.pushThreadBindings(dynamicBindings);
-
-			PersistentVector bindingInits = PersistentVector.EMPTY;
-			PersistentVector loopLocals = PersistentVector.EMPTY;
-			for(int i = 0; i < bindings.count(); i += 2)
-				{
-				if(!(bindings.nth(i) instanceof Symbol))
-					throw new IllegalArgumentException("Bad binding form, expected symbol, got: " + bindings.nth(i));
-				Symbol sym = (Symbol) bindings.nth(i);
-
-				Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
-				//sequential enhancement of env (like Lisp let*)
-				LocalBinding lb = registerLocal(sym, tagOf(sym));
-				BindingInit bi = new BindingInit(lb, init);
-				bindingInits = bindingInits.cons(bi);
-
-				if(isLoop)
-					loopLocals = loopLocals.cons(lb);
-				}
+			IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
+			                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
 			if(isLoop)
-				LOOP_LOCALS.set(loopLocals);
-			return new LetExpr(bindingInits, BodyExpr.parse(isLoop ? C.RETURN : context, body), isLoop);
-			}
-		finally
-			{
-			Var.popThreadBindings();
-			}
+				dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
+
+			try
+				{
+				Var.pushThreadBindings(dynamicBindings);
+
+				PersistentVector bindingInits = PersistentVector.EMPTY;
+				PersistentVector loopLocals = PersistentVector.EMPTY;
+				for(int i = 0; i < bindings.count(); i += 2)
+					{
+					if(!(bindings.nth(i) instanceof Symbol))
+						throw new IllegalArgumentException(
+								"Bad binding form, expected symbol, got: " + bindings.nth(i));
+					Symbol sym = (Symbol) bindings.nth(i);
+
+					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
+					//sequential enhancement of env (like Lisp let*)
+					LocalBinding lb = registerLocal(sym, tagOf(sym));
+					BindingInit bi = new BindingInit(lb, init);
+					bindingInits = bindingInits.cons(bi);
+
+					if(isLoop)
+						loopLocals = loopLocals.cons(lb);
+					}
+				if(isLoop)
+					LOOP_LOCALS.set(loopLocals);
+				return new LetExpr(bindingInits, (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body),
+				                   isLoop);
+				}
+			finally
+				{
+				Var.popThreadBindings();
+				}
+		}
 	}
 
 	public Object eval() throws Exception{
@@ -1628,20 +1716,23 @@ static class RecurExpr implements Expr{
 		gen.goTo(loopLabel);
 	}
 
-	public static Expr parse(C context, ISeq form) throws Exception{
-		IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
-		if(context != C.RETURN || loopLocals == null)
-			throw new UnsupportedOperationException("Can only recur from tail position");
-		PersistentVector args = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
-			{
-			args = args.cons(analyze(C.EXPRESSION, s.first()));
-			}
-		if(args.count() != loopLocals.count())
-			throw new IllegalArgumentException(
-					String.format("Mismatched argument count to recur, expected: %d args, got: %d",
-					              loopLocals.count(), args.count()));
-		return new RecurExpr(loopLocals, args);
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
+			if(context != C.RETURN || loopLocals == null)
+				throw new UnsupportedOperationException("Can only recur from tail position");
+			PersistentVector args = PersistentVector.EMPTY;
+			for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
+				{
+				args = args.cons(analyze(C.EXPRESSION, s.first()));
+				}
+			if(args.count() != loopLocals.count())
+				throw new IllegalArgumentException(
+						String.format("Mismatched argument count to recur, expected: %d args, got: %d",
+						              loopLocals.count(), args.count()));
+			return new RecurExpr(loopLocals, args);
+		}
 	}
 }
 
@@ -1704,40 +1795,11 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 			return analyze(context, v.applyTo(form.rest()));
 			}
 		}
-	if(op.equals(DEF))
-		return DefExpr.parse(context, form);
-	else if(op.equals(IF))
-		return IfExpr.parse(context, form);
-	else if(op.equals(FN))
+	IParser p;
+	if(op.equals(FN))
 		return FnExpr.parse(context, form, name);
-	else if(op.equals(DO))
-		return BodyExpr.parse(context, form.rest());
-	else if(op.equals(LET))
-		return LetExpr.parse(context, form, false);
-	else if(op.equals(LOOP))
-		return LetExpr.parse(context, form, true);
-	else if(op.equals(RECUR))
-		return RecurExpr.parse(context, form);
-	else if(op.equals(QUOTE))
-		return QuoteExpr.parse(context, form);
-	else if(op.equals(DOT))
-		return HostExpr.parse(context, form);
-	else if(op.equals(THE_VAR))
-		return TheVarExpr.parse(context, form);
-	else if(op.equals(ASSIGN))
-		return AssignExpr.parse(context, form);
-	else if(op.equals(TRY_FINALLY))
-		return TryFinallyExpr.parse(context, form);
-	else if(op.equals(THROW))
-		return ThrowExpr.parse(context, form);
-	else if(op.equals(MONITOR_ENTER))
-		return new MonitorEnterExpr(analyze(C.EXPRESSION, RT.second(form)));
-	else if(op.equals(MONITOR_EXIT))
-		return new MonitorExitExpr(analyze(C.EXPRESSION, RT.second(form)));
-	else if(op.equals(EQL_REF))
-		return EqlRefExpr.parse(context, form);
-	else if(op.equals(INSTANCE))
-		return InstanceExpr.parse(context, form);
+	else if((p = (IParser) specials.valAt(op)) != null)
+		return p.parse(context, form);
 	else
 		return InvokeExpr.parse(context, form);
 }
