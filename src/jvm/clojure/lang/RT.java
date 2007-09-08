@@ -27,9 +27,9 @@ final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "cu
                                                     Module.findOrCreateModule("clojure/user"));
 
 //string
-final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "*current-namespace*"), "user");
+final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "*current-namespace*"), "clojure");
 //simple-symbol->var
-final static Var ALIASES = Var.intern(Symbol.create("clojure", "*aliases*"), PersistentHashMap.EMPTY);
+final static Var REFERS = Var.intern(Symbol.create("clojure", "*refers*"), PersistentHashMap.EMPTY);
 //simple-symbol->fully-qualified-class-name-string
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"),
                                       map(Symbol.create("RT"), "clojure.lang.RT",

@@ -20,6 +20,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 public class Compiler implements Opcodes{
 
@@ -45,7 +46,8 @@ static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol CLASS = Symbol.create("class");
 static final Symbol UNQUOTE = Symbol.create("unquote");
 static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
-static final Symbol SYNTAX_QUOTE = Symbol.create("syntax-quote");
+static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
+static final Symbol LIST = Symbol.create("clojure", "list");
 
 static final Symbol _AMP_ = Symbol.create("&");
 
@@ -76,8 +78,8 @@ static IPersistentMap specials = RT.map(
 		CLASS, null,
 		UNQUOTE, null,
 		UNQUOTE_SPLICING, null,
-		SYNTAX_QUOTE, null,
-		_AMP_, null
+//		SYNTAX_QUOTE, null,
+_AMP_, null
 );
 
 private static final int MAX_POSITIONAL_ARITY = 20;
@@ -154,6 +156,112 @@ interface Expr{
 
 interface IParser{
 	Expr parse(C context, Object form) throws Exception;
+}
+
+static boolean isSpecial(Object sym){
+	return specials.contains(sym);
+}
+
+static public Object syntaxQuote(Object form){
+	if(isSpecial(form))
+		return RT.list(QUOTE, form);
+	else if(form instanceof Symbol)
+		{
+		Symbol sym = (Symbol) form;
+		//already qualified or classname?
+		if(sym.ns != null || sym.name.indexOf('.') > 0)
+			return sqMeta(sym, sym.meta());
+		IPersistentMap imports = (IPersistentMap) RT.IMPORTS.get();
+		//imported class?
+		String className = (String) imports.valAt(sym);
+		if(className != null)
+			return sqMeta(Symbol.intern(null, className), sym.meta());
+		//refers?
+		IPersistentMap refers = (IPersistentMap) RT.REFERS.get();
+		Var var = (Var) refers.valAt(sym);
+		if(var != null)
+			return sqMeta(var.sym, sym.meta());
+
+		return sqMeta(Symbol.intern(currentNS(), sym.name), sym.meta());
+		}
+	else if(form instanceof IPersistentCollection)
+		{
+		if(form instanceof IPersistentMap)
+			{
+			IPersistentVector keyvals = PersistentVector.EMPTY;
+			for(ISeq s = RT.seq(form); s != null; s = s.rest())
+				{
+				IMapEntry e = (IMapEntry) s.first();
+				keyvals = (IPersistentVector) keyvals.cons(e.key());
+				keyvals = (IPersistentVector) keyvals.cons(e.val());
+				}
+			IObj ret = PersistentHashMap.create((ISeq) syntaxQuote(keyvals.seq()));
+			if(form instanceof IObj)
+				return sqMeta(ret, ((IObj) form).meta());
+			else
+				return ret;
+			}
+		else if(form instanceof IPersistentVector)
+			{
+			IObj ret = PersistentVector.create((ISeq) syntaxQuote(((IPersistentVector) form).seq()));
+			if(form instanceof IObj)
+				return sqMeta(ret, ((IObj) form).meta());
+			else
+				return ret;
+			}
+		else if(form instanceof ISeq)
+			{
+			ISeq seq = RT.seq(form);
+			if(RT.equal(UNQUOTE, RT.first(seq)))
+				return RT.second(form);
+			else if(RT.equal(UNQUOTE_SPLICING, RT.first(seq)))
+				throw new IllegalStateException("splice not in list");
+			else
+				{
+				PersistentVector ret = PersistentVector.EMPTY;
+				ret = sqExpandList(ret, seq);
+
+				if(form instanceof IObj)
+					return RT.cons(LIST, sqMeta((IObj) ret.seq(), ((IObj) form).meta()));
+				else
+					return RT.cons(LIST, ret.seq());
+				}
+			}
+		else
+			throw new UnsupportedOperationException("Unknown Collection type");
+		}
+	else if(form instanceof IObj)
+		return sqMeta((IObj) form, ((IObj) form).meta());
+	else
+		return RT.list(QUOTE, form);
+}
+
+private static PersistentVector sqExpandList(PersistentVector ret, ISeq seq){
+	for(; seq != null; seq = seq.rest())
+		{
+		Object item = seq.first();
+		if(item instanceof ISeq && RT.equal(UNQUOTE, RT.first(item)))
+			ret = ret.cons(RT.second(item));
+		else if(item instanceof ISeq && RT.equal(UNQUOTE_SPLICING, RT.first(item)))
+			{
+			if(RT.second(item) instanceof ISeq)
+				ret = sqExpandList(ret, (ISeq) RT.second(item));
+			else
+				throw new IllegalStateException("splicing non-list");
+			}
+		else
+			ret = ret.cons(syntaxQuote(item));
+		}
+	return ret;
+}
+
+static Object sqMeta(IObj obj, IPersistentMap meta){
+	if(meta != null)
+		{
+		return obj.withMeta((IPersistentMap) syntaxQuote(meta));
+		}
+	else
+		return obj;
 }
 
 static class DefExpr implements Expr{
@@ -1050,6 +1158,7 @@ static class MapExpr implements Expr{
 			gen.pop();
 	}
 
+
 	static public Expr parse(C context, IPersistentMap form) throws Exception{
 		IPersistentVector keyvals = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form); s != null; s = s.rest())
@@ -1757,7 +1866,7 @@ private static Expr analyze(C context, Object form) throws Exception{
 }
 
 private static Expr analyze(C context, Object form, String name) throws Exception{
-	//todo symbol macro expansion
+	//todo symbol macro expansion?
 	if(form == null)
 		return NIL_EXPR;
 	Class fclass = form.getClass();
@@ -1846,8 +1955,8 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	else
 		{
 		//is it an alias?
-		IPersistentMap uses = (IPersistentMap) RT.ALIASES.get();
-		var = (Var) uses.valAt(sym);
+		IPersistentMap refers = (IPersistentMap) RT.REFERS.get();
+		var = (Var) refers.valAt(sym);
 		if(var == null && sym.ns == null)
 			var = Var.find(Symbol.intern(currentNS(), sym.name));
 		if(var == null && internNew)
@@ -1910,7 +2019,7 @@ public static Object load(InputStream s) throws Exception{
 		{
 		Var.pushThreadBindings(
 				RT.map(LOADER, new DynamicClassLoader(),
-				       RT.ALIASES, RT.ALIASES.get(),
+				       RT.REFERS, RT.REFERS.get(),
 				       RT.IMPORTS, RT.IMPORTS.get(),
 				       RT.CURRENT_NS, RT.CURRENT_NS.get()
 				));
@@ -1933,7 +2042,7 @@ public static void main(String[] args){
 	try
 		{
 		Var.pushThreadBindings(
-				RT.map(RT.ALIASES, RT.ALIASES.get(),
+				RT.map(RT.REFERS, RT.REFERS.get(),
 				       RT.IMPORTS, RT.IMPORTS.get(),
 				       RT.CURRENT_NS, RT.CURRENT_NS.get()
 				));

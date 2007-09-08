@@ -38,16 +38,16 @@ final public static PersistentHashMap EMPTY = new PersistentHashMap(0, new Empty
 /*
  * @param init {key1,val1,key2,val2,...}
  */
-public static IPersistentMap create(Object... init){
+public static PersistentHashMap create(Object... init){
 	IPersistentMap ret = EMPTY;
 	for(int i = 0; i < init.length; i += 2)
 		{
 		ret = ret.assoc(init[i], init[i + 1]);
 		}
-	return ret;
+	return (PersistentHashMap) ret;
 }
 
-public static IPersistentMap create(List init){
+public static PersistentHashMap create(List init){
 	IPersistentMap ret = EMPTY;
 	for(Iterator i = init.iterator(); i.hasNext();)
 		{
@@ -57,19 +57,30 @@ public static IPersistentMap create(List init){
 		Object val = i.next();
 		ret = ret.assoc(key, val);
 		}
-	return ret;
+	return (PersistentHashMap) ret;
+}
+
+static public PersistentHashMap create(ISeq items){
+	IPersistentMap ret = EMPTY;
+	for(; items != null; items = items.rest().rest())
+		{
+		if(items.rest() == null)
+			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
+		ret = ret.assoc(items.first(), RT.second(items));
+		}
+	return (PersistentHashMap) ret;
 }
 
 /*
  * @param init {key1,val1,key2,val2,...}
  */
-public static IPersistentMap create(IPersistentMap meta, Object... init){
+public static PersistentHashMap create(IPersistentMap meta, Object... init){
 	IPersistentMap ret = EMPTY.withMeta(meta);
 	for(int i = 0; i < init.length; i += 2)
 		{
 		ret = ret.assoc(init[i], init[i + 1]);
 		}
-	return ret;
+	return (PersistentHashMap) ret;
 }
 
 PersistentHashMap(int count, INode root){
