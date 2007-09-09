@@ -6,6 +6,11 @@
 
 (. (the-var defn) (setMacro))
 
+(def syntax-quote (fn [form]
+                      (. clojure.lang.Compiler (syntaxQuote form))))
+
+(. (the-var syntax-quote) (setMacro))
+
 (defn contains [coll key]
  (. RT (contains coll key)))
 
@@ -155,10 +160,10 @@
       (. x (oneMinus)))
 
 (defn pos? [x]
-      (. Num (plusp x)))
+      (. x (plusp)))
 
 (defn neg? [x]
-      (. Num (minusp x)))
+      (. x (minusp)))
 
 (defn zero? [x]
       (== x 0))

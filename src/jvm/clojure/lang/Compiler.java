@@ -164,6 +164,96 @@ static boolean isSpecial(Object sym){
 	return specials.contains(sym);
 }
 
+static Symbol resolveSymbol(Symbol sym){
+	//already qualified or classname?
+	if(sym.ns != null || sym.name.indexOf('.') > 0)
+		return sym;
+	IPersistentMap imports = (IPersistentMap) RT.IMPORTS.get();
+	//imported class?
+	String className = (String) imports.valAt(sym);
+	if(className != null)
+		return Symbol.intern(null, className);
+	//refers?
+	IPersistentMap refers = (IPersistentMap) RT.REFERS.get();
+	Var var = (Var) refers.valAt(sym);
+	if(var != null)
+		return var.sym;
+
+	return Symbol.intern(currentNS(), sym.name);
+}
+
+static public Object syntaxQuote(Object form) throws Exception{
+	Expr ret;
+	if(isSpecial(form))
+		ret = new QuoteExpr(form);
+	else if(form instanceof Symbol)
+		ret = new QuoteExpr(resolveSymbol((Symbol) form));
+	else if(form instanceof IPersistentCollection)
+		{
+		if(form instanceof IPersistentMap)
+			{
+			IPersistentVector keyvals = flattenMap(form);
+			ret = new MapExpr(PersistentVector.create((ISeq) syntaxQuote(keyvals.seq())));
+			}
+		else if(form instanceof IPersistentVector)
+			{
+			ret = new VectorExpr(PersistentVector.create((ISeq) syntaxQuote(((IPersistentVector) form).seq())));
+			}
+		else if(form instanceof ISeq)
+			{
+			ISeq seq = RT.seq(form);
+			if(RT.equal(UNQUOTE, RT.first(seq)))
+				ret = analyze(C.EXPRESSION, RT.second(form));
+			else if(RT.equal(UNQUOTE_SPLICING, RT.first(seq)))
+				throw new IllegalStateException("splice not in list");
+			else
+				{
+				PersistentVector v = PersistentVector.EMPTY;
+				ret = new VectorExpr(sqExpandList(v, seq));
+				}
+			}
+		else
+			throw new UnsupportedOperationException("Unknown Collection type");
+		}
+	else
+		ret = new QuoteExpr(form);
+
+	if(form instanceof IObj && ((IObj) form).meta() != null)
+		return sqMeta(ret, syntaxQuote(((IObj) form).meta()));
+	else
+		return ret;
+}
+
+private static PersistentVector sqExpandList(PersistentVector ret, ISeq seq) throws Exception{
+	for(; seq != null; seq = seq.rest())
+		{
+		Object item = seq.first();
+		if(item instanceof ISeq && RT.equal(UNQUOTE, RT.first(item)))
+			ret = ret.cons(analyze(C.EXPRESSION, RT.second(item)));
+		else if(item instanceof ISeq && RT.equal(UNQUOTE_SPLICING, RT.first(item)))
+			{
+			if(RT.second(item) == null || RT.second(item) instanceof ISeq)
+				ret = sqExpandList(ret, (ISeq) RT.second(item));
+			else
+				throw new IllegalStateException("splicing non-list");
+			}
+		else
+			ret = ret.cons(syntaxQuote(item));
+		}
+	return ret;
+}
+
+private static IPersistentVector flattenMap(Object form){
+	IPersistentVector keyvals = PersistentVector.EMPTY;
+	for(ISeq s = RT.seq(form); s != null; s = s.rest())
+		{
+		IMapEntry e = (IMapEntry) s.first();
+		keyvals = (IPersistentVector) keyvals.cons(e.key());
+		keyvals = (IPersistentVector) keyvals.cons(e.val());
+		}
+	return keyvals;
+}
+
 /*
 static public Object syntaxQuote(Object form){
 	if(isSpecial(form))
@@ -233,16 +323,6 @@ static public Object syntaxQuote(Object form){
 		return RT.list(QUOTE, form);
 }
 
-private static IPersistentVector flattenMap(Object form){
-	IPersistentVector keyvals = PersistentVector.EMPTY;
-	for(ISeq s = RT.seq(form); s != null; s = s.rest())
-		{
-		IMapEntry e = (IMapEntry) s.first();
-		keyvals = (IPersistentVector) keyvals.cons(e.key());
-		keyvals = (IPersistentVector) keyvals.cons(e.val());
-		}
-	return keyvals;
-}
 
 private static PersistentVector sqExpandList(PersistentVector ret, ISeq seq){
 	for(; seq != null; seq = seq.rest())
@@ -675,9 +755,11 @@ static class QuoteExpr extends LiteralExpr{
 	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
 	final static Method getQuotedValMethod = Method.getMethod("Object getQuotedVal(int)");
 
-	public QuoteExpr(int id, Object v){
-		this.id = id;
+	public QuoteExpr(Object v){
 		this.v = v;
+		this.id = RT.nextID();
+		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
+		loader.registerQuotedVal(id, v);
 	}
 
 	Object val(){
@@ -699,10 +781,7 @@ static class QuoteExpr extends LiteralExpr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form){
 			Object v = RT.second(form);
-			int id = RT.nextID();
-			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
-			loader.registerQuotedVal(id, v);
-			return new QuoteExpr(id, v);
+			return new QuoteExpr(v);
 		}
 	}
 }
@@ -1145,6 +1224,31 @@ static class EmptyExpr implements Expr{
 	}
 }
 
+static class ListExpr implements Expr{
+	final IPersistentVector args;
+	final static Method arrayToListMethod = Method.getMethod("clojure.lang.ISeq arrayToList(Object[])");
+
+
+	public ListExpr(IPersistentVector args){
+		this.args = args;
+	}
+
+	public Object eval() throws Exception{
+		IPersistentVector ret = PersistentVector.EMPTY;
+		for(int i = 0; i < args.count(); i++)
+			ret = (IPersistentVector) ret.cons(((Expr) args.nth(i)).eval());
+		return ret.seq();
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(args, fn, gen);
+		gen.invokeStatic(RT_TYPE, arrayToListMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+}
+
 static class MapExpr implements Expr{
 	final IPersistentVector keyvals;
 	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
@@ -1213,6 +1317,74 @@ static class VectorExpr implements Expr{
 
 }
 
+/*
+static class MapExpr implements Expr{
+	IPersistentVector keyvals;
+	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
+
+
+	public MapExpr(IPersistentMap form) throws Exception{
+		keyvals = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+			{
+			IMapEntry e = (IMapEntry) s.first();
+			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.key()));
+			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.val()));
+			}
+	}
+
+	public Object eval() throws Exception{
+		Object[] ret = new Object[keyvals.count()];
+		for(int i = 0; i < keyvals.count(); i++)
+			ret[i] = ((Expr) keyvals.nth(i)).eval();
+		return RT.map(ret);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(keyvals, fn, gen);
+		gen.invokeStatic(RT_TYPE, mapMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+
+	static public Expr parse(C context, IPersistentMap form) throws Exception{
+
+		return new MapExpr(form);
+	}
+}
+
+static class VectorExpr implements Expr{
+	IPersistentVector args;
+	final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
+
+
+	public VectorExpr(IPersistentVector form) throws Exception{
+		args = PersistentVector.EMPTY;
+		for(int i = 0; i < form.count(); i++)
+			args = (IPersistentVector) args.cons(analyze(C.EXPRESSION, form.nth(i)));
+	}
+
+	public Object eval() throws Exception{
+		IPersistentVector ret = PersistentVector.EMPTY;
+		for(int i = 0; i < args.count(); i++)
+			ret = (IPersistentVector) ret.cons(((Expr) args.nth(i)).eval());
+		return ret;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(args, fn, gen);
+		gen.invokeStatic(RT_TYPE, vectorMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	static public Expr parse(C context, IPersistentVector form) throws Exception{
+		return new VectorExpr(form);
+	}
+
+}
+*/
 static class InvokeExpr implements Expr{
 	final Expr fexpr;
 	final IPersistentVector args;
