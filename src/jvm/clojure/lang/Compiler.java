@@ -48,6 +48,8 @@ static final Symbol UNQUOTE = Symbol.create("unquote");
 static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
 static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
 static final Symbol LIST = Symbol.create("clojure", "list");
+static final Symbol HASHMAP = Symbol.create("clojure", "hashmap");
+static final Symbol VECTOR = Symbol.create("clojure", "vector");
 
 static final Symbol _AMP_ = Symbol.create("&");
 
@@ -162,6 +164,7 @@ static boolean isSpecial(Object sym){
 	return specials.contains(sym);
 }
 
+/*
 static public Object syntaxQuote(Object form){
 	if(isSpecial(form))
 		return RT.list(QUOTE, form);
@@ -170,31 +173,25 @@ static public Object syntaxQuote(Object form){
 		Symbol sym = (Symbol) form;
 		//already qualified or classname?
 		if(sym.ns != null || sym.name.indexOf('.') > 0)
-			return sqMeta(sym, sym.meta());
+			return RT.list(QUOTE,sqMeta(sym, sym.meta()));
 		IPersistentMap imports = (IPersistentMap) RT.IMPORTS.get();
 		//imported class?
 		String className = (String) imports.valAt(sym);
 		if(className != null)
-			return sqMeta(Symbol.intern(null, className), sym.meta());
+			return RT.list(QUOTE, sqMeta(Symbol.intern(null, className), sym.meta()));
 		//refers?
 		IPersistentMap refers = (IPersistentMap) RT.REFERS.get();
 		Var var = (Var) refers.valAt(sym);
 		if(var != null)
-			return sqMeta(var.sym, sym.meta());
+			return RT.list(QUOTE, sqMeta(var.sym, sym.meta()));
 
-		return sqMeta(Symbol.intern(currentNS(), sym.name), sym.meta());
+		return RT.list(QUOTE, sqMeta(Symbol.intern(currentNS(), sym.name), sym.meta()));
 		}
 	else if(form instanceof IPersistentCollection)
 		{
 		if(form instanceof IPersistentMap)
 			{
-			IPersistentVector keyvals = PersistentVector.EMPTY;
-			for(ISeq s = RT.seq(form); s != null; s = s.rest())
-				{
-				IMapEntry e = (IMapEntry) s.first();
-				keyvals = (IPersistentVector) keyvals.cons(e.key());
-				keyvals = (IPersistentVector) keyvals.cons(e.val());
-				}
+			IPersistentVector keyvals = flattenMap(form);
 			IObj ret = PersistentHashMap.create((ISeq) syntaxQuote(keyvals.seq()));
 			if(form instanceof IObj)
 				return sqMeta(ret, ((IObj) form).meta());
@@ -236,6 +233,17 @@ static public Object syntaxQuote(Object form){
 		return RT.list(QUOTE, form);
 }
 
+private static IPersistentVector flattenMap(Object form){
+	IPersistentVector keyvals = PersistentVector.EMPTY;
+	for(ISeq s = RT.seq(form); s != null; s = s.rest())
+		{
+		IMapEntry e = (IMapEntry) s.first();
+		keyvals = (IPersistentVector) keyvals.cons(e.key());
+		keyvals = (IPersistentVector) keyvals.cons(e.val());
+		}
+	return keyvals;
+}
+
 private static PersistentVector sqExpandList(PersistentVector ret, ISeq seq){
 	for(; seq != null; seq = seq.rest())
 		{
@@ -258,12 +266,14 @@ private static PersistentVector sqExpandList(PersistentVector ret, ISeq seq){
 static Object sqMeta(IObj obj, IPersistentMap meta){
 	if(meta != null)
 		{
-		return obj.withMeta((IPersistentMap) syntaxQuote(meta));
+		PersistentVector ret = PersistentVector.EMPTY;
+		ret = sqExpandList(ret, flattenMap(meta).seq());
+		return obj.withMeta(PersistentHashMap.create(ret.seq()));
 		}
 	else
 		return obj;
 }
-
+ */
 static class DefExpr implements Expr{
 	final Var var;
 	final Expr init;
@@ -1819,6 +1829,11 @@ static class RecurExpr implements Expr{
 			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
 			Expr arg = (Expr) args.nth(i);
 			arg.emit(C.EXPRESSION, fn, gen);
+			}
+
+		for(int i = loopLocals.count() - 1; i >= 0; i--)
+			{
+			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
 			}
 
