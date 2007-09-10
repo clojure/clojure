@@ -80,8 +80,8 @@ static IPersistentMap specials = RT.map(
 		CLASS, null,
 		UNQUOTE, null,
 		UNQUOTE_SPLICING, null,
-//		SYNTAX_QUOTE, null,
-_AMP_, null
+		SYNTAX_QUOTE, null,
+		_AMP_, null
 );
 
 private static final int MAX_POSITIONAL_ARITY = 20;
@@ -182,7 +182,7 @@ static Symbol resolveSymbol(Symbol sym){
 	return Symbol.intern(currentNS(), sym.name);
 }
 
-static public Object syntaxQuote(Object form) throws Exception{
+static public Expr syntaxQuote(Object form) throws Exception{
 	Expr ret;
 	if(isSpecial(form))
 		ret = new QuoteExpr(form);
@@ -193,11 +193,13 @@ static public Object syntaxQuote(Object form) throws Exception{
 		if(form instanceof IPersistentMap)
 			{
 			IPersistentVector keyvals = flattenMap(form);
-			ret = new MapExpr(PersistentVector.create((ISeq) syntaxQuote(keyvals.seq())));
+			PersistentVector v = PersistentVector.EMPTY;
+			ret = new MapExpr(sqExpandList(v, keyvals.seq()));
 			}
 		else if(form instanceof IPersistentVector)
 			{
-			ret = new VectorExpr(PersistentVector.create((ISeq) syntaxQuote(((IPersistentVector) form).seq())));
+			PersistentVector v = PersistentVector.EMPTY;
+			ret = new VectorExpr(sqExpandList(v, ((IPersistentVector) form).seq()));
 			}
 		else if(form instanceof ISeq)
 			{
@@ -209,7 +211,7 @@ static public Object syntaxQuote(Object form) throws Exception{
 			else
 				{
 				PersistentVector v = PersistentVector.EMPTY;
-				ret = new VectorExpr(sqExpandList(v, seq));
+				ret = new ListExpr(sqExpandList(v, seq));
 				}
 			}
 		else
@@ -219,7 +221,7 @@ static public Object syntaxQuote(Object form) throws Exception{
 		ret = new QuoteExpr(form);
 
 	if(form instanceof IObj && ((IObj) form).meta() != null)
-		return sqMeta(ret, syntaxQuote(((IObj) form).meta()));
+		return new MetaExpr(ret, (MapExpr) syntaxQuote(((IObj) form).meta()));
 	else
 		return ret;
 }
@@ -1070,6 +1072,35 @@ static class InstanceExpr implements Expr{
 	}
 }
 
+static class MetaExpr implements Expr{
+	final Expr expr;
+	final MapExpr meta;
+	final static Type IPERSISTENTMAP_TYPE = Type.getType(IPersistentMap.class);
+	final static Type IOBJ_TYPE = Type.getType(IObj.class);
+	final static Method withMetaMethod = Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)");
+
+
+	public MetaExpr(Expr expr, MapExpr meta){
+		this.expr = expr;
+		this.meta = meta;
+	}
+
+	public Object eval() throws Exception{
+		return ((IObj) expr.eval()).withMeta((IPersistentMap) meta.eval());
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			expr.emit(C.EXPRESSION, fn, gen);
+			gen.checkCast(IOBJ_TYPE);
+			meta.emit(C.EXPRESSION, fn, gen);
+			gen.checkCast(IPERSISTENTMAP_TYPE);
+			gen.invokeInterface(IOBJ_TYPE, withMetaMethod);
+			}
+	}
+}
+
 static class EqlRefExpr implements Expr{
 	final Expr expr1;
 	final Expr expr2;
@@ -1281,7 +1312,11 @@ static class MapExpr implements Expr{
 			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.key()));
 			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.val()));
 			}
-		return new MapExpr(keyvals);
+		Expr ret = new MapExpr(keyvals);
+		if(form instanceof IObj && ((IObj) form).meta() != null)
+			return new MetaExpr(ret, (MapExpr) MapExpr.parse(C.EXPRESSION, ((IObj) form).meta()));
+		else
+			return ret;
 	}
 }
 
@@ -1312,7 +1347,11 @@ static class VectorExpr implements Expr{
 		IPersistentVector args = PersistentVector.EMPTY;
 		for(int i = 0; i < form.count(); i++)
 			args = (IPersistentVector) args.cons(analyze(C.EXPRESSION, form.nth(i)));
-		return new VectorExpr(args);
+		Expr ret = new VectorExpr(args);
+		if(form instanceof IObj && ((IObj) form).meta() != null)
+			return new MetaExpr(ret, (MapExpr) MapExpr.parse(C.EXPRESSION, ((IObj) form).meta()));
+		else
+			return ret;
 	}
 
 }
@@ -2094,6 +2133,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 	IParser p;
 	if(op.equals(FN))
 		return FnExpr.parse(context, form, name);
+	else if(op.equals(SYNTAX_QUOTE))
+		return syntaxQuote(RT.second(form));
 	else if((p = (IParser) specials.valAt(op)) != null)
 		return p.parse(context, form);
 	else
