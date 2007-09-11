@@ -128,7 +128,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 		if(isRecursive || !(r instanceof LineNumberingPushbackReader))
 			throw e;
 		LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) r;
-		throw new Exception(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()));
+		throw new Exception(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()), e);
 		}
 }
 
