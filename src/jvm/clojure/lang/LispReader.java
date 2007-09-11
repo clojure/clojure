@@ -20,11 +20,12 @@ import java.math.BigInteger;
 public class LispReader{
 
 static Symbol QUOTE = Symbol.create(null, "quote");
-static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
+//static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
 static Symbol UNQUOTE = Symbol.create(null, "unquote");
 static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 static Symbol CONCAT = Symbol.create("clojure", "concat");
 static Symbol LIST = Symbol.create("clojure", "list");
+static Symbol APPLY = Symbol.create("clojure", "apply");
 static Symbol HASHMAP = Symbol.create("clojure", "hashmap");
 static Symbol VECTOR = Symbol.create("clojure", "vector");
 static Symbol WITH_META = Symbol.create("clojure", "with-meta");
@@ -416,25 +417,22 @@ static class SyntaxQuoteReader extends AFn{
 			if(form instanceof IPersistentMap)
 				{
 				IPersistentVector keyvals = flattenMap(form);
-				PersistentVector v = PersistentVector.EMPTY;
-				ret = RT.list(HASHMAP, RT.list(CONCAT, sqExpandList(v, keyvals.seq())));
+				ret = RT.list(APPLY, HASHMAP, RT.cons(CONCAT, sqExpandList(keyvals.seq())));
 				}
 			else if(form instanceof IPersistentVector)
 				{
-				PersistentVector v = PersistentVector.EMPTY;
-				ret = RT.list(VECTOR, RT.list(CONCAT, sqExpandList(v, ((IPersistentVector) form).seq())));
+				ret = RT.list(APPLY, VECTOR, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq())));
 				}
 			else if(form instanceof ISeq)
 				{
 				ISeq seq = RT.seq(form);
 				if(RT.equal(UNQUOTE, RT.first(seq)))
-					ret = form;
+					return RT.second(seq);
 				else if(RT.equal(UNQUOTE_SPLICING, RT.first(seq)))
 					throw new IllegalStateException("splice not in list");
 				else
 					{
-					PersistentVector v = PersistentVector.EMPTY;
-					ret = RT.list(CONCAT, sqExpandList(v, seq));
+					ret = RT.cons(CONCAT, sqExpandList(seq));
 					}
 				}
 			else
@@ -454,7 +452,8 @@ static class SyntaxQuoteReader extends AFn{
 			return ret;
 	}
 
-	private static ISeq sqExpandList(PersistentVector ret, ISeq seq) throws Exception{
+	private static ISeq sqExpandList(ISeq seq) throws Exception{
+		PersistentVector ret = PersistentVector.EMPTY;
 		for(; seq != null; seq = seq.rest())
 			{
 			Object item = seq.first();

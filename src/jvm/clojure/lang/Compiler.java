@@ -46,7 +46,7 @@ static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol CLASS = Symbol.create("class");
 static final Symbol UNQUOTE = Symbol.create("unquote");
 static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
-static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
+//static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
 static final Symbol LIST = Symbol.create("clojure", "list");
 static final Symbol HASHMAP = Symbol.create("clojure", "hashmap");
 static final Symbol VECTOR = Symbol.create("clojure", "vector");
@@ -80,8 +80,8 @@ static IPersistentMap specials = RT.map(
 		CLASS, null,
 		UNQUOTE, null,
 		UNQUOTE_SPLICING, null,
-		SYNTAX_QUOTE, null,
-		_AMP_, null
+//		SYNTAX_QUOTE, null,
+_AMP_, null
 );
 
 private static final int MAX_POSITIONAL_ARITY = 20;
@@ -182,107 +182,6 @@ static Symbol resolveSymbol(Symbol sym){
 	return Symbol.intern(currentNS(), sym.name);
 }
 
-
-/*
-static public Object syntaxQuote(Object form){
-	if(isSpecial(form))
-		return RT.list(QUOTE, form);
-	else if(form instanceof Symbol)
-		{
-		Symbol sym = (Symbol) form;
-		//already qualified or classname?
-		if(sym.ns != null || sym.name.indexOf('.') > 0)
-			return RT.list(QUOTE,sqMeta(sym, sym.meta()));
-		IPersistentMap imports = (IPersistentMap) RT.IMPORTS.get();
-		//imported class?
-		String className = (String) imports.valAt(sym);
-		if(className != null)
-			return RT.list(QUOTE, sqMeta(Symbol.intern(null, className), sym.meta()));
-		//refers?
-		IPersistentMap refers = (IPersistentMap) RT.REFERS.get();
-		Var var = (Var) refers.valAt(sym);
-		if(var != null)
-			return RT.list(QUOTE, sqMeta(var.sym, sym.meta()));
-
-		return RT.list(QUOTE, sqMeta(Symbol.intern(currentNS(), sym.name), sym.meta()));
-		}
-	else if(form instanceof IPersistentCollection)
-		{
-		if(form instanceof IPersistentMap)
-			{
-			IPersistentVector keyvals = flattenMap(form);
-			IObj ret = PersistentHashMap.create((ISeq) syntaxQuote(keyvals.seq()));
-			if(form instanceof IObj)
-				return sqMeta(ret, ((IObj) form).meta());
-			else
-				return ret;
-			}
-		else if(form instanceof IPersistentVector)
-			{
-			IObj ret = PersistentVector.create((ISeq) syntaxQuote(((IPersistentVector) form).seq()));
-			if(form instanceof IObj)
-				return sqMeta(ret, ((IObj) form).meta());
-			else
-				return ret;
-			}
-		else if(form instanceof ISeq)
-			{
-			ISeq seq = RT.seq(form);
-			if(RT.equal(UNQUOTE, RT.first(seq)))
-				return RT.second(form);
-			else if(RT.equal(UNQUOTE_SPLICING, RT.first(seq)))
-				throw new IllegalStateException("splice not in list");
-			else
-				{
-				PersistentVector ret = PersistentVector.EMPTY;
-				ret = sqExpandList(ret, seq);
-
-				if(form instanceof IObj)
-					return RT.cons(LIST, sqMeta((IObj) ret.seq(), ((IObj) form).meta()));
-				else
-					return RT.cons(LIST, ret.seq());
-				}
-			}
-		else
-			throw new UnsupportedOperationException("Unknown Collection type");
-		}
-	else if(form instanceof IObj)
-		return sqMeta((IObj) form, ((IObj) form).meta());
-	else
-		return RT.list(QUOTE, form);
-}
-
-
-private static PersistentVector sqExpandList(PersistentVector ret, ISeq seq){
-	for(; seq != null; seq = seq.rest())
-		{
-		Object item = seq.first();
-		if(item instanceof ISeq && RT.equal(UNQUOTE, RT.first(item)))
-			ret = ret.cons(RT.second(item));
-		else if(item instanceof ISeq && RT.equal(UNQUOTE_SPLICING, RT.first(item)))
-			{
-			if(RT.second(item) instanceof ISeq)
-				ret = sqExpandList(ret, (ISeq) RT.second(item));
-			else
-				throw new IllegalStateException("splicing non-list");
-			}
-		else
-			ret = ret.cons(syntaxQuote(item));
-		}
-	return ret;
-}
-
-static Object sqMeta(IObj obj, IPersistentMap meta){
-	if(meta != null)
-		{
-		PersistentVector ret = PersistentVector.EMPTY;
-		ret = sqExpandList(ret, flattenMap(meta).seq());
-		return obj.withMeta(PersistentHashMap.create(ret.seq()));
-		}
-	else
-		return obj;
-}
- */
 static class DefExpr implements Expr{
 	final Var var;
 	final Expr init;

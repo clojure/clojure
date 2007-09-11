@@ -4,30 +4,23 @@
 (def defn (fn [name & fdecl]
               (list 'def name (cons 'fn fdecl))))
 
-;(def defn (fn [name & fdecl]
-;              `(def ~name (fn ~@fdecl))))
-
 (. (the-var defn) (setMacro))
 
-(def syntax-quote (fn [form]
-                      (. clojure.lang.Compiler (syntaxQuote form))))
+(defn vector
+      ([] [])
+      ([& args]
+          (. clojure.lang.PersistentVector (create args))))
 
-(. (the-var syntax-quote) (setMacro))
+(defn hashmap
+      ([] {})
+      ([& args]
+          (. clojure.lang.PersistentHashMap (create args))))
 
-(defn contains [coll key]
- (. RT (contains coll key)))
+(defn meta [x]
+ (. x (meta)))
 
-(defn get [coll key]
- (. RT (get coll key)))
-
-(defn assoc [coll key val]
- (. RT (assoc coll key val)))
-
-(defn dissoc [coll key]
- (. RT (dissoc coll key)))
-
-(defn count [coll]
- (. RT (count coll)))
+(defn with-meta [x m]
+  (. x (withMeta m)))
 
 (def defmacro (fn [name & args]
                   (list 'do
@@ -43,11 +36,6 @@
    (list 'if test nil (cons 'do body)))
 
 (def t (. RT T))
-
-(defn vector
-      ([] [])
-      ([& args]
-          (. clojure.lang.PersistentVector (create args))))
 
 (defn nil? [x] (if x nil t))
 
@@ -75,31 +63,49 @@
             (second clauses)
             (cons 'cond (rest (rest clauses))))))
 
-(defmacro and
-  ([] t)
-  ([x] x)
-  ([x & rest] (list 'if x (cons 'and rest))))
-
-(defmacro or
-  ([] nil)
-  ([x] x)
-  ([x & rest]
-      (let [gor (gensym "or__")]
-        (list 'let (vector gor x)
-              (list 'if gor gor (cons 'or rest))))))
-
 (defn spread [arglist]
       (cond
        (nil? arglist) nil
        (nil? (rest arglist)) (first arglist)
        :else (cons (first arglist) (thisfn (rest arglist)))))
- 
+
 (defn apply [f & args]
       (. f (applyTo (spread args))))
 
 (defn list* [& args]
       (spread args))
 
+(defmacro delay [& body]
+  (list '. 'clojure.lang.Delay (list 'new (list* 'fn [] body))))
+
+(defmacro lazy-cons [x & body]
+  (list '. 'clojure.lang.FnSeq (list 'new x (list* 'delay body))))
+
+(defn concat
+      ([] nil)
+      ([x & xs]
+          (cond
+           (nil? xs) x
+           (nil? x) (recur (first xs) (rest xs))
+           :else (lazy-cons (first x) (apply concat (rest x) xs)))))
+
+;;at this point all the support for syntax-quote exists
+
+(defmacro and
+  ([] t)
+  ([x] x)
+  ([x & rest] `(if ~x (and ~@rest))))
+
+(defmacro or
+  ([] nil)
+  ([x] x)
+  ([x & rest]
+      (let [gor (gensym "or__")]
+        `(let [~gor ~x]
+              (if ~gor ~gor (or ~@rest))))))
+
+
+;;math stuff
 (defn +
       ([] 0)
       ([x] x)
@@ -180,26 +186,23 @@
 
 (defn identity [x] x)
 
-(defmacro locking [x & body]
-  (let [gsym (gensym)]
-    (list 'let [gsym x]
-          (list 'try-finally
-                (cons 'do (cons (list 'monitor-enter gsym) body))
-                (list 'monitor-exit gsym)))))
+;;map stuff
 
-(defmacro delay [& body]
-  (list '. 'clojure.lang.Delay (list 'new (list* 'fn [] body))))
+(defn contains [coll key]
+ (. RT (contains coll key)))
 
-(defmacro lazy-cons [x & body]
-  (list '. 'clojure.lang.FnSeq (list 'new x (list* 'delay body))))
+(defn get [coll key]
+ (. RT (get coll key)))
 
-(defn concat
-      ([] nil)
-      ([x & xs]
-          (cond
-           (nil? xs) x
-           (nil? x) (recur (first xs) (rest xs))
-           :else (lazy-cons (first x) (apply concat (rest x) xs)))))
+(defn assoc [coll key val]
+ (. RT (assoc coll key val)))
+
+(defn dissoc [coll key]
+ (. RT (dissoc coll key)))
+
+(defn count [coll]
+ (. RT (count coll)))
+
 
 (defn andfn [& args]
       (if (nil? (rest args))
@@ -211,3 +214,10 @@
           nil
         (or (first args) (recur (rest args)))))
 
+
+(defmacro locking [x & body]
+  (let [gsym (gensym)]
+    `(let [~gsym ~x]
+          (try-finally
+                (do (monitor-enter ~gsym) ~@body)
+                (monitor-exit ~gsym)))))
