@@ -104,7 +104,6 @@
         `(let [~gor ~x]
               (if ~gor ~gor (or ~@rest))))))
 
-
 ;;math stuff
 (defn +
       ([] 0)

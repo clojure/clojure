@@ -56,7 +56,7 @@ static
 	macros[']'] = new UnmatchedDelimiterReader();
 	macros['{'] = new MapReader();
 	macros['}'] = new UnmatchedDelimiterReader();
-	macros['|'] = new ArgVectorReader();
+//	macros['|'] = new ArgVectorReader();
 	macros['\\'] = new CharacterReader();
 	}
 
@@ -67,58 +67,68 @@ static boolean isWhitespace(int ch){
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
 		throws Exception{
 
-	for(; ;)
+	try
 		{
-		int ch = r.read();
-
-		while(isWhitespace(ch))
-			ch = r.read();
-
-		if(ch == -1)
+		for(; ;)
 			{
-			if(eofIsError)
-				throw new Exception("EOF while reading");
-			return eofValue;
-			}
+			int ch = r.read();
 
-		if(Character.isDigit(ch))
-			{
-			Object n = readNumber(r, (char) ch);
-			if(RT.suppressRead())
-				return null;
-			return n;
-			}
+			while(isWhitespace(ch))
+				ch = r.read();
 
-		IFn macroFn = getMacro(ch);
-		if(macroFn != null)
-			{
-			Object ret = macroFn.invoke(r, (char) ch);
-			if(RT.suppressRead())
-				return null;
-			//no op macros return the reader
-			if(ret == r)
-				continue;
-			return ret;
-			}
-
-		if(ch == '+' || ch == '-')
-			{
-			int ch2 = r.read();
-			if(Character.isDigit(ch2))
+			if(ch == -1)
 				{
-				r.unread(ch2);
+				if(eofIsError)
+					throw new Exception("EOF while reading");
+				return eofValue;
+				}
+
+			if(Character.isDigit(ch))
+				{
 				Object n = readNumber(r, (char) ch);
 				if(RT.suppressRead())
 					return null;
 				return n;
 				}
-			r.unread(ch2);
-			}
 
-		String token = readToken(r, (char) ch);
-		if(RT.suppressRead())
-			return null;
-		return interpretToken(token);
+			IFn macroFn = getMacro(ch);
+			if(macroFn != null)
+				{
+				Object ret = macroFn.invoke(r, (char) ch);
+				if(RT.suppressRead())
+					return null;
+				//no op macros return the reader
+				if(ret == r)
+					continue;
+				return ret;
+				}
+
+			if(ch == '+' || ch == '-')
+				{
+				int ch2 = r.read();
+				if(Character.isDigit(ch2))
+					{
+					r.unread(ch2);
+					Object n = readNumber(r, (char) ch);
+					if(RT.suppressRead())
+						return null;
+					return n;
+					}
+				r.unread(ch2);
+				}
+
+			String token = readToken(r, (char) ch);
+			if(RT.suppressRead())
+				return null;
+			return interpretToken(token);
+			}
+		}
+	catch(Exception e)
+		{
+		if(isRecursive || !(r instanceof LineNumberingPushbackReader))
+			throw e;
+		LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) r;
+		throw new Exception(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()));
 		}
 }
 
@@ -160,73 +170,6 @@ static private Object readNumber(PushbackReader r, char initch) throws Exception
 	return n;
 }
 
-/*
-static private Object readSymbol(PushbackReader r, char initch) throws Exception {
-    StringBuilder sb = new StringBuilder();
-    sb.append(initch);
-
-    for(;;)
-        {
-        int ch = r.read();
-        if(ch == -1 || Character.isWhitespace(ch) || isMacro(ch))
-            {
-            r.unread(ch);
-            return Symbol.intern(sb.toString());
-            }
-        else if(ch == '.')
-	        {
-	        r.unread(ch);
-	        Object ret = Symbol.intern(sb.toString());
-	        Object mem = null;
-	        while((mem = readMember(r)) != null)
-		        {
-		        //x.foo ==> (.foo  x)
-		        if(mem instanceof Symbol)
-			        ret = RT.list(mem, ret);
-		        else  //x.foo(y z) ==> (.foo x y z)
-			        {
-			        ISeq rseq = RT.seq(mem);
-			        ret = RT.cons(rseq.first(), RT.cons(ret, RT.rest(rseq)));
-			        }
-		        }
-	        return ret;
-	        }
-        sb.append((char)ch);
-        }
-}
-
-static private Object readMember(PushbackReader r) throws Exception {
-    StringBuilder sb = new StringBuilder();
-	int ch = r.read();
-	if(ch != '.')
-		{
-		r.unread(ch);
-		return null;
-		}
-	sb.append((char)ch);
-	boolean first = true;
-    for(;;)
-        {
-        ch = r.read();
-        if(ch == '(')
-	        {
-	        //r.unread(ch);
-	        ISeq args = readDelimitedList(')', r, true);
-	        return RT.cons(Symbol.intern(sb.toString()),args);
-	        }
-        else if(ch == -1 || ch == '.' || Character.isWhitespace(ch) || isMacro(ch))
-            {
-            r.unread(ch);
-            return Symbol.intern(sb.toString());
-            }
-        sb.append((char)ch);
-        if((first && !Character.isJavaIdentifierStart(ch))
-	        || !Character.isJavaIdentifierPart(ch))
-	        throw new IllegalArgumentException("Invalid member name component: " + sb.toString());
-        first = false;
-        }
-}
-*/
 
 static private Object interpretToken(String s) throws Exception{
 	if(s.equals("nil"))
@@ -246,31 +189,7 @@ static private Object interpretToken(String s) throws Exception{
 
 	throw new Exception("Invalid token: " + s);
 }
-/*
-private static Object matchHostName(String s) {
-    Matcher m = accessorPat.matcher(s);
-    if(m.matches())
-        return new Accessor(s);
-    m = classNamePat.matcher(s);
-    if(m.matches())
-        return new ClassName(RT.resolveClassNameInContext(m.group(1)));
-    m = instanceMemberPat.matcher(s);
-    if(m.matches())
-        return new InstanceMemberName(RT.resolveClassNameInContext(m.group(1)),m.group(2));
-    m = staticMemberPat.matcher(s);
-    if(m.matches())
-        return new StaticMemberName(RT.resolveClassNameInContext(m.group(1)),m.group(2));
 
-    return null;
-}
-
-private static Object matchSymbol(String s) {
-    Matcher m = symbolPat.matcher(s);
-    if(m.matches())
-        return Symbol.intern(s);
-    return null;
-}
-*/
 
 private static Object matchSymbol(String s){
 	Matcher m = symbolPat.matcher(s);
@@ -285,14 +204,6 @@ private static Object matchSymbol(String s){
 	return null;
 }
 
-/*
-private static Object matchVar(String s) throws Exception{
-	Matcher m = varPat.matcher(s);
-	if(m.matches())
-		return Module.intern(m.group(1), m.group(2));
-	return null;
-}
-*/
 
 private static Object matchNumber(String s){
 	Matcher m = intPat.matcher(s);
@@ -533,13 +444,13 @@ static class ListReader extends AFn{
 
 }
 
-static class ArgVectorReader extends AFn{
-	public Object invoke(Object reader, Object leftparen) throws Exception{
-		PushbackReader r = (PushbackReader) reader;
-		return ArgVector.create(readDelimitedList('|', r, true));
-	}
-
-}
+//static class ArgVectorReader extends AFn{
+//	public Object invoke(Object reader, Object leftparen) throws Exception{
+//		PushbackReader r = (PushbackReader) reader;
+//		return ArgVector.create(readDelimitedList('|', r, true));
+//	}
+//
+//}
 
 static class VectorReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
