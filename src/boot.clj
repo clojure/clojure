@@ -4,6 +4,9 @@
 (def defn (fn [name & fdecl]
               (list 'def name (cons 'fn fdecl))))
 
+;(def defn (fn [name & fdecl]
+;              `(def ~name (fn ~@fdecl))))
+
 (. (the-var defn) (setMacro))
 
 (def syntax-quote (fn [form]

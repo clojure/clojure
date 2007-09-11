@@ -182,79 +182,6 @@ static Symbol resolveSymbol(Symbol sym){
 	return Symbol.intern(currentNS(), sym.name);
 }
 
-static public Expr syntaxQuote(Object form) throws Exception{
-	Expr ret;
-	if(isSpecial(form))
-		ret = new QuoteExpr(form);
-	else if(form instanceof Symbol)
-		ret = new QuoteExpr(resolveSymbol((Symbol) form));
-	else if(form instanceof IPersistentCollection)
-		{
-		if(form instanceof IPersistentMap)
-			{
-			IPersistentVector keyvals = flattenMap(form);
-			PersistentVector v = PersistentVector.EMPTY;
-			ret = new MapExpr(sqExpandList(v, keyvals.seq()));
-			}
-		else if(form instanceof IPersistentVector)
-			{
-			PersistentVector v = PersistentVector.EMPTY;
-			ret = new VectorExpr(sqExpandList(v, ((IPersistentVector) form).seq()));
-			}
-		else if(form instanceof ISeq)
-			{
-			ISeq seq = RT.seq(form);
-			if(RT.equal(UNQUOTE, RT.first(seq)))
-				ret = analyze(C.EXPRESSION, RT.second(form));
-			else if(RT.equal(UNQUOTE_SPLICING, RT.first(seq)))
-				throw new IllegalStateException("splice not in list");
-			else
-				{
-				PersistentVector v = PersistentVector.EMPTY;
-				ret = new ListExpr(sqExpandList(v, seq));
-				}
-			}
-		else
-			throw new UnsupportedOperationException("Unknown Collection type");
-		}
-	else
-		ret = new QuoteExpr(form);
-
-	if(form instanceof IObj && ((IObj) form).meta() != null)
-		return new MetaExpr(ret, (MapExpr) syntaxQuote(((IObj) form).meta()));
-	else
-		return ret;
-}
-
-private static PersistentVector sqExpandList(PersistentVector ret, ISeq seq) throws Exception{
-	for(; seq != null; seq = seq.rest())
-		{
-		Object item = seq.first();
-		if(item instanceof ISeq && RT.equal(UNQUOTE, RT.first(item)))
-			ret = ret.cons(analyze(C.EXPRESSION, RT.second(item)));
-		else if(item instanceof ISeq && RT.equal(UNQUOTE_SPLICING, RT.first(item)))
-			{
-			if(RT.second(item) == null || RT.second(item) instanceof ISeq)
-				ret = sqExpandList(ret, (ISeq) RT.second(item));
-			else
-				throw new IllegalStateException("splicing non-list");
-			}
-		else
-			ret = ret.cons(syntaxQuote(item));
-		}
-	return ret;
-}
-
-private static IPersistentVector flattenMap(Object form){
-	IPersistentVector keyvals = PersistentVector.EMPTY;
-	for(ISeq s = RT.seq(form); s != null; s = s.rest())
-		{
-		IMapEntry e = (IMapEntry) s.first();
-		keyvals = (IPersistentVector) keyvals.cons(e.key());
-		keyvals = (IPersistentVector) keyvals.cons(e.val());
-		}
-	return keyvals;
-}
 
 /*
 static public Object syntaxQuote(Object form){
@@ -2133,8 +2060,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 	IParser p;
 	if(op.equals(FN))
 		return FnExpr.parse(context, form, name);
-	else if(op.equals(SYNTAX_QUOTE))
-		return syntaxQuote(RT.second(form));
+//	else if(op.equals(SYNTAX_QUOTE))
+//		return syntaxQuote(RT.second(form));
 	else if((p = (IParser) specials.valAt(op)) != null)
 		return p.parse(context, form);
 	else

@@ -19,10 +19,15 @@ import java.math.BigInteger;
 
 public class LispReader{
 
-//static Symbol QUOTE = Symbol.create(null, "quote");
-//static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
-//static Symbol UNQUOTE = Symbol.create(null, "unquote");
-//static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
+static Symbol QUOTE = Symbol.create(null, "quote");
+static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
+static Symbol UNQUOTE = Symbol.create(null, "unquote");
+static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
+static Symbol CONCAT = Symbol.create("clojure", "concat");
+static Symbol LIST = Symbol.create("clojure", "list");
+static Symbol HASHMAP = Symbol.create("clojure", "hashmap");
+static Symbol VECTOR = Symbol.create("clojure", "vector");
+static Symbol WITH_META = Symbol.create("clojure", "with-meta");
 
 static IFn[] macros = new IFn[256];
 static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
@@ -395,11 +400,87 @@ static class MetaReader extends AFn{
 static class SyntaxQuoteReader extends AFn{
 	public Object invoke(Object reader, Object backquote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		Object o = read(r, true, null, true);
-		return RT.list(Compiler.SYNTAX_QUOTE, o);
+		Object form = read(r, true, null, true);
+
+		return syntaxQuote(form);
+	}
+
+	static Object syntaxQuote(Object form) throws Exception{
+		Object ret;
+		if(Compiler.isSpecial(form))
+			ret = RT.list(Compiler.QUOTE, form);
+		else if(form instanceof Symbol)
+			ret = RT.list(Compiler.QUOTE, Compiler.resolveSymbol((Symbol) form));
+		else if(form instanceof IPersistentCollection)
+			{
+			if(form instanceof IPersistentMap)
+				{
+				IPersistentVector keyvals = flattenMap(form);
+				PersistentVector v = PersistentVector.EMPTY;
+				ret = RT.list(HASHMAP, RT.list(CONCAT, sqExpandList(v, keyvals.seq())));
+				}
+			else if(form instanceof IPersistentVector)
+				{
+				PersistentVector v = PersistentVector.EMPTY;
+				ret = RT.list(VECTOR, RT.list(CONCAT, sqExpandList(v, ((IPersistentVector) form).seq())));
+				}
+			else if(form instanceof ISeq)
+				{
+				ISeq seq = RT.seq(form);
+				if(RT.equal(UNQUOTE, RT.first(seq)))
+					ret = form;
+				else if(RT.equal(UNQUOTE_SPLICING, RT.first(seq)))
+					throw new IllegalStateException("splice not in list");
+				else
+					{
+					PersistentVector v = PersistentVector.EMPTY;
+					ret = RT.list(CONCAT, sqExpandList(v, seq));
+					}
+				}
+			else
+				throw new UnsupportedOperationException("Unknown Collection type");
+			}
+		else if(form instanceof Keyword
+		        || form instanceof Num
+		        || form instanceof Character
+		        || form instanceof String)
+			ret = form;
+		else
+			ret = RT.list(Compiler.QUOTE, form);
+
+		if(form instanceof IObj && ((IObj) form).meta() != null)
+			return RT.list(WITH_META, ret, syntaxQuote(((IObj) form).meta()));
+		else
+			return ret;
+	}
+
+	private static ISeq sqExpandList(PersistentVector ret, ISeq seq) throws Exception{
+		for(; seq != null; seq = seq.rest())
+			{
+			Object item = seq.first();
+			if(item instanceof ISeq && RT.equal(UNQUOTE, RT.first(item)))
+				ret = ret.cons(RT.list(LIST, RT.second(item)));
+			else if(item instanceof ISeq && RT.equal(UNQUOTE_SPLICING, RT.first(item)))
+				ret = ret.cons(RT.second(item));
+			else
+				ret = ret.cons(RT.list(LIST, syntaxQuote(item)));
+			}
+		return ret.seq();
+	}
+
+	private static IPersistentVector flattenMap(Object form){
+		IPersistentVector keyvals = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+			{
+			IMapEntry e = (IMapEntry) s.first();
+			keyvals = (IPersistentVector) keyvals.cons(e.key());
+			keyvals = (IPersistentVector) keyvals.cons(e.val());
+			}
+		return keyvals;
 	}
 
 }
+
 
 static class UnquoteReader extends AFn{
 	public Object invoke(Object reader, Object comma) throws Exception{
