@@ -135,6 +135,9 @@ static public Var METHOD = Var.create(null);
 static public Var SOURCE = Var.create(null);
 
 //Integer
+static public Var LINE = Var.create(0);
+
+//Integer
 static public Var NEXT_LOCAL_NUM = Var.create(0);
 
 //Integer
@@ -972,12 +975,14 @@ static class IfExpr implements Expr{
 	final Expr testExpr;
 	final Expr thenExpr;
 	final Expr elseExpr;
+	final int line;
 
 
-	public IfExpr(Expr testExpr, Expr thenExpr, Expr elseExpr){
+	public IfExpr(int line, Expr testExpr, Expr thenExpr, Expr elseExpr){
 		this.testExpr = testExpr;
 		this.thenExpr = thenExpr;
 		this.elseExpr = elseExpr;
+		this.line = line;
 	}
 
 	public Object eval() throws Exception{
@@ -989,6 +994,9 @@ static class IfExpr implements Expr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		Label elseLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
+
+		gen.visitLineNumber(line, gen.mark());
+
 		testExpr.emit(C.EXPRESSION, fn, gen);
 		gen.ifNull(elseLabel);
 		thenExpr.emit(context, fn, gen);
@@ -1006,7 +1014,7 @@ static class IfExpr implements Expr{
 				throw new Exception("Too many arguments to if");
 			else if(form.count() < 3)
 				throw new Exception("Too few arguments to if");
-			return new IfExpr(analyze(C.EXPRESSION, RT.second(form)),
+			return new IfExpr((Integer) LINE.get(), analyze(C.EXPRESSION, RT.second(form)),
 			                  analyze(context, RT.third(form)),
 			                  analyze(context, RT.fourth(form)));
 		}
@@ -1253,11 +1261,12 @@ static class VectorExpr implements Expr{
 static class InvokeExpr implements Expr{
 	final Expr fexpr;
 	final IPersistentVector args;
+	final int line;
 
-
-	public InvokeExpr(Expr fexpr, IPersistentVector args){
+	public InvokeExpr(int line, Expr fexpr, IPersistentVector args){
 		this.fexpr = fexpr;
 		this.args = args;
+		this.line = line;
 	}
 
 	public Object eval() throws Exception{
@@ -1269,6 +1278,7 @@ static class InvokeExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
 		fexpr.emit(C.EXPRESSION, fn, gen);
 		gen.checkCast(IFN_TYPE);
 		for(int i = 0; i < args.count(); i++)
@@ -1291,7 +1301,7 @@ static class InvokeExpr implements Expr{
 		if(args.count() > MAX_POSITIONAL_ARITY)
 			throw new IllegalArgumentException(
 					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
-		return new InvokeExpr(fexpr, args);
+		return new InvokeExpr((Integer) LINE.get(), fexpr, args);
 	}
 }
 
@@ -1946,25 +1956,40 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 }
 
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
-	Object op = RT.first(form);
-	//macro expansion
-	if(op instanceof Symbol || op instanceof Var)
+	Integer line = (Integer) LINE.get();
+	try
 		{
-		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
-		if(v != null && v.isMacro())
+		if(RT.meta(form) != null && RT.meta(form).contains(LispReader.LINE_KEY))
+			line = (Integer) RT.meta(form).valAt(LispReader.LINE_KEY);
+		Var.pushThreadBindings(
+				RT.map(LINE, line));
+		Object op = RT.first(form);
+		//macro expansion
+		if(op instanceof Symbol || op instanceof Var)
 			{
-			return analyze(context, v.applyTo(form.rest()));
+			Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
+			if(v != null && v.isMacro())
+				{
+				return analyze(context, v.applyTo(form.rest()));
+				}
 			}
+		IParser p;
+		if(op.equals(FN))
+			return FnExpr.parse(context, form, name);
+		else if((p = (IParser) specials.valAt(op)) != null)
+			return p.parse(context, form);
+		else
+			return InvokeExpr.parse(context, form);
 		}
-	IParser p;
-	if(op.equals(FN))
-		return FnExpr.parse(context, form, name);
-//	else if(op.equals(SYNTAX_QUOTE))
-//		return syntaxQuote(RT.second(form));
-	else if((p = (IParser) specials.valAt(op)) != null)
-		return p.parse(context, form);
-	else
-		return InvokeExpr.parse(context, form);
+	catch(Throwable e)
+		{
+		throw new Exception(String.format("%s:%d: %s", SOURCE.get(), (Integer) LINE.get(), e.getMessage()),
+		                    e);
+		}
+	finally
+		{
+		Var.popThreadBindings();
+		}
 }
 
 static Object eval(Object form) throws Exception{
@@ -2064,7 +2089,15 @@ private static Symbol tagOf(Symbol sym){
 }
 
 public static Object loadFile(String file) throws Exception{
-	return load(new FileInputStream(file));
+	try
+		{
+		Var.pushThreadBindings(RT.map(SOURCE, (new File(file)).getName()));
+		return load(new FileInputStream(file));
+		}
+	finally
+		{
+		Var.popThreadBindings();
+		}
 }
 
 public static Object load(InputStream s) throws Exception{
@@ -2098,7 +2131,8 @@ public static void main(String[] args){
 		Var.pushThreadBindings(
 				RT.map(RT.REFERS, RT.REFERS.get(),
 				       RT.IMPORTS, RT.IMPORTS.get(),
-				       RT.CURRENT_NS, RT.CURRENT_NS.get()
+				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
+				       SOURCE, "REPL"
 				));
 
 		for(; ;)

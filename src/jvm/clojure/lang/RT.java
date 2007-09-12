@@ -180,7 +180,7 @@ static public ISeq vals(Object coll){
 	return APersistentMap.ValSeq.create(seq(coll));
 }
 
-static public Object meta(Object x){
+static public IPersistentMap meta(Object x){
 	if(x == null)
 		return null;
 	return ((Obj) x).meta();
@@ -259,7 +259,7 @@ static public Associative assoc(Object coll, Object key, Object val){
 static public Object contains(Object coll, Object key){
 	if(coll == null)
 		return false;
-	return ((Associative) coll).contains(key);
+	return ((Associative) coll).contains(key) ? T : null;
 }
 
 static public Object find(Object coll, Object key){
