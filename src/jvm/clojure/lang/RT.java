@@ -583,7 +583,7 @@ static public void print(Object x, Writer w) throws Exception{
 	if(x instanceof Obj)
 		{
 		Obj o = (Obj) x;
-		if(o.meta() != null)
+		if(RT.count(o.meta()) > 0)
 			{
 			IPersistentMap meta = o.meta();
 			w.write("^");

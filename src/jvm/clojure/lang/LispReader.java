@@ -29,6 +29,7 @@ static Symbol APPLY = Symbol.create("clojure", "apply");
 static Symbol HASHMAP = Symbol.create("clojure", "hashmap");
 static Symbol VECTOR = Symbol.create("clojure", "vector");
 static Symbol WITH_META = Symbol.create("clojure", "with-meta");
+static Keyword LINE_KEY = Keyword.intern("clojure", "line");
 
 static IFn[] macros = new IFn[256];
 static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
@@ -295,14 +296,22 @@ static class QuoteReader extends AFn{
 static class MetaReader extends AFn{
 	public Object invoke(Object reader, Object caret) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
+		int line = -1;
+		if(r instanceof LineNumberingPushbackReader)
+			line = ((LineNumberingPushbackReader) r).getLineNumber();
 		Object meta = read(r, true, null, true);
 		if(meta instanceof Symbol || meta instanceof Keyword)
 			meta = RT.map(RT.TAG_KEY, meta);
 		else if(!(meta instanceof IPersistentMap))
 			throw new IllegalArgumentException("Metadata must be Symbol,Keyword or Map");
+
 		Object o = read(r, true, null, true);
 		if(o instanceof IObj)
+			{
+			if(line != -1 && o instanceof ISeq)
+				meta = ((IPersistentMap) meta).assoc(LINE_KEY, line);
 			return ((IObj) o).withMeta((IPersistentMap) meta);
+			}
 		else
 			throw new IllegalArgumentException("Metadata can only be applied to IObjs");
 	}
@@ -448,10 +457,17 @@ static class CharacterReader extends AFn{
 static class ListReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
+		int line = -1;
+		if(r instanceof LineNumberingPushbackReader)
+			line = ((LineNumberingPushbackReader) r).getLineNumber();
 		List list = readDelimitedList(')', r, true);
 		if(list.isEmpty())
 			return PersistentList.EMPTY;
-		return RT.seq(list);
+		IObj s = (IObj) RT.seq(list);
+		if(line != -1)
+			return s.withMeta(RT.map(LINE_KEY, line));
+		else
+			return s;
 	}
 
 }

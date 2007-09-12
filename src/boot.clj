@@ -220,3 +220,7 @@
           (try-finally
                 (do (monitor-enter ~gsym) ~@body)
                 (monitor-exit ~gsym)))))
+
+(defmacro ..
+  ([x form] `(. ~x ~form))
+  ([x form & more] `(.. (. ~x ~form) ~@more)))
