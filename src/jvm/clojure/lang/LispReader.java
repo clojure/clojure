@@ -21,8 +21,8 @@ public class LispReader{
 
 static Symbol QUOTE = Symbol.create(null, "quote");
 //static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
-static Symbol UNQUOTE = Symbol.create(null, "unquote");
-static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
+//static Symbol UNQUOTE = Symbol.create(null, "unquote");
+//static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 static Symbol CONCAT = Symbol.create("clojure", "concat");
 static Symbol LIST = Symbol.create("clojure", "list");
 static Symbol APPLY = Symbol.create("clojure", "apply");
@@ -323,6 +323,10 @@ static class SyntaxQuoteReader extends AFn{
 			ret = RT.list(Compiler.QUOTE, form);
 		else if(form instanceof Symbol)
 			ret = RT.list(Compiler.QUOTE, Compiler.resolveSymbol((Symbol) form));
+		else if(form instanceof Unquote)
+			return ((Unquote) form).o;
+		else if(form instanceof UnquoteSplicing)
+			throw new IllegalStateException("splice not in list");
 		else if(form instanceof IPersistentCollection)
 			{
 			if(form instanceof IPersistentMap)
@@ -337,14 +341,7 @@ static class SyntaxQuoteReader extends AFn{
 			else if(form instanceof ISeq)
 				{
 				ISeq seq = RT.seq(form);
-				if(RT.equal(UNQUOTE, RT.first(seq)))
-					return RT.second(seq);
-				else if(RT.equal(UNQUOTE_SPLICING, RT.first(seq)))
-					throw new IllegalStateException("splice not in list");
-				else
-					{
-					ret = RT.cons(CONCAT, sqExpandList(seq));
-					}
+				ret = RT.cons(CONCAT, sqExpandList(seq));
 				}
 			else
 				throw new UnsupportedOperationException("Unknown Collection type");
@@ -368,10 +365,10 @@ static class SyntaxQuoteReader extends AFn{
 		for(; seq != null; seq = seq.rest())
 			{
 			Object item = seq.first();
-			if(item instanceof ISeq && RT.equal(UNQUOTE, RT.first(item)))
-				ret = ret.cons(RT.list(LIST, RT.second(item)));
-			else if(item instanceof ISeq && RT.equal(UNQUOTE_SPLICING, RT.first(item)))
-				ret = ret.cons(RT.second(item));
+			if(item instanceof Unquote)
+				ret = ret.cons(RT.list(LIST, ((Unquote) item).o));
+			else if(item instanceof UnquoteSplicing)
+				ret = ret.cons(((UnquoteSplicing) item).o);
 			else
 				ret = ret.cons(RT.list(LIST, syntaxQuote(item)));
 			}
@@ -391,6 +388,21 @@ static class SyntaxQuoteReader extends AFn{
 
 }
 
+static class Unquote{
+	final Object o;
+
+	public Unquote(Object o){
+		this.o = o;
+	}
+}
+
+static class UnquoteSplicing{
+	final Object o;
+
+	public UnquoteSplicing(Object o){
+		this.o = o;
+	}
+}
 
 static class UnquoteReader extends AFn{
 	public Object invoke(Object reader, Object comma) throws Exception{
@@ -401,13 +413,13 @@ static class UnquoteReader extends AFn{
 		if(ch == '@')
 			{
 			Object o = read(r, true, null, true);
-			return RT.list(Compiler.UNQUOTE_SPLICING, o);
+			return new UnquoteSplicing(o);
 			}
 		else
 			{
 			r.unread(ch);
 			Object o = read(r, true, null, true);
-			return RT.list(Compiler.UNQUOTE, o);
+			return new Unquote(o);
 			}
 	}
 

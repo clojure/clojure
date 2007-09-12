@@ -44,8 +44,8 @@ static final Symbol INSTANCE = Symbol.create("instance?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol CLASS = Symbol.create("class");
-static final Symbol UNQUOTE = Symbol.create("unquote");
-static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
+//static final Symbol UNQUOTE = Symbol.create("unquote");
+//static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
 //static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
 static final Symbol LIST = Symbol.create("clojure", "list");
 static final Symbol HASHMAP = Symbol.create("clojure", "hashmap");
@@ -78,8 +78,8 @@ static IPersistentMap specials = RT.map(
 		INSTANCE, new InstanceExpr.Parser(),
 		THISFN, null,
 		CLASS, null,
-		UNQUOTE, null,
-		UNQUOTE_SPLICING, null,
+//		UNQUOTE, null,
+//		UNQUOTE_SPLICING, null,
 //		SYNTAX_QUOTE, null,
 _AMP_, null
 );
