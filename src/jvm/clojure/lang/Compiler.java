@@ -1557,6 +1557,7 @@ static class FnMethod{
 	LocalBinding restParm = null;
 	Expr body = null;
 	FnExpr fn;
+	PersistentVector argLocals;
 
 	public FnMethod(FnExpr fn, FnMethod parent){
 		this.parent = parent;
@@ -1590,7 +1591,7 @@ static class FnMethod{
 			registerLocal(THISFN, null);
 
 			PSTATE state = PSTATE.REQ;
-			PersistentVector loopLocals = PersistentVector.EMPTY;
+			PersistentVector argLocals = PersistentVector.EMPTY;
 			for(int i = 0; i < parms.count(); i++)
 				{
 				if(!(parms.nth(i) instanceof Symbol))
@@ -1607,7 +1608,7 @@ static class FnMethod{
 				else
 					{
 					LocalBinding lb = registerLocal(p, tagOf(p));
-					loopLocals = loopLocals.cons(lb);
+					argLocals = argLocals.cons(lb);
 					switch(state)
 						{
 						case REQ:
@@ -1625,7 +1626,8 @@ static class FnMethod{
 				}
 			if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
 				throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
-			LOOP_LOCALS.set(loopLocals);
+			LOOP_LOCALS.set(argLocals);
+			method.argLocals = argLocals;
 			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
 			return method;
 			}
@@ -1650,6 +1652,12 @@ static class FnMethod{
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
 			body.emit(C.RETURN, fn, gen);
+			Label end = gen.mark();
+			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.rest())
+				{
+				LocalBinding lb = (LocalBinding) lbs.first();
+				gen.visitLocalVariable(lb.name, "Ljava/lang/Object;", null, loopLabel, end, lb.idx);
+				}
 			}
 		finally
 			{
@@ -1836,9 +1844,9 @@ static class LetExpr implements Expr{
 			bi.init.emit(C.EXPRESSION, fn, gen);
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 			}
+		Label loopLabel = gen.mark();
 		if(isLoop)
 			{
-			Label loopLabel = gen.mark();
 			try
 				{
 				Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
@@ -1851,6 +1859,12 @@ static class LetExpr implements Expr{
 			}
 		else
 			body.emit(context, fn, gen);
+		Label end = gen.mark();
+		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.rest())
+			{
+			BindingInit bi = (BindingInit) bis.first();
+			gen.visitLocalVariable(bi.binding.name, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
+			}
 	}
 }
 
