@@ -26,10 +26,20 @@ final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
                                                     Module.findOrCreateModule("clojure/user"));
 
+final static Symbol LOAD_FILE = Symbol.create("clojure", "load-file");
+
 //string
 final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "*current-namespace*"), "clojure");
 //simple-symbol->var
-final static Var REFERS = Var.intern(Symbol.create("clojure", "*refers*"), PersistentHashMap.EMPTY);
+final static Var REFERS =
+		Var.intern(Symbol.create("clojure", "*refers*"),
+		           map(
+				           LOAD_FILE, Var.intern(LOAD_FILE,
+		                                         new AFn(){
+			                                         public Object invoke(Object arg1) throws Exception{
+				                                         return Compiler.loadFile((String) arg1);
+			                                         }
+		                                         })));
 //simple-symbol->fully-qualified-class-name-string
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"),
                                       map(Symbol.create("RT"), "clojure.lang.RT",
