@@ -1653,6 +1653,7 @@ static class FnMethod{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
 			body.emit(C.RETURN, fn, gen);
 			Label end = gen.mark();
+			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
 			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.rest())
 				{
 				LocalBinding lb = (LocalBinding) lbs.first();
@@ -1860,6 +1861,7 @@ static class LetExpr implements Expr{
 		else
 			body.emit(context, fn, gen);
 		Label end = gen.mark();
+		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
 		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.rest())
 			{
 			BindingInit bi = (BindingInit) bis.first();
