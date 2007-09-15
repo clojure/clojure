@@ -20,6 +20,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.util.List;
 
 public class Compiler implements Opcodes{
 
@@ -362,6 +363,101 @@ static interface AssignableExpr{
 }
 
 static abstract class HostExpr implements Expr{
+	final static Type CHAR_TYPE = Type.getType(Character.class);
+	final static Type NUMBER_TYPE = Type.getType(Number.class);
+	final static Method charValueMethod = Method.getMethod("char charValue()");
+	final static Method intValueMethod = Method.getMethod("int intValue()");
+	final static Method longValueMethod = Method.getMethod("long longValue()");
+	final static Method floatValueMethod = Method.getMethod("float floatValue()");
+	final static Method doubleValueMethod = Method.getMethod("double doubleValue()");
+	final static Method byteValueMethod = Method.getMethod("byte byteValue()");
+	final static Method shortValueMethod = Method.getMethod("short shortValue()");
+
+	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
+		if(returnType.isPrimitive())
+			{
+			if(returnType == boolean.class)
+				{
+				Label falseLabel = gen.newLabel();
+				Label endLabel = gen.newLabel();
+				gen.ifNull(falseLabel);
+				gen.push(1);
+				gen.goTo(endLabel);
+				gen.mark(falseLabel);
+				gen.push(0);
+				gen.mark(endLabel);
+				}
+			else if(returnType == char.class)
+				{
+				gen.checkCast(CHAR_TYPE);
+				gen.invokeStatic(CHAR_TYPE, charValueMethod);
+				}
+			else
+				{
+				Method m = intValueMethod;
+				gen.checkCast(NUMBER_TYPE);
+				if(returnType == int.class)
+					m = intValueMethod;
+				else if(returnType == float.class)
+					m = floatValueMethod;
+				else if(returnType == double.class)
+					m = doubleValueMethod;
+				else if(returnType == long.class)
+					m = longValueMethod;
+				else if(returnType == byte.class)
+					m = byteValueMethod;
+				else if(returnType == short.class)
+					m = shortValueMethod;
+				gen.invokeStatic(NUMBER_TYPE, m);
+				}
+			}
+
+	}
+
+	public static void emitUnboxArg(FnExpr fn, GeneratorAdapter gen, Class paramType){
+		if(paramType.isPrimitive())
+			{
+			if(paramType == boolean.class)
+				{
+				Label falseLabel = gen.newLabel();
+				Label endLabel = gen.newLabel();
+				gen.ifNull(falseLabel);
+				gen.push(1);
+				gen.goTo(endLabel);
+				gen.mark(falseLabel);
+				gen.push(0);
+				gen.mark(endLabel);
+				}
+			else if(paramType == char.class)
+				{
+				gen.checkCast(CHAR_TYPE);
+				gen.invokeStatic(CHAR_TYPE, charValueMethod);
+				}
+			else
+				{
+				Method m = intValueMethod;
+				gen.checkCast(NUMBER_TYPE);
+				if(paramType == int.class)
+					m = intValueMethod;
+				else if(paramType == float.class)
+					m = floatValueMethod;
+				else if(paramType == double.class)
+					m = doubleValueMethod;
+				else if(paramType == long.class)
+					m = longValueMethod;
+				else if(paramType == byte.class)
+					m = byteValueMethod;
+				else if(paramType == short.class)
+					m = shortValueMethod;
+				gen.invokeStatic(NUMBER_TYPE, m);
+				}
+			}
+		else
+			{
+			gen.checkCast(Type.getType(paramType));
+			}
+	}
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
@@ -518,6 +614,15 @@ static abstract class MethodExpr extends HostExpr{
 			gen.arrayStore(OBJECT_TYPE);
 			}
 	}
+
+	public static void emitTypedArgs(FnExpr fn, GeneratorAdapter gen, Class[] parameterTypes, IPersistentVector args){
+		for(int i = 0; i < parameterTypes.length; i++)
+			{
+			Expr e = (Expr) args.nth(i);
+			e.emit(C.EXPRESSION, fn, gen);
+			HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
+			}
+	}
 }
 
 static class InstanceMethodExpr extends MethodExpr{
@@ -561,15 +666,20 @@ static class StaticMethodExpr extends MethodExpr{
 	final String methodName;
 	final IPersistentVector args;
 	final int line;
+	final java.lang.reflect.Method method;
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
 
 
-	public StaticMethodExpr(int line, String className, String methodName, IPersistentVector args){
+	public StaticMethodExpr(int line, String className, String methodName, IPersistentVector args)
+			throws ClassNotFoundException{
 		this.className = className;
 		this.methodName = methodName;
 		this.args = args;
 		this.line = line;
+
+		List methods = Reflector.getMethods(Class.forName(className), args.count(), methodName, true);
+		method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
 	}
 
 	public Object eval() throws Exception{
@@ -581,10 +691,21 @@ static class StaticMethodExpr extends MethodExpr{
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
-		gen.push(className);
-		gen.push(methodName);
-		emitArgsAsArray(args, fn, gen);
-		gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
+		if(method != null)
+			{
+			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			Type type = Type.getObjectType(className.replace('.', '/'));
+			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
+			gen.invokeStatic(type, m);
+			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			}
+		else
+			{
+			gen.push(className);
+			gen.push(methodName);
+			emitArgsAsArray(args, fn, gen);
+			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
+			}
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
