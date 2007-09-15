@@ -224,3 +224,13 @@
 (defmacro ..
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
+
+;;polyfns
+(defmacro defpolyfn [name dispatch-fn]
+  `(def ~name (new clojure.lang.PolyFn ~dispatch-fn)))
+
+(defmacro defmethod [polyfn dispatch-val & fn-tail]
+  (let [pvar (gensym)]
+    `(let [~pvar (the-var ~polyfn)]
+       (locking ~pvar
+                (. ~pvar (bindRoot (.. ~pvar (getRoot) (assoc ~dispatch-val (fn ~@fn-tail)))))))))
