@@ -75,7 +75,7 @@ static IPersistentMap specials = RT.map(
 		MONITOR_EXIT, new MonitorExitExpr.Parser(),
 		INSTANCE, new InstanceExpr.Parser(),
 		THISFN, null,
-		CLASS, null,
+		CLASS, new ClassExpr.Parser(),
 //		UNQUOTE, null,
 //		UNQUOTE_SPLICING, null,
 //		SYNTAX_QUOTE, null,
@@ -853,6 +853,41 @@ static class ThrowExpr implements Expr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) throws Exception{
 			return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
+		}
+	}
+}
+
+static class ClassExpr implements Expr{
+	final String className;
+	final static Method forNameMethod = Method.getMethod("Class forName(String)");
+
+
+	public ClassExpr(String className){
+		this.className = className;
+	}
+
+	public Object eval() throws Exception{
+		return Class.forName(className);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			gen.push(className);
+			gen.invokeStatic(CLASS_TYPE, forNameMethod);
+			}
+	}
+
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(class Classname)
+			if(form.count() != 2)
+				throw new Exception("wrong number of arguments, expecting: (class Classname)");
+			String className = HostExpr.maybeClassName(RT.second(form));
+			if(className == null)
+				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
+			return new ClassExpr(className);
 		}
 	}
 }
