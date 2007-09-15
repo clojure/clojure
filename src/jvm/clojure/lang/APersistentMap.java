@@ -23,8 +23,13 @@ protected APersistentMap(){
 }
 
 public IPersistentCollection cons(Object o){
-	IMapEntry e = (IMapEntry) o;
-	return assoc(e.key(), e.val());
+	IPersistentMap ret = this;
+	for(ISeq es = RT.seq(o); es != null; es = es.rest())
+		{
+		IMapEntry e = (IMapEntry) es.first();
+		ret = ret.assoc(e.key(), e.val());
+		}
+	return ret;
 }
 
 public boolean equals(Object obj){
