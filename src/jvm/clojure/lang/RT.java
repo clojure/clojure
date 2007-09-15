@@ -211,7 +211,7 @@ public static int count(Object o){
 	return ((IPersistentCollection) o).count();
 }
 
-static public IPersistentCollection cons(Object x, IPersistentCollection y){
+static public IPersistentCollection conj(Object x, IPersistentCollection y){
 	if(y == null)
 		return new PersistentList(x);
 	return y.cons(x);

@@ -15,212 +15,178 @@ package clojure.lang;
 import java.math.BigInteger;
 
 public class RatioNum extends RationalNum{
-public boolean equals(Object arg0)
-	{
+public boolean equals(Object arg0){
 	return arg0 != null
 	       && arg0 instanceof RatioNum
 	       && ((RatioNum) arg0).numerator.equals(numerator)
 	       && ((RatioNum) arg0).denominator.equals(denominator);
-	}
+}
 
-public int hashCode()
-	{
+public int hashCode(){
 	return numerator.hashCode() ^ denominator.hashCode();
-	}
+}
 
-public String toString()
-	{
+public String toString(){
 	return numerator.toString() + "/" + denominator.toString();
-	}
+}
 
 public IntegerNum numerator;
 public IntegerNum denominator;
 
-public RatioNum(IntegerNum n, IntegerNum d)
-	{
+public RatioNum(IntegerNum n, IntegerNum d){
 	this.numerator = n;
 	this.denominator = d;
-	}
+}
 
-public double doubleValue()
-	{
+public double doubleValue(){
 	return numerator.doubleValue() / denominator.doubleValue();
-	}
+}
 
-public float floatValue()
-	{
+public float floatValue(){
 	return (float) doubleValue();
-	}
+}
 
-public int intValue()
-	{
+public int intValue(){
 	return (int) doubleValue();
-	}
+}
 
-public long longValue()
-	{
+public long longValue(){
 	return (long) doubleValue();
-	}
+}
 
-public boolean equiv(Num rhs)
-	{
+public boolean equiv(Num rhs){
 	return rhs.equivTo(this);
-	}
+}
 
-public boolean equivTo(BigInteger x)
-	{
+public boolean equivTo(BigInteger x){
 	return false;
-	}
+}
 
-public boolean equivTo(int x)
-	{
+public boolean equivTo(int x){
 	return false;
-	}
+}
 
-public boolean equivTo(RatioNum x)
-	{
+public boolean equivTo(RatioNum x){
 	return numerator.equiv(x.numerator) && denominator.equiv(x.denominator);
-	}
+}
 
-public boolean lt(Num rhs)
-	{
+public boolean lt(Num rhs){
 	return rhs.gt(this);
-	}
+}
 
-public boolean gt(BigInteger x)
-	{
+public boolean gt(BigInteger x){
 	return denominator.multiply(x).lt(numerator);
-	}
+}
 
-public boolean gt(int x)
-	{
+public boolean gt(int x){
 	return denominator.multiply(x).lt(numerator);
-	}
+}
 
-public boolean gt(RatioNum x)
-	{
+public boolean gt(RatioNum x){
 	return x.numerator.multiplyBy(denominator).lt(numerator.multiplyBy(x.denominator));
-	}
+}
 
-public Num add(Num rhs)
-	{
+public Num add(Num rhs){
 	return rhs.addTo(this);
-	}
+}
 
-public Num addTo(BigInteger x)
-	{
+public Num addTo(BigInteger x){
 	return Num.divide(numerator.add(denominator.multiply(x)), denominator);
-	}
+}
 
-public Num addTo(int x)
-	{
+public Num addTo(int x){
 	return Num.divide(numerator.add(denominator.multiply(x)), denominator);
-	}
+}
 
-public Num addTo(RatioNum x)
-	{
+public Num addTo(RatioNum x){
 	return Num.divide(numerator.multiplyBy(x.denominator)
 			.add(x.numerator.multiplyBy(denominator))
 			, denominator.multiplyBy(x.denominator));
-	}
+}
 
-public Num subtractFrom(Num x)
-	{
+public Num subtractFrom(Num x){
 	return x.add(this.multiply(-1));
-	}
+}
 
-public Num multiplyBy(Num rhs)
-	{
+public Num multiplyBy(Num rhs){
 	return rhs.multiply(this);
-	}
+}
 
-public Num multiply(BigInteger x)
-	{
+public Num multiply(BigInteger x){
 	return Num.divide(numerator.multiply(x), denominator);
-	}
+}
 
-public Num multiply(int x)
-	{
+public Num multiply(int x){
 	return Num.divide(numerator.multiply(x), denominator);
-	}
+}
 
-public Num multiply(RatioNum x)
-	{
+public Num multiply(RatioNum x){
 	return Num.divide(numerator.multiplyBy(x.numerator)
 			, denominator.multiplyBy(x.denominator));
-	}
+}
 
-public Num divideBy(Num rhs)
-	{
+public Num divideBy(Num rhs){
 	return rhs.divide(this);
-	}
+}
 
-public Num divide(BigInteger n)
-	{
+public Num divide(BigInteger n){
 	return Num.divide(denominator.multiply(n), numerator);
-	}
+}
 
-public Num divide(int n)
-	{
+public Num divide(int n){
 	return Num.divide(denominator.multiply(n), numerator);
-	}
+}
 
-public Num divide(RatioNum n)
-	{
+public Num divide(RatioNum n){
 	return Num.divide(denominator.multiplyBy(n.numerator)
 			, numerator.multiplyBy(n.denominator));
-	}
+}
 
 
-public Object truncateDivide( Num num)
-	{
-	return num.truncateBy( this);
-	}
+public Object truncateDivide(Num num){
+	return num.truncateBy(this);
+}
 
-public Object truncateBy( int div)
-	{
-	Num q = (Num) Num.truncate( numerator, denominator.multiply(div));
-	return RT.setValues( q, q.multiply(div).subtractFrom(this));
-	}
+public Object truncateBy(int div){
+	Num q = (Num) Num.truncate(numerator, denominator.multiply(div));
+	return RT.setValues(q, q.multiply(div).subtractFrom(this));
+}
 
-public Object truncateBy( BigInteger div)
-	{
-	Num q = (Num) Num.truncate( numerator, denominator.multiply(div));
-	return RT.setValues( q, q.multiply(div).subtractFrom(this));
-	}
+public Object truncateBy(BigInteger div){
+	Num q = (Num) Num.truncate(numerator, denominator.multiply(div));
+	return RT.setValues(q, q.multiply(div).subtractFrom(this));
+}
 
-public Object truncateBy( RatioNum div)
-	{
-	Num q = (Num) Num.truncate( numerator.multiplyBy(div.denominator),
+public Object truncateBy(RatioNum div){
+	Num q = (Num) Num.truncate(numerator.multiplyBy(div.denominator),
 	                           denominator.multiplyBy(div.numerator));
-	return RT.setValues( q, q.multiplyBy(div).subtractFrom(this));
-	}
+	return RT.setValues(q, q.multiplyBy(div).subtractFrom(this));
+}
 
 
-public Num negate()
-	{
+public Num negate(){
 	return Num.divide(numerator.negate(), denominator);
-	}
+}
 
-public boolean minusp()
-	{
+public boolean minusp(){
 	return numerator.minusp();
-	}
+}
 
-public boolean plusp()
-	{
+public boolean plusp(){
 	return numerator.plusp();
-	}
+}
 
-public Num oneMinus()
-	{
+public boolean zerop(){
+	return numerator.zerop();
+}
+
+public Num oneMinus(){
 	return addTo(-1);
-	}
+}
 
-public Num onePlus()
-	{
+public Num onePlus(){
 	return addTo(1);
-	}
+}
 
 }
 

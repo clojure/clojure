@@ -162,19 +162,19 @@
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn inc [x]
-      (. x (onePlus)))
+      (. Num (inc x)))
 
 (defn dec [x]
-      (. x (oneMinus)))
+      (. Num (dec x)))
 
 (defn pos? [x]
-      (. x (plusp)))
+      (. Num (posPred x)))
 
 (defn neg? [x]
-      (. x (minusp)))
+      (. Num (negPred x)))
 
 (defn zero? [x]
-      (== x 0))
+      (. Num (zeroPred x)))
 
 (defn complement [f]
   (fn [& args]

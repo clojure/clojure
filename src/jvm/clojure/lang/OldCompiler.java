@@ -1193,9 +1193,9 @@ private static Expr analyzeFn(C context, ISeq form) throws Exception{
 	IPersistentCollection methods = null;
 	for(int i = 0; i < methodArray.length; i++)
 		if(methodArray[i] != null)
-			methods = RT.cons(methodArray[i], methods);
+			methods = RT.conj(methodArray[i], methods);
 	if(variadicMethod != null)
-		methods = RT.cons(variadicMethod, methods);
+		methods = RT.conj(variadicMethod, methods);
 
 	fn.methods = methods;
 	fn.variadicMethod = variadicMethod;
@@ -1581,7 +1581,7 @@ private static void registerVar(Var var) throws Exception{
 }
 
 private static void registerFn(FnExpr fn) throws Exception{
-	FNS.set(RT.cons(fn, (IPersistentCollection) FNS.get()));
+	FNS.set(RT.conj(fn, (IPersistentCollection) FNS.get()));
 }
 
 static void closeOver(LocalBinding b, FnMethod method){

@@ -366,12 +366,17 @@ static abstract class HostExpr implements Expr{
 	final static Type CHAR_TYPE = Type.getType(Character.class);
 	final static Type NUMBER_TYPE = Type.getType(Number.class);
 	final static Method charValueMethod = Method.getMethod("char charValue()");
+	final static Method valueOfMethod = Method.getMethod("Character valueOf(char c)");
 	final static Method intValueMethod = Method.getMethod("int intValue()");
 	final static Method longValueMethod = Method.getMethod("long longValue()");
 	final static Method floatValueMethod = Method.getMethod("float floatValue()");
 	final static Method doubleValueMethod = Method.getMethod("double doubleValue()");
 	final static Method byteValueMethod = Method.getMethod("byte byteValue()");
 	final static Method shortValueMethod = Method.getMethod("short shortValue()");
+
+	final static Method fromIntMethod = Method.getMethod("clojure.lang.Num from(int)");
+	final static Method fromLongMethod = Method.getMethod("clojure.lang.Num from(long)");
+	final static Method fromDoubleMethod = Method.getMethod("clojure.lang.Num from(double)");
 
 	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
 		if(returnType.isPrimitive())
@@ -380,38 +385,38 @@ static abstract class HostExpr implements Expr{
 				{
 				Label falseLabel = gen.newLabel();
 				Label endLabel = gen.newLabel();
-				gen.ifNull(falseLabel);
-				gen.push(1);
+				gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
+				gen.getStatic(RT_TYPE, "T", SYMBOL_TYPE);
 				gen.goTo(endLabel);
 				gen.mark(falseLabel);
-				gen.push(0);
+				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
 				gen.mark(endLabel);
 				}
 			else if(returnType == char.class)
 				{
-				gen.checkCast(CHAR_TYPE);
-				gen.invokeStatic(CHAR_TYPE, charValueMethod);
+				gen.invokeStatic(CHAR_TYPE, valueOfMethod);
 				}
 			else
 				{
-				Method m = intValueMethod;
-				gen.checkCast(NUMBER_TYPE);
+				Method m = fromIntMethod;
 				if(returnType == int.class)
-					m = intValueMethod;
+					m = fromIntMethod;
 				else if(returnType == float.class)
-					m = floatValueMethod;
+					{
+					gen.visitInsn(F2D);
+					m = fromDoubleMethod;
+					}
 				else if(returnType == double.class)
-					m = doubleValueMethod;
+					m = fromDoubleMethod;
 				else if(returnType == long.class)
-					m = longValueMethod;
+					m = fromLongMethod;
 				else if(returnType == byte.class)
-					m = byteValueMethod;
+					m = fromIntMethod;
 				else if(returnType == short.class)
-					m = shortValueMethod;
-				gen.invokeStatic(NUMBER_TYPE, m);
+					m = fromIntMethod;
+				gen.invokeStatic(NUM_TYPE, m);
 				}
 			}
-
 	}
 
 	public static void emitUnboxArg(FnExpr fn, GeneratorAdapter gen, Class paramType){
@@ -1568,9 +1573,9 @@ static class FnExpr implements Expr{
 			IPersistentCollection methods = null;
 			for(int i = 0; i < methodArray.length; i++)
 				if(methodArray[i] != null)
-					methods = RT.cons(methodArray[i], methods);
+					methods = RT.conj(methodArray[i], methods);
 			if(variadicMethod != null)
-				methods = RT.cons(variadicMethod, methods);
+				methods = RT.conj(variadicMethod, methods);
 
 			fn.methods = methods;
 			fn.variadicMethod = variadicMethod;
