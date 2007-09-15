@@ -77,10 +77,10 @@
       (spread args))
 
 (defmacro delay [& body]
-  (list '. 'clojure.lang.Delay (list 'new (list* 'fn [] body))))
+  (list 'new 'clojure.lang.Delay (list* 'fn [] body)))
 
 (defmacro lazy-cons [x & body]
-  (list '. 'clojure.lang.FnSeq (list 'new x (list* 'delay body))))
+  (list 'new 'clojure.lang.FnSeq x (list* 'delay body)))
 
 (defn concat
       ([] nil)

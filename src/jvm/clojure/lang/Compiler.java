@@ -684,6 +684,8 @@ static class StaticMethodExpr extends MethodExpr{
 		this.line = line;
 
 		List methods = Reflector.getMethods(Class.forName(className), args.count(), methodName, true);
+		if(methods.isEmpty())
+			throw new IllegalArgumentException("No matching method found");
 		method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
 	}
 
