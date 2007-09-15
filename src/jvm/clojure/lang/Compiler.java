@@ -21,6 +21,8 @@ import org.objectweb.asm.util.CheckClassAdapter;
 import java.io.*;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.ArrayList;
+import java.lang.reflect.Constructor;
 
 public class Compiler implements Opcodes{
 
@@ -1037,14 +1039,29 @@ static class ClassExpr implements Expr{
 static class NewExpr implements Expr{
 	final String className;
 	final IPersistentVector args;
+	final Constructor ctor;
+	final Class c;
 	final static Method invokeConstructorMethod =
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 
 
-	public NewExpr(String className, IPersistentVector args){
+	public NewExpr(String className, IPersistentVector args) throws ClassNotFoundException{
 		this.args = args;
 		this.className = className;
+		this.c = Class.forName(className);
+		Constructor[] allctors = c.getConstructors();
+		ArrayList ctors = new ArrayList();
+		for(int i = 0; i < allctors.length; i++)
+			{
+			Constructor ctor = allctors[i];
+			if(ctor.getParameterTypes().length == args.count())
+				ctors.add(ctor);
+			}
+		if(ctors.isEmpty())
+			throw new IllegalArgumentException("No matching ctor found");
+
+		this.ctor = (ctors.size() == 1) ? (Constructor) ctors.get(0) : null;
 	}
 
 	public Object eval() throws Exception{
@@ -1055,10 +1072,21 @@ static class NewExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		gen.push(className);
-		gen.invokeStatic(CLASS_TYPE, forNameMethod);
-		MethodExpr.emitArgsAsArray(args, fn, gen);
-		gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
+		if(this.ctor != null)
+			{
+			Type type = Type.getType(c);
+			gen.newInstance(type);
+			gen.dup();
+			MethodExpr.emitTypedArgs(fn, gen, ctor.getParameterTypes(), args);
+			gen.invokeConstructor(type, new Method("<init>", Type.getConstructorDescriptor(ctor)));
+			}
+		else
+			{
+			gen.push(className);
+			gen.invokeStatic(CLASS_TYPE, forNameMethod);
+			MethodExpr.emitArgsAsArray(args, fn, gen);
+			gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
+			}
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
