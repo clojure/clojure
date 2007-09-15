@@ -1,5 +1,6 @@
 (def list (fn [& args] args))
 (def cons (fn [x seq] (. RT (cons x seq))))
+(def conj (fn [coll x] (. RT (conj coll x))))
 
 (def defn (fn [name & fdecl]
               (list 'def name (cons 'fn fdecl))))

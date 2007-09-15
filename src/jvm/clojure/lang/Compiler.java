@@ -1573,9 +1573,9 @@ static class FnExpr implements Expr{
 			IPersistentCollection methods = null;
 			for(int i = 0; i < methodArray.length; i++)
 				if(methodArray[i] != null)
-					methods = RT.conj(methodArray[i], methods);
+					methods = RT.conj(methods, methodArray[i]);
 			if(variadicMethod != null)
-				methods = RT.conj(variadicMethod, methods);
+				methods = RT.conj(methods, variadicMethod);
 
 			fn.methods = methods;
 			fn.variadicMethod = variadicMethod;

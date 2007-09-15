@@ -211,10 +211,10 @@ public static int count(Object o){
 	return ((IPersistentCollection) o).count();
 }
 
-static public IPersistentCollection conj(Object x, IPersistentCollection y){
-	if(y == null)
+static public IPersistentCollection conj(IPersistentCollection coll, Object x){
+	if(coll == null)
 		return new PersistentList(x);
-	return y.cons(x);
+	return coll.cons(x);
 }
 
 static public ISeq cons(Object x, ISeq y){
