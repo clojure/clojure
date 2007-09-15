@@ -15,13 +15,13 @@ import java.io.Reader;
 import java.io.LineNumberReader;
 
 
-public class LineNumberingPushbackReader extends PushbackReader {
+public class LineNumberingPushbackReader extends PushbackReader{
 
 public LineNumberingPushbackReader(Reader r){
-    super(new LineNumberReader(r));
+	super(new LineNumberReader(r));
 }
 
 public int getLineNumber(){
-    return ((LineNumberReader)in).getLineNumber();
+	return ((LineNumberReader) in).getLineNumber() + 1;
 }
 }

@@ -370,6 +370,7 @@ static abstract class HostExpr implements Expr{
 				throw new IllegalArgumentException("Malformed member expression, expecting (. target member)");
 			//determine static or instance
 			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
+			int line = (Integer) LINE.get();
 			String className = maybeClassName(RT.second(form));
 			//at this point className will be non-null if static
 			Expr instance = null;
@@ -380,9 +381,9 @@ static abstract class HostExpr implements Expr{
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				if(className != null)
-					return new StaticFieldExpr(className, sym.name);
+					return new StaticFieldExpr(line, className, sym.name);
 				else
-					return new InstanceFieldExpr(instance, sym.name);
+					return new InstanceFieldExpr(line, instance, sym.name);
 				}
 			else if(RT.third(form) instanceof ISeq && RT.first(RT.third(form)) instanceof Symbol)
 				{
@@ -391,9 +392,9 @@ static abstract class HostExpr implements Expr{
 				for(ISeq s = RT.rest(RT.third(form)); s != null; s = s.rest())
 					args = args.cons(analyze(C.EXPRESSION, s.first()));
 				if(className != null)
-					return new StaticMethodExpr(className, sym.name, args);
+					return new StaticMethodExpr(line, className, sym.name, args);
 				else
-					return new InstanceMethodExpr(instance, sym.name, args);
+					return new InstanceMethodExpr(line, instance, sym.name, args);
 				}
 			else
 				throw new IllegalArgumentException("Malformed member expression");
@@ -426,13 +427,15 @@ static abstract class FieldExpr extends HostExpr{
 static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	final Expr target;
 	final String fieldName;
+	final int line;
 	final static Method getInstanceFieldMethod = Method.getMethod("Object getInstanceField(Object,String)");
 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
 
-	public InstanceFieldExpr(Expr target, String fieldName){
+	public InstanceFieldExpr(int line, Expr target, String fieldName){
 		this.target = target;
 		this.fieldName = fieldName;
+		this.line = line;
 	}
 
 	public Object eval() throws Exception{
@@ -442,6 +445,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
 			{
+			gen.visitLineNumber(line, gen.mark());
 			target.emit(C.EXPRESSION, fn, gen);
 			gen.push(fieldName);
 			gen.invokeStatic(REFLECTOR_TYPE, getInstanceFieldMethod);
@@ -468,11 +472,12 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	final String fieldName;
 	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
 	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
+	final int line;
 
-
-	public StaticFieldExpr(String className, String fieldName){
+	public StaticFieldExpr(int line, String className, String fieldName){
 		this.className = className;
 		this.fieldName = fieldName;
+		this.line = line;
 	}
 
 	public Object eval() throws Exception{
@@ -480,6 +485,7 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
 		gen.push(className);
 		gen.push(fieldName);
 		gen.invokeStatic(REFLECTOR_TYPE, getStaticFieldMethod);
@@ -518,11 +524,13 @@ static class InstanceMethodExpr extends MethodExpr{
 	final Expr target;
 	final String methodName;
 	final IPersistentVector args;
+	final int line;
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(Expr target, String methodName, IPersistentVector args){
+	public InstanceMethodExpr(int line, Expr target, String methodName, IPersistentVector args){
+		this.line = line;
 		this.args = args;
 		this.methodName = methodName;
 		this.target = target;
@@ -537,6 +545,7 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
 		target.emit(C.EXPRESSION, fn, gen);
 		gen.push(methodName);
 		emitArgsAsArray(args, fn, gen);
@@ -551,14 +560,16 @@ static class StaticMethodExpr extends MethodExpr{
 	final String className;
 	final String methodName;
 	final IPersistentVector args;
+	final int line;
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
 
 
-	public StaticMethodExpr(String className, String methodName, IPersistentVector args){
+	public StaticMethodExpr(int line, String className, String methodName, IPersistentVector args){
 		this.className = className;
 		this.methodName = methodName;
 		this.args = args;
+		this.line = line;
 	}
 
 	public Object eval() throws Exception{
@@ -569,6 +580,7 @@ static class StaticMethodExpr extends MethodExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
 		gen.push(className);
 		gen.push(methodName);
 		emitArgsAsArray(args, fn, gen);
@@ -1374,6 +1386,7 @@ static class FnExpr implements Expr{
 	IPersistentMap keywords = PersistentHashMap.EMPTY;
 	IPersistentMap vars = PersistentHashMap.EMPTY;
 	Class compiledClass;
+	int line;
 
 	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
@@ -1405,7 +1418,7 @@ static class FnExpr implements Expr{
 			//turn former into latter
 			if(RT.second(form) instanceof IPersistentVector)
 				form = RT.list(FN, RT.rest(form));
-
+			fn.line = (Integer) LINE.get();
 			FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
 			FnMethod variadicMethod = null;
 			for(ISeq s = RT.rest(form); s != null; s = RT.rest(s))
@@ -1478,6 +1491,7 @@ static class FnExpr implements Expr{
 		              "1#1,1000:1\n" +
 		              "*E";
 		if(source != null && SOURCE_PATH.get() != null)
+		//cv.visitSource(source, null);
 			cv.visitSource(source, smap);
 		//static fields for keywords
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
@@ -1500,6 +1514,7 @@ static class FnExpr implements Expr{
 		                                                  null,
 		                                                  cv);
 		clinitgen.visitCode();
+		clinitgen.visitLineNumber(line, clinitgen.mark());
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 			{
 			Keyword k = (Keyword) s.first();
@@ -1534,6 +1549,7 @@ static class FnExpr implements Expr{
 		                                                null,
 		                                                cv);
 		ctorgen.visitCode();
+		ctorgen.visitLineNumber(line, ctorgen.mark());
 		ctorgen.loadThis();
 		if(isVariadic()) //RestFn ctor takes reqArity arg
 			{
@@ -1624,6 +1640,7 @@ static class FnMethod{
 	Expr body = null;
 	FnExpr fn;
 	PersistentVector argLocals;
+	int line;
 
 	public FnMethod(FnExpr fn, FnMethod parent){
 		this.parent = parent;
@@ -1645,6 +1662,7 @@ static class FnMethod{
 		try
 			{
 			FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
+			method.line = (Integer) LINE.get();
 			//register as the current method and set up a new env frame
 			Var.pushThreadBindings(
 					RT.map(
@@ -1714,6 +1732,7 @@ static class FnMethod{
 		                                            cv);
 		gen.visitCode();
 		Label loopLabel = gen.mark();
+		gen.visitLineNumber(line, loopLabel);
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
