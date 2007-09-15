@@ -27,6 +27,7 @@ final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "cu
                                                     Module.findOrCreateModule("clojure/user"));
 
 final static Symbol LOAD_FILE = Symbol.create("clojure", "load-file");
+final static Symbol EQL_REF = Symbol.create("clojure", "eql-ref?");
 
 //string
 final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "*current-namespace*"), "clojure");
@@ -39,7 +40,15 @@ final static Var REFERS =
 			                                         public Object invoke(Object arg1) throws Exception{
 				                                         return Compiler.loadFile((String) arg1);
 			                                         }
-		                                         })));
+		                                         }),
+				           EQL_REF, Var.intern(EQL_REF,
+		                                       new AFn(){
+			                                       public Object invoke(Object arg1, Object arg2)
+					                                       throws Exception{
+				                                       return arg1 == arg2 ? RT.T : null;
+			                                       }
+		                                       })
+		           ));
 //simple-symbol->fully-qualified-class-name-string
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"),
                                       map(Symbol.create("RT"), "clojure.lang.RT",

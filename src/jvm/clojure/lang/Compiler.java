@@ -39,7 +39,6 @@ static final Symbol TRY_FINALLY = Symbol.create("try-finally");
 static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
-static final Symbol EQL_REF = Symbol.create("eql-ref?");
 static final Symbol INSTANCE = Symbol.create("instance?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
@@ -74,7 +73,6 @@ static IPersistentMap specials = RT.map(
 		THROW, new ThrowExpr.Parser(),
 		MONITOR_ENTER, new MonitorEnterExpr.Parser(),
 		MONITOR_EXIT, new MonitorExitExpr.Parser(),
-		EQL_REF, new EqlRefExpr.Parser(),
 		INSTANCE, new InstanceExpr.Parser(),
 		THISFN, null,
 		CLASS, null,
@@ -133,6 +131,9 @@ static public Var METHOD = Var.create(null);
 
 //String
 static public Var SOURCE = Var.create(null);
+
+//String
+static public Var SOURCE_PATH = Var.create(null);
 
 //Integer
 static public Var LINE = Var.create(0);
@@ -930,47 +931,6 @@ static class MetaExpr implements Expr{
 	}
 }
 
-static class EqlRefExpr implements Expr{
-	final Expr expr1;
-	final Expr expr2;
-
-
-	public EqlRefExpr(Expr expr1, Expr expr2){
-		this.expr1 = expr1;
-		this.expr2 = expr2;
-	}
-
-	public Object eval() throws Exception{
-		return expr1.eval() == expr2.eval() ? RT.T : null;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		expr1.emit(C.EXPRESSION, fn, gen);
-		expr2.emit(C.EXPRESSION, fn, gen);
-		Label eqLabel = gen.newLabel();
-		Label end = gen.newLabel();
-		gen.visitJumpInsn(Opcodes.IF_ACMPEQ, eqLabel);
-		NIL_EXPR.emit(C.EXPRESSION, fn, gen);
-		gen.goTo(end);
-		gen.mark(eqLabel);
-		gen.getStatic(RT_TYPE, "T", SYMBOL_TYPE);
-		gen.mark(end);
-		if(context == C.STATEMENT)
-			gen.pop();
-	}
-
-	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
-			ISeq form = (ISeq) frm;
-			//(eql-ref? x y)
-			if(form.count() != 3)
-				throw new Exception("wrong number of arguments, expecting: (eql-ref? x y)");
-
-			return new EqlRefExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
-		}
-	}
-}
-
 static class IfExpr implements Expr{
 	final Expr testExpr;
 	final Expr thenExpr;
@@ -1305,11 +1265,23 @@ static class InvokeExpr implements Expr{
 	}
 }
 
+static class SourceDebugExtensionAttribute extends Attribute{
+	public SourceDebugExtensionAttribute(){
+		super("SourceDebugExtension");
+	}
+
+	void writeSMAP(ClassWriter cw, String smap){
+		ByteVector bv = write(cw, null, -1, -1, -1);
+		bv.putUTF8(smap);
+	}
+}
+
 static class FnExpr implements Expr{
 	IPersistentCollection methods;
 	//if there is a variadic overload (there can only be one) it is stored here
 	FnMethod variadicMethod = null;
 	String name;
+	String simpleName;
 	String internalName;
 	Type fntype;
 	//localbinding->itself
@@ -1333,9 +1305,10 @@ static class FnExpr implements Expr{
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
 		                  : (munge(currentNS()) + ".");
-		fn.name = basename + (name != null ?
-		                      munge(name)
-		                      : ("fn__" + RT.nextID()));
+		fn.simpleName = (name != null ?
+		                 munge(name)
+		                 : ("fn__" + RT.nextID()));
+		fn.name = basename + fn.simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.fntype = Type.getObjectType(fn.internalName);
 		try
@@ -1410,9 +1383,18 @@ static class FnExpr implements Expr{
 //		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
-		if(source != null)
-			cv.visitSource(source, null);
-
+		String smap = "SMAP\n" +
+		              simpleName + ".java\n" +
+		              "Clojure\n" +
+		              "*S Clojure\n" +
+		              "*F\n" +
+		              "+ 1 " + source + "\n" +
+		              (String) SOURCE_PATH.get() + "\n" +
+		              "*L\n" +
+		              "1#1,1000:1\n" +
+		              "*E";
+		if(source != null && SOURCE_PATH.get() != null)
+			cv.visitSource(source, smap);
 		//static fields for keywords
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 			{
@@ -2107,7 +2089,8 @@ private static Symbol tagOf(Symbol sym){
 public static Object loadFile(String file) throws Exception{
 	try
 		{
-		Var.pushThreadBindings(RT.map(SOURCE, (new File(file)).getName()));
+		Var.pushThreadBindings(RT.map(SOURCE_PATH, file,
+		                              SOURCE, (new File(file)).getName()));
 		return load(new FileInputStream(file));
 		}
 	finally
