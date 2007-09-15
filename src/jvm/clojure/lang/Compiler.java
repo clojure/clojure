@@ -20,7 +20,6 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
 
 public class Compiler implements Opcodes{
 
@@ -43,6 +42,7 @@ static final Symbol INSTANCE = Symbol.create("instance?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol CLASS = Symbol.create("class");
+static final Symbol NEW = Symbol.create("new");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
 //static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
@@ -76,6 +76,7 @@ static IPersistentMap specials = RT.map(
 		INSTANCE, new InstanceExpr.Parser(),
 		THISFN, null,
 		CLASS, new ClassExpr.Parser(),
+		NEW, new NewExpr.Parser(),
 //		UNQUOTE, null,
 //		UNQUOTE_SPLICING, null,
 //		SYNTAX_QUOTE, null,
@@ -545,6 +546,7 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 }
 
+
 static class StaticMethodExpr extends MethodExpr{
 	final String className;
 	final String methodName;
@@ -890,6 +892,53 @@ static class ClassExpr implements Expr{
 			return new ClassExpr(className);
 		}
 	}
+}
+
+static class NewExpr implements Expr{
+	final String className;
+	final IPersistentVector args;
+	final static Method invokeConstructorMethod =
+			Method.getMethod("Object invokeConstructor(Class,Object[])");
+	final static Method forNameMethod = Method.getMethod("Class forName(String)");
+
+
+	public NewExpr(String className, IPersistentVector args){
+		this.args = args;
+		this.className = className;
+	}
+
+	public Object eval() throws Exception{
+		Object[] argvals = new Object[args.count()];
+		for(int i = 0; i < args.count(); i++)
+			argvals[i] = ((Expr) args.nth(i)).eval();
+		return Reflector.invokeConstructor(Class.forName(className), argvals);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.push(className);
+		gen.invokeStatic(CLASS_TYPE, forNameMethod);
+		MethodExpr.emitArgsAsArray(args, fn, gen);
+		gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(new Classname args...)
+			if(form.count() < 2)
+				throw new Exception("wrong number of arguments, expecting: (new Classname args...)");
+			String className = HostExpr.maybeClassName(RT.second(form));
+			if(className == null)
+				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
+			PersistentVector args = PersistentVector.EMPTY;
+			for(ISeq s = RT.rest(RT.rest(form)); s != null; s = s.rest())
+				args = args.cons(analyze(C.EXPRESSION, s.first()));
+			return new NewExpr(className, args);
+		}
+	}
+
 }
 
 static class InstanceExpr implements Expr{
