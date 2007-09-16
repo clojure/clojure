@@ -17,10 +17,10 @@
       ([& args]
           (. clojure.lang.PersistentHashMap (create args))))
 
-(defn meta [x]
+(defn meta [#^IObj x]
  (. x (meta)))
 
-(defn with-meta [x m]
+(defn with-meta [#^IObj x m]
   (. x (withMeta m)))
 
 (def defmacro (fn [name & args]
@@ -50,13 +50,13 @@
 
 (defn eql? [x y] (. RT (equal x y)))
 
-(defn strcat [x y] (. x (concat y)))
+(defn strcat [#^String x y] (. x (concat y)))
 
-(defn str [x] (. x (toString)))
+(defn str [#^Object x] (. x (toString)))
 
 (defn gensym 
   ([] (thisfn "G__"))
-  ([prefix-string] (. clojure.lang.Symbol (intern (strcat prefix-string (str (. RT (nextID))))))))
+  ([prefix-string] (. Symbol (intern (strcat prefix-string (str (. RT (nextID))))))))
 
 (defmacro cond [& clauses]
   (when clauses
@@ -70,7 +70,7 @@
        (nil? (rest arglist)) (first arglist)
        :else (cons (first arglist) (thisfn (rest arglist)))))
 
-(defn apply [f & args]
+(defn apply [#^IFn f & args]
       (. f (applyTo (spread args))))
 
 (defn list* [& args]

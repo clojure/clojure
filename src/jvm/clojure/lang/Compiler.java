@@ -449,6 +449,10 @@ static abstract class HostExpr implements Expr{
 				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
 				gen.mark(endLabel);
 				}
+			else if(returnType == void.class)
+				{
+				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+				}
 			else if(returnType == char.class)
 				{
 				gen.invokeStatic(CHAR_TYPE, valueOfMethod);
@@ -751,10 +755,26 @@ static class InstanceMethodExpr extends MethodExpr{
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
-		target.emit(C.EXPRESSION, fn, gen);
-		gen.push(methodName);
-		emitArgsAsArray(args, fn, gen);
-		gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
+		if(method != null)
+			{
+			Type type = Type.getType(method.getDeclaringClass());
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.checkCast(type);
+			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
+			if(method.getDeclaringClass().isInterface())
+				gen.invokeInterface(type, m);
+			else
+				gen.invokeVirtual(type, m);
+			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			}
+		else
+			{
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.push(methodName);
+			emitArgsAsArray(args, fn, gen);
+			gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
+			}
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -1810,9 +1830,9 @@ static class FnExpr implements Expr{
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = cw;
+		//ClassVisitor cv = cw;
 		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
-//		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
+		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
 		String smap = "SMAP\n" +
