@@ -162,6 +162,21 @@ interface Expr{
 	Object eval() throws Exception;
 
 	void emit(C context, FnExpr fn, GeneratorAdapter gen);
+
+	boolean hasJavaClass() throws Exception;
+
+	Class getJavaClass() throws Exception;
+}
+
+static abstract class UntypedExpr implements Expr{
+
+	public Class getJavaClass(){
+		throw new IllegalArgumentException("Has no Java class");
+	}
+
+	public boolean hasJavaClass(){
+		return false;
+	}
 }
 
 interface IParser{
@@ -220,6 +235,14 @@ static class DefExpr implements Expr{
 			gen.pop();
 	}
 
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass(){
+		return Var.class;
+	}
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) throws Exception{
 			//(def x) or (def x initexpr)
@@ -253,6 +276,14 @@ static class AssignExpr implements Expr{
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		target.emitAssign(context, fn, gen, val);
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return val.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		return val.getJavaClass();
 	}
 
 	static class Parser implements IParser{
@@ -291,6 +322,14 @@ static class VarExpr implements Expr, AssignableExpr{
 			}
 	}
 
+	public boolean hasJavaClass(){
+		return tag != null;
+	}
+
+	public Class getJavaClass() throws ClassNotFoundException{
+		return HostExpr.tagToClass(tag);
+	}
+
 	public Object evalAssign(Expr val) throws Exception{
 		return var.set(val.eval());
 	}
@@ -321,6 +360,14 @@ static class TheVarExpr implements Expr{
 			fn.emitVar(gen, var);
 	}
 
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws ClassNotFoundException{
+		return Var.class;
+	}
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) throws Exception{
 			Symbol sym = (Symbol) RT.second(form);
@@ -347,6 +394,14 @@ static class KeywordExpr implements Expr{
 		if(context != C.STATEMENT)
 			fn.emitKeyword(gen, k);
 
+	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws ClassNotFoundException{
+		return Keyword.class;
 	}
 }
 
@@ -522,6 +577,13 @@ static abstract class HostExpr implements Expr{
 			}
 		return className;
 	}
+
+	static Class tagToClass(Symbol tag) throws ClassNotFoundException{
+		String className = maybeClassName(tag);
+		if(className != null)
+			return Class.forName(className);
+		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
+	}
 }
 
 static abstract class FieldExpr extends HostExpr{
@@ -553,6 +615,16 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			gen.push(fieldName);
 			gen.invokeStatic(REFLECTOR_TYPE, getInstanceFieldMethod);
 			}
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return target.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		Class targetClass = target.getJavaClass();
+		java.lang.reflect.Field field = targetClass.getField(fieldName);
+		return field.getType();
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
@@ -592,6 +664,16 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 		gen.push(className);
 		gen.push(fieldName);
 		gen.invokeStatic(REFLECTOR_TYPE, getStaticFieldMethod);
+	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		Class c = Class.forName(className);
+		java.lang.reflect.Field field = c.getField(fieldName);
+		return field.getType();
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
@@ -637,15 +719,26 @@ static class InstanceMethodExpr extends MethodExpr{
 	final String methodName;
 	final IPersistentVector args;
 	final int line;
+	final java.lang.reflect.Method method;
+
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(int line, Expr target, String methodName, IPersistentVector args){
+	public InstanceMethodExpr(int line, Expr target, String methodName, IPersistentVector args) throws Exception{
 		this.line = line;
 		this.args = args;
 		this.methodName = methodName;
 		this.target = target;
+		if(target.hasJavaClass())
+			{
+			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, true);
+			if(methods.isEmpty())
+				throw new IllegalArgumentException("No matching method found");
+			method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
+			}
+		else
+			method = null;
 	}
 
 	public Object eval() throws Exception{
@@ -664,6 +757,14 @@ static class InstanceMethodExpr extends MethodExpr{
 		gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
+	}
+
+	public boolean hasJavaClass(){
+		return method != null;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return method.getReturnType();
 	}
 }
 
@@ -718,6 +819,14 @@ static class StaticMethodExpr extends MethodExpr{
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
+
+	public boolean hasJavaClass(){
+		return method != null;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return method.getReturnType();
+	}
 }
 
 
@@ -754,6 +863,14 @@ static class QuoteExpr extends LiteralExpr{
 			}
 	}
 
+	public boolean hasJavaClass(){
+		return false;
+	}
+
+	public Class getJavaClass() throws Exception{
+		throw new IllegalArgumentException("Has no Java class");
+	}
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form){
 			Object v = RT.second(form);
@@ -770,6 +887,14 @@ static class NilExpr extends LiteralExpr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
 			gen.visitInsn(Opcodes.ACONST_NULL);
+	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return null;
 	}
 }
 
@@ -825,6 +950,14 @@ static class NumExpr extends LiteralExpr{
 			}
 	}
 
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return Num.class;
+	}
+
 	static void emitBigInteger(GeneratorAdapter gen, Num num){
 		gen.newInstance(BIGINT_TYPE);
 		gen.dup();
@@ -848,6 +981,14 @@ static class StringExpr extends LiteralExpr{
 		if(context != C.STATEMENT)
 			gen.push(str);
 	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return String.class;
+	}
 }
 
 static class CharExpr extends LiteralExpr{
@@ -870,9 +1011,17 @@ static class CharExpr extends LiteralExpr{
 			gen.invokeStatic(CHARACTER_TYPE, charValueOfMethod);
 			}
 	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return Character.class;
+	}
 }
 
-static class MonitorEnterExpr implements Expr{
+static class MonitorEnterExpr extends UntypedExpr{
 	final Expr target;
 
 	public MonitorEnterExpr(Expr target){
@@ -899,7 +1048,7 @@ static class MonitorEnterExpr implements Expr{
 	}
 }
 
-static class MonitorExitExpr implements Expr{
+static class MonitorExitExpr extends UntypedExpr{
 	final Expr target;
 
 	public MonitorExitExpr(Expr target){
@@ -959,6 +1108,14 @@ static class TryFinallyExpr implements Expr{
 		gen.mark(end);
 	}
 
+	public boolean hasJavaClass() throws Exception{
+		return tryExpr.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		return tryExpr.getJavaClass();
+	}
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
@@ -976,7 +1133,7 @@ static class TryFinallyExpr implements Expr{
 	}
 }
 
-static class ThrowExpr implements Expr{
+static class ThrowExpr extends UntypedExpr{
 	final Expr excExpr;
 
 	public ThrowExpr(Expr excExpr){
@@ -1020,6 +1177,14 @@ static class ClassExpr implements Expr{
 			gen.push(className);
 			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			}
+	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return Class.class;
 	}
 
 	static class Parser implements IParser{
@@ -1091,6 +1256,14 @@ static class NewExpr implements Expr{
 			gen.pop();
 	}
 
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return Class.forName(className);
+	}
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
@@ -1109,7 +1282,7 @@ static class NewExpr implements Expr{
 
 }
 
-static class InstanceExpr implements Expr{
+static class InstanceExpr extends UntypedExpr{
 	final Expr expr;
 	final String className;
 
@@ -1181,6 +1354,14 @@ static class MetaExpr implements Expr{
 			gen.invokeInterface(IOBJ_TYPE, withMetaMethod);
 			}
 	}
+
+	public boolean hasJavaClass() throws Exception{
+		return expr.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		return expr.getJavaClass();
+	}
 }
 
 static class IfExpr implements Expr{
@@ -1216,6 +1397,22 @@ static class IfExpr implements Expr{
 		gen.mark(elseLabel);
 		elseExpr.emit(context, fn, gen);
 		gen.mark(endLabel);
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return thenExpr.hasJavaClass()
+		       && elseExpr.hasJavaClass()
+		       &&
+		       (thenExpr.getJavaClass() == elseExpr.getJavaClass()
+		        || thenExpr.getJavaClass() == null
+		        || elseExpr.getJavaClass() == null);
+	}
+
+	public Class getJavaClass() throws Exception{
+		Class thenClass = thenExpr.getJavaClass();
+		if(thenClass != null)
+			return thenClass;
+		return elseExpr.getJavaClass();
 	}
 
 	static class Parser implements IParser{
@@ -1299,6 +1496,21 @@ static class EmptyExpr implements Expr{
 				throw new UnsupportedOperationException("Unknown Collection type");
 			}
 	}
+
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		if(coll instanceof IPersistentList)
+			return IPersistentList.class;
+		else if(coll instanceof IPersistentVector)
+			return IPersistentVector.class;
+		else if(coll instanceof IPersistentMap)
+			return IPersistentMap.class;
+		else
+			throw new UnsupportedOperationException("Unknown Collection type");
+	}
 }
 
 static class ListExpr implements Expr{
@@ -1324,6 +1536,14 @@ static class ListExpr implements Expr{
 			gen.pop();
 	}
 
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return IPersistentList.class;
+	}
+
 }
 
 static class MapExpr implements Expr{
@@ -1347,6 +1567,14 @@ static class MapExpr implements Expr{
 		gen.invokeStatic(RT_TYPE, mapMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return IPersistentMap.class;
 	}
 
 
@@ -1389,6 +1617,14 @@ static class VectorExpr implements Expr{
 			gen.pop();
 	}
 
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return IPersistentVector.class;
+	}
+
 	static public Expr parse(C context, IPersistentVector form) throws Exception{
 		IPersistentVector args = PersistentVector.EMPTY;
 		for(int i = 0; i < form.count(); i++)
@@ -1402,83 +1638,17 @@ static class VectorExpr implements Expr{
 
 }
 
-/*
-static class MapExpr implements Expr{
-	IPersistentVector keyvals;
-	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
-
-
-	public MapExpr(IPersistentMap form) throws Exception{
-		keyvals = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(form); s != null; s = s.rest())
-			{
-			IMapEntry e = (IMapEntry) s.first();
-			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.key()));
-			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.val()));
-			}
-	}
-
-	public Object eval() throws Exception{
-		Object[] ret = new Object[keyvals.count()];
-		for(int i = 0; i < keyvals.count(); i++)
-			ret[i] = ((Expr) keyvals.nth(i)).eval();
-		return RT.map(ret);
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		MethodExpr.emitArgsAsArray(keyvals, fn, gen);
-		gen.invokeStatic(RT_TYPE, mapMethod);
-		if(context == C.STATEMENT)
-			gen.pop();
-	}
-
-
-	static public Expr parse(C context, IPersistentMap form) throws Exception{
-
-		return new MapExpr(form);
-	}
-}
-
-static class VectorExpr implements Expr{
-	IPersistentVector args;
-	final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
-
-
-	public VectorExpr(IPersistentVector form) throws Exception{
-		args = PersistentVector.EMPTY;
-		for(int i = 0; i < form.count(); i++)
-			args = (IPersistentVector) args.cons(analyze(C.EXPRESSION, form.nth(i)));
-	}
-
-	public Object eval() throws Exception{
-		IPersistentVector ret = PersistentVector.EMPTY;
-		for(int i = 0; i < args.count(); i++)
-			ret = (IPersistentVector) ret.cons(((Expr) args.nth(i)).eval());
-		return ret;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		MethodExpr.emitArgsAsArray(args, fn, gen);
-		gen.invokeStatic(RT_TYPE, vectorMethod);
-		if(context == C.STATEMENT)
-			gen.pop();
-	}
-
-	static public Expr parse(C context, IPersistentVector form) throws Exception{
-		return new VectorExpr(form);
-	}
-
-}
-*/
 static class InvokeExpr implements Expr{
 	final Expr fexpr;
+	final Symbol tag;
 	final IPersistentVector args;
 	final int line;
 
-	public InvokeExpr(int line, Expr fexpr, IPersistentVector args){
+	public InvokeExpr(int line, Symbol tag, Expr fexpr, IPersistentVector args){
 		this.fexpr = fexpr;
 		this.args = args;
 		this.line = line;
+		this.tag = tag;
 	}
 
 	public Object eval() throws Exception{
@@ -1503,6 +1673,14 @@ static class InvokeExpr implements Expr{
 			gen.pop();
 	}
 
+	public boolean hasJavaClass() throws Exception{
+		return tag != null;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return HostExpr.tagToClass(tag);
+	}
+
 	static public Expr parse(C context, ISeq form) throws Exception{
 		Expr fexpr = analyze(C.EXPRESSION, form.first());
 		PersistentVector args = PersistentVector.EMPTY;
@@ -1513,7 +1691,8 @@ static class InvokeExpr implements Expr{
 		if(args.count() > MAX_POSITIONAL_ARITY)
 			throw new IllegalArgumentException(
 					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
-		return new InvokeExpr((Integer) LINE.get(), fexpr, args);
+
+		return new InvokeExpr((Integer) LINE.get(), tagOf(form), fexpr, args);
 	}
 }
 
@@ -1758,6 +1937,14 @@ static class FnExpr implements Expr{
 				}
 			gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
 			}
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return IFn.class;
 	}
 
 	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
@@ -2339,9 +2526,13 @@ static LocalBinding referenceLocal(Symbol sym) throws Exception{
 	return b;
 }
 
-private static Symbol tagOf(Symbol sym){
-	if(sym.meta() != null)
-		return (Symbol) sym.meta().valAt(RT.TAG_KEY);
+private static Symbol tagOf(Object o){
+	if(o instanceof IObj)
+		{
+		IObj obj = (IObj) o;
+		if(obj.meta() != null)
+			return (Symbol) obj.meta().valAt(RT.TAG_KEY);
+		}
 	return null;
 }
 
