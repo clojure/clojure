@@ -732,7 +732,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		if(target.hasJavaClass())
 			{
-			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, true);
+			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
 			if(methods.isEmpty())
 				throw new IllegalArgumentException("No matching method found");
 			method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
@@ -2034,7 +2034,7 @@ static class FnMethod{
 
 				else
 					{
-					LocalBinding lb = registerLocal(p, tagOf(p));
+					LocalBinding lb = registerLocal(p, tagOf(p) != null ? HostExpr.tagToClass(tagOf(p)) : null);
 					argLocals = argLocals.cons(lb);
 					switch(state)
 						{
@@ -2101,15 +2101,23 @@ static class FnMethod{
 
 static class LocalBinding{
 	final Symbol sym;
-	final Symbol tag;
+	final Class javaClass;
 	final int idx;
 	final String name;
 
-	public LocalBinding(int num, Symbol sym, Symbol tag){
+	public LocalBinding(int num, Symbol sym, Class javaClass){
 		this.idx = num;
 		this.sym = sym;
-		this.tag = tag;
+		this.javaClass = javaClass;
 		name = munge(sym.name);
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return javaClass != null;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return javaClass;
 	}
 }
 
@@ -2129,6 +2137,16 @@ static class LocalBindingExpr implements Expr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
 			fn.emitLocal(gen, b);
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return tag != null || b.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		if(tag != null)
+			return HostExpr.tagToClass(tag);
+		return b.getJavaClass();
 	}
 }
 
@@ -2153,6 +2171,8 @@ static class BodyExpr implements Expr{
 				         analyze(context, forms.first());
 				exprs = exprs.cons(e);
 				}
+			if(exprs.count() == 0)
+				exprs = exprs.cons(NIL_EXPR);
 			return new BodyExpr(exprs);
 		}
 	}
@@ -2168,20 +2188,25 @@ static class BodyExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(exprs.count() > 0)
+		for(int i = 0; i < exprs.count() - 1; i++)
 			{
-			for(int i = 0; i < exprs.count() - 1; i++)
-				{
-				Expr e = (Expr) exprs.nth(i);
-				e.emit(C.STATEMENT, fn, gen);
-				}
-			Expr last = (Expr) exprs.nth(exprs.count() - 1);
-			last.emit(context, fn, gen);
+			Expr e = (Expr) exprs.nth(i);
+			e.emit(C.STATEMENT, fn, gen);
 			}
-		else if(context != C.STATEMENT)
-			{
-			NIL_EXPR.emit(context, fn, gen);
-			}
+		Expr last = (Expr) exprs.nth(exprs.count() - 1);
+		last.emit(context, fn, gen);
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return lastExpr().hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		return lastExpr().getJavaClass();
+	}
+
+	private Expr lastExpr(){
+		return (Expr) exprs.nth(exprs.count() - 1);
 	}
 }
 
@@ -2243,7 +2268,13 @@ static class LetExpr implements Expr{
 
 					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 					//sequential enhancement of env (like Lisp let*)
-					LocalBinding lb = registerLocal(sym, tagOf(sym));
+					Symbol tag = tagOf(sym);
+					Class declClass = null;
+					if(tag != null)
+						declClass = HostExpr.tagToClass(tag);
+					else if(init.hasJavaClass())
+						declClass = init.getJavaClass();
+					LocalBinding lb = registerLocal(sym, declClass);
 					BindingInit bi = new BindingInit(lb, init);
 					bindingInits = bindingInits.cons(bi);
 
@@ -2296,6 +2327,14 @@ static class LetExpr implements Expr{
 			gen.visitLocalVariable(bi.binding.name, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
 			}
 	}
+
+	public boolean hasJavaClass() throws Exception{
+		return body.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		return body.getJavaClass();
+	}
 }
 
 static class RecurExpr implements Expr{
@@ -2331,6 +2370,14 @@ static class RecurExpr implements Expr{
 		gen.goTo(loopLabel);
 	}
 
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return null;
+	}
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
@@ -2351,9 +2398,9 @@ static class RecurExpr implements Expr{
 	}
 }
 
-private static LocalBinding registerLocal(Symbol sym, Symbol tag) throws Exception{
+private static LocalBinding registerLocal(Symbol sym, Class javaClass) throws Exception{
 	int num = getAndIncLocalNum();
-	LocalBinding b = new LocalBinding(num, sym, tag);
+	LocalBinding b = new LocalBinding(num, sym, javaClass);
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
 	FnMethod method = (FnMethod) METHOD.get();
