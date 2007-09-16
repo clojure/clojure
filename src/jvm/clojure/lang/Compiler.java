@@ -50,7 +50,7 @@ static final Symbol NEW = Symbol.create("new");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
 //static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
 static final Symbol LIST = Symbol.create("clojure", "list");
-static final Symbol HASHMAP = Symbol.create("clojure", "hashmap");
+static final Symbol HASHMAP = Symbol.create("clojure", "hash-map");
 static final Symbol VECTOR = Symbol.create("clojure", "vector");
 
 static final Symbol _AMP_ = Symbol.create("&");
@@ -2015,7 +2015,7 @@ static class FnMethod{
 							NEXT_LOCAL_NUM, 0));
 
 			//register 'this' as local 0
-			registerLocal(THISFN, null);
+			registerLocal(THISFN, null, null);
 
 			PSTATE state = PSTATE.REQ;
 			PersistentVector argLocals = PersistentVector.EMPTY;
@@ -2034,7 +2034,7 @@ static class FnMethod{
 
 				else
 					{
-					LocalBinding lb = registerLocal(p, tagOf(p) != null ? HostExpr.tagToClass(tagOf(p)) : null);
+					LocalBinding lb = registerLocal(p, tagOf(p), null);
 					argLocals = argLocals.cons(lb);
 					switch(state)
 						{
@@ -2101,23 +2101,27 @@ static class FnMethod{
 
 static class LocalBinding{
 	final Symbol sym;
-	final Class javaClass;
+	final Symbol tag;
+	final Expr init;
 	final int idx;
 	final String name;
 
-	public LocalBinding(int num, Symbol sym, Class javaClass){
+	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init){
 		this.idx = num;
 		this.sym = sym;
-		this.javaClass = javaClass;
+		this.tag = tag;
+		this.init = init;
 		name = munge(sym.name);
 	}
 
 	public boolean hasJavaClass() throws Exception{
-		return javaClass != null;
+		return tag != null
+		       || (init != null && init.hasJavaClass());
 	}
 
 	public Class getJavaClass() throws Exception{
-		return javaClass;
+		return tag != null ? HostExpr.tagToClass(tag)
+		       : init.getJavaClass();
 	}
 }
 
@@ -2268,13 +2272,7 @@ static class LetExpr implements Expr{
 
 					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 					//sequential enhancement of env (like Lisp let*)
-					Symbol tag = tagOf(sym);
-					Class declClass = null;
-					if(tag != null)
-						declClass = HostExpr.tagToClass(tag);
-					else if(init.hasJavaClass())
-						declClass = init.getJavaClass();
-					LocalBinding lb = registerLocal(sym, declClass);
+					LocalBinding lb = registerLocal(sym, tagOf(sym), init);
 					BindingInit bi = new BindingInit(lb, init);
 					bindingInits = bindingInits.cons(bi);
 
@@ -2398,9 +2396,9 @@ static class RecurExpr implements Expr{
 	}
 }
 
-private static LocalBinding registerLocal(Symbol sym, Class javaClass) throws Exception{
+private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init) throws Exception{
 	int num = getAndIncLocalNum();
-	LocalBinding b = new LocalBinding(num, sym, javaClass);
+	LocalBinding b = new LocalBinding(num, sym, tag, init);
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
 	FnMethod method = (FnMethod) METHOD.get();

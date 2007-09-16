@@ -26,12 +26,15 @@ static Symbol QUOTE = Symbol.create(null, "quote");
 static Symbol CONCAT = Symbol.create("clojure", "concat");
 static Symbol LIST = Symbol.create("clojure", "list");
 static Symbol APPLY = Symbol.create("clojure", "apply");
-static Symbol HASHMAP = Symbol.create("clojure", "hashmap");
+static Symbol HASHMAP = Symbol.create("clojure", "hash-map");
 static Symbol VECTOR = Symbol.create("clojure", "vector");
 static Symbol WITH_META = Symbol.create("clojure", "with-meta");
+static Symbol META = Symbol.create("clojure", "meta");
+static Symbol DEREF = Symbol.create("clojure", "deref");
 static Keyword LINE_KEY = Keyword.intern("clojure", "line");
 
 static IFn[] macros = new IFn[256];
+static IFn[] dispatchMacros = new IFn[256];
 static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
@@ -47,10 +50,11 @@ static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
-	macros['\''] = new QuoteReader();
+	macros['\''] = new WrappingReader(Compiler.QUOTE);
+	macros['@'] = new WrappingReader(DEREF);
+	macros['^'] = new WrappingReader(META);
 	macros['`'] = new SyntaxQuoteReader();
 	macros['~'] = new UnquoteReader();
-	macros['^'] = new MetaReader();
 	macros['('] = new ListReader();
 	macros[')'] = new UnmatchedDelimiterReader();
 	macros['['] = new VectorReader();
@@ -59,6 +63,11 @@ static
 	macros['}'] = new UnmatchedDelimiterReader();
 //	macros['|'] = new ArgVectorReader();
 	macros['\\'] = new CharacterReader();
+	macros['#'] = new DispatchReader();
+
+
+	dispatchMacros['^'] = new MetaReader();
+	dispatchMacros['\''] = new WrappingReader(Compiler.THE_VAR);
 	}
 
 static boolean isWhitespace(int ch){
@@ -140,7 +149,7 @@ static private String readToken(PushbackReader r, char initch) throws Exception{
 	for(; ;)
 		{
 		int ch = r.read();
-		if(ch == -1 || isWhitespace(ch) || isMacro(ch))
+		if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
 			{
 			r.unread(ch);
 			return sb.toString();
@@ -231,6 +240,9 @@ static private boolean isMacro(int ch){
 	return (ch < macros.length && macros[ch] != null);
 }
 
+static private boolean isTerminatingMacro(int ch){
+	return (ch != '#' && ch < macros.length && macros[ch] != null);
+}
 
 static class StringReader extends AFn{
 	public Object invoke(Object reader, Object doublequote) throws Exception{
@@ -284,13 +296,31 @@ static class CommentReader extends AFn{
 
 }
 
-static class QuoteReader extends AFn{
+static class WrappingReader extends AFn{
+	final Symbol sym;
+
+	public WrappingReader(Symbol sym){
+		this.sym = sym;
+	}
+
 	public Object invoke(Object reader, Object quote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		return RT.list(Compiler.QUOTE, o);
+		return RT.list(sym, o);
 	}
 
+}
+
+static class DispatchReader extends AFn{
+	public Object invoke(Object reader, Object hash) throws Exception{
+		int ch = ((Reader) reader).read();
+		if(ch == -1)
+			throw new Exception("EOF while reading character");
+		IFn fn = dispatchMacros[ch];
+		if(fn == null)
+			throw new Exception(String.format("No dispatch macro for: %c", (char) ch));
+		return fn.invoke(reader, ch);
+	}
 }
 
 static class MetaReader extends AFn{

@@ -12,7 +12,7 @@
       ([& args]
           (. clojure.lang.PersistentVector (create args))))
 
-(defn hashmap
+(defn hash-map
       ([] {})
       ([& args]
           (. clojure.lang.PersistentHashMap (create args))))
