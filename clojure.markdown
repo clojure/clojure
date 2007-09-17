@@ -220,7 +220,9 @@ Vectors and Maps yield vectors and maps whose contents are the *evaluated values
 ^{:x 1} [1 2 3]
 </code></pre>	
 
-Lists are considered *calls* to either special forms, macros, or functions. A call has the form `(operator operands*)`. 
+An empty list `()` evaluates to an empty list.
+
+Non-empty Lists are considered *calls* to either special forms, macros, or functions. A call has the form `(operator operands*)`. 
 
 Special forms are primitives built-in to Clojure that perform core operations. If the operator of a call is a symbol that resolves to the name of a special form, the call is to that special form. Each form discussed individually under [Special Forms](#specialforms).
 
@@ -259,7 +261,7 @@ Evaluates the exprs in a context in which the symbols are bound to their respect
 </code></pre>	
 
 ---
-### (quote form)
+### (*quote* form)
 Yields the unevaluated form
 
 <pre><code>
@@ -269,6 +271,10 @@ Yields the unevaluated form
 </code></pre>
 
 Note there is no attempt made to call the function `a`. The return value is a list of 3 symbols.
+
+---
+### (*the-var* symbol)
+The symbol must resolve to a var, and the Var object itself (not its value) is returned.
 
 ---
 ### (fn [params* ] exprs*)
@@ -294,10 +300,12 @@ The exprs are enclosed in an implicit `do`. The symbol `this-fn` is bound within
 
 A fn (overload) defines a recursion point at the top of the function, with arity equal to the number of params *including the rest param, if present*. See `recur`.
 
+---
 ### (*loop* [bindings* ] exprs*)
 
 `Loop` is exactly like `let`, except that it establishes a recursion point at the top of the loop, with arity equal to the number of bindings. See `recur`.
 
+---
 ### (*recur* exprs*)
 
 Evaluates the exprs in order, then, in parallel, rebinds the bindings of the recursion point to the values of the exprs. If the recursion point was a fn, then it rebinds the params. If the recursion point was a `loop`, then it rebinds the loop bindings. Execution then jumps back to the recursion point. The `recur` expression must match the arity of the recursion point exactly. In particular, if the recursion point was the top of a variadic function, there is no gathering of rest args, a single seq (or null) should be passed. `recur` in other than a tail position is an error.
@@ -313,6 +321,62 @@ Note that `recur` is the only non-stack-consuming looping construct in Clojure. 
           (recur (dec cnt) (* acc cnt))))))
 </code></pre>
 
+---
+### (*.* instance-expr instanceFieldName-symbol)
+### (*.* Classname-symbol staticFieldName-symbol)
+### (*.* instance-expr (instanceMethodName-symbol args*))
+### (*.* Classname-symbol (staticMethodName-symbol args*))
+
+The '.' special form is the primary access to Java. It can be considered a member-access operator, and/or read as 'in the scope of'. 
+
+If the first operand is a symbol that resolves to a class name, the access is considered to be to a static member of the named class. Otherwise it is presumed to be an instance member and the first argument is evaluated to produce the target object. 
+
+If the second operand is a symbol it is taken to be a field access - the name of the field is the name of the symbol. The value of the expression is the value of the field.
+
+If the second operand is a list it is taken to be a method call. The first element of the list must be a simple symbol, and the name of the method is the name of the symbol. The args, if any, are evaluated from left to right, and passed to the matching method, which is called, and its value returned. If the method has a void return type, the value of the expression will be `nil`. 
+
+Note that boolean return values will be turned into nil/non-nil, chars will become Characters, and numeric primitives will become Clojure Nums.
+
+---
+### (*new* Classname-symbol args*)
+The args, if any, are evaluated from left to right, and passed to the constructor of the class named by the symbol. The constructed object returned.
+
+---
+### (*class* Classname-symbol)
+Yields the java.lang.Class corresponding to the symbol.
+
+---
+### (*instance?* expr Classname-symbol)
+Evaluates expr and tests if it is an instance of the class named by the symbol.
+
+---
+### (*throw* expr)
+The expr is evaluated and thrown, therefor it should yield an instance of some derivee of Throwable.
+
+---
+### (*try-finally* expr finally-expr)
+The expr is evaluated and its value returned. Before returning, normally or abnormally, the finally-expr will be evaluated for its side effects.
+
+---
+### (*=* (. instance-expr instanceFieldName-symbol) expr)
+### (*=* (. Classname-symbol staticFieldName-symbol) expr)
+### (*=* var-symbol expr)
+Assignment. 
+
+When the first operand is a field member access form, the assignment is to the corresponding field. If it is an instance field, the instance expr will be evaluated, then the expr.
+
+When the first operand is a symbol, it must resolve to a global var. The value of the vars current thread binding is set to the value of expr. Currently, it is an error to attempt to set the root binding of a var using `=`, i.e. var assignments are thread-local.
+
+In all cases the value of expr is returned.
+
+Note - *you cannot assign to function params or local bindings*.
+
+---
+### (*monitor-enter* x)
+### (*monitor-exit* x)
+
+These are synchronization primitives that should be avoided in user code. Use the `locking` macro.
+
 <h2 id="datastructures">Data Structures</h2>
 <h2 id="sequences">Sequences</h2>
 <h2 id="vars">Vars and the Global Environment</h2>
@@ -327,4 +391,5 @@ Note that `recur` is the only non-stack-consuming looping construct in Clojure. 
 * `nil` is not a Symbol
 * The read table is currently not accessible to user programs
 * `let` is like `let*`
+* There is no tail-call optimization, use `recur`
 

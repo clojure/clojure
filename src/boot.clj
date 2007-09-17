@@ -110,8 +110,8 @@
       ([] 0)
       ([x] x)
       ([x y] (. Num (add x y)))
-      ([x y & rest]
-          (apply thisfn (thisfn x y) rest)))
+      ([x y & more]
+          (apply thisfn (thisfn x y) more)))
 
 (defn *
       ([] 1)
