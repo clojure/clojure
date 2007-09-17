@@ -75,7 +75,7 @@ Try:
 
 <h2 id="reader">Reader</h2>
 
-Clojure is a [homoiconic][hicon] language, which is a fancy term describing the fact that Clojure programs are represented by Clojure data structures. This is a very important difference between Clojure (and Common Lisp) and most other programming languages - Clojure is defined in terms of the evaluation of a data structure and **not** in terms of the syntax of character streams. It is quite common, and easy, for Clojure programs to manipulate, transform and produce other Clojure programs.
+Clojure is a [homoiconic][hicon] language, which is a fancy term describing the fact that Clojure programs are represented by Clojure data structures. This is a very important difference between Clojure (and Common Lisp) and most other programming languages - Clojure is defined in terms of the evaluation of a data structure and **not** in terms of the syntax of character streams/files. It is quite common, and easy, for Clojure programs to manipulate, transform and produce other Clojure programs.
 
 That said, most Clojure programs begin life as text files, and it is the task of the *reader* to parse the text and produce the data structure the compiler will see. This is not merely a phase of the compiler. The reader, and the Clojure data representations, have utility on their own in many of the same contexts one might use XML or JSON etc.
 
@@ -200,12 +200,13 @@ Strings, numbers, characters, `nil` and keywords evaluate to themselves.
 A Symbol is *resolved*:
 
 *	If it is namespace-qualified, the value is the value of the binding of the global var named by the symbol. It is an error if there is no global var named by the symbol.
-*	Else, it is not namespace-qualified:
+*	Else, it is not namespace-qualified and the first of the following applies:
  	1. If it names a special form it is considered a special form, and must be utilized accordingly.
-	2. Else, if in a local scope, a lookup is done to see if it names a local binding (e.g. a function argument or let-bound name). If so, the value is the value of the local binding.
-	3. A lookup is done in the *refers* map to see if there is a mapping from the symbol to a global var. If so, the value is the value of the binding of the global var referred-to by the symbol.
-	4. A lookup is done to see if there is a global var with a namespace equal to the *current-namespace* and the same name as the symbol. If so, the value is the value of the binding of the global var named by symbol *current-namespace*/symbol-name.
-	5. It is an error.
+	2. A lookup is done in the *imports* map to see if there is a mapping from the symbol to a fully qualified class name. If so, the symbol is considered to name a class. Note that class names are not first-class objects and are only valid in certain special forms.
+	3. If in a local scope (i.e. in a function definition), a lookup is done to see if it names a local binding (e.g. a function argument or let-bound name). If so, the value is the value of the local binding.
+	4. A lookup is done in the *refers* map to see if there is a mapping from the symbol to a global var. If so, the value is the value of the binding of the global var referred-to by the symbol.
+	5. A lookup is done to see if there is a global var with a namespace equal to the *current-namespace* and the same name as the symbol. If so, the value is the value of the binding of the global var named by symbol *current-namespace*/symbol-name.
+	6. It is an error.
 	
 If the Symbol has metadata, it may be used by the compiler, but will not be part of the resulting value.
 
@@ -225,11 +226,93 @@ Special forms are primitives built-in to Clojure that perform core operations. I
 
 Macros are functions that manipulate forms, allowing for syntactic abstraction. If the operator of a call is a symbol that names a global var that is a macro function, that function is called and is passed the *unevaluated* operand forms. The return value of the macro is then evaluated in its place.
 
-If the operator is not a special form or macro, it and the operands (if any) are evaluated, from left to right. The result of the evaluation of the operator is then cast to IFn (the interface representing Clojure functions), and invoke() is called on it, passing the evaluated arguments. The return value of invoke() is the value of the call expression.
+If the operator is not a special form or macro, the call is considered a function call, and it and the operands (if any) are evaluated, from left to right. The result of the evaluation of the operator is then cast to IFn (the interface representing Clojure functions), and invoke() is called on it, passing the evaluated arguments. The return value of invoke() is the value of the call expression. If the function call form has metadata, it may be used by the compiler, but will not be part of the resulting value.
 
 Note that special forms and macros might have other-than-normal evaluation of their arguments, as described in their entries under [Special Forms](#specialforms).
 
+The above describes the evaluation of a single form. `load` and `load-file` will sequentially evaluate the set of forms contained in the stream/file. Such sets of forms usually have side effects, often on the global environment, defining functions etc. The loading functions occur in a temporary context, in which *current-namespace*, *imports* and *refers* all have fresh bindings. That means that, should any form have an effect on those vars (e.g. `in-namespace, refers, import`), the effect will unwind at the completion of the load. 
+
 <h2 id="specialforms">Special Forms</h2>
+
+---
+### (*def* symbol init?)
+Creates or locates a global var with the name of `symbol` and a namespace of the value of `*current-namespace*`. If `init` is supplied, it is evaluated, and the root binding of the var is set to the resulting value. If `init` is not supplied, the root binding of var is unaffected. `def` always applies to the root binding, even if the var is thread-bound at the point where def is called.
+
+---
+### (*if* test then else?)
+Evaluates `test`. If not nil, evaluates and yields `then`, otherwise, evaluates and yields `else`. If `else` is not supplied it defaults to `nil`.
+
+---
+### (*do* exprs*)
+Evaluates the expressions in order and returns the value of the last. If no expressions are supplied, returns `nil`.
+
+---
+### (*let* [bindings* ] exprs*)
+binding => symbol init-expr
+
+Evaluates the exprs in a context in which the symbols are bound to their respective init-exprs. The bindings are sequential, so each binding can see the prior bindings. The exprs are contained in an implicit `do`.
+
+<pre><code>
+(let [x 1 y x] y)
+
+1
+</code></pre>	
+
+---
+### (quote form)
+Yields the unevaluated form
+
+<pre><code>
+'(a b c)
+
+(a b c)
+</code></pre>
+
+Note there is no attempt made to call the function `a`. The return value is a list of 3 symbols.
+
+---
+### (fn [params* ] exprs*)
+### (fn ([params* ] exprs*)+)
+params => positional-params* , or positional-params* `&` rest-param
+
+param => symbol
+
+Defines a function (fn). Fns are first-class objects that implement the IFn interface. The IFn interface defines an invoke() function that is overloaded with arity ranging from 0-20. A single fn object can implement one or more invoke points, and thus be overloaded on arity. One and only one overload can itself be variadic, by specifying the ampersand followed by a single rest-param. Such a variadic entry point, when called with arguments that exceed the positional params, will find them in a seq contained in the rest arg. If the supplied args do not exceed the positional params, the rest arg will be nil.
+
+The first form defines a fn with a single entry point. The second defines a fn with one or more overloads. The arities of the overloads must be distinct. In either case, the result of the expression is a single fn object.
+
+The exprs are enclosed in an implicit `do`. The symbol `this-fn` is bound within the function definition to the function object itself, allowing for self-calling, even in anonymous functions.
+
+<pre><code>
+(def *
+  (fn ([] 1)
+      ([x] x)
+      ([x y] (. Num (multiply x y)))
+      ([x y & more]
+          (apply thisfn (thisfn x y) more))))
+</code></pre>
+
+A fn (overload) defines a recursion point at the top of the function, with arity equal to the number of params *including the rest param, if present*. See `recur`.
+
+### (*loop* [bindings* ] exprs*)
+
+`Loop` is exactly like `let`, except that it establishes a recursion point at the top of the loop, with arity equal to the number of bindings. See `recur`.
+
+### (*recur* exprs*)
+
+Evaluates the exprs in order, then, in parallel, rebinds the bindings of the recursion point to the values of the exprs. If the recursion point was a fn, then it rebinds the params. If the recursion point was a `loop`, then it rebinds the loop bindings. Execution then jumps back to the recursion point. The `recur` expression must match the arity of the recursion point exactly. In particular, if the recursion point was the top of a variadic function, there is no gathering of rest args, a single seq (or null) should be passed. `recur` in other than a tail position is an error.
+
+Note that `recur` is the only non-stack-consuming looping construct in Clojure. There is no tail-call optimization and the use of self-calls for looping is discouraged. `recur` is functional and its use in tail-position is verified by the compiler.
+
+<pre><code>
+(def factorial 
+  (fn [n]
+    (loop [cnt n acc 1]
+       (if (zero? cnt)
+            acc
+          (recur (dec cnt) (* acc cnt))))))
+</code></pre>
+
 <h2 id="datastructures">Data Structures</h2>
 <h2 id="sequences">Sequences</h2>
 <h2 id="vars">Vars and the Global Environment</h2>
@@ -243,4 +326,5 @@ Note that special forms and macros might have other-than-normal evaluation of th
 * Keywords are not Symbols
 * `nil` is not a Symbol
 * The read table is currently not accessible to user programs
+* `let` is like `let*`
 
