@@ -71,7 +71,7 @@ Clojure is a [homoiconic][hicon] language, which is a fancy term describing the 
 
 That said, most Clojure programs begin life as text files, and it is the task of the *reader* to parse the text and produce the data structure the compiler will see. It is not merely a phase of the compiler. The reader, and the Clojure data representations, have utility on their own in many of the same contexts one might use XML or JSON etc.
 
-One might say the reader has syntax defined in terms of characters, and the Clojure language has syntax defined in terms of symbols, lists, vectors, maps etc.
+One might say the reader has syntax defined in terms of characters, and the Clojure language has syntax defined in terms of symbols, lists, vectors, maps etc. The reader is represented by the function `read`, which reads the next object (not character) from a stream.
 
 ### Data Structure Syntax
 *	Lists/Seqs
@@ -92,6 +92,10 @@ One might say the reader has syntax defined in terms of characters, and the Cloj
 	
 	`{:a 1 :b 2}`
 	
+	Commas are considered whitespace, and can be used to organize the pairs:
+	
+	`{:a 1, :b 2}`
+	
 * 	Literals
 	* Strings - Enclosed in `"double quotes"`
 	* Numbers - as per Java, plus indefinitely long integers are supported, as well as ratios, e.g. `22/7`
@@ -99,7 +103,31 @@ One might say the reader has syntax defined in terms of characters, and the Cloj
 	* `nil` - represents null and false
 	
 * Symbols
+
+	Symbols begin with a non-numeric character and can contain alphanumeric characters and !, -, _, and ? (other characters will be allowed, but not all macro characters have been determined). / has special meaning, it can be used once on the middle of a symbol to separate the namespace from the name.
+	
 * Keywords
+
+	Keywords are like symbols, except they can and must begin with a colon, e.g. `:fred`.
+
+### Macro characters
+	The behavior of the reader is driven by a combination of built-in constructs and an extension system called the read table. entries in the read table provide mapping from certain characters, called macro characters, that direct the reader to specific behavior. Unless indicated otherwise, these characters cannot be used in user symbols.
+
+*	Quote (')
+*	Syntax-quote (\`)
+*	Unquote (~)
+*	Unquote-splicing (~@)
+*	Character (\\)
+*	Comment (;)
+*	Meta (^)
+*	Deref (@)
+*	Dispatch (#)
+
+	The dispatch macro causes the reader to use a reader macro from another table, indexed by the character following #:
+
+	*	Metadata (#^)
+	*	Var quote (#')
+
 
 [hicon]:http://en.wikipedia.org/wiki/Homoiconicity
 
@@ -115,4 +143,7 @@ One might say the reader has syntax defined in terms of characters, and the Cloj
 * Clojure is case sensitive
 * () is not the same as nil
 * The reader is side-effect free
+* Keywords are not symbols
+* nil is not a symbol
+* the read table is currently not accessible to user programs
 
