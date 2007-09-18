@@ -277,8 +277,8 @@ Note there is no attempt made to call the function `a`. The return value is a li
 The symbol must resolve to a var, and the Var object itself (not its value) is returned.
 
 ---
-### (fn [params* ] exprs*)
-### (fn ([params* ] exprs*)+)
+### (*fn* [params* ] exprs*)
+### (*fn* ([params* ] exprs*)+)
 params => positional-params* , or positional-params* `&` rest-param
 
 param => symbol
@@ -378,6 +378,55 @@ Note - *you cannot assign to function params or local bindings*.
 These are synchronization primitives that should be avoided in user code. Use the `locking` macro.
 
 <h2 id="datastructures">Data Structures</h2>
+
+Clojure has a rich set of data structures. They share a set of properties:
+
+*	They are immutable
+*	They are read-able
+*	They support proper equality semantics in their implementation of `equals`
+*	In addition, the collections: 
+	*	Are manipulated via interfaces.
+	*	Support sequencing
+	*	Support persistent manipulation.
+	*	Support metadata
+	*	Implement Iterable
+
+### nil
+While not properly a data structure, `nil` is a valid value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
+
+### Nums
+All Clojure numbers are derived from Num, which in turn is derived from java.lang.Number. There are 4 types:
+
+* 	FixNum
+	
+	Represent integer values that fit in 32 bits. When arithmetic involving FixNums exceeds their capacity, they automatically become BigNums.
+	
+*	BigNum
+
+	Represent integers of arbitrary precision.
+	
+*	DoubleNum
+
+	Correspond to Java's `double`.
+	
+*	RatioNum
+
+	Represents a ratio between integers. Division of integers that can't be reduced to an integer yields a ratio, i.e. 22/7 = 22/7, rater than a floating point value.
+	
+Any numeric operation involving DoubleNums yields a DoubleNum. 
+
+### Strings
+Clojure strings are Java `Strings`.
+
+### Characters
+Clojure characters are Java `Characters`.
+
+### Keywords
+Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional namespaces, both of which are strings. The leading ':' is not part of the namespace or name.
+
+### Symbols
+Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional namespaces, both of which are strings.
+
 <h2 id="sequences">Sequences</h2>
 <h2 id="vars">Vars and the Global Environment</h2>
 <h2 id="refs">Refs and Transactions</h2>
