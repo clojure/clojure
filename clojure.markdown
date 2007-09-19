@@ -37,6 +37,7 @@ Rich Hickey
 ###[Evaluation](#evaluation)
 ###[Special Forms](#specialforms)
 ###[Data Structures](#datastructures)
+###[Metadata](#metadata)
 ###[Sequences](#sequences)
 ###[Vars and the Global Environment](#vars)
 ###[Refs and Transactions](#refs)
@@ -88,12 +89,12 @@ One might say the reader has syntax defined in terms of characters, and the Cloj
 ### Reader forms
 * 	Symbols
 
-	Symbols begin with a non-numeric character and can contain alphanumeric characters and *, +, !, -, _, and ? (other characters will be allowed eventually, but not all macro characters have been determined). / has special meaning, it can be used once in the middle of a symbol to separate the namespace from the name, e.g. `my-namespace/foo`. '.' has special meaning, it can be used one or more times in the middle of a symbol to designate a fully-qualified class name, e.g. `java.util.BitSet`.
+	Symbols begin with a non-numeric character and can contain alphanumeric characters and *, +, !, -, _, and ? (other characters will be allowed eventually, but not all macro characters have been determined). '/' has special meaning, it can be used once in the middle of a symbol to separate the namespace from the name, e.g. `my-namespace/foo`. '/' by itself names the division function. '.' has special meaning - it can be used one or more times in the middle of a symbol to designate a fully-qualified class name, e.g. `java.util.BitSet`. Symbols beginning with '.' are reserved by Clojure.
 
 * 	Literals
-	* Strings - Enclosed in `"double quotes"`
+	* Strings - Enclosed in `"double quotes"`. Standard Java escape characters.
 	* Numbers - as per Java, plus indefinitely long integers are supported, as well as ratios, e.g. `22/7`
-	* Characters - preceded by a backslash: `\c`
+	* Characters - preceded by a backslash: `\c`. `\newline`, `\space` and `\tab` yield the corresponding characters.
 	* `nil` - represents null and logical false
 	* Keywords
 
@@ -122,6 +123,8 @@ One might say the reader has syntax defined in terms of characters, and the Cloj
 	Commas are considered whitespace, and can be used to organize the pairs:
 	
 	`{:a 1, :b 2}`
+	
+	Keys and values can be any forms.
 
 ### Macro characters
 The behavior of the reader is driven by a combination of built-in constructs and an extension system called the read table. Entries in the read table provide mappings from certain characters, called macro characters, to specific reading behavior, called reader macros. Unless indicated otherwise, macro characters cannot be used in user symbols.
@@ -129,24 +132,6 @@ The behavior of the reader is driven by a combination of built-in constructs and
 *	Quote (')
 
 	`'form` => `(quote form)`
-*	Syntax-quote (\`, note, the "backquote" character), Unquote (~) and Unquote-splicing (~@)
-
-	For all forms other than Symbols, Lists, Vectors and Maps, \`x is the same as 'x. 
-	
-	For Symbols, syntax-quote resolves the symbol in the current context, yielding a fully-qualified symbol (i.e. namespace/name or fully.qualified.Classname). 
-	
-	For Lists/Vectors/Maps, syntax-quote establishes a template of the corresponding data structure. Within the template, unqualified forms behave as if recursively syntax-quoted, but forms can be exempted from such recursive quoting by qualifying them with unquote or unquote-splicing, in which case they will be treated as expressions and be replaced in the template by their value, or sequence of values, respectively.
-	
-	For example:
-	
-<pre><code>
-(def x 5)
-(def lst '(a b c))
-`(fred x ~x lst ~@lst 7 8 :nine)
-
-> (user/fred user/x 5 user/lst a b c 7 8 :nine)
-</code></pre>	
-	
 *	Character (\\)
 
 	As per above, yields a character literal.
@@ -182,6 +167,26 @@ The behavior of the reader is driven by a combination of built-in constructs and
 		
 		`#'x` => `(the-var x)`
 
+*	Syntax-quote (\`, note, the "backquote" character), Unquote (~) and Unquote-splicing (~@)
+
+	For all forms other than Symbols, Lists, Vectors and Maps, \`x is the same as 'x. 
+
+	For Symbols, syntax-quote *resolves* the symbol in the current context, yielding a fully-qualified symbol (i.e. namespace/name or fully.qualified.Classname). 
+
+	For Lists/Vectors/Maps, syntax-quote establishes a template of the corresponding data structure. Within the template, unqualified forms behave as if recursively syntax-quoted, but forms can be exempted from such recursive quoting by qualifying them with unquote or unquote-splicing, in which case they will be treated as expressions and be replaced in the template by their value, or sequence of values, respectively.
+
+	For example:
+<pre><code>
+	
+	(def x 5)
+	(def lst '(a b c))
+	(fred x ~x lst ~@lst 7 8 :nine)
+
+	> (user/fred user/x 5 user/lst a b c 7 8 :nine)
+		
+</code></pre>	
+
+
 The read table is currently not accessible to user programs.
 
 
@@ -193,6 +198,8 @@ Evaluation can occur in many contexts:
 *	On a sequence of forms read from a stream, via `load` or `load-file`
 *	Programmatically, via `eval`
 
+Clojure programs are composed of expressions. Every form not handled specially by a special form or macro is considered by the compiler to be an expression, which is evaluated to yield a value. There are no declarations or statements, although sometimes expressions may be evaluated for their side-effects and their values ignored.
+
 In all cases, evaluation is the same - a single object is considered by the compiler, evaluated, and its result returned. If an expression needs to be compiled, it will be. There is no separate compilation step, nor any need to worry that a function you have defined is being interpreted. *Clojure has no interpreter*.
 
 Strings, numbers, characters, `nil` and keywords evaluate to themselves.
@@ -202,13 +209,13 @@ A Symbol is *resolved*:
 *	If it is namespace-qualified, the value is the value of the binding of the global var named by the symbol. It is an error if there is no global var named by the symbol.
 *	Else, it is not namespace-qualified and the first of the following applies:
  	1. If it names a special form it is considered a special form, and must be utilized accordingly.
-	2. A lookup is done in the *imports* map to see if there is a mapping from the symbol to a fully qualified class name. If so, the symbol is considered to name a class. Note that class names are not first-class objects and are only valid in certain special forms.
+	2. A lookup is done in the \*imports\* map to see if there is a mapping from the symbol to a fully qualified class name. If so, the symbol is considered to name a Java class. Note that class names are not first-class objects and are only valid in certain special forms.
 	3. If in a local scope (i.e. in a function definition), a lookup is done to see if it names a local binding (e.g. a function argument or let-bound name). If so, the value is the value of the local binding.
-	4. A lookup is done in the *refers* map to see if there is a mapping from the symbol to a global var. If so, the value is the value of the binding of the global var referred-to by the symbol.
-	5. A lookup is done to see if there is a global var with a namespace equal to the *current-namespace* and the same name as the symbol. If so, the value is the value of the binding of the global var named by symbol *current-namespace*/symbol-name.
+	4. A lookup is done in the \*refers\* map to see if there is a mapping from the symbol to a global var. If so, the value is the value of the binding of the global var referred-to by the symbol.
+	5. A lookup is done to see if there is a global var with a namespace equal to the `*current-namespace*` and the same name as the symbol. If so, the value is the value of the binding of that global var.
 	6. It is an error.
 	
-If the Symbol has metadata, it may be used by the compiler, but will not be part of the resulting value.
+If a Symbol has metadata, it may be used by the compiler, but will not be part of the resulting value.
 
 Vectors and Maps yield vectors and maps whose contents are the *evaluated values* of the objects they contain. The same is true of metadata maps. If the vector or map has metadata, the *evaluated* metadata map will become the metadata of the resulting value.
 
@@ -217,7 +224,7 @@ Vectors and Maps yield vectors and maps whose contents are the *evaluated values
 (def y 2)
 #^{:x x} [x y 3]
 
-^{:x 1} [1 2 3]
+#^{:x 1} [1 2 3]
 </code></pre>	
 
 An empty list `()` evaluates to an empty list.
@@ -226,19 +233,19 @@ Non-empty Lists are considered *calls* to either special forms, macros, or funct
 
 Special forms are primitives built-in to Clojure that perform core operations. If the operator of a call is a symbol that resolves to the name of a special form, the call is to that special form. Each form discussed individually under [Special Forms](#specialforms).
 
-Macros are functions that manipulate forms, allowing for syntactic abstraction. If the operator of a call is a symbol that names a global var that is a macro function, that function is called and is passed the *unevaluated* operand forms. The return value of the macro is then evaluated in its place.
+Macros are functions that manipulate forms, allowing for syntactic abstraction. If the operator of a call is a symbol that names a global var that is a macro function, that macro function is called and is passed the *unevaluated* operand forms. The return value of the macro is then evaluated in its place.
 
-If the operator is not a special form or macro, the call is considered a function call, and it and the operands (if any) are evaluated, from left to right. The result of the evaluation of the operator is then cast to IFn (the interface representing Clojure functions), and invoke() is called on it, passing the evaluated arguments. The return value of invoke() is the value of the call expression. If the function call form has metadata, it may be used by the compiler, but will not be part of the resulting value.
+If the operator is not a special form or macro, the call is considered a function call. Both the operator and the operands (if any) are evaluated, from left to right. The result of the evaluation of the operator is then cast to IFn (the interface representing Clojure functions), and invoke() is called on it, passing the evaluated arguments. The return value of invoke() is the value of the call expression. If the function call form has metadata, it may be used by the compiler, but will not be part of the resulting value.
 
 Note that special forms and macros might have other-than-normal evaluation of their arguments, as described in their entries under [Special Forms](#specialforms).
 
-The above describes the evaluation of a single form. `load` and `load-file` will sequentially evaluate the set of forms contained in the stream/file. Such sets of forms usually have side effects, often on the global environment, defining functions etc. The loading functions occur in a temporary context, in which *current-namespace*, *imports* and *refers* all have fresh bindings. That means that, should any form have an effect on those vars (e.g. `in-namespace, refers, import`), the effect will unwind at the completion of the load. 
+The above describes the evaluation of a single form. `load` and `load-file` will sequentially evaluate the set of forms contained in the stream/file. Such sets of forms usually have side effects, often on the global environment, defining functions etc. The loading functions occur in a temporary context, in which `*current-namespace*`, `*imports*` and `*refers*` all have fresh bindings. That means that, should any form have an effect on those vars (e.g. `in-namespace, refers, import`), the effect will unwind at the completion of the load. 
 
 <h2 id="specialforms">Special Forms</h2>
 
 ---
 ### (*def* symbol init?)
-Creates or locates a global var with the name of `symbol` and a namespace of the value of `*current-namespace*`. If `init` is supplied, it is evaluated, and the root binding of the var is set to the resulting value. If `init` is not supplied, the root binding of var is unaffected. `def` always applies to the root binding, even if the var is thread-bound at the point where def is called.
+Creates or locates a global var with the name of `symbol` and a namespace of the value of `*current-namespace*`. If `init` is supplied, it is evaluated, and the root binding of the var is set to the resulting value. If `init` is not supplied, the root binding of the var is unaffected. `def` always applies to the root binding, even if the var is thread-bound at the point where def is called. `def` yields the var itself *(not its value)*.
 
 ---
 ### (*if* test then else?)
@@ -252,7 +259,7 @@ Evaluates the expressions in order and returns the value of the last. If no expr
 ### (*let* [bindings* ] exprs*)
 binding => symbol init-expr
 
-Evaluates the exprs in a context in which the symbols are bound to their respective init-exprs. The bindings are sequential, so each binding can see the prior bindings. The exprs are contained in an implicit `do`.
+Evaluates the exprs in a context in which the symbols are bound to their respective init-exprs. The bindings are sequential, so each binding can see the prior bindings. The exprs are contained in an implicit `do`. If a binding symbol is annotated with a metadata tag, the compiler will try to resolve the tag to a class name and presume that type in subsequent references to the binding.
 
 <pre><code>
 (let [x 1 y x] y)
@@ -262,7 +269,7 @@ Evaluates the exprs in a context in which the symbols are bound to their respect
 
 ---
 ### (*quote* form)
-Yields the unevaluated form
+Yields the unevaluated form.
 
 <pre><code>
 '(a b c)
@@ -274,20 +281,22 @@ Note there is no attempt made to call the function `a`. The return value is a li
 
 ---
 ### (*the-var* symbol)
-The symbol must resolve to a var, and the Var object itself (not its value) is returned.
+The symbol must resolve to a var, and the Var object itself *(not its value)* is returned.
 
 ---
 ### (*fn* [params* ] exprs*)
 ### (*fn* ([params* ] exprs*)+)
 params => positional-params* , or positional-params* `&` rest-param
 
-param => symbol
+positional-param => symbol
 
-Defines a function (fn). Fns are first-class objects that implement the IFn interface. The IFn interface defines an invoke() function that is overloaded with arity ranging from 0-20. A single fn object can implement one or more invoke points, and thus be overloaded on arity. One and only one overload can itself be variadic, by specifying the ampersand followed by a single rest-param. Such a variadic entry point, when called with arguments that exceed the positional params, will find them in a seq contained in the rest arg. If the supplied args do not exceed the positional params, the rest arg will be nil.
+rest-param => symbol
 
-The first form defines a fn with a single entry point. The second defines a fn with one or more overloads. The arities of the overloads must be distinct. In either case, the result of the expression is a single fn object.
+Defines a function (fn). Fns are first-class objects that implement the IFn interface. The IFn interface defines an invoke() function that is overloaded with arity ranging from 0-20. A single fn object can implement one or more invoke methods, and thus be overloaded on arity. One and only one overload can itself be variadic, by specifying the ampersand followed by a single rest-param. Such a variadic entry point, when called with arguments that exceed the positional params, will find them in a seq contained in the rest param. If the supplied args do not exceed the positional params, the rest param will be nil.
 
-The exprs are enclosed in an implicit `do`. The symbol `this-fn` is bound within the function definition to the function object itself, allowing for self-calling, even in anonymous functions.
+The first form defines a fn with a single invoke method. The second defines a fn with one or more overloaded invoke methods. The arities of the overloads must be distinct. In either case, the result of the expression is a single fn object.
+
+The exprs are compiled in an environment in which the params are bound to the actual arguments. The exprs are enclosed in an implicit `do`. The reserved symbol `this-fn` is bound within the function definition to the function object itself, allowing for self-calling, even in anonymous functions. If a param symbol is annotated with a metadata tag, the compiler will try to resolve the tag to a class name and presume that type in subsequent references to the binding.
 
 <pre><code>
 (def *
@@ -295,7 +304,7 @@ The exprs are enclosed in an implicit `do`. The symbol `this-fn` is bound within
       ([x] x)
       ([x y] (. Num (multiply x y)))
       ([x y & more]
-          (apply thisfn (thisfn x y) more))))
+          (apply this-fn (this-fn x y) more))))
 </code></pre>
 
 A fn (overload) defines a recursion point at the top of the function, with arity equal to the number of params *including the rest param, if present*. See `recur`.
@@ -308,9 +317,9 @@ A fn (overload) defines a recursion point at the top of the function, with arity
 ---
 ### (*recur* exprs*)
 
-Evaluates the exprs in order, then, in parallel, rebinds the bindings of the recursion point to the values of the exprs. If the recursion point was a fn, then it rebinds the params. If the recursion point was a `loop`, then it rebinds the loop bindings. Execution then jumps back to the recursion point. The `recur` expression must match the arity of the recursion point exactly. In particular, if the recursion point was the top of a variadic function, there is no gathering of rest args, a single seq (or null) should be passed. `recur` in other than a tail position is an error.
+Evaluates the exprs in order, then, in parallel, rebinds the bindings of the recursion point to the values of the exprs. If the recursion point was a fn method, then it rebinds the params. If the recursion point was a `loop`, then it rebinds the loop bindings. Execution then jumps back to the recursion point. The `recur` expression must match the arity of the recursion point exactly. In particular, if the recursion point was the top of a variadic fn method, there is no gathering of rest args - a single seq (or null) should be passed. `recur` in other than a tail position is an error.
 
-Note that `recur` is the only non-stack-consuming looping construct in Clojure. There is no tail-call optimization and the use of self-calls for looping is discouraged. `recur` is functional and its use in tail-position is verified by the compiler.
+Note that `recur` is the only non-stack-consuming looping construct in Clojure. There is no tail-call optimization and the use of self-calls for looping of unknown bounds is discouraged. `recur` is functional and its use in tail-position is verified by the compiler.
 
 <pre><code>
 (def factorial 
@@ -335,19 +344,19 @@ If the second operand is a symbol it is taken to be a field access - the name of
 
 If the second operand is a list it is taken to be a method call. The first element of the list must be a simple symbol, and the name of the method is the name of the symbol. The args, if any, are evaluated from left to right, and passed to the matching method, which is called, and its value returned. If the method has a void return type, the value of the expression will be `nil`. 
 
-Note that boolean return values will be turned into nil/non-nil, chars will become Characters, and numeric primitives will become Clojure Nums.
+Note that boolean return values will be turned into `nil` or non-nil, chars will become Characters, and numeric primitives will become Clojure Nums.
 
 ---
 ### (*new* Classname-symbol args*)
-The args, if any, are evaluated from left to right, and passed to the constructor of the class named by the symbol. The constructed object returned.
+The args, if any, are evaluated from left to right, and passed to the constructor of the class named by the symbol. The constructed object is returned.
 
 ---
 ### (*class* Classname-symbol)
-Yields the java.lang.Class corresponding to the symbol.
+Yields the java.lang.Class object corresponding to the symbol.
 
 ---
 ### (*instance?* expr Classname-symbol)
-Evaluates expr and tests if it is an instance of the class named by the symbol.
+Evaluates expr and tests if it is an instance of the class named by the symbol. Returns `nil` or non-nil
 
 ---
 ### (*throw* expr)
@@ -365,11 +374,11 @@ Assignment.
 
 When the first operand is a field member access form, the assignment is to the corresponding field. If it is an instance field, the instance expr will be evaluated, then the expr.
 
-When the first operand is a symbol, it must resolve to a global var. The value of the vars current thread binding is set to the value of expr. Currently, it is an error to attempt to set the root binding of a var using `=`, i.e. var assignments are thread-local.
+When the first operand is a symbol, it must resolve to a global var. The value of the var's current thread binding is set to the value of expr. Currently, it is an error to attempt to set the root binding of a var using `=`, i.e. var assignments are thread-local.
 
 In all cases the value of expr is returned.
 
-Note - *you cannot assign to function params or local bindings*.
+Note - *you cannot assign to function params or local bindings. Only Java fields, Var and Refs are mutable in Clojure*.
 
 ---
 ### (*monitor-enter* x)
@@ -392,10 +401,10 @@ Clojure has a rich set of data structures. They share a set of properties:
 	*	Implement Iterable
 
 ### nil
-While not properly a data structure, `nil` is a valid value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
+Not properly a data structure, `nil` is a valid value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
 
 ### Nums
-All Clojure numbers are derived from Num, which in turn is derived from java.lang.Number. There are 4 types:
+All Clojure numbers are derived from clojure.lang.Num, which in turn is derived from java.lang.Number. There are 4 types:
 
 * 	FixNum
 	
@@ -411,7 +420,7 @@ All Clojure numbers are derived from Num, which in turn is derived from java.lan
 	
 *	RatioNum
 
-	Represents a ratio between integers. Division of integers that can't be reduced to an integer yields a ratio, i.e. 22/7 = 22/7, rater than a floating point value.
+	Represents a ratio between integers. Division of integers that can't be reduced to an integer yields a ratio, i.e. 22/7 = 22/7, rather than a floating point value.
 	
 Any numeric operation involving DoubleNums yields a DoubleNum. 
 
@@ -425,7 +434,32 @@ Clojure characters are Java `Characters`.
 Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional namespaces, both of which are strings. The leading ':' is not part of the namespace or name.
 
 ### Symbols
-Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional namespaces, both of which are strings.
+Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional namespaces, both of which are strings. Symbols can have metadata.
+
+### Collections
+
+All of the Clojure collections are immutable and [persistent][pd]. In particular, the Clojure collections support efficient creation of 'modified' versions, by utilizing structural sharing, and make all of their performance bound guarantees for persistent use. The collections are efficient and inherently thread-safe. Collections are represented by abstractions, and there may be one or more concrete realizations. In particular, since 'modification' operations yield new collections, the new collection might not have the same concrete type as the source collection, but will have the same logical (interface) type. All the collections support these functions:
+
+---
+### (*count* coll)
+Returns the number of items in the collection. `(count nil)` returns `0`.
+
+---
+### (*conj* coll item)
+Conj[oin]. Returns a new collection with the item added. `(conj nil item)` returns `(item)`.
+
+---
+### (*seq* coll)
+Sequence. Returns a new ISeq on the collection. If the collection is empty, returns `nil`. `(seq nil)` returns `nil`.
+
+
+### Lists (IPersistentList)
+	
+### Maps (IPersistentMap)
+	
+### Vectors (IPersistentVector)
+
+<h2 id="metadata">Metadata</h2>
 
 <h2 id="sequences">Sequences</h2>
 <h2 id="vars">Vars and the Global Environment</h2>
