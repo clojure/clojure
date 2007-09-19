@@ -11,10 +11,6 @@
 package clojure.lang;
 
 
-public interface IPersistentList extends IPersistentCollection, Sequential {
-
-    Object peek();
-
-    IPersistentList pop();
+public interface IPersistentList extends Sequential, IStack{
 
 }

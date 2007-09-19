@@ -10,7 +10,7 @@ package clojure.lang;
  * You must not remove this notice, or any other, from this software.
  */
 
-public interface IPersistentVector extends Associative, Sequential{
+public interface IPersistentVector extends Associative, Sequential, IStack{
 int length();
 
 Object nth(int i);

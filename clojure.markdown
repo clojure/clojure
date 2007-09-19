@@ -217,7 +217,7 @@ A Symbol is *resolved*:
 	
 If a Symbol has metadata, it may be used by the compiler, but will not be part of the resulting value.
 
-Vectors and Maps yield vectors and maps whose contents are the *evaluated values* of the objects they contain. The same is true of metadata maps. If the vector or map has metadata, the *evaluated* metadata map will become the metadata of the resulting value.
+Vectors and Maps yield vectors and (hash) maps whose contents are the *evaluated values* of the objects they contain. The same is true of metadata maps. If the vector or map has metadata, the *evaluated* metadata map will become the metadata of the resulting value.
 
 <pre><code>
 (def x 1)
@@ -400,10 +400,10 @@ Clojure has a rich set of data structures. They share a set of properties:
 	*	Support metadata
 	*	Implement Iterable
 
-### nil
-Not properly a data structure, `nil` is a valid value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
+### _nil_
+`nil` is a possible value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
 
-### Nums
+### _Nums_
 All Clojure numbers are derived from clojure.lang.Num, which in turn is derived from java.lang.Number. There are 4 types:
 
 * 	FixNum
@@ -424,13 +424,13 @@ All Clojure numbers are derived from clojure.lang.Num, which in turn is derived 
 	
 Any numeric operation involving DoubleNums yields a DoubleNum. 
 
-### Strings
+### _Strings_
 Clojure strings are Java `Strings`.
 
-### Characters
+### _Characters_
 Clojure characters are Java `Characters`.
 
-### Keywords
+### _Keywords_
 Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional namespaces, both of which are strings. The leading ':' is not part of the namespace or name. Keywords implement IFn, for invoke() of one argument, which they expect to be a map, in which they look themselves up, i.e. keywords are functions of maps.
 
 <pre><code>
@@ -440,7 +440,7 @@ Keywords are symbolic identifiers that evaluate to themselves. They provide very
 > 2
 </code></pre>
 
-### Symbols
+### _Symbols_
 Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional namespaces, both of which are strings. Symbols can have metadata.
 
 ### _Collections_
@@ -453,7 +453,7 @@ Returns the number of items in the collection. `(count nil)` returns `0`.
 
 ---
 ### (*conj* coll item)
-Conj[oin]. Returns a new collection with the item 'added'. `(conj nil item)` returns `(item)`.
+Conj[oin]. Returns a *new* collection with the item 'added'. `(conj nil item)` returns `(item)`.
 
 ---
 ### (*seq* coll)
@@ -477,9 +477,18 @@ Returns a new list without the first item. If the list is empty, throws an excep
 		
 ### _Maps_ (IPersistentMap)
 
-Map keys to values. Two different map types are provided - hashed and sorted. Hash maps require keys that correctly support hashCode and equals. Sorted maps require keys that implement Comparable, or an instance of Comparator. Hash maps provide faster access O(log32N) vs O(logN), but sorted maps are, well, sorted. `count` is O(1). `conj` expects another (possibly single entry) map as the item, and returns a new map which is the old map plus the entries from the new, which may overwrite entries of the old. `seq` returns a sequence of map entries, which are key/value pairs. Maps implement IFn, for invoke() of one argument, which they presume is a key and look up in themselves, i.e. maps are functions of their keys. 
+Map keys to values. Two different map types are provided - hashed and sorted. Hash maps require keys that correctly support hashCode and equals. Sorted maps require keys that implement Comparable, or an instance of Comparator. Hash maps provide faster access O(log32N) vs O(logN), but sorted maps are, well, sorted. `count` is O(1). `conj` expects another (possibly single entry) map as the item, and returns a new map which is the old map plus the entries from the new, which may overwrite entries of the old. `seq` returns a sequence of map entries, which are key/value pairs. Sorted map also supports `rseq`, which returns the entries in reverse order. Maps implement IFn, for invoke() of one argument, which they presume is a key and look up in themselves, i.e. maps are functions of their keys. 
 
-They share these functions:
+Map functions:
+
+---
+### (*hash-map* & keyvals*)
+### (*sorted-map* & keyvals*)
+### (*sorted-map-by* comparator & keyvals*)
+
+keyval => key val
+
+Returns a new hash/sorted map with supplied mappings.
 
 ---
 ### (*assoc* map key val)
@@ -509,7 +518,8 @@ Returns a sequence of the map's keys.
 ### (*vals* map)
 Returns a sequence of the map's values.
 	
-### Vectors (IPersistentVector)
+### _Vectors (IPersistentVector)_
+
 
 
 <h2 id="metadata">Metadata</h2>

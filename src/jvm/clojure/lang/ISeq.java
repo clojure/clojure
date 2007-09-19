@@ -12,15 +12,15 @@ package clojure.lang;
 
 /**
  * A persistent, functional, sequence interface
- * 
+ * <p/>
  * ISeqs are immutable values, i.e. neither first(), nor rest() changes
  * or invalidates the ISeq
  */
-public interface ISeq extends IPersistentList{
+public interface ISeq extends IPersistentCollection{
 
-Object first() ;
+Object first();
 
-ISeq rest() ;
+ISeq rest();
 
 ISeq cons(Object o);
 

@@ -51,13 +51,13 @@ public int hashCode(){
 	return _hash;
 }
 
-public Object peek(){
-	return first();
-}
-
-public IPersistentList pop(){
-	return rest();
-}
+//public Object peek(){
+//	return first();
+//}
+//
+//public IPersistentList pop(){
+//	return rest();
+//}
 
 public int count(){
 	return 1 + RT.count(rest());

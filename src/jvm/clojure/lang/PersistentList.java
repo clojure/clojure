@@ -13,7 +13,7 @@ package clojure.lang;
 import java.util.List;
 import java.util.ListIterator;
 
-public class PersistentList extends ASeq{
+public class PersistentList extends ASeq implements IPersistentList{
 
 private final Object _first;
 private final PersistentList _rest;
@@ -50,6 +50,10 @@ public Object first(){
 
 public ISeq rest(){
 	return _rest;
+}
+
+public Object peek(){
+	return first();
 }
 
 public IPersistentList pop(){

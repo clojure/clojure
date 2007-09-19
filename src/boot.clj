@@ -202,6 +202,13 @@
 (defn count [coll]
   (. RT (count coll)))
 
+;;list stuff
+(defn peek [list]
+  (. RT (peek list)))
+
+(defn pop [list]
+  (. RT (pop list)))
+
 ;;map stuff
 
 (defn contains [coll key]
@@ -224,6 +231,9 @@
 
 (defn vals [map]
   (. RT (vals map)))
+
+(defn rseq [smap]
+  (. smap (rseq)))
 
 (defn andfn [& args]
       (if (nil? (rest args))

@@ -493,7 +493,8 @@ static class ListReader extends AFn{
 		List list = readDelimitedList(')', r, true);
 		if(list.isEmpty())
 			return PersistentList.EMPTY;
-		IObj s = (IObj) RT.seq(list);
+		IObj s = (IObj) PersistentList.create(list);
+//		IObj s = (IObj) RT.seq(list);
 		if(line != -1)
 			return s.withMeta(RT.map(LINE_KEY, line));
 		else
