@@ -17,6 +17,14 @@
       ([& args]
           (. clojure.lang.PersistentHashMap (create args))))
 
+(defn sorted-map
+      ([& args]
+          (. clojure.lang.PersistentTreeMap (create args))))
+
+(defn sorted-map-by
+      ([comparator & args]
+          (. clojure.lang.PersistentTreeMap (create comparator args))))
+
 (defn meta [#^IObj x]
  (. x (meta)))
 
@@ -208,9 +216,14 @@
 (defn dissoc [coll key]
  (. RT (dissoc coll key)))
 
-(defn count [coll]
- (. RT (count coll)))
+(defn find [coll key]
+ (. RT (find coll key)))
 
+(defn keys [map]
+  (. RT (keys map)))
+
+(defn vals [map]
+  (. RT (vals map)))
 
 (defn andfn [& args]
       (if (nil? (rest args))

@@ -13,7 +13,7 @@
 package clojure.lang;
 
 
-public class Symbol extends Obj{
+public class Symbol extends Obj implements Comparable{
 //these must be interned strings!
 public final String ns;
 public final String name;
@@ -76,5 +76,19 @@ private Symbol(IPersistentMap meta, String ns, String name){
 	this.name = name;
 	this.ns = ns;
 	this.hash = RT.hashCombine(name.hashCode(), RT.hash(ns));
+}
+
+public int compareTo(Object o){
+	Symbol s = (Symbol) o;
+	if(this.equals(o))
+		return 0;
+	if(this.ns == null && s.ns != null)
+		return -1;
+	if(this.ns != null && s.ns == null)
+		return 1;
+	int nsc = this.name.compareTo(s.name);
+	if(nsc != 0)
+		return nsc;
+	return this.name.compareTo(s.name);
 }
 }

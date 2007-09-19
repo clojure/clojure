@@ -10,7 +10,7 @@
 
 package clojure.lang;
 
-public abstract class APersistentMap extends Obj implements IPersistentMap{
+public abstract class APersistentMap extends AFn implements IPersistentMap{
 int _hash = -1;
 
 
@@ -128,4 +128,8 @@ static public class ValSeq extends ASeq{
 	}
 }
 
+
+public Object invoke(Object arg1) throws Exception{
+	return valAt(arg1);
+}
 }

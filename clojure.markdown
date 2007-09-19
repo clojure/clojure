@@ -431,12 +431,19 @@ Clojure strings are Java `Strings`.
 Clojure characters are Java `Characters`.
 
 ### Keywords
-Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional namespaces, both of which are strings. The leading ':' is not part of the namespace or name.
+Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional namespaces, both of which are strings. The leading ':' is not part of the namespace or name. Keywords implement IFn, for invoke() of one argument, which they expect to be a map, in which they look themselves up, i.e. keywords are functions of maps.
+
+<pre><code>
+(def m {:a 1 :b 2 :c 3})
+
+(:b m)
+> 2
+</code></pre>
 
 ### Symbols
 Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional namespaces, both of which are strings. Symbols can have metadata.
 
-### Collections
+### _Collections_
 
 All of the Clojure collections are immutable and [persistent][pd]. In particular, the Clojure collections support efficient creation of 'modified' versions, by utilizing structural sharing, and make all of their performance bound guarantees for persistent use. The collections are efficient and inherently thread-safe. Collections are represented by abstractions, and there may be one or more concrete realizations. In particular, since 'modification' operations yield new collections, the new collection might not have the same concrete type as the source collection, but will have the same logical (interface) type. All the collections support these functions:
 
@@ -446,18 +453,64 @@ Returns the number of items in the collection. `(count nil)` returns `0`.
 
 ---
 ### (*conj* coll item)
-Conj[oin]. Returns a new collection with the item added. `(conj nil item)` returns `(item)`.
+Conj[oin]. Returns a new collection with the item 'added'. `(conj nil item)` returns `(item)`.
 
 ---
 ### (*seq* coll)
 Sequence. Returns a new ISeq on the collection. If the collection is empty, returns `nil`. `(seq nil)` returns `nil`.
 
 
-### Lists (IPersistentList)
-	
-### Maps (IPersistentMap)
+### _Lists (IPersistentList)_
+Lists are collections. They implement the ISeq interface directly. `count` is O(1). `conj` puts the item at the front of the list. In addition, lists support the functions:
+
+---
+### (*list*  & items)
+Creates a new list containing the items.
+
+---
+### (*peek* list)
+Same as `first`. Returns the first item in the list. If the list is empty, returns `nil`.
+
+---
+### (*pop* list)
+Returns a new list without the first item. If the list is empty, throws an exception. Note - *not* the same as `rest`.
+		
+### _Maps_ (IPersistentMap)
+
+Map keys to values. Two different map types are provided - hashed and sorted. Hash maps require keys that correctly support hashCode and equals. Sorted maps require keys that implement Comparable, or an instance of Comparator. Hash maps provide faster access O(log32N) vs O(logN), but sorted maps are, well, sorted. `count` is O(1). `conj` expects another (possibly single entry) map as the item, and returns a new map which is the old map plus the entries from the new, which may overwrite entries of the old. `seq` returns a sequence of map entries, which are key/value pairs. Maps implement IFn, for invoke() of one argument, which they presume is a key and look up in themselves, i.e. maps are functions of their keys. 
+
+They share these functions:
+
+---
+### (*assoc* map key val)
+Assoc[iate]. Returns a new map of the same (hashed/sorted) type, that contains the mapping of key to val.
+
+---
+### (*dissoc* map key)
+Dissoc[iate]. Returns a new map of the same (hashed/sorted) type, that does not contain a mapping for key.
+
+---
+### (*get* map key)
+Returns the value mapped to key, or `nil` if key not present.
+
+---
+### (*contains* map key)
+Returns `nil` if key not present, else non-nil.
+
+---
+### (*find* map key)
+Returns the map entry for key, or `nil` if key not present.
+
+---
+### (*keys* map)
+Returns a sequence of the map's keys.
+
+---
+### (*vals* map)
+Returns a sequence of the map's values.
 	
 ### Vectors (IPersistentVector)
+
 
 <h2 id="metadata">Metadata</h2>
 

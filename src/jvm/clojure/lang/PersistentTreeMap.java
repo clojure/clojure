@@ -28,6 +28,8 @@ public final Comparator comp;
 public final Node tree;
 public final int _count;
 
+final static public PersistentTreeMap EMPTY = new PersistentTreeMap();
+
 public PersistentTreeMap(){
 	this(null);
 }
@@ -36,7 +38,7 @@ public PersistentTreeMap withMeta(IPersistentMap meta){
 	return new PersistentTreeMap(meta, comp, tree, _count);
 }
 
-public PersistentTreeMap(Comparator comp){
+private PersistentTreeMap(Comparator comp){
 	this(null, comp);
 }
 
@@ -53,6 +55,28 @@ PersistentTreeMap(IPersistentMap meta, Comparator comp, Node tree, int _count){
 	this.comp = comp;
 	this.tree = tree;
 	this._count = _count;
+}
+
+static public PersistentTreeMap create(ISeq items){
+	IPersistentMap ret = EMPTY;
+	for(; items != null; items = items.rest().rest())
+		{
+		if(items.rest() == null)
+			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
+		ret = ret.assoc(items.first(), RT.second(items));
+		}
+	return (PersistentTreeMap) ret;
+}
+
+static public PersistentTreeMap create(Comparator comp, ISeq items){
+	IPersistentMap ret = new PersistentTreeMap(comp);
+	for(; items != null; items = items.rest().rest())
+		{
+		if(items.rest() == null)
+			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
+		ret = ret.assoc(items.first(), RT.second(items));
+		}
+	return (PersistentTreeMap) ret;
 }
 
 public boolean contains(Object key){

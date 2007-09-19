@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class Keyword implements IFn{
+public class Keyword implements IFn, Comparable{
 
 private static ConcurrentHashMap<Symbol, Keyword> table = new ConcurrentHashMap();
 public final Symbol sym;
@@ -45,6 +45,11 @@ public Object call() throws Exception{
 public Object invoke() throws Exception{
 	return AFn.throwArity();
 }
+
+public int compareTo(Object o){
+	return sym.compareTo(((Keyword) o).sym);
+}
+
 
 /**
  * Indexer implements IFn for attr access
@@ -170,4 +175,6 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object applyTo(ISeq arglist) throws Exception{
 	return AFn.applyToHelper(this, arglist);
 }
+
+
 }
