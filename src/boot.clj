@@ -186,6 +186,14 @@
 
 (defn identity [x] x)
 
+;;Collection stuff
+
+(defn seq [coll]
+  (. RT (seq coll)))
+
+(defn count [coll]
+  (. RT (count coll)))
+
 ;;map stuff
 
 (defn contains [coll key]
