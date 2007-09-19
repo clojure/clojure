@@ -265,13 +265,13 @@ static public ISeq rrest(Object x){
 static public Object peek(Object x){
 	if(x == null)
 		return null;
-	return ((IStack) x).peek();
+	return ((IPersistentStack) x).peek();
 }
 
 static public Object pop(Object x){
 	if(x == null)
 		return null;
-	return ((IStack) x).pop();
+	return ((IPersistentStack) x).pop();
 }
 
 static public Object get(Object coll, Object key){

@@ -11,6 +11,6 @@
 package clojure.lang;
 
 
-public interface IPersistentList extends Sequential, IStack{
+public interface IPersistentList extends Sequential, IPersistentStack{
 
 }
