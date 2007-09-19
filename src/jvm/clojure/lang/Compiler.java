@@ -515,7 +515,7 @@ static abstract class HostExpr implements Expr{
 					m = byteValueMethod;
 				else if(paramType == short.class)
 					m = shortValueMethod;
-				gen.invokeStatic(NUMBER_TYPE, m);
+				gen.invokeVirtual(NUMBER_TYPE, m);
 				}
 			}
 		else

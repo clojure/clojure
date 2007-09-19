@@ -320,7 +320,7 @@ static public Object dissoc(Object key, Object coll){
 	return ((IPersistentMap) coll).without(key);
 }
 
-static public Object nth(int n, Object coll){
+static public Object nth(Object coll, int n){
 	if(coll == null)
 		return null;
 	else if(coll instanceof IPersistentVector)

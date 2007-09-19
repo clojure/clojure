@@ -80,9 +80,9 @@ public Object nth(int i){
 
 public PersistentVector assocN(int i, Object val){
 	if(i >= 0 && i < cnt)
-		{
 		return new PersistentVector(meta(), cnt, shift, doAssoc(shift, root, i, val));
-		}
+	if(i == cnt)
+		return cons(val);
 	throw new IndexOutOfBoundsException();
 }
 

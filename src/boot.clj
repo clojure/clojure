@@ -209,6 +209,9 @@
 (defn pop [list]
   (. RT (pop list)))
 
+(defn nth [coll index]
+ (. RT (nth coll index)))
+
 ;;map stuff
 
 (defn contains [coll key]

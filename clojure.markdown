@@ -474,6 +474,30 @@ Same as `first`. Returns the first item in the list. If the list is empty, retur
 ---
 ### (*pop* list)
 Returns a new list without the first item. If the list is empty, throws an exception. Note - *not* the same as `rest`.
+
+### _Vectors (IPersistentVector)_
+Vectors are collections. They are sequences of values indexed by contiguous integers. Vectors support O(log32N) access to items by index. `count` is O(1). `conj` puts the item at the end of the vector. In addition, vectors support the functions:
+
+---
+### (*vector*  & items)
+Creates a new vector containing the items.
+
+---
+### (*assoc* vector index val)
+Assoc[iate]. Returns a new vector that contains val at index. Note - index must be <= (count vector).
+
+---
+### (*get* map index)
+### (*nth* map index)
+Returns the value at the index. `get` returns `nil` if index out of bounds, `nth` throws an exception.
+
+---
+### (*peek* vector)
+Returns the last item in the vector. If the vector is empty, returns `nil`.
+
+---
+### (*pop* vector)
+Returns a new vector without the last item. If the vector is empty, throws an exception.
 		
 ### _Maps_ (IPersistentMap)
 
