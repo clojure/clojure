@@ -906,7 +906,7 @@ static class QuoteExpr extends LiteralExpr{
 				return new StringExpr((String) v);
 			else if(fclass == Character.class)
 				return new CharExpr((Character) v);
-			else if(v instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
+			else if(v instanceof IPersistentCollection && ((IPersistentCollection) v).count() == 0)
 				return new EmptyExpr(v);
 			else
 				return new QuoteExpr(v);
