@@ -894,7 +894,22 @@ static class QuoteExpr extends LiteralExpr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form){
 			Object v = RT.second(form);
-			return new QuoteExpr(v);
+
+			if(v == null)
+				return NIL_EXPR;
+			Class fclass = v.getClass();
+			if(fclass == Keyword.class)
+				return registerKeyword((Keyword) v);
+			else if(v instanceof Num)
+				return new NumExpr((Num) v);
+			else if(fclass == String.class)
+				return new StringExpr((String) v);
+			else if(fclass == Character.class)
+				return new CharExpr((Character) v);
+			else if(v instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
+				return new EmptyExpr(v);
+			else
+				return new QuoteExpr(v);
 		}
 	}
 }
