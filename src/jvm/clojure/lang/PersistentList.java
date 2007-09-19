@@ -28,13 +28,6 @@ public PersistentList(Object first){
 	this._count = 1;
 }
 
-PersistentList(Object first, PersistentList rest){
-	this._first = first;
-	this._rest = rest;
-
-	this._count = 1 + rest.count();
-}
-
 PersistentList(IPersistentMap meta, Object _first, PersistentList _rest, int _count){
 	super(meta);
 	this._first = _first;
@@ -59,12 +52,18 @@ public ISeq rest(){
 	return _rest;
 }
 
+public IPersistentList pop(){
+	if(_rest == null)
+		return EMPTY.withMeta(meta());
+	return _rest;
+}
+
 public int count(){
 	return _count;
 }
 
 public ISeq cons(Object o){
-	return new PersistentList(o, this);
+	return new PersistentList(meta(), o, this, _count + 1);
 }
 
 public PersistentList withMeta(IPersistentMap meta){
@@ -78,13 +77,17 @@ static class EmptyList extends PersistentList{
 	}
 
 	public ISeq cons(Object o){
-		return new PersistentList(o, null);
+		return new PersistentList(meta(), o, null, 1);
 	}
 
 	public PersistentList withMeta(IPersistentMap meta){
 		if(meta != meta())
 			return new EmptyList(meta);
 		return this;
+	}
+
+	public IPersistentList pop(){
+		throw new IllegalStateException("Can't pop empty list");
 	}
 
 	public ISeq seq(){
