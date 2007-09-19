@@ -476,7 +476,7 @@ Same as `first`. Returns the first item in the list. If the list is empty, retur
 Returns a new list without the first item. If the list is empty, throws an exception. Note - *not* the same as `rest`.
 
 ### _Vectors (IPersistentVector)_
-Vectors are collections. They are sequences of values indexed by contiguous integers. Vectors support O(log32N) access to items by index. `count` is O(1). `conj` puts the item at the end of the vector. In addition, vectors support the functions:
+Vectors are collections. They are sequences of values indexed by contiguous integers. Vectors support O(log32N) access to items by index. `count` is O(1). `conj` puts the item at the end of the vector. Vectors also support `rseq`, which returns the items in reverse order. Vectors implement IFn, for invoke() of one argument, which they presume is an index and look up in themselves as if by `nth`, i.e. vectors are functions of their indices.  In addition, vectors support the functions:
 
 ---
 ### (*vector*  & items)
@@ -541,9 +541,6 @@ Returns a sequence of the map's keys.
 ---
 ### (*vals* map)
 Returns a sequence of the map's values.
-	
-### _Vectors (IPersistentVector)_
-
 
 
 <h2 id="metadata">Metadata</h2>

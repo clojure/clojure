@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public class PersistentVector extends Obj implements IPersistentVector, Iterable{
+public class PersistentVector extends AFn implements IPersistentVector, Iterable{
 final int cnt;
 final int shift;
 final Object[] root;
@@ -160,6 +160,10 @@ public int hashCode(){
 
 public PersistentVector withMeta(IPersistentMap meta){
 	return new PersistentVector(meta, cnt, shift, root);
+}
+
+public Object invoke(Object arg1) throws Exception{
+	return nth(((Number) arg1).intValue());
 }
 
 public Iterator iterator(){
