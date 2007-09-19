@@ -81,7 +81,7 @@ That said, most Clojure programs begin life as text files, and it is the task of
 
 One might say the reader has syntax defined in terms of characters, and the Clojure language has syntax defined in terms of symbols, lists, vectors, maps etc. The reader is represented by the function `read`, which reads the next form (not character) from a stream, and returns the object represented by that form.
 
-	Since we have to start somewhere, we might as well start where evaluation starts, with the reader forms. This will inevitably entail talking about data structures whose descriptive details, and interpretation by the compiler, will follow.
+>Since we have to start somewhere, we might as well start where evaluation starts, with the reader forms. This will inevitably entail talking about data structures whose descriptive details, and interpretation by the compiler, will follow.
 
 [hicon]:http://en.wikipedia.org/wiki/Homoiconicity
 	
