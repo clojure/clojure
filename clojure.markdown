@@ -542,10 +542,39 @@ Returns a sequence of the map's keys.
 ### (*vals* map)
 Returns a sequence of the map's values.
 
+<h2 id="sequences">Sequences</h2>
+
+Clojure defines many algorithms in terms of sequences (seqs). A seq is a logical list, and where in most Lisps the list is represented by a concrete, 2-slot structure, Clojure uses the ISeq interface to allow many data structures to offer access to their elements as lists. The `seq` function yields an implementation of ISeq appropriate to the collection. Seqs differ from iterators in that they are immutable, not stateful cursors into a collection. As such, they are useful for much more than foreach - functions can consume and produce seqs, they are thread safe, they can share structure etc.
+
+---
+### (*first* seq)
+Returns the first item in the sequence. Is seq is `nil`, returns `nil`.
+
+---
+### (*rest* seq)
+Returns a seq of the items after the first. If there are no more items, returns `nil`.
+
+---
+### (*cons* item coll)
+Returns a new seq where item is the first element and the sequence of items in coll is the rest of the seq.
 
 <h2 id="metadata">Metadata</h2>
 
-<h2 id="sequences">Sequences</h2>
+Symbols and collections support metadata, a map of data about the symbol or collection. The metadata system allows for arbitrary annotation of data. It is used to convey information to the compiler about types, but can also be used by application developers for many purposes, annotating data sources, entry dates, policy etc.
+
+The important thing to understand about metadata is that it is not considered to be part of the value of an object. As such, *metadata does not impact equality*. Two objects that differ only in metadata are equal.
+
+That said, metadata and its relationship to an object is immutable - an object with different metadata is a different object.
+
+---
+### (*meta* obj)
+### ^obj
+Returns the metadata of obj, returns `nil` if there is no metadata.
+
+---
+### (*with-meta* obj map)
+Returns an object of the same type and value as obj, with map as its metadata.
+
 <h2 id="vars">Vars and the Global Environment</h2>
 <h2 id="refs">Refs and Transactions</h2>
 <h2 id="java">Access to Java</h2>
