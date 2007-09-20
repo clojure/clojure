@@ -13,15 +13,23 @@
 package clojure.lang;
 
 
-public class Symbol extends Obj implements Comparable{
+public class Symbol extends Obj implements Comparable, Named{
 //these must be interned strings!
-public final String ns;
-public final String name;
+final String ns;
+final String name;
 final int hash;
 
 public String toString(){
 	if(ns != null)
 		return ns + "/" + name;
+	return name;
+}
+
+public String getNamespace(){
+	return ns;
+}
+
+public String getName(){
 	return name;
 }
 

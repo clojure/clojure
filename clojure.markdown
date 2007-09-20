@@ -18,11 +18,11 @@ The use and distribution terms for this software are covered by the [Common Publ
 
 ##Contents
 ###Introduction
-Clojure is a dynamic programming language that targets the [Java Virtual Machine][jvm]. It is designed to be a general-purpose language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded server programming. Clojure is a compiled language - it compiles directly to JVM bytecode, yet remains completely dynamic. *Every* feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, and optional type hints with type inference, to ensure that calls to Java can avoid reflection. 
+Clojure is a dynamic programming language that targets the [Java Virtual Machine][jvm]. It is designed to be a general-purpose language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded server programming. Clojure is a compiled language - it compiles directly to JVM bytecode, yet remains completely dynamic. *Every* feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, with *optional* type hints and type inference, to ensure that calls to Java can avoid reflection. 
 
 Clojure is a dialect of Lisp, and shares with Lisp the code-as-data philosophy and a powerful macro system. Clojure is predominantly a [functional programming][fp] language, and features a rich set of immutable, [persistent data structures][pd]. When mutable state is needed, Clojure offers a [software transactional memory][stm] system that ensures clean, correct, multithreaded designs.
 
-I hope you find Clojure's combination of facilities elegant, powerful and fun to use.
+I hope you find Clojure's combination of facilities elegant, powerful, practical and fun to use.
 
 [jvm]:http://java.sun.com/docs/books/jvms/
 [fp]: http://en.wikipedia.org/wiki/Functional_programming
@@ -36,9 +36,11 @@ Rich Hickey
 ###[Reader](#reader)
 ###[Evaluation](#evaluation)
 ###[Special Forms](#specialforms)
+###[Macros](#macros)
 ###[Data Structures](#datastructures)
 ###[Metadata](#metadata)
 ###[Sequences](#sequences)
+###[Namespaces](#namespaces)
 ###[Vars and the Global Environment](#vars)
 ###[Refs and Transactions](#refs)
 ###[Access to Java](#java)			
@@ -46,11 +48,12 @@ Rich Hickey
 
 <h2 id="setup">Setup</h2>
 
-Clojure is [hosted on SourceForge][sf]. <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=137961&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
+Clojure is [hosted on SourceForge][sf]. 
+
+Feedback and discussion should occur on the [Clojure Google Group][cgg].
 
 Clojure is delivered in a zip file containing a single .jar, `clojure.jar`. It requires the [ASM 3.0 bytecode library][asm], and the current alpha distribution does not bundle it. `asm, asm-analysis, asm-commons and asm-util` jars are currently required. [Java][jdk] 1.5 or greater is required.
 
-Feedback and discussion should occur on the [Clojure Google Group][cgg].
 
 [asm]: http://asm.objectweb.org/
 [jdk]: http://java.sun.com/javase/downloads/index.jsp
@@ -89,7 +92,7 @@ One might say the reader has syntax defined in terms of characters, and the Cloj
 ### Reader forms
 * 	Symbols
 
-	Symbols begin with a non-numeric character and can contain alphanumeric characters and *, +, !, -, _, and ? (other characters will be allowed eventually, but not all macro characters have been determined). '/' has special meaning, it can be used once in the middle of a symbol to separate the namespace from the name, e.g. `my-namespace/foo`. '/' by itself names the division function. '.' has special meaning - it can be used one or more times in the middle of a symbol to designate a fully-qualified class name, e.g. `java.util.BitSet`. Symbols beginning with '.' are reserved by Clojure.
+	Symbols begin with a non-numeric character and can contain alphanumeric characters and *, +, !, -, _, and ? (other characters will be allowed eventually, but not all macro characters have been determined). '/' has special meaning, it can be used once in the middle of a symbol to separate the [namespace](#namespaces) from the name, e.g. `my-namespace/foo`. '/' by itself names the division function. '.' has special meaning - it can be used one or more times in the middle of a symbol to designate a fully-qualified class name, e.g. `java.util.BitSet`. Symbols beginning with '.' are reserved by Clojure.
 
 * 	Literals
 	* Strings - Enclosed in `"double quotes"`. Standard Java escape characters.
@@ -378,13 +381,15 @@ When the first operand is a symbol, it must resolve to a global var. The value o
 
 In all cases the value of expr is returned.
 
-Note - *you cannot assign to function params or local bindings. Only Java fields, Var and Refs are mutable in Clojure*.
+Note - *you cannot assign to function params or local bindings. Only Java fields, Vars and Refs are mutable in Clojure*.
 
 ---
 ### (*monitor-enter* x)
 ### (*monitor-exit* x)
 
 These are synchronization primitives that should be avoided in user code. Use the `locking` macro.
+
+<h2 id="macros">Macros</h2>
 
 <h2 id="datastructures">Data Structures</h2>
 
@@ -431,7 +436,7 @@ Clojure strings are Java `Strings`.
 Clojure characters are Java `Characters`.
 
 ### _Keywords_
-Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional namespaces, both of which are strings. The leading ':' is not part of the namespace or name. Keywords implement IFn, for invoke() of one argument, which they expect to be a map, in which they look themselves up, i.e. keywords are functions of maps.
+Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional [namespaces](#namespaces), both of which are strings. The leading ':' is not part of the namespace or name. Keywords implement IFn, for invoke() of one argument, which they expect to be a map, in which they look themselves up, i.e. keywords are functions of maps.
 
 <pre><code>
 (def m {:a 1 :b 2 :c 3})
@@ -441,7 +446,7 @@ Keywords are symbolic identifiers that evaluate to themselves. They provide very
 </code></pre>
 
 ### _Symbols_
-Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional namespaces, both of which are strings. Symbols can have metadata.
+Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional [namespaces](#namespaces), both of which are strings. Symbols can have metadata.
 
 ### _Collections_
 
@@ -560,9 +565,9 @@ Returns a new seq where item is the first element and the sequence of items in c
 
 <h2 id="metadata">Metadata</h2>
 
-Symbols and collections support metadata, a map of data about the symbol or collection. The metadata system allows for arbitrary annotation of data. It is used to convey information to the compiler about types, but can also be used by application developers for many purposes, annotating data sources, entry dates, policy etc.
+Symbols and collections support metadata, a map of data *about* the symbol or collection. The metadata system allows for arbitrary annotation of data. It is used to convey information to the compiler about types, but can also be used by application developers for many purposes, annotating data sources, policy etc.
 
-The important thing to understand about metadata is that it is not considered to be part of the value of an object. As such, *metadata does not impact equality*. Two objects that differ only in metadata are equal.
+An important thing to understand about metadata is that it is not considered to be part of the value of an object. As such, *metadata does not impact equality (or hash codes)*. Two objects that differ only in metadata are equal.
 
 That said, metadata and its relationship to an object is immutable - an object with different metadata is a different object.
 
@@ -575,7 +580,76 @@ Returns the metadata of obj, returns `nil` if there is no metadata.
 ### (*with-meta* obj map)
 Returns an object of the same type and value as obj, with map as its metadata.
 
+
+<h2 id="namespaces">Namespaces</h2>
+
+Symbols and keywords are two-part identifiers - with an optional namespace and a name, both Strings. Namespaces are used to distinguish two symbols that have the same name. Note that namespaces are not first-class - they are not collections of symbols sharing the same prefix, they cannot be enumerated etc. Essentially, namespaces just allow simpler identifiers to be used in contexts where a namespace is either not required (fn params and let-locals) or can be inferred.
+
+---
+### (*name* symbol-or-keyword)
+Returns the name String.
+
+---
+### (*namespace* symbol-or-keyword)
+Returns the namespace String or `nil` if not present.
+
 <h2 id="vars">Vars and the Global Environment</h2>
+Clojure is a practical language that recognizes the occasional need to maintain a persistent reference to a changing value and provides 2 distinct mechanisms for doing so in a controlled manner - Vars and [Refs](*refs). Vars provide a mechanism to refer to a mutable storage location that can be dynamically rebound (to a new storage location), on a per-thread basis. Every Var can (but needn't) have a root binding, which is a binding that is shared by all threads that do not have a per-thread binding. Thus, the value of a Var is the value of its per-thread binding, or, if it is not bound in the thread requesting the value, the value of the root binding, if any.
+
+The special form `def` creates (and [interns](#interning)) a Var. If the Var did not already exist and no initial value is supplied, the var is unbound:
+
+<pre><code>
+	
+(def x)
+Var: user/x
+x
+java.lang.IllegalStateException: Var user/x is unbound.
+
+</code></pre>
+
+Supplying an initial value binds the root (even if it was already bound).
+
+<pre><code>
+	
+(def x 1)
+Var: user/x
+x
+1
+
+</code></pre>
+
+Per-thread bindings for one or more Vars can be established via the macro `binding`:
+
+---
+### (*binding* [bindings* ] exprs*) - Macro
+binding => var-symbol init-expr
+
+Creates new bindings for the (*already-existing*) vars, with the supplied initial values, executes the exprs in an implicit `do`, then re-establishes the bindings that existed before. 
+
+Thus within-thread bindings obey a stack discipline:
+
+<pre><code>
+	
+(def x 1)
+(def y 1)
+(+ x y)
+2
+(binding [x 2 y 3] 
+  (+ x y))
+5
+(+ x y)
+2
+
+</code></pre>
+
+Bindings created with `binding` cannot be seen by any other thread. Bindings created with `binding` can be assigned to, which provides a means for nested contexts to communicate up the call stack.
+
+Functions defined with `defn` are stored in Vars, allowing for the re-definition of functions in a running program. This also enables many of the possibilities of aspect- or context-oriented programming. For instance, you could wrap a function with logging behavior only in certain call contexts or threads. 
+
+<h3 id="interning">Interning</h3>
+	
+The Var system maintains a global map of (namespace-qualified) symbols to Var objects. If a `def` expression does not find an entry in this map for the symbol being `def`-ed, it creates one, otherwise, it uses the existing Var. This find-or-create process is called interning. This means is that, unless they have been `undef`-ed, Var objects are stable references, and need not be looked up every time. It also means that the Var map constitutes a global environment, in which, as described in [Evaluation](#evaluation), the compiler attempts to resolve all free symbols as Vars.
+ 
 <h2 id="refs">Refs and Transactions</h2>
 <h2 id="java">Access to Java</h2>
 <h2 id="lisp">Differences with other Lisps</h2>
@@ -589,3 +663,4 @@ Returns an object of the same type and value as obj, with map as its metadata.
 * `let` is like `let*`
 * There is no tail-call optimization, use `recur`
 
+<a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=137961&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>

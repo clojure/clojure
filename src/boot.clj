@@ -238,6 +238,12 @@
 (defn rseq [smap]
   (. smap (rseq)))
 
+(defn name [#^clojure.lang.Named x]
+  (. x (getName)))
+
+(defn namespace [#^clojure.lang.Named x]
+  (. x (getNamespace)))
+
 (defn andfn [& args]
       (if (nil? (rest args))
           (first args)
@@ -269,3 +275,16 @@
     `(let [~pvar (the-var ~polyfn)]
        (locking ~pvar
                 (. ~pvar (bindRoot (.. ~pvar (getRoot) (assoc ~dispatch-val (fn ~@fn-tail)))))))))
+
+(defmacro binding [bindings & body]
+  (let [var-ize (fn [var-vals]
+                    (loop [ret [] vvs (seq var-vals)]
+                          (if vvs
+                              (recur  (conj (conj ret `(the-var ~(first vvs))) (second vvs))
+                                      (rest (rest vvs)))
+                            (seq ret))))]
+    `(try-finally
+      (do
+          (. Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
+          ~@body)
+      (. Var (popThreadBindings)))))
