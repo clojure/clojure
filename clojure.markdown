@@ -642,7 +642,7 @@ Thus within-thread bindings obey a stack discipline:
 
 </code></pre>
 
-Bindings created with `binding` cannot be seen by any other thread. Bindings created with `binding` can be assigned to, which provides a means for nested contexts to communicate up the call stack.
+Bindings created with `binding` cannot be seen by any other thread. Bindings created with `binding` can be assigned to, which provides a means for nested contexts to communicate with code above it the call stack.
 
 Functions defined with `defn` are stored in Vars, allowing for the re-definition of functions in a running program. This also enables many of the possibilities of aspect- or context-oriented programming. For instance, you could wrap a function with logging behavior only in certain call contexts or threads. 
 

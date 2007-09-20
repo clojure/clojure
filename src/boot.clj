@@ -109,9 +109,8 @@
   ([] nil)
   ([x] x)
   ([x & rest]
-      (let [gor (gensym "or__")]
-        `(let [~gor ~x]
-              (if ~gor ~gor (or ~@rest))))))
+      `(let [or# ~x]
+         (if or# or# (or ~@rest)))))
 
 ;;math stuff
 (defn +

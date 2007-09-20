@@ -46,6 +46,9 @@ static final Symbol SLASH = Symbol.create("/");
 //static Pattern staticMemberPat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
 //static Pattern classNamePat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.");
 
+//symbol->gensymbol
+static Var GENSYM_ENV = Var.create(null);
+
 static
 	{
 	macros['"'] = new StringReader();
@@ -351,9 +354,18 @@ static class MetaReader extends AFn{
 static class SyntaxQuoteReader extends AFn{
 	public Object invoke(Object reader, Object backquote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		Object form = read(r, true, null, true);
+		try
+			{
+			Var.pushThreadBindings(
+					RT.map(GENSYM_ENV, PersistentHashMap.EMPTY));
 
-		return syntaxQuote(form);
+			Object form = read(r, true, null, true);
+			return syntaxQuote(form);
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
 	}
 
 	static Object syntaxQuote(Object form) throws Exception{
@@ -361,7 +373,24 @@ static class SyntaxQuoteReader extends AFn{
 		if(Compiler.isSpecial(form))
 			ret = RT.list(Compiler.QUOTE, form);
 		else if(form instanceof Symbol)
-			ret = RT.list(Compiler.QUOTE, Compiler.resolveSymbol((Symbol) form));
+			{
+			Symbol sym = (Symbol) form;
+			if(sym.ns == null && sym.name.endsWith("#"))
+				{
+				IPersistentMap gmap = (IPersistentMap) GENSYM_ENV.get();
+				if(gmap == null)
+					throw new IllegalStateException("Gensym literal not in syntax-quote");
+				Symbol gs = (Symbol) gmap.valAt(sym);
+				if(gs == null)
+					GENSYM_ENV.set(gmap.assoc(sym, gs = Symbol.intern(null,
+					                                                  sym.name.substring(0, sym.name.length() - 1)
+					                                                  + "_" + RT.nextID())));
+				sym = gs;
+				}
+			else
+				sym = Compiler.resolveSymbol(sym);
+			ret = RT.list(Compiler.QUOTE, sym);
+			}
 		else if(form instanceof Unquote)
 			return ((Unquote) form).o;
 		else if(form instanceof UnquoteSplicing)
