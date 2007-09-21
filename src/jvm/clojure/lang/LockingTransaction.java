@@ -163,7 +163,7 @@ private boolean barge(Info refinfo){
 
 static LockingTransaction getEx(){
 	LockingTransaction t = transaction.get();
-	if(t.info == null)
+	if(t == null || t.info == null)
 		throw new IllegalStateException("No transaction running");
 	return t;
 }

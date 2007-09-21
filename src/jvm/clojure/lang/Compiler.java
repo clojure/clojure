@@ -2651,6 +2651,17 @@ public static Object load(InputStream s) throws Exception{
 }
 
 public static void main(String[] args){
+
+	for(String file : args)
+		try
+			{
+			loadFile(file);
+			}
+		catch(Exception e)
+			{
+			e.printStackTrace();
+			}
+
 	//repl
 	LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
 	OutputStreamWriter w = new OutputStreamWriter(System.out);

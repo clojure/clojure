@@ -287,3 +287,24 @@
           (. Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
           ~@body)
       (. Var (popThreadBindings)))))
+
+;;Refs
+(defn ref [x]
+ (new Ref x))
+
+(defn deref [#^Ref ref]
+  (. ref (get)))
+
+(defn deref! [#^Ref ref]
+  (. ref (currentVal)))
+
+(defn commute [#^Ref ref fun]
+  (. ref (commute fun)))
+
+(defn set [#^Ref ref val]
+  (. ref (set val)))
+
+(defmacro sync [& body]
+  `(. clojure.lang.LockingTransaction
+    (runInTransaction (fn [] ~@body))))
+
