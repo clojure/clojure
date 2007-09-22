@@ -43,7 +43,6 @@ Rich Hickey
 ###[Namespaces](#namespaces)
 ###[Vars and the Global Environment](#vars)
 ###[Refs and Transactions](#refs)
-###[Access to Java](#java)			
 ###[Differences with other Lisps](#lisp)			
 
 <h2 id="setup">Setup</h2>
@@ -460,7 +459,7 @@ Returns the number of items in the collection. `(count nil)` returns `0`.
 
 ---
 ### (*conj* coll item)
-Conj[oin]. Returns a *new* collection with the item 'added'. `(conj nil item)` returns `(item)`.
+Conj[oin]. Returns a *new* collection with the item 'added'. `(conj nil item)` returns `(item)`. This 'addition' may happen at different 'places' depending on the concrete type.
 
 ---
 ### (*seq* coll)
@@ -483,7 +482,7 @@ Same as `first`. Returns the first item in the list. If the list is empty, retur
 Returns a new list without the first item. If the list is empty, throws an exception. Note - *not* the same as `rest`.
 
 ### _Vectors (IPersistentVector)_
-Vectors are collections. They are sequences of values indexed by contiguous integers. Vectors support O(log32N) access to items by index. `count` is O(1). `conj` puts the item at the end of the vector. Vectors also support `rseq`, which returns the items in reverse order. Vectors implement IFn, for invoke() of one argument, which they presume is an index and look up in themselves as if by `nth`, i.e. vectors are functions of their indices.  In addition, vectors support the functions:
+Vectors are collections. They are sequences of values indexed by contiguous integers. Vectors support O(log<sub>32</sub>N) access to items by index. `count` is O(1). `conj` puts the item at the end of the vector. Vectors also support `rseq`, which returns the items in reverse order. Vectors implement IFn, for invoke() of one argument, which they presume is an index and look up in themselves as if by `nth`, i.e. vectors are functions of their indices.  In addition, vectors support the functions:
 
 ---
 ### (*vector*  & items)
@@ -508,7 +507,7 @@ Returns a new vector without the last item. If the vector is empty, throws an ex
 		
 ### _Maps_ (IPersistentMap)
 
-Map keys to values. Two different map types are provided - hashed and sorted. Hash maps require keys that correctly support hashCode and equals. Sorted maps require keys that implement Comparable, or an instance of Comparator. Hash maps provide faster access O(log32N) vs O(logN), but sorted maps are, well, sorted. `count` is O(1). `conj` expects another (possibly single entry) map as the item, and returns a new map which is the old map plus the entries from the new, which may overwrite entries of the old. `seq` returns a sequence of map entries, which are key/value pairs. Sorted map also supports `rseq`, which returns the entries in reverse order. Maps implement IFn, for invoke() of one argument, which they presume is a key and look up in themselves, i.e. maps are functions of their keys. 
+Map keys to values. Two different map types are provided - hashed and sorted. Hash maps require keys that correctly support hashCode and equals. Sorted maps require keys that implement Comparable, or an instance of Comparator. Hash maps provide faster access O(log<sub>32</sub>N) vs O(logN), but sorted maps are, well, sorted. `count` is O(1). `conj` expects another (possibly single entry) map as the item, and returns a new map which is the old map plus the entries from the new, which may overwrite entries of the old. `seq` returns a sequence of map entries, which are key/value pairs. Sorted map also supports `rseq`, which returns the entries in reverse order. Maps implement IFn, for invoke() of one argument, which they presume is a key and look up in themselves, i.e. maps are functions of their keys. 
 
 Map functions:
 
@@ -694,7 +693,7 @@ Creates and returns a Ref with an initial value of `init-val`.
 ### (*sync* transaction-flags exprs*) - Macro
 transaction-flags => TBD, pass `nil` for now
 
-Runs the exprs (in an implicit `do`) in a transaction that encompasses exprs and any nested calls. Starts a transaction if none is already running on this thread. Any exception will abort the transaction and flow out of `sync`. The exprs may be run more than once, but any effects on Refs will be atomic.
+Runs the exprs (in an implicit `do`) in a transaction that encompasses exprs and any nested calls. Starts a transaction if none is already running on this thread. Any uncaught exception will abort the transaction and flow out of `sync`. The exprs may be run more than once, but any effects on Refs will be atomic.
 
 ---
 ### (*deref* ref)
@@ -726,20 +725,28 @@ At the commit point of the transaction, sets the value of ref to be:
 
 Thus `fun` should be commutative, or, failing that, you must accept last-one-in-wins behavior. `commute` allows for more concurrency than `set`.
 
-<h2 id="java">Access to Java</h2>
 <h2 id="lisp">Differences with other Lisps</h2>
-
+This information is provided for programmers familiar with Common Lisp or Scheme.
+ 
 * Clojure is case sensitive
-* Clojure is Lisp-1
+* Clojure is a Lisp-1
 * () is not the same as nil
 * The reader is side-effect free
 * Keywords are not Symbols
 * Symbols are not storage locations (see Var)
 * `nil` is not a Symbol
 * The read table is currently not accessible to user programs
-* `let` is like `let*`
-* There is no tail-call optimization, use `recur`
-* \` does symbol resolution
-* ~ is unquote
+* `let` binds sequentially like `let*`
+* `do` is not a looping construct
+* There is no tail-call optimization, use `recur`.
+* syntax-quote does symbol resolution, so \`x is not the same as ‘x. 
+* \` has auto-gensyms.
+* ~ is unquote ',' is whitespace
+* There is reader syntax for maps and vectors
+* `cons`, `first` and `rest` manipulate sequence abstractions, not concrete cons cells
+* Most data structures are immutable
+* lambda is fn, and supports overloading by arity
+* eql? is the equality predicate
+* All Vars can be dynamically rebound, no `special` declaration. Since Clojure is a Lisp-1, functions can be dynamically rebound.
 
 <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=137961&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
