@@ -384,6 +384,7 @@ public Object valAt(Object key){
 	return null;
 }
 
+/*
 static public void main(String[] args){
 	if(args.length != 3)
 		{
@@ -454,5 +455,5 @@ static public void main(String[] args){
 	System.out.println("Done: " + tv + ", " + tp);
 
 }
-
+  */
 }

@@ -144,6 +144,7 @@ static class Seq extends ASeq{
 	}
 }
 
+/*
 public static void main(String[] args){
 	if(args.length != 1)
 		{
@@ -155,7 +156,6 @@ public static void main(String[] args){
 
 	long startTime, estimatedTime;
 
-	//*
 	Queue list = new LinkedList();
 	//Queue list = new ConcurrentLinkedQueue();
 	System.out.println("Queue");
@@ -174,9 +174,7 @@ public static void main(String[] args){
 	System.out.println("time: " + estimatedTime / 1000000);
 	System.out.println("peek: " + list.peek());
 
-//*/
 
-//*
 	PersistentQueue q = PersistentQueue.EMPTY;
 	System.out.println("PersistentQueue");
 	startTime = System.nanoTime();
@@ -197,19 +195,16 @@ public static void main(String[] args){
 	estimatedTime = System.nanoTime() - startTime;
 	System.out.println("time: " + estimatedTime / 1000000);
 	System.out.println("peek: " + q.peek());
-	//*/
 
 	IPersistentList q2 = q;
 	for(int i = 0; i < 10; i++)
 		{
 		q2 = (IPersistentList) q2.cons(i);
 		}
-/*
-    for(ISeq s = q.seq();s != null;s = s.rest())
-        System.out.println("q: " + s.first().toString());
-    for(ISeq s = q2.seq();s != null;s = s.rest())
-        System.out.println("q2: " + s.first().toString());
-//*/
+//    for(ISeq s = q.seq();s != null;s = s.rest())
+//        System.out.println("q: " + s.first().toString());
+//    for(ISeq s = q2.seq();s != null;s = s.rest())
+//        System.out.println("q2: " + s.first().toString());
 }
-
+*/
 }

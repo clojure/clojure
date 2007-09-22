@@ -166,7 +166,7 @@ public Set<Entry<K, V>> entrySet(){
 		}
 	};
 }
-
+/*
 public static void main(String[] args){
 	try
 		{
@@ -250,5 +250,5 @@ public static void main(String[] args){
 		e.printStackTrace();
 		}
 }
-
+*/
 }

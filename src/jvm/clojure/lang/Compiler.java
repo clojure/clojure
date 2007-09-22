@@ -1845,9 +1845,9 @@ static class FnExpr implements Expr{
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
-		//ClassVisitor cv = cw;
+		ClassVisitor cv = cw;
 		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
-		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
+		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
 		String smap = "SMAP\n" +
@@ -2681,13 +2681,15 @@ public static void main(String[] args){
 				{
 				Var.pushThreadBindings(
 						RT.map(LOADER, new DynamicClassLoader()));
+				w.write("> ");
+				w.flush();
 				Object r = LispReader.read(rdr, false, EOF, false);
 				if(r == EOF)
 					break;
 				Object ret = eval(r);
 				RT.print(ret, w);
 				w.write('\n');
-				w.flush();
+				//w.flush();
 				}
 			catch(Exception e)
 				{

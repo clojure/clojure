@@ -638,12 +638,12 @@ static public void print(Object x, Writer w) throws Exception{
 		w.write(x.toString());
 		w.write('"');
 		}
-	else if(x instanceof ArgVector)
-		{
-		w.write('|');
-		printInnerSeq(seq(x), w);
-		w.write('|');
-		}
+//	else if(x instanceof ArgVector)
+//		{
+//		w.write('|');
+//		printInnerSeq(seq(x), w);
+//		w.write('|');
+//		}
 	else if(x instanceof IPersistentMap)
 		{
 		w.write('{');
@@ -812,7 +812,7 @@ static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
 ///////////////////////////////// values //////////////////////////
 
 static public Object setValues(Object... vals){
-	ThreadLocalData.setValues(vals);
+	//ThreadLocalData.setValues(vals);
 	if(vals.length > 0)
 		return vals[0];
 	return null;

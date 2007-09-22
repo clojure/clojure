@@ -786,7 +786,7 @@ static class ValIterator implements Iterator{
 		throw new UnsupportedOperationException();
 	}
 }
-
+/*
 static public void main(String args[]){
 	if(args.length != 1)
 		System.err.println("Usage: RBTree n");
@@ -907,4 +907,5 @@ static public void main(String args[]){
 //	System.out.println("_count = " + set._count + ", min: " + set.minKey() + ", max: " + set.maxKey()
 //	                   + ", depth: " + set.depth());
 }
+*/
 }

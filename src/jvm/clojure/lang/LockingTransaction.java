@@ -348,7 +348,7 @@ Object doCommute(Ref ref, IFn fn) throws Exception{
 	return ret;
 }
 
-
+/*
 //for test
 static CyclicBarrier barrier;
 static ArrayList<Ref> items;
@@ -507,5 +507,5 @@ public static void main(String[] args){
 		ex.printStackTrace();
 		}
 }
-
+*/
 }

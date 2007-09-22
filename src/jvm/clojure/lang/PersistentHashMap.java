@@ -621,6 +621,7 @@ final static class HashCollisionNode implements INode{
 	}
 }
 
+/*
 public static void main(String[] args){
 	try
 		{
@@ -705,5 +706,6 @@ public static void main(String[] args){
 		}
 
 }
+*/
 }
 
