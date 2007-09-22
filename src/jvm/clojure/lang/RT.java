@@ -23,8 +23,8 @@ final static public Var OUT =
 		Var.intern(Symbol.create("clojure", "out"), new OutputStreamWriter(System.out));
 final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 
-final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
-                                                    Module.findOrCreateModule("clojure/user"));
+//final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
+//                                                    Module.findOrCreateModule("clojure/user"));
 
 final static Symbol LOAD_FILE = Symbol.create("clojure", "load-file");
 final static Symbol EQL_REF = Symbol.create("clojure", "eql-ref?");
@@ -357,6 +357,7 @@ static public Object assocN(int n, Object val, Object coll){
 		return null;
 }
 
+/*
 static public Iter iter(Object coll){
 	if(coll == null || coll instanceof Iter)
 		return (Iter) coll;
@@ -373,7 +374,7 @@ static public Iter iter(Object coll){
 	else
 		throw new IllegalArgumentException("Don't know how to create Iter from arg");
 }
-
+ */
 static boolean hasTag(Object o, Object tag){
 	if(!(o instanceof IObj))
 		return false;
