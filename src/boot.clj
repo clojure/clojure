@@ -255,11 +255,10 @@
 
 
 (defmacro locking [x & body]
-  (let [gsym (gensym)]
-    `(let [~gsym ~x]
-          (try-finally
-                (do (monitor-enter ~gsym) ~@body)
-                (monitor-exit ~gsym)))))
+  `(let [lockee# ~x]
+        (try-finally
+           (do (monitor-enter lockee#) ~@body)
+           (monitor-exit lockee#))))
 
 (defmacro ..
   ([x form] `(. ~x ~form))
@@ -270,10 +269,9 @@
   `(def ~name (new clojure.lang.PolyFn ~dispatch-fn)))
 
 (defmacro defmethod [polyfn dispatch-val & fn-tail]
-  (let [pvar (gensym)]
-    `(let [~pvar (the-var ~polyfn)]
-       (locking ~pvar
-                (. ~pvar (bindRoot (.. ~pvar (getRoot) (assoc ~dispatch-val (fn ~@fn-tail)))))))))
+  `(let [pvar# (the-var ~polyfn)]
+     (locking pvar#
+        (. pvar# (bindRoot (.. pvar# (getRoot) (assoc ~dispatch-val (fn ~@fn-tail))))))))
 
 (defmacro binding [bindings & body]
   (let [var-ize (fn [var-vals]
