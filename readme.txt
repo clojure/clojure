@@ -1,3 +1,4 @@
+ *   Clojure
  *   Copyright (c) Rich Hickey. All rights reserved.
  *   The use and distribution terms for this software are covered by the
  *   Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
@@ -9,6 +10,7 @@
 Docs: http://clojure.sourceforge.net/
 Feedback: http://groups.google.com/group/clojure
 
+--------------------------------------------------------------------------
 This program uses the ASM bytecode engineering library which is distributed
 with the following notice:
 
