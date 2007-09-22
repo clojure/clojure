@@ -2617,15 +2617,17 @@ private static Symbol tagOf(Object o){
 }
 
 public static Object loadFile(String file) throws Exception{
+	FileInputStream f = new FileInputStream(file);
 	try
 		{
 		Var.pushThreadBindings(RT.map(SOURCE_PATH, file,
 		                              SOURCE, (new File(file)).getName()));
-		return load(new FileInputStream(file));
+		return load(f);
 		}
 	finally
 		{
 		Var.popThreadBindings();
+		f.close();
 		}
 }
 
