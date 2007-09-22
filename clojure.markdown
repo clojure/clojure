@@ -18,7 +18,7 @@ The use and distribution terms for this software are covered by the [Common Publ
 
 ##Contents
 ###Introduction
-Clojure is a dynamic programming language that targets the [Java Virtual Machine][jvm]. It is designed to be a general-purpose language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded server programming. Clojure is a compiled language - it compiles directly to JVM bytecode, yet remains completely dynamic. *Every* feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, with *optional* type hints and type inference, to ensure that calls to Java can avoid reflection. 
+Clojure is a dynamic programming language that targets the [Java Virtual Machine][jvm]. It is designed to be a general-purpose language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded programming. Clojure is a compiled language - it compiles directly to JVM bytecode, yet remains completely dynamic. *Every* feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, with *optional* type hints and type inference, to ensure that calls to Java can avoid reflection. 
 
 Clojure is a dialect of Lisp, and shares with Lisp the code-as-data philosophy and a powerful macro system. Clojure is predominantly a [functional programming][fp] language, and features a rich set of immutable, [persistent data structures][pd]. When mutable state is needed, Clojure offers a [software transactional memory][stm] system that ensures clean, correct, multithreaded designs.
 
@@ -237,7 +237,7 @@ Non-empty Lists are considered *calls* to either special forms, macros, or funct
 
 Special forms are primitives built-in to Clojure that perform core operations. If the operator of a call is a symbol that resolves to the name of a special form, the call is to that special form. Each form discussed individually under [Special Forms](#specialforms).
 
-Macros are functions that manipulate forms, allowing for syntactic abstraction. If the operator of a call is a symbol that names a global var that is a macro function, that macro function is called and is passed the *unevaluated* operand forms. The return value of the macro is then evaluated in its place.
+[Macros](#macros) are functions that manipulate forms, allowing for syntactic abstraction. If the operator of a call is a symbol that names a global var that is a macro function, that macro function is called and is passed the *unevaluated* operand forms. The return value of the macro is then evaluated in its place.
 
 If the operator is not a special form or macro, the call is considered a function call. Both the operator and the operands (if any) are evaluated, from left to right. The result of the evaluation of the operator is then cast to IFn (the interface representing Clojure functions), and invoke() is called on it, passing the evaluated arguments. The return value of invoke() is the value of the call expression. If the function call form has metadata, it may be used by the compiler, but will not be part of the resulting value.
 
