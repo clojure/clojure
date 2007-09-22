@@ -301,10 +301,14 @@
 (defn commute [#^Ref ref fun]
   (. ref (commute fun)))
 
-(defn set [#^Ref ref val]
-  (. ref (set val)))
+(defn set
+  ([#^Ref ref]
+    (. ref (touch))
+    (. ref (get)))
+  ([#^Ref ref val]
+    (. ref (set val))))
 
-(defmacro sync [& body]
+(defmacro sync [flags-ignored-for-now & body]
   `(. clojure.lang.LockingTransaction
     (runInTransaction (fn [] ~@body))))
 

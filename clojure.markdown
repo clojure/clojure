@@ -146,9 +146,11 @@ The behavior of the reader is driven by a combination of built-in constructs and
 *	Meta (^)
 
 	`^form` => `(meta form)`
-*	Deref (@)
+*	Deref (@, @!)
 
 	`@form` => `(deref form)`
+
+	`@!form` => `(deref! form)`
 	
 *	Dispatch (#)
 
@@ -174,7 +176,7 @@ The behavior of the reader is driven by a combination of built-in constructs and
 
 	For all forms other than Symbols, Lists, Vectors and Maps, \`x is the same as 'x. 
 
-	For Symbols, syntax-quote *resolves* the symbol in the current context, yielding a fully-qualified symbol (i.e. namespace/name or fully.qualified.Classname). 
+	For Symbols, syntax-quote *resolves* the symbol in the current context, yielding a fully-qualified symbol (i.e. namespace/name or fully.qualified.Classname). If a symbol is non-namespace-qualified and ends with '#', it is resolved to a generated symbol with the same name to which '\_' and a unique id have been appended. e.g. `x#` will resolve to `x_123`. All references to that symbol within a syntax-quoted expression resolve to the same generated symbol.
 
 	For Lists/Vectors/Maps, syntax-quote establishes a template of the corresponding data structure. Within the template, unqualified forms behave as if recursively syntax-quoted, but forms can be exempted from such recursive quoting by qualifying them with unquote or unquote-splicing, in which case they will be treated as expressions and be replaced in the template by their value, or sequence of values, respectively.
 
@@ -651,16 +653,93 @@ Functions defined with `defn` are stored in Vars, allowing for the re-definition
 The Var system maintains a global map of (namespace-qualified) symbols to Var objects. If a `def` expression does not find an entry in this map for the symbol being `def`-ed, it creates one, otherwise, it uses the existing Var. This find-or-create process is called interning. This means is that, unless they have been `undef`-ed, Var objects are stable references, and need not be looked up every time. It also means that the Var map constitutes a global environment, in which, as described in [Evaluation](#evaluation), the compiler attempts to resolve all free symbols as Vars.
  
 <h2 id="refs">Refs and Transactions</h2>
+While Vars ensure safe use of mutable mutable storage locations via thread isolation, Refs ensure safe *shared* use of mutable storage locations via a [software transactional memory][stm] (STM) system. Refs are bound to a single storage location for their lifetime, and only allow reference to<sup>*</sup>, and mutation of, that location to occur within a transaction.
+
+<sup>*</sup>(except the `deref!` function, which yields the current value of a Ref outside of a transaction)
+
+Clojure transactions should be easy to understand if you've ever used database transactions - they ensure that all actions on Refs are atomic and isolated. Atomic means that every change to Refs made within a transaction occurs or none do. Isolated means that no transaction sees the effects of any other transaction while it is running. Another feature common to STMs is that, should a transaction have a conflict while running, it is automatically retried.
+
+There are many ways to do STMs (locking/pessimistic, lock-free/optimistic and hybrids) and it is still a research problem. The Clojure STM is, I think, novel in its use of [multiversion concurrency control][mvcc] with adaptive history queues for [snapshot isolation][snapshot], and providing a distinct `commute` operation.
+
+In practice, this means:
+
+1.	All reads of Refs will see a consistent snapshot of the 'Ref world' as of the starting point of the transaction (its 'read point'). The transaction *will* see any changes it has made. This is called the *in-transaction-value*.
+
+2.	All changes made to Refs during a transaction (via `set` or `commute`) will appear to occur at a single point in the 'Ref world' timeline (its 'write point').
+
+3.	No changes will have been made by any other transactions to any Refs that have been `set` by this transaction.
+
+4.	Changes *may have* been made by other transactions to any Refs that have been `commute`d by this transaction. That should be okay since the function applied by `commute` should be commutative.
+
+5.	Readers and commuters will never block writers, commuters, or other readers.
+
+6.	Writers will never block commuters, or readers.
+
+7.	I/O and other activities with side-effects should be avoided in transactions, since transactions *will* be retried.
+
+8.	If a constraint on the validity of a value of a Ref that is being changed depends upon the simultaneous value of a Ref that is *not being changed*, that second Ref can be protected from modification by calling `set` without a second argument. Refs 'set' this way will be protected (item #3), but don't change the world (item #2).
+
+9.	The Clojure MVCC STM is designed to work with the persistent collections, and it is strongly recommended that you use the collections as the values of your Refs. Since all work done in an STM transaction is speculative, it is imperative that there be a low cost to making copies and modifications. Persistent collections have free copies (just use the original, it can't be changed), and 'modifications' share structure efficiently. In any case:
+
+10.	The values placed in Refs *must be, or be considered, immutable*!! Otherwise, Clojure can't help you.
+
+[mvcc]:     http://en.wikipedia.org/wiki/Multiversion_concurrency_control
+[snapshot]: http://en.wikipedia.org/wiki/Snapshot_isolation
+
+---
+### (*ref* init-val)
+Creates and returns a Ref with an initial value of `init-val`.
+
+---
+### (*sync* transaction-flags exprs*) - Macro
+transaction-flags => TBD, pass `nil` for now
+
+Runs the exprs (in an implicit `do`) in a transaction that encompasses exprs and any nested calls. Starts a transaction if none is already running on this thread. Any exception will abort the transaction and flow out of `sync`. The exprs may be run more than once, but any effects on Refs will be atomic.
+
+---
+### (*deref* ref)
+### @ref
+
+Must be called in a transaction. Returns the in-transaction-value of ref.
+
+### (*deref!* ref)
+### @!ref
+
+May be called outside a transaction. Returns the most-recently-committed value of ref.
+
+---
+### (*set* ref)
+Must be called in a transaction. Protects the ref from modification by other transactions. Returns the in-transaction-value of ref. Allows for more concurrency than `(set ref @ref)`
+
+### (*set* ref val)
+Must be called in a transaction. Sets the value of ref. Returns val.
+
+---
+### (*commute* ref fun)
+Must be called in a transaction. Sets the in-transaction-value of ref to:
+
+ `(fun in-transaction-value-of-ref)`
+
+At the commit point of the transaction, sets the value of ref to be: 
+
+`(fun most-recently-committed-value-of-ref)`
+
+Thus `fun` should be commutative, or, failing that, you must accept last-one-in-wins behavior. `commute` allows for more concurrency than `set`.
+
 <h2 id="java">Access to Java</h2>
 <h2 id="lisp">Differences with other Lisps</h2>
 
 * Clojure is case sensitive
+* Clojure is Lisp-1
 * () is not the same as nil
 * The reader is side-effect free
 * Keywords are not Symbols
+* Symbols are not storage locations (see Var)
 * `nil` is not a Symbol
 * The read table is currently not accessible to user programs
 * `let` is like `let*`
 * There is no tail-call optimization, use `recur`
+* \` does symbol resolution
+* ~ is unquote
 
 <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=137961&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
