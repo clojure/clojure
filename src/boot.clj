@@ -318,3 +318,38 @@
   `(. clojure.lang.LockingTransaction
     (runInTransaction (fn [] ~@body))))
 
+; sequence fns
+(defn every [pred coll]
+  (if (seq coll)
+     (and (pred (first coll))
+          (recur pred (rest coll)))
+    t))
+
+(defn map
+  ([f coll]
+    (if (seq coll)
+       (lazy-cons (f (first coll)) (map f (rest coll)))
+      nil))
+  ([f coll & colls]
+    (if (and (seq coll) (every seq colls))
+      (lazy-cons (apply f (first coll) (map first colls))
+                 (apply map f (rest coll) (map rest colls)))
+      nil)))
+
+(defn filter [f coll]
+  (if (seq coll)
+     (let [v (f (first coll))]
+        (if v
+          (lazy-cons (first coll) (filter f (rest coll)))
+          (recur f (rest coll))))
+    nil))
+
+(defn reduce
+  ([f coll]
+     (if (seq coll)
+       (thisfn f (rest coll) (first coll))
+      (f)))
+  ([f coll val]
+    (if (seq coll)
+       (recur f (rest coll) (f val (first coll)))
+      val)))

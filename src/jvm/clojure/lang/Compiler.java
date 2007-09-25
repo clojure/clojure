@@ -2667,6 +2667,7 @@ public static void main(String[] args){
 	//repl
 	LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
+
 	Object EOF = new Object();
 	try
 		{
@@ -2676,6 +2677,7 @@ public static void main(String[] args){
 				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
 				       SOURCE, "REPL"
 				));
+		w.write("Clojure\n");
 
 		for(; ;)
 			{
@@ -2693,7 +2695,7 @@ public static void main(String[] args){
 				w.write('\n');
 				//w.flush();
 				}
-			catch(Exception e)
+			catch(Throwable e)
 				{
 				e.printStackTrace();
 				}
@@ -2702,6 +2704,10 @@ public static void main(String[] args){
 				Var.popThreadBindings();
 				}
 			}
+		}
+	catch(Exception e)
+		{
+		e.printStackTrace();
 		}
 	finally
 		{

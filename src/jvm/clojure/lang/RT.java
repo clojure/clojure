@@ -235,9 +235,10 @@ static public ISeq cons(Object x, ISeq y){
 }
 
 static public Object first(Object x){
-	if(x == null)
+	ISeq seq = seq(x);
+	if(seq == null)
 		return null;
-	return seq(x).first();
+	return seq.first();
 }
 
 static public Object second(Object x){
@@ -253,9 +254,10 @@ static public Object fourth(Object x){
 }
 
 static public ISeq rest(Object x){
-	if(x == null)
+	ISeq seq = seq(x);
+	if(seq == null)
 		return null;
-	return seq(x).rest();
+	return seq.rest();
 }
 
 static public ISeq rrest(Object x){

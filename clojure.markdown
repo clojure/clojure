@@ -51,7 +51,7 @@ Clojure is [hosted on SourceForge][sf].
 
 Feedback and discussion should occur on the [Clojure Google Group][cgg].
 
-Clojure is delivered in a zip file containing a single .jar, `clojure.jar`. It requires the [ASM 3.0 bytecode library][asm], and the current alpha distribution does not bundle it. `asm, asm-analysis, asm-commons and asm-util` jars are currently required. [Java][jdk] 1.5 or greater is required.
+Clojure is delivered in a zip file containing a single .jar, `clojure.jar`. It requires the [ASM 3.0 bytecode library][asm], and the current alpha distribution includes it. [Java][jdk] 1.5 or greater is required.
 
 
 [asm]: http://asm.objectweb.org/
@@ -60,13 +60,13 @@ Clojure is delivered in a zip file containing a single .jar, `clojure.jar`. It r
 [cgg]: http://groups.google.com/group/clojure
 
 <h2 id="quickstart">Quick Start</h2>
-Put the Clojure and ASM jars on the classpath and launch `java clojure.lang.Compiler`. This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself, so the first thing you need to do is load the `boot.clj` file included in the distribution:
+Put the Clojure jar on the classpath and launch `java clojure.lang.Compiler /your/path/to/src/boot.clj`. This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself (in `boot.clj`), so the first thing you need to do is load the `boot.clj` file included in the `src` directory of distribution, either on the command line as above or as follows:
 
 <pre><code>
-(load-file "/your/path/to/boot.clj")	
+(load-file "/your/path/to/src/boot.clj")	
 </code></pre>
 
-In the alpha, this will spew a bunch of bytecode as it compiles the file. This is to help me (and you) diagnose any code generation problems. After boot.clj is loaded you will have the language as described herein fully available.
+After boot.clj is loaded you will have the language as described herein fully available.
 
 Try:
 
@@ -184,7 +184,7 @@ The behavior of the reader is driven by a combination of built-in constructs and
 	
 	(def x 5)
 	(def lst '(a b c))
-	(fred x ~x lst ~@lst 7 8 :nine)
+	`(fred x ~x lst ~@lst 7 8 :nine)
 
 	> (user/fred user/x 5 user/lst a b c 7 8 :nine)
 		
@@ -391,6 +391,31 @@ Note - *you cannot assign to function params or local bindings. Only Java fields
 These are synchronization primitives that should be avoided in user code. Use the `locking` macro.
 
 <h2 id="macros">Macros</h2>
+Clojure has a programmatic macro system which allows the compiler to be extended by user code. Macros can be used to define syntactic constructs  which would require primitives or built-in support in other languages. Many core constructs of Clojure are not, in fact, primitives, but are normal macros. First we'll cover some of the included macros and then look at the facilities for creating your own.
+
+---
+### (*and* exprs*)
+Evaluates exprs one at a time, from left to right. If a form returns `nil`, `and` returns `nil` and doesn't evaluate any of the other expressions, otherwise it returns the value of the last expr. `(and)` returns `t`.
+
+---
+### (*or* exprs*)
+Evaluates exprs one at a time, from left to right. If a form returns a non-nil value, `or` returns that value and doesn't evaluate any of the other expressions, otherwise it returns `nil`. `(or)` returns `nil`.
+
+---
+### (*cond* test-expr-pairs*)
+test-expr-pair => test expr
+
+`cond` takes a set of test/expr pairs. It evaluates each test one at a time. If a test returns non-nil, `cond` evaluates and returns the value of the corresponding expr and doesn't evaluate any of the other tests or exprs. `(cond)` returns `nil`. `cond ` is a succinct and readable alternative to nested `if`s.
+
+---
+### (*defn* name [params* ] exprs*)
+### (*defn* name ([params* ] exprs*)+)
+Same as `(def name (fn [params* ] exprs*))` or  `(def name (fn ([params* ] exprs*)+))`
+
+---
+### (*defmacro* name [params* ] exprs*)
+### (*defmacro* name ([params* ] exprs*)+)
+Like defn, but the resulting function name is declared as a macro and will be used as a macro by the compiler when it is called.
 
 <h2 id="datastructures">Data Structures</h2>
 
