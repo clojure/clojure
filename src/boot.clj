@@ -294,7 +294,7 @@
           ~@body)
       (. Var (popThreadBindings)))))
 
-;;Refs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn ref [x]
  (new Ref x))
 
@@ -318,7 +318,8 @@
   `(. clojure.lang.LockingTransaction
     (runInTransaction (fn [] ~@body))))
 
-; sequence fns
+;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn every [pred coll]
   (if (seq coll)
      (and (pred (first coll))
@@ -327,22 +328,12 @@
 
 (defn map
   ([f coll]
-    (if (seq coll)
-       (lazy-cons (f (first coll)) (map f (rest coll)))
-      nil))
+    (when (seq coll)
+       (lazy-cons (f (first coll)) (map f (rest coll)))))
   ([f coll & colls]
-    (if (and (seq coll) (every seq colls))
+    (when (and (seq coll) (every seq colls))
       (lazy-cons (apply f (first coll) (map first colls))
-                 (apply map f (rest coll) (map rest colls)))
-      nil)))
-
-(defn filter [f coll]
-  (if (seq coll)
-     (let [v (f (first coll))]
-        (if v
-          (lazy-cons (first coll) (filter f (rest coll)))
-          (recur f (rest coll))))
-    nil))
+                 (apply map f (rest coll) (map rest colls))))))
 
 (defn reduce
   ([f coll]
@@ -353,3 +344,67 @@
     (if (seq coll)
        (recur f (rest coll) (f val (first coll)))
       val)))
+
+(defn take [n coll]
+  (when (and (pos? n) (seq coll))
+    (lazy-cons (first coll) (take (dec n) (rest coll)))))
+
+(defn take-while [pred coll]
+  (when (seq coll)
+     (if (pred (first coll))
+         (lazy-cons (first coll) (take-while pred (rest coll)))
+       (recur pred (rest coll)))))
+
+(defn drop [n coll]
+  (if (and (pos? n) (seq coll))
+      (recur (dec n) (rest coll))
+     coll))
+
+(defn drop-while [pred coll]
+  (if (and (seq coll) (pred (first coll)))
+      (recur pred (rest coll))
+     coll))
+
+(defn reverse [coll]
+  (reduce conj coll nil))
+
+(defn cycle-rep [xs ys]
+  (if xs
+      (lazy-cons (first xs) (cycle-rep (rest xs) ys))
+     (recur ys ys)))
+     
+(defn cycle [coll]
+  (when (seq coll)
+     (cycle-rep (seq coll) (seq coll))))
+
+(defn split [n coll]
+  [(take n coll) (drop n coll)])
+
+(defn repeat [x]
+  (lazy-cons x (repeat x)))
+
+(defn replicate [n x]
+  (take n (repeat x)))
+  
+(defn iterate [f x]
+ (let [v (f x)]
+   (lazy-cons v (iterate f v))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
+(defn comp [& fs]
+  (let [fs (reverse fs)]
+     (fn [& args]
+       (loop [ret (apply (first fs) args) fs (rest fs)]
+          (if fs
+              (recur ((first fs) ret) (rest fs))
+             ret)))))
+
+(defn curry
+	([f arg1]
+	   (fn [& args] (apply f arg1 args)))
+	([f arg1 arg2]
+	   (fn [& args] (apply f arg1 arg2 args)))
+	([f arg1 arg2 arg3]
+	   (fn [& args] (apply f arg1 arg2 arg3 args)))
+	([f arg1 arg2 arg3 & more]
+	  (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
