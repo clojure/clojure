@@ -488,7 +488,7 @@ Conj[oin]. Returns a *new* collection with the item 'added'. `(conj nil item)` r
 
 ---
 ### (*seq* coll)
-Sequence. Returns a new ISeq on the collection. If the collection is empty, returns `nil`. `(seq nil)` returns `nil`.
+Sequence. Returns a new ISeq on the collection. If the collection is empty, returns `nil`. `(seq nil)` returns `nil`. `seq` also works on native Java arrays and any objects that implement Iterable.
 
 
 ### _Lists (IPersistentList)_
@@ -575,7 +575,13 @@ Returns a sequence of the map's values.
 
 <h2 id="sequences">Sequences</h2>
 
-Clojure defines many algorithms in terms of sequences (seqs). A seq is a logical list, and where in most Lisps the list is represented by a concrete, 2-slot structure, Clojure uses the ISeq interface to allow many data structures to offer access to their elements as lists. The `seq` function yields an implementation of ISeq appropriate to the collection. Seqs differ from iterators in that they are immutable, not stateful cursors into a collection. As such, they are useful for much more than foreach - functions can consume and produce seqs, they are thread safe, they can share structure etc.
+Clojure defines many algorithms in terms of sequences (seqs). A seq is a logical list, and where in most Lisps the list is represented by a concrete, 2-slot structure, Clojure uses the ISeq interface to allow many data structures to provide access to their elements as sequences. The `seq` function yields an implementation of ISeq appropriate to the collection. Seqs differ from iterators in that they are persistent and immutable, not stateful cursors into a collection. As such, they are useful for much more than foreach - functions can consume and produce seqs, they are thread safe, they can share structure etc. 
+
+Most of the sequence library functions are *lazy*, i.e. functions that return seqs do so incrementally, as they are consumed, and thus consume any seq arguments incrementally as well.
+
+When `seq` is used on native Java arrays and objects that implement Iterable, the resulting sequence is still immutable and persistent, and will represent a single pass across the data. Because that pass might happen lazily, the pass might see changes that happen after `seq` has been called. Also, if the backing iterator is subject to ConcurrentModificationException, then so to is the resulting seq. That said, there is still a lot of utility to using seq on Iterables and arrays - since seqs support multi-pass and lazy algorithms. Robust programs should not mutate arrays or Iterables that have seqs on them.
+
+####The Seq interface:
 
 ---
 ### (*first* seq)
@@ -588,6 +594,31 @@ Returns a seq of the items after the first. If there are no more items, returns 
 ---
 ### (*cons* item coll)
 Returns a new seq where item is the first element and the sequence of items in coll is the rest of the seq.
+
+####The Seq library:
+
+---
+### (every pred seq)
+### (not-every pred seq)
+### (any pred seq)
+### (not-any pred seq)
+### (concat seqs*)
+### (map f seqs*)
+### (mapcat f seqs*)
+### (reduce f seq)
+### (reduce f seq val)
+### (filter pred seq)
+### (take n seq)
+### (take-while pred seq)
+### (drop n seq)
+### (drop-while pred seq)
+### (reverse seq)
+### (cycle seq)
+### (split-at n seq)
+### (split-with pred seq)
+### (repeat x)
+### (replicate n x)
+### (iterate f x)	
 
 <h2 id="metadata">Metadata</h2>
 
