@@ -318,7 +318,24 @@
   `(. clojure.lang.LockingTransaction
     (runInTransaction (fn [] ~@body))))
 
+;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn reduce
+  ([f coll]
+     (if (seq coll)
+       (thisfn f (rest coll) (first coll))
+      (f)))
+  ([f coll val]
+    (if (seq coll)
+       (recur f (rest coll) (f val (first coll)))
+      val)))
+
+(defn reverse [coll]
+  (reduce conj coll nil))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
+
+
 (defn comp [& fs]
   (let [fs (reverse fs)]
      (fn [& args]
@@ -339,6 +356,8 @@
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 
+
+  
 (defn every [pred coll]
   (if (seq coll)
      (and (pred (first coll))
@@ -364,16 +383,6 @@
 
 (defn mapcat [f & colls]
    (apply concat (apply map f colls)))
-   
-(defn reduce
-  ([f coll]
-     (if (seq coll)
-       (thisfn f (rest coll) (first coll))
-      (f)))
-  ([f coll val]
-    (if (seq coll)
-       (recur f (rest coll) (f val (first coll)))
-      val)))
 
 (defn filter [pred coll]
   (when (seq coll)
@@ -399,8 +408,7 @@
       (recur pred (rest coll))
      coll))
 
-(defn reverse [coll]
-  (reduce conj coll nil))
+
 
 (defn cycle-rep [xs ys]
   (if xs
