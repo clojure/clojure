@@ -37,6 +37,7 @@ Rich Hickey
 ###[Evaluation](#evaluation)
 ###[Special Forms](#specialforms)
 ###[Macros](#macros)
+###[Other Useful Functions](#other)
 ###[Data Structures](#datastructures)
 ###[Metadata](#metadata)
 ###[Sequences](#sequences)
@@ -313,6 +314,8 @@ The exprs are compiled in an environment in which the params are bound to the ac
 
 A fn (overload) defines a recursion point at the top of the function, with arity equal to the number of params *including the rest param, if present*. See `recur`.
 
+IFns are Callable.
+
 ---
 ### (*loop* [bindings* ] exprs*)
 
@@ -402,6 +405,14 @@ Evaluates exprs one at a time, from left to right. If a form returns `nil`, `and
 Evaluates exprs one at a time, from left to right. If a form returns a non-nil value, `or` returns that value and doesn't evaluate any of the other expressions, otherwise it returns `nil`. `(or)` returns `nil`.
 
 ---
+### (*when* test exprs*)
+Evaluates `test`. If non-nil, evaluates exprs in an implicit `do`.
+
+---
+### (*when-not* test exprs*)
+Evaluates `test`. If `nil`, evaluates exprs in an implicit `do`.
+
+---
 ### (*cond* test-expr-pairs*)
 test-expr-pair => test expr
 
@@ -417,19 +428,60 @@ Same as `(def name (fn [params* ] exprs*))` or  `(def name (fn ([params* ] exprs
 ### (*defmacro* name ([params* ] exprs*)+)
 Like defn, but the resulting function name is declared as a macro and will be used as a macro by the compiler when it is called.
 
+<h2 id="other">Other Useful Functions</h2>
+
+---
+### (*apply* f args* argseq)
+Applies fn f to the argument list formed by prepending args to argseq.
+
+---
+### (*nil?* x)
+### (*not* x)
+
+Returns non-nil if x is nil.
+
+---
+### (*complement* f)
+Takes a fn `f` and returns a fn that takes the same arguments as f, has the same effects, if any, and returns the opposite truth value.
+
+---
+### (*constantly* x)
+Returns a function that takes any number of arguments and returns x.
+
+---
+### (*identity* x)
+Returns x.
+
+---
+### (*str* x)
+
+Returns x.toString()
+
+---
+### (*strcat* x y)
+
+Returns x.concat(y)
+
+
 <h2 id="datastructures">Data Structures</h2>
 
 Clojure has a rich set of data structures. They share a set of properties:
 
 *	They are immutable
 *	They are read-able
-*	They support proper equality semantics in their implementation of `equals`
+*	They support proper equality semantics in their implementation of `equals` 
 *	In addition, the collections: 
 	*	Are manipulated via interfaces.
 	*	Support sequencing
 	*	Support persistent manipulation.
 	*	Support metadata
 	*	Implement Iterable
+
+---
+### (*eql?* obj1 obj2)
+
+Supported by all data structures.  Returns non-nil if obj1 equals obj2, `nil` if not. Same as Java `obj1.equals(obj2)` except it also works for `nil`.
+
 
 ### _nil_
 `nil` is a possible value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
@@ -455,6 +507,22 @@ All Clojure numbers are derived from clojure.lang.Num, which in turn is derived 
 	
 Any numeric operation involving DoubleNums yields a DoubleNum. 
 
+---
+### (*+* nums*)
+Returns the sum of nums. `(+)` returns 0.
+
+---
+### (*\** nums*)
+Returns the product of nums. `(*)` returns 1.
+
+---
+### (*/* numerator denominators*)
+If no denominators are supplied, returns 1/numerator, else returns numerator divided by all of the denominators.
+
+---
+### (*-* num subs*)
+If no subs are supplied, returns the negation of num, else subtracts of the subs from num and returns the result.
+
 ### _Strings_
 Clojure strings are Java `Strings`.
 
@@ -473,6 +541,11 @@ Keywords are symbolic identifiers that evaluate to themselves. They provide very
 
 ### _Symbols_
 Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional [namespaces](#namespaces), both of which are strings. Symbols can have metadata.
+
+---
+### (*gensym* prefix?)
+
+Returns a new symbol with a unique name. If a prefix string is supplied, the name is prefix__# where # is some unique number. If prefix is not supplied, the prefix is "G".
 
 ### _Collections_
 
@@ -495,8 +568,12 @@ Sequence. Returns a new ISeq on the collection. If the collection is empty, retu
 Lists are collections. They implement the ISeq interface directly. `count` is O(1). `conj` puts the item at the front of the list. In addition, lists support the functions:
 
 ---
-### (*list*  & items)
+### (*list*  items*)
 Creates a new list containing the items.
+
+---
+### (*list** items* seq)
+Creates a new list containing the items prepended to seq.
 
 ---
 ### (*peek* list)
@@ -510,7 +587,7 @@ Returns a new list without the first item. If the list is empty, throws an excep
 Vectors are collections. They are sequences of values indexed by contiguous integers. Vectors support O(log<sub>32</sub>N) access to items by index. `count` is O(1). `conj` puts the item at the end of the vector. Vectors also support `rseq`, which returns the items in reverse order. Vectors implement IFn, for invoke() of one argument, which they presume is an index and look up in themselves as if by `nth`, i.e. vectors are functions of their indices.  In addition, vectors support the functions:
 
 ---
-### (*vector*  & items)
+### (*vector* items*)
 Creates a new vector containing the items.
 
 ---
@@ -518,9 +595,9 @@ Creates a new vector containing the items.
 Assoc[iate]. Returns a new vector that contains val at index. Note - index must be <= (count vector).
 
 ---
-### (*get* map index)
-### (*nth* map index)
-Returns the value at the index. `get` returns `nil` if index out of bounds, `nth` throws an exception.
+### (*get* vector index)
+### (*nth* vector index)
+Returns the value at the index. `get` returns `nil` if index out of bounds, `nth` throws an exception. `nth` also works for Java arrays, and, in O(n) time, for sequences.
 
 ---
 ### (*peek* vector)
@@ -537,9 +614,9 @@ Map keys to values. Two different map types are provided - hashed and sorted. Ha
 Map functions:
 
 ---
-### (*hash-map* & keyvals*)
-### (*sorted-map* & keyvals*)
-### (*sorted-map-by* comparator & keyvals*)
+### (*hash-map* keyvals*)
+### (*sorted-map* keyvals*)
+### (*sorted-map-by* comparator keyvals*)
 
 keyval => key val
 
@@ -795,7 +872,7 @@ This information is provided for programmers familiar with Common Lisp or Scheme
 * `let` binds sequentially like `let*`
 * `do` is not a looping construct
 * There is no tail-call optimization, use `recur`.
-* syntax-quote does symbol resolution, so \`x is not the same as ‘x. 
+* syntax-quote does symbol resolution, so \`x is not the same as 'x. 
 * \` has auto-gensyms.
 * ~ is unquote ',' is whitespace
 * There is reader syntax for maps and vectors
