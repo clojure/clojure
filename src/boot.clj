@@ -66,9 +66,13 @@
 
 (defn eql? [x y] (. RT (equal x y)))
 
-(defn strcat [#^String x y] (. x (concat y)))
-
 (defn str [#^Object x] (. x (toString)))
+
+(defn strcat [x & ys]
+  (let [#^String s (str x)]
+    (if ys
+        (recur (. s  (concat (str (first ys)))) (rest ys))
+      s)))
 
 (defn gensym 
   ([] (thisfn "G__"))
@@ -221,20 +225,31 @@
 
 ;;map stuff
 
-(defn contains [coll key]
- (. RT (contains coll key)))
+(defn contains [map key]
+ (. RT (contains map key)))
 
-(defn get [coll key]
- (. RT (get coll key)))
+(defn get [map key]
+ (. RT (get map key)))
 
-(defn assoc [coll key val]
- (. RT (assoc coll key val)))
+(defn assoc [map key val]
+ (. RT (assoc map key val)))
 
-(defn dissoc [coll key]
- (. RT (dissoc coll key)))
+(defn dissoc [map key]
+ (. RT (dissoc map key)))
 
-(defn find [coll key]
- (. RT (find coll key)))
+(defn find [map key]
+ (. RT (find map key)))
+
+(defn select [map keyseq]
+ (loop [ret {} keys (seq keyseq)]
+   (if keys
+        (let [entry (. RT (find map (first keys)))]
+            (recur
+                (if entry
+                    (conj ret entry)
+                   ret)
+                (rest keys)))
+      ret)))
 
 (defn keys [map]
   (. RT (keys map)))
@@ -293,6 +308,9 @@
           (. Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
           ~@body)
       (. Var (popThreadBindings)))))
+
+(defn find-var [sym]
+ (. Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn ref [x]
@@ -408,8 +426,6 @@
       (recur pred (rest coll))
      coll))
 
-
-
 (defn cycle-rep [xs ys]
   (if xs
       (lazy-cons (first xs) (cycle-rep (rest xs) ys))
@@ -435,3 +451,68 @@
  (let [v (f x)]
    (lazy-cons v (iterate f v))))
 
+;; evaluation
+(defn eval [form]
+  (. clojure.lang.Compiler (eval form)))
+  
+(defmacro import [pkg & class-names]
+  (loop [ret () classes class-names]
+        (if classes
+            (let [c (first classes)]
+              (recur (conj ret
+                           (if (instance? c Symbol)
+                               `(= *imports* (assoc *imports* '~c ~(strcat pkg "." c)))
+                             `(= *imports* (assoc *imports* '~(second c) ~(strcat pkg "." (first c))))))
+                     (rest classes)))
+          (cons `do ret))))
+
+;(defmacro refer-to [ns & names]
+;  (loop [ret () names names]
+;        (if names
+;            (let [v (first names)]
+;              (recur (conj ret
+;                           (if (instance? v Symbol)
+;                               `(= *refers* (assoc *refers* '~v (the-var ~(. Symbol (intern (str ns) (str v))))))
+;                             `(= *refers* (assoc *refers* '~(second v) (the-var ~(. Symbol (intern (str ns) (str (first v)))))))))
+;                     (rest names)))
+;          (cons `do ret))))
+
+(defn refer-to [export-map]
+  (= *refers* (conj *refers* export-map)))
+
+(defn in-namespace [ns]
+  (= *current-namespace* ns))
+
+(defn make-export-map [var-syms]
+  (loop [ret {}
+         vs (seq var-syms)]
+    (if vs
+         (let [s (first vs) v (find-var s)]
+            (if v
+                (recur (assoc ret (. Symbol (intern (name s))) v) (rest vs))
+               (throw (new Exception (strcat "Can't find Var: " s)))))
+       ret)))
+
+(def *exports*
+  (make-export-map
+	`(
+		list cons conj defn
+		vector hash-map sorted-map sorted-map-by
+		meta with-meta defmacro when when-not
+		nil? not first rest second
+		eql? str strcat gensym cond
+		apply list* delay lazy-cons concat
+		and or + * / - == < <= > >=
+		inc dec pos? neg? zero?
+		complement constantly identity seq count
+		peek pop nth contains get
+		assoc dissoc find keys vals
+		rseq name namespace locking ..
+		defpolyfn defmethod binding find-var
+		ref deref deref! commute set sync
+		reduce reverse comp appl
+		every not-every any not-any
+		map mapcat filter take take-while drop drop-while
+		cycle split-at split-with repeat replicate iterate
+		eval import refer-to in-namespace
+	)))

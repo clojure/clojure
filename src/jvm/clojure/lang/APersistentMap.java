@@ -23,6 +23,12 @@ protected APersistentMap(){
 }
 
 public IPersistentCollection cons(Object o){
+	if(o instanceof IMapEntry)
+		{
+		IMapEntry e = (IMapEntry) o;
+		return assoc(e.key(), e.val());
+		}
+
 	IPersistentMap ret = this;
 	for(ISeq es = RT.seq(o); es != null; es = es.rest())
 		{
