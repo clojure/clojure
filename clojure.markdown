@@ -437,7 +437,15 @@ Executes exprs in an implicit `do`, while holding the monitor of x. Will release
 
 member => fieldName-symbol or (instanceMethodName-symbol args*)
 
+Expands into a member access (.) of the first member on the first argument, followed by the next member on the result etc. For instance:
+ 
 `(.. System (getProperties) (get "os.name"))`
+
+expands to:
+
+`(. (. System (getProperties)) (get "os.name"))`
+
+but is easier to write, read, and understand.
 
 ---
 ### (*defn* name [params* ] exprs*)
@@ -454,6 +462,24 @@ Like defn, but the resulting function name is declared as a macro and will be us
 ---
 ### (*apply* f args* argseq)
 Applies fn f to the argument list formed by prepending args to argseq.
+
+---
+### (*appl* f args+)
+Takes a function f and fewer than the normal arguments to f, and returns a fn that takes a variable number of additional args. When called, the returned function calls f with args + additional args.
+
+<pre><code>
+
+> (map (appl + 2) [1 2 3])
+(3 4 5)
+
+</code></pre>
+
+---
+### (*comp* fns+)
+
+Takes a set of functions and returns a fn that is the composition of those fns. The returned fn takes a variable number of args, applies the rightmost of fns to the args, the next fn (right-to-left) to the result, etc.
+
+((comp a b c) x y z)  ==> (a (b (c x y z))) 
 
 ---
 ### (*nil?* x)
@@ -548,6 +574,14 @@ If no subs are supplied, returns the negation of num, else subtracts of the subs
 ### (*==* nums+)
 Returns non-nil if nums all have the same value, otherwise `nil`.
 
+<pre><code>
+
+> (== 1 1.0)
+t
+> (eql? 1 1.0)
+nil
+
+</code></pre>
 ---
 ### (*<* nums+)
 Returns non-nil if nums are in monotonically increasing order, otherwise `nil`.
