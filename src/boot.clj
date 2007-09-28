@@ -344,7 +344,7 @@
               (recur ((first fs) ret) (rest fs))
              ret)))))
 
-(defn curry
+(defn appl
 	([f arg1]
 	   (fn [& args] (apply f arg1 args)))
 	([f arg1 arg2]
