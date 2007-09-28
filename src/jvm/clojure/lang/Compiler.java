@@ -104,7 +104,7 @@ private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
 static
 	{
 	OBJECT_TYPE = Type.getType(Object.class);
-	ARG_TYPES = new Type[MAX_POSITIONAL_ARITY][];
+	ARG_TYPES = new Type[MAX_POSITIONAL_ARITY + 1][];
 	for(int i = 0; i < MAX_POSITIONAL_ARITY; ++i)
 		{
 		Type[] a = new Type[i];
@@ -112,6 +112,12 @@ static
 			a[j] = OBJECT_TYPE;
 		ARG_TYPES[i] = a;
 		}
+	Type[] a = new Type[MAX_POSITIONAL_ARITY + 1];
+	for(int j = 0; j < MAX_POSITIONAL_ARITY; j++)
+		a[j] = OBJECT_TYPE;
+	a[MAX_POSITIONAL_ARITY] = Type.getType("[LObject;");
+	ARG_TYPES[MAX_POSITIONAL_ARITY] = a;
+
 	}
 
 
@@ -1698,12 +1704,22 @@ static class InvokeExpr implements Expr{
 		gen.visitLineNumber(line, gen.mark());
 		fexpr.emit(C.EXPRESSION, fn, gen);
 		gen.checkCast(IFN_TYPE);
-		for(int i = 0; i < args.count(); i++)
+		for(int i = 0; i < Math.min(MAX_POSITIONAL_ARITY, args.count()); i++)
 			{
 			Expr e = (Expr) args.nth(i);
 			e.emit(C.EXPRESSION, fn, gen);
 			}
-		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[args.count()]));
+		if(args.count() > MAX_POSITIONAL_ARITY)
+			{
+			PersistentVector restArgs = PersistentVector.EMPTY;
+			for(int i = MAX_POSITIONAL_ARITY; i < args.count(); i++)
+				{
+				restArgs = restArgs.cons(args.nth(i));
+				}
+			MethodExpr.emitArgsAsArray(restArgs, fn, gen);
+			}
+		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY,
+		                                                                                   args.count())]));
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -1723,9 +1739,9 @@ static class InvokeExpr implements Expr{
 			{
 			args = args.cons(analyze(C.EXPRESSION, s.first()));
 			}
-		if(args.count() > MAX_POSITIONAL_ARITY)
-			throw new IllegalArgumentException(
-					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
+//		if(args.count() > MAX_POSITIONAL_ARITY)
+//			throw new IllegalArgumentException(
+//					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 
 		return new InvokeExpr((Integer) LINE.get(), tagOf(form), fexpr, args);
 	}
@@ -2516,7 +2532,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		}
 }
 
-static Object eval(Object form) throws Exception{
+public static Object eval(Object form) throws Exception{
 	Expr expr = analyze(C.EVAL, form);
 	return expr.eval();
 }
@@ -2674,7 +2690,7 @@ public static void main(String[] args){
 		Var.pushThreadBindings(
 				RT.map(RT.REFERS, RT.REFERS.get(),
 				       RT.IMPORTS, RT.IMPORTS.get(),
-				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
+				       RT.CURRENT_NS, "clojure",
 				       SOURCE, "REPL"
 				));
 		w.write("Clojure\n");
@@ -2685,7 +2701,7 @@ public static void main(String[] args){
 				{
 				Var.pushThreadBindings(
 						RT.map(LOADER, new DynamicClassLoader()));
-				w.write("> ");
+				w.write(RT.CURRENT_NS.get().toString() + "=> ");
 				w.flush();
 				Object r = LispReader.read(rdr, false, EOF, false);
 				if(r == EOF)
