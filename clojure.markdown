@@ -24,12 +24,16 @@ Clojure is a dialect of Lisp, and shares with Lisp the code-as-data philosophy a
 
 I hope you find Clojure's combination of facilities elegant, powerful, practical and fun to use.
 
+
 [jvm]:http://java.sun.com/docs/books/jvms/
 [fp]: http://en.wikipedia.org/wiki/Functional_programming
 [pd]: http://en.wikipedia.org/wiki/Persistent_data_structure
 [stm]:http://en.wikipedia.org/wiki/Software_transactional_memory
 
 Rich Hickey
+
+---
+This documentation is continually being updated to reflect the current and new features of Clojure.
 
 ###[Setup](#setup)
 ###[Quick Start](#quickstart)
@@ -52,8 +56,7 @@ Clojure is [hosted on SourceForge][sf].
 
 Feedback and discussion should occur on the [Clojure Google Group][cgg].
 
-Clojure is delivered in a zip file containing a single .jar, `clojure.jar`. It requires the [ASM 3.0 bytecode library][asm], and the current alpha distribution includes it. [Java][jdk] 1.5 or greater is required.
-
+Clojure is delivered in a zip file containing a single .jar, `clojure.jar`, a readme, the CPL license and the source code in a `src` subdirectory. It uses the [ASM 3.0 bytecode library][asm], and the current alpha distribution includes it. [Java][jdk] 1.5 or greater is required.
 
 [asm]: http://asm.objectweb.org/
 [jdk]: http://java.sun.com/javase/downloads/index.jsp
@@ -61,7 +64,13 @@ Clojure is delivered in a zip file containing a single .jar, `clojure.jar`. It r
 [cgg]: http://groups.google.com/group/clojure
 
 <h2 id="quickstart">Quick Start</h2>
-Put the Clojure jar on the classpath and launch `java clojure.lang.Compiler /your/path/to/src/boot.clj`. This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself (in `boot.clj`), so the first thing you need to do is load the `boot.clj` file included in the `src` directory of distribution, either on the command line as above or as follows:
+In the directory you expanded `clojure.zip`:
+
+<pre><code>
+java -cp clojure.jar clojure.lang.Compiler src/boot.clj
+</code></pre>
+
+This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself (in `boot.clj`), so the first thing you need to do is load the `boot.clj` file included in the `src` directory of distribution, either on the command line (as above) or as follows:
 
 <pre><code>
 (load-file "/your/path/to/src/boot.clj")	
@@ -85,7 +94,7 @@ That said, most Clojure programs begin life as text files, and it is the task of
 
 One might say the reader has syntax defined in terms of characters, and the Clojure language has syntax defined in terms of symbols, lists, vectors, maps etc. The reader is represented by the function `read`, which reads the next form (not character) from a stream, and returns the object represented by that form.
 
->Since we have to start somewhere, we might as well start where evaluation starts, with the reader forms. This will inevitably entail talking about data structures whose descriptive details, and interpretation by the compiler, will follow.
+Since we have to start somewhere, we might as well start where evaluation starts, with the reader forms. This will inevitably entail talking about data structures whose descriptive details, and interpretation by the compiler, will follow.
 
 [hicon]:http://en.wikipedia.org/wiki/Homoiconicity
 	
@@ -301,7 +310,7 @@ Defines a function (fn). Fns are first-class objects that implement the IFn inte
 
 The first form defines a fn with a single invoke method. The second defines a fn with one or more overloaded invoke methods. The arities of the overloads must be distinct. In either case, the result of the expression is a single fn object.
 
-The exprs are compiled in an environment in which the params are bound to the actual arguments. The exprs are enclosed in an implicit `do`. The reserved symbol `this-fn` is bound within the function definition to the function object itself, allowing for self-calling, even in anonymous functions. If a param symbol is annotated with a metadata tag, the compiler will try to resolve the tag to a class name and presume that type in subsequent references to the binding.
+The exprs are compiled in an environment in which the params are bound to the actual arguments. The exprs are enclosed in an implicit `do`. The reserved symbol `thisfn` is bound within the function definition to the function object itself, allowing for self-calling, even in anonymous functions. If a param symbol is annotated with a metadata tag, the compiler will try to resolve the tag to a class name and presume that type in subsequent references to the binding.
 
 <pre><code>
 (def *
@@ -309,7 +318,7 @@ The exprs are compiled in an environment in which the params are bound to the ac
       ([x] x)
       ([x y] (. Num (multiply x y)))
       ([x y & more]
-          (apply this-fn (this-fn x y) more))))
+          (apply thisfn (this-fn x y) more))))
 </code></pre>
 
 A fn (overload) defines a recursion point at the top of the function, with arity equal to the number of params *including the rest param, if present*. See `recur`.
@@ -419,6 +428,18 @@ test-expr-pair => test expr
 `cond` takes a set of test/expr pairs. It evaluates each test one at a time. If a test returns non-nil, `cond` evaluates and returns the value of the corresponding expr and doesn't evaluate any of the other tests or exprs. `(cond)` returns `nil`. `cond ` is a succinct and readable alternative to nested `if`s.
 
 ---
+### (*locking* x exprs*)
+Executes exprs in an implicit `do`, while holding the monitor of x. Will release the monitor of x in all circumstances.
+
+---
+### (*..* instance-expr member+)
+### (*..* Classname-symbol member+)
+
+member => fieldName-symbol or (instanceMethodName-symbol args*)
+
+`(.. System (getProperties) (get "os.name"))`
+
+---
 ### (*defn* name [params* ] exprs*)
 ### (*defn* name ([params* ] exprs*)+)
 Same as `(def name (fn [params* ] exprs*))` or  `(def name (fn ([params* ] exprs*)+))`
@@ -522,6 +543,46 @@ If no denominators are supplied, returns 1/numerator, else returns numerator div
 ---
 ### (*-* num subs*)
 If no subs are supplied, returns the negation of num, else subtracts of the subs from num and returns the result.
+
+---
+### (*==* nums+)
+Returns non-nil if nums all have the same value, otherwise `nil`.
+
+---
+### (*<* nums+)
+Returns non-nil if nums are in monotonically increasing order, otherwise `nil`.
+
+---
+### (*<=* nums+)
+Returns non-nil if nums are in monotonically non-decreasing order, otherwise `nil`.
+
+---
+### (*>* nums+)
+Returns non-nil if nums are in monotonically decreasing order, otherwise `nil`.
+
+---
+### (*>=* nums+)
+Returns non-nil if nums are in monotonically non-increasing order, otherwise `nil`.
+
+---
+### (*inc* num)
+Returns a number one greater than num.
+
+---
+### (*dec* num)
+Returns a number one less than num.
+
+---
+### (*zero?* num)
+Returns non-nil if num is zero, else `nil`
+
+---
+### (*pos?* num)
+Returns non-nil if num is greater than zero, else `nil`
+
+---
+### (*neg?* num)
+Returns non-nil if num is less than zero, else `nil`
 
 ### _Strings_
 Clojure strings are Java `Strings`.
