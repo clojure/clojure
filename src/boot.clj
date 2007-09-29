@@ -6,6 +6,8 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
+(in-namespace "clojure")
+
 (def list (fn [& args] args))
 (def cons (fn [x seq] (. RT (cons x seq))))
 (def conj (fn [coll x] (. RT (conj coll x))))
@@ -480,8 +482,7 @@
 (defn refer-to [export-map]
   (= *refers* (conj *refers* export-map)))
 
-(defn in-namespace [ns]
-  (= *current-namespace* ns))
+
 
 (defn make-export-map [var-syms]
   (loop [ret {}
@@ -495,7 +496,7 @@
 
 (def *exports*
   (make-export-map
-	`(
+	`(  load-file eql-ref?
 		list cons conj defn
 		vector hash-map sorted-map sorted-map-by
 		meta with-meta defmacro when when-not

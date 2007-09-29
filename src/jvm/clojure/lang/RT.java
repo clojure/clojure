@@ -27,28 +27,13 @@ final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 //                                                    Module.findOrCreateModule("clojure/user"));
 
 final static Symbol LOAD_FILE = Symbol.create("clojure", "load-file");
+final static Symbol IN_NAMESPACE = Symbol.create("clojure", "in-namespace");
+final static Symbol EXPORTS = Symbol.create("clojure", "*exports*");
+final static Var EXPORTS_VAR = Var.intern(EXPORTS,PersistentHashMap.EMPTY);
 final static Symbol EQL_REF = Symbol.create("clojure", "eql-ref?");
 
 //string
 final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "*current-namespace*"), "clojure");
-//simple-symbol->var
-final static Var REFERS =
-		Var.intern(Symbol.create("clojure", "*refers*"),
-		           map(
-				           LOAD_FILE, Var.intern(LOAD_FILE,
-		                                         new AFn(){
-			                                         public Object invoke(Object arg1) throws Exception{
-				                                         return Compiler.loadFile((String) arg1);
-			                                         }
-		                                         }),
-				           EQL_REF, Var.intern(EQL_REF,
-		                                       new AFn(){
-			                                       public Object invoke(Object arg1, Object arg2)
-					                                       throws Exception{
-				                                       return arg1 == arg2 ? RT.T : null;
-			                                       }
-		                                       })
-		           ));
 //simple-symbol->fully-qualified-class-name-string
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"),
                                       map(Symbol.create("RT"), "clojure.lang.RT",
@@ -121,6 +106,35 @@ final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"),
                                           Symbol.create("SortedMap"), "java.util.SortedMap",
                                           Symbol.create("SortedSet"), "java.util.SortedSet"
                                       ));
+
+//simple-symbol->var
+final static Var REFERS =
+		Var.intern(Symbol.create("clojure", "*refers*"),
+		           map(
+				           IN_NAMESPACE, Var.intern(IN_NAMESPACE,
+		                                         new AFn(){
+			                                         public Object invoke(Object arg1) throws Exception{
+				                                         String ns = (String) arg1;
+				                                         CURRENT_NS.set(ns);
+				                                         Var.intern(Symbol.intern(ns, "*refers*"), EXPORTS_VAR.get());
+				                                         Var.intern(Symbol.intern(ns, "*imports*"), IMPORTS.get());
+				                                         return RT.T;
+			                                         }
+		                                         }),
+				           LOAD_FILE, Var.intern(LOAD_FILE,
+		                                         new AFn(){
+			                                         public Object invoke(Object arg1) throws Exception{
+				                                         return Compiler.loadFile((String) arg1);
+			                                         }
+		                                         }),
+				           EQL_REF, Var.intern(EQL_REF,
+		                                       new AFn(){
+			                                       public Object invoke(Object arg1, Object arg2)
+					                                       throws Exception{
+				                                       return arg1 == arg2 ? RT.T : null;
+			                                       }
+		                                       })
+		           ));
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 //static public final Character[] chars;
