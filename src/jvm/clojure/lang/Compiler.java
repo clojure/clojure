@@ -1165,7 +1165,7 @@ static class TryFinallyExpr implements Expr{
 				throw new IllegalArgumentException(
 						"Wrong number of arguments, expecting: (try-finally try-expr finally-expr) ");
 
-			if(context == C.EVAL)
+			if(context == C.EVAL || context == C.EXPRESSION)
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
 			return new TryFinallyExpr(analyze(context, RT.second(form)),
