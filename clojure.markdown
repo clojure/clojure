@@ -383,14 +383,14 @@ The expr is evaluated and thrown, therefor it should yield an instance of some d
 The expr is evaluated and its value returned. Before returning, normally or abnormally, the finally-expr will be evaluated for its side effects.
 
 ---
-### (*=* (. instance-expr instanceFieldName-symbol) expr)
-### (*=* (. Classname-symbol staticFieldName-symbol) expr)
-### (*=* var-symbol expr)
+### (*set!* (. instance-expr instanceFieldName-symbol) expr)
+### (*set!* (. Classname-symbol staticFieldName-symbol) expr)
+### (*set!* var-symbol expr)
 Assignment. 
 
 When the first operand is a field member access form, the assignment is to the corresponding field. If it is an instance field, the instance expr will be evaluated, then the expr.
 
-When the first operand is a symbol, it must resolve to a global var. The value of the var's current thread binding is set to the value of expr. Currently, it is an error to attempt to set the root binding of a var using `=`, i.e. var assignments are thread-local.
+When the first operand is a symbol, it must resolve to a global var. The value of the var's current thread binding is set to the value of expr. Currently, it is an error to attempt to set the root binding of a var using `set!`, i.e. var assignments are thread-local.
 
 In all cases the value of expr is returned.
 

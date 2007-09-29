@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-namespace "clojure")
+(in-namespace 'clojure)
 
 (def list (fn [& args] args))
 (def cons (fn [x seq] (. RT (cons x seq))))
@@ -453,6 +453,10 @@
  (let [v (f x)]
    (lazy-cons v (iterate f v))))
 
+
+(defn merge [& maps]
+  (reduce conj maps))
+
 ;; evaluation
 (defn eval [form]
   (. clojure.lang.Compiler (eval form)))
@@ -463,8 +467,8 @@
             (let [c (first classes)]
               (recur (conj ret
                            (if (instance? c Symbol)
-                               `(= *imports* (assoc *imports* '~c ~(strcat pkg "." c)))
-                             `(= *imports* (assoc *imports* '~(second c) ~(strcat pkg "." (first c))))))
+                               `(set! *imports* (assoc *imports* '~c ~(strcat pkg "." c)))
+                             `(set! *imports* (assoc *imports* '~(second c) ~(strcat pkg "." (first c))))))
                      (rest classes)))
           (cons `do ret))))
 
@@ -474,15 +478,13 @@
 ;            (let [v (first names)]
 ;              (recur (conj ret
 ;                           (if (instance? v Symbol)
-;                               `(= *refers* (assoc *refers* '~v (the-var ~(. Symbol (intern (str ns) (str v))))))
-;                             `(= *refers* (assoc *refers* '~(second v) (the-var ~(. Symbol (intern (str ns) (str (first v)))))))))
+;                               `(set! *refers* (assoc *refers* '~v (the-var ~(. Symbol (intern (str ns) (str v))))))
+;                             `(set! *refers* (assoc *refers* '~(second v) (the-var ~(. Symbol (intern (str ns) (str (first v)))))))))
 ;                     (rest names)))
 ;          (cons `do ret))))
 
-(defn refer-to [export-map]
-  (= *refers* (conj *refers* export-map)))
-
-
+(defn refer-to [& export-maps]
+  (set! *refers* (apply merge export-maps)))
 
 (defn make-export-map [var-syms]
   (loop [ret {}
@@ -507,7 +509,7 @@
 		inc dec pos? neg? zero?
 		complement constantly identity seq count
 		peek pop nth contains get
-		assoc dissoc find keys vals
+		assoc dissoc find keys vals merge
 		rseq name namespace locking ..
 		defpolyfn defmethod binding find-var
 		ref deref deref! commute set sync

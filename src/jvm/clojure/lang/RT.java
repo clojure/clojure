@@ -29,98 +29,102 @@ final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 final static Symbol LOAD_FILE = Symbol.create("clojure", "load-file");
 final static Symbol IN_NAMESPACE = Symbol.create("clojure", "in-namespace");
 final static Symbol EXPORTS = Symbol.create("clojure", "*exports*");
-final static Var EXPORTS_VAR = Var.intern(EXPORTS,PersistentHashMap.EMPTY);
+final static Var EXPORTS_VAR = Var.intern(EXPORTS, PersistentHashMap.EMPTY);
 final static Symbol EQL_REF = Symbol.create("clojure", "eql-ref?");
 
-//string
-final static Var CURRENT_NS = Var.intern(Symbol.create("clojure", "*current-namespace*"), "clojure");
+//symbol
+final static Var CURRENT_NS_SYM = Var.intern(Symbol.create("clojure", "*current-namespace*"), Symbol.create("clojure"));
 //simple-symbol->fully-qualified-class-name-string
-final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"),
-                                      map(Symbol.create("RT"), "clojure.lang.RT",
-                                          Symbol.create("Num"), "clojure.lang.Num",
-                                          Symbol.create("Symbol"), "clojure.lang.Symbol",
-                                          Symbol.create("Keyword"), "clojure.lang.Keyword",
-                                          Symbol.create("Var"), "clojure.lang.Var",
-                                          Symbol.create("Ref"), "clojure.lang.Ref",
-                                          Symbol.create("IFn"), "clojure.lang.IFn",
-                                          Symbol.create("IObj"), "clojure.lang.IObj",
-                                          Symbol.create("ISeq"), "clojure.lang.ISeq",
-                                          Symbol.create("IPersistentCollection"), "clojure.lang.IPersistentCollection",
-                                          Symbol.create("IPersistentMap"), "clojure.lang.IPersistentMap",
-                                          Symbol.create("IPersistentList"), "clojure.lang.IPersistentList",
-                                          Symbol.create("IPersistentVector"), "clojure.lang.IPersistentVector",
-                                          Symbol.create("Boolean"), "java.lang.Boolean",
-                                          Symbol.create("Byte"), "java.lang.Byte",
-                                          Symbol.create("Character"), "java.lang.Character",
-                                          Symbol.create("Class"), "java.lang.Class",
-                                          Symbol.create("ClassLoader"), "java.lang.ClassLoader",
-                                          Symbol.create("Compiler"), "java.lang.Compiler",
-                                          Symbol.create("Double"), "java.lang.Double",
-                                          Symbol.create("Enum"), "java.lang.Enum",
-                                          Symbol.create("Float"), "java.lang.Float",
-                                          Symbol.create("InheritableThreadLocal"), "java.lang.InheritableThreadLocal",
-                                          Symbol.create("Integer"), "java.lang.Integer",
-                                          Symbol.create("Long"), "java.lang.Long",
-                                          Symbol.create("Math"), "java.lang.Math",
-                                          Symbol.create("Number"), "java.lang.Number",
-                                          Symbol.create("Object"), "java.lang.Object",
-                                          Symbol.create("Package"), "java.lang.Package",
-                                          Symbol.create("Process"), "java.lang.Process",
-                                          Symbol.create("ProcessBuilder"), "java.lang.ProcessBuilder",
-                                          Symbol.create("Runtime"), "java.lang.Runtime",
-                                          Symbol.create("RuntimePermission"), "java.lang.RuntimePermission",
-                                          Symbol.create("SecurityManager"), "java.lang.SecurityManager",
-                                          Symbol.create("Short"), "java.lang.Short",
-                                          Symbol.create("StackTraceElement"), "java.lang.StackTraceElement",
-                                          Symbol.create("StrictMath"), "java.lang.StrictMath",
-                                          Symbol.create("String"), "java.lang.String",
-                                          Symbol.create("StringBuffer"), "java.lang.StringBuffer",
-                                          Symbol.create("StringBuilder"), "java.lang.StringBuilder",
-                                          Symbol.create("System"), "java.lang.System",
-                                          Symbol.create("Thread"), "java.lang.Thread",
-                                          Symbol.create("ThreadGroup"), "java.lang.ThreadGroup",
-                                          Symbol.create("ThreadLocal"), "java.lang.ThreadLocal",
-                                          Symbol.create("Throwable"), "java.lang.Throwable",
-                                          Symbol.create("Void"), "java.lang.Void",
-                                          Symbol.create("Appendable"), "java.lang.Appendable",
-                                          Symbol.create("CharSequence"), "java.lang.CharSequence",
-                                          Symbol.create("Cloneable"), "java.lang.Cloneable",
-                                          Symbol.create("Iterable"), "java.lang.Iterable",
-                                          Symbol.create("Readable"), "java.lang.Readable",
-                                          Symbol.create("Runnable"), "java.lang.Runnable",
-                                          Symbol.create("Exception"), "java.lang.Exception",
-                                          Symbol.create("Collection"), "java.util.Collection",
-                                          Symbol.create("Comparator"), "java.util.Comparator",
-                                          Symbol.create("Enumeration"), "java.util.Enumeration",
-                                          Symbol.create("EventListener"), "java.util.EventListener",
-                                          Symbol.create("Formattable"), "java.util.Formattable",
-                                          Symbol.create("Iterator"), "java.util.Iterator",
-                                          Symbol.create("List"), "java.util.List",
-                                          Symbol.create("ListIterator"), "java.util.ListIterator",
-                                          Symbol.create("Map"), "java.util.Map",
-                                          Symbol.create("Map$Entry"), "java.util.Map$Entry",
-                                          Symbol.create("Observer"), "java.util.Observer",
-                                          Symbol.create("Queue"), "java.util.Queue",
-                                          Symbol.create("RandomAccess"), "java.util.RandomAccess",
-                                          Symbol.create("Set"), "java.util.Set",
-                                          Symbol.create("SortedMap"), "java.util.SortedMap",
-                                          Symbol.create("SortedSet"), "java.util.SortedSet"
-                                      ));
+final static IPersistentMap DEFAULT_IMPORTS = map(Symbol.create("RT"), "clojure.lang.RT",
+                                                  Symbol.create("Num"), "clojure.lang.Num",
+                                                  Symbol.create("Symbol"), "clojure.lang.Symbol",
+                                                  Symbol.create("Keyword"), "clojure.lang.Keyword",
+                                                  Symbol.create("Var"), "clojure.lang.Var",
+                                                  Symbol.create("Ref"), "clojure.lang.Ref",
+                                                  Symbol.create("IFn"), "clojure.lang.IFn",
+                                                  Symbol.create("IObj"), "clojure.lang.IObj",
+                                                  Symbol.create("ISeq"), "clojure.lang.ISeq",
+                                                  Symbol.create("IPersistentCollection"),
+                                                  "clojure.lang.IPersistentCollection",
+                                                  Symbol.create("IPersistentMap"), "clojure.lang.IPersistentMap",
+                                                  Symbol.create("IPersistentList"), "clojure.lang.IPersistentList",
+                                                  Symbol.create("IPersistentVector"), "clojure.lang.IPersistentVector",
+                                                  Symbol.create("Boolean"), "java.lang.Boolean",
+                                                  Symbol.create("Byte"), "java.lang.Byte",
+                                                  Symbol.create("Character"), "java.lang.Character",
+                                                  Symbol.create("Class"), "java.lang.Class",
+                                                  Symbol.create("ClassLoader"), "java.lang.ClassLoader",
+                                                  Symbol.create("Compiler"), "java.lang.Compiler",
+                                                  Symbol.create("Double"), "java.lang.Double",
+                                                  Symbol.create("Enum"), "java.lang.Enum",
+                                                  Symbol.create("Float"), "java.lang.Float",
+                                                  Symbol.create("InheritableThreadLocal"),
+                                                  "java.lang.InheritableThreadLocal",
+                                                  Symbol.create("Integer"), "java.lang.Integer",
+                                                  Symbol.create("Long"), "java.lang.Long",
+                                                  Symbol.create("Math"), "java.lang.Math",
+                                                  Symbol.create("Number"), "java.lang.Number",
+                                                  Symbol.create("Object"), "java.lang.Object",
+                                                  Symbol.create("Package"), "java.lang.Package",
+                                                  Symbol.create("Process"), "java.lang.Process",
+                                                  Symbol.create("ProcessBuilder"), "java.lang.ProcessBuilder",
+                                                  Symbol.create("Runtime"), "java.lang.Runtime",
+                                                  Symbol.create("RuntimePermission"), "java.lang.RuntimePermission",
+                                                  Symbol.create("SecurityManager"), "java.lang.SecurityManager",
+                                                  Symbol.create("Short"), "java.lang.Short",
+                                                  Symbol.create("StackTraceElement"), "java.lang.StackTraceElement",
+                                                  Symbol.create("StrictMath"), "java.lang.StrictMath",
+                                                  Symbol.create("String"), "java.lang.String",
+                                                  Symbol.create("StringBuffer"), "java.lang.StringBuffer",
+                                                  Symbol.create("StringBuilder"), "java.lang.StringBuilder",
+                                                  Symbol.create("System"), "java.lang.System",
+                                                  Symbol.create("Thread"), "java.lang.Thread",
+                                                  Symbol.create("ThreadGroup"), "java.lang.ThreadGroup",
+                                                  Symbol.create("ThreadLocal"), "java.lang.ThreadLocal",
+                                                  Symbol.create("Throwable"), "java.lang.Throwable",
+                                                  Symbol.create("Void"), "java.lang.Void",
+                                                  Symbol.create("Appendable"), "java.lang.Appendable",
+                                                  Symbol.create("CharSequence"), "java.lang.CharSequence",
+                                                  Symbol.create("Cloneable"), "java.lang.Cloneable",
+                                                  Symbol.create("Iterable"), "java.lang.Iterable",
+                                                  Symbol.create("Readable"), "java.lang.Readable",
+                                                  Symbol.create("Runnable"), "java.lang.Runnable",
+                                                  Symbol.create("Exception"), "java.lang.Exception",
+                                                  Symbol.create("Collection"), "java.util.Collection",
+                                                  Symbol.create("Comparator"), "java.util.Comparator",
+                                                  Symbol.create("Enumeration"), "java.util.Enumeration",
+                                                  Symbol.create("EventListener"), "java.util.EventListener",
+                                                  Symbol.create("Formattable"), "java.util.Formattable",
+                                                  Symbol.create("Iterator"), "java.util.Iterator",
+                                                  Symbol.create("List"), "java.util.List",
+                                                  Symbol.create("ListIterator"), "java.util.ListIterator",
+                                                  Symbol.create("Map"), "java.util.Map",
+                                                  Symbol.create("Map$Entry"), "java.util.Map$Entry",
+                                                  Symbol.create("Observer"), "java.util.Observer",
+                                                  Symbol.create("Queue"), "java.util.Queue",
+                                                  Symbol.create("RandomAccess"), "java.util.RandomAccess",
+                                                  Symbol.create("Set"), "java.util.Set",
+                                                  Symbol.create("SortedMap"), "java.util.SortedMap",
+                                                  Symbol.create("SortedSet"), "java.util.SortedSet"
+);
 
+final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"), DEFAULT_IMPORTS);
+final static IFn inNamespace = new AFn(){
+	public Object invoke(Object arg1) throws Exception{
+		Symbol ns = (Symbol) arg1;
+		CURRENT_NS_SYM.set(ns);
+		Var refers = Var.intern(Symbol.intern(ns.name, "*refers*"), EXPORTS_VAR.get());
+		Var imports = Var.intern(Symbol.intern(ns.name, "*imports*"), DEFAULT_IMPORTS);
+		NS_REFERS.set(refers);
+		NS_IMPORTS.set(imports);
+		return RT.T;
+	}
+};
 //simple-symbol->var
 final static Var REFERS =
 		Var.intern(Symbol.create("clojure", "*refers*"),
 		           map(
-				           IN_NAMESPACE, Var.intern(IN_NAMESPACE,
-		                                         new AFn(){
-			                                         public Object invoke(Object arg1) throws Exception{
-				                                         String ns = (String) arg1;
-				                                         CURRENT_NS.set(ns);
-				                                         Var.intern(Symbol.intern(ns, "*refers*"), EXPORTS_VAR.get());
-				                                         Var.intern(Symbol.intern(ns, "*imports*"), IMPORTS.get());
-				                                         return RT.T;
-			                                         }
-		                                         }),
+				           IN_NAMESPACE, Var.intern(IN_NAMESPACE, inNamespace),
 				           LOAD_FILE, Var.intern(LOAD_FILE,
 		                                         new AFn(){
 			                                         public Object invoke(Object arg1) throws Exception{
@@ -136,6 +140,8 @@ final static Var REFERS =
 		                                       })
 		           ));
 
+static Var NS_IMPORTS = Var.intern(Symbol.create("clojure", "*ns-imports*"), IMPORTS);
+static Var NS_REFERS = Var.intern(Symbol.create("clojure", "*ns-refers*"), REFERS);
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 //static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
