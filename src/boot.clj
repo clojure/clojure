@@ -504,15 +504,22 @@
        (when (. clojure.lang.Var (find (sym (str *current-namespace*) (str name))))
          (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
        (let [varsym (sym (str ns) (str name))
-             var (. clojure.lang.Var (find varsym))]
+             var (. clojure.lang.Var (find varsym))
+             rvar ((. refers (get)) name)]
          (if var
-             (. refers (bindRoot (assoc (. refers (get)) name var)))
+             (if rvar
+                 (when (not (eql? rvar var))
+                   (throw (new Exception (strcat "Name conflict: " name " already exists in this refer map as: " (. rvar sym)))))
+               (. refers (bindRoot (assoc (. refers (get)) name var))))
             (throw (new Exception (strcat "Can't find Var: " varsym)))))))))
 
 (defn unrefer [& names]
    (let [#^clojure.lang.Var refers *ns-refers*]
 	  (dolist name names
         (. refers (bindRoot (dissoc (. refers (get)) name))))))
+
+(defn unintern [varsym]
+  (. clojure.lang.Var (unintern varsym)))
 
 (def *exports*
 	'(clojure
@@ -537,6 +544,6 @@
 		map mapcat filter take take-while drop drop-while
 		cycle split-at split-with repeat replicate iterate
 		dolist
-		eval import unimport refer unrefer in-namespace
+		eval import unimport refer unrefer in-namespace unintern
 	))
 

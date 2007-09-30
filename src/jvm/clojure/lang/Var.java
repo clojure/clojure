@@ -59,7 +59,7 @@ static InheritableThreadLocal<Frame> dvals = new InheritableThreadLocal<Frame>()
 
 Object root;
 transient final AtomicInteger count;
-final Symbol sym;
+final public Symbol sym;
 boolean macroFlag = false;
 
 static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();

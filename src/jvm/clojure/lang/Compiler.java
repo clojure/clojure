@@ -265,8 +265,8 @@ static class DefExpr implements Expr{
 			if(!v.sym.ns.equals(currentNS().name))
 				{
 				if(sym.ns == null)
-					throw new Exception("Name conflict, can't def " + sym + " because " + currentNS().name +
-					                    " namespace refers to:" + v.sym);
+					throw new Exception("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
+					                    " refers to:" + v.sym);
 				else
 					throw new Exception("Can't create defs outside of current ns");
 				}
