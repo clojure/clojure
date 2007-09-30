@@ -197,13 +197,13 @@ static Symbol resolveSymbol(Symbol sym){
 	//already qualified or classname?
 	if(sym.ns != null || sym.name.indexOf('.') > 0)
 		return sym;
-	IPersistentMap imports = (IPersistentMap) ((Var)RT.NS_IMPORTS.get()).get();
+	IPersistentMap imports = (IPersistentMap) ((Var) RT.NS_IMPORTS.get()).get();
 	//imported class?
 	String className = (String) imports.valAt(sym);
 	if(className != null)
 		return Symbol.intern(null, className);
 	//refers?
-	IPersistentMap refers = (IPersistentMap) ((Var)RT.NS_REFERS.get()).get();
+	IPersistentMap refers = (IPersistentMap) ((Var) RT.NS_REFERS.get()).get();
 	Var var = (Var) refers.valAt(sym);
 	if(var != null)
 		return var.sym;
@@ -258,9 +258,18 @@ static class DefExpr implements Expr{
 				throw new Exception("Too few arguments to def");
 			else if(!(RT.second(form) instanceof Symbol))
 				throw new Exception("Second argument to def must be a Symbol");
-			Var v = lookupVar((Symbol) RT.second(form), true);
+			Symbol sym = (Symbol) RT.second(form);
+			Var v = lookupVar(sym, true);
+			if(v == null)
+				throw new Exception("Can't refer to qualified var that doesn't exist");
 			if(!v.sym.ns.equals(currentNS().name))
-				throw new Exception("Can't create defs outside of current ns");
+				{
+				if(sym.ns == null)
+					throw new Exception("Name conflict, can't def " + sym + " because " + currentNS().name +
+					                    " namespace refers to:" + v.sym);
+				else
+					throw new Exception("Can't create defs outside of current ns");
+				}
 			return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name), RT.count(form) == 3);
 		}
 	}
@@ -580,7 +589,7 @@ static abstract class HostExpr implements Expr{
 					className = sym.name;
 				else
 					{
-					IPersistentMap imports = (IPersistentMap) ((Var)RT.NS_IMPORTS.get()).get();
+					IPersistentMap imports = (IPersistentMap) ((Var) RT.NS_IMPORTS.get()).get();
 					className = (String) imports.valAt(sym);
 					}
 				}
@@ -2574,7 +2583,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	else
 		{
 		//is it an alias?
-		IPersistentMap refers = (IPersistentMap) ((Var)RT.NS_REFERS.get()).get();
+		IPersistentMap refers = (IPersistentMap) ((Var) RT.NS_REFERS.get()).get();
 		var = (Var) refers.valAt(sym);
 		if(var == null && sym.ns == null)
 			var = Var.find(Symbol.intern(currentNS().name, sym.name));

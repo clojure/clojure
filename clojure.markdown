@@ -253,7 +253,7 @@ If the operator is not a special form or macro, the call is considered a functio
 
 Note that special forms and macros might have other-than-normal evaluation of their arguments, as described in their entries under [Special Forms](#specialforms).
 
-The above describes the evaluation of a single form. `load` and `load-file` will sequentially evaluate the set of forms contained in the stream/file. Such sets of forms usually have side effects, often on the global environment, defining functions etc. The loading functions occur in a temporary context, in which `*current-namespace*`, `*imports*` and `*refers*` all have fresh bindings. That means that, should any form have an effect on those vars (e.g. `in-namespace, refers, import`), the effect will unwind at the completion of the load. 
+The above describes the evaluation of a single form. `load` and `load-file` will sequentially evaluate the set of forms contained in the stream/file. Such sets of forms usually have side effects, often on the global environment, defining functions etc. The loading functions occur in a temporary context, in which `*current-namespace*` has a fresh binding. That means that, should any form have an effect on that var (e.g. `in-namespace), the effect will unwind at the completion of the load. 
 
 <h2 id="specialforms">Special Forms</h2>
 
@@ -627,12 +627,7 @@ Clojure characters are Java `Characters`.
 ### _Keywords_
 Keywords are symbolic identifiers that evaluate to themselves. They provide very fast equality tests. Like Symbols, they have names and optional [namespaces](#namespaces), both of which are strings. The leading ':' is not part of the namespace or name. Keywords implement IFn, for invoke() of one argument, which they expect to be a map, in which they look themselves up, i.e. keywords are functions of maps.
 
-<pre><code>
-(def m {:a 1 :b 2 :c 3})
 
-(:b m)
-> 2
-</code></pre>
 
 ### _Symbols_
 Symbols are identifiers that are normally used to refer to something else. They can be used in program forms to refer to function parameters, let bindings, class names and global vars. They have names and optional [namespaces](#namespaces), both of which are strings. Symbols can have metadata.
@@ -812,7 +807,52 @@ Returns an object of the same type and value as obj, with map as its metadata.
 
 <h2 id="namespaces">Namespaces</h2>
 
-Symbols and keywords are two-part identifiers - with an optional namespace and a name, both Strings. Namespaces are used to distinguish two symbols that have the same name. Note that namespaces are not first-class - they are not collections of symbols sharing the same prefix, they cannot be enumerated etc. Essentially, namespaces just allow simpler identifiers to be used in contexts where a namespace is either not required (fn params and let-locals) or can be inferred.
+Symbols and keywords are two-part identifiers - with an optional namespace and a name, both strings. Namespaces are used to distinguish two symbols that have the same name. Vars are named by symbols that must have a namespace part, and thus can be considered to be in namespaces. Note that namespaces are not first-class - they are not collections of symbols/vars sharing the same prefix, they cannot be enumerated etc. Essentially, namespaces just allow simpler identifiers to be used in contexts where a namespace is either not required (fn params and let-locals) or can be inferred. Namespaces do have 2 concrete properties, `*imports*` and `*refers*`, described below.
+
+As we've seen, all `def`s create vars in the current namespace. The `*current-namespace*` can and should be set only with a call to `in-namespace`.  `in-namespace` will set `*current-namespace*` to the supplied symbol, and will set up the bindings to the `*refers*` and `*imports*` vars. There are `*refers*` and `*imports*` in each namespace, and `in-namespace` will create them if they don't already exist. `*refers*` is a map from simple symbols to Vars, and its initial value consists of the symbols exported from the `clojure` namespace. `*imports*` is a map from simple symbols to fully-qualified classnames, and its initial value is the classes from the `java.lang` package.
+Mappings can be added to `*refers*` with `refer`, and to `*imports*` with `import`, and only via those functions.
+
+---
+### (*in-namespace* ns-symbol)
+Sets `*current-namespace*` to the supplied symbol, and will set up the bindings to the `*refers*` and `*imports*` vars, creating them if they don't already exist.
+
+---
+### (*import* import-lists+)
+
+import-list => (package-symbol class-name-symbols*)
+
+For each name in class-name-symbols, adds a mapping from `name` to "package.name" to the `*imports*` map of the current namespace.
+
+<pre><code>
+(import '(java.util Date Timer Random)
+        '(java.sql Connection Statement))
+</code></pre>
+  
+---
+### (*unimport* symbols+)
+
+Removes the mappings from the `*imports*` map of the current namespace.
+
+<pre><code>
+(unimport 'Date 'Statement)
+</code></pre>
+
+---
+### (*refer* refer-lists+)
+
+refer-list => (ns-symbol name-symbols*)
+
+For each name in name-symbols, adds a mapping from `name` to the var named ns/name to the `*refers*` map of the current namespace. The vars must exist.
+
+<pre><code>
+(refer '(fred-ns ricky lucy ethel)
+       '(barney-ns wilma fred betty))
+</code></pre>
+  
+---
+### (*unrefer* symbols+)
+
+Removes the mappings from the `*refers*` map of the current namespace.
 
 ---
 ### (*name* symbol-or-keyword)

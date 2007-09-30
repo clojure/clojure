@@ -490,7 +490,7 @@
          (. imps (bindRoot (assoc (. imps (get)) c (strcat pkg "." c))))))
    (apply thisfn (rest import-lists))))
 
-(defn unimport [names]
+(defn unimport [& names]
    (let [#^clojure.lang.Var imps *ns-imports*]
 	  (dolist name names
         (. imps (bindRoot (dissoc (. imps (get)) name))))))
@@ -501,13 +501,15 @@
          ns (first rlist)
          names (rest rlist)]
      (dolist name names
+       (when (. clojure.lang.Var (find (sym (str *current-namespace*) (str name))))
+         (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
        (let [varsym (sym (str ns) (str name))
              var (. clojure.lang.Var (find varsym))]
          (if var
              (. refers (bindRoot (assoc (. refers (get)) name var)))
             (throw (new Exception (strcat "Can't find Var: " varsym)))))))))
 
-(defn unrefer [names]
+(defn unrefer [& names]
    (let [#^clojure.lang.Var refers *ns-refers*]
 	  (dolist name names
         (. refers (bindRoot (dissoc (. refers (get)) name))))))
