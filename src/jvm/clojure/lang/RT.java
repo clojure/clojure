@@ -35,20 +35,21 @@ final static Symbol EQL_REF = Symbol.create("clojure", "eql-ref?");
 //symbol
 final static Var CURRENT_NS_SYM = Var.intern(Symbol.create("clojure", "*current-namespace*"), Symbol.create("clojure"));
 //simple-symbol->fully-qualified-class-name-string
-final static IPersistentMap DEFAULT_IMPORTS = map(Symbol.create("RT"), "clojure.lang.RT",
-                                                  Symbol.create("Num"), "clojure.lang.Num",
-                                                  Symbol.create("Symbol"), "clojure.lang.Symbol",
-                                                  Symbol.create("Keyword"), "clojure.lang.Keyword",
-                                                  Symbol.create("Var"), "clojure.lang.Var",
-                                                  Symbol.create("Ref"), "clojure.lang.Ref",
-                                                  Symbol.create("IFn"), "clojure.lang.IFn",
-                                                  Symbol.create("IObj"), "clojure.lang.IObj",
-                                                  Symbol.create("ISeq"), "clojure.lang.ISeq",
-                                                  Symbol.create("IPersistentCollection"),
-                                                  "clojure.lang.IPersistentCollection",
-                                                  Symbol.create("IPersistentMap"), "clojure.lang.IPersistentMap",
-                                                  Symbol.create("IPersistentList"), "clojure.lang.IPersistentList",
-                                                  Symbol.create("IPersistentVector"), "clojure.lang.IPersistentVector",
+final static IPersistentMap DEFAULT_IMPORTS = map(
+//												  Symbol.create("RT"), "clojure.lang.RT",
+//                                                  Symbol.create("Num"), "clojure.lang.Num",
+//                                                  Symbol.create("Symbol"), "clojure.lang.Symbol",
+//                                                  Symbol.create("Keyword"), "clojure.lang.Keyword",
+//                                                  Symbol.create("Var"), "clojure.lang.Var",
+//                                                  Symbol.create("Ref"), "clojure.lang.Ref",
+//                                                  Symbol.create("IFn"), "clojure.lang.IFn",
+//                                                  Symbol.create("IObj"), "clojure.lang.IObj",
+//                                                  Symbol.create("ISeq"), "clojure.lang.ISeq",
+//                                                  Symbol.create("IPersistentCollection"),
+//                                                  "clojure.lang.IPersistentCollection",
+//                                                  Symbol.create("IPersistentMap"), "clojure.lang.IPersistentMap",
+//                                                  Symbol.create("IPersistentList"), "clojure.lang.IPersistentList",
+//                                                  Symbol.create("IPersistentVector"), "clojure.lang.IPersistentVector",
                                                   Symbol.create("Boolean"), "java.lang.Boolean",
                                                   Symbol.create("Byte"), "java.lang.Byte",
                                                   Symbol.create("Character"), "java.lang.Character",
@@ -89,23 +90,23 @@ final static IPersistentMap DEFAULT_IMPORTS = map(Symbol.create("RT"), "clojure.
                                                   Symbol.create("Iterable"), "java.lang.Iterable",
                                                   Symbol.create("Readable"), "java.lang.Readable",
                                                   Symbol.create("Runnable"), "java.lang.Runnable",
-                                                  Symbol.create("Exception"), "java.lang.Exception",
-                                                  Symbol.create("Collection"), "java.util.Collection",
-                                                  Symbol.create("Comparator"), "java.util.Comparator",
-                                                  Symbol.create("Enumeration"), "java.util.Enumeration",
-                                                  Symbol.create("EventListener"), "java.util.EventListener",
-                                                  Symbol.create("Formattable"), "java.util.Formattable",
-                                                  Symbol.create("Iterator"), "java.util.Iterator",
-                                                  Symbol.create("List"), "java.util.List",
-                                                  Symbol.create("ListIterator"), "java.util.ListIterator",
-                                                  Symbol.create("Map"), "java.util.Map",
-                                                  Symbol.create("Map$Entry"), "java.util.Map$Entry",
-                                                  Symbol.create("Observer"), "java.util.Observer",
-                                                  Symbol.create("Queue"), "java.util.Queue",
-                                                  Symbol.create("RandomAccess"), "java.util.RandomAccess",
-                                                  Symbol.create("Set"), "java.util.Set",
-                                                  Symbol.create("SortedMap"), "java.util.SortedMap",
-                                                  Symbol.create("SortedSet"), "java.util.SortedSet"
+                                                  Symbol.create("Exception"), "java.lang.Exception"
+//                                                  Symbol.create("Collection"), "java.util.Collection",
+//                                                  Symbol.create("Comparator"), "java.util.Comparator",
+//                                                  Symbol.create("Enumeration"), "java.util.Enumeration",
+//                                                  Symbol.create("EventListener"), "java.util.EventListener",
+//                                                  Symbol.create("Formattable"), "java.util.Formattable",
+//                                                  Symbol.create("Iterator"), "java.util.Iterator",
+//                                                  Symbol.create("List"), "java.util.List",
+//                                                  Symbol.create("ListIterator"), "java.util.ListIterator",
+//                                                  Symbol.create("Map"), "java.util.Map",
+//                                                  Symbol.create("Map$Entry"), "java.util.Map$Entry",
+//                                                  Symbol.create("Observer"), "java.util.Observer",
+//                                                  Symbol.create("Queue"), "java.util.Queue",
+//                                                  Symbol.create("RandomAccess"), "java.util.RandomAccess",
+//                                                  Symbol.create("Set"), "java.util.Set",
+//                                                  Symbol.create("SortedMap"), "java.util.SortedMap",
+//                                                  Symbol.create("SortedSet"), "java.util.SortedSet"
 );
 
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"), DEFAULT_IMPORTS);
@@ -113,10 +114,16 @@ final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
 		Symbol ns = (Symbol) arg1;
 		CURRENT_NS_SYM.set(ns);
-		Var refers = Var.intern(Symbol.intern(ns.name, "*refers*"), EXPORTS_VAR.get());
-		Var imports = Var.intern(Symbol.intern(ns.name, "*imports*"), DEFAULT_IMPORTS);
+		Var refers = Var.intern(Symbol.intern(ns.name, "*refers*"));
+
+		Var imports = Var.intern(Symbol.intern(ns.name, "*imports*"), DEFAULT_IMPORTS,false);
 		NS_REFERS.set(refers);
 		NS_IMPORTS.set(imports);
+		if(!refers.isBound())
+			{
+			refers.bindRoot(PersistentHashMap.EMPTY);
+			Compiler.eval(list(Symbol.create("clojure","refer"),EXPORTS));
+			}
 		return RT.T;
 	}
 };
@@ -337,7 +344,7 @@ static public ISeq findKey(Keyword key, ISeq keyvals) throws Exception{
 	return null;
 }
 
-static public Object dissoc(Object key, Object coll){
+static public Object dissoc(Object coll, Object key){
 	if(coll == null)
 		return null;
 	return ((IPersistentMap) coll).without(key);

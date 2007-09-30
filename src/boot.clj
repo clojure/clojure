@@ -9,8 +9,8 @@
 (in-namespace 'clojure)
 
 (def list (fn [& args] args))
-(def cons (fn [x seq] (. RT (cons x seq))))
-(def conj (fn [coll x] (. RT (conj coll x))))
+(def cons (fn [x seq] (. clojure.lang.RT (cons x seq))))
+(def conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
 
 (def defn (fn [name & fdecl]
               (list 'def name (cons 'fn fdecl))))
@@ -35,10 +35,10 @@
       ([comparator & args]
           (. clojure.lang.PersistentTreeMap (create comparator args))))
 
-(defn meta [#^IObj x]
+(defn meta [#^clojure.lang.IObj x]
  (. x (meta)))
 
-(defn with-meta [#^IObj x m]
+(defn with-meta [#^clojure.lang.IObj x m]
   (. x (withMeta m)))
 
 (def defmacro (fn [name & args]
@@ -54,19 +54,24 @@
 (defmacro when-not [test & body]
    (list 'if test nil (cons 'do body)))
 
-(def t (. RT T))
+(def t (. clojure.lang.RT T))
 
 (defn nil? [x] (if x nil t))
 
 (defn not [x] (nil? x))
 
-(defn first [x] (. RT (first x)))
+(defn first [x] (. clojure.lang.RT (first x)))
 
-(defn rest [x] (. RT (rest x)))
+(defn rest [x] (. clojure.lang.RT (rest x)))
 
-(defn second [x] (. RT (second x)))
+(defn second [x] (. clojure.lang.RT (second x)))
 
-(defn eql? [x y] (. RT (equal x y)))
+(defn ffirst [x] (first (first x)))
+(defn rfirst [x] (rest (first x)))
+(defn frest [x] (first (rest x)))
+(defn rrest [x] (rest (rest x)))
+
+(defn eql? [x y] (. clojure.lang.RT (equal x y)))
 
 (defn str [#^Object x] (. x (toString)))
 
@@ -76,9 +81,13 @@
         (recur (. s  (concat (str (first ys)))) (rest ys))
       s)))
 
+(defn sym
+  ([name] (. clojure.lang.Symbol (intern name)))
+  ([ns name] (. clojure.lang.Symbol (intern ns name))))
+
 (defn gensym 
   ([] (thisfn "G__"))
-  ([prefix-string] (. Symbol (intern (strcat prefix-string (str (. RT (nextID))))))))
+  ([prefix-string] (. clojure.lang.Symbol (intern (strcat prefix-string (str (. clojure.lang.RT (nextID))))))))
 
 (defmacro cond [& clauses]
   (when clauses
@@ -92,7 +101,7 @@
        (nil? (rest arglist)) (first arglist)
        :else (cons (first arglist) (thisfn (rest arglist)))))
 
-(defn apply [#^IFn f & args]
+(defn apply [#^clojure.lang.IFn f & args]
       (. f (applyTo (spread args))))
 
 (defn list* [& args]
@@ -130,73 +139,73 @@
 (defn +
       ([] 0)
       ([x] x)
-      ([x y] (. Num (add x y)))
+      ([x y] (. clojure.lang.Num (add x y)))
       ([x y & more]
           (apply thisfn (thisfn x y) more)))
 
 (defn *
       ([] 1)
       ([x] x)
-      ([x y] (. Num (multiply x y)))
+      ([x y] (. clojure.lang.Num (multiply x y)))
       ([x y & rest]
           (apply thisfn (thisfn x y) rest)))
 
 (defn /
       ([x] (thisfn 1 x))
-      ([x y] (. Num (divide x y)))
+      ([x y] (. clojure.lang.Num (divide x y)))
       ([x y & rest]
           (apply thisfn (thisfn x y) rest)))
 
 (defn -
-      ([x] (. Num (negate x)))
-      ([x y] (. Num (subtract x y)))
+      ([x] (. clojure.lang.Num (negate x)))
+      ([x y] (. clojure.lang.Num (subtract x y)))
       ([x y & rest]
           (apply thisfn (thisfn x y) rest)))
 
 (defn <
       ([x] t)
-      ([x y] (. Num (lt x y)))
+      ([x y] (. clojure.lang.Num (lt x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn <=
       ([x] t)
-      ([x y] (. Num (lte x y)))
+      ([x y] (. clojure.lang.Num (lte x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn >
       ([x] t)
-      ([x y] (. Num (gt x y)))
+      ([x y] (. clojure.lang.Num (gt x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn >=
       ([x] t)
-      ([x y] (. Num (gte x y)))
+      ([x y] (. clojure.lang.Num (gte x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn ==
       ([x] t)
-      ([x y] (. Num (equiv x y)))
+      ([x y] (. clojure.lang.Num (equiv x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn inc [x]
-      (. Num (inc x)))
+      (. clojure.lang.Num (inc x)))
 
 (defn dec [x]
-      (. Num (dec x)))
+      (. clojure.lang.Num (dec x)))
 
 (defn pos? [x]
-      (. Num (posPred x)))
+      (. clojure.lang.Num (posPred x)))
 
 (defn neg? [x]
-      (. Num (negPred x)))
+      (. clojure.lang.Num (negPred x)))
 
 (defn zero? [x]
-      (. Num (zeroPred x)))
+      (. clojure.lang.Num (zeroPred x)))
 
 (defn complement [f]
   (fn [& args]
@@ -210,42 +219,42 @@
 ;;Collection stuff
 
 (defn seq [coll]
-  (. RT (seq coll)))
+  (. clojure.lang.RT (seq coll)))
 
 (defn count [coll]
-  (. RT (count coll)))
+  (. clojure.lang.RT (count coll)))
 
 ;;list stuff
 (defn peek [list]
-  (. RT (peek list)))
+  (. clojure.lang.RT (peek list)))
 
 (defn pop [list]
-  (. RT (pop list)))
+  (. clojure.lang.RT (pop list)))
 
 (defn nth [coll index]
- (. RT (nth coll index)))
+ (. clojure.lang.RT (nth coll index)))
 
 ;;map stuff
 
 (defn contains [map key]
- (. RT (contains map key)))
+ (. clojure.lang.RT (contains map key)))
 
 (defn get [map key]
- (. RT (get map key)))
+ (. clojure.lang.RT (get map key)))
 
 (defn assoc [map key val]
- (. RT (assoc map key val)))
+ (. clojure.lang.RT (assoc map key val)))
 
 (defn dissoc [map key]
- (. RT (dissoc map key)))
+ (. clojure.lang.RT (dissoc map key)))
 
 (defn find [map key]
- (. RT (find map key)))
+ (. clojure.lang.RT (find map key)))
 
 (defn select [map keyseq]
  (loop [ret {} keys (seq keyseq)]
    (if keys
-        (let [entry (. RT (find map (first keys)))]
+        (let [entry (. clojure.lang.RT (find map (first keys)))]
             (recur
                 (if entry
                     (conj ret entry)
@@ -254,10 +263,10 @@
       ret)))
 
 (defn keys [map]
-  (. RT (keys map)))
+  (. clojure.lang.RT (keys map)))
 
 (defn vals [map]
-  (. RT (vals map)))
+  (. clojure.lang.RT (vals map)))
 
 (defn rseq [smap]
   (. smap (rseq)))
@@ -307,31 +316,31 @@
                             (seq ret))))]
     `(try-finally
       (do
-          (. Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
+          (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
           ~@body)
-      (. Var (popThreadBindings)))))
+      (. clojure.lang.Var (popThreadBindings)))))
 
 (defn find-var [sym]
- (. Var (find sym)))
+ (. clojure.lang.Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn ref [x]
- (new Ref x))
+ (new clojure.lang.Ref x))
 
-(defn deref [#^Ref ref]
+(defn deref [#^clojure.lang.Ref ref]
   (. ref (get)))
 
-(defn deref! [#^Ref ref]
+(defn deref! [#^clojure.lang.Ref ref]
   (. ref (currentVal)))
 
-(defn commute [#^Ref ref fun]
+(defn commute [#^clojure.lang.Ref ref fun]
   (. ref (commute fun)))
 
 (defn set
-  ([#^Ref ref]
+  ([#^clojure.lang.Ref ref]
     (. ref (touch))
     (. ref (get)))
-  ([#^Ref ref val]
+  ([#^clojure.lang.Ref ref val]
     (. ref (set val))))
 
 (defmacro sync [flags-ignored-for-now & body]
@@ -458,51 +467,59 @@
   (reduce conj maps))
 
 ;; evaluation
+
 (defn eval [form]
   (. clojure.lang.Compiler (eval form)))
-  
-(defmacro import [pkg & class-names]
-  (loop [ret () classes class-names]
-        (if classes
-            (let [c (first classes)]
-              (recur (conj ret
-                           (if (instance? c Symbol)
-                               `(set! *imports* (assoc *imports* '~c ~(strcat pkg "." c)))
-                             `(set! *imports* (assoc *imports* '~(second c) ~(strcat pkg "." (first c))))))
-                     (rest classes)))
-          (cons `do ret))))
 
-;(defmacro refer-to [ns & names]
-;  (loop [ret () names names]
-;        (if names
-;            (let [v (first names)]
-;              (recur (conj ret
-;                           (if (instance? v Symbol)
-;                               `(set! *refers* (assoc *refers* '~v (the-var ~(. Symbol (intern (str ns) (str v))))))
-;                             `(set! *refers* (assoc *refers* '~(second v) (the-var ~(. Symbol (intern (str ns) (str (first v)))))))))
-;                     (rest names)))
-;          (cons `do ret))))
+(defn defimports [& imports-maps]
+  (def *imports* (apply merge imports-maps)))
 
-(defn refer-to [& export-maps]
-  (set! *refers* (apply merge export-maps)))
+(defmacro dolist [item list & body]
+  `(loop [list# (seq ~list)]
+      (when list#
+        (let [~item (first list#)]
+          ~@body)
+        (recur (rest list#)))))
 
-(defn make-export-map [var-syms]
-  (loop [ret {}
-         vs (seq var-syms)]
-    (if vs
-         (let [s (first vs) v (find-var s)]
-            (if v
-                (recur (assoc ret (. Symbol (intern (name s))) v) (rest vs))
-               (throw (new Exception (strcat "Can't find Var: " s)))))
-       ret)))
+(defn import [& import-lists]
+ (when import-lists
+   (let [#^clojure.lang.Var imps *ns-imports*
+         pkg (ffirst import-lists)
+         classes (rfirst import-lists)]
+       (dolist c classes
+         (. imps (bindRoot (assoc (. imps (get)) c (strcat pkg "." c))))))
+   (apply thisfn (rest import-lists))))
+
+(defn unimport [names]
+   (let [#^clojure.lang.Var imps *ns-imports*]
+	  (dolist name names
+        (. imps (bindRoot (dissoc (. imps (get)) name))))))
+
+(defn refer [& refer-lists]
+  (dolist rlist refer-lists
+   (let [#^clojure.lang.Var refers *ns-refers*
+         ns (first rlist)
+         names (rest rlist)]
+     (dolist name names
+       (let [varsym (sym (str ns) (str name))
+             var (. clojure.lang.Var (find varsym))]
+         (if var
+             (. refers (bindRoot (assoc (. refers (get)) name var)))
+            (throw (new Exception (strcat "Can't find Var: " varsym)))))))))
+
+(defn unrefer [names]
+   (let [#^clojure.lang.Var refers *ns-refers*]
+	  (dolist name names
+        (. refers (bindRoot (dissoc (. refers (get)) name))))))
 
 (def *exports*
-  (make-export-map
-	`(  load-file eql-ref?
+	'(clojure
+	    load-file eql-ref?
 		list cons conj defn
 		vector hash-map sorted-map sorted-map-by
 		meta with-meta defmacro when when-not
 		nil? not first rest second
+		ffirst frest rfirst rrest
 		eql? str strcat gensym cond
 		apply list* delay lazy-cons concat
 		and or + * / - == < <= > >=
@@ -510,12 +527,14 @@
 		complement constantly identity seq count
 		peek pop nth contains get
 		assoc dissoc find keys vals merge
-		rseq name namespace locking ..
+		rseq sym name namespace locking ..
 		defpolyfn defmethod binding find-var
 		ref deref deref! commute set sync
 		reduce reverse comp appl
 		every not-every any not-any
 		map mapcat filter take take-while drop drop-while
 		cycle split-at split-with repeat replicate iterate
-		eval import refer-to in-namespace
-	)))
+		dolist
+		eval import unimport refer unrefer in-namespace
+	))
+
