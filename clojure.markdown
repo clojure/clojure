@@ -10,7 +10,7 @@
 
 #Clo*j*ure
 ## A Dynamic Programming Language for the JVM
-Copyright (c) Rich Hickey. All rights reserved.
+Copyright © Rich Hickey. All rights reserved.
 
 The use and distribution terms for this software are covered by the [Common Public License 1.0][cpl], which can be found in the file CPL.TXT at the root of this distribution. By using this software in any fashion, you are agreeing to be bound by the terms of this license. You must not remove this notice, or any other, from this software.
 
@@ -33,7 +33,7 @@ I hope you find Clojure's combination of facilities elegant, powerful, practical
 Rich Hickey
 
 ---
-This documentation is continually being updated to reflect the current and new features of Clojure.
+This documentation is continually being updated to reflect the current and new features of Clojure. Check back frequently for additions and corrections.
 
 ###[Setup](#setup)
 ###[Quick Start](#quickstart)
@@ -64,26 +64,22 @@ Clojure is delivered in a zip file containing a single .jar, `clojure.jar`, a re
 [cgg]: http://groups.google.com/group/clojure
 
 <h2 id="quickstart">Quick Start</h2>
-In the directory you expanded `clojure.zip`:
+In the directory in which you expanded `clojure.zip`, run:
 
 <pre><code>
 java -cp clojure.jar clojure.lang.Compiler src/boot.clj
 </code></pre>
 
-This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself (in `boot.clj`), so the first thing you need to do is load the `boot.clj` file included in the `src` directory of distribution, either on the command line (as above) or as follows:
+This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself (in the `boot.clj` file included in the `src` directory of distribution), so the command-line argument is needed to do is load it.
 
-<pre><code>
-(load-file "/your/path/to/src/boot.clj")	
-</code></pre>
-
-After boot.clj is loaded you will have the language as described herein fully available.
+When boot.clj is loaded you will have the language as described herein fully available.
 
 Try:
 
 <pre><code>
-(+ 1 2 3)
-
-(. javax.swing.JOptionPane (showMessageDialog nil "Hello World"))	
+user=> (+ 1 2 3)
+6
+user=> (. javax.swing.JOptionPane (showMessageDialog nil "Hello World"))	
 </code></pre>
 
 <h2 id="reader">Reader</h2>
@@ -106,7 +102,9 @@ Since we have to start somewhere, we might as well start where evaluation starts
 * 	Literals
 	* Strings - Enclosed in `"double quotes"`. Standard Java escape characters.
 	* Numbers - as per Java, plus indefinitely long integers are supported, as well as ratios, e.g. `22/7`
-	* Characters - preceded by a backslash: `\c`. `\newline`, `\space` and `\tab` yield the corresponding characters.
+	* Characters - preceded by a backslash: `\c`. 
+	
+		`\newline`, `\space` and `\tab` yield the corresponding characters.
 	* `nil` - represents null and logical false
 	* Keywords
 
@@ -192,11 +190,11 @@ The behavior of the reader is driven by a combination of built-in constructs and
 	For example:
 <pre><code>
 	
-	(def x 5)
-	(def lst '(a b c))
-	`(fred x ~x lst ~@lst 7 8 :nine)
+	user=> (def x 5)
+	user=> (def lst '(a b c))
+	user=> `(fred x ~x lst ~@lst 7 8 :nine)
 
-	> (user/fred user/x 5 user/lst a b c 7 8 :nine)
+	(user/fred user/x 5 user/lst a b c 7 8 :nine)
 		
 </code></pre>	
 
@@ -234,9 +232,9 @@ If a Symbol has metadata, it may be used by the compiler, but will not be part o
 Vectors and Maps yield vectors and (hash) maps whose contents are the *evaluated values* of the objects they contain. The same is true of metadata maps. If the vector or map has metadata, the *evaluated* metadata map will become the metadata of the resulting value.
 
 <pre><code>
-(def x 1)
-(def y 2)
-#^{:x x} [x y 3]
+user=> (def x 1)
+user=> (def y 2)
+user=> #^{:x x} [x y 3]
 
 #^{:x 1} [1 2 3]
 </code></pre>	
@@ -259,7 +257,7 @@ The above describes the evaluation of a single form. `load` and `load-file` will
 
 ---
 ### (*def* symbol init?)
-Creates or locates a global var with the name of `symbol` and a namespace of the value of `*current-namespace*`. If `init` is supplied, it is evaluated, and the root binding of the var is set to the resulting value. If `init` is not supplied, the root binding of the var is unaffected. `def` always applies to the root binding, even if the var is thread-bound at the point where def is called. `def` yields the var itself *(not its value)*.
+Creates or locates a global var with the name of `symbol` and a namespace of the value of `*current-namespace*`. If `init` is supplied, it is evaluated, and the root binding of the var is set to the resulting value. If `init` is not supplied, the root binding of the var is unaffected. `def` always applies to the root binding, even if the var is thread-bound at the point where def is called. `def` yields the var itself *(not its value)*. Throws an exception if symbol is in the `*refers*` map.
 
 ---
 ### (*if* test then else?)
@@ -276,7 +274,7 @@ binding => symbol init-expr
 Evaluates the exprs in a context in which the symbols are bound to their respective init-exprs. The bindings are sequential, so each binding can see the prior bindings. The exprs are contained in an implicit `do`. If a binding symbol is annotated with a metadata tag, the compiler will try to resolve the tag to a class name and presume that type in subsequent references to the binding.
 
 <pre><code>
-(let [x 1 y x] y)
+user=> (let [x 1 y x] y)
 
 1
 </code></pre>	
@@ -286,7 +284,7 @@ Evaluates the exprs in a context in which the symbols are bound to their respect
 Yields the unevaluated form.
 
 <pre><code>
-'(a b c)
+user=> '(a b c)
 
 (a b c)
 </code></pre>
@@ -469,7 +467,7 @@ Takes a function f and fewer than the normal arguments to f, and returns a fn th
 
 <pre><code>
 
-> (map (appl + 2) [1 2 3])
+user=> (map (appl + 2) [1 2 3])
 (3 4 5)
 
 </code></pre>
@@ -531,7 +529,7 @@ Supported by all data structures.  Returns non-nil if obj1 equals obj2, `nil` if
 
 
 ### _nil_
-`nil` is a possible value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
+`nil` is a possible value of any data type in Clojure (since primitives are always boxed). `nil` has the same value as Java `null`. The Clojure conditional system is based around `nil`/non-nil, with `nil` representing the value of logical false in conditional tests - anything else is logical true. In addition, `nil` is used as the end-of-sequence sentinel value in the sequence protocol.
 
 ### _Nums_
 All Clojure numbers are derived from clojure.lang.Num, which in turn is derived from java.lang.Number. There are 4 types:
@@ -576,9 +574,9 @@ Returns non-nil if nums all have the same value, otherwise `nil`.
 
 <pre><code>
 
-> (== 1 1.0)
+user=> (== 1 1.0)
 t
-> (eql? 1 1.0)
+user=> (eql? 1 1.0)
 nil
 
 </code></pre>
@@ -647,7 +645,7 @@ Returns the number of items in the collection. `(count nil)` returns `0`.
 
 ---
 ### (*conj* coll item)
-Conj[oin]. Returns a *new* collection with the item 'added'. `(conj nil item)` returns `(item)`. This 'addition' may happen at different 'places' depending on the concrete type.
+Conj[oin]. Returns a *new* collection with the item 'added'. `(conj nil item)` returns `(item)`. The 'addition' may happen at different 'places' depending on the concrete type.
 
 ---
 ### (*seq* coll)
@@ -699,7 +697,7 @@ Returns a new vector without the last item. If the vector is empty, throws an ex
 		
 ### _Maps_ (IPersistentMap)
 
-Map keys to values. Two different map types are provided - hashed and sorted. Hash maps require keys that correctly support hashCode and equals. Sorted maps require keys that implement Comparable, or an instance of Comparator. Hash maps provide faster access O(log<sub>32</sub>N) vs O(logN), but sorted maps are, well, sorted. `count` is O(1). `conj` expects another (possibly single entry) map as the item, and returns a new map which is the old map plus the entries from the new, which may overwrite entries of the old. `seq` returns a sequence of map entries, which are key/value pairs. Sorted map also supports `rseq`, which returns the entries in reverse order. Maps implement IFn, for invoke() of one argument, which they presume is a key and look up in themselves, i.e. maps are functions of their keys. 
+Map keys to values. Two different map types are provided - hashed and sorted. Hash maps require keys that correctly support hashCode and equals. Sorted maps require keys that implement Comparable, or an instance of Comparator. Hash maps provide faster access O(log<sub>32</sub>N) vs O(logN), but sorted maps are, well, sorted. `count` is O(1). `conj` expects another (possibly single entry) map as the item, and returns a new map which is the old map plus the entries from the new, which may overwrite entries of the old. `seq` returns a sequence of map entries, which are key/value pairs. Sorted map also supports `rseq`, which returns the entries in reverse order. Maps implement IFn, for invoke() of one argument, which they presume is a key and look up in themselves, i.e. maps are functions of their keys. `nil` keys and values are ok. 
 
 Map functions:
 
@@ -740,9 +738,13 @@ Returns a sequence of the map's keys.
 ### (*vals* map)
 Returns a sequence of the map's values.
 
+---
+### (*merge* maps+)
+Returns a map that consists of the rest of the maps conj-ed onto the first. If a key occurs in more than one map, the mapping from the latter (left-to-right) will be the mapping in the result.
+
 <h2 id="sequences">Sequences</h2>
 
-Clojure defines many algorithms in terms of sequences (seqs). A seq is a logical list, and where in most Lisps the list is represented by a concrete, 2-slot structure, Clojure uses the ISeq interface to allow many data structures to provide access to their elements as sequences. The `seq` function yields an implementation of ISeq appropriate to the collection. Seqs differ from iterators in that they are persistent and immutable, not stateful cursors into a collection. As such, they are useful for much more than foreach - functions can consume and produce seqs, they are thread safe, they can share structure etc. 
+Clojure defines many algorithms in terms of sequences (seqs). A seq is a logical list, and unlike most Lisps where the list is represented by a concrete, 2-slot structure, Clojure uses the ISeq interface to allow many data structures to provide access to their elements as sequences. The `seq` function yields an implementation of ISeq appropriate to the collection. Seqs differ from iterators in that they are persistent and immutable, not stateful cursors into a collection. As such, they are useful for much more than foreach - functions can consume and produce seqs, they are thread safe, they can share structure etc. 
 
 Most of the sequence library functions are *lazy*, i.e. functions that return seqs do so incrementally, as they are consumed, and thus consume any seq arguments incrementally as well.
 
@@ -807,7 +809,7 @@ Returns an object of the same type and value as obj, with map as its metadata.
 
 <h2 id="namespaces">Namespaces</h2>
 
-Symbols and keywords are two-part identifiers - with an optional namespace and a name, both strings. Namespaces are used to distinguish two symbols that have the same name. Vars are named by symbols that must have a namespace part, and thus can be considered to be in namespaces. Note that namespaces are not first-class - they are not collections of symbols/vars sharing the same prefix, they cannot be enumerated etc. Essentially, namespaces just allow simpler identifiers to be used in contexts where a namespace is either not required (fn params and let-locals) or can be inferred. Namespaces do have 2 concrete properties, `*imports*` and `*refers*`, described below.
+Symbols and keywords are two-part identifiers - with an optional namespace and a name, both strings. Namespaces are used to distinguish two symbols that have the same name. Vars are named by symbols that must have a namespace part, and thus can be considered to be in namespaces. Note that namespaces are not first-class - they are not collections of symbols/vars sharing the same prefix, they cannot be enumerated etc. Essentially, namespaces just allow simpler identifiers to be used in contexts where a namespace is either not required (fn params and let-locals) or can be inferred. Namespaces do have 2 concrete properties, `*imports*` and `*refers*`, described below, which create a lookup context associated with a namespace.
 
 As we've seen, all `def`s create vars in the current namespace. The `*current-namespace*` can and should be set only with a call to `in-namespace`.  `in-namespace` will set `*current-namespace*` to the supplied symbol, and will set up the bindings to the `*refers*` and `*imports*` vars. There are `*refers*` and `*imports*` in each namespace, and `in-namespace` will create them if they don't already exist. `*refers*` is a map from simple symbols to Vars, and its initial value consists of the symbols exported from the `clojure` namespace. `*imports*` is a map from simple symbols to fully-qualified classnames, and its initial value is the classes from the `java.lang` package.
 Mappings can be added to `*refers*` with `refer`, and to `*imports*` with `import`, and only via those functions.
@@ -842,7 +844,7 @@ Removes the mappings from the `*imports*` map of the current namespace.
 
 refer-list => (ns-symbol name-symbols*)
 
-For each name in name-symbols, adds a mapping from `name` to the var named ns/name to the `*refers*` map of the current namespace. The vars must exist.
+For each name in name-symbols, adds a mapping from `name` to the var named ns/name to the `*refers*` map of the current namespace. The vars must exist. Throws an exception if name is already in `*refers*` mapped to a different var.
 
 <pre><code>
 (refer '(fred-ns ricky lucy ethel)
@@ -863,15 +865,15 @@ Returns the name String.
 Returns the namespace String or `nil` if not present.
 
 <h2 id="vars">Vars and the Global Environment</h2>
-Clojure is a practical language that recognizes the occasional need to maintain a persistent reference to a changing value and provides 2 distinct mechanisms for doing so in a controlled manner - Vars and [Refs](*refs). Vars provide a mechanism to refer to a mutable storage location that can be dynamically rebound (to a new storage location), on a per-thread basis. Every Var can (but needn't) have a root binding, which is a binding that is shared by all threads that do not have a per-thread binding. Thus, the value of a Var is the value of its per-thread binding, or, if it is not bound in the thread requesting the value, the value of the root binding, if any.
+Clojure is a practical language that recognizes the occasional need to maintain a persistent reference to a changing value and provides 2 distinct mechanisms for doing so in a controlled manner - Vars and [Refs](*refs). Vars provide a mechanism to refer to a mutable storage location that can be dynamically rebound (to a new storage location) on a per-thread basis. Every Var can (but needn't) have a root binding, which is a binding that is shared by all threads that do not have a per-thread binding. Thus, the value of a Var is the value of its per-thread binding, or, if it is not bound in the thread requesting the value, the value of the root binding, if any.
 
 The special form `def` creates (and [interns](#interning)) a Var. If the Var did not already exist and no initial value is supplied, the var is unbound:
 
 <pre><code>
 	
-(def x)
+user=> (def x)
 Var: user/x
-x
+user=> x
 java.lang.IllegalStateException: Var user/x is unbound.
 
 </code></pre>
@@ -880,9 +882,9 @@ Supplying an initial value binds the root (even if it was already bound).
 
 <pre><code>
 	
-(def x 1)
+user=> (def x 1)
 Var: user/x
-x
+user=> x
 1
 
 </code></pre>
@@ -899,25 +901,36 @@ Thus within-thread bindings obey a stack discipline:
 
 <pre><code>
 	
-(def x 1)
-(def y 1)
-(+ x y)
+user=> (def x 1)
+user=> (def y 1)
+user=> (+ x y)
 2
-(binding [x 2 y 3] 
-  (+ x y))
+user=> (binding [x 2 y 3] 
+         (+ x y))
 5
-(+ x y)
+user=> (+ x y)
 2
 
 </code></pre>
 
-Bindings created with `binding` cannot be seen by any other thread. Bindings created with `binding` can be assigned to, which provides a means for nested contexts to communicate with code above it the call stack.
+Bindings created with `binding` cannot be seen by any other thread. Bindings created with `binding` can be assigned to, which provides a means for nested contexts to communicate with code before it the call stack.
 
 Functions defined with `defn` are stored in Vars, allowing for the re-definition of functions in a running program. This also enables many of the possibilities of aspect- or context-oriented programming. For instance, you could wrap a function with logging behavior only in certain call contexts or threads. 
 
 <h3 id="interning">Interning</h3>
 	
-The Var system maintains a global map of (namespace-qualified) symbols to Var objects. If a `def` expression does not find an entry in this map for the symbol being `def`-ed, it creates one, otherwise, it uses the existing Var. This find-or-create process is called interning. This means is that, unless they have been `undef`-ed, Var objects are stable references, and need not be looked up every time. It also means that the Var map constitutes a global environment, in which, as described in [Evaluation](#evaluation), the compiler attempts to resolve all free symbols as Vars.
+The Var system maintains a global map of (namespace-qualified) symbols to Var objects. If a `def` expression does not find an entry in this map for the symbol being `def`-ed, it creates one, otherwise, it uses the existing Var. This find-or-create process is called interning. This means is that, unless they have been `unintern`-ed, Var objects are stable references, and need not be looked up every time. It also means that the Var map constitutes a global environment, in which, as described in [Evaluation](#evaluation), the compiler attempts to resolve all free symbols as Vars.
+
+---
+### (*find-var* varsym)
+
+Returns the global var named by the namespace-qualified symbol, or `nil` if not var with that name.
+
+---
+### (*unintern* varsym)
+
+Removes the global var named by the namespace-qualified symbol from the global namespace.
+
  
 <h2 id="refs">Refs and Transactions</h2>
 While Vars ensure safe use of mutable mutable storage locations via thread isolation, Refs ensure safe *shared* use of mutable storage locations via a [software transactional memory][stm] (STM) system. Refs are bound to a single storage location for their lifetime, and only allow reference to<sup>*</sup>, and mutation of, that location to occur within a transaction.
@@ -946,7 +959,7 @@ In practice, this means:
 
 8.	If a constraint on the validity of a value of a Ref that is being changed depends upon the simultaneous value of a Ref that is *not being changed*, that second Ref can be protected from modification by calling `set` without a second argument. Refs 'set' this way will be protected (item #3), but don't change the world (item #2).
 
-9.	The Clojure MVCC STM is designed to work with the persistent collections, and it is strongly recommended that you use the collections as the values of your Refs. Since all work done in an STM transaction is speculative, it is imperative that there be a low cost to making copies and modifications. Persistent collections have free copies (just use the original, it can't be changed), and 'modifications' share structure efficiently. In any case:
+9.	The Clojure MVCC STM is designed to work with the persistent collections, and it is strongly recommended that you use the Clojure collections as the values of your Refs. Since all work done in an STM transaction is speculative, it is imperative that there be a low cost to making copies and modifications. Persistent collections have free copies (just use the original, it can't be changed), and 'modifications' share structure efficiently. In any case:
 
 10.	The values placed in Refs *must be, or be considered, immutable*!! Otherwise, Clojure can't help you.
 
@@ -1004,7 +1017,7 @@ This information is provided for programmers familiar with Common Lisp or Scheme
 * Symbols are not storage locations (see Var)
 * `nil` is not a Symbol
 * The read table is currently not accessible to user programs
-* `let` binds sequentially like `let*`
+* `let` binds sequentially
 * `do` is not a looping construct
 * There is no tail-call optimization, use `recur`.
 * syntax-quote does symbol resolution, so \`x is not the same as 'x. 
