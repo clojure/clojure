@@ -10,7 +10,7 @@
 
 #Clo*j*ure
 ## A Dynamic Programming Language for the JVM
-Copyright © Rich Hickey. All rights reserved.
+Copyright (c) Rich Hickey. All rights reserved.
 
 The use and distribution terms for this software are covered by the [Common Public License 1.0][cpl], which can be found in the file CPL.TXT at the root of this distribution. By using this software in any fashion, you are agreeing to be bound by the terms of this license. You must not remove this notice, or any other, from this software.
 
@@ -70,7 +70,7 @@ In the directory in which you expanded `clojure.zip`, run:
 java -cp clojure.jar clojure.lang.Compiler src/boot.clj
 </code></pre>
 
-This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself (in the `boot.clj` file included in the `src` directory of distribution), so the command-line argument is needed to do is load it.
+This will bring up a simple read-eval-print loop (REPL). Much of Clojure is defined in Clojure itself (in the `boot.clj` file included in the `src` directory of distribution), so the command-line argument is needed to load it.
 
 When boot.clj is loaded you will have the language as described herein fully available.
 
