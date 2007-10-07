@@ -521,6 +521,34 @@
 (defn unintern [varsym]
   (. clojure.lang.Var (unintern varsym)))
 
+(defn into-array [aseq]
+  (. clojure.lang.RT (seqToTypedArray (seq aseq))))
+
+(defn array [& items]
+  (into-array items))
+
+(defn make-proxy [classes method-map]
+  (. java.lang.reflect.Proxy
+    (newProxyInstance (. java.lang.ClassLoader (getSystemClassLoader))
+                      (into-array classes)
+                      (new clojure.lang.ProxyHandler method-map))))
+
+(defn print
+  ([x] (thisfn x *out*))
+  ([x writer] (. clojure.lang.RT (print x writer))))
+
+(defn newline
+  ([] (thisfn *out*))
+  ([#^java.io.Writer writer]
+    (. writer (append \newline))
+    nil))
+
+(defn prn
+  ([x] (thisfn x *out*))
+  ([x writer]
+    (print x writer)
+    (newline)))
+
 (def *exports*
 	'(clojure
 	    load-file eql-ref?
@@ -545,5 +573,7 @@
 		cycle split-at split-with repeat replicate iterate
 		dolist
 		eval import unimport refer unrefer in-namespace unintern
+		into-array array
+		make-proxy prn print newline *out* *current-namespace*
 	))
 

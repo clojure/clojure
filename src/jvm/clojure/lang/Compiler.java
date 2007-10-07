@@ -2691,7 +2691,7 @@ public static void main(String[] args){
 
 	//repl
 	LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
-	OutputStreamWriter w = new OutputStreamWriter(System.out);
+	OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
 
 	Object EOF = new Object();
 	try

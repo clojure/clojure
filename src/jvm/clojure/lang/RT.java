@@ -15,12 +15,13 @@ package clojure.lang;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.io.*;
+import java.lang.reflect.Array;
 
 public class RT{
 
 static public Symbol T = Symbol.create(null, "t");
 final static public Var OUT =
-		Var.intern(Symbol.create("clojure", "out"), new OutputStreamWriter(System.out));
+		Var.intern(Symbol.create("clojure", "*out*"), new OutputStreamWriter(System.out));
 final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
@@ -561,6 +562,14 @@ static public Object[] seqToArray(ISeq seq) throws Exception{
 	Object[] ret = new Object[len];
 	for(int i = 0; seq != null; ++i, seq = seq.rest())
 		ret[i] = seq.first();
+	return ret;
+}
+
+static public Object seqToTypedArray(ISeq seq) throws Exception{
+	int len = length(seq);
+	Object ret = Array.newInstance(len > 0 ? seq.first().getClass() : Object.class, len);
+	for(int i = 0; seq != null; ++i, seq = seq.rest())
+		Array.set(ret,i,seq.first());
 	return ret;
 }
 
