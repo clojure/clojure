@@ -549,6 +549,13 @@
     (print x writer)
     (newline)))
 
+(defmacro .-> [x & members]
+   (let [gx (gensym)]
+     `(let [~gx ~x]
+        (do
+          ~@(map (fn [m] (list '. gx m))
+                  members)))))
+
 (def *exports*
 	'(clojure
 	    load-file eql-ref?
@@ -574,6 +581,6 @@
 		dolist
 		eval import unimport refer unrefer in-namespace unintern
 		into-array array
-		make-proxy prn print newline *out* *current-namespace*
+		make-proxy prn print newline *out* *current-namespace* .->
 	))
 
