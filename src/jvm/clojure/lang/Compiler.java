@@ -458,7 +458,7 @@ static abstract class HostExpr implements Expr{
 				Label falseLabel = gen.newLabel();
 				Label endLabel = gen.newLabel();
 				gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
-				gen.getStatic(RT_TYPE, "T", SYMBOL_TYPE);
+				gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
 				gen.goTo(endLabel);
 				gen.mark(falseLabel);
 				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
@@ -1355,7 +1355,7 @@ static class InstanceExpr extends UntypedExpr{
 			expr.emit(C.EXPRESSION, fn, gen);
 			gen.instanceOf(Type.getObjectType(className.replace('.', '/')));
 			gen.ifZCmp(GeneratorAdapter.EQ, not);
-			gen.getStatic(RT_TYPE, "T", SYMBOL_TYPE);
+			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
 			gen.goTo(end);
 			gen.mark(not);
 			NIL_EXPR.emit(C.EXPRESSION, fn, gen);

@@ -19,7 +19,7 @@ import java.lang.reflect.Array;
 
 public class RT{
 
-static public Symbol T = Symbol.create(null, "t");
+static public Keyword T = Keyword.intern(Symbol.create(null, "t"));
 final static public Var OUT =
 		Var.intern(Symbol.create("clojure", "*out*"), new OutputStreamWriter(System.out));
 final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");

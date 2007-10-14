@@ -54,9 +54,7 @@
 (defmacro when-not [test & body]
    (list 'if test nil (cons 'do body)))
 
-(def t (. clojure.lang.RT T))
-
-(defn nil? [x] (if x nil t))
+(defn nil? [x] (if x nil :t))
 
 (defn not [x] (nil? x))
 
@@ -124,7 +122,7 @@
 ;;at this point all the support for syntax-quote exists
 
 (defmacro and
-  ([] t)
+  ([] :t)
   ([x] x)
   ([x & rest] `(if ~x (and ~@rest))))
 
@@ -163,31 +161,31 @@
           (apply thisfn (thisfn x y) rest)))
 
 (defn <
-      ([x] t)
+      ([x] :t)
       ([x y] (. clojure.lang.Num (lt x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn <=
-      ([x] t)
+      ([x] :t)
       ([x y] (. clojure.lang.Num (lte x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn >
-      ([x] t)
+      ([x] :t)
       ([x y] (. clojure.lang.Num (gt x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn >=
-      ([x] t)
+      ([x] :t)
       ([x y] (. clojure.lang.Num (gte x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
 
 (defn ==
-      ([x] t)
+      ([x] :t)
       ([x y] (. clojure.lang.Num (equiv x y)))
       ([x y & rest]
           (and (thisfn x y) (apply thisfn y rest))))
@@ -391,7 +389,7 @@
   (if (seq coll)
      (and (pred (first coll))
           (recur pred (rest coll)))
-    t))
+    :t))
 
 (def not-every (comp not every))
 
@@ -465,6 +463,16 @@
 
 (defn merge [& maps]
   (reduce conj maps))
+
+(defn zipmap [keys vals]
+  (loop [map {}
+         ks (seq keys)
+         vs (seq vals)]
+    (if (and ks vs)
+        (recur (assoc map (first ks) (first vs))
+               (rest ks)
+               (rest vs))
+       map)))
 
 ;; evaluation
 
