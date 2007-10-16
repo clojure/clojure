@@ -22,7 +22,7 @@ static public ArraySeq create(){
 }
 
 static public ArraySeq create(Object... array){
-	if(array.length == 0)
+	if(array == null || array.length == 0)
 		return null;
 	return new ArraySeq(array, 0);
 }

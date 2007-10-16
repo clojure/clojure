@@ -541,6 +541,16 @@
                       (into-array classes)
                       (new clojure.lang.ProxyHandler method-map))))
 
+(defmacro new-proxy [classes & fs]
+  `(make-proxy
+      ~(apply vector (map (appl list 'class) classes))
+      ~(loop [fmap {} fs fs]
+              (if fs
+                  (recur (assoc fmap (name (ffirst fs))
+                                     (cons 'fn (rfirst fs)))
+                         (rest fs))
+                 fmap))))
+
 (defn print
   ([x] (thisfn x *out*))
   ([x writer] (. clojure.lang.RT (print x writer))))
@@ -585,10 +595,12 @@
 		reduce reverse comp appl
 		every not-every any not-any
 		map mapcat filter take take-while drop drop-while
+		zipmap
 		cycle split-at split-with repeat replicate iterate
 		dolist
 		eval import unimport refer unrefer in-namespace unintern
 		into-array array
-		make-proxy prn print newline *out* *current-namespace* .->
+		make-proxy new-proxy
+		prn print newline *out* *current-namespace* .->
 	))
 
