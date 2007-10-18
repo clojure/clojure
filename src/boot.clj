@@ -489,6 +489,12 @@
           ~@body)
         (recur (rest list#)))))
 
+(defmacro dotimes [i n & body]
+  `(loop [~i 0 n# ~n]
+     (when (< ~i n#)
+       ~@body
+       (recur (inc ~i) n#))))
+
 (defn import [& import-lists]
  (when import-lists
    (let [#^clojure.lang.Var imps *ns-imports*
@@ -573,6 +579,11 @@
         (do
           ~@(map (fn [m] (list '. gx m))
                   members)))))
+(defmacro time [expr]
+   `(let [start# (. System (nanoTime))
+          ret# ~expr]
+       (prn (strcat "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0)" msecs"))
+       ret#))
 
 (def *exports*
 	'(clojure
@@ -597,10 +608,11 @@
 		map mapcat filter take take-while drop drop-while
 		zipmap
 		cycle split-at split-with repeat replicate iterate
-		dolist
+		dolist  dotimes
 		eval import unimport refer unrefer in-namespace unintern
 		into-array array
 		make-proxy new-proxy
 		prn print newline *out* *current-namespace* .->
+		time
 	))
 
