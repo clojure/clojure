@@ -552,7 +552,7 @@ static abstract class HostExpr implements Expr{
 			//at this point className will be non-null if static
 			Expr instance = null;
 			if(className == null)
-				instance = analyze(C.EXPRESSION, RT.second(form));
+				instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
 
 			if(RT.third(form) instanceof Symbol)    //field
 				{
@@ -567,7 +567,7 @@ static abstract class HostExpr implements Expr{
 				Symbol sym = (Symbol) RT.first(RT.third(form));
 				PersistentVector args = PersistentVector.EMPTY;
 				for(ISeq s = RT.rest(RT.third(form)); s != null; s = s.rest())
-					args = args.cons(analyze(C.EXPRESSION, s.first()));
+					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(className != null)
 					return new StaticMethodExpr(line, className, sym.name, args);
 				else
@@ -1475,7 +1475,8 @@ static class IfExpr implements Expr{
 				throw new Exception("Too many arguments to if");
 			else if(form.count() < 3)
 				throw new Exception("Too few arguments to if");
-			return new IfExpr((Integer) LINE.get(), analyze(C.EXPRESSION, RT.second(form)),
+			return new IfExpr((Integer) LINE.get(),
+			                  analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form)),
 			                  analyze(context, RT.third(form)),
 			                  analyze(context, RT.fourth(form)));
 		}
@@ -1635,12 +1636,13 @@ static class MapExpr implements Expr{
 		for(ISeq s = RT.seq(form); s != null; s = s.rest())
 			{
 			IMapEntry e = (IMapEntry) s.first();
-			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.key()));
-			keyvals = (IPersistentVector) keyvals.cons(analyze(C.EXPRESSION, e.val()));
+			keyvals = (IPersistentVector) keyvals.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e.key()));
+			keyvals = (IPersistentVector) keyvals.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e.val()));
 			}
 		Expr ret = new MapExpr(keyvals);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
-			return new MetaExpr(ret, (MapExpr) MapExpr.parse(C.EXPRESSION, ((IObj) form).meta()));
+			return new MetaExpr(ret, (MapExpr) MapExpr
+					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
 		else
 			return ret;
 	}
@@ -1680,10 +1682,11 @@ static class VectorExpr implements Expr{
 	static public Expr parse(C context, IPersistentVector form) throws Exception{
 		IPersistentVector args = PersistentVector.EMPTY;
 		for(int i = 0; i < form.count(); i++)
-			args = (IPersistentVector) args.cons(analyze(C.EXPRESSION, form.nth(i)));
+			args = (IPersistentVector) args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, form.nth(i)));
 		Expr ret = new VectorExpr(args);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
-			return new MetaExpr(ret, (MapExpr) MapExpr.parse(C.EXPRESSION, ((IObj) form).meta()));
+			return new MetaExpr(ret, (MapExpr) MapExpr
+					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
 		else
 			return ret;
 	}
@@ -1744,11 +1747,13 @@ static class InvokeExpr implements Expr{
 	}
 
 	static public Expr parse(C context, ISeq form) throws Exception{
-		Expr fexpr = analyze(C.EXPRESSION, form.first());
+		if(context != C.EVAL)
+			context = C.EXPRESSION;
+		Expr fexpr = analyze(context, form.first());
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
 			{
-			args = args.cons(analyze(C.EXPRESSION, s.first()));
+			args = args.cons(analyze(context, s.first()));
 			}
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
@@ -2610,7 +2615,7 @@ private static void registerVar(Var var) throws Exception{
 		VARS.set(RT.assoc(varsMap, var, var));
 }
 
-private static Symbol currentNS(){
+static Symbol currentNS(){
 	return (Symbol) RT.CURRENT_NS_SYM.get();
 }
 
