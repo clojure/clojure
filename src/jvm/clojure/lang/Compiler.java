@@ -2229,7 +2229,8 @@ static class BodyExpr implements Expr{
 			PersistentVector exprs = PersistentVector.EMPTY;
 			for(; forms != null; forms = forms.rest())
 				{
-				Expr e = (context == C.STATEMENT || forms.rest() != null) ?
+				Expr e = (context != C.EVAL &&
+				         (context == C.STATEMENT || forms.rest() != null)) ?
 				         analyze(C.STATEMENT, forms.first())
 				         :
 				         analyze(context, forms.first());
