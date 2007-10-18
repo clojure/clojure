@@ -15,8 +15,8 @@ package clojure.lang;
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.util.TraceClassVisitor;
-import org.objectweb.asm.util.CheckClassAdapter;
+//import org.objectweb.asm.util.TraceClassVisitor;
+//import org.objectweb.asm.util.CheckClassAdapter;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -2230,10 +2230,10 @@ static class BodyExpr implements Expr{
 			for(; forms != null; forms = forms.rest())
 				{
 				Expr e = (context != C.EVAL &&
-				         (context == C.STATEMENT || forms.rest() != null)) ?
-				         analyze(C.STATEMENT, forms.first())
-				         :
-				         analyze(context, forms.first());
+				          (context == C.STATEMENT || forms.rest() != null)) ?
+				                                                            analyze(C.STATEMENT, forms.first())
+				                                                            :
+				                                                            analyze(context, forms.first());
 				exprs = exprs.cons(e);
 				}
 			if(exprs.count() == 0)
