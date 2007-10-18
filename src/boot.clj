@@ -457,8 +457,7 @@
   (take n (repeat x)))
   
 (defn iterate [f x]
- (let [v (f x)]
-   (lazy-cons v (iterate f v))))
+   (lazy-cons x (iterate f (f x))))
 
 
 (defn merge [& maps]
