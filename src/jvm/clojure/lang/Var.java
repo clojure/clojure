@@ -129,7 +129,7 @@ private Var(Symbol sym, Object root){
 }
 
 public boolean isBound(){
-	return hasRoot() || dvals.get().bindings.contains(this);
+	return hasRoot() || dvals.get().bindings.containsKey(this);
 }
 
 final public Object get(){

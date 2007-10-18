@@ -36,7 +36,7 @@ public Object val(){
 	return _val;
 }
 
-public boolean contains(Object key){
+public boolean containsKey(Object key){
 	return RT.equal(_key, key);
 }
 

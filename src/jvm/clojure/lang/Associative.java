@@ -10,7 +10,7 @@ package clojure.lang;
  * You must not remove this notice, or any other, from this software.
  */
 public interface Associative extends IPersistentCollection{
-boolean contains(Object key);
+boolean containsKey(Object key);
 
 IMapEntry entryAt(Object key);
 

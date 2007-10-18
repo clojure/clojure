@@ -14,9 +14,6 @@ package clojure.lang;
 
 import java.util.*;
 //this stuff is just for the test main()
-import java.util.regex.Pattern;
-import java.io.File;
-import java.io.FileNotFoundException;
 
 /*
  A persistent rendition of Phil Bagwell's Hash Array Mapped Trie
@@ -95,7 +92,7 @@ public PersistentHashMap(IPersistentMap meta, int count, INode root){
 	this.root = root;
 }
 
-public boolean contains(Object key){
+public boolean containsKey(Object key){
 	return entryAt(key) != null;
 }
 
@@ -119,7 +116,7 @@ public Object valAt(Object key){
 }
 
 public IPersistentMap assocEx(Object key, Object val) throws Exception{
-	if(contains(key))
+	if(containsKey(key))
 		throw new Exception("Key already present");
 	return assoc(key, val);
 }

@@ -26,7 +26,7 @@ import java.util.Iterator;
 public class PersistentArrayMap extends APersistentMap{
 
 final Object[] array;
-static final int HASHTABLE_THRESHOLD = 16;
+static final int HASHTABLE_THRESHOLD = 8;
 
 public static PersistentArrayMap EMPTY = new PersistentArrayMap();
 
@@ -65,7 +65,7 @@ public int count(){
 	return array.length / 2;
 }
 
-public boolean contains(Object key){
+public boolean containsKey(Object key){
 	return indexOf(key) >= 0;
 }
 

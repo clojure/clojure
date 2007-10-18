@@ -190,7 +190,7 @@ interface IParser{
 }
 
 static boolean isSpecial(Object sym){
-	return specials.contains(sym);
+	return specials.containsKey(sym);
 }
 
 static Symbol resolveSymbol(Symbol sym){
@@ -753,8 +753,10 @@ static class InstanceMethodExpr extends MethodExpr{
 			{
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
 			if(methods.isEmpty())
-				throw new IllegalArgumentException("No matching method found");
-			method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
+				method = null;
+			//throw new IllegalArgumentException("No matching method found");
+			else
+				method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
 			}
 		else
 			method = null;
@@ -2008,7 +2010,7 @@ static class FnExpr implements Expr{
 	}
 
 	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
-		if(closes.contains(lb))
+		if(closes.containsKey(lb))
 			{
 			gen.loadThis();
 			gen.getField(fntype, lb.name, OBJECT_TYPE);
@@ -2509,7 +2511,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 	Integer line = (Integer) LINE.get();
 	try
 		{
-		if(RT.meta(form) != null && RT.meta(form).contains(LispReader.LINE_KEY))
+		if(RT.meta(form) != null && RT.meta(form).containsKey(LispReader.LINE_KEY))
 			line = (Integer) RT.meta(form).valAt(LispReader.LINE_KEY);
 		Var.pushThreadBindings(
 				RT.map(LINE, line));

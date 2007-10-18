@@ -79,7 +79,7 @@ static public PersistentTreeMap create(Comparator comp, ISeq items){
 	return (PersistentTreeMap) ret;
 }
 
-public boolean contains(Object key){
+public boolean containsKey(Object key){
 	return entryAt(key) != null;
 }
 

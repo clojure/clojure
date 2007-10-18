@@ -10,7 +10,10 @@
 
 package clojure.lang;
 
-public abstract class ASeq extends Obj implements ISeq{
+import java.util.Collection;
+import java.util.Iterator;
+
+public abstract class ASeq extends Obj implements ISeq, Collection{
 transient int _hash = -1;
 
 
@@ -69,6 +72,83 @@ public ISeq seq(){
 
 public ISeq cons(Object o){
 	return new Cons(o, this);
+}
+
+// java.util.Collection implementation
+
+public Object[] toArray(){
+	return RT.seqToArray(seq());
+}
+
+public boolean add(Object o){
+	throw new UnsupportedOperationException();
+}
+
+public boolean remove(Object o){
+	throw new UnsupportedOperationException();
+}
+
+public boolean addAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public void clear(){
+	throw new UnsupportedOperationException();
+}
+
+public boolean retainAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public boolean removeAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public boolean containsAll(Collection c){
+	for(Object o : c)
+		{
+		if(contains(o))
+			return true;
+		}
+	return false;
+}
+
+public Object[] toArray(Object[] a){
+	if(a.length >= count())
+		{
+		ISeq s = seq();
+		for(int i = 0; s != null; ++i, s = s.rest())
+			{
+			a[i] = s.first();
+			}
+		if(a.length >= count())
+			a[count()] = null;
+		return a;
+		}
+	else
+		return toArray();
+}
+
+public int size(){
+	return count();
+}
+
+public boolean isEmpty(){
+	return count() == 0;
+}
+
+public boolean contains(Object o){
+	for(ISeq s = seq(); s != null; s = s.rest())
+		{
+		if(RT.equal(s.first(), o))
+			return true;
+		}
+	return false;
+}
+
+
+public Iterator iterator(){
+	return new SeqIterator(this);
 }
 
 }

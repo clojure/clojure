@@ -12,7 +12,6 @@
 
 package clojure.lang;
 
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.io.*;
 import java.lang.reflect.Array;
@@ -51,47 +50,47 @@ final static IPersistentMap DEFAULT_IMPORTS = map(
 //                                                  Symbol.create("IPersistentMap"), "clojure.lang.IPersistentMap",
 //                                                  Symbol.create("IPersistentList"), "clojure.lang.IPersistentList",
 //                                                  Symbol.create("IPersistentVector"), "clojure.lang.IPersistentVector",
-                                                  Symbol.create("Boolean"), "java.lang.Boolean",
-                                                  Symbol.create("Byte"), "java.lang.Byte",
-                                                  Symbol.create("Character"), "java.lang.Character",
-                                                  Symbol.create("Class"), "java.lang.Class",
-                                                  Symbol.create("ClassLoader"), "java.lang.ClassLoader",
-                                                  Symbol.create("Compiler"), "java.lang.Compiler",
-                                                  Symbol.create("Double"), "java.lang.Double",
-                                                  Symbol.create("Enum"), "java.lang.Enum",
-                                                  Symbol.create("Float"), "java.lang.Float",
-                                                  Symbol.create("InheritableThreadLocal"),
-                                                  "java.lang.InheritableThreadLocal",
-                                                  Symbol.create("Integer"), "java.lang.Integer",
-                                                  Symbol.create("Long"), "java.lang.Long",
-                                                  Symbol.create("Math"), "java.lang.Math",
-                                                  Symbol.create("Number"), "java.lang.Number",
-                                                  Symbol.create("Object"), "java.lang.Object",
-                                                  Symbol.create("Package"), "java.lang.Package",
-                                                  Symbol.create("Process"), "java.lang.Process",
-                                                  Symbol.create("ProcessBuilder"), "java.lang.ProcessBuilder",
-                                                  Symbol.create("Runtime"), "java.lang.Runtime",
-                                                  Symbol.create("RuntimePermission"), "java.lang.RuntimePermission",
-                                                  Symbol.create("SecurityManager"), "java.lang.SecurityManager",
-                                                  Symbol.create("Short"), "java.lang.Short",
-                                                  Symbol.create("StackTraceElement"), "java.lang.StackTraceElement",
-                                                  Symbol.create("StrictMath"), "java.lang.StrictMath",
-                                                  Symbol.create("String"), "java.lang.String",
-                                                  Symbol.create("StringBuffer"), "java.lang.StringBuffer",
-                                                  Symbol.create("StringBuilder"), "java.lang.StringBuilder",
-                                                  Symbol.create("System"), "java.lang.System",
-                                                  Symbol.create("Thread"), "java.lang.Thread",
-                                                  Symbol.create("ThreadGroup"), "java.lang.ThreadGroup",
-                                                  Symbol.create("ThreadLocal"), "java.lang.ThreadLocal",
-                                                  Symbol.create("Throwable"), "java.lang.Throwable",
-                                                  Symbol.create("Void"), "java.lang.Void",
-                                                  Symbol.create("Appendable"), "java.lang.Appendable",
-                                                  Symbol.create("CharSequence"), "java.lang.CharSequence",
-                                                  Symbol.create("Cloneable"), "java.lang.Cloneable",
-                                                  Symbol.create("Iterable"), "java.lang.Iterable",
-                                                  Symbol.create("Readable"), "java.lang.Readable",
-                                                  Symbol.create("Runnable"), "java.lang.Runnable",
-                                                  Symbol.create("Exception"), "java.lang.Exception"
+Symbol.create("Boolean"), "java.lang.Boolean",
+Symbol.create("Byte"), "java.lang.Byte",
+Symbol.create("Character"), "java.lang.Character",
+Symbol.create("Class"), "java.lang.Class",
+Symbol.create("ClassLoader"), "java.lang.ClassLoader",
+Symbol.create("Compiler"), "java.lang.Compiler",
+Symbol.create("Double"), "java.lang.Double",
+Symbol.create("Enum"), "java.lang.Enum",
+Symbol.create("Float"), "java.lang.Float",
+Symbol.create("InheritableThreadLocal"),
+"java.lang.InheritableThreadLocal",
+Symbol.create("Integer"), "java.lang.Integer",
+Symbol.create("Long"), "java.lang.Long",
+Symbol.create("Math"), "java.lang.Math",
+Symbol.create("Number"), "java.lang.Number",
+Symbol.create("Object"), "java.lang.Object",
+Symbol.create("Package"), "java.lang.Package",
+Symbol.create("Process"), "java.lang.Process",
+Symbol.create("ProcessBuilder"), "java.lang.ProcessBuilder",
+Symbol.create("Runtime"), "java.lang.Runtime",
+Symbol.create("RuntimePermission"), "java.lang.RuntimePermission",
+Symbol.create("SecurityManager"), "java.lang.SecurityManager",
+Symbol.create("Short"), "java.lang.Short",
+Symbol.create("StackTraceElement"), "java.lang.StackTraceElement",
+Symbol.create("StrictMath"), "java.lang.StrictMath",
+Symbol.create("String"), "java.lang.String",
+Symbol.create("StringBuffer"), "java.lang.StringBuffer",
+Symbol.create("StringBuilder"), "java.lang.StringBuilder",
+Symbol.create("System"), "java.lang.System",
+Symbol.create("Thread"), "java.lang.Thread",
+Symbol.create("ThreadGroup"), "java.lang.ThreadGroup",
+Symbol.create("ThreadLocal"), "java.lang.ThreadLocal",
+Symbol.create("Throwable"), "java.lang.Throwable",
+Symbol.create("Void"), "java.lang.Void",
+Symbol.create("Appendable"), "java.lang.Appendable",
+Symbol.create("CharSequence"), "java.lang.CharSequence",
+Symbol.create("Cloneable"), "java.lang.Cloneable",
+Symbol.create("Iterable"), "java.lang.Iterable",
+Symbol.create("Readable"), "java.lang.Readable",
+Symbol.create("Runnable"), "java.lang.Runnable",
+Symbol.create("Exception"), "java.lang.Exception"
 //                                                  Symbol.create("Collection"), "java.util.Collection",
 //                                                  Symbol.create("Comparator"), "java.util.Comparator",
 //                                                  Symbol.create("Enumeration"), "java.util.Enumeration",
@@ -117,13 +116,13 @@ final static IFn inNamespace = new AFn(){
 		CURRENT_NS_SYM.set(ns);
 		Var refers = Var.intern(Symbol.intern(ns.name, "*refers*"));
 
-		Var imports = Var.intern(Symbol.intern(ns.name, "*imports*"), DEFAULT_IMPORTS,false);
+		Var imports = Var.intern(Symbol.intern(ns.name, "*imports*"), DEFAULT_IMPORTS, false);
 		NS_REFERS.set(refers);
 		NS_IMPORTS.set(imports);
 		if(!refers.isBound())
 			{
 			refers.bindRoot(PersistentHashMap.EMPTY);
-			Compiler.eval(list(Symbol.create("clojure","refer"),EXPORTS));
+			Compiler.eval(list(Symbol.create("clojure", "refer"), EXPORTS));
 			}
 		return RT.T;
 	}
@@ -320,7 +319,7 @@ static public Associative assoc(Object coll, Object key, Object val){
 static public Object contains(Object coll, Object key){
 	if(coll == null)
 		return false;
-	return ((Associative) coll).contains(key) ? T : null;
+	return ((Associative) coll).containsKey(key) ? T : null;
 }
 
 static public Object find(Object coll, Object key){
@@ -494,6 +493,8 @@ static public double doubleCast(Object x){
 
 
 static public IPersistentMap map(Object... init){
+	if(init != null && init.length == 2)
+		return new MapEntry(init[0], init[1]);
 	return PersistentHashMap.create(init);
 }
 
@@ -557,7 +558,7 @@ static public ISeq arrayToList(Object[] a) throws Exception{
 	return ret;
 }
 
-static public Object[] seqToArray(ISeq seq) throws Exception{
+static public Object[] seqToArray(ISeq seq){
 	int len = length(seq);
 	Object[] ret = new Object[len];
 	for(int i = 0; seq != null; ++i, seq = seq.rest())
@@ -569,11 +570,11 @@ static public Object seqToTypedArray(ISeq seq) throws Exception{
 	int len = length(seq);
 	Object ret = Array.newInstance(len > 0 ? seq.first().getClass() : Object.class, len);
 	for(int i = 0; seq != null; ++i, seq = seq.rest())
-		Array.set(ret,i,seq.first());
+		Array.set(ret, i, seq.first());
 	return ret;
 }
 
-static public int length(ISeq list) throws Exception{
+static public int length(ISeq list){
 	int i = 0;
 	for(ISeq c = list; c != null; c = c.rest())
 		{
@@ -657,7 +658,7 @@ static public void print(Object x, Writer w) throws Exception{
 			{
 			IPersistentMap meta = o.meta();
 			w.write("#^");
-			if(meta.count() == 1 && meta.contains(TAG_KEY))
+			if(meta.count() == 1 && meta.containsKey(TAG_KEY))
 				print(meta.valAt(TAG_KEY), w);
 			else
 				print(meta, w);

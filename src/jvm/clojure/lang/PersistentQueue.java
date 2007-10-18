@@ -12,6 +12,8 @@ package clojure.lang;
 
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.Collection;
+import java.util.Iterator;
 //import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -21,7 +23,7 @@ import java.util.LinkedList;
  * so no reversing or suspensions required for persistent use
  */
 
-public class PersistentQueue extends Obj implements IPersistentList{
+public class PersistentQueue extends Obj implements IPersistentList, Collection{
 
 final public static PersistentQueue EMPTY = new PersistentQueue(null, null, null);
 
@@ -142,6 +144,82 @@ static class Seq extends ASeq{
 	public Seq withMeta(IPersistentMap meta){
 		return new Seq(meta, f, rseq);
 	}
+}
+
+// java.util.Collection implementation
+
+public Object[] toArray(){
+	return RT.seqToArray(seq());
+}
+
+public boolean add(Object o){
+	throw new UnsupportedOperationException();
+}
+
+public boolean remove(Object o){
+	throw new UnsupportedOperationException();
+}
+
+public boolean addAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public void clear(){
+	throw new UnsupportedOperationException();
+}
+
+public boolean retainAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public boolean removeAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public boolean containsAll(Collection c){
+	for(Object o : c)
+		{
+		if(contains(o))
+			return true;
+		}
+	return false;
+}
+
+public Object[] toArray(Object[] a){
+	if(a.length >= count())
+		{
+		ISeq s = seq();
+		for(int i = 0; s != null; ++i, s = s.rest())
+			{
+			a[i] = s.first();
+			}
+		if(a.length >= count())
+			a[count()] = null;
+		return a;
+		}
+	else
+		return toArray();
+}
+
+public int size(){
+	return count();
+}
+
+public boolean isEmpty(){
+	return count() == 0;
+}
+
+public boolean contains(Object o){
+	for(ISeq s = seq(); s != null; s = s.rest())
+		{
+		if(RT.equal(s.first(), o))
+			return true;
+		}
+	return false;
+}
+
+public Iterator iterator(){
+	return new SeqIterator(seq());
 }
 
 /*

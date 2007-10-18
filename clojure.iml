@@ -20,7 +20,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="asm-3.0" level="project" />
+    <orderEntry type="library" name="asm-3.0" level="project" />
     <orderEntryProperties />
   </component>
   <component name="VcsManagerConfiguration">

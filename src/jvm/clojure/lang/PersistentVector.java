@@ -12,9 +12,11 @@
 
 package clojure.lang;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Iterator;
 
-public class PersistentVector extends AFn implements IPersistentVector, Iterable{
+public class PersistentVector extends AFn implements IPersistentVector, Iterable, Collection{
 final int cnt;
 final int shift;
 final Object[] root;
@@ -185,6 +187,7 @@ public Iterator iterator(){
 	};
 }
 
+
 static class Seq extends ASeq implements IndexedSeq{
 	//todo - something more efficient
 	final PersistentVector v;
@@ -348,7 +351,8 @@ private Object[] doPop(int shift, Object[] arr){
 	return ret;
 }
 
-public boolean contains(Object key){
+
+public boolean containsKey(Object key){
 	if(!(key instanceof Number))
 		return false;
 	int i = ((Number) key).intValue();
@@ -382,6 +386,78 @@ public Object valAt(Object key){
 			return nth(i);
 		}
 	return null;
+}
+
+// java.util.Collection implementation
+
+public Object[] toArray(){
+	return RT.seqToArray(seq());
+}
+
+public boolean add(Object o){
+	throw new UnsupportedOperationException();
+}
+
+public boolean remove(Object o){
+	throw new UnsupportedOperationException();
+}
+
+public boolean addAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public void clear(){
+	throw new UnsupportedOperationException();
+}
+
+public boolean retainAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public boolean removeAll(Collection c){
+	throw new UnsupportedOperationException();
+}
+
+public boolean containsAll(Collection c){
+	for(Object o : c)
+		{
+		if(contains(o))
+			return true;
+		}
+	return false;
+}
+
+public Object[] toArray(Object[] a){
+	if(a.length >= count())
+		{
+		ISeq s = seq();
+		for(int i = 0; s != null; ++i, s = s.rest())
+			{
+			a[i] = s.first();
+			}
+		if(a.length >= count())
+			a[count()] = null;
+		return a;
+		}
+	else
+		return toArray();
+}
+
+public int size(){
+	return count();
+}
+
+public boolean isEmpty(){
+	return count() == 0;
+}
+
+public boolean contains(Object o){
+	for(ISeq s = seq(); s != null; s = s.rest())
+		{
+		if(RT.equal(s.first(), o))
+			return true;
+		}
+	return false;
 }
 
 /*
