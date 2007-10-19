@@ -2509,7 +2509,8 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		return MapExpr.parse(context, (IPersistentMap) form);
 
 //	else
-	throw new UnsupportedOperationException();
+	//throw new UnsupportedOperationException();
+	return new QuoteExpr(form);
 }
 
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
