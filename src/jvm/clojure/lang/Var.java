@@ -167,7 +167,7 @@ synchronized public void unbindRoot(){
 	this.root = dvals;
 }
 
-synchronized public void commuteRoot(IFn fn, Object root) throws Exception{
+synchronized public void commuteRoot(IFn fn) throws Exception{
 	this.root = fn.invoke(root);
 }
 
