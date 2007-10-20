@@ -37,27 +37,14 @@ static class Frame{
 	}
 }
 
-static InheritableThreadLocal<Frame> dvals = new InheritableThreadLocal<Frame>(){
-
-	protected Frame childValue(Frame parentValue){
-		//increment the entire map since we will share it
-		//note - allows communicating with parent via set() on initial bindings
-		//must be paired with releaseThreadBindings() on thread termination
-		//or else initial vars will have non-zero counts forever (inefficient, not fatal)
-		for(ISeq bs = RT.keys(parentValue.bindings); bs != null; bs = bs.rest())
-			{
-			Var v = (Var) bs.first();
-			v.count.incrementAndGet();
-			}
-		return new Frame(PersistentHashMap.EMPTY, parentValue.bindings, null);
-	}
+static ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
 
 	protected Frame initialValue(){
 		return new Frame();
 	}
 };
 
-Object root;
+volatile Object root;
 transient final AtomicInteger count;
 final public Symbol sym;
 boolean macroFlag = false;
@@ -171,13 +158,17 @@ final public boolean hasRoot(){
 }
 
 //binding root always clears macro flag
-public void bindRoot(Object root){
+synchronized public void bindRoot(Object root){
 	this.root = root;
 	macroFlag = false;
 }
 
-public void unbindRoot(){
+synchronized public void unbindRoot(){
 	this.root = dvals;
+}
+
+synchronized public void commuteRoot(IFn fn, Object root) throws Exception{
+	this.root = fn.invoke(root);
 }
 
 public static void pushThreadBindings(Associative bindings){
