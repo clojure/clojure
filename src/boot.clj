@@ -466,6 +466,11 @@
 (defn iterate [f x]
    (lazy-cons x (iterate f (f x))))
 
+(defn range
+ ([end] (take end (iterate inc 0)))
+ ([start end] (take (- end start) (iterate inc start)))
+ ([start end step]
+   (take-while (appl (if (pos? step) > <) end) (iterate (appl + step) start))))
 
 (defn merge [& maps]
   (reduce conj maps))
@@ -614,7 +619,7 @@
 		every not-every any not-any
 		map mapcat filter take take-while drop drop-while
 		zipmap
-		cycle split-at split-with repeat replicate iterate
+		cycle split-at split-with repeat replicate iterate range
 		dolist  dotimes
 		eval import unimport refer unrefer in-namespace unintern
 		into-array array
