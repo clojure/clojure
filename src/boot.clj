@@ -296,14 +296,21 @@
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
 
-;;polyfns
-(defmacro defpolyfn [name dispatch-fn]
-  `(def ~name (new clojure.lang.PolyFn ~dispatch-fn)))
+;;multimethods
+(defmacro defmulti
+  ([name dispatch-fn] (thisfn name dispatch-fn :default))
+  ([name dispatch-fn default-val]
+    `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
-(defmacro defmethod [polyfn dispatch-val & fn-tail]
-  `(let [pvar# (the-var ~polyfn)]
-     (locking pvar#
-        (. pvar# (bindRoot (.. pvar# (getRoot) (assoc ~dispatch-val (fn ~@fn-tail))))))))
+(defmacro defmethod [multifn dispatch-val & fn-tail]
+  `(let [pvar# (the-var ~multifn)]
+      (. pvar# (commuteRoot (fn [mf#] (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
+
+(defmacro remove-method [multifn dispatch-val]
+  `(let [pvar# (the-var ~multifn)]
+      (. pvar# (commuteRoot (fn [mf#] (. mf# (dissoc ~dispatch-val)))))))
+
+;;;;;;;;; var stuff      
 
 (defmacro binding [bindings & body]
   (let [var-ize (fn [var-vals]
@@ -600,7 +607,8 @@
 		peek pop nth contains get
 		assoc dissoc find keys vals merge
 		rseq sym name namespace locking ..
-		defpolyfn defmethod binding find-var
+		defmulti defmethod remove-method
+                binding find-var
 		ref deref deref! commute set sync
 		reduce reverse comp appl
 		every not-every any not-any

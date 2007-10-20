@@ -14,48 +14,43 @@ package clojure.lang;
 
 public class MultiFn extends AFn{
 final public IFn dispatchFn;
-final public IFn defaultFn;
+final public Object defaultDispatchVal;
 final public IPersistentMap methodTable;
 
-public MultiFn(IFn dispatchFn, IFn defaultFn){
+public MultiFn(IFn dispatchFn, Object defaultDispatchVal){
 	this.dispatchFn = dispatchFn;
-	this.defaultFn = defaultFn;
+	this.defaultDispatchVal = defaultDispatchVal;
 	this.methodTable = PersistentHashMap.EMPTY;
 }
 
 public MultiFn assoc(Object dispatchVal, IFn method){
-	return new MultiFn(meta(), dispatchFn, defaultFn, methodTable.assoc(dispatchVal, method));
+	return new MultiFn(meta(), dispatchFn, defaultDispatchVal, methodTable.assoc(dispatchVal, method));
 }
 
-public MultiFn withDefaultFn(IFn newDefaultFn){
-	return new MultiFn(meta(), dispatchFn, newDefaultFn, methodTable);
-}
 
-public MultiFn without(Object dispatchVal){
-	return new MultiFn(meta(), dispatchFn,  defaultFn, methodTable.without(dispatchVal));
+public MultiFn dissoc(Object dispatchVal){
+	return new MultiFn(meta(), dispatchFn,  defaultDispatchVal, methodTable.without(dispatchVal));
 }
 
 public Obj withMeta(IPersistentMap meta){
 	if(meta == meta())
 		return this;
-	return new MultiFn(meta, dispatchFn, defaultFn, methodTable);
+	return new MultiFn(meta, dispatchFn, defaultDispatchVal, methodTable);
 }
 
-private MultiFn(IPersistentMap meta, IFn dispatchFn, IFn defaultFn, IPersistentMap dispatchTable){
+private MultiFn(IPersistentMap meta, IFn dispatchFn, Object defaultDispatchVal, IPersistentMap dispatchTable){
 	super(meta);
 	this.dispatchFn = dispatchFn;
-	this.defaultFn = defaultFn;
+	this.defaultDispatchVal = defaultDispatchVal;
 	this.methodTable = dispatchTable;
 }
 
 private IFn getFn(Object dispatchVal) throws Exception{
 	IFn targetFn = (IFn) methodTable.valAt(dispatchVal);
 	if(targetFn == null)
-		{
-		if(defaultFn != null)
-			return defaultFn;
+	    targetFn = (IFn) methodTable.valAt(defaultDispatchVal);
+	if(targetFn == null)
 		throw new IllegalArgumentException(String.format("No method for dispatch value: %s", dispatchVal));
-		}
 	return targetFn;
 }
 
