@@ -16,6 +16,7 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Arrays;
 
 public class Reflector{
 
@@ -26,32 +27,53 @@ public static Object invokeInstanceMethod(Object target, String methodName, Obje
 }
 
 private static Object invokeMatchingMethod(List methods, Object target, Object[] args)
-		throws IllegalAccessException, InvocationTargetException{
+		throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
+	Method m = null;
+	Object[] boxedArgs = null;
 	if(methods.isEmpty())
 		{
 		throw new IllegalArgumentException("No matching field or method found");
 		}
 	else if(methods.size() == 1)
 		{
-		Method m = (Method) methods.get(0);
-		return prepRet(m.invoke(target, boxArgs(m.getParameterTypes(), args)));
+		m = (Method) methods.get(0);
+		boxedArgs = boxArgs(m.getParameterTypes(),args);
 		}
 	else //overloaded w/same arity
 		{
 		for(Iterator i = methods.iterator(); i.hasNext();)
 			{
-			Method m = (Method) i.next();
+			m = (Method) i.next();
 
 			Class[] params = m.getParameterTypes();
 			if(isCongruent(params, args))
 				{
-				Object[] boxedArgs = boxArgs(params, args);
-				return prepRet(m.invoke(target, boxedArgs));
+				boxedArgs = boxArgs(params, args);
+				break;
 				}
 			}
+		}
+	if(m == null)
 		throw new IllegalArgumentException("No matching field or method found");
 
+	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+		{
+		//public method of non-public class, try to find it in an interface
+		Class c = m.getDeclaringClass();
+		for(Class iface : c.getInterfaces())
+			{
+			for(Method im : iface.getDeclaredMethods())
+				{
+				if(im.getName().equals(m.getName())
+					&& Arrays.equals(m.getParameterTypes(),im.getParameterTypes()))
+					{
+					m = im;
+					break;
+					}
+				}
+			}
 		}
+	return prepRet(m.invoke(target, boxedArgs));
 }
 
 public static Object invokeConstructor(Class c, Object[] args) throws Exception{
