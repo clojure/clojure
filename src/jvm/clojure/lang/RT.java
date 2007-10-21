@@ -21,6 +21,9 @@ public class RT{
 static public Keyword T = Keyword.intern(Symbol.create(null, "t"));
 final static public Var OUT =
 		Var.intern(Symbol.create("clojure", "*out*"), new OutputStreamWriter(System.out));
+final static public Var IN =
+		Var.intern(Symbol.create("clojure", "*in*"),
+				   new LineNumberingPushbackReader(new InputStreamReader(System.in)));
 final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),

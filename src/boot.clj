@@ -584,6 +584,16 @@
     (print x writer)
     (newline)))
 
+(defn read
+  ([]
+    (thisfn *in*))
+  ([stream]
+    (thisfn stream :t nil))
+  ([stream eof-error? eof-value]
+    (thisfn stream eof-error? eof-value nil))
+  ([stream eof-error? eof-value recursive?]
+    (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
+
 (defmacro .-> [x & members]
    (let [gx (gensym)]
      `(let [~gx ~x]
@@ -625,6 +635,7 @@
 		into-array array
 		make-proxy new-proxy
 		prn print newline *out* *current-namespace* .->
+                read *in*
 		time
 	))
 

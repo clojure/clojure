@@ -2699,7 +2699,7 @@ public static void main(String[] args){
 			}
 
 	//repl
-	LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
+	LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) RT.IN.get();
 	OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
 
 	Object EOF = new Object();
