@@ -72,6 +72,26 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
 					}
 				}
 			}
+		//still haven't found a public version, try superclasses
+		if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+			{
+			sc:
+			for(Class sc = c.getSuperclass();sc!=null;sc = sc.getSuperclass())
+				{
+				if(Modifier.isPublic(sc.getModifiers()))
+					{
+					for(Method scm : sc.getDeclaredMethods())
+						{
+						if(scm.getName().equals(m.getName())
+							&& Arrays.equals(m.getParameterTypes(),scm.getParameterTypes()))
+							{
+							m = scm;
+							break sc;
+							}
+						}
+					}
+				}
+			}
 		}
 	return prepRet(m.invoke(target, boxedArgs));
 }
