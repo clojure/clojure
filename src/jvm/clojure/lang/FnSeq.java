@@ -13,17 +13,20 @@ package clojure.lang;
 public class FnSeq extends ASeq{
 
 final Object _first;
-final Delay _rest;
+IFn _restFn;
+volatile ISeq _rest;
 
-public FnSeq(Object first, Delay rest){
+public FnSeq(Object first, IFn restFn){
 	this._first = first;
-	this._rest = rest;
+	this._restFn = restFn;
+	this._rest = this;
 }
 
-public FnSeq(IPersistentMap meta, Object first, Delay rest){
+public FnSeq(IPersistentMap meta, Object first, IFn restFn, ISeq rest){
 	super(meta);
 	this._first = first;
 	this._rest = rest;
+	this._restFn = restFn;
 }
 
 public Object first(){
@@ -31,17 +34,29 @@ public Object first(){
 }
 
 public ISeq rest(){
-	try
-		{
-		return (ISeq) _rest.invoke();
-		}
-	catch(Exception e)
-		{
-		throw new Error(e.toString());
-		}
+	if(_restFn != null)
+		synchronized(this)
+			{
+			if(_restFn != null)
+				{
+				try
+					{
+					_rest = (ISeq) _restFn.invoke();
+					}
+				catch(Exception ex)
+					{
+					throw new Error(ex);
+					}
+				_restFn = null;
+				}
+			}
+	return _rest;
 }
 
 public FnSeq withMeta(IPersistentMap meta){
-	return new FnSeq(meta, _first, _rest);
+	if(meta == meta())
+		return this;
+	return new FnSeq(meta, _first, _restFn, _rest);
 }
+
 }

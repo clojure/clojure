@@ -108,8 +108,12 @@
 (defmacro delay [& body]
   (list 'new 'clojure.lang.Delay (list* 'fn [] body)))
 
+(defn fnseq [x restfn]
+  (new clojure.lang.FnSeq x restfn))
+
 (defmacro lazy-cons [x & body]
-  (list 'new 'clojure.lang.FnSeq x (list* 'delay body)))
+  (list 'fnseq x (list* 'fn [] body)))
+
 
 (defn concat
       ([] nil)
@@ -493,7 +497,7 @@
 (defn defimports [& imports-maps]
   (def *imports* (apply merge imports-maps)))
 
-(defmacro dolist [item list & body]
+(defmacro doseq [item list & body]
   `(loop [list# (seq ~list)]
       (when list#
         (let [~item (first list#)]
@@ -511,21 +515,21 @@
    (let [#^clojure.lang.Var imps *ns-imports*
          pkg (ffirst import-lists)
          classes (rfirst import-lists)]
-       (dolist c classes
+       (doseq c classes
          (. imps (bindRoot (assoc (. imps (get)) c (strcat pkg "." c))))))
    (apply thisfn (rest import-lists))))
 
 (defn unimport [& names]
    (let [#^clojure.lang.Var imps *ns-imports*]
-	  (dolist name names
+	  (doseq name names
         (. imps (bindRoot (dissoc (. imps (get)) name))))))
 
 (defn refer [& refer-lists]
-  (dolist rlist refer-lists
+  (doseq rlist refer-lists
    (let [#^clojure.lang.Var refers *ns-refers*
          ns (first rlist)
          names (rest rlist)]
-     (dolist name names
+     (doseq name names
        (when (. clojure.lang.Var (find (sym (str *current-namespace*) (str name))))
          (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
        (let [varsym (sym (str ns) (str name))
@@ -540,7 +544,7 @@
 
 (defn unrefer [& names]
    (let [#^clojure.lang.Var refers *ns-refers*]
-	  (dolist name names
+	  (doseq name names
         (. refers (bindRoot (dissoc (. refers (get)) name))))))
 
 (defn unintern [varsym]
@@ -548,6 +552,12 @@
 
 (defn into-array [aseq]
   (. clojure.lang.RT (seqToTypedArray (seq aseq))))
+
+(defn into [to from]
+  (let [ret to items (seq from)]
+    (if items
+       (recur (conj ret (first items)) (rest items))
+      ret)))
 
 (defn array [& items]
   (into-array items))
@@ -558,7 +568,7 @@
                       (into-array classes)
                       (new clojure.lang.ProxyHandler method-map))))
 
-(defmacro new-proxy [classes & fs]
+(defmacro implement [classes & fs]
   `(make-proxy
       ~(apply vector (map (appl list 'class) classes))
       ~(loop [fmap {} fs fs]
@@ -594,16 +604,21 @@
   ([stream eof-error? eof-value recursive?]
     (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
 
-(defmacro .-> [x & members]
+(defmacro doto [x & members]
    (let [gx (gensym)]
      `(let [~gx ~x]
         (do
           ~@(map (fn [m] (list '. gx m))
                   members)))))
+
+(defmacro memfn [name & args]
+  `(fn [target# ~@args]
+      (. target# (~name ~@args))))
+
 (defmacro time [expr]
    `(let [start# (. System (nanoTime))
           ret# ~expr]
-       (prn (strcat "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0)" msecs"))
+       (prn (strcat "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0) " msecs"))
        ret#))
 
 (def *exports*
@@ -615,7 +630,7 @@
 		nil? not first rest second
 		ffirst frest rfirst rrest
 		eql? str strcat gensym cond
-		apply list* delay lazy-cons concat
+		apply list* delay lazy-cons fnseq concat
 		and or + * / - == < <= > >=
 		inc dec pos? neg? zero?
 		complement constantly identity seq count
@@ -630,12 +645,13 @@
 		map mapcat filter take take-while drop drop-while
 		zipmap
 		cycle split-at split-with repeat replicate iterate range
-		dolist  dotimes
+		doseq  dotimes into
 		eval import unimport refer unrefer in-namespace unintern
 		into-array array
-		make-proxy new-proxy
-		prn print newline *out* *current-namespace* .->
-                read *in*
+		make-proxy implement
+		prn print newline *out* *current-namespace*
+		doto  memfn
+        read *in*
 		time
 	))
 
