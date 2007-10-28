@@ -625,6 +625,29 @@
 
 (import '(java.util.concurrent Executors LinkedBlockingQueue))
 
+(defn int [#^Number x]
+  (. x (intValue)))
+
+(defn long [#^Number x]
+  (. x (longValue)))
+
+(defn float [#^Number x]
+  (. x (floatValue)))
+
+(defn double [#^Number x]
+  (. x (doubleValue)))
+
+(defn short [#^Number x]
+  (. x (shortValue)))
+
+(defn byte [#^Number x]
+  (. x (byteValue)))
+
+(defn boolean [x]
+  (if x
+     (. Boolean TRUE)
+    (. Boolean FALSE)))
+
 (defn pmap
     ([f coll]
       (let [nthreads (.. Runtime (getRuntime) (availableProcessors))
@@ -646,7 +669,8 @@
                                   (. exec (submit task)))
                                 (replicate nthreads produce)))
           consume (fn []
-                    (if (sync nil (and (or @todo (pos? @out)) (commute out dec)))
+                    (if (sync nil (and (or @todo (pos? @out))
+                                  (commute out dec)))
                           (fnseq (. q (take)) thisfn)
                        (do
                          (. exec (shutdown))
@@ -658,7 +682,8 @@
                ((fn [collseq]
                  (when (every seq collseq)
                    (let [encl-fn thisfn]
-                      (lazy-cons (map first collseq) (encl-fn (map rest collseq))))))
+                      (lazy-cons (map first collseq)
+                                 (encl-fn (map rest collseq))))))
                 (cons coll colls)))))
 
 (def *exports*
@@ -693,5 +718,6 @@
 		doto  memfn
         read *in*
 		time
+		int long float double short byte boolean
 	))
 
