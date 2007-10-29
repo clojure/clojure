@@ -623,7 +623,6 @@
        (prn (strcat "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0) " msecs"))
        ret#))
 
-(import '(java.util.concurrent Executors LinkedBlockingQueue))
 
 (defn int [#^Number x]
   (. x (intValue)))
@@ -647,6 +646,48 @@
   (if x
      (. Boolean TRUE)
     (. Boolean FALSE)))
+
+(import '(java.lang.reflect Array))
+
+(defn aget [array idx]
+  (. Array (get array idx)))
+
+(defn aset [array idx val]
+  (. Array (set array idx val))
+  val)
+
+(defn aset-boolean [array idx val]
+  (. Array (setBoolean array idx (boolean val)))
+  val)
+
+(defn aset-int [array idx val]
+  (. Array (setInt array idx (int val)))
+  val)
+
+(defn aset-long [array idx val]
+  (. Array (setLong array idx (long val)))
+  val)
+
+(defn aset-float [array idx val]
+  (. Array (setFloat array idx (float val)))
+  val)
+
+(defn aset-double [array idx val]
+  (. Array (setDouble array idx (double val)))
+  val)
+
+(defn aset-short [array idx val]
+  (. Array (setShort array idx (short val)))
+  val)
+
+(defn aset-byte [array idx val]
+  (. Array (setByte array idx (byte val)))
+  val)
+
+(defn int-array [len]
+  (. Array (newInstance (. Integer TYPE) (int len))))
+  
+(import '(java.util.concurrent Executors LinkedBlockingQueue))
 
 (defn pmap
     ([f coll]
@@ -719,5 +760,7 @@
         read *in*
 		time
 		int long float double short byte boolean
+		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
+		int-array
 	))
 

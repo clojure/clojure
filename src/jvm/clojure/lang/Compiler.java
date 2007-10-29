@@ -15,8 +15,14 @@ package clojure.lang;
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
-//import org.objectweb.asm.util.TraceClassVisitor;
-//import org.objectweb.asm.util.CheckClassAdapter;
+
+/*
+import org.objectweb.asm.*;
+import org.objectweb.asm.commons.Method;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.util.TraceClassVisitor;
+import org.objectweb.asm.util.CheckClassAdapter;
+//*/
 
 import java.io.*;
 import java.math.BigInteger;
@@ -436,9 +442,24 @@ static interface AssignableExpr{
 
 static abstract class HostExpr implements Expr{
 	final static Type CHAR_TYPE = Type.getType(Character.class);
+	final static Type INTEGER_TYPE = Type.getType(Integer.class);
+	final static Type LONG_TYPE = Type.getType(Long.class);
+	final static Type FLOAT_TYPE = Type.getType(Float.class);
+	final static Type DOUBLE_TYPE = Type.getType(Double.class);
+	final static Type SHORT_TYPE = Type.getType(Short.class);
+	final static Type BYTE_TYPE = Type.getType(Byte.class);
 	final static Type NUMBER_TYPE = Type.getType(Number.class);
+
 	final static Method charValueMethod = Method.getMethod("char charValue()");
-	final static Method valueOfMethod = Method.getMethod("Character valueOf(char c)");
+
+	final static Method charValueOfMethod = Method.getMethod("Character valueOf(char)");
+	final static Method intValueOfMethod = Method.getMethod("Integer valueOf(int)");
+	final static Method longValueOfMethod = Method.getMethod("Long valueOf(long)");
+	final static Method floatValueOfMethod = Method.getMethod("Float valueOf(float)");
+	final static Method doubleValueOfMethod = Method.getMethod("Double valueOf(double)");
+	final static Method shortValueOfMethod = Method.getMethod("Short valueOf(short)");
+	final static Method byteValueOfMethod = Method.getMethod("Byte valueOf(byte)");
+
 	final static Method intValueMethod = Method.getMethod("int intValue()");
 	final static Method longValueMethod = Method.getMethod("long longValue()");
 	final static Method floatValueMethod = Method.getMethod("float floatValue()");
@@ -450,6 +471,7 @@ static abstract class HostExpr implements Expr{
 	final static Method fromLongMethod = Method.getMethod("clojure.lang.Num from(long)");
 	final static Method fromDoubleMethod = Method.getMethod("clojure.lang.Num from(double)");
 
+	/*
 	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
 		if(returnType.isPrimitive())
 			{
@@ -470,8 +492,11 @@ static abstract class HostExpr implements Expr{
 				}
 			else if(returnType == char.class)
 				{
-				gen.invokeStatic(CHAR_TYPE, valueOfMethod);
+				gen.invokeStatic(CHAR_TYPE, charValueOfMethod);
 				}
+			else if(returnType == int.class)
+				gen.invokeStatic(INTEGER_TYPE, intValueOfMethod);
+				//m = fromIntMethod;
 			else
 				{
 				Method m = fromIntMethod;
@@ -494,7 +519,53 @@ static abstract class HostExpr implements Expr{
 				}
 			}
 	}
-
+  */
+	//*
+	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
+		if(returnType.isPrimitive())
+			{
+			if(returnType == boolean.class)
+				{
+				Label falseLabel = gen.newLabel();
+				Label endLabel = gen.newLabel();
+				gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
+				gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
+				gen.goTo(endLabel);
+				gen.mark(falseLabel);
+				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+				gen.mark(endLabel);
+				}
+			else if(returnType == void.class)
+				{
+				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+				}
+			else if(returnType == char.class)
+				{
+				gen.invokeStatic(CHAR_TYPE, charValueOfMethod);
+				}
+			else
+				{
+				if(returnType == int.class)
+					//gen.invokeStatic(NUM_TYPE, fromIntMethod);
+					gen.invokeStatic(INTEGER_TYPE, intValueOfMethod);
+				else if(returnType == float.class)
+					{
+					//gen.visitInsn(F2D);
+					gen.invokeStatic(FLOAT_TYPE, floatValueOfMethod);
+					//m = floatValueOfMethod;
+					}
+				else if(returnType == double.class)
+					gen.invokeStatic(DOUBLE_TYPE, doubleValueOfMethod);
+				else if(returnType == long.class)
+					gen.invokeStatic(LONG_TYPE, longValueOfMethod);
+				else if(returnType == byte.class)
+					gen.invokeStatic(BYTE_TYPE, byteValueOfMethod);
+				else if(returnType == short.class)
+					gen.invokeStatic(SHORT_TYPE, shortValueOfMethod);
+				}
+			}
+	}
+//*/
 	public static void emitUnboxArg(FnExpr fn, GeneratorAdapter gen, Class paramType){
 		if(paramType.isPrimitive())
 			{
