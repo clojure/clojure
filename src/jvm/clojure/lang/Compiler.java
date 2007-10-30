@@ -2584,6 +2584,13 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	return new QuoteExpr(form);
 }
 
+static public class CompilerException extends Exception{
+
+	public CompilerException(String message, Throwable cause){
+		super(message, cause);
+	}
+}
+
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Integer line = (Integer) LINE.get();
 	try
@@ -2612,8 +2619,11 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		}
 	catch(Throwable e)
 		{
-		throw new Exception(String.format("%s:%d: %s", SOURCE.get(), (Integer) LINE.get(), e.getMessage()),
+		if(!(e instanceof CompilerException))
+			throw new CompilerException(String.format("%s:%d: %s", SOURCE.get(), (Integer) LINE.get(), e.getMessage()),
 		                    e);
+		else
+			throw (CompilerException)e;
 		}
 	finally
 		{
