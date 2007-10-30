@@ -684,8 +684,8 @@
   (. Array (setByte array idx (byte val)))
   val)
 
-(defn int-array [len]
-  (. Array (newInstance (. Integer TYPE) (int len))))
+(defn make-array [type len]
+  (. Array (newInstance type (int len))))
   
 (import '(java.util.concurrent Executors LinkedBlockingQueue))
 
@@ -761,6 +761,6 @@
 		time
 		int long float double short byte boolean
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
-		int-array
+		make-array
 	))
 
