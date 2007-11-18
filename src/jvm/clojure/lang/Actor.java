@@ -18,14 +18,15 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Actor extends RestFn{
+public class Actor extends RestFn implements IRef{
 volatile Object state;
 final Queue q = new LinkedList();
 boolean busy = false;
 
+final public Queue<Exception> errors = new LinkedBlockingQueue<Exception>();
 //todo - make tuneable
-final public static Queue errors = new LinkedBlockingQueue();
-final static Executor executor = Executors.newCachedThreadPool();
+final static Executor executor = Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
+//final static Executor executor = Executors.newCachedThreadPool();
 final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVector>();
 
 static class Action implements Runnable{
@@ -45,15 +46,15 @@ static class Action implements Runnable{
 		boolean hadError = false;
 		try
 			{
-			actor.state = fn.applyTo(RT.cons(actor, args));
+			actor.setState(fn.applyTo(RT.cons(actor.state, args)));
 			}
 		catch(Exception e)
 			{
 			//todo report/callback
-			errors.add(e);
+			actor.errors.add(e);
 			hadError = true;
 			}
-		
+
 		if(!hadError)
 			{
 			for(ISeq s = nested.get().seq(); s != null; s = s.rest())
@@ -81,14 +82,30 @@ static class Action implements Runnable{
 
 public Actor(Object state){
 	super(1);
-	this.state = state;
+	setState(state);
 }
 
-public Object getState(){
+void setState(Object newState){
+	if(newState instanceof IObj)
+		{
+		IObj o = (IObj) newState;
+		if(RT.get(o.meta(), RT.ACTOR_KEY) != this)
+			{
+			newState = o.withMeta((IPersistentMap) RT.assoc(o.meta(), RT.ACTOR_KEY, this));
+			}
+		}
+	state = newState;
+}
+
+public Object get(){
 	return state;
 }
 
-public Object doInvoke(Object fn, Object args){
+public Object doInvoke(Object fn, Object args) throws Exception{
+	if(!errors.isEmpty())
+		{
+		throw new Exception("Actor has errors", errors.peek());
+		}
 	Action action = new Action(this, (IFn) fn, (ISeq) args);
 	LockingTransaction trans = LockingTransaction.getRunning();
 	if(trans != null)
@@ -99,7 +116,7 @@ public Object doInvoke(Object fn, Object args){
 		}
 	else
 		enqueue(action);
-	
+
 	return this;
 }
 

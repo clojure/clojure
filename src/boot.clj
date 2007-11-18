@@ -35,12 +35,22 @@
       ([comparator & args]
           (. clojure.lang.PersistentTreeMap (create comparator args))))
 
+
+;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn meta [#^clojure.lang.IObj x]
  (. x (meta)))
 
 (defn with-meta [#^clojure.lang.IObj x m]
   (. x (withMeta m)))
 
+;;;;;;;;;;;;;;;;;;;; actors ;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn actor [state]
+ (new clojure.lang.Actor state))
+
+(defn actor-of [state]
+ (:actor ^state))
+ 
+;;;;;;;;;;;;;;;;;;;;
 (def defmacro (fn [name & args]
                   (list 'do
                         (cons 'defn (cons name args))
@@ -300,6 +310,10 @@
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
 
+(defmacro ->
+  ([x form] `(~(first form) ~x ~@(rest form)))
+  ([x form & more] `(-> ~(thisfn x form) ~@more)))
+
 ;;multimethods
 (defmacro defmulti
   ([name dispatch-fn] (thisfn name dispatch-fn :default))
@@ -336,7 +350,7 @@
 (defn ref [x]
  (new clojure.lang.Ref x))
 
-(defn deref [#^clojure.lang.Ref ref]
+(defn deref [#^clojure.lang.IRef ref]
   (. ref (get)))
 
 (defn deref! [#^clojure.lang.Ref ref]
@@ -742,7 +756,7 @@
 		complement constantly identity seq count
 		peek pop nth contains get
 		assoc dissoc find keys vals merge
-		rseq sym name namespace locking ..
+		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
 		ref deref deref! commute set sync
@@ -762,5 +776,6 @@
 		int long float double short byte boolean
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
 		make-array
+		actor actor-of
 	))
 
