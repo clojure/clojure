@@ -179,24 +179,24 @@ static public Num negate(Object x){
 	return Num.from(x).negate();
 }
 
-static public Object negPred(Num n){
-	return n.minusp() ? RT.T : null;
+static public Object negPred(Object x){
+	return Num.from(x).minusp() ? RT.T : null;
 }
 
-static public Object posPred(Num n){
-	return n.plusp() ? RT.T : null;
+static public Object posPred(Object x){
+	return Num.from(x).plusp() ? RT.T : null;
 }
 
-static public Object zeroPred(Num n){
-	return n.zerop() ? RT.T : null;
+static public Object zeroPred(Object x){
+	return Num.from(x).zerop() ? RT.T : null;
 }
 
-static public Num dec(Num n){
-	return n.oneMinus();
+static public Num dec(Object x){
+	return Num.from(x).oneMinus();
 }
 
-static public Num inc(Num n){
-	return n.onePlus();
+static public Num inc(Object x){
+	return Num.from(x).onePlus();
 }
 
 abstract public Num negate();
