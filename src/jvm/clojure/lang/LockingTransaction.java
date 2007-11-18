@@ -32,6 +32,7 @@ static final int COMMITTED = 4;
 
 final static ThreadLocal<LockingTransaction> transaction = new ThreadLocal<LockingTransaction>();
 
+
 static class RetryException extends Error{
 }
 
@@ -77,6 +78,7 @@ void stop(int status){
 		vals.clear();
 		sets.clear();
 		commutes.clear();
+		actions.clear();
 		}
 }
 
@@ -86,6 +88,7 @@ long readPoint;
 long startPoint;
 long startTime;
 final RetryException retryex = new RetryException();
+final ArrayList<Actor.Action> actions = new ArrayList<Actor.Action>();
 final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
 final HashSet<Ref> sets = new HashSet<Ref>();
 final TreeMap<Ref, ArrayList<IFn>> commutes = new TreeMap<Ref, ArrayList<IFn>>();
@@ -165,6 +168,13 @@ static LockingTransaction getEx(){
 	LockingTransaction t = transaction.get();
 	if(t == null || t.info == null)
 		throw new IllegalStateException("No transaction running");
+	return t;
+}
+
+static LockingTransaction getRunning(){
+	LockingTransaction t = transaction.get();
+	if(t == null || t.info == null)
+		return null;
 	return t;
 }
 
@@ -251,6 +261,10 @@ Object run(IFn fn) throws Exception{
 						ref.tvals.msecs = msecs;
 						}
 					}
+				for(Actor.Action action : actions)
+					{
+					action.actor.enqueue(action);
+					}
 				done = true;
 				info.status.set(COMMITTED);
 				}
@@ -274,6 +288,9 @@ Object run(IFn fn) throws Exception{
 	return ret;
 }
 
+public void enqueue(Actor.Action action){
+	actions.add(action);
+}
 
 Object doGet(Ref ref){
 	if(!info.running())
