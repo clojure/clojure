@@ -37,7 +37,7 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
 	else if(methods.size() == 1)
 		{
 		m = (Method) methods.get(0);
-		boxedArgs = boxArgs(m.getParameterTypes(),args);
+		boxedArgs = boxArgs(m.getParameterTypes(), args);
 		}
 	else //overloaded w/same arity
 		{
@@ -51,6 +51,8 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
 				boxedArgs = boxArgs(params, args);
 				break;
 				}
+			else
+				m = null;
 			}
 		}
 	if(m == null)
@@ -65,7 +67,7 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
 			for(Method im : iface.getDeclaredMethods())
 				{
 				if(im.getName().equals(m.getName())
-					&& Arrays.equals(m.getParameterTypes(),im.getParameterTypes()))
+				   && Arrays.equals(m.getParameterTypes(), im.getParameterTypes()))
 					{
 					m = im;
 					break;
@@ -76,14 +78,14 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
 		if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
 			{
 			sc:
-			for(Class sc = c.getSuperclass();sc!=null;sc = sc.getSuperclass())
+			for(Class sc = c.getSuperclass(); sc != null; sc = sc.getSuperclass())
 				{
 				if(Modifier.isPublic(sc.getModifiers()))
 					{
 					for(Method scm : sc.getDeclaredMethods())
 						{
 						if(scm.getName().equals(m.getName())
-							&& Arrays.equals(m.getParameterTypes(),scm.getParameterTypes()))
+						   && Arrays.equals(m.getParameterTypes(), scm.getParameterTypes()))
 							{
 							m = scm;
 							break sc;
@@ -245,9 +247,9 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 static Object boxArg(Class paramType, Object arg){
 	if(arg == null && !paramType.isPrimitive())
 		return arg;
-	Class argType = arg.getClass();
-	if(primBoxTypeMatch(paramType, argType))
-		return arg;
+//	Class argType = arg.getClass();
+//	if(primBoxTypeMatch(paramType, argType))
+//		return arg;
 	if(paramType == boolean.class)
 		{
 		if(arg == null)
@@ -291,13 +293,13 @@ static Object[] boxArgs(Class[] params, Object[] args){
 
 static public boolean primBoxTypeMatch(Class primType, Class boxType){
 	if(primType == int.class)
-		return boxType == Integer.class;
+		return boxType == Integer.class || boxType == FixNum.class;
 	else if(primType == float.class)
 		return boxType == Float.class;
 	else if(primType == double.class)
-		return boxType == Double.class;
+		return boxType == Double.class || boxType == DoubleNum.class;
 	else if(primType == long.class)
-		return boxType == Long.class;
+		return boxType == Long.class || boxType == BigNum.class;
 	else if(primType == char.class)
 		return boxType == Character.class;
 	else if(primType == short.class)
