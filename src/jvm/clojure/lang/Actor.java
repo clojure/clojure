@@ -18,12 +18,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Actor extends RestFn implements IRef{
+public class Actor implements IRef{
 volatile Object state;
 final Queue q = new LinkedList();
 boolean busy = false;
 
-final public Queue<Exception> errors = new LinkedBlockingQueue<Exception>();
+volatile ISeq errors = null;
 //todo - make tuneable
 final static Executor executor = Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
 //final static Executor executor = Executors.newCachedThreadPool();
@@ -51,7 +51,7 @@ static class Action implements Runnable{
 		catch(Exception e)
 			{
 			//todo report/callback
-			actor.errors.add(e);
+			actor.errors = RT.cons(e, actor.errors);
 			hadError = true;
 			}
 
@@ -81,7 +81,6 @@ static class Action implements Runnable{
 }
 
 public Actor(Object state){
-	super(1);
 	setState(state);
 }
 
@@ -101,12 +100,20 @@ public Object get(){
 	return state;
 }
 
-public Object doInvoke(Object fn, Object args) throws Exception{
-	if(!errors.isEmpty())
+public ISeq getErrors(){
+	return errors;
+}
+
+public void clearErrors(){
+	errors = null;
+}
+
+public Object send(IFn fn, ISeq args) throws Exception{
+	if(errors != null)
 		{
-		throw new Exception("Actor has errors", errors.peek());
+		throw new Exception("Actor has errors", (Exception) RT.first(errors));
 		}
-	Action action = new Action(this, (IFn) fn, (ISeq) args);
+	Action action = new Action(this, fn, args);
 	LockingTransaction trans = LockingTransaction.getRunning();
 	if(trans != null)
 		trans.enqueue(action);

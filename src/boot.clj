@@ -49,7 +49,16 @@
 
 (defn actor-of [state]
  (:actor ^state))
- 
+
+(defn ! [#^clojure.lang.Actor a f & args]
+  (. a (send f args)))
+
+(defn actor-errors [#^clojure.lang.Actor a]
+  (. a (getErrors)))
+
+(defn clear-actor-errors [#^clojure.lang.Actor a]
+  (. a (clearErrors)))
+  
 ;;;;;;;;;;;;;;;;;;;;
 (def defmacro (fn [name & args]
                   (list 'do
@@ -776,6 +785,6 @@
 		int long float double short byte boolean
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
 		make-array
-		actor actor-of
+		actor actor-of !
 	))
 
