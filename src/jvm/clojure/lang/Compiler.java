@@ -276,7 +276,8 @@ static class DefExpr implements Expr{
 				else
 					throw new Exception("Can't create defs outside of current ns");
 				}
-			return new DefExpr(v, analyze(C.EXPRESSION, RT.third(form), v.sym.name), RT.count(form) == 3);
+			return new DefExpr(v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
+			                   RT.count(form) == 3);
 		}
 	}
 }
@@ -546,7 +547,7 @@ static abstract class HostExpr implements Expr{
 			else
 				{
 				if(returnType == int.class)
-					//gen.invokeStatic(NUM_TYPE, fromIntMethod);
+				//gen.invokeStatic(NUM_TYPE, fromIntMethod);
 					gen.invokeStatic(INTEGER_TYPE, intValueOfMethod);
 				else if(returnType == float.class)
 					{
@@ -565,7 +566,8 @@ static abstract class HostExpr implements Expr{
 				}
 			}
 	}
-//*/
+
+	//*/
 	public static void emitUnboxArg(FnExpr fn, GeneratorAdapter gen, Class paramType){
 		if(paramType.isPrimitive())
 			{
@@ -2621,9 +2623,9 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		{
 		if(!(e instanceof CompilerException))
 			throw new CompilerException(String.format("%s:%d: %s", SOURCE.get(), (Integer) LINE.get(), e.getMessage()),
-		                    e);
+			                            e);
 		else
-			throw (CompilerException)e;
+			throw (CompilerException) e;
 		}
 	finally
 		{
