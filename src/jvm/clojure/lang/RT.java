@@ -23,7 +23,7 @@ final static public Var OUT =
 		Var.intern(Symbol.create("clojure", "*out*"), new OutputStreamWriter(System.out));
 final static public Var IN =
 		Var.intern(Symbol.create("clojure", "*in*"),
-				   new LineNumberingPushbackReader(new InputStreamReader(System.in)));
+		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
 final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
 final static Keyword ACTOR_KEY = Keyword.intern("clojure", "actor");
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
@@ -111,6 +111,9 @@ Symbol.create("Exception"), "java.lang.Exception"
 //                                                  Symbol.create("SortedMap"), "java.util.SortedMap",
 //                                                  Symbol.create("SortedSet"), "java.util.SortedSet"
 );
+
+
+final static Var PRINT_META = Var.intern(Symbol.create("clojure", "*print-meta*"), null);
 
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
@@ -657,7 +660,7 @@ static public void print(Object x, Writer w) throws Exception{
 	if(x instanceof Obj)
 		{
 		Obj o = (Obj) x;
-		if(RT.count(o.meta()) > 0)
+		if(RT.count(o.meta()) > 0 && PRINT_META.get() != null)
 			{
 			IPersistentMap meta = o.meta();
 			w.write("#^");

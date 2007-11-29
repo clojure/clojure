@@ -779,7 +779,7 @@
 		eval import unimport refer unrefer in-namespace unintern
 		into-array array
 		make-proxy implement
-		prn print newline *out* *current-namespace*
+		prn print newline *out* *current-namespace*  *print-meta*
 		doto  memfn
         read *in*
 		time
