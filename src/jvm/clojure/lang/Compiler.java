@@ -12,10 +12,12 @@
 
 package clojure.lang;
 
+//*
+
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
-
+//*/
 /*
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
@@ -585,7 +587,7 @@ static abstract class HostExpr implements Expr{
 			else if(paramType == char.class)
 				{
 				gen.checkCast(CHAR_TYPE);
-				gen.invokeStatic(CHAR_TYPE, charValueMethod);
+				gen.invokeVirtual(CHAR_TYPE, charValueMethod);
 				}
 			else
 				{
