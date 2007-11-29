@@ -133,12 +133,14 @@
 (defmacro lazy-cons [x & body]
   (list 'fnseq x (list* 'fn [] body)))
 
-
+(defn seq [coll]
+  (. clojure.lang.RT (seq coll)))
+  
 (defn concat
       ([] nil)
       ([x & xs]
           (cond
-           (nil? xs) x
+           (nil? xs) (seq x)
            (nil? x) (recur (first xs) (rest xs))
            :else (lazy-cons (first x) (apply concat (rest x) xs)))))
 
@@ -239,8 +241,7 @@
 
 ;;Collection stuff
 
-(defn seq [coll]
-  (. clojure.lang.RT (seq coll)))
+
 
 (defn count [coll]
   (. clojure.lang.RT (count coll)))
