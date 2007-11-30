@@ -256,9 +256,9 @@ static Object boxArg(Class paramType, Object arg){
 			return Boolean.FALSE;
 		return Boolean.TRUE;
 		}
-	else if(paramType.isPrimitive() && arg instanceof Num)
+	else if(paramType.isPrimitive() && arg instanceof Number)
 		{
-		Num n = (Num) arg;
+		Number n = (Number) arg;
 		if(paramType == int.class)
 			return n.intValue();
 		else if(paramType == float.class)
