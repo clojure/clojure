@@ -267,8 +267,8 @@ static Object boxArg(Class paramType, Object arg){
 			return n.doubleValue();
 		else if(paramType == long.class)
 			return n.longValue();
-		else if(paramType == char.class)
-			return (char) n.intValue();
+//		else if(paramType == char.class)
+//			return (char) n.intValue();
 		else if(paramType == short.class)
 			return n.shortValue();
 		else

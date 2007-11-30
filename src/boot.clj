@@ -666,6 +666,9 @@
 (defn byte [#^Number x]
   (. x (byteValue)))
 
+(defn char [x]
+  (. clojure.lang.RT (charCast x)))
+
 (defn boolean [x]
   (if x
      (. Boolean TRUE)
@@ -783,7 +786,7 @@
 		doto  memfn
         read *in*
 		time
-		int long float double short byte boolean
+		int long float double short byte boolean char
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
 		make-array
 		actor actor-of !
