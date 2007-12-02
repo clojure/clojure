@@ -108,8 +108,8 @@
 (defn apply [#^clojure.lang.IFn f & args]
       (. f (applyTo (spread args))))
 
-(defn list* [& args]
-      (spread args))
+(defn list* [arg & args]
+      (spread (cons arg args)))
 
 (defmacro delay [& body]
   (list 'new 'clojure.lang.Delay (list* 'fn [] body)))
