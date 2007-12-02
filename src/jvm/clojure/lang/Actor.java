@@ -22,12 +22,14 @@ public class Actor implements IRef{
 volatile Object state;
 final Queue q = new LinkedList();
 boolean busy = false;
+boolean commuting = false;
 
 volatile ISeq errors = null;
 //todo - make tuneable
 final static Executor executor = Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
 //final static Executor executor = Executors.newCachedThreadPool();
 final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVector>();
+final static ThreadLocal inChange = new ThreadLocal();
 
 static class Action implements Runnable{
 	final Actor actor;
@@ -46,7 +48,7 @@ static class Action implements Runnable{
 		boolean hadError = false;
 		try
 			{
-			actor.setState(fn.applyTo(RT.cons(actor.state, args)));
+			actor.commute(fn, args);
 			}
 		catch(Exception e)
 			{
@@ -106,6 +108,45 @@ public ISeq getErrors(){
 
 public void clearErrors(){
 	errors = null;
+}
+
+synchronized void commute(IFn fn, ISeq args) throws Exception{
+	try
+		{
+		commuting = true;
+		setState(fn.applyTo(RT.cons(state, args)));
+		}
+	finally
+		{
+		commuting = false;
+		}
+}
+
+public Object change(IFn fn, ISeq args) throws Exception{
+	if(errors != null)
+		{
+		throw new Exception("Actor has errors", (Exception) RT.first(errors));
+		}
+	//Action action = new Action(this, fn, args);
+	if(commuting)
+		throw new Exception("Recursive change");
+	LockingTransaction trans = LockingTransaction.getRunning();
+	if(trans != null)
+		throw new Exception("Cannot change an Actor in a transaction");
+	if(inChange.get() != null)
+		throw new Exception("Cannot nest changes, use send");
+
+	try
+		{
+		inChange.set(this);
+		commute(fn, args);
+		}
+	finally
+		{
+		inChange.set(null);
+		}
+
+	return this;
 }
 
 public Object send(IFn fn, ISeq args) throws Exception{
