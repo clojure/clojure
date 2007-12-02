@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.UUID;
 
-public class Ref implements IFn, Comparable<Ref>, IRef{
+public class TRef implements IFn, Comparable<TRef>, IRef{
 
-public int compareTo(Ref o){
+public int compareTo(TRef o){
 	return uuid.compareTo(o.uuid);
 }
 
@@ -55,7 +55,7 @@ final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
 final UUID uuid;
 
-public Ref(){
+public TRef(){
 	this.tvals = null;
 	this.tinfo = null;
 	this.faults = new AtomicInteger();
@@ -63,7 +63,7 @@ public Ref(){
 	this.uuid = UUID.randomUUID();
 }
 
-public Ref(Object initVal){
+public TRef(Object initVal){
 	this();
 	tvals = new TVal(initVal, 0, System.currentTimeMillis());
 }
@@ -71,7 +71,7 @@ public Ref(Object initVal){
 //note - makes no attempt to ensure there is no other Ref with same UUID
 
 //use only with a cache/registry
-public Ref(UUID uuid, Object initVal){
+public TRef(UUID uuid, Object initVal){
 	tvals = new TVal(initVal, 0, System.currentTimeMillis());
 	this.tinfo = null;
 	this.faults = new AtomicInteger();

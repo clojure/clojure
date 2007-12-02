@@ -16,7 +16,6 @@ import java.util.Queue;
 import java.util.LinkedList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class Actor implements IRef{
 volatile Object state;
@@ -48,7 +47,7 @@ static class Action implements Runnable{
 		boolean hadError = false;
 		try
 			{
-			actor.commute(fn, args);
+			actor.doAlter(fn, args);
 			}
 		catch(Exception e)
 			{
@@ -110,7 +109,7 @@ public void clearErrors(){
 	errors = null;
 }
 
-synchronized void commute(IFn fn, ISeq args) throws Exception{
+synchronized void doAlter(IFn fn, ISeq args) throws Exception{
 	try
 		{
 		commuting = true;
@@ -122,7 +121,7 @@ synchronized void commute(IFn fn, ISeq args) throws Exception{
 		}
 }
 
-public Object change(IFn fn, ISeq args) throws Exception{
+public Object alter(IFn fn, ISeq args) throws Exception{
 	if(errors != null)
 		{
 		throw new Exception("Actor has errors", (Exception) RT.first(errors));
@@ -139,7 +138,7 @@ public Object change(IFn fn, ISeq args) throws Exception{
 	try
 		{
 		inChange.set(this);
-		commute(fn, args);
+		doAlter(fn, args);
 		}
 	finally
 		{
@@ -149,7 +148,7 @@ public Object change(IFn fn, ISeq args) throws Exception{
 	return this;
 }
 
-public Object send(IFn fn, ISeq args) throws Exception{
+public Object commute(IFn fn, ISeq args) throws Exception{
 	if(errors != null)
 		{
 		throw new Exception("Actor has errors", (Exception) RT.first(errors));

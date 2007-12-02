@@ -13,7 +13,6 @@
 package clojure.lang;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
@@ -89,13 +88,13 @@ long startPoint;
 long startTime;
 final RetryException retryex = new RetryException();
 final ArrayList<Actor.Action> actions = new ArrayList<Actor.Action>();
-final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
-final HashSet<Ref> sets = new HashSet<Ref>();
-final TreeMap<Ref, ArrayList<IFn>> commutes = new TreeMap<Ref, ArrayList<IFn>>();
+final HashMap<TRef, Object> vals = new HashMap<TRef, Object>();
+final HashSet<TRef> sets = new HashSet<TRef>();
+final TreeMap<TRef, ArrayList<IFn>> commutes = new TreeMap<TRef, ArrayList<IFn>>();
 
 
 //returns the most recent val
-Object lock(Ref ref){
+Object lock(TRef ref){
 	boolean unlocked = false;
 	try
 		{
@@ -192,7 +191,7 @@ static public Object runInTransaction(IFn fn) throws Exception{
 Object run(IFn fn) throws Exception{
 	boolean done = false;
 	Object ret = null;
-	ArrayList<Ref> locked = new ArrayList<Ref>();
+	ArrayList<TRef> locked = new ArrayList<TRef>();
 
 	for(int i = 0; !done && i < RETRY_LIMIT; i++)
 		{
@@ -209,9 +208,9 @@ Object run(IFn fn) throws Exception{
 			//make sure no one has killed us before this point, and can't from now on
 			if(info.status.compareAndSet(RUNNING, COMMITTING))
 				{
-				for(Map.Entry<Ref, ArrayList<IFn>> e : commutes.entrySet())
+				for(Map.Entry<TRef, ArrayList<IFn>> e : commutes.entrySet())
 					{
-					Ref ref = e.getKey();
+					TRef ref = e.getKey();
 					ref.lock.writeLock().lock();
 					locked.add(ref);
 					Info refinfo = ref.tinfo;
@@ -228,7 +227,7 @@ Object run(IFn fn) throws Exception{
 						vals.put(ref, f.invoke(vals.get(ref)));
 						}
 					}
-				for(Ref ref : sets)
+				for(TRef ref : sets)
 					{
 					if(!commutes.containsKey(ref))
 						{
@@ -241,16 +240,16 @@ Object run(IFn fn) throws Exception{
 				//no more client code to be called
 				long msecs = System.currentTimeMillis();
 				long commitPoint = getCommitPoint();
-				for(Map.Entry<Ref, Object> e : vals.entrySet())
+				for(Map.Entry<TRef, Object> e : vals.entrySet())
 					{
-					Ref ref = e.getKey();
+					TRef ref = e.getKey();
 					if(ref.tvals == null)
 						{
-						ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs);
+						ref.tvals = new TRef.TVal(e.getValue(), commitPoint, msecs);
 						}
 					else if(ref.faults.get() > 0)
 						{
-						ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs, ref.tvals);
+						ref.tvals = new TRef.TVal(e.getValue(), commitPoint, msecs, ref.tvals);
 						ref.faults.set(0);
 						}
 					else
@@ -292,7 +291,7 @@ public void enqueue(Actor.Action action){
 	actions.add(action);
 }
 
-Object doGet(Ref ref){
+Object doGet(TRef ref){
 	if(!info.running())
 		throw retryex;
 	if(vals.containsKey(ref))
@@ -302,7 +301,7 @@ Object doGet(Ref ref){
 		ref.lock.readLock().lock();
 		if(ref.tvals == null)
 			throw new IllegalStateException(ref.toString() + " is unbound.");
-		Ref.TVal ver = ref.tvals;
+		TRef.TVal ver = ref.tvals;
 		do
 			{
 			if(ver.point <= readPoint)
@@ -319,7 +318,7 @@ Object doGet(Ref ref){
 
 }
 
-Object doSet(Ref ref, Object val){
+Object doSet(TRef ref, Object val){
 	if(!info.running())
 		throw retryex;
 	if(commutes.containsKey(ref))
@@ -333,13 +332,13 @@ Object doSet(Ref ref, Object val){
 	return val;
 }
 
-void doTouch(Ref ref){
+void doTouch(TRef ref){
 	if(!info.running())
 		throw retryex;
 	lock(ref);
 }
 
-Object doCommute(Ref ref, IFn fn) throws Exception{
+Object doCommute(TRef ref, IFn fn) throws Exception{
 	if(!info.running())
 		throw retryex;
 	if(!vals.containsKey(ref))

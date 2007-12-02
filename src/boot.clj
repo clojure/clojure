@@ -363,23 +363,23 @@
  (. clojure.lang.Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn ref [x]
- (new clojure.lang.Ref x))
+(defn tref [x]
+ (new clojure.lang.TRef x))
 
 (defn deref [#^clojure.lang.IRef ref]
   (. ref (get)))
 
-(defn deref! [#^clojure.lang.Ref ref]
+(defn deref! [#^clojure.lang.TRef ref]
   (. ref (currentVal)))
 
-(defn commute [#^clojure.lang.Ref ref fun]
+(defn commute [#^clojure.lang.TRef ref fun]
   (. ref (commute fun)))
 
 (defn set
-  ([#^clojure.lang.Ref ref]
+  ([#^clojure.lang.TRef ref]
     (. ref (touch))
     (. ref (get)))
-  ([#^clojure.lang.Ref ref val]
+  ([#^clojure.lang.TRef ref val]
     (. ref (set val))))
 
 (defmacro sync [flags-ignored-for-now & body]
@@ -726,8 +726,8 @@
     ([f coll]
       (let [nthreads (.. Runtime (getRuntime) (availableProcessors))
           exec (. Executors (newFixedThreadPool nthreads))
-          todo (ref (seq coll))
-          out (ref 0)
+          todo (tref (seq coll))
+          out (tref 0)
           q (new LinkedBlockingQueue)
           produce (fn []
                      (let [job (sync nil
@@ -778,7 +778,7 @@
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
-		ref deref deref! commute set sync
+		tref deref deref! commute set sync
 		reduce reverse comp appl
 		every not-every any not-any
 		map pmap mapcat filter take take-while drop drop-while
