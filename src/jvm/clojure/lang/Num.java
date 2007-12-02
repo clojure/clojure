@@ -106,19 +106,27 @@ abstract public Num divide(BigInteger x);
 
 abstract public Num divide(RatioNum x);
 
-static public Object truncate(Object num, Object div){
+static public Object[] truncate(Object num, Object div){
 	return Num.from(div).truncateDivide(Num.from(num));
 }
 
-abstract public Object truncateDivide(Num rhs);
+static public Object quotient(Object num, Object div){
+	return truncate(num,div)[0];
+}
 
-abstract public Object truncateBy(int x);
+static public Object remainder(Object num, Object div){
+	return truncate(num,div)[1];
+}
 
-abstract public Object truncateBy(BigInteger x);
+abstract public Object[] truncateDivide(Num rhs);
 
-abstract public Object truncateBy(RatioNum x);
+abstract public Object[] truncateBy(int x);
 
-static public Object truncateBigints(BigInteger n, BigInteger d){
+abstract public Object[] truncateBy(BigInteger x);
+
+abstract public Object[] truncateBy(RatioNum x);
+
+static public Object[] truncateBigints(BigInteger n, BigInteger d){
 	BigInteger[] result = n.divideAndRemainder(d);
 	return RT.setValues(Num.from(result[0]), Num.from(result[1]));
 }

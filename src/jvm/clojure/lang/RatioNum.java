@@ -143,23 +143,23 @@ public Num divide(RatioNum n){
 }
 
 
-public Object truncateDivide(Num num){
+public Object[] truncateDivide(Num num){
 	return num.truncateBy(this);
 }
 
-public Object truncateBy(int div){
-	Num q = (Num) Num.truncate(numerator, denominator.multiply(div));
+public Object[] truncateBy(int div){
+	Num q = (Num) Num.truncate(numerator, denominator.multiply(div))[0];
 	return RT.setValues(q, q.multiply(div).subtractFrom(this));
 }
 
-public Object truncateBy(BigInteger div){
-	Num q = (Num) Num.truncate(numerator, denominator.multiply(div));
+public Object[] truncateBy(BigInteger div){
+	Num q = (Num) Num.truncate(numerator, denominator.multiply(div))[0];
 	return RT.setValues(q, q.multiply(div).subtractFrom(this));
 }
 
-public Object truncateBy(RatioNum div){
+public Object[] truncateBy(RatioNum div){
 	Num q = (Num) Num.truncate(numerator.multiplyBy(div.denominator),
-	                           denominator.multiplyBy(div.numerator));
+	                           denominator.multiplyBy(div.numerator))[0];
 	return RT.setValues(q, q.multiplyBy(div).subtractFrom(this));
 }
 

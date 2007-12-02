@@ -133,7 +133,7 @@ public Num divide(RatioNum x){
 	return Num.from(x.doubleValue() / val);
 }
 
-static Object truncate(double n, double d){
+static Object[] truncate(double n, double d){
 	double q = n / d;
 	if(q <= Integer.MAX_VALUE && q >= Integer.MIN_VALUE)
 		{
@@ -148,19 +148,19 @@ static Object truncate(double n, double d){
 		}
 }
 
-public Object truncateBy(BigInteger x){
+public Object[] truncateBy(BigInteger x){
 	return truncate(val, x.doubleValue());
 }
 
-public Object truncateBy(int x){
+public Object[] truncateBy(int x){
 	return truncate(val, x);
 }
 
-public Object truncateBy(RatioNum x){
+public Object[] truncateBy(RatioNum x){
 	return truncate(val, x.doubleValue());
 }
 
-public Object truncateDivide(Num num){
+public Object[] truncateDivide(Num num){
 	return truncate(num.doubleValue(), val);
 }
 

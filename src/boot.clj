@@ -230,6 +230,12 @@
 (defn zero? [x]
       (. clojure.lang.Num (zeroPred x)))
 
+(defn quot [num div]
+  (. clojure.lang.Num (quotient num div)))
+
+(defn rem [num div]
+  (. clojure.lang.Num (remainder num div)))
+
 (defn complement [f]
   (fn [& args]
     (not (apply f args))))
@@ -765,7 +771,7 @@
 		eql? str strcat gensym cond
 		apply list* delay lazy-cons fnseq concat
 		and or + * / - == < <= > >=
-		inc dec pos? neg? zero?
+		inc dec pos? neg? zero? quot rem
 		complement constantly identity seq count
 		peek pop nth contains get
 		assoc dissoc find keys vals merge

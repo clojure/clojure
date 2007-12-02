@@ -858,10 +858,10 @@ static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
 }
 ///////////////////////////////// values //////////////////////////
 
-static public Object setValues(Object... vals){
+static public Object[] setValues(Object... vals){
 	//ThreadLocalData.setValues(vals);
 	if(vals.length > 0)
-		return vals[0];
+		return vals;//[0];
 	return null;
 }
 

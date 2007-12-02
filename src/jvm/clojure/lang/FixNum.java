@@ -121,20 +121,20 @@ public Num multiply(RatioNum x){
 	return x.multiply(val);
 }
 
-public Object truncateDivide(Num num){
+public Object[] truncateDivide(Num num){
 	return num.truncateBy(val);
 }
 
-public Object truncateBy(int div){
+public Object[] truncateBy(int div){
 	return RT.setValues(Num.from(val / div), Num.from(val % div));
 }
 
-public Object truncateBy(BigInteger div){
+public Object[] truncateBy(BigInteger div){
 	return Num.truncateBigints(BigInteger.valueOf(val), div);
 }
 
-public Object truncateBy(RatioNum div){
-	Num q = (Num) Num.truncate(div.denominator.multiply(val), div.numerator);
+public Object[] truncateBy(RatioNum div){
+	Num q = (Num) Num.truncate(div.denominator.multiply(val), div.numerator)[0];
 	return RT.setValues(q, q.multiplyBy(div).subtractFrom(this));
 }
 
