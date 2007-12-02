@@ -44,19 +44,19 @@
   (. x (withMeta m)))
 
 ;;;;;;;;;;;;;;;;;;;; actors ;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn actor [state]
- (new clojure.lang.Actor state))
+(defn iref [state]
+ (new clojure.lang.IRef state))
 
-(defn actor-of [state]
- (:actor ^state))
+(defn iref-of [state]
+ (:iref ^state))
 
-(defn ! [#^clojure.lang.Actor a f & args]
-  (. a (send f args)))
+(defn ! [#^clojure.lang.IRef a f & args]
+  (. a (commute f args)))
 
-(defn actor-errors [#^clojure.lang.Actor a]
+(defn actor-errors [#^clojure.lang.IRef a]
   (. a (getErrors)))
 
-(defn clear-actor-errors [#^clojure.lang.Actor a]
+(defn clear-actor-errors [#^clojure.lang.IRef a]
   (. a (clearErrors)))
   
 ;;;;;;;;;;;;;;;;;;;;
@@ -795,6 +795,6 @@
 		int long float double short byte boolean char
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
 		make-array
-		actor actor-of !
+		iref iref-of !
 	))
 

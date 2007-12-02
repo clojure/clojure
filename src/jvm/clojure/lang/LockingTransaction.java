@@ -87,7 +87,7 @@ long readPoint;
 long startPoint;
 long startTime;
 final RetryException retryex = new RetryException();
-final ArrayList<Actor.Action> actions = new ArrayList<Actor.Action>();
+final ArrayList<IRef.Action> actions = new ArrayList<IRef.Action>();
 final HashMap<TRef, Object> vals = new HashMap<TRef, Object>();
 final HashSet<TRef> sets = new HashSet<TRef>();
 final TreeMap<TRef, ArrayList<IFn>> commutes = new TreeMap<TRef, ArrayList<IFn>>();
@@ -260,9 +260,9 @@ Object run(IFn fn) throws Exception{
 						ref.tvals.msecs = msecs;
 						}
 					}
-				for(Actor.Action action : actions)
+				for(IRef.Action action : actions)
 					{
-					action.actor.enqueue(action);
+					action.iref.enqueue(action);
 					}
 				done = true;
 				info.status.set(COMMITTED);
@@ -287,7 +287,7 @@ Object run(IFn fn) throws Exception{
 	return ret;
 }
 
-public void enqueue(Actor.Action action){
+public void enqueue(IRef.Action action){
 	actions.add(action);
 }
 

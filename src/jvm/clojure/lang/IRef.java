@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class Actor implements Ref{
+public class IRef implements Ref{
 volatile Object state;
 final Queue q = new LinkedList();
 boolean busy = false;
@@ -31,13 +31,13 @@ final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVe
 final static ThreadLocal inChange = new ThreadLocal();
 
 static class Action implements Runnable{
-	final Actor actor;
+	final IRef iref;
 	final IFn fn;
 	final ISeq args;
 
 
-	public Action(Actor actor, IFn fn, ISeq args){
-		this.actor = actor;
+	public Action(IRef iref, IFn fn, ISeq args){
+		this.iref = iref;
 		this.args = args;
 		this.fn = fn;
 	}
@@ -47,12 +47,12 @@ static class Action implements Runnable{
 		boolean hadError = false;
 		try
 			{
-			actor.doAlter(fn, args);
+			iref.doAlter(fn, args);
 			}
 		catch(Exception e)
 			{
 			//todo report/callback
-			actor.errors = RT.cons(e, actor.errors);
+			iref.errors = RT.cons(e, iref.errors);
 			hadError = true;
 			}
 
@@ -61,19 +61,19 @@ static class Action implements Runnable{
 			for(ISeq s = nested.get().seq(); s != null; s = s.rest())
 				{
 				Action a = (Action) s.first();
-				a.actor.enqueue(a);
+				a.iref.enqueue(a);
 				}
 			}
 
-		synchronized(actor)
+		synchronized(iref)
 			{
-			if(!actor.q.isEmpty())
+			if(!iref.q.isEmpty())
 				{
-				executor.execute((Runnable) actor.q.remove());
+				executor.execute((Runnable) iref.q.remove());
 				}
 			else
 				{
-				actor.busy = false;
+				iref.busy = false;
 				}
 			}
 
@@ -81,7 +81,7 @@ static class Action implements Runnable{
 	}
 }
 
-public Actor(Object state){
+public IRef(Object state){
 	setState(state);
 }
 
@@ -89,9 +89,9 @@ void setState(Object newState){
 	if(newState instanceof IObj)
 		{
 		IObj o = (IObj) newState;
-		if(RT.get(o.meta(), RT.ACTOR_KEY) != this)
+		if(RT.get(o.meta(), RT.IREF_KEY) != this)
 			{
-			newState = o.withMeta((IPersistentMap) RT.assoc(o.meta(), RT.ACTOR_KEY, this));
+			newState = o.withMeta((IPersistentMap) RT.assoc(o.meta(), RT.IREF_KEY, this));
 			}
 		}
 	state = newState;
@@ -124,14 +124,14 @@ synchronized void doAlter(IFn fn, ISeq args) throws Exception{
 public Object alter(IFn fn, ISeq args) throws Exception{
 	if(errors != null)
 		{
-		throw new Exception("Actor has errors", (Exception) RT.first(errors));
+		throw new Exception("IRef has errors", (Exception) RT.first(errors));
 		}
 	//Action action = new Action(this, fn, args);
 	if(commuting)
 		throw new Exception("Recursive change");
 	LockingTransaction trans = LockingTransaction.getRunning();
 	if(trans != null)
-		throw new Exception("Cannot change an Actor in a transaction");
+		throw new Exception("Cannot change an IRef in a transaction");
 	if(inChange.get() != null)
 		throw new Exception("Cannot nest changes, use send");
 
@@ -151,7 +151,7 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 public Object commute(IFn fn, ISeq args) throws Exception{
 	if(errors != null)
 		{
-		throw new Exception("Actor has errors", (Exception) RT.first(errors));
+		throw new Exception("IRef has errors", (Exception) RT.first(errors));
 		}
 	Action action = new Action(this, fn, args);
 	LockingTransaction trans = LockingTransaction.getRunning();
