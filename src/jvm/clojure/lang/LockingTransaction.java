@@ -53,6 +53,16 @@ public static class Info{
 		return s == RUNNING || s == COMMITTING;
 	}
 }
+
+static class CFn{
+	final IFn fn;
+	final ISeq args;
+
+	public CFn(IFn fn, ISeq args){
+		this.fn = fn;
+		this.args = args;
+	}
+}
 //total order on transactions
 //transactions will consume a point for init, for each retry, and on commit if writing
 final private static AtomicInteger lastPoint = new AtomicInteger();
@@ -90,7 +100,7 @@ final RetryException retryex = new RetryException();
 final ArrayList<IRef.Action> actions = new ArrayList<IRef.Action>();
 final HashMap<TRef, Object> vals = new HashMap<TRef, Object>();
 final HashSet<TRef> sets = new HashSet<TRef>();
-final TreeMap<TRef, ArrayList<IFn>> commutes = new TreeMap<TRef, ArrayList<IFn>>();
+final TreeMap<TRef, ArrayList<CFn>> commutes = new TreeMap<TRef, ArrayList<CFn>>();
 
 
 //returns the most recent val
@@ -208,7 +218,7 @@ Object run(IFn fn) throws Exception{
 			//make sure no one has killed us before this point, and can't from now on
 			if(info.status.compareAndSet(RUNNING, COMMITTING))
 				{
-				for(Map.Entry<TRef, ArrayList<IFn>> e : commutes.entrySet())
+				for(Map.Entry<TRef, ArrayList<CFn>> e : commutes.entrySet())
 					{
 					TRef ref = e.getKey();
 					ref.lock.writeLock().lock();
@@ -222,9 +232,9 @@ Object run(IFn fn) throws Exception{
 					Object val = ref.tvals == null ? null : ref.tvals.val;
 					if(!sets.contains(ref))
 						vals.put(ref, val);
-					for(IFn f : e.getValue())
+					for(CFn f : e.getValue())
 						{
-						vals.put(ref, f.invoke(vals.get(ref)));
+						vals.put(ref, f.fn.applyTo(RT.cons(vals.get(ref), f.args)));
 						}
 					}
 				for(TRef ref : sets)
@@ -338,7 +348,7 @@ void doTouch(TRef ref){
 	lock(ref);
 }
 
-Object doCommute(TRef ref, IFn fn) throws Exception{
+Object doCommute(TRef ref, IFn fn, ISeq args) throws Exception{
 	if(!info.running())
 		throw retryex;
 	if(!vals.containsKey(ref))
@@ -355,11 +365,11 @@ Object doCommute(TRef ref, IFn fn) throws Exception{
 			}
 		vals.put(ref, val);
 		}
-	ArrayList<IFn> fns = commutes.get(ref);
+	ArrayList<CFn> fns = commutes.get(ref);
 	if(fns == null)
-		commutes.put(ref, fns = new ArrayList<IFn>());
-	fns.add(fn);
-	Object ret = fn.invoke(vals.get(ref));
+		commutes.put(ref, fns = new ArrayList<CFn>());
+	fns.add(new CFn(fn,args));
+	Object ret = fn.applyTo(RT.cons(vals.get(ref),args));
 	vals.put(ref, ret);
 	return ret;
 }

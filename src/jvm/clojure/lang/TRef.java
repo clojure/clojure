@@ -86,7 +86,7 @@ public UUID getUUID(){
 //the latest val
 
 // ok out of transaction
-public Object currentVal(){
+Object currentVal(){
 	try
 		{
 		lock.readLock().lock();
@@ -102,17 +102,24 @@ public Object currentVal(){
 
 //*
 
-//must be dynamically bound or transactional read
 public Object get(){
-	return LockingTransaction.getEx().doGet(this);
+	LockingTransaction t = LockingTransaction.getRunning();
+	if(t == null)
+		return currentVal();
+	return t.doGet(this);
 }
 
 public Object set(Object val){
 	return LockingTransaction.getEx().doSet(this, val);
 }
 
-public Object commute(IFn fn) throws Exception{
-	return LockingTransaction.getEx().doCommute(this, fn);
+public Object commute(IFn fn, ISeq args) throws Exception{
+	return LockingTransaction.getEx().doCommute(this, fn, args);
+}
+
+public Object alter(IFn fn, ISeq args) throws Exception{
+	LockingTransaction t = LockingTransaction.getEx();
+	return t.doSet(this, fn.applyTo(RT.cons(t.doGet(this), args)));
 }
 
 public void touch(){

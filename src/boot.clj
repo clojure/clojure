@@ -43,21 +43,7 @@
 (defn with-meta [#^clojure.lang.IObj x m]
   (. x (withMeta m)))
 
-;;;;;;;;;;;;;;;;;;;; actors ;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn iref [state]
- (new clojure.lang.IRef state))
 
-(defn iref-of [state]
- (:iref ^state))
-
-(defn ! [#^clojure.lang.IRef a f & args]
-  (. a (commute f args)))
-
-(defn actor-errors [#^clojure.lang.IRef a]
-  (. a (getErrors)))
-
-(defn clear-actor-errors [#^clojure.lang.IRef a]
-  (. a (clearErrors)))
   
 ;;;;;;;;;;;;;;;;;;;;
 (def defmacro (fn [name & args]
@@ -363,24 +349,39 @@
  (. clojure.lang.Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn iref [state]
+ (new clojure.lang.IRef state))
+
+(defn iref-of [state]
+ (:iref ^state))
+
+(defn ! [#^clojure.lang.IRef a f & args]
+  (. a (commute f args)))
+
+(defn iref-errors [#^clojure.lang.IRef a]
+  (. a (getErrors)))
+
+(defn clear-iref-errors [#^clojure.lang.IRef a]
+  (. a (clearErrors)))
+
 (defn tref [x]
  (new clojure.lang.TRef x))
 
 (defn deref [#^clojure.lang.Ref ref]
   (. ref (get)))
 
-(defn deref! [#^clojure.lang.TRef ref]
-  (. ref (currentVal)))
+(defn commute [#^clojure.lang.Ref ref fun & args]
+  (. ref (commute fun args)))
 
-(defn commute [#^clojure.lang.TRef ref fun]
-  (. ref (commute fun)))
+(defn alter [#^clojure.lang.Ref ref fun & args]
+  (. ref (alter fun args)))
 
-(defn set
-  ([#^clojure.lang.TRef ref]
+(defn set [#^clojure.lang.Ref ref val]
+    (. ref (set val)))
+
+(defn ensure [#^clojure.lang.TRef ref]
     (. ref (touch))
     (. ref (get)))
-  ([#^clojure.lang.TRef ref val]
-    (. ref (set val))))
 
 (defmacro sync [flags-ignored-for-now & body]
   `(. clojure.lang.LockingTransaction
@@ -733,7 +734,7 @@
                      (let [job (sync nil
                                  (when @todo
                                     (let [item (first @todo)]
-                                      (set todo (rest @todo))
+                                      (alter todo rest)
                                       (commute out inc)
                                       (list item))))]
                        (when job
@@ -778,7 +779,8 @@
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
-		tref deref deref! commute set sync
+		tref deref commute alter set ensure sync
+		iref iref-of iref-errors clear-iref-errors
 		reduce reverse comp appl
 		every not-every any not-any
 		map pmap mapcat filter take take-while drop drop-while
@@ -795,6 +797,5 @@
 		int long float double short byte boolean char
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
 		make-array
-		iref iref-of !
 	))
 

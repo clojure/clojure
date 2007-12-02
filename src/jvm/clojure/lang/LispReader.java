@@ -31,7 +31,7 @@ static Symbol VECTOR = Symbol.create("clojure", "vector");
 static Symbol WITH_META = Symbol.create("clojure", "with-meta");
 static Symbol META = Symbol.create("clojure", "meta");
 static Symbol DEREF = Symbol.create("clojure", "deref");
-static Symbol DEREF_BANG = Symbol.create("clojure", "deref!");
+//static Symbol DEREF_BANG = Symbol.create("clojure", "deref!");
 static Keyword LINE_KEY = Keyword.intern("clojure", "line");
 
 static IFn[] macros = new IFn[256];
@@ -55,7 +55,7 @@ static
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
 	macros['\''] = new WrappingReader(Compiler.QUOTE);
-	macros['@'] = new DerefReader();
+	macros['@'] = new WrappingReader(DEREF);//new DerefReader();
 	macros['^'] = new WrappingReader(META);
 	macros['`'] = new SyntaxQuoteReader();
 	macros['~'] = new UnquoteReader();
@@ -315,6 +315,7 @@ static class WrappingReader extends AFn{
 
 }
 
+/*
 static class DerefReader extends AFn{
 
 	public Object invoke(Object reader, Object quote) throws Exception{
@@ -336,6 +337,7 @@ static class DerefReader extends AFn{
 	}
 
 }
+*/
 
 static class DispatchReader extends AFn{
 	public Object invoke(Object reader, Object hash) throws Exception{

@@ -13,5 +13,12 @@
 package clojure.lang;
 
 public interface Ref{
-	Object get();
+
+Object get() throws Exception;
+
+Object alter(IFn fn, ISeq args) throws Exception;
+
+Object commute(IFn fn, ISeq args) throws Exception;
+
+Object set(Object val)  throws Exception;
 }

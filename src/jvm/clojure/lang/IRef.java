@@ -21,14 +21,14 @@ public class IRef implements Ref{
 volatile Object state;
 final Queue q = new LinkedList();
 boolean busy = false;
-boolean commuting = false;
+boolean altering = false;
 
 volatile ISeq errors = null;
 //todo - make tuneable
 final static Executor executor = Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
 //final static Executor executor = Executors.newCachedThreadPool();
 final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVector>();
-final static ThreadLocal inChange = new ThreadLocal();
+final static ThreadLocal inAlter = new ThreadLocal();
 
 static class Action implements Runnable{
 	final IRef iref;
@@ -112,12 +112,12 @@ public void clearErrors(){
 synchronized void doAlter(IFn fn, ISeq args) throws Exception{
 	try
 		{
-		commuting = true;
+		altering = true;
 		setState(fn.applyTo(RT.cons(state, args)));
 		}
 	finally
 		{
-		commuting = false;
+		altering = false;
 		}
 }
 
@@ -127,22 +127,22 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 		throw new Exception("IRef has errors", (Exception) RT.first(errors));
 		}
 	//Action action = new Action(this, fn, args);
-	if(commuting)
+	if(altering)
 		throw new Exception("Recursive change");
 	LockingTransaction trans = LockingTransaction.getRunning();
 	if(trans != null)
-		throw new Exception("Cannot change an IRef in a transaction");
-	if(inChange.get() != null)
-		throw new Exception("Cannot nest changes, use send");
+		throw new Exception("Cannot alter an IRef in a transaction");
+	if(inAlter.get() != null)
+		throw new Exception("Cannot nest alters, use commute");
 
 	try
 		{
-		inChange.set(this);
+		inAlter.set(this);
 		doAlter(fn, args);
 		}
 	finally
 		{
-		inChange.set(null);
+		inAlter.set(null);
 		}
 
 	return this;
@@ -165,6 +165,21 @@ public Object commute(IFn fn, ISeq args) throws Exception{
 		enqueue(action);
 
 	return this;
+}
+
+public Object set(Object val) throws Exception{
+	synchronized(this)
+		{
+		if(altering)
+			throw new Exception("Recursive change");
+		LockingTransaction trans = LockingTransaction.getRunning();
+		if(trans != null)
+			throw new Exception("Cannot set an IRef in a transaction");
+		if(inAlter.get() != null)
+			throw new Exception("Cannot nest alters, use commute");
+		setState(val);
+		return val;
+		}
 }
 
 void enqueue(Action action){
