@@ -366,7 +366,7 @@
 (defn tref [x]
  (new clojure.lang.TRef x))
 
-(defn deref [#^clojure.lang.IRef ref]
+(defn deref [#^clojure.lang.Ref ref]
   (. ref (get)))
 
 (defn deref! [#^clojure.lang.TRef ref]

@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public interface IRef{
+public interface Ref{
 	Object get();
 }

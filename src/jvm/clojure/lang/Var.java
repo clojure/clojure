@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public final class Var implements IFn, IRef{
+public final class Var implements IFn, Ref{
 
 static class Frame{
 	//Var->Box

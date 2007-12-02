@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class Actor implements IRef{
+public class Actor implements Ref{
 volatile Object state;
 final Queue q = new LinkedList();
 boolean busy = false;
