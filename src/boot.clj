@@ -8,7 +8,8 @@
 
 (in-namespace 'clojure)
 
-(def list (fn [& args] args))
+(def list (fn [& args] (if args args '())))
+
 (def cons (fn [x seq] (. clojure.lang.RT (cons x seq))))
 (def conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
 
@@ -370,8 +371,11 @@
 (defn deref [#^clojure.lang.Ref ref]
   (. ref (get)))
 
-(defn commute [#^clojure.lang.Ref ref fun & args]
+(defn commute [#^clojure.lang.TRef ref fun & args]
   (. ref (commute fun args)))
+
+(defn send [#^clojure.lang.IRef ref fun & args]
+  (. ref (send fun args)))
 
 (defn alter [#^clojure.lang.Ref ref fun & args]
   (. ref (alter fun args)))
@@ -779,7 +783,7 @@
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
-		tref deref commute alter set ensure sync
+		tref deref commute alter set ensure sync send
 		iref iref-of iref-errors clear-iref-errors
 		reduce reverse comp appl
 		every not-every any not-any

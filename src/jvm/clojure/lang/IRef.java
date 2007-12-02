@@ -133,7 +133,7 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 	if(trans != null)
 		throw new Exception("Cannot alter an IRef in a transaction");
 	if(inAlter.get() != null)
-		throw new Exception("Cannot nest alters, use commute");
+		throw new Exception("Cannot nest alters, use send");
 
 	try
 		{
@@ -148,7 +148,7 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 	return this;
 }
 
-public Object commute(IFn fn, ISeq args) throws Exception{
+public Object send(IFn fn, ISeq args) throws Exception{
 	if(errors != null)
 		{
 		throw new Exception("IRef has errors", (Exception) RT.first(errors));
@@ -176,7 +176,7 @@ public Object set(Object val) throws Exception{
 		if(trans != null)
 			throw new Exception("Cannot set an IRef in a transaction");
 		if(inAlter.get() != null)
-			throw new Exception("Cannot nest alters, use commute");
+			throw new Exception("Cannot nest alters, use send");
 		setState(val);
 		return val;
 		}

@@ -133,10 +133,6 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 	return this;
 }
 
-public Object commute(IFn fn, ISeq args) throws Exception{
-	return alter(fn,args);
-}
-
 public Object set(Object val){
 	Box b = getThreadBinding();
 	if(b != null)
