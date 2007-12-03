@@ -365,22 +365,22 @@
 (defn clear-agent-errors [#^clojure.lang.Agent a]
   (. a (clearErrors)))
 
-(defn tref [x]
- (new clojure.lang.TRef x))
+(defn ref [x]
+ (new clojure.lang.Ref x))
 
 (defn deref [#^clojure.lang.IRef ref]
   (. ref (get)))
 
-(defn commute [#^clojure.lang.TRef ref fun & args]
+(defn commute [#^clojure.lang.Ref ref fun & args]
   (. ref (commute fun args)))
 
-(defn alter [#^clojure.lang.TRef ref fun & args]
+(defn alter [#^clojure.lang.Ref ref fun & args]
   (. ref (alter fun args)))
 
-(defn set [#^clojure.lang.TRef ref val]
+(defn set [#^clojure.lang.Ref ref val]
     (. ref (set val)))
 
-(defn ensure [#^clojure.lang.TRef ref]
+(defn ensure [#^clojure.lang.Ref ref]
     (. ref (touch))
     (. ref (get)))
 
@@ -728,8 +728,8 @@
     ([f coll]
       (let [nthreads (.. Runtime (getRuntime) (availableProcessors))
           exec (. Executors (newFixedThreadPool nthreads))
-          todo (tref (seq coll))
-          out (tref 0)
+          todo (ref (seq coll))
+          out (ref 0)
           q (new LinkedBlockingQueue)
           produce (fn []
                      (let [job (sync nil
@@ -780,7 +780,7 @@
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
-		tref deref commute alter set ensure sync !
+		ref deref commute alter set ensure sync !
 		agent agent-of agent-errors clear-agent-errors
 		reduce reverse comp appl
 		every not-every any not-any

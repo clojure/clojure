@@ -98,13 +98,13 @@ long startPoint;
 long startTime;
 final RetryException retryex = new RetryException();
 final ArrayList<Agent.Action> actions = new ArrayList<Agent.Action>();
-final HashMap<TRef, Object> vals = new HashMap<TRef, Object>();
-final HashSet<TRef> sets = new HashSet<TRef>();
-final TreeMap<TRef, ArrayList<CFn>> commutes = new TreeMap<TRef, ArrayList<CFn>>();
+final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
+final HashSet<Ref> sets = new HashSet<Ref>();
+final TreeMap<Ref, ArrayList<CFn>> commutes = new TreeMap<Ref, ArrayList<CFn>>();
 
 
 //returns the most recent val
-Object lock(TRef ref){
+Object lock(Ref ref){
 	boolean unlocked = false;
 	try
 		{
@@ -201,7 +201,7 @@ static public Object runInTransaction(IFn fn) throws Exception{
 Object run(IFn fn) throws Exception{
 	boolean done = false;
 	Object ret = null;
-	ArrayList<TRef> locked = new ArrayList<TRef>();
+	ArrayList<Ref> locked = new ArrayList<Ref>();
 
 	for(int i = 0; !done && i < RETRY_LIMIT; i++)
 		{
@@ -218,9 +218,9 @@ Object run(IFn fn) throws Exception{
 			//make sure no one has killed us before this point, and can't from now on
 			if(info.status.compareAndSet(RUNNING, COMMITTING))
 				{
-				for(Map.Entry<TRef, ArrayList<CFn>> e : commutes.entrySet())
+				for(Map.Entry<Ref, ArrayList<CFn>> e : commutes.entrySet())
 					{
-					TRef ref = e.getKey();
+					Ref ref = e.getKey();
 					ref.lock.writeLock().lock();
 					locked.add(ref);
 					Info refinfo = ref.tinfo;
@@ -237,7 +237,7 @@ Object run(IFn fn) throws Exception{
 						vals.put(ref, f.fn.applyTo(RT.cons(vals.get(ref), f.args)));
 						}
 					}
-				for(TRef ref : sets)
+				for(Ref ref : sets)
 					{
 					if(!commutes.containsKey(ref))
 						{
@@ -250,16 +250,16 @@ Object run(IFn fn) throws Exception{
 				//no more client code to be called
 				long msecs = System.currentTimeMillis();
 				long commitPoint = getCommitPoint();
-				for(Map.Entry<TRef, Object> e : vals.entrySet())
+				for(Map.Entry<Ref, Object> e : vals.entrySet())
 					{
-					TRef ref = e.getKey();
+					Ref ref = e.getKey();
 					if(ref.tvals == null)
 						{
-						ref.tvals = new TRef.TVal(e.getValue(), commitPoint, msecs);
+						ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs);
 						}
 					else if(ref.faults.get() > 0)
 						{
-						ref.tvals = new TRef.TVal(e.getValue(), commitPoint, msecs, ref.tvals);
+						ref.tvals = new Ref.TVal(e.getValue(), commitPoint, msecs, ref.tvals);
 						ref.faults.set(0);
 						}
 					else
@@ -301,7 +301,7 @@ public void enqueue(Agent.Action action){
 	actions.add(action);
 }
 
-Object doGet(TRef ref){
+Object doGet(Ref ref){
 	if(!info.running())
 		throw retryex;
 	if(vals.containsKey(ref))
@@ -311,7 +311,7 @@ Object doGet(TRef ref){
 		ref.lock.readLock().lock();
 		if(ref.tvals == null)
 			throw new IllegalStateException(ref.toString() + " is unbound.");
-		TRef.TVal ver = ref.tvals;
+		Ref.TVal ver = ref.tvals;
 		do
 			{
 			if(ver.point <= readPoint)
@@ -328,7 +328,7 @@ Object doGet(TRef ref){
 
 }
 
-Object doSet(TRef ref, Object val){
+Object doSet(Ref ref, Object val){
 	if(!info.running())
 		throw retryex;
 	if(commutes.containsKey(ref))
@@ -342,13 +342,13 @@ Object doSet(TRef ref, Object val){
 	return val;
 }
 
-void doTouch(TRef ref){
+void doTouch(Ref ref){
 	if(!info.running())
 		throw retryex;
 	lock(ref);
 }
 
-Object doCommute(TRef ref, IFn fn, ISeq args) throws Exception{
+Object doCommute(Ref ref, IFn fn, ISeq args) throws Exception{
 	if(!info.running())
 		throw retryex;
 	if(!vals.containsKey(ref))
