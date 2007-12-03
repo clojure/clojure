@@ -368,7 +368,7 @@
 (defn tref [x]
  (new clojure.lang.TRef x))
 
-(defn deref [#^clojure.lang.Ref ref]
+(defn deref [#^clojure.lang.IRef ref]
   (. ref (get)))
 
 (defn commute [#^clojure.lang.TRef ref fun & args]

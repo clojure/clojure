@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public interface Ref{
+public interface IRef{
 
 Object get() throws Exception;
 

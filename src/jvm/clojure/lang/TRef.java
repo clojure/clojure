@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.UUID;
 
-public class TRef implements IFn, Comparable<TRef>, Ref{
+public class TRef implements IFn, Comparable<TRef>, IRef{
 
 public int compareTo(TRef o){
 	return uuid.compareTo(o.uuid);
