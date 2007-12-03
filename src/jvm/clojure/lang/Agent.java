@@ -14,8 +14,7 @@ package clojure.lang;
 
 import java.util.Queue;
 import java.util.LinkedList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Agent implements IRef{
 volatile Object state;
@@ -24,7 +23,12 @@ boolean busy = false;
 
 volatile ISeq errors = null;
 //todo - make tuneable
-final static Executor executor = Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors());
+final public static ThreadPoolExecutor executor =
+		new ThreadPoolExecutor(2 * Runtime.getRuntime().availableProcessors(),
+		                       2 * Runtime.getRuntime().availableProcessors(),
+		                       0L, TimeUnit.MILLISECONDS,
+		                       new LinkedBlockingQueue<Runnable>());
+//Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors());
 //final static Executor executor = Executors.newCachedThreadPool();
 final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVector>();
 
