@@ -128,7 +128,7 @@
       ([x & xs]
           (cond
            (nil? xs) (seq x)
-           (nil? x) (recur (first xs) (rest xs))
+           (nil? (seq x)) (recur (first xs) (rest xs))
            :else (lazy-cons (first x) (apply concat (rest x) xs)))))
 
 ;;at this point all the support for syntax-quote exists
