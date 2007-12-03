@@ -25,7 +25,7 @@ final static public Var IN =
 		Var.intern(Symbol.create("clojure", "*in*"),
 		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
 final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
-final static Keyword IREF_KEY = Keyword.intern("clojure", "iref");
+final static Keyword AGENT_KEY = Keyword.intern("clojure", "agent");
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 

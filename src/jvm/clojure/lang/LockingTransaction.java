@@ -97,7 +97,7 @@ long readPoint;
 long startPoint;
 long startTime;
 final RetryException retryex = new RetryException();
-final ArrayList<IRef.Action> actions = new ArrayList<IRef.Action>();
+final ArrayList<Agent.Action> actions = new ArrayList<Agent.Action>();
 final HashMap<TRef, Object> vals = new HashMap<TRef, Object>();
 final HashSet<TRef> sets = new HashSet<TRef>();
 final TreeMap<TRef, ArrayList<CFn>> commutes = new TreeMap<TRef, ArrayList<CFn>>();
@@ -270,9 +270,9 @@ Object run(IFn fn) throws Exception{
 						ref.tvals.msecs = msecs;
 						}
 					}
-				for(IRef.Action action : actions)
+				for(Agent.Action action : actions)
 					{
-					action.iref.enqueue(action);
+					action.agent.enqueue(action);
 					}
 				done = true;
 				info.status.set(COMMITTED);
@@ -297,7 +297,7 @@ Object run(IFn fn) throws Exception{
 	return ret;
 }
 
-public void enqueue(IRef.Action action){
+public void enqueue(Agent.Action action){
 	actions.add(action);
 }
 
@@ -368,8 +368,8 @@ Object doCommute(TRef ref, IFn fn, ISeq args) throws Exception{
 	ArrayList<CFn> fns = commutes.get(ref);
 	if(fns == null)
 		commutes.put(ref, fns = new ArrayList<CFn>());
-	fns.add(new CFn(fn,args));
-	Object ret = fn.applyTo(RT.cons(vals.get(ref),args));
+	fns.add(new CFn(fn, args));
+	Object ret = fn.applyTo(RT.cons(vals.get(ref), args));
 	vals.put(ref, ret);
 	return ret;
 }

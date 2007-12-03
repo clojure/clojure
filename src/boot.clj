@@ -350,19 +350,19 @@
  (. clojure.lang.Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn iref [state]
- (new clojure.lang.IRef state))
+(defn agent [state]
+ (new clojure.lang.Agent state))
 
-(defn iref-of [state]
- (:iref ^state))
+(defn agent-of [state]
+ (:agent ^state))
 
-(defn ! [#^clojure.lang.IRef a f & args]
-  (. a (commute f args)))
+(defn ! [#^clojure.lang.Agent a f & args]
+  (. a (dispatch f args)))
 
-(defn iref-errors [#^clojure.lang.IRef a]
+(defn agent-errors [#^clojure.lang.Agent a]
   (. a (getErrors)))
 
-(defn clear-iref-errors [#^clojure.lang.IRef a]
+(defn clear-agent-errors [#^clojure.lang.Agent a]
   (. a (clearErrors)))
 
 (defn tref [x]
@@ -374,13 +374,10 @@
 (defn commute [#^clojure.lang.TRef ref fun & args]
   (. ref (commute fun args)))
 
-(defn send [#^clojure.lang.IRef ref fun & args]
-  (. ref (send fun args)))
-
-(defn alter [#^clojure.lang.Ref ref fun & args]
+(defn alter [#^clojure.lang.TRef ref fun & args]
   (. ref (alter fun args)))
 
-(defn set [#^clojure.lang.Ref ref val]
+(defn set [#^clojure.lang.TRef ref val]
     (. ref (set val)))
 
 (defn ensure [#^clojure.lang.TRef ref]
@@ -783,8 +780,8 @@
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
-		tref deref commute alter set ensure sync send
-		iref iref-of iref-errors clear-iref-errors
+		tref deref commute alter set ensure sync !
+		agent agent-of agent-errors clear-agent-errors
 		reduce reverse comp appl
 		every not-every any not-any
 		map pmap mapcat filter take take-while drop drop-while

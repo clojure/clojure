@@ -17,27 +17,25 @@ import java.util.LinkedList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class IRef implements Ref{
+public class Agent implements Ref{
 volatile Object state;
 final Queue q = new LinkedList();
 boolean busy = false;
-boolean altering = false;
 
 volatile ISeq errors = null;
 //todo - make tuneable
-final static Executor executor = Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
+final static Executor executor = Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors());
 //final static Executor executor = Executors.newCachedThreadPool();
 final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVector>();
-final static ThreadLocal inAlter = new ThreadLocal();
 
 static class Action implements Runnable{
-	final IRef iref;
+	final Agent agent;
 	final IFn fn;
 	final ISeq args;
 
 
-	public Action(IRef iref, IFn fn, ISeq args){
-		this.iref = iref;
+	public Action(Agent agent, IFn fn, ISeq args){
+		this.agent = agent;
 		this.args = args;
 		this.fn = fn;
 	}
@@ -47,12 +45,12 @@ static class Action implements Runnable{
 		boolean hadError = false;
 		try
 			{
-			iref.doAlter(fn, args);
+			agent.setState(fn.applyTo(RT.cons(agent.state, args)));
 			}
 		catch(Exception e)
 			{
 			//todo report/callback
-			iref.errors = RT.cons(e, iref.errors);
+			agent.errors = RT.cons(e, agent.errors);
 			hadError = true;
 			}
 
@@ -61,19 +59,19 @@ static class Action implements Runnable{
 			for(ISeq s = nested.get().seq(); s != null; s = s.rest())
 				{
 				Action a = (Action) s.first();
-				a.iref.enqueue(a);
+				a.agent.enqueue(a);
 				}
 			}
 
-		synchronized(iref)
+		synchronized(agent)
 			{
-			if(!iref.q.isEmpty())
+			if(!agent.q.isEmpty())
 				{
-				executor.execute((Runnable) iref.q.remove());
+				executor.execute((Runnable) agent.q.remove());
 				}
 			else
 				{
-				iref.busy = false;
+				agent.busy = false;
 				}
 			}
 
@@ -81,7 +79,7 @@ static class Action implements Runnable{
 	}
 }
 
-public IRef(Object state){
+public Agent(Object state){
 	setState(state);
 }
 
@@ -89,15 +87,19 @@ void setState(Object newState){
 	if(newState instanceof IObj)
 		{
 		IObj o = (IObj) newState;
-		if(RT.get(o.meta(), RT.IREF_KEY) != this)
+		if(RT.get(o.meta(), RT.AGENT_KEY) != this)
 			{
-			newState = o.withMeta((IPersistentMap) RT.assoc(o.meta(), RT.IREF_KEY, this));
+			newState = o.withMeta((IPersistentMap) RT.assoc(o.meta(), RT.AGENT_KEY, this));
 			}
 		}
 	state = newState;
 }
 
-public Object get(){
+public Object get() throws Exception{
+	if(errors != null)
+		{
+		throw new Exception("Agent has errors", (Exception) RT.first(errors));
+		}
 	return state;
 }
 
@@ -109,49 +111,10 @@ public void clearErrors(){
 	errors = null;
 }
 
-synchronized void doAlter(IFn fn, ISeq args) throws Exception{
-	try
-		{
-		altering = true;
-		setState(fn.applyTo(RT.cons(state, args)));
-		}
-	finally
-		{
-		altering = false;
-		}
-}
-
-public Object alter(IFn fn, ISeq args) throws Exception{
+public Object dispatch(IFn fn, ISeq args) throws Exception{
 	if(errors != null)
 		{
-		throw new Exception("IRef has errors", (Exception) RT.first(errors));
-		}
-	//Action action = new Action(this, fn, args);
-	if(altering)
-		throw new Exception("Recursive change");
-	LockingTransaction trans = LockingTransaction.getRunning();
-	if(trans != null)
-		throw new Exception("Cannot alter an IRef in a transaction");
-	if(inAlter.get() != null)
-		throw new Exception("Cannot nest alters, use send");
-
-	try
-		{
-		inAlter.set(this);
-		doAlter(fn, args);
-		}
-	finally
-		{
-		inAlter.set(null);
-		}
-
-	return this;
-}
-
-public Object send(IFn fn, ISeq args) throws Exception{
-	if(errors != null)
-		{
-		throw new Exception("IRef has errors", (Exception) RT.first(errors));
+		throw new Exception("Agent has errors", (Exception) RT.first(errors));
 		}
 	Action action = new Action(this, fn, args);
 	LockingTransaction trans = LockingTransaction.getRunning();
@@ -165,21 +128,6 @@ public Object send(IFn fn, ISeq args) throws Exception{
 		enqueue(action);
 
 	return this;
-}
-
-public Object set(Object val) throws Exception{
-	synchronized(this)
-		{
-		if(altering)
-			throw new Exception("Recursive change");
-		LockingTransaction trans = LockingTransaction.getRunning();
-		if(trans != null)
-			throw new Exception("Cannot set an IRef in a transaction");
-		if(inAlter.get() != null)
-			throw new Exception("Cannot nest alters, use send");
-		setState(val);
-		return val;
-		}
 }
 
 void enqueue(Action action){

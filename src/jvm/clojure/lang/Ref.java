@@ -16,7 +16,4 @@ public interface Ref{
 
 Object get() throws Exception;
 
-Object alter(IFn fn, ISeq args) throws Exception;
-
-Object set(Object val)  throws Exception;
 }
