@@ -2461,7 +2461,7 @@ static class LetExpr implements Expr{
 		else
 			body.emit(context, fn, gen);
 		Label end = gen.mark();
-		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
+//		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
 		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.rest())
 			{
 			BindingInit bi = (BindingInit) bis.first();
