@@ -13,7 +13,7 @@ package clojure.lang;
 import java.util.Collection;
 import java.util.Iterator;
 
-public abstract class ASeq extends Obj implements ISeq, Collection{
+public abstract class ASeq extends Obj implements ISeq, Collection, Sequential{
 transient int _hash = -1;
 
 
