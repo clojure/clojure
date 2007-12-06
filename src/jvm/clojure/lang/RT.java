@@ -232,6 +232,8 @@ static public ISeq seq(Object coll){
 		return IteratorSeq.create(((Iterable) coll).iterator());
 	else if(coll instanceof Object[])
 		return ArraySeq.create((Object[]) coll);
+	else if(coll instanceof String)
+		return StringSeq.create((String) coll);
 	else
 		throw new IllegalAccessError("Don't know how to create ISeq from arg");
 }
