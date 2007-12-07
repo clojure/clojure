@@ -2736,12 +2736,19 @@ private static Symbol tagOf(Object o){
 }
 
 public static Object loadFile(String file) throws Exception{
-	FileInputStream f = new FileInputStream(file);
+	File fo = new File(file);
+	if(!fo.exists())
+		return null;
+
+	FileInputStream f = new FileInputStream(fo);
+
 	try
 		{
 		Var.pushThreadBindings(RT.map(SOURCE_PATH, file,
 		                              SOURCE, (new File(file)).getName()));
-		return load(f);
+		load(f);
+
+		return RT.T;
 		}
 	finally
 		{
@@ -2752,6 +2759,7 @@ public static Object loadFile(String file) throws Exception{
 
 public static Object load(InputStream s) throws Exception{
 	Object EOF = new Object();
+	Object ret = null;
 	try
 		{
 		Var.pushThreadBindings(
@@ -2762,13 +2770,13 @@ public static Object load(InputStream s) throws Exception{
 				));
 		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(s));
 		for(Object r = LispReader.read(rdr, false, EOF, false); r != EOF; r = LispReader.read(rdr, false, EOF, false))
-			eval(r);
+			ret = eval(r);
 		}
 	finally
 		{
 		Var.popThreadBindings();
 		}
-	return RT.T;
+	return ret;
 }
 
 public static void main(String[] args){
