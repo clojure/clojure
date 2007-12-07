@@ -2736,19 +2736,17 @@ private static Symbol tagOf(Object o){
 }
 
 public static Object loadFile(String file) throws Exception{
-	File fo = new File(file);
-	if(!fo.exists())
-		return null;
+//	File fo = new File(file);
+//	if(!fo.exists())
+//		return null;
 
-	FileInputStream f = new FileInputStream(fo);
+	FileInputStream f = new FileInputStream(file);
 
 	try
 		{
 		Var.pushThreadBindings(RT.map(SOURCE_PATH, file,
 		                              SOURCE, (new File(file)).getName()));
-		load(f);
-
-		return RT.T;
+		return load(f);
 		}
 	finally
 		{
