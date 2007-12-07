@@ -54,8 +54,12 @@ public IPersistentMap assoc(Object key, Object val){
 	return new PersistentArrayMap(meta(), new Object[]{_key, _val, key, val});
 }
 
+public Object valAt(Object key, Object notFound){
+	return RT.equal(_key, key) ? _val : notFound;
+}
+
 public Object valAt(Object key){
-	return RT.equal(_key, key) ? _val : null;
+	return valAt(key, null);
 }
 
 public IPersistentMap assocEx(Object key, Object val) throws Exception{

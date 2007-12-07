@@ -254,8 +254,11 @@
 (defn contains [map key]
  (. clojure.lang.RT (contains map key)))
 
-(defn get [map key]
- (. clojure.lang.RT (get map key)))
+(defn get
+  ([map key]
+    (. clojure.lang.RT (get map key)))
+  ([map key not-found]
+    (. clojure.lang.RT (get map key not-found))))
 
 (defn assoc [map key val]
  (. clojure.lang.RT (assoc map key val)))

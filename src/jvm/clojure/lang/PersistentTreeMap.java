@@ -197,9 +197,13 @@ int depth(Node t){
 	return 1 + Math.max(depth(t.left()), depth(t.right()));
 }
 
-public Object valAt(Object key){
+public Object valAt(Object key, Object notFound){
 	Node n = entryAt(key);
-	return (n != null) ? n.val() : null;
+	return (n != null) ? n.val() : notFound;
+}
+
+public Object valAt(Object key){
+	return valAt(key, null);
 }
 
 public int capacity(){

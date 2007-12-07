@@ -108,11 +108,15 @@ public IPersistentMap assoc(Object key, Object val){
 	return new PersistentHashMap(meta(), addedLeaf.val == null ? count : count + 1, newroot);
 }
 
-public Object valAt(Object key){
+public Object valAt(Object key, Object notFound){
 	IMapEntry e = entryAt(key);
 	if(e != null)
 		return e.val();
-	return null;
+	return notFound;
+}
+
+public Object valAt(Object key){
+	return valAt(key, null);
 }
 
 public IPersistentMap assocEx(Object key, Object val) throws Exception{

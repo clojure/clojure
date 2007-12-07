@@ -11,11 +11,14 @@
 package clojure.lang;
 
 
-public interface IPersistentMap extends Iterable, Associative {
+public interface IPersistentMap extends Iterable, Associative{
 
 
 IPersistentMap assoc(Object key, Object val);
+
 IPersistentMap assocEx(Object key, Object val) throws Exception;
 
 IPersistentMap without(Object key);
+
+Object valAt(Object key, Object notFound);
 }

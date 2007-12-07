@@ -146,11 +146,15 @@ IPersistentMap empty(){
 	return (IPersistentMap) EMPTY.withMeta(meta());
 }
 
-final public Object valAt(Object key){
+final public Object valAt(Object key, Object notFound){
 	int i = indexOf(key);
 	if(i >= 0)
 		return array[i + 1];
-	return null;
+	return notFound;
+}
+
+public Object valAt(Object key){
+	return valAt(key, null);
 }
 
 public int capacity(){

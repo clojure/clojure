@@ -232,8 +232,8 @@ static public ISeq seq(Object coll){
 		return IteratorSeq.create(((Iterable) coll).iterator());
 	else if(coll instanceof Object[])
 		return ArraySeq.create((Object[]) coll);
-	else if(coll instanceof String)
-		return StringSeq.create((String) coll);
+	else if(coll instanceof Object[])
+		return ArraySeq.create((Object[]) coll);
 	else
 		throw new IllegalAccessError("Don't know how to create ISeq from arg");
 }
@@ -316,6 +316,12 @@ static public Object get(Object coll, Object key){
 	if(coll == null)
 		return null;
 	return ((Associative) coll).valAt(key);
+}
+
+static public Object get(Object coll, Object key, Object notFound){
+	if(coll == null)
+		return notFound;
+	return ((IPersistentMap) coll).valAt(key, notFound);
 }
 
 static public Associative assoc(Object coll, Object key, Object val){
