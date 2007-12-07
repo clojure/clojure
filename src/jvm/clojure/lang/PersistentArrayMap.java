@@ -209,6 +209,18 @@ static class Seq extends ASeq implements IMapEntry{
 		return array[i + 1];
 	}
 
+	public Object getKey(){
+		return key();
+	}
+
+	public Object getValue(){
+		return val();
+	}
+
+	public Object setValue(Object value){
+		throw new UnsupportedOperationException();
+	}
+
 	public Object first(){
 		return this;
 	}
@@ -262,6 +274,18 @@ static class Iter implements Iterator, IMapEntry{
 
 	public Object val(){
 		return array[i + 1];
+	}
+
+	public Object getKey(){
+		return key();
+	}
+
+	public Object getValue(){
+		return val();
+	}
+
+	public Object setValue(Object value){
+		throw new UnsupportedOperationException();
 	}
 }
 }

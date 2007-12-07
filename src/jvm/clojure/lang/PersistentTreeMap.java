@@ -419,6 +419,19 @@ static abstract class Node implements IMapEntry{
 		return null;
 	}
 
+
+	public Object getKey(){
+		return key();
+	}
+
+	public Object getValue(){
+		return val();
+	}
+
+	public Object setValue(Object value){
+		throw new UnsupportedOperationException();
+	}
+
 	Node left(){
 		return null;
 	}

@@ -286,6 +286,12 @@
 (defn vals [map]
   (. clojure.lang.RT (vals map)))
 
+(defn key [#^java.util.Map$Entry e]
+ (. e (getKey)))
+
+(defn val [#^java.util.Map$Entry e]
+ (. e (getValue)))
+
 (defn rseq [smap]
   (. smap (rseq)))
 
@@ -780,6 +786,7 @@
 		complement constantly identity seq count
 		peek pop nth contains get
 		assoc dissoc find keys vals merge
+		key val
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var

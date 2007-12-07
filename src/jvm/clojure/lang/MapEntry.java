@@ -36,6 +36,18 @@ public Object val(){
 	return _val;
 }
 
+public Object getKey(){
+	return key();
+}
+
+public Object getValue(){
+	return val();
+}
+
+public Object setValue(Object value){
+	throw new UnsupportedOperationException();
+}
+
 public boolean containsKey(Object key){
 	return RT.equal(_key, key);
 }
