@@ -2412,7 +2412,8 @@ static class LetExpr implements Expr{
 						throw new IllegalArgumentException(
 								"Bad binding form, expected symbol, got: " + bindings.nth(i));
 					Symbol sym = (Symbol) bindings.nth(i);
-
+					if(sym.getNamespace() != null)
+						throw new Exception("Can't let qualified name");
 					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 					//sequential enhancement of env (like Lisp let*)
 					LocalBinding lb = registerLocal(sym, tagOf(sym), init);
