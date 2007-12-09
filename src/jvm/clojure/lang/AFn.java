@@ -12,7 +12,9 @@
 
 package clojure.lang;
 
-public abstract class AFn extends Obj implements IFn{
+import java.util.Comparator;
+
+public abstract class AFn extends Obj implements IFn, Comparator{
 
 public AFn(IPersistentMap meta){
 	super(meta);
@@ -27,6 +29,19 @@ public Obj withMeta(IPersistentMap meta){
 
 public Object call() throws Exception{
 	return invoke();
+}
+
+
+public int compare(Object o1, Object o2){
+	try
+		{
+		Number n = (Number) invoke(o1, o2);
+		return n.intValue();
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
 }
 
 public Object invoke() throws Exception{

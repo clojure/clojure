@@ -218,7 +218,7 @@ public Node entryAt(Object key){
 	Node t = tree;
 	while(t != null)
 		{
-		int c = compare(key, t.key);
+		int c = doCompare(key, t.key);
 		if(c == 0)
 			return t;
 		else if(c < 0)
@@ -229,7 +229,7 @@ public Node entryAt(Object key){
 	return t;
 }
 
-int compare(Object k1, Object k2){
+public int doCompare(Object k1, Object k2){
 	if(comp != null)
 		return comp.compare(k1, k2);
 	return ((Comparable) k1).compareTo(k2);
@@ -242,7 +242,7 @@ Node add(Node t, Object key, Object val, Box found){
 			return new Red(key);
 		return new RedVal(key, val);
 		}
-	int c = compare(key, t.key);
+	int c = doCompare(key, t.key);
 	if(c == 0)
 		{
 		found.val = t;
@@ -259,7 +259,7 @@ Node add(Node t, Object key, Object val, Box found){
 Node remove(Node t, Object key, Box found){
 	if(t == null)
 		return null; //not found indicator
-	int c = compare(key, t.key);
+	int c = doCompare(key, t.key);
 	if(c == 0)
 		{
 		found.val = t;
@@ -366,7 +366,7 @@ static Node rightBalance(Object key, Object val, Node left, Node ins){
 }
 
 Node replace(Node t, Object key, Object val){
-	int c = compare(key, t.key);
+	int c = doCompare(key, t.key);
 	return t.replace(t.key,
 	                 c == 0 ? val : t.val(),
 	                 c < 0 ? replace(t.left(), key, val) : t.left(),
