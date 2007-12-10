@@ -402,7 +402,7 @@
 (defn reduce
   ([f coll]
      (if (seq coll)
-       (thisfn f (rest coll) (first coll))
+       (thisfn f (first coll) (rest coll))
       (f)))
   ([f val coll]
     (if (seq coll)
