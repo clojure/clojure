@@ -404,13 +404,13 @@
      (if (seq coll)
        (thisfn f (rest coll) (first coll))
       (f)))
-  ([f coll val]
+  ([f val coll]
     (if (seq coll)
-       (recur f (rest coll) (f val (first coll)))
+       (recur f (f val (first coll)) (rest coll))
       val)))
 
 (defn reverse [coll]
-  (reduce conj coll nil))
+  (reduce conj nil coll))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
@@ -529,6 +529,26 @@
                (rest ks)
                (rest vs))
        map)))
+
+(defn line-seq [#^java.io.BufferedReader rdr]
+  (let [line  (. rdr (readLine))]
+    (when line
+      (lazy-cons line (line-seq rdr)))))
+
+(defn sort
+  ([#^java.util.Collection coll]
+   (when (and coll (not (. coll (isEmpty))))
+     (let [a (. coll (toArray))]
+       (. java.util.Arrays (sort a))
+       (seq a))))
+  ([#^java.util.Collection coll #^java.util.Comparator comp]
+   (when (and coll (not (. coll (isEmpty))))
+     (let [a (. coll (toArray))]
+       (. java.util.Arrays (sort a comp))
+       (seq a)))))
+
+(defn sort-by [keyfn #^java.util.Collection coll]
+  (sort coll (fn [x y] (. (keyfn x) (compareTo (keyfn y))))))
 
 ;; evaluation
 
@@ -787,6 +807,7 @@
 		peek pop nth contains get
 		assoc dissoc find keys vals merge
 		key val
+		line-seq sort sort-by
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var

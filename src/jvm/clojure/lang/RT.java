@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
 import java.io.*;
 import java.lang.reflect.Array;
 
@@ -725,6 +726,16 @@ static public void print(Object x, Writer w) throws Exception{
 			}
 		w.write(']');
 		}
+//	else if(x instanceof Map.Entry)
+//		{
+//		Map.Entry e = (Map.Entry) x;
+//		w.write('{');
+//		print(e.getKey(),w);
+//		w.write(' ');
+//		print(e.getValue(),w);
+//
+//		w.write('}');
+//		}
 	else if(x instanceof Character)
 		{
 		w.write('\\');
