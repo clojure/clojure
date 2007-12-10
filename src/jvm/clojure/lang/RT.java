@@ -383,7 +383,7 @@ static public Object nth(Object coll, int n){
 		return null;
 		}
 	else
-		return null;
+		throw new UnsupportedOperationException("nth not supported on this type");
 }
 
 static public Object assocN(int n, Object val, Object coll){
