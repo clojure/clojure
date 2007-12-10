@@ -667,6 +667,12 @@
   ([stream eof-error? eof-value recursive?]
     (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
 
+(defmacro with-open [rdr init & body]
+  `(let [~rdr ~init]
+     (try-finally
+      (do ~@body)
+      (. ~rdr (close)))))
+
 (defmacro doto [x & members]
    (let [gx (gensym)]
      `(let [~gx ~x]
@@ -824,7 +830,7 @@
 		make-proxy implement
 		prn print newline *out* *current-namespace*  *print-meta*
 		doto  memfn
-        read *in*
+        read *in* with-open
 		time
 		int long float double short byte boolean char
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
