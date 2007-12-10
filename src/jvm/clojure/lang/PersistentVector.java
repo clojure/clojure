@@ -378,16 +378,19 @@ public PersistentVector assoc(Object key, Object val){
 	throw new IllegalAccessError("Key must be integer");
 }
 
-public Object valAt(Object key){
+public Object valAt(Object key, Object notFound){
 	if(key instanceof Number)
 		{
 		int i = ((Number) key).intValue();
 		if(i >= 0 && i < count())
 			return nth(i);
 		}
-	return null;
+	return notFound;
 }
 
+public Object valAt(Object key){
+	return valAt(key, null);
+}
 // java.util.Collection implementation
 
 public Object[] toArray(){

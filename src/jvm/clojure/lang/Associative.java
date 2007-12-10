@@ -17,4 +17,6 @@ IMapEntry entryAt(Object key);
 Associative assoc(Object key, Object val);
 
 Object valAt(Object key);
+
+Object valAt(Object key, Object notFound);
 }

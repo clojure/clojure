@@ -322,7 +322,7 @@ static public Object get(Object coll, Object key){
 static public Object get(Object coll, Object key, Object notFound){
 	if(coll == null)
 		return notFound;
-	return ((IPersistentMap) coll).valAt(key, notFound);
+	return ((Associative) coll).valAt(key, notFound);
 }
 
 static public Associative assoc(Object coll, Object key, Object val){

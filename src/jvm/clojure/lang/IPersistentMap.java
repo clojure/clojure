@@ -20,5 +20,4 @@ IPersistentMap assocEx(Object key, Object val) throws Exception;
 
 IPersistentMap without(Object key);
 
-Object valAt(Object key, Object notFound);
 }
