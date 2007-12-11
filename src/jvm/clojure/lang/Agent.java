@@ -18,7 +18,8 @@ import java.util.concurrent.*;
 
 public class Agent implements IRef{
 volatile Object state;
-final Queue q = new LinkedList();
+//final Queue q = new LinkedList();
+IPersistentStack q = PersistentQueue.EMPTY;
 boolean busy = false;
 
 volatile ISeq errors = null;
@@ -67,17 +68,23 @@ static class Action implements Runnable{
 				}
 			}
 
+		Runnable exec = null;
 		synchronized(agent)
 			{
-			if(!agent.q.isEmpty())
+			if(agent.q.count() > 0)
+//				if(!agent.q.isEmpty())
 				{
-				executor.execute((Runnable) agent.q.remove());
+//				exec = (Runnable) agent.q.remove();
+				exec = (Runnable) agent.q.peek();
+				agent.q = agent.q.pop();
 				}
 			else
 				{
 				agent.busy = false;
 				}
 			}
+		if(exec != null)
+			executor.execute(exec);
 
 		nested.set(null);
 	}
@@ -135,16 +142,20 @@ public Object dispatch(IFn fn, ISeq args) throws Exception{
 }
 
 void enqueue(Action action){
+	boolean exec = false;
 	synchronized(this)
 		{
 		if(busy)
-			q.add(action);
+		//		q.add(action);
+			q = (IPersistentStack) q.cons(action);
 		else
 			{
 			busy = true;
-			executor.execute(action);
+			exec = true;
 			}
 		}
+	if(exec)
+		executor.execute(action);
 }
 
 }
