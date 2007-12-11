@@ -99,10 +99,13 @@
             (second clauses)
             (cons 'cond (rest (rest clauses))))))
 
+(defn seq [coll]
+  (. clojure.lang.RT (seq coll)))
+
 (defn spread [arglist]
       (cond
        (nil? arglist) nil
-       (nil? (rest arglist)) (first arglist)
+       (nil? (rest arglist)) (seq (first arglist))
        :else (cons (first arglist) (thisfn (rest arglist)))))
 
 (defn apply [#^clojure.lang.IFn f & args]
@@ -120,8 +123,7 @@
 (defmacro lazy-cons [x & body]
   (list 'fnseq x (list* 'fn [] body)))
 
-(defn seq [coll]
-  (. clojure.lang.RT (seq coll)))
+
   
 (defn concat
       ([] nil)
