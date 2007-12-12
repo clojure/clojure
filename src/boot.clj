@@ -522,6 +522,18 @@
 (defn merge [& maps]
   (reduce conj maps))
 
+(defn merge-with [f & maps]
+  (let [merge-entry (fn [m e]
+			(let [k (key e) v (val e)]
+			  (if (contains m k)
+			    (assoc m k (f v (m k)))
+			    (assoc m k v))))
+	merge2 (fn [m1 m2]
+		   (reduce merge-entry m1 (seq m2)))]
+    (reduce merge2 maps)))
+
+
+
 (defn zipmap [keys vals]
   (loop [map {}
          ks (seq keys)
@@ -561,14 +573,42 @@
   (def *imports* (apply merge imports-maps)))
 
 (defmacro doseq [item list & body]
-  `(let [ret# (seq ~list)]
-     (loop [list# ret#]
-       (when list#
-         (let [~item (first list#)]
-           ~@body)
-         (recur (rest list#))))
-      ret#))
+  `(loop [list# (seq ~list)]
+     (when list#
+       (let [~item (first list#)]
+         ~@body)
+       (recur (rest list#)))))
 
+(defn scan
+  ([coll]
+    (when (seq coll)
+      (recur (rest coll))))
+  ([n coll]
+    (when (and (seq coll) (pos? n))
+      (recur (dec n) (rest coll)))))
+
+(defn touch
+  ([coll]
+   (scan coll)
+   coll)
+  ([n coll]
+   (scan n coll)
+   coll))
+
+(defn await [& agents]
+  (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+	count-down (fn [agent] (. latch (countDown)) agent)]
+    (doseq agent agents
+      (! agent count-down))
+    (. latch (await))))
+
+(defn await-for [timeout-ms & agents]
+  (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+	count-down (fn [agent] (. latch (countDown)) agent)]
+    (doseq agent agents
+      (! agent count-down))
+    (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS)))))
+  
 (defmacro dotimes [i n & body]
   `(loop [~i 0 n# ~n]
      (when (< ~i n#)
@@ -813,7 +853,8 @@
 		inc dec pos? neg? zero? quot rem
 		complement constantly identity seq count
 		peek pop nth contains get
-		assoc dissoc find keys vals merge
+		assoc dissoc find keys vals merge merge-with
+		scan touch
 		key val
 		line-seq sort sort-by
 		rseq sym name namespace locking .. ->
@@ -821,6 +862,7 @@
                 binding find-var
 		ref deref commute alter set ensure sync !
 		agent agent-of agent-errors clear-agent-errors
+		await await-for
 		reduce reverse comp appl
 		every not-every any not-any
 		map pmap mapcat filter take take-while drop drop-while
