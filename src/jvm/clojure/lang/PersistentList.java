@@ -58,7 +58,7 @@ public Object peek(){
 
 public IPersistentList pop(){
 	if(_rest == null)
-		return EMPTY.withMeta(meta());
+		return EMPTY.withMeta(_meta);
 	return _rest;
 }
 
@@ -71,7 +71,9 @@ public ISeq cons(Object o){
 }
 
 public PersistentList withMeta(IPersistentMap meta){
-	return new PersistentList(meta, _first, _rest, _count);
+	if(meta != _meta)
+		return new PersistentList(meta, _first, _rest, _count);
+	return this;
 }
 
 static class EmptyList extends PersistentList{
