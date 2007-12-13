@@ -140,7 +140,7 @@ public boolean equals(Object obj){
 			if(ms == null || !RT.equal(nth(i), ms.first()))
 				return false;
 			}
-		if(ms.rest() != null)
+		if(ms != null)
 			return false;
 		}
 
