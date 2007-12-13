@@ -147,62 +147,92 @@
       `(let [or# ~x]
          (if or# or# (or ~@rest)))))
 
+;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn reduce
+  ([f coll]
+     (if (seq coll)
+       (thisfn f (first coll) (rest coll))
+      (f)))
+  ([f val coll]
+    (if (seq coll)
+       (recur f (f val (first coll)) (rest coll))
+      val)))
+
+(defn reverse [coll]
+  (reduce conj nil coll))
+  
 ;;math stuff
 (defn +
       ([] 0)
       ([x] x)
       ([x y] (. clojure.lang.Num (add x y)))
       ([x y & more]
-          (apply thisfn (thisfn x y) more)))
+          (reduce thisfn (thisfn x y) more)))
 
 (defn *
       ([] 1)
       ([x] x)
       ([x y] (. clojure.lang.Num (multiply x y)))
-      ([x y & rest]
-          (apply thisfn (thisfn x y) rest)))
+      ([x y & more]
+          (reduce thisfn (thisfn x y) more)))
 
 (defn /
       ([x] (thisfn 1 x))
       ([x y] (. clojure.lang.Num (divide x y)))
-      ([x y & rest]
-          (apply thisfn (thisfn x y) rest)))
+      ([x y & more]
+          (reduce thisfn (thisfn x y) more)))
 
 (defn -
       ([x] (. clojure.lang.Num (negate x)))
       ([x y] (. clojure.lang.Num (subtract x y)))
-      ([x y & rest]
-          (apply thisfn (thisfn x y) rest)))
+      ([x y & more]
+          (reduce thisfn (thisfn x y) more)))
 
 (defn <
       ([x] :t)
       ([x y] (. clojure.lang.Num (lt x y)))
-      ([x y & rest]
-          (and (thisfn x y) (apply thisfn y rest))))
+      ([x y & more]
+          (when (thisfn x y)
+            (if (rest more)
+                (recur y (first more) (rest more))
+                (thisfn y (first more))))))
 
 (defn <=
       ([x] :t)
       ([x y] (. clojure.lang.Num (lte x y)))
-      ([x y & rest]
-          (and (thisfn x y) (apply thisfn y rest))))
+      ([x y & more]
+          (when (thisfn x y)
+            (if (rest more)
+                (recur y (first more) (rest more))
+                (thisfn y (first more))))))
 
 (defn >
       ([x] :t)
       ([x y] (. clojure.lang.Num (gt x y)))
-      ([x y & rest]
-          (and (thisfn x y) (apply thisfn y rest))))
+      ([x y & more]
+          (when (thisfn x y)
+            (if (rest more)
+                (recur y (first more) (rest more))
+                (thisfn y (first more))))))
 
 (defn >=
       ([x] :t)
       ([x y] (. clojure.lang.Num (gte x y)))
-      ([x y & rest]
-          (and (thisfn x y) (apply thisfn y rest))))
+      ([x y & more]
+          (when (thisfn x y)
+            (if (rest more)
+                (recur y (first more) (rest more))
+                (thisfn y (first more))))))
 
 (defn ==
       ([x] :t)
       ([x y] (. clojure.lang.Num (equiv x y)))
-      ([x y & rest]
-          (and (thisfn x y) (apply thisfn y rest))))
+      ([x y & more]
+          (when (thisfn x y)
+            (if (rest more)
+                (recur y (first more) (rest more))
+                (thisfn y (first more))))))
 
 (defn inc [x]
       (. clojure.lang.Num (inc x)))
@@ -399,20 +429,7 @@
   `(. clojure.lang.LockingTransaction
     (runInTransaction (fn [] ~@body))))
 
-;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn reduce
-  ([f coll]
-     (if (seq coll)
-       (thisfn f (first coll) (rest coll))
-      (f)))
-  ([f val coll]
-    (if (seq coll)
-       (recur f (f val (first coll)) (rest coll))
-      val)))
-
-(defn reverse [coll]
-  (reduce conj nil coll))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
