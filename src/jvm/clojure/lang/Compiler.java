@@ -52,6 +52,7 @@ static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
 static final Symbol INSTANCE = Symbol.create("instance?");
+static final Symbol IDENTICAL = Symbol.create("identical?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol CLASS = Symbol.create("class");
@@ -88,6 +89,7 @@ static IPersistentMap specials = RT.map(
 		MONITOR_ENTER, new MonitorEnterExpr.Parser(),
 		MONITOR_EXIT, new MonitorExitExpr.Parser(),
 		INSTANCE, new InstanceExpr.Parser(),
+		IDENTICAL, new IdenticalExpr.Parser(),
 		THISFN, null,
 		CLASS, new ClassExpr.Parser(),
 		NEW, new NewExpr.Parser(),
@@ -1553,6 +1555,48 @@ static class NewExpr implements Expr{
 		}
 	}
 
+}
+
+static class IdenticalExpr extends UntypedExpr{
+	final Expr expr1;
+	final Expr expr2;
+
+
+	public IdenticalExpr(Expr expr1, Expr expr2){
+		this.expr1 = expr1;
+		this.expr2 = expr2;
+	}
+
+	public Object eval() throws Exception{
+		return expr1.eval() == expr2.eval() ?
+		       RT.T : null;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			Label not = gen.newLabel();
+			Label end = gen.newLabel();
+			expr1.emit(C.EXPRESSION, fn, gen);
+			expr2.emit(C.EXPRESSION, fn, gen);
+			gen.visitJumpInsn(IF_ACMPNE, not);
+			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
+			gen.goTo(end);
+			gen.mark(not);
+			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+			gen.mark(end);
+			}
+	}
+
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			if(form.count() != 3)
+				throw new Exception("wrong number of arguments, expecting: (identical? x y)");
+
+			return new IdenticalExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
+		}
+	}
 }
 
 static class InstanceExpr extends UntypedExpr{
