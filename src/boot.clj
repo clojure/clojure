@@ -234,6 +234,18 @@
                 (recur y (first more) (rest more))
                 (thisfn y (first more))))))
 
+(defn max
+  ([x] x)
+  ([x y] (if (> x y) x y))
+  ([x y & more]
+   (reduce thisfn (thisfn x y) more)))
+
+(defn min
+  ([x] x)
+  ([x y] (if (< x y) x y))
+  ([x y & more]
+   (reduce thisfn (thisfn x y) more)))
+
 (defn inc [x]
       (. clojure.lang.Num (inc x)))
 
@@ -910,5 +922,6 @@
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
 		make-array
 		macroexpand-1 macroexpand
+		max min
 	))
 
