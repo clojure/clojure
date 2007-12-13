@@ -839,6 +839,19 @@
                                  (encl-fn (map rest collseq))))))
                 (cons coll colls)))))
 
+(defn macroexpand-1 [form]
+  (let [v (. clojure.lang.Compiler (isMacro (first form)))]
+    (if v
+      (apply @v (rest form))
+      form)))
+
+(defn macroexpand [form]
+   (let [ex (macroexpand-1 form)
+	 v  (. clojure.lang.Compiler (isMacro (first ex)))]
+     (if v
+       (macroexpand ex)
+       ex)))
+
 (def *exports*
 	'(clojure
 	    load-file eql-ref?
@@ -879,5 +892,6 @@
 		int long float double short byte boolean char
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
 		make-array
+		macroexpand-1 macroexpand
 	))
 

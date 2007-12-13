@@ -2786,6 +2786,16 @@ static public class CompilerException extends Exception{
 	}
 }
 
+static public Var isMacro(Object op) throws Exception{
+	if(op instanceof Symbol || op instanceof Var)
+		{
+		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
+		if(v != null && v.isMacro())
+			return v;
+		}
+	return null;
+}
+
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Integer line = (Integer) LINE.get();
 	try
@@ -2796,13 +2806,10 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 				RT.map(LINE, line));
 		Object op = RT.first(form);
 		//macro expansion
-		if(op instanceof Symbol || op instanceof Var)
+		Var v = isMacro(op);
+		if(v != null)
 			{
-			Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
-			if(v != null && v.isMacro())
-				{
-				return analyze(context, v.applyTo(form.rest()));
-				}
+			return analyze(context, v.applyTo(form.rest()));
 			}
 		IParser p;
 		if(op.equals(FN))
