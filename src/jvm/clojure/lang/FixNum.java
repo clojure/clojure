@@ -201,4 +201,69 @@ public Num onePlus(){
 	return Num.from(val + 1);
 }
 
+public Num bitXorBy(IntegerNum rhs){
+	return rhs.bitXor(val);
+}
+
+public Num bitXor(BigInteger y){
+	return Num.from(BigInteger.valueOf(val).xor(y));
+}
+
+public Num bitXor(int y){
+	return Num.from(val ^ y);
+}
+
+public Num bitAndBy(IntegerNum rhs){
+	return rhs.bitAnd(val);
+}
+
+public Num bitAnd(int y){
+	return Num.from(val & y);
+}
+
+public Num bitAnd(BigInteger y){
+	return Num.from(BigInteger.valueOf(val).and(y));
+}
+
+public Num bitOrBy(IntegerNum rhs){
+	return rhs.bitOr(val);
+}
+
+public Num bitOr(int y){
+	return Num.from(val | y);
+}
+
+public Num bitOr(BigInteger y){
+	return Num.from(BigInteger.valueOf(val).or(y));
+}
+
+public Num bitNot(){
+	return Num.from(~val);
+}
+
+public Num shiftLeftBy(IntegerNum rhs){
+	return rhs.shiftLeft(val);
+}
+
+public Num shiftLeft(BigInteger y){
+	return Num.from(val << y.intValue());
+}
+
+public Num shiftLeft(int y){
+	return Num.from(val << y);
+}
+
+public Num shiftRightBy(IntegerNum rhs){
+	return rhs.shiftRight(val);
+}
+
+public Num shiftRight(BigInteger y){
+	return Num.from(val >> y.intValue());
+}
+
+public Num shiftRight(int y){
+	return Num.from(val >> y);
+}
+
+
 }

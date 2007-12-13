@@ -267,6 +267,26 @@
 (defn rem [num div]
   (. clojure.lang.Num (remainder num div)))
 
+;;Bit ops
+
+(defn bit-shift-left [x y]
+  (. clojure.lang.IntegerNum (shiftLeft x y)))
+
+(defn bit-shift-right [x y]
+  (. clojure.lang.IntegerNum (shiftRight x y)))
+
+(defn bit-and [x y]
+  (. clojure.lang.IntegerNum (bitAnd x y)))
+
+(defn bit-or [x y]
+  (. clojure.lang.IntegerNum (bitOr x y)))
+
+(defn bit-xor [x y]
+  (. clojure.lang.IntegerNum (bitXor x y)))
+
+(defn bit-not [x]
+  (. clojure.lang.IntegerNum (bitNot x)))
+
 (defn complement [f]
   (fn [& args]
     (not (apply f args))))
@@ -923,5 +943,7 @@
 		make-array
 		macroexpand-1 macroexpand
 		max min
+		bit-shift-left bit-shift-right
+		bit-and bit-or bit-xor bit-not
 	))
 

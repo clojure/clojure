@@ -181,5 +181,70 @@ public Num oneMinus(){
 public Num onePlus(){
 	return Num.from(val.add(BigInteger.ONE));
 }
+
+public Num bitXorBy(IntegerNum rhs){
+	return rhs.bitXor(val);
+}
+
+public Num bitXor(BigInteger y){
+	return Num.from(val.xor(y));
+}
+
+public Num bitXor(int y){
+	return Num.from(val.xor(BigInteger.valueOf(y)));
+}
+
+public Num bitAndBy(IntegerNum rhs){
+	return rhs.bitAnd(val);
+}
+
+public Num bitAnd(int y){
+	return Num.from(val.and(BigInteger.valueOf(y)));
+}
+
+public Num bitAnd(BigInteger y){
+	return Num.from(val.and(y));
+}
+
+public Num bitOrBy(IntegerNum rhs){
+	return rhs.bitOr(val);
+}
+
+public Num bitOr(int y){
+	return Num.from(val.or(BigInteger.valueOf(y)));
+}
+
+public Num bitOr(BigInteger y){
+	return Num.from(val.or(y));
+}
+
+public Num bitNot(){
+	return Num.from(val.not());
+}
+
+public Num shiftLeftBy(IntegerNum rhs){
+	return rhs.shiftLeft(val);
+}
+
+public Num shiftLeft(BigInteger y){
+	return Num.from(val.shiftLeft(y.intValue()));
+}
+
+public Num shiftLeft(int y){
+	return Num.from(val.shiftLeft(y));
+}
+
+public Num shiftRightBy(IntegerNum rhs){
+	return rhs.shiftRight(val);
+}
+
+public Num shiftRight(BigInteger y){
+	return Num.from(val.shiftRight(y.intValue()));
+}
+
+public Num shiftRight(int y){
+	return Num.from(val.shiftRight(y));
+}
+
 }
 
