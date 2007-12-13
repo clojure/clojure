@@ -12,13 +12,14 @@
 
 package clojure.lang;
 
-//*
+/*
 
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
-//*/
-/*
+/*/
+//*
+
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -46,6 +47,7 @@ static final Symbol THE_VAR = Symbol.create("the-var");
 static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("set!");
 static final Symbol TRY_FINALLY = Symbol.create("try-finally");
+static final Symbol TRY = Symbol.create("try");
 static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
@@ -81,6 +83,7 @@ static IPersistentMap specials = RT.map(
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
 		TRY_FINALLY, new TryFinallyExpr.Parser(),
+		TRY, new TryExpr.Parser(),
 		THROW, new ThrowExpr.Parser(),
 		MONITOR_ENTER, new MonitorEnterExpr.Parser(),
 		MONITOR_EXIT, new MonitorExitExpr.Parser(),
@@ -1203,6 +1206,149 @@ static class MonitorExitExpr extends UntypedExpr{
 
 }
 
+static class TryExpr implements Expr{
+	final Expr tryExpr;
+	final Expr finallyExpr;
+	final PersistentVector catchExprs;
+
+	static class CatchClause{
+		final String className;
+		final LocalBinding lb;
+		final Expr handler;
+		Label label;
+		Label endLabel;
+
+
+		public CatchClause(String className, LocalBinding lb, Expr handler){
+			this.className = className;
+			this.lb = lb;
+			this.handler = handler;
+		}
+	}
+
+	public TryExpr(Expr tryExpr, PersistentVector catchExprs, Expr finallyExpr){
+		this.tryExpr = tryExpr;
+		this.catchExprs = catchExprs;
+		this.finallyExpr = finallyExpr;
+	}
+
+	public Object eval() throws Exception{
+		throw new UnsupportedOperationException("Can't eval try");
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		Label startTry = gen.newLabel();
+		Label endTry = gen.newLabel();
+		Label end = gen.newLabel();
+		Label finallyLabel = gen.newLabel();
+		for(int i = 0; i < catchExprs.count(); i++)
+			{
+			CatchClause clause = (CatchClause) catchExprs.nth(i);
+			clause.label = gen.newLabel();
+			clause.endLabel = gen.newLabel();
+			gen.visitTryCatchBlock(startTry, endTry, clause.label, clause.className.replace('.', '/'));
+			}
+		if(finallyExpr != null)
+			gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
+
+		gen.mark(startTry);
+		tryExpr.emit(context, fn, gen);
+		gen.mark(endTry);
+		if(finallyExpr != null)
+			finallyExpr.emit(C.STATEMENT, fn, gen);
+		gen.goTo(end);
+
+		for(int i = 0; i < catchExprs.count(); i++)
+			{
+			CatchClause clause = (CatchClause) catchExprs.nth(i);
+			gen.mark(clause.label);
+			//exception should be on stack
+			//put in clause local
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), clause.lb.idx);
+			clause.handler.emit(context, fn, gen);
+			gen.mark(clause.endLabel);
+
+			if(finallyExpr != null)
+				finallyExpr.emit(C.STATEMENT, fn, gen);
+			gen.goTo(end);
+			}
+		if(finallyExpr != null)
+			{
+			gen.mark(finallyLabel);
+			//exception should be on stack
+			finallyExpr.emit(C.STATEMENT, fn, gen);
+			gen.throwException();
+			}
+		gen.mark(end);
+		for(int i = 0; i < catchExprs.count(); i++)
+			{
+			CatchClause clause = (CatchClause) catchExprs.nth(i);
+			gen.visitLocalVariable(clause.lb.name, "Ljava/lang/Object;", null, clause.label, clause.endLabel,
+			                       clause.lb.idx);
+			}
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return tryExpr.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		return tryExpr.getJavaClass();
+	}
+
+	static class Parser implements IParser{
+
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			if(context == C.EVAL || context == C.EXPRESSION)
+				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+
+			//(try try-expr catch-block finally-expr)
+			//catch-block: [class sym expr class2 sym2 expr2 ...]
+			if(form.count() != 3 && form.count() != 4)
+				throw new IllegalArgumentException(
+						"Wrong number of arguments, expecting: (try try-expr catch-block finally-expr?) ");
+
+			IPersistentVector catchBlock = (IPersistentVector) RT.third(form);
+			if((catchBlock.count() % 3) != 0)
+				throw new IllegalArgumentException("Bad catch block, expected matched class symbol expression triples");
+
+			PersistentVector catches = PersistentVector.EMPTY;
+
+			for(int i = 0; i < catchBlock.count(); i += 3)
+				{
+				String className = HostExpr.maybeClassName(catchBlock.nth(i));
+				if(className == null)
+					throw new IllegalArgumentException("Unable to resolve classname: " + catchBlock.nth(i));
+				if(!(catchBlock.nth(i + 1) instanceof Symbol))
+					throw new IllegalArgumentException(
+							"Bad binding form, expected symbol, got: " + catchBlock.nth(i + 1));
+				Symbol sym = (Symbol) catchBlock.nth(i + 1);
+				if(sym.getNamespace() != null)
+					throw new Exception("Can't bind qualified name");
+
+				IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
+				                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
+				try
+					{
+					Var.pushThreadBindings(dynamicBindings);
+					LocalBinding lb = registerLocal(sym, null, null);
+					Expr handler = analyze(context, catchBlock.nth(i + 2));
+					catches = catches.cons(new CatchClause(className, lb, handler));
+					}
+				finally
+					{
+					Var.popThreadBindings();
+					}
+				}
+
+			return new TryExpr(analyze(context, RT.second(form)),
+			                   catches,
+			                   RT.fourth(form) != null ? analyze(C.STATEMENT, RT.fourth(form)) : null);
+		}
+	}
+}
+
 static class TryFinallyExpr implements Expr{
 	final Expr tryExpr;
 	final Expr finallyExpr;
@@ -1952,8 +2098,8 @@ static class FnExpr implements Expr{
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = cw;
-		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
+		//ClassVisitor cv = cw;
+		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
