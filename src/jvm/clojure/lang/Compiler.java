@@ -744,14 +744,18 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	final String className;
 	final String fieldName;
+	final Class c;
+	final java.lang.reflect.Field field;
 	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
 	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
 	final int line;
 
-	public StaticFieldExpr(int line, String className, String fieldName){
+	public StaticFieldExpr(int line, String className, String fieldName) throws Exception{
 		this.className = className;
 		this.fieldName = fieldName;
 		this.line = line;
+		c = Class.forName(className);
+		field = c.getField(fieldName);
 	}
 
 	public Object eval() throws Exception{
@@ -759,10 +763,16 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
-		gen.push(className);
-		gen.push(fieldName);
-		gen.invokeStatic(REFLECTOR_TYPE, getStaticFieldMethod);
+		if(context != C.STATEMENT)
+			{
+			gen.visitLineNumber(line, gen.mark());
+
+			gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
+			HostExpr.emitBoxReturn(fn, gen, field.getType());
+			}
+//		gen.push(className);
+//		gen.push(fieldName);
+//		gen.invokeStatic(REFLECTOR_TYPE, getStaticFieldMethod);
 	}
 
 	public boolean hasJavaClass(){
