@@ -18,6 +18,6 @@ IPersistentMap assoc(Object key, Object val);
 
 IPersistentMap assocEx(Object key, Object val) throws Exception;
 
-IPersistentMap without(Object key);
+IPersistentMap without(Object key) throws Exception;
 
 }

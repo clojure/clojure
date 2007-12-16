@@ -28,7 +28,7 @@ public MultiFn assoc(Object dispatchVal, IFn method){
 }
 
 
-public MultiFn dissoc(Object dispatchVal){
+public MultiFn dissoc(Object dispatchVal) throws Exception{
 	return new MultiFn(meta(), dispatchFn,  defaultDispatchVal, methodTable.without(dispatchVal));
 }
 
