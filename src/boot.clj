@@ -901,6 +901,15 @@
        (macroexpand ex)
        ex)))
 
+(defmacro defstruct [name & keys]
+  `(def ~name (. clojure.lang.PersistentStructMap (createSlotMap (list ~@keys)))))
+
+(defn struct [s & inits]
+  (. clojure.lang.PersistentStructMap (create s inits)))
+
+(defn accessor [s key]
+   (. clojure.lang.PersistentStructMap (getAccessor s key)))
+
 (def *exports*
 	'(clojure
 	    load-file eql-ref?
@@ -945,5 +954,6 @@
 		max min
 		bit-shift-left bit-shift-right
 		bit-and bit-or bit-xor bit-not
+		defstruct struct accessor
 	))
 
