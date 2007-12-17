@@ -14,7 +14,8 @@ public class FnSeq extends ASeq{
 
 final Object _first;
 IFn _restFn;
-volatile ISeq _rest;
+//volatile 
+ISeq _rest;
 
 public FnSeq(Object first, IFn restFn){
 	this._first = first;
@@ -34,7 +35,7 @@ public Object first(){
 }
 
 public ISeq rest(){
-	if(_restFn != null)
+//	if(_restFn != null)
 		synchronized(this)
 			{
 			if(_restFn != null)
@@ -49,8 +50,8 @@ public ISeq rest(){
 					}
 				_restFn = null;
 				}
+			return _rest;
 			}
-	return _rest;
 }
 
 public FnSeq withMeta(IPersistentMap meta){
