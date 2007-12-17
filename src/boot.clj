@@ -957,6 +957,6 @@
 		max min
 		bit-shift-left bit-shift-right
 		bit-and bit-or bit-xor bit-not
-		defstruct struct accessor
+		defstruct struct accessor create-struct
 	))
 
