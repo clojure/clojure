@@ -324,7 +324,7 @@ public PersistentVector pop(){
 		{
 		return (PersistentVector) EMPTY.withMeta(meta());
 		}
-	if(newroot.length == 1)
+	if(shift > 0 && newroot.length == 1)
 		{
 		newroot = (Object[]) newroot[0];
 		newshift -= 5;
