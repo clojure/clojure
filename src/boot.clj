@@ -782,8 +782,8 @@
        ret#))
 
 
-(defn int [#^Number x]
-  (. x (intValue)))
+(defn int [x]
+  (. clojure.lang.RT (intCast x)))
 
 (defn long [#^Number x]
   (. x (longValue)))

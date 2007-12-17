@@ -491,7 +491,9 @@ static public short shortCast(Object x){
 }
 
 static public int intCast(Object x){
-	return ((Number) x).intValue();
+	if(x instanceof Number)
+		return ((Number) x).intValue();
+	return ((Character) x).charValue();
 }
 
 static public long longCast(Object x){
