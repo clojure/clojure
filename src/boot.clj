@@ -8,7 +8,7 @@
 
 (in-namespace 'clojure)
 
-(def list (fn [& args] (if args args '())))
+(def list (. clojure.lang.PersistentList creator))
 
 (def cons (fn [x seq] (. clojure.lang.RT (cons x seq))))
 (def conj (fn [coll x] (. clojure.lang.RT (conj coll x))))

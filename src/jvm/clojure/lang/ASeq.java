@@ -63,7 +63,10 @@ public int hashCode(){
 //}
 
 public int count(){
-	return 1 + RT.count(rest());
+	int i=1;
+	for(ISeq s = rest();s!=null;s = s.rest(),i++)
+		;
+	return i;
 }
 
 public ISeq seq(){

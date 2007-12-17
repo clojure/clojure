@@ -12,12 +12,30 @@ package clojure.lang;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.LinkedList;
 
 public class PersistentList extends ASeq implements IPersistentList{
 
 private final Object _first;
 private final PersistentList _rest;
 private final int _count;
+
+public static IFn creator = new RestFn(0){
+	protected Object doInvoke(Object args) throws Exception{
+		if(args instanceof ArraySeq)
+			{
+			Object[] argsarray = ((ArraySeq) args).array;
+			ISeq ret = EMPTY;
+			for(int i = argsarray.length - 1; i >= 0; --i)
+				ret = ret.cons(argsarray[i]);
+			return ret;
+			}
+		LinkedList list = new LinkedList();
+		for(ISeq s = RT.seq(args); s != null; s = s.rest())
+			list.add(s.first());
+		 return create(list);
+	}
+};
 
 final public static PersistentList EMPTY = new EmptyList(null);
 
@@ -66,7 +84,7 @@ public int count(){
 	return _count;
 }
 
-public ISeq cons(Object o){
+public PersistentList cons(Object o){
 	return new PersistentList(meta(), o, this, _count + 1);
 }
 
@@ -82,7 +100,7 @@ static class EmptyList extends PersistentList{
 		super(meta, null, null, 0);
 	}
 
-	public ISeq cons(Object o){
+	public PersistentList cons(Object o){
 		return new PersistentList(meta(), o, null, 1);
 	}
 
