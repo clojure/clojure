@@ -901,9 +901,12 @@
        (macroexpand ex)
        ex)))
 
-(defmacro defstruct [name & keys]
-  `(def ~name (. clojure.lang.PersistentStructMap (createSlotMap (list ~@keys)))))
+(defn create-struct [& keys]
+   (. clojure.lang.PersistentStructMap (createSlotMap keys)))
 
+(defmacro defstruct [name & keys]
+  `(def ~name (create-struct ~@keys)))
+  
 (defn struct [s & inits]
   (. clojure.lang.PersistentStructMap (create s inits)))
 
