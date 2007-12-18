@@ -23,46 +23,46 @@
 (def content (accessor element :content))
 
 (def content-handler
- (new clojure.lang.XMLHandler
-   (implement [ContentHandler]
-     (startElement [uri local-name q-name #^Attributes atts]
-       (let [attrs (fn [ret i]
-		       (if (neg? i)
-			 ret
-			 (recur (assoc ret 
-				  (. clojure.lang.Keyword (intern (sym (. atts (getQName i))))) 
-				  (. atts (getValue i)))
-				(dec i))))
-	     e (struct element 
-		       :tag (. clojure.lang.Keyword (intern (sym q-name))) 
-		       :attrs (when (pos? (. atts (getLength))) 
-				(attrs {} (dec (. atts (getLength))))))]
-	 (set! *stack* (conj *stack* *current*))
-	 (set! *current* e)
-	 (set! *state* :element))
-       nil)
-     (endElement [uri local-name q-name]
-       (let [push-content (fn [e c]
-			      (assoc e :content (conj (or (:content e) []) c)))]
-	 (when (eql? *state* :chars)
-	   (set! *current* (push-content *current* (str *sb*))))
-	 (set! *current* (push-content (peek *stack*) *current*))
-	 (set! *stack* (pop *stack*))
-	 (set! *state* :between))
-       nil)
-     (characters [ch start length]
-       (when-not (eql? *state* :between)
-	 (when (eql? *state* :element)
-	   (set! *sb* (new StringBuilder)))
-	 (let [#^StringBuilder sb *sb*]
-	   (. sb (append ch start length))
-	   (set! *state* :chars)))
-       nil))))
+  (new clojure.lang.XMLHandler
+       (implement [ContentHandler]
+         (startElement [uri local-name q-name #^Attributes atts]
+           (let [attrs (fn [ret i]
+                           (if (neg? i)
+                             ret
+                             (recur (assoc ret 
+                                      (. clojure.lang.Keyword (intern (sym (. atts (getQName i))))) 
+                                      (. atts (getValue i)))
+                                    (dec i))))
+                 e (struct element 
+                           :tag (. clojure.lang.Keyword (intern (sym q-name))) 
+                           :attrs (when (pos? (. atts (getLength))) 
+                                    (attrs {} (dec (. atts (getLength))))))]
+             (set! *stack* (conj *stack* *current*))
+             (set! *current* e)
+             (set! *state* :element))
+           nil)
+         (endElement [uri local-name q-name]
+           (let [push-content (fn [e c]
+                                  (assoc e :content (conj (or (:content e) []) c)))]
+             (when (eql? *state* :chars)
+               (set! *current* (push-content *current* (str *sb*))))
+             (set! *current* (push-content (peek *stack*) *current*))
+             (set! *stack* (pop *stack*))
+             (set! *state* :between))
+           nil)
+         (characters [ch start length]
+           (when-not (eql? *state* :between)
+             (when (eql? *state* :element)
+               (set! *sb* (new StringBuilder)))
+             (let [#^StringBuilder sb *sb*]
+               (. sb (append ch start length))
+               (set! *state* :chars)))
+           nil))))
 
 (defn parse [s]
   (let [p (.. SAXParserFactory (newInstance) (newSAXParser))]
     (binding [*stack* nil
-	      *current* (struct element)
+              *current* (struct element)
 	      *state* :between
 	      *sb* nil]
       (. p (parse s content-handler))
