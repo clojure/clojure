@@ -16,4 +16,7 @@ int length();
 Object nth(int i);
 
 IPersistentVector assocN(int i, Object val);
+
+IPersistentVector cons(Object o);
+
 }

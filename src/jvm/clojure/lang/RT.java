@@ -519,6 +519,14 @@ static public IPersistentVector vector(Object... init){
 	return PersistentVector.create(init);
 }
 
+static public IPersistentVector subvec(IPersistentVector v, int start, int end){
+	if(end < start || start < 0 || end > v.count())
+		throw new IndexOutOfBoundsException();
+	if(start == end)
+		return PersistentVector.EMPTY;
+	return new APersistentVector.SubVector(null, v, start, end);
+}
+
 /**
  * **************************************** list support *******************************
  */

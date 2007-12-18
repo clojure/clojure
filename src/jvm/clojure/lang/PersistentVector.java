@@ -16,11 +16,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Iterator;
 
-public class PersistentVector extends AFn implements IPersistentVector, Iterable, Collection{
+public class PersistentVector extends APersistentVector{
 final int cnt;
 final int shift;
 final Object[] root;
-int _hash = -1;
 
 public final static PersistentVector EMPTY = new PersistentVector(0, 0, RT.EMPTY_ARRAY);
 
@@ -52,6 +51,7 @@ static public PersistentVector create(Object... items){
 }
 
 PersistentVector(int cnt, int shift, Object[] root){
+	super(null);
 	this.cnt = cnt;
 	this.shift = shift;
 	this.root = root;
@@ -65,9 +65,6 @@ PersistentVector(IPersistentMap meta, int cnt, int shift, Object[] root){
 	this.root = root;
 }
 
-public int length(){
-	return cnt;
-}
 
 public Object nth(int i){
 	if(i >= 0 && i < cnt)
@@ -106,165 +103,10 @@ public int count(){
 	return cnt;
 }
 
-public ISeq seq(){
-	if(cnt > 0)
-		return new Seq(this, 0);
-	return null;
-}
-
-public ISeq rseq(){
-	if(cnt > 0)
-		return new RSeq(this, count() - 1);
-	return null;
-}
-
-public boolean equals(Object obj){
-	if(obj instanceof IPersistentVector)
-		{
-		IPersistentVector ma = (IPersistentVector) obj;
-		if(ma.count() != count() || ma.hashCode() != hashCode())
-			return false;
-		for(int i = 0; i < count(); i++)
-			{
-			if(!RT.equal(nth(i), ma.nth(i)))
-				return false;
-			}
-		}
-	else
-		{
-		if(!(obj instanceof Sequential))
-			return false;
-		ISeq ms = ((IPersistentCollection) obj).seq();
-		for(int i = 0; i < count(); i++, ms = ms.rest())
-			{
-			if(ms == null || !RT.equal(nth(i), ms.first()))
-				return false;
-			}
-		if(ms != null)
-			return false;
-		}
-
-	return true;
-}
-
-public int hashCode(){
-	if(_hash == -1)
-		{
-		int hash = 0;
-		for(int i = 0; i < cnt; i++)
-			{
-			hash = RT.hashCombine(hash, RT.hash(nth(i)));
-			}
-		this._hash = hash;
-		}
-	return _hash;
-}
-
 public PersistentVector withMeta(IPersistentMap meta){
 	return new PersistentVector(meta, cnt, shift, root);
 }
 
-public Object invoke(Object arg1) throws Exception{
-	return nth(((Number) arg1).intValue());
-}
-
-public Iterator iterator(){
-	//todo - something more efficient
-	return new Iterator(){
-		int i = 0;
-
-		public boolean hasNext(){
-			return i < cnt;
-		}
-
-		public Object next(){
-			return nth(i++);
-		}
-
-		public void remove(){
-			throw new UnsupportedOperationException();
-		}
-	};
-}
-
-
-static class Seq extends ASeq implements IndexedSeq{
-	//todo - something more efficient
-	final PersistentVector v;
-	final int i;
-
-
-	public Seq(PersistentVector v, int i){
-		this.v = v;
-		this.i = i;
-	}
-
-	Seq(IPersistentMap meta, PersistentVector v, int i){
-		super(meta);
-		this.v = v;
-		this.i = i;
-	}
-
-	public Object first(){
-		return v.nth(i);
-	}
-
-	public ISeq rest(){
-		if(i + 1 < v.cnt)
-			return new Seq(v, i + 1);
-		return null;
-	}
-
-	public int index(){
-		return i;
-	}
-
-	public int count(){
-		return v.cnt - i;
-	}
-
-	public Seq withMeta(IPersistentMap meta){
-		return new Seq(meta, v, i);
-	}
-}
-
-static class RSeq extends ASeq implements IndexedSeq{
-	final PersistentVector v;
-	final int i;
-
-	RSeq(PersistentVector vector, int i){
-		this.v = vector;
-		this.i = i;
-	}
-
-	RSeq(IPersistentMap meta, PersistentVector v, int i){
-		super(meta);
-		this.v = v;
-		this.i = i;
-	}
-
-	public Object first(){
-		return v.nth(i);
-	}
-
-	public ISeq rest(){
-		if(i > 0)
-			return new RSeq(v, i - 1);
-		return null;
-	}
-
-	public int index(){
-		return i;
-	}
-
-	public int count(){
-		return i + 1;
-	}
-
-	public RSeq withMeta(IPersistentMap meta){
-		return new RSeq(meta, v, i);
-	}
-}
 
 public PersistentVector cons(Object val){
 	Box expansion = new Box(null);
@@ -309,12 +151,6 @@ private Object[] doCons(int level, Object[] arr, Object val, Box expansion){
 	return ret;
 }
 
-public Object peek(){
-	if(cnt > 0)
-		return nth(cnt - 1);
-	return null;
-}
-
 public PersistentVector pop(){
 	if(cnt == 0)
 		throw new IllegalAccessError("Can't pop empty vector");
@@ -349,118 +185,6 @@ private Object[] doPop(int shift, Object[] arr){
 	Object[] ret = new Object[arr.length - 1];
 	System.arraycopy(arr, 0, ret, 0, ret.length);
 	return ret;
-}
-
-
-public boolean containsKey(Object key){
-	if(!(key instanceof Number))
-		return false;
-	int i = ((Number) key).intValue();
-	return i >= 0 && i < count();
-}
-
-public IMapEntry entryAt(Object key){
-	if(key instanceof Number)
-		{
-		int i = ((Number) key).intValue();
-		if(i >= 0 && i < count())
-			return new MapEntry(key, nth(i));
-		}
-	return null;
-}
-
-public PersistentVector assoc(Object key, Object val){
-	if(key instanceof Number)
-		{
-		int i = ((Number) key).intValue();
-		return assocN(i, val);
-		}
-	throw new IllegalAccessError("Key must be integer");
-}
-
-public Object valAt(Object key, Object notFound){
-	if(key instanceof Number)
-		{
-		int i = ((Number) key).intValue();
-		if(i >= 0 && i < count())
-			return nth(i);
-		}
-	return notFound;
-}
-
-public Object valAt(Object key){
-	return valAt(key, null);
-}
-// java.util.Collection implementation
-
-public Object[] toArray(){
-	return RT.seqToArray(seq());
-}
-
-public boolean add(Object o){
-	throw new UnsupportedOperationException();
-}
-
-public boolean remove(Object o){
-	throw new UnsupportedOperationException();
-}
-
-public boolean addAll(Collection c){
-	throw new UnsupportedOperationException();
-}
-
-public void clear(){
-	throw new UnsupportedOperationException();
-}
-
-public boolean retainAll(Collection c){
-	throw new UnsupportedOperationException();
-}
-
-public boolean removeAll(Collection c){
-	throw new UnsupportedOperationException();
-}
-
-public boolean containsAll(Collection c){
-	for(Object o : c)
-		{
-		if(contains(o))
-			return true;
-		}
-	return false;
-}
-
-public Object[] toArray(Object[] a){
-	if(a.length >= count())
-		{
-		ISeq s = seq();
-		for(int i = 0; s != null; ++i, s = s.rest())
-			{
-			a[i] = s.first();
-			}
-		if(a.length >= count())
-			a[count()] = null;
-		return a;
-		}
-	else
-		return toArray();
-}
-
-public int size(){
-	return count();
-}
-
-public boolean isEmpty(){
-	return count() == 0;
-}
-
-public boolean contains(Object o){
-	for(ISeq s = seq(); s != null; s = s.rest())
-		{
-		if(RT.equal(s.first(), o))
-			return true;
-		}
-	return false;
 }
 
 /*

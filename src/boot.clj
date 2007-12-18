@@ -913,6 +913,13 @@
 (defn accessor [s key]
    (. clojure.lang.PersistentStructMap (getAccessor s key)))
 
+(defn subvec
+  ([v start]
+    (thisfn v start (count v)))
+  ([v start end]
+    (. clojure.lang.RT (subvec v start end))))
+
+
 (def *exports*
 	'(clojure
 	    load-file eql-ref?
@@ -958,5 +965,6 @@
 		bit-shift-left bit-shift-right
 		bit-and bit-or bit-xor bit-not
 		defstruct struct accessor create-struct
+		subvec
 	))
 
