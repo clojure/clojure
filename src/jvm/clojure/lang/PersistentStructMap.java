@@ -78,6 +78,13 @@ PersistentStructMap(IPersistentMap meta, IPersistentMap keys, Object[] vals, IPe
 	this.vals = vals;
 }
 
+
+public Obj withMeta(IPersistentMap meta){
+	if(meta == _meta)
+		return this;
+	return new PersistentStructMap(meta, keyslots, vals, ext);
+}
+
 public boolean containsKey(Object key){
 	return keyslots.containsKey(key) || ext.containsKey(key);
 }
