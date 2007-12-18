@@ -692,8 +692,30 @@ static public void print(Object x, Writer w) throws Exception{
 		}
 	else if(x instanceof String)
 		{
+		String s = (String) x;
 		w.write('"');
-		w.write(x.toString());
+		//w.write(x.toString());
+		for(int i = 0; i < s.length(); i++)
+			{
+			char c = s.charAt(i);
+			switch(c)
+				{
+				case'\n':
+					w.write("\\n");
+					break;
+				case'\t':
+					w.write("\\t");
+					break;
+				case'"':
+					w.write("\\\"");
+					break;
+				case'\\':
+					w.write("\\\\");
+					break;
+				default:
+					w.write(c);
+				}
+			}
 		w.write('"');
 		}
 //	else if(x instanceof ArgVector)
