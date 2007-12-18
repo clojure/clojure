@@ -68,7 +68,7 @@
       (. p (parse s content-handler))
       ((:content *current*) 0))))
 
-(def *export* '(xml tag attrs content parse))
+(def *exports* '(xml tag attrs content parse))
 
 ;(load-file "/Users/rich/dev/clojure/src/xml.clj")
 ;(def x (xml/parse "http://arstechnica.com/journals.rssx"))
