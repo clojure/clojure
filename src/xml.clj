@@ -1,0 +1,74 @@
+;   Copyright (c) Rich Hickey. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+;   which can be found in the file CPL.TXT at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(in-namespace 'xml)
+
+(import '(org.xml.sax ContentHandler Attributes SAXException)
+	'(javax.xml.parsers SAXParser SAXParserFactory))
+
+(def *stack*)
+(def *current*)
+(def *state*) ; :element :chars :between
+(def *sb*)
+
+(defstruct element :tag :attrs :content)
+
+(def tag (accessor element :tag))
+(def attrs (accessor element :attrs))
+(def content (accessor element :content))
+
+(def content-handler
+ (new clojure.lang.XMLHandler
+   (implement [ContentHandler]
+     (startElement [uri local-name q-name #^Attributes atts]
+       (let [attrs (fn [ret i]
+		       (if (neg? i)
+			 ret
+			 (recur (assoc ret 
+				  (. clojure.lang.Keyword (intern (sym (. atts (getQName i))))) 
+				  (. atts (getValue i)))
+				(dec i))))
+	     e (struct element 
+		       :tag (. clojure.lang.Keyword (intern (sym q-name))) 
+		       :attrs (when (pos? (. atts (getLength))) 
+				(attrs {} (dec (. atts (getLength))))))]
+	 (set! *stack* (conj *stack* *current*))
+	 (set! *current* e)
+	 (set! *state* :element))
+       nil)
+     (endElement [uri local-name q-name]
+       (let [push-content (fn [e c]
+			      (assoc e :content (conj (or (:content e) []) c)))]
+	 (when (eql? *state* :chars)
+	   (set! *current* (push-content *current* (str *sb*))))
+	 (set! *current* (push-content (peek *stack*) *current*))
+	 (set! *stack* (pop *stack*))
+	 (set! *state* :between))
+       nil)
+     (characters [ch start length]
+       (when-not (eql? *state* :between)
+	 (when (eql? *state* :element)
+	   (set! *sb* (new StringBuilder)))
+	 (let [#^StringBuilder sb *sb*]
+	   (. sb (append ch start length))
+	   (set! *state* :chars)))
+       nil))))
+
+(defn parse [s]
+  (let [p (.. SAXParserFactory (newInstance) (newSAXParser))]
+    (binding [*stack* nil
+	      *current* (struct element)
+	      *state* :between
+	      *sb* nil]
+      (. p (parse s content-handler))
+      ((:content *current*) 0))))
+
+(def *export* '(xml tag attrs content parse))
+
+;(load-file "/Users/rich/dev/clojure/src/xml.clj")
+;(def x (xml/parse "http://arstechnica.com/journals.rssx"))
