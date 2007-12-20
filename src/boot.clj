@@ -77,7 +77,8 @@
 
 (defn eql? [x y] (. clojure.lang.RT (equal x y)))
 
-(defn str [#^Object x] (. x (toString)))
+(defn str [#^Object x]
+  (if x (. x (toString)) ""))
 
 (defn strcat [x & ys]
   (let [#^String s (str x)]
