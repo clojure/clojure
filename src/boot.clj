@@ -77,10 +77,10 @@
 
 (defn eql? [x y] (. clojure.lang.RT (equal x y)))
 
-(defn str [#^Object x]
+(defn #^String str [#^Object x]
   (if x (. x (toString)) ""))
 
-(defn strcat [x & ys]
+(defn #^String strcat [x & ys]
   (let [#^String s (str x)]
     (if ys
         (recur (. s  (concat (str (first ys)))) (rest ys))
@@ -783,28 +783,28 @@
        ret#))
 
 
-(defn int [x]
+(defn #^Integer int [x]
   (. clojure.lang.RT (intCast x)))
 
-(defn long [#^Number x]
+(defn #^Long long [#^Number x]
   (. x (longValue)))
 
-(defn float [#^Number x]
+(defn #^Float float [#^Number x]
   (. x (floatValue)))
 
-(defn double [#^Number x]
+(defn #^Double double [#^Number x]
   (. x (doubleValue)))
 
-(defn short [#^Number x]
+(defn #^Short short [#^Number x]
   (. x (shortValue)))
 
-(defn byte [#^Number x]
+(defn #^Byte byte [#^Number x]
   (. x (byteValue)))
 
-(defn char [x]
+(defn #^Character char [x]
   (. clojure.lang.RT (charCast x)))
 
-(defn boolean [x]
+(defn #^Boolean boolean [x]
   (if x
      (. Boolean TRUE)
     (. Boolean FALSE)))

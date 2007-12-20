@@ -12,13 +12,13 @@
 
 package clojure.lang;
 
-//*
+/*
 
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
 /*/
-/*
+//*
 
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
@@ -227,18 +227,23 @@ static Symbol resolveSymbol(Symbol sym){
 static class DefExpr implements Expr{
 	final Var var;
 	final Expr init;
+	final Symbol tag;
 	final boolean initProvided;
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
+	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
+	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
 
-	public DefExpr(Var var, Expr init, boolean initProvided){
+	public DefExpr(Var var, Expr init, boolean initProvided, Symbol tag){
 		this.var = var;
 		this.init = init;
 		this.initProvided = initProvided;
+		this.tag = tag;
 	}
 
 	public Object eval() throws Exception{
 		if(initProvided)
 			var.bindRoot(init.eval());
+		var.setTag(tag);
 		return var;
 	}
 
@@ -250,6 +255,16 @@ static class DefExpr implements Expr{
 			init.emit(C.EXPRESSION, fn, gen);
 			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
 			}
+		gen.dup();
+		if(tag != null)
+			{
+			gen.push(tag.ns);
+			gen.push(tag.name);
+			gen.invokeStatic(SYMBOL_TYPE, symcreate);
+			}
+		else
+			gen.visitInsn(Opcodes.ACONST_NULL);
+		gen.invokeVirtual(VAR_TYPE, setTagMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -284,7 +299,7 @@ static class DefExpr implements Expr{
 					throw new Exception("Can't create defs outside of current ns");
 				}
 			return new DefExpr(v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
-			                   RT.count(form) == 3);
+			                   RT.count(form) == 3, tagOf(sym));
 		}
 	}
 }
@@ -336,7 +351,7 @@ static class VarExpr implements Expr, AssignableExpr{
 
 	public VarExpr(Var var, Symbol tag){
 		this.var = var;
-		this.tag = tag;
+		this.tag = tag!=null?tag:var.getTag();
 	}
 
 	public Object eval() throws Exception{
@@ -356,7 +371,7 @@ static class VarExpr implements Expr, AssignableExpr{
 	}
 
 	public Class getJavaClass() throws ClassNotFoundException{
-		return HostExpr.tagToClass(tag);
+			return HostExpr.tagToClass(tag);
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
@@ -1978,7 +1993,7 @@ static class InvokeExpr implements Expr{
 		this.fexpr = fexpr;
 		this.args = args;
 		this.line = line;
-		this.tag = tag;
+		this.tag = tag!=null?tag:(fexpr instanceof VarExpr?((VarExpr)fexpr).tag:null);
 	}
 
 	public Object eval() throws Exception{
@@ -2152,8 +2167,8 @@ static class FnExpr implements Expr{
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = cw;
-		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
+		//ClassVisitor cv = cw;
+		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();

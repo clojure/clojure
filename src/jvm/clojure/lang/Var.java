@@ -48,6 +48,7 @@ volatile Object root;
 transient final AtomicInteger count;
 final public Symbol sym;
 boolean macroFlag = false;
+Symbol tag;
 
 static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();
 
@@ -156,6 +157,14 @@ public boolean isMacro(){
 
 public Object getRoot(){
 	return root;
+}
+
+public Symbol getTag(){
+	return tag;
+}
+
+public void setTag(Symbol tag){
+	this.tag = tag;
 }
 
 final public boolean hasRoot(){
