@@ -811,44 +811,60 @@
 
 (import '(java.lang.reflect Array))
 
-(defn aget [array idx]
-  (. Array (get array idx)))
+(defn alength [array]
+  (. Array (getLength array)))
 
-(defn aset [array idx val]
-  (. Array (set array idx val))
-  val)
+(defn aget 
+  ([array idx]
+   (. Array (get array idx)))
+  ([array idx & idxs]
+   (apply aget (aget array idx) idxs)))
 
-(defn aset-boolean [array idx val]
-  (. Array (setBoolean array idx (boolean val)))
-  val)
+(defn aset
+  ([array idx val]
+   (. Array (set array idx val))
+   val)
+  ([array idx idx2 & idxv]
+   (apply aset (aget array idx) idx2 idxv)))
 
-(defn aset-int [array idx val]
-  (. Array (setInt array idx (int val)))
-  val)
+(defmacro def-aset [name method coerce]
+  `(defn ~name
+    ([array# idx# val#]
+     (. Array (~method array# idx# (~coerce val#)))
+     val#)
+    ([array# idx# idx2# & idxv#]
+     (apply ~name (aget array# idx#) idx2# idxv#))))
 
-(defn aset-long [array idx val]
-  (. Array (setLong array idx (long val)))
-  val)
+(def-aset aset-int setInt int)
+(def-aset aset-long setLong long)
+(def-aset aset-boolean setBoolean boolean)
+(def-aset aset-float setFloat float)
+(def-aset aset-double setDouble double)
+(def-aset aset-short setShort short)
+(def-aset aset-byte setByte byte)
+(def-aset aset-char setChar char)
 
-(defn aset-float [array idx val]
-  (. Array (setFloat array idx (float val)))
-  val)
+(defn make-array 
+  ([type len]
+    (. Array (newInstance type (int len))))
+  ([type dim & more-dims]
+    (let [dims (cons dim more-dims)
+          dimarray (make-array (. Integer TYPE)  (count dims))]
+      (dotimes i (alength dimarray)
+        (aset-int dimarray i (nth dims i)))
+      (. Array (newInstance type dimarray)))))
 
-(defn aset-double [array idx val]
-  (. Array (setDouble array idx (double val)))
-  val)
+(defn to-array [#^java.util.Collection coll]
+  (. coll (toArray)))
 
-(defn aset-short [array idx val]
-  (. Array (setShort array idx (short val)))
-  val)
+(defn to-array-2d [#^java.util.Collection coll]
+  (let [ret (make-array (class "[Ljava.lang.Object;") (. coll (size)))]
+    (loop [i 0 xs (seq coll)]
+      (when xs
+        (aset ret i (to-array (first xs)))
+        (recur (inc i) (rest xs))))
+    ret))
 
-(defn aset-byte [array idx val]
-  (. Array (setByte array idx (byte val)))
-  val)
-
-(defn make-array [type len]
-  (. Array (newInstance type (int len))))
-  
 (import '(java.util.concurrent Executors LinkedBlockingQueue))
 
 (defn pmap
@@ -960,7 +976,7 @@
 		time
 		int long float double short byte boolean char
 		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
-		make-array
+		make-array alength to-array to-array-2d
 		macroexpand-1 macroexpand
 		max min
 		bit-shift-left bit-shift-right
