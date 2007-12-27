@@ -351,7 +351,7 @@ static class VarExpr implements Expr, AssignableExpr{
 
 	public VarExpr(Var var, Symbol tag){
 		this.var = var;
-		this.tag = tag!=null?tag:var.getTag();
+		this.tag = tag != null ? tag : var.getTag();
 	}
 
 	public Object eval() throws Exception{
@@ -371,7 +371,7 @@ static class VarExpr implements Expr, AssignableExpr{
 	}
 
 	public Class getJavaClass() throws ClassNotFoundException{
-			return HostExpr.tagToClass(tag);
+		return HostExpr.tagToClass(tag);
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
@@ -689,6 +689,8 @@ static abstract class HostExpr implements Expr{
 					}
 				}
 			}
+		else if(form instanceof String)
+			className = (String) form;
 		return className;
 	}
 
@@ -1993,7 +1995,7 @@ static class InvokeExpr implements Expr{
 		this.fexpr = fexpr;
 		this.args = args;
 		this.line = line;
-		this.tag = tag!=null?tag:(fexpr instanceof VarExpr?((VarExpr)fexpr).tag:null);
+		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
 	}
 
 	public Object eval() throws Exception{
