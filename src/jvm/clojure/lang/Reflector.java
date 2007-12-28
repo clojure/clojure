@@ -23,16 +23,16 @@ public class Reflector{
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) throws Exception{
 	Class c = target.getClass();
 	List methods = getMethods(c, args.length, methodName, false);
-	return prepRet(invokeMatchingMethod(methods, target, args));
+	return prepRet(invokeMatchingMethod(methodName, methods, target, args));
 }
 
-private static Object invokeMatchingMethod(List methods, Object target, Object[] args)
+private static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
 		throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
 	Method m = null;
 	Object[] boxedArgs = null;
 	if(methods.isEmpty())
 		{
-		throw new IllegalArgumentException("No matching field or method found");
+		throw new IllegalArgumentException("No matching method found: " + methodName);
 		}
 	else if(methods.size() == 1)
 		{
@@ -56,46 +56,43 @@ private static Object invokeMatchingMethod(List methods, Object target, Object[]
 			}
 		}
 	if(m == null)
-		throw new IllegalArgumentException("No matching field or method found");
+		throw new IllegalArgumentException("No matching method found: " + methodName);
 
 	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
 		{
-		//public method of non-public class, try to find it in an interface
-		Class c = m.getDeclaringClass();
-		for(Class iface : c.getInterfaces())
+		//public method of non-public class, try to find it in hierarchy
+		m = getAsMethodOfPublicBase(m.getDeclaringClass(), m);
+		}
+	if(m == null)
+		throw new IllegalArgumentException("No matching method found: " + methodName);
+	return prepRet(m.invoke(target, boxedArgs));
+}
+
+public static Method getAsMethodOfPublicBase(Class c, Method m){
+	for(Class iface : c.getInterfaces())
+		{
+		for(Method im : iface.getMethods())
 			{
-			for(Method im : iface.getDeclaredMethods())
+			if(im.getName().equals(m.getName())
+			   && Arrays.equals(m.getParameterTypes(), im.getParameterTypes()))
 				{
-				if(im.getName().equals(m.getName())
-				   && Arrays.equals(m.getParameterTypes(), im.getParameterTypes()))
-					{
-					m = im;
-					break;
-					}
-				}
-			}
-		//still haven't found a public version, try superclasses
-		if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
-			{
-			sc:
-			for(Class sc = c.getSuperclass(); sc != null; sc = sc.getSuperclass())
-				{
-				if(Modifier.isPublic(sc.getModifiers()))
-					{
-					for(Method scm : sc.getDeclaredMethods())
-						{
-						if(scm.getName().equals(m.getName())
-						   && Arrays.equals(m.getParameterTypes(), scm.getParameterTypes()))
-							{
-							m = scm;
-							break sc;
-							}
-						}
-					}
+				return im;
 				}
 			}
 		}
-	return prepRet(m.invoke(target, boxedArgs));
+	Class sc = c.getSuperclass();
+	if(sc == null)
+		return null;
+	for(Method scm : sc.getMethods())
+		{
+		if(scm.getName().equals(m.getName())
+		   && Arrays.equals(m.getParameterTypes(), scm.getParameterTypes())
+		   && Modifier.isPublic(scm.getDeclaringClass().getModifiers()))
+			{
+			return scm;
+			}
+		}
+	return getAsMethodOfPublicBase(sc, m);
 }
 
 public static Object invokeConstructor(Class c, Object[] args) throws Exception{
@@ -142,7 +139,7 @@ public static Object invokeStaticMethod(String className, String methodName, Obj
 	if(methodName.equals("new"))
 		return invokeConstructor(c, args);
 	List methods = getMethods(c, args.length, methodName, true);
-	return invokeMatchingMethod(methods, null, args);
+	return invokeMatchingMethod(methodName, methods, null, args);
 }
 
 public static Object getStaticField(String className, String fieldName) throws Exception{
