@@ -975,7 +975,7 @@
         read *in* with-open
 		time
 		int long float double short byte boolean char
-		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte
+		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte aset-char
 		make-array alength to-array to-array-2d
 		macroexpand-1 macroexpand
 		max min
