@@ -643,7 +643,7 @@ static abstract class HostExpr implements Expr{
 			//determine static or instance
 			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
 			int line = (Integer) LINE.get();
-			String className = maybeClassName(RT.second(form));
+			String className = maybeClassName(RT.second(form), false);
 			//at this point className will be non-null if static
 			Expr instance = null;
 			if(className == null)
@@ -673,7 +673,7 @@ static abstract class HostExpr implements Expr{
 		}
 	}
 
-	private static String maybeClassName(Object form){
+	private static String maybeClassName(Object form, boolean stringOk){
 		String className = null;
 		if(form instanceof Symbol)
 			{
@@ -689,13 +689,13 @@ static abstract class HostExpr implements Expr{
 					}
 				}
 			}
-		else if(form instanceof String)
+		else if(stringOk && form instanceof String)
 			className = (String) form;
 		return className;
 	}
 
 	static Class tagToClass(Symbol tag) throws ClassNotFoundException{
-		String className = maybeClassName(tag);
+		String className = maybeClassName(tag, false);
 		if(className != null)
 			return Class.forName(className);
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
@@ -1346,7 +1346,7 @@ static class TryExpr implements Expr{
 
 			for(int i = 0; i < catchBlock.count(); i += 3)
 				{
-				String className = HostExpr.maybeClassName(catchBlock.nth(i));
+				String className = HostExpr.maybeClassName(catchBlock.nth(i), false);
 				if(className == null)
 					throw new IllegalArgumentException("Unable to resolve classname: " + catchBlock.nth(i));
 				if(!(catchBlock.nth(i + 1) instanceof Symbol))
@@ -1495,7 +1495,7 @@ static class ClassExpr implements Expr{
 			//(class Classname)
 			if(form.count() != 2)
 				throw new Exception("wrong number of arguments, expecting: (class Classname)");
-			String className = HostExpr.maybeClassName(RT.second(form));
+			String className = HostExpr.maybeClassName(RT.second(form), true);
 			if(className == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
 			return new ClassExpr(className);
@@ -1572,7 +1572,7 @@ static class NewExpr implements Expr{
 			//(new Classname args...)
 			if(form.count() < 2)
 				throw new Exception("wrong number of arguments, expecting: (new Classname args...)");
-			String className = HostExpr.maybeClassName(RT.second(form));
+			String className = HostExpr.maybeClassName(RT.second(form), false);
 			if(className == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
 			PersistentVector args = PersistentVector.EMPTY;
@@ -1663,7 +1663,7 @@ static class InstanceExpr extends UntypedExpr{
 			//(instance? x Classname)
 			if(form.count() != 3)
 				throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
-			String className = HostExpr.maybeClassName(RT.third(form));
+			String className = HostExpr.maybeClassName(RT.third(form), true);
 			if(className == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
 			return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), className);
