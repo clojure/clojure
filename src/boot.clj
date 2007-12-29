@@ -379,9 +379,11 @@
 
 (defmacro locking [x & body]
   `(let [lockee# ~x]
-        (try-finally
-           (do (monitor-enter lockee#) ~@body)
-           (monitor-exit lockee#))))
+        (try
+           (monitor-enter lockee#)
+           ~@body
+           (finally
+             (monitor-exit lockee#)))))
 
 (defmacro ..
   ([x form] `(. ~x ~form))
@@ -414,11 +416,11 @@
                               (recur  (conj (conj ret `(the-var ~(first vvs))) (second vvs))
                                       (rest (rest vvs)))
                             (seq ret))))]
-    `(try-finally
-      (do
-          (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
-          ~@body)
-      (. clojure.lang.Var (popThreadBindings)))))
+    `(try
+      (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
+      ~@body
+      (finally
+        (. clojure.lang.Var (popThreadBindings))))))
 
 (defn find-var [sym]
  (. clojure.lang.Var (find sym)))
@@ -761,9 +763,10 @@
 
 (defmacro with-open [rdr init & body]
   `(let [~rdr ~init]
-     (try-finally
-      (do ~@body)
-      (. ~rdr (close)))))
+     (try
+      ~@body
+      (finally
+        (. ~rdr (close))))))
 
 (defmacro doto [x & members]
    (let [gx (gensym)]
