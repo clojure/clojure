@@ -48,6 +48,8 @@ static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("set!");
 static final Symbol TRY_FINALLY = Symbol.create("try-finally");
 static final Symbol TRY = Symbol.create("try");
+static final Symbol CATCH = Symbol.create("catch");
+static final Symbol FINALLY = Symbol.create("finally");
 static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
@@ -91,6 +93,8 @@ static IPersistentMap specials = RT.map(
 		INSTANCE, new InstanceExpr.Parser(),
 		IDENTICAL, new IdenticalExpr.Parser(),
 		THISFN, null,
+		CATCH, null,
+		FINALLY, null,
 		CLASS, new ClassExpr.Parser(),
 		NEW, new NewExpr.Parser(),
 //		UNQUOTE, null,
@@ -1332,48 +1336,64 @@ static class TryExpr implements Expr{
 			if(context == C.EVAL || context == C.EXPRESSION)
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
-			//(try try-expr catch-block finally-expr)
-			//catch-block: [class sym expr class2 sym2 expr2 ...]
-			if(form.count() != 3 && form.count() != 4)
-				throw new IllegalArgumentException(
-						"Wrong number of arguments, expecting: (try try-expr catch-block finally-expr?) ");
+			//(try try-expr* catch-expr* finally-expr?)
+			//catch-expr: (catch class sym expr*)
+			//finally-expr: (finally expr*)
 
-			IPersistentVector catchBlock = (IPersistentVector) RT.third(form);
-			if((catchBlock.count() % 3) != 0)
-				throw new IllegalArgumentException("Bad catch block, expected matched class symbol expression triples");
-
+			PersistentVector body = PersistentVector.EMPTY;
 			PersistentVector catches = PersistentVector.EMPTY;
+			Expr finallyExpr = null;
+			boolean caught = false;
 
-			for(int i = 0; i < catchBlock.count(); i += 3)
+			for(ISeq fs = form.rest(); fs != null; fs = fs.rest())
 				{
-				String className = HostExpr.maybeClassName(catchBlock.nth(i), false);
-				if(className == null)
-					throw new IllegalArgumentException("Unable to resolve classname: " + catchBlock.nth(i));
-				if(!(catchBlock.nth(i + 1) instanceof Symbol))
-					throw new IllegalArgumentException(
-							"Bad binding form, expected symbol, got: " + catchBlock.nth(i + 1));
-				Symbol sym = (Symbol) catchBlock.nth(i + 1);
-				if(sym.getNamespace() != null)
-					throw new Exception("Can't bind qualified name");
-
-				IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
-				                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
-				try
+				Object f = fs.first();
+				Object op = (f instanceof ISeq) ? ((ISeq) f).first() : null;
+				if(!RT.equal(op, CATCH) && !RT.equal(op, FINALLY))
 					{
-					Var.pushThreadBindings(dynamicBindings);
-					LocalBinding lb = registerLocal(sym, null, null);
-					Expr handler = analyze(context, catchBlock.nth(i + 2));
-					catches = catches.cons(new CatchClause(className, lb, handler));
+					if(caught)
+						throw new Exception("Only catch or finally clause can follow catch in try expression");
+					body = body.cons(f);
 					}
-				finally
+				else
 					{
-					Var.popThreadBindings();
+					if(RT.equal(op, CATCH))
+						{
+						String className = HostExpr.maybeClassName(RT.second(f), false);
+						if(className == null)
+							throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(f));
+						if(!(RT.third(f) instanceof Symbol))
+							throw new IllegalArgumentException(
+									"Bad binding form, expected symbol, got: " + RT.third(f));
+						Symbol sym = (Symbol) RT.third(f);
+						if(sym.getNamespace() != null)
+							throw new Exception("Can't bind qualified name");
+
+						IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
+						                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
+						try
+							{
+							Var.pushThreadBindings(dynamicBindings);
+							LocalBinding lb = registerLocal(sym, null, null);
+							Expr handler = (new BodyExpr.Parser()).parse(context, RT.rest(RT.rest(RT.rest(f))));
+							catches = catches.cons(new CatchClause(className, lb, handler));
+							}
+						finally
+							{
+							Var.popThreadBindings();
+							}
+						caught = true;
+						}
+					else //finally
+						{
+						if(fs.rest() != null)
+							throw new Exception("finally clause must be last in try expression");
+						finallyExpr = (new BodyExpr.Parser()).parse(C.STATEMENT, RT.rest(f));
+						}
 					}
 				}
 
-			return new TryExpr(analyze(context, RT.second(form)),
-			                   catches,
-			                   RT.fourth(form) != null ? analyze(C.STATEMENT, RT.fourth(form)) : null);
+			return new TryExpr((new BodyExpr.Parser()).parse(context, RT.seq(body)), catches, finallyExpr);
 		}
 	}
 }
