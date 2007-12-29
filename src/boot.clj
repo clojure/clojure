@@ -578,7 +578,7 @@
   (let [merge-entry (fn [m e]
 			(let [k (key e) v (val e)]
 			  (if (contains m k)
-			    (assoc m k (f v (m k)))
+			    (assoc m k (f (m k) v))
 			    (assoc m k v))))
 	merge2 (fn [m1 m2]
 		   (reduce merge-entry m1 (seq m2)))]
