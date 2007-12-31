@@ -18,9 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class LockingTransaction{
 
-public static int RETRY_LIMIT = 1000;
+public static int RETRY_LIMIT = 10000;
 public static int LOCK_WAIT_MSECS = 100;
-public static long BARGE_WAIT_NANOS = 100 * 1000000;
+public static long BARGE_WAIT_NANOS = 10 * 1000000;
 //public static int COMMUTE_RETRY_LIMIT = 10;
 
 static final int RUNNING = 0;
