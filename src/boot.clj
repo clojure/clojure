@@ -601,20 +601,26 @@
     (when line
       (lazy-cons line (line-seq rdr)))))
 
+(defn comparator [pred]
+  (fn [x y] (cond (pred x y) -1 (pred y x) 1 :t 0)))
+  
 (defn sort
   ([#^java.util.Collection coll]
    (when (and coll (not (. coll (isEmpty))))
      (let [a (. coll (toArray))]
        (. java.util.Arrays (sort a))
        (seq a))))
-  ([#^java.util.Collection coll #^java.util.Comparator comp]
+  ([#^java.util.Comparator comp #^java.util.Collection coll]
    (when (and coll (not (. coll (isEmpty))))
      (let [a (. coll (toArray))]
        (. java.util.Arrays (sort a comp))
        (seq a)))))
 
-(defn sort-by [keyfn #^java.util.Collection coll]
-  (sort coll (fn [x y] (. (keyfn x) (compareTo (keyfn y))))))
+(defn sort-by
+  ([keyfn coll]
+    (sort (fn [x y] (. #^Comparable (keyfn x) (compareTo (keyfn y)))) coll))
+  ([keyfn #^java.util.Comparator comp coll]
+    (sort (fn [x y] (. comp (compare (keyfn x) (keyfn y)))) coll)))
 
 ;; evaluation
 
@@ -957,7 +963,7 @@
 		assoc dissoc find keys vals merge merge-with
 		scan touch
 		key val
-		line-seq sort sort-by
+		line-seq sort sort-by comparator
 		rseq sym name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
