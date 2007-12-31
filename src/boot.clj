@@ -775,11 +775,12 @@
         (. ~rdr (close))))))
 
 (defmacro doto [x & members]
-   (let [gx (gensym)]
-     `(let [~gx ~x]
-        (do
-          ~@(map (fn [m] (list '. gx m))
-                  members)))))
+  (let [gx (gensym)]
+    `(let [~gx ~x]
+       (do
+         ~@(map (fn [m] (list '. gx m))
+                members))
+       ~gx)))
 
 (defmacro memfn [name & args]
   `(fn [target# ~@args]
