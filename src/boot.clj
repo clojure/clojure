@@ -946,10 +946,13 @@
   ([v start end]
     (. clojure.lang.RT (subvec v start end))))
 
+(defn load [rdr]
+  (. clojure.lang.Compiler (load rdr)))
+
 
 (def *exports*
 	'(clojure
-	    load-file eql-ref?
+	    load-file load
 		list cons conj defn
 		vector hash-map sorted-map sorted-map-by
 		meta with-meta defmacro when when-not
