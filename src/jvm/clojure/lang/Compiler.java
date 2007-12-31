@@ -2991,7 +2991,7 @@ public static Object loadFile(String file) throws Exception{
 		{
 		Var.pushThreadBindings(RT.map(SOURCE_PATH, file,
 		                              SOURCE, (new File(file)).getName()));
-		return load(f);
+		return load(new InputStreamReader(f));
 		}
 	finally
 		{
@@ -3000,7 +3000,7 @@ public static Object loadFile(String file) throws Exception{
 		}
 }
 
-public static Object load(InputStream s) throws Exception{
+public static Object load(Reader rdr) throws Exception{
 	Object EOF = new Object();
 	Object ret = null;
 	try
@@ -3011,8 +3011,11 @@ public static Object load(InputStream s) throws Exception{
 				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
 				       RT.CURRENT_NS_SYM, RT.CURRENT_NS_SYM.get()
 				));
-		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(s));
-		for(Object r = LispReader.read(rdr, false, EOF, false); r != EOF; r = LispReader.read(rdr, false, EOF, false))
+		LineNumberingPushbackReader pushbackReader =
+				(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
+				new LineNumberingPushbackReader(rdr);
+		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
+		    r = LispReader.read(pushbackReader, false, EOF, false))
 			ret = eval(r);
 		}
 	finally
