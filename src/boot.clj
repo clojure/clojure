@@ -741,21 +741,30 @@
                          (rest fs))
                  fmap))))
 
-(defn print
-  ([x] (thisfn x *out*))
-  ([x writer] (. clojure.lang.RT (print x writer))))
+(defn pr
+  ([x]
+   (. clojure.lang.RT (print x *out*))
+   nil)
+  ([x & more]
+   (pr x)
+   (. *out* (append \space))
+   (apply pr more)))
 
-(defn newline
-  ([] (thisfn *out*))
-  ([#^java.io.Writer writer]
-    (. writer (append \newline))
-    nil))
+(defn newline []
+  (. *out* (append \newline))
+  nil)
 
-(defn prn
-  ([x] (thisfn x *out*))
-  ([x writer]
-    (print x writer)
-    (newline)))
+(defn prn [& more]
+  (apply pr more)
+  (newline))
+
+(defn print [& more]
+  (binding [*print-readably* nil]
+    (apply pr more)))
+
+(defn println [& more]
+  (binding [*print-readably* nil]
+    (apply prn more)))
 
 (defn read
   ([]
@@ -983,7 +992,7 @@
 		eval import unimport refer unrefer in-namespace unintern
 		into-array array
 		make-proxy implement
-		prn print newline *out* *current-namespace*  *print-meta*
+		pr prn print println newline *out* *current-namespace*  *print-meta* *print-readably*
 		doto  memfn
         read *in* with-open
 		time

@@ -116,6 +116,7 @@ Symbol.create("Exception"), "java.lang.Exception"
 
 
 final static Var PRINT_META = Var.intern(Symbol.create("clojure", "*print-meta*"), null);
+final static Var PRINT_READABLY = Var.intern(Symbol.create("clojure", "*print-readably*"), T);
 
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
@@ -677,10 +678,11 @@ static public boolean suppressRead(){
 
 static public void print(Object x, Writer w) throws Exception{
 	//todo - make extensible
+	boolean readably = PRINT_READABLY.get() != null;
 	if(x instanceof Obj)
 		{
 		Obj o = (Obj) x;
-		if(RT.count(o.meta()) > 0 && PRINT_META.get() != null)
+		if(RT.count(o.meta()) > 0 && readably && PRINT_META.get() != null)
 			{
 			IPersistentMap meta = o.meta();
 			w.write("#^");
@@ -702,30 +704,35 @@ static public void print(Object x, Writer w) throws Exception{
 	else if(x instanceof String)
 		{
 		String s = (String) x;
-		w.write('"');
-		//w.write(x.toString());
-		for(int i = 0; i < s.length(); i++)
+		if(!readably)
+			w.write(s);
+		else
 			{
-			char c = s.charAt(i);
-			switch(c)
+			w.write('"');
+			//w.write(x.toString());
+			for(int i = 0; i < s.length(); i++)
 				{
-				case'\n':
-					w.write("\\n");
-					break;
-				case'\t':
-					w.write("\\t");
-					break;
-				case'"':
-					w.write("\\\"");
-					break;
-				case'\\':
-					w.write("\\\\");
-					break;
-				default:
-					w.write(c);
+				char c = s.charAt(i);
+				switch(c)
+					{
+					case'\n':
+						w.write("\\n");
+						break;
+					case'\t':
+						w.write("\\t");
+						break;
+					case'"':
+						w.write("\\\"");
+						break;
+					case'\\':
+						w.write("\\\\");
+						break;
+					default:
+						w.write(c);
+					}
 				}
+			w.write('"');
 			}
-		w.write('"');
 		}
 //	else if(x instanceof ArgVector)
 //		{
@@ -771,21 +778,26 @@ static public void print(Object x, Writer w) throws Exception{
 //		}
 	else if(x instanceof Character)
 		{
-		w.write('\\');
 		char c = ((Character) x).charValue();
-		switch(c)
+		if(!readably)
+			w.write(c);
+		else
 			{
-			case'\n':
-				w.write("newline");
-				break;
-			case'\t':
-				w.write("tab");
-				break;
-			case' ':
-				w.write("space");
-				break;
-			default:
-				w.write(c);
+			w.write('\\');
+			switch(c)
+				{
+				case'\n':
+					w.write("newline");
+					break;
+				case'\t':
+					w.write("tab");
+					break;
+				case' ':
+					w.write("space");
+					break;
+				default:
+					w.write(c);
+				}
 			}
 		}
 	else w.write(x.toString());
