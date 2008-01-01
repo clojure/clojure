@@ -1464,7 +1464,11 @@ static class ThrowExpr extends UntypedExpr{
 
 
 	public Object eval() throws Exception{
-		throw (Exception) excExpr.eval();
+		Object t = excExpr.eval();
+		if(t instanceof Exception)
+			throw (Exception) t;
+		else
+			throw (Error) t;
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
