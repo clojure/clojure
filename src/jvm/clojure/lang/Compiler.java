@@ -1464,11 +1464,7 @@ static class ThrowExpr extends UntypedExpr{
 
 
 	public Object eval() throws Exception{
-		Object t = excExpr.eval();
-		if(t instanceof Exception)
-			throw (Exception) t;
-		else
-			throw (Error) t;
+		throw new Exception("Can't eval throw");
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -1479,6 +1475,8 @@ static class ThrowExpr extends UntypedExpr{
 
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) throws Exception{
+			if(context == C.EVAL)
+				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 			return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
 		}
 	}
