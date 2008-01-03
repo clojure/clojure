@@ -80,11 +80,14 @@
 (defn #^String str [#^Object x]
   (if x (. x (toString)) ""))
 
-(defn #^String strcat [x & ys]
-  (let [#^String s (str x)]
-    (if ys
-        (recur (. s  (concat (str (first ys)))) (rest ys))
-      s)))
+(defn #^String strcat 
+  ([] "")
+  ([x] (str x))
+  ([x & ys]
+    (loop [sb (new StringBuilder (str x)) more ys]
+      (if more
+          (recur (. sb  (append (str (first more)))) (rest more))
+        (str sb)))))
 
 (defn sym
   ([name] (. clojure.lang.Symbol (intern name)))
@@ -742,6 +745,7 @@
                  fmap))))
 
 (defn pr
+  ([] nil)
   ([x]
    (. clojure.lang.RT (print x *out*))
    nil)
