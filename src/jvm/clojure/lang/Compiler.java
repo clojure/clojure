@@ -67,6 +67,7 @@ static final Symbol HASHMAP = Symbol.create("clojure", "hash-map");
 static final Symbol VECTOR = Symbol.create("clojure", "vector");
 
 static final Symbol _AMP_ = Symbol.create("&");
+static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 
 //static final Symbol IMPORT = Symbol.create("import");
 //static final Symbol USE = Symbol.create("use");
@@ -867,7 +868,17 @@ static class InstanceMethodExpr extends MethodExpr{
 				method = null;
 			//throw new IllegalArgumentException("No matching method found");
 			else
-				method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
+				{
+				int methodidx = 0;
+				if(methods.size() > 1)
+					{
+					ArrayList<Class[]> params = new ArrayList();
+					for(int i = 0; i < methods.size(); i++)
+						params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
+					methodidx = getMatchingParams(params, args);
+					}
+				method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+				}
 			}
 		else
 			method = null;
@@ -928,7 +939,7 @@ static class StaticMethodExpr extends MethodExpr{
 
 
 	public StaticMethodExpr(int line, String className, String methodName, IPersistentVector args)
-			throws ClassNotFoundException{
+			throws Exception{
 		this.className = className;
 		this.methodName = methodName;
 		this.args = args;
@@ -937,7 +948,16 @@ static class StaticMethodExpr extends MethodExpr{
 		List methods = Reflector.getMethods(Class.forName(className), args.count(), methodName, true);
 		if(methods.isEmpty())
 			throw new IllegalArgumentException("No matching method: " + methodName);
-		method = (java.lang.reflect.Method) ((methods.size() == 1) ? methods.get(0) : null);
+
+		int methodidx = 0;
+		if(methods.size() > 1)
+			{
+			ArrayList<Class[]> params = new ArrayList();
+			for(int i = 0; i < methods.size(); i++)
+				params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
+			methodidx = getMatchingParams(params, args);
+			}
+		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 	}
 
 	public Object eval() throws Exception{
@@ -1525,6 +1545,24 @@ static class ClassExpr implements Expr{
 	}
 }
 
+static int getMatchingParams(ArrayList<Class[]> paramlists, IPersistentVector argexprs) throws Exception{
+	//presumes matching lengths
+	for(int i = 0; i < paramlists.size(); i++)
+		{
+		boolean match = true;
+		ISeq aseq = argexprs.seq();
+		for(int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.rest())
+			{
+			Expr arg = (Expr) aseq.first();
+			Class aclass = arg.hasJavaClass()? arg.getJavaClass():Object.class;
+			match = Reflector.paramArgTypeMatch(paramlists.get(i)[p], aclass);
+			}
+		if(match)
+			return i;
+		}
+	return -1;
+}
+
 static class NewExpr implements Expr{
 	final String className;
 	final IPersistentVector args;
@@ -1535,22 +1573,32 @@ static class NewExpr implements Expr{
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 
 
-	public NewExpr(String className, IPersistentVector args) throws ClassNotFoundException{
+	public NewExpr(String className, IPersistentVector args) throws Exception{
 		this.args = args;
 		this.className = className;
 		this.c = Class.forName(className);
 		Constructor[] allctors = c.getConstructors();
 		ArrayList ctors = new ArrayList();
+		ArrayList<Class[]> params = new ArrayList();
 		for(int i = 0; i < allctors.length; i++)
 			{
 			Constructor ctor = allctors[i];
 			if(ctor.getParameterTypes().length == args.count())
+				{
 				ctors.add(ctor);
+				params.add(ctor.getParameterTypes());
+				}
 			}
 		if(ctors.isEmpty())
 			throw new IllegalArgumentException("No matching ctor found");
 
-		this.ctor = (ctors.size() == 1) ? (Constructor) ctors.get(0) : null;
+		int ctoridx = 0;
+		if(ctors.size() > 1)
+			{
+			ctoridx = getMatchingParams(params, args);
+			}
+
+		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
 	}
 
 	public Object eval() throws Exception{
@@ -2415,7 +2463,7 @@ static class FnMethod{
 
 				else
 					{
-					LocalBinding lb = registerLocal(p, tagOf(p), null);
+					LocalBinding lb = registerLocal(p, state==PSTATE.REST?ISEQ:tagOf(p), null);
 					argLocals = argLocals.cons(lb);
 					switch(state)
 						{

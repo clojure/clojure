@@ -908,7 +908,7 @@
                          (. q (put (f (first job))))
                          (recur))))
           tasks (doseq dnu (map (fn [task]
-                                  (. exec (submit task)))
+                                  (. exec (submit #^java.util.concurrent.Callable task)))
                                 (replicate nthreads produce)))
           consume (fn []
                     (if (sync nil (and (or @todo (pos? @out))

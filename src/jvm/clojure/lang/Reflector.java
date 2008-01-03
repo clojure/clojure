@@ -288,21 +288,25 @@ static Object[] boxArgs(Class[] params, Object[] args){
 	return ret;
 }
 
-static public boolean primBoxTypeMatch(Class primType, Class boxType){
-	if(primType == int.class)
-		return boxType == Integer.class || boxType == FixNum.class;
-	else if(primType == float.class)
-		return boxType == Float.class;
-	else if(primType == double.class)
-		return boxType == Double.class || boxType == DoubleNum.class;
-	else if(primType == long.class)
-		return boxType == Long.class || boxType == BigNum.class;
-	else if(primType == char.class)
-		return boxType == Character.class;
-	else if(primType == short.class)
-		return boxType == Short.class;
-	else if(primType == byte.class)
-		return boxType == Byte.class;
+static public boolean paramArgTypeMatch(Class paramType, Class argType){
+	if(paramType == argType || paramType.isAssignableFrom(argType))
+		return true;
+	if(paramType == int.class)
+		return argType == Integer.class || argType == FixNum.class;
+	else if(paramType == float.class)
+		return argType == Float.class;
+	else if(paramType == double.class)
+		return argType == Double.class || argType == DoubleNum.class;
+	else if(paramType == long.class)
+		return argType == Long.class || argType == BigNum.class;
+	else if(paramType == char.class)
+		return argType == Character.class;
+	else if(paramType == short.class)
+		return argType == Short.class;
+	else if(paramType == byte.class)
+		return argType == Byte.class;
+	else if(paramType == boolean.class)
+		return argType == Boolean.class;
 	return false;
 }
 
@@ -327,7 +331,7 @@ static boolean isCongruent(Class[] params, Object[] args){
 				if(arg == null)
 					ret = false;
 				else
-					ret = primBoxTypeMatch(paramType, argType);
+					ret = paramArgTypeMatch(paramType, argType);
 				}
 			else
 				{

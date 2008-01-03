@@ -162,6 +162,9 @@ static public final Object[] EMPTY_ARRAY = new Object[]{};
 //static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
 
+static{
+OUT.setTag(Symbol.create("java.io.PrintStream"));
+}
 //static
 //	{
 //	chars = new Character[256];
