@@ -23,7 +23,7 @@ public class Reflector{
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) throws Exception{
 	Class c = target.getClass();
 	List methods = getMethods(c, args.length, methodName, false);
-	return prepRet(invokeMatchingMethod(methodName, methods, target, args));
+	return invokeMatchingMethod(methodName, methods, target, args);
 }
 
 static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
@@ -65,7 +65,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		}
 	if(m == null)
 		throw new IllegalArgumentException("No matching method found: " + methodName);
-	return prepRet(m.invoke(target, boxedArgs));
+	return prepRet(m.getReturnType(),m.invoke(target, boxedArgs));
 }
 
 public static Method getAsMethodOfPublicBase(Class c, Method m){
@@ -149,7 +149,7 @@ public static Object getStaticField(String className, String fieldName) throws E
 	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{
-		return prepRet(f.get(null));
+		return prepRet(f.getType(),f.get(null));
 		}
 	throw new IllegalArgumentException("No matching field found");
 }
@@ -170,7 +170,7 @@ public static Object getInstanceField(Object target, String fieldName) throws Ex
 	Field f = getField(c, fieldName, false);
 	if(f != null)
 		{
-		return prepRet(f.get(target));
+		return prepRet(f.getType(),f.get(target));
 		}
 	throw new IllegalArgumentException("No matching field found");
 }
@@ -192,7 +192,7 @@ public static Object invokeInstanceMember(Object target, String name) throws Exc
 	Field f = getField(c, name, false);
 	if(f != null)  //field get
 		{
-		return prepRet(f.get(target));
+		return prepRet(f.getType(),f.get(target));
 		}
 	return invokeInstanceMethod(target, name, RT.EMPTY_ARRAY);
 }
@@ -242,18 +242,13 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 
 
 static Object boxArg(Class paramType, Object arg){
-	if(arg == null && !paramType.isPrimitive())
-		return arg;
-//	Class argType = arg.getClass();
-//	if(primBoxTypeMatch(paramType, argType))
-//		return arg;
-	if(paramType == boolean.class)
-		{
-		if(arg == null)
-			return Boolean.FALSE;
-		return Boolean.TRUE;
-		}
-	else if(paramType.isPrimitive() && arg instanceof Number)
+	if(!paramType.isPrimitive())
+		return paramType.cast(arg);
+	else if(paramType == boolean.class)
+		return Boolean.class.cast(arg);
+	else if(paramType == char.class)
+		return Character.class.cast(arg);
+	else if(arg instanceof Number)
 		{
 		Number n = (Number) arg;
 		if(paramType == int.class)
@@ -264,15 +259,12 @@ static Object boxArg(Class paramType, Object arg){
 			return n.doubleValue();
 		else if(paramType == long.class)
 			return n.longValue();
-//		else if(paramType == char.class)
-//			return (char) n.intValue();
 		else if(paramType == short.class)
 			return n.shortValue();
-		else
+		else if(paramType == byte.class)
 			return n.byteValue();
 		}
-	else
-		return arg;
+	throw new IllegalArgumentException("Unexpected param type");
 }
 
 static Object[] boxArgs(Class[] params, Object[] args){
@@ -289,6 +281,8 @@ static Object[] boxArgs(Class[] params, Object[] args){
 }
 
 static public boolean paramArgTypeMatch(Class paramType, Class argType){
+	if(argType == null)
+		return !paramType.isPrimitive();
 	if(paramType == argType || paramType.isAssignableFrom(argType))
 		return true;
 	if(paramType == int.class)
@@ -322,31 +316,15 @@ static boolean isCongruent(Class[] params, Object[] args){
 			Object arg = args[i];
 			Class argType = (arg == null) ? null : arg.getClass();
 			Class paramType = params[i];
-			if(paramType == boolean.class)
-				{
-				ret = arg == null || argType == Boolean.class;
-				}
-			else if(paramType.isPrimitive())
-				{
-				if(arg == null)
-					ret = false;
-				else
-					ret = paramArgTypeMatch(paramType, argType);
-				}
-			else
-				{
-				ret = arg == null
-				      || argType == paramType
-				      || paramType.isAssignableFrom(argType);
-				}
+			ret = paramArgTypeMatch(paramType, argType);
 			}
 		}
 	return ret;
 }
 
-static Object prepRet(Object x){
-	if(x instanceof Boolean)
-		return ((Boolean) x).booleanValue() ? x : null;
+static Object prepRet(Class c, Object x){
+	if(c == boolean.class)
+		return ((Boolean) x).booleanValue() ? RT.T : null;
 	return x;
 }
 }

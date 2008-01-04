@@ -471,6 +471,7 @@ static interface AssignableExpr{
 }
 
 static abstract class HostExpr implements Expr{
+	final static Type BOOLEAN_TYPE = Type.getType(Boolean.class);
 	final static Type CHAR_TYPE = Type.getType(Character.class);
 	final static Type INTEGER_TYPE = Type.getType(Integer.class);
 	final static Type LONG_TYPE = Type.getType(Long.class);
@@ -481,6 +482,7 @@ static abstract class HostExpr implements Expr{
 	final static Type NUMBER_TYPE = Type.getType(Number.class);
 
 	final static Method charValueMethod = Method.getMethod("char charValue()");
+	final static Method booleanValueMethod = Method.getMethod("boolean booleanValue()");
 
 	final static Method charValueOfMethod = Method.getMethod("Character valueOf(char)");
 	final static Method intValueOfMethod = Method.getMethod("Integer valueOf(int)");
@@ -602,14 +604,16 @@ static abstract class HostExpr implements Expr{
 			{
 			if(paramType == boolean.class)
 				{
-				Label falseLabel = gen.newLabel();
-				Label endLabel = gen.newLabel();
-				gen.ifNull(falseLabel);
-				gen.push(1);
-				gen.goTo(endLabel);
-				gen.mark(falseLabel);
-				gen.push(0);
-				gen.mark(endLabel);
+				gen.checkCast(BOOLEAN_TYPE);
+				gen.invokeVirtual(BOOLEAN_TYPE, booleanValueMethod);
+//				Label falseLabel = gen.newLabel();
+//				Label endLabel = gen.newLabel();
+//				gen.ifNull(falseLabel);
+//				gen.push(1);
+//				gen.goTo(endLabel);
+//				gen.mark(falseLabel);
+//				gen.push(0);
+//				gen.mark(endLabel);
 				}
 			else if(paramType == char.class)
 				{
@@ -2098,7 +2102,7 @@ static class InvokeExpr implements Expr{
 		PersistentVector argvs = PersistentVector.EMPTY;
 		for(int i = 0; i < args.count(); i++)
 			argvs = argvs.cons(((Expr) args.nth(i)).eval());
-		return Reflector.prepRet(fn.applyTo(RT.seq(argvs)));
+		return fn.applyTo(RT.seq(argvs));
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
