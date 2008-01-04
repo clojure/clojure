@@ -2947,8 +2947,22 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 }
 
 public static Object eval(Object form) throws Exception{
-	Expr expr = analyze(C.EVAL, form);
-	return expr.eval();
+	boolean createdLoader = false;
+	try
+		{
+		if(!LOADER.isBound())
+			{
+			Var.pushThreadBindings(RT.map(LOADER, new DynamicClassLoader()));
+			createdLoader = true;
+			}
+		Expr expr = analyze(C.EVAL, form);
+		return expr.eval();
+		}
+	finally
+		{
+		if(createdLoader)
+			Var.popThreadBindings();
+		}
 }
 
 private static KeywordExpr registerKeyword(Keyword keyword){
