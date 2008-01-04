@@ -31,6 +31,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
@@ -898,7 +899,11 @@ static class InstanceMethodExpr extends MethodExpr{
 		for(int i = 0; i < args.count(); i++)
 			argvals[i] = ((Expr) args.nth(i)).eval();
 		if(method != null)
-			return method.invoke(targetval, argvals);
+			{
+			LinkedList ms = new LinkedList();
+			ms.add(method);
+			return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
+			}
 		return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
 	}
 
@@ -975,7 +980,11 @@ static class StaticMethodExpr extends MethodExpr{
 		for(int i = 0; i < args.count(); i++)
 			argvals[i] = ((Expr) args.nth(i)).eval();
 		if(method != null)
-			return method.invoke(null, argvals);
+			{
+			LinkedList ms = new LinkedList();
+			ms.add(method);
+			return Reflector.invokeMatchingMethod(methodName, ms, null, argvals);
+			}
 		return Reflector.invokeStaticMethod(className, methodName, argvals);
 	}
 
@@ -1618,7 +1627,9 @@ static class NewExpr implements Expr{
 		for(int i = 0; i < args.count(); i++)
 			argvals[i] = ((Expr) args.nth(i)).eval();
 		if(this.ctor != null)
-			return ctor.newInstance(argvals);
+			{
+			return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), argvals));
+			}
 		return Reflector.invokeConstructor(Class.forName(className), argvals);
 	}
 

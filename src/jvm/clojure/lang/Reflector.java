@@ -26,7 +26,7 @@ public static Object invokeInstanceMethod(Object target, String methodName, Obje
 	return prepRet(invokeMatchingMethod(methodName, methods, target, args));
 }
 
-private static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
+static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
 		throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
 	Method m = null;
 	Object[] boxedArgs = null;
