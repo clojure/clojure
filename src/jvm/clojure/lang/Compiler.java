@@ -2467,6 +2467,8 @@ static class FnMethod{
 				if(!(parms.nth(i) instanceof Symbol))
 					throw new IllegalArgumentException("fn params must be Symbols");
 				Symbol p = (Symbol) parms.nth(i);
+				if(p.getNamespace() != null)
+					throw new Exception("Can't use qualified name as parameter");
 				if(p.equals(_AMP_))
 					{
 					if(state == PSTATE.REQ)
