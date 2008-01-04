@@ -163,7 +163,7 @@ static public final Object[] EMPTY_ARRAY = new Object[]{};
 static AtomicInteger id = new AtomicInteger(1);
 
 static{
-OUT.setTag(Symbol.create("java.io.PrintStream"));
+OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
 }
 //static
 //	{
