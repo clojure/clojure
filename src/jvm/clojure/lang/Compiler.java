@@ -32,6 +32,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.ArrayList;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 
 public class Compiler implements Opcodes{
 
@@ -877,7 +878,14 @@ static class InstanceMethodExpr extends MethodExpr{
 						params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
 					methodidx = getMatchingParams(params, args);
 					}
-				method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+				java.lang.reflect.Method m =
+						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+				if(m != null && !Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+					{
+					//public method of non-public class, try to find it in hierarchy
+					m = Reflector.getAsMethodOfPublicBase(m.getDeclaringClass(), m);
+					}
+				method = m;
 				}
 			}
 		else
@@ -889,6 +897,8 @@ static class InstanceMethodExpr extends MethodExpr{
 		Object[] argvals = new Object[args.count()];
 		for(int i = 0; i < args.count(); i++)
 			argvals[i] = ((Expr) args.nth(i)).eval();
+		if(method != null)
+			return method.invoke(targetval, argvals);
 		return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
 	}
 
@@ -964,6 +974,8 @@ static class StaticMethodExpr extends MethodExpr{
 		Object[] argvals = new Object[args.count()];
 		for(int i = 0; i < args.count(); i++)
 			argvals[i] = ((Expr) args.nth(i)).eval();
+		if(method != null)
+			return method.invoke(null, argvals);
 		return Reflector.invokeStaticMethod(className, methodName, argvals);
 	}
 
@@ -1554,7 +1566,7 @@ static int getMatchingParams(ArrayList<Class[]> paramlists, IPersistentVector ar
 		for(int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.rest())
 			{
 			Expr arg = (Expr) aseq.first();
-			Class aclass = arg.hasJavaClass()? arg.getJavaClass():Object.class;
+			Class aclass = arg.hasJavaClass() ? arg.getJavaClass() : Object.class;
 			match = Reflector.paramArgTypeMatch(paramlists.get(i)[p], aclass);
 			}
 		if(match)
@@ -1605,6 +1617,8 @@ static class NewExpr implements Expr{
 		Object[] argvals = new Object[args.count()];
 		for(int i = 0; i < args.count(); i++)
 			argvals[i] = ((Expr) args.nth(i)).eval();
+		if(this.ctor != null)
+			return ctor.newInstance(argvals);
 		return Reflector.invokeConstructor(Class.forName(className), argvals);
 	}
 
@@ -2463,7 +2477,7 @@ static class FnMethod{
 
 				else
 					{
-					LocalBinding lb = registerLocal(p, state==PSTATE.REST?ISEQ:tagOf(p), null);
+					LocalBinding lb = registerLocal(p, state == PSTATE.REST ? ISEQ : tagOf(p), null);
 					argLocals = argLocals.cons(lb);
 					switch(state)
 						{
