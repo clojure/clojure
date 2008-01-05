@@ -12,13 +12,13 @@
 
 package clojure.lang;
 
-//*
+/*
 
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
 /*/
-/*
+//*
 
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
@@ -691,7 +691,7 @@ static abstract class HostExpr implements Expr{
 			Symbol sym = (Symbol) form;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				if(sym.name.indexOf('.') > 0)
+				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 					className = sym.name;
 				else
 					{
@@ -706,7 +706,7 @@ static abstract class HostExpr implements Expr{
 	}
 
 	static Class tagToClass(Symbol tag) throws ClassNotFoundException{
-		String className = maybeClassName(tag, false);
+		String className = maybeClassName(tag, true);
 		if(className != null)
 			return Class.forName(className);
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
@@ -718,14 +718,18 @@ static abstract class FieldExpr extends HostExpr{
 
 static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	final Expr target;
+	final Class targetClass;
+	final java.lang.reflect.Field field;
 	final String fieldName;
 	final int line;
 	final static Method getInstanceFieldMethod = Method.getMethod("Object getInstanceField(Object,String)");
 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
 
-	public InstanceFieldExpr(int line, Expr target, String fieldName){
+	public InstanceFieldExpr(int line, Expr target, String fieldName) throws Exception{
 		this.target = target;
+		this.targetClass = target.hasJavaClass() ? target.getJavaClass() : null;
+		this.field = targetClass != null ? targetClass.getField(fieldName) : null;
 		this.fieldName = fieldName;
 		this.line = line;
 	}
@@ -738,14 +742,24 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		if(context != C.STATEMENT)
 			{
 			gen.visitLineNumber(line, gen.mark());
-			target.emit(C.EXPRESSION, fn, gen);
-			gen.push(fieldName);
-			gen.invokeStatic(REFLECTOR_TYPE, getInstanceFieldMethod);
+			if(targetClass != null)
+				{
+				target.emit(C.EXPRESSION, fn, gen);
+				gen.checkCast(Type.getType(targetClass));
+				gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
+				HostExpr.emitBoxReturn(fn, gen, field.getType());
+				}
+			else
+				{
+				target.emit(C.EXPRESSION, fn, gen);
+				gen.push(fieldName);
+				gen.invokeStatic(REFLECTOR_TYPE, getInstanceFieldMethod);
+				}
 			}
 	}
 
 	public boolean hasJavaClass() throws Exception{
-		return target.hasJavaClass();
+		return targetClass != null;
 	}
 
 	public Class getJavaClass() throws Exception{
@@ -760,10 +774,23 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 
 	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
 	                       Expr val){
-		target.emit(C.EXPRESSION, fn, gen);
-		gen.push(fieldName);
-		val.emit(C.EXPRESSION, fn, gen);
-		gen.invokeStatic(REFLECTOR_TYPE, setInstanceFieldMethod);
+		gen.visitLineNumber(line, gen.mark());
+		if(targetClass != null)
+			{
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.checkCast(Type.getType(targetClass));
+			val.emit(C.EXPRESSION, fn, gen);
+			gen.dupX1();
+			HostExpr.emitUnboxArg(fn, gen, field.getType());
+			gen.putField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
+			}
+		else
+			{
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.push(fieldName);
+			val.emit(C.EXPRESSION, fn, gen);
+			gen.invokeStatic(REFLECTOR_TYPE, setInstanceFieldMethod);
+			}
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -808,8 +835,8 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public Class getJavaClass() throws Exception{
-		Class c = Class.forName(className);
-		java.lang.reflect.Field field = c.getField(fieldName);
+		//Class c = Class.forName(className);
+		//java.lang.reflect.Field field = c.getField(fieldName);
 		return field.getType();
 	}
 
@@ -819,10 +846,11 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 
 	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
 	                       Expr val){
-		gen.push(className);
-		gen.push(fieldName);
+		gen.visitLineNumber(line, gen.mark());
 		val.emit(C.EXPRESSION, fn, gen);
-		gen.invokeStatic(REFLECTOR_TYPE, setStaticFieldMethod);
+		gen.dup();
+		HostExpr.emitUnboxArg(fn, gen, field.getType());
+		gen.putStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -2268,8 +2296,8 @@ static class FnExpr implements Expr{
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = cw;
-		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
+		//ClassVisitor cv = cw;
+		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
@@ -3070,7 +3098,13 @@ private static Symbol tagOf(Object o){
 		{
 		IObj obj = (IObj) o;
 		if(obj.meta() != null)
-			return (Symbol) obj.meta().valAt(RT.TAG_KEY);
+			{
+			Object tag = obj.meta().valAt(RT.TAG_KEY);
+			if(tag instanceof Symbol)
+				return (Symbol) tag;
+			else if(tag instanceof String)
+				return Symbol.intern(null, (String) tag);
+			}
 		}
 	return null;
 }

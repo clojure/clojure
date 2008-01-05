@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap extends APersistentMap{
+public class PersistentTreeMap extends APersistentMap implements Reversible{
 
 public final Comparator comp;
 public final Node tree;

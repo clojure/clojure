@@ -360,8 +360,8 @@
 (defn val [#^java.util.Map$Entry e]
  (. e (getValue)))
 
-(defn rseq [smap]
-  (. smap (rseq)))
+(defn rseq [#^clojure.lang.Reversible rev]
+  (. rev (rseq)))
 
 (defn name [#^clojure.lang.Named x]
   (. x (getName)))
@@ -700,7 +700,7 @@
          (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
        (let [varsym (sym (str ns) (str name))
              var (. clojure.lang.Var (find varsym))
-             rvar ((. refers (get)) name)]
+             #^clojure.lang.Var rvar ((. refers (get)) name)]
          (if var
              (if rvar
                  (when (not (eql? rvar var))
@@ -868,11 +868,11 @@
 (def-aset aset-char setChar char)
 
 (defn make-array 
-  ([type len]
+  ([#^Class type len]
     (. Array (newInstance type (int len))))
-  ([type dim & more-dims]
+  ([#^Class type dim & more-dims]
     (let [dims (cons dim more-dims)
-          dimarray (make-array (. Integer TYPE)  (count dims))]
+          #^"[I" dimarray (make-array (. Integer TYPE)  (count dims))]
       (dotimes i (alength dimarray)
         (aset-int dimarray i (nth dims i)))
       (. Array (newInstance type dimarray)))))
