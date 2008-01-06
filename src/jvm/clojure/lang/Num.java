@@ -111,11 +111,11 @@ static public Object[] truncate(Object num, Object div){
 }
 
 static public Object quotient(Object num, Object div){
-	return truncate(num,div)[0];
+	return truncate(num, div)[0];
 }
 
 static public Object remainder(Object num, Object div){
-	return truncate(num,div)[1];
+	return truncate(num, div)[1];
 }
 
 abstract public Object[] truncateDivide(Num rhs);
@@ -188,15 +188,15 @@ static public Num negate(Object x){
 }
 
 static public Object negPred(Object x){
-	return Num.from(x).minusp() ? RT.T : null;
+	return Num.from(x).minusp() ? RT.T : RT.F;
 }
 
 static public Object posPred(Object x){
-	return Num.from(x).plusp() ? RT.T : null;
+	return Num.from(x).plusp() ? RT.T : RT.F;
 }
 
 static public Object zeroPred(Object x){
-	return Num.from(x).zerop() ? RT.T : null;
+	return Num.from(x).zerop() ? RT.T : RT.F;
 }
 
 static public Num dec(Object x){

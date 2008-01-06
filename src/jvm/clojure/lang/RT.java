@@ -19,7 +19,8 @@ import java.lang.reflect.Array;
 
 public class RT{
 
-static public Keyword T = Keyword.intern(Symbol.create(null, "t"));
+static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null, "t"));
+static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.create(null, "t"));
 final static public Var OUT =
 		Var.intern(Symbol.create("clojure", "*out*"), new OutputStreamWriter(System.out));
 final static public Var IN =
@@ -115,7 +116,7 @@ Symbol.create("Exception"), "java.lang.Exception"
 );
 
 
-final static Var PRINT_META = Var.intern(Symbol.create("clojure", "*print-meta*"), null);
+final static Var PRINT_META = Var.intern(Symbol.create("clojure", "*print-meta*"), F);
 final static Var PRINT_READABLY = Var.intern(Symbol.create("clojure", "*print-readably*"), T);
 
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"), DEFAULT_IMPORTS);
@@ -151,7 +152,7 @@ final static Var REFERS =
 		                                       new AFn(){
 			                                       public Object invoke(Object arg1, Object arg2)
 					                                       throws Exception{
-				                                       return arg1 == arg2 ? RT.T : null;
+				                                       return arg1 == arg2 ? RT.T : RT.F;
 			                                       }
 		                                       })
 		           ));
@@ -162,9 +163,10 @@ static public final Object[] EMPTY_ARRAY = new Object[]{};
 //static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
 
-static{
-OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
-}
+static
+	{
+	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
+	}
 //static
 //	{
 //	chars = new Character[256];
@@ -339,7 +341,7 @@ static public Associative assoc(Object coll, Object key, Object val){
 static public Object contains(Object coll, Object key){
 	if(coll == null)
 		return false;
-	return ((Associative) coll).containsKey(key) ? T : null;
+	return ((Associative) coll).containsKey(key) ? T : F;
 }
 
 static public Object find(Object coll, Object key){
@@ -444,11 +446,11 @@ static public Character box(char x){
 }
 
 static public Object box(boolean x){
-	return x ? T : null;
+	return x ? T : F;
 }
 
 static public Object box(Boolean x){
-	return x ? T : null;
+	return x;// ? T : null;
 }
 
 static public Num box(byte x){
@@ -681,11 +683,11 @@ static public boolean suppressRead(){
 
 static public void print(Object x, Writer w) throws Exception{
 	//todo - make extensible
-	boolean readably = PRINT_READABLY.get() != null;
+	boolean readably = booleanCast(PRINT_READABLY.get());
 	if(x instanceof Obj)
 		{
 		Obj o = (Obj) x;
-		if(RT.count(o.meta()) > 0 && readably && PRINT_META.get() != null)
+		if(RT.count(o.meta()) > 0 && readably && booleanCast(PRINT_META.get()))
 			{
 			IPersistentMap meta = o.meta();
 			w.write("#^");

@@ -60,9 +60,11 @@
 (defmacro when-not [test & body]
    (list 'if test nil (cons 'do body)))
 
-(defn nil? [x] (if x nil :t))
+(defn #^Boolean nil? [x] (identical? x nil))
+(defn #^Boolean false? [x] (identical? x false))
+(defn #^Boolean true? [x] (identical? x true))
 
-(defn not [x] (nil? x))
+(defn not [x] (if x false true))
 
 (defn first [x] (. clojure.lang.RT (first x)))
 
@@ -75,7 +77,7 @@
 (defn frest [x] (first (rest x)))
 (defn rrest [x] (rest (rest x)))
 
-(defn eql? [x y] (. clojure.lang.RT (equal x y)))
+(defn #^Boolean eql? [x y] (. clojure.lang.RT (equal x y)))
 
 (defn #^String str [#^Object x]
   (if x (. x (toString)) ""))
@@ -140,7 +142,7 @@
 ;;at this point all the support for syntax-quote exists
 
 (defmacro and
-  ([] :t)
+  ([] true)
   ([x] x)
   ([x & rest] `(if ~x (and ~@rest))))
 
@@ -194,7 +196,7 @@
           (reduce thisfn (thisfn x y) more)))
 
 (defn <
-      ([x] :t)
+      ([x] true)
       ([x y] (. clojure.lang.Num (lt x y)))
       ([x y & more]
           (when (thisfn x y)
@@ -203,7 +205,7 @@
                 (thisfn y (first more))))))
 
 (defn <=
-      ([x] :t)
+      ([x] true)
       ([x y] (. clojure.lang.Num (lte x y)))
       ([x y & more]
           (when (thisfn x y)
@@ -212,7 +214,7 @@
                 (thisfn y (first more))))))
 
 (defn >
-      ([x] :t)
+      ([x] true)
       ([x y] (. clojure.lang.Num (gt x y)))
       ([x y & more]
           (when (thisfn x y)
@@ -221,7 +223,7 @@
                 (thisfn y (first more))))))
 
 (defn >=
-      ([x] :t)
+      ([x] true)
       ([x y] (. clojure.lang.Num (gte x y)))
       ([x y & more]
           (when (thisfn x y)
@@ -230,7 +232,7 @@
                 (thisfn y (first more))))))
 
 (defn ==
-      ([x] :t)
+      ([x] true)
       ([x y] (. clojure.lang.Num (equiv x y)))
       ([x y & more]
           (when (thisfn x y)
@@ -256,13 +258,13 @@
 (defn dec [x]
       (. clojure.lang.Num (dec x)))
 
-(defn pos? [x]
+(defn #^Boolean pos? [x]
       (. clojure.lang.Num (posPred x)))
 
-(defn neg? [x]
+(defn #^Boolean neg? [x]
       (. clojure.lang.Num (negPred x)))
 
-(defn zero? [x]
+(defn #^Boolean zero? [x]
       (. clojure.lang.Num (zeroPred x)))
 
 (defn quot [num div]
@@ -494,26 +496,26 @@
 
 
   
-(defn every [pred coll]
+(defn #^Boolean every? [pred coll]
   (if (seq coll)
      (and (pred (first coll))
           (recur pred (rest coll)))
-    :t))
+    true))
 
-(def not-every (comp not every))
+(def #^Boolean not-every? (comp not every?))
 
-(defn any [pred coll]
+(defn some [pred coll]
   (when (seq coll)
     (or (pred (first coll)) (recur pred (rest coll)))))
 
-(def not-any (comp not any))
+(def #^Boolean not-any? (comp not some))
 
 (defn map
   ([f coll]
     (when (seq coll)
        (lazy-cons (f (first coll)) (map f (rest coll)))))
   ([f coll & colls]
-    (when (and (seq coll) (every seq colls))
+    (when (and (seq coll) (every? seq colls))
       (lazy-cons (apply f (first coll) (map first colls))
                  (apply map f (rest coll) (map rest colls))))))
 
@@ -605,7 +607,7 @@
       (lazy-cons line (line-seq rdr)))))
 
 (defn comparator [pred]
-  (fn [x y] (cond (pred x y) -1 (pred y x) 1 :t 0)))
+  (fn [x y] (cond (pred x y) -1 (pred y x) 1 :else 0)))
   
 (defn sort
   ([#^java.util.Collection coll]
@@ -774,9 +776,9 @@
   ([]
     (thisfn *in*))
   ([stream]
-    (thisfn stream :t nil))
+    (thisfn stream true nil))
   ([stream eof-error? eof-value]
-    (thisfn stream eof-error? eof-value nil))
+    (thisfn stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
     (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
 
@@ -828,9 +830,7 @@
   (. clojure.lang.RT (charCast x)))
 
 (defn #^Boolean boolean [x]
-  (if x
-     (. Boolean TRUE)
-    (. Boolean FALSE)))
+  (if x true false))
 
 (import '(java.lang.reflect Array))
 
@@ -922,7 +922,7 @@
     ([f coll & colls]
        (thisfn (fn [items] (apply f items))
                ((fn [collseq]
-                 (when (every seq collseq)
+                 (when (every? seq collseq)
                    (let [encl-fn thisfn]
                       (lazy-cons (map first collseq)
                                  (encl-fn (map rest collseq))))))
@@ -988,7 +988,7 @@
 		agent agent-of agent-errors clear-agent-errors
 		await await-for
 		reduce reverse comp appl
-		every not-every any not-any
+		every? not-every? some not-any?
 		map pmap mapcat filter take take-while drop drop-while
 		zipmap
 		cycle split-at split-with repeat replicate iterate range
@@ -1009,5 +1009,6 @@
 		bit-and bit-or bit-xor bit-not
 		defstruct struct accessor create-struct
 		subvec
+		false? true?
 	))
 

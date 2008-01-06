@@ -190,7 +190,14 @@ static private Object interpretToken(String s) throws Exception{
 		{
 		return null;
 		}
-
+	else if(s.equals("true"))
+		{
+		return RT.T;
+		}
+	else if(s.equals("false"))
+		{
+		return RT.F;
+		}
 	else if(s.equals("/"))
 		{
 		return SLASH;

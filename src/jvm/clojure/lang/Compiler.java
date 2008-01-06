@@ -117,6 +117,7 @@ private static final Type RT_TYPE = Type.getType(RT.class);
 final static Type CLASS_TYPE = Type.getType(Class.class);
 final static Type REFLECTOR_TYPE = Type.getType(Reflector.class);
 final static Type THROWABLE_TYPE = Type.getType(Throwable.class);
+final static Type BOOLEAN_OBJECT_TYPE = Type.getType(Boolean.class);
 
 private static final Type[][] ARG_TYPES;
 private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -561,10 +562,11 @@ static abstract class HostExpr implements Expr{
 				Label falseLabel = gen.newLabel();
 				Label endLabel = gen.newLabel();
 				gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
-				gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
+				gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
 				gen.goTo(endLabel);
 				gen.mark(falseLabel);
-				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+				gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+//				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
 				gen.mark(endLabel);
 				}
 			else if(returnType == void.class)
@@ -1134,8 +1136,41 @@ static class NilExpr extends LiteralExpr{
 	}
 }
 
-static NilExpr NIL_EXPR = new NilExpr();
+final static NilExpr NIL_EXPR = new NilExpr();
 
+static class BooleanExpr extends LiteralExpr{
+	final boolean val;
+
+
+	public BooleanExpr(boolean val){
+		this.val = val;
+	}
+
+	Object val(){
+		return val ? RT.T : RT.F;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			{
+			if(val)
+				gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
+			else
+				gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+			}
+	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return Boolean.class;
+	}
+}
+
+final static BooleanExpr TRUE_EXPR = new BooleanExpr(true);
+final static BooleanExpr FALSE_EXPR = new BooleanExpr(false);
 
 static class NumExpr extends LiteralExpr{
 	final Num num;
@@ -1711,7 +1746,7 @@ static class NewExpr implements Expr{
 
 }
 
-static class IdenticalExpr extends UntypedExpr{
+static class IdenticalExpr implements Expr{
 	final Expr expr1;
 	final Expr expr2;
 
@@ -1721,9 +1756,17 @@ static class IdenticalExpr extends UntypedExpr{
 		this.expr2 = expr2;
 	}
 
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass(){
+		return Boolean.class;
+	}
+
 	public Object eval() throws Exception{
 		return expr1.eval() == expr2.eval() ?
-		       RT.T : null;
+		       RT.T : RT.F;
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -1734,10 +1777,12 @@ static class IdenticalExpr extends UntypedExpr{
 			expr1.emit(C.EXPRESSION, fn, gen);
 			expr2.emit(C.EXPRESSION, fn, gen);
 			gen.visitJumpInsn(IF_ACMPNE, not);
-			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
+			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
+//			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
 			gen.goTo(end);
 			gen.mark(not);
-			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+//			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
 			gen.mark(end);
 			}
 	}
@@ -1753,7 +1798,7 @@ static class IdenticalExpr extends UntypedExpr{
 	}
 }
 
-static class InstanceExpr extends UntypedExpr{
+static class InstanceExpr implements Expr{
 	final Expr expr;
 	final String className;
 
@@ -1765,7 +1810,15 @@ static class InstanceExpr extends UntypedExpr{
 
 	public Object eval() throws Exception{
 		return Class.forName(className).isInstance(expr.eval()) ?
-		       RT.T : null;
+		       RT.T : RT.F;
+	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass(){
+		return Boolean.class;
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -1776,10 +1829,12 @@ static class InstanceExpr extends UntypedExpr{
 			expr.emit(C.EXPRESSION, fn, gen);
 			gen.instanceOf(Type.getObjectType(className.replace('.', '/')));
 			gen.ifZCmp(GeneratorAdapter.EQ, not);
-			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
+			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
+//			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
 			gen.goTo(end);
 			gen.mark(not);
-			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+//			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
 			gen.mark(end);
 			}
 	}
@@ -1850,22 +1905,29 @@ static class IfExpr implements Expr{
 	}
 
 	public Object eval() throws Exception{
-		if(testExpr.eval() != null)
+		Object t = testExpr.eval();
+		if(t != null && t != Boolean.FALSE)
 			return thenExpr.eval();
 		return elseExpr.eval();
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		Label elseLabel = gen.newLabel();
+		Label nullLabel = gen.newLabel();
+		Label falseLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
 
 		gen.visitLineNumber(line, gen.mark());
 
 		testExpr.emit(C.EXPRESSION, fn, gen);
-		gen.ifNull(elseLabel);
+		gen.dup();
+		gen.ifNull(nullLabel);
+		gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+		gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
 		thenExpr.emit(context, fn, gen);
 		gen.goTo(endLabel);
-		gen.mark(elseLabel);
+		gen.mark(nullLabel);
+		gen.pop();
+		gen.mark(falseLabel);
 		elseExpr.emit(context, fn, gen);
 		gen.mark(endLabel);
 	}
@@ -2910,6 +2972,10 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	//todo symbol macro expansion?
 	if(form == null)
 		return NIL_EXPR;
+	else if(form == Boolean.TRUE)
+		return TRUE_EXPR;
+	else if(form == Boolean.FALSE)
+		return FALSE_EXPR;
 	Class fclass = form.getClass();
 	if(fclass == Symbol.class)
 		return analyzeSymbol((Symbol) form);
