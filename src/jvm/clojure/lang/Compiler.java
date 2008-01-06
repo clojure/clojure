@@ -734,6 +734,10 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.field = targetClass != null ? targetClass.getField(fieldName) : null;
 		this.fieldName = fieldName;
 		this.line = line;
+		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+			{
+			System.err.format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line, fieldName);
+			}
 	}
 
 	public Object eval() throws Exception{
@@ -925,6 +929,11 @@ static class InstanceMethodExpr extends MethodExpr{
 			}
 		else
 			method = null;
+
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+			{
+			System.err.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
+			}
 	}
 
 	public Object eval() throws Exception{
@@ -1007,6 +1016,10 @@ static class StaticMethodExpr extends MethodExpr{
 			methodidx = getMatchingParams(params, args);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+			{
+			System.err.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
+			}
 	}
 
 	public Object eval() throws Exception{
@@ -1661,7 +1674,7 @@ static class NewExpr implements Expr{
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 
 
-	public NewExpr(String className, IPersistentVector args) throws Exception{
+	public NewExpr(String className, IPersistentVector args, int line) throws Exception{
 		this.args = args;
 		this.className = className;
 		this.c = Class.forName(className);
@@ -1687,6 +1700,10 @@ static class NewExpr implements Expr{
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+			{
+			System.err.format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, className);
+			}
 	}
 
 	public Object eval() throws Exception{
@@ -1730,6 +1747,7 @@ static class NewExpr implements Expr{
 
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
+			int line = (Integer) LINE.get();
 			ISeq form = (ISeq) frm;
 			//(new Classname args...)
 			if(form.count() < 2)
@@ -1740,7 +1758,7 @@ static class NewExpr implements Expr{
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.rest(RT.rest(form)); s != null; s = s.rest())
 				args = args.cons(analyze(C.EXPRESSION, s.first()));
-			return new NewExpr(className, args);
+			return new NewExpr(className, args, line);
 		}
 	}
 

@@ -118,6 +118,7 @@ Symbol.create("Exception"), "java.lang.Exception"
 
 final static Var PRINT_META = Var.intern(Symbol.create("clojure", "*print-meta*"), F);
 final static Var PRINT_READABLY = Var.intern(Symbol.create("clojure", "*print-readably*"), T);
+final static Var WARN_ON_REFLECTION = Var.intern(Symbol.create("clojure", "*warn-on-reflection*"), F);
 
 final static Var IMPORTS = Var.intern(Symbol.create("clojure", "*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){

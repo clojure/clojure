@@ -1012,5 +1012,6 @@
 		defstruct struct accessor create-struct
 		subvec
 		false? true?
+		*warn-on-reflection*
 	))
 
