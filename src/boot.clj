@@ -144,7 +144,9 @@
 (defmacro and
   ([] true)
   ([x] x)
-  ([x & rest] `(if ~x (and ~@rest))))
+  ([x & rest]
+    `(let [and# ~x]
+       (if and# (and ~@rest) and#))))
 
 (defmacro or
   ([] nil)
