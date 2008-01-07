@@ -734,7 +734,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.field = targetClass != null ? targetClass.getField(fieldName) : null;
 		this.fieldName = fieldName;
 		this.line = line;
-		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
 			System.err.format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line, fieldName);
 			}
@@ -930,7 +930,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		else
 			method = null;
 
-		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
 			System.err.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
@@ -1016,7 +1016,7 @@ static class StaticMethodExpr extends MethodExpr{
 			methodidx = getMatchingParams(params, args);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
-		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
 			System.err.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
@@ -1700,7 +1700,7 @@ static class NewExpr implements Expr{
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
-		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION))
+		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
 			System.err.format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, className);
 			}
