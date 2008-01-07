@@ -341,7 +341,7 @@ static public Associative assoc(Object coll, Object key, Object val){
 
 static public Object contains(Object coll, Object key){
 	if(coll == null)
-		return false;
+		return F;
 	return ((Associative) coll).containsKey(key) ? T : F;
 }
 

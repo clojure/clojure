@@ -323,7 +323,7 @@
 
 ;;map stuff
 
-(defn contains [map key]
+(defn contains? [map key]
  (. clojure.lang.RT (contains map key)))
 
 (defn get
@@ -584,7 +584,7 @@
 (defn merge-with [f & maps]
   (let [merge-entry (fn [m e]
 			(let [k (key e) v (val e)]
-			  (if (contains m k)
+			  (if (contains? m k)
 			    (assoc m k (f (m k) v))
 			    (assoc m k v))))
 	merge2 (fn [m1 m2]
@@ -978,7 +978,7 @@
 		and or + * / - == < <= > >=
 		inc dec pos? neg? zero? quot rem
 		complement constantly identity seq count
-		peek pop nth contains get
+		peek pop nth contains? get
 		assoc dissoc find keys vals merge merge-with
 		scan touch
 		key val
