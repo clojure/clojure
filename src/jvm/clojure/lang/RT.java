@@ -727,6 +727,9 @@ static public void print(Object x, Writer w) throws Exception{
 					case'\t':
 						w.write("\\t");
 						break;
+					case'\r':
+						w.write("\\r");
+						break;
 					case'"':
 						w.write("\\\"");
 						break;
