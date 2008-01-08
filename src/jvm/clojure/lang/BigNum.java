@@ -20,7 +20,7 @@ public BigInteger val;
 public boolean equals(Object arg0){
 	return arg0 != null
 	       && arg0 instanceof BigNum
-	       && ((BigNum) arg0).val == val;
+	       && ((BigNum) arg0).val.equals(val);
 }
 
 public int hashCode(){
