@@ -50,13 +50,17 @@ final public Symbol sym;
 boolean macroFlag = false;
 Symbol tag;
 
-static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();
+static ConcurrentHashMap<String, ConcurrentHashMap<Symbol, Var>> namespaces =
+		new ConcurrentHashMap<String, ConcurrentHashMap<Symbol, Var>>();
+
+//static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();
 
 public static Var intern(Symbol sym, Object root){
 	return intern(sym, root, true);
 }
 
 public static Var intern(Symbol sym, Object root, boolean replaceRoot){
+	ConcurrentHashMap<Symbol, Var> table = table(sym);
 	Var dvout = table.get(sym);
 	boolean present = dvout != null;
 
@@ -79,6 +83,7 @@ public String toString(){
 }
 
 public static Var intern(Symbol sym){
+	ConcurrentHashMap<Symbol, Var> table = table(sym);
 	Var dvout = table.get(sym);
 	if(dvout != null)
 		return dvout;
@@ -90,12 +95,25 @@ public static Var intern(Symbol sym){
 }
 
 public static void unintern(Symbol sym){
-	table.remove(sym);
+	table(sym).remove(sym);
 }
 
 public static Var find(Symbol sym){
-	return table.get(sym);
+	return table(sym).get(sym);
 }
+
+static ConcurrentHashMap<Symbol, Var> table(Symbol sym){
+	String name = sym.ns;
+	if(name == null)
+		throw new IllegalArgumentException("Var names must have namespace");
+	ConcurrentHashMap<Symbol, Var> ns = namespaces.get(name);
+	if(ns != null)
+		return ns;
+	ConcurrentHashMap<Symbol, Var> newns = new ConcurrentHashMap<Symbol, Var>();
+	ns = namespaces.putIfAbsent(name,newns);
+	return ns == null?newns:ns;
+}
+
 
 public static Var create(){
 	return new Var(null);

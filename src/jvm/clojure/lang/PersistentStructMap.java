@@ -17,52 +17,71 @@ import java.util.Map;
 
 public class PersistentStructMap extends APersistentMap{
 
-final IPersistentMap keyslots;
+public static class Def{
+	final ISeq keys;
+	final IPersistentMap keyslots;
+
+	Def(ISeq keys, IPersistentMap keyslots){
+		this.keys = keys;
+		this.keyslots = keyslots;
+	}
+}
+
+final Def def;
 final Object[] vals;
 final IPersistentMap ext;
 
-static public IPersistentMap createSlotMap(ISeq keys){
+static public Def createSlotMap(ISeq keys){
 	if(keys == null)
 		throw new IllegalArgumentException("Must supply keys");
-	PersistentHashMap temp = PersistentHashMap.EMPTY;
-	for(ISeq s = keys; s != null; s = s.rest())
-		{
-		temp = (PersistentHashMap) temp.assoc(s.first(), null);
-		}
-	int i = 0;
 	PersistentHashMap ret = PersistentHashMap.EMPTY;
-	for(ISeq s = RT.keys(temp); s != null; s = s.rest(), i++)
+	int i=0;
+	for(ISeq s = keys; s != null; s = s.rest(),i++)
+		{
 		ret = (PersistentHashMap) ret.assoc(s.first(), i);
-	return ret;
+		}
+	return new Def(keys,ret);
 }
 
-static public PersistentStructMap create(IPersistentMap keyslots, ISeq init){
-	Object[] vals = new Object[keyslots.count()];
+static public PersistentStructMap create(Def def, ISeq keyvals){
+	Object[] vals = new Object[def.keyslots.count()];
 	IPersistentMap ext = PersistentHashMap.EMPTY;
-	for(; init != null; init = init.rest().rest())
+	for(; keyvals != null; keyvals = keyvals.rest().rest())
 		{
-		if(init.rest() == null)
-			throw new IllegalArgumentException(String.format("No value supplied for key: %s", init.first()));
-		Object k = init.first();
-		Object v = RT.second(init);
-		Map.Entry e = keyslots.entryAt(k);
+		if(keyvals.rest() == null)
+			throw new IllegalArgumentException(String.format("No value supplied for key: %s", keyvals.first()));
+		Object k = keyvals.first();
+		Object v = RT.second(keyvals);
+		Map.Entry e = def.keyslots.entryAt(k);
 		if(e != null)
 			vals[(Integer) e.getValue()] = v;
 		else
 			ext = ext.assoc(k, v);
 		}
-	return new PersistentStructMap(null, keyslots, vals, ext);
+	return new PersistentStructMap(null, def, vals, ext);
 }
 
-static public IFn getAccessor(final IPersistentMap keyslots, Object key){
-	Map.Entry e = keyslots.entryAt(key);
+static public PersistentStructMap construct(Def def, ISeq valseq){
+	Object[] vals = new Object[def.keyslots.count()];
+	IPersistentMap ext = PersistentHashMap.EMPTY;
+	for(int i=0;i<vals.length && valseq != null; valseq = valseq.rest(),i++)
+		{
+		vals[i] = valseq.first();
+		}
+	if(valseq != null)
+		throw new IllegalArgumentException("Too many arguments to struct constructor");
+	return new PersistentStructMap(null, def, vals, ext);
+}
+
+static public IFn getAccessor(final Def def, Object key){
+	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
 		final int i = (Integer) e.getValue();
 		return new AFn(){
 			public Object invoke(Object arg1) throws Exception{
 				PersistentStructMap m = (PersistentStructMap) arg1;
-				if(m.keyslots != keyslots)
+				if(m.def != def)
 					throw new Exception("Accessor/struct mismatch");
 				return m.vals[i];
 			}
@@ -71,10 +90,10 @@ static public IFn getAccessor(final IPersistentMap keyslots, Object key){
 	throw new IllegalArgumentException("Not a key of struct");
 }
 
-PersistentStructMap(IPersistentMap meta, IPersistentMap keys, Object[] vals, IPersistentMap ext){
+PersistentStructMap(IPersistentMap meta, Def def, Object[] vals, IPersistentMap ext){
 	super(meta);
 	this.ext = ext;
-	this.keyslots = keys;
+	this.def = def;
 	this.vals = vals;
 }
 
@@ -82,15 +101,15 @@ PersistentStructMap(IPersistentMap meta, IPersistentMap keys, Object[] vals, IPe
 public Obj withMeta(IPersistentMap meta){
 	if(meta == _meta)
 		return this;
-	return new PersistentStructMap(meta, keyslots, vals, ext);
+	return new PersistentStructMap(meta, def, vals, ext);
 }
 
 public boolean containsKey(Object key){
-	return keyslots.containsKey(key) || ext.containsKey(key);
+	return def.keyslots.containsKey(key) || ext.containsKey(key);
 }
 
 public IMapEntry entryAt(Object key){
-	Map.Entry e = keyslots.entryAt(key);
+	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
 		return new MapEntry(key, vals[(Integer) e.getValue()]);
@@ -99,19 +118,19 @@ public IMapEntry entryAt(Object key){
 }
 
 public IPersistentMap assoc(Object key, Object val){
-	Map.Entry e = keyslots.entryAt(key);
+	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
 		int i = (Integer) e.getValue();
 		Object[] newVals = vals.clone();
 		newVals[i] = val;
-		return new PersistentStructMap(_meta, keyslots, newVals, ext);
+		return new PersistentStructMap(_meta, def, newVals, ext);
 		}
-	return new PersistentStructMap(_meta, keyslots, vals, ext.assoc(key, val));
+	return new PersistentStructMap(_meta, def, vals, ext.assoc(key, val));
 }
 
 public Object valAt(Object key){
-	Map.Entry e = keyslots.entryAt(key);
+	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
 		return vals[(Integer) e.getValue()];
@@ -120,7 +139,7 @@ public Object valAt(Object key){
 }
 
 public Object valAt(Object key, Object notFound){
-	Map.Entry e = keyslots.entryAt(key);
+	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
 		return vals[(Integer) e.getValue()];
@@ -135,13 +154,13 @@ public IPersistentMap assocEx(Object key, Object val) throws Exception{
 }
 
 public IPersistentMap without(Object key) throws Exception{
-	Map.Entry e = keyslots.entryAt(key);
+	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		throw new Exception("Can't remove struct key");
 	IPersistentMap newExt = ext.without(key);
 	if(newExt == ext)
 		return this;
-	return new PersistentStructMap(_meta, keyslots, vals, newExt);
+	return new PersistentStructMap(_meta, def, vals, newExt);
 }
 
 public Iterator iterator(){
@@ -154,7 +173,7 @@ public int count(){
 }
 
 public ISeq seq(){
-	return new Seq(null, RT.keys(keyslots), vals, 0, ext);
+	return new Seq(null, def.keys, vals, 0, ext);
 }
 
 static class Seq extends ASeq{

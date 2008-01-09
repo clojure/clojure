@@ -95,6 +95,10 @@
   ([name] (. clojure.lang.Symbol (intern name)))
   ([ns name] (. clojure.lang.Symbol (intern ns name))))
 
+(defn keyword
+  ([name] (. clojure.lang.Keyword (intern nil name)))
+  ([ns name] (. clojure.lang.Keyword (intern ns name))))
+
 (defn gensym 
   ([] (thisfn "G__"))
   ([prefix-string] (. clojure.lang.Symbol (intern (strcat prefix-string (str (. clojure.lang.RT (nextID))))))))
@@ -952,6 +956,9 @@
 (defn struct [s & inits]
   (. clojure.lang.PersistentStructMap (create s inits)))
 
+(defn construct [s & vals]
+  (. clojure.lang.PersistentStructMap (construct s vals)))
+
 (defn accessor [s key]
    (. clojure.lang.PersistentStructMap (getAccessor s key)))
 
@@ -964,6 +971,17 @@
 (defn load [rdr]
   (. clojure.lang.Compiler (load rdr)))
 
+(defn resultset-seq [#^java.sql.ResultSet rs]
+  (let [rsmeta (. rs (getMetaData))
+	idxs (range 1 (inc (. rsmeta (getColumnCount))))
+	keys (map (comp keyword (memfn toLowerCase))
+	       (map (fn [i] (. rsmeta (getColumnName i))) idxs))
+	row-struct (apply create-struct keys)
+	row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
+	rows (fn []
+	       (when (. rs (next))
+		 (fnseq (apply construct row-struct (row-values)) thisfn)))]
+    (rows)))
 
 (def *exports*
 	'(clojure
@@ -983,7 +1001,7 @@
 		scan touch
 		key val
 		line-seq sort sort-by comparator
-		rseq sym name namespace locking .. ->
+		rseq sym keyword name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
 		ref deref commute alter set ensure sync !
@@ -1009,9 +1027,10 @@
 		max min
 		bit-shift-left bit-shift-right
 		bit-and bit-or bit-xor bit-not
-		defstruct struct accessor create-struct
+		defstruct struct accessor create-struct construct
 		subvec
 		false? true?
 		*warn-on-reflection*
+		resultset-seq
 	))
 
