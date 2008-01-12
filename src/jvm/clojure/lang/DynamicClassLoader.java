@@ -21,7 +21,7 @@ HashMap<Integer, Object> quotedVals = new HashMap<Integer, Object>();
 HashMap<String, byte[]> map = new HashMap<String, byte[]>();
 
 public DynamicClassLoader(){
-	super();
+	super(Compiler.class.getClassLoader());
 }
 
 public DynamicClassLoader(ClassLoader parent){
