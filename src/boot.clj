@@ -738,7 +738,7 @@
 
 (defn make-proxy [classes method-map]
   (. java.lang.reflect.Proxy
-    (newProxyInstance (. java.lang.ClassLoader (getSystemClassLoader))
+    (newProxyInstance (. (class clojure.lang.Compiler) (getClassLoader))
                       (into-array classes)
                       (new clojure.lang.ProxyHandler method-map))))
 
