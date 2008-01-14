@@ -953,10 +953,10 @@
 (defmacro defstruct [name & keys]
   `(def ~name (create-struct ~@keys)))
   
-(defn struct [s & inits]
+(defn struct-map [s & inits]
   (. clojure.lang.PersistentStructMap (create s inits)))
 
-(defn construct [s & vals]
+(defn struct [s & vals]
   (. clojure.lang.PersistentStructMap (construct s vals)))
 
 (defn accessor [s key]
@@ -980,8 +980,20 @@
 	row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
 	rows (fn []
 	       (when (. rs (next))
-		 (fnseq (apply construct row-struct (row-values)) thisfn)))]
+		 (fnseq (apply struct row-struct (row-values)) thisfn)))]
     (rows)))
+
+(defn to-set [coll]
+  (loop [ret {} keys (seq coll)]
+    (if keys
+      (recur (if (contains? ret (first keys))
+	       ret
+	       (assoc ret (first keys) true))
+	     (rest keys))
+      ret)))
+
+(defn distinct [coll]
+  (keys (to-set coll)))
 
 (def *exports*
 	'(clojure
@@ -1027,10 +1039,11 @@
 		max min
 		bit-shift-left bit-shift-right
 		bit-and bit-or bit-xor bit-not
-		defstruct struct accessor create-struct construct
+		defstruct struct accessor create-struct struct-map
 		subvec
 		false? true?
 		*warn-on-reflection*
 		resultset-seq
+		to-set distinct
 	))
 
