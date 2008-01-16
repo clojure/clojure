@@ -325,6 +325,8 @@ static boolean isCongruent(Class[] params, Object[] args){
 static Object prepRet(Class c, Object x){
 //	if(c == boolean.class)
 //		return ((Boolean) x).booleanValue() ? RT.T : null;
+	if(x instanceof Boolean && !((Boolean) x).booleanValue())
+		return Boolean.FALSE;
 	return x;
 }
 }
