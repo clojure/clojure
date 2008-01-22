@@ -60,7 +60,7 @@ public static Var intern(Symbol sym, Object root){
 }
 
 public static Var intern(Symbol sym, Object root, boolean replaceRoot){
-	ConcurrentHashMap<Symbol, Var> table = table(sym);
+	ConcurrentHashMap<Symbol, Var> table = getns(sym);
 	Var dvout = table.get(sym);
 	boolean present = dvout != null;
 
@@ -83,7 +83,7 @@ public String toString(){
 }
 
 public static Var intern(Symbol sym){
-	ConcurrentHashMap<Symbol, Var> table = table(sym);
+	ConcurrentHashMap<Symbol, Var> table = getns(sym);
 	Var dvout = table.get(sym);
 	if(dvout != null)
 		return dvout;
@@ -95,14 +95,14 @@ public static Var intern(Symbol sym){
 }
 
 public static void unintern(Symbol sym){
-	table(sym).remove(sym);
+	getns(sym).remove(sym);
 }
 
 public static Var find(Symbol sym){
-	return table(sym).get(sym);
+	return getns(sym).get(sym);
 }
 
-static ConcurrentHashMap<Symbol, Var> table(Symbol sym){
+static ConcurrentHashMap<Symbol, Var> getns(Symbol sym){
 	String name = sym.ns;
 	if(name == null)
 		throw new IllegalArgumentException("Var names must have namespace");
