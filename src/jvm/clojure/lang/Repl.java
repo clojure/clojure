@@ -38,7 +38,7 @@ public static void main(String[] args){
 		Var.pushThreadBindings(
 				RT.map(RT.NS_REFERS, RT.NS_REFERS.get(),
 				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-				       RT.CURRENT_NS_SYM, RT.CURRENT_NS_SYM.get(),
+				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
 				       RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.get(),
 				       Compiler.SOURCE, "REPL"
 				));

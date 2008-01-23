@@ -47,6 +47,7 @@ static ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
 volatile Object root;
 transient final AtomicInteger count;
 final public Symbol sym;
+final public Namespace ns;
 boolean macroFlag = false;
 Symbol tag;
 
@@ -55,24 +56,25 @@ static ConcurrentHashMap<String, ConcurrentHashMap<Symbol, Var>> namespaces =
 
 //static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();
 
-public static Var intern(Symbol sym, Object root){
-	return intern(sym, root, true);
+public static Var intern(Namespace ns, Symbol sym, Object root) throws Exception{
+	return intern(ns, sym, root, true);
 }
 
-public static Var intern(Symbol sym, Object root, boolean replaceRoot){
-	ConcurrentHashMap<Symbol, Var> table = getns(sym);
-	Var dvout = table.get(sym);
-	boolean present = dvout != null;
-
-	if(!present)
-		{
-		Var dvin = new Var(sym, root);
-		dvout = table.putIfAbsent(sym, dvin);
-		present = dvout != null;   //might have snuck in
-		if(!present)
-			dvout = dvin;
-		}
-	if(present && (!dvout.hasRoot() || replaceRoot))
+public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceRoot) throws Exception{
+//	ConcurrentHashMap<Symbol, Var> table = getns(sym);
+//	Var dvout = table.get(sym);
+//	boolean present = dvout != null;
+//
+//	if(!present)
+//		{
+//		Var dvin = new Var(ns, sym, root);
+//		dvout = table.putIfAbsent(sym, dvin);
+//		present = dvout != null;   //might have snuck in
+//		if(!present)
+//			dvout = dvin;
+//		}
+	Var dvout = ns.intern(sym);
+	if(!dvout.hasRoot() || replaceRoot)
 		dvout.bindRoot(root);
 	return dvout;
 }
@@ -82,55 +84,57 @@ public String toString(){
 	return "#<Var: " + (sym != null ? sym.toString() : "--unnamed--") + ">";
 }
 
-public static Var intern(Symbol sym){
-	ConcurrentHashMap<Symbol, Var> table = getns(sym);
-	Var dvout = table.get(sym);
-	if(dvout != null)
-		return dvout;
-
-	Var dvin = table.putIfAbsent(sym, dvout = new Var(sym));
-	if(dvin != null)
-		return dvin;
-	return dvout;
+public static Var intern(Namespace ns, Symbol sym) throws Exception{
+	return ns.intern(sym);
+//	ConcurrentHashMap<Symbol, Var> table = getns(sym);
+//	Var dvout = table.get(sym);
+//	if(dvout != null)
+//		return dvout;
+//
+//	Var dvin = table.putIfAbsent(sym, dvout = new Var(ns, sym));
+//	if(dvin != null)
+//		return dvin;
+//	return dvout;
 }
 
-public static void unintern(Symbol sym){
-	getns(sym).remove(sym);
+//public static void unintern(Symbol nsQualifiedSym){
+//	Namespace.findOrCreate(Symbol.create(nsQualifiedSym.ns).unintern(nsQualifiedSym);
+//}
+
+public static Var find(Symbol nsQualifiedSym){
+	return Namespace.findOrCreate(Symbol.create(nsQualifiedSym.ns)).findVar(Symbol.create(nsQualifiedSym.name));
 }
 
-public static Var find(Symbol sym){
-	return getns(sym).get(sym);
-}
-
-static ConcurrentHashMap<Symbol, Var> getns(Symbol sym){
-	String name = sym.ns;
-	if(name == null)
-		throw new IllegalArgumentException("Var names must have namespace");
-	ConcurrentHashMap<Symbol, Var> ns = namespaces.get(name);
-	if(ns != null)
-		return ns;
-	ConcurrentHashMap<Symbol, Var> newns = new ConcurrentHashMap<Symbol, Var>();
-	ns = namespaces.putIfAbsent(name,newns);
-	return ns == null?newns:ns;
-}
+//static ConcurrentHashMap<Symbol, Var> getns(Symbol sym){
+//	String name = sym.ns;
+//	if(name == null)
+//		throw new IllegalArgumentException("Var names must have namespace");
+//	ConcurrentHashMap<Symbol, Var> ns = namespaces.get(name);
+//	if(ns != null)
+//		return ns;
+//	ConcurrentHashMap<Symbol, Var> newns = new ConcurrentHashMap<Symbol, Var>();
+//	ns = namespaces.putIfAbsent(name,newns);
+//	return ns == null?newns:ns;
+//}
 
 
 public static Var create(){
-	return new Var(null);
+	return new Var(null,null);
 }
 
 public static Var create(Object root){
-	return new Var(null, root);
+	return new Var(null, null, root);
 }
 
-private Var(Symbol sym){
+Var(Namespace ns, Symbol sym){
+	this.ns = ns;
 	this.sym = sym;
 	this.count = new AtomicInteger();
 	this.root = dvals;  //use dvals as magic not-bound value
 }
 
-private Var(Symbol sym, Object root){
-	this(sym);
+Var(Namespace ns, Symbol sym, Object root){
+	this(ns,sym);
 	this.root = root;
 }
 

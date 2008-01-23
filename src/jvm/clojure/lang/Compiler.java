@@ -229,7 +229,7 @@ static Symbol resolveSymbol(Symbol sym){
 	if(var != null)
 		return var.sym;
 
-	return Symbol.intern(currentNS().name, sym.name);
+	return Symbol.intern(currentNS().name.name, sym.name);
 }
 
 static class DefExpr implements Expr{
@@ -298,7 +298,7 @@ static class DefExpr implements Expr{
 			Var v = lookupVar(sym, true);
 			if(v == null)
 				throw new Exception("Can't refer to qualified var that doesn't exist");
-			if(!v.sym.ns.equals(currentNS().name))
+			if(!v.ns.equals(currentNS()))
 				{
 				if(sym.ns == null)
 					throw new Exception("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
@@ -2302,7 +2302,7 @@ static class FnExpr implements Expr{
 		FnMethod enclosingMethod = (FnMethod) METHOD.get();
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
-		                  : (munge(currentNS().name) + ".");
+		                  : (munge(currentNS().name.name) + ".");
 		fn.simpleName = (name != null ?
 		                 munge(name)
 		                 : ("fn__" + RT.nextID()));
@@ -3132,12 +3132,12 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 		IPersistentMap refers = (IPersistentMap) ((Var) RT.NS_REFERS.get()).get();
 		var = (Var) refers.valAt(sym);
 		if(var == null && sym.ns == null)
-			var = Var.find(Symbol.intern(currentNS().name, sym.name));
+			var = Var.find(Symbol.intern(currentNS().name.name, sym.name));
 		if(var == null && internNew)
 			{
 			//introduce a new var in the current ns
-			String ns = currentNS().name;
-			var = Var.intern(Symbol.intern(ns, sym.name));
+			Namespace ns = currentNS();
+			var = Var.intern(ns,Symbol.create(sym.name));
 			}
 		}
 	if(var != null)
@@ -3153,8 +3153,8 @@ private static void registerVar(Var var) throws Exception{
 		VARS.set(RT.assoc(varsMap, var, var));
 }
 
-static Symbol currentNS(){
-	return (Symbol) RT.CURRENT_NS_SYM.get();
+static Namespace currentNS(){
+	return (Namespace) RT.CURRENT_NS.get();
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
@@ -3222,7 +3222,7 @@ public static Object load(Reader rdr) throws Exception{
 				RT.map(LOADER, new DynamicClassLoader(),
 				       RT.NS_REFERS, RT.NS_REFERS.get(),
 				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-				       RT.CURRENT_NS_SYM, RT.CURRENT_NS_SYM.get()
+				       RT.CURRENT_NS, RT.CURRENT_NS.get()
 				));
 		LineNumberingPushbackReader pushbackReader =
 				(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
@@ -3260,7 +3260,7 @@ public static void main(String[] args){
 		Var.pushThreadBindings(
 				RT.map(RT.NS_REFERS, RT.NS_REFERS.get(),
 				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-				       RT.CURRENT_NS_SYM, RT.CURRENT_NS_SYM.get(),
+				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
 				       SOURCE, "REPL"
 				));
 		w.write("Clojure\n");
