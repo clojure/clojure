@@ -3124,20 +3124,27 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
-		var = Var.find(sym);
+		Namespace ns = Namespace.find(Symbol.create(sym.ns));
+		if(ns == null)
+			throw new Exception("No such namespace: " + sym.ns);
+		var = ns.findInternedVar(sym);
 		}
 	else
 		{
-		//is it an alias?
-		IPersistentMap refers = (IPersistentMap) ((Var) RT.NS_REFERS.get()).get();
-		var = (Var) refers.valAt(sym);
-		if(var == null && sym.ns == null)
-			var = Var.find(Symbol.intern(currentNS().name.name, sym.name));
-		if(var == null && internNew)
+		//is it mapped?
+		Object o = currentNS().getMapping(sym);
+		if(o == null)
 			{
 			//introduce a new var in the current ns
-			Namespace ns = currentNS();
-			var = Var.intern(ns,Symbol.create(sym.name));
+			var = currentNS().intern(Symbol.create(sym.name));
+			}
+		else if(o instanceof Var)
+			{
+			var = (Var) o;
+			}
+		else
+			{
+			throw new Exception("Expecting var, " + sym + " is mapped to " + o.getClass());
 			}
 		}
 	if(var != null)

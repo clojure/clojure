@@ -17,19 +17,24 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Namespace{
 final public Symbol name;
-final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
+final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
 
 final static ConcurrentHashMap<Symbol, Namespace> namespaces = new ConcurrentHashMap<Symbol, Namespace>();
 
 Namespace(Symbol name){
 	this.name = name;
+	mappings.set(RT.DEFAULT_IMPORTS);
 }
 
 public IPersistentMap getMappings(){
 	return mappings.get();
 }
 
-Var intern(Symbol sym) throws Exception{
+Var intern(Symbol sym){
+	if(sym.ns != null)
+		{
+		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
+		}
 	IPersistentMap map = getMappings();
 	Object o;
 	Var v = null;
@@ -44,7 +49,7 @@ Var intern(Symbol sym) throws Exception{
 	if(o instanceof Var && ((Var) o).ns == this)
 		return (Var) o;
 
-	throw new Exception(sym + " already refers to: " + o + " in namespace: " + name);
+	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
 }
 
 Var unintern(Var var){
@@ -81,8 +86,18 @@ public static Namespace findOrCreate(Symbol name){
 	return ns == null?newns:ns;
 }
 
+public static Namespace find(Symbol name){
+	return namespaces.get(name);
+}
 
-public Var findVar(Symbol symbol){
-	return null;  //To change body of created methods use File | Settings | File Templates.
+public Object getMapping(Symbol name){
+	return mappings.get().valAt(name);
+}
+
+public Var findInternedVar(Symbol symbol){
+	Object o = mappings.get().valAt(symbol);
+	if(o != null && o instanceof Var && ((Var)o).ns == this)
+		return (Var) o;
+	return null;
 }
 }

@@ -51,28 +51,11 @@ final public Namespace ns;
 boolean macroFlag = false;
 Symbol tag;
 
-static ConcurrentHashMap<String, ConcurrentHashMap<Symbol, Var>> namespaces =
-		new ConcurrentHashMap<String, ConcurrentHashMap<Symbol, Var>>();
-
-//static ConcurrentHashMap<Symbol, Var> table = new ConcurrentHashMap<Symbol, Var>();
-
-public static Var intern(Namespace ns, Symbol sym, Object root) throws Exception{
+public static Var intern(Namespace ns, Symbol sym, Object root){
 	return intern(ns, sym, root, true);
 }
 
-public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceRoot) throws Exception{
-//	ConcurrentHashMap<Symbol, Var> table = getns(sym);
-//	Var dvout = table.get(sym);
-//	boolean present = dvout != null;
-//
-//	if(!present)
-//		{
-//		Var dvin = new Var(ns, sym, root);
-//		dvout = table.putIfAbsent(sym, dvin);
-//		present = dvout != null;   //might have snuck in
-//		if(!present)
-//			dvout = dvin;
-//		}
+public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceRoot){
 	Var dvout = ns.intern(sym);
 	if(!dvout.hasRoot() || replaceRoot)
 		dvout.bindRoot(root);
@@ -81,41 +64,12 @@ public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceR
 
 
 public String toString(){
-	return "#<Var: " + (sym != null ? sym.toString() : "--unnamed--") + ">";
+	return "#<Var: " + (ns!=null?(ns.name + "/"):"") + (sym != null ? sym.toString() : "--unnamed--") + ">";
 }
 
-public static Var intern(Namespace ns, Symbol sym) throws Exception{
+public static Var intern(Namespace ns, Symbol sym){
 	return ns.intern(sym);
-//	ConcurrentHashMap<Symbol, Var> table = getns(sym);
-//	Var dvout = table.get(sym);
-//	if(dvout != null)
-//		return dvout;
-//
-//	Var dvin = table.putIfAbsent(sym, dvout = new Var(ns, sym));
-//	if(dvin != null)
-//		return dvin;
-//	return dvout;
 }
-
-//public static void unintern(Symbol nsQualifiedSym){
-//	Namespace.findOrCreate(Symbol.create(nsQualifiedSym.ns).unintern(nsQualifiedSym);
-//}
-
-public static Var find(Symbol nsQualifiedSym){
-	return Namespace.findOrCreate(Symbol.create(nsQualifiedSym.ns)).findVar(Symbol.create(nsQualifiedSym.name));
-}
-
-//static ConcurrentHashMap<Symbol, Var> getns(Symbol sym){
-//	String name = sym.ns;
-//	if(name == null)
-//		throw new IllegalArgumentException("Var names must have namespace");
-//	ConcurrentHashMap<Symbol, Var> ns = namespaces.get(name);
-//	if(ns != null)
-//		return ns;
-//	ConcurrentHashMap<Symbol, Var> newns = new ConcurrentHashMap<Symbol, Var>();
-//	ns = namespaces.putIfAbsent(name,newns);
-//	return ns == null?newns:ns;
-//}
 
 
 public static Var create(){

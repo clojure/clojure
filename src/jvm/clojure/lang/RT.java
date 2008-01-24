@@ -20,28 +20,8 @@ public class RT{
 
 static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null, "t"));
 static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.create(null, "t"));
-static final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure"));
-static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
-final static public Var OUT =
-		Var.intern(CLOJURE_NS,Symbol.create("clojure", "*out*"), new OutputStreamWriter(System.out));
-final static public Var IN =
-		Var.intern(CLOJURE_NS,Symbol.create("clojure", "*in*"),
-		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
-final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
-final static Keyword AGENT_KEY = Keyword.intern("clojure", "agent");
-//final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
-//                                                    Module.findOrCreateModule("clojure/user"));
 
-final static Symbol LOAD_FILE = Symbol.create("clojure", "load-file");
-final static Symbol IN_NAMESPACE = Symbol.create("clojure", "in-namespace");
-final static Symbol EXPORTS = Symbol.create("clojure", "*exports*");
-final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS,EXPORTS, PersistentHashMap.EMPTY);
-final static Symbol EQL_REF = Symbol.create("clojure", "eql-ref?");
-
-//symbol
-final static Var CURRENT_NS = Var.intern(CLOJURE_NS,Symbol.create("clojure", "*current-namespace*"), 
-                                             CLOJURE_NS);
-//simple-symbol->fully-qualified-class-name-string
+//simple-symbol->class
 final static IPersistentMap DEFAULT_IMPORTS = map(
 //												  Symbol.create("RT"), "clojure.lang.RT",
 //                                                  Symbol.create("Num"), "clojure.lang.Num",
@@ -57,7 +37,7 @@ final static IPersistentMap DEFAULT_IMPORTS = map(
 //                                                  Symbol.create("IPersistentMap"), "clojure.lang.IPersistentMap",
 //                                                  Symbol.create("IPersistentList"), "clojure.lang.IPersistentList",
 //                                                  Symbol.create("IPersistentVector"), "clojure.lang.IPersistentVector",
-Symbol.create("Boolean"), "java.lang.Boolean",
+Symbol.create("Boolean"), Boolean.class,
 Symbol.create("Byte"), "java.lang.Byte",
 Symbol.create("Character"), "java.lang.Character",
 Symbol.create("Class"), "java.lang.Class",
@@ -118,31 +98,54 @@ Symbol.create("Exception"), "java.lang.Exception"
 );
 
 
-final static Var PRINT_META = Var.intern(CLOJURE_NS,Symbol.create("clojure", "*print-meta*"), F);
-final static Var PRINT_READABLY = Var.intern(CLOJURE_NS,Symbol.create("clojure", "*print-readably*"), T);
-final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS,Symbol.create("clojure", "*warn-on-reflection*"), F);
+static final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure"));
+//static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
+final static public Var OUT =
+		Var.intern(CLOJURE_NS,Symbol.create("*out*"), new OutputStreamWriter(System.out));
+final static public Var IN =
+		Var.intern(CLOJURE_NS,Symbol.create("*in*"),
+		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
+final static Keyword TAG_KEY = Keyword.intern("clojure","tag");
+final static Keyword AGENT_KEY = Keyword.intern("clojure","agent");
+//final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
+//                                                    Module.findOrCreateModule("clojure/user"));
 
-final static Var IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("clojure", "*imports*"), DEFAULT_IMPORTS);
+final static Symbol LOAD_FILE = Symbol.create("load-file");
+final static Symbol IN_NAMESPACE = Symbol.create("in-namespace");
+final static Symbol EXPORTS = Symbol.create("*exports*");
+final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS,EXPORTS, PersistentHashMap.EMPTY);
+final static Symbol EQL_REF = Symbol.create("eql-ref?");
+
+//symbol
+final static Var CURRENT_NS = Var.intern(CLOJURE_NS,Symbol.create("*current-namespace*"),
+                                             CLOJURE_NS);
+
+final static Var PRINT_META = Var.intern(CLOJURE_NS,Symbol.create("*print-meta*"), F);
+final static Var PRINT_READABLY = Var.intern(CLOJURE_NS,Symbol.create("*print-readably*"), T);
+final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS,Symbol.create("*warn-on-reflection*"), F);
+
+final static Var IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
-		Symbol ns = (Symbol) arg1;
-		CURRENT_NS.set(Namespace.findOrCreate(ns));
-		Var refers = Var.intern(null,Symbol.intern(ns.name, "*refers*"));
-
-		Var imports = Var.intern(null,Symbol.intern(ns.name, "*imports*"), DEFAULT_IMPORTS, false);
-		NS_REFERS.set(refers);
-		NS_IMPORTS.set(imports);
-		if(!refers.isBound())
-			{
-			refers.bindRoot(PersistentHashMap.EMPTY);
-			Compiler.eval(list(Symbol.create("clojure", "refer"), EXPORTS));
-			}
-		return RT.T;
+		Symbol nsname = (Symbol) arg1;
+		Namespace ns = Namespace.findOrCreate(nsname);
+		CURRENT_NS.set(ns);
+//		Var refers = Var.intern(null,Symbol.intern(nsname.name, "*refers*"));
+//
+//		Var imports = Var.intern(null,Symbol.intern(nsname.name, "*imports*"), DEFAULT_IMPORTS, false);
+//		NS_REFERS.set(refers);
+//		NS_IMPORTS.set(imports);
+//		if(!refers.isBound())
+//			{
+//			refers.bindRoot(PersistentHashMap.EMPTY);
+//			Compiler.eval(list(Symbol.create("clojure", "refer"), EXPORTS));
+//			}
+		return ns;
 	}
 };
 //simple-symbol->var
 final static Var REFERS =
-		Var.intern(CLOJURE_NS,Symbol.create("clojure", "*refers*"),
+		Var.intern(CLOJURE_NS,Symbol.create("*refers*"),
 		           map(
 				           IN_NAMESPACE, Var.intern(CLOJURE_NS,IN_NAMESPACE, inNamespace),
 				           LOAD_FILE, Var.intern(CLOJURE_NS,LOAD_FILE,
@@ -160,8 +163,8 @@ final static Var REFERS =
 		                                       })
 		           ));
 
-static Var NS_IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("clojure", "*ns-imports*"), IMPORTS);
-static Var NS_REFERS = Var.intern(CLOJURE_NS,Symbol.create("clojure", "*ns-refers*"), REFERS);
+static Var NS_IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("*ns-imports*"), IMPORTS);
+static Var NS_REFERS = Var.intern(CLOJURE_NS,Symbol.create("*ns-refers*"), REFERS);
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 //static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
