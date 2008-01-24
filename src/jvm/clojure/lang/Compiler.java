@@ -2290,8 +2290,8 @@ static class FnExpr implements Expr{
 	int line;
 
 	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
-	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
-	final static Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol)");
+	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
+	final static Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol, clojure.lang.Symbol)");
 	final static Method afnctor = Method.getMethod("void <init>()");
 	final static Method restfnctor = Method.getMethod("void <init>(int)");
 	final static Type aFnType = Type.getType(AFn.class);
@@ -2427,7 +2427,8 @@ static class FnExpr implements Expr{
 		for(ISeq s = RT.keys(vars); s != null; s = s.rest())
 			{
 			Var v = (Var) s.first();
-			clinitgen.push(v.sym.ns);
+			clinitgen.push(v.ns.name.name);
+			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
 			clinitgen.push(v.sym.name);
 			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
 			clinitgen.invokeStatic(VAR_TYPE, varintern);
@@ -3127,7 +3128,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 		Namespace ns = Namespace.find(Symbol.create(sym.ns));
 		if(ns == null)
 			throw new Exception("No such namespace: " + sym.ns);
-		var = ns.findInternedVar(sym);
+		var = ns.findInternedVar(Symbol.create(sym.name));
 		}
 	else
 		{
@@ -3144,7 +3145,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 			}
 		else
 			{
-			throw new Exception("Expecting var, " + sym + " is mapped to " + o.getClass());
+			throw new Exception("Expecting var, but " + sym + " is mapped to " + o);
 			}
 		}
 	if(var != null)

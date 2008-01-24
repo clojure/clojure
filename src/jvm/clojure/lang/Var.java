@@ -67,6 +67,20 @@ public String toString(){
 	return "#<Var: " + (ns!=null?(ns.name + "/"):"") + (sym != null ? sym.toString() : "--unnamed--") + ">";
 }
 
+public static Var find(Symbol nsQualifiedSym){
+	if(nsQualifiedSym.ns == null)
+		throw new IllegalArgumentException("Symbol must be namespace-qualified");
+	Namespace ns = Namespace.find(Symbol.create(nsQualifiedSym.ns));
+	if(ns == null)
+		throw new IllegalArgumentException("No such namespace: " + nsQualifiedSym.ns);
+	return ns.findInternedVar(Symbol.create(nsQualifiedSym.name));
+}
+
+public static Var intern(Symbol nsName, Symbol sym){
+	Namespace ns = Namespace.findOrCreate(nsName);
+	return intern(ns,sym);
+}
+
 public static Var intern(Namespace ns, Symbol sym){
 	return ns.intern(sym);
 }
