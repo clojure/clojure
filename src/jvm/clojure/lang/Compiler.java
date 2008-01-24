@@ -218,18 +218,29 @@ static Symbol resolveSymbol(Symbol sym){
 	//already qualified or classname?
 	if(sym.ns != null || sym.name.indexOf('.') > 0)
 		return sym;
-	IPersistentMap imports = (IPersistentMap) ((Var) RT.NS_IMPORTS.get()).get();
-	//imported class?
-	String className = (String) imports.valAt(sym);
-	if(className != null)
-		return Symbol.intern(null, className);
-	//refers?
-	IPersistentMap refers = (IPersistentMap) ((Var) RT.NS_REFERS.get()).get();
-	Var var = (Var) refers.valAt(sym);
-	if(var != null)
-		return var.sym;
+	Object o = currentNS().getMapping(sym);
+	if(o == null)
+		return Symbol.intern(currentNS().name.name, sym.name);
+	else if(o instanceof Class)
+		return Symbol.intern(null, ((Class)o).getName());
+	else if(o instanceof Var)
+		{
+		Var v = (Var) o;
+		return Symbol.create(v.ns.name.name, v.sym.name);
+		}
+	return null;
 
-	return Symbol.intern(currentNS().name.name, sym.name);
+//	IPersistentMap imports = (IPersistentMap) ((Var) RT.NS_IMPORTS.get()).get();
+//	//imported class?
+//	String className = (String) imports.valAt(sym);
+//	if(className != null)
+//		return Symbol.intern(null, className);
+//	//refers?
+//	IPersistentMap refers = (IPersistentMap) ((Var) RT.NS_REFERS.get()).get();
+//	Var var = (Var) refers.valAt(sym);
+//	if(var != null)
+//		return var.sym;
+
 }
 
 static class DefExpr implements Expr{
@@ -378,7 +389,7 @@ static class VarExpr implements Expr, AssignableExpr{
 		return tag != null;
 	}
 
-	public Class getJavaClass() throws ClassNotFoundException{
+	public Class getJavaClass() throws Exception{
 		return HostExpr.tagToClass(tag);
 	}
 
@@ -656,17 +667,17 @@ static abstract class HostExpr implements Expr{
 			//determine static or instance
 			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
 			int line = (Integer) LINE.get();
-			String className = maybeClassName(RT.second(form), false);
+			Class c = maybeClass(RT.second(form), false);
 			//at this point className will be non-null if static
 			Expr instance = null;
-			if(className == null)
+			if(c == null)
 				instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
 
 			if(RT.third(form) instanceof Symbol)    //field
 				{
 				Symbol sym = (Symbol) RT.third(form);
-				if(className != null)
-					return new StaticFieldExpr(line, className, sym.name);
+				if(c != null)
+					return new StaticFieldExpr(line, c, sym.name);
 				else
 					return new InstanceFieldExpr(line, instance, sym.name);
 				}
@@ -676,8 +687,8 @@ static abstract class HostExpr implements Expr{
 				PersistentVector args = PersistentVector.EMPTY;
 				for(ISeq s = RT.rest(RT.third(form)); s != null; s = s.rest())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
-				if(className != null)
-					return new StaticMethodExpr(line, className, sym.name, args);
+				if(c != null)
+					return new StaticMethodExpr(line, c, sym.name, args);
 				else
 					return new InstanceMethodExpr(line, instance, sym.name, args);
 				}
@@ -686,6 +697,28 @@ static abstract class HostExpr implements Expr{
 		}
 	}
 
+	private static Class maybeClass(Object form, boolean stringOk) throws Exception{
+		Class c = null;
+		if(form instanceof Symbol)
+			{
+			Symbol sym = (Symbol) form;
+			if(sym.ns == null) //if ns-qualified can't be classname
+				{
+				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+					c = Class.forName(sym.name);
+				else
+					{
+					Object o = currentNS().getMapping(sym);
+					if(o instanceof Class)
+						c = (Class) o;
+					}
+				}
+			}
+		else if(stringOk && form instanceof String)
+			c = Class.forName((String) form);
+		return c;
+	}
+/*
 	private static String maybeClassName(Object form, boolean stringOk){
 		String className = null;
 		if(form instanceof Symbol)
@@ -706,11 +739,11 @@ static abstract class HostExpr implements Expr{
 			className = (String) form;
 		return className;
 	}
-
-	static Class tagToClass(Symbol tag) throws ClassNotFoundException{
-		String className = maybeClassName(tag, true);
-		if(className != null)
-			return Class.forName(className);
+*/
+	static Class tagToClass(Symbol tag) throws Exception{
+		Class c = maybeClass(tag, true);
+		if(c != null)
+			return c;
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 	}
 }
@@ -803,7 +836,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 }
 
 static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
-	final String className;
+	//final String className;
 	final String fieldName;
 	final Class c;
 	final java.lang.reflect.Field field;
@@ -811,16 +844,17 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
 	final int line;
 
-	public StaticFieldExpr(int line, String className, String fieldName) throws Exception{
-		this.className = className;
+	public StaticFieldExpr(int line, Class c, String fieldName) throws Exception{
+		//this.className = className;
 		this.fieldName = fieldName;
 		this.line = line;
-		c = Class.forName(className);
+		//c = Class.forName(className);
+		this.c = c;
 		field = c.getField(fieldName);
 	}
 
 	public Object eval() throws Exception{
-		return Reflector.getStaticField(className, fieldName);
+		return Reflector.getStaticField(c, fieldName);
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -847,7 +881,7 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
-		return Reflector.setStaticField(className, fieldName, val.eval());
+		return Reflector.setStaticField(c, fieldName, val.eval());
 	}
 
 	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
@@ -987,7 +1021,8 @@ static class InstanceMethodExpr extends MethodExpr{
 
 
 static class StaticMethodExpr extends MethodExpr{
-	final String className;
+	//final String className;
+	final Class c;
 	final String methodName;
 	final IPersistentVector args;
 	final int line;
@@ -996,14 +1031,14 @@ static class StaticMethodExpr extends MethodExpr{
 			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
 
 
-	public StaticMethodExpr(int line, String className, String methodName, IPersistentVector args)
+	public StaticMethodExpr(int line, Class c, String methodName, IPersistentVector args)
 			throws Exception{
-		this.className = className;
+		this.c = c;
 		this.methodName = methodName;
 		this.args = args;
 		this.line = line;
 
-		List methods = Reflector.getMethods(Class.forName(className), args.count(), methodName, true);
+		List methods = Reflector.getMethods(c, args.count(), methodName, true);
 		if(methods.isEmpty())
 			throw new IllegalArgumentException("No matching method: " + methodName);
 
@@ -1032,7 +1067,7 @@ static class StaticMethodExpr extends MethodExpr{
 			ms.add(method);
 			return Reflector.invokeMatchingMethod(methodName, ms, null, argvals);
 			}
-		return Reflector.invokeStaticMethod(className, methodName, argvals);
+		return Reflector.invokeStaticMethod(c, methodName, argvals);
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -1040,14 +1075,15 @@ static class StaticMethodExpr extends MethodExpr{
 		if(method != null)
 			{
 			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
-			Type type = Type.getObjectType(className.replace('.', '/'));
+			//Type type = Type.getObjectType(className.replace('.', '/'));
+			Type type = Type.getType(c);
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			gen.invokeStatic(type, m);
 			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
 			}
 		else
 			{
-			gen.push(className);
+			gen.push(c.getName());
 			gen.push(methodName);
 			emitArgsAsArray(args, fn, gen);
 			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
@@ -1366,15 +1402,16 @@ static class TryExpr implements Expr{
 	final PersistentVector catchExprs;
 
 	static class CatchClause{
-		final String className;
+		//final String className;
+		final Class c;
 		final LocalBinding lb;
 		final Expr handler;
 		Label label;
 		Label endLabel;
 
 
-		public CatchClause(String className, LocalBinding lb, Expr handler){
-			this.className = className;
+		public CatchClause(Class c, LocalBinding lb, Expr handler){
+			this.c = c;
 			this.lb = lb;
 			this.handler = handler;
 		}
@@ -1400,7 +1437,7 @@ static class TryExpr implements Expr{
 			CatchClause clause = (CatchClause) catchExprs.nth(i);
 			clause.label = gen.newLabel();
 			clause.endLabel = gen.newLabel();
-			gen.visitTryCatchBlock(startTry, endTry, clause.label, clause.className.replace('.', '/'));
+			gen.visitTryCatchBlock(startTry, endTry, clause.label, clause.c.getName().replace('.', '/'));
 			}
 		if(finallyExpr != null)
 			gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
@@ -1480,8 +1517,8 @@ static class TryExpr implements Expr{
 					{
 					if(RT.equal(op, CATCH))
 						{
-						String className = HostExpr.maybeClassName(RT.second(f), false);
-						if(className == null)
+						Class c = HostExpr.maybeClass(RT.second(f), false);
+						if(c == null)
 							throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(f));
 						if(!(RT.third(f) instanceof Symbol))
 							throw new IllegalArgumentException(
@@ -1497,7 +1534,7 @@ static class TryExpr implements Expr{
 							Var.pushThreadBindings(dynamicBindings);
 							LocalBinding lb = registerLocal(sym, null, null);
 							Expr handler = (new BodyExpr.Parser()).parse(context, RT.rest(RT.rest(RT.rest(f))));
-							catches = catches.cons(new CatchClause(className, lb, handler));
+							catches = catches.cons(new CatchClause(c, lb, handler));
 							}
 						finally
 							{
@@ -1604,22 +1641,22 @@ static class ThrowExpr extends UntypedExpr{
 }
 
 static class ClassExpr implements Expr{
-	final String className;
+	final Class c;
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 
 
-	public ClassExpr(String className){
-		this.className = className;
+	public ClassExpr(Class c){
+		this.c = c;
 	}
 
 	public Object eval() throws Exception{
-		return Class.forName(className);
+		return c;
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
 			{
-			gen.push(className);
+			gen.push(c.getName());
 			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			}
 	}
@@ -1638,10 +1675,10 @@ static class ClassExpr implements Expr{
 			//(class Classname)
 			if(form.count() != 2)
 				throw new Exception("wrong number of arguments, expecting: (class Classname)");
-			String className = HostExpr.maybeClassName(RT.second(form), true);
-			if(className == null)
+			Class c = HostExpr.maybeClass(RT.second(form), true);
+			if(c == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
-			return new ClassExpr(className);
+			return new ClassExpr(c);
 		}
 	}
 }
@@ -1665,7 +1702,6 @@ static int getMatchingParams(ArrayList<Class[]> paramlists, IPersistentVector ar
 }
 
 static class NewExpr implements Expr{
-	final String className;
 	final IPersistentVector args;
 	final Constructor ctor;
 	final Class c;
@@ -1674,10 +1710,9 @@ static class NewExpr implements Expr{
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 
 
-	public NewExpr(String className, IPersistentVector args, int line) throws Exception{
+	public NewExpr(Class c, IPersistentVector args, int line) throws Exception{
 		this.args = args;
-		this.className = className;
-		this.c = Class.forName(className);
+		this.c = c;
 		Constructor[] allctors = c.getConstructors();
 		ArrayList ctors = new ArrayList();
 		ArrayList<Class[]> params = new ArrayList();
@@ -1702,7 +1737,7 @@ static class NewExpr implements Expr{
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			System.err.format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, className);
+			System.err.format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, c.getName());
 			}
 	}
 
@@ -1714,7 +1749,7 @@ static class NewExpr implements Expr{
 			{
 			return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), argvals));
 			}
-		return Reflector.invokeConstructor(Class.forName(className), argvals);
+		return Reflector.invokeConstructor(c, argvals);
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -1728,7 +1763,7 @@ static class NewExpr implements Expr{
 			}
 		else
 			{
-			gen.push(className);
+			gen.push(c.getName());
 			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			MethodExpr.emitArgsAsArray(args, fn, gen);
 			gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
@@ -1742,7 +1777,7 @@ static class NewExpr implements Expr{
 	}
 
 	public Class getJavaClass() throws Exception{
-		return Class.forName(className);
+		return c;
 	}
 
 	static class Parser implements IParser{
@@ -1752,13 +1787,13 @@ static class NewExpr implements Expr{
 			//(new Classname args...)
 			if(form.count() < 2)
 				throw new Exception("wrong number of arguments, expecting: (new Classname args...)");
-			String className = HostExpr.maybeClassName(RT.second(form), false);
-			if(className == null)
+			Class c = HostExpr.maybeClass(RT.second(form), false);
+			if(c == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.rest(RT.rest(form)); s != null; s = s.rest())
 				args = args.cons(analyze(C.EXPRESSION, s.first()));
-			return new NewExpr(className, args, line);
+			return new NewExpr(c, args, line);
 		}
 	}
 
@@ -1818,16 +1853,16 @@ static class IdenticalExpr implements Expr{
 
 static class InstanceExpr implements Expr{
 	final Expr expr;
-	final String className;
+	final Class c;
 
 
-	public InstanceExpr(Expr expr, String className){
+	public InstanceExpr(Expr expr, Class c){
 		this.expr = expr;
-		this.className = className;
+		this.c = c;
 	}
 
 	public Object eval() throws Exception{
-		return Class.forName(className).isInstance(expr.eval()) ?
+		return c.isInstance(expr.eval()) ?
 		       RT.T : RT.F;
 	}
 
@@ -1845,7 +1880,7 @@ static class InstanceExpr implements Expr{
 			Label not = gen.newLabel();
 			Label end = gen.newLabel();
 			expr.emit(C.EXPRESSION, fn, gen);
-			gen.instanceOf(Type.getObjectType(className.replace('.', '/')));
+			gen.instanceOf(Type.getType(c));
 			gen.ifZCmp(GeneratorAdapter.EQ, not);
 			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
 //			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
@@ -1863,10 +1898,10 @@ static class InstanceExpr implements Expr{
 			//(instance? x Classname)
 			if(form.count() != 3)
 				throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
-			String className = HostExpr.maybeClassName(RT.third(form), true);
-			if(className == null)
+			Class c = HostExpr.maybeClass(RT.third(form), true);
+			if(c == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
-			return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), className);
+			return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), c);
 		}
 	}
 }
@@ -3228,8 +3263,8 @@ public static Object load(Reader rdr) throws Exception{
 		{
 		Var.pushThreadBindings(
 				RT.map(LOADER, new DynamicClassLoader(),
-				       RT.NS_REFERS, RT.NS_REFERS.get(),
-				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
+//				       RT.NS_REFERS, RT.NS_REFERS.get(),
+//				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
 				       RT.CURRENT_NS, RT.CURRENT_NS.get()
 				));
 		LineNumberingPushbackReader pushbackReader =
@@ -3266,8 +3301,9 @@ public static void main(String[] args){
 	try
 		{
 		Var.pushThreadBindings(
-				RT.map(RT.NS_REFERS, RT.NS_REFERS.get(),
-				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
+				RT.map(
+//						RT.NS_REFERS, RT.NS_REFERS.get(),
+//				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
 				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
 				       SOURCE, "REPL"
 				));

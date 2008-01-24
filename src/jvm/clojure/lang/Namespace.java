@@ -42,9 +42,9 @@ Var intern(Symbol sym){
 		{
 		if(v == null)
 			v = new Var(this, sym);
-		map = getMappings();
 		IPersistentMap newMap = map.assoc(sym,v);
 		mappings.compareAndSet(map,newMap);
+		map = getMappings();
 		}
 	if(o instanceof Var && ((Var) o).ns == this)
 		return (Var) o;
@@ -52,28 +52,46 @@ Var intern(Symbol sym){
 	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
 }
 
-Var unintern(Var var){
-   return null;
+Object reference(Symbol sym, Object val){
+	if(sym.ns != null)
+		{
+		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
+		}
+	IPersistentMap map = getMappings();
+	Object o;
+	while((o = map.valAt(sym)) == null)
+		{
+		IPersistentMap newMap = map.assoc(sym,val);
+		mappings.compareAndSet(map,newMap);
+		map = getMappings();
+		}
+	if(o == val)
+		return o;
+
+	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+}
+
+void unintern(Symbol sym) throws Exception{
+	if(sym.ns != null)
+		{
+		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
+		}
+	IPersistentMap map = getMappings();
+	while(map.containsKey(sym))
+		{
+		IPersistentMap newMap = map.without(sym);
+		mappings.compareAndSet(map,newMap);
+		map = getMappings();
+		}
 }
 
 public Class importClass(Symbol sym, Class c){
-	return null;
+	return (Class) reference(sym,c);
 
 }
-
-public Class unimport(Symbol sym){
-	return null;
-
-}
-
 
 public Var refer(Symbol sym, Var var){
-	return null;
-
-}
-
-public Var unrefer(Symbol sym){
-	return null;
+	return (Var) reference(sym,var);
 
 }
 

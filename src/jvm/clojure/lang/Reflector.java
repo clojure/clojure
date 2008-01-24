@@ -136,6 +136,10 @@ public static Object invokeStaticMethodVariadic(String className, String methodN
 
 public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception{
 	Class c = Class.forName(className);
+	return invokeStaticMethod(c, methodName, args);
+}
+
+public static Object invokeStaticMethod(Class c, String methodName, Object[] args) throws Exception{
 	if(methodName.equals("new"))
 		return invokeConstructor(c, args);
 	List methods = getMethods(c, args.length, methodName, true);
@@ -144,6 +148,10 @@ public static Object invokeStaticMethod(String className, String methodName, Obj
 
 public static Object getStaticField(String className, String fieldName) throws Exception{
 	Class c = Class.forName(className);
+	return getStaticField(c, fieldName);
+}
+
+public static Object getStaticField(Class c, String fieldName) throws Exception{
 //	if(fieldName.equals("class"))
 //		return c;
 	Field f = getField(c, fieldName, true);
@@ -153,9 +161,12 @@ public static Object getStaticField(String className, String fieldName) throws E
 		}
 	throw new IllegalArgumentException("No matching field found");
 }
-
 public static Object setStaticField(String className, String fieldName, Object val) throws Exception{
 	Class c = Class.forName(className);
+	return setStaticField(c, fieldName, val);
+}
+
+public static Object setStaticField(Class c, String fieldName, Object val) throws Exception{
 	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{

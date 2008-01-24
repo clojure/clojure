@@ -91,7 +91,7 @@
           (recur (. sb  (append (str (first more)))) (rest more))
         (str sb)))))
 
-(defn sym
+(defn symbol
   ([name] (. clojure.lang.Symbol (intern name)))
   ([ns name] (. clojure.lang.Symbol (intern ns name))))
 
@@ -686,11 +686,11 @@
 
 (defn import [& import-lists]
  (when import-lists
-   (let [#^clojure.lang.Var imps *ns-imports*
+   (let [#^clojure.lang.Namespace ns *current-namespace*
          pkg (ffirst import-lists)
          classes (rfirst import-lists)]
        (doseq c classes
-         (. imps (bindRoot (assoc (. imps (get)) c (strcat pkg "." c))))))
+         (. ns (importClass c (. Class (forName (strcat pkg "." c)))))) )
    (apply thisfn (rest import-lists))))
 
 (defn unimport [& names]
@@ -704,9 +704,9 @@
          ns (first rlist)
          names (rest rlist)]
      (doseq name names
-       (when (. clojure.lang.Var (find (sym (str *current-namespace*) (str name))))
+       (when (. clojure.lang.Var (find (symbol(str *current-namespace*) (str name))))
          (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
-       (let [varsym (sym (str ns) (str name))
+       (let [varsym (symbol (str ns) (str name))
              var (. clojure.lang.Var (find varsym))
              #^clojure.lang.Var rvar ((. refers (get)) name)]
          (if var
@@ -721,8 +721,8 @@
 	  (doseq name names
         (. refers (bindRoot (dissoc (. refers (get)) name))))))
 
-(defn unintern [varsym]
-  (. clojure.lang.Var (unintern varsym)))
+;(defn unintern [varsym]
+;  (. clojure.lang.Var (unintern varsym)))
 
 (defn into-array [aseq]
   (. clojure.lang.RT (seqToTypedArray (seq aseq))))
@@ -1013,7 +1013,7 @@
 		scan touch
 		key val
 		line-seq sort sort-by comparator
-		rseq sym keyword name namespace locking .. ->
+		rseq symbol keyword name namespace locking .. ->
 		defmulti defmethod remove-method
                 binding find-var
 		ref deref commute alter set ensure sync !
@@ -1025,7 +1025,8 @@
 		zipmap
 		cycle split-at split-with repeat replicate iterate range
 		doseq  dotimes into
-		eval import unimport refer unrefer in-namespace unintern
+		eval import unimport refer unrefer in-namespace 
+		;unintern
 		into-array array
 		make-proxy implement
 		pr prn print println newline *out* *current-namespace*  *print-meta* *print-readably*
