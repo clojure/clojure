@@ -3158,6 +3158,10 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 }
 
 static Object resolve(Symbol sym) throws Exception{
+	return resolveIn(currentNS(), sym);
+}
+
+static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
@@ -3177,7 +3181,7 @@ static Object resolve(Symbol sym) throws Exception{
 		}
 	else
 		{
-		Object o = currentNS().getMapping(sym);
+		Object o = n.getMapping(sym);
 		if(o == null)
 			throw new Exception("Unable to resolve symbol: " + sym + " in this context");
 		return o;

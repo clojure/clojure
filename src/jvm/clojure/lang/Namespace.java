@@ -15,15 +15,27 @@ package clojure.lang;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Namespace{
+public class Namespace {
 final public Symbol name;
 final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
 
 final static ConcurrentHashMap<Symbol, Namespace> namespaces = new ConcurrentHashMap<Symbol, Namespace>();
 
+public String toString() {
+	return "#<Namespace: " + name + ">";
+}
+
 Namespace(Symbol name){
 	this.name = name;
 	mappings.set(RT.DEFAULT_IMPORTS);
+}
+
+public static ISeq all(){
+	return RT.seq(namespaces.values());
+}
+
+public Symbol getName(){
+	return name;
 }
 
 public IPersistentMap getMappings(){
@@ -104,6 +116,12 @@ public static Namespace findOrCreate(Symbol name){
 	return ns == null ? newns : ns;
 }
 
+public static Namespace remove(Symbol name){
+	if(name.equals(RT.CLOJURE_NS.name))
+		throw new IllegalAccessError("Cannot remove clojure namespace");
+	return namespaces.remove(name);
+}
+
 public static Namespace find(Symbol name){
 	return namespaces.get(name);
 }
@@ -118,4 +136,5 @@ public Var findInternedVar(Symbol symbol){
 		return (Var) o;
 	return null;
 }
+
 }

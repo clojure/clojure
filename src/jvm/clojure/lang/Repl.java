@@ -16,6 +16,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 public class Repl{
+static final Symbol REFER = Symbol.create("clojure", "refer");
+static final Symbol QUOTE = Symbol.create("quote");
+static final Symbol CLOJURE = Symbol.create("clojure");
 public static void main(String[] args){
 
 	for(String file : args)
@@ -45,7 +48,7 @@ public static void main(String[] args){
 				));
 		w.write("Clojure\n");
 		RT.inNamespace.invoke(Symbol.create("user"));
-
+		Compiler.eval(RT.list(REFER, RT.list(QUOTE, CLOJURE)));
 		for(; ;)
 			{
 			try

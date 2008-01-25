@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-namespace 'clojure)
+(in-ns 'clojure)
 
 (def list (. clojure.lang.PersistentList creator))
 
@@ -81,6 +81,7 @@
 (defn rrest [x] (rest (rest x)))
 
 (defn #^Boolean = [x y] (. clojure.lang.RT (equal x y)))
+(defn #^Boolean != [x y] (not (= x y)))
 
 (defn #^String str [#^Object x]
   (if x (. x (toString)) ""))
@@ -689,7 +690,7 @@
 
 (defn import [& import-lists]
  (when import-lists
-   (let [#^clojure.lang.Namespace ns *current-namespace*
+   (let [#^clojure.lang.Namespace ns *ns*
          pkg (ffirst import-lists)
          classes (rfirst import-lists)]
        (doseq c classes
@@ -707,7 +708,7 @@
 ;         ns (first rlist)
 ;         names (rest rlist)]
 ;     (doseq name names
-;       (when (. clojure.lang.Var (find (symbol(str *current-namespace*) (str name))))
+;       (when (. clojure.lang.Var (find (symbol(str *ns*) (str name))))
 ;         (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
 ;       (let [varsym (symbol (str ns) (str name))
 ;             var (. clojure.lang.Var (find varsym))
@@ -998,14 +999,102 @@
 (defn distinct [coll]
   (keys (to-set coll)))
 
+(defn filter-vals [pred amap]
+  (loop [ret {} es (seq amap)]
+    (if es
+      (if (pred (val (first es)))
+	(recur (assoc ret (key (first es)) (val (first es))) (rest es))
+	(recur ret (rest es)))
+      ret)))
+
+(defn filter-keys [pred amap]
+  (loop [ret {} es (seq amap)]
+    (if es
+      (if (pred (key (first es)))
+	(recur (assoc ret (key (first es)) (val (first es))) (rest es))
+	(recur ret (rest es)))
+      ret)))
+
+(defn find-ns [sym]
+  (. clojure.lang.Namespace (find sym)))
+
+(defn create-ns [sym]
+  (. clojure.lang.Namespace (findOrCreate sym)))
+
+(defn remove-ns [sym]
+  (. clojure.lang.Namespace (remove sym)))
+
+(defn all-ns []
+  (. clojure.lang.Namespace (all)))
+
+(defn ns-name [#^clojure.lang.Namespace ns]
+  (. ns (getName)))
+
+(defn ns-map [#^clojure.lang.Namespace ns]
+  (. ns (getMappings)))
+
 (defn export [syms]
   (doseq sym syms
-   (.. *current-namespace* (intern sym) (setExported true))))
+   (.. *ns* (intern sym) (setExported true))))
 
 (defn exports [#^clojure.lang.Namespace ns]
-  (filter (fn [v] (and (instance? clojure.lang.Var v)
+  (filter-vals (fn [v] (and (instance? clojure.lang.Var v)
                        (. v (isExported))))
-          (vals (. ns (getMappings)))))
+          (ns-map ns)))
+
+(defn imports [#^clojure.lang.Namespace ns]
+  (filter-vals (partial instance? Class) (ns-map ns)))
+
+(defn refer [ns-sym & filters]
+  (let [ns (find-ns ns-sym)
+	    fs (apply hash-map filters)
+	    nsexports (exports ns)
+	    rename (or (:rename fs) {})
+	    exclude (to-set (:exclude fs))
+	    to-do (or (:only fs) (keys nsexports))]
+    (doseq sym to-do
+      (when-not (exclude sym)
+	    (let [var (nsexports sym)]
+	      (when-not var
+	        (throw (new java.lang.IllegalAccessError (strcat sym " is not exported"))))
+	      (. *ns* (refer (or (rename sym) sym) var)))))))
+
+(defn refers [#^clojure.lang.Namespace ns]
+  (filter-vals (fn [v] (and (instance? clojure.lang.Var v)
+			                (!= ns (. v ns))))
+          (ns-map ns)))
+
+(defn interns [#^clojure.lang.Namespace ns]
+  (filter-vals (fn [v] (and (instance? clojure.lang.Var v)
+			                (= ns (. v ns))))
+          (ns-map ns)))
+
+(defn take-nth [n coll]
+  (when (seq coll)
+    (lazy-cons (first coll) (take-nth n (drop n coll)))))
+
+(defn interleave [& colls]
+  (apply concat (apply map list colls)))
+
+(defn get-var [#^clojure.lang.Var x]
+  (. x (get)))
+
+(defn set-var [#^clojure.lang.Var x val]
+  (. x (set val)))
+
+(defmacro with-local-vars [name-vals-vec & body]
+  `(let [~@(interleave (take-nth 2 name-vals-vec)
+                       (repeat '(. clojure.lang.Var (create))))]
+     (try
+      (. clojure.lang.Var (pushThreadBindings (hash-map ~@name-vals-vec)))
+      ~@body
+      (finally (. clojure.lang.Var (popThreadBindings))))))
+
+(defn resolve-in [ns sym]
+  (. clojure.lang.Compiler (resolveIn ns sym)))
+
+(defn resolve [sym]
+  (resolve-in *ns* sym))
 
 (export
 	'(  load-file load
@@ -1014,7 +1103,7 @@
 		meta with-meta defmacro when when-not
 		nil? not first rest second
 		ffirst frest rfirst rrest
-		= str strcat gensym cond
+		= != str strcat gensym cond
 		apply list* delay lazy-cons fnseq concat
 		and or + * / - == < <= > >=
 		inc dec pos? neg? zero? quot rem
@@ -1038,12 +1127,12 @@
 		doseq  dotimes into
 		eval import
 		;unimport
-		;refer unrefer 
-		in-namespace
+		refer refers interns 
+		in-ns
 		;unintern
 		into-array array
 		make-proxy implement
-		pr prn print println newline *out* *current-namespace*  *print-meta* *print-readably*
+		pr prn print println newline *out* *ns*  *print-meta* *print-readably*
 		doto  memfn
         read *in* with-open
 		time
@@ -1060,8 +1149,12 @@
 		*warn-on-reflection*
 		resultset-seq
 		to-set distinct
-		export exports
+		export exports imports ns-map
 		identical?  instance?
-		load-file in-namespace
+		load-file in-ns find-ns
+		filter-vals filter-keys find-ns create-ns remove-ns
+		take-nth interleave get-var set-var with-local-vars
+		resolve-in resolve
+		all-ns ns-name
 	))
 

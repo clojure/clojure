@@ -110,14 +110,14 @@ final static Keyword AGENT_KEY = Keyword.intern("clojure", "agent");
 //                                                    Module.findOrCreateModule("clojure/user"));
 
 final static Symbol LOAD_FILE = Symbol.create("load-file");
-final static Symbol IN_NAMESPACE = Symbol.create("in-namespace");
+final static Symbol IN_NAMESPACE = Symbol.create("in-ns");
 final static Symbol EXPORTS = Symbol.create("*exports*");
 final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS, EXPORTS, PersistentHashMap.EMPTY);
 //final static Symbol EQL_REF = Symbol.create("eql-ref?");
 static final Symbol IDENTICAL = Symbol.create("identical?");
 
 //symbol
-final static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*current-namespace*"),
+final static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),
                                          CLOJURE_NS);
 
 final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
