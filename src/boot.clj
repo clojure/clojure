@@ -693,10 +693,10 @@
          (. ns (importClass c (. Class (forName (strcat pkg "." c)))))) )
    (apply thisfn (rest import-lists))))
 
-(defn unimport [& names]
-   (let [#^clojure.lang.Var imps *ns-imports*]
-	  (doseq name names
-        (. imps (bindRoot (dissoc (. imps (get)) name))))))
+;(defn unimport [& names]
+;   (let [#^clojure.lang.Var imps *ns-imports*]
+;	  (doseq name names
+;        (. imps (bindRoot (dissoc (. imps (get)) name))))))
 
 (defn refer [& refer-lists]
   (doseq rlist refer-lists
@@ -716,10 +716,10 @@
                (. refers (bindRoot (assoc (. refers (get)) name var))))
             (throw (new Exception (strcat "Can't find Var: " varsym)))))))))
 
-(defn unrefer [& names]
-   (let [#^clojure.lang.Var refers *ns-refers*]
-	  (doseq name names
-        (. refers (bindRoot (dissoc (. refers (get)) name))))))
+;(defn unrefer [& names]
+;   (let [#^clojure.lang.Var refers *ns-refers*]
+;	  (doseq name names
+;        (. refers (bindRoot (dissoc (. refers (get)) name))))))
 
 ;(defn unintern [varsym]
 ;  (. clojure.lang.Var (unintern varsym)))
@@ -1025,7 +1025,9 @@
 		zipmap
 		cycle split-at split-with repeat replicate iterate range
 		doseq  dotimes into
-		eval import unimport refer unrefer in-namespace 
+		eval import
+		;unimport
+		refer unrefer in-namespace 
 		;unintern
 		into-array array
 		make-proxy implement

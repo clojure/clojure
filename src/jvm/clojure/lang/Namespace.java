@@ -42,8 +42,8 @@ Var intern(Symbol sym){
 		{
 		if(v == null)
 			v = new Var(this, sym);
-		IPersistentMap newMap = map.assoc(sym,v);
-		mappings.compareAndSet(map,newMap);
+		IPersistentMap newMap = map.assoc(sym, v);
+		mappings.compareAndSet(map, newMap);
 		map = getMappings();
 		}
 	if(o instanceof Var && ((Var) o).ns == this)
@@ -61,8 +61,8 @@ Object reference(Symbol sym, Object val){
 	Object o;
 	while((o = map.valAt(sym)) == null)
 		{
-		IPersistentMap newMap = map.assoc(sym,val);
-		mappings.compareAndSet(map,newMap);
+		IPersistentMap newMap = map.assoc(sym, val);
+		mappings.compareAndSet(map, newMap);
 		map = getMappings();
 		}
 	if(o == val)
@@ -71,27 +71,27 @@ Object reference(Symbol sym, Object val){
 	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
 }
 
-void unintern(Symbol sym) throws Exception{
+public void unintern(Symbol sym) throws Exception{
 	if(sym.ns != null)
 		{
-		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
+		throw new IllegalArgumentException("Can't unintern namespace-qualified symbol");
 		}
 	IPersistentMap map = getMappings();
 	while(map.containsKey(sym))
 		{
 		IPersistentMap newMap = map.without(sym);
-		mappings.compareAndSet(map,newMap);
+		mappings.compareAndSet(map, newMap);
 		map = getMappings();
 		}
 }
 
 public Class importClass(Symbol sym, Class c){
-	return (Class) reference(sym,c);
+	return (Class) reference(sym, c);
 
 }
 
 public Var refer(Symbol sym, Var var){
-	return (Var) reference(sym,var);
+	return (Var) reference(sym, var);
 
 }
 
@@ -100,8 +100,8 @@ public static Namespace findOrCreate(Symbol name){
 	if(ns != null)
 		return ns;
 	Namespace newns = new Namespace(name);
-	ns = namespaces.putIfAbsent(name,newns);
-	return ns == null?newns:ns;
+	ns = namespaces.putIfAbsent(name, newns);
+	return ns == null ? newns : ns;
 }
 
 public static Namespace find(Symbol name){
@@ -114,7 +114,7 @@ public Object getMapping(Symbol name){
 
 public Var findInternedVar(Symbol symbol){
 	Object o = mappings.get().valAt(symbol);
-	if(o != null && o instanceof Var && ((Var)o).ns == this)
+	if(o != null && o instanceof Var && ((Var) o).ns == this)
 		return (Var) o;
 	return null;
 }

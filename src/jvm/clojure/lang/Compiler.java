@@ -139,6 +139,7 @@ static
 	a[MAX_POSITIONAL_ARITY] = Type.getType("[LObject;");
 	ARG_TYPES[MAX_POSITIONAL_ARITY] = a;
 
+
 	}
 
 
@@ -222,24 +223,13 @@ static Symbol resolveSymbol(Symbol sym){
 	if(o == null)
 		return Symbol.intern(currentNS().name.name, sym.name);
 	else if(o instanceof Class)
-		return Symbol.intern(null, ((Class)o).getName());
+		return Symbol.intern(null, ((Class) o).getName());
 	else if(o instanceof Var)
 		{
 		Var v = (Var) o;
 		return Symbol.create(v.ns.name.name, v.sym.name);
 		}
 	return null;
-
-//	IPersistentMap imports = (IPersistentMap) ((Var) RT.NS_IMPORTS.get()).get();
-//	//imported class?
-//	String className = (String) imports.valAt(sym);
-//	if(className != null)
-//		return Symbol.intern(null, className);
-//	//refers?
-//	IPersistentMap refers = (IPersistentMap) ((Var) RT.NS_REFERS.get()).get();
-//	Var var = (Var) refers.valAt(sym);
-//	if(var != null)
-//		return var.sym;
 
 }
 
@@ -718,28 +708,29 @@ static abstract class HostExpr implements Expr{
 			c = Class.forName((String) form);
 		return c;
 	}
-/*
-	private static String maybeClassName(Object form, boolean stringOk){
-		String className = null;
-		if(form instanceof Symbol)
-			{
-			Symbol sym = (Symbol) form;
-			if(sym.ns == null) //if ns-qualified can't be classname
-				{
-				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
-					className = sym.name;
-				else
-					{
-					IPersistentMap imports = (IPersistentMap) ((Var) RT.NS_IMPORTS.get()).get();
-					className = (String) imports.valAt(sym);
-					}
-				}
-			}
-		else if(stringOk && form instanceof String)
-			className = (String) form;
-		return className;
-	}
-*/
+
+	/*
+	 private static String maybeClassName(Object form, boolean stringOk){
+		 String className = null;
+		 if(form instanceof Symbol)
+			 {
+			 Symbol sym = (Symbol) form;
+			 if(sym.ns == null) //if ns-qualified can't be classname
+				 {
+				 if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+					 className = sym.name;
+				 else
+					 {
+					 IPersistentMap imports = (IPersistentMap) ((Var) RT.NS_IMPORTS.get()).get();
+					 className = (String) imports.valAt(sym);
+					 }
+				 }
+			 }
+		 else if(stringOk && form instanceof String)
+			 className = (String) form;
+		 return className;
+	 }
+ */
 	static Class tagToClass(Symbol tag) throws Exception{
 		Class c = maybeClass(tag, true);
 		if(c != null)
@@ -769,7 +760,8 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.line = line;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			System.err.format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line, fieldName);
+			System.err.format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line,
+			                  fieldName);
 			}
 	}
 
@@ -2326,7 +2318,8 @@ static class FnExpr implements Expr{
 
 	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
-	final static Method varintern = Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol, clojure.lang.Symbol)");
+	final static Method varintern =
+			Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol, clojure.lang.Symbol)");
 	final static Method afnctor = Method.getMethod("void <init>()");
 	final static Method restfnctor = Method.getMethod("void <init>(int)");
 	final static Type aFnType = Type.getType(AFn.class);
@@ -3147,11 +3140,45 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		if(b != null)
 			return new LocalBindingExpr(b, tag);
 		}
-	Var v = lookupVar(sym, false);
-	if(v != null)
+	//Var v = lookupVar(sym, false);
+//	Var v = lookupVar(sym, false);
+//	if(v != null)
+//		return new VarExpr(v, tag);
+	Object o = resolve(sym);
+	if(o instanceof Var)
+		{
+		Var v = (Var) o;
+		registerVar(v);
 		return new VarExpr(v, tag);
+		}
+	else if(o instanceof Class)
+		return new ClassExpr((Class) o);
+
 	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
 
+}
+
+static Object resolve(Symbol sym) throws Exception{
+	//note - ns-qualified vars must already exist
+	if(sym.ns != null)
+		{
+		Namespace ns = Namespace.find(Symbol.create(sym.ns));
+		if(ns == null)
+			throw new Exception("No such namespace: " + sym.ns);
+		Var v = ns.findInternedVar(Symbol.create(sym.name));
+		if(v == null)
+			throw new Exception("No such var: " + sym);
+		else if(v.ns != currentNS() && !v.isExported())
+			throw new Exception("var: " + sym + " is not exported");
+		return v;
+		}
+	else
+		{
+		Object o = currentNS().getMapping(sym);
+		if(o == null)
+			throw new Exception("Unable to resolve symbol: " + sym + " in this context");
+		return o;
+		}
 }
 
 static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
@@ -3265,7 +3292,7 @@ public static Object load(Reader rdr) throws Exception{
 				RT.map(LOADER, new DynamicClassLoader(),
 //				       RT.NS_REFERS, RT.NS_REFERS.get(),
 //				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-				       RT.CURRENT_NS, RT.CURRENT_NS.get()
+RT.CURRENT_NS, RT.CURRENT_NS.get()
 				));
 		LineNumberingPushbackReader pushbackReader =
 				(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
@@ -3304,8 +3331,8 @@ public static void main(String[] args){
 				RT.map(
 //						RT.NS_REFERS, RT.NS_REFERS.get(),
 //				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
-				       SOURCE, "REPL"
+RT.CURRENT_NS, RT.CURRENT_NS.get(),
+SOURCE, "REPL"
 				));
 		w.write("Clojure\n");
 		RT.inNamespace.invoke(Symbol.create("user"));

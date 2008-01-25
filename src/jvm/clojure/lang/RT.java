@@ -46,7 +46,7 @@ Symbol.create("Compiler"), Compiler.class,
 Symbol.create("Double"), Double.class,
 Symbol.create("Enum"), Enum.class,
 Symbol.create("Float"), Float.class,
-Symbol.create("InheritableThreadLocal"),InheritableThreadLocal.class,
+Symbol.create("InheritableThreadLocal"), InheritableThreadLocal.class,
 Symbol.create("Integer"), Integer.class,
 Symbol.create("Long"), Long.class,
 Symbol.create("Math"), Math.class,
@@ -100,30 +100,30 @@ Symbol.create("Exception"), Exception.class
 static final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure"));
 //static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
 final static public Var OUT =
-		Var.intern(CLOJURE_NS,Symbol.create("*out*"), new OutputStreamWriter(System.out));
+		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out));
 final static public Var IN =
-		Var.intern(CLOJURE_NS,Symbol.create("*in*"),
+		Var.intern(CLOJURE_NS, Symbol.create("*in*"),
 		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
-final static Keyword TAG_KEY = Keyword.intern("clojure","tag");
-final static Keyword AGENT_KEY = Keyword.intern("clojure","agent");
+final static Keyword TAG_KEY = Keyword.intern("clojure", "tag");
+final static Keyword AGENT_KEY = Keyword.intern("clojure", "agent");
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 
 final static Symbol LOAD_FILE = Symbol.create("load-file");
 final static Symbol IN_NAMESPACE = Symbol.create("in-namespace");
 final static Symbol EXPORTS = Symbol.create("*exports*");
-final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS,EXPORTS, PersistentHashMap.EMPTY);
+final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS, EXPORTS, PersistentHashMap.EMPTY);
 final static Symbol EQL_REF = Symbol.create("eql-ref?");
 
 //symbol
-final static Var CURRENT_NS = Var.intern(CLOJURE_NS,Symbol.create("*current-namespace*"),
-                                             CLOJURE_NS);
+final static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*current-namespace*"),
+                                         CLOJURE_NS);
 
-final static Var PRINT_META = Var.intern(CLOJURE_NS,Symbol.create("*print-meta*"), F);
-final static Var PRINT_READABLY = Var.intern(CLOJURE_NS,Symbol.create("*print-readably*"), T);
-final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS,Symbol.create("*warn-on-reflection*"), F);
+final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
+final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
+final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
 
-final static Var IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("*imports*"), DEFAULT_IMPORTS);
+final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
 		Symbol nsname = (Symbol) arg1;
@@ -144,16 +144,16 @@ final static IFn inNamespace = new AFn(){
 };
 //simple-symbol->var
 final static Var REFERS =
-		Var.intern(CLOJURE_NS,Symbol.create("*refers*"),
+		Var.intern(CLOJURE_NS, Symbol.create("*refers*"),
 		           map(
-				           IN_NAMESPACE, Var.intern(CLOJURE_NS,IN_NAMESPACE, inNamespace),
-				           LOAD_FILE, Var.intern(CLOJURE_NS,LOAD_FILE,
+				           IN_NAMESPACE, Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace),
+				           LOAD_FILE, Var.intern(CLOJURE_NS, LOAD_FILE,
 		                                         new AFn(){
 			                                         public Object invoke(Object arg1) throws Exception{
 				                                         return Compiler.loadFile((String) arg1);
 			                                         }
 		                                         }),
-				           EQL_REF, Var.intern(CLOJURE_NS,EQL_REF,
+				           EQL_REF, Var.intern(CLOJURE_NS, EQL_REF,
 		                                       new AFn(){
 			                                       public Object invoke(Object arg1, Object arg2)
 					                                       throws Exception{
@@ -171,6 +171,15 @@ static AtomicInteger id = new AtomicInteger(1);
 static
 	{
 	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
+	try
+		{
+		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
+		Compiler.load(new InputStreamReader(ins));
+		}
+	catch(Exception e)
+		{
+		throw new IllegalStateException("Error loading boot.clj", e);
+		}
 	}
 //static
 //	{
@@ -725,19 +734,19 @@ static public void print(Object x, Writer w) throws Exception{
 				char c = s.charAt(i);
 				switch(c)
 					{
-					case'\n':
+					case '\n':
 						w.write("\\n");
 						break;
-					case'\t':
+					case '\t':
 						w.write("\\t");
 						break;
-					case'\r':
+					case '\r':
 						w.write("\\r");
 						break;
-					case'"':
+					case '"':
 						w.write("\\\"");
 						break;
-					case'\\':
+					case '\\':
 						w.write("\\\\");
 						break;
 					default:
@@ -799,13 +808,13 @@ static public void print(Object x, Writer w) throws Exception{
 			w.write('\\');
 			switch(c)
 				{
-				case'\n':
+				case '\n':
 					w.write("newline");
 					break;
-				case'\t':
+				case '\t':
 					w.write("tab");
 					break;
-				case' ':
+				case ' ':
 					w.write("space");
 					break;
 				default:
@@ -847,13 +856,13 @@ static public void formatStandard(Writer w, Object obj) throws IOException{
 		char c = ((Character) obj).charValue();
 		switch(c)
 			{
-			case'\n':
+			case '\n':
 				w.write("newline");
 				break;
-			case'\t':
+			case '\t':
 				w.write("tab");
 				break;
-			case' ':
+			case ' ':
 				w.write("space");
 				break;
 			default:
@@ -884,29 +893,29 @@ static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
 		char c = s.charAt(i++);
 		switch(Character.toLowerCase(c))
 			{
-			case'~':
+			case '~':
 				char d = s.charAt(i++);
 				switch(Character.toLowerCase(d))
 					{
-					case'%':
+					case '%':
 						w.write('\n');
 						break;
-					case't':
+					case 't':
 						w.write('\t');
 						break;
-					case'a':
+					case 'a':
 						if(args == null)
 							throw new IllegalArgumentException("Missing argument");
 						RT.formatAesthetic(w, RT.first(args));
 						args = RT.rest(args);
 						break;
-					case's':
+					case 's':
 						if(args == null)
 							throw new IllegalArgumentException("Missing argument");
 						RT.formatStandard(w, RT.first(args));
 						args = RT.rest(args);
 						break;
-					case'{':
+					case '{':
 						int j = s.indexOf("~}", i);    //note - does not nest
 						if(j == -1)
 							throw new IllegalArgumentException("Missing ~}");
@@ -916,11 +925,11 @@ static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
 						args = RT.rest(args);
 						i = j + 2; //skip ~}
 						break;
-					case'^':
+					case '^':
 						if(args == null)
 							return null;
 						break;
-					case'~':
+					case '~':
 						w.write('~');
 						break;
 					default:

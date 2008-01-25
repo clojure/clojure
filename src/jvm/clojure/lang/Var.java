@@ -49,6 +49,7 @@ transient final AtomicInteger count;
 final public Symbol sym;
 final public Namespace ns;
 boolean macroFlag = false;
+boolean exported = false;
 Symbol tag;
 
 public static Var intern(Namespace ns, Symbol sym, Object root){
@@ -64,7 +65,7 @@ public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceR
 
 
 public String toString(){
-	return "#<Var: " + (ns!=null?(ns.name + "/"):"") + (sym != null ? sym.toString() : "--unnamed--") + ">";
+	return "#<Var: " + (ns != null ? (ns.name + "/") : "") + (sym != null ? sym.toString() : "--unnamed--") + ">";
 }
 
 public static Var find(Symbol nsQualifiedSym){
@@ -78,7 +79,7 @@ public static Var find(Symbol nsQualifiedSym){
 
 public static Var intern(Symbol nsName, Symbol sym){
 	Namespace ns = Namespace.findOrCreate(nsName);
-	return intern(ns,sym);
+	return intern(ns, sym);
 }
 
 public static Var intern(Namespace ns, Symbol sym){
@@ -87,7 +88,7 @@ public static Var intern(Namespace ns, Symbol sym){
 
 
 public static Var create(){
-	return new Var(null,null);
+	return new Var(null, null);
 }
 
 public static Var create(Object root){
@@ -102,7 +103,7 @@ Var(Namespace ns, Symbol sym){
 }
 
 Var(Namespace ns, Symbol sym, Object root){
-	this(ns,sym);
+	this(ns, sym);
 	this.root = root;
 }
 
@@ -143,6 +144,14 @@ public void setMacro(){
 
 public boolean isMacro(){
 	return macroFlag;
+}
+
+public void setExported(boolean state){
+	exported = state;
+}
+
+public boolean isExported(){
+	return exported;
 }
 
 public Object getRoot(){
