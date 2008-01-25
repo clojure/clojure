@@ -18,6 +18,9 @@
 
 (. (the-var defn) (setMacro))
 
+(defn instance? [#^Class c x]
+  (. c (isInstance x)))
+  
 (defn vector
       ([] [])
       ([& args]
@@ -77,7 +80,7 @@
 (defn frest [x] (first (rest x)))
 (defn rrest [x] (rest (rest x)))
 
-(defn #^Boolean eql? [x y] (. clojure.lang.RT (equal x y)))
+(defn #^Boolean = [x y] (. clojure.lang.RT (equal x y)))
 
 (defn #^String str [#^Object x]
   (if x (. x (toString)) ""))
@@ -488,7 +491,7 @@
               (recur ((first fs) ret) (rest fs))
              ret)))))
 
-(defn appl
+(defn partial
 	([f arg1]
 	   (fn [& args] (apply f arg1 args)))
 	([f arg1 arg2]
@@ -580,7 +583,7 @@
  ([end] (take end (iterate inc 0)))
  ([start end] (take (- end start) (iterate inc start)))
  ([start end step]
-   (take-while (appl (if (pos? step) > <) end) (iterate (appl + step) start))))
+   (take-while (partial (if (pos? step) > <) end) (iterate (partial + step) start))))
 
 (defn merge [& maps]
   (reduce conj maps))
@@ -698,23 +701,23 @@
 ;	  (doseq name names
 ;        (. imps (bindRoot (dissoc (. imps (get)) name))))))
 
-(defn refer [& refer-lists]
-  (doseq rlist refer-lists
-   (let [#^clojure.lang.Var refers *ns-refers*
-         ns (first rlist)
-         names (rest rlist)]
-     (doseq name names
-       (when (. clojure.lang.Var (find (symbol(str *current-namespace*) (str name))))
-         (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
-       (let [varsym (symbol (str ns) (str name))
-             var (. clojure.lang.Var (find varsym))
-             #^clojure.lang.Var rvar ((. refers (get)) name)]
-         (if var
-             (if rvar
-                 (when (not (eql? rvar var))
-                   (throw (new Exception (strcat "Name conflict: " name " already exists in this refer map as: " (. rvar sym)))))
-               (. refers (bindRoot (assoc (. refers (get)) name var))))
-            (throw (new Exception (strcat "Can't find Var: " varsym)))))))))
+;(defn refer [& refer-lists]
+;  (doseq rlist refer-lists
+;   (let [#^clojure.lang.Var refers *ns-refers*
+;         ns (first rlist)
+;         names (rest rlist)]
+;     (doseq name names
+;       (when (. clojure.lang.Var (find (symbol(str *current-namespace*) (str name))))
+;         (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
+;       (let [varsym (symbol (str ns) (str name))
+;             var (. clojure.lang.Var (find varsym))
+;             #^clojure.lang.Var rvar ((. refers (get)) name)]
+;         (if var
+;             (if rvar
+;                 (when (not (= rvar var))
+;                   (throw (new Exception (strcat "Name conflict: " name " already exists in this refer map as: " (. rvar sym)))))
+;               (. refers (bindRoot (assoc (. refers (get)) name var))))
+;            (throw (new Exception (strcat "Can't find Var: " varsym)))))))))
 
 ;(defn unrefer [& names]
 ;   (let [#^clojure.lang.Var refers *ns-refers*]
@@ -738,13 +741,13 @@
 
 (defn make-proxy [classes method-map]
   (. java.lang.reflect.Proxy
-    (newProxyInstance (. (class clojure.lang.Compiler) (getClassLoader))
+    (newProxyInstance (. (identity clojure.lang.Compiler) (getClassLoader))
                       (into-array classes)
                       (new clojure.lang.ProxyHandler method-map))))
 
 (defmacro implement [classes & fs]
   `(make-proxy
-      ~(apply vector (map (appl list 'class) classes))
+      ~classes
       ~(loop [fmap {} fs fs]
               (if fs
                   (recur (assoc fmap (name (ffirst fs))
@@ -887,7 +890,7 @@
   (. coll (toArray)))
 
 (defn to-array-2d [#^java.util.Collection coll]
-  (let [ret (make-array (class "[Ljava.lang.Object;") (. coll (size)))]
+  (let [ret (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
     (loop [i 0 xs (seq coll)]
       (when xs
         (aset ret i (to-array (first xs)))
@@ -995,15 +998,23 @@
 (defn distinct [coll]
   (keys (to-set coll)))
 
-(def *exports*
-	'(clojure
-	    load-file load
+(defn export [syms]
+  (doseq sym syms
+   (.. *current-namespace* (intern sym) (setExported true))))
+
+(defn exports [#^clojure.lang.Namespace ns]
+  (filter (fn [v] (and (instance? clojure.lang.Var v)
+                       (. v (isExported))))
+          (vals (. ns (getMappings)))))
+
+(export
+	'(  load-file load
 		list cons conj defn
 		vector hash-map sorted-map sorted-map-by
 		meta with-meta defmacro when when-not
 		nil? not first rest second
 		ffirst frest rfirst rrest
-		eql? str strcat gensym cond
+		= str strcat gensym cond
 		apply list* delay lazy-cons fnseq concat
 		and or + * / - == < <= > >=
 		inc dec pos? neg? zero? quot rem
@@ -1019,7 +1030,7 @@
 		ref deref commute alter set ensure sync !
 		agent agent-of agent-errors clear-agent-errors
 		await await-for
-		reduce reverse comp appl
+		reduce reverse comp partial
 		every? not-every? some not-any?
 		map pmap mapcat filter take take-while drop drop-while
 		zipmap
@@ -1027,7 +1038,8 @@
 		doseq  dotimes into
 		eval import
 		;unimport
-		refer unrefer in-namespace 
+		;refer unrefer 
+		in-namespace
 		;unintern
 		into-array array
 		make-proxy implement
@@ -1048,5 +1060,8 @@
 		*warn-on-reflection*
 		resultset-seq
 		to-set distinct
+		export exports
+		identical?  instance?
+		load-file in-namespace
 	))
 

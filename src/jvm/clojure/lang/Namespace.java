@@ -30,7 +30,7 @@ public IPersistentMap getMappings(){
 	return mappings.get();
 }
 
-Var intern(Symbol sym){
+public Var intern(Symbol sym){
 	if(sym.ns != null)
 		{
 		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");

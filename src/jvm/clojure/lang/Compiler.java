@@ -48,18 +48,17 @@ static final Symbol QUOTE = Symbol.create("quote");
 static final Symbol THE_VAR = Symbol.create("the-var");
 static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("set!");
-static final Symbol TRY_FINALLY = Symbol.create("try-finally");
+//static final Symbol TRY_FINALLY = Symbol.create("try-finally");
 static final Symbol TRY = Symbol.create("try");
 static final Symbol CATCH = Symbol.create("catch");
 static final Symbol FINALLY = Symbol.create("finally");
 static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
-static final Symbol INSTANCE = Symbol.create("instance?");
-static final Symbol IDENTICAL = Symbol.create("identical?");
+//static final Symbol INSTANCE = Symbol.create("instance?");
 
 static final Symbol THISFN = Symbol.create("thisfn");
-static final Symbol CLASS = Symbol.create("class");
+//static final Symbol CLASS = Symbol.create("class");
 static final Symbol NEW = Symbol.create("new");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
@@ -88,17 +87,17 @@ static IPersistentMap specials = RT.map(
 		THE_VAR, new TheVarExpr.Parser(),
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
-		TRY_FINALLY, new TryFinallyExpr.Parser(),
+//		TRY_FINALLY, new TryFinallyExpr.Parser(),
 		TRY, new TryExpr.Parser(),
 		THROW, new ThrowExpr.Parser(),
 		MONITOR_ENTER, new MonitorEnterExpr.Parser(),
 		MONITOR_EXIT, new MonitorExitExpr.Parser(),
-		INSTANCE, new InstanceExpr.Parser(),
-		IDENTICAL, new IdenticalExpr.Parser(),
+//		INSTANCE, new InstanceExpr.Parser(),
+//		IDENTICAL, new IdenticalExpr.Parser(),
 		THISFN, null,
 		CATCH, null,
 		FINALLY, null,
-		CLASS, new ClassExpr.Parser(),
+//		CLASS, new ClassExpr.Parser(),
 		NEW, new NewExpr.Parser(),
 //		UNQUOTE, null,
 //		UNQUOTE_SPLICING, null,
@@ -1355,7 +1354,7 @@ static class MonitorEnterExpr extends UntypedExpr{
 
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) throws Exception{
-			return analyze(C.EXPRESSION, RT.second(form));
+			return new MonitorEnterExpr(analyze(C.EXPRESSION, RT.second(form)));
 		}
 	}
 }
@@ -1382,7 +1381,7 @@ static class MonitorExitExpr extends UntypedExpr{
 
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) throws Exception{
-			return analyze(C.EXPRESSION, RT.second(form));
+			return new MonitorExitExpr(analyze(C.EXPRESSION, RT.second(form)));
 		}
 	}
 
@@ -1548,62 +1547,62 @@ static class TryExpr implements Expr{
 	}
 }
 
-static class TryFinallyExpr implements Expr{
-	final Expr tryExpr;
-	final Expr finallyExpr;
-
-
-	public TryFinallyExpr(Expr tryExpr, Expr finallyExpr){
-		this.tryExpr = tryExpr;
-		this.finallyExpr = finallyExpr;
-	}
-
-	public Object eval() throws Exception{
-		throw new UnsupportedOperationException("Can't eval try");
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		Label startTry = gen.newLabel();
-		Label endTry = gen.newLabel();
-		Label end = gen.newLabel();
-		Label finallyLabel = gen.newLabel();
-		gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
-		gen.mark(startTry);
-		tryExpr.emit(context, fn, gen);
-		gen.mark(endTry);
-		finallyExpr.emit(C.STATEMENT, fn, gen);
-		gen.goTo(end);
-		gen.mark(finallyLabel);
-		//exception should be on stack
-		finallyExpr.emit(C.STATEMENT, fn, gen);
-		gen.throwException();
-		gen.mark(end);
-	}
-
-	public boolean hasJavaClass() throws Exception{
-		return tryExpr.hasJavaClass();
-	}
-
-	public Class getJavaClass() throws Exception{
-		return tryExpr.getJavaClass();
-	}
-
-	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
-			ISeq form = (ISeq) frm;
-			//(try-finally try-expr finally-expr)
-			if(form.count() != 3)
-				throw new IllegalArgumentException(
-						"Wrong number of arguments, expecting: (try-finally try-expr finally-expr) ");
-
-			if(context == C.EVAL || context == C.EXPRESSION)
-				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
-
-			return new TryFinallyExpr(analyze(context, RT.second(form)),
-			                          analyze(C.STATEMENT, RT.third(form)));
-		}
-	}
-}
+//static class TryFinallyExpr implements Expr{
+//	final Expr tryExpr;
+//	final Expr finallyExpr;
+//
+//
+//	public TryFinallyExpr(Expr tryExpr, Expr finallyExpr){
+//		this.tryExpr = tryExpr;
+//		this.finallyExpr = finallyExpr;
+//	}
+//
+//	public Object eval() throws Exception{
+//		throw new UnsupportedOperationException("Can't eval try");
+//	}
+//
+//	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+//		Label startTry = gen.newLabel();
+//		Label endTry = gen.newLabel();
+//		Label end = gen.newLabel();
+//		Label finallyLabel = gen.newLabel();
+//		gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
+//		gen.mark(startTry);
+//		tryExpr.emit(context, fn, gen);
+//		gen.mark(endTry);
+//		finallyExpr.emit(C.STATEMENT, fn, gen);
+//		gen.goTo(end);
+//		gen.mark(finallyLabel);
+//		//exception should be on stack
+//		finallyExpr.emit(C.STATEMENT, fn, gen);
+//		gen.throwException();
+//		gen.mark(end);
+//	}
+//
+//	public boolean hasJavaClass() throws Exception{
+//		return tryExpr.hasJavaClass();
+//	}
+//
+//	public Class getJavaClass() throws Exception{
+//		return tryExpr.getJavaClass();
+//	}
+//
+//	static class Parser implements IParser{
+//		public Expr parse(C context, Object frm) throws Exception{
+//			ISeq form = (ISeq) frm;
+//			//(try-finally try-expr finally-expr)
+//			if(form.count() != 3)
+//				throw new IllegalArgumentException(
+//						"Wrong number of arguments, expecting: (try-finally try-expr finally-expr) ");
+//
+//			if(context == C.EVAL || context == C.EXPRESSION)
+//				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+//
+//			return new TryFinallyExpr(analyze(context, RT.second(form)),
+//			                          analyze(C.STATEMENT, RT.third(form)));
+//		}
+//	}
+//}
 
 static class ThrowExpr extends UntypedExpr{
 	final Expr excExpr;
@@ -1791,112 +1790,112 @@ static class NewExpr implements Expr{
 
 }
 
-static class IdenticalExpr implements Expr{
-	final Expr expr1;
-	final Expr expr2;
+//static class IdenticalExpr implements Expr{
+//	final Expr expr1;
+//	final Expr expr2;
+//
+//
+//	public IdenticalExpr(Expr expr1, Expr expr2){
+//		this.expr1 = expr1;
+//		this.expr2 = expr2;
+//	}
+//
+//	public boolean hasJavaClass(){
+//		return true;
+//	}
+//
+//	public Class getJavaClass(){
+//		return Boolean.class;
+//	}
+//
+//	public Object eval() throws Exception{
+//		return expr1.eval() == expr2.eval() ?
+//		       RT.T : RT.F;
+//	}
+//
+//	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+//		if(context != C.STATEMENT)
+//			{
+//			Label not = gen.newLabel();
+//			Label end = gen.newLabel();
+//			expr1.emit(C.EXPRESSION, fn, gen);
+//			expr2.emit(C.EXPRESSION, fn, gen);
+//			gen.visitJumpInsn(IF_ACMPNE, not);
+//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
+////			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
+//			gen.goTo(end);
+//			gen.mark(not);
+//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+////			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+//			gen.mark(end);
+//			}
+//	}
+//
+//	static class Parser implements IParser{
+//		public Expr parse(C context, Object frm) throws Exception{
+//			ISeq form = (ISeq) frm;
+//			if(form.count() != 3)
+//				throw new Exception("wrong number of arguments, expecting: (identical? x y)");
+//
+//			return new IdenticalExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
+//		}
+//	}
+//}
 
-
-	public IdenticalExpr(Expr expr1, Expr expr2){
-		this.expr1 = expr1;
-		this.expr2 = expr2;
-	}
-
-	public boolean hasJavaClass(){
-		return true;
-	}
-
-	public Class getJavaClass(){
-		return Boolean.class;
-	}
-
-	public Object eval() throws Exception{
-		return expr1.eval() == expr2.eval() ?
-		       RT.T : RT.F;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			{
-			Label not = gen.newLabel();
-			Label end = gen.newLabel();
-			expr1.emit(C.EXPRESSION, fn, gen);
-			expr2.emit(C.EXPRESSION, fn, gen);
-			gen.visitJumpInsn(IF_ACMPNE, not);
-			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
-//			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
-			gen.goTo(end);
-			gen.mark(not);
-			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
-//			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
-			gen.mark(end);
-			}
-	}
-
-	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
-			ISeq form = (ISeq) frm;
-			if(form.count() != 3)
-				throw new Exception("wrong number of arguments, expecting: (identical? x y)");
-
-			return new IdenticalExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
-		}
-	}
-}
-
-static class InstanceExpr implements Expr{
-	final Expr expr;
-	final Class c;
-
-
-	public InstanceExpr(Expr expr, Class c){
-		this.expr = expr;
-		this.c = c;
-	}
-
-	public Object eval() throws Exception{
-		return c.isInstance(expr.eval()) ?
-		       RT.T : RT.F;
-	}
-
-	public boolean hasJavaClass(){
-		return true;
-	}
-
-	public Class getJavaClass(){
-		return Boolean.class;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			{
-			Label not = gen.newLabel();
-			Label end = gen.newLabel();
-			expr.emit(C.EXPRESSION, fn, gen);
-			gen.instanceOf(Type.getType(c));
-			gen.ifZCmp(GeneratorAdapter.EQ, not);
-			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
-//			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
-			gen.goTo(end);
-			gen.mark(not);
-			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
-//			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
-			gen.mark(end);
-			}
-	}
-
-	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
-			ISeq form = (ISeq) frm;
-			//(instance? x Classname)
-			if(form.count() != 3)
-				throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
-			Class c = HostExpr.maybeClass(RT.third(form), true);
-			if(c == null)
-				throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
-			return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), c);
-		}
-	}
-}
+//static class InstanceExpr implements Expr{
+//	final Expr expr;
+//	final Class c;
+//
+//
+//	public InstanceExpr(Expr expr, Class c){
+//		this.expr = expr;
+//		this.c = c;
+//	}
+//
+//	public Object eval() throws Exception{
+//		return c.isInstance(expr.eval()) ?
+//		       RT.T : RT.F;
+//	}
+//
+//	public boolean hasJavaClass(){
+//		return true;
+//	}
+//
+//	public Class getJavaClass(){
+//		return Boolean.class;
+//	}
+//
+//	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+//		if(context != C.STATEMENT)
+//			{
+//			Label not = gen.newLabel();
+//			Label end = gen.newLabel();
+//			expr.emit(C.EXPRESSION, fn, gen);
+//			gen.instanceOf(Type.getType(c));
+//			gen.ifZCmp(GeneratorAdapter.EQ, not);
+//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
+////			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
+//			gen.goTo(end);
+//			gen.mark(not);
+//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+////			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+//			gen.mark(end);
+//			}
+//	}
+//
+//	static class Parser implements IParser{
+//		public Expr parse(C context, Object frm) throws Exception{
+//			ISeq form = (ISeq) frm;
+//			//(instance? x Classname)
+//			if(form.count() != 3)
+//				throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
+//			Class c = HostExpr.maybeClass(RT.third(form), true);
+//			if(c == null)
+//				throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
+//			return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), c);
+//		}
+//	}
+//}
 
 static class MetaExpr implements Expr{
 	final Expr expr;
@@ -3152,7 +3151,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		return new VarExpr(v, tag);
 		}
 	else if(o instanceof Class)
-		return new ClassExpr((Class) o);
+		return new QuoteExpr(o);
 
 	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
 
@@ -3169,8 +3168,12 @@ static Object resolve(Symbol sym) throws Exception{
 		if(v == null)
 			throw new Exception("No such var: " + sym);
 		else if(v.ns != currentNS() && !v.isExported())
-			throw new Exception("var: " + sym + " is not exported");
+			throw new IllegalAccessError("var: " + sym + " is not exported");
 		return v;
+		}
+	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+		{
+		return Class.forName(sym.name);
 		}
 	else
 		{
@@ -3182,7 +3185,7 @@ static Object resolve(Symbol sym) throws Exception{
 }
 
 static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
-	Var var;
+	Var var = null;
 
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
@@ -3199,7 +3202,8 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 		if(o == null)
 			{
 			//introduce a new var in the current ns
-			var = currentNS().intern(Symbol.create(sym.name));
+			if(internNew)
+				var = currentNS().intern(Symbol.create(sym.name));
 			}
 		else if(o instanceof Var)
 			{

@@ -113,7 +113,8 @@ final static Symbol LOAD_FILE = Symbol.create("load-file");
 final static Symbol IN_NAMESPACE = Symbol.create("in-namespace");
 final static Symbol EXPORTS = Symbol.create("*exports*");
 final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS, EXPORTS, PersistentHashMap.EMPTY);
-final static Symbol EQL_REF = Symbol.create("eql-ref?");
+//final static Symbol EQL_REF = Symbol.create("eql-ref?");
+static final Symbol IDENTICAL = Symbol.create("identical?");
 
 //symbol
 final static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*current-namespace*"),
@@ -143,24 +144,24 @@ final static IFn inNamespace = new AFn(){
 	}
 };
 //simple-symbol->var
-final static Var REFERS =
-		Var.intern(CLOJURE_NS, Symbol.create("*refers*"),
-		           map(
-				           IN_NAMESPACE, Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace),
-				           LOAD_FILE, Var.intern(CLOJURE_NS, LOAD_FILE,
-		                                         new AFn(){
-			                                         public Object invoke(Object arg1) throws Exception{
-				                                         return Compiler.loadFile((String) arg1);
-			                                         }
-		                                         }),
-				           EQL_REF, Var.intern(CLOJURE_NS, EQL_REF,
-		                                       new AFn(){
-			                                       public Object invoke(Object arg1, Object arg2)
-					                                       throws Exception{
-				                                       return arg1 == arg2 ? RT.T : RT.F;
-			                                       }
-		                                       })
-		           ));
+//final static Var REFERS =
+//		Var.intern(CLOJURE_NS, Symbol.create("*refers*"),
+//		           map(
+//				           IN_NAMESPACE, Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace),
+//				           LOAD_FILE, Var.intern(CLOJURE_NS, LOAD_FILE,
+//		                                         new AFn(){
+//			                                         public Object invoke(Object arg1) throws Exception{
+//				                                         return Compiler.loadFile((String) arg1);
+//			                                         }
+//		                                         }),
+//				           IDENTICAL, Var.intern(CLOJURE_NS, IDENTICAL,
+//		                                         new AFn(){
+//			                                         public Object invoke(Object arg1, Object arg2)
+//					                                         throws Exception{
+//				                                         return arg1 == arg2 ? RT.T : RT.F;
+//			                                         }
+//		                                         })
+//		           ));
 
 //static Var NS_IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("*ns-imports*"), IMPORTS);
 //static Var NS_REFERS = Var.intern(CLOJURE_NS,Symbol.create("*ns-refers*"), REFERS);
@@ -170,7 +171,20 @@ static AtomicInteger id = new AtomicInteger(1);
 
 static
 	{
-	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
+	Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
+	Var.intern(CLOJURE_NS, LOAD_FILE,
+	           new AFn(){
+		           public Object invoke(Object arg1) throws Exception{
+			           return Compiler.loadFile((String) arg1);
+		           }
+	           });
+	Var.intern(CLOJURE_NS, IDENTICAL,
+	           new AFn(){
+		           public Object invoke(Object arg1, Object arg2)
+				           throws Exception{
+			           return arg1 == arg2 ? RT.T : RT.F;
+		           }
+	           });
 	try
 		{
 		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
