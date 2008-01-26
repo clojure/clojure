@@ -48,7 +48,7 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 			return ((Number) ret).floatValue();
 		else if(rt == Double.TYPE)
 			return ((Number) ret).doubleValue();
-		else if(rt == Boolean.TYPE)
+		else if(rt == Boolean.TYPE && !(ret instanceof Boolean))
 			return ret == null ? Boolean.FALSE : Boolean.TRUE;
 		else if(rt == Byte.TYPE)
 			return (byte) ((Number) ret).intValue();
