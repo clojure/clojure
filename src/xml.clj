@@ -6,7 +6,8 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-namespace 'xml)
+(in-ns 'xml)
+(clojure/refer 'clojure)
 
 (import '(org.xml.sax ContentHandler Attributes SAXException)
 	'(javax.xml.parsers SAXParser SAXParserFactory))
@@ -30,13 +31,13 @@
                            (if (neg? i)
                              ret
                              (recur (assoc ret 
-                                      (. clojure.lang.Keyword (intern (sym (. atts (getQName i))))) 
+                                      (. clojure.lang.Keyword (intern (symbol (. atts (getQName i)))))
                                       (. atts (getValue i)))
                                     (dec i))))
                  e (struct element 
-                           :tag (. clojure.lang.Keyword (intern (sym q-name))) 
-                           :attrs (when (pos? (. atts (getLength))) 
-                                    (attrs {} (dec (. atts (getLength))))))]
+                           (. clojure.lang.Keyword (intern (symbol q-name)))
+                           (when (pos? (. atts (getLength)))
+                             (attrs {} (dec (. atts (getLength))))))]
              (set! *stack* (conj *stack* *current*))
              (set! *current* e)
              (set! *state* :element))
@@ -44,15 +45,15 @@
          (endElement [uri local-name q-name]
            (let [push-content (fn [e c]
                                   (assoc e :content (conj (or (:content e) []) c)))]
-             (when (eql? *state* :chars)
+             (when (= *state* :chars)
                (set! *current* (push-content *current* (str *sb*))))
              (set! *current* (push-content (peek *stack*) *current*))
              (set! *stack* (pop *stack*))
              (set! *state* :between))
            nil)
          (characters [ch start length]
-           (when-not (eql? *state* :between)
-             (when (eql? *state* :element)
+           (when-not (= *state* :between)
+             (when (= *state* :element)
                (set! *sb* (new StringBuilder)))
              (let [#^StringBuilder sb *sb*]
                (. sb (append ch start length))
@@ -68,7 +69,27 @@
       (. p (parse s content-handler))
       ((:content *current*) 0))))
 
-(def *exports* '(xml tag attrs content parse))
+(defn emit-element [e]
+  (if (instance? String e)
+    (println e)
+    (do
+      (print (strcat "<" (name (:tag e))))
+      (when (:attrs e)
+	(doseq attr (:attrs e)
+	  (print (strcat " " (name (key attr)) "='" (val attr)"'"))))
+      (if (:content e)
+	(do
+	  (println ">")
+	  (doseq c (:content e)
+	    (emit-element c))
+	  (println (strcat "</" (name (:tag e)) ">")))
+	(println "/>")))))
+
+(defn emit [x]
+  (println "<?xml version='1.0' encoding='UTF-8'?>")
+  (emit-element x))
+
+(export '(tag attrs content parse element emit emit-element))
 
 ;(load-file "/Users/rich/dev/clojure/src/xml.clj")
 ;(def x (xml/parse "http://arstechnica.com/journals.rssx"))

@@ -999,18 +999,10 @@
 (defn distinct [coll]
   (keys (to-set coll)))
 
-(defn filter-vals [pred amap]
+(defn filter-key [keyfn pred amap]
   (loop [ret {} es (seq amap)]
     (if es
-      (if (pred (val (first es)))
-	(recur (assoc ret (key (first es)) (val (first es))) (rest es))
-	(recur ret (rest es)))
-      ret)))
-
-(defn filter-keys [pred amap]
-  (loop [ret {} es (seq amap)]
-    (if es
-      (if (pred (key (first es)))
+      (if (pred (keyfn (first es)))
 	(recur (assoc ret (key (first es)) (val (first es))) (rest es))
 	(recur ret (rest es)))
       ret)))
@@ -1038,12 +1030,12 @@
    (.. *ns* (intern sym) (setExported true))))
 
 (defn exports [#^clojure.lang.Namespace ns]
-  (filter-vals (fn [v] (and (instance? clojure.lang.Var v)
+  (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
                        (. v (isExported))))
           (ns-map ns)))
 
 (defn imports [#^clojure.lang.Namespace ns]
-  (filter-vals (partial instance? Class) (ns-map ns)))
+  (filter-key val (partial instance? Class) (ns-map ns)))
 
 (defn refer [ns-sym & filters]
   (let [ns (find-ns ns-sym)
@@ -1060,12 +1052,12 @@
 	      (. *ns* (refer (or (rename sym) sym) var)))))))
 
 (defn refers [#^clojure.lang.Namespace ns]
-  (filter-vals (fn [v] (and (instance? clojure.lang.Var v)
+  (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
 			                (!= ns (. v ns))))
           (ns-map ns)))
 
 (defn interns [#^clojure.lang.Namespace ns]
-  (filter-vals (fn [v] (and (instance? clojure.lang.Var v)
+  (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
 			                (= ns (. v ns))))
           (ns-map ns)))
 
@@ -1152,7 +1144,7 @@
 		export exports imports ns-map
 		identical?  instance?
 		load-file in-ns find-ns
-		filter-vals filter-keys find-ns create-ns remove-ns
+		filter-key find-ns create-ns remove-ns
 		take-nth interleave get-var set-var with-local-vars
 		resolve-in resolve
 		all-ns ns-name
