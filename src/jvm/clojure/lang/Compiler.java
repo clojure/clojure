@@ -83,7 +83,7 @@ static IPersistentMap specials = RT.map(
 		LET, new LetExpr.Parser(),
 		DO, new BodyExpr.Parser(),
 		FN, null,
-		QUOTE, new QuoteExpr.Parser(),
+		QUOTE, new ConstantExpr.Parser(),
 		THE_VAR, new TheVarExpr.Parser(),
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
@@ -1093,7 +1093,7 @@ static class StaticMethodExpr extends MethodExpr{
 }
 
 
-static class QuoteExpr extends LiteralExpr{
+static class ConstantExpr extends LiteralExpr{
 	//stuff quoted vals in classloader at compile time, pull out at runtime
 	//this won't work for static compilation...
 	final Object v;
@@ -1103,7 +1103,7 @@ static class QuoteExpr extends LiteralExpr{
 	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
 	final static Method getQuotedValMethod = Method.getMethod("Object getQuotedVal(int)");
 
-	public QuoteExpr(Object v){
+	public ConstantExpr(Object v){
 		this.v = v;
 		this.id = RT.nextID();
 		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
@@ -1152,7 +1152,7 @@ static class QuoteExpr extends LiteralExpr{
 			else if(v instanceof IPersistentCollection && ((IPersistentCollection) v).count() == 0)
 				return new EmptyExpr(v);
 			else
-				return new QuoteExpr(v);
+				return new ConstantExpr(v);
 		}
 	}
 }
@@ -3044,7 +3044,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 
 //	else
 	//throw new UnsupportedOperationException();
-	return new QuoteExpr(form);
+	return new ConstantExpr(form);
 }
 
 static public class CompilerException extends Exception{
@@ -3151,7 +3151,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		return new VarExpr(v, tag);
 		}
 	else if(o instanceof Class)
-		return new QuoteExpr(o);
+		return new ConstantExpr(o);
 
 	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
 

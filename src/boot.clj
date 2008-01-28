@@ -1070,10 +1070,10 @@
 (defn interleave [& colls]
   (apply concat (apply map list colls)))
 
-(defn get-var [#^clojure.lang.Var x]
+(defn var-get [#^clojure.lang.Var x]
   (. x (get)))
 
-(defn set-var [#^clojure.lang.Var x val]
+(defn var-set [#^clojure.lang.Var x val]
   (. x (set val)))
 
 (defmacro with-local-vars [name-vals-vec & body]
@@ -1151,7 +1151,7 @@
 		identical?  instance?
 		load-file in-ns find-ns
 		filter-key find-ns create-ns remove-ns
-		take-nth interleave get-var set-var with-local-vars
+		take-nth interleave var-get var-set with-local-vars
 		ns-resolve resolve
 		all-ns ns-name
 		array-map
