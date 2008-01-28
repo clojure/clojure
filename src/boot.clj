@@ -39,7 +39,6 @@
       ([comparator & args]
           (. clojure.lang.PersistentTreeMap (create comparator args))))
 
-
 ;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn meta [#^clojure.lang.IObj x]
  (. x (meta)))
@@ -1085,11 +1084,15 @@
       ~@body
       (finally (. clojure.lang.Var (popThreadBindings))))))
 
-(defn resolve-in [ns sym]
+(defn ns-resolve [ns sym]
   (. clojure.lang.Compiler (resolveIn ns sym)))
 
 (defn resolve [sym]
-  (resolve-in *ns* sym))
+  (ns-resolve *ns* sym))
+
+(defn array-map
+	([] (. clojure.lang.PersistentArrayMap EMPTY))
+	([& args] (new clojure.lang.PersistentArrayMap (to-array args))))
 
 (export
 	'(  load-file load
@@ -1149,7 +1152,8 @@
 		load-file in-ns find-ns
 		filter-key find-ns create-ns remove-ns
 		take-nth interleave get-var set-var with-local-vars
-		resolve-in resolve
+		ns-resolve resolve
 		all-ns ns-name
+		array-map
 	))
 
