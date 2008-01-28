@@ -144,6 +144,8 @@ static public Num divide(BigInteger n, BigInteger d){
 }
 
 static public boolean equiv(Object x, Object y){
+	if(!(y instanceof Number && x instanceof Number))
+		return false;
 	return Num.from(x).equiv(Num.from(y));
 }
 

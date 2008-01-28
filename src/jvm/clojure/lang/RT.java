@@ -208,8 +208,15 @@ static public int nextID(){
 }
 
 static public boolean equal(Object k1, Object k2){
-	return k1 == k2 ||
-	       (k1 != null && k1.equals(k2));
+	if(k1 == k2)
+		return true;
+	if(k1 != null)
+		{
+	    if(k1 instanceof Number)
+			return Num.equiv(k1, k2);
+	    return k1.equals(k2);
+		}
+	return false;
 }
 
 //static public Object eq(Object arg1, Object arg2){
