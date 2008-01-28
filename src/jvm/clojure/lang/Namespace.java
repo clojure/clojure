@@ -83,7 +83,7 @@ Object reference(Symbol sym, Object val){
 	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
 }
 
-public void unintern(Symbol sym) throws Exception{
+public void unmap(Symbol sym) throws Exception{
 	if(sym.ns != null)
 		{
 		throw new IllegalArgumentException("Can't unintern namespace-qualified symbol");

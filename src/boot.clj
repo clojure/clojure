@@ -81,7 +81,7 @@
 (defn rrest [x] (rest (rest x)))
 
 (defn #^Boolean = [x y] (. clojure.lang.RT (equal x y)))
-(defn #^Boolean != [x y] (not (= x y)))
+(defn #^Boolean not= [x y] (not (= x y)))
 
 (defn #^String str [#^Object x]
   (if x (. x (toString)) ""))
@@ -1025,22 +1025,25 @@
 (defn ns-map [#^clojure.lang.Namespace ns]
   (. ns (getMappings)))
 
+(defn ns-unmap [#^clojure.lang.Namespace ns sym]
+  (. ns (unmap sym)))
+
 (defn export [syms]
   (doseq sym syms
    (.. *ns* (intern sym) (setExported true))))
 
-(defn exports [#^clojure.lang.Namespace ns]
+(defn ns-exports [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
                        (. v (isExported))))
           (ns-map ns)))
 
-(defn imports [#^clojure.lang.Namespace ns]
+(defn ns-imports [#^clojure.lang.Namespace ns]
   (filter-key val (partial instance? Class) (ns-map ns)))
 
 (defn refer [ns-sym & filters]
   (let [ns (find-ns ns-sym)
 	    fs (apply hash-map filters)
-	    nsexports (exports ns)
+	    nsexports (ns-exports ns)
 	    rename (or (:rename fs) {})
 	    exclude (to-set (:exclude fs))
 	    to-do (or (:only fs) (keys nsexports))]
@@ -1051,12 +1054,12 @@
 	        (throw (new java.lang.IllegalAccessError (strcat sym " is not exported"))))
 	      (. *ns* (refer (or (rename sym) sym) var)))))))
 
-(defn refers [#^clojure.lang.Namespace ns]
+(defn ns-refers [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
-			                (!= ns (. v ns))))
+			                (not= ns (. v ns))))
           (ns-map ns)))
 
-(defn interns [#^clojure.lang.Namespace ns]
+(defn ns-interns [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
 			                (= ns (. v ns))))
           (ns-map ns)))
@@ -1095,7 +1098,7 @@
 		meta with-meta defmacro when when-not
 		nil? not first rest second
 		ffirst frest rfirst rrest
-		= != str strcat gensym cond
+		= not= str strcat gensym cond
 		apply list* delay lazy-cons fnseq concat
 		and or + * / - == < <= > >=
 		inc dec pos? neg? zero? quot rem
@@ -1118,8 +1121,8 @@
 		cycle split-at split-with repeat replicate iterate range
 		doseq  dotimes into
 		eval import
-		;unimport
-		refer refers interns 
+		ns-unmap
+		refer ns-refers ns-interns 
 		in-ns
 		;unintern
 		into-array array
@@ -1141,7 +1144,7 @@
 		*warn-on-reflection*
 		resultset-seq
 		to-set distinct
-		export exports imports ns-map
+		export ns-exports ns-imports ns-map
 		identical?  instance?
 		load-file in-ns find-ns
 		filter-key find-ns create-ns remove-ns
