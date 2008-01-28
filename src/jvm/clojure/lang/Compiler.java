@@ -1215,6 +1215,7 @@ static class BooleanExpr extends LiteralExpr{
 final static BooleanExpr TRUE_EXPR = new BooleanExpr(true);
 final static BooleanExpr FALSE_EXPR = new BooleanExpr(false);
 
+/*
 static class NumExpr extends LiteralExpr{
 	final Num num;
 	final static Method numFromIntMethod = Method.getMethod("clojure.lang.Num from(int)");
@@ -1334,7 +1335,7 @@ static class CharExpr extends LiteralExpr{
 		return Character.class;
 	}
 }
-
+ */
 static class MonitorEnterExpr extends UntypedExpr{
 	final Expr target;
 
@@ -3099,12 +3100,12 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		return analyzeSymbol((Symbol) form);
 	else if(fclass == Keyword.class)
 		return registerKeyword((Keyword) form);
-	else if(form instanceof Num)
-		return new NumExpr((Num) form);
-	else if(fclass == String.class)
-		return new StringExpr((String) form);
-	else if(fclass == Character.class)
-		return new CharExpr((Character) form);
+//	else if(form instanceof Num)
+//		return new NumExpr((Num) form);
+//	else if(fclass == String.class)
+//		return new StringExpr((String) form);
+//	else if(fclass == Character.class)
+//		return new CharExpr((Character) form);
 	else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
 		return new EmptyExpr(form);
 	else if(form instanceof ISeq)

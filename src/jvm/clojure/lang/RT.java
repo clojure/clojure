@@ -171,6 +171,7 @@ static AtomicInteger id = new AtomicInteger(1);
 
 static
 	{
+	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
 	Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
 	Var.intern(CLOJURE_NS, LOAD_FILE,
 	           new AFn(){
