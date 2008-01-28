@@ -17,7 +17,7 @@ import java.util.HashMap;
 //todo: possibly extend URLClassLoader?
 
 public class DynamicClassLoader extends ClassLoader{
-HashMap<Integer, Object> quotedVals = new HashMap<Integer, Object>();
+HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
 HashMap<String, byte[]> map = new HashMap<String, byte[]>();
 
 public DynamicClassLoader(){
@@ -45,12 +45,12 @@ protected Class<?> findClass(String name) throws ClassNotFoundException{
 	throw new ClassNotFoundException(name);
 }
 
-public void registerQuotedVal(int id, Object val){
-	quotedVals.put(id, val);
+public void registerConstants(int id, Object[] val){
+	constantVals.put(id, val);
 }
 
-public Object getQuotedVal(int id){
-	return quotedVals.get(id);
+public Object[] getConstants(int id){
+	return constantVals.get(id);
 }
 
 }

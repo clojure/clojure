@@ -88,17 +88,17 @@ static IPersistentMap specials = RT.map(
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
 //		TRY_FINALLY, new TryFinallyExpr.Parser(),
-		TRY, new TryExpr.Parser(),
-		THROW, new ThrowExpr.Parser(),
-		MONITOR_ENTER, new MonitorEnterExpr.Parser(),
-		MONITOR_EXIT, new MonitorExitExpr.Parser(),
+TRY, new TryExpr.Parser(),
+THROW, new ThrowExpr.Parser(),
+MONITOR_ENTER, new MonitorEnterExpr.Parser(),
+MONITOR_EXIT, new MonitorExitExpr.Parser(),
 //		INSTANCE, new InstanceExpr.Parser(),
 //		IDENTICAL, new IdenticalExpr.Parser(),
-		THISFN, null,
-		CATCH, null,
-		FINALLY, null,
+THISFN, null,
+CATCH, null,
+FINALLY, null,
 //		CLASS, new ClassExpr.Parser(),
-		NEW, new NewExpr.Parser(),
+NEW, new NewExpr.Parser(),
 //		UNQUOTE, null,
 //		UNQUOTE_SPLICING, null,
 //		SYNTAX_QUOTE, null,
@@ -151,10 +151,13 @@ static public Var LOOP_LOCALS = Var.create();
 //Label
 static public Var LOOP_LABEL = Var.create();
 
-//keyword->keywordexpr
+//vector<object>
+static public Var CONSTANTS = Var.create();
+
+//keyword->constid
 static public Var KEYWORDS = Var.create();
 
-//var->var
+//var->constid
 static public Var VARS = Var.create();
 
 //FnFrame
@@ -1098,16 +1101,13 @@ static class ConstantExpr extends LiteralExpr{
 	//this won't work for static compilation...
 	final Object v;
 	final int id;
-	final static Type DYNAMIC_CLASSLOADER_TYPE = Type.getType(DynamicClassLoader.class);
-	final static Method getClassMethod = Method.getMethod("Class getClass()");
-	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
-	final static Method getQuotedValMethod = Method.getMethod("Object getQuotedVal(int)");
 
 	public ConstantExpr(Object v){
 		this.v = v;
-		this.id = RT.nextID();
-		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
-		loader.registerQuotedVal(id, v);
+		this.id = registerConstant(v);
+//		this.id = RT.nextID();
+//		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
+//		loader.registerQuotedVal(id, v);
 	}
 
 	Object val(){
@@ -1117,21 +1117,24 @@ static class ConstantExpr extends LiteralExpr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
 			{
-			gen.loadThis();
-			gen.invokeVirtual(OBJECT_TYPE, getClassMethod);
-			gen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
-			gen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
-			gen.push(id);
-			gen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getQuotedValMethod);
+			fn.emitConstant(gen, id);
+//			gen.loadThis();
+//			gen.invokeVirtual(OBJECT_TYPE, getClassMethod);
+//			gen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
+//			gen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
+//			gen.push(id);
+//			gen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getQuotedValMethod);
 			}
 	}
 
 	public boolean hasJavaClass(){
-		return false;
+		return Modifier.isPublic(v.getClass().getModifiers());
+		//return false;
 	}
 
 	public Class getJavaClass() throws Exception{
-		throw new IllegalArgumentException("Has no Java class");
+		return v.getClass();
+		//throw new IllegalArgumentException("Has no Java class");
 	}
 
 	static class Parser implements IParser{
@@ -1140,17 +1143,17 @@ static class ConstantExpr extends LiteralExpr{
 
 			if(v == null)
 				return NIL_EXPR;
-			Class fclass = v.getClass();
-			if(fclass == Keyword.class)
-				return registerKeyword((Keyword) v);
-			else if(v instanceof Num)
-				return new NumExpr((Num) v);
-			else if(fclass == String.class)
-				return new StringExpr((String) v);
-			else if(fclass == Character.class)
-				return new CharExpr((Character) v);
-			else if(v instanceof IPersistentCollection && ((IPersistentCollection) v).count() == 0)
-				return new EmptyExpr(v);
+//			Class fclass = v.getClass();
+//			if(fclass == Keyword.class)
+//				return registerKeyword((Keyword) v);
+//			else if(v instanceof Num)
+//				return new NumExpr((Num) v);
+//			else if(fclass == String.class)
+//				return new StringExpr((String) v);
+//			else if(fclass == Character.class)
+//				return new CharExpr((Character) v);
+//			else if(v instanceof IPersistentCollection && ((IPersistentCollection) v).count() == 0)
+//				return new EmptyExpr(v);
 			else
 				return new ConstantExpr(v);
 		}
@@ -2300,6 +2303,7 @@ static class SourceDebugExtensionAttribute extends Attribute{
 }
 
 static class FnExpr implements Expr{
+	static final String CONST_PREFIX = "const__";
 	IPersistentCollection methods;
 	//if there is a variadic overload (there can only be one) it is stored here
 	FnMethod variadicMethod = null;
@@ -2314,6 +2318,8 @@ static class FnExpr implements Expr{
 	IPersistentMap vars = PersistentHashMap.EMPTY;
 	Class compiledClass;
 	int line;
+	PersistentVector constants;
+	int constantsID;
 
 	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
@@ -2323,6 +2329,11 @@ static class FnExpr implements Expr{
 	final static Method restfnctor = Method.getMethod("void <init>(int)");
 	final static Type aFnType = Type.getType(AFn.class);
 	final static Type restFnType = Type.getType(RestFn.class);
+
+	final static Type DYNAMIC_CLASSLOADER_TYPE = Type.getType(DynamicClassLoader.class);
+	final static Method getClassMethod = Method.getMethod("Class getClass()");
+	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
+	final static Method getConstantsMethod = Method.getMethod("Object[] getConstants(int)");
 
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr();
@@ -2339,9 +2350,9 @@ static class FnExpr implements Expr{
 		try
 			{
 			Var.pushThreadBindings(
-					RT.map(
-							KEYWORDS, PersistentHashMap.EMPTY,
-							VARS, PersistentHashMap.EMPTY));
+					RT.map(CONSTANTS, PersistentVector.EMPTY,
+					       KEYWORDS, PersistentHashMap.EMPTY,
+					       VARS, PersistentHashMap.EMPTY));
 			//(fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
 			//turn former into latter
 			if(RT.second(form) instanceof IPersistentVector)
@@ -2383,6 +2394,10 @@ static class FnExpr implements Expr{
 			fn.variadicMethod = variadicMethod;
 			fn.keywords = (IPersistentMap) KEYWORDS.get();
 			fn.vars = (IPersistentMap) VARS.get();
+			fn.constants = (PersistentVector) CONSTANTS.get();
+			fn.constantsID = RT.nextID();
+			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
+			loader.registerConstants(fn.constantsID, fn.constants.toArray());
 			}
 		finally
 			{
@@ -2421,6 +2436,15 @@ static class FnExpr implements Expr{
 		if(source != null && SOURCE_PATH.get() != null)
 		//cv.visitSource(source, null);
 			cv.visitSource(source, smap);
+
+		//static fields for constants
+		for(int i = 0; i < constants.count(); i++)
+			{
+			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, constantName(i), constantType(i).getDescriptor(),
+			              null, null);
+			}
+
+/*
 		//static fields for keywords
 		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 			{
@@ -2435,7 +2459,8 @@ static class FnExpr implements Expr{
 			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(v.sym.toString()),
 			              VAR_TYPE.getDescriptor(), null, null);
 			}
-		//static init for keywords and vars
+			*/
+		//static init for constants, keywords and vars
 		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
 		                                                  Method.getMethod("void <clinit> ()"),
 		                                                  null,
@@ -2443,25 +2468,49 @@ static class FnExpr implements Expr{
 		                                                  cv);
 		clinitgen.visitCode();
 		clinitgen.visitLineNumber(line, clinitgen.mark());
-		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
+//		Label begin = clinitgen.newLabel();
+//		Label end = clinitgen.newLabel();
+
+		if(constants.count() > 0)
 			{
-			Keyword k = (Keyword) s.first();
-			clinitgen.push(k.sym.ns);
-			clinitgen.push(k.sym.name);
-			clinitgen.invokeStatic(KEYWORD_TYPE, kwintern);
-			clinitgen.putStatic(fntype, munge(k.sym.toString()), KEYWORD_TYPE);
+//		clinitgen.mark(begin);
+			clinitgen.visitLdcInsn(fntype);
+			clinitgen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
+			clinitgen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
+			clinitgen.push(constantsID);
+			clinitgen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getConstantsMethod);
+
+			for(int i = 0; i < constants.count(); i++)
+				{
+				clinitgen.dup();
+				clinitgen.push(i);
+				clinitgen.arrayLoad(OBJECT_TYPE);
+				clinitgen.checkCast(constantType(i));
+				clinitgen.putStatic(fntype, constantName(i), constantType(i));
+				}
 			}
-		for(ISeq s = RT.keys(vars); s != null; s = s.rest())
-			{
-			Var v = (Var) s.first();
-			clinitgen.push(v.ns.name.name);
-			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
-			clinitgen.push(v.sym.name);
-			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
-			clinitgen.invokeStatic(VAR_TYPE, varintern);
-			clinitgen.putStatic(fntype, munge(v.sym.toString()), VAR_TYPE);
-			}
+//		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
+//			{
+//			Keyword k = (Keyword) s.first();
+//			clinitgen.push(k.sym.ns);
+//			clinitgen.push(k.sym.name);
+//			clinitgen.invokeStatic(KEYWORD_TYPE, kwintern);
+//			clinitgen.putStatic(fntype, munge(k.sym.toString()), KEYWORD_TYPE);
+//			}
+//		for(ISeq s = RT.keys(vars); s != null; s = s.rest())
+//			{
+//			Var v = (Var) s.first();
+//			clinitgen.push(v.ns.name.name);
+//			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
+//			clinitgen.push(v.sym.name);
+//			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
+//			clinitgen.invokeStatic(VAR_TYPE, varintern);
+//			clinitgen.putStatic(fntype, munge(v.sym.toString()), VAR_TYPE);
+//			}
+//		clinitgen.mark(end);
+//		clinitgen.visitLocalVariable("constants", "[Ljava/lang/Object;", null, begin, end, 0);
 		clinitgen.returnValue();
+
 		clinitgen.endMethod();
 //		clinitgen.visitMaxs(1, 1);
 		//instance fields for closed-overs
@@ -2552,11 +2601,34 @@ static class FnExpr implements Expr{
 	}
 
 	public void emitVar(GeneratorAdapter gen, Var var){
-		gen.getStatic(fntype, munge(var.sym.toString()), VAR_TYPE);
+		Integer i = (Integer) vars.valAt(var);
+		emitConstant(gen, i);
+		//gen.getStatic(fntype, munge(var.sym.toString()), VAR_TYPE);
 	}
 
 	public void emitKeyword(GeneratorAdapter gen, Keyword k){
-		gen.getStatic(fntype, munge(k.sym.toString()), KEYWORD_TYPE);
+		Integer i = (Integer) keywords.valAt(k);
+		emitConstant(gen, i);
+//		gen.getStatic(fntype, munge(k.sym.toString()), KEYWORD_TYPE);
+	}
+
+	public void emitConstant(GeneratorAdapter gen, int id){
+		gen.getStatic(fntype, constantName(id), constantType(id));
+	}
+
+
+	String constantName(int id){
+		return CONST_PREFIX + id;
+	}
+
+	Type constantType(int id){
+		Object o = constants.nth(id);
+		Class c = o.getClass();
+		if(Modifier.isPublic(c.getModifiers()))
+			{
+			return Type.getType(c);
+			}
+		return OBJECT_TYPE;
 	}
 }
 
@@ -3120,15 +3192,29 @@ public static Object eval(Object form) throws Exception{
 		}
 }
 
+private static int registerConstant(Object o){
+	if(!CONSTANTS.isBound())
+		return -1;
+	IPersistentVector v = (IPersistentVector) CONSTANTS.get();
+	CONSTANTS.set(RT.conj(v, o));
+	return v.count();
+}
+
 private static KeywordExpr registerKeyword(Keyword keyword){
 	if(!KEYWORDS.isBound())
 		return new KeywordExpr(keyword);
 
 	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.get();
-	KeywordExpr ke = (KeywordExpr) RT.get(keywordsMap, keyword);
-	if(ke == null)
-		KEYWORDS.set(RT.assoc(keywordsMap, keyword, ke = new KeywordExpr(keyword)));
-	return ke;
+	Object id = RT.get(keywordsMap, keyword);
+	if(id == null)
+		{
+		KEYWORDS.set(RT.assoc(keywordsMap, keyword, registerConstant(keyword)));
+		}
+	return new KeywordExpr(keyword);
+//	KeywordExpr ke = (KeywordExpr) RT.get(keywordsMap, keyword);
+//	if(ke == null)
+//		KEYWORDS.set(RT.assoc(keywordsMap, keyword, ke = new KeywordExpr(keyword)));
+//	return ke;
 }
 
 private static Expr analyzeSymbol(Symbol sym) throws Exception{
@@ -3227,8 +3313,13 @@ private static void registerVar(Var var) throws Exception{
 	if(!VARS.isBound())
 		return;
 	IPersistentMap varsMap = (IPersistentMap) VARS.get();
-	if(varsMap != null && RT.get(varsMap, var) == null)
-		VARS.set(RT.assoc(varsMap, var, var));
+	Object id = RT.get(varsMap, var);
+	if(id == null)
+		{
+		VARS.set(RT.assoc(varsMap, var, registerConstant(var)));
+		}
+//	if(varsMap != null && RT.get(varsMap, var) == null)
+//		VARS.set(RT.assoc(varsMap, var, var));
 }
 
 static Namespace currentNS(){
