@@ -419,6 +419,9 @@ static abstract class Node implements IMapEntry{
 		return null;
 	}
 
+	public String toString(){
+		return RT.entryString(key(), val());
+	}
 
 	public Object getKey(){
 		return key();

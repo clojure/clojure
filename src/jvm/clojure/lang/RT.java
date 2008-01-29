@@ -386,6 +386,10 @@ static public Object find(Object coll, Object key){
 	return ((Associative) coll).entryAt(key);
 }
 
+static public String entryString( Object key,Object val){
+	return "<" + key + " " + val + ">";
+}
+
 //takes a seq of key,val,key,val
 
 //returns tail starting at val of matching key if found, else null

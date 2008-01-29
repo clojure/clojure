@@ -495,6 +495,10 @@ final static class LeafNode implements INode, IMapEntry, Map.Entry{
 		this.val = val;
 	}
 
+	public String toString(){
+		return RT.entryString(key, val);
+	}
+
 	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
 		if(hash == this.hash)
 			{

@@ -28,6 +28,10 @@ public MapEntry(IPersistentMap meta, Object _key, Object _val){
 	this._val = _val;
 }
 
+public String toString(){
+	return RT.entryString(_key, _val);
+}
+
 public Object key(){
 	return _key;
 }

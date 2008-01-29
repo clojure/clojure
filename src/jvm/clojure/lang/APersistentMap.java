@@ -24,6 +24,10 @@ protected APersistentMap(IPersistentMap meta){
 protected APersistentMap(){
 }
 
+public String toString(){
+	return "<map: - " + count() + " items>";
+}
+
 public IPersistentCollection cons(Object o){
 	if(o instanceof IMapEntry)
 		{

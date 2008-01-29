@@ -22,6 +22,10 @@ public APersistentVector(IPersistentMap meta){
 	super(meta);
 }
 
+public String toString(){
+	return "<vector: - " + count() + " items>";
+}
+
 public ISeq seq(){
 	if(count() > 0)
 		return new Seq(this, 0);
