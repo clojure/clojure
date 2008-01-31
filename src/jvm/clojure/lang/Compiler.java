@@ -57,7 +57,7 @@ static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
 //static final Symbol INSTANCE = Symbol.create("instance?");
 
-static final Symbol THISFN = Symbol.create("thisfn");
+//static final Symbol THISFN = Symbol.create("thisfn");
 //static final Symbol CLASS = Symbol.create("class");
 static final Symbol NEW = Symbol.create("new");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
@@ -94,7 +94,7 @@ MONITOR_ENTER, new MonitorEnterExpr.Parser(),
 MONITOR_EXIT, new MonitorExitExpr.Parser(),
 //		INSTANCE, new InstanceExpr.Parser(),
 //		IDENTICAL, new IdenticalExpr.Parser(),
-THISFN, null,
+//THISFN, null,
 CATCH, null,
 FINALLY, null,
 //		CLASS, new ClassExpr.Parser(),
@@ -2311,6 +2311,7 @@ static class FnExpr implements Expr{
 	String name;
 	String simpleName;
 	String internalName;
+	String thisName;
 	Type fntype;
 	//localbinding->itself
 	IPersistentMap closes = PersistentHashMap.EMPTY;
@@ -2339,6 +2340,7 @@ static class FnExpr implements Expr{
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr();
 		FnMethod enclosingMethod = (FnMethod) METHOD.get();
+		fn.thisName = name;
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
 		                  : (munge(currentNS().name.name) + ".");
@@ -2682,7 +2684,8 @@ static class FnMethod{
 							NEXT_LOCAL_NUM, 0));
 
 			//register 'this' as local 0
-			registerLocal(THISFN, null, null);
+			//registerLocal(THISFN, null, null);
+			registerLocal(Symbol.intern(fn.thisName != null?fn.thisName:"fn__" + RT.nextID()), null, null);
 
 			PSTATE state = PSTATE.REQ;
 			PersistentVector argLocals = PersistentVector.EMPTY;

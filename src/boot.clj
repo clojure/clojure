@@ -103,7 +103,7 @@
   ([ns name] (. clojure.lang.Keyword (intern ns name))))
 
 (defn gensym 
-  ([] (thisfn "G__"))
+  ([] (gensym "G__"))
   ([prefix-string] (. clojure.lang.Symbol (intern (strcat prefix-string (str (. clojure.lang.RT (nextID))))))))
 
 (defmacro cond [& clauses]
@@ -119,7 +119,7 @@
       (cond
        (nil? arglist) nil
        (nil? (rest arglist)) (seq (first arglist))
-       :else (cons (first arglist) (thisfn (rest arglist)))))
+       :else (cons (first arglist) (spread (rest arglist)))))
 
 (defn apply [#^clojure.lang.IFn f & args]
       (. f (applyTo (spread args))))
@@ -167,7 +167,7 @@
 (defn reduce
   ([f coll]
      (if (seq coll)
-       (thisfn f (first coll) (rest coll))
+       (reduce f (first coll) (rest coll))
       (f)))
   ([f val coll]
     (if (seq coll)
@@ -183,83 +183,83 @@
       ([x] x)
       ([x y] (. clojure.lang.Num (add x y)))
       ([x y & more]
-          (reduce thisfn (thisfn x y) more)))
+          (reduce + (+ x y) more)))
 
 (defn *
       ([] 1)
       ([x] x)
       ([x y] (. clojure.lang.Num (multiply x y)))
       ([x y & more]
-          (reduce thisfn (thisfn x y) more)))
+          (reduce * (* x y) more)))
 
 (defn /
-      ([x] (thisfn 1 x))
+      ([x] (/ 1 x))
       ([x y] (. clojure.lang.Num (divide x y)))
       ([x y & more]
-          (reduce thisfn (thisfn x y) more)))
+          (reduce / (/ x y) more)))
 
 (defn -
       ([x] (. clojure.lang.Num (negate x)))
       ([x y] (. clojure.lang.Num (subtract x y)))
       ([x y & more]
-          (reduce thisfn (thisfn x y) more)))
+          (reduce - (- x y) more)))
 
 (defn <
       ([x] true)
       ([x y] (. clojure.lang.Num (lt x y)))
       ([x y & more]
-          (when (thisfn x y)
+          (when (< x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (thisfn y (first more))))))
+                (< y (first more))))))
 
 (defn <=
       ([x] true)
       ([x y] (. clojure.lang.Num (lte x y)))
       ([x y & more]
-          (when (thisfn x y)
+          (when (<= x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (thisfn y (first more))))))
+                (<= y (first more))))))
 
 (defn >
       ([x] true)
       ([x y] (. clojure.lang.Num (gt x y)))
       ([x y & more]
-          (when (thisfn x y)
+          (when (> x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (thisfn y (first more))))))
+                (> y (first more))))))
 
 (defn >=
       ([x] true)
       ([x y] (. clojure.lang.Num (gte x y)))
       ([x y & more]
-          (when (thisfn x y)
+          (when (>= x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (thisfn y (first more))))))
+                (>= y (first more))))))
 
 (defn ==
       ([x] true)
       ([x y] (. clojure.lang.Num (equiv x y)))
       ([x y & more]
-          (when (thisfn x y)
+          (when (== x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (thisfn y (first more))))))
+                (== y (first more))))))
 
 (defn max
   ([x] x)
   ([x y] (if (> x y) x y))
   ([x y & more]
-   (reduce thisfn (thisfn x y) more)))
+   (reduce max (max x y) more)))
 
 (defn min
   ([x] x)
   ([x y] (if (< x y) x y))
   ([x y & more]
-   (reduce thisfn (thisfn x y) more)))
+   (reduce min (min x y) more)))
 
 (defn inc [x]
       (. clojure.lang.Num (inc x)))
@@ -405,11 +405,11 @@
 
 (defmacro ->
   ([x form] `(~(first form) ~x ~@(rest form)))
-  ([x form & more] `(-> ~(thisfn x form) ~@more)))
+  ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
 ;;multimethods
 (defmacro defmulti
-  ([name dispatch-fn] (thisfn name dispatch-fn :default))
+  ([name dispatch-fn] (defmulti name dispatch-fn :default))
   ([name dispatch-fn default-val]
     `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
@@ -555,14 +555,13 @@
       (recur pred (rest coll))
      coll))
 
-(defn cycle-rep [xs ys]
-  (if xs
-      (lazy-cons (first xs) (cycle-rep (rest xs) ys))
-     (recur ys ys)))
-     
 (defn cycle [coll]
-  (when (seq coll)
-     (cycle-rep (seq coll) (seq coll))))
+  (let [rep (fn [xs ys]
+                (if xs
+                  (lazy-cons (first xs) (rep (rest xs) ys))
+                  (recur ys ys)))]
+    (when (seq coll)
+      (rep (seq coll) (seq coll)))))
 
 (defn split-at [n coll]
   [(take n coll) (drop n coll)])
@@ -694,7 +693,7 @@
          classes (rfirst import-lists)]
        (doseq c classes
          (. ns (importClass c (. Class (forName (strcat pkg "." c)))))) )
-   (apply thisfn (rest import-lists))))
+   (apply import (rest import-lists))))
 
 ;(defn unimport [& names]
 ;   (let [#^clojure.lang.Var imps *ns-imports*]
@@ -783,11 +782,11 @@
 
 (defn read
   ([]
-    (thisfn *in*))
+    (read *in*))
   ([stream]
-    (thisfn stream true nil))
+    (read stream true nil))
   ([stream eof-error? eof-value]
-    (thisfn stream eof-error? eof-value false))
+    (read stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
     (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
 
@@ -900,42 +899,41 @@
 (import '(java.util.concurrent Executors LinkedBlockingQueue))
 
 (defn pmap
-    ([f coll]
-      (let [nthreads (.. Runtime (getRuntime) (availableProcessors))
-          exec (. Executors (newFixedThreadPool nthreads))
-          todo (ref (seq coll))
-          out (ref 0)
-          q (new LinkedBlockingQueue)
-          produce (fn []
+  ([f coll]
+   (let [nthreads (.. Runtime (getRuntime) (availableProcessors))
+         exec (. Executors (newFixedThreadPool nthreads))
+         todo (ref (seq coll))
+         out (ref 0)
+         q (new LinkedBlockingQueue)
+         produce (fn []
                      (let [job (sync nil
                                  (when @todo
-                                    (let [item (first @todo)]
-                                      (alter todo rest)
-                                      (commute out inc)
-                                      (list item))))]
+                                   (let [item (first @todo)]
+                                     (alter todo rest)
+                                     (commute out inc)
+                                     (list item))))]
                        (when job
                          (. q (put (f (first job))))
                          (recur))))
-          tasks (doseq dnu (map (fn [task]
-                                  (. exec (submit #^java.util.concurrent.Callable task)))
-                                (replicate nthreads produce)))
-          consume (fn []
-                    (if (sync nil (and (or @todo (pos? @out))
-                                  (commute out dec)))
-                          (fnseq (. q (take)) thisfn)
+         tasks (doseq dnu (map (fn [task]
+                                   (. exec (submit #^java.util.concurrent.Callable task)))
+                               (replicate nthreads produce)))
+         consume (fn []
+                     (if (sync nil (and (or @todo (pos? @out))
+                                        (commute out dec)))
+                       (fnseq (. q (take)) consume)
                        (do
                          (. exec (shutdown))
                          (doseq x tasks)
                          nil)))]
-         (consume)))
-    ([f coll & colls]
-       (thisfn (fn [items] (apply f items))
-               ((fn [collseq]
-                 (when (every? seq collseq)
-                   (let [encl-fn thisfn]
-                      (lazy-cons (map first collseq)
-                                 (encl-fn (map rest collseq))))))
-                (cons coll colls)))))
+     (consume)))
+  ([f coll & colls]
+   (pmap (fn [items] (apply f items))
+         (let [encl-fn (fn [collseq]
+                           (when (every? seq collseq)
+                             (lazy-cons (map first collseq)
+                                        (encl-fn (map rest collseq)))))]
+           (encl-fn (cons coll colls))))))
 
 (defn macroexpand-1 [form]
   (let [v (. clojure.lang.Compiler (isMacro (first form)))]
@@ -967,7 +965,7 @@
 
 (defn subvec
   ([v start]
-    (thisfn v start (count v)))
+    (subvec v start (count v)))
   ([v start end]
     (. clojure.lang.RT (subvec v start end))))
 
@@ -983,7 +981,7 @@
 	row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
 	rows (fn []
 	       (when (. rs (next))
-		 (fnseq (apply struct row-struct (row-values)) thisfn)))]
+		     (fnseq (apply struct row-struct (row-values)) rows)))]
     (rows)))
 
 (defn to-set [coll]
