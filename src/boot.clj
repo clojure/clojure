@@ -556,12 +556,12 @@
      coll))
 
 (defn cycle [coll]
-  (let [rep (fn [xs ys]
-                (if xs
-                  (lazy-cons (first xs) (rep (rest xs) ys))
-                  (recur ys ys)))]
-    (when (seq coll)
-      (rep (seq coll) (seq coll)))))
+  (when (seq coll)
+    (let [rep (fn [xs]
+                  (if xs
+                    (lazy-cons (first xs) (rep (rest xs)))
+                    (recur (seq coll))))]
+      (rep (seq coll)))))
 
 (defn split-at [n coll]
   [(take n coll) (drop n coll)])
