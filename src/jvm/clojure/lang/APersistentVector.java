@@ -323,8 +323,10 @@ static class SubVector extends APersistentVector{
 	}
 
 	public IPersistentVector assocN(int i, Object val){
-		if(start + i >= end)
+		if(start + i > end)
 			throw new IndexOutOfBoundsException();
+		else if(start + i == end)
+			return cons(val);
 		return new SubVector(_meta, v.assocN(start + i, val), start, end);
 	}
 
