@@ -1092,11 +1092,11 @@
 	([] (. clojure.lang.PersistentArrayMap EMPTY))
 	([& args] (new clojure.lang.PersistentArrayMap (to-array args))))
 
-(defmacro for
+(defmacro for 
   ([seq-expr expr] (list `for seq-expr `true expr))
   ([seq-exprs filter-expr expr]
    (let [items (take-nth 2 seq-exprs)
-	 seqs (take-nth 2 (drop 1 seq-exprs))
+	 seqs (map (fn [x] (list `seq x)) (take-nth 2 (drop 1 seq-exprs)))
 	 gseqs (map (fn [x] (gensym (strcat (name x) "seq__"))) items)
 	 gs (map (fn [x] (gensym (strcat (name x) "s__"))) items)
 	 limit (dec (count items))
