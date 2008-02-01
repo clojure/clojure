@@ -1092,6 +1092,30 @@
 	([] (. clojure.lang.PersistentArrayMap EMPTY))
 	([& args] (new clojure.lang.PersistentArrayMap (to-array args))))
 
+(defmacro for
+  ([seq-expr expr] (list `for seq-expr `true expr))
+  ([seq-exprs filter-expr expr]
+   (let [items (take-nth 2 seq-exprs)
+	 seqs (take-nth 2 (drop 1 seq-exprs))
+	 gseqs (map (fn [x] (gensym (strcat (name x) "seq__"))) items)
+	 gs (map (fn [x] (gensym (strcat (name x) "s__"))) items)
+	 limit (dec (count items))
+	 gloop (gensym "loop__")
+	 recur-list (fn [lvl] (concat (take (dec lvl) gs) [(list `rest (nth gs (dec lvl)))] (drop lvl gseqs)))
+	 emit (fn [lvl]
+		  (list 'if (nth gs lvl)
+		    (if (= limit lvl)
+		      `(let [~@(interleave items (map (fn [xs] (list `first xs)) gs))]
+			 (if ~filter-expr
+			   (lazy-cons ~expr (~gloop ~@(recur-list (inc lvl))))
+			   (recur  ~@(recur-list (inc lvl)))))
+		      (emit (inc lvl)))
+		    (when (pos? lvl)
+		      (list* `recur (recur-list lvl)))))]
+     `(let [~@(interleave gseqs seqs)
+	    ~gloop (fn [~@gs] ~(emit 0))]
+	(~gloop ~@gseqs)))))
+
 (export
 	'(  load-file load
 		list cons conj defn
@@ -1153,5 +1177,6 @@
 		ns-resolve resolve
 		all-ns ns-name
 		array-map
+		for
 	))
 
