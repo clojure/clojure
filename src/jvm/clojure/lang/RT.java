@@ -13,6 +13,10 @@
 package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
 import java.io.*;
 import java.lang.reflect.Array;
 
@@ -213,9 +217,9 @@ static public boolean equal(Object k1, Object k2){
 		return true;
 	if(k1 != null)
 		{
-	    if(k1 instanceof Number)
+		if(k1 instanceof Number)
 			return Num.equiv(k1, k2);
-	    return k1.equals(k2);
+		return k1.equals(k2);
 		}
 	return false;
 }
@@ -299,7 +303,17 @@ static public IPersistentMap meta(Object x){
 public static int count(Object o){
 	if(o == null)
 		return 0;
-	return ((IPersistentCollection) o).count();
+	else if(o instanceof IPersistentCollection)
+		return ((IPersistentCollection) o).count();
+	else if(o instanceof String)
+		return ((String) o).length();
+	else if(o instanceof Collection)
+		return ((Collection) o).size();
+	else if(o instanceof Map)
+		return ((Map) o).size();
+	else if(o.getClass().isArray())
+		return Array.getLength(o);
+	throw new UnsupportedOperationException("count not supported on this type");
 }
 
 static public IPersistentCollection conj(IPersistentCollection coll, Object x){
@@ -359,13 +373,29 @@ static public Object pop(Object x){
 static public Object get(Object coll, Object key){
 	if(coll == null)
 		return null;
-	return ((Associative) coll).valAt(key);
+	else if(coll instanceof Associative)
+		return ((Associative) coll).valAt(key);
+	else if(coll instanceof Map)
+		{
+		Map m = (Map) coll;
+		return m.get(key);
+		}
+	throw new UnsupportedOperationException("get not supported on this type");
 }
 
 static public Object get(Object coll, Object key, Object notFound){
 	if(coll == null)
 		return notFound;
-	return ((Associative) coll).valAt(key, notFound);
+	else if(coll instanceof Associative)
+		return ((Associative) coll).valAt(key, notFound);
+	else if(coll instanceof Map)
+		{
+		Map m = (Map) coll;
+		if(m.containsKey(key))
+			return m.get(key);
+		return notFound;
+		}
+	throw new UnsupportedOperationException("get not supported on this type");
 }
 
 static public Associative assoc(Object coll, Object key, Object val){
@@ -377,7 +407,14 @@ static public Associative assoc(Object coll, Object key, Object val){
 static public Object contains(Object coll, Object key){
 	if(coll == null)
 		return F;
-	return ((Associative) coll).containsKey(key) ? T : F;
+	else if(coll instanceof Associative)
+		return ((Associative) coll).containsKey(key) ? T : F;
+	else if(coll instanceof Map)
+		{
+		Map m = (Map) coll;
+		return m.containsKey(key) ? T : F;
+		}
+	throw new UnsupportedOperationException("contains not supported on this type");
 }
 
 static public Object find(Object coll, Object key){
@@ -386,7 +423,7 @@ static public Object find(Object coll, Object key){
 	return ((Associative) coll).entryAt(key);
 }
 
-static public String entryString( Object key,Object val){
+static public String entryString(Object key, Object val){
 	return "<" + key + " " + val + ">";
 }
 
@@ -417,8 +454,12 @@ static public Object nth(Object coll, int n){
 		return null;
 	else if(coll instanceof IPersistentVector)
 		return ((IPersistentVector) coll).nth(n);
-	else if(coll instanceof Object[])
-		return ((Object[]) coll)[n];
+	else if(coll instanceof String)
+		return Character.valueOf(((String) coll).charAt(n));
+	else if(coll instanceof List)
+		return ((List) coll).get(n);
+	else if(coll.getClass().isArray())
+		return Array.get(coll, n);
 	else if(coll instanceof Sequential)
 		{
 		ISeq seq = ((IPersistentCollection) coll).seq();
