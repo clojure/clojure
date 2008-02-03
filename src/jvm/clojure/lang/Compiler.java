@@ -2340,7 +2340,7 @@ static class FnExpr implements Expr{
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr();
 		FnMethod enclosingMethod = (FnMethod) METHOD.get();
-		fn.thisName = name;
+		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
 		                  : (munge(currentNS().name.name) + ".");
@@ -2356,7 +2356,15 @@ static class FnExpr implements Expr{
 					RT.map(CONSTANTS, PersistentVector.EMPTY,
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY));
-			//(fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
+
+			//arglist might be preceded by symbol naming this fn
+			if(RT.second(form) instanceof Symbol)
+				{
+				fn.thisName = ((Symbol)RT.second(form)).name;
+				form = RT.cons(FN, RT.rest(RT.rest(form)));
+				}
+
+			//now (fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
 			//turn former into latter
 			if(RT.second(form) instanceof IPersistentVector)
 				form = RT.list(FN, RT.rest(form));

@@ -14,7 +14,7 @@
 (def conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
 
 (def defn (fn [name & fdecl]
-              (list 'def name (cons 'fn fdecl))))
+              (list 'def name (cons 'fn (cons name fdecl)))))
 
 (. (the-var defn) (setMacro))
 
@@ -557,9 +557,9 @@
 
 (defn cycle [coll]
   (when (seq coll)
-    (let [rep (fn [xs]
+    (let [rep (fn this [xs]
                   (if xs
-                    (lazy-cons (first xs) (rep (rest xs)))
+                    (lazy-cons (first xs) (this (rest xs)))
                     (recur (seq coll))))]
       (rep (seq coll)))))
 
@@ -694,37 +694,6 @@
        (doseq c classes
          (. ns (importClass c (. Class (forName (strcat pkg "." c)))))) )
    (apply import (rest import-lists))))
-
-;(defn unimport [& names]
-;   (let [#^clojure.lang.Var imps *ns-imports*]
-;	  (doseq name names
-;        (. imps (bindRoot (dissoc (. imps (get)) name))))))
-
-;(defn refer [& refer-lists]
-;  (doseq rlist refer-lists
-;   (let [#^clojure.lang.Var refers *ns-refers*
-;         ns (first rlist)
-;         names (rest rlist)]
-;     (doseq name names
-;       (when (. clojure.lang.Var (find (symbol(str *ns*) (str name))))
-;         (throw (new Exception (strcat "Name conflict: " name " already exists in this namespace"))))
-;       (let [varsym (symbol (str ns) (str name))
-;             var (. clojure.lang.Var (find varsym))
-;             #^clojure.lang.Var rvar ((. refers (get)) name)]
-;         (if var
-;             (if rvar
-;                 (when (not (= rvar var))
-;                   (throw (new Exception (strcat "Name conflict: " name " already exists in this refer map as: " (. rvar sym)))))
-;               (. refers (bindRoot (assoc (. refers (get)) name var))))
-;            (throw (new Exception (strcat "Can't find Var: " varsym)))))))))
-
-;(defn unrefer [& names]
-;   (let [#^clojure.lang.Var refers *ns-refers*]
-;	  (doseq name names
-;        (. refers (bindRoot (dissoc (. refers (get)) name))))))
-
-;(defn unintern [varsym]
-;  (. clojure.lang.Var (unintern varsym)))
 
 (defn into-array [aseq]
   (. clojure.lang.RT (seqToTypedArray (seq aseq))))
@@ -918,10 +887,10 @@
          tasks (doseq dnu (map (fn [task]
                                    (. exec (submit #^java.util.concurrent.Callable task)))
                                (replicate nthreads produce)))
-         consume (fn []
+         consume (fn this []
                      (if (sync nil (and (or @todo (pos? @out))
                                         (commute out dec)))
-                       (fnseq (. q (take)) consume)
+                       (fnseq (. q (take)) this)
                        (do
                          (. exec (shutdown))
                          (doseq x tasks)
@@ -929,10 +898,10 @@
      (consume)))
   ([f coll & colls]
    (pmap (fn [items] (apply f items))
-         (let [encl-fn (fn [collseq]
+         (let [encl-fn (fn this [collseq]
                            (when (every? seq collseq)
                              (lazy-cons (map first collseq)
-                                        (encl-fn (map rest collseq)))))]
+                                        (this (map rest collseq)))))]
            (encl-fn (cons coll colls))))))
 
 (defn macroexpand-1 [form]
@@ -979,9 +948,9 @@
 	       (map (fn [i] (. rsmeta (getColumnName i))) idxs))
 	row-struct (apply create-struct keys)
 	row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
-	rows (fn []
+	rows (fn this []
 	       (when (. rs (next))
-		     (fnseq (apply struct row-struct (row-values)) rows)))]
+		     (fnseq (apply struct row-struct (row-values)) this)))]
     (rows)))
 
 (defn to-set [coll]
@@ -1102,18 +1071,18 @@
 	 limit (dec (count items))
 	 gloop (gensym "loop__")
 	 recur-list (fn [lvl] (concat (take (dec lvl) gs) [(list `rest (nth gs (dec lvl)))] (drop lvl gseqs)))
-	 emit (fn [lvl]
+	 emit (fn this [lvl]
 		  (list 'if (nth gs lvl)
 		    (if (= limit lvl)
 		      `(let [~@(interleave items (map (fn [xs] (list `first xs)) gs))]
 			 (if ~filter-expr
 			   (lazy-cons ~expr (~gloop ~@(recur-list (inc lvl))))
 			   (recur  ~@(recur-list (inc lvl)))))
-		      (emit (inc lvl)))
+		      (this (inc lvl)))
 		    (when (pos? lvl)
 		      (list* `recur (recur-list lvl)))))]
      `(let [~@(interleave gseqs seqs)
-	    ~gloop (fn [~@gs] ~(emit 0))]
+	    ~gloop (fn ~gloop [~@gs] ~(emit 0))]
 	(~gloop ~@gseqs)))))
 
 (export
