@@ -380,6 +380,12 @@ static public Object get(Object coll, Object key){
 		Map m = (Map) coll;
 		return m.get(key);
 		}
+	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
+		{
+		int n = ((Number) key).intValue();
+		return nth(coll, n);
+		}
+
 	throw new UnsupportedOperationException("get not supported on this type");
 }
 
@@ -394,6 +400,11 @@ static public Object get(Object coll, Object key, Object notFound){
 		if(m.containsKey(key))
 			return m.get(key);
 		return notFound;
+		}
+	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
+		{
+		int n = ((Number) key).intValue();
+		return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
 		}
 	throw new UnsupportedOperationException("get not supported on this type");
 }
@@ -414,6 +425,12 @@ static public Object contains(Object coll, Object key){
 		Map m = (Map) coll;
 		return m.containsKey(key) ? T : F;
 		}
+	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
+		{
+		int n = ((Number) key).intValue();
+		return n >= 0 && n < count(coll);
+		}
+
 	throw new UnsupportedOperationException("contains not supported on this type");
 }
 
