@@ -2360,7 +2360,7 @@ static class FnExpr implements Expr{
 			//arglist might be preceded by symbol naming this fn
 			if(RT.second(form) instanceof Symbol)
 				{
-				fn.thisName = ((Symbol)RT.second(form)).name;
+				fn.thisName = ((Symbol) RT.second(form)).name;
 				form = RT.cons(FN, RT.rest(RT.rest(form)));
 				}
 
@@ -2693,7 +2693,7 @@ static class FnMethod{
 
 			//register 'this' as local 0
 			//registerLocal(THISFN, null, null);
-			registerLocal(Symbol.intern(fn.thisName != null?fn.thisName:"fn__" + RT.nextID()), null, null);
+			registerLocal(Symbol.intern(fn.thisName != null ? fn.thisName : "fn__" + RT.nextID()), null, null);
 
 			PSTATE state = PSTATE.REQ;
 			PersistentVector argLocals = PersistentVector.EMPTY;
@@ -3143,7 +3143,11 @@ static public Var isMacro(Object op) throws Exception{
 		{
 		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
 		if(v != null && v.isMacro())
+			{
+			if(v.ns != currentNS() && !v.isExported())
+				throw new IllegalAccessError("var: " + v + " is not exported");
 			return v;
+			}
 		}
 	return null;
 }
