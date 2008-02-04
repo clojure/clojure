@@ -1156,6 +1156,42 @@
 	    ~gloop (fn ~gloop [~@gs] ~(emit 0))]
 	(~gloop ~@gseqs)))))
 
+(defmacro fn* [& sigs]
+  (let [name (if (symbol? (first sigs)) (first sigs) nil)
+        sigs (if name (rest sigs) sigs)
+        sigs (if (vector? (first sigs)) (list sigs) sigs)
+        psig (fn [sig]
+               (let* [[params & body] sig]
+                 (if (every? symbol? params)
+                   sig
+                   (loop [params params
+                          new-params []
+                          lets []]
+                     (if params
+                       (if (symbol? (first params))
+                         (recur (rest params) (conj new-params (first params)) lets)
+                         (let [gparam (gensym "p__")]
+                            (recur (rest params) (conj new-params gparam) (-> lets (conj (first params)) (conj gparam)))))
+                       `(~new-params
+                         (let* ~lets
+                            ~@body)))))))
+        new-sigs (map psig sigs)]
+    (if name
+      (list* 'fn name new-sigs)
+      (cons 'fn new-sigs))))
+
+(def defn* (fn [name & fdecl]
+              (list 'def name (cons `fn* (cons name fdecl)))))
+
+(. (the-var defn*) (setMacro))
+
+(def defmacro* (fn [name & args]
+                  (list 'do
+                        (cons `defn* (cons name args))
+                        (list '. (list 'the-var name) '(setMacro)))))
+
+(. (the-var defmacro*) (setMacro))
+
 (export
 	'(  load-file load
 		list cons conj defn
@@ -1220,6 +1256,6 @@
 		for
 		nthrest
 		string? symbol? map? seq? vector?
-		let*
+		let* fn* defn* defmacro*
 	))
 
