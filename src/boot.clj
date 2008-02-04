@@ -1061,6 +1061,77 @@
 	([] (. clojure.lang.PersistentArrayMap EMPTY))
 	([& args] (new clojure.lang.PersistentArrayMap (to-array args))))
 
+(defn nthrest [coll n]
+  (loop [n n xs (seq coll)]
+    (if (and xs (pos? n))
+      (recur (dec n) (rest xs))
+      xs)))
+
+(defn string? [x]
+  (instance? String x))
+
+(defn symbol? [x]
+  (instance? clojure.lang.Symbol x))
+
+(defn map? [x]
+  (instance? clojure.lang.IPersistentMap x))
+
+(defn seq? [x]
+  (instance? clojure.lang.ISeq x))
+
+(defn vector? [x]
+  (instance? clojure.lang.IPersistentVector x))
+
+(defmacro let* [bindings & body]
+  (let [bmap (apply array-map bindings)
+        pb (fn pb [bvec b v]
+               (let [pvec
+                     (fn [bvec b val]
+                         (let [gvec (gensym "vec__")]
+                           (loop [ret (-> bvec (conj gvec) (conj val))
+                                  n 0
+                                  bs b
+                                  seen-rest? false]
+                             (if bs
+                               (let [firstb (first bs)]
+                                 (cond
+                                  (= firstb '&) (recur (pb ret (second bs) (list `nthrest gvec n))
+                                                       n
+                                                       (rrest bs)
+                                                       true)
+                                  (= firstb :as) (pb ret (second bs) gvec)
+                                  :else (if seen-rest?
+                                          (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
+                                          (recur (pb ret firstb  (list `nth gvec n))
+                                                 (inc n)
+                                                 (rest bs)
+                                                 seen-rest?))))
+                               ret))))
+                     pmap
+                     (fn [bvec b v]
+                         (let [gmap (or (:as b) (gensym "map__"))
+                               defaults (:or b)]
+                           (loop [ret (-> bvec (conj gmap) (conj v))
+                                  bes (seq (-> b (dissoc :as) (dissoc :or)))]
+                             (if bes
+                               (let [bb (key (first bes))
+                                     bk (val (first bes))
+                                     has-default (contains? defaults bb)]
+                                 (recur (pb ret bb (if has-default
+                                                     (list `get gmap bk (defaults bb))
+                                                     (list `get gmap bk)))
+                                        (rest bes)))
+                               ret))))]
+                 (cond
+                  (symbol? b) (-> bvec (conj b) (conj v))
+                  (vector? b) (pvec bvec b v)
+                  (map? b) (pmap bvec b v)
+                  :else (throw (new Exception "Unsupported binding form")))))
+        process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
+    (if (every? symbol? (keys bmap))
+      `(let ~bindings ~@body)
+      `(let ~(reduce process-entry [] bmap) ~@body))))
+
 (defmacro for 
   ([seq-expr expr] (list `for seq-expr `true expr))
   ([seq-exprs filter-expr expr]
@@ -1147,5 +1218,8 @@
 		all-ns ns-name
 		array-map
 		for
+		nthrest
+		string? symbol? map? seq? vector?
+		let*
 	))
 
