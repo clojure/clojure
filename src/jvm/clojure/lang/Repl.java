@@ -19,8 +19,8 @@ public class Repl{
 static final Symbol REFER = Symbol.create("clojure", "refer");
 static final Symbol QUOTE = Symbol.create("quote");
 static final Symbol CLOJURE = Symbol.create("clojure");
-public static void main(String[] args){
-
+public static void main(String[] args) throws Exception{
+	RT.init();
 	for(String file : args)
 		try
 			{

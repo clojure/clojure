@@ -16,7 +16,9 @@ import java.io.OutputStreamWriter;
 import java.io.IOException;
 
 public class Script{
-public static void main(String[] args){
+public static void main(String[] args) throws Exception{
+
+	RT.init();
 
 	for(String file : args)
 		try

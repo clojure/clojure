@@ -190,15 +190,15 @@ static
 			           return arg1 == arg2 ? RT.T : RT.F;
 		           }
 	           });
-	try
-		{
-		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
-		Compiler.load(new InputStreamReader(ins));
-		}
-	catch(Exception e)
-		{
-		throw new IllegalStateException("Error loading boot.clj", e);
-		}
+//	try
+//		{
+//		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
+//		Compiler.load(new InputStreamReader(ins));
+//		}
+//	catch(Exception e)
+//		{
+//		throw new IllegalStateException("Error loading boot.clj", e);
+//		}
 	}
 //static
 //	{
@@ -207,6 +207,20 @@ static
 //		chars[i] = new Character((char) i);
 //	}
 
+
+static public void init() throws Exception{
+	try
+        {
+        Var.pushThreadBindings(RT.map(Compiler.SOURCE_PATH, "boot.clj",
+                                      Compiler.SOURCE, "boot.clj"));
+        InputStream ins = RT.class.getResourceAsStream("/boot.clj");
+        Compiler.load(new InputStreamReader(ins));
+        }
+    finally
+        {
+        Var.popThreadBindings();
+        }
+}
 
 static public int nextID(){
 	return id.getAndIncrement();

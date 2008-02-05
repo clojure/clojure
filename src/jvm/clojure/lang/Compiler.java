@@ -3423,8 +3423,8 @@ RT.CURRENT_NS, RT.CURRENT_NS.get()
 	return ret;
 }
 
-public static void main(String[] args){
-
+public static void main(String[] args) throws Exception{
+	RT.init();
 	for(String file : args)
 		try
 			{
