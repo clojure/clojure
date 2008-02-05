@@ -690,6 +690,8 @@ static abstract class HostExpr implements Expr{
 	}
 
 	private static Class maybeClass(Object form, boolean stringOk) throws Exception{
+		if(form instanceof Class)
+			return (Class) form;
 		Class c = null;
 		if(form instanceof Symbol)
 			{
