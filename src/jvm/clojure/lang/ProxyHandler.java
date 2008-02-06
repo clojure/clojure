@@ -31,6 +31,18 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 		{
 		if(rt == Void.TYPE)
 			return null;
+		else if(method.getName().equals("equals"))
+			{
+			return proxy == args[0];
+			}
+		else if(method.getName().equals("hashCode"))
+			{
+			return System.identityHashCode(proxy);
+			}
+		else if(method.getName().equals("toString"))
+			{
+			return "Proxy: " + System.identityHashCode(proxy);
+			}
 		throw new UnsupportedOperationException();
 		}
 	Object ret = fn.applyTo(ArraySeq.create(args));
