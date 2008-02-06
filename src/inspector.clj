@@ -20,6 +20,7 @@
   (cond 
    (instance? java.util.Map$Entry x) :entry
    (instance? clojure.lang.IPersistentMap x) :map 
+   (instance? java.util.Map x) :map 
    (instance? clojure.lang.Sequential x) :seq
    :atom))
 
@@ -41,6 +42,8 @@
 (defmethod get-child-count :entry [e]
   (count (val e)))
 
+(defmethod is-leaf :map [m]
+  false)
 (defmethod get-child :map [m index]
   (nth (seq m) index))
 

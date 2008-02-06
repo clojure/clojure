@@ -296,6 +296,8 @@ static public ISeq seq(Object coll){
 		return ArraySeq.create((Object[]) coll);
 	else if(coll instanceof String)
 		return StringSeq.create((String) coll);
+	else if(coll instanceof Map)
+		return seq(((Map) coll).entrySet());
 	else
 		throw new IllegalAccessError("Don't know how to create ISeq from arg");
 }
