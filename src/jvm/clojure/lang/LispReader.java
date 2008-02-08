@@ -32,7 +32,6 @@ static Symbol WITH_META = Symbol.create("clojure", "with-meta");
 static Symbol META = Symbol.create("clojure", "meta");
 static Symbol DEREF = Symbol.create("clojure", "deref");
 //static Symbol DEREF_BANG = Symbol.create("clojure", "deref!");
-static Keyword LINE_KEY = Keyword.intern("clojure", "line");
 
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
@@ -374,7 +373,7 @@ static class MetaReader extends AFn{
 		if(o instanceof IObj)
 			{
 			if(line != -1 && o instanceof ISeq)
-				meta = ((IPersistentMap) meta).assoc(LINE_KEY, line);
+				meta = ((IPersistentMap) meta).assoc(RT.LINE_KEY, line);
 			return ((IObj) o).withMeta((IPersistentMap) meta);
 			}
 		else
@@ -557,7 +556,7 @@ static class ListReader extends AFn{
 		IObj s = (IObj) PersistentList.create(list);
 //		IObj s = (IObj) RT.seq(list);
 		if(line != -1)
-			return s.withMeta(RT.map(LINE_KEY, line));
+			return s.withMeta(RT.map(RT.LINE_KEY, line));
 		else
 			return s;
 	}

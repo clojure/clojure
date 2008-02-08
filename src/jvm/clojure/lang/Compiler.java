@@ -28,7 +28,6 @@ import org.objectweb.asm.util.CheckClassAdapter;
 //*/
 
 import java.io.*;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -45,7 +44,7 @@ static final Symbol LET = Symbol.create("let");
 static final Symbol DO = Symbol.create("do");
 static final Symbol FN = Symbol.create("fn");
 static final Symbol QUOTE = Symbol.create("quote");
-static final Symbol THE_VAR = Symbol.create("the-var");
+static final Symbol THE_VAR = Symbol.create("var");
 static final Symbol DOT = Symbol.create(".");
 static final Symbol ASSIGN = Symbol.create("set!");
 //static final Symbol TRY_FINALLY = Symbol.create("try-finally");
@@ -117,6 +116,7 @@ final static Type CLASS_TYPE = Type.getType(Class.class);
 final static Type REFLECTOR_TYPE = Type.getType(Reflector.class);
 final static Type THROWABLE_TYPE = Type.getType(Throwable.class);
 final static Type BOOLEAN_OBJECT_TYPE = Type.getType(Boolean.class);
+final static Type IPERSISTENTMAP_TYPE = Type.getType(IPersistentMap.class);
 
 private static final Type[][] ARG_TYPES;
 private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -238,23 +238,27 @@ static Symbol resolveSymbol(Symbol sym){
 static class DefExpr implements Expr{
 	final Var var;
 	final Expr init;
-	final Symbol tag;
+	final Expr meta;
 	final boolean initProvided;
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
 	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
+	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
 
-	public DefExpr(Var var, Expr init, boolean initProvided, Symbol tag){
+	public DefExpr(Var var, Expr init, Expr meta, boolean initProvided){
 		this.var = var;
 		this.init = init;
+		this.meta = meta;
 		this.initProvided = initProvided;
-		this.tag = tag;
 	}
 
 	public Object eval() throws Exception{
 		if(initProvided)
 			var.bindRoot(init.eval());
-		var.setTag(tag);
+		if(meta != null)
+			{
+			var.setMeta((IPersistentMap) meta.eval());
+			}
 		return var;
 	}
 
@@ -266,16 +270,14 @@ static class DefExpr implements Expr{
 			init.emit(C.EXPRESSION, fn, gen);
 			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
 			}
-		gen.dup();
-		if(tag != null)
+		if(meta != null)
 			{
-			gen.push(tag.ns);
-			gen.push(tag.name);
-			gen.invokeStatic(SYMBOL_TYPE, symcreate);
+			gen.dup();
+			meta.emit(C.EXPRESSION, fn, gen);
+			gen.checkCast(IPERSISTENTMAP_TYPE);
+			gen.invokeVirtual(VAR_TYPE, setMetaMethod);
 			}
-		else
-			gen.visitInsn(Opcodes.ACONST_NULL);
-		gen.invokeVirtual(VAR_TYPE, setTagMethod);
+
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -305,12 +307,15 @@ static class DefExpr implements Expr{
 				{
 				if(sym.ns == null)
 					throw new Exception("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
-					                    " refers to:" + v.sym);
+					                    " refers to:" + v);
 				else
 					throw new Exception("Can't create defs outside of current ns");
 				}
+			IPersistentMap mm = sym.meta();
+			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY,SOURCE.get());
+			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr(v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
-			                   RT.count(form) == 3, tagOf(sym));
+			                   meta, RT.count(form) == 3);
 		}
 	}
 }
@@ -356,7 +361,7 @@ static class AssignExpr implements Expr{
 
 static class VarExpr implements Expr, AssignableExpr{
 	final Var var;
-	final Symbol tag;
+	final Object tag;
 	final static Method getMethod = Method.getMethod("Object get()");
 	final static Method setMethod = Method.getMethod("Object set(Object)");
 
@@ -735,7 +740,7 @@ static abstract class HostExpr implements Expr{
 		 return className;
 	 }
  */
-	static Class tagToClass(Symbol tag) throws Exception{
+	static Class tagToClass(Object tag) throws Exception{
 		Class c = maybeClass(tag, true);
 		if(c != null)
 			return c;
@@ -1906,7 +1911,6 @@ static class NewExpr implements Expr{
 static class MetaExpr implements Expr{
 	final Expr expr;
 	final MapExpr meta;
-	final static Type IPERSISTENTMAP_TYPE = Type.getType(IPersistentMap.class);
 	final static Type IOBJ_TYPE = Type.getType(IObj.class);
 	final static Method withMetaMethod = Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)");
 
@@ -2226,7 +2230,7 @@ static class VectorExpr implements Expr{
 
 static class InvokeExpr implements Expr{
 	final Expr fexpr;
-	final Symbol tag;
+	final Object tag;
 	final IPersistentVector args;
 	final int line;
 
@@ -3146,7 +3150,7 @@ static public Var isMacro(Object op) throws Exception{
 		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
 		if(v != null && v.isMacro())
 			{
-			if(v.ns != currentNS() && !v.isExported())
+			if(v.ns != currentNS() && !v.isPublic())
 				throw new IllegalAccessError("var: " + v + " is not exported");
 			return v;
 			}
@@ -3158,8 +3162,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 	Integer line = (Integer) LINE.get();
 	try
 		{
-		if(RT.meta(form) != null && RT.meta(form).containsKey(LispReader.LINE_KEY))
-			line = (Integer) RT.meta(form).valAt(LispReader.LINE_KEY);
+		if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+			line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
 		Var.pushThreadBindings(
 				RT.map(LINE, line));
 		Object op = RT.first(form);
@@ -3275,7 +3279,7 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		Var v = ns.findInternedVar(Symbol.create(sym.name));
 		if(v == null)
 			throw new Exception("No such var: " + sym);
-		else if(v.ns != currentNS() && !v.isExported())
+		else if(v.ns != currentNS() && !v.isPublic())
 			throw new IllegalAccessError("var: " + sym + " is not exported");
 		return v;
 		}

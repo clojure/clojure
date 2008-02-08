@@ -16,7 +16,7 @@
 (def defn (fn [name & fdecl]
               (list 'def name (cons 'fn (cons name fdecl)))))
 
-(. (the-var defn) (setMacro))
+(. (var defn) (setMacro))
 
 (defn instance? [#^Class c x]
   (. c (isInstance x)))
@@ -52,9 +52,9 @@
 (def defmacro (fn [name & args]
                   (list 'do
                         (cons 'defn (cons name args))
-                        (list '. (list 'the-var name) '(setMacro)))))
+                        (list '. (list 'var name) '(setMacro)))))
 
-(. (the-var defmacro) (setMacro))
+(. (var defmacro) (setMacro))
 
 (defmacro when [test & body]
    (list 'if test (cons 'do body)))
@@ -414,11 +414,11 @@
     `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
 (defmacro defmethod [multifn dispatch-val & fn-tail]
-  `(let [pvar# (the-var ~multifn)]
+  `(let [pvar# (var ~multifn)]
       (. pvar# (commuteRoot (fn [mf#] (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
 
 (defmacro remove-method [multifn dispatch-val]
-  `(let [pvar# (the-var ~multifn)]
+  `(let [pvar# (var ~multifn)]
       (. pvar# (commuteRoot (fn [mf#] (. mf# (dissoc ~dispatch-val)))))))
 
 ;;;;;;;;; var stuff      
@@ -427,7 +427,7 @@
   (let [var-ize (fn [var-vals]
                     (loop [ret [] vvs (seq var-vals)]
                           (if vvs
-                              (recur  (conj (conj ret `(the-var ~(first vvs))) (second vvs))
+                              (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
                                       (rest (rest vvs)))
                             (seq ret))))]
     `(try
@@ -994,13 +994,14 @@
 (defn ns-unmap [#^clojure.lang.Namespace ns sym]
   (. ns (unmap sym)))
 
-(defn export [syms]
-  (doseq sym syms
-   (.. *ns* (intern sym) (setExported true))))
+;(defn export [syms]
+;  (doseq sym syms
+;   (.. *ns* (intern sym) (setExported true))))
 
 (defn ns-exports [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
-                       (. v (isExported))))
+                               (= ns (. v ns))
+                               (. v (isPublic))))
           (ns-map ns)))
 
 (defn ns-imports [#^clojure.lang.Namespace ns]
@@ -1015,10 +1016,10 @@
 	    to-do (or (:only fs) (keys nsexports))]
     (doseq sym to-do
       (when-not (exclude sym)
-	    (let [var (nsexports sym)]
-	      (when-not var
+	    (let [v (nsexports sym)]
+	      (when-not v
 	        (throw (new java.lang.IllegalAccessError (strcat sym " is not exported"))))
-	      (. *ns* (refer (or (rename sym) sym) var)))))))
+	      (. *ns* (refer (or (rename sym) sym) v)))))))
 
 (defn ns-refers [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
@@ -1183,14 +1184,14 @@
 (def defn* (fn [name & fdecl]
               (list 'def name (cons `fn* (cons name fdecl)))))
 
-(. (the-var defn*) (setMacro))
+(. (var defn*) (setMacro))
 
 (def defmacro* (fn [name & args]
                   (list 'do
                         (cons `defn* (cons name args))
-                        (list '. (list 'the-var name) '(setMacro)))))
+                        (list '. (list 'var name) '(setMacro)))))
 
-(. (the-var defmacro*) (setMacro))
+(. (var defmacro*) (setMacro))
 
 (defn bean [#^Object x]
   (let [c (. x (getClass))
@@ -1216,6 +1217,9 @@
 		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
 			       (this (rest pseq))))) (keys pmap))))))
 
+(defmacro comment [& body])
+
+(comment
 (export
 	'(  load-file load
 		list cons conj defn
@@ -1269,7 +1273,8 @@
 		*warn-on-reflection*
 		resultset-seq
 		to-set distinct
-		export ns-exports ns-imports ns-map
+		export
+		ns-exports ns-imports ns-map
 		identical?  instance?
 		load-file in-ns find-ns
 		filter-key find-ns create-ns remove-ns
@@ -1281,6 +1286,7 @@
 		nthrest
 		string? symbol? map? seq? vector?
 		let* fn* defn* defmacro*
-		bean
+		bean select
 	))
+	)
 

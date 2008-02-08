@@ -12,11 +12,11 @@
 
 package clojure.lang;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public final class Var implements IFn, IRef{
+public final class Var implements IFn, IRef, IObj{
+
 
 static class Frame{
 	//Var->Box
@@ -44,13 +44,18 @@ static ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
 	}
 };
 
+static Keyword privateKey = Keyword.intern(null, "private");
+static Keyword macroKey = Keyword.intern(null, "macro");
+static Keyword nameKey = Keyword.intern(null, "name");
+static Keyword nsKey = Keyword.intern(null, "ns");
+//static Keyword tagKey = Keyword.intern(null, "tag");
+
 volatile Object root;
 transient final AtomicInteger count;
-final public Symbol sym;
-final public Namespace ns;
-boolean macroFlag = false;
-boolean exported = false;
-Symbol tag;
+public final Symbol sym;
+public final Namespace ns;
+
+IPersistentMap _meta;
 
 public static Var intern(Namespace ns, Symbol sym, Object root){
 	return intern(ns, sym, root, true);
@@ -67,7 +72,7 @@ public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceR
 public String toString(){
 	return "#<Var: " + (ns != null ? (ns.name + "/") : "") +
 	       (sym != null ? sym.toString() : "--unnamed--") +
-	       (exported?" (exported)":"") + ">";
+	       ">";
 }
 
 public static Var find(Symbol nsQualifiedSym){
@@ -102,6 +107,7 @@ Var(Namespace ns, Symbol sym){
 	this.sym = sym;
 	this.count = new AtomicInteger();
 	this.root = dvals;  //use dvals as magic not-bound value
+	setMeta(PersistentHashMap.EMPTY);
 }
 
 Var(Namespace ns, Symbol sym, Object root){
@@ -140,32 +146,45 @@ public Object set(Object val){
 	throw new IllegalStateException(String.format("Can't change/establish root binding of: %s with set", sym));
 }
 
+public void setMeta(IPersistentMap m){
+	//ensure these basis keys
+	_meta = m.assoc(nameKey, sym).assoc(nsKey, ns);
+}
+
+public IPersistentMap meta(){
+	return _meta;
+}
+
+public IObj withMeta(IPersistentMap meta){
+	throw new UnsupportedOperationException("Vars are not values");
+}
+
 public void setMacro(){
-	macroFlag = true;
+	_meta = _meta.assoc(macroKey, RT.T);
 }
 
 public boolean isMacro(){
-	return macroFlag;
+	return RT.booleanCast(_meta.valAt(macroKey));
 }
 
-public void setExported(boolean state){
-	exported = state;
-}
+//public void setExported(boolean state){
+//	_meta = _meta.assoc(privateKey, state);
+//}
 
-public boolean isExported(){
-	return exported;
+public boolean isPublic(){
+	return !RT.booleanCast(_meta.valAt(privateKey));
 }
 
 public Object getRoot(){
 	return root;
 }
 
-public Symbol getTag(){
-	return tag;
+public Object getTag(){
+	return _meta.valAt(RT.TAG_KEY);
 }
 
 public void setTag(Symbol tag){
-	this.tag = tag;
+	_meta = _meta.assoc(RT.TAG_KEY, tag);
 }
 
 final public boolean hasRoot(){
@@ -175,7 +194,7 @@ final public boolean hasRoot(){
 //binding root always clears macro flag
 synchronized public void bindRoot(Object root){
 	this.root = root;
-	macroFlag = false;
+	_meta = _meta.assoc(macroKey, RT.F);
 }
 
 synchronized public void unbindRoot(){
