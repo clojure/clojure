@@ -39,13 +39,6 @@
       ([comparator & args]
           (. clojure.lang.PersistentTreeMap (create comparator args))))
 
-;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn meta [#^clojure.lang.IObj x]
- (. x (meta)))
-
-(defn with-meta [#^clojure.lang.IObj x m]
-  (. x (withMeta m)))
-
 
   
 ;;;;;;;;;;;;;;;;;;;;
@@ -61,6 +54,15 @@
 
 (defmacro when-not [test & body]
    (list 'if test nil (cons 'do body)))
+
+;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn meta [x]
+  (when (instance? clojure.lang.IObj x)
+    (. #^clojure.lang.IObj x (meta))))
+
+(defn with-meta [#^clojure.lang.IObj x m]
+  (. x (withMeta m)))
+
 
 (defn #^Boolean nil? [x] (identical? x nil))
 (defn #^Boolean false? [x] (identical? x false))
