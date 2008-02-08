@@ -998,7 +998,7 @@
 ;  (doseq sym syms
 ;   (.. *ns* (intern sym) (setExported true))))
 
-(defn ns-exports [#^clojure.lang.Namespace ns]
+(defn ns-publics [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
                                (= ns (. v ns))
                                (. v (isPublic))))
@@ -1010,15 +1010,15 @@
 (defn refer [ns-sym & filters]
   (let [ns (find-ns ns-sym)
 	    fs (apply hash-map filters)
-	    nsexports (ns-exports ns)
+	    nspublics (ns-publics ns)
 	    rename (or (:rename fs) {})
 	    exclude (to-set (:exclude fs))
-	    to-do (or (:only fs) (keys nsexports))]
+	    to-do (or (:only fs) (keys nspublics))]
     (doseq sym to-do
       (when-not (exclude sym)
-	    (let [v (nsexports sym)]
+	    (let [v (nspublics sym)]
 	      (when-not v
-	        (throw (new java.lang.IllegalAccessError (strcat sym " is not exported"))))
+	        (throw (new java.lang.IllegalAccessError (strcat sym " is not public"))))
 	      (. *ns* (refer (or (rename sym) sym) v)))))))
 
 (defn ns-refers [#^clojure.lang.Namespace ns]
@@ -1274,7 +1274,7 @@
 		resultset-seq
 		to-set distinct
 		export
-		ns-exports ns-imports ns-map
+		ns-publics ns-imports ns-map
 		identical?  instance?
 		load-file in-ns find-ns
 		filter-key find-ns create-ns remove-ns
