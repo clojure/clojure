@@ -1219,6 +1219,23 @@
 
 (defmacro comment [& body])
 
+(defn prstr [x]
+  (binding [*out* (new java.io.StringWriter)]
+    (pr x)
+    (str *out*)))
+
+(defmacro assert [x]
+  `(when-not ~x
+     (throw (new Exception (strcat "Assert failed: " (prstr '~x))))))
+
+(defn
+#^{:doc "test [v] finds fn at key :test in var metadata and calls it, presuming failure will throw exception"}
+test [v]
+  (let [f (:test ^v)]
+    (if f
+      (do (f) :ok)
+      :no-test)))
+      
 (comment
 (export
 	'(  load-file load
