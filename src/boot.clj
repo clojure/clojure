@@ -1135,29 +1135,37 @@
       `(let ~bindings ~@body)
       `(let ~(reduce process-entry [] bmap) ~@body))))
 
-(defmacro for 
+(defmacro when-first [x xs & body]
+  `(when ~xs
+     (let* [~x (first ~xs)]
+       ~@body)))
+
+(defmacro lazy-cat
+  ([coll] `(seq ~coll))
+  ([coll & colls]
+   `(let [iter# (fn iter# [coll#]
+		    (if (seq coll#)
+		      (lazy-cons (first coll#) (iter# (rest coll#)))
+		      (lazy-cat ~@colls)))]
+      (iter# ~coll))))
+      
+(defmacro for
   ([seq-expr expr] (list `for seq-expr `true expr))
   ([seq-exprs filter-expr expr]
-   (let* [items (take-nth 2 seq-exprs)
-	 seqs (map (fn [x] (list `seq x)) (take-nth 2 (drop 1 seq-exprs)))
-	 gseqs (map (fn [x] (gensym "seq__")) items)
-	 gs (map (fn [x] (gensym "s__")) items)
-	 limit (dec (count items))
-	 gloop (gensym "loop__")
-	 recur-list (fn [lvl] (concat (take (dec lvl) gs) [(list `rest (nth gs (dec lvl)))] (drop lvl gseqs)))
-	 emit (fn this [lvl]
-		  (list 'if (nth gs lvl)
-		    (if (= limit lvl)
-		      `(let* [~@(interleave items (map (fn [xs] (list `first xs)) gs))]
-			 (if ~filter-expr
-			   (lazy-cons ~expr (~gloop ~@(recur-list (inc lvl))))
-			   (recur  ~@(recur-list (inc lvl)))))
-		      (this (inc lvl)))
-		    (when (pos? lvl)
-		      (list* `recur (recur-list lvl)))))]
-     `(let* [~@(interleave gseqs seqs)
-	    ~gloop (fn ~gloop [~@gs] ~(emit 0))]
-	(~gloop ~@gseqs)))))
+   (let [emit (fn emit [ses]
+		  (let [x (key (first ses)) xs (val (first ses))
+			giter (gensym "iter__") gxs (gensym "s__")]
+		    `(fn ~giter [~gxs]
+			 (when-first ~x ~gxs
+			    ~(if (rest ses)
+			       `(let [iterys# ~(emit (rest ses))]
+				  (lazy-cat (iterys# ~(val (second ses)))
+					    (~giter (rest ~gxs))))
+			       `(if ~filter-expr
+				  (lazy-cons ~expr (~giter (rest ~gxs)))
+				  (recur (rest ~gxs))))))))]
+     `(let [iter# ~(emit (seq (apply array-map seq-exprs)))]
+	(iter# ~(second seq-exprs))))))
 
 (defmacro fn* [& sigs]
   (let [name (if (symbol? (first sigs)) (first sigs) nil)
@@ -1237,7 +1245,10 @@ test [v]
     (if f
       (do (f) :ok)
       :no-test)))
-      
+
+
+
+
 (comment
 (export
 	'(  load-file load
@@ -1306,6 +1317,7 @@ test [v]
 		string? symbol? map? seq? vector?
 		let* fn* defn* defmacro*
 		bean select
+		when-first lazy-cat
 	))
 	)
 
