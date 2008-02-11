@@ -9,12 +9,19 @@
 (in-ns 'clojure)
 
 (def list (. clojure.lang.PersistentList creator))
+(def cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
 
-(def cons (fn [x seq] (. clojure.lang.RT (cons x seq))))
+;during bootstrap we don't have destructuring let or fn, will redefine later
+(def #^{:macro true}
+	let (fn* [& decl] (cons 'let* decl)))
+
+(def #^{:macro true}
+	fn (fn* [& decl] (cons 'fn* decl))) 
+
 (def conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
 
 (def defn (fn [name & fdecl]
-              (list 'def name (cons 'fn (cons name fdecl)))))
+              (list 'def name (cons `fn (cons name fdecl)))))
 
 (. (var defn) (setMacro))
 
@@ -44,7 +51,7 @@
 ;;;;;;;;;;;;;;;;;;;;
 (def defmacro (fn [name & args]
                   (list 'do
-                        (cons 'defn (cons name args))
+                        (cons `defn (cons name args))
                         (list '. (list 'var name) '(setMacro)))))
 
 (. (var defmacro) (setMacro))
@@ -128,13 +135,13 @@
       (spread (cons arg args)))
 
 (defmacro delay [& body]
-  (list 'new 'clojure.lang.Delay (list* 'fn [] body)))
+  (list 'new 'clojure.lang.Delay (list* `fn [] body)))
 
 (defn fnseq [x restfn]
   (new clojure.lang.FnSeq x restfn))
 
 (defmacro lazy-cons [x & body]
-  (list 'fnseq x (list* 'fn [] body)))
+  (list 'fnseq x (list* `fn [] body)))
 
 
   
@@ -719,7 +726,7 @@
       ~(loop [fmap {} fs fs]
               (if fs
                   (recur (assoc fmap (name (ffirst fs))
-                                     (cons 'fn (rfirst fs)))
+                                     (cons `fn (rfirst fs)))
                          (rest fs))
                  fmap))))
 
@@ -1083,7 +1090,8 @@
 (defn vector? [x]
   (instance? clojure.lang.IPersistentVector x))
 
-(defmacro let* [bindings & body]
+;redefine let with destructuring
+(defmacro let [bindings & body]
   (let [bmap (apply array-map bindings)
         pb (fn pb [bvec b v]
                (let [pvec
@@ -1130,12 +1138,12 @@
                   :else (throw (new Exception "Unsupported binding form")))))
         process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
     (if (every? symbol? (keys bmap))
-      `(let ~bindings ~@body)
-      `(let ~(reduce process-entry [] bmap) ~@body))))
+      `(let* ~bindings ~@body)
+      `(let* ~(reduce process-entry [] bmap) ~@body))))
 
 (defmacro when-first [x xs & body]
   `(when ~xs
-     (let* [~x (first ~xs)]
+     (let [~x (first ~xs)]
        ~@body)))
 
 (defmacro lazy-cat
@@ -1165,12 +1173,13 @@
      `(let [iter# ~(emit (seq (apply array-map seq-exprs)))]
 	(iter# ~(second seq-exprs))))))
 
-(defmacro fn* [& sigs]
+;redefine fn with destructuring
+(defmacro fn [& sigs]
   (let [name (if (symbol? (first sigs)) (first sigs) nil)
         sigs (if name (rest sigs) sigs)
         sigs (if (vector? (first sigs)) (list sigs) sigs)
         psig (fn [sig]
-               (let* [[params & body] sig]
+               (let [[params & body] sig]
                  (if (every? symbol? params)
                    sig
                    (loop [params params
@@ -1182,24 +1191,12 @@
                          (let [gparam (gensym "p__")]
                             (recur (rest params) (conj new-params gparam) (-> lets (conj (first params)) (conj gparam)))))
                        `(~new-params
-                         (let* ~lets
+                         (let ~lets
                             ~@body)))))))
         new-sigs (map psig sigs)]
     (if name
-      (list* 'fn name new-sigs)
-      (cons 'fn new-sigs))))
-
-(def defn* (fn [name & fdecl]
-              (list 'def name (cons `fn* (cons name fdecl)))))
-
-(. (var defn*) (setMacro))
-
-(def defmacro* (fn [name & args]
-                  (list 'do
-                        (cons `defn* (cons name args))
-                        (list '. (list 'var name) '(setMacro)))))
-
-(. (var defmacro*) (setMacro))
+      (list* 'fn* name new-sigs)
+      (cons 'fn* new-sigs))))
 
 (defn bean [#^Object x]
   (let [c (. x (getClass))
@@ -1250,79 +1247,4 @@ test [v]
     (if f
       (do (f) :ok)
       :no-test)))
-
-
-
-
-(comment
-(export
-	'(  load-file load
-		list cons conj defn
-		vector hash-map sorted-map sorted-map-by
-		meta with-meta defmacro when when-not
-		nil? not first rest second
-		ffirst frest rfirst rrest
-		= not= str gensym cond
-		apply list* delay lazy-cons fnseq concat
-		and or + * / - == < <= > >=
-		inc dec pos? neg? zero? quot rem
-		complement constantly identity seq count
-		peek pop nth contains? get
-		assoc dissoc find keys vals merge merge-with
-		scan touch
-		key val
-		line-seq sort sort-by comparator
-		rseq symbol keyword name namespace locking .. ->
-		defmulti defmethod remove-method
-                binding find-var
-		ref deref commute alter set ensure sync !
-		agent agent-of agent-errors clear-agent-errors
-		await await-for
-		reduce reverse comp partial
-		every? not-every? some not-any?
-		map pmap mapcat filter take take-while drop drop-while
-		zipmap
-		cycle split-at split-with repeat replicate iterate range
-		doseq  dotimes into
-		eval import
-		ns-unmap
-		refer ns-refers ns-interns 
-		in-ns
-		;unintern
-		into-array array
-		make-proxy implement
-		pr prn print println newline *out* *ns*  *print-meta* *print-readably*
-		doto  memfn
-        read *in* with-open
-		time
-		int long float double short byte boolean char
-		aget aset aset-boolean aset-int aset-long aset-float aset-double aset-short aset-byte aset-char
-		make-array alength to-array to-array-2d
-		macroexpand-1 macroexpand
-		max min
-		bit-shift-left bit-shift-right
-		bit-and bit-or bit-xor bit-not
-		defstruct struct accessor create-struct struct-map
-		subvec
-		false? true?
-		*warn-on-reflection*
-		resultset-seq
-		to-set distinct
-		export
-		ns-publics ns-imports ns-map
-		identical?  instance?
-		load-file in-ns find-ns
-		filter-key find-ns create-ns remove-ns
-		take-nth interleave var-get var-set with-local-vars
-		ns-resolve resolve
-		all-ns ns-name
-		array-map
-		for
-		nthrest
-		string? symbol? map? seq? vector?
-		let* fn* defn* defmacro*
-		bean select
-		when-first lazy-cat
-	))
-	)
 
