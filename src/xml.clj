@@ -73,16 +73,16 @@
   (if (instance? String e)
     (println e)
     (do
-      (print (strcat "<" (name (:tag e))))
+      (print (str "<" (name (:tag e))))
       (when (:attrs e)
 	(doseq attr (:attrs e)
-	  (print (strcat " " (name (key attr)) "='" (val attr)"'"))))
+	  (print (str " " (name (key attr)) "='" (val attr)"'"))))
       (if (:content e)
 	(do
 	  (println ">")
 	  (doseq c (:content e)
 	    (emit-element c))
-	  (println (strcat "</" (name (:tag e)) ">")))
+	  (println (str "</" (name (:tag e)) ">")))
 	(println "/>")))))
 
 (defn emit [x]
