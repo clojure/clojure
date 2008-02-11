@@ -89,7 +89,7 @@
   (println "<?xml version='1.0' encoding='UTF-8'?>")
   (emit-element x))
 
-(export '(tag attrs content parse element emit emit-element))
+;(export '(tag attrs content parse element emit emit-element))
 
 ;(load-file "/Users/rich/dev/clojure/src/xml.clj")
 ;(def x (xml/parse "http://arstechnica.com/journals.rssx"))
