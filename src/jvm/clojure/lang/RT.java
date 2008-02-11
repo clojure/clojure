@@ -495,6 +495,15 @@ static public Object nth(Object coll, int n){
 		return ((List) coll).get(n);
 	else if(coll.getClass().isArray())
 		return Array.get(coll, n);
+	else if(coll instanceof Map.Entry)
+		{
+		Map.Entry e = (Map.Entry) coll;
+		if(n == 0)
+			return e.getKey();
+		else if(n == 1)
+			return e.getValue();
+		throw new IndexOutOfBoundsException();
+		}
 	else if(coll instanceof Sequential)
 		{
 		ISeq seq = ((IPersistentCollection) coll).seq();
