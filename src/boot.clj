@@ -84,12 +84,10 @@
 (defn #^Boolean = [x y] (. clojure.lang.RT (equal x y)))
 (defn #^Boolean not= [x y] (not (= x y)))
 
-(defn #^String str [#^Object x]
-  (if x (. x (toString)) ""))
-
-(defn #^String strcat 
+(defn #^String str
   ([] "")
-  ([x] (str x))
+  ([#^Object x]
+   (if x (. x (toString)) ""))
   ([x & ys]
     (loop [sb (new StringBuilder (str x)) more ys]
       (if more
@@ -106,7 +104,7 @@
 
 (defn gensym 
   ([] (gensym "G__"))
-  ([prefix-string] (. clojure.lang.Symbol (intern (strcat prefix-string (str (. clojure.lang.RT (nextID))))))))
+  ([prefix-string] (. clojure.lang.Symbol (intern (str prefix-string (str (. clojure.lang.RT (nextID))))))))
 
 (defmacro cond [& clauses]
   (when clauses
@@ -694,7 +692,7 @@
          pkg (ffirst import-lists)
          classes (rfirst import-lists)]
        (doseq c classes
-         (. ns (importClass c (. Class (forName (strcat pkg "." c)))))) )
+         (. ns (importClass c (. Class (forName (str pkg "." c)))))) )
    (apply import (rest import-lists))))
 
 (defn into-array [aseq]
@@ -783,7 +781,7 @@
 (defmacro time [expr]
    `(let [start# (. System (nanoTime))
           ret# ~expr]
-       (prn (strcat "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0) " msecs"))
+       (prn (str "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0) " msecs"))
        ret#))
 
 
@@ -1020,7 +1018,7 @@
       (when-not (exclude sym)
 	    (let [v (nspublics sym)]
 	      (when-not v
-	        (throw (new java.lang.IllegalAccessError (strcat sym " is not public"))))
+	        (throw (new java.lang.IllegalAccessError (str sym " is not public"))))
 	      (. *ns* (refer (or (rename sym) sym) v)))))))
 
 (defn ns-refers [#^clojure.lang.Namespace ns]
@@ -1236,7 +1234,7 @@
 
 (defmacro assert [x]
   `(when-not ~x
-     (throw (new Exception (strcat "Assert failed: " (prstr '~x))))))
+     (throw (new Exception (str "Assert failed: " (prstr '~x))))))
 
 (defn
 #^{:doc "test [v] finds fn at key :test in var metadata and calls it, presuming failure will throw exception"}
@@ -1257,7 +1255,7 @@ test [v]
 		meta with-meta defmacro when when-not
 		nil? not first rest second
 		ffirst frest rfirst rrest
-		= not= str strcat gensym cond
+		= not= str gensym cond
 		apply list* delay lazy-cons fnseq concat
 		and or + * / - == < <= > >=
 		inc dec pos? neg? zero? quot rem
