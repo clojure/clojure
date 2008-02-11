@@ -1214,10 +1214,10 @@
 			      (getBeanInfo c)
 			      (getPropertyDescriptors))))
 	v (fn [k] ((pmap k)))
-        snapshot (fn []
-                     (reduce (fn [m e]
-                                 (assoc m (key e) ((val e))))
-                             {} (seq pmap)))]
+    snapshot (fn []
+                (reduce (fn [m e]
+                            (assoc m (key e) ((val e))))
+                        {} (seq pmap)))]
     (implement [clojure.lang.IPersistentMap]
       (containsKey [k] (contains? pmap k))
       (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
