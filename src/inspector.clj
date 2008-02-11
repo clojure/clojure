@@ -22,7 +22,7 @@
    (instance? clojure.lang.IPersistentMap x) :map 
    (instance? java.util.Map x) :map 
    (instance? clojure.lang.Sequential x) :seq
-   :atom))
+   :else :atom))
 
 (defmulti is-leaf collection-tag)
 (defmulti get-child (fn [parent index] (collection-tag parent)))
