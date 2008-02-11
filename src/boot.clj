@@ -1213,13 +1213,20 @@
 		     (seq (.. java.beans.Introspector
 			      (getBeanInfo c)
 			      (getPropertyDescriptors))))
-	v (fn [k] ((pmap k)))]
+	v (fn [k] ((pmap k)))
+        snapshot (fn []
+                     (reduce (fn [m e]
+                                 (assoc m (key e) ((val e))))
+                             {} (seq pmap)))]
     (implement [clojure.lang.IPersistentMap]
       (containsKey [k] (contains? pmap k))
       (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
       (valAt ([k] (v k))
 	     ([k default] (if (contains? pmap k) (v k) default)))
+      (cons [m] (conj (snapshot) m))
       (count [] (count pmap))
+      (assoc [k v] (assoc (snapshot) k v))
+      (without [k] (dissoc (snapshot) k))
       (seq [] ((fn this [pseq]
 		  (when pseq
 		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
