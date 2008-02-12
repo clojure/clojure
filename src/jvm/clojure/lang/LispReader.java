@@ -71,6 +71,8 @@ static
 
 	dispatchMacros['^'] = new MetaReader();
 	dispatchMacros['\''] = new WrappingReader(Compiler.THE_VAR);
+	dispatchMacros['"'] = new RegexReader();
+
 	}
 
 static boolean isWhitespace(int ch){
@@ -252,6 +254,14 @@ static private boolean isMacro(int ch){
 
 static private boolean isTerminatingMacro(int ch){
 	return (ch != '#' && ch < macros.length && macros[ch] != null);
+}
+
+static class RegexReader extends AFn{
+	static StringReader stringrdr = new StringReader();
+	public Object invoke(Object reader, Object doublequote) throws Exception{
+		String str = (String) stringrdr.invoke(reader, doublequote);
+		return Pattern.compile(str);
+	}
 }
 
 static class StringReader extends AFn{
