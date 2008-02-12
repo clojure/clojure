@@ -497,7 +497,7 @@ static public Object nth(Object coll, int n){
 	else if(coll instanceof List)
 		return ((List) coll).get(n);
 	else if(coll instanceof Matcher)
-		return ((Matcher)coll).group(n+1);
+		return ((Matcher)coll).group(n);
 	else if(coll instanceof Map.Entry)
 		{
 		Map.Entry e = (Map.Entry) coll;
