@@ -1248,3 +1248,14 @@ test [v]
       (do (f) :ok)
       :no-test)))
 
+(defn re-seq [#^java.util.regex.Pattern re s]
+  (let [m (. re (matcher s))]
+    ((fn step []
+	  (when (. m (find))
+	    (lazy-cons (. m (group)) (step)))))))
+
+(defn re-matches [#^java.util.regex.Pattern re s]
+  (let [m (. re (matcher s))]
+    (when (. m (matches))
+      m)))
+

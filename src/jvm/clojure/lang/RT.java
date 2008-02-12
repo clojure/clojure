@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.regex.Matcher;
 import java.io.*;
 import java.lang.reflect.Array;
 
@@ -491,10 +492,12 @@ static public Object nth(Object coll, int n){
 		return ((IPersistentVector) coll).nth(n);
 	else if(coll instanceof String)
 		return Character.valueOf(((String) coll).charAt(n));
-	else if(coll instanceof List)
-		return ((List) coll).get(n);
 	else if(coll.getClass().isArray())
 		return Array.get(coll, n);
+	else if(coll instanceof List)
+		return ((List) coll).get(n);
+	else if(coll instanceof Matcher)
+		return ((Matcher)coll).group(n+1);
 	else if(coll instanceof Map.Entry)
 		{
 		Map.Entry e = (Map.Entry) coll;
