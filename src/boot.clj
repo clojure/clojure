@@ -8,8 +8,8 @@
 
 (in-ns 'clojure)
 
-(def #^{:sigs '([& args])} list (. clojure.lang.PersistentList creator))
-(def #^{:sigs '([x seq])} cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
+(def #^{:arglists '([& args])} list (. clojure.lang.PersistentList creator))
+(def #^{:arglists '([x seq])} cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
 
 ;during bootstrap we don't have destructuring let or fn, will redefine later
 (def #^{:macro true}
@@ -18,12 +18,12 @@
 (def #^{:macro true}
 	fn (fn* [& decl] (cons 'fn* decl))) 
 
-(def #^{:sigs '([coll x])} conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
-(def #^{:sigs '([x])} first (fn [x] (. clojure.lang.RT (first x))))
-(def #^{:sigs '([x])} rest (fn [x] (. clojure.lang.RT (rest x))))
-(def #^{:sigs '([coll])} seq (fn [coll] (. clojure.lang.RT (seq coll))))
-(def #^{:sigs '([#^Class c x])} instance? (fn [#^Class c x] (. c (isInstance x))))
-(def #^{:sigs '([x])} seq? (fn [x] (instance? clojure.lang.ISeq x)))
+(def #^{:arglists '([coll x])} conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
+(def #^{:arglists '([x])} first (fn [x] (. clojure.lang.RT (first x))))
+(def #^{:arglists '([x])} rest (fn [x] (. clojure.lang.RT (rest x))))
+(def #^{:arglists '([coll])} seq (fn [coll] (. clojure.lang.RT (seq coll))))
+(def #^{:arglists '([#^Class c x])} instance? (fn [#^Class c x] (. c (isInstance x))))
+(def #^{:arglists '([x])} seq? (fn [x] (instance? clojure.lang.ISeq x)))
 (def #^{:private true}
   sigs
   (fn [fdecl]
@@ -33,19 +33,19 @@
 	      (recur (conj ret (first (first fdecl))) (rest fdecl))
 	      (seq ret)))
       (list (first fdecl)))))
-(def #^{:sigs '([map key val])} assoc (fn [map key val] (. clojure.lang.RT (assoc map key val))))
+(def #^{:arglists '([map key val])} assoc (fn [map key val] (. clojure.lang.RT (assoc map key val))))
 
 ;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def #^{:sigs '([x])} meta (fn [x]
+(def #^{:arglists '([x])} meta (fn [x]
   (if (instance? clojure.lang.IObj x)
     (. #^clojure.lang.IObj x (meta)))))
 
-(def #^{:sigs '([#^clojure.lang.IObj x m])} with-meta (fn [#^clojure.lang.IObj x m]
+(def #^{:arglists '([#^clojure.lang.IObj x m])} with-meta (fn [#^clojure.lang.IObj x m]
   (. x (withMeta m))))
 
 
 (def defn (fn [name & fdecl]
-              (list 'def (with-meta name (assoc (meta name) :sigs (list 'quote (sigs fdecl))))
+              (list 'def (with-meta name (assoc (meta name) :arglists (list 'quote (sigs fdecl))))
               (cons `fn (cons name fdecl)))))
 
 (. (var defn) (setMacro))
@@ -1238,10 +1238,27 @@
 
 (defmacro comment [& body])
 
-(defn prstr [x]
-  (binding [*out* (new java.io.StringWriter)]
-    (pr x)
-    (str *out*)))
+(defmacro with-out-str [& body]
+  `(let [s# (new java.io.StringWriter)]
+    (binding [*out* s#]
+      ~@body
+      (str s#))))
+
+(defn pr-str [& xs]
+  (with-out-str
+    (apply pr xs)))
+
+(defn prn-str [& xs]
+  (with-out-str
+    (apply prn xs)))
+
+(defn print-str [& xs]
+  (with-out-str
+    (apply print xs)))
+
+(defn println-str [& xs]
+  (with-out-str
+    (apply println xs)))
 
 (defmacro assert [x]
   `(when-not ~x
