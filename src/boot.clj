@@ -425,7 +425,7 @@
 
 ;;multimethods
 (defmacro defmulti
-  ([name dispatch-fn] (defmulti name dispatch-fn :default))
+  ([name dispatch-fn] `(defmulti ~name ~dispatch-fn :default))
   ([name dispatch-fn default-val]
     `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
