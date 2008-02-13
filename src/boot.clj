@@ -1255,6 +1255,9 @@ test [v]
       (do (f) :ok)
       :no-test)))
 
+(defn #^java.util.regex.Matcher re-matcher [#^java.util.regex.Pattern re s]
+  (. re (matcher s)))
+
 (defn re-groups [#^java.util.regex.Matcher m]
   (let [gc  (. m (groupCount))]
     (if (zero? gc)
@@ -1265,13 +1268,22 @@ test [v]
 	  ret)))))
 
 (defn re-seq [#^java.util.regex.Pattern re s]
-  (let [m (. re (matcher s))]
+  (let [m (re-matcher re s)]
     ((fn step []
 	(when (. m (find))
 	  (lazy-cons (re-groups m) (step)))))))
 
 (defn re-matches [#^java.util.regex.Pattern re s]
-  (let [m (. re (matcher s))]
+  (let [m (re-matcher re s)]
     (when (. m (matches))
       (re-groups m))))
+
+
+(defn re-find
+  ([#^java.util.regex.Matcher m]
+   (when (. m (find))
+     (re-groups m)))
+  ([#^java.util.regex.Pattern re s]
+   (let [m (re-matcher re s)]
+     (re-find m))))
 
