@@ -8,8 +8,8 @@
 
 (in-ns 'clojure)
 
-(def list (. clojure.lang.PersistentList creator))
-(def cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
+(def #^{:sigs '([& args])} list (. clojure.lang.PersistentList creator))
+(def #^{:sigs '([x seq])} cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
 
 ;during bootstrap we don't have destructuring let or fn, will redefine later
 (def #^{:macro true}
@@ -18,16 +18,39 @@
 (def #^{:macro true}
 	fn (fn* [& decl] (cons 'fn* decl))) 
 
-(def conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
+(def #^{:sigs '([coll x])} conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
+(def #^{:sigs '([x])} first (fn [x] (. clojure.lang.RT (first x))))
+(def #^{:sigs '([x])} rest (fn [x] (. clojure.lang.RT (rest x))))
+(def #^{:sigs '([coll])} seq (fn [coll] (. clojure.lang.RT (seq coll))))
+(def #^{:sigs '([#^Class c x])} instance? (fn [#^Class c x] (. c (isInstance x))))
+(def #^{:sigs '([x])} seq? (fn [x] (instance? clojure.lang.ISeq x)))
+(def #^{:private true}
+  sigs
+  (fn [fdecl]
+    (if (seq? (first fdecl))
+      (loop [ret [] fdecl fdecl]
+        (if fdecl
+	      (recur (conj ret (first (first fdecl))) (rest fdecl))
+	      (seq ret)))
+      (list (first fdecl)))))
+(def #^{:sigs '([map key val])} assoc (fn [map key val] (. clojure.lang.RT (assoc map key val))))
+
+;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def #^{:sigs '([x])} meta (fn [x]
+  (if (instance? clojure.lang.IObj x)
+    (. #^clojure.lang.IObj x (meta)))))
+
+(def #^{:sigs '([#^clojure.lang.IObj x m])} with-meta (fn [#^clojure.lang.IObj x m]
+  (. x (withMeta m))))
+
 
 (def defn (fn [name & fdecl]
-              (list 'def name (cons `fn (cons name fdecl)))))
+              (list 'def (with-meta name (assoc (meta name) :sigs (list 'quote (sigs fdecl))))
+              (cons `fn (cons name fdecl)))))
 
 (. (var defn) (setMacro))
 
-(defn instance? [#^Class c x]
-  (. c (isInstance x)))
-  
+
 (defn vector
       ([] [])
       ([& args]
@@ -62,13 +85,6 @@
 (defmacro when-not [test & body]
    (list 'if test nil (cons 'do body)))
 
-;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn meta [x]
-  (when (instance? clojure.lang.IObj x)
-    (. #^clojure.lang.IObj x (meta))))
-
-(defn with-meta [#^clojure.lang.IObj x m]
-  (. x (withMeta m)))
 
 
 (defn #^Boolean nil? [x] (identical? x nil))
@@ -77,9 +93,6 @@
 
 (defn not [x] (if x false true))
 
-(defn first [x] (. clojure.lang.RT (first x)))
-
-(defn rest [x] (. clojure.lang.RT (rest x)))
 
 (defn second [x] (. clojure.lang.RT (second x)))
 
@@ -118,9 +131,6 @@
     (list 'if (first clauses)
             (second clauses)
             (cons 'cond (rest (rest clauses))))))
-
-(defn seq [coll]
-  (. clojure.lang.RT (seq coll)))
 
 (defn spread [arglist]
       (cond
@@ -346,8 +356,7 @@
   ([map key not-found]
     (. clojure.lang.RT (get map key not-found))))
 
-(defn assoc [map key val]
- (. clojure.lang.RT (assoc map key val)))
+
 
 (defn dissoc [map key]
  (. clojure.lang.RT (dissoc map key)))
@@ -1084,8 +1093,6 @@
 (defn map? [x]
   (instance? clojure.lang.IPersistentMap x))
 
-(defn seq? [x]
-  (instance? clojure.lang.ISeq x))
 
 (defn vector? [x]
   (instance? clojure.lang.IPersistentVector x))
