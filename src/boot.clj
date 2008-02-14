@@ -1262,7 +1262,7 @@
 
 (defmacro assert [x]
   `(when-not ~x
-     (throw (new Exception (str "Assert failed: " (prstr '~x))))))
+     (throw (new Exception (str "Assert failed: " (pr-str '~x))))))
 
 (defn
 #^{:doc "test [v] finds fn at key :test in var metadata and calls it, presuming failure will throw exception"}
