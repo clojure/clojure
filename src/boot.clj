@@ -1304,3 +1304,12 @@ test [v]
    (let [m (re-matcher re s)]
      (re-find m))))
 
+(defn rand
+  ([] (. Math (random)))
+  ([n] (* n (rand))))
+
+(defn rand-int [n]
+	(int (rand n)))
+
+(defmacro defn- [name & decls]
+  (list* `defn (with-meta name (assoc (meta name) :private true)) decls))
