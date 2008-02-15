@@ -15,7 +15,9 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.math.BigInteger;
+import java.lang.*;
 
 public class LispReader{
 
@@ -48,6 +50,8 @@ static final Symbol SLASH = Symbol.create("/");
 
 //symbol->gensymbol
 static Var GENSYM_ENV = Var.create(null);
+//sorted-map num->gensymbol
+static Var ARG_ENV = Var.create(null);
 
 static
 	{
@@ -66,13 +70,14 @@ static
 	macros['}'] = new UnmatchedDelimiterReader();
 //	macros['|'] = new ArgVectorReader();
 	macros['\\'] = new CharacterReader();
+	macros['%'] = new ArgReader();
 	macros['#'] = new DispatchReader();
 
 
 	dispatchMacros['^'] = new MetaReader();
 	dispatchMacros['\''] = new WrappingReader(Compiler.THE_VAR);
 	dispatchMacros['"'] = new RegexReader();
-
+	dispatchMacros['('] = new FnReader();
 	}
 
 static boolean isWhitespace(int ch){
@@ -367,6 +372,86 @@ static class DispatchReader extends AFn{
 	}
 }
 
+static Symbol garg(int n){
+	return Symbol.intern(null,(n == -1?"rest":("p" + n)) + "__" + RT.nextID());
+}
+
+static class FnReader extends AFn{
+	public Object invoke(Object reader, Object lparen) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		try
+			{
+			Var.pushThreadBindings(
+					RT.map(ARG_ENV, PersistentTreeMap.EMPTY));
+			r.unread('(');
+			Object form = read(r, true, null, true);
+
+			PersistentVector args = PersistentVector.EMPTY;
+			PersistentTreeMap argsyms = (PersistentTreeMap) ARG_ENV.get();
+			ISeq rargs = argsyms.rseq();
+			if(rargs != null)
+				{
+				int higharg = (Integer)((Map.Entry)rargs.first()).getKey();
+				if(higharg > 0)
+					{
+					for(int i = 1;i<=higharg;++i)
+						{
+						Object sym = argsyms.valAt(i);
+						if(sym == null)
+							sym = garg(i);
+						args = args.cons(sym);
+						}
+					}
+				Object restsym = argsyms.valAt(-1);
+				if(restsym != null)
+					{
+					args = args.cons(Compiler._AMP_);
+					args = args.cons(restsym);
+					}
+				}
+			return RT.list(Compiler.FN,args,form);
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
+	}
+}
+
+static Symbol registerArg(int n){
+	PersistentTreeMap argsyms = (PersistentTreeMap) ARG_ENV.get();
+	if(argsyms == null)
+		{
+		throw new IllegalStateException("arg literal not in #()");
+		}
+	Symbol ret = (Symbol) argsyms.valAt(n);
+	if(ret == null)
+		{
+		ret =  garg(n);
+		ARG_ENV.set(argsyms.assoc(n, ret));
+		}
+	return ret;
+}
+
+static class ArgReader extends AFn{
+	public Object invoke(Object reader, Object pct) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		int ch = r.read();
+		r.unread(ch);
+		//% alone is first arg
+		if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
+			{
+			return registerArg(1);
+			}
+		Object n = read(r, true, null, true);
+		if(n.equals(Compiler._AMP_))
+			return registerArg(-1);
+		if(!(n instanceof Number))
+			throw new IllegalStateException("arg literal must be %, %& or %integer");
+		return registerArg(((Number) n).intValue());
+	}
+}
+
 static class MetaReader extends AFn{
 	public Object invoke(Object reader, Object caret) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
@@ -425,7 +510,7 @@ static class SyntaxQuoteReader extends AFn{
 				if(gs == null)
 					GENSYM_ENV.set(gmap.assoc(sym, gs = Symbol.intern(null,
 					                                                  sym.name.substring(0, sym.name.length() - 1)
-					                                                  + "_" + RT.nextID())));
+					                                                  + "__" + RT.nextID())));
 				sym = gs;
 				}
 			else
