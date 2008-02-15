@@ -79,7 +79,9 @@
 
 (. (var defmacro) (setMacro))
 
-(defmacro when [test & body]
+(defmacro
+#^{:doc "Evaluates test. If logical true, evaluates body in an implicit do."}
+when [test & body]
    (list 'if test (cons 'do body)))
 
 (defmacro when-not [test & body]
@@ -165,14 +167,22 @@
 
 ;;at this point all the support for syntax-quote exists
 
-(defmacro and
+(defmacro
+#^{:doc "Evaluates exprs one at a time, from left to right. If a form returns logical false (nil or false),
+and returns that value and doesn't evaluate any of the other expressions, otherwise it returns the value of the last expr.
+(and) returns true."}
+and
   ([] true)
   ([x] x)
   ([x & rest]
     `(let [and# ~x]
        (if and# (and ~@rest) and#))))
 
-(defmacro or
+(defmacro
+#^{:doc "Evaluates exprs one at a time, from left to right. If a form returns a logical true value,
+or returns that value and doesn't evaluate any of the other expressions, otherwise it returns the value of the
+last expression. (or) returns nil."}
+or
   ([] nil)
   ([x] x)
   ([x & rest]
@@ -653,7 +663,9 @@
 
 ;; evaluation
 
-(defn eval [form]
+(defn
+#^{:doc "Evaluates the form data structure (not text!) and returns the result."}
+eval [form]
   (. clojure.lang.Compiler (eval form)))
 
 (defn defimports [& imports-maps]
@@ -765,7 +777,11 @@
   (binding [*print-readably* nil]
     (apply prn more)))
 
-(defn read
+
+(defn
+#^{:doc "Reads the next object from stream, which must be an instance of java.io.PushbackReader or some derivee.
+stream defaults to the current value of *in* ."}
+read
   ([]
     (read *in*))
   ([stream]
@@ -954,7 +970,9 @@
   ([v start end]
     (. clojure.lang.RT (subvec v start end))))
 
-(defn load [rdr]
+(defn
+#^{:doc "sequentially read and evaluate the set of forms contained in the stream/file"}
+load [rdr]
   (. clojure.lang.Compiler (load rdr)))
 
 (defn resultset-seq [#^java.sql.ResultSet rs]
@@ -1098,7 +1116,9 @@
   (instance? clojure.lang.IPersistentVector x))
 
 ;redefine let with destructuring
-(defmacro let [bindings & body]
+(defmacro
+#^{:doc "Evaluates the exprs in a lexical context in which the symbols in the binding-forms are bound to their respective init-exprs or parts therein."}
+let [bindings & body]
   (let [bmap (apply array-map bindings)
         pb (fn pb [bvec b v]
                (let [pvec
