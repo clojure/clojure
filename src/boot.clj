@@ -8,7 +8,10 @@
 
 (in-ns 'clojure)
 
-(def #^{:arglists '([& args])} list (. clojure.lang.PersistentList creator))
+(def #^{:arglists '([& args])
+:doc "Creates a new list containing the items."}
+list (. clojure.lang.PersistentList creator))
+
 (def #^{:arglists '([x seq])} cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
 
 ;during bootstrap we don't have destructuring let or fn, will redefine later
@@ -18,12 +21,24 @@
 (def #^{:macro true}
 	fn (fn* [& decl] (cons 'fn* decl))) 
 
-(def #^{:arglists '([coll x])} conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
+(def #^{:arglists '([coll x])
+:doc "conj[oin]. Returns a new collection with the item 'added'. (conj nil item) returns (item).
+The 'addition' may happen at different 'places' depending on the concrete type."} 
+conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
+
 (def #^{:arglists '([x])} first (fn [x] (. clojure.lang.RT (first x))))
 (def #^{:arglists '([x])} rest (fn [x] (. clojure.lang.RT (rest x))))
-(def #^{:arglists '([coll])} seq (fn [coll] (. clojure.lang.RT (seq coll))))
+
+(def #^{:arglists '([coll])
+:doc "Sequence. Returns a new ISeq on the collection. If the collection is empty, returns nil. (seq nil) returns nil.
+seq also works on Strings, native Java arrays (of reference types) and any objects that implement Iterable."} 
+seq (fn [coll] (. clojure.lang.RT (seq coll))))
+
 (def #^{:arglists '([#^Class c x])} instance? (fn [#^Class c x] (. c (isInstance x))))
-(def #^{:arglists '([x])} seq? (fn [x] (instance? clojure.lang.ISeq x)))
+
+(def #^{:arglists '([x])
+:doc "Return true if x implements ISeq"} 
+seq? (fn [x] (instance? clojure.lang.ISeq x)))
 (def #^{:private true}
   sigs
   (fn [fdecl]
@@ -33,7 +48,12 @@
 	      (recur (conj ret (first (first fdecl))) (rest fdecl))
 	      (seq ret)))
       (list (first fdecl)))))
-(def #^{:arglists '([map key val])} assoc (fn [map key val] (. clojure.lang.RT (assoc map key val))))
+
+(def #^{:arglists '([map key val])
+:doc "assoc[iate]. When applied to a map, returns a new map of the same (hashed/sorted) type,
+that contains the mapping of key to val. when applied to a vector, returns a new vector that contains val at index.
+Note - index must be <= (count vector)."} 
+assoc (fn [map key val] (. clojure.lang.RT (assoc map key val))))
 
 ;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def #^{:arglists '([x])} meta (fn [x]
@@ -44,14 +64,18 @@
   (. x (withMeta m))))
 
 
-(def defn (fn [name & fdecl]
+(def
+#^{:doc "Same as (def name (fn [params* ] exprs*)) or (def name (fn ([params* ] exprs*)+))"}
+defn (fn [name & fdecl]
               (list 'def (with-meta name (assoc (meta name) :arglists (list 'quote (sigs fdecl))))
               (cons `fn (cons name fdecl)))))
 
 (. (var defn) (setMacro))
 
 
-(defn vector
+(defn
+#^{:doc "Creates a new vector containing the args."}
+vector
       ([] [])
       ([& args]
           (. clojure.lang.PersistentVector (create args))))
@@ -72,7 +96,10 @@
 
   
 ;;;;;;;;;;;;;;;;;;;;
-(def defmacro (fn [name & args]
+(def
+#^{:doc "Like defn, but the resulting function name is declared as a macro
+and will be used as a macro by the compiler when it is called."}
+defmacro (fn [name & args]
                   (list 'do
                         (cons `defn (cons name args))
                         (list '. (list 'var name) '(setMacro)))))
@@ -84,16 +111,28 @@
 when [test & body]
    (list 'if test (cons 'do body)))
 
-(defmacro when-not [test & body]
+(defmacro
+#^{:doc "Evaluates test. If logical false, evaluates body in an implicit do."}
+when-not [test & body]
    (list 'if test nil (cons 'do body)))
 
 
 
-(defn #^Boolean nil? [x] (identical? x nil))
-(defn #^Boolean false? [x] (identical? x false))
-(defn #^Boolean true? [x] (identical? x true))
+(defn
+#^{:tag Boolean :doc "Returns true if x is nil, false otherwise."}
+nil? [x] (identical? x nil))
 
-(defn not [x] (if x false true))
+(defn
+#^{:tag Boolean :doc "Returns true if x is the value false, false otherwise."}
+false? [x] (identical? x false))
+
+(defn
+#^{:tag Boolean :doc "Returns true if x is the value true, false otherwise."}
+true? [x] (identical? x true))
+
+(defn
+#^{:tag Boolean :doc "Returns true if x is logical false, false otherwise."}
+not [x] (if x false true))
 
 
 (defn second [x] (. clojure.lang.RT (second x)))
@@ -103,10 +142,23 @@ when [test & body]
 (defn frest [x] (first (rest x)))
 (defn rrest [x] (rest (rest x)))
 
-(defn #^Boolean = [x y] (. clojure.lang.RT (equal x y)))
-(defn #^Boolean not= [x y] (not (= x y)))
+(defn
+#^{:tag Boolean
+   :doc "Equality. Returns true if obj1 equals obj2, false if not. Same as Java obj1.equals(obj2)
+except it also works for nil, and compares numbers in a type-independent manner.
+Clojure's immutable data structures define equals() (and thus =) as a value, not an identity, comparison."}
+= [x y] (. clojure.lang.RT (equal x y)))
 
-(defn #^String str
+(defn
+#^{:tag Boolean
+   :doc "Same as (not (= obj1 obj2))"}
+not= [x y] (not (= x y)))
+
+(defn
+#^{:tag String
+  :doc "With no args, returns the empty string. With one arg x, returns x.toString().
+(str nil) returns the empty string.  With more than one arg, returns the concatenation of the str values of the args."}
+str
   ([] "")
   ([#^Object x]
    (if x (. x (toString)) ""))
@@ -116,19 +168,31 @@ when [test & body]
           (recur (. sb  (append (str (first more)))) (rest more))
         (str sb)))))
 
-(defn symbol
+(defn
+#^{:doc "Returns a Symbol with the given namespace and name."}
+symbol
   ([name] (. clojure.lang.Symbol (intern name)))
   ([ns name] (. clojure.lang.Symbol (intern ns name))))
 
-(defn keyword
+(defn
+#^{:doc "Returns a Keyword with the given namespace and name.
+Do not use : in the keyword strings, it will be added automatically."}
+keyword
   ([name] (. clojure.lang.Keyword (intern nil name)))
   ([ns name] (. clojure.lang.Keyword (intern ns name))))
 
-(defn gensym 
+(defn
+#^{:doc "Returns a new symbol with a unique name. If a prefix string is supplied,
+the name is prefix__# where # is some unique number. If prefix is not supplied, the prefix is 'G'."}
+gensym
   ([] (gensym "G__"))
   ([prefix-string] (. clojure.lang.Symbol (intern (str prefix-string (str (. clojure.lang.RT (nextID))))))))
 
-(defmacro cond [& clauses]
+(defmacro
+#^{:doc "Takes a set of test/expr pairs. It evaluates each test one at a time.
+If a test returns logical true, cond evaluates and returns the value of the corresponding expr
+and doesn't evaluate any of the other tests or exprs. (cond) returns nil."}
+cond [& clauses]
   (when clauses
     (list 'if (first clauses)
             (second clauses)
@@ -140,11 +204,15 @@ when [test & body]
        (nil? (rest arglist)) (seq (first arglist))
        :else (cons (first arglist) (spread (rest arglist)))))
 
-(defn apply [#^clojure.lang.IFn f & args]
+(defn 
+#^{:doc "Applies fn f to the argument list formed by prepending args to argseq."}
+apply [#^clojure.lang.IFn f & args]
       (. f (applyTo (spread args))))
 
-(defn list* [arg & args]
-      (spread (cons arg args)))
+(defn
+#^{:doc "Creates a new list containing the item prepended to more."}
+list* [item & more]
+      (spread (cons item more)))
 
 (defmacro delay [& body]
   (list 'new 'clojure.lang.Delay (list* `fn [] body)))
@@ -205,33 +273,44 @@ or
   (reduce conj nil coll))
   
 ;;math stuff
-(defn +
+(defn
+#^{:doc "Returns the sum of nums. (+) returns 0."}
++
       ([] 0)
       ([x] x)
       ([x y] (. clojure.lang.Num (add x y)))
       ([x y & more]
           (reduce + (+ x y) more)))
 
-(defn *
+(defn
+#^{:doc "Returns the product of nums. (*) returns 1."}
+*
       ([] 1)
       ([x] x)
       ([x y] (. clojure.lang.Num (multiply x y)))
       ([x y & more]
           (reduce * (* x y) more)))
 
-(defn /
+(defn
+#^{:doc "If no denominators are supplied, returns 1/numerator,
+else returns numerator divided by all of the denominators."}
+/
       ([x] (/ 1 x))
       ([x y] (. clojure.lang.Num (divide x y)))
       ([x y & more]
           (reduce / (/ x y) more)))
 
-(defn -
+(defn
+#^{:doc "If no ys are supplied, returns the negation of x, else subtracts the ys from x and returns the result."}
+-
       ([x] (. clojure.lang.Num (negate x)))
       ([x y] (. clojure.lang.Num (subtract x y)))
       ([x y & more]
           (reduce - (- x y) more)))
 
-(defn <
+(defn
+#^{:doc "Returns non-nil if nums are in monotonically increasing order, otherwise nil."}
+<
       ([x] true)
       ([x y] (. clojure.lang.Num (lt x y)))
       ([x y & more]
@@ -240,7 +319,9 @@ or
                 (recur y (first more) (rest more))
                 (< y (first more))))))
 
-(defn <=
+(defn
+#^{:doc "Returns non-nil if nums are in monotonically non-decreasing order, otherwise nil."}
+<=
       ([x] true)
       ([x y] (. clojure.lang.Num (lte x y)))
       ([x y & more]
@@ -249,7 +330,9 @@ or
                 (recur y (first more) (rest more))
                 (<= y (first more))))))
 
-(defn >
+(defn
+#^{:doc "Returns non-nil if nums are in monotonically decreasing order, otherwise nil."}
+>
       ([x] true)
       ([x y] (. clojure.lang.Num (gt x y)))
       ([x y & more]
@@ -258,7 +341,9 @@ or
                 (recur y (first more) (rest more))
                 (> y (first more))))))
 
-(defn >=
+(defn
+#^{:doc "Returns non-nil if nums are in monotonically non-increasing order, otherwise nil."}
+>=
       ([x] true)
       ([x y] (. clojure.lang.Num (gte x y)))
       ([x y & more]
@@ -267,7 +352,9 @@ or
                 (recur y (first more) (rest more))
                 (>= y (first more))))))
 
-(defn ==
+(defn
+#^{:doc "Returns non-nil if nums all have the same value, otherwise nil"}
+==
       ([x] true)
       ([x y] (. clojure.lang.Num (equiv x y)))
       ([x y & more]
@@ -276,37 +363,58 @@ or
                 (recur y (first more) (rest more))
                 (== y (first more))))))
 
-(defn max
+(defn
+#^{:doc "Returns the greatest of the nums."}
+max
   ([x] x)
   ([x y] (if (> x y) x y))
   ([x y & more]
    (reduce max (max x y) more)))
 
-(defn min
+(defn
+#^{:doc "Returns the least of the nums."}
+min
   ([x] x)
   ([x y] (if (< x y) x y))
   ([x y & more]
    (reduce min (min x y) more)))
 
-(defn inc [x]
+(defn
+#^{:doc "Returns a number one greater than num."}
+inc [x]
       (. clojure.lang.Num (inc x)))
 
-(defn dec [x]
+(defn
+#^{:doc "Returns a number one less than num."}
+dec [x]
       (. clojure.lang.Num (dec x)))
 
-(defn #^Boolean pos? [x]
+(defn
+#^{:tag Boolean
+:doc "Returns true if num is greater than zero, else false"}
+pos? [x]
       (. clojure.lang.Num (posPred x)))
 
-(defn #^Boolean neg? [x]
+(defn
+#^{:tag Boolean
+:doc "Returns true if num is less than zero, else false"}
+neg? [x]
       (. clojure.lang.Num (negPred x)))
 
-(defn #^Boolean zero? [x]
+(defn 
+#^{:tag Boolean
+:doc "Returns true if num is zero, else false"}
+zero? [x]
       (. clojure.lang.Num (zeroPred x)))
 
-(defn quot [num div]
+(defn
+#^{:doc "quot[ient] of dividing numerator by denominator."}
+quot [num div]
   (. clojure.lang.Num (quotient num div)))
 
-(defn rem [num div]
+(defn
+#^{:doc "rem[ainder] of dividing numerator by denominator."}
+rem [num div]
   (. clojure.lang.Num (remainder num div)))
 
 ;;Bit ops
@@ -329,27 +437,42 @@ or
 (defn bit-not [x]
   (. clojure.lang.IntegerNum (bitNot x)))
 
-(defn complement [f]
+(defn
+#^{:doc "Takes a fn f and returns a fn that takes the same arguments as f,
+has the same effects, if any, and returns the opposite truth value."}
+complement [f]
   (fn [& args]
     (not (apply f args))))
 
-(defn constantly [x]
+(defn
+#^{:doc "Returns a function that takes any number of arguments and returns x."}
+constantly [x]
   (fn [& args] x))
 
-(defn identity [x] x)
+(defn
+#^{:doc "Returns its argument."}
+identity [x] x)
 
 ;;Collection stuff
 
 
 
-(defn count [coll]
+(defn
+#^{:doc "Returns the number of items in the collection. (count nil) returns 0.
+Also works on strings, arrays, and Java Collections and Maps"}
+count [coll]
   (. clojure.lang.RT (count coll)))
 
 ;;list stuff
-(defn peek [list]
+(defn
+#^{:doc "Same as first. Returns the first item in the list. If the list is empty, returns nil."}
+peek [list]
   (. clojure.lang.RT (peek list)))
 
-(defn pop [list]
+(defn
+#^{:doc "Returns a new list without the first item. If the list is empty, throws an exception.
+Note - not the same as rest."}
+pop [list]
   (. clojure.lang.RT (pop list)))
 
 (defn nth [coll index]
@@ -357,10 +480,14 @@ or
 
 ;;map stuff
 
-(defn contains? [map key]
+(defn
+#^{:doc "Returns true if key is present, else false."}
+contains? [map key]
  (. clojure.lang.RT (contains map key)))
 
-(defn get
+(defn
+#^{:doc "Returns the value mapped to key, not-found or nil if key not present."}
+get
   ([map key]
     (. clojure.lang.RT (get map key)))
   ([map key not-found]
@@ -368,13 +495,19 @@ or
 
 
 
-(defn dissoc [map key]
+(defn
+#^{:doc "dissoc[iate]. Returns a new map of the same (hashed/sorted) type, that does not contain a mapping for key."}
+dissoc [map key]
  (. clojure.lang.RT (dissoc map key)))
 
-(defn find [map key]
+(defn
+#^{:doc "Returns the map entry for key, or nil if key not present."}
+find [map key]
  (. clojure.lang.RT (find map key)))
 
-(defn select [map keyseq]
+(defn
+#^{:doc "Returns a map containing only those entries in map whose key is in keys"}
+select [map keyseq]
  (loop [ret {} keys (seq keyseq)]
    (if keys
         (let [entry (. clojure.lang.RT (find map (first keys)))]
@@ -385,16 +518,24 @@ or
                 (rest keys)))
       ret)))
 
-(defn keys [map]
+(defn
+#^{:doc "Returns a sequence of the map's keys."}
+keys [map]
   (. clojure.lang.RT (keys map)))
 
-(defn vals [map]
+(defn
+#^{:doc "Returns a sequence of the map's values."}
+vals [map]
   (. clojure.lang.RT (vals map)))
 
-(defn key [#^java.util.Map$Entry e]
+(defn
+#^{:doc "Returns the key of the map entry."}
+key [#^java.util.Map$Entry e]
  (. e (getKey)))
 
-(defn val [#^java.util.Map$Entry e]
+(defn
+#^{:doc "Returns the value in the map entry."}
+val [#^java.util.Map$Entry e]
  (. e (getValue)))
 
 (defn rseq [#^clojure.lang.Reversible rev]
@@ -417,7 +558,10 @@ or
         (or (first args) (recur (rest args)))))
 
 
-(defmacro locking [x & body]
+(defmacro
+#^{:doc "Executes exprs in an implicit do, while holding the monitor of x.
+Will release the monitor of x in all circumstances."}
+locking [x & body]
   `(let [lockee# ~x]
         (try
            (monitor-enter lockee#)
@@ -429,7 +573,10 @@ or
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
 
-(defmacro ->
+(defmacro
+#^{:doc "Macro. Threads the expr through the forms. Inserts expr as the second item in the first form.
+If there are more forms, inserts the first form as the second item in second form, etc."}
+->
   ([x form] `(~(first form) ~x ~@(rest form)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
@@ -509,7 +656,11 @@ or
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
 
-(defn comp [& fs]
+(defn
+#^{:doc "Takes a set of functions and returns a fn that is the composition of those fns.
+The returned fn takes a variable number of args, applies the rightmost of fns to the args,
+the next fn (right-to-left) to the result, etc."}
+comp [& fs]
   (let [fs (reverse fs)]
      (fn [& args]
        (loop [ret (apply (first fs) args) fs (rest fs)]
@@ -517,7 +668,10 @@ or
               (recur ((first fs) ret) (rest fs))
              ret)))))
 
-(defn partial
+(defn
+#^{:doc "Takes a function f and fewer than the normal arguments to f, and returns a fn that takes
+a variable number of additional args. When called, the returned function calls f with args + additional args."}
+partial
 	([f arg1]
 	   (fn [& args] (apply f arg1 args)))
 	([f arg1 arg2]
@@ -610,10 +764,17 @@ or
  ([start end step]
    (take-while (partial (if (pos? step) > <) end) (iterate (partial + step) start))))
 
-(defn merge [& maps]
+(defn
+#^{:doc "Returns a map that consists of the rest of the maps conj-ed onto the first.
+If a key occurs in more than one map, the mapping from the latter (left-to-right) will be the mapping in the result."}
+merge [& maps]
   (reduce conj maps))
 
-(defn merge-with [f & maps]
+(defn
+#^{:doc "Returns a map that consists of the rest of the maps conj-ed onto the first.
+If a key occurs in more than one map, the mapping(s) from the latter (left-to-right) will be combined
+with the mapping in the result by calling (f val-in-result val-in-latter)."}
+merge-with [f & maps]
   (let [merge-entry (fn [m e]
 			(let [k (key e) v (val e)]
 			  (if (contains? m k)
@@ -635,12 +796,16 @@ or
                (rest vs))
        map)))
 
-(defn line-seq [#^java.io.BufferedReader rdr]
+(defn
+#^{:doc "Returns the lines of text from rdr as a lazy sequence of strings. rdr must implement java.io.BufferedReader."}
+line-seq [#^java.io.BufferedReader rdr]
   (let [line  (. rdr (readLine))]
     (when line
       (lazy-cons line (line-seq rdr)))))
 
-(defn comparator [pred]
+(defn
+#^{:doc "Returns an implementation of java.util.Comparator based upon pred."}
+comparator [pred]
   (fn [x y] (cond (pred x y) -1 (pred y x) 1 :else 0)))
   
 (defn sort
@@ -708,7 +873,9 @@ eval [form]
       (! agent count-down))
     (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS)))))
   
-(defmacro dotimes [i n & body]
+(defmacro
+#^{:doc "Repeatedly executes body (presumably for side-effects) with name bound to integers from 0 through n-1."}
+dotimes [i n & body]
   `(loop [~i 0 n# ~n]
      (when (< ~i n#)
        ~@body
@@ -751,7 +918,11 @@ eval [form]
                          (rest fs))
                  fmap))))
 
-(defn pr
+(defn
+#^{:doc "Prints the object(s) to the output stream that is the current value of *out*.
+Prints the object(s), separated by spaces if there is more than one.
+By default, pr and prn print in a way that objects can be read by the reader"}
+pr
   ([] nil)
   ([x]
    (. clojure.lang.RT (print x *out*))
@@ -765,15 +936,22 @@ eval [form]
   (. *out* (append \newline))
   nil)
 
-(defn prn [& more]
+(defn
+#^{:doc "Same as pr followed by (newline)"}
+prn [& more]
   (apply pr more)
   (newline))
 
-(defn print [& more]
+(defn
+#^{:doc "Prints the object(s) to the output stream that is the current value of *out*.
+ print and println produce output for human consumption."}
+print [& more]
   (binding [*print-readably* nil]
     (apply pr more)))
 
-(defn println [& more]
+(defn
+#^{:doc "Same as print followed by (newline)"}
+println [& more]
   (binding [*print-readably* nil]
     (apply prn more)))
 
@@ -810,7 +988,9 @@ read
   `(fn [target# ~@args]
       (. target# (~name ~@args))))
 
-(defmacro time [expr]
+(defmacro
+#^{:doc "Evaluates expr and prints the time it took. Returns the value of expr."}
+time [expr]
    `(let [start# (. System (nanoTime))
           ret# ~expr]
        (prn (str "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0) " msecs"))
@@ -936,32 +1116,52 @@ read
                                         (this (map rest collseq)))))]
            (encl-fn (cons coll colls))))))
 
-(defn macroexpand-1 [form]
+(defn
+#^{:doc "If form represents a macro form, returns its expansion, else returns form."}
+macroexpand-1 [form]
   (let [v (. clojure.lang.Compiler (isMacro (first form)))]
     (if v
       (apply @v (rest form))
       form)))
 
-(defn macroexpand [form]
+(defn
+#^{:doc "Repeatedly calls macroexpand-1 on form until it no longer represents a macro form, then returns it.
+Note neither macroexpand-1 nor macroexpand expand macros in subforms."}
+macroexpand [form]
    (let [ex (macroexpand-1 form)
 	 v  (. clojure.lang.Compiler (isMacro (first ex)))]
      (if v
        (macroexpand ex)
        ex)))
 
-(defn create-struct [& keys]
+(defn
+#^{:doc "Returns a structure basis object."}
+create-struct [& keys]
    (. clojure.lang.PersistentStructMap (createSlotMap keys)))
 
-(defmacro defstruct [name & keys]
+(defmacro
+#^{:doc "Same as (def name (create-struct keys...))"}
+defstruct [name & keys]
   `(def ~name (create-struct ~@keys)))
   
-(defn struct-map [s & inits]
+(defn
+#^{:doc "Returns a new structmap instance with the keys of the structure-basis. keyvals may contain all,
+some or none of the basis keys - where values are not supplied they will default to nil.
+keyvals can also contain keys not in the basis."}
+struct-map [s & inits]
   (. clojure.lang.PersistentStructMap (create s inits)))
 
-(defn struct [s & vals]
+(defn
+#^{:doc "Returns a new structmap instance with the keys of the structure-basis. vals must be supplied for
+basis keys in order - where values are not supplied they will default to nil."}
+struct [s & vals]
   (. clojure.lang.PersistentStructMap (construct s vals)))
 
-(defn accessor [s key]
+(defn
+#^{:doc "Returns a fn that, given an instance of a structmap with the basis, returns the value at the key.
+The key must be in the basis. The returned function should be (slightly) more efficient than using get,
+but such use of accessors should be limited to known performance-critical areas."}
+accessor [s key]
    (. clojure.lang.PersistentStructMap (getAccessor s key)))
 
 (defn subvec
@@ -1092,9 +1292,11 @@ load [rdr]
 (defn resolve [sym]
   (ns-resolve *ns* sym))
 
-(defn array-map
+(defn
+#^{:doc "Constructs an array-map."}
+array-map
 	([] (. clojure.lang.PersistentArrayMap EMPTY))
-	([& args] (new clojure.lang.PersistentArrayMap (to-array args))))
+	([& keyvals] (new clojure.lang.PersistentArrayMap (to-array keyvals))))
 
 (defn nthrest [coll n]
   (loop [n n xs (seq coll)]
@@ -1102,22 +1304,31 @@ load [rdr]
       (recur (dec n) (rest xs))
       xs)))
 
-(defn string? [x]
+(defn
+#^{:doc "Return true if x is a String"}
+string? [x]
   (instance? String x))
 
-(defn symbol? [x]
+(defn
+#^{:doc "Return true if x is a Symbol"}
+symbol? [x]
   (instance? clojure.lang.Symbol x))
 
-(defn map? [x]
+(defn
+#^{:doc "Return true if x implements IPersistentMap"}
+map? [x]
   (instance? clojure.lang.IPersistentMap x))
 
 
-(defn vector? [x]
+(defn
+#^{:doc "Return true if x implements IPersistentVector "}
+vector? [x]
   (instance? clojure.lang.IPersistentVector x))
 
 ;redefine let with destructuring
 (defmacro
-#^{:doc "Evaluates the exprs in a lexical context in which the symbols in the binding-forms are bound to their respective init-exprs or parts therein."}
+#^{:doc "Evaluates the exprs in a lexical context in which the symbols in the binding-forms are bound to their
+respective init-exprs or parts therein."}
 let [bindings & body]
   (let [bmap (apply array-map bindings)
         pb (fn pb [bvec b v]
@@ -1258,29 +1469,42 @@ let [bindings & body]
 
 (defmacro comment [& body])
 
-(defmacro with-out-str [& body]
+(defmacro
+#^{:doc "Evaluates exprs in a context in which *out* is bound to a fresh StringWriter.
+Returns the string created by any nested printing calls."}
+with-out-str [& body]
   `(let [s# (new java.io.StringWriter)]
     (binding [*out* s#]
       ~@body
       (str s#))))
 
-(defn pr-str [& xs]
+(defn
+#^{:doc "pr to a string, returning it"}
+pr-str [& xs]
   (with-out-str
     (apply pr xs)))
 
-(defn prn-str [& xs]
+(defn
+#^{:doc "prn to a string, returning it"}
+prn-str [& xs]
   (with-out-str
     (apply prn xs)))
 
-(defn print-str [& xs]
+(defn
+#^{:doc "print to a string, returning it"}
+print-str [& xs]
   (with-out-str
     (apply print xs)))
 
-(defn println-str [& xs]
+(defn
+#^{:doc "println to a string, returning it"}
+println-str [& xs]
   (with-out-str
     (apply println xs)))
 
-(defmacro assert [x]
+(defmacro
+#^{:doc "Evaluates expr and throws an exception if it does not evaluate to logical true."}
+assert [x]
   `(when-not ~x
      (throw (new Exception (str "Assert failed: " (pr-str '~x))))))
 
@@ -1292,10 +1516,17 @@ test [v]
       (do (f) :ok)
       :no-test)))
 
-(defn #^java.util.regex.Matcher re-matcher [#^java.util.regex.Pattern re s]
+(defn
+#^{:tag java.util.regex.Matcher
+:doc "Returns an instance of java.util.regex.Matcher, for use, e.g. in re-find."}
+re-matcher [#^java.util.regex.Pattern re s]
   (. re (matcher s)))
 
-(defn re-groups [#^java.util.regex.Matcher m]
+(defn
+#^{:doc "Returns the groups from the most recent match/find. If there are no nested groups,
+returns a string of the entire match. If there are nested groups, returns a vector of the groups,
+the first element being the entire match."}
+re-groups [#^java.util.regex.Matcher m]
   (let [gc  (. m (groupCount))]
     (if (zero? gc)
       (. m (group))
@@ -1304,19 +1535,28 @@ test [v]
 	  (recur (conj ret (. m (group c))) (inc c))
 	  ret)))))
 
-(defn re-seq [#^java.util.regex.Pattern re s]
+(defn
+#^{:doc "Returns a lazy sequence of successive matches of pattern in string, using java.util.regex.Matcher.find(),
+each such match processed with re-groups."}
+re-seq [#^java.util.regex.Pattern re s]
   (let [m (re-matcher re s)]
     ((fn step []
 	(when (. m (find))
 	  (lazy-cons (re-groups m) (step)))))))
 
-(defn re-matches [#^java.util.regex.Pattern re s]
+(defn
+#^{:doc "Returns the match, if any, of string to pattern, using java.util.regex.Matcher.matches().
+Uses re-groups to return the groups."}
+re-matches [#^java.util.regex.Pattern re s]
   (let [m (re-matcher re s)]
     (when (. m (matches))
       (re-groups m))))
 
 
-(defn re-find
+(defn
+#^{:doc "Returns the next regex match, if any, of string to pattern, using java.util.regex.Matcher.find().
+Uses re-groups to return the groups."}
+re-find
   ([#^java.util.regex.Matcher m]
    (when (. m (find))
      (re-groups m)))
@@ -1333,3 +1573,9 @@ test [v]
 
 (defmacro defn- [name & decls]
   (list* `defn (with-meta name (assoc (meta name) :private true)) decls))
+
+(defmacro doc [varname]
+  `(do
+     (prn (var ~varname))
+     (prn (:arglists (meta (var ~varname))))
+     (println (:doc (meta (var ~varname))))))
