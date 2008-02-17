@@ -14,7 +14,8 @@
 list (. clojure.lang.PersistentList creator))
 
 (def
-	#^{:arglists '([x seq])}
+	#^{:arglists '([x seq])
+	   :doc "Returns a new seq where x is the first element and seq is the rest."}
 cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
 
 ;during bootstrap we don't have destructuring let or fn, will redefine later
@@ -33,11 +34,14 @@ fn (fn* [& decl] (cons 'fn* decl)))
 conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
 
 (def
-	#^{:arglists '([x])}
-first (fn [x] (. clojure.lang.RT (first x))))
+	#^{:arglists '([x])
+	   :doc "Returns the first item in the collection. Calls seq on its argument. If coll is nil, returns nil."}
+first (fn [coll] (. clojure.lang.RT (first coll))))
 
 (def
-	#^{:arglists '([x])}
+	#^{:arglists '([x])
+	  :doc "Returns a seq of the items after the first. Calls seq on its argument.
+	        If there are no more items, returns nil."}
 rest (fn [x] (. clojure.lang.RT (rest x))))
 
 (def
@@ -241,15 +245,25 @@ list* [item & more]
 (defmacro delay [& body]
   (list 'new 'clojure.lang.Delay (list* `fn [] body)))
 
-(defn fnseq [x restfn]
+(defn
+	#^{:doc "Returns a seq object whose first is first and whose rest is the value produced by calling restfn
+	with no arguments. restfn will be called at most once per step in the sequence, e.g. calling rest repeatedly
+	on the head of the seq calls restfn once - the value it yields is cached."}
+fnseq [x restfn]
   (new clojure.lang.FnSeq x restfn))
 
-(defmacro lazy-cons [x & body]
+(defmacro
+	#^{:doc "Expands to code which produces a seq object whose first is first-expr (evaluated) and whose rest is body,
+	which is not evaluated until rest is called. rest-expr will be evaluated at most once per step in the sequence,
+	e.g. calling rest repeatedly on the head of the seq evaluates rest-expr once - the value it yields is cached."}
+lazy-cons [x & body]
   (list 'fnseq x (list* `fn [] body)))
 
 
   
-(defn concat
+(defn
+	#^{:doc "Returns a lazy seq representing the concatenation of the elements in colls."}
+concat
       ([] nil)
       ([x & xs]
           (cond
@@ -283,7 +297,14 @@ or
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn reduce
+(defn
+	#^{:doc "f should be a function of 2 arguments. If val is not supplied, returns the result of applying f to the
+	first 2 items in coll, then applying f to that result and the 3rd item, etc. If coll contains no items,
+	f must accept no arguments as well,	and reduce returns the result of calling f with no arguments.
+	If coll has only 1 item, it is returned and f is not called. 
+	If val is supplied, returns the result of applying f to val and the first item in coll, then applying f to
+	that result and the 2nd item, etc. If coll contains no items, returns val and f is not called."}
+reduce
   ([f coll]
      (if (seq coll)
        (reduce f (first coll) (rest coll))
@@ -293,7 +314,9 @@ or
        (recur f (f val (first coll)) (rest coll))
       val)))
 
-(defn reverse [coll]
+(defn
+	#^{:doc "Returns a seq of the items in coll in reverse order. Not lazy."}
+reverse [coll]
   (reduce conj nil coll))
   
 ;;math stuff
@@ -709,21 +732,36 @@ partial
 
 
   
-(defn #^Boolean every? [pred coll]
+(defn
+	#^{:tag Boolean
+		:doc "Returns true if (pred x) is logical true for every x in coll, else false."}
+every? [pred coll]
   (if (seq coll)
      (and (pred (first coll))
           (recur pred (rest coll)))
     true))
 
-(def #^Boolean not-every? (comp not every?))
+(def
+	#^{:tag Boolean
+	   :doc "Returns false if (pred x) is logical true for every x in coll, else true."}
+not-every? (comp not every?))
 
-(defn some [pred coll]
+(defn
+	#^{:doc "Returns the first logical true value of (pred x) for any x in coll, else nil."}
+some [pred coll]
   (when (seq coll)
     (or (pred (first coll)) (recur pred (rest coll)))))
 
-(def #^Boolean not-any? (comp not some))
+(def 
+	#^{:tag Boolean
+	   :doc "Returns false if (pred x) is logical true for any x in coll, else true."}
+not-any? (comp not some))
 
-(defn map
+(defn
+	#^{:doc "Returns a lazy seq consisting of the result of applying f to the set of first items of each coll,
+	followed by applying f to the set of second items in each coll, until any one of the colls is exhausted.
+	Any remaining items in other colls are ignored. Function f should accept number-of-colls arguments."}
+map
   ([f coll]
     (when (seq coll)
        (lazy-cons (f (first coll)) (map f (rest coll)))))
@@ -732,34 +770,49 @@ partial
       (lazy-cons (apply f (first coll) (map first colls))
                  (apply map f (rest coll) (map rest colls))))))
 
-(defn mapcat [f & colls]
+(defn
+	#^{:doc "Returns the result of applying concat to the result of applying map to f and colls.
+	Thus function f should return a collection."}
+mapcat [f & colls]
    (apply concat (apply map f colls)))
 
-(defn filter [pred coll]
+(defn
+	#^{:doc "Returns a lazy seq of the items in coll for which (pred item) returns true."}
+filter [pred coll]
   (when (seq coll)
      (if (pred (first coll))
          (lazy-cons (first coll) (filter pred (rest coll)))
        (recur pred (rest coll)))))
 
-(defn take [n coll]
+(defn
+	#^{:doc "Returns a lazy seq of the first n items in coll, or all items if there are fewer than n."}
+take [n coll]
   (when (and (pos? n) (seq coll))
     (lazy-cons (first coll) (take (dec n) (rest coll)))))
 
-(defn take-while [pred coll]
+(defn
+	#^{:doc "Returns a lazy seq of successive items from coll while (pred item) returns true."}
+take-while [pred coll]
   (when (and (seq coll) (pred (first coll)))
      (lazy-cons (first coll) (take-while pred (rest coll)))))
 
-(defn drop [n coll]
+(defn
+	#^{:doc "Returns a lazy seq of all but the first n items in coll."}
+drop [n coll]
   (if (and (pos? n) (seq coll))
       (recur (dec n) (rest coll))
      coll))
 
-(defn drop-while [pred coll]
+(defn
+	#^{:doc "Returns a lazy seq of the items in coll starting from the first item for which (pred item) returns nil."}
+drop-while [pred coll]
   (if (and (seq coll) (pred (first coll)))
       (recur pred (rest coll))
      coll))
 
-(defn cycle [coll]
+(defn
+	#^{:doc "Returns a lazy (infinite!) seq of repetitions of the items in coll."}
+cycle [coll]
   (when (seq coll)
     (let [rep (fn this [xs]
                   (if xs
@@ -767,22 +820,35 @@ partial
                     (recur (seq coll))))]
       (rep (seq coll)))))
 
-(defn split-at [n coll]
+(defn
+	#^{:doc "Returns a vector of [(take n coll) (drop n coll)]"}
+split-at [n coll]
   [(take n coll) (drop n coll)])
 
-(defn split-with [pred coll]
+(defn
+	#^{:doc "Returns a vector of [(take-while pred coll) (drop-while pred coll)]"}
+split-with [pred coll]
   [(take-while pred coll) (drop-while pred coll)])
 
-(defn repeat [x]
+(defn
+	#^{:doc "Returns a lazy (infinite!) seq of xs."}
+repeat [x]
   (lazy-cons x (repeat x)))
 
-(defn replicate [n x]
+(defn
+	#^{:doc "Returns a lazy seq of n xs."}
+replicate [n x]
   (take n (repeat x)))
   
-(defn iterate [f x]
+(defn
+	#^{:doc "Returns a lazy seq of x, (f x), (f (f x)) etc."}
+iterate [f x]
    (lazy-cons x (iterate f (f x))))
 
-(defn range
+(defn
+	#^{:doc "Returns a lazy seq of nums from start (inclusive) to end (exclusive), by step,
+	where start defaults to 0 and step to 1."}
+range
  ([end] (take end (iterate inc 0)))
  ([start end] (take (- end start) (iterate inc start)))
  ([start end step]
@@ -811,7 +877,9 @@ merge-with [f & maps]
 
 
 
-(defn zipmap [keys vals]
+(defn
+	#^{:doc "Returns a map with the keys mapped to the corresponding vals."}
+zipmap [keys vals]
   (loop [map {}
          ks (seq keys)
          vs (seq vals)]
@@ -834,7 +902,10 @@ line-seq [#^java.io.BufferedReader rdr]
 comparator [pred]
   (fn [x y] (cond (pred x y) -1 (pred y x) 1 :else 0)))
   
-(defn sort
+(defn
+	#^{:doc "Returns a sorted sequence of the items in coll. If no comparator is supplied,
+	the items must implement Comparable. comparator must implement java.util.Comparator."}
+sort
   ([#^java.util.Collection coll]
    (when (and coll (not (. coll (isEmpty))))
      (let [a (. coll (toArray))]
@@ -846,7 +917,10 @@ comparator [pred]
        (. java.util.Arrays (sort a comp))
        (seq a)))))
 
-(defn sort-by
+(defn
+	#^{:doc "Returns a sorted sequence of the items in coll, where the sort order is determined by comparing (keyfn item).
+	If no comparator is supplied, the keys must implement Comparable. comparator must implement java.util.Comparator."}
+sort-by
   ([keyfn coll]
     (sort (fn [x y] (. #^Comparable (keyfn x) (compareTo (keyfn y)))) coll))
   ([keyfn #^java.util.Comparator comp coll]
@@ -862,14 +936,21 @@ eval [form]
 (defn defimports [& imports-maps]
   (def *imports* (apply merge imports-maps)))
 
-(defmacro doseq [item list & body]
+(defmacro
+	#^{:doc "Repeatedly executes body (presumably for side-effects) with binding-form bound to successive items from coll.
+	Does not retain the head of the sequence. Returns nil."}
+doseq [item list & body]
   `(loop [list# (seq ~list)]
      (when list#
        (let [~item (first list#)]
          ~@body)
        (recur (rest list#)))))
 
-(defn scan
+(defn
+	#^{:doc "When lazy sequences are produced via functions that have side effects, any effects other than those
+	needed to produce the first element in the seq do not occur until the seq is consumed. scan can be used to force
+	any effects. Walks through the successive rests of the seq, does not retain the head and returns nil."}
+scan
   ([coll]
     (when (seq coll)
       (recur (rest coll))))
@@ -877,7 +958,12 @@ eval [form]
     (when (and (seq coll) (pos? n))
       (recur (dec n) (rest coll)))))
 
-(defn touch
+(defn
+	#^{:doc "When lazy sequences are produced via functions that have side effects, any effects other than those
+	needed to produce the first element in the seq do not occur until the seq is consumed. touch can be used to force
+	any effects. Walks through the successive rests of the seq, retains the head and returns it,
+	thus causing the entire seq to reside in memory at one time."}
+touch
   ([coll]
    (scan coll)
    coll)
@@ -919,7 +1005,9 @@ dotimes [i n & body]
 (defn into-array [aseq]
   (. clojure.lang.RT (seqToTypedArray (seq aseq))))
 
-(defn into [to from]
+(defn
+	#^{:doc "Returns a new coll consisting of to-coll with all of the items of from-coll conjoined."}
+into [to from]
   (let [ret to items (seq from)]
     (if items
        (recur (conj ret (first items)) (rest items))
@@ -1213,7 +1301,9 @@ load [rdr]
 		     (fnseq (apply struct row-struct (row-values)) this)))]
     (rows)))
 
-(defn to-set [coll]
+(defn
+	#^{:doc "Returns a map of the distinct elements of coll to true."}
+to-set [coll]
   (loop [ret {} keys (seq coll)]
     (if keys
       (recur (if (contains? ret (first keys))
@@ -1222,7 +1312,9 @@ load [rdr]
 	     (rest keys))
       ret)))
 
-(defn distinct [coll]
+(defn
+	#^{:doc "Returns a sequence of the elements of coll with duplicates removed"}
+distinct [coll]
   (keys (to-set coll)))
 
 (defn filter-key [keyfn pred amap]
@@ -1291,11 +1383,15 @@ load [rdr]
 			                (= ns (. v ns))))
           (ns-map ns)))
 
-(defn take-nth [n coll]
+(defn
+	#^{:doc "Returns a lazy seq of every nth item in coll."}
+take-nth [n coll]
   (when (seq coll)
     (lazy-cons (first coll) (take-nth n (drop n coll)))))
 
-(defn interleave [& colls]
+(defn
+	#^{:doc "Returns a lazy seq of the first item in each coll, then the second etc."}
+interleave [& colls]
   (apply concat (apply map list colls)))
 
 (defn var-get [#^clojure.lang.Var x]
@@ -1324,7 +1420,9 @@ array-map
 	([] (. clojure.lang.PersistentArrayMap EMPTY))
 	([& keyvals] (new clojure.lang.PersistentArrayMap (to-array keyvals))))
 
-(defn nthrest [coll n]
+(defn
+	#^{:doc "Returns the nth rest of coll, (seq coll) when n is 0."}
+nthrest [coll n]
   (loop [n n xs (seq coll)]
     (if (and xs (pos? n))
       (recur (dec n) (rest xs))
@@ -1410,12 +1508,17 @@ let [bindings & body]
       `(let* ~bindings ~@body)
       `(let* ~(reduce process-entry [] bmap) ~@body))))
 
-(defmacro when-first [x xs & body]
+(defmacro
+	#^{:doc "Same as (when (seq xs) (let [x (first xs)] body))"}
+when-first [x xs & body]
   `(when ~xs
      (let [~x (first ~xs)]
        ~@body)))
 
-(defmacro lazy-cat
+(defmacro
+	#^{:doc "Expands to code which yields a lazy sequence of the concatenation of the supplied colls.
+	Each coll expr is not evaluated until it is needed."}
+lazy-cat
   ([coll] `(seq ~coll))
   ([coll & colls]
    `(let [iter# (fn iter# [coll#]
@@ -1424,7 +1527,11 @@ let [bindings & body]
 		      (lazy-cat ~@colls)))]
       (iter# ~coll))))
       
-(defmacro for
+(defmacro
+	#^{:doc "List comprehension. Takes one or more binding-form/collection-expr pairs, an optional filtering (where)
+	expression, and yields a lazy sequence of evaluations of expr. Collections are iterated in a nested fashion,
+	rightmost fastest, and nested coll-exprs can refer to bindings created in prior binding-forms."}
+for
   ([seq-expr expr] (list `for seq-expr `true expr))
   ([seq-exprs filter-expr expr]
    (let [emit (fn emit [ses]
