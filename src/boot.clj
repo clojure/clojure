@@ -44,6 +44,13 @@ first (fn [coll] (. clojure.lang.RT (first coll))))
 	        If there are no more items, returns nil."}
 rest (fn [x] (. clojure.lang.RT (rest x))))
 
+(def second (fn [x] (. clojure.lang.RT (second x))))
+
+(def ffirst (fn [x] (first (first x))))
+(def rfirst (fn [x] (rest (first x))))
+(def frest (fn [x] (first (rest x))))
+(def rrest (fn [x] (rest (rest x))))
+
 (def
 	#^{:arglists '([coll])
 	   :doc "Sequence. Returns a new ISeq on the collection. If the collection is empty, returns nil.
@@ -72,11 +79,17 @@ sigs
       (list (first fdecl)))))
 
 (def
-	#^{:arglists '([map key val])
+	#^{:arglists '([map key val] [map key val & kvs])
 		:doc "assoc[iate]. When applied to a map, returns a new map of the same (hashed/sorted) type,
-		that contains the mapping of key to val. when applied to a vector, returns a new vector that contains val at index.
-		Note - index must be <= (count vector)."}
-assoc (fn [map key val] (. clojure.lang.RT (assoc map key val))))
+		that contains the mapping of key(s) to val(s). When applied to a vector, returns a new vector that contains val
+		at index. Note - index must be <= (count vector)."}
+assoc (fn
+       ([map key val] (. clojure.lang.RT (assoc map key val)))
+       ([map key val & kvs]
+        (let [ret (assoc map key val)]
+          (if kvs
+            (recur ret (first kvs) (second kvs) (rrest kvs))
+            ret)))))
 
 ;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def
@@ -164,12 +177,7 @@ true? [x] (identical? x true))
 not [x] (if x false true))
 
 
-(defn second [x] (. clojure.lang.RT (second x)))
 
-(defn ffirst [x] (first (first x)))
-(defn rfirst [x] (rest (first x)))
-(defn frest [x] (first (rest x)))
-(defn rrest [x] (rest (rest x)))
 
 (defn
 	#^{:tag Boolean
@@ -542,12 +550,16 @@ get
   ([map key not-found]
     (. clojure.lang.RT (get map key not-found))))
 
-
-
 (defn
-	#^{:doc "dissoc[iate]. Returns a new map of the same (hashed/sorted) type, that does not contain a mapping for key."}
-dissoc [map key]
- (. clojure.lang.RT (dissoc map key)))
+	#^{:doc "dissoc[iate]. Returns a new map of the same (hashed/sorted) type, that does not contain a mapping for key(s)."}
+dissoc
+  ([map key]
+   (. clojure.lang.RT (dissoc map key)))
+  ([map key & ks]
+   (let [ret (dissoc map key)]
+     (if ks
+       (recur ret (first ks) (rest ks))
+       ret))))
 
 (defn
 	#^{:doc "Returns the map entry for key, or nil if key not present."}
@@ -827,9 +839,9 @@ drop-while [pred coll]
 	#^{:doc "Returns a lazy (infinite!) seq of repetitions of the items in coll."}
 cycle [coll]
   (when (seq coll)
-    (let [rep (fn this [xs]
+    (let [rep (fn thisfn [xs]
                   (if xs
-                    (lazy-cons (first xs) (this (rest xs)))
+                    (lazy-cons (first xs) (thisfn (rest xs)))
                     (recur (seq coll))))]
       (rep (seq coll)))))
 
@@ -959,11 +971,14 @@ doseq [item list & body]
          ~@body)
        (recur (rest list#)))))
 
+(defn scan [& args] (throw (new Exception "scan is now called dorun")))
+(defn touch [& args] (throw (new Exception "touch is now called doall")))
+
 (defn
 	#^{:doc "When lazy sequences are produced via functions that have side effects, any effects other than those
-	needed to produce the first element in the seq do not occur until the seq is consumed. scan can be used to force
+	needed to produce the first element in the seq do not occur until the seq is consumed. dorun can be used to force
 	any effects. Walks through the successive rests of the seq, does not retain the head and returns nil."}
-scan
+dorun
   ([coll]
     (when (seq coll)
       (recur (rest coll))))
@@ -973,15 +988,15 @@ scan
 
 (defn
 	#^{:doc "When lazy sequences are produced via functions that have side effects, any effects other than those
-	needed to produce the first element in the seq do not occur until the seq is consumed. touch can be used to force
+	needed to produce the first element in the seq do not occur until the seq is consumed. doall can be used to force
 	any effects. Walks through the successive rests of the seq, retains the head and returns it,
 	thus causing the entire seq to reside in memory at one time."}
-touch
+doall
   ([coll]
-   (scan coll)
+   (dorun coll)
    coll)
   ([n coll]
-   (scan n coll)
+   (dorun n coll)
    coll))
 
 (defn await [& agents]
@@ -1230,10 +1245,10 @@ time [expr]
          tasks (doseq dnu (map (fn [task]
                                    (. exec (submit #^java.util.concurrent.Callable task)))
                                (replicate nthreads produce)))
-         consume (fn this []
+         consume (fn thisfn []
                      (if (sync nil (and (or @todo (pos? @out))
                                         (commute out dec)))
-                       (fnseq (. q (take)) this)
+                       (fnseq (. q (take)) thisfn)
                        (do
                          (. exec (shutdown))
                          (doseq x tasks)
@@ -1241,10 +1256,10 @@ time [expr]
      (consume)))
   ([f coll & colls]
    (pmap (fn [items] (apply f items))
-         (let [encl-fn (fn this [collseq]
+         (let [encl-fn (fn thisfn [collseq]
                            (when (every? seq collseq)
                              (lazy-cons (map first collseq)
-                                        (this (map rest collseq)))))]
+                                        (thisfn (map rest collseq)))))]
            (encl-fn (cons coll colls))))))
 
 (defn
@@ -1313,9 +1328,9 @@ load [rdr]
 	       (map (fn [i] (. rsmeta (getColumnName i))) idxs))
 	row-struct (apply create-struct keys)
 	row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
-	rows (fn this []
+	rows (fn thisfn []
 	       (when (. rs (next))
-		     (fnseq (apply struct row-struct (row-values)) this)))]
+		     (fnseq (apply struct row-struct (row-values)) thisfn)))]
     (rows)))
 
 (defn
@@ -1659,10 +1674,10 @@ for
       (count [] (count pmap))
       (assoc [k v] (assoc (snapshot) k v))
       (without [k] (dissoc (snapshot) k))
-      (seq [] ((fn this [pseq]
+      (seq [] ((fn thisfn [pseq]
 		  (when pseq
 		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
-			       (this (rest pseq))))) (keys pmap))))))
+			       (thisfn (rest pseq))))) (keys pmap))))))
 
 (defmacro comment [& body])
 
@@ -1785,11 +1800,11 @@ re-find
 
 (defn find-doc [re-string]
   (let [re  (re-pattern re-string)]
-    (scan (for [ns (all-ns) v (vals (ns-interns ns))]
+    (dorun (for [ns (all-ns) v (vals (ns-interns ns))]
                (and (:doc ^v)
                     (or (re-find (re-matcher re (:doc ^v)))
                         (re-find (re-matcher re (str (:name ^v))))))
-            (print-doc v)))))
+              (print-doc v)))))
 
 (defmacro doc [varname]
   `(print-doc (var ~varname)))
