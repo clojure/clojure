@@ -14,13 +14,16 @@ package clojure.lang;
 
 import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.util.List;
+import java.util.Arrays;
 
 public class Script{
 public static void main(String[] args) throws Exception{
 
 	RT.init();
 
-	for(String file : args)
+
+	for(String file : RT.processCommandLine(args))
 		try
 			{
 			Compiler.loadFile(file);

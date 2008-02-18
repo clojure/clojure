@@ -19,9 +19,10 @@ public class Repl{
 static final Symbol REFER = Symbol.create("clojure", "refer");
 static final Symbol QUOTE = Symbol.create("quote");
 static final Symbol CLOJURE = Symbol.create("clojure");
+
 public static void main(String[] args) throws Exception{
 	RT.init();
-	for(String file : args)
+	for(String file : RT.processCommandLine(args))
 		try
 			{
 			Compiler.loadFile(file);
@@ -42,9 +43,9 @@ public static void main(String[] args) throws Exception{
 				RT.map(
 //						RT.NS_REFERS, RT.NS_REFERS.get(),
 //				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
-				       RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.get(),
-				       Compiler.SOURCE, "REPL"
+RT.CURRENT_NS, RT.CURRENT_NS.get(),
+RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.get(),
+Compiler.SOURCE, "REPL"
 				));
 		w.write("Clojure\n");
 		RT.inNamespace.invoke(Symbol.create("user"));

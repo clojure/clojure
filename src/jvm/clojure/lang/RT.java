@@ -118,11 +118,11 @@ static Keyword FILE_KEY = Keyword.intern(null, "file");
 
 final static Symbol LOAD_FILE = Symbol.create("load-file");
 final static Symbol IN_NAMESPACE = Symbol.create("in-ns");
-final static Symbol EXPORTS = Symbol.create("*exports*");
-final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS, EXPORTS, PersistentHashMap.EMPTY);
+//final static Symbol EXPORTS = Symbol.create("*exports*");
+//final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS, EXPORTS, PersistentHashMap.EMPTY);
 //final static Symbol EQL_REF = Symbol.create("eql-ref?");
 static final Symbol IDENTICAL = Symbol.create("identical?");
-
+final static Var CMD_LINE_ARGS = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
 //symbol
 final static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),
                                          CLOJURE_NS);
@@ -150,6 +150,17 @@ final static IFn inNamespace = new AFn(){
 		return ns;
 	}
 };
+
+public static List<String> processCommandLine(String[] args){
+	List<String> arglist = Arrays.asList(args);
+	int split = arglist.indexOf("--");
+	if(split >= 0)
+		{
+		CMD_LINE_ARGS.bindRoot(RT.seq(arglist.subList(split + 1, args.length)));
+		return arglist.subList(0, split);
+		}
+	return arglist;
+}
 //simple-symbol->var
 //final static Var REFERS =
 //		Var.intern(CLOJURE_NS, Symbol.create("*refers*"),
@@ -213,16 +224,16 @@ static
 
 static public void init() throws Exception{
 	try
-        {
-        Var.pushThreadBindings(RT.map(Compiler.SOURCE_PATH, "boot.clj",
-                                      Compiler.SOURCE, "boot.clj"));
-        InputStream ins = RT.class.getResourceAsStream("/boot.clj");
-        Compiler.load(new InputStreamReader(ins));
-        }
-    finally
-        {
-        Var.popThreadBindings();
-        }
+		{
+		Var.pushThreadBindings(RT.map(Compiler.SOURCE_PATH, "boot.clj",
+		                              Compiler.SOURCE, "boot.clj"));
+		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
+		Compiler.load(new InputStreamReader(ins));
+		}
+	finally
+		{
+		Var.popThreadBindings();
+		}
 }
 
 static public int nextID(){
@@ -497,7 +508,7 @@ static public Object nth(Object coll, int n){
 	else if(coll instanceof List)
 		return ((List) coll).get(n);
 	else if(coll instanceof Matcher)
-		return ((Matcher)coll).group(n);
+		return ((Matcher) coll).group(n);
 	else if(coll instanceof Map.Entry)
 		{
 		Map.Entry e = (Map.Entry) coll;
