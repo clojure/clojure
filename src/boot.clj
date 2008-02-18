@@ -1800,7 +1800,7 @@ re-find
 
 (defn find-doc [re-string]
   (let [re  (re-pattern re-string)]
-    (dorun (for [ns (all-ns) v (vals (ns-interns ns))]
+    (dorun (for [ns (all-ns) v (sort-by (comp :name meta) (vals (ns-interns ns)))]
                (and (:doc ^v)
                     (or (re-find (re-matcher re (:doc ^v)))
                         (re-find (re-matcher re (str (:name ^v))))))
