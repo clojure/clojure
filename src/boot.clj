@@ -1424,18 +1424,18 @@ ns-imports [#^clojure.lang.Namespace ns]
   current namespace. Filters can be used to select a subset, via inclusion or exclusion, or to provide a mapping
   to a symbol different from the var's name, in order to prevent clashes."}
 refer [ns-sym & filters]
-  (let [ns (find-ns ns-sym)
-	    fs (apply hash-map filters)
-	    nspublics (ns-publics ns)
-	    rename (or (:rename fs) {})
-	    exclude (to-set (:exclude fs))
-	    to-do (or (:only fs) (keys nspublics))]
+  (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
+        fs (apply hash-map filters)
+        nspublics (ns-publics ns)
+        rename (or (:rename fs) {})
+        exclude (to-set (:exclude fs))
+        to-do (or (:only fs) (keys nspublics))]
     (doseq sym to-do
       (when-not (exclude sym)
-	    (let [v (nspublics sym)]
-	      (when-not v
-	        (throw (new java.lang.IllegalAccessError (str sym " is not public"))))
-	      (. *ns* (refer (or (rename sym) sym) v)))))))
+        (let [v (nspublics sym)]
+          (when-not v
+            (throw (new java.lang.IllegalAccessError (str sym " is not public"))))
+          (. *ns* (refer (or (rename sym) sym) v)))))))
 
 (defn
 	#^{:doc "Returns a map of the refer mappings for the namespace."}
