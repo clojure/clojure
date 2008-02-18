@@ -1796,6 +1796,8 @@ re-find
   (println "-------------------------")
   (println (str (ns-name (:ns ^v)) "/" (:name ^v)))
   (prn (:arglists ^v))
+  (when (:macro ^v)
+    (println "Macro"))
   (println "\t\t" (:doc ^v)))
 
 (defn find-doc [re-string]
