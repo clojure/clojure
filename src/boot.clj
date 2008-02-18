@@ -80,13 +80,15 @@ assoc (fn [map key val] (. clojure.lang.RT (assoc map key val))))
 
 ;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def
-	#^{:arglists '([x])}
+	#^{:arglists '([x])
+	   :doc "Returns the metadata of obj, returns nil if there is no metadata."}
 meta (fn [x]
   (if (instance? clojure.lang.IObj x)
     (. #^clojure.lang.IObj x (meta)))))
 
 (def
-	#^{:arglists '([#^clojure.lang.IObj x m])}
+	#^{:arglists '([#^clojure.lang.IObj x m])
+	   :doc "Returns an object of the same type and value as obj, with map m as its metadata."}
 with-meta (fn [#^clojure.lang.IObj x m]
   (. x (withMeta m))))
 
@@ -588,10 +590,14 @@ val [#^java.util.Map$Entry e]
 (defn rseq [#^clojure.lang.Reversible rev]
   (. rev (rseq)))
 
-(defn name [#^clojure.lang.Named x]
+(defn
+	#^{:doc "Returns the name String of a symbol or keyword."}
+name [#^clojure.lang.Named x]
   (. x (getName)))
 
-(defn namespace [#^clojure.lang.Named x]
+(defn
+	#^{:doc "Returns the namespace String of a symbol or keyword, or nil if not present."}
+namespace [#^clojure.lang.Named x]
   (. x (getNamespace)))
 
 (defn andfn [& args]
@@ -628,16 +634,23 @@ locking [x & body]
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
 ;;multimethods
-(defmacro defmulti
+(defmacro 
+	#^{:doc "Creates a new multimethod with the associated dispatch function. If default-dispatch-val is supplied
+	it becomes the default dispatch value of the multimethod, otherwise the default dispatch value is :default."}
+defmulti
   ([name dispatch-fn] `(defmulti ~name ~dispatch-fn :default))
   ([name dispatch-fn default-val]
     `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
-(defmacro defmethod [multifn dispatch-val & fn-tail]
+(defmacro
+	#^{:doc "Creates and installs a new method of multimethod associated with dispatch-value. "}
+defmethod [multifn dispatch-val & fn-tail]
   `(let [pvar# (var ~multifn)]
       (. pvar# (commuteRoot (fn [mf#] (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
 
-(defmacro remove-method [multifn dispatch-val]
+(defmacro
+	#^{:doc "Removes the method of multimethod associated with dispatch-value."}
+remove-method [multifn dispatch-val]
   `(let [pvar# (var ~multifn)]
       (. pvar# (commuteRoot (fn [mf#] (. mf# (dissoc ~dispatch-val)))))))
 
@@ -993,7 +1006,11 @@ dotimes [i n & body]
        ~@body
        (recur (inc ~i) n#))))
 
-(defn import [& import-lists]
+(defn
+	#^{:doc "import-list => (package-symbol class-name-symbols*)
+	For each name in class-name-symbols, adds a mapping from name to the class named by package.name 
+	to the current namespace."}
+import [& import-lists]
  (when import-lists
    (let [#^clojure.lang.Namespace ns *ns*
          pkg (ffirst import-lists)
@@ -1325,41 +1342,73 @@ distinct [coll]
 	(recur ret (rest es)))
       ret)))
 
-(defn find-ns [sym]
+(defn
+	#^{:doc "Returns the namespace named by the symbol or nil if it doesn't exist."}
+find-ns [sym]
   (. clojure.lang.Namespace (find sym)))
 
-(defn create-ns [sym]
+(defn
+	#^{:doc "Create a new namespace named by the symbol if one doesn't already exist,
+	returns it or the already-existing namespace of the same name."}
+create-ns [sym]
   (. clojure.lang.Namespace (findOrCreate sym)))
 
-(defn remove-ns [sym]
+(defn
+	#^{:doc "Removes the namespace named by the symbol. Use with caution.
+	Cannot be used to remove the clojure namespace."}
+remove-ns [sym]
   (. clojure.lang.Namespace (remove sym)))
 
-(defn all-ns []
+(defn
+	#^{:doc "Returns a sequence of all namespaces."}
+all-ns []
   (. clojure.lang.Namespace (all)))
 
-(defn ns-name [#^clojure.lang.Namespace ns]
+(defn
+	#^{:doc "Returns the name of the namespace, a symbol."}
+ns-name [#^clojure.lang.Namespace ns]
   (. ns (getName)))
 
-(defn ns-map [#^clojure.lang.Namespace ns]
+(defn
+	#^{:doc "Returns a map of all the mappings for the namespace."}
+ns-map [#^clojure.lang.Namespace ns]
   (. ns (getMappings)))
 
-(defn ns-unmap [#^clojure.lang.Namespace ns sym]
+(defn
+	#^{:doc "Removes the mappings for the symbol from the namespace."}
+ns-unmap [#^clojure.lang.Namespace ns sym]
   (. ns (unmap sym)))
 
 ;(defn export [syms]
 ;  (doseq sym syms
 ;   (.. *ns* (intern sym) (setExported true))))
 
-(defn ns-publics [#^clojure.lang.Namespace ns]
+(defn
+	#^{:doc "Returns a map of the public intern mappings for the namespace."}
+ns-publics [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
                                (= ns (. v ns))
                                (. v (isPublic))))
           (ns-map ns)))
 
-(defn ns-imports [#^clojure.lang.Namespace ns]
+(defn
+	#^{:doc "Returns a map of the import mappings for the namespace."}
+ns-imports [#^clojure.lang.Namespace ns]
   (filter-key val (partial instance? Class) (ns-map ns)))
 
-(defn refer [ns-sym & filters]
+(defn
+	#^{:doc "refers to all public vars of ns, subject to filters
+ filters can include at most one each of:
+   :exclude list-of-symbols
+   :only list-of-symbols
+   :rename map-of-fromsymbol-tosymbol
+
+
+  For each public interned var in the namespace named by the symbol, adds a mapping from the name of the var
+  to the var to the current namespace.  Throws an exception if name is already mapped to something else in the
+  current namespace. Filters can be used to select a subset, via inclusion or exclusion, or to provide a mapping
+  to a symbol different from the var's name, in order to prevent clashes."}
+refer [ns-sym & filters]
   (let [ns (find-ns ns-sym)
 	    fs (apply hash-map filters)
 	    nspublics (ns-publics ns)
@@ -1373,12 +1422,16 @@ distinct [coll]
 	        (throw (new java.lang.IllegalAccessError (str sym " is not public"))))
 	      (. *ns* (refer (or (rename sym) sym) v)))))))
 
-(defn ns-refers [#^clojure.lang.Namespace ns]
+(defn
+	#^{:doc "Returns a map of the refer mappings for the namespace."}
+ns-refers [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
 			                (not= ns (. v ns))))
           (ns-map ns)))
 
-(defn ns-interns [#^clojure.lang.Namespace ns]
+(defn
+	#^{:doc "Returns a map of the intern mappings for the namespace."}
+ns-interns [#^clojure.lang.Namespace ns]
   (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
 			                (= ns (. v ns))))
           (ns-map ns)))
@@ -1408,10 +1461,16 @@ interleave [& colls]
       ~@body
       (finally (. clojure.lang.Var (popThreadBindings))))))
 
-(defn ns-resolve [ns sym]
+(defn
+	#^{:doc "Returns the var or Class to which a symbol will be resolved in the namespace.
+	Note that if the symbol is fully qualified, the var/Class to which it resolves need not
+	be present in the namespace."}
+ns-resolve [ns sym]
   (. clojure.lang.Compiler (resolveIn ns sym)))
 
-(defn resolve [sym]
+(defn
+	#^{:doc "same as (ns-resolve *ns* symbol)"}
+resolve [sym]
   (ns-resolve *ns* sym))
 
 (defn
@@ -1655,6 +1714,12 @@ test [v]
       :no-test)))
 
 (defn
+	#^{:tag java.util.regex.Pattern
+	   :doc "Returns an instance of java.util.regex.Pattern, for use, e.g. in re-matcher."}
+re-pattern [s]
+  (. java.util.regex.Pattern (compile s)))
+  
+(defn
 	#^{:tag java.util.regex.Matcher
 	   :doc "Returns an instance of java.util.regex.Matcher, for use, e.g. in re-find."}
 re-matcher [#^java.util.regex.Pattern re s]
@@ -1712,8 +1777,19 @@ re-find
 (defmacro defn- [name & decls]
   (list* `defn (with-meta name (assoc (meta name) :private true)) decls))
 
+(defn print-doc [v]
+  (println "-------------------------")
+  (println (str (ns-name (:ns ^v)) "/" (:name ^v)))
+  (prn (:arglists ^v))
+  (println "\t\t" (:doc ^v)))
+
+(defn find-doc [re-string]
+  (let [re  (re-pattern re-string)]
+    (scan (for [ns (all-ns) v (vals (ns-interns ns))]
+               (and (:doc ^v)
+                    (or (re-find (re-matcher re (:doc ^v)))
+                        (re-find (re-matcher re (str (:name ^v))))))
+            (print-doc v)))))
+
 (defmacro doc [varname]
-  `(do
-     (prn (var ~varname))
-     (prn (:arglists (meta (var ~varname))))
-     (println "\t\t" (:doc (meta (var ~varname))))))
+  `(print-doc (var ~varname)))
