@@ -59,7 +59,8 @@ rest (fn [x] (. clojure.lang.RT (rest x))))
 seq (fn [coll] (. clojure.lang.RT (seq coll))))
 
 (def
-	#^{:arglists '([#^Class c x])}
+	#^{:arglists '([#^Class c x])
+	   :doc "Evaluates x and tests if it is an instance of the class c. Returns true or false"}
 instance? (fn [#^Class c x] (. c (isInstance x))))
 
 (def
@@ -640,7 +641,15 @@ locking [x & body]
            (finally
              (monitor-exit lockee#)))))
 
-(defmacro ..
+(defmacro
+	#^{:doc "form => fieldName-symbol or (instanceMethodName-symbol args*)
+	Expands into a member access (.) of the first member on the first argument, followed by the next member on the result,
+	etc. For instance:
+		(.. System (getProperties) (get \"os.name\"))
+	expands to:
+		(. (. System (getProperties)) (get \"os.name\"))
+	but is easier to write, read, and understand."}
+..
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
 
@@ -674,7 +683,11 @@ remove-method [multifn dispatch-val]
 
 ;;;;;;;;; var stuff      
 
-(defmacro binding [bindings & body]
+(defmacro
+	#^{:doc "binding => var-symbol init-expr
+	Creates new bindings for the (already-existing) vars, with the supplied initial values,
+	executes the exprs in an implicit do, then re-establishes the bindings that existed before."}
+binding [bindings & body]
   (let [var-ize (fn [var-vals]
                     (loop [ret [] vvs (seq var-vals)]
                           (if vvs
@@ -687,45 +700,83 @@ remove-method [multifn dispatch-val]
       (finally
         (. clojure.lang.Var (popThreadBindings))))))
 
-(defn find-var [sym]
+(defn
+	#^{:doc "Returns the global var named by the namespace-qualified symbol, or nil if no var with that name."}
+find-var [sym]
  (. clojure.lang.Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn agent [state]
+(defn
+	#^{:doc "Creates and returns an agent with an initial value of state."}
+agent [state]
  (new clojure.lang.Agent state))
 
 (defn agent-of [state]
  (:agent ^state))
 
-(defn ! [#^clojure.lang.Agent a f & args]
+(defn
+	#^{:doc "Dispatch an action to an agent. Returns the agent immediately. Subsequently, in a thread in a thread pool,
+	the state of the agent will be set to the value of:
+		(apply action-fn state-of-agent args)"}
+! [#^clojure.lang.Agent a f & args]
   (. a (dispatch f args)))
 
-(defn agent-errors [#^clojure.lang.Agent a]
+(defn
+	#^{:doc "Returns a sequence of the exceptions thrown during asynchronous actions of the agent."}
+agent-errors [#^clojure.lang.Agent a]
   (. a (getErrors)))
 
-(defn clear-agent-errors [#^clojure.lang.Agent a]
+(defn
+	#^{:doc "Clears any exceptions thrown during asynchronous actions of the agent, allowing subsequent actions to occur."}
+clear-agent-errors [#^clojure.lang.Agent a]
   (. a (clearErrors)))
 
-(defn ref [x]
+(defn
+	#^{:doc "Creates and returns a Ref with an initial value of x."}
+ref [x]
  (new clojure.lang.Ref x))
 
-(defn deref [#^clojure.lang.IRef ref]
+(defn
+	#^{:doc "Also reader macro: @ref/@agent
+	Within a transaction, returns the in-transaction-value of ref, else returns the
+	most-recently-committed value of ref. When applied to an agent, returns its current state."}
+deref [#^clojure.lang.IRef ref]
   (. ref (get)))
 
-(defn commute [#^clojure.lang.Ref ref fun & args]
+(defn
+	#^{:doc "Must be called in a transaction. Sets the in-transaction-value of ref to:
+		(apply fun in-transaction-value-of-ref args)
+	At the commit point of the transaction, sets the value of ref to be:
+		(apply fun most-recently-committed-value-of-ref args)
+	Thus fun should be commutative, or, failing that, you must accept last-one-in-wins behavior.
+	commute allows for more concurrency than set."}
+commute [#^clojure.lang.Ref ref fun & args]
   (. ref (commute fun args)))
 
-(defn alter [#^clojure.lang.Ref ref fun & args]
+(defn
+	#^{:doc "Must be called in a transaction. Sets the in-transaction-value of ref to:
+	(apply fun in-transaction-value-of-ref args)"}
+alter [#^clojure.lang.Ref ref fun & args]
   (. ref (alter fun args)))
 
-(defn set [#^clojure.lang.Ref ref val]
+(defn
+	#^{:doc "Must be called in a transaction. Sets the value of ref. Returns val."}
+set [#^clojure.lang.Ref ref val]
     (. ref (set val)))
 
-(defn ensure [#^clojure.lang.Ref ref]
+(defn
+	#^{:doc "Must be called in a transaction. Protects the ref from modification by other transactions.
+	Returns the in-transaction-value of ref. Allows for more concurrency than (set ref @ref)"}
+ensure [#^clojure.lang.Ref ref]
     (. ref (touch))
     (. ref (get)))
 
-(defmacro sync [flags-ignored-for-now & body]
+(defmacro
+	#^{:doc "transaction-flags => TBD, pass nil for now
+	Runs the exprs (in an implicit do) in a transaction that encompasses exprs and any nested calls.
+	Starts a transaction if none is already running on this thread. Any uncaught exception will abort the
+	transaction and flow out of sync. The exprs may be run more than once, but any effects on Refs will be atomic."}
+sync [flags-ignored-for-now & body]
   `(. clojure.lang.LockingTransaction
     (runInTransaction (fn [] ~@body))))
 
@@ -1005,14 +1056,20 @@ doall
    (dorun n coll)
    coll))
 
-(defn await [& agents]
+(defn
+	#^{:doc "Blocks the current thread (indefinitely!) until all actions dispatched thus far,
+	from this thread or agent, to the agent(s) have occurred."}
+await [& agents]
   (let [latch (new java.util.concurrent.CountDownLatch (count agents))
 	count-down (fn [agent] (. latch (countDown)) agent)]
     (doseq agent agents
       (! agent count-down))
     (. latch (await))))
 
-(defn await-for [timeout-ms & agents]
+(defn
+	#^{:doc "Blocks the current thread until all actions dispatched thus far (from this thread or agent) to the agents
+	have occurred, or the timeout (in milliseconds) has elapsed. Returns nil if returning due to timeout, non-nil otherwise."}
+await-for [timeout-ms & agents]
   (let [latch (new java.util.concurrent.CountDownLatch (count agents))
 	count-down (fn [agent] (. latch (countDown)) agent)]
     (doseq agent agents
@@ -1040,7 +1097,10 @@ import [& import-lists]
          (. ns (importClass c (. Class (forName (str pkg "." c)))))) )
    (apply import (rest import-lists))))
 
-(defn into-array [aseq]
+(defn
+	#^{:doc "Returns an array of the type of the first element in coll, containing the contents of coll,
+	which must be of a compatible type."}
+into-array [aseq]
   (. clojure.lang.RT (seqToTypedArray (seq aseq))))
 
 (defn
@@ -1060,9 +1120,15 @@ into [to from]
                       (into-array classes)
                       (new clojure.lang.ProxyHandler method-map))))
 
-(defmacro implement [classes & fs]
+(defmacro
+	#^{:doc "f => (name [args+] body)
+	Expands to code which creates a instance of a class that implements the named interface(s) by calling the
+	supplied fns. The interface names must be valid class names of interface types. If a method is not provided for a
+	non-void-returning interface method, an UnsupportedOperationException will be thrown should it be called.
+	Method fns are closures and can capture the environment in which implement is called. "}
+implement [interfaces & fs]
   `(make-proxy
-      ~classes
+      ~interfaces
       ~(loop [fmap {} fs fs]
               (if fs
                   (recur (assoc fmap (name (ffirst fs))
@@ -1128,7 +1194,11 @@ read
       (finally
         (. ~rdr (close))))))
 
-(defmacro doto [x & members]
+(defmacro
+	#^{:doc "Evaluates x then calls all of the methods with the supplied arguments in succession on the resulting object,
+	returning it.
+		(doto (new java.util.HashMap) (put \"a\" 1) (put \"b\" 2))"}
+doto [x & members]
   (let [gx (gensym)]
     `(let [~gx ~x]
        (do
@@ -1136,7 +1206,11 @@ read
                 members))
        ~gx)))
 
-(defmacro memfn [name & args]
+(defmacro
+	#^{:doc "Expands into code that creates a fn that expects to be passed an object and any args and calls
+	the named instance method on the object passing the args. Use when you want to treat a Java method
+	as a first-class fn."}
+memfn [name & args]
   `(fn [target# ~@args]
       (. target# (~name ~@args))))
 
@@ -1175,16 +1249,22 @@ time [expr]
 
 (import '(java.lang.reflect Array))
 
-(defn alength [array]
+(defn
+	#^{:doc "Returns the length of the Java array. Works on arrays of all types."}
+alength [array]
   (. Array (getLength array)))
 
-(defn aget 
+(defn
+	#^{:doc "Returns the value at the index/indices. Works on Java arrays of all types."}
+aget
   ([array idx]
    (. Array (get array idx)))
   ([array idx & idxs]
    (apply aget (aget array idx) idxs)))
 
-(defn aset
+(defn
+	#^{:doc "Sets the value at the index/indices. Works on Java arrays of reference types. Returns val."}
+aset
   ([array idx val]
    (. Array (set array idx val))
    val)
@@ -1199,16 +1279,36 @@ time [expr]
     ([array# idx# idx2# & idxv#]
      (apply ~name (aget array# idx#) idx2# idxv#))))
 
-(def-aset aset-int setInt int)
-(def-aset aset-long setLong long)
-(def-aset aset-boolean setBoolean boolean)
-(def-aset aset-float setFloat float)
-(def-aset aset-double setDouble double)
-(def-aset aset-short setShort short)
-(def-aset aset-byte setByte byte)
-(def-aset aset-char setChar char)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of int. Returns val."}
+aset-int setInt int)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of long. Returns val."}
+aset-long setLong long)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of boolean. Returns val."}
+aset-boolean setBoolean boolean)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of float. Returns val."}
+aset-float setFloat float)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of double. Returns val."}
+aset-double setDouble double)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of short. Returns val."}
+aset-short setShort short)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of byte. Returns val."}
+aset-byte setByte byte)
+(def-aset
+	#^{:doc "Sets the value at the index/indices. Works on arrays of char. Returns val."}
+aset-char setChar char)
 
-(defn make-array 
+(defn
+	#^{:doc "Creates and returns an array of instances of the specified class of the specified dimension(s).
+	Note that a class object is required. Class objects can be obtained by using their imported or fully-qualified name.
+	Class objects for the primitive types can be obtained using, e.g., (. Integer TYPE)."}
+make-array
   ([#^Class type len]
     (. Array (newInstance type (int len))))
   ([#^Class type dim & more-dims]
@@ -1218,10 +1318,16 @@ time [expr]
         (aset-int dimarray i (nth dims i)))
       (. Array (newInstance type dimarray)))))
 
-(defn to-array [#^java.util.Collection coll]
+(defn
+	#^{:doc "Returns an array of Objects containing the contents of coll, which can be any Collection.
+	Maps to java.util.Collection.toArray()."}
+to-array [#^java.util.Collection coll]
   (. coll (toArray)))
 
-(defn to-array-2d [#^java.util.Collection coll]
+(defn
+	#^{:doc "Returns a (potentially-ragged) 2-dimensional array of Objects containing the contents of coll,
+	which can be any Collection of any Collection."}
+to-array-2d [#^java.util.Collection coll]
   (let [ret (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
     (loop [i 0 xs (seq coll)]
       (when xs
@@ -1468,13 +1574,21 @@ take-nth [n coll]
 interleave [& colls]
   (apply concat (apply map list colls)))
 
-(defn var-get [#^clojure.lang.Var x]
+(defn
+	#^{:doc "Gets the value in the var object"}
+var-get [#^clojure.lang.Var x]
   (. x (get)))
 
-(defn var-set [#^clojure.lang.Var x val]
+(defn
+	#^{:doc "Sets the value in the var object to val. The var must be thread-locally bound."}
+var-set [#^clojure.lang.Var x val]
   (. x (set val)))
 
-(defmacro with-local-vars [name-vals-vec & body]
+(defmacro
+	#^{:doc "varbinding=> symbol init-expr
+	Executes the exprs in a context in which the symbols are bound to vars with per-thread bindings to the init-exprs.
+	The symbols refer to the var objects themselves, and must be accessed with var-get and var-set"}
+with-local-vars [name-vals-vec & body]
   `(let [~@(interleave (take-nth 2 name-vals-vec)
                        (repeat '(. clojure.lang.Var (create))))]
      (try
@@ -1654,7 +1768,9 @@ for
       (list* 'fn* name new-sigs)
       (cons 'fn* new-sigs))))
 
-(defn bean [#^Object x]
+(defn
+	#^{:doc "Takes a Java object and returns a read-only implementation of the map abstraction based upon its JavaBean properties."}
+bean [#^Object x]
   (let [c (. x (getClass))
 	pmap (reduce (fn [m #^java.beans.PropertyDescriptor pd]
 			 (let [name (. pd (getName))
