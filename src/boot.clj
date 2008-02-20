@@ -553,6 +553,7 @@ get
 (defn
 	#^{:doc "dissoc[iate]. Returns a new map of the same (hashed/sorted) type, that does not contain a mapping for key(s)."}
 dissoc
+  ([map] map)
   ([map key]
    (. clojure.lang.RT (dissoc map key)))
   ([map key & ks]
