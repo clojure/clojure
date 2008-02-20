@@ -366,59 +366,64 @@ reverse [coll]
           (reduce - (- x y) more)))
 
 (defn
-	#^{:doc "Returns non-nil if nums are in monotonically increasing order, otherwise nil."}
+	#^{:doc "Returns non-nil if nums are in monotonically increasing order, otherwise false."}
 <
       ([x] true)
       ([x y] (. clojure.lang.Num (lt x y)))
       ([x y & more]
-          (when (< x y)
+          (if (< x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (< y (first more))))))
+                (< y (first more)))
+            false)))
 
 (defn
-	#^{:doc "Returns non-nil if nums are in monotonically non-decreasing order, otherwise nil."}
+	#^{:doc "Returns non-nil if nums are in monotonically non-decreasing order, otherwise false."}
 <=
       ([x] true)
       ([x y] (. clojure.lang.Num (lte x y)))
       ([x y & more]
-          (when (<= x y)
+          (if (<= x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (<= y (first more))))))
+                (<= y (first more)))
+            false)))
 
 (defn
-	#^{:doc "Returns non-nil if nums are in monotonically decreasing order, otherwise nil."}
+	#^{:doc "Returns non-nil if nums are in monotonically decreasing order, otherwise false."}
 >
       ([x] true)
       ([x y] (. clojure.lang.Num (gt x y)))
       ([x y & more]
-          (when (> x y)
+          (if (> x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (> y (first more))))))
+                (> y (first more)))
+            false)))
 
 (defn
-	#^{:doc "Returns non-nil if nums are in monotonically non-increasing order, otherwise nil."}
+	#^{:doc "Returns non-nil if nums are in monotonically non-increasing order, otherwise false."}
 >=
       ([x] true)
       ([x y] (. clojure.lang.Num (gte x y)))
       ([x y & more]
-          (when (>= x y)
+          (if (>= x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (>= y (first more))))))
+                (>= y (first more)))
+            false)))
 
 (defn
-	#^{:doc "Returns non-nil if nums all have the same value, otherwise nil"}
+	#^{:doc "Returns non-nil if nums all have the same value, otherwise false"}
 ==
       ([x] true)
       ([x y] (. clojure.lang.Num (equiv x y)))
       ([x y & more]
-          (when (== x y)
+          (if (== x y)
             (if (rest more)
                 (recur y (first more) (rest more))
-                (== y (first more))))))
+                (== y (first more)))
+            false)))
 
 (defn
 	#^{:doc "Returns the greatest of the nums."}
