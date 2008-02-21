@@ -131,7 +131,7 @@ final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*
 final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
 final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
 
-final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
+//final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
 		Symbol nsname = (Symbol) arg1;
@@ -189,21 +189,26 @@ static AtomicInteger id = new AtomicInteger(1);
 
 static
 	{
+	Keyword dockw = Keyword.intern(null, "doc");
 	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
-	Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
+	Var v;
+	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
+	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed."));
 	Var.intern(CLOJURE_NS, LOAD_FILE,
 	           new AFn(){
 		           public Object invoke(Object arg1) throws Exception{
 			           return Compiler.loadFile((String) arg1);
 		           }
 	           });
-	Var.intern(CLOJURE_NS, IDENTICAL,
-	           new AFn(){
-		           public Object invoke(Object arg1, Object arg2)
-				           throws Exception{
-			           return arg1 == arg2 ? RT.T : RT.F;
-		           }
-	           });
+	v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file."));
+	v = Var.intern(CLOJURE_NS, IDENTICAL,
+	               new AFn(){
+		               public Object invoke(Object arg1, Object arg2)
+				               throws Exception{
+			               return arg1 == arg2 ? RT.T : RT.F;
+		               }
+	               });
+	v.setMeta(map(dockw, "Tests if 2 arguments are the same object"));
 //	try
 //		{
 //		InputStream ins = RT.class.getResourceAsStream("/boot.clj");

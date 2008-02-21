@@ -123,18 +123,27 @@ vector
       ([& args]
           (. clojure.lang.PersistentVector (create args))))
 
-(defn hash-map
+(defn
+	#^{:doc "keyval => key val
+	Returns a new hash map with supplied mappings."}
+hash-map
       ([] {})
-      ([& args]
-          (. clojure.lang.PersistentHashMap (create args))))
+      ([& keyvals]
+          (. clojure.lang.PersistentHashMap (create keyvals))))
 
-(defn sorted-map
-      ([& args]
-          (. clojure.lang.PersistentTreeMap (create args))))
+(defn
+	#^{:doc "keyval => key val
+	Returns a new sorted map with supplied mappings."}
+sorted-map
+      ([& keyvals]
+          (. clojure.lang.PersistentTreeMap (create keyvals))))
 
-(defn sorted-map-by
-      ([comparator & args]
-          (. clojure.lang.PersistentTreeMap (create comparator args))))
+(defn
+	#^{:doc "keyval => key val
+	Returns a new sorted map with supplied mappings, using the supplied comparator."}
+sorted-map-by
+      ([comparator & keyvals]
+          (. clojure.lang.PersistentTreeMap (create comparator keyvals))))
 
 
   
@@ -237,7 +246,9 @@ cond [& clauses]
             (second clauses)
             (cons 'cond (rest (rest clauses))))))
 
-(defn spread [arglist]
+(defn
+#^{:private true}
+spread [arglist]
       (cond
        (nil? arglist) nil
        (nil? (rest arglist)) (seq (first arglist))
@@ -253,7 +264,8 @@ apply [#^clojure.lang.IFn f & args]
 list* [item & more]
       (spread (cons item more)))
 
-(defmacro delay [& body]
+(defmacro #^{:private true}
+delay [& body]
   (list 'new 'clojure.lang.Delay (list* `fn [] body)))
 
 (defn
@@ -482,22 +494,34 @@ rem [num div]
 
 ;;Bit ops
 
-(defn bit-shift-left [x y]
+(defn
+	#^{:doc "Bitwise shift left"}
+bit-shift-left [x y]
   (. clojure.lang.IntegerNum (shiftLeft x y)))
 
-(defn bit-shift-right [x y]
+(defn
+	#^{:doc "Bitwise shift right"}
+bit-shift-right [x y]
   (. clojure.lang.IntegerNum (shiftRight x y)))
 
-(defn bit-and [x y]
+(defn
+	#^{:doc "Bitwise and"}
+bit-and [x y]
   (. clojure.lang.IntegerNum (bitAnd x y)))
 
-(defn bit-or [x y]
+(defn
+	#^{:doc "Bitwise or"}
+bit-or [x y]
   (. clojure.lang.IntegerNum (bitOr x y)))
 
-(defn bit-xor [x y]
+(defn
+	#^{:doc "Bitwise exclusive or"}
+bit-xor [x y]
   (. clojure.lang.IntegerNum (bitXor x y)))
 
-(defn bit-not [x]
+(defn
+	#^{:doc "Bitwise not"}
+bit-not [x]
   (. clojure.lang.IntegerNum (bitNot x)))
 
 (defn
@@ -538,7 +562,10 @@ peek [list]
 pop [list]
   (. clojure.lang.RT (pop list)))
 
-(defn nth [coll index]
+(defn
+	#^{:doc "Returns the value at the index. get returns nil if index out of bounds, nth throws an exception.
+	nth also works for strings,  Java arrays and Lists, and, in O(n) time, for sequences."}
+nth [coll index]
  (. clojure.lang.RT (nth coll index)))
 
 ;;map stuff
@@ -606,7 +633,10 @@ key [#^java.util.Map$Entry e]
 val [#^java.util.Map$Entry e]
  (. e (getValue)))
 
-(defn rseq [#^clojure.lang.Reversible rev]
+(defn
+	#^{:doc "Returns, in constant time, a sequence of the items in rev (which can be a vector or sorted-map),
+	in reverse order."}
+rseq [#^clojure.lang.Reversible rev]
   (. rev (rseq)))
 
 (defn
@@ -619,12 +649,14 @@ name [#^clojure.lang.Named x]
 namespace [#^clojure.lang.Named x]
   (. x (getNamespace)))
 
-(defn andfn [& args]
+(defn #^{:private true}
+andfn [& args]
       (if (nil? (rest args))
           (first args)
         (and (first args) (recur (rest args)))))
 
-(defn orfn [& args]
+(defn #^{:private true}
+orfn [& args]
       (if (nil? args)
           nil
         (or (first args) (recur (rest args)))))
@@ -711,7 +743,8 @@ find-var [sym]
 agent [state]
  (new clojure.lang.Agent state))
 
-(defn agent-of [state]
+(defn #^{:private true}
+agent-of [state]
  (:agent ^state))
 
 (defn
@@ -1015,8 +1048,8 @@ sort-by
 eval [form]
   (. clojure.lang.Compiler (eval form)))
 
-(defn defimports [& imports-maps]
-  (def *imports* (apply merge imports-maps)))
+;(defn defimports [& imports-maps]
+;  (def *imports* (apply merge imports-maps)))
 
 (defmacro
 	#^{:doc "Repeatedly executes body (presumably for side-effects) with binding-form bound to successive items from coll.
@@ -1111,10 +1144,12 @@ into [to from]
        (recur (conj ret (first items)) (rest items))
       ret)))
 
-(defn array [& items]
+(defn #^{:private true}
+array [& items]
   (into-array items))
 
-(defn make-proxy [classes method-map]
+(defn #^{:private true}
+make-proxy [classes method-map]
   (. java.lang.reflect.Proxy
     (newProxyInstance (. (identity clojure.lang.Compiler) (getClassLoader))
                       (into-array classes)
@@ -1150,7 +1185,9 @@ pr
    (. *out* (append \space))
    (apply pr more)))
 
-(defn newline []
+(defn
+	#^{:doc "Writes a newline to the output stream that is the current value of *out*"}
+newline []
   (. *out* (append \newline))
   nil)
 
@@ -1187,12 +1224,15 @@ read
   ([stream eof-error? eof-value recursive?]
     (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
 
-(defmacro with-open [rdr init & body]
-  `(let [~rdr ~init]
+(defmacro
+	#^{:doc "Evaluates body in a try expression with name bound to the value of init,
+	and a finally clause that calls (. name (close))."}
+with-open [name init & body]
+  `(let [~name ~init]
      (try
       ~@body
       (finally
-        (. ~rdr (close))))))
+        (. ~name (close))))))
 
 (defmacro
 	#^{:doc "Evaluates x then calls all of the methods with the supplied arguments in succession on the resulting object,
@@ -1271,7 +1311,9 @@ aset
   ([array idx idx2 & idxv]
    (apply aset (aget array idx) idx2 idxv)))
 
-(defmacro def-aset [name method coerce]
+(defmacro
+#^{:private true}
+def-aset [name method coerce]
   `(defn ~name
     ([array# idx# val#]
      (. Array (~method array# idx# (~coerce val#)))
@@ -1422,7 +1464,11 @@ struct [s & vals]
 accessor [s key]
    (. clojure.lang.PersistentStructMap (getAccessor s key)))
 
-(defn subvec
+(defn
+	#^{:doc "Returns a persistent vector of the items in vector from start (inclusive) to end (exclusive).
+	If end is not supplied, defaults to (count vector). This operation is O(1) and very fast,
+	as the resulting vector shares structure with the original and no trimming is done."}
+subvec
   ([v start]
     (subvec v start (count v)))
   ([v start end]
@@ -1433,7 +1479,9 @@ accessor [s key]
 load [rdr]
   (. clojure.lang.Compiler (load rdr)))
 
-(defn resultset-seq [#^java.sql.ResultSet rs]
+(defn
+	#^{:doc "Creates and returns a lazy sequence of structmaps corresponding to the rows in the java.sql.ResultSet rs"}
+resultset-seq [#^java.sql.ResultSet rs]
   (let [rsmeta (. rs (getMetaData))
 	idxs (range 1 (inc (. rsmeta (getColumnCount))))
 	keys (map (comp keyword (memfn toLowerCase))
@@ -1461,7 +1509,8 @@ to-set [coll]
 distinct [coll]
   (keys (to-set coll)))
 
-(defn filter-key [keyfn pred amap]
+(defn #^{:private true}
+filter-key [keyfn pred amap]
   (loop [ret {} es (seq amap)]
     (if es
       (if (pred (keyfn (first es)))
@@ -1744,7 +1793,16 @@ for
 	(iter# ~(second seq-exprs))))))
 
 ;redefine fn with destructuring
-(defmacro fn [& sigs]
+(defmacro
+	#^{:doc "(fn name? [params* ] exprs*)
+		(fn name? ([params* ] exprs*)+)
+	params => positional-params* , or positional-params* & rest-param
+	positional-param => binding-form
+	rest-param => binding-form
+	name => symbol
+
+	Defines a function"}
+fn [& sigs]
   (let [name (if (symbol? (first sigs)) (first sigs) nil)
         sigs (if name (rest sigs) sigs)
         sigs (if (vector? (first sigs)) (list sigs) sigs)
@@ -1801,7 +1859,9 @@ bean [#^Object x]
 		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
 			       (thisfn (rest pseq))))) (keys pmap))))))
 
-(defmacro comment [& body])
+(defmacro
+	#^{:doc "ignores body, yields nil"}
+comment [& body])
 
 (defmacro
 	#^{:doc "Evaluates exprs in a context in which *out* is bound to a fresh StringWriter.
@@ -1904,17 +1964,25 @@ re-find
    (let [m (re-matcher re s)]
      (re-find m))))
 
-(defn rand
+(defn
+	#^{:doc "Returns a random floating point number between 0 (inclusive) and 1 (exclusive)."}
+rand
   ([] (. Math (random)))
   ([n] (* n (rand))))
 
-(defn rand-int [n]
+(defn
+	#^{:doc "Returns a random integer between 0 (inclusive) and n (exclusive)."}
+rand-int [n]
 	(int (rand n)))
 
-(defmacro defn- [name & decls]
+(defmacro
+	#^{:doc "same as defn, yielding non-public def"}
+defn- [name & decls]
   (list* `defn (with-meta name (assoc (meta name) :private true)) decls))
 
-(defn print-doc [v]
+(defn
+#^{:private true}
+print-doc [v]
   (println "-------------------------")
   (println (str (ns-name (:ns ^v)) "/" (:name ^v)))
   (prn (:arglists ^v))
@@ -1922,7 +1990,9 @@ re-find
     (println "Macro"))
   (println "\t\t" (:doc ^v)))
 
-(defn find-doc [re-string]
+(defn
+	#^{:doc "Prints documentation for any var whose documentation or name contains a match for re-string"}
+find-doc [re-string]
   (let [re  (re-pattern re-string)]
     (dorun (for [ns (all-ns) v (sort-by (comp :name meta) (vals (ns-interns ns)))]
                (and (:doc ^v)
@@ -1930,5 +2000,7 @@ re-find
                         (re-find (re-matcher re (str (:name ^v))))))
               (print-doc v)))))
 
-(defmacro doc [varname]
+(defmacro
+	#^{:doc "Prints documentation for the var named by varname"}
+doc [varname]
   `(print-doc (var ~varname)))
