@@ -421,7 +421,8 @@ static public Object get(Object coll, Object key){
 		return nth(coll, n);
 		}
 
-	throw new UnsupportedOperationException("get not supported on this type");
+	return null;
+	//throw new UnsupportedOperationException("get not supported on this type");
 }
 
 static public Object get(Object coll, Object key, Object notFound){
@@ -441,7 +442,9 @@ static public Object get(Object coll, Object key, Object notFound){
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
 		}
-	throw new UnsupportedOperationException("get not supported on this type");
+	return notFound;
+
+//	throw new UnsupportedOperationException("get not supported on this type");
 }
 
 static public Associative assoc(Object coll, Object key, Object val){
