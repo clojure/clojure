@@ -84,6 +84,11 @@ static boolean isWhitespace(int ch){
 	return Character.isWhitespace(ch) || ch == ',';
 }
 
+static void unread(PushbackReader r, int ch) throws IOException{
+	if(ch != -1)
+		r.unread(ch);
+}
+
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
 		throws Exception{
 
@@ -128,13 +133,13 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 				int ch2 = r.read();
 				if(Character.isDigit(ch2))
 					{
-					r.unread(ch2);
+					unread(r, ch2);
 					Object n = readNumber(r, (char) ch);
 					if(RT.suppressRead())
 						return null;
 					return n;
 					}
-				r.unread(ch2);
+				unread(r, ch2);
 				}
 
 			String token = readToken(r, (char) ch);
@@ -161,7 +166,7 @@ static private String readToken(PushbackReader r, char initch) throws Exception{
 		int ch = r.read();
 		if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
 			{
-			r.unread(ch);
+			unread(r, ch);
 			return sb.toString();
 			}
 		sb.append((char) ch);
@@ -177,7 +182,7 @@ static private Object readNumber(PushbackReader r, char initch) throws Exception
 		int ch = r.read();
 		if(ch == -1 || isWhitespace(ch) || isMacro(ch))
 			{
-			r.unread(ch);
+			unread(r, ch);
 			break;
 			}
 		sb.append((char) ch);
@@ -263,6 +268,7 @@ static private boolean isTerminatingMacro(int ch){
 
 static class RegexReader extends AFn{
 	static StringReader stringrdr = new StringReader();
+
 	public Object invoke(Object reader, Object doublequote) throws Exception{
 		String str = (String) stringrdr.invoke(reader, doublequote);
 		return Pattern.compile(str);
@@ -285,18 +291,18 @@ static class StringReader extends AFn{
 					throw new Exception("EOF while reading string");
 				switch(ch)
 					{
-					case't':
+					case 't':
 						ch = '\t';
 						break;
-					case'r':
+					case 'r':
 						ch = '\r';
 						break;
-					case'n':
+					case 'n':
 						ch = '\n';
 						break;
-					case'\\':
+					case '\\':
 						break;
-					case'"':
+					case '"':
 						break;
 					default:
 						throw new Exception("Unsupported escape character: \\" + (char) ch);
@@ -373,7 +379,7 @@ static class DispatchReader extends AFn{
 }
 
 static Symbol garg(int n){
-	return Symbol.intern(null,(n == -1?"rest":("p" + n)) + "__" + RT.nextID());
+	return Symbol.intern(null, (n == -1 ? "rest" : ("p" + n)) + "__" + RT.nextID());
 }
 
 static class FnReader extends AFn{
@@ -391,10 +397,10 @@ static class FnReader extends AFn{
 			ISeq rargs = argsyms.rseq();
 			if(rargs != null)
 				{
-				int higharg = (Integer)((Map.Entry)rargs.first()).getKey();
+				int higharg = (Integer) ((Map.Entry) rargs.first()).getKey();
 				if(higharg > 0)
 					{
-					for(int i = 1;i<=higharg;++i)
+					for(int i = 1; i <= higharg; ++i)
 						{
 						Object sym = argsyms.valAt(i);
 						if(sym == null)
@@ -409,7 +415,7 @@ static class FnReader extends AFn{
 					args = args.cons(restsym);
 					}
 				}
-			return RT.list(Compiler.FN,args,form);
+			return RT.list(Compiler.FN, args, form);
 			}
 		finally
 			{
@@ -427,7 +433,7 @@ static Symbol registerArg(int n){
 	Symbol ret = (Symbol) argsyms.valAt(n);
 	if(ret == null)
 		{
-		ret =  garg(n);
+		ret = garg(n);
 		ARG_ENV.set(argsyms.assoc(n, ret));
 		}
 	return ret;
@@ -437,7 +443,7 @@ static class ArgReader extends AFn{
 	public Object invoke(Object reader, Object pct) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		int ch = r.read();
-		r.unread(ch);
+		unread(r, ch);
 		//% alone is first arg
 		if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
 			{
@@ -611,7 +617,7 @@ static class UnquoteReader extends AFn{
 			}
 		else
 			{
-			r.unread(ch);
+			unread(r, ch);
 			Object o = read(r, true, null, true);
 			return new Unquote(o);
 			}
@@ -715,7 +721,7 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 			}
 		else
 			{
-			r.unread(ch);
+			unread(r, ch);
 
 			Object o = read(r, true, null, isRecursive);
 			if(o != r)
