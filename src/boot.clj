@@ -1148,7 +1148,7 @@ into [to from]
 array [& items]
   (into-array items))
 
-(defn #^{:private true}
+(defn
 make-proxy [classes method-map]
   (. java.lang.reflect.Proxy
     (newProxyInstance (. (identity clojure.lang.Compiler) (getClassLoader))
@@ -1981,7 +1981,6 @@ defn- [name & decls]
   (list* `defn (with-meta name (assoc (meta name) :private true)) decls))
 
 (defn
-#^{:private true}
 print-doc [v]
   (println "-------------------------")
   (println (str (ns-name (:ns ^v)) "/" (:name ^v)))

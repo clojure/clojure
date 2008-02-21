@@ -465,8 +465,8 @@ static public Object contains(Object coll, Object key){
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll);
 		}
-
-	throw new UnsupportedOperationException("contains not supported on this type");
+	return F;
+	//throw new UnsupportedOperationException("contains not supported on this type");
 }
 
 static public Object find(Object coll, Object key){
