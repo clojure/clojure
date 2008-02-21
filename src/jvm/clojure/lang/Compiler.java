@@ -312,7 +312,7 @@ static class DefExpr implements Expr{
 					throw new Exception("Can't create defs outside of current ns");
 				}
 			IPersistentMap mm = sym.meta();
-			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY,SOURCE.get());
+			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, SOURCE.get());
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr(v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
 			                   meta, RT.count(form) == 3);
@@ -3299,13 +3299,17 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	Var var = null;
 
-	//note - ns-qualified vars must already exist
+	//note - ns-qualified vars in other namespaces must already exist
 	if(sym.ns != null)
 		{
 		Namespace ns = Namespace.find(Symbol.create(sym.ns));
 		if(ns == null)
 			throw new Exception("No such namespace: " + sym.ns);
-		var = ns.findInternedVar(Symbol.create(sym.name));
+		Symbol name = Symbol.create(sym.name);
+		if(internNew && ns == currentNS())
+			var = currentNS().intern(name);
+		else
+			var = ns.findInternedVar(name);
 		}
 	else
 		{
