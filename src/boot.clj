@@ -44,12 +44,25 @@ first (fn [coll] (. clojure.lang.RT (first coll))))
 	        If there are no more items, returns nil."}
 rest (fn [x] (. clojure.lang.RT (rest x))))
 
-(def second (fn [x] (. clojure.lang.RT (second x))))
+(def
+	#^{:doc "Same as (first (rest x))"}
+second (fn [x] (first (rest x))))
 
-(def ffirst (fn [x] (first (first x))))
-(def rfirst (fn [x] (rest (first x))))
-(def frest (fn [x] (first (rest x))))
-(def rrest (fn [x] (rest (rest x))))
+(def
+	#^{:doc "Same as (first (first x))"}
+ffirst (fn [x] (first (first x))))
+
+(def
+	#^{:doc "Same as (rest (first x))"}
+rfirst (fn [x] (rest (first x))))
+
+(def
+	#^{:doc "Same as (first (rest x))"}
+frest (fn [x] (first (rest x))))
+
+(def
+	#^{:doc "Same as (rest (rest x))"}
+rrest (fn [x] (rest (rest x))))
 
 (def
 	#^{:arglists '([coll])
@@ -1263,28 +1276,36 @@ time [expr]
        ret#))
 
 
-(defn #^Integer int [x]
+(defn #^{:tag Integer :doc "Coerce to int"}
+int [x]
   (. clojure.lang.RT (intCast x)))
 
-(defn #^Long long [#^Number x]
+(defn #^{:tag Long :doc "Coerce to long"}
+long [#^Number x]
   (. x (longValue)))
 
-(defn #^Float float [#^Number x]
+(defn #^{:tag Float :doc "Coerce to float"}
+float [#^Number x]
   (. x (floatValue)))
 
-(defn #^Double double [#^Number x]
+(defn #^{:tag Double :doc "Coerce to double"}
+double [#^Number x]
   (. x (doubleValue)))
 
-(defn #^Short short [#^Number x]
+(defn #^{:tag Short :doc "Coerce to short"}
+short [#^Number x]
   (. x (shortValue)))
 
-(defn #^Byte byte [#^Number x]
+(defn #^{:tag Byte :doc "Coerce to byte"}
+byte [#^Number x]
   (. x (byteValue)))
 
-(defn #^Character char [x]
+(defn #^{:tag Character :doc "Coerce to char"}
+char [x]
   (. clojure.lang.RT (charCast x)))
 
-(defn #^Boolean boolean [x]
+(defn #^{:tag Boolean :doc "Coerce to boolean"} 
+boolean [x]
   (if x true false))
 
 (import '(java.lang.reflect Array))

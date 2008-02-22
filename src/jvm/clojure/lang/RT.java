@@ -194,12 +194,12 @@ static
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
 	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed."));
-	Var.intern(CLOJURE_NS, LOAD_FILE,
-	           new AFn(){
-		           public Object invoke(Object arg1) throws Exception{
-			           return Compiler.loadFile((String) arg1);
-		           }
-	           });
+	v = Var.intern(CLOJURE_NS, LOAD_FILE,
+	               new AFn(){
+		               public Object invoke(Object arg1) throws Exception{
+			               return Compiler.loadFile((String) arg1);
+		               }
+	               });
 	v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file."));
 	v = Var.intern(CLOJURE_NS, IDENTICAL,
 	               new AFn(){
