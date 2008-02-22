@@ -24,50 +24,57 @@
 (def content (accessor element :content))
 
 (def content-handler
-  (new clojure.lang.XMLHandler
-       (implement [ContentHandler]
-         (startElement [uri local-name q-name #^Attributes atts]
-           (let [attrs (fn [ret i]
+  (let [push-content (fn [e c]
+                       (assoc e :content (conj (or (:content e) []) c)))
+        push-chars (fn []
+                     (when (and (= *state* :chars)
+                                (some (complement #(. Character (isWhitespace %))) (str *sb*)))
+                       (set! *current* (push-content *current* (str *sb*)))))]
+    (new clojure.lang.XMLHandler
+         (implement [ContentHandler]
+           (startElement [uri local-name q-name #^Attributes atts]
+             (let [attrs (fn [ret i]
                            (if (neg? i)
                              ret
                              (recur (assoc ret 
-                                      (. clojure.lang.Keyword (intern (symbol (. atts (getQName i)))))
-                                      (. atts (getValue i)))
+                                           (. clojure.lang.Keyword (intern (symbol (. atts (getQName i)))))
+                                           (. atts (getValue i)))
                                     (dec i))))
-                 e (struct element 
-                           (. clojure.lang.Keyword (intern (symbol q-name)))
-                           (when (pos? (. atts (getLength)))
-                             (attrs {} (dec (. atts (getLength))))))]
-             (set! *stack* (conj *stack* *current*))
-             (set! *current* e)
-             (set! *state* :element))
-           nil)
-         (endElement [uri local-name q-name]
-           (let [push-content (fn [e c]
-                                  (assoc e :content (conj (or (:content e) []) c)))]
-             (when (= *state* :chars)
-               (set! *current* (push-content *current* (str *sb*))))
+                   e (struct element 
+                             (. clojure.lang.Keyword (intern (symbol q-name)))
+                             (when (pos? (. atts (getLength)))
+                               (attrs {} (dec (. atts (getLength))))))]
+               (push-chars)
+               (set! *stack* (conj *stack* *current*))
+               (set! *current* e)
+               (set! *state* :element))
+             nil)
+           (endElement [uri local-name q-name]
+             (push-chars)
              (set! *current* (push-content (peek *stack*) *current*))
              (set! *stack* (pop *stack*))
-             (set! *state* :between))
-           nil)
-         (characters [ch start length]
-           (when-not (= *state* :between)
-             (when (= *state* :element)
+             (set! *state* :between)
+             nil)
+           (characters [ch start length]
+             (when-not (= *state* :chars)
                (set! *sb* (new StringBuilder)))
              (let [#^StringBuilder sb *sb*]
                (. sb (append ch start length))
-               (set! *state* :chars)))
-           nil))))
+               (set! *state* :chars))
+             nil)))))
 
-(defn parse [s]
-  (let [p (.. SAXParserFactory (newInstance) (newSAXParser))]
+(defn startparse-sax [s ch]
+  (.. SAXParserFactory (newInstance) (newSAXParser) (parse s ch)))
+
+(defn parse
+  ([s] (parse s startparse-sax))
+  ([s startparse]
     (binding [*stack* nil
               *current* (struct element)
-	      *state* :between
-	      *sb* nil]
-      (. p (parse s content-handler))
-      ((:content *current*) 0))))
+              *state* :between
+              *sb* nil]
+      (startparse s content-handler)
+      ((:content *current*) 0)))) 
 
 (defn emit-element [e]
   (if (instance? String e)
