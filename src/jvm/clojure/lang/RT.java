@@ -102,7 +102,7 @@ Symbol.create("Exception"), Exception.class
 );
 
 
-static final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure"));
+static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure"));
 //static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
 final static public Var OUT =
 		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out));
@@ -124,8 +124,8 @@ final static Symbol IN_NAMESPACE = Symbol.create("in-ns");
 static final Symbol IDENTICAL = Symbol.create("identical?");
 final static Var CMD_LINE_ARGS = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
 //symbol
-final static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),
-                                         CLOJURE_NS);
+final public static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),
+                                                CLOJURE_NS);
 
 final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
 final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
@@ -226,6 +226,10 @@ static
 //		chars[i] = new Character((char) i);
 //	}
 
+
+static public Var var(String ns, String name){
+	return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name));
+}
 
 static public void init() throws Exception{
 	try
