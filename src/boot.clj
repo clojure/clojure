@@ -699,10 +699,13 @@ locking [x & body]
   ([x form & more] `(.. (. ~x ~form) ~@more)))
 
 (defmacro
-	#^{:doc "Macro. Threads the expr through the forms. Inserts expr as the second item in the first form.
-	If there are more forms, inserts the first form as the second item in second form, etc."}
+	#^{:doc "Macro. Threads the expr through the forms. Inserts expr as the second item in the first form,
+	making a list of it if it is not a list already. If there are more forms, inserts the first form as the 
+	second item in second form, etc."}
 ->
-  ([x form] `(~(first form) ~x ~@(rest form)))
+  ([x form] (if (seq? form)
+                `(~(first form) ~x ~@(rest form))
+                (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
 ;;multimethods
