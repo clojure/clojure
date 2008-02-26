@@ -218,4 +218,17 @@ remove [loc]
 
 (-> dz next remove next remove root)
 
+(loop [loc dz]
+  (if (end? loc)
+    (root loc)
+    (recur (next (if (= '* (node loc)) 
+                   (replace loc '/)
+                   loc)))))
+
+(loop [loc dz]
+  (if (end? loc)
+    (root loc)
+    (recur (next (if (= '* (node loc)) 
+                   (remove loc)
+                   loc)))))
 )
