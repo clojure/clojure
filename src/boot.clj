@@ -1167,7 +1167,7 @@ array [& items]
 (defn
 make-proxy [classes method-map]
   (. java.lang.reflect.Proxy
-    (newProxyInstance (. (identity clojure.lang.Compiler) (getClassLoader))
+    (newProxyInstance (.. Thread (currentThread) (getContextClassLoader))
                       (into-array classes)
                       (new clojure.lang.ProxyHandler method-map))))
 
