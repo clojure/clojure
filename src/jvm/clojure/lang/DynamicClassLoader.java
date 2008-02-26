@@ -21,7 +21,8 @@ HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
 HashMap<String, byte[]> map = new HashMap<String, byte[]>();
 
 public DynamicClassLoader(){
-	super(Compiler.class.getClassLoader());
+	super(Thread.currentThread().getContextClassLoader());
+	//super(Compiler.class.getClassLoader());
 }
 
 public DynamicClassLoader(ClassLoader parent){
