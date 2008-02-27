@@ -1388,7 +1388,9 @@ make-array
 	#^{:doc "Returns an array of Objects containing the contents of coll, which can be any Collection.
 	Maps to java.util.Collection.toArray()."}
 to-array [#^java.util.Collection coll]
-  (. coll (toArray)))
+  (if (zero? (count coll))
+    (. clojure.lang.RT EMPTY_ARRAY)
+    (. coll (toArray))))
 
 (defn
 	#^{:doc "Returns a (potentially-ragged) 2-dimensional array of Objects containing the contents of coll,
