@@ -2027,3 +2027,35 @@ find-doc [re-string]
 	#^{:doc "Prints documentation for the var named by varname"}
 doc [varname]
   `(print-doc (var ~varname)))
+
+(defn
+	#^{:doc "returns a lazy sequence of the nodes in a tree, via a depth-first walk.
+	branch? must be a fn of one arg that returns true if passed a node that can have children (but may not).
+	children must be a fn of one arg that returns a sequence of the children. Will only be called on nodes
+	for which branch? returns true. Root is the root node of the tree, must be a branch."}
+tree-seq [branch? children root]
+  (let [walk (fn walk [nodes]
+                 (when-first node nodes
+                   (lazy-cons
+                    node
+                    (if (branch? node)
+                      (lazy-cat (walk (children node))
+                                (walk (rest nodes)))
+                      (walk (rest nodes))))))]
+    (lazy-cons root (walk (children root)))))
+
+(defn
+	#^{:doc "A tree seq on java.io.Files"}
+file-seq [dir]
+  (tree-seq
+   (fn [#^java.io.File f] (. f (isDirectory)))
+   (fn [#^java.io.File d] (seq (. d (listFiles))))
+   dir))
+
+(defn
+	#^{:doc "A tree seq on the xml elements as per xml/parse"}
+xml-seq [root]
+  (tree-seq
+   (complement string?)
+   (comp seq :content)
+   root))
