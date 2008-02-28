@@ -74,7 +74,7 @@ static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 
 //static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
 
-static IPersistentMap specials = RT.map(
+static final public IPersistentMap specials = RT.map(
 		DEF, new DefExpr.Parser(),
 		LOOP, new LetExpr.Parser(),
 		RECUR, new RecurExpr.Parser(),
@@ -3292,6 +3292,29 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		Object o = n.getMapping(sym);
 		if(o == null)
 			throw new Exception("Unable to resolve symbol: " + sym + " in this context");
+		return o;
+		}
+}
+
+static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
+	//note - ns-qualified vars must already exist
+	if(sym.ns != null)
+		{
+		Namespace ns = Namespace.find(Symbol.create(sym.ns));
+		if(ns == null)
+			return null;
+		Var v = ns.findInternedVar(Symbol.create(sym.name));
+		if(v == null)
+			return null;
+		return v;
+		}
+	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+		{
+		return Class.forName(sym.name);
+		}
+	else
+		{
+		Object o = n.getMapping(sym);
 		return o;
 		}
 }

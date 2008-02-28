@@ -1672,11 +1672,11 @@ with-local-vars [name-vals-vec & body]
       (finally (. clojure.lang.Var (popThreadBindings))))))
 
 (defn
-	#^{:doc "Returns the var or Class to which a symbol will be resolved in the namespace.
+	#^{:doc "Returns the var or Class to which a symbol will be resolved in the namespace, else nil.
 	Note that if the symbol is fully qualified, the var/Class to which it resolves need not
 	be present in the namespace."}
 ns-resolve [ns sym]
-  (. clojure.lang.Compiler (resolveIn ns sym)))
+  (. clojure.lang.Compiler (maybeResolveIn ns sym)))
 
 (defn
 	#^{:doc "same as (ns-resolve *ns* symbol)"}
@@ -2061,3 +2061,13 @@ xml-seq [root]
    (complement string?)
    (comp seq :content)
    root))
+
+(defn
+	#^{:doc "Returns true if s names a special form"}
+special-symbol? [s]
+  (contains? (. clojure.lang.Compiler specials) s))
+
+(defn
+	#^{:doc "Returns true if v is of type clojure.lang.Var"}
+var? [v]
+  (instance? clojure.lang.Var v))
