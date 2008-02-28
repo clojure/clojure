@@ -128,7 +128,11 @@ defn (fn [name & fdecl]
 
 (. (var defn) (setMacro))
 
-
+(defn
+	#^{:doc "Throws a ClassCastException if x is not a c, else returns x."}
+cast [#^Class c x]
+ (. c (cast x)))
+ 
 (defn
 	#^{:doc "Creates a new vector containing the args."}
 vector
@@ -360,7 +364,7 @@ reverse [coll]
 	#^{:doc "Returns the sum of nums. (+) returns 0."}
 +
       ([] 0)
-      ([x] x)
+      ([x] (cast Number x))
       ([x y] (. clojure.lang.Num (add x y)))
       ([x y & more]
           (reduce + (+ x y) more)))
@@ -369,7 +373,7 @@ reverse [coll]
 	#^{:doc "Returns the product of nums. (*) returns 1."}
 *
       ([] 1)
-      ([x] x)
+      ([x] (cast Number x))
       ([x y] (. clojure.lang.Num (multiply x y)))
       ([x y & more]
           (reduce * (* x y) more)))
@@ -2071,3 +2075,4 @@ special-symbol? [s]
 	#^{:doc "Returns true if v is of type clojure.lang.Var"}
 var? [v]
   (instance? clojure.lang.Var v))
+
