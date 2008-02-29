@@ -2076,3 +2076,7 @@ special-symbol? [s]
 var? [v]
   (instance? clojure.lang.Var v))
 
+(defn
+	#^{:doc "Returns the Class of x"}
+class [#^Object x]
+  (. x (getClass)))
