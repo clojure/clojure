@@ -26,10 +26,60 @@
               ctype (. Type (getObjectType cname))
               iname (fn [c] (.. Type (getType c) (getInternalName)))
               fmap "__clojureFnMap"
+              totype (fn [c] (. Type (getType c)))
               to-types (fn [cs] (if (pos? (count cs))
-                                  (into-array (map #(. Type (getType %)) cs))
+                                  (into-array (map totype cs))
                                   (make-array Type 0)))
-              map-type (. Type (getType PersistentHashMap))]
+              super-type (totype super)
+              map-type (totype PersistentHashMap)
+              ifn-type (totype clojure.lang.IFn)
+              obj-type (totype Object)
+              sym-type (totype clojure.lang.Symbol)
+              rt-type  (totype clojure.lang.RT)
+              ex-type  (totype java.lang.UnsupportedOperationException)
+              gen-method
+                (fn [meth else-gen]
+                  (let [ptypes (to-types (. meth (getParameterTypes)))
+                        rtype (totype (. meth (getReturnType)))
+                        m (new Method (. meth (getName)) rtype ptypes)
+                        gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
+                        else-label (. gen (newLabel))
+                        end-label (. gen (newLabel))
+                        decl-type (. Type (getType (. meth (getDeclaringClass))))]
+                     (. gen (visitCode))
+                     (. gen (loadThis))
+                     (. gen (getField ctype fmap map-type))
+                                        ;get symbol corresponding to name
+                     (. gen (push (. meth (getName))))
+                     (. gen (invokeStatic sym-type (. Method (getMethod "clojure.lang.Symbol create(String)"))))
+                                        ;lookup fn in map
+                     (. gen (invokeStatic rt-type (. Method (getMethod "Object get(Object, Object)"))))
+                     (. gen (dup))
+                     (. gen (ifNull else-label))
+                                        ;if found
+                     (. gen (loadThis))
+                                        ;box args
+                     (dotimes i (count ptypes)
+                       (. gen (loadArg i))
+                       (. gen (box (nth ptypes i))))
+                                        ;call fn
+                     (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
+                                                           (into-array (cons obj-type 
+                                                                             (replicate (count ptypes) obj-type))))))
+                                        ;unbox return
+                     (. gen (unbox rtype))
+                     (. gen (goTo end-label))
+                     
+                                        ;else call supplied alternative generator
+                     (. gen (mark else-label))
+                     (. gen (pop))
+
+                     (else-gen gen m)
+                     
+                     (. gen (mark end-label))
+                     (. gen (returnValue))
+                     (. gen (endMethod))))]
+
           ;start class definition
           (. cv (visit (. Opcodes V1_5) (. Opcodes ACC_PUBLIC) 
                        cname nil (iname super) 
@@ -48,7 +98,7 @@
                 (. gen (loadThis))
                 (. gen (dup))
                 (. gen (loadArgs))
-                (. gen (invokeConstructor (. Type (getType super)) m))
+                (. gen (invokeConstructor super-type m))
                 ;init fmap
                 (. gen (getStatic map-type "EMPTY" map-type))
                 (. gen (putField ctype fmap map-type))
@@ -63,7 +113,7 @@
             (. gen (dup))
             (. gen (getField ctype fmap map-type))
             (. gen (loadArgs))
-            (. gen (invokeInterface (. Type (getType clojure.lang.IPersistentCollection))
+            (. gen (invokeInterface (totype clojure.lang.IPersistentCollection)
                                     (. Method (getMethod "clojure.lang.IPersistentCollection cons(Object)"))))
             (. gen (checkCast map-type))
             (. gen (putField ctype fmap map-type))
@@ -78,8 +128,43 @@
             (. gen (returnValue))
             (. gen (endMethod)))
 
-          ;add methods matching super's, if no mapping -> call super
-          ;add methods matching interfaces', if no mapping -> return void or throw
+          ;calc set of supers' non-private instance methods
+          (let [mm (loop [mm {} c super]
+                     (if c
+                       (recur
+                        (loop [mm mm meths (seq (. super (getDeclaredMethods)))]
+                          (if meths 
+                            (let [#^java.lang.reflect.Method meth (first meths)
+                                  mods (. meth (getModifiers))
+                                  mk [(. meth (getName)) (seq (. meth (getParameterTypes)))]]
+                              (if (or (contains? mm mk)
+                                      (. Modifier (isPrivate mods)) 
+                                      (. Modifier (isStatic mods))
+                                      (. Modifier (isFinal mods)))
+                                (recur mm (rest meths))
+                                (recur (assoc mm mk meth) (rest meths))))
+                            mm))
+                        (. c (getSuperclass)))
+                       mm))]
+            ;add methods matching supers', if no mapping -> call super
+            (doseq #^java.lang.reflect.Method meth (vals mm)
+              (gen-method meth 
+                          (fn [gen m]
+                            (. gen (loadThis))
+                                        ;push args
+                            (. gen (loadArgs))
+                                        ;call super
+                            (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL) 
+                                                    (. super-type (getInternalName))
+                                                    (. m (getName))
+                                                    (. m (getDescriptor)))))))
+
+            ;add methods matching interfaces', if no mapping -> throw
+            (doseq #^Class iface interfaces
+              (doseq #^java.lang.reflect.Method meth (. iface (getMethods))
+                 (gen-method meth 
+                             (fn [gen m]
+                               (. gen (throwException ex-type (. m (getName)))))))))
 
           ;finish class def
           (. cv (visitEnd))
@@ -94,7 +179,7 @@
   (. Reflector (invokeConstructor c (to-array ctor-args))))
 
 (defn update-proxy [#^IProxy proxy mappings]
-  (. proxy (updateMappings mappings)))
+  (. proxy (__updateClojureFnMappings mappings)))
 
 (defn proxy-mappings [#^IProxy proxy]
-  (. proxy (getMappings)))
+  (. proxy (__getClojureFnMappings)))
