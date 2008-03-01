@@ -484,7 +484,7 @@ final static class BitmapIndexedNode implements INode{
 
 }
 
-final static class LeafNode implements INode, IMapEntry, Map.Entry{
+final static class LeafNode extends AMapEntry implements INode{
 	final int hash;
 	final Object key;
 	final Object val;
@@ -493,10 +493,6 @@ final static class LeafNode implements INode, IMapEntry, Map.Entry{
 		this.hash = hash;
 		this.key = key;
 		this.val = val;
-	}
-
-	public String toString(){
-		return RT.entryString(key, val);
 	}
 
 	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){

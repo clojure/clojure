@@ -463,7 +463,7 @@ static public Object get(Object coll, Object key, Object notFound){
 
 static public Associative assoc(Object coll, Object key, Object val){
 	if(coll == null)
-		return new MapEntry(key, val);
+		return new PersistentArrayMap(new Object[]{key, val});
 	return ((Associative) coll).assoc(key, val);
 }
 
@@ -490,10 +490,6 @@ static public Object find(Object coll, Object key){
 	if(coll == null)
 		return null;
 	return ((Associative) coll).entryAt(key);
-}
-
-static public String entryString(Object key, Object val){
-	return "<" + key + " " + val + ">";
 }
 
 //takes a seq of key,val,key,val
@@ -531,15 +527,7 @@ static public Object nth(Object coll, int n){
 		return ((List) coll).get(n);
 	else if(coll instanceof Matcher)
 		return ((Matcher) coll).group(n);
-	else if(coll instanceof Map.Entry)
-		{
-		Map.Entry e = (Map.Entry) coll;
-		if(n == 0)
-			return e.getKey();
-		else if(n == 1)
-			return e.getValue();
-		throw new IndexOutOfBoundsException();
-		}
+
 	else if(coll instanceof Sequential)
 		{
 		ISeq seq = ((IPersistentCollection) coll).seq();
@@ -679,7 +667,7 @@ static public double doubleCast(Object x){
 
 static public IPersistentMap map(Object... init){
 	if(init != null && init.length == 2)
-		return new MapEntry(init[0], init[1]);
+		return new PersistentArrayMap(init);
 	return PersistentHashMap.create(init);
 }
 

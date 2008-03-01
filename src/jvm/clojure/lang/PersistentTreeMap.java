@@ -404,7 +404,7 @@ static Black black(Object key, Object val, Node left, Node right){
 	return new BlackBranchVal(key, val, left, right);
 }
 
-static abstract class Node implements IMapEntry{
+static abstract class Node extends AMapEntry{
 	final Object key;
 
 	Node(Object key){
@@ -417,10 +417,6 @@ static abstract class Node implements IMapEntry{
 
 	public Object val(){
 		return null;
-	}
-
-	public String toString(){
-		return RT.entryString(key(), val());
 	}
 
 	public Object getKey(){

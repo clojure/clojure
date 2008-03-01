@@ -72,7 +72,7 @@ public boolean containsKey(Object key){
 public IMapEntry entryAt(Object key){
 	int i = indexOf(key);
 	if(i >= 0)
-		return new Iter(array, i);
+		return new MapEntry(key,array[i+1]);
 	return null;
 }
 
@@ -186,7 +186,7 @@ public ISeq seq(){
 	return null;
 }
 
-static class Seq extends ASeq implements IMapEntry{
+static class Seq extends ASeq{
 	final Object[] array;
 	final int i;
 
@@ -201,28 +201,8 @@ static class Seq extends ASeq implements IMapEntry{
 		this.i = i;
 	}
 
-	public Object key(){
-		return array[i];
-	}
-
-	public Object val(){
-		return array[i + 1];
-	}
-
-	public Object getKey(){
-		return key();
-	}
-
-	public Object getValue(){
-		return val();
-	}
-
-	public Object setValue(Object value){
-		throw new UnsupportedOperationException();
-	}
-
 	public Object first(){
-		return this;
+		return new MapEntry(array[i],array[i+1]);
 	}
 
 	public ISeq rest(){
@@ -240,7 +220,7 @@ static class Seq extends ASeq implements IMapEntry{
 	}
 }
 
-static class Iter implements Iterator, IMapEntry{
+static class Iter implements Iterator{
 	Object[] array;
 	int i;
 
@@ -261,31 +241,12 @@ static class Iter implements Iterator, IMapEntry{
 
 	public Object next(){
 		i += 2;
-		return this;
+		return new MapEntry(array[i],array[i+1]);
 	}
 
 	public void remove(){
 		throw new UnsupportedOperationException();
 	}
 
-	public Object key(){
-		return array[i];
-	}
-
-	public Object val(){
-		return array[i + 1];
-	}
-
-	public Object getKey(){
-		return key();
-	}
-
-	public Object getValue(){
-		return val();
-	}
-
-	public Object setValue(Object value){
-		throw new UnsupportedOperationException();
-	}
 }
 }
