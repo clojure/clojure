@@ -138,7 +138,7 @@ get-proxy-class [& bases]
           (let [mm (loop [mm {} c super]
                      (if c
                        (recur
-                        (loop [mm mm meths (seq (. super (getDeclaredMethods)))]
+                        (loop [mm mm meths (seq (. c (getDeclaredMethods)))]
                           (if meths 
                             (let [#^java.lang.reflect.Method meth (first meths)
                                   mods (. meth (getModifiers))
