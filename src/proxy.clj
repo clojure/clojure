@@ -16,9 +16,12 @@
 (def *proxy-classes* (ref {}))
 
 (defn  
-  #^{:doc "Takes an optional single class followed by zero or more interfaces. If not supplied class defaults to Object. 
-  Creates an returns an instance of a proxy class derived from the supplied classes. The resulting value is 
-  cached and used for any subsequent requests for the same class set. Returns a Class object."}
+  #^{:doc "Takes an optional single class followed by zero or more
+		interfaces. If not supplied class defaults to Object.
+		Creates an returns an instance of a proxy class derived
+		from the supplied classes. The resulting value is  cached
+		and used for any subsequent requests for the same class
+		set. Returns a Class object."}
 get-proxy-class [& bases]
   (let [bases (if (. (first bases) (isInterface))
                 (cons Object bases)
@@ -182,17 +185,22 @@ get-proxy-class [& bases]
             c)))))
 
 (defn 
-  #^{:doc "Takes a proxy class and any arguments for its superclass ctor and creates and returns an instance
-  of the proxy."}
+  #^{:doc "Takes a proxy class and any arguments for its superclass ctor
+		and creates and returns an instance of the proxy."}
 construct-proxy [c & ctor-args]
   (. Reflector (invokeConstructor c (to-array ctor-args))))
 
 (defn 
-  #^{:doc "Takes a proxy instance and a map of symbols (whose names must correspond to methods of the proxy 
-  superclass/superinterfaces) to fns (which must take arguments matching the corresponding method, plus an 
-  additional (explicit) first arg corresponding to this, and updates (via assoc) the proxy's fn map. nil can be 
-  passed instead of a fn, in which case the corresponding method will revert to the default behavior. Note that this
-  function can be used to update the behavior of an existing instance without changing its identity."}
+  #^{:doc "Takes a proxy instance and a map of symbols (whose names must
+		correspond to methods of the proxy
+		superclass/superinterfaces) to fns (which must take
+		arguments matching the corresponding method, plus an
+		additional (explicit) first arg corresponding to this, and
+		updates (via assoc) the proxy's fn map. nil can be  passed
+		instead of a fn, in which case the corresponding method
+		will revert to the default behavior. Note that this
+		function can be used to update the behavior of an existing
+		instance without changing its identity."}
 update-proxy [#^IProxy proxy mappings]
   (. proxy (__updateClojureFnMappings mappings)))
 
@@ -203,16 +211,30 @@ proxy-mappings [#^IProxy proxy]
 
 (defmacro
   #^{:doc "class-and-interfaces - a vector of class names
-      args - a (possibly empty) vector of arguments to the superclass constructor.
-      f => (name [params*] body) or (name ([params*] body) ([params+] body) ...)
-  Expands to code which creates a instance of a proxy class that implements the named class/interface(s) 
-  by calling the supplied fns. A single class, if provided, must be first. If not provided it defaults to Object.
-  The interfaces names must be valid interface types. If a method fn is not provided for a class method, the 
-  superclass methd will be called. If a method fn is not provided for an interface method, an 
-  UnsupportedOperationException will be thrown should it be called. Method fns are closures and can capture 
-  the environment in which proxy is called. Each method fn takes an additional implicit first arg, 
-  which is bound to 'this. Note that while method fns can be provided to override protected methods, 
-  they have no other access to protected members, nor to super, as these capabilities cannot be proxied."}
+
+		args - a (possibly empty) vector of arguments to the
+			superclass constructor.
+
+		f => (name [params*] body) or
+			(name ([params*] body) ([params+] body) ...)
+
+		Expands to code which creates a instance of a proxy class
+		that implements the named class/interface(s)  by calling
+		the supplied fns. A single class, if provided, must be
+		first. If not provided it defaults to Object.
+
+		The interfaces names must be valid interface types. If a
+		method fn is not provided for a class method, the
+		superclass methd will be called. If a method fn is not
+		provided for an interface method, an
+		UnsupportedOperationException will be thrown should it be
+		called. Method fns are closures and can capture  the
+		environment in which proxy is called. Each method fn takes
+		an additional implicit first arg,  which is bound to
+		'this. Note that while method fns can be provided to
+		override protected methods,  they have no other access to
+		protected members, nor to super, as these capabilities
+		cannot be proxied."}
 proxy [class-and-interfaces args & fs]
   `(let [pc# (get-proxy-class ~@class-and-interfaces)
          p# (construct-proxy pc# ~@args)]   
@@ -233,8 +255,9 @@ proxy [class-and-interfaces args & fs]
 
 
 (defn
-	#^{:doc "Takes a Java object and returns a read-only implementation of the map abstraction based 
-        upon its JavaBean properties."}
+	#^{:doc "Takes a Java object and returns a read-only
+		implementation of the map abstraction based  upon its
+		JavaBean properties."}
 bean [#^Object x]
   (let [c (. x (getClass))
 	pmap (reduce (fn [m #^java.beans.PropertyDescriptor pd]
