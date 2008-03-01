@@ -238,6 +238,16 @@ static public void init() throws Exception{
 		                              Compiler.SOURCE, "boot.clj"));
 		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
 		Compiler.load(new InputStreamReader(ins));
+		ins.close();
+		ins = RT.class.getResourceAsStream("/proxy.clj");
+		Compiler.load(new InputStreamReader(ins));
+		ins.close();
+		ins = RT.class.getResourceAsStream("/zip.clj");
+		Compiler.load(new InputStreamReader(ins));
+		ins.close();
+		ins = RT.class.getResourceAsStream("/xml.clj");
+		Compiler.load(new InputStreamReader(ins));
+		ins.close();
 		}
 	finally
 		{

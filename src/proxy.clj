@@ -15,7 +15,11 @@
 
 (def *proxy-classes* (ref {}))
 
-(defn get-proxy-class [& bases]
+(defn  
+  #^{:doc "Takes an optional single class followed by zero or more interfaces. If not supplied class defaults to Object. 
+  Creates an returns an instance of a proxy class derived from the supplied classes. The resulting value is 
+  cached and used for any subsequent requests for the same class set. Returns a Class object."}
+get-proxy-class [& bases]
   (let [bases (if (. (first bases) (isInterface))
                 (cons Object bases)
                 bases)
@@ -38,7 +42,7 @@
               rt-type  (totype clojure.lang.RT)
               ex-type  (totype java.lang.UnsupportedOperationException)
               gen-method
-                (fn [meth else-gen]
+                (fn [#^java.lang.reflect.Method meth else-gen]
                   (let [ptypes (to-types (. meth (getParameterTypes)))
                         rtype (totype (. meth (getReturnType)))
                         m (new Method (. meth (getName)) rtype ptypes)
@@ -68,6 +72,8 @@
                                                                              (replicate (count ptypes) obj-type))))))
                                         ;unbox return
                      (. gen (unbox rtype))
+                     (when (= (. rtype (getSort)) (. Type VOID))
+                       (. gen (pop)))
                      (. gen (goTo end-label))
                      
                                         ;else call supplied alternative generator
@@ -175,11 +181,88 @@
             (sync nil (commute *proxy-classes* assoc bases c))
             c)))))
 
-(defn construct-proxy [c & ctor-args]
+(defn 
+  #^{:doc "Takes a proxy class and any arguments for its superclass ctor and creates and returns an instance
+  of the proxy."}
+construct-proxy [c & ctor-args]
   (. Reflector (invokeConstructor c (to-array ctor-args))))
 
-(defn update-proxy [#^IProxy proxy mappings]
+(defn 
+  #^{:doc "Takes a proxy instance and a map of symbols (whose names must correspond to methods of the proxy 
+  superclass/superinterfaces) to fns (which must take arguments matching the corresponding method, plus an 
+  additional (explicit) first arg corresponding to this, and updates (via assoc) the proxy's fn map. nil can be 
+  passed instead of a fn, in which case the corresponding method will revert to the default behavior. Note that this
+  function can be used to update the behavior of an existing instance without changing its identity."}
+update-proxy [#^IProxy proxy mappings]
   (. proxy (__updateClojureFnMappings mappings)))
 
-(defn proxy-mappings [#^IProxy proxy]
+(defn 
+  #^{:doc "Takes a proxy instance and returns the proxy's fn map."}
+proxy-mappings [#^IProxy proxy]
   (. proxy (__getClojureFnMappings)))
+
+(defmacro
+  #^{:doc "class-and-interfaces - a vector of class names
+      args - a (possibly empty) vector of arguments to the superclass constructor.
+      f => (name [params*] body) or (name ([params*] body) ([params+] body) ...)
+  Expands to code which creates a instance of a proxy class that implements the named class/interface(s) 
+  by calling the supplied fns. A single class, if provided, must be first. If not provided it defaults to Object.
+  The interfaces names must be valid interface types. If a method fn is not provided for a class method, the 
+  superclass methd will be called. If a method fn is not provided for an interface method, an 
+  UnsupportedOperationException will be thrown should it be called. Method fns are closures and can capture 
+  the environment in which proxy is called. Each method fn takes an additional implicit first arg, 
+  which is bound to 'this. Note that while method fns can be provided to override protected methods, 
+  they have no other access to protected members, nor to super, as these capabilities cannot be proxied."}
+proxy [class-and-interfaces args & fs]
+  `(let [pc# (get-proxy-class ~@class-and-interfaces)
+         p# (construct-proxy pc# ~@args)]   
+     (update-proxy p#
+       ~(loop [fmap {} fs fs]
+          (if fs
+            (let [[sym & meths] (first fs)
+                  meths (if (vector? (first meths))
+                          (list meths)
+                          meths)
+                  meths (map (fn [[params & body]]
+                               (cons (apply vector 'this params) body))
+                             meths)]
+              (recur (assoc fmap (list `quote sym) (cons `fn meths)) (rest fs)))
+            fmap)))
+     p#))
+
+
+
+(defn
+	#^{:doc "Takes a Java object and returns a read-only implementation of the map abstraction based 
+        upon its JavaBean properties."}
+bean [#^Object x]
+  (let [c (. x (getClass))
+	pmap (reduce (fn [m #^java.beans.PropertyDescriptor pd]
+			 (let [name (. pd (getName))
+			       method (. pd (getReadMethod))]
+			   (if (and method (zero? (alength (. method (getParameterTypes)))))
+			     (assoc m (keyword name) (fn [] (. method (invoke x nil))))
+			     m)))
+		     {}
+		     (seq (.. java.beans.Introspector
+			      (getBeanInfo c)
+			      (getPropertyDescriptors))))
+	v (fn [k] ((pmap k)))
+    snapshot (fn []
+                (reduce (fn [m e]
+                            (assoc m (key e) ((val e))))
+                        {} (seq pmap)))]
+    (proxy [clojure.lang.IPersistentMap]
+           []
+      (containsKey [k] (contains? pmap k))
+      (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
+      (valAt ([k] (v k))
+	     ([k default] (if (contains? pmap k) (v k) default)))
+      (cons [m] (conj (snapshot) m))
+      (count [] (count pmap))
+      (assoc [k v] (assoc (snapshot) k v))
+      (without [k] (dissoc (snapshot) k))
+      (seq [] ((fn thisfn [pseq]
+		  (when pseq
+		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
+			       (thisfn (rest pseq))))) (keys pmap))))))

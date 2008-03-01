@@ -1856,38 +1856,6 @@ fn [& sigs]
       (list* 'fn* name new-sigs)
       (cons 'fn* new-sigs))))
 
-(defn
-	#^{:doc "Takes a Java object and returns a read-only implementation of the map abstraction based upon its JavaBean properties."}
-bean [#^Object x]
-  (let [c (. x (getClass))
-	pmap (reduce (fn [m #^java.beans.PropertyDescriptor pd]
-			 (let [name (. pd (getName))
-			       method (. pd (getReadMethod))]
-			   (if (and method (zero? (alength (. method (getParameterTypes)))))
-			     (assoc m (keyword name) (fn [] (. method (invoke x nil))))
-			     m)))
-		     {}
-		     (seq (.. java.beans.Introspector
-			      (getBeanInfo c)
-			      (getPropertyDescriptors))))
-	v (fn [k] ((pmap k)))
-    snapshot (fn []
-                (reduce (fn [m e]
-                            (assoc m (key e) ((val e))))
-                        {} (seq pmap)))]
-    (implement [clojure.lang.IPersistentMap]
-      (containsKey [k] (contains? pmap k))
-      (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
-      (valAt ([k] (v k))
-	     ([k default] (if (contains? pmap k) (v k) default)))
-      (cons [m] (conj (snapshot) m))
-      (count [] (count pmap))
-      (assoc [k v] (assoc (snapshot) k v))
-      (without [k] (dissoc (snapshot) k))
-      (seq [] ((fn thisfn [pseq]
-		  (when pseq
-		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
-			       (thisfn (rest pseq))))) (keys pmap))))))
 
 (defmacro
 	#^{:doc "ignores body, yields nil"}
