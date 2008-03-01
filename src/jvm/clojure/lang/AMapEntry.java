@@ -17,14 +17,12 @@ import java.io.StringWriter;
 public abstract class AMapEntry implements IMapEntry, IPersistentVector{
 
 public boolean equals(Object obj){
-	if(!(obj instanceof IMapEntry))
-		return false;
-	IMapEntry o = (IMapEntry) obj;
-	return RT.equal(key(), o.key()) && RT.equal(val(), o.val());
+	return APersistentVector.doEquals(this, obj);
 }
 
 public int hashCode(){
-	return RT.hashCombine(RT.hash(key()), RT.hash(val()));
+	//must match logic in APersistentVector
+	return RT.hashCombine(RT.hashCombine(0,RT.hash(key())), RT.hash(val()));
 }
 
 public String toString(){

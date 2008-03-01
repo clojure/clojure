@@ -29,10 +29,12 @@ public String toString(){
 }
 
 public IPersistentCollection cons(Object o){
-	if(o instanceof IMapEntry)
+	if(o instanceof IPersistentVector)
 		{
-		IMapEntry e = (IMapEntry) o;
-		return assoc(e.key(), e.val());
+		IPersistentVector v = (IPersistentVector) o;
+		if(v.count() != 2)
+			throw new IllegalArgumentException("Vector arg to map conj must be a pair");
+		return assoc(v.nth(0), v.nth(1));
 		}
 
 	IPersistentMap ret = this;

@@ -38,15 +38,15 @@ public ISeq rseq(){
 	return null;
 }
 
-public boolean equals(Object obj){
+static boolean doEquals(IPersistentVector v, Object obj){
 	if(obj instanceof IPersistentVector)
 		{
 		IPersistentVector ma = (IPersistentVector) obj;
-		if(ma.count() != count() || ma.hashCode() != hashCode())
+		if(ma.count() != v.count() || ma.hashCode() != v.hashCode())
 			return false;
-		for(int i = 0; i < count(); i++)
+		for(int i = 0; i < v.count(); i++)
 			{
-			if(!RT.equal(nth(i), ma.nth(i)))
+			if(!RT.equal(v.nth(i), ma.nth(i)))
 				return false;
 			}
 		}
@@ -55,9 +55,9 @@ public boolean equals(Object obj){
 		if(!(obj instanceof Sequential))
 			return false;
 		ISeq ms = ((IPersistentCollection) obj).seq();
-		for(int i = 0; i < count(); i++, ms = ms.rest())
+		for(int i = 0; i < v.count(); i++, ms = ms.rest())
 			{
-			if(ms == null || !RT.equal(nth(i), ms.first()))
+			if(ms == null || !RT.equal(v.nth(i), ms.first()))
 				return false;
 			}
 		if(ms != null)
@@ -65,6 +65,11 @@ public boolean equals(Object obj){
 		}
 
 	return true;
+
+}
+
+public boolean equals(Object obj){
+	return doEquals(this, obj);
 }
 
 public int hashCode(){
