@@ -19,10 +19,14 @@ list (. clojure.lang.PersistentList creator))
 		seq is the rest."}
 cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
 
-;during bootstrap we don't have destructuring let or fn, will redefine later
+;during bootstrap we don't have destructuring let, loop or fn, will redefine later
 (def
 	#^{:macro true}
 let (fn* [& decl] (cons 'let* decl)))
+
+(def
+	#^{:macro true}
+loop (fn* [& decl] (cons 'loop* decl)))
 
 (def
 	#^{:macro true}
@@ -1918,51 +1922,47 @@ map? [x]
 vector? [x]
   (instance? clojure.lang.IPersistentVector x))
 
-;redefine let with destructuring
-(defmacro
-	#^{:doc "Evaluates the exprs in a lexical context in which the
-		symbols in the binding-forms are bound to their respective
-		init-exprs or parts therein."}
-let [bindings & body]
+;redefine let and loop  with destructuring
+(defn destructure [bindings]
   (let [bmap (apply array-map bindings)
         pb (fn pb [bvec b v]
                (let [pvec
                      (fn [bvec b val]
-                         (let [gvec (gensym "vec__")]
-                           (loop [ret (-> bvec (conj gvec) (conj val))
-                                  n 0
-                                  bs b
-                                  seen-rest? false]
-                             (if bs
-                               (let [firstb (first bs)]
-                                 (cond
-                                  (= firstb '&) (recur (pb ret (second bs) (list `nthrest gvec n))
-                                                       n
-                                                       (rrest bs)
-                                                       true)
-                                  (= firstb :as) (pb ret (second bs) gvec)
-                                  :else (if seen-rest?
-                                          (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
-                                          (recur (pb ret firstb  (list `nth gvec n))
-                                                 (inc n)
-                                                 (rest bs)
-                                                 seen-rest?))))
-                               ret))))
+                       (let [gvec (gensym "vec__")]
+                         (loop [ret (-> bvec (conj gvec) (conj val))
+                                n 0
+                                bs b
+                                seen-rest? false]
+                           (if bs
+                             (let [firstb (first bs)]
+                               (cond
+                                (= firstb '&) (recur (pb ret (second bs) (list `nthrest gvec n))
+                                                     n
+                                                     (rrest bs)
+                                                     true)
+                                (= firstb :as) (pb ret (second bs) gvec)
+                                :else (if seen-rest?
+                                        (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
+                                        (recur (pb ret firstb  (list `nth gvec n))
+                                               (inc n)
+                                               (rest bs)
+                                               seen-rest?))))
+                             ret))))
                      pmap
                      (fn [bvec b v]
-                         (let [gmap (or (:as b) (gensym "map__"))
-                               defaults (:or b)]
-                           (loop [ret (-> bvec (conj gmap) (conj v))
-                                  bes (seq (-> b (dissoc :as) (dissoc :or)))]
-                             (if bes
-                               (let [bb (key (first bes))
-                                     bk (val (first bes))
-                                     has-default (contains? defaults bb)]
-                                 (recur (pb ret bb (if has-default
-                                                     (list `get gmap bk (defaults bb))
-                                                     (list `get gmap bk)))
-                                        (rest bes)))
-                               ret))))]
+                       (let [gmap (or (:as b) (gensym "map__"))
+                             defaults (:or b)]
+                         (loop [ret (-> bvec (conj gmap) (conj v))
+                                bes (seq (-> b (dissoc :as) (dissoc :or)))]
+                           (if bes
+                             (let [bb (key (first bes))
+                                   bk (val (first bes))
+                                   has-default (contains? defaults bb)]
+                               (recur (pb ret bb (if has-default
+                                                   (list `get gmap bk (defaults bb))
+                                                   (list `get gmap bk)))
+                                      (rest bes)))
+                             ret))))]
                  (cond
                   (symbol? b) (-> bvec (conj b) (conj v))
                   (vector? b) (pvec bvec b v)
@@ -1970,9 +1970,31 @@ let [bindings & body]
                   :else (throw (new Exception "Unsupported binding form")))))
         process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
     (if (every? symbol? (keys bmap))
-      `(let* ~bindings ~@body)
-      `(let* ~(reduce process-entry [] bmap) ~@body))))
+      bindings
+      (reduce process-entry [] bmap))))
 
+(defmacro
+	#^{:doc "Evaluates the exprs in a lexical context in which the
+		symbols in the binding-forms are bound to their respective
+		init-exprs or parts therein."}
+let [bindings & body]
+  `(let* ~(destructure bindings) ~@body))
+
+(defmacro
+	#^{:doc "Evaluates the exprs in a lexical context in which the
+		symbols in the binding-forms are bound to their respective
+		init-exprs or parts therein. Acts as a recur target."}
+loop [bindings & body]
+  (let [db (destructure bindings)]
+    (if (= db bindings)
+      `(loop* ~bindings ~@body)
+      (let [vs (take-nth 2 (drop 1 bindings))
+            gs (map (fn [x] (gensym)) vs)
+            ds (take-nth 2 bindings)]
+        `(loop* ~(apply vector (interleave gs vs))
+          (let ~(apply vector (interleave ds gs))
+            ~@body))))))
+  
 (defmacro
 	#^{:doc "Same as (when (seq xs) (let [x (first xs)] body))"}
 when-first [x xs & body]
