@@ -2258,3 +2258,38 @@ var? [v]
 	#^{:doc "Returns the Class of x"}
 class [#^Object x]
   (. x (getClass)))
+
+(defn 
+	#^{:doc "Reads the file named by f into a string and returns it."}
+slurp [f]
+  (let [r (new java.io.BufferedReader (new java.io.FileReader f))
+        sb (new StringBuilder)]
+    (loop [c (. r (read))]
+      (if (neg? c)
+        (str sb)
+        (do 
+          (. sb (append (char c)))
+          (recur (. r (read))))))))
+
+(defn 
+	#^{:doc "Returns the substring of s beginning at start inclusive, 
+		and ending at end (defaults to length of string), exclusive."}
+subs 
+  ([#^String s start] (. s (substring start)))
+  ([#^String s start end] (. s (substring start end))))
+
+(defn
+	#^{:doc "Returns the x for which (k x), a number, is greatest."}
+max-key
+  ([k x] x)
+  ([k x y] (if (> (k x) (k y)) x y))
+  ([k x y & more]
+   (reduce #(max-key k %1 %2) (max-key k x y) more)))
+
+(defn
+	#^{:doc "Returns the x for which (k x), a number, is least."}
+min-key
+  ([k x] x)
+  ([k x y] (if (< (k x) (k y)) x y))
+  ([k x y & more]
+   (reduce #(min-key k %1 %2) (min-key k x y) more)))
