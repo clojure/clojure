@@ -13,10 +13,7 @@
 package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.io.*;
 import java.lang.reflect.Array;
@@ -331,6 +328,8 @@ static public ISeq seq(Object coll){
 		return StringSeq.create((String) coll);
 	else if(coll instanceof Map)
 		return seq(((Map) coll).entrySet());
+	else if(coll instanceof Enumeration)
+		return EnumerationSeq.create(((Enumeration) coll));
 	else
 		throw new IllegalAccessError("Don't know how to create ISeq from arg");
 }
