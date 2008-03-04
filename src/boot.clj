@@ -164,11 +164,25 @@ hash-map
           (. clojure.lang.PersistentHashMap (create keyvals))))
 
 (defn
+	#^{:doc "Returns a new hash set with supplied keys."}
+hash-set
+      ([] {})
+      ([& keys]
+          (. clojure.lang.PersistentHashSet (create keys))))
+
+(defn
 	#^{:doc "keyval => key val
 		Returns a new sorted map with supplied mappings."}
 sorted-map
       ([& keyvals]
           (. clojure.lang.PersistentTreeMap (create keyvals))))
+
+(defn
+	#^{:doc "Returns a new sorted set with supplied keys."}
+sorted-set
+      ([] {})
+      ([& keys]
+          (. clojure.lang.PersistentTreeSet (create keys))))
 
 (defn
 	#^{:doc "keyval => key val
@@ -221,8 +235,6 @@ true? [x] (identical? x true))
 (defn
 	#^{:tag Boolean :doc "Returns true if x is logical false, false otherwise."}
 not [x] (if x false true))
-
-
 
 
 (defn
@@ -670,6 +682,19 @@ dissoc
    (. clojure.lang.RT (dissoc map key)))
   ([map key & ks]
    (let [ret (dissoc map key)]
+     (if ks
+       (recur ret (first ks) (rest ks))
+       ret))))
+
+(defn
+	#^{:doc "disj[oin]. Returns a new set of the same
+		(hashed/sorted) type, that does not contain key(s)."}
+disj
+  ([set] set)
+  ([#^clojure.lang.IPersistentSet set key]
+   (. set (disjoin key)))
+  ([set key & ks]
+   (let [ret (disj set key)]
      (if ks
        (recur ret (first ks) (rest ks))
        ret))))

@@ -29,6 +29,7 @@ static Symbol CONCAT = Symbol.create("clojure", "concat");
 static Symbol LIST = Symbol.create("clojure", "list");
 static Symbol APPLY = Symbol.create("clojure", "apply");
 static Symbol HASHMAP = Symbol.create("clojure", "hash-map");
+static Symbol HASHSET = Symbol.create("clojure", "hash-set");
 static Symbol VECTOR = Symbol.create("clojure", "vector");
 static Symbol WITH_META = Symbol.create("clojure", "with-meta");
 static Symbol META = Symbol.create("clojure", "meta");
@@ -78,6 +79,7 @@ static
 	dispatchMacros['\''] = new WrappingReader(Compiler.THE_VAR);
 	dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['('] = new FnReader();
+	dispatchMacros['{'] = new SetReader();
 	}
 
 static boolean isWhitespace(int ch){
@@ -538,6 +540,10 @@ static class SyntaxQuoteReader extends AFn{
 				{
 				ret = RT.list(APPLY, VECTOR, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq())));
 				}
+			else if(form instanceof IPersistentSet)
+				{
+				ret = RT.list(APPLY, HASHSET, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq())));
+				}
 			else if(form instanceof ISeq)
 				{
 				ISeq seq = RT.seq(form);
@@ -684,6 +690,14 @@ static class MapReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		return PersistentHashMap.create(readDelimitedList('}', r, true));
+	}
+
+}
+
+static class SetReader extends AFn{
+	public Object invoke(Object reader, Object leftbracket) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		return PersistentHashSet.create(readDelimitedList('}', r, true));
 	}
 
 }

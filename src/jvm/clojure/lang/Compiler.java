@@ -2059,6 +2059,7 @@ static String munge(String name){
 static class EmptyExpr implements Expr{
 	final Object coll;
 	final static Type HASHMAP_TYPE = Type.getType(PersistentHashMap.class);
+	final static Type HASHSET_TYPE = Type.getType(PersistentHashSet.class);
 	final static Type VECTOR_TYPE = Type.getType(PersistentVector.class);
 	final static Type LIST_TYPE = Type.getType(PersistentList.class);
 
@@ -2080,6 +2081,8 @@ static class EmptyExpr implements Expr{
 				gen.getStatic(VECTOR_TYPE, "EMPTY", VECTOR_TYPE);
 			else if(coll instanceof IPersistentMap)
 				gen.getStatic(HASHMAP_TYPE, "EMPTY", HASHMAP_TYPE);
+			else if(coll instanceof IPersistentSet)
+				gen.getStatic(HASHSET_TYPE, "EMPTY", HASHSET_TYPE);
 			else
 				throw new UnsupportedOperationException("Unknown Collection type");
 			}
@@ -2096,6 +2099,8 @@ static class EmptyExpr implements Expr{
 			return IPersistentVector.class;
 		else if(coll instanceof IPersistentMap)
 			return IPersistentMap.class;
+		else if(coll instanceof IPersistentSet)
+			return IPersistentSet.class;
 		else
 			throw new UnsupportedOperationException("Unknown Collection type");
 	}
@@ -2175,6 +2180,54 @@ static class MapExpr implements Expr{
 			keyvals = (IPersistentVector) keyvals.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e.val()));
 			}
 		Expr ret = new MapExpr(keyvals);
+		if(form instanceof IObj && ((IObj) form).meta() != null)
+			return new MetaExpr(ret, (MapExpr) MapExpr
+					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
+		else
+			return ret;
+	}
+}
+
+static class SetExpr implements Expr{
+	final IPersistentVector keys;
+	final static Method setMethod = Method.getMethod("clojure.lang.IPersistentSet set(Object[])");
+
+
+	public SetExpr(IPersistentVector keys){
+		this.keys = keys;
+	}
+
+	public Object eval() throws Exception{
+		Object[] ret = new Object[keys.count()];
+		for(int i = 0; i < keys.count(); i++)
+			ret[i] = ((Expr) keys.nth(i)).eval();
+		return RT.set(ret);
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(keys, fn, gen);
+		gen.invokeStatic(RT_TYPE, setMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return IPersistentSet.class;
+	}
+
+
+	static public Expr parse(C context, IPersistentSet form) throws Exception{
+		IPersistentVector keys = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+			{
+			Object e = s.first();
+			keys = (IPersistentVector) keys.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e));
+			}
+		Expr ret = new SetExpr(keys);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
 			return new MetaExpr(ret, (MapExpr) MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
@@ -3131,6 +3184,8 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		return VectorExpr.parse(context, (IPersistentVector) form);
 	else if(form instanceof IPersistentMap)
 		return MapExpr.parse(context, (IPersistentMap) form);
+	else if(form instanceof IPersistentSet)
+		return SetExpr.parse(context, (IPersistentSet) form);
 
 //	else
 	//throw new UnsupportedOperationException();

@@ -471,6 +471,8 @@ static public Object contains(Object coll, Object key){
 		return F;
 	else if(coll instanceof Associative)
 		return ((Associative) coll).containsKey(key) ? T : F;
+	else if(coll instanceof IPersistentSet)
+		return ((IPersistentSet) coll).contains(key) ? T : F;
 	else if(coll instanceof Map)
 		{
 		Map m = (Map) coll;
@@ -668,6 +670,10 @@ static public IPersistentMap map(Object... init){
 	if(init != null && init.length == 2)
 		return new PersistentArrayMap(init);
 	return PersistentHashMap.create(init);
+}
+
+static public IPersistentSet set(Object... init){
+	return PersistentHashSet.create(init);
 }
 
 static public IPersistentVector vector(Object... init){
@@ -921,6 +927,17 @@ static public void print(Object x, Writer w) throws Exception{
 				w.write(' ');
 			}
 		w.write(']');
+		}
+	else if(x instanceof IPersistentSet)
+		{
+		w.write("#{");
+		for(ISeq s = seq(x); s != null; s = s.rest())
+			{
+			print(s.first(), w);
+			if(s.rest() != null)
+				w.write(" ");
+			}
+		w.write('}');
 		}
 //	else if(x instanceof Map.Entry)
 //		{
