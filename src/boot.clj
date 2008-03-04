@@ -166,7 +166,7 @@ hash-map
 (defn
 	#^{:doc "Returns a new hash set with supplied keys."}
 hash-set
-      ([] {})
+      ([] #{})
       ([& keys]
           (. clojure.lang.PersistentHashSet (create keys))))
 
@@ -707,7 +707,7 @@ find [map key]
 (defn
 	#^{:doc "Returns a map containing only those entries in map whose
  		key is in keys"}
-select [map keyseq]
+select-keys [map keyseq]
  (loop [ret {} keys (seq keyseq)]
    (if keys
         (let [entry (. clojure.lang.RT (find map (first keys)))]
@@ -920,7 +920,7 @@ deref [#^clojure.lang.IRef ref]
 
 		Thus fun should be commutative, or, failing that, you must
 		accept last-one-in-wins behavior.  commute allows for more
-		concurrency than set."}
+		concurrency than ref-set."}
 commute [#^clojure.lang.Ref ref fun & args]
   (. ref (commute fun args)))
 
@@ -935,14 +935,14 @@ alter [#^clojure.lang.Ref ref fun & args]
 (defn
 	#^{:doc "Must be called in a transaction. Sets the value of ref.
 		Returns val."}
-set [#^clojure.lang.Ref ref val]
+ref-set [#^clojure.lang.Ref ref val]
     (. ref (set val)))
 
 (defn
 	#^{:doc "Must be called in a transaction. Protects the ref from
 		modification by other transactions.  Returns the
 		in-transaction-value of ref. Allows for more concurrency
-		than (set ref @ref)"}
+		than (ref-set ref @ref)"}
 ensure [#^clojure.lang.Ref ref]
     (. ref (touch))
     (. ref (get)))
@@ -1733,20 +1733,14 @@ resultset-seq [#^java.sql.ResultSet rs]
 
 (defn
 	#^{:doc "Returns a map of the distinct elements of coll to true."}
-to-set [coll]
-  (loop [ret {} keys (seq coll)]
-    (if keys
-      (recur (if (contains? ret (first keys))
-	       ret
-	       (assoc ret (first keys) true))
-	     (rest keys))
-      ret)))
+set [coll]
+  (apply hash-set coll))
 
 (defn
 	#^{:doc "Returns a sequence of the elements of coll with
 		duplicates removed"}
 distinct [coll]
-  (keys (to-set coll)))
+  (seq (set coll)))
 
 (defn #^{:private true}
 filter-key [keyfn pred amap]
@@ -1834,7 +1828,7 @@ refer [ns-sym & filters]
         fs (apply hash-map filters)
         nspublics (ns-publics ns)
         rename (or (:rename fs) {})
-        exclude (to-set (:exclude fs))
+        exclude (set (:exclude fs))
         to-do (or (:only fs) (keys nspublics))]
     (doseq sym to-do
       (when-not (exclude sym)

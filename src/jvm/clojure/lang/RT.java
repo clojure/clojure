@@ -245,6 +245,9 @@ static public void init() throws Exception{
 		ins = RT.class.getResourceAsStream("/xml.clj");
 		Compiler.load(new InputStreamReader(ins));
 		ins.close();
+		ins = RT.class.getResourceAsStream("/set.clj");
+		Compiler.load(new InputStreamReader(ins));
+		ins.close();
 		}
 	finally
 		{
