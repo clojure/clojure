@@ -1439,10 +1439,7 @@ static class TryExpr implements Expr{
 			CatchClause clause = (CatchClause) catchExprs.nth(i);
 			clause.label = gen.newLabel();
 			clause.endLabel = gen.newLabel();
-			gen.visitTryCatchBlock(startTry, endTry, clause.label, clause.c.getName().replace('.', '/'));
 			}
-		if(finallyExpr != null)
-			gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
 
 		gen.mark(startTry);
 		tryExpr.emit(context, fn, gen);
@@ -1473,6 +1470,13 @@ static class TryExpr implements Expr{
 			gen.throwException();
 			}
 		gen.mark(end);
+		for(int i = 0; i < catchExprs.count(); i++)
+			{
+			CatchClause clause = (CatchClause) catchExprs.nth(i);
+			gen.visitTryCatchBlock(startTry, endTry, clause.label, clause.c.getName().replace('.', '/'));
+			}
+		if(finallyExpr != null)
+			gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
 		for(int i = 0; i < catchExprs.count(); i++)
 			{
 			CatchClause clause = (CatchClause) catchExprs.nth(i);
