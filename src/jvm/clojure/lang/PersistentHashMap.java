@@ -143,7 +143,7 @@ public int count(){
 }
 
 public ISeq seq(){
-	return root.seq();
+	return root.nodeSeq();
 }
 
 static int mask(int hash, int shift){
@@ -179,7 +179,7 @@ static interface INode{
 
 	LeafNode find(int hash, Object key);
 
-	ISeq seq();
+	ISeq nodeSeq();
 
 	int getHash();
 }
@@ -206,7 +206,7 @@ final static class EmptyNode implements INode{
 		return null;
 	}
 
-	public ISeq seq(){
+	public ISeq nodeSeq(){
 		return null;
 	}
 
@@ -274,7 +274,7 @@ final static class FullNode implements INode{
 		return nodes[mask(hash, shift)].find(hash, key);
 	}
 
-	public ISeq seq(){
+	public ISeq nodeSeq(){
 		return Seq.create(this, 0);
 	}
 
@@ -304,7 +304,7 @@ final static class FullNode implements INode{
 		static ISeq create(FullNode node, int i){
 			if(i >= node.nodes.length)
 				return null;
-			return new Seq(node.nodes[i].seq(), i, node);
+			return new Seq(node.nodes[i].nodeSeq(), i, node);
 		}
 
 		public Object first(){
@@ -436,7 +436,7 @@ final static class BitmapIndexedNode implements INode{
 		return _hash;
 	}
 
-	public ISeq seq(){
+	public ISeq nodeSeq(){
 		return Seq.create(this, 0);
 	}
 
@@ -462,7 +462,7 @@ final static class BitmapIndexedNode implements INode{
 		static ISeq create(BitmapIndexedNode node, int i){
 			if(i >= node.nodes.length)
 				return null;
-			return new Seq(node.nodes[i].seq(), i, node);
+			return new Seq(node.nodes[i].nodeSeq(), i, node);
 		}
 
 		public Object first(){
@@ -525,7 +525,7 @@ final static class LeafNode extends AMapEntry implements INode{
 		return null;
 	}
 
-	public ISeq seq(){
+	public ISeq nodeSeq(){
 		return RT.cons(this, null);
 	}
 
@@ -604,7 +604,7 @@ final static class HashCollisionNode implements INode{
 		return null;
 	}
 
-	public ISeq seq(){
+	public ISeq nodeSeq(){
 		return ArraySeq.create((Object[]) leaves);
 	}
 
