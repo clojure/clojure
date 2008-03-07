@@ -2047,7 +2047,7 @@ static public IPersistentMap CHAR_MAP =
 		                         '\\', "_BSLASH_",
 		                         '?', "_QMARK_");
 
-static String munge(String name){
+static public String munge(String name){
 	StringBuilder sb = new StringBuilder();
 	for(char c : name.toCharArray())
 		{
@@ -2505,7 +2505,7 @@ static class FnExpr implements Expr{
 		              "+ 1 " + source + "\n" +
 		              (String) SOURCE_PATH.get() + "\n" +
 		              "*L\n" +
-		              "1#1,1000:1\n" +
+		              "1#1,10000:1\n" +
 		              "*E";
 		if(source != null && SOURCE_PATH.get() != null)
 		//cv.visitSource(source, null);
