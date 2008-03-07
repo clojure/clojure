@@ -575,119 +575,100 @@
   {:tag Boolean}
   [x] (. clojure.lang.Num (zeroPred x)))
 
-(defn
-	#^{:doc "quot[ient] of dividing numerator by denominator."}
-quot [num div]
-  (. clojure.lang.Num (quotient num div)))
+(defn quot
+  "quot[ient] of dividing numerator by denominator."
+  [num div]
+    (. clojure.lang.Num (quotient num div)))
 
-(defn
-	#^{:doc "rem[ainder] of dividing numerator by denominator."}
-rem [num div]
-  (. clojure.lang.Num (remainder num div)))
+(defn rem
+  "rem[ainder] of dividing numerator by denominator."
+  [num div]
+    (. clojure.lang.Num (remainder num div)))
 
 ;;Bit ops
 
-(defn
-	#^{:doc "Bitwise shift left"}
-bit-shift-left [x y]
-  (. clojure.lang.IntegerNum (shiftLeft x y)))
+(defn bit-shift-left
+  "Bitwise shift left"
+  [x y] (. clojure.lang.IntegerNum (shiftLeft x y)))
 
-(defn
-	#^{:doc "Bitwise shift right"}
-bit-shift-right [x y]
-  (. clojure.lang.IntegerNum (shiftRight x y)))
+(defn bit-shift-right
+  "Bitwise shift right"
+  [x y] (. clojure.lang.IntegerNum (shiftRight x y)))
 
-(defn
-	#^{:doc "Bitwise and"}
-bit-and [x y]
-  (. clojure.lang.IntegerNum (bitAnd x y)))
+(defn bit-and
+  "Bitwise and"
+  [x y] (. clojure.lang.IntegerNum (bitAnd x y)))
 
-(defn
-	#^{:doc "Bitwise or"}
-bit-or [x y]
-  (. clojure.lang.IntegerNum (bitOr x y)))
+(defn bit-or
+  "Bitwise or"
+  [x y] (. clojure.lang.IntegerNum (bitOr x y)))
 
-(defn
-	#^{:doc "Bitwise exclusive or"}
-bit-xor [x y]
-  (. clojure.lang.IntegerNum (bitXor x y)))
+(defn bit-xor
+  "Bitwise exclusive or"
+  [x y] (. clojure.lang.IntegerNum (bitXor x y)))
 
-(defn
-	#^{:doc "Bitwise not"}
-bit-not [x]
-  (. clojure.lang.IntegerNum (bitNot x)))
+(defn bit-not
+  "Bitwise not"
+  [x] (. clojure.lang.IntegerNum (bitNot x)))
 
-(defn
-	#^{:doc "Takes a fn f and returns a fn that takes the same
-		arguments as f, has the same effects, if any, and returns
-		the opposite truth value."}
-complement [f]
-  (fn [& args]
-    (not (apply f args))))
+(defn complement
+  "Takes a fn f and returns a fn that takes the same arguments as f,
+  has the same effects, if any, and returns the opposite truth value."  
+  [f] (fn [& args]
+        (not (apply f args))))
 
-(defn
-	#^{:doc "Returns a function that takes any number of arguments and
-		returns x."}
-constantly [x]
-  (fn [& args] x))
+(defn constantly
+  "Returns a function that takes any number of arguments and returns x."
+  [x] (fn [& args] x))
 
-(defn
-	#^{:doc "Returns its argument."}
-identity [x] x)
+(defn identity
+  "Returns its argument."
+  [x] x)
 
 ;;Collection stuff
 
 
 
-(defn
-	#^{:doc "Returns the number of items in the collection. (count
-		nil) returns 0.  Also works on strings, arrays, and Java
-		Collections and Maps"}
-count [coll]
-  (. clojure.lang.RT (count coll)))
+(defn count
+  "Returns the number of items in the collection. (count nil) returns
+  0.  Also works on strings, arrays, and Java Collections and Maps"
+  [coll] (. clojure.lang.RT (count coll)))
 
 ;;list stuff
-(defn
-	#^{:doc "Same as first. Returns the first item in the list. If the
-		list is empty, returns nil."}
-peek [list]
-  (. clojure.lang.RT (peek list)))
+(defn peek
+  "For a list or queue, same as first, for a vector, same as, but much
+  more efficient than, last. If the collection is empty, returns nil."
+  [coll] (. clojure.lang.RT (peek coll)))
 
-(defn
-	#^{:doc "Returns a new list without the first item. If the list is
-		empty, throws an exception.  Note - not the same as rest."}
-pop [list]
-  (. clojure.lang.RT (pop list)))
+(defn pop
+  "For a list or queue, returns a new list/queue without the first
+  item, for a vector, returns a new vector without the last item. If
+  the collection is empty, throws an exception.  Note - not the same
+  as rest/butlast."
+  [coll] (. clojure.lang.RT (pop coll)))
 
-(defn
-	#^{:doc "Returns the value at the index. get returns nil if index
-		out of bounds, nth throws an exception.  nth also works
-		for strings,  Java arrays and Lists, and, in O(n) time,
-		for sequences."}
-nth [coll index]
- (. clojure.lang.RT (nth coll index)))
+(defn nth
+  "Returns the value at the index. get returns nil if index out of
+  bounds, nth throws an exception.  nth also works for strings, Java
+  arrays and Lists, and, in O(n) time, for sequences."
+  [coll index] (. clojure.lang.RT (nth coll index)))
 
 ;;map stuff
 
-(defn
-	#^{:doc "Returns true if key is present, else false."}
-contains? [map key]
- (. clojure.lang.RT (contains map key)))
+(defn contains?
+  "Returns true if key is present, else false."
+  [map key] (. clojure.lang.RT (contains map key)))
 
-(defn
-	#^{:doc "Returns the value mapped to key, not-found or
-		nil if key not present."}
-get
+(defn get
+  "Returns the value mapped to key, not-found or nil if key not present."
   ([map key]
-    (. clojure.lang.RT (get map key)))
+   (. clojure.lang.RT (get map key)))
   ([map key not-found]
-    (. clojure.lang.RT (get map key not-found))))
+   (. clojure.lang.RT (get map key not-found))))
 
-(defn
-	#^{:doc "dissoc[iate]. Returns a new map of the same
-		(hashed/sorted) type, that does not contain a mapping for
-		key(s)."}
-dissoc
+(defn dissoc
+  "dissoc[iate]. Returns a new map of the same (hashed/sorted) type,
+  that does not contain a mapping for key(s)."
   ([map] map)
   ([map key]
    (. clojure.lang.RT (dissoc map key)))
@@ -697,10 +678,9 @@ dissoc
        (recur ret (first ks) (rest ks))
        ret))))
 
-(defn
-	#^{:doc "disj[oin]. Returns a new set of the same
-		(hashed/sorted) type, that does not contain key(s)."}
-disj
+(defn disj
+  "disj[oin]. Returns a new set of the same (hashed/sorted) type, that
+  does not contain key(s)."
   ([set] set)
   ([#^clojure.lang.IPersistentSet set key]
    (. set (disjoin key)))
@@ -710,86 +690,67 @@ disj
        (recur ret (first ks) (rest ks))
        ret))))
 
-(defn
-	#^{:doc "Returns the map entry for key, or nil if key not present."}
-find [map key]
- (. clojure.lang.RT (find map key)))
+(defn find
+  "Returns the map entry for key, or nil if key not present."
+  [map key] (. clojure.lang.RT (find map key)))
 
-(defn
-	#^{:doc "Returns a map containing only those entries in map whose
- 		key is in keys"}
-select-keys [map keyseq]
- (loop [ret {} keys (seq keyseq)]
-   (if keys
+(defn select-keys
+  "Returns a map containing only those entries in map whose key is in keys"
+  [map keyseq]
+    (loop [ret {} keys (seq keyseq)]
+      (if keys
         (let [entry (. clojure.lang.RT (find map (first keys)))]
-            (recur
-                (if entry
-                    (conj ret entry)
-                   ret)
-                (rest keys)))
-      ret)))
+          (recur
+           (if entry
+             (conj ret entry)
+             ret)
+           (rest keys)))
+        ret)))
 
-(defn
-	#^{:doc "Returns a sequence of the map's keys."}
-keys [map]
-  (. clojure.lang.RT (keys map)))
+(defn keys
+  "Returns a sequence of the map's keys."
+  [map] (. clojure.lang.RT (keys map)))
 
-(defn
-	#^{:doc "Returns a sequence of the map's values."}
-vals [map]
-  (. clojure.lang.RT (vals map)))
+(defn vals
+  "Returns a sequence of the map's values."
+  [map] (. clojure.lang.RT (vals map)))
 
-(defn
-	#^{:doc "Returns the key of the map entry."}
-key [#^java.util.Map$Entry e]
- (. e (getKey)))
+(defn key
+  "Returns the key of the map entry."
+  [#^java.util.Map$Entry e]
+    (. e (getKey)))
 
-(defn
-	#^{:doc "Returns the value in the map entry."}
-val [#^java.util.Map$Entry e]
- (. e (getValue)))
+(defn val
+  "Returns the value in the map entry."
+  [#^java.util.Map$Entry e]
+    (. e (getValue)))
 
-(defn
-	#^{:doc "Returns, in constant time, a sequence of the items in rev
-		(which can be a vector or sorted-map), in reverse order."}
-rseq [#^clojure.lang.Reversible rev]
-  (. rev (rseq)))
+(defn rseq
+  "Returns, in constant time, a sequence of the items in rev (which
+  can be a vector or sorted-map), in reverse order."
+  [#^clojure.lang.Reversible rev]
+    (. rev (rseq)))
 
-(defn
-	#^{:doc "Returns the name String of a symbol or keyword."}
-name [#^clojure.lang.Named x]
-  (. x (getName)))
+(defn name
+  "Returns the name String of a symbol or keyword."
+  [#^clojure.lang.Named x]
+    (. x (getName)))
 
-(defn
-	#^{:doc "Returns the namespace String of a symbol or keyword, or
-		nil if not present."}
-namespace [#^clojure.lang.Named x]
-  (. x (getNamespace)))
+(defn namespace
+  "Returns the namespace String of a symbol or keyword, or nil if not present."
+  [#^clojure.lang.Named x]
+    (. x (getNamespace)))
 
-(defn #^{:private true}
-andfn [& args]
-      (if (nil? (rest args))
-          (first args)
-        (and (first args) (recur (rest args)))))
-
-(defn #^{:private true}
-orfn [& args]
-      (if (nil? args)
-          nil
-        (or (first args) (recur (rest args)))))
-
-
-(defmacro
-	#^{:doc "Executes exprs in an implicit do, while holding the
-		monitor of x.  Will release the monitor of x in all
-		circumstances."}
-locking [x & body]
+(defmacro locking
+  "Executes exprs in an implicit do, while holding the monitor of x.
+  Will release the monitor of x in all circumstances."
+  [x & body]
   `(let [lockee# ~x]
-        (try
-           (monitor-enter lockee#)
-           ~@body
-           (finally
-             (monitor-exit lockee#)))))
+     (try
+      (monitor-enter lockee#)
+      ~@body
+      (finally
+       (monitor-exit lockee#)))))
 
 (defmacro
 	#^{:doc "form => fieldName-symbol or (instanceMethodName-symbol args*)
@@ -2228,7 +2189,7 @@ print-doc [v]
   (prn (:arglists ^v))
   (when (:macro ^v)
     (println "Macro"))
-  (println "\t\t" (:doc ^v)))
+  (println " " (:doc ^v)))
 
 (defn
 	#^{:doc "Prints documentation for any var whose documentation or
