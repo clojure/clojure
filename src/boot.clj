@@ -752,323 +752,304 @@
       (finally
        (monitor-exit lockee#)))))
 
-(defmacro
-	#^{:doc "form => fieldName-symbol or (instanceMethodName-symbol args*)
+(defmacro ..
+  "form => fieldName-symbol or (instanceMethodName-symbol args*)
 
-		Expands into a member access (.) of the first member on
-		the first argument, followed by the next member on the
-		result, etc. For instance:
+  Expands into a member access (.) of the first member on the first
+  argument, followed by the next member on the result, etc. For
+  instance:
 
-			(.. System (getProperties) (get \"os.name\"))
+  (.. System (getProperties) (get \"os.name\"))
 
-		expands to:
+  expands to:
 
-			(. (. System (getProperties)) (get \"os.name\"))
+  (. (. System (getProperties)) (get \"os.name\"))
 
-		but is easier to write, read, and understand."}
-..
+  but is easier to write, read, and understand."
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
 
-(defmacro
-	#^{:doc "Macro. Threads the expr through the forms. Inserts expr
-		as the second item in the first form, making a list of it
-		if it is not a list already. If there are more forms,
-		inserts the first form as the  second item in second form,
-		etc."}
-->
+(defmacro ->
+  "Macro. Threads the expr through the forms. Inserts x as the
+  second item in the first form, making a list of it if it is not a
+  list already. If there are more forms, inserts the first form as the
+  second item in second form, etc."
   ([x form] (if (seq? form)
-                `(~(first form) ~x ~@(rest form))
-                (list form x)))
+              `(~(first form) ~x ~@(rest form))
+              (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
 ;;multimethods
-(defmacro 
-	#^{:doc "Creates a new multimethod with the associated dispatch
-		function. If default-dispatch-val is supplied it becomes
-		the default dispatch value of the multimethod, otherwise
-		the default dispatch value is :default."}
-defmulti
+(defmacro defmulti
+  "Creates a new multimethod with the associated dispatch function. If
+  default-dispatch-val is supplied it becomes the default dispatch
+  value of the multimethod, otherwise the default dispatch value
+  is :default."
   ([name dispatch-fn] `(defmulti ~name ~dispatch-fn :default))
   ([name dispatch-fn default-val]
-    `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
+   `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
-(defmacro
-	#^{:doc "Creates and installs a new method of multimethod
-		associated with dispatch-value. "}
-defmethod [multifn dispatch-val & fn-tail]
+(defmacro defmethod
+  "Creates and installs a new method of multimethod associated with dispatch-value. "
+  [multifn dispatch-val & fn-tail]
   `(let [pvar# (var ~multifn)]
-      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
+     (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
+                             (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
 
-(defmacro
-	#^{:doc "Removes the method of multimethod associated
-		with dispatch-value."}
-remove-method [multifn dispatch-val]
+(defmacro remove-method
+  "Removes the method of multimethod associated	with dispatch-value."
+ [multifn dispatch-val]
   `(let [pvar# (var ~multifn)]
-      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] (. mf# (dissoc ~dispatch-val)))))))
+      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
+                              (. mf# (dissoc ~dispatch-val)))))))
 
 ;;;;;;;;; var stuff      
 
-(defmacro
-	#^{:doc "binding => var-symbol init-expr
-		Creates new bindings for the (already-existing) vars, with
-		the supplied initial values, executes the exprs in an
-		implicit do, then re-establishes the bindings that existed
-		before."}
-binding [bindings & body]
-  (let [var-ize (fn [var-vals]
-                    (loop [ret [] vvs (seq var-vals)]
-                          (if vvs
-                              (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
-                                      (rest (rest vvs)))
-                            (seq ret))))]
-    `(try
-      (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
-      ~@body
-      (finally
-        (. clojure.lang.Var (popThreadBindings))))))
+(defmacro binding
+  "binding => var-symbol init-expr 
 
-(defn
-	#^{:doc "Returns the global var named by the namespace-qualified
-		symbol, or nil if no var with that name."}
-find-var [sym]
- (. clojure.lang.Var (find sym)))
+  Creates new bindings for the (already-existing) vars, with the
+  supplied initial values, executes the exprs in an implicit do, then
+  re-establishes the bindings that existed before."  
+  [bindings & body]
+    (let [var-ize (fn [var-vals]
+                    (loop [ret [] vvs (seq var-vals)]
+                      (if vvs
+                        (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
+                                (rest (rest vvs)))
+                        (seq ret))))]
+      `(try
+        (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
+        ~@body
+        (finally
+         (. clojure.lang.Var (popThreadBindings))))))
+
+(defn find-var
+  "Returns the global var named by the namespace-qualified symbol, or
+  nil if no var with that name."
+ [sym] (. clojure.lang.Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn
-	#^{:doc "Creates and returns an agent with an initial
-		value of state."}
-agent [state]
- (new clojure.lang.Agent state))
+(defn agent
+  "Creates and returns an agent with an initial value of state."
+  [state] (new clojure.lang.Agent state))
 
-(defn #^{:private true}
-agent-of [state]
- (:agent ^state))
+(defn agent-of
+  {:private true}
+  [state] (:agent ^state))
 
-(defn
-	#^{:doc "Dispatch an action to an agent. Returns the agent
-		immediately.  Subsequently, in a thread in a thread pool,
-		the state of the agent will be set to the value of:
+(defn !
+  "Dispatch an action to an agent. Returns the agent immediately.
+  Subsequently, in a thread in a thread pool, the state of the will be
+  set to the value of:
 
-			(apply action-fn state-of-agent args)"}
-! [#^clojure.lang.Agent a f & args]
-  (. a (dispatch f args)))
+  (apply action-fn state-of-agent args)"
+  [#^clojure.lang.Agent a f & args]
+    (. a (dispatch f args)))
 
-(defn
-	#^{:doc "Returns a sequence of the exceptions thrown during
-		asynchronous actions of the agent."}
-agent-errors [#^clojure.lang.Agent a]
-  (. a (getErrors)))
+(defn agent-errors
+  "Returns a sequence of the exceptions thrown during asynchronous
+  actions of the agent."  
+  [#^clojure.lang.Agent a] (. a (getErrors)))
 
-(defn
-	#^{:doc "Clears any exceptions thrown during asynchronous actions
-		of the agent, allowing subsequent actions to occur."}
-clear-agent-errors [#^clojure.lang.Agent a]
-  (. a (clearErrors)))
+(defn clear-agent-errors
+  "Clears any exceptions thrown during asynchronous actions of the
+  agent, allowing subsequent actions to occur."  
+  [#^clojure.lang.Agent a] (. a (clearErrors)))
 
-(defn
-	#^{:doc "Creates and returns a Ref with an initial value of x."}
-ref [x]
- (new clojure.lang.Ref x))
+(defn ref
+  "Creates and returns a Ref with an initial value of x."
+  [x] (new clojure.lang.Ref x))
 
-(defn
-	#^{:doc "Also reader macro: @ref/@agent
-		Within a transaction, returns the in-transaction-value of
-		ref, else returns the most-recently-committed value of
-		ref. When applied to an agent, returns its current state."}
-deref [#^clojure.lang.IRef ref]
-  (. ref (get)))
+(defn deref
+  "Also reader macro: @ref/@agent Within a transaction, returns the
+  in-transaction-value of ref, else returns the
+  most-recently-committed value of ref. When applied to an agent,
+  returns its current state."
+ [#^clojure.lang.IRef ref] (. ref (get)))
 
-(defn
-	#^{:doc "Must be called in a transaction. Sets the
-		in-transaction-value of ref to:
 
-			(apply fun in-transaction-value-of-ref args)
+(defn commute
+  "Must be called in a transaction. Sets the in-transaction-value of
+  ref to:
 
-		At the commit point of the transaction, sets the value of
-		ref to be:
+  (apply fun in-transaction-value-of-ref args)
 
-			(apply fun most-recently-committed-value-of-ref args)
+  At the commit point of the transaction, sets the value of ref to be:
 
-		Thus fun should be commutative, or, failing that, you must
-		accept last-one-in-wins behavior.  commute allows for more
-		concurrency than ref-set."}
-commute [#^clojure.lang.Ref ref fun & args]
-  (. ref (commute fun args)))
+  (apply fun most-recently-committed-value-of-ref args)
 
-(defn
-	#^{:doc "Must be called in a transaction. Sets the
-		in-transaction-value of ref to:
+  Thus fun should be commutative, or, failing that, you must accept
+  last-one-in-wins behavior.  commute allows for more concurrency than
+  ref-set."  
 
-			(apply fun in-transaction-value-of-ref args)"}
-alter [#^clojure.lang.Ref ref fun & args]
-  (. ref (alter fun args)))
+  [#^clojure.lang.Ref ref fun & args]
+    (. ref (commute fun args)))
 
-(defn
-	#^{:doc "Must be called in a transaction. Sets the value of ref.
-		Returns val."}
-ref-set [#^clojure.lang.Ref ref val]
+(defn alter
+  "Must be called in a transaction. Sets the in-transaction-value of
+  ref to:
+
+  (apply fun in-transaction-value-of-ref args)"
+  [#^clojure.lang.Ref ref fun & args]
+    (. ref (alter fun args)))
+
+(defn ref-set
+  "Must be called in a transaction. Sets the value of ref.
+  Returns val."  
+  [#^clojure.lang.Ref ref val]
     (. ref (set val)))
 
-(defn
-	#^{:doc "Must be called in a transaction. Protects the ref from
-		modification by other transactions.  Returns the
-		in-transaction-value of ref. Allows for more concurrency
-		than (ref-set ref @ref)"}
-ensure [#^clojure.lang.Ref ref]
+(defn ensure
+  "Must be called in a transaction. Protects the ref from modification
+  by other transactions.  Returns the in-transaction-value of
+  ref. Allows for more concurrency than (ref-set ref @ref)"
+  [#^clojure.lang.Ref ref]
     (. ref (touch))
     (. ref (get)))
 
-(defmacro
-	#^{:doc "transaction-flags => TBD, pass nil for now
+(defmacro sync
+  "transaction-flags => TBD, pass nil for now
 
-		Runs the exprs (in an implicit do) in a transaction that
-		encompasses exprs and any nested calls.  Starts a
-		transaction if none is already running on this thread. Any
-		uncaught exception will abort the transaction and flow out
-		of sync. The exprs may be run more than once, but any
-		effects on Refs will be atomic."}
-sync [flags-ignored-for-now & body]
+  Runs the exprs (in an implicit do) in a transaction that encompasses
+  exprs and any nested calls.  Starts a transaction if none is already
+  running on this thread. Any uncaught exception will abort the
+  transaction and flow out of sync. The exprs may be run more than
+  once, but any effects on Refs will be atomic."
+  [flags-ignored-for-now & body]
   `(. clojure.lang.LockingTransaction
-    (runInTransaction (fn [] ~@body))))
+      (runInTransaction (fn [] ~@body))))
 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
 
-(defn
-	#^{:doc "Takes a set of functions and returns a fn that is the
-		composition of those fns.  The returned fn takes a
-		variable number of args, applies the rightmost of fns to
-		the args, the next fn (right-to-left) to the result, etc."}
-comp [& fs]
-  (let [fs (reverse fs)]
-     (fn [& args]
-       (loop [ret (apply (first fs) args) fs (rest fs)]
+(defn comp
+  "Takes a set of functions and returns a fn that is the composition
+  of those fns.  The returned fn takes a variable number of args,
+  applies the rightmost of fns to the args, the next
+  fn (right-to-left) to the result, etc."
+  [& fs]
+    (let [fs (reverse fs)]
+      (fn [& args]
+        (loop [ret (apply (first fs) args) fs (rest fs)]
           (if fs
-              (recur ((first fs) ret) (rest fs))
-             ret)))))
+            (recur ((first fs) ret) (rest fs))
+            ret)))))
 
-(defn
-	#^{:doc "Takes a function f and fewer than the normal arguments to
-		f, and returns a fn that takes a variable number of
-		additional args. When called, the returned function calls
-		f with args + additional args."}
-partial
-	([f arg1]
-	   (fn [& args] (apply f arg1 args)))
-	([f arg1 arg2]
-	   (fn [& args] (apply f arg1 arg2 args)))
-	([f arg1 arg2 arg3]
-	   (fn [& args] (apply f arg1 arg2 arg3 args)))
-	([f arg1 arg2 arg3 & more]
-	  (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
+(defn partial
+  "Takes a function f and fewer than the normal arguments to f, and
+  returns a fn that takes a variable number of additional args. When
+  called, the returned function calls f with args + additional args."
+  ([f arg1]
+   (fn [& args] (apply f arg1 args)))
+  ([f arg1 arg2]
+   (fn [& args] (apply f arg1 arg2 args)))
+  ([f arg1 arg2 arg3]
+   (fn [& args] (apply f arg1 arg2 arg3 args)))
+  ([f arg1 arg2 arg3 & more]
+   (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
-
-
   
-(defn
-	#^{:tag Boolean
-		:doc "Returns true if (pred x) is logical true for
-		every x in coll, else false."}
-every? [pred coll]
-  (if (seq coll)
-     (and (pred (first coll))
-          (recur pred (rest coll)))
-    true))
+(defn every?
+  "Returns true if (pred x) is logical true for every x in coll, else
+  false."  
+  {:tag Boolean}
+  [pred coll]
+    (if (seq coll)
+      (and (pred (first coll))
+           (recur pred (rest coll)))
+      true))
 
 (def
-	#^{:tag Boolean
-	   :doc "Returns false if (pred x) is logical true for
-		every x in coll, else true."}
+ #^{:tag Boolean
+    :doc "Returns false if (pred x) is logical true for every x in
+  coll, else true."}
 not-every? (comp not every?))
 
-(defn
-	#^{:doc "Returns the first logical true value of (pred x) for
-		any x in coll, else nil."}
-some [pred coll]
-  (when (seq coll)
-    (or (pred (first coll)) (recur pred (rest coll)))))
+(defn some
+  "Returns the first logical true value of (pred x) for any x in coll,
+  else nil."
+  [pred coll]
+    (when (seq coll)
+      (or (pred (first coll)) (recur pred (rest coll)))))
 
 (def 
-	#^{:tag Boolean
-	   :doc "Returns false if (pred x) is logical true for
-		any x in coll, else true."}
-not-any? (comp not some))
+ #^{:tag Boolean
+    :doc "Returns false if (pred x) is logical true for any x in coll,
+  else true."}  
+ not-any? (comp not some))
 
-(defn
-	#^{:doc "Returns a lazy seq consisting of the result of applying f
-		to the set of first items of each coll, followed by
-		applying f to the set of second items in each coll, until
-		any one of the colls is exhausted.  Any remaining items in
-		other colls are ignored. Function f should accept
-		number-of-colls arguments."}
-map
+(defn map
+  "Returns a lazy seq consisting of the result of applying f to the
+  set of first items of each coll, followed by applying f to the set
+  of second items in each coll, until any one of the colls is
+  exhausted.  Any remaining items in other colls are ignored. Function
+  f should accept number-of-colls arguments."
   ([f coll]
-    (when (seq coll)
-       (lazy-cons (f (first coll)) (map f (rest coll)))))
+   (when (seq coll)
+     (lazy-cons (f (first coll)) (map f (rest coll)))))
   ([f coll & colls]
-    (when (and (seq coll) (every? seq colls))
-      (lazy-cons (apply f (first coll) (map first colls))
-                 (apply map f (rest coll) (map rest colls))))))
+   (when (and (seq coll) (every? seq colls))
+     (lazy-cons (apply f (first coll) (map first colls))
+                (apply map f (rest coll) (map rest colls))))))
 
-(defn
-	#^{:doc "Returns the result of applying concat to the result of
-		applying map to f and colls.  Thus function f should
-		return a collection."}
-mapcat [f & colls]
-   (apply concat (apply map f colls)))
+(defn mapcat
+  "Returns the result of applying concat to the result of applying map
+  to f and colls.  Thus function f should return a collection."
+  [f & colls]
+    (apply concat (apply map f colls)))
 
-(defn
-	#^{:doc "Returns a lazy seq of the items in coll for which
-		(pred item) returns true."}
-filter [pred coll]
-  (when (seq coll)
-     (if (pred (first coll))
-         (lazy-cons (first coll) (filter pred (rest coll)))
-       (recur pred (rest coll)))))
+(defn filter
+  "Returns a lazy seq of the items in coll for which
+  (pred item) returns true."
+  [pred coll]
+    (when (seq coll)
+      (if (pred (first coll))
+        (lazy-cons (first coll) (filter pred (rest coll)))
+        (recur pred (rest coll)))))
 
-(defn
-	#^{:doc "Returns a lazy seq of the first n items in coll, or all
-		items if there are fewer than n."}
-take [n coll]
-  (when (and (pos? n) (seq coll))
-    (lazy-cons (first coll) (take (dec n) (rest coll)))))
+(defn take
+  "Returns a lazy seq of the first n items in coll, or all items if
+  there are fewer than n."  
+  [n coll]
+    (when (and (pos? n) (seq coll))
+      (lazy-cons (first coll) (take (dec n) (rest coll)))))
 
-(defn
-	#^{:doc "Returns a lazy seq of successive items from coll while
-		(pred item) returns true."}
-take-while [pred coll]
-  (when (and (seq coll) (pred (first coll)))
-     (lazy-cons (first coll) (take-while pred (rest coll)))))
+(defn take-while
+  "Returns a lazy seq of successive items from coll while
+  (pred item) returns true."
+  [pred coll]
+    (when (and (seq coll) (pred (first coll)))
+      (lazy-cons (first coll) (take-while pred (rest coll)))))
 
-(defn
-	#^{:doc "Returns a lazy seq of all but the first n items in coll."}
-drop [n coll]
-  (if (and (pos? n) (seq coll))
+(defn drop
+  "Returns a lazy seq of all but the first n items in coll."
+  [n coll]
+    (if (and (pos? n) (seq coll))
       (recur (dec n) (rest coll))
-     coll))
+      coll))
 
-(defn
-	#^{:doc "Returns a lazy seq of the items in coll starting from
-		the first item for which (pred item) returns nil."}
-drop-while [pred coll]
-  (if (and (seq coll) (pred (first coll)))
+(defn drop-while
+  "Returns a lazy seq of the items in coll starting from the first
+  item for which (pred item) returns nil."
+  [pred coll]
+    (if (and (seq coll) (pred (first coll)))
       (recur pred (rest coll))
-     coll))
+      coll))
 
-(defn
-	#^{:doc "Returns a lazy (infinite!) seq of repetitions of
-		the items in coll."}
-cycle [coll]
-  (when (seq coll)
-    (let [rep (fn thisfn [xs]
-                  (if xs
-                    (lazy-cons (first xs) (thisfn (rest xs)))
-                    (recur (seq coll))))]
-      (rep (seq coll)))))
+(defn cycle
+  "Returns a lazy (infinite!) seq of repetitions of the items in
+  coll."  
+  [coll]
+    (when (seq coll)
+      (let [rep (fn thisfn [xs]
+                    (if xs
+                      (lazy-cons (first xs) (thisfn (rest xs)))
+                      (recur (seq coll))))]
+        (rep (seq coll)))))
 
 (defn
 	#^{:doc "Returns a vector of [(take n coll) (drop n coll)]"}
