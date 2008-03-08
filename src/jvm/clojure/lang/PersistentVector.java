@@ -12,20 +12,18 @@
 
 package clojure.lang;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Iterator;
 
 public class PersistentVector extends APersistentVector{
 final int cnt;
 final int shift;
 final Object[] root;
+final Object[] tail;
 
-public final static PersistentVector EMPTY = new PersistentVector(0, 0, RT.EMPTY_ARRAY);
+public final static PersistentVector EMPTY = new PersistentVector(0, 5, RT.EMPTY_ARRAY, RT.EMPTY_ARRAY);
 
 
 static public PersistentVector create(ISeq items){
-	//todo - consider building tree directly
 	PersistentVector ret = EMPTY;
 	for(; items != null; items = items.rest())
 		ret = ret.cons(items.first());
@@ -33,42 +31,45 @@ static public PersistentVector create(ISeq items){
 }
 
 static public PersistentVector create(List items){
-	//todo - consider building tree directly
 	PersistentVector ret = EMPTY;
 	for(Object item : items)
 		ret = ret.cons(item);
 	return ret;
 }
 
-/**
- * This ctor may capture/alias the passed array, so do not modify later !
- */
 static public PersistentVector create(Object... items){
-	//todo - consider building tree directly
-	if(items.length <= 32)
-		return new PersistentVector(items.length, 0, items);
-	return create(ArraySeq.create((Object[]) items));
+	PersistentVector ret = EMPTY;
+	for(Object item : items)
+		ret = ret.cons(item);
+	return ret;
 }
 
-PersistentVector(int cnt, int shift, Object[] root){
+PersistentVector(int cnt, int shift, Object[] root, Object[] tail){
 	super(null);
 	this.cnt = cnt;
 	this.shift = shift;
 	this.root = root;
+	this.tail = tail;
 }
 
 
-PersistentVector(IPersistentMap meta, int cnt, int shift, Object[] root){
+PersistentVector(IPersistentMap meta, int cnt, int shift, Object[] root, Object[] tail){
 	super(meta);
 	this.cnt = cnt;
 	this.shift = shift;
 	this.root = root;
+	this.tail = tail;
 }
 
+final int tailoff(){
+	return cnt - tail.length;
+}
 
 public Object nth(int i){
 	if(i >= 0 && i < cnt)
 		{
+		if(i >= tailoff())
+			return tail[i & 0x01f];
 		Object[] arr = root;
 		for(int level = shift; level > 0; level -= 5)
 			arr = (Object[]) arr[(i >>> level) & 0x01f];
@@ -79,7 +80,18 @@ public Object nth(int i){
 
 public PersistentVector assocN(int i, Object val){
 	if(i >= 0 && i < cnt)
-		return new PersistentVector(meta(), cnt, shift, doAssoc(shift, root, i, val));
+		{
+		if(i >= tailoff())
+			{
+			Object[] newTail = new Object[tail.length];
+			System.arraycopy(tail, 0, newTail, 0, tail.length);
+			newTail[i & 0x01f] = val;
+
+			return new PersistentVector(meta(), cnt, shift, root, newTail);
+			}
+
+		return new PersistentVector(meta(), cnt, shift, doAssoc(shift, root, i, val), tail);
+		}
 	if(i == cnt)
 		return cons(val);
 	throw new IndexOutOfBoundsException();
@@ -104,31 +116,38 @@ public int count(){
 }
 
 public PersistentVector withMeta(IPersistentMap meta){
-	return new PersistentVector(meta, cnt, shift, root);
+	return new PersistentVector(meta, cnt, shift, root, tail);
 }
 
 
 public PersistentVector cons(Object val){
+	if(tail.length < 32)
+		{
+		Object[] newTail = new Object[tail.length + 1];
+		System.arraycopy(tail, 0, newTail, 0, tail.length);
+		newTail[tail.length] = val;
+		return new PersistentVector(meta(), cnt + 1, shift, root, newTail);
+		}
 	Box expansion = new Box(null);
-	Object[] newroot = doCons(shift, root, val, expansion);
+	Object[] newroot = pushTail(shift - 5, root, tail, expansion);
 	int newshift = shift;
 	if(expansion.val != null)
 		{
 		newroot = new Object[]{newroot, expansion.val};
 		newshift += 5;
 		}
-	return new PersistentVector(meta(), cnt + 1, newshift, newroot);
+	return new PersistentVector(meta(), cnt + 1, newshift, newroot, new Object[]{val});
 }
 
-private Object[] doCons(int level, Object[] arr, Object val, Box expansion){
+private Object[] pushTail(int level, Object[] arr, Object[] tailNode, Box expansion){
 	Object newchild;
 	if(level == 0)
 		{
-		newchild = val;
+		newchild = tailNode;
 		}
 	else
 		{
-		newchild = doCons(level - 5, (Object[]) arr[arr.length - 1], val, expansion);
+		newchild = pushTail(level - 5, (Object[]) arr[arr.length - 1], tailNode, expansion);
 		if(expansion.val == null)
 			{
 			Object[] ret = arr.clone();
@@ -154,24 +173,33 @@ private Object[] doCons(int level, Object[] arr, Object val, Box expansion){
 public PersistentVector pop(){
 	if(cnt == 0)
 		throw new IllegalAccessError("Can't pop empty vector");
-	Object[] newroot = doPop(shift, root);
+	if(cnt == 1)
+		return EMPTY.withMeta(meta());
+	if(tail.length > 1)
+		{
+		Object[] newTail = new Object[tail.length - 1];
+		System.arraycopy(tail, 0, newTail, 0, newTail.length);
+		return new PersistentVector(meta(), cnt - 1, shift, root, newTail);
+		}
+	Box ptail = new Box(null);
+	Object[] newroot = popTail(shift - 5, root, ptail);
 	int newshift = shift;
 	if(newroot == null)
 		{
-		return (PersistentVector) EMPTY.withMeta(meta());
+		newroot = RT.EMPTY_ARRAY;
 		}
-	if(shift > 0 && newroot.length == 1)
+	if(shift > 5 && newroot.length == 1)
 		{
 		newroot = (Object[]) newroot[0];
 		newshift -= 5;
 		}
-	return new PersistentVector(meta(), cnt - 1, newshift, newroot);
+	return new PersistentVector(meta(), cnt - 1, newshift, newroot, (Object[]) ptail.val);
 }
 
-private Object[] doPop(int shift, Object[] arr){
+private Object[] popTail(int shift, Object[] arr, Box ptail){
 	if(shift > 0)
 		{
-		Object[] newchild = doPop(shift - 5, (Object[]) arr[arr.length - 1]);
+		Object[] newchild = popTail(shift - 5, (Object[]) arr[arr.length - 1], ptail);
 		if(newchild != null)
 			{
 			Object[] ret = arr.clone();
@@ -179,6 +207,8 @@ private Object[] doPop(int shift, Object[] arr){
 			return ret;
 			}
 		}
+	if(shift == 0)
+		ptail.val = arr[arr.length - 1];
 	//contraction
 	if(arr.length == 1)
 		return null;
