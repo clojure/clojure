@@ -9,66 +9,65 @@
 (in-ns 'set)
 (clojure/refer 'clojure)
 
-(defn 
-	#^{:doc "Returns a set that is the union of the two sets."}
-union [xset yset]
-  (reduce conj xset yset))
+(defn union
+  "Returns a set that is the union of the two sets."
+  [xset yset]
+    (reduce conj xset yset))
 
-(defn 
-	#^{:doc "Returns a set that is xset without the elements of yset."}
-difference [xset yset]
-  (reduce disj xset yset))
+(defn difference
+  "Returns a set that is xset without the elements of yset."
+  [xset yset]
+    (reduce disj xset yset))
 
-(defn 
-	#^{:doc "Returns a set of the elements present in both xset and yset."}
-intersection [xset yset]
-  (difference xset (difference xset yset)))
+(defn intersection
+  "Returns a set of the elements present in both xset and yset."
+  [xset yset]
+    (difference xset (difference xset yset)))
 
-(defn 
-	#^{:doc "Returns a set of the elements for which pred is true"}
-select [pred xset]
-  (reduce (fn [s k] (if (pred k) (disj s k) s))
-          xset xset))
+(defn select
+  "Returns a set of the elements for which pred is true"
+  [pred xset]
+    (reduce (fn [s k] (if (pred k) (disj s k) s))
+            xset xset))
 
-(defn 
-	#^{:doc "Returns a rel of the elements of xrel with only the keys in ks"}
-project [xrel ks]
-  (set (map #(select-keys % ks) xrel)))
+(defn project
+  "Returns a rel of the elements of xrel with only the keys in ks"
+  [xrel ks]
+    (set (map #(select-keys % ks) xrel)))
 
-(defn 
-	#^{:doc "Returns the map with the keys in kmap renamed to the vals in kmap"}
-rename-keys [map kmap]
-  (reduce 
-   (fn [m [old new]]
-     (if (not= old new)
-       (-> m (assoc new (m old)) (dissoc old))
-       m)) 
-   map kmap))
+(defn rename-keys
+  "Returns the map with the keys in kmap renamed to the vals in kmap"
+  [map kmap]
+    (reduce 
+     (fn [m [old new]]
+       (if (not= old new)
+         (-> m (assoc new (m old)) (dissoc old))
+         m)) 
+     map kmap))
 
-(defn 
-	#^{:doc "Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap"}
-rename [xrel kmap]
-  (set (map #(rename-keys % kmap) xrel)))
+(defn rename
+  "Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap"
+  [xrel kmap]
+    (set (map #(rename-keys % kmap) xrel)))
 
-(defn 
-	#^{:doc "Returns a map of the distinct values of ks in the xrel mapped to a
-		 set of the maps in xrel with the corresponding values of ks."}
-index [xrel ks]
-  (reduce
-   (fn [m x]
-     (let [ik (select-keys x ks)]
-       (assoc m ik (conj (get m ik #{}) x))))
-   {} xrel))
+(defn index
+  "Returns a map of the distinct values of ks in the xrel mapped to a
+  set of the maps in xrel with the corresponding values of ks."
+  [xrel ks]
+    (reduce
+     (fn [m x]
+       (let [ik (select-keys x ks)]
+         (assoc m ik (conj (get m ik #{}) x))))
+     {} xrel))
    
-(defn 
-	#^{:doc "Returns the map with the vals mapped to the keys."}
-map-invert [m]
-  (reduce (fn [m [k v]] (assoc m v k)) {} m))
+(defn map-invert
+  "Returns the map with the vals mapped to the keys."
+  [m] (reduce (fn [m [k v]] (assoc m v k)) {} m))
 
-(defn 
-	#^{:doc "When passed 2 rels, returns the rel corresponding to the natural join.
-		 When passed an additional keymap, joins on the corresponding keys."}
-join 
+(defn join
+  "When passed 2 rels, returns the rel corresponding to the natural
+  join. When passed an additional keymap, joins on the corresponding
+  keys."
   ([xrel yrel] ;natural join
    (when (and (seq xrel) (seq yrel))
      (let [ks (intersection (set (keys (first xrel))) (set (keys (first yrel))))
