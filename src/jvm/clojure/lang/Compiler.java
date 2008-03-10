@@ -2406,13 +2406,13 @@ static class FnExpr implements Expr{
 		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
-		                  : (munge(currentNS().name.name) + ".");
+		                  : "clojure.fns." + (munge(currentNS().name.name) + ".");
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
 		fn.simpleName = ((name != null ?
 		                    munge(name) : "fn")
 		                    + "__" + RT.nextID());
-		fn.name = "cljfn." + basename + fn.simpleName;
+		fn.name = basename + fn.simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.fntype = Type.getObjectType(fn.internalName);
 		try
