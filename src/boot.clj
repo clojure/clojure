@@ -18,59 +18,59 @@
     :doc "Returns a new seq where x is the first element and seq is
     the rest."}
 
- cons (fn* [x seq] (. clojure.lang.RT (cons x seq))))
+ cons (fn* cons [x seq] (. clojure.lang.RT (cons x seq))))
 
 ;during bootstrap we don't have destructuring let, loop or fn, will redefine later
 (def
  #^{:macro true}
-  let (fn* [& decl] (cons 'let* decl)))
+  let (fn* let [& decl] (cons 'let* decl)))
 
 (def
  #^{:macro true}
- loop (fn* [& decl] (cons 'loop* decl)))
+ loop (fn* loop [& decl] (cons 'loop* decl)))
 
 (def
  #^{:macro true}
- fn (fn* [& decl] (cons 'fn* decl)))
+ fn (fn* fn [& decl] (cons 'fn* decl)))
 
 (def
  #^{:arglists '([coll x])
     :doc "conj[oin]. Returns a new collection with the x
     'added'. (conj nil item) returns (item).  The 'addition' may
     happen at different 'places' depending on the concrete type."}
- conj (fn [coll x] (. clojure.lang.RT (conj coll x))))
+ conj (fn conj [coll x] (. clojure.lang.RT (conj coll x))))
 
 (def
  #^{:arglists '([coll])
     :doc "Returns the first item in the collection. Calls seq on its
     argument. If coll is nil, returns nil."}
- first (fn [coll] (. clojure.lang.RT (first coll))))
+ first (fn first [coll] (. clojure.lang.RT (first coll))))
 
 (def
  #^{:arglists '([coll])
     :doc "Returns a seq of the items after the first. Calls seq on its
   argument.  If there are no more items, returns nil."}  
- rest (fn [x] (. clojure.lang.RT (rest x))))
+ rest (fn rest [x] (. clojure.lang.RT (rest x))))
 
 (def
  #^{:doc "Same as (first (rest x))"}
- second (fn [x] (first (rest x))))
+ second (fn second [x] (first (rest x))))
 
 (def
  #^{:doc "Same as (first (first x))"}
- ffirst (fn [x] (first (first x))))
+ ffirst (fn ffirst [x] (first (first x))))
 
 (def
  #^{:doc "Same as (rest (first x))"}
- rfirst (fn [x] (rest (first x))))
+ rfirst (fn rfirst [x] (rest (first x))))
 
 (def
  #^{:doc "Same as (first (rest x))"}
- frest (fn [x] (first (rest x))))
+ frest (fn frest [x] (first (rest x))))
 
 (def
  #^{:doc "Same as (rest (rest x))"}
- rrest (fn [x] (rest (rest x))))
+ rrest (fn rrest [x] (rest (rest x))))
 
 (def
  #^{:arglists '([coll])
@@ -78,33 +78,33 @@
     collection is empty, returns nil.  (seq nil) returns nil. seq also
     works on Strings, native Java arrays (of reference types) and any
     objects that implement Iterable."}
- seq (fn [coll] (. clojure.lang.RT (seq coll))))
+ seq (fn seq [coll] (. clojure.lang.RT (seq coll))))
 
 (def
  #^{:arglists '([#^Class c x])
     :doc "Evaluates x and tests if it is an instance of the class
     c. Returns true or false"}
- instance? (fn [#^Class c x] (. c (isInstance x))))
+ instance? (fn instance? [#^Class c x] (. c (isInstance x))))
 
 (def
  #^{:arglists '([x])
     :doc "Return true if x implements ISeq"}
- seq? (fn [x] (instance? clojure.lang.ISeq x)))
+ seq? (fn seq? [x] (instance? clojure.lang.ISeq x)))
 
 (def
  #^{:arglists '([x])
     :doc "Return true if x is a String"}
- string? (fn [x] (instance? String x)))
+ string? (fn string? [x] (instance? String x)))
 
 (def
  #^{:arglists '([x])
     :doc "Return true if x implements IPersistentMap"}
- map? (fn [x] (instance? clojure.lang.IPersistentMap x)))
+ map? (fn map? [x] (instance? clojure.lang.IPersistentMap x)))
 
 (def
  #^{:arglists '([x])
     :doc "Return true if x implements IPersistentVector "}
- vector? (fn [x] (instance? clojure.lang.IPersistentVector x)))
+ vector? (fn vector? [x] (instance? clojure.lang.IPersistentVector x)))
 
 (def
  #^{:private true}
@@ -124,7 +124,7 @@
     val(s). When applied to a vector, returns a new vector that
     contains val at index. Note - index must be <= (count vector)."}
  assoc
- (fn
+ (fn assoc
    ([map key val] (. clojure.lang.RT (assoc map key val)))
    ([map key val & kvs]
     (let [ret (assoc map key val)]
@@ -136,7 +136,7 @@
 (def
  #^{:arglists '([obj])
     :doc "Returns the metadata of obj, returns nil if there is no metadata."}
- meta (fn [x]
+ meta (fn meta [x]
         (if (instance? clojure.lang.IObj x)
           (. #^clojure.lang.IObj x (meta)))))
 
@@ -144,13 +144,13 @@
  #^{:arglists '([#^clojure.lang.IObj obj m])
     :doc "Returns an object of the same type and value as obj, with
     map m as its metadata."}
- with-meta (fn [#^clojure.lang.IObj x m]
+ with-meta (fn with-meta [#^clojure.lang.IObj x m]
              (. x (withMeta m))))
 
 (def 
  #^{:arglists '([coll])
     :doc "Return the last item in coll, in linear time"}
- last (fn [s]
+ last (fn last [s]
         (if (rest s)
           (recur (rest s))
           (first s))))
@@ -158,7 +158,7 @@
 (def 
  #^{:arglists '([coll])
     :doc "Return a sequence of all but the last item in coll, in linear time"}
- butlast (fn [s]
+ butlast (fn butlast [s]
            (loop [ret [] s s]
              (if (rest s)
                (recur (conj ret (first s)) (rest s))
@@ -171,7 +171,7 @@
     as (def name (fn [params* ] exprs*)) or (def name (fn ([params* ]
     exprs*)+)) with any doc-string or attrs added to the var
     metadata"}
- defn (fn [name & fdecl]
+ defn (fn defn [name & fdecl]
         (let [m (if (string? (first fdecl))
                   {:doc (first fdecl)}
                   {})

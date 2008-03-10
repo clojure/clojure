@@ -2407,10 +2407,12 @@ static class FnExpr implements Expr{
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
 		                  : (munge(currentNS().name.name) + ".");
-		fn.simpleName = (name != null ?
-		                 munge(name)
-		                 : ("fn__" + RT.nextID()));
-		fn.name = basename + fn.simpleName;
+		if(RT.second(form) instanceof Symbol)
+			name = ((Symbol) RT.second(form)).name;
+		fn.simpleName = ((name != null ?
+		                    munge(name) : "fn")
+		                    + "__" + RT.nextID());
+		fn.name = "cljfn." + basename + fn.simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.fntype = Type.getObjectType(fn.internalName);
 		try
