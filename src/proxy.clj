@@ -45,7 +45,8 @@
                 ex-type  (totype java.lang.UnsupportedOperationException)
                 gen-method
                 (fn [#^java.lang.reflect.Method meth else-gen]
-                  (let [ptypes (to-types (. meth (getParameterTypes)))
+                  (let [pclasses (. meth (getParameterTypes))
+                        ptypes (to-types pclasses)
                         rtype (totype (. meth (getReturnType)))
                         m (new Method (. meth (getName)) rtype ptypes)
                         gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
@@ -67,7 +68,7 @@
                                         ;box args
                     (dotimes i (count ptypes)
                       (. gen (loadArg i))
-                      (. gen (box (nth ptypes i))))
+                      (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
                                         ;call fn
                     (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
                                                           (into-array (cons obj-type 

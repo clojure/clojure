@@ -228,24 +228,12 @@ static public Var var(String ns, String name){
 	return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name));
 }
 
-static public void init() throws Exception{
+static void loadResourceScript(String name) throws Exception{
 	try
 		{
-		Var.pushThreadBindings(RT.map(Compiler.SOURCE_PATH, "boot.clj",
-		                              Compiler.SOURCE, "boot.clj"));
-		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
-		Compiler.load(new InputStreamReader(ins));
-		ins.close();
-		ins = RT.class.getResourceAsStream("/proxy.clj");
-		Compiler.load(new InputStreamReader(ins));
-		ins.close();
-		ins = RT.class.getResourceAsStream("/zip.clj");
-		Compiler.load(new InputStreamReader(ins));
-		ins.close();
-		ins = RT.class.getResourceAsStream("/xml.clj");
-		Compiler.load(new InputStreamReader(ins));
-		ins.close();
-		ins = RT.class.getResourceAsStream("/set.clj");
+		Var.pushThreadBindings(RT.map(Compiler.SOURCE_PATH, name,
+		                              Compiler.SOURCE, name));
+		InputStream ins = RT.class.getResourceAsStream("/" + name);
 		Compiler.load(new InputStreamReader(ins));
 		ins.close();
 		}
@@ -253,6 +241,14 @@ static public void init() throws Exception{
 		{
 		Var.popThreadBindings();
 		}
+}
+
+static public void init() throws Exception{
+	loadResourceScript("boot.clj");
+	loadResourceScript("proxy.clj");
+	loadResourceScript("zip.clj");
+	loadResourceScript("xml.clj");
+	loadResourceScript("set.clj");
 }
 
 static public int nextID(){

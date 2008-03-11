@@ -350,7 +350,7 @@ static class AssignExpr implements Expr{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
 			if(RT.length(form) != 3)
-				throw new IllegalArgumentException("Malformed assignment, expecting (= target val)");
+				throw new IllegalArgumentException("Malformed assignment, expecting (set! target val)");
 			Expr target = analyze(C.EXPRESSION, RT.second(form));
 			if(!(target instanceof AssignableExpr))
 				throw new IllegalArgumentException("Invalid assignment target");
@@ -479,7 +479,7 @@ static interface AssignableExpr{
 	void emitAssign(C context, FnExpr fn, GeneratorAdapter gen, Expr val);
 }
 
-static abstract class HostExpr implements Expr{
+static public abstract class HostExpr implements Expr{
 	final static Type BOOLEAN_TYPE = Type.getType(Boolean.class);
 	final static Type CHAR_TYPE = Type.getType(Character.class);
 	final static Type INTEGER_TYPE = Type.getType(Integer.class);
