@@ -1320,6 +1320,13 @@ make-proxy [classes method-map]
     (. *out* (append \newline))
     nil)
 
+(defn flush 
+  "Flushes the output stream that is the current value of
+  *out*" 
+  []
+    (. *out* (flush))
+    nil)
+
 (defn prn
   "Same as pr followed by (newline)"
   [& more]
@@ -1352,6 +1359,10 @@ make-proxy [classes method-map]
    (read stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
    (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
+
+(defn read-line
+  "Reads the next line from stream that is the current value of *in* ."
+  [] (. *in* (readLine)))
 
 (defmacro with-open
   "Evaluates body in a try expression with name bound to the value of

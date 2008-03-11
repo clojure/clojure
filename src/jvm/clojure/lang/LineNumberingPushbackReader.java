@@ -13,6 +13,7 @@ package clojure.lang;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.LineNumberReader;
+import java.io.IOException;
 
 
 public class LineNumberingPushbackReader extends PushbackReader{
@@ -23,5 +24,9 @@ public LineNumberingPushbackReader(Reader r){
 
 public int getLineNumber(){
 	return ((LineNumberReader) in).getLineNumber() + 1;
+}
+
+public String readLine() throws IOException{
+	return ((LineNumberReader)in).readLine();
 }
 }
