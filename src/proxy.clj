@@ -140,7 +140,9 @@
             (let [mm (loop [mm {} c super]
                        (if c
                          (recur
-                          (loop [mm mm meths (seq (. c (getDeclaredMethods)))]
+                          (loop [mm mm meths (concat 
+                                              (seq (. c (getDeclaredMethods)))
+                                              (seq (. c (getMethods))))]
                             (if meths 
                               (let [#^java.lang.reflect.Method meth (first meths)
                                     mods (. meth (getModifiers))
