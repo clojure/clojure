@@ -124,8 +124,8 @@ private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
 static
 	{
 	OBJECT_TYPE = Type.getType(Object.class);
-	ARG_TYPES = new Type[MAX_POSITIONAL_ARITY + 1][];
-	for(int i = 0; i < MAX_POSITIONAL_ARITY; ++i)
+	ARG_TYPES = new Type[MAX_POSITIONAL_ARITY + 2][];
+	for(int i = 0; i <= MAX_POSITIONAL_ARITY; ++i)
 		{
 		Type[] a = new Type[i];
 		for(int j = 0; j < i; j++)
@@ -135,8 +135,8 @@ static
 	Type[] a = new Type[MAX_POSITIONAL_ARITY + 1];
 	for(int j = 0; j < MAX_POSITIONAL_ARITY; j++)
 		a[j] = OBJECT_TYPE;
-	a[MAX_POSITIONAL_ARITY] = Type.getType("[LObject;");
-	ARG_TYPES[MAX_POSITIONAL_ARITY] = a;
+	a[MAX_POSITIONAL_ARITY] = Type.getType("[Ljava/lang/Object;");
+	ARG_TYPES[MAX_POSITIONAL_ARITY+1] = a;
 
 
 	}
@@ -2324,7 +2324,7 @@ static class InvokeExpr implements Expr{
 				}
 			MethodExpr.emitArgsAsArray(restArgs, fn, gen);
 			}
-		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY,
+		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY+1,
 		                                                                                   args.count())]));
 		if(context == C.STATEMENT)
 			gen.pop();
