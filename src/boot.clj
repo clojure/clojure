@@ -2206,14 +2206,14 @@ make-proxy [classes method-map]
 (defn slurp
   "Reads the file named by f into a string and returns it."
   [f]
-    (let [r (new java.io.BufferedReader (new java.io.FileReader f))
-          sb (new StringBuilder)]
+  (with-open r (new java.io.BufferedReader (new java.io.FileReader f))
+    (let [sb (new StringBuilder)]
       (loop [c (. r (read))]
         (if (neg? c)
           (str sb)
           (do 
             (. sb (append (char c)))
-            (recur (. r (read))))))))
+            (recur (. r (read)))))))))
 
 (defn subs
   "Returns the substring of s beginning at start inclusive, and ending
