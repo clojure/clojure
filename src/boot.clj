@@ -834,18 +834,25 @@
   "Creates and returns an agent with an initial value of state."
   [state] (new clojure.lang.Agent state))
 
-(defn agent-of
-  {:private true}
-  [state] (:agent ^state))
+(defn ! [& args] (throw (new Exception "! is now send. See also send-off")))
 
-(defn !
+(defn send
   "Dispatch an action to an agent. Returns the agent immediately.
   Subsequently, in a thread in a thread pool, the state of the will be
   set to the value of:
 
   (apply action-fn state-of-agent args)"
   [#^clojure.lang.Agent a f & args]
-    (. a (dispatch f args)))
+    (. a (dispatch f args false)))
+
+(defn send-off
+  "Dispatch a potentially blocking action to an agent. Returns the
+  agent immediately. Subsequently, in a separate thread, the state of
+  the will be set to the value of:
+
+  (apply action-fn state-of-agent args)"
+  [#^clojure.lang.Agent a f & args]
+    (. a (dispatch f args true)))
 
 (defn agent-errors
   "Returns a sequence of the exceptions thrown during asynchronous

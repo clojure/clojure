@@ -17,121 +17,45 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Agent implements IRef{
 volatile Object state;
-//final Queue q = new LinkedList();
 AtomicReference<IPersistentStack> q = new AtomicReference(PersistentQueue.EMPTY);
-//boolean busy = false;
 
 volatile ISeq errors = null;
-//todo - make tuneable
-//final public static ThreadPoolExecutor executor =
-//		new ThreadPoolExecutor(
-//				2 * Runtime.getRuntime().availableProcessors(),
-//				2 * Runtime.getRuntime().availableProcessors(),
-//				0L, TimeUnit.MILLISECONDS,
-//				new LinkedBlockingQueue<Runnable>());
-final public static ThreadPoolExecutor executor =
-		new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-		                       Integer.MAX_VALUE,
-		                       200L, TimeUnit.MILLISECONDS,
-		                       new SynchronousQueue());
 
-//		                       new LinkedBlockingQueue<Runnable>());
-//Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors());
-//final static Executor executor = Executors.newCachedThreadPool();
+final public static Executor pooledExecutor =
+		Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+final static Executor soloExecutor = Executors.newCachedThreadPool();
+
 final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVector>();
 
-static class ThreadPool{
-	static class Worker implements Runnable{
-		Runnable task;
-
-		public Worker(Runnable task){
-			this.task = task;
-		}
-
-		public void newTask(Runnable task){
-			synchronized(this)
-				{
-				this.task = task;
-				notify();
-				}
-		}
-
-		public void run(){
-			for(; ;)
-				{
-				task.run();
-				synchronized(this)
-					{
-					IPersistentStack workers = ThreadPool.workers.get();
-					if(workers.count() < ThreadPool.workerReserve)
-						{
-						boolean pushed = false;
-						while(!pushed)
-							{
-							IPersistentStack prior = ThreadPool.workers.get();
-							IPersistentStack next = (IPersistentStack) prior.cons(this);
-							pushed = ThreadPool.workers.compareAndSet(prior, next);
-							}
-						task = null;
-						try
-							{
-							while(task == null)
-								wait();
-							}
-						catch(InterruptedException e)
-							{
-							break;
-							}
-						}
-					else  //have enough reserve workers, die
-						break;
-					}
-				}
-		}
-	}
-
-	static int workerReserve = 2 * Runtime.getRuntime().availableProcessors();
-	static AtomicReference<IPersistentStack> workers = new AtomicReference(PersistentList.EMPTY);
-
-	static void execute(Runnable r){
-		IPersistentStack ws = null;
-		while(ws == null)
-			{
-			ws = workers.get();
-			if(ws.count() > 0)
-				{
-				IPersistentStack popped = ws.pop();
-				if(!workers.compareAndSet(ws, popped))
-					ws = null;
-				}
-			}
-		if(ws.count() > 0)
-			{
-			Worker worker = (Worker) ws.peek();
-			worker.newTask(r);
-			}
-		else
-			(new Thread(new Worker(r))).start();
-
-	}
-}
 
 static class Action implements Runnable{
 	final Agent agent;
 	final IFn fn;
 	final ISeq args;
+	final boolean solo;
 
 
-	public Action(Agent agent, IFn fn, ISeq args){
+	public Action(Agent agent, IFn fn, ISeq args, boolean solo){
 		this.agent = agent;
 		this.args = args;
 		this.fn = fn;
+		this.solo = solo;
+	}
+
+	void execute(){
+		if(solo)
+			soloExecutor.execute(this);
+		else
+			pooledExecutor.execute(this);
 	}
 
 	static void doRun(Action action){
-		while(action != null)
+		try
 			{
+			Var.pushThreadBindings(RT.map(RT.AGENT, action.agent));
 			nested.set(PersistentVector.EMPTY);
+
 			boolean hadError = false;
 			try
 				{
@@ -162,11 +86,14 @@ static class Action implements Runnable{
 				popped = action.agent.q.compareAndSet(prior, next);
 				}
 
-//			if(next.count() > 0)
-//				executor.execute((Runnable) next.peek());
-//			action = null;
-			action = (Action) next.peek();
+			if(next.count() > 0)
+				((Action) next.peek()).execute();
+
+			}
+		finally
+			{
 			nested.set(null);
+			Var.popThreadBindings();
 			}
 	}
 
@@ -180,14 +107,6 @@ public Agent(Object state){
 }
 
 void setState(Object newState){
-	if(newState instanceof IObj)
-		{
-		IObj o = (IObj) newState;
-		if(RT.get(o.meta(), RT.AGENT_KEY) != this)
-			{
-			newState = o.withMeta((IPersistentMap) RT.assoc(o.meta(), RT.AGENT_KEY, this));
-			}
-		}
 	state = newState;
 }
 
@@ -207,12 +126,12 @@ public void clearErrors(){
 	errors = null;
 }
 
-public Object dispatch(IFn fn, ISeq args) throws Exception{
+public Object dispatch(IFn fn, ISeq args, boolean solo) throws Exception{
 	if(errors != null)
 		{
 		throw new Exception("Agent has errors", (Exception) RT.first(errors));
 		}
-	Action action = new Action(this, fn, args);
+	Action action = new Action(this, fn, args, solo);
 	LockingTransaction trans = LockingTransaction.getRunning();
 	if(trans != null)
 		trans.enqueue(action);
@@ -236,8 +155,7 @@ void enqueue(Action action){
 		}
 
 	if(prior.count() == 0)
-//		executor.execute(action);
-		ThreadPool.execute(action);
+		action.execute();
 }
 
 }

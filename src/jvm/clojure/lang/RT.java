@@ -107,7 +107,7 @@ final static public Var IN =
 		Var.intern(CLOJURE_NS, Symbol.create("*in*"),
 		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
-final static Keyword AGENT_KEY = Keyword.intern("clojure", "agent");
+final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
