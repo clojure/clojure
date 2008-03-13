@@ -22,7 +22,7 @@ AtomicReference<IPersistentStack> q = new AtomicReference(PersistentQueue.EMPTY)
 volatile ISeq errors = null;
 
 final public static Executor pooledExecutor =
-		Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
 
 final static Executor soloExecutor = Executors.newCachedThreadPool();
 
