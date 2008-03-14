@@ -42,6 +42,8 @@ public static void main(String[] args) throws Exception{
 		{
 		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 		}
+
+	System.exit(0);	
 }
 }
 

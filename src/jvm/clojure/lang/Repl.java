@@ -88,6 +88,7 @@ public static void main(String[] args) throws Exception{
 		{
 		Var.popThreadBindings();
 		}
+	System.exit(0);
 }
 
 }
