@@ -3178,8 +3178,8 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		return registerKeyword((Keyword) form);
 //	else if(form instanceof Num)
 //		return new NumExpr((Num) form);
-//	else if(fclass == String.class)
-//		return new StringExpr((String) form);
+	else if(fclass == String.class)
+		return new ConstantExpr(((String) form).intern());
 //	else if(fclass == Character.class)
 //		return new CharExpr((Character) form);
 	else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
