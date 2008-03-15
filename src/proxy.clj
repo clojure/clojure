@@ -138,24 +138,26 @@
               (. gen (endMethod)))
             
                                         ;calc set of supers' non-private instance methods
-            (let [mm (loop [mm {} c super]
+            (let [mm (loop [mm {} considered #{} c super]
                        (if c
-                         (recur
-                          (loop [mm mm meths (concat 
-                                              (seq (. c (getDeclaredMethods)))
-                                              (seq (. c (getMethods))))]
-                            (if meths 
-                              (let [#^java.lang.reflect.Method meth (first meths)
-                                    mods (. meth (getModifiers))
-                                    mk [(. meth (getName)) (seq (. meth (getParameterTypes)))]]
-                                (if (or (contains? mm mk)
-                                        (. Modifier (isPrivate mods)) 
-                                        (. Modifier (isStatic mods))
-                                        (. Modifier (isFinal mods)))
-                                  (recur mm (rest meths))
-                                  (recur (assoc mm mk meth) (rest meths))))
-                              mm))
-                          (. c (getSuperclass)))
+                         (let [[mm considered]
+                               (loop [mm mm 
+                                      considered considered 
+                                      meths (concat 
+                                             (seq (. c (getDeclaredMethods)))
+                                             (seq (. c (getMethods))))]
+                                 (if meths 
+                                   (let [#^java.lang.reflect.Method meth (first meths)
+                                         mods (. meth (getModifiers))
+                                         mk [(. meth (getName)) (seq (. meth (getParameterTypes)))]]
+                                     (if (or (considered mk)
+                                             (. Modifier (isPrivate mods)) 
+                                             (. Modifier (isStatic mods))
+                                             (. Modifier (isFinal mods)))
+                                       (recur mm (conj considered mk) (rest meths))
+                                       (recur (assoc mm mk meth) (conj considered mk) (rest meths))))
+                                   [mm considered]))]
+                           (recur mm considered (. c (getSuperclass))))
                          mm))]
                                         ;add methods matching supers', if no mapping -> call super
               (doseq #^java.lang.reflect.Method meth (vals mm)
