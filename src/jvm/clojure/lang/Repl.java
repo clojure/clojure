@@ -58,7 +58,11 @@ public static void main(String[] args) throws Exception{
 				w.flush();
 				Object r = LispReader.read(rdr, false, EOF, false);
 				if(r == EOF)
+					{
+					w.write("\n");
+					w.flush();
 					break;
+					}
 				Object ret = Compiler.eval(r);
 				RT.print(ret, w);
 				w.write('\n');
