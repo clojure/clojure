@@ -2246,3 +2246,29 @@ make-proxy [classes method-map]
                      (if (seen f) (recur r seen)
                          (lazy-cons f (step r (conj seen f))))))]
       (step (seq coll) #{})))
+
+(defmacro if-let 
+  "Same as (let [name test] (if name then else))"
+  [name test then else]
+  `(let [~name ~test]
+     (if ~name ~then ~else)))
+
+(defmacro when-let 
+  "Same as (let [name test] (when name body))"
+  [name test & body]
+  `(let [~name ~test]
+     (when ~name ~@body)))
+
+(defn replace
+  "Given a map of replacement pairs and a vector/collection, returns a
+  vector/seq with any elements = a key in smap replaced with the
+  corresponding val in smap" 
+  [smap coll]
+    (if (vector? coll)
+      (reduce (fn [v i]
+                (if-let e (find smap (nth v i))
+                        (assoc v i (val e))
+                        v))
+              coll (range (count coll)))
+      (map #(if-let e (find smap %) (val e) %) coll)))
+      

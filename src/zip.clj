@@ -10,7 +10,7 @@
 ;see Huet
 
 (in-ns 'zip)
-(clojure/refer 'clojure)
+(clojure/refer 'clojure :exclude '(replace))
 
 (defn zipper
   "Creates a new zipper structure. 
