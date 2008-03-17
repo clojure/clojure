@@ -1684,10 +1684,6 @@ make-proxy [classes method-map]
   "Returns a set of the distinct elements of coll."
   [coll] (apply hash-set coll))
 
-(defn distinct
-  "Returns a sequence of the elements of coll with duplicates removed"
-  [coll] (seq (set coll)))
-
 (defn #^{:private true}
   filter-key [keyfn pred amap]
     (loop [ret {} es (seq amap)]
@@ -2241,3 +2237,12 @@ make-proxy [classes method-map]
   ([k x y] (if (< (k x) (k y)) x y))
   ([k x y & more]
    (reduce #(min-key k %1 %2) (min-key k x y) more)))
+
+(defn distinct
+  "Returns a lazy sequence of the elements of coll with duplicates removed"
+  [coll] 
+    (let [step (fn step [[f & r :as xs] seen]
+                   (when xs
+                     (if (seen f) (recur r seen)
+                         (lazy-cons f (step r (conj seen f))))))]
+      (step (seq coll) #{})))
