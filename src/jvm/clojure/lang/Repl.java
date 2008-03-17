@@ -71,7 +71,7 @@ public static void main(String[] args) throws Exception{
 			catch(Throwable e)
 				{
 				while(rdr.ready())
-					rdr.read();
+					rdr.readLine();
 				Throwable c = e;
 				while(c.getCause() != null)
 					c = c.getCause();
