@@ -70,8 +70,8 @@ public static void main(String[] args) throws Exception{
 				}
 			catch(Throwable e)
 				{
-				while(rdr.ready())
-					rdr.readLine();
+//				while(rdr.ready())
+//					rdr.readLine();
 				Throwable c = e;
 				while(c.getCause() != null)
 					c = c.getCause();
