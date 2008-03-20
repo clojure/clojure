@@ -1223,7 +1223,7 @@ not-every? (comp not every?))
     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
           count-down (fn [agent] (. latch (countDown)) agent)]
       (doseq agent agents
-        (! agent count-down))
+        (send agent count-down))
       (. latch (await))))
 
 (defn await-for
@@ -1235,7 +1235,7 @@ not-every? (comp not every?))
     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
           count-down (fn [agent] (. latch (countDown)) agent)]
       (doseq agent agents
-        (! agent count-down))
+        (send agent count-down))
       (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS)))))
   
 (defmacro dotimes
