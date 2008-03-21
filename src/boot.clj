@@ -306,7 +306,7 @@
   {:tag String}
   ([] "")
   ([#^Object x]
-   (if x (. x (toString)) ""))
+   (if (nil? x) "" (. x (toString))))
   ([x & ys]
    (loop [sb (new StringBuilder (str x)) more ys]
      (if more
