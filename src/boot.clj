@@ -838,8 +838,8 @@
 
 (defn send
   "Dispatch an action to an agent. Returns the agent immediately.
-  Subsequently, in a thread in a thread pool, the state of the will be
-  set to the value of:
+  Subsequently, in a thread from a thread pool, the state of the agent
+  will be set to the value of:
 
   (apply action-fn state-of-agent args)"
   [#^clojure.lang.Agent a f & args]
@@ -848,7 +848,7 @@
 (defn send-off
   "Dispatch a potentially blocking action to an agent. Returns the
   agent immediately. Subsequently, in a separate thread, the state of
-  the will be set to the value of:
+  the agent will be set to the value of:
 
   (apply action-fn state-of-agent args)"
   [#^clojure.lang.Agent a f & args]
