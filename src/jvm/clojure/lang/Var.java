@@ -260,6 +260,17 @@ public Object call() throws Exception{
 	return invoke();
 }
 
+public void run(){
+	try
+		{
+		invoke();
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
+
 public Object invoke() throws Exception{
 	return fn().invoke();
 }

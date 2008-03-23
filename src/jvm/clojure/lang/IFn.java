@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.concurrent.Callable;
 
-public interface IFn extends Callable{
+public interface IFn extends Callable, Runnable{
 
 public Object invoke() throws Exception;
 

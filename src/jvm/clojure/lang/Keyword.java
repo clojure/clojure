@@ -47,6 +47,10 @@ public Object call() throws Exception{
 	return throwArity();
 }
 
+public void run(){
+	throw new UnsupportedOperationException();
+}
+
 public Object invoke() throws Exception{
 	return throwArity();
 }

@@ -136,7 +136,7 @@ static
 	for(int j = 0; j < MAX_POSITIONAL_ARITY; j++)
 		a[j] = OBJECT_TYPE;
 	a[MAX_POSITIONAL_ARITY] = Type.getType("[Ljava/lang/Object;");
-	ARG_TYPES[MAX_POSITIONAL_ARITY+1] = a;
+	ARG_TYPES[MAX_POSITIONAL_ARITY + 1] = a;
 
 
 	}
@@ -950,7 +950,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					ArrayList<Class[]> params = new ArrayList();
 					for(int i = 0; i < methods.size(); i++)
 						params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
-					methodidx = getMatchingParams(params, args);
+					methodidx = getMatchingParams(methodName,params, args);
 					}
 				java.lang.reflect.Method m =
 						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
@@ -1049,7 +1049,7 @@ static class StaticMethodExpr extends MethodExpr{
 			ArrayList<Class[]> params = new ArrayList();
 			for(int i = 0; i < methods.size(); i++)
 				params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
-			methodidx = getMatchingParams(params, args);
+			methodidx = getMatchingParams(methodName,params, args);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
@@ -1689,8 +1689,22 @@ static class ClassExpr implements Expr{
 	}
 }
 
-static int getMatchingParams(ArrayList<Class[]> paramlists, IPersistentVector argexprs) throws Exception{
+static boolean subsumes(Class[] c1, Class[] c2){
 	//presumes matching lengths
+	for(int i=0;i<c1.length;i++)
+		{
+		if(c2[i].isPrimitive() && c1[i] == Object.class)
+			continue;
+		if(!c2[i].isAssignableFrom(c1[i]))
+			return false;
+		}
+	return true;
+}
+
+static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, IPersistentVector argexprs)
+		throws Exception{
+	//presumes matching lengths
+	int matchIdx = -1;
 	for(int i = 0; i < paramlists.size(); i++)
 		{
 		boolean match = true;
@@ -1702,9 +1716,19 @@ static int getMatchingParams(ArrayList<Class[]> paramlists, IPersistentVector ar
 			match = Reflector.paramArgTypeMatch(paramlists.get(i)[p], aclass);
 			}
 		if(match)
-			return i;
+			{
+			if(matchIdx == -1)
+				matchIdx = i;
+			else
+				{
+				if(subsumes(paramlists.get(i),paramlists.get(matchIdx)))
+					matchIdx = i;
+				else if(!subsumes(paramlists.get(matchIdx),paramlists.get(i)))
+					throw new IllegalArgumentException("More than one matching method found: " + methodName);
+				}
+			}
 		}
-	return -1;
+	return matchIdx;
 }
 
 static class NewExpr implements Expr{
@@ -1737,7 +1761,7 @@ static class NewExpr implements Expr{
 		int ctoridx = 0;
 		if(ctors.size() > 1)
 			{
-			ctoridx = getMatchingParams(params, args);
+			ctoridx = getMatchingParams(c.getName(),params, args);
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
@@ -2324,7 +2348,7 @@ static class InvokeExpr implements Expr{
 				}
 			MethodExpr.emitArgsAsArray(restArgs, fn, gen);
 			}
-		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY+1,
+		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY + 1,
 		                                                                                   args.count())]));
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -2376,6 +2400,7 @@ static class FnExpr implements Expr{
 	String internalName;
 	String thisName;
 	Type fntype;
+	final Object tag;
 	//localbinding->itself
 	IPersistentMap closes = PersistentHashMap.EMPTY;
 	//Keyword->KeywordExpr
@@ -2400,8 +2425,12 @@ static class FnExpr implements Expr{
 	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
 	final static Method getConstantsMethod = Method.getMethod("Object[] getConstants(int)");
 
+	public FnExpr(Object tag){
+		this.tag = tag;
+	}
+
 	static Expr parse(C context, ISeq form, String name) throws Exception{
-		FnExpr fn = new FnExpr();
+		FnExpr fn = new FnExpr(tagOf(form));
 		FnMethod enclosingMethod = (FnMethod) METHOD.get();
 		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
@@ -2410,8 +2439,8 @@ static class FnExpr implements Expr{
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
 		fn.simpleName = ((name != null ?
-		                    munge(name) : "fn")
-		                    + "__" + RT.nextID());
+		                  munge(name) : "fn")
+		                 + "__" + RT.nextID());
 		fn.name = basename + fn.simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.fntype = Type.getObjectType(fn.internalName);
@@ -2663,7 +2692,7 @@ static class FnExpr implements Expr{
 	}
 
 	public Class getJavaClass() throws Exception{
-		return IFn.class;
+		return (tag != null) ? HostExpr.tagToClass(tag) : IFn.class;
 	}
 
 	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
@@ -3232,7 +3261,15 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		Var v = isMacro(op);
 		if(v != null)
 			{
-			return analyze(context, v.applyTo(form.rest()));
+			try
+				{
+				Var.pushThreadBindings(RT.map(RT.MACRO_META, ((IObj) form).meta()));
+				return analyze(context, v.applyTo(form.rest()));
+				}
+			finally
+				{
+				Var.popThreadBindings();
+				}
 			}
 		IParser p;
 		if(op.equals(FN))

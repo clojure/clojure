@@ -31,6 +31,16 @@ public Object call() throws Exception{
 	return invoke();
 }
 
+public void run(){
+	try
+		{
+		invoke();
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
 
 public int compare(Object o1, Object o2){
 	try

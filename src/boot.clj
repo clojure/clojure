@@ -308,7 +308,7 @@
   ([#^Object x]
    (if (nil? x) "" (. x (toString))))
   ([x & ys]
-   (loop [sb (new StringBuilder (str x)) more ys]
+   (loop [sb (new StringBuilder #^String (str x)) more ys]
      (if more
        (recur (. sb  (append (str (first more)))) (rest more))
        (str sb)))))
@@ -1734,7 +1734,7 @@ make-proxy [classes method-map]
 (defn ns-publics
   "Returns a map of the public intern mappings for the namespace."
   [#^clojure.lang.Namespace ns]
-    (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
+    (filter-key val (fn [#^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
                                  (= ns (. v ns))
                                  (. v (isPublic))))
                 (ns-map ns)))
@@ -1776,14 +1776,14 @@ make-proxy [classes method-map]
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
   [#^clojure.lang.Namespace ns]
-    (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
+    (filter-key val (fn [#^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
                                  (not= ns (. v ns))))
                 (ns-map ns)))
 
 (defn ns-interns
   "Returns a map of the intern mappings for the namespace."
   [#^clojure.lang.Namespace ns]
-    (filter-key val (fn [v] (and (instance? clojure.lang.Var v)
+    (filter-key val (fn [#^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
                                  (= ns (. v ns))))
                 (ns-map ns)))
 
@@ -2004,9 +2004,11 @@ make-proxy [classes method-map]
                            (let ~lets
                              ~@body)))))))
           new-sigs (map psig sigs)]
-      (if name
-        (list* 'fn* name new-sigs)
-        (cons 'fn* new-sigs))))
+      (with-meta
+        (if name
+          (list* 'fn* name new-sigs)
+          (cons 'fn* new-sigs))
+        *macro-meta*)))
 
 (defmacro comment
   "Ignores body, yields nil"
@@ -2208,7 +2210,7 @@ make-proxy [classes method-map]
 
 (defn slurp
   "Reads the file named by f into a string and returns it."
-  [f]
+  [#^String f]
   (with-open r (new java.io.BufferedReader (new java.io.FileReader f))
     (let [sb (new StringBuilder)]
       (loop [c (. r (read))]

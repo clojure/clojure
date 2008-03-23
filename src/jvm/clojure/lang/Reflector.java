@@ -48,10 +48,13 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 			Class[] params = m.getParameterTypes();
 			if(isCongruent(params, args))
 				{
+				if(boxedArgs != null)
+					throw new IllegalArgumentException("More than one matching method found: " + methodName);
+
 				boxedArgs = boxArgs(params, args);
-				break;
+				//break;
 				}
-			else
+			else if(boxedArgs == null)
 				m = null;
 			}
 		}

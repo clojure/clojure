@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Callable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.io.*;
@@ -79,6 +80,7 @@ Symbol.create("Comparable"), Comparable.class,
 Symbol.create("Iterable"), Iterable.class,
 Symbol.create("Readable"), Readable.class,
 Symbol.create("Runnable"), Runnable.class,
+Symbol.create("Callable"), Callable.class,
 Symbol.create("Exception"), Exception.class
 //                                                  Symbol.create("Collection"), "java.util.Collection",
 //                                                  Symbol.create("Comparator"), "java.util.Comparator",
@@ -108,6 +110,7 @@ final static public Var IN =
 		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
+final static public Var MACRO_META = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
@@ -188,6 +191,7 @@ static
 	{
 	Keyword dockw = Keyword.intern(null, "doc");
 	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
+	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
 	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed."));
