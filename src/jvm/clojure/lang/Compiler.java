@@ -164,7 +164,7 @@ static public Var VARS = Var.create();
 static public Var METHOD = Var.create(null);
 
 //String
-static public Var SOURCE = Var.create(null);
+static public Var SOURCE = Var.create("NO_SOURCE_FILE");
 
 //String
 static public Var SOURCE_PATH = Var.create(null);

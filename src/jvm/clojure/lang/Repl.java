@@ -16,44 +16,53 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 public class Repl{
-static final Symbol REFER = Symbol.create("clojure", "refer");
-static final Symbol QUOTE = Symbol.create("quote");
+static final Symbol USER = Symbol.create("user");
 static final Symbol CLOJURE = Symbol.create("clojure");
 
+static final Var in_ns = RT.var("clojure", "in-ns");
+static final Var refer = RT.var("clojure", "refer");
+static final Var ns = RT.var("clojure", "*ns*");
+static final Var warn_on_reflection = RT.var("clojure", "*warn-on-reflection*");
+
 public static void main(String[] args) throws Exception{
+	//must call this once before using Clojure
 	RT.init();
-	for(String file : RT.processCommandLine(args))
-		try
-			{
-			Compiler.loadFile(file);
-			}
-		catch(Exception e)
-			{
-			e.printStackTrace();
-			}
 
-	//repl
-	LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
-	OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
-
-	Object EOF = new Object();
 	try
 		{
+		//*ns* must be thread-bound for in-ns to work
+		//thread-bind *warn-on-reflection* so it can be set!
+		//must have corresponding popThreadBindings in finally clause
 		Var.pushThreadBindings(
-				RT.map(
-						RT.CURRENT_NS, RT.CURRENT_NS.get(),
-						RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.get(),
-						Compiler.SOURCE, "REPL"
-				));
+				RT.map(ns, ns.get(),
+				       warn_on_reflection, warn_on_reflection.get()));
+
+		//create and move into the user namespace
+		in_ns.invoke(USER);
+		refer.invoke(CLOJURE);
+
+		//load any supplied files
+		for(String file : RT.processCommandLine(args))
+			try
+				{
+				Compiler.loadFile(file);
+				}
+			catch(Exception e)
+				{
+				e.printStackTrace();
+				}
+
+		//repl IO support
+		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
+		OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
+		Object EOF = new Object();
+
+		//start the loop
 		w.write("Clojure\n");
-		RT.inNamespace.invoke(Symbol.create("user"));
-		Compiler.eval(RT.list(REFER, RT.list(QUOTE, CLOJURE)));
 		for(; ;)
 			{
 			try
 				{
-				Var.pushThreadBindings(
-						RT.map(Compiler.LOADER, new DynamicClassLoader()));
 				w.write(Compiler.currentNS().name + "=> ");
 				w.flush();
 				Object r = LispReader.read(rdr, false, EOF, false);
@@ -70,17 +79,11 @@ public static void main(String[] args) throws Exception{
 				}
 			catch(Throwable e)
 				{
-//				while(rdr.ready())
-//					rdr.readLine();
 				Throwable c = e;
 				while(c.getCause() != null)
 					c = c.getCause();
 				System.err.println(c);
 				e.printStackTrace();
-				}
-			finally
-				{
-				Var.popThreadBindings();
 				}
 			}
 		}
