@@ -2791,7 +2791,7 @@ static class FnMethod{
 	Expr body = null;
 	FnExpr fn;
 	PersistentVector argLocals;
-	int maxLocal=0;
+	int maxLocal = 0;
 	int line;
 
 	public FnMethod(FnExpr fn, FnMethod parent){
@@ -2916,11 +2916,11 @@ static class FnMethod{
 			gen.visitInsn(Opcodes.ACONST_NULL);
 			gen.storeArg(i);
 			}
-		for(int i=numParams()+1;i<maxLocal+1;i++)
-			{
-			gen.visitInsn(Opcodes.ACONST_NULL);
-			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
-			}
+//		for(int i=numParams()+1;i<maxLocal+1;i++)
+//			{
+//			gen.visitInsn(Opcodes.ACONST_NULL);
+//			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+//			}
 	}
 }
 
