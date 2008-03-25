@@ -2911,11 +2911,11 @@ static class FnMethod{
 	}
 
 	void emitClearLocals(GeneratorAdapter gen){
-		for(int i = 0; i < numParams(); i++)
-			{
-			gen.visitInsn(Opcodes.ACONST_NULL);
-			gen.storeArg(i);
-			}
+//		for(int i = 0; i < numParams(); i++)
+//			{
+//			gen.visitInsn(Opcodes.ACONST_NULL);
+//			gen.storeArg(i);
+//			}
 //		for(int i=numParams()+1;i<maxLocal+1;i++)
 //			{
 //			gen.visitInsn(Opcodes.ACONST_NULL);
