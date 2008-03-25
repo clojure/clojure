@@ -996,7 +996,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			if(context == C.RETURN)
 				{
 				FnMethod method = (FnMethod) METHOD.get();
-				method.emitClearArgs(gen);
+				method.emitClearLocals(gen);
 				}
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			if(method.getDeclaringClass().isInterface())
@@ -1013,7 +1013,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			if(context == C.RETURN)
 				{
 				FnMethod method = (FnMethod) METHOD.get();
-				method.emitClearArgs(gen);
+				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
 			}
@@ -1090,7 +1090,7 @@ static class StaticMethodExpr extends MethodExpr{
 			if(context == C.RETURN)
 				{
 				FnMethod method = (FnMethod) METHOD.get();
-				method.emitClearArgs(gen);
+				method.emitClearLocals(gen);
 				}
 			Type type = Type.getType(c);
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
@@ -1105,7 +1105,7 @@ static class StaticMethodExpr extends MethodExpr{
 			if(context == C.RETURN)
 				{
 				FnMethod method = (FnMethod) METHOD.get();
-				method.emitClearArgs(gen);
+				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
 			}
@@ -1812,7 +1812,7 @@ static class NewExpr implements Expr{
 			if(context == C.RETURN)
 				{
 				FnMethod method = (FnMethod) METHOD.get();
-				method.emitClearArgs(gen);
+				method.emitClearLocals(gen);
 				}
 			gen.invokeConstructor(type, new Method("<init>", Type.getConstructorDescriptor(ctor)));
 			}
@@ -1824,7 +1824,7 @@ static class NewExpr implements Expr{
 			if(context == C.RETURN)
 				{
 				FnMethod method = (FnMethod) METHOD.get();
-				method.emitClearArgs(gen);
+				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
 			}
@@ -2382,7 +2382,7 @@ static class InvokeExpr implements Expr{
 		if(context == C.RETURN)
 			{
 			FnMethod method = (FnMethod) METHOD.get();
-			method.emitClearArgs(gen);
+			method.emitClearLocals(gen);
 			}
 
 		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY + 1,
@@ -2791,6 +2791,7 @@ static class FnMethod{
 	Expr body = null;
 	FnExpr fn;
 	PersistentVector argLocals;
+	int maxLocal=0;
 	int line;
 
 	public FnMethod(FnExpr fn, FnMethod parent){
@@ -2909,11 +2910,16 @@ static class FnMethod{
 		gen.endMethod();
 	}
 
-	void emitClearArgs(GeneratorAdapter gen){
+	void emitClearLocals(GeneratorAdapter gen){
 		for(int i = 0; i < numParams(); i++)
 			{
 			gen.visitInsn(Opcodes.ACONST_NULL);
 			gen.storeArg(i);
+			}
+		for(int i=numParams()+1;i<maxLocal+1;i++)
+			{
+			gen.visitInsn(Opcodes.ACONST_NULL);
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
 			}
 	}
 }
@@ -3229,6 +3235,9 @@ private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init) thr
 
 private static int getAndIncLocalNum(){
 	int num = ((Number) NEXT_LOCAL_NUM.get()).intValue();
+	FnMethod m = (FnMethod) METHOD.get();
+	if(num > m.maxLocal)
+		m.maxLocal = num;
 	NEXT_LOCAL_NUM.set(num + 1);
 	return num;
 }
