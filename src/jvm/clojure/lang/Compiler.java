@@ -950,7 +950,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					ArrayList<Class[]> params = new ArrayList();
 					for(int i = 0; i < methods.size(); i++)
 						params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
-					methodidx = getMatchingParams(methodName,params, args);
+					methodidx = getMatchingParams(methodName, params, args);
 					}
 				java.lang.reflect.Method m =
 						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
@@ -993,6 +993,11 @@ static class InstanceMethodExpr extends MethodExpr{
 			target.emit(C.EXPRESSION, fn, gen);
 			gen.checkCast(type);
 			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearArgs(gen);
+				}
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			if(method.getDeclaringClass().isInterface())
 				gen.invokeInterface(type, m);
@@ -1005,6 +1010,11 @@ static class InstanceMethodExpr extends MethodExpr{
 			target.emit(C.EXPRESSION, fn, gen);
 			gen.push(methodName);
 			emitArgsAsArray(args, fn, gen);
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearArgs(gen);
+				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
 			}
 		if(context == C.STATEMENT)
@@ -1049,7 +1059,7 @@ static class StaticMethodExpr extends MethodExpr{
 			ArrayList<Class[]> params = new ArrayList();
 			for(int i = 0; i < methods.size(); i++)
 				params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
-			methodidx = getMatchingParams(methodName,params, args);
+			methodidx = getMatchingParams(methodName, params, args);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
@@ -1077,6 +1087,11 @@ static class StaticMethodExpr extends MethodExpr{
 			{
 			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
 			//Type type = Type.getObjectType(className.replace('.', '/'));
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearArgs(gen);
+				}
 			Type type = Type.getType(c);
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			gen.invokeStatic(type, m);
@@ -1087,6 +1102,11 @@ static class StaticMethodExpr extends MethodExpr{
 			gen.push(c.getName());
 			gen.push(methodName);
 			emitArgsAsArray(args, fn, gen);
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearArgs(gen);
+				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
 			}
 		if(context == C.STATEMENT)
@@ -1691,7 +1711,7 @@ static class ClassExpr implements Expr{
 
 static boolean subsumes(Class[] c1, Class[] c2){
 	//presumes matching lengths
-	for(int i=0;i<c1.length;i++)
+	for(int i = 0; i < c1.length; i++)
 		{
 		if(c2[i].isPrimitive() && c1[i] == Object.class)
 			continue;
@@ -1721,9 +1741,9 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 				matchIdx = i;
 			else
 				{
-				if(subsumes(paramlists.get(i),paramlists.get(matchIdx)))
+				if(subsumes(paramlists.get(i), paramlists.get(matchIdx)))
 					matchIdx = i;
-				else if(!subsumes(paramlists.get(matchIdx),paramlists.get(i)))
+				else if(!subsumes(paramlists.get(matchIdx), paramlists.get(i)))
 					throw new IllegalArgumentException("More than one matching method found: " + methodName);
 				}
 			}
@@ -1761,7 +1781,7 @@ static class NewExpr implements Expr{
 		int ctoridx = 0;
 		if(ctors.size() > 1)
 			{
-			ctoridx = getMatchingParams(c.getName(),params, args);
+			ctoridx = getMatchingParams(c.getName(), params, args);
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
@@ -1789,6 +1809,11 @@ static class NewExpr implements Expr{
 			gen.newInstance(type);
 			gen.dup();
 			MethodExpr.emitTypedArgs(fn, gen, ctor.getParameterTypes(), args);
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearArgs(gen);
+				}
 			gen.invokeConstructor(type, new Method("<init>", Type.getConstructorDescriptor(ctor)));
 			}
 		else
@@ -1796,6 +1821,11 @@ static class NewExpr implements Expr{
 			gen.push(c.getName());
 			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			MethodExpr.emitArgsAsArray(args, fn, gen);
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearArgs(gen);
+				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
 			}
 		if(context == C.STATEMENT)
@@ -2348,6 +2378,13 @@ static class InvokeExpr implements Expr{
 				}
 			MethodExpr.emitArgsAsArray(restArgs, fn, gen);
 			}
+
+		if(context == C.RETURN)
+			{
+			FnMethod method = (FnMethod) METHOD.get();
+			method.emitClearArgs(gen);
+			}
+
 		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY + 1,
 		                                                                                   args.count())]));
 		if(context == C.STATEMENT)
@@ -2852,7 +2889,7 @@ static class FnMethod{
 		gen.visitLineNumber(line, loopLabel);
 		try
 			{
-			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
+			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
 			body.emit(C.RETURN, fn, gen);
 			Label end = gen.mark();
 			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
@@ -2870,6 +2907,14 @@ static class FnMethod{
 		gen.returnValue();
 		//gen.visitMaxs(1, 1);
 		gen.endMethod();
+	}
+
+	void emitClearArgs(GeneratorAdapter gen){
+		for(int i = 0; i < numParams(); i++)
+			{
+			gen.visitInsn(Opcodes.ACONST_NULL);
+			gen.storeArg(i);
+			}
 	}
 }
 
