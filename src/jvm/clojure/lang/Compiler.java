@@ -163,6 +163,9 @@ static public Var VARS = Var.create();
 //FnFrame
 static public Var METHOD = Var.create(null);
 
+//null or not
+static public Var IN_CATCH_FINALLY = Var.create(null);
+
 //String
 static public Var SOURCE = Var.create("NO_SOURCE_FILE");
 
@@ -1554,7 +1557,8 @@ static class TryExpr implements Expr{
 							throw new Exception("Can't bind qualified name");
 
 						IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
-						                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
+						                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get(),
+						                                        IN_CATCH_FINALLY, RT.T);
 						try
 							{
 							Var.pushThreadBindings(dynamicBindings);
@@ -1572,7 +1576,15 @@ static class TryExpr implements Expr{
 						{
 						if(fs.rest() != null)
 							throw new Exception("finally clause must be last in try expression");
-						finallyExpr = (new BodyExpr.Parser()).parse(C.STATEMENT, RT.rest(f));
+						try
+							{
+							Var.pushThreadBindings(RT.map(IN_CATCH_FINALLY, RT.T));
+							finallyExpr = (new BodyExpr.Parser()).parse(C.STATEMENT, RT.rest(f));
+							}
+						finally
+							{
+							Var.popThreadBindings();
+							}
 						}
 					}
 				}
@@ -2793,6 +2805,7 @@ static class FnMethod{
 	PersistentVector argLocals;
 	int maxLocal = 0;
 	int line;
+	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
 
 	public FnMethod(FnExpr fn, FnMethod parent){
 		this.parent = parent;
@@ -2911,16 +2924,22 @@ static class FnMethod{
 	}
 
 	void emitClearLocals(GeneratorAdapter gen){
-//		for(int i = 0; i < numParams(); i++)
-//			{
-//			gen.visitInsn(Opcodes.ACONST_NULL);
-//			gen.storeArg(i);
-//			}
-//		for(int i=numParams()+1;i<maxLocal+1;i++)
-//			{
-//			gen.visitInsn(Opcodes.ACONST_NULL);
-//			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
-//			}
+		for(int i = 0; i < numParams(); i++)
+			{
+			if(!localsUsedInCatchFinally.contains(i))
+				{
+				gen.visitInsn(Opcodes.ACONST_NULL);
+				gen.storeArg(i);
+				}
+			}
+		for(int i = numParams() + 1; i < maxLocal + 1; i++)
+			{
+			if(!localsUsedInCatchFinally.contains(i))
+				{
+				gen.visitInsn(Opcodes.ACONST_NULL);
+				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+				}
+			}
 	}
 }
 
@@ -3542,7 +3561,12 @@ static LocalBinding referenceLocal(Symbol sym) throws Exception{
 	LocalBinding b = (LocalBinding) RT.get(LOCAL_ENV.get(), sym);
 	if(b != null)
 		{
-		closeOver(b, (FnMethod) METHOD.get());
+		FnMethod method = (FnMethod) METHOD.get();
+		closeOver(b, method);
+		if(RT.get(method.locals, b) != null && IN_CATCH_FINALLY.get() != null)
+			{
+			method.localsUsedInCatchFinally = (PersistentHashSet) method.localsUsedInCatchFinally.cons(b.idx);
+			}
 		}
 	return b;
 }
