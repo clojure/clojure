@@ -2427,7 +2427,7 @@ static class SourceDebugExtensionAttribute extends Attribute{
 	}
 }
 
-static class FnExpr implements Expr{
+static public class FnExpr implements Expr{
 	static final String CONST_PREFIX = "const__";
 	IPersistentCollection methods;
 	//if there is a variadic overload (there can only be one) it is stored here
