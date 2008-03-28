@@ -176,8 +176,8 @@ static public Var SOURCE_PATH = Var.create(null);
 static public Var LINE = Var.create(0);
 
 //Integer
-static public Var LINE_BEFORE = Var.create();
-static public Var LINE_AFTER = Var.create();
+static public Var LINE_BEFORE = Var.create(0);
+static public Var LINE_AFTER = Var.create(0);
 
 //Integer
 static public Var NEXT_LOCAL_NUM = Var.create(0);
