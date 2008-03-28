@@ -176,6 +176,10 @@ static public Var SOURCE_PATH = Var.create(null);
 static public Var LINE = Var.create(0);
 
 //Integer
+static public Var LINE_BEFORE = Var.create();
+static public Var LINE_AFTER = Var.create();
+
+//Integer
 static public Var NEXT_LOCAL_NUM = Var.create(0);
 
 //Integer
@@ -2577,6 +2581,8 @@ static public class FnExpr implements Expr{
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
+		int lineBefore = (Integer)LINE_BEFORE.get();
+		int lineAfter = (Integer)LINE_AFTER.get() + 1;
 		String smap = "SMAP\n" +
 		              simpleName + ".java\n" +
 		              "Clojure\n" +
@@ -2585,7 +2591,7 @@ static public class FnExpr implements Expr{
 		              "+ 1 " + source + "\n" +
 		              (String) SOURCE_PATH.get() + "\n" +
 		              "*L\n" +
-		              "1#1,10000:1\n" +
+		              String.format("%d#1,%d:%d\n",lineBefore,lineAfter-lineBefore,lineBefore) +
 		              "*E";
 		if(source != null && SOURCE_PATH.get() != null)
 		//cv.visitSource(source, null);
@@ -3610,20 +3616,24 @@ public static Object loadFile(String file) throws Exception{
 public static Object load(Reader rdr) throws Exception{
 	Object EOF = new Object();
 	Object ret = null;
+	LineNumberingPushbackReader pushbackReader =
+			(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
+			new LineNumberingPushbackReader(rdr);
 	try
 		{
 		Var.pushThreadBindings(
 				RT.map(LOADER, new DynamicClassLoader(),
-//				       RT.NS_REFERS, RT.NS_REFERS.get(),
-//				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-RT.CURRENT_NS, RT.CURRENT_NS.get()
+				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
+				       LINE_BEFORE, pushbackReader.getLineNumber(),
+				       LINE_AFTER, pushbackReader.getLineNumber()
 				));
-		LineNumberingPushbackReader pushbackReader =
-				(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
-				new LineNumberingPushbackReader(rdr);
 		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
 		    r = LispReader.read(pushbackReader, false, EOF, false))
+			{
+			LINE_AFTER.set(pushbackReader.getLineNumber());
 			ret = eval(r);
+			LINE_BEFORE.set(pushbackReader.getLineNumber());
+			}
 		}
 	finally
 		{
