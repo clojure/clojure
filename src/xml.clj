@@ -31,7 +31,7 @@
                                 (some (complement #(. Character (isWhitespace %))) (str *sb*)))
                        (set! *current* (push-content *current* (str *sb*)))))]
     (new clojure.lang.XMLHandler
-         (implement [ContentHandler]
+         (proxy [ContentHandler] []
            (startElement [uri local-name q-name #^Attributes atts]
              (let [attrs (fn [ret i]
                            (if (neg? i)
@@ -61,12 +61,27 @@
              (let [#^StringBuilder sb *sb*]
                (. sb (append ch start length))
                (set! *state* :chars))
-             nil)))))
+             nil)
+           (setDocumentLocator [locator])
+           (startDocument [])
+           (endDocument [])
+           (startPrefixMapping [prefix uri])
+           (endPrefixMapping [prefix])
+           (ignorableWhitespace [ch start length])
+           (processingInstruction [target data])
+           (skippedEntity [name])
+           ))))
 
 (defn startparse-sax [s ch]
   (.. SAXParserFactory (newInstance) (newSAXParser) (parse s ch)))
 
 (defn parse
+  "Parses and loads the source s, which can be a File, InputStream or
+  String naming a URI. Returns a tree of the xml/element struct-map,
+  which has the keys :tag, :attrs, and :content. and accessor fns tag,
+  attrs, and content. Other parsers can be supplied by passing
+  startparse, a fn taking a source and a ContentHandler and returning
+  a parser"
   ([s] (parse s startparse-sax))
   ([s startparse]
     (binding [*stack* nil

@@ -53,23 +53,28 @@
  rest (fn rest [x] (. clojure.lang.RT (rest x))))
 
 (def
- #^{:doc "Same as (first (rest x))"}
+ #^{:doc "Same as (first (rest x))"
+    :arglists '([x])}
  second (fn second [x] (first (rest x))))
 
 (def
- #^{:doc "Same as (first (first x))"}
+ #^{:doc "Same as (first (first x))"
+    :arglists '([x])}
  ffirst (fn ffirst [x] (first (first x))))
 
 (def
- #^{:doc "Same as (rest (first x))"}
+ #^{:doc "Same as (rest (first x))"
+    :arglists '([x])}
  rfirst (fn rfirst [x] (rest (first x))))
 
 (def
- #^{:doc "Same as (first (rest x))"}
+ #^{:doc "Same as (first (rest x))"
+    :arglists '([x])}
  frest (fn frest [x] (first (rest x))))
 
 (def
- #^{:doc "Same as (rest (rest x))"}
+ #^{:doc "Same as (rest (rest x))"
+    :arglists '([x])}
  rrest (fn rrest [x] (rest (rest x))))
 
 (def
@@ -166,11 +171,11 @@
 
 (def 
 
- #^{:doc "(defn name doc-string? attr-map? [params*] body) or (defn
-    name doc-string? attr-map? ([params*] body)+ attr-map?)  Same
-    as (def name (fn [params* ] exprs*)) or (def name (fn ([params* ]
-    exprs*)+)) with any doc-string or attrs added to the var
-    metadata"}
+ #^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
+    name (fn ([params* ] exprs*)+)) with any doc-string or attrs added
+    to the var metadata"
+    :arglists '([name doc-string? attr-map? [params*] body]
+                [name doc-string? attr-map? ([params*] body)+ attr-map?])}
  defn (fn defn [name & fdecl]
         (let [m (if (string? (first fdecl))
                   {:doc (first fdecl)}
@@ -246,7 +251,9 @@
 
  #^{:doc "Like defn, but the resulting function name is declared as a
   macro and will be used as a macro by the compiler when it is
-  called."}
+  called."
+    :arglists '([name doc-string? attr-map? [params*] body]
+                [name doc-string? attr-map? ([params*] body)+ attr-map?])}
  defmacro (fn [name & args]
             (list 'do
                   (cons `defn (cons name args))
@@ -973,7 +980,8 @@
 (def
  #^{:tag Boolean
     :doc "Returns false if (pred x) is logical true for every x in
-  coll, else true."}
+  coll, else true."
+    :arglists '([pred coll])}
 not-every? (comp not every?))
 
 (defn some
@@ -986,7 +994,8 @@ not-every? (comp not every?))
 (def 
  #^{:tag Boolean
     :doc "Returns false if (pred x) is logical true for any x in coll,
-  else true."}  
+  else true."
+    :arglists '([pred coll])}  
  not-any? (comp not some))
 
 (defn map
@@ -1281,34 +1290,6 @@ not-every? (comp not every?))
   array [& items]
     (into-array items))
 
-(defn
-make-proxy [classes method-map]
-  (. java.lang.reflect.Proxy
-    (newProxyInstance (.. Thread (currentThread) (getContextClassLoader))
-                      (into-array classes)
-                      (new clojure.lang.ProxyHandler method-map))))
-
-(defmacro implement
-  "f => (name [args+] body)
-
-  Deprecated - use proxy.
-  Expands to code which creates a instance of a class that implements
-  the named interface(s) by calling the supplied fns. The interface
-  names must be valid class names of interface types. If a method is
-  not provided for a non-void-returning interface method, an
-  UnsupportedOperationException will be thrown should it be called.
-  Method fns are closures and can capture the environment in which
-  implement is called."
-  [interfaces & fs]
-  `(make-proxy
-    ~interfaces
-    ~(loop [fmap {} fs fs]
-       (if fs
-         (recur (assoc fmap (name (ffirst fs))
-                       (cons `fn (rfirst fs)))
-                (rest fs))
-         fmap))))
-
 (defn pr
   "Prints the object(s) to the output stream that is the current value
   of *out*.  Prints the object(s), separated by spaces if there is
@@ -1483,6 +1464,7 @@ make-proxy [classes method-map]
   #^{:private true}
   def-aset [name method coerce]
     `(defn ~name
+       {:arglists '([~'array ~'idx ~'val] [~'array ~'idx ~'idx2 & ~'idxv])}
        ([array# idx# val#]
         (. Array (~method array# idx# (~coerce val#)))
         val#)
@@ -2273,4 +2255,13 @@ make-proxy [classes method-map]
                         v))
               coll (range (count coll)))
       (map #(if-let e (find smap %) (val e) %) coll)))
+
+(defmacro dosync 
+  "Runs the exprs (in an implicit do) in a transaction that encompasses
+  exprs and any nested calls.  Starts a transaction if none is already
+  running on this thread. Any uncaught exception will abort the
+  transaction and flow out of dosync. The exprs may be run more than
+  once, but any effects on Refs will be atomic."
+  [& exprs]
+  `(sync nil ~@exprs))
       

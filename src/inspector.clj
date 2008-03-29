@@ -48,7 +48,7 @@
   (nth (seq m) index))
 
 (defn tree-model [data]
-  (implement [TreeModel]
+  (proxy [TreeModel] []
     (getRoot [] data)
     (addTreeModelListener [treeModelListener])
     (getChild [parent index]
@@ -69,7 +69,7 @@
 	colcnt (count row1)
 	cnt (count data)
 	vals (if (instance? clojure.lang.IPersistentMap row1) vals identity)]
-    (implement [TableModel]
+    (proxy [TableModel] []
       (addTableModelListener [tableModelListener])
       (getColumnClass [columnIndex] Object)
       (getColumnCount [] colcnt)
@@ -83,20 +83,28 @@
       (isCellEditable [rowIndex columnIndex] false)
       (removeTableModelListener [tableModelListener]))))
       
-(defn inspect-tree [data]
+(defn inspect-tree 
+  "creates a graphical (Swing) inspector on the supplied hierarchical data"
+  [data]
   (doto (new JFrame "Clojure Inspector")
     (add (new JScrollPane (new JTree (tree-model data))))
     (setSize 400 600)
     (setVisible true)))
 
-(defn inspect-table [data]
+(defn inspect-table 
+  "creates a graphical (Swing) inspector on the supplied regular
+  data, which must be a sequential data structure of data structures
+  of equal length"
+    [data]
   (doto (new JFrame "Clojure Inspector")
     (add (new JScrollPane (new JTable (table-model data))))
     (setSize 400 600)
     (setVisible true)))
 
-;(export '(inspect-table inspect-tree))
+(comment
 
-;(inspect-tree {:a 1 :b 2 :c [1 2 3 {:d 4 :e 5 :f [6 7 8]}]})
-;(inspect-table [[1 2 3][4 5 6][7 8 9][10 11 12]])
+(load-file "src/inspector.clj")
+(inspect-tree {:a 1 :b 2 :c [1 2 3 {:d 4 :e 5 :f [6 7 8]}]})
+(inspect-table [[1 2 3][4 5 6][7 8 9][10 11 12]])
 
+)
