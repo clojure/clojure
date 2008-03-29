@@ -1932,7 +1932,7 @@ make-proxy [classes method-map]
 (defmacro when-first
   "Same as (when (seq xs) (let [x (first xs)] body))"
   [x xs & body]
-  `(when ~xs
+  `(when (seq ~xs)
      (let [~x (first ~xs)]
        ~@body)))
 
