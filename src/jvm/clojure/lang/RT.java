@@ -190,18 +190,22 @@ static AtomicInteger id = new AtomicInteger(1);
 static
 	{
 	Keyword dockw = Keyword.intern(null, "doc");
+	Keyword arglistskw = Keyword.intern(null, "arglists");
+	Symbol namesym = Symbol.create("name");
 	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
 	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
-	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed."));
+	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
+	              arglistskw, list(vector(namesym))));
 	v = Var.intern(CLOJURE_NS, LOAD_FILE,
 	               new AFn(){
 		               public Object invoke(Object arg1) throws Exception{
 			               return Compiler.loadFile((String) arg1);
 		               }
 	               });
-	v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file."));
+	v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
+	              arglistskw, list(vector(namesym))));
 	v = Var.intern(CLOJURE_NS, IDENTICAL,
 	               new AFn(){
 		               public Object invoke(Object arg1, Object arg2)
