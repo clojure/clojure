@@ -3234,6 +3234,8 @@ static class RecurExpr implements Expr{
 			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
 			if(context != C.RETURN || loopLocals == null)
 				throw new UnsupportedOperationException("Can only recur from tail position");
+			if(IN_CATCH_FINALLY.get()!=null)
+				throw new UnsupportedOperationException("Cannot recur from catch/finally");
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
 				{
