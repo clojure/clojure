@@ -175,9 +175,10 @@
                                         ;add methods matching interfaces', if no mapping -> throw
               (doseq #^Class iface interfaces
                 (doseq #^java.lang.reflect.Method meth (. iface (getMethods))
-                   (gen-method meth 
-                               (fn [gen m]
-                                 (. gen (throwException ex-type (. m (getName)))))))))
+                   (when-not (contains? mm [(. meth (getName)) (seq (. meth (getParameterTypes)))])
+                     (gen-method meth 
+                                 (fn [gen m]
+                                   (. gen (throwException ex-type (. m (getName))))))))))
 
                                         ;finish class def
             (. cv (visitEnd))
