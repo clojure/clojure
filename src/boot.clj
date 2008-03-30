@@ -1883,7 +1883,7 @@ not-every? (comp not every?))
                   (symbol? b) (-> bvec (conj b) (conj v))
                   (vector? b) (pvec bvec b v)
                   (map? b) (pmap bvec b v)
-                  :else (throw (new Exception "Unsupported binding form")))))
+                  :else (throw (new Exception (str "Unsupported binding form: " b))))))
         process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
     (if (every? symbol? (keys bmap))
       bindings
@@ -1930,30 +1930,6 @@ not-every? (comp not every?))
 		      (lazy-cat ~@colls)))]
       (iter# ~coll))))
       
-(defmacro for
-  "List comprehension. Takes one or more
-  binding-form/collection-expr pairs, an optional filtering
-  (where) expression, and yields a lazy sequence of evaluations of
-  expr. Collections are iterated in a nested fashion, rightmost
-  fastest, and nested coll-exprs can refer to bindings created in
-  prior binding-forms."
-  ([seq-expr expr] (list `for seq-expr `true expr))
-  ([seq-exprs filter-expr expr]
-   (let [emit (fn emit [ses]
-		  (let [x (key (first ses)) xs (val (first ses))
-			giter (gensym "iter__") gxs (gensym "s__")]
-		    `(fn ~giter [~gxs]
-			 (when-first ~x ~gxs
-			    ~(if (rest ses)
-			       `(let [iterys# ~(emit (rest ses))]
-				  (lazy-cat (iterys# ~(val (second ses)))
-					    (~giter (rest ~gxs))))
-			       `(if ~filter-expr
-				  (lazy-cons ~expr (~giter (rest ~gxs)))
-				  (recur (rest ~gxs))))))))]
-     `(let [iter# ~(emit (seq (apply array-map seq-exprs)))]
-	(iter# ~(second seq-exprs))))))
-
 ;redefine fn with destructuring
 (defmacro fn
   "(fn name? [params* ] exprs*)
@@ -1991,6 +1967,41 @@ not-every? (comp not every?))
           (list* 'fn* name new-sigs)
           (cons 'fn* new-sigs))
         *macro-meta*)))
+
+(defmacro for
+ "List comprehension. Takes a vector of one or more
+ binding-form/collection-expr pairs, each followed by an optional filtering
+ :when/:while expression (:when test or :while test), and yields a
+ lazy sequence of evaluations of expr. Collections are iterated in a
+ nested fashion, rightmost fastest, and nested coll-exprs can refer to
+ bindings created in prior binding-forms.
+
+ (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
+ ([seq-exprs expr]
+  (let [pargs (fn [xs]
+                (loop [ret []
+                       [b e & [w f & wr :as r] :as xs] (seq xs)]
+                  (if xs
+                    (cond 
+                     (= w :when) (recur (conj ret {:b b :e e :f f :w :when}) wr)
+                     (= w :while) (recur (conj ret {:b b :e e :f f :w :while}) wr)
+                     :else (recur (conj ret {:b b :e e :f true :w :while}) r))
+                    (seq ret))))
+        emit (fn emit [[{b :b f :f w :w} & [{ys :e} :as rses]]]
+		  (let [giter (gensym "iter__") gxs (gensym "s__")]
+		    `(fn ~giter [~gxs]
+			 (when-first ~b ~gxs
+                           (if ~f
+			    ~(if rses
+			       `(let [iterys# ~(emit rses)]
+				  (lazy-cat (iterys# ~ys)
+					    (~giter (rest ~gxs))))
+			       `(lazy-cons ~expr (~giter (rest ~gxs))))
+                            ~(if (= w :when)
+                               `(recur (rest ~gxs))
+                               nil))))))]
+    `(let [iter# ~(emit (pargs seq-exprs))]
+	(iter# ~(second seq-exprs))))))
 
 (defmacro comment
   "Ignores body, yields nil"
@@ -2132,10 +2143,11 @@ not-every? (comp not every?))
  contains a match for re-string"
   [re-string]
     (let [re  (re-pattern re-string)]
-      (dorun (for [ns (all-ns) v (sort-by (comp :name meta) (vals (ns-interns ns)))]
-               (and (:doc ^v)
-                    (or (re-find (re-matcher re (:doc ^v)))
-                        (re-find (re-matcher re (str (:name ^v))))))
+      (dorun (for [ns (all-ns) 
+                   v (sort-by (comp :name meta) (vals (ns-interns ns)))
+                   :when (and (:doc ^v)
+                          (or (re-find (re-matcher re (:doc ^v)))
+                              (re-find (re-matcher re (str (:name ^v))))))]
                (print-doc v)))))
 
 (defmacro doc
