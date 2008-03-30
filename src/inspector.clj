@@ -104,6 +104,7 @@
 (comment
 
 (load-file "src/inspector.clj")
+(refer 'inspector)
 (inspect-tree {:a 1 :b 2 :c [1 2 3 {:d 4 :e 5 :f [6 7 8]}]})
 (inspect-table [[1 2 3][4 5 6][7 8 9][10 11 12]])
 

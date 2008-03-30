@@ -213,7 +213,8 @@ static
 			               return arg1 == arg2 ? RT.T : RT.F;
 		               }
 	               });
-	v.setMeta(map(dockw, "Tests if 2 arguments are the same object"));
+	v.setMeta(map(dockw, "Tests if 2 arguments are the same object",
+	              arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
 //	try
 //		{
 //		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
