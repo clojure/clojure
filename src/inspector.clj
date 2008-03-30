@@ -60,7 +60,6 @@
     (valueForPathChanged [path newValue])
     (getIndexOfChild [parent child]
       -1)
-    (addTreeModelListener [treeModelListener])
     (removeTreeModelListener [treeModelListener])))
 
 
