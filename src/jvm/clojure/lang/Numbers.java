@@ -69,9 +69,9 @@ public static Object add(int x, Object y){
 }
 
 public static double[] add(double[] x, double y){
-	double[] ret = x.clone();
+	double[] ret = new double[x.length];//x.clone();
 	for(int i = 0; i < ret.length; i++)
-		ret[i] += y;
+		ret[i] = x[i] + y;
 	return ret;
 }
 
@@ -83,7 +83,7 @@ public static float[] add(float[] x, float y){
 }
 
 public static Ratio add(Ratio x, int y){
-	 return null;
+	return null;
 }
 
 public static Double add(double x, double y){
