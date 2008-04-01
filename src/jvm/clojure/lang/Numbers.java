@@ -16,6 +16,175 @@ import java.math.BigInteger;
 import java.math.BigDecimal;
 
 public class Numbers{
+
+static interface Dispatch{
+	Object add(Object x, Object y, Dispatch dy);
+
+	Object addTo(int x, Object y);
+
+	Object addTo(long x, Object y);
+
+	Object addTo(BigInteger x, Object y);
+
+	Object addTo(BigDecimal x, Object y);
+
+	Object addTo(Ratio x, Object y);
+
+	Object addTo(float x, Object y);
+
+	Object addTo(double x, Object y);
+
+	Object addTo(float[] x, Object y);
+
+	Object addTo(double[] x, Object y);
+}
+
+static abstract class DefaultDispatch implements Dispatch{
+	public Object addTo(float x, Object y){
+		return x + ((Number) y).floatValue();
+	}
+
+	public Object addTo(double x, Object y){
+		return x + ((Number) y).doubleValue();
+	}
+
+	public Object addTo(float[] x, Object y){
+		float[] ret = new float[x.length];
+		float yf = ((Number) y).floatValue();
+		for(int i = 0; i < ret.length; i++)
+			ret[i] = x[i] + yf;
+		return ret;
+	}
+
+	public Object addTo(double[] x, Object y){
+		double[] ret = new double[x.length];
+		double yd = ((Number) y).doubleValue();
+		for(int i = 0; i < ret.length; i++)
+			ret[i] = x[i] + yd;
+		return ret;
+	}
+}
+/*
+static Dispatch intDispatch = new DefaultDispatch(){
+
+	public Object add(Object x, Object y, Dispatch dy){
+		return dy.addTo(((Number) x).intValue(), y);
+	}
+
+	public Object addTo(int x, Object y){
+		long ret = (long) x + ((Number) y).longValue();
+		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
+			return (int)ret;
+		return ret;
+	}
+
+	public Object addTo(long x, Object y){
+	}
+
+	public Object addTo(BigInteger x, Object y){
+	}
+
+	public Object addTo(BigDecimal x, Object y){
+	}
+
+	public Object addTo(Ratio x, Object y){
+	}
+}
+*/
+
+static BigInteger toBigInteger(Object x){
+	if(x instanceof BigInteger)
+		return (BigInteger) x;
+	else
+		return BigInteger.valueOf(((Number) x).longValue());
+}
+
+static Ratio toRatio(Object x){
+	if(x instanceof Ratio)
+		return (Ratio) x;
+	return new Ratio(toBigInteger(x), BigInteger.ONE);
+}
+
+static public Number reduce(BigInteger val){
+	if(val.bitLength() < 32)
+		return val.intValue();
+	else
+		return val;
+}
+
+static public Object divide(BigInteger n, BigInteger d){
+	BigInteger gcd = n.gcd(d);
+	if(gcd.equals(BigInteger.ZERO))
+		return 0;
+	n = n.divide(gcd);
+	d = d.divide(gcd);
+	if(d.equals(BigInteger.ONE))
+		return reduce(n);
+	return new Ratio((d.signum() < 0 ? n.negate() : n),
+	                    (d.signum() < 0 ? d.negate() : d));
+}
+
+static interface Ops{
+	public Object add(Object x, Object y);
+}
+
+static Ops intOps = new Ops(){
+	public Object add(Object x, Object y){
+		long ret = ((Number) x).longValue() + ((Number) y).longValue();
+		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
+			return (int)ret;
+		return ret;
+	}
+};
+
+static Ops doubleOps = new Ops(){
+	public Object add(Object x, Object y){
+		return ((Number) x).doubleValue() + ((Number) y).doubleValue();
+	}
+};
+
+static Ops floatOps = new Ops(){
+	public Object add(Object x, Object y){
+		return ((Number) x).floatValue() + ((Number) y).floatValue();
+	}
+};
+
+static Ops ratioOps = new Ops(){
+	public Object add(Object x, Object y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+	return divide(rx.numerator.multiply(rx.denominator)
+			.add(rx.numerator.multiply(ry.denominator))
+			, ry.denominator.multiply(rx.denominator));
+	}
+};
+/*
+static Ops ops(Object x, Object y){
+	Class xc = x.getClass();
+	Class yc = y.getClass();
+
+	if(xc == Integer.class && yc == Integer.class)
+		return intOps;
+	else if(xc.isArray() || yc.isArray())
+		{
+
+		}
+	else if(xc == Double.class || yc == Double.class)
+		return doubleOps;
+	else if(xc == Float.class || yc == Float.class)
+		return floatOps;
+	else if(xc == Ratio.class || yc == Ratio.class)
+		return ratioOps;
+	else if(xc == BigDecimal.class || yc == BigDecimal.class)
+		return bigdecOps;
+	else if(xc == BigInteger.class || yc == BigInteger.class
+			|| xc == Long.class || yc == Long.class)
+		return bigintOps;
+
+	return intOps;
+}
+//	*/
+ /*
 static Object add(Object x, Object y){
 	Class c = x.getClass();
 	if(c == Integer.class)
@@ -39,7 +208,7 @@ static Object add(Object x, Object y){
 	else
 		return add(((Number) x).intValue(), y);
 }
-
+   */
 public static Object add(int x, Object y){
 	Class c = y.getClass();
 	if(c == Integer.class)
