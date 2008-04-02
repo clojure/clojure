@@ -190,7 +190,7 @@ static Ops bigintOps = new Ops(){
 	}
 };
 
-/*
+//*
 static Ops ops(Object x, Object y){
    Class xc = x.getClass();
    Class yc = y.getClass();

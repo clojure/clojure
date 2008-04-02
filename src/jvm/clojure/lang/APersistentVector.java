@@ -272,14 +272,14 @@ static class Seq extends ASeq implements IndexedSeq{
 	public Object reduce(IFn f) throws Exception{
 		Object ret = v.nth(i);
 		for(int x = i + 1; x < v.count(); x++)
-			ret = f.invoke(ret, x);
+			ret = f.invoke(ret, v.nth(x));
 		return ret;
 	}
 
 	public Object reduce(IFn f, Object start) throws Exception{
 		Object ret = f.invoke(start, v.nth(i));
 		for(int x = i + 1; x < v.count(); x++)
-			ret = f.invoke(ret, x);
+			ret = f.invoke(ret, v.nth(x));
 		return ret;
 	}
 }

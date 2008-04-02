@@ -71,14 +71,14 @@ public ArraySeq withMeta(IPersistentMap meta){
 public Object reduce(IFn f) throws Exception{
 	Object ret = array[i];
 	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, x);
+		ret = f.invoke(ret, array[x]);
 	return ret;
 }
 
 public Object reduce(IFn f, Object start) throws Exception{
 	Object ret = f.invoke(start,array[i]);
 	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, x);
+		ret = f.invoke(ret, array[x]);
 	return ret;
 }
 }
