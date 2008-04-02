@@ -336,6 +336,8 @@ static public ISeq seq(Object coll){
 		return StringSeq.create((String) coll);
 	else if(coll instanceof Map)
 		return seq(((Map) coll).entrySet());
+	else if(coll instanceof Iterator)
+		return IteratorSeq.create((Iterator) coll);
 	else if(coll instanceof Enumeration)
 		return EnumerationSeq.create(((Enumeration) coll));
 	else
