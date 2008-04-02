@@ -24,4 +24,8 @@ ISeq rest();
 
 ISeq cons(Object o);
 
+Object reduce(IFn f) throws Exception;
+
+Object reduce(IFn f, Object start) throws Exception;
+
 }

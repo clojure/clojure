@@ -82,7 +82,8 @@
     :doc "Sequence. Returns a new ISeq on the collection. If the
     collection is empty, returns nil.  (seq nil) returns nil. seq also
     works on Strings, native Java arrays (of reference types) and any
-    objects that implement Iterable."}
+    objects that implement Iterable."
+    :tag clojure.lang.ISeq}
  seq (fn seq [coll] (. clojure.lang.RT (seq coll))))
 
 (def
@@ -440,13 +441,15 @@
   applying f to that result and the 2nd item, etc. If coll contains no
   items, returns val and f is not called."
   ([f coll]
-   (if (seq coll)
-     (reduce f (first coll) (rest coll))
-     (f)))
+   (let [s (seq coll)]
+     (if s
+       (. s (reduce f))
+       (f))))
   ([f val coll]
-   (if (seq coll)
-     (recur f (f val (first coll)) (rest coll))
-     val)))
+   (let [s (seq coll)]
+     (if s
+       (. s (reduce f val))
+       val))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
@@ -1095,8 +1098,12 @@ not-every? (comp not every?))
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
   (exclusive), by step, where start defaults to 0 and step to 1."
-  ([end] (take end (iterate inc 0)))
-  ([start end] (take (- end start) (iterate inc start)))
+  ([end] (if (< end (. Integer MAX_VALUE))
+           (new clojure.lang.Range 0 end)
+           (take end (iterate inc 0))))
+  ([start end] (if (and (< start end) (< end (. Integer MAX_VALUE)))
+                 (new clojure.lang.Range start end)
+                 (take (- end start) (iterate inc start))))
   ([start end step]
    (take-while (partial (if (pos? step) > <) end) (iterate (partial + step) start))))
 

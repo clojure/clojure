@@ -99,9 +99,28 @@ static BigInteger toBigInteger(Object x){
 		return BigInteger.valueOf(((Number) x).longValue());
 }
 
+static BigDecimal toBigDecimal(Object x){
+	if(x instanceof BigDecimal)
+		return (BigDecimal) x;
+	else if(x instanceof BigInteger)
+		return new BigDecimal((BigInteger) x);
+	else
+		return BigDecimal.valueOf(((Number) x).longValue());
+}
+
 static Ratio toRatio(Object x){
 	if(x instanceof Ratio)
 		return (Ratio) x;
+	else if(x instanceof BigDecimal)
+		{
+		BigDecimal bx = (BigDecimal) x;
+		BigInteger bv = bx.unscaledValue();
+		int scale = bx.scale();
+		if(scale < 0)
+			return new Ratio(bv, BigInteger.TEN.pow(-scale));
+		else
+			return new Ratio(bv.multiply(BigInteger.TEN.pow(scale)), BigInteger.ONE);
+		}
 	return new Ratio(toBigInteger(x), BigInteger.ONE);
 }
 
@@ -121,7 +140,7 @@ static public Object divide(BigInteger n, BigInteger d){
 	if(d.equals(BigInteger.ONE))
 		return reduce(n);
 	return new Ratio((d.signum() < 0 ? n.negate() : n),
-	                    (d.signum() < 0 ? d.negate() : d));
+	                 (d.signum() < 0 ? d.negate() : d));
 }
 
 static interface Ops{
@@ -132,7 +151,7 @@ static Ops intOps = new Ops(){
 	public Object add(Object x, Object y){
 		long ret = ((Number) x).longValue() + ((Number) y).longValue();
 		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
-			return (int)ret;
+			return (int) ret;
 		return ret;
 	}
 };
@@ -153,38 +172,51 @@ static Ops ratioOps = new Ops(){
 	public Object add(Object x, Object y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
-	return divide(rx.numerator.multiply(rx.denominator)
-			.add(rx.numerator.multiply(ry.denominator))
-			, ry.denominator.multiply(rx.denominator));
+		return divide(rx.numerator.multiply(rx.denominator)
+				.add(rx.numerator.multiply(ry.denominator))
+				, ry.denominator.multiply(rx.denominator));
 	}
 };
+
+static Ops bigdecOps = new Ops(){
+	public Object add(Object x, Object y){
+		return toBigDecimal(x).add(toBigDecimal(y));
+	}
+};
+
+static Ops bigintOps = new Ops(){
+	public Object add(Object x, Object y){
+		return reduce(toBigInteger(x).add(toBigInteger(y)));
+	}
+};
+
 /*
 static Ops ops(Object x, Object y){
-	Class xc = x.getClass();
-	Class yc = y.getClass();
+   Class xc = x.getClass();
+   Class yc = y.getClass();
 
-	if(xc == Integer.class && yc == Integer.class)
-		return intOps;
-	else if(xc.isArray() || yc.isArray())
-		{
+   if(xc == Integer.class && yc == Integer.class)
+	   return intOps;
+   else if(xc.isArray() || yc.isArray())
+	   {
 
-		}
-	else if(xc == Double.class || yc == Double.class)
-		return doubleOps;
-	else if(xc == Float.class || yc == Float.class)
-		return floatOps;
-	else if(xc == Ratio.class || yc == Ratio.class)
-		return ratioOps;
-	else if(xc == BigDecimal.class || yc == BigDecimal.class)
-		return bigdecOps;
-	else if(xc == BigInteger.class || yc == BigInteger.class
-			|| xc == Long.class || yc == Long.class)
-		return bigintOps;
+	   }
+   else if(xc == Double.class || yc == Double.class)
+	   return doubleOps;
+   else if(xc == Float.class || yc == Float.class)
+	   return floatOps;
+   else if(xc == Ratio.class || yc == Ratio.class)
+	   return ratioOps;
+   else if(xc == BigDecimal.class || yc == BigDecimal.class)
+	   return bigdecOps;
+   else if(xc == BigInteger.class || yc == BigInteger.class
+		   || xc == Long.class || yc == Long.class)
+	   return bigintOps;
 
-	return intOps;
+   return intOps;
 }
 //	*/
- /*
+/*
 static Object add(Object x, Object y){
 	Class c = x.getClass();
 	if(c == Integer.class)

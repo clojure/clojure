@@ -67,4 +67,18 @@ public int index(){
 public ArraySeq withMeta(IPersistentMap meta){
 	return new ArraySeq(meta, array, i);
 }
+
+public Object reduce(IFn f) throws Exception{
+	Object ret = array[i];
+	for(int x = i+1;x < array.length;x++)
+		ret = f.invoke(ret, x);
+	return ret;
+}
+
+public Object reduce(IFn f, Object start) throws Exception{
+	Object ret = f.invoke(start,array[i]);
+	for(int x = i+1;x < array.length;x++)
+		ret = f.invoke(ret, x);
+	return ret;
+}
 }

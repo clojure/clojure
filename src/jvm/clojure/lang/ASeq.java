@@ -54,6 +54,20 @@ public int hashCode(){
 	return _hash;
 }
 
+public Object reduce(IFn f) throws Exception{
+	Object ret = first();
+	for(ISeq s = rest();s != null;s=s.rest())
+		ret = f.invoke(ret,s.first());
+	return ret;
+}
+
+public Object reduce(IFn f, Object start) throws Exception{
+	Object ret = f.invoke(start,first());
+	for(ISeq s = rest();s != null;s=s.rest())
+		ret = f.invoke(ret,s.first());
+	return ret;
+}
+
 //public Object peek(){
 //	return first();
 //}
