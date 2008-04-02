@@ -1587,7 +1587,7 @@ not-every? (comp not every?))
   "If form represents a macro form, returns its expansion,
   else returns form."
   [form]
-    (let [v (. clojure.lang.Compiler (isMacro (first form)))]
+    (let [v (and (seq? form) (. clojure.lang.Compiler (isMacro (first form))))]
       (if v
         (apply @v (rest form))
         form)))
@@ -1598,7 +1598,7 @@ not-every? (comp not every?))
   macroexpand-1 nor macroexpand expand macros in subforms."
   [form]
     (let [ex (macroexpand-1 form)
-          v  (. clojure.lang.Compiler (isMacro (first ex)))]
+          v  (and (seq? ex) (. clojure.lang.Compiler (isMacro (first ex))))]
       (if v
         (macroexpand ex)
         ex)))
