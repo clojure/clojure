@@ -17,80 +17,10 @@ import java.math.BigDecimal;
 
 public class Numbers{
 
-static interface Dispatch{
-	Object add(Object x, Object y, Dispatch dy);
-
-	Object addTo(int x, Object y);
-
-	Object addTo(long x, Object y);
-
-	Object addTo(BigInteger x, Object y);
-
-	Object addTo(BigDecimal x, Object y);
-
-	Object addTo(Ratio x, Object y);
-
-	Object addTo(float x, Object y);
-
-	Object addTo(double x, Object y);
-
-	Object addTo(float[] x, Object y);
-
-	Object addTo(double[] x, Object y);
+static public Object add(Object x, Object y){
+	return ops(x).add(x, y);
 }
 
-static abstract class DefaultDispatch implements Dispatch{
-	public Object addTo(float x, Object y){
-		return x + ((Number) y).floatValue();
-	}
-
-	public Object addTo(double x, Object y){
-		return x + ((Number) y).doubleValue();
-	}
-
-	public Object addTo(float[] x, Object y){
-		float[] ret = new float[x.length];
-		float yf = ((Number) y).floatValue();
-		for(int i = 0; i < ret.length; i++)
-			ret[i] = x[i] + yf;
-		return ret;
-	}
-
-	public Object addTo(double[] x, Object y){
-		double[] ret = new double[x.length];
-		double yd = ((Number) y).doubleValue();
-		for(int i = 0; i < ret.length; i++)
-			ret[i] = x[i] + yd;
-		return ret;
-	}
-}
-/*
-static Dispatch intDispatch = new DefaultDispatch(){
-
-	public Object add(Object x, Object y, Dispatch dy){
-		return dy.addTo(((Number) x).intValue(), y);
-	}
-
-	public Object addTo(int x, Object y){
-		long ret = (long) x + ((Number) y).longValue();
-		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
-			return (int)ret;
-		return ret;
-	}
-
-	public Object addTo(long x, Object y){
-	}
-
-	public Object addTo(BigInteger x, Object y){
-	}
-
-	public Object addTo(BigDecimal x, Object y){
-	}
-
-	public Object addTo(Ratio x, Object y){
-	}
-}
-*/
 
 static BigInteger toBigInteger(Object x){
 	if(x instanceof BigInteger)
@@ -127,6 +57,8 @@ static Ratio toRatio(Object x){
 static public Number reduce(BigInteger val){
 	if(val.bitLength() < 32)
 		return val.intValue();
+	else if(val.bitLength() < 64)
+		return val.longValue();
 	else
 		return val;
 }
@@ -147,29 +79,43 @@ static interface Ops{
 	public Object add(Object x, Object y);
 }
 
-static Ops intOps = new Ops(){
-	public Object add(Object x, Object y){
+static final IntOps intOps = new IntOps();
+//Ops(){
+//	final public Object add(Object x, Object y){
+//		long ret = ((Number) x).longValue() + ((Number) y).longValue();
+//		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
+//			return (int) ret;
+//		return ret;
+//	}
+//};
+
+static class IntOps implements Ops{
+	final public Ops ops(Object y){
+		 return Numbers.ops(y);
+	}
+
+	final public Object add(Object x, Object y){
 		long ret = ((Number) x).longValue() + ((Number) y).longValue();
 		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
-			return (int) ret;
+			return (int)ret;
 		return ret;
 	}
-};
+}
 
-static Ops doubleOps = new Ops(){
-	public Object add(Object x, Object y){
+static final Ops doubleOps = new Ops(){
+	final public Object add(Object x, Object y){
 		return ((Number) x).doubleValue() + ((Number) y).doubleValue();
 	}
 };
 
-static Ops floatOps = new Ops(){
-	public Object add(Object x, Object y){
+static final Ops floatOps = new Ops(){
+	final public Object add(Object x, Object y){
 		return ((Number) x).floatValue() + ((Number) y).floatValue();
 	}
 };
 
-static Ops ratioOps = new Ops(){
-	public Object add(Object x, Object y){
+static final Ops ratioOps = new Ops(){
+	final public Object add(Object x, Object y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
 		return divide(rx.numerator.multiply(rx.denominator)
@@ -178,44 +124,144 @@ static Ops ratioOps = new Ops(){
 	}
 };
 
-static Ops bigdecOps = new Ops(){
-	public Object add(Object x, Object y){
+static final Ops bigdecOps = new Ops(){
+	final public Object add(Object x, Object y){
 		return toBigDecimal(x).add(toBigDecimal(y));
 	}
 };
 
-static Ops bigintOps = new Ops(){
-	public Object add(Object x, Object y){
+static final Ops bigintOps = new Ops(){
+	final public Object add(Object x, Object y){
 		return reduce(toBigInteger(x).add(toBigInteger(y)));
 	}
 };
 
+static class DoubleArrayOps implements Ops{
+	final boolean first;
+
+	DoubleArrayOps(boolean first){
+		this.first = first;
+	}
+
+	final public Object add(Object x, Object y){
+		double[] a = (double[]) (first ? x : y);
+		Object arg = first ? y : x;
+		double[] ret = new double[a.length];
+		if(arg instanceof Number)
+			{
+			double yd = ((Number) arg).doubleValue();
+			for(int i = 0; i < a.length; i++)
+				ret[i] = a[i] + yd;
+			}
+		else if(arg instanceof double[])
+			{
+			double[] ya = (double[]) arg;
+			for(int i = 0; i < a.length; i++)
+				ret[i] = a[i] + ya[i];
+			}
+		else
+			{
+			float[] ya = (float[]) arg;
+			for(int i = 0; i < a.length; i++)
+				ret[i] = a[i] + ya[i];
+			}
+		return ret;
+	}
+}
+
+static class FloatArrayOps implements Ops{
+	final boolean first;
+
+	FloatArrayOps(boolean first){
+		this.first = first;
+	}
+
+	final public Object add(Object x, Object y){
+		float[] a = (float[]) (first ? x : y);
+		Object arg = first ? y : x;
+		float[] ret = new float[a.length];
+		if(arg instanceof Number)
+			{
+			float yd = ((Number) arg).floatValue();
+			for(int i = 0; i < a.length; i++)
+				ret[i] = a[i] + yd;
+			}
+		else if(arg instanceof double[])
+			{
+			double[] ya = (double[]) arg;
+			for(int i = 0; i < a.length; i++)
+				ret[i] = a[i] + (float) ya[i];
+			}
+		else
+			{
+			float[] ya = (float[]) arg;
+			for(int i = 0; i < a.length; i++)
+				ret[i] = a[i] + ya[i];
+			}
+		return ret;
+	}
+}
+
 //*
+
+static Ops ops(Object x){
+	Class xc = x.getClass();
+
+	if(xc == Integer.class)
+		return intOps;
+	else if(xc == Double.class)
+		return doubleOps;
+	else if(xc == Float.class)
+		return floatOps;
+	else if(xc == BigInteger.class)
+		return bigintOps;
+	else if(xc == Ratio.class)
+		return ratioOps;
+	else if(xc == BigDecimal.class)
+		return bigdecOps;
+	else if(xc == double[].class)
+		return new DoubleArrayOps(true);
+	else if(xc == float[].class)
+		return new FloatArrayOps(true);
+
+	return intOps;
+}
 static Ops ops(Object x, Object y){
-   Class xc = x.getClass();
-   Class yc = y.getClass();
+	Class xc = x.getClass();
+	Class yc = y.getClass();
 
-   if(xc == Integer.class && yc == Integer.class)
-	   return intOps;
-   else if(xc.isArray() || yc.isArray())
-	   {
+	if(xc == Integer.class)// && yc == Integer.class)
+		return intOps.ops(y);
+	//*
+	else if(xc.isArray() || yc.isArray())
+		{
+		if(xc == double[].class)
+			return new DoubleArrayOps(true);
+		else if(yc == double[].class)
+			return new DoubleArrayOps(false);
+		else if(xc == float[].class)
+			return new FloatArrayOps(true);
+		else if(yc == float[].class)
+			return new FloatArrayOps(false);
+		throw new IllegalArgumentException("Unsupported array type");
+		}
+	else if(xc == Double.class || yc == Double.class)
+		return doubleOps;
+	else if(xc == Float.class || yc == Float.class)
+		return floatOps;
+	else if(xc == Ratio.class || yc == Ratio.class)
+		return ratioOps;
+	else if(xc == BigDecimal.class || yc == BigDecimal.class)
+		return bigdecOps;
+	else if(xc == BigInteger.class || yc == BigInteger.class
+	        || xc == Long.class || yc == Long.class)
+		return bigintOps;
+		//*/
 
-	   }
-   else if(xc == Double.class || yc == Double.class)
-	   return doubleOps;
-   else if(xc == Float.class || yc == Float.class)
-	   return floatOps;
-   else if(xc == Ratio.class || yc == Ratio.class)
-	   return ratioOps;
-   else if(xc == BigDecimal.class || yc == BigDecimal.class)
-	   return bigdecOps;
-   else if(xc == BigInteger.class || yc == BigInteger.class
-		   || xc == Long.class || yc == Long.class)
-	   return bigintOps;
-
-   return intOps;
+	return intOps;
 }
 //	*/
+
 /*
 static Object add(Object x, Object y){
 	Class c = x.getClass();
