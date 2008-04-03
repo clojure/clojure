@@ -95,7 +95,10 @@ abstract public Num multiply(BigInteger x);
 abstract public Num multiply(RatioNum x);
 
 static public Num divide(Object x, Object y){
-	return Num.from(x).divideBy(Num.from(y));
+	Num ny = Num.from(y);
+	if(ny.zerop())
+		throw new ArithmeticException("Divide by zero");
+	return Num.from(x).divideBy(ny);
 }
 
 abstract public Num divideBy(Num rhs);
@@ -132,6 +135,8 @@ static public Object[] truncateBigints(BigInteger n, BigInteger d){
 }
 
 static public Num divide(BigInteger n, BigInteger d){
+	if(d.equals(BigInteger.ZERO))
+		throw new ArithmeticException("Divide by zero");
 	BigInteger gcd = n.gcd(d);
 	if(gcd.equals(BigInteger.ZERO))
 		return Num.ZERO;
