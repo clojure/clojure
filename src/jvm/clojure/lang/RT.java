@@ -237,7 +237,7 @@ static public Var var(String ns, String name){
 	return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name));
 }
 
-static void loadResourceScript(String name) throws Exception{
+public static void  loadResourceScript(String name) throws Exception{
 	try
 		{
 		Var.pushThreadBindings(RT.map(Compiler.SOURCE_PATH, name,
