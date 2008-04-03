@@ -31,8 +31,8 @@
 ;;
 ;;  The "force" variations are useful during development.
 ;;
-;;  'provide' is made available as a separate function (rather than being
-;;  done automatically after loading an implementation file) to allow
+;;  'provide' is made available as a separate function (in addition to
+;;  being done automatically after loading an implementation file) to allow
 ;;  flexibility in providing a package's capabilities by some means other
 ;;  than loading an implementation file using 'require'.
 ;;
@@ -100,9 +100,7 @@
     (when-not (provided? package)
       (let [resource (str package ".clj")]
         (load-resource resource)
-        (when-not (provided? package)
-          (throw (new Exception (str \" resource \"
-                                     " did not provide " package))))))))
+        (provide package)))))
 
 (defn require-ns
   "Requires a package and then refers to the namespace of the same name
