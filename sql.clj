@@ -1,10 +1,3 @@
-;;  sql.clj
-;;
-;;  A Clojure interface to sql databases via jdbc
-;;
-;;  scgilardi (gmail)
-;;  2 April 2008
-;;
 ;;  Copyright (c) Stephen C. Gilardi. All rights reserved.
 ;;  The use and distribution terms for this software are covered by the
 ;;  Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
@@ -12,6 +5,13 @@
 ;;  By using this software in any fashion, you are agreeing to be bound by
 ;;  the terms of this license.
 ;;  You must not remove this notice, or any other, from this software.
+;;
+;;  sql.clj
+;;
+;;  A Clojure interface to sql databases via jdbc
+;;
+;;  scgilardi (gmail)
+;;  2 April 2008
 
 (clojure/in-ns 'sql)
 (clojure/refer 'clojure)
