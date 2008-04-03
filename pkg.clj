@@ -11,18 +11,20 @@
 ;;  Clojure package loading and dependency via require/provide.
 ;;
 ;;  A 'package' is a named set of capabilities represented by a symbol.
-;;  Its capabilities are expected to be defined in an implementation
-;;  file somewhere in CLASSPATH whose name is the package name followed
-;;  by ".clj".  The implementation file may be in the filesystem, in a
-;;  jar file, or at any other valid CLASSPATH URL.
+;;  The capabilities are usually defined in an implementation file
+;;  somewhere in CLASSPATH whose name is the package name followed by
+;;  ".clj".  The implementation file may be in the filesystem, in a jar
+;;  file, or at any other valid CLASSPATH URL.
 ;;
 ;;  A call to 'require' indicates that subsequent code depends on
 ;;  capabilities provided by one or more packages and loads any of those
 ;;  packages that have not already been provided.
 ;;
-;;  A call to 'provide' indicates that a package's capabilities have been
-;;  successfully loaded.  A package's implementation file will generally
-;;  end with a call to provide.
+;;  A call to 'provide' records that a package's capabilities are loaded.
+;;  By default this is done automatically when 'require' loads the
+;;  package's implementation file. 'provide' is also available separately
+;;  to allow flexibility in making a package's capabilities available by
+;;  some means other than the default.
 ;;
 ;;  pkg.clj provides variations of 'require' that:
 ;;
@@ -38,11 +40,6 @@
 ;;      the package and its dependencies. 'require-ns-force'
 ;;
 ;;  The "force" variations are useful during development.
-;;
-;;  'provide' is made available as a separate function (in addition to
-;;  being done automatically after loading an implementation file) to allow
-;;  flexibility in providing a package's capabilities by some means other
-;;  than loading an implementation file using 'require'.
 ;;
 ;;  scgilardi (gmail)
 ;;  2 April 2008
