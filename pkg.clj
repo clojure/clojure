@@ -111,7 +111,7 @@
   (require package)
   (apply refer package filters))
 
-(defn require-forced
+(defn require-force
   "Like 'require' but will reload packages (and their dependencies) that
   have already been provided"
   [& packages]
@@ -123,11 +123,11 @@
      (commute *packages* set/union forced-packages)))
   nil)
 
-(defn require-ns-forced
+(defn require-ns-force
   "Like 'require-ns' but will reload packages (and their dependencies)
   that have already been provided"
   [package & filters]
-  (require-forced package)
+  (require-force package)
   (apply refer package filters))
 
 (provide 'pkg)
