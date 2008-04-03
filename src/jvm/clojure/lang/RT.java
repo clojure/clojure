@@ -192,7 +192,7 @@ static
 	Keyword dockw = Keyword.intern(null, "doc");
 	Keyword arglistskw = Keyword.intern(null, "arglists");
 	Symbol namesym = Symbol.create("name");
-	OUT.setTag(Symbol.create("java.io.OutputStreamWriter"));
+	OUT.setTag(Symbol.create("java.io.Writer"));
 	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
