@@ -200,6 +200,15 @@ public static Object setInstanceField(Object target, String fieldName, Object va
 	throw new IllegalArgumentException("No matching field found: " + fieldName);
 }
 
+public static Object invokeNoArgInstanceMember(Object target, String name) throws Exception{
+	//favor method over field
+	List meths = getMethods(target.getClass(),0,name,false);
+	if(meths.size() > 0)
+		return invokeMatchingMethod(name, meths, target, RT.EMPTY_ARRAY);
+	else
+		return getInstanceField(target, name);
+}
+
 public static Object invokeInstanceMember(Object target, String name) throws Exception{
 	//check for field first
 	Class c = target.getClass();

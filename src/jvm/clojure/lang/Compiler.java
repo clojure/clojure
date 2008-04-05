@@ -665,19 +665,30 @@ static public abstract class HostExpr implements Expr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
-			//(. x fieldname-sym) or (. x (methodname-sym args...))
-			if(RT.length(form) != 3)
-				throw new IllegalArgumentException("Malformed member expression, expecting (. target member)");
+			//(. x fieldname-sym) or
+			//(. x 0-ary-method)
+			// (. x methodname-sym args+)
+			// (. x (methodname-sym args?))
+			if(RT.length(form) < 3)
+				throw new IllegalArgumentException("Malformed member expression, expecting (. target member ...)");
 			//determine static or instance
 			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
 			int line = (Integer) LINE.get();
 			Class c = maybeClass(RT.second(form), false);
-			//at this point className will be non-null if static
+			//at this point c will be non-null if static
 			Expr instance = null;
 			if(c == null)
 				instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
-
-			if(RT.third(form) instanceof Symbol)    //field
+			boolean maybeField = RT.length(form) == 3 && RT.third(form) instanceof Symbol;
+			if(maybeField)
+				{
+				Symbol sym = (Symbol) RT.third(form);
+				if(c != null)
+					maybeField = Reflector.getMethods(c, 0, sym.name, true).size() == 0;
+				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
+					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, sym.name, false).size() == 0;
+				}
+			if(maybeField)    //field
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				if(c != null)
@@ -685,19 +696,20 @@ static public abstract class HostExpr implements Expr{
 				else
 					return new InstanceFieldExpr(line, instance, sym.name);
 				}
-			else if(RT.third(form) instanceof ISeq && RT.first(RT.third(form)) instanceof Symbol)
+			else
 				{
-				Symbol sym = (Symbol) RT.first(RT.third(form));
+				ISeq call = (ISeq) ((RT.third(form) instanceof ISeq)?RT.third(form):RT.rest(RT.rest(form)));
+				if(!(RT.first(call) instanceof Symbol))
+					throw new IllegalArgumentException("Malformed member expression");
+				Symbol sym = (Symbol) RT.first(call);
 				PersistentVector args = PersistentVector.EMPTY;
-				for(ISeq s = RT.rest(RT.third(form)); s != null; s = s.rest())
+				for(ISeq s = RT.rest(call); s != null; s = s.rest())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
 					return new StaticMethodExpr(line, c, sym.name, args);
 				else
 					return new InstanceMethodExpr(line, instance, sym.name, args);
 				}
-			else
-				throw new IllegalArgumentException("Malformed member expression");
 		}
 	}
 
@@ -764,7 +776,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	final java.lang.reflect.Field field;
 	final String fieldName;
 	final int line;
-	final static Method getInstanceFieldMethod = Method.getMethod("Object getInstanceField(Object,String)");
+	final static Method invokeNoArgInstanceMember = Method.getMethod("Object invokeNoArgInstanceMember(Object,String)");
 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
 
@@ -782,7 +794,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public Object eval() throws Exception{
-		return Reflector.getInstanceField(target.eval(), fieldName);
+		return Reflector.invokeNoArgInstanceMember(target.eval(), fieldName);
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -800,7 +812,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 				{
 				target.emit(C.EXPRESSION, fn, gen);
 				gen.push(fieldName);
-				gen.invokeStatic(REFLECTOR_TYPE, getInstanceFieldMethod);
+				gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
 				}
 			}
 	}
@@ -2581,8 +2593,8 @@ static public class FnExpr implements Expr{
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
-		int lineBefore = (Integer)LINE_BEFORE.get();
-		int lineAfter = (Integer)LINE_AFTER.get() + 1;
+		int lineBefore = (Integer) LINE_BEFORE.get();
+		int lineAfter = (Integer) LINE_AFTER.get() + 1;
 		String smap = "SMAP\n" +
 		              simpleName + ".java\n" +
 		              "Clojure\n" +
@@ -2591,7 +2603,7 @@ static public class FnExpr implements Expr{
 		              "+ 1 " + source + "\n" +
 		              (String) SOURCE_PATH.get() + "\n" +
 		              "*L\n" +
-		              String.format("%d#1,%d:%d\n",lineBefore,lineAfter-lineBefore,lineBefore) +
+		              String.format("%d#1,%d:%d\n", lineBefore, lineAfter - lineBefore, lineBefore) +
 		              "*E";
 		if(source != null && SOURCE_PATH.get() != null)
 		//cv.visitSource(source, null);
@@ -3234,7 +3246,7 @@ static class RecurExpr implements Expr{
 			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
 			if(context != C.RETURN || loopLocals == null)
 				throw new UnsupportedOperationException("Can only recur from tail position");
-			if(IN_CATCH_FINALLY.get()!=null)
+			if(IN_CATCH_FINALLY.get() != null)
 				throw new UnsupportedOperationException("Cannot recur from catch/finally");
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
