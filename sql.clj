@@ -65,9 +65,6 @@
        (doseq ~rec (resultset-seq rset#)
          ~@body))))
 
-(when (find-var 'pkg/provide)
-  (pkg/provide 'sql))
-
 (comment
 
  ;; Examples
@@ -80,7 +77,7 @@
  ;; of 'db' below (and perhaps suggest the need for more variations of
  ;; get-connection).
 
- (pkg/require-ns 'sql)
+ (require 'sql)
 
  (class org.sqlite.JDBC)
 
