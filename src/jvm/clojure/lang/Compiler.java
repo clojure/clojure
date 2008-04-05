@@ -698,7 +698,7 @@ static public abstract class HostExpr implements Expr{
 				}
 			else
 				{
-				ISeq call = (ISeq) ((RT.third(form) instanceof ISeq)?RT.third(form):RT.rest(RT.rest(form)));
+				ISeq call = (ISeq) ((RT.third(form) instanceof ISeq) ? RT.third(form) : RT.rest(RT.rest(form)));
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
@@ -3341,6 +3341,59 @@ static public Var isMacro(Object op) throws Exception{
 	return null;
 }
 
+public static Object macroexpand1(Object x) throws Exception{
+	if(x instanceof ISeq)
+		{
+		ISeq form = (ISeq) x;
+		Object op = RT.first(form);
+		if(isSpecial(op))
+			return x;
+		//macro expansion
+		Var v = isMacro(op);
+		if(v != null)
+			{
+			try
+				{
+				Var.pushThreadBindings(RT.map(RT.MACRO_META, ((IObj) form).meta()));
+				return v.applyTo(form.rest());
+				}
+			finally
+				{
+				Var.popThreadBindings();
+				}
+			}
+		else
+			{
+			if(op instanceof Symbol)
+				{
+				Symbol sym = (Symbol) op;
+				String sname = sym.name;
+				//(.substring s 2 5) => (. s substring 2 5)
+				if(sym.name.charAt(0) == '.')
+					{
+					Symbol meth = Symbol.intern(sname.substring(1));
+					return RT.listStar(DOT, RT.second(form), meth, form.rest().rest());
+					}
+				else
+					{
+					//(s.substring 2 5) => (. s substring 2 5)
+					int idx = sname.indexOf('.');
+					if(idx > 0 && idx < sname.length() - 1 && idx == sname.lastIndexOf('.'))
+						{
+						Symbol target = Symbol.intern(sname.substring(0, idx));
+						Symbol meth = Symbol.intern(sname.substring(idx + 1));
+						return RT.listStar(DOT, target, meth, form.rest());
+						}
+					//(StringBuilder. "foo") => (new StringBuilder "foo")	
+					else if(idx == sname.length() - 1)
+						return RT.listStar(NEW, Symbol.intern(sname.substring(0, idx)), form.rest());
+					}
+				}
+			}
+		}
+	return x;
+}
+
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Integer line = (Integer) LINE.get();
 	try
@@ -3349,21 +3402,12 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 			line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
 		Var.pushThreadBindings(
 				RT.map(LINE, line));
+
+		Object me = macroexpand1(form);
+		if(me != form)
+			return analyze(context, me);
+
 		Object op = RT.first(form);
-		//macro expansion
-		Var v = isMacro(op);
-		if(v != null)
-			{
-			try
-				{
-				Var.pushThreadBindings(RT.map(RT.MACRO_META, ((IObj) form).meta()));
-				return analyze(context, v.applyTo(form.rest()));
-				}
-			finally
-				{
-				Var.popThreadBindings();
-				}
-			}
 		IParser p;
 		if(op.equals(FN))
 			return FnExpr.parse(context, form, name);

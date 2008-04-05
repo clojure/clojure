@@ -1587,21 +1587,17 @@ not-every? (comp not every?))
   "If form represents a macro form, returns its expansion,
   else returns form."
   [form]
-    (let [v (and (seq? form) (. clojure.lang.Compiler (isMacro (first form))))]
-      (if v
-        (apply @v (rest form))
-        form)))
+    (. clojure.lang.Compiler (macroexpand1 form)))
 
 (defn macroexpand
   "Repeatedly calls macroexpand-1 on form until it no longer
   represents a macro form, then returns it.  Note neither
   macroexpand-1 nor macroexpand expand macros in subforms."
   [form]
-    (let [ex (macroexpand-1 form)
-          v  (and (seq? ex) (. clojure.lang.Compiler (isMacro (first ex))))]
-      (if v
-        (macroexpand ex)
-        ex)))
+    (let [ex (macroexpand-1 form)]
+      (if (identical? ex form)
+        form
+        (macroexpand ex))))
 
 (defn create-struct
   "Returns a structure basis object."
