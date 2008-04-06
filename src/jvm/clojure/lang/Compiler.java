@@ -798,22 +798,24 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
+		gen.visitLineNumber(line, gen.mark());
+		if(targetClass != null)
 			{
-			gen.visitLineNumber(line, gen.mark());
-			if(targetClass != null)
+			if(context != C.STATEMENT)
 				{
 				target.emit(C.EXPRESSION, fn, gen);
 				gen.checkCast(Type.getType(targetClass));
 				gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
 				HostExpr.emitBoxReturn(fn, gen, field.getType());
 				}
-			else
-				{
-				target.emit(C.EXPRESSION, fn, gen);
-				gen.push(fieldName);
-				gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
-				}
+			}
+		else
+			{
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.push(fieldName);
+			gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
+			if(context == C.STATEMENT)
+				gen.pop();
 			}
 	}
 
@@ -3372,7 +3374,8 @@ public static Object macroexpand1(Object x) throws Exception{
 				if(sym.name.charAt(0) == '.')
 					{
 					if(RT.length(form) < 2)
-						throw new IllegalArgumentException("Malformed member expression, expecting (.member target ...)");
+						throw new IllegalArgumentException(
+								"Malformed member expression, expecting (.member target ...)");
 					Symbol meth = Symbol.intern(sname.substring(1));
 					return RT.listStar(DOT, RT.second(form), meth, form.rest().rest());
 					}
