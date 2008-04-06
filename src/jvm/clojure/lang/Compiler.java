@@ -3371,6 +3371,8 @@ public static Object macroexpand1(Object x) throws Exception{
 				//(.substring s 2 5) => (. s substring 2 5)
 				if(sym.name.charAt(0) == '.')
 					{
+					if(RT.length(form) < 2)
+						throw new IllegalArgumentException("Malformed member expression, expecting (.member target ...)");
 					Symbol meth = Symbol.intern(sname.substring(1));
 					return RT.listStar(DOT, RT.second(form), meth, form.rest().rest());
 					}
