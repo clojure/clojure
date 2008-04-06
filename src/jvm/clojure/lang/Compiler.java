@@ -3377,8 +3377,9 @@ public static Object macroexpand1(Object x) throws Exception{
 				else
 					{
 					//(s.substring 2 5) => (. s substring 2 5)
-					int idx = sname.indexOf('.');
-					if(idx > 0 && idx < sname.length() - 1 && idx == sname.lastIndexOf('.'))
+					//also (package.class.name ...) (. package.class name ...)
+					int idx = sname.lastIndexOf('.');
+					if(idx > 0 && idx < sname.length() - 1)
 						{
 						Symbol target = Symbol.intern(sname.substring(0, idx));
 						Symbol meth = Symbol.intern(sname.substring(idx + 1));
