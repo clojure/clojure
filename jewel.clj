@@ -53,12 +53,23 @@
 (def
  #^{:private true :doc
  "A ref to a set of symbols representing loaded jewels"}
- *jewels* (ref #{}))
+ *jewels*)
 
 (def
  #^{:private true :doc
  "True while a verbose require is pending"}
- *verbose* false)
+ *verbose*)
+
+(defmacro init-once
+  "Initializes a var exactly once.  The var must already exist."
+  #^{:private true}
+  [var init]
+  `(let [v# (resolve '~var)]
+	 (when-not (. v# (isBound))
+	   (. v# (bindRoot ~init)))))
+
+(init-once *jewels* (ref #{}))
+(init-once *verbose* false)
 
 (defn- load-system-resource
   "Loads Clojure source from a resource within classpath"
