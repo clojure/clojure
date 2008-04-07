@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.math.BigInteger;
 
-public class Ratio extends Number{
+public class Ratio extends Number implements Comparable{
 final public BigInteger numerator;
 final public BigInteger denominator;
 
@@ -52,5 +52,10 @@ public float floatValue(){
 
 public double doubleValue(){
 	return numerator.doubleValue() / denominator.doubleValue();
+}
+
+public int compareTo(Object o){
+	Number other = (Number)o;
+	return Numbers.compare(this, other);
 }
 }

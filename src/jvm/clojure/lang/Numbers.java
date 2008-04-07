@@ -26,9 +26,42 @@ static interface Ops{
 	Ops opsWith(BigIntegerOps x);
 	Ops opsWith(BigDecimalOps x);
 
+	public boolean isZero(Number x);
+	public boolean isPos(Number x);
+	public boolean isNeg(Number x);
+
 	public Number add(Number x, Number y);
-	//public Number subtract(Number x, Number y);
+	public Number multiply(Number x, Number y);
+	public Number divide(Number x, Number y);
+	public Number quotient(Number x, Number y);
+	public Number remainder(Number x, Number y);
+
+	public boolean equiv(Number x, Number y);
+	public boolean lt(Number x, Number y);
+
 	public Number negate(Number x);
+	public Number inc(Number x);
+	public Number dec(Number x);
+}
+
+static public boolean isZero(Number x){
+	return ops(x).isZero(x);
+}
+static public boolean isPos(Number x){
+	return ops(x).isPos(x);
+}
+static public boolean isNeg(Number x){
+	return ops(x).isNeg(x);
+}
+
+static public Number negate(Number x){
+	return ops(x).negate(x);
+}
+static public Number inc(Number x){
+	return ops(x).inc(x);
+}
+static public Number dec(Number x){
+	return ops(x).dec(x);		
 }
 
 static public Number add(Number x, Number y){
@@ -37,7 +70,78 @@ static public Number add(Number x, Number y){
 
 static public Number subtract(Number x, Number y){
 	Ops yops = ops(y);
-	return ops(x).combine(ops(y)).add(x, y);
+	return ops(x).combine(yops).add(x, yops.negate(y));
+}
+
+static public Number multiply(Number x, Number y){
+	return ops(x).combine(ops(y)).multiply(x, y);
+}
+
+static public Number divide(Number x, Number y){
+	Ops yops = ops(y);
+	if(yops.isZero(y))
+		throw new ArithmeticException("Divide by zero");
+	return ops(x).combine(yops).divide(x, y);
+}
+
+static public Number quotient(Number x, Number y){
+	Ops yops = ops(y);
+	if(yops.isZero(y))
+		throw new ArithmeticException("Divide by zero");
+	return ops(x).combine(yops).quotient(x, y);
+}
+
+static public Number remainder(Number x, Number y){
+	Ops yops = ops(y);
+	if(yops.isZero(y))
+		throw new ArithmeticException("Divide by zero");
+	return ops(x).combine(yops).remainder(x, y);
+}
+
+static Number quotient(double n, double d){
+	double q = n / d;
+	if(q <= Integer.MAX_VALUE && q >= Integer.MIN_VALUE)
+		{
+		return (int) q;
+		}
+	else
+		{ //bigint quotient
+		return reduce(new BigDecimal(q).toBigInteger());
+		}
+}
+
+static Number remainder(double n, double d){
+	double q = n / d;
+	if(q <= Integer.MAX_VALUE && q >= Integer.MIN_VALUE)
+		{
+		return (n - ((int) q) * d);
+		}
+	else
+		{ //bigint quotient
+		Number bq = reduce(new BigDecimal(q).toBigInteger());
+		return (n - bq.doubleValue() * d);
+		}
+}
+
+static public boolean equiv(Number x, Number y){
+	return ops(x).combine(ops(y)).equiv(x, y);
+}
+
+static public boolean lt(Number x, Number y){
+	return ops(x).combine(ops(y)).lt(x, y);
+}
+
+static public boolean gt(Number x, Number y){
+	return ops(x).combine(ops(y)).lt(y, x);
+}
+
+static public int compare(Number x, Number y){
+	Ops ops = ops(x).combine(ops(y));
+	if(ops.lt(x,y))
+		return -1;
+	else if(ops.lt(y,x))
+		return 1;
+	return 0;
 }
 
 static BigInteger toBigInteger(Object x){
@@ -80,6 +184,8 @@ static public Number reduce(BigInteger val){
 }
 
 static public Number divide(BigInteger n, BigInteger d){
+	if(d.equals(BigInteger.ZERO))
+		throw new ArithmeticException("Divide by zero");
 	BigInteger gcd = n.gcd(d);
 	if(gcd.equals(BigInteger.ZERO))
 		return 0;
@@ -92,7 +198,7 @@ static public Number divide(BigInteger n, BigInteger d){
 }
 
 
-static class IntegerOps implements Ops{
+final static class IntegerOps implements Ops{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -104,6 +210,18 @@ static class IntegerOps implements Ops{
 	final public Ops opsWith(BigIntegerOps x){return BIGINTEGER_OPS;}
 	final public Ops opsWith(BigDecimalOps x){return BIGDECIMAL_OPS;}
 
+	public boolean isZero(Number x){
+		return x.intValue() == 0;
+	}
+
+	public boolean isPos(Number x){
+		return x.intValue() > 0;
+	}
+
+	public boolean isNeg(Number x){
+		return x.intValue() < 0;
+	}
+
 	final public Number add(Number x, Number y){
 		long ret = x.longValue() + y.longValue();
 		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
@@ -111,13 +229,79 @@ static class IntegerOps implements Ops{
 		return ret;
 	}
 
+	final public Number multiply(Number x, Number y){
+		long ret = x.longValue() * y.longValue();
+		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
+			return (int)ret;
+		return ret;
+	}
+
+	static int gcd(int u, int v){
+		while(v != 0)
+			{
+			int r = u % v;
+			u = v;
+			v = r;
+			}
+		return u;
+	}
+
+	public Number divide(Number x, Number y){
+		int n = x.intValue();
+		int val = y.intValue();
+		int gcd = gcd(n, val);
+		if(gcd == 0)
+			return 0;
+
+		n = n / gcd;
+		int d = val / gcd;
+		if(d == 1)
+			return n;
+		if(d < 0)
+			{
+			n = -n;
+			d = -d;
+			}
+		return new Ratio(BigInteger.valueOf(n), BigInteger.valueOf(d));
+	}
+
+	public Number quotient(Number x, Number y){
+		return x.intValue() / y.intValue();
+	}
+
+	public Number remainder(Number x, Number y){
+		return x.intValue() % y.intValue();
+	}
+
+	public boolean equiv(Number x, Number y){
+		return x.intValue() == y.intValue();
+	}
+
+	public boolean lt(Number x, Number y){
+		return x.intValue() < y.intValue();
+	}
+
 	//public Number subtract(Number x, Number y);
-	public Number negate(Number x){
+	final public Number negate(Number x){
 		return -x.intValue();
+	}
+
+	public Number inc(Number x){
+		int val = x.intValue();
+		if(val < Integer.MAX_VALUE)
+			return val+1;
+		return BigInteger.valueOf((long)val + 1);
+	}
+
+	public Number dec(Number x){
+		int val = x.intValue();
+		if(val > Integer.MIN_VALUE)
+			return val-1;
+		return BigInteger.valueOf((long)val - 1);
 	}
 }
 
-static class FloatOps implements Ops{
+final static class FloatOps implements Ops{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -129,17 +313,61 @@ static class FloatOps implements Ops{
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
 
+	public boolean isZero(Number x){
+		return x.floatValue() == 0;
+	}
+
+	public boolean isPos(Number x){
+		return x.floatValue() > 0;
+	}
+
+	public boolean isNeg(Number x){
+		return x.floatValue() < 0;
+	}
+
 	final public Number add(Number x, Number y){
 		return x.floatValue() + y.floatValue();
 	}
 
+	final public Number multiply(Number x, Number y){
+		return x.floatValue() * y.floatValue();
+	}
+
+	public Number divide(Number x, Number y){
+		return x.floatValue() / y.floatValue();
+	}
+
+	public Number quotient(Number x, Number y){
+		return Numbers.quotient(x.doubleValue(), y.doubleValue());
+	}
+
+	public Number remainder(Number x, Number y){
+		return Numbers.remainder(x.doubleValue(), y.doubleValue());
+	}
+
+	public boolean equiv(Number x, Number y){
+		return x.floatValue() == y.floatValue();
+	}
+
+	public boolean lt(Number x, Number y){
+		return x.floatValue() < y.floatValue();
+	}
+
 	//public Number subtract(Number x, Number y);
-	public Number negate(Number x){
+	final public Number negate(Number x){
 		return -x.floatValue();
+	}
+
+	public Number inc(Number x){
+		return x.floatValue() + 1;
+	}
+
+	public Number dec(Number x){
+		return x.floatValue() - 1;
 	}
 }
 
-static class DoubleOps implements Ops{
+final static class DoubleOps implements Ops{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -151,17 +379,61 @@ static class DoubleOps implements Ops{
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
 
+	public boolean isZero(Number x){
+		return x.doubleValue() == 0;
+	}
+
+	public boolean isPos(Number x){
+		return x.doubleValue() > 0;
+	}
+
+	public boolean isNeg(Number x){
+		return x.doubleValue() < 0;
+	}
+
 	final public Number add(Number x, Number y){
 		return x.doubleValue() + y.doubleValue();
 	}
 
+	final public Number multiply(Number x, Number y){
+		return x.doubleValue() * y.doubleValue();
+	}
+
+	public Number divide(Number x, Number y){
+		return x.doubleValue() / y.doubleValue();
+	}
+
+	public Number quotient(Number x, Number y){
+		return Numbers.quotient(x.doubleValue(), y.doubleValue());
+	}
+
+	public Number remainder(Number x, Number y){
+		return Numbers.remainder(x.doubleValue(), y.doubleValue());
+	}
+	
+	public boolean equiv(Number x, Number y){
+		return x.doubleValue() == y.doubleValue();
+	}
+
+	public boolean lt(Number x, Number y){
+		return x.doubleValue() < y.doubleValue();
+	}
+
 	//public Number subtract(Number x, Number y);
-	public Number negate(Number x){
+	final public Number negate(Number x){
 		return -x.doubleValue();
+	}
+
+	public Number inc(Number x){
+		return x.doubleValue() + 1;
+	}
+
+	public Number dec(Number x){
+		return x.doubleValue() - 1;
 	}
 }
 
-static class RatioOps implements Ops{
+final static class RatioOps implements Ops{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -173,23 +445,89 @@ static class RatioOps implements Ops{
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
 
+	public boolean isZero(Number x){
+		Ratio r = (Ratio) x;
+		return r.numerator.signum() == 0;
+	}
+
+	public boolean isPos(Number x){
+		Ratio r = (Ratio) x;
+		return r.numerator.signum() > 0;
+	}
+
+	public boolean isNeg(Number x){
+		Ratio r = (Ratio) x;
+		return r.numerator.signum() < 0;
+	}
+
 	final public Number add(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
-		return divide(rx.numerator.multiply(rx.denominator)
+		return divide(ry.numerator.multiply(rx.denominator)
 				.add(rx.numerator.multiply(ry.denominator))
 				, ry.denominator.multiply(rx.denominator));
 	}
 
+	final public Number multiply(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		return Numbers.divide(ry.numerator.multiply(rx.numerator)
+						, ry.denominator.multiply(rx.denominator));
+	}
+
+	public Number divide(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		return Numbers.divide(ry.denominator.multiply(rx.numerator)
+			, ry.numerator.multiply(rx.denominator));
+	}
+
+	public Number quotient(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
+	                           rx.denominator.multiply(ry.numerator));
+		return reduce(q);
+	}
+
+	public Number remainder(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
+	                           rx.denominator.multiply(ry.numerator));
+		return Numbers.subtract(x, Numbers.multiply(q, y));
+	}
+
+	public boolean equiv(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		return rx.numerator.equals(ry.numerator)
+		       && rx.denominator.equals(ry.denominator);
+	}
+
+	public boolean lt(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		return Numbers.lt(rx.numerator.multiply(ry.denominator),ry.numerator.multiply(rx.denominator));
+	}
+
 	//public Number subtract(Number x, Number y);
-	public Number negate(Number x){
+	final public Number negate(Number x){
 		Ratio r = (Ratio) x;
 		return new Ratio(r.numerator.negate(), r.denominator);
 	}
 
+	public Number inc(Number x){
+		return Numbers.add(x,1);
+	}
+
+	public Number dec(Number x){
+		return Numbers.add(x,-1);
+	}
 
 }
-static class BigIntegerOps implements Ops{
+
+final static class BigIntegerOps implements Ops{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -201,17 +539,66 @@ static class BigIntegerOps implements Ops{
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return BIGDECIMAL_OPS;}
 
+	public boolean isZero(Number x){
+		BigInteger bx = (BigInteger) x;
+		return bx.signum() == 0;
+	}
+
+	public boolean isPos(Number x){
+		BigInteger bx = (BigInteger) x;
+		return bx.signum() > 0;
+	}
+
+	public boolean isNeg(Number x){
+		BigInteger bx = (BigInteger) x;
+		return bx.signum() < 0;
+	}
+
 	final public Number add(Number x, Number y){
 		return reduce(toBigInteger(x).add(toBigInteger(y)));
 	}
 
+	final public Number multiply(Number x, Number y){
+		return reduce(toBigInteger(x).multiply(toBigInteger(y)));
+	}
+
+	public Number divide(Number x, Number y){
+		return Numbers.divide(toBigInteger(x), toBigInteger(y));
+	}
+
+	public Number quotient(Number x, Number y){
+		return toBigInteger(x).divide(toBigInteger(y));
+	}
+
+	public Number remainder(Number x, Number y){
+		return toBigInteger(x).remainder(toBigInteger(y));
+	}
+
+	public boolean equiv(Number x, Number y){
+		return toBigInteger(x).equals(toBigInteger(y));
+	}
+
+	public boolean lt(Number x, Number y){
+		return toBigInteger(x).compareTo(toBigInteger(y)) < 0;
+	}
+
 	//public Number subtract(Number x, Number y);
-	public Number negate(Number x){
+	final public Number negate(Number x){
 		return ((BigInteger)x).negate();
+	}
+
+	public Number inc(Number x){
+		BigInteger bx = (BigInteger) x;
+		return reduce(bx.add(BigInteger.ONE));
+	}
+
+	public Number dec(Number x){
+		BigInteger bx = (BigInteger) x;
+		return reduce(bx.subtract(BigInteger.ONE));
 	}
 }
 
-static class BigDecimalOps implements Ops{
+final static class BigDecimalOps implements Ops{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -223,13 +610,62 @@ static class BigDecimalOps implements Ops{
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
 
+	public boolean isZero(Number x){
+		BigDecimal bx = (BigDecimal) x;
+		return bx.signum() == 0;
+	}
+
+	public boolean isPos(Number x){
+		BigDecimal bx = (BigDecimal) x;
+		return bx.signum() > 0;
+	}
+
+	public boolean isNeg(Number x){
+		BigDecimal bx = (BigDecimal) x;
+		return bx.signum() < 0;
+	}
+
 	final public Number add(Number x, Number y){
 		return toBigDecimal(x).add(toBigDecimal(y));
 	}
 
+	final public Number multiply(Number x, Number y){
+		return toBigDecimal(x).multiply(toBigDecimal(y));
+	}
+
+	public Number divide(Number x, Number y){
+		return toBigDecimal(x).divide(toBigDecimal(y));
+	}
+
+	public Number quotient(Number x, Number y){
+		return toBigDecimal(x).divideToIntegralValue(toBigDecimal(y));
+	}
+
+	public Number remainder(Number x, Number y){
+		return toBigDecimal(x).remainder(toBigDecimal(y));
+	}
+
+	public boolean equiv(Number x, Number y){
+		return toBigDecimal(x).equals(toBigDecimal(y));
+	}
+
+	public boolean lt(Number x, Number y){
+		return toBigDecimal(x).compareTo(toBigDecimal(y)) < 0;
+	}
+
 	//public Number subtract(Number x, Number y);
-	public Number negate(Number x){
-		return ((BigDecimal)x).negate();		
+	final public Number negate(Number x){
+		return ((BigDecimal)x).negate();
+	}
+
+	public Number inc(Number x){
+		BigDecimal bx = (BigDecimal) x;
+		return bx.add(BigDecimal.ONE);
+	}
+
+	public Number dec(Number x){
+		BigDecimal bx = (BigDecimal) x;
+		return bx.subtract(BigDecimal.ONE);
 	}
 }
 
