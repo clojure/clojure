@@ -441,7 +441,7 @@ static public Object get(Object coll, Object key){
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
 		{
 		int n = ((Number) key).intValue();
-		if(n < count(coll))
+		if(n >= 0 && n < count(coll))
 			return nth(coll, n);
 		return null;
 		}
