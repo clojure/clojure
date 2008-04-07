@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public abstract class RationalNum extends RealNum {
+abstract class RationalNum extends RealNum {
 
 }

@@ -270,7 +270,7 @@ static public boolean equal(Object k1, Object k2){
 	if(k1 != null)
 		{
 		if(k1 instanceof Number)
-			return Num.equiv(k1, k2);
+			return Numbers.equiv(k1, k2);
 		return k1.equals(k2);
 		}
 	return false;
@@ -615,28 +615,28 @@ static public Object box(Boolean x){
 	return x;// ? T : null;
 }
 
-static public Num box(byte x){
-	return Num.from(x);
+static public Number box(byte x){
+	return x;//Num.from(x);
 }
 
-static public Num box(short x){
-	return Num.from(x);
+static public Number box(short x){
+	return x;//Num.from(x);
 }
 
-static public Num box(int x){
-	return Num.from(x);
+static public Number box(int x){
+	return x;//Num.from(x);
 }
 
-static public Num box(long x){
-	return Num.from(x);
+static public Number box(long x){
+	return x;//Num.from(x);
 }
 
-static public Num box(float x){
-	return Num.from(x);
+static public Number box(float x){
+	return x;//Num.from(x);
 }
 
-static public Num box(double x){
-	return Num.from(x);
+static public Number box(double x){
+	return x;//Num.from(x);
 }
 
 static public char charCast(Object x){

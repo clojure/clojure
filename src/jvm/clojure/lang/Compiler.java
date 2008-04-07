@@ -109,7 +109,7 @@ private static final Type OBJECT_TYPE;
 private static final Type KEYWORD_TYPE = Type.getType(Keyword.class);
 private static final Type VAR_TYPE = Type.getType(Var.class);
 private static final Type SYMBOL_TYPE = Type.getType(Symbol.class);
-private static final Type NUM_TYPE = Type.getType(Num.class);
+//private static final Type NUM_TYPE = Type.getType(Num.class);
 private static final Type IFN_TYPE = Type.getType(IFn.class);
 private static final Type RT_TYPE = Type.getType(RT.class);
 final static Type CLASS_TYPE = Type.getType(Class.class);

@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.math.BigInteger;
 
-public abstract class IntegerNum extends RationalNum{
+abstract class IntegerNum extends RationalNum{
 static public Num bitXor(Object x, Object y){
 	return ((IntegerNum) Num.from(y)).bitXorBy((IntegerNum) Num.from(x));
 }

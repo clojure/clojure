@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public abstract class RealNum extends Num {
+abstract class RealNum extends Num {
 
 }

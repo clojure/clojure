@@ -15,7 +15,7 @@ package clojure.lang;
 import java.math.BigInteger;
 import java.math.BigDecimal;
 
-public class DoubleNum extends FloatNum{
+class DoubleNum extends FloatNum{
 double val;
 
 public DoubleNum(double val){

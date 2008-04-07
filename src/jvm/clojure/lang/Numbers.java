@@ -123,6 +123,11 @@ static Number remainder(double n, double d){
 		}
 }
 
+static public boolean equiv(Object x, Object y){
+	return y instanceof Number && x instanceof Number
+		&& equiv((Number) x, (Number) y);
+	}
+
 static public boolean equiv(Number x, Number y){
 	return ops(x).combine(ops(y)).equiv(x, y);
 }
@@ -131,8 +136,16 @@ static public boolean lt(Number x, Number y){
 	return ops(x).combine(ops(y)).lt(x, y);
 }
 
+static public boolean lte(Number x, Number y){
+	return !ops(x).combine(ops(y)).lt(y, x);
+}
+
 static public boolean gt(Number x, Number y){
 	return ops(x).combine(ops(y)).lt(y, x);
+}
+
+static public boolean gte(Number x, Number y){
+	return !ops(x).combine(ops(y)).lt(x, y);
 }
 
 static public int compare(Number x, Number y){
@@ -540,17 +553,17 @@ final static class BigIntegerOps implements Ops{
 	final public Ops opsWith(BigDecimalOps x){return BIGDECIMAL_OPS;}
 
 	public boolean isZero(Number x){
-		BigInteger bx = (BigInteger) x;
+		BigInteger bx = toBigInteger(x);
 		return bx.signum() == 0;
 	}
 
 	public boolean isPos(Number x){
-		BigInteger bx = (BigInteger) x;
+		BigInteger bx = toBigInteger(x);
 		return bx.signum() > 0;
 	}
 
 	public boolean isNeg(Number x){
-		BigInteger bx = (BigInteger) x;
+		BigInteger bx = toBigInteger(x);
 		return bx.signum() < 0;
 	}
 
@@ -584,16 +597,16 @@ final static class BigIntegerOps implements Ops{
 
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
-		return ((BigInteger)x).negate();
+		return toBigInteger(x).negate();
 	}
 
 	public Number inc(Number x){
-		BigInteger bx = (BigInteger) x;
+		BigInteger bx = toBigInteger(x);
 		return reduce(bx.add(BigInteger.ONE));
 	}
 
 	public Number dec(Number x){
-		BigInteger bx = (BigInteger) x;
+		BigInteger bx = toBigInteger(x);
 		return reduce(bx.subtract(BigInteger.ONE));
 	}
 }
@@ -686,6 +699,8 @@ static Ops ops(Object x){
 	else if(xc == Float.class)
 		return FLOAT_OPS;
 	else if(xc == BigInteger.class)
+		return BIGINTEGER_OPS;
+	else if(xc == Long.class)
 		return BIGINTEGER_OPS;
 	else if(xc == Ratio.class)
 		return RATIO_OPS;

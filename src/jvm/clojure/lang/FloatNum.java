@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public abstract class FloatNum extends RealNum {
+abstract class FloatNum extends RealNum {
 
 }

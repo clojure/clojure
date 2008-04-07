@@ -460,7 +460,7 @@
   "Returns the sum of nums. (+) returns 0."
   ([] 0)
   ([x] (cast Number x))
-  ([x y] (. clojure.lang.Num (add x y)))
+  ([x y] (. clojure.lang.Numbers (add x y)))
   ([x y & more]
    (reduce + (+ x y) more)))
 
@@ -468,7 +468,7 @@
   "Returns the product of nums. (*) returns 1."
   ([] 1)
   ([x] (cast Number x))
-  ([x y] (. clojure.lang.Num (multiply x y)))
+  ([x y] (. clojure.lang.Numbers (multiply x y)))
   ([x y & more]
    (reduce * (* x y) more)))
 
@@ -476,15 +476,15 @@
   "If no denominators are supplied, returns 1/numerator,
   else returns numerator divided by all of the denominators."
   ([x] (/ 1 x))
-  ([x y] (. clojure.lang.Num (divide x y)))
+  ([x y] (. clojure.lang.Numbers (divide x y)))
   ([x y & more]
    (reduce / (/ x y) more)))
 
 (defn -
   "If no ys are supplied, returns the negation of x, else subtracts
   the ys from x and returns the result."
-  ([x] (. clojure.lang.Num (negate x)))
-  ([x y] (. clojure.lang.Num (subtract x y)))
+  ([x] (. clojure.lang.Numbers (negate x)))
+  ([x y] (. clojure.lang.Numbers (subtract x y)))
   ([x y & more]
    (reduce - (- x y) more)))
 
@@ -492,7 +492,7 @@
   "Returns non-nil if nums are in monotonically increasing order,
   otherwise false."
   ([x] true)
-  ([x y] (. clojure.lang.Num (lt x y)))
+  ([x y] (. clojure.lang.Numbers (lt x y)))
   ([x y & more]
    (if (< x y)
      (if (rest more)
@@ -504,7 +504,7 @@
   "Returns non-nil if nums are in monotonically non-decreasing order,
   otherwise false."
   ([x] true)
-  ([x y] (. clojure.lang.Num (lte x y)))
+  ([x y] (. clojure.lang.Numbers (lte x y)))
   ([x y & more]
    (if (<= x y)
      (if (rest more)
@@ -516,7 +516,7 @@
   "Returns non-nil if nums are in monotonically decreasing order,
   otherwise false."
   ([x] true)
-  ([x y] (. clojure.lang.Num (gt x y)))
+  ([x y] (. clojure.lang.Numbers (gt x y)))
   ([x y & more]
    (if (> x y)
      (if (rest more)
@@ -528,7 +528,7 @@
   "Returns non-nil if nums are in monotonically non-increasing order,
   otherwise false."
   ([x] true)
-  ([x y] (. clojure.lang.Num (gte x y)))
+  ([x y] (. clojure.lang.Numbers (gte x y)))
   ([x y & more]
    (if (>= x y)
      (if (rest more)
@@ -539,7 +539,7 @@
 (defn ==
   "Returns non-nil if nums all have the same value, otherwise false"
   ([x] true)
-  ([x y] (. clojure.lang.Num (equiv x y)))
+  ([x y] (. clojure.lang.Numbers (equiv x y)))
   ([x y & more]
    (if (== x y)
      (if (rest more)
@@ -563,36 +563,36 @@
 
 (defn inc
   "Returns a number one greater than num."
-  [x] (. clojure.lang.Num (inc x)))
+  [x] (. clojure.lang.Numbers (inc x)))
 
 (defn dec
   "Returns a number one less than num."
-  [x] (. clojure.lang.Num (dec x)))
+  [x] (. clojure.lang.Numbers (dec x)))
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
   {:tag Boolean}
-  [x] (. clojure.lang.Num (posPred x)))
+  [x] (. clojure.lang.Numbers (isPos x)))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
   {:tag Boolean}
-  [x] (. clojure.lang.Num (negPred x)))
+  [x] (. clojure.lang.Numbers (isNeg x)))
 
 (defn zero?
   "Returns true if num is zero, else false"
   {:tag Boolean}
-  [x] (. clojure.lang.Num (zeroPred x)))
+  [x] (. clojure.lang.Numbers (isZero x)))
 
 (defn quot
   "quot[ient] of dividing numerator by denominator."
   [num div]
-    (. clojure.lang.Num (quotient num div)))
+    (. clojure.lang.Numbers (quotient num div)))
 
 (defn rem
   "rem[ainder] of dividing numerator by denominator."
   [num div]
-    (. clojure.lang.Num (remainder num div)))
+    (. clojure.lang.Numbers (remainder num div)))
 
 ;;Bit ops
 

@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.math.BigInteger;
 
-public class BigNum extends IntegerNum{
+class BigNum extends IntegerNum{
 public BigInteger val;
 
 public boolean equals(Object arg0){

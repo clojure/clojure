@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.math.BigInteger;
 
-public abstract class Num extends Number implements Comparable{
+abstract class Num extends Number implements Comparable{
 
 public final static Num ZERO = from(0);
 public final static Num ONE = from(1);

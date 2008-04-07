@@ -242,14 +242,14 @@ private static Object matchSymbol(String s){
 private static Object matchNumber(String s){
 	Matcher m = intPat.matcher(s);
 	if(m.matches())
-		return Num.from(new BigInteger(s));
+		return Numbers.reduce(new BigInteger(s));
 	m = floatPat.matcher(s);
 	if(m.matches())
-		return Num.from(Double.parseDouble(s));
+		return Double.parseDouble(s);
 	m = ratioPat.matcher(s);
 	if(m.matches())
 		{
-		return Num.divide(new BigInteger(m.group(1)), new BigInteger(m.group(2)));
+		return Numbers.divide(new BigInteger(m.group(1)), new BigInteger(m.group(2)));
 		}
 	return null;
 }
@@ -555,7 +555,7 @@ static class SyntaxQuoteReader extends AFn{
 				throw new UnsupportedOperationException("Unknown Collection type");
 			}
 		else if(form instanceof Keyword
-		        || form instanceof Num
+		        || form instanceof Number
 		        || form instanceof Character
 		        || form instanceof String)
 			ret = form;
