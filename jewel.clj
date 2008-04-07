@@ -21,7 +21,7 @@
 ;;  and provides two functions that make it convenient to use jewels from
 ;;  Clojure source code and the Clojure repl:
 ;;
-;;  'jewel/require' takes a symbol representing a jewel and zero or more
+;;  'jewel/require' takes a symbol that names a jewel and zero or more
 ;;  optional keyword parameters.
 ;;  jewel/require:
 ;;    - ensures that the jewel is either already loaded or loads it from
