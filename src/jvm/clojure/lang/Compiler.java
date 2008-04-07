@@ -2800,6 +2800,11 @@ static public class FnExpr implements Expr{
 		Class c = o.getClass();
 		if(Modifier.isPublic(c.getModifiers()))
 			{
+			//can't emit derived fn types due to visibility
+			if(RestFn.class.isAssignableFrom(c))
+				return Type.getType(RestFn.class);
+			else if(AFn.class.isAssignableFrom(c))
+				return Type.getType(AFn.class);
 			return Type.getType(c);
 			}
 		return OBJECT_TYPE;
