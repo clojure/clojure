@@ -17,7 +17,26 @@ import java.math.BigDecimal;
 
 public class Numbers{
 
-static public Object add(Object x, Object y){
+static interface Ops{
+	Ops combine(Ops y);
+	Ops opsWith(IntegerOps x);
+	Ops opsWith(FloatOps x);
+	Ops opsWith(DoubleOps x);
+	Ops opsWith(RatioOps x);
+	Ops opsWith(BigIntegerOps x);
+	Ops opsWith(BigDecimalOps x);
+
+	public Number add(Number x, Number y);
+	//public Number subtract(Number x, Number y);
+	public Number negate(Number x);
+}
+
+static public Number add(Number x, Number y){
+	return ops(x).combine(ops(y)).add(x, y);
+}
+
+static public Number subtract(Number x, Number y){
+	Ops yops = ops(y);
 	return ops(x).combine(ops(y)).add(x, y);
 }
 
@@ -56,13 +75,11 @@ static Ratio toRatio(Object x){
 static public Number reduce(BigInteger val){
 	if(val.bitLength() < 32)
 		return val.intValue();
-	else if(val.bitLength() < 64)
-		return val.longValue();
 	else
 		return val;
 }
 
-static public Object divide(BigInteger n, BigInteger d){
+static public Number divide(BigInteger n, BigInteger d){
 	BigInteger gcd = n.gcd(d);
 	if(gcd.equals(BigInteger.ZERO))
 		return 0;
@@ -74,19 +91,6 @@ static public Object divide(BigInteger n, BigInteger d){
 	                 (d.signum() < 0 ? d.negate() : d));
 }
 
-static interface Ops{
-	Ops combine(Ops y);
-	Ops opsWith(IntegerOps x);
-	Ops opsWith(FloatOps x);
-	Ops opsWith(DoubleOps x);
-	Ops opsWith(RatioOps x);
-	Ops opsWith(BigIntegerOps x);
-	Ops opsWith(BigDecimalOps x);
-	Ops opsWith(FloatArrayOps x);
-	Ops opsWith(DoubleArrayOps x);
-
-	public Object add(Object x, Object y);
-}
 
 static class IntegerOps implements Ops{
 	public Ops combine(Ops y){
@@ -99,14 +103,17 @@ static class IntegerOps implements Ops{
 	final public Ops opsWith(RatioOps x){return RATIO_OPS;}
 	final public Ops opsWith(BigIntegerOps x){return BIGINTEGER_OPS;}
 	final public Ops opsWith(BigDecimalOps x){return BIGDECIMAL_OPS;}
-	final public Ops opsWith(FloatArrayOps x){return FLOATARRAY_OPS;}
-	final public Ops opsWith(DoubleArrayOps x){return DOUBLEARRAY_OPS;}
 
-	final public Object add(Object x, Object y){
-		long ret = ((Number) x).longValue() + ((Number) y).longValue();
+	final public Number add(Number x, Number y){
+		long ret = x.longValue() + y.longValue();
 		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
 			return (int)ret;
 		return ret;
+	}
+
+	//public Number subtract(Number x, Number y);
+	public Number negate(Number x){
+		return -x.intValue();
 	}
 }
 
@@ -121,11 +128,14 @@ static class FloatOps implements Ops{
 	final public Ops opsWith(RatioOps x){return this;}
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
-	final public Ops opsWith(FloatArrayOps x){return FLOATARRAY_OPS;}
-	final public Ops opsWith(DoubleArrayOps x){return DOUBLEARRAY_OPS;}
 
-	final public Object add(Object x, Object y){
-		return ((Number) x).floatValue() + ((Number) y).floatValue();
+	final public Number add(Number x, Number y){
+		return x.floatValue() + y.floatValue();
+	}
+
+	//public Number subtract(Number x, Number y);
+	public Number negate(Number x){
+		return -x.floatValue();
 	}
 }
 
@@ -140,11 +150,14 @@ static class DoubleOps implements Ops{
 	final public Ops opsWith(RatioOps x){return this;}
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
-	final public Ops opsWith(FloatArrayOps x){return FLOATARRAY_OPS;}
-	final public Ops opsWith(DoubleArrayOps x){return DOUBLEARRAY_OPS;}
 
-	final public Object add(Object x, Object y){
-		return ((Number) x).doubleValue() + ((Number) y).doubleValue();
+	final public Number add(Number x, Number y){
+		return x.doubleValue() + y.doubleValue();
+	}
+
+	//public Number subtract(Number x, Number y);
+	public Number negate(Number x){
+		return -x.doubleValue();
 	}
 }
 
@@ -159,16 +172,22 @@ static class RatioOps implements Ops{
 	final public Ops opsWith(RatioOps x){return this;}
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
-	final public Ops opsWith(FloatArrayOps x){return FLOATARRAY_OPS;}
-	final public Ops opsWith(DoubleArrayOps x){return DOUBLEARRAY_OPS;}
 
-	final public Object add(Object x, Object y){
+	final public Number add(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
 		return divide(rx.numerator.multiply(rx.denominator)
 				.add(rx.numerator.multiply(ry.denominator))
 				, ry.denominator.multiply(rx.denominator));
 	}
+
+	//public Number subtract(Number x, Number y);
+	public Number negate(Number x){
+		Ratio r = (Ratio) x;
+		return new Ratio(r.numerator.negate(), r.denominator);
+	}
+
+
 }
 static class BigIntegerOps implements Ops{
 	public Ops combine(Ops y){
@@ -181,11 +200,14 @@ static class BigIntegerOps implements Ops{
 	final public Ops opsWith(RatioOps x){return RATIO_OPS;}
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return BIGDECIMAL_OPS;}
-	final public Ops opsWith(FloatArrayOps x){return FLOATARRAY_OPS;}
-	final public Ops opsWith(DoubleArrayOps x){return DOUBLEARRAY_OPS;}
 
-	final public Object add(Object x, Object y){
+	final public Number add(Number x, Number y){
 		return reduce(toBigInteger(x).add(toBigInteger(y)));
+	}
+
+	//public Number subtract(Number x, Number y);
+	public Number negate(Number x){
+		return ((BigInteger)x).negate();
 	}
 }
 
@@ -200,103 +222,14 @@ static class BigDecimalOps implements Ops{
 	final public Ops opsWith(RatioOps x){return RATIO_OPS;}
 	final public Ops opsWith(BigIntegerOps x){return this;}
 	final public Ops opsWith(BigDecimalOps x){return this;}
-	final public Ops opsWith(FloatArrayOps x){return FLOATARRAY_OPS;}
-	final public Ops opsWith(DoubleArrayOps x){return DOUBLEARRAY_OPS;}
 
-	final public Object add(Object x, Object y){
+	final public Number add(Number x, Number y){
 		return toBigDecimal(x).add(toBigDecimal(y));
 	}
-}
 
-static class FloatArrayOps implements Ops{
-	public Ops combine(Ops y){
-		return y.opsWith(this);
-	}
-
-	final boolean first;
-
-	FloatArrayOps(boolean first){
-		this.first = first;
-	}
-
-	final public Ops opsWith(IntegerOps x){return FLOATARRAY_OPS_REV;}
-	final public Ops opsWith(FloatOps x){return FLOATARRAY_OPS_REV;}
-	final public Ops opsWith(DoubleOps x){return FLOATARRAY_OPS_REV;}
-	final public Ops opsWith(RatioOps x){return FLOATARRAY_OPS_REV;}
-	final public Ops opsWith(BigIntegerOps x){return FLOATARRAY_OPS_REV;}
-	final public Ops opsWith(BigDecimalOps x){return FLOATARRAY_OPS_REV;}
-	final public Ops opsWith(FloatArrayOps x){return x;}
-	final public Ops opsWith(DoubleArrayOps x){return x;}
-
-	final public Object add(Object x, Object y){
-		float[] a = (float[]) (first ? x : y);
-		Object arg = first ? y : x;
-		float[] ret = new float[a.length];
-		if(arg instanceof Number)
-			{
-			float yd = ((Number) arg).floatValue();
-			for(int i = 0; i < a.length; i++)
-				ret[i] = a[i] + yd;
-			}
-		else if(arg instanceof double[])
-			{
-			double[] ya = (double[]) arg;
-			for(int i = 0; i < a.length; i++)
-				ret[i] = a[i] + (float) ya[i];
-			}
-		else
-			{
-			float[] ya = (float[]) arg;
-			for(int i = 0; i < a.length; i++)
-				ret[i] = a[i] + ya[i];
-			}
-		return ret;
-	}
-}
-
-static class DoubleArrayOps implements Ops{
-	public Ops combine(Ops y){
-		return y.opsWith(this);
-	}
-
-	final boolean first;
-
-	DoubleArrayOps(boolean first){
-		this.first = first;
-	}
-
-	final public Ops opsWith(IntegerOps x){return DOUBLEARRAY_OPS_REV;}
-	final public Ops opsWith(FloatOps x){return DOUBLEARRAY_OPS_REV;}
-	final public Ops opsWith(DoubleOps x){return DOUBLEARRAY_OPS_REV;}
-	final public Ops opsWith(RatioOps x){return DOUBLEARRAY_OPS_REV;}
-	final public Ops opsWith(BigIntegerOps x){return DOUBLEARRAY_OPS_REV;}
-	final public Ops opsWith(BigDecimalOps x){return DOUBLEARRAY_OPS_REV;}
-	final public Ops opsWith(FloatArrayOps x){return DOUBLEARRAY_OPS_REV;}
-	final public Ops opsWith(DoubleArrayOps x){return x;}
-
-	final public Object add(Object x, Object y){
-		double[] a = (double[]) (first ? x : y);
-		Object arg = first ? y : x;
-		double[] ret = new double[a.length];
-		if(arg instanceof Number)
-			{
-			double yd = ((Number) arg).doubleValue();
-			for(int i = 0; i < a.length; i++)
-				ret[i] = a[i] + yd;
-			}
-		else if(arg instanceof double[])
-			{
-			double[] ya = (double[]) arg;
-			for(int i = 0; i < a.length; i++)
-				ret[i] = a[i] + ya[i];
-			}
-		else
-			{
-			float[] ya = (float[]) arg;
-			for(int i = 0; i < a.length; i++)
-				ret[i] = a[i] + ya[i];
-			}
-		return ret;
+	//public Number subtract(Number x, Number y);
+	public Number negate(Number x){
+		return ((BigDecimal)x).negate();		
 	}
 }
 
@@ -306,11 +239,6 @@ static final DoubleOps DOUBLE_OPS = new DoubleOps();
 static final RatioOps RATIO_OPS = new RatioOps();
 static final BigIntegerOps BIGINTEGER_OPS = new BigIntegerOps();
 static final BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
-static final FloatArrayOps FLOATARRAY_OPS = new FloatArrayOps(true);
-static final DoubleArrayOps DOUBLEARRAY_OPS = new DoubleArrayOps(true);
-static final FloatArrayOps FLOATARRAY_OPS_REV = new FloatArrayOps(false);
-static final DoubleArrayOps DOUBLEARRAY_OPS_REV = new DoubleArrayOps(false);
-
 
 static Ops ops(Object x){
 	Class xc = x.getClass();
@@ -327,10 +255,6 @@ static Ops ops(Object x){
 		return RATIO_OPS;
 	else if(xc == BigDecimal.class)
 		return BIGDECIMAL_OPS;
-	else if(xc == double[].class)
-		return DOUBLEARRAY_OPS;
-	else if(xc == float[].class)
-		return FLOATARRAY_OPS;
 	else
 		return INTEGER_OPS;
 }
