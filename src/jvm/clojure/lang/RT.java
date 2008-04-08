@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class RT{
 
@@ -82,7 +83,9 @@ Symbol.create("Iterable"), Iterable.class,
 Symbol.create("Readable"), Readable.class,
 Symbol.create("Runnable"), Runnable.class,
 Symbol.create("Callable"), Callable.class,
-Symbol.create("Exception"), Exception.class
+Symbol.create("Exception"), Exception.class,
+Symbol.create("BigInteger"), BigInteger.class,
+Symbol.create("BigDecimal"), BigDecimal.class
 //                                                  Symbol.create("Collection"), "java.util.Collection",
 //                                                  Symbol.create("Comparator"), "java.util.Comparator",
 //                                                  Symbol.create("Enumeration"), "java.util.Enumeration",

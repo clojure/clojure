@@ -594,6 +594,11 @@
   [num div]
     (. clojure.lang.Numbers (remainder num div)))
 
+(defn rationalize
+  "returns the rational value of num"
+  [num]
+  (. clojure.lang.Numbers (rationalize num)))
+
 ;;Bit ops
 
 (defn bit-shift-left

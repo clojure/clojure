@@ -182,11 +182,27 @@ static Ratio toRatio(Object x){
 		BigInteger bv = bx.unscaledValue();
 		int scale = bx.scale();
 		if(scale < 0)
-			return new Ratio(bv, BigInteger.TEN.pow(-scale));
+			return new Ratio(bv.multiply(BigInteger.TEN.pow(-scale)),BigInteger.ONE);
 		else
-			return new Ratio(bv.multiply(BigInteger.TEN.pow(scale)), BigInteger.ONE);
+			return new Ratio(bv,BigInteger.TEN.pow(scale));
 		}
 	return new Ratio(toBigInteger(x), BigInteger.ONE);
+}
+
+static public Number rationalize(Number x){
+	if(x instanceof Float || x instanceof Double)
+		return rationalize(BigDecimal.valueOf(x.doubleValue()));
+	else if(x instanceof BigDecimal)
+		{
+		BigDecimal bx = (BigDecimal) x;
+		BigInteger bv = bx.unscaledValue();
+		int scale = bx.scale();
+		if(scale < 0)
+			return bv.multiply(BigInteger.TEN.pow(-scale));
+		else
+			return divide(bv, BigInteger.TEN.pow(scale));
+		}
+	return x;
 }
 
 static public Number reduce(BigInteger val){
