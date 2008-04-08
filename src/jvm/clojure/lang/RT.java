@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.io.*;
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 
 public class RT{
 
@@ -984,6 +985,11 @@ static public void print(Object x, Writer w) throws Exception{
 					w.write(c);
 				}
 			}
+		}
+	else if(x instanceof BigDecimal && readably)
+		{
+		w.write(x.toString());
+		w.write('M');
 		}
 	else w.write(x.toString());
 }

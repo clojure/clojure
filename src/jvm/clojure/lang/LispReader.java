@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.lang.*;
 
 public class LispReader{
@@ -42,7 +43,7 @@ static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
-static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?");
+static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?");
 static final Symbol SLASH = Symbol.create("/");
 //static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
 //static Pattern instanceMemberPat = Pattern.compile("\\.([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
@@ -245,7 +246,11 @@ private static Object matchNumber(String s){
 		return Numbers.reduce(new BigInteger(s));
 	m = floatPat.matcher(s);
 	if(m.matches())
+		{
+		if(s.charAt(s.length()-1) == 'M')
+			return new BigDecimal(s.substring(0, s.length() - 1));
 		return Double.parseDouble(s);
+		}
 	m = ratioPat.matcher(s);
 	if(m.matches())
 		{
