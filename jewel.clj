@@ -6,27 +6,27 @@
 ;;  the terms of this license.
 ;;  You must not remove this notice, or any other, from this software.
 ;;
-;;  jewel.clj
+;;  lib.clj
 ;;
-;;  A 'jewel' is a Clojure source file that follows these conventions:
+;;  A 'lib' is a Clojure source file that follows these conventions:
 ;;
 ;;    - has a basename that is a valid symbol name in Clojure
 ;;    - has the extension ".clj"
 ;;
-;;  A jewel will typically also contain forms that provide something useful
+;;  A lib will typically also contain forms that provide something useful
 ;;  for a Clojure program to use.  It may also define a namespace with the
 ;;  same name as its basename.
 ;;
-;;  This file is an example of a jewel. It follows the naming conventions
-;;  and provides these functions in the 'jewel' namespace that make it
-;;  convenient to use jewels from Clojure source code and the Clojure repl:
+;;  This file is an example of a lib. It follows the naming conventions
+;;  and provides these functions in the 'lib' namespace that make it
+;;  convenient to use libs from Clojure source code and the Clojure repl:
 ;;
-;;  'require'               searches classpath for jewels and loads them if
+;;  'require'               searches classpath for libs and loads them if
 ;;                          they are not already loaded
 ;;
-;;  'use'                   requires jewels and refers to their namespaces
+;;  'use'                   requires libs and refers to their namespaces
 ;;
-;;  'jewels'                returns a sorted list of loaded jewels
+;;  'libs'                  returns a sorted list of loaded libs
 ;;
 ;;  'load-uri'              loads Clojure source from a location
 ;;
@@ -39,9 +39,9 @@
 ;;  8 April 2008
 ;;
 ;;  Thanks to Stuart Sierra for providing many useful ideas, discussions
-;;  and code contributions for jewel.clj.
+;;  and code contributions for lib.clj.
 
-(clojure/in-ns 'jewel)
+(clojure/in-ns 'lib)
 (clojure/refer 'clojure)
 
 (import '(java.io BufferedReader InputStreamReader))
@@ -58,9 +58,9 @@
 
 (def
  #^{:private true :doc
- "A ref to a set of symbols representing loaded jewels"}
- *jewels*)
-(init-once *jewels* (ref #{}))
+ "A ref to a set of symbols representing loaded libs"}
+ *libs*)
+(init-once *libs* (ref #{}))
 
 (def
  #^{:private true :doc
@@ -71,7 +71,7 @@
 (def load-system-resource)
 
 (defn- load-one
-  "Loads a jewel from <classpath>/in/"
+  "Loads a lib from <classpath>/in/"
   [sym in need-ns]
   (let [res (str sym ".clj")]
     (load-system-resource res in)
@@ -79,22 +79,22 @@
       (throw (new Exception (str "namespace '" sym "' not found after "
                                  "loading resource '" res "'")))))
   (dosync
-   (commute *jewels* conj sym))
+   (commute *libs* conj sym))
   (when *verbose*
-    (println "loaded jewel" sym)))
+    (println "loaded lib" sym)))
 
 (defn- load-all
-  "Loads a jewel and any jewels on which it (directly or
-  indirectly) depends even if already loaded."
+  "Loads a lib and any libs on which it directly or indirectly
+  depends even if already loaded."
   [sym in need-ns]
   (dosync
-   (commute *jewels* set/union
-     (binding [*jewels* (ref #{})]
+   (commute *libs* set/union
+     (binding [*libs* (ref #{})]
        (load-one sym in need-ns)
-       @*jewels*))))
+       @*libs*))))
 
 (defn- require-one
-  "Single-argument version of 'require'."
+  "Single-argument version of 'require'"
   [sym & options]
   (let [opts (apply hash-map options)
         in (:in opts)
@@ -105,11 +105,11 @@
     (binding [*verbose* (or *verbose* verbose)]
       (cond reload-all
             (load-all sym in need-ns)
-            (or reload (not (contains? @*jewels* sym)))
+            (or reload (not (contains? @*libs* sym)))
             (load-one sym in need-ns)))))
 
 (defn- use-one
-  "Single-argument version of 'use'."
+  "Single-argument version of 'use'"
   [sym & options]
   (apply require-one sym :need-ns true options)
   (apply refer sym options))
@@ -118,23 +118,23 @@
 
 (defn require
   "Declares that subsequent code requires the capabilities
-  provided by the named jewels. Each argument is a quoted
+  provided by the named libs. Each argument is a quoted
   symbol or a quoted list of the form (symbol & options...).
 
-  If the jewel named by the symbol is not yet loaded
-  searches for it and loads it.  The default search is in the
-  locations in classpath. Options may include at most one each
-  of the following:
+  If the lib named by the symbol is not yet loaded, searches
+  for it and loads it.  The default search is in the locations
+  in classpath. Options may include at most one each of the
+  following:
 
     :in string
     :reload boolean
     :reload-all boolean
     :verbose boolean
 
-  An argument to :in specifies the path to the jewel's parent
+  An argument to :in specifies the path to the lib's parent
   directory relative to a location in classpath.
-  When :reload is true, the jewel is reloaded if already loaded.
-  When :reload-all is true, the jewel and all jewels on which
+  When :reload is true, the lib is reloaded if already loaded.
+  When :reload-all is true, the lib and all libs on which
   it directly or indirectly depends are reloaded.
   When :verbose is true, prints a message after each load."
   [& args]
@@ -144,19 +144,19 @@
       (apply require-one arg))))
 
 (defn use
-  "Requires and 'refer's the named jewels.  Syntax is like that
-  of 'require', with additional options which are filters for
-  'refer'."
+  "Requires and 'refer's the named libs. Arguments are like
+  those of 'require', with additional options which are filters
+  for 'refer'."
   [& args]
   (doseq arg args
     (if (symbol? arg)
       (use-one arg)
       (apply use-one arg))))
 
-(defn jewels
-  "Returns a sorted sequence of symbols naming loaded jewels"
+(defn libs
+  "Returns a sorted sequence of symbols naming loaded libs"
   []
-  (sort @*jewels*))
+  (sort @*libs*))
 
 (defn load-uri
   "Loads Clojure source from a URI, which may be a java.net.URI
