@@ -115,6 +115,7 @@ final static public Var IN =
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
 final static public Var MACRO_META = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
+final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
@@ -198,6 +199,7 @@ static
 	Symbol namesym = Symbol.create("name");
 	OUT.setTag(Symbol.create("java.io.Writer"));
 	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
+	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
 	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",

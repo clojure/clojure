@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.math.BigInteger;
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 public class Numbers{
 
@@ -628,6 +629,8 @@ final static class BigIntegerOps implements Ops{
 }
 
 final static class BigDecimalOps implements Ops{
+	final static Var MATH_CONTEXT = RT.MATH_CONTEXT;
+	
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -655,23 +658,38 @@ final static class BigDecimalOps implements Ops{
 	}
 
 	final public Number add(Number x, Number y){
-		return toBigDecimal(x).add(toBigDecimal(y));
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
+		return mc == null 
+			? toBigDecimal(x).add(toBigDecimal(y)) 
+			: toBigDecimal(x).add(toBigDecimal(y), mc);
 	}
 
 	final public Number multiply(Number x, Number y){
-		return toBigDecimal(x).multiply(toBigDecimal(y));
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
+		return mc == null 
+			? toBigDecimal(x).multiply(toBigDecimal(y)) 
+			: toBigDecimal(x).multiply(toBigDecimal(y), mc);
 	}
 
 	public Number divide(Number x, Number y){
-		return toBigDecimal(x).divide(toBigDecimal(y));
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
+		return mc == null 
+			? toBigDecimal(x).divide(toBigDecimal(y)) 
+			: toBigDecimal(x).divide(toBigDecimal(y), mc);
 	}
 
 	public Number quotient(Number x, Number y){
-		return toBigDecimal(x).divideToIntegralValue(toBigDecimal(y));
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
+		return mc == null 
+			? toBigDecimal(x).divideToIntegralValue(toBigDecimal(y)) 
+			: toBigDecimal(x).divideToIntegralValue(toBigDecimal(y), mc);
 	}
 
 	public Number remainder(Number x, Number y){
-		return toBigDecimal(x).remainder(toBigDecimal(y));
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
+		return mc == null 
+			? toBigDecimal(x).remainder(toBigDecimal(y)) 
+			: toBigDecimal(x).remainder(toBigDecimal(y), mc);
 	}
 
 	public boolean equiv(Number x, Number y){
@@ -684,17 +702,26 @@ final static class BigDecimalOps implements Ops{
 
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
-		return ((BigDecimal)x).negate();
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
+		return mc == null 
+			? ((BigDecimal)x).negate() 
+			: ((BigDecimal)x).negate(mc);
 	}
 
 	public Number inc(Number x){
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
 		BigDecimal bx = (BigDecimal) x;
-		return bx.add(BigDecimal.ONE);
+		return mc == null 
+			? bx.add(BigDecimal.ONE) 
+			: bx.add(BigDecimal.ONE, mc);
 	}
 
 	public Number dec(Number x){
+		MathContext mc = (MathContext) MATH_CONTEXT.get();
 		BigDecimal bx = (BigDecimal) x;
-		return bx.subtract(BigDecimal.ONE);
+		return mc == null 
+			? bx.subtract(BigDecimal.ONE) 
+			: bx.subtract(BigDecimal.ONE, mc);
 	}
 }
 
