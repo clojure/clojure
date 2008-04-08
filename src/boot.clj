@@ -827,11 +827,12 @@
                         (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
                                 (rest (rest vvs)))
                         (seq ret))))]
-      `(try
-        (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
-        ~@body
-        (finally
-         (. clojure.lang.Var (popThreadBindings))))))
+      `(do
+         (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
+         (try
+          ~@body
+          (finally
+           (. clojure.lang.Var (popThreadBindings)))))))
 
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
@@ -1802,8 +1803,8 @@ not-every? (comp not every?))
   [name-vals-vec & body]
   `(let [~@(interleave (take-nth 2 name-vals-vec)
                        (repeat '(. clojure.lang.Var (create))))]
+     (. clojure.lang.Var (pushThreadBindings (hash-map ~@name-vals-vec)))
      (try
-      (. clojure.lang.Var (pushThreadBindings (hash-map ~@name-vals-vec)))
       ~@body
       (finally (. clojure.lang.Var (popThreadBindings))))))
 
