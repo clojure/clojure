@@ -902,6 +902,12 @@ static public void print(Object x, Writer w) throws Exception{
 					case '\\':
 						w.write("\\\\");
 						break;
+					case '\f':
+					    w.write("\\f");
+					    break;
+                    case '\b':
+                        w.write("\\b");
+                        break;
 					default:
 						w.write(c);
 					}
@@ -981,6 +987,12 @@ static public void print(Object x, Writer w) throws Exception{
 				case ' ':
 					w.write("space");
 					break;
+	            case '\b':
+	                w.write("backspace");
+	                break;
+	            case '\f':
+	                w.write("formfeed");
+	                break;
 				default:
 					w.write(c);
 				}
@@ -1034,6 +1046,12 @@ static public void formatStandard(Writer w, Object obj) throws IOException{
 			case ' ':
 				w.write("space");
 				break;
+            case '\b':
+                w.write("backspace");
+                break;
+            case '\f':
+                w.write("formfeed");
+                break;
 			default:
 				w.write(c);
 			}

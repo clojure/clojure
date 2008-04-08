@@ -198,6 +198,42 @@ static private Object readNumber(PushbackReader r, char initch) throws Exception
 	return n;
 }
 
+static private int readUnicodeChar(String token, int offset, int length, int base) throws Exception {
+    if (token.length() != offset + length)
+        throw new IllegalArgumentException("Invalid unicode character: \\" + token);
+    int uc = 0;
+    for (int i = offset; i < offset + length; ++i)
+        {
+        int d = Character.digit(token.charAt(i), base);
+        if (d == -1)
+            throw new IllegalArgumentException("Invalid digit: " + (char) d);
+        uc = uc * base + d;
+        }
+    return (char) uc;
+}
+
+static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) throws Exception {
+    int uc = Character.digit(initch, base);
+    if(uc == -1)
+        throw new IllegalArgumentException("Invalid digit: " + initch);
+    int i = 1;
+    for(; i < length; ++i)
+        {
+        int ch = r.read();
+        if(ch == -1 || isWhitespace(ch) || isMacro(ch))
+            {
+            unread(r, ch);
+            break;
+            }
+        int d = Character.digit(ch, base);
+        if(d == -1)
+            throw new IllegalArgumentException("Invalid digit: " + (char) ch);
+        uc = uc * base + d;
+        }
+    if(i != length && exact)
+        throw new IllegalArgumentException("Invalid character length: " + i + ", should be: " + length);
+    return uc;
+}
 
 static private Object interpretToken(String s) throws Exception{
 	if(s.equals("nil"))
@@ -311,8 +347,32 @@ static class StringReader extends AFn{
 						break;
 					case '"':
 						break;
+					case 'b':
+					    ch = '\b';
+					    break;
+                    case 'f':
+                        ch = '\f';
+                        break;
+                    case 'u':
+                        {
+                        ch = r.read();
+                        if (Character.isDigit(ch))
+                            ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
+                        else
+                            throw new Exception("Invalid unicode escape: \\" + (char) ch);
+                        break;
+                        }
 					default:
-						throw new Exception("Unsupported escape character: \\" + (char) ch);
+					    {
+					    if (Character.isDigit(ch))
+					        {
+					        ch = readUnicodeChar((PushbackReader) r, ch, 8, 3, false);
+					        if (ch > 0377)
+					            throw new Exception("Octal escape sequence must be in range [0, 377].");
+					        }
+					    else
+					        throw new Exception("Unsupported escape character: \\" + (char) ch);    
+					    }
 					}
 				}
 			sb.append((char) ch);
@@ -653,6 +713,22 @@ static class CharacterReader extends AFn{
 			return ' ';
 		else if(token.equals("tab"))
 			return '\t';
+        else if(token.equals("backspace"))
+            return '\b';
+        else if(token.equals("formfeed"))
+            return '\f';
+        else if (token.startsWith("u"))
+            return (char) readUnicodeChar(token, 1, 4, 16);
+        else if (token.startsWith("o"))
+            {
+            int len = token.length() - 1;
+            if (len > 3)
+                throw new Exception("Invalid octal escape sequence length: " + len);
+            int uc = readUnicodeChar(token, 1, len, 8);
+            if (uc > 0377)
+                throw new Exception("Octal escape sequence must be in range [0, 377].");
+            return (char) uc;
+            }
 		throw new Exception("Unsupported character: \\" + token);
 	}
 
