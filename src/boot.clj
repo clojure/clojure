@@ -2286,18 +2286,17 @@ not-every? (comp not every?))
   `(sync nil ~@exprs))
 
 (defmacro with-precision
-  "Sets the precision and rounding mode to be used for BigDecimal operations. 
-  Usage: (with-precision 10 (/ 1M 3)) 
+  "Sets the precision and rounding mode to be used for BigDecimal operations.
+
+  Usage: (with-precision 10 (/ 1M 3))
   or:    (with-precision 10 :rounding HALF_DOWN (/ 1M 3))
-  The rounding mode is one of CEILING, FLOOR, HALF_UP, HALF_DOWN, HALF_EVEN, 
-  UP, DOWN and UNNECESSARY; it defaults to HALF_UP."  
+  
+  The rounding mode is one of CEILING, FLOOR, HALF_UP, HALF_DOWN,
+  HALF_EVEN, UP, DOWN and UNNECESSARY; it defaults to HALF_UP."
   [precision & exprs]
-  (let [[body mc] 
-          (if (= (first exprs) :rounding)
-            [(rest (rest exprs))
-             (java.math.MathContext. precision 
-                                     (. clojure.lang.Reflector getStaticField java.math.RoundingMode (name (second exprs))))]
-            [exprs
-             (java.math.MathContext. precision)])]
-    `(binding [*math-context* ~mc]
-       ~@body)))
+    (let [[body rm] (if (= (first exprs) :rounding)
+                      [(rest (rest exprs))
+                       `((. java.math.RoundingMode ~(second exprs)))]
+                      [exprs nil])]
+      `(binding [*math-context* (java.math.MathContext. ~precision ~@rm)]
+         ~@body))) 
