@@ -72,7 +72,7 @@
   #^{:private true}
   [pred loc]
       (let [rtn (pred loc)]
-        (cond (:zip-filter/is-node? ^rtn) (list rtn)
+        (cond (and (map? ^rtn) (:zip-filter/is-node? ^rtn)) (list rtn)
               (= rtn true)                (list loc)
               (= rtn false)               nil
               (nil? rtn)                  nil
@@ -83,7 +83,7 @@
   #^{:private true}
   [loc preds mkpred]
     (reduce (fn [prevseq expr]
-                (mapcat (partial fixup-apply (or (mkpred expr) expr)) prevseq))
+                (mapcat #(fixup-apply (or (mkpred expr) expr) %) prevseq))
             (list (with-meta loc (assoc ^loc :zip-filter/is-node? true)))
             preds))
 
@@ -99,7 +99,7 @@
 (defn attr
   "Returns the xml attribute named attrname, of the xml node at location loc."
   ([attrname]     (fn [loc] (attr loc attrname)))
-  ([loc attrname] (-> loc zip/node :attrs attrname)))
+  ([loc attrname] (when (zip/branch? loc) (-> loc zip/node :attrs attrname))))
 
 (defn attr=
   "Returns a query predicate that matches a node when it has an
