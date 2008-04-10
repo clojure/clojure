@@ -3668,21 +3668,21 @@ public static Object loadFile(String file) throws Exception{
 //		return null;
 
 	FileInputStream f = new FileInputStream(file);
-
 	try
 		{
-		Var.pushThreadBindings(RT.map(SOURCE_PATH, file,
-		                              SOURCE, (new File(file)).getName()));
-		return load(new InputStreamReader(f));
+		return load(new InputStreamReader(f), file, (new File(file)).getName());
 		}
 	finally
 		{
-		Var.popThreadBindings();
 		f.close();
 		}
 }
 
 public static Object load(Reader rdr) throws Exception{
+	return load(rdr, null, "NO_SOURCE_FILE");
+}
+
+public static Object load(Reader rdr, String sourcePath, String sourceName) throws Exception{
 	Object EOF = new Object();
 	Object ret = null;
 	LineNumberingPushbackReader pushbackReader =
@@ -3692,6 +3692,8 @@ public static Object load(Reader rdr) throws Exception{
 		{
 		Var.pushThreadBindings(
 				RT.map(LOADER, new DynamicClassLoader(),
+				       SOURCE_PATH, sourcePath,
+				       SOURCE, sourceName,
 				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
 				       LINE_BEFORE, pushbackReader.getLineNumber(),
 				       LINE_AFTER, pushbackReader.getLineNumber()
