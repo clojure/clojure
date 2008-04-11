@@ -682,6 +682,12 @@ static public class Seq extends ASeq{
 	final boolean asc;
 	final int cnt;
 
+	public Seq(ISeq stack, boolean asc){
+		this.stack = stack;
+		this.asc = asc;
+		this.cnt = -1;
+	}
+
 	public Seq(ISeq stack, boolean asc, int cnt){
 		this.stack = stack;
 		this.asc = asc;
@@ -723,6 +729,8 @@ static public class Seq extends ASeq{
 	}
 
 	public int count(){
+		if(cnt < 0)
+			return super.count();
 		return cnt;
 	}
 
