@@ -28,7 +28,10 @@
 (clojure/refer 'clojure)
 
 (defmacro aif
-  "Like 'if', but binds the result of the test to 'symbol' in the
+  "DEPRECATED in favor of 'if-let' in boot.clj as of Clojure SVN
+  revision 755 on March 17 2008.
+
+  Like 'if', but binds the result of the test to 'symbol' in the
   body."
   ([symbol test then]
    `(let [~symbol ~test]
@@ -38,7 +41,10 @@
       (if ~symbol ~then ~else))))
 
 (defmacro awhen
-  "Like 'when', but binds the result of the test to 'symbol' in the
+  "DEPRECATED in favor of 'when-let' in boot.clj as of Clojure SVN
+  revision 755 on March 17 2008.
+
+  Like 'when', but binds the result of the test to 'symbol' in the
   body."
   [symbol test & body]
   `(aif ~symbol ~test
