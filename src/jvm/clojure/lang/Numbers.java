@@ -20,37 +20,87 @@ public class Numbers{
 
 static interface Ops{
 	Ops combine(Ops y);
+
 	Ops opsWith(IntegerOps x);
+
 	Ops opsWith(FloatOps x);
+
 	Ops opsWith(DoubleOps x);
+
 	Ops opsWith(RatioOps x);
+
 	Ops opsWith(BigIntegerOps x);
+
 	Ops opsWith(BigDecimalOps x);
 
 	public boolean isZero(Number x);
+
 	public boolean isPos(Number x);
+
 	public boolean isNeg(Number x);
 
 	public Number add(Number x, Number y);
+
 	public Number multiply(Number x, Number y);
+
 	public Number divide(Number x, Number y);
+
 	public Number quotient(Number x, Number y);
+
 	public Number remainder(Number x, Number y);
 
 	public boolean equiv(Number x, Number y);
+
 	public boolean lt(Number x, Number y);
 
 	public Number negate(Number x);
+
 	public Number inc(Number x);
+
 	public Number dec(Number x);
 }
+
+static interface BitOps{
+	BitOps combine(BitOps y);
+
+	BitOps bitOpsWith(IntegerBitOps x);
+
+	BitOps bitOpsWith(LongBitOps x);
+
+	BitOps bitOpsWith(BigIntegerBitOps x);
+
+	public Number not(Number x);
+
+	public Number and(Number x, Number y);
+
+	public Number or(Number x, Number y);
+
+	public Number xor(Number x, Number y);
+
+	public Number andNot(Number x, Number y);
+
+	public Number clearBit(Number x, int n);
+
+	public Number setBit(Number x, int n);
+
+	public Number flipBit(Number x, int n);
+
+	public boolean testBit(Number x, int n);
+
+	public Number shiftLeft(Number x, int n);
+
+	public Number shiftRight(Number x, int n);
+}
+
 
 static public boolean isZero(Number x){
 	return ops(x).isZero(x);
 }
+
 static public boolean isPos(Number x){
 	return ops(x).isPos(x);
 }
+
 static public boolean isNeg(Number x){
 	return ops(x).isNeg(x);
 }
@@ -58,11 +108,13 @@ static public boolean isNeg(Number x){
 static public Number negate(Number x){
 	return ops(x).negate(x);
 }
+
 static public Number inc(Number x){
 	return ops(x).inc(x);
 }
+
 static public Number dec(Number x){
-	return ops(x).dec(x);		
+	return ops(x).dec(x);
 }
 
 static public Number add(Number x, Number y){
@@ -126,8 +178,8 @@ static Number remainder(double n, double d){
 
 static public boolean equiv(Object x, Object y){
 	return y instanceof Number && x instanceof Number
-		&& equiv((Number) x, (Number) y);
-	}
+	       && equiv((Number) x, (Number) y);
+}
 
 static public boolean equiv(Number x, Number y){
 	return ops(x).combine(ops(y)).equiv(x, y);
@@ -151,9 +203,9 @@ static public boolean gte(Number x, Number y){
 
 static public int compare(Number x, Number y){
 	Ops ops = ops(x).combine(ops(y));
-	if(ops.lt(x,y))
+	if(ops.lt(x, y))
 		return -1;
-	else if(ops.lt(y,x))
+	else if(ops.lt(y, x))
 		return 1;
 	return 0;
 }
@@ -183,9 +235,9 @@ static Ratio toRatio(Object x){
 		BigInteger bv = bx.unscaledValue();
 		int scale = bx.scale();
 		if(scale < 0)
-			return new Ratio(bv.multiply(BigInteger.TEN.pow(-scale)),BigInteger.ONE);
+			return new Ratio(bv.multiply(BigInteger.TEN.pow(-scale)), BigInteger.ONE);
 		else
-			return new Ratio(bv,BigInteger.TEN.pow(scale));
+			return new Ratio(bv, BigInteger.TEN.pow(scale));
 		}
 	return new Ratio(toBigInteger(x), BigInteger.ONE);
 }
@@ -209,6 +261,15 @@ static public Number rationalize(Number x){
 static public Number reduce(BigInteger val){
 	if(val.bitLength() < 32)
 		return val.intValue();
+//	else if(val.bitLength() < 64)
+//		return val.longValue();
+	else
+		return val;
+}
+
+static public Number reduce(long val){
+	if(val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE)
+		return (int) val;
 	else
 		return val;
 }
@@ -227,18 +288,88 @@ static public Number divide(BigInteger n, BigInteger d){
 	                 (d.signum() < 0 ? d.negate() : d));
 }
 
+static public Number not(Number x){
+	return bitOps(x).not(x);
+}
+
+
+static public Number and(Number x, Number y){
+	return bitOps(x).combine(bitOps(y)).and(x, y);
+}
+
+static public Number or(Number x, Number y){
+	return bitOps(x).combine(bitOps(y)).or(x, y);
+}
+
+static public Number xor(Number x, Number y){
+	return bitOps(x).combine(bitOps(y)).xor(x, y);
+}
+
+static public Number andNot(Number x, Number y){
+	return bitOps(x).combine(bitOps(y)).andNot(x, y);
+}
+
+static public Number clearBit(Number x, int n){
+	if(n < 0)
+		throw new ArithmeticException("Negative bit index");
+	return bitOps(x).clearBit(x, n);
+}
+
+static public Number setBit(Number x, int n){
+	if(n < 0)
+		throw new ArithmeticException("Negative bit index");
+	return bitOps(x).setBit(x, n);
+}
+
+static public Number flipBit(Number x, int n){
+	if(n < 0)
+		throw new ArithmeticException("Negative bit index");
+	return bitOps(x).flipBit(x, n);
+}
+
+static public boolean testBit(Number x, int n){
+	if(n < 0)
+		throw new ArithmeticException("Negative bit index");
+	return bitOps(x).testBit(x, n);
+}
+
+static public Number shiftLeft(Number x, int n){
+	return bitOps(x).shiftLeft(x, n);
+}
+
+static public Number shiftRight(Number x, int n){
+	return bitOps(x).shiftRight(x, n);
+}
+
 
 final static class IntegerOps implements Ops{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
 
-	final public Ops opsWith(IntegerOps x){return this;}
-	final public Ops opsWith(FloatOps x){return FLOAT_OPS;}
-	final public Ops opsWith(DoubleOps x){return DOUBLE_OPS;}
-	final public Ops opsWith(RatioOps x){return RATIO_OPS;}
-	final public Ops opsWith(BigIntegerOps x){return BIGINTEGER_OPS;}
-	final public Ops opsWith(BigDecimalOps x){return BIGDECIMAL_OPS;}
+	final public Ops opsWith(IntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(FloatOps x){
+		return FLOAT_OPS;
+	}
+
+	final public Ops opsWith(DoubleOps x){
+		return DOUBLE_OPS;
+	}
+
+	final public Ops opsWith(RatioOps x){
+		return RATIO_OPS;
+	}
+
+	final public Ops opsWith(BigIntegerOps x){
+		return BIGINTEGER_OPS;
+	}
+
+	final public Ops opsWith(BigDecimalOps x){
+		return BIGDECIMAL_OPS;
+	}
 
 	public boolean isZero(Number x){
 		return x.intValue() == 0;
@@ -255,14 +386,14 @@ final static class IntegerOps implements Ops{
 	final public Number add(Number x, Number y){
 		long ret = x.longValue() + y.longValue();
 		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
-			return (int)ret;
+			return (int) ret;
 		return ret;
 	}
 
 	final public Number multiply(Number x, Number y){
 		long ret = x.longValue() * y.longValue();
 		if(ret <= Integer.MAX_VALUE && ret >= Integer.MIN_VALUE)
-			return (int)ret;
+			return (int) ret;
 		return ret;
 	}
 
@@ -319,15 +450,15 @@ final static class IntegerOps implements Ops{
 	public Number inc(Number x){
 		int val = x.intValue();
 		if(val < Integer.MAX_VALUE)
-			return val+1;
-		return BigInteger.valueOf((long)val + 1);
+			return val + 1;
+		return BigInteger.valueOf((long) val + 1);
 	}
 
 	public Number dec(Number x){
 		int val = x.intValue();
 		if(val > Integer.MIN_VALUE)
-			return val-1;
-		return BigInteger.valueOf((long)val - 1);
+			return val - 1;
+		return BigInteger.valueOf((long) val - 1);
 	}
 }
 
@@ -336,12 +467,29 @@ final static class FloatOps implements Ops{
 		return y.opsWith(this);
 	}
 
-	final public Ops opsWith(IntegerOps x){return this;}
-	final public Ops opsWith(FloatOps x){return this;}
-	final public Ops opsWith(DoubleOps x){return DOUBLE_OPS;}
-	final public Ops opsWith(RatioOps x){return this;}
-	final public Ops opsWith(BigIntegerOps x){return this;}
-	final public Ops opsWith(BigDecimalOps x){return this;}
+	final public Ops opsWith(IntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(FloatOps x){
+		return this;
+	}
+
+	final public Ops opsWith(DoubleOps x){
+		return DOUBLE_OPS;
+	}
+
+	final public Ops opsWith(RatioOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigIntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigDecimalOps x){
+		return this;
+	}
 
 	public boolean isZero(Number x){
 		return x.floatValue() == 0;
@@ -402,12 +550,29 @@ final static class DoubleOps implements Ops{
 		return y.opsWith(this);
 	}
 
-	final public Ops opsWith(IntegerOps x){return this;}
-	final public Ops opsWith(FloatOps x){return this;}
-	final public Ops opsWith(DoubleOps x){return this;}
-	final public Ops opsWith(RatioOps x){return this;}
-	final public Ops opsWith(BigIntegerOps x){return this;}
-	final public Ops opsWith(BigDecimalOps x){return this;}
+	final public Ops opsWith(IntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(FloatOps x){
+		return this;
+	}
+
+	final public Ops opsWith(DoubleOps x){
+		return this;
+	}
+
+	final public Ops opsWith(RatioOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigIntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigDecimalOps x){
+		return this;
+	}
 
 	public boolean isZero(Number x){
 		return x.doubleValue() == 0;
@@ -440,7 +605,7 @@ final static class DoubleOps implements Ops{
 	public Number remainder(Number x, Number y){
 		return Numbers.remainder(x.doubleValue(), y.doubleValue());
 	}
-	
+
 	public boolean equiv(Number x, Number y){
 		return x.doubleValue() == y.doubleValue();
 	}
@@ -468,12 +633,29 @@ final static class RatioOps implements Ops{
 		return y.opsWith(this);
 	}
 
-	final public Ops opsWith(IntegerOps x){return this;}
-	final public Ops opsWith(FloatOps x){return FLOAT_OPS;}
-	final public Ops opsWith(DoubleOps x){return DOUBLE_OPS;}
-	final public Ops opsWith(RatioOps x){return this;}
-	final public Ops opsWith(BigIntegerOps x){return this;}
-	final public Ops opsWith(BigDecimalOps x){return this;}
+	final public Ops opsWith(IntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(FloatOps x){
+		return FLOAT_OPS;
+	}
+
+	final public Ops opsWith(DoubleOps x){
+		return DOUBLE_OPS;
+	}
+
+	final public Ops opsWith(RatioOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigIntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigDecimalOps x){
+		return this;
+	}
 
 	public boolean isZero(Number x){
 		Ratio r = (Ratio) x;
@@ -502,21 +684,21 @@ final static class RatioOps implements Ops{
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
 		return Numbers.divide(ry.numerator.multiply(rx.numerator)
-						, ry.denominator.multiply(rx.denominator));
+				, ry.denominator.multiply(rx.denominator));
 	}
 
 	public Number divide(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
 		return Numbers.divide(ry.denominator.multiply(rx.numerator)
-			, ry.numerator.multiply(rx.denominator));
+				, ry.numerator.multiply(rx.denominator));
 	}
 
 	public Number quotient(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
 		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
-	                           rx.denominator.multiply(ry.numerator));
+				rx.denominator.multiply(ry.numerator));
 		return reduce(q);
 	}
 
@@ -524,7 +706,7 @@ final static class RatioOps implements Ops{
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
 		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
-	                           rx.denominator.multiply(ry.numerator));
+				rx.denominator.multiply(ry.numerator));
 		return Numbers.subtract(x, Numbers.multiply(q, y));
 	}
 
@@ -538,7 +720,7 @@ final static class RatioOps implements Ops{
 	public boolean lt(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
-		return Numbers.lt(rx.numerator.multiply(ry.denominator),ry.numerator.multiply(rx.denominator));
+		return Numbers.lt(rx.numerator.multiply(ry.denominator), ry.numerator.multiply(rx.denominator));
 	}
 
 	//public Number subtract(Number x, Number y);
@@ -548,11 +730,11 @@ final static class RatioOps implements Ops{
 	}
 
 	public Number inc(Number x){
-		return Numbers.add(x,1);
+		return Numbers.add(x, 1);
 	}
 
 	public Number dec(Number x){
-		return Numbers.add(x,-1);
+		return Numbers.add(x, -1);
 	}
 
 }
@@ -562,12 +744,29 @@ final static class BigIntegerOps implements Ops{
 		return y.opsWith(this);
 	}
 
-	final public Ops opsWith(IntegerOps x){return this;}
-	final public Ops opsWith(FloatOps x){return FLOAT_OPS;}
-	final public Ops opsWith(DoubleOps x){return DOUBLE_OPS;}
-	final public Ops opsWith(RatioOps x){return RATIO_OPS;}
-	final public Ops opsWith(BigIntegerOps x){return this;}
-	final public Ops opsWith(BigDecimalOps x){return BIGDECIMAL_OPS;}
+	final public Ops opsWith(IntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(FloatOps x){
+		return FLOAT_OPS;
+	}
+
+	final public Ops opsWith(DoubleOps x){
+		return DOUBLE_OPS;
+	}
+
+	final public Ops opsWith(RatioOps x){
+		return RATIO_OPS;
+	}
+
+	final public Ops opsWith(BigIntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigDecimalOps x){
+		return BIGDECIMAL_OPS;
+	}
 
 	public boolean isZero(Number x){
 		BigInteger bx = toBigInteger(x);
@@ -630,17 +829,34 @@ final static class BigIntegerOps implements Ops{
 
 final static class BigDecimalOps implements Ops{
 	final static Var MATH_CONTEXT = RT.MATH_CONTEXT;
-	
+
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
 
-	final public Ops opsWith(IntegerOps x){return this;}
-	final public Ops opsWith(FloatOps x){return FLOAT_OPS;}
-	final public Ops opsWith(DoubleOps x){return DOUBLE_OPS;}
-	final public Ops opsWith(RatioOps x){return RATIO_OPS;}
-	final public Ops opsWith(BigIntegerOps x){return this;}
-	final public Ops opsWith(BigDecimalOps x){return this;}
+	final public Ops opsWith(IntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(FloatOps x){
+		return FLOAT_OPS;
+	}
+
+	final public Ops opsWith(DoubleOps x){
+		return DOUBLE_OPS;
+	}
+
+	final public Ops opsWith(RatioOps x){
+		return RATIO_OPS;
+	}
+
+	final public Ops opsWith(BigIntegerOps x){
+		return this;
+	}
+
+	final public Ops opsWith(BigDecimalOps x){
+		return this;
+	}
 
 	public boolean isZero(Number x){
 		BigDecimal bx = (BigDecimal) x;
@@ -659,37 +875,37 @@ final static class BigDecimalOps implements Ops{
 
 	final public Number add(Number x, Number y){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
-		return mc == null 
-			? toBigDecimal(x).add(toBigDecimal(y)) 
-			: toBigDecimal(x).add(toBigDecimal(y), mc);
+		return mc == null
+		       ? toBigDecimal(x).add(toBigDecimal(y))
+		       : toBigDecimal(x).add(toBigDecimal(y), mc);
 	}
 
 	final public Number multiply(Number x, Number y){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
-		return mc == null 
-			? toBigDecimal(x).multiply(toBigDecimal(y)) 
-			: toBigDecimal(x).multiply(toBigDecimal(y), mc);
+		return mc == null
+		       ? toBigDecimal(x).multiply(toBigDecimal(y))
+		       : toBigDecimal(x).multiply(toBigDecimal(y), mc);
 	}
 
 	public Number divide(Number x, Number y){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
-		return mc == null 
-			? toBigDecimal(x).divide(toBigDecimal(y)) 
-			: toBigDecimal(x).divide(toBigDecimal(y), mc);
+		return mc == null
+		       ? toBigDecimal(x).divide(toBigDecimal(y))
+		       : toBigDecimal(x).divide(toBigDecimal(y), mc);
 	}
 
 	public Number quotient(Number x, Number y){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
-		return mc == null 
-			? toBigDecimal(x).divideToIntegralValue(toBigDecimal(y)) 
-			: toBigDecimal(x).divideToIntegralValue(toBigDecimal(y), mc);
+		return mc == null
+		       ? toBigDecimal(x).divideToIntegralValue(toBigDecimal(y))
+		       : toBigDecimal(x).divideToIntegralValue(toBigDecimal(y), mc);
 	}
 
 	public Number remainder(Number x, Number y){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
-		return mc == null 
-			? toBigDecimal(x).remainder(toBigDecimal(y)) 
-			: toBigDecimal(x).remainder(toBigDecimal(y), mc);
+		return mc == null
+		       ? toBigDecimal(x).remainder(toBigDecimal(y))
+		       : toBigDecimal(x).remainder(toBigDecimal(y), mc);
 	}
 
 	public boolean equiv(Number x, Number y){
@@ -703,25 +919,236 @@ final static class BigDecimalOps implements Ops{
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
-		return mc == null 
-			? ((BigDecimal)x).negate() 
-			: ((BigDecimal)x).negate(mc);
+		return mc == null
+		       ? ((BigDecimal) x).negate()
+		       : ((BigDecimal) x).negate(mc);
 	}
 
 	public Number inc(Number x){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
 		BigDecimal bx = (BigDecimal) x;
-		return mc == null 
-			? bx.add(BigDecimal.ONE) 
-			: bx.add(BigDecimal.ONE, mc);
+		return mc == null
+		       ? bx.add(BigDecimal.ONE)
+		       : bx.add(BigDecimal.ONE, mc);
 	}
 
 	public Number dec(Number x){
 		MathContext mc = (MathContext) MATH_CONTEXT.get();
 		BigDecimal bx = (BigDecimal) x;
-		return mc == null 
-			? bx.subtract(BigDecimal.ONE) 
-			: bx.subtract(BigDecimal.ONE, mc);
+		return mc == null
+		       ? bx.subtract(BigDecimal.ONE)
+		       : bx.subtract(BigDecimal.ONE, mc);
+	}
+}
+
+final static class IntegerBitOps implements BitOps{
+	public BitOps combine(BitOps y){
+		return y.bitOpsWith(this);
+	}
+
+	final public BitOps bitOpsWith(IntegerBitOps x){
+		return this;
+	}
+
+	final public BitOps bitOpsWith(LongBitOps x){
+		return LONG_BITOPS;
+	}
+
+	final public BitOps bitOpsWith(BigIntegerBitOps x){
+		return BIGINTEGER_BITOPS;
+	}
+
+
+	public Number not(Number x){
+		return ~x.intValue();
+	}
+
+	public Number and(Number x, Number y){
+		return x.intValue() & y.intValue();
+	}
+
+	public Number or(Number x, Number y){
+		return x.intValue() | y.intValue();
+	}
+
+	public Number xor(Number x, Number y){
+		return x.intValue() ^ y.intValue();
+	}
+
+	public Number andNot(Number x, Number y){
+		return x.intValue() & ~y.intValue();
+	}
+
+	public Number clearBit(Number x, int n){
+		if(n < 32)
+			return x.intValue() & ~(1 << n);
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public Number setBit(Number x, int n){
+		if(n < 32)
+			return x.intValue() | (1 << n);
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public Number flipBit(Number x, int n){
+		if(n < 32)
+			return x.intValue() ^ (1 << n);
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public boolean testBit(Number x, int n){
+		if(n < 32)
+			return (x.intValue() & (1 << n)) != 0;
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public Number shiftLeft(Number x, int n){
+		if(n < 0)
+			return shiftRight(x, -n);
+		return x.intValue() << n;
+	}
+
+	public Number shiftRight(Number x, int n){
+		if(n < 0)
+			return shiftLeft(x, -n);
+		return x.intValue() >> n;
+	}
+}
+
+final static class LongBitOps implements BitOps{
+	public BitOps combine(BitOps y){
+		return y.bitOpsWith(this);
+	}
+
+	final public BitOps bitOpsWith(IntegerBitOps x){
+		return this;
+	}
+
+	final public BitOps bitOpsWith(LongBitOps x){
+		return this;
+	}
+
+	final public BitOps bitOpsWith(BigIntegerBitOps x){
+		return BIGINTEGER_BITOPS;
+	}
+
+	public Number not(Number x){
+		return ~x.longValue();
+	}
+
+	public Number and(Number x, Number y){
+		return x.longValue() & y.longValue();
+	}
+
+	public Number or(Number x, Number y){
+		return x.longValue() | y.longValue();
+	}
+
+	public Number xor(Number x, Number y){
+		return x.longValue() ^ y.longValue();
+	}
+
+	public Number andNot(Number x, Number y){
+		return x.longValue() & ~y.longValue();
+	}
+
+	public Number clearBit(Number x, int n){
+		if(n < 64)
+			return x.longValue() & ~(1L << n);
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public Number setBit(Number x, int n){
+		if(n < 64)
+			return x.longValue() | (1L << n);
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public Number flipBit(Number x, int n){
+		if(n < 64)
+			return x.longValue() ^ (1L << n);
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public boolean testBit(Number x, int n){
+		if(n < 64)
+			return (x.longValue() & (1L << n)) != 0;
+		throw new ArithmeticException("bit index out of range");
+	}
+
+	public Number shiftLeft(Number x, int n){
+		if(n < 0)
+			return shiftRight(x, -n);
+		return x.longValue() << n;
+	}
+
+	public Number shiftRight(Number x, int n){
+		if(n < 0)
+			return shiftLeft(x, -n);
+		return x.longValue() >> n;
+	}
+}
+
+final static class BigIntegerBitOps implements BitOps{
+	public BitOps combine(BitOps y){
+		return y.bitOpsWith(this);
+	}
+
+	final public BitOps bitOpsWith(IntegerBitOps x){
+		return this;
+	}
+
+	final public BitOps bitOpsWith(LongBitOps x){
+		return this;
+	}
+
+	final public BitOps bitOpsWith(BigIntegerBitOps x){
+		return this;
+	}
+
+	public Number not(Number x){
+		return toBigInteger(x).not();
+	}
+
+	public Number and(Number x, Number y){
+		return toBigInteger(x).and(toBigInteger(y));
+	}
+
+	public Number or(Number x, Number y){
+		return toBigInteger(x).or(toBigInteger(y));
+	}
+
+	public Number xor(Number x, Number y){
+		return toBigInteger(x).xor(toBigInteger(y));
+	}
+
+	public Number andNot(Number x, Number y){
+		return toBigInteger(x).andNot(toBigInteger(y));
+	}
+
+	public Number clearBit(Number x, int n){
+		return toBigInteger(x).clearBit(n);
+	}
+
+	public Number setBit(Number x, int n){
+		return toBigInteger(x).setBit(n);
+	}
+
+	public Number flipBit(Number x, int n){
+		return toBigInteger(x).flipBit(n);
+	}
+
+	public boolean testBit(Number x, int n){
+		return toBigInteger(x).testBit(n);
+	}
+
+	public Number shiftLeft(Number x, int n){
+		return toBigInteger(x).shiftLeft(n);
+	}
+
+	public Number shiftRight(Number x, int n){
+		return toBigInteger(x).shiftRight(n);
 	}
 }
 
@@ -731,6 +1158,10 @@ static final DoubleOps DOUBLE_OPS = new DoubleOps();
 static final RatioOps RATIO_OPS = new RatioOps();
 static final BigIntegerOps BIGINTEGER_OPS = new BigIntegerOps();
 static final BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
+
+static final IntegerBitOps INTEGER_BITOPS = new IntegerBitOps();
+static final LongBitOps LONG_BITOPS = new LongBitOps();
+static final BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
 
 static Ops ops(Object x){
 	Class xc = x.getClass();
@@ -751,6 +1182,21 @@ static Ops ops(Object x){
 		return BIGDECIMAL_OPS;
 	else
 		return INTEGER_OPS;
+}
+
+static BitOps bitOps(Object x){
+	Class xc = x.getClass();
+
+	if(xc == Integer.class)
+		return INTEGER_BITOPS;
+	else if(xc == Long.class)
+		return LONG_BITOPS;
+	else if(xc == BigInteger.class)
+		return BIGINTEGER_BITOPS;
+	else if(xc == Double.class || xc == Float.class || xc == BigDecimalOps.class || xc == Ratio.class)
+		throw new ArithmeticException("bit operation on non integer type: " + xc);
+	else
+		return INTEGER_BITOPS;
 }
 
 }

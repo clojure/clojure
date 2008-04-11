@@ -601,29 +601,54 @@
 
 ;;Bit ops
 
-(defn bit-shift-left
-  "Bitwise shift left"
-  [x y] (. clojure.lang.IntegerNum (shiftLeft x y)))
+(defn bit-not
+  "Bitwise complement"
+  [x] (. clojure.lang.Numbers not x))
 
-(defn bit-shift-right
-  "Bitwise shift right"
-  [x y] (. clojure.lang.IntegerNum (shiftRight x y)))
 
 (defn bit-and
   "Bitwise and"
-  [x y] (. clojure.lang.IntegerNum (bitAnd x y)))
+  [x y] (. clojure.lang.Numbers and x y))
 
 (defn bit-or
   "Bitwise or"
-  [x y] (. clojure.lang.IntegerNum (bitOr x y)))
+  [x y] (. clojure.lang.Numbers or x y))
 
 (defn bit-xor
   "Bitwise exclusive or"
-  [x y] (. clojure.lang.IntegerNum (bitXor x y)))
+  [x y] (. clojure.lang.Numbers xor x y))
 
-(defn bit-not
-  "Bitwise not"
-  [x] (. clojure.lang.IntegerNum (bitNot x)))
+(defn bit-nand
+  "Bitwise and with complement"
+  [x y] (. clojure.lang.Numbers andNot x y))
+
+
+(defn bit-clear
+  "Clear bit at index n"
+  [x n] (. clojure.lang.Numbers clearBit x n))
+
+(defn bit-set
+  "Set bit at index n"
+  [x n] (. clojure.lang.Numbers setBit x n))
+
+(defn bit-flip
+  "Flip bit at index n"
+  [x n] (. clojure.lang.Numbers flipBit x n))
+
+(defn bit-test
+  "Test bit at index n"
+  [x n] (. clojure.lang.Numbers testBit x n))
+
+
+(defn bit-shift-left
+  "Bitwise shift left"
+  [x n] (. clojure.lang.Numbers shiftLeft x n))
+
+(defn bit-shift-right
+  "Bitwise shift right"
+  [x n] (. clojure.lang.Numbers shiftRight x n))
+
+;;
 
 (defn complement
   "Takes a fn f and returns a fn that takes the same arguments as f,
