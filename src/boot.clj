@@ -2277,16 +2277,21 @@ not-every? (comp not every?))
       (step (seq coll) #{})))
 
 (defmacro if-let 
-  "Same as (let [name test] (if name then else))"
-  [name test then else]
-  `(let [~name ~test]
-     (if ~name ~then ~else)))
+  "if test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
+  [binding-form test then else]
+  `(let [temp# ~test]
+     (if temp# 
+       (let [~binding-form temp#]
+         ~then)
+       ~else)))
 
 (defmacro when-let 
-  "Same as (let [name test] (when name body))"
-  [name test & body]
-  `(let [~name ~test]
-     (when ~name ~@body)))
+  "when test is true, evaluates body with binding-form bound to the value of test"
+  [binding-form test & body]
+  `(let [temp# ~test]
+     (when temp#
+       (let [~binding-form temp#]
+         ~@body))))
 
 (defn replace
   "Given a map of replacement pairs and a vector/collection, returns a
