@@ -244,18 +244,9 @@ static public Var var(String ns, String name){
 }
 
 public static void  loadResourceScript(String name) throws Exception{
-	try
-		{
-		Var.pushThreadBindings(RT.map(Compiler.SOURCE_PATH, name,
-		                              Compiler.SOURCE, name));
 		InputStream ins = RT.class.getResourceAsStream("/" + name);
-		Compiler.load(new InputStreamReader(ins));
+		Compiler.load(new InputStreamReader(ins),name,name);
 		ins.close();
-		}
-	finally
-		{
-		Var.popThreadBindings();
-		}
 }
 
 static public void init() throws Exception{
