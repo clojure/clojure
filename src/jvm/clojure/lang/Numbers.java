@@ -980,37 +980,54 @@ final static class IntegerBitOps implements BitOps{
 	}
 
 	public Number clearBit(Number x, int n){
-		if(n < 32)
+		if (n < 31)
 			return x.intValue() & ~(1 << n);
-		throw new ArithmeticException("bit index out of range");
+		else if (n < 63)
+			return x.longValue() & ~(1L << n);
+		else
+			return toBigInteger(x).clearBit(n);
 	}
 
 	public Number setBit(Number x, int n){
-		if(n < 32)
+		if (n < 31)
 			return x.intValue() | (1 << n);
-		throw new ArithmeticException("bit index out of range");
+		else if (n < 63)
+			return x.longValue() | (1L << n);
+		else
+			return toBigInteger(x).setBit(n);
 	}
 
 	public Number flipBit(Number x, int n){
-		if(n < 32)
+		if (n < 31)
 			return x.intValue() ^ (1 << n);
-		throw new ArithmeticException("bit index out of range");
+		else if (n < 63)
+			return x.longValue() ^ (1L << n);
+		else
+			return toBigInteger(x).flipBit(n);
 	}
 
 	public boolean testBit(Number x, int n){
-		if(n < 32)
+		if (n < 32)
 			return (x.intValue() & (1 << n)) != 0;
-		throw new ArithmeticException("bit index out of range");
+		else if (n < 64)
+			return (x.longValue() & (1L << n)) != 0;
+		else
+			return toBigInteger(x).testBit(n);
 	}
 
 	public Number shiftLeft(Number x, int n){
-		if(n < 0)
-			return shiftRight(x, -n);
-		return x.intValue() << n;
+		if (n < 32)
+			{
+			if (n < 0)
+				return shiftRight(x, -n);
+			return reduce(x.longValue() << n);
+			}
+		else
+			return reduce(toBigInteger(x).shiftLeft(n));
 	}
-
+	
 	public Number shiftRight(Number x, int n){
-		if(n < 0)
+		if (n < 0)
 			return shiftLeft(x, -n);
 		return x.intValue() >> n;
 	}
@@ -1054,37 +1071,41 @@ final static class LongBitOps implements BitOps{
 	}
 
 	public Number clearBit(Number x, int n){
-		if(n < 64)
+		if (n < 63)
 			return x.longValue() & ~(1L << n);
-		throw new ArithmeticException("bit index out of range");
+		else
+			return toBigInteger(x).clearBit(n);
 	}
 
 	public Number setBit(Number x, int n){
-		if(n < 64)
+		if (n < 63)
 			return x.longValue() | (1L << n);
-		throw new ArithmeticException("bit index out of range");
+		else
+			return toBigInteger(x).setBit(n);
 	}
 
 	public Number flipBit(Number x, int n){
-		if(n < 64)
+		if (n < 63)
 			return x.longValue() ^ (1L << n);
-		throw new ArithmeticException("bit index out of range");
+		else
+			return toBigInteger(x).flipBit(n);
 	}
 
 	public boolean testBit(Number x, int n){
-		if(n < 64)
+		if (n < 64)
 			return (x.longValue() & (1L << n)) != 0;
-		throw new ArithmeticException("bit index out of range");
+		else
+			return toBigInteger(x).testBit(n);
 	}
 
 	public Number shiftLeft(Number x, int n){
-		if(n < 0)
+		if (n < 0)
 			return shiftRight(x, -n);
-		return x.longValue() << n;
+		return reduce(toBigInteger(x).shiftLeft(n));
 	}
 
 	public Number shiftRight(Number x, int n){
-		if(n < 0)
+		if (n < 0)
 			return shiftLeft(x, -n);
 		return x.longValue() >> n;
 	}
