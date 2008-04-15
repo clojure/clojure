@@ -2340,3 +2340,41 @@ not-every? (comp not every?))
                       [exprs nil])]
       `(binding [*math-context* (java.math.MathContext. ~precision ~@rm)]
          ~@body))) 
+
+(defn bound-fn
+  {:private true}
+  [#^clojure.lang.Sorted sc test key]
+  (fn [e]
+    (test (.. sc comparator (compare (. sc entryKey e) key)) 0)))
+  
+(defn subseq
+  "sc must be a sorted collection, test(s) one of <, <=, > or
+  >=. Returns a seq of those entries with keys ek for
+  which (test (.. sc comparator (compare ek key)) 0) is true"  
+  ([#^clojure.lang.Sorted sc test key]
+   (let [include (bound-fn sc test key)]
+     (if (#{> >=} test)
+       (when-let [e :as s] (. sc seqFrom key true)
+         (if (include e) s (rest s)))
+       (take-while include (. sc seq true)))))     
+  ([#^clojure.lang.Sorted sc start-test start-key end-test end-key]
+   (when-let [e :as s] (. sc seqFrom start-key true)
+     (take-while (bound-fn sc end-test end-key)
+                 (if ((bound-fn sc start-test start-key) e) s (rest s))))))
+
+(defn rsubseq
+  "sc must be a sorted collection, test(s) one of <, <=, > or
+  >=. Returns a reverse seq of those entries with keys ek for
+  which (test (.. sc comparator (compare ek key)) 0) is true"
+  ([#^clojure.lang.Sorted sc test key]
+   (let [include (bound-fn sc test key)]
+     (if (#{< <=} test)
+       (when-let [e :as s] (. sc seqFrom key false)
+         (if (include e) s (rest s)))
+       (take-while include (. sc seq false)))))     
+  ([#^clojure.lang.Sorted sc start-test start-key end-test end-key]
+   (when-let [e :as s] (. sc seqFrom end-key false)
+     (take-while (bound-fn sc start-test start-key)
+                 (if ((bound-fn sc end-test end-key) e) s (rest s))))))
+
+

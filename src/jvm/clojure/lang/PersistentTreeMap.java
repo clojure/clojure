@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap extends APersistentMap implements Reversible{
+public class PersistentTreeMap extends APersistentMap implements Reversible, Sorted{
 
 public final Comparator comp;
 public final Node tree;
@@ -31,7 +31,7 @@ public final int _count;
 final static public PersistentTreeMap EMPTY = new PersistentTreeMap();
 
 public PersistentTreeMap(){
-	this(null);
+	this(RT.DEFAULT_COMPARATOR);
 }
 
 public PersistentTreeMap withMeta(IPersistentMap meta){
@@ -132,6 +132,59 @@ public ISeq rseq() throws Exception{
 	return null;
 }
 
+public Comparator comparator(){
+	return comp;
+}
+
+public Object entryKey(Object entry){
+	return ((IMapEntry) entry).key();
+}
+
+public ISeq seq(boolean ascending){
+	if(_count > 0)
+		return Seq.create(tree, ascending, _count);
+	return null;
+}
+
+public ISeq seqFrom(Object key, boolean ascending){
+	if(_count > 0)
+		{
+		ISeq stack = null;
+		Node t = tree;
+		while(t != null)
+			{
+			int c = doCompare(key, t.key);
+			if(c == 0)
+				{
+				stack = RT.cons(t, stack);
+				return new Seq(stack, ascending);
+				}
+			else if(ascending)
+				{
+				if(c < 0)
+					{
+					stack = RT.cons(t, stack);
+					t = t.left();
+					}
+				else
+					t = t.right();
+				}
+			else
+				{
+				if(c > 0)
+					{
+					stack = RT.cons(t, stack);
+					t = t.right();
+					}
+				else
+					t = t.left();
+				}
+			}
+		if(stack != null)
+			return new Seq(stack, ascending);
+		}
+	return null;
+}
 
 public NodeIterator iterator(){
 	return new NodeIterator(tree, true);
@@ -230,9 +283,9 @@ public Node entryAt(Object key){
 }
 
 public int doCompare(Object k1, Object k2){
-	if(comp != null)
+//	if(comp != null)
 		return comp.compare(k1, k2);
-	return ((Comparable) k1).compareTo(k2);
+//	return ((Comparable) k1).compareTo(k2);
 }
 
 Node add(Node t, Object key, Object val, Box found){

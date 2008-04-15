@@ -189,6 +189,12 @@ public static List<String> processCommandLine(String[] args){
 //static Var NS_IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("*ns-imports*"), IMPORTS);
 //static Var NS_REFERS = Var.intern(CLOJURE_NS,Symbol.create("*ns-refers*"), REFERS);
 static public final Object[] EMPTY_ARRAY = new Object[]{};
+static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
+	public int compare(Object o1, Object o2){
+		return ((Comparable) o1).compareTo(o2);
+	}
+};
+
 //static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
 
