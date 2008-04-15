@@ -783,7 +783,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	public InstanceFieldExpr(int line, Expr target, String fieldName) throws Exception{
 		this.target = target;
 		this.targetClass = target.hasJavaClass() ? target.getJavaClass() : null;
-		this.field = targetClass != null ? targetClass.getField(fieldName) : null;
+		this.field = targetClass != null ? Reflector.getField(targetClass,fieldName,false) : null;
 		this.fieldName = fieldName;
 		this.line = line;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
@@ -820,12 +820,10 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public boolean hasJavaClass() throws Exception{
-		return targetClass != null;
+		return field != null;
 	}
 
 	public Class getJavaClass() throws Exception{
-		Class targetClass = target.getJavaClass();
-		java.lang.reflect.Field field = targetClass.getField(fieldName);
 		return field.getType();
 	}
 

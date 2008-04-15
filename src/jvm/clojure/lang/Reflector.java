@@ -260,6 +260,19 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 			methods.add(allmethods[i]);
 			}
 		}
+	if(!getStatics && c.isInterface())
+		{
+		allmethods = Object.class.getMethods();
+		for(int i = 0; i < allmethods.length; i++)
+			{
+			if(name.equals(allmethods[i].getName())
+			   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
+			   && allmethods[i].getParameterTypes().length == arity)
+				{
+				methods.add(allmethods[i]);
+				}
+			}
+		}
 	return methods;
 }
 
