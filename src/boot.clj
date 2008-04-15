@@ -618,7 +618,7 @@
   "Bitwise exclusive or"
   [x y] (. clojure.lang.Numbers xor x y))
 
-(defn bit-nand
+(defn bit-and-not
   "Bitwise and with complement"
   [x y] (. clojure.lang.Numbers andNot x y))
 
@@ -1472,6 +1472,16 @@ not-every? (comp not every?))
   "Coerce to boolean"
   {:tag Boolean} 
   [x] (if x true false))
+
+(defn bigint 
+  "Coerce to BigInteger"
+  {:tag BigInteger} 
+  [x] (BigInteger.valueOf x))
+
+(defn bigdec
+  "Coerce to BigDecimal"
+  {:tag BigDecimal}
+  [x] (BigDecimal.valueOf x))
 
 (import '(java.lang.reflect Array))
 
