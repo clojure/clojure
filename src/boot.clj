@@ -201,7 +201,7 @@
                       fdecl)
               m (conj {:arglists (list 'quote (sigs fdecl))} m)]
           (list 'def (with-meta name (conj (if (meta name) (meta name) {}) m))
-                (cons `fn (cons name fdecl))))))
+                (cons `fn fdecl)))))
 
 (. (var defn) (setMacro))
 
