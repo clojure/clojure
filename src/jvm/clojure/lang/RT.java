@@ -20,6 +20,8 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 public class RT{
 
@@ -1140,4 +1142,11 @@ static public Object[] setValues(Object... vals){
 	return null;
 }
 
+static public ClassLoader makeClassLoader(){
+	return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction(){
+		public Object run(){
+			return new DynamicClassLoader();
+		}
+	});
+}
 }

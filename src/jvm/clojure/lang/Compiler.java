@@ -143,50 +143,50 @@ static
 
 
 //symbol->localbinding
-static public Var LOCAL_ENV = Var.create(null);
+static final public Var LOCAL_ENV = Var.create(null);
 
 //vector<localbinding>
-static public Var LOOP_LOCALS = Var.create();
+static final public Var LOOP_LOCALS = Var.create();
 
 //Label
-static public Var LOOP_LABEL = Var.create();
+static final public Var LOOP_LABEL = Var.create();
 
 //vector<object>
-static public Var CONSTANTS = Var.create();
+static final public Var CONSTANTS = Var.create();
 
 //keyword->constid
-static public Var KEYWORDS = Var.create();
+static final public Var KEYWORDS = Var.create();
 
 //var->constid
-static public Var VARS = Var.create();
+static final public Var VARS = Var.create();
 
 //FnFrame
-static public Var METHOD = Var.create(null);
+static final public Var METHOD = Var.create(null);
 
 //null or not
-static public Var IN_CATCH_FINALLY = Var.create(null);
+static final public Var IN_CATCH_FINALLY = Var.create(null);
 
 //String
-static public Var SOURCE = Var.create("NO_SOURCE_FILE");
+static final public Var SOURCE = Var.create("NO_SOURCE_FILE");
 
 //String
-static public Var SOURCE_PATH = Var.create(null);
+static final public Var SOURCE_PATH = Var.create(null);
 
 //Integer
-static public Var LINE = Var.create(0);
+static final public Var LINE = Var.create(0);
 
 //Integer
-static public Var LINE_BEFORE = Var.create(0);
-static public Var LINE_AFTER = Var.create(0);
+static final public Var LINE_BEFORE = Var.create(0);
+static final public Var LINE_AFTER = Var.create(0);
 
 //Integer
-static public Var NEXT_LOCAL_NUM = Var.create(0);
+static final public Var NEXT_LOCAL_NUM = Var.create(0);
 
 //Integer
-static public Var RET_LOCAL_NUM = Var.create();
+static final public Var RET_LOCAL_NUM = Var.create();
 
 //DynamicClassLoader
-static public Var LOADER = Var.create();
+static final public Var LOADER = Var.create();
 
 enum C{
 	STATEMENT,  //value ignored
@@ -2104,7 +2104,7 @@ static class IfExpr implements Expr{
 	}
 }
 
-static public IPersistentMap CHAR_MAP =
+static final public IPersistentMap CHAR_MAP =
 		PersistentHashMap.create('-', "_",
 		                         '.', "_DOT_",
 		                         ':', "_COLON_",
@@ -3445,7 +3445,7 @@ public static Object eval(Object form) throws Exception{
 		{
 		if(!LOADER.isBound())
 			{
-			Var.pushThreadBindings(RT.map(LOADER, new DynamicClassLoader()));
+			Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
 			createdLoader = true;
 			}
 		Expr expr = analyze(C.EVAL, form);
@@ -3689,7 +3689,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 	try
 		{
 		Var.pushThreadBindings(
-				RT.map(LOADER, new DynamicClassLoader(),
+				RT.map(LOADER, RT.makeClassLoader(),
 				       SOURCE_PATH, sourcePath,
 				       SOURCE, sourceName,
 				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
@@ -3745,7 +3745,7 @@ SOURCE, "REPL"
 			try
 				{
 				Var.pushThreadBindings(
-						RT.map(LOADER, new DynamicClassLoader()));
+						RT.map(LOADER, RT.makeClassLoader()));
 				w.write(currentNS().name + "=> ");
 				w.flush();
 				Object r = LispReader.read(rdr, false, EOF, false);

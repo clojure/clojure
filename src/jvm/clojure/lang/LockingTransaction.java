@@ -18,9 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class LockingTransaction{
 
-public static int RETRY_LIMIT = 10000;
-public static int LOCK_WAIT_MSECS = 100;
-public static long BARGE_WAIT_NANOS = 10 * 1000000;
+public static final int RETRY_LIMIT = 10000;
+public static final int LOCK_WAIT_MSECS = 100;
+public static final long BARGE_WAIT_NANOS = 10 * 1000000;
 //public static int COMMUTE_RETRY_LIMIT = 10;
 
 static final int RUNNING = 0;
@@ -32,7 +32,7 @@ static final int COMMITTED = 4;
 final static ThreadLocal<LockingTransaction> transaction = new ThreadLocal<LockingTransaction>();
 
 
-static class RetryException extends Error{
+static class RetryEx extends Error{
 }
 
 static class AbortException extends Exception{
@@ -96,7 +96,7 @@ Info info;
 long readPoint;
 long startPoint;
 long startTime;
-final RetryException retryex = new RetryException();
+final RetryEx retryex = new RetryEx();
 final ArrayList<Agent.Action> actions = new ArrayList<Agent.Action>();
 final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
 final HashSet<Ref> sets = new HashSet<Ref>();
@@ -278,7 +278,7 @@ Object run(IFn fn) throws Exception{
 				info.status.set(COMMITTED);
 				}
 			}
-		catch(RetryException retry)
+		catch(RetryEx retry)
 			{
 			//eat this so we retry rather than fall out
 			}

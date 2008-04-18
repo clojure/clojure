@@ -14,10 +14,11 @@ package clojure.lang;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.io.Serializable;
 
 public class PersistentStructMap extends APersistentMap{
 
-public static class Def{
+public static class Def implements Serializable{
 	final ISeq keys;
 	final IPersistentMap keyslots;
 

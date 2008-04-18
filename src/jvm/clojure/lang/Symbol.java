@@ -12,8 +12,11 @@
 
 package clojure.lang;
 
+import java.io.Serializable;
+import java.io.ObjectStreamException;
 
-public class Symbol extends Obj implements Comparable, Named{
+
+public class Symbol extends Obj implements Comparable, Named, Serializable{
 //these must be interned strings!
 final String ns;
 final String name;
@@ -99,4 +102,9 @@ public int compareTo(Object o){
 		return nsc;
 	return this.name.compareTo(s.name);
 }
+
+private Object readResolve() throws ObjectStreamException{
+	return intern(ns, name);
+}
+
 }

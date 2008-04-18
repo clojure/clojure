@@ -28,7 +28,7 @@ public class PersistentArrayMap extends APersistentMap{
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 8;
 
-public static PersistentArrayMap EMPTY = new PersistentArrayMap();
+public static final PersistentArrayMap EMPTY = new PersistentArrayMap();
 
 protected PersistentArrayMap(){
 	this.array = new Object[]{};

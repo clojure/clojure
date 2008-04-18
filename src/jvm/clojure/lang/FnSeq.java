@@ -34,29 +34,28 @@ public Object first(){
 	return _first;
 }
 
-public ISeq rest(){
-//	if(_restFn != null)
-		synchronized(this)
+synchronized public ISeq rest(){
+	if(_restFn != null)
+		{
+		try
 			{
-			if(_restFn != null)
-				{
-				try
-					{
-					_rest = (ISeq) _restFn.invoke();
-					}
-				catch(Exception ex)
-					{
-					throw new Error(ex);
-					}
-				_restFn = null;
-				}
-			return _rest;
+			_rest = (ISeq) _restFn.invoke();
 			}
+		catch(Exception ex)
+			{
+			throw new Error(ex);
+			}
+		_restFn = null;
+		}
+	return _rest;
 }
 
-public FnSeq withMeta(IPersistentMap meta){
+
+synchronized public FnSeq withMeta(IPersistentMap meta){
 	if(meta == meta())
 		return this;
+	//force eval of restFn before copying
+	rest();
 	return new FnSeq(meta, _first, _restFn, _rest);
 }
 

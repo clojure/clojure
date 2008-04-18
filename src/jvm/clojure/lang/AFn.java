@@ -13,8 +13,9 @@
 package clojure.lang;
 
 import java.util.Comparator;
+import java.io.Serializable;
 
-public abstract class AFn extends Obj implements IFn, Comparator{
+public abstract class AFn extends Obj implements IFn, Comparator, Serializable{
 
 public AFn(IPersistentMap meta){
 	super(meta);

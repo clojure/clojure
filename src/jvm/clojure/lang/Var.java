@@ -72,9 +72,7 @@ public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceR
 public String toString(){
 	if(ns != null)
 		return "#'" + ns.name + "/" + sym;
-	return "#<Var: " + (ns != null ? (ns.name + "/") : "") +
-	       (sym != null ? sym.toString() : "--unnamed--") +
-	       ">";
+	return "#<Var: " + (sym != null ? sym.toString() : "--unnamed--") + ">";
 }
 
 public static Var find(Symbol nsQualifiedSym){

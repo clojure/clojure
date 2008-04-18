@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class SeqIterator implements Iterator{
 
@@ -26,7 +27,9 @@ public boolean hasNext(){
 	return seq != null;
 }
 
-public Object next(){
+public Object next() throws NoSuchElementException {
+	if(seq == null)
+		throw new NoSuchElementException();
 	Object ret = RT.first(seq);
 	seq = RT.rest(seq);
 	return ret;
