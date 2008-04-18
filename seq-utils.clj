@@ -26,25 +26,28 @@
     (filter (complement s?) (tree-seq s? seq x))))
 
 (defn batch
-  "Divides 'coll' into sequences each containing 'size' elements,
-  returns a sequence of those sequences.  The last sequence may
-  have fewer than 'size' elements."
-  [size coll]
-  (when coll
-    (lazy-cons (take size coll) (batch size (drop size coll)))))
+  "Returns a sequence of sequences, each containing 'size' elements
+  from s."
+  [size s]
+  (when s
+    (lazy-cons (take size s) (batch size (drop size s)))))
 
 (defn separate
-  "Separates elements in 'coll' into two sequences, one for which 
-  (f item) is logical true, the other for which (f item) is logical
-  false.  Returns a vector containing two (lazy) sequences:
-     [ (true-items) (false-items) ]"
-  [f coll]
-  [(filter f coll) (filter (complement f) coll)])
+  "Returns a vector:
+   [ (filter f s), (filter (complement f) s) ]"
+  [f s]
+  [(filter f s) (filter (complement f) s)])
 
 (defn includes?
-  "Returns true if 'coll' (a sequential collection) contains 'value',
-  false otherwise.  Uses '=' to test equality.  May scan the entire
-  collection."
-  [value coll]
-  (if (some (fn [x] (= x value)) coll)
+  "Returns true if s contains something equal (with =) to x."
+  [x s]
+  (if (some (fn [y] (= y x)) s)
     true false))
+
+(defn indexed
+  "Returns a lazy sequence of [index, item] pairs, where items come
+  from 's' and indexes count up from zero.
+
+  (indexed '(a b c d))  =>  ([0 a] [1 b] [2 c] [3 d])"
+  [s]
+  (map vector (iterate inc 0) s))
