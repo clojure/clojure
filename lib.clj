@@ -114,6 +114,12 @@
   (apply require-one sym :need-ns true options)
   (apply refer sym options))
 
+(defn- ns-vars
+  "Returns a sorted list of symbols naming public vars in
+  a namespace"
+  [ns]
+  (sort (map first (ns-publics ns))))
+
 ;; Public
 
 (defn require
@@ -157,6 +163,26 @@
   "Returns a sorted sequence of symbols naming loaded libs"
   []
   (sort @*libs*))
+
+(defn vars
+  "Returns a sorted sequence of symbols naming public vars in
+  a namespace"
+  [ns-sym]
+  (when-let ns (find-ns ns-sym)
+    (ns-vars ns)))
+
+(defn docs
+  "Prints documentation for the public names in a namespace"
+  [ns-sym]
+  (when-let ns (find-ns ns-sym)
+    (doseq item (ns-vars ns)
+      (print-doc (ns-resolve ns item)))))
+
+(defn dir
+  "Prints a sorted directory of public names in a namespace"
+  [ns-sym]
+  (doseq item (vars ns-sym)
+    (println item)))
 
 (defn load-uri
   "Loads Clojure source from a URI, which may be a java.net.URI
