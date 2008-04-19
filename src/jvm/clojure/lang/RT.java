@@ -238,6 +238,15 @@ static
 //		{
 //		throw new IllegalStateException("Error loading boot.clj", e);
 //		}
+
+	try
+		{
+		doInit();
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
 	}
 //static
 //	{
@@ -251,13 +260,17 @@ static public Var var(String ns, String name){
 	return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name));
 }
 
-public static void  loadResourceScript(String name) throws Exception{
-		InputStream ins = RT.class.getResourceAsStream("/" + name);
-		Compiler.load(new InputStreamReader(ins),name,name);
-		ins.close();
+public static void loadResourceScript(String name) throws Exception{
+	InputStream ins = RT.class.getResourceAsStream("/" + name);
+	Compiler.load(new InputStreamReader(ins), name, name);
+	ins.close();
 }
 
 static public void init() throws Exception{
+	System.err.println("No need to call RT.init() anymore");
+}
+
+static void doInit() throws Exception{
 	loadResourceScript("boot.clj");
 	loadResourceScript("proxy.clj");
 	loadResourceScript("zip.clj");
@@ -267,18 +280,6 @@ static public void init() throws Exception{
 
 static public int nextID(){
 	return id.getAndIncrement();
-}
-
-static public boolean equal(Object k1, Object k2){
-	if(k1 == k2)
-		return true;
-	if(k1 != null)
-		{
-		if(k1 instanceof Number)
-			return Numbers.equiv(k1, k2);
-		return k1.equals(k2);
-		}
-	return false;
 }
 
 //static public Object eq(Object arg1, Object arg2){
@@ -315,18 +316,6 @@ static public boolean equal(Object k1, Object k2){
 //        }
 
 ////////////// Collections support /////////////////////////////////
-
-static public int hash(Object o){
-	if(o == null)
-		return 0;
-	return o.hashCode();
-}
-
-static public int hashCombine(int seed, int hash){
-	//a la boost
-	seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-	return seed;
-}
 
 static public ISeq seq(Object coll){
 	if(coll == null)
@@ -598,7 +587,7 @@ static boolean hasTag(Object o, Object tag){
 	if(!(o instanceof IObj))
 		return false;
 	IPersistentMap meta = ((IObj) o).meta();
-	return RT.equal(tag, RT.get(meta, TAG_KEY));
+	return Util.equal(tag, RT.get(meta, TAG_KEY));
 }
 
 /**
@@ -907,11 +896,11 @@ static public void print(Object x, Writer w) throws Exception{
 						w.write("\\\\");
 						break;
 					case '\f':
-					    w.write("\\f");
-					    break;
-                    case '\b':
-                        w.write("\\b");
-                        break;
+						w.write("\\f");
+						break;
+					case '\b':
+						w.write("\\b");
+						break;
 					default:
 						w.write(c);
 					}
@@ -991,12 +980,12 @@ static public void print(Object x, Writer w) throws Exception{
 				case ' ':
 					w.write("space");
 					break;
-	            case '\b':
-	                w.write("backspace");
-	                break;
-	            case '\f':
-	                w.write("formfeed");
-	                break;
+				case '\b':
+					w.write("backspace");
+					break;
+				case '\f':
+					w.write("formfeed");
+					break;
 				default:
 					w.write(c);
 				}
@@ -1050,12 +1039,12 @@ static public void formatStandard(Writer w, Object obj) throws IOException{
 			case ' ':
 				w.write("space");
 				break;
-            case '\b':
-                w.write("backspace");
-                break;
-            case '\f':
-                w.write("formfeed");
-                break;
+			case '\b':
+				w.write("backspace");
+				break;
+			case '\f':
+				w.write("formfeed");
+				break;
 			default:
 				w.write(c);
 			}
@@ -1068,7 +1057,7 @@ static public Object format(Object o, String s, Object... args) throws Exception
 	Writer w;
 	if(o == null)
 		w = new StringWriter();
-	else if(equal(o, T))
+	else if(Util.equal(o, T))
 		w = (Writer) OUT.get();
 	else
 		w = (Writer) o;

@@ -37,7 +37,7 @@ public ISeq seq(){
 }
 
 public Object invoke(Object arg1) throws Exception{
-	return contains(arg1)?arg1:null;
+	return contains(arg1) ? arg1 : null;
 }
 
 public boolean equals(Object obj){
@@ -63,8 +63,8 @@ public int hashCode(){
 		int hash = count();
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
-			Object e =  s.first();
-			hash = RT.hashCombine(hash,RT.hash(e));
+			Object e = s.first();
+			hash = Util.hashCombine(hash, Util.hash(e));
 			}
 		this._hash = hash;
 		}

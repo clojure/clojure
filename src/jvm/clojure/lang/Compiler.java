@@ -74,7 +74,7 @@ static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 
 //static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
 
-static final public IPersistentMap specials = RT.map(
+static final public IPersistentMap specials = PersistentHashMap.create(
 		DEF, new DefExpr.Parser(),
 		LOOP, new LetExpr.Parser(),
 		RECUR, new RecurExpr.Parser(),
@@ -783,7 +783,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	public InstanceFieldExpr(int line, Expr target, String fieldName) throws Exception{
 		this.target = target;
 		this.targetClass = target.hasJavaClass() ? target.getJavaClass() : null;
-		this.field = targetClass != null ? Reflector.getField(targetClass,fieldName,false) : null;
+		this.field = targetClass != null ? Reflector.getField(targetClass, fieldName, false) : null;
 		this.fieldName = fieldName;
 		this.line = line;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
@@ -1552,7 +1552,7 @@ static class TryExpr implements Expr{
 				{
 				Object f = fs.first();
 				Object op = (f instanceof ISeq) ? ((ISeq) f).first() : null;
-				if(!RT.equal(op, CATCH) && !RT.equal(op, FINALLY))
+				if(!Util.equal(op, CATCH) && !Util.equal(op, FINALLY))
 					{
 					if(caught)
 						throw new Exception("Only catch or finally clause can follow catch in try expression");
@@ -1560,7 +1560,7 @@ static class TryExpr implements Expr{
 					}
 				else
 					{
-					if(RT.equal(op, CATCH))
+					if(Util.equal(op, CATCH))
 						{
 						Class c = HostExpr.maybeClass(RT.second(f), false);
 						if(c == null)
@@ -3031,7 +3031,7 @@ static class BodyExpr implements Expr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frms) throws Exception{
 			ISeq forms = (ISeq) frms;
-			if(RT.equal(RT.first(forms), DO))
+			if(Util.equal(RT.first(forms), DO))
 				forms = RT.rest(forms);
 			PersistentVector exprs = PersistentVector.EMPTY;
 			for(; forms != null; forms = forms.rest())

@@ -32,7 +32,7 @@ public boolean equals(Object obj){
 	ISeq ms = ((IPersistentCollection) obj).seq();
 	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
 		{
-		if(ms == null || !RT.equal(s.first(), ms.first()))
+		if(ms == null || !Util.equal(s.first(), ms.first()))
 			return false;
 		}
 	if(ms != null)
@@ -47,7 +47,7 @@ public int hashCode(){
 		int hash = 0;
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
-			hash = RT.hashCombine(hash, RT.hash(s.first()));
+			hash = Util.hashCombine(hash, Util.hash(s.first()));
 			}
 		this._hash = hash;
 		}
@@ -56,15 +56,15 @@ public int hashCode(){
 
 public Object reduce(IFn f) throws Exception{
 	Object ret = first();
-	for(ISeq s = rest();s != null;s=s.rest())
-		ret = f.invoke(ret,s.first());
+	for(ISeq s = rest(); s != null; s = s.rest())
+		ret = f.invoke(ret, s.first());
 	return ret;
 }
 
 public Object reduce(IFn f, Object start) throws Exception{
-	Object ret = f.invoke(start,first());
-	for(ISeq s = rest();s != null;s=s.rest())
-		ret = f.invoke(ret,s.first());
+	Object ret = f.invoke(start, first());
+	for(ISeq s = rest(); s != null; s = s.rest())
+		ret = f.invoke(ret, s.first());
 	return ret;
 }
 
@@ -77,8 +77,8 @@ public Object reduce(IFn f, Object start) throws Exception{
 //}
 
 public int count(){
-	int i=1;
-	for(ISeq s = rest();s!=null;s = s.rest(),i++)
+	int i = 1;
+	for(ISeq s = rest(); s != null; s = s.rest(), i++)
 		;
 	return i;
 }
@@ -157,7 +157,7 @@ public boolean isEmpty(){
 public boolean contains(Object o){
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
-		if(RT.equal(s.first(), o))
+		if(Util.equal(s.first(), o))
 			return true;
 		}
 	return false;

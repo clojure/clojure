@@ -300,7 +300,7 @@
   structures define equals() (and thus =) as a value, not an identity,
   comparison."
   {:tag Boolean} 
-  [x y] (. clojure.lang.RT (equal x y)))
+  [x y] (. clojure.lang.Util (equal x y)))
 
 (defn not=
   "Same as (not (= obj1 obj2))"

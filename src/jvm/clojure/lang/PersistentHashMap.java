@@ -97,12 +97,12 @@ public boolean containsKey(Object key){
 }
 
 public IMapEntry entryAt(Object key){
-	return root.find(RT.hash(key), key);
+	return root.find(Util.hash(key), key);
 }
 
 public IPersistentMap assoc(Object key, Object val){
 	Box addedLeaf = new Box(null);
-	INode newroot = root.assoc(0, RT.hash(key), key, val, addedLeaf);
+	INode newroot = root.assoc(0, Util.hash(key), key, val, addedLeaf);
 	if(newroot == root)
 		return this;
 	return new PersistentHashMap(meta(), addedLeaf.val == null ? count : count + 1, newroot);
@@ -126,7 +126,7 @@ public IPersistentMap assocEx(Object key, Object val) throws Exception{
 }
 
 public IPersistentMap without(Object key){
-	INode newroot = root.without(RT.hash(key), key);
+	INode newroot = root.without(Util.hash(key), key);
 	if(newroot == root)
 		return this;
 	if(newroot == null)
@@ -498,9 +498,9 @@ final static class LeafNode extends AMapEntry implements INode{
 	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
 		if(hash == this.hash)
 			{
-			if(RT.equal(key, this.key))
+			if(Util.equal(key, this.key))
 				{
-				if(RT.equal(val, this.val))
+				if(Util.equal(val, this.val))
 					return this;
 				//note  - do not set addedLeaf, since we are replacing
 				return new LeafNode(hash, key, val);
@@ -514,13 +514,13 @@ final static class LeafNode extends AMapEntry implements INode{
 	}
 
 	public INode without(int hash, Object key){
-		if(hash == this.hash && RT.equal(key, this.key))
+		if(hash == this.hash && Util.equal(key, this.key))
 			return null;
 		return this;
 	}
 
 	public LeafNode find(int hash, Object key){
-		if(hash == this.hash && RT.equal(key, this.key))
+		if(hash == this.hash && Util.equal(key, this.key))
 			return this;
 		return null;
 	}
@@ -570,7 +570,7 @@ final static class HashCollisionNode implements INode{
 			int idx = findIndex(hash, key);
 			if(idx != -1)
 				{
-				if(RT.equal(leaves[idx].val, val))
+				if(Util.equal(leaves[idx].val, val))
 					return this;
 				LeafNode[] newLeaves = leaves.clone();
 				//note  - do not set addedLeaf, since we are replacing

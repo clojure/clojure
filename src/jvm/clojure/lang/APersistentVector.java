@@ -46,7 +46,7 @@ static boolean doEquals(IPersistentVector v, Object obj){
 			return false;
 		for(int i = 0; i < v.count(); i++)
 			{
-			if(!RT.equal(v.nth(i), ma.nth(i)))
+			if(!Util.equal(v.nth(i), ma.nth(i)))
 				return false;
 			}
 		}
@@ -57,7 +57,7 @@ static boolean doEquals(IPersistentVector v, Object obj){
 		ISeq ms = ((IPersistentCollection) obj).seq();
 		for(int i = 0; i < v.count(); i++, ms = ms.rest())
 			{
-			if(ms == null || !RT.equal(v.nth(i), ms.first()))
+			if(ms == null || !Util.equal(v.nth(i), ms.first()))
 				return false;
 			}
 		if(ms != null)
@@ -78,7 +78,7 @@ public int hashCode(){
 		int hash = 0;
 		for(int i = 0; i < count(); i++)
 			{
-			hash = RT.hashCombine(hash, RT.hash(nth(i)));
+			hash = Util.hashCombine(hash, Util.hash(nth(i)));
 			}
 		this._hash = hash;
 		}
@@ -220,7 +220,7 @@ public boolean isEmpty(){
 public boolean contains(Object o){
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
-		if(RT.equal(s.first(), o))
+		if(Util.equal(s.first(), o))
 			return true;
 		}
 	return false;

@@ -59,7 +59,7 @@ public boolean equals(Object obj){
 		IMapEntry e = (IMapEntry) s.first();
 		IMapEntry me = m.entryAt(e.key());
 
-		if(me == null || !RT.equal(e.val(), me.val()))
+		if(me == null || !Util.equal(e.val(), me.val()))
 			return false;
 		}
 
@@ -73,7 +73,7 @@ public int hashCode(){
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
 			IMapEntry e = (IMapEntry) s.first();
-			hash ^= RT.hashCombine(RT.hash(e.key()), RT.hash(e.val()));
+			hash ^= Util.hashCombine(Util.hash(e.key()), Util.hash(e.val()));
 			}
 		this._hash = hash;
 		}
@@ -215,7 +215,7 @@ public boolean contains(Object o){
 		{
 		IMapEntry e = (IMapEntry) o;
 		IMapEntry v = entryAt(e.key());
-		return (v != null && RT.equal(v.val(), e.val()));
+		return (v != null && Util.equal(v.val(), e.val()));
 		}
 	return false;
 }

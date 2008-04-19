@@ -22,14 +22,14 @@ public boolean equals(Object obj){
 
 public int hashCode(){
 	//must match logic in APersistentVector
-	return RT.hashCombine(RT.hashCombine(0,RT.hash(key())), RT.hash(val()));
+	return Util.hashCombine(Util.hashCombine(0, Util.hash(key())), Util.hash(val()));
 }
 
 public String toString(){
 	StringWriter sw = new StringWriter();
 	try
 		{
-		RT.print(this,sw);
+		RT.print(this, sw);
 		}
 	catch(Exception e)
 		{
@@ -46,7 +46,7 @@ public int length(){
 public Object nth(int i){
 	if(i == 0)
 		return key();
-	else if (i == 1)
+	else if(i == 1)
 		return val();
 	else
 		throw new IndexOutOfBoundsException();
@@ -81,7 +81,7 @@ public IMapEntry entryAt(Object key){
 }
 
 public Associative assoc(Object key, Object val){
-	return asVector().assoc(key,val);
+	return asVector().assoc(key, val);
 }
 
 public Object valAt(Object key){
@@ -89,7 +89,7 @@ public Object valAt(Object key){
 }
 
 public Object valAt(Object key, Object notFound){
-	return asVector().valAt(key,notFound);
+	return asVector().valAt(key, notFound);
 }
 
 public Object peek(){

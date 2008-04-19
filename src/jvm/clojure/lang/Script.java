@@ -20,8 +20,7 @@ import java.util.Arrays;
 public class Script{
 public static void main(String[] args) throws Exception{
 
-	RT.init();
-
+//	RT.init();
 
 	for(String file : RT.processCommandLine(args))
 		try
@@ -43,7 +42,7 @@ public static void main(String[] args) throws Exception{
 		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 		}
 
-	System.exit(0);	
+	System.exit(0);
 }
 }
 

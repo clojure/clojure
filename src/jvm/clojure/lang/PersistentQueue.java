@@ -10,8 +10,6 @@
 
 package clojure.lang;
 
-import java.util.Queue;
-import java.util.LinkedList;
 import java.util.Collection;
 import java.util.Iterator;
 //import java.util.concurrent.ConcurrentLinkedQueue;
@@ -46,7 +44,7 @@ public boolean equals(Object obj){
 	ISeq ms = ((IPersistentCollection) obj).seq();
 	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
 		{
-		if(ms == null || !RT.equal(s.first(), ms.first()))
+		if(ms == null || !Util.equal(s.first(), ms.first()))
 			return false;
 		}
 	return ms.rest() == null;
@@ -59,7 +57,7 @@ public int hashCode(){
 		int hash = 0;
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
-			hash = RT.hashCombine(hash, RT.hash(s.first()));
+			hash = Util.hashCombine(hash, Util.hash(s.first()));
 			}
 		this._hash = hash;
 		}
@@ -212,7 +210,7 @@ public boolean isEmpty(){
 public boolean contains(Object o){
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
-		if(RT.equal(s.first(), o))
+		if(Util.equal(s.first(), o))
 			return true;
 		}
 	return false;

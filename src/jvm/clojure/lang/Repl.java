@@ -25,8 +25,8 @@ static final Var ns = RT.var("clojure", "*ns*");
 static final Var warn_on_reflection = RT.var("clojure", "*warn-on-reflection*");
 
 public static void main(String[] args) throws Exception{
-	//must call this once before using Clojure
-	RT.init();
+
+//	RT.init();
 
 	try
 		{
