@@ -385,13 +385,13 @@
 
 (defmacro lazy-cons
   "Expands to code which produces a seq object whose first is
-  first-expr (evaluated) and whose rest is rest-expr, which is not
-  evaluated until rest is called. rest-expr will be evaluated at most
-  once per step in the sequence, e.g. calling rest repeatedly on the
-  head of the seq evaluates rest-expr once - the value it yields is
+  first-expr and whose rest is rest-expr, neither of which is
+  evaluated until first/rest is called. Each expr will be evaluated at most
+  once per step in the sequence, e.g. calling first/rest repeatedly on the
+  same node of the seq evaluates first/rest-expr once - the values they yield are
   cached."
  [first-expr & rest-expr]
-  (list 'fnseq first-expr (list* `fn [] rest-expr)))
+  (list 'new 'clojure.lang.LazySeq (list `fn [] first-expr) (list* `fn [] rest-expr)))
 
 
   
