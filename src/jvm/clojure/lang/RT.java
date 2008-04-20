@@ -199,6 +199,7 @@ static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
 
 //static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
+static final public ClassLoader ROOT_CLASSLOADER = new DynamicClassLoader();
 
 static
 	{
@@ -262,8 +263,11 @@ static public Var var(String ns, String name){
 
 public static void loadResourceScript(String name) throws Exception{
 	InputStream ins = RT.class.getResourceAsStream("/" + name);
-	Compiler.load(new InputStreamReader(ins), name, name);
-	ins.close();
+	if(ins != null)
+		{
+		Compiler.load(new InputStreamReader(ins), name, name);
+		ins.close();
+		}
 }
 
 static public void init() throws Exception{
@@ -276,6 +280,25 @@ static void doInit() throws Exception{
 	loadResourceScript("zip.clj");
 	loadResourceScript("xml.clj");
 	loadResourceScript("set.clj");
+
+	Var.pushThreadBindings(
+			RT.map(CURRENT_NS, CURRENT_NS.get(),
+			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
+	try
+		{
+		Symbol USER = Symbol.create("user");
+		Symbol CLOJURE = Symbol.create("clojure");
+
+		Var in_ns = var("clojure", "in-ns");
+		Var refer = var("clojure", "refer");
+		in_ns.invoke(USER);
+		refer.invoke(CLOJURE);
+		loadResourceScript("user.clj");
+		}
+	finally
+		{
+		Var.popThreadBindings();
+		}
 }
 
 static public int nextID(){
@@ -1131,11 +1154,17 @@ static public Object[] setValues(Object... vals){
 	return null;
 }
 
+
 static public ClassLoader makeClassLoader(){
 	return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction(){
 		public Object run(){
-			return new DynamicClassLoader();
+			return new DynamicClassLoader(ROOT_CLASSLOADER);
 		}
 	});
 }
+
+static public Class classForName(String name) throws ClassNotFoundException{
+	return Class.forName(name, false, RT.ROOT_CLASSLOADER);
+}
+
 }

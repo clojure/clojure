@@ -11,7 +11,7 @@
  '(clojure.asm ClassWriter ClassVisitor Opcodes Type) 
  '(java.lang.reflect Modifier Constructor)
  '(clojure.asm.commons Method GeneratorAdapter)
- '(clojure.lang IProxy Reflector DynamicClassLoader IPersistentMap PersistentHashMap))
+ '(clojure.lang IProxy Reflector DynamicClassLoader IPersistentMap PersistentHashMap RT))
 
 (def *proxy-classes* (ref {}))
 
@@ -183,7 +183,7 @@
                                         ;finish class def
             (. cv (visitEnd))
                                         ;generate, cache and return class object
-            (let [loader (new DynamicClassLoader)
+            (let [loader (RT.ROOT_CLASSLOADER)
                   c (. loader (defineClass (. cname (replace "/" ".")) 
                                 (. cv (toByteArray))))]
               (sync nil (commute *proxy-classes* assoc bases c))

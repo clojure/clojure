@@ -723,7 +723,7 @@ static public abstract class HostExpr implements Expr{
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
 				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
-					c = Class.forName(sym.name);
+					c = RT.classForName(sym.name);
 				else
 					{
 					Object o = currentNS().getMapping(sym);
@@ -733,7 +733,7 @@ static public abstract class HostExpr implements Expr{
 				}
 			}
 		else if(stringOk && form instanceof String)
-			c = Class.forName((String) form);
+			c = RT.classForName((String) form);
 		return c;
 	}
 
@@ -1694,6 +1694,7 @@ static class ThrowExpr extends UntypedExpr{
 	}
 }
 
+/*
 static class ClassExpr implements Expr{
 	final Class c;
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
@@ -1736,6 +1737,7 @@ static class ClassExpr implements Expr{
 		}
 	}
 }
+*/
 
 static boolean subsumes(Class[] c1, Class[] c2){
 	//presumes matching lengths
@@ -1847,7 +1849,7 @@ static class NewExpr implements Expr{
 		else
 			{
 			gen.push(c.getName());
-			gen.invokeStatic(CLASS_TYPE, forNameMethod);
+			gen.invokeStatic(RT_TYPE, forNameMethod);
 			MethodExpr.emitArgsAsArray(args, fn, gen);
 			if(context == C.RETURN)
 				{
@@ -3529,7 +3531,7 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		}
 	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 		{
-		return Class.forName(sym.name);
+		return RT.classForName(sym.name);
 		}
 	else
 		{
@@ -3554,7 +3556,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 		}
 	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 		{
-		return Class.forName(sym.name);
+		return RT.classForName(sym.name);
 		}
 	else
 		{
