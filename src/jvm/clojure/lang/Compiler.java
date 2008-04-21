@@ -1787,7 +1787,7 @@ static class NewExpr implements Expr{
 	final Class c;
 	final static Method invokeConstructorMethod =
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
-	final static Method forNameMethod = Method.getMethod("Class forName(String)");
+	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
 
 	public NewExpr(Class c, IPersistentVector args, int line) throws Exception{

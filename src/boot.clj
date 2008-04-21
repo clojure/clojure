@@ -1699,7 +1699,7 @@ not-every? (comp not every?))
           row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
           rows (fn thisfn []
                    (when (. rs (next))
-		     (fnseq (apply struct row-struct (row-values)) thisfn)))]
+		     (lazy-cons (apply struct row-struct (row-values)) (thisfn))))]
       (rows)))
 
 (defn set 
