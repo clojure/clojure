@@ -12,8 +12,10 @@
 
 package clojure.lang;
 
+import java.lang.reflect.Array;
+
 public class ArraySeq extends ASeq implements IndexedSeq{
-final Object[] array;
+final Object array;
 final int i;
 //ISeq _rest;
 
@@ -27,24 +29,30 @@ static public ArraySeq create(Object... array){
 	return new ArraySeq(array, 0);
 }
 
-ArraySeq(Object[] array, int i){
+static ArraySeq createFromObject(Object array){
+	if(array == null || Array.getLength(array) == 0)
+		return null;
+	return new ArraySeq(array, 0);
+}
+
+ArraySeq(Object array, int i){
 	this.array = array;
 	this.i = i;
 //    this._rest = this;
 }
 
-ArraySeq(IPersistentMap meta, Object[] array, int i){
+ArraySeq(IPersistentMap meta, Object array, int i){
 	super(meta);
 	this.array = array;
 	this.i = i;
 }
 
 public Object first(){
-	return array[i];
+	return Array.get(array,i);
 }
 
 public ISeq rest(){
-	if(i + 1 < array.length)
+	if(i + 1 < Array.getLength(array))
 		return new ArraySeq(array, i + 1);
 	return null;
 //    if(_rest == this)
@@ -57,7 +65,7 @@ public ISeq rest(){
 }
 
 public int count(){
-	return array.length - i;
+	return Array.getLength(array) - i;
 }
 
 public int index(){
@@ -69,16 +77,16 @@ public ArraySeq withMeta(IPersistentMap meta){
 }
 
 public Object reduce(IFn f) throws Exception{
-	Object ret = array[i];
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
+	Object ret = Array.get(array,i);
+	for(int x = i+1;x < Array.getLength(array);x++)
+		ret = f.invoke(ret, Array.get(array,x));
 	return ret;
 }
 
 public Object reduce(IFn f, Object start) throws Exception{
-	Object ret = f.invoke(start,array[i]);
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
+	Object ret = f.invoke(start,Array.get(array,i));
+	for(int x = i+1;x < Array.getLength(array);x++)
+		ret = f.invoke(ret, Array.get(array,x));
 	return ret;
 }
 }

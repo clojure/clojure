@@ -347,8 +347,8 @@ static public ISeq seq(Object coll){
 		return ((IPersistentCollection) coll).seq();
 	else if(coll instanceof Iterable)
 		return IteratorSeq.create(((Iterable) coll).iterator());
-	else if(coll instanceof Object[])
-		return ArraySeq.create((Object[]) coll);
+	else if(coll.getClass().isArray())
+		return ArraySeq.createFromObject(coll);
 	else if(coll instanceof String)
 		return StringSeq.create((String) coll);
 	else if(coll instanceof Map)

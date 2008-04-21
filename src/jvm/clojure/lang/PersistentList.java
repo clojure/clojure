@@ -24,7 +24,7 @@ public static IFn creator = new RestFn(0){
 	protected Object doInvoke(Object args) throws Exception{
 		if(args instanceof ArraySeq)
 			{
-			Object[] argsarray = ((ArraySeq) args).array;
+			Object[] argsarray = (Object[]) ((ArraySeq) args).array;
 			ISeq ret = EMPTY;
 			for(int i = argsarray.length - 1; i >= 0; --i)
 				ret = ret.cons(argsarray[i]);
