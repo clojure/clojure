@@ -3407,13 +3407,12 @@ public static Object macroexpand1(Object x) throws Exception{
 
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Integer line = (Integer) LINE.get();
+	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+		line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
+	Var.pushThreadBindings(
+			RT.map(LINE, line));
 	try
 		{
-		if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-			line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
-		Var.pushThreadBindings(
-				RT.map(LINE, line));
-
 		Object me = macroexpand1(form);
 		if(me != form)
 			return analyze(context, me);
@@ -3443,13 +3442,13 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 
 public static Object eval(Object form) throws Exception{
 	boolean createdLoader = false;
+	if(!LOADER.isBound())
+		{
+		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
+		createdLoader = true;
+		}
 	try
 		{
-		if(!LOADER.isBound())
-			{
-			Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
-			createdLoader = true;
-			}
 		Expr expr = analyze(C.EVAL, form);
 		return expr.eval();
 		}
@@ -3688,16 +3687,17 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 	LineNumberingPushbackReader pushbackReader =
 			(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
 			new LineNumberingPushbackReader(rdr);
+	Var.pushThreadBindings(
+			RT.map(LOADER, RT.makeClassLoader(),
+			       SOURCE_PATH, sourcePath,
+			       SOURCE, sourceName,
+			       RT.CURRENT_NS, RT.CURRENT_NS.get(),
+			       LINE_BEFORE, pushbackReader.getLineNumber(),
+			       LINE_AFTER, pushbackReader.getLineNumber()
+			));
+
 	try
 		{
-		Var.pushThreadBindings(
-				RT.map(LOADER, RT.makeClassLoader(),
-				       SOURCE_PATH, sourcePath,
-				       SOURCE, sourceName,
-				       RT.CURRENT_NS, RT.CURRENT_NS.get(),
-				       LINE_BEFORE, pushbackReader.getLineNumber(),
-				       LINE_AFTER, pushbackReader.getLineNumber()
-				));
 		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
 		    r = LispReader.read(pushbackReader, false, EOF, false))
 			{
