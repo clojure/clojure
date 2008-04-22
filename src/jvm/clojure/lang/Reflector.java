@@ -138,7 +138,7 @@ public static Object invokeStaticMethodVariadic(String className, String methodN
 }
 
 public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception{
-	Class c = Class.forName(className);
+	Class c = RT.classForName(className);
 	return invokeStaticMethod(c, methodName, args);
 }
 
