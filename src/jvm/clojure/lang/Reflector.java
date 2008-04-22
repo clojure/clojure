@@ -150,7 +150,7 @@ public static Object invokeStaticMethod(Class c, String methodName, Object[] arg
 }
 
 public static Object getStaticField(String className, String fieldName) throws Exception{
-	Class c = Class.forName(className);
+	Class c = RT.classForName(className);
 	return getStaticField(c, fieldName);
 }
 
@@ -165,7 +165,7 @@ public static Object getStaticField(Class c, String fieldName) throws Exception{
 	throw new IllegalArgumentException("No matching field found: " + fieldName);
 }
 public static Object setStaticField(String className, String fieldName, Object val) throws Exception{
-	Class c = Class.forName(className);
+	Class c = RT.classForName(className);
 	return setStaticField(c, fieldName, val);
 }
 
