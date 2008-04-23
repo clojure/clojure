@@ -54,6 +54,10 @@ private IFn getFn(Object dispatchVal) throws Exception{
 	return targetFn;
 }
 
+public Object invoke() throws Exception{
+	return getFn(dispatchFn.invoke()).invoke();
+}
+
 public Object invoke(Object arg1) throws Exception{
 	return getFn(dispatchFn.invoke(arg1)).invoke(arg1);
 }
