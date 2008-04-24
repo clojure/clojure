@@ -11,7 +11,7 @@
 ;;  A Clojure interface to sql databases via jdbc
 ;;
 ;;  scgilardi (gmail)
-;;  2 April 2008
+;;  23 April 2008
 
 (clojure/in-ns 'sql)
 (clojure/refer 'clojure)
@@ -79,7 +79,7 @@
 
  (require 'sql)
 
- (class org.sqlite.JDBC)
+ (. Class (forName "org.sqlite.JDBC"))
 
  (defn db []
    (get-connection "sqlite" "test.db"))
