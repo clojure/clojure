@@ -77,7 +77,7 @@
  ;; of 'db' below (and perhaps suggest the need for more variations of
  ;; get-connection).
 
- (require 'sql)
+ (require sql)
 
  (. Class (forName "org.sqlite.JDBC"))
 

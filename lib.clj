@@ -8,35 +8,78 @@
 ;;
 ;;  lib.clj
 ;;
-;;  A 'lib' is a Clojure source file that follows these conventions:
+;;  A 'lib' is a unit of Clojure code contained in a file that follows
+;;  these conventions:
 ;;
 ;;    - has a basename that is a valid symbol name in Clojure
 ;;    - has the extension ".clj"
 ;;
-;;  A lib will typically also contain forms that provide something useful
-;;  for a Clojure program to use.  It may also define a namespace with the
-;;  same name as its basename.
+;;  A lib's name is the basename of its implementation file.
 ;;
-;;  This file is an example of a lib. It follows the naming conventions
-;;  and provides these functions in the 'lib' namespace that make it
-;;  convenient to use libs from Clojure source code and the Clojure repl:
+;;  A lib will typically contain forms that provide something useful for
+;;  a Clojure program to use.  It may also define a namespace which shares
+;;  its name.
 ;;
-;;  'require'               searches classpath for libs and loads them if
-;;                          they are not already loaded
+;;  Libspecs
 ;;
-;;  'use'                   requires libs and refers to their namespaces
+;;  A lib is specified by a libspec which is either a lib name or a seq
+;;  beginning with a lib name and followed by zero or more options
+;;  expressed as sequential keywords and values. The options may include
+;;  any of the filters documented for clojure/refer or the :in option which
+;;  specifies the path to the lib's parent directory relative to one of the
+;;  classpath roots.
 ;;
-;;  'libs'                  returns a sorted list of loaded libs
+;;  Flags
 ;;
-;;  'load-uri'              loads Clojure source from a location
+;;  Several flags are available to control the loading of libs:
 ;;
-;;  'load-system-resource'  loads Clojure source from a resource in
-;;                          classpath
+;;  :require       indicates that already loaded libs need not be reloaded
+;;  :use           triggers a call to clojure/refer for each lib's namespace
+;;                 after ensuring the lib is loaded
+;;  :reload        forces reloading of libs that are already loaded
+;;  :reload-all    implies :reload and also forces reloading of all libs
+;;                 on which each lib directly or indirectly depend
+;;  :verbose       triggers printing a message each time a lib is loaded
 ;;
-;;  'require' and 'use' have additional options as described in their docs.
+;;  The :reload and :reload-all flags supersede :require.
+;;
+;;  Examples
+;;
+;;  (require sql)
+;;  (require test :in "private/resources")
+;;  (use sql ns-utils :verbose)
+;;  (use
+;;    (sql :exclude (get-connection) :rename {execute-commands do-commands})
+;;    ns-utils :reload-all :verbose)
+;;  (use (sql))
+;;
+;;  lib.clj provides the following functions and macros:
+;;
+;;  Foundation
+;;
+;;    'load-libs'             searches classpath for libs and loads them
+;;                            based on libspecs and flags
+;;
+;;    'libs'                  returns a sorted sequence of symbols naming
+;;                            loaded libs
+;;
+;;  Dependency Management
+;;
+;;    'require'               searches classpath for libs and loads them
+;;                            if they are not already loaded (macro)
+;;
+;;    'use'                   requires libs and refers to their namespaces
+;;                            with options (macro)
+;;
+;;  Loading
+;;
+;;    'load-uri'              loads Clojure source from a location
+;;
+;;    'load-system-resource'  loads Clojure source from a resource in
+;;                            classpath
 ;;
 ;;  scgilardi (gmail)
-;;  8 April 2008
+;;  23 April 2008
 ;;
 ;;  Thanks to Stuart Sierra for providing many useful ideas, discussions
 ;;  and code contributions for lib.clj.
@@ -58,131 +101,121 @@
 
 (def
  #^{:private true :doc
- "A ref to a set of symbols representing loaded libs"}
+    "A ref to a set of symbols representing loaded libs"}
  *libs*)
 (init-once *libs* (ref #{}))
 
 (def
  #^{:private true :doc
- "True while a verbose require is pending"}
+    "True while a verbose require is pending"}
  *verbose*)
 (init-once *verbose* false)
 
 (def load-system-resource)
 
-(defn- load-one
+(defn- load-lib
   "Loads a lib from <classpath>/in/"
   [sym in need-ns]
   (let [res (str sym ".clj")]
     (load-system-resource res in)
     (when (and need-ns (not (find-ns sym)))
-      (throw (new Exception (str "namespace '" sym "' not found after "
-                                 "loading resource '" res "'")))))
+      (throw (new Exception
+                  (str "namespace '" sym "' not found after "
+                       "loading resource '" res "'")))))
   (dosync
    (commute *libs* conj sym))
   (when *verbose*
-    (println "loaded lib" sym)))
+    (println "loaded" sym)))
 
 (defn- load-all
-  "Loads a lib and any libs on which it directly or indirectly
-  depends even if already loaded."
+  "Loads a lib from <classpath>/in/ and forces a load of any
+  libs on which it directly or indirectly depends"
   [sym in need-ns]
   (dosync
    (commute *libs* set/union
-     (binding [*libs* (ref #{})]
-       (load-one sym in need-ns)
-       @*libs*))))
+            (binding [*libs* (ref #{})]
+              (load-lib sym in need-ns)
+              @*libs*))))
 
-(defn- require-one
-  "Single-argument version of 'require'"
+(defn- load-with-options
+  "Load a lib with options expressed as sequential keywords and
+  values"
   [sym & options]
   (let [opts (apply hash-map options)
         in (:in opts)
-        need-ns (:need-ns opts)
         reload (:reload opts)
         reload-all (:reload-all opts)
-        verbose (:verbose opts)]
+        require (:require opts)
+        use (:use opts)
+        verbose (:verbose opts)
+        loaded (contains? @*libs* sym)]
     (binding [*verbose* (or *verbose* verbose)]
       (cond reload-all
-            (load-all sym in need-ns)
-            (or reload (not (contains? @*libs* sym)))
-            (load-one sym in need-ns)))))
+            (load-all sym in use)
+            (or reload (not require) (not loaded))
+            (load-lib sym in use)))
+    (when use
+      (apply refer sym options))))
 
-(defn- use-one
-  "Single-argument version of 'use'"
-  [sym & options]
-  (apply require-one sym :need-ns true options)
-  (apply refer sym options))
+;; Foundation
 
-(defn- ns-vars
-  "Returns a sorted list of symbols naming public vars in
-  a namespace"
-  [ns]
-  (sort (map first (ns-publics ns))))
-
-;; Public
-
-(defn require
-  "Declares that subsequent code requires the capabilities
-  provided by the named libs. Each argument is a quoted
-  symbol or a quoted list of the form (symbol & options...).
-
-  If the lib named by the symbol is not yet loaded, searches
-  for it and loads it.  The default search is in the locations
-  in classpath. Options may include at most one each of the
-  following:
-
-    :in string
-    :reload boolean
-    :reload-all boolean
-    :verbose boolean
-
-  An argument to :in specifies the path to the lib's parent
-  directory relative to a location in classpath.
-  When :reload is true, the lib is reloaded if already loaded.
-  When :reload-all is true, the lib and all libs on which
-  it directly or indirectly depends are reloaded.
-  When :verbose is true, prints a message after each load."
+(defn load-libs
+  "Searches classpath for libs and loads them based on libspecs
+  and flags. In addition to the flags documented for 'require'
+  load-libs supports :require which indicates that already loaded
+  libs need not be reloaded and :use which triggers a call to
+  'clojure/refer' for the lib's namespace after ensuring the lib
+  is loaded. The :reload and :reload-all flags supersede
+  :require."
   [& args]
-  (doseq arg args
-    (if (symbol? arg)
-      (require-one arg)
-      (apply require-one arg))))
-
-(defn use
-  "Requires and 'refer's the named libs. Arguments are like
-  those of 'require', with additional options which are filters
-  for 'refer'."
-  [& args]
-  (doseq arg args
-    (if (symbol? arg)
-      (use-one arg)
-      (apply use-one arg))))
+  (let [libspecs (filter (comp not keyword?) args)
+        flags (filter keyword? args)
+        options (interleave flags (repeat true))]
+    (doseq libspec libspecs
+      (let [libspec
+            (if (and (seq? libspec) (= 'quote (first libspec)))
+              (second libspec) libspec)]
+        (apply load-with-options
+               ((if (symbol? libspec) cons concat)
+                libspec options))))))
 
 (defn libs
   "Returns a sorted sequence of symbols naming loaded libs"
   []
   (sort @*libs*))
 
-(defn vars
-  "Returns a sorted sequence of symbols naming public vars in
-  a namespace"
-  [ns-sym]
-  (when-let ns (find-ns ns-sym)
-    (ns-vars ns)))
+;; Dependency Management
 
-(defn docs
-  "Prints documentation for the public names in a namespace"
-  [ns-sym]
-  (when-let ns (find-ns ns-sym)
-    (doseq item (ns-vars ns)
-      (print-doc (ns-resolve ns item)))))
+(defmacro require
+  "Searches classpath for libs and loads them if they are not
+  already loaded. Each argument is either a libspec or a flag.
+  A libspec is a name or a seq of the form (name [options*]).
+  Each option is a sequential keyword-value pair. 'require'
+  supports the :in option whose value is the path of the lib's
+  parent directory relative to a location in classpath.
 
-(defn dir
-  "Prints a sorted directory of public names in a namespace"
-  [ns-sym]
-  (doseq item (vars ns-sym)
-    (println item)))
+  Flags may include:
+
+    :reload
+    :reload-all
+    :verbose
+
+  The :reload flag forces reloading of libs that are already
+  loaded. The :reload-all flag implies :reload and also forces
+  reloading of all libs on which the libs directly or indirectly
+  depend. The :verbose flag triggers printing a message each time
+  a lib is loaded."
+  [& args]
+  `(apply load-libs :require '~args))
+
+(defmacro use
+  "Requires and refers to the named libs (see clojure/refer).
+  Arguments are like those of 'lib/require', except that libspecs
+  can contain additional options which are filters for refer."
+  [& args]
+  `(apply load-libs :require :use '~args))
+
+;; Loading
 
 (defn load-uri
   "Loads Clojure source from a URI, which may be a java.net.URI
@@ -208,10 +241,10 @@
 (defn load-system-resource
   "Loads Clojure source from a resource within classpath"
   ([res]
-   (let [url (. ClassLoader (getSystemResource res))]
-     (when-not url
-       (throw (new Exception (str "resource '" res
-                                  "' not found in classpath"))))
-     (load-uri url)))
+     (let [url (. ClassLoader (getSystemResource res))]
+       (when-not url
+         (throw (new Exception (str "resource '" res
+                                    "' not found in classpath"))))
+       (load-uri url)))
   ([res in]
-   (load-system-resource (if in (str in \/ res) res))))
+     (load-system-resource (if in (str in \/ res) res))))
