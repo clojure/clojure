@@ -46,11 +46,11 @@
 ;;  Examples
 ;;
 ;;  (require sql)
-;;  (require test :in "private/resources")
+;;  (require (test :in "private/resources"))
 ;;  (use sql ns-utils :verbose)
-;;  (use
+;;  (use :reload-all :verbose
 ;;    (sql :exclude (get-connection) :rename {execute-commands do-commands})
-;;    ns-utils :reload-all :verbose)
+;;    ns-utils)
 ;;  (use (sql))
 ;;
 ;;  lib.clj provides the following functions and macros:
