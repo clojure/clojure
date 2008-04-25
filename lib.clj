@@ -38,7 +38,7 @@
 ;;                 after ensuring the lib is loaded
 ;;  :reload        forces reloading of libs that are already loaded
 ;;  :reload-all    implies :reload and also forces reloading of all libs
-;;                 on which each lib directly or indirectly depend
+;;                 on which each lib directly or indirectly depends
 ;;  :verbose       triggers printing a message each time a lib is loaded
 ;;
 ;;  The :reload and :reload-all flags supersede :require.
@@ -157,6 +157,15 @@
     (when use
       (apply refer sym options))))
 
+(defn- remove-quote
+  "If form is a 'quote' special form, return the unquoted value
+  else return form"
+  [form]
+  (if (and (seq? form)
+           (= 'quote (first form))
+           (= 2 (count form)))
+    (second form) form))
+
 ;; Foundation
 
 (defn load-libs
@@ -172,9 +181,7 @@
         flags (filter keyword? args)
         options (interleave flags (repeat true))]
     (doseq libspec libspecs
-      (let [libspec
-            (if (and (seq? libspec) (= 'quote (first libspec)))
-              (second libspec) libspec)]
+      (let [libspec (remove-quote libspec)]
         (apply load-with-options
                ((if (symbol? libspec) cons concat)
                 libspec options))))))
