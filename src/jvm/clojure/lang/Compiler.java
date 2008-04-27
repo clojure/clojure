@@ -1471,6 +1471,7 @@ static class TryExpr implements Expr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		Label startTry = gen.newLabel();
 		Label endTry = gen.newLabel();
+		Label endTryCatch = gen.newLabel();
 		Label end = gen.newLabel();
 		Label finallyLabel = gen.newLabel();
 		for(int i = 0; i < catchExprs.count(); i++)
@@ -1501,6 +1502,7 @@ static class TryExpr implements Expr{
 				finallyExpr.emit(C.STATEMENT, fn, gen);
 			gen.goTo(end);
 			}
+		gen.mark(endTryCatch);
 		if(finallyExpr != null)
 			{
 			gen.mark(finallyLabel);
@@ -1515,7 +1517,7 @@ static class TryExpr implements Expr{
 			gen.visitTryCatchBlock(startTry, endTry, clause.label, clause.c.getName().replace('.', '/'));
 			}
 		if(finallyExpr != null)
-			gen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
+			gen.visitTryCatchBlock(startTry, endTryCatch, finallyLabel, null);
 		for(int i = 0; i < catchExprs.count(); i++)
 			{
 			CatchClause clause = (CatchClause) catchExprs.nth(i);
