@@ -1908,15 +1908,21 @@ not-every? (comp not every?))
                      (fn [bvec b v]
                        (let [gmap (or (:as b) (gensym "map__"))
                              defaults (:or b)]
-                         (loop [ret (-> bvec (conj gmap) (conj v))
-                                bes (seq (-> b (dissoc :as) (dissoc :or)))]
+                         (loop [ret (-> bvec (conj gmap) (conj (list `or v {})))
+                                bes (reduce
+                                      (fn [bes entry]
+                                          (reduce #(assoc %1 %2 ((val entry) %2))
+                                                  (dissoc bes (key entry))
+                                                  ((key entry) bes)))
+                                      (dissoc b :as :or)
+                                      {:keys #(keyword (str %)), :strs str, :syms #(list `quote %)})]
                            (if bes
                              (let [bb (key (first bes))
                                    bk (val (first bes))
                                    has-default (contains? defaults bb)]
                                (recur (pb ret bb (if has-default
                                                    (list `get gmap bk (defaults bb))
-                                                   (list `get gmap bk)))
+                                                   (list gmap bk)))
                                       (rest bes)))
                              ret))))]
                  (cond
