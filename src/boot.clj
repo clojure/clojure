@@ -2291,12 +2291,14 @@ not-every? (comp not every?))
 
 (defmacro if-let 
   "if test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
-  [binding-form test then else]
-  `(let [temp# ~test]
-     (if temp# 
-       (let [~binding-form temp#]
-         ~then)
-       ~else)))
+  ([binding-form test then]
+   `(if-let ~binding-form ~test ~then nil))
+  ([binding-form test then else]
+   `(let [temp# ~test]
+      (if temp# 
+        (let [~binding-form temp#]
+          ~then)
+        ~else))))
 
 (defmacro when-let 
   "when test is true, evaluates body with binding-form bound to the value of test"
