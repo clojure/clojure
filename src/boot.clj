@@ -1910,12 +1910,12 @@ not-every? (comp not every?))
                              defaults (:or b)]
                          (loop [ret (-> bvec (conj gmap) (conj (list `or v {})))
                                 bes (reduce
-                                      (fn [bes entry]
-                                          (reduce #(assoc %1 %2 ((val entry) %2))
-                                                  (dissoc bes (key entry))
-                                                  ((key entry) bes)))
-                                      (dissoc b :as :or)
-                                      {:keys #(keyword (str %)), :strs str, :syms #(list `quote %)})]
+                                     (fn [bes entry]
+                                       (reduce #(assoc %1 %2 ((val entry) %2))
+                                               (dissoc bes (key entry))
+                                               ((key entry) bes)))
+                                     (dissoc b :as :or)
+                                     {:keys #(keyword (str %)), :strs str, :syms #(list `quote %)})]
                            (if bes
                              (let [bb (key (first bes))
                                    bk (val (first bes))
