@@ -3417,7 +3417,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		{
 		Object me = macroexpand1(form);
 		if(me != form)
-			return analyze(context, me);
+			return analyze(context, me, name);
 
 		Object op = RT.first(form);
 		IParser p;
