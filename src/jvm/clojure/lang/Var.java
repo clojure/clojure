@@ -116,7 +116,7 @@ Var(Namespace ns, Symbol sym, Object root){
 }
 
 public boolean isBound(){
-	return hasRoot() || dvals.get().bindings.containsKey(this);
+	return hasRoot() || (count.get() > 0 && dvals.get().bindings.containsKey(this));
 }
 
 final public Object get(){
