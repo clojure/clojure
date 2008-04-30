@@ -11,6 +11,7 @@
 package clojure.lang;
 
 import java.util.Collection;
+import java.util.Map;
 
 public abstract class APersistentMap extends AFn implements IPersistentMap, Collection{
 int _hash = -1;
@@ -29,7 +30,13 @@ public String toString(){
 }
 
 public IPersistentCollection cons(Object o){
-	if(o instanceof IPersistentVector)
+	if(o instanceof Map.Entry)
+		{
+		Map.Entry e = (Map.Entry) o;
+
+		return assoc(e.getKey(), e.getValue());
+		}
+	else if(o instanceof IPersistentVector)
 		{
 		IPersistentVector v = (IPersistentVector) o;
 		if(v.count() != 2)

@@ -265,7 +265,7 @@ public static void loadResourceScript(String name) throws Exception{
 	InputStream ins = RT.class.getResourceAsStream("/" + name);
 	if(ins != null)
 		{
-		Compiler.load(new InputStreamReader(ins), RT.class.getResource("/"+name).toString(), name);
+		Compiler.load(new InputStreamReader(ins), RT.class.getResource("/" + name).toString(), name);
 		ins.close();
 		}
 }
@@ -519,6 +519,13 @@ static public Object contains(Object coll, Object key){
 static public Object find(Object coll, Object key){
 	if(coll == null)
 		return null;
+	else if(coll instanceof Map)
+		{
+		Map m = (Map) coll;
+		if(m.containsKey(key))
+			return new MapEntry(key, m.get(key));
+		return null;
+		}
 	return ((Associative) coll).entryAt(key);
 }
 
