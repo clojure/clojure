@@ -1010,7 +1010,8 @@ static class InstanceMethodExpr extends MethodExpr{
 			{
 			Type type = Type.getType(method.getDeclaringClass());
 			target.emit(C.EXPRESSION, fn, gen);
-			gen.checkCast(type);
+			if(!method.getDeclaringClass().isInterface())
+				gen.checkCast(type);
 			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
@@ -2395,7 +2396,7 @@ static class InvokeExpr implements Expr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		fexpr.emit(C.EXPRESSION, fn, gen);
-		gen.checkCast(IFN_TYPE);
+		//gen.checkCast(IFN_TYPE);
 		for(int i = 0; i < Math.min(MAX_POSITIONAL_ARITY, args.count()); i++)
 			{
 			Expr e = (Expr) args.nth(i);
