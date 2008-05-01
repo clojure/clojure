@@ -1263,6 +1263,8 @@ not-every? (comp not every?))
   dispatched thus far, from this thread or agent, to the agent(s) have
   occurred."
   [& agents]
+    (when *agent*
+      (throw (new Exception "Can't await in agent action")))
     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
           count-down (fn [agent] (. latch (countDown)) agent)]
       (doseq agent agents
@@ -1275,6 +1277,8 @@ not-every? (comp not every?))
   timeout (in milliseconds) has elapsed. Returns nil if returning due
   to timeout, non-nil otherwise."
   [timeout-ms & agents]
+    (when *agent*
+      (throw (new Exception "Can't await in agent action")))
     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
           count-down (fn [agent] (. latch (countDown)) agent)]
       (doseq agent agents
