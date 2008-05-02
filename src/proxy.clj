@@ -1,3 +1,4 @@
+;   Copyright (c) Rich Hickey. All rights reserved.
 ;   The use and distribution terms for this software are covered by the
 ;   Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
 ;   which can be found in the file CPL.TXT at the root of this distribution.
@@ -14,6 +15,9 @@
  '(clojure.lang IProxy Reflector DynamicClassLoader IPersistentMap PersistentHashMap RT))
 
 (def *proxy-classes* (ref {}))
+
+(defn method-sig [#^java.lang.reflect.Method meth]
+  [(. meth (getName)) (seq (. meth (getParameterTypes))) (. meth getReturnType)])
 
 (defn get-proxy-class 
   "Takes an optional single class followed by zero or more
@@ -149,7 +153,7 @@
                                  (if meths 
                                    (let [#^java.lang.reflect.Method meth (first meths)
                                          mods (. meth (getModifiers))
-                                         mk [(. meth (getName)) (seq (. meth (getParameterTypes)))]]
+                                         mk (method-sig meth)]
                                      (if (or (considered mk)
                                              (. Modifier (isPrivate mods)) 
                                              (. Modifier (isStatic mods))
@@ -175,7 +179,7 @@
                                         ;add methods matching interfaces', if no mapping -> throw
               (doseq #^Class iface interfaces
                 (doseq #^java.lang.reflect.Method meth (. iface (getMethods))
-                   (when-not (contains? mm [(. meth (getName)) (seq (. meth (getParameterTypes)))])
+                   (when-not (contains? mm (method-sig meth))
                      (gen-method meth 
                                  (fn [gen m]
                                    (. gen (throwException ex-type (. m (getName))))))))))
