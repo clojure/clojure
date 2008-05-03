@@ -799,7 +799,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
-		if(targetClass != null)
+		if(targetClass != null && field != null)
 			{
 			if(context != C.STATEMENT)
 				{
