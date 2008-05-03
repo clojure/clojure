@@ -6,13 +6,15 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
+(in-ns 'clojure)
+
 (import '(java.lang.reflect Modifier Constructor)
         '(clojure.asm ClassWriter ClassVisitor Opcodes Type)
         '(clojure.asm.commons Method GeneratorAdapter)
         '(clojure.lang IPersistentMap))
 
-(defn method-sig [#^java.lang.reflect.Method meth]
-  [(. meth (getName)) (seq (. meth (getParameterTypes)))])
+;(defn method-sig [#^java.lang.reflect.Method meth]
+;  [(. meth (getName)) (seq (. meth (getParameterTypes)))])
 
 (defn non-private-methods [#^Class c]
   (loop [mm {}
@@ -44,10 +46,11 @@
         :when (not (. Modifier (isPrivate (. ctor (getModifiers)))))]
     (apply vector (. ctor (getParameterTypes)))))
 
-(distinct (map first(keys (mapcat non-private-methods [Object IPersistentMap]))))
+;(distinct (map first(keys (mapcat non-private-methods [Object IPersistentMap]))))
 
-(defn gen-class [name & options]
-  (let [{:keys [extends implements constructors methods main factory state init exposes]} (apply hash-map options)
+(defn gen-class [mname & options]
+  (let [name (str mname)
+        {:keys [extends implements constructors methods main factory state init exposes]} (apply hash-map options)
         super (or extends Object)
         interfaces implements
         supers (cons super (seq interfaces))
@@ -73,11 +76,13 @@
         rt-type  (totype clojure.lang.RT)
         var-type  (totype clojure.lang.Var)
         ifn-type (totype clojure.lang.IFn)
+        iseq-type (totype clojure.lang.ISeq)
         ex-type  (totype java.lang.UnsupportedOperationException)
         var-fields (concat (and init [init-name]) 
                            (and main [main-name])
                            (distinct (concat (map first (keys (mapcat non-private-methods supers)))
-                                             (keys methods))))
+                                             (map (comp str first) methods)
+                                             (mapcat (comp (partial map str) vals val) exposes))))
         emit-get-var (fn [gen v]
                        (let [false-label (. gen newLabel)
                              end-label (. gen newLabel)]
@@ -92,18 +97,15 @@
                          (. gen visitInsn (Opcodes.ACONST_NULL))
                          (. gen mark end-label)))
         emit-forwarding-method
-        (fn [#^java.lang.reflect.Method meth else-gen]
-          (let [pclasses (. meth (getParameterTypes))
-                ptypes (to-types pclasses)
-                rtype (totype (. meth (getReturnType)))
-                m (new Method (. meth (getName)) rtype ptypes)
+        (fn [mname pclasses rclass else-gen]
+          (let [ptypes (to-types pclasses)
+                rtype (totype rclass)
+                m (new Method mname rtype ptypes)
                 gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
                 else-label (. gen (newLabel))
-                end-label (. gen (newLabel))
-                                        ;decl-type (. Type (getType (. meth (getDeclaringClass))))
-                ]
+                end-label (. gen (newLabel))]
             (. gen (visitCode))
-            (emit-get-var gen (. meth (getName)))
+            (emit-get-var gen mname)
             (. gen (dup))
             (. gen (ifNull else-label))
                                         ;if found
@@ -225,12 +227,24 @@
             (throw (new Exception ":init not specified, but ctor and super ctor args differ"))))
 
         (. gen (returnValue))
-        (. gen (endMethod))))
+        (. gen (endMethod))
+                                        ;factory
+        (when factory
+          (let [fm (new Method factory-name ctype ptypes)
+                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (Opcodes.ACC_STATIC)) 
+                         fm nil nil cv)]
+            (. gen (visitCode))
+            (. gen newInstance ctype)
+            (. gen dup)
+            (. gen (loadArgs))
+            (. gen (invokeConstructor ctype m))            
+            (. gen (returnValue))
+            (. gen (endMethod))))))
     
                                         ;add methods matching supers', if no fn -> call super
     (let [mm (non-private-methods super)]
       (doseq #^java.lang.reflect.Method meth (vals mm)
-             (emit-forwarding-method meth 
+             (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) 
                                      (fn [gen m]
                                        (. gen (loadThis))
                                         ;push args
@@ -244,23 +258,73 @@
        (doseq #^Class iface interfaces
               (doseq #^java.lang.reflect.Method meth (. iface (getMethods))
                      (when-not (contains? mm (method-sig meth))
-                       (emit-forwarding-method meth 
+                       (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) 
                                                (fn [gen m]
-                                                 (. gen (throwException ex-type (. m (getName))))))))))
-    
+                                                 (. gen (throwException ex-type (. m (getName)))))))))
+                                        ;extra methods
+       (doseq [mname pclasses rclass :as msig] methods
+         (emit-forwarding-method (str mname) pclasses rclass 
+                                 (fn [gen m]
+                                     (. gen (throwException ex-type (. m (getName))))))))
+
+                                        ;main
+    (when main
+      (let [m (Method.getMethod "void main (String[])")
+            gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (Opcodes.ACC_STATIC)) 
+                     m nil nil cv)
+            no-main-label (. gen newLabel)
+            end-label (. gen newLabel)]
+        (. gen (visitCode))
+
+        (emit-get-var gen main-name)
+        (. gen dup)
+        (. gen ifNull no-main-label)
+        (. gen loadArgs)
+        (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.ISeq seq(Object)"))))
+        (. gen (invokeInterface ifn-type (new Method "applyTo" obj-type 
+                                              (into-array [iseq-type]))))
+        (. gen pop)
+        (. gen goTo end-label)
+                                        ;no main found
+        (. gen mark no-main-label)
+        (. gen (throwException ex-type (str main-name " not defined")))
+        (. gen mark end-label)
+        (. gen (returnValue))
+        (. gen (endMethod))))
+                                        ;field exposers
+    (doseq [f {getter :get setter :set}] exposes
+      (let [fld (.getField super (str f))
+            ftype (totype (.getType fld))]
+        (when getter
+          (let [m (new Method (str getter) ftype (to-types []))
+                gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+            (. gen (visitCode))
+            (. gen loadThis)
+            (. gen getField ctype (str f) ftype)
+            (. gen (returnValue))
+            (. gen (endMethod))))
+        (when setter
+          (let [m (new Method (str setter) (Type.VOID_TYPE) (into-array [ftype]))
+                gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+            (. gen (visitCode))
+            (. gen loadThis)
+            (. gen loadArgs)
+            (. gen putField ctype (str f) ftype)
+            (. gen (returnValue))
+            (. gen (endMethod))))))
                                         ;finish class def
     (. cv (visitEnd))
     {:name name :bytecode (. cv (toByteArray))}))
 
 (comment
-
+;usage
 (gen-class 
  package-qualified-name
   ;all below are optional
  :extends aclass
  :implements [interface ...]
  :constructors {[param-types] [super-param-types], ...}
- :methods {name [return-type [param-types]], ...}
+ :methods [[name [param-types] return-type], ...]
  :main boolean
  :factory name
  :state name
@@ -269,16 +333,35 @@
 
 (let [{:keys [name bytecode]} 
       (gen-class (str (gensym "fred.lucy.Ethel__")) 
+                 :extends clojure.lang.Box ;APersistentMap
                  :implements [IPersistentMap]
-                 :state state)];{[Object] []})]
+                 :state 'state
+                 ;:constructors {[Object] [Object]}
+                 ;:init 'init
+                 :main true
+                 :factory 'create
+                 :methods [['foo [Object] Object]
+                           ['foo [] Object]]
+                 :exposes {'val {:get 'getVal :set 'setVal}}
+                 )]
   (.. clojure.lang.RT ROOT_CLASSLOADER (defineClass name bytecode)))
 
-(def ethel (new fred.lucy.Ethel__2174))
-
-(in-ns 'fred.lucy.Ethel__2102)
+(in-ns 'fred.lucy.Ethel__2276)
 (clojure/refer 'clojure :exclude '(assoc seq count cons))
-(defn __init [n] [[] n])
+(defn init [n] [[] n])
+(defn foo 
+  ([this] :foo) 
+  ([this x] x))
+(defn main [x y] (println x y))
 (in-ns 'user)
+(def ethel (new fred.lucy.Ethel__2276 42))
+(def ethel (fred.lucy.Ethel__2276.create 21))
+(fred.lucy.Ethel__2276.main (into-array ["lucy" "ricky"]))
+(.state ethel)
+(.foo ethel 7)
+(.foo ethel)
+(.getVal ethel)
+(.setVal ethel 12)
 )
 
 (gen-class org.clojure.MyComparator :implements [Comparator])
