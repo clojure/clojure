@@ -154,7 +154,7 @@
                         (. obj-type getDescriptor)
                         nil nil)))
     
-                                        ;static init to set up var fields
+                                        ;static init to set up var fields and load clj
     (let [gen (new GeneratorAdapter (+ (Opcodes.ACC_PUBLIC) (Opcodes.ACC_STATIC)) 
                    (Method.getMethod "void <clinit> ()")
                    nil nil cv)]
@@ -163,7 +163,12 @@
         (. gen push name)
         (. gen push v)
         (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.Var var(String,String)"))))
-        (. gen putStatic ctype (var-name v) var-type))              
+        (. gen putStatic ctype (var-name v) var-type))
+      
+      (. gen push ctype)
+      (. gen push (str (name.replace \. (java.io.File.separatorChar)) ".clj"))
+      (. gen (invokeStatic rt-type (. Method (getMethod "void loadResourceScript(Class,String)"))))
+      
       (. gen (returnValue))
       (. gen (endMethod)))
     
@@ -316,6 +321,18 @@
     (. cv (visitEnd))
     {:name name :bytecode (. cv (toByteArray))}))
 
+(defn gen-and-load-class [name & options]
+  (let [{:keys [name bytecode]}
+        (apply gen-class (str name) options)]
+    (.. clojure.lang.RT ROOT_CLASSLOADER (defineClass (str name) bytecode))))
+
+(defn gen-and-save-class [path name & options]
+  (let [{:keys [name bytecode]} (apply gen-class (str name) options)
+        file (java.io.File. path (str (name.replace \. (java.io.File.separatorChar)) ".class"))]
+    (.createNewFile file)
+    (with-open f (java.io.FileOutputStream. file)
+      (.write f bytecode))))
+
 (comment
 ;usage
 (gen-class 
@@ -323,28 +340,28 @@
   ;all below are optional
  :extends aclass
  :implements [interface ...]
- :constructors {[param-types] [super-param-types], ...}
- :methods [[name [param-types] return-type], ...]
+ :constructors {[param-types] [super-param-types], }
+ :methods [[name [param-types] return-type], ]
  :main boolean
  :factory name
  :state name
  :init name
- :exposes {protected-field {:get name :set name}, ...})
-
-(let [{:keys [name bytecode]} 
-      (gen-class (str (gensym "fred.lucy.Ethel__")) 
-                 :extends clojure.lang.Box ;APersistentMap
-                 :implements [IPersistentMap]
-                 :state 'state
-                 ;:constructors {[Object] [Object]}
-                 ;:init 'init
-                 :main true
-                 :factory 'create
-                 :methods [['foo [Object] Object]
-                           ['foo [] Object]]
-                 :exposes {'val {:get 'getVal :set 'setVal}}
-                 )]
-  (.. clojure.lang.RT ROOT_CLASSLOADER (defineClass name bytecode)))
+ :exposes {protected-field {:get name :set name}, })
+ 
+;(gen-and-load-class 
+(clojure/gen-and-save-class 
+ "/Users/rich/Downloads"
+ 'fred.lucy.Ethel 
+ :extends clojure.lang.Box ;APersistentMap
+ :implements [clojure.lang.IPersistentMap]
+ :state 'state
+                                        ;:constructors {[Object] [Object]}
+                                        ;:init 'init
+ :main true
+ :factory 'create
+ :methods [['foo [Object] Object]
+           ['foo [] Object]]
+ :exposes {'val {:get 'getVal :set 'setVal}})
 
 (in-ns 'fred.lucy.Ethel__2276)
 (clojure/refer 'clojure :exclude '(assoc seq count cons))
@@ -362,8 +379,10 @@
 (.foo ethel)
 (.getVal ethel)
 (.setVal ethel 12)
-)
 
 (gen-class org.clojure.MyComparator :implements [Comparator])
 (in-ns 'org.clojure.MyComparator)
 (defn compare [this x y] ...)
+
+)
+

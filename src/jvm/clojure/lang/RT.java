@@ -262,10 +262,14 @@ static public Var var(String ns, String name){
 }
 
 public static void loadResourceScript(String name) throws Exception{
-	InputStream ins = RT.class.getResourceAsStream("/" + name);
+	loadResourceScript(RT.class, name);
+}
+
+public static void loadResourceScript(Class c, String name) throws Exception{
+	InputStream ins = c.getResourceAsStream("/" + name);
 	if(ins != null)
 		{
-		Compiler.load(new InputStreamReader(ins), RT.class.getResource("/" + name).toString(), name);
+		Compiler.load(new InputStreamReader(ins), c.getResource("/" + name).toString(), name);
 		ins.close();
 		}
 }
@@ -275,11 +279,11 @@ static public void init() throws Exception{
 }
 
 static void doInit() throws Exception{
-	loadResourceScript("boot.clj");
-	loadResourceScript("proxy.clj");
-	loadResourceScript("zip.clj");
-	loadResourceScript("xml.clj");
-	loadResourceScript("set.clj");
+	loadResourceScript(RT.class,"boot.clj");
+	loadResourceScript(RT.class,"proxy.clj");
+	loadResourceScript(RT.class,"zip.clj");
+	loadResourceScript(RT.class,"xml.clj");
+	loadResourceScript(RT.class,"set.clj");
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.get(),
@@ -293,7 +297,7 @@ static void doInit() throws Exception{
 		Var refer = var("clojure", "refer");
 		in_ns.invoke(USER);
 		refer.invoke(CLOJURE);
-		loadResourceScript("user.clj");
+		loadResourceScript(RT.class,"user.clj");
 		}
 	finally
 		{
