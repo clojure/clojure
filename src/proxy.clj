@@ -277,7 +277,7 @@
                    (reduce (fn [m e]
                              (assoc m (key e) ((val e))))
                            {} (seq pmap)))]
-    (proxy [clojure.lang.IPersistentMap]
+    (proxy [clojure.lang.APersistentMap]
            []
       (containsKey [k] (contains? pmap k))
       (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
