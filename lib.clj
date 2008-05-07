@@ -6,72 +6,103 @@
 ;;  the terms of this license.
 ;;  You must not remove this notice, or any other, from this software.
 ;;
-;;  lib.clj
+;;  File: lib.clj
 ;;
-;;  A 'lib' is a unit of Clojure code contained in a file that follows
-;;  these conventions:
+;;  lib.clj provides facilities for loading and managing libs. A lib is
+;;  is a unit of Clojure code contained in a file or other resource within
+;;  classpath. The name of the lib's container is the lib's name followed
+;;  by ".clj". A lib's name must be a valid Clojure symbol name.
 ;;
-;;    - has a basename that is a valid symbol name in Clojure
-;;    - has the extension ".clj"
+;;  A lib will typically contain useful functions, macros, and other vars.
 ;;
-;;  A lib's name is the basename of its implementation file.
+;;  Core
 ;;
-;;  A lib will typically contain forms that provide something useful for
-;;  a Clojure program to use.  It may also define a namespace which shares
-;;  its name.
+;;  Function: load-libs
+;;
+;;  load-libs is the core function provided by lib.clj. Its arguments are
+;;  libspecs and flags. It uses libspecs to find lib containers and flags
+;;  to control how the libs are loaded. In an explicit call to load-libs
+;;  libspecs must be quoted. This requirement is relaxed by the 'require'
+;;  and 'use' macros described below.
 ;;
 ;;  Libspecs
 ;;
-;;  A lib is specified by a libspec which is either a lib name or a seq
-;;  beginning with a lib name and followed by zero or more options
-;;  expressed as sequential keywords and values. The options may include
-;;  any of the filters documented for clojure/refer or the :in option which
-;;  specifies the path to the lib's parent directory relative to one of the
-;;  classpath roots.
+;;  A libspec is either a lib name or a list beginning with the lib name
+;;  and followed by zero or more options.
+;;
+;;  Options
+;;
+;;  Options in a libspec are keywords followed by values. These are the
+;;  options supported by load-libs and the kind of value each expects:
+;;
+;;    :in          a string specifying the path to the parent directory
+;;                 of the lib's container relative to one of the
+;;                 directories in classpath
+;;    :ns          a symbol specifying a namespace for the lib. If :ns
+;;                 is not present, its value defaults to the lib's name.
+;;                 See the :use flag below.
+;;    :exclude     a list as documented for clojure/refer
+;;    :only        a list as documented for clojure/refer
+;;    :rename      a map as documented for clojure/refer
 ;;
 ;;  Flags
 ;;
-;;  Several flags are available to control the loading of libs:
+;;  Flags apply to all the libs specified in a single call to load-libs.
+;;  These are the flags supported by load-libs:
 ;;
 ;;  :require       indicates that already loaded libs need not be reloaded
 ;;  :use           triggers a call to clojure/refer for each lib's namespace
-;;                 after ensuring the lib is loaded
+;;                 after ensuring the lib is loaded. The call to refer
+;;                 includes any filter options in the libspec.
 ;;  :reload        forces reloading of libs that are already loaded
 ;;  :reload-all    implies :reload and also forces reloading of all libs
 ;;                 on which each lib directly or indirectly depends
 ;;  :verbose       triggers printing a message each time a lib is loaded
 ;;
-;;  The :reload and :reload-all flags supersede :require.
+;;  (The :reload and :reload-all flags supersede :require.)
+;;
+;;  Function: libs
+;;
+;;  The libs function returns a sorted seq of symbols naming the currently
+;;  loaded libs.
+;;
+;;  Convenience
+;;
+;;  lib.clj provides two convenience macros to make calls to load-libs
+;;  easier to write and read. Libspecs in calls to these macros do not
+;;  need to be quoted.
+;;
+;;  Macro: require
+;;
+;;  The require macro accepts libspecs and flags and ensures that the
+;;  specified libs are loaded. By default, require will not reload a lib
+;;  that is already loaded.
+;;
+;;  Macro: use
+;;
+;;  The use macro accepts libspecs and flags and first requires the libs
+;;  and then refers to each lib's namespace using any filter options present
+;;  in its libspec.
 ;;
 ;;  Examples
 ;;
-;;  (require sql)
-;;  (require (test :in "private/resources"))
+;;  (load-libs :require 'sql '(test :in "private/resources"))
+;;  (require sql (test :in "private/resources"))
+;;
+;;  (load-libs :require :use 'sql 'ns-utils :verbose)
 ;;  (use sql ns-utils :verbose)
+;;
 ;;  (use :reload-all :verbose
 ;;    (sql :exclude (get-connection) :rename {execute-commands do-commands})
 ;;    ns-utils)
 ;;  (use (sql))
 ;;
-;;  lib.clj provides the following functions and macros:
-;;
-;;  Foundation
-;;
-;;    'load-libs'             searches classpath for libs and loads them
-;;                            based on libspecs and flags
-;;
-;;    'libs'                  returns a sorted sequence of symbols naming
-;;                            loaded libs
-;;
-;;  Dependency Management
-;;
-;;    'require'               searches classpath for libs and loads them
-;;                            if they are not already loaded (macro)
-;;
-;;    'use'                   requires libs and refers to their namespaces
-;;                            with options (macro)
+;;  (use (genclass :ns clojure))
 ;;
 ;;  Loading
+;;
+;;  lib.clj provides these functions for loading arbitrary Clojure source
+;;  files:
 ;;
 ;;    'load-uri'              loads Clojure source from a location
 ;;
@@ -79,7 +110,7 @@
 ;;                            classpath
 ;;
 ;;  scgilardi (gmail)
-;;  23 April 2008
+;;  06 May 2008
 ;;
 ;;  Thanks to Stuart Sierra for providing many useful ideas, discussions
 ;;  and code contributions for lib.clj.
@@ -92,7 +123,7 @@
 ;; Private
 
 (defmacro init-once
-  "Initializes a var exactly once.  The var must already exist."
+  "Initializes a var exactly once. The var must already exist."
   {:private true}
   [var init]
   `(let [v# (resolve '~var)]
@@ -114,13 +145,14 @@
 (def load-system-resource)
 
 (defn- load-lib
-  "Loads a lib from <classpath>/in/"
-  [sym in need-ns]
+  "Loads a lib from <classpath>/in/ and ensures the namespace
+  named by ns (if any) exists"
+  [sym in ns]
   (let [res (str sym ".clj")]
     (load-system-resource res in)
-    (when (and need-ns (not (find-ns sym)))
+    (when (and ns (not (find-ns ns)))
       (throw (new Exception
-                  (str "namespace '" sym "' not found after "
+                  (str "namespace '" ns "' not found after "
                        "loading resource '" res "'")))))
   (dosync
    (commute *libs* conj sym))
@@ -130,11 +162,11 @@
 (defn- load-all
   "Loads a lib from <classpath>/in/ and forces a load of any
   libs on which it directly or indirectly depends"
-  [sym in need-ns]
+  [sym in ns]
   (dosync
    (commute *libs* set/union
             (binding [*libs* (ref #{})]
-              (load-lib sym in need-ns)
+              (load-lib sym in ns)
               @*libs*))))
 
 (defn- load-with-options
@@ -143,19 +175,21 @@
   [sym & options]
   (let [opts (apply hash-map options)
         in (:in opts)
+        ns (:ns opts)
         reload (:reload opts)
         reload-all (:reload-all opts)
         require (:require opts)
         use (:use opts)
         verbose (:verbose opts)
-        loaded (contains? @*libs* sym)]
+        loaded (contains? @*libs* sym)
+        namespace (and use (or ns sym))]
     (binding [*verbose* (or *verbose* verbose)]
       (cond reload-all
-            (load-all sym in use)
+            (load-all sym in namespace)
             (or reload (not require) (not loaded))
-            (load-lib sym in use)))
-    (when use
-      (apply refer sym options))))
+            (load-lib sym in namespace)))
+    (when namespace
+      (apply refer namespace options))))
 
 (defn- remove-quote
   "If form is a 'quote' special form, return the unquoted value
@@ -166,7 +200,7 @@
            (= 2 (count form)))
     (second form) form))
 
-;; Foundation
+;; Core
 
 (defn load-libs
   "Searches classpath for libs and loads them based on libspecs
@@ -181,17 +215,16 @@
         flags (filter keyword? args)
         options (interleave flags (repeat true))]
     (doseq libspec libspecs
-      (let [libspec (remove-quote libspec)]
-        (apply load-with-options
-               ((if (symbol? libspec) cons concat)
-                libspec options))))))
+      (let [libspec (remove-quote libspec)
+            combine (if (symbol? libspec) cons concat)]
+        (apply load-with-options (combine libspec options))))))
 
 (defn libs
   "Returns a sorted sequence of symbols naming loaded libs"
   []
   (sort @*libs*))
 
-;; Dependency Management
+;; Convenience
 
 (defmacro require
   "Searches classpath for libs and loads them if they are not
@@ -218,7 +251,9 @@
 (defmacro use
   "Requires and refers to the named libs (see clojure/refer).
   Arguments are like those of 'lib/require', except that libspecs
-  can contain additional options which are filters for refer."
+  can contain an :ns option specifying a namespace to refer to
+  (ns defaults to the lib's name) and additional options which
+  are filters for clojure/refer."
   [& args]
   `(apply load-libs :require :use '~args))
 
@@ -226,7 +261,7 @@
 
 (defn load-uri
   "Loads Clojure source from a URI, which may be a java.net.URI
-  java.net.URL, or String.  Accepts any URI scheme supported by
+  java.net.URL, or String. Accepts any URI scheme supported by
   java.net.URLConnection (http and jar), plus file URIs."
   [uri]
   (let [url (cond  ; coerce argument into java.net.URL
