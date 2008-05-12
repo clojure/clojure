@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 public class RT{
 
@@ -199,7 +201,12 @@ static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
 
 //static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
-static final public ClassLoader ROOT_CLASSLOADER = new DynamicClassLoader();
+static final public DynamicClassLoader ROOT_CLASSLOADER = new DynamicClassLoader();
+
+static public void addURL(Object url) throws Exception{
+	URL u = (url instanceof String)?(new URL((String) url)):(URL)url;
+	ROOT_CLASSLOADER.addURL(u);
+}
 
 static
 	{

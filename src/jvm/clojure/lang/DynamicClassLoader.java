@@ -13,20 +13,23 @@
 package clojure.lang;
 
 import java.util.HashMap;
+import java.net.URLClassLoader;
+import java.net.URL;
 
 //todo: possibly extend URLClassLoader?
 
-public class DynamicClassLoader extends ClassLoader{
+public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
 HashMap<String, byte[]> map = new HashMap<String, byte[]>();
+static final URL[] EMPTY_URLS = new URL[]{};
 
 public DynamicClassLoader(){
-	super(Thread.currentThread().getContextClassLoader());
+	super(EMPTY_URLS,Thread.currentThread().getContextClassLoader());
 	//super(Compiler.class.getClassLoader());
 }
 
 public DynamicClassLoader(ClassLoader parent){
-	super(parent);
+	super(EMPTY_URLS,parent);
 }
 
 public Class defineClass(String name, byte[] bytes){
@@ -43,7 +46,8 @@ protected Class<?> findClass(String name) throws ClassNotFoundException{
 	byte[] bytes = map.get(name);
 	if(bytes != null)
 		return defineClass(name, bytes, 0, bytes.length);
-	throw new ClassNotFoundException(name);
+	return super.findClass(name);
+	//throw new ClassNotFoundException(name);
 }
 
 public void registerConstants(int id, Object[] val){
@@ -52,6 +56,10 @@ public void registerConstants(int id, Object[] val){
 
 public Object[] getConstants(int id){
 	return constantVals.get(id);
+}
+
+public void addURL(URL url){
+	super.addURL(url);
 }
 
 }

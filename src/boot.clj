@@ -2387,3 +2387,12 @@ not-every? (comp not every?))
                  (if ((bound-fn sc end-test end-key) e) s (rest s))))))
 
 
+(defn repeatedly 
+  "Takes a function of no args, presumably with side effects, and returns an infinite
+  lazy sequence of calls to it"
+  [f] (lazy-cons (f) (repeatedly f)))
+
+
+(defn add-classpath
+  "Adds the url (String or URL object) to the classpath per URLClassLoader.addURL"
+  [url] (clojure.lang.RT.addURL url))
