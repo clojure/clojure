@@ -404,7 +404,11 @@
 
 (defn gen-and-load-class 
   "Generates and immediately loads the bytecode for the specified
-  class. See gen-class for a description of the options"
+  class. Note that a class generated this way can be loaded only once
+  - the JVM supports only one class with a given name per
+  classloader. Subsequent to generation you can import it into any
+  desired namespaces just like any other class. See gen-class for a
+  description of the options."
 
   [name & options]
   (let [{:keys [name bytecode]}
@@ -473,6 +477,12 @@
 (gen-class org.clojure.MyComparator :implements [Comparator])
 (in-ns 'org.clojure.MyComparator)
 (defn compare [this x y] ...)
+
+(load-file "/Users/rich/dev/clojure/src/genclass.clj")
+
+(clojure/gen-and-save-class "/Users/rich/dev/clojure/gen/" 
+ 'org.clojure.ClojureServlet 
+ :extends javax.servlet.http.HttpServlet)
 
 )
 
