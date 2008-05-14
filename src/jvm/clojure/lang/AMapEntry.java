@@ -53,7 +53,7 @@ public Object nth(int i){
 }
 
 private IPersistentVector asVector(){
-	return PersistentVector.create(key(), val());
+	return LazilyPersistentVector.createOwning(key(), val());
 }
 
 public IPersistentVector assocN(int i, Object val){
@@ -97,7 +97,7 @@ public Object peek(){
 }
 
 public IPersistentStack pop(){
-	return PersistentVector.create(key());
+	return LazilyPersistentVector.createOwning(key());
 }
 
 public ISeq rseq() throws Exception{

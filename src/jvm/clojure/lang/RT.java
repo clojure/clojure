@@ -23,7 +23,6 @@ import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.net.URL;
-import java.net.MalformedURLException;
 
 public class RT{
 
@@ -724,7 +723,7 @@ static public IPersistentSet set(Object... init){
 }
 
 static public IPersistentVector vector(Object... init){
-	return PersistentVector.create(init);
+	return LazilyPersistentVector.createOwning(init);
 }
 
 static public IPersistentVector subvec(IPersistentVector v, int start, int end){

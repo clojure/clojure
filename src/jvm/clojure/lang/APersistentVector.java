@@ -253,7 +253,7 @@ static class Seq extends ASeq implements IndexedSeq{
 
 	public ISeq rest(){
 		if(i + 1 < v.count())
-			return new PersistentVector.Seq(v, i + 1);
+			return new APersistentVector.Seq(v, i + 1);
 		return null;
 	}
 
@@ -265,8 +265,8 @@ static class Seq extends ASeq implements IndexedSeq{
 		return v.count() - i;
 	}
 
-	public PersistentVector.Seq withMeta(IPersistentMap meta){
-		return new PersistentVector.Seq(meta, v, i);
+	public APersistentVector.Seq withMeta(IPersistentMap meta){
+		return new APersistentVector.Seq(meta, v, i);
 	}
 
 	public Object reduce(IFn f) throws Exception{
@@ -305,7 +305,7 @@ static class RSeq extends ASeq implements IndexedSeq{
 
 	public ISeq rest(){
 		if(i > 0)
-			return new PersistentVector.RSeq(v, i - 1);
+			return new APersistentVector.RSeq(v, i - 1);
 		return null;
 	}
 
@@ -317,8 +317,8 @@ static class RSeq extends ASeq implements IndexedSeq{
 		return i + 1;
 	}
 
-	public PersistentVector.RSeq withMeta(IPersistentMap meta){
-		return new PersistentVector.RSeq(meta, v, i);
+	public APersistentVector.RSeq withMeta(IPersistentMap meta){
+		return new APersistentVector.RSeq(meta, v, i);
 	}
 }
 

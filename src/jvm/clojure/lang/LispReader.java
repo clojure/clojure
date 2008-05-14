@@ -764,7 +764,7 @@ static class ListReader extends AFn{
 static class VectorReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		return PersistentVector.create(readDelimitedList(']', r, true));
+		return LazilyPersistentVector.create(readDelimitedList(']', r, true));
 	}
 
 }

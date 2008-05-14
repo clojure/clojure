@@ -26,7 +26,7 @@ final public static Executor pooledExecutor =
 
 final static Executor soloExecutor = Executors.newCachedThreadPool();
 
-final static ThreadLocal<PersistentVector> nested = new ThreadLocal<PersistentVector>();
+final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();
 
 
 static class Action implements Runnable{

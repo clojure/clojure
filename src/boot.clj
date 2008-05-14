@@ -214,7 +214,7 @@
   "Creates a new vector containing the args."
   ([] [])
   ([& args]
-   (. clojure.lang.PersistentVector (create args))))
+   (. clojure.lang.LazilyPersistentVector (create args))))
 
 (defn hash-map
   "keyval => key val
@@ -2386,13 +2386,20 @@ not-every? (comp not every?))
      (take-while (bound-fn sc start-test start-key)
                  (if ((bound-fn sc end-test end-key) e) s (rest s))))))
 
-
 (defn repeatedly 
   "Takes a function of no args, presumably with side effects, and returns an infinite
   lazy sequence of calls to it"
   [f] (lazy-cons (f) (repeatedly f)))
 
-
 (defn add-classpath
   "Adds the url (String or URL object) to the classpath per URLClassLoader.addURL"
   [url] (clojure.lang.RT.addURL url))
+
+(defn vec
+  "Creates a new vector containing the contents of coll."
+  ([coll]
+   (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll)))))
+
+(defn hash
+  "Returns the hash code of its argument"
+  [x] (. clojure.lang.Util (hash x)))
