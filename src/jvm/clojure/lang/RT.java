@@ -203,7 +203,7 @@ static AtomicInteger id = new AtomicInteger(1);
 static final public DynamicClassLoader ROOT_CLASSLOADER = new DynamicClassLoader();
 
 static public void addURL(Object url) throws Exception{
-	URL u = (url instanceof String)?(new URL((String) url)):(URL)url;
+	URL u = (url instanceof String) ? (new URL((String) url)) : (URL) url;
 	ROOT_CLASSLOADER.addURL(u);
 }
 
@@ -285,11 +285,11 @@ static public void init() throws Exception{
 }
 
 static void doInit() throws Exception{
-	loadResourceScript(RT.class,"boot.clj");
-	loadResourceScript(RT.class,"proxy.clj");
-	loadResourceScript(RT.class,"zip.clj");
-	loadResourceScript(RT.class,"xml.clj");
-	loadResourceScript(RT.class,"set.clj");
+	loadResourceScript(RT.class, "boot.clj");
+	loadResourceScript(RT.class, "proxy.clj");
+	loadResourceScript(RT.class, "zip.clj");
+	loadResourceScript(RT.class, "xml.clj");
+	loadResourceScript(RT.class, "set.clj");
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.get(),
@@ -303,7 +303,7 @@ static void doInit() throws Exception{
 		Var refer = var("clojure", "refer");
 		in_ns.invoke(USER);
 		refer.invoke(CLOJURE);
-		loadResourceScript(RT.class,"user.clj");
+		loadResourceScript(RT.class, "user.clj");
 		}
 	finally
 		{
@@ -788,6 +788,25 @@ static public ISeq arrayToList(Object[] a) throws Exception{
 	for(int i = a.length - 1; i >= 0; --i)
 		ret = (ISeq) cons(a[i], ret);
 	return ret;
+}
+
+static public Object[] toArray(Object coll) throws Exception{
+	if(coll == null)
+		return EMPTY_ARRAY;
+	else if(coll instanceof Object[])
+		return (Object[]) coll;
+	else if(coll instanceof Collection)
+		return ((Collection) coll).toArray();
+	else if(coll instanceof String)
+		{
+		char[] chars = ((String) coll).toCharArray();
+		Object[] ret = new Object[chars.length];
+		for(int i = 0; i < chars.length; i++)
+			ret[i] = chars[i];
+		return ret;
+		}
+	else
+		throw new Exception("Unable to convert: " + coll.getClass() + " to Object[]");
 }
 
 static public Object[] seqToArray(ISeq seq){

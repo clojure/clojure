@@ -1569,10 +1569,7 @@ not-every? (comp not every?))
 (defn to-array
   "Returns an array of Objects containing the contents of coll, which
   can be any Collection.  Maps to java.util.Collection.toArray()."
-  [#^java.util.Collection coll]
-    (if (zero? (count coll))
-      (. clojure.lang.RT EMPTY_ARRAY)
-      (. coll (toArray))))
+  [coll] (. clojure.lang.RT (toArray coll)))
 
 (defn to-array-2d
   "Returns a (potentially-ragged) 2-dimensional array of Objects

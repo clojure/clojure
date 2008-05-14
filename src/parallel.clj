@@ -10,24 +10,54 @@
 (clojure/refer 'clojure)
 
 (import '(jsr166y.forkjoin ParallelArray ParallelArrayWithBounds ParallelArrayWithFilter 
-                           ParallelArrayWithMapping Ops$Reducer Ops$Predicate))
+                           ParallelArrayWithMapping 
+                           Ops$Op Ops$BinaryOp Ops$Reducer Ops$Predicate Ops$BinaryPredicate Ops$IntAndObjectPredicate
+                           Ops$IntAndObjectToObject))
 
-(defn parray [coll]
+(defn par [coll]
   (if (instance? ParallelArrayWithMapping coll)
     coll
-    (ParallelArray.createUsingHandoff 
-     (if (identical? (class coll) (class (clojure.lang.RT.EMPTY_ARRAY)))
-       coll 
-       (to-array coll)) 
+    (ParallelArray.createUsingHandoff  
+     (to-array coll) 
      (ParallelArray.defaultExecutor))))
 
-(defn- pall [coll]
+(defn pall [coll]
   (if (instance? ParallelArrayWithMapping coll)
     (. coll all)
-    (parray coll)))
+    (par coll)))
+
+(defn pany [coll] 
+  (. (par coll) any))
+
+(defn pmax 
+  ([coll] (. (par coll) max))
+  ([coll comp] (. (par coll) max comp)))
+
+(defn pmin
+  ([coll] (. (par coll) min))
+  ([coll comp] (. (par coll) min comp)))
+
+(defn- summary-map [s]
+  {:min (s.min) :max (s.max) :size (s.size) :min-index (s.indexOfMin) :max-index (s.indexOfMax)})
+
+(defn psummary 
+  ([coll] (summary-map (. (par coll) summary)))
+  ([coll comp] (summary-map (. (par coll) summary comp))))
 
 (defn punique [coll]
-  (. (parray coll) allUniqueElements))
+  (. (par coll) allUniqueElements))
+
+(defn- op [f]
+  (proxy [Ops$Op] []
+    (op [x] (f x))))
+
+(defn- binary-op [f]
+  (proxy [Ops$BinaryOp] []
+    (op [x y] (f x y))))
+
+(defn- int-and-object-to-object [f]
+  (proxy [Ops$IntAndObjectToObject] []
+    (op [i x] (f i x))))
 
 (defn- reducer [f]
   (proxy [Ops$Reducer] []
@@ -37,31 +67,61 @@
   (proxy [Ops$Predicate] []
     (op [x] (boolean (f x)))))
 
-;this doesn't work, passes null to reducer
+(defn- binary-predicate [f]
+  (proxy [Ops$BinaryPredicate] []
+    (op [x y] (boolean (f x y)))))
+
+(defn- int-and-object-predicate [f]
+  (proxy [Ops$IntAndObjectPredicate] []
+    (op [i x] (boolean (f i x)))))
+
+;this doesn't work, passes null to reducer?
 (defn pcumulate [coll f init]
-  (.. (pall coll) (cumulate (reducer f) init)))
+  (.. (pall coll) (precumulate (reducer f) init)))
 
-(defn preduce [f init coll]
-  (. (parray coll) (reduce (reducer f) init)))
+(defn preduce [f base coll]
+  (. (par coll) (reduce (reducer f) base)))
 
-(defn psort [coll]
-  (. (pall coll) sort))
+(defn psort 
+  ([coll] (. (pall coll) sort))
+  ([coll comp] (. (pall coll) sort comp)))
 
-(defn pbound [coll start end]
-  (. (parray coll) withBounds start end))
+(defn pfilter-nils [coll]
+  (. (pall coll) removeNulls))
 
-(defn pfilter
+(defn pfilter-dupes [coll]
+  (. (pall coll) removeConsecutiveDuplicates))
+
+(defn with-bounds [coll start end]
+  (. (par coll) withBounds start end))
+
+(defn with-filter
   ([coll f]
-     (. (parray coll) withFilter (predicate f))))
+     (. (par coll) withFilter (predicate f)))
+  ([coll f2 coll2]
+     (. (par coll) withFilter (binary-predicate f2) (par coll2))))
 
-(defn pfilter
+(defn with-indexed-filter
   ([coll f]
-     (. (parray coll) withFilter (predicate f))))
+     (. (par coll) withIndexedFilter (int-and-object-predicate f))))
+
+(defn with-mapping
+  ([coll f]
+     (. (par coll) withMapping (op f)))
+  ([coll f2 coll2]
+     (. (par coll) withMapping (binary-op f2) (par coll2))))
+
+(defn with-indexed-mapping
+  ([coll f]
+     (. (par coll) withIndexedMapping (int-and-object-to-object f))))
+
+(defn pvec [pa]
+  (vec (. (pall pa) getArray)))
 
 (comment
 
 (punique [1 2 3 2 1])
-(def v (range 10000000))
+(pcumulate [1 2 3 2 1] + 0) ;broken
 (def a (make-array Object 1000000))
 (dotimes i (count a)
   (aset a i i))
@@ -69,4 +129,17 @@
 (time (preduce + 0 a))
 (preduce + 0 [1 2 3 2 1])
 (preduce + 0 (psort a))
+(pall (with-indexed-filter (par [11 2 3 2]) (fn [i x] (> i x))))
+(pall (with-filter (par [11 2 3 2]) (fn [x y] (> y x)) (par [110 2 33 2])))
+
+(psummary ;or pvec/pmax etc
+ (-> (par [11 2 3 2]) 
+     (with-filter (fn [x y] (> y x)) 
+                  (par [110 2 33 2]))
+     (with-mapping #(* % 2))))
+
+(preduce + 0
+  (-> (par [11 2 3 2]) 
+      (with-filter (fn [x y] (> y x)) 
+                   (par [110 2 33 2]))))
 )
