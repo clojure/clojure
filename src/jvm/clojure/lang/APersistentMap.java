@@ -47,8 +47,8 @@ public IPersistentCollection cons(Object o){
 	IPersistentMap ret = this;
 	for(ISeq es = RT.seq(o); es != null; es = es.rest())
 		{
-		IMapEntry e = (IMapEntry) es.first();
-		ret = ret.assoc(e.key(), e.val());
+		Map.Entry e = (Map.Entry) es.first();
+		ret = ret.assoc(e.getKey(), e.getValue());
 		}
 	return ret;
 }
@@ -63,10 +63,10 @@ public boolean equals(Object obj){
 
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
-		IMapEntry e = (IMapEntry) s.first();
-		IMapEntry me = m.entryAt(e.key());
+		Map.Entry e = (Map.Entry) s.first();
+		Map.Entry me = m.entryAt(e.getKey());
 
-		if(me == null || !Util.equal(e.val(), me.val()))
+		if(me == null || !Util.equal(e.getValue(), me.getValue()))
 			return false;
 		}
 
@@ -79,8 +79,8 @@ public int hashCode(){
 		int hash = count();
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
-			IMapEntry e = (IMapEntry) s.first();
-			hash ^= Util.hashCombine(Util.hash(e.key()), Util.hash(e.val()));
+			Map.Entry e = (Map.Entry) s.first();
+			hash ^= Util.hashCombine(Util.hash(e.getKey()), Util.hash(e.getValue()));
 			}
 		this._hash = hash;
 		}
@@ -106,7 +106,7 @@ static public class KeySeq extends ASeq{
 	}
 
 	public Object first(){
-		return ((IMapEntry) seq.first()).key();
+		return ((Map.Entry) seq.first()).getKey();
 	}
 
 	public ISeq rest(){
@@ -137,7 +137,7 @@ static public class ValSeq extends ASeq{
 	}
 
 	public Object first(){
-		return ((IMapEntry) seq.first()).val();
+		return ((Map.Entry) seq.first()).getValue();
 	}
 
 	public ISeq rest(){
@@ -218,11 +218,11 @@ public boolean isEmpty(){
 }
 
 public boolean contains(Object o){
-	if(o instanceof IMapEntry)
+	if(o instanceof Map.Entry)
 		{
-		IMapEntry e = (IMapEntry) o;
-		IMapEntry v = entryAt(e.key());
-		return (v != null && Util.equal(v.val(), e.val()));
+		Map.Entry e = (Map.Entry) o;
+		Map.Entry v = entryAt(e.getKey());
+		return (v != null && Util.equal(v.getValue(), e.getValue()));
 		}
 	return false;
 }
