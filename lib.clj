@@ -211,7 +211,7 @@
   is loaded. The :reload and :reload-all flags supersede
   :require."
   [& args]
-  (let [libspecs (filter (comp not keyword?) args)
+  (let [libspecs (filter (complement keyword?) args)
         flags (filter keyword? args)
         options (interleave flags (repeat true))]
     (doseq libspec libspecs
