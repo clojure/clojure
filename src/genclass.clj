@@ -46,6 +46,16 @@
         :when (not (. Modifier (isPrivate (. ctor (getModifiers)))))]
     (apply vector (. ctor (getParameterTypes)))))
 
+(defn- escape-class-name [c]
+  (.. (.getSimpleName c) 
+      (replace "[]" "<>")))
+
+(defn- overload-name [mname pclasses]
+  (if (seq pclasses)
+    (apply str mname (interleave (repeat \-) 
+                                 (map escape-class-name pclasses)))
+    (str mname "-void")))
+
 ;(distinct (map first(keys (mapcat non-private-methods [Object IPersistentMap]))))
 
 (defn gen-class 
@@ -159,10 +169,14 @@
         ifn-type (totype clojure.lang.IFn)
         iseq-type (totype clojure.lang.ISeq)
         ex-type  (totype java.lang.UnsupportedOperationException)
+        all-sigs (distinct (concat (map #(let[[m p] (key %)] {m [p]}) (mapcat non-private-methods supers))
+                                   (map (fn [[m p]] {(str m) [p]}) methods)))
+        sigs-by-name (apply merge-with concat {} all-sigs)
+        overloads (into {} (filter (fn [[m s]] (rest s)) sigs-by-name))
         var-fields (concat (and init [init-name]) 
                            (and main [main-name])
-                           (distinct (concat (map first (keys (mapcat non-private-methods supers)))
-                                             (map (comp str first) methods)
+                           (distinct (concat (keys sigs-by-name)
+                                             (mapcat (fn [[m s]] (map #(overload-name m %) s)) overloads)
                                              (mapcat (comp (partial map str) vals val) exposes))))
         emit-get-var (fn [gen v]
                        (let [false-label (. gen newLabel)
@@ -182,13 +196,22 @@
           (let [ptypes (to-types pclasses)
                 rtype (totype rclass)
                 m (new Method mname rtype ptypes)
+                is-overload (overloads mname)
                 gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
+                found-label (. gen (newLabel))
                 else-label (. gen (newLabel))
                 end-label (. gen (newLabel))]
             (. gen (visitCode))
+            (when is-overload
+              (emit-get-var gen (overload-name mname pclasses))
+              (. gen (dup))
+              (. gen (ifNonNull found-label))
+              (. gen (pop)))
             (emit-get-var gen mname)
             (. gen (dup))
             (. gen (ifNull else-label))
+            (when is-overload
+              (. gen (mark found-label)))
                                         ;if found
             (. gen (loadThis))
                                         ;box args
