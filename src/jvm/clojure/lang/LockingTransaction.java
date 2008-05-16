@@ -87,7 +87,7 @@ void stop(int status){
 		vals.clear();
 		sets.clear();
 		commutes.clear();
-		actions.clear();
+		//actions.clear();
 		}
 }
 
@@ -270,10 +270,7 @@ Object run(IFn fn) throws Exception{
 						ref.tvals.msecs = msecs;
 						}
 					}
-				for(Agent.Action action : actions)
-					{
-					action.agent.enqueue(action);
-					}
+
 				done = true;
 				info.status.set(COMMITTED);
 				}
@@ -290,6 +287,14 @@ Object run(IFn fn) throws Exception{
 				}
 			locked.clear();
 			stop(done ? COMMITTED : RETRY);
+			if(done) //re-dispatch out of transaction
+				{
+				for(Agent.Action action : actions)
+					{
+					Agent.dispatchAction(action);
+					}
+				}
+			actions.clear();
 			}
 		}
 	if(!done)

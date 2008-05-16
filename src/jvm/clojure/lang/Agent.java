@@ -132,6 +132,12 @@ public Object dispatch(IFn fn, ISeq args, boolean solo) throws Exception{
 		throw new Exception("Agent has errors", (Exception) RT.first(errors));
 		}
 	Action action = new Action(this, fn, args, solo);
+	dispatchAction(action);
+
+	return this;
+}
+
+static void dispatchAction(Action action){
 	LockingTransaction trans = LockingTransaction.getRunning();
 	if(trans != null)
 		trans.enqueue(action);
@@ -140,9 +146,7 @@ public Object dispatch(IFn fn, ISeq args, boolean solo) throws Exception{
 		nested.set(nested.get().cons(action));
 		}
 	else
-		enqueue(action);
-
-	return this;
+		action.agent.enqueue(action);
 }
 
 void enqueue(Action action){
