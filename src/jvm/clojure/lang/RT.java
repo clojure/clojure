@@ -275,7 +275,7 @@ public static void loadResourceScript(Class c, String name) throws Exception{
 	InputStream ins = c.getResourceAsStream("/" + name);
 	if(ins != null)
 		{
-		Compiler.load(new InputStreamReader(ins), c.getResource("/" + name).toString(), name);
+		Compiler.load(new InputStreamReader(ins), name, name);
 		ins.close();
 		}
 }
