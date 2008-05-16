@@ -95,11 +95,14 @@ public int compareTo(Object o){
 		return 0;
 	if(this.ns == null && s.ns != null)
 		return -1;
-	if(this.ns != null && s.ns == null)
-		return 1;
-	int nsc = this.name.compareTo(s.name);
-	if(nsc != 0)
-		return nsc;
+	if(this.ns != null)
+		{
+		if(s.ns == null)
+			return 1;
+		int nsc = this.ns.compareTo(s.ns);
+		if(nsc != 0)
+			return nsc;
+		}
 	return this.name.compareTo(s.name);
 }
 
