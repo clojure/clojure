@@ -47,12 +47,20 @@ vector using pvec.
      (to-array coll) 
      (ParallelArray.defaultExecutor))))
 
+(defn- pa-to-vec [pa]
+  (vec (. pa getArray)))
+
 (defn pall
   "Realizes a copy of the coll as a parallel array, with any bounds/filters/maps applied"
   [coll]
   (if (instance? ParallelArrayWithMapping coll)
     (. coll all)
     (par coll)))
+
+(defn pvec 
+  "Returns the realized contents of the parallel array pa as a Clojure vector"
+  [pa] (pa-to-vec (pall pa)))
+
 
 (defn pany
   "Returns some (random) element of the coll if it satisfies the bound/filter/map"
@@ -83,7 +91,7 @@ vector using pvec.
 (defn pdistinct
   "Returns a parallel array of the distinct elements of coll"
   [coll]
-  (. (par coll) allUniqueElements))
+  (pa-to-vec (. (par coll) allUniqueElements)))
 
 (defn- op [f]
   (proxy [Ops$Op] []
@@ -193,9 +201,8 @@ vector using pvec.
   ([coll f2]
      (. (par coll) withIndexedMapping (int-and-object-to-object f2))))
 
-(defn pvec 
-  "Returns the realized contents of the parallel array pa as a Clojure vector"
-  [pa] (vec (. (pall pa) getArray)))
+
+
 
 
 (comment
@@ -204,9 +211,12 @@ vector using pvec.
 ;(pcumulate [1 2 3 2 1] + 0) ;broken, not exposed
 (def a (make-array Object 1000000))
 (dotimes i (count a)
-  (aset a i i))
+  (aset a i (rand-int i)))
 (time (reduce + 0 a))
 (time (preduce + 0 a))
+(time (count (distinct a)))
+(time (count (pdistinct a)))
+
 (preduce + 0 [1 2 3 2 1])
 (preduce + 0 (psort a))
 (pall (with-indexed-filter (par [11 2 3 2]) (fn [i x] (> i x))))
@@ -222,4 +232,7 @@ vector using pvec.
   (-> (par [11 2 3 2]) 
       (with-filter (fn [x y] (> y x)) 
                    (par [110 2 33 2]))))
+
+(par coll :bound [1 2] :filter fn :map fn)
+
 )
