@@ -368,7 +368,7 @@ static public ISeq seq(Object coll){
 	else if(coll instanceof Enumeration)
 		return EnumerationSeq.create(((Enumeration) coll));
 	else
-		throw new IllegalAccessError("Don't know how to create ISeq from arg");
+		throw new IllegalAccessError("Don't know how to create ISeq from: " + coll.getClass().getSimpleName());
 }
 
 static public ISeq keys(Object coll){
@@ -398,7 +398,7 @@ public static int count(Object o){
 		return ((Map) o).size();
 	else if(o.getClass().isArray())
 		return Array.getLength(o);
-	throw new UnsupportedOperationException("count not supported on this type");
+	throw new UnsupportedOperationException("count not supported on this type: " + o.getClass().getSimpleName());
 }
 
 static public IPersistentCollection conj(IPersistentCollection coll, Object x){
@@ -586,7 +586,7 @@ static public Object nth(Object coll, int n){
 		return null;
 		}
 	else
-		throw new UnsupportedOperationException("nth not supported on this type");
+		throw new UnsupportedOperationException("nth not supported on this type: " + coll.getClass().getSimpleName());
 }
 
 static public Object assocN(int n, Object val, Object coll){
