@@ -37,9 +37,14 @@
   (list* `defvar (with-meta name (assoc (meta name) :private true)) decls))
 
 (defmacro defalias
-  "Defines a new var with the same value and metadata as another except
-  a fresh namespace, name, and optionally doc."
+  "Defines an alias for a var: a new var with the same value and metadata
+  as another with the exception of :namespace, :name, :file, :line, and
+  optionally :doc which are those of new var."
   ([name orig]
-   `(. (def ~name ~orig) setMeta (meta #'~orig)))
+   `(let [v# (def ~name ~orig)]
+	  (. v# setMeta (merge (meta #'~orig) (meta #'~name)))
+	  v#))
   ([name orig doc]
-   `(. (def ~name ~orig) setMeta (assoc (meta #'~orig) :doc ~doc))))
+   `(let [v# (def ~name ~orig)]
+	  (. v# setMeta (merge (meta #'~orig) (assoc (meta #'~name) :doc ~doc)))
+	  v#)))
