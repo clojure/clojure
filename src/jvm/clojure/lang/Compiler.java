@@ -3339,6 +3339,9 @@ static public class CompilerException extends Exception{
 }
 
 static public Var isMacro(Object op) throws Exception{
+	//no local macros for now
+	if(op instanceof Symbol && referenceLocal((Symbol)op) != null)
+		return null;
 	if(op instanceof Symbol || op instanceof Var)
 		{
 		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
