@@ -14,7 +14,7 @@
 ;;  scgilardi (gmail)
 ;;  17 May 2008
 
-(in-ns 'def)
+(clojure/in-ns 'def)
 (clojure/refer 'clojure)
 
 (defmacro defvar
@@ -42,9 +42,9 @@
   optionally :doc which are those of new var."
   ([name orig]
    `(let [v# (def ~name ~orig)]
-	  (. v# setMeta (merge (meta #'~orig) (meta #'~name)))
+	  (. v# (setMeta (merge (meta #'~orig) (meta #'~name))))
 	  v#))
   ([name orig doc]
    `(let [v# (def ~name ~orig)]
-	  (. v# setMeta (merge (meta #'~orig) (assoc (meta #'~name) :doc ~doc)))
+	  (. v# (setMeta (merge (meta #'~orig) (assoc (meta #'~name) :doc ~doc))))
 	  v#)))
