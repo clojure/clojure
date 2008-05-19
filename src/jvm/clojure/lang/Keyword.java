@@ -76,9 +76,7 @@ public String getName(){
  * @throws Exception
  */
 public Object invoke(Object obj) throws Exception{
-	if(obj == null)
-		return null;
-	return ((IPersistentMap) obj).valAt(this);
+	return RT.get(obj, this);
 }
 
 public Object invoke(Object obj, Object val) throws Exception{
