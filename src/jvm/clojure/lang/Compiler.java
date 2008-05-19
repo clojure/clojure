@@ -382,10 +382,11 @@ static class VarExpr implements Expr, AssignableExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
+		fn.emitVar(gen, var);
+		gen.invokeVirtual(VAR_TYPE, getMethod);
+		if(context == C.STATEMENT)
 			{
-			fn.emitVar(gen, var);
-			gen.invokeVirtual(VAR_TYPE, getMethod);
+			gen.pop();
 			}
 	}
 
@@ -423,8 +424,9 @@ static class TheVarExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			fn.emitVar(gen, var);
+		fn.emitVar(gen, var);
+		if(context == C.STATEMENT)
+			gen.pop();
 	}
 
 	public boolean hasJavaClass(){
@@ -458,8 +460,9 @@ static class KeywordExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			fn.emitKeyword(gen, k);
+		fn.emitKeyword(gen, k);
+		if(context == C.STATEMENT)
+			gen.pop();
 
 	}
 
@@ -801,12 +804,13 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
 			{
-			if(context != C.STATEMENT)
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.checkCast(Type.getType(targetClass));
+			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
+			HostExpr.emitBoxReturn(fn, gen, field.getType());
+			if(context == C.STATEMENT)
 				{
-				target.emit(C.EXPRESSION, fn, gen);
-				gen.checkCast(Type.getType(targetClass));
-				gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
-				HostExpr.emitBoxReturn(fn, gen, field.getType());
+				gen.pop();
 				}
 			}
 		else
@@ -878,12 +882,13 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			{
-			gen.visitLineNumber(line, gen.mark());
+		gen.visitLineNumber(line, gen.mark());
 
-			gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
-			HostExpr.emitBoxReturn(fn, gen, field.getType());
+		gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
+		HostExpr.emitBoxReturn(fn, gen, field.getType());
+		if(context == C.STATEMENT)
+			{
+			gen.pop();
 			}
 //		gen.push(className);
 //		gen.push(fieldName);
@@ -1162,9 +1167,10 @@ static class ConstantExpr extends LiteralExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
+		fn.emitConstant(gen, id);
+		if(context == C.STATEMENT)
 			{
-			fn.emitConstant(gen, id);
+			gen.pop();
 //			gen.loadThis();
 //			gen.invokeVirtual(OBJECT_TYPE, getClassMethod);
 //			gen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
@@ -1213,8 +1219,9 @@ static class NilExpr extends LiteralExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			gen.visitInsn(Opcodes.ACONST_NULL);
+		gen.visitInsn(Opcodes.ACONST_NULL);
+		if(context == C.STATEMENT)
+			gen.pop();
 	}
 
 	public boolean hasJavaClass(){
@@ -1241,12 +1248,13 @@ static class BooleanExpr extends LiteralExpr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
+		if(val)
+			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
+		else
+			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+		if(context == C.STATEMENT)
 			{
-			if(val)
-				gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
-			else
-				gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+			gen.pop();
 			}
 	}
 
@@ -1397,9 +1405,10 @@ static class MonitorEnterExpr extends UntypedExpr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		target.emit(C.EXPRESSION, fn, gen);
 		gen.monitorEnter();
-		if(context != C.STATEMENT)
+		NIL_EXPR.emit(context, fn, gen);
+		if(context == C.STATEMENT)
 			{
-			NIL_EXPR.emit(context, fn, gen);
+			gen.pop();
 			}
 	}
 
@@ -1424,9 +1433,10 @@ static class MonitorExitExpr extends UntypedExpr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		target.emit(C.EXPRESSION, fn, gen);
 		gen.monitorExit();
-		if(context != C.STATEMENT)
+		NIL_EXPR.emit(context, fn, gen);
+		if(context == C.STATEMENT)
 			{
-			NIL_EXPR.emit(context, fn, gen);
+			gen.pop();
 			}
 	}
 
@@ -2016,13 +2026,14 @@ static class MetaExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
+		expr.emit(C.EXPRESSION, fn, gen);
+		gen.checkCast(IOBJ_TYPE);
+		meta.emit(C.EXPRESSION, fn, gen);
+		gen.checkCast(IPERSISTENTMAP_TYPE);
+		gen.invokeInterface(IOBJ_TYPE, withMetaMethod);
+		if(context == C.STATEMENT)
 			{
-			expr.emit(C.EXPRESSION, fn, gen);
-			gen.checkCast(IOBJ_TYPE);
-			meta.emit(C.EXPRESSION, fn, gen);
-			gen.checkCast(IPERSISTENTMAP_TYPE);
-			gen.invokeInterface(IOBJ_TYPE, withMetaMethod);
+			gen.pop();
 			}
 	}
 
@@ -2164,18 +2175,19 @@ static class EmptyExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
+		if(coll instanceof IPersistentList)
+			gen.getStatic(LIST_TYPE, "EMPTY", LIST_TYPE);
+		else if(coll instanceof IPersistentVector)
+			gen.getStatic(VECTOR_TYPE, "EMPTY", VECTOR_TYPE);
+		else if(coll instanceof IPersistentMap)
+			gen.getStatic(HASHMAP_TYPE, "EMPTY", HASHMAP_TYPE);
+		else if(coll instanceof IPersistentSet)
+			gen.getStatic(HASHSET_TYPE, "EMPTY", HASHSET_TYPE);
+		else
+			throw new UnsupportedOperationException("Unknown Collection type");
+		if(context == C.STATEMENT)
 			{
-			if(coll instanceof IPersistentList)
-				gen.getStatic(LIST_TYPE, "EMPTY", LIST_TYPE);
-			else if(coll instanceof IPersistentVector)
-				gen.getStatic(VECTOR_TYPE, "EMPTY", VECTOR_TYPE);
-			else if(coll instanceof IPersistentMap)
-				gen.getStatic(HASHMAP_TYPE, "EMPTY", HASHMAP_TYPE);
-			else if(coll instanceof IPersistentSet)
-				gen.getStatic(HASHSET_TYPE, "EMPTY", HASHSET_TYPE);
-			else
-				throw new UnsupportedOperationException("Unknown Collection type");
+			gen.pop();
 			}
 	}
 
@@ -2746,16 +2758,17 @@ static public class FnExpr implements Expr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//fn arg is enclosing fn, not this
-		if(context != C.STATEMENT)
+		gen.newInstance(fntype);
+		gen.dup();
+		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
 			{
-			gen.newInstance(fntype);
-			gen.dup();
-			for(ISeq s = RT.keys(closes); s != null; s = s.rest())
-				{
-				LocalBinding lb = (LocalBinding) s.first();
-				fn.emitLocal(gen, lb);
-				}
-			gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
+			LocalBinding lb = (LocalBinding) s.first();
+			fn.emitLocal(gen, lb);
+			}
+		gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
+		if(context == C.STATEMENT)
+			{
+			gen.pop();
 			}
 	}
 
