@@ -2400,3 +2400,19 @@ not-every? (comp not every?))
 (defn hash
   "Returns the hash code of its argument"
   [x] (. clojure.lang.Util (hash x)))
+
+(defn interpose
+  "Returns a lazy seq of the elements of coll separated by sep"
+  [sep coll] (drop 1 (interleave (repeat sep) coll)))
+
+(defn partition
+  "Returns a lazy sequence of lists of n items each, at offsets step
+  apart. If step is not supplied, defaults to n, i.e. the partitions
+  do not overlap."
+  ([n coll]
+     (partition n n coll))
+  ([n step coll]
+     (take-while #(= n (count %))
+       (when (seq coll)
+         (lazy-cons (take n coll) (partition n step (drop step coll)))))))
+
