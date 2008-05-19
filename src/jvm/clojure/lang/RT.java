@@ -465,6 +465,12 @@ static public Object get(Object coll, Object key){
 		Map m = (Map) coll;
 		return m.get(key);
 		}
+	else if(coll instanceof IPersistentSet)
+		{
+		IPersistentSet set = (IPersistentSet) coll;
+		if(set.contains(key))
+			return key;
+		}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
 		{
 		int n = ((Number) key).intValue();
@@ -488,6 +494,13 @@ static public Object get(Object coll, Object key, Object notFound){
 		if(m.containsKey(key))
 			return m.get(key);
 		return notFound;
+		}
+	else if(coll instanceof IPersistentSet)
+		{
+		IPersistentSet set = (IPersistentSet) coll;
+		if(set.contains(key))
+			return key;
+		return notFound;		
 		}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
 		{
