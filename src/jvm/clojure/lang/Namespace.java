@@ -118,7 +118,7 @@ public static Namespace findOrCreate(Symbol name){
 
 public static Namespace remove(Symbol name){
 	if(name.equals(RT.CLOJURE_NS.name))
-		throw new IllegalAccessError("Cannot remove clojure namespace");
+		throw new IllegalArgumentException("Cannot remove clojure namespace");
 	return namespaces.remove(name);
 }
 

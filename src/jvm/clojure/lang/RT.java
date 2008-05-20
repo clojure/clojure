@@ -368,7 +368,7 @@ static public ISeq seq(Object coll){
 	else if(coll instanceof Enumeration)
 		return EnumerationSeq.create(((Enumeration) coll));
 	else
-		throw new IllegalAccessError("Don't know how to create ISeq from: " + coll.getClass().getSimpleName());
+		throw new IllegalArgumentException("Don't know how to create ISeq from: " + coll.getClass().getSimpleName());
 }
 
 static public ISeq keys(Object coll){

@@ -137,7 +137,7 @@ public IPersistentVector assoc(Object key, Object val){
 		int i = ((Number) key).intValue();
 		return assocN(i, val);
 		}
-	throw new IllegalAccessError("Key must be integer");
+	throw new IllegalArgumentException("Key must be integer");
 }
 
 public Object valAt(Object key, Object notFound){

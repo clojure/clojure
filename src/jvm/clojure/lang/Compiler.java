@@ -3361,7 +3361,7 @@ static public Var isMacro(Object op) throws Exception{
 		if(v != null && v.isMacro())
 			{
 			if(v.ns != currentNS() && !v.isPublic())
-				throw new IllegalAccessError("var: " + v + " is not public");
+				throw new IllegalStateException("var: " + v + " is not public");
 			return v;
 			}
 		}
@@ -3545,7 +3545,7 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		if(v == null)
 			throw new Exception("No such var: " + sym);
 		else if(v.ns != currentNS() && !v.isPublic())
-			throw new IllegalAccessError("var: " + sym + " is not public");
+			throw new IllegalStateException("var: " + sym + " is not public");
 		return v;
 		}
 	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')

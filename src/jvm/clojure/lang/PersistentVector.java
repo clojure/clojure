@@ -172,7 +172,7 @@ private Object[] pushTail(int level, Object[] arr, Object[] tailNode, Box expans
 
 public PersistentVector pop(){
 	if(cnt == 0)
-		throw new IllegalAccessError("Can't pop empty vector");
+		throw new IllegalStateException("Can't pop empty vector");
 	if(cnt == 1)
 		return EMPTY.withMeta(meta());
 	if(tail.length > 1)
