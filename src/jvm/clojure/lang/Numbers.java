@@ -1220,4 +1220,15 @@ static BitOps bitOps(Object x){
 		return INTEGER_BITOPS;
 }
 
+static public int addi(int x, int y) {
+	return x + y;
+}
+
+static public int subtracti(int x, int y) {
+	return x - y;
+}
+
+static public boolean lti(int x, int y) {
+	return x <  y;
+}
 }
