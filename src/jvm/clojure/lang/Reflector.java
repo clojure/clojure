@@ -322,13 +322,13 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 	if(paramType == argType || paramType.isAssignableFrom(argType))
 		return true;
 	if(paramType == int.class)
-		return argType == Integer.class || argType == FixNum.class;
+		return argType == Integer.class;// || argType == FixNum.class;
 	else if(paramType == float.class)
 		return argType == Float.class;
 	else if(paramType == double.class)
-		return argType == Double.class || argType == DoubleNum.class;
+		return argType == Double.class;// || argType == DoubleNum.class;
 	else if(paramType == long.class)
-		return argType == Long.class || argType == BigNum.class;
+		return argType == Long.class;// || argType == BigNum.class;
 	else if(paramType == char.class)
 		return argType == Character.class;
 	else if(paramType == short.class)
