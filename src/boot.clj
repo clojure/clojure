@@ -1477,12 +1477,12 @@ not-every? (comp not every?))
 (defn bigint 
   "Coerce to BigInteger"
   {:tag BigInteger} 
-  [x] (BigInteger.valueOf x))
+  [x] (. BigInteger valueOf x))
 
 (defn bigdec
   "Coerce to BigDecimal"
   {:tag BigDecimal}
-  [x] (BigDecimal.valueOf x))
+  [x] (. BigDecimal valueOf x))
 
 (import '(java.lang.reflect Array))
 
@@ -2390,7 +2390,7 @@ not-every? (comp not every?))
 
 (defn add-classpath
   "Adds the url (String or URL object) to the classpath per URLClassLoader.addURL"
-  [url] (clojure.lang.RT.addURL url))
+  [url] (. clojure.lang.RT addURL url))
 
 (defn vec
   "Creates a new vector containing the contents of coll."

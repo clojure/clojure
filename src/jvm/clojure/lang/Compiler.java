@@ -3409,14 +3409,15 @@ public static Object macroexpand1(Object x) throws Exception{
 					//(s.substring 2 5) => (. s substring 2 5)
 					//also (package.class.name ...) (. package.class name ...)
 					int idx = sname.lastIndexOf('.');
-					if(idx > 0 && idx < sname.length() - 1)
-						{
-						Symbol target = Symbol.intern(sname.substring(0, idx));
-						Symbol meth = Symbol.intern(sname.substring(idx + 1));
-						return RT.listStar(DOT, target, meth, form.rest());
-						}
+//					if(idx > 0 && idx < sname.length() - 1)
+//						{
+//						Symbol target = Symbol.intern(sname.substring(0, idx));
+//						Symbol meth = Symbol.intern(sname.substring(idx + 1));
+//						return RT.listStar(DOT, target, meth, form.rest());
+//						}
 					//(StringBuilder. "foo") => (new StringBuilder "foo")	
-					else if(idx == sname.length() - 1)
+					//else 
+					if(idx == sname.length() - 1)
 						return RT.listStar(NEW, Symbol.intern(sname.substring(0, idx)), form.rest());
 					}
 				}
