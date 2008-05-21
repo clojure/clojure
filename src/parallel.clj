@@ -115,9 +115,9 @@ pvec.
   ([coll] 
      (if (instance? ParallelArrayWithMapping coll)
        coll
-       (ParallelArray.createUsingHandoff  
+       (. ParallelArray createUsingHandoff  
         (to-array coll) 
-        (ParallelArray.defaultExecutor))))
+        (. ParallelArray defaultExecutor))))
   ([coll & ops]
      (reduce (fn [pa [op args]] 
                  (cond
@@ -151,7 +151,7 @@ pvec.
   ([coll comp] (. (par coll) min comp)))
 
 (defn- summary-map [s]
-  {:min (s.min) :max (s.max) :size (s.size) :min-index (s.indexOfMin) :max-index (s.indexOfMax)})
+  {:min (.min s) :max (.max s) :size (.size s) :min-index (.indexOfMin s) :max-index (.indexOfMax s)})
 
 (defn psummary 
   "Returns a map of summary statistics (min. max, size, min-index, max-index, 

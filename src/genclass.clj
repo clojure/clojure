@@ -184,12 +184,12 @@
                          (. gen getStatic ctype (var-name v) var-type)
                          (. gen dup)
                          (. gen invokeVirtual var-type (. Method (getMethod "boolean isBound()")))
-                         (. gen ifZCmp (GeneratorAdapter.EQ) false-label)
+                         (. gen ifZCmp (. GeneratorAdapter EQ) false-label)
                          (. gen invokeVirtual var-type (. Method (getMethod "Object get()")))
                          (. gen goTo end-label)
                          (. gen mark false-label)
                          (. gen pop)
-                         (. gen visitInsn (Opcodes.ACONST_NULL))
+                         (. gen visitInsn (. Opcodes ACONST_NULL))
                          (. gen mark end-label)))
         emit-forwarding-method
         (fn [mname pclasses rclass else-gen]
@@ -246,21 +246,21 @@
     
                                         ;static fields for vars
     (doseq v var-fields
-      (. cv (visitField (+ (Opcodes.ACC_PUBLIC) (Opcodes.ACC_FINAL) (Opcodes.ACC_STATIC))
+      (. cv (visitField (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_FINAL) (. Opcodes ACC_STATIC))
                         (var-name v) 
                         (. var-type getDescriptor)
                         nil nil)))
     
                                         ;instance field for state
     (when state
-      (. cv (visitField (+ (Opcodes.ACC_PUBLIC) (Opcodes.ACC_FINAL))
+      (. cv (visitField (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_FINAL))
                         state-name 
                         (. obj-type getDescriptor)
                         nil nil)))
     
                                         ;static init to set up var fields and load clj
-    (let [gen (new GeneratorAdapter (+ (Opcodes.ACC_PUBLIC) (Opcodes.ACC_STATIC)) 
-                   (Method.getMethod "void <clinit> ()")
+    (let [gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC)) 
+                   (. Method getMethod "void <clinit> ()")
                    nil nil cv)]
       (. gen (visitCode))
       (doseq v var-fields
@@ -270,7 +270,7 @@
         (. gen putStatic ctype (var-name v) var-type))
       
       (. gen push ctype)
-      (. gen push (str (name.replace \. (java.io.File.separatorChar)) ".clj"))
+      (. gen push (str (. name replace \. (. java.io.File separatorChar)) ".clj"))
       (. gen (invokeStatic rt-type (. Method (getMethod "void loadResourceScript(Class,String)"))))
       
       (. gen (returnValue))
@@ -340,7 +340,7 @@
                                         ;factory
         (when factory
           (let [fm (new Method factory-name ctype ptypes)
-                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (Opcodes.ACC_STATIC)) 
+                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC)) 
                          fm nil nil cv)]
             (. gen (visitCode))
             (. gen newInstance ctype)
@@ -378,8 +378,8 @@
 
                                         ;main
     (when main
-      (let [m (Method.getMethod "void main (String[])")
-            gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (Opcodes.ACC_STATIC)) 
+      (let [m (. Method getMethod "void main (String[])")
+            gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC)) 
                      m nil nil cv)
             no-main-label (. gen newLabel)
             end-label (. gen newLabel)]
@@ -413,7 +413,7 @@
             (. gen (returnValue))
             (. gen (endMethod))))
         (when setter
-          (let [m (new Method (str setter) (Type.VOID_TYPE) (into-array [ftype]))
+          (let [m (new Method (str setter) (. Type VOID_TYPE) (into-array [ftype]))
                 gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
             (. gen (visitCode))
             (. gen loadThis)
@@ -445,7 +445,7 @@
 
   [path name & options]
   (let [{:keys [name bytecode]} (apply gen-class (str name) options)
-        file (java.io.File. path (str (name.replace \. (java.io.File.separatorChar)) ".class"))]
+        file (java.io.File. path (str (. name replace \. (. java.io.File separatorChar)) ".class"))]
     (.createNewFile file)
     (with-open f (java.io.FileOutputStream. file)
       (.write f bytecode))))
@@ -508,4 +508,3 @@
  :extends javax.servlet.http.HttpServlet)
 
 )
-
