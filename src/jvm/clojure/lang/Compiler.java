@@ -69,6 +69,8 @@ static final Symbol VECTOR = Symbol.create("clojure", "vector");
 static final Symbol _AMP_ = Symbol.create("&");
 static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 
+static final Keyword inlineKey = Keyword.intern(null, "inline");
+
 //static final Symbol IMPORT = Symbol.create("import");
 //static final Symbol USE = Symbol.create("use");
 
@@ -2408,7 +2410,7 @@ static class InvokeExpr implements Expr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		fexpr.emit(C.EXPRESSION, fn, gen);
-		//gen.checkCast(IFN_TYPE);
+		gen.checkCast(IFN_TYPE);
 		for(int i = 0; i < Math.min(MAX_POSITIONAL_ARITY, args.count()); i++)
 			{
 			Expr e = (Expr) args.nth(i);
@@ -3368,6 +3370,23 @@ static public Var isMacro(Object op) throws Exception{
 	return null;
 }
 
+static public IFn isInline(Object op) throws Exception{
+	//no local inlines for now
+	if(op instanceof Symbol && referenceLocal((Symbol)op) != null)
+		return null;
+	if(op instanceof Symbol || op instanceof Var)
+		{
+		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
+		if(v != null)
+			{
+			if(v.ns != currentNS() && !v.isPublic())
+				throw new IllegalStateException("var: " + v + " is not public");
+			return (IFn) RT.get(v.meta(), inlineKey);
+			}
+		}
+	return null;
+}
+
 public static Object macroexpand1(Object x) throws Exception{
 	if(x instanceof ISeq)
 		{
@@ -3439,6 +3458,9 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 			return analyze(context, me, name);
 
 		Object op = RT.first(form);
+		IFn inline = isInline(op);
+		if(inline != null)
+			return analyze(context, inline.applyTo(RT.rest(form)));
 		IParser p;
 		if(op.equals(FN))
 			return FnExpr.parse(context, form, name);

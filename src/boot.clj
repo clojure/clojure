@@ -2416,3 +2416,14 @@ not-every? (comp not every?))
        (when (seq coll)
          (lazy-cons (take n coll) (partition n step (drop step coll)))))))
 
+(defmacro definline 
+  "Experimental - like defmacro, except defines a named function whose
+  body is the expansion, calls to which may be expanded inline as if
+  it were a macro" 
+  [name & decl]
+  (let [[args expr] (drop-while (comp not vector?) decl)
+        inline (eval (list 'fn args expr))]
+    `(do
+       (defn ~name ~args ~(apply inline args))
+       (let [v# (var ~name)]
+         (.setMeta v# (assoc ^v# :inline ~inline))))))
