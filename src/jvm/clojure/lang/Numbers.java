@@ -1220,15 +1220,75 @@ static BitOps bitOps(Object x){
 		return INTEGER_BITOPS;
 }
 
-static public int addi(int x, int y) {
-	return x + y;
+static public class I{
+static public int add(int x, int y) {return x + y;}
+static public int subtract(int x, int y) {return x - y;}
+static public int negate(int x) {return -x;}
+static public int inc(int x) {return x+1;}
+static public int dec(int x) {return x-1;}
+static public int multiply(int x, int y) {return x * y;}
+static public int divide(int x, int y) {return x / y;}
+static public boolean equiv(int x, int y) {return x ==  y;}
+static public boolean lt(int x, int y) {return x <  y;}
+static public boolean lte(int x, int y) {return x <=  y;}
+static public boolean gt(int x, int y) {return x >  y;}
+static public boolean gte(int x, int y) {return x >=  y;}
+static public boolean pos(int x) {return x > 0;}
+static public boolean neg(int x) {return x < 0;}
+static public boolean zero(int x) {return x == 0;}
 }
 
-static public int subtracti(int x, int y) {
-	return x - y;
+static public class L{
+static public long add(long x, long y) {return x + y;}
+static public long subtract(long x, long y) {return x - y;}
+static public long negate(long x) {return -x;}
+static public long inc(long x) {return x+1;}
+static public long dec(long x) {return x-1;}
+static public long multiply(long x, long y) {return x * y;}
+static public long divide(long x, long y) {return x / y;}
+static public boolean equiv(long x, long y) {return x ==  y;}
+static public boolean lt(long x, long y) {return x <  y;}
+static public boolean lte(long x, long y) {return x <=  y;}
+static public boolean gt(long x, long y) {return x >  y;}
+static public boolean gte(long x, long y) {return x >=  y;}
+static public boolean pos(long x) {return x > 0;}
+static public boolean neg(long x) {return x < 0;}
+static public boolean zero(long x) {return x == 0;}
 }
 
-static public boolean lti(int x, int y) {
-	return x <  y;
+static public class F{
+static public float add(float x, float y) {return x + y;}
+static public float subtract(float x, float y) {return x - y;}
+static public float negate(float x) {return -x;}
+static public float inc(float x) {return x+1;}
+static public float dec(float x) {return x-1;}
+static public float multiply(float x, float y) {return x * y;}
+static public float divide(float x, float y) {return x / y;}
+static public boolean equiv(float x, float y) {return x ==  y;}
+static public boolean lt(float x, float y) {return x <  y;}
+static public boolean lte(float x, float y) {return x <=  y;}
+static public boolean gt(float x, float y) {return x >  y;}
+static public boolean gte(float x, float y) {return x >=  y;}
+static public boolean pos(float x) {return x > 0;}
+static public boolean neg(float x) {return x < 0;}
+static public boolean zero(float x) {return x == 0;}
+}
+
+static public class D{
+static public double add(double x, double y) {return x + y;}
+static public double subtract(double x, double y) {return x - y;}
+static public double negate(double x) {return -x;}
+static public double inc(double x) {return x+1;}
+static public double dec(double x) {return x-1;}
+static public double multiply(double x, double y) {return x * y;}
+static public double divide(double x, double y) {return x / y;}
+static public boolean equiv(double x, double y) {return x ==  y;}
+static public boolean lt(double x, double y) {return x <  y;}
+static public boolean lte(double x, double y) {return x <=  y;}
+static public boolean gt(double x, double y) {return x >  y;}
+static public boolean gte(double x, double y) {return x >=  y;}
+static public boolean pos(double x) {return x > 0;}
+static public boolean neg(double x) {return x < 0;}
+static public boolean zero(double x) {return x == 0;}
 }
 }
