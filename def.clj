@@ -36,6 +36,11 @@
   [name & decls]
   (list* `defvar (with-meta name (assoc (meta name) :private true)) decls))
 
+(defmacro defstruct-
+  "Same as defstruct but yields a private definition"
+  [name & decls]
+  (list* `defstruct (with-meta name (assoc (meta name) :private true)) decls))
+
 (defmacro defalias
   "Defines an alias for a var: a new var with the same value and metadata
   as another with the exception of :namespace, :name, :file, :line, and
