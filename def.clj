@@ -20,11 +20,18 @@
 (defmacro defvar
   "Defines a var with an optional intializer and doc string"
   ([name]
-   (list `def name))
+     (list `def name))
   ([name init]
-   (list `def name init))
+     (list `def name init))
   ([name init doc]
-   (list `def (with-meta name (assoc (meta name) :doc doc)) init)))
+     (list `def (with-meta name (assoc (meta name) :doc doc)) init)))
+
+(defmacro defunbound
+  "Defines an unbound var with optional doc string"
+  ([name]
+     (list `def name))
+  ([name doc]
+     (list `def (with-meta name (assoc (meta name) :doc doc)))))
 
 (defmacro defmacro-
   "Same as defmacro but yields a private definition"
@@ -36,6 +43,11 @@
   [name & decls]
   (list* `defvar (with-meta name (assoc (meta name) :private true)) decls))
 
+(defmacro defunbound-
+  "Same as defunbound but yields a private definition"
+  [name & decls]
+  (list* `defunbound (with-meta name (assoc (meta name) :private true)) decls))
+
 (defmacro defstruct-
   "Same as defstruct but yields a private definition"
   [name & decls]
@@ -46,10 +58,10 @@
   as another with the exception of :namespace, :name, :file, :line, and
   optionally :doc which are those of new var."
   ([name orig]
-   `(let [v# (def ~name ~orig)]
-	  (. v# (setMeta (merge (meta #'~orig) (meta #'~name))))
-	  v#))
+     `(let [v# (def ~name ~orig)]
+        (. v# (setMeta (merge (meta #'~orig) (meta #'~name))))
+        v#))
   ([name orig doc]
-   `(let [v# (def ~name ~orig)]
-	  (. v# (setMeta (merge (meta #'~orig) (assoc (meta #'~name) :doc ~doc))))
-	  v#)))
+     `(let [v# (def ~name ~orig)]
+        (. v# (setMeta (merge (meta #'~orig) (assoc (meta #'~name) :doc ~doc))))
+        v#)))
