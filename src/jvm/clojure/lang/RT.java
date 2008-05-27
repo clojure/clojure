@@ -819,6 +819,14 @@ static public Object[] toArray(Object coll) throws Exception{
 			ret[i] = chars[i];
 		return ret;
 		}
+	else if (coll.getClass().isArray())
+		{
+	    ISeq s = (seq(coll));
+		Object[] ret = new Object[count(s)];
+		for(int i = 0; i < ret.length; i++, s = s.rest())
+			ret[i] = s.first();
+		return ret;
+		}
 	else
 		throw new Exception("Unable to convert: " + coll.getClass() + " to Object[]");
 }

@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (in-ns 'int)
-(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec))
+(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec array max min))
 (import '(clojure.lang Numbers$I))
 
 (definline + [x y] `(. Numbers$I add ~x ~y))
@@ -26,8 +26,40 @@
 (definline dec [x] `(. Numbers$I dec ~x))
 (definline negate [x] `(. Numbers$I negate ~x))
 
+(definline array [size init] `(. Numbers$I array ~size ~init))
+(definline vsadd [xs y] `(. Numbers$I vsadd ~xs ~y))
+(definline vssub [xs y] `(. Numbers$I vssub ~xs ~y))
+(definline vsdiv [xs y] `(. Numbers$I vsdiv ~xs ~y))
+(definline vsmul [xs y] `(. Numbers$I vsmul ~xs ~y))
+(definline svdiv [x ys] `(. Numbers$I svdiv ~x ~ys))
+
+(definline vsmuladd [xs y zs] `(. Numbers$I vsmuladd ~xs ~y ~zs))
+(definline vsmulsub [xs y zs] `(. Numbers$I vsmulsub ~xs ~y ~zs))
+(definline vsmulsadd [xs y z] `(. Numbers$I vsmuladd ~xs ~y ~z))
+(definline vsmulssub [xs y z] `(. Numbers$I vsmulssub ~xs ~y ~z))
+
+(definline vabs [xs] `(. Numbers$I vabs ~xs))
+(definline vnegabs [xs] `(. Numbers$I vnegabs ~xs))
+(definline vneg [xs] `(. Numbers$I vneg ~xs))
+(definline vsqr [xs] `(. Numbers$I vsqr ~xs))
+(definline vsignedsqr [xs] `(. Numbers$I vsignedsqr ~xs))
+(definline vreverse [xs] `(. Numbers$I vreverse ~xs))
+(definline vrunningsum [xs] `(. Numbers$I vrunningsum ~xs))
+(definline vsort [xs] `(. Numbers$I vsort ~xs))
+(definline vmax [xs] `(. Numbers$I vmax ~xs))
+(definline vmin [xs] `(. Numbers$I vmin ~xs))
+(definline vmean [xs] `(. Numbers$I vmean ~xs))
+(definline vrms [xs] `(. Numbers$I vrms ~xs))
+(definline vsum [xs] `(. Numbers$I vsum ~xs))
+
+(definline vclip [xs low high] `(. Numbers$I vclip ~xs ~low ~high))
+(definline vclipcounts [xs low high] `(. Numbers$I vclipcounts ~xs ~low ~high))
+(definline vthresh [xs thresh otherwise] `(. Numbers$I vthresh ~xs ~thresh ~otherwise))
+
+(definline vdot [xs ys] `(. Numbers$I vdot ~xs ~ys))
+
 (in-ns 'long)
-(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec))
+(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec array))
 (import '(clojure.lang Numbers$L))
 
 (definline + [x y] `(. Numbers$L add ~x ~y))
@@ -47,7 +79,7 @@
 (definline negate [x] `(. Numbers$L negate ~x))
 
 (in-ns 'float)
-(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec))
+(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec array))
 (import '(clojure.lang Numbers$F))
 
 (definline + [x y] `(. Numbers$F add ~x ~y))
@@ -67,7 +99,7 @@
 (definline negate [x] `(. Numbers$F negate ~x))
 
 (in-ns 'double)
-(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec))
+(clojure/refer 'clojure :exclude '(+ - * / == < <= > >= zero? pos? neg? inc dec array))
 (import '(clojure.lang Numbers$D))
 
 (definline + [x y] `(. Numbers$D add ~x ~y))
