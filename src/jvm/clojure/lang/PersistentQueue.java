@@ -99,6 +99,10 @@ public PersistentQueue cons(Object o){
 		return new PersistentQueue(meta(), f, (r != null ? r : PersistentVector.EMPTY).cons(o));
 }
 
+public IPersistentCollection empty(){
+	return EMPTY.withMeta(meta());	
+}
+
 public PersistentQueue withMeta(IPersistentMap meta){
 	return new PersistentQueue(meta, f, r);
 }

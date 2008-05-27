@@ -63,6 +63,10 @@ public IPersistentSet cons(Object o){
 	return new PersistentHashSet(meta(),impl.assoc(o,o));
 }
 
+public IPersistentCollection empty(){
+	return EMPTY.withMeta(meta());	
+}
+
 public PersistentHashSet withMeta(IPersistentMap meta){
 	return new PersistentHashSet(meta, impl);
 }

@@ -139,6 +139,10 @@ public PersistentVector cons(Object val){
 	return new PersistentVector(meta(), cnt + 1, newshift, newroot, new Object[]{val});
 }
 
+public IPersistentCollection empty(){
+	return EMPTY.withMeta(meta());
+}
+
 private Object[] pushTail(int level, Object[] arr, Object[] tailNode, Box expansion){
 	Object newchild;
 	if(level == 0)

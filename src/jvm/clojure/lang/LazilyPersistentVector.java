@@ -54,6 +54,10 @@ public IPersistentVector cons(Object o){
 	return v().cons(o);
 }
 
+public IPersistentCollection empty(){
+	return PersistentVector.EMPTY.withMeta(meta());	
+}
+
 public IPersistentStack pop(){
 	return v().pop();
 }

@@ -177,6 +177,10 @@ public ISeq seq(){
 	return new Seq(null, def.keys, vals, 0, ext);
 }
 
+public IPersistentCollection empty(){
+	return construct(def, null);
+}
+
 static class Seq extends ASeq{
 	final int i;
 	final ISeq keys;

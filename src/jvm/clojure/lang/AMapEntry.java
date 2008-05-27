@@ -15,6 +15,9 @@ package clojure.lang;
 import java.io.StringWriter;
 
 public abstract class AMapEntry implements IMapEntry, IPersistentVector{
+public IPersistentCollection empty(){
+	return null;
+}
 
 public boolean equals(Object obj){
 	return APersistentVector.doEquals(this, obj);

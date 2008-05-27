@@ -142,7 +142,7 @@ public IPersistentMap without(Object key){
 	return this;
 }
 
-IPersistentMap empty(){
+public IPersistentMap empty(){
 	return (IPersistentMap) EMPTY.withMeta(meta());
 }
 

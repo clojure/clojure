@@ -2427,3 +2427,8 @@ not-every? (comp not every?))
        (defn ~name ~args ~(apply inline args))
        (let [v# (var ~name)]
          (.setMeta v# (assoc ^v# :inline ~inline))))))
+
+(defn empty 
+  "Returns an empty collection of the same category as coll, or null"
+  [#^ clojure.lang.IPersistentCollection coll]
+  (.empty coll))

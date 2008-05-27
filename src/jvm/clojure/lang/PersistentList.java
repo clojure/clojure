@@ -88,6 +88,10 @@ public PersistentList cons(Object o){
 	return new PersistentList(meta(), o, this, _count + 1);
 }
 
+public IPersistentCollection empty(){
+	return EMPTY.withMeta(meta());	
+}
+
 public PersistentList withMeta(IPersistentMap meta){
 	if(meta != _meta)
 		return new PersistentList(meta, _first, _rest, _count);

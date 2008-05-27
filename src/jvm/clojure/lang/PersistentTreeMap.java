@@ -126,6 +126,10 @@ public ISeq seq(){
 	return null;
 }
 
+public IPersistentCollection empty(){
+	return EMPTY.withMeta(meta());	
+}
+
 public ISeq rseq() throws Exception{
 	if(_count > 0)
 		return Seq.create(tree, false, _count);

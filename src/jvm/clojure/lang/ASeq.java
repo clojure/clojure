@@ -17,6 +17,10 @@ public abstract class ASeq extends Obj implements ISeq, Collection, Sequential{
 transient int _hash = -1;
 
 
+public IPersistentCollection empty(){
+	return null;
+}
+
 protected ASeq(IPersistentMap meta){
 	super(meta);
 }

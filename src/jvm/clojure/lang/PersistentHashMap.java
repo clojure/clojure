@@ -146,6 +146,10 @@ public ISeq seq(){
 	return root.nodeSeq();
 }
 
+public IPersistentCollection empty(){
+	return EMPTY.withMeta(meta());	
+}
+
 static int mask(int hash, int shift){
 	//return ((hash << shift) >>> 27);// & 0x01f;
 	return (hash >>> shift) & 0x01f;

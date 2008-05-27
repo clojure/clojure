@@ -18,4 +18,6 @@ int count();
 ISeq seq();
 
 IPersistentCollection cons(Object o);
+
+IPersistentCollection empty();
 }

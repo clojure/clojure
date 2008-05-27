@@ -63,6 +63,10 @@ public IPersistentSet cons(Object o){
 	return new PersistentTreeSet(meta(),impl.assoc(o,o));
 }
 
+public IPersistentCollection empty(){
+	return EMPTY.withMeta(meta());	
+}
+
 public ISeq rseq() throws Exception{
 	return APersistentMap.KeySeq.create(((Reversible) impl).rseq());
 }

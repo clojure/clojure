@@ -357,6 +357,10 @@ static class SubVector extends APersistentVector{
 		return new SubVector(_meta, v.assocN(end, o), start, end + 1);
 	}
 
+	public IPersistentCollection empty(){
+		return PersistentVector.EMPTY.withMeta(meta());		
+	}
+
 	public IPersistentStack pop(){
 		if(end - 1 == start)
 			{
