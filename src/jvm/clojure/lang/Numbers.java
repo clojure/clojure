@@ -1268,7 +1268,15 @@ static public class F{
 	static public boolean neg(float x) {return x < 0;}
 	static public boolean zero(float x) {return x == 0;}
 
-	static public float[] array(int size, Object init){
+	static public float aget(float[] xs, int i){
+		return xs[i];
+	}
+
+	static public int alength(float[] xs){
+		return xs.length;
+	}
+
+	static public float[] vec(int size, Object init){
 		float[] ret = new float[size];
 		if(init instanceof Number)
 			{
@@ -1284,6 +1292,21 @@ static public class F{
 			}
 		return ret;
 	}
+
+	static public float[] vec(Object sizeOrSeq){
+		if(sizeOrSeq instanceof Number)
+			return new float[((Number)sizeOrSeq).intValue()];
+		else
+			{
+			ISeq s = RT.seq(sizeOrSeq);
+			int size = s.count();
+			float[] ret = new float[size];
+			for(int i = 0; i < size && s != null;i++,s=s.rest())
+				ret[i] = ((Number)s.first()).intValue();
+			return ret;
+			}
+	}
+
 
 	static public float[] vsadd(float[] x, float y){
 		final float[] xs = x.clone();
@@ -1588,12 +1611,20 @@ static public class F{
 		return xs;
 		}
 
-	static public float[] vmap(float[] x, IFn fn) throws Exception{
+	static public float[] vmap(IFn fn, float[] x) throws Exception{
 		float[] xs = x.clone();
 		for(int i=0;i<xs.length;i++)
 			xs[i] = ((Number)fn.invoke(xs[i])).floatValue();
 		return xs;
 		}
+
+	static public float[] vmap(IFn fn, float[] x, float[] ys) throws Exception{
+		float[] xs = x.clone();
+		for(int i=0;i<xs.length;i++)
+			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).floatValue();
+		return xs;
+		}
+
 }
 
 static public class D{
@@ -1613,7 +1644,15 @@ static public class D{
 	static public boolean neg(double x) {return x < 0;}
 	static public boolean zero(double x) {return x == 0;}
 
-	static public double[] array(int size, Object init){
+	static public double aget(double[] xs, int i){
+		return xs[i];
+	}
+
+	static public int alength(double[] xs){
+		return xs.length;
+	}
+
+	static public double[] vec(int size, Object init){
 		double[] ret = new double[size];
 		if(init instanceof Number)
 			{
@@ -1628,6 +1667,20 @@ static public class D{
 				ret[i] = ((Number)s.first()).doubleValue();
 			}
 		return ret;
+	}
+
+	static public double[] vec(Object sizeOrSeq){
+		if(sizeOrSeq instanceof Number)
+			return new double[((Number)sizeOrSeq).intValue()];
+		else
+			{
+			ISeq s = RT.seq(sizeOrSeq);
+			int size = s.count();
+			double[] ret = new double[size];
+			for(int i = 0; i < size && s != null;i++,s=s.rest())
+				ret[i] = ((Number)s.first()).intValue();
+			return ret;
+			}
 	}
 
 	static public double[] vsadd(double[] x, double y){
@@ -1933,10 +1986,17 @@ static public class D{
 		return xs;
 		}
 
-	static public double[] vmap(double[] x, IFn fn) throws Exception{
+	static public double[] vmap(IFn fn, double[] x) throws Exception{
 		double[] xs = x.clone();
 		for(int i=0;i<xs.length;i++)
 			xs[i] = ((Number)fn.invoke(xs[i])).doubleValue();
+		return xs;
+		}
+
+	static public double[] vmap(IFn fn, double[] x, double[] ys) throws Exception{
+		double[] xs = x.clone();
+		for(int i=0;i<xs.length;i++)
+			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).doubleValue();
 		return xs;
 		}
 }
@@ -1958,7 +2018,15 @@ static public class I{
 	static public boolean neg(int x) {return x < 0;}
 	static public boolean zero(int x) {return x == 0;}
 
-	static public int[] array(int size, Object init){
+	static public int aget(int[] xs, int i){
+		return xs[i];
+	}
+
+	static public int alength(int[] xs){
+		return xs.length;
+	}
+
+	static public int[] vec(int size, Object init){
 		int[] ret = new int[size];
 		if(init instanceof Number)
 			{
@@ -1973,6 +2041,20 @@ static public class I{
 				ret[i] = ((Number)s.first()).intValue();
 			}
 		return ret;
+	}
+
+	static public int[] vec(Object sizeOrSeq){
+		if(sizeOrSeq instanceof Number)
+			return new int[((Number)sizeOrSeq).intValue()];
+		else
+			{
+			ISeq s = RT.seq(sizeOrSeq);
+			int size = s.count();
+			int[] ret = new int[size];
+			for(int i = 0; i < size && s != null;i++,s=s.rest())
+				ret[i] = ((Number)s.first()).intValue();
+			return ret;
+			}
 	}
 
 	static public int[] vsadd(int[] x, int y){
@@ -2278,10 +2360,17 @@ static public class I{
 		return xs;
 		}
 
-	static public int[] vmap(int[] x, IFn fn) throws Exception{
+	static public int[] vmap(IFn fn, int[] x) throws Exception{
 		int[] xs = x.clone();
 		for(int i=0;i<xs.length;i++)
 			xs[i] = ((Number)fn.invoke(xs[i])).intValue();
+		return xs;
+		}
+
+	static public int[] vmap(IFn fn, int[] x, int[] ys) throws Exception{
+		int[] xs = x.clone();
+		for(int i=0;i<xs.length;i++)
+			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).intValue();
 		return xs;
 		}
 
@@ -2304,7 +2393,15 @@ static public class L{
 	static public boolean neg(long x) {return x < 0;}
 	static public boolean zero(long x) {return x == 0;}
 
-	static public long[] array(int size, Object init){
+	static public long aget(long[] xs, int i){
+		return xs[i];
+	}
+
+	static public int alength(long[] xs){
+		return xs.length;
+	}
+
+	static public long[] vec(int size, Object init){
 		long[] ret = new long[size];
 		if(init instanceof Number)
 			{
@@ -2320,6 +2417,21 @@ static public class L{
 			}
 		return ret;
 	}
+
+	static public long[] vec(Object sizeOrSeq){
+		if(sizeOrSeq instanceof Number)
+			return new long[((Number)sizeOrSeq).intValue()];
+		else
+			{
+			ISeq s = RT.seq(sizeOrSeq);
+			int size = s.count();
+			long[] ret = new long[size];
+			for(int i = 0; i < size && s != null;i++,s=s.rest())
+				ret[i] = ((Number)s.first()).intValue();
+			return ret;
+			}
+	}
+
 
 	static public long[] vsadd(long[] x, long y){
 		final long[] xs = x.clone();
@@ -2624,10 +2736,17 @@ static public class L{
 		return xs;
 		}
 
-	static public long[] vmap(long[] x, IFn fn) throws Exception{
+	static public long[] vmap(IFn fn, long[] x) throws Exception{
 		long[] xs = x.clone();
 		for(int i=0;i<xs.length;i++)
 			xs[i] = ((Number)fn.invoke(xs[i])).longValue();
+		return xs;
+		}
+
+	static public long[] vmap(IFn fn, long[] x, long[] ys) throws Exception{
+		long[] xs = x.clone();
+		for(int i=0;i<xs.length;i++)
+			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).longValue();
 		return xs;
 		}
 
