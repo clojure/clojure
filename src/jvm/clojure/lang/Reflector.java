@@ -255,6 +255,7 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 		{
 		if(name.equals(allmethods[i].getName())
 		   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
+		   && !Modifier.isVolatile(allmethods[i].getModifiers())
 		   && allmethods[i].getParameterTypes().length == arity)
 			{
 			methods.add(allmethods[i]);

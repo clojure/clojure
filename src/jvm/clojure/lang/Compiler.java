@@ -1756,14 +1756,19 @@ static class ClassExpr implements Expr{
 
 static boolean subsumes(Class[] c1, Class[] c2){
 	//presumes matching lengths
+	Boolean better = false;
 	for(int i = 0; i < c1.length; i++)
 		{
-		if(c2[i].isPrimitive() && c1[i] == Object.class)
-			continue;
-		if(!c2[i].isAssignableFrom(c1[i]))
-			return false;
+		if(!(c1[i] == c2[i] || c2[i].isPrimitive() && c1[i] == Object.class))
+			{
+			if(c1[i].isPrimitive() && c2[i] == Object.class
+			   || c2[i].isAssignableFrom(c1[i]))
+				better = true;
+			else
+				return false;
+			}
 		}
-	return true;
+	return better;
 }
 
 static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, IPersistentVector argexprs)
@@ -2967,7 +2972,7 @@ static class FnMethod{
 	}
 
 	void emitClearLocals(GeneratorAdapter gen){
-		for(int i = 1; i < numParams()+1; i++)
+		for(int i = 1; i < numParams() + 1; i++)
 			{
 			if(!localsUsedInCatchFinally.contains(i))
 				{
@@ -3355,7 +3360,7 @@ static public class CompilerException extends Exception{
 
 static public Var isMacro(Object op) throws Exception{
 	//no local macros for now
-	if(op instanceof Symbol && referenceLocal((Symbol)op) != null)
+	if(op instanceof Symbol && referenceLocal((Symbol) op) != null)
 		return null;
 	if(op instanceof Symbol || op instanceof Var)
 		{
@@ -3372,7 +3377,7 @@ static public Var isMacro(Object op) throws Exception{
 
 static public IFn isInline(Object op) throws Exception{
 	//no local inlines for now
-	if(op instanceof Symbol && referenceLocal((Symbol)op) != null)
+	if(op instanceof Symbol && referenceLocal((Symbol) op) != null)
 		return null;
 	if(op instanceof Symbol || op instanceof Var)
 		{
