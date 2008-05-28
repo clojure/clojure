@@ -17,7 +17,7 @@ import java.util.LinkedList;
 public class PersistentList extends ASeq implements IPersistentList{
 
 private final Object _first;
-private final PersistentList _rest;
+private final IPersistentList _rest;
 private final int _count;
 
 public static IFn creator = new RestFn(0){
@@ -25,9 +25,9 @@ public static IFn creator = new RestFn(0){
 		if(args instanceof ArraySeq)
 			{
 			Object[] argsarray = (Object[]) ((ArraySeq) args).array;
-			ISeq ret = EMPTY;
+			IPersistentList ret = EMPTY;
 			for(int i = argsarray.length - 1; i >= 0; --i)
-				ret = ret.cons(argsarray[i]);
+				ret = (IPersistentList) ret.cons(argsarray[i]);
 			return ret;
 			}
 		LinkedList list = new LinkedList();
@@ -37,7 +37,7 @@ public static IFn creator = new RestFn(0){
 	}
 };
 
-final public static PersistentList EMPTY = new EmptyList(null);
+final public static EmptyList EMPTY = new EmptyList(null);
 
 public PersistentList(Object first){
 	this._first = first;
@@ -46,18 +46,18 @@ public PersistentList(Object first){
 	this._count = 1;
 }
 
-PersistentList(IPersistentMap meta, Object _first, PersistentList _rest, int _count){
+PersistentList(IPersistentMap meta, Object _first, IPersistentList _rest, int _count){
 	super(meta);
 	this._first = _first;
 	this._rest = _rest;
 	this._count = _count;
 }
 
-public static ISeq create(List init){
-	ISeq ret = EMPTY;
+public static IPersistentList create(List init){
+	IPersistentList ret = EMPTY;
 	for(ListIterator i = init.listIterator(init.size()); i.hasPrevious();)
 		{
-		ret = ret.cons(i.previous());
+		ret = (IPersistentList) ret.cons(i.previous());
 		}
 	return ret;
 }
@@ -67,7 +67,9 @@ public Object first(){
 }
 
 public ISeq rest(){
-	return _rest;
+	if(_count == 1)
+		return null;
+	return (ISeq) _rest;
 }
 
 public Object peek(){
@@ -98,24 +100,36 @@ public PersistentList withMeta(IPersistentMap meta){
 	return this;
 }
 
-static class EmptyList extends PersistentList{
+static class EmptyList extends Obj implements IPersistentList{
 
 	EmptyList(IPersistentMap meta){
-		super(meta, null, null, 0);
+		super(meta);
 	}
 
 	public PersistentList cons(Object o){
 		return new PersistentList(meta(), o, null, 1);
 	}
 
-	public PersistentList withMeta(IPersistentMap meta){
+	public IPersistentCollection empty(){
+		return this;
+	}
+
+	public EmptyList withMeta(IPersistentMap meta){
 		if(meta != meta())
 			return new EmptyList(meta);
 		return this;
 	}
 
+	public Object peek(){
+		return null;
+	}
+
 	public IPersistentList pop(){
 		throw new IllegalStateException("Can't pop empty list");
+	}
+
+	public int count(){
+		return 0;
 	}
 
 	public ISeq seq(){
