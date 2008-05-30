@@ -524,6 +524,8 @@ static public abstract class HostExpr implements Expr{
 	final static Method fromLongMethod = Method.getMethod("clojure.lang.Num from(long)");
 	final static Method fromDoubleMethod = Method.getMethod("clojure.lang.Num from(double)");
 
+	abstract public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen);
+
 	/*
 	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
 		if(returnType.isPrimitive())
@@ -802,6 +804,18 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		return Reflector.invokeNoArgInstanceMember(target.eval(), fieldName);
 	}
 
+	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
+		if(targetClass != null && field != null)
+			{
+			target.emit(C.EXPRESSION, fn, gen);
+			gen.checkCast(Type.getType(targetClass));
+			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
+			}
+		else
+			throw new UnsupportedOperationException("Unboxed emit of unknown member");
+	}
+
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
@@ -809,7 +823,8 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			target.emit(C.EXPRESSION, fn, gen);
 			gen.checkCast(Type.getType(targetClass));
 			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
-			HostExpr.emitBoxReturn(fn, gen, field.getType());
+			if(context != C.STATEMENT)
+				HostExpr.emitBoxReturn(fn, gen, field.getType());
 			if(context == C.STATEMENT)
 				{
 				gen.pop();
@@ -883,11 +898,17 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 		return Reflector.getStaticField(c, fieldName);
 	}
 
+	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
+		gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
+	}
+
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 
 		gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
-		HostExpr.emitBoxReturn(fn, gen, field.getType());
+		if(context != C.STATEMENT)
+			HostExpr.emitBoxReturn(fn, gen, field.getType());
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -921,6 +942,8 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
+
+
 }
 
 static abstract class MethodExpr extends HostExpr{
@@ -940,8 +963,23 @@ static abstract class MethodExpr extends HostExpr{
 		for(int i = 0; i < parameterTypes.length; i++)
 			{
 			Expr e = (Expr) args.nth(i);
-			e.emit(C.EXPRESSION, fn, gen);
-			HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
+			try
+				{
+				if(e instanceof HostExpr && e.hasJavaClass() && e.getJavaClass() == parameterTypes[i])
+					{
+					((HostExpr)e).emitUnboxed(C.EXPRESSION, fn, gen);					
+					}
+				else
+					{
+					e.emit(C.EXPRESSION, fn, gen);
+					HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
+					}
+				}
+			catch(Exception e1)
+				{
+				e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+				}
+
 			}
 	}
 }
@@ -1011,6 +1049,30 @@ static class InstanceMethodExpr extends MethodExpr{
 		return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
 	}
 
+	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
+		if(method != null)
+			{
+			Type type = Type.getType(method.getDeclaringClass());
+			target.emit(C.EXPRESSION, fn, gen);
+			if(!method.getDeclaringClass().isInterface())
+				gen.checkCast(type);
+			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearLocals(gen);
+				}
+			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
+			if(method.getDeclaringClass().isInterface())
+				gen.invokeInterface(type, m);
+			else
+				gen.invokeVirtual(type, m);
+			}
+		else
+			throw new UnsupportedOperationException("Unboxed emit of unknown member");
+	}
+
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
@@ -1030,7 +1092,8 @@ static class InstanceMethodExpr extends MethodExpr{
 				gen.invokeInterface(type, m);
 			else
 				gen.invokeVirtual(type, m);
-			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
+				HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
 			}
 		else
 			{
@@ -1108,6 +1171,25 @@ static class StaticMethodExpr extends MethodExpr{
 		return Reflector.invokeStaticMethod(c, methodName, argvals);
 	}
 
+	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
+		if(method != null)
+			{
+			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			//Type type = Type.getObjectType(className.replace('.', '/'));
+			if(context == C.RETURN)
+				{
+				FnMethod method = (FnMethod) METHOD.get();
+				method.emitClearLocals(gen);
+				}
+			Type type = Type.getType(c);
+			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
+			gen.invokeStatic(type, m);
+			}
+		else
+			throw new UnsupportedOperationException("Unboxed emit of unknown member");			
+	}
+
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
@@ -1122,7 +1204,8 @@ static class StaticMethodExpr extends MethodExpr{
 			Type type = Type.getType(c);
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			gen.invokeStatic(type, m);
-			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
+				HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
 			}
 		else
 			{
@@ -2081,11 +2164,26 @@ static class IfExpr implements Expr{
 
 		gen.visitLineNumber(line, gen.mark());
 
-		testExpr.emit(C.EXPRESSION, fn, gen);
-		gen.dup();
-		gen.ifNull(nullLabel);
-		gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
-		gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
+		try
+			{
+			if(testExpr instanceof HostExpr && testExpr.hasJavaClass() && testExpr.getJavaClass() == boolean.class)
+				{
+				((HostExpr)testExpr).emitUnboxed(C.EXPRESSION, fn, gen);
+				gen.ifZCmp(gen.EQ,falseLabel);
+				}
+			else
+				{
+				testExpr.emit(C.EXPRESSION, fn, gen);
+				gen.dup();
+				gen.ifNull(nullLabel);
+				gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+				gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
+				}
+			}
+		catch(Exception e)
+			{
+			throw new RuntimeException(e);
+			}
 		thenExpr.emit(context, fn, gen);
 		gen.goTo(endLabel);
 		gen.mark(nullLabel);
@@ -2144,6 +2242,7 @@ static final public IPersistentMap CHAR_MAP =
 		                         '^', "_CARET_",
 		                         '&', "_AMPERSAND_",
 		                         '*', "_STAR_",
+		                         '|', "_BAR_",
 		                         '{', "_LBRACE_",
 		                         '}', "_RBRACE_",
 		                         '[', "_LBRACK_",
