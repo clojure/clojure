@@ -941,7 +941,7 @@ static public void print(Object x, Writer w) throws Exception{
 		}
 	if(x == null)
 		w.write("nil");
-	else if(x instanceof ISeq)
+	else if(x instanceof ISeq || x instanceof IPersistentList)
 		{
 		w.write('(');
 		printInnerSeq(seq(x), w);
