@@ -1251,6 +1251,25 @@ static BitOps bitOps(Object x){
 //		executor.invokeAll(ops);
 //		}
 
+static final public class Indexer{
+	int i;
+
+	public Indexer(int i){
+		this.i = i;
+	}
+
+	public final int get(){
+		return i;
+	}
+
+	public final int inc(){
+		return i += 1;
+	}
+	public final int inc(int n){
+		return i += n;
+	}
+
+}
 static public class F{
 	static public float add(float x, float y) {return x + y;}
 	static public float subtract(float x, float y) {return x - y;}
@@ -1272,8 +1291,17 @@ static public class F{
 		return xs[i];
 	}
 
+	static public float aset(float[] xs, int i, float v){
+		xs[i] = v;
+		return v;
+	}
+
 	static public int alength(float[] xs){
 		return xs.length;
+	}
+
+	static public float[] aclone(float[] xs){
+		return xs.clone();
 	}
 
 	static public float[] vec(int size, Object init){
@@ -1648,8 +1676,17 @@ static public class D{
 		return xs[i];
 	}
 
+	static public double aset(double[] xs, int i, double v){
+		xs[i] = v;
+		return v;
+	}
+
 	static public int alength(double[] xs){
 		return xs.length;
+	}
+
+	static public double[] aclone(double[] xs){
+		return xs.clone();
 	}
 
 	static public double[] vec(int size, Object init){
@@ -2022,8 +2059,17 @@ static public class I{
 		return xs[i];
 	}
 
+	static public int aset(int[] xs, int i, int v){
+		xs[i] = v;
+		return v;
+	}
+
 	static public int alength(int[] xs){
 		return xs.length;
+	}
+
+	static public int[] aclone(int[] xs){
+		return xs.clone();
 	}
 
 	static public int[] vec(int size, Object init){
@@ -2397,8 +2443,17 @@ static public class L{
 		return xs[i];
 	}
 
+	static public long aset(long[] xs, int i, long v){
+		xs[i] = v;
+		return v;
+	}
+
 	static public int alength(long[] xs){
 		return xs.length;
+	}
+
+	static public long[] aclone(long[] xs){
+		return xs.clone();
 	}
 
 	static public long[] vec(int size, Object init){
