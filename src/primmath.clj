@@ -26,12 +26,12 @@
 (definline dec [x] `(. Numbers$I dec ~x))
 (definline negate [x] `(. Numbers$I negate ~x))
 
-(definline aget [xs i] `(. Numbers$I aget ~xs ~i))
+;(definline aget [xs i] `(. Numbers$I aget ~xs ~i))
 
-(definline aset! [xs i v] `(. Numbers$I aset ~xs ~i ~v))
-(definline aclone [xs] `(. Numbers$I aclone ~xs))
+;(definline aset! [xs i v] `(. Numbers$I aset ~xs ~i ~v))
+;(definline aclone [xs] `(. Numbers$I aclone ~xs))
 
-(definline alength [xs] `(. Numbers$I alength ~xs))
+;(definline alength [xs] `(. Numbers$I alength ~xs))
 
 (defn array 
   ([size-or-seq] (. Numbers$I vec size-or-seq))
@@ -106,12 +106,12 @@
 (definline dec [x] `(. Numbers$L dec ~x))
 (definline negate [x] `(. Numbers$L negate ~x))
 
-(definline aget [xs i] `(. Numbers$L aget ~xs ~i))
+;(definline aget [xs i] `(. Numbers$L aget ~xs ~i))
 
-(definline aset! [xs i v] `(. Numbers$L aset ~xs ~i ~v))
-(definline aclone [xs] `(. Numbers$L aclone ~xs))
+;(definline aset! [xs i v] `(. Numbers$L aset ~xs ~i ~v))
+;(definline aclone [xs] `(. Numbers$L aclone ~xs))
 
-(definline alength [xs] `(. Numbers$L alength ~xs))
+;(definline alength [xs] `(. Numbers$L alength ~xs))
 
 (defn array 
   ([size-or-seq] (. Numbers$L vec size-or-seq))
@@ -186,12 +186,12 @@
 (definline dec [x] `(. Numbers$F dec ~x))
 (definline negate [x] `(. Numbers$F negate ~x))
 
-(definline aget [xs i] `(. Numbers$F aget ~xs ~i))
+;(definline aget [xs i] `(. Numbers$F aget ~xs ~i))
 
-(definline aset! [xs i v] `(. Numbers$F aset ~xs ~i ~v))
-(definline aclone [xs] `(. Numbers$F aclone ~xs))
+;(definline aset! [xs i v] `(. Numbers$F aset ~xs ~i ~v))
+;(definline aclone [xs] `(. Numbers$F aclone ~xs))
 
-(definline alength [xs] `(. Numbers$F alength ~xs))
+;(definline alength [xs] `(. Numbers$F alength ~xs))
 
 (defn array 
   ([size-or-seq] (. Numbers$F vec size-or-seq))
@@ -266,12 +266,12 @@
 (definline dec [x] `(. Numbers$D dec ~x))
 (definline negate [x] `(. Numbers$D negate ~x))
 
-(definline aget [xs i] `(. Numbers$D aget ~xs ~i))
+;(definline aget [xs i] `(. Numbers$D aget ~xs ~i))
 
-(definline aset! [xs i v] `(. Numbers$D aset ~xs ~i ~v))
-(definline aclone [xs] `(. Numbers$D aclone ~xs))
+;(definline aset! [xs i v] `(. Numbers$D aset ~xs ~i ~v))
+;(definline aclone [xs] `(. Numbers$D aclone ~xs))
 
-(definline alength [xs] `(. Numbers$D alength ~xs))
+;(definline alength [xs] `(. Numbers$D alength ~xs))
 
 (defn array 
   ([size-or-seq] (. Numbers$D vec size-or-seq))

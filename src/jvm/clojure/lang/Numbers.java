@@ -99,48 +99,48 @@ static interface BitOps{
 }
 
 
-static public boolean isZero(Number x){
-	return ops(x).isZero(x);
+static public boolean isZero(Object x){
+	return ops(x).isZero((Number)x);
 }
 
-static public boolean isPos(Number x){
-	return ops(x).isPos(x);
+static public boolean isPos(Object x){
+	return ops(x).isPos((Number)x);
 }
 
-static public boolean isNeg(Number x){
-	return ops(x).isNeg(x);
+static public boolean isNeg(Object x){
+	return ops(x).isNeg((Number)x);
 }
 
-static public Number negate(Number x){
-	return ops(x).negate(x);
+static public Number minus(Object x){
+	return ops(x).negate((Number)x);
 }
 
-static public Number inc(Number x){
-	return ops(x).inc(x);
+static public Number inc(Object x){
+	return ops(x).inc((Number)x);
 }
 
-static public Number dec(Number x){
-	return ops(x).dec(x);
+static public Number dec(Object x){
+	return ops(x).dec((Number)x);
 }
 
-static public Number add(Number x, Number y){
-	return ops(x).combine(ops(y)).add(x, y);
+static public Number add(Object x, Object y){
+	return ops(x).combine(ops(y)).add((Number)x, (Number)y);
 }
 
-static public Number subtract(Number x, Number y){
+static public Number minus(Object x, Object y){
 	Ops yops = ops(y);
-	return ops(x).combine(yops).add(x, yops.negate(y));
+	return ops(x).combine(yops).add((Number)x, yops.negate((Number)y));
 }
 
-static public Number multiply(Number x, Number y){
-	return ops(x).combine(ops(y)).multiply(x, y);
+static public Number multiply(Object x, Object y){
+	return ops(x).combine(ops(y)).multiply((Number)x, (Number)y);
 }
 
-static public Number divide(Number x, Number y){
+static public Number divide(Object x, Object y){
 	Ops yops = ops(y);
-	if(yops.isZero(y))
+	if(yops.isZero((Number)y))
 		throw new ArithmeticException("Divide by zero");
-	return ops(x).combine(yops).divide(x, y);
+	return ops(x).combine(yops).divide((Number)x, (Number)y);
 }
 
 static public Number quotient(Number x, Number y){
@@ -191,20 +191,20 @@ static public boolean equiv(Number x, Number y){
 	return ops(x).combine(ops(y)).equiv(x, y);
 }
 
-static public boolean lt(Number x, Number y){
-	return ops(x).combine(ops(y)).lt(x, y);
+static public boolean lt(Object x, Object y){
+	return ops(x).combine(ops(y)).lt((Number)x, (Number)y);
 }
 
-static public boolean lte(Number x, Number y){
-	return !ops(x).combine(ops(y)).lt(y, x);
+static public boolean lte(Object x, Object y){
+	return !ops(x).combine(ops(y)).lt((Number)y, (Number)x);
 }
 
-static public boolean gt(Number x, Number y){
-	return ops(x).combine(ops(y)).lt(y, x);
+static public boolean gt(Object x, Object y){
+	return ops(x).combine(ops(y)).lt((Number)y, (Number)x);
 }
 
-static public boolean gte(Number x, Number y){
-	return !ops(x).combine(ops(y)).lt(x, y);
+static public boolean gte(Object x, Object y){
+	return !ops(x).combine(ops(y)).lt((Number)x, (Number)y);
 }
 
 static public int compare(Number x, Number y){
@@ -713,7 +713,7 @@ final static class RatioOps implements Ops{
 		Ratio ry = toRatio(y);
 		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
 				rx.denominator.multiply(ry.numerator));
-		return Numbers.subtract(x, Numbers.multiply(q, y));
+		return Numbers.minus(x, Numbers.multiply(q, y));
 	}
 
 	public boolean equiv(Number x, Number y){
@@ -1250,67 +1250,212 @@ static BitOps bitOps(Object x){
 //		executor.invokeAll(ops);
 //		}
 
+
+	static public float[] float_array(int size, Object init){
+		float[] ret = new float[size];
+		if(init instanceof Number)
+			{
+			float f = ((Number) init).floatValue();
+			for(int i = 0; i < ret.length; i++)
+				ret[i] = f;
+			}
+		else
+			{
+			ISeq s = RT.seq(init);
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).floatValue();
+			}
+		return ret;
+	}
+
+	static public float[] float_array(Object sizeOrSeq){
+		if(sizeOrSeq instanceof Number)
+			return new float[((Number) sizeOrSeq).intValue()];
+		else
+			{
+			ISeq s = RT.seq(sizeOrSeq);
+			int size = s.count();
+			float[] ret = new float[size];
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).intValue();
+			return ret;
+			}
+	}
+
+static public double[] double_array(int size, Object init){
+	double[] ret = new double[size];
+	if(init instanceof Number)
+		{
+		double f = ((Number) init).doubleValue();
+		for(int i = 0; i < ret.length; i++)
+			ret[i] = f;
+		}
+	else
+		{
+		ISeq s = RT.seq(init);
+		for(int i = 0; i < size && s != null; i++, s = s.rest())
+			ret[i] = ((Number) s.first()).doubleValue();
+		}
+	return ret;
+}
+
+static public double[] double_array(Object sizeOrSeq){
+	if(sizeOrSeq instanceof Number)
+		return new double[((Number) sizeOrSeq).intValue()];
+	else
+		{
+		ISeq s = RT.seq(sizeOrSeq);
+		int size = s.count();
+		double[] ret = new double[size];
+		for(int i = 0; i < size && s != null; i++, s = s.rest())
+			ret[i] = ((Number) s.first()).intValue();
+		return ret;
+		}
+}
+
+static public int[] int_array(int size, Object init){
+	int[] ret = new int[size];
+	if(init instanceof Number)
+		{
+		int f = ((Number) init).intValue();
+		for(int i = 0; i < ret.length; i++)
+			ret[i] = f;
+		}
+	else
+		{
+		ISeq s = RT.seq(init);
+		for(int i = 0; i < size && s != null; i++, s = s.rest())
+			ret[i] = ((Number) s.first()).intValue();
+		}
+	return ret;
+}
+
+static public int[] int_array(Object sizeOrSeq){
+	if(sizeOrSeq instanceof Number)
+		return new int[((Number) sizeOrSeq).intValue()];
+	else
+		{
+		ISeq s = RT.seq(sizeOrSeq);
+		int size = s.count();
+		int[] ret = new int[size];
+		for(int i = 0; i < size && s != null; i++, s = s.rest())
+			ret[i] = ((Number) s.first()).intValue();
+		return ret;
+		}
+}
+
+static public long[] long_array(int size, Object init){
+	long[] ret = new long[size];
+	if(init instanceof Number)
+		{
+		long f = ((Number) init).longValue();
+		for(int i = 0; i < ret.length; i++)
+			ret[i] = f;
+		}
+	else
+		{
+		ISeq s = RT.seq(init);
+		for(int i = 0; i < size && s != null; i++, s = s.rest())
+			ret[i] = ((Number) s.first()).longValue();
+		}
+	return ret;
+}
+
+static public long[] long_array(Object sizeOrSeq){
+	if(sizeOrSeq instanceof Number)
+		return new long[((Number) sizeOrSeq).intValue()];
+	else
+		{
+		ISeq s = RT.seq(sizeOrSeq);
+		int size = s.count();
+		long[] ret = new long[size];
+		for(int i = 0; i < size && s != null; i++, s = s.rest())
+			ret[i] = ((Number) s.first()).intValue();
+		return ret;
+		}
+}
+
+static public float[] floats(Object array){
+	return (float[]) array;
+}
+
+static public double[] doubles(Object array){
+	return (double[]) array;
+}
+
+static public int[] ints(Object array){
+	return (int[]) array;
+}
+
+static public long[] longs(Object array){
+	return (long[]) array;
+}
+
+static public Number num(Object x){
+	return (Number) x;
+}
+
 static public Number num(float x){
 	return x;
 }
 
-static public float prim_add(float x, float y){
+static public float add(float x, float y){
 	return x + y;
 }
 
-static public float prim_subtract(float x, float y){
+static public float minus(float x, float y){
 	return x - y;
 }
 
-static public float prim_negate(float x){
+static public float minus(float x){
 	return -x;
 }
 
-static public float prim_inc(float x){
+static public float inc(float x){
 	return x + 1;
 }
 
-static public float prim_dec(float x){
+static public float dec(float x){
 	return x - 1;
 }
 
-static public float prim_multiply(float x, float y){
+static public float multiply(float x, float y){
 	return x * y;
 }
 
-static public float prim_divide(float x, float y){
+static public float divide(float x, float y){
 	return x / y;
 }
 
-static public boolean prim_equiv(float x, float y){
+static public boolean equiv(float x, float y){
 	return x == y;
 }
 
-static public boolean prim_lt(float x, float y){
+static public boolean lt(float x, float y){
 	return x < y;
 }
 
-static public boolean prim_lte(float x, float y){
+static public boolean lte(float x, float y){
 	return x <= y;
 }
 
-static public boolean prim_gt(float x, float y){
+static public boolean gt(float x, float y){
 	return x > y;
 }
 
-static public boolean prim_gte(float x, float y){
+static public boolean gte(float x, float y){
 	return x >= y;
 }
 
-static public boolean prim_isPos(float x){
+static public boolean isPos(float x){
 	return x > 0;
 }
 
-static public boolean prim_isNeg(float x){
+static public boolean isNeg(float x){
 	return x < 0;
 }
 
-static public boolean prim_isZero(float x){
+static public boolean isZero(float x){
 	return x == 0;
 }
 
@@ -1318,127 +1463,170 @@ static public Number num(double x){
 	return x;
 }
 
-static public double prim_add(double x, double y){
+static public double add(double x, double y){
 	return x + y;
 }
 
-static public double prim_subtract(double x, double y){
+static public double minus(double x, double y){
 	return x - y;
 }
 
-static public double prim_negate(double x){
+static public double minus(double x){
 	return -x;
 }
 
-static public double prim_inc(double x){
+static public double inc(double x){
 	return x + 1;
 }
 
-static public double prim_dec(double x){
+static public double dec(double x){
 	return x - 1;
 }
 
-static public double prim_multiply(double x, double y){
+static public double multiply(double x, double y){
 	return x * y;
 }
 
-static public double prim_divide(double x, double y){
+static public double divide(double x, double y){
 	return x / y;
 }
 
-static public boolean prim_equiv(double x, double y){
+static public boolean equiv(double x, double y){
 	return x == y;
 }
 
-static public boolean prim_lt(double x, double y){
+static public boolean lt(double x, double y){
 	return x < y;
 }
 
-static public boolean prim_lte(double x, double y){
+static public boolean lte(double x, double y){
 	return x <= y;
 }
 
-static public boolean prim_gt(double x, double y){
+static public boolean gt(double x, double y){
 	return x > y;
 }
 
-static public boolean prim_gte(double x, double y){
+static public boolean gte(double x, double y){
 	return x >= y;
 }
 
-static public boolean prim_isPos(double x){
+static public boolean isPos(double x){
 	return x > 0;
 }
 
-static public boolean prim_isNeg(double x){
+static public boolean isNeg(double x){
 	return x < 0;
 }
 
-static public boolean prim_isZero(double x){
+static public boolean isZero(double x){
 	return x == 0;
+}
+
+static int throwIntOverflow(){
+	throw new ArithmeticException("integer overflow");
 }
 
 static public Number num(int x){
 	return x;
 }
 
-static public int prim_add(int x, int y){
+static public int unchecked_add(int x, int y){
 	return x + y;
 }
 
-static public int prim_subtract(int x, int y){
+static public int unchecked_subtract(int x, int y){
 	return x - y;
 }
 
-static public int prim_negate(int x){
+static public int unchecked_negate(int x){
 	return -x;
 }
 
-static public int prim_inc(int x){
+static public int unchecked_inc(int x){
 	return x + 1;
 }
 
-static public int prim_dec(int x){
+static public int unchecked_dec(int x){
 	return x - 1;
 }
 
-static public int prim_multiply(int x, int y){
+static public int unchecked_multiply(int x, int y){
 	return x * y;
 }
 
-static public int prim_divide(int x, int y){
+static public int add(int x, int y){
+	int ret = x + y;
+	if ((ret ^ x) < 0 && (ret ^ y) < 0)
+		return throwIntOverflow();
+	return ret;
+}
+
+static public int minus(int x, int y){
+	int ret = x - y;
+	if ((ret ^ x) < 0 && (ret ^ -y) < 0)
+		return throwIntOverflow();
+	return ret;
+}
+
+static public int minus(int x){
+	if(x == Integer.MIN_VALUE)
+		return throwIntOverflow();
+	return -x;
+}
+
+static public int inc(int x){
+	if(x == Integer.MAX_VALUE)
+		return throwIntOverflow();
+	return x + 1;
+}
+
+static public int dec(int x){
+	if(x == Integer.MIN_VALUE)
+		return throwIntOverflow();
+	return x - 1;
+}
+
+static public int multiply(int x, int y){
+	int ret = x * y;
+	if (y != 0 && ret/y != x)
+		return throwIntOverflow();
+	return ret;
+}
+
+static public int divide(int x, int y){
 	return x / y;
 }
 
-static public boolean prim_equiv(int x, int y){
+static public boolean equiv(int x, int y){
 	return x == y;
 }
 
-static public boolean prim_lt(int x, int y){
+static public boolean lt(int x, int y){
 	return x < y;
 }
 
-static public boolean prim_lte(int x, int y){
+static public boolean lte(int x, int y){
 	return x <= y;
 }
 
-static public boolean prim_gt(int x, int y){
+static public boolean gt(int x, int y){
 	return x > y;
 }
 
-static public boolean prim_gte(int x, int y){
+static public boolean gte(int x, int y){
 	return x >= y;
 }
 
-static public boolean prim_isPos(int x){
+static public boolean isPos(int x){
 	return x > 0;
 }
 
-static public boolean prim_isNeg(int x){
+static public boolean isNeg(int x){
 	return x < 0;
 }
 
-static public boolean prim_isZero(int x){
+static public boolean isZero(int x){
 	return x == 0;
 }
 
@@ -1446,66 +1634,106 @@ static public Number num(long x){
 	return x;
 }
 
-static public long prim_add(long x, long y){
+static public long unchecked_add(long x, long y){
 	return x + y;
 }
 
-static public long prim_subtract(long x, long y){
+static public long unchecked_subtract(long x, long y){
 	return x - y;
 }
 
-static public long prim_negate(long x){
+static public long unchecked_negate(long x){
 	return -x;
 }
 
-static public long prim_inc(long x){
+static public long unchecked_inc(long x){
 	return x + 1;
 }
 
-static public long prim_dec(long x){
+static public long unchecked_dec(long x){
 	return x - 1;
 }
 
-static public long prim_multiply(long x, long y){
+static public long unchecked_multiply(long x, long y){
 	return x * y;
 }
 
-static public long prim_divide(long x, long y){
+static public long add(long x, long y){
+	long ret = x + y;
+	if ((ret ^ x) < 0 && (ret ^ y) < 0)
+		return throwIntOverflow();
+	return ret;
+}
+
+static public long minus(long x, long y){
+	long ret = x - y;
+	if ((ret ^ x) < 0 && (ret ^ -y) < 0)
+		return throwIntOverflow();
+	return ret;
+}
+
+static public long minus(long x){
+	if(x == Integer.MIN_VALUE)
+		return throwIntOverflow();
+	return -x;
+}
+
+static public long inc(long x){
+	if(x == Integer.MAX_VALUE)
+		return throwIntOverflow();
+	return x + 1;
+}
+
+static public long dec(long x){
+	if(x == Integer.MIN_VALUE)
+		return throwIntOverflow();
+	return x - 1;
+}
+
+static public long multiply(long x, long y){
+	long ret = x * y;
+	if (y != 0 && ret/y != x)
+		return throwIntOverflow();
+	return ret;
+}
+
+static public long divide(long x, long y){
 	return x / y;
 }
 
-static public boolean prim_equiv(long x, long y){
+static public boolean equiv(long x, long y){
 	return x == y;
 }
 
-static public boolean prim_lt(long x, long y){
+static public boolean lt(long x, long y){
 	return x < y;
 }
 
-static public boolean prim_lte(long x, long y){
+static public boolean lte(long x, long y){
 	return x <= y;
 }
 
-static public boolean prim_gt(long x, long y){
+static public boolean gt(long x, long y){
 	return x > y;
 }
 
-static public boolean prim_gte(long x, long y){
+static public boolean gte(long x, long y){
 	return x >= y;
 }
 
-static public boolean prim_isPos(long x){
+static public boolean isPos(long x){
 	return x > 0;
 }
 
-static public boolean prim_isNeg(long x){
+static public boolean isNeg(long x){
 	return x < 0;
 }
 
-static public boolean prim_isZero(long x){
+static public boolean isZero(long x){
 	return x == 0;
 }
 
+/*
 static public class F{
 	static public float add(float x, float y){
 		return x + y;
@@ -3218,5 +3446,5 @@ static public class L{
 	}
 
 }
-
+*/
 }

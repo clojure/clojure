@@ -286,10 +286,10 @@ static public void init() throws Exception{
 
 static void doInit() throws Exception{
 	loadResourceScript(RT.class, "boot.clj");
-	loadResourceScript(RT.class, "primmath.clj");
+	//loadResourceScript(RT.class, "primmath.clj");
 	loadResourceScript(RT.class, "proxy.clj");
 	loadResourceScript(RT.class, "zip.clj");
-	//loadResourceScript(RT.class, "xml.clj");
+	loadResourceScript(RT.class, "xml.clj");
 	loadResourceScript(RT.class, "set.clj");
 
 	Var.pushThreadBindings(
@@ -1286,6 +1286,173 @@ static public ClassLoader makeClassLoader(){
 
 static public Class classForName(String name) throws ClassNotFoundException{
 	return Class.forName(name, false, RT.ROOT_CLASSLOADER);
+}
+
+
+static public float aget(float[] xs, int i){
+	return xs[i];
+}
+
+static public float aset(float[] xs, int i, float v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(float[] xs){
+	return xs.length;
+}
+
+static public float[] aclone(float[] xs){
+	return xs.clone();
+}
+
+static public double aget(double[] xs, int i){
+	return xs[i];
+}
+
+static public double aset(double[] xs, int i, double v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(double[] xs){
+	return xs.length;
+}
+
+static public double[] aclone(double[] xs){
+	return xs.clone();
+}
+
+static public int aget(int[] xs, int i){
+	return xs[i];
+}
+
+static public int aset(int[] xs, int i, int v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(int[] xs){
+	return xs.length;
+}
+
+static public int[] aclone(int[] xs){
+	return xs.clone();
+}
+
+static public long aget(long[] xs, int i){
+	return xs[i];
+}
+
+static public long aset(long[] xs, int i, long v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(long[] xs){
+	return xs.length;
+}
+
+static public long[] aclone(long[] xs){
+	return xs.clone();
+}
+
+static public char aget(char[] xs, int i){
+	return xs[i];
+}
+
+static public char aset(char[] xs, int i, char v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(char[] xs){
+	return xs.length;
+}
+
+static public char[] aclone(char[] xs){
+	return xs.clone();
+}
+
+static public byte aget(byte[] xs, int i){
+	return xs[i];
+}
+
+static public byte aset(byte[] xs, int i, byte v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(byte[] xs){
+	return xs.length;
+}
+
+static public byte[] aclone(byte[] xs){
+	return xs.clone();
+}
+
+static public short aget(short[] xs, int i){
+	return xs[i];
+}
+
+static public short aset(short[] xs, int i, short v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(short[] xs){
+	return xs.length;
+}
+
+static public short[] aclone(short[] xs){
+	return xs.clone();
+}
+
+static public boolean aget(boolean[] xs, int i){
+	return xs[i];
+}
+
+static public boolean aset(boolean[] xs, int i, boolean v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(boolean[] xs){
+	return xs.length;
+}
+
+static public boolean[] aclone(boolean[] xs){
+	return xs.clone();
+}
+
+static public Object aget(Object[] xs, int i){
+	return xs[i];
+}
+
+static public Object aset(Object[] xs, int i, Object v){
+	xs[i] = v;
+	return v;
+}
+
+static public int alength(Object[] xs){
+	return xs.length;
+}
+
+static public Object[] aclone(Object[] xs){
+	return xs.clone();
+}
+
+static public Object aget(Object xs, int i){
+	return Array.get(xs,i);
+}
+
+static public Object aset(Object xs, int i, Object v){
+	Array.set(xs,i,v);
+	return v;
+}
+
+static public int alength(Object xs){
+	return Array.getLength(xs);
 }
 
 }

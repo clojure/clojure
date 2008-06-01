@@ -468,33 +468,41 @@
 
 (defn *
   "Returns the product of nums. (*) returns 1."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (multiply ~x ~y)))
+   :inline-arities #{2}}
   ([] 1)
   ([x] (cast Number x))
-  ([x y] (. clojure.lang.Numbers (multiply x y)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (multiply x y)))
   ([x y & more]
    (reduce * (* x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
   else returns numerator divided by all of the denominators."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (divide ~x ~y)))
+   :inline-arities #{2}}
   ([x] (/ 1 x))
-  ([x y] (. clojure.lang.Numbers (divide x y)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (divide x y)))
   ([x y & more]
    (reduce / (/ x y) more)))
 
 (defn -
   "If no ys are supplied, returns the negation of x, else subtracts
   the ys from x and returns the result."
-  ([x] (. clojure.lang.Numbers (negate x)))
-  ([x y] (. clojure.lang.Numbers (subtract x y)))
+  {:inline (fn [& args] `(. clojure.lang.Numbers (minus ~@args)))
+   :inline-arities #{1 2}}
+  ([x] (. clojure.lang.Numbers (minus x)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (minus x y)))
   ([x y & more]
    (reduce - (- x y) more)))
 
 (defn <
   "Returns non-nil if nums are in monotonically increasing order,
   otherwise false."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (lt ~x ~y)))
+   :inline-arities #{2}}
   ([x] true)
-  ([x y] (. clojure.lang.Numbers (lt x y)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (lt x y)))
   ([x y & more]
    (if (< x y)
      (if (rest more)
@@ -505,8 +513,10 @@
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
   otherwise false."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (lte ~x ~y)))
+   :inline-arities #{2}}
   ([x] true)
-  ([x y] (. clojure.lang.Numbers (lte x y)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (lte x y)))
   ([x y & more]
    (if (<= x y)
      (if (rest more)
@@ -517,8 +527,10 @@
 (defn >
   "Returns non-nil if nums are in monotonically decreasing order,
   otherwise false."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (gt ~x ~y)))
+   :inline-arities #{2}}
   ([x] true)
-  ([x y] (. clojure.lang.Numbers (gt x y)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (gt x y)))
   ([x y & more]
    (if (> x y)
      (if (rest more)
@@ -529,8 +541,10 @@
 (defn >=
   "Returns non-nil if nums are in monotonically non-increasing order,
   otherwise false."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (gte ~x ~y)))
+   :inline-arities #{2}}
   ([x] true)
-  ([x y] (. clojure.lang.Numbers (gte x y)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (gte x y)))
   ([x y & more]
    (if (>= x y)
      (if (rest more)
@@ -540,8 +554,10 @@
 
 (defn ==
   "Returns non-nil if nums all have the same value, otherwise false"
+  {:inline (fn [x y] `(. clojure.lang.Numbers (equiv ~x ~y)))
+   :inline-arities #{2}}
   ([x] true)
-  ([x y] (. clojure.lang.Numbers (equiv x y)))
+  ([#^Number x #^Number y] (. clojure.lang.Numbers (equiv x y)))
   ([x y & more]
    (if (== x y)
      (if (rest more)
@@ -565,25 +581,66 @@
 
 (defn inc
   "Returns a number one greater than num."
+  {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))}
   [x] (. clojure.lang.Numbers (inc x)))
 
 (defn dec
   "Returns a number one less than num."
+  {:inline (fn [x] `(. clojure.lang.Numbers (dec ~x)))}
   [x] (. clojure.lang.Numbers (dec x)))
+
+(defn unchecked-inc
+  "Returns a number one greater than x, an int or long. 
+  Note - uses a primitive operator subject to overflow."
+  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_inc ~x)))}
+  [x] (. clojure.lang.Numbers (unchecked_inc x)))
+
+(defn unchecked-dec
+  "Returns a number one less than x, an int or long. 
+  Note - uses a primitive operator subject to overflow."
+  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_dec ~x)))}
+  [x] (. clojure.lang.Numbers (unchecked_dec x)))
+
+(defn unchecked-negate
+  "Returns the negation of x, an int or long. 
+  Note - uses a primitive operator subject to overflow."
+  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_negate ~x)))}
+  [x] (. clojure.lang.Numbers (unchecked_negate x)))
+
+(defn unchecked-add
+  "Returns the sum of x and y, both int or long. 
+  Note - uses a primitive operator subject to overflow."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_add ~x ~y)))}
+  [x y] (. clojure.lang.Numbers (unchecked_add x y)))
+
+(defn unchecked-subtract
+  "Returns the difference of x and y, both int or long. 
+  Note - uses a primitive operator subject to overflow."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_subtract ~x ~y)))}
+  [x y] (. clojure.lang.Numbers (unchecked_subtract x y)))
+
+(defn unchecked-multiply
+  "Returns the product of x and y, both int or long. 
+  Note - uses a primitive operator subject to overflow."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_multiply ~x ~y)))}
+  [x y] (. clojure.lang.Numbers (unchecked_multiply x y)))
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
-  {:tag Boolean}
+  {:tag Boolean
+   :inline (fn [x] `(. clojure.lang.Numbers (isPos ~x)))}
   [x] (. clojure.lang.Numbers (isPos x)))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
-  {:tag Boolean}
+  {:tag Boolean
+   :inline (fn [x] `(. clojure.lang.Numbers (isNeg ~x)))}
   [x] (. clojure.lang.Numbers (isNeg x)))
 
 (defn zero?
   "Returns true if num is zero, else false"
-  {:tag Boolean}
+  {:tag Boolean
+   :inline (fn [x] `(. clojure.lang.Numbers (isZero ~x)))}
   [x] (. clojure.lang.Numbers (isZero x)))
 
 (defn quot
@@ -1291,10 +1348,11 @@ not-every? (comp not every?))
   "Repeatedly executes body (presumably for side-effects) with name
   bound to integers from 0 through n-1."
   [i n & body]
-  `(loop [~i 0 n# ~n]
-     (when (< ~i n#)
-       ~@body
-       (recur (inc ~i) n#))))
+  `(let [n# (int ~n)]
+     (loop [~i (int 0)]
+       (when (< ~i n#)
+         ~@body
+         (recur (unchecked-inc ~i))))))
 
 (defn import
   "import-list => (package-symbol class-name-symbols*)
@@ -1433,7 +1491,7 @@ not-every? (comp not every?))
   [expr]
   `(let [start# (. System (nanoTime))
          ret# ~expr]
-     (prn (str "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0) " msecs"))
+     (prn (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " msecs"))
      ret#))
 
 (defn num
@@ -1501,11 +1559,20 @@ not-every? (comp not every?))
 (defn alength
   "Returns the length of the Java array. Works on arrays of all
   types."
-  [array] (. Array (getLength array)))
+  {:inline (fn [a] `(. clojure.lang.RT (alength ~a)))}
+  [array] (. clojure.lang.RT (alength array)))
+
+(defn aclone
+  "Returns a clone of the Java array. Works on arrays of known
+  types."
+  {:inline (fn [a] `(. clojure.lang.RT (aclone ~a)))}
+  [array] (. clojure.lang.RT (aclone array)))
 
 (defn aget
   "Returns the value at the index/indices. Works on Java arrays of all
   types."
+  {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
+   :inline-arities #{2}}
   ([array idx]
    (. Array (get array idx)))
   ([array idx & idxs]
@@ -1514,6 +1581,8 @@ not-every? (comp not every?))
 (defn aset
   "Sets the value at the index/indices. Works on Java arrays of
   reference types. Returns val."
+  {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a ~i ~v)))
+   :inline-arities #{3}}
   ([array idx val]
    (. Array (set array idx val))
    val)
@@ -2444,3 +2513,73 @@ not-every? (comp not every?))
   "Returns an empty collection of the same category as coll, or nil"
   [#^clojure.lang.IPersistentCollection coll]
   (.empty coll))
+
+(defmacro amap
+  "Maps an expression across an array a, using an index named idx, and
+  return value named ret, initialized to a clone of a, then setting each element of
+  ret to the evaluation of expr, returning the new array ret."
+  [a idx ret expr]
+  `(let [a# ~a
+         ~ret (aclone a#)]
+     (loop  [~idx (int 0)]
+       (if (< ~idx  (alength a#))
+         (do 
+           (aset ~ret ~idx ~expr)
+           (recur (unchecked-inc ~idx)))
+         ~ret))))
+
+(defmacro areduce 
+  "Reduces an expression across an array a, using an index named idx,
+  and return value named ret, initialized to init, setting ret to the evaluation of expr at
+  each step, returning ret."
+  [a idx ret init expr]
+  `(let [a# ~a]
+     (loop  [~idx (int 0) ~ret ~init]
+       (if (< ~idx  (alength a#)) 
+         (recur (unchecked-inc ~idx) ~expr)
+         ~ret))))
+
+(defn float-array 
+  "Creates an array of floats"
+  {:inline (fn [& args] `(. clojure.lang.Numbers float_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
+
+(defn double-array 
+  "Creates an array of doubles"
+  {:inline (fn [& args] `(. clojure.lang.Numbers double_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers double_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers double_array size init-val-or-seq)))
+
+(defn int-array 
+  "Creates an array of ints"
+  {:inline (fn [& args] `(. clojure.lang.Numbers int_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers int_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
+
+(defn long-array 
+  "Creates an array of ints"
+  {:inline (fn [& args] `(. clojure.lang.Numbers long_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers long_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers long_array size init-val-or-seq)))
+
+(definline floats
+  "Casts to float[]"
+  [xs] `(. clojure.lang.Numbers floats ~xs))
+
+(definline ints
+  "Casts to int[]"
+  [xs] `(. clojure.lang.Numbers ints ~xs))
+
+(definline doubles
+  "Casts to double[]"
+  [xs] `(. clojure.lang.Numbers doubles ~xs))
+
+(definline longs
+  "Casts to long[]"
+  [xs] `(. clojure.lang.Numbers longs ~xs))
+

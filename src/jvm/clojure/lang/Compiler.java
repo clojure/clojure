@@ -12,13 +12,13 @@
 
 package clojure.lang;
 
-/*
+//*
 
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
-/*/
-//*
+//*/
+/*
 
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
@@ -733,15 +733,23 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) form;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-//				if(sym.name.equals("int"))
-//					c = int.class;
-//				else if(sym.name.equals("long"))
-//					c = long.class;
-//				else if(sym.name.equals("float"))
-//					c = float.class;
-//				else if(sym.name.equals("double"))
-//					c = double.class;
-//				else 
+				if(sym.name.equals("ints"))
+					c = int[].class;
+				else if(sym.name.equals("longs"))
+					c = long[].class;
+				else if(sym.name.equals("floats"))
+					c = float[].class;
+				else if(sym.name.equals("doubles"))
+					c = double[].class;
+				else if(sym.name.equals("chars"))
+					c = double[].class;
+				else if(sym.name.equals("shorts"))
+					c = short[].class;
+				else if(sym.name.equals("bytes"))
+					c = byte[].class;
+				else if(sym.name.equals("booleans"))
+					c = boolean[].class;
+				else
 				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 					c = RT.classForName(sym.name);
 				else
@@ -1875,8 +1883,8 @@ static boolean subsumes(Class[] c1, Class[] c2){
 		if(!(c1[i] == c2[i] || c2[i].isPrimitive() && c1[i] == Object.class))
 			{
 			if(c1[i].isPrimitive() && c2[i] == Object.class
-//			   || Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
-|| c2[i].isAssignableFrom(c1[i]))
+			    //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
+				|| c2[i].isAssignableFrom(c1[i]))
 				better = true;
 			else
 				return false;
@@ -2302,6 +2310,7 @@ static class EmptyExpr implements Expr{
 	final static Type HASHSET_TYPE = Type.getType(PersistentHashSet.class);
 	final static Type VECTOR_TYPE = Type.getType(PersistentVector.class);
 	final static Type LIST_TYPE = Type.getType(PersistentList.class);
+	final static Type EMPTY_LIST_TYPE = Type.getType(PersistentList.EmptyList.class);
 
 
 	public EmptyExpr(Object coll){
@@ -2314,7 +2323,7 @@ static class EmptyExpr implements Expr{
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		if(coll instanceof IPersistentList)
-			gen.getStatic(LIST_TYPE, "EMPTY", LIST_TYPE);
+			gen.getStatic(LIST_TYPE, "EMPTY", EMPTY_LIST_TYPE);
 		else if(coll instanceof IPersistentVector)
 			gen.getStatic(VECTOR_TYPE, "EMPTY", VECTOR_TYPE);
 		else if(coll instanceof IPersistentMap)
@@ -2743,8 +2752,8 @@ static public class FnExpr implements Expr{
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
-		//ClassVisitor cv = cw;
-		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
+		ClassVisitor cv = cw;
+		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
