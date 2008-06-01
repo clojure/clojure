@@ -458,6 +458,8 @@
 ;;math stuff
 (defn +
   "Returns the sum of nums. (+) returns 0."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (add ~x ~y)))
+   :inline-arities #{2}}
   ([] 0)
   ([x] (cast Number x))
   ([x y] (. clojure.lang.Numbers (add x y)))
@@ -1434,24 +1436,34 @@ not-every? (comp not every?))
      (prn (str "Elapsed time: " (/ (- (. System (nanoTime)) start#) 1000000.0) " msecs"))
      ret#))
 
+(defn num
+  "Coerce to Number"
+  {:tag Number
+   :inline (fn  [x] `(. clojure.lang.Numbers (num ~x)))}
+  [x] (. clojure.lang.Numbers (num x)))
+
 (defn int
   "Coerce to int"
-  {:tag Integer}
+  {:tag Integer
+   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
   [x] (. clojure.lang.RT (intCast x)))
 
 (defn long
   "Coerce to long"
-  {:tag Long}
+  {:tag Long
+   :inline (fn  [x] `(. clojure.lang.RT (longCast ~x)))}
   [#^Number x] (. x (longValue)))
 
 (defn float
   "Coerce to float"
-  {:tag Float}
+  {:tag Float
+   :inline (fn  [x] `(. clojure.lang.RT (floatCast ~x)))}
   [#^Number x] (. x (floatValue)))
 
 (defn double
   "Coerce to double"
-  {:tag Double}
+  {:tag Double
+   :inline (fn  [x] `(. clojure.lang.RT (doubleCast ~x)))}
   [#^Number x] (. x (doubleValue)))
 
 (defn short

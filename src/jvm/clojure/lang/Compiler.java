@@ -12,13 +12,13 @@
 
 package clojure.lang;
 
-//*
+/*
 
 import clojure.asm.*;
 import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
 /*/
-/*
+//*
 
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
@@ -70,6 +70,7 @@ static final Symbol _AMP_ = Symbol.create("&");
 static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 
 static final Keyword inlineKey = Keyword.intern(null, "inline");
+static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 
 //static final Symbol IMPORT = Symbol.create("import");
 //static final Symbol USE = Symbol.create("use");
@@ -491,7 +492,11 @@ static interface AssignableExpr{
 	void emitAssign(C context, FnExpr fn, GeneratorAdapter gen, Expr val);
 }
 
-static public abstract class HostExpr implements Expr{
+static public interface MaybePrimitiveExpr{
+	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen);
+}
+
+static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	final static Type BOOLEAN_TYPE = Type.getType(Boolean.class);
 	final static Type CHAR_TYPE = Type.getType(Character.class);
 	final static Type INTEGER_TYPE = Type.getType(Integer.class);
@@ -524,7 +529,6 @@ static public abstract class HostExpr implements Expr{
 	final static Method fromLongMethod = Method.getMethod("clojure.lang.Num from(long)");
 	final static Method fromDoubleMethod = Method.getMethod("clojure.lang.Num from(double)");
 
-	abstract public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen);
 
 	/*
 	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
@@ -729,6 +733,15 @@ static public abstract class HostExpr implements Expr{
 			Symbol sym = (Symbol) form;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
+//				if(sym.name.equals("int"))
+//					c = int.class;
+//				else if(sym.name.equals("long"))
+//					c = long.class;
+//				else if(sym.name.equals("float"))
+//					c = float.class;
+//				else if(sym.name.equals("double"))
+//					c = double.class;
+//				else 
 				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 					c = RT.classForName(sym.name);
 				else
@@ -946,6 +959,23 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 
 }
 
+static Class maybePrimitiveType(Expr e){
+	try
+		{
+		if(e instanceof MaybePrimitiveExpr && e.hasJavaClass())
+			{
+			Class c = e.getJavaClass();
+			if(Util.isPrimitive(c))
+				return c;
+			}
+		}
+	catch(Exception ex)
+		{
+		throw new RuntimeException(ex);
+		}
+	return null;
+}
+
 static abstract class MethodExpr extends HostExpr{
 	static void emitArgsAsArray(IPersistentVector args, FnExpr fn, GeneratorAdapter gen){
 		gen.push(args.count());
@@ -965,9 +995,9 @@ static abstract class MethodExpr extends HostExpr{
 			Expr e = (Expr) args.nth(i);
 			try
 				{
-				if(e instanceof HostExpr && e.hasJavaClass() && e.getJavaClass() == parameterTypes[i])
+				if(maybePrimitiveType(e) == parameterTypes[i])
 					{
-					((HostExpr)e).emitUnboxed(C.EXPRESSION, fn, gen);					
+					((MaybePrimitiveExpr) e).emitUnboxed(C.EXPRESSION, fn, gen);
 					}
 				else
 					{
@@ -1187,7 +1217,7 @@ static class StaticMethodExpr extends MethodExpr{
 			gen.invokeStatic(type, m);
 			}
 		else
-			throw new UnsupportedOperationException("Unboxed emit of unknown member");			
+			throw new UnsupportedOperationException("Unboxed emit of unknown member");
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -1845,7 +1875,8 @@ static boolean subsumes(Class[] c1, Class[] c2){
 		if(!(c1[i] == c2[i] || c2[i].isPrimitive() && c1[i] == Object.class))
 			{
 			if(c1[i].isPrimitive() && c2[i] == Object.class
-			   || c2[i].isAssignableFrom(c1[i]))
+//			   || Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
+|| c2[i].isAssignableFrom(c1[i]))
 				better = true;
 			else
 				return false;
@@ -2166,10 +2197,11 @@ static class IfExpr implements Expr{
 
 		try
 			{
-			if(testExpr instanceof HostExpr && testExpr.hasJavaClass() && testExpr.getJavaClass() == boolean.class)
+			if(testExpr instanceof MaybePrimitiveExpr && testExpr.hasJavaClass() &&
+			   testExpr.getJavaClass() == boolean.class)
 				{
-				((HostExpr)testExpr).emitUnboxed(C.EXPRESSION, fn, gen);
-				gen.ifZCmp(gen.EQ,falseLabel);
+				((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, fn, gen);
+				gen.ifZCmp(gen.EQ, falseLabel);
 				}
 			else
 				{
@@ -2711,8 +2743,8 @@ static public class FnExpr implements Expr{
 		//derived from AFn/RestFn
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = cw;
-		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
+		//ClassVisitor cv = cw;
+		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC, internalName, null, isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
 		String source = (String) SOURCE.get();
@@ -2893,7 +2925,16 @@ static public class FnExpr implements Expr{
 			gen.getField(fntype, lb.name, OBJECT_TYPE);
 			}
 		else
-			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
+			{
+			Class primc = lb.getPrimitiveType();
+			if(primc != null)
+				{
+				gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), lb.idx);
+				HostExpr.emitBoxReturn(this, gen, primc);
+				}
+			else
+				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
+			}
 	}
 
 	public void emitVar(GeneratorAdapter gen, Var var){
@@ -3071,6 +3112,7 @@ static class FnMethod{
 	}
 
 	void emitClearLocals(GeneratorAdapter gen){
+		//this seems shaky given primitive locals - revisit
 		for(int i = 1; i < numParams() + 1; i++)
 			{
 			if(!localsUsedInCatchFinally.contains(i))
@@ -3098,7 +3140,9 @@ static class LocalBinding{
 	final int idx;
 	final String name;
 
-	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init){
+	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init) throws Exception{
+		if(maybePrimitiveType(init) != null && tag != null)
+			throw new UnsupportedOperationException("Can't type hint a local with a primitive initializer");
 		this.idx = num;
 		this.sym = sym;
 		this.tag = tag;
@@ -3115,19 +3159,29 @@ static class LocalBinding{
 		return tag != null ? HostExpr.tagToClass(tag)
 		       : init.getJavaClass();
 	}
+
+	public Class getPrimitiveType(){
+		return maybePrimitiveType(init);
+	}
 }
 
-static class LocalBindingExpr implements Expr{
+static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
 	final LocalBinding b;
 	final Symbol tag;
 
-	public LocalBindingExpr(LocalBinding b, Symbol tag){
+	public LocalBindingExpr(LocalBinding b, Symbol tag) throws Exception{
+		if(b.getPrimitiveType() != null && tag != null)
+			throw new UnsupportedOperationException("Can't type hint a primitive local");
 		this.b = b;
 		this.tag = tag;
 	}
 
 	public Object eval() throws Exception{
 		throw new UnsupportedOperationException("Can't eval locals");
+	}
+
+	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.visitVarInsn(Type.getType(b.getPrimitiveType()).getOpcode(Opcodes.ILOAD), b.idx);
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -3144,6 +3198,8 @@ static class LocalBindingExpr implements Expr{
 			return HostExpr.tagToClass(tag);
 		return b.getJavaClass();
 	}
+
+
 }
 
 static class BodyExpr implements Expr{
@@ -3293,8 +3349,17 @@ static class LetExpr implements Expr{
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
-			bi.init.emit(C.EXPRESSION, fn, gen);
-			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
+			Class primc = maybePrimitiveType(bi.init);
+			if(primc != null)
+				{
+				((MaybePrimitiveExpr) bi.init).emitUnboxed(C.EXPRESSION, fn, gen);
+				gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ISTORE), bi.binding.idx);
+				}
+			else
+				{
+				bi.init.emit(C.EXPRESSION, fn, gen);
+				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
+				}
 			}
 		Label loopLabel = gen.mark();
 		if(isLoop)
@@ -3316,7 +3381,12 @@ static class LetExpr implements Expr{
 		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.rest())
 			{
 			BindingInit bi = (BindingInit) bis.first();
-			gen.visitLocalVariable(bi.binding.name, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
+			Class primc = maybePrimitiveType(bi.init);
+			if(primc != null)
+				gen.visitLocalVariable(bi.binding.name, Type.getDescriptor(primc), null, loopLabel, end,
+				                       bi.binding.idx);
+			else
+				gen.visitLocalVariable(bi.binding.name, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
 			}
 	}
 
@@ -3350,13 +3420,35 @@ static class RecurExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
 			Expr arg = (Expr) args.nth(i);
-			arg.emit(C.EXPRESSION, fn, gen);
+			if(lb.getPrimitiveType() != null)
+				{
+				Class primc = lb.getPrimitiveType();
+				try
+					{
+					if(!(arg instanceof MaybePrimitiveExpr && arg.hasJavaClass() && arg.getJavaClass() == primc))
+						throw new IllegalArgumentException("recur arg for primitive local: " +
+						                                   lb.name + " must be matching primitive");
+					}
+				catch(Exception e)
+					{
+					throw new RuntimeException(e);
+					}
+				((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, fn, gen);
+				}
+			else
+				{
+				arg.emit(C.EXPRESSION, fn, gen);
+				}
 			}
 
 		for(int i = loopLocals.count() - 1; i >= 0; i--)
 			{
 			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
-			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
+			Class primc = lb.getPrimitiveType();
+			if(primc != null)
+				gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ISTORE), lb.idx);
+			else
+				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
 			}
 
 		gen.goTo(loopLabel);
@@ -3474,7 +3566,7 @@ static public Var isMacro(Object op) throws Exception{
 	return null;
 }
 
-static public IFn isInline(Object op) throws Exception{
+static public IFn isInline(Object op, int arity) throws Exception{
 	//no local inlines for now
 	if(op instanceof Symbol && referenceLocal((Symbol) op) != null)
 		return null;
@@ -3485,7 +3577,13 @@ static public IFn isInline(Object op) throws Exception{
 			{
 			if(v.ns != currentNS() && !v.isPublic())
 				throw new IllegalStateException("var: " + v + " is not public");
-			return (IFn) RT.get(v.meta(), inlineKey);
+			IFn ret = (IFn) RT.get(v.meta(), inlineKey);
+			if(ret != null)
+				{
+				IPersistentSet arities = (IPersistentSet) RT.get(v.meta(), inlineAritiesKey);
+				if(arities == null || arities.contains(arity))
+					return ret;
+				}
 			}
 		}
 	return null;
@@ -3562,7 +3660,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 			return analyze(context, me, name);
 
 		Object op = RT.first(form);
-		IFn inline = isInline(op);
+		IFn inline = isInline(op, RT.count(RT.rest(form)));
 		if(inline != null)
 			return analyze(context, inline.applyTo(RT.rest(form)));
 		IParser p;

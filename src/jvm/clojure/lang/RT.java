@@ -289,7 +289,7 @@ static void doInit() throws Exception{
 	loadResourceScript(RT.class, "primmath.clj");
 	loadResourceScript(RT.class, "proxy.clj");
 	loadResourceScript(RT.class, "zip.clj");
-	loadResourceScript(RT.class, "xml.clj");
+	//loadResourceScript(RT.class, "xml.clj");
 	loadResourceScript(RT.class, "set.clj");
 
 	Var.pushThreadBindings(
@@ -501,7 +501,7 @@ static public Object get(Object coll, Object key, Object notFound){
 		IPersistentSet set = (IPersistentSet) coll;
 		if(set.contains(key))
 			return key;
-		return notFound;		
+		return notFound;
 		}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
 		{
@@ -713,18 +713,81 @@ static public int intCast(Object x){
 	return ((Character) x).charValue();
 }
 
+static public int intCast(int x){
+	return x;
+}
+
+static public int intCast(float x){
+	return (int) x;
+}
+
+static public int intCast(long x){
+	return (int) x;
+}
+
+static public int intCast(double x){
+	return (int) x;
+}
+
 static public long longCast(Object x){
 	return ((Number) x).longValue();
+}
+
+static public long longCast(int x){
+	return x;
+}
+
+static public long longCast(float x){
+	return (long) x;
+}
+
+static public long longCast(long x){
+	return x;
+}
+
+static public long longCast(double x){
+	return (long) x;
 }
 
 static public float floatCast(Object x){
 	return ((Number) x).floatValue();
 }
 
+static public float floatCast(int x){
+	return x;
+}
+
+static public float floatCast(float x){
+	return x;
+}
+
+static public float floatCast(long x){
+	return x;
+}
+
+static public float floatCast(double x){
+	return (float) x;
+}
+
 static public double doubleCast(Object x){
 	return ((Number) x).doubleValue();
 }
 
+static public double doubleCast(int x){
+	return x;
+}
+
+static public double doubleCast(float x){
+	return x;
+}
+
+static public double doubleCast(long x){
+	return x;
+}
+
+static public double doubleCast(double x){
+	return x;
+}
 
 static public IPersistentMap map(Object... init){
 	if(init != null && init.length == 2)
@@ -819,9 +882,9 @@ static public Object[] toArray(Object coll) throws Exception{
 			ret[i] = chars[i];
 		return ret;
 		}
-	else if (coll.getClass().isArray())
+	else if(coll.getClass().isArray())
 		{
-	    ISeq s = (seq(coll));
+		ISeq s = (seq(coll));
 		Object[] ret = new Object[count(s)];
 		for(int i = 0; i < ret.length; i++, s = s.rest())
 			ret[i] = s.first();

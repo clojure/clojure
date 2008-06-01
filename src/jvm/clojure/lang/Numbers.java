@@ -986,54 +986,54 @@ final static class IntegerBitOps implements BitOps{
 	}
 
 	public Number clearBit(Number x, int n){
-		if (n < 31)
+		if(n < 31)
 			return x.intValue() & ~(1 << n);
-		else if (n < 63)
+		else if(n < 63)
 			return x.longValue() & ~(1L << n);
 		else
 			return toBigInteger(x).clearBit(n);
 	}
 
 	public Number setBit(Number x, int n){
-		if (n < 31)
+		if(n < 31)
 			return x.intValue() | (1 << n);
-		else if (n < 63)
+		else if(n < 63)
 			return x.longValue() | (1L << n);
 		else
 			return toBigInteger(x).setBit(n);
 	}
 
 	public Number flipBit(Number x, int n){
-		if (n < 31)
+		if(n < 31)
 			return x.intValue() ^ (1 << n);
-		else if (n < 63)
+		else if(n < 63)
 			return x.longValue() ^ (1L << n);
 		else
 			return toBigInteger(x).flipBit(n);
 	}
 
 	public boolean testBit(Number x, int n){
-		if (n < 32)
+		if(n < 32)
 			return (x.intValue() & (1 << n)) != 0;
-		else if (n < 64)
+		else if(n < 64)
 			return (x.longValue() & (1L << n)) != 0;
 		else
 			return toBigInteger(x).testBit(n);
 	}
 
 	public Number shiftLeft(Number x, int n){
-		if (n < 32)
+		if(n < 32)
 			{
-			if (n < 0)
+			if(n < 0)
 				return shiftRight(x, -n);
 			return reduce(x.longValue() << n);
 			}
 		else
 			return reduce(toBigInteger(x).shiftLeft(n));
 	}
-	
+
 	public Number shiftRight(Number x, int n){
-		if (n < 0)
+		if(n < 0)
 			return shiftLeft(x, -n);
 		return x.intValue() >> n;
 	}
@@ -1077,41 +1077,41 @@ final static class LongBitOps implements BitOps{
 	}
 
 	public Number clearBit(Number x, int n){
-		if (n < 63)
+		if(n < 63)
 			return x.longValue() & ~(1L << n);
 		else
 			return toBigInteger(x).clearBit(n);
 	}
 
 	public Number setBit(Number x, int n){
-		if (n < 63)
+		if(n < 63)
 			return x.longValue() | (1L << n);
 		else
 			return toBigInteger(x).setBit(n);
 	}
 
 	public Number flipBit(Number x, int n){
-		if (n < 63)
+		if(n < 63)
 			return x.longValue() ^ (1L << n);
 		else
 			return toBigInteger(x).flipBit(n);
 	}
 
 	public boolean testBit(Number x, int n){
-		if (n < 64)
+		if(n < 64)
 			return (x.longValue() & (1L << n)) != 0;
 		else
 			return toBigInteger(x).testBit(n);
 	}
 
 	public Number shiftLeft(Number x, int n){
-		if (n < 0)
+		if(n < 0)
 			return shiftRight(x, -n);
 		return reduce(toBigInteger(x).shiftLeft(n));
 	}
 
 	public Number shiftRight(Number x, int n){
-		if (n < 0)
+		if(n < 0)
 			return shiftLeft(x, -n);
 		return x.longValue() >> n;
 	}
@@ -1226,7 +1226,6 @@ static BitOps bitOps(Object x){
 		return INTEGER_BITOPS;
 }
 
-
 //final static ExecutorService executor = Executors.newCachedThreadPool();
 //static public int minChunk = 100;
 //static int chunkSize(int alength){
@@ -1251,41 +1250,322 @@ static BitOps bitOps(Object x){
 //		executor.invokeAll(ops);
 //		}
 
-static final public class Indexer{
-	int i;
-
-	public Indexer(int i){
-		this.i = i;
-	}
-
-	public final int get(){
-		return i;
-	}
-
-	public final int inc(){
-		return i += 1;
-	}
-	public final int inc(int n){
-		return i += n;
-	}
-
+static public Number num(float x){
+	return x;
 }
+
+static public float prim_add(float x, float y){
+	return x + y;
+}
+
+static public float prim_subtract(float x, float y){
+	return x - y;
+}
+
+static public float prim_negate(float x){
+	return -x;
+}
+
+static public float prim_inc(float x){
+	return x + 1;
+}
+
+static public float prim_dec(float x){
+	return x - 1;
+}
+
+static public float prim_multiply(float x, float y){
+	return x * y;
+}
+
+static public float prim_divide(float x, float y){
+	return x / y;
+}
+
+static public boolean prim_equiv(float x, float y){
+	return x == y;
+}
+
+static public boolean prim_lt(float x, float y){
+	return x < y;
+}
+
+static public boolean prim_lte(float x, float y){
+	return x <= y;
+}
+
+static public boolean prim_gt(float x, float y){
+	return x > y;
+}
+
+static public boolean prim_gte(float x, float y){
+	return x >= y;
+}
+
+static public boolean prim_isPos(float x){
+	return x > 0;
+}
+
+static public boolean prim_isNeg(float x){
+	return x < 0;
+}
+
+static public boolean prim_isZero(float x){
+	return x == 0;
+}
+
+static public Number num(double x){
+	return x;
+}
+
+static public double prim_add(double x, double y){
+	return x + y;
+}
+
+static public double prim_subtract(double x, double y){
+	return x - y;
+}
+
+static public double prim_negate(double x){
+	return -x;
+}
+
+static public double prim_inc(double x){
+	return x + 1;
+}
+
+static public double prim_dec(double x){
+	return x - 1;
+}
+
+static public double prim_multiply(double x, double y){
+	return x * y;
+}
+
+static public double prim_divide(double x, double y){
+	return x / y;
+}
+
+static public boolean prim_equiv(double x, double y){
+	return x == y;
+}
+
+static public boolean prim_lt(double x, double y){
+	return x < y;
+}
+
+static public boolean prim_lte(double x, double y){
+	return x <= y;
+}
+
+static public boolean prim_gt(double x, double y){
+	return x > y;
+}
+
+static public boolean prim_gte(double x, double y){
+	return x >= y;
+}
+
+static public boolean prim_isPos(double x){
+	return x > 0;
+}
+
+static public boolean prim_isNeg(double x){
+	return x < 0;
+}
+
+static public boolean prim_isZero(double x){
+	return x == 0;
+}
+
+static public Number num(int x){
+	return x;
+}
+
+static public int prim_add(int x, int y){
+	return x + y;
+}
+
+static public int prim_subtract(int x, int y){
+	return x - y;
+}
+
+static public int prim_negate(int x){
+	return -x;
+}
+
+static public int prim_inc(int x){
+	return x + 1;
+}
+
+static public int prim_dec(int x){
+	return x - 1;
+}
+
+static public int prim_multiply(int x, int y){
+	return x * y;
+}
+
+static public int prim_divide(int x, int y){
+	return x / y;
+}
+
+static public boolean prim_equiv(int x, int y){
+	return x == y;
+}
+
+static public boolean prim_lt(int x, int y){
+	return x < y;
+}
+
+static public boolean prim_lte(int x, int y){
+	return x <= y;
+}
+
+static public boolean prim_gt(int x, int y){
+	return x > y;
+}
+
+static public boolean prim_gte(int x, int y){
+	return x >= y;
+}
+
+static public boolean prim_isPos(int x){
+	return x > 0;
+}
+
+static public boolean prim_isNeg(int x){
+	return x < 0;
+}
+
+static public boolean prim_isZero(int x){
+	return x == 0;
+}
+
+static public Number num(long x){
+	return x;
+}
+
+static public long prim_add(long x, long y){
+	return x + y;
+}
+
+static public long prim_subtract(long x, long y){
+	return x - y;
+}
+
+static public long prim_negate(long x){
+	return -x;
+}
+
+static public long prim_inc(long x){
+	return x + 1;
+}
+
+static public long prim_dec(long x){
+	return x - 1;
+}
+
+static public long prim_multiply(long x, long y){
+	return x * y;
+}
+
+static public long prim_divide(long x, long y){
+	return x / y;
+}
+
+static public boolean prim_equiv(long x, long y){
+	return x == y;
+}
+
+static public boolean prim_lt(long x, long y){
+	return x < y;
+}
+
+static public boolean prim_lte(long x, long y){
+	return x <= y;
+}
+
+static public boolean prim_gt(long x, long y){
+	return x > y;
+}
+
+static public boolean prim_gte(long x, long y){
+	return x >= y;
+}
+
+static public boolean prim_isPos(long x){
+	return x > 0;
+}
+
+static public boolean prim_isNeg(long x){
+	return x < 0;
+}
+
+static public boolean prim_isZero(long x){
+	return x == 0;
+}
+
 static public class F{
-	static public float add(float x, float y) {return x + y;}
-	static public float subtract(float x, float y) {return x - y;}
-	static public float negate(float x) {return -x;}
-	static public float inc(float x) {return x+1;}
-	static public float dec(float x) {return x-1;}
-	static public float multiply(float x, float y) {return x * y;}
-	static public float divide(float x, float y) {return x / y;}
-	static public boolean equiv(float x, float y) {return x ==  y;}
-	static public boolean lt(float x, float y) {return x <  y;}
-	static public boolean lte(float x, float y) {return x <=  y;}
-	static public boolean gt(float x, float y) {return x >  y;}
-	static public boolean gte(float x, float y) {return x >=  y;}
-	static public boolean pos(float x) {return x > 0;}
-	static public boolean neg(float x) {return x < 0;}
-	static public boolean zero(float x) {return x == 0;}
+	static public float add(float x, float y){
+		return x + y;
+	}
+
+	static public float subtract(float x, float y){
+		return x - y;
+	}
+
+	static public float negate(float x){
+		return -x;
+	}
+
+	static public float inc(float x){
+		return x + 1;
+	}
+
+	static public float dec(float x){
+		return x - 1;
+	}
+
+	static public float multiply(float x, float y){
+		return x * y;
+	}
+
+	static public float divide(float x, float y){
+		return x / y;
+	}
+
+	static public boolean equiv(float x, float y){
+		return x == y;
+	}
+
+	static public boolean lt(float x, float y){
+		return x < y;
+	}
+
+	static public boolean lte(float x, float y){
+		return x <= y;
+	}
+
+	static public boolean gt(float x, float y){
+		return x > y;
+	}
+
+	static public boolean gte(float x, float y){
+		return x >= y;
+	}
+
+	static public boolean pos(float x){
+		return x > 0;
+	}
+
+	static public boolean neg(float x){
+		return x < 0;
+	}
+
+	static public boolean zero(float x){
+		return x == 0;
+	}
 
 	static public float aget(float[] xs, int i){
 		return xs[i];
@@ -1308,29 +1588,29 @@ static public class F{
 		float[] ret = new float[size];
 		if(init instanceof Number)
 			{
-			float f = ((Number)init).floatValue();
-			for(int i=0;i<ret.length;i++)
+			float f = ((Number) init).floatValue();
+			for(int i = 0; i < ret.length; i++)
 				ret[i] = f;
 			}
 		else
 			{
 			ISeq s = RT.seq(init);
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).floatValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).floatValue();
 			}
 		return ret;
 	}
 
 	static public float[] vec(Object sizeOrSeq){
 		if(sizeOrSeq instanceof Number)
-			return new float[((Number)sizeOrSeq).intValue()];
+			return new float[((Number) sizeOrSeq).intValue()];
 		else
 			{
 			ISeq s = RT.seq(sizeOrSeq);
 			int size = s.count();
 			float[] ret = new float[size];
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).intValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).intValue();
 			return ret;
 			}
 	}
@@ -1338,339 +1618,383 @@ static public class F{
 
 	static public float[] vsadd(float[] x, float y){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += y;
 		return xs;
 	}
 
 	static public float[] vssub(float[] x, float y){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= y;
 		return xs;
 	}
 
 	static public float[] vsdiv(float[] x, float y){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= y;
 		return xs;
 	}
 
 	static public float[] vsmul(float[] x, float y){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= y;
 		return xs;
 	}
 
 	static public float[] svdiv(float y, float[] x){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = y/xs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = y / xs[i];
 		return xs;
 	}
 
 	static public float[] vsmuladd(float[] x, float y, float[] zs){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + zs[i];
 		return xs;
 	}
 
 	static public float[] vsmulsub(float[] x, float y, float[] zs){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - zs[i];
 		return xs;
 	}
 
 	static public float[] vsmulsadd(float[] x, float y, float z){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + z;
 		return xs;
 	}
 
 	static public float[] vsmulssub(float[] x, float y, float z){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - z;
 		return xs;
 	}
 
 	static public float[] vabs(float[] x){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public float[] vnegabs(float[] x){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public float[] vneg(float[] x){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -xs[i];
 		return xs;
-		}
+	}
 
 	static public float[] vsqr(float[] x){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= xs[i];
 		return xs;
-		}
+	}
 
 	static public float[] vsignedsqr(float[] x){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public float[] vclip(float[] x, float low, float high){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				xs[i] = low;
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				xs[i] = high;
 			}
 		return xs;
-		}
+	}
 
 	static public IPersistentVector vclipcounts(float[] x, float low, float high){
 		final float[] xs = x.clone();
 		int lowc = 0;
 		int highc = 0;
 
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				{
 				++lowc;
 				xs[i] = low;
 				}
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				{
 				++highc;
 				xs[i] = high;
 				}
 			}
-		return RT.vector(xs,lowc,highc);
-		}
+		return RT.vector(xs, lowc, highc);
+	}
 
 	static public float[] vthresh(float[] x, float thresh, float otherwise){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<thresh)
+			if(xs[i] < thresh)
 				xs[i] = otherwise;
 			}
 		return xs;
-		}
+	}
 
 	static public float[] vreverse(float[] x){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = xs[xs.length - i - 1];
 		return xs;
-		}
+	}
 
 	static public float[] vrunningsum(float[] x){
 		final float[] xs = x.clone();
-		for(int i=1;i<xs.length;i++)
+		for(int i = 1; i < xs.length; i++)
 			xs[i] = xs[i - 1] + xs[i];
 		return xs;
-		}
+	}
 
 	static public float[] vsort(float[] x){
 		final float[] xs = x.clone();
 		Arrays.sort(xs);
 		return xs;
-		}
+	}
 
 	static public float vdot(float[] xs, float[] ys){
 		float ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i] * ys[i];
 		return ret;
-		}
+	}
 
 	static public float vmax(float[] xs){
 		if(xs.length == 0)
 			return 0;
 		float ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.max(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.max(ret, xs[i]);
 		return ret;
-		}
+	}
 
 	static public float vmin(float[] xs){
 		if(xs.length == 0)
 			return 0;
 		float ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.min(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.min(ret, xs[i]);
 		return ret;
-		}
-
-	static public float vmean(float[] xs) {
-		if(xs.length == 0)
-			return 0;
-		return vsum(xs)/xs.length;
 	}
 
-	static public double vrms(float[] xs) {
+	static public float vmean(float[] xs){
+		if(xs.length == 0)
+			return 0;
+		return vsum(xs) / xs.length;
+	}
+
+	static public double vrms(float[] xs){
 		if(xs.length == 0)
 			return 0;
 		float ret = 0;
-		for(int i=0;i<xs.length;i++)
-			ret += xs[i]*xs[i];
-		return Math.sqrt(ret/xs.length);
+		for(int i = 0; i < xs.length; i++)
+			ret += xs[i] * xs[i];
+		return Math.sqrt(ret / xs.length);
 	}
 
-	static public float vsum(float[] xs) {
+	static public float vsum(float[] xs){
 		float ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i];
 		return ret;
 	}
 
 	static public boolean vequiv(float[] xs, float[] ys){
-		return Arrays.equals(xs,ys) ;
+		return Arrays.equals(xs, ys);
 	}
 
 	static public float[] vadd(float[] x, float[] ys){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += ys[i];
 		return xs;
-		}
+	}
 
 	static public float[] vsub(float[] x, float[] ys){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= ys[i];
 		return xs;
-		}
+	}
 
 	static public float[] vaddmul(float[] x, float[] ys, float[] zs){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public float[] vsubmul(float[] x, float[] ys, float[] zs){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public float[] vaddsmul(float[] x, float[] ys, float z){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public float[] vsubsmul(float[] x, float[] ys, float z){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public float[] vmulsadd(float[] x, float[] ys, float z){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + z;
 		return xs;
-		}
+	}
 
 	static public float[] vdiv(float[] x, float[] ys){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= ys[i];
 		return xs;
-		}
+	}
 
 	static public float[] vmul(float[] x, float[] ys){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= ys[i];
 		return xs;
-		}
+	}
 
 	static public float[] vmuladd(float[] x, float[] ys, float[] zs){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + zs[i];
 		return xs;
-		}
+	}
 
 	static public float[] vmulsub(float[] x, float[] ys, float[] zs){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])-zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) - zs[i];
 		return xs;
-		}
+	}
 
 	static public float[] vmax(float[] x, float[] ys){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.max(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.max(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public float[] vmin(float[] x, float[] ys){
 		final float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.min(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.min(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public float[] vmap(IFn fn, float[] x) throws Exception{
 		float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i])).floatValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i])).floatValue();
 		return xs;
-		}
+	}
 
 	static public float[] vmap(IFn fn, float[] x, float[] ys) throws Exception{
 		float[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).floatValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).floatValue();
 		return xs;
-		}
+	}
 
 }
 
 static public class D{
-	static public double add(double x, double y) {return x + y;}
-	static public double subtract(double x, double y) {return x - y;}
-	static public double negate(double x) {return -x;}
-	static public double inc(double x) {return x+1;}
-	static public double dec(double x) {return x-1;}
-	static public double multiply(double x, double y) {return x * y;}
-	static public double divide(double x, double y) {return x / y;}
-	static public boolean equiv(double x, double y) {return x ==  y;}
-	static public boolean lt(double x, double y) {return x <  y;}
-	static public boolean lte(double x, double y) {return x <=  y;}
-	static public boolean gt(double x, double y) {return x >  y;}
-	static public boolean gte(double x, double y) {return x >=  y;}
-	static public boolean pos(double x) {return x > 0;}
-	static public boolean neg(double x) {return x < 0;}
-	static public boolean zero(double x) {return x == 0;}
+	static public double add(double x, double y){
+		return x + y;
+	}
+
+	static public double subtract(double x, double y){
+		return x - y;
+	}
+
+	static public double negate(double x){
+		return -x;
+	}
+
+	static public double inc(double x){
+		return x + 1;
+	}
+
+	static public double dec(double x){
+		return x - 1;
+	}
+
+	static public double multiply(double x, double y){
+		return x * y;
+	}
+
+	static public double divide(double x, double y){
+		return x / y;
+	}
+
+	static public boolean equiv(double x, double y){
+		return x == y;
+	}
+
+	static public boolean lt(double x, double y){
+		return x < y;
+	}
+
+	static public boolean lte(double x, double y){
+		return x <= y;
+	}
+
+	static public boolean gt(double x, double y){
+		return x > y;
+	}
+
+	static public boolean gte(double x, double y){
+		return x >= y;
+	}
+
+	static public boolean pos(double x){
+		return x > 0;
+	}
+
+	static public boolean neg(double x){
+		return x < 0;
+	}
+
+	static public boolean zero(double x){
+		return x == 0;
+	}
 
 	static public double aget(double[] xs, int i){
 		return xs[i];
@@ -1693,367 +2017,411 @@ static public class D{
 		double[] ret = new double[size];
 		if(init instanceof Number)
 			{
-			double f = ((Number)init).doubleValue();
-			for(int i=0;i<ret.length;i++)
+			double f = ((Number) init).doubleValue();
+			for(int i = 0; i < ret.length; i++)
 				ret[i] = f;
 			}
 		else
 			{
 			ISeq s = RT.seq(init);
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).doubleValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).doubleValue();
 			}
 		return ret;
 	}
 
 	static public double[] vec(Object sizeOrSeq){
 		if(sizeOrSeq instanceof Number)
-			return new double[((Number)sizeOrSeq).intValue()];
+			return new double[((Number) sizeOrSeq).intValue()];
 		else
 			{
 			ISeq s = RT.seq(sizeOrSeq);
 			int size = s.count();
 			double[] ret = new double[size];
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).intValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).intValue();
 			return ret;
 			}
 	}
 
 	static public double[] vsadd(double[] x, double y){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += y;
 		return xs;
 	}
 
 	static public double[] vssub(double[] x, double y){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= y;
 		return xs;
 	}
 
 	static public double[] vsdiv(double[] x, double y){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= y;
 		return xs;
 	}
 
 	static public double[] vsmul(double[] x, double y){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= y;
 		return xs;
 	}
 
 	static public double[] svdiv(double y, double[] x){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = y/xs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = y / xs[i];
 		return xs;
 	}
 
 	static public double[] vsmuladd(double[] x, double y, double[] zs){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + zs[i];
 		return xs;
 	}
 
 	static public double[] vsmulsub(double[] x, double y, double[] zs){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - zs[i];
 		return xs;
 	}
 
 	static public double[] vsmulsadd(double[] x, double y, double z){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + z;
 		return xs;
 	}
 
 	static public double[] vsmulssub(double[] x, double y, double z){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - z;
 		return xs;
 	}
 
 	static public double[] vabs(double[] x){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public double[] vnegabs(double[] x){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public double[] vneg(double[] x){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -xs[i];
 		return xs;
-		}
+	}
 
 	static public double[] vsqr(double[] x){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= xs[i];
 		return xs;
-		}
+	}
 
 	static public double[] vsignedsqr(double[] x){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public double[] vclip(double[] x, double low, double high){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				xs[i] = low;
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				xs[i] = high;
 			}
 		return xs;
-		}
+	}
 
 	static public IPersistentVector vclipcounts(double[] x, double low, double high){
 		final double[] xs = x.clone();
 		int lowc = 0;
 		int highc = 0;
 
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				{
 				++lowc;
 				xs[i] = low;
 				}
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				{
 				++highc;
 				xs[i] = high;
 				}
 			}
-		return RT.vector(xs,lowc,highc);
-		}
+		return RT.vector(xs, lowc, highc);
+	}
 
 	static public double[] vthresh(double[] x, double thresh, double otherwise){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<thresh)
+			if(xs[i] < thresh)
 				xs[i] = otherwise;
 			}
 		return xs;
-		}
+	}
 
 	static public double[] vreverse(double[] x){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = xs[xs.length - i - 1];
 		return xs;
-		}
+	}
 
 	static public double[] vrunningsum(double[] x){
 		final double[] xs = x.clone();
-		for(int i=1;i<xs.length;i++)
+		for(int i = 1; i < xs.length; i++)
 			xs[i] = xs[i - 1] + xs[i];
 		return xs;
-		}
+	}
 
 	static public double[] vsort(double[] x){
 		final double[] xs = x.clone();
 		Arrays.sort(xs);
 		return xs;
-		}
+	}
 
 	static public double vdot(double[] xs, double[] ys){
 		double ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i] * ys[i];
 		return ret;
-		}
+	}
 
 	static public double vmax(double[] xs){
 		if(xs.length == 0)
 			return 0;
 		double ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.max(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.max(ret, xs[i]);
 		return ret;
-		}
+	}
 
 	static public double vmin(double[] xs){
 		if(xs.length == 0)
 			return 0;
 		double ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.min(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.min(ret, xs[i]);
 		return ret;
-		}
-
-	static public double vmean(double[] xs) {
-		if(xs.length == 0)
-			return 0;
-		return vsum(xs)/xs.length;
 	}
 
-	static public double vrms(double[] xs) {
+	static public double vmean(double[] xs){
+		if(xs.length == 0)
+			return 0;
+		return vsum(xs) / xs.length;
+	}
+
+	static public double vrms(double[] xs){
 		if(xs.length == 0)
 			return 0;
 		double ret = 0;
-		for(int i=0;i<xs.length;i++)
-			ret += xs[i]*xs[i];
-		return Math.sqrt(ret/xs.length);
+		for(int i = 0; i < xs.length; i++)
+			ret += xs[i] * xs[i];
+		return Math.sqrt(ret / xs.length);
 	}
 
-	static public double vsum(double[] xs) {
+	static public double vsum(double[] xs){
 		double ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i];
 		return ret;
 	}
 
 	static public boolean vequiv(double[] xs, double[] ys){
-		return Arrays.equals(xs,ys) ;
+		return Arrays.equals(xs, ys);
 	}
 
 	static public double[] vadd(double[] x, double[] ys){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += ys[i];
 		return xs;
-		}
+	}
 
 	static public double[] vsub(double[] x, double[] ys){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= ys[i];
 		return xs;
-		}
+	}
 
 	static public double[] vaddmul(double[] x, double[] ys, double[] zs){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public double[] vsubmul(double[] x, double[] ys, double[] zs){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public double[] vaddsmul(double[] x, double[] ys, double z){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public double[] vsubsmul(double[] x, double[] ys, double z){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public double[] vmulsadd(double[] x, double[] ys, double z){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + z;
 		return xs;
-		}
+	}
 
 	static public double[] vdiv(double[] x, double[] ys){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= ys[i];
 		return xs;
-		}
+	}
 
 	static public double[] vmul(double[] x, double[] ys){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= ys[i];
 		return xs;
-		}
+	}
 
 	static public double[] vmuladd(double[] x, double[] ys, double[] zs){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + zs[i];
 		return xs;
-		}
+	}
 
 	static public double[] vmulsub(double[] x, double[] ys, double[] zs){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])-zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) - zs[i];
 		return xs;
-		}
+	}
 
 	static public double[] vmax(double[] x, double[] ys){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.max(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.max(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public double[] vmin(double[] x, double[] ys){
 		final double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.min(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.min(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public double[] vmap(IFn fn, double[] x) throws Exception{
 		double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i])).doubleValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i])).doubleValue();
 		return xs;
-		}
+	}
 
 	static public double[] vmap(IFn fn, double[] x, double[] ys) throws Exception{
 		double[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).doubleValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).doubleValue();
 		return xs;
-		}
+	}
 }
 
 static public class I{
-	static public int add(int x, int y) {return x + y;}
-	static public int subtract(int x, int y) {return x - y;}
-	static public int negate(int x) {return -x;}
-	static public int inc(int x) {return x+1;}
-	static public int dec(int x) {return x-1;}
-	static public int multiply(int x, int y) {return x * y;}
-	static public int divide(int x, int y) {return x / y;}
-	static public boolean equiv(int x, int y) {return x ==  y;}
-	static public boolean lt(int x, int y) {return x <  y;}
-	static public boolean lte(int x, int y) {return x <=  y;}
-	static public boolean gt(int x, int y) {return x >  y;}
-	static public boolean gte(int x, int y) {return x >=  y;}
-	static public boolean pos(int x) {return x > 0;}
-	static public boolean neg(int x) {return x < 0;}
-	static public boolean zero(int x) {return x == 0;}
+	static public int add(int x, int y){
+		return x + y;
+	}
+
+	static public int subtract(int x, int y){
+		return x - y;
+	}
+
+	static public int negate(int x){
+		return -x;
+	}
+
+	static public int inc(int x){
+		return x + 1;
+	}
+
+	static public int dec(int x){
+		return x - 1;
+	}
+
+	static public int multiply(int x, int y){
+		return x * y;
+	}
+
+	static public int divide(int x, int y){
+		return x / y;
+	}
+
+	static public boolean equiv(int x, int y){
+		return x == y;
+	}
+
+	static public boolean lt(int x, int y){
+		return x < y;
+	}
+
+	static public boolean lte(int x, int y){
+		return x <= y;
+	}
+
+	static public boolean gt(int x, int y){
+		return x > y;
+	}
+
+	static public boolean gte(int x, int y){
+		return x >= y;
+	}
+
+	static public boolean pos(int x){
+		return x > 0;
+	}
+
+	static public boolean neg(int x){
+		return x < 0;
+	}
+
+	static public boolean zero(int x){
+		return x == 0;
+	}
 
 	static public int aget(int[] xs, int i){
 		return xs[i];
@@ -2076,368 +2444,412 @@ static public class I{
 		int[] ret = new int[size];
 		if(init instanceof Number)
 			{
-			int f = ((Number)init).intValue();
-			for(int i=0;i<ret.length;i++)
+			int f = ((Number) init).intValue();
+			for(int i = 0; i < ret.length; i++)
 				ret[i] = f;
 			}
 		else
 			{
 			ISeq s = RT.seq(init);
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).intValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).intValue();
 			}
 		return ret;
 	}
 
 	static public int[] vec(Object sizeOrSeq){
 		if(sizeOrSeq instanceof Number)
-			return new int[((Number)sizeOrSeq).intValue()];
+			return new int[((Number) sizeOrSeq).intValue()];
 		else
 			{
 			ISeq s = RT.seq(sizeOrSeq);
 			int size = s.count();
 			int[] ret = new int[size];
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).intValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).intValue();
 			return ret;
 			}
 	}
 
 	static public int[] vsadd(int[] x, int y){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += y;
 		return xs;
 	}
 
 	static public int[] vssub(int[] x, int y){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= y;
 		return xs;
 	}
 
 	static public int[] vsdiv(int[] x, int y){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= y;
 		return xs;
 	}
 
 	static public int[] vsmul(int[] x, int y){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= y;
 		return xs;
 	}
 
 	static public int[] svdiv(int y, int[] x){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = y/xs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = y / xs[i];
 		return xs;
 	}
 
 	static public int[] vsmuladd(int[] x, int y, int[] zs){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + zs[i];
 		return xs;
 	}
 
 	static public int[] vsmulsub(int[] x, int y, int[] zs){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - zs[i];
 		return xs;
 	}
 
 	static public int[] vsmulsadd(int[] x, int y, int z){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + z;
 		return xs;
 	}
 
 	static public int[] vsmulssub(int[] x, int y, int z){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - z;
 		return xs;
 	}
 
 	static public int[] vabs(int[] x){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public int[] vnegabs(int[] x){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public int[] vneg(int[] x){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -xs[i];
 		return xs;
-		}
+	}
 
 	static public int[] vsqr(int[] x){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= xs[i];
 		return xs;
-		}
+	}
 
 	static public int[] vsignedsqr(int[] x){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public int[] vclip(int[] x, int low, int high){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				xs[i] = low;
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				xs[i] = high;
 			}
 		return xs;
-		}
+	}
 
 	static public IPersistentVector vclipcounts(int[] x, int low, int high){
 		final int[] xs = x.clone();
 		int lowc = 0;
 		int highc = 0;
 
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				{
 				++lowc;
 				xs[i] = low;
 				}
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				{
 				++highc;
 				xs[i] = high;
 				}
 			}
-		return RT.vector(xs,lowc,highc);
-		}
+		return RT.vector(xs, lowc, highc);
+	}
 
 	static public int[] vthresh(int[] x, int thresh, int otherwise){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<thresh)
+			if(xs[i] < thresh)
 				xs[i] = otherwise;
 			}
 		return xs;
-		}
+	}
 
 	static public int[] vreverse(int[] x){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = xs[xs.length - i - 1];
 		return xs;
-		}
+	}
 
 	static public int[] vrunningsum(int[] x){
 		final int[] xs = x.clone();
-		for(int i=1;i<xs.length;i++)
+		for(int i = 1; i < xs.length; i++)
 			xs[i] = xs[i - 1] + xs[i];
 		return xs;
-		}
+	}
 
 	static public int[] vsort(int[] x){
 		final int[] xs = x.clone();
 		Arrays.sort(xs);
 		return xs;
-		}
+	}
 
 	static public int vdot(int[] xs, int[] ys){
 		int ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i] * ys[i];
 		return ret;
-		}
+	}
 
 	static public int vmax(int[] xs){
 		if(xs.length == 0)
 			return 0;
 		int ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.max(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.max(ret, xs[i]);
 		return ret;
-		}
+	}
 
 	static public int vmin(int[] xs){
 		if(xs.length == 0)
 			return 0;
 		int ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.min(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.min(ret, xs[i]);
 		return ret;
-		}
-
-	static public double vmean(int[] xs) {
-		if(xs.length == 0)
-			return 0;
-		return vsum(xs)/(double)xs.length;
 	}
 
-	static public double vrms(int[] xs) {
+	static public double vmean(int[] xs){
+		if(xs.length == 0)
+			return 0;
+		return vsum(xs) / (double) xs.length;
+	}
+
+	static public double vrms(int[] xs){
 		if(xs.length == 0)
 			return 0;
 		int ret = 0;
-		for(int i=0;i<xs.length;i++)
-			ret += xs[i]*xs[i];
-		return Math.sqrt(ret/(double)xs.length);
+		for(int i = 0; i < xs.length; i++)
+			ret += xs[i] * xs[i];
+		return Math.sqrt(ret / (double) xs.length);
 	}
 
-	static public int vsum(int[] xs) {
+	static public int vsum(int[] xs){
 		int ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i];
 		return ret;
 	}
 
 	static public boolean vequiv(int[] xs, int[] ys){
-		return Arrays.equals(xs,ys) ;
+		return Arrays.equals(xs, ys);
 	}
 
 	static public int[] vadd(int[] x, int[] ys){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += ys[i];
 		return xs;
-		}
+	}
 
 	static public int[] vsub(int[] x, int[] ys){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= ys[i];
 		return xs;
-		}
+	}
 
 	static public int[] vaddmul(int[] x, int[] ys, int[] zs){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public int[] vsubmul(int[] x, int[] ys, int[] zs){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public int[] vaddsmul(int[] x, int[] ys, int z){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public int[] vsubsmul(int[] x, int[] ys, int z){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public int[] vmulsadd(int[] x, int[] ys, int z){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + z;
 		return xs;
-		}
+	}
 
 	static public int[] vdiv(int[] x, int[] ys){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= ys[i];
 		return xs;
-		}
+	}
 
 	static public int[] vmul(int[] x, int[] ys){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= ys[i];
 		return xs;
-		}
+	}
 
 	static public int[] vmuladd(int[] x, int[] ys, int[] zs){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + zs[i];
 		return xs;
-		}
+	}
 
 	static public int[] vmulsub(int[] x, int[] ys, int[] zs){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])-zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) - zs[i];
 		return xs;
-		}
+	}
 
 	static public int[] vmax(int[] x, int[] ys){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.max(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.max(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public int[] vmin(int[] x, int[] ys){
 		final int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.min(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.min(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public int[] vmap(IFn fn, int[] x) throws Exception{
 		int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i])).intValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i])).intValue();
 		return xs;
-		}
+	}
 
 	static public int[] vmap(IFn fn, int[] x, int[] ys) throws Exception{
 		int[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).intValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).intValue();
 		return xs;
-		}
+	}
 
 }
 
 static public class L{
-	static public long add(long x, long y) {return x + y;}
-	static public long subtract(long x, long y) {return x - y;}
-	static public long negate(long x) {return -x;}
-	static public long inc(long x) {return x+1;}
-	static public long dec(long x) {return x-1;}
-	static public long multiply(long x, long y) {return x * y;}
-	static public long divide(long x, long y) {return x / y;}
-	static public boolean equiv(long x, long y) {return x ==  y;}
-	static public boolean lt(long x, long y) {return x <  y;}
-	static public boolean lte(long x, long y) {return x <=  y;}
-	static public boolean gt(long x, long y) {return x >  y;}
-	static public boolean gte(long x, long y) {return x >=  y;}
-	static public boolean pos(long x) {return x > 0;}
-	static public boolean neg(long x) {return x < 0;}
-	static public boolean zero(long x) {return x == 0;}
+	static public long add(long x, long y){
+		return x + y;
+	}
+
+	static public long subtract(long x, long y){
+		return x - y;
+	}
+
+	static public long negate(long x){
+		return -x;
+	}
+
+	static public long inc(long x){
+		return x + 1;
+	}
+
+	static public long dec(long x){
+		return x - 1;
+	}
+
+	static public long multiply(long x, long y){
+		return x * y;
+	}
+
+	static public long divide(long x, long y){
+		return x / y;
+	}
+
+	static public boolean equiv(long x, long y){
+		return x == y;
+	}
+
+	static public boolean lt(long x, long y){
+		return x < y;
+	}
+
+	static public boolean lte(long x, long y){
+		return x <= y;
+	}
+
+	static public boolean gt(long x, long y){
+		return x > y;
+	}
+
+	static public boolean gte(long x, long y){
+		return x >= y;
+	}
+
+	static public boolean pos(long x){
+		return x > 0;
+	}
+
+	static public boolean neg(long x){
+		return x < 0;
+	}
+
+	static public boolean zero(long x){
+		return x == 0;
+	}
 
 	static public long aget(long[] xs, int i){
 		return xs[i];
@@ -2460,29 +2872,29 @@ static public class L{
 		long[] ret = new long[size];
 		if(init instanceof Number)
 			{
-			long f = ((Number)init).longValue();
-			for(int i=0;i<ret.length;i++)
+			long f = ((Number) init).longValue();
+			for(int i = 0; i < ret.length; i++)
 				ret[i] = f;
 			}
 		else
 			{
 			ISeq s = RT.seq(init);
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).longValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).longValue();
 			}
 		return ret;
 	}
 
 	static public long[] vec(Object sizeOrSeq){
 		if(sizeOrSeq instanceof Number)
-			return new long[((Number)sizeOrSeq).intValue()];
+			return new long[((Number) sizeOrSeq).intValue()];
 		else
 			{
 			ISeq s = RT.seq(sizeOrSeq);
 			int size = s.count();
 			long[] ret = new long[size];
-			for(int i = 0; i < size && s != null;i++,s=s.rest())
-				ret[i] = ((Number)s.first()).intValue();
+			for(int i = 0; i < size && s != null; i++, s = s.rest())
+				ret[i] = ((Number) s.first()).intValue();
 			return ret;
 			}
 	}
@@ -2490,320 +2902,320 @@ static public class L{
 
 	static public long[] vsadd(long[] x, long y){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += y;
 		return xs;
 	}
 
 	static public long[] vssub(long[] x, long y){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= y;
 		return xs;
 	}
 
 	static public long[] vsdiv(long[] x, long y){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= y;
 		return xs;
 	}
 
 	static public long[] vsmul(long[] x, long y){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= y;
 		return xs;
 	}
 
 	static public long[] svdiv(long y, long[] x){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = y/xs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = y / xs[i];
 		return xs;
 	}
 
 	static public long[] vsmuladd(long[] x, long y, long[] zs){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + zs[i];
 		return xs;
 	}
 
 	static public long[] vsmulsub(long[] x, long y, long[] zs){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - zs[i];
 		return xs;
 	}
 
 	static public long[] vsmulsadd(long[] x, long y, long z){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y + z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y + z;
 		return xs;
 	}
 
 	static public long[] vsmulssub(long[] x, long y, long z){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = xs[i]*y - z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = xs[i] * y - z;
 		return xs;
 	}
 
 	static public long[] vabs(long[] x){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public long[] vnegabs(long[] x){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public long[] vneg(long[] x){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = -xs[i];
 		return xs;
-		}
+	}
 
 	static public long[] vsqr(long[] x){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= xs[i];
 		return xs;
-		}
+	}
 
 	static public long[] vsignedsqr(long[] x){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= Math.abs(xs[i]);
 		return xs;
-		}
+	}
 
 	static public long[] vclip(long[] x, long low, long high){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				xs[i] = low;
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				xs[i] = high;
 			}
 		return xs;
-		}
+	}
 
 	static public IPersistentVector vclipcounts(long[] x, long low, long high){
 		final long[] xs = x.clone();
 		int lowc = 0;
 		int highc = 0;
 
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<low)
+			if(xs[i] < low)
 				{
 				++lowc;
 				xs[i] = low;
 				}
-			else if(xs[i]>high)
+			else if(xs[i] > high)
 				{
 				++highc;
 				xs[i] = high;
 				}
 			}
-		return RT.vector(xs,lowc,highc);
-		}
+		return RT.vector(xs, lowc, highc);
+	}
 
 	static public long[] vthresh(long[] x, long thresh, long otherwise){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			{
-			if(xs[i]<thresh)
+			if(xs[i] < thresh)
 				xs[i] = otherwise;
 			}
 		return xs;
-		}
+	}
 
 	static public long[] vreverse(long[] x){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] = xs[xs.length - i - 1];
 		return xs;
-		}
+	}
 
 	static public long[] vrunningsum(long[] x){
 		final long[] xs = x.clone();
-		for(int i=1;i<xs.length;i++)
+		for(int i = 1; i < xs.length; i++)
 			xs[i] = xs[i - 1] + xs[i];
 		return xs;
-		}
+	}
 
 	static public long[] vsort(long[] x){
 		final long[] xs = x.clone();
 		Arrays.sort(xs);
 		return xs;
-		}
+	}
 
 	static public long vdot(long[] xs, long[] ys){
 		long ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i] * ys[i];
 		return ret;
-		}
+	}
 
 	static public long vmax(long[] xs){
 		if(xs.length == 0)
 			return 0;
 		long ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.max(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.max(ret, xs[i]);
 		return ret;
-		}
+	}
 
 	static public long vmin(long[] xs){
 		if(xs.length == 0)
 			return 0;
 		long ret = xs[0];
-		for(int i=0;i<xs.length;i++)
-			ret = Math.min(ret,xs[i]);
+		for(int i = 0; i < xs.length; i++)
+			ret = Math.min(ret, xs[i]);
 		return ret;
-		}
-
-	static public double vmean(long[] xs) {
-		if(xs.length == 0)
-			return 0;
-		return vsum(xs)/(double)xs.length;
 	}
 
-	static public double vrms(long[] xs) {
+	static public double vmean(long[] xs){
+		if(xs.length == 0)
+			return 0;
+		return vsum(xs) / (double) xs.length;
+	}
+
+	static public double vrms(long[] xs){
 		if(xs.length == 0)
 			return 0;
 		long ret = 0;
-		for(int i=0;i<xs.length;i++)
-			ret += xs[i]*xs[i];
-		return Math.sqrt(ret/(double)xs.length);
+		for(int i = 0; i < xs.length; i++)
+			ret += xs[i] * xs[i];
+		return Math.sqrt(ret / (double) xs.length);
 	}
 
-	static public long vsum(long[] xs) {
+	static public long vsum(long[] xs){
 		long ret = 0;
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			ret += xs[i];
 		return ret;
 	}
 
 	static public boolean vequiv(long[] xs, long[] ys){
-		return Arrays.equals(xs,ys) ;
+		return Arrays.equals(xs, ys);
 	}
 
 	static public long[] vadd(long[] x, long[] ys){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] += ys[i];
 		return xs;
-		}
+	}
 
 	static public long[] vsub(long[] x, long[] ys){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] -= ys[i];
 		return xs;
-		}
+	}
 
 	static public long[] vaddmul(long[] x, long[] ys, long[] zs){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public long[] vsubmul(long[] x, long[] ys, long[] zs){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * zs[i];
 		return xs;
-		}
+	}
 
 	static public long[] vaddsmul(long[] x, long[] ys, long z){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]+ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] + ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public long[] vsubsmul(long[] x, long[] ys, long z){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]-ys[i])*z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] - ys[i]) * z;
 		return xs;
-		}
+	}
 
 	static public long[] vmulsadd(long[] x, long[] ys, long z){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+z;
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + z;
 		return xs;
-		}
+	}
 
 	static public long[] vdiv(long[] x, long[] ys){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] /= ys[i];
 		return xs;
-		}
+	}
 
 	static public long[] vmul(long[] x, long[] ys){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
+		for(int i = 0; i < xs.length; i++)
 			xs[i] *= ys[i];
 		return xs;
-		}
+	}
 
 	static public long[] vmuladd(long[] x, long[] ys, long[] zs){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])+zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) + zs[i];
 		return xs;
-		}
+	}
 
 	static public long[] vmulsub(long[] x, long[] ys, long[] zs){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = (xs[i]*ys[i])-zs[i];
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = (xs[i] * ys[i]) - zs[i];
 		return xs;
-		}
+	}
 
 	static public long[] vmax(long[] x, long[] ys){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.max(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.max(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public long[] vmin(long[] x, long[] ys){
 		final long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = Math.min(xs[i],ys[i]);
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = Math.min(xs[i], ys[i]);
 		return xs;
-		}
+	}
 
 	static public long[] vmap(IFn fn, long[] x) throws Exception{
 		long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i])).longValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i])).longValue();
 		return xs;
-		}
+	}
 
 	static public long[] vmap(IFn fn, long[] x, long[] ys) throws Exception{
 		long[] xs = x.clone();
-		for(int i=0;i<xs.length;i++)
-			xs[i] = ((Number)fn.invoke(xs[i], ys[i])).longValue();
+		for(int i = 0; i < xs.length; i++)
+			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).longValue();
 		return xs;
-		}
+	}
 
 }
 

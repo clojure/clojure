@@ -36,4 +36,9 @@ static public int hashCombine(int seed, int hash){
 	seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	return seed;
 }
+
+static public boolean isPrimitive(Class c){
+	return c != null && c.isPrimitive();
+}
+
 }
