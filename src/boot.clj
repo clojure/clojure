@@ -472,7 +472,7 @@
    :inline-arities #{2}}
   ([] 1)
   ([x] (cast Number x))
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (multiply x y)))
+  ([x y] (. clojure.lang.Numbers (multiply x y)))
   ([x y & more]
    (reduce * (* x y) more)))
 
@@ -482,7 +482,7 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (divide ~x ~y)))
    :inline-arities #{2}}
   ([x] (/ 1 x))
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (divide x y)))
+  ([x y] (. clojure.lang.Numbers (divide x y)))
   ([x y & more]
    (reduce / (/ x y) more)))
 
@@ -492,7 +492,7 @@
   {:inline (fn [& args] `(. clojure.lang.Numbers (minus ~@args)))
    :inline-arities #{1 2}}
   ([x] (. clojure.lang.Numbers (minus x)))
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (minus x y)))
+  ([x y] (. clojure.lang.Numbers (minus x y)))
   ([x y & more]
    (reduce - (- x y) more)))
 
@@ -502,7 +502,7 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (lt ~x ~y)))
    :inline-arities #{2}}
   ([x] true)
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (lt x y)))
+  ([x y] (. clojure.lang.Numbers (lt x y)))
   ([x y & more]
    (if (< x y)
      (if (rest more)
@@ -516,7 +516,7 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (lte ~x ~y)))
    :inline-arities #{2}}
   ([x] true)
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (lte x y)))
+  ([x y] (. clojure.lang.Numbers (lte x y)))
   ([x y & more]
    (if (<= x y)
      (if (rest more)
@@ -530,7 +530,7 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (gt ~x ~y)))
    :inline-arities #{2}}
   ([x] true)
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (gt x y)))
+  ([x y] (. clojure.lang.Numbers (gt x y)))
   ([x y & more]
    (if (> x y)
      (if (rest more)
@@ -544,7 +544,7 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (gte ~x ~y)))
    :inline-arities #{2}}
   ([x] true)
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (gte x y)))
+  ([x y] (. clojure.lang.Numbers (gte x y)))
   ([x y & more]
    (if (>= x y)
      (if (rest more)
@@ -557,7 +557,7 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (equiv ~x ~y)))
    :inline-arities #{2}}
   ([x] true)
-  ([#^Number x #^Number y] (. clojure.lang.Numbers (equiv x y)))
+  ([x y] (. clojure.lang.Numbers (equiv x y)))
   ([x y & more]
    (if (== x y)
      (if (rest more)

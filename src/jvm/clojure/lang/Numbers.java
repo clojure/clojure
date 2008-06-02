@@ -1562,6 +1562,7 @@ static public int add(int x, int y){
 	return ret;
 }
 
+
 static public int minus(int x, int y){
 	int ret = x - y;
 	if ((ret ^ x) < 0 && (ret ^ -y) < 0)
@@ -3447,4 +3448,723 @@ static public class L{
 
 }
 */
+
+
+//overload resolution
+
+static public Number add(int x, Object y){
+	return add((Object)x,y);
+}
+
+static public Number add(Object x, int y){
+	return add(x,(Object)y);
+}
+
+static public Number add(float x, Object y){
+	return add((Object)x,y);
+}
+
+static public Number add(Object x, float y){
+	return add(x,(Object)y);
+}
+
+static public Number add(long x, Object y){
+	return add((Object)x,y);
+}
+
+static public Number add(Object x, long y){
+	return add(x,(Object)y);
+}
+
+static public Number add(double x, Object y){
+	return add((Object)x,y);
+}
+
+static public Number add(Object x, double y){
+	return add(x,(Object)y);
+}
+
+static public Number minus(int x, Object y){
+	return minus((Object)x,y);
+}
+
+static public Number minus(Object x, int y){
+	return minus(x,(Object)y);
+}
+
+static public Number minus(float x, Object y){
+	return minus((Object)x,y);
+}
+
+static public Number minus(Object x, float y){
+	return minus(x,(Object)y);
+}
+
+static public Number minus(long x, Object y){
+	return minus((Object)x,y);
+}
+
+static public Number minus(Object x, long y){
+	return minus(x,(Object)y);
+}
+
+static public Number minus(double x, Object y){
+	return minus((Object)x,y);
+}
+
+static public Number minus(Object x, double y){
+	return minus(x,(Object)y);
+}
+
+static public Number multiply(int x, Object y){
+	return multiply((Object)x,y);
+}
+
+static public Number multiply(Object x, int y){
+	return multiply(x,(Object)y);
+}
+
+static public Number multiply(float x, Object y){
+	return multiply((Object)x,y);
+}
+
+static public Number multiply(Object x, float y){
+	return multiply(x,(Object)y);
+}
+
+static public Number multiply(long x, Object y){
+	return multiply((Object)x,y);
+}
+
+static public Number multiply(Object x, long y){
+	return multiply(x,(Object)y);
+}
+
+static public Number multiply(double x, Object y){
+	return multiply((Object)x,y);
+}
+
+static public Number multiply(Object x, double y){
+	return multiply(x,(Object)y);
+}
+
+static public Number divide(int x, Object y){
+	return divide((Object)x,y);
+}
+
+static public Number divide(Object x, int y){
+	return divide(x,(Object)y);
+}
+
+static public Number divide(float x, Object y){
+	return divide((Object)x,y);
+}
+
+static public Number divide(Object x, float y){
+	return divide(x,(Object)y);
+}
+
+static public Number divide(long x, Object y){
+	return divide((Object)x,y);
+}
+
+static public Number divide(Object x, long y){
+	return divide(x,(Object)y);
+}
+
+static public Number divide(double x, Object y){
+	return divide((Object)x,y);
+}
+
+static public Number divide(Object x, double y){
+	return divide(x,(Object)y);
+}
+
+static public boolean lt(int x, Object y){
+	return lt((Object)x,y);
+}
+
+static public boolean lt(Object x, int y){
+	return lt(x,(Object)y);
+}
+
+static public boolean lt(float x, Object y){
+	return lt((Object)x,y);
+}
+
+static public boolean lt(Object x, float y){
+	return lt(x,(Object)y);
+}
+
+static public boolean lt(long x, Object y){
+	return lt((Object)x,y);
+}
+
+static public boolean lt(Object x, long y){
+	return lt(x,(Object)y);
+}
+
+static public boolean lt(double x, Object y){
+	return lt((Object)x,y);
+}
+
+static public boolean lt(Object x, double y){
+	return lt(x,(Object)y);
+}
+
+static public boolean lte(int x, Object y){
+	return lte((Object)x,y);
+}
+
+static public boolean lte(Object x, int y){
+	return lte(x,(Object)y);
+}
+
+static public boolean lte(float x, Object y){
+	return lte((Object)x,y);
+}
+
+static public boolean lte(Object x, float y){
+	return lte(x,(Object)y);
+}
+
+static public boolean lte(long x, Object y){
+	return lte((Object)x,y);
+}
+
+static public boolean lte(Object x, long y){
+	return lte(x,(Object)y);
+}
+
+static public boolean lte(double x, Object y){
+	return lte((Object)x,y);
+}
+
+static public boolean lte(Object x, double y){
+	return lte(x,(Object)y);
+}
+
+static public boolean gt(int x, Object y){
+	return gt((Object)x,y);
+}
+
+static public boolean gt(Object x, int y){
+	return gt(x,(Object)y);
+}
+
+static public boolean gt(float x, Object y){
+	return gt((Object)x,y);
+}
+
+static public boolean gt(Object x, float y){
+	return gt(x,(Object)y);
+}
+
+static public boolean gt(long x, Object y){
+	return gt((Object)x,y);
+}
+
+static public boolean gt(Object x, long y){
+	return gt(x,(Object)y);
+}
+
+static public boolean gt(double x, Object y){
+	return gt((Object)x,y);
+}
+
+static public boolean gt(Object x, double y){
+	return gt(x,(Object)y);
+}
+
+static public boolean gte(int x, Object y){
+	return gte((Object)x,y);
+}
+
+static public boolean gte(Object x, int y){
+	return gte(x,(Object)y);
+}
+
+static public boolean gte(float x, Object y){
+	return gte((Object)x,y);
+}
+
+static public boolean gte(Object x, float y){
+	return gte(x,(Object)y);
+}
+
+static public boolean gte(long x, Object y){
+	return gte((Object)x,y);
+}
+
+static public boolean gte(Object x, long y){
+	return gte(x,(Object)y);
+}
+
+static public boolean gte(double x, Object y){
+	return gte((Object)x,y);
+}
+
+static public boolean gte(Object x, double y){
+	return gte(x,(Object)y);
+}
+
+
+static public boolean equiv(int x, Object y){
+	return equiv((Object)x,y);
+}
+
+static public boolean equiv(Object x, int y){
+	return equiv(x,(Object)y);
+}
+
+static public boolean equiv(float x, Object y){
+	return equiv((Object)x,y);
+}
+
+static public boolean equiv(Object x, float y){
+	return equiv(x,(Object)y);
+}
+
+static public boolean equiv(long x, Object y){
+	return equiv((Object)x,y);
+}
+
+static public boolean equiv(Object x, long y){
+	return equiv(x,(Object)y);
+}
+
+static public boolean equiv(double x, Object y){
+	return equiv((Object)x,y);
+}
+
+static public boolean equiv(Object x, double y){
+	return equiv(x,(Object)y);
+}
+
+
+static public float add(int x, float y){
+	return add((float)x,y);
+}
+
+static public float add(float x, int y){
+	return add(x,(float)y);
+}
+
+static public double add(int x, double y){
+	return add((double)x,y);
+}
+
+static public double add(double x, int y){
+	return add(x,(double)y);
+}
+
+static public long add(int x, long y){
+	return add((long)x,y);
+}
+
+static public long add(long x, int y){
+	return add(x,(long)y);
+}
+
+static public float add(long x, float y){
+	return add((float)x,y);
+}
+
+static public float add(float x, long y){
+	return add(x,(float)y);
+}
+
+static public double add(long x, double y){
+	return add((double)x,y);
+}
+
+static public double add(double x, long y){
+	return add(x,(double)y);
+}
+
+static public double add(float x, double y){
+	return add((double)x,y);
+}
+
+static public double add(double x, float y){
+	return add(x,(double)y);
+}
+
+static public float minus(int x, float y){
+	return minus((float)x,y);
+}
+
+static public float minus(float x, int y){
+	return minus(x,(float)y);
+}
+
+static public double minus(int x, double y){
+	return minus((double)x,y);
+}
+
+static public double minus(double x, int y){
+	return minus(x,(double)y);
+}
+
+static public long minus(int x, long y){
+	return minus((long)x,y);
+}
+
+static public long minus(long x, int y){
+	return minus(x,(long)y);
+}
+
+static public float minus(long x, float y){
+	return minus((float)x,y);
+}
+
+static public float minus(float x, long y){
+	return minus(x,(float)y);
+}
+
+static public double minus(long x, double y){
+	return minus((double)x,y);
+}
+
+static public double minus(double x, long y){
+	return minus(x,(double)y);
+}
+
+static public double minus(float x, double y){
+	return minus((double)x,y);
+}
+
+static public double minus(double x, float y){
+	return minus(x,(double)y);
+}
+
+static public float multiply(int x, float y){
+	return multiply((float)x,y);
+}
+
+static public float multiply(float x, int y){
+	return multiply(x,(float)y);
+}
+
+static public double multiply(int x, double y){
+	return multiply((double)x,y);
+}
+
+static public double multiply(double x, int y){
+	return multiply(x,(double)y);
+}
+
+static public long multiply(int x, long y){
+	return multiply((long)x,y);
+}
+
+static public long multiply(long x, int y){
+	return multiply(x,(long)y);
+}
+
+static public float multiply(long x, float y){
+	return multiply((float)x,y);
+}
+
+static public float multiply(float x, long y){
+	return multiply(x,(float)y);
+}
+
+static public double multiply(long x, double y){
+	return multiply((double)x,y);
+}
+
+static public double multiply(double x, long y){
+	return multiply(x,(double)y);
+}
+
+static public double multiply(float x, double y){
+	return multiply((double)x,y);
+}
+
+static public double multiply(double x, float y){
+	return multiply(x,(double)y);
+}
+
+static public float divide(int x, float y){
+	return divide((float)x,y);
+}
+
+static public float divide(float x, int y){
+	return divide(x,(float)y);
+}
+
+static public double divide(int x, double y){
+	return divide((double)x,y);
+}
+
+static public double divide(double x, int y){
+	return divide(x,(double)y);
+}
+
+static public float divide(long x, float y){
+	return divide((float)x,y);
+}
+
+static public float divide(float x, long y){
+	return divide(x,(float)y);
+}
+
+static public double divide(long x, double y){
+	return divide((double)x,y);
+}
+
+static public double divide(double x, long y){
+	return divide(x,(double)y);
+}
+
+static public double divide(float x, double y){
+	return divide((double)x,y);
+}
+
+static public double divide(double x, float y){
+	return divide(x,(double)y);
+}
+
+static public boolean lt(int x, float y){
+	return lt((float)x,y);
+}
+
+static public boolean lt(float x, int y){
+	return lt(x,(float)y);
+}
+
+static public boolean lt(int x, double y){
+	return lt((double)x,y);
+}
+
+static public boolean lt(double x, int y){
+	return lt(x,(double)y);
+}
+
+static public boolean lt(int x, long y){
+	return lt((long)x,y);
+}
+
+static public boolean lt(long x, int y){
+	return lt(x,(long)y);
+}
+
+static public boolean lt(long x, float y){
+	return lt((float)x,y);
+}
+
+static public boolean lt(float x, long y){
+	return lt(x,(float)y);
+}
+
+static public boolean lt(long x, double y){
+	return lt((double)x,y);
+}
+
+static public boolean lt(double x, long y){
+	return lt(x,(double)y);
+}
+
+static public boolean lt(float x, double y){
+	return lt((double)x,y);
+}
+
+static public boolean lt(double x, float y){
+	return lt(x,(double)y);
+}
+
+
+static public boolean lte(int x, float y){
+	return lte((float)x,y);
+}
+
+static public boolean lte(float x, int y){
+	return lte(x,(float)y);
+}
+
+static public boolean lte(int x, double y){
+	return lte((double)x,y);
+}
+
+static public boolean lte(double x, int y){
+	return lte(x,(double)y);
+}
+
+static public boolean lte(int x, long y){
+	return lte((long)x,y);
+}
+
+static public boolean lte(long x, int y){
+	return lte(x,(long)y);
+}
+
+static public boolean lte(long x, float y){
+	return lte((float)x,y);
+}
+
+static public boolean lte(float x, long y){
+	return lte(x,(float)y);
+}
+
+static public boolean lte(long x, double y){
+	return lte((double)x,y);
+}
+
+static public boolean lte(double x, long y){
+	return lte(x,(double)y);
+}
+
+static public boolean lte(float x, double y){
+	return lte((double)x,y);
+}
+
+static public boolean lte(double x, float y){
+	return lte(x,(double)y);
+}
+
+static public boolean gt(int x, float y){
+	return gt((float)x,y);
+}
+
+static public boolean gt(float x, int y){
+	return gt(x,(float)y);
+}
+
+static public boolean gt(int x, double y){
+	return gt((double)x,y);
+}
+
+static public boolean gt(double x, int y){
+	return gt(x,(double)y);
+}
+
+static public boolean gt(int x, long y){
+	return gt((long)x,y);
+}
+
+static public boolean gt(long x, int y){
+	return gt(x,(long)y);
+}
+
+static public boolean gt(long x, float y){
+	return gt((float)x,y);
+}
+
+static public boolean gt(float x, long y){
+	return gt(x,(float)y);
+}
+
+static public boolean gt(long x, double y){
+	return gt((double)x,y);
+}
+
+static public boolean gt(double x, long y){
+	return gt(x,(double)y);
+}
+
+static public boolean gt(float x, double y){
+	return gt((double)x,y);
+}
+
+static public boolean gt(double x, float y){
+	return gt(x,(double)y);
+}
+
+static public boolean gte(int x, float y){
+	return gte((float)x,y);
+}
+
+static public boolean gte(float x, int y){
+	return gte(x,(float)y);
+}
+
+static public boolean gte(int x, double y){
+	return gte((double)x,y);
+}
+
+static public boolean gte(double x, int y){
+	return gte(x,(double)y);
+}
+
+static public boolean gte(int x, long y){
+	return gte((long)x,y);
+}
+
+static public boolean gte(long x, int y){
+	return gte(x,(long)y);
+}
+
+static public boolean gte(long x, float y){
+	return gte((float)x,y);
+}
+
+static public boolean gte(float x, long y){
+	return gte(x,(float)y);
+}
+
+static public boolean gte(long x, double y){
+	return gte((double)x,y);
+}
+
+static public boolean gte(double x, long y){
+	return gte(x,(double)y);
+}
+
+static public boolean gte(float x, double y){
+	return gte((double)x,y);
+}
+
+static public boolean gte(double x, float y){
+	return gte(x,(double)y);
+}
+
+static public boolean equiv(int x, float y){
+	return equiv((float)x,y);
+}
+
+static public boolean equiv(float x, int y){
+	return equiv(x,(float)y);
+}
+
+static public boolean equiv(int x, double y){
+	return equiv((double)x,y);
+}
+
+static public boolean equiv(double x, int y){
+	return equiv(x,(double)y);
+}
+
+static public boolean equiv(int x, long y){
+	return equiv((long)x,y);
+}
+
+static public boolean equiv(long x, int y){
+	return equiv(x,(long)y);
+}
+
+static public boolean equiv(long x, float y){
+	return equiv((float)x,y);
+}
+
+static public boolean equiv(float x, long y){
+	return equiv(x,(float)y);
+}
+
+static public boolean equiv(long x, double y){
+	return equiv((double)x,y);
+}
+
+static public boolean equiv(double x, long y){
+	return equiv(x,(double)y);
+}
+
+static public boolean equiv(float x, double y){
+	return equiv((double)x,y);
+}
+
+static public boolean equiv(double x, float y){
+	return equiv(x,(double)y);
+}
+
 }
