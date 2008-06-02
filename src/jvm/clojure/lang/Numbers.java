@@ -1594,7 +1594,7 @@ static public int multiply(int x, int y){
 	return ret;
 }
 
-static public int divide(int x, int y){
+static public int unchecked_divide(int x, int y){
 	return x / y;
 }
 
@@ -1697,7 +1697,7 @@ static public long multiply(long x, long y){
 	return ret;
 }
 
-static public long divide(long x, long y){
+static public long unchecked_divide(long x, long y){
 	return x / y;
 }
 

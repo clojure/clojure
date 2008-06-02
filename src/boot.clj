@@ -625,6 +625,12 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_multiply ~x ~y)))}
   [x y] (. clojure.lang.Numbers (unchecked_multiply x y)))
 
+(defn unchecked-divide
+  "Returns the division of x by y, both int or long. 
+  Note - uses a primitive operator subject to truncation."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_divide ~x ~y)))}
+  [x y] (. clojure.lang.Numbers (unchecked_divide x y)))
+
 (defn pos?
   "Returns true if num is greater than zero, else false"
   {:tag Boolean
