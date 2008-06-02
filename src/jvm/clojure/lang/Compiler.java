@@ -1880,11 +1880,12 @@ static boolean subsumes(Class[] c1, Class[] c2){
 	Boolean better = false;
 	for(int i = 0; i < c1.length; i++)
 		{
-		if(!(c1[i] == c2[i] || c2[i].isPrimitive() && c1[i] == Object.class))
+		if(c1[i] != c2[i])// || c2[i].isPrimitive() && c1[i] == Object.class))
 			{
-			if(c1[i].isPrimitive() && c2[i] == Object.class
+			if(!c1[i].isPrimitive() && c2[i].isPrimitive()
 			    //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
-				|| c2[i].isAssignableFrom(c1[i]))
+				|| 
+				c2[i].isAssignableFrom(c1[i]))
 				better = true;
 			else
 				return false;
