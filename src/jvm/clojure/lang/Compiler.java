@@ -1898,6 +1898,7 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 		throws Exception{
 	//presumes matching lengths
 	int matchIdx = -1;
+	boolean tied = false;
 	for(int i = 0; i < paramlists.size(); i++)
 		{
 		boolean match = true;
@@ -1915,12 +1916,18 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 			else
 				{
 				if(subsumes(paramlists.get(i), paramlists.get(matchIdx)))
+					{
 					matchIdx = i;
+					tied = false;
+					}
 				else if(!subsumes(paramlists.get(matchIdx), paramlists.get(i)))
-					throw new IllegalArgumentException("More than one matching method found: " + methodName);
+					tied = true;
 				}
 			}
 		}
+	if(tied)
+		throw new IllegalArgumentException("More than one matching method found: " + methodName);
+
 	return matchIdx;
 }
 
