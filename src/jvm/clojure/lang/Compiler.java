@@ -1529,10 +1529,6 @@ static class MonitorEnterExpr extends UntypedExpr{
 		target.emit(C.EXPRESSION, fn, gen);
 		gen.monitorEnter();
 		NIL_EXPR.emit(context, fn, gen);
-		if(context == C.STATEMENT)
-			{
-			gen.pop();
-			}
 	}
 
 	static class Parser implements IParser{
@@ -1557,10 +1553,6 @@ static class MonitorExitExpr extends UntypedExpr{
 		target.emit(C.EXPRESSION, fn, gen);
 		gen.monitorExit();
 		NIL_EXPR.emit(context, fn, gen);
-		if(context == C.STATEMENT)
-			{
-			gen.pop();
-			}
 	}
 
 	static class Parser implements IParser{

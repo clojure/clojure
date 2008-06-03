@@ -286,7 +286,6 @@ static public void init() throws Exception{
 
 static void doInit() throws Exception{
 	loadResourceScript(RT.class, "boot.clj");
-	//loadResourceScript(RT.class, "primmath.clj");
 	loadResourceScript(RT.class, "proxy.clj");
 	loadResourceScript(RT.class, "zip.clj");
 	loadResourceScript(RT.class, "xml.clj");
