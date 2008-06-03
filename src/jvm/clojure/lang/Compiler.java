@@ -3168,7 +3168,8 @@ static class LocalBinding{
 	}
 
 	public boolean hasJavaClass() throws Exception{
-		if(init != null && init.hasJavaClass() && init.getJavaClass().isPrimitive()
+		if(init != null && init.hasJavaClass()
+		   && Util.isPrimitive(init.getJavaClass())
 		   && !(init instanceof MaybePrimitiveExpr))
 			return false;
 		return tag != null
