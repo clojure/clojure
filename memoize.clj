@@ -20,14 +20,13 @@
 (defn memoize
   "Returns a memoized version of a referentially transparent function. The
   memoized version of the function keeps a cache of the mapping from arguments
-  to results and, when calls with the same arguments are repeated often,  has
+  to results and, when calls with the same arguments are repeated often, has
   higher performance at the expense of higher memory use."
   [function]
   (let [cache (ref {})]
     (fn [& args]
-      (if-let cached (@cache args)
-        cached
-        (let [result (apply function args)]
-          (dosync
-           (commute cache assoc args result))
-          result)))))
+      (or (@cache args)
+          (let [result (apply function args)]
+            (dosync
+             (commute cache assoc args result))
+            result)))))
