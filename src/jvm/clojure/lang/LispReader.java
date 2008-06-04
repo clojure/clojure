@@ -39,7 +39,8 @@ static Symbol DEREF = Symbol.create("clojure", "deref");
 
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
-static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
+//static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
+static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^/]*/)?([\\D&&[^:/]][^/]*)");
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
@@ -266,6 +267,13 @@ private static Object matchSymbol(String s){
 	Matcher m = symbolPat.matcher(s);
 	if(m.matches())
 		{
+		int gc = m.groupCount();
+		String ns = m.group(1);
+		String name = m.group(2);
+		if(ns != null && ns.endsWith(":/")
+			|| name.endsWith(":")
+			|| s.contains("::"))
+			return null;
 		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));
 		if(isKeyword)
