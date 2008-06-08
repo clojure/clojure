@@ -42,7 +42,7 @@
       (primes-from 11 wheel)))
   "A lazy sequence of all the prime numbers.")
 
-(defvar fib
+(defvar fibs
   (concat [0 1]
     (let [rest-fn
           (fn rest-fn [a b]
