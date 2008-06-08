@@ -15,7 +15,7 @@
 ;;           7 from consideration by incrementing past them. Also inspired
 ;;           by code from Christophe Grand in [2].
 ;;
-;;  fib    - based on code from Rich Hickey at the Clojure wiki [3]  
+;;  fib    - based on code from Rich Hickey at the Clojure wiki [3]
 ;;
 ;;  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
 ;;  [2] http://clj-me.blogspot.com/2008/06/primes.html
@@ -32,21 +32,21 @@
 (defvar primes
   (lazy-cat [2 3 5 7]
     (let [primes-from
-		  (fn primes-from [n [f & r]]
-			(if (some #(zero? (rem n %)) (take-while #(<= (* % %) n) primes))
-			  (recur (+ n f) r)
-			  (lazy-cons n (primes-from (+ n f) r))))
-		  wheel (cycle [2 4 2 4 6 2 6 4 2 4 6 6 2 6  4  2
-						6 4 6 8 4 2 4 2 4 8 6 4 6 2  4  6
-						2 6 6 4 2 4 6 2 6 4 2 4 2 10 2 10])]
-	  (primes-from 11 wheel)))
+          (fn primes-from [n [f & r]]
+            (if (some #(zero? (rem n %)) (take-while #(<= (* % %) n) primes))
+              (recur (+ n f) r)
+              (lazy-cons n (primes-from (+ n f) r))))
+          wheel (cycle [2 4 2 4 6 2 6 4 2 4 6 6 2 6  4  2
+                        6 4 6 8 4 2 4 2 4 8 6 4 6 2  4  6
+                        2 6 6 4 2 4 6 2 6 4 2 4 2 10 2 10])]
+      (primes-from 11 wheel)))
   "A lazy sequence of all the prime numbers.")
 
 (defvar fib
   (concat [0 1]
     (let [rest-fn
-		  (fn rest-fn [a b]
-			(let [next (+ a b)]
-			  (lazy-cons next (rest-fn b next))))]
-	  (rest-fn 0 1)))
+          (fn rest-fn [a b]
+            (let [next (+ a b)]
+              (lazy-cons next (rest-fn b next))))]
+      (rest-fn 0 1)))
   "A lazy sequence of all the fibonacci numbers.")
