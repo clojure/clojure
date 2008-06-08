@@ -11,11 +11,11 @@
 ;;  Lazy sequences
 ;;
 ;;  primes - based on the "naive" implemention described in [1] plus a
-;;           small "wheel" which eliminiates multiples of 2, 3, 5, and
+;;           small "wheel" which eliminates multiples of 2, 3, 5, and
 ;;           7 from consideration by incrementing past them. Also inspired
 ;;           by code from Christophe Grand in [2].
 ;;
-;;  fib    - based on code from Rich Hickey at the Clojure wiki [3]
+;;  fibs   - based on code from Rich Hickey at the Clojure wiki [3]
 ;;
 ;;  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
 ;;  [2] http://clj-me.blogspot.com/2008/06/primes.html
