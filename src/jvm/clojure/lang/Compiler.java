@@ -2745,6 +2745,24 @@ static public class FnExpr implements Expr{
 		return variadicMethod != null;
 	}
 
+	Type[] ctorTypes(){
+		if(closes.count() == 0)
+			return ARG_TYPES[0];
+		PersistentVector tv = PersistentVector.EMPTY;
+		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
+			{
+			LocalBinding lb = (LocalBinding) s.first();
+			if(lb.getPrimitiveType() != null)
+				tv = tv.cons(Type.getType(lb.getPrimitiveType()));
+			else
+				tv = tv.cons(OBJECT_TYPE);
+			}
+		Type[] ret = new Type[tv.count()];
+		for(int i=0;i<tv.count();i++)
+			ret[i] = (Type) tv.nth(i);
+		return ret;
+	}
+
 	private void compile(){
 		//create bytecode for a class
 		//with name current_ns.defname[$letname]+
@@ -2853,10 +2871,14 @@ static public class FnExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+			if(lb.getPrimitiveType() != null)
+				cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(), null, null);
+			else
+				cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 			}
 		//ctor that takes closed-overs and inits base + fields
-		Method m = new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]);
+//		Method m = new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]);
+		Method m = new Method("<init>", Type.VOID_TYPE, ctorTypes());
 		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
 		                                                m,
 		                                                null,
@@ -2877,8 +2899,16 @@ static public class FnExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			ctorgen.loadThis();
-			ctorgen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), a);
-			ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
+			if(lb.getPrimitiveType() != null)
+				{
+				ctorgen.visitVarInsn(Type.getType(lb.getPrimitiveType()).getOpcode(Opcodes.ILOAD), a);
+				ctorgen.putField(fntype, lb.name, Type.getType(lb.getPrimitiveType()));
+				}
+			else
+				{
+				ctorgen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), a);
+				ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
+				}
 			}
 		ctorgen.returnValue();
 		//	ctorgen.visitMaxs(1, 1);
@@ -2910,9 +2940,13 @@ static public class FnExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			fn.emitLocal(gen, lb);
+			if(lb.getPrimitiveType()!=null)
+				fn.emitUnboxedLocal(gen, lb);
+			else
+				fn.emitLocal(gen, lb);
 			}
-		gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
+//		gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
+		gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ctorTypes()));
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -2930,8 +2964,15 @@ static public class FnExpr implements Expr{
 	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
 		if(closes.containsKey(lb))
 			{
+			Class primc = lb.getPrimitiveType();
 			gen.loadThis();
-			gen.getField(fntype, lb.name, OBJECT_TYPE);
+			if(primc != null)
+				{
+				gen.getField(fntype, lb.name, Type.getType(primc));
+				HostExpr.emitBoxReturn(this, gen, primc);
+				}
+			else
+				gen.getField(fntype, lb.name, OBJECT_TYPE);
 			}
 		else
 			{
@@ -2944,6 +2985,17 @@ static public class FnExpr implements Expr{
 			else
 				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
 			}
+	}
+
+	private void emitUnboxedLocal(GeneratorAdapter gen, LocalBinding lb){
+		Class primc = lb.getPrimitiveType();
+		if(closes.containsKey(lb))
+			{
+			gen.loadThis();			
+			gen.getField(fntype, lb.name, Type.getType(primc));
+			}
+		else
+			gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), lb.idx);
 	}
 
 	public void emitVar(GeneratorAdapter gen, Var var){
@@ -3194,7 +3246,7 @@ static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
-		gen.visitVarInsn(Type.getType(b.getPrimitiveType()).getOpcode(Opcodes.ILOAD), b.idx);
+		fn.emitUnboxedLocal(gen, b);
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
