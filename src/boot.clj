@@ -2499,9 +2499,10 @@ not-every? (comp not every?))
   ([n coll]
      (partition n n coll))
   ([n step coll]
-     (take-while #(= n (count %))
-       (when (seq coll)
-         (lazy-cons (take n coll) (partition n step (drop step coll)))))))
+   (when (seq coll)
+     (let [p (take n coll)]
+       (when (= n (count p))
+         (lazy-cons  p (partition n step (drop step coll))))))))
 
 (defmacro definline 
   "Experimental - like defmacro, except defines a named function whose
