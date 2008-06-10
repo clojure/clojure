@@ -1605,6 +1605,7 @@ static class TryExpr implements Expr{
 		Label endTry = gen.newLabel();
 		Label endTryCatch = gen.newLabel();
 		Label end = gen.newLabel();
+		Label ret = gen.newLabel();
 		Label finallyLabel = gen.newLabel();
 		for(int i = 0; i < catchExprs.count(); i++)
 			{
@@ -1620,7 +1621,7 @@ static class TryExpr implements Expr{
 		gen.mark(endTry);
 		if(finallyExpr != null)
 			finallyExpr.emit(C.STATEMENT, fn, gen);
-		gen.goTo(end);
+		gen.goTo(ret);
 
 		for(int i = 0; i < catchExprs.count(); i++)
 			{
@@ -1646,9 +1647,10 @@ static class TryExpr implements Expr{
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), finallyLocal);
 			gen.throwException();
 			}
-		gen.mark(end);
+		gen.mark(ret);
 		if(context != C.STATEMENT)
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), retLocal);
+		gen.mark(end);
 		for(int i = 0; i < catchExprs.count(); i++)
 			{
 			CatchClause clause = (CatchClause) catchExprs.nth(i);
