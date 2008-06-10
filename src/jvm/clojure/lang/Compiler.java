@@ -1393,6 +1393,31 @@ static class BooleanExpr extends LiteralExpr{
 final static BooleanExpr TRUE_EXPR = new BooleanExpr(true);
 final static BooleanExpr FALSE_EXPR = new BooleanExpr(false);
 
+static class StringExpr extends LiteralExpr{
+	final String str;
+
+	public StringExpr(String str){
+		this.str = str;
+	}
+
+	Object val(){
+		return str;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			gen.push(str);
+	}
+
+	public boolean hasJavaClass(){
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return String.class;
+	}
+}
+
 /*
 static class NumExpr extends LiteralExpr{
 	final Num num;
@@ -1459,30 +1484,7 @@ static class NumExpr extends LiteralExpr{
 	}
 }
 
-static class StringExpr extends LiteralExpr{
-	final String str;
 
-	public StringExpr(String str){
-		this.str = str;
-	}
-
-	Object val(){
-		return str;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			gen.push(str);
-	}
-
-	public boolean hasJavaClass(){
-		return true;
-	}
-
-	public Class getJavaClass() throws Exception{
-		return String.class;
-	}
-}
 
 static class CharExpr extends LiteralExpr{
 	final Character ch;
@@ -1567,6 +1569,8 @@ static class TryExpr implements Expr{
 	final Expr tryExpr;
 	final Expr finallyExpr;
 	final PersistentVector catchExprs;
+	final int retLocal;
+	final int finallyLocal;
 
 	static class CatchClause{
 		//final String className;
@@ -1584,10 +1588,12 @@ static class TryExpr implements Expr{
 		}
 	}
 
-	public TryExpr(Expr tryExpr, PersistentVector catchExprs, Expr finallyExpr){
+	public TryExpr(Expr tryExpr, PersistentVector catchExprs, Expr finallyExpr, int retLocal, int finallyLocal){
 		this.tryExpr = tryExpr;
 		this.catchExprs = catchExprs;
 		this.finallyExpr = finallyExpr;
+		this.retLocal = retLocal;
+		this.finallyLocal = finallyLocal;
 	}
 
 	public Object eval() throws Exception{
@@ -1609,6 +1615,8 @@ static class TryExpr implements Expr{
 
 		gen.mark(startTry);
 		tryExpr.emit(context, fn, gen);
+		if(context != C.STATEMENT)
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), retLocal);
 		gen.mark(endTry);
 		if(finallyExpr != null)
 			finallyExpr.emit(C.STATEMENT, fn, gen);
@@ -1633,10 +1641,14 @@ static class TryExpr implements Expr{
 			{
 			gen.mark(finallyLabel);
 			//exception should be on stack
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), finallyLocal);
 			finallyExpr.emit(C.STATEMENT, fn, gen);
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), finallyLocal);
 			gen.throwException();
 			}
 		gen.mark(end);
+		if(context != C.STATEMENT)
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), retLocal);
 		for(int i = 0; i < catchExprs.count(); i++)
 			{
 			CatchClause clause = (CatchClause) catchExprs.nth(i);
@@ -1676,6 +1688,8 @@ static class TryExpr implements Expr{
 			Expr finallyExpr = null;
 			boolean caught = false;
 
+			int retLocal = getAndIncLocalNum();
+			int finallyLocal = getAndIncLocalNum();
 			for(ISeq fs = form.rest(); fs != null; fs = fs.rest())
 				{
 				Object f = fs.first();
@@ -1733,7 +1747,8 @@ static class TryExpr implements Expr{
 					}
 				}
 
-			return new TryExpr((new BodyExpr.Parser()).parse(context, RT.seq(body)), catches, finallyExpr);
+			return new TryExpr((new BodyExpr.Parser()).parse(context, RT.seq(body)), catches, finallyExpr, retLocal,
+			                   finallyLocal);
 		}
 	}
 }
@@ -3588,7 +3603,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 //	else if(form instanceof Num)
 //		return new NumExpr((Num) form);
 	else if(fclass == String.class)
-		return new ConstantExpr(((String) form).intern());
+		return new StringExpr(((String) form).intern());
 //	else if(fclass == Character.class)
 //		return new CharExpr((Character) form);
 	else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
