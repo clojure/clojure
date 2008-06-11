@@ -230,7 +230,7 @@ public int length(){
 	return count();
 }
 
-static class Seq extends ASeq implements IndexedSeq{
+static class Seq extends ASeq implements IndexedSeq, IReduce{
 	//todo - something more efficient
 	final IPersistentVector v;
 	final int i;

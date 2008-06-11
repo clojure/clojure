@@ -442,12 +442,16 @@
   ([f coll]
    (let [s (seq coll)]
      (if s
-       (. s (reduce f))
+       (if (instance? clojure.lang.IReduce s)
+         (. s (reduce f))
+         (reduce f (first s) (rest s)))
        (f))))
   ([f val coll]
    (let [s (seq coll)]
      (if s
-       (. s (reduce f val))
+       (if (instance? clojure.lang.IReduce s)
+         (. s (reduce f val))
+         (recur f (f val (first s)) (rest s)))
        val))))
 
 (defn reverse

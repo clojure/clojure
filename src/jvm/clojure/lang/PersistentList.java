@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.LinkedList;
 
-public class PersistentList extends ASeq implements IPersistentList{
+public class PersistentList extends ASeq implements IPersistentList, IReduce{
 
 private final Object _first;
 private final IPersistentList _rest;
@@ -98,6 +98,20 @@ public PersistentList withMeta(IPersistentMap meta){
 	if(meta != _meta)
 		return new PersistentList(meta, _first, _rest, _count);
 	return this;
+}
+
+public Object reduce(IFn f) throws Exception{
+	Object ret = first();
+	for(ISeq s = rest(); s != null; s = s.rest())
+		ret = f.invoke(ret, s.first());
+	return ret;
+}
+
+public Object reduce(IFn f, Object start) throws Exception{
+	Object ret = f.invoke(start, first());
+	for(ISeq s = rest(); s != null; s = s.rest())
+		ret = f.invoke(ret, s.first());
+	return ret;
 }
 
 static class EmptyList extends Obj implements IPersistentList{

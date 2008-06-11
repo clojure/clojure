@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.lang.reflect.Array;
 
-public class ArraySeq extends ASeq implements IndexedSeq{
+public class ArraySeq extends ASeq implements IndexedSeq, IReduce{
 final Object array;
 final int i;
 //ISeq _rest;
@@ -101,7 +101,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 
 //////////////////////////////////// specialized primitive versions ///////////////////////////////
 
-static public class ArraySeq_int extends ASeq implements IndexedSeq{
+static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
 final int[] array;
 final int i;
 
@@ -149,7 +149,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 }
 
 
-static public class ArraySeq_float extends ASeq implements IndexedSeq{
+static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
 final float[] array;
 final int i;
 
@@ -196,7 +196,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 }
 }
 
-static public class ArraySeq_double extends ASeq implements IndexedSeq{
+static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
 final double[] array;
 final int i;
 
@@ -243,7 +243,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 }
 }
 
-static public class ArraySeq_long extends ASeq implements IndexedSeq{
+static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
 final long[] array;
 final int i;
 

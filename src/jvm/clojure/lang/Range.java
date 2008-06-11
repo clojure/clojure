@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class Range extends ASeq{
+public class Range extends ASeq implements IReduce{
 final int end;
 final int n;
 
