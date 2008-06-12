@@ -19,13 +19,13 @@
 ;; defined in javax.xml.stream.XMLOutputStream, included with the JDK
 ;; since version 6.
 ;;
-;; The main entry point is the 'with-xml-output' macro, which takes
+;; The main entry point is the 'with-xml-out' macro, which takes
 ;; one argument, an open java.io.Writer, and a body.  This macro opens
 ;; a new XMLStreamWriter on the given output stream and ensures that
 ;; all document tags are closed.  It does NOT close the underlying
 ;; Writer.
 ;;
-;; Within the body of 'with-xml-output', certain forms will be
+;; Within the body of 'with-xml-out', certain forms will be
 ;; translated into XML:
 ;;
 ;;     "This is a string."    =>  This is a string.
@@ -37,34 +37,34 @@
 ;;    [:foo {:bar "this & that"}]  =>  <foo bar="this &amp; that"/>
 ;;
 ;; Declare XML namespace prefixes inside 'emit-xml' with
-;; (xmlns prefix uri), where 'prefix' is a keyword.
+;; (set-xmlns prefix uri), where 'prefix' is a keyword.
 ;;
 ;; Once a namespace has been declared, create elements in that
 ;; namespace by using a 2-element vector [prefix localname] as the tag
 ;; name:
 ;;
-;;     (with-xml-output *out*
-;;       (xmlns :me "http://xmlns.com/mine")
+;;     (with-xml-out *out*
+;;       (set-xmlns :me "http://xmlns.com/mine")
 ;;       [[:me :foo] "content"])
 ;;
 ;;   =>  <me:foo xmlns:me="http://xmlns.com/mine">content</me:foo>
 ;;
 ;; Same with attributes: 
 ;;
-;;     (with-xml-output *out*
-;;       (xmlns :me "http://xmlns.com/mine")
+;;     (with-xml-out *out*
+;;       (set-xmlns :me "http://xmlns.com/mine")
 ;;       [:foo {[:me bar] "value"}])
 ;;
 ;;   =>  <foo me:bar="value" xmlns:me="http://xmlns.com/mine"/>
 ;;
 ;; Undeclared namespaces will get an auto-generated prefix:
 ;;
-;;     (with-xml-output *out* [["http://myns.com/" :foo]])
+;;     (with-xml-out *out* [["http://myns.com/" :foo]])
 ;;
 ;;   =>  <zdef18:foo xmlns:zdef18="http://myns.com/"/>
 ;;
 ;; Normal function calls and symbols may be placed in the body of
-;; 'with-xml-output'; they will be evaluated normally and their return
+;; 'with-xml-out'; they will be evaluated normally and their return
 ;; values will be included as text in the XML output.  To avoid adding
 ;; text to the output, functions should return nil.
 ;;
@@ -73,7 +73,7 @@
 ;;
 ;;     (defn foo [name] (emit-xml [:mytag {:id name}]))
 ;;
-;;     (with-xml-output *out*
+;;     (with-xml-out *out*
 ;;       [:root (foo 24) (foo 24)])
 ;;
 ;;  =>  <root><mytag id="24"/><mytag id="24"/></root>
@@ -81,7 +81,7 @@
 ;; To create the default XML declaration (version 1.0 and UTF-8
 ;; encoding), use the (xmldecl) macro:
 ;;
-;;    (with-xml-output *out* (xmldecl))
+;;    (with-xml-out *out* (xmldecl))
 ;;
 ;;  =>  <?xml version="1.0" encoding="UTF-8"?>
 ;;
@@ -102,9 +102,9 @@
 
 (def
  *xml-output-factory*
- (let [factory (XMLOutputFactory.newInstance)]
-   (. factory setProperty
-      "javax.xml.stream.isRepairingNamespaces" true)
+ (let [factory (. XMLOutputFactory (newInstance))]
+   (. factory (setProperty
+               "javax.xml.stream.isRepairingNamespaces" true))
    factory))
 
 (def *xml-stream-writer*)
@@ -117,48 +117,48 @@
 
 (defn apply-indent []
   (when *xml-indent*
-    (. *xml-stream-writer* writeCharacters "\n")
+    (. *xml-stream-writer* (writeCharacters "\n"))
     (dotimes i (* *xml-indent* *xml-tag-depth*)
-      (. *xml-stream-writer* writeCharacters " "))))
+      (. *xml-stream-writer* (writeCharacters " ")))))
 
 (defn start-tag
   ([name]
      (apply-indent)
      (set! *xml-tag-depth* (inc *xml-tag-depth*))
      (. *xml-stream-writer*
-        writeStartElement (to-name name)))
+        (writeStartElement (to-name name))))
   ([namespace name]
      (apply-indent)
      (set! *xml-tag-depth* (inc *xml-tag-depth*))
      (. *xml-stream-writer*
-        writeStartElement namespace (to-name name))))
+        (writeStartElement namespace (to-name name)))))
 
 (defn empty-tag
   ([name]
      (. *xml-stream-writer*
-        writeEmptyElement (to-name name)))
+        (writeEmptyElement (to-name name))))
   ([namespace name]
      (. *xml-stream-writer*
-        writeEmptyElement namespace (to-name name))))
+        (writeEmptyElement namespace (to-name name)))))
 
 (defn xml-attr
   ([name value]
-     (. *xml-stream-writer* writeAttribute (to-name name) value))
+     (. *xml-stream-writer* (writeAttribute (to-name name) (str value))))
   ([namespace name value]
-     (. *xml-stream-writer* writeAttribute namespace (to-name name) value)))
+     (. *xml-stream-writer* (writeAttribute namespace (to-name name) (str value)))))
 
 (defn xml-text [t]
   (when t
     (apply-indent)
-    (. *xml-stream-writer* writeCharacters (str t))))
+    (. *xml-stream-writer* (writeCharacters (str t)))))
 
 (defn end-tag []
   (set! *xml-tag-depth* (dec *xml-tag-depth*))
   (apply-indent)
-  (. *xml-stream-writer* writeEndElement))
+  (. *xml-stream-writer* (writeEndElement)))
 
 (defn entity [name]
-  (. *xml-stream-writer* writeEntityRef (to-name name)))
+  (. *xml-stream-writer* (writeEntityRef (to-name name))))
 
 (def emit-form)
 
@@ -188,7 +188,7 @@
 (defn- emit-xml-attr [name-value]
   (let [[name value] name-value]
     (if (vector? name)
-      (list 'xml-attr (first name) (second name) value)
+      (list 'xml-attr (list 'resolve-xmlns (first name)) (second name) value)
       (list 'xml-attr name value))))
 
 (defn- emit-xml-attrs [xml-attr-map]
@@ -202,24 +202,24 @@
    true `(xml-text ~form)))
 
 (defmacro xmldecl []
-  '(. *xml-stream-writer* writeStartDocument "UTF-8" "1.0"))
+  '(. *xml-stream-writer* (writeStartDocument "UTF-8" "1.0")))
 
-(defmacro xmlns [prefix namespace]
+(defmacro set-xmlns [prefix namespace]
   `(sync nil
      (set! *xmlns-prefixes* (assoc *xmlns-prefixes* ~prefix ~namespace))
-     (. *xml-stream-writer* setPrefix ~(to-name prefix) ~namespace)))
+     (. *xml-stream-writer* (setPrefix ~(to-name prefix) ~namespace))))
 
 (defmacro emit-xml [& forms]
   `(do ~@(map emit-form forms)))
 
-(defmacro with-xml-output [writer & body]
+(defmacro with-xml-out [writer & body]
   `(binding [*xml-stream-writer*
-             (. *xml-output-factory* createXMLStreamWriter ~writer)
+             (. *xml-output-factory* (createXMLStreamWriter ~writer))
              *xmlns-prefixes* {}
              *xml-tag-depth* 0]
      (try
       (emit-xml ~@body)
       (finally
-       (. *xml-stream-writer* writeEndDocument)
-       (. *xml-stream-writer* close)
+       (. *xml-stream-writer* (writeEndDocument))
+       (. *xml-stream-writer* (close))
        nil))))
