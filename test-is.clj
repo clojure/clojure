@@ -41,6 +41,11 @@
 
 ;;; PRIVATE
 
+(def
+ #^{:doc "PrintWriter to which test results are printed; defaults to
+ System.err."}
+ *test-out* (. System err))
+
 (defmacro #^{:private true} defcounter [ref-name fn-name]
   `(do (def ~(with-meta ref-name {:private true}) nil)
        (defn ~fn-name []
@@ -55,14 +60,19 @@
   `(throw (new java.lang.AssertionError
                (str ~reason (when ~message (str "; " ~message))))))
 
-(defn- assert-expr [form message]
+(defn- assert-true [form message]
   `(do (count-assertion)
        (let [value# ~form]
          (when-not value#
            (failure (str ~(pr-str form) " was false/nil")
                     ~message)))))
 
-(defn- assert-equal [form message]
+;; Multimethod for testing expressions, dispatches on the first symbol
+;; in the expression.
+(defmulti assert-expr (fn [form message] (first form)))
+
+;; Test for (= actual expected) expressions.
+(defmethod assert-expr '= [form message]
   (let [expr1 (second form)
         expr2 (nth form 2)]
     `(do (count-assertion)
@@ -72,6 +82,23 @@
              (failure (str ~(pr-str expr1) " is " (pr-str value1#)
                            " but should be " (pr-str value2#))
                       ~message))))))
+
+;; Test for (instance? class object) expressions.
+(defmethod assert-expr 'instance? [form message]
+  (let [clazz (second form)
+        object (nth form 2)]
+    `(do (count-assertion)
+         (let [value1# ~clazz
+               value2# ~object]
+           (when-not (instance? value1# value2#)
+             (failure (str ~(pr-str object) " has " (class value2#)
+                           " but should have " (pr-str value1#))
+                      ~message))))))
+
+;; Generic expression test, just check if expression evaluates to
+;; logical true.
+(defmethod assert-expr :default [form message]
+  (assert-true form message))
 
 (defn- always-fail-assert [message]
   `(do (count-assertion)
@@ -83,7 +110,7 @@
              *failures* (ref 0)
              *exceptions* (ref 0)]
      ~@body
-     (.. System err (println (str "\nRan " @*tests* " tests with "
+     (. *test-out* (println (str "\nRan " @*tests* " tests with "
                                   @*assertions* " assertions.\n"
                                   @*failures* " failures, "
                                   @*exceptions* " exceptions.")))))
@@ -96,11 +123,11 @@
    (f)
    (catch java.lang.AssertionError e
      (count-failure)
-     (.. System err (println (str "FAIL in " name ": "
-                                  (.getMessage e)))))
+     (. *test-out* (println (str "FAIL in " name ": "
+                                 (.getMessage e)))))
    (catch java.lang.Exception e
      (count-exception)
-     (.. System err (println (str "EXCEPTION in " name ": " e))))))
+     (. *test-out* (println (str "EXCEPTION in " name ": " e))))))
 
 (defn- test-var
   "Finds and calls the fn in a var's :test metadata."
@@ -112,7 +139,7 @@
   "Tests all interned symbols in the namespace."
   [ns]
   (let [ns (if (symbol? ns) (find-ns ns) ns)]
-    (.. System err (println (str "Testing " ns)))
+    (. *test-out* (println (str "Testing " ns)))
     (dorun (map test-var (vals (ns-interns ns))))))
 
 
@@ -124,14 +151,15 @@
 
   form may be one of:
     * an equality test like (= expression expected-value)
+    * an instance? test like (instance? class expression)
     * nil, which always fails
     * an arbitrary expression, fails if it returns false/nil"
   ([form] `(is ~form nil))
   ([form message]
      (cond
       (nil? form) (always-fail-assert message)
-      (and (seq? form) (= '= (first form))) (assert-equal form message)
-      :else (assert-expr form message))))
+      (seq? form) (assert-expr form message)
+      :else (assert-true form message))))
 
 (defn test-ns
   "Runs tests on all interned symbols in the namespaces 
