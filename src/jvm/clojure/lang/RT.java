@@ -121,6 +121,7 @@ final static public Var MACRO_META = Var.intern(CLOJURE_NS, Symbol.create("*macr
 final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
+final static public Var USE_CONTEXT_CLASSLOADER = Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), null);
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 
@@ -1279,13 +1280,20 @@ static public Object[] setValues(Object... vals){
 static public ClassLoader makeClassLoader(){
 	return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction(){
 		public Object run(){
-			return new DynamicClassLoader(ROOT_CLASSLOADER);
+			return new DynamicClassLoader(baseLoader());
 		}
 	});
 }
 
+static ClassLoader baseLoader(){
+	if (booleanCast(USE_CONTEXT_CLASSLOADER.get()))
+		return Thread.currentThread().getContextClassLoader();
+	return ROOT_CLASSLOADER;
+}
+
 static public Class classForName(String name) throws ClassNotFoundException{
-	return Class.forName(name, false, RT.ROOT_CLASSLOADER);
+
+	return Class.forName(name, false, baseLoader());
 }
 
 
