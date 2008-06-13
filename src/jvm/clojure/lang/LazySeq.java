@@ -55,7 +55,7 @@ synchronized public ISeq rest(){
 		{
 		try
 			{
-			_rest = (ISeq) _restFn.invoke();
+			_rest = RT.seq(_restFn.invoke());
 			}
 		catch(Exception ex)
 			{

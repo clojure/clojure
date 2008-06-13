@@ -407,7 +407,8 @@ static public IPersistentCollection conj(IPersistentCollection coll, Object x){
 	return coll.cons(x);
 }
 
-static public ISeq cons(Object x, ISeq y){
+static public ISeq cons(Object x, Object coll){
+	ISeq y = seq(coll);
 	if(y == null)
 		return new PersistentList(x);
 	return y.cons(x);
