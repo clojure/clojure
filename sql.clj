@@ -22,7 +22,7 @@
   "Attempts to get a connection to a database via a jdbc URL"
   [subprotocol db-name]
   (let [url (str "jdbc:" subprotocol ":" db-name)]
-    (. DriverManager (getConnection url))))
+    (.getConnection DriverManager url)))
 
 (defmacro with-connection
   "Evaluates body in the context of a connection to a database. Any updates
@@ -31,37 +31,37 @@
   [con init & body]
   `(with-open ~con ~init
      (try
-      (. ~con (setAutoCommit false))
+      (.setAutoCommit ~con false))
       ~@body
-      (. ~con (commit))
+      (.commit ~con)
       (catch Exception e#
-             (. ~con (rollback))
-             (throw (new Exception "transaction rolled back" e#))))))
+             (.rollback ~con)
+             (throw (Exception. "transaction rolled back" e#)))))
 
 (defn execute-commands
   "Executes a sequence of SQL commands that do not return results"
   [con commands]
-  (with-open stmt (. con (createStatement))
+  (with-open stmt (.createStatement con)
     (doseq cmd commands
-      (. stmt (addBatch cmd)))
-    (. stmt (executeBatch))))
+      (.addBatch stmt cmd))
+    (.executeBatch stmt)))
 
 (defn execute-prepared-statement
   "Executes a prepared statement with a sequence of parameter sets"
   [con sql sets]
-  (with-open stmt (. con (prepareStatement sql))
+  (with-open stmt (.prepareStatement con sql)
     (doseq set sets
-      (doseq arg (map vector (iterate inc 1) set)
-        (. stmt (setObject (arg 0) (arg 1))))
-      (. stmt (addBatch)))
-    (. stmt (executeBatch))))
+      (doseq [index value] (map vector (iterate inc 1) set)
+        (.setObject stmt index value))
+      (.addBatch stmt ))
+    (.executeBatch stmt)))
 
 (defmacro with-query-results
   "Executes a query and then evaluates body repeatedly with rec bound to
   each of the generated results in turn"
   [rec con sql & body]
-  `(with-open stmt# (. ~con (prepareStatement ~sql))
-     (with-open rset# (. stmt# (executeQuery))
+  `(with-open stmt# (.prepareStatement ~con ~sql)
+     (with-open rset# (.executeQuery stmt#)
        (doseq ~rec (resultset-seq rset#)
          ~@body))))
 
@@ -69,50 +69,58 @@
 
  ;; Examples
 
- ;; Simple tests of sql.clj using sqlite as a JDBC provider.  Note that
- ;; unlike sql.clj itself, these tests require that java be able to
- ;; access sqlite via something like: http://zentus.com/sqlitejdbc .
+ ;; Simple tests of sql.clj using derby as a JDBC provider.
  ;;
  ;; Substituting a different database should only affect the definition
  ;; of 'db' below (and perhaps suggest the need for more variations of
  ;; get-connection).
 
- (require sql)
+(clojure/in-ns 'sql-test)
+(clojure/refer 'clojure)
 
- (. Class (forName "org.sqlite.JDBC"))
+(lib/use sql)
 
- (defn db []
-   (get-connection "sqlite" "test.db"))
+(.forName Class "org.apache.derby.jdbc.EmbeddedDriver")
 
- (defn db-write []
-   (with-connection con (db)
+(defn db []
+  (get-connection "derby" "/tmp/test-derby.db;create=true"))
+
+(defn db-drop []
+  (with-connection con (db)
+    (try                   
      (execute-commands con
-        ["drop table if exists fruit"
-         "create table fruit (name, appearance, cost int, grade real)"])
-     (execute-prepared-statement con
-       "insert into fruit values (?, ?, ?, ?)"
-       [["Apple" "red" 59 87]
-        ["Banana" "yellow" 29 92.2]
-        ["Peach" "fuzzy" 139 90.0]
-        ["Orange" "juicy" 89 88.6]])))
+       ["drop table fruit"])
+     (catch Exception e))))
 
- (defn db-read []
-   (with-connection con (db)
-     (with-query-results rec con
-       "select * from fruit"
-       (println rec))))
+(defn db-write []
+  (db-drop)
+  (with-connection con (db)
+    (execute-commands con
+      ["create table fruit (name varchar(32), appearance varchar(32), cost int, grade real)"])
+    (execute-prepared-statement con
+      "insert into fruit values (?, ?, ?, ?)"
+      [["Apple" "red" 59 87]
+       ["Banana" "yellow" 29 92.2]
+       ["Peach" "fuzzy" 139 90.0]
+       ["Orange" "juicy" 89 88.6]])))
 
- (defn db-grade-a []
-   (with-connection con (db)
-     (with-query-results rec con
-       "select name, cost from fruit where grade >= 90"
-       (println rec))))
+(defn db-read []
+  (with-connection con (db)
+    (with-query-results rec con
+      "select * from fruit"
+      (println rec))))
 
- (defn db-exception []
-   (with-connection con (db)
-     (execute-prepared-statement con
-       "insert into fruit (name, appearance) values (?, ?)"
-       [["Grape" "yummy"]
-        ["Pear" "bruised"]])
-     (throw (new Exception "an exception"))))
+(defn db-grade-a []
+  (with-connection con (db)
+    (with-query-results rec con
+      "select name, cost from fruit where grade >= 90"
+      (println rec))))
+
+(defn db-exception []
+  (with-connection con (db)
+    (execute-prepared-statement con
+      "insert into fruit (name, appearance) values (?, ?)"
+      [["Grape" "yummy"]
+       ["Pear" "bruised"]])
+    (throw (Exception. "an exception"))))
 )

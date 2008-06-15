@@ -99,16 +99,6 @@
 ;;
 ;;  (use (genclass :ns clojure))
 ;;
-;;  Loading
-;;
-;;  lib.clj provides these functions for loading arbitrary Clojure source
-;;  files:
-;;
-;;    'load-uri'              loads Clojure source from a location
-;;
-;;    'load-system-resource'  loads Clojure source from a resource in
-;;                            classpath
-;;
 ;;  scgilardi (gmail)
 ;;  06 May 2008
 ;;
@@ -119,6 +109,7 @@
 (clojure/refer 'clojure)
 
 (import '(java.io BufferedReader InputStreamReader))
+(import '(clojure.lang RT))
 
 ;; Private
 
@@ -127,8 +118,8 @@
   {:private true}
   [var init]
   `(let [v# (resolve '~var)]
-     (when-not (. v# (isBound))
-       (. v# (bindRoot ~init)))))
+     (when-not (.isBound v#)
+       (.bindRoot v# ~init))))
 
 (def
  #^{:private true :doc
@@ -142,18 +133,16 @@
  *verbose*)
 (init-once *verbose* false)
 
-(def load-system-resource)
-
 (defn- load-lib
-  "Loads a lib from <classpath>/in/ and ensures the namespace
-  named by ns (if any) exists"
+  "Loads a lib from <classpath>/in/ and ensures that namespace
+  ns (if specified) exists"
   [sym in ns]
   (let [res (str sym ".clj")]
-    (load-system-resource res in)
+    (.loadResourceScript RT (if in (str in \/ res) res))
     (when (and ns (not (find-ns ns)))
-      (throw (new Exception
-                  (str "namespace '" ns "' not found after "
-                       "loading resource '" res "'")))))
+      (throw (Exception.
+              (str "namespace '" ns "' not found after "
+                   "loading resource '" res "'")))))
   (dosync
    (commute *libs* conj sym))
   (when *verbose*
@@ -256,37 +245,3 @@
   are filters for clojure/refer."
   [& args]
   `(apply load-libs :require :use '~args))
-
-;; Loading
-
-(defn load-uri
-  "Loads Clojure source from a URI, which may be a java.net.URI
-  java.net.URL, or String. Accepts any URI scheme supported by
-  java.net.URLConnection (http and jar), plus file URIs."
-  [uri]
-  (let [url (cond  ; coerce argument into java.net.URL
-             (instance? java.net.URL uri) uri
-             (instance? java.net.URI uri) (. uri (toURL))
-             (string? uri) (new java.net.URL uri)
-             :else (throw (new Exception
-                               (str "Cannot coerce "
-                                    (class uri)
-                                    " into java.net.URL."))))]
-    (if (= "file" (. url (getProtocol)))
-      (load-file (. url (getFile)))
-      (with-open reader
-          (new BufferedReader
-               (new InputStreamReader
-                    (. url (openStream))))
-        (load reader)))))
-
-(defn load-system-resource
-  "Loads Clojure source from a resource within classpath"
-  ([res]
-     (let [url (. ClassLoader (getSystemResource res))]
-       (when-not url
-         (throw (new Exception (str "resource '" res
-                                    "' not found in classpath"))))
-       (load-uri url)))
-  ([res in]
-     (load-system-resource (if in (str in \/ res) res))))
