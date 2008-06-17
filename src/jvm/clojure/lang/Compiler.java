@@ -3707,6 +3707,19 @@ public static Object macroexpand1(Object x) throws Exception{
 					Symbol meth = Symbol.intern(sname.substring(1));
 					return RT.listStar(DOT, RT.second(form), meth, form.rest().rest());
 					}
+				else if (sym.ns != null)
+					{
+					Symbol target = Symbol.intern(sym.ns);
+					if(Namespace.find(target) == null)
+						{
+						Class c = HostExpr.maybeClass(target,false);
+						if(c != null)
+							{
+							Symbol meth = Symbol.intern(sym.name);
+							return RT.listStar(DOT, target, meth, form.rest());
+							}
+						}
+					}
 				else
 					{
 					//(s.substring 2 5) => (. s substring 2 5)
@@ -3819,6 +3832,18 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		if(b != null)
 			return new LocalBindingExpr(b, tag);
 		}
+	else
+		{
+		Symbol nsSym = Symbol.create(sym.ns);
+		if(Namespace.find(nsSym) == null)
+			{
+			Class c = HostExpr.maybeClass(nsSym,false);
+			if(c != null)
+				{
+				return new StaticFieldExpr((Integer)LINE.get(),c,sym.name);
+				}
+			}
+		}
 	//Var v = lookupVar(sym, false);
 //	Var v = lookupVar(sym, false);
 //	if(v != null)
@@ -3897,9 +3922,11 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	//note - ns-qualified vars in other namespaces must already exist
 	if(sym.ns != null)
 		{
-		Namespace ns = Namespace.find(Symbol.create(sym.ns));
+		Symbol nsSym = Symbol.create(sym.ns);
+		Namespace ns = Namespace.find(nsSym);
 		if(ns == null)
-			throw new Exception("No such namespace: " + sym.ns);
+			return null;
+			//throw new Exception("No such namespace: " + sym.ns);
 		Symbol name = Symbol.create(sym.name);
 		if(internNew && ns == currentNS())
 			var = currentNS().intern(name);
