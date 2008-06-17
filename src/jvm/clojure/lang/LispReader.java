@@ -42,7 +42,9 @@ static IFn[] dispatchMacros = new IFn[256];
 //static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
 static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^/]*/)?([\\D&&[^:/]][^/]*)");
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
-static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
+//static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
+static Pattern intPat =
+Pattern.compile("([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)\\.?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?");
 static final Symbol SLASH = Symbol.create("/");
@@ -195,7 +197,7 @@ static private Object readNumber(PushbackReader r, char initch) throws Exception
 	String s = sb.toString();
 	Object n = matchNumber(s);
 	if(n == null)
-		throw new IllegalArgumentException("Invalid number: " + s);
+		throw new NumberFormatException("Invalid number: " + s);
 	return n;
 }
 
@@ -286,8 +288,25 @@ private static Object matchSymbol(String s){
 
 private static Object matchNumber(String s){
 	Matcher m = intPat.matcher(s);
-	if(m.matches())
-		return Numbers.reduce(new BigInteger(s));
+	if(m.matches()) {
+		if (m.group(2) != null)
+			return 0;
+		boolean negate = (m.group(1).equals("-"));
+		String n;
+		int radix = 10;
+		if ((n = m.group(3)) != null)
+			radix = 10;
+		else if ((n = m.group(4)) != null)
+			radix = 16;
+		else if ((n = m.group(5)) != null)
+			radix = 8;
+		else if ((n = m.group(7)) != null)
+			radix = Integer.parseInt(m.group(6));
+		if(n == null)
+			return null;
+		BigInteger bn = new BigInteger(n,radix);
+		return Numbers.reduce(negate ? bn.negate() : bn);
+	}
 	m = floatPat.matcher(s);
 	if(m.matches())
 		{
