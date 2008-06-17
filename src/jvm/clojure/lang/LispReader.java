@@ -655,9 +655,13 @@ static class SyntaxQuoteReader extends AFn{
 			ret = RT.list(Compiler.QUOTE, form);
 
 		if(form instanceof IObj && ((IObj) form).meta() != null)
-			return RT.list(WITH_META, ret, syntaxQuote(((IObj) form).meta()));
-		else
-			return ret;
+			{
+			//filter line numbers
+			IPersistentMap newMeta = ((IObj) form).meta().without(RT.LINE_KEY);
+			if(newMeta.count() > 0)
+				return RT.list(WITH_META, ret, syntaxQuote(((IObj) form).meta()));
+			}
+		return ret;
 	}
 
 	private static ISeq sqExpandList(ISeq seq) throws Exception{
