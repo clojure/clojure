@@ -253,9 +253,22 @@
                   meths (map (fn [[params & body]]
                                (cons (apply vector 'this params) body))
                              meths)]
-              (recur (assoc fmap (list `quote sym) (cons `fn meths)) (rest fs)))
+              (recur (assoc fmap (list `quote (symbol (name sym))) (cons `fn meths)) (rest fs)))
             fmap)))
      p#))
+
+(defn proxy-call-with-super [call this meth]
+ (let [m (proxy-mappings this)]
+    (update-proxy this (assoc m meth nil))
+    (let [ret (call)]
+      (update-proxy this m)
+      ret)))
+
+(defmacro proxy-super 
+  "Use to call a superclass method in the body of a proxy method. 
+  Note, expansion captures 'this"
+  [meth & args]
+ `(proxy-call-with-super (fn [] (. ~'this ~meth ~@args))  ~'this '~(symbol (name meth))))
 
 (defn bean
   "Takes a Java object and returns a read-only implementation of the
