@@ -470,8 +470,7 @@ static public Object get(Object coll, Object key){
 	else if(coll instanceof IPersistentSet)
 		{
 		IPersistentSet set = (IPersistentSet) coll;
-		if(set.contains(key))
-			return key;
+		return set.get(key);
 		}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
 		{
@@ -501,7 +500,7 @@ static public Object get(Object coll, Object key, Object notFound){
 		{
 		IPersistentSet set = (IPersistentSet) coll;
 		if(set.contains(key))
-			return key;
+			return set.get(key);
 		return notFound;
 		}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))

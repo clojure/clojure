@@ -28,6 +28,10 @@ public boolean contains(Object key){
 	return impl.containsKey(key);
 }
 
+public Object get(Object key){
+	return impl.valAt(key);
+}
+
 public int count(){
 	return impl.count();
 }
@@ -37,7 +41,7 @@ public ISeq seq(){
 }
 
 public Object invoke(Object arg1) throws Exception{
-	return contains(arg1) ? arg1 : null;
+	return get(arg1);
 }
 
 public boolean equals(Object obj){

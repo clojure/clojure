@@ -91,7 +91,7 @@
   :init name
 
   If supplied, names a function that will be called with the arguments
-  to the constructor. Must return [[superclass-constructor-args] state] 
+  to the constructor. Must return [ [superclass-constructor-args] state] 
   If not supplied, the constructor args are passed directly to
   the superclass constructor and the state will be nil
 
@@ -104,7 +104,7 @@
   constructor signature. When you supply this, you must supply an :init
   specifier.
 
-  :methods [[name [param-types] return-type], ...]
+  :methods [ [name [param-types] return-type], ...]
 
   The generated class automatically defines all of the non-private
   methods of its superclasses/interfaces. This parameter can be used
