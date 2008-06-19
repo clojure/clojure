@@ -109,7 +109,9 @@
   The generated class automatically defines all of the non-private
   methods of its superclasses/interfaces. This parameter can be used
   to specify the signatures of additional methods of the generated
-  class. Do not repeat superclass/interface signatures here.
+  class. Static methods can be specified with #^{:static true} in the
+  signature's metadata. Do not repeat superclass/interface signatures
+  here.
 
   :main boolean
 
@@ -192,12 +194,13 @@
                          (. gen visitInsn (. Opcodes ACONST_NULL))
                          (. gen mark end-label)))
         emit-forwarding-method
-        (fn [mname pclasses rclass else-gen]
+        (fn [mname pclasses rclass as-static else-gen]
           (let [ptypes (to-types pclasses)
                 rtype (totype rclass)
                 m (new Method mname rtype ptypes)
                 is-overload (overloads mname)
-                gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
+                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (if as-static (. Opcodes ACC_STATIC) 0)) 
+                         m nil nil cv)
                 found-label (. gen (newLabel))
                 else-label (. gen (newLabel))
                 end-label (. gen (newLabel))]
@@ -213,15 +216,19 @@
             (when is-overload
               (. gen (mark found-label)))
                                         ;if found
-            (. gen (loadThis))
+            (when-not as-static
+              (. gen (loadThis)))
                                         ;box args
             (dotimes i (count ptypes)
               (. gen (loadArg i))
               (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
                                         ;call fn
             (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
-                                                  (into-array (cons obj-type 
-                                                                    (replicate (count ptypes) obj-type))))))
+                                                  (to-types (replicate (+ (count ptypes)
+                                                                          (if as-static 0 1)) 
+                                                                       Object)))))
+                                                  ;(into-array (cons obj-type 
+                                                  ;                 (replicate (count ptypes) obj-type))))))
                                         ;unbox return
             (. gen (unbox rtype))
             (when (= (. rtype (getSort)) (. Type VOID))
@@ -353,7 +360,7 @@
                                         ;add methods matching supers', if no fn -> call super
     (let [mm (non-private-methods super)]
       (doseq #^java.lang.reflect.Method meth (vals mm)
-             (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) 
+             (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
                                      (fn [gen m]
                                        (. gen (loadThis))
                                         ;push args
@@ -367,12 +374,12 @@
        (doseq #^Class iface interfaces
               (doseq #^java.lang.reflect.Method meth (. iface (getMethods))
                      (when-not (contains? mm (method-sig meth))
-                       (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) 
+                       (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
                                                (fn [gen m]
                                                  (. gen (throwException ex-type (. m (getName)))))))))
                                         ;extra methods
        (doseq [mname pclasses rclass :as msig] methods
-         (emit-forwarding-method (str mname) pclasses rclass 
+         (emit-forwarding-method (str mname) pclasses rclass (:static ^msig)
                                  (fn [gen m]
                                      (. gen (throwException ex-type (. m (getName))))))))
 
@@ -465,9 +472,9 @@
  :init name
  :exposes {protected-field {:get name :set name}, })
  
-;(gen-and-load-class 
-(clojure/gen-and-save-class 
- "/Users/rich/Downloads"
+(gen-and-load-class 
+;(clojure/gen-and-save-class 
+; "/Users/rich/Downloads"
  'fred.lucy.Ethel 
  :extends clojure.lang.Box ;APersistentMap
  :implements [clojure.lang.IPersistentMap]
@@ -476,16 +483,15 @@
                                         ;:init 'init
  :main true
  :factory 'create
- :methods [['foo [Object] Object]
-           ['foo [] Object]]
+ :methods [#^{:static true} ['foo [Object] Object]
+           ['bar [] Object]]
  :exposes {'val {:get 'getVal :set 'setVal}})
 
-(in-ns 'fred.lucy.Ethel__2276)
-(clojure/refer 'clojure :exclude '(assoc seq count cons))
+(in-ns 'fred.lucy.Ethel)
+(clojure/refer 'clojure :exclude '(assoc seq count cons empty))
 (defn init [n] [[] n])
 (defn foo 
-  ([this] :foo) 
-  ([this x] x))
+  ([x] x))
 (defn main [x y] (println x y))
 (in-ns 'user)
 (def ethel (new fred.lucy.Ethel__2276 42))
