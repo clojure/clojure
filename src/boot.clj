@@ -758,9 +758,11 @@
 
 (defn nth
   "Returns the value at the index. get returns nil if index out of
-  bounds, nth throws an exception.  nth also works for strings, Java
-  arrays and Lists, and, in O(n) time, for sequences."
-  [coll index] (. clojure.lang.RT (nth coll index)))
+  bounds, nth throws an exception unless not-found is supplied.  nth
+  also works for strings, Java arrays, regex Matchers and Lists, and,
+  in O(n) time, for sequences."
+  ([coll index] (. clojure.lang.RT (nth coll index)))
+  ([coll index not-found] (. clojure.lang.RT (nth coll index not-found))))
 
 ;;map stuff
 
@@ -1992,7 +1994,7 @@ not-every? (comp not every?))
                                 (= firstb :as) (pb ret (second bs) gvec)
                                 :else (if seen-rest?
                                         (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
-                                        (recur (pb ret firstb  (list `nth gvec n))
+                                        (recur (pb ret firstb  (list `nth gvec n nil))
                                                (inc n)
                                                (rest bs)
                                                seen-rest?))))

@@ -597,7 +597,58 @@ static public Object nth(Object coll, int n){
 			if(i == n)
 				return seq.first();
 			}
-		return null;
+		throw new IndexOutOfBoundsException();
+		}
+	else
+		throw new UnsupportedOperationException("nth not supported on this type: " + coll.getClass().getSimpleName());
+}
+
+static public Object nth(Object coll, int n, Object notFound){
+	if(coll == null)
+		return notFound;
+	else if(coll instanceof IPersistentVector)
+		{
+		IPersistentVector v = (IPersistentVector) coll;
+		if(n < v.count())
+			return v.nth(n);
+		return notFound;
+		}
+	else if(coll instanceof String)
+		{
+		String s = (String) coll;
+		if(n < s.length())
+			return Character.valueOf(s.charAt(n));
+		return notFound;
+		}
+	else if(coll.getClass().isArray())
+		{
+		if(n < Array.getLength(coll))
+			return Array.get(coll, n);
+		return notFound;
+		}
+	else if(coll instanceof List)
+		{
+		List list = (List) coll;
+		if(n < list.size())
+			return list.get(n);
+		return notFound;
+		}
+	else if(coll instanceof Matcher)
+		{
+		Matcher m = (Matcher) coll;
+		if(n < m.groupCount())
+			return m.group(n);
+		return notFound;
+		}
+	else if(coll instanceof Sequential)
+		{
+		ISeq seq = ((IPersistentCollection) coll).seq();
+		for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+			{
+			if(i == n)
+				return seq.first();
+			}
+		return notFound;
 		}
 	else
 		throw new UnsupportedOperationException("nth not supported on this type: " + coll.getClass().getSimpleName());
