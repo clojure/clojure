@@ -2901,8 +2901,11 @@ static public class FnExpr implements Expr{
 		                                                null,
 		                                                null,
 		                                                cv);
+		Label start = ctorgen.newLabel();
+		Label end = ctorgen.newLabel();
 		ctorgen.visitCode();
 		ctorgen.visitLineNumber(line, ctorgen.mark());
+		ctorgen.visitLabel(start);
 		ctorgen.loadThis();
 		if(isVariadic()) //RestFn ctor takes reqArity arg
 			{
@@ -2916,10 +2919,13 @@ static public class FnExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			ctorgen.loadThis();
-			if(lb.getPrimitiveType() != null)
+			Class primc = lb.getPrimitiveType();
+			if(primc != null)
 				{
-				ctorgen.visitVarInsn(Type.getType(lb.getPrimitiveType()).getOpcode(Opcodes.ILOAD), a);
-				ctorgen.putField(fntype, lb.name, Type.getType(lb.getPrimitiveType()));
+				ctorgen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), a);
+				ctorgen.putField(fntype, lb.name, Type.getType(primc));
+				if(primc == Long.TYPE || primc == Double.TYPE)
+					++a;
 				}
 			else
 				{
@@ -2927,6 +2933,23 @@ static public class FnExpr implements Expr{
 				ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
 				}
 			}
+		ctorgen.visitLabel(end);
+//		a = 1;
+//		for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
+//			{
+//			LocalBinding lb = (LocalBinding) s.first();
+//			Class primc = lb.getPrimitiveType();
+//			if(primc != null)
+//				{
+//				ctorgen.visitLocalVariable(lb.name, Type.getDescriptor(primc), null, start, end, a);
+//				if(primc == Long.TYPE || primc == Double.TYPE)
+//					++a;
+//				}
+//			else
+//				{
+//				ctorgen.visitLocalVariable(lb.name, "Ljava/lang/Object;", null, start, end, a);
+//				}
+//			}
 		ctorgen.returnValue();
 		//	ctorgen.visitMaxs(1, 1);
 		ctorgen.endMethod();
