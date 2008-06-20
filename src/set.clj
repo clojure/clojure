@@ -69,7 +69,7 @@
   join. When passed an additional keymap, joins on the corresponding
   keys."
   ([xrel yrel] ;natural join
-   (when (and (seq xrel) (seq yrel))
+   (if (and (seq xrel) (seq yrel))
      (let [ks (intersection (set (keys (first xrel))) (set (keys (first yrel))))
            [r s] (if (<= (count xrel) (count yrel))
                    [xrel yrel]
@@ -80,7 +80,8 @@
                    (if found
                      (reduce #(conj %1 (merge %2 x)) ret found)
                      ret)))
-               #{} s))))
+               #{} s))
+     #{}))
   ([xrel yrel km] ;arbitrary key mapping
    (let [[r s k] (if (<= (count xrel) (count yrel))
                    [xrel yrel (map-invert km)]
