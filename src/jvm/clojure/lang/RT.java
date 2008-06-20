@@ -589,6 +589,16 @@ static public Object nth(Object coll, int n){
 	else if(coll instanceof Matcher)
 		return ((Matcher) coll).group(n);
 
+	else if(coll instanceof Map.Entry)
+		{
+		Map.Entry e = (Map.Entry) coll;
+		if(n == 0)
+			return e.getKey();
+		else if (n == 1)
+			return e.getValue();
+		throw new IndexOutOfBoundsException();
+		}
+
 	else if(coll instanceof Sequential)
 		{
 		ISeq seq = ((IPersistentCollection) coll).seq();
@@ -638,6 +648,15 @@ static public Object nth(Object coll, int n, Object notFound){
 		Matcher m = (Matcher) coll;
 		if(n < m.groupCount())
 			return m.group(n);
+		return notFound;
+		}
+	else if(coll instanceof Map.Entry)
+		{
+		Map.Entry e = (Map.Entry) coll;
+		if(n == 0)
+			return e.getKey();
+		else if (n == 1)
+			return e.getValue();
 		return notFound;
 		}
 	else if(coll instanceof Sequential)
