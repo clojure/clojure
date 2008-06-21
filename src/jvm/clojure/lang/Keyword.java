@@ -79,8 +79,8 @@ public Object invoke(Object obj) throws Exception{
 	return RT.get(obj, this);
 }
 
-public Object invoke(Object obj, Object val) throws Exception{
-	return throwArity();
+public Object invoke(Object obj, Object notFound) throws Exception{
+	return RT.get(obj, this, notFound);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{

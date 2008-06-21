@@ -154,6 +154,10 @@ public Object invoke(Object arg1) throws Exception{
 	return valAt(arg1);
 }
 
+public Object invoke(Object arg1, Object notFound) throws Exception{
+	return valAt(arg1, notFound);
+}
+
 // java.util.Collection implementation
 
 public Object[] toArray(){

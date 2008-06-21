@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.io.ObjectStreamException;
 
 
-public class Symbol extends Obj implements Comparable, Named, Serializable{
+public class Symbol extends AFn implements Comparable, Named, Serializable{
 //these must be interned strings!
 final String ns;
 final String name;
@@ -108,6 +108,14 @@ public int compareTo(Object o){
 
 private Object readResolve() throws ObjectStreamException{
 	return intern(ns, name);
+}
+
+public Object invoke(Object obj) throws Exception{
+	return RT.get(obj, this);
+}
+
+public Object invoke(Object obj, Object notFound) throws Exception{
+	return RT.get(obj, this, notFound);
 }
 
 }
