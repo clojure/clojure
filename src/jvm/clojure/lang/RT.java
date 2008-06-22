@@ -121,7 +121,8 @@ final static public Var MACRO_META = Var.intern(CLOJURE_NS, Symbol.create("*macr
 final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
-final static public Var USE_CONTEXT_CLASSLOADER = Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), null);
+final static public Var USE_CONTEXT_CLASSLOADER =
+		Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), null);
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 
@@ -594,7 +595,7 @@ static public Object nth(Object coll, int n){
 		Map.Entry e = (Map.Entry) coll;
 		if(n == 0)
 			return e.getKey();
-		else if (n == 1)
+		else if(n == 1)
 			return e.getValue();
 		throw new IndexOutOfBoundsException();
 		}
@@ -655,7 +656,7 @@ static public Object nth(Object coll, int n, Object notFound){
 		Map.Entry e = (Map.Entry) coll;
 		if(n == 0)
 			return e.getKey();
-		else if (n == 1)
+		else if(n == 1)
 			return e.getValue();
 		return notFound;
 		}
@@ -1200,6 +1201,9 @@ static public void print(Object x, Writer w) throws Exception{
 				case '\f':
 					w.write("formfeed");
 					break;
+				case '\r':
+					w.write("return");
+					break;
 				default:
 					w.write(c);
 				}
@@ -1355,7 +1359,7 @@ static public ClassLoader makeClassLoader(){
 }
 
 static ClassLoader baseLoader(){
-	if (booleanCast(USE_CONTEXT_CLASSLOADER.get()))
+	if(booleanCast(USE_CONTEXT_CLASSLOADER.get()))
 		return Thread.currentThread().getContextClassLoader();
 	return ROOT_CLASSLOADER;
 }
@@ -1520,11 +1524,11 @@ static public Object[] aclone(Object[] xs){
 }
 
 static public Object aget(Object xs, int i){
-	return Array.get(xs,i);
+	return Array.get(xs, i);
 }
 
 static public Object aset(Object xs, int i, Object v){
-	Array.set(xs,i,v);
+	Array.set(xs, i, v);
 	return v;
 }
 

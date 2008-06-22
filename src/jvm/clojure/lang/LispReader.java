@@ -44,7 +44,8 @@ static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^/]*/)?([\\D&&[^:/
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 //static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern intPat =
-Pattern.compile("([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)\\.?");
+		Pattern.compile(
+				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)\\.?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?");
 static final Symbol SLASH = Symbol.create("/");
@@ -201,41 +202,41 @@ static private Object readNumber(PushbackReader r, char initch) throws Exception
 	return n;
 }
 
-static private int readUnicodeChar(String token, int offset, int length, int base) throws Exception {
-    if (token.length() != offset + length)
-        throw new IllegalArgumentException("Invalid unicode character: \\" + token);
-    int uc = 0;
-    for (int i = offset; i < offset + length; ++i)
-        {
-        int d = Character.digit(token.charAt(i), base);
-        if (d == -1)
-            throw new IllegalArgumentException("Invalid digit: " + (char) d);
-        uc = uc * base + d;
-        }
-    return (char) uc;
+static private int readUnicodeChar(String token, int offset, int length, int base) throws Exception{
+	if(token.length() != offset + length)
+		throw new IllegalArgumentException("Invalid unicode character: \\" + token);
+	int uc = 0;
+	for(int i = offset; i < offset + length; ++i)
+		{
+		int d = Character.digit(token.charAt(i), base);
+		if(d == -1)
+			throw new IllegalArgumentException("Invalid digit: " + (char) d);
+		uc = uc * base + d;
+		}
+	return (char) uc;
 }
 
-static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) throws Exception {
-    int uc = Character.digit(initch, base);
-    if(uc == -1)
-        throw new IllegalArgumentException("Invalid digit: " + initch);
-    int i = 1;
-    for(; i < length; ++i)
-        {
-        int ch = r.read();
-        if(ch == -1 || isWhitespace(ch) || isMacro(ch))
-            {
-            unread(r, ch);
-            break;
-            }
-        int d = Character.digit(ch, base);
-        if(d == -1)
-            throw new IllegalArgumentException("Invalid digit: " + (char) ch);
-        uc = uc * base + d;
-        }
-    if(i != length && exact)
-        throw new IllegalArgumentException("Invalid character length: " + i + ", should be: " + length);
-    return uc;
+static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) throws Exception{
+	int uc = Character.digit(initch, base);
+	if(uc == -1)
+		throw new IllegalArgumentException("Invalid digit: " + initch);
+	int i = 1;
+	for(; i < length; ++i)
+		{
+		int ch = r.read();
+		if(ch == -1 || isWhitespace(ch) || isMacro(ch))
+			{
+			unread(r, ch);
+			break;
+			}
+		int d = Character.digit(ch, base);
+		if(d == -1)
+			throw new IllegalArgumentException("Invalid digit: " + (char) ch);
+		uc = uc * base + d;
+		}
+	if(i != length && exact)
+		throw new IllegalArgumentException("Invalid character length: " + i + ", should be: " + length);
+	return uc;
 }
 
 static private Object interpretToken(String s) throws Exception{
@@ -273,8 +274,8 @@ private static Object matchSymbol(String s){
 		String ns = m.group(1);
 		String name = m.group(2);
 		if(ns != null && ns.endsWith(":/")
-			|| name.endsWith(":")
-			|| s.contains("::"))
+		   || name.endsWith(":")
+		   || s.contains("::"))
 			return null;
 		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));
@@ -288,29 +289,30 @@ private static Object matchSymbol(String s){
 
 private static Object matchNumber(String s){
 	Matcher m = intPat.matcher(s);
-	if(m.matches()) {
-		if (m.group(2) != null)
+	if(m.matches())
+		{
+		if(m.group(2) != null)
 			return 0;
 		boolean negate = (m.group(1).equals("-"));
 		String n;
 		int radix = 10;
-		if ((n = m.group(3)) != null)
+		if((n = m.group(3)) != null)
 			radix = 10;
-		else if ((n = m.group(4)) != null)
+		else if((n = m.group(4)) != null)
 			radix = 16;
-		else if ((n = m.group(5)) != null)
+		else if((n = m.group(5)) != null)
 			radix = 8;
-		else if ((n = m.group(7)) != null)
+		else if((n = m.group(7)) != null)
 			radix = Integer.parseInt(m.group(6));
 		if(n == null)
 			return null;
-		BigInteger bn = new BigInteger(n,radix);
+		BigInteger bn = new BigInteger(n, radix);
 		return Numbers.reduce(negate ? bn.negate() : bn);
-	}
+		}
 	m = floatPat.matcher(s);
 	if(m.matches())
 		{
-		if(s.charAt(s.length()-1) == 'M')
+		if(s.charAt(s.length() - 1) == 'M')
 			return new BigDecimal(s.substring(0, s.length() - 1));
 		return Double.parseDouble(s);
 		}
@@ -375,31 +377,31 @@ static class StringReader extends AFn{
 					case '"':
 						break;
 					case 'b':
-					    ch = '\b';
-					    break;
-                    case 'f':
-                        ch = '\f';
-                        break;
-                    case 'u':
-                        {
-                        ch = r.read();
-                        if (Character.isDigit(ch))
-                            ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
-                        else
-                            throw new Exception("Invalid unicode escape: \\" + (char) ch);
-                        break;
-                        }
+						ch = '\b';
+						break;
+					case 'f':
+						ch = '\f';
+						break;
+					case 'u':
+					{
+					ch = r.read();
+					if(Character.isDigit(ch))
+						ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
+					else
+						throw new Exception("Invalid unicode escape: \\" + (char) ch);
+					break;
+					}
 					default:
-					    {
-					    if (Character.isDigit(ch))
-					        {
-					        ch = readUnicodeChar((PushbackReader) r, ch, 8, 3, false);
-					        if (ch > 0377)
-					            throw new Exception("Octal escape sequence must be in range [0, 377].");
-					        }
-					    else
-					        throw new Exception("Unsupported escape character: \\" + (char) ch);    
-					    }
+					{
+					if(Character.isDigit(ch))
+						{
+						ch = readUnicodeChar((PushbackReader) r, ch, 8, 3, false);
+						if(ch > 0377)
+							throw new Exception("Octal escape sequence must be in range [0, 377].");
+						}
+					else
+						throw new Exception("Unsupported escape character: \\" + (char) ch);
+					}
 					}
 				}
 			sb.append((char) ch);
@@ -744,22 +746,24 @@ static class CharacterReader extends AFn{
 			return ' ';
 		else if(token.equals("tab"))
 			return '\t';
-        else if(token.equals("backspace"))
-            return '\b';
-        else if(token.equals("formfeed"))
-            return '\f';
-        else if (token.startsWith("u"))
-            return (char) readUnicodeChar(token, 1, 4, 16);
-        else if (token.startsWith("o"))
-            {
-            int len = token.length() - 1;
-            if (len > 3)
-                throw new Exception("Invalid octal escape sequence length: " + len);
-            int uc = readUnicodeChar(token, 1, len, 8);
-            if (uc > 0377)
-                throw new Exception("Octal escape sequence must be in range [0, 377].");
-            return (char) uc;
-            }
+		else if(token.equals("backspace"))
+			return '\b';
+		else if(token.equals("formfeed"))
+			return '\f';
+		else if(token.equals("return"))
+			return '\r';
+		else if(token.startsWith("u"))
+			return (char) readUnicodeChar(token, 1, 4, 16);
+		else if(token.startsWith("o"))
+			{
+			int len = token.length() - 1;
+			if(len > 3)
+				throw new Exception("Invalid octal escape sequence length: " + len);
+			int uc = readUnicodeChar(token, 1, len, 8);
+			if(uc > 0377)
+				throw new Exception("Octal escape sequence must be in range [0, 377].");
+			return (char) uc;
+			}
 		throw new Exception("Unsupported character: \\" + token);
 	}
 
