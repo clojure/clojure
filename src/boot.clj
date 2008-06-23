@@ -292,21 +292,6 @@
   {:tag Boolean}
   [x] (if x false true))
 
-
-(defn =
-  "Equality. Returns true if obj1 equals obj2, false if not. Same as
-  Java obj1.equals(obj2) except it also works for nil, and compares
-  numbers in a type-independent manner.  Clojure's immutable data
-  structures define equals() (and thus =) as a value, not an identity,
-  comparison."
-  {:tag Boolean} 
-  [x y] (. clojure.lang.Util (equal x y)))
-
-(defn not=
-  "Same as (not (= obj1 obj2))"
-  {:tag Boolean}
-  [x y] (not (= x y)))
-
 (defn str
   "With no args, returns the empty string. With one arg x, returns
   x.toString().  (str nil) returns the empty string. With more than
@@ -392,8 +377,6 @@
   cached."
  [first-expr & rest-expr]
   (list 'new 'clojure.lang.LazySeq (list `fn [] first-expr) (list* `fn [] rest-expr)))
-
-
   
 (defn concat
   "Returns a lazy seq representing the concatenation of	the elements in x + xs."
@@ -405,6 +388,29 @@
     :else (lazy-cons (first x) (apply concat (rest x) xs)))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
+(defn =
+  "Equality. Returns true if obj1 equals obj2, false if not. Same as
+  Java obj1.equals(obj2) except it also works for nil, and compares
+  numbers in a type-independent manner.  Clojure's immutable data
+  structures define equals() (and thus =) as a value, not an identity,
+  comparison."
+  {:tag Boolean
+   :inline (fn [x y] `(. clojure.lang.Util equal ~x ~y))} 
+  [x y] (. clojure.lang.Util (equal x y)))
+
+(defn not=
+  "Same as (not (= obj1 obj2))"
+  {:tag Boolean}
+  [x y] (not (= x y)))
+
+(defn compare
+  "Comparator. Returns 0 if x equals y, -1 if x is logically 'less
+  than' y, else 1. Same as Java x.compareTo(y) except it also works
+  for nil, and compares numbers in a type-independent manner. x must
+  implement Comparable"
+  {:tag Integer
+   :inline (fn [x y] `(. clojure.lang.Util compare ~x ~y))} 
+  [x y] (. clojure.lang.Util (compare x y)))
 
 (defmacro and
   "Evaluates exprs one at a time, from left to right. If a form
@@ -1257,13 +1263,10 @@ not-every? (comp not every?))
   
 (defn sort
   "Returns a sorted sequence of the items in coll. If no comparator is
-  supplied, the items must implement Comparable. comparator must
+  supplied, uses compare. comparator must
   implement java.util.Comparator."
   ([#^java.util.Collection coll]
-   (when (and coll (not (. coll (isEmpty))))
-     (let [a (. coll (toArray))]
-       (. java.util.Arrays (sort a))
-       (seq a))))
+   (sort compare coll))
   ([#^java.util.Comparator comp #^java.util.Collection coll]
    (when (and coll (not (. coll (isEmpty))))
      (let [a (. coll (toArray))]
@@ -1273,10 +1276,10 @@ not-every? (comp not every?))
 (defn sort-by
   "Returns a sorted sequence of the items in coll, where the sort
   order is determined by comparing (keyfn item).  If no comparator is
-  supplied, the keys must implement Comparable. comparator must
+  supplied, uses compare. comparator must
   implement java.util.Comparator."
   ([keyfn coll]
-   (sort (fn [x y] (. #^Comparable (keyfn x) (compareTo (keyfn y)))) coll))
+   (sort-by compare coll))
   ([keyfn #^java.util.Comparator comp coll]
    (sort (fn [x y] (. comp (compare (keyfn x) (keyfn y)))) coll)))
 
