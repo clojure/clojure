@@ -162,4 +162,8 @@ void enqueue(Action action){
 		action.execute();
 }
 
+public int getQueueCount(){
+	return q.get().count();
+}
+
 }
