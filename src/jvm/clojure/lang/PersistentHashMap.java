@@ -504,7 +504,7 @@ final static class LeafNode extends AMapEntry implements INode{
 			{
 			if(Util.equal(key, this.key))
 				{
-				if(Util.equal(val, this.val))
+				if(val == this.val)
 					return this;
 				//note  - do not set addedLeaf, since we are replacing
 				return new LeafNode(hash, key, val);
@@ -574,7 +574,7 @@ final static class HashCollisionNode implements INode{
 			int idx = findIndex(hash, key);
 			if(idx != -1)
 				{
-				if(Util.equal(leaves[idx].val, val))
+				if(leaves[idx].val == val)
 					return this;
 				LeafNode[] newLeaves = leaves.clone();
 				//note  - do not set addedLeaf, since we are replacing
