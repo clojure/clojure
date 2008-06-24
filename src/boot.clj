@@ -1279,7 +1279,7 @@ not-every? (comp not every?))
   supplied, uses compare. comparator must
   implement java.util.Comparator."
   ([keyfn coll]
-   (sort-by compare coll))
+   (sort-by keyfn compare coll))
   ([keyfn #^java.util.Comparator comp coll]
    (sort (fn [x y] (. comp (compare (keyfn x) (keyfn y)))) coll)))
 
