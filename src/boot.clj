@@ -237,7 +237,6 @@
 
 (defn sorted-set
   "Returns a new sorted set with supplied keys."
-  ([] {})
   ([& keys]
    (. clojure.lang.PersistentTreeSet (create keys))))
 
