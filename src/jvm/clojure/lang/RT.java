@@ -216,6 +216,7 @@ static
 	Symbol namesym = Symbol.create("name");
 	OUT.setTag(Symbol.create("java.io.Writer"));
 	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
+	AGENT.setTag(Symbol.create("clojure.lang.Agent"));
 	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);

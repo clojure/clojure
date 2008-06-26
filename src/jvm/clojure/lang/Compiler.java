@@ -173,7 +173,8 @@ static final public Var IN_CATCH_FINALLY = Var.create(null);
 static final public Var SOURCE = Var.create("NO_SOURCE_FILE");
 
 //String
-static final public Var SOURCE_PATH = Var.create(null);
+static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure")),
+                                                 Symbol.create("*file*"), null);
 
 //Integer
 static final public Var LINE = Var.create(0);
@@ -749,8 +750,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					c = byte[].class;
 				else if(sym.name.equals("booleans"))
 					c = boolean[].class;
-				else
-				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+				else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 					c = RT.classForName(sym.name);
 				else
 					{
@@ -1892,9 +1892,9 @@ static boolean subsumes(Class[] c1, Class[] c2){
 		if(c1[i] != c2[i])// || c2[i].isPrimitive() && c1[i] == Object.class))
 			{
 			if(!c1[i].isPrimitive() && c2[i].isPrimitive()
-			    //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
-				|| 
-				c2[i].isAssignableFrom(c1[i]))
+			   //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
+			   ||
+			   c2[i].isAssignableFrom(c1[i]))
 				better = true;
 			else
 				return false;
@@ -2775,7 +2775,7 @@ static public class FnExpr implements Expr{
 				tv = tv.cons(OBJECT_TYPE);
 			}
 		Type[] ret = new Type[tv.count()];
-		for(int i=0;i<tv.count();i++)
+		for(int i = 0; i < tv.count(); i++)
 			ret[i] = (Type) tv.nth(i);
 		return ret;
 	}
@@ -2889,7 +2889,8 @@ static public class FnExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
-				cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(), null, null);
+				cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
+				              null, null);
 			else
 				cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 			}
@@ -2980,7 +2981,7 @@ static public class FnExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			if(lb.getPrimitiveType()!=null)
+			if(lb.getPrimitiveType() != null)
 				fn.emitUnboxedLocal(gen, lb);
 			else
 				fn.emitLocal(gen, lb);
@@ -3031,7 +3032,7 @@ static public class FnExpr implements Expr{
 		Class primc = lb.getPrimitiveType();
 		if(closes.containsKey(lb))
 			{
-			gen.loadThis();			
+			gen.loadThis();
 			gen.getField(fntype, lb.name, Type.getType(primc));
 			}
 		else
@@ -3730,12 +3731,12 @@ public static Object macroexpand1(Object x) throws Exception{
 					Symbol meth = Symbol.intern(sname.substring(1));
 					return RT.listStar(DOT, RT.second(form), meth, form.rest().rest());
 					}
-				else if (sym.ns != null)
+				else if(sym.ns != null)
 					{
 					Symbol target = Symbol.intern(sym.ns);
 					if(Namespace.find(target) == null)
 						{
-						Class c = HostExpr.maybeClass(target,false);
+						Class c = HostExpr.maybeClass(target, false);
 						if(c != null)
 							{
 							Symbol meth = Symbol.intern(sym.name);
@@ -3860,10 +3861,10 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		Symbol nsSym = Symbol.create(sym.ns);
 		if(Namespace.find(nsSym) == null)
 			{
-			Class c = HostExpr.maybeClass(nsSym,false);
+			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
-				return new StaticFieldExpr((Integer)LINE.get(),c,sym.name);
+				return new StaticFieldExpr((Integer) LINE.get(), c, sym.name);
 				}
 			}
 		}
@@ -3949,7 +3950,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 		Namespace ns = Namespace.find(nsSym);
 		if(ns == null)
 			return null;
-			//throw new Exception("No such namespace: " + sym.ns);
+		//throw new Exception("No such namespace: " + sym.ns);
 		Symbol name = Symbol.create(sym.name);
 		if(internNew && ns == currentNS())
 			var = currentNS().intern(name);
