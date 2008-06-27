@@ -145,7 +145,7 @@ pvec.
   ([coll comp] (. (par coll) max comp)))
 
 (defn pmin
-  "Returns the maximum element, presuming Comparable elements, unless
+  "Returns the minimum element, presuming Comparable elements, unless
   a Comparator comp is supplied"
   ([coll] (. (par coll) min))
   ([coll comp] (. (par coll) min comp)))

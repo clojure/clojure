@@ -453,12 +453,12 @@
        (f))))
   ([f val coll]
      (let [s (seq coll)]
-       (when (instance? clojure.lang.IReduce s)
-         (. #^clojure.lang.IReduce s (reduce f val)))
-       ((fn [f val s]
-          (if s
-            (recur f (f val (first s)) (rest s))
-            val)) f val s))))
+       (if (instance? clojure.lang.IReduce s)
+         (. #^clojure.lang.IReduce s (reduce f val))
+         ((fn [f val s]
+            (if s
+              (recur f (f val (first s)) (rest s))
+              val)) f val s)))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
