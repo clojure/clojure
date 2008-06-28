@@ -31,16 +31,6 @@
 
 (lib/use def)
 
-(defn isqrt
-  "Returns the integer square root of n"
-  [n]
-  (loop [xn 1]
-	(prn xn)
-	(let [xn1 (quot (+ xn (quot n xn)) 2)]
-	  (if (= xn1 xn)
-		xn1
-		(recur xn1)))))
-
 (defvar primes
   (lazy-cat [2 3 5 7]
     (let [primes-from
