@@ -99,6 +99,12 @@
 ;;
 ;;  (use (genclass :ns clojure))
 ;;
+;;  Loading
+;;
+;;  Function: load-resource
+;;  Function: find-system-resource
+;;  Function: load-system-resource
+;;
 ;;  scgilardi (gmail)
 ;;  06 May 2008
 ;;
@@ -108,8 +114,9 @@
 (clojure/in-ns 'lib)
 (clojure/refer 'clojure)
 
-(import '(java.io BufferedReader InputStreamReader))
 (import '(clojure.lang RT))
+(import '(java.io BufferedReader InputStreamReader))
+(import '(java.net URI URL))
 
 ;; Private
 
@@ -133,12 +140,14 @@
  *verbose*)
 (init-once *verbose* false)
 
+(def load-system-resource)
+
 (defn- load-lib
   "Loads a lib from <classpath>/in/ and ensures that namespace
   ns (if specified) exists"
   [sym in ns]
   (let [res (str sym ".clj")]
-    (.loadResourceScript RT (if in (str in \/ res) res))
+    (load-system-resource (if in (str in \/ res) res))
     (when (and ns (not (find-ns ns)))
       (throw (Exception.
               (str "namespace '" ns "' not found after "
@@ -245,3 +254,48 @@
   are filters for clojure/refer."
   [& args]
   `(apply load-libs :require :use '~args))
+
+;; Loading
+
+(defn load-resource
+  "Loads Clojure source from a resource specified by java.net.URI
+  java.net.URL, or String. Accepts any URI scheme supported by
+  java.net.URLConnection (http and jar), plus file URIs."
+  [resource]
+  (let [url (cond  ; coerce argument into URL
+             (instance? URL resource) resource
+             (instance? URI resource) (.toURL resource)
+             (string? resource) (URL. resource)
+             :else (throw (Exception.
+                           (str "Cannot coerce " (class resource)
+                                " to java.net.URL."))))]
+    (with-open reader
+        (BufferedReader.
+         (InputStreamReader.
+          (.openStream url)))
+      (.load Compiler reader (.getPath url) (.getFile url)))))
+
+;; The RT ClassLoader may be the same as the system ClassLoader, so
+;; they are in a set to eliminate duplicates.  The ROOT_CLASSLOADER is
+;; an instance of clojure.lang.DynamicClassLoader, and can be updated
+;; with clojure/add-classpath.
+
+(def *class-loaders*
+     #^{:private true :doc
+        "A set of available class loaders"}
+     (set [(.getSystemClassLoader ClassLoader)
+           (.getClassLoader (identity RT))
+           (.ROOT_CLASSLOADER RT)]))
+
+(defn find-system-resource
+  "Searches for the resource in available ClassLoaders.  Returns a
+  URL, or nil if the resource is not found."
+  [name]
+  (some #(.findResource % name) *class-loaders*))
+
+(defn load-system-resource
+  "Loads Clojure source from a resource within classpath"
+  [resource]
+  (if-let url (find-system-resource resource)
+    (load-resource url)
+    (throw (Exception. (str "Cannot find resource " resource)))))
