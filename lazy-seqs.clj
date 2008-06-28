@@ -17,6 +17,8 @@
 ;;
 ;;  fibs   - based on code from Rich Hickey at the Clojure wiki [3]
 ;;
+;;  powers-of-2 - all the powers of 2
+;;
 ;;  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
 ;;  [2] http://clj-me.blogspot.com/2008/06/primes.html
 ;;  [3] http://en.wikibooks.org/wiki/Clojure_Programming#Examples
@@ -28,6 +30,16 @@
 (clojure/refer 'clojure)
 
 (lib/use def)
+
+(defn isqrt
+  "Returns the integer square root of n"
+  [n]
+  (loop [xn 1]
+	(prn xn)
+	(let [xn1 (quot (+ xn (quot n xn)) 2)]
+	  (if (= xn1 xn)
+		xn1
+		(recur xn1)))))
 
 (defvar primes
   (lazy-cat [2 3 5 7]
@@ -43,10 +55,19 @@
   "A lazy sequence of all the prime numbers.")
 
 (defvar fibs
-  (concat [0 1]
+  (lazy-cat [0 1]
     (let [rest-fn
           (fn rest-fn [a b]
             (let [next (+ a b)]
               (lazy-cons next (rest-fn b next))))]
       (rest-fn 0 1)))
   "A lazy sequence of all the fibonacci numbers.")
+
+(defvar powers-of-2
+  (lazy-cons 1
+    (let [rest-fn
+          (fn rest-fn [n]
+            (let [next (bit-shift-left n 1)]
+              (lazy-cons next (rest-fn next))))]
+      (rest-fn 1)))
+  "A lazy sequence of all the powers of 2")

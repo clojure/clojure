@@ -17,6 +17,13 @@
 (clojure/in-ns 'def)
 (clojure/refer 'clojure)
 
+(defmacro init-once
+  "Initializes a var exactly once. The var must already exist."
+  [var init]
+  `(let [v# (resolve '~var)]
+     (when-not (.isBound v#)
+       (.bindRoot v# ~init))))
+
 (defmacro defvar
   "Defines a var with an optional intializer and doc string"
   ([name]
