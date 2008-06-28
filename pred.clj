@@ -86,7 +86,7 @@
   `(and (function? ~x) (boolean (:macro ^#'~x))))
 
 (defn integer?
-  "Returns true if x is even"
+  "Returns true if x is an integer"
   [x]
   (or (instance? Integer x)
       (instance? Long x)
