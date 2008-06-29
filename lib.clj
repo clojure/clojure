@@ -265,10 +265,11 @@
   (let [url (cond  ; coerce argument into URL
              (instance? URL loc) loc
              (instance? URI loc) (.toURL loc)
-             (string? loc) (URL. loc)
-             :else (throw (Exception.
-                           (str "Cannot coerce " (class loc)
-                                " to java.net.URL."))))]
+             (string? loc) (URL. loc))]
+    (when-not url
+      (throw
+       (Exception.
+        (str "Cannot coerce " (class loc) " to java.net.URL"))))
     (with-open reader
         (BufferedReader.
          (InputStreamReader.
