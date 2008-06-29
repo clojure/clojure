@@ -101,3 +101,8 @@
   "Returns true if x is odd, throws an exception if x is not an integer"
   [x]
   (not (even? x)))
+
+(defn empty?
+  "Returns true if coll is empty"
+  [coll]
+  (not (seq coll)))
