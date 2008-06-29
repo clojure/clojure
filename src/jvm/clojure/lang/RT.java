@@ -137,6 +137,7 @@ final static Var CMD_LINE_ARGS = Var.intern(CLOJURE_NS, Symbol.create("*command-
 final public static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),
                                                 CLOJURE_NS);
 
+final static Var FLUSH_ON_NEWLINE = Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), T);
 final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
 final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
 final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);

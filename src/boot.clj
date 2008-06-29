@@ -1437,10 +1437,12 @@ not-every? (comp not every?))
     nil)
 
 (defn prn
-  "Same as pr followed by (newline)"
+  "Same as pr followed by (newline). Observes *flush-on-newline*"
   [& more]
     (apply pr more)
-    (newline))
+    (newline)
+    (when *flush-on-newline*
+      (flush)))
 
 (defn print
   "Prints the object(s) to the output stream that is the current value
