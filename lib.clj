@@ -261,13 +261,13 @@
   "Loads Clojure source from a resource specified by java.net.URI
   java.net.URL, or String. Accepts any URI scheme supported by
   java.net.URLConnection (http and jar), plus file URIs."
-  [resource]
+  [loc]
   (let [url (cond  ; coerce argument into URL
-             (instance? URL resource) resource
-             (instance? URI resource) (.toURL resource)
-             (string? resource) (URL. resource)
+             (instance? URL loc) loc
+             (instance? URI loc) (.toURL loc)
+             (string? loc) (URL. loc)
              :else (throw (Exception.
-                           (str "Cannot coerce " (class resource)
+                           (str "Cannot coerce " (class loc)
                                 " to java.net.URL."))))]
     (with-open reader
         (BufferedReader.
@@ -280,12 +280,13 @@
 ;; an instance of clojure.lang.DynamicClassLoader, and can be updated
 ;; with clojure/add-classpath.
 
-(def *class-loaders*
-     #^{:private true :doc
-        "A set of available class loaders"}
-     (set [(.getSystemClassLoader ClassLoader)
-           (.getClassLoader (identity RT))
-           (.ROOT_CLASSLOADER RT)]))
+(def
+ #^{:private true :doc
+    "A set of available class loaders"}
+ *class-loaders*
+ (set [(.getSystemClassLoader ClassLoader)
+       (.getClassLoader (identity RT))
+       (.ROOT_CLASSLOADER RT)]))
 
 (defn find-system-resource
   "Searches for the resource in available ClassLoaders.  Returns a
@@ -295,7 +296,7 @@
 
 (defn load-system-resource
   "Loads Clojure source from a resource within classpath"
-  [resource]
-  (if-let url (find-system-resource resource)
+  [name]
+  (if-let url (find-system-resource name)
     (load-resource url)
-    (throw (Exception. (str "Cannot find resource " resource)))))
+    (throw (Exception. (str "Cannot find resource " name)))))
