@@ -11,9 +11,21 @@
 ;;  lib.clj provides facilities for loading and managing libs. A lib is
 ;;  is a unit of Clojure code contained in a file or other resource within
 ;;  classpath. The name of the lib's container is the lib's name followed
-;;  by ".clj". A lib's name must be a valid Clojure symbol name.
+;;  by ".clj". A lib's name must be a valid Clojure symbol name.  lib.clj
+;;  also provides functions for finding and loading resources via class
+;;  loaders visible to the Clojure runtime.
 ;;
-;;  A lib will typically contain useful functions, macros, and other vars.
+;;  Resources
+;;
+;;  Function: find-resource
+;;
+;;  Searches available class loaders for a resource given its path relative
+;;  to classpath. Returns a URL if the resource is found or nil.
+;;
+;;  Function: load-resource
+;;
+;;  loads Clojure source from an absolute path expressed as a URI, URL
+;;  or String
 ;;
 ;;  Core
 ;;
@@ -63,7 +75,7 @@
 ;;
 ;;  Function: libs
 ;;
-;;  The libs function returns a sorted seq of symbols naming the currently
+;;  The libs function returns a sorted set of symbols naming the currently
 ;;  loaded libs.
 ;;
 ;;  Convenience
@@ -99,14 +111,8 @@
 ;;
 ;;  (use (genclass :ns clojure))
 ;;
-;;  Loading
-;;
-;;  Function: load-resource
-;;  Function: find-system-resource
-;;  Function: load-system-resource
-;;
 ;;  scgilardi (gmail)
-;;  06 May 2008
+;;  Created: 7 April 2008
 ;;
 ;;  Thanks to Stuart Sierra for providing many useful ideas, discussions
 ;;  and code contributions for lib.clj.
@@ -132,7 +138,7 @@
  #^{:private true :doc
     "A ref to a set of symbols representing loaded libs"}
  *libs*)
-(init-once *libs* (ref #{}))
+(init-once *libs* (ref (sorted-set)))
 
 (def
  #^{:private true :doc
@@ -140,18 +146,37 @@
  *verbose*)
 (init-once *verbose* false)
 
-(def load-system-resource)
+(def
+ #^{:private true :doc
+    "A vector of the available class loaders ordered by the
+  degree to which they are controlled by Clojure. The root
+  loader's classpath can be extended with clojure/add-classpath"}
+ *class-loaders*
+ (let [root (.ROOT_CLASSLOADER RT)
+       runtime (.getClassLoader (identity RT))
+       system (.getSystemClassLoader ClassLoader)]
+   (if (= system runtime)
+     [root system]
+     [root runtime system])))
+
+(def find-resource)                     ; forward declaration
+(def load-resource)                     ; forward declaration
 
 (defn- load-lib
   "Loads a lib from <classpath>/in/ and ensures that namespace
   ns (if specified) exists"
   [sym in ns]
-  (let [res (str sym ".clj")]
-    (load-system-resource (if in (str in \/ res) res))
+  (let [res (str sym ".clj")
+        rel-path (if in (str in \/ res) res)
+        url (find-resource rel-path)]
+    (when-not url
+      (throw (Exception.
+              (str "resource '" rel-path "' not found"))))
+    (load-resource url)
     (when (and ns (not (find-ns ns)))
       (throw (Exception.
               (str "namespace '" ns "' not found after "
-                   "loading resource '" res "'")))))
+                   "loading resource '" rel-path "'")))))
   (dosync
    (commute *libs* conj sym))
   (when *verbose*
@@ -163,7 +188,7 @@
   [sym in ns]
   (dosync
    (commute *libs* set/union
-            (binding [*libs* (ref #{})]
+            (binding [*libs* (ref (sorted-set))]
               (load-lib sym in ns)
               @*libs*))))
 
@@ -198,6 +223,33 @@
            (= 2 (count form)))
     (second form) form))
 
+;; Resources
+
+(defn find-resource
+  "Searches for a resource given a path relative to classpath via
+  available ClassLoaders. Returns a URL if the resource is found or nil."
+  [rel-path]
+  (some #(.findResource % rel-path) *class-loaders*))
+
+(defn load-resource
+  "Loads Clojure source from a resource specified by an absolute path.
+  The path may be a URI, URL, or String. Accepts any URI scheme
+  supported by URLConnection (http and jar), plus file paths."
+  [abs-path]
+  (let [url (cond                       ; coerce argument into URL
+             (instance? URL abs-path) abs-path
+             (instance? URI abs-path) (.toURL abs-path)
+             (string? abs-path) (URL. abs-path))]
+    (when-not url
+      (throw
+       (Exception.
+        (str "Cannot coerce " (class abs-path) " to java.net.URL"))))
+    (with-open reader
+        (BufferedReader.
+         (InputStreamReader.
+          (.openStream url)))
+      (.load Compiler reader (.getPath url) (.getFile url)))))
+
 ;; Core
 
 (defn load-libs
@@ -218,9 +270,9 @@
         (apply load-with-options (combine libspec options))))))
 
 (defn libs
-  "Returns a sorted sequence of symbols naming loaded libs"
+  "Returns a sorted set of symbols naming loaded libs"
   []
-  (sort @*libs*))
+  @*libs*)
 
 ;; Convenience
 
@@ -254,50 +306,3 @@
   are filters for clojure/refer."
   [& args]
   `(apply load-libs :require :use '~args))
-
-;; Loading
-
-(defn load-resource
-  "Loads Clojure source from a resource specified by java.net.URI
-  java.net.URL, or String. Accepts any URI scheme supported by
-  java.net.URLConnection (http and jar), plus file URIs."
-  [loc]
-  (let [url (cond  ; coerce argument into URL
-             (instance? URL loc) loc
-             (instance? URI loc) (.toURL loc)
-             (string? loc) (URL. loc))]
-    (when-not url
-      (throw
-       (Exception.
-        (str "Cannot coerce " (class loc) " to java.net.URL"))))
-    (with-open reader
-        (BufferedReader.
-         (InputStreamReader.
-          (.openStream url)))
-      (.load Compiler reader (.getPath url) (.getFile url)))))
-
-;; The RT ClassLoader may be the same as the system ClassLoader, so
-;; they are in a set to eliminate duplicates.  The ROOT_CLASSLOADER is
-;; an instance of clojure.lang.DynamicClassLoader, and can be updated
-;; with clojure/add-classpath.
-
-(def
- #^{:private true :doc
-    "A set of available class loaders"}
- *class-loaders*
- (set [(.getSystemClassLoader ClassLoader)
-       (.getClassLoader (identity RT))
-       (.ROOT_CLASSLOADER RT)]))
-
-(defn find-system-resource
-  "Searches for the resource in available ClassLoaders.  Returns a
-  URL, or nil if the resource is not found."
-  [name]
-  (some #(.findResource % name) *class-loaders*))
-
-(defn load-system-resource
-  "Loads Clojure source from a resource within classpath"
-  [name]
-  (if-let url (find-system-resource name)
-    (load-resource url)
-    (throw (Exception. (str "Cannot find resource " name)))))
