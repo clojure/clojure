@@ -844,8 +844,8 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			target.emit(C.EXPRESSION, fn, gen);
 			gen.checkCast(Type.getType(targetClass));
 			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
-			if(context != C.STATEMENT)
-				HostExpr.emitBoxReturn(fn, gen, field.getType());
+			//if(context != C.STATEMENT)
+			HostExpr.emitBoxReturn(fn, gen, field.getType());
 			if(context == C.STATEMENT)
 				{
 				gen.pop();
@@ -928,8 +928,8 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 		gen.visitLineNumber(line, gen.mark());
 
 		gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
-		if(context != C.STATEMENT)
-			HostExpr.emitBoxReturn(fn, gen, field.getType());
+		//if(context != C.STATEMENT)
+		HostExpr.emitBoxReturn(fn, gen, field.getType());
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -1130,8 +1130,8 @@ static class InstanceMethodExpr extends MethodExpr{
 				gen.invokeInterface(type, m);
 			else
 				gen.invokeVirtual(type, m);
-			if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
-				HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			//if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
+			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
 			}
 		else
 			{
@@ -1242,8 +1242,8 @@ static class StaticMethodExpr extends MethodExpr{
 			Type type = Type.getType(c);
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			gen.invokeStatic(type, m);
-			if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
-				HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			//if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
+			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
 			}
 		else
 			{
