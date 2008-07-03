@@ -1158,6 +1158,11 @@ not-every? (comp not every?))
       (recur (dec n) (rest coll))
       coll))
 
+(defn drop-last
+  "Return a lazy seq of all but the last n (default 1) items in coll"
+  ([s] (drop-last 1 s))
+  ([n s] (map (fn [x _] x) (seq s) (drop n s))))
+
 (defn drop-while
   "Returns a lazy seq of the items in coll starting from the first
   item for which (pred item) returns nil."
