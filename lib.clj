@@ -192,21 +192,13 @@
               (load-lib sym in ns)
               @*libs*))))
 
-(defn- eval-option
-  "Evaluates an option which may be a symbol representing a var
-  or a literal (including nil)"
-  [option]
-  (if (symbol? option)
-    (deref (resolve option))
-    option))
-
 (defn- load-with-options
   "Load a lib with options expressed as sequential keywords and
   values"
   [sym & options]
   (let [opts (apply hash-map options)
-        in (eval-option (:in opts))
-        ns (eval-option (:ns opts))
+        in (eval (:in opts))
+        ns (eval (:ns opts))
         reload (:reload opts)
         reload-all (:reload-all opts)
         require (:require opts)
