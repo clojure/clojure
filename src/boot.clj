@@ -354,7 +354,9 @@
     (spread (cons item more)))
 
 (defmacro delay
-  {:private true}
+  "Takes a body of expressions and yields a function than will invoke
+  the body only the first time it is called, and will cache the result
+  and return it on all calls"
   [& body] 
     (list 'new 'clojure.lang.Delay (list* `fn [] body)))
 

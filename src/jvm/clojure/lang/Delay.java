@@ -12,27 +12,24 @@
 
 package clojure.lang;
 
-public class Delay extends AFn{
-public volatile Object val;
+public class Delay extends AFn implements IRef{
+Object val;
 IFn fn;
-
 
 public Delay(IFn fn){
 	this.fn = fn;
-	this.val = this;
+	this.val = null;
 }
 
 public Object invoke() throws Exception{
-	if(val == this)
+	return get();
+}
+
+synchronized public Object get() throws Exception{
+	if(fn != null)
 		{
-		synchronized(this)
-			{
-			if(val == this)
-				{
-				val = fn.invoke();
-				fn = null;
-				}
-			}
+		val = fn.invoke();
+		fn = null;
 		}
 	return val;
 }
