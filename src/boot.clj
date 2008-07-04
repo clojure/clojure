@@ -1158,7 +1158,7 @@ not-every? (comp not every?))
   [n coll]
     (if (and (pos? n) (seq coll))
       (recur (dec n) (rest coll))
-      coll))
+      (seq coll)))
 
 (defn drop-last
   "Return a lazy seq of all but the last n (default 1) items in coll"
@@ -1171,7 +1171,7 @@ not-every? (comp not every?))
   [pred coll]
     (if (and (seq coll) (pred (first coll)))
       (recur pred (rest coll))
-      coll))
+      (seq coll)))
 
 (defn cycle
   "Returns a lazy (infinite!) seq of repetitions of the items in
