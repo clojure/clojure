@@ -159,6 +159,13 @@
      [root system]
      [root runtime system])))
 
+(defn- throw-if
+  "Throws an exception with a message if pred is true. Args
+  after pred will be passed along to str to form the message."
+  [pred & args]
+  (when pred
+    (throw (Exception.(apply str args)))))
+
 (def find-resource)                     ; forward declaration
 (def load-resource)                     ; forward declaration
 
@@ -169,14 +176,12 @@
   (let [res (str sym ".clj")
         rel-path (if in (str in \/ res) res)
         url (find-resource rel-path)]
-    (when-not url
-      (throw (Exception.
-              (str "resource '" rel-path "' not found"))))
+    (throw-if (not url)
+              "resource '" rel-path "' not found in classpath")
     (load-resource url)
-    (when (and ns (not (find-ns ns)))
-      (throw (Exception.
-              (str "namespace '" ns "' not found after "
-                   "loading resource '" rel-path "'")))))
+    (throw-if (and ns (not (find-ns ns)))
+              "namespace '" ns "' not found after loading "
+              "resource '" rel-path "'"))
   (dosync
    (commute *libs* conj sym))
   (when *verbose*
@@ -240,10 +245,8 @@
              (instance? URL abs-path) abs-path
              (instance? URI abs-path) (.toURL abs-path)
              (string? abs-path) (URL. abs-path))]
-    (when-not url
-      (throw
-       (Exception.
-        (str "Cannot coerce " (class abs-path) " to java.net.URL"))))
+    (throw-if (not url)
+              "Cannot coerce " (class abs-path) " to " URL)
     (with-open reader
         (BufferedReader.
          (InputStreamReader.
