@@ -16,7 +16,7 @@
 (clojure/in-ns 'string)
 (clojure/refer 'clojure)
 
-;; until Clojure upports "..." arguments, calling String/format directly
+;; until Clojure supports "..." arguments, calling String/format directly
 ;; is just ugly enough, and could be commonly used enough to warrant a
 ;; Clojure wrapper.
 ;;
