@@ -160,10 +160,10 @@
      [root runtime system])))
 
 (defn- throw-if
-  "Throws an exception with a message if pred is true. Args
-  after pred will be passed along to str to form the message."
-  [pred & args]
-  (if pred (throw (Exception.(apply str args)))))
+  "Throws an exception with a message if pred is true. See
+  java.util.Formatter for format string syntax."
+  [pred fmt & args]
+  (if pred (throw (Exception. (String/format fmt (to-array args))))))
 
 (def find-resource)                     ; forward declaration
 (def load-resource)                     ; forward declaration
@@ -175,10 +175,11 @@
   (let [res (str sym ".clj")
         rel-path (if in (str in \/ res) res)
         url (find-resource rel-path)]
-    (throw-if (not url) "resource '" rel-path "' not found in classpath")
+    (throw-if (not url) "resource '%s' not found in classpath" rel-path)
     (load-resource url)
-    (throw-if (and ns (not (find-ns ns))) "namespace '" ns "' not found"
-              " after loading resource '" rel-path "'"))
+    (throw-if (and ns (not (find-ns ns)))
+              "namespace '%s' not found after loading resource '%s'"
+              ns rel-path))
   (dosync
    (commute *libs* conj sym))
   (when *verbose*
@@ -242,7 +243,7 @@
              (instance? URL abs-path) abs-path
              (instance? URI abs-path) (.toURL abs-path)
              (string? abs-path) (URL. abs-path))]
-    (throw-if (not url) "Cannot coerce " (class abs-path) " to " URL)
+    (throw-if (not url) "Cannot coerce %s to %s" (class abs-path) URL)
     (with-open reader
         (BufferedReader.
          (InputStreamReader.
