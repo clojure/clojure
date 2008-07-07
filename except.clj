@@ -24,15 +24,15 @@
   corresponding to format specifiers in format."
   [pred & args]
   (if pred
-	(let [[arg0 arg1 & more] args
+    (let [[arg0 arg1 & more] args
           [class fmt fmt-args] (if (instance? Class arg0)
                                  [arg0 arg1 more]
                                  [Exception arg0 (cons arg1 more)])
-		  ctor (.getConstructor (identity class) (into-array [String]))
-		  message (apply format fmt fmt-args)
+          ctor (.getConstructor (identity class) (into-array [String]))
+          message (apply format fmt fmt-args)
           exception (.newInstance ctor (into-array [message]))
           raw-trace (.getStackTrace exception)
           boring? #(not= (.getMethodName %) "doInvoke")
           trace (drop 2 (drop-while boring? raw-trace))]
       (.setStackTrace exception (into-array trace))
-	  (throw exception))))
+      (throw exception))))
