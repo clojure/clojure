@@ -3,6 +3,8 @@
 ;; by Stuart Sierra, http://stuartsierra.com/
 ;; June 5, 2008
 
+;; Thanks to Chas Emerick for contributions.
+
 ;; Copyright (c) 2008 Stuart Sierra. All rights reserved.  The use and
 ;; distribution terms for this software are covered by the Common
 ;; Public License 1.0 (http://www.opensource.org/licenses/cpl1.0.php)
@@ -127,7 +129,8 @@
                                  (.getMessage e)))))
    (catch java.lang.Exception e
      (count-exception)
-     (. *test-out* (println (str "EXCEPTION in " name ": " e))))))
+     (. *test-out* (println (str "EXCEPTION in " name ":")))
+     (.printStackTrace e *test-out*))))
 
 (defn- test-var
   "Finds and calls the fn in a var's :test metadata."
