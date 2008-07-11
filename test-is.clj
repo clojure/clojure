@@ -32,21 +32,21 @@
 ;;     (deftest test-new-fn
 ;;       (is (= (new-fn) "Awesome")))
 ;;
-;; Run tests with (test-ns) or (test-all). As in any language with
-;; macros, you may need to recompile functions after changing a macro
-;; definition.
+;; Run tests with (run-tests). As in any language with macros, you may
+;; need to recompile functions after changing a macro definition.
 
 
 
 (clojure/in-ns 'test-is)
 (clojure/refer 'clojure)
 
-;;; PRIVATE
-
 (def
  #^{:doc "PrintWriter to which test results are printed; defaults to
  System.err."}
  *test-out* (. System err))
+
+
+;;; PRIVATE
 
 (defmacro #^{:private true} defcounter [ref-name fn-name]
   `(do (def ~(with-meta ref-name {:private true}) nil)
@@ -106,16 +106,20 @@
   `(do (count-assertion)
        (failure ~message nil)))
 
-(defmacro #^{:private true} with-test-counters [& body]
+(defmacro #^{:private true} with-test-counters
+  "Creates dynamic bindings for counting the number of tests,
+  assertions, failures, and exceptions.  Returns the results in a
+  map."
+  [& body]
   `(binding [*tests* (ref 0)
              *assertions* (ref 0)
              *failures* (ref 0)
              *exceptions* (ref 0)]
      ~@body
-     (. *test-out* (println (str "\nRan " @*tests* " tests with "
-                                  @*assertions* " assertions.\n"
-                                  @*failures* " failures, "
-                                  @*exceptions* " exceptions.")))))
+     {:tests @*tests*
+      :assertions @*assertions*
+      :failures @*failures*
+      :exceptions @*exceptions*}))
 
 (defn- run-test-fn
   "Calls the function; reports errors/exceptions."
@@ -164,17 +168,42 @@
       (seq? form) (assert-expr form message)
       :else (assert-true form message))))
 
+(defn print-results
+  "Prints a summary of the results from test-ns to *test-out*."
+  [r]
+  (. *test-out*
+     (println (str "\nRan " (:tests r) " tests "
+                   (:assertions r) " assertions.\n"
+                   (:failures r) " failures, "
+                   (:exceptions r) " exceptions.")))  )
+
 (defn test-ns
   "Runs tests on all interned symbols in the namespaces 
-  (symbols or namespace objects) and reports results."
+  (symbols or namespace objects).
+
+  Returns a map with the following keys:
+    :tests      => number of tests run
+    :assertions => number of assertions checked
+    :failures   => number of failed assertions
+    :exceptions => number of exceptions raised
+  
+  If no namespace is given, uses *ns*."
   ([] (test-ns *ns*))
   ([& namespaces]
      (with-test-counters (dorun (map test-interns namespaces)))))
 
-(defn test-all
-  "Runs all tests in all namespaces."
+(defn run-tests
+  "Runs tests in the given namespaces and prints a summary of
+  results.
+
+  If no namespace is given, uses *ns*."
+  [& namespaces]
+  (print-results (apply test-ns namespaces)))
+
+(defn run-all-tests
+  "Runs tests in all namespaces and prints a summary of results."
   []
-  (apply test-ns (all-ns)))
+  (apply run-tests (all-ns)))
 
 (defmacro deftest
   "Defs an unbound Var with body in its :test fn."
