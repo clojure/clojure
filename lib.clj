@@ -179,18 +179,20 @@
         filter-opts (select-keys opts *filter-keys*)]
     (binding [*verbose* (or *verbose* verbose)]
       (when load
+        (when *verbose*
+          (printf "(lib/load-resource \"%s\")\n" url)
+          (flush))
         (throw-if (not url) "'%s' not found in classpath" path)
-        (load sym url namespace)
-        (when *verbose*
-          (printf "(lib/load-resource \"%s\")\n" url)))
+        (load sym url namespace))
       (when namespace
-        (apply refer namespace (mapcat seq filter-opts))
         (when *verbose*
+          (printf "(clojure/in-ns '%s)\n" (ns-name *ns*))
           (printf "(clojure/refer '%s" namespace)
           (dorun (map
                   #(printf " %s '%s" (key %) (print-str (val %)))
                   filter-opts))
-          (printf ")\n"))))))
+          (printf ")\n"))
+        (apply refer namespace (mapcat seq filter-opts))))))
 
 ;; Resources
 
