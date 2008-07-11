@@ -44,8 +44,8 @@
 ;;
 ;;  Examples
 ;;
-;;    (load-libs :require 'sql '(test :in "private/resources"))
-;;    (require sql (test :in "private/resources"))
+;;    (load-libs :require 'sql '(sql-test :in "private/unit-tests"))
+;;    (require sql (sql-test :in "private/unit-tests"))
 ;;
 ;;    (load-libs :require :use 'sql 'ns-utils :verbose)
 ;;    (use sql ns-utils :verbose)
