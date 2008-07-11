@@ -173,8 +173,7 @@
                    (or reload (not require) (not loaded))
                    load-one)
         namespace (when use (or ns sym))
-        res (str sym ".clj")
-        path (if in (str in \/ res) res)
+        path (str (if in (str in \/)) sym ".clj")
         url (find-resource path)
         filter-opts (select-keys opts *filter-keys*)]
     (binding [*verbose* (or *verbose* verbose)]
