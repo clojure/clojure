@@ -94,7 +94,7 @@
                     (. gen (endMethod))))]
             
                                         ;start class definition
-            (. cv (visit (. Opcodes V1_5) (. Opcodes ACC_PUBLIC) 
+            (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
                          cname nil (iname super) 
                          (into-array (map iname (cons IProxy interfaces)))))
                                         ;add field for fn mappings
@@ -157,7 +157,8 @@
                                      (if (or (considered mk)
                                              (. Modifier (isPrivate mods)) 
                                              (. Modifier (isStatic mods))
-                                             (. Modifier (isFinal mods)))
+                                             (. Modifier (isFinal mods))
+                                             (= "finalize" (.getName meth)))
                                        (recur mm (conj considered mk) (rest meths))
                                        (recur (assoc mm mk meth) (conj considered mk) (rest meths))))
                                    [mm considered]))]

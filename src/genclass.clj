@@ -28,13 +28,14 @@
                           (seq (. c (getDeclaredMethods)))
                           (seq (. c (getMethods))))]
               (if meths
-                (let [#^Method meth (first meths)
+                (let [#^java.lang.reflect.Method meth (first meths)
                       mods (. meth (getModifiers))
                       mk (method-sig meth)]
                   (if (or (considered mk)
                           (. Modifier (isPrivate mods))
                           (. Modifier (isStatic mods))
-                          (. Modifier (isFinal mods)))
+                          (. Modifier (isFinal mods))
+                          (= "finalize" (.getName meth)))
                     (recur mm (conj considered mk) (rest meths))
                     (recur (assoc mm mk meth) (conj considered mk) (rest meths))))
                 [mm considered]))]
@@ -246,7 +247,7 @@
             (. gen (endMethod))))
         ]
                                         ;start class definition
-    (. cv (visit (. Opcodes V1_5) (. Opcodes ACC_PUBLIC)
+    (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
                  cname nil (iname super)
                  (when interfaces
                    (into-array (map iname interfaces)))))
