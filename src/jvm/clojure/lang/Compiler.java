@@ -1631,11 +1631,13 @@ static class TryExpr implements Expr{
 			//put in clause local
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), clause.lb.idx);
 			clause.handler.emit(context, fn, gen);
+			if(context != C.STATEMENT)
+				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), retLocal);
 			gen.mark(clause.endLabel);
 
 			if(finallyExpr != null)
 				finallyExpr.emit(C.STATEMENT, fn, gen);
-			gen.goTo(end);
+			gen.goTo(ret);
 			}
 		gen.mark(endTryCatch);
 		if(finallyExpr != null)
