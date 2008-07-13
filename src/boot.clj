@@ -34,13 +34,6 @@
  fn (fn* fn [& decl] (cons 'fn* decl)))
 
 (def
- #^{:arglists '([coll x])
-    :doc "conj[oin]. Returns a new collection with the x
-    'added'. (conj nil item) returns (item).  The 'addition' may
-    happen at different 'places' depending on the concrete type."}
- conj (fn conj [coll x] (. clojure.lang.RT (conj coll x))))
-
-(def
  #^{:arglists '([coll])
     :doc "Returns the first item in the collection. Calls seq on its
     argument. If coll is nil, returns nil."}
@@ -51,6 +44,18 @@
     :doc "Returns a seq of the items after the first. Calls seq on its
   argument.  If there are no more items, returns nil."}  
  rest (fn rest [x] (. clojure.lang.RT (rest x))))
+
+(def
+ #^{:arglists '([coll x] [coll x & xs])
+    :doc "conj[oin]. Returns a new collection with the xs
+    'added'. (conj nil item) returns (item).  The 'addition' may
+    happen at different 'places' depending on the concrete type."}
+ conj (fn conj 
+        ([coll x] (. clojure.lang.RT (conj coll x)))
+        ([coll x & xs]
+         (if xs
+           (recur (conj coll x) (first xs) (rest xs))
+           (conj coll x)))))
 
 (def
  #^{:doc "Same as (first (rest x))"
@@ -2109,8 +2114,8 @@ not-every? (comp not every?))
               gs (map (fn [b] (if (symbol? b) b (gensym))) bs)
               bfs (reduce (fn [ret [b v g]]
                             (if (symbol? b)
-                              (-> ret (conj g) (conj v))
-                              (-> ret (conj g) (conj v) (conj b) (conj g))))
+                              (conj ret g v)
+                              (conj ret g v b g)))
                           [] (map vector bs vs gs))]
           `(let ~bfs
              (loop* ~(vec (interleave gs gs))
