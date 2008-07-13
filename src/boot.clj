@@ -209,12 +209,22 @@
   "Throws a ClassCastException if x is not a c, else returns x."
   [#^Class c x] 
   (. c (cast x)))
+
+(defn to-array
+  "Returns an array of Objects containing the contents of coll, which
+  can be any Collection.  Maps to java.util.Collection.toArray()."
+  [coll] (. clojure.lang.RT (toArray coll)))
  
 (defn vector
   "Creates a new vector containing the args."
   ([] [])
   ([& args]
    (. clojure.lang.LazilyPersistentVector (create args))))
+
+(defn vec
+  "Creates a new vector containing the contents of coll."
+  ([coll]
+   (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll)))))
 
 (defn hash-map
   "keyval => key val
@@ -1676,11 +1686,6 @@ not-every? (comp not every?))
        (aset-int dimarray i (nth dims i)))
      (. Array (newInstance type dimarray)))))
 
-(defn to-array
-  "Returns an array of Objects containing the contents of coll, which
-  can be any Collection.  Maps to java.util.Collection.toArray()."
-  [coll] (. clojure.lang.RT (toArray coll)))
-
 (defn to-array-2d
   "Returns a (potentially-ragged) 2-dimensional array of Objects
   containing the contents of coll, which can be any Collection of any
@@ -2053,40 +2058,6 @@ not-every? (comp not every?))
   [bindings & body]
   `(let* ~(destructure bindings) ~@body))
 
-(defmacro loop
-  "Evaluates the exprs in a lexical context in which the symbols in
-  the binding-forms are bound to their respective init-exprs or parts
-  therein. Acts as a recur target."
-  [bindings & body]
-    (let [db (destructure bindings)]
-      (if (= db bindings)
-        `(loop* ~bindings ~@body)
-        (let [vs (take-nth 2 (drop 1 bindings))
-              gs (map (fn [x] (gensym)) vs)
-              ds (take-nth 2 bindings)]
-          `(loop* ~(apply vector (interleave gs vs))
-              (let ~(apply vector (interleave ds gs))
-                ~@body))))))
-  
-(defmacro when-first
-  "Same as (when (seq xs) (let [x (first xs)] body))"
-  [x xs & body]
-  `(when (seq ~xs)
-     (let [~x (first ~xs)]
-       ~@body)))
-
-(defmacro lazy-cat
-  "Expands to code which yields a lazy sequence of the concatenation
-  of the supplied colls.  Each coll expr is not evaluated until it is
-  needed."
-  ([coll] `(seq ~coll))
-  ([coll & colls]
-   `(let [iter# (fn iter# [coll#]
-		    (if (seq coll#)
-		      (lazy-cons (first coll#) (iter# (rest coll#)))
-		      (lazy-cat ~@colls)))]
-      (iter# ~coll))))
-      
 ;redefine fn with destructuring
 (defmacro fn
   "(fn name? [params* ] exprs*)
@@ -2124,6 +2095,48 @@ not-every? (comp not every?))
           (list* 'fn* name new-sigs)
           (cons 'fn* new-sigs))
         *macro-meta*)))
+
+(defmacro loop
+  "Evaluates the exprs in a lexical context in which the symbols in
+  the binding-forms are bound to their respective init-exprs or parts
+  therein. Acts as a recur target."
+  [bindings & body]
+    (let [db (destructure bindings)]
+      (if (= db bindings)
+        `(loop* ~bindings ~@body)
+        (let [vs (take-nth 2 (drop 1 bindings))
+              bs (take-nth 2 bindings)
+              gs (map (fn [b] (if (symbol? b) b (gensym))) bs)
+              bfs (reduce (fn [ret [b v g]]
+                            (if (symbol? b)
+                              (-> ret (conj g) (conj v))
+                              (-> ret (conj g) (conj v) (conj b) (conj g))))
+                          [] (map vector bs vs gs))]
+          `(let ~bfs
+             (loop* ~(vec (interleave gs gs))
+               (let ~(vec (interleave bs gs))
+                 ~@body)))))))
+  
+(defmacro when-first
+  "Same as (when (seq xs) (let [x (first xs)] body))"
+  [x xs & body]
+  `(when (seq ~xs)
+     (let [~x (first ~xs)]
+       ~@body)))
+
+(defmacro lazy-cat
+  "Expands to code which yields a lazy sequence of the concatenation
+  of the supplied colls.  Each coll expr is not evaluated until it is
+  needed."
+  ([coll] `(seq ~coll))
+  ([coll & colls]
+   `(let [iter# (fn iter# [coll#]
+		    (if (seq coll#)
+		      (lazy-cons (first coll#) (iter# (rest coll#)))
+		      (lazy-cat ~@colls)))]
+      (iter# ~coll))))
+      
+
 
 (defmacro for
  "List comprehension. Takes a vector of one or more
@@ -2502,10 +2515,7 @@ not-every? (comp not every?))
   "Adds the url (String or URL object) to the classpath per URLClassLoader.addURL"
   [url] (. clojure.lang.RT addURL url))
 
-(defn vec
-  "Creates a new vector containing the contents of coll."
-  ([coll]
-   (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll)))))
+
 
 (defn hash
   "Returns the hash code of its argument"
