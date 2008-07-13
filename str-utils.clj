@@ -41,7 +41,4 @@
   "Returns a string of all elements in 'sequence', separated by
   'separator'.  Like Perl's 'join'."
   [separator sequence]
-  (reduce (fn
-	   ([] (str))  ; in case sequence is empty
-	   ([total next] (str total separator next)))
-	  (seq sequence)))
+  (apply str (interpose separator sequence)))
