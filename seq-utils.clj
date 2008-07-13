@@ -27,7 +27,8 @@
 
 (defn batch
   "Returns a sequence of sequences, each containing 'size' elements
-  from s."
+  from s.  DEPRECATED in favor of clojure/partition, added to boot.clj
+  in r865."
   [size s]
   (when s
     (lazy-cons (take size s) (batch size (drop size s)))))
