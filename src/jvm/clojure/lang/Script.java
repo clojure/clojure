@@ -20,29 +20,24 @@ import java.util.Arrays;
 public class Script{
 public static void main(String[] args) throws Exception{
 
-//	RT.init();
-
 	for(String file : RT.processCommandLine(args))
 		try
 			{
 			Compiler.loadFile(file);
 			}
-		catch(Exception e)
+		finally
 			{
-			e.printStackTrace();
+			OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();
+			try
+				{
+				w.flush();
+				w.close();
+				}
+			catch(IOException e)
+				{
+				e.printStackTrace();
+				}
 			}
-	OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();
-	try
-		{
-		w.flush();
-		w.close();
-		}
-	catch(IOException e)
-		{
-		e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-		}
-
-	//System.exit(0);
 }
 }
 
