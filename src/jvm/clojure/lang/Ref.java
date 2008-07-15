@@ -158,7 +158,7 @@ void trimHistory(){
 
 
 final public IFn fn(){
-	return (IFn) currentVal();
+	return (IFn) get();
 }
 
 public Object call() throws Exception{
