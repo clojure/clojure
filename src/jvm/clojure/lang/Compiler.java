@@ -3618,37 +3618,48 @@ private static Expr analyze(C context, Object form) throws Exception{
 
 private static Expr analyze(C context, Object form, String name) throws Exception{
 	//todo symbol macro expansion?
-	if(form == null)
-		return NIL_EXPR;
-	else if(form == Boolean.TRUE)
-		return TRUE_EXPR;
-	else if(form == Boolean.FALSE)
-		return FALSE_EXPR;
-	Class fclass = form.getClass();
-	if(fclass == Symbol.class)
-		return analyzeSymbol((Symbol) form);
-	else if(fclass == Keyword.class)
-		return registerKeyword((Keyword) form);
+	try
+		{
+		if(form == null)
+			return NIL_EXPR;
+		else if(form == Boolean.TRUE)
+			return TRUE_EXPR;
+		else if(form == Boolean.FALSE)
+			return FALSE_EXPR;
+		Class fclass = form.getClass();
+		if(fclass == Symbol.class)
+			return analyzeSymbol((Symbol) form);
+		else if(fclass == Keyword.class)
+			return registerKeyword((Keyword) form);
 //	else if(form instanceof Num)
 //		return new NumExpr((Num) form);
-	else if(fclass == String.class)
-		return new StringExpr(((String) form).intern());
+		else if(fclass == String.class)
+			return new StringExpr(((String) form).intern());
 //	else if(fclass == Character.class)
 //		return new CharExpr((Character) form);
-	else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
-		return new EmptyExpr(form);
-	else if(form instanceof ISeq)
-		return analyzeSeq(context, (ISeq) form, name);
-	else if(form instanceof IPersistentVector)
-		return VectorExpr.parse(context, (IPersistentVector) form);
-	else if(form instanceof IPersistentMap)
-		return MapExpr.parse(context, (IPersistentMap) form);
-	else if(form instanceof IPersistentSet)
-		return SetExpr.parse(context, (IPersistentSet) form);
+		else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
+			return new EmptyExpr(form);
+		else if(form instanceof ISeq)
+			return analyzeSeq(context, (ISeq) form, name);
+		else if(form instanceof IPersistentVector)
+			return VectorExpr.parse(context, (IPersistentVector) form);
+		else if(form instanceof IPersistentMap)
+			return MapExpr.parse(context, (IPersistentMap) form);
+		else if(form instanceof IPersistentSet)
+			return SetExpr.parse(context, (IPersistentSet) form);
 
 //	else
-	//throw new UnsupportedOperationException();
-	return new ConstantExpr(form);
+		//throw new UnsupportedOperationException();
+		return new ConstantExpr(form);
+		}
+	catch(Throwable e)
+		{
+		if(!(e instanceof CompilerException))
+			throw new CompilerException(String.format("%s:%d: %s", SOURCE.get(), (Integer) LINE.get(), e.getMessage()),
+			                            e);
+		else
+			throw (CompilerException) e;
+		}
 }
 
 static public class CompilerException extends Exception{
