@@ -1716,7 +1716,7 @@ static class TryExpr implements Expr{
 									"Bad binding form, expected symbol, got: " + RT.third(f));
 						Symbol sym = (Symbol) RT.third(f);
 						if(sym.getNamespace() != null)
-							throw new Exception("Can't bind qualified name");
+							throw new Exception("Can't bind qualified name:" + sym);
 
 						IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
 						                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get(),
@@ -3141,7 +3141,7 @@ static class FnMethod{
 					throw new IllegalArgumentException("fn params must be Symbols");
 				Symbol p = (Symbol) parms.nth(i);
 				if(p.getNamespace() != null)
-					throw new Exception("Can't use qualified name as parameter");
+					throw new Exception("Can't use qualified name as parameter: " + p);
 				if(p.equals(_AMP_))
 					{
 					if(state == PSTATE.REQ)
@@ -3428,7 +3428,7 @@ static class LetExpr implements Expr{
 								"Bad binding form, expected symbol, got: " + bindings.nth(i));
 					Symbol sym = (Symbol) bindings.nth(i);
 					if(sym.getNamespace() != null)
-						throw new Exception("Can't let qualified name");
+						throw new Exception("Can't let qualified name: " + sym);
 					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 					//sequential enhancement of env (like Lisp let*)
 					LocalBinding lb = registerLocal(sym, tagOf(sym), init);
