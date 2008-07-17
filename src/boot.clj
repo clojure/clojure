@@ -1016,6 +1016,8 @@
 
   (apply fun in-transaction-value-of-ref args)
 
+  and returns the in-transaction-value of ref.
+
   At the commit point of the transaction, sets the value of ref to be:
 
   (apply fun most-recently-committed-value-of-ref args)
@@ -1031,7 +1033,9 @@
   "Must be called in a transaction. Sets the in-transaction-value of
   ref to:
 
-  (apply fun in-transaction-value-of-ref args)"
+  (apply fun in-transaction-value-of-ref args)
+
+  and returns the in-transaction-value of ref."
   [#^clojure.lang.Ref ref fun & args]
     (. ref (alter fun args)))
 
