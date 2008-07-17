@@ -3816,8 +3816,17 @@ public static Object eval(Object form) throws Exception{
 		}
 	try
 		{
-		Expr expr = analyze(C.EVAL, form);
-		return expr.eval();
+		if(form instanceof IPersistentCollection)
+			{
+			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "repl");
+			IFn fn = (IFn) fexpr.eval();
+			return fn.invoke();
+			}
+		else
+			{
+			Expr expr = analyze(C.EVAL, form);
+			return expr.eval();
+			}
 		}
 	finally
 		{
