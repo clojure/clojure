@@ -21,9 +21,18 @@ import java.util.Arrays;
 public class Reflector{
 
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) throws Exception{
-	Class c = target.getClass();
-	List methods = getMethods(c, args.length, methodName, false);
-	return invokeMatchingMethod(methodName, methods, target, args);
+	try
+		{
+		Class c = target.getClass();
+		List methods = getMethods(c, args.length, methodName, false);
+		return invokeMatchingMethod(methodName, methods, target, args);
+		}
+	catch(InvocationTargetException e)
+		{
+		if(e.getCause() instanceof Exception)
+			throw (Exception) e.getCause();
+		throw e;
+		}
 }
 
 static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
@@ -49,7 +58,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 			Class[] params = m.getParameterTypes();
 			if(isCongruent(params, args))
 				{
-				if(foundm == null || Compiler.subsumes(params,foundm.getParameterTypes()))
+				if(foundm == null || Compiler.subsumes(params, foundm.getParameterTypes()))
 					{
 					foundm = m;
 					boxedArgs = boxArgs(params, args);
@@ -99,36 +108,45 @@ public static Method getAsMethodOfPublicBase(Class c, Method m){
 }
 
 public static Object invokeConstructor(Class c, Object[] args) throws Exception{
-	Constructor[] allctors = c.getConstructors();
-	ArrayList ctors = new ArrayList();
-	for(int i = 0; i < allctors.length; i++)
+	try
 		{
-		Constructor ctor = allctors[i];
-		if(ctor.getParameterTypes().length == args.length)
-			ctors.add(ctor);
-		}
-	if(ctors.isEmpty())
-		{
-		throw new IllegalArgumentException("No matching ctor found");
-		}
-	else if(ctors.size() == 1)
-		{
-		Constructor ctor = (Constructor) ctors.get(0);
-		return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
-		}
-	else //overloaded w/same arity
-		{
-		for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
+		Constructor[] allctors = c.getConstructors();
+		ArrayList ctors = new ArrayList();
+		for(int i = 0; i < allctors.length; i++)
 			{
-			Constructor ctor = (Constructor) iterator.next();
-			Class[] params = ctor.getParameterTypes();
-			if(isCongruent(params, args))
-				{
-				Object[] boxedArgs = boxArgs(params, args);
-				return ctor.newInstance(boxedArgs);
-				}
+			Constructor ctor = allctors[i];
+			if(ctor.getParameterTypes().length == args.length)
+				ctors.add(ctor);
 			}
-		throw new IllegalArgumentException("No matching ctor found");
+		if(ctors.isEmpty())
+			{
+			throw new IllegalArgumentException("No matching ctor found");
+			}
+		else if(ctors.size() == 1)
+			{
+			Constructor ctor = (Constructor) ctors.get(0);
+			return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
+			}
+		else //overloaded w/same arity
+			{
+			for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
+				{
+				Constructor ctor = (Constructor) iterator.next();
+				Class[] params = ctor.getParameterTypes();
+				if(isCongruent(params, args))
+					{
+					Object[] boxedArgs = boxArgs(params, args);
+					return ctor.newInstance(boxedArgs);
+					}
+				}
+			throw new IllegalArgumentException("No matching ctor found");
+			}
+		}
+	catch(InvocationTargetException e)
+		{
+		if(e.getCause() instanceof Exception)
+			throw (Exception) e.getCause();
+		throw e;
 		}
 }
 
@@ -139,7 +157,16 @@ public static Object invokeStaticMethodVariadic(String className, String methodN
 
 public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception{
 	Class c = RT.classForName(className);
-	return invokeStaticMethod(c, methodName, args);
+	try
+		{
+		return invokeStaticMethod(c, methodName, args);
+		}
+	catch(InvocationTargetException e)
+		{
+		if(e.getCause() instanceof Exception)
+			throw (Exception) e.getCause();
+		throw e;
+		}
 }
 
 public static Object invokeStaticMethod(Class c, String methodName, Object[] args) throws Exception{
@@ -164,6 +191,7 @@ public static Object getStaticField(Class c, String fieldName) throws Exception{
 		}
 	throw new IllegalArgumentException("No matching field found: " + fieldName);
 }
+
 public static Object setStaticField(String className, String fieldName, Object val) throws Exception{
 	Class c = RT.classForName(className);
 	return setStaticField(c, fieldName, val);
@@ -202,7 +230,7 @@ public static Object setInstanceField(Object target, String fieldName, Object va
 
 public static Object invokeNoArgInstanceMember(Object target, String name) throws Exception{
 	//favor method over field
-	List meths = getMethods(target.getClass(),0,name,false);
+	List meths = getMethods(target.getClass(), 0, name, false);
 	if(meths.size() > 0)
 		return invokeMatchingMethod(name, meths, target, RT.EMPTY_ARRAY);
 	else
