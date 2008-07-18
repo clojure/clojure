@@ -212,6 +212,7 @@ pvec.
 
 
 (comment
+(load-file "src/parallel.clj")
 (refer 'parallel)
 (pdistinct [1 2 3 2 1])
 ;(pcumulate [1 2 3 2 1] + 0) ;broken, not exposed
