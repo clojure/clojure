@@ -20,24 +20,24 @@ import java.util.Arrays;
 public class Script{
 public static void main(String[] args) throws Exception{
 
-	for(String file : RT.processCommandLine(args))
+	try
+		{
+		for(String file : RT.processCommandLine(args))
+			Compiler.loadFile(file);
+		}
+	finally
+		{
+		OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();
 		try
 			{
-			Compiler.loadFile(file);
+			w.flush();
+			w.close();
 			}
-		finally
+		catch(IOException e)
 			{
-			OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();
-			try
-				{
-				w.flush();
-				w.close();
-				}
-			catch(IOException e)
-				{
-				e.printStackTrace();
-				}
+			e.printStackTrace();
 			}
+		}
 }
 }
 
