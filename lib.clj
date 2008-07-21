@@ -69,6 +69,8 @@
 (clojure/in-ns 'lib)
 (clojure/refer 'clojure)
 
+(alias 'set 'clojure.set)
+
 (import '(clojure.lang RT))
 (import '(java.io BufferedReader InputStreamReader))
 (import '(java.net URI URL))
