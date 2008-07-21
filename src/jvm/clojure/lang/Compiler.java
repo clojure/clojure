@@ -2286,7 +2286,7 @@ static class IfExpr implements Expr{
 
 static final public IPersistentMap CHAR_MAP =
 		PersistentHashMap.create('-', "_",
-		                         '.', "_DOT_",
+//		                         '.', "_DOT_",
 		                         ':', "_COLON_",
 		                         '+', "_PLUS_",
 		                         '>', "_GT_",
@@ -2683,7 +2683,8 @@ static public class FnExpr implements Expr{
 		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
-		                  : "clojure.fns." + (munge(currentNS().name.name) + ".");
+		                  : //"clojure.fns." + 
+		                    (munge(currentNS().name.name) + ".");
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
 		fn.simpleName = ((name != null ?
@@ -3827,9 +3828,11 @@ public static Object eval(Object form) throws Exception{
 		}
 	try
 		{
-		if(form instanceof IPersistentCollection)
+		if(form instanceof IPersistentCollection
+		    && !(RT.first(form) instanceof Symbol
+				&& ((Symbol)RT.first(form)).name.startsWith("def")))
 			{
-			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "repl");
+			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
 			IFn fn = (IFn) fexpr.eval();
 			return fn.invoke();
 			}

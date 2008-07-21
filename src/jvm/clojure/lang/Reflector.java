@@ -36,7 +36,7 @@ public static Object invokeInstanceMethod(Object target, String methodName, Obje
 }
 
 static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
-		throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
+		throws Exception{
 	Method m = null;
 	Object[] boxedArgs = null;
 	if(methods.isEmpty())
@@ -77,7 +77,16 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		}
 	if(m == null)
 		throw new IllegalArgumentException("No matching method found: " + methodName);
+	try{
 	return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
+	}
+	catch(InvocationTargetException e)
+		{
+		if(e.getCause() instanceof Exception)
+			throw (Exception) e.getCause();
+		throw e;
+		}
+
 }
 
 public static Method getAsMethodOfPublicBase(Class c, Method m){

@@ -289,11 +289,12 @@ static public void init() throws Exception{
 }
 
 static void doInit() throws Exception{
-	loadResourceScript(RT.class, "boot.clj");
-	loadResourceScript(RT.class, "proxy.clj");
-	loadResourceScript(RT.class, "zip.clj");
-	loadResourceScript(RT.class, "xml.clj");
-	loadResourceScript(RT.class, "set.clj");
+	loadResourceScript(RT.class, "clojure/boot.clj");
+	loadResourceScript(RT.class, "clojure/proxy.clj");
+	loadResourceScript(RT.class, "clojure/genclass.clj");
+	loadResourceScript(RT.class, "clojure/zip/zip.clj");
+	loadResourceScript(RT.class, "clojure/xml/xml.clj");
+	loadResourceScript(RT.class, "clojure/set/set.clj");
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.get(),
