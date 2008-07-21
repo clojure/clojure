@@ -15,19 +15,21 @@ package clojure.lang;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Namespace {
+public class Namespace{
 final public Symbol name;
 final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
+final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();
 
 final static ConcurrentHashMap<Symbol, Namespace> namespaces = new ConcurrentHashMap<Symbol, Namespace>();
 
-public String toString() {
+public String toString(){
 	return "#<Namespace: " + name + ">";
 }
 
 Namespace(Symbol name){
 	this.name = name;
 	mappings.set(RT.DEFAULT_IMPORTS);
+	aliases.set(RT.map());
 }
 
 public static ISeq all(){
@@ -137,4 +139,39 @@ public Var findInternedVar(Symbol symbol){
 	return null;
 }
 
+
+public IPersistentMap getAliases(){
+	return aliases.get();
+}
+
+public Namespace lookupAlias(Symbol alias){
+	IPersistentMap map = getAliases();
+	return (Namespace) map.valAt(alias);
+}
+
+public void addAlias(Symbol alias, Namespace ns){
+	if (alias == null || ns == null)
+		throw new NullPointerException("Expecting Symbol + Namespace");
+	IPersistentMap map = getAliases();
+	while(!map.containsKey(alias))
+		{
+		IPersistentMap newMap = map.assoc(alias, ns);
+		aliases.compareAndSet(map, newMap);
+		map = getAliases();
+		}
+	// you can rebind an alias, but only to the initially-aliased namespace.
+	if(!map.valAt(alias).equals(ns))
+		throw new IllegalStateException("Alias " + alias + " already exists in namespace "
+		                                   + name + ", aliasing " + map.valAt(alias));
+}
+
+public void removeAlias(Symbol alias) throws Exception{
+	IPersistentMap map = getAliases();
+	while(map.containsKey(alias))
+		{
+		IPersistentMap newMap = map.without(alias);
+		aliases.compareAndSet(map, newMap);
+		map = getAliases();
+		}
+}
 }

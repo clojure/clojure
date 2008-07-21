@@ -3748,9 +3748,9 @@ public static Object macroexpand1(Object x) throws Exception{
 					}
 				else if(sym.ns != null)
 					{
-					Symbol target = Symbol.intern(sym.ns);
-					if(Namespace.find(target) == null)
+					if(namespaceFor(sym) == null)
 						{
+						Symbol target = Symbol.intern(sym.ns);
 						Class c = HostExpr.maybeClass(target, false);
 						if(c != null)
 							{
@@ -3884,9 +3884,9 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		}
 	else
 		{
-		Symbol nsSym = Symbol.create(sym.ns);
-		if(Namespace.find(nsSym) == null)
+		if(namespaceFor(sym) == null)
 			{
+			Symbol nsSym = Symbol.create(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
@@ -3916,13 +3916,27 @@ static Object resolve(Symbol sym) throws Exception{
 	return resolveIn(currentNS(), sym);
 }
 
+static private Namespace namespaceFor(Symbol sym) {
+	//note, presumes non-nil sym.ns
+    // first check against currentNS' aliases...
+	Symbol nsSym = Symbol.create(sym.ns);
+    Namespace ns = currentNS().lookupAlias(nsSym);
+    if (ns == null)
+	    {
+		// ...otherwise check the Namespaces map.
+		ns = Namespace.find(nsSym);
+        }
+    return ns;
+}
+
 static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
-		Namespace ns = Namespace.find(Symbol.create(sym.ns));
+		Namespace ns = namespaceFor(sym);
 		if(ns == null)
 			throw new Exception("No such namespace: " + sym.ns);
+
 		Var v = ns.findInternedVar(Symbol.create(sym.name));
 		if(v == null)
 			throw new Exception("No such var: " + sym);
@@ -3943,11 +3957,12 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		}
 }
 
+
 static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
-		Namespace ns = Namespace.find(Symbol.create(sym.ns));
+		Namespace ns = namespaceFor(sym);
 		if(ns == null)
 			return null;
 		Var v = ns.findInternedVar(Symbol.create(sym.name));
@@ -3966,14 +3981,14 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 		}
 }
 
+
 static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	Var var = null;
 
 	//note - ns-qualified vars in other namespaces must already exist
 	if(sym.ns != null)
 		{
-		Symbol nsSym = Symbol.create(sym.ns);
-		Namespace ns = Namespace.find(nsSym);
+		Namespace ns = namespaceFor(sym);
 		if(ns == null)
 			return null;
 		//throw new Exception("No such namespace: " + sym.ns);

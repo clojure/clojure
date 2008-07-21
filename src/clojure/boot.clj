@@ -1934,6 +1934,22 @@ not-every? (comp not every?))
                                  (= ns (. v ns))))
                 (ns-map ns)))
 
+(defn alias
+  "Add an alias in the current namespace to another
+  namespace. Arguments are two symbols: the alias to be used, and
+  the symbolic name of the target namespace."
+  [alias namespace-sym]
+  (.addAlias *ns* alias (find-ns namespace-sym)))
+
+(defn ns-aliases
+  "Returns a map of the aliases for the namespace."
+  [#^clojure.lang.Namespace ns]  (.getAliases ns))
+
+(defn ns-unalias
+  "Removes the alias for the symbol from the namespace."
+  [#^clojure.lang.Namespace ns sym]
+    (. ns (removeAlias sym)))
+
 (defn take-nth
   "Returns a lazy seq of every nth item in coll."
   [n coll]
