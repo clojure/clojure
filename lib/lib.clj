@@ -194,7 +194,7 @@
     (binding [*verbose* (or *verbose* verbose)]
       (when load
         (when *verbose*
-          (printf "(lib/load-resource \"%s\")\n" url)
+          (printf "(clojure-contrib.lib/load-resource \"%s\")\n" url)
           (flush))
         (throw-if (not url) "'%s' not found in classpath" path)
         (load sym url namespace))
