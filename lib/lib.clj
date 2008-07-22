@@ -155,7 +155,7 @@
               (load-one sym url ns)
               @*libs*))))
 
-(defn sym-file
+(defn- sym-file
   "Returns the implementation file path for a libspec sym"
   [sym]
   (let [n (name sym)
