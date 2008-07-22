@@ -1277,7 +1277,7 @@ static BitOps bitOps(Object x){
 			int size = s.count();
 			float[] ret = new float[size];
 			for(int i = 0; i < size && s != null; i++, s = s.rest())
-				ret[i] = ((Number) s.first()).intValue();
+				ret[i] = ((Number) s.first()).floatValue();
 			return ret;
 			}
 	}
@@ -1308,7 +1308,7 @@ static public double[] double_array(Object sizeOrSeq){
 		int size = s.count();
 		double[] ret = new double[size];
 		for(int i = 0; i < size && s != null; i++, s = s.rest())
-			ret[i] = ((Number) s.first()).intValue();
+			ret[i] = ((Number) s.first()).doubleValue();
 		return ret;
 		}
 }
@@ -1370,7 +1370,7 @@ static public long[] long_array(Object sizeOrSeq){
 		int size = s.count();
 		long[] ret = new long[size];
 		for(int i = 0; i < size && s != null; i++, s = s.rest())
-			ret[i] = ((Number) s.first()).intValue();
+			ret[i] = ((Number) s.first()).longValue();
 		return ret;
 		}
 }
