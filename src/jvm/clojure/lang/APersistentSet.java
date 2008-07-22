@@ -14,8 +14,9 @@ package clojure.lang;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 
-public abstract class APersistentSet extends AFn implements IPersistentSet, Collection{
+public abstract class APersistentSet extends AFn implements IPersistentSet, Collection, Set{
 int _hash = -1;
 final IPersistentMap impl;
 

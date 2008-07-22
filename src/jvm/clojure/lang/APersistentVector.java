@@ -12,10 +12,10 @@
 
 package clojure.lang;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
-public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable, Collection{
+public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable, Collection, List,
+                                                               RandomAccess{
 int _hash = -1;
 
 public APersistentVector(IPersistentMap meta){
@@ -84,6 +84,92 @@ public int hashCode(){
 		}
 	return _hash;
 }
+
+public Object get(int index){
+	return nth(index);
+}
+
+public Object remove(int i){
+	throw new UnsupportedOperationException();
+}
+
+public int indexOf(Object o){
+	for(int i=0;i<count();i++)
+		if(Util.equal(nth(i),o))
+			return i;
+	return -1;
+}
+
+public int lastIndexOf(Object o){
+	for(int i=count()-1;i>=0;i--)
+		if(Util.equal(nth(i),o))
+			return i;
+	return -1;
+}
+
+public ListIterator listIterator(){
+	return listIterator(0);
+}
+
+public ListIterator listIterator(final int index){
+	return new ListIterator(){
+		int nexti = index;
+
+		public boolean hasNext(){
+			return nexti < count()-1;
+		}
+
+		public Object next(){
+			return nth(nexti++);
+		}
+
+		public boolean hasPrevious(){
+			return nexti > 0;
+		}
+
+		public Object previous(){
+			return nth(--nexti);
+		}
+
+		public int nextIndex(){
+			return nexti;
+		}
+
+		public int previousIndex(){
+			return nexti - 1;
+		}
+
+		public void remove(){
+			throw new UnsupportedOperationException();
+		}
+
+		public void set(Object o){
+			throw new UnsupportedOperationException();
+		}
+
+		public void add(Object o){
+			throw new UnsupportedOperationException();
+		}
+	} ;
+}
+
+public List subList(int fromIndex, int toIndex){
+	return (List) RT.subvec(this, fromIndex, toIndex);
+}
+
+
+public Object set(int i, Object o){
+	throw new UnsupportedOperationException();
+}
+
+public void add(int i, Object o){
+	throw new UnsupportedOperationException();
+}
+
+public boolean addAll(int i, Collection c){
+	throw new UnsupportedOperationException();
+}
+
 
 public Object invoke(Object arg1) throws Exception{
 	return nth(((Number) arg1).intValue());
