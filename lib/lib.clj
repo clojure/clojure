@@ -66,7 +66,7 @@
 ;;  Thanks to Stuart Sierra for providing many useful ideas, discussions
 ;;  and code contributions for lib.clj.
 
-(clojure/in-ns 'lib)
+(clojure/in-ns 'clojure-contrib.lib)
 (clojure/refer 'clojure)
 
 (alias 'set 'clojure.set)
@@ -155,6 +155,19 @@
               (load-one sym url ns)
               @*libs*))))
 
+(defn sym-file
+  "Returns the implementation file path for a libspec sym"
+  [sym]
+  (let [n (name sym)
+		index (inc (.lastIndexOf n (int \.)))
+		leaf (.substring n index)
+		ns (if (zero? index) (name (ns-name *ns*)) n)
+		file-new (str (.replace ns \. \/) \/ leaf ".clj")
+		file-old (str sym ".clj")]
+	(if (find-resource file-new)
+	  file-new
+	  file-old)))
+
 (defn- load-lib
   "Loads a lib with options: sequential keywords and arguments. The
   arguments to all options are evaluated so literal symbols or lists must
@@ -175,7 +188,7 @@
                    (or reload (not require) (not loaded))
                    load-one)
         namespace (when use (or ns sym))
-        path (str (if in (str in \/)) sym ".clj")
+        path (str (if in (str in \/)) (sym-file sym))
         url (find-resource path)
         filter-opts (select-keys opts *filter-keys*)]
     (binding [*verbose* (or *verbose* verbose)]
