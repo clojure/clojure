@@ -205,7 +205,7 @@ public Object[] toArray(Object[] a){
 			{
 			a[i] = s.first();
 			}
-		if(a.length >= count())
+		if(a.length > count())
 			a[count()] = null;
 		return a;
 		}
