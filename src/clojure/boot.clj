@@ -965,7 +965,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn agent
-  "Creates and returns an agent with an initial value of state and an optional validate fn."
+  "Creates and returns an agent with an initial value of state and an
+  optional validate fn. validate-fn must be nil or a side-effect-free fn of
+  one argument, whwich will be passed the intended new state on any state
+  change. If the new state is unacceptable, the validate-fn should
+  throw an exception."
   ([state] (new clojure.lang.Agent state))
   ([state validate-fn] (new clojure.lang.Agent state validate-fn)))
 
@@ -1006,7 +1010,12 @@
   [] (. clojure.lang.Agent shutdown))
 
 (defn ref
-  "Creates and returns a Ref with an initial value of x and an optional validate fn."
+  "Creates and returns a Ref with an initial value of x and an optional validate fn.
+  validate-fn must be nil or a side-effect-free fn of one argument, which will
+  be passed the intended new state on any state change. If the new
+  state is unacceptable, the validate-fn should throw an
+  exception. validate-fn will be called on transaction commit, when
+  all refs have their final values."  
   ([x] (new clojure.lang.Ref x))
   ([x validate-fn] (new clojure.lang.Ref x validate-fn)))
 
@@ -1018,8 +1027,13 @@
  [#^clojure.lang.IRef ref] (. ref (get)))
 
 (defn set-validator
-  "Sets the validator-fn for a var/ref/agent."
- [#^clojure.lang.IRef iref validator-fn] (. iref (setValidator validator-fn)))
+  "Sets the validator-fn for a var/ref/agent. validator-fn must be nil or a
+  side-effect-free fn of one argument, which will be passed the intended
+  new state on any state change. If the new state is unacceptable, the
+  validator-fn should throw an exception. If the current state (root
+  value if var) is not acceptable to the new validator, an exception
+  will be thrown and the validator will not be changed." 
+  [#^clojure.lang.IRef iref validator-fn] (. iref (setValidator validator-fn)))
 
 (defn get-validator
   "Gets the validator-fn for a var/ref/agent."
