@@ -11,6 +11,7 @@
 
 (clojure/in-ns 'zip-filter)
 (clojure/refer 'clojure)
+(alias 'zip 'clojure.zip)
 
 (defn sequential?
   "Returns true if x implements Sequential."
@@ -92,6 +93,9 @@
 
 (clojure/in-ns 'zip-filter-xml)
 (clojure/refer 'clojure)
+
+(alias 'zip 'clojure.zip)
+(alias 'xml 'clojure.xml)
 (refer 'zip-filter)
 
 (def xml->)
