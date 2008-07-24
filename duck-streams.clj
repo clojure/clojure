@@ -86,7 +86,7 @@
   [x]
   (cond 
    (instance? PrintWriter x) x
-   (instance? BufferedWriter x) (new PrintWriter x)
+   (instance? BufferedWriter x) (new PrintWriter #^BufferedWriter x)
    (instance? Writer x) (bufw x)  ; includes FileWriter
    (instance? OutputStream x) (bufw (new OutputStreamWriter x))
    (instance? File x) (bufw (new FileWriter #^File x))
@@ -104,7 +104,7 @@
 (defn write-lines
   "Opposite of 'line-seq'.  Writes lines (a seq) to writer (an open
   java.io.PrintWriter), separated by newlines."
-  [writer lines]
+  [#^PrintWriter writer lines]
   (let [line (first lines)]
     (when line
       (. writer (write (str line)))
@@ -115,6 +115,6 @@
   "Opposite of 'slurp'.  Writes 'contents' to the file named by
   'filename'."
   [filename contents]
-  (with-open w (writer filename)
+  (with-open w (#^PrintWriter writer filename)
     (. w (print contents))))
 
