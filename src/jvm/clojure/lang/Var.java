@@ -54,6 +54,7 @@ volatile Object root;
 transient final AtomicInteger count;
 public final Symbol sym;
 public final Namespace ns;
+volatile IFn validator = null;
 
 IPersistentMap _meta;
 
@@ -128,12 +129,34 @@ final public Object get(){
 	throw new IllegalStateException(String.format("Var %s is unbound.", sym));
 }
 
+public void setValidator(IFn vf){
+	if(isBound())
+		validate(vf,getRoot());
+	validator = vf;
+}
+
+public IFn getValidator(){
+	return validator;
+}
+
 public Object alter(IFn fn, ISeq args) throws Exception{
 	set(fn.applyTo(RT.cons(get(), args)));
 	return this;
 }
 
+void validate(IFn vf, Object val){
+	try{
+		if(vf != null)
+			vf.invoke(val);
+		}
+	catch(Exception e)
+		{
+		throw new IllegalStateException("Invalid var state", e);
+		}
+}
+
 public Object set(Object val){
+	validate(getValidator(),val);
 	Box b = getThreadBinding();
 	if(b != null)
 		return (b.val = val);
@@ -193,6 +216,7 @@ final public boolean hasRoot(){
 
 //binding root always clears macro flag
 synchronized public void bindRoot(Object root){
+	validate(getValidator(), root);
 	this.root = root;
 	_meta = _meta.assoc(macroKey, RT.F);
 }
@@ -202,7 +226,9 @@ synchronized public void unbindRoot(){
 }
 
 synchronized public void commuteRoot(IFn fn) throws Exception{
-	this.root = fn.invoke(root);
+	Object newRoot = fn.invoke(root);
+	validate(getValidator(),newRoot);
+	this.root = newRoot;
 }
 
 public static void pushThreadBindings(Associative bindings){
@@ -212,6 +238,7 @@ public static void pushThreadBindings(Associative bindings){
 		{
 		IMapEntry e = (IMapEntry) bs.first();
 		Var v = (Var) e.key();
+		v.validate(v.getValidator(), e.val());
 		v.count.incrementAndGet();
 		bmap = bmap.assoc(v, new Box(e.val()));
 		}

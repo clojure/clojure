@@ -54,8 +54,9 @@ final AtomicInteger faults;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
 final UUID uuid;
+IFn validator;
 
-public Ref(){
+Ref(){
 	this.tvals = null;
 	this.tinfo = null;
 	this.faults = new AtomicInteger();
@@ -63,25 +64,33 @@ public Ref(){
 	this.uuid = UUID.randomUUID();
 }
 
-public Ref(Object initVal){
+public Ref(Object initVal) throws Exception{
+	this(initVal, null);
+}
+
+public Ref(Object initVal,IFn validator) throws Exception{
 	this();
+	if(validator != null)
+		validate(validator,initVal);
+	this.validator = validator;
 	tvals = new TVal(initVal, 0, System.currentTimeMillis());
 }
 
 //note - makes no attempt to ensure there is no other Ref with same UUID
 
 //use only with a cache/registry
-public Ref(UUID uuid, Object initVal){
-	tvals = new TVal(initVal, 0, System.currentTimeMillis());
-	this.tinfo = null;
-	this.faults = new AtomicInteger();
-	this.lock = new ReentrantReadWriteLock();
-	this.uuid = uuid;
-}
+//public Ref(UUID uuid, Object initVal){
+//	tvals = new TVal(initVal, 0, System.currentTimeMillis());
+//	this.tinfo = null;
+//	this.faults = new AtomicInteger();
+//	this.lock = new ReentrantReadWriteLock();
+//	this.uuid = uuid;
+//}
 
 public UUID getUUID(){
 	return uuid;
 }
+
 
 //the latest val
 
@@ -107,6 +116,42 @@ public Object get(){
 	if(t == null)
 		return currentVal();
 	return t.doGet(this);
+}
+
+void validate(IFn vf, Object val){
+	try{
+		if(vf != null)
+			vf.invoke(val);
+		}
+	catch(Exception e)
+		{
+		throw new IllegalStateException("Invalid ref state", e);
+		}
+}
+
+public void setValidator(IFn vf){
+	try
+		{
+		lock.writeLock().lock();
+		validate(vf,currentVal());
+		validator = vf;
+		}
+	finally
+		{
+		lock.writeLock().unlock();
+		}
+}
+
+public IFn getValidator(){
+	try
+		{
+		lock.readLock().lock();
+		return validator;
+		}
+	finally
+		{
+		lock.readLock().unlock();
+		}
 }
 
 public Object set(Object val){
@@ -140,7 +185,7 @@ boolean isBound(){
 }
 
 
-void trimHistory(){
+public void trimHistory(){
 	try
 		{
 		lock.writeLock().lock();

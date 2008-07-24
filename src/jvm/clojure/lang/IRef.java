@@ -16,4 +16,7 @@ public interface IRef{
 
 Object get() throws Exception;
 
+void setValidator(IFn vf);
+
+IFn getValidator();
 }

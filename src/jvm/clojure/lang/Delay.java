@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class Delay extends AFn implements IRef{
+public class Delay extends AFn{
 Object val;
 IFn fn;
 

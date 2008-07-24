@@ -246,6 +246,12 @@ Object run(IFn fn) throws Exception{
 						}
 					}
 
+				//validate
+				for(Ref ref : sets)
+					{
+					ref.validate(ref.getValidator(), ref.get());
+					}
+
 				//at this point, all values calced, all refs to be written locked
 				//no more client code to be called
 				long msecs = System.currentTimeMillis();

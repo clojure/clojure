@@ -17,17 +17,23 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Agent implements IRef{
 volatile Object state;
+volatile IFn validator = null;
 AtomicReference<IPersistentStack> q = new AtomicReference(PersistentQueue.EMPTY);
 
 volatile ISeq errors = null;
 
-final public static Executor pooledExecutor =
+final public static ExecutorService pooledExecutor =
 		Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
 
-final static Executor soloExecutor = Executors.newCachedThreadPool();
+final static ExecutorService soloExecutor = Executors.newCachedThreadPool();
 
 final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();
 
+
+public static void shutdown(){
+	soloExecutor.shutdown();
+	pooledExecutor.shutdown();
+}
 
 static class Action implements Runnable{
 	final Agent agent;
@@ -102,12 +108,29 @@ static class Action implements Runnable{
 	}
 }
 
-public Agent(Object state){
+public Agent(Object state) throws Exception{
+	this(state,null);
+}
+
+public Agent(Object state, IFn validator) throws Exception{
+	this.validator = validator;
 	setState(state);
 }
 
-void setState(Object newState){
+void setState(Object newState) throws Exception{
+	validate(getValidator(),newState);
 	state = newState;
+}
+
+void validate(IFn vf, Object val){
+	try{
+		if(vf != null)
+			vf.invoke(val);
+		}
+	catch(Exception e)
+		{
+		throw new IllegalStateException("Invalid agent state", e);
+		}
 }
 
 public Object get() throws Exception{
@@ -116,6 +139,15 @@ public Object get() throws Exception{
 		throw new Exception("Agent has errors", (Exception) RT.first(errors));
 		}
 	return state;
+}
+
+public void setValidator(IFn vf){
+	validate(vf,state);
+	validator = vf;
+}
+
+public IFn getValidator(){
+	return validator;
 }
 
 public ISeq getErrors(){

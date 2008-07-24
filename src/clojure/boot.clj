@@ -965,8 +965,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn agent
-  "Creates and returns an agent with an initial value of state."
-  [state] (new clojure.lang.Agent state))
+  "Creates and returns an agent with an initial value of state and an optional validate fn."
+  ([state] (new clojure.lang.Agent state))
+  ([state validate-fn] (new clojure.lang.Agent state validate-fn)))
 
 (defn ! [& args] (throw (new Exception "! is now send. See also send-off")))
 
@@ -998,9 +999,16 @@
   agent, allowing subsequent actions to occur."  
   [#^clojure.lang.Agent a] (. a (clearErrors)))
 
+(defn shutdown-agents
+  "Initiates a shutdown of the thread pools that back the agent
+  system. Running actions will complete, but no new actions will be
+  accepted"
+  [] (. clojure.lang.Agent shutdown))
+
 (defn ref
-  "Creates and returns a Ref with an initial value of x."
-  [x] (new clojure.lang.Ref x))
+  "Creates and returns a Ref with an initial value of x and an optional validate fn."
+  ([x] (new clojure.lang.Ref x))
+  ([x validate-fn] (new clojure.lang.Ref x validate-fn)))
 
 (defn deref
   "Also reader macro: @ref/@agent Within a transaction, returns the
@@ -1009,6 +1017,13 @@
   returns its current state."
  [#^clojure.lang.IRef ref] (. ref (get)))
 
+(defn set-validator
+  "Sets the validator-fn for a var/ref/agent."
+ [#^clojure.lang.IRef iref validator-fn] (. iref (setValidator validator-fn)))
+
+(defn get-validator
+  "Gets the validator-fn for a var/ref/agent."
+ [#^clojure.lang.IRef iref] (. iref (getValidator)))
 
 (defn commute
   "Must be called in a transaction. Sets the in-transaction-value of
