@@ -967,7 +967,7 @@
 (defn agent
   "Creates and returns an agent with an initial value of state and an
   optional validate fn. validate-fn must be nil or a side-effect-free fn of
-  one argument, whwich will be passed the intended new state on any state
+  one argument, which will be passed the intended new state on any state
   change. If the new state is unacceptable, the validate-fn should
   throw an exception."
   ([state] (new clojure.lang.Agent state))
