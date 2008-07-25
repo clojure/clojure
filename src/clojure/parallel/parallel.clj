@@ -8,6 +8,7 @@
 
 (in-ns 'clojure.parallel)
 (clojure/refer 'clojure)
+(alias 'parallel 'clojure.parallel)
 
 (comment "
 The parallel library wraps the ForkJoin library scheduled for inclusion in JDK 7:
