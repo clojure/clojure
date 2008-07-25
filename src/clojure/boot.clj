@@ -2243,24 +2243,28 @@ not-every? (comp not every?))
 
 (defn pr-str
   "pr to a string, returning it"
+  {:tag String}
   [& xs]
     (with-out-str
      (apply pr xs)))
 
 (defn prn-str
   "prn to a string, returning it"
+  {:tag String}
   [& xs]
   (with-out-str
    (apply prn xs)))
 
 (defn print-str
   "print to a string, returning it"
+  {:tag String}
   [& xs]
     (with-out-str
      (apply print xs)))
 
 (defn println-str
   "println to a string, returning it"
+  {:tag String}
   [& xs]
     (with-out-str
      (apply println xs)))
@@ -2713,3 +2717,7 @@ not-every? (comp not every?))
                        (lazy-cons (if (identical? x NIL) nil x) (drain))))))]
      (send-off agt fill)
      (drain))))
+
+(defn class?
+  "Returns true if x is an instance of Class"
+  [x] (instance? Class x))
