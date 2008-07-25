@@ -1212,6 +1212,10 @@ static public void print(Object x, Writer w) throws Exception{
 				}
 			}
 		}
+	else if(x instanceof Class)
+		{
+		w.write(((Class) x).getName());
+		}
 	else if(x instanceof BigDecimal && readably)
 		{
 		w.write(x.toString());
