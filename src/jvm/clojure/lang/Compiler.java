@@ -230,8 +230,15 @@ static boolean isSpecial(Object sym){
 
 static Symbol resolveSymbol(Symbol sym){
 	//already qualified or classname?
-	if(sym.ns != null || sym.name.indexOf('.') > 0)
+	if(sym.name.indexOf('.') > 0)
 		return sym;
+	if(sym.ns != null)
+		{
+		Namespace ns = namespaceFor(sym);
+		if(ns == null || ns.name.name == sym.ns)
+			return sym;
+		return Symbol.create(ns.name.name, sym.name);
+		}
 	Object o = currentNS().getMapping(sym);
 	if(o == null)
 		return Symbol.intern(currentNS().name.name, sym.name);
@@ -2287,28 +2294,28 @@ static class IfExpr implements Expr{
 static final public IPersistentMap CHAR_MAP =
 		PersistentHashMap.create('-', "_",
 //		                         '.', "_DOT_",
-		                         ':', "_COLON_",
-		                         '+', "_PLUS_",
-		                         '>', "_GT_",
-		                         '<', "_LT_",
-		                         '=', "_EQ_",
-		                         '~', "_TILDE_",
-		                         '!', "_BANG_",
-		                         '@', "_CIRCA_",
-		                         '#', "_SHARP_",
-		                         '$', "_DOLLARSIGN_",
-		                         '%', "_PERCENT_",
-		                         '^', "_CARET_",
-		                         '&', "_AMPERSAND_",
-		                         '*', "_STAR_",
-		                         '|', "_BAR_",
-		                         '{', "_LBRACE_",
-		                         '}', "_RBRACE_",
-		                         '[', "_LBRACK_",
-		                         ']', "_RBRACK_",
-		                         '/', "_SLASH_",
-		                         '\\', "_BSLASH_",
-		                         '?', "_QMARK_");
+':', "_COLON_",
+'+', "_PLUS_",
+'>', "_GT_",
+'<', "_LT_",
+'=', "_EQ_",
+'~', "_TILDE_",
+'!', "_BANG_",
+'@', "_CIRCA_",
+'#', "_SHARP_",
+'$', "_DOLLARSIGN_",
+'%', "_PERCENT_",
+'^', "_CARET_",
+'&', "_AMPERSAND_",
+'*', "_STAR_",
+'|', "_BAR_",
+'{', "_LBRACE_",
+'}', "_RBRACE_",
+'[', "_LBRACK_",
+']', "_RBRACK_",
+'/', "_SLASH_",
+'\\', "_BSLASH_",
+'?', "_QMARK_");
 
 static public String munge(String name){
 	StringBuilder sb = new StringBuilder();
@@ -2684,7 +2691,7 @@ static public class FnExpr implements Expr{
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
 		                  : //"clojure.fns." + 
-		                    (munge(currentNS().name.name) + ".");
+		                  (munge(currentNS().name.name) + ".");
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
 		fn.simpleName = ((name != null ?
@@ -3829,8 +3836,8 @@ public static Object eval(Object form) throws Exception{
 	try
 		{
 		if(form instanceof IPersistentCollection
-		    && !(RT.first(form) instanceof Symbol
-				&& ((Symbol)RT.first(form)).name.startsWith("def")))
+		   && !(RT.first(form) instanceof Symbol
+		        && ((Symbol) RT.first(form)).name.startsWith("def")))
 			{
 			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
 			IFn fn = (IFn) fexpr.eval();
@@ -3916,17 +3923,17 @@ static Object resolve(Symbol sym) throws Exception{
 	return resolveIn(currentNS(), sym);
 }
 
-static private Namespace namespaceFor(Symbol sym) {
+static private Namespace namespaceFor(Symbol sym){
 	//note, presumes non-nil sym.ns
-    // first check against currentNS' aliases...
+	// first check against currentNS' aliases...
 	Symbol nsSym = Symbol.create(sym.ns);
-    Namespace ns = currentNS().lookupAlias(nsSym);
-    if (ns == null)
-	    {
+	Namespace ns = currentNS().lookupAlias(nsSym);
+	if(ns == null)
+		{
 		// ...otherwise check the Namespaces map.
 		ns = Namespace.find(nsSym);
-        }
-    return ns;
+		}
+	return ns;
 }
 
 static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
