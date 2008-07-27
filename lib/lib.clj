@@ -12,15 +12,15 @@
 ;;  contained in Java resources.
 ;;
 ;;  lib.clj manages namespaces that are defined by loading Clojure source
-;;  from resources (libs) within classpath. Namespace names are Symbols.
+;;  from resources (libs) within classpath. Namespace names are symbols.
 ;;  Every namespace has an associated namespace directory in classpath
 ;;  whose class-path-relative path is derived from the namespace name by
 ;;  replacing any periods with slashes.
 ;;
 ;;  A lib is a unit of Clojure code contained in a file or other resource
-;;  within classpath. A lib name is a Symbol whose name is a concatenation
+;;  within classpath. A lib name is a symbol whose name is a concatenation
 ;;  of a namespace name, a period, and a namespace-relative name. A lib is
-;;  contained in a resource whose class-path-relative path is derived from
+;;  contained in a resource whose classpath-relative path is derived from
 ;;  the lib name by replacing all periods with slashas and then appending
 ;;  ".clj".
 ;;
@@ -138,7 +138,7 @@
 
 (def
  #^{:private true :doc
-    "A ref to a set of symbols representing loaded libs"}
+    "A ref to a sorted set of symbols representing loaded namespaces"}
  *namespaces*)
 (init-once *namespaces* (ref (sorted-set)))
 
@@ -188,7 +188,7 @@
 
 (defn- load-one
   "Loads one lib from a resoure and ensures that namespace ns (if
-  specified) exists. If require is true, also records the load so
+  not nil) exists. If require is true, also records the load so
   a duplicate load will be skipped."
   [sym url ns require]
   (load-resource url)
@@ -235,7 +235,7 @@
         loaded (contains? @*namespaces* sym)
         load (cond reload-all
                    load-all
-                   (or reload (not require) (not loaded))
+                   (or raw reload (not require) (not loaded))
                    load-one)
         namespace (when use sym)
         path ((if raw lib-path root-lib-path) sym)
@@ -243,10 +243,10 @@
         filter-opts (select-keys opts *filter-keys*)]
     (binding [*verbose* (or *verbose* verbose)]
       (when load
+        (throw-if (not url) "'%s' not found in classpath" path)
         (when *verbose*
           (printf "(clojure-contrib.lib/load-resource \"%s\")\n" url)
           (flush))
-        (throw-if (not url) "'%s' not found in classpath" path)
         (load sym url namespace require))
       (when namespace
         (when *verbose*
@@ -284,27 +284,27 @@
           (.openStream url)))
       (.load Compiler reader (.getPath url) (.getFile url)))))
 
-;; Libs
+;; Raw Libs
 
 (defn load-libs
   "Searches classpath for libs and loads them. Each argument is either a
   libgroupspec that identifies a group of libs to load or a flag that
-  modifies how all the identified libs are loaded.
+  modifies how all the identified libs are loaded. Symbols identify paths
+  within classpath. Symbol names map to paths by replacing periods with
+  slashes.
 
-  A libgroupspec is a list containing a prefix Symbol that identifies a
-  directory within classpath and libspecs that identify libs relative to
-  that directory.
+  A libgroupspec is a list containing a symbol that identifies a prefix
+  directory followed by libspecs that identify libs relative to that
+  directory.
 
-  A libspec is a Symbol.
-
-  Periods in Symbol names are mapped to slashes in paths.
+  A libspec is a symbol.
 
   A flag is a keyword.
   Recognized flags: :reload-all, :verbose
 
   :reload-all forces loading of all namespaces that the identified libs
     directly or indirectly load via load-namespaces/require/use
-  :verbose triggers printing a message after loading each lib"
+  :verbose triggers printing information about each load and refer"
   [& args]
   (let [libgroupspecs (filter (complement keyword?) args)
         flags (filter keyword? args)
@@ -317,25 +317,25 @@
 ;; Namespaces
 
 (defn load-namespaces
-  "Searches classpath for namespaces and loads their definitions. Each
+  "Searches classpath for namespace definitions and loads them. Each
   argument is either an nsgroupspec that identifies a group of namespaces
   to load or a flag that modifies how all the identified namespaces are
-  loaded.
+  loaded. Symbols identify paths within classpath. Symbol names map to
+  paths by replacing periods with slashes.
 
-  An nsgroupspec is a list containing a prefix Symbol that identifies a
-  directory wihin classpath and nsspecs that identify namespace directories
-  relative to that directory and loading options. Periods in Symbol names
-  are mapped to slashes in paths.
+  An nsgroupspec is a list containing a symbol that identifies a prefix
+  directory followed by nsspecs that identify namespace directories
+  relative to that prefix and loading options.
 
-  An nsspec is a Symbol or a list containing a Symbol and options.
+  An nsspec is a symbol or a list containing a symbol and options. The
+  recognized options are only effective when the :use flag is set.
 
   An option is a keyword followed by an argument.
   Recognized options: :exclude, :only, :rename
 
   The arguments and semantics for :exclude, :only, and :rename are those
-  documented for clojure/refer. They are effective only when the :use flag
-  is set.
-
+  documented for clojure/refer.
+  
   A flag is a keyword.
   Recognized flags: :require, :use, :reload, :reload-all, :verbose
 
@@ -343,11 +343,11 @@
     already loaded need not be reloaded
   :use triggers referring to each namespace with its options as filters
   :reload forces loading of all the identified namespace definitions even
-    if they were loaded previously. :reload supersedes :require
+    if they are already loaded. :reload supersedes :require
   :reload-all implies :reload and also forces loading of all namespace
     definitions that the identified namespace definitions directly or
     indirectly load via load-namespaces/require/use
-  :verbose triggers printing a message after loading each lib"
+  :verbose triggers printing information about each load and refer"
   [& args]
   (let [nsgroupspecs (filter (complement keyword?) args)
         flags (filter keyword? args)
@@ -364,14 +364,60 @@
   @*namespaces*)
 
 (defn require
-  "Loads namespace definitions if they are not already loaded. See doc for
-  load-namespaces (:require flag set) for further information."
+  "Searches classpath for namespace definitions and loads them if they are
+  not already loaded. Each argument is either an nsgroupspec that
+  identifies a group of namespaces to load or a flag that modifies how all
+  the identified namespaces are loaded. Symbols identify paths within
+  classpath. Symbol names map to paths by replacing periods with slashes.
+
+  An nsgroupspec is a list containing a symbol that identifies a prefix
+  directory followed by nsspecs that identify namespace directories
+  relative to that prefix and loading options.
+
+  In the general case, an nsspec is a symbol or a list containing a symbol
+  and options. In the case of require, no options are available so an
+  nsspec should be a symbol. (see also load-namespaces and use)
+
+  A flag is a keyword.
+  Recognized flags: :reload, :reload-all, :verbose
+
+  :reload forces loading of all the identified namespace definitions even
+    if they are already loaded.
+  :reload-all implies :reload and also forces loading of all namespace
+    definitions that the identified namespace definitions directly or
+    indirectly load via load-namespaces/require/use
+  :verbose triggers printing information about each load and refer"
   [& args]
   (apply load-namespaces :require args))
 
 (defn use
-  "Loads namespace definitions if they are not already loaded and refers to
-  the namespaces. See doc for load-namespaces (:require and :use flags set
-  and nsspec options) for further information."
+  "Searches classpath for namespace definitions, loads them if they are not
+  already loaded, and refers to them. Each argument is either an
+  nsgroupspec that identifies a group of namespaces to load or a flag that
+  modifies how all the identified namespaces are loaded. Symbols identify
+  paths within classpath. Symbol names map to paths by replacing periods
+  with slashes.
+
+  An nsgroupspec is a list containing a symbol that identifies a prefix
+  directory followed by nsspecs that identify namespace directories
+  relative to that prefix and loading options.
+
+  An nsspec is a symbol or a list containing a symbol and options.
+
+  An option is a keyword followed by an argument.
+  Recognized options: :exclude, :only, :rename
+
+  The arguments and semantics for :exclude, :only, and :rename are those
+  documented for clojure/refer.
+  
+  A flag is a keyword.
+  Recognized flags: :reload, :reload-all, :verbose
+
+  :reload forces loading of all the identified namespace definitions even
+    if they are already loaded. :reload supersedes :require
+  :reload-all implies :reload and also forces loading of all namespace
+    definitions that the identified namespace definitions directly or
+    indirectly load via load-namespaces/require/use
+  :verbose triggers printing information about each load and refer"
   [& args]
   (apply load-namespaces :require :use args))
