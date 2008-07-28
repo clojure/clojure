@@ -2833,15 +2833,16 @@ not-every? (comp not every?))
                         (assoc ret k 
                                (reduce conj (get targets k #{}) (cons target (targets target)))))
                       m (cons source (sources source))))]
-     (when-not (contains? (tp tag) parent)
-       (when (contains? (ta tag) parent)
-         (throw (Exception. (print-str tag "already has" parent "as ancestor"))))
-       (when (contains? (ta parent) tag)
-         (throw (Exception. (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))
-
-       {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
-        :ancestors (tf (:ancestors h) tag td parent ta)
-        :descendants (tf (:descendants h) parent ta tag td)}))))
+     (or 
+      (when-not (contains? (tp tag) parent)
+        (when (contains? (ta tag) parent)
+          (throw (Exception. (print-str tag "already has" parent "as ancestor"))))
+        (when (contains? (ta parent) tag)
+          (throw (Exception. (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))        
+        {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
+         :ancestors (tf (:ancestors h) tag td parent ta)
+         :descendants (tf (:descendants h) parent ta tag td)})
+      h))))
 
 (defn underive 
   "Removes a parent/child relationship between parent and
@@ -2858,7 +2859,8 @@ not-every? (comp not every?))
                  (assoc ret k 
                         (reduce disj (get targets k) (cons target (targets target)))))
                m (cons source (sources source))))]
-     (when (contains? (tp tag) parent)
+     (if (contains? (tp tag) parent)
        {:parent (assoc (:parents h) tag (disj (get tp tag) parent))    
         :ancestors (tf (:ancestors h) tag td parent ta)
-        :descendants (tf (:descendants h) parent ta tag td)}))))
+        :descendants (tf (:descendants h) parent ta tag td)}
+       h))))
