@@ -151,6 +151,7 @@
         ctor-sig-map (or constructors (zipmap (ctor-sigs super) (ctor-sigs super)))
         cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
         cname (. name (replace "." "/"))
+        [pkg-name sname] (.split name "[.](?=[^.]*$)")
         ctype (. Type (getObjectType cname))
         iname (fn [c] (.. Type (getType c) (getInternalName)))
         totype (fn [c] (. Type (getType c)))
@@ -272,8 +273,8 @@
                    nil nil cv)]
       (. gen (visitCode))
       (doseq v var-fields
-        (. gen push name)
-        (. gen push v)
+        (. gen push pkg-name)
+        (. gen push (str sname "-" v))
         (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.Var var(String,String)"))))
         (. gen putStatic ctype (var-name v) var-type))
       
