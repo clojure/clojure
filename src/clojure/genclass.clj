@@ -410,7 +410,7 @@
         (. gen (endMethod))))
                                         ;field exposers
     (doseq [f {getter :get setter :set}] exposes
-      (let [fld (.getField super (str f))
+      (let [fld (.getDeclaredField super (str f))
             ftype (totype (.getType fld))]
         (when getter
           (let [m (new Method (str getter) ftype (to-types []))
