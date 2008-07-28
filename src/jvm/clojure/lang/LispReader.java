@@ -40,7 +40,7 @@ static Symbol DEREF = Symbol.create("clojure", "deref");
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
 //static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
-static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]].*/)?([\\D&&[^:/]][^/]*)");
+static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?([\\D&&[^/]][^/]*)");
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 //static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern intPat =
@@ -275,8 +275,13 @@ private static Object matchSymbol(String s){
 		String name = m.group(2);
 		if(ns != null && ns.endsWith(":/")
 		   || name.endsWith(":")
-		   || s.contains("::"))
+		   || s.indexOf("::", 1) != -1)
 			return null;
+		if(s.startsWith("::"))
+			{
+			//auto-resolving keyword
+			return Keyword.intern(Compiler.resolveSymbol(Symbol.intern(s.substring(2))));
+			}
 		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));
 		if(isKeyword)

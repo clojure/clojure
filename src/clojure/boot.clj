@@ -925,16 +925,20 @@
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
   [multifn dispatch-val & fn-tail]
-  `(let [pvar# (var ~multifn)]
-     (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
-                             (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
+  `(. ~multifn addMethod ~dispatch-val (fn ~@fn-tail)))
+
+;  `(let [pvar# (var ~multifn)]
+;     (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
+;                             (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
 
 (defmacro remove-method
   "Removes the method of multimethod associated	with dispatch-value."
  [multifn dispatch-val]
-  `(let [pvar# (var ~multifn)]
-      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
-                              (. mf# (dissoc ~dispatch-val)))))))
+ `(. ~multifn removeMethod ~dispatch-val))
+
+;  `(let [pvar# (var ~multifn)]
+;      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
+;                              (. mf# (dissoc ~dispatch-val)))))))
 
 ;;;;;;;;; var stuff      
 
@@ -2721,3 +2725,140 @@ not-every? (comp not every?))
 (defn class?
   "Returns true if x is an instance of Class"
   [x] (instance? Class x))
+
+(defn alter-var-root
+  "Atomically alters the root binding of var v by applying f to its
+  current value plus any args"
+  [#^clojure.lang.Var v f & args] (.alterRoot v f args))
+
+(defn make-hierarchy 
+  "Creates a hierarchy object for use with derive, isa? etc."
+  [] {:parents {} :descendants {} :ancestors {}})
+
+(def #^{:private true}
+     global-hierarchy (make-hierarchy))
+
+(defn not-empty 
+  "If coll is empty, returns nil, else coll"
+  [coll] (when (seq coll) coll))
+
+(defn bases
+  "Returns the immediate superclass and direct interfaces of c, if any"
+  [#^Class c]
+  (let [i (.getInterfaces c)
+        s (.getSuperclass c)]
+    (not-empty
+     (if s (cons s i) i))))
+
+(defn supers 
+  "Returns the immediate and indirect superclasses and interfaces of c, if any"
+  [#^Class class]
+  (loop [ret #{} c class]
+    (if c
+      (recur (into ret (bases c)) (.getSuperclass c))
+      (not-empty ret))))
+
+(defn isa?
+  "Returns true if child is directly or indirectly derived from
+  parent, either via a Java type inheritance relationship or a
+  relationship established via derive. h must be a hierarchy obtained
+  from make-hierarchy, if not supplied defaults to the global
+  hierarchy"
+  ([child parent] (isa? global-hierarchy child parent))
+  ([h child parent]
+   (or (= child parent)
+       (and (class? parent) (class? child) 
+            (. #^Class parent isAssignableFrom child))
+       (contains? ((:ancestors h) child) parent)
+       (and (class child) (some #(contains? ((:ancestors h) %) parent) (supers child)))
+       (and (vector? parent) (vector? child)
+            (= (count parent) (count child))
+            (loop [ret true i 0]
+              (if (= i (count parent))
+                ret
+                (recur (and (isa? (child i) (parent i)) ret) (inc i))))))))
+
+(defn parents
+  "Returns the immediate parents of tag, either via a Java type
+  inheritance relationship or a relationship established via derive. h
+  must be a hierarchy obtained from make-hierarchy, if not supplied
+  defaults to the global hierarchy"
+  ([tag] (parents global-hierarchy tag))
+  ([h tag] (not-empty
+            (let [tp (get (:parents h) tag)]
+              (if (class? tag)
+                (into (set (bases tag)) tp) 
+                tp)))))
+
+(defn ancestors 
+  "Returns the immediate and indirect parents of tag, either via a Java type
+  inheritance relationship or a relationship established via derive. h
+  must be a hierarchy obtained from make-hierarchy, if not supplied
+  defaults to the global hierarchy"
+  ([tag] (ancestors global-hierarchy tag))
+  ([h tag] (not-empty
+            (let [ta (get (:ancestors h) tag)]
+              (if (class? tag)
+                (into (set (supers tag)) ta) 
+                ta)))))
+
+(defn descendants
+  "Returns the immediate and indirect children of tag, either via a Java type
+  inheritance relationship or a relationship established via derive. h
+  must be a hierarchy obtained from make-hierarchy, if not supplied
+  defaults to the global hierarchy" 
+  ([tag] (descendants global-hierarchy tag))
+  ([h tag] (if (class? tag)
+             (throw (java.lang.UnsupportedOperationException. "Can't get descendants of classes"))
+             (not-empty (get (:descendants h) tag)))))
+
+(defn derive
+  "Establishes a parent/child relationship between parent and
+  tag. Parent must be a namespace-qualified symbol or keyword and
+  child can be either a namespace-qualified symbol or keyword or a
+  class. h must be a hierarchy obtained from make-hierarchy, if not
+  supplied defaults to, and modifies, the global hierarchy."
+  ([tag parent] (alter-var-root #'global-hierarchy derive tag parent) nil)
+  ([h tag parent]
+   (assert (not= tag parent))
+   (assert (or (class? tag) (and (instance? clojure.lang.Named tag) (namespace tag))))
+   (assert (instance? clojure.lang.Named parent))
+   (assert (namespace parent))
+
+   (let [tp (:parents h)
+         td (:descendants h)
+         ta (:ancestors h)
+         tf (fn [m source sources target targets]
+              (reduce (fn [ret k]
+                        (assoc ret k 
+                               (reduce conj (get targets k #{}) (cons target (targets target)))))
+                      m (cons source (sources source))))]
+     (when-not (contains? (tp tag) parent)
+       (when (contains? (ta tag) parent)
+         (throw (Exception. (print-str tag "already has" parent "as ancestor"))))
+       (when (contains? (ta parent) tag)
+         (throw (Exception. (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))
+
+       {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
+        :ancestors (tf (:ancestors h) tag td parent ta)
+        :descendants (tf (:descendants h) parent ta tag td)}))))
+
+(defn underive 
+  "Removes a parent/child relationship between parent and
+  tag. h must be a hierarchy obtained from make-hierarchy, if not
+  supplied defaults to, and modifies, the global hierarchy."
+  ([tag parent] (alter-var-root #'global-hierarchy underive tag parent) nil)
+  ([h tag parent]
+   (let [tp (:parents h)
+         td (:descendants h)
+         ta (:ancestors h)
+         tf (fn [m source sources target targets]
+              (reduce
+               (fn [ret k]
+                 (assoc ret k 
+                        (reduce disj (get targets k) (cons target (targets target)))))
+               m (cons source (sources source))))]
+     (when (contains? (tp tag) parent)
+       {:parent (assoc (:parents h) tag (disj (get tp tag) parent))    
+        :ancestors (tf (:ancestors h) tag td parent ta)
+        :descendants (tf (:descendants h) parent ta tag td)}))))

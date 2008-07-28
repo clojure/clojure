@@ -12,46 +12,91 @@
 
 package clojure.lang;
 
+import java.util.Map;
+
 public class MultiFn extends AFn{
 final public IFn dispatchFn;
 final public Object defaultDispatchVal;
-final public IPersistentMap methodTable;
+IPersistentMap methodTable;
+IPersistentMap methodCache;
+Object cachedHierarchy;
 
-public MultiFn(IFn dispatchFn, Object defaultDispatchVal){
+static final Var assoc = RT.var("clojure", "assoc");
+static final Var dissoc = RT.var("clojure", "dissoc");
+static final Var isa = RT.var("clojure", "isa?");
+static final Var hierarchy = RT.var("clojure", "global-hierarchy");
+
+public MultiFn(IFn dispatchFn, Object defaultDispatchVal) throws Exception{
 	this.dispatchFn = dispatchFn;
 	this.defaultDispatchVal = defaultDispatchVal;
 	this.methodTable = PersistentHashMap.EMPTY;
+	this.methodCache = methodTable;
+	cachedHierarchy = null;
 }
 
-public MultiFn assoc(Object dispatchVal, IFn method){
-	return new MultiFn(meta(), dispatchFn, defaultDispatchVal, methodTable.assoc(dispatchVal, method));
+synchronized public MultiFn addMethod(Object dispatchVal, IFn method) throws Exception{
+	methodTable = methodTable.assoc(dispatchVal, method);
+	resetCache();
+	return this;
 }
 
-
-public MultiFn dissoc(Object dispatchVal) throws Exception{
-	return new MultiFn(meta(), dispatchFn,  defaultDispatchVal, methodTable.without(dispatchVal));
+synchronized public MultiFn removeMethod(Object dispatchVal) throws Exception{
+	methodTable = methodTable.without(dispatchVal);
+	resetCache();
+	return this;
 }
 
-public Obj withMeta(IPersistentMap meta){
-	if(meta == meta())
-		return this;
-	return new MultiFn(meta, dispatchFn, defaultDispatchVal, methodTable);
+private IPersistentMap resetCache(){
+	methodCache = methodTable;
+	cachedHierarchy = hierarchy.get();
+	return methodCache;
 }
 
-private MultiFn(IPersistentMap meta, IFn dispatchFn, Object defaultDispatchVal, IPersistentMap dispatchTable){
-	super(meta);
-	this.dispatchFn = dispatchFn;
-	this.defaultDispatchVal = defaultDispatchVal;
-	this.methodTable = dispatchTable;
-}
-
-private IFn getFn(Object dispatchVal) throws Exception{
-	IFn targetFn = (IFn) methodTable.valAt(dispatchVal);
-	if(targetFn == null)
-	    targetFn = (IFn) methodTable.valAt(defaultDispatchVal);
+synchronized private IFn getFn(Object dispatchVal) throws Exception{
+	if(cachedHierarchy != hierarchy.get())
+		resetCache();
+	IFn targetFn = (IFn) methodCache.valAt(dispatchVal);
+	if(targetFn != null)
+		return targetFn;
+	targetFn = findAndCacheBestMethod(dispatchVal);
+	if(targetFn != null)
+		return targetFn;
+	targetFn = (IFn) methodTable.valAt(defaultDispatchVal);
 	if(targetFn == null)
 		throw new IllegalArgumentException(String.format("No method for dispatch value: %s", dispatchVal));
 	return targetFn;
+}
+
+private IFn findAndCacheBestMethod(Object dispatchVal) throws Exception{
+	Map.Entry bestEntry = null;
+	for(Object o : methodTable)
+		{
+		Map.Entry e = (Map.Entry) o;
+		if(RT.booleanCast(isa.invoke(dispatchVal, e.getKey())))
+			{
+			if(bestEntry == null || RT.booleanCast(isa.invoke(e.getKey(), bestEntry.getKey())))
+				bestEntry = e;
+			if(!RT.booleanCast(isa.invoke(bestEntry.getKey(), e.getKey())))
+				throw new IllegalArgumentException(
+						String.format("Multiple methods match dispatch value: %s -> %s and %s",
+						              dispatchVal, e.getKey(), bestEntry.getKey()));
+			}
+		}
+	if(bestEntry == null)
+		throw new IllegalArgumentException(String.format("No method for dispatch value: %s", dispatchVal));
+
+	//ensure basis has stayed stable throughout, else redo
+	if(cachedHierarchy == hierarchy.get())
+		{
+		//place in cache
+		methodCache = methodCache.assoc(dispatchVal, bestEntry.getValue());
+		return (IFn) bestEntry.getValue();
+		}
+	else
+		{
+		resetCache();
+		return findAndCacheBestMethod(dispatchVal);
+		}
 }
 
 public Object invoke() throws Exception{

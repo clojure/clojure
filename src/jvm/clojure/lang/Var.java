@@ -131,7 +131,7 @@ final public Object get(){
 
 public void setValidator(IFn vf){
 	if(isBound())
-		validate(vf,getRoot());
+		validate(vf, getRoot());
 	validator = vf;
 }
 
@@ -145,7 +145,8 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 }
 
 void validate(IFn vf, Object val){
-	try{
+	try
+		{
 		if(vf != null)
 			vf.invoke(val);
 		}
@@ -156,7 +157,7 @@ void validate(IFn vf, Object val){
 }
 
 public Object set(Object val){
-	validate(getValidator(),val);
+	validate(getValidator(), val);
 	Box b = getThreadBinding();
 	if(b != null)
 		return (b.val = val);
@@ -227,8 +228,15 @@ synchronized public void unbindRoot(){
 
 synchronized public void commuteRoot(IFn fn) throws Exception{
 	Object newRoot = fn.invoke(root);
-	validate(getValidator(),newRoot);
+	validate(getValidator(), newRoot);
 	this.root = newRoot;
+}
+
+synchronized public Object alterRoot(IFn fn, ISeq args) throws Exception{
+	Object newRoot = fn.applyTo(RT.cons(root, args));
+	validate(getValidator(), newRoot);
+	this.root = newRoot;
+	return newRoot;
 }
 
 public static void pushThreadBindings(Associative bindings){
