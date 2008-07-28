@@ -13,11 +13,13 @@
 package clojure.lang;
 
 import java.util.Map;
+import java.util.Collection;
 
 public class MultiFn extends AFn{
 final public IFn dispatchFn;
 final public Object defaultDispatchVal;
 IPersistentMap methodTable;
+IPersistentMap preferTable;
 IPersistentMap methodCache;
 Object cachedHierarchy;
 
@@ -31,6 +33,7 @@ public MultiFn(IFn dispatchFn, Object defaultDispatchVal) throws Exception{
 	this.defaultDispatchVal = defaultDispatchVal;
 	this.methodTable = PersistentHashMap.EMPTY;
 	this.methodCache = methodTable;
+	this.preferTable = PersistentHashMap.EMPTY;
 	cachedHierarchy = null;
 }
 
@@ -44,6 +47,31 @@ synchronized public MultiFn removeMethod(Object dispatchVal) throws Exception{
 	methodTable = methodTable.without(dispatchVal);
 	resetCache();
 	return this;
+}
+
+synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchValY){
+	if(prefers(dispatchValY, dispatchValX))
+		throw new IllegalStateException(
+				String.format("Preference conflict: %s is already preferred to %s", dispatchValY, dispatchValX));
+	preferTable = preferTable.assoc(dispatchValX, RT.conj((IPersistentCollection) RT.get(preferTable,
+	                                                                                     dispatchValX,
+	                                                                                     PersistentHashSet.EMPTY),
+	                                                      dispatchValY));
+	resetCache();
+	return this;
+}
+
+private boolean prefers(Object x, Object y){
+	IPersistentSet xprefs = (IPersistentSet) preferTable.valAt(x);
+	return xprefs != null && xprefs.contains(y);
+}
+
+private boolean isA(Object x, Object y) throws Exception{
+	return RT.booleanCast(isa.invoke(x, y));
+}
+
+private boolean dominates(Object x, Object y) throws Exception{
+	return prefers(x, y) || isA(x, y);
 }
 
 private IPersistentMap resetCache(){
@@ -72,14 +100,15 @@ private IFn findAndCacheBestMethod(Object dispatchVal) throws Exception{
 	for(Object o : methodTable)
 		{
 		Map.Entry e = (Map.Entry) o;
-		if(RT.booleanCast(isa.invoke(dispatchVal, e.getKey())))
+		if(isA(dispatchVal, e.getKey()))
 			{
-			if(bestEntry == null || RT.booleanCast(isa.invoke(e.getKey(), bestEntry.getKey())))
+			if(bestEntry == null || dominates(e.getKey(), bestEntry.getKey()))
 				bestEntry = e;
-			if(!RT.booleanCast(isa.invoke(bestEntry.getKey(), e.getKey())))
+			if(!dominates(bestEntry.getKey(), e.getKey()))
 				throw new IllegalArgumentException(
-						String.format("Multiple methods match dispatch value: %s -> %s and %s",
-						              dispatchVal, e.getKey(), bestEntry.getKey()));
+						String.format(
+								"Multiple methods match dispatch value: %s -> %s and %s, and neither is preferred",
+								dispatchVal, e.getKey(), bestEntry.getKey()));
 			}
 		}
 	if(bestEntry == null)

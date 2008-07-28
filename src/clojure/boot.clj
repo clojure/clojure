@@ -927,18 +927,15 @@
   [multifn dispatch-val & fn-tail]
   `(. ~multifn addMethod ~dispatch-val (fn ~@fn-tail)))
 
-;  `(let [pvar# (var ~multifn)]
-;     (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
-;                             (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
-
 (defmacro remove-method
   "Removes the method of multimethod associated	with dispatch-value."
  [multifn dispatch-val]
  `(. ~multifn removeMethod ~dispatch-val))
 
-;  `(let [pvar# (var ~multifn)]
-;      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
-;                              (. mf# (dissoc ~dispatch-val)))))))
+(defmacro prefer-method
+  "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y when there is a conflict"
+  [multifn dispatch-val-x dispatch-val-y]
+  `(. ~multifn preferMethod ~dispatch-val-x ~dispatch-val-y))
 
 ;;;;;;;;; var stuff      
 
