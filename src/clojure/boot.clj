@@ -2770,7 +2770,7 @@ not-every? (comp not every?))
        (and (class? parent) (class? child) 
             (. #^Class parent isAssignableFrom child))
        (contains? ((:ancestors h) child) parent)
-       (and (class child) (some #(contains? ((:ancestors h) %) parent) (supers child)))
+       (and (class? child) (some #(contains? ((:ancestors h) %) parent) (supers child)))
        (and (vector? parent) (vector? child)
             (= (count parent) (count child))
             (loop [ret true i 0]
