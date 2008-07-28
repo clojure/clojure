@@ -65,13 +65,15 @@
   be a string or symbol). The gen-class construct contains no
   implementation, as the implementation will be dynamically sought by
   the generated class in functions in a corresponding Clojure
-  namespace. Given a generated class org.mydomain.MyClass, methods
-  will be implemented that look for same-named functions in a Clojure
-  namespace called org.domain.MyClass. The init and main
-  functions (see below) will be found similarly. The static
-  initializer for the generated class will attempt to load the Clojure
-  support code for the class as a resource from the claspath, e.g. in
-  the example case, org/mydomain/MyClass.clj
+  namespace. Given a generated class org.mydomain.MyClass with a
+  method named mymethod, gen-class will generate an implementation
+  that looks for a function named MyClass-mymethod in a Clojure
+  namespace called org.mydomain. All inherited methods, generated
+  methods, and init and main functions (see :methods, :init, and :main
+  below) will be found similarly. The static initializer for the
+  generated class will attempt to load the Clojure support code for
+  the class as a resource from the classpath, e.g. in the example
+  case, org/mydomain/MyClass.clj
 
   Returns a map containing :name and :bytecode. Most uses will be
   satisfied by the higher-level gen-and-load-class and
@@ -473,46 +475,46 @@
  :state name
  :init name
  :exposes {protected-field {:get name :set name}, })
- 
-(gen-and-load-class 
-;(clojure/gen-and-save-class 
-; "/Users/rich/Downloads"
- 'fred.lucy.Ethel 
- :extends clojure.lang.Box ;APersistentMap
- :implements [clojure.lang.IPersistentMap]
- :state 'state
-                                        ;:constructors {[Object] [Object]}
-                                        ;:init 'init
- :main true
- :factory 'create
- :methods [#^{:static true} ['foo [Object] Object]
-           ['bar [] Object]]
- :exposes {'val {:get 'getVal :set 'setVal}})
 
-(in-ns 'fred.lucy.Ethel)
-(clojure/refer 'clojure :exclude '(assoc seq count cons empty))
-(defn init [n] [[] n])
-(defn foo 
-  ([x] x))
-(defn main [x y] (println x y))
+(gen-and-load-class 'net.n01se.TestObj
+  :extends javax.swing.DefaultCellEditor
+  :constructors {[Integer] [javax.swing.JCheckBox]}
+  :factory 'makeone
+  :methods [['mymax [Integer] Integer]]
+  :init 'init
+  :main true
+  :state 'myint
+  :exposes '{clickCountToStart {:get get-c-count :set set-c-count}})
+
+;-------------------------------
+(clojure/in-ns 'net.n01se)
+(clojure/refer 'clojure)
+
+(defn TestObj-init [myint]
+  [[(javax.swing.JCheckBox.)] myint])
+
+(defn TestObj-mymax [this i]
+  (max i (.myint this)))
+
+(defn TestObj-getCellEditorValue [this]
+  (prn :getCellEditorValue)
+  nil)
+
+(defn TestObj-main [istr]
+  (prn :main istr))
+
+;-------------------------------
 (in-ns 'user)
-(def ethel (new fred.lucy.Ethel__2276 42))
-(def ethel (fred.lucy.Ethel__2276.create 21))
-(fred.lucy.Ethel__2276.main (into-array ["lucy" "ricky"]))
-(.state ethel)
-(.foo ethel 7)
-(.foo ethel)
-(.getVal ethel)
-(.setVal ethel 12)
+(prn (.mymax (net.n01se.TestObj. 5) 9))
+(.getCellEditorValue (net.n01se.TestObj. 6))
+(prn (.myint (net.n01se.TestObj. 7)))
+(prn (. net.n01se.TestObj makeone 8))
+(prn (net.n01se.TestObj/makeone 9))
+(. net.n01se.TestObj main (into-array ["howdy"]))
+(prn (net.n01se/TestObj-getCellEditorValue (net.n01se.TestObj. 10)))
+(prn (.get-c-count (net.n01se.TestObj. 11)))
 
-(gen-class org.clojure.MyComparator :implements [Comparator])
-(in-ns 'org.clojure.MyComparator)
-(defn compare [this x y] ...)
-
-(load-file "/Users/rich/dev/clojure/src/genclass.clj")
-
-(clojure/gen-and-save-class "/Users/rich/dev/clojure/gen/" 
- 'org.clojure.ClojureServlet 
- :extends javax.servlet.http.HttpServlet)
-
+; the following would fail because :exposes only generates class
+; methods, not namespace functions
+;(prn (net.n01se.TestObj/get-c-count (net.n01se.TestObj. 12)))
 )
