@@ -2050,7 +2050,7 @@ static class NewExpr implements Expr{
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.rest(RT.rest(form)); s != null; s = s.rest())
-				args = args.cons(analyze(C.EXPRESSION, s.first()));
+				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 			return new NewExpr(c, args, line);
 		}
 	}
