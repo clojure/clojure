@@ -212,8 +212,8 @@
   "Returns a classpath-relative path given the name of a symbol"
   [name]
   (.. name
-	  (replace \- \_)
-	  (replace \. \/)))
+      (replace \- \_)
+      (replace \. \/)))
 
 (defn- lib-path
   "Returns the resource path for a lib"
