@@ -6,7 +6,7 @@
 ;;  the terms of this license.
 ;;  You must not remove this notice, or any other, from this software.
 ;;
-;;  ns-utils.clj
+;;  ns-utils
 ;;
 ;;  Namespace Utilities
 ;;
@@ -36,7 +36,7 @@
 ;;  scgilardi (gmail)
 ;;  23 April 2008
 
-(clojure/in-ns 'clojure-contrib.ns-utils)
+(clojure/in-ns 'clojure.contrib.ns-utils)
 (clojure/refer 'clojure)
 
 ;; Namespace Utilities
