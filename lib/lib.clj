@@ -6,56 +6,56 @@
 ;;  this license. You must not remove this notice, or any other, from this
 ;;  software.
 ;;
-;;  File: lib.clj
+;;  lib
 ;;
-;;  lib.clj provides functions for loading and managing Clojure source code
-;;  contained in Java resources.
+;;  lib provides functions for loading and managing Clojure source code
+;;  contained in Java resources. lib tracks what it loads at the
+;;  granularity of namespaces and provides convenient functions for
+;;  ensuring that namespace definitions have been loaded while avoiding
+;;  duplicate loads.
 ;;
-;;  lib.clj manages namespaces that are defined by loading Clojure source
-;;  from resources (libs) within classpath. Namespace names are symbols.
-;;  Every namespace has an associated namespace directory in classpath
-;;  whose class-path-relative path is derived from the namespace name by
-;;  replacing any periods with slashes.
+;;  Namespace names are symbols. Every namespace has an associated
+;;  'namespace directory' whose classpath-relative path is derived from the
+;;  namespace name by replacing any periods with slashes. Clojure
+;;  namespaces map one-to-one with Java packages.
 ;;
-;;  A lib is a unit of Clojure code contained in a file or other resource
-;;  within classpath. A lib name is a symbol whose name is a concatenation
-;;  of a namespace name, a period, and a namespace-relative name. A lib is
+;;  A 'lib' is a unit of Clojure code contained in a resource within
+;;  classpath. A lib name is a symbol whose name is a concatenation of a
+;;  namespace name, a period, and a namespace-relative name. A lib is
 ;;  contained in a resource whose classpath-relative path is derived from
-;;  the lib name by replacing all periods with slashas and then appending
+;;  the lib name by replacing all periods with slashes and then appending
 ;;  ".clj".
 ;;
-;;  To load a namespace definition, lib.clj loads the namespace's 'root
-;;  lib'. The root lib's name is derived from the namespace name by
-;;  repeating the "leaf" portion of the namespace name. For example, the
-;;  root lib for the namespace 'clojure.contrib.def' is the lib named
-;;  'clojure.contrib.def.def'. It is contained in the resource:
-;;
-;;    <classpath>/clojure/contrib/def/def.clj
+;;  To load a namespace definition, lib loads the 'root lib' for the
+;;  namespace. The root lib's name is derived from the namespace name by
+;;  repeating its "leaf" portion. For example, the root lib for the
+;;  namespace 'clojure.contrib.def is the lib 'clojure.contrib.def.def
+;;  contained in the resource <classpath>/clojure/contrib/def/def.clj .
 ;;
 ;;  The following code ensures that 'clojure.contrib.def and
 ;;  'clojure.contrib.sql are loaded:
 ;;
 ;;    (require '(clojure.contrib def sql))
 ;;
-;;  In cases where the complete namespace is defined in more than one lib
-;;  all the libs should be contained within the hierarchy of directories
-;;  under the namespace directory and the root lib must (drectly or
-;;  indirectly) load the additional libs. For example, a hypothetical
-;;  namespace named 'clojure.contrib.math-funcs might be defined in
-;;  multiple libs contained in resources like these:
+;;  In cases where a namespace is defined by more than one lib, all the
+;;  libs should be contained within the hierarchy of directories under the
+;;  namespace directory. The root lib must (drectly or indirectly) load the
+;;  additional libs. For example, a hypothetical namespace named
+;;  'clojure.contrib.math-funcs might be defined in multiple libs contained
+;;  in resources like these:
 ;;
-;;    <classpath>/clojure/contrib/math-funcs/math-funcs.clj
-;;    <classpath>/clojure/contrib/math-funcs/trig.clj
-;;    <classpath>/clojure/contrib/math-funcs/logarithms.clj
-;;    <classpath>/clojure/contrib/math-funcs/bessel.clj
-;;    <classpath>/clojure/contrib/math-funcs/inverses/trig.clj
-;;    <classpath>/clojure/contrib/math-funcs/inverses/logarithms.clj
+;;    <classpath>/clojure/contrib/math_funcs/math_funcs.clj
+;;    <classpath>/clojure/contrib/math_funcs/trig.clj
+;;    <classpath>/clojure/contrib/math_funcs/logarithms.clj
+;;    <classpath>/clojure/contrib/math_funcs/bessel.clj
+;;    <classpath>/clojure/contrib/math_funcs/inverses/trig.clj
+;;    <classpath>/clojure/contrib/math_funcs/inverses/logarithms.clj
 ;;
 ;;  The following code ensures that 'clojure.contrib.math-funcs is loaded:
 ;;
 ;;    (require '(clojure.contrib math-funcs))
 ;;
-;;  This is the portion of math-funcs.clj that loads the remaining libs:
+;;  This is the portion of math_funcs.clj that loads the additional libs:
 ;;
 ;;    (clojure/in-ns 'clojure.contrib.math-funcs)
 ;;
@@ -63,11 +63,11 @@
 ;;     '(clojure.contrib.math-funcs
 ;;       trig logarithms bessel inverses.trig inverses.logarithms))
 ;;
-;;  lib.clj also provides general functions for finding and loading
-;;  resources using the class loaders visible to the Clojure runtime.
+;;  lib also provides general functions for finding and loading resources
+;;  using the class loaders visible to the Clojure runtime.
 ;;
-;;  Here is a brief overview of what's in lib.clj. For detailed docs
-;;  please see the doc strings for the individual functions.
+;;  Here is a brief overview of what's in lib. For detailed docs please see
+;;  the doc strings for the individual functions.
 ;;
 ;;  Resources
 ;;
@@ -77,10 +77,10 @@
 ;;    Function: load-resource
 ;;    Loads Clojure source from an absolute path: URI, URL or String
 ;;
-;;  Libs
+;;  Raw Libs
 ;;
 ;;    Function: load-libs
-;;    Loads libs from arbitrary locations under classpath
+;;    Loads libs by name from arbitrary locations under classpath
 ;;
 ;;  Namespaces
 ;;
@@ -89,7 +89,7 @@
 ;;
 ;;    Function: namespaces
 ;;    Returns a sorted set of symbols naming the set of namespaces
-;;      that lib.clj has loaded and is tracking
+;;      that lib has loaded and is tracking
 ;;
 ;;    Function: require
 ;;    Loads namespace definitions that are not already loaded
