@@ -212,8 +212,8 @@
   "Returns a classpath-relative path given the name of a symbol"
   [name]
   (.. name
-	(replace \- \_)
-	(replace \. \/)))
+	  (replace \- \_)
+	  (replace \. \/)))
 
 (defn- lib-path
   "Returns the resource path for a lib"
@@ -342,7 +342,7 @@
 
   The arguments and semantics for :exclude, :only, and :rename are those
   documented for clojure/refer.
-  
+
   A flag is a keyword.
   Recognized flags: :require, :use, :reload, :reload-all, :verbose
 
@@ -416,7 +416,7 @@
 
   The arguments and semantics for :exclude, :only, and :rename are those
   documented for clojure/refer.
-  
+
   A flag is a keyword.
   Recognized flags: :reload, :reload-all, :verbose
 
