@@ -7,6 +7,7 @@
 
 	<property name="src" location="src"/>
 	<property name="jsrc" location="${src}/jvm"/>
+	<property name="cljsrc" location="${src}/clj"/>
 	<property name="build" location="classes"/>
 	<property name="clojure_jar" location="clojure.jar"/>
 	<property name="bootclj" location="${src}/boot.clj"/>
@@ -24,7 +25,7 @@
 	<target name="jar" depends="compile"
 	        description="Create jar file.">
 		<jar jarfile="${clojure_jar}" basedir="${build}">
-			<fileset dir="${src}" includes="**/*.clj"/>
+			<fileset dir="${cljsrc}" includes="**/*.clj"/>
 			<manifest>
 				<attribute name="Main-Class" value="clojure.lang.Repl"/>
 				<attribute name="Class-Path" value="."/>
