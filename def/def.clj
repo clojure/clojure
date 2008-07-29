@@ -14,7 +14,7 @@
 ;;  scgilardi (gmail)
 ;;  17 May 2008
 
-(clojure/in-ns 'clojure-contrib.def)
+(clojure/in-ns 'clojure.contrib.def)
 (clojure/refer 'clojure)
 
 (defmacro init-once

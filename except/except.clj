@@ -11,10 +11,10 @@
 ;;  scgilardi (gmail)
 ;;  Created 07 July 2008
 
-(clojure/in-ns 'clojure-contrib.except)
+(clojure/in-ns 'clojure.contrib.except)
 (clojure/refer 'clojure)
 
-(clojure-contrib.lib/use '(clojure-contrib string))
+(clojure.contrib.lib/use '(clojure.contrib string))
 
 (defn throw-if
   "Throws an exception with a message if pred is true. Arguments are:

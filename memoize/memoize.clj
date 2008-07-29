@@ -14,7 +14,7 @@
 ;;  Based on Common Lisp code from:
 ;;  http://asymmetrical-view.com/talks/lisp-presentation/lisp-presentation.pdf
 
-(clojure/in-ns 'clojure-contrib.memoize)
+(clojure/in-ns 'clojure.contrib.memoize)
 (clojure/refer 'clojure)
 
 (defn memoize

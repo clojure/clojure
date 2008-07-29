@@ -13,7 +13,7 @@
 ;;  scgilardi (gmail)
 ;;  28 June 2008
 
-(clojure/in-ns 'clojure-contrib.pred)
+(clojure/in-ns 'clojure.contrib.pred)
 (clojure/refer 'clojure)
 
 (defn coll?

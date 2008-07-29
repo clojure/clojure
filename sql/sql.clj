@@ -13,7 +13,7 @@
 ;;  scgilardi (gmail)
 ;;  23 April 2008
 
-(clojure/in-ns 'clojure-contrib.sql)
+(clojure/in-ns 'clojure.contrib.sql)
 (clojure/refer 'clojure)
 
 (import '(java.sql DriverManager Connection PreparedStatement ResultSet))

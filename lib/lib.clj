@@ -27,40 +27,40 @@
 ;;  To load a namespace definition, lib.clj loads the namespace's 'root
 ;;  lib'. The root lib's name is derived from the namespace name by
 ;;  repeating the "leaf" portion of the namespace name. For example, the
-;;  root lib for the namespace 'clojure-contrib.def' is the lib named
-;;  'clojure-contrib.def.def'. It is contained in the resource:
+;;  root lib for the namespace 'clojure.contrib.def' is the lib named
+;;  'clojure.contrib.def.def'. It is contained in the resource:
 ;;
-;;    <classpath>/clojure-contrib/def/def.clj
+;;    <classpath>/clojure/contrib/def/def.clj
 ;;
-;;  The following code ensures that 'clojure-contrib.def and
-;;  'clojure-contrib.sql are loaded:
+;;  The following code ensures that 'clojure.contrib.def and
+;;  'clojure.contrib.sql are loaded:
 ;;
-;;    (require '(clojure-contrib def sql))
+;;    (require '(clojure.contrib def sql))
 ;;
 ;;  In cases where the complete namespace is defined in more than one lib
 ;;  all the libs should be contained within the hierarchy of directories
 ;;  under the namespace directory and the root lib must (drectly or
 ;;  indirectly) load the additional libs. For example, a hypothetical
-;;  namespace named 'clojure-contrib.math-funcs might be defined in
+;;  namespace named 'clojure.contrib.math-funcs might be defined in
 ;;  multiple libs contained in resources like these:
 ;;
-;;    <classpath>/clojure-contrib/math-funcs/math-funcs.clj
-;;    <classpath>/clojure-contrib/math-funcs/trig.clj
-;;    <classpath>/clojure-contrib/math-funcs/logarithms.clj
-;;    <classpath>/clojure-contrib/math-funcs/bessel.clj
-;;    <classpath>/clojure-contrib/math-funcs/inverses/trig.clj
-;;    <classpath>/clojure-contrib/math-funcs/inverses/logarithms.clj
+;;    <classpath>/clojure/contrib/math-funcs/math-funcs.clj
+;;    <classpath>/clojure/contrib/math-funcs/trig.clj
+;;    <classpath>/clojure/contrib/math-funcs/logarithms.clj
+;;    <classpath>/clojure/contrib/math-funcs/bessel.clj
+;;    <classpath>/clojure/contrib/math-funcs/inverses/trig.clj
+;;    <classpath>/clojure/contrib/math-funcs/inverses/logarithms.clj
 ;;
-;;  The following code ensures that 'clojure-contrib.math-funcs is loaded:
+;;  The following code ensures that 'clojure.contrib.math-funcs is loaded:
 ;;
-;;    (require '(clojure-contrib math-funcs))
+;;    (require '(clojure.contrib math-funcs))
 ;;
 ;;  This is the portion of math-funcs.clj that loads the remaining libs:
 ;;
-;;    (clojure/in-ns 'clojure-contrib.math-funcs)
+;;    (clojure/in-ns 'clojure.contrib.math-funcs)
 ;;
-;;    (clojure-contrib.lib/load-libs
-;;     '(clojure-contrib.math-funcs
+;;    (clojure.contrib.lib/load-libs
+;;     '(clojure.contrib.math-funcs
 ;;       trig logarithms bessel inverses.trig inverses.logarithms))
 ;;
 ;;  lib.clj also provides general functions for finding and loading
@@ -99,14 +99,14 @@
 ;;
 ;;  Examples
 ;;
-;;    (load-namespaces :require '(clojure-contrib sql sql.tests))
-;;    (require '(clojure-contrib sql sql.tests))
+;;    (load-namespaces :require '(clojure.contrib sql sql.tests))
+;;    (require '(clojure.contrib sql sql.tests))
 ;;
-;;    (load-namespaces :require :use '(clojure-contrib sql ns-utils) :verbose)
-;;    (use '(clojure-contrib sql ns-utils) :verbose)
+;;    (load-namespaces :require :use '(clojure.contrib sql ns-utils) :verbose)
+;;    (use '(clojure.contrib sql ns-utils) :verbose)
 ;;
 ;;    (use :reload-all :verbose
-;;      '(clojure-contrib
+;;      '(clojure.contrib
 ;;        (sql :exclude (get-connection)
 ;;             :rename {execute-commands do-commands})
 ;;        ns-utils))
@@ -117,7 +117,7 @@
 ;;  Thanks to Stuart Sierra for providing many useful ideas, discussions
 ;;  and code contributions for lib.clj.
 
-(clojure/in-ns 'clojure-contrib.lib)
+(clojure/in-ns 'clojure.contrib.lib)
 (clojure/refer 'clojure)
 
 (alias 'set 'clojure.set)
@@ -208,18 +208,25 @@
               (load-one sym url ns require)
               @*namespaces*))))
 
+(defn- name-path
+  "Returns a classpath-relative path given the name of a symbol"
+  [name]
+  (.. name
+	(replace \- \_)
+	(replace \. \/)))
+
 (defn- lib-path
   "Returns the resource path for a lib"
   [lib-sym]
-  (str (.replace (name lib-sym) \. \/) ".clj"))
+  (str (name-path (name lib-sym)) ".clj"))
 
 (defn- root-lib-path
   "Returns the resource path for a namespace root lib"
   [ns-sym]
-  (let [n (name ns-sym)
-        index (inc (.lastIndexOf n (int \.)))
-        leaf (.substring n index)]
-    (str (.replace n \. \/) \/ leaf ".clj")))
+  (let [n (name-path (name ns-sym))
+        i (inc (.lastIndexOf n (int \/)))
+        leaf (.substring n i)]
+    (str n \/ leaf ".clj")))
 
 (defn- load-lib
   "Loads a lib with options: sequential keywords and arguments."
@@ -245,7 +252,7 @@
       (when load
         (throw-if (not url) "'%s' not found in classpath" path)
         (when *verbose*
-          (printf "(clojure-contrib.lib/load-resource \"%s\")\n" url)
+          (printf "(clojure.contrib.lib/load-resource \"%s\")\n" url)
           (flush))
         (load sym url namespace require))
       (when namespace

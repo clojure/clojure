@@ -13,7 +13,7 @@
 ;;  scgilardi (gmail)
 ;;  Created: 6 July 2008
 
-(clojure/in-ns 'clojure-contrib.string)
+(clojure/in-ns 'clojure.contrib.string)
 (clojure/refer 'clojure)
 
 ;; until Clojure supports "..." arguments, calling String/format directly
