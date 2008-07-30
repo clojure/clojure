@@ -36,12 +36,12 @@ static public Def createSlotMap(ISeq keys){
 	if(keys == null)
 		throw new IllegalArgumentException("Must supply keys");
 	PersistentHashMap ret = PersistentHashMap.EMPTY;
-	int i=0;
-	for(ISeq s = keys; s != null; s = s.rest(),i++)
+	int i = 0;
+	for(ISeq s = keys; s != null; s = s.rest(), i++)
 		{
 		ret = (PersistentHashMap) ret.assoc(s.first(), i);
 		}
-	return new Def(keys,ret);
+	return new Def(keys, ret);
 }
 
 static public PersistentStructMap create(Def def, ISeq keyvals){
@@ -65,7 +65,7 @@ static public PersistentStructMap create(Def def, ISeq keyvals){
 static public PersistentStructMap construct(Def def, ISeq valseq){
 	Object[] vals = new Object[def.keyslots.count()];
 	IPersistentMap ext = PersistentHashMap.EMPTY;
-	for(int i=0;i<vals.length && valseq != null; valseq = valseq.rest(),i++)
+	for(int i = 0; i < vals.length && valseq != null; valseq = valseq.rest(), i++)
 		{
 		vals[i] = valseq.first();
 		}
@@ -91,18 +91,28 @@ static public IFn getAccessor(final Def def, Object key){
 	throw new IllegalArgumentException("Not a key of struct");
 }
 
-PersistentStructMap(IPersistentMap meta, Def def, Object[] vals, IPersistentMap ext){
+protected PersistentStructMap(IPersistentMap meta, Def def, Object[] vals, IPersistentMap ext){
 	super(meta);
 	this.ext = ext;
 	this.def = def;
 	this.vals = vals;
 }
 
+/**
+ * Returns a new instance of PersistentStructMap using the given parameters.
+ * This function is used instead of the PersistentStructMap constructor by
+ * all methods that return a new PersistentStructMap.  This is done so as to
+ * allow subclasses to return instances of their class from all
+ * PersistentStructMap methods.
+ */
+protected PersistentStructMap makeNew(IPersistentMap meta, Def def, Object[] vals, IPersistentMap ext){
+	return new PersistentStructMap(meta, def, vals, ext);
+}
 
 public Obj withMeta(IPersistentMap meta){
 	if(meta == _meta)
 		return this;
-	return new PersistentStructMap(meta, def, vals, ext);
+	return makeNew(meta, def, vals, ext);
 }
 
 public boolean containsKey(Object key){
@@ -125,9 +135,9 @@ public IPersistentMap assoc(Object key, Object val){
 		int i = (Integer) e.getValue();
 		Object[] newVals = vals.clone();
 		newVals[i] = val;
-		return new PersistentStructMap(_meta, def, newVals, ext);
+		return makeNew(_meta, def, newVals, ext);
 		}
-	return new PersistentStructMap(_meta, def, vals, ext.assoc(key, val));
+	return makeNew(_meta, def, vals, ext.assoc(key, val));
 }
 
 public Object valAt(Object key){
@@ -161,7 +171,7 @@ public IPersistentMap without(Object key) throws Exception{
 	IPersistentMap newExt = ext.without(key);
 	if(newExt == ext)
 		return this;
-	return new PersistentStructMap(_meta, def, vals, newExt);
+	return makeNew(_meta, def, vals, newExt);
 }
 
 public Iterator iterator(){
