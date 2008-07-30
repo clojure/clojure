@@ -281,7 +281,7 @@
         (. gen putStatic ctype (var-name v) var-type))
       
       (. gen push ctype)
-      (. gen push (str (. name replace \. (. java.io.File separatorChar)) ".clj"))
+      (. gen push (str (. name replace \. \/) ".clj"))
       (. gen (invokeStatic rt-type (. Method (getMethod "void loadResourceScript(Class,String)"))))
       
       (. gen (returnValue))
