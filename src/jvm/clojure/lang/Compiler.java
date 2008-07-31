@@ -1687,7 +1687,8 @@ static class TryExpr implements Expr{
 
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
-			if(context == C.EVAL || context == C.EXPRESSION)
+//			if(context == C.EVAL || context == C.EXPRESSION)
+			if(context != C.RETURN)
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
 			//(try try-expr* catch-expr* finally-expr?)
@@ -2695,7 +2696,7 @@ static public class FnExpr implements Expr{
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
 		fn.simpleName = ((name != null ?
-		                  munge(name) : "fn")
+		                  munge(name).replace(".", "_DOT_") : "fn")
 		                 + "__" + RT.nextID());
 		fn.name = basename + fn.simpleName;
 		fn.internalName = fn.name.replace('.', '/');
