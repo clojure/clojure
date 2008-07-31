@@ -455,9 +455,9 @@ static public Object applyToHelper(IFn ifn, ISeq arglist) throws Exception{
 }
 
 public Object throwArity(){
-	String name =  getClass().getSimpleName();
+	String name = getClass().getSimpleName();
 	int suffix = name.lastIndexOf("__");
 	throw new IllegalArgumentException("Wrong number of args passed to: "
-	                                   + (suffix == -1?name:name.substring(0,suffix)));
+	                                   + (suffix == -1 ? name : name.substring(0, suffix)).replace('_', '-'));
 }
 }
