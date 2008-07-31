@@ -1124,8 +1124,8 @@ static class InstanceMethodExpr extends MethodExpr{
 			{
 			Type type = Type.getType(method.getDeclaringClass());
 			target.emit(C.EXPRESSION, fn, gen);
-//			if(!method.getDeclaringClass().isInterface())
-			gen.checkCast(type);
+			if(!method.getDeclaringClass().isInterface())
+				gen.checkCast(type);
 			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
