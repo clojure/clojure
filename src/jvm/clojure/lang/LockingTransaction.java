@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Callable;
 
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class LockingTransaction{
@@ -187,18 +188,18 @@ static LockingTransaction getRunning(){
 	return t;
 }
 
-static public Object runInTransaction(IFn fn) throws Exception{
+static public Object runInTransaction(Callable fn) throws Exception{
 	LockingTransaction t = transaction.get();
 	if(t == null)
 		transaction.set(t = new LockingTransaction());
 
 	if(t.info != null)
-		return fn.invoke();
+		return fn.call();
 
 	return t.run(fn);
 }
 
-Object run(IFn fn) throws Exception{
+Object run(Callable fn) throws Exception{
 	boolean done = false;
 	Object ret = null;
 	ArrayList<Ref> locked = new ArrayList<Ref>();
@@ -214,7 +215,7 @@ Object run(IFn fn) throws Exception{
 				startTime = System.nanoTime();
 				}
 			info = new Info(RUNNING, startPoint);
-			ret = fn.invoke();
+			ret = fn.call();
 			//make sure no one has killed us before this point, and can't from now on
 			if(info.status.compareAndSet(RUNNING, COMMITTING))
 				{
