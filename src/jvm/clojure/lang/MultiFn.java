@@ -112,8 +112,7 @@ private IFn findAndCacheBestMethod(Object dispatchVal) throws Exception{
 			}
 		}
 	if(bestEntry == null)
-		throw new IllegalArgumentException(String.format("No method for dispatch value: %s", dispatchVal));
-
+		return null;
 	//ensure basis has stayed stable throughout, else redo
 	if(cachedHierarchy == hierarchy.get())
 		{
