@@ -3,29 +3,29 @@
          xmlns:xsi="http//www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>jvm.clojure</groupId>
-  <artifactId>clojure-lang</artifactId>
-  <name>clojure-lang</name>
-  <version>1.0-SNAPSHOT</version>
-  <url>http://clojure.sourceforge.net/</url>
-  <build>
-    <sourceDirectory>src/jvm</sourceDirectory>
-    <scriptSourceDirectory>src</scriptSourceDirectory>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-          <optimize>true</optimize>
-        </configuration>
-      </plugin>
-    </plugins>
-    <resources>
-      <resource>
-        <directory>src/</directory>
-      </resource>
-    </resources>
-  </build>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>jvm.clojure</groupId>
+	<artifactId>clojure-lang</artifactId>
+	<name>clojure-lang</name>
+	<version>1.0-SNAPSHOT</version>
+	<url>http://clojure.org/</url>
+	<build>
+		<sourceDirectory>src/jvm</sourceDirectory>
+		<scriptSourceDirectory>src/clj</scriptSourceDirectory>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+					<optimize>true</optimize>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/clj/</directory>
+			</resource>
+		</resources>
+	</build>
 </project>
