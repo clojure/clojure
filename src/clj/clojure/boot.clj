@@ -2429,7 +2429,7 @@ not-every? (comp not every?))
 
 (defn class
   "Returns the Class of x"
-  [#^Object x] (. x (getClass)))
+  [#^Object x] (if (nil? x) x (. x (getClass))))
 
 (defn slurp
   "Reads the file named by f into a string and returns it."
