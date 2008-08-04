@@ -1732,7 +1732,9 @@ static class TryExpr implements Expr{
 						try
 							{
 							Var.pushThreadBindings(dynamicBindings);
-							LocalBinding lb = registerLocal(sym, null, null);
+							LocalBinding lb = registerLocal(sym,
+							                                (Symbol) (RT.second(f) instanceof Symbol ? RT.second(f)
+							                                          : null), null);
 							Expr handler = (new BodyExpr.Parser()).parse(context, RT.rest(RT.rest(RT.rest(f))));
 							catches = catches.cons(new CatchClause(c, lb, handler));
 							}
