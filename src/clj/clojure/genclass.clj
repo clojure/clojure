@@ -375,12 +375,15 @@
                                                                (. m (getName))
                                                                (. m (getDescriptor)))))))
                                         ;add methods matching interfaces', if no fn -> throw
-       (doseq #^Class iface interfaces
-              (doseq #^java.lang.reflect.Method meth (. iface (getMethods))
-                     (when-not (contains? mm (method-sig meth))
-                       (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
-                                               (fn [gen m]
-                                                 (. gen (throwException ex-type (. m (getName)))))))))
+      (reduce (fn [mm meth]
+                (if (contains? mm (method-sig meth))
+                  mm
+                  (do
+                    (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
+                                            (fn [gen m]
+                                              (. gen (throwException ex-type (. m (getName))))))
+                    (assoc mm (method-sig meth) meth))))
+              mm (mapcat #(.getMethods %) interfaces))
                                         ;extra methods
        (doseq [mname pclasses rclass :as msig] methods
          (emit-forwarding-method (str mname) pclasses rclass (:static ^msig)
