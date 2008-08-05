@@ -231,7 +231,7 @@
 (defn- load-lib
   "Loads a lib with options: sequential keywords and arguments."
   [prefix sym & options]
-  (let [sym (symbol (str prefix \. sym))
+  (let [sym (symbol (str prefix (when prefix \.) sym))
         opts (apply hash-map options)
         raw (:raw opts)
         reload (:reload opts)
