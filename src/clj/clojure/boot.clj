@@ -413,6 +413,7 @@
   {:tag Boolean
    :inline (fn [x y] `(. clojure.lang.Util equal ~x ~y))
    :inline-arities #{2}} 
+  ([x] true)
   ([x y] (. clojure.lang.Util (equal x y)))
   ([x y & more]
    (if (= x y)
@@ -424,6 +425,7 @@
 (defn not=
   "Same as (not (= obj1 obj2))"
   {:tag Boolean}
+  ([x] false)
   ([x y] (not (= x y)))
   ([x y & more]
    (not (apply = x y more))))
@@ -2875,8 +2877,9 @@ not-every? (comp not every?))
 
 
 (defn none=
-  "Returns true if none of the arguments are equal"
+  "Returns true if no two of the arguments are equal"
   {:tag Boolean}
+  ([x] true)
   ([x y] (not (= x y)))
   ([x y & more]
    (if (not= x y)
