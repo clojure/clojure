@@ -364,8 +364,9 @@
         (apply load-lib nil nsarg flag-opts)
         (let [[prefix & nsspecs] nsarg]
           (doseq nsspec nsspecs
-            (let [combine (if (symbol? nsspec) cons concat)]
-              (apply load-lib prefix (combine nsspec flag-opts)))))))))
+            (if (symbol? nsspec)
+              (apply load-lib prefix nsspec flag-opts)
+              (apply load-lib prefix (concat nsspec flag-opts)))))))))
 
 (defn namespaces
   "Returns a sorted set of symbols naming loaded namespaces"
