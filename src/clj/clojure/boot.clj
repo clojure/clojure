@@ -405,19 +405,30 @@
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 (defn =
-  "Equality. Returns true if obj1 equals obj2, false if not. Same as
-  Java obj1.equals(obj2) except it also works for nil, and compares
+  "Equality. Returns true if x equals y, false if not. Same as
+  Java x.equals(y) except it also works for nil, and compares
   numbers in a type-independent manner.  Clojure's immutable data
   structures define equals() (and thus =) as a value, not an identity,
   comparison."
   {:tag Boolean
-   :inline (fn [x y] `(. clojure.lang.Util equal ~x ~y))} 
-  [x y] (. clojure.lang.Util (equal x y)))
+   :inline (fn [x y] `(. clojure.lang.Util equal ~x ~y))
+   :inline-arities #{2}} 
+  ([x y] (. clojure.lang.Util (equal x y)))
+  ([x y & more]
+   (if (= x y)
+     (if (rest more)
+       (recur y (first more) (rest more))
+       (= y (first more)))
+     false)))
 
 (defn not=
   "Same as (not (= obj1 obj2))"
   {:tag Boolean}
-  [x y] (not (= x y)))
+  ([x y] (not (= x y)))
+  ([x y & more]
+   (not (apply = x y more))))
+
+
 
 (defn compare
   "Comparator. Returns 0 if x equals y, -1 if x is logically 'less
@@ -2861,3 +2872,18 @@ not-every? (comp not every?))
         :ancestors (tf (:ancestors h) tag td parent ta)
         :descendants (tf (:descendants h) parent ta tag td)}
        h))))
+
+
+(defn none=
+  "Returns true if none of the arguments are equal"
+  {:tag Boolean}
+  ([x y] (not (= x y)))
+  ([x y & more]
+   (if (not= x y)
+     (loop [s #{x y} [x & etc :as xs] more]
+       (if xs
+         (if (contains? s x)
+           false
+           (recur (conj s x) etc))
+         true))
+     false)))
