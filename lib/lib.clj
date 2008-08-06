@@ -360,13 +360,19 @@
         flags (filter keyword? args)
         flag-opts (interleave flags (repeat true))]
     (doseq nsarg nsargs
-      (if (symbol? nsarg)
-        (apply load-lib nil nsarg flag-opts)
-        (let [[prefix & nsspecs] nsarg]
-          (doseq nsspec nsspecs
-            (if (symbol? nsspec)
-              (apply load-lib prefix nsspec flag-opts)
-              (apply load-lib prefix (concat nsspec flag-opts)))))))))
+      (cond (symbol? nsarg)
+            (apply load-lib nil nsarg flag-opts)
+            (nil? (second nsarg))
+            (apply load-lib nil (first nsarg) flag-opts)
+            (keyword? (second nsarg))
+            (apply load-lib nil (concat nsarg flag-opts))
+            :else
+            (let [[prefix & nsspecs] nsarg]
+              (throw-if (not prefix) "prefix cannot be nil")
+              (doseq nsspec nsspecs
+                (if (symbol? nsspec)
+                  (apply load-lib prefix nsspec flag-opts)
+                  (apply load-lib prefix (concat nsspec flag-opts)))))))))
 
 (defn namespaces
   "Returns a sorted set of symbols naming loaded namespaces"
