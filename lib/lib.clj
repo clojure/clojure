@@ -356,14 +356,16 @@
     indirectly load via load-namespaces/require/use
   :verbose triggers printing information about each load and refer"
   [& args]
-  (let [nsgroupspecs (filter (complement keyword?) args)
+  (let [nsargs (filter (complement keyword?) args)
         flags (filter keyword? args)
         flag-opts (interleave flags (repeat true))]
-    (doseq nsgroupspec nsgroupspecs
-      (let [[prefix & nsspecs] nsgroupspec]
-        (doseq nsspec nsspecs
-          (let [combine (if (symbol? nsspec) cons concat)]
-            (apply load-lib prefix (combine nsspec flag-opts))))))))
+    (doseq nsarg nsargs
+      (if (symbol? nsarg)
+        (apply load-lib nil nsarg flag-opts)
+        (let [[prefix & nsspecs] nsarg]
+          (doseq nsspec nsspecs
+            (let [combine (if (symbol? nsspec) cons concat)]
+              (apply load-lib prefix (combine nsspec flag-opts)))))))))
 
 (defn namespaces
   "Returns a sorted set of symbols naming loaded namespaces"
