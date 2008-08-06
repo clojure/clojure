@@ -3912,6 +3912,8 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 	if(o instanceof Var)
 		{
 		Var v = (Var) o;
+		if(isMacro(v) != null)
+			throw new Exception("Can't take value of a macro: " + v);
 		registerVar(v);
 		return new VarExpr(v, tag);
 		}
