@@ -282,7 +282,8 @@
       
       (. gen push ctype)
       (. gen push (str (. name replace \. \/) ".clj"))
-      (. gen (invokeStatic rt-type (. Method (getMethod "void loadResourceScript(Class,String)"))))
+      (. gen push 0)
+      (. gen (invokeStatic rt-type (. Method (getMethod "void loadResourceScript(Class,String,boolean)"))))
       
       (. gen (returnValue))
       (. gen (endMethod)))

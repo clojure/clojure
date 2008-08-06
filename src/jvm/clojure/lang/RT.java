@@ -324,11 +324,27 @@ static public Var var(String ns, String name){
 	return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name));
 }
 
+static public Var var(String ns, String name, Object init){
+	return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name), init);
+}
+
 public static void loadResourceScript(String name) throws Exception{
-	loadResourceScript(RT.class, name);
+	loadResourceScript(name, true);
+}
+
+public static void maybeLoadResourceScript(String name) throws Exception{
+	loadResourceScript(name, false);
+}
+
+public static void loadResourceScript(String name, boolean failIfNotFound) throws Exception{
+	loadResourceScript(RT.class, name, failIfNotFound);
 }
 
 public static void loadResourceScript(Class c, String name) throws Exception{
+	loadResourceScript(c, name, true);
+}
+
+public static void loadResourceScript(Class c, String name, boolean failIfNotFound) throws Exception{
 	int slash = name.lastIndexOf('/');
 	String file = slash >= 0 ? name.substring(slash + 1) : name;
 	InputStream ins = c.getResourceAsStream("/" + name);
@@ -336,6 +352,10 @@ public static void loadResourceScript(Class c, String name) throws Exception{
 		{
 		Compiler.load(new InputStreamReader(ins), name, file);
 		ins.close();
+		}
+	else if(failIfNotFound)
+		{
+		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + name);
 		}
 }
 
@@ -345,11 +365,11 @@ static public void init() throws Exception{
 
 static void doInit() throws Exception{
 	loadResourceScript(RT.class, "clojure/boot.clj");
-	loadResourceScript(RT.class, "clojure/proxy.clj");
-	loadResourceScript(RT.class, "clojure/genclass.clj");
-	loadResourceScript(RT.class, "clojure/zip/zip.clj");
-	loadResourceScript(RT.class, "clojure/xml/xml.clj");
-	loadResourceScript(RT.class, "clojure/set/set.clj");
+	loadResourceScript(RT.class, "clojure/proxy.clj", false);
+	loadResourceScript(RT.class, "clojure/genclass.clj", false);
+	loadResourceScript(RT.class, "clojure/zip/zip.clj", false);
+	loadResourceScript(RT.class, "clojure/xml/xml.clj", false);
+	loadResourceScript(RT.class, "clojure/set/set.clj", false);
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.get(),
@@ -363,7 +383,7 @@ static void doInit() throws Exception{
 		Var refer = var("clojure", "refer");
 		in_ns.invoke(USER);
 		refer.invoke(CLOJURE);
-		loadResourceScript(RT.class, "user.clj");
+		maybeLoadResourceScript("user.clj");
 		}
 	finally
 		{
