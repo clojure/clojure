@@ -10,9 +10,7 @@
 
 package clojure.lang;
 
-import java.util.List;
-import java.util.ListIterator;
-import java.util.LinkedList;
+import java.util.*;
 
 public class PersistentList extends ASeq implements IPersistentList, IReduce{
 
@@ -33,7 +31,7 @@ public static IFn creator = new RestFn(0){
 		LinkedList list = new LinkedList();
 		for(ISeq s = RT.seq(args); s != null; s = s.rest())
 			list.add(s.first());
-		 return create(list);
+		return create(list);
 	}
 };
 
@@ -91,7 +89,7 @@ public PersistentList cons(Object o){
 }
 
 public IPersistentCollection empty(){
-	return EMPTY.withMeta(meta());	
+	return EMPTY.withMeta(meta());
 }
 
 public PersistentList withMeta(IPersistentMap meta){
@@ -114,7 +112,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 	return ret;
 }
 
-static class EmptyList extends Obj implements IPersistentList{
+static class EmptyList extends Obj implements IPersistentList, Collection{
 
 	EmptyList(IPersistentMap meta){
 		super(meta);
@@ -148,6 +146,74 @@ static class EmptyList extends Obj implements IPersistentList{
 
 	public ISeq seq(){
 		return null;
+	}
+
+
+	public int size(){
+		return 0;
+	}
+
+	public boolean isEmpty(){
+		return true;
+	}
+
+	public boolean contains(Object o){
+		return false;
+	}
+
+	public Iterator iterator(){
+		return new Iterator(){
+
+			public boolean hasNext(){
+				return false;
+			}
+
+			public Object next(){
+				throw new NoSuchElementException();
+			}
+
+			public void remove(){
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
+
+	public Object[] toArray(){
+		return RT.EMPTY_ARRAY;
+	}
+
+	public boolean add(Object o){
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean remove(Object o){
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean addAll(Collection collection){
+		throw new UnsupportedOperationException();
+	}
+
+	public void clear(){
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean retainAll(Collection collection){
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean removeAll(Collection collection){
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean containsAll(Collection collection){
+		return collection.isEmpty();
+	}
+
+	public Object[] toArray(Object[] objects){
+		if(objects.length > 0)
+			objects[0] = null;
+		return objects;
 	}
 }
 
