@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.*;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable, Collection, List,
-                                                               RandomAccess{
+                                                               RandomAccess, Comparable{
 int _hash = -1;
 
 public APersistentVector(IPersistentMap meta){
@@ -94,15 +94,15 @@ public Object remove(int i){
 }
 
 public int indexOf(Object o){
-	for(int i=0;i<count();i++)
-		if(Util.equal(nth(i),o))
+	for(int i = 0; i < count(); i++)
+		if(Util.equal(nth(i), o))
 			return i;
 	return -1;
 }
 
 public int lastIndexOf(Object o){
-	for(int i=count()-1;i>=0;i--)
-		if(Util.equal(nth(i),o))
+	for(int i = count() - 1; i >= 0; i--)
+		if(Util.equal(nth(i), o))
 			return i;
 	return -1;
 }
@@ -116,7 +116,7 @@ public ListIterator listIterator(final int index){
 		int nexti = index;
 
 		public boolean hasNext(){
-			return nexti < count()-1;
+			return nexti < count() - 1;
 		}
 
 		public Object next(){
@@ -150,7 +150,7 @@ public ListIterator listIterator(final int index){
 		public void add(Object o){
 			throw new UnsupportedOperationException();
 		}
-	} ;
+	};
 }
 
 public List subList(int fromIndex, int toIndex){
@@ -316,6 +316,21 @@ public int length(){
 	return count();
 }
 
+public int compareTo(Object o){
+	IPersistentVector v = (IPersistentVector) o;
+	if(count() < v.count())
+		return -1;
+	else if(count() > v.count())
+		return 1;
+	for(int i = 0; i < count(); i++)
+		{
+		int c = ((Comparable) nth(i)).compareTo(v.nth(i));
+		if(c != 0)
+			return c;
+		}
+	return 0;
+}
+
 static class Seq extends ASeq implements IndexedSeq, IReduce{
 	//todo - something more efficient
 	final IPersistentVector v;
@@ -444,7 +459,7 @@ static class SubVector extends APersistentVector{
 	}
 
 	public IPersistentCollection empty(){
-		return PersistentVector.EMPTY.withMeta(meta());		
+		return PersistentVector.EMPTY.withMeta(meta());
 	}
 
 	public IPersistentStack pop(){
