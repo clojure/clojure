@@ -259,9 +259,8 @@
         (when *verbose*
           (printf "(clojure/in-ns '%s)\n" (ns-name *ns*))
           (printf "(clojure/refer '%s" namespace)
-          (dorun (map
-                  #(printf " %s '%s" (key %) (print-str (val %)))
-                  filter-opts))
+          (doseq opt filter-opts
+            (printf " %s '%s" (key opt) (print-str (val opt))))
           (printf ")\n"))
         (apply refer namespace (mapcat seq filter-opts))))))
 
