@@ -9,7 +9,7 @@
 ; Functions for generating interface classes, which can then be loaded
 ; or saved to a .class file.
 
-(clojure/in-ns 'gen-interface)
+(clojure/in-ns 'clojure.contrib.gen-interface)
 (clojure/refer 'clojure)
 
 (import '(clojure.asm ClassWriter Opcodes Type)
