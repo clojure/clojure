@@ -4100,7 +4100,7 @@ public static Object loadFile(String file) throws Exception{
 	FileInputStream f = new FileInputStream(file);
 	try
 		{
-		return load(new InputStreamReader(f), new File(file).getAbsolutePath(), (new File(file)).getName());
+		return load(new InputStreamReader(f,RT.UTF8), new File(file).getAbsolutePath(), (new File(file)).getName());
 		}
 	finally
 		{

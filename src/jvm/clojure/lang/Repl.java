@@ -53,7 +53,7 @@ public static void main(String[] args) throws Exception{
 				}
 
 		//repl IO support
-		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in));
+		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in,RT.UTF8));
 		OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
 		Object EOF = new Object();
 

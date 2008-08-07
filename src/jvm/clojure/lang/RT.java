@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 public class RT{
 
@@ -160,14 +161,16 @@ Symbol.create("SuppressWarnings"), SuppressWarnings.class
 //                                                  Symbol.create("SortedSet"), "java.util.SortedSet"
 );
 
+// single instance of UTF-8 Charset, so as to avoid catching UnsupportedCharsetExceptions everywhere
+static public Charset UTF8 = Charset.forName("UTF-8");
 
 static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure"));
 //static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
 final static public Var OUT =
-		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out));
+		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out,UTF8));
 final static public Var IN =
 		Var.intern(CLOJURE_NS, Symbol.create("*in*"),
-		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
+		           new LineNumberingPushbackReader(new InputStreamReader(System.in,UTF8)));
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
 final static public Var MACRO_META = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
@@ -350,7 +353,7 @@ public static void loadResourceScript(Class c, String name, boolean failIfNotFou
 	InputStream ins = c.getResourceAsStream("/" + name);
 	if(ins != null)
 		{
-		Compiler.load(new InputStreamReader(ins), name, file);
+		Compiler.load(new InputStreamReader(ins,UTF8), name, file);
 		ins.close();
 		}
 	else if(failIfNotFound)
