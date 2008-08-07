@@ -190,10 +190,10 @@
   "Loads one lib from a resoure and ensures that namespace ns (if
   not nil) exists. If require is true, also records the load so
   a duplicate load will be skipped."
-  [sym url ns require]
+  [sym url require use]
   (load-resource url)
-  (throw-if (and ns (not (find-ns ns)))
-            "namespace '%s' not found after loading '%s'" ns url)
+  (throw-if (and use (not (find-ns sym)))
+            "namespace '%s' not found after loading '%s'" sym url)
   (when require
     (dosync
      (commute *namespaces* conj sym))))
@@ -201,11 +201,11 @@
 (defn- load-all
   "Loads a lib from a resource and forces a load of any libs which it
   directly or indirectly loads via require/use/load-namespaces"
-  [sym url ns require]
+  [sym url require use]
   (dosync
    (commute *namespaces* set/union
             (binding [*namespaces* (ref (sorted-set))]
-              (load-one sym url ns require)
+              (load-one sym url require use)
               @*namespaces*))))
 
 (defn- name-path
@@ -233,6 +233,7 @@
   [prefix sym & options]
   (let [sym (symbol (str prefix (when prefix \.) sym))
         opts (apply hash-map options)
+        as (:as opts)
         raw (:raw opts)
         reload (:reload opts)
         reload-all (:reload-all opts)
@@ -244,7 +245,6 @@
                    load-all
                    (or raw reload (not require) (not loaded))
                    load-one)
-        namespace (when use sym)
         path ((if raw lib-path root-lib-path) sym)
         url (find-resource path)
         filter-opts (select-keys opts *filter-keys*)]
@@ -254,15 +254,17 @@
         (when *verbose*
           (printf "(clojure.contrib.lib/load-resource \"%s\")\n" url)
           (flush))
-        (load sym url namespace require))
-      (when namespace
+        (load sym url require use))
+      (when as
+        (alias as sym))
+      (when use
         (when *verbose*
           (printf "(clojure/in-ns '%s)\n" (ns-name *ns*))
-          (printf "(clojure/refer '%s" namespace)
+          (printf "(clojure/refer '%s" sym)
           (doseq opt filter-opts
             (printf " %s '%s" (key opt) (print-str (val opt))))
           (printf ")\n"))
-        (apply refer namespace (mapcat seq filter-opts))))))
+        (apply refer sym (mapcat seq filter-opts))))))
 
 ;; Resources
 
