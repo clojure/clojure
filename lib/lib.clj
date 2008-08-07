@@ -312,13 +312,16 @@
     directly or indirectly load via load-namespaces/require/use
   :verbose triggers printing information about each load and refer"
   [& args]
-  (let [libgroupspecs (filter (complement keyword?) args)
+  (let [libargs (filter (complement keyword?) args)
         flags (filter keyword? args)
         flag-opts (interleave flags (repeat true))]
-    (doseq libgroupspec libgroupspecs
-      (let [[prefix & libspecs] libgroupspec]
-        (doseq libspec libspecs
-          (apply load-lib prefix libspec :raw true flag-opts))))))
+    (doseq libarg libargs
+      (if (symbol? libarg)
+        (apply load-lib nil libarg :raw true flag-opts)
+        (let [[prefix & libspecs] libarg]
+          (throw-if (not prefix) "prefix cannot be nil")
+          (doseq libspec libspecs
+            (apply load-lib prefix libspec :raw true flag-opts)))))))
 
 ;; Namespaces
 
