@@ -190,9 +190,9 @@
   "Loads one lib from a resoure and ensures that namespace ns (if
   not nil) exists. If require is true, also records the load so
   a duplicate load will be skipped."
-  [sym url require use]
+  [sym url require need-ns]
   (load-resource url)
-  (throw-if (and use (not (find-ns sym)))
+  (throw-if (and need-ns (not (find-ns sym)))
             "namespace '%s' not found after loading '%s'" sym url)
   (when require
     (dosync
@@ -201,11 +201,11 @@
 (defn- load-all
   "Loads a lib from a resource and forces a load of any libs which it
   directly or indirectly loads via require/use/load-namespaces"
-  [sym url require use]
+  [sym url require need-ns]
   (dosync
    (commute *namespaces* set/union
             (binding [*namespaces* (ref (sorted-set))]
-              (load-one sym url require use)
+              (load-one sym url require need-ns)
               @*namespaces*))))
 
 (defn- name-path
@@ -245,6 +245,7 @@
                    load-all
                    (or raw reload (not require) (not loaded))
                    load-one)
+        need-ns (or as use)
         path ((if raw lib-path root-lib-path) sym)
         url (find-resource path)
         filter-opts (select-keys opts *filter-keys*)]
@@ -254,7 +255,9 @@
         (when *verbose*
           (printf "(clojure.contrib.lib/load-resource \"%s\")\n" url)
           (flush))
-        (load sym url require use))
+        (load sym url require need-ns))
+      (throw-if (and need-ns (not (find-ns sym)))
+                "namespace '%s' not found" sym)
       (when as
         (alias as sym))
       (when use
