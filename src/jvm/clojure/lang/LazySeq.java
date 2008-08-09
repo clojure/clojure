@@ -13,65 +13,44 @@
 package clojure.lang;
 
 public class LazySeq extends ASeq{
+final IFn f;
 
-IFn _firstFn;
-Object _first;
-IFn _restFn;
-ISeq _rest;
-
-public LazySeq(IFn firstFn, IFn restFn){
-	this._firstFn = firstFn;
-	this._restFn = restFn;
-	this._first = null;
-	this._rest = null;
+public LazySeq(IFn f){
+	this.f = f;
 }
 
-LazySeq(IPersistentMap meta, Object first, ISeq rest){
+public Object first(){
+	try
+		{
+		return f.invoke();
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
+
+public ISeq rest(){
+	try
+		{
+		return (ISeq) f.invoke(null);
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
+
+LazySeq(IPersistentMap meta, IFn f){
 	super(meta);
-	this._first = first;
-	this._rest = rest;
+	this.f = f;
 }
 
-synchronized public Object first(){
-	if(_firstFn != null)
-		{
-		try
-			{
-			_first = _firstFn.invoke();
-			}
-		catch(Exception ex)
-			{
-			throw new RuntimeException(ex);
-			}
-		_firstFn = null;
-		}
-	return _first;
-}
-
-synchronized public ISeq rest(){
-	//force sequential evaluation
-	first();
-	if(_restFn != null)
-		{
-		try
-			{
-			_rest = RT.seq(_restFn.invoke());
-			}
-		catch(Exception ex)
-			{
-			throw new RuntimeException(ex);
-			}
-		_restFn = null;
-		}
-	return _rest;
-}
-
-synchronized public LazySeq withMeta(IPersistentMap meta){
+public Obj withMeta(IPersistentMap meta){
 	if(meta == meta())
 		return this;
-	//force before copying
-	rest();
-	return new LazySeq(meta, _first, _rest);
+	return new LazySeq(meta, f);
 }
+
 
 }

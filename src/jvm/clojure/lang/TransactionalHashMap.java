@@ -22,8 +22,13 @@ IPersistentMap mapAt(int bin){
 	return (IPersistentMap) bins[bin].get();
 }
 
-int binFor(Object k){
-	return k.hashCode() % bins.length;
+final int binFor(Object k){
+	//spread hashes, a la Cliff Click
+	int h = k.hashCode();
+	h ^= (h >>> 20) ^ (h >>> 12);
+	h ^= (h >>> 7) ^ (h >>> 4);
+	return h % bins.length;
+//	return k.hashCode() % bins.length;
 }
 
 Entry entryAt(Object k){

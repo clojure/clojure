@@ -369,11 +369,19 @@
     (spread (cons item more)))
 
 (defmacro delay
-  "Takes a body of expressions and yields a function than will invoke
-  the body only the first time it is called, and will cache the result
-  and return it on all calls"
+  "Takes a body of expressions and yields a Delay object than will
+  invoke the body only the first time it is forced (with force), and
+  will cache the result and return it on all subsequent force calls"
   [& body] 
     (list 'new 'clojure.lang.Delay (list* `fn [] body)))
+
+(defn delay? 
+  "returns true if x is a Delay created with delay"
+  [x] (instance? clojure.lang.Delay x))
+
+(defn force
+  "If x is a Delay, returns the (possibly cached) value of its expression, else returns x"
+  [x] (. clojure.lang.Delay (force x)))
 
 (defn fnseq
   "Returns a seq object whose first is first and whose rest is the
@@ -392,7 +400,17 @@
   same node of the seq evaluates first/rest-expr once - the values they yield are
   cached."
  [first-expr & rest-expr]
-  (list 'new 'clojure.lang.LazySeq (list `fn [] first-expr) (list* `fn [] rest-expr)))
+  (list 'new 'clojure.lang.LazyCons (list `fn [] first-expr) (list* `fn [] rest-expr)))
+
+(defmacro lazy-seq
+  "Expands to code which produces a seq object whose first is the
+  value of first-expr and whose rest is the value of rest-expr,
+  neither of which is evaluated until first/rest is called. Each expr
+  will be evaluated every step in the sequence, e.g. calling
+  first/rest repeatedly on the same node of the seq evaluates
+  first/rest-expr repeatedly - the values they yield are not cached."
+ [first-expr rest-expr]
+  (list 'new 'clojure.lang.LazySeq (list `fn (list [] first-expr) (list [(gensym)] rest-expr))))
   
 (defn concat
   "Returns a lazy seq representing the concatenation of	the elements in x + xs."
@@ -933,7 +951,7 @@
   is :default."
   ([name dispatch-fn] `(defmulti ~name ~dispatch-fn :default))
   ([name dispatch-fn default-val]
-   `(def ~name (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
+   `(def ~(with-meta name {:tag 'clojure.lang.MultiFn}) (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
@@ -2876,7 +2894,7 @@ not-every? (comp not every?))
        h))))
 
 
-(defn none=
+(defn distinct?
   "Returns true if no two of the arguments are equal"
   {:tag Boolean}
   ([x] true)

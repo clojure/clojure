@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class Delay extends AFn{
+public class Delay{
 Object val;
 IFn fn;
 
@@ -21,11 +21,13 @@ public Delay(IFn fn){
 	this.val = null;
 }
 
-public Object invoke() throws Exception{
-	return get();
+static public Object force(Object x) throws Exception{
+	return (x instanceof Delay) ?
+	       ((Delay) x).get()
+	       : x;
 }
 
-synchronized public Object get() throws Exception{
+synchronized Object get() throws Exception{
 	if(fn != null)
 		{
 		val = fn.invoke();
