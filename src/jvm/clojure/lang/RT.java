@@ -436,9 +436,16 @@ static public int nextID(){
 static public ISeq seq(Object coll){
 	if(coll == null)
 		return null;
+	else if(coll instanceof ISeq)
+		return (ISeq) coll;
 	else if(coll instanceof IPersistentCollection)
 		return ((IPersistentCollection) coll).seq();
-	else if(coll instanceof Iterable)
+	else
+		return seqFrom(coll);
+}
+
+static ISeq seqFrom(Object coll){
+	if(coll instanceof Iterable)
 		return IteratorSeq.create(((Iterable) coll).iterator());
 	else if(coll.getClass().isArray())
 		return ArraySeq.createFromObject(coll);
@@ -463,9 +470,9 @@ static public ISeq vals(Object coll){
 }
 
 static public IPersistentMap meta(Object x){
-	if(x == null)
-		return null;
-	return ((Obj) x).meta();
+	if(x instanceof IObj)
+		return ((Obj) x).meta();
+	return null;
 }
 
 public static int count(Object o){
@@ -498,6 +505,8 @@ static public ISeq cons(Object x, Object coll){
 }
 
 static public Object first(Object x){
+	if(x instanceof ISeq)
+		return ((ISeq)x).first();
 	ISeq seq = seq(x);
 	if(seq == null)
 		return null;
@@ -517,6 +526,8 @@ static public Object fourth(Object x){
 }
 
 static public ISeq rest(Object x){
+	if(x instanceof ISeq)
+		return ((ISeq)x).rest();
 	ISeq seq = seq(x);
 	if(seq == null)
 		return null;

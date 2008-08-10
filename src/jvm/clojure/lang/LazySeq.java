@@ -12,14 +12,14 @@
 
 package clojure.lang;
 
-public class LazySeq extends ASeq{
+final public class LazySeq extends ASeq{
 final IFn f;
 
 public LazySeq(IFn f){
 	this.f = f;
 }
 
-public Object first(){
+final public Object first(){
 	try
 		{
 		return f.invoke();
@@ -30,10 +30,10 @@ public Object first(){
 		}
 }
 
-public ISeq rest(){
+final public ISeq rest(){
 	try
 		{
-		return (ISeq) f.invoke(null);
+		return RT.seq(f.invoke(null));
 		}
 	catch(Exception e)
 		{
@@ -51,6 +51,4 @@ public Obj withMeta(IPersistentMap meta){
 		return this;
 	return new LazySeq(meta, f);
 }
-
-
 }

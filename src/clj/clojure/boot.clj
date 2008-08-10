@@ -400,7 +400,7 @@
   same node of the seq evaluates first/rest-expr once - the values they yield are
   cached."
  [first-expr & rest-expr]
-  (list 'new 'clojure.lang.LazyCons (list `fn [] first-expr) (list* `fn [] rest-expr)))
+ (list 'new 'clojure.lang.LazyCons (list `fn (list [] first-expr) (list* [(gensym)] rest-expr))))
 
 (defmacro lazy-seq
   "Expands to code which produces a seq object whose first is the
@@ -411,16 +411,27 @@
   first/rest-expr repeatedly - the values they yield are not cached."
  [first-expr rest-expr]
   (list 'new 'clojure.lang.LazySeq (list `fn (list [] first-expr) (list [(gensym)] rest-expr))))
-  
-(defn concat
-  "Returns a lazy seq representing the concatenation of	the elements in x + xs."
-  ([] nil)
-  ([x & xs]
-   (cond
-    (nil? xs) (seq x)
-    (nil? (seq x)) (recur (first xs) (rest xs))
-    :else (lazy-cons (first x) (apply concat (rest x) xs)))))
+ 
+(defn cache-seq
+  "Given a seq s, returns a lazy seq that will touch each element of s
+  at most once, caching the results."
+  [s] (when s (clojure.lang.CachedSeq. s)))
 
+(defn concat
+  "Returns a lazy seq representing the concatenation of	the elements in the supplied colls."
+  ([] nil)
+  ([x] (seq x))
+  ([x y] 
+     (if (seq x) 
+       (lazy-seq (first x) (concat (rest x) y))
+       (seq y)))
+  ([x y & zs]
+     (let [cat (fn cat [xys]
+                   (if (seq xys)
+                     (lazy-seq (first xys) (cat (rest xys)))
+                     (apply concat zs)))]
+       (cat (concat x y)))))
+ 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 (defn =
   "Equality. Returns true if x equals y, false if not. Same as
@@ -506,7 +517,8 @@
          ((fn [f val s]
             (if s
               (recur f (f val (first s)) (rest s))
-              val)) f val s)))))
+              val)) 
+          f val s)))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
@@ -1171,10 +1183,10 @@
 
 (def
  #^{:tag Boolean
-    :doc "Returns false if (pred x) is logical true for every x in
+    :doc "Returns false if (pred x) is logical true for every x in 
   coll, else true."
     :arglists '([pred coll])}
-not-every? (comp not every?))
+ not-every? (comp not every?))
 
 (defn some
   "Returns the first logical true value of (pred x) for any x in coll,
@@ -1212,11 +1224,11 @@ not-every? (comp not every?))
 
 (defn filter
   "Returns a lazy seq of the items in coll for which
-  (pred item) returns true."
+  (pred item) returns true. pred must be free of side-effects."
   [pred coll]
     (when (seq coll)
       (if (pred (first coll))
-        (lazy-cons (first coll) (filter pred (rest coll)))
+        (lazy-seq (first coll) (filter pred (rest coll)))
         (recur pred (rest coll)))))
 
 (defn take
@@ -1224,14 +1236,14 @@ not-every? (comp not every?))
   there are fewer than n."  
   [n coll]
     (when (and (pos? n) (seq coll))
-      (lazy-cons (first coll) (take (dec n) (rest coll)))))
+      (lazy-seq (first coll) (take (dec n) (rest coll)))))
 
 (defn take-while
   "Returns a lazy seq of successive items from coll while
-  (pred item) returns true."
+  (pred item) returns true. pred must be free of side-effects."
   [pred coll]
     (when (and (seq coll) (pred (first coll)))
-      (lazy-cons (first coll) (take-while pred (rest coll)))))
+      (lazy-seq (first coll) (take-while pred (rest coll)))))
 
 (defn drop
   "Returns a lazy seq of all but the first n items in coll."
@@ -1260,7 +1272,7 @@ not-every? (comp not every?))
     (when (seq coll)
       (let [rep (fn thisfn [xs]
                     (if xs
-                      (lazy-cons (first xs) (thisfn (rest xs)))
+                      (lazy-seq (first xs) (thisfn (rest xs)))
                       (recur (seq coll))))]
         (rep (seq coll)))))
 
@@ -1276,15 +1288,15 @@ not-every? (comp not every?))
 
 (defn repeat
   "Returns a lazy (infinite!) seq of xs."
-  [x] (lazy-cons x (repeat x)))
+  [x] (lazy-seq x (repeat x)))
 
 (defn replicate
   "Returns a lazy seq of n xs."
   [n x] (take n (repeat x)))
   
 (defn iterate
-  "Returns a lazy seq of x, (f x), (f (f x)) etc."
-  [f x] (lazy-cons x (iterate f (f x))))
+  "Returns a lazy seq of x, (f x), (f (f x)) etc. f must be free of side-effects"
+  [f x] (lazy-seq x (iterate f (f x))))
 
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
@@ -2218,7 +2230,7 @@ not-every? (comp not every?))
   ([coll & colls]
    `(let [iter# (fn iter# [coll#]
 		    (if (seq coll#)
-		      (lazy-cons (first coll#) (iter# (rest coll#)))
+		      (lazy-seq (first coll#) (iter# (rest coll#)))
 		      (lazy-cat ~@colls)))]
       (iter# ~coll))))
       
@@ -2630,7 +2642,7 @@ not-every? (comp not every?))
 (defmacro definline 
   "Experimental - like defmacro, except defines a named function whose
   body is the expansion, calls to which may be expanded inline as if
-  it were a macro" 
+  it were a macro. Cannot be used with variadic (&) args." 
   [name & decl]
   (let [[args expr] (drop-while (comp not vector?) decl)
         inline (eval (list 'fn args expr))]

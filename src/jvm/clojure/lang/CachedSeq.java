@@ -8,22 +8,22 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Aug 9, 2008 */
+/* rich Aug 10, 2008 */
 
 package clojure.lang;
 
-final public class LazyCons extends ASeq{
-IFn f;
+public class CachedSeq extends ASeq{
+ISeq s;
 Object _first;
 ISeq _rest;
 
-public LazyCons(IFn f){
-	this.f = f;
+public CachedSeq(ISeq s){
+	this.s = s;
 	this._first = this;
 	this._rest = this;
 }
 
-LazyCons(IPersistentMap meta, Object first, ISeq rest){
+CachedSeq(IPersistentMap meta, Object first, ISeq rest){
 	super(meta);
 	this._first = first;
 	this._rest = rest;
@@ -33,16 +33,7 @@ final
 synchronized
 public Object first(){
 	if(_first == this)
-		{
-		try
-			{
-			_first = f.invoke();
-			}
-		catch(Exception ex)
-			{
-			throw new RuntimeException(ex);
-			}
-		}
+		_first = s.first();
 	return _first;
 }
 
@@ -51,27 +42,24 @@ synchronized
 public ISeq rest(){
 	if(_rest == this)
 		{
-		try
-			{
-			//force sequential evaluation
-			if(_first == this)
-				first();
-			_rest = RT.seq(f.invoke(null));
-			}
-		catch(Exception ex)
-			{
-			throw new RuntimeException(ex);
-			}
-		f = null;
+		//force sequential evaluation
+		if(_first == this)
+			first();
+		ISeq rs = s.rest();
+		if(rs == null)
+			_rest = rs;
+		else
+			_rest = new CachedSeq(rs);
+		s = null;
 		}
 	return _rest;
 }
 
-public LazyCons withMeta(IPersistentMap meta){
+public CachedSeq withMeta(IPersistentMap meta){
 	if(meta == meta())
 		return this;
 	//force before copying
 	rest();
-	return new LazyCons(meta, _first, _rest);
+	return new CachedSeq(meta, _first, _rest);
 }
 }
