@@ -426,11 +426,12 @@
        (lazy-seq (first x) (concat (rest x) y))
        (seq y)))
   ([x y & zs]
-     (let [cat (fn cat [xys]
+     (let [cat (fn cat [xys zs]
                    (if (seq xys)
-                     (lazy-seq (first xys) (cat (rest xys)))
-                     (apply concat zs)))]
-       (cat (concat x y)))))
+                     (lazy-seq (first xys) (cat (rest xys) zs))
+                     (when zs
+                       (recur (first zs) (rest zs)))))]
+       (cat (concat x y) zs))))
  
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 (defn =
