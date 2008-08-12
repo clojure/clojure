@@ -2286,6 +2286,14 @@
        ~@body
        (str s#))))
 
+(defmacro with-in-str
+  "Evaluates body in a context in which *in* is bound to a fresh
+  StringReader initialized with the string s."
+  [s & body]
+  `(with-open s# (-> (java.io.StringReader. ~s) clojure.lang.LineNumberingPushbackReader.)
+     (binding [*in* s#]
+       ~@body)))
+
 (defn pr-str
   "pr to a string, returning it"
   {:tag String}
