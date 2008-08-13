@@ -77,9 +77,10 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		}
 	if(m == null)
 		throw new IllegalArgumentException("No matching method found: " + methodName);
-	try{
-	return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
-	}
+	try
+		{
+		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
+		}
 	catch(InvocationTargetException e)
 		{
 		if(e.getCause() instanceof Exception)
@@ -290,12 +291,21 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 	ArrayList methods = new ArrayList();
 	for(int i = 0; i < allmethods.length; i++)
 		{
-		if(name.equals(allmethods[i].getName())
-		   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
-		   && !Modifier.isVolatile(allmethods[i].getModifiers())
-		   && allmethods[i].getParameterTypes().length == arity)
+		try
 			{
-			methods.add(allmethods[i]);
+			if(name.equals(allmethods[i].getName())
+			   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
+			   && allmethods[i].getParameterTypes().length == arity
+			   && (!Modifier.isVolatile(allmethods[i].getModifiers())
+			       || c.getMethod(allmethods[i].getName(), allmethods[i].getParameterTypes())
+					.equals(allmethods[i])))
+				{
+				methods.add(allmethods[i]);
+				}
+			}
+		catch(NoSuchMethodException e)
+			{
+			throw new RuntimeException(e);
 			}
 		}
 	if(!getStatics && c.isInterface())
