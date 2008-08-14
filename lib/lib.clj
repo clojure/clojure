@@ -181,7 +181,14 @@
   "Throws an exception with a message if pred is true. See
   java.util.Formatter for format string syntax."
   [pred fmt & args]
-  (when pred (throw (Exception. (apply format fmt args)))))
+  (when pred
+    (let [message (apply format fmt args)
+          exception (Exception. message)
+          raw-trace (.getStackTrace exception)
+          boring? #(not= (.getMethodName %) "doInvoke")
+          trace (into-array (drop 2 (drop-while boring? raw-trace)))]
+      (.setStackTrace exception trace)
+      (throw exception))))
 
 (def find-resource)                     ; forward declaration
 (def load-resource)                     ; forward declaration
