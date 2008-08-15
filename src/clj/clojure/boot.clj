@@ -402,15 +402,15 @@
  [first-expr & rest-expr]
  (list 'new 'clojure.lang.LazyCons (list `fn (list [] first-expr) (list* [(gensym)] rest-expr))))
 
-(defmacro lazy-seq
-  "Expands to code which produces a seq object whose first is the
-  value of first-expr and whose rest is the value of rest-expr,
-  neither of which is evaluated until first/rest is called. Each expr
-  will be evaluated every step in the sequence, e.g. calling
-  first/rest repeatedly on the same node of the seq evaluates
-  first/rest-expr repeatedly - the values they yield are not cached."
- [first-expr rest-expr]
-  (list 'new 'clojure.lang.LazySeq (list `fn (list [] first-expr) (list [(gensym)] rest-expr))))
+;(defmacro lazy-seq
+;  "Expands to code which produces a seq object whose first is the
+;  value of first-expr and whose rest is the value of rest-expr,
+;  neither of which is evaluated until first/rest is called. Each expr
+;  will be evaluated every step in the sequence, e.g. calling
+;  first/rest repeatedly on the same node of the seq evaluates
+;  first/rest-expr repeatedly - the values they yield are not cached."
+; [first-expr rest-expr]
+;  (list 'new 'clojure.lang.LazySeq (list `fn (list [] first-expr) (list [(gensym)] rest-expr))))
  
 (defn cache-seq
   "Given a seq s, returns a lazy seq that will touch each element of s
@@ -423,12 +423,12 @@
   ([x] (seq x))
   ([x y] 
      (if (seq x) 
-       (lazy-seq (first x) (concat (rest x) y))
+       (lazy-cons (first x) (concat (rest x) y))
        (seq y)))
   ([x y & zs]
      (let [cat (fn cat [xys zs]
                    (if (seq xys)
-                     (lazy-seq (first xys) (cat (rest xys) zs))
+                     (lazy-cons (first xys) (cat (rest xys) zs))
                      (when zs
                        (recur (first zs) (rest zs)))))]
        (cat (concat x y) zs))))
@@ -1229,7 +1229,7 @@
   [pred coll]
     (when (seq coll)
       (if (pred (first coll))
-        (lazy-seq (first coll) (filter pred (rest coll)))
+        (lazy-cons (first coll) (filter pred (rest coll)))
         (recur pred (rest coll)))))
 
 (defn take
@@ -1237,14 +1237,14 @@
   there are fewer than n."  
   [n coll]
     (when (and (pos? n) (seq coll))
-      (lazy-seq (first coll) (take (dec n) (rest coll)))))
+      (lazy-cons (first coll) (take (dec n) (rest coll)))))
 
 (defn take-while
   "Returns a lazy seq of successive items from coll while
   (pred item) returns true. pred must be free of side-effects."
   [pred coll]
     (when (and (seq coll) (pred (first coll)))
-      (lazy-seq (first coll) (take-while pred (rest coll)))))
+      (lazy-cons (first coll) (take-while pred (rest coll)))))
 
 (defn drop
   "Returns a lazy seq of all but the first n items in coll."
@@ -1273,7 +1273,7 @@
     (when (seq coll)
       (let [rep (fn thisfn [xs]
                     (if xs
-                      (lazy-seq (first xs) (thisfn (rest xs)))
+                      (lazy-cons (first xs) (thisfn (rest xs)))
                       (recur (seq coll))))]
         (rep (seq coll)))))
 
@@ -1289,7 +1289,7 @@
 
 (defn repeat
   "Returns a lazy (infinite!) seq of xs."
-  [x] (lazy-seq x (repeat x)))
+  [x] (lazy-cons x (repeat x)))
 
 (defn replicate
   "Returns a lazy seq of n xs."
@@ -1297,7 +1297,7 @@
   
 (defn iterate
   "Returns a lazy seq of x, (f x), (f (f x)) etc. f must be free of side-effects"
-  [f x] (lazy-seq x (iterate f (f x))))
+  [f x] (lazy-cons x (iterate f (f x))))
 
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
@@ -1412,10 +1412,10 @@
   be used to force any effects. Walks through the successive rests of
   the seq, does not retain the head and returns nil."
   ([coll]
-   (when (seq coll)
+   (when (and (seq coll) (or (first coll) true))
      (recur (rest coll))))
   ([n coll]
-   (when (and (seq coll) (pos? n))
+   (when (and (seq coll) (pos? n) (or (first coll) true))
      (recur (dec n) (rest coll)))))
 
 (defn doall
@@ -2231,7 +2231,7 @@
   ([coll & colls]
    `(let [iter# (fn iter# [coll#]
 		    (if (seq coll#)
-		      (lazy-seq (first coll#) (iter# (rest coll#)))
+		      (lazy-cons (first coll#) (iter# (rest coll#)))
 		      (lazy-cat ~@colls)))]
       (iter# ~coll))))
       
