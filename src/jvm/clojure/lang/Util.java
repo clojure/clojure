@@ -52,7 +52,7 @@ static public int hashCombine(int seed, int hash){
 }
 
 static public boolean isPrimitive(Class c){
-	return c != null && c.isPrimitive();
+	return c != null && c.isPrimitive() && !(c == Void.TYPE);
 }
 
 }
