@@ -1,0 +1,7 @@
+2008-08-16 All namespace-directory-aware libs have been moved to
+src/clojure/contrib. Please udpate your clojure classpaths accordingly.
+
+2008-08-16 Revision 134 is the last to contain
+non-namespace-directory-aware libs at the top level of this repository. At
+the time of this writing, Clojure's SVN version is 1001.
+
