@@ -12,7 +12,7 @@
 
   <!-- The directory under dist.root that matches the
        classpath "clojure.contrib". -->
-  <property name="dist.path" location="${dist.root}/clojure/contrib"/>
+  <property name="dist.path" location="${dist.root}"/>
 
   <target name="clean"
           description="Remove generated files and directories.">
@@ -30,9 +30,9 @@
           depends="clean,dirs">
     <copy todir="${dist.path}">
       <fileset dir="." includes="CPL.TXT"/>
-      <fileset dir="." includes="**/*.clj"/>
+      <fileset dir="." includes="src/clojure/contrib/**/*.clj"/>
     </copy>
-    <jar jarfile="${jarfile}" basedir="${dist.root}"/>
+    <jar jarfile="${jarfile}" basedir="${dist.root}/src"/>
   </target>
 
 </project>
