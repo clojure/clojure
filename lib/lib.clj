@@ -6,70 +6,87 @@
 ;;  this license. You must not remove this notice, or any other, from this
 ;;  software.
 ;;
-;;  lib
+;;  clojure.contrib.lib (Lib)
 ;;
-;;  lib provides functions for loading and managing Clojure source code
-;;  contained in Java resources. lib tracks what it loads at the
-;;  granularity of namespaces and provides convenient functions for
-;;  ensuring that namespace definitions have been loaded while avoiding
-;;  duplicate loads.
+;;  Lib provides functions for loading and managing Clojure source code
+;;  contained in Java resources.
 ;;
-;;  Namespace names are symbols. Every namespace has an associated
-;;  'namespace directory' whose classpath-relative path is derived from the
-;;  namespace name by replacing any periods with slashes. Clojure
-;;  namespaces map one-to-one with Java packages.
+;;  A 'lib' is a unit of Clojure source code contained in a Java resource
+;;  and named by a symbol. The lib's name is used to identify the lib and
+;;  to locate the resource that contains it.
 ;;
-;;  A 'lib' is a unit of Clojure code contained in a resource within
-;;  classpath. A lib name is a symbol whose name is a concatenation of a
-;;  namespace name, a period, and a namespace-relative name. A lib is
-;;  contained in a resource whose classpath-relative path is derived from
-;;  the lib name by replacing all periods with slashes and then appending
-;;  ".clj".
+;;  Lib provides functions to:
 ;;
-;;  To load a namespace definition, lib loads the 'root lib' for the
+;;    - find a resource given a classpath-relative path
+;;    - load code from a resource given an absolute path
+;;    - load libs from resources given lib names
+;;    - load namespace definitions given namespace specs
+;;    - ensure namespace definitions have been loaded while avoiding
+;;      duplicate loads, and
+;;    - create a namespace and refer 'clojure into it succinctly
+;;
+;;  Symbols, Namespaces, Packages
+;;
+;;  Symbols in Clojure are two-part identifiers - with an optional
+;;  namespace and a name, both strings. Namespaces are used to distinguish
+;;  two symbols that have the same name. Vars are named by symbols that
+;;  must have a namespace part, and thus can be considered to be in
+;;  namespaces. [From Clojure documentation]
+;;
+;;  Packages in Java play a role similar to Clojure namespaces - they
+;;  partition the global namespace to allow large programs to avoid name
+;;  conflicts. Java defines a mapping from package names to directories
+;;  within classpath: components of a package name separated by periods
+;;  correspond to components of a classpath-relative path separated by
+;;  slashes. Lib uses this same mapping to locate libs and namespaces in
+;;  classpath.
+;;
+;;  Loading Libs
+;;
+;;  A lib's name provides the location of the resource that contains it in
+;;  classpath. The resource name is the last component of the lib's path
+;;  followed by ".clj". For example, a lib named 'a.b.c is contained in the
+;;  resource "<classpath>/a/b/c.clj".
+;;
+;;  Loading Namespaces
+;;
+;;  To load a namespace definition, Lib loads the 'root lib' for the
 ;;  namespace. The root lib's name is derived from the namespace name by
-;;  repeating its "leaf" portion. For example, the root lib for the
-;;  namespace 'clojure.contrib.def is the lib 'clojure.contrib.def.def
-;;  contained in the resource <classpath>/clojure/contrib/def/def.clj .
+;;  repeating its last component. For example, the root lib for the
+;;  namespace 'x.y.z is the lib 'x.y.z.z contained in the resource
+;;  "<classpath>/x/y/z/z.clj". The namespace definition may be entirely
+;;  within the root lib or it may span multiple libs in the hierarchy of
+;;  directories at and under the namespace's directory. In the latter case
+;;  the root lib must include commands to (directly or indirectly) load the
+;;  remaining libs.
 ;;
-;;  The following code ensures that 'clojure.contrib.def and
-;;  'clojure.contrib.sql are loaded:
+;;  Nsspecs
 ;;
-;;    (require '(clojure.contrib def sql))
+;;  An nsspec specifies a namespace to load. It is either a namespace name
+;;  or a list containing the namespace name and zero or more options
+;;  expressed as squential keywords and values. Nsspec examples:
+;;    - 'clojure.contrib.sql
+;;    - '(clojure.contrib.sql)
+;;    - '(clojure.contrib.sql :exclude (get-connection)).
+;;    - '(clojure.contrib.sql :as sql)
 ;;
-;;  In cases where a namespace is defined by more than one lib, all the
-;;  libs should be contained within the hierarchy of directories under the
-;;  namespace directory. The root lib must (drectly or indirectly) load the
-;;  additional libs. For example, a hypothetical namespace named
-;;  'clojure.contrib.math-funcs might be defined in multiple libs contained
-;;  in resources like these:
+;;  Prefix Lists
 ;;
-;;    <classpath>/clojure/contrib/math_funcs/math_funcs.clj
-;;    <classpath>/clojure/contrib/math_funcs/trig.clj
-;;    <classpath>/clojure/contrib/math_funcs/logarithms.clj
-;;    <classpath>/clojure/contrib/math_funcs/bessel.clj
-;;    <classpath>/clojure/contrib/math_funcs/inverses/trig.clj
-;;    <classpath>/clojure/contrib/math_funcs/inverses/logarithms.clj
+;;  It is common for Clojure code to depend on several libs whose names
+;;  have one or more initial components in common. When specifying lib or
+;;  namespace names for Lib to use, prefix lists can be used to reduce
+;;  repetition in the call. A prefix list is a list containing the shared
+;;  prefix followed by lib or namespace names and/or prefix lists with the
+;;  shared prefix elided. For example, the following are all equivalent:
+;;    (load-libs 'a.b.c 'a.b.d 'a.c.e 'a.c.f) ; all names fully qualified
+;;    (load-libs '(a.b c d) '(a.c e f)) ; 'a.b and 'a.c extracted
+;;    (load-libs '(a (b c d) (c e f))) ; all common prefixes extracted
+;;  Symbols containing explicit periods and the equivalent prefix lists may
+;;  be mixed freely.
 ;;
-;;  The following code ensures that 'clojure.contrib.math-funcs is loaded:
+;;  Lib Functions
 ;;
-;;    (require '(clojure.contrib math-funcs))
-;;
-;;  This is the portion of math_funcs.clj that loads the additional libs:
-;;
-;;    (clojure/in-ns 'clojure.contrib.math-funcs)
-;;
-;;    (clojure.contrib.lib/load-libs
-;;     '(clojure.contrib.math-funcs
-;;       trig logarithms bessel inverses.trig inverses.logarithms))
-;;
-;;  lib also provides general functions for finding and loading resources
-;;  using the class loaders visible to the Clojure runtime.
-;;
-;;  Here is a brief overview of what's in lib. For detailed docs please see
-;;  the doc strings for the individual functions.
-;;
-;;  Resources
+;;   Resources
 ;;
 ;;    Function: find-resource
 ;;    Searches available class loaders for a resource, returns URL or nil
@@ -77,27 +94,27 @@
 ;;    Function: load-resource
 ;;    Loads Clojure source from an absolute path: URI, URL or String
 ;;
-;;  Raw Libs
+;;   Libs
 ;;
 ;;    Function: load-libs
-;;    Loads libs by name from arbitrary locations under classpath
+;;    Loads libs by name from arbitrary locations within classpath
 ;;
-;;  Namespaces
+;;   Namespaces
 ;;
 ;;    Function: load-namespaces
 ;;    Loads namespace definitions by loading namespace root libs
 ;;
 ;;    Function: namespaces
-;;    Returns a sorted set of symbols naming the set of namespaces
-;;      that lib has loaded and is tracking
+;;    Returns a sorted set symbols naming namespaces that have been loaded
+;;      with the :require option - used to track and avoid duplicate loads.
 ;;
 ;;    Function: require
-;;    Loads namespace definitions that are not already loaded
+;;    Loads namespace definitions that have not yet been loaded
 ;;
 ;;    Function: use
 ;;    Requires namespaces and refers to them using clojure/refer
 ;;
-;;  Examples
+;;   Examples
 ;;
 ;;    (load-namespaces :require '(clojure.contrib sql sql.tests))
 ;;    (require '(clojure.contrib sql sql.tests))
@@ -190,14 +207,29 @@
       (.setStackTrace exception trace)
       (throw exception))))
 
+(defn- nsspec?
+  "Returns true if x is an nsspec"
+  [x]
+  (or (symbol? x)
+      (nil? (second x))
+      (keyword? (second x))))
+
+(defn- prepend
+  "Prepends a symbol or collection to coll"
+  [x coll]
+  (if (symbol? x)
+    (cons x coll)
+    (concat x coll)))
+
 (def find-resource)                     ; forward declaration
 (def load-resource)                     ; forward declaration
 
 (defn- load-one
-  "Loads one lib from a resoure and ensures that namespace ns (if
-  not nil) exists. If require is true, also records the load so
-  a duplicate load will be skipped."
-  [sym url require need-ns]
+  "Loads one lib from a resource at url. If need-ns is 'true' ensures that
+  the namespace named by sym exists after loading. If require is 'true'
+  also records the namespace named by sym as loaded so any duplicate loads
+  can be skipped."
+  [url need-ns sym require]
   (load-resource url)
   (throw-if (and need-ns (not (find-ns sym)))
             "namespace '%s' not found after loading '%s'" sym url)
@@ -206,17 +238,17 @@
      (commute *namespaces* conj sym))))
 
 (defn- load-all
-  "Loads a lib from a resource and forces a load of any libs which it
-  directly or indirectly loads via require/use/load-namespaces"
-  [sym url require need-ns]
+  "Loads a lib from a resource at url and forces a load of any namespaces
+  it directly or indirectly loads via require/use/load-namespaces"
+  [url need-ns sym require]
   (dosync
    (commute *namespaces* set/union
             (binding [*namespaces* (ref (sorted-set))]
-              (load-one sym url require need-ns)
+              (load-one url need-ns sym require)
               @*namespaces*))))
 
 (defn- name-path
-  "Returns a classpath-relative path given the name of a symbol"
+  "Returns a classpath-relative path given a symbol name"
   [name]
   (.. name
       (replace \- \_)
@@ -241,19 +273,19 @@
   (let [sym (symbol (str prefix (when prefix \.) sym))
         opts (apply hash-map options)
         as (:as opts)
-        raw (:raw opts)
         reload (:reload opts)
         reload-all (:reload-all opts)
         require (:require opts)
+        root (:root opts)
         use (:use opts)
         verbose (:verbose opts)
         loaded (contains? @*namespaces* sym)
         load (cond reload-all
                    load-all
-                   (or raw reload (not require) (not loaded))
+                   (or reload (not require) (not loaded))
                    load-one)
         need-ns (or as use)
-        path ((if raw lib-path root-lib-path) sym)
+        path ((if root root-lib-path lib-path) sym)
         url (find-resource path)
         filter-opts (select-keys opts *filter-keys*)]
     (binding [*verbose* (or *verbose* verbose)]
@@ -262,25 +294,42 @@
         (when *verbose*
           (printf "(clojure.contrib.lib/load-resource \"%s\")\n" url)
           (flush))
-        (load sym url require need-ns))
+        (load url need-ns sym require))
       (throw-if (and need-ns (not (find-ns sym)))
                 "namespace '%s' not found" sym)
+      (when (and need-ns *verbose*)
+        (printf "(clojure/in-ns '%s)\n" (ns-name *ns*)))
       (when as
+        (when *verbose*
+          (printf "(clojure/alias '%s '%s)\n" as sym))
         (alias as sym))
       (when use
         (when *verbose*
-          (printf "(clojure/in-ns '%s)\n" (ns-name *ns*))
           (printf "(clojure/refer '%s" sym)
           (doseq opt filter-opts
             (printf " %s '%s" (key opt) (print-str (val opt))))
           (printf ")\n"))
         (apply refer sym (mapcat seq filter-opts))))))
 
+(defn- load-prefix-list
+  "Loads libs and handles (nested) prefix lists"
+  [load? prefix opts & args]
+  (doseq arg args
+    (if (load? arg)
+      (apply load-lib prefix (prepend arg opts))
+      (let [[nested-prefix & nested-args] arg]
+        (throw-if (nil? nested-prefix) "prefix cannot be nil")
+        (apply load-prefix-list
+               load?
+               (symbol (str prefix (when prefix \.) nested-prefix))
+               opts
+               nested-args)))))
+
 ;; Resources
 
 (defn find-resource
-  "Searches for a resource given a path relative to classpath using
-  available ClassLoaders. Returns a URL if the resource is found or nil."
+  "Searches for a resource given a classpath-relative path using available
+  ClassLoaders. If the resource is found, returns its URL, otherwise nil."
   [rel-path]
   (some #(.findResource % rel-path) *class-loaders*))
 
@@ -302,91 +351,99 @@
           (.openStream url)))
       (.load Compiler reader (.getPath url) (.getFile url)))))
 
-;; Raw Libs
+;; Libs
 
 (defn load-libs
-  "Searches classpath for libs and loads them. Each argument is either a
-  libgroupspec that identifies a group of libs to load or a flag that
-  modifies how all the identified libs are loaded. Symbols identify paths
-  within classpath. Symbol names map to paths by replacing periods with
-  slashes.
+  "Loads libs - Clojure source contained in resources in classpath. Each
+  argument is a either a symbol that identifies a lib, a prefix list that
+  identifies multiple libs with names that share common prefixes, or a flag
+  that modifies how all the identified libs are loaded. Symbol names map to
+  paths within classpath: components of the symbol name separated by
+  periods correspond to components in classpath-relative paths separated by
+  slashes. The full resource path is the mapped path with '.clj'
+  appended. For example, the resource containing the lib 'a.b.c is
+  '<classpath>/a/b/c.clj'.
 
-  A libgroupspec is a list containing a symbol that identifies a prefix
-  directory followed by libspecs that identify libs relative to that
-  directory.
 
-  A libspec is a symbol.
+  Multiple libs whose names share the same period-delimited prefix can be
+  identified succinctly using a prefix list: a list containing the shared
+  prefix followed by symbols and/or prefix lists with the shared prefix
+  elided. For example, the following are all equivalent:
+    (load-libs 'a.b.c 'a.b.d 'a.c.e 'a.c.f) ; all names fully qualified
+    (load-libs '(a.b c d) '(a.c e f)) ; 'a.b and 'a.c extracted
+    (load-libs '(a (b c d) (c e f))) ; all common prefixes extracted
+  Symbols containing explicit periods and the equivalent prefix lists may
+  be mixed freely.
 
-  A flag is a keyword.
   Recognized flags: :reload-all, :verbose
 
   :reload-all forces loading of all namespaces that the identified libs
     directly or indirectly load via load-namespaces/require/use
   :verbose triggers printing information about each load and refer"
   [& args]
-  (let [libargs (filter (complement keyword?) args)
-        flags (filter keyword? args)
-        flag-opts (interleave flags (repeat true))]
-    (doseq libarg libargs
-      (if (symbol? libarg)
-        (apply load-lib nil libarg :raw true flag-opts)
-        (let [[prefix & libspecs] libarg]
-          (throw-if (not prefix) "prefix cannot be nil")
-          (doseq libspec libspecs
-            (apply load-lib prefix libspec :raw true flag-opts)))))))
+  (let [flags (filter keyword? args)
+        opts (interleave flags (repeat true))
+        args (filter (complement keyword?) args)]
+    (apply load-prefix-list symbol? nil opts args)))
 
 ;; Namespaces
 
 (defn load-namespaces
-  "Searches classpath for namespace definitions and loads them. Each
-  argument is either an nsgroupspec that identifies a group of namespaces
-  to load or a flag that modifies how all the identified namespaces are
-  loaded. Symbols identify paths within classpath. Symbol names map to
-  paths by replacing periods with slashes.
+  "Loads namespace definitions contained in resources in classpath.
+  Each argument is a either an nsspec that identifies a namespace, a prefix
+  list that identifies multiple namespaces with names that share common
+  prefixes, or a flag that modifies how all the identified namespaces are
+  loaded. Namespace names map to paths within classpath: components of the
+  namespace name separated by periods correspond to components in
+  classpath-relative paths separated by slashes. To load the namespace
+  definition, load-namespaces loads the namespace's 'root lib'. The root
+  lib's name is derived from the namespace name by repeating its last
+  component. The root lib for namespace 'a.b.c is the lib 'a.b.c.c
+  contained in the resource '<classpath>/a/b/c/c.clj'. The namespace
+  definition need not be completely contained in its root lib. If it's not
+  the root lib must contain code to (directly or indirectly) load the
+  additional libs using load-libs.
 
-  An nsgroupspec is a list containing a symbol that identifies a prefix
-  directory followed by nsspecs that identify namespace directories
-  relative to that prefix and loading options.
-
-  An nsspec is a symbol or a list containing a symbol and options. The
-  recognized options are only effective when the :use flag is set.
+  An nsspec is a symbol or a list containing a symbol and options. Some
+  options may have meaning only when specific flags are set.
 
   An option is a keyword followed by an argument.
-  Recognized options: :exclude, :only, :rename
+  Recognized options: :as :exclude, :only, :rename
 
+  The argument for :as is a symbol to use as an alias for the specified
+  namespace.
   The arguments and semantics for :exclude, :only, and :rename are those
-  documented for clojure/refer.
+  documented for clojure/refer. They are only effective when the :use flag
+  is present.
+
+  Multiple namespaces whose names share the same period-delimited prefix
+  can be identified succinctly using a prefix list: a list containing the
+  shared prefix followed by nsspecs and/or prefix lists with the shared
+  prefix elided. For example, the following are all equivalent:
+    (load-namespaces 'a.b.c 'a.b.d 'a.c.e 'a.c.f) ; fully qualified names
+    (load-namespaces '(a.b c d) '(a.c e f)) ; 'a.b and 'a.c extracted
+    (load-namespaces '(a (b c d) (c e f))) ; all common prefixes extracted
+  Symbols containing explicit periods and the equivalent prefix lists may be
+  mixed freely.
 
   A flag is a keyword.
   Recognized flags: :require, :use, :reload, :reload-all, :verbose
 
   :require indicates that any identified namespace definitions that are
     already loaded need not be reloaded
-  :use triggers referring to each namespace with its options as filters
+  :use triggers referring to each namespace with optional filters specified
+    in its options
   :reload forces loading of all the identified namespace definitions even
     if they are already loaded. :reload supersedes :require
   :reload-all implies :reload and also forces loading of all namespace
     definitions that the identified namespace definitions directly or
     indirectly load via load-namespaces/require/use
-  :verbose triggers printing information about each load and refer"
+  :verbose triggers printing information about each load, alias and refer"
   [& args]
-  (let [nsargs (filter (complement keyword?) args)
-        flags (filter keyword? args)
-        flag-opts (interleave flags (repeat true))]
-    (doseq nsarg nsargs
-      (cond (symbol? nsarg)
-            (apply load-lib nil nsarg flag-opts)
-            (nil? (second nsarg))
-            (apply load-lib nil (first nsarg) flag-opts)
-            (keyword? (second nsarg))
-            (apply load-lib nil (concat nsarg flag-opts))
-            :else
-            (let [[prefix & nsspecs] nsarg]
-              (throw-if (not prefix) "prefix cannot be nil")
-              (doseq nsspec nsspecs
-                (if (symbol? nsspec)
-                  (apply load-lib prefix nsspec flag-opts)
-                  (apply load-lib prefix (concat nsspec flag-opts)))))))))
+  (let [flags (cons :root (filter keyword? args))
+        opts (interleave flags (repeat true))
+        args (filter (complement keyword?) args)]
+    (apply load-prefix-list nsspec? nil opts args)))
 
 (defn namespaces
   "Returns a sorted set of symbols naming loaded namespaces"
@@ -394,60 +451,28 @@
   @*namespaces*)
 
 (defn require
-  "Searches classpath for namespace definitions and loads them if they are
-  not already loaded. Each argument is either an nsgroupspec that
-  identifies a group of namespaces to load or a flag that modifies how all
-  the identified namespaces are loaded. Symbols identify paths within
-  classpath. Symbol names map to paths by replacing periods with slashes.
-
-  An nsgroupspec is a list containing a symbol that identifies a prefix
-  directory followed by nsspecs that identify namespace directories
-  relative to that prefix and loading options.
-
-  In the general case, an nsspec is a symbol or a list containing a symbol
-  and options. In the case of require, no options are available so an
-  nsspec should be a symbol. (see also load-namespaces and use)
-
-  A flag is a keyword.
-  Recognized flags: :reload, :reload-all, :verbose
-
-  :reload forces loading of all the identified namespace definitions even
-    if they are already loaded.
-  :reload-all implies :reload and also forces loading of all namespace
-    definitions that the identified namespace definitions directly or
-    indirectly load via load-namespaces/require/use
-  :verbose triggers printing information about each load and refer"
+  "Ensures that namespaces are loaded while avoiding duplicate
+  loads. Arguments are described in the docs for 'load-namespaces. The
+  :require flag is automatically set."
   [& args]
   (apply load-namespaces :require args))
 
 (defn use
-  "Searches classpath for namespace definitions, loads them if they are not
-  already loaded, and refers to them. Each argument is either an
-  nsgroupspec that identifies a group of namespaces to load or a flag that
-  modifies how all the identified namespaces are loaded. Symbols identify
-  paths within classpath. Symbol names map to paths by replacing periods
-  with slashes.
-
-  An nsgroupspec is a list containing a symbol that identifies a prefix
-  directory followed by nsspecs that identify namespace directories
-  relative to that prefix and loading options.
-
-  An nsspec is a symbol or a list containing a symbol and options.
-
-  An option is a keyword followed by an argument.
-  Recognized options: :exclude, :only, :rename
-
-  The arguments and semantics for :exclude, :only, and :rename are those
-  documented for clojure/refer.
-
-  A flag is a keyword.
-  Recognized flags: :reload, :reload-all, :verbose
-
-  :reload forces loading of all the identified namespace definitions even
-    if they are already loaded. :reload supersedes :require
-  :reload-all implies :reload and also forces loading of all namespace
-    definitions that the identified namespace definitions directly or
-    indirectly load via load-namespaces/require/use
-  :verbose triggers printing information about each load and refer"
+  "Ensures that namespaces are loaded while avoiding duplicate loads and
+  refers to them in the current namespace. Arguments are described in the
+  docs for 'load-namespaces. The :require and :use flags are automatically
+  set."
   [& args]
   (apply load-namespaces :require :use args))
+
+(defn init-ns
+  "Creates ns (if necessary), makes it current, and uses clojure/refer to
+  make the 'clojure namespace available to it. Optional clojure-filters can
+  be passed along to clojure/refer to modify how much of and how 'clojure
+  is pulled in. init-ns also refers to (all of) 'clojure.contrib.lib.
+  Namespace root libs will typically begin with a call to init-ns; any
+  subordinate libs can begin with a call to in-ns."
+  [ns & clojure-filters]
+  (in-ns ns)
+  (apply refer 'clojure clojure-filters)
+  (refer 'clojure.contrib.lib))
