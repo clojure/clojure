@@ -72,12 +72,13 @@
 ;;
 ;;  Prefix Lists
 ;;
-;;  It is common for Clojure code to depend on several libs whose names
-;;  have one or more initial components in common. When specifying lib or
-;;  namespace names for Lib to use, prefix lists can be used to reduce
-;;  repetition in the call. A prefix list is a list containing the shared
-;;  prefix followed by lib or namespace names and/or prefix lists with the
-;;  shared prefix elided. For example, the following are all equivalent:
+;;  It is common for Clojure code to depend on several libs or namespaces
+;;  whose names have one or more initial components in common. When
+;;  specifying lib or namespace names for Lib to use, prefix lists can be
+;;  used to reduce repetition in the call. A prefix list is a list
+;;  containing the shared prefix followed by lib or namespace names and/or
+;;  prefix lists with the shared prefix elided. For example, the following
+;;  are all equivalent:
 ;;    (load-libs 'a.b.c 'a.b.d 'a.c.e 'a.c.f) ; all names fully qualified
 ;;    (load-libs '(a.b c d) '(a.c e f)) ; 'a.b and 'a.c extracted
 ;;    (load-libs '(a (b c d) (c e f))) ; all common prefixes extracted
