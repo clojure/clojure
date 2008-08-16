@@ -115,6 +115,10 @@
 ;;    Function: use
 ;;    Requires namespaces and refers to them using clojure/refer
 ;;
+;;    Function: init-ns
+;;    Creates and enters a namespace and refers to 'clojure and
+;;    'clojure.contrib.lib (use in namespace root libs)
+;;
 ;;   Examples
 ;;
 ;;    (load-namespaces :require '(clojure.contrib sql sql.tests))
