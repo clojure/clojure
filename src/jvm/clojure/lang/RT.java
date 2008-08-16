@@ -1454,7 +1454,7 @@ static public ClassLoader makeClassLoader(){
 	});
 }
 
-static ClassLoader baseLoader(){
+static public ClassLoader baseLoader(){
 	if(booleanCast(USE_CONTEXT_CLASSLOADER.get()))
 		return Thread.currentThread().getContextClassLoader();
 	return ROOT_CLASSLOADER;
