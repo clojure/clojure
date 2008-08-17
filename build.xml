@@ -30,9 +30,9 @@
           depends="clean,dirs">
     <copy todir="${dist.path}">
       <fileset dir="." includes="CPL.TXT"/>
-      <fileset dir="." includes="src/clojure/contrib/**/*.clj"/>
+      <fileset dir="./src" includes="clojure/contrib/**/*.clj"/>
     </copy>
-    <jar jarfile="${jarfile}" basedir="${dist.root}/src"/>
+    <jar jarfile="${jarfile}" basedir="${dist.root}"/>
   </target>
 
 </project>
