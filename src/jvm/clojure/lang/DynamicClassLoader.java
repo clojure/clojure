@@ -13,8 +13,11 @@
 package clojure.lang;
 
 import java.util.HashMap;
+import java.util.Enumeration;
+import java.util.Vector;
 import java.net.URLClassLoader;
 import java.net.URL;
+import java.io.IOException;
 
 //todo: possibly extend URLClassLoader?
 
@@ -48,6 +51,29 @@ protected Class<?> findClass(String name) throws ClassNotFoundException{
 		return defineClass(name, bytes, 0, bytes.length);
 	return super.findClass(name);
 	//throw new ClassNotFoundException(name);
+}
+
+public URL findResource(String name){
+	URL url = super.findResource(name);
+	if(url == null)
+		url = getParent().getResource(name);
+	return url;
+}
+
+public Enumeration<URL> findResources(String name) throws IOException{
+	Enumeration<URL> ret = getParent().getResources(name);
+	if(ret.hasMoreElements())
+		{
+		Vector<URL> v = new Vector();
+		Enumeration<URL> sret =  super.findResources(name);
+		while(sret.hasMoreElements())
+			v.add(sret.nextElement());
+		while(ret.hasMoreElements())
+			v.add(ret.nextElement());
+		return v.elements();
+		}
+	else
+		return super.findResources(name);
 }
 
 public void registerConstants(int id, Object[] val){
