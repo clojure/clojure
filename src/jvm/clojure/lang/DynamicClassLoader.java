@@ -53,29 +53,6 @@ protected Class<?> findClass(String name) throws ClassNotFoundException{
 	//throw new ClassNotFoundException(name);
 }
 
-public URL findResource(String name){
-	URL url = super.findResource(name);
-	if(url == null)
-		url = getParent().getResource(name);
-	return url;
-}
-
-public Enumeration<URL> findResources(String name) throws IOException{
-	Enumeration<URL> ret = getParent().getResources(name);
-	if(ret.hasMoreElements())
-		{
-		Vector<URL> v = new Vector();
-		Enumeration<URL> sret =  super.findResources(name);
-		while(sret.hasMoreElements())
-			v.add(sret.nextElement());
-		while(ret.hasMoreElements())
-			v.add(ret.nextElement());
-		return v.elements();
-		}
-	else
-		return super.findResources(name);
-}
-
 public void registerConstants(int id, Object[] val){
 	constantVals.put(id, val);
 }
