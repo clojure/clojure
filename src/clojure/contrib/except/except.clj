@@ -30,7 +30,7 @@
   format-args are zero or more objects that correspond to the format
   specifiers in format."
   [pred & args]
-  (if pred
+  (when pred
     (let [class-present (instance? Class (first args))
           args (if class-present args (cons Exception args))
           [class fmt & fmt-args] args
