@@ -10,17 +10,17 @@
 ;;
 ;;  A 'lib' is a named set of resources in classpath whose contents define
 ;;  a library of Clojure code. Lib names are symbols and each lib is
-;;  associated with the Clojure namespace and the Java package that share
-;;  its name. A lib's name also locates its root directory within classpath
+;;  associated with a Clojure namespace and a Java package that share its
+;;  name. A lib's name also locates its root directory within classpath
 ;;  using Java's package name to classpath-relative path mapping. All
 ;;  resources in a lib should be contained in the directory structure under
-;;  its root directory. All definitions the lib makes should be in the
-;;  lib's namespace.
+;;  its root directory. All definitions a lib makes should be in its
+;;  associated namespace.
 ;;
 ;;  Clojure loads a lib by loading its root resource. The root resource
 ;;  path is derived from the root directory path by repeating its last
 ;;  component and appending '.clj'. For example, the lib 'x.y.z has root
-;;  directory <classpath>/x/y/z'; root resource '<classpath>/x/y/z/z.clj.
+;;  directory <classpath>/x/y/z; root resource <classpath>/x/y/z/z.clj.
 ;;  The root resource should contain code to create the lib's namespace and
 ;;  load any additional lib resources.
 ;;
@@ -241,17 +241,16 @@
 
   A 'lib' is a named set of resources in classpath whose contents define a
   library of Clojure code. Lib names are symbols and each lib is associated
-  with the Clojure namespace and the Java package that share its name. A
-  lib's name also locates its root directory within classpath using Java's
+  with a Clojure namespace and a Java package that share its name. A lib's
+  name also locates its root directory within classpath using Java's
   package name to classpath-relative path mapping. All resources in a lib
-  should be contained in the directory structure under its root
-  directory. All definitions the lib makes should be in the lib's
-  namespace.
+  should be contained in the directory structure under its root directory.
+  All definitions a lib makes should be in its associated namespace.
 
   'require loads a lib by loading its root resource. The root resource path
   is derived from the root directory path by repeating its last component
   and appending '.clj'. For example, the lib 'x.y.z has root directory
-  <classpath>/x/y/z'; root resource '<classpath>/x/y/z/z.clj. The root
+  <classpath>/x/y/z; root resource <classpath>/x/y/z/z.clj. The root
   resource should contain code to create the lib's namespace and load any
   additional lib resources.
 
