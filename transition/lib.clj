@@ -134,16 +134,16 @@
 
 (defn- root-directory
   "Returns the root directory path for a lib"
-  [sym]
+  [lib]
   (str \/
-       (.. (name sym)
+       (.. (name lib)
            (replace \- \_)
            (replace \. \/))))
 
 (defn- root-resource
   "Returns the root resource path for a lib"
-  [sym]
-  (let [d (root-directory sym)
+  [lib]
+  (let [d (root-directory lib)
         i (inc (.lastIndexOf d (int \/)))
         leaf (.substring d i)]
     (str d \/ leaf ".clj")))
@@ -154,33 +154,33 @@
   "Loads a lib given its name. If need-ns, ensures that the associated
   namespace exists after loading. If require, records the load so any
   duplicate loads can be skipped."
-  [sym need-ns require]
-  (load-resources (root-resource sym))
-  (throw-if (and need-ns (not (find-ns sym)))
+  [lib need-ns require]
+  (load-resources (root-resource lib))
+  (throw-if (and need-ns (not (find-ns lib)))
             "namespace '%s' not found after loading '%s'"
-            sym (root-resource sym))
+            lib (root-resource lib))
   (when require
     (dosync
-     (commute *loaded-libs* conj sym))))
+     (commute *loaded-libs* conj lib))))
 
 (defn- load-all
   "Loads a lib given its name and forces a load of any libs it directly or
   indirectly loads. If need-ns, ensures that the associated namespace
   exists after loading. If require, records the load so any duplicate loads
   can be skipped."
-  [sym need-ns require]
+  [lib need-ns require]
   (dosync
    (commute *loaded-libs* clojure.set/union
             (binding [*loaded-libs* (ref (sorted-set))]
-              (load-one sym need-ns require)
+              (load-one lib need-ns require)
               @*loaded-libs*))))
 
 (defn- load-lib
   "Loads a lib with options"
-  [prefix sym & options]
-  (throw-if (and prefix (pos? (.indexOf (name sym) (int \.))))
+  [prefix lib & options]
+  (throw-if (and prefix (pos? (.indexOf (name lib) (int \.))))
             "lib names inside prefix lists must not contain periods")
-  (let [sym (if prefix (symbol (str prefix \. sym)) sym)
+  (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         opts (apply hash-map options)
         as (:as opts)
         reload (:reload opts)
@@ -188,7 +188,7 @@
         require (:require opts)
         use (:use opts)
         verbose (:verbose opts)
-        loaded (contains? @*loaded-libs* sym)
+        loaded (contains? @*loaded-libs* lib)
         load (cond reload-all
                    load-all
                    (or reload (not require) (not loaded))
@@ -197,22 +197,22 @@
         filter-opts (select-keys opts '(:exclude :only :rename))]
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
-        (load sym need-ns require)
-        (throw-if (and need-ns (not (find-ns sym)))
-                  "namespace '%s' not found" sym))
+        (load lib need-ns require)
+        (throw-if (and need-ns (not (find-ns lib)))
+                  "namespace '%s' not found" lib))
       (when (and need-ns *loading-verbosely*)
         (printf "(clojure/in-ns '%s)\n" (ns-name *ns*)))
       (when as
         (when *loading-verbosely*
-          (printf "(clojure/alias '%s '%s)\n" as sym))
-        (alias as sym))
+          (printf "(clojure/alias '%s '%s)\n" as lib))
+        (alias as lib))
       (when use
         (when *loading-verbosely*
-          (printf "(clojure/refer '%s" sym)
+          (printf "(clojure/refer '%s" lib)
           (doseq opt filter-opts
             (printf " %s '%s" (key opt) (print-str (val opt))))
           (printf ")\n"))
-        (apply refer sym (mapcat seq filter-opts))))))
+        (apply refer lib (mapcat seq filter-opts))))))
 
 (defn- load-libs
   "Loads libs, interpreting prefix lists and libspecs for forwarding to
