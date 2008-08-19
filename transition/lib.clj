@@ -215,7 +215,7 @@
         (apply refer lib (mapcat seq filter-opts))))))
 
 (defn- load-libs
-  "Loads libs, interpreting prefix lists and libspecs for forwarding to
+  "Loads libs, interpreting libs, prefix lists, and flags for forwarding to
   load-lib"
   [& args]
   (let [flags (filter keyword? args)
