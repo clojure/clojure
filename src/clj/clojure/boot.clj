@@ -2929,3 +2929,14 @@
            (recur (conj s x) etc))
          true))
      false)))
+
+(defn iterator-seq 
+  "Returns a seq on a java.util.Iterator. Note that most collections
+  providing iterators implement Iterable and thus support seq directly."
+  [iter]
+  (clojure.lang.IteratorSeq/create iter))
+
+(defn enumeration-seq 
+  "Returns a seq on a java.lang.Enumeration"
+  [e]
+  (clojure.lang.EnumerationSeq/create e))
