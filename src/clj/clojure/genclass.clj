@@ -197,6 +197,10 @@
                          (. gen pop)
                          (. gen visitInsn (. Opcodes ACONST_NULL))
                          (. gen mark end-label)))
+        emit-unsupported (fn [gen m]
+                           (. gen (throwException ex-type (str (. m (getName)) " ("
+                                                               pkg-name "/" sname "-" (.getName m)
+                                                               " not defined?)"))))
         emit-forwarding-method
         (fn [mname pclasses rclass as-static else-gen]
           (let [ptypes (to-types pclasses)
@@ -381,15 +385,13 @@
                   mm
                   (do
                     (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
-                                            (fn [gen m]
-                                              (. gen (throwException ex-type (. m (getName))))))
+                                            emit-unsupported)
                     (assoc mm (method-sig meth) meth))))
               mm (mapcat #(.getMethods %) interfaces))
                                         ;extra methods
        (doseq [mname pclasses rclass :as msig] methods
          (emit-forwarding-method (str mname) pclasses rclass (:static ^msig)
-                                 (fn [gen m]
-                                     (. gen (throwException ex-type (. m (getName))))))))
+                                 emit-unsupported)))
 
                                         ;main
     (when main
@@ -411,7 +413,7 @@
         (. gen goTo end-label)
                                         ;no main found
         (. gen mark no-main-label)
-        (. gen (throwException ex-type (str main-name " not defined")))
+        (. gen (throwException ex-type (str pkg-name "/" main-name " not defined")))
         (. gen mark end-label)
         (. gen (returnValue))
         (. gen (endMethod))))
