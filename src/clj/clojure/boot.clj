@@ -1488,6 +1488,13 @@
           (. ns (importClass c (. Class (forName (str pkg "." c)))))) )
       (apply import (rest import-lists))))
 
+(defmacro imports
+  "import-list => (package-name class-names*)
+
+  For each (unevaluated) name in class-names, adds a mapping from name to the
+  class named by package-name.name to the current namespace."
+  [& import-lists] `(import ~@(map #(list 'quote %) import-lists)))
+
 (defn into-array
   "Returns an array of the type of the first element in coll,
   containing the contents of coll, which must be of a compatible
@@ -1993,6 +2000,23 @@
             (when-not v
               (throw (new java.lang.IllegalAccessError (str sym " is not public"))))
             (. *ns* (refer (or (rename sym) sym) v)))))))
+
+(defmacro refers 
+  "refers to all public vars of ns, subject to filters.
+  filters can include at most one each of:
+
+  :exclude list-of-names
+  :only list-of-names
+  :rename map-of-fromname-toname
+
+  For each public interned var in the namespace named by the symbol,
+  adds a mapping from the name of the var to the var to the current
+  namespace.  Throws an exception if name is already mapped to
+  something else in the current namespace. Filters can be used to
+  select a subset, via inclusion or exclusion, or to provide a mapping
+  to a symbol different from the var's name, in order to prevent
+  clashes."
+  [ns-name & filters] `(refer '~ns-name ~@(map #(list 'quote %) filters)))
 
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
@@ -2940,3 +2964,23 @@
   "Returns a seq on a java.lang.Enumeration"
   [e]
   (clojure.lang.EnumerationSeq/create e))
+
+(defn format
+  "Formats a string using java.lang.String.format, see java.util.Formatter for format
+  string syntax"
+  [fmt & args]
+  (String/format fmt (to-array args)))
+
+(defn printf
+  "Prints formatted output, as per format"
+  [fmt & args]
+  (print (apply format fmt args)))
+
+(defmacro ns
+  "Sets *ns* to the namespace named by name (unevaluated), creating it if needed. 
+  If the ns didn't already exist, refers the clojure namespace"
+  [name]
+  `(let [existed# (clojure.lang.Namespace/find '~name)]
+     (in-ns '~name)
+     (when-not existed#
+       (clojure/refer '~'clojure))))
