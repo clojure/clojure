@@ -189,16 +189,6 @@
      [root system]
      [root runtime system])))
 
-(defn- format
-  "Formats a string using String/format"
-  [fmt & args]
-  (String/format fmt (to-array args)))
-
-(defn- printf
-  "Prints formatted output"
-  [fmt & args]
-  (print (apply format fmt args)))
-
 (defn- throw-if
   "Throws an exception with a message if pred is true. See
   java.util.Formatter for format string syntax."
