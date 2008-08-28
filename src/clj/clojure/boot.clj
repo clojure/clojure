@@ -3196,3 +3196,29 @@
         (printf "(clojure/load-resources \"%s\")\n" path)
         (flush))
       (.loadResourceScript clojure.lang.RT (.substring path 1)))))
+
+;;;;;;;;;;;;; nested associative ops ;;;;;;;;;;;
+
+(defn get-in
+  "returns the value in a nested associative structure, where ks is a sequence of keys"
+  [m ks]
+  (reduce get m ks))
+
+(defn assoc-in
+  "Associates a value in a nested associative structure, where ks is a
+  sequence of keys and v is the new value and returns a new nested structure.  
+  If any levels do not exist, hash-maps will be created."  
+  [m [k & ks] v]
+  (if ks
+    (assoc m k (assoc-in (get m k) ks v))
+    (assoc m k v)))
+
+(defn update-in 
+  "'Updates' a value in a nested associative structure, where ks is a
+  sequence of keys and f is a function that will take the old value
+  and return the new value, and returns a new nested structure.  
+  If any levels do not exist, hash-maps will be created."
+  ([m [k & ks] f]
+   (if ks
+     (assoc m k (update-in (get m k) ks f))
+     (assoc m k (f (get m k))))))
