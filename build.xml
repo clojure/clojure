@@ -7,32 +7,17 @@
   <!-- The JAR file to create. -->
   <property name="jarfile" location="clojure-contrib.jar"/>
 
-  <!-- The top-level directory of the JAR file. -->
-  <property name="dist.root" location="dist"/>
-
-  <!-- The directory under dist.root that matches the
-       classpath "clojure.contrib". -->
-  <property name="dist.path" location="${dist.root}"/>
-
   <target name="clean"
           description="Remove generated files and directories.">
-    <delete dir="${dist.root}"/>
     <delete file="${jarfile}"/>
   </target>
 
-  <target name="dirs"
-          description="Create build dirs.">
-    <mkdir dir="${dist.path}"/>
-  </target>
-
   <target name="jar"
-          description="Create jar file."
-          depends="clean,dirs">
-    <copy todir="${dist.path}">
+          description="Create jar file.">
+    <jar jarfile="${jarfile}">
       <fileset dir="." includes="CPL.TXT"/>
       <fileset dir="./src" includes="clojure/contrib/**/*.clj"/>
-    </copy>
-    <jar jarfile="${jarfile}" basedir="${dist.root}"/>
+    </jar>
   </target>
 
 </project>
