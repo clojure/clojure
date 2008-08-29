@@ -9,11 +9,9 @@
 ; Functions for generating interface classes, which can then be loaded
 ; or saved to a .class file.
 
-(clojure/in-ns 'clojure.contrib.gen-interface)
-(clojure/refer 'clojure)
-
-(import '(clojure.asm ClassWriter Opcodes Type)
-        '(java.io File FileOutputStream IOException))
+(ns clojure.contrib.gen-interface
+  (:imports (clojure.asm ClassWriter Opcodes Type)
+            (java.io File FileOutputStream IOException)))
 
 (defn- asm-type
   "Returns an asm Type object for c, which may be a primitive class
