@@ -25,13 +25,12 @@
 ;; of 'slurp') and 'write-lines' (opposite of 'line-seq').
 
 
-(clojure/in-ns 'clojure.contrib.duck-streams)
-(clojure/refer 'clojure)
-
-(import '(java.io Reader InputStream InputStreamReader FileReader
-		  BufferedReader File PrintWriter OutputStream
-		  OutputStreamWriter BufferedWriter Writer FileWriter)
-	'(java.net URI URL MalformedURLException))
+(clojure/ns clojure.contrib.duck-streams
+            (:import 
+             (java.io Reader InputStream InputStreamReader FileReader
+                      BufferedReader File PrintWriter OutputStream
+                      OutputStreamWriter BufferedWriter Writer FileWriter)
+             (java.net URI URL MalformedURLException)))
 
 (defmacro bufr
   {:private true}

@@ -18,8 +18,7 @@
 ;; This file depends on genclass.clj in the Clojure distribution.
 
 
-(clojure/in-ns 'clojure.contrib.enum)
-(clojure/refer 'clojure)
+(clojure/ns clojure.contrib.enum)
 
 (defmacro defenum
   "Generates and loads a subclass of java.lang.Enum, then

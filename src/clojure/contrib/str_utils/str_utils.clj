@@ -12,11 +12,8 @@
 ;; remove this notice, or any other, from this software.
 
 
-(clojure/in-ns 'clojure.contrib.str-utils)
-(clojure/refer 'clojure)
-
-(import '(java.util.regex Pattern))
-
+(clojure/in-ns clojure.contrib.str-utils
+               (:import (java.util.regex Pattern)))
 
 (defn re-split
   "Splits the string on instances of 'pattern'.  Returns a sequence of

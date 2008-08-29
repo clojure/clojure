@@ -37,8 +37,7 @@
 
 
 
-(clojure/in-ns 'clojure.contrib.test-is)
-(clojure/refer 'clojure)
+(clojure/ns clojure.contrib.test-is)
 
 (def
  #^{:doc "PrintWriter to which test results are printed; defaults to

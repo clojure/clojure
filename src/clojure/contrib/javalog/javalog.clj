@@ -19,11 +19,10 @@
 
 
 
-(clojure/in-ns 'clojure.contrib.javalog)
-(clojure/refer 'clojure)
-
-(import '(java.util.logging Logger Level ConsoleHandler
-                            FileHandler SimpleFormatter))
+(clojure/ns clojure.contrib.javalog
+            (:import 
+             (java.util.logging Logger Level ConsoleHandler
+                                FileHandler SimpleFormatter)))
 
 (def 
  #^{:tag Logger

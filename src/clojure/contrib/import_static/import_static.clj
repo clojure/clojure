@@ -13,9 +13,8 @@
 
 
 
-(clojure/in-ns 'clojure.contrib.import-static)
-(clojure/refer 'clojure)
-(clojure/refer 'clojure.set)
+(clojure/ns clojure.contrib.import-static
+            (:use clojure.set))
 
 (defmacro import-static
   "Imports the named static fields and/or static methods of the class

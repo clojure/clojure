@@ -12,8 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(clojure/in-ns 'clojure.contrib.seq-utils)
-(clojure/refer 'clojure)
+(clojure/ns clojure.contrib.seq-utils)
 
 
 ;; 'flatten' written by Rich Hickey,
@@ -24,14 +23,6 @@
   [x]
   (let [s? #(instance? clojure.lang.Sequential %)]
     (filter (complement s?) (tree-seq s? seq x))))
-
-(defn batch
-  "Returns a sequence of sequences, each containing 'size' elements
-  from s.  DEPRECATED in favor of clojure/partition, added to boot.clj
-  in r865."
-  [size s]
-  (when s
-    (lazy-cons (take size s) (batch size (drop size s)))))
 
 (defn separate
   "Returns a vector:

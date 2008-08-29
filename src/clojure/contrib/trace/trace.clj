@@ -16,8 +16,7 @@
 ;; code is doing.
 
 
-(clojure/in-ns 'clojure.contrib.trace)
-(clojure/refer 'clojure)
+(clojure/ns clojure.contrib.trace)
 
 (def
  #^{:doc "PrintStream for trace output.  Defaults to System.err."}

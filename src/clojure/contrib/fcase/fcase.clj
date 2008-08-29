@@ -18,8 +18,7 @@
 ;; test for regular expressions and class membership.
 
 
-(clojure/in-ns 'clojure.contrib.fcase)
-(clojure/refer 'clojure)
+(clojure/ns clojure.contrib.fcase)
 
 
 (defmacro fcase
