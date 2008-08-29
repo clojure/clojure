@@ -1475,7 +1475,7 @@
   "import-list => (package-symbol class-name-symbols*)
 
   For each name in class-name-symbols, adds a mapping from name to the
-  class named by package.name to the current namespace. Use :imports in the ns 
+  class named by package.name to the current namespace. Use :import in the ns 
   macro in preference to calling this directly."  
   [& import-lists]
     (when import-lists
@@ -1977,7 +1977,7 @@
   something else in the current namespace. Filters can be used to
   select a subset, via inclusion or exclusion, or to provide a mapping
   to a symbol different from the var's name, in order to prevent
-  clashes. Use :uses in the ns macro in preference to calling this directly."
+  clashes. Use :use in the ns macro in preference to calling this directly."
   [ns-sym & filters]
     (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
           fs (apply hash-map filters)
@@ -2009,7 +2009,8 @@
 (defn alias
   "Add an alias in the current namespace to another
   namespace. Arguments are two symbols: the alias to be used, and
-  the symbolic name of the target namespace."
+  the symbolic name of the target namespace. Use :as in the ns macro in preference 
+  to calling this directly."
   [alias namespace-sym]
   (.addAlias *ns* alias (find-ns namespace-sym)))
 
@@ -2953,19 +2954,19 @@
 (defmacro ns
   "Sets *ns* to the namespace named by name (unevaluated), creating it if needed. 
   If the ns didn't already exist, refers the clojure namespace. references can be zero or more of:
-  (:requires ...) (:uses ...) (:imports ...) with the syntax of require/use/import respectively, 
+  (:require ...) (:use ...) (:import ...) with the syntax of require/use/import respectively, 
   except the arguments are unevaluated and need not be quoted. Use of ns is preferred to 
   individual calls to in-ns/require/use/import:
 
   (ns foo
-    (:requires (clojure.contrib sql sql.tests))
-    (:uses (my.lib this that))
-    (:imports (java.util Date Timer Random)
+    (:require (clojure.contrib sql sql.tests))
+    (:use (my.lib this that))
+    (:import (java.util Date Timer Random)
               (java.sql Connection Statement)))"
   [name & references]
   (let [process-reference 
         (fn [[kname & args]]
-          `(~(symbol (subs (clojure/name kname) 0 (dec (count (clojure/name kname))))) 
+          `(~(symbol (clojure/name kname)) 
             ~@(map #(list 'quote %) args)))]
     `(let [existed# (clojure.lang.Namespace/find '~name)]
        (in-ns '~name)
@@ -3119,7 +3120,7 @@
   "Loads libs, skipping any that are already loaded. Each argument is
   either a libspec that identifies a lib, a prefix list that identifies
   multiple libs whose names share a common prefix, or a flag that modifies
-  how all the identified libs are loaded. Use :requires in the ns macro 
+  how all the identified libs are loaded. Use :require in the ns macro 
   in preference to calling this directly.
 
   Libs
@@ -3171,7 +3172,7 @@
 
 (defn use
   "Like 'require, but also refers to each lib's namespace using
-  clojure/refer. Use :uses in the ns macro in preference to calling
+  clojure/refer. Use :use in the ns macro in preference to calling
   this directly.
 
   'use accepts additional options in libspecs: :exclude, :only, :rename.
