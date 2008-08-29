@@ -13,10 +13,9 @@
 ;;  scgilardi (gmail)
 ;;  23 April 2008
 
-(clojure/in-ns 'clojure.contrib.sql)
-(clojure/refer 'clojure)
-
-(import '(java.sql DriverManager Connection PreparedStatement ResultSet))
+(clojure/ns clojure.contrib.sql
+ (:import
+  (java.sql DriverManager Connection PreparedStatement ResultSet)))
 
 (defn get-connection
   "Attempts to get a connection to a database via a jdbc URL"

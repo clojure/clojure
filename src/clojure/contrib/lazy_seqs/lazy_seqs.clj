@@ -32,10 +32,8 @@
 ;;  scgilardi (gmail)
 ;;  Created 07 June 2008
 
-(clojure/in-ns 'clojure.contrib.lazy-seqs)
-(clojure/refer 'clojure)
-
-(clojure.contrib.lib/use '(clojure.contrib def))
+(clojure/ns clojure.contrib.lazy-seqs
+ (:use clojure.contrib.def))
 
 (defvar primes
   (lazy-cat [2 3 5 7]

@@ -13,8 +13,7 @@
 ;;  scgilardi (gmail)
 ;;  28 June 2008
 
-(clojure/in-ns 'clojure.contrib.pred)
-(clojure/refer 'clojure)
+(clojure/ns clojure.contrib.pred)
 
 (defn coll?
   "Returns true if x implements IPersistentCollection"

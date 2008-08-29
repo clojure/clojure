@@ -14,11 +14,12 @@
 ;;  scgilardi (gmail)
 ;;  17 May 2008
 
-(clojure/in-ns 'clojure.contrib.def)
-(clojure/refer 'clojure)
+(clojure/ns clojure.contrib.def)
 
 (defmacro init-once
-  "Initializes a var exactly once. The var must already exist."
+  "Initializes a var exactly once. The var must already exist.
+  (NOTE: Since SVN 1008, Clojure includes defonce. Please use that instead
+  of init-once.)"
   [var init]
   `(let [v# (resolve '~var)]
      (when-not (.isBound v#)
