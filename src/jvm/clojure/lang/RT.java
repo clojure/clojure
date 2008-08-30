@@ -350,7 +350,7 @@ public static void loadResourceScript(Class c, String name) throws Exception{
 public static void loadResourceScript(Class c, String name, boolean failIfNotFound) throws Exception{
 	int slash = name.lastIndexOf('/');
 	String file = slash >= 0 ? name.substring(slash + 1) : name;
-	InputStream ins = c.getResourceAsStream("/" + name);
+	InputStream ins = baseLoader().getResourceAsStream(name);
 	if(ins != null)
 		{
 		Compiler.load(new InputStreamReader(ins, UTF8), name, file);
