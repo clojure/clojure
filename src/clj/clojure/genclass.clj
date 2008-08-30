@@ -75,6 +75,8 @@
   the class as a resource from the classpath, e.g. in the example
   case, org/mydomain/MyClass.clj
 
+  Note that methods with a maximum of 18 parameters are supported.
+
   Returns a map containing :name and :bytecode. Most uses will be
   satisfied by the higher-level gen-and-load-class and
   gen-and-store-class functions, which generate and immediately load,
@@ -213,43 +215,46 @@
                 else-label (. gen (newLabel))
                 end-label (. gen (newLabel))]
             (. gen (visitCode))
-            (when is-overload
-              (emit-get-var gen (overload-name mname pclasses))
-              (. gen (dup))
-              (. gen (ifNonNull found-label))
-              (. gen (pop)))
-            (emit-get-var gen mname)
-            (. gen (dup))
-            (. gen (ifNull else-label))
-            (when is-overload
-              (. gen (mark found-label)))
+            (if (> (count pclasses) 18)
+              (else-gen gen m)
+              (do
+                (when is-overload
+                  (emit-get-var gen (overload-name mname pclasses))
+                  (. gen (dup))
+                  (. gen (ifNonNull found-label))
+                  (. gen (pop)))
+                (emit-get-var gen mname)
+                (. gen (dup))
+                (. gen (ifNull else-label))
+                (when is-overload
+                  (. gen (mark found-label)))
                                         ;if found
-            (when-not as-static
-              (. gen (loadThis)))
+                (when-not as-static
+                  (. gen (loadThis)))
                                         ;box args
-            (dotimes i (count ptypes)
-              (. gen (loadArg i))
-              (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
+                (dotimes i (count ptypes)
+                  (. gen (loadArg i))
+                  (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
                                         ;call fn
-            (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
-                                                  (to-types (replicate (+ (count ptypes)
-                                                                          (if as-static 0 1)) 
-                                                                       Object)))))
-                                                  ;(into-array (cons obj-type 
-                                                  ;                 (replicate (count ptypes) obj-type))))))
+                (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
+                                                      (to-types (replicate (+ (count ptypes)
+                                                                              (if as-static 0 1)) 
+                                                                           Object)))))
+                                        ;(into-array (cons obj-type 
+                                        ;                 (replicate (count ptypes) obj-type))))))
                                         ;unbox return
-            (. gen (unbox rtype))
-            (when (= (. rtype (getSort)) (. Type VOID))
-              (. gen (pop)))
-            (. gen (goTo end-label))
-            
+                (. gen (unbox rtype))
+                (when (= (. rtype (getSort)) (. Type VOID))
+                  (. gen (pop)))
+                (. gen (goTo end-label))
+                
                                         ;else call supplied alternative generator
-            (. gen (mark else-label))
-            (. gen (pop))
+                (. gen (mark else-label))
+                (. gen (pop))
+                
+                (else-gen gen m)
             
-            (else-gen gen m)
-            
-            (. gen (mark end-label))
+                (. gen (mark end-label))))
             (. gen (returnValue))
             (. gen (endMethod))))
         ]
