@@ -13,26 +13,27 @@
 package clojure.lang;
 
 final public class LazyCons extends ASeq{
+final private static ISeq sentinel = new Cons(null, null);
 IFn f;
 Object _first;
 ISeq _rest;
 
 public LazyCons(IFn f){
 	this.f = f;
-	this._first = this;
-	this._rest = this;
+	this._first = sentinel;
+	this._rest = sentinel;
 }
 
 LazyCons(IPersistentMap meta, Object first, ISeq rest){
 	super(meta);
-	this._first = first;
-	this._rest = rest;
+	this._first = sentinel;
+	this._rest = sentinel;
 }
 
 final
 synchronized
 public Object first(){
-	if(_first == this)
+	if(_first == sentinel)
 		{
 		try
 			{
@@ -49,12 +50,12 @@ public Object first(){
 final
 synchronized
 public ISeq rest(){
-	if(_rest == this)
+	if(_rest == sentinel)
 		{
 		try
 			{
 			//force sequential evaluation
-			if(_first == this)
+			if(_first == sentinel)
 				first();
 			_rest = RT.seq(f.invoke(null));
 			}
