@@ -10,8 +10,8 @@
 ; or saved to a .class file.
 
 (ns clojure.contrib.gen-interface
-  (:imports (clojure.asm ClassWriter Opcodes Type)
-            (java.io File FileOutputStream IOException)))
+  (:import (clojure.asm ClassWriter Opcodes Type)
+           (java.io File FileOutputStream IOException)))
 
 (defn- asm-type
   "Returns an asm Type object for c, which may be a primitive class
