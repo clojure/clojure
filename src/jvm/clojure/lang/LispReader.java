@@ -22,7 +22,8 @@ import java.lang.*;
 
 public class LispReader{
 
-static Symbol QUOTE = Symbol.create(null, "quote");
+static final Symbol QUOTE = Symbol.create("quote");
+static final Symbol THE_VAR = Symbol.create("var");
 //static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
 //static Symbol UNQUOTE = Symbol.create(null, "unquote");
 //static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
@@ -63,7 +64,7 @@ static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
-	macros['\''] = new WrappingReader(Compiler.QUOTE);
+	macros['\''] = new WrappingReader(QUOTE);
 	macros['@'] = new WrappingReader(DEREF);//new DerefReader();
 	macros['^'] = new WrappingReader(META);
 	macros['`'] = new SyntaxQuoteReader();
@@ -81,7 +82,7 @@ static
 
 
 	dispatchMacros['^'] = new MetaReader();
-	dispatchMacros['\''] = new WrappingReader(Compiler.THE_VAR);
+	dispatchMacros['\''] = new WrappingReader(THE_VAR);
 	dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['('] = new FnReader();
 	dispatchMacros['{'] = new SetReader();
@@ -871,6 +872,13 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 }
 
 /*
+public static void main(String[] args) throws Exception{
+	//RT.init();
+	PushbackReader rdr = new PushbackReader( new java.io.StringReader( "(+ 21 21)" ) );
+	Object input = LispReader.read(rdr, false, new Object(), false );
+	System.out.println(Compiler.eval(input));
+}
+
 public static void main(String[] args){
 	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in));
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
