@@ -3223,3 +3223,79 @@
    (if ks
      (assoc m k (update-in (get m k) ks f))
      (assoc m k (f (get m k))))))
+
+(defn empty?
+  "Returns true if coll has no items - same as (not (seq coll)). 
+  Please use the idiom (seq x) rather than (not (empty? x))"
+  [coll] (not (seq coll)))
+
+(defn coll?
+  "Returns true if x implements IPersistentCollection"
+  [x] (instance? clojure.lang.IPersistentCollection x))
+
+(defn list?
+  "Returns true if x implements IPersistentList"
+  [x] (instance? clojure.lang.IPersistentList x))
+
+(defn set?
+  "Returns true if x implements IPersistentSet"
+  [x] (instance? clojure.lang.IPersistentSet x))
+
+(defn number?
+  "Returns true if x is a Number"
+  [x]
+  (instance? Number x))
+
+(defn fn?
+  "Returns true if x implements IFn. Note that many data structures 
+  (e.g. sets and maps) implement IFn"
+  [x] (instance? clojure.lang.IFn x))
+
+(defn integer?
+  "Returns true if n is an integer"
+  [n]
+  (or (instance? Integer n)
+      (instance? Long n)
+      (instance? BigInteger n)))
+
+(defn ratio?
+  "Returns true if n is a Ratio"
+  [n] (instance? clojure.lang.Ratio n))
+
+(defn decimal?
+  "Returns true if n is a BigDecimal"
+  [n] (instance? BigDecimal n))
+
+(defn float?
+  "Returns true if n is a floating point number" 
+  [n]   
+  (or (instance? Double n)
+      (instance? Float n)))
+
+(defn rational? [n]
+  "Returns true if n is a rational number"
+  (or (integer? n) (ratio? n) (decimal? n)))
+
+(defn associative? 
+ "Returns true if coll implements Associative"
+  [coll] (instance? clojure.lang.Associative coll))
+
+(defn sequential? 
+ "Returns true if coll implements Sequential"
+  [coll] (instance? clojure.lang.Sequential coll))
+
+(defn sorted? 
+ "Returns true if coll implements Sorted"
+  [coll] (instance? clojure.lang.Sorted coll))
+
+(defn reversible? 
+ "Returns true if coll implements Reversible"
+  [coll] (instance? clojure.lang.Reversible coll))
+
+(defn even?
+  "Returns true if n is even, throws an exception if n is not an integer"
+  [n] (zero? (bit-and n 1)))
+
+(defn odd?
+  "Returns true if n is odd, throws an exception if n is not an integer"
+  [n] (not (even? n)))
