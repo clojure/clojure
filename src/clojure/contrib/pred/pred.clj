@@ -10,42 +10,32 @@
 ;;
 ;;  Some clojure predicates
 ;;
+;;  Items commented out below are defined in the clojure namespace
+;;
 ;;  scgilardi (gmail)
 ;;  28 June 2008
 
 (clojure/ns clojure.contrib.pred)
 
-(defn coll?
-  "Returns true if x implements IPersistentCollection"
-  [x]
-  (instance? clojure.lang.IPersistentCollection x))
-
-(defn list?
-  "Returns true if x implements IPersistentList"
-  [x]
-  (instance? clojure.lang.IPersistentList x))
-
-;; map
-
-(defn set?
-  "Returns true if x implements IPersistentSet"
-  [x]
-  (instance? clojure.lang.IPersistentSet x))
+;; coll?
+;; list?
+;; map?
+;; set?
 
 (defn stack?
   "Returns true if x implements IPersistentStack"
   [x]
   (instance? clojure.lang.IPersistentStack x))
 
-;; vector
+;; vector?
 
 (defn ref?
   "Returns true if x implements IRef"
   [x]
   (instance? clojure.lang.IRef x))
 
-;; seq
-;; var
+;; seq?
+;; var?
 
 (defn map-entry?
   "Returns true if x is a MapEntry"
@@ -57,51 +47,24 @@
   [x]
   (not (coll? x)))
 
-(defn number?
-  "Returns true if x is a Number"
-  [x]
-  (instance? Number x))
-
-(defn ratio?
-  "Returns true if x is a Ratio"
-  [x]
-  (instance? clojure.lang.Ratio x))
+;; number?
+;; ratio?
 
 (defn range?
   "Returns true if x is a Range"
   [x]
   (instance? clojure.lang.Range x))
 
-(defn function?
-  "Returns true if x implements IFn"
-  [x]
-  (instance? clojure.lang.IFn x))
+;; function? -> fn?
 
 (defmacro macro?
   "Returns true if x is a function and the symbol of the
   same name can be resolved and has its :macro metadata
   set"
   [x]
-  `(and (function? ~x) (boolean (:macro ^#'~x))))
+  `(and (fn? ~x) (boolean (:macro ^#'~x))))
 
-(defn integer?
-  "Returns true if x is an integer"
-  [x]
-  (or (instance? Integer x)
-      (instance? Long x)
-      (instance? BigInteger x)))
-
-(defn even?
-  "Returns true if x is even, throws an exception if x is not an integer"
-  [x]
-  (zero? (bit-and x 1)))
-
-(defn odd?
-  "Returns true if x is odd, throws an exception if x is not an integer"
-  [x]
-  (not (even? x)))
-
-(defn empty?
-  "Returns true if coll is empty"
-  [coll]
-  (not (seq coll)))
+;; integer?
+;; even?
+;; odd?
+;; empty?
