@@ -2952,27 +2952,37 @@
   (print (apply format fmt args)))
 
 (defmacro ns
-  "Sets *ns* to the namespace named by name (unevaluated), creating it if needed. 
-  If the ns didn't already exist, refers the clojure namespace. references can be zero or more of:
-  (:require ...) (:use ...) (:import ...) with the syntax of require/use/import respectively, 
-  except the arguments are unevaluated and need not be quoted. Use of ns is preferred to 
-  individual calls to in-ns/require/use/import:
+  "Sets *ns* to the namespace named by name (unevaluated), creating it
+  if needed.  references can be zero or more of: (:refer-clojure ...)
+  (:require ...) (:use ...) (:import ...) (:load-resources ...) with
+  the syntax of refer-clojure/require/use/import/load-resources
+  respectively, except the arguments are unevaluated and need not be
+  quoted.  If :refer-clojure is not used, a default (refer 'clojure)
+  is used.  Use of ns is preferred to individual calls to
+  in-ns/require/use/import:
 
   (ns foo
+    (:refer-clojure :exclude [ancestors printf])
     (:require (clojure.contrib sql sql.tests))
     (:use (my.lib this that))
     (:import (java.util Date Timer Random)
-              (java.sql Connection Statement)))"
+              (java.sql Connection Statement))
+    (:load-resources \"/mystuff/foo.clj\"))"
   [name & references]
   (let [process-reference 
         (fn [[kname & args]]
-          `(~(symbol (clojure/name kname)) 
-            ~@(map #(list 'quote %) args)))]
-    `(let [existed# (clojure.lang.Namespace/find '~name)]
-       (in-ns '~name)
-       (when-not existed#
-         (clojure/refer '~'clojure))
-     ~@(map process-reference references))))
+          `(~(symbol "clojure" (clojure/name kname))
+             ~@(map #(list 'quote %) args)))]
+    `(do
+       (clojure/in-ns '~name)
+       ~@(when (not-any? #(= :refer-clojure (first %)) references)
+           `((clojure/refer '~'clojure)))
+       ~@(map process-reference references))))
+
+(defmacro refer-clojure
+  "Same as (refer 'clojure <filters>)"
+  [& filters]
+  `(clojure/refer '~'clojure ~@filters))
 
 (defmacro defonce 
   "defs name to have the root value of the expr iff the named var has no root value, 

@@ -6,12 +6,10 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-ns 'clojure.inspector)
-(clojure/refer 'clojure)
-
-(import '(javax.swing.tree TreeModel)
-	'(javax.swing.table TableModel)
-	'(javax.swing JTree JTable JScrollPane JFrame))
+(ns clojure.inspector
+    (:import (javax.swing.tree TreeModel)
+	(javax.swing.table TableModel)
+	(javax.swing JTree JTable JScrollPane JFrame)))
 
 (defn atom? [x]
   (not (instance? clojure.lang.IPersistentCollection x)))

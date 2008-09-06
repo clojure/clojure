@@ -6,8 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-ns 'clojure.parallel)
-(clojure/refer 'clojure)
+(ns clojure.parallel)
 (alias 'parallel 'clojure.parallel)
 
 (comment "

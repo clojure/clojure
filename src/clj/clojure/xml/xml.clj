@@ -6,11 +6,9 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-ns 'clojure.xml)
-(clojure/refer 'clojure)
-
-(import '(org.xml.sax ContentHandler Attributes SAXException)
-	'(javax.xml.parsers SAXParser SAXParserFactory))
+(ns clojure.xml
+    (:import (org.xml.sax ContentHandler Attributes SAXException)
+             (javax.xml.parsers SAXParser SAXParserFactory)))
 
 (def *stack*)
 (def *current*)

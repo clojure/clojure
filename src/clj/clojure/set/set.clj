@@ -6,8 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-ns 'clojure.set)
-(clojure/refer 'clojure)
+(ns clojure.set)
 
 (defn union
   "Returns a set that is the union of the two sets."

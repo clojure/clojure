@@ -72,6 +72,9 @@ static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 static final Keyword inlineKey = Keyword.intern(null, "inline");
 static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 
+static final Symbol NS = Symbol.create("ns");
+static final Symbol IN_NS = Symbol.create("in-ns");
+
 //static final Symbol IMPORT = Symbol.create("import");
 //static final Symbol USE = Symbol.create("use");
 
@@ -3960,6 +3963,10 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		{
 		return RT.classForName(sym.name);
 		}
+	else if(sym.equals(NS))
+		return RT.NS_VAR;
+	else if(sym.equals(IN_NS))
+		return RT.IN_NS_VAR;
 	else
 		{
 		Object o = n.getMapping(sym);
@@ -3986,6 +3993,10 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 		{
 		return RT.classForName(sym.name);
 		}
+	else if(sym.equals(NS))
+		return RT.NS_VAR;
+	else if(sym.equals(IN_NS))
+		return RT.IN_NS_VAR;
 	else
 		{
 		Object o = n.getMapping(sym);
@@ -4010,6 +4021,10 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 		else
 			var = ns.findInternedVar(name);
 		}
+	else if(sym.equals(NS))
+		return RT.NS_VAR;
+	else if(sym.equals(IN_NS))
+		return RT.IN_NS_VAR;
 	else
 		{
 		//is it mapped?

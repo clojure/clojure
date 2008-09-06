@@ -184,6 +184,7 @@ final static public Var USE_CONTEXT_CLASSLOADER =
 
 final static Symbol LOAD_FILE = Symbol.create("load-file");
 final static Symbol IN_NAMESPACE = Symbol.create("in-ns");
+final static Symbol NAMESPACE = Symbol.create("ns");
 //final static Symbol EXPORTS = Symbol.create("*exports*");
 //final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS, EXPORTS, PersistentHashMap.EMPTY);
 //final static Symbol EQL_REF = Symbol.create("eql-ref?");
@@ -197,6 +198,9 @@ final static Var FLUSH_ON_NEWLINE = Var.intern(CLOJURE_NS, Symbol.create("*flush
 final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
 final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
 final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
+
+final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), F);
+final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("ns"), F);
 
 //final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){

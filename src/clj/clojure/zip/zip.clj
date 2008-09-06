@@ -9,8 +9,8 @@
 ;functional hierarchical zipper, with navigation, editing and enumeration
 ;see Huet
 
-(in-ns 'clojure.zip)
-(clojure/refer 'clojure :exclude '(replace))
+(ns clojure.zip
+    (:refer-clojure :exclude (replace)))
 
 (defn zipper
   "Creates a new zipper structure. 
