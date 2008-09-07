@@ -4022,9 +4022,9 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 			var = ns.findInternedVar(name);
 		}
 	else if(sym.equals(NS))
-		return RT.NS_VAR;
+		var =  RT.NS_VAR;
 	else if(sym.equals(IN_NS))
-		return RT.IN_NS_VAR;
+		var = RT.IN_NS_VAR;
 	else
 		{
 		//is it mapped?
