@@ -9,13 +9,13 @@
 ; Functions for memory-mapping files, plus some functions that use a
 ; mmaped file for "normal" activies -- slurp, load-file, etc.
 
-(clojure/in-ns 'clojure.contrib.mmap)
-(clojure/refer 'clojure :exclude '(slurp load-file))
+(ns clojure.contrib.mmap
+    (:refer-clojure :exclude (slurp load-file))
+    (:import (java.nio ByteBuffer CharBuffer)
+             (java.io PushbackReader InputStream InputStreamReader
+                      FileInputStream)))
 
 ;(set! *warn-on-reflection* true)
-
-(import '(java.nio ByteBuffer CharBuffer)
-        '(java.io PushbackReader InputStream InputStreamReader FileInputStream))
 
 (def READ_ONLY #^{:private true}
   (java.nio.channels.FileChannel$MapMode/READ_ONLY))
