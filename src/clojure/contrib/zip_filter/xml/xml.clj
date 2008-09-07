@@ -8,17 +8,10 @@
 
 ; Specialization of zip-filter for xml trees.
 
-(clojure/in-ns 'clojure.contrib.zip-filter.xml)
-(clojure/refer 'clojure)
-
-; load zip-filter if it isn't already -- when will lib.clj be guaranteed?
-(when-not (find-ns 'clojure.contrib.zip-filter)
-  (clojure.lang.RT/loadResourceScript
-    "clojure/contrib/zip_filter/zip_filter.clj"))
-
-(alias 'zf 'clojure.contrib.zip-filter)
-(alias 'zip 'clojure.zip)
-(alias 'xml 'clojure.xml)
+(ns clojure.contrib.zip-filter.xml
+    (:require [clojure.contrib.zip-filter :as zf]
+              [clojure.zip :as zip]
+              [clojure.xml :as xml]))
 
 (def xml->)
 
