@@ -14,7 +14,7 @@
 ;;  scgilardi (gmail)
 ;;  17 May 2008
 
-(clojure/ns clojure.contrib.def)
+(ns clojure.contrib.def)
 
 (defmacro init-once
   "Initializes a var exactly once. The var must already exist.

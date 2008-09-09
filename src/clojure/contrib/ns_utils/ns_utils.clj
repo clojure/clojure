@@ -36,8 +36,8 @@
 ;;  scgilardi (gmail)
 ;;  23 April 2008
 
-(clojure/ns clojure.contrib.ns-utils
- (:use clojure.contrib.except))
+(ns clojure.contrib.ns-utils
+  (:use clojure.contrib.except))
 
 ;; Namespace Utilities
 

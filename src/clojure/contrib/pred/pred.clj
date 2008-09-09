@@ -15,7 +15,7 @@
 ;;  scgilardi (gmail)
 ;;  28 June 2008
 
-(clojure/ns clojure.contrib.pred)
+(ns clojure.contrib.pred)
 
 ;; coll?
 ;; list?

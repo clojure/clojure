@@ -14,7 +14,7 @@
 ;;  Based on Common Lisp code from:
 ;;  http://asymmetrical-view.com/talks/lisp-presentation/lisp-presentation.pdf
 
-(clojure/ns clojure.contrib.memoize)
+(ns clojure.contrib.memoize)
 
 (defn memoize
   "Returns a memoized version of a referentially transparent function. The

@@ -11,7 +11,7 @@
 ;;  scgilardi (gmail)
 ;;  Created 07 July 2008
 
-(clojure/ns clojure.contrib.except)
+(ns clojure.contrib.except)
 
 (defn throw-if
   "Throws an exception with a message if pred is true. Arguments are:
