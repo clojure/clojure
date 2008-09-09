@@ -1879,10 +1879,18 @@
   ([v start end]
    (. clojure.lang.RT (subvec v start end))))
 
-(defn load
+(defn load-reader
   "Sequentially read and evaluate the set of forms contained in the
   stream/file" 
   [rdr] (. clojure.lang.Compiler (load rdr)))
+
+(defn load-string
+  "Sequentially read and evaluate the set of forms contained in the
+  string"
+  [s]
+  (let [rdr (-> (java.io.StringReader. s)
+                (clojure.lang.LineNumberingPushbackReader.))]
+    (load-reader rdr)))
 
 (defn resultset-seq
   "Creates and returns a lazy sequence of structmaps corresponding to
@@ -2954,12 +2962,11 @@
 (defmacro ns
   "Sets *ns* to the namespace named by name (unevaluated), creating it
   if needed.  references can be zero or more of: (:refer-clojure ...)
-  (:require ...) (:use ...) (:import ...) (:load-resources ...) with
-  the syntax of refer-clojure/require/use/import/load-resources
-  respectively, except the arguments are unevaluated and need not be
-  quoted.  If :refer-clojure is not used, a default (refer 'clojure)
-  is used.  Use of ns is preferred to individual calls to
-  in-ns/require/use/import:
+  (:require ...) (:use ...) (:import ...) (:load ...) with the syntax
+  of refer-clojure/require/use/import/load respectively, except the
+  arguments are unevaluated and need not be quoted.  If :refer-clojure
+  is not used, a default (refer 'clojure) is used. Use of ns is preferred
+  to individual calls to in-ns/require/use/import:
 
   (ns foo
     (:refer-clojure :exclude [ancestors printf])
@@ -2967,7 +2974,7 @@
     (:use (my.lib this that))
     (:import (java.util Date Timer Random)
               (java.sql Connection Statement))
-    (:load-resources \"/mystuff/foo.clj\"))"
+    (:load \"/mystuff/foo.clj\"))"
   [name & references]
   (let [process-reference 
         (fn [[kname & args]]
@@ -2992,7 +2999,7 @@
      (when-not (.hasRoot v#)
        (def ~name ~expr))))
 
-;;;;;;;;;;; require/use/load-resources, contributed by Stephen C. Gilardi ;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;; require/use/load, contributed by Stephen C. Gilardi ;;;;;;;;;;;;;;;;;;
 
 (defonce
   #^{:private true 
@@ -3048,14 +3055,14 @@
         leaf (.substring d i)]
     (str d \/ leaf ".clj")))
 
-(def load-resources)
+(def load)
 
 (defn- load-one
   "Loads a lib given its name. If need-ns, ensures that the associated
   namespace exists after loading. If require, records the load so any
   duplicate loads can be skipped."
   [lib need-ns require]
-  (load-resources (root-resource lib))
+  (load (root-resource lib))
   (throw-if (and need-ns (not (find-ns lib)))
             "namespace '%s' not found after loading '%s'"
             lib (root-resource lib))
@@ -3175,8 +3182,7 @@
     already loaded
   :reload-all implies :reload and also forces loading of all libs that the
     identified libs directly or indirectly load via require or use
-  :verbose triggers printing information about calls to load-resources,
-    alias, and refer"
+  :verbose triggers printing information about each load, alias, and refer"
   [& args]
   (apply load-libs :require args))
 
@@ -3194,7 +3200,7 @@
   "Returns a sorted set of symbols naming the currently loaded libs"
   [] @*loaded-libs*)
 
-(defn load-resources
+(defn load
   "Loads Clojure code from resources in classpath. A path is interpreted as
   classpath-relative if it begins with a slash or relative to the root
   directory for the current namespace otherwise."
@@ -3204,7 +3210,7 @@
                  path
                  (str (root-directory (ns-name *ns*)) \/ path))]
       (when *loading-verbosely*
-        (printf "(clojure/load-resources \"%s\")\n" path)
+        (printf "(clojure/load \"%s\")\n" path)
         (flush))
       (.loadResourceScript clojure.lang.RT (.substring path 1)))))
 
