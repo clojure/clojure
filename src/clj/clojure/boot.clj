@@ -3007,6 +3007,11 @@
   *loaded-libs* (ref (sorted-set)))
 
 (defonce
+  #^{:private true 
+     :doc "the set of paths currently being loaded by this thread"}
+  *pending-paths* #{})
+
+(defonce
   #^{:private true :doc
      "True while a verbose load is pending"}
   *loading-verbosely* false)
@@ -3212,7 +3217,11 @@
       (when *loading-verbosely*
         (printf "(clojure/load \"%s\")\n" path)
         (flush))
-      (.loadResourceScript clojure.lang.RT (.substring path 1)))))
+      (throw-if (*pending-paths* path)
+                "cannot load '%s' again while it is loading"
+                path)
+      (binding [*pending-paths* (conj *pending-paths* path)]
+        (.loadResourceScript clojure.lang.RT (.substring path 1))))))
 
 ;;;;;;;;;;;;; nested associative ops ;;;;;;;;;;;
 
