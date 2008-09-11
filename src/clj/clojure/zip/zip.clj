@@ -101,7 +101,7 @@
   the top"
   [loc]
     (let [[node {l :l, ppath :ppath, pnodes :pnodes r :r, changed? :changed?, :as path}] loc]
-      (when path
+      (when pnodes
         (let [pnode (peek pnodes)]
           (with-meta (if changed?
                        [(make-node loc pnode (concat l (cons node r))) 
