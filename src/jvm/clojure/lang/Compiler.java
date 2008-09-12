@@ -275,7 +275,12 @@ static class DefExpr implements Expr{
 
 	public Object eval() throws Exception{
 		if(initProvided)
-			var.bindRoot(init.eval());
+			{
+//			if(init instanceof FnExpr && ((FnExpr) init).closes.count()==0)
+//				var.bindRoot(new FnLoaderThunk((FnExpr) init,var));
+//			else
+				var.bindRoot(init.eval());
+			}
 		if(meta != null)
 			{
 			var.setMeta((IPersistentMap) meta.eval());
@@ -2651,6 +2656,33 @@ static class SourceDebugExtensionAttribute extends Attribute{
 	}
 }
 
+static class FnLoaderThunk extends RestFn{
+	FnExpr fx;
+	Var v;
+	IFn f;
+
+	FnLoaderThunk(FnExpr fx, Var v){
+		super(0);
+		this.fx = fx;
+		this.v = v;
+	}
+
+	protected Object doInvoke(Object args) throws Exception{
+		IFn f = loadFn();
+		return f.applyTo((ISeq) args);
+	}
+
+	synchronized private IFn loadFn() throws Exception{
+		if(f == null)
+			{
+		    Class fc = fx.getCompiledClass();
+			f = (IFn)fc.newInstance();
+			v.swapRoot(f);
+			}
+		return f;
+	}
+}
+
 static public class FnExpr implements Expr{
 	static final String CONST_PREFIX = "const__";
 	IPersistentCollection methods;
@@ -2685,6 +2717,8 @@ static public class FnExpr implements Expr{
 	final static Method getClassMethod = Method.getMethod("Class getClass()");
 	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
 	final static Method getConstantsMethod = Method.getMethod("Object[] getConstants(int)");
+	private DynamicClassLoader loader;
+	private byte[] bytecode;
 
 	public FnExpr(Object tag){
 		this.tag = tag;
@@ -2981,16 +3015,22 @@ static public class FnExpr implements Expr{
 		//end of class
 		cv.visitEnd();
 
-		//define class and store
-		DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
-		compiledClass = loader.defineClass(name, cw.toByteArray());
+		loader = (DynamicClassLoader) LOADER.get();
+		bytecode =  cw.toByteArray();
+	}
+
+	synchronized Class getCompiledClass(){
+		if(compiledClass == null)
+			compiledClass = loader.defineClass(name, bytecode);
+		return compiledClass;
 	}
 
 	public Object eval() throws Exception{
-		return compiledClass.newInstance();
+		return getCompiledClass().newInstance();
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		getCompiledClass();
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//fn arg is enclosing fn, not this
 		gen.newInstance(fntype);
@@ -3091,6 +3131,7 @@ static public class FnExpr implements Expr{
 			}
 		return OBJECT_TYPE;
 	}
+
 }
 
 enum PSTATE{

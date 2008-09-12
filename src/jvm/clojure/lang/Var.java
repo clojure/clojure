@@ -222,6 +222,11 @@ synchronized public void bindRoot(Object root){
 	_meta = _meta.assoc(macroKey, RT.F);
 }
 
+synchronized void swapRoot(Object root){
+	validate(getValidator(), root);
+	this.root = root;
+}
+
 synchronized public void unbindRoot(){
 	this.root = dvals;
 }
