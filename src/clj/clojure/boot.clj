@@ -1922,37 +1922,43 @@
 
 (defn find-ns
   "Returns the namespace named by the symbol or nil if it doesn't exist."
-  [sym] (. clojure.lang.Namespace (find sym)))
+  [sym] (clojure.lang.Namespace/find sym))
 
 (defn create-ns
   "Create a new namespace named by the symbol if one doesn't already
   exist, returns it or the already-existing namespace of the same
   name."
-  [sym] (. clojure.lang.Namespace (findOrCreate sym)))
+  [sym] (clojure.lang.Namespace/findOrCreate sym))
 
 (defn remove-ns
   "Removes the namespace named by the symbol. Use with caution.
   Cannot be used to remove the clojure namespace."
-  [sym] (. clojure.lang.Namespace (remove sym)))
+  [sym] (clojure.lang.Namespace/remove sym))
 
 (defn all-ns
   "Returns a sequence of all namespaces."
-  [] (. clojure.lang.Namespace (all)))
+  [] (clojure.lang.Namespace/all))
+
+(defn #^{:private true :tag clojure.lang.Namespace}
+  the-ns [x]
+  (if (instance? clojure.lang.Namespace x) 
+    x 
+    (or (find-ns x) (throw (Exception. (str "No namespace: " x " found"))))))
 
 (defn ns-name
   "Returns the name of the namespace, a symbol."
-  [#^clojure.lang.Namespace ns]
-    (. ns (getName)))
+  [ns]
+  (.getName (the-ns ns)))
 
 (defn ns-map
   "Returns a map of all the mappings for the namespace."
-  [#^clojure.lang.Namespace ns]
-    (. ns (getMappings)))
+  [ns]
+  (.getMappings (the-ns ns)))
 
 (defn ns-unmap
   "Removes the mappings for the symbol from the namespace."
-  [#^clojure.lang.Namespace ns sym]
-    (. ns (unmap sym)))
+  [ns sym]
+  (.unmap (the-ns ns) sym))
 
 ;(defn export [syms]
 ;  (doseq sym syms
@@ -1960,16 +1966,17 @@
 
 (defn ns-publics
   "Returns a map of the public intern mappings for the namespace."
-  [#^clojure.lang.Namespace ns]
+  [ns]
+  (let [ns (the-ns ns)]
     (filter-key val (fn [#^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
-                                 (= ns (. v ns))
-                                 (. v (isPublic))))
-                (ns-map ns)))
+                                 (= ns (.ns v))
+                                 (.isPublic v)))
+                (ns-map ns))))
 
 (defn ns-imports
   "Returns a map of the import mappings for the namespace."
-  [#^clojure.lang.Namespace ns]
-    (filter-key val (partial instance? Class) (ns-map ns)))
+  [ns]
+  (filter-key val (partial instance? Class) (ns-map ns)))
 
 (defn refer
   "refers to all public vars of ns, subject to filters.
@@ -2002,17 +2009,19 @@
 
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
-  [#^clojure.lang.Namespace ns]
+  [ns]
+  (let [ns (the-ns ns)]
     (filter-key val (fn [#^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
-                                 (not= ns (. v ns))))
-                (ns-map ns)))
+                                 (not= ns (.ns v))))
+                (ns-map ns))))
 
 (defn ns-interns
   "Returns a map of the intern mappings for the namespace."
-  [#^clojure.lang.Namespace ns]
+  [ns]
+  (let [ns (the-ns ns)]
     (filter-key val (fn [#^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
-                                 (= ns (. v ns))))
-                (ns-map ns)))
+                                 (= ns (.ns v))))
+                (ns-map ns))))
 
 (defn alias
   "Add an alias in the current namespace to another
@@ -2024,12 +2033,13 @@
 
 (defn ns-aliases
   "Returns a map of the aliases for the namespace."
-  [#^clojure.lang.Namespace ns]  (.getAliases ns))
+  [ns]
+  (.getAliases (the-ns ns)))
 
 (defn ns-unalias
   "Removes the alias for the symbol from the namespace."
-  [#^clojure.lang.Namespace ns sym]
-    (. ns (removeAlias sym)))
+  [ns sym]
+  (.removeAlias (the-ns ns) sym))
 
 (defn take-nth
   "Returns a lazy seq of every nth item in coll."
@@ -2073,7 +2083,7 @@
   the var/Class to which it resolves need not be present in the
   namespace."
   [ns sym]
-    (. clojure.lang.Compiler (maybeResolveIn ns sym)))
+  (clojure.lang.Compiler/maybeResolveIn (the-ns ns) sym))
 
 (defn resolve
   "same as (ns-resolve *ns* symbol)"
