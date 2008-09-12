@@ -22,6 +22,27 @@
   ([#^Pattern pattern string] (seq (. pattern (split string))))
   ([#^Pattern pattern string limit] (seq (. pattern (split string limit)))))
 
+(defn re-partition
+  "Splits the string into a lazy sequence of substrings, alternating
+  between substrings that match the patthern and the substrings
+  between the matches.  The sequence always starts with the substring
+  before the first match, or an empty string if the beginning of the
+  string matches.
+
+  For example: (re-partition #\"[a-z]+\" \"abc123def\")
+
+  Returns: (\"\" \"abc\" \"123\" \"def\")"
+  [#^Pattern re string]
+  (let [m (re-matcher re string)]
+    ((fn step [prevend]
+       (if (.find m)
+         (lazy-cons (.subSequence string prevend (.start m))
+                    (lazy-cons (re-groups m)
+                               (step (+ (.start m) (count (.group m))))))
+         (when (< prevend (.length string))
+           (list (.subSequence string prevend (.length string))))))
+     0)))
+
 (defn re-gsub
   "Replaces all instances of 'pattern' in 'string' with
   'replacement'.  Like Ruby's 'String#gsub'."
