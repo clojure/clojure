@@ -1,0 +1,434 @@
+diff --git a/src/jvm/clojure/lang/Compiler.java b/src/jvm/clojure/lang/Compiler.java
+index afb25de..fd3cc49 100644
+--- a/src/jvm/clojure/lang/Compiler.java
++++ b/src/jvm/clojure/lang/Compiler.java
+@@ -195,7 +195,7 @@ static final public Var RET_LOCAL_NUM = Var.create();
+ //DynamicClassLoader
+ static final public Var LOADER = Var.create();
+ 
+-enum C{
++public enum C{
+ 	STATEMENT,  //value ignored
+ 	EXPRESSION, //value required
+ 	RETURN,      //tail position relative to enclosing recur frame
+@@ -212,7 +212,7 @@ interface Expr{
+ 	Class getJavaClass() throws Exception;
+ }
+ 
+-static abstract class UntypedExpr implements Expr{
++public static abstract class UntypedExpr implements Expr{
+ 
+ 	public Class getJavaClass(){
+ 		throw new IllegalArgumentException("Has no Java class");
+@@ -256,11 +256,11 @@ static Symbol resolveSymbol(Symbol sym){
+ 
+ }
+ 
+-static class DefExpr implements Expr{
+-	final Var var;
+-	final Expr init;
+-	final Expr meta;
+-	final boolean initProvided;
++public static class DefExpr implements Expr{
++	public final Var var;
++	public final Expr init;
++	public final Expr meta;
++	public final boolean initProvided;
+ 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
+ 	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
+ 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
+@@ -341,10 +341,9 @@ static class DefExpr implements Expr{
+ 	}
+ }
+ 
+-static class AssignExpr implements Expr{
+-	final AssignableExpr target;
+-	final Expr val;
+-
++public static class AssignExpr implements Expr{
++	public final AssignableExpr target;
++	public final Expr val;
+ 
+ 	public AssignExpr(AssignableExpr target, Expr val){
+ 		this.target = target;
+@@ -380,9 +379,9 @@ static class AssignExpr implements Expr{
+ 	}
+ }
+ 
+-static class VarExpr implements Expr, AssignableExpr{
+-	final Var var;
+-	final Object tag;
++public static class VarExpr implements Expr, AssignableExpr{
++	public final Var var;
++	public final Object tag;
+ 	final static Method getMethod = Method.getMethod("Object get()");
+ 	final static Method setMethod = Method.getMethod("Object set(Object)");
+ 
+@@ -426,8 +425,8 @@ static class VarExpr implements Expr, AssignableExpr{
+ 	}
+ }
+ 
+-static class TheVarExpr implements Expr{
+-	final Var var;
++public static class TheVarExpr implements Expr{
++	public final Var var;
+ 
+ 	public TheVarExpr(Var var){
+ 		this.var = var;
+@@ -462,8 +461,8 @@ static class TheVarExpr implements Expr{
+ 	}
+ }
+ 
+-static class KeywordExpr implements Expr{
+-	final Keyword k;
++public static class KeywordExpr implements Expr{
++	public final Keyword k;
+ 
+ 	public KeywordExpr(Keyword k){
+ 		this.k = k;
+@@ -489,7 +488,7 @@ static class KeywordExpr implements Expr{
+ 	}
+ }
+ 
+-static abstract class LiteralExpr implements Expr{
++public static abstract class LiteralExpr implements Expr{
+ 	abstract Object val();
+ 
+ 	public Object eval(){
+@@ -909,9 +908,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
+ 
+ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
+ 	//final String className;
+-	final String fieldName;
+-	final Class c;
+-	final java.lang.reflect.Field field;
++	public final String fieldName;
++	public final Class c;
++	public final java.lang.reflect.Field field;
+ 	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
+ 	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
+ 	final int line;
+@@ -1171,11 +1170,11 @@ static class InstanceMethodExpr extends MethodExpr{
+ 
+ static class StaticMethodExpr extends MethodExpr{
+ 	//final String className;
+-	final Class c;
+-	final String methodName;
+-	final IPersistentVector args;
+-	final int line;
+-	final java.lang.reflect.Method method;
++	public final Class c;
++	public final String methodName;
++	public final IPersistentVector args;
++	public final int line;
++	public final java.lang.reflect.Method method;
+ 	final static Method invokeStaticMethodMethod =
+ 			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
+ 
+@@ -1284,8 +1283,8 @@ static class StaticMethodExpr extends MethodExpr{
+ static class ConstantExpr extends LiteralExpr{
+ 	//stuff quoted vals in classloader at compile time, pull out at runtime
+ 	//this won't work for static compilation...
+-	final Object v;
+-	final int id;
++	public final Object v;
++	public final int id;
+ 
+ 	public ConstantExpr(Object v){
+ 		this.v = v;
+@@ -1404,7 +1403,7 @@ final static BooleanExpr TRUE_EXPR = new BooleanExpr(true);
+ final static BooleanExpr FALSE_EXPR = new BooleanExpr(false);
+ 
+ static class StringExpr extends LiteralExpr{
+-	final String str;
++	public final String str;
+ 
+ 	public StringExpr(String str){
+ 		this.str = str;
+@@ -1575,12 +1574,12 @@ static class MonitorExitExpr extends UntypedExpr{
+ 
+ }
+ 
+-static class TryExpr implements Expr{
+-	final Expr tryExpr;
+-	final Expr finallyExpr;
+-	final PersistentVector catchExprs;
+-	final int retLocal;
+-	final int finallyLocal;
++public static class TryExpr implements Expr{
++	public final Expr tryExpr;
++	public final Expr finallyExpr;
++	public final PersistentVector catchExprs;
++	public final int retLocal;
++	public final int finallyLocal;
+ 
+ 	static class CatchClause{
+ 		//final String className;
+@@ -1955,10 +1954,10 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
+ 	return matchIdx;
+ }
+ 
+-static class NewExpr implements Expr{
+-	final IPersistentVector args;
+-	final Constructor ctor;
+-	final Class c;
++public static class NewExpr implements Expr{
++	public final IPersistentVector args;
++	public final Constructor ctor;
++	public final Class c;
+ 	final static Method invokeConstructorMethod =
+ 			Method.getMethod("Object invokeConstructor(Class,Object[])");
+ 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
+@@ -2170,9 +2169,9 @@ static class NewExpr implements Expr{
+ //	}
+ //}
+ 
+-static class MetaExpr implements Expr{
+-	final Expr expr;
+-	final MapExpr meta;
++public static class MetaExpr implements Expr{
++	public final Expr expr;
++	public final MapExpr meta;
+ 	final static Type IOBJ_TYPE = Type.getType(IObj.class);
+ 	final static Method withMetaMethod = Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)");
+ 
+@@ -2207,11 +2206,11 @@ static class MetaExpr implements Expr{
+ 	}
+ }
+ 
+-static class IfExpr implements Expr{
+-	final Expr testExpr;
+-	final Expr thenExpr;
+-	final Expr elseExpr;
+-	final int line;
++public static class IfExpr implements Expr{
++	public final Expr testExpr;
++	public final Expr thenExpr;
++	public final Expr elseExpr;
++	public final int line;
+ 
+ 
+ 	public IfExpr(int line, Expr testExpr, Expr thenExpr, Expr elseExpr){
+@@ -2336,8 +2335,8 @@ static public String munge(String name){
+ 	return sb.toString();
+ }
+ 
+-static class EmptyExpr implements Expr{
+-	final Object coll;
++public static class EmptyExpr implements Expr{
++	public final Object coll;
+ 	final static Type HASHMAP_TYPE = Type.getType(PersistentHashMap.class);
+ 	final static Type HASHSET_TYPE = Type.getType(PersistentHashSet.class);
+ 	final static Type VECTOR_TYPE = Type.getType(PersistentVector.class);
+@@ -2388,8 +2387,8 @@ static class EmptyExpr implements Expr{
+ 	}
+ }
+ 
+-static class ListExpr implements Expr{
+-	final IPersistentVector args;
++public static class ListExpr implements Expr{
++	public final IPersistentVector args;
+ 	final static Method arrayToListMethod = Method.getMethod("clojure.lang.ISeq arrayToList(Object[])");
+ 
+ 
+@@ -2421,8 +2420,8 @@ static class ListExpr implements Expr{
+ 
+ }
+ 
+-static class MapExpr implements Expr{
+-	final IPersistentVector keyvals;
++public static class MapExpr implements Expr{
++	public final IPersistentVector keyvals;
+ 	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
+ 
+ 
+@@ -2470,8 +2469,8 @@ static class MapExpr implements Expr{
+ 	}
+ }
+ 
+-static class SetExpr implements Expr{
+-	final IPersistentVector keys;
++public static class SetExpr implements Expr{
++	public final IPersistentVector keys;
+ 	final static Method setMethod = Method.getMethod("clojure.lang.IPersistentSet set(Object[])");
+ 
+ 
+@@ -2518,8 +2517,8 @@ static class SetExpr implements Expr{
+ 	}
+ }
+ 
+-static class VectorExpr implements Expr{
+-	final IPersistentVector args;
++public static class VectorExpr implements Expr{
++	public final IPersistentVector args;
+ 	final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
+ 
+ 
+@@ -2563,11 +2562,11 @@ static class VectorExpr implements Expr{
+ 
+ }
+ 
+-static class InvokeExpr implements Expr{
+-	final Expr fexpr;
+-	final Object tag;
+-	final IPersistentVector args;
+-	final int line;
++public static class InvokeExpr implements Expr{
++	public final Expr fexpr;
++	public final Object tag;
++	public final IPersistentVector args;
++	public final int line;
+ 
+ 	public InvokeExpr(int line, Symbol tag, Expr fexpr, IPersistentVector args){
+ 		this.fexpr = fexpr;
+@@ -2661,7 +2660,7 @@ static public class FnExpr implements Expr{
+ 	String internalName;
+ 	String thisName;
+ 	Type fntype;
+-	final Object tag;
++	public final Object tag;
+ 	//localbinding->itself
+ 	IPersistentMap closes = PersistentHashMap.EMPTY;
+ 	//Keyword->KeywordExpr
+@@ -2671,6 +2670,20 @@ static public class FnExpr implements Expr{
+ 	int line;
+ 	PersistentVector constants;
+ 	int constantsID;
++	public final IPersistentCollection methods() { return methods;}
++	public final FnMethod variadicMethod() { return variadicMethod;}
++	public final String name() { return name;}
++	public final String simpleName() { return simpleName;}
++	public final String internalName() { return internalName;}
++	public final String thisName() { return thisName;}
++	public final Type fntype() { return fntype;}
++	public final IPersistentMap closes() { return closes;}
++	public final IPersistentMap keywords() { return keywords;}
++	public final IPersistentMap vars() { return vars;}
++	public final Class compiledClass() { return compiledClass;}
++	public final int line() { return line;}
++	public final PersistentVector constants() { return constants;}
++	public final int constantsID() { return constantsID;}
+ 
+ 	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
+ 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
+@@ -3098,10 +3111,10 @@ enum PSTATE{
+ }
+ 
+ 
+-static class FnMethod{
++public static class FnMethod{
+ 	//when closures are defined inside other closures,
+ 	//the closed over locals need to be propagated to the enclosing fn
+-	final FnMethod parent;
++	public final FnMethod parent;
+ 	//localbinding->localbinding
+ 	IPersistentMap locals = null;
+ 	//localbinding->localbinding
+@@ -3113,6 +3126,14 @@ static class FnMethod{
+ 	int maxLocal = 0;
+ 	int line;
+ 	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
++	public final IPersistentMap locals() { return locals;}
++	public final PersistentVector reqParms() { return reqParms;}
++	public final LocalBinding restParm() { return restParm;}
++	public final Expr body() { return body;}
++	public final FnExpr fn() { return fn;}
++	public final PersistentVector argLocals() { return argLocals;}
++	public final int maxLocal() { return maxLocal;}
++	public final int line() { return line;}
+ 
+ 	public FnMethod(FnExpr fn, FnMethod parent){
+ 		this.parent = parent;
+@@ -3252,12 +3273,12 @@ static class FnMethod{
+ 	}
+ }
+ 
+-static class LocalBinding{
+-	final Symbol sym;
+-	final Symbol tag;
+-	final Expr init;
+-	final int idx;
+-	final String name;
++public static class LocalBinding{
++	public final Symbol sym;
++	public final Symbol tag;
++	public final Expr init;
++	public final int idx;
++	public final String name;
+ 
+ 	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init) throws Exception{
+ 		if(maybePrimitiveType(init) != null && tag != null)
+@@ -3288,9 +3309,9 @@ static class LocalBinding{
+ 	}
+ }
+ 
+-static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
+-	final LocalBinding b;
+-	final Symbol tag;
++public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
++	public final LocalBinding b;
++	public final Symbol tag;
+ 
+ 	public LocalBindingExpr(LocalBinding b, Symbol tag) throws Exception{
+ 		if(b.getPrimitiveType() != null && tag != null)
+@@ -3325,8 +3346,9 @@ static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
+ 
+ }
+ 
+-static class BodyExpr implements Expr{
++public static class BodyExpr implements Expr{
+ 	PersistentVector exprs;
++	public final PersistentVector exprs() { return exprs;}
+ 
+ 	public BodyExpr(PersistentVector exprs){
+ 		this.exprs = exprs;
+@@ -3386,9 +3408,11 @@ static class BodyExpr implements Expr{
+ 	}
+ }
+ 
+-static class BindingInit{
++public static class BindingInit{
+ 	LocalBinding binding;
+ 	Expr init;
++	public final LocalBinding binding() { return binding;}
++	public final Expr init() { return init;}
+ 
+ 	public BindingInit(LocalBinding binding, Expr init){
+ 		this.binding = binding;
+@@ -3396,10 +3420,10 @@ static class BindingInit{
+ 	}
+ }
+ 
+-static class LetExpr implements Expr{
+-	final PersistentVector bindingInits;
+-	final Expr body;
+-	final boolean isLoop;
++public static class LetExpr implements Expr{
++	public final PersistentVector bindingInits;
++	public final Expr body;
++	public final boolean isLoop;
+ 
+ 	public LetExpr(PersistentVector bindingInits, Expr body, boolean isLoop){
+ 		this.bindingInits = bindingInits;
+@@ -3522,9 +3546,9 @@ static class LetExpr implements Expr{
+ 	}
+ }
+ 
+-static class RecurExpr implements Expr{
+-	final IPersistentVector args;
+-	final IPersistentVector loopLocals;
++public static class RecurExpr implements Expr{
++	public final IPersistentVector args;
++	public final IPersistentVector loopLocals;
+ 
+ 	public RecurExpr(IPersistentVector loopLocals, IPersistentVector args){
+ 		this.loopLocals = loopLocals;
+@@ -3626,7 +3650,7 @@ private static int getAndIncLocalNum(){
+ 	return num;
+ }
+ 
+-private static Expr analyze(C context, Object form) throws Exception{
++public static Expr analyze(C context, Object form) throws Exception{
+ 	return analyze(context, form, null);
+ }
+ 
