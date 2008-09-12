@@ -26,8 +26,8 @@ public LazyCons(IFn f){
 
 LazyCons(IPersistentMap meta, Object first, ISeq rest){
 	super(meta);
-	this._first = sentinel;
-	this._rest = sentinel;
+	this._first = first;
+	this._rest = rest;
 }
 
 final
