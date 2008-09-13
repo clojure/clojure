@@ -713,6 +713,8 @@ static public Object nth(Object coll, int n){
 static public Object nth(Object coll, int n, Object notFound){
 	if(coll == null)
 		return notFound;
+	else if(n < 0)
+		return notFound;
 	else if(coll instanceof IPersistentVector)
 		{
 		IPersistentVector v = (IPersistentVector) coll;
