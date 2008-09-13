@@ -1,5 +1,5 @@
 diff --git a/src/jvm/clojure/lang/Compiler.java b/src/jvm/clojure/lang/Compiler.java
-index afb25de..fd3cc49 100644
+index afb25de..832abd8 100644
 --- a/src/jvm/clojure/lang/Compiler.java
 +++ b/src/jvm/clojure/lang/Compiler.java
 @@ -195,7 +195,7 @@ static final public Var RET_LOCAL_NUM = Var.create();
@@ -95,6 +95,23 @@ index afb25de..fd3cc49 100644
  	abstract Object val();
  
  	public Object eval(){
+@@ -809,11 +808,11 @@ static abstract class FieldExpr extends HostExpr{
+ }
+ 
+ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
+-	final Expr target;
+-	final Class targetClass;
+-	final java.lang.reflect.Field field;
+-	final String fieldName;
+-	final int line;
++	public final Expr target;
++	public final Class targetClass;
++	public final java.lang.reflect.Field field;
++	public final String fieldName;
++	public final int line;
+ 	final static Method invokeNoArgInstanceMember = Method.getMethod("Object invokeNoArgInstanceMember(Object,String)");
+ 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
+ 
 @@ -909,9 +908,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
  
  static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
@@ -108,6 +125,23 @@ index afb25de..fd3cc49 100644
  	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
  	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
  	final int line;
+@@ -1033,11 +1032,11 @@ static abstract class MethodExpr extends HostExpr{
+ }
+ 
+ static class InstanceMethodExpr extends MethodExpr{
+-	final Expr target;
+-	final String methodName;
+-	final IPersistentVector args;
+-	final int line;
+-	final java.lang.reflect.Method method;
++	public final Expr target;
++	public final String methodName;
++	public final IPersistentVector args;
++	public final int line;
++	public final java.lang.reflect.Method method;
+ 
+ 	final static Method invokeInstanceMethodMethod =
+ 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 @@ -1171,11 +1170,11 @@ static class InstanceMethodExpr extends MethodExpr{
  
  static class StaticMethodExpr extends MethodExpr{
@@ -136,6 +170,15 @@ index afb25de..fd3cc49 100644
  
  	public ConstantExpr(Object v){
  		this.v = v;
+@@ -1369,7 +1368,7 @@ static class NilExpr extends LiteralExpr{
+ final static NilExpr NIL_EXPR = new NilExpr();
+ 
+ static class BooleanExpr extends LiteralExpr{
+-	final boolean val;
++	public final boolean val;
+ 
+ 
+ 	public BooleanExpr(boolean val){
 @@ -1404,7 +1403,7 @@ final static BooleanExpr TRUE_EXPR = new BooleanExpr(true);
  final static BooleanExpr FALSE_EXPR = new BooleanExpr(false);
  
@@ -145,17 +188,15 @@ index afb25de..fd3cc49 100644
  
  	public StringExpr(String str){
  		this.str = str;
-@@ -1575,12 +1574,12 @@ static class MonitorExitExpr extends UntypedExpr{
- 
+@@ -1576,17 +1575,17 @@ static class MonitorExitExpr extends UntypedExpr{
  }
  
--static class TryExpr implements Expr{
+ static class TryExpr implements Expr{
 -	final Expr tryExpr;
 -	final Expr finallyExpr;
 -	final PersistentVector catchExprs;
 -	final int retLocal;
 -	final int finallyLocal;
-+public static class TryExpr implements Expr{
 +	public final Expr tryExpr;
 +	public final Expr finallyExpr;
 +	public final PersistentVector catchExprs;
@@ -164,6 +205,24 @@ index afb25de..fd3cc49 100644
  
  	static class CatchClause{
  		//final String className;
+-		final Class c;
+-		final LocalBinding lb;
+-		final Expr handler;
++		public final Class c;
++		public final LocalBinding lb;
++		public final Expr handler;
+ 		Label label;
+ 		Label endLabel;
+ 
+@@ -1828,7 +1827,7 @@ static class TryExpr implements Expr{
+ //}
+ 
+ static class ThrowExpr extends UntypedExpr{
+-	final Expr excExpr;
++	public final Expr excExpr;
+ 
+ 	public ThrowExpr(Expr excExpr){
+ 		this.excExpr = excExpr;
 @@ -1955,10 +1954,10 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
  	return matchIdx;
  }
