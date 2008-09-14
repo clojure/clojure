@@ -1,47 +1,60 @@
+;;  Copyright (c) Stephen C. Gilardi. All rights reserved. The use and
+;;  distribution terms for this software are covered by the Common Public
+;;  License 1.0 (http://opensource.org/licenses/cpl.php) which can be found
+;;  in the file CPL.TXT at the root of this distribution. By using this
+;;  software in any fashion, you are agreeing to be bound by the terms of
+;;  this license. You must not remove this notice, or any other, from this
+;;  software.
+;;
+;;  test.clj
+;;
+;;  test/example for clojure.contrib.sql.test
+;;
+;;  scgilardi (gmail)
+;;  Created 13 September 2008
+
 (ns clojure.contrib.sql.test
   (:use clojure.contrib.sql))
 
 (Class/forName "org.apache.derby.jdbc.EmbeddedDriver")
 
 (defn db []
-  (get-connection "derby" "/tmp/clojure.contrib.sql.test.db;create=true"))
-
-(defn db-drop []
-  (with-connection con (db)
-    (try                   
-     (execute-commands con
-       ["drop table fruit"])
-     (catch Exception e))))
+  (connection "derby" "/tmp/clojure.contrib.sql.test.db;create=true"))
 
 (defn db-write []
-  (db-drop)
   (with-connection con (db)
-    (execute-commands con
-      ["create table fruit (name varchar(32), appearance varchar(32), cost int, grade real)"])
-	(seq
-	 (execute-prepared-statement con
-	   "insert into fruit values (?, ?, ?, ?)"
-	   [["Apple" "red" 59 87]
-		["Banana" "yellow" 29 92.2]
-		["Peach" "fuzzy" 139 90.0]
-		["Orange" "juicy" 89 88.6]]))))
-  
+    (try
+     (drop-table con "fruit")
+     (catch Exception e))
+    (create-table con
+      "fruit"
+      "name varchar(32)"
+      "appearance varchar(32)"
+      "cost int"
+      "grade real")
+    (do-prepared con
+      "insert into fruit values (?, ?, ?, ?)"
+      ["Apple" "red" 59 87]
+      ["Banana" "yellow" 29 92.2]
+      ["Peach" "fuzzy" 139 90.0]
+      ["Orange" "juicy" 89 88.6])))
+
 (defn db-read []
   (with-connection con (db)
-    (with-query-results rec con
+    (with-results rec con
       "select * from fruit"
       (println rec))))
 
 (defn db-grade-a []
   (with-connection con (db)
-    (with-query-results rec con
+    (with-results rec con
       "select name, cost from fruit where grade >= 90"
       (println rec))))
 
 (defn db-exception []
   (with-connection con (db)
-    (execute-prepared-statement con
+    (do-prepared con
       "insert into fruit (name, appearance) values (?, ?)"
-      [["Grape" "yummy"]
-       ["Pear" "bruised"]])
+      ["Grape" "yummy"]
+      ["Pear" "bruised"])
     (throw (Exception. "an exception"))))

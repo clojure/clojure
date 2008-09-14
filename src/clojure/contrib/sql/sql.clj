@@ -1,10 +1,10 @@
-;;  Copyright (c) Stephen C. Gilardi. All rights reserved.
-;;  The use and distribution terms for this software are covered by the
-;;  Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
-;;  which can be found in the file CPL.TXT at the root of this distribution.
-;;  By using this software in any fashion, you are agreeing to be bound by
-;;  the terms of this license.
-;;  You must not remove this notice, or any other, from this software.
+;;  Copyright (c) Stephen C. Gilardi. All rights reserved. The use and
+;;  distribution terms for this software are covered by the Common Public
+;;  License 1.0 (http://opensource.org/licenses/cpl.php) which can be found
+;;  in the file CPL.TXT at the root of this distribution. By using this
+;;  software in any fashion, you are agreeing to be bound by the terms of
+;;  this license. You must not remove this notice, or any other, from this
+;;  software.
 ;;
 ;;  sql.clj
 ;;
@@ -13,17 +13,16 @@
 ;;  See clojure.contrib.sql.test for an example
 ;;
 ;;  scgilardi (gmail)
-;;  23 April 2008
+;;  Created 2 April 2008
 
 (ns clojure.contrib.sql
   (:import
    (java.sql DriverManager Connection PreparedStatement ResultSet)))
 
-(defn get-connection
+(defn connection
   "Attempts to get a connection to a database via a jdbc URL"
   [subprotocol db-name]
-  (let [url (str "jdbc:" subprotocol ":" db-name)]
-    (DriverManager/getConnection url)))
+  (DriverManager/getConnection (format "jdbc:%s:%s" subprotocol db-name)))
 
 (defmacro with-connection
   "Evaluates body in the context of a connection to a database. Any updates
@@ -32,24 +31,24 @@
   [con init & body]
   `(with-open ~con ~init
      (try
-      (.setAutoCommit ~con false))
+      (.setAutoCommit ~con false)
       ~@body
       (.commit ~con)
       (catch Exception e#
-             (.rollback ~con)
-             (throw (Exception. "transaction rolled back" e#)))))
+        (.rollback ~con)
+        (throw (Exception. "transaction rolled back" e#))))))
 
-(defn execute-commands
-  "Executes a sequence of SQL commands that do not return results"
-  [con commands]
+(defn do-commands
+  "Executes SQL commands that do not return results"
+  [con & commands]
   (with-open stmt (.createStatement con)
     (doseq cmd commands
       (.addBatch stmt cmd))
     (.executeBatch stmt)))
 
-(defn execute-prepared-statement
-  "Executes a prepared statement with a sequence of parameter sets"
-  [con sql sets]
+(defn do-prepared
+  "Executes a prepared statement with parameter sets"
+  [con sql & sets]
   (with-open stmt (.prepareStatement con sql)
     (doseq set sets
       (doseq [index value] (map vector (iterate inc 1) set)
@@ -57,7 +56,21 @@
       (.addBatch stmt ))
     (.executeBatch stmt)))
 
-(defmacro with-query-results
+(defn create-table
+  "Creates a table given a name and column specifications"
+  [con name & cols]
+  (do-commands con
+    (format "create table %s (%s)"
+            name
+            (apply str (interpose "," cols)))))
+
+(defn drop-table
+  "Drops a table give its name"
+  [con name]
+  (do-commands con
+    (format "drop table %s" name)))
+
+(defmacro with-results
   "Executes a query and then evaluates body repeatedly with rec bound to
   each of the generated results in turn"
   [rec con sql & body]
