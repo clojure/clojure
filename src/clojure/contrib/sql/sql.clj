@@ -70,6 +70,27 @@
   (do-commands con
     (format "drop table %s" name)))
 
+(defn insert-values
+  "Inserts values into columns of a table. Columns is a seq of column
+  names (as strings) and each value is a seq of values for those
+  columns. To insert complete rows (all columns), use insert-rows"
+  [con table columns & values]
+  (let [count (count (first values))
+        template (apply str (interpose "," (replicate count "?")))
+        cols (if (seq columns)
+               (format "(%s)" (apply str (interpose "," columns)))
+               "")]
+    (apply do-prepared
+           con
+           (format "insert into %s %s values (%s)" table cols template)
+           values)))
+
+(defn insert-rows
+  "Inserts complete rows into a table. Each row is a seq of values for
+  each of the table's columns in order."
+  [con table & rows]
+  (apply insert-values con table nil rows))
+
 (defmacro with-results
   "Executes a query and then evaluates body repeatedly with rec bound to
   each of the generated results in turn"

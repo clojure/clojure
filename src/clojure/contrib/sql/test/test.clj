@@ -26,18 +26,19 @@
     (try
      (drop-table con "fruit")
      (catch Exception e))
-    (create-table con
-      "fruit"
+    (create-table con "fruit"
       "name varchar(32)"
       "appearance varchar(32)"
       "cost int"
       "grade real")
-    (do-prepared con
-      "insert into fruit values (?, ?, ?, ?)"
+	(insert-rows con "fruit"
       ["Apple" "red" 59 87]
       ["Banana" "yellow" 29 92.2]
       ["Peach" "fuzzy" 139 90.0]
-      ["Orange" "juicy" 89 88.6])))
+      ["Orange" "juicy" 89 88.6])
+	(insert-values con "fruit" ["name" "cost"]
+      ["Mango" 722]
+      ["Feijoa" 441])))
 
 (defn db-read []
   (with-connection con (db)
@@ -53,8 +54,7 @@
 
 (defn db-exception []
   (with-connection con (db)
-    (do-prepared con
-      "insert into fruit (name, appearance) values (?, ?)"
+	(insert-values con "fruit" ["name" "appearance"]
       ["Grape" "yummy"]
       ["Pear" "bruised"])
     (throw (Exception. "an exception"))))
