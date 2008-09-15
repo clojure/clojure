@@ -291,21 +291,13 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 	ArrayList methods = new ArrayList();
 	for(int i = 0; i < allmethods.length; i++)
 		{
-		try
+		final Method method = allmethods[i];
+		if(name.equals(method.getName())
+		   && Modifier.isStatic(method.getModifiers()) == getStatics
+		   && method.getParameterTypes().length == arity
+		   && !method.isSynthetic())
 			{
-			if(name.equals(allmethods[i].getName())
-			   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
-			   && allmethods[i].getParameterTypes().length == arity
-			   && (!Modifier.isVolatile(allmethods[i].getModifiers())
-			       || c.getMethod(allmethods[i].getName(), allmethods[i].getParameterTypes())
-					.equals(allmethods[i])))
-				{
-				methods.add(allmethods[i]);
-				}
-			}
-		catch(NoSuchMethodException e)
-			{
-			throw new RuntimeException(e);
+			methods.add(method);
 			}
 		}
 	if(!getStatics && c.isInterface())
