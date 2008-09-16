@@ -39,13 +39,8 @@ clojure = {
     throw ("count not supported on: " + (typeof x) + " " + x.constructor);
   },
   JS: {
-    resolveVar: function( symns, symnm, ctxns ) {
-      if( symns ) {
-        return symns[ symnm ];
-      }
-      else {
-        return ctxns[ symnm ] || clojure[ symnm ] || window[ symnm ];
-      }
+    resolveVar: function( sym, ctxns ) {
+      return ctxns[ sym ] || clojure[ sym ] || window[ sym ];
     },
     ObjSeq: {
       create: function( obj ) {

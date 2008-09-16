@@ -13,6 +13,7 @@
     (str sb)))
 
 (def *arity-check* false)
+(def *has-recur*)
 
 (defmulti tojs (fn [e ctx] (class e)))
 
@@ -21,26 +22,35 @@
     (str (Compiler/munge (str (.getName ns))) "." (Compiler/munge (str name)))))
 
 (defmethod tojs clojure.lang.Compiler$DefExpr [e ctx]
-  (str (tojs (.var e) ctx) "=" (tojs (.init e) ctx) ";\n"))
+  (str (tojs (.var e) ctx) "=" (tojs (.init e) ctx)))
 
 (defn fnmethod [fm maxm ctx]
   (let [lm (into {} (map (fn [[lb lb] i] [lb (str (.name lb) "_" i)])
                          (.locals fm) (iterate inc 0)))
         thisfn (some #(when (= (.name %) (:fnname ctx)) %) (keys lm))
-        mainvars (vals (reduce dissoc lm (cons thisfn (when (= fm maxm)
-                                                        (.reqParms fm)))))]
+        [body has-recur] (binding [*has-recur* false]
+                           [(tojs (.body fm)
+                                  (merge-with merge ctx {:localmap lm}))
+                            *has-recur*])
+        inits (concat
+                (when has-recur ["_cnt" "_rtn"])
+                (vals (reduce dissoc lm (cons thisfn (when (= fm maxm)
+                                                       (.reqParms fm)))))
+                (when thisfn [(str (lm thisfn) "=arguments.callee")])
+                (when (not= fm maxm)
+                  (for [lb (.reqParms fm)]
+                    [(lm lb) "=arguments[" (dec (.idx lb)) "]"]))
+                (when-let lb (.restParm fm)
+                  [(lm lb) "=clojure.JS.rest_args(arguments,"
+                   (count (.reqParms fm)) ")"]))]
     (.reqParms maxm)
-    (vstr [(when mainvars ["var " (vec (interpose "," mainvars)) ";\n"])
-           (when thisfn ["var " (lm thisfn) "=arguments.callee;\n"])
-           (when (not= fm maxm)
-             (vec (for [lb (.reqParms fm)]
-                    [(lm lb) "=arguments[" (dec (.idx lb)) "];\n"])))
-           (when-let lb (.restParm fm)
-             ["var " (lm lb) "=clojure.JS.rest_args(arguments,"
-              (count (.reqParms fm)) ");\n"])
-           "var _rtn,_cnt;do{_cnt=0;\n_rtn="
-           (tojs (.body fm) (merge-with merge ctx {:localmap lm}))
-           ";\n}while(_cnt);return _rtn;"])))
+    (vstr [(when (seq inits)
+             (apply vector "var " (interpose "," inits)))
+           (if has-recur
+             [";do{_cnt=0;\n_rtn="
+              body
+              "\n}while(_cnt);return _rtn;"]
+             [";return (" body ")"])])))
 
 (defmethod tojs clojure.lang.Compiler$FnExpr [e ctx]
   (let [maxm (or (.variadicMethod e)
@@ -71,15 +81,16 @@
    (apply str (interpose ",\n" (map #(tojs % ctx) (.exprs e)))))
 
 (defmethod tojs clojure.lang.Compiler$LetExpr [e ctx]
-  (let [inits (vec (for [bi (.bindingInits e)]
-                     ["(" ((:localmap ctx) (.binding bi))
-                      "=" (tojs (.init bi) ctx) "),\n"]))]
+  (let [inits (vec (interpose ",\n" (for [bi (.bindingInits e)]
+                                    ["(" ((:localmap ctx) (.binding bi))
+                                     "=" (tojs (.init bi) ctx) ")"])))]
     (if (.isLoop e)
-      (vstr ["((function(){var _rtn,_cnt;"
-             inits "0;"
-             "do{_cnt=0;\n_rtn=" (tojs (.body e) ctx)
-             "}while(_cnt);return _rtn;})())"])
-      (vstr ["(" inits (tojs (.body e) ctx) ")"]))))
+      (binding [*has-recur* false]
+        (vstr ["((function(){var _rtn,_cnt;"
+              inits ";"
+              "do{_cnt=0;\n_rtn=" (tojs (.body e) ctx)
+              "}while(_cnt);return _rtn;})())"]))
+      (vstr ["(" inits ",\n" (tojs (.body e) ctx) ")"]))))
 
 (defmethod tojs clojure.lang.Compiler$VectorExpr [e ctx]
   (vstr ["clojure.JS.lit_vector(["
@@ -101,13 +112,9 @@
   (const-str (.v e)))
 
 (defmethod tojs clojure.lang.Compiler$UnresolvedVarExpr [e ctx]
-  (vstr ["clojure.JS.resolveVar("
-         (if-let ns (namespace (.symbol e))
-                 [\" (Compiler/munge ns) \"]
-                 "null")
-         ",\"" (Compiler/munge (name (.symbol e)))
-         "\"," (Compiler/munge (name (.name *ns*)))
-         ")"]))
+  (vstr ["clojure.JS.resolveVar(\""
+         (Compiler/munge (name (.symbol e))) "\","
+         (Compiler/munge (name (.name *ns*))) ")"]))
 
 (defmethod tojs clojure.lang.Compiler$InvokeExpr [e ctx]
   (vstr [(tojs (.fexpr e) ctx)
@@ -163,6 +170,7 @@
        "):(" (tojs (.elseExpr e) ctx) "))"))
 
 (defmethod tojs clojure.lang.Compiler$RecurExpr [e ctx]
+  (set! *has-recur* true)
   (vstr ["(_cnt=1"
          (vec (map #(str ",_t" %2 "=" (tojs %1 ctx)) (.args e) (iterate inc 0)))
          (vec (map #(str "," ((:localmap ctx) %1) "=_t" %2)
@@ -252,7 +260,7 @@
   (println (formtojs
     '(defn foo
       ([a b c & d] (prn 3 a b c))
-      ([c];
+      ([c]
         ;(String/asd "hello")
         ;(.foo 55)
         (let [[a b] [1 2]]
@@ -275,7 +283,8 @@
   ;(println (formtojs '(binding [*out* 5] (set! *out* 10))))
   (println (formtojs '(.replace "a/b/c" "/" ".")))
   (println (formtojs '(list '(1 "str" 'sym :key) 4 "str2" 6 #{:set 9 8})))
-  (println (formtojs '(fn forever[] (forever)))))
+  (println (formtojs '(fn forever[] (forever))))
+  (println (formtojs '(fn forever[] (loop [] (recur))))))
 
 ;(simple-tests)
 ;(testboot)
