@@ -12,7 +12,6 @@
     (lvl v)
     (str sb)))
 
-(def *arity-check* false)
 (def *has-recur*)
 
 (defmulti tojs (fn [e ctx] (class e)))
@@ -25,8 +24,8 @@
   (str (tojs (.var e) ctx) "=" (tojs (.init e) ctx)))
 
 (defn fnmethod [fm maxm ctx]
-  (let [lm (into {} (map (fn [[lb lb] i] [lb (str (.name lb) "_" i)])
-                         (.locals fm) (iterate inc 0)))
+  (let [lm (into {} (for [[lb lb] (.locals fm)]
+                      [lb (str (.name lb) "_" (.idx lb))]))
         thisfn (some #(when (= (.name %) (:fnname ctx)) %) (keys lm))
         [body has-recur] (binding [*has-recur* false]
                            [(tojs (.body fm)
@@ -62,19 +61,16 @@
         manym (< 1 (count (.methods e)))
         newctx (assoc ctx :fnname (.thisName e))]
     (vstr ["(function("
-           (vec (interpose "," (map #(vector (.name %) "_" (.idx %))
-                                    (.reqParms maxm))))
+           (vec (interpose "," (for [lb (.reqParms maxm)]
+                                 [(.name lb) "_" (.idx lb)])))
            "){\n"
            (vec (for [fm (.methods e) :when (not= fm (.variadicMethod e))]
-                  [(when manym
-                     ["if(arguments.length==" (count (.reqParms fm)) "){\n"])
-                   (fnmethod fm maxm newctx)
-                   (when manym "}\n")]))
-           (if (.variadicMethod e)
-             [(fnmethod (.variadicMethod e) maxm newctx) "\n"]
-             (when *arity-check*
-               ["throw \"Wrong number of args passed to: "
-                (.thisName e) "\";\n"]))
+                  (if manym
+                    ["if(arguments.length==" (count (.reqParms fm)) "){\n"
+                     (fnmethod fm maxm newctx) "}\n"]
+                    (fnmethod fm maxm newctx))))
+           (when (.variadicMethod e)
+             [(fnmethod (.variadicMethod e) maxm newctx) "\n"])
            "})"])))
 
 (defmethod tojs clojure.lang.Compiler$BodyExpr [e ctx]
@@ -289,4 +285,4 @@
 ;(simple-tests)
 ;(testboot)
 
-(filetojs "t01.cljs")
+(filetojs (first *command-line-args*))

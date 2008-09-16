@@ -52,7 +52,12 @@ clojure = {
       }
     }
   },
-  lang: {}
+  lang: {
+    Numbers: {
+      isPos: function(x) { return x > 0; },
+      dec: function(x) { return x - 1; }
+    }
+  }
 };
 
 clojure.lang.ArraySeq = function( _meta, a, i ) {
