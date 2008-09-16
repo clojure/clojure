@@ -12,6 +12,8 @@
     (lvl v)
     (str sb)))
 
+(def *arity-check* false)
+
 (defmulti tojs (fn [e ctx] (class e)))
 
 (defmethod tojs clojure.lang.Var [e ctx]
@@ -21,16 +23,18 @@
 (defmethod tojs clojure.lang.Compiler$DefExpr [e ctx]
   (str (tojs (.var e) ctx) "=" (tojs (.init e) ctx) ";\n"))
 
-(defn fnmethod [fm ctx]
+(defn fnmethod [fm maxm ctx]
   (let [lm (into {} (map (fn [[lb lb] i] [lb (str (.name lb) "_" i)])
-                         (.locals fm) (iterate inc 0)))]
-    (vstr ["var " (vec (interpose "," (vals lm))) ";\n"
-           (when-let thisfn (some #(when (= (.name %)
-                                            (.thisName (:fnexpr ctx))) %)
-                                  (keys lm))
-             [(lm thisfn) "=" (.simpleName (:fnexpr ctx)) ";\n"])
-           (vec (for [lb (.reqParms fm)]
-                  [(lm lb) "=arguments[" (dec (.idx lb)) "];\n"]))
+                         (.locals fm) (iterate inc 0)))
+        thisfn (some #(when (= (.name %) (:fnname ctx)) %) (keys lm))
+        mainvars (vals (reduce dissoc lm (cons thisfn (when (= fm maxm)
+                                                        (.reqParms fm)))))]
+    (.reqParms maxm)
+    (vstr [(when mainvars ["var " (vec (interpose "," mainvars)) ";\n"])
+           (when thisfn ["var " (lm thisfn) "=arguments.callee;\n"])
+           (when (not= fm maxm)
+             (vec (for [lb (.reqParms fm)]
+                    [(lm lb) "=arguments[" (dec (.idx lb)) "];\n"])))
            (when-let lb (.restParm fm)
              ["var " (lm lb) "=clojure.JS.rest_args(arguments,"
               (count (.reqParms fm)) ");\n"])
@@ -39,15 +43,29 @@
            ";\n}while(_cnt);return _rtn;"])))
 
 (defmethod tojs clojure.lang.Compiler$FnExpr [e ctx]
-  (vstr ["(function " (.simpleName e) "(){\n"
-         (vec (for [fm (.methods e) :when (not= fm (.variadicMethod e))]
-                ["if(arguments.length==" (count (.argLocals fm)) "){\n"
-                  (fnmethod fm (assoc ctx :fnexpr e))
-                 "}\n"]))
-         (if (.variadicMethod e)
-           [(fnmethod (.variadicMethod e) ctx) "\n"]
-           ["throw \"Wrong number of args passed to: " (.thisName e) "\";\n"])
-         "})"]))
+  (let [maxm (or (.variadicMethod e)
+                 (-> (into (sorted-map)
+                           (for [fm (.methods e)
+                                 :when (not= fm (.variadicMethod e))]
+                             [(count (.reqParms fm)) fm]))
+                     last val))
+        manym (< 1 (count (.methods e)))
+        newctx (assoc ctx :fnname (.thisName e))]
+    (vstr ["(function("
+           (vec (interpose "," (map #(vector (.name %) "_" (.idx %))
+                                    (.reqParms maxm))))
+           "){\n"
+           (vec (for [fm (.methods e) :when (not= fm (.variadicMethod e))]
+                  [(when manym
+                     ["if(arguments.length==" (count (.reqParms fm)) "){\n"])
+                   (fnmethod fm maxm newctx)
+                   (when manym "}\n")]))
+           (if (.variadicMethod e)
+             [(fnmethod (.variadicMethod e) maxm newctx) "\n"]
+             (when *arity-check*
+               ["throw \"Wrong number of args passed to: "
+                (.thisName e) "\";\n"]))
+           "})"])))
 
 (defmethod tojs clojure.lang.Compiler$BodyExpr [e ctx]
    (apply str (interpose ",\n" (map #(tojs % ctx) (.exprs e)))))
