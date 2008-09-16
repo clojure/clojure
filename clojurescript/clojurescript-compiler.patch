@@ -1,5 +1,5 @@
 diff --git a/src/jvm/clojure/lang/Compiler.java b/src/jvm/clojure/lang/Compiler.java
-index e087d08..659d346 100644
+index e087d08..400b34a 100644
 --- a/src/jvm/clojure/lang/Compiler.java
 +++ b/src/jvm/clojure/lang/Compiler.java
 @@ -195,7 +195,7 @@ static final public Var RET_LOCAL_NUM = Var.create();
@@ -528,15 +528,24 @@ index e087d08..659d346 100644
  
  	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
  
-@@ -4008,6 +4058,8 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
- 		return RT.NS_VAR;
- 	else if(sym.equals(IN_NS))
- 		return RT.IN_NS_VAR;
-+	else if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.get()))
-+		return sym;
- 	else
+@@ -4012,7 +4062,16 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
  		{
  		Object o = n.getMapping(sym);
+ 		if(o == null)
+-			throw new Exception("Unable to resolve symbol: " + sym + " in this context");
++			{
++			if( RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.get()))
++				{
++				return sym;
++				}
++			else
++				{
++				throw new Exception("Unable to resolve symbol: " + sym + " in this context");
++				}
++			}
+ 		return o;
+ 		}
+ }
 diff --git a/src/jvm/clojure/lang/RT.java b/src/jvm/clojure/lang/RT.java
 index 2ce55e4..06379eb 100644
 --- a/src/jvm/clojure/lang/RT.java
