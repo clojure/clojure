@@ -3973,10 +3973,14 @@ static Object resolve(Symbol sym) throws Exception{
 }
 
 static private Namespace namespaceFor(Symbol sym){
+	return namespaceFor(currentNS(),sym);
+}
+
+static private Namespace namespaceFor(Namespace inns,Symbol sym){
 	//note, presumes non-nil sym.ns
 	// first check against currentNS' aliases...
 	Symbol nsSym = Symbol.create(sym.ns);
-	Namespace ns = currentNS().lookupAlias(nsSym);
+	Namespace ns = inns.lookupAlias(nsSym);
 	if(ns == null)
 		{
 		// ...otherwise check the Namespaces map.
@@ -3989,7 +3993,7 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
-		Namespace ns = namespaceFor(sym);
+		Namespace ns = namespaceFor(n,sym);
 		if(ns == null)
 			throw new Exception("No such namespace: " + sym.ns);
 
@@ -4022,7 +4026,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
-		Namespace ns = namespaceFor(sym);
+		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
 			return null;
 		Var v = ns.findInternedVar(Symbol.create(sym.name));
