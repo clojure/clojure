@@ -26,7 +26,7 @@
 (defn fnmethod [fm maxm ctx]
   (let [lm (into {} (for [[lb lb] (.locals fm)]
                       [lb (str (.name lb) "_" (.idx lb))]))
-        thisfn (some #(when (= (.name %) (:fnname ctx)) %) (keys lm))
+        thisfn (first (filter #(= 0 (.idx %)) (keys lm)))
         [body has-recur] (binding [*has-recur* false]
                            [(tojs (.body fm)
                                   (merge-with merge ctx {:localmap lm}))
@@ -35,7 +35,7 @@
                 (when has-recur ["_cnt" "_rtn"])
                 (vals (reduce dissoc lm (cons thisfn (when (= fm maxm)
                                                        (.reqParms fm)))))
-                (when thisfn [(str (lm thisfn) "=arguments.callee")])
+                (when (:fnname ctx) [(str (lm thisfn) "=arguments.callee")])
                 (when (not= fm maxm)
                   (for [lb (.reqParms fm)]
                     [(lm lb) "=arguments[" (dec (.idx lb)) "]"]))
@@ -44,12 +44,12 @@
                    (count (.reqParms fm)) ")"]))]
     (.reqParms maxm)
     (vstr [(when (seq inits)
-             (apply vector "var " (interpose "," inits)))
+             [(apply vector "var " (interpose "," inits)) ";\n"])
            (if has-recur
-             [";do{_cnt=0;\n_rtn="
+             ["do{_cnt=0;_rtn="
               body
               "\n}while(_cnt);return _rtn;"]
-             [";return (" body ")"])])))
+             ["return (" body ")"])])))
 
 (defmethod tojs clojure.lang.Compiler$FnExpr [e ctx]
   (let [maxm (or (.variadicMethod e)
