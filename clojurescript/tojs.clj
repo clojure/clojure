@@ -16,13 +16,6 @@
 
 (defmulti tojs (fn [e ctx] (class e)))
 
-(defmethod tojs clojure.lang.Var [e ctx]
-  (let [{:keys [name ns]} ^e]
-    (str (Compiler/munge (str (.getName ns))) "." (Compiler/munge (str name)))))
-
-(defmethod tojs clojure.lang.Compiler$DefExpr [e ctx]
-  (str (tojs (.var e) ctx) "=" (tojs (.init e) ctx)))
-
 (defn fnmethod [fm maxm ctx]
   (let [lm (into {} (for [[lb lb] (.locals fm)]
                       [lb (str (.name lb) "_" (.idx lb))]))
@@ -107,10 +100,33 @@
 (defmethod tojs clojure.lang.Compiler$ConstantExpr [e ctx]
   (const-str (.v e)))
 
+
+(defn var-parts [e]
+  (let [{:keys [name ns]} ^(.var e)]
+    [(Compiler/munge (str (.getName ns)))
+     (Compiler/munge (str name))]))
+
 (defmethod tojs clojure.lang.Compiler$UnresolvedVarExpr [e ctx]
   (vstr ["clojure.JS.resolveVar(\""
          (Compiler/munge (name (.symbol e))) "\","
          (Compiler/munge (name (.name *ns*))) ")"]))
+
+(defmethod tojs clojure.lang.Compiler$VarExpr [e ctx]
+  (let [[vns vname] (var-parts e)]
+    (str vns "." vname)))
+
+(defmethod tojs clojure.lang.Compiler$TheVarExpr [e ctx]
+  (let [[vns vname] (var-parts e)]
+    (str vns "._var_" vname)))
+
+(defmethod tojs clojure.lang.Compiler$AssignExpr [e ctx]
+  (let [[vns vname] (var-parts (.target e))]
+    (str vns "._var_" vname ".set(" (tojs (.val e) ctx) ")")))
+
+(defmethod tojs clojure.lang.Compiler$DefExpr [e ctx]
+  (let [[vns vname] (var-parts e)]
+    (str "clojure.JS.def(" vns ",\"" vname "\"," (tojs (.init e) ctx) ")")))
+
 
 (defmethod tojs clojure.lang.Compiler$InvokeExpr [e ctx]
   (vstr [(tojs (.fexpr e) ctx)
@@ -129,13 +145,6 @@
 
 (defmethod tojs clojure.lang.Compiler$StringExpr [e ctx]
   (const-str (.str e)))
-
-(defmethod tojs clojure.lang.Compiler$VarExpr [e ctx]
-  (tojs (.var e) ctx))
-
-(defmethod tojs clojure.lang.Compiler$TheVarExpr [e ctx]
-  ; XXX not really right
-  (tojs (.var e) ctx))
 
 (defmethod tojs clojure.lang.Compiler$KeywordExpr [e ctx]
   (const-str (.k e)))
@@ -185,9 +194,6 @@
 
 (defmethod tojs clojure.lang.Compiler$BooleanExpr [e ctx]
   (if (.val e) "true" "false"))
-
-(defmethod tojs clojure.lang.Compiler$AssignExpr [e ctx]
-  (vstr ["(" (tojs (.target e) ctx) "=" (tojs (.val e) ctx) ")"]))
 
 (defmethod tojs clojure.lang.Compiler$ThrowExpr [e ctx]
   (vstr ["(function(){throw " (tojs (.excExpr e) ctx) "})()"]))

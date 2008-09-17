@@ -1,8 +1,12 @@
 clojure = {
   in_ns: function(s) {
-    var ns = s.substring(1);
-    if( ! window[ns] ) {
-      window[ns] = {};
+    var nsparts = s.substring(1).split('.');
+    var base = window;
+    for( var i = 0; i < nsparts.length; ++i ) {
+      if( ! base[nsparts[i]] ) {
+        base[nsparts[i]] = {};
+      }
+      base = base[nsparts[i]];
     }
   },
   refer: function(s) {},
@@ -31,7 +35,21 @@ clojure = {
     return seq.rest();
   },
   second: function(x) { return clojure.first(clojure.rest(x)); },
-  prn: print,
+  prn: function() {
+    var args = [];
+    for( var i = 0; i < arguments.length; ++i ) {
+      args.push( arguments[ i ] );
+    }
+    print( args.join(" ") );
+  },
+  hash_map: function() {
+    // This just makes a seq for now
+    var pairs = [];
+    for( var i = 0; i < arguments.length; i += 2 ) {
+      pairs.push( [ arguments[i], arguments[i + 1] ] )
+    }
+    return clojure.lang.ArraySeq.create( pairs );
+  },
   count: function(x) {
     if( x === null ) return 0;
     if( x.count ) return x.count();
@@ -41,6 +59,11 @@ clojure = {
   JS: {
     resolveVar: function( sym, ctxns ) {
       return ctxns[ sym ] || clojure[ sym ] || window[ sym ];
+    },
+    def: function( ns, name, init ) {
+      var v = new clojure.lang.Var( ns, name );
+      ns["_var_" + name] = v;
+      v.push( init );
     },
     ObjSeq: {
       create: function( obj ) {
@@ -55,7 +78,11 @@ clojure = {
   lang: {
     Numbers: {
       isPos: function(x) { return x > 0; },
+      inc: function(x) { return x + 1; },
       dec: function(x) { return x - 1; }
+    },
+    Util: {
+      equal: function(x,y) { return x == y; }
     }
   }
 };
@@ -145,4 +172,45 @@ clojure.lang.LazyCons.prototype.withMeta = function(_meta) {
 
 clojure.lang.LazyCons.prototype.seq = function() {
   return this;
+};
+
+
+clojure.lang.Var = function( ns, name ) {
+  this.ns = ns;
+  this.name = name;
+  this.stack = [];
+};
+
+clojure.lang.Var.prototype.push = function( val ) {
+  this.stack.push( val );
+  this.ns[ this.name ] = val;
+};
+
+clojure.lang.Var.prototype.pop = function() {
+  this.stack.pop();
+  this.ns[ this.name ] = this.stack[ this.stack.length - 1 ];
+};
+
+clojure.lang.Var.prototype.set = function( val ) {
+  this.stack.pop();
+  this.push( val );
+};
+
+clojure.lang.Var.stack = [];
+
+clojure.lang.Var.pushThreadBindings = function( m ) {
+  var vars=[], b;
+  for( var bs = m.seq(); bs; bs = bs.rest()) {
+    b = bs.first();
+    vars.push( b[0] );
+    b[0].push( b[1] );
+  }
+  clojure.lang.Var.stack.push( vars );
+};
+
+clojure.lang.Var.popThreadBindings = function() {
+  var vars = clojure.lang.Var.stack.pop();
+  for( var i = 0; i < vars.length; ++i ) {
+    vars[i].pop();
+  }
 };
