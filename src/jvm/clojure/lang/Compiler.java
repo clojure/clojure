@@ -261,12 +261,16 @@ static class DefExpr implements Expr{
 	final Expr init;
 	final Expr meta;
 	final boolean initProvided;
+	final String source;
+	final int line;
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
 	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
 
-	public DefExpr(Var var, Expr init, Expr meta, boolean initProvided){
+	public DefExpr(String source,int line,Var var, Expr init, Expr meta, boolean initProvided){
+		this.source = source;
+		this.line = line;
 		this.var = var;
 		this.init = init;
 		this.meta = meta;
@@ -274,18 +278,29 @@ static class DefExpr implements Expr{
 	}
 
 	public Object eval() throws Exception{
-		if(initProvided)
+		try
 			{
+			if(initProvided)
+				{
 //			if(init instanceof FnExpr && ((FnExpr) init).closes.count()==0)
 //				var.bindRoot(new FnLoaderThunk((FnExpr) init,var));
 //			else
 				var.bindRoot(init.eval());
+				}
+			if(meta != null)
+				{
+				var.setMeta((IPersistentMap) meta.eval());
+				}
+			return var;
 			}
-		if(meta != null)
+		catch(Throwable e)
 			{
-			var.setMeta((IPersistentMap) meta.eval());
+			if(!(e instanceof CompilerException))
+				throw new CompilerException(errorMsg(source, line, e.getMessage()),
+				                            e);
+			else
+				throw (CompilerException) e;
 			}
-		return var;
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -340,7 +355,8 @@ static class DefExpr implements Expr{
 			IPersistentMap mm = sym.meta();
 			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, SOURCE.get());
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
-			return new DefExpr(v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
+			return new DefExpr((String) SOURCE_PATH.get(),(Integer) LINE.get(),
+			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
 			                   meta, RT.count(form) == 3);
 		}
 	}
@@ -701,6 +717,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			//determine static or instance
 			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
 			int line = (Integer) LINE.get();
+			String source = (String) SOURCE_PATH.get();
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -733,9 +750,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				for(ISeq s = RT.rest(call); s != null; s = s.rest())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
-					return new StaticMethodExpr(line, c, sym.name, args);
+					return new StaticMethodExpr(source, line, c, sym.name, args);
 				else
-					return new InstanceMethodExpr(line, instance, sym.name, args);
+					return new InstanceMethodExpr(source, line, instance, sym.name, args);
 				}
 		}
 	}
@@ -1041,6 +1058,7 @@ static class InstanceMethodExpr extends MethodExpr{
 	final Expr target;
 	final String methodName;
 	final IPersistentVector args;
+	final String source;
 	final int line;
 	final java.lang.reflect.Method method;
 
@@ -1048,7 +1066,9 @@ static class InstanceMethodExpr extends MethodExpr{
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(int line, Expr target, String methodName, IPersistentVector args) throws Exception{
+	public InstanceMethodExpr(String source, int line, Expr target, String methodName, IPersistentVector args)
+			throws Exception{
+		this.source = source;
 		this.line = line;
 		this.args = args;
 		this.methodName = methodName;
@@ -1089,17 +1109,28 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 
 	public Object eval() throws Exception{
-		Object targetval = target.eval();
-		Object[] argvals = new Object[args.count()];
-		for(int i = 0; i < args.count(); i++)
-			argvals[i] = ((Expr) args.nth(i)).eval();
-		if(method != null)
+		try
 			{
-			LinkedList ms = new LinkedList();
-			ms.add(method);
-			return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
+			Object targetval = target.eval();
+			Object[] argvals = new Object[args.count()];
+			for(int i = 0; i < args.count(); i++)
+				argvals[i] = ((Expr) args.nth(i)).eval();
+			if(method != null)
+				{
+				LinkedList ms = new LinkedList();
+				ms.add(method);
+				return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
+				}
+			return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
 			}
-		return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
+		catch(Throwable e)
+			{
+			if(!(e instanceof CompilerException))
+				throw new CompilerException(errorMsg(source, line, e.getMessage()),
+				                            e);
+			else
+				throw (CompilerException) e;
+			}
 	}
 
 	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
@@ -1179,17 +1210,19 @@ static class StaticMethodExpr extends MethodExpr{
 	final Class c;
 	final String methodName;
 	final IPersistentVector args;
+	final String source;
 	final int line;
 	final java.lang.reflect.Method method;
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
 
 
-	public StaticMethodExpr(int line, Class c, String methodName, IPersistentVector args)
+	public StaticMethodExpr(String source, int line, Class c, String methodName, IPersistentVector args)
 			throws Exception{
 		this.c = c;
 		this.methodName = methodName;
 		this.args = args;
+		this.source = source;
 		this.line = line;
 
 		List methods = Reflector.getMethods(c, args.count(), methodName, true);
@@ -1212,16 +1245,27 @@ static class StaticMethodExpr extends MethodExpr{
 	}
 
 	public Object eval() throws Exception{
-		Object[] argvals = new Object[args.count()];
-		for(int i = 0; i < args.count(); i++)
-			argvals[i] = ((Expr) args.nth(i)).eval();
-		if(method != null)
+		try
 			{
-			LinkedList ms = new LinkedList();
-			ms.add(method);
-			return Reflector.invokeMatchingMethod(methodName, ms, null, argvals);
+			Object[] argvals = new Object[args.count()];
+			for(int i = 0; i < args.count(); i++)
+				argvals[i] = ((Expr) args.nth(i)).eval();
+			if(method != null)
+				{
+				LinkedList ms = new LinkedList();
+				ms.add(method);
+				return Reflector.invokeMatchingMethod(methodName, ms, null, argvals);
+				}
+			return Reflector.invokeStaticMethod(c, methodName, argvals);
 			}
-		return Reflector.invokeStaticMethod(c, methodName, argvals);
+		catch(Throwable e)
+			{
+			if(!(e instanceof CompilerException))
+				throw new CompilerException(errorMsg(source, line, e.getMessage()),
+				                            e);
+			else
+				throw (CompilerException) e;
+			}
 	}
 
 	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
@@ -2573,8 +2617,10 @@ static class InvokeExpr implements Expr{
 	final Object tag;
 	final IPersistentVector args;
 	final int line;
+	final String source;
 
-	public InvokeExpr(int line, Symbol tag, Expr fexpr, IPersistentVector args){
+	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args){
+		this.source = source;
 		this.fexpr = fexpr;
 		this.args = args;
 		this.line = line;
@@ -2582,11 +2628,22 @@ static class InvokeExpr implements Expr{
 	}
 
 	public Object eval() throws Exception{
-		IFn fn = (IFn) fexpr.eval();
-		PersistentVector argvs = PersistentVector.EMPTY;
-		for(int i = 0; i < args.count(); i++)
-			argvs = argvs.cons(((Expr) args.nth(i)).eval());
-		return fn.applyTo(RT.seq(argvs));
+		try
+			{
+			IFn fn = (IFn) fexpr.eval();
+			PersistentVector argvs = PersistentVector.EMPTY;
+			for(int i = 0; i < args.count(); i++)
+				argvs = argvs.cons(((Expr) args.nth(i)).eval());
+			return fn.applyTo(RT.seq(argvs));
+			}
+		catch(Throwable e)
+			{
+			if(!(e instanceof CompilerException))
+				throw new CompilerException(errorMsg(source,line,e.getMessage()),
+				                            e);
+			else
+				throw (CompilerException) e;
+			}
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -2641,7 +2698,7 @@ static class InvokeExpr implements Expr{
 //			throw new IllegalArgumentException(
 //					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 
-		return new InvokeExpr((Integer) LINE.get(), tagOf(form), fexpr, args);
+		return new InvokeExpr((String) SOURCE_PATH.get(),(Integer) LINE.get(), tagOf(form), fexpr, args);
 	}
 }
 
@@ -3859,18 +3916,14 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		else
 			return InvokeExpr.parse(context, form);
 		}
-	catch(Throwable e)
-		{
-		if(!(e instanceof CompilerException))
-			throw new CompilerException(String.format("%s:%d: %s", SOURCE.get(), (Integer) LINE.get(), e.getMessage()),
-			                            e);
-		else
-			throw (CompilerException) e;
-		}
 	finally
 		{
 		Var.popThreadBindings();
 		}
+}
+
+static String errorMsg(String source, int line, String s){
+	return String.format("%s:%d: %s", source,line, s);
 }
 
 public static Object eval(Object form) throws Exception{
@@ -3895,6 +3948,14 @@ public static Object eval(Object form) throws Exception{
 			Expr expr = analyze(C.EVAL, form);
 			return expr.eval();
 			}
+		}
+	catch(Throwable e)
+		{
+		if(!(e instanceof CompilerException))
+			throw new CompilerException(errorMsg((String)SOURCE.get(), (Integer) LINE.get(),e.getMessage()),
+			                            e);
+		else
+			throw (CompilerException) e;
 		}
 	finally
 		{
