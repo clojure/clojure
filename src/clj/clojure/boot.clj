@@ -2409,10 +2409,36 @@
                               (re-find (re-matcher re (str (:name ^v))))))]
                (print-doc v)))))
 
+(defn special-form-anchor
+  "Returns the anchor tag on http://clojure.org/special_forms for the
+  special form x, or nil"
+  [x]
+  (#{'. 'def 'do 'fn 'if 'let 'loop 'monitor-enter 'monitor-exit 'new
+  'quote 'recur 'set! 'throw 'try 'var} x))
+
+(defn syntax-symbol-anchor
+  "Returns the anchor tag on http://clojure.org/special_forms for the
+  special form that uses syntax symbol x, or nil"
+  [x]
+  ({'& 'fn 'catch 'try 'finally 'try} x))
+
+(defn print-special-doc
+  [name type anchor]
+  (println "-------------------------")
+  (println name)
+  (println type)
+  (println (str "  Please see http://clojure.org/special_forms#" anchor)))
+
 (defmacro doc
-  "Prints documentation for the var named by varname"
-  [varname]
-  `(print-doc (var ~varname)))
+  "Prints documentation for a var or special form given its name"
+  [name]
+  (cond
+   (special-form-anchor `~name)
+   `(print-special-doc '~name "Special Form" (special-form-anchor '~name))
+   (syntax-symbol-anchor `~name)
+   `(print-special-doc '~name "Syntax Symbol" (syntax-symbol-anchor '~name))
+   :else
+   `(print-doc (var ~name))))
 
 (defn tree-seq
   "returns a lazy sequence of the nodes in a tree, via a depth-first walk.
