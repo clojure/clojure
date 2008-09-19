@@ -296,8 +296,7 @@ static class DefExpr implements Expr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(errorMsg(source, line, e.getMessage()),
-				                            e);
+				throw new CompilerException(source, line, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -355,7 +354,7 @@ static class DefExpr implements Expr{
 			IPersistentMap mm = sym.meta();
 			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, SOURCE.get());
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
-			return new DefExpr((String) SOURCE_PATH.get(),(Integer) LINE.get(),
+			return new DefExpr((String) SOURCE.get(),(Integer) LINE.get(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
 			                   meta, RT.count(form) == 3);
 		}
@@ -717,7 +716,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			//determine static or instance
 			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
 			int line = (Integer) LINE.get();
-			String source = (String) SOURCE_PATH.get();
+			String source = (String) SOURCE.get();
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -1126,8 +1125,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(errorMsg(source, line, e.getMessage()),
-				                            e);
+				throw new CompilerException(source, line, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -1261,8 +1259,7 @@ static class StaticMethodExpr extends MethodExpr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(errorMsg(source, line, e.getMessage()),
-				                            e);
+				throw new CompilerException(source, line, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -2639,8 +2636,7 @@ static class InvokeExpr implements Expr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(errorMsg(source,line,e.getMessage()),
-				                            e);
+				throw new CompilerException(source, line, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -2698,7 +2694,7 @@ static class InvokeExpr implements Expr{
 //			throw new IllegalArgumentException(
 //					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 
-		return new InvokeExpr((String) SOURCE_PATH.get(),(Integer) LINE.get(), tagOf(form), fexpr, args);
+		return new InvokeExpr((String) SOURCE.get(),(Integer) LINE.get(), tagOf(form), fexpr, args);
 	}
 }
 
@@ -3767,8 +3763,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException(String.format("%s:%d: %s", SOURCE.get(), (Integer) LINE.get(), e.getMessage()),
-			                            e);
+			throw new CompilerException((String) SOURCE.get(), (Integer) LINE.get(), e);
 		else
 			throw (CompilerException) e;
 		}
@@ -3776,8 +3771,11 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 
 static public class CompilerException extends Exception{
 
-	public CompilerException(String message, Throwable cause){
-		super(message, cause);
+	public CompilerException(String source, int line, Throwable cause){
+		super(errorMsg(source,line,cause.toString()), cause);
+	}
+	public String toString(){
+		return getMessage();
 	}
 }
 
@@ -3923,7 +3921,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 }
 
 static String errorMsg(String source, int line, String s){
-	return String.format("%s:%d: %s", source,line, s);
+	return String.format("%s (%s:%d)", s, source, line);
 }
 
 public static Object eval(Object form) throws Exception{
@@ -3952,8 +3950,7 @@ public static Object eval(Object form) throws Exception{
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException(errorMsg((String)SOURCE.get(), (Integer) LINE.get(),e.getMessage()),
-			                            e);
+			throw new CompilerException((String)SOURCE.get(), (Integer) LINE.get(),e);
 		else
 			throw (CompilerException) e;
 		}

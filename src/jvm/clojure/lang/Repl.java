@@ -23,6 +23,10 @@ static final Var in_ns = RT.var("clojure", "in-ns");
 static final Var refer = RT.var("clojure", "refer");
 static final Var ns = RT.var("clojure", "*ns*");
 static final Var warn_on_reflection = RT.var("clojure", "*warn-on-reflection*");
+static final Var star1 = RT.var("clojure", "*1");
+static final Var star2 = RT.var("clojure", "*2");
+static final Var star3 = RT.var("clojure", "*3");
+static final Var stare = RT.var("clojure", "*e");
 
 public static void main(String[] args) throws Exception{
 
@@ -32,10 +36,15 @@ public static void main(String[] args) throws Exception{
 		{
 		//*ns* must be thread-bound for in-ns to work
 		//thread-bind *warn-on-reflection* so it can be set!
+		//thread-bind *1,*2,*3,*e so each repl has its own history
 		//must have corresponding popThreadBindings in finally clause
 		Var.pushThreadBindings(
 				RT.map(ns, ns.get(),
-				       warn_on_reflection, warn_on_reflection.get()));
+					   warn_on_reflection, warn_on_reflection.get(),
+					   star1, null,
+					   star2, null,
+					   star3, null,
+					   stare, null));
 
 		//create and move into the user namespace
 		in_ns.invoke(USER);
@@ -76,14 +85,17 @@ public static void main(String[] args) throws Exception{
 				RT.print(ret, w);
 				w.write('\n');
 				//w.flush();
+				star3.set(star2.get());
+				star2.set(star1.get());
+				star1.set(ret);
 				}
 			catch(Throwable e)
 				{
 				Throwable c = e;
 				while(c.getCause() != null)
 					c = c.getCause();
-				System.err.println(c);
-				e.printStackTrace();
+				System.err.println(e instanceof Compiler.CompilerException ? e : c);
+				stare.set(e);
 				}
 			}
 		}
