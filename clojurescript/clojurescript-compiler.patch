@@ -1,5 +1,5 @@
 diff --git a/src/jvm/clojure/lang/Compiler.java b/src/jvm/clojure/lang/Compiler.java
-index e087d08..400b34a 100644
+index a44aa2e..aae4cc9 100644
 --- a/src/jvm/clojure/lang/Compiler.java
 +++ b/src/jvm/clojure/lang/Compiler.java
 @@ -195,7 +195,7 @@ static final public Var RET_LOCAL_NUM = Var.create();
@@ -20,24 +20,26 @@ index e087d08..400b34a 100644
  
  	public Class getJavaClass(){
  		throw new IllegalArgumentException("Has no Java class");
-@@ -256,11 +256,11 @@ static Symbol resolveSymbol(Symbol sym){
- 
+@@ -257,12 +257,12 @@ static Symbol resolveSymbol(Symbol sym){
  }
  
--static class DefExpr implements Expr{
+ static class DefExpr implements Expr{
 -	final Var var;
 -	final Expr init;
 -	final Expr meta;
 -	final boolean initProvided;
-+public static class DefExpr implements Expr{
+-	final String source;
+-	final int line;
 +	public final Var var;
 +	public final Expr init;
 +	public final Expr meta;
 +	public final boolean initProvided;
++	public final String source;
++	public final int line;
  	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
  	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
  	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
-@@ -346,10 +346,9 @@ static class DefExpr implements Expr{
+@@ -361,10 +361,9 @@ static class DefExpr implements Expr{
  	}
  }
  
@@ -51,7 +53,7 @@ index e087d08..400b34a 100644
  
  	public AssignExpr(AssignableExpr target, Expr val){
  		this.target = target;
-@@ -385,9 +384,9 @@ static class AssignExpr implements Expr{
+@@ -400,9 +399,9 @@ static class AssignExpr implements Expr{
  	}
  }
  
@@ -64,7 +66,7 @@ index e087d08..400b34a 100644
  	final static Method getMethod = Method.getMethod("Object get()");
  	final static Method setMethod = Method.getMethod("Object set(Object)");
  
-@@ -431,8 +430,8 @@ static class VarExpr implements Expr, AssignableExpr{
+@@ -446,8 +445,8 @@ static class VarExpr implements Expr, AssignableExpr{
  	}
  }
  
@@ -75,7 +77,7 @@ index e087d08..400b34a 100644
  
  	public TheVarExpr(Var var){
  		this.var = var;
-@@ -467,8 +466,8 @@ static class TheVarExpr implements Expr{
+@@ -482,8 +481,8 @@ static class TheVarExpr implements Expr{
  	}
  }
  
@@ -86,7 +88,7 @@ index e087d08..400b34a 100644
  
  	public KeywordExpr(Keyword k){
  		this.k = k;
-@@ -494,7 +493,7 @@ static class KeywordExpr implements Expr{
+@@ -509,7 +508,7 @@ static class KeywordExpr implements Expr{
  	}
  }
  
@@ -95,7 +97,7 @@ index e087d08..400b34a 100644
  	abstract Object val();
  
  	public Object eval(){
-@@ -814,11 +813,11 @@ static abstract class FieldExpr extends HostExpr{
+@@ -830,11 +829,11 @@ static abstract class FieldExpr extends HostExpr{
  }
  
  static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
@@ -112,7 +114,7 @@ index e087d08..400b34a 100644
  	final static Method invokeNoArgInstanceMember = Method.getMethod("Object invokeNoArgInstanceMember(Object,String)");
  	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
  
-@@ -914,9 +913,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
+@@ -930,9 +929,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
  
  static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
  	//final String className;
@@ -125,41 +127,45 @@ index e087d08..400b34a 100644
  	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
  	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
  	final int line;
-@@ -1038,11 +1037,11 @@ static abstract class MethodExpr extends HostExpr{
+@@ -1054,12 +1053,12 @@ static abstract class MethodExpr extends HostExpr{
  }
  
  static class InstanceMethodExpr extends MethodExpr{
 -	final Expr target;
 -	final String methodName;
 -	final IPersistentVector args;
+-	final String source;
 -	final int line;
 -	final java.lang.reflect.Method method;
 +	public final Expr target;
 +	public final String methodName;
 +	public final IPersistentVector args;
++	public final String source;
 +	public final int line;
 +	public final java.lang.reflect.Method method;
  
  	final static Method invokeInstanceMethodMethod =
  			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
-@@ -1176,11 +1175,11 @@ static class InstanceMethodExpr extends MethodExpr{
+@@ -1205,12 +1204,12 @@ static class InstanceMethodExpr extends MethodExpr{
  
  static class StaticMethodExpr extends MethodExpr{
  	//final String className;
 -	final Class c;
 -	final String methodName;
 -	final IPersistentVector args;
+-	final String source;
 -	final int line;
 -	final java.lang.reflect.Method method;
 +	public final Class c;
 +	public final String methodName;
 +	public final IPersistentVector args;
++	public final String source;
 +	public final int line;
 +	public final java.lang.reflect.Method method;
  	final static Method invokeStaticMethodMethod =
  			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
  
-@@ -1285,12 +1284,36 @@ static class StaticMethodExpr extends MethodExpr{
+@@ -1326,12 +1325,36 @@ static class StaticMethodExpr extends MethodExpr{
  	}
  }
  
@@ -198,7 +204,7 @@ index e087d08..400b34a 100644
  
  	public ConstantExpr(Object v){
  		this.v = v;
-@@ -1374,7 +1397,7 @@ static class NilExpr extends LiteralExpr{
+@@ -1415,7 +1438,7 @@ static class NilExpr extends LiteralExpr{
  final static NilExpr NIL_EXPR = new NilExpr();
  
  static class BooleanExpr extends LiteralExpr{
@@ -207,7 +213,7 @@ index e087d08..400b34a 100644
  
  
  	public BooleanExpr(boolean val){
-@@ -1409,7 +1432,7 @@ final static BooleanExpr TRUE_EXPR = new BooleanExpr(true);
+@@ -1450,7 +1473,7 @@ final static BooleanExpr TRUE_EXPR = new BooleanExpr(true);
  final static BooleanExpr FALSE_EXPR = new BooleanExpr(false);
  
  static class StringExpr extends LiteralExpr{
@@ -216,22 +222,25 @@ index e087d08..400b34a 100644
  
  	public StringExpr(String str){
  		this.str = str;
-@@ -1581,17 +1604,17 @@ static class MonitorExitExpr extends UntypedExpr{
+@@ -1621,18 +1644,18 @@ static class MonitorExitExpr extends UntypedExpr{
+ 
  }
  
- static class TryExpr implements Expr{
+-static class TryExpr implements Expr{
 -	final Expr tryExpr;
 -	final Expr finallyExpr;
 -	final PersistentVector catchExprs;
 -	final int retLocal;
 -	final int finallyLocal;
++public static class TryExpr implements Expr{
 +	public final Expr tryExpr;
 +	public final Expr finallyExpr;
 +	public final PersistentVector catchExprs;
 +	public final int retLocal;
 +	public final int finallyLocal;
  
- 	static class CatchClause{
+-	static class CatchClause{
++	public static class CatchClause{
  		//final String className;
 -		final Class c;
 -		final LocalBinding lb;
@@ -242,7 +251,7 @@ index e087d08..400b34a 100644
  		Label label;
  		Label endLabel;
  
-@@ -1833,7 +1856,7 @@ static class TryExpr implements Expr{
+@@ -1874,7 +1897,7 @@ static class TryExpr implements Expr{
  //}
  
  static class ThrowExpr extends UntypedExpr{
@@ -251,7 +260,7 @@ index e087d08..400b34a 100644
  
  	public ThrowExpr(Expr excExpr){
  		this.excExpr = excExpr;
-@@ -1960,10 +1983,10 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
+@@ -2001,10 +2024,10 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
  	return matchIdx;
  }
  
@@ -266,7 +275,7 @@ index e087d08..400b34a 100644
  	final static Method invokeConstructorMethod =
  			Method.getMethod("Object invokeConstructor(Class,Object[])");
  	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
-@@ -2175,9 +2198,9 @@ static class NewExpr implements Expr{
+@@ -2216,9 +2239,9 @@ static class NewExpr implements Expr{
  //	}
  //}
  
@@ -279,7 +288,7 @@ index e087d08..400b34a 100644
  	final static Type IOBJ_TYPE = Type.getType(IObj.class);
  	final static Method withMetaMethod = Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)");
  
-@@ -2212,11 +2235,11 @@ static class MetaExpr implements Expr{
+@@ -2253,11 +2276,11 @@ static class MetaExpr implements Expr{
  	}
  }
  
@@ -296,7 +305,7 @@ index e087d08..400b34a 100644
  
  
  	public IfExpr(int line, Expr testExpr, Expr thenExpr, Expr elseExpr){
-@@ -2341,8 +2364,8 @@ static public String munge(String name){
+@@ -2382,8 +2405,8 @@ static public String munge(String name){
  	return sb.toString();
  }
  
@@ -307,7 +316,7 @@ index e087d08..400b34a 100644
  	final static Type HASHMAP_TYPE = Type.getType(PersistentHashMap.class);
  	final static Type HASHSET_TYPE = Type.getType(PersistentHashSet.class);
  	final static Type VECTOR_TYPE = Type.getType(PersistentVector.class);
-@@ -2393,8 +2416,8 @@ static class EmptyExpr implements Expr{
+@@ -2434,8 +2457,8 @@ static class EmptyExpr implements Expr{
  	}
  }
  
@@ -318,7 +327,7 @@ index e087d08..400b34a 100644
  	final static Method arrayToListMethod = Method.getMethod("clojure.lang.ISeq arrayToList(Object[])");
  
  
-@@ -2426,8 +2449,8 @@ static class ListExpr implements Expr{
+@@ -2467,8 +2490,8 @@ static class ListExpr implements Expr{
  
  }
  
@@ -329,7 +338,7 @@ index e087d08..400b34a 100644
  	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
  
  
-@@ -2475,8 +2498,8 @@ static class MapExpr implements Expr{
+@@ -2516,8 +2539,8 @@ static class MapExpr implements Expr{
  	}
  }
  
@@ -340,7 +349,7 @@ index e087d08..400b34a 100644
  	final static Method setMethod = Method.getMethod("clojure.lang.IPersistentSet set(Object[])");
  
  
-@@ -2523,8 +2546,8 @@ static class SetExpr implements Expr{
+@@ -2564,8 +2587,8 @@ static class SetExpr implements Expr{
  	}
  }
  
@@ -351,24 +360,24 @@ index e087d08..400b34a 100644
  	final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
  
  
-@@ -2568,11 +2591,11 @@ static class VectorExpr implements Expr{
- 
+@@ -2610,11 +2633,11 @@ static class VectorExpr implements Expr{
  }
  
--static class InvokeExpr implements Expr{
+ static class InvokeExpr implements Expr{
 -	final Expr fexpr;
 -	final Object tag;
 -	final IPersistentVector args;
 -	final int line;
-+public static class InvokeExpr implements Expr{
+-	final String source;
 +	public final Expr fexpr;
 +	public final Object tag;
 +	public final IPersistentVector args;
 +	public final int line;
++	public final String source;
  
- 	public InvokeExpr(int line, Symbol tag, Expr fexpr, IPersistentVector args){
- 		this.fexpr = fexpr;
-@@ -2693,7 +2716,7 @@ static public class FnExpr implements Expr{
+ 	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args){
+ 		this.source = source;
+@@ -2746,7 +2769,7 @@ static public class FnExpr implements Expr{
  	String internalName;
  	String thisName;
  	Type fntype;
@@ -377,7 +386,7 @@ index e087d08..400b34a 100644
  	//localbinding->itself
  	IPersistentMap closes = PersistentHashMap.EMPTY;
  	//Keyword->KeywordExpr
-@@ -2703,6 +2726,20 @@ static public class FnExpr implements Expr{
+@@ -2756,6 +2779,20 @@ static public class FnExpr implements Expr{
  	int line;
  	PersistentVector constants;
  	int constantsID;
@@ -398,7 +407,7 @@ index e087d08..400b34a 100644
  
  	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
  	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
-@@ -3139,10 +3176,10 @@ enum PSTATE{
+@@ -3192,10 +3229,10 @@ enum PSTATE{
  }
  
  
@@ -411,7 +420,7 @@ index e087d08..400b34a 100644
  	//localbinding->localbinding
  	IPersistentMap locals = null;
  	//localbinding->localbinding
-@@ -3154,6 +3191,14 @@ static class FnMethod{
+@@ -3207,6 +3244,14 @@ static class FnMethod{
  	int maxLocal = 0;
  	int line;
  	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
@@ -426,7 +435,7 @@ index e087d08..400b34a 100644
  
  	public FnMethod(FnExpr fn, FnMethod parent){
  		this.parent = parent;
-@@ -3293,12 +3338,12 @@ static class FnMethod{
+@@ -3346,12 +3391,12 @@ static class FnMethod{
  	}
  }
  
@@ -445,7 +454,7 @@ index e087d08..400b34a 100644
  
  	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init) throws Exception{
  		if(maybePrimitiveType(init) != null && tag != null)
-@@ -3329,9 +3374,9 @@ static class LocalBinding{
+@@ -3382,9 +3427,9 @@ static class LocalBinding{
  	}
  }
  
@@ -458,7 +467,7 @@ index e087d08..400b34a 100644
  
  	public LocalBindingExpr(LocalBinding b, Symbol tag) throws Exception{
  		if(b.getPrimitiveType() != null && tag != null)
-@@ -3366,8 +3411,9 @@ static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
+@@ -3419,8 +3464,9 @@ static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
  
  }
  
@@ -469,7 +478,7 @@ index e087d08..400b34a 100644
  
  	public BodyExpr(PersistentVector exprs){
  		this.exprs = exprs;
-@@ -3427,9 +3473,11 @@ static class BodyExpr implements Expr{
+@@ -3480,9 +3526,11 @@ static class BodyExpr implements Expr{
  	}
  }
  
@@ -482,7 +491,7 @@ index e087d08..400b34a 100644
  
  	public BindingInit(LocalBinding binding, Expr init){
  		this.binding = binding;
-@@ -3437,10 +3485,10 @@ static class BindingInit{
+@@ -3490,10 +3538,10 @@ static class BindingInit{
  	}
  }
  
@@ -497,7 +506,7 @@ index e087d08..400b34a 100644
  
  	public LetExpr(PersistentVector bindingInits, Expr body, boolean isLoop){
  		this.bindingInits = bindingInits;
-@@ -3563,9 +3611,9 @@ static class LetExpr implements Expr{
+@@ -3616,9 +3664,9 @@ static class LetExpr implements Expr{
  	}
  }
  
@@ -510,7 +519,7 @@ index e087d08..400b34a 100644
  
  	public RecurExpr(IPersistentVector loopLocals, IPersistentVector args){
  		this.loopLocals = loopLocals;
-@@ -3667,7 +3715,7 @@ private static int getAndIncLocalNum(){
+@@ -3720,7 +3768,7 @@ private static int getAndIncLocalNum(){
  	return num;
  }
  
@@ -519,7 +528,7 @@ index e087d08..400b34a 100644
  	return analyze(context, form, null);
  }
  
-@@ -3963,6 +4011,8 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
+@@ -4021,6 +4069,8 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
  		}
  	else if(o instanceof Class)
  		return new ConstantExpr(o);
@@ -528,7 +537,7 @@ index e087d08..400b34a 100644
  
  	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
  
-@@ -4012,7 +4062,16 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
+@@ -4074,7 +4124,16 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
  		{
  		Object o = n.getMapping(sym);
  		if(o == null)

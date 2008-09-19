@@ -12,7 +12,10 @@
     (lvl v)
     (str sb)))
 
-(def *has-recur*)
+(def *debug-fn-names* true)
+(def *debug-comments* true)
+
+(def *has-recur*) ; used internally
 
 (defmulti tojs (fn [e ctx] (class e)))
 
@@ -33,8 +36,8 @@
                   (for [lb (.reqParms fm)]
                     [(lm lb) "=arguments[" (dec (.idx lb)) "]"]))
                 (when-let lb (.restParm fm)
-                  [(lm lb) "=clojure.JS.rest_args(arguments,"
-                   (count (.reqParms fm)) ")"]))]
+                  [(str (lm lb) "=clojure.JS.rest_args(arguments,"
+                        (count (.reqParms fm)) ")")]))]
     (.reqParms maxm)
     (vstr [(when (seq inits)
              [(apply vector "var " (interpose "," inits)) ";\n"])
@@ -53,7 +56,10 @@
                      last val))
         manym (< 1 (count (.methods e)))
         newctx (assoc ctx :fnname (.thisName e))]
-    (vstr ["(function("
+    (vstr ["(function"
+           (when *debug-fn-names*
+             [" __" (.replaceAll (.name e) "[\\W_]+" "_")])
+           "("
            (vec (interpose "," (for [lb (.reqParms maxm)]
                                  [(.name lb) "_" (.idx lb)])))
            "){\n"
@@ -75,10 +81,12 @@
                                      "=" (tojs (.init bi) ctx) ")"])))]
     (if (.isLoop e)
       (binding [*has-recur* false]
-        (vstr ["((function(){var _rtn,_cnt;"
-              inits ";"
-              "do{_cnt=0;\n_rtn=" (tojs (.body e) ctx)
-              "}while(_cnt);return _rtn;})())"]))
+        (vstr ["((function"
+               (when *debug-fn-names* " __loop")
+               "(){var _rtn,_cnt;"
+               inits ";"
+               "do{_cnt=0;\n_rtn=" (tojs (.body e) ctx)
+               "}while(_cnt);return _rtn;})())"]))
       (vstr ["(" inits ",\n" (tojs (.body e) ctx) ")"]))))
 
 (defmethod tojs clojure.lang.Compiler$VectorExpr [e ctx]
@@ -88,27 +96,30 @@
 
 (defn const-str [c]
   (cond
-    (string?  c) (str \" c \")
-    (keyword? c) (str \" c \")
+    (or (instance? Character c)
+        (keyword? c)
+        (string?  c)) (pr-str (str c))
     (symbol?  c) (str \" \' c \")
     (class?   c) (.getCanonicalName c)
     (list?    c) (vstr ["clojure.JS.lit_list(["
                         (vec (interpose "," (map const-str c)))
                         "])"])
+    (fn?      c) (str \" c \")
     :else (str c)))
 
 (defmethod tojs clojure.lang.Compiler$ConstantExpr [e ctx]
   (const-str (.v e)))
 
+(defn var-munge [x]
+  (-> x str Compiler/munge (.replace "." "_DOT_")))
 
 (defn var-parts [e]
   (let [{:keys [name ns]} ^(.var e)]
-    [(Compiler/munge (str (.getName ns)))
-     (Compiler/munge (str name))]))
+    [(Compiler/munge (str (.getName ns))) (var-munge name)]))
 
 (defmethod tojs clojure.lang.Compiler$UnresolvedVarExpr [e ctx]
   (vstr ["clojure.JS.resolveVar(\""
-         (Compiler/munge (name (.symbol e))) "\","
+         (var-munge (name (.symbol e))) "\","
          (Compiler/munge (name (.name *ns*))) ")"]))
 
 (defmethod tojs clojure.lang.Compiler$VarExpr [e ctx]
@@ -196,18 +207,22 @@
   (if (.val e) "true" "false"))
 
 (defmethod tojs clojure.lang.Compiler$ThrowExpr [e ctx]
-  (vstr ["(function(){throw " (tojs (.excExpr e) ctx) "})()"]))
+  (vstr ["(function"
+         (when *debug-fn-names* " __throw")
+         "(){throw " (tojs (.excExpr e) ctx) "})()"]))
 
 (defmethod tojs clojure.lang.Compiler$TryExpr [e ctx]
-  (vstr ["(function(){try{var _rtn="
+  (vstr ["(function"
+         (when *debug-fn-names* " __try")
+         "(){try{var _rtn=("
          (tojs (.tryExpr e) ctx)
-         "}"
+         ")}"
          (when (seq (.catchExprs e))
            (when (not= 1 (count (.catchExprs e)))
              (throw (Exception. "tojs only supports one catch clause per try")))
            (let [cc (first (.catchExprs e))]
              ["\ncatch(" ((:localmap ctx) (.lb cc)) "){_rtn="
-              (tojs (.handler e) ctx)
+              (tojs (.handler cc) ctx)
               "}"]))
          (when (.finallyExpr e)
            ["\nfinally{"
@@ -215,47 +230,35 @@
             "}"])
          "})()"]))
 
+(def skip-defs '#{seq instance? assoc floats doubles ints longs
+                 global-hierarchy apply})
 
 (defn formtojs [f]
   (binding [*allow-unresolved-vars* true]
-    (str (tojs (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
-               {:localmap {}})
-         ";\n")))
-
-(defn testboot []
-  (let [boot "/home/chouser/build/clojure/src/clj/clojure/boot.clj"
-        bootreader (java.io.PushbackReader. (ds/reader boot))
-        tmpns (create-ns 'tmp)]
-    (binding [*ns* tmpns]
-      (eval '(def identical? clojure/identical?))
-      (eval '(def *ns* nil))
-      (eval '(def *in* nil))
-      (eval '(def *out* nil))
-      (eval '(def *flush-on-newline* nil))
-      (eval '(def *print-readably* nil))
-      (eval '(def *agent* nil)))
-    (loop []
-      (when-let f (read bootreader)
-        (println "======")
-        (prn f)
-        (println "---")
-        (binding [*ns* tmpns]
-          (println (formtojs f))
-          (eval f))
-        (recur)))))
+    (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
+          mainexpr (-> expr .fexpr .methods first .body .exprs first)]
+      (when-not (or (and (instance? clojure.lang.Compiler$DefExpr mainexpr)
+                         (skip-defs (:name ^(.var mainexpr))))
+                    (and (instance? clojure.lang.Compiler$BodyExpr mainexpr)
+                         (instance? clojure.lang.Compiler$DefExpr (first (.exprs mainexpr)))
+                         (skip-defs (:name ^(.var (first (.exprs mainexpr)))))))
+        (str (tojs expr {:localmap {}}) ";")))))
 
 (defn filetojs [filename]
   (let [reader (java.io.PushbackReader. (ds/reader filename))]
     (binding [*ns* (create-ns 'tmp)]
       (loop []
         (when-let f (try (read reader) (catch Exception e nil))
-          (println "//======")
-          (print "//")
-          (prn f)
-          (println "//---")
-          (println (formtojs f))
-          (when (= 'ns (first f))
-            (eval f))
+          (when-let js (formtojs f)
+            (when *debug-comments*
+              (println "\n//======")
+              (print "//")
+              (prn f)
+              (println "//---"))
+            (println (formtojs f))
+            (when (or (= 'ns (first f))
+                      (= 'in-ns (first f)))
+              (eval f)))
           (recur))))))
 
 (defn simple-tests []
@@ -289,6 +292,5 @@
   (println (formtojs '(fn forever[] (loop [] (recur))))))
 
 ;(simple-tests)
-;(testboot)
 
 (filetojs (first *command-line-args*))
