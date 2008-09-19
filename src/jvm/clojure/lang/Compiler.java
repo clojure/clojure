@@ -4255,6 +4255,10 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 			LINE_BEFORE.set(pushbackReader.getLineNumber());
 			}
 		}
+	catch(LispReader.ReaderException e)
+		{
+		throw new CompilerException(sourceName,e.line,e.getCause());
+		}
 	finally
 		{
 		Var.popThreadBindings();
