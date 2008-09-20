@@ -29,14 +29,13 @@
                             *has-recur*])
         inits (concat
                 (when has-recur ["_cnt" "_rtn"])
-                (vals (reduce dissoc lm (cons thisfn (when (= fm maxm)
-                                                       (.reqParms fm)))))
+                (vals (reduce dissoc lm (cons thisfn (.reqParms fm))))
                 (when (:fnname ctx) [(str (lm thisfn) "=arguments.callee")])
                 (when (not= fm maxm)
-                  (for [lb (.reqParms fm)]
+                  (for [lb (.reqParms fm) :when (not= (.name lb) (.name (nth (.reqParms maxm) (dec (.idx lb)))))]
                     [(lm lb) "=arguments[" (dec (.idx lb)) "]"]))
                 (when-let lb (.restParm fm)
-                  [(str (lm lb) "=clojure.JS.rest_args(arguments,"
+                  [(str (lm lb) "=clojure.JS.rest_args(this,arguments,"
                         (count (.reqParms fm)) ")")]))]
     (.reqParms maxm)
     (vstr [(when (seq inits)
@@ -56,21 +55,23 @@
                      last val))
         manym (< 1 (count (.methods e)))
         newctx (assoc ctx :fnname (.thisName e))]
-    (vstr ["(function"
+    (vstr [(when (.variadicMethod e)
+             "clojure.JS.variatic")
+           "(function"
            (when *debug-fn-names*
              [" __" (.replaceAll (.name e) "[\\W_]+" "_")])
            "("
            (vec (interpose "," (for [lb (.reqParms maxm)]
                                  [(.name lb) "_" (.idx lb)])))
-           "){\n"
-           (vec (for [fm (.methods e) :when (not= fm (.variadicMethod e))]
-                  (if manym
-                    ["if(arguments.length==" (count (.reqParms fm)) "){\n"
-                     (fnmethod fm maxm newctx) "}\n"]
-                    (fnmethod fm maxm newctx))))
-           (when (.variadicMethod e)
-             [(fnmethod (.variadicMethod e) maxm newctx) "\n"])
-           "})"])))
+           "){"
+           (when manym
+             ["switch(arguments.length){"
+              (vec (for [fm (.methods e) :when (not= fm maxm)]
+                     ["\ncase " (count (.reqParms fm)) ":"
+                      (fnmethod fm maxm newctx)]))
+              "}"])
+           "\n"
+           (fnmethod maxm maxm newctx) "})"])))
 
 (defmethod tojs clojure.lang.Compiler$BodyExpr [e ctx]
    (apply str (interpose ",\n" (map #(tojs % ctx) (.exprs e)))))
@@ -230,18 +231,25 @@
             "}"])
          "})()"]))
 
-(def skip-defs '#{seq instance? assoc floats doubles ints longs
-                 global-hierarchy apply})
+
+(def skip-set '#{seq instance? assoc floats doubles ints longs
+                 global-hierarchy apply refer first rest})
+
+(defn skip-defs [expr]
+  (let [m ^(.var expr)]
+    (or (:macro m) (skip-set (:name m)))))
 
 (defn formtojs [f]
   (binding [*allow-unresolved-vars* true]
     (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
           mainexpr (-> expr .fexpr .methods first .body .exprs first)]
+      ;(when (instance? clojure.lang.Compiler$InvokeExpr mainexpr) (prn :invoke f))
       (when-not (or (and (instance? clojure.lang.Compiler$DefExpr mainexpr)
-                         (skip-defs (:name ^(.var mainexpr))))
+                         (skip-defs mainexpr))
+                    (instance? clojure.lang.Compiler$InstanceMethodExpr mainexpr)
                     (and (instance? clojure.lang.Compiler$BodyExpr mainexpr)
                          (instance? clojure.lang.Compiler$DefExpr (first (.exprs mainexpr)))
-                         (skip-defs (:name ^(.var (first (.exprs mainexpr)))))))
+                         (skip-defs (first (.exprs mainexpr)))))
         (str (tojs expr {:localmap {}}) ";")))))
 
 (defn filetojs [filename]

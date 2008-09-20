@@ -33,7 +33,45 @@ clojure = new clojure_Namespace({
     throw ("Don't know how to create ISeq from: " +
         (typeof coll) + " " + coll.constructor.name);
   },
-  apply: function( f, args ) {
+  apply: function( f ) {
+    if( f.isVariatic ) {
+      // lazy
+      var i, args = [];
+      var eagercount = Math.min( f.arity, arguments.length - 2 );
+      for( i = 0; i < eagercount; ++i ) {
+        args.push( arguments[ i + 1 ] );
+      }
+      if( eagercount == f.arity ) {
+        if( arguments.length - eagercount < 3 ) {
+          args.push( clojure.seq( arguments[ arguments.length - 1 ] ) );
+        }
+        else {
+          args.push( clojure.concat(
+                  new clojure.lang.ArraySeq(
+                      null, arguments, eagercount + 1, arguments.length - 1 ),
+                  arguments[ arguments.length - 1 ] ) );
+        }
+      }
+      else {
+        var s = clojure.seq( arguments[ arguments.length - 1 ] );
+        for( ; s && args.length < f.arity; s = s.rest() ) {
+          args.push( s.first() );
+        }
+        args.push( s );
+      }
+      return f.apply( clojure.JS.variatic_sentinel, args );
+    }
+    else {
+      // non-lazy
+      var args = [];
+      for( var i = 1; i < arguments.length - 1; ++i ) {
+        args.push( arguments[ i ] );
+      }
+      for( var s = arguments[ arguments.length - 1]; s; s = s.rest()) {
+        args.push( s.first() );
+      }
+      return f.apply( null, args );
+    }
   },
   first: function(x) {
     if( x.first ) return x.first();
@@ -82,6 +120,10 @@ clojure = new clojure_Namespace({
   },
   JS: {
     merge: clojure_merge,
+    variatic: function( f ) {
+      f.isVariatic = true;
+      return f;
+    },
     resolveVar: function( sym, ctxns ) {
       return ctxns[ sym ] || clojure[ sym ] || window[ sym ];
     },
@@ -91,11 +133,14 @@ clojure = new clojure_Namespace({
       v.push( init );
       return v;
     },
-    rest_args: function( args, i ) {
-      return clojure.lang.ArraySeq.create( null, args, i );
+    variatic_sentinel: {},
+    rest_args: function( varflag, args, i ) {
+      if( varflag === clojure.JS.variatic_sentinel )
+        return args[ args.length - 1 ];
+      return new clojure.lang.ArraySeq( null, args, i );
     },
     lit_list: function( a ) {
-      return clojure.lang.ArraySeq.create( null, a, 0 );
+      return new clojure.lang.ArraySeq( null, a, 0 );
     },
     ObjSeq: {
       create: function( obj ) {
@@ -120,10 +165,11 @@ clojure = new clojure_Namespace({
   }
 });
 
-clojure.lang.ArraySeq = function( _meta, a, i ) {
+clojure.lang.ArraySeq = function( _meta, a, i, len ) {
   this._meta = _meta;
   this.a = a;
   this.i = i;
+  this.len = (len === undefined) ? a.length : len;
 };
 
 clojure.lang.ArraySeq.create = function( a ) {
@@ -140,13 +186,13 @@ clojure.lang.ArraySeq.prototype.first = function() {
 };
 
 clojure.lang.ArraySeq.prototype.rest = function() {
-  if( this.i + 1 < this.a.length )
-    return new clojure.lang.ArraySeq( this._meta, this.a, this.i + 1 );
+  if( this.i + 1 < this.len )
+    return new clojure.lang.ArraySeq( this._meta, this.a, this.i + 1, this.len);
   return null;
 };
 
 clojure.lang.ArraySeq.prototype.count = function() {
-  return this.a.length - this.i;
+  return this.len - this.i;
 };
 
 clojure.lang.ArraySeq.prototype.index = function() {
@@ -154,12 +200,12 @@ clojure.lang.ArraySeq.prototype.index = function() {
 };
 
 clojure.lang.ArraySeq.prototype.withMeta = function( _meta ) {
-  return new clojure.lang.ArraySeq( _meta, this.array, this.i );
+  return new clojure.lang.ArraySeq( _meta, this.array, this.i, this.len );
 };
 
 clojure.lang.ArraySeq.prototype.reduce = function( fn, start ) {
   var ret = (start === undefined) ? this.a[0] : fn(start, this.a[0]);
-  for( var x = this.i + 1; x < this.a.length; ++x ) {
+  for( var x = this.i + 1; x < this.len; ++x ) {
     ret = fn( ret, this.a[x] );
   }
   return ret;
@@ -273,6 +319,21 @@ clojure.lang.Namespace.find = function( s ) {
 clojure.lang.Namespace.prototype.getMappings = function() {
   return this;
 };
+
+clojure._STAR_out_STAR_ = {
+  append: function(x) {
+    document.getElementById( 'ta' ).value += x;
+  }
+}
+
+java = { lang: {} };
+java.lang.StringBuilder = function( x ) {
+  this.a = [ x ];
+};
+clojure.JS.merge( java.lang.StringBuilder.prototype, {
+  append: function( x ) { this.a.push( x ); return this; },
+  toString: function() { return this.a.join(''); }
+});
 
 delete clojure_merge;
 delete clojure_Namespace;
