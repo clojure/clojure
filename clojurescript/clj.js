@@ -9,10 +9,12 @@ function clojure_Namespace( m ) {
   clojure_merge( this, m || {} );
 };
 
+clojure_global = this;
+
 clojure = new clojure_Namespace({
   in_ns: function(s) {
     var nsparts = s.substring(1).split('.');
-    var base = window;
+    var base = clojure.JS.global;
     for( var i = 0; i < nsparts.length; ++i ) {
       if( ! base[nsparts[i]] ) {
         base[nsparts[i]] = new clojure.lang.Namespace();
@@ -89,13 +91,6 @@ clojure = new clojure_Namespace({
   instance_QMARK_: function( c, o ) {
     return o !== null && o.constructor == c;
   },
-  prn: function() {
-    var args = [];
-    for( var i = 0; i < arguments.length; ++i ) {
-      args.push( arguments[ i ] );
-    }
-    print( args.join(" ") );
-  },
   hash_map: function() {
     // This just makes a seq for now
     var pairs = [];
@@ -115,17 +110,21 @@ clojure = new clojure_Namespace({
     if( x.length != undefined ) return x.length;
     throw ("count not supported on: " + (typeof x) + " " + x.constructor);
   },
+  import_: function() {
+    // do nothing
+  },
   identical_QMARK_: function( a, b ) {
     return a === b;
   },
   JS: {
     merge: clojure_merge,
+    global: clojure_global,
     variatic: function( f ) {
       f.isVariatic = true;
       return f;
     },
     resolveVar: function( sym, ctxns ) {
-      return ctxns[ sym ] || clojure[ sym ] || window[ sym ];
+      return ctxns[ sym ] || clojure[ sym ] || clojure.JS.global[ sym ];
     },
     def: function( ns, name, init ) {
       var v = new clojure.lang.Var( ns, name );
@@ -141,6 +140,15 @@ clojure = new clojure_Namespace({
     },
     lit_list: function( a ) {
       return new clojure.lang.ArraySeq( null, a, 0 );
+    },
+    defclass: function( pkg, classname, opts ) {
+      var cls = pkg[ classname ] = opts.init || function() {};
+      cls.classname = classname;
+      if( opts.extend ) { cls.prototype = new opts.extend[0]; }
+      cls.constructor = cls;
+      if( opts.statics ) { clojure.JS.merge( cls, opts.statics ); }
+      if( opts.methods ) { clojure.JS.merge( cls.prototype, opts.methods ); }
+      return cls;
     },
     ObjSeq: {
       create: function( obj ) {
@@ -161,59 +169,110 @@ clojure = new clojure_Namespace({
     Util: {
       equal: function(x,y) { return x == y; }
     },
+    RT: {
+      conj: function( coll, x ) {
+        var y = clojure.seq( coll );
+        if( y === null )
+          return new clojure.lang.PersistentList( null, x );
+        return y.cons( x );
+      },
+      print: function( o, w ) {
+        if( o !== null )
+          w.write( "" + o );
+      }
+    },
     IReduce: {}
   }
 });
 
-clojure.lang.ArraySeq = function( _meta, a, i, len ) {
-  this._meta = _meta;
-  this.a = a;
-  this.i = i;
-  this.len = (len === undefined) ? a.length : len;
-};
-
-clojure.lang.ArraySeq.create = function( a ) {
-  if( a && a.length ) {
-    return new clojure.lang.ArraySeq( null, a, 0 );
+clojure.JS.defclass( clojure.lang, "ASeq", {
+  methods: {
+    equals: function( obj ) {
+      var ms = obj.seq();
+      for( var s = this.seq(); s !== null; s = s.rest(), ms = ms.rest() ) {
+        if( ms === null || !clojure.lang.Util.equal( s.first(), ms.first() ))
+          return false;
+      }
+      if( ms !== null )
+        return false;
+      return true;
+    },
+    hashCode: function() { throw "not yet implemented"; },
+    count: function() {
+      var i = 1;
+      for( var s = this.rest(); s; s = s.rest() )
+        i += 1;
+      return i;
+    },
+    seq: function(){ return this; },
+    cons: function(o){ return new clojure.lang.Cons( null, o, this ); },
+    toArray: function(){ return clojure.lang.RT.seqToArray( this.seq() ); },
+    containsAll: function(c){ throw "not yet implemented"; },
+    size: function(){ return this.count(); },
+    isEmpty: function(){ return this.count() == 0; },
+    contains: function(c){ throw "not yet implemented"; }
   }
-  else {
-    return null;
+});
+
+clojure.JS.defclass( clojure.lang, "Cons", {
+  extend: [clojure.lang.ASeq],
+  init: function( _meta, _first, _rest ) {
+    this._meta = _meta;
+    this._first = _first;
+    this._rest = _rest;
+  },
+  methods: {
+    first: function(){ return this._first; },
+    rest: function(){ return this._rest; },
+    count: function(){ return 1 + clojure.count( this._rest ); },
+    seq: function(){ return this; },
+    withMeta: function(_meta){
+      return new clojure.lang.Cons( _meta, this._first, this._rest );
+    }
   }
-};
+});
 
-clojure.lang.ArraySeq.prototype.first = function() {
-  return this.a[this.i];
-};
-
-clojure.lang.ArraySeq.prototype.rest = function() {
-  if( this.i + 1 < this.len )
-    return new clojure.lang.ArraySeq( this._meta, this.a, this.i + 1, this.len);
-  return null;
-};
-
-clojure.lang.ArraySeq.prototype.count = function() {
-  return this.len - this.i;
-};
-
-clojure.lang.ArraySeq.prototype.index = function() {
-  return this.i;
-};
-
-clojure.lang.ArraySeq.prototype.withMeta = function( _meta ) {
-  return new clojure.lang.ArraySeq( _meta, this.array, this.i, this.len );
-};
-
-clojure.lang.ArraySeq.prototype.reduce = function( fn, start ) {
-  var ret = (start === undefined) ? this.a[0] : fn(start, this.a[0]);
-  for( var x = this.i + 1; x < this.len; ++x ) {
-    ret = fn( ret, this.a[x] );
+clojure.JS.defclass( clojure.lang, "ArraySeq", {
+  extend: [clojure.lang.ASeq],
+  init: function( _meta, a, i, len ) {
+    this._meta = _meta;
+    this.a = a;
+    this.i = i;
+    this.len = (len === undefined) ? a.length : len;
+  },
+  statics: {
+    create: function( a ) {
+      if( a && a.length ) {
+        return new clojure.lang.ArraySeq( null, a, 0 );
+      }
+      else {
+        return null;
+      }
+    }
+  },
+  methods: {
+    first: function() { return this.a[this.i]; },
+    rest: function() {
+      if( this.i + 1 < this.len )
+        return new clojure.lang.ArraySeq(
+            this._meta, this.a, this.i + 1, this.len);
+      return null;
+    },
+    count: function() { return this.len - this.i; },
+    index: function() { return this.i; },
+    withMeta: function( _meta ) {
+      return new clojure.lang.ArraySeq( _meta, this.array, this.i, this.len );
+    },
+    reduce: function( fn, start ) {
+      var ret = (start === undefined) ? this.a[0] : fn(start, this.a[0]);
+      for( var x = this.i + 1; x < this.len; ++x ) {
+        ret = fn( ret, this.a[x] );
+      }
+      return ret;
+    },
+    seq: function() { return this; }
   }
-  return ret;
-};
-
-clojure.lang.ArraySeq.prototype.seq = function() {
-  return this;
-};
+});
 
 
 clojure.lang.LazyCons = function(f,_first,_rest) {
@@ -252,7 +311,6 @@ clojure.lang.LazyCons.prototype.withMeta = function(_meta) {
 clojure.lang.LazyCons.prototype.seq = function() {
   return this;
 };
-
 
 clojure.lang.Var = function( ns, name ) {
   this.ns = ns;
@@ -302,29 +360,111 @@ clojure.lang.Var.popThreadBindings = function() {
   }
 };
 
-clojure.lang.PersistentList = { creator: function() {
-  var real = clojure.lang.PersistentList.creator;
-  if( real == arguments.callee ) {
-    throw "Not yet implemented: clojure.lang.PersistentList.creator";
+
+
+clojure.JS.defclass( clojure.lang, "EmptyList", {
+  //extend: [clojure.lang.IPersistentList],
+  init: function( _meta ) { this._meta = _meta; },
+  methods: {
+    cons: function(o) {
+      return new clojure.lang.PersistentList( this.meta(), o );
+    },
+    empty: function() { return this; },
+    withMeta: function(m) {
+      if( m != this.meta() )
+        return new clojure.lang.EmptyList( m );
+      return this;
+    },
+    peek: function() { return null; },
+    pop: function() { throw "Can't pop empty list"; },
+    count: function() { return 0; },
+    seq: function() { return null; },
+    size: function() { return 0; },
+    isEmpty: function() { return true; },
+    contains: function() { return false; },
+    toArray: function() { return clojure.lang.RT.EMPTY_ARRAY; },
+    containsAll: function( coll ) { return coll.isEmpty(); }
   }
-  return real.apply( arguments );
-}};
+});
+
+clojure.JS.defclass( clojure.lang, "PersistentList", {
+  init: function( _meta, _first, _rest, _count ) {
+    this._meta = _meta || null;
+    this._first = _first;
+    this._rest = _rest || null;
+    this._count = _count || 1;
+  },
+  statics: {
+    creator: function() {
+      var real = clojure.lang.PersistentList.creator;
+      if( real == arguments.callee ) {
+        throw "Not yet implemented: clojure.lang.PersistentList.creator";
+      }
+      return real.apply( arguments );
+    },
+    EMPTY: new clojure.lang.EmptyList(null)
+  },
+  methods: {
+    first: function(){ return this._first; },
+    rest: function(){
+      if( this._count == 1 )
+        return null;
+      return this._rest;
+    },
+    peek: function(){ return this.first; },
+    pop: function(){
+      if( this._rest === null )
+        return this.empty();
+      return this._rest;
+    },
+    count: function(){ return this._count; },
+    cons: function(o){
+      return new clojure.lang.PersistentList(
+          this._meta, o, this, this._count + 1 );
+    },
+    empty: function(){
+      return clojure.lang.PersistentList.EMPTY.withMeta( this._meta );
+    },
+    withMeta: function( _meta ){
+      if( _meta != this._meta )
+        return new clojure.lang.PersistentList(
+            this._meta, this._first, this._rest, this._count );
+      return this;
+    },
+    reduce: function( f, start ){
+      var ret = (start === undefined) ? this.first() : f( start, this.first() );
+      for( var s = this.rest(); s !== null; s = s.rest() )
+        ret = f( ret, s.first() );
+      return ret;
+    }
+  }
+});
+
 
 clojure.lang.Namespace = clojure_Namespace;
 
 clojure.lang.Namespace.find = function( s ) {
-  return window[ s.substring(1) ];
+  return clojure.JS.global[ s.substring(1) ];
 };
 
 clojure.lang.Namespace.prototype.getMappings = function() {
   return this;
 };
 
-clojure._STAR_out_STAR_ = {
-  append: function(x) {
-    document.getElementById( 'ta' ).value += x;
+(function() {
+  var buf = [];
+  function write(s) {
+    var parts = s.split(/\n/);
+    if( parts.length == 1 ) {
+      buf.push(s);
+    }
+    else {
+      print( buf.join('') + parts.splice(0, parts.length - 1).join('\n') );
+      buf = [ parts[parts.length - 1] ];
+    }
   }
-}
+  clojure._STAR_out_STAR_ = { append: write, write: write };
+})();
 
 java = { lang: {} };
 java.lang.StringBuilder = function( x ) {
@@ -337,3 +477,4 @@ clojure.JS.merge( java.lang.StringBuilder.prototype, {
 
 delete clojure_merge;
 delete clojure_Namespace;
+delete clojure_global;

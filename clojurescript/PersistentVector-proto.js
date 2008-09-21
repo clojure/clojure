@@ -25,7 +25,7 @@ function PersistentVector( _meta, cnt, shift, root, tail ) {
 }
 
 PersistentVector.prototype = new APersistentVector( null );
-PersistentVector.contraction = PersistentVector;
+PersistentVector.constructor = PersistentVector;
 
 PersistentVector.prototype.tailoff = function() {
   return this.cnt - this.tail.length;

@@ -27,12 +27,14 @@
                            [(tojs (.body fm)
                                   (merge-with merge ctx {:localmap lm}))
                             *has-recur*])
+        mparm (into {} (for [p (.reqParms maxm)] [(.idx p) p]))
         inits (concat
                 (when has-recur ["_cnt" "_rtn"])
                 (vals (reduce dissoc lm (cons thisfn (.reqParms fm))))
                 (when (:fnname ctx) [(str (lm thisfn) "=arguments.callee")])
                 (when (not= fm maxm)
-                  (for [lb (.reqParms fm) :when (not= (.name lb) (.name (nth (.reqParms maxm) (dec (.idx lb)))))]
+                  (for [lb (.reqParms fm)
+                        :when (not= (.name lb) (.name (mparm (.idx lb))))]
                     [(lm lb) "=arguments[" (dec (.idx lb)) "]"]))
                 (when-let lb (.restParm fm)
                   [(str (lm lb) "=clojure.JS.rest_args(this,arguments,"
@@ -111,8 +113,13 @@
 (defmethod tojs clojure.lang.Compiler$ConstantExpr [e ctx]
   (const-str (.v e)))
 
+(def js-reserved '#{import boolean short byte char})
+
 (defn var-munge [x]
-  (-> x str Compiler/munge (.replace "." "_DOT_")))
+  (let [n (-> x str Compiler/munge (.replace "." "_DOT_"))]
+    (if (js-reserved (symbol n))
+      (str n "_")
+      n)))
 
 (defn var-parts [e]
   (let [{:keys [name ns]} ^(.var e)]
@@ -125,7 +132,9 @@
 
 (defmethod tojs clojure.lang.Compiler$VarExpr [e ctx]
   (let [[vns vname] (var-parts e)]
-    (str vns "." vname)))
+    (if (and (= vns "clojurescript.js") (#{"this"} vname))
+      vname
+      (str vns "." vname))))
 
 (defmethod tojs clojure.lang.Compiler$TheVarExpr [e ctx]
   (let [[vns vname] (var-parts e)]
@@ -233,7 +242,7 @@
 
 
 (def skip-set '#{seq instance? assoc floats doubles ints longs
-                 global-hierarchy apply refer first rest})
+                 global-hierarchy apply refer first rest import hash-map})
 
 (defn skip-defs [expr]
   (let [m ^(.var expr)]
