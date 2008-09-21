@@ -17,6 +17,7 @@ import java.lang.reflect.Array;
 public class ArraySeq extends ASeq implements IndexedSeq, IReduce{
 final Object array;
 final int i;
+final Object[] oa;
 //ISeq _rest;
 
 static public ArraySeq create(){
@@ -47,6 +48,7 @@ static ISeq createFromObject(Object array){
 ArraySeq(Object array, int i){
 	this.array = array;
 	this.i = i;
+	this.oa = (Object[]) (array instanceof Object[] ? array : null);
 //    this._rest = this;
 }
 
@@ -54,26 +56,32 @@ ArraySeq(IPersistentMap meta, Object array, int i){
 	super(meta);
 	this.array = array;
 	this.i = i;
+	this.oa = (Object[]) (array instanceof Object[] ? array : null);
 }
 
 public Object first(){
-	return Array.get(array,i);
+	if(oa != null)
+		return oa[i];
+	return Array.get(array, i);
 }
 
 public ISeq rest(){
-	if(i + 1 < Array.getLength(array))
-		return new ArraySeq(array, i + 1);
+	if(oa != null)
+		{
+		if(i + 1 < oa.length)
+			return new ArraySeq(array, i + 1);
+		}
+	else
+		{
+		if(i + 1 < Array.getLength(array))
+			return new ArraySeq(array, i + 1);
+		}
 	return null;
-//    if(_rest == this)
-//        {
-//        if(i+1 < array.length)
-//		    _rest = new ArraySeq(array, i + 1);
-//	    _rest = null;
-//        }
-//    return _rest;
 }
 
 public int count(){
+	if(oa != null)
+		return oa.length;
 	return Array.getLength(array) - i;
 }
 
@@ -86,208 +94,223 @@ public ArraySeq withMeta(IPersistentMap meta){
 }
 
 public Object reduce(IFn f) throws Exception{
-	Object ret = Array.get(array,i);
-	for(int x = i+1;x < Array.getLength(array);x++)
-		ret = f.invoke(ret, Array.get(array,x));
+	if(oa != null)
+		{
+		Object ret = oa[i];
+		for(int x = i + 1; x < oa.length; x++)
+			ret = f.invoke(ret, oa[x]);
+		return ret;
+		}
+
+	Object ret = Array.get(array, i);
+	for(int x = i + 1; x < Array.getLength(array); x++)
+		ret = f.invoke(ret, Array.get(array, x));
 	return ret;
 }
 
 public Object reduce(IFn f, Object start) throws Exception{
-	Object ret = f.invoke(start,Array.get(array,i));
-	for(int x = i+1;x < Array.getLength(array);x++)
-		ret = f.invoke(ret, Array.get(array,x));
+	if(oa != null)
+		{
+		Object ret = f.invoke(start, oa[i]);
+		for(int x = i + 1; x < oa.length; x++)
+			ret = f.invoke(ret, oa[x]);
+		return ret;
+		}
+	Object ret = f.invoke(start, Array.get(array, i));
+	for(int x = i + 1; x < Array.getLength(array); x++)
+		ret = f.invoke(ret, Array.get(array, x));
 	return ret;
 }
 
 //////////////////////////////////// specialized primitive versions ///////////////////////////////
 
 static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
-final int[] array;
-final int i;
+	final int[] array;
+	final int i;
 
-ArraySeq_int(IPersistentMap meta, int[] array, int i){
-	super(meta);
-	this.array = array;
-	this.i = i;
-}
+	ArraySeq_int(IPersistentMap meta, int[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
 
-public Object first(){
-	return array[i];
-}
+	public Object first(){
+		return array[i];
+	}
 
-public ISeq rest(){
-	if(i + 1 < array.length)
-		return new ArraySeq_int(meta(),array, i + 1);
-	return null;
-}
+	public ISeq rest(){
+		if(i + 1 < array.length)
+			return new ArraySeq_int(meta(), array, i + 1);
+		return null;
+	}
 
-public int count(){
-	return array.length - i;
-}
+	public int count(){
+		return array.length - i;
+	}
 
-public int index(){
-	return i;
-}
+	public int index(){
+		return i;
+	}
 
-public ArraySeq_int withMeta(IPersistentMap meta){
-	return new ArraySeq_int(meta, array, i);
-}
+	public ArraySeq_int withMeta(IPersistentMap meta){
+		return new ArraySeq_int(meta, array, i);
+	}
 
-public Object reduce(IFn f) throws Exception{
-	Object ret = array[i];
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f) throws Exception{
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 
-public Object reduce(IFn f, Object start) throws Exception{
-	Object ret = f.invoke(start,array[i]);
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f, Object start) throws Exception{
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 }
 
 
 static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
-final float[] array;
-final int i;
+	final float[] array;
+	final int i;
 
-ArraySeq_float(IPersistentMap meta, float[] array, int i){
-	super(meta);
-	this.array = array;
-	this.i = i;
-}
+	ArraySeq_float(IPersistentMap meta, float[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
 
-public Object first(){
-	return array[i];
-}
+	public Object first(){
+		return array[i];
+	}
 
-public ISeq rest(){
-	if(i + 1 < array.length)
-		return new ArraySeq_float(meta(),array, i + 1);
-	return null;
-}
+	public ISeq rest(){
+		if(i + 1 < array.length)
+			return new ArraySeq_float(meta(), array, i + 1);
+		return null;
+	}
 
-public int count(){
-	return array.length - i;
-}
+	public int count(){
+		return array.length - i;
+	}
 
-public int index(){
-	return i;
-}
+	public int index(){
+		return i;
+	}
 
-public ArraySeq_float withMeta(IPersistentMap meta){
-	return new ArraySeq_float(meta, array, i);
-}
+	public ArraySeq_float withMeta(IPersistentMap meta){
+		return new ArraySeq_float(meta, array, i);
+	}
 
-public Object reduce(IFn f) throws Exception{
-	Object ret = array[i];
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f) throws Exception{
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 
-public Object reduce(IFn f, Object start) throws Exception{
-	Object ret = f.invoke(start,array[i]);
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f, Object start) throws Exception{
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 }
 
 static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
-final double[] array;
-final int i;
+	final double[] array;
+	final int i;
 
-ArraySeq_double(IPersistentMap meta, double[] array, int i){
-	super(meta);
-	this.array = array;
-	this.i = i;
-}
+	ArraySeq_double(IPersistentMap meta, double[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
 
-public Object first(){
-	return array[i];
-}
+	public Object first(){
+		return array[i];
+	}
 
-public ISeq rest(){
-	if(i + 1 < array.length)
-		return new ArraySeq_double(meta(),array, i + 1);
-	return null;
-}
+	public ISeq rest(){
+		if(i + 1 < array.length)
+			return new ArraySeq_double(meta(), array, i + 1);
+		return null;
+	}
 
-public int count(){
-	return array.length - i;
-}
+	public int count(){
+		return array.length - i;
+	}
 
-public int index(){
-	return i;
-}
+	public int index(){
+		return i;
+	}
 
-public ArraySeq_double withMeta(IPersistentMap meta){
-	return new ArraySeq_double(meta, array, i);
-}
+	public ArraySeq_double withMeta(IPersistentMap meta){
+		return new ArraySeq_double(meta, array, i);
+	}
 
-public Object reduce(IFn f) throws Exception{
-	Object ret = array[i];
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f) throws Exception{
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 
-public Object reduce(IFn f, Object start) throws Exception{
-	Object ret = f.invoke(start,array[i]);
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f, Object start) throws Exception{
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 }
 
 static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
-final long[] array;
-final int i;
+	final long[] array;
+	final int i;
 
-ArraySeq_long(IPersistentMap meta, long[] array, int i){
-	super(meta);
-	this.array = array;
-	this.i = i;
-}
+	ArraySeq_long(IPersistentMap meta, long[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
 
-public Object first(){
-	return array[i];
-}
+	public Object first(){
+		return array[i];
+	}
 
-public ISeq rest(){
-	if(i + 1 < array.length)
-		return new ArraySeq_long(meta(),array, i + 1);
-	return null;
-}
+	public ISeq rest(){
+		if(i + 1 < array.length)
+			return new ArraySeq_long(meta(), array, i + 1);
+		return null;
+	}
 
-public int count(){
-	return array.length - i;
-}
+	public int count(){
+		return array.length - i;
+	}
 
-public int index(){
-	return i;
-}
+	public int index(){
+		return i;
+	}
 
-public ArraySeq_long withMeta(IPersistentMap meta){
-	return new ArraySeq_long(meta, array, i);
-}
+	public ArraySeq_long withMeta(IPersistentMap meta){
+		return new ArraySeq_long(meta, array, i);
+	}
 
-public Object reduce(IFn f) throws Exception{
-	Object ret = array[i];
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f) throws Exception{
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 
-public Object reduce(IFn f, Object start) throws Exception{
-	Object ret = f.invoke(start,array[i]);
-	for(int x = i+1;x < array.length;x++)
-		ret = f.invoke(ret, array[x]);
-	return ret;
-}
+	public Object reduce(IFn f, Object start) throws Exception{
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
 }
 
 }
