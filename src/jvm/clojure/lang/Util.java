@@ -12,6 +12,8 @@
 
 package clojure.lang;
 
+import java.math.BigInteger;
+
 public class Util{
 static public boolean equal(Object k1, Object k2){
 	if(k1 == k2)
@@ -53,6 +55,12 @@ static public int hashCombine(int seed, int hash){
 
 static public boolean isPrimitive(Class c){
 	return c != null && c.isPrimitive() && !(c == Void.TYPE);
+}
+
+static public boolean isInteger(Object x){
+	return x instanceof Integer
+			|| x instanceof Long
+			|| x instanceof BigInteger;
 }
 
 }

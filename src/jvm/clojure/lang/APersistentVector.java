@@ -172,7 +172,9 @@ public boolean addAll(int i, Collection c){
 
 
 public Object invoke(Object arg1) throws Exception{
-	return nth(((Number) arg1).intValue());
+	if(Util.isInteger(arg1))
+		return nth(((Number) arg1).intValue());
+	throw new IllegalArgumentException("Key must be integer");
 }
 
 public Iterator iterator(){
@@ -201,14 +203,14 @@ public Object peek(){
 }
 
 public boolean containsKey(Object key){
-	if(!(key instanceof Number))
+	if(!(Util.isInteger(key)))
 		return false;
 	int i = ((Number) key).intValue();
 	return i >= 0 && i < count();
 }
 
 public IMapEntry entryAt(Object key){
-	if(key instanceof Number)
+	if(Util.isInteger(key))
 		{
 		int i = ((Number) key).intValue();
 		if(i >= 0 && i < count())
@@ -218,7 +220,7 @@ public IMapEntry entryAt(Object key){
 }
 
 public IPersistentVector assoc(Object key, Object val){
-	if(key instanceof Number)
+	if(Util.isInteger(key))
 		{
 		int i = ((Number) key).intValue();
 		return assocN(i, val);
@@ -227,7 +229,7 @@ public IPersistentVector assoc(Object key, Object val){
 }
 
 public Object valAt(Object key, Object notFound){
-	if(key instanceof Number)
+	if(Util.isInteger(key))
 		{
 		int i = ((Number) key).intValue();
 		if(i >= 0 && i < count())
