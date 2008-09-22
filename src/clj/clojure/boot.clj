@@ -3469,3 +3469,7 @@
 (defmethod print-method java.math.BigDecimal [b, #^Writer w]
   (.write w (str b))
   (.write w "M"))
+
+(defmethod print-method java.util.regex.Pattern [p #^Writer w]
+  (.append w \#)
+  (print-method (str p) w))
