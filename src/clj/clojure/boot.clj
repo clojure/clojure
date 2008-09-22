@@ -1506,6 +1506,12 @@
   array [& items]
     (into-array items))
 
+(defn class
+  "Returns the Class of x"
+  [#^Object x] (if (nil? x) x (. x (getClass))))
+
+(defmulti print-method (fn [x writer] (class x)))
+
 (defn pr
   "Prints the object(s) to the output stream that is the current value
   of *out*.  Prints the object(s), separated by spaces if there is
@@ -1513,7 +1519,7 @@
   can be read by the reader"
   ([] nil)
   ([x]
-   (. clojure.lang.RT (print x *out*))
+   (print-method x *out*)
    nil)
   ([x & more]
    (pr x)
@@ -2483,10 +2489,6 @@
   "Returns true if v is of type clojure.lang.Var"
   [v] (instance? clojure.lang.Var v))
 
-(defn class
-  "Returns the Class of x"
-  [#^Object x] (if (nil? x) x (. x (getClass))))
-
 (defn slurp
   "Reads the file named by f into a string and returns it."
   [#^String f]
@@ -3362,3 +3364,108 @@
 (def
  #^{:doc "bound in a repl thread to the most recent exception caught by the repl"}
  *e)
+
+(import '(java.io Writer))
+
+(defn- print-sequential [#^String begin, print-one, #^String sep, #^String end, sequence, #^Writer w]
+  (.write w begin)
+  (loop [[f & r :as s] (seq sequence)]
+    (if r
+      (do (print-one f w) (.write w sep) (recur r))
+      (when s (print-one f w))))
+  (.write w end))
+
+(defn- print-meta [o, #^Writer w]
+  (when-let m (meta o)
+    (when (and *print-meta* *print-readably* (pos? (count m)))
+      (.write w "#^")
+      (if (and (= (count m) 1) (:tag m))
+          (print-method (:tag m) w)
+          (print-method m w))
+      (.write w " "))))
+
+(defmethod print-method nil [o, #^Writer w]
+  (.write w "nil"))
+
+(defmethod print-method :default [o, #^Writer w]
+  (print-meta o w)
+  (.write w (str o)))
+
+(defmethod print-method clojure.lang.ISeq [o, #^Writer w]
+  (print-meta o w)
+  (print-sequential "(" print-method " " ")" o w))
+
+(defmethod print-method clojure.lang.IPersistentList [o, #^Writer w]
+  (print-meta o w)
+  (print-sequential "(" print-method " " ")" o w))
+
+(def #^{:tag String 
+        :doc "Returns escape string for char or nil if none"}
+  char-escape-string
+    {\newline "\\n"
+     \tab  "\\t"
+     \return "\\r"
+     \" "\\\""
+     \\  "\\\\"
+     \formfeed "\\f"
+     \backspace "\\b"})
+
+(defmethod print-method String [#^String s, #^Writer w]
+  (if *print-readably*
+    (do (.append w \")
+      (dotimes n (count s)
+        (let [c (.charAt s n)
+              e (char-escape-string c)]
+          (if e (.write w e) (.append w c))))
+      (.append w \"))
+    (.write w s))
+  nil)
+
+(defmethod print-method clojure.lang.IPersistentVector [v, #^Writer w]
+  (print-meta v w)
+  (.append w \[)
+  (dotimes n (dec (count v))
+    (print-method (nth v n) w)
+    (.append w \ ))
+  (print-method (nth v (dec (count v))) w)
+  (.append w \])
+  nil)
+
+(defmethod print-method clojure.lang.IPersistentMap [m, #^Writer w]
+  (print-meta m w)
+  (print-sequential 
+   "{"
+   (fn [e  #^Writer w] 
+     (do (print-method (key e) w) (.append w \ ) (print-method (val e) w)))
+   ", "
+   "}"
+   (seq m) w))
+
+(defmethod print-method clojure.lang.IPersistentSet [s, #^Writer w]
+  (print-meta s w)
+  (print-sequential "#{" print-method " " "}" (seq s) w))
+
+(def #^{:tag String 
+        :doc "Returns name string for char or nil if none"} 
+ char-name-string
+   {\newline "newline"
+    \tab "tab"
+    \space "space"
+    \backspace "backspace"
+    \formfeed "formfeed"
+    \return "return"})
+
+(defmethod print-method java.lang.Character [#^Character c, #^Writer w]
+  (if *print-readably*
+    (do (.append w \\)
+        (let [n (char-name-string c)]
+          (if n (.write w n) (.append w c))))
+    (.append w c))
+  nil)
+
+(defmethod print-method Class [#^Class c, #^Writer w]
+  (.write w (.getName c)))
+
+(defmethod print-method java.math.BigDecimal [b, #^Writer w]
+  (.write w (str b))
+  (.write w "M"))

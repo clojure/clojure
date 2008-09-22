@@ -202,7 +202,7 @@ final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.create("*
 
 final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), F);
 final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("ns"), F);
-
+static final Var PRINT_METHOD = Var.intern(CLOJURE_NS, Symbol.create("print-method"));
 //final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
@@ -1156,7 +1156,9 @@ static public boolean suppressRead(){
 
 
 static public void print(Object x, Writer w) throws Exception{
-	//todo - make extensible
+	//call multimethod
+	PRINT_METHOD.invoke(x, w);
+/*
 	boolean readably = booleanCast(PRINT_READABLY.get());
 	if(x instanceof Obj)
 		{
@@ -1318,6 +1320,7 @@ static public void print(Object x, Writer w) throws Exception{
 		w.write('M');
 		}
 	else w.write(x.toString());
+	*/
 }
 
 private static void printInnerSeq(ISeq x, Writer w) throws Exception{

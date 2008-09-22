@@ -4324,7 +4324,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 		}
 	return ret;
 }
-
+/*
 public static void main(String[] args) throws Exception{
 	RT.init();
 	for(String file : args)
@@ -4389,4 +4389,5 @@ SOURCE, "REPL"
 		Var.popThreadBindings();
 		}
 }
+*/
 }
