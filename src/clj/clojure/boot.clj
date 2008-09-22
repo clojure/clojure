@@ -1212,10 +1212,19 @@
   ([f coll]
    (when (seq coll)
      (lazy-cons (f (first coll)) (map f (rest coll)))))
-  ([f coll & colls]
-   (when (and (seq coll) (every? seq colls))
-     (lazy-cons (apply f (first coll) (map first colls))
-                (apply map f (rest coll) (map rest colls))))))
+  ([f c1 c2]
+   (when (and (seq c1) (seq c2))
+     (lazy-cons (f (first c1) (first c2)) 
+                (map f (rest c1) (rest c2)))))
+  ([f c1 c2 c3]
+   (when (and (seq c1) (seq c2) (seq c3))
+     (lazy-cons (f (first c1) (first c2) (first c3)) 
+                (map f (rest c1) (rest c2) (rest c3)))))
+  ([f c1 c2 c3 & colls]
+   (let [step (fn step [cs]
+                  (when (every? seq cs)
+                    (lazy-cons (map first cs) (step (map rest cs)))))]
+     (map #(apply f %) (step (conj colls c3 c2 c1))))))
 
 (defn mapcat
   "Returns the result of applying concat to the result of applying map
@@ -3398,6 +3407,8 @@
 (defmethod print-method clojure.lang.IPersistentList [o, #^Writer w]
   (print-meta o w)
   (print-sequential "(" print-method " " ")" o w))
+
+(prefer-method print-method clojure.lang.IPersistentList clojure.lang.ISeq)
 
 (def #^{:tag String 
         :doc "Returns escape string for char or nil if none"}
