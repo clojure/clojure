@@ -37,7 +37,7 @@ public static void shutdown(){
 	pooledExecutor.shutdown();
 }
 
-static class Action implements Callable{
+static class Action implements Runnable{
 	final Agent agent;
 	final IFn fn;
 	final ISeq args;
@@ -53,12 +53,12 @@ static class Action implements Callable{
 
 	void execute(){
 		if(solo)
-			soloExecutor.submit(this);
+			soloExecutor.execute(this);
 		else
-			pooledExecutor.submit(this);
+			pooledExecutor.execute(this);
 	}
 
-	static void doRun(Action action) throws Exception{
+	static void doRun(Action action){
 		try
 			{
 			Var.pushThreadBindings(RT.map(RT.AGENT, action.agent));
@@ -69,6 +69,11 @@ static class Action implements Callable{
 			try
 				{
 				changed = action.agent.setState(action.fn.applyTo(RT.cons(action.agent.state, action.args)));
+				for(Object o : action.agent.watchers.get())
+					{
+					Map.Entry e = (Map.Entry) o;
+					((IFn) e.getValue()).invoke(e.getKey(), action.agent, RT.box(changed));
+					}
 				}
 			catch(Exception e)
 				{
@@ -79,11 +84,6 @@ static class Action implements Callable{
 
 			if(!hadError)
 				{
-				for(Object o : action.agent.watchers.get())
-					{
-					Map.Entry e = (Map.Entry) o;
-					((IFn) e.getValue()).invoke(e.getKey(), action.agent, RT.box(changed));
-					}
 				for(ISeq s = nested.get().seq(); s != null; s = s.rest())
 					{
 					Action a = (Action) s.first();
@@ -111,9 +111,8 @@ static class Action implements Callable{
 			}
 	}
 
-	public Object call() throws Exception{
+	public void run(){
 		doRun(this);
-		return this;
 	}
 }
 
