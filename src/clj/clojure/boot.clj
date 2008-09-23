@@ -3435,10 +3435,10 @@
 (defmethod print-method clojure.lang.IPersistentVector [v, #^Writer w]
   (print-meta v w)
   (.append w \[)
-  (dotimes n (dec (count v))
+  (dotimes n (count v)
     (print-method (nth v n) w)
-    (.append w \ ))
-  (print-method (nth v (dec (count v))) w)
+    (when (< n (dec (count v)))
+      (.append w \ )))
   (.append w \])
   nil)
 
