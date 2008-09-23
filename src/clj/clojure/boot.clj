@@ -1038,6 +1038,25 @@
   [#^clojure.lang.Agent a f & args]
     (. a (dispatch f args true)))
 
+(defn add-watch
+  "Experimental.
+  Adds a watcher to an agent. Whenever the agent runs an action, any
+  registered watchers will have their callback function called.  The
+  callback fn will be passed 3 args, the watcher, the agent and a boolean
+  which will be true if the agent's state was (potentially) changed by
+  the action. The callback fn is run synchronously with the action,
+  and thus derefs of the agent in the callback will see the value set
+  during that action. Because it is run on the action thread, the
+  callback should not block, but can send messages."
+  [#^clojure.lang.Agent a watcher callback]
+  (.addWatch a watcher callback))
+
+(defn remove-watch
+  "Experimental.
+  Removes a watcher (set by add-watch) from an agent"
+  [#^clojure.lang.Agent a watcher]
+  (.removeWatch a watcher))
+
 (defn agent-errors
   "Returns a sequence of the exceptions thrown during asynchronous
   actions of the agent."  
@@ -3484,3 +3503,4 @@
 (defmethod print-method java.util.regex.Pattern [p #^Writer w]
   (.append w \#)
   (print-method (str p) w))
+
