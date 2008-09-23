@@ -58,7 +58,7 @@
         manym (< 1 (count (.methods e)))
         newctx (assoc ctx :fnname (.thisName e))]
     (vstr [(when (.variadicMethod e)
-             "clojure.JS.variatic")
+             ["clojure.JS.variatic(" (count (.reqParms maxm)) ","])
            "(function"
            (when *debug-fn-names*
              [" __" (.replaceAll (.name e) "[\\W_]+" "_")])
@@ -73,7 +73,10 @@
                       (fnmethod fm maxm newctx)]))
               "}"])
            "\n"
-           (fnmethod maxm maxm newctx) "})"])))
+           (fnmethod maxm maxm newctx) "})"
+           (when (.variadicMethod e)
+             ")")
+           ])))
 
 (defmethod tojs clojure.lang.Compiler$BodyExpr [e ctx]
    (apply str (interpose ",\n" (map #(tojs % ctx) (.exprs e)))))

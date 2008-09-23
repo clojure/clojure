@@ -129,7 +129,8 @@ clojure = new clojure_Namespace({
   JS: {
     merge: clojure_merge,
     global: clojure_global,
-    variatic: function( f ) {
+    variatic: function( arity, f ) {
+      f.arity = arity;
       f.isVariatic = true;
       return f;
     },
