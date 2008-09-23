@@ -6,7 +6,7 @@ function vToString( v ) {
   return ['[', a.join(' '), ']'].join('');
 }
 
-var v = PersistentVector.EMPTY;
+var v = clojure.lang.PersistentVector.EMPTY;
 for( var i = 0; i < 100; ++i ) {
   v = v.cons( i * 10 );
 }
@@ -19,12 +19,13 @@ for( v2 = v; v2.count() > 0; v2 = v2.pop() ) {
 }
 print( a );
 
-v = PersistentVector.EMPTY;
+v = clojure.lang.PersistentVector.EMPTY;
 for( var i = 0; i < 100000; ++i ) { v = v.cons( i ); }
 for(; v.count() > 0; v = v.pop() ) { v.peek() };
 
 
-print( vToString( PersistentVector.create( [ 'a', 'b', 'c', 'd', 'e' ] ) ) );
+print( vToString( clojure.lang.PersistentVector.create(
+            [ 'a', 'b', 'c', 'd', 'e' ] ) ) );
 
 function time( msg, fn, reps ) {
   reps = reps || 1;
@@ -58,7 +59,7 @@ function suite( size, writes, reads, reps ) {
   print( "Suite size: " + size + ", writes: " + writes + ", reads: " + reads );
 
   var a = [];
-  var p = PersistentVector.EMPTY;
+  var p = clojure.lang.PersistentVector.EMPTY;
 
   time( "  Array push", function() {
     for( var i = 0; i < size; i++ ) {
@@ -73,7 +74,7 @@ function suite( size, writes, reads, reps ) {
   }, reps );
 
   var ta = 0;
-  time( "Array", function() {
+  time( "  Array set ", function() {
     Rand.reset();
     for( var i = 0; i < writes; ++i ) {
       a[ Rand.next( size ) ] = i;
@@ -84,7 +85,7 @@ function suite( size, writes, reads, reps ) {
   }, reps);
 
   var tp = 0;
-  time( "PV   ", function() {
+  time( "  PV set    ", function() {
     Rand.reset();
     for( var i = 0; i < writes; ++i ) {
       p = p.assocN( Rand.next( size ), i );
@@ -98,14 +99,14 @@ function suite( size, writes, reads, reps ) {
 }
 
 suite( 100000, 10000, 20000 );
-suite( 30, 10000, 20000, 1000 );
+suite( 30, 10000, 20000, 50 );
 suite( 100000, 10000, 0 );
-suite( 30, 10000, 0 );
+suite( 30, 10000, 0, 50 );
 suite( 100000, 0, 20000 );
-suite( 30, 0, 20000 );
+suite( 30, 0, 20000, 100 );
 
 /*
-var p = PersistentVector.EMPTY;
+var p = clojure.lang.PersistentVector.EMPTY;
 for( var i = 0; i < 1088; i++ ) {
 //for( var i = 0; i < 1056; i++ ) {
   p = p.cons( i );
@@ -114,5 +115,5 @@ print( p.nth( p.count() - 33 ) )
 print( p.cons("oops").nth( p.count() - 33 ) )
 */
 
-//print( PersistentVector.EMPTY.constructor );
+//print( clojure.lang.PersistentVector.EMPTY.constructor );
 print('done');

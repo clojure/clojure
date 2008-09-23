@@ -1,17 +1,23 @@
 This directory contains work in progress on what may eventually become
-ClojureScript.  If it worked, it would allow code written in a subset
-of Clojure to be automatically translated to JavaScript.
+ClojureScript.  It currently allows code written in a very small
+subset of Clojure to be automatically translated to JavaScript.
 
-The .js files are hand-written ports of Java included in Clojure, or
-hand-written tests for the above.
+tojs.clj is Clojure code to translate Clojure forms to Javascript.  It
+was used to generate boot.js from clojure's own boot.clj.
 
-tojs.clj is Clojure code to translate Clojure forms to Javascript.
+To run any of the tests, do something like:
 
-clojurescript-compiler.patch is a patch file to add features to
-Clojure that are required by tojs.clj.
+java -cp ~/build/clojure/clojure.jar:/home/chouser/proj/clojure-contrib/src
+clojure.lang.Script tojs.clj -- t03.cljs > t03.js
+
+Now that you've got the .js file, you can test using Rhino:
+
+/usr/bin/java -jar /usr/share/java/js.jar -f clj.js -f boot.js -f t03.js
+
+Or point a browser at test.html and choose the test you want to run.
 
 There's plenty more to do.  If you'd like to help, contact the Clojure
 Google group: clojure@googlegroups.com
 
 --Chouser
-12 Sept 2008
+23 Sept 2008

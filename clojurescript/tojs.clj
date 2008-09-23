@@ -242,7 +242,8 @@
 
 
 (def skip-set '#{seq instance? assoc floats doubles ints longs
-                 global-hierarchy apply refer first rest import hash-map})
+                 global-hierarchy apply refer first rest import hash-map
+                 count find})
 
 (defn skip-defs [expr]
   (let [m ^(.var expr)]
