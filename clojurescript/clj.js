@@ -1,17 +1,19 @@
-function clojure_merge( t, s ) {
-  for( var i in s ) {
-    t[ i ] = s[ i ];
+clojure = {
+  JS: {
+    global: this,
+    merge: function( t, s ) {
+      for( var i in s ) {
+        t[ i ] = s[ i ];
+      }
+      return t;
+    }
+  },
+  lang: {
+    Namespace: function( m ) { clojure.JS.merge( this, m || {} ); }
   }
-  return t;
 };
 
-function clojure_Namespace( m ) {
-  clojure_merge( this, m || {} );
-};
-
-clojure_global = this;
-
-clojure = new clojure_Namespace({
+clojure = new clojure.lang.Namespace({
   in_ns: function(s) {
     var nsparts = s.substring(1).split('.');
     var base = clojure.JS.global;
@@ -127,8 +129,8 @@ clojure = new clojure_Namespace({
     return a === b;
   },
   JS: {
-    merge: clojure_merge,
-    global: clojure_global,
+    merge: clojure.JS.merge,
+    global: clojure.JS.global,
     variatic: function( arity, f ) {
       f.arity = arity;
       f.isVariatic = true;
@@ -199,6 +201,7 @@ clojure = new clojure_Namespace({
     }
   },
   lang: {
+    Namespace: clojure.lang.Namespace,
     Numbers: {
       isPos: function(x) { return x > 0; },
       inc: function(x) { return x + 1; },
@@ -899,8 +902,6 @@ clojure.lang.PersistentVector.EMPTY =
   new clojure.lang.PersistentVector(
       {}, 0, 5, clojure.lang.RT.EMPTY_ARRAY, clojure.lang.RT.EMPTY_ARRAY );
 
-clojure.lang.Namespace = clojure_Namespace;
-
 clojure.lang.Namespace.find = function( s ) {
   return clojure.JS.global[ s.substring(1) ];
 };
@@ -923,7 +924,3 @@ clojure.lang.Namespace.prototype.getMappings = function() {
   }
   clojure._STAR_out_STAR_ = { append: write, write: write };
 })();
-
-delete clojure_merge;
-delete clojure_Namespace;
-delete clojure_global;

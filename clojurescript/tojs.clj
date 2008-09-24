@@ -29,7 +29,8 @@
                             *has-recur*])
         mparm (into {} (for [p (.reqParms maxm)] [(.idx p) p]))
         inits (concat
-                (when has-recur ["_cnt" "_rtn"])
+                (when has-recur
+                  ["_cnt" "_rtn"])
                 (vals (reduce dissoc lm (cons thisfn (.reqParms fm))))
                 (when (:fnname ctx) [(str (lm thisfn) "=arguments.callee")])
                 (when (not= fm maxm)
@@ -200,9 +201,10 @@
 
 (defmethod tojs clojure.lang.Compiler$RecurExpr [e ctx]
   (set! *has-recur* true)
-  (vstr ["(_cnt=1"
-         (vec (map #(str ",_t" %2 "=" (tojs %1 ctx)) (.args e) (iterate inc 0)))
-         (vec (map #(str "," ((:localmap ctx) %1) "=_t" %2)
+  (vstr ["(_cnt=1,_rtn=["
+         (vec (interpose "," (map #(tojs % ctx) (.args e))))
+         "]"
+         (vec (map #(str "," ((:localmap ctx) %1) "=_rtn[" %2 "]")
                    (.loopLocals e) (iterate inc 0)))
          ")"]))
 
