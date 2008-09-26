@@ -1,9 +1,10 @@
 ;;; test_is.clj: test framework for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; June 5, 2008
+;; September 25, 2008
 
 ;; Thanks to Chas Emerick for contributions.
+;; Thanks to Allen Rohner for assert-raises.
 
 ;; Copyright (c) 2008 Stuart Sierra. All rights reserved.  The use and
 ;; distribution terms for this software are covered by the Common
@@ -32,12 +33,23 @@
 ;;     (deftest test-new-fn
 ;;       (is (= (new-fn) "Awesome")))
 ;;
+;; You can test that a function throws an exception with the "throws"
+;; macro:
+;;
+;;     (defn factorial
+;;       ([n] (cond
+;;             (zero? n) 1  ; 0!=1 is often defined for convenience
+;;             (> n 0) (* n (factorial (dec n)))
+;;             :else (throw (IllegalArgumentException. "Negative factorial"))))
+;;       {:test (fn [] (is (= (factorial 3) 6))
+;;                     (is (= (factorial 6) 720))
+;;                     (throws IllegalArgumentException (factorial -2)))}) 
+;;
 ;; Run tests with (run-tests). As in any language with macros, you may
 ;; need to recompile functions after changing a macro definition.
 
 
-
-(clojure/ns clojure.contrib.test-is)
+(ns clojure.contrib.test-is)
 
 (def
  #^{:doc "PrintWriter to which test results are printed; defaults to
@@ -167,11 +179,27 @@
       (seq? form) (assert-expr form message)
       :else (assert-true form message))))
 
+(defmacro throws
+  "Asserts that form throws an exception of the given class (or one of
+  its subclasses)."
+  ([class form]
+     `(throws ~class ~form nil))
+  ([class form message]
+  `(try
+    (count-assertion)
+    (let [value# ~form]
+      (failure (str "expected " ~(pr-str form) " to throw " ~class
+                    ", but returned " value#) ~message))
+    (catch ~class e# nil)  ; the correct exception was thrown
+    (catch java.lang.Throwable e#  ; some other exception was thrown
+      (failure (str "expected " ~(pr-str form) " to throw " ~class
+                    ", but threw " e#) ~message)))))
+
 (defn print-results
   "Prints a summary of the results from test-ns to *test-out*."
   [r]
   (. *test-out*
-     (println (str "\nRan " (:tests r) " tests "
+     (println (str "\nRan " (:tests r) " tests with "
                    (:assertions r) " assertions.\n"
                    (:failures r) " failures, "
                    (:exceptions r) " exceptions.")))  )
@@ -205,6 +233,6 @@
   (apply run-tests (all-ns)))
 
 (defmacro deftest
-  "Defs an unbound Var with body in its :test fn."
+  "Defines a Var with no value and with body in its :test fn."
   [name & body]
   `(def ~(with-meta name {:test `(fn [] ~@body)})))
