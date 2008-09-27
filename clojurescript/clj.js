@@ -38,7 +38,7 @@ clojure = new clojure.lang.Namespace({
         (typeof coll) + " " + coll.constructor.name);
   },
   apply: function( f ) {
-    if( f.isVariatic ) {
+    if( f.isVariadic ) {
       // lazy
       var i, args = [];
       var eagercount = Math.min( f.arity, arguments.length - 2 );
@@ -61,9 +61,10 @@ clojure = new clojure.lang.Namespace({
         for( ; s && args.length < f.arity; s = s.rest() ) {
           args.push( s.first() );
         }
-        args.push( s );
+        if( s )
+          args.push( s );
       }
-      return f.apply( clojure.JS.variatic_sentinel, args );
+      return f.apply( clojure.JS.variadic_sentinel, args );
     }
     else {
       // non-lazy
@@ -103,13 +104,44 @@ clojure = new clojure.lang.Namespace({
     }
     return coll.entryAt( key );
   },
-  hash_map: function() {
-    // This just makes a seq for now
-    var pairs = [];
-    for( var i = 0; i < arguments.length; i += 2 ) {
-      pairs.push( [ arguments[i], arguments[i + 1] ] )
+  get: function(coll, key, notFound ) {
+    if( coll === null )
+      return null;
+    if( coll.valAt )
+      return coll.valAt( key, notFound );
+    if( coll.containsKey ) {
+      if( notFound === undefined || coll.containsKey( key ) )
+        return coll.get( key );
+      return notFound;
     }
-    return clojure.lang.ArraySeq.create( pairs );
+    if( coll.contains ) {
+      if( notFound === undefined || coll.contains( key ) )
+        return coll.get( key );
+      return notFound;
+    }
+    if( notFound === undefined || key in coll )
+      return coll[ key ];
+    return notFound;
+  },
+  contains_QMARK_: function(coll, key) {
+    if( coll === null )
+      return false;
+    if( coll.containsKey )
+      return coll.containsKey( key ) ? true : false;
+    if( coll.contains )
+      return coll.contains( key ) ? true : false;
+    return key in coll;
+  },
+  hash_map: function() {
+    return clojure.lang.PersistentHashMap.create( arguments );
+  },
+  hash_set: function() {
+    return clojure.lang.PersistentHashSet.create( arguments );
+  },
+  keyword: function(a,b) {
+    if( b === undefined )
+      return clojure.lang.Keyword.intern( "", a );
+    return clojure.lang.Keyword.intern( a, b );
   },
   assoc: function( coll, key, val ) {
     if( coll === null )
@@ -122,18 +154,29 @@ clojure = new clojure.lang.Namespace({
     if( x.length != undefined ) return x.length;
     throw ("count not supported on: " + (typeof x) + " " + x.constructor);
   },
+  class_: function(o) {
+    if( o === null )
+      return null;
+    return o.constructor || typeof o;
+  },
   import_: function() {
     // do nothing
   },
   identical_QMARK_: function( a, b ) {
     return a === b;
   },
+  keys: function(coll) {
+    return clojure.lang.APersistentMap.KeySeq.create(clojure.seq(coll));
+  },
+  vals: function(coll) {
+    return clojure.lang.APersistentMap.ValSeq.create(clojure.seq(coll));
+  },
   JS: {
     merge: clojure.JS.merge,
     global: clojure.JS.global,
-    variatic: function( arity, f ) {
+    variadic: function( arity, f ) {
       f.arity = arity;
-      f.isVariatic = true;
+      f.isVariadic = true;
       return f;
     },
     resolveVar: function( sym, ctxns ) {
@@ -145,11 +188,14 @@ clojure = new clojure.lang.Namespace({
       v.push( init );
       return v;
     },
-    variatic_sentinel: {},
+    variadic_sentinel: {},
     rest_args: function( varflag, args, i ) {
-      if( varflag === clojure.JS.variatic_sentinel )
+      if( varflag === clojure.JS.variadic_sentinel )
         return args[ args.length - 1 ];
       return new clojure.lang.ArraySeq( null, args, i );
+    },
+    invoke: function( obj, methodname, args ) {
+      return obj[ methodname ].apply( obj, args );
     },
     lit_list: function( a ) {
       return new clojure.lang.ArraySeq( null, a, 0 );
@@ -157,11 +203,14 @@ clojure = new clojure.lang.Namespace({
     implement: function( cls, name, extend, implement ) {
       cls.classname = name;
       cls.classset = {};
+      cls.hashCode = function() { return clojure.lang.Util.hash( name ); };
+      cls.getSuperclass = function() { return extend || null; };
+      cls.getInterfaces = function() { return implement || null; };
       cls.classset[ name ] = true;
       if( implement ) {
         for( var i = 0; i < implement.length; ++i ) {
           if( ! implement[ i ] )
-            throw "Can't implement null";
+            throw "Can't implement null: " + name;
           clojure.JS.merge( cls.classset, implement[ i ].classset );
         }
       }
@@ -188,7 +237,16 @@ clojure = new clojure.lang.Namespace({
         return false;
       if( o.constructor === c )
         return true;
-      return o.constructor.classset[ c ];
+      if( ! o.constructor.classset )
+        return false; // builtin class that doesn't match?
+      return o.constructor.classset[ c.classname ];
+    },
+    bitcount: function(n){
+      var rtn = 0;
+      for( ; n; n >>= 1) {
+        rtn += n & 1;
+      }
+      return rtn;
     },
     ObjSeq: {
       create: function( obj ) {
@@ -204,10 +262,33 @@ clojure = new clojure.lang.Namespace({
     Namespace: clojure.lang.Namespace,
     Numbers: {
       isPos: function(x) { return x > 0; },
+      lt: function(x,y) { return x < y; },
+      gt: function(x,y) { return x > y; },
       inc: function(x) { return x + 1; },
-      dec: function(x) { return x - 1; }
+      dec: function(x) { return x - 1; },
+      unchecked_inc: function(x) { return x + 1; }
     },
     Util: {
+      hash: function(o){
+        if( o === null )
+          return 0;
+        if( typeof o == typeof "" ) {
+          var ret = 0;
+          for( var i = 0; i < o.length; ++i ) {
+            ret ^= o.charCodeAt(i) << ((i % 4) * 8);
+          }
+          return ret;
+        }
+        if( o == String )
+          return clojure.lang.Util.hash("stringtype");
+        if( o == Number )
+          return clojure.lang.Util.hash("numbertype");
+        if( o == RegExp )
+          return clojure.lang.Util.hash("regexptype");
+        if( o == Object )
+          return clojure.lang.Util.hash("objecttype");
+        return o.hashCode();
+      },
       equal: function(x,y) { return x == y; },
       isInteger: function(x) { return typeof x == typeof 0; }
     },
@@ -230,23 +311,37 @@ clojure = new clojure.lang.Namespace({
           ret[ i ] = s.first();
         return ret;
       },
-      print: function( o, w ) {
-        if( o !== null )
-          w.write( "" + o );
-      }
-    },
-    IReduce: {}
+      intCast: function(i) {
+        return parseInt(i);
+      },
+    }
   }
 });
 
-java = { util: {}, lang: {} };
+java = { util: { regex: {} }, lang: {}, math: {} };
 clojure.JS.definterface( java.util, "Map" );
 clojure.JS.definterface( java.util, "Collection" );
+clojure.JS.definterface( java.util.regex, "Pattern" );
+clojure.JS.definterface( java.lang, "Character" );
+clojure.JS.definterface( java.lang, "Class" );
+clojure.JS.definterface( java.math, "BigDecimal", [Number] );
+clojure.JS.definterface( java.math, "BigInteger", [Number] );
 clojure.JS.defclass( java.lang, "StringBuilder", {
   init: function( x ) { this.a = [ x ]; },
   methods: {
     append: function( x ) { this.a.push( x ); return this; },
     toString: function() { return this.a.join(''); }
+  }
+});
+
+clojure.JS.defclass( java.lang, "String", {
+  init: function(s) {
+    this.s = s;
+    this.length = s.length;
+  },
+  methods: {
+    charAt: function(x) { return this.s.charAt(x); },
+    toString: function() { return this.s; }
   }
 });
 
@@ -259,6 +354,16 @@ clojure.JS.defclass( clojure.lang, "Obj", {
     meta: function() { return this._meta; }
   }
 });
+
+clojure.JS.definterface( clojure.lang, "IReduce" );
+
+clojure.JS.definterface( clojure.lang, "IPersistentCollection" );
+
+clojure.JS.definterface( clojure.lang, "ISeq",
+    [clojure.lang.IPersistentCollection] );
+
+clojure.JS.definterface( clojure.lang, "IndexedSeq",
+    [clojure.lang.ISeq] );
 
 clojure.JS.defclass( clojure.lang, "ASeq", {
   methods: {
@@ -309,6 +414,7 @@ clojure.JS.defclass( clojure.lang, "Cons", {
 
 clojure.JS.defclass( clojure.lang, "ArraySeq", {
   extend: clojure.lang.ASeq,
+  implement: [clojure.lang.IndexedSeq, clojure.lang.IReduce],
   init: function( _meta, a, i, len ) {
     this._meta = _meta;
     this.a = a;
@@ -398,9 +504,9 @@ clojure.JS.defclass( clojure.lang, "Var", {
     pushThreadBindings: function( m ) {
       var vars=[], b;
       for( var bs = m.seq(); bs; bs = bs.rest()) {
-        b = bs.first();
-        vars.push( b[0] );
-        b[0].push( b[1] );
+        e = bs.first();
+        vars.push( e.key() );
+        e.key().push( e.val() );
       }
       clojure.lang.Var.stack.push( vars );
     },
@@ -425,11 +531,23 @@ clojure.JS.defclass( clojure.lang, "Var", {
       this.push( val );
     },
     hasRoot: function() { return this.stack.length > 0; },
-    setMacro: function() { this.macro = true; }
+    hashCode: function() {
+      return clojure.lang.Util.hash( this.ns + "/" + this.name );
+    }
   }
 });
 
-clojure.JS.definterface( clojure.lang, "IPersistentCollection" );
+clojure.JS.definterface( clojure.lang, "IFn" );
+
+clojure.JS.defclass( clojure.lang, "AFn", {
+  extend: clojure.lang.Obj,
+  implement: [clojure.lang.IFn],
+  methods: {
+    apply: function( obj, args ){
+      return this.invoke.apply( this, args );
+    }
+  }
+});
 
 clojure.JS.definterface( clojure.lang, "IPersistentStack",
     [clojure.lang.IPersistentCollection] );
@@ -437,6 +555,54 @@ clojure.JS.definterface( clojure.lang, "IPersistentStack",
 clojure.JS.definterface( clojure.lang, "Sequential" );
 
 clojure.JS.definterface( clojure.lang, "Reversible" );
+
+clojure.JS.definterface( clojure.lang, "Named" );
+
+clojure.JS.defclass( clojure.lang, "Keyword", {
+  extend: clojure.lang.AFn,
+  implement: [clojure.lang.Named],
+  init: function( ns, name ) {
+    this._ns = ns;
+    this._name = name;
+  },
+  statics: {
+    table: {},
+    intern: function( ns, name ) {
+      var key = ns + "/" + name;
+      var obj = clojure.lang.Keyword.table[ key ];
+      if( obj )
+        return obj;
+      return clojure.lang.Keyword.table[ key ] =
+        new clojure.lang.Keyword( ns, name );
+    }
+  },
+  methods: {
+    toString: function() {
+      return ":" + (this.ns ? this.ns+"/" : "") + this._name;
+    },
+    compareTo: function(o) {
+      if( this == o )
+        return 0;
+      if( this._ns === null && o._ns !== null )
+        return -1;
+      if( this._ns !== null ) {
+        if( o._ns === null )
+          return 1;
+        var nsc = clojure.JS.compare(this._ns, o._ns);
+        if( nsc !== 0 )
+          return nsc;
+      }
+      return clojure.JS.compare(this._name, o._name);
+    },
+    getNamespace: function() { return this._ns; },
+    getName: function() { return this._name; },
+    hashCode: function() {
+      return clojure.lang.Util.hash( this._ns + "/" + this._name );
+    },
+    invoke: function(coll, notFound) { return clojure.get( coll,this,notFound);}
+  }
+});
+
 
 clojure.JS.definterface( clojure.lang, "IPersistentList",
     [clojure.lang.Sequential, clojure.lang.IPersistentStack] );
@@ -485,6 +651,7 @@ clojure.JS.defclass( clojure.lang, "AMapEntry", {
     },
     hashCode: function(){ throw "not implemented yet"; },
     toString: function(){
+      return this.key() + " " + this.val();
       var sw = new java.io.StringWriter();
       clojure.lang.RT.print( this, sw );
       return sw.toString();
@@ -532,6 +699,8 @@ clojure.JS.defclass( clojure.lang, "MapEntry", {
 });
 
 clojure.JS.defclass( clojure.lang, "PersistentList", {
+  extend: clojure.lang.ASeq,
+  implement: [clojure.lang.IPersistentList, clojure.lang.IReduce],
   init: function( _meta, _first, _rest, _count ) {
     this._meta = _meta || null;
     this._first = _first;
@@ -659,9 +828,11 @@ clojure.JS.defclass( clojure.lang, "APersistentVector", {
         if( i >= 0 && i < this.count() )
           return this.nth(i);
       }
+      if( notFound === undefined )
+        return null;
       return notFound;
     },
-    toArray: function(){ return clojure.lang.RT.setToArray( this.seq() ); },
+    toArray: function(){ return clojure.lang.RT.seqToArray( this.seq() ); },
     containsAll: function(){ throw "not implemented yet"; },
     size: function(){ return this.count(); },
     isEmpty: function(){ return this.count() === 0; },
@@ -902,6 +1073,664 @@ clojure.lang.PersistentVector.EMPTY =
   new clojure.lang.PersistentVector(
       {}, 0, 5, clojure.lang.RT.EMPTY_ARRAY, clojure.lang.RT.EMPTY_ARRAY );
 
+clojure.JS.definterface( clojure.lang, "IPersistentMap",
+    [clojure.lang.Associative]);
+
+clojure.JS.defclass( clojure.lang, "APersistentMap", {
+  extend: clojure.lang.AFn,
+  implement: [clojure.lang.IPersistentMap, java.util.Collection],
+  init: function(_meta) {
+    this._meta = _meta;
+    this._hash = -1;
+  },
+  methods: {
+    cons: function(o){
+      if( clojure.JS.instanceq( clojure.lang.IPersistentVector, o ) ) {
+        if( o.count() != 2 )
+          throw "Vector arg to map conj must be a pair";
+        return this.assoc( o.nth(0), o.nth(1) );
+      }
+      var e, ret = this;
+      for( var es = clojure.seq( o ); es; es = es.rest() ) {
+        e = es.first();
+        ret = ret.assoc( e.getKey(), e.getValue() );
+      }
+      return ret;
+    },
+    equals: function(m){
+      if( ! clojure.JS.instanceq( clojure.lang.IPersistentMap, m ) )
+        return false;
+      if( m.count() != this.count() || m.hashCode() != this.hashCode() )
+        return false;
+      var e, me;
+      for( var s = this.seq(); s; s = s.rest() ) {
+        e = s.first();
+        me = m.entryAt( e.getKey() );
+        if( me === null
+            || ! clojure.lang.Util.equal( e.getValue(), me.getValue() ))
+        {
+          return false;
+        }
+      }
+      return true;
+    },
+    hashCode: function(){
+      if( this._hash == -1 ) {
+        var e, hash = this.count();
+        for( s = this.seq(); s; s = s.rest() ) {
+          e = s.first();
+          hash ^= clojure.lang.Util.hashCombine(
+              clojure.lang.Util.hash( e.getKey() ),
+              clojure.lang.Util.hash( e.getValue() ) );
+        }
+        this._hash = hash;
+      }
+      return _hash;
+    },
+    containsAll: function(){ throw "not implemented yet"; },
+    invoke: function(k,notFound){ return this.valAt(k,notFound); },
+    toArray: function(){ return clojure.lang.RT.seqToArray( this.seq() ); },
+    size: function(){ return this.count(); },
+    isEmpty: function(){ return this.count() === 0; },
+    contains: function(e){
+      if( clojure.JS.instanceq( clojure.lang.MapEntry, e ) ) {
+        var v = this.entryAt( e.getKey() );
+        return (v!==null && clojure.lang.Util.equal(v.getValue(),e.getValue()));
+      }
+      return false;
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.APersistentMap, "KeySeq", {
+  extend: clojure.lang.ASeq,
+  init: function(_meta, _seq) {
+    this._meta = _meta;
+    this._seq = _seq;
+  },
+  statics: {
+    create: function(seq){
+      if(seq === null)
+        return null;
+      return new clojure.lang.APersistentMap.KeySeq(seq);
+    }
+  },
+  methods: {
+    first: function(){ return this._seq.first().getKey(); },
+    rest: function(){
+      return clojure.lang.APersistentMap.KeySeq.create( this._seq.rest() );
+    },
+    withMeta: function(_meta){
+      return new clojure.lang.APersistentMap.KeySeq( _meta, this._seq );
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.APersistentMap, "ValSeq", {
+  extend: clojure.lang.ASeq,
+  init: function(_meta, _seq) {
+    this._meta = _meta;
+    this._seq = _seq;
+  },
+  statics: {
+    create: function(seq){
+      if(seq === null)
+        return null;
+      return new clojure.lang.APersistentMap.ValSeq(seq);
+    }
+  },
+  methods: {
+    first: function(){ return this._seq.first().getValue(); },
+    rest: function(){
+      return clojure.lang.APersistentMap.ValSeq.create( this._seq.rest() );
+    },
+    withMeta: function(_meta){
+      return new clojure.lang.APersistentMap.ValSeq( _meta, this._seq );
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang, "PersistentHashMap", {
+  extend: clojure.lang.APersistentMap,
+  init: function(_meta, _count, _root){
+    this._meta = _meta;
+    this._count = _count;
+    this._root = _root;
+  },
+  statics: {
+    create: function(init){
+      var ret = clojure.lang.PersistentHashMap.EMPTY;
+      for( var s = clojure.seq( init ); s; s=s.rest().rest() ){
+        if( s.rest() === null )
+          throw "No value supplied for key: " + s.first();
+        ret = ret.assoc( s.first(), clojure.second( s ) );
+      }
+      return ret;
+    },
+    mask: function(hash, shift){ return (hash >>> shift) & 0x01f; }
+  },
+  methods:{
+    containsKey: function(key){ return this.entryAt(key) !== null; },
+    entryAt: function(k){ return this._root.find(clojure.lang.Util.hash(k),k);},
+    assoc: function(k,v){
+      var addedLeaf=[null];
+      var newroot = this._root.assoc(
+          0, clojure.lang.Util.hash(k), k, v, addedLeaf );
+      if( newroot == this._root )
+        return this;
+      return new clojure.lang.PersistentHashMap(
+          this._meta, this._count + (addedLeaf[0] === null ? 0 : 1), newroot );
+    },
+    valAt: function(k, notFound){
+      var e = this.entryAt(k);
+      if( e !== null )
+        return e.val();
+      if( notFound === undefined )
+        return null;
+      return notFound;
+    },
+    assocEx: function(k,v){
+      if(this.containsKey(k))
+        throw "Key already present";
+      return this.assoc(k,v);
+    },
+    without: function(k){
+      var newroot = this._root.without( clojure.lang.Util.hash(k), k );
+      if( newroot == this._root )
+        return this;
+      if( newroot == null )
+        return this.empty();
+      return new cloljure.lang.PersistentHashMap(
+          this._meta, this._count-1, newroot );
+    },
+    count: function(){ return this._count; },
+    seq: function(){ return this._root.nodeSeq(); },
+    empty: function(){
+      return clojure.lang.PersistentHashMap.EMPTY.withMeta( this._meta );
+    },
+    withMeta: function(_meta){
+      return new clojure.lang.PersistentHashMap( _meta, this._count,this._root);
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.PersistentHashMap, "EmptyNode", {
+  methods: {
+    assoc: function(shift, hash, key, val, addedLeaf){
+      var ret = new clojure.lang.PersistentHashMap.LeafNode( hash, key, val );
+      addedLeaf[0] = ret;
+      return ret;
+    },
+    without: function(h,k){ return this; },
+    find:    function(h,k){ return null; },
+    nodeSeq: function(){ return null;},
+    getHash: function(){ return 0;}
+  }
+});
+
+clojure.lang.PersistentHashMap.EMPTY = new clojure.lang.PersistentHashMap(
+    null, 0, new clojure.lang.PersistentHashMap.EmptyNode() );
+
+clojure.JS.defclass( clojure.lang.PersistentHashMap, "FullNode", {
+  init: function(nodes, shift){
+    this._nodes = nodes;
+    this._shift = shift;
+    this._hash = nodes[0].getHash();
+  },
+  statics: {
+    bitpos: function(hash, shift) {
+      return 1 << clojure.lang.PersistentHashMap.mask( hash, shift );
+    }
+  },
+  methods: {
+    assoc: function( levelShift, hash, key, val, addedLeaf ) {
+      var PHM = clojure.lang.PersistentHashMap;
+      var idx = PHM.mask( hash, this._shift );
+      var n = this._nodes[idx].assoc( this._shift+5, hash, key, val, addedLeaf);
+      if( n == this._nodes[idx] )
+        return this;
+      else {
+        var newnodes = nodes.slice();
+        newnodes[idx] = n;
+        return new PHM.FullNode( newnodes, this._shift );
+      }
+    },
+    without: function(hash, key){
+      var PHM = clojure.lang.PersistentHashMap;
+      var idx = PHM.mask( hash, this._shift );
+      var n = this._nodes[idx].without( hash, key );
+      if( n != this._nodes[idx] ) {
+        var newnodes = nodes.slice();
+        if( n == null ) {
+          nodes.splice( idx, 1 );
+          return new PHM.BitmapIndexedNode(
+              ~PHM.FullNode.bitpos(hash,this._shift), newnodes, this._shift );
+        }
+        newnodes[ idx ] = n;
+        return new PHM.FullNode( newnodes, this._shift );
+      }
+      return this;
+    },
+    find: function(hash, key) {
+      return (nodes[clojure.lang.PersistentHashMap.mask( hash, this._shift )]
+        .find( hash, key ));
+    },
+    nodeSeq: function(){
+      return clojure.lang.PersistentHashMap.FullNode.Seq.create( this, 0 );
+    },
+    getHash: function(){ return this._hash; }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.PersistentHashMap.FullNode, "Seq", {
+  extend: clojure.lang.ASeq,
+  init: function( _meta, s, i, node ) {
+    this._meta = _meta;
+    this.s = s;
+    this.i = i;
+    this.node = node;
+  },
+  statics: {
+    create: function(node, i){
+      if( i >= node.nodes.length )
+        return null;
+      return new clojure.lang.PersistentHashMap.FullNode.Seq(
+          null, node.nodes[i].nodeSeq(), i, node );
+    }
+  },
+  methods: {
+    first: function(){ return this.s.first(); },
+    rest: function(){
+      var Seq = clojure.lang.PersistentHashMap.FullNode.Seq;
+      var nexts = this.s.rest();
+      if( nexts )
+        return new Seq( null, nexts, this.i, this.node );
+      return Seq.create( node,this.i+1);
+    },
+    withMeta: function(_meta){
+      return new clojure.lang.PersistentHashMap.FullNode.Seq(
+          _meta, this.s, this.i, this.node );
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.PersistentHashMap, "BitmapIndexedNode", {
+  init: function(bitmap, nodes, shift) {
+    this.bitmap = bitmap;
+    this.nodes = nodes;
+    this.shift = shift;
+    this._hash = nodes[0].getHash();
+  },
+  statics: {
+    bitpos: function(hash, shift) {
+      return 1 << clojure.lang.PersistentHashMap.mask( hash, shift );
+    },
+    createA: function(bitmap, nodes, shift){
+      var PHM = clojure.lang.PersistentHashMap;
+      if(bitmap == -1)
+        return new PHM.FullNode( nodes, shift );
+      return new PHM.BitmapIndexedNode( bitmap, nodes, shift );
+    },
+    createB: function(shift, branch, hash, key, val, addedLeaf){
+      var PHM = clojure.lang.PersistentHashMap;
+      return (new PHM.BitmapIndexedNode(
+                PHM.BitmapIndexedNode.bitpos(branch.getHash(), shift),
+                [branch],
+                shift)).assoc( shift, hash, key, val, addedLeaf );
+    }
+  },
+  methods: {
+    index: function(bit) { return clojure.JS.bitcount(this.bitmap & (bit-1) );},
+    assoc: function(levelShift, hash, key, val, addedLeaf){
+      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode;
+      var bit = BIN.bitpos( hash, this.shift );
+      var idx = this.index( bit );
+      if((this.bitmap & bit) != 0) {
+        var n = this.nodes[idx].assoc( this.shift+5, hash, key, val, addedLeaf);
+        if( n == this.nodes[idx] )
+          return this;
+        else {
+          var newnodes = this.nodes.slice();
+          newnodes[idx] = n;
+          return new BIN( this.bitmap, newnodes, this.shift );
+        }
+      }
+      else {
+        addedLeaf[0]= new clojure.lang.PersistentHashMap.LeafNode(hash,key,val);
+        var newnodes = this.nodes.slice();
+        newnodes.splice( idx, 0, addedLeaf[0] );
+        return BIN.createA( this.bitmap | bit, newnodes, this.shift );
+      }
+    },
+    without: function( hash, key ) {
+      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode;
+      var bit = BIN.bitpos( hash, this.shift );
+      if((this.bitmap & bit) !== 0) {
+        var idx = this.index( bit );
+        var n = this.nodes[ idx ].without( hash, key );
+        if( n != this.nodes[ idx ] ) {
+          if( n === null ) {
+            if( this.bitmap == bit )
+              return null;
+            var newnodes = this.nodes.slice();
+            newnodes.splice( idx, 1 );
+            return new BIN( bitmap & ~bit, newnodes, this.shift );
+          }
+          var newnodes = this.nodes.slice();
+          newnodes[ idx ] = n;
+          return new BIN( bitmap, newnodes, this.shift );
+        }
+      }
+      return this;
+    },
+    find: function( hash, key ) {
+      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode;
+      var bit = BIN.bitpos( hash, this.shift );
+      if((this.bitmap & bit) !== 0)
+        return this.nodes[ this.index(bit) ].find( hash, key );
+      return null;
+    },
+    getHash: function(){ return this._hash; },
+    nodeSeq: function(){
+      return clojure.lang.PersistentHashMap.BitmapIndexedNode.Seq.create(
+          this, 0 );
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.PersistentHashMap.BitmapIndexedNode, "Seq", {
+  extend: clojure.lang.ASeq,
+  init: function( _meta, s, i, node ) {
+    this._meta = _meta;
+    this.s = s;
+    this.i = i;
+    this.node = node;
+  },
+  statics: {
+    create: function(node, i){
+      if( i >= node.nodes.length )
+        return null;
+      return new clojure.lang.PersistentHashMap.BitmapIndexedNode.Seq(
+          null, node.nodes[i].nodeSeq(), i, node );
+    }
+  },
+  methods: {
+    first: function(){ return this.s.first(); },
+    rest: function(){
+      var Seq = clojure.lang.PersistentHashMap.BitmapIndexedNode.Seq;
+      var nexts = this.s.rest();
+      if( nexts )
+        return new Seq( null, nexts, this.i, this.node );
+      return Seq.create( this.node, this.i+1 );
+    },
+    withMeta: function(_meta){
+      return new clojure.lang.PersistentHashMap.BitmapIndexedNode.Seq(
+          _meta, this.s, this.i, this.node );
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.PersistentHashMap, "LeafNode", {
+  extend: clojure.lang.AMapEntry,
+  init: function( hash, key, val ) {
+    this.hash = hash;
+    this._key = key;
+    this._val = val;
+  },
+  methods: {
+    assoc: function(shift, hash, key, val, addedLeaf) {
+      var PHM = clojure.lang.PersistentHashMap;
+      if( hash == this.hash ) {
+        if( clojure.lang.Util.equal( key, this._key ) ) {
+          if( val == this._val )
+            return this;
+          return new PHM.LeafNode( hash, key, val );
+        }
+        var newLeaf = new PHM.LeafNode( hash, key, val );
+        addedLeaf[0] = newLeaf;
+        return new PHM.HashCollisionNode( hash, [this, newLeaf] );
+      }
+      return PHM.BitmapIndexedNode.createB(
+          shift, this, hash, key, val, addedLeaf );
+    },
+    without: function(hash, key){
+      if(hash == this.hash && clojure.lang.Util.equal( key, this._key ))
+        return null;
+      return this;
+    },
+    find: function(hash, key){
+      if(hash == this.hash && clojure.lang.Util.equal( key, this._key ))
+        return this;
+      return null;
+    },
+    nodeSeq: function(){ return clojure.cons( this, null ); },
+    getHash: function(){ return this.hash; },
+    key: function(){ return this._key; },
+    val: function(){ return this._val; },
+    getKey: function(){ return this._key; },
+    getValue: function(){ return this._val; }
+  }
+});
+
+clojure.JS.defclass( clojure.lang.PersistentHashMap, "HashCollisionNode", {
+  init: function(hash, leaves){
+    this.hash = hash;
+    this.leaves = leaves;
+  },
+  methods: {
+    assoc: function(shift, hash, key, val, addedLeaf) {
+      var PHM = clojure.lang.PersistentHashMap;
+      if( hash == this.hash ) {
+        var idx = this.findIndex( hash, key );
+        if( idx != -1 ) {
+          if( this.leaves[idx].val == val )
+            return this;
+          var newLeaves = this.leaves.slice();
+          newLeaves[idx] = new PHM.LeafNode( hash, key, val );
+          return new PHM.HashCollisionNode( has, newLeaves );
+        }
+        addedLeaf[0] = new PHM.LeafNode( hash, key, val );
+        var newLeaves = this.leaves.concat( addedLeaf );
+        return new PHM.HashCollisionNode( hash, newLeaves );
+      }
+      return PHM.BitmapIndexedNode.createB(shift,this,hash,key,val,addedLeaf);
+    },
+    without: function(hash, key){
+      var idx = this.findIndex( hash, key );
+      if( idx != -1 )
+        return leaves[ idx ];
+      return null;
+    },
+    nodeSeq: function(){
+      return clojure.lang.ArraySeq.create(this.leaves);
+    },
+    findIndex: function(hash, key){
+      for( var i = 0; i < this.leaves.length; ++i ) {
+        if( this.leaves[i].find( hash, key ) != null )
+          return i;
+      }
+      return -1;
+    },
+    getHash: function(){ return this.hash; }
+  }
+});
+
+clojure.JS.definterface( clojure.lang, "IPersistentSet",
+    [ clojure.lang.IPersistentCollection ] );
+
+clojure.JS.defclass( clojure.lang, "APersistentSet", {
+  extend: clojure.lang.AFn,
+  implement: [ clojure.lang.IPersistentSet ],
+  init: function( meta, impl ) {
+    this._meta = meta;
+    this.impl = impl;
+    this._hash = -1;
+  },
+  methods: {
+    contains: function(key){ return this.impl.containsKey(key); },
+    get: function(key){ return this.impl.valAt(key); },
+    count: function(){ return this.impl.count(); },
+    seq: function(){ return clojure.keys( this.impl ); },
+    invoke: function(key){ return this.get(key); },
+    equals: function(m) {
+      if( ! clojure.instanceq( clojure.lang.IPersistentSet ) )
+        return false;
+      if( m.count() != this.count() || m.hashCode() != this.hashCode() )
+        return false;
+      for( var s = this.seq(); s; s = s.rest() ) {
+        if( ! m.contains( s.first() ) )
+          return false;
+      }
+      return true;
+    },
+    hashCode: function() {
+      if( this._hash == -1 ) {
+        var hash = this.count();
+        for( var s = this.seq(); s; s = s.rest() ) {
+          hash = clojure.lang.Util.hashCombine(
+              hash, clojure.lang.Util.hash( s.first() ) );
+        }
+        this._hash = hash;
+      }
+      return this._hash;
+    },
+    toArray: function(){ return clojure.lang.RT.seqToArray( this.seq() ); },
+    containsAll: function(c){ throw "not yet implemented"; },
+    size: function(){ return this.count(); },
+    isEmpty: function(){ return this.count() == 0; }
+  }
+});
+
+clojure.JS.defclass( clojure.lang, "PersistentHashSet", {
+  extend: clojure.lang.APersistentSet,
+  init: function( meta, impl ) {
+    clojure.lang.APersistentSet.call( this, meta, impl );
+  },
+  statics: {
+    create: function(init){
+      var ret = clojure.lang.PersistentHashSet.EMPTY;
+      for( var s = clojure.seq( init ); s; s=s.rest() ){
+        ret = ret.cons( s.first() );
+      }
+      return ret;
+    }
+  },
+  methods: {
+    disjoin: function(key) {
+      if( this.contains(key) )
+        return new clojure.lang.PersistentHashSet(
+            this._meta, this.impl.without(key));
+      return this;
+    },
+    cons: function(o) {
+      if( this.contains(o) )
+        return this;
+      return new clojure.lang.PersistentHashSet(
+          this._meta, this.impl.assoc(o));
+    },
+    empty: function(){
+      return clojure.lang.PersistentHashSet.EMPTY.withMeta( this._meta );
+    },
+    withMeta: function(_meta){
+      return new clojure.lang.PersistentHashSet( _meta, this.impl );
+    }
+  }
+});
+
+clojure.lang.PersistentHashSet.EMPTY = new clojure.lang.PersistentHashSet(
+    null, clojure.lang.PersistentHashMap.EMPTY );
+
+clojure.JS.defclass( clojure.lang, "MultiFn", {
+  extend: clojure.lang.AFn,
+  init: function( dispatchFn, defaultDispatchVal ) {
+    this.dispatchFn = dispatchFn;
+    this.defaultDispatchVal = defaultDispatchVal;
+    this.methodTable = clojure.lang.PersistentHashMap.EMPTY;
+    this.methodCache = clojure.lang.PersistentHashMap.EMPTY;
+    this.preferTable = clojure.lang.PersistentHashMap.EMPTY;
+    this.cachedHierarchy = null;
+  },
+  methods: {
+    addMethod: function( dispatchVal, method ){
+      this.methodTable = this.methodTable.assoc( dispatchVal, method );
+      this.resetCache();
+      return this;
+    },
+    removeMethod: function( dispatchVal ){
+      this.methodTable = this.methodTable.without( dispatchVal );
+      this.resetCache();
+      return this;
+    },
+    preferMethod: function( dispatchValX, dispatchValY ){
+      if( this.prefers( dispatchValY, dispatchValX ) )
+        throw ("Preference conflict: " + dispatchValY +
+            " is already preferred to" + dispatchValX);
+      var oldset = clojure.get(
+          this.preferTable, dispatchValX, clojure.lang.PersistentHashSet.EMPTY);
+      this.preferTable = this.preferTable.assoc(
+          dispatchValX, clojure.conj( oldset, dispatchValY ) );
+      this.resetCache();
+      return this;
+    },
+    prefers: function(x,y) {
+      var xprefs = this.preferTable.valAt(x);
+      return xprefs && xprefs.contains(y);
+    },
+    isA: function(x,y) { return clojure.isa_QMARK_( x, y ); },
+    dominates: function(x,y) { return this.prefers(x,y) || this.isA(x,y); },
+    resetCache: function() {
+      this.methodCache = this.methodTable;
+      this.cachedHierarchy = clojure.global_hierarchy;
+      return this.methodCache;
+    },
+    getFn: function(dispatchVal) {
+      if( this.cachedHierarchy != clojure.global_hierarchy )
+        this.resetCache();
+      var targetFn =
+        this.methodCache.valAt( dispatchVal ) ||
+        this.findAndCacheBestMethod( dispatchVal ) ||
+        this.methodTable.valAt( this.defaultDispatchVal );
+      if( targetFn === null )
+        throw "No method for dispatch value: " + dispatchVal;
+      return targetFn;
+    },
+    findAndCacheBestMethod: function( dispatchVal ) {
+      var e, bestEntry = null;
+      for( var s = this.methodTable.seq(); s; s = s.rest() ) {
+        e = s.first();
+        if( this.isA( dispatchVal, e.getKey() ) ) {
+          if( bestEntry===null || this.dominates(e.getKey(),bestEntry.getKey()))
+            bestEntry = e;
+          if( ! this.dominates( bestEntry.getKey(), e.getKey() ) )
+            throw ["Multiple methods match dispatch value:", dispatchVal,
+                  "->", e.getKey(), "and", bestEntry.getKey(),
+                  "and neither is preferred"].join(' ');
+        }
+      }
+      if( bestEntry === null )
+        return null;
+      // skip multi-threading protection
+      this.methodCache = this.methodCache.assoc(
+          dispatchVal, bestEntry.getValue());
+      return bestEntry.getValue();
+    },
+    invoke: function() {
+      return (this.getFn( this.dispatchFn.apply( null, arguments ) )
+        .apply( null, arguments ));
+    }
+  }
+});
+
+clojure.print_method = new clojure.lang.MultiFn(
+  function (x, writer){ return clojure.class_(x); },
+  clojure.keyword("","default"));
+
+clojure.print_method.addMethod( String, function(s,w) {
+  return clojure.print_method.apply( null, [new java.lang.String(s), w] );
+});
+
+clojure.JS.def(clojure,"_STAR_print_readably_STAR_",true);
+
 clojure.lang.Namespace.find = function( s ) {
   return clojure.JS.global[ s.substring(1) ];
 };
@@ -913,13 +1742,15 @@ clojure.lang.Namespace.prototype.getMappings = function() {
 (function() {
   var buf = [];
   function write(s) {
+    s = s.toString();
     var parts = s.split(/\n/);
     if( parts.length == 1 ) {
       buf.push(s);
     }
     else {
-      print( buf.join('') + parts.splice(0, parts.length - 1).join('\n') );
-      buf = [ parts[parts.length - 1] ];
+      var last = parts.pop();
+      print( buf.join('') + parts.join('\n') );
+      buf = [ last ];
     }
   }
   clojure._STAR_out_STAR_ = { append: write, write: write };

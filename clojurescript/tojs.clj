@@ -29,8 +29,7 @@
                             *has-recur*])
         mparm (into {} (for [p (.reqParms maxm)] [(.idx p) p]))
         inits (concat
-                (when has-recur
-                  ["_cnt" "_rtn"])
+                (when has-recur ["_cnt" "_rtn"])
                 (vals (reduce dissoc lm (cons thisfn (.reqParms fm))))
                 (when (:fnname ctx) [(str (lm thisfn) "=arguments.callee")])
                 (when (not= fm maxm)
@@ -59,7 +58,7 @@
         manym (< 1 (count (.methods e)))
         newctx (assoc ctx :fnname (.thisName e))]
     (vstr [(when (.variadicMethod e)
-             ["clojure.JS.variatic(" (count (.reqParms maxm)) ","])
+             ["clojure.JS.variadic(" (count (.reqParms maxm)) ","])
            "(function"
            (when *debug-fn-names*
              [" __" (.replaceAll (.name e) "[\\W_]+" "_")])
@@ -104,8 +103,8 @@
 (defn const-str [c]
   (cond
     (or (instance? Character c)
-        (keyword? c)
         (string?  c)) (pr-str (str c))
+    (keyword? c) (str "clojure.keyword(\"" (namespace c) "\",\"" (name c) "\")")
     (symbol?  c) (str \" \' c \")
     (class?   c) (.getCanonicalName c)
     (list?    c) (vstr ["clojure.JS.lit_list(["
@@ -117,7 +116,7 @@
 (defmethod tojs clojure.lang.Compiler$ConstantExpr [e ctx]
   (const-str (.v e)))
 
-(def js-reserved '#{import boolean short byte char})
+(def js-reserved '#{import boolean short byte char class})
 
 (defn var-munge [x]
   (let [n (-> x str Compiler/munge (.replace "." "_DOT_"))]
@@ -155,9 +154,9 @@
 
 (defmethod tojs clojure.lang.Compiler$InvokeExpr [e ctx]
   (vstr [(tojs (.fexpr e) ctx)
-         "("
+         ".apply(null,["
          (vec (interpose "," (map #(tojs % ctx) (.args e))))
-         ")"]))
+         "])"]))
 
 (defmethod tojs clojure.lang.Compiler$LocalBindingExpr [e ctx]
   ((:localmap ctx) (.b e)))
@@ -187,6 +186,10 @@
          (vec (interpose "," (map #(tojs % ctx) (.args e))))
          "))"]))
 
+;(defmethod tojs clojure.lang.Compiler$InstanceMethodExpr [e ctx]
+;  (vstr ["clojure.JS.invoke((" (tojs (.target e) ctx) "),\"" (.methodName e)
+;         "\",[" (vec (interpose "," (map #(tojs % ctx) (.args e)))) "])"]))
+
 (defmethod tojs clojure.lang.Compiler$InstanceMethodExpr [e ctx]
   (vstr ["(" (tojs (.target e) ctx) ")." (.methodName e)
          "(" (vec (interpose "," (map #(tojs % ctx) (.args e)))) ")"]))
@@ -209,14 +212,14 @@
          ")"]))
 
 (defmethod tojs clojure.lang.Compiler$MapExpr [e ctx]
-  (vstr ["clojure.lang.HashMap.create(["
+  (vstr ["clojure.hash_map("
          (vec (interpose "," (map #(tojs % ctx) (.keyvals e))))
-         "])"]))
+         ")"]))
 
 (defmethod tojs clojure.lang.Compiler$SetExpr [e ctx]
-  (vstr ["clojure.lang.HashSet.create(["
+  (vstr ["clojure.hash_set("
          (vec (interpose "," (map #(tojs % ctx) (.keys e))))
-         "])"]))
+         ")"]))
 
 (defmethod tojs clojure.lang.Compiler$BooleanExpr [e ctx]
   (if (.val e) "true" "false"))
@@ -247,8 +250,9 @@
 
 
 (def skip-set '#{seq instance? assoc floats doubles ints longs
-                 global-hierarchy apply refer first rest import hash-map
-                 count find})
+                 apply refer first rest import hash-map
+                 count find keys vals get class contains?
+                 print-method})
 
 (defn skip-defs [expr]
   (let [m ^(.var expr)]
@@ -261,7 +265,9 @@
       ;(when (instance? clojure.lang.Compiler$InvokeExpr mainexpr) (prn :invoke f))
       (when-not (or (and (instance? clojure.lang.Compiler$DefExpr mainexpr)
                          (skip-defs mainexpr))
-                    (instance? clojure.lang.Compiler$InstanceMethodExpr mainexpr)
+                    (and (instance? clojure.lang.Compiler$InstanceMethodExpr mainexpr)
+                         (= "setMacro" (.methodName mainexpr)))
+
                     (and (instance? clojure.lang.Compiler$BodyExpr mainexpr)
                          (instance? clojure.lang.Compiler$DefExpr (first (.exprs mainexpr)))
                          (skip-defs (first (.exprs mainexpr)))))
