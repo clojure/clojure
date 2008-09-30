@@ -3397,10 +3397,10 @@
 
 (defn- print-sequential [#^String begin, print-one, #^String sep, #^String end, sequence, #^Writer w]
   (.write w begin)
-  (loop [[f & r :as s] (seq sequence)]
-    (if r
-      (do (print-one f w) (.write w sep) (recur r))
-      (when s (print-one f w))))
+  (loop [s (seq sequence)]
+    (if (rest s)
+      (do (print-one (first s) w) (.write w sep) (recur (rest s)))
+      (when s (print-one (first s) w))))
   (.write w end))
 
 (defn- print-meta [o, #^Writer w]
