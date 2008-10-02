@@ -1,3 +1,13 @@
+;   Copyright (c) Chris Houser, Sep 2008. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+;   which can be found in the file CPL.TXT at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+; Reads Clojure code and emits equivalent JavaScript
+
 (ns tojs
     (:import (clojure.lang Compiler Compiler$C))
     (:require [clojure.contrib.duck-streams :as ds]))
@@ -249,10 +259,20 @@
          "})()"]))
 
 
-(def skip-set '#{seq instance? assoc floats doubles ints longs
-                 apply refer first rest import hash-map
-                 count find keys vals get class contains?
-                 print-method})
+(def skip-set '#{;-- implemented directly in clj.js
+                 seq instance? assoc apply refer first rest import
+                 hash-map count find keys vals get class contains?
+                 print-method class? number? string? integer? nth
+                 ;-- not supported yet
+                 make-array to-array-2d re-pattern re-matcher re-groups
+                 re-seq re-matches re-find format
+                 ;-- will probably never be supported in cljurescript
+                 eval resolve ns-resolve await await-for macroexpand
+                 macroexpand-1 load-reader load-string special-symbol?
+                 bigint bigdec floats doubles ints longs aset-int
+                 aset-long aset-boolean aset-float aset-double
+                 aset-short aset-char aset-byte slurp seque
+                 decimal? float? pmap })
 
 (defn skip-defs [expr]
   (let [m ^(.var expr)]
