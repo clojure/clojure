@@ -17,12 +17,33 @@
 
 (ns clojure.contrib.sql
   (:import
-   (java.sql DriverManager Connection PreparedStatement ResultSet)))
+   (java.sql DriverManager Connection PreparedStatement ResultSet)
+   (java.util Properties)))
+
+(defn- properties
+  "Converts a Clojure map from keywords or symbols to values into a
+  java.util.Properties object that maps the names of the keywords or
+  symbols to the String representation of the values"
+  [m]
+  (let [p (Properties.)]
+    (when m
+      (loop [[key & keys] (keys m)
+             [val & vals] (vals m)]
+        (.setProperty p (name key) (str val))
+        (when keys
+          (recur keys vals))))
+    p))
 
 (defn connection
-  "Attempts to get a connection to a database via a jdbc URL"
-  [subprotocol db-name]
-  (DriverManager/getConnection (format "jdbc:%s:%s" subprotocol db-name)))
+  "Returns a connection to a database via a jdbc URL. Additional options
+  for the connection may be specified either as a map from keywords to
+  values or as inline keywords and values after db-name"
+  [subprotocol db-name & opts]
+  (DriverManager/getConnection
+   (format "jdbc:%s:%s" subprotocol db-name)
+   (properties (if (keyword? (first opts))
+                 (apply hash-map opts)
+                 (first opts)))))
 
 (defmacro with-connection
   "Evaluates body in the context of a connection to a database. Any updates

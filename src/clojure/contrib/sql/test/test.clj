@@ -19,7 +19,7 @@
 (Class/forName "org.apache.derby.jdbc.EmbeddedDriver")
 
 (defn db []
-  (connection "derby" "/tmp/clojure.contrib.sql.test.db;create=true"))
+  (connection "derby" "/tmp/clojure.contrib.sql.test.db" :create true))
 
 (defn db-write []
   (with-connection con (db)
@@ -31,12 +31,12 @@
       "appearance varchar(32)"
       "cost int"
       "grade real")
-	(insert-rows con "fruit"
+    (insert-rows con "fruit"
       ["Apple" "red" 59 87]
       ["Banana" "yellow" 29 92.2]
       ["Peach" "fuzzy" 139 90.0]
       ["Orange" "juicy" 89 88.6])
-	(insert-values con "fruit" ["name" "cost"]
+    (insert-values con "fruit" ["name" "cost"]
       ["Mango" 722]
       ["Feijoa" 441])))
 
@@ -54,7 +54,7 @@
 
 (defn db-exception []
   (with-connection con (db)
-	(insert-values con "fruit" ["name" "appearance"]
+    (insert-values con "fruit" ["name" "appearance"]
       ["Grape" "yummy"]
       ["Pear" "bruised"])
     (throw (Exception. "an exception"))))
