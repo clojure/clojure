@@ -103,7 +103,7 @@
   "Inserts complete rows into a table. Each row is a seq of values for
   each of the table's columns in order."
   [con table & rows]
-  (apply insert-values con (the-str table) nil rows))
+  (apply insert-values con table nil rows))
 
 (defmacro with-results
   "Executes a query and then evaluates body repeatedly with rec bound to
