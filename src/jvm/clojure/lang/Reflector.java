@@ -298,8 +298,9 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 			   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
 			   && allmethods[i].getParameterTypes().length == arity
 			   && (!Modifier.isVolatile(allmethods[i].getModifiers())
-			       || c.getMethod(allmethods[i].getName(), allmethods[i].getParameterTypes())
-					.equals(allmethods[i])))
+			       || (c == StringBuilder.class &&
+			          c.getMethod(allmethods[i].getName(), allmethods[i].getParameterTypes())
+					.equals(allmethods[i]))))
 				{
 				methods.add(allmethods[i]);
 				}
