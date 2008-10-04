@@ -3962,6 +3962,13 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		else
 			return InvokeExpr.parse(context, form);
 		}
+	catch(Throwable e)
+		{
+		if(!(e instanceof CompilerException))
+			throw new CompilerException((String) SOURCE.get(), (Integer) LINE.get(), e);
+		else
+			throw (CompilerException) e;
+		}
 	finally
 		{
 		Var.popThreadBindings();

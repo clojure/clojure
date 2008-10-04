@@ -784,6 +784,15 @@
   "Bitwise shift right"
   [x n] (. clojure.lang.Numbers shiftRight x n))
 
+(defn even?
+  "Returns true if n is even, throws an exception if n is not an integer"
+  [n] (zero? (bit-and n 1)))
+
+(defn odd?
+  "Returns true if n is odd, throws an exception if n is not an integer"
+  [n] (not (even? n)))
+
+
 ;;
 
 (defn complement
@@ -2167,6 +2176,8 @@
   the binding-forms are bound to their respective init-exprs or parts
   therein."
   [bindings & body]
+  (when (odd? (count bindings))
+    (throw (Exception. "Odd number of elements in let bindings")))
   `(let* ~(destructure bindings) ~@body))
 
 ;redefine fn with destructuring
@@ -3346,14 +3357,6 @@
 (defn reversible? 
  "Returns true if coll implements Reversible"
   [coll] (instance? clojure.lang.Reversible coll))
-
-(defn even?
-  "Returns true if n is even, throws an exception if n is not an integer"
-  [n] (zero? (bit-and n 1)))
-
-(defn odd?
-  "Returns true if n is odd, throws an exception if n is not an integer"
-  [n] (not (even? n)))
 
 (defn pmap 
   "Like map, except f is applied in parallel. Semi-lazy in that the
