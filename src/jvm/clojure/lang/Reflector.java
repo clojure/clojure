@@ -295,12 +295,12 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 			{
 			Method method = allmethods[i];
 			if(name.equals(method.getName())
-			   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
-			   && allmethods[i].getParameterTypes().length == arity
-			   && (!Modifier.isVolatile(allmethods[i].getModifiers())
+			   && Modifier.isStatic(method.getModifiers()) == getStatics
+			   && method.getParameterTypes().length == arity
+			   && (!method.isBridge()
 			       || (c == StringBuilder.class &&
-			          c.getMethod(allmethods[i].getName(), allmethods[i].getParameterTypes())
-					.equals(allmethods[i]))))
+			          c.getMethod(method.getName(), method.getParameterTypes())
+					.equals(method))))
 				{
 				methods.add(allmethods[i]);
 				}
