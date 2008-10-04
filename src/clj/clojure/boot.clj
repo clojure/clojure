@@ -2274,9 +2274,11 @@
 			 (when-first ~b ~gxs
                            (if ~f
 			    ~(if rses
-			       `(let [iterys# ~(emit rses)]
-				  (lazy-cat (iterys# ~ys)
-					    (~giter (rest ~gxs))))
+			       `(let [iterys# ~(emit rses)
+                                      fs# (iterys# ~ys)]
+                                  (if fs#
+				    (lazy-cat fs# (~giter (rest ~gxs)))
+                                    (recur (rest ~gxs))))
 			       `(lazy-cons ~expr (~giter (rest ~gxs))))
                             ~(if (= w :when)
                                `(recur (rest ~gxs))
