@@ -739,19 +739,23 @@
 
 (defn bit-not
   "Bitwise complement"
+  {:inline (fn [x] `(. clojure.lang.Numbers (not ~x)))}
   [x] (. clojure.lang.Numbers not x))
 
 
 (defn bit-and
   "Bitwise and"
+   {:inline (fn [x y] `(. clojure.lang.Numbers (and ~x ~y)))}
   [x y] (. clojure.lang.Numbers and x y))
 
 (defn bit-or
   "Bitwise or"
+  {:inline (fn [x y] `(. clojure.lang.Numbers (or ~x ~y)))}
   [x y] (. clojure.lang.Numbers or x y))
 
 (defn bit-xor
   "Bitwise exclusive or"
+  {:inline (fn [x y] `(. clojure.lang.Numbers (xor ~x ~y)))}
   [x y] (. clojure.lang.Numbers xor x y))
 
 (defn bit-and-not

@@ -294,21 +294,21 @@ static public Number divide(BigInteger n, BigInteger d){
 	                 (d.signum() < 0 ? d.negate() : d));
 }
 
-static public Number not(Number x){
-	return bitOps(x).not(x);
+static public Number not(Object x){
+	return bitOps(x).not((Number)x);
 }
 
 
-static public Number and(Number x, Number y){
-	return bitOps(x).combine(bitOps(y)).and(x, y);
+static public Number and(Object x, Object y){
+	return bitOps(x).combine(bitOps(y)).and((Number)x, (Number)y);
 }
 
-static public Number or(Number x, Number y){
-	return bitOps(x).combine(bitOps(y)).or(x, y);
+static public Number or(Object x, Object y){
+	return bitOps(x).combine(bitOps(y)).or((Number)x, (Number)y);
 }
 
-static public Number xor(Number x, Number y){
-	return bitOps(x).combine(bitOps(y)).xor(x, y);
+static public Number xor(Object x, Object y){
+	return bitOps(x).combine(bitOps(y)).xor((Number)x, (Number)y);
 }
 
 static public Number andNot(Number x, Number y){
@@ -1562,6 +1562,21 @@ static public int add(int x, int y){
 	return ret;
 }
 
+static public int not(int x){
+	return ~x;
+}
+
+static public int and(int x, int y){
+	return x & y;
+}
+
+static public int or(int x, int y){
+	return x | y;
+}
+
+static public int xor(int x, int y){
+	return x ^ y;
+}
 
 static public int minus(int x, int y){
 	int ret = x - y;
@@ -3458,6 +3473,30 @@ static public Number add(int x, Object y){
 
 static public Number add(Object x, int y){
 	return add(x,(Object)y);
+}
+
+static public Number and(int x, Object y){
+	return and((Object)x,y);
+}
+
+static public Number and(Object x, int y){
+	return and(x,(Object)y);
+}
+
+static public Number or(int x, Object y){
+	return or((Object)x,y);
+}
+
+static public Number or(Object x, int y){
+	return or(x,(Object)y);
+}
+
+static public Number xor(int x, Object y){
+	return xor((Object)x,y);
+}
+
+static public Number xor(Object x, int y){
+	return xor(x,(Object)y);
 }
 
 static public Number add(float x, Object y){
