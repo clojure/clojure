@@ -18,21 +18,8 @@
 (ns clojure.contrib.sql
   (:import
    (java.sql DriverManager Connection PreparedStatement ResultSet)
-   (java.util Properties)))
-
-(defn- properties
-  "Converts a Clojure map from keywords or symbols to values into a
-  java.util.Properties object that maps the names of the keywords or
-  symbols to the String representation of the values"
-  [m]
-  (let [p (Properties.)]
-    (when m
-      (loop [[key & keys] (keys m)
-             [val & vals] (vals m)]
-        (.setProperty p (name key) (str val))
-        (when keys
-          (recur keys vals))))
-    p))
+   (java.util Properties))
+  (:load "internal.clj"))
 
 (defn connection
   "Returns a connection to a database via a jdbc URL. Additional options
@@ -74,43 +61,49 @@
     (doseq set sets
       (doseq [index value] (map vector (iterate inc 1) set)
         (.setObject stmt index value))
-      (.addBatch stmt ))
+      (.addBatch stmt))
     (.executeBatch stmt)))
 
 (defn create-table
-  "Creates a table given a name and column specifications"
+  "Creates a table given a name (a string or keyword) and column specs. A
+  column spec is a name (a string or keyword) followed by a type (a string
+  or keyword naming a data type understood by the database)."
   [con name & cols]
   (do-commands con
     (format "create table %s (%s)"
-            name
-            (apply str (interpose "," cols)))))
+            (the-str name)
+            (apply str
+             (apply concat
+              (interpose ", "
+               (map (partial interpose " ")
+                (partition 2 (the-strs cols)))))))))
 
 (defn drop-table
-  "Drops a table give its name"
+  "Drops a table give its name (a string or keyword)"
   [con name]
   (do-commands con
-    (format "drop table %s" name)))
+    (format "drop table %s" (the-str name))))
 
 (defn insert-values
   "Inserts values into columns of a table. Columns is a seq of column
-  names (as strings) and each value is a seq of values for those
-  columns. To insert complete rows (all columns), use insert-rows"
+  names (strings or keywords) and each value is a seq of values for those
+  columns. To insert complete rows (all columns), use insert-rows."
   [con table columns & values]
   (let [count (count (first values))
         template (apply str (interpose "," (replicate count "?")))
         cols (if (seq columns)
-               (format "(%s)" (apply str (interpose "," columns)))
+               (format "(%s)" (apply str (interpose "," (the-strs columns))))
                "")]
     (apply do-prepared
            con
-           (format "insert into %s %s values (%s)" table cols template)
+           (format "insert into %s %s values (%s)" (the-str table) cols template)
            values)))
 
 (defn insert-rows
   "Inserts complete rows into a table. Each row is a seq of values for
   each of the table's columns in order."
   [con table & rows]
-  (apply insert-values con table nil rows))
+  (apply insert-values con (the-str table) nil rows))
 
 (defmacro with-results
   "Executes a query and then evaluates body repeatedly with rec bound to
