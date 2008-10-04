@@ -31,9 +31,3 @@
   (if (instance? String x)
     x
     (name x)))
-
-(defn- the-strs
-  "Returns a seq of the Strings represented by the Strings, Keywords, or
-  Symbols in the seq x"
-  [x]
-  (map the-str x))

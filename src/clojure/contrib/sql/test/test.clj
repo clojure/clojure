@@ -27,10 +27,10 @@
      (drop-table con :fruit)
      (catch Exception e))
     (create-table con :fruit
-      :name "varchar(32)"
-      :appearance "varchar(32)"
-      :cost :int
-      :grade :real)
+      [:name "varchar(32)" "NOT NULL"]
+      [:appearance "varchar(32)"]
+      [:cost :int]
+      [:grade :real])
     (insert-rows con :fruit
       ["Apple" "red" 59 87]
       ["Banana" "yellow" 29 92.2]

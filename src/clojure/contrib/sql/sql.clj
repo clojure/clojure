@@ -66,17 +66,17 @@
 
 (defn create-table
   "Creates a table given a name (a string or keyword) and column specs. A
-  column spec is a name (a string or keyword) followed by a type (a string
-  or keyword naming a data type understood by the database)."
+  column spec is a vector containing a name, a type, and optionally other
+  items such as constraints, each a string or keyword."
   [con name & cols]
   (do-commands con
     (format "create table %s (%s)"
             (the-str name)
             (apply str
-             (apply concat
-              (interpose ", "
-               (map (partial interpose " ")
-                (partition 2 (the-strs cols)))))))))
+             (map the-str
+              (apply concat
+               (interpose [", "]
+                (map (partial interpose " ") cols))))))))
 
 (defn drop-table
   "Drops a table give its name (a string or keyword)"
@@ -92,7 +92,7 @@
   (let [count (count (first values))
         template (apply str (interpose "," (replicate count "?")))
         cols (if (seq columns)
-               (format "(%s)" (apply str (interpose "," (the-strs columns))))
+               (format "(%s)" (apply str (interpose "," (map the-str columns))))
                "")]
     (apply do-prepared
            con
