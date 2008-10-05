@@ -41,7 +41,8 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 	Object[] boxedArgs = null;
 	if(methods.isEmpty())
 		{
-		throw new IllegalArgumentException("No matching method found: " + methodName);
+		throw new IllegalArgumentException("No matching method found: " + methodName
+			+ " for " + target.getClass());
 		}
 	else if(methods.size() == 1)
 		{
@@ -68,7 +69,8 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		m = foundm;
 		}
 	if(m == null)
-		throw new IllegalArgumentException("No matching method found: " + methodName);
+		throw new IllegalArgumentException("No matching method found: " + methodName
+			+ " for " + target.getClass());
 
 	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
 		{
@@ -76,7 +78,8 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		m = getAsMethodOfPublicBase(m.getDeclaringClass(), m);
 		}
 	if(m == null)
-		throw new IllegalArgumentException("No matching method found: " + methodName);
+		throw new IllegalArgumentException("No matching method found: " + methodName
+			+ " for " + target.getClass());
 	try
 		{
 		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
@@ -130,7 +133,8 @@ public static Object invokeConstructor(Class c, Object[] args) throws Exception{
 			}
 		if(ctors.isEmpty())
 			{
-			throw new IllegalArgumentException("No matching ctor found");
+			throw new IllegalArgumentException("No matching ctor found"
+				+ " for " + c);
 			}
 		else if(ctors.size() == 1)
 			{
@@ -149,7 +153,8 @@ public static Object invokeConstructor(Class c, Object[] args) throws Exception{
 					return ctor.newInstance(boxedArgs);
 					}
 				}
-			throw new IllegalArgumentException("No matching ctor found");
+			throw new IllegalArgumentException("No matching ctor found"
+				+ " for " + c);
 			}
 		}
 	catch(InvocationTargetException e)
@@ -199,7 +204,8 @@ public static Object getStaticField(Class c, String fieldName) throws Exception{
 		{
 		return prepRet(f.getType(), f.get(null));
 		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName);
+	throw new IllegalArgumentException("No matching field found: " + fieldName
+		+ " for " + c);
 }
 
 public static Object setStaticField(String className, String fieldName, Object val) throws Exception{
@@ -214,7 +220,8 @@ public static Object setStaticField(Class c, String fieldName, Object val) throw
 		f.set(null, boxArg(f.getType(), val));
 		return val;
 		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName);
+	throw new IllegalArgumentException("No matching field found: " + fieldName
+		+ " for " + c);
 }
 
 public static Object getInstanceField(Object target, String fieldName) throws Exception{
@@ -224,7 +231,8 @@ public static Object getInstanceField(Object target, String fieldName) throws Ex
 		{
 		return prepRet(f.getType(), f.get(target));
 		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName);
+	throw new IllegalArgumentException("No matching field found: " + fieldName
+		+ " for " + target.getClass());
 }
 
 public static Object setInstanceField(Object target, String fieldName, Object val) throws Exception{
@@ -235,7 +243,8 @@ public static Object setInstanceField(Object target, String fieldName, Object va
 		f.set(target, boxArg(f.getType(), val));
 		return val;
 		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName);
+	throw new IllegalArgumentException("No matching field found: " + fieldName
+		+ " for " + target.getClass());
 }
 
 public static Object invokeNoArgInstanceMember(Object target, String name) throws Exception{
