@@ -313,6 +313,8 @@ clojure = new clojure.lang.Namespace({
       isPos: function(x) { return x > 0; },
       lt: function(x,y) { return x < y; },
       gt: function(x,y) { return x > y; },
+      minus: function(x,y) { return x - y; },
+      add: function(x,y) { return x + y; },
       inc: function(x) { return x + 1; },
       dec: function(x) { return x - 1; },
       unchecked_inc: function(x) { return x + 1; }
@@ -371,6 +373,9 @@ clojure = new clojure.lang.Namespace({
       intCast: function(i) {
         return parseInt(i);
       },
+      makeStringBuilder: function(s) {
+        return new clojure.JS.StringBuilder( s===undefined ? "" : s );
+      }
     }
   }
 });
@@ -496,7 +501,7 @@ clojure.JS.defclass( clojure.lang, "ArraySeq", {
       return new clojure.lang.ArraySeq( _meta, this.array, this.i, this.len );
     },
     reduce: function( fn, start ) {
-      var ret = (start === undefined) ? this.a[0] : fn(start, this.a[0]);
+      var ret = (start===undefined) ? this.a[this.i] : fn(start,this.a[this.i]);
       for( var x = this.i + 1; x < this.len; ++x ) {
         ret = fn( ret, this.a[x] );
       }
