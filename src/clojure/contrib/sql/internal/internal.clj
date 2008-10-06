@@ -6,7 +6,7 @@
 ;;  this license. You must not remove this notice, or any other, from this
 ;;  software.
 ;;
-;;  internal definitions for 'clojure.contrib.sql
+;;  internal definitions for clojure.contrib.sql
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 3 October 2008

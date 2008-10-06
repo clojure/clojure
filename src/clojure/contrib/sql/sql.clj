@@ -89,7 +89,7 @@
   or keyword) and column specs. A column spec is a vector containing a name
   and optionally a type and other items such as constraints, each a string
   or keyword."
-  [name & cols]
+  [name & column-specs]
   (do-commands
    (format "create table %s (%s)"
            (the-str name)
@@ -97,7 +97,7 @@
              (map the-str
               (apply concat
                (interpose [", "]
-                (map (partial interpose " ") cols))))))))
+                (map (partial interpose " ") column-specs))))))))
 
 (defn drop-table
   "Drops a table on the open database connection given its name (a string
@@ -110,16 +110,16 @@
   "Inserts values into columns of a table. columns is a vector of column
   names (strings or keywords) and each value is a vector of values for
   those columns. To insert complete rows (all columns), use insert-rows."
-  [table columns & values]
+  [table column-names & values]
   (let [count (count (first values))
         template (apply str (interpose "," (replicate count "?")))
-        cols (if (seq columns)
+        columns (if (seq column-names)
                (format "(%s)"
-                       (apply str(interpose "," (map the-str columns))))
+                 (apply str (interpose "," (map the-str column-names))))
                "")]
     (apply do-prepared
            (format "insert into %s %s values (%s)"
-                   (the-str table) cols template)
+                   (the-str table) columns template)
            values)))
 
 (defn insert-rows
@@ -129,10 +129,10 @@
   (apply insert-values table nil rows))
 
 (defmacro with-results
-  "Executes a query and then evaluates body with res bound to a seq of the
-  results"
-  [res sql & body]
+  "Executes a query and then evaluates body with results bound to a seq of
+  the results"
+  [results sql & body]
   `(with-open stmt# (.prepareStatement (connection) ~sql)
      (with-open rset# (.executeQuery stmt#)
-       (let [~res (resultset-seq rset#)]
+       (let [~results (resultset-seq rset#)]
          ~@body))))

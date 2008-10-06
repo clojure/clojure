@@ -8,7 +8,7 @@
 ;;
 ;;  test.clj
 ;;
-;;  test/example for clojure.contrib.sql.test
+;;  test/example for clojure.contrib.sql
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 13 September 2008
