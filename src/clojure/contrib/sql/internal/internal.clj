@@ -16,30 +16,28 @@
 (def *db* {:connection nil :level 0})
 
 (defn connection
-  "Returns the current database connection. Throws an exception if there is
-  no curent connection."
+  "Returns the current database connection or throws an exception."
   []
-  (if-let connection (:connection *db*)
-	connection
-	(throw (Exception. "no current database connection"))))
+  (or (:connection *db*)
+      (throw (Exception. "no current database connection"))))
+
+(defn the-str
+  "Returns the name or string representation of x"
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
 
 (defn properties
-  "Converts a Clojure map from keywords or symbols to values into a
-  java.util.Properties object that maps the names of the keywords or
-  symbols to the String representation of the values"
+  "Converts a map from keywords or symbols to values into a
+  java.util.Properties object that maps the same keys to the values with
+  all represented as strings."
   [m]
   (let [p (java.util.Properties.)]
     (when m
       (loop [[key & keys] (keys m)
              [val & vals] (vals m)]
-        (.setProperty p (name key) (str val))
+        (.setProperty p (the-str key) (the-str val))
         (when keys
           (recur keys vals))))
     p))
-
-(defn the-str
-  "Returns the String represented by the String, Keyword, or Symbol x"
-  [x]
-  (if (instance? String x)
-    x
-    (name x)))
