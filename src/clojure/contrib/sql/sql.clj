@@ -17,7 +17,7 @@
 
 (ns clojure.contrib.sql
   (:use clojure.contrib.except
-		clojure.contrib.sql.internal))
+        clojure.contrib.sql.internal))
 
 (defmacro with-connection
   "Evaluates body in the context of a new connection to a database then
@@ -114,10 +114,12 @@
   (let [count (count (first values))
         template (apply str (interpose "," (replicate count "?")))
         cols (if (seq columns)
-               (format "(%s)" (apply str (interpose "," (map the-str columns))))
+               (format "(%s)"
+                       (apply str(interpose "," (map the-str columns))))
                "")]
     (apply do-prepared
-           (format "insert into %s %s values (%s)" (the-str table) cols template)
+           (format "insert into %s %s values (%s)"
+                   (the-str table) cols template)
            values)))
 
 (defn insert-rows
