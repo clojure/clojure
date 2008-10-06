@@ -14,47 +14,72 @@
 ;;  Created 13 September 2008
 
 (ns clojure.contrib.sql.test
-  (:use clojure.contrib.sql))
+  (:require [clojure.contrib.sql :as sql]))
 
-(clojure.lang.RT/classForName "org.apache.derby.jdbc.EmbeddedDriver")
+(def db {:classname "org.apache.derby.jdbc.EmbeddedDriver"
+         :subprotocol "derby"
+         :subname "/tmp/clojure.contrib.sql.test.db"
+         :create true})
 
-(defn db []
-  (connection "derby" "/tmp/clojure.contrib.sql.test.db" :create true))
+(defn drop-fruit []
+  (try
+   (sql/drop-table :fruit)
+   (catch Exception e)))
+
+(defn create-fruit []
+  (sql/create-table :fruit
+    [:name "varchar(32)" "NOT NULL"]
+    [:appearance "varchar(32)"]
+    [:cost :int]
+    [:grade :real]))
+
+(defn insert-rows-fruit []
+  (sql/insert-rows :fruit
+    ["Apple" "red" 59 87]
+    ["Banana" "yellow" 29 92.2]
+    ["Peach" "fuzzy" 139 90.0]
+    ["Orange" "juicy" 89 88.6]))
+
+(defn insert-values-fruit []
+  (sql/insert-values :fruit
+    [:name :cost]
+    ["Mango" 722]
+    ["Feijoa" 441]))
 
 (defn db-write []
-  (with-connection con (db)
-    (try
-     (drop-table con :fruit)
-     (catch Exception e))
-    (create-table con :fruit
-      [:name "varchar(32)" "NOT NULL"]
-      [:appearance "varchar(32)"]
-      [:cost :int]
-      [:grade :real])
-    (insert-rows con :fruit
-      ["Apple" "red" 59 87]
-      ["Banana" "yellow" 29 92.2]
-      ["Peach" "fuzzy" 139 90.0]
-      ["Orange" "juicy" 89 88.6])
-    (insert-values con :fruit [:name :cost]
-      ["Mango" 722]
-      ["Feijoa" 441])))
+  (sql/with-connection db
+    (sql/transaction
+     (drop-fruit)
+     (create-fruit)
+     (insert-rows-fruit)
+     (insert-values-fruit)))
+  nil)
 
 (defn db-read []
-  (with-connection con (db)
-    (with-results rec con
-      "select * from fruit"
-      (println rec))))
+  (sql/with-connection db
+    (sql/with-results res
+     "select * from fruit"
+      (doseq rec res
+        (println rec)))))
+
+(defn db-read-all []
+  (sql/with-connection db
+    (sql/with-results res
+     "select * from fruit"
+      (into [] res))))
 
 (defn db-grade-a []
-  (with-connection con (db)
-    (with-results rec con
-      "select name, cost from fruit where grade >= 90"
-      (println rec))))
+  (sql/with-connection db
+    (sql/with-results res
+     "select name, cost from fruit where grade >= 90"
+      (doseq rec res
+        (println rec)))))
 
 (defn db-exception []
-  (with-connection con (db)
-    (insert-values con :fruit [:name :appearance]
-      ["Grape" "yummy"]
-      ["Pear" "bruised"])
-    (throw (Exception. "an exception"))))
+  (sql/with-connection db
+    (sql/transaction
+      (sql/insert-values :fruit
+        [:name :appearance]
+        ["Grape" "yummy"]
+        ["Pear" "bruised"])
+      (throw (Exception. "an exception")))))

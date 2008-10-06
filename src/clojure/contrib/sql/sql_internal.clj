@@ -11,12 +11,12 @@
 ;;  scgilardi (gmail)
 ;;  Created 3 October 2008
 
-(defn- properties
+(defn properties
   "Converts a Clojure map from keywords or symbols to values into a
   java.util.Properties object that maps the names of the keywords or
   symbols to the String representation of the values"
   [m]
-  (let [p (Properties.)]
+  (let [p (java.util.Properties.)]
     (when m
       (loop [[key & keys] (keys m)
              [val & vals] (vals m)]
