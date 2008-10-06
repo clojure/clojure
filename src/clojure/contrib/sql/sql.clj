@@ -16,10 +16,8 @@
 ;;  Created 2 April 2008
 
 (ns clojure.contrib.sql
-  (:use clojure.contrib.except)
-  (:load "sql_internal.clj"))
-
-(def *db* {:con nil :level 0})
+  (:use clojure.contrib.except
+		clojure.contrib.sql.internal))
 
 (defmacro with-connection
   "Evaluates body in the context of a new connection to a database then
@@ -37,7 +35,7 @@
          (java.sql.DriverManager/getConnection
           (format "jdbc:%s:%s" (:subprotocol ~db-spec) (:subname ~db-spec))
           (properties (dissoc ~db-spec :classname :subprotocol :subname)))
-       (binding [*db* (assoc *db* :con con# :level 0)]
+       (binding [*db* (assoc *db* :connection con# :level 0)]
          ~@body))))
 
 (defmacro transaction
@@ -46,9 +44,8 @@
   any uncaught exception. Any nested transactions will be absorbed into the
   outermost transaction."
   [& body]
-  `(let [con# (:con *db*)
+  `(let [con# (connection)
          level# (:level *db*)]
-     (throw-if (not con#) "no database connection")
      (binding [*db* (assoc *db* :level (inc level#))]
        (let [auto-commit# (.getAutoCommit con#)]
          (when (zero? level#)
@@ -71,7 +68,7 @@
   "Executes SQL commands that don't return results on the open database
   connection"
   [& commands]
-  (with-open stmt (.createStatement (:con *db*))
+  (with-open stmt (.createStatement (connection))
     (doseq cmd commands
       (.addBatch stmt cmd))
     (.executeBatch stmt)))
@@ -80,7 +77,7 @@
   "Executes a prepared statement on the open database connection with
   parameter sets"
   [sql & sets]
-  (with-open stmt (.prepareStatement (:con *db*) sql)
+  (with-open stmt (.prepareStatement (connection) sql)
     (doseq set sets
       (doseq [index value] (map vector (iterate inc 1) set)
         (.setObject stmt index value))
@@ -133,7 +130,7 @@
   "Executes a query and then evaluates body with res bound to a seq of the
   results"
   [res sql & body]
-  `(with-open stmt# (.prepareStatement (:con *db*) ~sql)
+  `(with-open stmt# (.prepareStatement (connection) ~sql)
      (with-open rset# (.executeQuery stmt#)
        (let [~res (resultset-seq rset#)]
          ~@body))))

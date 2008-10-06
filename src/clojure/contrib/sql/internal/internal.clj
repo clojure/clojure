@@ -11,6 +11,18 @@
 ;;  scgilardi (gmail)
 ;;  Created 3 October 2008
 
+(ns clojure.contrib.sql.internal)
+
+(def *db* {:connection nil :level 0})
+
+(defn connection
+  "Returns the current database connection. Throws an exception if there is
+  no curent connection."
+  []
+  (if-let connection (:connection *db*)
+	connection
+	(throw (Exception. "no current database connection"))))
+
 (defn properties
   "Converts a Clojure map from keywords or symbols to values into a
   java.util.Properties object that maps the names of the keywords or
@@ -25,7 +37,7 @@
           (recur keys vals))))
     p))
 
-(defn- the-str
+(defn the-str
   "Returns the String represented by the String, Keyword, or Symbol x"
   [x]
   (if (instance? String x)
