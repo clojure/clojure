@@ -1,5 +1,5 @@
 diff --git a/src/clj/clojure/boot.clj b/src/clj/clojure/boot.clj
-index 68cb448..e09191a 100644
+index e0dd304..3c1f7e8 100644
 --- a/src/clj/clojure/boot.clj
 +++ b/src/clj/clojure/boot.clj
 @@ -315,7 +315,7 @@
@@ -29,7 +29,7 @@ index 68cb448..e09191a 100644
    ([x y] (. clojure.lang.Numbers (multiply x y)))
    ([x y & more]
     (reduce * (* x y) more)))
-@@ -1018,7 +1018,7 @@
+@@ -1031,7 +1031,7 @@
    ([state] (new clojure.lang.Agent state))
    ([state validate-fn] (new clojure.lang.Agent state validate-fn)))
  
@@ -38,7 +38,7 @@ index 68cb448..e09191a 100644
  
  (defn send
    "Dispatch an action to an agent. Returns the agent immediately.
-@@ -1330,10 +1330,10 @@
+@@ -1343,10 +1343,10 @@
  (defn range
    "Returns a lazy seq of nums from start (inclusive) to end
    (exclusive), by step, where start defaults to 0 and step to 1."
@@ -51,7 +51,7 @@ index 68cb448..e09191a 100644
                   (new clojure.lang.Range start end)
                   (take (- end start) (iterate inc start))))
    ([start end step]
-@@ -1397,7 +1397,7 @@
+@@ -1410,7 +1410,7 @@
    ([#^java.util.Comparator comp #^java.util.Collection coll]
     (when (and coll (not (. coll (isEmpty))))
       (let [a (. coll (toArray))]
@@ -60,7 +60,7 @@ index 68cb448..e09191a 100644
         (seq a)))))
  
  (defn sort-by
-@@ -1427,8 +1427,8 @@
+@@ -1440,8 +1440,8 @@
           ~@body)
         (recur (rest list#)))))
  
@@ -71,7 +71,7 @@ index 68cb448..e09191a 100644
  
  (defn dorun
    "When lazy sequences are produced via functions that have side
-@@ -1463,7 +1463,7 @@
+@@ -1476,7 +1476,7 @@
    occurred."
    [& agents]
      (when *agent*
@@ -80,7 +80,7 @@ index 68cb448..e09191a 100644
      (let [latch (new java.util.concurrent.CountDownLatch (count agents))
            count-down (fn [agent] (. latch (countDown)) agent)]
        (doseq agent agents
-@@ -1482,7 +1482,7 @@
+@@ -1495,7 +1495,7 @@
    to timeout, non-nil otherwise."
    [timeout-ms & agents]
      (when *agent*
@@ -89,7 +89,7 @@ index 68cb448..e09191a 100644
      (let [latch (new java.util.concurrent.CountDownLatch (count agents))
            count-down (fn [agent] (. latch (countDown)) agent)]
        (doseq agent agents
-@@ -1514,6 +1514,8 @@
+@@ -1527,6 +1527,8 @@
            (. ns (importClass c (. Class (forName (str pkg "." c)))))) )
        (apply import (rest import-lists))))
  
@@ -98,7 +98,7 @@ index 68cb448..e09191a 100644
  (defn into-array
    "Returns an array of the type of the first element in coll,
    containing the contents of coll, which must be of a compatible
-@@ -1728,7 +1730,7 @@
+@@ -1741,7 +1743,7 @@
    {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
     :inline-arities #{2}}
    ([array idx]
@@ -107,7 +107,7 @@ index 68cb448..e09191a 100644
    ([array idx & idxs]
     (apply aget (aget array idx) idxs)))
  
-@@ -1738,7 +1740,7 @@
+@@ -1751,7 +1753,7 @@
    {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a ~i ~v)))
     :inline-arities #{3}}
    ([array idx val]
@@ -116,7 +116,7 @@ index 68cb448..e09191a 100644
     val)
    ([array idx idx2 & idxv]
     (apply aset (aget array idx) idx2 idxv)))
-@@ -1906,6 +1908,10 @@
+@@ -1919,6 +1921,10 @@
    "Returns a set of the distinct elements of coll."
    [coll] (apply hash-set coll))
  
@@ -127,7 +127,7 @@ index 68cb448..e09191a 100644
  (defn #^{:private true}
    filter-key [keyfn pred amap]
      (loop [ret {} es (seq amap)]
-@@ -1938,7 +1944,7 @@
+@@ -1951,7 +1957,7 @@
    the-ns [x]
    (if (instance? clojure.lang.Namespace x) 
      x 
@@ -136,7 +136,7 @@ index 68cb448..e09191a 100644
  
  (defn ns-name
    "Returns the name of the namespace, a symbol."
-@@ -1971,7 +1977,7 @@
+@@ -1984,7 +1990,7 @@
  (defn ns-imports
    "Returns a map of the import mappings for the namespace."
    [ns]
@@ -145,7 +145,7 @@ index 68cb448..e09191a 100644
  
  (defn refer
    "refers to all public vars of ns, subject to filters.
-@@ -1989,7 +1995,8 @@
+@@ -2002,7 +2008,8 @@
    to a symbol different from the var's name, in order to prevent
    clashes. Use :use in the ns macro in preference to calling this directly."
    [ns-sym & filters]
@@ -155,7 +155,7 @@ index 68cb448..e09191a 100644
            fs (apply hash-map filters)
            nspublics (ns-publics ns)
            rename (or (:rename fs) {})
-@@ -2125,7 +2132,7 @@
+@@ -2138,7 +2145,7 @@
                                                       true)
                                  (= firstb :as) (pb ret (second bs) gvec)
                                  :else (if seen-rest?
@@ -164,7 +164,7 @@ index 68cb448..e09191a 100644
                                          (recur (pb ret firstb  (list `nth gvec n nil))
                                                 (inc n)
                                                 (rest bs)
-@@ -2156,7 +2163,7 @@
+@@ -2169,7 +2176,7 @@
                    (symbol? b) (-> bvec (conj b) (conj v))
                    (vector? b) (pvec bvec b v)
                    (map? b) (pmap bvec b v)
@@ -173,7 +173,7 @@ index 68cb448..e09191a 100644
          process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
      (if (every? symbol? (keys bmap))
        bindings
-@@ -2293,7 +2300,7 @@
+@@ -2310,7 +2317,7 @@
    StringWriter.  Returns the string created by any nested printing
    calls."
    [& body]
@@ -182,7 +182,7 @@ index 68cb448..e09191a 100644
       (binding [*out* s#]
         ~@body
         (str s#))))
-@@ -2339,7 +2346,7 @@
+@@ -2356,7 +2363,7 @@
   logical true."
    [x]
    `(when-not ~x
@@ -191,7 +191,7 @@ index 68cb448..e09191a 100644
  
  (defn test
    "test [v] finds fn at key :test in var metadata and calls it,
-@@ -2411,7 +2418,7 @@
+@@ -2428,7 +2435,7 @@
  (defn rand
    "Returns a random floating point number between 0 (inclusive) and
    1 (exclusive)."
@@ -200,7 +200,7 @@ index 68cb448..e09191a 100644
    ([n] (* n (rand))))
  
  (defn rand-int
-@@ -2521,7 +2528,7 @@
+@@ -2538,7 +2545,7 @@
    "Reads the file named by f into a string and returns it."
    [#^String f]
    (with-open r (new java.io.BufferedReader (new java.io.FileReader f))
@@ -209,7 +209,7 @@ index 68cb448..e09191a 100644
        (loop [c (. r (read))]
          (if (neg? c)
            (str sb)
-@@ -2805,10 +2812,6 @@
+@@ -2822,10 +2829,6 @@
       (send-off agt fill)
       (drain))))
  
@@ -220,7 +220,7 @@ index 68cb448..e09191a 100644
  (defn alter-var-root
    "Atomically alters the root binding of var v by applying f to its
    current value plus any args"
-@@ -2893,7 +2896,7 @@
+@@ -2910,7 +2913,7 @@
    relationships."
    ([tag] (descendants global-hierarchy tag))
    ([h tag] (if (class? tag)
@@ -229,7 +229,7 @@ index 68cb448..e09191a 100644
               (not-empty (get (:descendants h) tag)))))
  
  (defn derive
-@@ -2920,9 +2923,9 @@
+@@ -2937,9 +2940,9 @@
       (or 
        (when-not (contains? (tp tag) parent)
          (when (contains? (ta tag) parent)
@@ -241,7 +241,7 @@ index 68cb448..e09191a 100644
          {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
           :ancestors (tf (:ancestors h) tag td parent ta)
           :descendants (tf (:descendants h) parent ta tag td)})
-@@ -3049,7 +3052,7 @@
+@@ -3066,7 +3069,7 @@
    [pred fmt & args]
    (when pred
      (let [message (apply format fmt args)

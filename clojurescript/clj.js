@@ -17,12 +17,20 @@ clojure = {
       }
       return t;
     },
-    Class: {}
+    Class: {
+      classname: "clojure.JS.Class",
+      hashCode: function() { return clojure.lang.Util.hash( this.classname ); },
+      isAssignableFrom: function(base) { return base.classset[this.classname];},
+      getSuperclass: function() { return this.extend || null; },
+      getInterfaces: function() { return this.implement || null; }
+    }
   },
   lang: {
     Namespace: function( m ) { clojure.JS.merge( this, m || {} ); }
   }
 };
+
+clojure.JS.Class.constructor = clojure.JS.Class;
 
 if( ! clojure.JS.global["java"] ) {
   java = { lang: { String: {}, Character: {}, Class: {} },
@@ -191,7 +199,7 @@ clojure = new clojure.lang.Namespace({
     if( o === null )
       return null;
     if( typeof o === clojure.JS.functionType && ! ("constructor" in o) )
-      return "" + o; // a Java class?
+      return java.lang.Class;
     return o.constructor || typeof o;
   },
   import_: function() {
@@ -241,12 +249,12 @@ clojure = new clojure.lang.Namespace({
       return new clojure.lang.ArraySeq( null, a, 0 );
     },
     implement: function( cls, name, extend, implement ) {
+      clojure.JS.merge( cls, clojure.JS.Class );
       cls.classname = name;
       cls.extend = extend;
       cls.implement = implement;
       cls.classset = {};
       cls.classset[ name ] = true;
-      clojure.JS.merge( cls, clojure.JS.classmethods );
       if( implement ) {
         for( var i = 0; i < implement.length; ++i ) {
           if( ! implement[ i ] )
@@ -289,13 +297,6 @@ clojure = new clojure.lang.Namespace({
         rtn += n & 1;
       }
       return rtn;
-    },
-    classmethods: {
-      constructor: clojure.JS.Class,
-      hashCode: function() { return clojure.lang.Util.hash( this.classname ); },
-      isAssignableFrom: function(base) { return base.classset[this.classname];},
-      getSuperclass: function() { return this.extend || null; },
-      getInterfaces: function() { return this.implement || null; }
     },
     ObjSeq: {
       create: function( obj ) {
@@ -479,12 +480,9 @@ clojure.JS.defclass( clojure.lang, "ArraySeq", {
   },
   statics: {
     create: function( a ) {
-      if( a && a.length ) {
+      if( a && a.length )
         return new clojure.lang.ArraySeq( null, a, 0 );
-      }
-      else {
-        return null;
-      }
+      return null;
     }
   },
   methods: {
@@ -1597,6 +1595,12 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "HashCollisionNode", {
         return leaves[ idx ];
       return null;
     },
+    find: function(hash, key){
+      var idx = this.findIndex(hash, key);
+      if(idx != -1)
+        return this.leaves[idx];
+      return null;
+    },
     nodeSeq: function(){
       return clojure.lang.ArraySeq.create(this.leaves);
     },
@@ -1782,7 +1786,16 @@ clojure.print_method = new clojure.lang.MultiFn(
   clojure.keyword("","default"));
 
 clojure.print_method.addMethod( String, function(s,w) {
-  return clojure.print_method.apply( null, [new clojure.JS.String(s), w] );
+  return (clojure.get( clojure.print_method.methodTable, java.lang.String )
+    .apply(null, [new clojure.JS.String(s), w]));
+});
+
+clojure.print_method.addMethod( java.lang.Class, function(c,w) {
+  return clojure.print_method.apply( null, [""+c, w] );
+});
+
+clojure.print_method.addMethod( clojure.JS.Class, function(c,w) {
+  return w.write( c.classname );
 });
 
 clojure.JS.def(clojure,"_STAR_print_readably_STAR_",true);

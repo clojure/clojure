@@ -9,7 +9,8 @@
 ; Reads Clojure code and emits equivalent JavaScript
 
 (ns tojs
-    (:import (clojure.lang Compiler Compiler$C))
+    (:import (clojure.lang Compiler Compiler$C Compiler$BodyExpr
+                           Compiler$DefExpr Compiler$InstanceMethodExpr))
     (:require [clojure.contrib.duck-streams :as ds]))
 
 (defn vstr [v]
@@ -196,16 +197,12 @@
          (vec (interpose "," (map #(tojs % ctx) (.args e))))
          "))"]))
 
-;(defmethod tojs clojure.lang.Compiler$InstanceMethodExpr [e ctx]
-;  (vstr ["clojure.JS.invoke((" (tojs (.target e) ctx) "),\"" (.methodName e)
-;         "\",[" (vec (interpose "," (map #(tojs % ctx) (.args e)))) "])"]))
-
 (defmethod tojs clojure.lang.Compiler$InstanceMethodExpr [e ctx]
-  (vstr ["(" (tojs (.target e) ctx) ")." (.methodName e)
+  (vstr ["(" (tojs (.target e) ctx) ")." (var-munge (.methodName e))
          "(" (vec (interpose "," (map #(tojs % ctx) (.args e)))) ")"]))
 
 (defmethod tojs clojure.lang.Compiler$InstanceFieldExpr [e ctx]
-  (vstr ["(" (tojs (.target e) ctx) ")." (.fieldName e)]))
+  (vstr ["(" (tojs (.target e) ctx) ")." (var-munge (.fieldName e))]))
 
 (defmethod tojs clojure.lang.Compiler$IfExpr [e ctx]
   (str "((" (tojs (.testExpr e) ctx)
@@ -274,6 +271,8 @@
                  aset-short aset-char aset-byte slurp seque
                  decimal? float? pmap })
 
+(def skip-method #{"java.lang.Class"})
+
 (defn skip-defs [expr]
   (let [m ^(.var expr)]
     (or (:macro m) (skip-set (:name m)))))
@@ -282,14 +281,15 @@
   (binding [*allow-unresolved-vars* true]
     (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
           mainexpr (-> expr .fexpr .methods first .body .exprs first)]
-      ;(when (instance? clojure.lang.Compiler$InvokeExpr mainexpr) (prn :invoke f))
-      (when-not (or (and (instance? clojure.lang.Compiler$DefExpr mainexpr)
+      (when-not (or (and (instance? Compiler$DefExpr mainexpr)
                          (skip-defs mainexpr))
-                    (and (instance? clojure.lang.Compiler$InstanceMethodExpr mainexpr)
-                         (= "setMacro" (.methodName mainexpr)))
-
-                    (and (instance? clojure.lang.Compiler$BodyExpr mainexpr)
-                         (instance? clojure.lang.Compiler$DefExpr (first (.exprs mainexpr)))
+                    (and (instance? Compiler$InstanceMethodExpr mainexpr)
+                         (or (= "setMacro" (.methodName mainexpr))
+                             (and (= "addMethod" (.methodName mainexpr))
+                                  (skip-method (tojs (first (.args mainexpr))
+                                                     nil)))))
+                    (and (instance? Compiler$BodyExpr mainexpr)
+                         (instance? Compiler$DefExpr (first (.exprs mainexpr)))
                          (skip-defs (first (.exprs mainexpr)))))
         (str (tojs expr {:localmap {}}) ";")))))
 
@@ -298,16 +298,20 @@
     (binding [*ns* (create-ns 'tmp)]
       (loop []
         (when-let f (try (read reader) (catch Exception e nil))
-          (when-let js (formtojs f)
+          (if-let js (formtojs f)
+            (do
+              (when *debug-comments*
+                (println "\n//======")
+                (print "//")
+                (prn f)
+                (println "//---"))
+              (println (formtojs f))
+              (when (or (= 'ns (first f))
+                        (= 'in-ns (first f)))
+                (eval f)))
             (when *debug-comments*
-              (println "\n//======")
-              (print "//")
-              (prn f)
-              (println "//---"))
-            (println (formtojs f))
-            (when (or (= 'ns (first f))
-                      (= 'in-ns (first f)))
-              (eval f)))
+              (print "// Skipping: ")
+              (prn f)))
           (recur))))))
 
 (defn simple-tests []
