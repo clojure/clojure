@@ -1,5 +1,5 @@
 diff --git a/src/clj/clojure/boot.clj b/src/clj/clojure/boot.clj
-index e0dd304..3c1f7e8 100644
+index 40c90a0..99caeba 100644
 --- a/src/clj/clojure/boot.clj
 +++ b/src/clj/clojure/boot.clj
 @@ -315,7 +315,7 @@
@@ -52,9 +52,9 @@ index e0dd304..3c1f7e8 100644
                   (take (- end start) (iterate inc start))))
    ([start end step]
 @@ -1410,7 +1410,7 @@
-   ([#^java.util.Comparator comp #^java.util.Collection coll]
-    (when (and coll (not (. coll (isEmpty))))
-      (let [a (. coll (toArray))]
+   ([#^java.util.Comparator comp coll]
+    (when (and coll (not (zero? (count coll))))
+      (let [a (to-array coll)]
 -       (. java.util.Arrays (sort a comp))
 +       (clojure.lang.RT/sortArray a comp)
         (seq a)))))
@@ -251,7 +251,7 @@ index e0dd304..3c1f7e8 100644
            boring? #(not= (.getMethodName %) "doInvoke")
            trace (into-array (drop 2 (drop-while boring? raw-trace)))]
 diff --git a/src/jvm/clojure/lang/RT.java b/src/jvm/clojure/lang/RT.java
-index 2a01ab3..18d4007 100644
+index 0a891bf..a1fafb7 100644
 --- a/src/jvm/clojure/lang/RT.java
 +++ b/src/jvm/clojure/lang/RT.java
 @@ -30,6 +30,8 @@ public class RT{
@@ -274,7 +274,7 @@ index 2a01ab3..18d4007 100644
  static public IPersistentMap map(Object... init){
  	if(init != null && init.length == 2)
  		return new PersistentArrayMap(init);
-@@ -1642,4 +1648,35 @@ static public int alength(Object xs){
+@@ -1644,4 +1650,35 @@ static public int alength(Object xs){
  	return Array.getLength(xs);
  }
  
