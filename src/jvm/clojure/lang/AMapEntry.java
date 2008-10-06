@@ -14,10 +14,50 @@ package clojure.lang;
 
 import java.io.StringWriter;
 
-public abstract class AMapEntry implements IMapEntry, IPersistentVector{
+public abstract class AMapEntry extends APersistentVector implements IMapEntry{
+
+public Object nth(int i){
+	if(i == 0)
+		return key();
+	else if(i == 1)
+		return val();
+	else
+		throw new IndexOutOfBoundsException();
+}
+
+private IPersistentVector asVector(){
+	return LazilyPersistentVector.createOwning(key(), val());
+}
+
+public IPersistentVector assocN(int i, Object val){
+	return asVector().assocN(i, val);
+}
+
+public int count(){
+	return 2;
+}
+
+public ISeq seq(){
+	return asVector().seq();
+}
+
+public IPersistentVector cons(Object o){
+	return asVector().cons(o);
+}
+
 public IPersistentCollection empty(){
 	return null;
 }
+
+public IPersistentStack pop(){
+	return LazilyPersistentVector.createOwning(key());
+}
+
+public Object setValue(Object value){
+	throw new UnsupportedOperationException();
+}
+
+/*
 
 public boolean equals(Object obj){
 	return APersistentVector.doEquals(this, obj);
@@ -25,7 +65,8 @@ public boolean equals(Object obj){
 
 public int hashCode(){
 	//must match logic in APersistentVector
-	return Util.hashCombine(Util.hashCombine(0, Util.hash(key())), Util.hash(val()));
+	return 31 * (31 + Util.hash(key())) + Util.hash(val());
+//	return Util.hashCombine(Util.hashCombine(0, Util.hash(key())), Util.hash(val()));
 }
 
 public String toString(){
@@ -99,11 +140,10 @@ public Object peek(){
 	return val();
 }
 
-public IPersistentStack pop(){
-	return LazilyPersistentVector.createOwning(key());
-}
 
 public ISeq rseq() throws Exception{
 	return asVector().rseq();
 }
+*/
+
 }

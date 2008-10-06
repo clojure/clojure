@@ -37,8 +37,4 @@ public Object getValue(){
 	return val();
 }
 
-public Object setValue(Object value){
-	throw new UnsupportedOperationException();
-}
-
 }

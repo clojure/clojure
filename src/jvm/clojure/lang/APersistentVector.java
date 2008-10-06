@@ -14,12 +14,16 @@ package clojure.lang;
 
 import java.util.*;
 
-public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable, Collection, List,
+public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
+                                                               List,
                                                                RandomAccess, Comparable{
 int _hash = -1;
 
 public APersistentVector(IPersistentMap meta){
 	super(meta);
+}
+
+protected APersistentVector(){
 }
 
 public String toString(){
@@ -39,17 +43,30 @@ public ISeq rseq(){
 }
 
 static boolean doEquals(IPersistentVector v, Object obj){
-	if(obj instanceof IPersistentVector)
+	if(obj instanceof List || obj instanceof IPersistentVector)
 		{
-		IPersistentVector ma = (IPersistentVector) obj;
-		if(ma.count() != v.count() || ma.hashCode() != v.hashCode())
+		Collection ma = (Collection) obj;
+		if(ma.size() != v.count() || ma.hashCode() != v.hashCode())
 			return false;
-		for(int i = 0; i < v.count(); i++)
+		for(Iterator i1 = ((List) v).iterator(), i2 = ma.iterator();
+		    i1.hasNext();)
 			{
-			if(!Util.equal(v.nth(i), ma.nth(i)))
+			if(!Util.equal(i1.next(), i2.next()))
 				return false;
 			}
+		return true;
 		}
+//	if(obj instanceof IPersistentVector)
+//		{
+//		IPersistentVector ma = (IPersistentVector) obj;
+//		if(ma.count() != v.count() || ma.hashCode() != v.hashCode())
+//			return false;
+//		for(int i = 0; i < v.count(); i++)
+//			{
+//			if(!Util.equal(v.nth(i), ma.nth(i)))
+//				return false;
+//			}
+//		}
 	else
 		{
 		if(!(obj instanceof Sequential))
@@ -75,11 +92,18 @@ public boolean equals(Object obj){
 public int hashCode(){
 	if(_hash == -1)
 		{
-		int hash = 0;
-		for(int i = 0; i < count(); i++)
+		int hash = 1;
+		Iterator i = iterator();
+		while(i.hasNext())
 			{
-			hash = Util.hashCombine(hash, Util.hash(nth(i)));
+			Object obj = i.next();
+			hash = 31 * hash + (obj == null ? 0 : obj.hashCode());
 			}
+//		int hash = 0;
+//		for(int i = 0; i < count(); i++)
+//			{
+//			hash = Util.hashCombine(hash, Util.hash(nth(i)));
+//			}
 		this._hash = hash;
 		}
 	return _hash;
@@ -116,7 +140,7 @@ public ListIterator listIterator(final int index){
 		int nexti = index;
 
 		public boolean hasNext(){
-			return nexti < count() - 1;
+			return nexti < count();
 		}
 
 		public Object next(){

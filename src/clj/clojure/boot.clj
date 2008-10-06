@@ -1405,11 +1405,11 @@
   "Returns a sorted sequence of the items in coll. If no comparator is
   supplied, uses compare. comparator must
   implement java.util.Comparator."
-  ([#^java.util.Collection coll]
+  ([coll]
    (sort compare coll))
-  ([#^java.util.Comparator comp #^java.util.Collection coll]
-   (when (and coll (not (. coll (isEmpty))))
-     (let [a (. coll (toArray))]
+  ([#^java.util.Comparator comp coll]
+   (when (and coll (not (zero? (count coll))))
+     (let [a (to-array coll)]
        (. java.util.Arrays (sort a comp))
        (seq a)))))
 

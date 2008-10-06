@@ -484,10 +484,6 @@ static abstract class Node extends AMapEntry{
 		return val();
 	}
 
-	public Object setValue(Object value){
-		throw new UnsupportedOperationException();
-	}
-
 	Node left(){
 		return null;
 	}

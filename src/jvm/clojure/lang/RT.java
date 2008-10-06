@@ -1044,6 +1044,8 @@ static public Object[] toArray(Object coll) throws Exception{
 		return (Object[]) coll;
 	else if(coll instanceof Collection)
 		return ((Collection) coll).toArray();
+	else if(coll instanceof Map)
+		return ((Map) coll).entrySet().toArray();
 	else if(coll instanceof String)
 		{
 		char[] chars = ((String) coll).toCharArray();

@@ -46,18 +46,23 @@ public Object invoke(Object arg1) throws Exception{
 }
 
 public boolean equals(Object obj){
-	if(!(obj instanceof IPersistentSet))
+	if(!(obj instanceof Set))
 		return false;
-	IPersistentSet m = (IPersistentSet) obj;
+	Set m = (Set) obj;
 
-	if(m.count() != count() || m.hashCode() != hashCode())
+	if(m.size() != count() || m.hashCode() != hashCode())
 		return false;
 
-	for(ISeq s = seq(); s != null; s = s.rest())
+	for(Object aM : m)
 		{
-		if(!m.contains(s.first()))
+		if(!m.contains(aM))
 			return false;
 		}
+//	for(ISeq s = seq(); s != null; s = s.rest())
+//		{
+//		if(!m.contains(s.first()))
+//			return false;
+//		}
 
 	return true;
 }
@@ -65,11 +70,13 @@ public boolean equals(Object obj){
 public int hashCode(){
 	if(_hash == -1)
 		{
-		int hash = count();
+		//int hash = count();
+		int hash = 0;
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
 			Object e = s.first();
-			hash = Util.hashCombine(hash, Util.hash(e));
+//			hash = Util.hashCombine(hash, Util.hash(e));
+			hash +=  Util.hash(e);
 			}
 		this._hash = hash;
 		}

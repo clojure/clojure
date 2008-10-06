@@ -10,10 +10,9 @@
 
 package clojure.lang;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
-public abstract class APersistentMap extends AFn implements IPersistentMap, Collection{
+public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable{
 int _hash = -1;
 
 
@@ -54,19 +53,19 @@ public IPersistentCollection cons(Object o){
 }
 
 public boolean equals(Object obj){
-	if(!(obj instanceof IPersistentMap))
+	if(!(obj instanceof Map))
 		return false;
-	IPersistentMap m = (IPersistentMap) obj;
+	Map m = (Map) obj;
 
-	if(m.count() != count() || m.hashCode() != hashCode())
+	if(m.size() != size() || m.hashCode() != hashCode())
 		return false;
 
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
 		Map.Entry e = (Map.Entry) s.first();
-		Map.Entry me = m.entryAt(e.getKey());
+		boolean found = m.containsKey(e.getKey());
 
-		if(me == null || !Util.equal(e.getValue(), me.getValue()))
+		if(!found || !Util.equal(e.getValue(), m.get(e.getKey())))
 			return false;
 		}
 
@@ -76,11 +75,14 @@ public boolean equals(Object obj){
 public int hashCode(){
 	if(_hash == -1)
 		{
-		int hash = count();
+		//int hash = count();
+		int hash = 0;
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
 			Map.Entry e = (Map.Entry) s.first();
-			hash ^= Util.hashCombine(Util.hash(e.getKey()), Util.hash(e.getValue()));
+			hash += (e.getKey() == null ? 0 : e.getKey().hashCode()) ^
+			        (e.getValue() == null ? 0 : e.getValue().hashCode());
+			//hash ^= Util.hashCombine(Util.hash(e.getKey()), Util.hash(e.getValue()));
 			}
 		this._hash = hash;
 		}
@@ -158,6 +160,133 @@ public Object invoke(Object arg1, Object notFound) throws Exception{
 	return valAt(arg1, notFound);
 }
 
+// java.util.Map implementation
+
+public void clear(){
+	throw new UnsupportedOperationException();
+}
+
+public boolean containsValue(Object value){
+	return values().contains(value);
+}
+
+public Set entrySet(){
+	return new AbstractSet(){
+
+		public Iterator iterator(){
+			return APersistentMap.this.iterator();
+		}
+
+		public int size(){
+			return count();
+		}
+
+		public int hashCode(){
+			return APersistentMap.this.hashCode();
+		}
+
+		public boolean contains(Object o){
+			if(o instanceof Entry)
+				{
+				Entry e = (Entry) o;
+				Entry found = entryAt(e.getKey());
+				if(found != null && Util.equal(found.getValue(), e.getValue()))
+					return true;
+				}
+			return false;
+		}
+	};
+}
+
+public Object get(Object key){
+	return valAt(key);
+}
+
+public boolean isEmpty(){
+	return count() == 0;
+}
+
+public Set keySet(){
+	return new AbstractSet(){
+
+		public Iterator iterator(){
+			final Iterator mi = APersistentMap.this.iterator();
+
+			return new Iterator(){
+
+
+				public boolean hasNext(){
+					return mi.hasNext();
+				}
+
+				public Object next(){
+					Entry e = (Entry) mi.next();
+					return e.getKey();
+				}
+
+				public void remove(){
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
+
+		public int size(){
+			return count();
+		}
+
+		public boolean contains(Object o){
+			return APersistentMap.this.containsKey(o);
+		}
+	};
+}
+
+public Object put(Object key, Object value){
+	throw new UnsupportedOperationException();
+}
+
+public void putAll(Map t){
+	throw new UnsupportedOperationException();
+}
+
+public Object remove(Object key){
+	throw new UnsupportedOperationException();
+}
+
+public int size(){
+	return count();
+}
+
+public Collection values(){
+	return new AbstractCollection(){
+
+		public Iterator iterator(){
+			final Iterator mi = APersistentMap.this.iterator();
+
+			return new Iterator(){
+
+
+				public boolean hasNext(){
+					return mi.hasNext();
+				}
+
+				public Object next(){
+					Entry e = (Entry) mi.next();
+					return e.getValue();
+				}
+
+				public void remove(){
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
+
+		public int size(){
+			return count();
+		}
+	};
+}
+
+/*
 // java.util.Collection implementation
 
 public Object[] toArray(){
@@ -230,5 +359,5 @@ public boolean contains(Object o){
 		}
 	return false;
 }
-
+*/
 }

@@ -552,10 +552,6 @@ final static class LeafNode extends AMapEntry implements INode{
 	public Object getValue(){
 		return this.val;
 	}
-
-	public Object setValue(Object value){
-		throw new UnsupportedOperationException();
-	}
 }
 
 final static class HashCollisionNode implements INode{
