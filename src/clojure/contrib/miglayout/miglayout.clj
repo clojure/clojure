@@ -21,7 +21,7 @@
 
 (ns clojure.contrib.miglayout
   (:import (java.awt Container Component)
-		   (net.miginfocom.swing MigLayout)))
+           (net.miginfocom.swing MigLayout)))
 
 (defn miglayout
   "Adds java.awt.Components to a java.awt.Container with constraints
