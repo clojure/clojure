@@ -30,14 +30,14 @@
     - container is the container for the subsequent components
     - an optional map mapping any or all of the keys :layout, :column
       or :row to a string that specifies the corresponding constraints for
-      the whole layout.
+      the whole layout
     - a series of compononents, each followed by zero or more component
-      constraints.
+      constraints
 
   Component constraints may be supplied as strings, keywords, vectors, or
   maps. The set of constraints for a single component is presented to
   MiGLayout as a single string with each constraint and its arguments
-  separated from any subsequent constraint by a commas. Keywords appear
+  separated from any subsequent constraint by a comma. Keywords appear
   without their leading colons.
 
   Component constraints:
@@ -47,7 +47,7 @@
     - A keyword specifies a single constraint without arguments
     - A vector specifies a single constraint with zero or more arguments
     - A map specifiess one or more constraints as keys, each mapped to a
-      single argument."
+      single argument"
   [container & args]
   (let [[f & r :as a] args
         [constraints args] (if (map? f) [f r] [nil a])
