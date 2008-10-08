@@ -2874,9 +2874,9 @@
        (and (vector? parent) (vector? child)
             (= (count parent) (count child))
             (loop [ret true i 0]
-              (if (= i (count parent))
+              (if (or (not ret) (= i (count parent)))
                 ret
-                (recur (and (isa? (child i) (parent i)) ret) (inc i))))))))
+                (recur (isa? h (child i) (parent i)) (inc i))))))))
 
 (defn parents
   "Returns the immediate parents of tag, either via a Java type
