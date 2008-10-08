@@ -179,6 +179,23 @@ clojure = new clojure.lang.Namespace({
   hash_set: function() {
     return clojure.lang.PersistentHashSet.create( arguments );
   },
+  to_array: function(coll){
+    if( coll === null )
+      return clojure.lang.RT.EMPTY_ARRAY;
+    if( coll.toArray )
+      return coll.toArray();
+    if( typeof coll === clojure.JS.stringType ) {
+      var rtn = new Array( coll.length );
+      for( var i = 0; i < coll.length; ++i ) {
+        rtn[i] = coll[i];
+      }
+      return rtn;
+    }
+    if( coll.constructor === Array ) {
+      return coll.slice(0);
+    }
+    throw "Unable to convert: " + coll.constructor.classname + " to Array";
+  },
   keyword: function(a,b) {
     if( b === undefined )
       return clojure.lang.Keyword.intern( "", a );
@@ -322,24 +339,14 @@ clojure = new clojure.lang.Namespace({
     },
     Util: {
       hash: function(o){
-        if( o === null )
-          return 0;
-        if( typeof o == clojure.JS.stringType ) {
-          var ret = 0; // lousy hand-made string hash
-          for( var i = 0; i < o.length; ++i ) {
-            ret ^= o.charCodeAt(i) << ((i % 4) * 8);
-          }
-          return ret;
-        }
-        if( typeof o == clojure.JS.numberType ) {
-          return o & 0xffffffff;
-        }
         switch( o ) {
+          case null:     return 0;
           case String:   return 0x7A837A70;
           case Number:   return 0x7A837A71;
           case RegExp:   return 0x7A837A72;
           case Object:   return 0x7A837A73;
           case Function: return 0x7A837A74;
+          case Array:    return 0x7A837A75;
           case java.lang.String:
           case java.lang.Character:
           case java.lang.Class:
@@ -347,7 +354,29 @@ clojure = new clojure.lang.Namespace({
           case java.util.regex.Pattern:
                          return 0x7A830001;
         }
+        switch( typeof o ) {
+          case clojure.JS.stringType:
+            var ret = 0; // lousy hand-made string hash
+            for( var i = 0; i < o.length; ++i ) {
+              ret ^= o.charCodeAt(i) << ((i % 4) * 8);
+            }
+            return ret;
+          case clojure.JS.numberType:
+            return o & 0xffffffff;
+        }
+        switch( o.constructor ) {
+          case Array:
+            var ret = o.length;
+            for( var i = 0; i < o.length; ++i ) {
+              ret = clojure.lang.Util.hashCombine(
+                  ret, clojure.lang.Util.hash( o[i] ) );
+            }
+            return ret;
+        }
         return o.hashCode();
+      },
+      hashCombine: function(seed, hash){
+        return seed ^ (hash + 0x9e3779b9 + (seed << 6) + (seed >> 2));
       },
       equal: function(x,y) { return x == y; },
       isInteger: function(x) { return typeof x == clojure.JS.numberType; }
@@ -762,13 +791,17 @@ clojure.JS.defclass( clojure.lang, "PersistentList", {
     this._count = _count || 1;
   },
   statics: {
-    creator: function() {
-      var real = clojure.lang.PersistentList.creator;
-      if( real == arguments.callee ) {
-        throw "Not yet implemented: clojure.lang.PersistentList.creator";
+    creator: clojure.JS.variadic(0,function(){
+      var args = clojure.JS.rest_args(this,arguments,0);
+      if( clojure.JS.instanceq( clojure.lang.ArraySeq, args ) ) {
+        var ret = clojure.lang.PersistentList.EMPTY;
+        for( var i = args.a.length - 1; i >= 0; --i ) {
+          ret = ret.cons( args.a[ i ] );
+        }
+        return ret;
       }
-      return real.apply( arguments );
-    },
+      throw "Not yet implemented: clojure.lang.PersistentList.creator with non-ArraySeq";
+    }),
     EMPTY: new clojure.lang.EmptyList(null)
   },
   methods: {
@@ -808,6 +841,8 @@ clojure.JS.defclass( clojure.lang, "PersistentList", {
 });
 
 clojure.JS.defclass( clojure.lang, "APersistentVector", {
+  extend: clojure.lang.AFn,
+  implement: [clojure.lang.IPersistentVector],
   init: function( _meta ) { this._meta = _meta; },
   methods: {
     meta: function() { return this._meta; },
@@ -823,7 +858,7 @@ clojure.JS.defclass( clojure.lang, "APersistentVector", {
     },
     rseq: function() {
       if( this.count() > 0 )
-        return new clojure.lang.APersistentVector.RSeq( this, this.count() - 1);
+        return new clojure.lang.APersistentVector.RSeq( null, this, this.count() - 1);
       return null;
     },
     equals: function() { throw "not implemented yet"; },
@@ -921,6 +956,7 @@ clojure.JS.defclass( clojure.lang.APersistentVector, "Seq", {
     this.i = i;
   },
   methods: {
+    seq: function(){ return this; },
     first: function(){ return this.v.nth(this.i); },
     rest: function(){
       if( this.i + 1 < this.v.count() )
@@ -951,16 +987,55 @@ clojure.JS.defclass( clojure.lang.APersistentVector, "RSeq", {
     this.i = i;
   },
   methods: {
+    seq: function(){ return this; },
     first: function(){ return this.v.nth(this.i); },
     rest: function(){
       if( this.i > 0 )
-        return new clojure.lang.APersistentVector.RSeq( this.v, this.i - 1 );
+        return new clojure.lang.APersistentVector.RSeq( this._meta, this.v, this.i - 1 );
       return null;
     },
     index: function(){ return this.i; },
     count: function(){ return this.i + 1; },
     withMeta: function(_meta){
       return new clojure.lang.APersistentVector.RSeq( _meta, this.v, this.i );
+    }
+  }
+});
+
+clojure.JS.defclass( clojure.lang, "LazilyPersistentVector", {
+  extend: clojure.lang.APersistentVector,
+  init: function( _meta, ary, v ) {
+    this._meta = _meta;
+    this.ary = ary;
+    this._v = v;
+  },
+  statics: {
+    createOwning: function(ary) {
+      if(ary.length === 0)
+        return clojure.lang.PersistentVector.EMPTY;
+      return new clojure.lang.LazilyPersistentVector( null, ary, null );
+    },
+    create: function(coll) {
+      return clojure.lang.LazilyPersistentVector.createOwning(coll.toArray());
+    }
+  },
+  methods: {
+    toArray: function() { return this.ary; },
+    nth: function(i) { return this.ary[i]; },
+    assocN: function(i,val) { return this.v().assoc(i,val); },
+    count: function() { return this.ary.length; },
+    cons: function(o) { return this.v().cons(o); },
+    empty: function() { return clojure.lang.PersistentVector.EMPTY.withMeta(this._meta); },
+    pop: function() { return this.v().pop(); },
+    v: function() {
+      if( this._v === null )
+        this._v = clojure.lang.PersistentVector.create(this.ary);
+      return this._v;
+    },
+    withMeta: function(meta) {
+      if( meta != this._meta )
+        return new clojure.lang.LazilyPersistentVector( meta, this.ary, this.v );
+      return this;
     }
   }
 });

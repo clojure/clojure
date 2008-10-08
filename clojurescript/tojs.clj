@@ -260,6 +260,7 @@
                  seq instance? assoc apply refer first rest import
                  hash-map count find keys vals get class contains?
                  print-method class? number? string? integer? nth
+                 to-array
                  ;-- not supported yet
                  make-array to-array-2d re-pattern re-matcher re-groups
                  re-seq re-matches re-find format
