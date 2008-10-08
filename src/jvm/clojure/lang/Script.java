@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Arrays;
@@ -75,7 +76,7 @@ public static void main(String[] args) throws Exception{
 			}
 		catch(IOException e)
 			{
-			e.printStackTrace();
+			e.printStackTrace((PrintWriter)RT.ERR.get());
 			}
 		}
 }

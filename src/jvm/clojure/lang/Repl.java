@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
 public class Repl{
 static final Symbol USER = Symbol.create("user");
@@ -58,7 +59,7 @@ public static void main(String[] args) throws Exception{
 				}
 			catch(Exception e)
 				{
-				e.printStackTrace();
+				e.printStackTrace((PrintWriter)RT.ERR.get());
 				}
 
 		//repl IO support
@@ -94,14 +95,14 @@ public static void main(String[] args) throws Exception{
 				Throwable c = e;
 				while(c.getCause() != null)
 					c = c.getCause();
-				System.err.println(e instanceof Compiler.CompilerException ? e : c);
+				((PrintWriter)RT.ERR.get()).println(e instanceof Compiler.CompilerException ? e : c);
 				stare.set(e);
 				}
 			}
 		}
 	catch(Exception e)
 		{
-		e.printStackTrace();
+		e.printStackTrace((PrintWriter)RT.ERR.get());
 		}
 	finally
 		{

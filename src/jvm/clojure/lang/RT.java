@@ -171,6 +171,9 @@ final static public Var OUT =
 final static public Var IN =
 		Var.intern(CLOJURE_NS, Symbol.create("*in*"),
 		           new LineNumberingPushbackReader(new InputStreamReader(System.in, UTF8)));
+final static public Var ERR =
+		Var.intern(CLOJURE_NS, Symbol.create("*err*"),
+		           new PrintWriter(new OutputStreamWriter(System.err, UTF8), true));
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
 final static public Var MACRO_META = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
@@ -368,7 +371,7 @@ public static void loadResourceScript(Class c, String name, boolean failIfNotFou
 }
 
 static public void init() throws Exception{
-	System.err.println("No need to call RT.init() anymore");
+	((PrintWriter)RT.ERR.get()).println("No need to call RT.init() anymore");
 }
 
 static void doInit() throws Exception{

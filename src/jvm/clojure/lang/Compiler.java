@@ -846,7 +846,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.line = line;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			System.err.format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line,
+			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line,
 			                  fieldName);
 			}
 	}
@@ -1045,7 +1045,7 @@ static abstract class MethodExpr extends HostExpr{
 				}
 			catch(Exception e1)
 				{
-				e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+				e1.printStackTrace((PrintWriter)RT.ERR.get());  //To change body of catch statement use File | Settings | File Templates.
 				}
 
 			}
@@ -1102,7 +1102,7 @@ static class InstanceMethodExpr extends MethodExpr{
 
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			System.err.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
+			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
 	}
 
@@ -1237,7 +1237,7 @@ static class StaticMethodExpr extends MethodExpr{
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			System.err.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
+			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
 	}
 
@@ -2060,7 +2060,7 @@ public static class NewExpr implements Expr{
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			System.err.format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, c.getName());
+			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, c.getName());
 			}
 	}
 
