@@ -20,7 +20,8 @@
 ;;  Created 5 October 2008
 
 (ns clojure.contrib.miglayout
-  (:import (net.miginfocom.swing MigLayout)))
+  (:import (java.awt Container Component)
+		   (net.miginfocom.swing MigLayout)))
 
 (defn miglayout
   "Adds java.awt.Components to a java.awt.Container with constraints
@@ -48,7 +49,7 @@
     - A vector specifies a single constraint with zero or more arguments
     - A map specifiess one or more constraints as keys, each mapped to a
       single argument"
-  [container & args]
+  [#^Container container & args]
   (let [[f & r :as a] args
         [constraints args] (if (map? f) [f r] [nil a])
         the-str #((if (keyword? %) name str) %)]
@@ -57,7 +58,7 @@
        (str (:layout constraints))
        (str (:column constraints))
        (str (:row constraints))))
-    (loop [component (first args)
+    (loop [#^Component component (first args)
            constraints nil
            [arg & args] (rest args)]
       (cond (string? arg)
