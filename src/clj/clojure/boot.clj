@@ -2129,7 +2129,7 @@
                                 n 0
                                 bs b
                                 seen-rest? false]
-                           (if bs
+                           (if (seq bs)
                              (let [firstb (first bs)]
                                (cond
                                 (= firstb '&) (recur (pb ret (second bs) (list `nthrest gvec n))
@@ -2156,7 +2156,7 @@
                                                ((key entry) bes)))
                                      (dissoc b :as :or)
                                      {:keys #(keyword (str %)), :strs str, :syms #(list `quote %)})]
-                           (if bes
+                           (if (seq bes)
                              (let [bb (key (first bes))
                                    bk (val (first bes))
                                    has-default (contains? defaults bb)]
