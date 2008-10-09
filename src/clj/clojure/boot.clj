@@ -3438,6 +3438,16 @@
 
 (prefer-method print-method clojure.lang.IPersistentList clojure.lang.ISeq)
 
+(defmethod print-method java.util.List [o, #^Writer w]
+  (.write w "##(")
+  (.write w (.getName (class o)))
+  (.write w ". ")
+  (print-sequential "[" print-method " " "]" o w)
+  (.write w ")"))
+
+(prefer-method print-method clojure.lang.IPersistentList java.util.List)
+(prefer-method print-method clojure.lang.IPersistentVector java.util.List)
+
 (def #^{:tag String 
         :doc "Returns escape string for char or nil if none"}
   char-escape-string
@@ -3480,6 +3490,21 @@
    "}"
    (seq m) w))
 
+(defmethod print-method java.util.Map [m, #^Writer w]
+  (.write w "##(")
+  (.write w (.getName (class m)))
+  (.write w ". ")
+  (print-sequential 
+   "{"
+   (fn [e  #^Writer w] 
+     (do (print-method (key e) w) (.append w \ ) (print-method (val e) w)))
+   ", "
+   "}"
+   (seq m) w)
+  (.write w ")"))
+
+(prefer-method print-method clojure.lang.IPersistentMap java.util.Map)
+
 (defmethod print-method clojure.lang.IPersistentSet [s, #^Writer w]
   (print-meta s w)
   (print-sequential "#{" print-method " " "}" (seq s) w))
@@ -3503,6 +3528,7 @@
   nil)
 
 (defmethod print-method Class [#^Class c, #^Writer w]
+  (.write w "##")
   (.write w (.getName c)))
 
 (defmethod print-method java.math.BigDecimal [b, #^Writer w]

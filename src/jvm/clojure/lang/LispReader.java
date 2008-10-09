@@ -82,10 +82,11 @@ static
 
 
 	dispatchMacros['^'] = new MetaReader();
-	dispatchMacros['\''] = new WrappingReader(THE_VAR);
+	dispatchMacros['\''] = new VarReader();
 	dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['('] = new FnReader();
 	dispatchMacros['{'] = new SetReader();
+	dispatchMacros['#'] = new EvalReader();
 	}
 
 static boolean isWhitespace(int ch){
@@ -171,7 +172,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 			throw e;
 		LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) r;
 		//throw new Exception(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()), e);
-		throw new ReaderException(rdr.getLineNumber(),e);
+		throw new ReaderException(rdr.getLineNumber(), e);
 		}
 }
 
@@ -452,6 +453,17 @@ static class WrappingReader extends AFn{
 		return RT.list(sym, o);
 	}
 
+}
+
+static class VarReader extends AFn{
+	public Object invoke(Object reader, Object quote) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		Object o = read(r, true, null, true);
+		Object v = Compiler.maybeResolveIn(Compiler.currentNS(), (Symbol) o);
+		if(v instanceof Var)
+			return v;
+		return RT.list(THE_VAR, o);
+	}
 }
 
 /*
@@ -800,6 +812,16 @@ static class ListReader extends AFn{
 			return s.withMeta(RT.map(RT.LINE_KEY, line));
 		else
 			return s;
+	}
+
+}
+
+static class EvalReader extends AFn{
+	public Object invoke(Object reader, Object eq) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+
+		Compiler.Expr expr = Compiler.analyze(Compiler.C.EVAL, read(r, true, null, true));
+		return expr.eval();
 	}
 
 }
