@@ -684,7 +684,7 @@ static class SyntaxQuoteReader extends AFn{
 		else
 			ret = RT.list(Compiler.QUOTE, form);
 
-		if(form instanceof IObj && ((IObj) form).meta() != null)
+		if(form instanceof IObj && !(form instanceof Var) && ((IObj) form).meta() != null)
 			{
 			//filter line numbers
 			IPersistentMap newMeta = ((IObj) form).meta().without(RT.LINE_KEY);
