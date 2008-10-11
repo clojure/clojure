@@ -3442,6 +3442,9 @@
 (defmethod print-method Number [o, #^Writer w]
   (.write w (str o)))
 
+(defmethod print-method Boolean [o, #^Writer w]
+  (.write w (str o)))
+
 (defn print-simple [o, #^Writer w]
   (print-meta o w)
   (.write w (str o)))
