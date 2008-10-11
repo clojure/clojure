@@ -40,9 +40,9 @@ if( ! clojure.JS.global["java"] ) {
 
 clojure = new clojure.lang.Namespace({
   in_ns: function(s) {
-    var nsparts = s.substring(1).split('.');
-    var base = clojure.JS.global;
-    for( var i = 0; i < nsparts.length; ++i ) {
+    var i, nsparts = s.substring(1).split('.'),
+        base = clojure.JS.global;
+    for( i = 0; i < nsparts.length; ++i ) {
       if( ! base[nsparts[i]] ) {
         base[nsparts[i]] = new clojure.lang.Namespace();
       }
@@ -63,44 +63,44 @@ clojure = new clojure.lang.Namespace({
         (typeof coll) + " " + coll.constructor.name);
   },
   apply: function( f ) {
+    var i, newargs = [], s, eagercount,
+        oldargs = arguments, arglen = oldargs.length;
     if( f.isVariadic ) {
       // lazy
-      var i, args = [];
-      var eagercount = Math.min( f.arity, arguments.length - 2 );
+      eagercount = Math.min( f.arity, arglen - 2 );
       for( i = 0; i < eagercount; ++i ) {
-        args.push( arguments[ i + 1 ] );
+        newargs.push( oldargs[ i + 1 ] );
       }
       if( eagercount == f.arity ) {
-        if( arguments.length - eagercount < 3 ) {
-          args.push( clojure.seq( arguments[ arguments.length - 1 ] ) );
+        if( arglen - eagercount < 3 ) {
+          newargs.push( clojure.seq( oldargs[ arglen - 1 ] ) );
         }
         else {
-          args.push( clojure.concat(
+          newargs.push( clojure.concat(
                   new clojure.lang.ArraySeq(
-                      null, arguments, eagercount + 1, arguments.length - 1 ),
-                  arguments[ arguments.length - 1 ] ) );
+                      null, oldargs, eagercount + 1, arglen - 1 ),
+                  oldargs[ arglen - 1 ] ) );
         }
       }
       else {
-        var s = clojure.seq( arguments[ arguments.length - 1 ] );
-        for( ; s && args.length < f.arity; s = s.rest() ) {
-          args.push( s.first() );
+        s = clojure.seq( oldargs[ arglen - 1 ] );
+        for( ; s && arglen < f.arity; s = s.rest() ) {
+          newargs.push( s.first() );
         }
         if( s )
-          args.push( s );
+          newargs.push( s );
       }
-      return f.apply( clojure.JS.variadic_sentinel, args );
+      return f.apply( clojure.JS.variadic_sentinel, newargs );
     }
     else {
       // non-lazy
-      var args = [];
-      for( var i = 1; i < arguments.length - 1; ++i ) {
-        args.push( arguments[ i ] );
+      for( i = 1; i < arglen - 1; ++i ) {
+        newargs.push( oldargs[ i ] );
       }
-      for( var s = arguments[ arguments.length - 1]; s; s = s.rest()) {
-        args.push( s.first() );
+      for( s = oldargs[ arglen - 1]; s; s = s.rest()) {
+        newargs.push( s.first() );
       }
-      return f.apply( null, args );
+      return f.apply( null, newargs );
     }
   },
   first: function(x) {
@@ -146,7 +146,7 @@ clojure = new clojure.lang.Namespace({
     return (usenull || key in coll) ? coll[ key ] : notFound;
   },
   nth: function(coll, n, notFound) {
-    var usenull = notFound === undefined;
+    var usenull = (notFound === undefined), seq, i;
     if( coll === null )
       return usenull ? null : notFound;
     if( coll.nth )
@@ -154,7 +154,7 @@ clojure = new clojure.lang.Namespace({
     if( coll.get )
       return usenull || n < coll.size() ? coll.get(n) : notFound;
     if( coll.seq ) {
-      for( var seq = coll.seq(), i = 0; i <= n && seq; seq = seq.rest() ) {
+      for( seq = coll.seq(), i = 0; i <= n && seq; seq = seq.rest() ) {
         if( i == n )
           return seq.first();
       }
@@ -185,8 +185,8 @@ clojure = new clojure.lang.Namespace({
     if( coll.toArray )
       return coll.toArray();
     if( typeof coll === clojure.JS.stringType ) {
-      var rtn = new Array( coll.length );
-      for( var i = 0; i < coll.length; ++i ) {
+      var i = 0, rtn = new Array( coll.length );
+      for( ; i < coll.length; ++i ) {
         rtn[i] = coll[i];
       }
       return rtn;
@@ -317,8 +317,8 @@ clojure = new clojure.lang.Namespace({
     },
     ObjSeq: {
       create: function( obj ) {
-        var pairs = [];
-        for( var i in obj ) {
+        var i, pairs = [];
+        for( i in obj ) {
           pairs.push( [i, obj[i]] );
         }
         return clojure.lang.ArraySeq.create( pairs );
@@ -354,10 +354,11 @@ clojure = new clojure.lang.Namespace({
           case java.util.regex.Pattern:
                          return 0x7A830001;
         }
+        var i = 0, ret = o.length;
         switch( typeof o ) {
           case clojure.JS.stringType:
-            var ret = 0; // lousy hand-made string hash
-            for( var i = 0; i < o.length; ++i ) {
+            // lousy hand-made string hash
+            for( ; i < o.length; ++i ) {
               ret ^= o.charCodeAt(i) << ((i % 4) * 8);
             }
             return ret;
@@ -366,8 +367,7 @@ clojure = new clojure.lang.Namespace({
         }
         switch( o.constructor ) {
           case Array:
-            var ret = o.length;
-            for( var i = 0; i < o.length; ++i ) {
+            for( ; i < o.length; ++i ) {
               ret = clojure.lang.Util.hashCombine(
                   ret, clojure.lang.Util.hash( o[i] ) );
             }
@@ -395,8 +395,8 @@ clojure = new clojure.lang.Namespace({
         return y.cons( x );
       },
       seqToArray: function(s) {
-        var ret = new Array( clojure.count( s ) );
-        for( var i = 0; s !== null; ++i, s = s.rest() )
+        var i = 0, ret = new Array( clojure.count( s ) );
+        for( ; s !== null; ++i, s = s.rest() )
           ret[ i ] = s.first();
         return ret;
       },
@@ -454,8 +454,8 @@ clojure.JS.definterface( clojure.lang, "IndexedSeq",
 clojure.JS.defclass( clojure.lang, "ASeq", {
   methods: {
     equals: function( obj ) {
-      var ms = obj.seq();
-      for( var s = this.seq(); s !== null; s = s.rest(), ms = ms.rest() ) {
+      var s = this.seq(), ms = obj.seq();
+      for( ; s !== null; s = s.rest(), ms = ms.rest() ) {
         if( ms === null || !clojure.lang.Util.equal( s.first(), ms.first() ))
           return false;
       }
@@ -465,8 +465,8 @@ clojure.JS.defclass( clojure.lang, "ASeq", {
     },
     hashCode: function() { throw "not yet implemented"; },
     count: function() {
-      var i = 1;
-      for( var s = this.rest(); s; s = s.rest() )
+      var i = 1, s = this.rest();
+      for( ; s; s = s.rest() )
         i += 1;
       return i;
     },
@@ -528,8 +528,9 @@ clojure.JS.defclass( clojure.lang, "ArraySeq", {
       return new clojure.lang.ArraySeq( _meta, this.array, this.i, this.len );
     },
     reduce: function( fn, start ) {
-      var ret = (start===undefined) ? this.a[this.i] : fn(start,this.a[this.i]);
-      for( var x = this.i + 1; x < this.len; ++x ) {
+      var ret = (start===undefined) ? this.a[this.i] : fn(start,this.a[this.i]),
+          x = this.i + 1;
+      for( ; x < this.len; ++x ) {
         ret = fn( ret, this.a[x] );
       }
       return ret;
@@ -585,8 +586,8 @@ clojure.JS.defclass( clojure.lang, "Var", {
   statics: {
     stack: [],
     pushThreadBindings: function( m ) {
-      var vars=[], b;
-      for( var bs = m.seq(); bs; bs = bs.rest()) {
+      var vars=[], bs = m.seq(), e;
+      for( ; bs; bs = bs.rest()) {
         e = bs.first();
         vars.push( e.key() );
         e.key().push( e.val() );
@@ -594,8 +595,8 @@ clojure.JS.defclass( clojure.lang, "Var", {
       clojure.lang.Var.stack.push( vars );
     },
     popThreadBindings: function() {
-      var vars = clojure.lang.Var.stack.pop();
-      for( var i = 0; i < vars.length; ++i ) {
+      var i = 0, vars = clojure.lang.Var.stack.pop();
+      for( ; i < vars.length; ++i ) {
         vars[i].pop();
       }
     }
@@ -651,8 +652,8 @@ clojure.JS.defclass( clojure.lang, "Keyword", {
   statics: {
     table: {},
     intern: function( ns, name ) {
-      var key = ns + "/" + name;
-      var obj = clojure.lang.Keyword.table[ key ];
+      var key = ns + "/" + name,
+          obj = clojure.lang.Keyword.table[ key ];
       if( obj )
         return obj;
       return clojure.lang.Keyword.table[ key ] =
@@ -792,10 +793,11 @@ clojure.JS.defclass( clojure.lang, "PersistentList", {
   },
   statics: {
     creator: clojure.JS.variadic(0,function(){
-      var args = clojure.JS.rest_args(this,arguments,0);
+      var args = clojure.JS.rest_args(this,arguments,0),
+          ret, i;
       if( clojure.JS.instanceq( clojure.lang.ArraySeq, args ) ) {
-        var ret = clojure.lang.PersistentList.EMPTY;
-        for( var i = args.a.length - 1; i >= 0; --i ) {
+        ret = clojure.lang.PersistentList.EMPTY;
+        for( i = args.a.length - 1; i >= 0; --i ) {
           ret = ret.cons( args.a[ i ] );
         }
         return ret;
@@ -832,8 +834,9 @@ clojure.JS.defclass( clojure.lang, "PersistentList", {
       return this;
     },
     reduce: function( f, start ){
-      var ret = (start === undefined) ? this.first() : f( start, this.first() );
-      for( var s = this.rest(); s !== null; s = s.rest() )
+      var ret = (start === undefined) ? this.first() : f( start, this.first() ),
+          s = this.rest();
+      for( ; s !== null; s = s.rest() )
         ret = f( ret, s.first() );
       return ret;
     }
@@ -865,8 +868,8 @@ clojure.JS.defclass( clojure.lang, "APersistentVector", {
     hashCode: function() { throw "not implemented yet"; },
     get: function(i) { return this.nth(i); },
     indexOf: function( o ){
-      var len = this.count();
-      for( var i = 0; i < len; ++i )
+      var i = 0, len = this.count();
+      for( ; i < len; ++i )
         if( clojure.lang.Util.equal( this.nth( i ), o ) )
           return i;
       return -1;
@@ -934,12 +937,12 @@ clojure.JS.defclass( clojure.lang, "APersistentVector", {
     },
     length: function(){ return this.count(); },
     compareTo: function(v){
-      var c, len = this.count();
+      var i, c, len = this.count();
       if( len < v.count() )
         return -1;
       else if( len > v.count() )
         return 1;
-      for( var i = 0; i < len; ++i ) {
+      for( i = 0; i < len; ++i ) {
         c = this.nth(i).compareTo( v.nth(i) );
         if( c != 0 )
           return c;
@@ -971,8 +974,9 @@ clojure.JS.defclass( clojure.lang.APersistentVector, "Seq", {
     },
     reduce: function( fn, start ) {
       var ret = (start === undefined) ?
-                this.v.nth(this.i) : fn(start,this.v.nth(this.i));
-      for( var x = this.i + 1; x < this.count(); ++x ) {
+                this.v.nth(this.i) : fn(start,this.v.nth(this.i)),
+          x = this.i + 1;
+      for( ; x < this.count(); ++x ) {
         ret = fn( ret, this.v.nth(x) );
       }
       return ret;
@@ -1051,8 +1055,8 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
   },
   statics: {
     create: function( items ) {
-      var ret = clojure.lang.PersistentVector.EMPTY;
-      for( var i = 0; i < items.length; ++i ) {
+      var i = 0, ret = clojure.lang.PersistentVector.EMPTY;
+      for( ; i < items.length; ++i ) {
         ret = ret.cons( items[ i ] );
       }
       return ret;
@@ -1065,8 +1069,9 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
         if( i >= this.tailoff() ) {
           return this.tail[ i & 0x01f ];
         }
-        var arr = this.root;
-        for( var level = this.shift; level > 0; level -= 5 ) {
+        var arr = this.root,
+            level = this.shift;
+        for( ; level > 0; level -= 5 ) {
           arr = arr[ (i >>> level) & 0x01f ];
         }
         return arr[ i & 0x01f ];
@@ -1091,12 +1096,12 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
       throw "IndexOutOfBoundsException";
     },
     doAssoc: function( level, arr, i, val ) {
-      var ret = arr.slice( 0 );
+      var subidx, ret = arr.slice( 0 );
       if( level == 0 ) {
         ret[ i & 0x01f ] = val;
       }
       else {
-        var subidx = (i >>> level) & 0x01f;
+        subidx = (i >>> level) & 0x01f;
         ret[ subidx ] = this.doAssoc( level - 5, arr[ subidx ], i, val );
       }
       return ret;
@@ -1107,15 +1112,15 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
           _meta, this.cnt, this.shift, this.root, this.tail );
     },
     cons: function( val ) {
+      var newTail, expansion, newroot, newshift;
       if( this.tail.length < 32 ) {
-        var newTail = this.tail.concat( [val] );
+        newTail = this.tail.concat( [val] );
         return new clojure.lang.PersistentVector(
             this.meta(), this.cnt + 1, this.shift, this.root, newTail );
       }
-      var expansion = [null];
-      var newroot = this.pushTail(
-          this.shift - 5, this.root, this.tail, expansion);
-      var newshift = this.shift;
+      expansion = [null];
+      newroot = this.pushTail( this.shift-5, this.root, this.tail, expansion);
+      newshift = this.shift;
       if( expansion[0] != null ) {
         newroot = [newroot, expansion[0]];
         newshift += 5;
@@ -1128,7 +1133,7 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
     },
     pushTail: function( level, arr, tailNode, expansion)
     {
-      var newchild;
+      var ret, newchild;
       if( level == 0 ) {
         newchild = tailNode;
       }
@@ -1136,7 +1141,7 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
         newchild = this.pushTail(
             level - 5, arr[arr.length - 1], tailNode, expansion);
         if( expansion[0] == null ) {
-          var ret = arr.slice( 0 );
+          ret = arr.slice( 0 );
           ret[ arr.length - 1 ] = newchild;
           return ret;
         }
@@ -1159,14 +1164,15 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
       if( this.cnt == 1 ) {
         return clojure.lang.PersistentVector.EMPTY.withMeta( this.meta() );
       }
+      var newTail, ptail, newroot, newshift;
       if( this.tail.length > 1 ) {
-        var newTail = this.tail.slice( 0, this.tail.length - 1 );
+        newTail = this.tail.slice( 0, this.tail.length - 1 );
         return new clojure.lang.PersistentVector(
             this.meta(), this.cnt - 1, this.shift, this.root, newTail );
       }
-      var ptail = [null];
-      var newroot = this.popTail( this.shift - 5, this.root, ptail );
-      var newshift = this.shift;
+      ptail = [null];
+      newroot = this.popTail( this.shift - 5, this.root, ptail );
+      newshift = this.shift;
       if( newroot == null ) {
         newroot = clojure.lang.RT.EMPTY_ARRAY;
       }
@@ -1179,9 +1185,10 @@ clojure.JS.defclass( clojure.lang, "PersistentVector", {
     },
     popTail: function( shift, arr, ptail ) {
       if( shift > 0 ) {
-        var newchild = this.popTail( shift - 5, arr[ arr.length - 1 ], ptail );
+        var newchild = this.popTail( shift - 5, arr[ arr.length - 1 ], ptail ),
+            ret;
         if( newchild != null ) {
-          var ret = arr.slice( 0 );
+          ret = arr.slice( 0 );
           ret[ arr.length - 1 ] = newchild;
           return ret;
         }
@@ -1219,8 +1226,8 @@ clojure.JS.defclass( clojure.lang, "APersistentMap", {
           throw "Vector arg to map conj must be a pair";
         return this.assoc( o.nth(0), o.nth(1) );
       }
-      var e, ret = this;
-      for( var es = clojure.seq( o ); es; es = es.rest() ) {
+      var e, ret = this, es = clojure.seq( o );
+      for( ; es; es = es.rest() ) {
         e = es.first();
         ret = ret.assoc( e.getKey(), e.getValue() );
       }
@@ -1231,8 +1238,8 @@ clojure.JS.defclass( clojure.lang, "APersistentMap", {
         return false;
       if( m.count() != this.count() || m.hashCode() != this.hashCode() )
         return false;
-      var e, me;
-      for( var s = this.seq(); s; s = s.rest() ) {
+      var e, me, s = this.seq();
+      for( ; s; s = s.rest() ) {
         e = s.first();
         me = m.entryAt( e.getKey() );
         if( me === null
@@ -1245,8 +1252,9 @@ clojure.JS.defclass( clojure.lang, "APersistentMap", {
     },
     hashCode: function(){
       if( this._hash == -1 ) {
-        var e, hash = this.count();
-        for( s = this.seq(); s; s = s.rest() ) {
+        var e, hash = this.count(),
+            s = this.seq();
+        for( ; s; s = s.rest() ) {
           e = s.first();
           hash ^= clojure.lang.Util.hashCombine(
               clojure.lang.Util.hash( e.getKey() ),
@@ -1328,8 +1336,9 @@ clojure.JS.defclass( clojure.lang, "PersistentHashMap", {
   },
   statics: {
     create: function(init){
-      var ret = clojure.lang.PersistentHashMap.EMPTY;
-      for( var s = clojure.seq( init ); s; s=s.rest().rest() ){
+      var ret = clojure.lang.PersistentHashMap.EMPTY,
+          s = clojure.seq( init );
+      for( ; s; s=s.rest().rest() ){
         if( s.rest() === null )
           throw "No value supplied for key: " + s.first();
         ret = ret.assoc( s.first(), clojure.second( s ) );
@@ -1342,9 +1351,9 @@ clojure.JS.defclass( clojure.lang, "PersistentHashMap", {
     containsKey: function(key){ return this.entryAt(key) !== null; },
     entryAt: function(k){ return this._root.find(clojure.lang.Util.hash(k),k);},
     assoc: function(k,v){
-      var addedLeaf=[null];
-      var newroot = this._root.assoc(
-          0, clojure.lang.Util.hash(k), k, v, addedLeaf );
+      var addedLeaf=[null],
+          newroot = this._root.assoc(
+             0, clojure.lang.Util.hash(k), k, v, addedLeaf );
       if( newroot == this._root )
         return this;
       return new clojure.lang.PersistentHashMap(
@@ -1413,23 +1422,25 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "FullNode", {
   },
   methods: {
     assoc: function( levelShift, hash, key, val, addedLeaf ) {
-      var PHM = clojure.lang.PersistentHashMap;
-      var idx = PHM.mask( hash, this._shift );
-      var n = this._nodes[idx].assoc( this._shift+5, hash, key, val, addedLeaf);
+      var newnodes,
+          PHM = clojure.lang.PersistentHashMap,
+          idx = PHM.mask( hash, this._shift ),
+          n = this._nodes[idx].assoc( this._shift+5, hash, key, val, addedLeaf);
       if( n == this._nodes[idx] )
         return this;
       else {
-        var newnodes = nodes.slice();
+        newnodes = nodes.slice();
         newnodes[idx] = n;
         return new PHM.FullNode( newnodes, this._shift );
       }
     },
     without: function(hash, key){
-      var PHM = clojure.lang.PersistentHashMap;
-      var idx = PHM.mask( hash, this._shift );
-      var n = this._nodes[idx].without( hash, key );
+      var newnodes,
+          PHM = clojure.lang.PersistentHashMap,
+          idx = PHM.mask( hash, this._shift ),
+          n = this._nodes[idx].without( hash, key );
       if( n != this._nodes[idx] ) {
-        var newnodes = nodes.slice();
+        newnodes = nodes.slice();
         if( n == null ) {
           nodes.splice( idx, 1 );
           return new PHM.BitmapIndexedNode(
@@ -1470,8 +1481,8 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap.FullNode, "Seq", {
   methods: {
     first: function(){ return this.s.first(); },
     rest: function(){
-      var Seq = clojure.lang.PersistentHashMap.FullNode.Seq;
-      var nexts = this.s.rest();
+      var Seq = clojure.lang.PersistentHashMap.FullNode.Seq,
+          nexts = this.s.rest();
       if( nexts )
         return new Seq( null, nexts, this.i, this.node );
       return Seq.create( node,this.i+1);
@@ -1511,41 +1522,43 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "BitmapIndexedNode", {
   methods: {
     index: function(bit) { return clojure.JS.bitcount(this.bitmap & (bit-1) );},
     assoc: function(levelShift, hash, key, val, addedLeaf){
-      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode;
-      var bit = BIN.bitpos( hash, this.shift );
-      var idx = this.index( bit );
+      var newnodes, n,
+          BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode,
+          bit = BIN.bitpos( hash, this.shift ),
+          idx = this.index( bit );
       if((this.bitmap & bit) != 0) {
-        var n = this.nodes[idx].assoc( this.shift+5, hash, key, val, addedLeaf);
+        n = this.nodes[idx].assoc( this.shift+5, hash, key, val, addedLeaf);
         if( n == this.nodes[idx] )
           return this;
         else {
-          var newnodes = this.nodes.slice();
+          newnodes = this.nodes.slice();
           newnodes[idx] = n;
           return new BIN( this.bitmap, newnodes, this.shift );
         }
       }
       else {
         addedLeaf[0]= new clojure.lang.PersistentHashMap.LeafNode(hash,key,val);
-        var newnodes = this.nodes.slice();
+        newnodes = this.nodes.slice();
         newnodes.splice( idx, 0, addedLeaf[0] );
         return BIN.createA( this.bitmap | bit, newnodes, this.shift );
       }
     },
     without: function( hash, key ) {
-      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode;
-      var bit = BIN.bitpos( hash, this.shift );
+      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode,
+          bit = BIN.bitpos( hash, this.shift ),
+          idx, n, newnodes;
       if((this.bitmap & bit) !== 0) {
-        var idx = this.index( bit );
-        var n = this.nodes[ idx ].without( hash, key );
+        idx = this.index( bit );
+        n = this.nodes[ idx ].without( hash, key );
         if( n != this.nodes[ idx ] ) {
           if( n === null ) {
             if( this.bitmap == bit )
               return null;
-            var newnodes = this.nodes.slice();
+            newnodes = this.nodes.slice();
             newnodes.splice( idx, 1 );
             return new BIN( bitmap & ~bit, newnodes, this.shift );
           }
-          var newnodes = this.nodes.slice();
+          newnodes = this.nodes.slice();
           newnodes[ idx ] = n;
           return new BIN( bitmap, newnodes, this.shift );
         }
@@ -1553,8 +1566,8 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "BitmapIndexedNode", {
       return this;
     },
     find: function( hash, key ) {
-      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode;
-      var bit = BIN.bitpos( hash, this.shift );
+      var BIN = clojure.lang.PersistentHashMap.BitmapIndexedNode,
+          bit = BIN.bitpos( hash, this.shift );
       if((this.bitmap & bit) !== 0)
         return this.nodes[ this.index(bit) ].find( hash, key );
       return null;
@@ -1586,8 +1599,8 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap.BitmapIndexedNode, "Seq", {
   methods: {
     first: function(){ return this.s.first(); },
     rest: function(){
-      var Seq = clojure.lang.PersistentHashMap.BitmapIndexedNode.Seq;
-      var nexts = this.s.rest();
+      var Seq = clojure.lang.PersistentHashMap.BitmapIndexedNode.Seq,
+          nexts = this.s.rest();
       if( nexts )
         return new Seq( null, nexts, this.i, this.node );
       return Seq.create( this.node, this.i+1 );
@@ -1608,14 +1621,14 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "LeafNode", {
   },
   methods: {
     assoc: function(shift, hash, key, val, addedLeaf) {
-      var PHM = clojure.lang.PersistentHashMap;
+      var newLeaf, PHM = clojure.lang.PersistentHashMap;
       if( hash == this.hash ) {
         if( clojure.lang.Util.equal( key, this._key ) ) {
           if( val == this._val )
             return this;
           return new PHM.LeafNode( hash, key, val );
         }
-        var newLeaf = new PHM.LeafNode( hash, key, val );
+        newLeaf = new PHM.LeafNode( hash, key, val );
         addedLeaf[0] = newLeaf;
         return new PHM.HashCollisionNode( hash, [this, newLeaf] );
       }
@@ -1648,18 +1661,18 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "HashCollisionNode", {
   },
   methods: {
     assoc: function(shift, hash, key, val, addedLeaf) {
-      var PHM = clojure.lang.PersistentHashMap;
+      var idx, newLeaves, PHM = clojure.lang.PersistentHashMap;
       if( hash == this.hash ) {
-        var idx = this.findIndex( hash, key );
+        idx = this.findIndex( hash, key );
         if( idx != -1 ) {
           if( this.leaves[idx].val == val )
             return this;
-          var newLeaves = this.leaves.slice();
+          newLeaves = this.leaves.slice();
           newLeaves[idx] = new PHM.LeafNode( hash, key, val );
-          return new PHM.HashCollisionNode( has, newLeaves );
+          return new PHM.HashCollisionNode( hash, newLeaves );
         }
         addedLeaf[0] = new PHM.LeafNode( hash, key, val );
-        var newLeaves = this.leaves.concat( addedLeaf );
+        newLeaves = this.leaves.concat( addedLeaf );
         return new PHM.HashCollisionNode( hash, newLeaves );
       }
       return PHM.BitmapIndexedNode.createB(shift,this,hash,key,val,addedLeaf);
@@ -1720,8 +1733,9 @@ clojure.JS.defclass( clojure.lang, "APersistentSet", {
     },
     hashCode: function() {
       if( this._hash == -1 ) {
-        var hash = this.count();
-        for( var s = this.seq(); s; s = s.rest() ) {
+        var hash = this.count(),
+            s = this.seq();
+        for( ; s; s = s.rest() ) {
           hash = clojure.lang.Util.hashCombine(
               hash, clojure.lang.Util.hash( s.first() ) );
         }
@@ -1743,8 +1757,9 @@ clojure.JS.defclass( clojure.lang, "PersistentHashSet", {
   },
   statics: {
     create: function(init){
-      var ret = clojure.lang.PersistentHashSet.EMPTY;
-      for( var s = clojure.seq( init ); s; s=s.rest() ){
+      var ret = clojure.lang.PersistentHashSet.EMPTY,
+          s = clojure.seq( init );
+      for( ; s; s=s.rest() ){
         ret = ret.cons( s.first() );
       }
       return ret;
@@ -1830,8 +1845,9 @@ clojure.JS.defclass( clojure.lang, "MultiFn", {
       return targetFn;
     },
     findAndCacheBestMethod: function( dispatchVal ) {
-      var e, bestEntry = null;
-      for( var s = this.methodTable.seq(); s; s = s.rest() ) {
+      var e, bestEntry = null,
+          s = this.methodTable.seq();
+      for( ; s; s = s.rest() ) {
         e = s.first();
         if( this.isA( dispatchVal, e.getKey() ) ) {
           if( bestEntry===null || this.dominates(e.getKey(),bestEntry.getKey()))
@@ -1887,12 +1903,12 @@ clojure.lang.Namespace.prototype.getMappings = function() {
   var buf = [];
   function write(s) {
     s = s.toString();
-    var parts = s.split(/\n/);
+    var last, parts = s.split(/\n/);
     if( parts.length == 1 ) {
       buf.push(s);
     }
     else {
-      var last = parts.pop();
+      last = parts.pop();
       print( buf.join('') + parts.join('\n') );
       buf = [ last ];
     }
