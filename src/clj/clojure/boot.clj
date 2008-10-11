@@ -3425,9 +3425,31 @@
 (defmethod print-method nil [o, #^Writer w]
   (.write w "nil"))
 
+(defn print-ctor [o print-args #^Writer w]
+  (.write w "#=(")
+  (.write w (.getName (class o)))
+  (.write w ". ")
+  (print-args o w)
+  (.write w ")"))
+
 (defmethod print-method :default [o, #^Writer w]
+  (print-ctor o #(print-method (str %1) %2) w))
+
+(defmethod print-method clojure.lang.Keyword [o, #^Writer w]
+  (.write w (str o)))
+
+(defmethod print-method Number [o, #^Writer w]
+  (.write w (str o)))
+
+(defn print-simple [o, #^Writer w]
   (print-meta o w)
   (.write w (str o)))
+
+(defmethod print-method clojure.lang.Symbol [o, #^Writer w]
+  (print-simple o w))
+
+(defmethod print-method clojure.lang.Var [o, #^Writer w]
+  (print-simple o w))
 
 (defmethod print-method clojure.lang.ISeq [o, #^Writer w]
   (print-meta o w)
@@ -3439,18 +3461,12 @@
 
 (prefer-method print-method clojure.lang.IPersistentList clojure.lang.ISeq)
 
-(defn print-ctor [o print-args #^Writer w]
-  (.write w "#=(")
-  (.write w (.getName (class o)))
-  (.write w ". ")
-  (print-args o w)
-  (.write w ")"))
 
-(defmethod print-method java.util.List [o, #^Writer w]
+(defmethod print-method java.util.Collection [o, #^Writer w]
  (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
 
-(prefer-method print-method clojure.lang.IPersistentList java.util.List)
-(prefer-method print-method clojure.lang.IPersistentVector java.util.List)
+(prefer-method print-method clojure.lang.IPersistentList java.util.Collection)
+(prefer-method print-method clojure.lang.IPersistentVector java.util.Collection)
 
 (def #^{:tag String 
         :doc "Returns escape string for char or nil if none"}
@@ -3510,6 +3526,13 @@
 (defmethod print-method clojure.lang.IPersistentSet [s, #^Writer w]
   (print-meta s w)
   (print-sequential "#{" print-method " " "}" (seq s) w))
+
+(defmethod print-method java.util.Set [s, #^Writer w]
+  (print-ctor s
+              #(print-sequential "#{" print-method " " "}" (seq %1) %2)
+              w))
+
+(prefer-method print-method clojure.lang.IPersistentSet java.util.Set)
 
 (def #^{:tag String 
         :doc "Returns name string for char or nil if none"} 

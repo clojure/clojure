@@ -459,12 +459,12 @@ static class VarReader extends AFn{
 	public Object invoke(Object reader, Object quote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		if(o instanceof Symbol)
-			{
-			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), (Symbol) o);
-			if(v instanceof Var)
-				return v;
-			}
+//		if(o instanceof Symbol)
+//			{
+//			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), (Symbol) o);
+//			if(v instanceof Var)
+//				return v;
+//			}
 		return RT.list(THE_VAR, o);
 	}
 }
@@ -861,6 +861,10 @@ static class EvalReader extends AFn{
 		else if(o instanceof IPersistentList)
 			{
 			Symbol fs = (Symbol) RT.first(o);
+			if(fs.equals(THE_VAR))
+				{
+				return Compiler.resolve((Symbol) RT.second(o));
+				}
 			if(fs.name.endsWith("."))
 				{
 				Object[] args = RT.toArray(RT.rest(o));
@@ -876,7 +880,7 @@ static class EvalReader extends AFn{
 				{
 				return ((IFn) v).applyTo(RT.rest(o));
 				}
-			throw new Exception("Can't resolve " + v);
+			throw new Exception("Can't resolve " + fs);
 			}
 		else
 			throw new IllegalArgumentException("Unsupported #= form");
