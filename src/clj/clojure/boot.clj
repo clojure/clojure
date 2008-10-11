@@ -977,7 +977,8 @@
   is :default."
   ([name dispatch-fn] `(defmulti ~name ~dispatch-fn :default))
   ([name dispatch-fn default-val]
-   `(def ~(with-meta name {:tag 'clojure.lang.MultiFn}) (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
+   `(def ~(with-meta name (assoc ^name :tag 'clojure.lang.MultiFn)) 
+         (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
