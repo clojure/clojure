@@ -26,6 +26,7 @@ Object cachedHierarchy;
 static final Var assoc = RT.var("clojure", "assoc");
 static final Var dissoc = RT.var("clojure", "dissoc");
 static final Var isa = RT.var("clojure", "isa?");
+static final Var parents = RT.var("clojure", "parents");
 static final Var hierarchy = RT.var("clojure", "global-hierarchy");
 
 public MultiFn(IFn dispatchFn, Object defaultDispatchVal) throws Exception{
@@ -49,7 +50,7 @@ synchronized public MultiFn removeMethod(Object dispatchVal) throws Exception{
 	return this;
 }
 
-synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchValY){
+synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) throws Exception{
 	if(prefers(dispatchValY, dispatchValX))
 		throw new IllegalStateException(
 				String.format("Preference conflict: %s is already preferred to %s", dispatchValY, dispatchValX));
@@ -61,9 +62,21 @@ synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchVal
 	return this;
 }
 
-private boolean prefers(Object x, Object y){
+private boolean prefers(Object x, Object y) throws Exception{
 	IPersistentSet xprefs = (IPersistentSet) preferTable.valAt(x);
-	return xprefs != null && xprefs.contains(y);
+	if(xprefs != null && xprefs.contains(y))
+		return true;
+	for(ISeq ps = RT.seq(parents.invoke(y)); ps != null; ps = ps.rest())
+		{
+		if(prefers(x, ps.first()))
+			return true;
+		}
+	for(ISeq ps = RT.seq(parents.invoke(x)); ps != null; ps = ps.rest())
+		{
+		if(prefers(ps.first(), y))
+			return true;
+		}
+	return false;
 }
 
 private boolean isA(Object x, Object y) throws Exception{

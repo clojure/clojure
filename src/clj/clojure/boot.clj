@@ -2854,9 +2854,10 @@
 (defn supers 
   "Returns the immediate and indirect superclasses and interfaces of c, if any"
   [#^Class class]
-  (loop [ret #{} c class]
-    (if c
-      (recur (into ret (bases c)) (.getSuperclass c))
+  (loop [ret (set (bases class)) cs ret]
+    (if (seq cs)
+      (let [c (first cs) bs (bases c)]
+        (recur (into ret bs) (into (disj cs c) bs)))
       (not-empty ret))))
 
 (defn isa?
@@ -3465,8 +3466,7 @@
 (defmethod print-method java.util.Collection [o, #^Writer w]
  (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
 
-(prefer-method print-method clojure.lang.IPersistentList java.util.Collection)
-(prefer-method print-method clojure.lang.IPersistentVector java.util.Collection)
+(prefer-method print-method clojure.lang.IPersistentCollection java.util.Collection)
 
 (def #^{:tag String 
         :doc "Returns escape string for char or nil if none"}
@@ -3532,7 +3532,7 @@
               #(print-sequential "#{" print-method " " "}" (seq %1) %2)
               w))
 
-(prefer-method print-method clojure.lang.IPersistentSet java.util.Set)
+;(prefer-method print-method clojure.lang.IPersistentSet java.util.Set)
 
 (def #^{:tag String 
         :doc "Returns name string for char or nil if none"} 
