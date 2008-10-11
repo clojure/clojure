@@ -3438,12 +3438,15 @@
 
 (prefer-method print-method clojure.lang.IPersistentList clojure.lang.ISeq)
 
-(defmethod print-method java.util.List [o, #^Writer w]
-  (.write w "##(")
+(defn print-ctor [o print-args #^Writer w]
+  (.write w "#=(")
   (.write w (.getName (class o)))
   (.write w ". ")
-  (print-sequential "[" print-method " " "]" o w)
+  (print-args o w)
   (.write w ")"))
+
+(defmethod print-method java.util.List [o, #^Writer w]
+ (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
 
 (prefer-method print-method clojure.lang.IPersistentList java.util.List)
 (prefer-method print-method clojure.lang.IPersistentVector java.util.List)
@@ -3476,7 +3479,7 @@
   (dotimes n (count v)
     (print-method (nth v n) w)
     (when (< n (dec (count v)))
-      (.append w \ )))
+      (.append w \space)))
   (.append w \])
   nil)
 
@@ -3485,23 +3488,21 @@
   (print-sequential 
    "{"
    (fn [e  #^Writer w] 
-     (do (print-method (key e) w) (.append w \ ) (print-method (val e) w)))
+     (do (print-method (key e) w) (.append w \space) (print-method (val e) w)))
    ", "
    "}"
    (seq m) w))
 
 (defmethod print-method java.util.Map [m, #^Writer w]
-  (.write w "##(")
-  (.write w (.getName (class m)))
-  (.write w ". ")
-  (print-sequential 
-   "{"
-   (fn [e  #^Writer w] 
-     (do (print-method (key e) w) (.append w \ ) (print-method (val e) w)))
-   ", "
-   "}"
-   (seq m) w)
-  (.write w ")"))
+  (print-ctor m 
+              #(print-sequential 
+                "{"
+                (fn [e  #^Writer w] 
+                  (do (print-method (key e) w) (.append w \space) (print-method (val e) w)))
+                ", "
+                "}"
+                (seq %1) %2) 
+              w))
 
 (prefer-method print-method clojure.lang.IPersistentMap java.util.Map)
 
@@ -3528,7 +3529,7 @@
   nil)
 
 (defmethod print-method Class [#^Class c, #^Writer w]
-  (.write w "##")
+  (.write w "#=")
   (.write w (.getName c)))
 
 (defmethod print-method java.math.BigDecimal [b, #^Writer w]
@@ -3538,4 +3539,8 @@
 (defmethod print-method java.util.regex.Pattern [p #^Writer w]
   (.append w \#)
   (print-method (str p) w))
+
+(defmacro declare
+  "defs the supplied var names with no bindings, useful for making forward declarations."
+  [& names] `(do ~@(map #(list 'def %) names)))
 

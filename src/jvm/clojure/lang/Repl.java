@@ -24,6 +24,7 @@ static final Var in_ns = RT.var("clojure", "in-ns");
 static final Var refer = RT.var("clojure", "refer");
 static final Var ns = RT.var("clojure", "*ns*");
 static final Var warn_on_reflection = RT.var("clojure", "*warn-on-reflection*");
+static final Var print_meta = RT.var("clojure", "*print-meta*");
 static final Var star1 = RT.var("clojure", "*1");
 static final Var star2 = RT.var("clojure", "*2");
 static final Var star3 = RT.var("clojure", "*3");
@@ -41,11 +42,12 @@ public static void main(String[] args) throws Exception{
 		//must have corresponding popThreadBindings in finally clause
 		Var.pushThreadBindings(
 				RT.map(ns, ns.get(),
-					   warn_on_reflection, warn_on_reflection.get(),
-					   star1, null,
-					   star2, null,
-					   star3, null,
-					   stare, null));
+				       warn_on_reflection, warn_on_reflection.get(),
+				       print_meta, print_meta.get(),
+				       star1, null,
+				       star2, null,
+				       star3, null,
+				       stare, null));
 
 		//create and move into the user namespace
 		in_ns.invoke(USER);
@@ -59,11 +61,11 @@ public static void main(String[] args) throws Exception{
 				}
 			catch(Exception e)
 				{
-				e.printStackTrace((PrintWriter)RT.ERR.get());
+				e.printStackTrace((PrintWriter) RT.ERR.get());
 				}
 
 		//repl IO support
-		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in,RT.UTF8));
+		LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(new InputStreamReader(System.in, RT.UTF8));
 		OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
 		Object EOF = new Object();
 
@@ -95,14 +97,14 @@ public static void main(String[] args) throws Exception{
 				Throwable c = e;
 				while(c.getCause() != null)
 					c = c.getCause();
-				((PrintWriter)RT.ERR.get()).println(e instanceof Compiler.CompilerException ? e : c);
+				((PrintWriter) RT.ERR.get()).println(e instanceof Compiler.CompilerException ? e : c);
 				stare.set(e);
 				}
 			}
 		}
 	catch(Exception e)
 		{
-		e.printStackTrace((PrintWriter)RT.ERR.get());
+		e.printStackTrace((PrintWriter) RT.ERR.get());
 		}
 	finally
 		{

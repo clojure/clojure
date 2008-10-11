@@ -86,7 +86,7 @@ static
 	dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['('] = new FnReader();
 	dispatchMacros['{'] = new SetReader();
-	dispatchMacros['#'] = new EvalReader();
+	dispatchMacros['='] = new EvalReader();
 	}
 
 static boolean isWhitespace(int ch){
@@ -459,9 +459,12 @@ static class VarReader extends AFn{
 	public Object invoke(Object reader, Object quote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		Object v = Compiler.maybeResolveIn(Compiler.currentNS(), (Symbol) o);
-		if(v instanceof Var)
-			return v;
+		if(o instanceof Symbol)
+			{
+			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), (Symbol) o);
+			if(v instanceof Var)
+				return v;
+			}
 		return RT.list(THE_VAR, o);
 	}
 }
@@ -816,14 +819,68 @@ static class ListReader extends AFn{
 
 }
 
+static class CtorReader extends AFn{
+	static final Symbol cls = Symbol.create("class");
+
+	public Object invoke(Object reader, Object leftangle) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		// #<class classname>
+		// #<classname args*>
+		// #<classname/staticMethod args*>
+		List list = readDelimitedList('>', r, true);
+		if(list.isEmpty())
+			throw new Exception("Must supply 'class', classname or classname/staticMethod");
+		Symbol s = (Symbol) list.get(0);
+		Object[] args = list.subList(1, list.size()).toArray();
+		if(s.equals(cls))
+			{
+			return RT.classForName(args[0].toString());
+			}
+		else if(s.ns != null) //static method
+			{
+			String classname = s.ns;
+			String method = s.name;
+			return Reflector.invokeStaticMethod(classname, method, args);
+			}
+		else
+			{
+			return Reflector.invokeConstructor(RT.classForName(s.name), args);
+			}
+	}
+
+}
+
 static class EvalReader extends AFn{
 	public Object invoke(Object reader, Object eq) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-
-		Compiler.Expr expr = Compiler.analyze(Compiler.C.EVAL, read(r, true, null, true));
-		return expr.eval();
+		Object o = read(r, true, null, true);
+		if(o instanceof Symbol)
+			{
+			return RT.classForName(o.toString());
+			}
+		else if(o instanceof IPersistentList)
+			{
+			Symbol fs = (Symbol) RT.first(o);
+			if(fs.name.endsWith("."))
+				{
+				Object[] args = RT.toArray(RT.rest(o));
+				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
+				}
+			if(Compiler.namesStaticMember(fs))
+				{
+				Object[] args = RT.toArray(RT.rest(o));
+				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
+				}
+			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
+			if(v instanceof Var)
+				{
+				return ((IFn) v).applyTo(RT.rest(o));
+				}
+			throw new Exception("Can't resolve " + v);
+			}
+		else
+			throw new IllegalArgumentException("Unsupported #= form");
 	}
-
 }
 
 //static class ArgVectorReader extends AFn{

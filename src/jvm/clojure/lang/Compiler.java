@@ -268,7 +268,7 @@ static class DefExpr implements Expr{
 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
 
-	public DefExpr(String source,int line,Var var, Expr init, Expr meta, boolean initProvided){
+	public DefExpr(String source, int line, Var var, Expr init, Expr meta, boolean initProvided){
 		this.source = source;
 		this.line = line;
 		this.var = var;
@@ -354,7 +354,7 @@ static class DefExpr implements Expr{
 			IPersistentMap mm = sym.meta();
 			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, SOURCE.get());
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
-			return new DefExpr((String) SOURCE.get(),(Integer) LINE.get(),
+			return new DefExpr((String) SOURCE.get(), (Integer) LINE.get(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
 			                   meta, RT.count(form) == 3);
 		}
@@ -846,8 +846,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.line = line;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line,
-			                  fieldName);
+			((PrintWriter) RT.ERR.get())
+					.format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line,
+					        fieldName);
 			}
 	}
 
@@ -1045,7 +1046,8 @@ static abstract class MethodExpr extends HostExpr{
 				}
 			catch(Exception e1)
 				{
-				e1.printStackTrace((PrintWriter)RT.ERR.get());  //To change body of catch statement use File | Settings | File Templates.
+				e1.printStackTrace((PrintWriter) RT.ERR
+						.get());  //To change body of catch statement use File | Settings | File Templates.
 				}
 
 			}
@@ -1102,7 +1104,8 @@ static class InstanceMethodExpr extends MethodExpr{
 
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
+			((PrintWriter) RT.ERR.get())
+					.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
 	}
 
@@ -1237,7 +1240,8 @@ static class StaticMethodExpr extends MethodExpr{
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
+			((PrintWriter) RT.ERR.get())
+					.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
 	}
 
@@ -1328,7 +1332,7 @@ static class StaticMethodExpr extends MethodExpr{
 static class UnresolvedVarExpr implements Expr{
 	public final Symbol symbol;
 
-	public UnresolvedVarExpr(Symbol symbol) {
+	public UnresolvedVarExpr(Symbol symbol){
 		this.symbol = symbol;
 	}
 
@@ -2060,7 +2064,8 @@ public static class NewExpr implements Expr{
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
 			{
-			((PrintWriter)RT.ERR.get()).format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, c.getName());
+			((PrintWriter) RT.ERR.get())
+					.format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, c.getName());
 			}
 	}
 
@@ -2717,7 +2722,7 @@ static class InvokeExpr implements Expr{
 //			throw new IllegalArgumentException(
 //					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 
-		return new InvokeExpr((String) SOURCE.get(),(Integer) LINE.get(), tagOf(form), fexpr, args);
+		return new InvokeExpr((String) SOURCE.get(), (Integer) LINE.get(), tagOf(form), fexpr, args);
 	}
 }
 
@@ -2751,8 +2756,8 @@ static class FnLoaderThunk extends RestFn{
 	synchronized private IFn loadFn() throws Exception{
 		if(f == null)
 			{
-		    Class fc = fx.getCompiledClass();
-			f = (IFn)fc.newInstance();
+			Class fc = fx.getCompiledClass();
+			f = (IFn) fc.newInstance();
 			v.swapRoot(f);
 			}
 		return f;
@@ -2779,20 +2784,62 @@ static public class FnExpr implements Expr{
 	int line;
 	PersistentVector constants;
 	int constantsID;
-	public final IPersistentCollection methods() { return methods;}
-	public final FnMethod variadicMethod() { return variadicMethod;}
-	public final String name() { return name;}
-	public final String simpleName() { return simpleName;}
-	public final String internalName() { return internalName;}
-	public final String thisName() { return thisName;}
-	public final Type fntype() { return fntype;}
-	public final IPersistentMap closes() { return closes;}
-	public final IPersistentMap keywords() { return keywords;}
-	public final IPersistentMap vars() { return vars;}
-	public final Class compiledClass() { return compiledClass;}
-	public final int line() { return line;}
-	public final PersistentVector constants() { return constants;}
-	public final int constantsID() { return constantsID;}
+
+	public final IPersistentCollection methods(){
+		return methods;
+	}
+
+	public final FnMethod variadicMethod(){
+		return variadicMethod;
+	}
+
+	public final String name(){
+		return name;
+	}
+
+	public final String simpleName(){
+		return simpleName;
+	}
+
+	public final String internalName(){
+		return internalName;
+	}
+
+	public final String thisName(){
+		return thisName;
+	}
+
+	public final Type fntype(){
+		return fntype;
+	}
+
+	public final IPersistentMap closes(){
+		return closes;
+	}
+
+	public final IPersistentMap keywords(){
+		return keywords;
+	}
+
+	public final IPersistentMap vars(){
+		return vars;
+	}
+
+	public final Class compiledClass(){
+		return compiledClass;
+	}
+
+	public final int line(){
+		return line;
+	}
+
+	public final PersistentVector constants(){
+		return constants;
+	}
+
+	public final int constantsID(){
+		return constantsID;
+	}
 
 	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
 	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
@@ -3106,7 +3153,7 @@ static public class FnExpr implements Expr{
 		cv.visitEnd();
 
 		loader = (DynamicClassLoader) LOADER.get();
-		bytecode =  cw.toByteArray();
+		bytecode = cw.toByteArray();
 	}
 
 	synchronized Class getCompiledClass(){
@@ -3244,14 +3291,38 @@ public static class FnMethod{
 	int maxLocal = 0;
 	int line;
 	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
-	public final IPersistentMap locals() { return locals;}
-	public final PersistentVector reqParms() { return reqParms;}
-	public final LocalBinding restParm() { return restParm;}
-	public final Expr body() { return body;}
-	public final FnExpr fn() { return fn;}
-	public final PersistentVector argLocals() { return argLocals;}
-	public final int maxLocal() { return maxLocal;}
-	public final int line() { return line;}
+
+	public final IPersistentMap locals(){
+		return locals;
+	}
+
+	public final PersistentVector reqParms(){
+		return reqParms;
+	}
+
+	public final LocalBinding restParm(){
+		return restParm;
+	}
+
+	public final Expr body(){
+		return body;
+	}
+
+	public final FnExpr fn(){
+		return fn;
+	}
+
+	public final PersistentVector argLocals(){
+		return argLocals;
+	}
+
+	public final int maxLocal(){
+		return maxLocal;
+	}
+
+	public final int line(){
+		return line;
+	}
 
 	public FnMethod(FnExpr fn, FnMethod parent){
 		this.parent = parent;
@@ -3466,7 +3537,10 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
 
 public static class BodyExpr implements Expr{
 	PersistentVector exprs;
-	public final PersistentVector exprs() { return exprs;}
+
+	public final PersistentVector exprs(){
+		return exprs;
+	}
 
 	public BodyExpr(PersistentVector exprs){
 		this.exprs = exprs;
@@ -3529,8 +3603,14 @@ public static class BodyExpr implements Expr{
 public static class BindingInit{
 	LocalBinding binding;
 	Expr init;
-	public final LocalBinding binding() { return binding;}
-	public final Expr init() { return init;}
+
+	public final LocalBinding binding(){
+		return binding;
+	}
+
+	public final Expr init(){
+		return init;
+	}
 
 	public BindingInit(LocalBinding binding, Expr init){
 		this.binding = binding;
@@ -3820,8 +3900,9 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 static public class CompilerException extends Exception{
 
 	public CompilerException(String source, int line, Throwable cause){
-		super(errorMsg(source,line,cause.toString()), cause);
+		super(errorMsg(source, line, cause.toString()), cause);
 	}
+
 	public String toString(){
 		return getMessage();
 	}
@@ -3867,6 +3948,10 @@ static public IFn isInline(Object op, int arity) throws Exception{
 	return null;
 }
 
+public static boolean namesStaticMember(Symbol sym){
+	return sym.ns != null && namespaceFor(sym) == null;
+}
+
 public static Object macroexpand1(Object x) throws Exception{
 	if(x instanceof ISeq)
 		{
@@ -3903,17 +3988,14 @@ public static Object macroexpand1(Object x) throws Exception{
 					Symbol meth = Symbol.intern(sname.substring(1));
 					return RT.listStar(DOT, RT.second(form), meth, form.rest().rest());
 					}
-				else if(sym.ns != null)
+				else if(namesStaticMember(sym))
 					{
-					if(namespaceFor(sym) == null)
+					Symbol target = Symbol.intern(sym.ns);
+					Class c = HostExpr.maybeClass(target, false);
+					if(c != null)
 						{
-						Symbol target = Symbol.intern(sym.ns);
-						Class c = HostExpr.maybeClass(target, false);
-						if(c != null)
-							{
-							Symbol meth = Symbol.intern(sym.name);
-							return RT.listStar(DOT, target, meth, form.rest());
-							}
+						Symbol meth = Symbol.intern(sym.name);
+						return RT.listStar(DOT, target, meth, form.rest());
 						}
 					}
 				else
@@ -4005,7 +4087,7 @@ public static Object eval(Object form) throws Exception{
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException((String)SOURCE.get(), (Integer) LINE.get(),e);
+			throw new CompilerException((String) SOURCE.get(), (Integer) LINE.get(), e);
 		else
 			throw (CompilerException) e;
 		}
@@ -4088,10 +4170,10 @@ static Object resolve(Symbol sym) throws Exception{
 }
 
 static private Namespace namespaceFor(Symbol sym){
-	return namespaceFor(currentNS(),sym);
+	return namespaceFor(currentNS(), sym);
 }
 
-static private Namespace namespaceFor(Namespace inns,Symbol sym){
+static private Namespace namespaceFor(Namespace inns, Symbol sym){
 	//note, presumes non-nil sym.ns
 	// first check against currentNS' aliases...
 	Symbol nsSym = Symbol.create(sym.ns);
@@ -4108,7 +4190,7 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
-		Namespace ns = namespaceFor(n,sym);
+		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
 			throw new Exception("No such namespace: " + sym.ns);
 
@@ -4132,7 +4214,7 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		Object o = n.getMapping(sym);
 		if(o == null)
 			{
-			if( RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.get()))
+			if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.get()))
 				{
 				return sym;
 				}
@@ -4191,7 +4273,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 			var = ns.findInternedVar(name);
 		}
 	else if(sym.equals(NS))
-		var =  RT.NS_VAR;
+		var = RT.NS_VAR;
 	else if(sym.equals(IN_NS))
 		var = RT.IN_NS_VAR;
 	else
@@ -4284,7 +4366,7 @@ public static Object loadFile(String file) throws Exception{
 	FileInputStream f = new FileInputStream(file);
 	try
 		{
-		return load(new InputStreamReader(f,RT.UTF8), new File(file).getAbsolutePath(), (new File(file)).getName());
+		return load(new InputStreamReader(f, RT.UTF8), new File(file).getAbsolutePath(), (new File(file)).getName());
 		}
 	finally
 		{
@@ -4323,7 +4405,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 		}
 	catch(LispReader.ReaderException e)
 		{
-		throw new CompilerException(sourceName,e.line,e.getCause());
+		throw new CompilerException(sourceName, e.line, e.getCause());
 		}
 	finally
 		{
