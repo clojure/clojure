@@ -205,6 +205,7 @@ final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.create("*
 
 final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), F);
 final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("ns"), F);
+static final Var PRINT_INITIALIZED = Var.intern(CLOJURE_NS, Symbol.create("print-initialized"));
 static final Var PRINT_METHOD = Var.intern(CLOJURE_NS, Symbol.create("print-method"));
 //final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
@@ -1159,11 +1160,37 @@ static public boolean suppressRead(){
 	return false;
 }
 
+static public String printString(Object x) {
+	try
+		{
+		StringWriter sw = new StringWriter();
+		print(x,sw);
+		return sw.toString();
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
+
+static public Object readString(String s){
+	PushbackReader r = new PushbackReader(new StringReader(s));
+	try
+		{
+		return LispReader.read(r,true,null,false);
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
 
 static public void print(Object x, Writer w) throws Exception{
 	//call multimethod
-	PRINT_METHOD.invoke(x, w);
-/*
+	if(PRINT_INITIALIZED.isBound())
+		PRINT_METHOD.invoke(x, w);
+//*
+	else{
 	boolean readably = booleanCast(PRINT_READABLY.get());
 	if(x instanceof Obj)
 		{
@@ -1317,6 +1344,7 @@ static public void print(Object x, Writer w) throws Exception{
 		}
 	else if(x instanceof Class)
 		{
+		w.write("#=");
 		w.write(((Class) x).getName());
 		}
 	else if(x instanceof BigDecimal && readably)
@@ -1325,7 +1353,8 @@ static public void print(Object x, Writer w) throws Exception{
 		w.write('M');
 		}
 	else w.write(x.toString());
-	*/
+	}
+	//*/
 }
 
 private static void printInnerSeq(ISeq x, Writer w) throws Exception{

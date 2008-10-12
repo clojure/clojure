@@ -25,7 +25,7 @@ protected APersistentMap(){
 }
 
 public String toString(){
-	return "<map: - " + count() + " items>";
+	return RT.printString(this);
 }
 
 public IPersistentCollection cons(Object o){

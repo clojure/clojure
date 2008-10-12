@@ -25,6 +25,10 @@ protected APersistentSet(IPersistentMap meta, IPersistentMap impl){
 	this.impl = impl;
 }
 
+public String toString(){
+	return RT.printString(this);
+}
+
 public boolean contains(Object key){
 	return impl.containsKey(key);
 }

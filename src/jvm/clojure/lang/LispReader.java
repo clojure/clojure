@@ -50,6 +50,7 @@ static Pattern intPat =
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?");
 static final Symbol SLASH = Symbol.create("/");
+static final Symbol CLOJURE_SLASH = Symbol.create("clojure","/");
 //static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
 //static Pattern instanceMemberPat = Pattern.compile("\\.([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
 //static Pattern staticMemberPat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
@@ -267,6 +268,10 @@ static private Object interpretToken(String s) throws Exception{
 	else if(s.equals("/"))
 		{
 		return SLASH;
+		}
+	else if(s.equals("clojure//"))
+		{
+		return CLOJURE_SLASH;
 		}
 	Object ret = null;
 

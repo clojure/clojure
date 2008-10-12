@@ -2854,6 +2854,7 @@ static public class FnExpr implements Expr{
 	final static Method getClassMethod = Method.getMethod("Class getClass()");
 	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
 	final static Method getConstantsMethod = Method.getMethod("Object[] getConstants(int)");
+	final static Method readStringMethod = Method.getMethod("Object readString(String)");
 	private DynamicClassLoader loader;
 	private byte[] bytecode;
 
@@ -2935,7 +2936,7 @@ static public class FnExpr implements Expr{
 			fn.constants = (PersistentVector) CONSTANTS.get();
 			fn.constantsID = RT.nextID();
 			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
-			loader.registerConstants(fn.constantsID, fn.constants.toArray());
+			//loader.registerConstants(fn.constantsID, fn.constants.toArray());
 			}
 		finally
 			{
@@ -3032,18 +3033,21 @@ static public class FnExpr implements Expr{
 
 		if(constants.count() > 0)
 			{
+
 //		clinitgen.mark(begin);
-			clinitgen.visitLdcInsn(fntype);
-			clinitgen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
-			clinitgen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
-			clinitgen.push(constantsID);
-			clinitgen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getConstantsMethod);
+//			clinitgen.visitLdcInsn(fntype);
+//			clinitgen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
+//			clinitgen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
+//			clinitgen.push(constantsID);
+//			clinitgen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getConstantsMethod);
 
 			for(int i = 0; i < constants.count(); i++)
 				{
-				clinitgen.dup();
-				clinitgen.push(i);
-				clinitgen.arrayLoad(OBJECT_TYPE);
+				clinitgen.push(RT.printString(constants.nth(i)));
+				clinitgen.invokeStatic(RT_TYPE, readStringMethod);
+//				clinitgen.dup();
+//				clinitgen.push(i);
+//				clinitgen.arrayLoad(OBJECT_TYPE);
 				clinitgen.checkCast(constantType(i));
 				clinitgen.putStatic(fntype, constantName(i), constantType(i));
 				}

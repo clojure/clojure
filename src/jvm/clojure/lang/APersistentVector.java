@@ -27,7 +27,7 @@ protected APersistentVector(){
 }
 
 public String toString(){
-	return "<vector: - " + count() + " items>";
+	return RT.printString(this);
 }
 
 public ISeq seq(){

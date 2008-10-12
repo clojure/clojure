@@ -3567,6 +3567,8 @@
   (.append w \#)
   (print-method (str p) w))
 
+(def #^{:private true} print-initialized true)
+
 (defmacro declare
   "defs the supplied var names with no bindings, useful for making forward declarations."
   [& names] `(do ~@(map #(list 'def %) names)))
