@@ -124,7 +124,7 @@ public Set<Entry<K, V>> entrySet(){
 		{
 		IPersistentMap map = mapAt(i);
 		if(map.count() > 0)
-			entries.addAll((Collection) map);
+			entries.addAll((Collection) RT.seq(map));
 		}
 	return new AbstractSet<Entry<K, V>>(){
 		public Iterator iterator(){
