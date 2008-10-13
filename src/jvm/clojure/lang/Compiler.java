@@ -2968,7 +2968,7 @@ static public class FnExpr implements Expr{
 		return ret;
 	}
 
-	private void compile(){
+	private void compile() throws IOException{
 		//create bytecode for a class
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
@@ -2976,7 +2976,7 @@ static public class FnExpr implements Expr{
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
 		ClassVisitor cv = cw;
-		//ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
+//		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,
 		         isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
@@ -3158,11 +3158,31 @@ static public class FnExpr implements Expr{
 
 		loader = (DynamicClassLoader) LOADER.get();
 		bytecode = cw.toByteArray();
+		String path = "gen" + File.separator + internalName + ".class";
+		File cf = new File(path);
+		cf.getParentFile().mkdirs();
+		cf.createNewFile();
+		OutputStream cfs = new FileOutputStream(cf);
+		try
+			{
+			cfs.write(bytecode);
+			}
+		finally
+			{
+			cfs.close();
+			}
 	}
 
 	synchronized Class getCompiledClass(){
 		if(compiledClass == null)
-			compiledClass = loader.defineClass(name, bytecode);
+			try
+				{
+				compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
+				}
+			catch(ClassNotFoundException e)
+				{
+				throw new RuntimeException(e);
+				}
 		return compiledClass;
 	}
 
@@ -3268,7 +3288,9 @@ static public class FnExpr implements Expr{
 				return Type.getType(RestFn.class);
 			else if(AFn.class.isAssignableFrom(c))
 				return Type.getType(AFn.class);
-			return Type.getType(c);
+			else if(c == Var.class)
+				return Type.getType(Var.class);
+//			return Type.getType(c);
 			}
 		return OBJECT_TYPE;
 	}
@@ -4421,6 +4443,100 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 		}
 	return ret;
 }
+
+public static Object compile(Reader rdr, String sourcePath, String sourceName) throws Exception{
+	Object EOF = new Object();
+	Object ret = null;
+	LineNumberingPushbackReader pushbackReader =
+			(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
+			new LineNumberingPushbackReader(rdr);
+	Var.pushThreadBindings(
+			RT.map(SOURCE_PATH, sourcePath,
+			       SOURCE, sourceName,
+			       RT.CURRENT_NS, RT.CURRENT_NS.get(),
+			       LINE_BEFORE, pushbackReader.getLineNumber(),
+			       LINE_AFTER, pushbackReader.getLineNumber(),
+			       CONSTANTS, PersistentVector.EMPTY,
+			       KEYWORDS, PersistentHashMap.EMPTY,
+			       VARS, PersistentHashMap.EMPTY
+			));
+
+	try
+		{
+		FnExpr fn = new FnExpr(null);
+		fn.internalName = sourcePath.replace(File.separator, "/").substring(0, sourcePath.lastIndexOf('.'));
+		fn.fntype = Type.getObjectType(fn.internalName);
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		ClassVisitor cv = cw;
+		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, fn.internalName, null,
+		         "java.lang.Object", null);
+
+		//static load method
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
+		                                            Method.getMethod("void load ()"),
+		                                            null,
+		                                            null,
+		                                            cv);
+		gen.visitCode();
+
+		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
+		    r = LispReader.read(pushbackReader, false, EOF, false))
+			{
+			LINE_AFTER.set(pushbackReader.getLineNumber());
+			Expr expr = analyze(C.EVAL, r);
+			fn.keywords = (IPersistentMap) KEYWORDS.get();
+			fn.vars = (IPersistentMap) VARS.get();
+			fn.constants = (PersistentVector) CONSTANTS.get();
+			expr.emit(C.EXPRESSION, fn, gen);
+			expr.eval();
+			LINE_BEFORE.set(pushbackReader.getLineNumber());
+			}
+		//end of load
+		gen.returnValue();
+		gen.endMethod();
+
+		//static fields for constants
+		for(int i = 0; i < fn.constants.count(); i++)
+			{
+			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, fn.constantName(i), fn.constantType(i).getDescriptor(),
+			              null, null);
+			}
+
+		//static init for constants, keywords and vars
+		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
+		                                                  Method.getMethod("void <clinit> ()"),
+		                                                  null,
+		                                                  null,
+		                                                  cv);
+		clinitgen.visitCode();
+		if(fn.constants.count() > 0)
+			{
+			for(int i = 0; i < fn.constants.count(); i++)
+				{
+				clinitgen.push(RT.printString(fn.constants.nth(i)));
+				clinitgen.invokeStatic(RT_TYPE, FnExpr.readStringMethod);
+				clinitgen.checkCast(fn.constantType(i));
+				clinitgen.putStatic(fn.fntype, fn.constantName(i), fn.constantType(i));
+				}
+			}
+		//end of static init
+		clinitgen.returnValue();
+		clinitgen.endMethod();
+
+		//end of class
+		cv.visitEnd();
+		}
+	catch(LispReader.ReaderException e)
+		{
+		throw new CompilerException(sourceName, e.line, e.getCause());
+		}
+	finally
+		{
+		Var.popThreadBindings();
+		}
+	return ret;
+}
+
 /*
 public static void main(String[] args) throws Exception{
 	RT.init();
