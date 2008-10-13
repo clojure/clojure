@@ -3567,6 +3567,11 @@
   (.append w \#)
   (print-method (str p) w))
 
+(defmethod print-method clojure.lang.Namespace [n #^Writer w]
+  (.write w "#=(find-ns ")
+  (print-method (.name n) w)
+  (.write w ")"))
+
 (def #^{:private true} print-initialized true)
 
 (defmacro declare
