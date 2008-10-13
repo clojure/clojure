@@ -21,80 +21,59 @@
 
 (ns clojure.contrib.miglayout
   (:import (java.awt Container Component)
-           (net.miginfocom.swing MigLayout)))
+           (net.miginfocom.swing MigLayout))
+  (:use clojure.contrib.miglayout.internal))
 
 (defn miglayout
   "Adds java.awt.Components to a java.awt.Container with constraints
   formatted for the MiGLayout layout manager.
 
-  Arguments: container layout-constraints? [component constraint*]*
+  Arguments: container [item constraint*]*
 
     - container: the container for the specified components, its layout
       manager will be set to a new instance of MigLayout
-    - layout-constraints: an optional map that maps any or all of
-      :layout, :column, and/or :row to a string that specifies the
-      corresponding constraints for the whole layout
-    - an inline series of components and constraints: each component may be
-      followed by zero or more component constraints
 
-  The set of constraints for each component is presented to MiGLayout as a
-  single string with each constraint and its arguments separated from any
-  subsequent constraint by a comma.
+    - an inline series of items and constraints--each item may be followed
+      by zero or more constraints.
 
-  Component constraint: string, keyword, vector, or map
+  Item:
+
+    - An item is either a Component or one of the keywords :layout
+     :column or :row. Constraints for a keyword item affect the entire
+      layout.
+
+  Constraints:
+
+    - The set of constraints for each item is presented to MiGLayout as a
+      single string with each constraint and its arguments separated from
+      any subsequent constraint by a comma.
+
+  Constraint: string, keyword, vector, or map
 
     - A string specifies one or more constraints each with zero or more
       arguments. If it specifies more than one constraint, the string must
       include commas to separate them.
     - A keyword specifies a single constraint without arguments
     - A vector specifies a single constraint with one or more arguments
-    - A map specifiess one or more constraints as keys, each mapped to a
-      single argument
-
-  Empty strings, vectors, and maps are accepted but don't affect the
-  layout."
+    - A map specifies one or more constraints as keys, each mapped to a
+      single argument"
   [#^Container container & args]
-  (let [[f & r :as a] args
-        [constraints args] (if (map? f) [f r] [nil a])
-        the-str #((if (keyword? %) name str) %)]
-    (.setLayout container
-      (MigLayout.
-       (str (:layout constraints))
-       (str (:column constraints))
-       (str (:row constraints))))
-    (loop [#^Component component (first args)
-           constraints nil
-           [arg & args] (rest args)]
-      (cond (string? arg)
-            (recur component
-                   (str constraints ", " arg)
-                   args)
-            (keyword? arg)
-            (recur component
-                   (str constraints ", " (name arg))
-                   args)
-            (vector? arg)
-            (recur component
-                   (apply str constraints ", "
-                     (map the-str
-                       (interpose " " arg)))
-                   args)
-            (map? arg)
-            (recur component
-                   (apply str constraints ", "
-                     (map the-str
-                       (apply concat
-                         (interpose [", "]
-                           (map #(interpose " " %) arg)))))
-                   args)
-            (or (instance? java.awt.Component arg) (nil? arg))
-            (do
-              (if constraints
-                (.add container component (subs constraints 2))
-                (.add container component))
-              (if arg
-                (recur arg nil args)
-                container))
-            :else
-            (throw (IllegalArgumentException.
-                    (format "unrecognized argument: %s (%s)" arg (class arg))))))))
+  (loop [[item & args] args
+         item-constraints {:layout {} :component []}]
+    (if item
+      (let [[constraints args] (split-with constraint? args)]
+        (recur args
+         (update-in
+          item-constraints
+          [(if (component? item) :component :layout)]
+          #(conj % [item (apply format-constraints constraints)]))))
+      (do
+        (.setLayout
+         container
+         (MigLayout.
+          (get-in item-constraints [:layout :layout])
+          (get-in item-constraints [:layout :column])
+          (get-in item-constraints [:layout :row])))
+        (doseq [component constraints] (:component item-constraints)
+          (.add container component constraints))
+        container))))

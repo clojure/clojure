@@ -45,7 +45,7 @@
   (fn test1
     [panel]
     (miglayout panel
-      {:column "[right]"}
+      :column               "[right]"
       (JLabel. "General")   "split, span"
       (JSeparator.)         "growx, wrap"
       (JLabel. "Company")   "gap 10"
@@ -67,7 +67,7 @@
   (fn test2
     [panel]
     (miglayout panel
-      {:column "[right]"}
+      :column               "[right]"
       (JLabel. "General")   "split, span"
       (JSeparator.)         :growx :wrap
       (JLabel. "Company")   [:gap 10]
