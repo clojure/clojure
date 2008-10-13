@@ -868,7 +868,7 @@ static class EvalReader extends AFn{
 			Symbol fs = (Symbol) RT.first(o);
 			if(fs.equals(THE_VAR))
 				{
-				return Compiler.resolve((Symbol) RT.second(o));
+				return Compiler.resolve((Symbol) RT.second(o),true);
 				}
 			if(fs.name.endsWith("."))
 				{

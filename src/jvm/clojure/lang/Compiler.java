@@ -4169,8 +4169,12 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 
 }
 
+static Object resolve(Symbol sym, boolean allowPrivate) throws Exception{
+	return resolveIn(currentNS(), sym, allowPrivate);
+}
+
 static Object resolve(Symbol sym) throws Exception{
-	return resolveIn(currentNS(), sym);
+	return resolveIn(currentNS(), sym, false);
 }
 
 static private Namespace namespaceFor(Symbol sym){
@@ -4190,7 +4194,7 @@ static private Namespace namespaceFor(Namespace inns, Symbol sym){
 	return ns;
 }
 
-static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
+static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) throws Exception{
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
@@ -4201,7 +4205,7 @@ static public Object resolveIn(Namespace n, Symbol sym) throws Exception{
 		Var v = ns.findInternedVar(Symbol.create(sym.name));
 		if(v == null)
 			throw new Exception("No such var: " + sym);
-		else if(v.ns != currentNS() && !v.isPublic())
+		else if(v.ns != currentNS() && !v.isPublic() && !allowPrivate)
 			throw new IllegalStateException("var: " + sym + " is not public");
 		return v;
 		}
