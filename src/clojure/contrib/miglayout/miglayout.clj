@@ -6,7 +6,7 @@
 ;;  this license. You must not remove this notice, or any other, from this
 ;;  software.
 ;;
-;;  miglayout.clj
+;;  clojure.contrib.miglayout
 ;;
 ;;  Clojure support for the MiGLayout layout manager
 ;;  http://www.miglayout.com/
@@ -42,38 +42,22 @@
      :column or :row. Constraints for a keyword item affect the entire
       layout.
 
-  Constraints:
-
-    - The set of constraints for each item is presented to MiGLayout as a
-      single string with each constraint and its arguments separated from
-      any subsequent constraint by a comma.
-
   Constraint: string, keyword, vector, or map
 
     - A string specifies one or more constraints each with zero or more
-      arguments. If it specifies more than one constraint, the string must
-      include commas to separate them.
+      arguments.
     - A keyword specifies a single constraint without arguments
     - A vector specifies a single constraint with one or more arguments
     - A map specifies one or more constraints as keys, each mapped to a
       single argument"
   [#^Container container & args]
-  (loop [[item & args] args
-         item-constraints {:layout {} :component []}]
-    (if item
-      (let [[constraints args] (split-with constraint? args)]
-        (recur args
-         (update-in
-          item-constraints
-          [(if (component? item) :component :layout)]
-          #(conj % [item (apply format-constraints constraints)]))))
-      (do
-        (.setLayout
-         container
-         (MigLayout.
-          (get-in item-constraints [:layout :layout])
-          (get-in item-constraints [:layout :column])
-          (get-in item-constraints [:layout :row])))
-        (doseq [component constraints] (:component item-constraints)
-          (.add container component constraints))
-        container))))
+  (let [{:keys [keyword-items components]}
+        (apply parse-item-constraints args)]
+    (.setLayout container
+      (MigLayout.
+       (:layout keyword-items)
+       (:column keyword-items)
+       (:row keyword-items)))
+    (doseq [#^Component component constraints] components
+      (.add container component constraints))
+    container))
