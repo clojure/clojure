@@ -1552,6 +1552,66 @@
   "Returns the Class of x"
   [#^Object x] (if (nil? x) x (. x (getClass))))
 
+(defn num
+  "Coerce to Number"
+  {:tag Number
+   :inline (fn  [x] `(. clojure.lang.Numbers (num ~x)))}
+  [x] (. clojure.lang.Numbers (num x)))
+
+(defn int
+  "Coerce to int"
+  {:tag Integer
+   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
+  [x] (. clojure.lang.RT (intCast x)))
+
+(defn long
+  "Coerce to long"
+  {:tag Long
+   :inline (fn  [x] `(. clojure.lang.RT (longCast ~x)))}
+  [#^Number x] (. x (longValue)))
+
+(defn float
+  "Coerce to float"
+  {:tag Float
+   :inline (fn  [x] `(. clojure.lang.RT (floatCast ~x)))}
+  [#^Number x] (. x (floatValue)))
+
+(defn double
+  "Coerce to double"
+  {:tag Double
+   :inline (fn  [x] `(. clojure.lang.RT (doubleCast ~x)))}
+  [#^Number x] (. x (doubleValue)))
+
+(defn short
+  "Coerce to short"
+  {:tag Short}
+  [#^Number x] (. x (shortValue)))
+
+(defn byte
+  "Coerce to byte"
+  {:tag Byte}
+  [#^Number x] (. x (byteValue)))
+
+(defn char
+  "Coerce to char"
+  {:tag Character}
+  [x] (. clojure.lang.RT (charCast x)))
+
+(defn boolean
+  "Coerce to boolean"
+  {:tag Boolean} 
+  [x] (if x true false))
+
+(defn bigint 
+  "Coerce to BigInteger"
+  {:tag BigInteger} 
+  [x] (. BigInteger valueOf x))
+
+(defn bigdec
+  "Coerce to BigDecimal"
+  {:tag BigDecimal}
+  [x] (. BigDecimal valueOf x))
+
 (defmulti print-method (fn [x writer] (class x)))
 
 (defn pr
@@ -1615,7 +1675,7 @@
   ([stream eof-error? eof-value]
    (read stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
-   (. clojure.lang.LispReader (read stream eof-error? eof-value recursive?))))
+   (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?))))
 
 (defn read-line
   "Reads the next line from stream that is the current value of *in* ."
@@ -1662,65 +1722,7 @@
      (prn (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " msecs"))
      ret#))
 
-(defn num
-  "Coerce to Number"
-  {:tag Number
-   :inline (fn  [x] `(. clojure.lang.Numbers (num ~x)))}
-  [x] (. clojure.lang.Numbers (num x)))
 
-(defn int
-  "Coerce to int"
-  {:tag Integer
-   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
-  [x] (. clojure.lang.RT (intCast x)))
-
-(defn long
-  "Coerce to long"
-  {:tag Long
-   :inline (fn  [x] `(. clojure.lang.RT (longCast ~x)))}
-  [#^Number x] (. x (longValue)))
-
-(defn float
-  "Coerce to float"
-  {:tag Float
-   :inline (fn  [x] `(. clojure.lang.RT (floatCast ~x)))}
-  [#^Number x] (. x (floatValue)))
-
-(defn double
-  "Coerce to double"
-  {:tag Double
-   :inline (fn  [x] `(. clojure.lang.RT (doubleCast ~x)))}
-  [#^Number x] (. x (doubleValue)))
-
-(defn short
-  "Coerce to short"
-  {:tag Short}
-  [#^Number x] (. x (shortValue)))
-
-(defn byte
-  "Coerce to byte"
-  {:tag Byte}
-  [#^Number x] (. x (byteValue)))
-
-(defn char
-  "Coerce to char"
-  {:tag Character}
-  [x] (. clojure.lang.RT (charCast x)))
-
-(defn boolean
-  "Coerce to boolean"
-  {:tag Boolean} 
-  [x] (if x true false))
-
-(defn bigint 
-  "Coerce to BigInteger"
-  {:tag BigInteger} 
-  [x] (. BigInteger valueOf x))
-
-(defn bigdec
-  "Coerce to BigDecimal"
-  {:tag BigDecimal}
-  [x] (. BigDecimal valueOf x))
 
 (import '(java.lang.reflect Array))
 
@@ -3286,15 +3288,17 @@
     (assoc m k (assoc-in (get m k) ks v))
     (assoc m k v)))
 
-(defn update-in 
+(defn update-in
   "'Updates' a value in a nested associative structure, where ks is a
   sequence of keys and f is a function that will take the old value
-  and return the new value, and returns a new nested structure.  
-  If any levels do not exist, hash-maps will be created."
-  ([m [k & ks] f]
+  and any supplied args and return the new value, and returns a new
+  nested structure.  If any levels do not exist, hash-maps will be
+  created."
+  ([m [k & ks] f & args]
    (if ks
-     (assoc m k (update-in (get m k) ks f))
-     (assoc m k (f (get m k))))))
+     (assoc m k (apply update-in (get m k) ks f args))
+     (assoc m k (apply f (get m k) args)))))
+
 
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)). 

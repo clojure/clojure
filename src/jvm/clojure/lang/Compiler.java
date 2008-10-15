@@ -2936,7 +2936,7 @@ static public class FnExpr implements Expr{
 			fn.constants = (PersistentVector) CONSTANTS.get();
 			fn.constantsID = RT.nextID();
 			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
-			//loader.registerConstants(fn.constantsID, fn.constants.toArray());
+			loader.registerConstants(fn.constantsID, fn.constants.toArray());
 			}
 		finally
 			{
@@ -3158,28 +3158,29 @@ static public class FnExpr implements Expr{
 
 		loader = (DynamicClassLoader) LOADER.get();
 		bytecode = cw.toByteArray();
-		String path = "gen" + File.separator + internalName + ".class";
-		File cf = new File(path);
-		cf.getParentFile().mkdirs();
-		cf.createNewFile();
-		OutputStream cfs = new FileOutputStream(cf);
-		try
-			{
-			cfs.write(bytecode);
-			}
-		finally
-			{
-			cfs.close();
-			}
+//		String path = "gen" + File.separator + internalName + ".class";
+//		File cf = new File(path);
+//		cf.getParentFile().mkdirs();
+//		cf.createNewFile();
+//		OutputStream cfs = new FileOutputStream(cf);
+//		try
+//			{
+//			cfs.write(bytecode);
+//			}
+//		finally
+//			{
+//			cfs.close();
+//			}
 	}
 
 	synchronized Class getCompiledClass(){
 		if(compiledClass == null)
 			try
 				{
-				compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
+				//compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
+				compiledClass = loader.defineClass(name, bytecode);
 				}
-			catch(ClassNotFoundException e)
+			catch(Exception e)
 				{
 				throw new RuntimeException(e);
 				}
