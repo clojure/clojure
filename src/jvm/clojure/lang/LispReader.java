@@ -364,8 +364,22 @@ static class RegexReader extends AFn{
 	static StringReader stringrdr = new StringReader();
 
 	public Object invoke(Object reader, Object doublequote) throws Exception{
-		String str = (String) stringrdr.invoke(reader, doublequote);
-		return Pattern.compile(str);
+		StringBuilder sb = new StringBuilder();
+		Reader r = (Reader) reader;
+		for(int ch = r.read(); ch != '"'; ch = r.read())
+			{
+			if(ch == -1)
+				throw new Exception("EOF while reading regex");
+			sb.append( (char) ch );
+			if(ch == '\\')	//escape
+				{
+				ch = r.read();
+				if(ch == -1)
+					throw new Exception("EOF while reading regex");
+				sb.append( (char) ch ) ;
+				}
+			}
+		return Pattern.compile(sb.toString());
 	}
 }
 

@@ -3568,8 +3568,26 @@
   (.write w "M"))
 
 (defmethod print-method java.util.regex.Pattern [p #^Writer w]
-  (.append w \#)
-  (print-method (str p) w))
+  (.write w "#\"")
+  (loop [[#^Character c & r :as s] (seq (.pattern #^java.util.regex.Pattern p))
+         qmode false]
+    (when s
+      (cond
+        (= c \\) (let [[#^Character c2 & r2] r]
+                   (.append w \\)
+                   (.append w c2)
+                   (if qmode
+                      (recur r2 (not= c2 \E))
+                      (recur r2 (= c2 \Q))))
+        (= c \") (do
+                   (if qmode
+                     (.write w "\\E\\\"\\Q")
+                     (.write w "\\\""))
+                   (recur r qmode))
+        :else    (do
+                   (.append w c)
+                   (recur r qmode)))))
+  (.append w \"))
 
 (defmethod print-method clojure.lang.Namespace [n #^Writer w]
   (.write w "#=(find-ns ")
