@@ -726,7 +726,7 @@
     (. clojure.lang.Numbers (quotient num div)))
 
 (defn rem
-  "rem[ainder] of dividing numerator by denominator."
+  "remainder of dividing numerator by denominator."
   [num div]
     (. clojure.lang.Numbers (remainder num div)))
 
