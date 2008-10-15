@@ -26,7 +26,9 @@
 (def *debug-fn-names* true)
 (def *debug-comments* true)
 
-(def *has-recur*) ; used internally
+; used internally
+(def *has-recur*)
+(def *local-names* {})
 
 (defmulti tojs (fn [e ctx] (class e)))
 
@@ -41,7 +43,8 @@
         mparm (into {} (for [p (.reqParms maxm)] [(.idx p) p]))
         inits (concat
                 (when has-recur ["_cnt" "_rtn"])
-                (vals (reduce dissoc lm (cons thisfn (.reqParms fm))))
+                (vals (reduce dissoc lm
+                              (conj (.reqParms fm) thisfn (.restParm fm))))
                 (when (:fnname ctx) [(str (lm thisfn) "=arguments.callee")])
                 (when (not= fm maxm)
                   (for [lb (.reqParms fm)
@@ -67,7 +70,11 @@
                              [(count (.reqParms fm)) fm]))
                      last val))
         manym (< 1 (count (.methods e)))
-        newctx (assoc ctx :fnname (.thisName e))]
+        newctx (assoc ctx :fnname (.thisName e))
+        [methods local-names] (binding [*local-names* *local-names*]
+                                [(into {} (for [fm (.methods e)]
+                                             [fm (fnmethod fm maxm newctx)]))
+                                 *local-names*])]
     (vstr [(when (.variadicMethod e)
              ["clojure.JS.variadic(" (count (.reqParms maxm)) ","])
            "(function"
@@ -77,14 +84,14 @@
            (vec (interpose "," (for [lb (.reqParms maxm)]
                                  [(.name lb) "_" (.idx lb)])))
            "){"
+           ;"\n//" (vec (interpose "," (vals local-names))) "\n"
            (when manym
              ["switch(arguments.length){"
-              (vec (for [fm (.methods e) :when (not= fm maxm)]
-                     ["\ncase " (count (.reqParms fm)) ":"
-                      (fnmethod fm maxm newctx)]))
+              (vec (for [[fm body] methods :when (not= fm maxm)]
+                     ["\ncase " (count (.reqParms fm)) ":" body]))
               "}"])
            "\n"
-           (fnmethod maxm maxm newctx) "})"
+           (methods maxm) "})"
            (when (.variadicMethod e)
              ")")
            ])))
@@ -170,7 +177,9 @@
          "])"]))
 
 (defmethod tojs clojure.lang.Compiler$LocalBindingExpr [e ctx]
-  ((:localmap ctx) (.b e)))
+  (let [local-name ((:localmap ctx) (.b e))]
+    (set! *local-names* (assoc *local-names* (.b e) local-name))
+    local-name))
 
 (defmethod tojs clojure.lang.Compiler$NilExpr [e ctx]
   "null")
@@ -253,7 +262,7 @@
            ["\nfinally{"
             (tojs (.finallyExpr e) ctx)
             "}"])
-         "})()"]))
+         "return _rtn})()"]))
 
 
 (def skip-set '#{;-- implemented directly in clj.js
@@ -272,7 +281,8 @@
                  aset-short aset-char aset-byte slurp seque
                  decimal? float? pmap })
 
-(def skip-method #{"java.lang.Class"})
+;(def skip-method #{"java.lang.Class"})
+(def skip-method #{})
 
 (defn skip-defs [expr]
   (let [m ^(.var expr)]

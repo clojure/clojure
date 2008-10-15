@@ -26,25 +26,30 @@ clojure = {
     }
   },
   lang: {
-    Namespace: function( m ) { clojure.JS.merge( this, m || {} ); }
+    Namespace: function( n, m ) {
+      this.name = n;
+      clojure.JS.merge( this, m || {} );
+    }
   }
 };
 
 clojure.JS.Class.constructor = clojure.JS.Class;
+clojure.JS.Class.classset = { Class: true };
 
 if( ! clojure.JS.global["java"] ) {
-  java = { lang: { String: {}, Character: {}, Class: {} },
+  java = { lang: { String: {}, Character: {}, Class: {}, Number: {},
+                   Boolean: {} },
            math: { BigDecimal: {} },
-           util: { regex: { Pattern: {} } } };
+           util: { Collection: {}, Map: {}, Set: {}, regex: { Pattern: {} } } };
 }
 
-clojure = new clojure.lang.Namespace({
+clojure = new clojure.lang.Namespace("clojure",{
   in_ns: function(s) {
     var i, nsparts = s.substring(1).split('.'),
         base = clojure.JS.global;
     for( i = 0; i < nsparts.length; ++i ) {
       if( ! base[nsparts[i]] ) {
-        base[nsparts[i]] = new clojure.lang.Namespace();
+        base[nsparts[i]] = new clojure.lang.Namespace(nsparts[i]);
       }
       base = base[nsparts[i]];
     }
@@ -84,7 +89,7 @@ clojure = new clojure.lang.Namespace({
       }
       else {
         s = clojure.seq( oldargs[ arglen - 1 ] );
-        for( ; s && arglen < f.arity; s = s.rest() ) {
+        for( ; s && newargs.length < f.arity; s = s.rest() ) {
           newargs.push( s.first() );
         }
         if( s )
@@ -213,7 +218,7 @@ clojure = new clojure.lang.Namespace({
     throw ("count not supported on: " + (typeof x) + " " + x.constructor);
   },
   class_: function(o) {
-    if( o === null )
+    if( o === null || o === undefined )
       return null;
     if( typeof o === clojure.JS.functionType && ! ("constructor" in o) )
       return java.lang.Class;
@@ -282,7 +287,7 @@ clojure = new clojure.lang.Namespace({
     },
     definterface: function( pkg, name, implement ) {
       var cls = pkg[ name ] = {};
-      clojure.JS.implement( cls, name, implement );
+      clojure.JS.implement( cls, name, null, implement );
       return cls;
     },
     defclass: function( pkg, name, opts ) {
@@ -307,6 +312,12 @@ clojure = new clojure.lang.Namespace({
       if( ! o.constructor.classset )
         return false; // builtin class that doesn't match?
       return o.constructor.classset[ c.classname ];
+    },
+    relayMethod: function( method, jsclass, javaclass, ctor ) {
+      method.addMethod( jsclass, function(o,w) {
+        return (clojure.get( method.methodTable, javaclass )
+          .apply(null, [ctor ? ctor(o) : o, w]));
+      });
     },
     bitcount: function(n){
       var rtn = 0;
@@ -350,7 +361,12 @@ clojure = new clojure.lang.Namespace({
           case java.lang.String:
           case java.lang.Character:
           case java.lang.Class:
+          case java.lang.Number:
+          case java.lang.Boolean:
           case java.math.BigDecimal:
+          case java.util.Collection:
+          case java.util.Map:
+          case java.util.Set:
           case java.util.regex.Pattern:
                          return 0x7A830001;
         }
@@ -405,7 +421,14 @@ clojure = new clojure.lang.Namespace({
       },
       makeStringBuilder: function(s) {
         return new clojure.JS.StringBuilder( s===undefined ? "" : s );
-      }
+      },
+      className: function(c) {
+        if( "classname" in c )
+          return c.classname;
+        if( "name" in c )
+          return c.name;
+        return "" + c;
+      },
     }
   }
 });
@@ -430,6 +453,8 @@ clojure.JS.defclass( clojure.JS, "String", {
     toString: function() { return this.s; }
   }
 });
+
+clojure.JS.defclass( clojure.lang, "Symbol", {});
 
 clojure.JS.definterface( clojure.lang, "IObj" );
 
@@ -1378,7 +1403,7 @@ clojure.JS.defclass( clojure.lang, "PersistentHashMap", {
         return this;
       if( newroot == null )
         return this.empty();
-      return new cloljure.lang.PersistentHashMap(
+      return new clojure.lang.PersistentHashMap(
           this._meta, this._count-1, newroot );
     },
     count: function(){ return this._count; },
@@ -1556,7 +1581,7 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "BitmapIndexedNode", {
               return null;
             newnodes = this.nodes.slice();
             newnodes.splice( idx, 1 );
-            return new BIN( bitmap & ~bit, newnodes, this.shift );
+            return new BIN( this.bitmap & ~bit, newnodes, this.shift );
           }
           newnodes = this.nodes.slice();
           newnodes[ idx ] = n;
@@ -1876,20 +1901,13 @@ clojure.print_method = new clojure.lang.MultiFn(
   function (x, writer){ return clojure.class_(x); },
   clojure.keyword("","default"));
 
-clojure.print_method.addMethod( String, function(s,w) {
-  return (clojure.get( clojure.print_method.methodTable, java.lang.String )
-    .apply(null, [new clojure.JS.String(s), w]));
-});
-
-clojure.print_method.addMethod( java.lang.Class, function(c,w) {
-  return clojure.print_method.apply( null, [""+c, w] );
-});
-
-clojure.print_method.addMethod( clojure.JS.Class, function(c,w) {
-  return w.write( c.classname );
-});
+clojure.JS.relayMethod( clojure.print_method, Number, java.lang.Number );
+clojure.JS.relayMethod( clojure.print_method, String, java.lang.String,
+    function(o) { return new clojure.JS.String(o); } );
 
 clojure.JS.def(clojure,"_STAR_print_readably_STAR_",true);
+
+clojure.JS.implement( clojure.lang.Namespace, "Namespace" );
 
 clojure.lang.Namespace.find = function( s ) {
   return clojure.JS.global[ s.substring(1) ];
@@ -1897,6 +1915,10 @@ clojure.lang.Namespace.find = function( s ) {
 
 clojure.lang.Namespace.prototype.getMappings = function() {
   return this;
+};
+
+clojure.lang.Namespace.prototype.hashCode = function() {
+  return clojure.hash( this.name );
 };
 
 (function() {
