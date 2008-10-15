@@ -427,7 +427,11 @@ clojure = new clojure.lang.Namespace("clojure",{
           return c.classname;
         if( "name" in c )
           return c.name;
-        return "" + c;
+        var s = "" + c,
+            m = /^\[JavaClass (.*)]$/.exec(s);
+        if( m )
+          return m[1];
+        return s;
       },
     }
   }
@@ -1904,6 +1908,7 @@ clojure.print_method = new clojure.lang.MultiFn(
 clojure.JS.relayMethod( clojure.print_method, Number, java.lang.Number );
 clojure.JS.relayMethod( clojure.print_method, String, java.lang.String,
     function(o) { return new clojure.JS.String(o); } );
+clojure.JS.relayMethod( clojure.print_method, clojure.JS.Class, java.lang.Class );
 
 clojure.JS.def(clojure,"_STAR_print_readably_STAR_",true);
 

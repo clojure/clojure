@@ -10,7 +10,9 @@
 
 (ns tojs
     (:import (clojure.lang Compiler Compiler$C Compiler$BodyExpr
-                           Compiler$DefExpr Compiler$InstanceMethodExpr))
+                           Compiler$DefExpr Compiler$InstanceMethodExpr)
+             (java.io BufferedReader InputStreamReader StringReader PrintWriter)
+             (java.net URLDecoder))
     (:require [clojure.contrib.duck-streams :as ds]))
 
 (defn vstr [v]
@@ -306,24 +308,25 @@
 
 (defn filetojs [filename]
   (let [reader (java.io.PushbackReader. (ds/reader filename))]
-    (binding [*ns* (create-ns 'tmp)]
+    (binding [*ns* (create-ns 'user)]
       (loop []
-        (when-let f (try (read reader) (catch Exception e nil))
-          (if-let js (formtojs f)
-            (do
+        (let [f (read reader false reader false)]
+          (when-not (identical? f reader)
+            (if-let js (formtojs f)
+              (do
+                (when *debug-comments*
+                  (println "\n//======")
+                  (print "//")
+                  (prn f)
+                  (println "//---"))
+                (println js)
+                (when (or (= 'ns (first f))
+                          (= 'in-ns (first f)))
+                  (eval f)))
               (when *debug-comments*
-                (println "\n//======")
-                (print "//")
-                (prn f)
-                (println "//---"))
-              (println (formtojs f))
-              (when (or (= 'ns (first f))
-                        (= 'in-ns (first f)))
-                (eval f)))
-            (when *debug-comments*
-              (print "// Skipping: ")
-              (prn f)))
-          (recur))))))
+                (print "// Skipping: ")
+                (prn f)))
+            (recur)))))))
 
 (defn simple-tests []
   (println (formtojs
@@ -355,6 +358,24 @@
   (println (formtojs '(fn forever[] (forever))))
   (println (formtojs '(fn forever[] (loop [] (recur))))))
 
+(defn serve [port]
+  (loop [server (java.net.ServerSocket. port)]
+    (with-open socket (.accept server)
+      (binding [*out* (-> socket .getOutputStream ds/writer)]
+        (try
+          (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
+          (let [line1 (-> socket .getInputStream ds/reader .readLine)
+                [_ url] (re-find #"^GET /(.*?) HTTP" line1)
+                codestr (str "(prn " (URLDecoder/decode url) ")")]
+            (filetojs (StringReader. codestr)))
+        (catch Exception e
+          (println "clojure.prn(\"")
+          (.printStackTrace e (PrintWriter. *out*))
+          (println "\");")))))
+    (recur server)))
+
 ;(simple-tests)
+
+;(serve 8080)
 
 (filetojs (first *command-line-args*))
