@@ -623,6 +623,11 @@ static class MetaReader extends AFn{
 			{
 			if(line != -1 && o instanceof ISeq)
 				meta = ((IPersistentMap) meta).assoc(RT.LINE_KEY, line);
+			if(o instanceof Var)
+				{
+				((Var)o).setMeta((IPersistentMap) meta);
+				return o;
+				}
 			return ((IObj) o).withMeta((IPersistentMap) meta);
 			}
 		else
