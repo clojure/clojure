@@ -644,6 +644,11 @@ clojure.JS.defclass( clojure.lang, "Var", {
       this.push( val );
     },
     hasRoot: function() { return this.stack.length > 0; },
+    toString: function() {
+      if( this.ns !== null )
+        return "#=(var " + this.ns.name + "/" + this.name + ")";
+      return "#<Var: " + (this.name !== null ? this.name : "--unnamed--") + ">";
+    },
     hashCode: function() {
       return clojure.lang.Util.hash( this.ns + "/" + this.name );
     }
@@ -1925,6 +1930,8 @@ clojure.lang.Namespace.prototype.getMappings = function() {
 clojure.lang.Namespace.prototype.hashCode = function() {
   return clojure.hash( this.name );
 };
+
+clojure.in_ns("'user");
 
 (function() {
   var buf = [];

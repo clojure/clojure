@@ -354,6 +354,7 @@
 
   ;(println (formtojs '(binding [*out* 5] (set! *out* 10))))
   (println (formtojs '(.replace "a/b/c" "/" ".")))
+  (println (formtojs '(.getName ":foo")))
   (println (formtojs '(list '(1 "str" 'sym :key) 4 "str2" 6 #{:set 9 8})))
   (println (formtojs '(fn forever[] (forever))))
   (println (formtojs '(fn forever[] (loop [] (recur))))))
@@ -361,21 +362,29 @@
 (defn serve [port]
   (loop [server (java.net.ServerSocket. port)]
     (with-open socket (.accept server)
-      (binding [*out* (-> socket .getOutputStream ds/writer)]
+      (binding [*debug-fn-names* false
+                *debug-comments* false
+                *out* (-> socket .getOutputStream ds/writer)]
         (try
           (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
           (let [line1 (-> socket .getInputStream ds/reader .readLine)
                 [_ url] (re-find #"^GET /(.*?) HTTP" line1)
-                codestr (str "(prn " (URLDecoder/decode url) ")")]
-            (filetojs (StringReader. codestr)))
-        (catch Exception e
-          (println "clojure.prn(\"")
-          (.printStackTrace e (PrintWriter. *out*))
-          (println "\");")))))
+                codestr (str "(prn " (URLDecoder/decode url) ")")
+                js (with-out-str (filetojs (StringReader. codestr)))]
+            (println "jsrepl.state('compiled');")
+            (println js)
+            (println "jsrepl.state('done');"))
+          (catch Exception e
+            (if (= (.getMessage e) "EOF while reading")
+              (println "jsrepl.state('incomplete');")
+              (let [trace (with-out-str
+                            (.printStackTrace e (PrintWriter. *out*)))]
+                (println "jsrepl.state('error',\""
+                   (.replace trace "\n" "\\n") "\");")))))))
     (recur server)))
 
 ;(simple-tests)
 
-;(serve 8080)
+;(serve 8081)
 
 (filetojs (first *command-line-args*))
