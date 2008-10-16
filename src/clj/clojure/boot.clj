@@ -1274,6 +1274,15 @@
         (lazy-cons (first coll) (filter pred (rest coll)))
         (recur pred (rest coll)))))
 
+(defn remove
+  "Returns a lazy seq of the items in coll for which
+  (pred item) returns false. pred must be free of side-effects."
+  [pred coll]
+    (when (seq coll)
+      (if (pred (first coll))
+        (recur pred (rest coll))
+        (lazy-cons (first coll) (remove pred (rest coll))))))
+
 (defn take
   "Returns a lazy seq of the first n items in coll, or all items if
   there are fewer than n."  
