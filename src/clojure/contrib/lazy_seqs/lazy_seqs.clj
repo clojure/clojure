@@ -86,3 +86,14 @@
        (map #(cons f %) (permutations r)))
      (rotations x))
     (list nil)))
+
+(defn combinations
+  "Returns a lazy seq of all combinations built of one item from each seq given.
+   See also (doc for)"
+  [& acs]
+  (let [step (fn step [head [s & cs :as acs]]
+               (if acs
+                 (mapcat #(step (conj head %) cs) s)
+                 (list head)))]
+    (when acs
+      (step [] acs))))
