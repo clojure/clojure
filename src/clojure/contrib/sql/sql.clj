@@ -30,7 +30,7 @@
   the driver as properties such as :user, :password, etc."
   [db-spec & body]
   `(do
-     (clojure.lang.RT/classForName (:classname ~db-spec))
+     (Class/forName (:classname ~db-spec))
      (with-open con#
          (java.sql.DriverManager/getConnection
           (format "jdbc:%s:%s" (:subprotocol ~db-spec) (:subname ~db-spec))
