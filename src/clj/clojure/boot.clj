@@ -1541,11 +1541,15 @@
       (apply import (rest import-lists))))
 
 (defn into-array
-  "Returns an array of the type of the first element in coll,
-  containing the contents of coll, which must be of a compatible
-  type."
-  [aseq]
-    (. clojure.lang.RT (seqToTypedArray (seq aseq))))
+  "Returns an array with components set to the values in aseq. The array's
+  component type is type if provided, or the type of the first value in
+  aseq if present, or Object. All values in aseq must be compatible with
+  the component type. Class objects for the primitive types can be obtained
+  using, e.g., Integer/TYPE."
+  ([aseq]
+     (clojure.lang.RT/seqToTypedArray (seq aseq)))
+  ([type aseq]
+     (clojure.lang.RT/seqToTypedArray type (seq aseq))))
 
 (defn into
   "Returns a new coll consisting of to-coll with all of the items of
@@ -1819,7 +1823,7 @@
   the specified dimension(s).  Note that a class object is required.
   Class objects can be obtained by using their imported or
   fully-qualified name.  Class objects for the primitive types can be
-  obtained using, e.g., (. Integer TYPE)."
+  obtained using, e.g., Integer/TYPE."
   ([#^Class type len]
    (. Array (newInstance type (int len))))
   ([#^Class type dim & more-dims]

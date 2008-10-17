@@ -1079,8 +1079,12 @@ static public Object[] seqToArray(ISeq seq){
 }
 
 static public Object seqToTypedArray(ISeq seq) throws Exception{
-	int len = length(seq);
-	Object ret = Array.newInstance(len > 0 ? seq.first().getClass() : Object.class, len);
+	Class type = (seq != null) ? seq.first().getClass() : Object.class;
+	return seqToTypedArray(type, seq);
+}
+
+static public Object seqToTypedArray(Class type, ISeq seq) throws Exception{
+	Object ret = Array.newInstance(type, length(seq));
 	for(int i = 0; seq != null; ++i, seq = seq.rest())
 		Array.set(ret, i, seq.first());
 	return ret;
