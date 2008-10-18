@@ -1697,6 +1697,10 @@
   "Reads the next line from stream that is the current value of *in* ."
   [] (. *in* (readLine)))
 
+(defn read-string 
+  "Reads one object from the string s"
+  [s] (clojure.lang.RT/readString s))
+
 (defmacro with-open
   "Evaluates body in a try expression with name bound to the value of
   init, and a finally clause that calls (. name (close))."
