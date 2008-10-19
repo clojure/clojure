@@ -59,7 +59,7 @@ public boolean equals(Object obj){
 
 	for(Object aM : m)
 		{
-		if(!m.contains(aM))
+		if(!contains(aM))
 			return false;
 		}
 //	for(ISeq s = seq(); s != null; s = s.rest())
