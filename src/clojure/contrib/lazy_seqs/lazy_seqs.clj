@@ -59,12 +59,7 @@
   "A lazy sequence of all the fibonacci numbers.")
 
 (defvar powers-of-2
-  (lazy-cons 1
-    (let [rest-fn
-          (fn rest-fn [n]
-            (let [next (bit-shift-left n 1)]
-              (lazy-cons next (rest-fn next))))]
-      (rest-fn 1)))
+  (lazy-cons 1 (map #(bit-shift-left % 1) powers-of-2))
   "A lazy sequence of all the powers of 2")
 
 (defn rotations
