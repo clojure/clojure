@@ -13,7 +13,9 @@
                            Compiler$DefExpr Compiler$InstanceMethodExpr)
              (java.io BufferedReader InputStreamReader StringReader PrintWriter)
              (java.net URLDecoder))
-    (:require [clojure.contrib.duck-streams :as ds]))
+    (:use [clojure.contrib.command-line :only (with-command-line)])
+    (:require (clojure.contrib [duck-streams :as ds]
+                               [seq-utils :as su])))
 
 (defn vstr [v]
   (let [sb (StringBuilder.)
@@ -196,7 +198,8 @@
   (const-str (.k e)))
 
 (defmethod tojs clojure.lang.Compiler$StaticFieldExpr [e ctx]
-  (str (.getCanonicalName (.c e)) "." (.fieldName e)))
+  (str "clojure.JS.getOrRun(" (.getCanonicalName (.c e)) ",\""
+       (var-munge (.fieldName e)) "\")"))
 
 (defmethod tojs clojure.lang.Compiler$StaticMethodExpr [e ctx]
   (vstr [(.getCanonicalName (.c e)) "." (.methodName e) "("
@@ -213,7 +216,8 @@
          "(" (vec (interpose "," (map #(tojs % ctx) (.args e)))) ")"]))
 
 (defmethod tojs clojure.lang.Compiler$InstanceFieldExpr [e ctx]
-  (vstr ["(" (tojs (.target e) ctx) ")." (var-munge (.fieldName e))]))
+  (vstr ["clojure.JS.getOrRun(" (tojs (.target e) ctx) ",\""
+         (var-munge (.fieldName e)) "\")"]))
 
 (defmethod tojs clojure.lang.Compiler$IfExpr [e ctx]
   (str "((" (tojs (.testExpr e) ctx)
@@ -359,7 +363,7 @@
   (println (formtojs '(fn forever[] (forever))))
   (println (formtojs '(fn forever[] (loop [] (recur))))))
 
-(defn serve [port]
+(defn start-server [port]
   (loop [server (java.net.ServerSocket. port)]
     (with-open socket (.accept server)
       (binding [*debug-fn-names* false
@@ -383,8 +387,22 @@
                    (.replace trace "\n" "\\n") "\");")))))))
     (recur server)))
 
-;(simple-tests)
+(defn mkboot []
+  (binding [*out* (ds/writer "boot.js")]
+    (filetojs (.getResourceAsStream (clojure.lang.RT/baseLoader)
+                                    "clojure/boot.clj"))))
 
-;(serve 8081)
-
-(filetojs (first *command-line-args*))
+(with-command-line *command-line-args*
+  "tojs -- Compile ClojureScript to JavaScript"
+  [[simple? "Runs some simple built-in tests"]
+   [serve   "Starts a repl server on the given port" 8081]
+   [mkboot? "Generates a boot.js file"]
+   [v?      "Includes extra fn names and comments in js"]
+   filenames]
+  (binding [*debug-fn-names* v? *debug-comments* v?]
+    (cond
+      simple? (simple-tests)
+      serve   (start-server (Integer/parseInt serve))
+      mkboot? (mkboot)
+      :else   (doseq filename filenames
+                 (filetojs filename)))))

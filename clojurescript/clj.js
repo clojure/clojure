@@ -236,6 +236,8 @@ clojure = new clojure.lang.Namespace("clojure",{
   vals: function(coll) {
     return clojure.lang.APersistentMap.ValSeq.create(clojure.seq(coll));
   },
+  get_prop: function(coll,key) { return coll[ key ]; },
+  set_prop: function(coll,key,val) { return coll[ key ] = val; },
   JS: {
     merge: clojure.JS.merge,
     global: clojure.JS.global,
@@ -267,8 +269,17 @@ clojure = new clojure.lang.Namespace("clojure",{
     invoke: function( obj, methodname, args ) {
       return obj[ methodname ].apply( obj, args );
     },
+    getOrRun: function( obj, prop ) {
+      var val = obj[ prop ];
+      if( val !== undefined && "apply" in val )
+        return val.apply( obj, [] );
+      return val;
+    },
     lit_list: function( a ) {
       return new clojure.lang.ArraySeq( null, a, 0 );
+    },
+    lit_vector: function( a ) {
+      return clojure.lang.LazilyPersistentVector.createOwning( a );
     },
     implement: function( cls, name, extend, implement ) {
       clojure.JS.merge( cls, clojure.JS.Class );
@@ -358,6 +369,7 @@ clojure = new clojure.lang.Namespace("clojure",{
           case Object:   return 0x7A837A73;
           case Function: return 0x7A837A74;
           case Array:    return 0x7A837A75;
+          case Boolean:  return 0x7A837A76;
           case java.lang.String:
           case java.lang.Character:
           case java.lang.Class:
@@ -481,6 +493,7 @@ clojure.JS.definterface( clojure.lang, "IndexedSeq",
     [clojure.lang.ISeq] );
 
 clojure.JS.defclass( clojure.lang, "ASeq", {
+  implement: [clojure.lang.ISeq],
   methods: {
     equals: function( obj ) {
       var s = this.seq(), ms = obj.seq();
@@ -570,6 +583,7 @@ clojure.JS.defclass( clojure.lang, "ArraySeq", {
 
 
 clojure.JS.defclass( clojure.lang, "LazyCons", {
+  extend: clojure.lang.ASeq,
   init: function(f,_first,_rest) {
     this.f = f;
     this._first = _first === undefined ? clojure.lang.LazyCons.sentinel :_first;
@@ -1594,7 +1608,7 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "BitmapIndexedNode", {
           }
           newnodes = this.nodes.slice();
           newnodes[ idx ] = n;
-          return new BIN( bitmap, newnodes, this.shift );
+          return new BIN( this.bitmap, newnodes, this.shift );
         }
       }
       return this;
@@ -1911,6 +1925,8 @@ clojure.print_method = new clojure.lang.MultiFn(
   clojure.keyword("","default"));
 
 clojure.JS.relayMethod( clojure.print_method, Number, java.lang.Number );
+clojure.JS.relayMethod( clojure.print_method, Array, java.util.Collection );
+clojure.JS.relayMethod( clojure.print_method, Boolean, java.lang.Boolean );
 clojure.JS.relayMethod( clojure.print_method, String, java.lang.String,
     function(o) { return new clojure.JS.String(o); } );
 clojure.JS.relayMethod( clojure.print_method, clojure.JS.Class, java.lang.Class );

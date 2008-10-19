@@ -30,7 +30,8 @@
           document.body.appendChild( s );
         },
         posttext: function() {
-          print( "user=> " + jsrepl.text.value.replace("\n","\n       "));
+          var text = jsrepl.text.value.replace(/\n$/,"");
+          print( "user=> " + text.replace(/\n/g,"\n       "));
           jsrepl.text.value = "";
         },
         state: function(s,m) {
@@ -51,7 +52,7 @@
         e = e || event;
         if( e.keyCode == 13 ) {
           var s = document.createElement('script');
-          s.src = "http://localhost:8081/" +
+          s.src = "http://mycroft:8080/" +
             escape(jsrepl.text.value).replace(/\+/,'%2b');
           document.body.appendChild( s );
         }
