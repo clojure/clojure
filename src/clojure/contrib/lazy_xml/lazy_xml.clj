@@ -13,8 +13,8 @@
 ; http://www.extreme.indiana.edu/xgws/xsoap/xpp/
 (def has-pull false)
 (defn- parse-seq-pull [& _])
-(try (load-resources "with_pull.clj")
-  (catch ClassNotFoundException e))
+(try (load "with_pull.clj")
+  (catch Exception e))
 
 (defn startparse-sax [s ch]
   (.. SAXParserFactory newInstance newSAXParser (parse s ch)))
