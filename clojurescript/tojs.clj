@@ -166,8 +166,12 @@
     (str vns "._var_" vname)))
 
 (defmethod tojs clojure.lang.Compiler$AssignExpr [e ctx]
-  (let [[vns vname] (var-parts (.target e))]
-    (str vns "._var_" vname ".set(" (tojs (.val e) ctx) ")")))
+  (let [target (.target e)]
+    (if (instance? clojure.lang.Compiler$InstanceFieldExpr target)
+      (vstr ["(" (tojs (.target target) ctx) "."
+             (var-munge (.fieldName target)) "=" (tojs (.val e) ctx) ")"])
+      (let [[vns vname] (var-parts target)]
+        (str vns "._var_" vname ".set(" (tojs (.val e) ctx) ")")))))
 
 (defmethod tojs clojure.lang.Compiler$DefExpr [e ctx]
   (let [[vns vname] (var-parts e)]

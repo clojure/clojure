@@ -109,12 +109,14 @@ clojure = new clojure.lang.Namespace("clojure",{
     }
   },
   first: function(x) {
+    if( x === null ) return null;
     if( x.first ) return x.first();
     var seq = clojure.seq( x );
     if( seq === null ) return null;
     return seq.first();
   },
   rest: function(x) {
+    if( x === null ) return null;
     if( x.rest ) return x.rest();
     var seq = clojure.seq( x );
     if( seq === null ) return null;
@@ -236,8 +238,6 @@ clojure = new clojure.lang.Namespace("clojure",{
   vals: function(coll) {
     return clojure.lang.APersistentMap.ValSeq.create(clojure.seq(coll));
   },
-  get_prop: function(coll,key) { return coll[ key ]; },
-  set_prop: function(coll,key,val) { return coll[ key ] = val; },
   JS: {
     merge: clojure.JS.merge,
     global: clojure.JS.global,
@@ -271,8 +271,11 @@ clojure = new clojure.lang.Namespace("clojure",{
     },
     getOrRun: function( obj, prop ) {
       var val = obj[ prop ];
-      if( val !== undefined && "apply" in val )
+      if( typeof val === clojure.JS.functionType
+          || (typeof val === clojure.JS.objectType && "apply" in val) )
+      {
         return val.apply( obj, [] );
+      }
       return val;
     },
     lit_list: function( a ) {
@@ -401,7 +404,9 @@ clojure = new clojure.lang.Namespace("clojure",{
             }
             return ret;
         }
-        return o.hashCode();
+        if( o.hashCode )
+          return o.hashCode();
+        return 0x11111111;
       },
       hashCombine: function(seed, hash){
         return seed ^ (hash + 0x9e3779b9 + (seed << 6) + (seed >> 2));
@@ -1001,6 +1006,8 @@ clojure.JS.defclass( clojure.lang, "APersistentVector", {
 });
 
 clojure.JS.defclass( clojure.lang.APersistentVector, "Seq", {
+  extend: clojure.lang.ASeq,
+  implement: [clojure.lang.IndexedSeq, clojure.lang.IReduce],
   init: function( _meta, v, i){
     this._meta = _meta;
     this.v = v;
