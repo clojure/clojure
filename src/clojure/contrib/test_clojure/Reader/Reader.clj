@@ -15,7 +15,6 @@
 ;;  scgilardi (gmail)
 ;;  Created 22 October 2008
 
-sq/clj/local/clojure/contrib/test_clojure2/
 (ns clojure.contrib.test-clojure.Reader
   (:use clojure.contrib.test-is))
 
