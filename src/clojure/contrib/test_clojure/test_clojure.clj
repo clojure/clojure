@@ -15,7 +15,7 @@
 
 (ns clojure.contrib.test-clojure
   (:use (clojure.contrib test-is)
-        (clojure.contrib.test-clojure Reader)))
+        (clojure.contrib.test-clojure reader)))
 
 (binding [*test-out* (java.io.PrintWriter. *out*)]
-  (run-tests 'clojure.contrib.test-clojure.Reader))
+  (run-tests 'clojure.contrib.test-clojure.reader))
