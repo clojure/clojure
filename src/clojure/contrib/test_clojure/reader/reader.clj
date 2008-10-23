@@ -15,7 +15,7 @@
 ;;  scgilardi (gmail)
 ;;  Created 22 October 2008
 
-(ns clojure.contrib.test-clojure.Reader
+(ns clojure.contrib.test-clojure.reader
   (:use clojure.contrib.test-is))
 
 ;; Symbols
