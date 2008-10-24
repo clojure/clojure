@@ -25,6 +25,8 @@ static final Var refer = RT.var("clojure", "refer");
 static final Var ns = RT.var("clojure", "*ns*");
 static final Var warn_on_reflection = RT.var("clojure", "*warn-on-reflection*");
 static final Var print_meta = RT.var("clojure", "*print-meta*");
+static final Var print_length = RT.var("clojure", "*print-length*");
+static final Var print_level = RT.var("clojure", "*print-level*");
 static final Var star1 = RT.var("clojure", "*1");
 static final Var star2 = RT.var("clojure", "*2");
 static final Var star3 = RT.var("clojure", "*3");
@@ -44,6 +46,8 @@ public static void main(String[] args) throws Exception{
 				RT.map(ns, ns.get(),
 				       warn_on_reflection, warn_on_reflection.get(),
 				       print_meta, print_meta.get(),
+				       print_length, print_length.get(),
+				       print_level, print_level.get(),
 				       star1, null,
 				       star2, null,
 				       star3, null,

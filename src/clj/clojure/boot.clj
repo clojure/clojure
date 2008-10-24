@@ -960,7 +960,7 @@
   ([x form & more] `(.. (. ~x ~form) ~@more)))
 
 (defmacro ->
-  "Macro. Threads the expr through the forms. Inserts x as the
+  "Threads the expr through the forms. Inserts x as the
   second item in the first form, making a list of it if it is not a
   list already. If there are more forms, inserts the first form as the
   second item in second form, etc."
@@ -3430,13 +3430,50 @@
 
 (import '(java.io Writer))
 
+(def
+ #^{:doc "*print-length* controls how many items of each collection the
+  printer will print. If it is bound to logical false, there is no
+  limit. Otherwise, it must be bound to an integer indicating the maximum
+  number of items of each collection to print. If a collection contains
+  more items, the printer will print items up to the limit followed by
+  '...' to represent the remaining items. The root binding is nil
+  indicating no limit."}
+ *print-length* nil)
+
+(def
+ #^{:doc "*print-level* controls how many levels deep the printer will
+  print nested objects. If it is bound to logical false, there is no
+  limit. Otherwise, it must be bound to an integer indicating the maximum
+  level to print. Each argument to print is at level 0; if an argument is a
+  collection, its items are at level 1; and so on. If an object is a
+  collection and is at a level greater than or equal to the value bound to
+  *print-level*, the printer prints '#' to represent it. The root binding
+  is nil indicating no limit."}
+*print-level* nil)
+
 (defn- print-sequential [#^String begin, print-one, #^String sep, #^String end, sequence, #^Writer w]
-  (.write w begin)
-  (loop [s (seq sequence)]
-    (if (rest s)
-      (do (print-one (first s) w) (.write w sep) (recur (rest s)))
-      (when s (print-one (first s) w))))
-  (.write w end))
+  (binding [*print-level* (and *print-level* (dec *print-level*))]
+    (if (and *print-level* (neg? *print-level*))
+      (.write w "#")
+      (do
+        (.write w begin)
+        (when-let xs (seq sequence)
+          (if *print-length*
+            (loop [[x & xs] xs
+                   print-length *print-length*]
+              (if (zero? print-length)
+                (.write w "...")
+                (do
+                  (print-one x w)
+                  (when xs
+                    (.write w sep)
+                    (recur xs (dec print-length))))))
+            (loop [[x & xs] xs]
+              (print-one x w)
+              (when xs
+                (.write w sep)
+                (recur xs)))))
+        (.write w end)))))
 
 (defn- print-meta [o, #^Writer w]
   (when-let m (meta o)
@@ -3519,13 +3556,7 @@
 
 (defmethod print-method clojure.lang.IPersistentVector [v, #^Writer w]
   (print-meta v w)
-  (.append w \[)
-  (dotimes n (count v)
-    (print-method (nth v n) w)
-    (when (< n (dec (count v)))
-      (.append w \space)))
-  (.append w \])
-  nil)
+  (print-sequential "[" print-method " " "]" v w))
 
 (defmethod print-method clojure.lang.IPersistentMap [m, #^Writer w]
   (print-meta m w)
