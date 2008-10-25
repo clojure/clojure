@@ -31,6 +31,7 @@ import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Arrays;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
@@ -2017,7 +2018,8 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 					matchIdx = i;
 					tied = false;
 					}
-				else if(!subsumes(paramlists.get(matchIdx), paramlists.get(i)))
+				else if(!(subsumes(paramlists.get(matchIdx), paramlists.get(i))
+				          || Arrays.equals(paramlists.get(matchIdx), paramlists.get(i))))
 					tied = true;
 				}
 			}
