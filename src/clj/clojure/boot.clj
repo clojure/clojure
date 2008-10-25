@@ -1288,7 +1288,7 @@
   there are fewer than n."  
   [n coll]
     (when (and (pos? n) (seq coll))
-      (lazy-cons (first coll) (take (dec n) (rest coll)))))
+      (lazy-cons (first coll) (when (> n 1) (take (dec n) (rest coll))))))
 
 (defn take-while
   "Returns a lazy seq of successive items from coll while
