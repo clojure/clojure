@@ -3610,9 +3610,29 @@
     (.append w c))
   nil)
 
+(def primitives-classnames
+  {Float/TYPE "Float/TYPE"
+   Integer/TYPE "Integer/TYPE"
+   Long/TYPE "Long/TYPE"
+   Boolean/TYPE "Boolean/TYPE"
+   Character/TYPE "Character/TYPE"
+   Double/TYPE "Double/TYPE"
+   Byte/TYPE "Byte/TYPE"
+   Short/TYPE "Short/TYPE"})
+
 (defmethod print-method Class [#^Class c, #^Writer w]
-  (.write w "#=")
-  (.write w (.getName c)))
+  (cond
+    (.isPrimitive c) (do
+                       (.write w "#=(identity ")
+                       (.write w (primitives-classnames c))
+                       (.write w ")"))
+    (.isArray c) (do
+                   (.write w "#=(java.lang.Class/forName \"")
+                   (.write w (.getName c))
+                   (.write w "\")"))
+    :else (do
+            (.write w "#=")
+            (.write w (.getName c)))))
 
 (defmethod print-method java.math.BigDecimal [b, #^Writer w]
   (.write w (str b))
