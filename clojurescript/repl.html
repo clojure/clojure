@@ -34,6 +34,10 @@
           print( "user=> " + text.replace(/\n/g,"\n       "));
           jsrepl.text.value = "";
         },
+        err: function(e) {
+          print(e);
+          clojure._var__STAR_e.set(e);
+        },
         state: function(s,m) {
           jsrepl.status.innerHTML = s;
           switch( s ) {

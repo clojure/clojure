@@ -1,5 +1,11 @@
+commit 0d0d8e3801c91ee8dd35c9051afe1f026a0aaed1
+Author: Chouser <chouser@n01se.net>
+Date:   Sun Oct 26 01:09:48 2008 -0400
+
+    Less Java dependence in boot.clj (for ClojureScript)
+
 diff --git a/src/clj/clojure/boot.clj b/src/clj/clojure/boot.clj
-index cb6b441..91d7d47 100644
+index b7d7ac7..882ff2a 100644
 --- a/src/clj/clojure/boot.clj
 +++ b/src/clj/clojure/boot.clj
 @@ -315,7 +315,7 @@
@@ -249,7 +255,7 @@ index cb6b441..91d7d47 100644
            raw-trace (.getStackTrace exception)
            boring? #(not= (.getMethodName %) "doInvoke")
            trace (into-array (drop 2 (drop-while boring? raw-trace)))]
-@@ -3452,7 +3454,7 @@
+@@ -3489,7 +3491,7 @@
  
  (defn print-ctor [o print-args #^Writer w]
    (.write w "#=(")
@@ -258,12 +264,17 @@ index cb6b441..91d7d47 100644
    (.write w ". ")
    (print-args o w)
    (.write w ")"))
-@@ -3581,7 +3583,7 @@
- 
- (defmethod print-method Class [#^Class c, #^Writer w]
-   (.write w "#=")
--  (.write w (.getName c)))
-+  (.write w (RT/className c)))
+@@ -3628,11 +3630,11 @@
+                        (.write w ")"))
+     (.isArray c) (do
+                    (.write w "#=(java.lang.Class/forName \"")
+-                   (.write w (.getName c))
++                   (.write w (RT/className c))
+                    (.write w "\")"))
+     :else (do
+             (.write w "#=")
+-            (.write w (.getName c)))))
++            (.write w (RT/className c)))))
  
  (defmethod print-method java.math.BigDecimal [b, #^Writer w]
    (.write w (str b))

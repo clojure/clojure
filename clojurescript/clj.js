@@ -123,6 +123,12 @@ clojure = new clojure.lang.Namespace("clojure",{
     return seq.rest();
   },
   second: function(x) { return clojure.first(clojure.rest(x)); },
+  cons: function( x, coll ) {
+    var y = clojure.seq( coll );
+    if( y === null )
+      return new clojure.lang.PersistentList( null, x );
+    return y.cons( x );
+  },
   instance_QMARK_: function( c, o ) {
     return clojure.JS.instanceq( c, o );
   },
@@ -279,7 +285,9 @@ clojure = new clojure.lang.Namespace("clojure",{
       return val;
     },
     lit_list: function( a ) {
-      return new clojure.lang.ArraySeq( null, a, 0 );
+      if( a.length > 0 )
+        return new clojure.lang.ArraySeq( null, a, 0 );
+      return clojure.lang.PersistentList.EMPTY;
     },
     lit_vector: function( a ) {
       return clojure.lang.LazilyPersistentVector.createOwning( a );
@@ -327,9 +335,10 @@ clojure = new clojure.lang.Namespace("clojure",{
         return false; // builtin class that doesn't match?
       return o.constructor.classset[ c.classname ];
     },
-    relayMethod: function( method, jsclass, javaclass, ctor ) {
-      method.addMethod( jsclass, function(o,w) {
-        return (clojure.get( method.methodTable, javaclass )
+    relayPrintMethod: function( jsclass, javaclass, ctor ) {
+      var m = clojure.print_method;
+      m.addMethod( jsclass, function(o,w) {
+        return (clojure.get( m.methodTable, javaclass )
           .apply(null, [ctor ? ctor(o) : o, w]));
       });
     },
@@ -353,13 +362,23 @@ clojure = new clojure.lang.Namespace("clojure",{
   lang: {
     Namespace: clojure.lang.Namespace,
     Numbers: {
+      isZero: function(x) { return x === 0; },
       isPos: function(x) { return x > 0; },
-      lt: function(x,y) { return x < y; },
-      gt: function(x,y) { return x > y; },
-      minus: function(x,y) { return x - y; },
-      add: function(x,y) { return x + y; },
+      isNeg: function(x) { return x < 0; },
+      minus: function(x,y) { return y === undefined ? -x : x - y; },
       inc: function(x) { return x + 1; },
       dec: function(x) { return x - 1; },
+      add: function(x,y) { return x + y; },
+      multiply: function(x,y) { return x * y; },
+      divide: function(x,y) { return x / y; },
+      quotient: function(x,y) { return parseInt(x / y); },
+      remainder: function(x,y) { return x % y; },
+      equiv: function(x,y) { return x == y; },
+      lt: function(x,y) { return x < y; },
+      lte: function(x,y) { return x <= y; },
+      gt: function(x,y) { return x > y; },
+      gte: function(x,y) { return x >= y; },
+      compare: function(x,y) { return (x<y) ? -1 :( (y<x) ? 1 : 0 ); },
       unchecked_inc: function(x) { return x + 1; }
     },
     Util: {
@@ -420,12 +439,6 @@ clojure = new clojure.lang.Namespace("clojure",{
         if( coll === null )
           return new clojure.lang.PersistentList( null, x );
         return coll.cons( x );
-      },
-      cons: function( x, coll ) {
-        var y = clojure.seq( coll );
-        if( y === null )
-          return new clojure.lang.PersistentList( null, x );
-        return y.cons( x );
       },
       seqToArray: function(s) {
         var i = 0, ret = new Array( clojure.count( s ) );
@@ -661,6 +674,9 @@ clojure.JS.defclass( clojure.lang, "Var", {
     set: function( val ) {
       this.stack.pop();
       this.push( val );
+    },
+    get: function() {
+      return this.ns[ this.name ];
     },
     hasRoot: function() { return this.stack.length > 0; },
     toString: function() {
@@ -1931,12 +1947,16 @@ clojure.print_method = new clojure.lang.MultiFn(
   function (x, writer){ return clojure.class_(x); },
   clojure.keyword("","default"));
 
-clojure.JS.relayMethod( clojure.print_method, Number, java.lang.Number );
-clojure.JS.relayMethod( clojure.print_method, Array, java.util.Collection );
-clojure.JS.relayMethod( clojure.print_method, Boolean, java.lang.Boolean );
-clojure.JS.relayMethod( clojure.print_method, String, java.lang.String,
+clojure.print_method.addMethod( java.lang.Class, function(o,w) {
+  w.write("#="+clojure.lang.RT.className(o));
+});
+
+clojure.JS.relayPrintMethod( Number,  java.lang.Number );
+clojure.JS.relayPrintMethod( Array,   java.util.Collection );
+clojure.JS.relayPrintMethod( Boolean, java.lang.Boolean );
+clojure.JS.relayPrintMethod( String,  java.lang.String,
     function(o) { return new clojure.JS.String(o); } );
-clojure.JS.relayMethod( clojure.print_method, clojure.JS.Class, java.lang.Class );
+clojure.JS.relayPrintMethod( clojure.JS.Class, java.lang.Class );
 
 clojure.JS.def(clojure,"_STAR_print_readably_STAR_",true);
 
@@ -1946,13 +1966,10 @@ clojure.lang.Namespace.find = function( s ) {
   return clojure.JS.global[ s.substring(1) ];
 };
 
-clojure.lang.Namespace.prototype.getMappings = function() {
-  return this;
-};
-
-clojure.lang.Namespace.prototype.hashCode = function() {
-  return clojure.hash( this.name );
-};
+clojure.JS.merge( clojure.lang.Namespace.prototype, {
+  getMappings: function() { return this; },
+  hashCode: function() { return clojure.hash( this.name ); }
+});
 
 clojure.in_ns("'user");
 

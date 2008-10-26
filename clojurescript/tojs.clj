@@ -133,7 +133,7 @@
                         (vec (interpose "," (map const-str c)))
                         "])"])
     (fn?      c) (str \" c \")
-    :else (str c)))
+    :else (str "(" c ")")))
 
 (defmethod tojs clojure.lang.Compiler$ConstantExpr [e ctx]
   (const-str (.v e)))
@@ -279,20 +279,19 @@
                  seq instance? assoc apply refer first rest import
                  hash-map count find keys vals get class contains?
                  print-method class? number? string? integer? nth
-                 to-array
+                 to-array cons
                  ;-- not supported yet
                  make-array to-array-2d re-pattern re-matcher re-groups
                  re-seq re-matches re-find format
-                 ;-- will probably never be supported in cljurescript
+                 ;-- will probably never be supported in clojurescript
                  eval resolve ns-resolve await await-for macroexpand
                  macroexpand-1 load-reader load-string special-symbol?
                  bigint bigdec floats doubles ints longs aset-int
                  aset-long aset-boolean aset-float aset-double
                  aset-short aset-char aset-byte slurp seque
-                 decimal? float? pmap })
+                 decimal? float? pmap primitives-classnames})
 
-;(def skip-method #{"java.lang.Class"})
-(def skip-method #{})
+(def skip-method #{"java.lang.Class"})
 
 (defn skip-defs [expr]
   (let [m ^(.var expr)]
@@ -368,6 +367,7 @@
   (println (formtojs '(fn forever[] (loop [] (recur))))))
 
 (defn start-server [port]
+  (println "Opening port" port)
   (loop [server (java.net.ServerSocket. port)]
     (with-open socket (.accept server)
       (binding [*debug-fn-names* false
@@ -379,9 +379,9 @@
                 [_ url] (re-find #"^GET /(.*?) HTTP" line1)
                 codestr (str "(prn " (URLDecoder/decode url) ")")
                 js (with-out-str (filetojs (StringReader. codestr)))]
-            (println "jsrepl.state('compiled');")
+            (println "jsrepl.state('compiled');try{")
             (println js)
-            (println "jsrepl.state('done');"))
+            (println "}catch(e){jsrepl.err(e)};jsrepl.state('done');"))
           (catch Exception e
             (if (= (.getMessage e) "EOF while reading")
               (println "jsrepl.state('incomplete');")
