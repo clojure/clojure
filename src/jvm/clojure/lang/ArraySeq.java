@@ -81,7 +81,7 @@ public ISeq rest(){
 
 public int count(){
 	if(oa != null)
-		return oa.length;
+		return oa.length - i;
 	return Array.getLength(array) - i;
 }
 
