@@ -19,7 +19,7 @@
 
 	<target name="compile" depends="init"
 	        description="Compile Java sources.">
-		<javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes" debug="true"/>
+		<javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes" debug="true" target="1.5"/>
 	</target>
 
 	<target name="jar" depends="compile"
