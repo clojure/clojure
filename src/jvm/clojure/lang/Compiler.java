@@ -3045,7 +3045,10 @@ static public class FnExpr implements Expr{
 
 			for(int i = 0; i < constants.count(); i++)
 				{
-				clinitgen.push(RT.printString(constants.nth(i)));
+				String cs = RT.printString(constants.nth(i));
+				if(cs.startsWith("#<"))
+					throw new RuntimeException("Can't embed unreadable object in code: " + cs);
+				clinitgen.push(cs);
 				clinitgen.invokeStatic(RT_TYPE, readStringMethod);
 //				clinitgen.dup();
 //				clinitgen.push(i);

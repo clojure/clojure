@@ -3495,7 +3495,9 @@
   (.write w ")"))
 
 (defmethod print-method :default [o, #^Writer w]
-  (print-ctor o #(print-method (str %1) %2) w))
+  (.write w "#<")
+  (.write w (str o))
+  (.write w ">"))
 
 (defmethod print-method clojure.lang.Keyword [o, #^Writer w]
   (.write w (str o)))

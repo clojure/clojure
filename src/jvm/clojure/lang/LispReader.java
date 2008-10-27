@@ -88,6 +88,7 @@ static
 	dispatchMacros['('] = new FnReader();
 	dispatchMacros['{'] = new SetReader();
 	dispatchMacros['='] = new EvalReader();
+	dispatchMacros['<'] = new UnreadableReader();
 	}
 
 static boolean isWhitespace(int ch){
@@ -948,6 +949,12 @@ static class UnmatchedDelimiterReader extends AFn{
 		throw new Exception("Unmatched delimiter: " + rightdelim);
 	}
 
+}
+
+static class UnreadableReader extends AFn{
+	public Object invoke(Object reader, Object leftangle) throws Exception{
+		throw new Exception("Unreadable form");
+	}
 }
 
 public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) throws Exception{
