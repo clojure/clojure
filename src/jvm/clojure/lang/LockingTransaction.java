@@ -248,9 +248,10 @@ Object run(Callable fn) throws Exception{
 					}
 
 				//validate
-				for(Ref ref : sets)
+				for(Map.Entry<Ref, Object> e : vals.entrySet())
 					{
-					ref.validate(ref.getValidator(), ref.get());
+					Ref ref = e.getKey();
+					ref.validate(ref.getValidator(), e.getValue());
 					}
 
 				//at this point, all values calced, all refs to be written locked
