@@ -418,7 +418,7 @@
         (. gen goTo end-label)
                                         ;no main found
         (. gen mark no-main-label)
-        (. gen (throwException ex-type (str pkg-name "/" main-name " not defined")))
+        (. gen (throwException ex-type (str pkg-name "/" sname "-" main-name " not defined")))
         (. gen mark end-label)
         (. gen (returnValue))
         (. gen (endMethod))))
