@@ -13,6 +13,31 @@
 
 (ns clojure.contrib.except)
 
+(defn throwf
+  "Throws an exception with a message formatted like printf. Arguments are:
+
+      class? format format-args*
+
+  class is optional and defaults to Exception. If present, it must be a
+  Class in the tree under Throwable with a constructor that takes a single
+  String.
+
+  format is a string as documented for java.util.Formatter.
+
+  format-args are zero or more objects that correspond to the format
+  specifiers in format."
+  [& args]
+  (let [[class fmt & fmt-args]
+        (if (instance? Class (first args)) args (cons Exception args))
+        ctor (.getConstructor (identity class) (into-array [String]))
+        message (apply format fmt fmt-args)
+        exception (.newInstance ctor (into-array [message]))
+        raw-trace (.getStackTrace exception)
+        boring? #(not= (.getMethodName %) "doInvoke")
+        trace (into-array (drop 2 (drop-while boring? raw-trace)))]
+    (.setStackTrace exception trace)
+    (throw exception)))
+
 (defn throw-if
   "Throws an exception with a message if pred is true. Arguments are:
 
@@ -28,14 +53,4 @@
   specifiers in format."
   [pred & args]
   (when pred
-    (let [class-present (instance? Class (first args))
-          args (if class-present args (cons Exception args))
-          [class fmt & fmt-args] args
-          ctor (.getConstructor (identity class) (into-array [String]))
-          message (apply format fmt fmt-args)
-          exception (.newInstance ctor (into-array [message]))
-          raw-trace (.getStackTrace exception)
-          boring? #(not= (.getMethodName %) "doInvoke")
-          trace (into-array (drop 2 (drop-while boring? raw-trace)))]
-      (.setStackTrace exception trace)
-      (throw exception))))
+    (apply throwf args)))
