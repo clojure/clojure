@@ -14,33 +14,36 @@
 ;;  Created 13 October 2008
 
 (ns clojure.contrib.miglayout.internal
-  (:import (java.awt Component)))
+  (:import (java.awt Component))
+  (:use (clojure.contrib except fcase)))
+
+(defn format-constraint
+  "Returns a vector of vectors representing one or more constraints
+  separated by commas. Constraints may be specified in Clojure using
+  strings, keywords, vectors, and/or maps."
+  [c]
+  [[", "]
+   (fcase #(%1 %2) c
+     string?  [c]
+     keyword? [c]
+     vector?  (interpose " " c)
+     map?     (apply concat (interpose [", "] (map #(interpose " " %) c)))
+     (throwf IllegalArgumentException
+             "unrecognized constraint: %s (%s)" c (class c)))])
+
+(defn the-str
+  "Returns the string for x--its name if it's a keyword."
+  [x]
+  ((if (keyword? x) name str) x))
 
 (defn format-constraints
   "Returns a string representing all the constraints for one keyword-item
-  or component formatted for miglayout. In Clojure, the constraints may be
-  specified using strings, keywords, vectors, and/or maps."
+  or component formatted for miglayout."
   [& constraints]
-  (loop [[c & cs] constraints
-         v []]
-    (if c
-      (recur cs (concat v [", "]
-        (cond (or (string? c) (keyword? c))
-              [c]
-              (vector? c)
-              (interpose " " c)
-              (map? c)
-              (apply concat (interpose [", "] (map #(interpose " " %) c)))
-              :else
-              (throw
-               (IllegalArgumentException.
-                (format "unrecognized constraint: %s (%s)" c (class c)))))))
-      (apply str (map #((if (keyword? %) name str) %) (rest v))))))
-
-(defn keyword-item?
-  "Returns true if x is a keyword-item"
-  [x]
-  (#{:layout :column :row} x))
+  (apply str
+         (map the-str
+              (rest (reduce concat []
+                            (mapcat format-constraint constraints))))))
 
 (defn component?
   "Returns true if x is a java.awt.Component"
@@ -51,8 +54,8 @@
   "Returns true if x is not a keyword-item or component"
   [x]
   (not
-   (or (keyword-item? x)
-       (component? x))))
+   (or (component? x)
+       (#{:layout :column :row} x))))
 
 (defn parse-item-constraints
   "Iterates over args and builds a map containing :keywords, a map of from
@@ -61,12 +64,12 @@
   a vector because ordering of components matters."
   [& args]
   (loop [[item & args] args
-         item-constraints {:keyword-items {} :components []}]
+         item-constraints {:components [] :keyword-items {}}]
     (if item
       (let [[constraints args] (split-with constraint? args)]
         (recur args
           (update-in
            item-constraints
            [(if (component? item) :components :keyword-items)]
-           #(conj % [item (apply format-constraints constraints)]))))
+           conj [item (apply format-constraints constraints)])))
       item-constraints)))
