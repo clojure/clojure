@@ -35,14 +35,17 @@ public static Object invokeInstanceMethod(Object target, String methodName, Obje
 		}
 }
 
+private static String noMethodReport(String methodName, Object target){
+	 return "No matching method found: " + methodName
+			+ (target==null?"":" for " + target.getClass());
+}
 static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
 		throws Exception{
 	Method m = null;
 	Object[] boxedArgs = null;
 	if(methods.isEmpty())
 		{
-		throw new IllegalArgumentException("No matching method found: " + methodName
-			+ " for " + target.getClass());
+		throw new IllegalArgumentException(noMethodReport(methodName,target));
 		}
 	else if(methods.size() == 1)
 		{
@@ -69,8 +72,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		m = foundm;
 		}
 	if(m == null)
-		throw new IllegalArgumentException("No matching method found: " + methodName
-			+ " for " + target.getClass());
+		throw new IllegalArgumentException(noMethodReport(methodName,target));
 
 	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
 		{
@@ -78,8 +80,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		m = getAsMethodOfPublicBase(m.getDeclaringClass(), m);
 		}
 	if(m == null)
-		throw new IllegalArgumentException("No matching method found: " + methodName
-			+ " for " + target.getClass());
+		throw new IllegalArgumentException(noMethodReport(methodName,target));
 	try
 		{
 		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
