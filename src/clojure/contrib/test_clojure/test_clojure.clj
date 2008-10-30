@@ -15,20 +15,9 @@
 
 (ns clojure.contrib.test-clojure
   (:import (java.io File FilenameFilter))
-  (:use clojure.contrib.test-is))
-
-(defn- filename-filter-re
-  [pattern]
-  (proxy [FilenameFilter] []
-    (accept
-     [dir name]
-     (boolean (re-matches pattern name)))))
-
-(doseq file (.listFiles
-             (File. "tests")
-             (filename-filter-re #".*\.clj"))
-  (printf "Loading %s\n" file)
-  (load (.getPath file)))
+  (:use clojure.contrib.test-is)
+  (:load "tests/reader.clj"
+         "tests/printer.clj"))
 
 (binding [*test-out* (java.io.PrintWriter. *out*)]
   (run-tests)
