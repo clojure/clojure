@@ -64,6 +64,22 @@
   (is (instance? Double 0.0))
   (is (instance? Double -0.0))
   (is (instance? Double -1.0))
+
+  ; Read BigDecimal
+  (is (instance? BigDecimal 2147483647M))
+  (is (instance? BigDecimal +1M))
+  (is (instance? BigDecimal 1M))
+  (is (instance? BigDecimal +0M))
+  (is (instance? BigDecimal 0M))
+  (is (instance? BigDecimal -0M))
+  (is (instance? BigDecimal -1M))
+  (is (instance? BigDecimal -2147483648M))
+  (is (instance? BigDecimal +1.0M))
+  (is (instance? BigDecimal 1.0M))
+  (is (instance? BigDecimal +0.0M))
+  (is (instance? BigDecimal 0.0M))
+  (is (instance? BigDecimal -0.0M))
+  (is (instance? BigDecimal -1.0M))
 )
 
 

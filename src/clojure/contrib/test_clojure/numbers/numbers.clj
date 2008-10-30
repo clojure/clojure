@@ -6,12 +6,10 @@
 ;;  this license. You must not remove this notice, or any other, from this
 ;;  software.
 ;;
-;;  Tests for the Clojure functions documented at the URL:
-;;
-;;    http://clojure.org/Reader
+;;  clojure.contrib.test-clojure.numbers
 ;;
 ;;  scgilardi (gmail)
-;;  Created 22 October 2008
+;;  Created 30 October 2008
 
 (ns clojure.contrib.test-clojure.numbers
   (:use clojure.contrib.test-is))
