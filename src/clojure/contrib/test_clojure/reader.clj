@@ -6,17 +6,12 @@
 ;;  this license. You must not remove this notice, or any other, from this
 ;;  software.
 ;;
-;;  clojure.contrib.test-clojure.Reader.clj
-;;
 ;;  Tests for the Clojure functions documented at the URL:
 ;;
 ;;    http://clojure.org/Reader
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 22 October 2008
-
-(ns clojure.contrib.test-clojure.reader
-  (:use clojure.contrib.test-is))
 
 ;; Symbols
 

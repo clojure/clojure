@@ -14,8 +14,9 @@
 ;;  Created 22 October 2008
 
 (ns clojure.contrib.test-clojure
-  (:use (clojure.contrib test-is)
-        (clojure.contrib.test-clojure reader)))
+  (:use clojure.contrib.test-is)
+  (:load "reader.clj" "printer.clj"))
 
 (binding [*test-out* (java.io.PrintWriter. *out*)]
-  (run-tests 'clojure.contrib.test-clojure.reader))
+  (run-tests)
+  (println))
