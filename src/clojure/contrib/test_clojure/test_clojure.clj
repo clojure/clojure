@@ -15,10 +15,18 @@
 
 (ns clojure.contrib.test-clojure
   (:import (java.io File FilenameFilter))
-  (:use clojure.contrib.test-is)
-  (:load "tests/reader.clj"
-         "tests/printer.clj"))
+  (:use clojure.contrib.test-is))
+
+(def tests [:reader :printer :numbers])
+
+(defn test-name
+  [test]
+  (symbol (str "clojure.contrib.test-clojure." (name test))))
+
+(doseq test tests
+  (require (test-name test)))
 
 (binding [*test-out* (java.io.PrintWriter. *out*)]
-  (run-tests)
-  (println))
+  (doseq test tests
+    (println "\n\n=====>" test)
+    (run-tests (test-name test))))

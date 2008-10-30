@@ -6,15 +6,20 @@
 ;;  this license. You must not remove this notice, or any other, from this
 ;;  software.
 ;;
+;;  clojure.contrib.test-clojure.printer
+;;
 ;;  scgilardi (gmail)
 ;;  Created 29 October 2008
 
-(deftest t-print-length-empty-seq
+(ns clojure.contrib.test-clojure.printer
+  (:use clojure.contrib.test-is))
+
+(deftest print-length-empty-seq
   (let [coll () val "()"]
     (is (= val (binding [*print-length* 0] (print-str coll))))
     (is (= val (binding [*print-length* 1] (print-str coll))))))
 
-(deftest t-print-length-seq
+(deftest print-length-seq
   (let [coll (range 5)
         length-val '((0 "(...)")
                      (1 "(0 ...)")
@@ -26,12 +31,12 @@
       (binding [*print-length* length]
         (is (= val (print-str coll)))))))
 
-(deftest t-print-length-empty-vec
+(deftest print-length-empty-vec
   (let [coll [] val "[]"]
     (is (= val (binding [*print-length* 0] (print-str coll))))
     (is (= val (binding [*print-length* 1] (print-str coll))))))
 
-(deftest t-print-length-vec
+(deftest print-length-vec
   (let [coll [0 1 2 3 4]
         length-val '((0 "[...]")
                      (1 "[0 ...]")
@@ -43,7 +48,7 @@
       (binding [*print-length* length]
         (is (= val (print-str coll)))))))
 
-(deftest t-print-level-seq
+(deftest print-level-seq
   (let [coll '(0 (1 (2 (3 (4)))))
         level-val '((0 "#")
                     (1 "(0 #)")
@@ -55,7 +60,7 @@
       (binding [*print-level* level]
         (is (= val (print-str coll)))))))
 
-(deftest t-print-level-length-coll
+(deftest print-level-length-coll
   (let [coll '(if (member x y) (+ (first x) 3) (foo (a b c d "Baz")))
         level-length-val
         '((0 1 "#")

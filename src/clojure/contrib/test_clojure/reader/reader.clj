@@ -13,9 +13,12 @@
 ;;  scgilardi (gmail)
 ;;  Created 22 October 2008
 
+(ns clojure.contrib.test-clojure.reader
+  (:use clojure.contrib.test-is))
+
 ;; Symbols
 
-(deftest t-Symbols
+(deftest Symbols
   (is (= 'abc (symbol "abc")))
   (is (= '*+!-_? (symbol "*+!-_?")))
   (is (= 'abc:def:ghi (symbol "abc:def:ghi")))
@@ -30,7 +33,7 @@
 
 ;; Strings
 
-(deftest t-Strings
+(deftest Strings
   (is (= "abcde" (str \a \b \c \d \e)))
   (is (= "abc
   def" (str \a \b \c \newline \space \space \d \e \f)))
@@ -38,7 +41,31 @@
 
 ;; Numbers
 
-(deftest t-Numbers)
+(deftest Numbers
+
+  ; Read Integer
+  (is (instance? Integer 2147483647))
+  (is (instance? Integer +1))
+  (is (instance? Integer 1))
+  (is (instance? Integer +0))
+  (is (instance? Integer 0))
+  (is (instance? Integer -0))
+  (is (instance? Integer -1))
+  (is (instance? Integer -2147483648))
+
+  ; Read BigInteger
+  (is (instance? BigInteger 2147483648))
+  (is (instance? BigInteger -2147483649))
+
+  ; Read Double
+  (is (instance? Double +1.0))
+  (is (instance? Double 1.0))
+  (is (instance? Double +0.0))
+  (is (instance? Double 0.0))
+  (is (instance? Double -0.0))
+  (is (instance? Double -1.0))
+)
+
 
 ;; Characters
 
