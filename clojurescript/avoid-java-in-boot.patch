@@ -1,11 +1,11 @@
-commit 0d0d8e3801c91ee8dd35c9051afe1f026a0aaed1
+commit 46c8f274922f705aa0f95e7177d7476968e95b91
 Author: Chouser <chouser@n01se.net>
 Date:   Sun Oct 26 01:09:48 2008 -0400
 
     Less Java dependence in boot.clj (for ClojureScript)
 
 diff --git a/src/clj/clojure/boot.clj b/src/clj/clojure/boot.clj
-index b7d7ac7..882ff2a 100644
+index 4415d9b..22771db 100644
 --- a/src/clj/clojure/boot.clj
 +++ b/src/clj/clojure/boot.clj
 @@ -315,7 +315,7 @@
@@ -264,7 +264,7 @@ index b7d7ac7..882ff2a 100644
    (.write w ". ")
    (print-args o w)
    (.write w ")"))
-@@ -3628,11 +3630,11 @@
+@@ -3630,11 +3632,11 @@
                         (.write w ")"))
      (.isArray c) (do
                     (.write w "#=(java.lang.Class/forName \"")

@@ -27,7 +27,7 @@ clojure = {
   },
   lang: {
     Namespace: function( n, m ) {
-      this.name = n;
+      this.name = n; // FIXME: this pollutes the namespace
       clojure.JS.merge( this, m || {} );
     }
   }
@@ -45,7 +45,7 @@ if( ! clojure.JS.global["java"] ) {
 
 clojure = new clojure.lang.Namespace("clojure",{
   in_ns: function(s) {
-    var i, nsparts = s.substring(1).split('.'),
+    var i, nsparts = s.getName().split('.'),
         base = clojure.JS.global;
     for( i = 0; i < nsparts.length; ++i ) {
       if( ! base[nsparts[i]] ) {
@@ -211,8 +211,13 @@ clojure = new clojure.lang.Namespace("clojure",{
   },
   keyword: function(a,b) {
     if( b === undefined )
-      return clojure.lang.Keyword.intern( "", a );
+      return clojure.lang.Keyword.intern( null, a );
     return clojure.lang.Keyword.intern( a, b );
+  },
+  symbol: function(a,b) {
+    if( b === undefined )
+      return clojure.lang.Symbol.intern( null, a );
+    return clojure.lang.Symbol.intern( a, b );
   },
   assoc: function( coll, key, val ) {
     if( coll === null )
@@ -488,8 +493,6 @@ clojure.JS.defclass( clojure.JS, "String", {
   }
 });
 
-clojure.JS.defclass( clojure.lang, "Symbol", {});
-
 clojure.JS.definterface( clojure.lang, "IObj" );
 
 clojure.JS.defclass( clojure.lang, "Obj", {
@@ -721,7 +724,7 @@ clojure.JS.defclass( clojure.lang, "Keyword", {
   statics: {
     table: {},
     intern: function( ns, name ) {
-      var key = ns + "/" + name,
+      var key = (ns || "") + "/" + name,
           obj = clojure.lang.Keyword.table[ key ];
       if( obj )
         return obj;
@@ -732,6 +735,51 @@ clojure.JS.defclass( clojure.lang, "Keyword", {
   methods: {
     toString: function() {
       return ":" + (this.ns ? this.ns+"/" : "") + this._name;
+    },
+    compareTo: function(o) {
+      if( this == o )
+        return 0;
+      if( this._ns === null && o._ns !== null )
+        return -1;
+      if( this._ns !== null ) {
+        if( o._ns === null )
+          return 1;
+        var nsc = clojure.JS.compare(this._ns, o._ns);
+        if( nsc !== 0 )
+          return nsc;
+      }
+      return clojure.JS.compare(this._name, o._name);
+    },
+    getNamespace: function() { return this._ns; },
+    getName: function() { return this._name; },
+    hashCode: function() {
+      return clojure.lang.Util.hash( this._ns + "/" + this._name );
+    },
+    invoke: function(coll, notFound) { return clojure.get( coll,this,notFound);}
+  }
+});
+
+clojure.JS.defclass( clojure.lang, "Symbol", {
+  extend: clojure.lang.AFn,
+  implement: [clojure.lang.Named],
+  init: function( ns, name ) {
+    this._ns = ns;
+    this._name = name;
+  },
+  statics: {
+    table: {},
+    intern: function( ns, name ) {
+      var key = (ns || "") + "/" + name,
+          obj = clojure.lang.Symbol.table[ key ];
+      if( obj )
+        return obj;
+      return clojure.lang.Symbol.table[ key ] =
+        new clojure.lang.Symbol( ns, name );
+    }
+  },
+  methods: {
+    toString: function() {
+      return (this.ns ? this.ns+"/" : "") + this._name;
     },
     compareTo: function(o) {
       if( this == o )
@@ -1963,7 +2011,7 @@ clojure.JS.def(clojure,"_STAR_print_readably_STAR_",true);
 clojure.JS.implement( clojure.lang.Namespace, "Namespace" );
 
 clojure.lang.Namespace.find = function( s ) {
-  return clojure.JS.global[ s.substring(1) ];
+  return clojure.JS.global[ s.getName() ];
 };
 
 clojure.JS.merge( clojure.lang.Namespace.prototype, {
@@ -1971,7 +2019,7 @@ clojure.JS.merge( clojure.lang.Namespace.prototype, {
   hashCode: function() { return clojure.hash( this.name ); }
 });
 
-clojure.in_ns("'user");
+clojure.in_ns(clojure.symbol("user"));
 
 (function() {
   var buf = [];

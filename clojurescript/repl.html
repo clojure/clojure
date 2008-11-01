@@ -1,69 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-  <body>
-    <textarea rows="24" cols="80" id="ta"></textarea><br />
-    <span style="font-family: monospace">user=&gt;</span>
-    <textarea id="text" rows="6" cols="80"
-      style="vertical-align: top"></textarea>
-    <div id="status"></div>
-    <!--
-    <form onsubmit="jsrepl.runtest(); return false">
-      <select id="t">
-        <option>t01.js</option>
-        <option>t02.js</option>
-        <option>t03.js</option>
-        <option>t04.js</option>
-        <option>t05.js</option>
-        <option>t06.js</option>
-      </select>
-      <input type="submit" value="Run test" />
-    </form>
-    -->
-    <script type="text/javascript">
-      jsrepl = {
-        ta: document.getElementById( 'ta' ),
-        t: document.getElementById( 't' ),
-        text: document.getElementById( 'text' ),
-        status: document.getElementById( 'status' ),
-        runtest: function() {
-          var s = document.createElement('script');
-          s.src = jsrepl.t.value;
-          document.body.appendChild( s );
-        },
-        posttext: function() {
-          var text = jsrepl.text.value.replace(/\n$/,"");
-          print( "user=> " + text.replace(/\n/g,"\n       "));
-          jsrepl.text.value = "";
-        },
-        err: function(e) {
-          print(e);
-          clojure._var__STAR_e.set(e);
-        },
-        state: function(s,m) {
-          jsrepl.status.innerHTML = s;
-          switch( s ) {
-            case 'error':
-              jsrepl.posttext();
-              print( m );
-              break;
-            case 'compiled':
-              jsrepl.posttext();
-              break;
-          }
-          jsrepl.ta.scrollTop = jsrepl.ta.scrollHeight;
-        }
-      };
-      jsrepl.text.onkeypress = function(e) {
-        e = e || event;
-        if( e.keyCode == 13 ) {
-          var s = document.createElement('script');
-          s.src = "http://localhost:8081/" +
-            escape(jsrepl.text.value).replace(/\+/,'%2b');
-          document.body.appendChild( s );
-        }
-      };
-      function print( x ) { jsrepl.ta.value += x + "\n"; }
-    </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <head>
+    <title>ClojureScript REPL</title>
+    <style type="text/css">
+      body {
+        font-family: Monaco,monospace;
+        font-size: 10pt;
+      }
+      .pad {
+        height: 20em;
+      }
+      #log {
+        height: 20em;
+        overflow: auto;
+        white-space: pre-wrap;
+      }
+      #log table {
+        border-collapse: collapse;
+      }
+      #log td {
+        vertical-align: top;
+        padding: 0;
+      }
+      .ns {
+        float: left;
+      }
+      .cg {
+        color: #00b;
+      }
+      textarea#input {
+        padding: 0;
+        margin: 0;
+        border: none;
+        width: 90%;
+        height: 6em;
+      }
+    </style>
     <script type="text/javascript" src="clj.js"></script>
     <script type="text/javascript" src="boot.js"></script>
+    <script type="text/javascript" src="repl.js"></script>
+  </head>
+  <body>
+    <div id="log">
+      <div class="pad"></div>
+    </div>
+    <div class="ns cg">user=&gt;&nbsp;</div>
+    <textarea id="input"></textarea>
+    <div id="status"></div>
+    <div id="scripts"></div>
   </body>
 </html>

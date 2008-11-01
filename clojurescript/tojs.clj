@@ -127,12 +127,15 @@
     (or (instance? Character c)
         (string?  c)) (pr-str (str c))
     (keyword? c) (str "clojure.keyword(\"" (namespace c) "\",\"" (name c) "\")")
-    (symbol?  c) (str \" \' c \")
+    (symbol?  c) (str "clojure.symbol(\"" c "\")")
     (class?   c) (.getCanonicalName c)
     (list?    c) (vstr ["clojure.JS.lit_list(["
                         (vec (interpose "," (map const-str c)))
                         "])"])
     (fn?      c) (str \" c \")
+    (instance? java.util.regex.Pattern c) (str "(/"
+                                               (.replace (str c) "/" "\\/")
+                                               "/)")
     :else (str "(" c ")")))
 
 (defmethod tojs clojure.lang.Compiler$ConstantExpr [e ctx]
@@ -279,14 +282,15 @@
                  seq instance? assoc apply refer first rest import
                  hash-map count find keys vals get class contains?
                  print-method class? number? string? integer? nth
-                 to-array cons
+                 to-array cons keyword symbol
                  ;-- not supported yet
                  make-array to-array-2d re-pattern re-matcher re-groups
                  re-seq re-matches re-find format
                  ;-- will probably never be supported in clojurescript
                  eval resolve ns-resolve await await-for macroexpand
                  macroexpand-1 load-reader load-string special-symbol?
-                 bigint bigdec floats doubles ints longs aset-int
+                 bigint bigdec floats doubles ints longs float-array
+                 double-array int-array long-array aset-int
                  aset-long aset-boolean aset-float aset-double
                  aset-short aset-char aset-byte slurp seque
                  decimal? float? pmap primitives-classnames})
@@ -298,20 +302,21 @@
     (or (:macro m) (skip-set (:name m)))))
 
 (defn formtojs [f]
-  (binding [*allow-unresolved-vars* true]
-    (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
-          mainexpr (-> expr .fexpr .methods first .body .exprs first)]
-      (when-not (or (and (instance? Compiler$DefExpr mainexpr)
-                         (skip-defs mainexpr))
-                    (and (instance? Compiler$InstanceMethodExpr mainexpr)
-                         (or (= "setMacro" (.methodName mainexpr))
-                             (and (= "addMethod" (.methodName mainexpr))
-                                  (skip-method (tojs (first (.args mainexpr))
-                                                     nil)))))
-                    (and (instance? Compiler$BodyExpr mainexpr)
-                         (instance? Compiler$DefExpr (first (.exprs mainexpr)))
-                         (skip-defs (first (.exprs mainexpr)))))
-        (str (tojs expr {:localmap {}}) ";")))))
+  (when-not (= 'definline (first f))
+    (binding [*allow-unresolved-vars* true]
+      (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
+            mainexpr (-> expr .fexpr .methods first .body .exprs first)]
+        (when-not (or (and (instance? Compiler$DefExpr mainexpr)
+                           (skip-defs mainexpr))
+                      (and (instance? Compiler$InstanceMethodExpr mainexpr)
+                           (or (= "setMacro" (.methodName mainexpr))
+                               (and (= "addMethod" (.methodName mainexpr))
+                                    (skip-method (tojs (first (.args mainexpr))
+                                                       nil)))))
+                      (and (instance? Compiler$BodyExpr mainexpr)
+                           (instance? Compiler$DefExpr (first (.exprs mainexpr)))
+                           (skip-defs (first (.exprs mainexpr)))))
+          (str (tojs expr {:localmap {}}) ";"))))))
 
 (defn filetojs [filename]
   (let [reader (java.io.PushbackReader. (ds/reader filename))]
