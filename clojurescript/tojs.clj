@@ -302,7 +302,7 @@
     (or (:macro m) (skip-set (:name m)))))
 
 (defn formtojs [f]
-  (when-not (= 'definline (first f))
+  (when-not (and (coll? f) (= 'definline (first f)))
     (binding [*allow-unresolved-vars* true]
       (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
             mainexpr (-> expr .fexpr .methods first .body .exprs first)]
@@ -316,7 +316,7 @@
                       (and (instance? Compiler$BodyExpr mainexpr)
                            (instance? Compiler$DefExpr (first (.exprs mainexpr)))
                            (skip-defs (first (.exprs mainexpr)))))
-          (str (tojs expr {:localmap {}}) ";"))))))
+          (tojs expr {:localmap {}}))))))
 
 (defn filetojs [filename]
   (let [reader (java.io.PushbackReader. (ds/reader filename))]
@@ -331,9 +331,10 @@
                   (print "//")
                   (prn f)
                   (println "//---"))
-                (println js)
-                (when (or (= 'ns (first f))
-                          (= 'in-ns (first f)))
+                (println (str js ";"))
+                (when (and (coll? f)
+                           (or (= 'ns (first f))
+                               (= 'in-ns (first f))))
                   (eval f)))
               (when *debug-comments*
                 (print "// Skipping: ")
@@ -382,11 +383,11 @@
           (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
           (let [line1 (-> socket .getInputStream ds/reader .readLine)
                 [_ url] (re-find #"^GET /(.*?) HTTP" line1)
-                codestr (str "(prn " (URLDecoder/decode url) ")")
+                codestr (URLDecoder/decode url)
                 js (with-out-str (filetojs (StringReader. codestr)))]
             (println "jsrepl.state('compiled');try{")
-            (println js)
-            (println "}catch(e){jsrepl.err(e)};jsrepl.state('done');"))
+            (println "jsrepl.lastval=" js )
+            (println "jsrepl.state('done');}catch(e){jsrepl.err(e)};"))
           (catch Exception e
             (if (= (.getMessage e) "EOF while reading")
               (println "jsrepl.state('incomplete');")

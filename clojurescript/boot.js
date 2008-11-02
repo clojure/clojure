@@ -136,7 +136,7 @@ do{_cnt=0;_rtn=((clojure.rest.apply(null,[s_1]))?((_cnt=1,_rtn=[clojure.rest.app
 //---
 (function __clojure_fn_3002(){
 return (clojure.JS.def(clojure,"butlast",(function __clojure_fn_3002_butlast_3004(s_1){
-var s_3,ret_2,butlast_0=arguments.callee;
+var ret_2,s_3,butlast_0=arguments.callee;
 return (((function __loop(){var _rtn,_cnt;(ret_2=clojure.lang.PersistentVector.EMPTY),
 (s_3=s_1);do{_cnt=0;
 _rtn=((clojure.rest.apply(null,[s_3]))?((_cnt=1,_rtn=[clojure.conj.apply(null,[ret_2,clojure.first.apply(null,[s_3])]),clojure.rest.apply(null,[s_3])],ret_2=_rtn[0],s_3=_rtn[1])):(clojure.seq.apply(null,[ret_2])))}while(_cnt);return _rtn;})()))})))}).apply(null,[]);
@@ -240,7 +240,7 @@ return (((x_1)?(false):(true)))})))}).apply(null,[]);
 return (clojure.JS.def(clojure,"str",clojure.JS.variadic(1,(function __clojure_fn_3117_str_3119(x_1){switch(arguments.length){
 case 0:return ("")
 case 1:return (((clojure.nil_QMARK_.apply(null,[x_1]))?(""):((x_1).toString())))}
-var more_4,sb_3,ys_2=clojure.JS.rest_args(this,arguments,1);
+var sb_3,more_4,ys_2=clojure.JS.rest_args(this,arguments,1);
 return (((function __loop(){var _rtn,_cnt;(sb_3=clojure.lang.RT.makeStringBuilder(clojure.str.apply(null,[x_1]))),
 (more_4=ys_2);do{_cnt=0;
 _rtn=((more_4)?((_cnt=1,_rtn=[(sb_3).append(clojure.str.apply(null,[clojure.first.apply(null,[more_4])])),clojure.rest.apply(null,[more_4])],sb_3=_rtn[0],more_4=_rtn[1])):(clojure.str.apply(null,[sb_3])))}while(_cnt);return _rtn;})()))}))))}).apply(null,[]);
@@ -307,11 +307,11 @@ return (((s_1)?((new clojure.lang.CachedSeq(s_1))):(null)))})))}).apply(null,[])
 //---
 (function __clojure_fn_3206(){
 return (clojure.JS.def(clojure,"concat",clojure.JS.variadic(2,(function __clojure_fn_3206_concat_3208(x_1,y_2){switch(arguments.length){
-case 0:return (null)
+case 1:return (clojure.seq.apply(null,[x_1]))
 case 2:return (((clojure.seq.apply(null,[x_1]))?((new clojure.lang.LazyCons((function __clojure_fn_3206_concat_3208_fn_3213(G__3212_1){switch(arguments.length){
 case 0:return (clojure.first.apply(null,[x_1]))}
 return (clojure.concat.apply(null,[clojure.rest.apply(null,[x_1]),y_2]))})))):(clojure.seq.apply(null,[y_2]))))
-case 1:return (clojure.seq.apply(null,[x_1]))}
+case 0:return (null)}
 var cat_4,zs_3=clojure.JS.rest_args(this,arguments,2);
 return (((cat_4=(function __clojure_fn_3206_concat_3208_cat_3218(xys_1,zs_2){
 var _cnt,_rtn,cat_0=arguments.callee;
@@ -322,12 +322,12 @@ return (cat_0.apply(null,[clojure.rest.apply(null,[xys_1]),zs_2]))})))):(((zs_2)
 cat_4.apply(null,[clojure.concat.apply(null,[x_1,y_2]),zs_3])))}))))}).apply(null,[]);
 
 //======
-//(defn = "Equality. Returns true if x equals y, false if not. Same as\n  Java x.equals(y) except it also works for nil, and compares\n  numbers in a type-independent manner.  Clojure's immutable data\n  structures define equals() (and thus =) as a value, not an identity,\n  comparison." {:tag Boolean, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Util)) (clojure/list (quote clojure/equal)) (clojure/list x) (clojure/list y))), :inline-arities #{2}} ([x] true) ([x y] (. clojure.lang.Util (equal x y))) ([x y & more] (if (= x y) (if (rest more) (recur y (first more) (rest more)) (= y (first more))) false)))
+//(defn = "Equality. Returns true if x equals y, false if not. Same as\n  Java x.equals(y) except it also works for nil, and compares\n  numbers in a type-independent manner.  Clojure's immutable data\n  structures define equals() (and thus =) as a value, not an identity,\n  comparison." {:tag Boolean, :inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Util)) (clojure/list (quote clojure/equal)) (clojure/list x) (clojure/list y)))} ([x] true) ([x y] (. clojure.lang.Util (equal x y))) ([x y & more] (if (= x y) (if (rest more) (recur y (first more) (rest more)) (= y (first more))) false)))
 //---
 (function __clojure_fn_3227(){
 return (clojure.JS.def(clojure,"_EQ_",clojure.JS.variadic(2,(function __clojure_fn_3227_EQ_3232(x_1,y_2){switch(arguments.length){
-case 1:return (true)
-case 2:return (clojure.lang.Util.equal(x_1,y_2))}
+case 2:return (clojure.lang.Util.equal(x_1,y_2))
+case 1:return (true)}
 var _cnt,_rtn,more_3=clojure.JS.rest_args(this,arguments,2);
 do{_cnt=0;_rtn=((clojure.lang.Util.equal(x_1,y_2))?(((clojure.rest.apply(null,[more_3]))?((_cnt=1,_rtn=[y_2,clojure.first.apply(null,[more_3]),clojure.rest.apply(null,[more_3])],x_1=_rtn[0],y_2=_rtn[1],more_3=_rtn[2])):(clojure.lang.Util.equal(y_2,clojure.first.apply(null,[more_3]))))):(false))
 }while(_cnt);return _rtn;}))))}).apply(null,[]);
@@ -337,8 +337,8 @@ do{_cnt=0;_rtn=((clojure.lang.Util.equal(x_1,y_2))?(((clojure.rest.apply(null,[m
 //---
 (function __clojure_fn_3238(){
 return (clojure.JS.def(clojure,"not_EQ_",clojure.JS.variadic(2,(function __clojure_fn_3238_not_EQ_3240(x_1,y_2){switch(arguments.length){
-case 2:return (clojure.not.apply(null,[clojure.lang.Util.equal(x_1,y_2)]))
-case 1:return (false)}
+case 1:return (false)
+case 2:return (clojure.not.apply(null,[clojure.lang.Util.equal(x_1,y_2)]))}
 var more_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.not.apply(null,[clojure.apply.apply(null,[clojure._EQ_,x_1,y_2,more_3])]))}))))}).apply(null,[]);
 
@@ -374,7 +374,7 @@ return (clojure.JS.def(clojure,"reverse",(function __clojure_fn_3283_reverse_328
 return (clojure.reduce.apply(null,[clojure.conj,null,coll_1]))})))}).apply(null,[]);
 
 //======
-//(defn + "Returns the sum of nums. (+) returns 0." {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/add)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([] 0) ([x] (clojure.lang.RT/numberCast x)) ([x y] (. clojure.lang.Numbers (add x y))) ([x y & more] (reduce + (+ x y) more)))
+//(defn + "Returns the sum of nums. (+) returns 0." {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/add)) (clojure/list x) (clojure/list y)))))} ([] 0) ([x] (clojure.lang.RT/numberCast x)) ([x y] (. clojure.lang.Numbers (add x y))) ([x y & more] (reduce + (+ x y) more)))
 //---
 (function __clojure_fn_3289(){
 return (clojure.JS.def(clojure,"_PLUS_",clojure.JS.variadic(2,(function __clojure_fn_3289_PLUS_3294(x_1,y_2){switch(arguments.length){
@@ -385,18 +385,18 @@ var more_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.reduce.apply(null,[clojure._PLUS_,clojure.lang.Numbers.add(x_1,y_2),more_3]))}))))}).apply(null,[]);
 
 //======
-//(defn * "Returns the product of nums. (*) returns 1." {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/multiply)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([] 1) ([x] (clojure.lang.RT/numberCast x)) ([x y] (. clojure.lang.Numbers (multiply x y))) ([x y & more] (reduce * (* x y) more)))
+//(defn * "Returns the product of nums. (*) returns 1." {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/multiply)) (clojure/list x) (clojure/list y)))))} ([] 1) ([x] (clojure.lang.RT/numberCast x)) ([x y] (. clojure.lang.Numbers (multiply x y))) ([x y & more] (reduce * (* x y) more)))
 //---
 (function __clojure_fn_3301(){
 return (clojure.JS.def(clojure,"_STAR_",clojure.JS.variadic(2,(function __clojure_fn_3301_STAR_3306(x_1,y_2){switch(arguments.length){
-case 2:return (clojure.lang.Numbers.multiply(x_1,y_2))
 case 0:return ((1))
+case 2:return (clojure.lang.Numbers.multiply(x_1,y_2))
 case 1:return (clojure.lang.RT.numberCast(x_1))}
 var more_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.reduce.apply(null,[clojure._STAR_,clojure.lang.Numbers.multiply(x_1,y_2),more_3]))}))))}).apply(null,[]);
 
 //======
-//(defn / "If no denominators are supplied, returns 1/numerator,\n  else returns numerator divided by all of the denominators." {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/divide)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([x] (/ 1 x)) ([x y] (. clojure.lang.Numbers (divide x y))) ([x y & more] (reduce / (/ x y) more)))
+//(defn / "If no denominators are supplied, returns 1/numerator,\n  else returns numerator divided by all of the denominators." {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/divide)) (clojure/list x) (clojure/list y)))))} ([x] (/ 1 x)) ([x y] (. clojure.lang.Numbers (divide x y))) ([x y & more] (reduce / (/ x y) more)))
 //---
 (function __clojure_fn_3313(){
 return (clojure.JS.def(clojure,"_SLASH_",clojure.JS.variadic(2,(function __clojure_fn_3313_SLASH_3318(x_1,y_2){switch(arguments.length){
@@ -406,7 +406,7 @@ var more_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.reduce.apply(null,[clojure._SLASH_,clojure.lang.Numbers.divide(x_1,y_2),more_3]))}))))}).apply(null,[]);
 
 //======
-//(defn - "If no ys are supplied, returns the negation of x, else subtracts\n  the ys from x and returns the result." {:inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/minus)) args)))), :inline-arities #{1 2}} ([x] (. clojure.lang.Numbers (minus x))) ([x y] (. clojure.lang.Numbers (minus x y))) ([x y & more] (reduce - (- x y) more)))
+//(defn - "If no ys are supplied, returns the negation of x, else subtracts\n  the ys from x and returns the result." {:inline-arities #{1 2}, :inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/minus)) args))))} ([x] (. clojure.lang.Numbers (minus x))) ([x y] (. clojure.lang.Numbers (minus x y))) ([x y & more] (reduce - (- x y) more)))
 //---
 (function __clojure_fn_3324(){
 return (clojure.JS.def(clojure,"_",clojure.JS.variadic(2,(function __clojure_fn_3324_3329(x_1,y_2){switch(arguments.length){
@@ -416,29 +416,29 @@ var more_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.reduce.apply(null,[clojure._,clojure.lang.Numbers.minus(x_1,y_2),more_3]))}))))}).apply(null,[]);
 
 //======
-//(defn < "Returns non-nil if nums are in monotonically increasing order,\n  otherwise false." {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/lt)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([x] true) ([x y] (. clojure.lang.Numbers (lt x y))) ([x y & more] (if (< x y) (if (rest more) (recur y (first more) (rest more)) (< y (first more))) false)))
+//(defn < "Returns non-nil if nums are in monotonically increasing order,\n  otherwise false." {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/lt)) (clojure/list x) (clojure/list y)))))} ([x] true) ([x y] (. clojure.lang.Numbers (lt x y))) ([x y & more] (if (< x y) (if (rest more) (recur y (first more) (rest more)) (< y (first more))) false)))
 //---
 (function __clojure_fn_3335(){
 return (clojure.JS.def(clojure,"_LT_",clojure.JS.variadic(2,(function __clojure_fn_3335_LT_3340(x_1,y_2){switch(arguments.length){
-case 1:return (true)
-case 2:return (clojure.lang.Numbers.lt(x_1,y_2))}
+case 2:return (clojure.lang.Numbers.lt(x_1,y_2))
+case 1:return (true)}
 var _cnt,_rtn,more_3=clojure.JS.rest_args(this,arguments,2);
 do{_cnt=0;_rtn=((clojure.lang.Numbers.lt(x_1,y_2))?(((clojure.rest.apply(null,[more_3]))?((_cnt=1,_rtn=[y_2,clojure.first.apply(null,[more_3]),clojure.rest.apply(null,[more_3])],x_1=_rtn[0],y_2=_rtn[1],more_3=_rtn[2])):(clojure.lang.Numbers.lt(y_2,clojure.first.apply(null,[more_3]))))):(false))
 }while(_cnt);return _rtn;}))))}).apply(null,[]);
 
 //======
-//(defn <= "Returns non-nil if nums are in monotonically non-decreasing order,\n  otherwise false." {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/lte)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([x] true) ([x y] (. clojure.lang.Numbers (lte x y))) ([x y & more] (if (<= x y) (if (rest more) (recur y (first more) (rest more)) (<= y (first more))) false)))
+//(defn <= "Returns non-nil if nums are in monotonically non-decreasing order,\n  otherwise false." {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/lte)) (clojure/list x) (clojure/list y)))))} ([x] true) ([x y] (. clojure.lang.Numbers (lte x y))) ([x y & more] (if (<= x y) (if (rest more) (recur y (first more) (rest more)) (<= y (first more))) false)))
 //---
 (function __clojure_fn_3346(){
 return (clojure.JS.def(clojure,"_LT__EQ_",clojure.JS.variadic(2,(function __clojure_fn_3346_LT_EQ_3351(x_1,y_2){switch(arguments.length){
-case 1:return (true)
-case 2:return (clojure.lang.Numbers.lte(x_1,y_2))}
+case 2:return (clojure.lang.Numbers.lte(x_1,y_2))
+case 1:return (true)}
 var _cnt,_rtn,more_3=clojure.JS.rest_args(this,arguments,2);
 do{_cnt=0;_rtn=((clojure.lang.Numbers.lte(x_1,y_2))?(((clojure.rest.apply(null,[more_3]))?((_cnt=1,_rtn=[y_2,clojure.first.apply(null,[more_3]),clojure.rest.apply(null,[more_3])],x_1=_rtn[0],y_2=_rtn[1],more_3=_rtn[2])):(clojure.lang.Numbers.lte(y_2,clojure.first.apply(null,[more_3]))))):(false))
 }while(_cnt);return _rtn;}))))}).apply(null,[]);
 
 //======
-//(defn > "Returns non-nil if nums are in monotonically decreasing order,\n  otherwise false." {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/gt)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([x] true) ([x y] (. clojure.lang.Numbers (gt x y))) ([x y & more] (if (> x y) (if (rest more) (recur y (first more) (rest more)) (> y (first more))) false)))
+//(defn > "Returns non-nil if nums are in monotonically decreasing order,\n  otherwise false." {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/gt)) (clojure/list x) (clojure/list y)))))} ([x] true) ([x y] (. clojure.lang.Numbers (gt x y))) ([x y & more] (if (> x y) (if (rest more) (recur y (first more) (rest more)) (> y (first more))) false)))
 //---
 (function __clojure_fn_3357(){
 return (clojure.JS.def(clojure,"_GT_",clojure.JS.variadic(2,(function __clojure_fn_3357_GT_3362(x_1,y_2){switch(arguments.length){
@@ -449,23 +449,23 @@ do{_cnt=0;_rtn=((clojure.lang.Numbers.gt(x_1,y_2))?(((clojure.rest.apply(null,[m
 }while(_cnt);return _rtn;}))))}).apply(null,[]);
 
 //======
-//(defn >= "Returns non-nil if nums are in monotonically non-increasing order,\n  otherwise false." {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/gte)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([x] true) ([x y] (. clojure.lang.Numbers (gte x y))) ([x y & more] (if (>= x y) (if (rest more) (recur y (first more) (rest more)) (>= y (first more))) false)))
+//(defn >= "Returns non-nil if nums are in monotonically non-increasing order,\n  otherwise false." {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/gte)) (clojure/list x) (clojure/list y)))))} ([x] true) ([x y] (. clojure.lang.Numbers (gte x y))) ([x y & more] (if (>= x y) (if (rest more) (recur y (first more) (rest more)) (>= y (first more))) false)))
 //---
 (function __clojure_fn_3368(){
 return (clojure.JS.def(clojure,"_GT__EQ_",clojure.JS.variadic(2,(function __clojure_fn_3368_GT_EQ_3373(x_1,y_2){switch(arguments.length){
-case 2:return (clojure.lang.Numbers.gte(x_1,y_2))
-case 1:return (true)}
+case 1:return (true)
+case 2:return (clojure.lang.Numbers.gte(x_1,y_2))}
 var _cnt,_rtn,more_3=clojure.JS.rest_args(this,arguments,2);
 do{_cnt=0;_rtn=((clojure.lang.Numbers.gte(x_1,y_2))?(((clojure.rest.apply(null,[more_3]))?((_cnt=1,_rtn=[y_2,clojure.first.apply(null,[more_3]),clojure.rest.apply(null,[more_3])],x_1=_rtn[0],y_2=_rtn[1],more_3=_rtn[2])):(clojure.lang.Numbers.gte(y_2,clojure.first.apply(null,[more_3]))))):(false))
 }while(_cnt);return _rtn;}))))}).apply(null,[]);
 
 //======
-//(defn == "Returns non-nil if nums all have the same value, otherwise false" {:inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/equiv)) (clojure/list x) (clojure/list y))))), :inline-arities #{2}} ([x] true) ([x y] (. clojure.lang.Numbers (equiv x y))) ([x y & more] (if (== x y) (if (rest more) (recur y (first more) (rest more)) (== y (first more))) false)))
+//(defn == "Returns non-nil if nums all have the same value, otherwise false" {:inline-arities #{2}, :inline (fn [x y] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (clojure/concat (clojure/list (quote clojure/equiv)) (clojure/list x) (clojure/list y)))))} ([x] true) ([x y] (. clojure.lang.Numbers (equiv x y))) ([x y & more] (if (== x y) (if (rest more) (recur y (first more) (rest more)) (== y (first more))) false)))
 //---
 (function __clojure_fn_3379(){
 return (clojure.JS.def(clojure,"_EQ__EQ_",clojure.JS.variadic(2,(function __clojure_fn_3379_EQ_EQ_3384(x_1,y_2){switch(arguments.length){
-case 1:return (true)
-case 2:return (clojure.lang.Numbers.equiv(x_1,y_2))}
+case 2:return (clojure.lang.Numbers.equiv(x_1,y_2))
+case 1:return (true)}
 var _cnt,_rtn,more_3=clojure.JS.rest_args(this,arguments,2);
 do{_cnt=0;_rtn=((clojure.lang.Numbers.equiv(x_1,y_2))?(((clojure.rest.apply(null,[more_3]))?((_cnt=1,_rtn=[y_2,clojure.first.apply(null,[more_3]),clojure.rest.apply(null,[more_3])],x_1=_rtn[0],y_2=_rtn[1],more_3=_rtn[2])):(clojure.lang.Numbers.equiv(y_2,clojure.first.apply(null,[more_3]))))):(false))
 }while(_cnt);return _rtn;}))))}).apply(null,[]);
@@ -475,8 +475,8 @@ do{_cnt=0;_rtn=((clojure.lang.Numbers.equiv(x_1,y_2))?(((clojure.rest.apply(null
 //---
 (function __clojure_fn_3390(){
 return (clojure.JS.def(clojure,"max",clojure.JS.variadic(2,(function __clojure_fn_3390_max_3392(x_1,y_2){switch(arguments.length){
-case 2:return (((clojure.lang.Numbers.gt(x_1,y_2))?(x_1):(y_2)))
-case 1:return (x_1)}
+case 1:return (x_1)
+case 2:return (((clojure.lang.Numbers.gt(x_1,y_2))?(x_1):(y_2)))}
 var more_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.reduce.apply(null,[clojure.max,clojure.max.apply(null,[x_1,y_2]),more_3]))}))))}).apply(null,[]);
 
@@ -746,8 +746,8 @@ do{_cnt=0;_rtn=((ret_4=clojure.dissoc.apply(null,[map_1,key_2])),
 //---
 (function __clojure_fn_3692(){
 return (clojure.JS.def(clojure,"disj",clojure.JS.variadic(2,(function __clojure_fn_3692_disj_3694(set_1,key_2){switch(arguments.length){
-case 2:return ((set_1).disjoin(key_2))
-case 1:return (set_1)}
+case 1:return (set_1)
+case 2:return ((set_1).disjoin(key_2))}
 var _cnt,_rtn,ret_4,ks_3=clojure.JS.rest_args(this,arguments,2);
 do{_cnt=0;_rtn=((ret_4=clojure.disj.apply(null,[set_1,key_2])),
 ((ks_3)?((_cnt=1,_rtn=[ret_4,clojure.first.apply(null,[ks_3]),clojure.rest.apply(null,[ks_3])],set_1=_rtn[0],key_2=_rtn[1],ks_3=_rtn[2])):(ret_4)))
@@ -759,7 +759,7 @@ do{_cnt=0;_rtn=((ret_4=clojure.disj.apply(null,[set_1,key_2])),
 //---
 (function __clojure_fn_3706(){
 return (clojure.JS.def(clojure,"select_keys",(function __clojure_fn_3706_select_keys_3708(map_1,keyseq_2){
-var ret_3,keys_4,entry_5;
+var keys_4,entry_5,ret_3;
 return (((function __loop(){var _rtn,_cnt;(ret_3=clojure.lang.PersistentHashMap.EMPTY),
 (keys_4=clojure.seq.apply(null,[keyseq_2]));do{_cnt=0;
 _rtn=((keys_4)?(((entry_5=clojure.lang.RT.find(map_1,clojure.first.apply(null,[keys_4]))),
@@ -953,7 +953,7 @@ return (clojure.JS.def(clojure,"comp",clojure.JS.variadic(0,(function __clojure_
 var fs_2,fs_1=clojure.JS.rest_args(this,arguments,0);
 return (((fs_2=clojure.reverse.apply(null,[fs_1])),
 clojure.JS.variadic(0,(function __clojure_fn_3925_comp_3927_fn_3929(){
-var fs_3,ret_2,args_1=clojure.JS.rest_args(this,arguments,0);
+var ret_2,fs_3,args_1=clojure.JS.rest_args(this,arguments,0);
 return (((function __loop(){var _rtn,_cnt;(ret_2=clojure.apply.apply(null,[clojure.first.apply(null,[fs_2]),args_1])),
 (fs_3=clojure.rest.apply(null,[fs_2]));do{_cnt=0;
 _rtn=((fs_3)?((_cnt=1,_rtn=[clojure.first.apply(null,[fs_3]).apply(null,[ret_2]),clojure.rest.apply(null,[fs_3])],ret_2=_rtn[0],fs_3=_rtn[1])):(ret_2))}while(_cnt);return _rtn;})()))}))))}))))}).apply(null,[]);
@@ -963,12 +963,12 @@ _rtn=((fs_3)?((_cnt=1,_rtn=[clojure.first.apply(null,[fs_3]).apply(null,[ret_2])
 //---
 (function __clojure_fn_3934(){
 return (clojure.JS.def(clojure,"partial",clojure.JS.variadic(4,(function __clojure_fn_3934_partial_3936(f_1,arg1_2,arg2_3,arg3_4){switch(arguments.length){
-case 2:return (clojure.JS.variadic(0,(function __clojure_fn_3934_partial_3936_fn_3938(){
-var args_1=clojure.JS.rest_args(this,arguments,0);
-return (clojure.apply.apply(null,[f_1,arg1_2,args_1]))})))
 case 3:return (clojure.JS.variadic(0,(function __clojure_fn_3934_partial_3936_fn_3942(){
 var args_1=clojure.JS.rest_args(this,arguments,0);
 return (clojure.apply.apply(null,[f_1,arg1_2,arg2_3,args_1]))})))
+case 2:return (clojure.JS.variadic(0,(function __clojure_fn_3934_partial_3936_fn_3938(){
+var args_1=clojure.JS.rest_args(this,arguments,0);
+return (clojure.apply.apply(null,[f_1,arg1_2,args_1]))})))
 case 4:return (clojure.JS.variadic(0,(function __clojure_fn_3934_partial_3936_fn_3946(){
 var args_1=clojure.JS.rest_args(this,arguments,0);
 return (clojure.apply.apply(null,[f_1,arg1_2,arg2_3,arg3_4,args_1]))})))}
@@ -1019,16 +1019,16 @@ return (((((and__196_4=clojure.seq.apply(null,[c1_2])),
 ((and__196_4)?(clojure.seq.apply(null,[c2_3])):(and__196_4))))?((new clojure.lang.LazyCons((function __clojure_fn_3974_map_3976_fn_3985(G__3984_1){switch(arguments.length){
 case 0:return (f_1.apply(null,[clojure.first.apply(null,[c1_2]),clojure.first.apply(null,[c2_3])]))}
 return (clojure.map.apply(null,[f_1,clojure.rest.apply(null,[c1_2]),clojure.rest.apply(null,[c2_3])]))})))):(null)))
+case 2:var coll_2=arguments[1];
+return (((clojure.seq.apply(null,[coll_2]))?((new clojure.lang.LazyCons((function __clojure_fn_3974_map_3976_fn_3979(G__3978_1){switch(arguments.length){
+case 0:return (f_1.apply(null,[clojure.first.apply(null,[coll_2])]))}
+return (clojure.map.apply(null,[f_1,clojure.rest.apply(null,[coll_2])]))})))):(null)))
 case 4:var and__196_5,and__196_6;
 return (((((and__196_5=clojure.seq.apply(null,[c1_2])),
 ((and__196_5)?(((and__196_6=clojure.seq.apply(null,[c2_3])),
 ((and__196_6)?(clojure.seq.apply(null,[c3_4])):(and__196_6)))):(and__196_5))))?((new clojure.lang.LazyCons((function __clojure_fn_3974_map_3976_fn_3991(G__3990_1){switch(arguments.length){
 case 0:return (f_1.apply(null,[clojure.first.apply(null,[c1_2]),clojure.first.apply(null,[c2_3]),clojure.first.apply(null,[c3_4])]))}
-return (clojure.map.apply(null,[f_1,clojure.rest.apply(null,[c1_2]),clojure.rest.apply(null,[c2_3]),clojure.rest.apply(null,[c3_4])]))})))):(null)))
-case 2:var coll_2=arguments[1];
-return (((clojure.seq.apply(null,[coll_2]))?((new clojure.lang.LazyCons((function __clojure_fn_3974_map_3976_fn_3979(G__3978_1){switch(arguments.length){
-case 0:return (f_1.apply(null,[clojure.first.apply(null,[coll_2])]))}
-return (clojure.map.apply(null,[f_1,clojure.rest.apply(null,[coll_2])]))})))):(null)))}
+return (clojure.map.apply(null,[f_1,clojure.rest.apply(null,[c1_2]),clojure.rest.apply(null,[c2_3]),clojure.rest.apply(null,[c3_4])]))})))):(null)))}
 var step_6,colls_5=clojure.JS.rest_args(this,arguments,4);
 return (((step_6=(function __clojure_fn_3974_map_3976_step_3996(cs_1){
 var step_0=arguments.callee;
@@ -1204,7 +1204,7 @@ return (clojure.conj.apply(null,[((or__202_3=p1__4141_1),
 return (clojure.JS.def(clojure,"merge_with",clojure.JS.variadic(1,(function __clojure_fn_4152_merge_with_4154(f_1){
 var merge2_4,merge_entry_3,maps_2=clojure.JS.rest_args(this,arguments,1);
 return (((clojure.some.apply(null,[clojure.identity,maps_2]))?(((merge_entry_3=(function __clojure_fn_4152_merge_with_4154_merge_entry_4156(m_1,e_2){
-var v_4,k_3;
+var k_3,v_4;
 return (((k_3=clojure.key.apply(null,[e_2])),
 (v_4=clojure.val.apply(null,[e_2])),
 ((clojure.contains_QMARK_.apply(null,[m_1,k_3]))?(clojure.assoc.apply(null,[m_1,k_3,f_1.apply(null,[m_1.apply(null,[k_3]),v_4])])):(clojure.assoc.apply(null,[m_1,k_3,v_4])))))})),
@@ -1219,7 +1219,7 @@ clojure.reduce.apply(null,[merge2_4,maps_2]))):(null)))}))))}).apply(null,[]);
 //---
 (function __clojure_fn_4164(){
 return (clojure.JS.def(clojure,"zipmap",(function __clojure_fn_4164_zipmap_4166(keys_1,vals_2){
-var ks_4,vs_5,and__196_6,map_3;
+var and__196_6,vs_5,ks_4,map_3;
 return (((function __loop(){var _rtn,_cnt;(map_3=clojure.lang.PersistentHashMap.EMPTY),
 (ks_4=clojure.seq.apply(null,[keys_1])),
 (vs_5=clojure.seq.apply(null,[vals_2]));do{_cnt=0;
@@ -1296,7 +1296,7 @@ do{_cnt=0;_rtn=((((and__196_2=clojure.seq.apply(null,[coll_1])),
 ((and__196_2)?(((or__202_3=clojure.first.apply(null,[coll_1])),
 ((or__202_3)?(or__202_3):(true)))):(and__196_2))))?((_cnt=1,_rtn=[clojure.rest.apply(null,[coll_1])],coll_1=_rtn[0])):(null))
 }while(_cnt);return _rtn;}
-var _cnt,_rtn,and__196_4,and__196_3,or__202_5;
+var _cnt,_rtn,or__202_5,and__196_4,and__196_3;
 do{_cnt=0;_rtn=((((and__196_3=clojure.seq.apply(null,[coll_2])),
 ((and__196_3)?(((and__196_4=clojure.lang.Numbers.isPos(n_1)),
 ((and__196_4)?(((or__202_5=clojure.first.apply(null,[coll_2])),
@@ -1340,7 +1340,7 @@ return (clojure.lang.RT.seqToTypedArray(type_1,clojure.seq.apply(null,[aseq_2]))
 //---
 (function __clojure_fn_4290(){
 return (clojure.JS.def(clojure,"into",(function __clojure_fn_4290_into_4292(to_1,from_2){
-var _cnt,_rtn,items_4,ret_3;
+var _cnt,_rtn,ret_3,items_4;
 do{_cnt=0;_rtn=((ret_3=to_1),
 (items_4=clojure.seq.apply(null,[from_2])),
 ((items_4)?((_cnt=1,_rtn=[clojure.conj.apply(null,[ret_3,clojure.first.apply(null,[items_4])]),clojure.rest.apply(null,[items_4])],to_1=_rtn[0],from_2=_rtn[1])):(ret_3)))
@@ -1485,9 +1485,9 @@ finally{clojure.lang.Var.popThreadBindings()}return _rtn})())}))))}).apply(null,
 //---
 (function __clojure_fn_4433(){
 return (clojure.JS.def(clojure,"read",(function __clojure_fn_4433_read_4435(stream_1,eof_error_QMARK__2,eof_value_3,recursive_QMARK__4){switch(arguments.length){
-case 3:return (clojure.read.apply(null,[stream_1,eof_error_QMARK__2,eof_value_3,false]))
 case 1:return (clojure.read.apply(null,[stream_1,true,null]))
-case 0:return (clojure.read.apply(null,[clojure._STAR_in_STAR_]))}
+case 0:return (clojure.read.apply(null,[clojure._STAR_in_STAR_]))
+case 3:return (clojure.read.apply(null,[stream_1,eof_error_QMARK__2,eof_value_3,false]))}
 return (clojure.lang.LispReader.read(stream_1,clojure.boolean_.apply(null,[eof_error_QMARK__2]),eof_value_3,recursive_QMARK__4))})))}).apply(null,[]);
 
 //======
@@ -1535,7 +1535,7 @@ return (clojure.JS.def(clojure,"aclone",(function __clojure_fn_4499_aclone_4504(
 return (clojure.lang.RT.aclone(array_1))})))}).apply(null,[]);
 
 //======
-//(defn aget "Returns the value at the index/indices. Works on Java arrays of all\n  types." {:inline (fn [a i] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.RT)) (clojure/list (clojure/concat (clojure/list (quote clojure/aget)) (clojure/list a) (clojure/list i))))), :inline-arities #{2}} ([array idx] (RT/aget array idx)) ([array idx & idxs] (apply aget (aget array idx) idxs)))
+//(defn aget "Returns the value at the index/indices. Works on Java arrays of all\n  types." {:inline-arities #{2}, :inline (fn [a i] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.RT)) (clojure/list (clojure/concat (clojure/list (quote clojure/aget)) (clojure/list a) (clojure/list i)))))} ([array idx] (RT/aget array idx)) ([array idx & idxs] (apply aget (aget array idx) idxs)))
 //---
 (function __clojure_fn_4508(){
 return (clojure.JS.def(clojure,"aget",clojure.JS.variadic(2,(function __clojure_fn_4508_aget_4513(array_1,idx_2){switch(arguments.length){
@@ -1544,7 +1544,7 @@ var idxs_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.apply.apply(null,[clojure.aget,clojure.lang.RT.aget(array_1,idx_2),idxs_3]))}))))}).apply(null,[]);
 
 //======
-//(defn aset "Sets the value at the index/indices. Works on Java arrays of\n  reference types. Returns val." {:inline (fn [a i v] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.RT)) (clojure/list (clojure/concat (clojure/list (quote clojure/aset)) (clojure/list a) (clojure/list i) (clojure/list v))))), :inline-arities #{3}} ([array idx val] (RT/aset array idx val) val) ([array idx idx2 & idxv] (apply aset (aget array idx) idx2 idxv)))
+//(defn aset "Sets the value at the index/indices. Works on Java arrays of\n  reference types. Returns val." {:inline-arities #{3}, :inline (fn [a i v] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.RT)) (clojure/list (clojure/concat (clojure/list (quote clojure/aset)) (clojure/list a) (clojure/list i) (clojure/list v)))))} ([array idx val] (RT/aset array idx val) val) ([array idx idx2 & idxv] (apply aset (aget array idx) idx2 idxv)))
 //---
 (function __clojure_fn_4518(){
 return (clojure.JS.def(clojure,"aset",clojure.JS.variadic(3,(function __clojure_fn_4518_aset_4523(array_1,idx_2,idx2_3){switch(arguments.length){
@@ -1614,7 +1614,7 @@ return (clojure.lang.RT.subvec(v_1,start_2,end_3))})))}).apply(null,[]);
 //---
 (function __clojure_fn_4669(){
 return (clojure.JS.def(clojure,"resultset_seq",(function __clojure_fn_4669_resultset_seq_4671(rs_1){
-var rows_7,row_struct_5,idxs_3,rsmeta_2,keys_4,row_values_6;
+var keys_4,rsmeta_2,idxs_3,row_struct_5,rows_7,row_values_6;
 return (((rsmeta_2=(rs_1).getMetaData()),
 (idxs_3=clojure.range.apply(null,[(1),clojure.lang.Numbers.inc((rsmeta_2).getColumnCount())])),
 (keys_4=clojure.map.apply(null,[clojure.comp.apply(null,[clojure.keyword,(function __clojure_fn_4669_resultset_seq_4671_fn_4673(target__939_1){
@@ -1715,7 +1715,7 @@ return (clojure.JS.def(clojure,"ns_publics",(function __clojure_fn_4760_ns_publi
 var ns_2;
 return (((ns_2=clojure.the_ns.apply(null,[ns_1])),
 clojure.filter_key.apply(null,[clojure.val,(function __clojure_fn_4760_ns_publics_4762_fn_4764(v_1){
-var and__196_2,and__196_3;
+var and__196_3,and__196_2;
 return (((and__196_2=clojure.instance_QMARK_.apply(null,[clojure.lang.Var,v_1])),
 ((and__196_2)?(((and__196_3=clojure.lang.Util.equal(ns_2,clojure.JS.getOrRun(v_1,"ns"))),
 ((and__196_3)?((v_1).isPublic()):(and__196_3)))):(and__196_2))))}),clojure.ns_map.apply(null,[ns_2])])))})))}).apply(null,[]);
@@ -1821,7 +1821,7 @@ return ((new clojure.lang.PersistentArrayMap(clojure.to_array.apply(null,[keyval
 //---
 (function __clojure_fn_4871(){
 return (clojure.JS.def(clojure,"nthrest",(function __clojure_fn_4871_nthrest_4873(coll_1,n_2){
-var n_3,and__196_5,xs_4;
+var and__196_5,n_3,xs_4;
 return (((function __loop(){var _rtn,_cnt;(n_3=n_2),
 (xs_4=clojure.seq.apply(null,[coll_1]));do{_cnt=0;
 _rtn=((((and__196_5=xs_4),
@@ -1846,12 +1846,12 @@ return (clojure.instance_QMARK_.apply(null,[clojure.lang.Keyword,x_1]))})))}).ap
 //---
 (function __clojure_fn_4893(){
 return (clojure.JS.def(clojure,"destructure",(function __clojure_fn_4893_destructure_4895(bindings_1){
-var process_entry_4,pb_3,bmap_2;
+var bmap_2,process_entry_4,pb_3;
 return (((bmap_2=clojure.apply.apply(null,[clojure.array_map,bindings_1])),
 (pb_3=(function __clojure_fn_4893_destructure_4895_pb_4897(bvec_1,b_2,v_3){
-var pvec_4,pmap_5,pb_0=arguments.callee;
+var pmap_5,pvec_4,pb_0=arguments.callee;
 return (((pvec_4=(function __clojure_fn_4893_destructure_4895_pb_4897_pvec_4898(bvec_1,b_2,val_3){
-var firstb_9,seen_rest_QMARK__8,bs_7,n_6,gvec_4,ret_5;
+var seen_rest_QMARK__8,bs_7,ret_5,gvec_4,firstb_9,n_6;
 return (((gvec_4=clojure.gensym.apply(null,["vec__"])),
 ((function __loop(){var _rtn,_cnt;(ret_5=clojure.conj.apply(null,[clojure.conj.apply(null,[bvec_1,gvec_4]),val_3])),
 (n_6=(0)),
@@ -1860,7 +1860,7 @@ return (((gvec_4=clojure.gensym.apply(null,["vec__"])),
 _rtn=((clojure.seq.apply(null,[bs_7]))?(((firstb_9=clojure.first.apply(null,[bs_7])),
 ((clojure.lang.Util.equal(firstb_9,clojure.symbol("&")))?((_cnt=1,_rtn=[pb_0.apply(null,[ret_5,clojure.second.apply(null,[bs_7]),clojure.list.apply(null,[clojure.symbol("clojure/nthrest"),gvec_4,n_6])]),n_6,clojure.rrest.apply(null,[bs_7]),true],ret_5=_rtn[0],n_6=_rtn[1],bs_7=_rtn[2],seen_rest_QMARK__8=_rtn[3])):(((clojure.lang.Util.equal(firstb_9,clojure.keyword("","as")))?(pb_0.apply(null,[ret_5,clojure.second.apply(null,[bs_7]),gvec_4])):(((clojure.keyword("","else"))?(((seen_rest_QMARK__8)?((function __throw(){throw clojure.lang.RT.makeException("Unsupported binding form, only :as can follow & parameter")})()):((_cnt=1,_rtn=[pb_0.apply(null,[ret_5,firstb_9,clojure.list.apply(null,[clojure.symbol("clojure/nth"),gvec_4,n_6,null])]),clojure.lang.Numbers.inc(n_6),clojure.rest.apply(null,[bs_7]),seen_rest_QMARK__8],ret_5=_rtn[0],n_6=_rtn[1],bs_7=_rtn[2],seen_rest_QMARK__8=_rtn[3])))):(null)))))))):(ret_5))}while(_cnt);return _rtn;})())))})),
 (pmap_5=(function __clojure_fn_4893_destructure_4895_pb_4897_pmap_4901(bvec_1,b_2,v_3){
-var or__202_4,bb_8,bes_7,bk_9,gmap_4,ret_6,has_default_10,defaults_5;
+var defaults_5,ret_6,bes_7,bk_9,gmap_4,has_default_10,or__202_4,bb_8;
 return (((gmap_4=((or__202_4=clojure.keyword("","as").apply(null,[b_2])),
 ((or__202_4)?(or__202_4):(clojure.gensym.apply(null,["map__"]))))),
 (defaults_5=clojure.keyword("","or").apply(null,[b_2])),
@@ -1988,10 +1988,10 @@ return (clojure.JS.def(clojure,"find_doc",(function __clojure_fn_5118_find_doc_5
 var iter__1247_3,re_2;
 return (((re_2=clojure.re_pattern.apply(null,[re_string_1])),
 clojure.dorun.apply(null,[((iter__1247_3=(function __clojure_fn_5118_find_doc_5120_iter_5122_5126(s__5123_1){
-var _cnt,_rtn,iter__1239_5,iterys__1245_3,ns_2,fs__1246_4,iter__5122_0=arguments.callee;
+var _cnt,_rtn,iterys__1245_3,iter__1239_5,ns_2,fs__1246_4,iter__5122_0=arguments.callee;
 do{_cnt=0;_rtn=((clojure.seq.apply(null,[s__5123_1]))?(((ns_2=clojure.first.apply(null,[s__5123_1])),
 ((true)?(((iterys__1245_3=(function __clojure_fn_5118_find_doc_5120_iter_5122_5126_iter_5124_5127(s__5125_1){
-var _cnt,_rtn,or__202_4,v_2,and__196_3,iter__5124_0=arguments.callee;
+var _cnt,_rtn,and__196_3,v_2,or__202_4,iter__5124_0=arguments.callee;
 do{_cnt=0;_rtn=((clojure.seq.apply(null,[s__5125_1]))?(((v_2=clojure.first.apply(null,[s__5125_1])),
 ((((and__196_3=clojure.keyword("","doc").apply(null,[clojure.meta.apply(null,[v_2])])),
 ((and__196_3)?(((or__202_4=clojure.re_find.apply(null,[clojure.re_matcher.apply(null,[re_2,clojure.keyword("","doc").apply(null,[clojure.meta.apply(null,[v_2])])])])),
@@ -2094,8 +2094,8 @@ return ((s_1).substring(start_2,end_3))})))}).apply(null,[]);
 //---
 (function __clojure_fn_5238(){
 return (clojure.JS.def(clojure,"max_key",clojure.JS.variadic(3,(function __clojure_fn_5238_max_key_5240(k_1,x_2,y_3){switch(arguments.length){
-case 2:return (x_2)
-case 3:return (((clojure.lang.Numbers.gt(k_1.apply(null,[x_2]),k_1.apply(null,[y_3])))?(x_2):(y_3)))}
+case 3:return (((clojure.lang.Numbers.gt(k_1.apply(null,[x_2]),k_1.apply(null,[y_3])))?(x_2):(y_3)))
+case 2:return (x_2)}
 var more_4=clojure.JS.rest_args(this,arguments,3);
 return (clojure.reduce.apply(null,[(function __clojure_fn_5238_max_key_5240_fn_5244(p1__5236_1,p2__5237_2){
 return (clojure.max_key.apply(null,[k_1,p1__5236_1,p2__5237_2]))}),clojure.max_key.apply(null,[k_1,x_2,y_3]),more_4]))}))))}).apply(null,[]);
@@ -2105,8 +2105,8 @@ return (clojure.max_key.apply(null,[k_1,p1__5236_1,p2__5237_2]))}),clojure.max_k
 //---
 (function __clojure_fn_5251(){
 return (clojure.JS.def(clojure,"min_key",clojure.JS.variadic(3,(function __clojure_fn_5251_min_key_5253(k_1,x_2,y_3){switch(arguments.length){
-case 2:return (x_2)
-case 3:return (((clojure.lang.Numbers.lt(k_1.apply(null,[x_2]),k_1.apply(null,[y_3])))?(x_2):(y_3)))}
+case 3:return (((clojure.lang.Numbers.lt(k_1.apply(null,[x_2]),k_1.apply(null,[y_3])))?(x_2):(y_3)))
+case 2:return (x_2)}
 var more_4=clojure.JS.rest_args(this,arguments,3);
 return (clojure.reduce.apply(null,[(function __clojure_fn_5251_min_key_5253_fn_5257(p1__5249_1,p2__5250_2){
 return (clojure.min_key.apply(null,[k_1,p1__5249_1,p2__5250_2]))}),clojure.min_key.apply(null,[k_1,x_2,y_3]),more_4]))}))))}).apply(null,[]);
@@ -2118,7 +2118,7 @@ return (clojure.min_key.apply(null,[k_1,p1__5249_1,p2__5250_2]))}),clojure.min_k
 return (clojure.JS.def(clojure,"distinct",(function __clojure_fn_5262_distinct_5264(coll_1){
 var step_2;
 return (((step_2=(function __clojure_fn_5262_distinct_5264_step_5267(p__5266_1,seen_2){
-var _cnt,_rtn,r_5,xs_6,f_4,vec__5268_3,step_0=arguments.callee;
+var _cnt,_rtn,f_4,vec__5268_3,xs_6,r_5,step_0=arguments.callee;
 do{_cnt=0;_rtn=((vec__5268_3=p__5266_1),
 (f_4=clojure.nth.apply(null,[vec__5268_3,(0),null])),
 (r_5=clojure.nthrest.apply(null,[vec__5268_3,(1)])),
@@ -2141,7 +2141,7 @@ var temp__1450_3,e_4;
 return (((temp__1450_3=clojure.find.apply(null,[smap_1,clojure.nth.apply(null,[v_1,i_2])])),
 ((temp__1450_3)?(((e_4=temp__1450_3),
 clojure.assoc.apply(null,[v_1,i_2,clojure.val.apply(null,[e_4])]))):(v_1))))}),coll_2,clojure.range.apply(null,[clojure.count.apply(null,[coll_2])])])):(clojure.map.apply(null,[(function __clojure_fn_5293_replace_5295_fn_5300(p1__5292_1){
-var temp__1450_2,e_3;
+var e_3,temp__1450_2;
 return (((temp__1450_2=clojure.find.apply(null,[smap_1,p1__5292_1])),
 ((temp__1450_2)?(((e_3=temp__1450_2),
 clojure.val.apply(null,[e_3]))):(p1__5292_1))))}),coll_2]))))})))}).apply(null,[]);
@@ -2161,14 +2161,14 @@ return (test_2.apply(null,[((sc_1).comparator()).compare((sc_1).entryKey(e_1),ke
 //---
 (function __clojure_fn_5327(){
 return (clojure.JS.def(clojure,"subseq",(function __clojure_fn_5327_subseq_5329(sc_1,start_test_2,start_key_3,end_test_4,end_key_5){switch(arguments.length){
-case 3:var s_8,e_7,temp__1455_5,include_4,vec__5331_6,test_2=arguments[1],key_3=arguments[2];
+case 3:var e_7,vec__5331_6,s_8,temp__1455_5,include_4,test_2=arguments[1],key_3=arguments[2];
 return (((include_4=clojure.bound_fn.apply(null,[sc_1,test_2,key_3])),
 ((clojure.hash_set(clojure._GT_,clojure._GT__EQ_).apply(null,[test_2]))?(((temp__1455_5=(sc_1).seqFrom(key_3,true)),
 ((temp__1455_5)?(((vec__5331_6=temp__1455_5),
 (e_7=clojure.nth.apply(null,[vec__5331_6,(0),null])),
 (s_8=vec__5331_6),
 ((include_4.apply(null,[e_7]))?(s_8):(clojure.rest.apply(null,[s_8]))))):(null)))):(clojure.take_while.apply(null,[include_4,(sc_1).seq(true)])))))}
-var vec__5333_7,e_8,temp__1455_6,s_9;
+var temp__1455_6,vec__5333_7,e_8,s_9;
 return (((temp__1455_6=(sc_1).seqFrom(start_key_3,true)),
 ((temp__1455_6)?(((vec__5333_7=temp__1455_6),
 (e_8=clojure.nth.apply(null,[vec__5333_7,(0),null])),
@@ -2180,14 +2180,14 @@ clojure.take_while.apply(null,[clojure.bound_fn.apply(null,[sc_1,end_test_4,end_
 //---
 (function __clojure_fn_5336(){
 return (clojure.JS.def(clojure,"rsubseq",(function __clojure_fn_5336_rsubseq_5338(sc_1,start_test_2,start_key_3,end_test_4,end_key_5){switch(arguments.length){
-case 3:var include_4,temp__1455_5,s_8,e_7,vec__5340_6,test_2=arguments[1],key_3=arguments[2];
+case 3:var vec__5340_6,e_7,temp__1455_5,include_4,s_8,test_2=arguments[1],key_3=arguments[2];
 return (((include_4=clojure.bound_fn.apply(null,[sc_1,test_2,key_3])),
 ((clojure.hash_set(clojure._LT_,clojure._LT__EQ_).apply(null,[test_2]))?(((temp__1455_5=(sc_1).seqFrom(key_3,false)),
 ((temp__1455_5)?(((vec__5340_6=temp__1455_5),
 (e_7=clojure.nth.apply(null,[vec__5340_6,(0),null])),
 (s_8=vec__5340_6),
 ((include_4.apply(null,[e_7]))?(s_8):(clojure.rest.apply(null,[s_8]))))):(null)))):(clojure.take_while.apply(null,[include_4,(sc_1).seq(false)])))))}
-var vec__5342_7,temp__1455_6,s_9,e_8;
+var temp__1455_6,e_8,s_9,vec__5342_7;
 return (((temp__1455_6=(sc_1).seqFrom(end_key_5,false)),
 ((temp__1455_6)?(((vec__5342_7=temp__1455_6),
 (e_8=clojure.nth.apply(null,[vec__5342_7,(0),null])),
@@ -2246,10 +2246,10 @@ return (clojure.JS.def(clojure,"empty",(function __clojure_fn_5394_empty_5396(co
 return ((coll_1).empty())})))}).apply(null,[]);
 // Skipping: (defmacro amap "Maps an expression across an array a, using an index named idx, and\n  return value named ret, initialized to a clone of a, then setting each element of\n  ret to the evaluation of expr, returning the new array ret." [a idx ret expr] (clojure/concat (clojure/list (quote clojure/let)) (clojure/list (clojure/apply clojure/vector (clojure/concat (clojure/list (quote a__5400)) (clojure/list a) (clojure/list ret) (clojure/list (clojure/concat (clojure/list (quote clojure/aclone)) (clojure/list (quote a__5400))))))) (clojure/list (clojure/concat (clojure/list (quote clojure/loop)) (clojure/list (clojure/apply clojure/vector (clojure/concat (clojure/list idx) (clojure/list (clojure/concat (clojure/list (quote clojure/int)) (clojure/list 0)))))) (clojure/list (clojure/concat (clojure/list (quote if)) (clojure/list (clojure/concat (clojure/list (quote clojure/<)) (clojure/list idx) (clojure/list (clojure/concat (clojure/list (quote clojure/alength)) (clojure/list (quote a__5400)))))) (clojure/list (clojure/concat (clojure/list (quote do)) (clojure/list (clojure/concat (clojure/list (quote clojure/aset)) (clojure/list ret) (clojure/list idx) (clojure/list expr))) (clojure/list (clojure/concat (clojure/list (quote recur)) (clojure/list (clojure/concat (clojure/list (quote clojure/unchecked-inc)) (clojure/list idx))))))) (clojure/list ret)))))))
 // Skipping: (defmacro areduce "Reduces an expression across an array a, using an index named idx,\n  and return value named ret, initialized to init, setting ret to the evaluation of expr at\n  each step, returning ret." [a idx ret init expr] (clojure/concat (clojure/list (quote clojure/let)) (clojure/list (clojure/apply clojure/vector (clojure/concat (clojure/list (quote a__5407)) (clojure/list a)))) (clojure/list (clojure/concat (clojure/list (quote clojure/loop)) (clojure/list (clojure/apply clojure/vector (clojure/concat (clojure/list idx) (clojure/list (clojure/concat (clojure/list (quote clojure/int)) (clojure/list 0))) (clojure/list ret) (clojure/list init)))) (clojure/list (clojure/concat (clojure/list (quote if)) (clojure/list (clojure/concat (clojure/list (quote clojure/<)) (clojure/list idx) (clojure/list (clojure/concat (clojure/list (quote clojure/alength)) (clojure/list (quote a__5407)))))) (clojure/list (clojure/concat (clojure/list (quote recur)) (clojure/list (clojure/concat (clojure/list (quote clojure/unchecked-inc)) (clojure/list idx))) (clojure/list expr))) (clojure/list ret)))))))
-// Skipping: (defn float-array "Creates an array of floats" {:inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/float_array)) args)), :inline-arities #{1 2}} ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
-// Skipping: (defn double-array "Creates an array of doubles" {:inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/double_array)) args)), :inline-arities #{1 2}} ([size-or-seq] (. clojure.lang.Numbers double_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers double_array size init-val-or-seq)))
-// Skipping: (defn int-array "Creates an array of ints" {:inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/int_array)) args)), :inline-arities #{1 2}} ([size-or-seq] (. clojure.lang.Numbers int_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
-// Skipping: (defn long-array "Creates an array of ints" {:inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/long_array)) args)), :inline-arities #{1 2}} ([size-or-seq] (. clojure.lang.Numbers long_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers long_array size init-val-or-seq)))
+// Skipping: (defn float-array "Creates an array of floats" {:inline-arities #{1 2}, :inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/float_array)) args))} ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
+// Skipping: (defn double-array "Creates an array of doubles" {:inline-arities #{1 2}, :inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/double_array)) args))} ([size-or-seq] (. clojure.lang.Numbers double_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers double_array size init-val-or-seq)))
+// Skipping: (defn int-array "Creates an array of ints" {:inline-arities #{1 2}, :inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/int_array)) args))} ([size-or-seq] (. clojure.lang.Numbers int_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
+// Skipping: (defn long-array "Creates an array of ints" {:inline-arities #{1 2}, :inline (fn [& args] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/long_array)) args))} ([size-or-seq] (. clojure.lang.Numbers long_array size-or-seq)) ([size init-val-or-seq] (. clojure.lang.Numbers long_array size init-val-or-seq)))
 // Skipping: (definline floats "Casts to float[]" [xs] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/floats)) (clojure/list xs)))
 // Skipping: (definline ints "Casts to int[]" [xs] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/ints)) (clojure/list xs)))
 // Skipping: (definline doubles "Casts to double[]" [xs] (clojure/concat (clojure/list (quote .)) (clojure/list (quote clojure.lang.Numbers)) (clojure/list (quote clojure/doubles)) (clojure/list xs)))
@@ -2305,7 +2305,7 @@ clojure.not_empty.apply(null,[((s_3)?(clojure.cons.apply(null,[s_3,i_2])):(i_2))
 //---
 (function __clojure_fn_5505(){
 return (clojure.JS.def(clojure,"supers",(function __clojure_fn_5505_supers_5507(class_1){
-var ret_2,bs_5,c_4,cs_3;
+var c_4,ret_2,cs_3,bs_5;
 return (((function __loop(){var _rtn,_cnt;(ret_2=clojure.set.apply(null,[clojure.bases.apply(null,[class_1])])),
 (cs_3=ret_2);do{_cnt=0;
 _rtn=((clojure.seq.apply(null,[cs_3]))?(((c_4=clojure.first.apply(null,[cs_3])),
@@ -2319,7 +2319,7 @@ _rtn=((clojure.seq.apply(null,[cs_3]))?(((c_4=clojure.first.apply(null,[cs_3])),
 return (clojure.JS.def(clojure,"isa_QMARK_",(function __clojure_fn_5512_isa_QMARK_5514(h_1,child_2,parent_3){switch(arguments.length){
 case 2:var child_1=arguments[0],parent_2=arguments[1];
 return (clojure.isa_QMARK_.apply(null,[clojure.global_hierarchy,child_1,parent_2]))}
-var or__202_4,or__202_7,ret_11,and__196_9,and__196_6,or__202_5,and__196_7,and__196_5,i_12,and__196_8,or__202_13,or__202_6,and__196_10;
+var or__202_13,and__196_5,and__196_7,and__196_9,or__202_5,or__202_4,ret_11,and__196_8,and__196_6,or__202_7,and__196_10,i_12,or__202_6;
 return (((or__202_4=clojure.lang.Util.equal(child_2,parent_3)),
 ((or__202_4)?(or__202_4):(((or__202_5=((and__196_5=clojure.class_QMARK_.apply(null,[parent_3])),
 ((and__196_5)?(((and__196_6=clojure.class_QMARK_.apply(null,[child_2])),
@@ -2375,7 +2375,7 @@ return (clojure.JS.def(clojure,"derive",(function __clojure_fn_5543_derive_5545(
 case 2:var tag_1=arguments[0],parent_2=arguments[1];
 return (clojure.alter_var_root.apply(null,[clojure._var_global_hierarchy,clojure.derive,tag_1,parent_2]),
 null)}
-var tp_4,tf_7,ta_6,and__196_5,td_5,or__202_4,or__202_8;
+var or__202_4,tp_4,and__196_5,tf_7,td_5,ta_6,or__202_8;
 return (((clojure.not_EQ_.apply(null,[tag_2,parent_3]))?(null):((function __throw(){throw clojure.lang.RT.makeException(clojure.str.apply(null,["Assert failed: ",clojure.pr_str.apply(null,[clojure.JS.lit_list([clojure.symbol("not="),clojure.symbol("tag"),clojure.symbol("parent")])])]))})())),
 ((((or__202_4=clojure.class_QMARK_.apply(null,[tag_2])),
 ((or__202_4)?(or__202_4):(((and__196_5=clojure.instance_QMARK_.apply(null,[clojure.lang.Named,tag_2])),
@@ -2401,7 +2401,7 @@ return (clojure.JS.def(clojure,"underive",(function __clojure_fn_5556_underive_5
 case 2:var tag_1=arguments[0],parent_2=arguments[1];
 return (clojure.alter_var_root.apply(null,[clojure._var_global_hierarchy,clojure.underive,tag_1,parent_2]),
 null)}
-var ta_6,tf_7,tp_4,td_5;
+var tf_7,tp_4,td_5,ta_6;
 return (((tp_4=clojure.keyword("","parents").apply(null,[h_1])),
 (td_5=clojure.keyword("","descendants").apply(null,[h_1])),
 (ta_6=clojure.keyword("","ancestors").apply(null,[h_1])),
@@ -2417,7 +2417,7 @@ return (clojure.assoc.apply(null,[ret_1,k_2,clojure.reduce.apply(null,[clojure.d
 return (clojure.JS.def(clojure,"distinct_QMARK_",clojure.JS.variadic(2,(function __clojure_fn_5569_distinct_QMARK_5571(x_1,y_2){switch(arguments.length){
 case 1:return (true)
 case 2:return (clojure.not.apply(null,[clojure.lang.Util.equal(x_1,y_2)]))}
-var x_14,vec__5577_6,etc_15,vec__5578_13,etc_8,G__5576_11,G__5576_5,xs_9,x_7,xs_16,s_4,s_12,s_10,more_3=clojure.JS.rest_args(this,arguments,2);
+var G__5576_11,etc_8,s_4,xs_9,vec__5578_13,x_7,G__5576_5,x_14,etc_15,s_12,xs_16,s_10,vec__5577_6,more_3=clojure.JS.rest_args(this,arguments,2);
 return (((clojure.not_EQ_.apply(null,[x_1,y_2]))?(((s_4=clojure.hash_set(y_2,x_1)),
 (G__5576_5=more_3),
 (vec__5577_6=G__5576_5),
@@ -2488,7 +2488,7 @@ return (((v__1728_1=clojure.JS.def(clojure,"_STAR_loading_verbosely_STAR_",null)
 //---
 (function __clojure_fn_5647(){
 return (clojure.JS.def(clojure,"throw_if",clojure.JS.variadic(2,(function __clojure_fn_5647_throw_if_5649(pred_1,fmt_2){
-var raw_trace_6,exception_5,message_4,boring_QMARK__7,trace_8,args_3=clojure.JS.rest_args(this,arguments,2);
+var message_4,exception_5,trace_8,boring_QMARK__7,raw_trace_6,args_3=clojure.JS.rest_args(this,arguments,2);
 return (((pred_1)?(((message_4=clojure.apply.apply(null,[clojure.format,fmt_2,args_3])),
 (exception_5=clojure.lang.RT.makeException(message_4)),
 (raw_trace_6=(exception_5).getStackTrace()),
@@ -2503,7 +2503,7 @@ return (clojure.not_EQ_.apply(null,[clojure.JS.getOrRun(p1__5646_1,"getMethodNam
 //---
 (function __clojure_fn_5656(){
 return (clojure.JS.def(clojure,"libspec_QMARK_",(function __clojure_fn_5656_libspec_QMARK_5658(x_1){
-var or__202_2,or__202_4,and__196_3;
+var and__196_3,or__202_4,or__202_2;
 return (((or__202_2=clojure.symbol_QMARK_.apply(null,[x_1])),
 ((or__202_2)?(or__202_2):(((and__196_3=clojure.vector_QMARK_.apply(null,[x_1])),
 ((and__196_3)?(((or__202_4=clojure.nil_QMARK_.apply(null,[clojure.second.apply(null,[x_1])])),
@@ -2528,7 +2528,7 @@ return (clojure.str.apply(null,["/",((clojure.name.apply(null,[lib_1])).replace(
 //---
 (function __clojure_fn_5674(){
 return (clojure.JS.def(clojure,"root_resource",(function __clojure_fn_5674_root_resource_5676(lib_1){
-var i_3,leaf_4,d_2;
+var leaf_4,i_3,d_2;
 return (((d_2=clojure.root_directory.apply(null,[lib_1])),
 (i_3=clojure.lang.Numbers.inc((d_2).lastIndexOf(clojure.lang.RT.intCast("/")))),
 (leaf_4=(d_2).substring(i_3)),
@@ -2570,7 +2570,7 @@ finally{clojure.lang.Var.popThreadBindings()}return _rtn})())}).apply(null,[])])
 //---
 (function __clojure_fn_5709(){
 return (clojure.JS.def(clojure,"load_lib",clojure.JS.variadic(2,(function __clojure_fn_5709_load_lib_5711(prefix_1,lib_2){
-var loaded_13,or__202_15,map__5713_6,and__196_19,reload_7,load_14,and__196_19,require_9,as_8,verbose_11,lib_4,opts_5,use_12,list__794_19,opt_20,filter_opts_16,reload_all_10,or__202_14,or__202_17,or__202_15,and__196_4,need_ns_15,options_3=clojure.JS.rest_args(this,arguments,2);
+var require_9,verbose_11,and__196_19,need_ns_15,use_12,or__202_15,opts_5,and__196_4,opt_20,lib_4,reload_7,as_8,list__794_19,and__196_19,filter_opts_16,or__202_17,or__202_15,map__5713_6,reload_all_10,load_14,loaded_13,or__202_14,options_3=clojure.JS.rest_args(this,arguments,2);
 return (clojure.throw_if.apply(null,[((and__196_4=prefix_1),
 ((and__196_4)?(clojure.lang.Numbers.isPos((clojure.name.apply(null,[lib_2])).indexOf(clojure.lang.RT.intCast(".")))):(and__196_4))),"lib names inside prefix lists must not contain periods"]),
 ((lib_4=((prefix_1)?(clojure.symbol.apply(null,[clojure.str.apply(null,[prefix_1,".",lib_2])])):(lib_2))),
@@ -2611,7 +2611,7 @@ finally{clojure.lang.Var.popThreadBindings()}return _rtn})()))}))))}).apply(null
 //---
 (function __clojure_fn_5716(){
 return (clojure.JS.def(clojure,"load_libs",clojure.JS.variadic(0,(function __clojure_fn_5716_load_libs_5718(){
-var flags_2,arg_6,arg_11,opts_3,args_9,args_4,list__794_10,vec__5720_7,prefix_8,list__794_5,args_1=clojure.JS.rest_args(this,arguments,0);
+var prefix_8,arg_11,flags_2,vec__5720_7,list__794_5,arg_6,args_9,opts_3,list__794_10,args_4,args_1=clojure.JS.rest_args(this,arguments,0);
 return (((flags_2=clojure.filter.apply(null,[clojure.keyword_QMARK_,args_1])),
 (opts_3=clojure.interleave.apply(null,[flags_2,clojure.repeat.apply(null,[true])])),
 (args_4=clojure.filter.apply(null,[clojure.complement.apply(null,[clojure.keyword_QMARK_]),args_1])),
@@ -2655,7 +2655,7 @@ return (clojure.deref.apply(null,[clojure._STAR_loaded_libs_STAR_]))})))}).apply
 //---
 (function __clojure_fn_5741(){
 return (clojure.JS.def(clojure,"load",clojure.JS.variadic(0,(function __clojure_fn_5741_load_5743(){
-var list__794_2,path_4,path_3,paths_1=clojure.JS.rest_args(this,arguments,0);
+var path_3,list__794_2,path_4,paths_1=clojure.JS.rest_args(this,arguments,0);
 return (((function __loop(){var _rtn,_cnt;(list__794_2=clojure.seq.apply(null,[paths_1]));do{_cnt=0;
 _rtn=((list__794_2)?(((path_3=clojure.first.apply(null,[list__794_2])),
 ((path_4=(((path_3).startsWith("/"))?(path_3):(clojure.str.apply(null,[clojure.root_directory.apply(null,[clojure.ns_name.apply(null,[clojure._STAR_ns_STAR_])]),"/",path_3])))),
@@ -2680,7 +2680,7 @@ return (clojure.reduce.apply(null,[clojure.get,m_1,ks_2]))})))}).apply(null,[]);
 //---
 (function __clojure_fn_5756(){
 return (clojure.JS.def(clojure,"assoc_in",(function __clojure_fn_5756_assoc_in_5759(m_1,p__5758_2,v_3){
-var k_5,vec__5761_4,ks_6;
+var vec__5761_4,ks_6,k_5;
 return (((vec__5761_4=p__5758_2),
 (k_5=clojure.nth.apply(null,[vec__5761_4,(0),null])),
 (ks_6=clojure.nthrest.apply(null,[vec__5761_4,(1)])),
@@ -2691,7 +2691,7 @@ return (((vec__5761_4=p__5758_2),
 //---
 (function __clojure_fn_5764(){
 return (clojure.JS.def(clojure,"update_in",clojure.JS.variadic(3,(function __clojure_fn_5764_update_in_5767(m_1,p__5766_2,f_3){
-var k_6,vec__5769_5,ks_7,args_4=clojure.JS.rest_args(this,arguments,3);
+var vec__5769_5,ks_7,k_6,args_4=clojure.JS.rest_args(this,arguments,3);
 return (((vec__5769_5=p__5766_2),
 (k_6=clojure.nth.apply(null,[vec__5769_5,(0),null])),
 (ks_7=clojure.nthrest.apply(null,[vec__5769_5,(1)])),
@@ -2830,7 +2830,7 @@ return (clojure.JS.def(clojure,"_STAR_print_level_STAR_",null))}).apply(null,[])
 //---
 (function __clojure_fn_5922(){
 return (clojure.JS.def(clojure,"print_sequential",(function __clojure_fn_5922_print_sequential_5924(begin_1,print_one_2,sep_3,end_4,sequence_5,w_6){
-var xs_18,G__5931_11,vec__5929_18,print_length_17,x_13,xs_14,and__196_9,vec__5933_16,G__5927_11,xs_20,print_length_15,vec__5928_12,and__196_7,x_19,x_13,xs_14,vec__5932_12,G__5927_16,xs_10,print_length_21,x_17,temp__1455_9,G__5931_15;
+var x_13,print_length_17,x_13,vec__5928_12,and__196_9,temp__1455_9,vec__5933_16,G__5931_11,print_length_15,xs_10,xs_14,and__196_7,G__5931_15,xs_14,x_19,xs_20,vec__5929_18,xs_18,G__5927_11,G__5927_16,vec__5932_12,print_length_21,x_17;
 return (clojure.lang.Var.pushThreadBindings(clojure.hash_map.apply(null,[clojure._var__STAR_print_level_STAR_,((and__196_7=clojure._STAR_print_level_STAR_),
 ((and__196_7)?(clojure.lang.Numbers.dec(clojure._STAR_print_level_STAR_)):(and__196_7)))])),
 (function __try(){try{var _rtn=(((((and__196_9=clojure._STAR_print_level_STAR_),
@@ -2869,7 +2869,7 @@ finally{clojure.lang.Var.popThreadBindings()}return _rtn})())})))}).apply(null,[
 //---
 (function __clojure_fn_5936(){
 return (clojure.JS.def(clojure,"print_meta",(function __clojure_fn_5936_print_meta_5938(o_1,w_2){
-var temp__1455_3,and__196_5,and__196_6,m_4,and__196_5;
+var and__196_5,and__196_5,m_4,temp__1455_3,and__196_6;
 return (((temp__1455_3=clojure.meta.apply(null,[o_1])),
 ((temp__1455_3)?(((m_4=temp__1455_3),
 ((((and__196_5=clojure._STAR_print_meta_STAR_),
@@ -2996,7 +2996,7 @@ return (clojure.JS.def(clojure,"char_escape_string",clojure.hash_map("\"","\\\""
 //---
 (function __clojure_fn_6028(){
 return ((clojure.print_method).addMethod(java.lang.String,(function __clojure_fn_6028_fn_6030(s_1,w_2){
-var e_6,n__827_3,c_5,n_4;
+var c_5,n_4,n__827_3,e_6;
 return (((clojure._STAR_print_readably_STAR_)?((w_2).append("\""),
 ((n__827_3=clojure.lang.RT.intCast(clojure.count.apply(null,[s_1]))),
 ((function __loop(){var _rtn,_cnt;(n_4=clojure.lang.RT.intCast((0)));do{_cnt=0;
@@ -3091,7 +3091,7 @@ return ((w_2).write(clojure.str.apply(null,[b_1])),
 //---
 (function __clojure_fn_6107(){
 return ((clojure.print_method).addMethod(java.util.regex.Pattern,(function __clojure_fn_6107_fn_6109(p_1,w_2){
-var vec__6114_11,r_13,r_6,qmode_10,G__6112_9,G__6112_3,qmode_15,vec__6113_4,c2_17,vec__6115_16,r2_18,c_12,s_7,s_14,c_5,qmode_8;
+var c_5,s_7,vec__6113_4,c2_17,vec__6115_16,r_13,G__6112_9,vec__6114_11,qmode_10,r2_18,c_12,s_14,r_6,G__6112_3,qmode_8,qmode_15;
 return ((w_2).write("#\""),
 ((G__6112_3=clojure.seq.apply(null,[(p_1).pattern()])),
 (vec__6113_4=G__6112_3),

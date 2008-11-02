@@ -36,19 +36,22 @@
         border: none;
         width: 90%;
         height: 6em;
+        background: #f3f3f3;
       }
     </style>
-    <script type="text/javascript" src="clj.js"></script>
-    <script type="text/javascript" src="boot.js"></script>
+    <script type="text/javascript" src="../clj.js"></script>
+    <script type="text/javascript" src="../boot.js"></script>
     <script type="text/javascript" src="repl.js"></script>
   </head>
   <body>
     <div id="log">
       <div class="pad"></div>
     </div>
-    <div class="ns cg">user=&gt;&nbsp;</div>
+    <div class="ns cg">
+      user=&gt;&nbsp;<br />
+      <img id="status" src="blank.gif">
+    </div>
     <textarea id="input"></textarea>
-    <div id="status"></div>
     <div id="scripts"></div>
   </body>
 </html>
