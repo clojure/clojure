@@ -22,15 +22,15 @@
 
 (def elems)
 (def lastval)
-(def *print-color* nil)
+(def *print-class* nil)
 
 (defn repl-print [text]
   (let [log (:log elems)]
     (doseq line (.split text #"\n")
       (append-dom log
-        [:div {:class "cg"
-               :style (when *print-color*
-                        (str "color:" *print-color*))}
+        [:div {:class (str "cg "
+                           (when *print-class*
+                             (str " " *print-class*)))}
          line]))
     (set! (.scrollTop log) (.scrollHeight log))))
 
@@ -44,9 +44,9 @@
   (set! (-> :scripts elems .innerHTML) "")
   (set! (-> :input elems .value) ""))
 
-(defn print-err [m]
-  (binding [*print-color* "#a00"]
-    (println m)))
+(defmacro print-with-class [c m]
+  `(binding [*print-class* ~c]
+     (println ~m)))
 
 (defn show-state [url]
   (set! (-> :status elems .src) url))
@@ -58,13 +58,13 @@
     (= status "error") (do
                          (postexpr)
                          (show-state "blank.gif")
-                         (print-err msg))
+                         (print-with-class "err" msg))
     (= status "compiled") (do
                             (postexpr)
                             (setTimeout #(show-state "blank.gif") 0))))
 
 (defn err [e]
-  (print-err e)
+  (print-with-class "err" e)
   (set! *e e))
 
 (set! *print-length* 103)

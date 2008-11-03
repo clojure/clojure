@@ -29,6 +29,7 @@
 
 (def *debug-fn-names* true)
 (def *debug-comments* true)
+(def *eval-defmacro* true)
 
 ; used internally
 (def *has-recur*)
@@ -278,7 +279,13 @@
          "return _rtn})()"]))
 
 
-(def skip-set '#{;-- implemented directly in clj.js
+(defmulti toclj class)
+(defmethod toclj clojure.lang.Compiler$KeywordExpr  [e] (.k e))
+(defmethod toclj clojure.lang.Compiler$StringExpr   [e] (.str e))
+(defmethod toclj clojure.lang.Compiler$ConstantExpr [e] (.v e))
+
+
+(def skip-def '#{;-- implemented directly in clj.js
                  seq instance? assoc apply refer first rest import
                  hash-map count find keys vals get class contains?
                  print-method class? number? string? integer? nth
@@ -286,6 +293,8 @@
                  ;-- not supported yet
                  make-array to-array-2d re-pattern re-matcher re-groups
                  re-seq re-matches re-find format
+                 ;-- macros defined without using defmacro
+                 let loop fn defn defmacro
                  ;-- will probably never be supported in clojurescript
                  eval resolve ns-resolve await await-for macroexpand
                  macroexpand-1 load-reader load-string special-symbol?
@@ -297,26 +306,31 @@
 
 (def skip-method #{"java.lang.Class"})
 
-(defn skip-defs [expr]
-  (let [m ^(.var expr)]
-    (or (:macro m) (skip-set (:name m)))))
-
 (defn formtojs [f]
   (when-not (and (coll? f) (= 'definline (first f)))
     (binding [*allow-unresolved-vars* true]
       (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
-            mainexpr (-> expr .fexpr .methods first .body .exprs first)]
-        (when-not (or (and (instance? Compiler$DefExpr mainexpr)
-                           (skip-defs mainexpr))
-                      (and (instance? Compiler$InstanceMethodExpr mainexpr)
-                           (or (= "setMacro" (.methodName mainexpr))
-                               (and (= "addMethod" (.methodName mainexpr))
-                                    (skip-method (tojs (first (.args mainexpr))
-                                                       nil)))))
-                      (and (instance? Compiler$BodyExpr mainexpr)
-                           (instance? Compiler$DefExpr (first (.exprs mainexpr)))
-                           (skip-defs (first (.exprs mainexpr)))))
-          (tojs expr {:localmap {}}))))))
+            mainexpr (-> expr .fexpr .methods first .body .exprs first)
+            defmacro?  (and (instance? Compiler$BodyExpr mainexpr)
+                            (instance? Compiler$DefExpr (first (.exprs mainexpr)))
+                            (instance? Compiler$InstanceMethodExpr (second (.exprs mainexpr)))
+                            (= "setMacro" (.methodName (second (.exprs mainexpr)))))]
+        (if defmacro?
+          (when *eval-defmacro*
+            (eval f)
+            nil)
+          (when-not (or (and (instance? Compiler$DefExpr mainexpr)
+                            (skip-def (:name ^(.var mainexpr))))
+                        (and (instance? Compiler$InstanceMethodExpr mainexpr)
+                            (or (= "setMacro" (.methodName mainexpr))
+                                (and (= "addMethod" (.methodName mainexpr))
+                                      (skip-method (tojs (first (.args mainexpr))
+                                                        nil)))))
+                        (and (instance? Compiler$BodyExpr mainexpr)
+                            (instance? Compiler$DefExpr (first (.exprs mainexpr)))
+                            (instance? Compiler$InstanceMethodExpr (second (.exprs mainexpr)))
+                            (= "setMacro" (.methodName (second (.exprs mainexpr))))))
+            (tojs expr {:localmap {}})))))))
 
 (defn filetojs [filename]
   (let [reader (java.io.PushbackReader. (ds/reader filename))]
@@ -378,6 +392,7 @@
     (with-open socket (.accept server)
       (binding [*debug-fn-names* false
                 *debug-comments* false
+                *eval-defmacro* false
                 *out* (-> socket .getOutputStream ds/writer)]
         (try
           (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
