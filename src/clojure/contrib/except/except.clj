@@ -11,46 +11,52 @@
 ;;  scgilardi (gmail)
 ;;  Created 07 July 2008
 
-(ns clojure.contrib.except)
+(ns clojure.contrib.except
+  (:import (clojure.lang Reflector)))
+
+(declare throw-formatted)
 
 (defn throwf
-  "Throws an exception with a message formatted like printf. Arguments are:
+  "Throws a formatted Exception or Error with an optional message formatted
+  like clojure/printf. All arguments are optional:
 
-      class? format format-args*
+      class? format? format-args*
 
-  class is optional and defaults to Exception. If present, it must be a
-  Class in the tree under Throwable with a constructor that takes a single
-  String.
-
-  format is a string as documented for java.util.Formatter.
-
-  format-args are zero or more objects that correspond to the format
-  specifiers in format."
+  - class defaults to Exception
+  - format is a format string for clojure/format
+  - format-args are objects that correspond format specifiers in format."
   [& args]
-  (let [[class fmt & fmt-args]
-        (if (instance? Class (first args)) args (cons Exception args))
-        ctor (.getConstructor (identity class) (into-array [String]))
-        message (apply format fmt fmt-args)
-        exception (.newInstance ctor (into-array [message]))
-        raw-trace (.getStackTrace exception)
-        boring? #(not= (.getMethodName %) "doInvoke")
-        trace (into-array (drop 2 (drop-while boring? raw-trace)))]
-    (.setStackTrace exception trace)
-    (throw exception)))
+  (apply throw-formatted "clojure.contrib.except.throwf" args))
 
 (defn throw-if
-  "Throws an exception with a message if pred is true. Arguments are:
+  "Throws a formatted Exception or Error if test is true. args are those
+  documented for throwf."
+  [test & args]
+  (when test
+    (apply throw-formatted "clojure.contrib.except.throw_if" args)))
 
-      pred class? format format-args*
+;; throw-if-not is synonymous with assert, but clojure/assert exists
 
-  class is optional and defaults to Exception. If present, it must be a
-  Class in the tree under Throwable with a constructor that takes a single
-  String.
+(defn throw-if-not
+  "Throws a formatted Exception or Error if test is false. args are those
+  documented for throwf."
+  [test & args]
+  (when-not test
+    (apply throw-formatted "clojure.contrib.except.throw_if_not" args)))
 
-  format is a string as documented for java.util.Formatter.
-
-  format-args are zero or more objects that correspond to the format
-  specifiers in format."
-  [pred & args]
-  (when pred
-    (apply throwf args)))
+(defn- throw-formatted
+  "Internal helper for formatted exceptions. It builds the formatted message,
+  creates the exception object, and edits the exception's stack trace to
+  exclude frames that are internal to our implementation. The stack trace
+  will start with the line in the caller that contains the throwf,
+  throw-if, or throw-if-not call."
+  [fn-prefix & args]
+  (let [[class & [fmt & fmt-args]]
+         (if (class? (first args)) args (cons Exception args))
+        args (into-array (if fmt [(apply format fmt fmt-args)] []))
+        exception (Reflector/invokeConstructor class args)
+        raw-trace (.getStackTrace exception)
+        not-our-fn? #(not (.startsWith (.getClassName %) fn-prefix))
+        trace (into-array (rrest (drop-while not-our-fn? raw-trace)))]
+    (.setStackTrace exception trace)
+    (throw exception)))
