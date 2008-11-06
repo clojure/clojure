@@ -315,10 +315,11 @@
   ([#^Object x]
    (if (nil? x) "" (. x (toString))))
   ([x & ys]
-   (loop [sb (new StringBuilder #^String (str x)) more ys]
-     (if more
-       (recur (. sb  (append (str (first more)))) (rest more))
-       (str sb)))))
+     ((fn [#^StringBuilder sb more]
+          (if more
+            (recur (. sb  (append (str (first more)))) (rest more))
+            (str sb)))
+      (new StringBuilder #^String (str x)) ys)))
 
 (defn symbol
   "Returns a Symbol with the given namespace and name."
