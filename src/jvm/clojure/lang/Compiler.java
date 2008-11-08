@@ -62,10 +62,10 @@ static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
 static final Symbol NEW = Symbol.create("new");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
-//static final Symbol SYNTAX_QUOTE = Symbol.create("clojure", "syntax-quote");
-static final Symbol LIST = Symbol.create("clojure", "list");
-static final Symbol HASHMAP = Symbol.create("clojure", "hash-map");
-static final Symbol VECTOR = Symbol.create("clojure", "vector");
+//static final Symbol SYNTAX_QUOTE = Symbol.create("clojure.core", "syntax-quote");
+static final Symbol LIST = Symbol.create("clojure.core", "list");
+static final Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
+static final Symbol VECTOR = Symbol.create("clojure.core", "vector");
 
 static final Symbol _AMP_ = Symbol.create("&");
 static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
@@ -177,7 +177,7 @@ static final public Var IN_CATCH_FINALLY = Var.create(null);
 static final public Var SOURCE = Var.create("NO_SOURCE_FILE");
 
 //String
-static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure")),
+static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                                  Symbol.create("*file*"), null);
 
 //Integer
@@ -2871,7 +2871,7 @@ static public class FnExpr implements Expr{
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
 		                  : //"clojure.fns." + 
-		                  (munge(currentNS().name.name) + ".");
+		                  (munge(currentNS().name.name) + "$");
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
 		fn.simpleName = ((name != null ?
@@ -3172,27 +3172,27 @@ static public class FnExpr implements Expr{
 
 		loader = (DynamicClassLoader) LOADER.get();
 		bytecode = cw.toByteArray();
-//		String path = "gen" + File.separator + internalName + ".class";
-//		File cf = new File(path);
-//		cf.getParentFile().mkdirs();
-//		cf.createNewFile();
-//		OutputStream cfs = new FileOutputStream(cf);
-//		try
-//			{
-//			cfs.write(bytecode);
-//			}
-//		finally
-//			{
-//			cfs.close();
-//			}
+		String path = "gen" + File.separator + internalName + ".class";
+		File cf = new File(path);
+		cf.getParentFile().mkdirs();
+		cf.createNewFile();
+		OutputStream cfs = new FileOutputStream(cf);
+		try
+			{
+			cfs.write(bytecode);
+			}
+		finally
+			{
+			cfs.close();
+			}
 	}
 
 	synchronized Class getCompiledClass(){
 		if(compiledClass == null)
 			try
 				{
-				//compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
-				compiledClass = loader.defineClass(name, bytecode);
+				compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
+				//compiledClass = loader.defineClass(name, bytecode);
 				}
 			catch(Exception e)
 				{
@@ -3206,7 +3206,7 @@ static public class FnExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		getCompiledClass();
+		//getCompiledClass();
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//fn arg is enclosing fn, not this
 		gen.newInstance(fntype);

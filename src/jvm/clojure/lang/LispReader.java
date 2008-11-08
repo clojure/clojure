@@ -27,16 +27,16 @@ static final Symbol THE_VAR = Symbol.create("var");
 //static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
 //static Symbol UNQUOTE = Symbol.create(null, "unquote");
 //static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
-static Symbol CONCAT = Symbol.create("clojure", "concat");
-static Symbol LIST = Symbol.create("clojure", "list");
-static Symbol APPLY = Symbol.create("clojure", "apply");
-static Symbol HASHMAP = Symbol.create("clojure", "hash-map");
-static Symbol HASHSET = Symbol.create("clojure", "hash-set");
-static Symbol VECTOR = Symbol.create("clojure", "vector");
-static Symbol WITH_META = Symbol.create("clojure", "with-meta");
-static Symbol META = Symbol.create("clojure", "meta");
-static Symbol DEREF = Symbol.create("clojure", "deref");
-//static Symbol DEREF_BANG = Symbol.create("clojure", "deref!");
+static Symbol CONCAT = Symbol.create("clojure.core", "concat");
+static Symbol LIST = Symbol.create("clojure.core", "list");
+static Symbol APPLY = Symbol.create("clojure.core", "apply");
+static Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
+static Symbol HASHSET = Symbol.create("clojure.core", "hash-set");
+static Symbol VECTOR = Symbol.create("clojure.core", "vector");
+static Symbol WITH_META = Symbol.create("clojure.core", "with-meta");
+static Symbol META = Symbol.create("clojure.core", "meta");
+static Symbol DEREF = Symbol.create("clojure.core", "deref");
+//static Symbol DEREF_BANG = Symbol.create("clojure.core", "deref!");
 
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
@@ -50,7 +50,7 @@ static Pattern intPat =
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?");
 static final Symbol SLASH = Symbol.create("/");
-static final Symbol CLOJURE_SLASH = Symbol.create("clojure","/");
+static final Symbol CLOJURE_SLASH = Symbol.create("clojure.core","/");
 //static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
 //static Pattern instanceMemberPat = Pattern.compile("\\.([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
 //static Pattern staticMemberPat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
@@ -270,7 +270,7 @@ static private Object interpretToken(String s) throws Exception{
 		{
 		return SLASH;
 		}
-	else if(s.equals("clojure//"))
+	else if(s.equals("clojure.core//"))
 		{
 		return CLOJURE_SLASH;
 		}

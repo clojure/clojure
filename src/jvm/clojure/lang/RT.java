@@ -164,7 +164,7 @@ Symbol.create("SuppressWarnings"), SuppressWarnings.class
 // single instance of UTF-8 Charset, so as to avoid catching UnsupportedCharsetExceptions everywhere
 static public Charset UTF8 = Charset.forName("UTF-8");
 
-static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure"));
+static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure.core"));
 //static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
 final static public Var OUT =
 		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out, UTF8));
@@ -182,7 +182,7 @@ static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 final static public Var USE_CONTEXT_CLASSLOADER =
 		Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), null);
-//final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure", "current-module"),
+//final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure.core", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 
 final static Symbol LOAD_FILE = Symbol.create("load-file");
@@ -222,7 +222,7 @@ final static IFn inNamespace = new AFn(){
 //		if(!refers.isBound())
 //			{
 //			refers.bindRoot(PersistentHashMap.EMPTY);
-//			Compiler.eval(list(Symbol.create("clojure", "refer"), EXPORTS));
+//			Compiler.eval(list(Symbol.create("clojure.core", "refer"), EXPORTS));
 //			}
 		return ns;
 	}
@@ -377,12 +377,12 @@ static public void init() throws Exception{
 }
 
 static void doInit() throws Exception{
-	loadResourceScript(RT.class, "clojure/boot.clj");
+	loadResourceScript(RT.class, "clojure/core.clj");
 	loadResourceScript(RT.class, "clojure/proxy.clj", false);
 	loadResourceScript(RT.class, "clojure/genclass.clj", false);
-	loadResourceScript(RT.class, "clojure/zip/zip.clj", false);
-	loadResourceScript(RT.class, "clojure/xml/xml.clj", false);
-	loadResourceScript(RT.class, "clojure/set/set.clj", false);
+	loadResourceScript(RT.class, "clojure/zip.clj", false);
+	loadResourceScript(RT.class, "clojure/xml.clj", false);
+	loadResourceScript(RT.class, "clojure/set.clj", false);
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.get(),
@@ -390,10 +390,10 @@ static void doInit() throws Exception{
 	try
 		{
 		Symbol USER = Symbol.create("user");
-		Symbol CLOJURE = Symbol.create("clojure");
+		Symbol CLOJURE = Symbol.create("clojure.core");
 
-		Var in_ns = var("clojure", "in-ns");
-		Var refer = var("clojure", "refer");
+		Var in_ns = var("clojure.core", "in-ns");
+		Var refer = var("clojure.core", "refer");
 		in_ns.invoke(USER);
 		refer.invoke(CLOJURE);
 		maybeLoadResourceScript("user.clj");

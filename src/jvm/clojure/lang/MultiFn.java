@@ -23,11 +23,11 @@ IPersistentMap preferTable;
 IPersistentMap methodCache;
 Object cachedHierarchy;
 
-static final Var assoc = RT.var("clojure", "assoc");
-static final Var dissoc = RT.var("clojure", "dissoc");
-static final Var isa = RT.var("clojure", "isa?");
-static final Var parents = RT.var("clojure", "parents");
-static final Var hierarchy = RT.var("clojure", "global-hierarchy");
+static final Var assoc = RT.var("clojure.core", "assoc");
+static final Var dissoc = RT.var("clojure.core", "dissoc");
+static final Var isa = RT.var("clojure.core", "isa?");
+static final Var parents = RT.var("clojure.core", "parents");
+static final Var hierarchy = RT.var("clojure.core", "global-hierarchy");
 
 public MultiFn(IFn dispatchFn, Object defaultDispatchVal) throws Exception{
 	this.dispatchFn = dispatchFn;

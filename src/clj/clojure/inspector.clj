@@ -7,9 +7,12 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.inspector
-    (:import (javax.swing.tree TreeModel)
-	(javax.swing.table TableModel)
-	(javax.swing JTree JTable JScrollPane JFrame)))
+    (:import
+     (java.awt BorderLayout)
+     (java.awt.event ActionEvent ActionListener)
+     (javax.swing.tree TreeModel)
+     (javax.swing.table TableModel AbstractTableModel)
+     (javax.swing JPanel JTree JTable JScrollPane JFrame JToolBar JButton SwingUtilities)))
 
 (defn atom? [x]
   (not (instance? clojure.lang.IPersistentCollection x)))
@@ -61,7 +64,7 @@
     (removeTreeModelListener [treeModelListener])))
 
 
-(defn table-model [data]
+(defn old-table-model [data]
   (let [row1 (first data)
 	colcnt (count row1)
 	cnt (count data)
@@ -94,9 +97,79 @@
   of equal length"
     [data]
   (doto (new JFrame "Clojure Inspector")
-    (add (new JScrollPane (new JTable (table-model data))))
+    (add (new JScrollPane (new JTable (old-table-model data))))
     (setSize 400 600)
     (setVisible true)))
+
+
+(defmulti list-provider class)
+
+(defmethod list-provider :default [x]
+  {:nrows 1 :get-value (fn [i] x) :get-label (fn [i] (.getName (class x)))})
+
+(defmethod list-provider java.util.List [c]
+  (let [v (if (vector? c) c (vec c))]
+    {:nrows (count v) 
+     :get-value (fn [i] (v i)) 
+     :get-label (fn [i] i)}))
+
+(defmethod list-provider java.util.Map [c]
+  (let [v (vec (sort (map (fn [[k v]] (vector k v)) c)))]
+    {:nrows (count v) 
+     :get-value (fn [i] ((v i) 1)) 
+     :get-label (fn [i] ((v i) 0))}))
+
+(defn list-model [provider]
+  (let [{:keys [nrows get-value get-label]} provider]
+    (proxy [AbstractTableModel] []
+      (getColumnCount [] 2)
+      (getRowCount [] nrows)
+      (getValueAt [rowIndex columnIndex]
+        (cond 
+         (= 0 columnIndex) (get-label rowIndex)
+         (= 1 columnIndex) (print-str (get-value rowIndex)))))))
+
+(defmulti table-model class)
+
+(defmethod table-model :default [x]
+  (proxy [AbstractTableModel] []
+    (getColumnCount [] 2)
+    (getRowCount [] 1)
+    (getValueAt [rowIndex columnIndex]
+      (if (zero? columnIndex)
+        (class x)
+        x))))
+
+(defn make-inspector [x]
+  (agent {:frame frame :data x :parent nil :index 0}))
+
+
+(defn inspect
+  "creates a graphical (Swing) inspector on the supplied object"
+  [x]
+  (doto (JFrame. "Clojure Inspector")
+    (add 
+     (doto (JPanel. (BorderLayout.))
+       (add (doto (JToolBar.)
+              (add (JButton. "Back"))
+              (addSeparator)
+              (add (JButton. "List"))
+              (add (JButton. "Table"))
+              (add (JButton. "Bean"))
+              (add (JButton. "Line"))
+              (add (JButton. "Bar"))
+              (addSeparator)
+              (add (JButton. "Prev"))
+              (add (JButton. "Next")))
+            BorderLayout/NORTH)
+       (add
+        (JScrollPane. 
+         (doto (JTable. (list-model (list-provider x)))
+           (setAutoResizeMode JTable/AUTO_RESIZE_LAST_COLUMN))) 
+        BorderLayout/CENTER)))
+    (setSize 400 400)
+    (setVisible true)))
+
 
 (comment
 

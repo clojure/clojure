@@ -18,19 +18,19 @@ import java.io.PrintWriter;
 
 public class Repl{
 static final Symbol USER = Symbol.create("user");
-static final Symbol CLOJURE = Symbol.create("clojure");
+static final Symbol CLOJURE = Symbol.create("clojure.core");
 
-static final Var in_ns = RT.var("clojure", "in-ns");
-static final Var refer = RT.var("clojure", "refer");
-static final Var ns = RT.var("clojure", "*ns*");
-static final Var warn_on_reflection = RT.var("clojure", "*warn-on-reflection*");
-static final Var print_meta = RT.var("clojure", "*print-meta*");
-static final Var print_length = RT.var("clojure", "*print-length*");
-static final Var print_level = RT.var("clojure", "*print-level*");
-static final Var star1 = RT.var("clojure", "*1");
-static final Var star2 = RT.var("clojure", "*2");
-static final Var star3 = RT.var("clojure", "*3");
-static final Var stare = RT.var("clojure", "*e");
+static final Var in_ns = RT.var("clojure.core", "in-ns");
+static final Var refer = RT.var("clojure.core", "refer");
+static final Var ns = RT.var("clojure.core", "*ns*");
+static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
+static final Var print_meta = RT.var("clojure.core", "*print-meta*");
+static final Var print_length = RT.var("clojure.core", "*print-length*");
+static final Var print_level = RT.var("clojure.core", "*print-level*");
+static final Var star1 = RT.var("clojure.core", "*1");
+static final Var star2 = RT.var("clojure.core", "*2");
+static final Var star3 = RT.var("clojure.core", "*3");
+static final Var stare = RT.var("clojure.core", "*e");
 
 public static void main(String[] args) throws Exception{
 

@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-ns 'clojure)
+(in-ns 'clojure.core)
 
 (def
  #^{:arglists '([& items])
@@ -3097,18 +3097,18 @@
   [name & references]
   (let [process-reference 
         (fn [[kname & args]]
-          `(~(symbol "clojure" (clojure/name kname))
+          `(~(symbol "clojure.core" (clojure.core/name kname))
              ~@(map #(list 'quote %) args)))]
     `(do
-       (clojure/in-ns '~name)
+       (clojure.core/in-ns '~name)
        ~@(when (not-any? #(= :refer-clojure (first %)) references)
-           `((clojure/refer '~'clojure)))
+           `((clojure.core/refer '~'clojure.core)))
        ~@(map process-reference references))))
 
 (defmacro refer-clojure
   "Same as (refer 'clojure <filters>)"
   [& filters]
-  `(clojure/refer '~'clojure ~@filters))
+  `(clojure.core/refer '~'clojure.core ~@filters))
 
 (defmacro defonce 
   "defs name to have the root value of the expr iff the named var has no root value, 
@@ -3227,14 +3227,14 @@
         (throw-if (and need-ns (not (find-ns lib)))
                   "namespace '%s' not found" lib))
       (when (and need-ns *loading-verbosely*)
-        (printf "(clojure/in-ns '%s)\n" (ns-name *ns*)))
+        (printf "(clojure.core/in-ns '%s)\n" (ns-name *ns*)))
       (when as
         (when *loading-verbosely*
-          (printf "(clojure/alias '%s '%s)\n" as lib))
+          (printf "(clojure.core/alias '%s '%s)\n" as lib))
         (alias as lib))
       (when use
         (when *loading-verbosely*
-          (printf "(clojure/refer '%s" lib)
+          (printf "(clojure.core/refer '%s" lib)
           (doseq [opt filter-opts]
             (printf " %s '%s" (key opt) (print-str (val opt))))
           (printf ")\n"))
@@ -3312,12 +3312,12 @@
 
 (defn use
   "Like 'require, but also refers to each lib's namespace using
-  clojure/refer. Use :use in the ns macro in preference to calling
+  clojure.core/refer. Use :use in the ns macro in preference to calling
   this directly.
 
   'use accepts additional options in libspecs: :exclude, :only, :rename.
   The arguments and semantics for :exclude, :only, and :rename are the same
-  as those documented for clojure/refer."
+  as those documented for clojure.core/refer."
   [& args] (apply load-libs :require :use args))
 
 (defn loaded-libs
@@ -3334,7 +3334,7 @@
                  path
                  (str (root-directory (ns-name *ns*)) \/ path))]
       (when *loading-verbosely*
-        (printf "(clojure/load \"%s\")\n" path)
+        (printf "(clojure.core/load \"%s\")\n" path)
         (flush))
       (throw-if (*pending-paths* path)
                 "cannot load '%s' again while it is loading"

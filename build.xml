@@ -10,7 +10,7 @@
 	<property name="cljsrc" location="${src}/clj"/>
 	<property name="build" location="classes"/>
 	<property name="clojure_jar" location="clojure.jar"/>
-	<property name="bootclj" location="${cljsrc}/clojure/boot.clj"/>
+	<property name="bootclj" location="${cljsrc}/clojure/core.clj"/>
 
 	<target name="init">
 		<tstamp/>

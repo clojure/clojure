@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(in-ns 'clojure)
+(in-ns 'clojure.core)
 
 (import '(java.lang.reflect Modifier Constructor)
         '(clojure.asm ClassWriter ClassVisitor Opcodes Type)
