@@ -1437,6 +1437,18 @@
   ([keyfn #^java.util.Comparator comp coll]
    (sort (fn [x y] (. comp (compare (keyfn x) (keyfn y)))) coll)))
 
+(defn partition
+  "Returns a lazy sequence of lists of n items each, at offsets step
+  apart. If step is not supplied, defaults to n, i.e. the partitions
+  do not overlap."
+  ([n coll]
+     (partition n n coll))
+  ([n step coll]
+   (when (seq coll)
+     (let [p (take n coll)]
+       (when (= n (count p))
+         (lazy-cons  p (partition n step (drop step coll))))))))
+
 ;; evaluation
 
 (defn eval
@@ -1445,14 +1457,23 @@
 
 (defmacro doseq
   "Repeatedly executes body (presumably for side-effects) with
-  binding-form bound to successive items from coll.  Does not retain
+  bindings and filtering as provided by \"for\".  Does not retain
   the head of the sequence. Returns nil."
-  [item list & body]
-  `(loop [list# (seq ~list)]
-     (when list#
-       (let [~item (first list#)]
-         ~@body)
-       (recur (rest list#)))))
+  [seq-exprs & body]
+  (let [binds (reduce (fn [binds p]
+                        (if (instance? clojure.lang.Keyword (first p))
+                          (conj (pop binds) (apply assoc (peek binds) p))
+                          (conj binds {:name (first p) :init (second p)})))
+                      [] (partition 2 seq-exprs))
+        emit (fn emit [bind & binds]
+               `(loop [sq# (seq ~(:init bind))]
+                  (when sq#
+                    (let [~(:name bind) (first sq#)]
+                      (when ~(or (:while bind) true)
+                        (when ~(or (:when bind) true)
+                          ~(if binds (apply emit binds) `(do ~@body)))
+                        (recur (rest sq#)))))))]
+    (apply emit binds)))
 
 (defn scan [& args] (throw (new Exception "scan is now called dorun")))
 (defn touch [& args] (throw (new Exception "touch is now called doall")))
@@ -1493,7 +1514,7 @@
       (throw (new Exception "Can't await in agent action")))
     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
           count-down (fn [agent] (. latch (countDown)) agent)]
-      (doseq agent agents
+      (doseq [agent agents]
         (send agent count-down))
       (. latch (await))))
 
@@ -1512,19 +1533,26 @@
       (throw (new Exception "Can't await in agent action")))
     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
           count-down (fn [agent] (. latch (countDown)) agent)]
-      (doseq agent agents
+      (doseq [agent agents]
         (send agent count-down))
       (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS)))))
   
 (defmacro dotimes
-  "Repeatedly executes body (presumably for side-effects) with name
+  "bindings => name n
+
+  Repeatedly executes body (presumably for side-effects) with name
   bound to integers from 0 through n-1."
-  [i n & body]
-  `(let [n# (int ~n)]
-     (loop [~i (int 0)]
-       (when (< ~i n#)
-         ~@body
-         (recur (unchecked-inc ~i))))))
+  [bindings & body]
+  (if (vector? bindings)
+    (let [i (first bindings)
+          n (second bindings)]
+      `(let [n# (int ~n)]
+         (loop [~i (int 0)]
+           (when (< ~i n#)
+             ~@body
+             (recur (unchecked-inc ~i))))))
+    (throw (IllegalArgumentException.
+             "dotimes now requires a vector for its binding"))))
 
 (defn import
   "import-list => (package-symbol class-name-symbols*)
@@ -1537,7 +1565,7 @@
       (let [#^clojure.lang.Namespace ns *ns*
             pkg (ffirst import-lists)
             classes (rfirst import-lists)]
-        (doseq c classes
+        (doseq [c classes]
           (. ns (importClass c (. Class (forName (str pkg "." c)))))) )
       (apply import (rest import-lists))))
 
@@ -1713,14 +1741,19 @@
   [s] (clojure.lang.RT/readString s))
 
 (defmacro with-open
-  "Evaluates body in a try expression with name bound to the value of
-  init, and a finally clause that calls (. name (close))."
-  [name init & body]
-  `(let [~name ~init]
-     (try
-      ~@body
-      (finally
-       (. ~name (close))))))
+  "bindings => name init
+
+  Evaluates body in a try expression with name bound to the value of
+  init, and a finally clause that calls (.close name)."
+  [bindings & body]
+  (if (vector? bindings)
+    `(let ~bindings
+       (try
+         ~@body
+         (finally
+           (.close ~(first bindings)))))
+    (throw (IllegalArgumentException.
+             "with-open now requires a vector for its binding"))))
 
 (defmacro doto
   "Evaluates x then calls all of the methods with the supplied
@@ -1844,7 +1877,7 @@
   ([#^Class type dim & more-dims]
    (let [dims (cons dim more-dims)
          #^"[I" dimarray (make-array (. Integer TYPE)  (count dims))]
-     (dotimes i (alength dimarray)
+     (dotimes [i (alength dimarray)]
        (aset-int dimarray i (nth dims i)))
      (. Array (newInstance type dimarray)))))
 
@@ -2003,7 +2036,7 @@
   (.unmap (the-ns ns) sym))
 
 ;(defn export [syms]
-;  (doseq sym syms
+;  (doseq [sym syms]
 ;   (.. *ns* (intern sym) (setExported true))))
 
 (defn ns-publics
@@ -2042,7 +2075,7 @@
           rename (or (:rename fs) {})
           exclude (set (:exclude fs))
           to-do (or (:only fs) (keys nspublics))]
-      (doseq sym to-do
+      (doseq [sym to-do]
         (when-not (exclude sym)
           (let [v (nspublics sym)]
             (when-not v
@@ -2278,11 +2311,17 @@
                  ~@body)))))))
   
 (defmacro when-first
-  "Same as (when (seq xs) (let [x (first xs)] body))"
-  [x xs & body]
-  `(when (seq ~xs)
-     (let [~x (first ~xs)]
-       ~@body)))
+  "bindings => x xs
+
+  Same as (when (seq xs) (let [x (first xs)] body))"
+  [bindings & body]
+  (if (vector? bindings)
+    (let [[x xs] bindings]
+      `(when (seq ~xs)
+         (let [~x (first ~xs)]
+           ~@body)))
+    (throw (IllegalArgumentException.
+             "when-first now requires a vector for its binding"))))
 
 (defmacro lazy-cat
   "Expands to code which yields a lazy sequence of the concatenation
@@ -2320,7 +2359,7 @@
         emit (fn emit [[{b :b f :f w :w} & [{ys :e} :as rses]]]
 		  (let [giter (gensym "iter__") gxs (gensym "s__")]
 		    `(fn ~giter [~gxs]
-			 (when-first ~b ~gxs
+			 (when-first [~b ~gxs]
                            (if ~f
 			    ~(if rses
 			       `(let [iterys# ~(emit rses)
@@ -2534,7 +2573,7 @@
   tree, must be a branch."  
   [branch? children root]
     (let [walk (fn walk [nodes]
-                   (when-first node nodes
+                   (when-first [node nodes]
                      (lazy-cons
                       node
                       (if (branch? node)
@@ -2571,7 +2610,7 @@
 (defn slurp
   "Reads the file named by f into a string and returns it."
   [#^String f]
-  (with-open r (new java.io.BufferedReader (new java.io.FileReader f))
+  (with-open [r (new java.io.BufferedReader (new java.io.FileReader f))]
     (let [sb (new StringBuilder)]
       (loop [c (. r (read))]
         (if (neg? c)
@@ -2609,24 +2648,36 @@
                          (lazy-cons f (step r (conj seen f))))))]
       (step (seq coll) #{})))
 
-(defmacro if-let 
-  "if test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
-  ([binding-form test then]
-   `(if-let ~binding-form ~test ~then nil))
-  ([binding-form test then else]
-   `(let [temp# ~test]
-      (if temp# 
-        (let [~binding-form temp#]
-          ~then)
-        ~else))))
+(defmacro if-let
+  "bindings => binding-form test
 
-(defmacro when-let 
-  "when test is true, evaluates body with binding-form bound to the value of test"
-  [binding-form test & body]
-  `(let [temp# ~test]
-     (when temp#
-       (let [~binding-form temp#]
-         ~@body))))
+  If test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
+  ([bindings then]
+   `(if-let ~bindings ~then nil))
+  ([bindings then else & oldform]
+   (if (and (vector? bindings) (nil? oldform))
+     (let [[form tst] bindings]
+       `(let [temp# ~tst]
+          (if temp# 
+            (let [~form temp#]
+              ~then)
+            ~else)))
+     (throw (IllegalArgumentException.
+              "if-let now requires a vector for its binding")))))
+
+(defmacro when-let
+  "bindings => binding-form test
+
+  When test is true, evaluates body with binding-form bound to the value of test"
+  [bindings & body]
+  (if (vector? bindings)
+    (let [[form tst] bindings]
+      `(let [temp# ~tst]
+         (when temp#
+           (let [~form temp#]
+             ~@body))))
+    (throw (IllegalArgumentException.
+             "when-let now requires a vector for its binding"))))
 
 (defn replace
   "Given a map of replacement pairs and a vector/collection, returns a
@@ -2635,11 +2686,11 @@
   [smap coll]
     (if (vector? coll)
       (reduce (fn [v i]
-                (if-let e (find smap (nth v i))
+                (if-let [e (find smap (nth v i))]
                         (assoc v i (val e))
                         v))
               coll (range (count coll)))
-      (map #(if-let e (find smap %) (val e) %) coll)))
+      (map #(if-let [e (find smap %)] (val e) %) coll)))
 
 (defmacro dosync 
   "Runs the exprs (in an implicit do) in a transaction that encompasses
@@ -2679,11 +2730,11 @@
   ([#^clojure.lang.Sorted sc test key]
    (let [include (bound-fn sc test key)]
      (if (#{> >=} test)
-       (when-let [e :as s] (. sc seqFrom key true)
+       (when-let [[e :as s] (. sc seqFrom key true)]
          (if (include e) s (rest s)))
        (take-while include (. sc seq true)))))     
   ([#^clojure.lang.Sorted sc start-test start-key end-test end-key]
-   (when-let [e :as s] (. sc seqFrom start-key true)
+   (when-let [[e :as s] (. sc seqFrom start-key true)]
      (take-while (bound-fn sc end-test end-key)
                  (if ((bound-fn sc start-test start-key) e) s (rest s))))))
 
@@ -2694,11 +2745,11 @@
   ([#^clojure.lang.Sorted sc test key]
    (let [include (bound-fn sc test key)]
      (if (#{< <=} test)
-       (when-let [e :as s] (. sc seqFrom key false)
+       (when-let [[e :as s] (. sc seqFrom key false)]
          (if (include e) s (rest s)))
        (take-while include (. sc seq false)))))     
   ([#^clojure.lang.Sorted sc start-test start-key end-test end-key]
-   (when-let [e :as s] (. sc seqFrom end-key false)
+   (when-let [[e :as s] (. sc seqFrom end-key false)]
      (take-while (bound-fn sc start-test start-key)
                  (if ((bound-fn sc end-test end-key) e) s (rest s))))))
 
@@ -2720,18 +2771,6 @@
 (defn interpose
   "Returns a lazy seq of the elements of coll separated by sep"
   [sep coll] (drop 1 (interleave (repeat sep) coll)))
-
-(defn partition
-  "Returns a lazy sequence of lists of n items each, at offsets step
-  apart. If step is not supplied, defaults to n, i.e. the partitions
-  do not overlap."
-  ([n coll]
-     (partition n n coll))
-  ([n step coll]
-   (when (seq coll)
-     (let [p (take n coll)]
-       (when (= n (count p))
-         (lazy-cons  p (partition n step (drop step coll))))))))
 
 (defmacro definline 
   "Experimental - like defmacro, except defines a named function whose
@@ -3196,7 +3235,7 @@
       (when use
         (when *loading-verbosely*
           (printf "(clojure/refer '%s" lib)
-          (doseq opt filter-opts
+          (doseq [opt filter-opts]
             (printf " %s '%s" (key opt) (print-str (val opt))))
           (printf ")\n"))
         (apply refer lib (mapcat seq filter-opts))))))
@@ -3208,12 +3247,12 @@
   (let [flags (filter keyword? args)
         opts (interleave flags (repeat true))
         args (filter (complement keyword?) args)]
-    (doseq arg args
+    (doseq [arg args]
       (if (libspec? arg)
         (apply load-lib nil (prependss arg opts))
         (let [[prefix & args] arg]
           (throw-if (nil? prefix) "prefix cannot be nil")
-          (doseq arg args
+          (doseq [arg args]
             (apply load-lib prefix (prependss arg opts))))))))
 
 ;; Public
@@ -3290,7 +3329,7 @@
   classpath-relative if it begins with a slash or relative to the root
   directory for the current namespace otherwise."
   [& paths]
-  (doseq path paths
+  (doseq [path paths]
     (let [path (if (.startsWith path "/")
                  path
                  (str (root-directory (ns-name *ns*)) \/ path))]
@@ -3468,7 +3507,7 @@
       (.write w "#")
       (do
         (.write w begin)
-        (when-let xs (seq sequence)
+        (when-let [xs (seq sequence)]
           (if (and (not *print-dup*) *print-length*)
             (loop [[x & xs] xs
                    print-length *print-length*]
@@ -3487,7 +3526,7 @@
         (.write w end)))))
 
 (defn- print-meta [o, #^Writer w]
-  (when-let m (meta o)
+  (when-let [m (meta o)]
     (when (and (pos? (count m))
                (or *print-dup*
                    (and *print-meta* *print-readably*)))
@@ -3536,14 +3575,6 @@
 (prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.AFn)
 (prefer-method print-dup java.util.Map clojure.lang.AFn)
 (prefer-method print-dup java.util.Collection clojure.lang.AFn)
-
-(defmethod print-dup clojure.lang.Ratio [o, #^Writer w]
-  (print-ctor o
-              (fn [#^clojure.lang.Ratio o #^Writer w]
-                (print-dup (.numerator o) w)
-                (.write w " ")
-                (print-dup (.numerator o) w))
-              w))
 
 (defmethod print-method Boolean [o, #^Writer w]
   (.write w (str o)))
@@ -3607,7 +3638,7 @@
 (defmethod print-method String [#^String s, #^Writer w]
   (if (or *print-dup* *print-readably*)
     (do (.append w \")
-      (dotimes n (count s)
+      (dotimes [n (count s)]
         (let [c (.charAt s n)
               e (char-escape-string c)]
           (if e (.write w e) (.append w c))))
@@ -3684,6 +3715,7 @@
 (defmethod print-dup java.lang.Character [c w] (print-method c w))
 (defmethod print-dup java.lang.Integer [o w] (print-method o w))
 (defmethod print-dup java.lang.Double [o w] (print-method o w))
+(defmethod print-dup clojure.lang.Ratio [o w] (print-method o w))
 (defmethod print-dup java.math.BigDecimal [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w))

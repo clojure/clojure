@@ -70,7 +70,7 @@
                                         ;if found
                     (. gen (loadThis))
                                         ;box args
-                    (dotimes i (count ptypes)
+                    (dotimes [i (count ptypes)]
                       (. gen (loadArg i))
                       (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
                                         ;call fn
@@ -101,7 +101,7 @@
             (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_VOLATILE))
                               fmap (. map-type (getDescriptor)) nil nil))          
                                         ;add ctors matching/calling super's
-            (doseq #^Constructor ctor (. super (getDeclaredConstructors))
+            (doseq [#^Constructor ctor (. super (getDeclaredConstructors))]
               (when-not (. Modifier (isPrivate (. ctor (getModifiers))))
                 (let [ptypes (to-types (. ctor (getParameterTypes)))
                       m (new Method "<init>" (. Type VOID_TYPE) ptypes)
@@ -165,7 +165,7 @@
                            (recur mm considered (. c (getSuperclass))))
                          mm))]
                                         ;add methods matching supers', if no mapping -> call super
-              (doseq #^java.lang.reflect.Method meth (vals mm)
+              (doseq [#^java.lang.reflect.Method meth (vals mm)]
                      (gen-method meth 
                                  (fn [gen m]
                                    (. gen (loadThis))
@@ -178,8 +178,8 @@
                                                            (. m (getDescriptor)))))))
               
                                         ;add methods matching interfaces', if no mapping -> throw
-              (doseq #^Class iface interfaces
-                (doseq #^java.lang.reflect.Method meth (. iface (getMethods))
+              (doseq [#^Class iface interfaces]
+                (doseq [#^java.lang.reflect.Method meth (. iface (getMethods))]
                    (when-not (contains? mm (method-sig meth))
                      (gen-method meth 
                                  (fn [gen m]

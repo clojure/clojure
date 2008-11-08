@@ -232,7 +232,7 @@
                 (when-not as-static
                   (. gen (loadThis)))
                                         ;box args
-                (dotimes i (count ptypes)
+                (dotimes [i (count ptypes)]
                   (. gen (loadArg i))
                   (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
                                         ;call fn
@@ -265,7 +265,7 @@
                    (into-array (map iname interfaces)))))
     
                                         ;static fields for vars
-    (doseq v var-fields
+    (doseq [v var-fields]
       (. cv (visitField (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_FINAL) (. Opcodes ACC_STATIC))
                         (var-name v) 
                         (. var-type getDescriptor)
@@ -283,7 +283,7 @@
                    (. Method getMethod "void <clinit> ()")
                    nil nil cv)]
       (. gen (visitCode))
-      (doseq v var-fields
+      (doseq [v var-fields]
         (. gen push pkg-name)
         (. gen push (str sname "-" v))
         (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.Var var(String,String)"))))
@@ -298,7 +298,7 @@
       (. gen (endMethod)))
     
                                         ;ctors
-    (doseq [pclasses super-pclasses] ctor-sig-map
+    (doseq [[pclasses super-pclasses] ctor-sig-map]
       (let [ptypes (to-types pclasses)
             super-ptypes (to-types super-pclasses)
             m (new Method "<init>" (. Type VOID_TYPE) ptypes)
@@ -316,7 +316,7 @@
             (. gen dup)
             (. gen ifNull no-init-label)
                                         ;box init args
-            (dotimes i (count pclasses)
+            (dotimes [i (count pclasses)]
               (. gen (loadArg i))
               (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
                                         ;call init fn
@@ -330,7 +330,7 @@
             
             (. gen (loadThis))
             (. gen dupX1)
-            (dotimes i (count super-pclasses)
+            (dotimes [i (count super-pclasses)]
               (. gen loadLocal local)
               (. gen push i)
               (. gen (invokeStatic rt-type nth-method))
@@ -373,7 +373,7 @@
     
                                         ;add methods matching supers', if no fn -> call super
     (let [mm (non-private-methods super)]
-      (doseq #^java.lang.reflect.Method meth (vals mm)
+      (doseq [#^java.lang.reflect.Method meth (vals mm)]
              (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
                                      (fn [gen m]
                                        (. gen (loadThis))
@@ -394,7 +394,7 @@
                     (assoc mm (method-sig meth) meth))))
               mm (mapcat #(.getMethods %) interfaces))
                                         ;extra methods
-       (doseq [mname pclasses rclass :as msig] methods
+       (doseq [[mname pclasses rclass :as msig] methods]
          (emit-forwarding-method (str mname) pclasses rclass (:static ^msig)
                                  emit-unsupported)))
 
@@ -423,7 +423,7 @@
         (. gen (returnValue))
         (. gen (endMethod))))
                                         ;field exposers
-    (doseq [f {getter :get setter :set}] exposes
+    (doseq [[f {getter :get setter :set}] exposes]
       (let [fld (.getDeclaredField super (str f))
             ftype (totype (.getType fld))]
         (when getter
@@ -469,7 +469,7 @@
   (let [{:keys [name bytecode]} (apply gen-class (str name) options)
         file (java.io.File. path (str (. name replace \. (. java.io.File separatorChar)) ".class"))]
     (.createNewFile file)
-    (with-open f (java.io.FileOutputStream. file)
+    (with-open [f (java.io.FileOutputStream. file)]
       (.write f bytecode))))
 
 (comment
