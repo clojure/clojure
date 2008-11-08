@@ -200,13 +200,14 @@ final public static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*ns*"
 final static Var FLUSH_ON_NEWLINE = Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), T);
 final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
 final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
+final static Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), F);
 final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
 final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), F);
 
 final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), F);
 final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("ns"), F);
 static final Var PRINT_INITIALIZED = Var.intern(CLOJURE_NS, Symbol.create("print-initialized"));
-static final Var PRINT_METHOD = Var.intern(CLOJURE_NS, Symbol.create("print-method"));
+static final Var PR_ON = Var.intern(CLOJURE_NS, Symbol.create("pr-on"));
 //final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
@@ -1191,8 +1192,8 @@ static public Object readString(String s){
 
 static public void print(Object x, Writer w) throws Exception{
 	//call multimethod
-	if(PRINT_INITIALIZED.isBound())
-		PRINT_METHOD.invoke(x, w);
+	if(PRINT_INITIALIZED.isBound() && RT.booleanCast(PRINT_INITIALIZED.get()))
+		PR_ON.invoke(x, w);
 //*
 	else{
 	boolean readably = booleanCast(PRINT_READABLY.get());
@@ -1355,6 +1356,11 @@ static public void print(Object x, Writer w) throws Exception{
 		{
 		w.write(x.toString());
 		w.write('M');
+		}
+	else if(x instanceof Var)
+		{
+		Var v = (Var) x;
+		w.write("#=(var " + v.ns.name + "/" + v.sym + ")");
 		}
 	else w.write(x.toString());
 	}

@@ -1565,7 +1565,7 @@
   array [& items]
     (into-array items))
 
-(defn class
+(defn #^Class class
   "Returns the Class of x"
   [#^Object x] (if (nil? x) x (. x (getClass))))
 
@@ -1629,7 +1629,18 @@
   {:tag BigDecimal}
   [x] (. BigDecimal valueOf x))
 
+(def #^{:private true} print-initialized false)
+
 (defmulti print-method (fn [x writer] (class x)))
+(defmulti print-dup (fn [x writer] (class x)))
+
+(defn pr-on 
+  {:private true}
+  [x w]
+  (if *print-dup*
+    (print-dup x w)
+    (print-method x w))
+  nil)
 
 (defn pr
   "Prints the object(s) to the output stream that is the current value
@@ -1638,8 +1649,7 @@
   can be read by the reader"
   ([] nil)
   ([x]
-   (print-method x *out*)
-   nil)
+     (pr-on x *out*))
   ([x & more]
    (pr x)
    (. *out* (append \space))
@@ -3453,13 +3463,13 @@
 *print-level* nil)
 
 (defn- print-sequential [#^String begin, print-one, #^String sep, #^String end, sequence, #^Writer w]
-  (binding [*print-level* (and *print-level* (dec *print-level*))]
+  (binding [*print-level* (and (not *print-dup*) *print-level* (dec *print-level*))]
     (if (and *print-level* (neg? *print-level*))
       (.write w "#")
       (do
         (.write w begin)
         (when-let xs (seq sequence)
-          (if *print-length*
+          (if (and (not *print-dup*) *print-length*)
             (loop [[x & xs] xs
                    print-length *print-length*]
               (if (zero? print-length)
@@ -3478,36 +3488,67 @@
 
 (defn- print-meta [o, #^Writer w]
   (when-let m (meta o)
-    (when (and *print-meta* *print-readably* (pos? (count m)))
+    (when (and (pos? (count m))
+               (or *print-dup*
+                   (and *print-meta* *print-readably*)))
       (.write w "#^")
       (if (and (= (count m) 1) (:tag m))
-          (print-method (:tag m) w)
-          (print-method m w))
+          (pr-on (:tag m) w)
+          (pr-on m w))
       (.write w " "))))
 
 (defmethod print-method nil [o, #^Writer w]
   (.write w "nil"))
 
+(defmethod print-dup nil [o w] (print-method o w))
+
 (defn print-ctor [o print-args #^Writer w]
   (.write w "#=(")
-  (.write w (.getName (class o)))
+  (.write w (.getName #^Class (class o)))
   (.write w ". ")
   (print-args o w)
   (.write w ")"))
 
 (defmethod print-method :default [o, #^Writer w]
   (.write w "#<")
+  (.write w (.getSimpleName (class o)))
+  (.write w " ")
   (.write w (str o))
   (.write w ">"))
 
 (defmethod print-method clojure.lang.Keyword [o, #^Writer w]
   (.write w (str o)))
 
+(defmethod print-dup clojure.lang.Keyword [o w] (print-method o w))
+
 (defmethod print-method Number [o, #^Writer w]
   (.write w (str o)))
 
+(defmethod print-dup Number [o, #^Writer w]
+  (print-ctor o
+              (fn [o w]
+                  (print-dup (str o) w))
+              w))
+
+(defmethod print-dup clojure.lang.AFn [o, #^Writer w]
+  (print-ctor o (fn [o w]) w))
+
+(prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.AFn)
+(prefer-method print-dup java.util.Map clojure.lang.AFn)
+(prefer-method print-dup java.util.Collection clojure.lang.AFn)
+
+(defmethod print-dup clojure.lang.Ratio [o, #^Writer w]
+  (print-ctor o
+              (fn [#^clojure.lang.Ratio o #^Writer w]
+                (print-dup (.numerator o) w)
+                (.write w " ")
+                (print-dup (.numerator o) w))
+              w))
+
 (defmethod print-method Boolean [o, #^Writer w]
   (.write w (str o)))
+
+(defmethod print-dup Boolean [o w] (print-method o w))
 
 (defn print-simple [o, #^Writer w]
   (print-meta o w)
@@ -3516,8 +3557,13 @@
 (defmethod print-method clojure.lang.Symbol [o, #^Writer w]
   (print-simple o w))
 
+(defmethod print-dup clojure.lang.Symbol [o w] (print-method o w))
+
 (defmethod print-method clojure.lang.Var [o, #^Writer w]
   (print-simple o w))
+
+(defmethod print-dup clojure.lang.Var [#^clojure.lang.Var o, #^Writer w]
+  (.write w (str "#=(var " (.name (.ns o)) "/" (.sym o) ")")))
 
 (defmethod print-method clojure.lang.ISeq [o, #^Writer w]
   (print-meta o w)
@@ -3529,11 +3575,23 @@
 
 (prefer-method print-method clojure.lang.IPersistentList clojure.lang.ISeq)
 
-
 (defmethod print-method java.util.Collection [o, #^Writer w]
  (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
 
 (prefer-method print-method clojure.lang.IPersistentCollection java.util.Collection)
+
+(defmethod print-dup java.util.Collection [o, #^Writer w]
+ (print-ctor o #(print-sequential "[" print-dup " " "]" %1 %2) w))
+
+(defmethod print-dup clojure.lang.IPersistentCollection [o, #^Writer w]
+  (print-meta o w)
+  (.write w "#=(")
+  (.write w (.getName #^Class (class o)))
+  (.write w "/create ")
+  (print-sequential "[" print-dup " " "]" o w)
+  (.write w ")"))
+
+(prefer-method print-dup clojure.lang.IPersistentCollection java.util.Collection)
 
 (def #^{:tag String 
         :doc "Returns escape string for char or nil if none"}
@@ -3547,7 +3605,7 @@
      \backspace "\\b"})
 
 (defmethod print-method String [#^String s, #^Writer w]
-  (if *print-readably*
+  (if (or *print-dup* *print-readably*)
     (do (.append w \")
       (dotimes n (count s)
         (let [c (.charAt s n)
@@ -3557,36 +3615,46 @@
     (.write w s))
   nil)
 
+(defmethod print-dup String [s w] (print-method s w))
+
 (defmethod print-method clojure.lang.IPersistentVector [v, #^Writer w]
   (print-meta v w)
-  (print-sequential "[" print-method " " "]" v w))
+  (print-sequential "[" pr-on " " "]" v w))
 
-(defmethod print-method clojure.lang.IPersistentMap [m, #^Writer w]
-  (print-meta m w)
+(defn- print-map [m print-one w]
   (print-sequential 
    "{"
    (fn [e  #^Writer w] 
-     (do (print-method (key e) w) (.append w \space) (print-method (val e) w)))
+     (do (print-one (key e) w) (.append w \space) (print-one (val e) w)))
    ", "
    "}"
    (seq m) w))
 
+(defmethod print-method clojure.lang.IPersistentMap [m, #^Writer w]
+  (print-meta m w)
+  (print-map m pr-on w))
+
 (defmethod print-method java.util.Map [m, #^Writer w]
-  (print-ctor m 
-              #(print-sequential 
-                "{"
-                (fn [e  #^Writer w] 
-                  (do (print-method (key e) w) (.append w \space) (print-method (val e) w)))
-                ", "
-                "}"
-                (seq %1) %2) 
-              w))
+  (print-ctor m #(print-map (seq %1) print-method %2) w))
 
 (prefer-method print-method clojure.lang.IPersistentMap java.util.Map)
 
+(defmethod print-dup java.util.Map [m, #^Writer w]
+  (print-ctor m #(print-map (seq %1) print-dup %2) w))
+
+(defmethod print-dup clojure.lang.IPersistentMap [m, #^Writer w]
+  (print-meta m w)
+  (.write w "#=(")
+  (.write w (.getName (class m)))
+  (.write w "/create ")
+  (print-map m print-dup w)
+  (.write w ")"))
+
+(prefer-method print-dup clojure.lang.IPersistentCollection java.util.Map)
+
 (defmethod print-method clojure.lang.IPersistentSet [s, #^Writer w]
   (print-meta s w)
-  (print-sequential "#{" print-method " " "}" (seq s) w))
+  (print-sequential "#{" pr-on " " "}" (seq s) w))
 
 (defmethod print-method java.util.Set [s, #^Writer w]
   (print-ctor s
@@ -3606,12 +3674,20 @@
     \return "return"})
 
 (defmethod print-method java.lang.Character [#^Character c, #^Writer w]
-  (if *print-readably*
+  (if (or *print-dup* *print-readably*)
     (do (.append w \\)
         (let [n (char-name-string c)]
           (if n (.write w n) (.append w c))))
     (.append w c))
   nil)
+
+(defmethod print-dup java.lang.Character [c w] (print-method c w))
+(defmethod print-dup java.lang.Integer [o w] (print-method o w))
+(defmethod print-dup java.lang.Double [o w] (print-method o w))
+(defmethod print-dup java.math.BigDecimal [o w] (print-method o w))
+(defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
+(defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w))
+(defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
 
 (def primitives-classnames
   {Float/TYPE "Float/TYPE"
@@ -3624,10 +3700,13 @@
    Short/TYPE "Short/TYPE"})
 
 (defmethod print-method Class [#^Class c, #^Writer w]
+  (.write w (.getName c)))
+
+(defmethod print-dup Class [#^Class c, #^Writer w]
   (cond
     (.isPrimitive c) (do
                        (.write w "#=(identity ")
-                       (.write w (primitives-classnames c))
+                       (.write w #^String (primitives-classnames c))
                        (.write w ")"))
     (.isArray c) (do
                    (.write w "#=(java.lang.Class/forName \"")
@@ -3663,9 +3742,11 @@
                    (recur r qmode)))))
   (.append w \"))
 
-(defmethod print-method clojure.lang.Namespace [n #^Writer w]
+(defmethod print-dup java.util.regex.Pattern [p #^Writer w] (print-method p w))
+
+(defmethod print-dup clojure.lang.Namespace [#^clojure.lang.Namespace n #^Writer w]
   (.write w "#=(find-ns ")
-  (print-method (.name n) w)
+  (print-dup (.name n) w)
   (.write w ")"))
 
 (def #^{:private true} print-initialized true)

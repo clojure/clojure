@@ -72,7 +72,7 @@ public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceR
 
 public String toString(){
 	if(ns != null)
-		return "#=(var " + ns.name + "/" + sym + ")";
+		return "#'" + ns.name + "/" + sym;
 	return "#<Var: " + (sym != null ? sym.toString() : "--unnamed--") + ">";
 }
 

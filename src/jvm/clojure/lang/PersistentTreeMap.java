@@ -30,6 +30,16 @@ public final int _count;
 
 final static public PersistentTreeMap EMPTY = new PersistentTreeMap();
 
+static public IPersistentMap create(Map other){
+	IPersistentMap ret = EMPTY;
+	for(Object o : other.entrySet())
+		{
+		Map.Entry e = (Entry) o;
+		ret = ret.assoc(e.getKey(), e.getValue());
+		}
+	return ret;
+}
+
 public PersistentTreeMap(){
 	this(RT.DEFAULT_COMPARATOR);
 }

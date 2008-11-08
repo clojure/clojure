@@ -32,6 +32,16 @@ final INode root;
 
 final public static PersistentHashMap EMPTY = new PersistentHashMap(0, new EmptyNode());
 
+static public IPersistentMap create(Map other){
+	IPersistentMap ret = EMPTY;
+	for(Object o : other.entrySet())
+		{
+		Map.Entry e = (Entry) o;
+		ret = ret.assoc(e.getKey(), e.getValue());
+		}
+	return ret;
+}
+
 /*
  * @param init {key1,val1,key2,val2,...}
  */

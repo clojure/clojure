@@ -3042,10 +3042,15 @@ static public class FnExpr implements Expr{
 //			clinitgen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
 //			clinitgen.push(constantsID);
 //			clinitgen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getConstantsMethod);
+			try{
+			Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
 
 			for(int i = 0; i < constants.count(); i++)
 				{
 				String cs = RT.printString(constants.nth(i));
+				if(cs.length() == 0)
+					throw new RuntimeException("Can't embed unreadable object in code: " + constants.nth(i));
+
 				if(cs.startsWith("#<"))
 					throw new RuntimeException("Can't embed unreadable object in code: " + cs);
 				clinitgen.push(cs);
@@ -3056,6 +3061,10 @@ static public class FnExpr implements Expr{
 				clinitgen.checkCast(constantType(i));
 				clinitgen.putStatic(fntype, constantName(i), constantType(i));
 				}
+			}
+			finally{
+				Var.popThreadBindings();
+			}
 			}
 //		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
 //			{

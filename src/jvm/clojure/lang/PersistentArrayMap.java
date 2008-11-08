@@ -11,6 +11,7 @@
 package clojure.lang;
 
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Simple implementation of persistent map on an array
@@ -29,6 +30,16 @@ final Object[] array;
 static final int HASHTABLE_THRESHOLD = 8;
 
 public static final PersistentArrayMap EMPTY = new PersistentArrayMap();
+
+static public IPersistentMap create(Map other){
+	IPersistentMap ret = EMPTY;
+	for(Object o : other.entrySet())
+		{
+		Map.Entry e = (Entry) o;
+		ret = ret.assoc(e.getKey(), e.getValue());
+		}
+	return ret;
+}
 
 protected PersistentArrayMap(){
 	this.array = new Object[]{};

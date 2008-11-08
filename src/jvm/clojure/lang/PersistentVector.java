@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.util.List;
+import java.util.Collection;
 
 public class PersistentVector extends APersistentVector{
 final int cnt;

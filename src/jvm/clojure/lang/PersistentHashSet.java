@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.util.List;
 import java.util.Iterator;
+import java.util.Collection;
 
 public class PersistentHashSet extends APersistentSet{
 
@@ -30,9 +31,8 @@ public static PersistentHashSet create(Object... init){
 
 public static PersistentHashSet create(List init){
 	PersistentHashSet ret = EMPTY;
-	for(Iterator i = init.iterator(); i.hasNext();)
+	for(Object key : init)
 		{
-		Object key = i.next();
 		ret = (PersistentHashSet) ret.cons(key);
 		}
 	return ret;
