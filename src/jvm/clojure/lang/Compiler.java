@@ -180,6 +180,13 @@ static final public Var SOURCE = Var.create("NO_SOURCE_FILE");
 static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                                  Symbol.create("*file*"), null);
 
+//String
+static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                                 Symbol.create("*compile-path*"), null);
+//boolean
+static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                                 Symbol.create("*compile-files*"), RT.F);
+
 //Integer
 static final public Var LINE = Var.create(0);
 
@@ -2970,7 +2977,7 @@ static public class FnExpr implements Expr{
 		return ret;
 	}
 
-	private void compile() throws IOException{
+	private void compile() throws Exception{
 		//create bytecode for a class
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
@@ -3035,57 +3042,9 @@ static public class FnExpr implements Expr{
 
 		if(constants.count() > 0)
 			{
-
-//		clinitgen.mark(begin);
-//			clinitgen.visitLdcInsn(fntype);
-//			clinitgen.invokeVirtual(CLASS_TYPE, getClassLoaderMethod);
-//			clinitgen.checkCast(DYNAMIC_CLASSLOADER_TYPE);
-//			clinitgen.push(constantsID);
-//			clinitgen.invokeVirtual(DYNAMIC_CLASSLOADER_TYPE, getConstantsMethod);
-			try{
-			Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
-
-			for(int i = 0; i < constants.count(); i++)
-				{
-				String cs = RT.printString(constants.nth(i));
-				if(cs.length() == 0)
-					throw new RuntimeException("Can't embed unreadable object in code: " + constants.nth(i));
-
-				if(cs.startsWith("#<"))
-					throw new RuntimeException("Can't embed unreadable object in code: " + cs);
-				clinitgen.push(cs);
-				clinitgen.invokeStatic(RT_TYPE, readStringMethod);
-//				clinitgen.dup();
-//				clinitgen.push(i);
-//				clinitgen.arrayLoad(OBJECT_TYPE);
-				clinitgen.checkCast(constantType(i));
-				clinitgen.putStatic(fntype, constantName(i), constantType(i));
-				}
+			emitConstants(clinitgen);
 			}
-			finally{
-				Var.popThreadBindings();
-			}
-			}
-//		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
-//			{
-//			Keyword k = (Keyword) s.first();
-//			clinitgen.push(k.sym.ns);
-//			clinitgen.push(k.sym.name);
-//			clinitgen.invokeStatic(KEYWORD_TYPE, kwintern);
-//			clinitgen.putStatic(fntype, munge(k.sym.toString()), KEYWORD_TYPE);
-//			}
-//		for(ISeq s = RT.keys(vars); s != null; s = s.rest())
-//			{
-//			Var v = (Var) s.first();
-//			clinitgen.push(v.ns.name.name);
-//			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
-//			clinitgen.push(v.sym.name);
-//			clinitgen.invokeStatic(SYMBOL_TYPE, symcreate);
-//			clinitgen.invokeStatic(VAR_TYPE, varintern);
-//			clinitgen.putStatic(fntype, munge(v.sym.toString()), VAR_TYPE);
-//			}
-//		clinitgen.mark(end);
-//		clinitgen.visitLocalVariable("constants", "[Ljava/lang/Object;", null, begin, end, 0);
+
 		clinitgen.returnValue();
 
 		clinitgen.endMethod();
@@ -3170,29 +3129,47 @@ static public class FnExpr implements Expr{
 		//end of class
 		cv.visitEnd();
 
-		loader = (DynamicClassLoader) LOADER.get();
 		bytecode = cw.toByteArray();
-		String path = "gen" + File.separator + internalName + ".class";
-		File cf = new File(path);
-		cf.getParentFile().mkdirs();
-		cf.createNewFile();
-		OutputStream cfs = new FileOutputStream(cf);
-		try
+		if(RT.booleanCast(COMPILE_FILES.get()))
+			writeClassFile(internalName,bytecode);
+		else
+			getCompiledClass();			
+	}
+
+
+	void emitConstants(GeneratorAdapter clinitgen){
+		try{
+			Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
+
+		for(int i = 0; i < constants.count(); i++)
 			{
-			cfs.write(bytecode);
+			String cs = RT.printString(constants.nth(i));
+			if(cs.length() == 0)
+				throw new RuntimeException("Can't embed unreadable object in code: " + constants.nth(i));
+
+			if(cs.startsWith("#<"))
+				throw new RuntimeException("Can't embed unreadable object in code: " + cs);
+			clinitgen.push(cs);
+			clinitgen.invokeStatic(RT_TYPE, readStringMethod);
+//				clinitgen.dup();
+//				clinitgen.push(i);
+//				clinitgen.arrayLoad(OBJECT_TYPE);
+			clinitgen.checkCast(constantType(i));
+			clinitgen.putStatic(fntype, constantName(i), constantType(i));
 			}
-		finally
-			{
-			cfs.close();
-			}
+		}
+		finally{
+			Var.popThreadBindings();
+		}
 	}
 
 	synchronized Class getCompiledClass(){
 		if(compiledClass == null)
 			try
 				{
-				compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
-				//compiledClass = loader.defineClass(name, bytecode);
+				//compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
+				loader = (DynamicClassLoader) LOADER.get();
+				compiledClass = loader.defineClass(name, bytecode);
 				}
 			catch(Exception e)
 				{
@@ -3206,7 +3183,6 @@ static public class FnExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		//getCompiledClass();
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//fn arg is enclosing fn, not this
 		gen.newInstance(fntype);
@@ -4459,7 +4435,29 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 	return ret;
 }
 
+static public void writeClassFile(String internalName, byte[] bytecode) throws Exception{
+	String genPath = (String) COMPILE_PATH.get();
+	if(genPath == null)
+		throw new Exception("*compile-path* not set");
+	String path = genPath + File.separator + internalName + ".class";
+	File cf = new File(path);
+	cf.getParentFile().mkdirs();
+	cf.createNewFile();
+	OutputStream cfs = new FileOutputStream(cf);
+	try
+		{
+		cfs.write(bytecode);
+		}
+	finally
+		{
+		cfs.close();
+		}
+}
+
 public static Object compile(Reader rdr, String sourcePath, String sourceName) throws Exception{
+	if(COMPILE_PATH.get() == null)
+		throw new Exception("*compile-path* not set");
+	
 	Object EOF = new Object();
 	Object ret = null;
 	LineNumberingPushbackReader pushbackReader =
@@ -4473,7 +4471,8 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       LINE_AFTER, pushbackReader.getLineNumber(),
 			       CONSTANTS, PersistentVector.EMPTY,
 			       KEYWORDS, PersistentHashMap.EMPTY,
-			       VARS, PersistentHashMap.EMPTY
+			       VARS, PersistentHashMap.EMPTY,
+			       COMPILE_FILES, RT.T
 			));
 
 	try
@@ -4484,7 +4483,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		ClassVisitor cv = cw;
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, fn.internalName, null,
-		         "java.lang.Object", null);
+		         "java/lang/Object", null);
 
 		//static load method
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
@@ -4526,13 +4525,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		clinitgen.visitCode();
 		if(fn.constants.count() > 0)
 			{
-			for(int i = 0; i < fn.constants.count(); i++)
-				{
-				clinitgen.push(RT.printString(fn.constants.nth(i)));
-				clinitgen.invokeStatic(RT_TYPE, FnExpr.readStringMethod);
-				clinitgen.checkCast(fn.constantType(i));
-				clinitgen.putStatic(fn.fntype, fn.constantName(i), fn.constantType(i));
-				}
+			fn.emitConstants(clinitgen);
 			}
 		//end of static init
 		clinitgen.returnValue();
@@ -4540,6 +4533,8 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 
 		//end of class
 		cv.visitEnd();
+		
+		writeClassFile(fn.internalName,cw.toByteArray());
 		}
 	catch(LispReader.ReaderException e)
 		{
@@ -4552,70 +4547,4 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 	return ret;
 }
 
-/*
-public static void main(String[] args) throws Exception{
-	RT.init();
-	for(String file : args)
-		try
-			{
-			loadFile(file);
-			}
-		catch(Exception e)
-			{
-			e.printStackTrace();
-			}
-
-	//repl
-	LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) RT.IN.get();
-	OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
-
-	Object EOF = new Object();
-	try
-		{
-		Var.pushThreadBindings(
-				RT.map(
-//						RT.NS_REFERS, RT.NS_REFERS.get(),
-//				       RT.NS_IMPORTS, RT.NS_IMPORTS.get(),
-RT.CURRENT_NS, RT.CURRENT_NS.get(),
-SOURCE, "REPL"
-				));
-		w.write("Clojure\n");
-		RT.inNamespace.invoke(Symbol.create("user"));
-
-		for(; ;)
-			{
-			try
-				{
-				Var.pushThreadBindings(
-						RT.map(LOADER, RT.makeClassLoader()));
-				w.write(currentNS().name + "=> ");
-				w.flush();
-				Object r = LispReader.read(rdr, false, EOF, false);
-				if(r == EOF)
-					break;
-				Object ret = eval(r);
-				RT.print(ret, w);
-				w.write('\n');
-				//w.flush();
-				}
-			catch(Throwable e)
-				{
-				e.printStackTrace();
-				}
-			finally
-				{
-				Var.popThreadBindings();
-				}
-			}
-		}
-	catch(Exception e)
-		{
-		e.printStackTrace();
-		}
-	finally
-		{
-		Var.popThreadBindings();
-		}
-}
-*/
 }

@@ -140,8 +140,8 @@
         (class x)
         x))))
 
-(defn make-inspector [x]
-  (agent {:frame frame :data x :parent nil :index 0}))
+;(defn make-inspector [x]
+;  (agent {:frame frame :data x :parent nil :index 0}))
 
 
 (defn inspect

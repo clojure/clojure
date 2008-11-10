@@ -15,6 +15,9 @@ package clojure.lang;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Callable;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
 import java.util.regex.Matcher;
 import java.io.*;
 import java.lang.reflect.Array;
@@ -23,6 +26,8 @@ import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.JarURLConnection;
 import java.nio.charset.Charset;
 
 public class RT{
@@ -376,13 +381,86 @@ static public void init() throws Exception{
 	((PrintWriter)RT.ERR.get()).println("No need to call RT.init() anymore");
 }
 
+static public long lastModified(URL url,String libfile) throws Exception{
+	if(url.getProtocol().equals("jar"))
+		{
+		return ((JarURLConnection)url.openConnection()).getJarFile().getEntry(libfile).getTime();
+		}
+	else
+		{
+		File f = new File(url.toURI());
+		return f.lastModified();
+		}
+}
+static public void loadLib(String lib) throws Exception{
+	loadLib(lib, true);
+}
+
+static public void compileLib(String lib) throws Exception{
+	String libpath = lib.replace('.', '/');
+	String cljfile = libpath + ".clj";
+	InputStream ins = baseLoader().getResourceAsStream(cljfile);
+	if(ins != null)
+		{
+		Compiler.compile(new InputStreamReader(ins, UTF8), cljfile, cljfile.substring(cljfile.lastIndexOf("/")));
+		}
+	else
+		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + lib);
+}
+
+static public void loadLib(String lib, boolean failIfNotFound) throws Exception{
+	String libpath = lib.replace('.', '/');
+	String classfile = libpath + ".class";
+	String cljfile = libpath + ".clj";
+	URL classURL = baseLoader().getResource(classfile);
+	URL cljURL = baseLoader().getResource(cljfile);
+
+	if(classURL != null &&
+	   (cljURL == null
+	    || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
+		{
+		try
+			{
+			Var.pushThreadBindings(
+					RT.map(CURRENT_NS, CURRENT_NS.get(),
+					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
+			Reflector.invokeStaticMethod(classForName(lib), "load", EMPTY_ARRAY);
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
+		}
+	else if(cljURL != null)
+		{
+		loadResourceScript(RT.class, cljfile);
+		}
+	else if(failIfNotFound)
+		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + lib);
+
+}
 static void doInit() throws Exception{
-	loadResourceScript(RT.class, "clojure/core.clj");
-	loadResourceScript(RT.class, "clojure/proxy.clj", false);
-	loadResourceScript(RT.class, "clojure/genclass.clj", false);
-	loadResourceScript(RT.class, "clojure/zip.clj", false);
-	loadResourceScript(RT.class, "clojure/xml.clj", false);
-	loadResourceScript(RT.class, "clojure/set.clj", false);
+	loadLib("clojure.core");
+	loadLib("clojure.zip",false);
+	loadLib("clojure.xml",false);
+	loadLib("clojure.set",false);
+//	try
+//		{
+//		Reflector.invokeStaticMethod("clojure.core", "load", EMPTY_ARRAY);
+//		Reflector.invokeStaticMethod("clojure.zip", "load", EMPTY_ARRAY);
+//		Reflector.invokeStaticMethod("clojure.xml", "load", EMPTY_ARRAY);
+//		Reflector.invokeStaticMethod("clojure.set", "load", EMPTY_ARRAY);
+//		}
+//	finally
+//		{
+//		Var.popThreadBindings();
+//		}
+//	loadResourceScript(RT.class, "clojure/core.clj");
+//	loadResourceScript(RT.class, "clojure/proxy.clj", false);
+//	loadResourceScript(RT.class, "clojure/genclass.clj", false);
+//	loadResourceScript(RT.class, "clojure/zip.clj", false);
+//	loadResourceScript(RT.class, "clojure/xml.clj", false);
+//	loadResourceScript(RT.class, "clojure/set.clj", false);
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.get(),

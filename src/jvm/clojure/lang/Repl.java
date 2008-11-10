@@ -23,6 +23,7 @@ static final Symbol CLOJURE = Symbol.create("clojure.core");
 static final Var in_ns = RT.var("clojure.core", "in-ns");
 static final Var refer = RT.var("clojure.core", "refer");
 static final Var ns = RT.var("clojure.core", "*ns*");
+static final Var compile_path = RT.var("clojure.core", "*compile-path*");
 static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
 static final Var print_meta = RT.var("clojure.core", "*print-meta*");
 static final Var print_length = RT.var("clojure.core", "*print-length*");
@@ -48,6 +49,7 @@ public static void main(String[] args) throws Exception{
 				       print_meta, print_meta.get(),
 				       print_length, print_length.get(),
 				       print_level, print_level.get(),
+				       compile_path, "classes",
 				       star1, null,
 				       star2, null,
 				       star3, null,
