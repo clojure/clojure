@@ -4471,8 +4471,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       LINE_AFTER, pushbackReader.getLineNumber(),
 			       CONSTANTS, PersistentVector.EMPTY,
 			       KEYWORDS, PersistentHashMap.EMPTY,
-			       VARS, PersistentHashMap.EMPTY,
-			       COMPILE_FILES, RT.T
+			       VARS, PersistentHashMap.EMPTY
 			));
 
 	try

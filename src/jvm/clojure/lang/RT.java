@@ -368,8 +368,14 @@ public static void loadResourceScript(Class c, String name, boolean failIfNotFou
 	InputStream ins = baseLoader().getResourceAsStream(name);
 	if(ins != null)
 		{
-		Compiler.load(new InputStreamReader(ins, UTF8), name, file);
-		ins.close();
+		try
+			{
+			Compiler.load(new InputStreamReader(ins, UTF8), name, file);
+			}
+		finally
+			{
+			ins.close();
+			}
 		}
 	else if(failIfNotFound)
 		{
@@ -392,26 +398,33 @@ static public long lastModified(URL url,String libfile) throws Exception{
 		return f.lastModified();
 		}
 }
-static public void loadLib(String lib) throws Exception{
-	loadLib(lib, true);
-}
 
-static public void compileLib(String lib) throws Exception{
-	String libpath = lib.replace('.', '/');
-	String cljfile = libpath + ".clj";
+static void compile(String cljfile) throws Exception{
 	InputStream ins = baseLoader().getResourceAsStream(cljfile);
 	if(ins != null)
 		{
-		Compiler.compile(new InputStreamReader(ins, UTF8), cljfile, cljfile.substring(cljfile.lastIndexOf("/")));
+		try
+			{
+			Compiler.compile(new InputStreamReader(ins, UTF8), cljfile,
+			                 cljfile.substring(1 + cljfile.lastIndexOf("/")));
+			}
+		finally
+			{
+			ins.close();
+			}
+
 		}
 	else
-		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + lib);
+		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + cljfile);
 }
 
-static public void loadLib(String lib, boolean failIfNotFound) throws Exception{
-	String libpath = lib.replace('.', '/');
-	String classfile = libpath + ".class";
-	String cljfile = libpath + ".clj";
+static public void load(String scriptbase) throws Exception{
+	load(scriptbase, true);
+}
+
+static public void load(String scriptbase, boolean failIfNotFound) throws Exception{
+	String classfile = scriptbase + ".class";
+	String cljfile = scriptbase + ".clj";
 	URL classURL = baseLoader().getResource(classfile);
 	URL cljURL = baseLoader().getResource(cljfile);
 
@@ -424,7 +437,7 @@ static public void loadLib(String lib, boolean failIfNotFound) throws Exception{
 			Var.pushThreadBindings(
 					RT.map(CURRENT_NS, CURRENT_NS.get(),
 					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
-			Reflector.invokeStaticMethod(classForName(lib), "load", EMPTY_ARRAY);
+			Reflector.invokeStaticMethod(classForName(scriptbase.replace('/','.')), "load", EMPTY_ARRAY);
 			}
 		finally
 			{
@@ -433,17 +446,20 @@ static public void loadLib(String lib, boolean failIfNotFound) throws Exception{
 		}
 	else if(cljURL != null)
 		{
-		loadResourceScript(RT.class, cljfile);
+		if (booleanCast(Compiler.COMPILE_FILES.get()))
+			compile(cljfile);
+		else
+			loadResourceScript(RT.class, cljfile);
 		}
 	else if(failIfNotFound)
-		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + lib);
-
+		throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, cljfile));
 }
+
 static void doInit() throws Exception{
-	loadLib("clojure.core");
-	loadLib("clojure.zip",false);
-	loadLib("clojure.xml",false);
-	loadLib("clojure.set",false);
+	load("clojure/core");
+	load("clojure/zip",false);
+	load("clojure/xml",false);
+	load("clojure/set",false);
 //	try
 //		{
 //		Reflector.invokeStaticMethod("clojure.core", "load", EMPTY_ARRAY);
