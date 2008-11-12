@@ -76,7 +76,7 @@
        iname nil object-iname
        (when (seq extends)
          (into-array extends)))
-    (doseq [mname pclasses rclass] methods
+    (doseq [[mname pclasses rclass] methods]
       (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
          mname
          (Type/getMethodDescriptor rclass (if pclasses
@@ -105,7 +105,7 @@
       (.createNewFile file)
       (catch IOException e
         (throw (Exception. (str "Failed to create " file) e))))
-    (with-open f (FileOutputStream. file)
+    (with-open [f (FileOutputStream. file)]
       (.write f bytecode))))
 
 (defn gen-and-load-interface
@@ -171,7 +171,7 @@
 
 (prn :isInterface (.isInterface (identity net.n01se.Foo)))
 (prn :interfaces (seq (.getGenericInterfaces (identity net.n01se.Foo))))
-(doseq m (seq (.getMethods (identity net.n01se.Foo)))
+(doseq [m (seq (.getMethods (identity net.n01se.Foo)))]
   (prn m))
 
 )
