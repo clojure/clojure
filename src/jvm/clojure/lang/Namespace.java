@@ -23,7 +23,7 @@ final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentM
 final static ConcurrentHashMap<Symbol, Namespace> namespaces = new ConcurrentHashMap<Symbol, Namespace>();
 
 public String toString(){
-	return "#<Namespace: " + name + ">";
+	return name.toString();
 }
 
 Namespace(Symbol name){
