@@ -45,40 +45,42 @@
 
 (defn load-file [f]
   "Like clojure.lang/load-file, but uses mmap internally."
-  (load (PushbackReader. (InputStreamReader. (buffer-stream (mmap f))))))
+  (with-open [rdr (-> f mmap buffer-stream InputStreamReader. PushbackReader.)]
+    (load-reader rdr)))
 
 
 (comment
 
 (alias 'mmap 'clojure.contrib.mmap)
+(alias 'core 'clojure.core)
 
 ;---
 ; zip_filter.clj is 95KB
-(def tf "/home/chouser/build/clojure/src/clj/clojure/boot.clj")
+(def tf "/home/chouser/build/clojure/src/clj/clojure/core.clj")
 (println "\nload-file" tf)
-(time (dotimes _ 5 (clojure/load-file tf))) ; 2595.672561 msecs
-(time (dotimes _ 5 (mmap/load-file tf)))    ; 2323.142295 msecs
+(time (dotimes [_ 5] (core/load-file tf))) ; 5420.177813 msecs
+(time (dotimes [_ 5] (mmap/load-file tf))) ; 7946.854434 msecs -- not so good
 
 ;---
 ; kern.log.0 is 961KB
 (def tf "/var/log/kern.log.0")
 (println "\nslurp" tf)
-(time (dotimes _ 10 (.length (clojure/slurp tf)))) ; 815.068747 msecs
-(time (dotimes _ 10 (.length (mmap/slurp tf))))    ; 141.090915 msecs
+(time (dotimes [_ 10] (.length (core/slurp tf)))) ; 435.767226 msecs
+(time (dotimes [_ 10] (.length (mmap/slurp tf)))) ;  93.176858 msecs
 
 ;---
 ; kern.log.0 is 961KB
 (def tf "/var/log/kern.log.0")
 (println "\nregex slurp large" tf)
-(time (dotimes _ 10 (count (re-seq #"EXT3.*" (clojure/slurp tf))))) ; 889
-(time (dotimes _ 10 (count (re-seq #"EXT3.*" (mmap/slurp tf)))))    ; 140
+(time (dotimes [_ 10] (count (re-seq #"EXT3.*" (core/slurp tf))))) ; 416
+(time (dotimes [_ 10] (count (re-seq #"EXT3.*" (mmap/slurp tf))))) ; 101
 
 ;---
 ; mmap.clj is about 3.1KB
-(def tf "/home/chouser/proj/clojure-contrib/src/clojure/contrib/mmap/mmap.clj")
+(def tf "/home/chouser/proj/clojure-contrib/src/clojure/contrib/mmap.clj")
 (println "\nregex slurp small" tf)
 
-(time (dotimes _ 1000 (count (re-seq #"defn \\S*" (clojure/slurp tf))))) ; 318
-(time (dotimes _ 1000 (count (re-seq #"defn \\S*" (mmap/slurp tf)))))    ; 118
+(time (dotimes [_ 1000] (count (re-seq #"defn \S*" (core/slurp tf))))) ; 308
+(time (dotimes [_ 1000] (count (re-seq #"defn \S*" (mmap/slurp tf))))) ; 198
 
 )
