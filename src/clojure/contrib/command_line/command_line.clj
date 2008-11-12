@@ -5,7 +5,7 @@
   (let [{specs true [rest-name] false} (su/group-by vector? cmdspec)
         names (assoc (into {} (for [[n txt d] specs] [(str n) d]))
                  "help?" nil)]
-    (loop [[argkey & [argval :as r]] args
+    (loop [[argkey & [argval :as r]] (if (seq args) args ["--help"])
            cmdmap {:cmdspec cmdspec rest-name []}]
       (if argkey
         (let [[_ & [keybase]] (re-find #"^--?(.*)" argkey)]
