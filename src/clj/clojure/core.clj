@@ -321,15 +321,24 @@
             (str sb)))
       (new StringBuilder #^String (str x)) ys)))
 
+
+(defn symbol?
+  "Return true if x is a Symbol"
+  [x] (instance? clojure.lang.Symbol x))
+
+(defn keyword?
+  "Return true if x is a Keyword"
+  [x] (instance? clojure.lang.Keyword x))
+
 (defn symbol
   "Returns a Symbol with the given namespace and name."
-  ([name] (. clojure.lang.Symbol (intern name)))
+  ([name] (if (symbol? name) name (. clojure.lang.Symbol (intern name))))
   ([ns name] (. clojure.lang.Symbol (intern ns name))))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
   in the keyword strings, it will be added automatically."
-  ([name] (. clojure.lang.Keyword (intern nil name)))
+  ([name] (if (keyword? name) name (. clojure.lang.Keyword (intern nil name))))
   ([ns name] (. clojure.lang.Keyword (intern ns name))))
 
 (defn gensym
@@ -2177,13 +2186,6 @@
         (recur (dec n) (rest xs))
         xs)))
 
-(defn symbol?
-  "Return true if x is a Symbol"
-  [x] (instance? clojure.lang.Symbol x))
-
-(defn keyword?
-  "Return true if x is a Keyword"
-  [x] (instance? clojure.lang.Keyword x))
 
 ;redefine let and loop  with destructuring
 (defn destructure [bindings]
