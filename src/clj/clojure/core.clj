@@ -3404,7 +3404,9 @@
   [n]
   (or (instance? Integer n)
       (instance? Long n)
-      (instance? BigInteger n)))
+      (instance? BigInteger n)
+      (instance? Short n)
+      (instance? Byte n)))
 
 (defn ratio?
   "Returns true if n is a Ratio"
