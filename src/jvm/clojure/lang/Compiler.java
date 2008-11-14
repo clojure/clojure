@@ -4530,6 +4530,25 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		clinitgen.returnValue();
 		clinitgen.endMethod();
 
+//		//main
+//		GeneratorAdapter maingen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
+//		                                            Method.getMethod("void main (String[])"),
+//		                                            null,
+//		                                            null,
+//		                                            cv);
+//		maingen.visitCode();
+//		maingen.push(fn.internalName.replace('/', '.'));
+//		maingen.push("main");
+//		maingen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+//		maingen.loadArgs();
+//		maingen.invokeStatic(RT_TYPE,Method.getMethod("clojure.lang.ISeq seq(Object)"));
+//        maingen.invokeInterface(IFN_TYPE, new Method("applyTo",OBJECT_TYPE,new Type[]{Type.getType(ISeq.class)}));
+//		maingen.pop();
+//
+//		 //end of main
+//		maingen.returnValue();
+//		maingen.endMethod();
+
 		//end of class
 		cv.visitEnd();
 		
