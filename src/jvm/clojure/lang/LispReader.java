@@ -422,10 +422,9 @@ static class StringReader extends AFn{
 					case 'u':
 					{
 					ch = r.read();
-					if(Character.isDigit(ch))
-						ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
-					else
-						throw new Exception("Invalid unicode escape: \\" + (char) ch);
+					if (Character.digit(ch, 16) == -1)
+					    throw new Exception("Invalid unicode escape: \\u" + (char) ch);
+					ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
 					break;
 					}
 					default:
@@ -809,7 +808,12 @@ static class CharacterReader extends AFn{
 		else if(token.equals("return"))
 			return '\r';
 		else if(token.startsWith("u"))
-			return (char) readUnicodeChar(token, 1, 4, 16);
+		    {
+			 char c = (char) readUnicodeChar(token, 1, 4, 16);
+			 if(c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
+			     throw new Exception("Invalid character constant: \\u" + Integer.toString(c, 16));
+			 return c;
+		    }
 		else if(token.startsWith("o"))
 			{
 			int len = token.length() - 1;
