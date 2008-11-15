@@ -4481,8 +4481,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		fn.fntype = Type.getObjectType(fn.internalName);
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		ClassVisitor cv = cw;
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, fn.internalName, null,
-		         "java/lang/Object", null);
+		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, fn.internalName, null, "java/lang/Object", null);
 
 		//static load method
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
