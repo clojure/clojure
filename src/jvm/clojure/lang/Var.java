@@ -126,7 +126,7 @@ final public Object get(){
 		return b.val;
 	if(hasRoot())
 		return root;
-	throw new IllegalStateException(String.format("Var %s is unbound.", sym));
+	throw new IllegalStateException(String.format("Var %s/%s is unbound.", ns, sym));
 }
 
 public void setValidator(IFn vf){
