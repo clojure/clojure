@@ -4536,6 +4536,9 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                                            null,
 		                                            cv);
 		maingen.visitCode();
+		maingen.push(fn.internalName);
+		maingen.push(true);
+		maingen.invokeStatic(RT_TYPE, Method.getMethod("void load(String,boolean)"));
 		maingen.push(fn.internalName.replace('/', '.'));
 		maingen.push("main");
 		maingen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
