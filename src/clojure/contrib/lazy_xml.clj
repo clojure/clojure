@@ -13,8 +13,8 @@
 ; http://www.extreme.indiana.edu/xgws/xsoap/xpp/
 (def has-pull false)
 (defn- parse-seq-pull [& _])
-(try (load "with_pull.clj")
-  (catch Exception e))
+(try (load "lazy_xml/with_pull")
+  (catch ClassNotFoundException e))
 
 (defn startparse-sax [s ch]
   (.. SAXParserFactory newInstance newSAXParser (parse s ch)))
@@ -175,6 +175,6 @@
 
 ; When used with zip and zip-filter, you can get do queries like this
 ; without parsing more than the first few tags:
-; (zip/node (first (xml-> x :id)))
+; (zip/node (first (xml-> (zip/xml-zip tree) :id)))
 
 )
