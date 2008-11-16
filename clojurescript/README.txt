@@ -3,7 +3,8 @@ ClojureScript.  It currently allows code written in a very small
 subset of Clojure to be automatically translated to JavaScript.
 
 tojs.clj is Clojure code to translate Clojure forms to Javascript.  It
-was used to generate boot.js from clojure's own boot.clj.
+was used to generate core.js from clojure's own core.clj and
+core-print.clj.
 
 To run any of the tests, do something like:
 
@@ -12,7 +13,7 @@ clojure.lang.Script tojs.clj -- t03.cljs > t03.js
 
 Now that you've got the .js file, you can test using Rhino:
 
-/usr/bin/java -jar /usr/share/java/js.jar -f clj.js -f boot.js -f t03.js
+/usr/bin/java -jar /usr/share/java/js.jar -f rt.js -f core.js -f t03.js
 
 Or point a browser at test.html and choose the test you want to run.
 

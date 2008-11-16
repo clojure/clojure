@@ -20,7 +20,7 @@
 (defn vstr [v]
   (let [sb (StringBuilder.)
         lvl (fn lvl [v]
-              (doseq i v
+              (doseq [i v]
                 (if (vector? i)
                   (lvl i)
                   (.append sb (str i)))))]
@@ -55,7 +55,7 @@
                   (for [lb (.reqParms fm)
                         :when (not= (.name lb) (.name (mparm (.idx lb))))]
                     [(lm lb) "=arguments[" (dec (.idx lb)) "]"]))
-                (when-let lb (.restParm fm)
+                (when-let [lb (.restParm fm)]
                   [(str (lm lb) "=clojure.JS.rest_args(this,arguments,"
                         (count (.reqParms fm)) ")")]))]
     (.reqParms maxm)
@@ -127,8 +127,8 @@
   (cond
     (or (instance? Character c)
         (string?  c)) (pr-str (str c))
-    (keyword? c) (str "clojure.keyword(\"" (namespace c) "\",\"" (name c) "\")")
-    (symbol?  c) (str "clojure.symbol(\"" c "\")")
+    (keyword? c) (str "clojure.core.keyword(\"" (namespace c) "\",\"" (name c) "\")")
+    (symbol?  c) (str "clojure.core.symbol(\"" c "\")")
     (class?   c) (.getCanonicalName c)
     (list?    c) (vstr ["clojure.JS.lit_list(["
                         (vec (interpose "," (map const-str c)))
@@ -242,12 +242,12 @@
          ")"]))
 
 (defmethod tojs clojure.lang.Compiler$MapExpr [e ctx]
-  (vstr ["clojure.hash_map("
+  (vstr ["clojure.core.hash_map("
          (vec (interpose "," (map #(tojs % ctx) (.keyvals e))))
          ")"]))
 
 (defmethod tojs clojure.lang.Compiler$SetExpr [e ctx]
-  (vstr ["clojure.hash_set("
+  (vstr ["clojure.core.hash_set("
          (vec (interpose "," (map #(tojs % ctx) (.keys e))))
          ")"]))
 
@@ -289,7 +289,7 @@
                  seq instance? assoc apply refer first rest import
                  hash-map count find keys vals get class contains?
                  print-method class? number? string? integer? nth
-                 to-array cons keyword symbol
+                 to-array cons keyword symbol load
                  ;-- not supported yet
                  make-array to-array-2d re-pattern re-matcher re-groups
                  re-seq re-matches re-find format
@@ -338,7 +338,7 @@
       (loop []
         (let [f (read reader false reader false)]
           (when-not (identical? f reader)
-            (if-let js (formtojs f)
+            (if-let [js (formtojs f)]
               (do
                 (when *debug-comments*
                   (println "\n//======")
@@ -389,7 +389,7 @@
 (defn start-server [port]
   (println "Opening port" port)
   (loop [server (java.net.ServerSocket. port)]
-    (with-open socket (.accept server)
+    (with-open [socket (.accept server)]
       (binding [*debug-fn-names* false
                 *debug-comments* false
                 *eval-defmacro* false
@@ -412,22 +412,22 @@
                    (.replace trace "\n" "\\n") "\");")))))))
     (recur server)))
 
-(defn mkboot []
-  (binding [*out* (ds/writer "boot.js")]
-    (filetojs (.getResourceAsStream (clojure.lang.RT/baseLoader)
-                                    "clojure/boot.clj"))))
+(defn mkcore []
+  (binding [*out* (ds/writer "core.js")]
+    (doseq [file ["clojure/core.clj" "clojure/core-print.clj"]]
+      (filetojs (.getResourceAsStream (clojure.lang.RT/baseLoader) file)))))
 
 (with-command-line *command-line-args*
   "tojs -- Compile ClojureScript to JavaScript"
   [[simple? "Runs some simple built-in tests"]
    [serve   "Starts a repl server on the given port" 8081]
-   [mkboot? "Generates a boot.js file"]
+   [mkcore? "Generates a core.js file"]
    [v?      "Includes extra fn names and comments in js"]
    filenames]
   (binding [*debug-fn-names* v? *debug-comments* v?]
     (cond
       simple? (simple-tests)
       serve   (start-server (Integer/parseInt serve))
-      mkboot? (mkboot)
-      :else   (doseq filename filenames
+      mkcore? (mkcore)
+      :else   (doseq [filename filenames]
                  (filetojs filename)))))

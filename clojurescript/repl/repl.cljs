@@ -8,7 +8,7 @@
       (if (keyword? tag)
         (let [elem (.createElement document (name tag))]
           (when (map? attrs)
-            (doseq [k v] attrs
+            (doseq [[k v] attrs]
               (when v (.setAttribute elem (name k) v))))
           [(append-dom elem (if (map? attrs) body (cons attrs body)))])
         (mapcat dom o)))
@@ -16,7 +16,7 @@
       [(.createTextNode document (str o))])))
 
 (defn append-dom [parent v]
-  (doseq i (dom v)
+  (doseq [i (dom v)]
     (.appendChild parent i))
   parent)
 
@@ -26,7 +26,7 @@
 
 (defn repl-print [text]
   (let [log (:log elems)]
-    (doseq line (.split text #"\n")
+    (doseq [line (.split text #"\n")]
       (append-dom log
         [:div {:class (str "cg "
                            (when *print-class*

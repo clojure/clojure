@@ -43,7 +43,237 @@ if( ! clojure.JS.global["java"] ) {
            util: { Collection: {}, Map: {}, Set: {}, regex: { Pattern: {} } } };
 }
 
-clojure = new clojure.lang.Namespace("clojure",{
+clojure = {
+  JS: {
+    merge: clojure.JS.merge,
+    global: clojure.JS.global,
+    Class: clojure.JS.Class,
+    objectType: typeof {},
+    functionType: typeof function(){},
+    stringType: typeof "",
+    numberType: typeof 0,
+    variadic: function( arity, f ) {
+      f.arity = arity;
+      f.isVariadic = true;
+      return f;
+    },
+    resolveVar: function( sym, ctxns ) {
+      return ctxns[ sym ] || clojure[ sym ] || clojure.JS.global[ sym ];
+    },
+    def: function( ns, name, init ) {
+      var v = new clojure.lang.Var( ns, name );
+      ns["_var_" + name] = v;
+      v.push( init );
+      return v;
+    },
+    variadic_sentinel: {},
+    rest_args: function( varflag, args, i ) {
+      if( varflag === clojure.JS.variadic_sentinel )
+        return args[ args.length - 1 ];
+      return new clojure.lang.ArraySeq( null, args, i );
+    },
+    invoke: function( obj, methodname, args ) {
+      return obj[ methodname ].apply( obj, args );
+    },
+    getOrRun: function( obj, prop ) {
+      var val = obj[ prop ];
+      if( typeof val === clojure.JS.functionType
+          || (typeof val === clojure.JS.objectType && "apply" in val) )
+      {
+        return val.apply( obj, [] );
+      }
+      return val;
+    },
+    lit_list: function( a ) {
+      if( a.length > 0 )
+        return new clojure.lang.ArraySeq( null, a, 0 );
+      return clojure.lang.PersistentList.EMPTY;
+    },
+    lit_vector: function( a ) {
+      return clojure.lang.LazilyPersistentVector.createOwning( a );
+    },
+    implement: function( cls, name, extend, implement ) {
+      clojure.JS.merge( cls, clojure.JS.Class );
+      cls.classname = name;
+      cls.extend = extend;
+      cls.implement = implement;
+      cls.classset = {};
+      cls.classset[ name ] = true;
+      if( implement ) {
+        for( var i = 0; i < implement.length; ++i ) {
+          if( ! implement[ i ] )
+            throw "Can't implement null: " + name;
+          clojure.JS.merge( cls.classset, implement[ i ].classset );
+        }
+      }
+    },
+    definterface: function( pkg, name, implement ) {
+      var cls = pkg[ name ] = {};
+      clojure.JS.implement( cls, name, null, implement );
+      return cls;
+    },
+    defclass: function( pkg, name, opts ) {
+      var cls = pkg[ name ] = opts.init || function() {};
+      clojure.JS.implement( cls, name, opts.extend, opts.implement );
+      if( 'extend' in opts ) {
+        cls.prototype = new opts.extend;
+        cls.prototype.constructor = cls;
+        clojure.JS.merge( cls.classset, opts.extend.classset );
+      }
+      if( opts.statics ) { clojure.JS.merge( cls, opts.statics ); }
+      if( opts.methods ) { clojure.JS.merge( cls.prototype, opts.methods ); }
+      return cls;
+    },
+    instanceq: function( c, o ){
+      if( o === null )
+        return false;
+      if( typeof o === clojure.JS.functionType && ! ("constructor" in o) )
+        return false; // a Java class?
+      if( o.constructor === c )
+        return true;
+      if( ! o.constructor.classset )
+        return false; // builtin class that doesn't match?
+      return o.constructor.classset[ c.classname ];
+    },
+    relayPrintMethod: function( jsclass, javaclass, ctor ) {
+      var m = clojure.core.print_method;
+      m.addMethod( jsclass, function(o,w) {
+        return (clojure.core.get( m.methodTable, javaclass )
+          .apply(null, [ctor ? ctor(o) : o, w]));
+      });
+    },
+    bitcount: function(n){
+      var rtn = 0;
+      for( ; n; n >>= 1) {
+        rtn += n & 1;
+      }
+      return rtn;
+    },
+    ObjSeq: {
+      create: function( obj ) {
+        var i, pairs = [];
+        for( i in obj ) {
+          pairs.push( [i, obj[i]] );
+        }
+        return clojure.lang.ArraySeq.create( pairs );
+      }
+    }
+  },
+  lang: {
+    Namespace: clojure.lang.Namespace,
+    Numbers: {
+      isZero: function(x) { return x === 0; },
+      isPos: function(x) { return x > 0; },
+      isNeg: function(x) { return x < 0; },
+      minus: function(x,y) { return y === undefined ? -x : x - y; },
+      inc: function(x) { return x + 1; },
+      dec: function(x) { return x - 1; },
+      add: function(x,y) { return x + y; },
+      multiply: function(x,y) { return x * y; },
+      divide: function(x,y) { return x / y; },
+      quotient: function(x,y) { return parseInt(x / y); },
+      remainder: function(x,y) { return x % y; },
+      equiv: function(x,y) { return x == y; },
+      lt: function(x,y) { return x < y; },
+      lte: function(x,y) { return x <= y; },
+      gt: function(x,y) { return x > y; },
+      gte: function(x,y) { return x >= y; },
+      compare: function(x,y) { return (x<y) ? -1 :( (y<x) ? 1 : 0 ); },
+      unchecked_inc: function(x) { return x + 1; }
+    },
+    Util: {
+      hash: function(o){
+        switch( o ) {
+          case null:     return 0;
+          case Array:    return 0x7A837A71;
+          case Boolean:  return 0x7A837A72;
+          case Function: return 0x7A837A73;
+          case Number:   return 0x7A837A74;
+          case Object:   return 0x7A837A75;
+          case RegExp:   return 0x7A837A76;
+          case String:   return 0x7A837A77;
+          case java.lang.Boolean:
+          case java.lang.Character:
+          case java.lang.Class:
+          case java.lang.Double:
+          case java.lang.Integer:
+          case java.lang.Number:
+          case java.lang.String:
+          case java.math.BigDecimal:
+          case java.util.Collection:
+          case java.util.Map:
+          case java.util.Set:
+          case java.util.regex.Pattern:
+                         return 0x7A830001;
+        }
+        var i = 0, ret = o.length;
+        switch( typeof o ) {
+          case clojure.JS.stringType:
+            // lousy hand-made string hash
+            for( ; i < o.length; ++i ) {
+              ret ^= o.charCodeAt(i) << ((i % 4) * 8);
+            }
+            return ret;
+          case clojure.JS.numberType:
+            return o & 0xffffffff;
+        }
+        switch( o.constructor ) {
+          case Array:
+            for( ; i < o.length; ++i ) {
+              ret = clojure.lang.Util.hashCombine(
+                  ret, clojure.lang.Util.hash( o[i] ) );
+            }
+            return ret;
+        }
+        if( o.hashCode )
+          return o.hashCode();
+        return 0x11111111;
+      },
+      hashCombine: function(seed, hash){
+        return seed ^ (hash + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+      },
+      equal: function(x,y) { return x == y; },
+      isInteger: function(x) { return typeof x == clojure.JS.numberType; }
+    },
+    RT: {
+      EMPTY_ARRAY: [],
+      conj: function( coll, x ) {
+        if( coll === null )
+          return new clojure.lang.PersistentList( null, x );
+        return coll.cons( x );
+      },
+      seqToArray: function(s) {
+        var i = 0, ret = new Array( clojure.count( s ) );
+        for( ; s !== null; ++i, s = s.rest() )
+          ret[ i ] = s.first();
+        return ret;
+      },
+      intCast: function(i) {
+        return parseInt(i);
+      },
+      makeStringBuilder: function(s) {
+        return new clojure.JS.StringBuilder( s===undefined ? "" : s );
+      },
+      className: function(c) {
+        if( "classname" in c )
+          return c.classname;
+        if( "name" in c )
+          return c.name;
+        var s = "" + c,
+            m = /^\[JavaClass (.*)]$/.exec(s);
+        if( m )
+          return m[1];
+        return s;
+      },
+      simpleClassName: function(c) {
+        // FIXME: should generate simple name
+        return clojure.lang.RT.className(c);
+      }
+    }
+  }
+};
+
+clojure.core = new clojure.lang.Namespace("clojure.core",{
   in_ns: function(s) {
     var i, nsparts = s.getName().split('.'),
         base = clojure.JS.global;
@@ -55,6 +285,7 @@ clojure = new clojure.lang.Namespace("clojure",{
     }
   },
   refer: function(s) {},
+  load: function(s) {},
   seq: function(coll){
     if( coll === null ) return null;
     else if( coll.seq ) return coll.seq();
@@ -78,17 +309,17 @@ clojure = new clojure.lang.Namespace("clojure",{
       }
       if( eagercount == f.arity ) {
         if( arglen - eagercount < 3 ) {
-          newargs.push( clojure.seq( oldargs[ arglen - 1 ] ) );
+          newargs.push( clojure.core.seq( oldargs[ arglen - 1 ] ) );
         }
         else {
-          newargs.push( clojure.concat(
+          newargs.push( clojure.core.concat(
                   new clojure.lang.ArraySeq(
                       null, oldargs, eagercount + 1, arglen - 1 ),
                   oldargs[ arglen - 1 ] ) );
         }
       }
       else {
-        s = clojure.seq( oldargs[ arglen - 1 ] );
+        s = clojure.core.seq( oldargs[ arglen - 1 ] );
         for( ; s && newargs.length < f.arity; s = s.rest() ) {
           newargs.push( s.first() );
         }
@@ -111,20 +342,20 @@ clojure = new clojure.lang.Namespace("clojure",{
   first: function(x) {
     if( x === null ) return null;
     if( x.first ) return x.first();
-    var seq = clojure.seq( x );
+    var seq = clojure.core.seq( x );
     if( seq === null ) return null;
     return seq.first();
   },
   rest: function(x) {
     if( x === null ) return null;
     if( x.rest ) return x.rest();
-    var seq = clojure.seq( x );
+    var seq = clojure.core.seq( x );
     if( seq === null ) return null;
     return seq.rest();
   },
   second: function(x) { return clojure.first(clojure.rest(x)); },
   cons: function( x, coll ) {
-    var y = clojure.seq( coll );
+    var y = clojure.core.seq( coll );
     if( y === null )
       return new clojure.lang.PersistentList( null, x );
     return y.cons( x );
@@ -244,231 +475,10 @@ clojure = new clojure.lang.Namespace("clojure",{
     return a === b;
   },
   keys: function(coll) {
-    return clojure.lang.APersistentMap.KeySeq.create(clojure.seq(coll));
+    return clojure.lang.APersistentMap.KeySeq.create(clojure.core.seq(coll));
   },
   vals: function(coll) {
-    return clojure.lang.APersistentMap.ValSeq.create(clojure.seq(coll));
-  },
-  JS: {
-    merge: clojure.JS.merge,
-    global: clojure.JS.global,
-    Class: clojure.JS.Class,
-    objectType: typeof {},
-    functionType: typeof function(){},
-    stringType: typeof "",
-    numberType: typeof 0,
-    variadic: function( arity, f ) {
-      f.arity = arity;
-      f.isVariadic = true;
-      return f;
-    },
-    resolveVar: function( sym, ctxns ) {
-      return ctxns[ sym ] || clojure[ sym ] || clojure.JS.global[ sym ];
-    },
-    def: function( ns, name, init ) {
-      var v = new clojure.lang.Var( ns, name );
-      ns["_var_" + name] = v;
-      v.push( init );
-      return v;
-    },
-    variadic_sentinel: {},
-    rest_args: function( varflag, args, i ) {
-      if( varflag === clojure.JS.variadic_sentinel )
-        return args[ args.length - 1 ];
-      return new clojure.lang.ArraySeq( null, args, i );
-    },
-    invoke: function( obj, methodname, args ) {
-      return obj[ methodname ].apply( obj, args );
-    },
-    getOrRun: function( obj, prop ) {
-      var val = obj[ prop ];
-      if( typeof val === clojure.JS.functionType
-          || (typeof val === clojure.JS.objectType && "apply" in val) )
-      {
-        return val.apply( obj, [] );
-      }
-      return val;
-    },
-    lit_list: function( a ) {
-      if( a.length > 0 )
-        return new clojure.lang.ArraySeq( null, a, 0 );
-      return clojure.lang.PersistentList.EMPTY;
-    },
-    lit_vector: function( a ) {
-      return clojure.lang.LazilyPersistentVector.createOwning( a );
-    },
-    implement: function( cls, name, extend, implement ) {
-      clojure.JS.merge( cls, clojure.JS.Class );
-      cls.classname = name;
-      cls.extend = extend;
-      cls.implement = implement;
-      cls.classset = {};
-      cls.classset[ name ] = true;
-      if( implement ) {
-        for( var i = 0; i < implement.length; ++i ) {
-          if( ! implement[ i ] )
-            throw "Can't implement null: " + name;
-          clojure.JS.merge( cls.classset, implement[ i ].classset );
-        }
-      }
-    },
-    definterface: function( pkg, name, implement ) {
-      var cls = pkg[ name ] = {};
-      clojure.JS.implement( cls, name, null, implement );
-      return cls;
-    },
-    defclass: function( pkg, name, opts ) {
-      var cls = pkg[ name ] = opts.init || function() {};
-      clojure.JS.implement( cls, name, opts.extend, opts.implement );
-      if( 'extend' in opts ) {
-        cls.prototype = new opts.extend;
-        cls.prototype.constructor = cls;
-        clojure.JS.merge( cls.classset, opts.extend.classset );
-      }
-      if( opts.statics ) { clojure.JS.merge( cls, opts.statics ); }
-      if( opts.methods ) { clojure.JS.merge( cls.prototype, opts.methods ); }
-      return cls;
-    },
-    instanceq: function( c, o ){
-      if( o === null )
-        return false;
-      if( typeof o === clojure.JS.functionType && ! ("constructor" in o) )
-        return false; // a Java class?
-      if( o.constructor === c )
-        return true;
-      if( ! o.constructor.classset )
-        return false; // builtin class that doesn't match?
-      return o.constructor.classset[ c.classname ];
-    },
-    relayPrintMethod: function( jsclass, javaclass, ctor ) {
-      var m = clojure.print_method;
-      m.addMethod( jsclass, function(o,w) {
-        return (clojure.get( m.methodTable, javaclass )
-          .apply(null, [ctor ? ctor(o) : o, w]));
-      });
-    },
-    bitcount: function(n){
-      var rtn = 0;
-      for( ; n; n >>= 1) {
-        rtn += n & 1;
-      }
-      return rtn;
-    },
-    ObjSeq: {
-      create: function( obj ) {
-        var i, pairs = [];
-        for( i in obj ) {
-          pairs.push( [i, obj[i]] );
-        }
-        return clojure.lang.ArraySeq.create( pairs );
-      }
-    }
-  },
-  lang: {
-    Namespace: clojure.lang.Namespace,
-    Numbers: {
-      isZero: function(x) { return x === 0; },
-      isPos: function(x) { return x > 0; },
-      isNeg: function(x) { return x < 0; },
-      minus: function(x,y) { return y === undefined ? -x : x - y; },
-      inc: function(x) { return x + 1; },
-      dec: function(x) { return x - 1; },
-      add: function(x,y) { return x + y; },
-      multiply: function(x,y) { return x * y; },
-      divide: function(x,y) { return x / y; },
-      quotient: function(x,y) { return parseInt(x / y); },
-      remainder: function(x,y) { return x % y; },
-      equiv: function(x,y) { return x == y; },
-      lt: function(x,y) { return x < y; },
-      lte: function(x,y) { return x <= y; },
-      gt: function(x,y) { return x > y; },
-      gte: function(x,y) { return x >= y; },
-      compare: function(x,y) { return (x<y) ? -1 :( (y<x) ? 1 : 0 ); },
-      unchecked_inc: function(x) { return x + 1; }
-    },
-    Util: {
-      hash: function(o){
-        switch( o ) {
-          case null:     return 0;
-          case String:   return 0x7A837A70;
-          case Number:   return 0x7A837A71;
-          case RegExp:   return 0x7A837A72;
-          case Object:   return 0x7A837A73;
-          case Function: return 0x7A837A74;
-          case Array:    return 0x7A837A75;
-          case Boolean:  return 0x7A837A76;
-          case java.lang.String:
-          case java.lang.Character:
-          case java.lang.Class:
-          case java.lang.Number:
-          case java.lang.Boolean:
-          case java.math.BigDecimal:
-          case java.util.Collection:
-          case java.util.Map:
-          case java.util.Set:
-          case java.util.regex.Pattern:
-                         return 0x7A830001;
-        }
-        var i = 0, ret = o.length;
-        switch( typeof o ) {
-          case clojure.JS.stringType:
-            // lousy hand-made string hash
-            for( ; i < o.length; ++i ) {
-              ret ^= o.charCodeAt(i) << ((i % 4) * 8);
-            }
-            return ret;
-          case clojure.JS.numberType:
-            return o & 0xffffffff;
-        }
-        switch( o.constructor ) {
-          case Array:
-            for( ; i < o.length; ++i ) {
-              ret = clojure.lang.Util.hashCombine(
-                  ret, clojure.lang.Util.hash( o[i] ) );
-            }
-            return ret;
-        }
-        if( o.hashCode )
-          return o.hashCode();
-        return 0x11111111;
-      },
-      hashCombine: function(seed, hash){
-        return seed ^ (hash + 0x9e3779b9 + (seed << 6) + (seed >> 2));
-      },
-      equal: function(x,y) { return x == y; },
-      isInteger: function(x) { return typeof x == clojure.JS.numberType; }
-    },
-    RT: {
-      EMPTY_ARRAY: [],
-      conj: function( coll, x ) {
-        if( coll === null )
-          return new clojure.lang.PersistentList( null, x );
-        return coll.cons( x );
-      },
-      seqToArray: function(s) {
-        var i = 0, ret = new Array( clojure.count( s ) );
-        for( ; s !== null; ++i, s = s.rest() )
-          ret[ i ] = s.first();
-        return ret;
-      },
-      intCast: function(i) {
-        return parseInt(i);
-      },
-      makeStringBuilder: function(s) {
-        return new clojure.JS.StringBuilder( s===undefined ? "" : s );
-      },
-      className: function(c) {
-        if( "classname" in c )
-          return c.classname;
-        if( "name" in c )
-          return c.name;
-        var s = "" + c,
-            m = /^\[JavaClass (.*)]$/.exec(s);
-        if( m )
-          return m[1];
-        return s;
-      },
-    }
+    return clojure.lang.APersistentMap.ValSeq.create(clojure.core.seq(coll));
   }
 });
 
@@ -624,7 +634,7 @@ clojure.JS.defclass( clojure.lang, "LazyCons", {
         if( this._first === clojure.lang.LazyCons.sentinel ) {
           this.first();
         }
-        this._rest = clojure.seq( this.f(null) );
+        this._rest = clojure.core.seq( this.f(null) );
         this.f = null;
       }
       return this._rest;
@@ -755,9 +765,11 @@ clojure.JS.defclass( clojure.lang, "Keyword", {
     hashCode: function() {
       return clojure.lang.Util.hash( this._ns + "/" + this._name );
     },
-    invoke: function(coll, notFound) { return clojure.get( coll,this,notFound);}
+    invoke: function(coll, notFound) { return clojure.core.get( coll,this,notFound);}
   }
 });
+
+clojure.JS.defclass( clojure.lang, "Ratio", {} );
 
 clojure.JS.defclass( clojure.lang, "Symbol", {
   extend: clojure.lang.AFn,
@@ -800,7 +812,9 @@ clojure.JS.defclass( clojure.lang, "Symbol", {
     hashCode: function() {
       return clojure.lang.Util.hash( this._ns + "/" + this._name );
     },
-    invoke: function(coll, notFound) { return clojure.get( coll,this,notFound);}
+    invoke: function(coll, notFound) {
+      return clojure.core.get( coll,this,notFound);
+    }
   }
 });
 
@@ -1345,7 +1359,7 @@ clojure.JS.defclass( clojure.lang, "APersistentMap", {
           throw "Vector arg to map conj must be a pair";
         return this.assoc( o.nth(0), o.nth(1) );
       }
-      var e, ret = this, es = clojure.seq( o );
+      var e, ret = this, es = clojure.core.seq( o );
       for( ; es; es = es.rest() ) {
         e = es.first();
         ret = ret.assoc( e.getKey(), e.getValue() );
@@ -1456,11 +1470,11 @@ clojure.JS.defclass( clojure.lang, "PersistentHashMap", {
   statics: {
     create: function(init){
       var ret = clojure.lang.PersistentHashMap.EMPTY,
-          s = clojure.seq( init );
+          s = clojure.core.seq( init );
       for( ; s; s=s.rest().rest() ){
         if( s.rest() === null )
           throw "No value supplied for key: " + s.first();
-        ret = ret.assoc( s.first(), clojure.second( s ) );
+        ret = ret.assoc( s.first(), clojure.core.second( s ) );
       }
       return ret;
     },
@@ -1764,7 +1778,7 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "LeafNode", {
         return this;
       return null;
     },
-    nodeSeq: function(){ return clojure.cons( this, null ); },
+    nodeSeq: function(){ return clojure.core.cons( this, null ); },
     getHash: function(){ return this.hash; },
     key: function(){ return this._key; },
     val: function(){ return this._val; },
@@ -1837,7 +1851,7 @@ clojure.JS.defclass( clojure.lang, "APersistentSet", {
     contains: function(key){ return this.impl.containsKey(key); },
     get: function(key){ return this.impl.valAt(key); },
     count: function(){ return this.impl.count(); },
-    seq: function(){ return clojure.keys( this.impl ); },
+    seq: function(){ return clojure.core.keys( this.impl ); },
     invoke: function(key){ return this.get(key); },
     equals: function(m) {
       if( ! clojure.instanceq( clojure.lang.IPersistentSet ) )
@@ -1877,7 +1891,7 @@ clojure.JS.defclass( clojure.lang, "PersistentHashSet", {
   statics: {
     create: function(init){
       var ret = clojure.lang.PersistentHashSet.EMPTY,
-          s = clojure.seq( init );
+          s = clojure.core.seq( init );
       for( ; s; s=s.rest() ){
         ret = ret.cons( s.first() );
       }
@@ -1934,10 +1948,10 @@ clojure.JS.defclass( clojure.lang, "MultiFn", {
       if( this.prefers( dispatchValY, dispatchValX ) )
         throw ("Preference conflict: " + dispatchValY +
             " is already preferred to" + dispatchValX);
-      var oldset = clojure.get(
+      var oldset = clojure.core.get(
           this.preferTable, dispatchValX, clojure.lang.PersistentHashSet.EMPTY);
       this.preferTable = this.preferTable.assoc(
-          dispatchValX, clojure.conj( oldset, dispatchValY ) );
+          dispatchValX, clojure.core.conj( oldset, dispatchValY ) );
       this.resetCache();
       return this;
     },
@@ -1945,15 +1959,15 @@ clojure.JS.defclass( clojure.lang, "MultiFn", {
       var xprefs = this.preferTable.valAt(x);
       return xprefs && xprefs.contains(y);
     },
-    isA: function(x,y) { return clojure.isa_QMARK_( x, y ); },
+    isA: function(x,y) { return clojure.core.isa_QMARK_( x, y ); },
     dominates: function(x,y) { return this.prefers(x,y) || this.isA(x,y); },
     resetCache: function() {
       this.methodCache = this.methodTable;
-      this.cachedHierarchy = clojure.global_hierarchy;
+      this.cachedHierarchy = clojure.core.global_hierarchy;
       return this.methodCache;
     },
     getFn: function(dispatchVal) {
-      if( this.cachedHierarchy != clojure.global_hierarchy )
+      if( this.cachedHierarchy != clojure.core.global_hierarchy )
         this.resetCache();
       var targetFn =
         this.methodCache.valAt( dispatchVal ) ||
@@ -1991,11 +2005,11 @@ clojure.JS.defclass( clojure.lang, "MultiFn", {
   }
 });
 
-clojure.print_method = new clojure.lang.MultiFn(
-  function (x, writer){ return clojure.class_(x); },
-  clojure.keyword("","default"));
+clojure.core.print_method = new clojure.lang.MultiFn(
+  function (x, writer){ return clojure.core.class_(x); },
+  clojure.core.keyword("","default"));
 
-clojure.print_method.addMethod( java.lang.Class, function(o,w) {
+clojure.core.print_method.addMethod( java.lang.Class, function(o,w) {
   w.write("#="+clojure.lang.RT.className(o));
 });
 
@@ -2006,7 +2020,7 @@ clojure.JS.relayPrintMethod( String,  java.lang.String,
     function(o) { return new clojure.JS.String(o); } );
 clojure.JS.relayPrintMethod( clojure.JS.Class, java.lang.Class );
 
-clojure.JS.def(clojure,"_STAR_print_readably_STAR_",true);
+clojure.JS.def(clojure.core,"_STAR_print_readably_STAR_",true);
 
 clojure.JS.implement( clojure.lang.Namespace, "Namespace" );
 
@@ -2019,7 +2033,7 @@ clojure.JS.merge( clojure.lang.Namespace.prototype, {
   hashCode: function() { return clojure.hash( this.name ); }
 });
 
-clojure.in_ns(clojure.symbol("user"));
+clojure.core.in_ns(clojure.core.symbol("user"));
 
 (function() {
   var buf = [];
@@ -2035,5 +2049,5 @@ clojure.in_ns(clojure.symbol("user"));
       buf = [ last ];
     }
   }
-  clojure._STAR_out_STAR_ = { append: write, write: write };
+  clojure.core._STAR_out_STAR_ = { append: write, write: write };
 })();
