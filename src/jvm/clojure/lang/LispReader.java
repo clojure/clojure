@@ -88,6 +88,7 @@ static
 	dispatchMacros['('] = new FnReader();
 	dispatchMacros['{'] = new SetReader();
 	dispatchMacros['='] = new EvalReader();
+	dispatchMacros['!'] = new CommentReader();
 	dispatchMacros['<'] = new UnreadableReader();
 	}
 
