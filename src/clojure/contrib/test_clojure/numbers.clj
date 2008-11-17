@@ -16,54 +16,62 @@
 
 (deftest Coerced-Byte
   (let [v (byte 3)]
-    (is (instance? Byte v))
-    (is (number? v))
-    (is (integer? v))
-    (is (rational? v))))
+    (all-true
+     (instance? Byte v)
+     (number? v)
+     (integer? v)
+     (rational? v))))
 
 (deftest Coerced-Short
   (let [v (short 3)]
-    (is (instance? Short v))
-    (is (number? v))
-    (is (integer? v))
-    (is (rational? v))))
+    (all-true
+     (instance? Short v)
+     (number? v)
+     (integer? v)
+     (rational? v))))
 
 (deftest Coerced-Integer
   (let [v (int 3)]
-    (is (instance? Integer v))
-    (is (number? v))
-    (is (integer? v))
-    (is (rational? v))))
+    (all-true
+     (instance? Integer v)
+     (number? v)
+     (integer? v)
+     (rational? v))))
 
 (deftest Coerced-Long
   (let [v (long 3)]
-    (is (instance? Long v))
-    (is (number? v))
-    (is (integer? v))
-    (is (rational? v))))
+    (all-true
+     (instance? Long v)
+     (number? v)
+     (integer? v)
+     (rational? v))))
 
 (deftest Coerced-BigInteger
   (let [v (bigint 3)]
-    (is (instance? BigInteger v))
-    (is (number? v))
-    (is (integer? v))
-    (is (rational? v))))
+    (all-true
+     (instance? BigInteger v)
+     (number? v)
+     (integer? v)
+     (rational? v))))
 
 (deftest Coerced-Float
   (let [v (float 3)]
-    (is (instance? Float v))
-    (is (number? v))
-    (is (float? v))))
+    (all-true
+     (instance? Float v)
+     (number? v)
+     (float? v))))
 
 (deftest Coerced-Double
   (let [v (double 3)]
-    (is (instance? Double v))
-    (is (number? v))
-    (is (float? v))))
+    (all-true
+     (instance? Double v)
+     (number? v)
+     (float? v))))
 
 (deftest Coerced-BigDecimal
   (let [v (bigdec 3)]
-    (is (instance? BigDecimal v))
-    (is (number? v))
-    (is (decimal? v))
-    (is (not (float? v)))))
+    (all-true
+     (instance? BigDecimal v)
+     (number? v)
+     (decimal? v)
+     (not (float? v)))))

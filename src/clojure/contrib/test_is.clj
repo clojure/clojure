@@ -49,12 +49,13 @@
 ;; need to recompile functions after changing a macro definition.
 
 
-(ns clojure.contrib.test-is)
+(ns clojure.contrib.test-is
+    (:import (java.io PrintWriter)))
 
 (def
  #^{:doc "PrintWriter to which test results are printed; defaults to
- System.err."}
- *test-out* (. System err))
+  Standard Output."}
+ *test-out* (PrintWriter. *out*))
 
 
 ;;; PRIVATE
@@ -194,6 +195,25 @@
     (catch java.lang.Throwable e#  ; some other exception was thrown
       (failure (str "expected " ~(pr-str form) " to throw " ~class
                     ", but threw " e#) ~message)))))
+
+(defmacro all-true
+  "Convenience macro; every body expression is tested with 'is'."
+  [& body]
+  `(do ~@(map (fn [expr] (list 'is expr))
+              body)))
+
+(defmacro each= 
+  "Convenience macro for doing a bunch of equality tests.  Same as
+  doing (is (= ...)) on each pair.
+
+  (each= (test-expr-1) expected-value1
+         (test-expr-2) expected-value2
+         (test-expr-3) expected-value3)
+  "
+  [& forms]
+  `(all-true
+    ~@(map (fn [[expr expected]] (list '= expr expected))
+           (partition 2 forms))))
 
 (defn print-results
   "Prints a summary of the results from test-ns to *test-out*."
