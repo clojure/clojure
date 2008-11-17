@@ -131,10 +131,10 @@ public boolean removeAll(Collection c){
 public boolean containsAll(Collection c){
 	for(Object o : c)
 		{
-		if(contains(o))
-			return true;
+		if(!contains(o))
+			return false;
 		}
-	return false;
+	return true;
 }
 
 public Object[] toArray(Object[] a){
