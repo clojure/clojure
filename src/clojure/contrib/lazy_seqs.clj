@@ -15,7 +15,7 @@
 ;;           7 from consideration by incrementing past them. Also inspired
 ;;           by code from Christophe Grand in [2].
 ;;
-;;  fibs   - based on code from Rich Hickey at the Clojure wiki [3]
+;;  fibs   - attributed to 'every haskell beginner tutorial'
 ;;
 ;;  powers-of-2 - all the powers of 2
 ;;
@@ -27,7 +27,6 @@
 ;;
 ;;  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
 ;;  [2] http://clj-me.blogspot.com/2008/06/primes.html
-;;  [3] http://en.wikibooks.org/wiki/Clojure_Programming#Examples
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 07 June 2008
