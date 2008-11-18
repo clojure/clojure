@@ -4458,7 +4458,7 @@ static public void writeClassFile(String internalName, byte[] bytecode) throws E
 		}
 }
 
-static void pushNS(){
+public static void pushNS(){
 	Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
 	                                                           Symbol.create("*ns*")),null));
 }
