@@ -132,7 +132,7 @@
   "Executes a query and then evaluates body with results bound to a seq of
   the results"
   [results sql & body]
-  `(with-open [stmt# (.prepareStatement (connection) ~sql)
-               rset# (.executeQuery stmt#)]
+  `(with-open [stmt# (.prepareStatement (connection) ~sql)]
+     (with-open [rset# (.executeQuery stmt#)]
        (let [~results (resultset-seq rset#)]
-         ~@body)))
+         ~@body))))
