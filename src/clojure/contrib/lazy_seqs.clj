@@ -50,12 +50,7 @@
   "A lazy sequence of all the prime numbers.")
 
 (defvar fibs
-  (lazy-cat [0 1]
-    (let [rest-fn
-          (fn rest-fn [a b]
-            (let [next (+ a b)]
-              (lazy-cons next (rest-fn b next))))]
-      (rest-fn 0 1)))
+  (lazy-cat [0 1] (map + fibs (rest fibs)))
   "A lazy sequence of all the fibonacci numbers.")
 
 (defvar powers-of-2
