@@ -185,7 +185,7 @@ static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.
                                                  Symbol.create("*compile-path*"), null);
 //boolean
 static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                 Symbol.create("*compile-files*"), RT.F);
+                                                 Symbol.create("*compile-files*"), Boolean.FALSE);
 
 //Integer
 static final public Var LINE = Var.create(0);
@@ -2944,8 +2944,8 @@ static public class FnExpr implements Expr{
 			fn.vars = (IPersistentMap) VARS.get();
 			fn.constants = (PersistentVector) CONSTANTS.get();
 			fn.constantsID = RT.nextID();
-			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
-			loader.registerConstants(fn.constantsID, fn.constants.toArray());
+//			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
+//			loader.registerConstants(fn.constantsID, fn.constants.toArray());
 			}
 		finally
 			{
@@ -3167,9 +3167,13 @@ static public class FnExpr implements Expr{
 		if(compiledClass == null)
 			try
 				{
-				//compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
-				loader = (DynamicClassLoader) LOADER.get();
-				compiledClass = loader.defineClass(name, bytecode);
+				if(RT.booleanCast(COMPILE_FILES.get()))
+					compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
+				else
+					{
+					loader = (DynamicClassLoader) LOADER.get();
+					compiledClass = loader.defineClass(name, bytecode);
+					}
 				}
 			catch(Exception e)
 				{
@@ -4454,6 +4458,11 @@ static public void writeClassFile(String internalName, byte[] bytecode) throws E
 		}
 }
 
+static void pushNS(){
+	Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
+	                                                           Symbol.create("*ns*")),null));
+}
+
 public static Object compile(Reader rdr, String sourcePath, String sourceName) throws Exception{
 	if(COMPILE_PATH.get() == null)
 		throw new Exception("*compile-path* not set");
@@ -4521,10 +4530,29 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                                                  null,
 		                                                  cv);
 		clinitgen.visitCode();
+		Label startTry = clinitgen.newLabel();
+		Label endTry = clinitgen.newLabel();
+		Label end = clinitgen.newLabel();
+		Label finallyLabel = clinitgen.newLabel();
+
 		if(fn.constants.count() > 0)
 			{
 			fn.emitConstants(clinitgen);
 			}
+		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void pushNS()"));
+		clinitgen.mark(startTry);
+		clinitgen.invokeStatic(fn.fntype, Method.getMethod("void load()"));
+		clinitgen.mark(endTry);
+		clinitgen.invokeStatic(VAR_TYPE, Method.getMethod("void popThreadBindings()"));
+		clinitgen.goTo(end);
+
+		clinitgen.mark(finallyLabel);
+		//exception should be on stack
+		clinitgen.invokeStatic(VAR_TYPE, Method.getMethod("void popThreadBindings()"));
+		clinitgen.throwException();
+		clinitgen.mark(end);
+		clinitgen.visitTryCatchBlock(startTry, endTry, finallyLabel, null);
+
 		//end of static init
 		clinitgen.returnValue();
 		clinitgen.endMethod();
@@ -4536,9 +4564,6 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                                            null,
 		                                            cv);
 		maingen.visitCode();
-		maingen.push(fn.internalName);
-		maingen.push(true);
-		maingen.invokeStatic(RT_TYPE, Method.getMethod("void load(String,boolean)"));
 		maingen.push(fn.internalName.replace('/', '.'));
 		maingen.push("main");
 		maingen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));

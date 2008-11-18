@@ -2394,7 +2394,7 @@
   "Evaluates body in a context in which *in* is bound to a fresh
   StringReader initialized with the string s."
   [s & body]
-  `(with-open s# (-> (java.io.StringReader. ~s) clojure.lang.LineNumberingPushbackReader.)
+  `(with-open [s# (-> (java.io.StringReader. ~s) clojure.lang.LineNumberingPushbackReader.)]
      (binding [*in* s#]
        ~@body)))
 
@@ -3100,10 +3100,11 @@
   (let [process-reference 
         (fn [[kname & args]]
           `(~(symbol "clojure.core" (clojure.core/name kname))
-             ~@(map #(list 'quote %) args)))]
+             ~@(map #(list 'quote %) args)))
+        references (remove #(= :gen-class (first %)) references)]
     `(do
        (clojure.core/in-ns '~name)
-       ~@(when (not-any? #(= :refer-clojure (first %)) references)
+       ~@(when (and (not= name '~'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
            `((clojure.core/refer '~'clojure.core)))
        ~@(map process-reference references))))
 

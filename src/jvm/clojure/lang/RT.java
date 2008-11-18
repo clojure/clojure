@@ -290,6 +290,8 @@ static
 	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
 	AGENT.setTag(Symbol.create("clojure.lang.Agent"));
 	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
+	//during bootstrap ns same as in-ns
+	Var.intern(CLOJURE_NS, NAMESPACE, inNamespace);
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
 	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
@@ -437,7 +439,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 			Var.pushThreadBindings(
 					RT.map(CURRENT_NS, CURRENT_NS.get(),
 					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
-			Reflector.invokeStaticMethod(classForName(scriptbase.replace('/','.')), "load", EMPTY_ARRAY);
+			loadClassForName(scriptbase.replace('/','.'));
 			}
 		finally
 			{
@@ -1613,6 +1615,16 @@ static public Class classForName(String name) throws ClassNotFoundException{
 	return Class.forName(name, false, baseLoader());
 }
 
+static public boolean loadClassForName(String name) throws ClassNotFoundException{
+	try{
+	Class.forName(name, true, baseLoader());
+	}
+	catch(Exception e)
+		{
+		return false;
+		}
+	return true;
+}
 
 static public float aget(float[] xs, int i){
 	return xs[i];
