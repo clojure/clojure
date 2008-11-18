@@ -45,6 +45,7 @@ static ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
 };
 
 static Keyword privateKey = Keyword.intern(null, "private");
+static IPersistentMap privateMeta = new PersistentArrayMap(new Object[]{privateKey, Boolean.TRUE});
 static Keyword macroKey = Keyword.intern(null, "macro");
 static Keyword nameKey = Keyword.intern(null, "name");
 static Keyword nsKey = Keyword.intern(null, "ns");
@@ -88,6 +89,13 @@ public static Var find(Symbol nsQualifiedSym){
 public static Var intern(Symbol nsName, Symbol sym){
 	Namespace ns = Namespace.findOrCreate(nsName);
 	return intern(ns, sym);
+}
+
+public static Var internPrivate(String nsName, String sym){
+	Namespace ns = Namespace.findOrCreate(Symbol.intern(nsName));
+	Var ret = intern(ns, Symbol.intern(sym));
+	ret.setMeta(privateMeta);
+	return ret;
 }
 
 public static Var intern(Namespace ns, Symbol sym){

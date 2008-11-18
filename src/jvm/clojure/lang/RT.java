@@ -1615,11 +1615,11 @@ static public Class classForName(String name) throws ClassNotFoundException{
 	return Class.forName(name, false, baseLoader());
 }
 
-static public boolean loadClassForName(String name) throws ClassNotFoundException{
+static public boolean loadClassForName(String name) throws Exception{
 	try{
 	Class.forName(name, true, baseLoader());
 	}
-	catch(Exception e)
+	catch(ClassNotFoundException e)
 		{
 		return false;
 		}

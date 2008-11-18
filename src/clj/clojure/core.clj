@@ -3083,11 +3083,13 @@
 (defmacro ns
   "Sets *ns* to the namespace named by name (unevaluated), creating it
   if needed.  references can be zero or more of: (:refer-clojure ...)
-  (:require ...) (:use ...) (:import ...) (:load ...) with the syntax
-  of refer-clojure/require/use/import/load respectively, except the
-  arguments are unevaluated and need not be quoted.  If :refer-clojure
-  is not used, a default (refer 'clojure) is used. Use of ns is preferred
-  to individual calls to in-ns/require/use/import:
+  (:require ...) (:use ...) (:import ...) (:load ...) (:gen-class)
+  with the syntax of refer-clojure/require/use/import/load/gen-class
+  respectively, except the arguments are unevaluated and need not be
+  quoted, and the :gen-class clause does not take a name (since the
+  class name corresponds to the ns name).  If :refer-clojure is not
+  used, a default (refer 'clojure) is used. Use of ns is preferred to
+  individual calls to in-ns/require/use/import:
 
   (ns foo
     (:refer-clojure :exclude [ancestors printf])

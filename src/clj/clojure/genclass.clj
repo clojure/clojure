@@ -59,6 +59,17 @@
 
 ;(distinct (map first(keys (mapcat non-private-methods [Object IPersistentMap]))))
 
+(def #^{:private true} prim->class
+     {'int Integer/TYPE
+      'long Long/TYPE
+      'float Float/TYPE
+      'double Double/TYPE
+      'void Void/TYPE
+      'short Short/TYPE
+      'boolean Boolean/TYPE
+      'byte Byte/TYPE
+      'char Character/TYPE})
+
 (defn gen-class 
   "Generates compiled bytecode for a class with the given
   package-qualified cname (which, as all names in these parameters, can
@@ -67,13 +78,13 @@
   the generated class in functions in a corresponding Clojure
   namespace. Given a generated class org.mydomain.MyClass with a
   method named mymethod, gen-class will generate an implementation
-  that looks for a function named MyClass-mymethod in a Clojure
-  namespace called org.mydomain. All inherited methods, generated
+  that looks for a function named -mymethod in a Clojure
+  namespace called org.mydomain.MyClass . All inherited methods, generated
   methods, and init and main functions (see :methods, :init, and :main
   below) will be found similarly. The static initializer for the
   generated class will attempt to load the Clojure support code for
   the class as a resource from the classpath, e.g. in the example
-  case, org/mydomain/MyClass.clj
+  case, org/mydomain/MyClass__init.class
 
   Note that methods with a maximum of 18 parameters are supported.
 
@@ -107,7 +118,8 @@
   parameter may be used to explicitly specify constructors, each entry
   providing a mapping from a constructor signature to a superclass
   constructor signature. When you supply this, you must supply an :init
-  specifier.
+  specifier. In this and all subsequent sections taking types, the primitive
+  types can be referred to by their Java names (int, float etc)
 
   :methods [ [name [param-types] return-type], ...]
 
@@ -147,15 +159,24 @@
   for use in the implementation."
 
   [cname & options]
-  (let [name (str cname)
+  (let [the-class (fn [x] 
+                    (cond 
+                     (class? x) x
+                     (contains? prim->class x) (prim->class x)
+                     :else (let [strx (str x)]
+                             (clojure.lang.RT/classForName 
+                              (if (some #{\.} strx)
+                                strx
+                                (str "java.lang." strx))))))
+        name (str cname)
         {:keys [extends implements constructors methods main factory state init exposes]} (apply hash-map options)
-        super (or extends Object)
-        interfaces implements
-        supers (cons super (seq interfaces))
+        super (if extends (the-class extends) Object)
+        interfaces (map the-class implements)
+        supers (cons super interfaces)
         ctor-sig-map (or constructors (zipmap (ctor-sigs super) (ctor-sigs super)))
         cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
         cname (. name (replace "." "/"))
-        [pkg-name sname] (.split name "[.](?=[^.]*$)")
+        pkg-name name
         ctype (. Type (getObjectType cname))
         iname (fn [c] (.. Type (getType c) (getInternalName)))
         totype (fn [c] (. Type (getType c)))
@@ -172,6 +193,7 @@
         state-name (str state)
         main-name "main"
         var-name (fn [s] (str s "__var"))
+        class-type  (totype Class)
         rt-type  (totype clojure.lang.RT)
         var-type  (totype clojure.lang.Var)
         ifn-type (totype clojure.lang.IFn)
@@ -201,11 +223,13 @@
                          (. gen mark end-label)))
         emit-unsupported (fn [gen m]
                            (. gen (throwException ex-type (str (. m (getName)) " ("
-                                                               pkg-name "/" sname "-" (.getName m)
+                                                               pkg-name "/" "-" (.getName m)
                                                                " not defined?)"))))
         emit-forwarding-method
         (fn [mname pclasses rclass as-static else-gen]
-          (let [ptypes (to-types pclasses)
+          (let [pclasses (map the-class pclasses)
+                rclass (the-class rclass)
+                ptypes (to-types pclasses)
                 rtype (totype rclass)
                 m (new Method mname rtype ptypes)
                 is-overload (overloads mname)
@@ -278,28 +302,28 @@
                         (. obj-type getDescriptor)
                         nil nil)))
     
-                                        ;static init to set up var fields and load clj
+                                        ;static init to set up var fields and load init
     (let [gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC)) 
                    (. Method getMethod "void <clinit> ()")
                    nil nil cv)]
       (. gen (visitCode))
       (doseq [v var-fields]
         (. gen push pkg-name)
-        (. gen push (str sname "-" v))
-        (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.Var var(String,String)"))))
+        (. gen push (str "-" v))
+        (. gen (invokeStatic var-type (. Method (getMethod "clojure.lang.Var internPrivate(String,String)"))))
         (. gen putStatic ctype (var-name v) var-type))
       
-      (. gen push ctype)
-      (. gen push (str (. name replace \. \/) ".clj"))
-      (. gen push 0)
-      (. gen (invokeStatic rt-type (. Method (getMethod "void loadResourceScript(Class,String,boolean)"))))
-      
+      (. gen push (str name "__init"))
+      (. gen (invokeStatic class-type (. Method (getMethod "Class forName(String)"))))
+      (. gen pop)
       (. gen (returnValue))
       (. gen (endMethod)))
     
                                         ;ctors
     (doseq [[pclasses super-pclasses] ctor-sig-map]
-      (let [ptypes (to-types pclasses)
+      (let [pclasses (map the-class pclasses)
+            super-pclasses (map the-class super-pclasses)
+            ptypes (to-types pclasses)
             super-ptypes (to-types super-pclasses)
             m (new Method "<init>" (. Type VOID_TYPE) ptypes)
             super-m (new Method "<init>" (. Type VOID_TYPE) super-ptypes)
@@ -418,7 +442,7 @@
         (. gen goTo end-label)
                                         ;no main found
         (. gen mark no-main-label)
-        (. gen (throwException ex-type (str pkg-name "/" sname "-" main-name " not defined")))
+        (. gen (throwException ex-type (str pkg-name "/" "-" main-name " not defined")))
         (. gen mark end-label)
         (. gen (returnValue))
         (. gen (endMethod))))
@@ -447,6 +471,8 @@
     (. cv (visitEnd))
     {:name name :bytecode (. cv (toByteArray))}))
 
+(comment
+
 (defn gen-and-load-class 
   "Generates and immediately loads the bytecode for the specified
   class. Note that a class generated this way can be loaded only once
@@ -471,6 +497,7 @@
     (.createNewFile file)
     (with-open [f (java.io.FileOutputStream. file)]
       (.write f bytecode))))
+)
 
 (comment
 ;usage
