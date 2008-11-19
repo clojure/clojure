@@ -1765,16 +1765,19 @@
              "with-open now requires a vector for its binding"))))
 
 (defmacro doto
-  "Evaluates x then calls all of the methods with the supplied
-  arguments in succession on the resulting object, returning it.
+  "Evaluates x then calls all of the methods and functions with the 
+  value of x supplied at the from of the given arguments.  The forms
+  are evaluated in order.  Returns x.
 
-  (doto (new java.util.HashMap) (put \"a\" 1) (put \"b\" 2))"
-  [x & members]
+  (doto (new java.util.HashMap) (.put \"a\" 1) (.put \"b\" 2))"
+  [x & forms]
     (let [gx (gensym)]
       `(let [~gx ~x]
-         (do
-           ~@(map (fn [m] (list '. gx m))
-                  members))
+         ~@(map (fn [f]
+                  (if (seq? f)
+                    `(~(first f) ~gx ~@(rest f))
+                    `(~f ~gx)))
+                forms)
          ~gx)))
 
 (defmacro memfn

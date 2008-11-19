@@ -15,14 +15,13 @@
      (javax.swing JPanel JTree JTable JScrollPane JFrame JToolBar JButton SwingUtilities)))
 
 (defn atom? [x]
-  (not (instance? clojure.lang.IPersistentCollection x)))
+  (not (coll? x)))
 
 (defn collection-tag [x]
   (cond 
    (instance? java.util.Map$Entry x) :entry
-   (instance? clojure.lang.IPersistentMap x) :map 
-   (instance? java.util.Map x) :map 
-   (instance? clojure.lang.Sequential x) :seq
+   (instance? java.util.Map x) :map
+   (sequential? x) :seq
    :else :atom))
 
 (defmulti is-leaf collection-tag)
@@ -68,13 +67,13 @@
   (let [row1 (first data)
 	colcnt (count row1)
 	cnt (count data)
-	vals (if (instance? clojure.lang.IPersistentMap row1) vals identity)]
+	vals (if (map? row1) vals identity)]
     (proxy [TableModel] []
       (addTableModelListener [tableModelListener])
       (getColumnClass [columnIndex] Object)
       (getColumnCount [] colcnt)
       (getColumnName [columnIndex]
-	(if (instance? clojure.lang.IPersistentMap row1)
+	(if (map? row1)
 	  (name (nth (keys row1) columnIndex))
 	  (str columnIndex)))
       (getRowCount [] cnt)
@@ -86,20 +85,20 @@
 (defn inspect-tree 
   "creates a graphical (Swing) inspector on the supplied hierarchical data"
   [data]
-  (doto (new JFrame "Clojure Inspector")
-    (add (new JScrollPane (new JTree (tree-model data))))
-    (setSize 400 600)
-    (setVisible true)))
+  (doto (JFrame. "Clojure Inspector")
+    (.add (JScrollPane. (JTree. (tree-model data))))
+    (.setSize 400 600)
+    (.setVisible true)))
 
 (defn inspect-table 
   "creates a graphical (Swing) inspector on the supplied regular
   data, which must be a sequential data structure of data structures
   of equal length"
     [data]
-  (doto (new JFrame "Clojure Inspector")
-    (add (new JScrollPane (new JTable (old-table-model data))))
-    (setSize 400 600)
-    (setVisible true)))
+  (doto (JFrame. "Clojure Inspector")
+    (.add (JScrollPane. (JTable. (old-table-model data))))
+    (.setSize 400 600)
+    (.setVisible true)))
 
 
 (defmulti list-provider class)
@@ -148,27 +147,27 @@
   "creates a graphical (Swing) inspector on the supplied object"
   [x]
   (doto (JFrame. "Clojure Inspector")
-    (add 
-     (doto (JPanel. (BorderLayout.))
-       (add (doto (JToolBar.)
-              (add (JButton. "Back"))
-              (addSeparator)
-              (add (JButton. "List"))
-              (add (JButton. "Table"))
-              (add (JButton. "Bean"))
-              (add (JButton. "Line"))
-              (add (JButton. "Bar"))
-              (addSeparator)
-              (add (JButton. "Prev"))
-              (add (JButton. "Next")))
-            BorderLayout/NORTH)
-       (add
-        (JScrollPane. 
-         (doto (JTable. (list-model (list-provider x)))
-           (setAutoResizeMode JTable/AUTO_RESIZE_LAST_COLUMN))) 
-        BorderLayout/CENTER)))
-    (setSize 400 400)
-    (setVisible true)))
+    (.add
+      (doto (JPanel. (BorderLayout.))
+        (.add (doto (JToolBar.)
+                (.add (JButton. "Back"))
+                (.addSeparator)
+                (.add (JButton. "List"))
+                (.add (JButton. "Table"))
+                (.add (JButton. "Bean"))
+                (.add (JButton. "Line"))
+                (.add (JButton. "Bar"))
+                (.addSeparator)
+                (.add (JButton. "Prev"))
+                (.add (JButton. "Next")))
+              BorderLayout/NORTH)
+        (.add
+          (JScrollPane. 
+            (doto (JTable. (list-model (list-provider x)))
+              (.setAutoResizeMode JTable/AUTO_RESIZE_LAST_COLUMN)))
+          BorderLayout/CENTER)))
+    (.setSize 400 400)
+    (.setVisible true)))
 
 
 (comment
