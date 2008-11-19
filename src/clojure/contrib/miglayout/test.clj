@@ -23,9 +23,9 @@
 (defn run-test
   [index]
   (doto (JFrame. (format "MigLayout Test %d" index))
-    (add ((tests index) (JPanel.)))
-    (pack)
-    (setVisible true)))
+    (.add ((tests index) (JPanel.)))
+    (.pack)
+    (.setVisible true)))
 
 (def tests [
 
