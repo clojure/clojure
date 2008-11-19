@@ -2992,8 +2992,12 @@ static public class FnExpr implements Expr{
 		String source = (String) SOURCE.get();
 		int lineBefore = (Integer) LINE_BEFORE.get();
 		int lineAfter = (Integer) LINE_AFTER.get() + 1;
-		String smap = "SMAP\n" +
-		              simpleName + ".java\n" +
+
+		if(source != null && SOURCE_PATH.get() != null)
+			{
+		//cv.visitSource(source, null);
+			String smap = "SMAP\n" +
+		              source.substring(0,source.lastIndexOf('.')) + ".java\n" +
 		              "Clojure\n" +
 		              "*S Clojure\n" +
 		              "*F\n" +
@@ -3002,9 +3006,8 @@ static public class FnExpr implements Expr{
 		              "*L\n" +
 		              String.format("%d#1,%d:%d\n", lineBefore, lineAfter - lineBefore, lineBefore) +
 		              "*E";
-		if(source != null && SOURCE_PATH.get() != null)
-		//cv.visitSource(source, null);
 			cv.visitSource(source, smap);
+			}
 
 		//static fields for constants
 		for(int i = 0; i < constants.count(); i++)
