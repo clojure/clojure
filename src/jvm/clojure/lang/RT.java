@@ -782,7 +782,7 @@ static public Object nth(Object coll, int n){
 	else if(coll instanceof String)
 		return Character.valueOf(((String) coll).charAt(n));
 	else if(coll.getClass().isArray())
-		return Array.get(coll, n);
+		return Reflector.prepRet(Array.get(coll, n));
 	else if(coll instanceof List)
 		return ((List) coll).get(n);
 	else if(coll instanceof Matcher)
@@ -834,7 +834,7 @@ static public Object nth(Object coll, int n, Object notFound){
 	else if(coll.getClass().isArray())
 		{
 		if(n < Array.getLength(coll))
-			return Array.get(coll, n);
+			return Reflector.prepRet(Array.get(coll, n));
 		return notFound;
 		}
 	else if(coll instanceof List)
@@ -1780,7 +1780,7 @@ static public Object[] aclone(Object[] xs){
 }
 
 static public Object aget(Object xs, int i){
-	return Array.get(xs, i);
+	return Reflector.prepRet(Array.get(xs, i));
 }
 
 static public Object aset(Object xs, int i, Object v){

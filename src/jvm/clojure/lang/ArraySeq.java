@@ -62,7 +62,7 @@ ArraySeq(IPersistentMap meta, Object array, int i){
 public Object first(){
 	if(oa != null)
 		return oa[i];
-	return Array.get(array, i);
+	return Reflector.prepRet(Array.get(array, i));
 }
 
 public ISeq rest(){
@@ -102,9 +102,9 @@ public Object reduce(IFn f) throws Exception{
 		return ret;
 		}
 
-	Object ret = Array.get(array, i);
+	Object ret = Reflector.prepRet(Array.get(array, i));
 	for(int x = i + 1; x < Array.getLength(array); x++)
-		ret = f.invoke(ret, Array.get(array, x));
+		ret = f.invoke(ret, Reflector.prepRet(Array.get(array, x)));
 	return ret;
 }
 
@@ -116,9 +116,9 @@ public Object reduce(IFn f, Object start) throws Exception{
 			ret = f.invoke(ret, oa[x]);
 		return ret;
 		}
-	Object ret = f.invoke(start, Array.get(array, i));
+	Object ret = f.invoke(start, Reflector.prepRet(Array.get(array, i)));
 	for(int x = i + 1; x < Array.getLength(array); x++)
-		ret = f.invoke(ret, Array.get(array, x));
+		ret = f.invoke(ret, Reflector.prepRet(Array.get(array, x)));
 	return ret;
 }
 

@@ -1820,7 +1820,7 @@
   {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
    :inline-arities #{2}}
   ([array idx]
-   (. Array (get array idx)))
+   (clojure.lang.Reflector/prepRet (. Array (get array idx))))
   ([array idx & idxs]
    (apply aget (aget array idx) idxs)))
 
