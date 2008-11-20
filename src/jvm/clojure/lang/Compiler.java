@@ -3135,8 +3135,8 @@ static public class FnExpr implements Expr{
 		bytecode = cw.toByteArray();
 		if(RT.booleanCast(COMPILE_FILES.get()))
 			writeClassFile(internalName,bytecode);
-		else
-			getCompiledClass();			
+//		else
+//			getCompiledClass();
 	}
 
 
@@ -3192,6 +3192,7 @@ static public class FnExpr implements Expr{
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//fn arg is enclosing fn, not this
+		getCompiledClass();
 		gen.newInstance(fntype);
 		gen.dup();
 		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
