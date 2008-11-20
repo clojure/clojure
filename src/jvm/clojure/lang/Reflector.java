@@ -299,27 +299,39 @@ static public Field getField(Class c, String name, boolean getStatics){
 static public List getMethods(Class c, int arity, String name, boolean getStatics){
 	Method[] allmethods = c.getMethods();
 	ArrayList methods = new ArrayList();
+	ArrayList bridgeMethods = new ArrayList();
 	for(int i = 0; i < allmethods.length; i++)
 		{
-		try
+		Method method = allmethods[i];
+		if(name.equals(method.getName())
+		   && Modifier.isStatic(method.getModifiers()) == getStatics
+		   && method.getParameterTypes().length == arity)
 			{
-			Method method = allmethods[i];
-			if(name.equals(method.getName())
-			   && Modifier.isStatic(method.getModifiers()) == getStatics
-			   && method.getParameterTypes().length == arity
-			   && (!method.isBridge()
-			       || (c == StringBuilder.class &&
-			          c.getMethod(method.getName(), method.getParameterTypes())
-					.equals(method))))
+			try
 				{
-				methods.add(allmethods[i]);
+				if(method.isBridge()
+				   && c.getMethod(method.getName(), method.getParameterTypes())
+						.equals(method))
+					bridgeMethods.add(method);
+				else
+					methods.add(method);
+				}
+			catch(NoSuchMethodException e)
+				{
 				}
 			}
-		catch(NoSuchMethodException e)
-			{
-			throw new RuntimeException(e);
-			}
+//			   && (!method.isBridge()
+//			       || (c == StringBuilder.class &&
+//			          c.getMethod(method.getName(), method.getParameterTypes())
+//					.equals(method))))
+//				{
+//				methods.add(allmethods[i]);
+//				}
 		}
+
+	if(methods.isEmpty())
+		methods.addAll(bridgeMethods);
+	
 	if(!getStatics && c.isInterface())
 		{
 		allmethods = Object.class.getMethods();

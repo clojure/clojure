@@ -3106,7 +3106,7 @@
         references (remove #(= :gen-class (first %)) references)]
     `(do
        (clojure.core/in-ns '~name)
-       ~@(when (and (not= name '~'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
+       ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
            `((clojure.core/refer '~'clojure.core)))
        ~@(map process-reference references))))
 
