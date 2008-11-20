@@ -1484,9 +1484,6 @@
                         (recur (rest sq#)))))))]
     (apply emit binds)))
 
-(defn scan [& args] (throw (new Exception "scan is now called dorun")))
-(defn touch [& args] (throw (new Exception "touch is now called doall")))
-
 (defn dorun
   "When lazy sequences are produced via functions that have side
   effects, any effects other than those needed to produce the first
