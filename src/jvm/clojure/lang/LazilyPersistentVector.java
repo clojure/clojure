@@ -35,7 +35,7 @@ LazilyPersistentVector(IPersistentMap meta, Object[] array, PersistentVector v){
 }
 
 public Object[] toArray(){
-	return array;
+	return array.clone();
 }
 
 public Object nth(int i){
