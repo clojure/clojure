@@ -298,8 +298,14 @@ private static Object matchSymbol(String s){
 			return null;
 		if(s.startsWith("::"))
 			{
+			Symbol ks = Symbol.intern(s.substring(2));
+			Namespace kns;
+			if(ks.ns != null)
+				kns = Compiler.namespaceFor(ks);
+			else
+				kns = Compiler.currentNS();
 			//auto-resolving keyword
-			return Keyword.intern(Compiler.resolveSymbol(Symbol.intern(s.substring(2))));
+			return Keyword.intern(kns.name.name,ks.name);
 			}
 		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));

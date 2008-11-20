@@ -2997,15 +2997,18 @@ static public class FnExpr implements Expr{
 			{
 		//cv.visitSource(source, null);
 			String smap = "SMAP\n" +
-		              source.substring(0,source.lastIndexOf('.')) + ".java\n" +
-		              "Clojure\n" +
-		              "*S Clojure\n" +
-		              "*F\n" +
-		              "+ 1 " + source + "\n" +
-		              (String) SOURCE_PATH.get() + "\n" +
-		              "*L\n" +
-		              String.format("%d#1,%d:%d\n", lineBefore, lineAfter - lineBefore, lineBefore) +
-		              "*E";
+			              ((source.lastIndexOf('.') > 0) ? 
+			               source.substring(0, source.lastIndexOf('.'))
+			               : simpleName)
+			              + ".java\n" +
+			              "Clojure\n" +
+			              "*S Clojure\n" +
+			              "*F\n" +
+			              "+ 1 " + source + "\n" +
+			              (String) SOURCE_PATH.get() + "\n" +
+			              "*L\n" +
+			              String.format("%d#1,%d:%d\n", lineBefore, lineAfter - lineBefore, lineBefore) +
+			              "*E";
 			cv.visitSource(source, smap);
 			}
 
@@ -4198,11 +4201,11 @@ static Object resolve(Symbol sym) throws Exception{
 	return resolveIn(currentNS(), sym, false);
 }
 
-static private Namespace namespaceFor(Symbol sym){
+static Namespace namespaceFor(Symbol sym){
 	return namespaceFor(currentNS(), sym);
 }
 
-static private Namespace namespaceFor(Namespace inns, Symbol sym){
+static Namespace namespaceFor(Namespace inns, Symbol sym){
 	//note, presumes non-nil sym.ns
 	// first check against currentNS' aliases...
 	Symbol nsSym = Symbol.create(sym.ns);
