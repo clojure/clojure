@@ -4498,7 +4498,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			{
 			Keyword gk = Keyword.intern(null, "gen-class");
 			Symbol nssym = (Symbol) RT.second(r);
-			if(!nssym.toString().equals(classname))
+			if(!nssym.toString().replace('-','_').equals(classname))
 				throw new Exception(String.format("Namespace name must match file, had: %s and %s",
 				                                  nssym, sourcePath));
 			for(ISeq s = RT.rest(RT.rest(r)); s != null; s = s.rest())
