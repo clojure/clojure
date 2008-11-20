@@ -357,7 +357,7 @@
     (when clauses
       (list 'if (first clauses)
             (second clauses)
-            (cons 'cond (rest (rest clauses))))))
+            (cons 'clojure.core/cond (rest (rest clauses))))))
 
 (defn spread
   {:private true}
@@ -2780,7 +2780,7 @@
   it were a macro. Cannot be used with variadic (&) args." 
   [name & decl]
   (let [[args expr] (drop-while (comp not vector?) decl)
-        inline (eval (list 'fn args expr))]
+        inline (eval (list `fn args expr))]
     `(do
        (defn ~name ~args ~(apply inline args))
        (let [v# (var ~name)]
