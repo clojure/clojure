@@ -8,7 +8,7 @@
 
 ; Reads Clojure code and emits equivalent JavaScript
 
-(ns tojs
+(ns clojurescript.tojs
     (:import (clojure.lang Compiler Compiler$C Compiler$BodyExpr
                            Compiler$DefExpr Compiler$InstanceMethodExpr)
              (java.io BufferedReader InputStreamReader StringReader PrintWriter)
@@ -397,7 +397,7 @@
         (try
           (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
           (let [line1 (-> socket .getInputStream ds/reader .readLine)
-                [_ url] (re-find #"^GET /(.*?) HTTP" line1)
+                [_ url] (re-find #"^GET /\?(.*?) HTTP" line1)
                 codestr (URLDecoder/decode url)
                 js (with-out-str (filetojs (StringReader. codestr)))]
             (println "jsrepl.state('compiled');try{")
@@ -417,17 +417,20 @@
     (doseq [file ["clojure/core.clj" "clojure/core-print.clj"]]
       (filetojs (.getResourceAsStream (clojure.lang.RT/baseLoader) file)))))
 
-(with-command-line *command-line-args*
-  "tojs -- Compile ClojureScript to JavaScript"
-  [[simple? "Runs some simple built-in tests"]
-   [serve   "Starts a repl server on the given port" 8081]
-   [mkcore? "Generates a core.js file"]
-   [v?      "Includes extra fn names and comments in js"]
-   filenames]
-  (binding [*debug-fn-names* v? *debug-comments* v?]
-    (cond
-      simple? (simple-tests)
-      serve   (start-server (Integer/parseInt serve))
-      mkcore? (mkcore)
-      :else   (doseq [filename filenames]
-                 (filetojs filename)))))
+(defn main [& args]
+  (with-command-line args
+    "tojs -- Compile ClojureScript to JavaScript"
+    [[simple? "Runs some simple built-in tests"]
+    [serve   "Starts a repl server on the given port" 8081]
+    [mkcore? "Generates a core.js file"]
+    [v?      "Includes extra fn names and comments in js"]
+    filenames]
+    (binding [*debug-fn-names* v? *debug-comments* v?]
+      (cond
+        simple? (simple-tests)
+        serve   (start-server (Integer/parseInt serve))
+        mkcore? (mkcore)
+        :else   (doseq [filename filenames]
+                  (filetojs filename))))))
+
+(when-not *compile-files* (apply main *command-line-args*))
