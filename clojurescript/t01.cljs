@@ -5,9 +5,9 @@
 
 (defn script-src []
   (for [elem (.getElementsByTagName document "script")]
-    (if-let src (.src elem)
+    (if-let [src (.src elem)]
       src
       "--none--")))
 
-(doseq src (script-src)
+(doseq [src (script-src)]
   (prn src))

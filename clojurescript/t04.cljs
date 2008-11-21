@@ -7,9 +7,9 @@
   (for [elem (.getElementsByTagName document "script")]
     (do
       (prn :next)
-      (if-let src (.src elem)
+      (if-let [src (.src elem)]
         src
         "--none--"))))
 
-(doseq src (take 2 (script-src))
+(doseq [src (take 2 (script-src))]
   (prn src))

@@ -82,7 +82,7 @@
             (when (== (.keyCode e) 13)
               (set! (-> :status elems .src) "clojure-logo-anim-03.gif")
               (append-dom (:scripts elems)
-                [:script {:src (str "http://localhost/proj/cgi-proxy/cgi-proxy.cgi?"
+                [:script {:src (str "http://clojurescript.n01se.net:8081/?"
                                     (-> :input elems .value escape
                                         (.replace #"\+" "%2b")))}])))))
 

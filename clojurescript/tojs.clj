@@ -308,7 +308,8 @@
 
 (defn formtojs [f]
   (when-not (and (coll? f) (= 'definline (first f)))
-    (binding [*allow-unresolved-vars* true]
+    (binding [*allow-unresolved-vars* true
+              *private-compiler-loader* (clojure.lang.RT/makeClassLoader)]
       (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
             mainexpr (-> expr .fexpr .methods first .body .exprs first)
             defmacro?  (and (instance? Compiler$BodyExpr mainexpr)
@@ -387,29 +388,31 @@
   (println (formtojs '(fn forever[] (loop [] (recur))))))
 
 (defn start-server [port]
-  (println "Opening port" port)
-  (loop [server (java.net.ServerSocket. port)]
-    (with-open [socket (.accept server)]
-      (binding [*debug-fn-names* false
-                *debug-comments* false
-                *eval-defmacro* false
-                *out* (-> socket .getOutputStream ds/writer)]
-        (try
-          (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
-          (let [line1 (-> socket .getInputStream ds/reader .readLine)
-                [_ url] (re-find #"^GET /\?(.*?) HTTP" line1)
-                codestr (URLDecoder/decode url)
-                js (with-out-str (filetojs (StringReader. codestr)))]
-            (println "jsrepl.state('compiled');try{")
-            (println "jsrepl.lastval=" js )
-            (println "jsrepl.state('done');}catch(e){jsrepl.err(e)};"))
-          (catch Exception e
-            (if (= (.getMessage e) "EOF while reading")
-              (println "jsrepl.state('incomplete');")
-              (let [trace (with-out-str
-                            (.printStackTrace e (PrintWriter. *out*)))]
-                (println "jsrepl.state('error',\""
-                   (.replace trace "\n" "\\n") "\");")))))))
+  ;(println "Opening port" port)
+  (loop [server (java.net.ServerSocket. port)] ; should bind only to 127.0.0.1
+    (send-off (agent (.accept server))
+      (fn [socket]
+        (with-open [socket socket]
+          (binding [*debug-fn-names* false
+                    *debug-comments* false
+                    *eval-defmacro* false
+                    *out* (-> socket .getOutputStream ds/writer)]
+            (try
+              (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
+              (let [line1 (-> socket .getInputStream ds/reader .readLine)
+                    [_ url] (re-find #"^GET /\?(.*?) HTTP" line1)
+                    codestr (URLDecoder/decode url)
+                    js (with-out-str (filetojs (StringReader. codestr)))]
+                (println "jsrepl.state('compiled');try{")
+                (println "jsrepl.lastval=" js )
+                (println "jsrepl.state('done');}catch(e){jsrepl.err(e)};"))
+              (catch Exception e
+                (if (= (.getMessage e) "EOF while reading")
+                  (println "jsrepl.state('incomplete');")
+                  (let [trace (with-out-str
+                                (.printStackTrace e (PrintWriter. *out*)))]
+                    (println "jsrepl.state('error',\""
+                             (.replace trace "\n" "\\n") "\");")))))))))
     (recur server)))
 
 (defn mkcore []
@@ -417,7 +420,7 @@
     (doseq [file ["clojure/core.clj" "clojure/core-print.clj"]]
       (filetojs (.getResourceAsStream (clojure.lang.RT/baseLoader) file)))))
 
-(defn main [& args]
+(defn -main [& args]
   (with-command-line args
     "tojs -- Compile ClojureScript to JavaScript"
     [[simple? "Runs some simple built-in tests"]
@@ -433,4 +436,4 @@
         :else   (doseq [filename filenames]
                   (filetojs filename))))))
 
-(when-not *compile-files* (apply main *command-line-args*))
+;(when-not *compile-files* (apply -main *command-line-args*))

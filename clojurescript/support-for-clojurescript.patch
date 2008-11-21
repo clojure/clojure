@@ -1,8 +1,8 @@
-commit 2fd9fcb876effe15a10ceadda7649f89fa0c7bb1
+commit 5b84f0b77a1e1b9cc443c64b66e6fbffaa6f17a4
 Author: Chouser <chouser@n01se.net>
-Date:   Sun Nov 16 01:02:30 2008 -0500
+Date:   Thu Nov 20 11:03:00 2008 -0500
 
-    Less Java dependence in clojure.core (for ClojureScript)
+    ClojureScript support
 
 diff --git a/src/clj/clojure/core-print.clj b/src/clj/clojure/core-print.clj
 index 05c8abc..0f04558 100644
@@ -74,7 +74,7 @@ index 05c8abc..0f04558 100644
 \ No newline at end of file
 +(def #^{:private true} print-initialized true)
 diff --git a/src/clj/clojure/core.clj b/src/clj/clojure/core.clj
-index 1e74fef..982205c 100644
+index 1957f4f..0831fee 100644
 --- a/src/clj/clojure/core.clj
 +++ b/src/clj/clojure/core.clj
 @@ -319,7 +319,7 @@
@@ -135,18 +135,7 @@ index 1e74fef..982205c 100644
         (seq a)))))
  
  (defn sort-by
-@@ -1484,8 +1484,8 @@
-                         (recur (rest sq#)))))))]
-     (apply emit binds)))
- 
--(defn scan [& args] (throw (new Exception "scan is now called dorun")))
--(defn touch [& args] (throw (new Exception "touch is now called doall")))
-+(defn scan [& args] (throw (clojure.lang.RT/makeException "scan is now called dorun")))
-+(defn touch [& args] (throw (clojure.lang.RT/makeException "touch is now called doall")))
- 
- (defn dorun
-   "When lazy sequences are produced via functions that have side
-@@ -1520,7 +1520,7 @@
+@@ -1517,7 +1517,7 @@
    occurred."
    [& agents]
      (when *agent*
@@ -155,7 +144,7 @@ index 1e74fef..982205c 100644
      (let [latch (new java.util.concurrent.CountDownLatch (count agents))
            count-down (fn [agent] (. latch (countDown)) agent)]
        (doseq [agent agents]
-@@ -1539,7 +1539,7 @@
+@@ -1536,7 +1536,7 @@
    to timeout, non-nil otherwise."
    [timeout-ms & agents]
      (when *agent*
@@ -164,7 +153,7 @@ index 1e74fef..982205c 100644
      (let [latch (new java.util.concurrent.CountDownLatch (count agents))
            count-down (fn [agent] (. latch (countDown)) agent)]
        (doseq [agent agents]
-@@ -1801,6 +1801,7 @@
+@@ -1798,6 +1798,7 @@
  
  
  (import '(java.lang.reflect Array))
@@ -172,7 +161,7 @@ index 1e74fef..982205c 100644
  
  (defn alength
    "Returns the length of the Java array. Works on arrays of all
-@@ -1820,7 +1821,7 @@
+@@ -1817,7 +1818,7 @@
    {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
     :inline-arities #{2}}
    ([array idx]
@@ -181,7 +170,7 @@ index 1e74fef..982205c 100644
    ([array idx & idxs]
     (apply aget (aget array idx) idxs)))
  
-@@ -1830,7 +1831,7 @@
+@@ -1827,7 +1828,7 @@
    {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a ~i ~v)))
     :inline-arities #{3}}
    ([array idx val]
@@ -190,7 +179,7 @@ index 1e74fef..982205c 100644
     val)
    ([array idx idx2 & idxv]
     (apply aset (aget array idx) idx2 idxv)))
-@@ -1998,6 +1999,10 @@
+@@ -1995,6 +1996,10 @@
    "Returns a set of the distinct elements of coll."
    [coll] (apply hash-set coll))
  
@@ -201,7 +190,7 @@ index 1e74fef..982205c 100644
  (defn #^{:private true}
    filter-key [keyfn pred amap]
      (loop [ret {} es (seq amap)]
-@@ -2030,7 +2035,7 @@
+@@ -2027,7 +2032,7 @@
    the-ns [x]
    (if (instance? clojure.lang.Namespace x) 
      x 
@@ -210,7 +199,7 @@ index 1e74fef..982205c 100644
  
  (defn ns-name
    "Returns the name of the namespace, a symbol."
-@@ -2063,7 +2068,7 @@
+@@ -2060,7 +2065,7 @@
  (defn ns-imports
    "Returns a map of the import mappings for the namespace."
    [ns]
@@ -219,7 +208,7 @@ index 1e74fef..982205c 100644
  
  (defn refer
    "refers to all public vars of ns, subject to filters.
-@@ -2081,7 +2086,8 @@
+@@ -2078,7 +2083,8 @@
    to a symbol different from the var's name, in order to prevent
    clashes. Use :use in the ns macro in preference to calling this directly."
    [ns-sym & filters]
@@ -229,7 +218,7 @@ index 1e74fef..982205c 100644
            fs (apply hash-map filters)
            nspublics (ns-publics ns)
            rename (or (:rename fs) {})
-@@ -2210,7 +2216,7 @@
+@@ -2207,7 +2213,7 @@
                                                       true)
                                  (= firstb :as) (pb ret (second bs) gvec)
                                  :else (if seen-rest?
@@ -238,7 +227,7 @@ index 1e74fef..982205c 100644
                                          (recur (pb ret firstb  (list `nth gvec n nil))
                                                 (inc n)
                                                 (rest bs)
-@@ -2241,7 +2247,7 @@
+@@ -2238,7 +2244,7 @@
                    (symbol? b) (-> bvec (conj b) (conj v))
                    (vector? b) (pvec bvec b v)
                    (map? b) (pmap bvec b v)
@@ -247,7 +236,7 @@ index 1e74fef..982205c 100644
          process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
      (if (every? symbol? (keys bmap))
        bindings
-@@ -2388,7 +2394,7 @@
+@@ -2385,7 +2391,7 @@
    StringWriter.  Returns the string created by any nested printing
    calls."
    [& body]
@@ -256,7 +245,7 @@ index 1e74fef..982205c 100644
       (binding [*out* s#]
         ~@body
         (str s#))))
-@@ -2434,7 +2440,7 @@
+@@ -2431,7 +2437,7 @@
   logical true."
    [x]
    `(when-not ~x
@@ -265,7 +254,7 @@ index 1e74fef..982205c 100644
  
  (defn test
    "test [v] finds fn at key :test in var metadata and calls it,
-@@ -2506,7 +2512,7 @@
+@@ -2503,7 +2509,7 @@
  (defn rand
    "Returns a random floating point number between 0 (inclusive) and
    1 (exclusive)."
@@ -274,7 +263,7 @@ index 1e74fef..982205c 100644
    ([n] (* n (rand))))
  
  (defn rand-int
-@@ -2616,7 +2622,7 @@
+@@ -2613,7 +2619,7 @@
    "Reads the file named by f into a string and returns it."
    [#^String f]
    (with-open [r (new java.io.BufferedReader (new java.io.FileReader f))]
@@ -283,7 +272,7 @@ index 1e74fef..982205c 100644
        (loop [c (. r (read))]
          (if (neg? c)
            (str sb)
-@@ -2900,10 +2906,6 @@
+@@ -2897,10 +2903,6 @@
       (send-off agt fill)
       (drain))))
  
@@ -294,7 +283,7 @@ index 1e74fef..982205c 100644
  (defn alter-var-root
    "Atomically alters the root binding of var v by applying f to its
    current value plus any args"
-@@ -2989,7 +2991,7 @@
+@@ -2986,7 +2988,7 @@
    relationships."
    ([tag] (descendants global-hierarchy tag))
    ([h tag] (if (class? tag)
@@ -303,7 +292,7 @@ index 1e74fef..982205c 100644
               (not-empty (get (:descendants h) tag)))))
  
  (defn derive
-@@ -3016,9 +3018,9 @@
+@@ -3013,9 +3015,9 @@
       (or 
        (when-not (contains? (tp tag) parent)
          (when (contains? (ta tag) parent)
@@ -311,11 +300,11 @@ index 1e74fef..982205c 100644
 +          (throw (RT/makeException (print-str tag "already has" parent "as ancestor"))))
          (when (contains? (ta parent) tag)
 -          (throw (Exception. (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))        
-+          (throw (RT/makeException (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))        
++          (throw (RT/makeException (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))
          {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
           :ancestors (tf (:ancestors h) tag td parent ta)
           :descendants (tf (:descendants h) parent ta tag td)})
-@@ -3148,7 +3150,7 @@
+@@ -3145,7 +3147,7 @@
    [pred fmt & args]
    (when pred
      (let [message (apply format fmt args)
@@ -324,6 +313,20 @@ index 1e74fef..982205c 100644
            raw-trace (.getStackTrace exception)
            boring? #(not= (.getMethodName %) "doInvoke")
            trace (into-array (drop 2 (drop-while boring? raw-trace)))]
+diff --git a/src/jvm/clojure/lang/Compiler.java b/src/jvm/clojure/lang/Compiler.java
+index bbb5aff..d4dc231 100644
+--- a/src/jvm/clojure/lang/Compiler.java
++++ b/src/jvm/clojure/lang/Compiler.java
+@@ -201,7 +201,8 @@ static final public Var NEXT_LOCAL_NUM = Var.create(0);
+ static final public Var RET_LOCAL_NUM = Var.create();
+ 
+ //DynamicClassLoader
+-static final public Var LOADER = Var.create();
++static final public Var LOADER = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
++                                                 Symbol.create("*private-compiler-loader*"));
+ 
+ public enum C{
+ 	STATEMENT,  //value ignored
 diff --git a/src/jvm/clojure/lang/RT.java b/src/jvm/clojure/lang/RT.java
 index f6139d1..fab9304 100644
 --- a/src/jvm/clojure/lang/RT.java
