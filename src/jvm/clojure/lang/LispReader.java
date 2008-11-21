@@ -101,7 +101,7 @@ static void unread(PushbackReader r, int ch) throws IOException{
 		r.unread(ch);
 }
 
-static class ReaderException extends Exception{
+public static class ReaderException extends Exception{
 	final int line;
 
 	public ReaderException(int line, Throwable cause){
@@ -368,7 +368,7 @@ static private boolean isTerminatingMacro(int ch){
 	return (ch != '#' && ch < macros.length && macros[ch] != null);
 }
 
-static class RegexReader extends AFn{
+public static class RegexReader extends AFn{
 	static StringReader stringrdr = new StringReader();
 
 	public Object invoke(Object reader, Object doublequote) throws Exception{
@@ -391,7 +391,7 @@ static class RegexReader extends AFn{
 	}
 }
 
-static class StringReader extends AFn{
+public static class StringReader extends AFn{
 	public Object invoke(Object reader, Object doublequote) throws Exception{
 		StringBuilder sb = new StringBuilder();
 		Reader r = (Reader) reader;
@@ -453,7 +453,7 @@ static class StringReader extends AFn{
 	}
 }
 
-static class CommentReader extends AFn{
+public static class CommentReader extends AFn{
 	public Object invoke(Object reader, Object semicolon) throws Exception{
 		Reader r = (Reader) reader;
 		int ch;
@@ -466,7 +466,7 @@ static class CommentReader extends AFn{
 
 }
 
-static class WrappingReader extends AFn{
+public static class WrappingReader extends AFn{
 	final Symbol sym;
 
 	public WrappingReader(Symbol sym){
@@ -481,7 +481,7 @@ static class WrappingReader extends AFn{
 
 }
 
-static class VarReader extends AFn{
+public static class VarReader extends AFn{
 	public Object invoke(Object reader, Object quote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
@@ -519,7 +519,7 @@ static class DerefReader extends AFn{
 }
 */
 
-static class DispatchReader extends AFn{
+public static class DispatchReader extends AFn{
 	public Object invoke(Object reader, Object hash) throws Exception{
 		int ch = ((Reader) reader).read();
 		if(ch == -1)
@@ -535,7 +535,7 @@ static Symbol garg(int n){
 	return Symbol.intern(null, (n == -1 ? "rest" : ("p" + n)) + "__" + RT.nextID());
 }
 
-static class FnReader extends AFn{
+public static class FnReader extends AFn{
 	public Object invoke(Object reader, Object lparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		if(ARG_ENV.get() != null)
@@ -613,7 +613,7 @@ static class ArgReader extends AFn{
 	}
 }
 
-static class MetaReader extends AFn{
+public static class MetaReader extends AFn{
 	public Object invoke(Object reader, Object caret) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
@@ -643,7 +643,7 @@ static class MetaReader extends AFn{
 
 }
 
-static class SyntaxQuoteReader extends AFn{
+public static class SyntaxQuoteReader extends AFn{
 	public Object invoke(Object reader, Object backquote) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		try
@@ -793,7 +793,7 @@ static class UnquoteReader extends AFn{
 
 }
 
-static class CharacterReader extends AFn{
+public static class CharacterReader extends AFn{
 	public Object invoke(Object reader, Object backslash) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		int ch = r.read();
@@ -836,7 +836,7 @@ static class CharacterReader extends AFn{
 
 }
 
-static class ListReader extends AFn{
+public static class ListReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
@@ -886,7 +886,7 @@ static class CtorReader extends AFn{
 
 }
 
-static class EvalReader extends AFn{
+public static class EvalReader extends AFn{
 	public Object invoke(Object reader, Object eq) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
@@ -932,7 +932,7 @@ static class EvalReader extends AFn{
 //
 //}
 
-static class VectorReader extends AFn{
+public static class VectorReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		return LazilyPersistentVector.create(readDelimitedList(']', r, true));
@@ -940,7 +940,7 @@ static class VectorReader extends AFn{
 
 }
 
-static class MapReader extends AFn{
+public static class MapReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		return PersistentHashMap.create(readDelimitedList('}', r, true));
@@ -948,7 +948,7 @@ static class MapReader extends AFn{
 
 }
 
-static class SetReader extends AFn{
+public static class SetReader extends AFn{
 	public Object invoke(Object reader, Object leftbracket) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
 		return PersistentHashSet.create(readDelimitedList('}', r, true));
@@ -956,14 +956,14 @@ static class SetReader extends AFn{
 
 }
 
-static class UnmatchedDelimiterReader extends AFn{
+public static class UnmatchedDelimiterReader extends AFn{
 	public Object invoke(Object reader, Object rightdelim) throws Exception{
 		throw new Exception("Unmatched delimiter: " + rightdelim);
 	}
 
 }
 
-static class UnreadableReader extends AFn{
+public static class UnreadableReader extends AFn{
 	public Object invoke(Object reader, Object leftangle) throws Exception{
 		throw new Exception("Unreadable form");
 	}
