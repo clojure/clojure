@@ -36,7 +36,7 @@
 
 (def #^{:private true} factory
   (doto (XmlPullParserFactory/newInstance)
-    (setNamespaceAware true)))
+    (.setNamespaceAware true)))
 
 (defn- parse-seq-pull [s]
   (let [xpp (.newPullParser factory)]
