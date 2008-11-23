@@ -14,7 +14,6 @@
 ;;  Created 22 October 2008
 
 (ns clojure.contrib.test-clojure
-  (:import (java.io File FilenameFilter))
   (:use clojure.contrib.test-is))
 
 (def tests [:reader :printer :numbers])
