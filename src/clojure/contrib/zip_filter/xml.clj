@@ -13,7 +13,7 @@
               [clojure.zip :as zip]
               [clojure.xml :as xml]))
 
-(def xml->)
+(declare xml->)
 
 (defn attr
   "Returns the xml attribute named attrname, of the xml node at location loc."
