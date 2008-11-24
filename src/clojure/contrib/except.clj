@@ -41,8 +41,6 @@
   (when test
     (throw (throwable args))))
 
-;; throw-if-not is synonymous with assert, but clojure/assert exists
-
 (defn throw-if-not
   "Throws an Exception or Error if test is false. args are those documented
   for throwf."
