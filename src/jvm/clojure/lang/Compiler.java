@@ -2988,7 +2988,7 @@ static public class FnExpr implements Expr{
 //		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,
-		         isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", null);
+		         isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", new String[]{"clojure/lang/Fn"});
 		String source = (String) SOURCE.get();
 		int lineBefore = (Integer) LINE_BEFORE.get();
 		int lineAfter = (Integer) LINE_AFTER.get() + 1;

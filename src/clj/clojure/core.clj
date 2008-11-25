@@ -1042,8 +1042,6 @@
   ([state] (new clojure.lang.Agent state))
   ([state validate-fn] (new clojure.lang.Agent state validate-fn)))
 
-(defn ! [& args] (throw (new Exception "! is now send. See also send-off")))
-
 (defn send
   "Dispatch an action to an agent. Returns the agent immediately.
   Subsequently, in a thread from a thread pool, the state of the agent
@@ -3399,10 +3397,14 @@
   [x]
   (instance? Number x))
 
-(defn fn?
+(defn ifn?
   "Returns true if x implements IFn. Note that many data structures 
   (e.g. sets and maps) implement IFn"
   [x] (instance? clojure.lang.IFn x))
+
+(defn fn?
+  "Returns true if x implements Fn, i.e. is an object created via fn."
+  [x] (instance? clojure.lang.Fn x))
 
 (defn integer?
   "Returns true if n is an integer"
@@ -3491,7 +3493,18 @@
   "defs the supplied var names with no bindings, useful for making forward declarations."
   [& names] `(do ~@(map #(list 'def %) names)))
 
-
+(defn trampoline [f]
+  "trampoline can be used to convert algorithms requiring mutual
+  recursion without stack consumption. f must be a fn of no
+  arguments. Calls f. If f returns a fn, calls that fn with no
+  arguments, and continues to repeat, until the return value is not a
+  fn, then returns that non-fn value. Note that if you want to return
+  a fn as a final value, you must wrap it in some data structure and
+  unpack it after trampoline returns."
+  (let [ret (f)]
+   (if (fn? ret)
+     (recur ret)
+     ret)))
 
 
 
