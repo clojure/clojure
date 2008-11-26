@@ -995,15 +995,15 @@
   [multifn dispatch-val & fn-tail]
   `(. ~multifn addMethod ~dispatch-val (fn ~@fn-tail)))
 
-(defmacro remove-method
+(defn remove-method
   "Removes the method of multimethod associated	with dispatch-value."
  [multifn dispatch-val]
- `(. ~multifn removeMethod ~dispatch-val))
+ (. multifn removeMethod dispatch-val))
 
-(defmacro prefer-method
+(defn prefer-method
   "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y when there is a conflict"
   [multifn dispatch-val-x dispatch-val-y]
-  `(. ~multifn preferMethod ~dispatch-val-x ~dispatch-val-y))
+  (. multifn preferMethod dispatch-val-x dispatch-val-y))
 
 ;;;;;;;;; var stuff      
 
