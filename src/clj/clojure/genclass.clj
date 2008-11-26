@@ -71,15 +71,18 @@
       'char Character/TYPE})
 
 (defn gen-class 
-  "Generates compiled bytecode for a class with the given
-  package-qualified cname (which, as all names in these parameters, can
-  be a string or symbol). The gen-class construct contains no
+  "This documents the :gen-class directive of the ns function, and is
+  not meant to be called directly.
+
+  Generates compiled bytecode for a class with the given
+  package-qualified cname (which, as all names in these parameters,
+  can be a string or symbol). The gen-class construct contains no
   implementation, as the implementation will be dynamically sought by
   the generated class in functions in a corresponding Clojure
   namespace. Given a generated class org.mydomain.MyClass with a
   method named mymethod, gen-class will generate an implementation
-  that looks for a function named -mymethod in a Clojure
-  namespace called org.mydomain.MyClass . All inherited methods, generated
+  that looks for a function named -mymethod in a Clojure namespace
+  called org.mydomain.MyClass . All inherited methods, generated
   methods, and init and main functions (see :methods, :init, and :main
   below) will be found similarly. The static initializer for the
   generated class will attempt to load the Clojure support code for
@@ -88,10 +91,10 @@
 
   Note that methods with a maximum of 18 parameters are supported.
 
-  Returns a map containing :name and :bytecode. Most uses will be
-  satisfied by the higher-level gen-and-load-class and
-  gen-and-store-class functions, which generate and immediately load,
-  or generate and store to disk, respectively.
+  In all subsequent sections taking types, the primitive types can be
+  referred to by their Java names (int, float etc), and classes in the
+  java.lang package can be used without a package qualifier. All other
+  classes must be fully qualified.
 
   Options should be a set of key/value pairs, all of which are optional:
 
@@ -118,8 +121,7 @@
   parameter may be used to explicitly specify constructors, each entry
   providing a mapping from a constructor signature to a superclass
   constructor signature. When you supply this, you must supply an :init
-  specifier. In this and all subsequent sections taking types, the primitive
-  types can be referred to by their Java names (int, float etc)
+  specifier. 
 
   :methods [ [name [param-types] return-type], ...]
 
@@ -290,7 +292,7 @@
     
                                         ;static fields for vars
     (doseq [v var-fields]
-      (. cv (visitField (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_FINAL) (. Opcodes ACC_STATIC))
+      (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_FINAL) (. Opcodes ACC_STATIC))
                         (var-name v) 
                         (. var-type getDescriptor)
                         nil nil)))

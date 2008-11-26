@@ -3089,8 +3089,10 @@
   respectively, except the arguments are unevaluated and need not be
   quoted, and the :gen-class clause does not take a name (since the
   class name corresponds to the ns name).  If :refer-clojure is not
-  used, a default (refer 'clojure) is used. Use of ns is preferred to
-  individual calls to in-ns/require/use/import:
+  used, a default (refer 'clojure) is used. The :gen-class directive
+  is ignored when not compiling. If :gen-class is not specified, when
+  compiled the generated class will have only main. Use of ns is
+  preferred to individual calls to in-ns/require/use/import:
 
   (ns foo
     (:refer-clojure :exclude [ancestors printf])
@@ -3346,9 +3348,16 @@
       (binding [*pending-paths* (conj *pending-paths* path)]
         (clojure.lang.RT/load  (.substring path 1))))))
 
-(defn compile [lib]
+(defn compile
+  "Compiles the namespace named by the symbol lib into a set of
+  classfiles. The source for the lib must be in a proper
+  classpath-relative directory. The output files will go into the
+  directory specified by *compile-path*, and that directory too must
+  be in the classpath."  
+  [lib]
   (binding [*compile-files* true]
-    (load-one lib true true)))
+    (load-one lib true true))
+  lib)
 
 ;;;;;;;;;;;;; nested associative ops ;;;;;;;;;;;
 
@@ -3525,6 +3534,15 @@
      (let [v (clojure.lang.Var/intern (the-ns ns) name val)]
        (when ^name (.setMeta v ^name))
        v)))
+
+(defmacro while
+  "Repeatedly executes body while test expression is true. Presumes
+  some side-effect will cause test to become false/nil. Returns nil"  
+  [test & body]
+  `(loop []
+     (when ~test
+       ~@body
+       (recur))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
