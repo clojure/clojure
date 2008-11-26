@@ -2021,8 +2021,11 @@
   "Returns a sequence of all namespaces."
   [] (clojure.lang.Namespace/all))
 
-(defn #^{:private true :tag clojure.lang.Namespace}
-  the-ns [x]
+(defn #^clojure.lang.Namespace the-ns
+  "If passed a namespace, returns it. Else, when passed a symbol,
+  returns the namespace named by it, throwing an exception if not
+  found."
+  [x]
   (if (instance? clojure.lang.Namespace x) 
     x 
     (or (find-ns x) (throw (Exception. (str "No namespace: " x " found"))))))
@@ -3509,7 +3512,19 @@
   ([f & args]
      (trampoline #(apply f args))))
 
-
+(defn intern
+  "Finds or creates a var named by the symbol name in the namespace
+  ns (which can be a symbol or a namespace), setting its root binding
+  to val if supplied. The namespace must exist. The var will adopt any
+  metadata from the name symbol.  Returns the var."
+  ([ns name] 
+     (let [v (clojure.lang.Var/intern (the-ns ns) name)]
+       (when ^name (.setMeta v ^name))
+       v))
+  ([ns name val] 
+     (let [v (clojure.lang.Var/intern (the-ns ns) name val)]
+       (when ^name (.setMeta v ^name))
+       v)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
