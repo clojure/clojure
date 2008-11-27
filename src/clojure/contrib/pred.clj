@@ -57,12 +57,12 @@
 
 ;; function? -> fn?
 
-(defmacro macro?
-  "Returns true if x is a function and the symbol of the
-  same name can be resolved and has its :macro metadata
-  set"
+(defn macro?
+  "Returns true if x names a macro"
   [x]
-  `(and (fn? ~x) (boolean (:macro ^#'~x))))
+  (and (symbol? x)
+       (boolean
+        (:macro (meta (resolve x))))))
 
 ;; integer?
 ;; even?

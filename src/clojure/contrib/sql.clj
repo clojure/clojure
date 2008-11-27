@@ -78,10 +78,10 @@
   parameter sets"
   [sql & sets]
   (with-open [stmt (.prepareStatement (connection) sql)]
-    (doseq [set sets]
-      (doseq [[index value] (map vector (iterate inc 1) set)]
-        (.setObject stmt index value))
-      (.addBatch stmt))
+      (doseq [set sets
+              [index value] (map vector (iterate inc 1) set)]
+          (.setObject stmt index value)
+        (.addBatch stmt))
     (.executeBatch stmt)))
 
 (defn create-table
