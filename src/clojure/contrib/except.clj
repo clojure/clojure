@@ -69,7 +69,7 @@
                                      (cons Exception args))
         ctor-args (into-array (if fmt [(apply format fmt fmt-args)] []))
         throwable (Reflector/invokeConstructor class ctor-args)
-        our-prefix "clojure.contrib.except.throwable"
+        our-prefix "clojure.contrib.except$throwable"
         not-us? #(not (.startsWith (.getClassName %) our-prefix))
         raw-trace (.getStackTrace throwable)
         edited-trace (into-array StackTraceElement
