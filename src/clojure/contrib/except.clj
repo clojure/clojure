@@ -72,6 +72,7 @@
         our-prefix "clojure.contrib.except.throwable"
         not-us? #(not (.startsWith (.getClassName %) our-prefix))
         raw-trace (.getStackTrace throwable)
-        edited-trace (into-array (drop 3 (drop-while not-us? raw-trace)))]
+        edited-trace (into-array StackTraceElement
+                      (drop 3 (drop-while not-us? raw-trace)))]
     (.setStackTrace throwable edited-trace)
     throwable))
