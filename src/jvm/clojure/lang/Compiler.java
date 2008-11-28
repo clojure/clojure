@@ -4450,9 +4450,15 @@ static public void writeClassFile(String internalName, byte[] bytecode) throws E
 	String genPath = (String) COMPILE_PATH.get();
 	if(genPath == null)
 		throw new Exception("*compile-path* not set");
+	String[] dirs = internalName.split("/");
+	String p = genPath;
+	for(int i=0;i<dirs.length-1;i++)
+		{
+		p += File.separator + dirs[i];
+		(new File(p)).mkdir();
+		}
 	String path = genPath + File.separator + internalName + ".class";
 	File cf = new File(path);
-	cf.getParentFile().mkdirs();
 	cf.createNewFile();
 	OutputStream cfs = new FileOutputStream(cf);
 	try
