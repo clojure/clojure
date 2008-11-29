@@ -34,6 +34,7 @@ public class RT{
 
 static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null, "t"));
 static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.create(null, "t"));
+static final public String LOADER_SUFFIX = "__init";
 
 //simple-symbol->class
 final static IPersistentMap DEFAULT_IMPORTS = map(
@@ -193,9 +194,6 @@ final static public Var USE_CONTEXT_CLASSLOADER =
 final static Symbol LOAD_FILE = Symbol.create("load-file");
 final static Symbol IN_NAMESPACE = Symbol.create("in-ns");
 final static Symbol NAMESPACE = Symbol.create("ns");
-//final static Symbol EXPORTS = Symbol.create("*exports*");
-//final static Var EXPORTS_VAR = Var.intern(CLOJURE_NS, EXPORTS, PersistentHashMap.EMPTY);
-//final static Symbol EQL_REF = Symbol.create("eql-ref?");
 static final Symbol IDENTICAL = Symbol.create("identical?");
 final static Var CMD_LINE_ARGS = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
 //symbol
@@ -219,16 +217,6 @@ final static IFn inNamespace = new AFn(){
 		Symbol nsname = (Symbol) arg1;
 		Namespace ns = Namespace.findOrCreate(nsname);
 		CURRENT_NS.set(ns);
-//		Var refers = Var.intern(null,Symbol.intern(nsname.name, "*refers*"));
-//
-//		Var imports = Var.intern(null,Symbol.intern(nsname.name, "*imports*"), DEFAULT_IMPORTS, false);
-//		NS_REFERS.set(refers);
-//		NS_IMPORTS.set(imports);
-//		if(!refers.isBound())
-//			{
-//			refers.bindRoot(PersistentHashMap.EMPTY);
-//			Compiler.eval(list(Symbol.create("clojure.core", "refer"), EXPORTS));
-//			}
 		return ns;
 	}
 };
@@ -243,28 +231,7 @@ public static List<String> processCommandLine(String[] args){
 		}
 	return arglist;
 }
-//simple-symbol->var
-//final static Var REFERS =
-//		Var.intern(CLOJURE_NS, Symbol.create("*refers*"),
-//		           map(
-//				           IN_NAMESPACE, Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace),
-//				           LOAD_FILE, Var.intern(CLOJURE_NS, LOAD_FILE,
-//		                                         new AFn(){
-//			                                         public Object invoke(Object arg1) throws Exception{
-//				                                         return Compiler.loadFile((String) arg1);
-//			                                         }
-//		                                         }),
-//				           IDENTICAL, Var.intern(CLOJURE_NS, IDENTICAL,
-//		                                         new AFn(){
-//			                                         public Object invoke(Object arg1, Object arg2)
-//					                                         throws Exception{
-//				                                         return arg1 == arg2 ? RT.T : RT.F;
-//			                                         }
-//		                                         })
-//		           ));
 
-//static Var NS_IMPORTS = Var.intern(CLOJURE_NS,Symbol.create("*ns-imports*"), IMPORTS);
-//static Var NS_REFERS = Var.intern(CLOJURE_NS,Symbol.create("*ns-refers*"), REFERS);
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
 	public int compare(Object o1, Object o2){
@@ -272,7 +239,6 @@ static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
 	}
 };
 
-//static public final Character[] chars;
 static AtomicInteger id = new AtomicInteger(1);
 static final public DynamicClassLoader ROOT_CLASSLOADER = new DynamicClassLoader();
 
@@ -291,7 +257,8 @@ static
 	AGENT.setTag(Symbol.create("clojure.lang.Agent"));
 	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
 	//during bootstrap ns same as in-ns
-	Var.intern(CLOJURE_NS, NAMESPACE, inNamespace);
+	Var nv = Var.intern(CLOJURE_NS, NAMESPACE, inNamespace);
+	nv.setMacro();
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
 	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
@@ -313,16 +280,6 @@ static
 	               });
 	v.setMeta(map(dockw, "Tests if 2 arguments are the same object",
 	              arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
-//	try
-//		{
-//		InputStream ins = RT.class.getResourceAsStream("/boot.clj");
-//		Compiler.load(new InputStreamReader(ins));
-//		}
-//	catch(Exception e)
-//		{
-//		throw new IllegalStateException("Error loading boot.clj", e);
-//		}
-
 	try
 		{
 		doInit();
@@ -332,12 +289,6 @@ static
 		throw new RuntimeException(e);
 		}
 	}
-//static
-//	{
-//	chars = new Character[256];
-//	for(int i = 0; i < chars.length; i++)
-//		chars[i] = new Character((char) i);
-//	}
 
 
 static public Var var(String ns, String name){
@@ -425,7 +376,7 @@ static public void load(String scriptbase) throws Exception{
 }
 
 static public void load(String scriptbase, boolean failIfNotFound) throws Exception{
-	String classfile = scriptbase + ".class";
+	String classfile = scriptbase + LOADER_SUFFIX + ".class";
 	String cljfile = scriptbase + ".clj";
 	URL classURL = baseLoader().getResource(classfile);
 	URL cljURL = baseLoader().getResource(cljfile);
@@ -439,7 +390,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 			Var.pushThreadBindings(
 					RT.map(CURRENT_NS, CURRENT_NS.get(),
 					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
-			loadClassForName(scriptbase.replace('/','.'));
+			loadClassForName(scriptbase.replace('/','.') + LOADER_SUFFIX);
 			}
 		finally
 			{
@@ -462,23 +413,6 @@ static void doInit() throws Exception{
 	load("clojure/zip",false);
 	load("clojure/xml",false);
 	load("clojure/set",false);
-//	try
-//		{
-//		Reflector.invokeStaticMethod("clojure.core", "load", EMPTY_ARRAY);
-//		Reflector.invokeStaticMethod("clojure.zip", "load", EMPTY_ARRAY);
-//		Reflector.invokeStaticMethod("clojure.xml", "load", EMPTY_ARRAY);
-//		Reflector.invokeStaticMethod("clojure.set", "load", EMPTY_ARRAY);
-//		}
-//	finally
-//		{
-//		Var.popThreadBindings();
-//		}
-//	loadResourceScript(RT.class, "clojure/core.clj");
-//	loadResourceScript(RT.class, "clojure/proxy.clj", false);
-//	loadResourceScript(RT.class, "clojure/genclass.clj", false);
-//	loadResourceScript(RT.class, "clojure/zip.clj", false);
-//	loadResourceScript(RT.class, "clojure/xml.clj", false);
-//	loadResourceScript(RT.class, "clojure/set.clj", false);
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.get(),
@@ -504,38 +438,6 @@ static public int nextID(){
 	return id.getAndIncrement();
 }
 
-//static public Object eq(Object arg1, Object arg2){
-//	return (arg1 == arg2) ? Boolean.TRUE : null;
-//}
-//
-//static public Object eql(Object arg1, Object arg2){
-//	if(arg1 == arg2)
-//		return Boolean.TRUE;
-//	if(arg1 == null || arg2 == null)
-//		return null;
-//	if(arg1 instanceof Num
-//	   && arg1.getClass() == arg2.getClass()
-//	   && arg1.equals(arg2))
-//		return Boolean.TRUE;
-//	if(arg1.getClass() == Character.class
-//	   && arg2.getClass() == Character.class
-//	   && arg1.equals(arg2))
-//		return Boolean.TRUE;
-//	return null;
-//}
-
-//    static public Object equal(Object arg1, Object arg2) {
-//        if(arg1 == null)
-//            return arg2 == null ? Boolean.TRUE : null;
-//        else if(arg2 == null)
-//            return null;
-//        return (eql(arg1,arg2) != null
-//                || (arg1.getClass() == Cons.class
-//                    && arg2.getClass() == Cons.class
-//                    && equal(((Cons)arg1)._first,((Cons)arg2)._first)!=null
-//                    && equal(((Cons)arg1)._rest,((Cons)arg2)._rest)!=null))
-//               ?Boolean.TRUE:null;
-//        }
 
 ////////////// Collections support /////////////////////////////////
 
@@ -559,10 +461,6 @@ static ISeq seqFrom(Object coll){
 		return StringSeq.create((String) coll);
 	else if(coll instanceof Map)
 		return seq(((Map) coll).entrySet());
-//	else if(coll instanceof Iterator)
-//		return IteratorSeq.create((Iterator) coll);
-//	else if(coll instanceof Enumeration)
-//		return EnumerationSeq.create(((Enumeration) coll));
 	else
 		throw new IllegalArgumentException("Don't know how to create ISeq from: " + coll.getClass().getSimpleName());
 }
@@ -680,7 +578,6 @@ static public Object get(Object coll, Object key){
 		}
 
 	return null;
-	//throw new UnsupportedOperationException("get not supported on this type");
 }
 
 static public Object get(Object coll, Object key, Object notFound){
@@ -709,7 +606,6 @@ static public Object get(Object coll, Object key, Object notFound){
 		}
 	return notFound;
 
-//	throw new UnsupportedOperationException("get not supported on this type");
 }
 
 static public Associative assoc(Object coll, Object key, Object val){
@@ -736,7 +632,6 @@ static public Object contains(Object coll, Object key){
 		return n >= 0 && n < count(coll);
 		}
 	return F;
-	//throw new UnsupportedOperationException("contains not supported on this type");
 }
 
 static public Object find(Object coll, Object key){
@@ -890,24 +785,6 @@ static public Object assocN(int n, Object val, Object coll){
 		return null;
 }
 
-/*
-static public Iter iter(Object coll){
-	if(coll == null || coll instanceof Iter)
-		return (Iter) coll;
-	else if(coll instanceof Iterator)
-		{
-		Iterator i = (Iterator) coll;
-		if(i.hasNext())
-			return new IteratorIter(i);
-		return null;
-		}
-	else if(coll instanceof Iterable)
-		return new IteratorIter(((Iterable) coll).iterator());
-
-	else
-		throw new IllegalArgumentException("Don't know how to create Iter from arg");
-}
- */
 static boolean hasTag(Object o, Object tag){
 	if(!(o instanceof IObj))
 		return false;
@@ -1357,12 +1234,6 @@ static public void print(Object x, Writer w) throws Exception{
 			w.write('"');
 			}
 		}
-//	else if(x instanceof ArgVector)
-//		{
-//		w.write('|');
-//		printInnerSeq(seq(x), w);
-//		w.write('|');
-//		}
 	else if(x instanceof IPersistentMap)
 		{
 		w.write('{');
@@ -1400,16 +1271,6 @@ static public void print(Object x, Writer w) throws Exception{
 			}
 		w.write('}');
 		}
-//	else if(x instanceof Map.Entry)
-//		{
-//		Map.Entry e = (Map.Entry) x;
-//		w.write('{');
-//		print(e.getKey(),w);
-//		w.write(' ');
-//		print(e.getValue(),w);
-//
-//		w.write('}');
-//		}
 	else if(x instanceof Character)
 		{
 		char c = ((Character) x).charValue();

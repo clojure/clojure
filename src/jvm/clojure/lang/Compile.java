@@ -45,18 +45,16 @@ public static void main(String[] args) throws Exception{
 		{
 		Var.pushThreadBindings(RT.map(compile_path, path));
 
-		out.write("Compiling " + count + " " +
-		          ((count == 1) ? "lib" : "libs") +
-		          " to " + path);
-		out.flush();
-
 		for(String lib : args)
-			compile.invoke(Symbol.intern(lib));
-
-		Var.popThreadBindings();
+        {
+            out.write("Compiling " + lib + " to " + path + "\n");
+            out.flush();
+            compile.invoke(Symbol.intern(lib));
+        }
 		}
 	finally
 		{
+        Var.popThreadBindings();
 		try
 			{
 			out.flush();

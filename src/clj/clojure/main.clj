@@ -9,6 +9,7 @@
 ;; Originally contributed by Stephen C. Gilardi
 
 (ns clojure.main
+  (:gen-class)
   (:import (clojure.lang Compiler Compiler$CompilerException RT)))
 
 (defmacro with-bindings

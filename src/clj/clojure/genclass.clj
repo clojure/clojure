@@ -70,108 +70,22 @@
       'byte Byte/TYPE
       'char Character/TYPE})
 
-(defn gen-class 
-  "This documents the :gen-class directive of the ns function, and is
-  not meant to be called directly.
+(defn- the-class [x] 
+  (cond 
+   (class? x) x
+   (contains? prim->class x) (prim->class x)
+   :else (let [strx (str x)]
+           (clojure.lang.RT/classForName 
+            (if (some #{\.} strx)
+              strx
+              (str "java.lang." strx))))))
 
-  Generates compiled bytecode for a class with the given
-  package-qualified cname (which, as all names in these parameters,
-  can be a string or symbol). The gen-class construct contains no
-  implementation, as the implementation will be dynamically sought by
-  the generated class in functions in a corresponding Clojure
-  namespace. Given a generated class org.mydomain.MyClass with a
-  method named mymethod, gen-class will generate an implementation
-  that looks for a function named -mymethod in a Clojure namespace
-  called org.mydomain.MyClass . All inherited methods, generated
-  methods, and init and main functions (see :methods, :init, and :main
-  below) will be found similarly. The static initializer for the
-  generated class will attempt to load the Clojure support code for
-  the class as a resource from the classpath, e.g. in the example
-  case, org/mydomain/MyClass__init.class
-
-  Note that methods with a maximum of 18 parameters are supported.
-
-  In all subsequent sections taking types, the primitive types can be
-  referred to by their Java names (int, float etc), and classes in the
-  java.lang package can be used without a package qualifier. All other
-  classes must be fully qualified.
-
-  Options should be a set of key/value pairs, all of which are optional:
-
-  :extends aclass
-
-  Specifies the superclass, the non-private methods of which will be
-  overridden by the class. If not provided, defaults to Object.
-
-  :implements [interface ...]
-
-  One or more interfaces, the methods of which will be implemented by the class.
-
-  :init name
-
-  If supplied, names a function that will be called with the arguments
-  to the constructor. Must return [ [superclass-constructor-args] state] 
-  If not supplied, the constructor args are passed directly to
-  the superclass constructor and the state will be nil
-
-  :constructors {[param-types] [super-param-types], ...}
-
-  By default, constructors are created for the generated class which
-  match the signature(s) of the constructors for the superclass. This
-  parameter may be used to explicitly specify constructors, each entry
-  providing a mapping from a constructor signature to a superclass
-  constructor signature. When you supply this, you must supply an :init
-  specifier. 
-
-  :methods [ [name [param-types] return-type], ...]
-
-  The generated class automatically defines all of the non-private
-  methods of its superclasses/interfaces. This parameter can be used
-  to specify the signatures of additional methods of the generated
-  class. Static methods can be specified with #^{:static true} in the
-  signature's metadata. Do not repeat superclass/interface signatures
-  here.
-
-  :main boolean
-
-  If supplied and true, a static public main function will be
-  generated. It will pass each string of the String[] argument as a
-  separate argument to a function called 'main.
-
-  :factory name
-
-  If supplied, a (set of) public static factory function(s) will be
-  created with the given name, and the same signature(s) as the
-  constructor(s).
-  
-  :state name
-
-  If supplied, a public final instance field with the given name will be
-  created. You must supply an :init function in order to provide a
-  value for the state. Note that, though final, the state can be a ref
-  or agent, supporting the creation of Java objects with transactional
-  or asynchronous mutation semantics.
-
-  :exposes {protected-field-name {:get name :set name}, ...}
-
-  Since the implementations of the methods of the generated class
-  occur in Clojure functions, they have no access to the inherited
-  protected fields of the superclass. This parameter can be used to
-  generate public getter/setter methods exposing the protected field(s)
-  for use in the implementation."
-
-  [cname & options]
-  (let [the-class (fn [x] 
-                    (cond 
-                     (class? x) x
-                     (contains? prim->class x) (prim->class x)
-                     :else (let [strx (str x)]
-                             (clojure.lang.RT/classForName 
-                              (if (some #{\.} strx)
-                                strx
-                                (str "java.lang." strx))))))
-        name (str cname)
-        {:keys [extends implements constructors methods main factory state init exposes]} (apply hash-map options)
+(defn generate-class [options-map]
+  (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
+        {:keys [name extends implements constructors methods main factory state init exposes 
+                prefix load-impl-ns impl-ns]} 
+          (merge default-options options-map)
+        name (str name)
         super (if extends (the-class extends) Object)
         interfaces (map the-class implements)
         supers (cons super interfaces)
@@ -179,6 +93,8 @@
         cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
         cname (. name (replace "." "/"))
         pkg-name name
+        impl-pkg-name (str impl-ns)
+        impl-cname (.. impl-pkg-name (replace "." "/") (replace \- \_))
         ctype (. Type (getObjectType cname))
         iname (fn [c] (.. Type (getType c) (getInternalName)))
         totype (fn [c] (. Type (getType c)))
@@ -205,8 +121,8 @@
                                    (map (fn [[m p]] {(str m) [p]}) methods)))
         sigs-by-name (apply merge-with concat {} all-sigs)
         overloads (into {} (filter (fn [[m s]] (rest s)) sigs-by-name))
-        var-fields (concat (and init [init-name]) 
-                           (and main [main-name])
+        var-fields (concat (when init [init-name]) 
+                           (when main [main-name])
                            (distinct (concat (keys sigs-by-name)
                                              (mapcat (fn [[m s]] (map #(overload-name m %) s)) overloads)
                                              (mapcat (comp (partial map str) vals val) exposes))))
@@ -225,7 +141,7 @@
                          (. gen mark end-label)))
         emit-unsupported (fn [gen m]
                            (. gen (throwException ex-type (str (. m (getName)) " ("
-                                                               pkg-name "/" "-" (.getName m)
+                                                               impl-pkg-name "/" prefix (.getName m)
                                                                " not defined?)"))))
         emit-forwarding-method
         (fn [mname pclasses rclass as-static else-gen]
@@ -310,14 +226,21 @@
                    nil nil cv)]
       (. gen (visitCode))
       (doseq [v var-fields]
-        (. gen push pkg-name)
-        (. gen push (str "-" v))
+        (. gen push impl-pkg-name)
+        (. gen push (str prefix v))
         (. gen (invokeStatic var-type (. Method (getMethod "clojure.lang.Var internPrivate(String,String)"))))
         (. gen putStatic ctype (var-name v) var-type))
       
-      (. gen push (str name "__init"))
-      (. gen (invokeStatic class-type (. Method (getMethod "Class forName(String)"))))
-      (. gen pop)
+      (when load-impl-ns
+        (. gen push "clojure.core")
+        (. gen push "load")
+        (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.Var var(String,String)"))))
+        (. gen push (str "/" impl-cname))
+        (. gen (invokeInterface ifn-type (new Method "invoke" obj-type (to-types [Object]))))
+;        (. gen push (str (.replace impl-pkg-name \- \_) "__init"))
+;        (. gen (invokeStatic class-type (. Method (getMethod "Class forName(String)"))))
+        (. gen pop))
+
       (. gen (returnValue))
       (. gen (endMethod)))
     
@@ -373,7 +296,7 @@
             (. gen goTo end-label)
                                         ;no init found
             (. gen mark no-init-label)
-            (. gen (throwException ex-type (str init-name " not defined")))
+            (. gen (throwException ex-type (str impl-pkg-name "/" prefix init-name " not defined")))
             (. gen mark end-label))
           (if (= pclasses super-pclasses)
             (do
@@ -444,7 +367,7 @@
         (. gen goTo end-label)
                                         ;no main found
         (. gen mark no-main-label)
-        (. gen (throwException ex-type (str pkg-name "/" "-" main-name " not defined")))
+        (. gen (throwException ex-type (str impl-pkg-name "/" prefix main-name " not defined")))
         (. gen mark end-label)
         (. gen (returnValue))
         (. gen (endMethod))))
@@ -471,7 +394,124 @@
             (. gen (endMethod))))))
                                         ;finish class def
     (. cv (visitEnd))
-    {:name name :bytecode (. cv (toByteArray))}))
+    [cname (. cv (toByteArray))]))
+
+(defmacro gen-class 
+  "When compiling, generates compiled bytecode for a class with the
+  given package-qualified :name (which, as all names in these
+  parameters, can be a string or symbol), and writes the .class file
+  to the *compile-path* directory.  When not compiling, does
+  nothing. The gen-class construct contains no implementation, as the
+  implementation will be dynamically sought by the generated class in
+  functions in an implementing Clojure namespace. Given a generated
+  class org.mydomain.MyClass with a method named mymethod, gen-class
+  will generate an implementation that looks for a function named by 
+  (str prefix mymethod) (default prefix: \"-\") in a
+  Clojure namespace specified by :impl-ns
+  (defaults to the current namespace). All inherited methods,
+  generated methods, and init and main functions (see :methods, :init,
+  and :main below) will be found similarly prefixed. By default, the
+  static initializer for the generated class will attempt to load the
+  Clojure support code for the class as a resource from the classpath,
+  e.g. in the example case, org/mydomain/MyClass__init.class. This
+  behavior can be controlled by :load-impl-ns
+
+  Note that methods with a maximum of 18 parameters are supported.
+
+  In all subsequent sections taking types, the primitive types can be
+  referred to by their Java names (int, float etc), and classes in the
+  java.lang package can be used without a package qualifier. All other
+  classes must be fully qualified.
+
+  Options should be a set of key/value pairs, all except for :name are optional:
+
+  :name aname
+
+  The package-qualified name of the class to be generated
+
+  :extends aclass
+
+  Specifies the superclass, the non-private methods of which will be
+  overridden by the class. If not provided, defaults to Object.
+
+  :implements [interface ...]
+
+  One or more interfaces, the methods of which will be implemented by the class.
+
+  :init name
+
+  If supplied, names a function that will be called with the arguments
+  to the constructor. Must return [ [superclass-constructor-args] state] 
+  If not supplied, the constructor args are passed directly to
+  the superclass constructor and the state will be nil
+
+  :constructors {[param-types] [super-param-types], ...}
+
+  By default, constructors are created for the generated class which
+  match the signature(s) of the constructors for the superclass. This
+  parameter may be used to explicitly specify constructors, each entry
+  providing a mapping from a constructor signature to a superclass
+  constructor signature. When you supply this, you must supply an :init
+  specifier. 
+
+  :methods [ [name [param-types] return-type], ...]
+
+  The generated class automatically defines all of the non-private
+  methods of its superclasses/interfaces. This parameter can be used
+  to specify the signatures of additional methods of the generated
+  class. Static methods can be specified with #^{:static true} in the
+  signature's metadata. Do not repeat superclass/interface signatures
+  here.
+
+  :main boolean
+
+  If supplied and true, a static public main function will be generated. It will
+  pass each string of the String[] argument as a separate argument to
+  a function called (str prefix main).
+
+  :factory name
+
+  If supplied, a (set of) public static factory function(s) will be
+  created with the given name, and the same signature(s) as the
+  constructor(s).
+  
+  :state name
+
+  If supplied, a public final instance field with the given name will be
+  created. You must supply an :init function in order to provide a
+  value for the state. Note that, though final, the state can be a ref
+  or agent, supporting the creation of Java objects with transactional
+  or asynchronous mutation semantics.
+
+  :exposes {protected-field-name {:get name :set name}, ...}
+
+  Since the implementations of the methods of the generated class
+  occur in Clojure functions, they have no access to the inherited
+  protected fields of the superclass. This parameter can be used to
+  generate public getter/setter methods exposing the protected field(s)
+  for use in the implementation.
+
+  :prefix string
+
+  Default: \"-\" Methods called e.g. Foo will be looked up in vars called
+  prefixFoo in the implementing ns.
+
+  :impl-ns name
+
+  Default: the name of the current ns. Implementations of methods will be looked up in this namespace.
+
+  :load-impl-ns boolean
+
+  Default: true. Causes the static initializer for the generated class
+  to reference the load code for the implementing namespace. Should be
+  true when implementing-ns is the default, false if you intend to
+  load the code via some other method."
+  
+  [& options]
+    (when *compile-files*
+      (let [options-map (apply hash-map options)
+            [cname bytecode] (generate-class options-map)]
+        (clojure.lang.Compiler/writeClassFile cname bytecode))))
 
 (comment
 
@@ -483,22 +523,11 @@
   desired namespaces just like any other class. See gen-class for a
   description of the options."
 
-  [name & options]
-  (let [{:keys [name bytecode]}
-        (apply gen-class (str name) options)]
-    (.. clojure.lang.RT ROOT_CLASSLOADER (defineClass (str name) bytecode))))
+  [& options]
+  (let [options-map (apply hash-map options)
+        [cname bytecode] (generate-class options-map)]
+    (.. clojure.lang.RT ROOT_CLASSLOADER (defineClass cname bytecode))))
 
-(defn gen-and-save-class 
-  "Generates the bytecode for the named class and stores in a .class
-  file in a subpath of the supplied path, the directories for which
-  must already exist. See gen-class for a description of the options"
-
-  [path name & options]
-  (let [{:keys [name bytecode]} (apply gen-class (str name) options)
-        file (java.io.File. path (str (. name replace \. (. java.io.File separatorChar)) ".class"))]
-    (.createNewFile file)
-    (with-open [f (java.io.FileOutputStream. file)]
-      (.write f bytecode))))
 )
 
 (comment

@@ -4061,6 +4061,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 			return analyze(context, me, name);
 
 		Object op = RT.first(form);
+		if(op == null)
+			throw new IllegalArgumentException("Can't call nil");
 		IFn inline = isInline(op, RT.count(RT.rest(form)));
 		if(inline != null)
 			return analyze(context, inline.applyTo(RT.rest(form)));
@@ -4498,43 +4500,10 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 
 	try
 		{
-		//use genclass for the stub
-		String classname = sourcePath.substring(0, sourcePath.lastIndexOf('.')).replace('/', '.');
-		Object r = LispReader.read(pushbackReader, false, EOF, false);
-		Object genclassArgs = null;
-		if(r instanceof IPersistentList
-		   && (Util.equal(RT.first(r), Symbol.create("ns"))
-		       || Util.equal(RT.first(r), Symbol.create("clojure.core", "ns"))))
-			{
-			Keyword gk = Keyword.intern(null, "gen-class");
-			Symbol nssym = (Symbol) RT.second(r);
-			if(!nssym.toString().replace('-','_').equals(classname))
-				throw new Exception(String.format("Namespace name must match file, had: %s and %s",
-				                                  nssym, sourcePath));
-			for(ISeq s = RT.rest(RT.rest(r)); s != null; s = s.rest())
-				{
-				Object entry = s.first();
-				if(RT.first(entry).equals(gk))
-					{
-					genclassArgs = RT.rest(entry);
-					break;
-					}
-				}
-			}
-
-		if(genclassArgs == null)
-			genclassArgs = RT.list(Keyword.intern(null, "main"), RT.T);
-
-		genclassArgs = RT.cons(classname, genclassArgs);
-		Var genclass = RT.var("clojure.core", "gen-class");
-		IPersistentMap gret = (IPersistentMap) genclass.applyTo(RT.seq(genclassArgs));
-		writeClassFile(sourcePath.substring(0, sourcePath.lastIndexOf('.')),
-		               (byte[]) RT.get(gret, Keyword.intern(null, "bytecode")));
-
 		//generate loader class
 		FnExpr fn = new FnExpr(null);
 		fn.internalName = sourcePath.replace(File.separator, "/").substring(0, sourcePath.lastIndexOf('.'))
-		                  + "__init";
+		                  + RT.LOADER_SUFFIX;
 
 		fn.fntype = Type.getObjectType(fn.internalName);
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
@@ -4549,7 +4518,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                                            cv);
 		gen.visitCode();
 
-		for(; r != EOF;
+		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
 		    r = LispReader.read(pushbackReader, false, EOF, false))
 			{
 			LINE_AFTER.set(pushbackReader.getLineNumber());
@@ -4605,25 +4574,6 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		//end of static init
 		clinitgen.returnValue();
 		clinitgen.endMethod();
-
-		//main
-//		GeneratorAdapter maingen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
-//		                                                Method.getMethod("void main (String[])"),
-//		                                                null,
-//		                                                null,
-//		                                                cv);
-//		maingen.visitCode();
-//		maingen.push(fn.internalName.replace('/', '.'));
-//		maingen.push("main");
-//		maingen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
-//		maingen.loadArgs();
-//		maingen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.ISeq seq(Object)"));
-//		maingen.invokeInterface(IFN_TYPE, new Method("applyTo", OBJECT_TYPE, new Type[]{Type.getType(ISeq.class)}));
-//		maingen.pop();
-//
-//		//end of main
-//		maingen.returnValue();
-//		maingen.endMethod();
 
 		//end of class
 		cv.visitEnd();
