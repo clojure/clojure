@@ -80,7 +80,7 @@
               strx
               (str "java.lang." strx))))))
 
-(defn generate-class [options-map]
+(defn- generate-class [options-map]
   (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
         {:keys [name extends implements constructors methods main factory state init exposes 
                 prefix load-impl-ns impl-ns]} 
@@ -413,7 +413,7 @@
   and :main below) will be found similarly prefixed. By default, the
   static initializer for the generated class will attempt to load the
   Clojure support code for the class as a resource from the classpath,
-  e.g. in the example case, org/mydomain/MyClass__init.class. This
+  e.g. in the example case, ``org/mydomain/MyClass__init.class``. This
   behavior can be controlled by :load-impl-ns
 
   Note that methods with a maximum of 18 parameters are supported.
@@ -513,6 +513,79 @@
             [cname bytecode] (generate-class options-map)]
         (clojure.lang.Compiler/writeClassFile cname bytecode))))
 
+;;;;;;;;;;;;;;;;;;;; gen-interface ;;;;;;;;;;;;;;;;;;;;;;
+;; based on original contribution by Chris Houser
+
+(defn- asm-type
+  "Returns an asm Type object for c, which may be a primitive class
+  (such as Integer/TYPE), any other class (such as Double), or a
+  fully-qualified class name given as a string or symbol
+  (such as 'java.lang.String)"
+  [c]
+  (if (or (instance? Class c) (prim->class c))
+    (Type/getType (the-class c))
+    (let [strx (str c)]
+      (Type/getObjectType 
+       (.replace (if (some #{\.} strx)
+                   strx
+                   (str "java.lang." strx)) 
+                 "." "/")))))
+
+(defn- generate-interface
+  [{:keys [name extends methods]}]
+  (let [iname (.replace (str name) "." "/")
+        cv (ClassWriter. ClassWriter/COMPUTE_MAXS)]
+    (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC 
+                                Opcodes/ACC_ABSTRACT
+                                Opcodes/ACC_INTERFACE)
+       iname nil "java/lang/Object"
+       (when (seq extends)
+         (into-array (map #(.getInternalName (asm-type %)) extends))))
+    (doseq [[mname pclasses rclass] methods]
+      (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
+         (str mname)
+         (Type/getMethodDescriptor (asm-type rclass) 
+                                   (if pclasses
+                                     (into-array Type (map asm-type pclasses))
+                                     (make-array Type 0)))
+         nil nil))
+    (. cv visitEnd)
+    [iname (. cv toByteArray)]))
+
+(defmacro gen-interface
+  "When compiling, generates compiled bytecode for an interface with
+  the given package-qualified :name (which, as all names in these
+  parameters, can be a string or symbol), and writes the .class file
+  to the *compile-path* directory.  When not compiling, does nothing.
+ 
+  In all subsequent sections taking types, the primitive types can be
+  referred to by their Java names (int, float etc), and classes in the
+  java.lang package can be used without a package qualifier. All other
+  classes must be fully qualified.
+ 
+  Options should be a set of key/value pairs, all except for :name are
+  optional:
+
+  :name aname
+
+  The package-qualified name of the class to be generated
+
+  :extends [interface ...]
+
+  One or more interfaces, which will be extended by this interface.
+
+  :methods [ [name [param-types] return-type], ...]
+
+  This parameter is used to specify the signatures of the methods of
+  the generated interface.  Do not repeat superinterface signatures
+  here."
+
+  [& options]
+  (when *compile-files*
+    (let [options-map (apply hash-map options)
+          [cname bytecode] (generate-interface options-map)]
+      (clojure.lang.Compiler/writeClassFile cname bytecode)))) 
+
 (comment
 
 (defn gen-and-load-class 
@@ -528,62 +601,4 @@
         [cname bytecode] (generate-class options-map)]
     (.. clojure.lang.RT ROOT_CLASSLOADER (defineClass cname bytecode))))
 
-)
-
-(comment
-;usage
-(gen-class 
- package-qualified-name
-  ;all below are optional
- :extends aclass
- :implements [interface ...]
- :constructors {[param-types] [super-param-types], }
- :methods [[name [param-types] return-type], ]
- :main boolean
- :factory name
- :state name
- :init name
- :exposes {protected-field {:get name :set name}, })
-
-(gen-and-load-class 'net.n01se.TestObj
-  :extends javax.swing.DefaultCellEditor
-  :constructors {[Integer] [javax.swing.JCheckBox]}
-  :factory 'makeone
-  :methods [['mymax [Integer] Integer]]
-  :init 'init
-  :main true
-  :state 'myint
-  :exposes '{clickCountToStart {:get get-c-count :set set-c-count}})
-
-;-------------------------------
-(clojure/in-ns 'net.n01se)
-(clojure/refer 'clojure)
-
-(defn TestObj-init [myint]
-  [[(javax.swing.JCheckBox.)] myint])
-
-(defn TestObj-mymax [this i]
-  (max i (.myint this)))
-
-(defn TestObj-getCellEditorValue [this]
-  (prn :getCellEditorValue)
-  nil)
-
-(defn TestObj-main [istr]
-  (prn :main istr))
-
-;-------------------------------
-(in-ns 'user)
-(prn (.mymax (net.n01se.TestObj. 5) 9))
-(.getCellEditorValue (net.n01se.TestObj. 6))
-(prn (.myint (net.n01se.TestObj. 7)))
-(prn (. net.n01se.TestObj makeone 8))
-(prn (net.n01se.TestObj/makeone 9))
-(. net.n01se.TestObj main (into-array ["howdy"]))
-(prn (net.n01se/TestObj-getCellEditorValue (net.n01se.TestObj. 10)))
-(prn (.get-c-count (net.n01se.TestObj. 11)))
-
-; the following would fail because :exposes only generates class
-; methods, not namespace functions
-;(prn (net.n01se.TestObj/get-c-count (net.n01se.TestObj. 12)))
 )
