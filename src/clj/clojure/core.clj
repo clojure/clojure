@@ -3352,11 +3352,12 @@
       (when *loading-verbosely*
         (printf "(clojure.core/load \"%s\")\n" path)
         (flush))
-      (throw-if (*pending-paths* path)
-                "cannot load '%s' again while it is loading"
-                path)
-      (binding [*pending-paths* (conj *pending-paths* path)]
-        (clojure.lang.RT/load  (.substring path 1))))))
+;      (throw-if (*pending-paths* path)
+;                "cannot load '%s' again while it is loading"
+;                path)
+      (when-not (*pending-paths* path)
+        (binding [*pending-paths* (conj *pending-paths* path)]
+          (clojure.lang.RT/load  (.substring path 1)))))))
 
 (defn compile
   "Compiles the namespace named by the symbol lib into a set of
