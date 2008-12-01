@@ -64,10 +64,10 @@
   as another with the exception of :namespace, :name, :file, :line, and
   optionally :doc which are those of new var."
   ([name orig]
-     `(let [v# (def ~name (var ~orig))]
+     `(let [v# (def ~name (. (var ~orig) (get)))]
         (. v# (setMeta (merge (meta (var ~orig)) (meta (var ~name)))))
         v#))
   ([name orig doc]
-     `(let [v# (def ~name (var ~orig))]
+     `(let [v# (def ~name (. (var ~orig) (get)))]
         (. v# (setMeta (merge (meta (var ~orig)) (assoc (meta (var ~name)) :doc ~doc))))
         v#)))
