@@ -16,15 +16,6 @@
 
 (ns clojure.contrib.def)
 
-(defmacro init-once
-  "Initializes a var exactly once. The var must already exist.
-  (NOTE: Since SVN 1008, Clojure includes defonce. Please use that instead
-  of init-once.)"
-  [var init]
-  `(let [v# (resolve '~var)]
-     (when-not (.isBound v#)
-       (.bindRoot v# ~init))))
-
 (defmacro defvar
   "Defines a var with an optional intializer and doc string"
   ([name]
@@ -60,6 +51,13 @@
   "Same as defstruct but yields a private definition"
   [name & decls]
   (list* `defstruct (with-meta name (assoc (meta name) :private true)) decls))
+
+(defmacro defonce-
+  "Same as defonce but yields a private definition"
+  ([name expr]
+     (list `defonce (with-meta name (assoc (meta name) :private true)) expr))
+  ([name expr doc]
+     (list `defonce (with-meta name (assoc (meta name) :private true :doc doc)) expr)))
 
 (defmacro defalias
   "Defines an alias for a var: a new var with the same value and metadata
