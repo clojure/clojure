@@ -1476,13 +1476,15 @@ static public Class classForName(String name) throws ClassNotFoundException{
 	return Class.forName(name, false, baseLoader());
 }
 
-static public Class loadClassForName(String name){
+static public Class loadClassForName(String name) throws ClassNotFoundException{
 	try{
     	return Class.forName(name, true, baseLoader());
 	    }
 	catch(ClassNotFoundException e)
 		{
-		return null;
+		if(e.getCause() == null)
+			return null;
+		throw e;
 		}
 }
 
