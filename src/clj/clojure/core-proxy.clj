@@ -137,28 +137,29 @@
       (. gen (endMethod)))
     
                                         ;calc set of supers' non-private instance methods
-    (let [mm (loop [mm {} considered #{} c super]
-               (if c
-                 (let [[mm considered]
-                       (loop [mm mm 
-                              considered considered 
-                              meths (concat 
-                                     (seq (. c (getDeclaredMethods)))
-                                     (seq (. c (getMethods))))]
-                         (if meths 
-                           (let [#^java.lang.reflect.Method meth (first meths)
-                                 mods (. meth (getModifiers))
-                                 mk (method-sig meth)]
-                             (if (or (considered mk)
-                                     (. Modifier (isPrivate mods)) 
-                                     (. Modifier (isStatic mods))
-                                     (. Modifier (isFinal mods))
-                                     (= "finalize" (.getName meth)))
-                               (recur mm (conj considered mk) (rest meths))
-                               (recur (assoc mm mk meth) (conj considered mk) (rest meths))))
-                           [mm considered]))]
-                   (recur mm considered (. c (getSuperclass))))
-                 mm))]
+    (let [[mm considered]
+            (loop [mm {} considered #{} c super]
+              (if c
+                (let [[mm considered]
+                      (loop [mm mm 
+                             considered considered 
+                             meths (concat 
+                                    (seq (. c (getDeclaredMethods)))
+                                    (seq (. c (getMethods))))]
+                        (if meths 
+                          (let [#^java.lang.reflect.Method meth (first meths)
+                                mods (. meth (getModifiers))
+                                mk (method-sig meth)]
+                            (if (or (considered mk)
+                                    (. Modifier (isPrivate mods)) 
+                                    (. Modifier (isStatic mods))
+                                    (. Modifier (isFinal mods))
+                                    (= "finalize" (.getName meth)))
+                              (recur mm (conj considered mk) (rest meths))
+                              (recur (assoc mm mk meth) (conj considered mk) (rest meths))))
+                          [mm considered]))]
+                  (recur mm considered (. c (getSuperclass))))
+                [mm considered]))]
                                         ;add methods matching supers', if no mapping -> call super
       (doseq [#^java.lang.reflect.Method meth (vals mm)]
           (gen-method meth 
@@ -175,10 +176,11 @@
                                         ;add methods matching interfaces', if no mapping -> throw
       (doseq [#^Class iface interfaces]
           (doseq [#^java.lang.reflect.Method meth (. iface (getMethods))]
-              (when-not (contains? mm (method-sig meth))
+            (let [msig (method-sig meth)]
+              (when-not (or (contains? mm msig) (contains? considered msig))
                 (gen-method meth 
                             (fn [gen m]
-                                (. gen (throwException ex-type (. m (getName))))))))))
+                                (. gen (throwException ex-type (. m (getName)))))))))))
     
                                         ;finish class def
     (. cv (visitEnd))
@@ -320,3 +322,56 @@
 		  (when pseq
 		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
 			       (thisfn (rest pseq))))) (keys pmap))))))
+
+(import '(java.util.concurrent.atomic AtomicReference))
+
+(defn atom
+  "Creates and returns a new Atom with an initial value of x and an
+  optional validate fn. validate-fn must be nil or a side-effect-free
+  fn of one argument, which will be passed the intended new state on
+  any state change. If the new state is unacceptable, the validate-fn
+  should throw an exception."
+  ([x] (atom x nil))
+  ([x validator-fn]
+     (let [validator (AtomicReference. nil)
+           atom (proxy [AtomicReference clojure.lang.IRef] [x]
+                  (getValidator [] (.get validator))
+                  (setValidator [f]
+                    (when f
+                      (try
+                       (f @this)
+                       (catch Exception e
+                         (throw (IllegalStateException. "Invalid atom state" e)))))
+                    (.set validator f)))]
+       (set-validator atom validator-fn)
+       atom)))
+
+(defn swap!
+  "Atomically swaps the value of atom to be:
+  (apply f current-value-of-atom args). 
+  Returns nil"
+  [#^AtomicReference atom f & args]
+  (let [validate (get-validator atom)]
+    (loop [oldv (.get atom)]
+      (let [newv (apply f oldv args)]
+        (when validate
+          (try
+           (validate newv)
+           (catch Exception e
+             (throw (IllegalStateException. "Invalid atom state" e)))))
+        (when-not (.compareAndSet atom oldv newv)
+          (recur (.get atom)))))))
+
+(defn compare-and-set! 
+  "Atomically sets the value of atom to newval if and only if the
+  current value of the atom is identical to oldval. Returns true if
+  set happened, else false" 
+  [#^AtomicReference atom oldval newval]
+    (let [validate (get-validator atom)]
+      (when validate
+        (try
+         (validate newval)
+         (catch Exception e
+           (throw (IllegalStateException. "Invalid atom state" e)))))
+      (.compareAndSet atom oldval newval)))
+
