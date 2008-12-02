@@ -76,21 +76,40 @@
         namespace (ns-name *ns*)]
     (format prompt-fmt-internal serial thread depth line namespace)))
 
+(defn- whitespace?
+  "Returns logical true if c is whitespace in Clojure"
+  [c]
+  (or (Character/isWhitespace c) (= c (int \,))))
+
+(defn- eol?
+  "Returns logical true if c is an eol character"
+  [c]
+  (#{\return \newline} (char c)))
+
+(defn- skip-to-eol
+  "Reads and skips everything until an eol character"
+  [s]
+  (loop [c (.read s)]
+    (when-not (eol? c)
+      (recur (.read s)))))
+          
 (defn- skip-whitespace
   "Reads and skips whitespace characters from stream s. Returns :eos on end
-  of stream, :eol on end of line, or false on non-whitespace."
+  of stream, :eol on end of line, :eol after skipping rest of line on
+  semicolon, or false otherwise."
   [s]
   (loop [c (.read s)]
     (cond (= c -1) :eos
-          (#{\return \newline} (char c)) :eol
-          (or (Character/isWhitespace c) (= c \,)) (recur (.read s))
+          (eol? c) :eol
+          (= c (int \;)) (do (skip-to-eol s) :eol)
+          (whitespace? c) (recur (.read s))
           :else (do (.unread s c) false))))
 
 (defn- read-hook
   "Read hook that keeps the compiler's line number in sync with that of our
   input stream, prompts only when there is nothing remaining to read on the
   previous input line, and calls the Clojure reader only when there's
-  something to read on the current line."
+  something interesting to read on the current line."
   [eof]
   (loop [c (skip-whitespace *in*)]
     (cond (= c :eos) eof
