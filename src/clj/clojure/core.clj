@@ -1106,11 +1106,11 @@
   ([x validate-fn] (new clojure.lang.Ref x validate-fn)))
 
 (defn deref
-  "Also reader macro: @ref/@agent/@var/@atom Within a transaction, returns the
-  in-transaction-value of ref, else returns the
-  most-recently-committed value of ref. When applied to an var, agent ot atom,
-  returns its current state."
- [#^clojure.lang.IRef ref] (. ref (get)))
+  "Also reader macro: @ref/@agent/@var/@atom Within a transaction,
+  returns the in-transaction-value of ref, else returns the
+  most-recently-committed value of ref. When applied to a var, agent
+  or atom, returns its current state."  
+  [#^clojure.lang.IRef ref] (. ref (get)))
 
 (defn set-validator
   "Sets the validator-fn for a var/ref/agent/atom. validator-fn must be nil or a
