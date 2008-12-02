@@ -772,23 +772,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) form;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				if(sym.name.equals("ints"))
-					c = int[].class;
-				else if(sym.name.equals("longs"))
-					c = long[].class;
-				else if(sym.name.equals("floats"))
-					c = float[].class;
-				else if(sym.name.equals("doubles"))
-					c = double[].class;
-				else if(sym.name.equals("chars"))
-					c = double[].class;
-				else if(sym.name.equals("shorts"))
-					c = short[].class;
-				else if(sym.name.equals("bytes"))
-					c = byte[].class;
-				else if(sym.name.equals("booleans"))
-					c = boolean[].class;
-				else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 					c = RT.classForName(sym.name);
 				else
 					{
@@ -827,6 +811,29 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
  */
 	static Class tagToClass(Object tag) throws Exception{
 		Class c = maybeClass(tag, true);
+		if(tag instanceof Symbol)
+			{
+			Symbol sym = (Symbol) tag;
+			if(sym.ns == null) //if ns-qualified can't be classname
+				{
+				if(sym.name.equals("ints"))
+					c = int[].class;
+				else if(sym.name.equals("longs"))
+					c = long[].class;
+				else if(sym.name.equals("floats"))
+					c = float[].class;
+				else if(sym.name.equals("doubles"))
+					c = double[].class;
+				else if(sym.name.equals("chars"))
+					c = double[].class;
+				else if(sym.name.equals("shorts"))
+					c = short[].class;
+				else if(sym.name.equals("bytes"))
+					c = byte[].class;
+				else if(sym.name.equals("booleans"))
+					c = boolean[].class;
+				}
+			}
 		if(c != null)
 			return c;
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
