@@ -2488,7 +2488,9 @@
   "Returns an instance of java.util.regex.Pattern, for use, e.g. in
   re-matcher."  
   {:tag java.util.regex.Pattern}
-  [s] (. java.util.regex.Pattern (compile s)))
+  [s] (if (instance? java.util.regex.Pattern s)
+        s
+        (. java.util.regex.Pattern (compile s))))
   
 (defn re-matcher
   "Returns an instance of java.util.regex.Matcher, for use, e.g. in
@@ -2567,9 +2569,9 @@
 
 (defn find-doc
   "Prints documentation for any var whose documentation or name
- contains a match for re-string"
-  [re-string]
-    (let [re  (re-pattern re-string)]
+ contains a match for re-string-or-pattern"
+  [re-string-or-pattern]
+    (let [re  (re-pattern re-string-or-pattern)]
       (dorun (for [ns (all-ns) 
                    v (sort-by (comp :name meta) (vals (ns-interns ns)))
                    :when (and (:doc ^v)
