@@ -1106,14 +1106,14 @@
   ([x validate-fn] (new clojure.lang.Ref x validate-fn)))
 
 (defn deref
-  "Also reader macro: @ref/@agent Within a transaction, returns the
+  "Also reader macro: @ref/@agent/@var/@atom Within a transaction, returns the
   in-transaction-value of ref, else returns the
-  most-recently-committed value of ref. When applied to an agent,
+  most-recently-committed value of ref. When applied to an var, agent ot atom,
   returns its current state."
  [#^clojure.lang.IRef ref] (. ref (get)))
 
 (defn set-validator
-  "Sets the validator-fn for a var/ref/agent. validator-fn must be nil or a
+  "Sets the validator-fn for a var/ref/agent/atom. validator-fn must be nil or a
   side-effect-free fn of one argument, which will be passed the intended
   new state on any state change. If the new state is unacceptable, the
   validator-fn should throw an exception. If the current state (root
@@ -1122,7 +1122,7 @@
   [#^clojure.lang.IRef iref validator-fn] (. iref (setValidator validator-fn)))
 
 (defn get-validator
-  "Gets the validator-fn for a var/ref/agent."
+  "Gets the validator-fn for a var/ref/agent/atom."
  [#^clojure.lang.IRef iref] (. iref (getValidator)))
 
 (defn commute
@@ -1651,15 +1651,56 @@
   {:tag Boolean} 
   [x] (if x true false))
 
+(defn number?
+  "Returns true if x is a Number"
+  [x]
+  (instance? Number x))
+
+(defn integer?
+  "Returns true if n is an integer"
+  [n]
+  (or (instance? Integer n)
+      (instance? Long n)
+      (instance? BigInteger n)
+      (instance? Short n)
+      (instance? Byte n)))
+
+(defn ratio?
+  "Returns true if n is a Ratio"
+  [n] (instance? clojure.lang.Ratio n))
+
+(defn decimal?
+  "Returns true if n is a BigDecimal"
+  [n] (instance? BigDecimal n))
+
+(defn float?
+  "Returns true if n is a floating point number" 
+  [n]   
+  (or (instance? Double n)
+      (instance? Float n)))
+
+(defn rational? [n]
+  "Returns true if n is a rational number"
+  (or (integer? n) (ratio? n) (decimal? n)))
+
 (defn bigint 
   "Coerce to BigInteger"
   {:tag BigInteger} 
-  [x] (. BigInteger valueOf x))
+  [x] (cond
+       (instance? BigInteger x) x
+       (decimal? x) (.toBigInteger #^BigDecimal x)
+       (number? x) (BigInteger/valueOf (long x))
+       :else (BigInteger. x)))
 
 (defn bigdec
   "Coerce to BigDecimal"
   {:tag BigDecimal}
-  [x] (. BigDecimal valueOf x))
+  [x] (cond 
+       (decimal? x) x
+       (float? x) (. BigDecimal valueOf (double x))
+       (instance? BigInteger x) (BigDecimal. #^BigInteger x)
+       (number? x) (BigDecimal/valueOf (long x))
+       :else (BigDecimal. x)))
 
 (def #^{:private true} print-initialized false)
 
@@ -3415,11 +3456,6 @@
   "Returns true if x implements IPersistentSet"
   [x] (instance? clojure.lang.IPersistentSet x))
 
-(defn number?
-  "Returns true if x is a Number"
-  [x]
-  (instance? Number x))
-
 (defn ifn?
   "Returns true if x implements IFn. Note that many data structures 
   (e.g. sets and maps) implement IFn"
@@ -3429,32 +3465,6 @@
   "Returns true if x implements Fn, i.e. is an object created via fn."
   [x] (instance? clojure.lang.Fn x))
 
-(defn integer?
-  "Returns true if n is an integer"
-  [n]
-  (or (instance? Integer n)
-      (instance? Long n)
-      (instance? BigInteger n)
-      (instance? Short n)
-      (instance? Byte n)))
-
-(defn ratio?
-  "Returns true if n is a Ratio"
-  [n] (instance? clojure.lang.Ratio n))
-
-(defn decimal?
-  "Returns true if n is a BigDecimal"
-  [n] (instance? BigDecimal n))
-
-(defn float?
-  "Returns true if n is a floating point number" 
-  [n]   
-  (or (instance? Double n)
-      (instance? Float n)))
-
-(defn rational? [n]
-  "Returns true if n is a rational number"
-  (or (integer? n) (ratio? n) (decimal? n)))
 
 (defn associative? 
  "Returns true if coll implements Associative"
