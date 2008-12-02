@@ -117,9 +117,11 @@
           (do
             (print (repl-prompt))
             (flush)
-            (var-set Compiler/LINE (.getLineNumber *in*))
             (recur (skip-whitespace *in*)))
-          :else (read *in* false eof))))
+          :else
+          (do
+            (var-set Compiler/LINE (.getLineNumber *in*))
+            (read *in* false eof)))))
 
 ;; Public
 
