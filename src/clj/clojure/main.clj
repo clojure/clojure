@@ -82,7 +82,7 @@
               flush   flush
               read    #(read *in* false %)
               eval    eval
-              print   println
+              print   prn
               caught  #(.println *err* (repl-exception %))}}
         (apply hash-map options)
         eof (Object.)]
