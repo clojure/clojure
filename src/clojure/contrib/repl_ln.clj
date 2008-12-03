@@ -16,6 +16,7 @@
   (:import (clojure.lang Compiler LineNumberingPushbackReader RT Var)
            (java.io InputStreamReader OutputStreamWriter PrintWriter)
            (java.util Date))
+  (:require clojure.main)
   (:use clojure.contrib.def))
 
 ;; Private
