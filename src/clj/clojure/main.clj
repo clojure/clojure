@@ -70,7 +70,7 @@
        default: eval
 
      - :print, function of one argument, prints its argument to the output
-       default: println
+       default: prn
 
      - :caught, function of one argument, a throwable, called when
        read, eval, or print throws an exception or error
