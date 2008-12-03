@@ -32,9 +32,9 @@
               (-> htmlpane .getDocument (.processHTMLFrameHyperlinkEvent e))
               (.setPage htmlpane (.getURL e)))))))
     (doto (javax.swing.JFrame.)
-      (setContentPane (javax.swing.JScrollPane. htmlpane))
-      (setBounds 32 32 700 900)
-      (show))))
+      (.setContentPane (javax.swing.JScrollPane. htmlpane))
+      (.setBounds 32 32 700 900)
+      (.show))))
 
 (defn javadoc
  "Opens a browser window displaying the javadoc for the argument."
