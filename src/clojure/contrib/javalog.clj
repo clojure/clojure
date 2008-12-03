@@ -18,6 +18,18 @@
 ;; environments.
 
 
+;; NOTES ADDED December 3, 2008
+;;
+;; This uses Logger.GLOBAL_LOGGER_NAME, which was introduced in
+;; Java 6.  This library will not work on Java 5.
+;;
+;; With improved syntax for calling Java from Clojure such as
+;; "(.method object)" and "ClassName/staticMember", this library is
+;; less useful than it once was.  Consider it DEPRECATED.  I now
+;; recommend using the Java logging API directly instead of this
+;; library.  Better yet, use Apache Commons Logging,
+;; <http://commons.apache.org/logging/>, which has a nicer API.
+
 
 (ns clojure.contrib.javalog
             (:import 
