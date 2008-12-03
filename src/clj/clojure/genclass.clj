@@ -57,6 +57,15 @@
                                  (map escape-class-name pclasses)))
     (str mname "-void")))
 
+(defn- find-field [#^Class c f]
+  (let [start-class c]
+    (loop [c c]
+      (if (= c Object)
+        (throw (new Exception (str "field, " f ", not defined in class, " start-class ", or its ancestors")))
+        (let [dflds (.getDeclaredFields c)
+              rfld (first (filter #(= f (.getName %)) dflds))]
+          (or rfld (recur (.getSuperclass c))))))))
+
 ;(distinct (map first(keys (mapcat non-private-methods [Object IPersistentMap]))))
 
 (def #^{:private true} prim->class
@@ -373,7 +382,7 @@
         (. gen (endMethod))))
                                         ;field exposers
     (doseq [[f {getter :get setter :set}] exposes]
-      (let [fld (.getDeclaredField super (str f))
+      (let [fld (find-field super (str f))
             ftype (totype (.getType fld))]
         (when getter
           (let [m (new Method (str getter) ftype (to-types []))
