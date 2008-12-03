@@ -1,22 +1,71 @@
 <project name="clojure-contrib" default="jar">
 
   <description>
-    Pack all clojure-contrib sources into a JAR.
+    Pack all clojure-contrib sources into a JAR. Compile those that can
+    be compiled standalone if the clojure.jar property points us to
+    clojure.jar .
   </description>
+
+  <property name="src" location="src"/>
+  <property name="build" location="classes"/>
+
+  <available property="hasclojure" file="${clojure.jar}"/>
 
   <!-- The JAR file to create. -->
   <property name="jarfile" location="clojure-contrib.jar"/>
 
-  <target name="clean"
-          description="Remove generated files and directories.">
-    <delete file="${jarfile}"/>
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
   </target>
 
-  <target name="jar"
-          description="Create jar file.">
+  <target name="clean" description="Remove generated files and directories.">
+    <delete file="${jarfile}"/>
+    <delete dir="${build}"/>
+  </target>
+
+  <target name="compile_clojure" depends="init"
+          description="Compile Clojure sources."
+          if="hasclojure">
+    <java classname="clojure.lang.Compile">
+      <classpath>
+        <path location="${build}"/>
+        <path location="${src}"/>
+        <path location="${clojure.jar}"/>
+      </classpath>
+      <sysproperty key="clojure.compile.path" value="${build}"/>
+      <arg value="clojure.contrib.command-line"/>
+      <arg value="clojure.contrib.cond"/>
+      <arg value="clojure.contrib.def"/>
+      <arg value="clojure.contrib.duck-streams"/>
+      <arg value="clojure.contrib.except"/>
+      <arg value="clojure.contrib.fcase"/>
+      <arg value="clojure.contrib.import-static"/>
+      <arg value="clojure.contrib.javadoc"/>
+      <arg value="clojure.contrib.lazy-seqs"/>
+      <arg value="clojure.contrib.memoize"/>
+      <arg value="clojure.contrib.mmap"/>
+      <arg value="clojure.contrib.ns-utils"/>
+      <arg value="clojure.contrib.pred"/>
+      <arg value="clojure.contrib.repl-ln"/>
+      <arg value="clojure.contrib.seq-utils"/>
+      <arg value="clojure.contrib.sql.internal"/>
+      <arg value="clojure.contrib.sql"/>
+      <arg value="clojure.contrib.str-utils"/>
+      <arg value="clojure.contrib.test-is"/>
+      <arg value="clojure.contrib.trace"/>
+      <arg value="clojure.contrib.zip-filter"/>
+    </java>
+  </target>
+
+  <target name="jar" description="Create jar file." depends="compile_clojure">
     <jar jarfile="${jarfile}">
-      <fileset dir="." includes="CPL.TXT"/>
-      <fileset dir="./src" includes="clojure/contrib/**/*.clj"/>
+      <path location="CPL.txt"/>
+      <fileset dir="${src}" includes="**/*.clj"/>
+      <fileset dir="${build}" includes="**/*.class"/>
+      <manifest>
+        <attribute name="Class-Path" value="."/>
+      </manifest>
     </jar>
   </target>
 
