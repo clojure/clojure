@@ -13,6 +13,7 @@
 ;;  Created 28 November 2008
 
 (ns clojure.contrib.repl-ln
+  (:gen-class)
   (:import (clojure.lang Compiler LineNumberingPushbackReader RT Var)
            (java.io InputStreamReader OutputStreamWriter PrintWriter)
            (java.util Date))
@@ -218,3 +219,10 @@
       (finally
        (Var/popThreadBindings)
        (prn)))))
+
+(defn -main
+  [& args]
+  (binding [*ns* *ns*
+            *command-line-args* args]
+    (in-ns 'user)
+    (repl)))
