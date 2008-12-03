@@ -34,7 +34,7 @@
 (ns clojure.contrib.trace)
 
 (def
- ^{:doc "Current stack depth of traced function calls."}
+ #^{:doc "Current stack depth of traced function calls."}
  *trace-depth* 0)
 
 (defn tracer
