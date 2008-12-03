@@ -1,7 +1,7 @@
 ;;; trace.clj -- simple call-tracing macros for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; June 9, 2008
+;; December 3, 2008
 
 ;; Copyright (c) 2008 Stuart Sierra. All rights reserved.  The use and
 ;; distribution terms for this software are covered by the Common
@@ -16,39 +16,63 @@
 ;; code is doing.
 
 
+;; CHANGE LOG
+;;
+;; December 3, 2008:
+;;
+;;   * replaced *trace-out* with tracer
+;;
+;;   * made trace a function instead of a macro 
+;;     (suggestion from Stuart Halloway)
+;;
+;;   * added trace-fn-call
+;;
+;; June 9, 2008: first version
+
+
+
 (ns clojure.contrib.trace)
 
 (def
- #^{:doc "PrintStream for trace output.  Defaults to System.err."}
- *trace-out* (. System err))
+ ^{:doc "Current stack depth of traced function calls."}
+ *trace-depth* 0)
 
-(defmacro trace
-  "Prints value of expr to standard error and returns it.  Can be
-  inserted anywhere without affecting surrounding code.  Optional
-  'name' argument can be used to identify what is being traced."
-  ([expr]
-     `(let [value# ~expr]
-        (. *trace-out* (println
-                        (str "TRACE: " (pr-str value#))))
-        value#))
-  ([name expr]
-     `(let [value# ~expr]
-        (. *trace-out* (println
-                        (str "TRACE " ~name ": " (pr-str value#))))
-        value#)))
+(defn tracer
+  "This function is called by trace.  Prints to standard output, but
+  may be rebound to do anything you like.  'name' is optional."
+  [name value]
+  (println (str "TRACE" (when name (str " " name)) ": " value)))
+
+(defn trace
+  "Sends name (optional) and value to the tracer function, then
+  returns value.  May be wrapped around any expression without
+  affecting the result."
+  ([value] (trace nil value))
+  ([name value]
+     (tracer name (pr-str value))
+     value))
+
+(defn trace-indent
+  "Returns an indentation string based on *trace-depth*"
+  []
+  (apply str (take *trace-depth* (repeat "|    "))))
+
+(defn trace-fn-call
+  "Traces a single call to a function f with args.  'name' is the
+  symbol name of the function."
+  [name f args]
+  (let [id (gensym "t")]
+    (tracer id (str (trace-indent) (pr-str (cons name args))))
+    (let [value (binding [*trace-depth* (inc *trace-depth*)]
+                  (apply f args))]
+      (tracer id (str (trace-indent) "=> " (pr-str value)))
+      value)))
 
 (defmacro deftrace
   "Use in place of defn; traces each call/return of this fn, including
-  arguments."
+  arguments.  Nested calls to deftrace'd functions will print a
+  tree-like structure."
   [name & definition]
   `(let [f# (fn ~@definition)]
      (defn ~name [& args#]
-       (let [id# (gensym "t")]  ; identifier for this invocation
-         (. *trace-out*
-            (println (str "TRACE " id# ": " ~(str name)
-                          " called with " (pr-str args#))))
-         (let [value# (apply f# args#)]  ; call original fn
-           (. *trace-out*
-              (println (str "TRACE " id# ": " ~(str name)
-                            " returned " (pr-str value#))))
-           value#)))))
+       (trace-fn-call '~name f# args#))))
