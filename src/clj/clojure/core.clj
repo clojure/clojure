@@ -3570,8 +3570,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(load "core-proxy")
-(load "core-print")
+(load "core_proxy")
+(load "core_print")
 (load "genclass")
 
 
