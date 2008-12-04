@@ -348,8 +348,9 @@
 
 (defn swap!
   "Atomically swaps the value of atom to be:
-  (apply f current-value-of-atom args). 
-  Returns nil"
+  (apply f current-value-of-atom args). Note that f may be called
+  multiple times, and thus should be free of side effects.  Returns
+  the value that was swapped in."  
   [#^AtomicReference atom f & args]
   (let [validate (get-validator atom)]
     (loop [oldv (.get atom)]
@@ -359,7 +360,8 @@
            (validate newv)
            (catch Exception e
              (throw (IllegalStateException. "Invalid atom state" e)))))
-        (when-not (.compareAndSet atom oldv newv)
+        (if (.compareAndSet atom oldv newv)
+          newv
           (recur (.get atom)))))))
 
 (defn compare-and-set! 
