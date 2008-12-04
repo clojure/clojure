@@ -350,7 +350,7 @@ public int compareTo(Object o){
 		return 1;
 	for(int i = 0; i < count(); i++)
 		{
-		int c = ((Comparable) nth(i)).compareTo(v.nth(i));
+		int c = Util.compare(nth(i),v.nth(i));
 		if(c != 0)
 			return c;
 		}
