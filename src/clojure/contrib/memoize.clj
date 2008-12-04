@@ -22,10 +22,9 @@
   to results and, when calls with the same arguments are repeated often, has
   higher performance at the expense of higher memory use."
   [function]
-  (let [cache (ref {})]
+  (let [cache (atom {})]
     (fn [& args]
       (or (@cache args)
           (let [result (apply function args)]
-            (dosync
-             (commute cache assoc args result))
+            (swap! cache assoc args result)
             result)))))
