@@ -60,7 +60,7 @@
 
   <target name="jar" description="Create jar file." depends="compile_clojure">
     <jar jarfile="${jarfile}">
-      <path location="CPL.txt"/>
+      <path location="CPL.TXT"/>
       <fileset dir="${src}" includes="**/*.clj"/>
       <fileset dir="${build}" includes="**/*.class"/>
       <manifest>
