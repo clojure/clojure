@@ -150,6 +150,7 @@
   [& args]
   (repl :init
         (fn []
+          (println "Clojure")
           (set! *command-line-args* args)
           (in-ns 'user))))
 
