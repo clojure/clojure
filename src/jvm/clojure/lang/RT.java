@@ -235,7 +235,7 @@ public static List<String> processCommandLine(String[] args){
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
 	public int compare(Object o1, Object o2){
-		return ((Comparable) o1).compareTo(o2);
+		return Util.compare(o1,o2);
 	}
 };
 
