@@ -233,7 +233,7 @@
   for clojure.main/repl with the following change and additions:
 
        - :prompt has a new default
-         default: #(clojure.core/print repl-prompt)
+         default: #(clojure.core/print (repl-prompt))
 
        - :in,:out,:err input, output, and error streams
          default: System/in, System/out, System/err
@@ -270,7 +270,7 @@
        Compiler/SOURCE (var-get Compiler/SOURCE)
        Compiler/LINE (var-get Compiler/LINE)
        (var *info*) *info*
-       (var *private*) *private*})
+       (var *private*) {}})
      (assoc! *info*
              :started (Date.)
              :serial (swap! *serial-number* inc)
