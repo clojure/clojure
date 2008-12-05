@@ -22,10 +22,11 @@
   binding-compatible with binding-form, or use :else as the test and don't
   refer to any parts of binding-form in the expr. (cond-let binding-form)
   returns nil."
-  [binding-form & clauses]
-  (when-let [[test expr & more] clauses]
-    (if (= test :else)
-      expr
-      `(if ~test
-         (let [~binding-form ~test] ~expr)
-         (cond-let ~binding-form ~@more)))))
+  [bindings & clauses]
+  (let [binding (first bindings)]
+    (when-let [[test expr & more] clauses]
+      (if (= test :else)
+        expr
+        `(if-let [~binding ~test]
+           ~expr
+           (cond-let ~bindings ~@more))))))
