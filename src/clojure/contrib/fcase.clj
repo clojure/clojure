@@ -80,7 +80,7 @@
   [test-value & clauses]
   `(fcase instance? ~test-value ~@clauses))
 
-(defn- in-case-test [test-seq case-value]
+(defn in-case-test [test-seq case-value]
   (some (fn [item] (= item case-value))
         test-seq))
 
