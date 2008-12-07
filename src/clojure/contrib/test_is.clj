@@ -1,10 +1,10 @@
 ;;; test_is.clj: test framework for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; September 25, 2008
+;; December 3, 2008
 
-;; Thanks to Chas Emerick for contributions.
-;; Thanks to Allen Rohner for assert-raises.
+;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
+;; contributions and suggestions.
 
 ;; Copyright (c) 2008 Stuart Sierra. All rights reserved.  The use and
 ;; distribution terms for this software are covered by the Common
@@ -13,7 +13,6 @@
 ;; distribution.  By using this software in any fashion, you are
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
-
 
 
 ;; Inspired by many Common Lisp test frameworks and clojure/test, this
@@ -26,15 +25,15 @@
 ;;       ([x] (+ x 2))
 ;;       {:test (fn [] (is (= (add2 3) 5))
 ;;                     (is (= (add2 -4) -2)
-;;                     (is (> (add2 50) 50)))})
+;;                     (is (> (add2 50) 50))))})
 ;;
 ;; You can also define tests in isolation with the "deftest" macro:
 ;;
 ;;     (deftest test-new-fn
 ;;       (is (= (new-fn) "Awesome")))
 ;;
-;; You can test that a function throws an exception with the "throws"
-;; macro:
+;; You can test that a function throws an exception with the
+;; "is thrown?" form:
 ;;
 ;;     (defn factorial
 ;;       ([n] (cond
@@ -43,216 +42,204 @@
 ;;             :else (throw (IllegalArgumentException. "Negative factorial"))))
 ;;       {:test (fn [] (is (= (factorial 3) 6))
 ;;                     (is (= (factorial 6) 720))
-;;                     (throws IllegalArgumentException (factorial -2)))}) 
+;;                     (is (thrown? IllegalArgumentException (factorial -2))))}) 
 ;;
 ;; Run tests with (run-tests). As in any language with macros, you may
 ;; need to recompile functions after changing a macro definition.
 
 
-(ns clojure.contrib.test-is
-    (:import (java.io PrintWriter)))
-
-(def
- #^{:doc "PrintWriter to which test results are printed; defaults to
-  Standard Output."}
- *test-out* (PrintWriter. *out*))
+(ns clojure.contrib.test-is)
 
 
-;;; PRIVATE
+(def *report-counters* nil)  ; bound to a ref of a map in test-ns
 
-(defmacro #^{:private true} defcounter [ref-name fn-name]
-  `(do (def ~(with-meta ref-name {:private true}) nil)
-       (defn ~fn-name []
-         (when ~ref-name (sync nil (commute ~ref-name inc))))))
-
-(defcounter *tests* count-test)
-(defcounter *assertions* count-assertion)
-(defcounter *failures* count-failure)
-(defcounter *exceptions* count-exception)
-
-(defmacro failure [reason message]
-  `(throw (new java.lang.AssertionError
-               (str ~reason (when ~message (str "; " ~message))))))
-
-(defn- assert-true [form message]
-  `(do (count-assertion)
-       (let [value# ~form]
-         (when-not value#
-           (failure (str ~(pr-str form) " was false/nil")
-                    ~message)))))
-
-;; Multimethod for testing expressions, dispatches on the first symbol
-;; in the expression.
-(defmulti assert-expr (fn [form message] (first form)))
-
-;; Test for (= actual expected) expressions.
-(defmethod assert-expr '= [form message]
-  (let [expr1 (second form)
-        expr2 (nth form 2)]
-    `(do (count-assertion)
-         (let [value1# ~expr1
-               value2# ~expr2]
-           (when-not (= value1# value2#)
-             (failure (str ~(pr-str expr1) " is " (pr-str value1#)
-                           " but should be " (pr-str value2#))
-                      ~message))))))
-
-;; Test for (instance? class object) expressions.
-(defmethod assert-expr 'instance? [form message]
-  (let [clazz (second form)
-        object (nth form 2)]
-    `(do (count-assertion)
-         (let [value1# ~clazz
-               value2# ~object]
-           (when-not (instance? value1# value2#)
-             (failure (str ~(pr-str object) " has " (class value2#)
-                           " but should have " (pr-str value1#))
-                      ~message))))))
-
-;; Generic expression test, just check if expression evaluates to
-;; logical true.
-(defmethod assert-expr :default [form message]
-  (assert-true form message))
-
-(defn- always-fail-assert [message]
-  `(do (count-assertion)
-       (failure ~message nil)))
-
-(defmacro #^{:private true} with-test-counters
-  "Creates dynamic bindings for counting the number of tests,
-  assertions, failures, and exceptions.  Returns the results in a
-  map."
-  [& body]
-  `(binding [*tests* (ref 0)
-             *assertions* (ref 0)
-             *failures* (ref 0)
-             *exceptions* (ref 0)]
-     ~@body
-     {:tests @*tests*
-      :assertions @*assertions*
-      :failures @*failures*
-      :exceptions @*exceptions*}))
-
-(defn- run-test-fn
-  "Calls the function; reports errors/exceptions."
-  [f name]
-  (try
-   (count-test)
-   (f)
-   (catch java.lang.AssertionError e
-     (count-failure)
-     (. *test-out* (println (str "FAIL in " name ": "
-                                 (.getMessage e)))))
-   (catch java.lang.Exception e
-     (count-exception)
-     (. *test-out* (println (str "EXCEPTION in " name ":")))
-     (.printStackTrace e *test-out*))))
-
-(defn- test-var
-  "Finds and calls the fn in a var's :test metadata."
-  [v]
-  (when-let [f (:test (meta v))]
-    (run-test-fn f (str v))))
-
-(defn- test-interns
-  "Tests all interned symbols in the namespace."
-  [ns]
-  (let [ns (if (symbol? ns) (find-ns ns) ns)]
-    (. *test-out* (println (str "Testing " ns)))
-    (dorun (map test-var (vals (ns-interns ns))))))
+(def *test-name* nil)  ; bound to the name of a var during testing
 
 
-;;; PUBLIC
+
+;;; REPORTING METHODS
+
+;; These are used in assert-expr methods.  Rebind "report" to plug in
+;; your own test-reporting framework.
+
+(defn report-count
+  "Increments the named counter in *report-counters*."
+  [name]
+  (when *report-counters*
+    (dosync (commute *report-counters* assoc name
+                     (inc (or (*report-counters* name) 0))))))
+
+(defmulti report (fn [event msg expected actual] event))
+
+(defmethod report :info [event msg expected actual]
+  (newline)
+  (println msg))
+
+(defmethod report :pass [event msg expected actual]
+  (report-count :pass))
+
+(defmethod report :fail [event msg expected actual]
+  (report-count :fail)
+  (println "\nFAIL in" *test-name*)
+  (when msg (println msg))
+  (println "expected:" (pr-str expected))
+  (println "  actual:" (pr-str actual)))
+
+(defmethod report :error [event msg expected actual]
+  (report-count :error)
+  (println "\nERROR in" *test-name* msg)
+  (when msg (println msg))
+  (println "expected:" (pr-str expected))
+  (println "  actual:" (pr-str actual)))
+
+
+
+;;; ASSERTION METHODS
+
+;; You don't call these, but you can add methods to extend the 'is'
+;; macro.  These define different kinds of tests, based on the first
+;; symbol in the test expression.
+
+(defmulti assert-expr 
+  (fn [msg form]
+    (cond
+     (nil? form) :always-fail
+     (seq? form) (first form)
+     :else :default)))
+
+(defmethod assert-expr :default [msg form]
+  ;; Default test: evaluate the form (which may be a bare symbol), and
+  ;; pass if it is logical true.
+  `(let [value# ~form]
+     (if value#
+       (report :pass ~msg '~form value#)
+       (report :fail ~msg '~form value#))
+     value#))
+
+(defmethod assert-expr :always-fail [msg form]
+  ;; nil test: always fail
+  `(report :fail ~msg nil nil))
+
+(defmethod assert-expr '= [msg form]
+  ;; Equality test.  Doesn't care about argument order: 
+  ;; (is (= expected actual))  or  (is (= actual expected))
+  `(let [values# (list ~@(rest form))]
+     (let [result# (apply = values#)]
+       (if result#
+         (report :pass ~msg '~form (cons '~'= values#))
+         (report :fail ~msg '~form (cons '~'not= values#)))
+       result#)))
+
+(defmethod assert-expr 'instance? [msg form]
+  ;; Test if x is an instance of y.
+  `(let [klass# ~(nth form 1)
+         object# ~(nth form 2)]
+     (let [result# (instance? klass# object#)]
+       (if result#
+         (report :pass ~msg '~form (class object#))
+         (report :fail ~msg '~form (class object#)))
+       result#)))
+
+(defmethod assert-expr 'thrown? [msg form]
+  ;; (is (thrown? c expr))
+  ;; Asserts that evaluating expr throws an exception of class c.
+  ;; Returns the exception thrown.
+  (let [klass (second form)
+        body (rrest form)]
+    `(try ~@body
+          (report :fail ~msg '~form nil)
+          (catch ~klass e#
+            (report :pass ~msg '~form e#)
+            e#))))
+
+;; New assertions coming soon:
+;; * thrown-with-msg?
+;; * re-matches
+
+
+;;; CATCHING UNEXPECTED EXCEPTIONS
+
+(defmacro try-expr
+  "Used by the 'is' macro to catch unexpected exceptions.
+  You don't call this."
+  [msg form]
+  `(try ~(assert-expr msg form)
+        (catch Throwable t#
+          (report :error ~msg '~form t#))))
+
+
+
+;;; ASSERTION MACROS
+
+;; you use these in your tests
 
 (defmacro is
-  "Generic assertion macro.  Throws AssertionError if form evaluates
-  logical false.  Optional message will be added to the error.
-
-  form may be one of:
-    * an equality test like (= expression expected-value)
-    * an instance? test like (instance? class expression)
-    * nil, which always fails
-    * an arbitrary expression, fails if it returns false/nil"
-  ([form] `(is ~form nil))
-  ([form message]
-     (cond
-      (nil? form) (always-fail-assert message)
-      (seq? form) (assert-expr form message)
-      :else (assert-true form message))))
-
-(defmacro throws
-  "Asserts that form throws an exception of the given class (or one of
-  its subclasses)."
-  ([class form]
-     `(throws ~class ~form nil))
-  ([class form message]
-  `(try
-    (count-assertion)
-    (let [value# ~form]
-      (failure (str "expected " ~(pr-str form) " to throw " ~class
-                    ", but returned " value#) ~message))
-    (catch ~class e# nil)  ; the correct exception was thrown
-    (catch java.lang.Throwable e#  ; some other exception was thrown
-      (failure (str "expected " ~(pr-str form) " to throw " ~class
-                    ", but threw " e#) ~message)))))
-
-(defmacro all-true
-  "Convenience macro; every body expression is tested with 'is'."
-  [& body]
-  `(do ~@(map (fn [expr] (list 'is expr))
-              body)))
-
-(defmacro each= 
-  "Convenience macro for doing a bunch of equality tests.  Same as
-  doing (is (= ...)) on each pair.
-
-  (each= (test-expr-1) expected-value1
-         (test-expr-2) expected-value2
-         (test-expr-3) expected-value3)
-  "
-  [& forms]
-  `(all-true
-    ~@(map (fn [[expr expected]] (list '= expr expected))
-           (partition 2 forms))))
-
-(defn print-results
-  "Prints a summary of the results from test-ns to *test-out*."
-  [r]
-  (. *test-out*
-     (println (str "\nRan " (:tests r) " tests with "
-                   (:assertions r) " assertions.\n"
-                   (:failures r) " failures, "
-                   (:exceptions r) " exceptions.")))  )
-
-(defn test-ns
-  "Runs tests on all interned symbols in the namespaces 
-  (symbols or namespace objects).
-
-  Returns a map with the following keys:
-    :tests      => number of tests run
-    :assertions => number of assertions checked
-    :failures   => number of failed assertions
-    :exceptions => number of exceptions raised
+  "Generic assertion macro.  'form' is any predicate test.
+  'msg' is an optional message to attach to the assertion.
   
-  If no namespace is given, uses *ns*."
-  ([] (test-ns *ns*))
-  ([& namespaces]
-     (with-test-counters (dorun (map test-interns namespaces)))))
+  Example: (is (= 4 (+ 2 2)) \"Two plus two should be 4\")
 
-(defn run-tests
-  "Runs tests in the given namespaces and prints a summary of
-  results.
+  Special form (is (thrown? c body)) checks that an instance of c is
+  thrown from body, fails if not; then returns the thing thrown."
+  ([form] `(is ~form nil))
+  ([form msg] `(try-expr ~msg ~form)))
 
-  If no namespace is given, uses *ns*."
-  [& namespaces]
-  (print-results (apply test-ns namespaces)))
+(defmacro are
+  "Checks multiple assertions with the same predicate.
+  Expands to (is (pred p1 p2)) for each pair.
 
-(defn run-all-tests
-  "Runs tests in all namespaces and prints a summary of results."
-  []
-  (apply run-tests (all-ns)))
+  Example: (are = 2 (+ 1 1), 4 (+ 2 2))"
+  [pred & pairs]
+  `(do ~@(map (fn [pair] (list 'is (cons pred pair)))
+              (partition 2 pairs))))
+
+
+
+;;; DEFINING TESTS INDEPENDENT OF FUNCTIONS
 
 (defmacro deftest
   "Defines a Var with no value and with body in its :test fn."
   [name & body]
   `(def ~(with-meta name {:test `(fn [] ~@body)})))
+
+
+
+;;; RUNNING TESTS
+
+(defn test-var [v]
+  (when-let [t (:test (meta v))]
+      (binding [*test-name* (str v)]
+        (report-count :test)
+        (t))))
+
+(defn test-ns
+  "Tests all vars in the namespace.  Returns a map of counts
+  for :test, :pass, :fail, and :error results."
+  [ns]
+  (binding [*report-counters* (ref {:test 0, :pass 0,
+                                    :fail 0, :error 0})]
+    (let [ns (if (symbol? ns) (find-ns ns) ns)]
+      (report :info (str "Testing " ns) nil nil)
+      (doseq [v (vals (ns-interns ns))]
+          (test-var v)))
+    @*report-counters*))
+
+(defn print-results
+  "Prints formatted results message based on the reported
+  counts in r."
+  [r]
+  (println "\nRan" (:test r) "tests containing"
+           (+ (:pass r) (:fail r) (:error r)) "assertions.")
+  (println (:fail r) "failures," (:error r) "errors."))
+
+(defn run-tests
+  "Runs all tests in the given namespaces; prints results.
+  Defaults to current namespace if none given."
+  ([] (run-tests *ns*))
+  ([& namespaces]
+      (print-results (apply merge-with + (map test-ns namespaces)))))
+
+(defn run-all-tests
+  "Runs all tests in all namespaces; prints results."
+  []
+  (apply run-tests (all-ns)))
