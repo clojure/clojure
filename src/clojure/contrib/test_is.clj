@@ -206,7 +206,10 @@
 
 ;;; RUNNING TESTS
 
-(defn test-var [v]
+(defn test-var
+  "If v has a function in its :test metadata, calls that function, with
+  *test-name* bound to the name of the var."
+  [v]
   (when-let [t (:test (meta v))]
       (binding [*test-name* (str v)]
         (report-count :test)
