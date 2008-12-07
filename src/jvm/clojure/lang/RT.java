@@ -254,8 +254,9 @@ static
 	Symbol namesym = Symbol.create("name");
 	OUT.setTag(Symbol.create("java.io.Writer"));
 	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
-	AGENT.setTag(Symbol.create("clojure.lang.Agent"));
-	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
+    AGENT.setMeta(map(dockw, "The agent currently running an action on this thread, else nil"));
+    AGENT.setTag(Symbol.create("clojure.lang.Agent"));
+    MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
 	//during bootstrap ns same as in-ns
 	Var nv = Var.intern(CLOJURE_NS, NAMESPACE, inNamespace);
 	nv.setMacro();
