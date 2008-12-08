@@ -1614,6 +1614,10 @@ static public int unchecked_divide(int x, int y){
 	return x / y;
 }
 
+static public int unchecked_remainder(int x, int y){
+	return x % y;
+}
+
 static public boolean equiv(int x, int y){
 	return x == y;
 }
@@ -1715,6 +1719,10 @@ static public long multiply(long x, long y){
 
 static public long unchecked_divide(long x, long y){
 	return x / y;
+}
+
+static public long unchecked_remainder(long x, long y){
+	return x % y;
 }
 
 static public boolean equiv(long x, long y){

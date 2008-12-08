@@ -712,6 +712,12 @@
   {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_divide ~x ~y)))}
   [x y] (. clojure.lang.Numbers (unchecked_divide x y)))
 
+(defn unchecked-remainder
+  "Returns the remainder of division of x by y, both int or long. 
+  Note - uses a primitive operator subject to truncation."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_remainder ~x ~y)))}
+  [x y] (. clojure.lang.Numbers (unchecked_remainder x y)))
+
 (defn pos?
   "Returns true if num is greater than zero, else false"
   {:tag Boolean
