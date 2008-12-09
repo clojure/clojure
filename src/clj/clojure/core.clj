@@ -1473,20 +1473,22 @@
   bindings and filtering as provided by \"for\".  Does not retain
   the head of the sequence. Returns nil."
   [seq-exprs & body]
-  (let [binds (reduce (fn [binds p]
-                        (if (instance? clojure.lang.Keyword (first p))
-                          (conj (pop binds) (apply assoc (peek binds) p))
-                          (conj binds {:name (first p) :init (second p)})))
+  (let [groups (reduce (fn [groups p]
+                        (if (keyword? (first p))
+                          (conj (pop groups) (apply assoc (peek groups) p))
+                          (conj groups {:bind (first p) :seq (second p)})))
                       [] (partition 2 seq-exprs))
-        emit (fn emit [bind & binds]
-               `(loop [sq# (seq ~(:init bind))]
+        emit (fn emit [group & more-groups]
+               `(loop [sq# (seq ~(:seq group))]
                   (when sq#
-                    (let [~(:name bind) (first sq#)]
-                      (when ~(or (:while bind) true)
-                        (when ~(or (:when bind) true)
-                          ~(if binds (apply emit binds) `(do ~@body)))
+                    (let [~(:bind group) (first sq#)]
+                      (when ~(or (:while group) true)
+                        (when ~(or (:when group) true)
+                          ~(if more-groups
+                             (apply emit more-groups)
+                             `(do ~@body)))
                         (recur (rest sq#)))))))]
-    (apply emit binds)))
+    (apply emit groups)))
 
 (defn dorun
   "When lazy sequences are produced via functions that have side
@@ -2385,8 +2387,6 @@
 		      (lazy-cat ~@colls)))]
       (iter# ~coll))))
       
-
-
 (defmacro for
  "List comprehension. Takes a vector of one or more
  binding-form/collection-expr pairs, each followed by an optional filtering
@@ -2397,31 +2397,27 @@
 
  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
  ([seq-exprs expr]
-  (let [pargs (fn [xs]
-                (loop [ret []
-                       [b e & [w f & wr :as r] :as xs] (seq xs)]
-                  (if xs
-                    (cond 
-                     (= w :when) (recur (conj ret {:b b :e e :f f :w :when}) wr)
-                     (= w :while) (recur (conj ret {:b b :e e :f f :w :while}) wr)
-                     :else (recur (conj ret {:b b :e e :f true :w :while}) r))
-                    (seq ret))))
-        emit (fn emit [[{b :b f :f w :w} & [{ys :e} :as rses]]]
+  (let [to-groups (fn [seq-exprs]
+                    (reduce (fn [groups [k v]]
+                              (if (keyword? k)
+                                (conj (pop groups) (assoc (peek groups) k v))
+                                (conj groups {:bind k :seq v})))
+                            [] (partition 2 seq-exprs)))
+        emit (fn emit [[group & [{next-seq :seq} :as more-groups]]]
 		  (let [giter (gensym "iter__") gxs (gensym "s__")]
 		    `(fn ~giter [~gxs]
-			 (when-first [~b ~gxs]
-                           (if ~f
-			    ~(if rses
-			       `(let [iterys# ~(emit rses)
-                                      fs# (iterys# ~ys)]
-                                  (if fs#
-				    (lazy-cat fs# (~giter (rest ~gxs)))
-                                    (recur (rest ~gxs))))
-			       `(lazy-cons ~expr (~giter (rest ~gxs))))
-                            ~(if (= w :when)
-                               `(recur (rest ~gxs))
-                               nil))))))]
-    `(let [iter# ~(emit (pargs seq-exprs))]
+			 (when-first [~(:bind group) ~gxs]
+                           (when ~(or (:while group) true)
+                             (if ~(or (:when group) true)
+                               ~(if more-groups
+                                  `(let [iterys# ~(emit more-groups)
+                                         fs# (iterys# ~next-seq)]
+                                     (if fs#
+                                       (lazy-cat fs# (~giter (rest ~gxs)))
+                                       (recur (rest ~gxs))))
+                                  `(lazy-cons ~expr (~giter (rest ~gxs))))
+                              (recur (rest ~gxs))))))))]
+    `(let [iter# ~(emit (to-groups seq-exprs))]
 	(iter# ~(second seq-exprs))))))
 
 (defmacro comment
