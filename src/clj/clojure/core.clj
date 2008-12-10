@@ -3041,12 +3041,15 @@
   child can be either a namespace-qualified symbol or keyword or a
   class. h must be a hierarchy obtained from make-hierarchy, if not
   supplied defaults to, and modifies, the global hierarchy."
-  ([tag parent] (alter-var-root #'global-hierarchy derive tag parent) nil)
+  ([tag parent]
+   (assert (namespace parent))
+   (assert (or (class? tag) (and (instance? clojure.lang.Named tag) (namespace tag))))
+
+   (alter-var-root #'global-hierarchy derive tag parent) nil)
   ([h tag parent]
    (assert (not= tag parent))
-   (assert (or (class? tag) (and (instance? clojure.lang.Named tag) (namespace tag))))
+   (assert (or (class? tag) (instance? clojure.lang.Named tag)))
    (assert (instance? clojure.lang.Named parent))
-   (assert (namespace parent))
 
    (let [tp (:parents h)
          td (:descendants h)
