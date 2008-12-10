@@ -144,15 +144,36 @@
          (var-set Compiler/LINE (.getLineNumber *in*))
          (read eof))))))
 
+(defn- process-inits
+  "Processes initial pairs of args of the form:
+
+    -i     filepath, or
+    --init filepath
+
+  by loading the referenced files. Returns a seq of the remaining args."
+  [args]
+  (loop [[init filename & more :as args] args]
+    (if (#{"-i" "--init"} init)
+      (do
+        (clojure.main/load-script filename)
+        (recur more))
+      args)))
+
+(defn- process-command-line
+  "Args are strings passed in from the command line. Loads any requested
+  init files and binds *command-line-args* to a seq of the remaining args"
+  [args]
+  (set! *command-line-args* (process-inits args)))
+
 (defn- -main
-  "Main entry point, starts a repl and sets up *command-line-args* and
-  enters user namespace"
+  "Main entry point, starts a repl enters the user namespace and processes
+  command line args."
   [& args]
   (repl :init
         (fn []
           (println "Clojure")
-          (set! *command-line-args* args)
-          (in-ns 'user))))
+          (in-ns 'user)
+          (process-command-line args))))
 
 ;; Public
 
