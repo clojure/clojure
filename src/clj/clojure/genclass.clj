@@ -92,7 +92,7 @@
 (defn- generate-class [options-map]
   (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
         {:keys [name extends implements constructors methods main factory state init exposes 
-                prefix load-impl-ns impl-ns]} 
+                exposes-methods prefix load-impl-ns impl-ns]} 
           (merge default-options options-map)
         name (str name)
         super (if extends (the-class extends) Object)
@@ -132,6 +132,7 @@
         overloads (into {} (filter (fn [[m s]] (rest s)) sigs-by-name))
         var-fields (concat (when init [init-name]) 
                            (when main [main-name])
+                           ;(when exposes-methods (map str (vals exposes-methods)))
                            (distinct (concat (keys sigs-by-name)
                                              (mapcat (fn [[m s]] (map #(overload-name m %) s)) overloads)
                                              (mapcat (comp (partial map str) vals val) exposes))))
@@ -354,8 +355,25 @@
                                         ;extra methods
        (doseq [[mname pclasses rclass :as msig] methods]
          (emit-forwarding-method (str mname) pclasses rclass (:static ^msig)
-                                 emit-unsupported)))
-
+                                 emit-unsupported))
+                                        ;expose specified overridden superclass methods
+       (doseq [[local-mname m] (reduce (fn [ms [[name _ _] m]]
+                              (if (contains? exposes-methods (symbol name))
+                                (conj ms [((symbol name) exposes-methods) m])
+                                ms)) [] (seq mm))]
+         (let [ptypes (to-types (.getParameterTypes m))
+               rtype (totype (.getReturnType m))
+               exposer-m (new Method (str local-mname) rtype ptypes)
+               target-m (new Method (.getName m) rtype ptypes)
+               gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) exposer-m nil nil cv)]
+           (. gen (loadThis))
+           (. gen (loadArgs))
+           (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL) 
+                                   (. super-type (getInternalName))
+                                   (. target-m (getName))
+                                   (. target-m (getDescriptor))))
+           (. gen (returnValue))
+           (. gen (endMethod)))))
                                         ;main
     (when main
       (let [m (. Method getMethod "void main (String[])")
@@ -499,6 +517,12 @@
   protected fields of the superclass. This parameter can be used to
   generate public getter/setter methods exposing the protected field(s)
   for use in the implementation.
+
+  :exposes-methods {super-method-name exposed-name, ...}
+
+  It is sometimes necessary to call the superclass' implementation of an
+  overridden method.  Those methods may be exposed and referred in 
+  the new method implementation by a local name.
 
   :prefix string
 
