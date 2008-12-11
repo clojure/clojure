@@ -12,8 +12,9 @@ package clojure.lang;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class ASeq extends Obj implements ISeq, Collection{
+public abstract class ASeq extends Obj implements ISeq, Collection, Streamable{
 transient int _hash = -1;
 
 public String toString(){
@@ -175,4 +176,25 @@ public Iterator iterator(){
 	return new SeqIterator(this);
 }
 
+public IStream stream() throws Exception {
+    return new Stream(this);
+}
+
+    static class Stream implements IStream{
+    ISeq s;
+
+    public Stream(ISeq s) {
+        this.s = s;
+    }
+
+    synchronized public Object next() throws Exception {
+        if(s != null)
+            {
+            Object ret = s.first();
+            s = s.rest();
+            return ret;
+            }
+        return RT.eos();
+    }
+}
 }

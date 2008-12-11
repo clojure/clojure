@@ -13,10 +13,11 @@
 package clojure.lang;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
                                                                List,
-                                                               RandomAccess, Comparable{
+                                                               RandomAccess, Comparable, Streamable{
 int _hash = -1;
 
 public APersistentVector(IPersistentMap meta){
@@ -357,7 +358,19 @@ public int compareTo(Object o){
 	return 0;
 }
 
-static class Seq extends ASeq implements IndexedSeq, IReduce{
+public IStream stream() throws Exception {
+    final AtomicInteger ai = new AtomicInteger(0);
+    return new IStream(){
+        public Object next() throws Exception {
+            int i = ai.getAndIncrement();
+            if(i < count())
+                return nth(i);
+            return RT.eos();
+        }
+    };
+}
+
+    static class Seq extends ASeq implements IndexedSeq, IReduce{
 	//todo - something more efficient
 	final IPersistentVector v;
 	final int i;
