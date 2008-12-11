@@ -43,10 +43,8 @@
       <arg value="clojure.contrib.import-static"/>
       <arg value="clojure.contrib.javadoc"/>
       <arg value="clojure.contrib.lazy-seqs"/>
-      <arg value="clojure.contrib.memoize"/>
       <arg value="clojure.contrib.mmap"/>
       <arg value="clojure.contrib.ns-utils"/>
-      <arg value="clojure.contrib.pred"/>
       <arg value="clojure.contrib.repl-ln"/>
       <arg value="clojure.contrib.seq-utils"/>
       <arg value="clojure.contrib.sql.internal"/>
