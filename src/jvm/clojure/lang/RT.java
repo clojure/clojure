@@ -453,6 +453,31 @@ static public ISeq seq(Object coll){
 		return seqFrom(coll);
 }
 
+static public IStream stream(final Object coll) throws Exception{
+	if(coll == null)
+		return EMPTY_STREAM;
+    else if(coll instanceof IStream)
+        return (IStream) coll;
+	else if(coll instanceof Streamable)
+		return ((Streamable)coll).stream();
+    else if(coll instanceof Fn)
+        {
+        return new IStream(){
+            public Object next() throws Exception {
+                return ((IFn)coll).invoke();
+            }
+        };
+        }
+    else if(coll instanceof Iterable)
+		return new IteratorStream(((Iterable) coll).iterator());
+    else if (coll.getClass().isArray())
+        return ArrayStream.createFromObject(coll);
+    else if (coll instanceof String)
+        return ArrayStream.createFromObject(((String)coll).toCharArray());
+
+    throw new IllegalArgumentException("Don't know how to create IStream from: " + coll.getClass().getSimpleName());
+}
+
 static ISeq seqFrom(Object coll){
 	if(coll instanceof Iterable)
 		return IteratorSeq.create(((Iterable) coll).iterator());
@@ -697,7 +722,8 @@ static public Object nth(Object coll, int n){
 	else if(coll instanceof Sequential)
 		{
 		ISeq seq = ((IPersistentCollection) coll).seq();
-		for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+        coll = null;
+        for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
 			{
 			if(i == n)
 				return seq.first();
@@ -759,7 +785,8 @@ static public Object nth(Object coll, int n, Object notFound){
 	else if(coll instanceof Sequential)
 		{
 		ISeq seq = ((IPersistentCollection) coll).seq();
-		for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+        coll = null;
+        for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
 			{
 			if(i == n)
 				return seq.first();
@@ -1655,4 +1682,20 @@ static public int alength(Object xs){
 	return Array.getLength(xs);
 }
 
+final static private Object EOS = new Object();
+    
+final static public Object eos() {
+        return EOS;
+    }
+
+static public boolean isEOS(Object o){
+        return o == EOS;
+    }
+
+static final public IStream EMPTY_STREAM = new IStream(){
+
+    public Object next() throws Exception {
+        return eos();
+    }
+};
 }
