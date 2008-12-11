@@ -68,3 +68,11 @@
                (when-not (identical? s ends)
                  (lazy-cons (first s) (this (rest s)))))]
       (lazy-cons (tw s) (partition-by f ends)))))
+
+(defn frequencies
+  "Returns a map from distinct items in coll to the number of times
+  they appear."
+  [coll]
+  (reduce (fn [counts x]
+              (assoc counts x (inc (get counts x 0))))
+          {} coll))
