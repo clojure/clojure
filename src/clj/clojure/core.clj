@@ -444,6 +444,12 @@
        (cat (concat x y) zs))))
  
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
+(defmacro if-not
+  "Evaluates test. If logical false, evaluates and returns then expr, otherwise else expr, if supplied, else nil."
+  ([test then] `(if-not ~test ~then nil))
+  ([test then else]
+   `(if (not ~test) ~then ~else)))
+
 (defn =
   "Equality. Returns true if x equals y, false if not. Same as
   Java x.equals(y) except it also works for nil, and compares
@@ -1187,6 +1193,17 @@
       (runInTransaction (fn [] ~@body))))
 
 
+(defmacro io! 
+  "If an io! block occurs in a transaction, throws an
+  IllegalStateException, else runs body in an implicit do. If the
+  first expression in body is a literal string, will use that as the
+  exception message."
+  [& body]
+  (let [message (when (string? (first body)) (first body))
+        body (if message (rest body) body)]
+    `(if (clojure.lang.LockingTransaction/isRunning)
+       (throw (new IllegalStateException ~(or message "I/O in transaction")))
+       (do ~@body))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
@@ -1522,13 +1539,14 @@
   dispatched thus far, from this thread or agent, to the agent(s) have
   occurred."
   [& agents]
+  (io! "await in transaction"
     (when *agent*
       (throw (new Exception "Can't await in agent action")))
     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
           count-down (fn [agent] (. latch (countDown)) agent)]
       (doseq [agent agents]
         (send agent count-down))
-      (. latch (await))))
+      (. latch (await)))))
 
 (defn await1 [#^clojure.lang.Agent a]
   (when (pos? (.getQueueCount a))
@@ -1541,13 +1559,14 @@
   timeout (in milliseconds) has elapsed. Returns nil if returning due
   to timeout, non-nil otherwise."
   [timeout-ms & agents]
-    (when *agent*
-      (throw (new Exception "Can't await in agent action")))
-    (let [latch (new java.util.concurrent.CountDownLatch (count agents))
-          count-down (fn [agent] (. latch (countDown)) agent)]
-      (doseq [agent agents]
-        (send agent count-down))
-      (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS)))))
+    (io! "await-for in transaction"
+     (when *agent*
+       (throw (new Exception "Can't await in agent action")))
+     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+           count-down (fn [agent] (. latch (countDown)) agent)]
+       (doseq [agent agents]
+           (send agent count-down))
+       (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS))))))
   
 (defmacro dotimes
   "bindings => name n
@@ -3572,6 +3591,21 @@
        ~@body
        (recur))))
 
+(declare atom swap!)
+
+(defn memoize 
+  "Returns a memoized version of a referentially transparent function. The
+  memoized version of the function keeps a cache of the mapping from arguments
+  to results and, when calls with the same arguments are repeated often, has
+  higher performance at the expense of higher memory use."
+  [f]
+  (let [mem (atom {})]
+    (fn [& args]
+      (if-let [e (find @mem args)]
+        (val e)
+        (let [ret (apply f args)]
+          (swap! mem assoc args ret)
+          ret)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

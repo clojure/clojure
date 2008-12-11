@@ -181,6 +181,10 @@ static LockingTransaction getEx(){
 	return t;
 }
 
+static public boolean isRunning(){
+	return getRunning() != null;
+}
+
 static LockingTransaction getRunning(){
 	LockingTransaction t = transaction.get();
 	if(t == null || t.info == null)
