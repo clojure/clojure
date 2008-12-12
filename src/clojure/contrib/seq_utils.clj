@@ -46,10 +46,11 @@
 
 ;; group-by written by Rich Hickey;
 ;; see http://paste.lisp.org/display/64190
-(defn group-by [f coll]
+(defn group-by 
   "Returns a sorted map of the elements of coll keyed by the result of
   f on each element. The value at each key will be a vector of the
   corresponding elements, in the order they appeared in coll."
+  [f coll]
   (reduce
    (fn [ret x]
      (let [k (f x)]
@@ -58,9 +59,10 @@
 
 ;; partition-by written by Rich Hickey;
 ;; see http://paste.lisp.org/display/64190
-(defn partition-by [f coll]
+(defn partition-by 
   "Applies f to each value in coll, splitting it each time f returns
    a new value.  Returns a lazy seq of lazy seqs."
+  [f coll]
   (when-let [s (seq coll)]
     (let [fv (f (first s))
           ends (drop-while #(= fv (f %)) (rest s))
