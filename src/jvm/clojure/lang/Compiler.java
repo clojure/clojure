@@ -3150,31 +3150,49 @@ static public class FnExpr implements Expr{
 	}
 
 
-	void emitConstants(GeneratorAdapter clinitgen){
-		try{
-			Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
+    void emitConstants(GeneratorAdapter clinitgen) {
+        try
+            {
+            Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
 
-		for(int i = 0; i < constants.count(); i++)
-			{
-			String cs = RT.printString(constants.nth(i));
-			if(cs.length() == 0)
-				throw new RuntimeException("Can't embed unreadable object in code: " + constants.nth(i));
+            for (int i = 0; i < constants.count(); i++)
+                {
+                if (constants.nth(i) instanceof String)
+                    {
+                    clinitgen.push((String)constants.nth(i));
+                    }
+                else
+                    {
+                    String cs = null;
+                    try
+                        {
+                        cs = RT.printString(constants.nth(i));
+                        }
+                    catch (Exception e)
+                        {
+                        throw new RuntimeException("Can't embed object in code, maybe print-dup not defined: "
+                                + constants.nth(i));
+                        }
+                    if (cs.length() == 0)
+                        throw new RuntimeException("Can't embed unreadable object in code: " + constants.nth(i));
 
-			if(cs.startsWith("#<"))
-				throw new RuntimeException("Can't embed unreadable object in code: " + cs);
-			clinitgen.push(cs);
-			clinitgen.invokeStatic(RT_TYPE, readStringMethod);
+                    if (cs.startsWith("#<"))
+                        throw new RuntimeException("Can't embed unreadable object in code: " + cs);
+                    clinitgen.push(cs);
+                    clinitgen.invokeStatic(RT_TYPE, readStringMethod);
+                    clinitgen.checkCast(constantType(i));
+                    }
 //				clinitgen.dup();
 //				clinitgen.push(i);
 //				clinitgen.arrayLoad(OBJECT_TYPE);
-			clinitgen.checkCast(constantType(i));
-			clinitgen.putStatic(fntype, constantName(i), constantType(i));
-			}
-		}
-		finally{
-			Var.popThreadBindings();
-		}
-	}
+                clinitgen.putStatic(fntype, constantName(i), constantType(i));
+                }
+            }
+        finally
+            {
+            Var.popThreadBindings();
+            }
+    }
 
 	synchronized Class getCompiledClass(){
 		if(compiledClass == null)
@@ -3299,6 +3317,8 @@ static public class FnExpr implements Expr{
 				return Type.getType(AFn.class);
 			else if(c == Var.class)
 				return Type.getType(Var.class);
+            else if(c == String.class)
+                return Type.getType(String.class);
 //			return Type.getType(c);
 			}
 		return OBJECT_TYPE;
@@ -4138,8 +4158,11 @@ public static Object eval(Object form) throws Exception{
 private static int registerConstant(Object o){
 	if(!CONSTANTS.isBound())
 		return -1;
-	IPersistentVector v = (IPersistentVector) CONSTANTS.get();
-	CONSTANTS.set(RT.conj(v, o));
+	PersistentVector v = (PersistentVector) CONSTANTS.get();
+    int i = v.indexOf(o);
+    if(i >= 0)
+        return i;
+    CONSTANTS.set(RT.conj(v, o));
 	return v.count();
 }
 
