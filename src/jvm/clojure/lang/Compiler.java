@@ -825,7 +825,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				else if(sym.name.equals("doubles"))
 					c = double[].class;
 				else if(sym.name.equals("chars"))
-					c = double[].class;
+					c = char[].class;
 				else if(sym.name.equals("shorts"))
 					c = short[].class;
 				else if(sym.name.equals("bytes"))
