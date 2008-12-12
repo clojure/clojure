@@ -4159,9 +4159,6 @@ private static int registerConstant(Object o){
 	if(!CONSTANTS.isBound())
 		return -1;
 	PersistentVector v = (PersistentVector) CONSTANTS.get();
-    int i = v.indexOf(o);
-    if(i >= 0)
-        return i;
     CONSTANTS.set(RT.conj(v, o));
 	return v.count();
 }
