@@ -4199,7 +4199,8 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
-				return new StaticFieldExpr((Integer) LINE.get(), c, sym.name);
+				if(Reflector.getField(c,sym.name,true)!= null)
+					return new StaticFieldExpr((Integer) LINE.get(), c, sym.name);
 				}
 			}
 		}
