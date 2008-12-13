@@ -36,7 +36,7 @@
                             (into-array (map totype cs))
                             (make-array Type 0)))
         super-type (totype super)
-        map-type (totype PersistentHashMap)
+        imap-type (totype IPersistentMap)
         ifn-type (totype clojure.lang.IFn)
         obj-type (totype Object)
         sym-type (totype clojure.lang.Symbol)
@@ -54,10 +54,9 @@
                   decl-type (. Type (getType (. meth (getDeclaringClass))))]
               (. gen (visitCode))
               (. gen (loadThis))
-              (. gen (getField ctype fmap map-type))
-                                        ;get symbol corresponding to name
+              (. gen (getField ctype fmap imap-type))
+                                      
               (. gen (push (. meth (getName))))
-              (. gen (invokeStatic sym-type (. Method (getMethod "clojure.lang.Symbol create(String)"))))
                                         ;lookup fn in map
               (. gen (invokeStatic rt-type (. Method (getMethod "Object get(Object, Object)"))))
               (. gen (dup))
@@ -94,7 +93,7 @@
                  (into-array (map iname (cons IProxy interfaces)))))
                                         ;add field for fn mappings
     (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_VOLATILE))
-                      fmap (. map-type (getDescriptor)) nil nil))          
+                      fmap (. imap-type (getDescriptor)) nil nil))          
                                         ;add ctors matching/calling super's
     (doseq [#^Constructor ctor (. super (getDeclaredConstructors))]
         (when-not (. Modifier (isPrivate (. ctor (getModifiers))))
@@ -107,24 +106,30 @@
             (. gen (dup))
             (. gen (loadArgs))
             (. gen (invokeConstructor super-type m))
-                                        ;init fmap
-            (. gen (getStatic map-type "EMPTY" map-type))
-            (. gen (putField ctype fmap map-type))
             
             (. gen (returnValue))
             (. gen (endMethod)))))
                                         ;add IProxy methods
+    (let [m (. Method (getMethod "void __initClojureFnMappings(clojure.lang.IPersistentMap)"))
+          gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+      (. gen (visitCode))
+      (. gen (loadThis))
+      (. gen (loadArgs))
+      (. gen (putField ctype fmap imap-type))
+      
+      (. gen (returnValue))
+      (. gen (endMethod)))
     (let [m (. Method (getMethod "void __updateClojureFnMappings(clojure.lang.IPersistentMap)"))
           gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
       (. gen (visitCode))
       (. gen (loadThis))
       (. gen (dup))
-      (. gen (getField ctype fmap map-type))
+      (. gen (getField ctype fmap imap-type))
       (. gen (loadArgs))
       (. gen (invokeInterface (totype clojure.lang.IPersistentCollection)
                               (. Method (getMethod "clojure.lang.IPersistentCollection cons(Object)"))))
-      (. gen (checkCast map-type))
-      (. gen (putField ctype fmap map-type))
+      (. gen (checkCast imap-type))
+      (. gen (putField ctype fmap imap-type))
       
       (. gen (returnValue))
       (. gen (endMethod)))
@@ -132,7 +137,7 @@
           gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
       (. gen (visitCode))
       (. gen (loadThis))
-      (. gen (getField ctype fmap map-type))
+      (. gen (getField ctype fmap imap-type))
       (. gen (returnValue))
       (. gen (endMethod)))
     
@@ -210,8 +215,17 @@
   [c & ctor-args]
     (. Reflector (invokeConstructor c (to-array ctor-args))))
 
+(defn init-proxy
+  "Takes a proxy instance and a map of strings (which must
+  correspond to methods of the proxy superclass/superinterfaces) to
+  fns (which must take arguments matching the corresponding method,
+  plus an additional (explicit) first arg corresponding to this, and
+  sets the proxy's fn map."
+  [#^IProxy proxy mappings]
+    (. proxy (__initClojureFnMappings mappings)))
+
 (defn update-proxy
-  "Takes a proxy instance and a map of symbols (whose names must
+  "Takes a proxy instance and a map of strings (which must
   correspond to methods of the proxy superclass/superinterfaces) to
   fns (which must take arguments matching the corresponding method,
   plus an additional (explicit) first arg corresponding to this, and
@@ -259,9 +273,9 @@
                             (clojure.lang.Compiler/writeClassFile cname bytecode)))
          pc-effect (apply get-proxy-class bases)
          pname (proxy-name super interfaces)]
-     `(let [pc# (get-proxy-class ~@class-and-interfaces)
+     `(let [;pc# (get-proxy-class ~@class-and-interfaces)
             p# (new ~(symbol pname) ~@args)] ;(construct-proxy pc# ~@args)]   
-        (update-proxy p#
+        (init-proxy p#
          ~(loop [fmap {} fs fs]
             (if fs
               (let [[sym & meths] (first fs)
@@ -271,7 +285,7 @@
                     meths (map (fn [[params & body]]
                                    (cons (apply vector 'this params) body))
                                meths)]
-                (recur (assoc fmap (list `quote (symbol (name sym))) (cons `fn meths)) (rest fs)))
+                (recur (assoc fmap (name sym) (cons `fn meths)) (rest fs)))
               fmap)))
         p#)))
 
@@ -286,7 +300,7 @@
   "Use to call a superclass method in the body of a proxy method. 
   Note, expansion captures 'this"
   [meth & args]
- `(proxy-call-with-super (fn [] (. ~'this ~meth ~@args))  ~'this '~(symbol (name meth))))
+ `(proxy-call-with-super (fn [] (. ~'this ~meth ~@args))  ~'this ~(name meth)))
 
 (defn bean
   "Takes a Java object and returns a read-only implementation of the

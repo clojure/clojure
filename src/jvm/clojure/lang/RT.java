@@ -966,7 +966,9 @@ static public double doubleCast(double x){
 }
 
 static public IPersistentMap map(Object... init){
-	if(init != null && init.length == 2)
+    if(init == null)
+        return PersistentArrayMap.EMPTY;
+    else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
 		return new PersistentArrayMap(init);
 	return PersistentHashMap.create(init);
 }
