@@ -44,7 +44,7 @@
                  (if method?
                    (str (.getSimpleName (.getReturnType m)) (param-str m))
                    (str (.getSimpleName (.getType m))))))]
-    [[(not static?) method? (sortable text)] text]))
+    [[(not static?) method? (sortable text)] text m]))
 
 (defn show
   ([x] (show x nil))
