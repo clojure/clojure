@@ -66,6 +66,7 @@ static final Symbol NEW = Symbol.create("new");
 static final Symbol LIST = Symbol.create("clojure.core", "list");
 static final Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
 static final Symbol VECTOR = Symbol.create("clojure.core", "vector");
+static final Symbol IDENTITY = Symbol.create("clojure.core", "identity");
 
 static final Symbol _AMP_ = Symbol.create("&");
 static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
@@ -4041,7 +4042,12 @@ public static Object macroexpand1(Object x) throws Exception{
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
 					Symbol meth = Symbol.intern(sname.substring(1));
-					return RT.listStar(DOT, RT.second(form), meth, form.rest().rest());
+                    Object target = RT.second(form);
+                    if(HostExpr.maybeClass(target,false) != null)
+                        {
+                        target = RT.list(IDENTITY, target);
+                        }
+                    return RT.listStar(DOT, target, meth, form.rest().rest());
 					}
 				else if(namesStaticMember(sym))
 					{
