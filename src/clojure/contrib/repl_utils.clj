@@ -12,36 +12,54 @@
   (:import (java.io LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
            (clojure.lang RT))
-  (:use [clojure.contrib.str-utils :only (str-join)]))
+  (:use [clojure.contrib.seq-utils :only (indexed)]
+        [clojure.contrib.str-utils :only (str-join re-sub re-partition)]))
+
+(defn- sortable [t]
+  (apply str (map (fn [[a b]] (str a (format "%04d" (Integer. b))))
+                  (partition 2 (concat (re-partition #"\d+" t) [0])))))
+
+(defn- param-str [m]
+  (str " (" (str-join
+              "," (map (fn [[c i]]
+                         (if (> i 3)
+                           (str (.getSimpleName c) "*" i)
+                           (str-join "," (replicate i (.getSimpleName c)))))
+                       (reduce (fn [pairs y] (let [[x i] (peek pairs)]
+                                               (if (= x y)
+                                                 (conj (pop pairs) [y (inc i)])
+                                                 (conj pairs [y 1]))))
+                               [] (.getParameterTypes m))))
+  ")"))
+
+(defn- member-vec [m]
+  (let [static? (Modifier/isStatic (.getModifiers m))
+        method? (instance? Method m)
+        ctor?   (instance? Constructor m)
+        text (if ctor?
+               (str "<init>" (param-str m))
+               (str
+                 (when static? "static ")
+                 (.getName m) " : "
+                 (if method?
+                   (str (.getSimpleName (.getReturnType m)) (param-str m))
+                   (str (.getSimpleName (.getType m))))))]
+    [[(not static?) method? (sortable text)] text]))
 
 (defn show
   ([x] (show x nil))
   ([x i]
       (let [c (if (class? x) x (class x))
-            items (sort
-                    (for [m (concat (.getFields c)
-                                    (.getMethods c)
-                                    (.getConstructors c))]
-                      (let [static? (bit-and Modifier/STATIC
-                                             (.getModifiers m))
-                            method? (instance? Method m)
-                            ctor?   (instance? Constructor m)
-                            text (if ctor?
-                                   (str "(" (str-join
-                                              ", " (.getParameterTypes m)) ")")
-                                   (str
-                                     (if (pos? static?) "static ")
-                                     (.getName m) " : "
-                                     (if method?
-                                       (str (.getReturnType m) " ("
-                                            (count (.getParameterTypes m)) ")")
-                                       (str (.getType m)))))]
-                        [(- static?) method? text (str m) m])))]
+            items (sort (for [m (concat (.getFields c)
+                                        (.getMethods c)
+                                        (.getConstructors c))]
+                          (member-vec m)))]
         (if i
           (last (nth items i))
-          (do (println "=== " c " ===")
-            (doseq [[e i] (map list items (iterate inc 0))]
-              (printf "[%2d] %s\n" i (nth e 2))))))))
+          (do
+            (println "=== " (Modifier/toString (.getModifiers c)) c " ===")
+            (doseq [[i e] (indexed items)]
+              (printf "[%2d] %s\n" i (second e))))))))
 
 (defn get-source [x]
   (when-let [v (resolve x)]
