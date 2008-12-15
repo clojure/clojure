@@ -13,13 +13,17 @@
 
 
 
-;; This file defines the "template" macro.  "template" is similar in
-;; spirit to #().  It has body expressions with "holes" represented by
-;; the symbols _1, _2, _3, and so on.  ("_" is a synonym for "_1".)
-;; The holes become arguments to an anonymous function whose body is
-;; the template body.  Unlike #() or "fn", however, any expressions
-;; that do not have any holes will be evaluated only once, at the time
-;; the function is created, not every time the function is called.
+;; This file defines macros for using template expressions.  These are
+;; useful for writing macros.
+;;
+;; A template is an expression containing "holes" represented by the
+;; symbols _1, _2, _3, and so on.  ("_" is a synonym for "_1".)
+;;
+;; The "template" macro is similar to #().  It returns an anonymous
+;; function containing the body of the template.  Unlike #() or "fn",
+;; however, any expressions that do not have any holes will be
+;; evaluated only once, at the time the function is created, not every
+;; time the function is called.
 ;;
 ;; Examples:
 ;;
@@ -29,8 +33,8 @@
     (Thread/sleep 1000)
     1000)
 
-  ;; With fn, think-hard gets called every time.
-  (time (doall (map (fn [x] (+ x (think-hard)))
+  ;; With #(), think-hard gets called every time.
+  (time (doall (map #(+ % (think-hard))
                     (range 5))))
   ;;=> "Elapsed time: 5001.33455 msecs"
   ;;=> (1000 1001 1002 1003 1004)
@@ -42,8 +46,18 @@
   ;;=> (1000 1001 1002 1003 1004)
 )
 ;;
-;; You can use this to write macros that take a template as an
-;; argument.
+;;
+;; There is also the do-template macro, which works differently.  It
+;; calls the same template multiple times, filling in values, and puts
+;; it all inside a "do" block.  It will split up the values based on
+;; the number of holes in the template.
+(comment
+  (do-template (foo _1 _2) :a :b :c :d)
+  ;; expands to: (do (foo :a :b) (foo :c :d))
+
+  (do-template (foo _1 _2 _3) 10 11 12 13 14 15)
+  ;; expands to: (foo 10 11 12) (foo 13 14 15)
+  )
 
 
 
@@ -80,16 +94,26 @@
   as _1).  Any sub-expressions without any _* variables are evaluated
   when the fn is created, not when it is called."
   [& form]
-  (let [form (postwalk-replace {'_ '_1} form)
-        holes (find-holes form)
-        pures (find-pure-exprs form)
-        smap (zipmap pures (repeatedly #(gensym "HOLE_")))
-        newform (prewalk-replace smap form)
-        ;; Now, make sure we omit nested sub-expressions:
-        used (set (filter #(.startsWith (name %) "HOLE_")
-                          (find-symbols newform)))
-        newmap (reduce (fn [m [k v]] (if (used v) (assoc m k v) m))
-                       {} smap)]
-    `(let ~(flatten-map (clojure.set/map-invert newmap))
-       (fn ~(vec holes)
-           ~@newform))))
+  `(let ~(flatten-map (clojure.set/map-invert newmap))
+     (fn ~(vec holes)
+         ~@newform)))
+
+(defn apply-template
+  "Replaces _1, _2, _3, etc. in expr with corresponding elements of
+  values.  Returns the modified expression.  For use in macros."
+  [expr values]
+  (let [expr (postwalk-replace {'_ '_1} expr)
+        holes (find-holes expr)
+        smap (zipmap holes values)]
+    (prewalk-replace smap expr)))
+
+(defmacro do-template
+  "Repeatedly evaluates template expr (in a do block) using values in
+  args.  args are grouped by the number of holes in the template.
+  Example: (do-template (check _1 _2) :a :b :c :d)
+  expands to (do (check :a :b) (check :c :d))"
+  [expr & args]
+  (let [expr (postwalk-replace {'_ '_1} expr)
+        argcount (count (find-holes expr))]
+    `(do ~@(map (fn [a] (apply-template expr a))
+                (partition argcount args)))))
