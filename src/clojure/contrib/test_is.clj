@@ -46,9 +46,28 @@
 ;;
 ;; Run tests with (run-tests). As in any language with macros, you may
 ;; need to recompile functions after changing a macro definition.
+;;
+;; If you want write a bunch of tests with the same predicate, use
+;; "are", which takes a template and applies it inside "is".
+;;
+;; Examples:
+;;
+;;     (deftest test-addition
+;;       (are (= _1 _2)
+;;            3 (+ 2 1)
+;;            4 (+ 2 2)
+;;            5 (+ 4 1)))
+;;
+;;     (deftest test-predicates
+;;       (are _  ; the template is just an underscore
+;;            (true? true)
+;;            (false? false)
+;;            (nil? nil)))
 
 
-(ns clojure.contrib.test-is)
+
+(ns clojure.contrib.test-is
+    (:require [clojure.contrib.template :as temp]))
 
 
 (def *report-counters* nil)  ; bound to a ref of a map in test-ns
@@ -185,13 +204,11 @@
   ([form msg] `(try-expr ~msg ~form)))
 
 (defmacro are
-  "Checks multiple assertions with the same predicate.
-  Expands to (is (pred p1 p2)) for each pair.
-
-  Example: (are = 2 (+ 1 1), 4 (+ 2 2))"
-  [pred & pairs]
-  `(do ~@(map (fn [pair] (list 'is (cons pred pair)))
-              (partition 2 pairs))))
+  "Checks multiple assertions with a template expression.
+  Example: (are (= _1 _2)  2 (+ 1 1),  4 (+ 2 2))
+  See clojure.contrib.template for documentation of templates."
+  [expr & args]
+  `(temp/do-template (is ~expr) ~@args))
 
 
 
