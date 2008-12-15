@@ -14,7 +14,9 @@
 (def has-pull false)
 (defn- parse-seq-pull [& _])
 (try (load "lazy_xml/with_pull")
-  (catch ClassNotFoundException e))
+  (catch Exception e
+    (when-not (re-seq #"XmlPullParser" (str e))
+      (throw e))))
 
 (defn startparse-sax [s ch]
   (.. SAXParserFactory newInstance newSAXParser (parse s ch)))
@@ -107,6 +109,11 @@
   ([s startparse queue-size]
     (first (mktree (parse-seq s startparse queue-size)))))
 
+(def escape-xml-map {\< "&lt;" \> "&gt;" \" "&quot;" \& "&amp;"})
+
+(defn escape-xml [text]
+  (apply str (map #(escape-xml-map % %) text)))
+
 (defn emit-element
   "Recursively prints as XML text the element struct e.  To have it
   print extra whitespace like clojure.xml/emit, use the :pad true
@@ -115,12 +122,13 @@
   (let [opts (apply hash-set opts)
         pad (if (:pad opts) "\n" "")]
     (if (instance? String e)
-      (print (str e pad))
+      (print (str (escape-xml e) pad))
       (do
         (print (str "<" (name (:tag e))))
         (when (:attrs e)
           (doseq [attr (:attrs e)]
-            (print (str " " (name (key attr)) "='" (val attr) "'"))))
+            (print (str " " (name (key attr))
+                        "='" (escape-xml (val attr)) "'"))))
         (if (:content e)
           (do
             (print (str ">" pad))
