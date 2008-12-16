@@ -106,7 +106,7 @@
 
 (defmethod report :error [event msg expected actual]
   (report-count :error)
-  (println "\nERROR in" *test-name* msg)
+  (println "\nERROR in" *test-name*)
   (when msg (println msg))
   (println "expected:" (pr-str expected))
   (println "  actual:" (pr-str actual)))
@@ -230,7 +230,10 @@
   (when-let [t (:test (meta v))]
       (binding [*test-name* (str v)]
         (report-count :test)
-        (t))))
+        (try (t)
+             (catch Throwable e
+               (report :error "Uncaught exception, not in assertion."
+                       nil e))))))
 
 (defn test-ns
   "Tests all vars in the namespace.  Returns a map of counts
