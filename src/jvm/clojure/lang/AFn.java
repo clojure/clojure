@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.Comparator;
 import java.io.Serializable;
 
-public abstract class AFn extends Obj implements IFn, Comparator, Serializable{
+public abstract class AFn extends Obj implements IFn, Serializable{
 
 public AFn(IPersistentMap meta){
 	super(meta);
@@ -43,26 +43,7 @@ public void run(){
 		}
 }
 
-public int compare(Object o1, Object o2){
-	try
-		{
-		Object o = invoke(o1, o2);
 
-		if(o instanceof Boolean)
-			{
-			if(RT.booleanCast(o))
-				return -1;
-			return RT.booleanCast(invoke(o2,o1))? 1 : 0;
-			}
-		
-		Number n = (Number) o;
-		return n.intValue();
-		}
-	catch(Exception e)
-		{
-		throw new RuntimeException(e);
-		}
-}
 
 public Object invoke() throws Exception{
 	return throwArity();

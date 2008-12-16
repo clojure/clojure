@@ -9,7 +9,7 @@
  **/
 package clojure.lang;
 
-public abstract class RestFn extends AFn{
+public abstract class RestFn extends AFunction{
 
 protected int reqArity;
 

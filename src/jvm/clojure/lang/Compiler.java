@@ -2864,7 +2864,7 @@ static public class FnExpr implements Expr{
 			Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol, clojure.lang.Symbol)");
 	final static Method afnctor = Method.getMethod("void <init>()");
 	final static Method restfnctor = Method.getMethod("void <init>(int)");
-	final static Type aFnType = Type.getType(AFn.class);
+	final static Type aFnType = Type.getType(AFunction.class);
 	final static Type restFnType = Type.getType(RestFn.class);
 
 	final static Type DYNAMIC_CLASSLOADER_TYPE = Type.getType(DynamicClassLoader.class);
@@ -2996,7 +2996,7 @@ static public class FnExpr implements Expr{
 //		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,
-		         isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFn", new String[]{"clojure/lang/Fn"});
+		         isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction", null);
 		String source = (String) SOURCE.get();
 		int lineBefore = (Integer) LINE_BEFORE.get();
 		int lineAfter = (Integer) LINE_AFTER.get() + 1;
