@@ -10,6 +10,7 @@
 ; or saved to a .class file.
 
 (ns clojure.contrib.gen-interface
+  (:refer-clojure :exclude (gen-interface))
   (:import (clojure.asm ClassWriter Opcodes Type)
            (java.io File FileOutputStream IOException)))
 
@@ -132,7 +133,7 @@
   (let [spec (apply make-spec make-spec-args)]
     (save-interface-bytecode path spec (spec-bytecode spec))))
 
-(defn gen-interface
+(defn gen-save-and-interface
   "Uses the given interface description to generate a Java interface,
    save it to a .class file, and immediately load it so it's ready
    for use by subsequent gen-interface or gen-class calls.  The .class
