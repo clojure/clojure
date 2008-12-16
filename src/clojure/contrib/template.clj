@@ -94,9 +94,19 @@
   as _1).  Any sub-expressions without any _* variables are evaluated
   when the fn is created, not when it is called."
   [& form]
-  `(let ~(flatten-map (clojure.set/map-invert newmap))
-     (fn ~(vec holes)
-         ~@newform)))
+  (let [form (postwalk-replace {'_ '_1} form)
+        holes (find-holes form)
+        pures (find-pure-exprs form)
+        smap (zipmap pures (repeatedly #(gensym "HOLE_")))
+        newform (prewalk-replace smap form)
+        ;; Now, make sure we omit nested sub-expressions:
+        used (set (filter #(.startsWith (name %) "HOLE_")
+                          (find-symbols newform)))
+        newmap (reduce (fn [m [k v]] (if (used v) (assoc m k v) m))
+                       {} smap)]
+    `(let ~(flatten-map (clojure.set/map-invert newmap))
+       (fn ~(vec holes)
+           ~@newform))))
 
 (defn apply-template
   "Replaces _1, _2, _3, etc. in expr with corresponding elements of
