@@ -1,7 +1,7 @@
 ;;; seq_utils.clj -- Sequence utilities for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; last updated August 12, 2008
+;; last updated December 16, 2008
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -19,10 +19,11 @@
 ;; see http://groups.google.com/group/clojure/msg/385098fabfcaad9b
 (defn flatten
   "Takes any nested combination of sequential things (lists, vectors,
-  etc.) and returns their contents as a single, flat sequence."
+  etc.) and returns their contents as a single, flat sequence.
+  (flatten nil) returns nil."
   [x]
-  (let [s? #(instance? clojure.lang.Sequential %)]
-    (filter (complement s?) (tree-seq s? seq x))))
+  (filter (complement sequential?)
+          (rest (tree-seq sequential? seq x))))
 
 (defn separate
   "Returns a vector:
