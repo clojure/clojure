@@ -11,7 +11,7 @@
   <property name="build" location="classes"/>
   <property name="clojure_jar" location="clojure.jar"/>
 
-  <target name="init">
+  <target name="init" depends="clean">
     <tstamp/>
     <mkdir dir="${build}"/>
   </target>
