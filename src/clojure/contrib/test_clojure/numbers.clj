@@ -16,7 +16,7 @@
 
 (deftest Coerced-Byte
   (let [v (byte 3)]
-    (all-true
+    (are _
      (instance? Byte v)
      (number? v)
      (integer? v)
@@ -24,7 +24,7 @@
 
 (deftest Coerced-Short
   (let [v (short 3)]
-    (all-true
+    (are _
      (instance? Short v)
      (number? v)
      (integer? v)
@@ -32,7 +32,7 @@
 
 (deftest Coerced-Integer
   (let [v (int 3)]
-    (all-true
+    (are _
      (instance? Integer v)
      (number? v)
      (integer? v)
@@ -40,7 +40,7 @@
 
 (deftest Coerced-Long
   (let [v (long 3)]
-    (all-true
+    (are _
      (instance? Long v)
      (number? v)
      (integer? v)
@@ -48,7 +48,7 @@
 
 (deftest Coerced-BigInteger
   (let [v (bigint 3)]
-    (all-true
+    (are _
      (instance? BigInteger v)
      (number? v)
      (integer? v)
@@ -56,21 +56,21 @@
 
 (deftest Coerced-Float
   (let [v (float 3)]
-    (all-true
+    (are _
      (instance? Float v)
      (number? v)
      (float? v))))
 
 (deftest Coerced-Double
   (let [v (double 3)]
-    (all-true
+    (are _
      (instance? Double v)
      (number? v)
      (float? v))))
 
 (deftest Coerced-BigDecimal
   (let [v (bigdec 3)]
-    (all-true
+    (are _
      (instance? BigDecimal v)
      (number? v)
      (decimal? v)
