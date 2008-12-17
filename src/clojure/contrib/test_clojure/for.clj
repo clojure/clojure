@@ -86,7 +86,7 @@
   (is (= (for [x (only 6) :while (< x 5) :when (odd? x)] x) '(1 3)))
   (is (= (for [x (only 6)
                :while (< x 5) ; if :while is false, :when should not be evaled
-               :when (do (is (< x 5) (odd? x)))] x) '(1 3))))
+               :when (do (if (< x 5) (odd? x)))] x) '(1 3))))
 
 (deftest Nesting
   (is (= (for [x '(a b) y (interpose x '(1 2)) z (list x y)] [x y z])
