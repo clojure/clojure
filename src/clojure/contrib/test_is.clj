@@ -72,7 +72,7 @@
 
 (def *report-counters* nil)  ; bound to a ref of a map in test-ns
 
-(def *test-name* nil)  ; bound to the name of a var during testing
+(def *testing-vars* (list))  ; bound to hierarchy of vars being tested
 
 
 
@@ -80,6 +80,15 @@
 
 ;; These are used in assert-expr methods.  Rebind "report" to plug in
 ;; your own test-reporting framework.
+
+(defn testing-str
+  "Returns a string representation of the current test.  Renders names
+  in *testing-vars* as a list, then the source file and line of
+  current test."
+  []
+  (str (reverse (map #(:name (meta %)) *testing-vars*))
+       " (" (:file (meta (first *testing-vars*)))
+       ":" (:line (meta (first *testing-vars*))) ")"))
 
 (defn report-count
   "Increments the named counter in *report-counters*."
@@ -99,14 +108,14 @@
 
 (defmethod report :fail [event msg expected actual]
   (report-count :fail)
-  (println "\nFAIL in" *test-name*)
+  (println "\nFAIL in" (testing-str))
   (when msg (println msg))
   (println "expected:" (pr-str expected))
   (println "  actual:" (pr-str actual)))
 
 (defmethod report :error [event msg expected actual]
   (report-count :error)
-  (println "\nERROR in" *test-name*)
+  (println "\nERROR in" (testing-str))
   (when msg (println msg))
   (println "expected:" (pr-str expected))
   (println "  actual:" (pr-str actual)))
@@ -215,20 +224,31 @@
 ;;; DEFINING TESTS INDEPENDENT OF FUNCTIONS
 
 (defmacro deftest
-  "Defines a Var with no value and with body in its :test fn."
+  "Defines a test function with no arguments.  Test functions may call
+  other tests, so tests may be composed.  If you compose tests, you
+  should also define a function named test-ns-hook; run-tests will
+  call this function.
+
+  If name is nil, a symbol like T-123 will be generated.
+
+  Note: Actually, the test body goes in the :test metadata on the var,
+  and the real function (the value of the var) calls test-var on
+  itself."
   [name & body]
-  `(def ~(with-meta name {:test `(fn [] ~@body)})))
+  (let [symbol (if (nil? name) (gensym "T-") name)]
+    `(def ~(with-meta symbol {:test `(fn [] ~@body)})
+          (fn [] (test-var (var ~symbol))))))
 
 
 
 ;;; RUNNING TESTS
 
 (defn test-var
-  "If v has a function in its :test metadata, calls that function, with
-  *test-name* bound to the name of the var."
+  "If v has a function in its :test metadata, calls that function,
+  with *testing-vars* bound to (conj *testing-vars* v)."
   [v]
   (when-let [t (:test (meta v))]
-      (binding [*test-name* (str v)]
+      (binding [*testing-vars* (conj *testing-vars* v)]
         (report-count :test)
         (try (t)
              (catch Throwable e
@@ -236,15 +256,20 @@
                        nil e))))))
 
 (defn test-ns
-  "Tests all vars in the namespace.  Returns a map of counts
-  for :test, :pass, :fail, and :error results."
+  "If the namespace defines a function named test-ns-hook, calls that.
+  Otherwise, calls test-var on all vars in the namespace. Returns a
+  map of counts for :test, :pass, :fail, and :error results."
   [ns]
   (binding [*report-counters* (ref {:test 0, :pass 0,
                                     :fail 0, :error 0})]
     (let [ns (if (symbol? ns) (find-ns ns) ns)]
       (report :info (str "Testing " ns) nil nil)
-      (doseq [v (vals (ns-interns ns))]
-          (test-var v)))
+      ;; If ns has a test-ns-hook function, call that:
+      (if-let [v (find-var (symbol (str (ns-name ns)) "test-ns-hook"))]
+          ((var-get v))
+        ;; Otherwise, just test every var in the ns.
+        (doseq [v (vals (ns-interns ns))]
+            (test-var v))))
     @*report-counters*))
 
 (defn print-results
