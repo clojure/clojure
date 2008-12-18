@@ -10,6 +10,9 @@
 Docs: http://clojure.org
 Feedback: http://groups.google.com/group/clojure
 
+To Run java -cp clojure.jar clojure.lang.Repl
+To Build: ant
+
 --------------------------------------------------------------------------
 This program uses the ASM bytecode engineering library which is distributed
 with the following notice:
