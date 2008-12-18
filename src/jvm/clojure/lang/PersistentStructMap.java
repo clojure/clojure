@@ -123,7 +123,7 @@ public IMapEntry entryAt(Object key){
 	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
-		return new MapEntry(key, vals[(Integer) e.getValue()]);
+		return new MapEntry(e.getKey(), vals[(Integer) e.getValue()]);
 		}
 	return ext.entryAt(key);
 }

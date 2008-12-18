@@ -663,14 +663,15 @@ static public Object contains(Object coll, Object key){
 static public Object find(Object coll, Object key){
 	if(coll == null)
 		return null;
-	else if(coll instanceof Map)
+	else if(coll instanceof Associative)
+        return ((Associative) coll).entryAt(key);
+    else
 		{
 		Map m = (Map) coll;
 		if(m.containsKey(key))
 			return new MapEntry(key, m.get(key));
 		return null;
 		}
-	return ((Associative) coll).entryAt(key);
 }
 
 //takes a seq of key,val,key,val
