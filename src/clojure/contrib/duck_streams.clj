@@ -42,6 +42,21 @@
 
 
 
+(defn #^File file
+  "Concatenates args as strings returns a java.io.File.  Replaces all
+  / and \\ with File/separatorChar.  Replaces ~ at the start of the
+  path with the user.home system property."
+  [& args]
+  (let [#^String s (apply str args)
+        s (.replace s \/ File/separatorChar)
+        s (.replace s \\ File/separatorChar)
+        s (if (.startsWith s "~")
+            (str (System/getProperty "user.home")
+                 File/separatorChar (subs s 1))
+            s)]
+    (File. s)))
+
+
 (defmacro #^{:private true} bufr [reader]
   `(new java.io.BufferedReader ~reader))
 
@@ -165,17 +180,3 @@
   [f content]
   (with-open [#^PrintWriter w (writer f)]
       (.print w content)))
-
-(defn #^File file
-  "Concatenates args as strings returns a java.io.File.  Replaces all
-  / and \\ with File/separatorChar.  Replaces ~ at the start of the
-  path with the user.home system property."
-  [& args]
-  (let [#^String s (apply str args)
-        s (.replace s \/ File/separatorChar)
-        s (.replace s \\ File/separatorChar)
-        s (if (.startsWith s "~")
-            (str (System/getProperty "user.home")
-                 File/separatorChar (subs s 1))
-            s)]
-    (File. s)))
