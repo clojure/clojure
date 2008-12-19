@@ -43,10 +43,10 @@
    (list? form) (outer (apply list (map inner form)))
    (seq? form) (outer (doall (map inner form)))
    (vector? form) (outer (vec (map inner form)))
-   (map? form) (outer (into (outer (sorted? form) (sorted-map) {})
-                        (map inner form)))
-   (set? form) (outer (into (outer (sorted? form) (sorted-set) #{})
-                        (map inner form)))
+   (map? form) (outer (into (outer (if (sorted? form) (sorted-map) {}))
+                            (map inner form)))
+   (set? form) (outer (into (outer (if (sorted? form) (sorted-set) #{}))
+                            (map inner form)))
    :else (outer form)))
 
 (defn postwalk
