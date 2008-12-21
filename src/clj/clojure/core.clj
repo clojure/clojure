@@ -1591,14 +1591,19 @@
   For each name in class-name-symbols, adds a mapping from name to the
   class named by package.name to the current namespace. Use :import in the ns 
   macro in preference to calling this directly."  
-  [& import-lists]
-    (when import-lists
-      (let [#^clojure.lang.Namespace ns *ns*
-            pkg (ffirst import-lists)
-            classes (rfirst import-lists)]
-        (doseq [c classes]
-          (. ns (importClass c (. Class (forName (str pkg "." c)))))) )
-      (apply import (rest import-lists))))
+  [& import-symbols-or-lists]
+    (let [#^clojure.lang.Namespace ns *ns*]
+      (doseq [spec import-symbols-or-lists]
+        (if (symbol? spec)
+          (let [n (name spec)
+                dot (.lastIndexOf n (. clojure.lang.RT (intCast \.)))
+                c (symbol (.substring n (inc dot)))]
+            (. ns (importClass c (. Class (forName (name spec))))))
+          (let [pkg (first spec)
+                classes (rest spec)]
+            (doseq [c classes]
+              (. ns (importClass c (. Class (forName (str pkg "." c)))))))))))
+
 
 (defn into-array
   "Returns an array with components set to the values in aseq. The array's
