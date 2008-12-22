@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
@@ -66,7 +67,7 @@ static class CFn{
 }
 //total order on transactions
 //transactions will consume a point for init, for each retry, and on commit if writing
-final private static AtomicInteger lastPoint = new AtomicInteger();
+final private static AtomicLong lastPoint = new AtomicLong();
 
 void getReadPoint(){
 	readPoint = lastPoint.incrementAndGet();
