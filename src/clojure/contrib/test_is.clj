@@ -240,6 +240,15 @@
           (fn [] (test-var (var ~symbol))))))
 
 
+(defmacro set-test
+  "Experimental.
+  Sets :test metadata of the named var to a fn with the given body.
+  The var must already exist.  Does not modify the value of the var.
+  Note: loses the var's original :line and :arglists metadata."
+  [name & body]
+  `(def ~(with-meta name (assoc ^name :test `(fn [] ~@body)))
+        ~name))
+
 
 ;;; RUNNING TESTS
 
