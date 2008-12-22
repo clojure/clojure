@@ -136,7 +136,7 @@
   (test-that
     "If a symbol is package-qualified, it is an error if there is no Class named
     by the symbol"
-    (throws Compiler$CompilerException (eval 'java.lang.FooBar)))
+    (is (thrown? Compiler$CompilerException (eval 'java.lang.FooBar))))
 
   (test-that
     "If a symbol is not qualified, the following applies, in this order:
@@ -161,12 +161,12 @@
     ; First
     (doall (for [form '(def if do let quote var fn loop recur throw try
                          monitor-enter monitor-exit)]
-             (throws Compiler$CompilerException (eval form))))
+             (is (thrown? Compiler$CompilerException (eval form)))))
     (let [if "foo"]
-      (throws Compiler$CompilerException (eval 'if)))
+      (is (thrown? Compiler$CompilerException (eval 'if)))
 
     ; Second
-    (is (= (eval 'Boolean) (class-for-name "java.lang.Boolean")))
+      (is (= (eval 'Boolean) (class-for-name "java.lang.Boolean"))))
     (let [Boolean "foo"]
       (is (= (eval 'Boolean) (class-for-name "java.lang.Boolean"))))
 
@@ -175,10 +175,10 @@
 
     ; Fourth
     (in-test-ns (is (= (eval 'foo) "abc")))
-    (throws Compiler$CompilerException (eval 'bar)) ; not in this namespace
+    (is (thrown? Compiler$CompilerException (eval 'bar))) ; not in this namespace
 
     ; Fifth
-    (throws Compiler$CompilerException (eval 'foobar))))
+    (is (thrown? Compiler$CompilerException (eval 'foobar)))))
 
 ;;; Metadata tests ;;;
 
