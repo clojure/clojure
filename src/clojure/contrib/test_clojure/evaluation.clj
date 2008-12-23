@@ -215,7 +215,7 @@
 
   (test-that
     "Non-empty lists are considered calls"
-    (is (thrown? Exception (eval '(1 2 3))))))
+    (is (thrown? Compiler$CompilerException (eval '(1 2 3))))))
 
 (deftest Macros)
 
