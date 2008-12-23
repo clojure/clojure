@@ -1,6 +1,6 @@
 ;;; fcase.clj -- simple variants of "case" for Clojure
 
-;; by Stuart Sierra <mail@stuartsierra.com>
+;; by Stuart Sierra, http://stuartsierra.com/
 ;; April 7, 2008
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
@@ -16,6 +16,10 @@
 ;; the equality-testing function as an argument.  It also defines a
 ;; traditional "case" macro that tests using "=" and variants that
 ;; test for regular expressions and class membership.
+
+
+;; Note (December 23, 2008): This library has been supplanted by the
+;; inclusion of "condp" in clojure.core as of Clojure SVN rev. 1180.
 
 
 (ns clojure.contrib.fcase)
