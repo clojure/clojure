@@ -25,7 +25,7 @@ public class LispReader{
 static final Symbol QUOTE = Symbol.create("quote");
 static final Symbol THE_VAR = Symbol.create("var");
 //static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
-//static Symbol UNQUOTE = Symbol.create(null, "unquote");
+static Symbol UNQUOTE = Symbol.create("clojure.core", "unquote");
 //static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 static Symbol CONCAT = Symbol.create("clojure.core", "concat");
 static Symbol LIST = Symbol.create("clojure.core", "list");
@@ -683,8 +683,8 @@ public static class SyntaxQuoteReader extends AFn{
 				sym = Compiler.resolveSymbol(sym);
 			ret = RT.list(Compiler.QUOTE, sym);
 			}
-		else if(form instanceof Unquote)
-			return ((Unquote) form).o;
+		else if(isUnquote(form))
+			return RT.second(form);
 		else if(form instanceof UnquoteSplicing)
 			throw new IllegalStateException("splice not in list");
 		else if(form instanceof IPersistentCollection)
@@ -733,8 +733,8 @@ public static class SyntaxQuoteReader extends AFn{
 		for(; seq != null; seq = seq.rest())
 			{
 			Object item = seq.first();
-			if(item instanceof Unquote)
-				ret = ret.cons(RT.list(LIST, ((Unquote) item).o));
+			if(isUnquote(item))
+				ret = ret.cons(RT.list(LIST, RT.second(item)));
 			else if(item instanceof UnquoteSplicing)
 				ret = ret.cons(((UnquoteSplicing) item).o);
 			else
@@ -756,13 +756,6 @@ public static class SyntaxQuoteReader extends AFn{
 
 }
 
-static class Unquote{
-	final Object o;
-
-	public Unquote(Object o){
-		this.o = o;
-	}
-}
 
 static class UnquoteSplicing{
 	final Object o;
@@ -770,6 +763,10 @@ static class UnquoteSplicing{
 	public UnquoteSplicing(Object o){
 		this.o = o;
 	}
+}
+
+static boolean isUnquote(Object form){
+	return form instanceof ISeq && RT.first(form).equals(UNQUOTE);
 }
 
 static class UnquoteReader extends AFn{
@@ -787,7 +784,7 @@ static class UnquoteReader extends AFn{
 			{
 			unread(r, ch);
 			Object o = read(r, true, null, true);
-			return new Unquote(o);
+			return RT.list(UNQUOTE, o);
 			}
 	}
 

@@ -8,6 +8,8 @@
 
 (ns clojure.core)
 
+(def unquote)
+
 (def
  #^{:arglists '([& items])
     :doc "Creates a new list containing the items."}
