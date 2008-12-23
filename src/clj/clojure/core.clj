@@ -1817,18 +1817,34 @@
   "Reads one object from the string s"
   [s] (clojure.lang.RT/readString s))
 
-(defmacro with-open
-  "bindings => name init
+(defn subvec
+  "Returns a persistent vector of the items in vector from
+  start (inclusive) to end (exclusive).  If end is not supplied,
+  defaults to (count vector). This operation is O(1) and very fast, as
+  the resulting vector shares structure with the original and no
+  trimming is done."
+  ([v start]
+   (subvec v start (count v)))
+  ([v start end]
+   (. clojure.lang.RT (subvec v start end))))
 
-  Evaluates body in a try expression with name bound to the value of
-  init, and a finally clause that calls (.close name)."
+(defmacro with-open
+  "bindings => [name init ...]
+
+  Evaluates body in a try expression with names bound to the values
+  of the inits, and a finally clause that calls (.close name) on each
+  name in reverse order."
   [bindings & body]
   (if (vector? bindings)
-    `(let ~bindings
-       (try
-         ~@body
-         (finally
-           (.close ~(first bindings)))))
+    (cond
+      (= (count bindings) 0) `(do ~@body)
+      (symbol? (bindings 0)) `(let ~(subvec bindings 0 2)
+                                (try
+                                    (with-open ~(subvec bindings 2) ~@body)
+                                    (finally
+                                      (. ~(bindings 0) close))))
+      :else (throw (IllegalArgumentException.
+                     "with-open only allows Symbols in bindings")))
     (throw (IllegalArgumentException.
              "with-open now requires a vector for its binding"))))
 
@@ -2022,17 +2038,6 @@
   performance-critical areas."
   [s key]
     (. clojure.lang.PersistentStructMap (getAccessor s key)))
-
-(defn subvec
-  "Returns a persistent vector of the items in vector from
-  start (inclusive) to end (exclusive).  If end is not supplied,
-  defaults to (count vector). This operation is O(1) and very fast, as
-  the resulting vector shares structure with the original and no
-  trimming is done."
-  ([v start]
-   (subvec v start (count v)))
-  ([v start end]
-   (. clojure.lang.RT (subvec v start end))))
 
 (defn load-reader
   "Sequentially read and evaluate the set of forms contained in the
