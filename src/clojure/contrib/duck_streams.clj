@@ -180,3 +180,9 @@
   [f content]
   (with-open [#^PrintWriter w (writer f)]
       (.print w content)))
+
+(defn pwd
+  "Returns current working directory as a String.  (Like UNIX 'pwd'.)
+  Note: In Java, you cannot change the current working directory."
+  []
+  (System/getProperty "user.dir"))
