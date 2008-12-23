@@ -84,11 +84,7 @@ static class Action implements Runnable{
 
 			if(!hadError)
 				{
-				for(ISeq s = nested.get().seq(); s != null; s = s.rest())
-					{
-					Action a = (Action) s.first();
-					a.agent.enqueue(a);
-					}
+				releasePendingSends();
 				}
 
 			boolean popped = false;
@@ -232,4 +228,16 @@ public Agent removeWatch(Object watcher) throws Exception{
 	return this;
 }
 
+static public int releasePendingSends(){
+	IPersistentVector sends = nested.get();
+	if(sends == null)
+		return 0;
+	for(int i=0;i<sends.count();i++)
+		{
+		Action a = (Action) sends.valAt(i);
+		a.agent.enqueue(a);
+		}
+	nested.set(PersistentVector.EMPTY);
+	return sends.count();
+}
 }
