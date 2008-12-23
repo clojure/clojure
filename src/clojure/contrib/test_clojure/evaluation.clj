@@ -198,8 +198,7 @@
       evaluated values of the objects they contain."
       (is (= (eval '[x y 3]) [1 2 3]))
       (is (= (eval '{:x x :y y :z 3}) {:x 1 :y 2 :z 3}))
-      (is (= (class (eval '{:x x :y y}))
-             clojure.lang.PersistentHashMap))))
+      (is (instance? clojure.lang.IPersistentMap (eval '{:x x :y y})))))
 
   (in-test-ns
     (test-that
@@ -216,9 +215,7 @@
 
   (test-that
     "Non-empty lists are considered calls"
-    (throws-with-msg #".*Integer cannot be cast .* clojure\.lang\.IFn.*"
-                     (eval '(1 2 3))
-                     ClassCastException)))
+    (is (thrown? Exception (eval '(1 2 3))))))
 
 (deftest Macros)
 
