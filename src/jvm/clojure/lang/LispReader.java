@@ -943,7 +943,7 @@ public static class VectorReader extends AFn{
 public static class MapReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		return PersistentHashMap.create(readDelimitedList('}', r, true));
+		return RT.map(readDelimitedList('}', r, true).toArray());
 	}
 
 }

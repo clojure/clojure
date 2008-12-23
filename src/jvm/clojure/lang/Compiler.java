@@ -2429,7 +2429,7 @@ static public String munge(String name){
 
 public static class EmptyExpr implements Expr{
 	public final Object coll;
-	final static Type HASHMAP_TYPE = Type.getType(PersistentHashMap.class);
+	final static Type HASHMAP_TYPE = Type.getType(PersistentArrayMap.class);
 	final static Type HASHSET_TYPE = Type.getType(PersistentHashSet.class);
 	final static Type VECTOR_TYPE = Type.getType(PersistentVector.class);
 	final static Type LIST_TYPE = Type.getType(PersistentList.class);
