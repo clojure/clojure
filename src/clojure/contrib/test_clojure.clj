@@ -16,8 +16,7 @@
 (ns clojure.contrib.test-clojure
   (:use clojure.contrib.test-is))
 
-; 2008/12/19 SDH temporarily removed evaluation.clj, which isn't passing
-(def tests [:for :reader :printer :numbers :evaluation])
+(def tests [:for :reader :printer :numbers :evaluation :sequences])
 
 (defn test-name
   [test]
