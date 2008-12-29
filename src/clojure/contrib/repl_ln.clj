@@ -15,10 +15,10 @@
 (ns clojure.contrib.repl-ln
   (:gen-class)
   (:import (clojure.lang Compiler LineNumberingPushbackReader RT Var)
-           (java.io InputStreamReader OutputStreamWriter PrintWriter)
-           (java.util Date))
+           java.util.Date)
   (:require clojure.main)
-  (:use (clojure.contrib cond def fcase)))
+  (:use [clojure.contrib.def
+         :only (defmacro- defonce- defstruct- defvar-)]))
 
 ;; Private
 
@@ -49,18 +49,10 @@
 
 (defvar- +info-defaults+
   (struct-map repl-info
-    :name-fmt "repl-%S"
+    :name-fmt   "repl-%S"
     :prompt-fmt "%S:%L %N=> "
-    :depth 0)
+    :depth      0)
   "Default/root values for repl info")
-
-(defvar- +special-character+
-  { (int \return)  :eol
-    (int \newline) :eol
-    (int \,)       :ws
-    (int \;)       :cte
-    -1             :eos }
-  "Maps interesting character codes to keywords representing their type")
 
 (defonce- *serial-number* (atom 0)
   "Serial number counter")
@@ -84,65 +76,11 @@
         {:keys [serial thread depth]} *info*]
     (format name-fmt serial thread depth)))
 
-(defn- next-char
-  "Reads the next character in s and either returns it or one of the
-  following keywords if the character is of the corresponding type:
-    :ws  whitespace
-    :eol end-of-line
-    :eos end-of-stream
-    :cte comment-to-end character"
-  [s]
-  (let [c (.read s)]
-    (cond-let [type]
-      (+special-character+ c) type
-      (Character/isWhitespace c) :ws
-      :else c)))
-
-(defn- skip-to-end
-  "Skips characters on stream s until an end of stream or end of line"
-  [s]
-  (loop [c (next-char s)]
-    (if (#{:eol :eos} c)
-      c
-      (recur (next-char s)))))
-
-(defn- find-readable-this-line
-  "Skips characters on stream s until end of stream, end of line, or a
-  character of interest to the Reader. Returns :eos on end of stream, :eol
-  on end of line, :eol or :eos after skipping to end of line or end of
-  stream on semicolon, or :readable otherwise. Before returning :readable,
-  the readable character is pushed back onto the stream."
-  [s]
-  (loop [c (next-char s)]
-    (case c
-     :eol c
-     :eos c
-     :cte (skip-to-end s)
-     :ws (recur (next-char s))
-     (do
-       (.unread s c)
-       :readable))))
-
-(defn- read-hook
-  "Read hook for clojure.main/repl that keeps the compiler's line number in
-  sync with that of our input stream, prompts only when there is nothing
-  interesting remaining to read on the previous input line, and calls the
-  Reader only when there's something interesting to read on the current
-  line."
-  [eof]
-  (let [{:keys [prompt flush read]} *private*]
-    (loop [c (find-readable-this-line *in*)]
-      (case c
-       :eos eof
-       :eol
-       (do
-         (prompt)
-         (flush)
-         (recur (find-readable-this-line *in*)))
-       :readable
-       (do
-         (var-set Compiler/LINE (.getLineNumber *in*))
-         (read eof))))))
+(defn- prompt-hook
+  []
+  (let [prompt (*private* :prompt)]
+    (var-set Compiler/LINE (.getLineNumber *in*))
+    (prompt)))
 
 (defn- process-inits
   "Processes initial pairs of args of the form:
@@ -256,39 +194,30 @@
        - :prompt has a new default
          default: #(clojure.core/print (repl-prompt))
 
-       - :in,:out,:err input, output, and error streams
-         default: System/in, System/out, System/err
-
-       - :encoding java.nio.charset.Charset, encoding for in, out, err
-         default: RT/UTF8
-
        - :name-fmt, Name format string
          default: the name-fmt of the parent repl, or \"repl-%S\"
 
        - :prompt-fmt, Prompt format string
          default: the prompt-fmt of the parent repl, or \"%S:%L %N=> \""
   [& options]
-  (let [{:keys [init prompt flush read eval print caught in out err
-                encoding name-fmt prompt-fmt]
-         :or {init       #()
-              prompt     #(clojure.core/print (repl-prompt))
-              flush      flush
-              read       #(read *in* false %)
-              eval       eval
-              print      prn
-              caught     #(.println *err* (clojure.main/repl-exception %))
-              in         System/in
-              out        System/out
-              err        System/err
-              encoding   RT/UTF8}}
-        (apply hash-map options)]
+  (let [{:keys [init need-prompt prompt flush read eval print caught
+                name-fmt prompt-fmt]
+         :or {init        #()
+              need-prompt (if (instance? LineNumberingPushbackReader *in*)
+                            #(.atLineStart *in*)
+                            #(identity true))
+              prompt      #(clojure.core/print (repl-prompt))
+              flush       flush
+              read        read
+              eval        eval
+              print       prn
+              caught      #(.println *err* (clojure.main/repl-exception %))
+              name-fmt    (*info* :name-fmt)
+              prompt-fmt  (*info* :prompt-fmt)}}
+              (apply hash-map options)]
     (try
      (Var/pushThreadBindings
-      {RT/IN (LineNumberingPushbackReader.
-              (InputStreamReader. in encoding))
-       RT/OUT (OutputStreamWriter. out encoding)
-       RT/ERR (PrintWriter. (OutputStreamWriter. err encoding) true)
-       Compiler/SOURCE (var-get Compiler/SOURCE)
+      {Compiler/SOURCE (var-get Compiler/SOURCE)
        Compiler/LINE (var-get Compiler/LINE)
        (var *info*) *info*
        (var *private*) {}})
@@ -296,20 +225,17 @@
              :started (Date.)
              :serial (swap! *serial-number* inc)
              :thread (.getId (Thread/currentThread))
-             :depth (inc (:depth *info*)))
+             :depth (inc (*info* :depth)))
      (assoc! *private*
-             :prompt prompt
-             :flush flush
-             :read read)
-     (set-repl-name (or name-fmt (:name-fmt *info*)))
-     (set-repl-prompt (or prompt-fmt (:prompt-fmt *info*)))
-     ;; unread newline to enable first prompt
-     (.unread *in* (int \newline))
+             :prompt prompt)
+     (set-repl-name name-fmt)
+     (set-repl-prompt prompt-fmt)
      (clojure.main/repl
       :init init
-      :prompt #()
-      :flush #()
-      :read read-hook
+      :need-prompt need-prompt
+      :prompt prompt-hook
+      :flush flush
+      :read read
       :eval eval
       :print print
       :caught caught)
