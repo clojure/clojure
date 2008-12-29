@@ -3338,6 +3338,8 @@ public static class FnMethod{
 	public final FnMethod parent;
 	//localbinding->localbinding
 	IPersistentMap locals = null;
+    //num->localbinding
+    IPersistentMap indexlocals = null;
 	//localbinding->localbinding
 	PersistentVector reqParms = PersistentVector.EMPTY;
 	LocalBinding restParm = null;
@@ -3511,8 +3513,12 @@ public static class FnMethod{
 			{
 			if(!localsUsedInCatchFinally.contains(i))
 				{
-				gen.visitInsn(Opcodes.ACONST_NULL);
-				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+                LocalBinding b = (LocalBinding) RT.get(indexlocals,i);
+			    if(b == null || maybePrimitiveType(b.init) == null)
+                    {
+				    gen.visitInsn(Opcodes.ACONST_NULL);
+				    gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+                    }
 				}
 			}
 	}
@@ -3782,12 +3788,15 @@ public static class LetExpr implements Expr{
 		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.rest())
 			{
 			BindingInit bi = (BindingInit) bis.first();
+            String lname = bi.binding.name;
+            if(lname.endsWith("__auto__"))
+                lname += RT.nextID();
 			Class primc = maybePrimitiveType(bi.init);
 			if(primc != null)
-				gen.visitLocalVariable(bi.binding.name, Type.getDescriptor(primc), null, loopLabel, end,
+				gen.visitLocalVariable(lname, Type.getDescriptor(primc), null, loopLabel, end,
 				                       bi.binding.idx);
 			else
-				gen.visitLocalVariable(bi.binding.name, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
+				gen.visitLocalVariable(lname, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
 			}
 	}
 
@@ -3892,6 +3901,7 @@ private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init) thr
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
 	FnMethod method = (FnMethod) METHOD.get();
 	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
+    method.indexlocals = (IPersistentMap) RT.assoc(method.indexlocals, num, b);
 	return b;
 }
 

@@ -676,7 +676,7 @@ public static class SyntaxQuoteReader extends AFn{
 				if(gs == null)
 					GENSYM_ENV.set(gmap.assoc(sym, gs = Symbol.intern(null,
 					                                                  sym.name.substring(0, sym.name.length() - 1)
-					                                                  + "__" + RT.nextID())));
+					                                                  + "__" + RT.nextID() + "__auto__")));
 				sym = gs;
 				}
 			else
