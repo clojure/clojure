@@ -62,6 +62,7 @@
               (. gen (dup))
               (. gen (ifNull else-label))
                                         ;if found
+              (.checkCast gen ifn-type)
               (. gen (loadThis))
                                         ;box args
               (dotimes [i (count ptypes)]
@@ -125,6 +126,7 @@
       (. gen (loadThis))
       (. gen (dup))
       (. gen (getField ctype fmap imap-type))
+      (.checkCast gen (totype clojure.lang.IPersistentCollection))
       (. gen (loadArgs))
       (. gen (invokeInterface (totype clojure.lang.IPersistentCollection)
                               (. Method (getMethod "clojure.lang.IPersistentCollection cons(Object)"))))

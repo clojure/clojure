@@ -181,6 +181,7 @@
                 (when is-overload
                   (. gen (mark found-label)))
                                         ;if found
+                (.checkCast gen ifn-type)
                 (when-not as-static
                   (. gen (loadThis)))
                                         ;box args
@@ -274,6 +275,7 @@
             (emit-get-var gen init-name)
             (. gen dup)
             (. gen ifNull no-init-label)
+            (.checkCast gen ifn-type)
                                         ;box init args
             (dotimes [i (count pclasses)]
               (. gen (loadArg i))
@@ -386,6 +388,7 @@
         (emit-get-var gen main-name)
         (. gen dup)
         (. gen ifNull no-main-label)
+        (.checkCast gen ifn-type)
         (. gen loadArgs)
         (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.ISeq seq(Object)"))))
         (. gen (invokeInterface ifn-type (new Method "applyTo" obj-type 
