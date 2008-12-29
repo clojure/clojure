@@ -381,6 +381,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 	String cljfile = scriptbase + ".clj";
 	URL classURL = baseLoader().getResource(classfile);
 	URL cljURL = baseLoader().getResource(cljfile);
+    boolean failed = false;
 
 	if(classURL != null &&
 	   (cljURL == null
@@ -405,7 +406,22 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 		else
 			loadResourceScript(RT.class, cljfile);
 		}
-	else if(failIfNotFound)
+    else
+        {
+        try
+            {
+            Var.pushThreadBindings(
+                    RT.map(CURRENT_NS, CURRENT_NS.get(),
+                           WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
+            failed = loadClassForName(scriptbase.replace('/','.') + LOADER_SUFFIX) == null;
+            }
+        finally
+            {
+            Var.popThreadBindings();
+            }
+        }
+
+	if(failed && failIfNotFound)
 		throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, cljfile));
 }
 
