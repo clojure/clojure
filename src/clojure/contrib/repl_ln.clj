@@ -15,6 +15,7 @@
 (ns clojure.contrib.repl-ln
   (:gen-class)
   (:import (clojure.lang Compiler LineNumberingPushbackReader RT Var)
+           (java.io InputStreamReader OutputStreamWriter PrintWriter)
            java.util.Date)
   (:require clojure.main)
   (:use [clojure.contrib.def
@@ -102,6 +103,23 @@
   init files and binds *command-line-args* to a seq of the remaining args"
   [args]
   (set! *command-line-args* (process-inits args)))
+
+(defn stream-repl
+  "Repl entry point that provides convenient overriding of input, output,
+  and err streams via sequential keyword-value pairs. Default values
+  for :in, :out, and :err are streams associated with System/in,
+  System/out, and System/err using UTF-8 encoding. Also supports all the
+  options provided by clojure.contrib.repl-ln/repl."
+  [& options]
+  (let [enc RT/UTF8
+        {:keys [in out err]
+         :or {in (LineNumberingPushbackReader.
+                  (InputStreamReader. System/in enc))
+              out (OutputStreamWriter. System/out enc)
+              err (PrintWriter. (OutputStreamWriter. System/err enc))}}
+        (apply hash-map options)]
+    (binding [*in* in *out* out *err* err]
+      (apply repl options))))
 
 (defn- -main
   "Main entry point, starts a repl enters the user namespace and processes
