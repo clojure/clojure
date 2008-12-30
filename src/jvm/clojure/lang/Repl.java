@@ -14,7 +14,7 @@ package clojure.lang;
 
 import clojure.main;
 
-class Repl {
+public class Repl {
 
 public static void main(String[] args) throws Exception{
     main.legacy_repl(args);

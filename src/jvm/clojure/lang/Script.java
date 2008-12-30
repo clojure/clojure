@@ -14,7 +14,7 @@ package clojure.lang;
 
 import clojure.main;
 
-class Script {
+public class Script {
 
 public static void main(String[] args) throws Exception{
     main.legacy_script(args);
