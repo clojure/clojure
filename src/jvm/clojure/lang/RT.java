@@ -381,47 +381,33 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 	String cljfile = scriptbase + ".clj";
 	URL classURL = baseLoader().getResource(classfile);
 	URL cljURL = baseLoader().getResource(cljfile);
-    boolean failed = false;
+    boolean loaded = false;
 
-	if(classURL != null &&
-	   (cljURL == null
-	    || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
+	if((classURL != null &&
+	    (cljURL == null
+	        || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
+        || classURL == null)
 		{
 		try
 			{
 			Var.pushThreadBindings(
 					RT.map(CURRENT_NS, CURRENT_NS.get(),
 					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
-			loadClassForName(scriptbase.replace('/','.') + LOADER_SUFFIX);
+			loaded = (loadClassForName(scriptbase.replace('/','.') + LOADER_SUFFIX) != null);
 			}
 		finally
 			{
 			Var.popThreadBindings();
 			}
 		}
-	else if(cljURL != null)
+	if(!loaded && cljURL != null)
 		{
 		if (booleanCast(Compiler.COMPILE_FILES.get()))
 			compile(cljfile);
 		else
 			loadResourceScript(RT.class, cljfile);
 		}
-    else
-        {
-        try
-            {
-            Var.pushThreadBindings(
-                    RT.map(CURRENT_NS, CURRENT_NS.get(),
-                           WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
-            failed = loadClassForName(scriptbase.replace('/','.') + LOADER_SUFFIX) == null;
-            }
-        finally
-            {
-            Var.popThreadBindings();
-            }
-        }
-
-	if(failed && failIfNotFound)
+	else if(!loaded && failIfNotFound)
 		throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, cljfile));
 }
 

@@ -1101,9 +1101,14 @@ static class InstanceMethodExpr extends MethodExpr{
 				if(methods.size() > 1)
 					{
 					ArrayList<Class[]> params = new ArrayList();
+                    ArrayList<Class> rets = new ArrayList();
 					for(int i = 0; i < methods.size(); i++)
-						params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
-					methodidx = getMatchingParams(methodName, params, args);
+                        {
+                        java.lang.reflect.Method m = (java.lang.reflect.Method)methods.get(i);
+						params.add(m.getParameterTypes());
+                        rets.add(m.getReturnType());
+                        }
+					methodidx = getMatchingParams(methodName, params, args,rets);
 					}
 				java.lang.reflect.Method m =
 						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
@@ -1249,9 +1254,14 @@ static class StaticMethodExpr extends MethodExpr{
 		if(methods.size() > 1)
 			{
 			ArrayList<Class[]> params = new ArrayList();
+            ArrayList<Class> rets = new ArrayList();
 			for(int i = 0; i < methods.size(); i++)
-				params.add(((java.lang.reflect.Method) methods.get(i)).getParameterTypes());
-			methodidx = getMatchingParams(methodName, params, args);
+                {
+                java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
+                params.add(m.getParameterTypes());
+                rets.add(m.getReturnType());
+                }
+			methodidx = getMatchingParams(methodName, params, args,rets);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
@@ -2007,7 +2017,7 @@ static boolean subsumes(Class[] c1, Class[] c2){
 	return better;
 }
 
-static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, IPersistentVector argexprs)
+static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, IPersistentVector argexprs, List<Class> rets)
 		throws Exception{
 	//presumes matching lengths
 	int matchIdx = -1;
@@ -2033,8 +2043,12 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 					matchIdx = i;
 					tied = false;
 					}
-				else if(!(subsumes(paramlists.get(matchIdx), paramlists.get(i))
-				          || Arrays.equals(paramlists.get(matchIdx), paramlists.get(i))))
+                else if(Arrays.equals(paramlists.get(matchIdx), paramlists.get(i)))
+                    {
+                    if(rets.get(matchIdx).isAssignableFrom(rets.get(i)))
+                        matchIdx = i;
+                    }
+				else if(!(subsumes(paramlists.get(matchIdx), paramlists.get(i))))
 					tied = true;
 				}
 			}
@@ -2060,6 +2074,7 @@ public static class NewExpr implements Expr{
 		Constructor[] allctors = c.getConstructors();
 		ArrayList ctors = new ArrayList();
 		ArrayList<Class[]> params = new ArrayList();
+        ArrayList<Class> rets = new ArrayList();
 		for(int i = 0; i < allctors.length; i++)
 			{
 			Constructor ctor = allctors[i];
@@ -2067,6 +2082,7 @@ public static class NewExpr implements Expr{
 				{
 				ctors.add(ctor);
 				params.add(ctor.getParameterTypes());
+                rets.add(c);
 				}
 			}
 		if(ctors.isEmpty())
@@ -2075,7 +2091,7 @@ public static class NewExpr implements Expr{
 		int ctoridx = 0;
 		if(ctors.size() > 1)
 			{
-			ctoridx = getMatchingParams(c.getName(), params, args);
+			ctoridx = getMatchingParams(c.getName(), params, args, rets);
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
