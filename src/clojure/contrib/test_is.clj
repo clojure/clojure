@@ -74,6 +74,9 @@
 
 (def *testing-vars* (list))  ; bound to hierarchy of vars being tested
 
+(def *testing-contexts* (list))  ; bound to strings of test contexts
+
+(defonce *load-tests* true)  ; if false, deftest is ignored
 
 
 ;;; REPORTING METHODS
@@ -81,14 +84,21 @@
 ;; These are used in assert-expr methods.  Rebind "report" to plug in
 ;; your own test-reporting framework.
 
-(defn testing-str
+(defn testing-vars-str
   "Returns a string representation of the current test.  Renders names
   in *testing-vars* as a list, then the source file and line of
   current test."
   []
-  (str (reverse (map #(:name (meta %)) *testing-vars*))
+  (str ;;(ns-name (:ns (meta (first *testing-vars*)))) "/ "
+       (reverse (map #(:name (meta %)) *testing-vars*))
        " (" (:file (meta (first *testing-vars*)))
        ":" (:line (meta (first *testing-vars*))) ")"))
+
+(defn testing-contexts-str
+  "Returns a string representation of the current test context. Joins
+  strings in *testing-contexts* with spaces."
+  []
+  (apply str (interpose " " (reverse *testing-contexts*))))
 
 (defn report-count
   "Increments the named counter in *report-counters*."
@@ -108,14 +118,16 @@
 
 (defmethod report :fail [event msg expected actual]
   (report-count :fail)
-  (println "\nFAIL in" (testing-str))
+  (println "\nFAIL in" (testing-vars-str))
+  (when (seq *testing-contexts*) (println (testing-contexts-str)))
   (when msg (println msg))
   (println "expected:" (pr-str expected))
   (println "  actual:" (pr-str actual)))
 
 (defmethod report :error [event msg expected actual]
   (report-count :error)
-  (println "\nERROR in" (testing-str))
+  (println "\nERROR in" (testing-vars-str))
+  (when (seq *testing-contexts*) (println (testing-contexts-str)))
   (when msg (println msg))
   (println "expected:" (pr-str expected))
   (println "  actual:" (pr-str actual)))
@@ -219,6 +231,13 @@
   [expr & args]
   `(temp/do-template (is ~expr) ~@args))
 
+(defmacro testing
+  "Adds a new string to the list of testing contexts.  May be nested,
+  but must occur inside a test function (deftest)."
+  [string & body]
+  `(binding [*testing-contexts* (conj *testing-contexts* ~string)]
+     ~@body))
+
 
 
 ;;; DEFINING TESTS INDEPENDENT OF FUNCTIONS
@@ -229,15 +248,13 @@
   should also define a function named test-ns-hook; run-tests will
   call this function.
 
-  If name is nil, a symbol like T-123 will be generated.
-
   Note: Actually, the test body goes in the :test metadata on the var,
   and the real function (the value of the var) calls test-var on
   itself."
   [name & body]
-  (let [symbol (if (nil? name) (gensym "T-") name)]
-    `(def ~(with-meta symbol {:test `(fn [] ~@body)})
-          (fn [] (test-var (var ~symbol))))))
+  (when *load-tests*
+    `(def ~(with-meta name {:test `(fn [] ~@body)})
+          (fn [] (test-var (var ~name))))))
 
 
 (defmacro set-test
