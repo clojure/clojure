@@ -150,8 +150,8 @@
  #^{:arglists '([obj])
     :doc "Returns the metadata of obj, returns nil if there is no metadata."}
  meta (fn meta [x]
-        (if (instance? clojure.lang.IObj x)
-          (. #^clojure.lang.IObj x (meta)))))
+        (if (instance? clojure.lang.IMeta x)
+          (. #^clojure.lang.IMeta x (meta)))))
 
 (def
  #^{:arglists '([#^clojure.lang.IObj obj m])
@@ -1047,14 +1047,31 @@
  [sym] (. clojure.lang.Var (find sym)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn #^{:private true}
+  setup-reference [r options]
+  (let [opts (apply hash-map options)]
+    (when (:meta opts)
+      (.resetMeta r (:meta opts)))
+    (when (:validator opts)
+      (.setValidator r (:validator opts)))
+    r))
+
 (defn agent
-  "Creates and returns an agent with an initial value of state and an
-  optional validate fn. validate-fn must be nil or a side-effect-free fn of
-  one argument, which will be passed the intended new state on any state
+  "Creates and returns an agent with an initial value of state and
+  zero or more options (in any order):
+  
+  :meta metadata-map
+  
+  :validator validate-fn
+
+  If metadata-map is supplied, it will be come the metadata on the
+  agent. validate-fn must be nil or a side-effect-free fn of one
+  argument, which will be passed the intended new state on any state
   change. If the new state is unacceptable, the validate-fn should
-  throw an exception."
+  return false or throw an exception."
   ([state] (new clojure.lang.Agent state))
-  ([state validate-fn] (new clojure.lang.Agent state validate-fn)))
+  ([state & options]
+     (setup-reference (agent state) options)))
 
 (defn send
   "Dispatch an action to an agent. Returns the agent immediately.
@@ -1119,14 +1136,21 @@
   [] (. clojure.lang.Agent shutdown))
 
 (defn ref
-  "Creates and returns a Ref with an initial value of x and an optional validate fn.
-  validate-fn must be nil or a side-effect-free fn of one argument, which will
-  be passed the intended new state on any state change. If the new
-  state is unacceptable, the validate-fn should throw an
-  exception. validate-fn will be called on transaction commit, when
-  all refs have their final values."  
+  "Creates and returns a Ref with an initial value of x and zero or
+  more options (in any order):
+  
+  :meta metadata-map
+  
+  :validator validate-fn
+
+  If metadata-map is supplied, it will be come the metadata on the
+  ref. validate-fn must be nil or a side-effect-free fn of one
+  argument, which will be passed the intended new state on any state
+  change. If the new state is unacceptable, the validate-fn should
+  return false or throw an exception. validate-fn will be called on
+  transaction commit, when all refs have their final values." 
   ([x] (new clojure.lang.Ref x))
-  ([x validate-fn] (new clojure.lang.Ref x validate-fn)))
+  ([x & options] (setup-reference (ref x) options)))
 
 (defn deref
   "Also reader macro: @ref/@agent/@var/@atom Within a transaction,
@@ -1135,11 +1159,45 @@
   or atom, returns its current state."  
   [#^clojure.lang.IRef ref] (. ref (get)))
 
-(defn set-validator
+(defn atom
+  "Creates and returns an Atom with an initial value of x and zero or
+  more options (in any order):
+  
+  :meta metadata-map
+  
+  :validator validate-fn
+
+  If metadata-map is supplied, it will be come the metadata on the
+  atom. validate-fn must be nil or a side-effect-free fn of one
+  argument, which will be passed the intended new state on any state
+  change. If the new state is unacceptable, the validate-fn should
+  return false or throw an exception."
+  ([x] (new clojure.lang.Atom x))
+  ([x & options] (setup-reference (atom x) options)))
+
+(defn swap!
+  "Atomically swaps the value of atom to be:
+  (apply f current-value-of-atom args). Note that f may be called
+  multiple times, and thus should be free of side effects.  Returns
+  the value that was swapped in."  
+  [#^clojure.lang.Atom atom f & args] (.swap atom f args))
+
+(defn compare-and-set! 
+  "Atomically sets the value of atom to newval if and only if the
+  current value of the atom is identical to oldval. Returns true if
+  set happened, else false" 
+  [#^clojure.lang.Atom atom oldval newval] (.compareAndSet atom oldval newval))
+
+(defn reset! 
+  "Sets the value of atom to newval without regard for the
+  current value. Returns newval." 
+  [#^clojure.lang.Atom atom newval] (.reset atom newval))
+
+(defn set-validator!
   "Sets the validator-fn for a var/ref/agent/atom. validator-fn must be nil or a
   side-effect-free fn of one argument, which will be passed the intended
   new state on any state change. If the new state is unacceptable, the
-  validator-fn should throw an exception. If the current state (root
+  validator-fn should return false or throw an exception. If the current state (root
   value if var) is not acceptable to the new validator, an exception
   will be thrown and the validator will not be changed." 
   [#^clojure.lang.IRef iref validator-fn] (. iref (setValidator validator-fn)))
@@ -1147,6 +1205,18 @@
 (defn get-validator
   "Gets the validator-fn for a var/ref/agent/atom."
  [#^clojure.lang.IRef iref] (. iref (getValidator)))
+
+(defn alter-meta!
+  "Atomically sets the metadata for a namespace/var/ref/agent/atom to be: 
+  
+  (apply f its-current-meta args) 
+  
+  f must be free of side-effects"
+ [#^clojure.lang.IReference iref f & args] (.alterMeta iref f args))
+
+(defn reset-meta!
+  "Atomically resets the metadata for a namespace/var/ref/agent/atom"
+ [#^clojure.lang.IReference iref metadata-map] (.resetMeta iref metadata-map))
 
 (defn commute
   "Must be called in a transaction. Sets the in-transaction-value of

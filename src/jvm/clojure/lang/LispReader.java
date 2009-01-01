@@ -626,19 +626,19 @@ public static class MetaReader extends AFn{
 			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
 
 		Object o = read(r, true, null, true);
-		if(o instanceof IObj)
+		if(o instanceof IMeta)
 			{
 			if(line != -1 && o instanceof ISeq)
 				meta = ((IPersistentMap) meta).assoc(RT.LINE_KEY, line);
-			if(o instanceof Var)
+			if(o instanceof IReference)
 				{
-				((Var)o).setMeta((IPersistentMap) meta);
+				((IReference)o).resetMeta((IPersistentMap) meta);
 				return o;
 				}
 			return ((IObj) o).withMeta((IPersistentMap) meta);
 			}
 		else
-			throw new IllegalArgumentException("Metadata can only be applied to IObjs");
+			throw new IllegalArgumentException("Metadata can only be applied to IMetas");
 	}
 
 }
@@ -718,7 +718,7 @@ public static class SyntaxQuoteReader extends AFn{
 		else
 			ret = RT.list(Compiler.QUOTE, form);
 
-		if(form instanceof IObj && !(form instanceof Var) && ((IObj) form).meta() != null)
+		if(form instanceof IObj && RT.meta(form) != null)
 			{
 			//filter line numbers
 			IPersistentMap newMeta = ((IObj) form).meta().without(RT.LINE_KEY);

@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public final class Var implements IFn, IRef, IObj{
+public final class Var extends AReference implements IFn, IRef, Settable{
 
 
 static class Frame{
@@ -57,7 +57,7 @@ public final Symbol sym;
 public final Namespace ns;
 volatile IFn validator = null;
 
-IPersistentMap _meta;
+//IPersistentMap _meta;
 
 public static Var intern(Namespace ns, Symbol sym, Object root){
 	return intern(ns, sym, root, true);
@@ -153,11 +153,14 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 }
 
 void validate(IFn vf, Object val){
-	try
-		{
-		if(vf != null)
-			vf.invoke(val);
+	try{
+		if(vf != null && !RT.booleanCast(vf.invoke(val)))
+            throw new IllegalStateException("Invalid var state");
 		}
+    catch(RuntimeException re)
+        {
+        throw re;
+        }
 	catch(Exception e)
 		{
 		throw new IllegalStateException("Invalid var state", e);
@@ -178,25 +181,33 @@ public Object set(Object val){
 	throw new IllegalStateException(String.format("Can't change/establish root binding of: %s with set", sym));
 }
 
-public void setMeta(IPersistentMap m){
-	//ensure these basis keys
-	_meta = m.assoc(nameKey, sym).assoc(nsKey, ns);
+public Object doSet(Object val) throws Exception {
+    return set(val);
+    }
+
+public Object doReset(Object val) throws Exception {
+    bindRoot(val);
+    return val;
+    }
+
+public void setMeta(IPersistentMap m) {
+    //ensure these basis keys
+    resetMeta(m.assoc(nameKey, sym).assoc(nsKey, ns));
 }
 
-public IPersistentMap meta(){
-	return _meta;
-}
-
-public IObj withMeta(IPersistentMap meta){
-	throw new UnsupportedOperationException("Vars are not values");
-}
-
-public void setMacro(){
-	_meta = _meta.assoc(macroKey, RT.T);
+public void setMacro() {
+    try
+        {
+        alterMeta(assoc, RT.list(macroKey, RT.T));
+        }
+    catch (Exception e)
+        {
+        throw new RuntimeException(e);
+        }
 }
 
 public boolean isMacro(){
-	return RT.booleanCast(_meta.valAt(macroKey));
+	return RT.booleanCast(meta().valAt(macroKey));
 }
 
 //public void setExported(boolean state){
@@ -204,7 +215,7 @@ public boolean isMacro(){
 //}
 
 public boolean isPublic(){
-	return !RT.booleanCast(_meta.valAt(privateKey));
+	return !RT.booleanCast(meta().valAt(privateKey));
 }
 
 public Object getRoot(){
@@ -212,11 +223,18 @@ public Object getRoot(){
 }
 
 public Object getTag(){
-	return _meta.valAt(RT.TAG_KEY);
+	return meta().valAt(RT.TAG_KEY);
 }
 
-public void setTag(Symbol tag){
-	_meta = _meta.assoc(RT.TAG_KEY, tag);
+public void setTag(Symbol tag) {
+    try
+        {
+        alterMeta(assoc, RT.list(RT.TAG_KEY, tag));
+        }
+    catch (Exception e)
+        {
+        throw new RuntimeException(e);
+        }
 }
 
 final public boolean hasRoot(){
@@ -227,7 +245,14 @@ final public boolean hasRoot(){
 synchronized public void bindRoot(Object root){
 	validate(getValidator(), root);
 	this.root = root;
-	_meta = _meta.assoc(macroKey, RT.F);
+    try
+        {
+        alterMeta(assoc, RT.list(macroKey, RT.F));
+        }
+    catch (Exception e)
+        {
+        throw new RuntimeException(e);
+        }
 }
 
 synchronized void swapRoot(Object root){
@@ -444,4 +469,10 @@ public Object applyTo(ISeq arglist) throws Exception{
 	return AFn.applyToHelper(this, arglist);
 }
 
+static IFn assoc = new AFn(){
+    @Override
+    public Object invoke(Object m, Object k, Object v) throws Exception {
+        return RT.assoc(m, k, v);
+    }
+};
 }

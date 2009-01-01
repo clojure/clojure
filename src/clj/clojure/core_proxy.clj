@@ -339,57 +339,5 @@
 		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
 			       (thisfn (rest pseq))))) (keys pmap))))))
 
-(import '(java.util.concurrent.atomic AtomicReference))
 
-(defn atom
-  "Creates and returns a new Atom with an initial value of x and an
-  optional validate fn. validate-fn must be nil or a side-effect-free
-  fn of one argument, which will be passed the intended new state on
-  any state change. If the new state is unacceptable, the validate-fn
-  should throw an exception."
-  ([x] (atom x nil))
-  ([x validator-fn]
-     (let [validator (AtomicReference. nil)
-           atom (proxy [AtomicReference clojure.lang.IRef] [x]
-                  (getValidator [] (.get validator))
-                  (setValidator [f]
-                    (when f
-                      (try
-                       (f @this)
-                       (catch Exception e
-                         (throw (IllegalStateException. "Invalid atom state" e)))))
-                    (.set validator f)))]
-       (set-validator atom validator-fn)
-       atom)))
-
-(defn swap!
-  "Atomically swaps the value of atom to be:
-  (apply f current-value-of-atom args). Note that f may be called
-  multiple times, and thus should be free of side effects.  Returns
-  the value that was swapped in."  
-  [#^AtomicReference atom f & args]
-  (let [validate (get-validator atom)]
-    (loop [oldv (.get atom)]
-      (let [newv (apply f oldv args)]
-        (when validate
-          (try
-           (validate newv)
-           (catch Exception e
-             (throw (IllegalStateException. "Invalid atom state" e)))))
-        (if (.compareAndSet atom oldv newv)
-          newv
-          (recur (.get atom)))))))
-
-(defn compare-and-set! 
-  "Atomically sets the value of atom to newval if and only if the
-  current value of the atom is identical to oldval. Returns true if
-  set happened, else false" 
-  [#^AtomicReference atom oldval newval]
-    (let [validate (get-validator atom)]
-      (when validate
-        (try
-         (validate newval)
-         (catch Exception e
-           (throw (IllegalStateException. "Invalid atom state" e)))))
-      (.compareAndSet atom oldval newval)))
 

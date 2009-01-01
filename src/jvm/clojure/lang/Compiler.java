@@ -4047,7 +4047,7 @@ public static Object macroexpand1(Object x) throws Exception{
 			{
 			try
 				{
-				Var.pushThreadBindings(RT.map(RT.MACRO_META, ((IObj) form).meta()));
+				Var.pushThreadBindings(RT.map(RT.MACRO_META, RT.meta(form)));
 				return v.applyTo(form.rest());
 				}
 			finally
@@ -4437,19 +4437,12 @@ static LocalBinding referenceLocal(Symbol sym) throws Exception{
 }
 
 private static Symbol tagOf(Object o){
-	if(o instanceof IObj)
-		{
-		IObj obj = (IObj) o;
-		if(obj.meta() != null)
-			{
-			Object tag = obj.meta().valAt(RT.TAG_KEY);
-			if(tag instanceof Symbol)
-				return (Symbol) tag;
-			else if(tag instanceof String)
-				return Symbol.intern(null, (String) tag);
-			}
-		}
-	return null;
+    Object tag = RT.get(RT.meta(o), RT.TAG_KEY);
+    if (tag instanceof Symbol)
+        return (Symbol) tag;
+    else if (tag instanceof String)
+        return Symbol.intern(null, (String) tag);
+    return null;
 }
 
 public static Object loadFile(String file) throws Exception{

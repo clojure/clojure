@@ -16,10 +16,9 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.Map;
 
-public class Agent implements IRef{
+public class Agent extends ARef {
 volatile Object state;
-volatile IFn validator = null;
-AtomicReference<IPersistentStack> q = new AtomicReference(PersistentQueue.EMPTY);
+    AtomicReference<IPersistentStack> q = new AtomicReference(PersistentQueue.EMPTY);
 AtomicReference<IPersistentMap> watchers = new AtomicReference(PersistentHashMap.EMPTY);
 
 volatile ISeq errors = null;
@@ -116,27 +115,16 @@ public Agent(Object state) throws Exception{
 	this(state,null);
 }
 
-public Agent(Object state, IFn validator) throws Exception{
-	this.validator = validator;
-	setState(state);
+public Agent(Object state, IPersistentMap meta) throws Exception {
+    super(meta);
+    setState(state);
 }
 
 boolean setState(Object newState) throws Exception{
-	validate(getValidator(),newState);
+	validate(newState);
 	boolean ret = state != newState;
 	state = newState;
 	return ret;
-}
-
-void validate(IFn vf, Object val){
-	try{
-		if(vf != null)
-			vf.invoke(val);
-		}
-	catch(Exception e)
-		{
-		throw new IllegalStateException("Invalid agent state", e);
-		}
 }
 
 public Object get() throws Exception{
@@ -147,16 +135,7 @@ public Object get() throws Exception{
 	return state;
 }
 
-public void setValidator(IFn vf){
-	validate(vf,state);
-	validator = vf;
-}
-
-public IFn getValidator(){
-	return validator;
-}
-
-public ISeq getErrors(){
+    public ISeq getErrors(){
 	return errors;
 }
 

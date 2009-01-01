@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Namespace{
+public class Namespace extends AReference{
 final public Symbol name;
 final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
 final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();

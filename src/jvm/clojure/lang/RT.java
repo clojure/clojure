@@ -502,8 +502,8 @@ static public ISeq vals(Object coll){
 }
 
 static public IPersistentMap meta(Object x){
-	if(x instanceof IObj)
-		return ((Obj) x).meta();
+	if(x instanceof IMeta)
+		return ((IMeta) x).meta();
 	return null;
 }
 
@@ -817,10 +817,7 @@ static public Object assocN(int n, Object val, Object coll){
 }
 
 static boolean hasTag(Object o, Object tag){
-	if(!(o instanceof IObj))
-		return false;
-	IPersistentMap meta = ((IObj) o).meta();
-	return Util.equal(tag, RT.get(meta, TAG_KEY));
+	return Util.equal(tag, RT.get(RT.meta(o), TAG_KEY));
 }
 
 /**

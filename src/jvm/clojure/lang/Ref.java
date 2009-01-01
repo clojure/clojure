@@ -13,16 +13,21 @@
 package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.UUID;
 
-public class Ref implements IFn, Comparable<Ref>, IRef{
+public class Ref extends AReference implements IFn, Comparable<Ref>, IRef{
+    public int compareTo(Ref ref) {
+        if(this.id == ref.id)
+            return 0;
+        else if(this.id < ref.id)
+            return -1;
+        else
+            return 1;
+    }
 
-public int compareTo(Ref o){
-	return uuid.compareTo(o.uuid);
-}
-
-public static class TVal{
+    public static class TVal{
 	Object val;
 	long point;
 	long msecs;
@@ -53,44 +58,22 @@ TVal tvals;
 final AtomicInteger faults;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
-final UUID uuid;
 IFn validator;
+final long id;
 
-Ref(){
-	this.tvals = null;
-	this.tinfo = null;
-	this.faults = new AtomicInteger();
-	this.lock = new ReentrantReadWriteLock();
-	this.uuid = UUID.randomUUID();
-}
+static final AtomicLong ids = new AtomicLong();
 
 public Ref(Object initVal) throws Exception{
 	this(initVal, null);
 }
 
-public Ref(Object initVal,IFn validator) throws Exception{
-	this();
-	if(validator != null)
-		validate(validator,initVal);
-	this.validator = validator;
+public Ref(Object initVal,IPersistentMap meta) throws Exception{
+    super(meta);
+    this.id = ids.getAndIncrement();
+	this.faults = new AtomicInteger();
+	this.lock = new ReentrantReadWriteLock();
 	tvals = new TVal(initVal, 0, System.currentTimeMillis());
 }
-
-//note - makes no attempt to ensure there is no other Ref with same UUID
-
-//use only with a cache/registry
-//public Ref(UUID uuid, Object initVal){
-//	tvals = new TVal(initVal, 0, System.currentTimeMillis());
-//	this.tinfo = null;
-//	this.faults = new AtomicInteger();
-//	this.lock = new ReentrantReadWriteLock();
-//	this.uuid = uuid;
-//}
-
-public UUID getUUID(){
-	return uuid;
-}
-
 
 //the latest val
 
@@ -120,9 +103,13 @@ public Object get(){
 
 void validate(IFn vf, Object val){
 	try{
-		if(vf != null)
-			vf.invoke(val);
+		if(vf != null && !RT.booleanCast(vf.invoke(val)))
+            throw new IllegalStateException("Invalid ref state");
 		}
+    catch(RuntimeException re)
+        {
+        throw re;
+        }
 	catch(Exception e)
 		{
 		throw new IllegalStateException("Invalid ref state", e);

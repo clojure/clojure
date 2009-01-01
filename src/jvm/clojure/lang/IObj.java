@@ -11,10 +11,8 @@
 package clojure.lang;
 
 
-public interface IObj{
+public interface IObj extends IMeta {
 
-public IPersistentMap meta();
-
-public IObj withMeta(IPersistentMap meta);
+    public IObj withMeta(IPersistentMap meta);
 
 }
