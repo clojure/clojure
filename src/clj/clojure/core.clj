@@ -1107,7 +1107,8 @@
   additional arg, the reference. Whenever the reference's state
   changes, any registered watchers will have their actions
   sent. send-type must be one of :send or :send-off. The actions will
-  be sent afer the reference's state is changed."
+  be sent after the reference's state is changed. Var watchers are
+  triggered only by root binding changes, not thread-local set!s"
   [#^clojure.lang.IRef reference send-type watcher-agent action-fn]
   (.addWatch reference watcher-agent action-fn (= send-type :send-off)))
 
