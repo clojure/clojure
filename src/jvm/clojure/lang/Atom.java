@@ -37,18 +37,26 @@ public class Atom extends ARef{
             Object newv = f.applyTo(new Cons(v, args));
             validate(newv);
             if(state.compareAndSet(v,newv))
+                {
+                if(v != newv)
+                    notifyWatches();
                 return newv;
+                }
             }
     }
 
     public boolean compareAndSet(Object oldv, Object newv){
         validate(newv);
-        return state.compareAndSet(oldv, newv);
+        boolean ret = state.compareAndSet(oldv, newv);
+        if (ret && oldv != newv)
+            notifyWatches();
+        return ret;
     }
 
     public Object reset(Object newval){
         validate(newval);
         state.set(newval);
+        notifyWatches();
         return newval;
     }
 }

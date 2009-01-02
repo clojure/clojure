@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public final class Var extends AReference implements IFn, IRef, Settable{
+public final class Var extends ARef implements IFn, IRef, Settable{
 
 
 static class Frame{
@@ -55,7 +55,6 @@ volatile Object root;
 transient final AtomicInteger count;
 public final Symbol sym;
 public final Namespace ns;
-volatile IFn validator = null;
 
 //IPersistentMap _meta;
 
@@ -143,28 +142,9 @@ public void setValidator(IFn vf){
 	validator = vf;
 }
 
-public IFn getValidator(){
-	return validator;
-}
-
 public Object alter(IFn fn, ISeq args) throws Exception{
 	set(fn.applyTo(RT.cons(get(), args)));
 	return this;
-}
-
-void validate(IFn vf, Object val){
-	try{
-		if(vf != null && !RT.booleanCast(vf.invoke(val)))
-            throw new IllegalStateException("Invalid var state");
-		}
-    catch(RuntimeException re)
-        {
-        throw re;
-        }
-	catch(Exception e)
-		{
-		throw new IllegalStateException("Invalid var state", e);
-		}
 }
 
 public Object set(Object val){
@@ -253,11 +233,13 @@ synchronized public void bindRoot(Object root){
         {
         throw new RuntimeException(e);
         }
+    notifyWatches();
 }
 
 synchronized void swapRoot(Object root){
 	validate(getValidator(), root);
 	this.root = root;
+    notifyWatches();
 }
 
 synchronized public void unbindRoot(){
@@ -268,12 +250,14 @@ synchronized public void commuteRoot(IFn fn) throws Exception{
 	Object newRoot = fn.invoke(root);
 	validate(getValidator(), newRoot);
 	this.root = newRoot;
+    notifyWatches();
 }
 
 synchronized public Object alterRoot(IFn fn, ISeq args) throws Exception{
 	Object newRoot = fn.applyTo(RT.cons(root, args));
 	validate(getValidator(), newRoot);
 	this.root = newRoot;
+    notifyWatches();
 	return newRoot;
 }
 

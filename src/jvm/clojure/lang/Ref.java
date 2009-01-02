@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.UUID;
 
-public class Ref extends AReference implements IFn, Comparable<Ref>, IRef{
+public class Ref extends ARef implements IFn, Comparable<Ref>, IRef{
     public int compareTo(Ref ref) {
         if(this.id == ref.id)
             return 0;
@@ -58,7 +58,7 @@ TVal tvals;
 final AtomicInteger faults;
 final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
-IFn validator;
+//IFn validator;
 final long id;
 
 static final AtomicLong ids = new AtomicLong();
@@ -101,45 +101,45 @@ public Object get(){
 	return t.doGet(this);
 }
 
-void validate(IFn vf, Object val){
-	try{
-		if(vf != null && !RT.booleanCast(vf.invoke(val)))
-            throw new IllegalStateException("Invalid ref state");
-		}
-    catch(RuntimeException re)
-        {
-        throw re;
-        }
-	catch(Exception e)
-		{
-		throw new IllegalStateException("Invalid ref state", e);
-		}
-}
-
-public void setValidator(IFn vf){
-	try
-		{
-		lock.writeLock().lock();
-		validate(vf,currentVal());
-		validator = vf;
-		}
-	finally
-		{
-		lock.writeLock().unlock();
-		}
-}
-
-public IFn getValidator(){
-	try
-		{
-		lock.readLock().lock();
-		return validator;
-		}
-	finally
-		{
-		lock.readLock().unlock();
-		}
-}
+//void validate(IFn vf, Object val){
+//	try{
+//		if(vf != null && !RT.booleanCast(vf.invoke(val)))
+//            throw new IllegalStateException("Invalid ref state");
+//		}
+//    catch(RuntimeException re)
+//        {
+//        throw re;
+//        }
+//	catch(Exception e)
+//		{
+//		throw new IllegalStateException("Invalid ref state", e);
+//		}
+//}
+//
+//public void setValidator(IFn vf){
+//	try
+//		{
+//		lock.writeLock().lock();
+//		validate(vf,currentVal());
+//		validator = vf;
+//		}
+//	finally
+//		{
+//		lock.writeLock().unlock();
+//		}
+//}
+//
+//public IFn getValidator(){
+//	try
+//		{
+//		lock.readLock().lock();
+//		return validator;
+//		}
+//	finally
+//		{
+//		lock.readLock().unlock();
+//		}
+//}
 
 public Object set(Object val){
 	return LockingTransaction.getEx().doSet(this, val);

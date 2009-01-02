@@ -12,8 +12,12 @@
 
 package clojure.lang;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
+
 public abstract class ARef extends AReference implements IRef {
-    private volatile IFn validator = null;
+    protected volatile IFn validator = null;
+    private AtomicReference<IPersistentMap> watchers = new AtomicReference(PersistentHashMap.EMPTY);
 
     public ARef() {
         super();
@@ -56,5 +60,62 @@ public abstract class ARef extends AReference implements IRef {
 
     public IFn getValidator(){
         return validator;
+    }
+
+    public IPersistentMap getWatches(){
+        return watchers.get();
+    }
+    
+    public IRef addWatch(Agent watcher, IFn action, boolean sendOff){
+        boolean added = false;
+        IPersistentMap prior = null;
+        while(!added)
+            {
+            prior = watchers.get();
+            added = watchers.compareAndSet(prior, prior.assoc(watcher,new Object[]{action,sendOff}));
+            }
+
+        return this;
+    }
+
+    public IRef removeWatch(Agent watcher){
+        boolean removed = false;
+        IPersistentMap prior = null;
+        while(!removed)
+            {
+            prior = watchers.get();
+            try
+                {
+                removed = watchers.compareAndSet(prior, prior.without(watcher));
+                }
+            catch (Exception e)
+                {
+                throw new RuntimeException(e);
+                }
+            }
+
+        return this;
+    }
+
+    public void notifyWatches() {
+        IPersistentMap ws = watchers.get();
+        if (ws != null)
+            {
+            ISeq args = new Cons(this, null);
+            for (ISeq s = RT.seq(ws); s != null; s = s.rest())
+                {
+                Map.Entry e = (Map.Entry) s.first();
+                Object[] a = (Object[]) e.getValue();
+                Agent agent = (Agent) e.getKey();
+                try
+                    {
+                    agent.dispatch((IFn) a[0], args, (Boolean)a[1]);
+                    }
+                catch (Exception e1)
+                    {
+                    //eat dispatching exceptions and continue
+                    }
+                }
+            }
     }
 }

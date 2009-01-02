@@ -1100,24 +1100,22 @@
   occurring, does nothing. Returns the number of actions dispatched."  
   [] (clojure.lang.Agent/releasePendingSends))
 
-(defn add-watch
+(defn add-watcher
   "Experimental.
-  Adds a watcher to an agent. Whenever the agent runs an action, any
-  registered watchers will have their callback function called.  The
-  callback fn will be passed 3 args, the watcher, the agent and a boolean
-  which will be true if the agent's state was (potentially) changed by
-  the action. The callback fn is run synchronously with the action,
-  and thus derefs of the agent in the callback will see the value set
-  during that action. Because it is run on the action thread, the
-  callback should not block, but can send messages."
-  [#^clojure.lang.Agent a watcher callback]
-  (.addWatch a watcher callback))
+  Adds a watcher to an agent/atom/var/ref reference. The watcher must
+  be an Agent, and the action a function of the agent's state and one
+  additional arg, the reference. Whenever the reference's state
+  changes, any registered watchers will have their actions
+  sent. send-type must be one of :send or :send-off. The actions will
+  be sent afer the reference's state is changed."
+  [#^clojure.lang.IRef reference send-type watcher-agent action-fn]
+  (.addWatch reference watcher-agent action-fn (= send-type :send-off)))
 
-(defn remove-watch
+(defn remove-watcher
   "Experimental.
-  Removes a watcher (set by add-watch) from an agent"
-  [#^clojure.lang.Agent a watcher]
-  (.removeWatch a watcher))
+  Removes a watcher (set by add-watcher) from a reference"
+  [#^clojure.lang.IRef reference watcher-agent]
+  (.removeWatch reference watcher-agent))
 
 (defn agent-errors
   "Returns a sequence of the exceptions thrown during asynchronous

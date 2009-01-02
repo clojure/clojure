@@ -19,9 +19,8 @@ import java.util.Map;
 public class Agent extends ARef {
 volatile Object state;
     AtomicReference<IPersistentStack> q = new AtomicReference(PersistentQueue.EMPTY);
-AtomicReference<IPersistentMap> watchers = new AtomicReference(PersistentHashMap.EMPTY);
 
-volatile ISeq errors = null;
+    volatile ISeq errors = null;
 
 final public static ExecutorService pooledExecutor =
 		Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
@@ -68,11 +67,8 @@ static class Action implements Runnable{
 			try
 				{
 				changed = action.agent.setState(action.fn.applyTo(RT.cons(action.agent.state, action.args)));
-				for(Object o : action.agent.watchers.get())
-					{
-					Map.Entry e = (Map.Entry) o;
-					((IFn) e.getValue()).invoke(e.getKey(), action.agent, RT.box(changed));
-					}
+                if(changed)
+                    action.agent.notifyWatches();
 				}
 			catch(Exception e)
 				{
@@ -143,10 +139,10 @@ public void clearErrors(){
 	errors = null;
 }
 
-public Object dispatch(IFn fn, ISeq args, boolean solo) throws Exception{
+public Object dispatch(IFn fn, ISeq args, boolean solo) {
 	if(errors != null)
 		{
-		throw new Exception("Agent has errors", (Exception) RT.first(errors));
+		throw new RuntimeException("Agent has errors", (Exception) RT.first(errors));
 		}
 	Action action = new Action(this, fn, args, solo);
 	dispatchAction(action);
@@ -183,31 +179,7 @@ public int getQueueCount(){
 	return q.get().count();
 }
 
-public Agent addWatch(Object watcher, IFn callback){
-	boolean added = false;
-	IPersistentMap prior = null;
-	while(!added)
-		{
-		prior = watchers.get();
-		added = watchers.compareAndSet(prior, prior.assoc(watcher,callback));
-		}
-
-	return this;
-}
-
-public Agent removeWatch(Object watcher) throws Exception{
-	boolean removed = false;
-	IPersistentMap prior = null;
-	while(!removed)
-		{
-		prior = watchers.get();
-		removed = watchers.compareAndSet(prior, prior.without(watcher));
-		}
-	
-	return this;
-}
-
-static public int releasePendingSends(){
+    static public int releasePendingSends(){
 	IPersistentVector sends = nested.get();
 	if(sends == null)
 		return 0;

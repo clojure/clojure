@@ -252,11 +252,12 @@ Object run(Callable fn) throws Exception{
 						}
 					}
 
-				//validate
+				//validate and enqueue notifications
 				for(Map.Entry<Ref, Object> e : vals.entrySet())
 					{
 					Ref ref = e.getKey();
 					ref.validate(ref.getValidator(), e.getValue());
+                    ref.notifyWatches();
 					}
 
 				//at this point, all values calced, all refs to be written locked

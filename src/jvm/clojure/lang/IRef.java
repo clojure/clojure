@@ -14,9 +14,17 @@ package clojure.lang;
 
 public interface IRef{
 
-Object get() throws Exception;
+    Object get() throws Exception;
 
-void setValidator(IFn vf);
+    void setValidator(IFn vf);
 
-IFn getValidator();
+    IFn getValidator();
+
+    IPersistentMap getWatches();
+
+    IRef addWatch(Agent watcher, IFn action, boolean sendOff);
+
+    IRef removeWatch(Agent watcher);
+
+    void notifyWatches();
 }
