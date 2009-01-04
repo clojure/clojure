@@ -15,21 +15,11 @@
 
 (def *db* {:connection nil :level 0})
 
-(defn connection
+(defn connection*
   "Returns the current database connection or throws"
   []
   (or (:connection *db*)
       (throw (Exception. "no current database connection"))))
-
-(defn create-statement
-  "Creates a statement object on the current connection"
-  []
-  (.createStatement (connection)))
-
-(defn prepare-statement
-  "Creates a prepared statement object on the current connection"
-  [sql]
-  (.prepareStatement (connection) sql))
 
 (defn the-str
   "Returns the name or string representation of x"
@@ -73,7 +63,7 @@
   or rolled back on any uncaught exception. Any nested transactions are
   absorbed into the outermost transaction."
   [thunk]
-  (let [con (connection)
+  (let [con (connection*)
         outermost (zero? (:level *db*))
         auto-commit (when outermost (.getAutoCommit con))]
     (binding [*db* (update-in *db* [:level] inc)]

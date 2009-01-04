@@ -16,7 +16,11 @@
 ;;  Created 2 April 2008
 
 (ns clojure.contrib.sql
+  (:use [clojure.contrib.def :only (defvar)])
   (:use clojure.contrib.sql.internal))
+
+(defvar connection connection*
+  "Returns the current database connection (or throws if there is none)")
 
 (defmacro with-connection
   "Evaluates body in the context of a new connection to a database then
@@ -42,7 +46,7 @@
   "Executes SQL commands that don't return results on the open database
   connection"
   [& commands]
-  (with-open [stmt (create-statement)]
+  (with-open [stmt (.createStatement (connection))]
     (doseq [cmd commands]
       (.addBatch stmt cmd))
     (.executeBatch stmt)))
@@ -51,7 +55,7 @@
   "Executes a prepared statement on the open database connection with
   parameter sets"
   [sql & sets]
-  (with-open [stmt (prepare-statement sql)]
+  (with-open [stmt (.prepareStatement (connection) sql)]
     (doseq [set sets]
       (doseq [[index value] (map vector (iterate inc 1) set)]
         (.setObject stmt index value))
@@ -107,7 +111,7 @@
   "Executes a query and then evaluates body with results bound to a seq of
   the results"
   [results sql & body]
-  `(with-open [stmt# (prepare-statement ~sql)
+  `(with-open [stmt# (.prepareStatement (connection) ~sql)
                rset# (.executeQuery stmt#)]
      (let [~results (resultset-seq rset#)]
        ~@body)))
