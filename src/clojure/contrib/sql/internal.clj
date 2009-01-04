@@ -16,10 +16,20 @@
 (def *db* {:connection nil :level 0})
 
 (defn connection
-  "Returns the current database connection or throws an exception."
+  "Returns the current database connection or throws"
   []
   (or (:connection *db*)
       (throw (Exception. "no current database connection"))))
+
+(defn create-statement
+  "Creates a statement object on the current connection"
+  []
+  (.createStatement (connection)))
+
+(defn prepare-statement
+  "Creates a prepared statement object on the current connection"
+  [sql]
+  (.prepareStatement (connection) sql))
 
 (defn the-str
   "Returns the name or string representation of x"
@@ -29,15 +39,56 @@
     (str x)))
 
 (defn properties
-  "Converts a map from keywords or symbols to values into a
-  java.util.Properties object that maps the same keys to the values with
+  "Converts a map from keywords, symbols, or strings to values into a
+  java.util.Properties object that maps the key names to the values with
   all represented as strings."
   [m]
   (let [p (java.util.Properties.)]
-    (when m
-      (loop [[key & keys] (keys m)
-             [val & vals] (vals m)]
-        (.setProperty p (the-str key) (the-str val))
-        (when keys
-          (recur keys vals))))
+    (doseq [[key val] (seq m)]
+      (.setProperty p (the-str key) (the-str val)))
     p))
+
+(defn with-connection*
+  "Evaluates thunk in the context of a new connection to a database then
+  closes the connection. db-spec is a map containing string values for
+  these required keys:
+    :classname     the jdbc driver class name
+    :subprotocol   the jdbc subprotocol
+    :subname       the jdbc subname
+  db-spec may contain additional key-value pairs that are passed along to
+  the driver as properties such as :user, :password, etc."
+  [db-spec thunk]
+  (clojure.lang.RT/loadClassForName (:classname db-spec))
+  (with-open
+      [con
+       (java.sql.DriverManager/getConnection
+        (format "jdbc:%s:%s" (:subprotocol db-spec) (:subname db-spec))
+        (properties (dissoc db-spec :classname :subprotocol :subname)))]
+    (binding [*db* (assoc *db* :connection con :level 0)]
+      (thunk))))
+
+(defn transaction*
+  "Evaluates thunk as a transaction on the open database connection.
+  Any database updates are committed together as a group after evaluating,
+  or rolled back on any uncaught exception. Any nested transactions are
+  absorbed into the outermost transaction."
+  [thunk]
+  (let [con (connection)
+        outermost (zero? (:level *db*))
+        auto-commit (when outermost (.getAutoCommit con))]
+    (binding [*db* (update-in *db* [:level] inc)]
+      (when outermost
+        (.setAutoCommit con false))
+      (try
+       (let [value (thunk)]
+         (when outermost
+           (.commit con))
+         value)
+       (catch Exception e
+         (.rollback con)
+         (throw (Exception.
+                 (format "transaction rolled back: %s"
+                         (.getMessage e)) e)))
+       (finally
+        (when outermost
+          (.setAutoCommit con auto-commit)))))))

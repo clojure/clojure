@@ -16,59 +16,33 @@
 ;;  Created 2 April 2008
 
 (ns clojure.contrib.sql
-  (:use clojure.contrib.except
-        clojure.contrib.sql.internal))
+  (:use clojure.contrib.sql.internal))
 
 (defmacro with-connection
   "Evaluates body in the context of a new connection to a database then
-  closes it. db-spec is a map containing string values for these required
-  keys:
+  closes the connection. db-spec is a map containing string values for
+  these required keys:
     :classname     the jdbc driver class name
     :subprotocol   the jdbc subprotocol
     :subname       the jdbc subname
   db-spec may contain additional key-value pairs that are passed along to
   the driver as properties such as :user, :password, etc."
   [db-spec & body]
-  `(do
-     (Class/forName (:classname ~db-spec))
-     (with-open [con#
-         (java.sql.DriverManager/getConnection
-          (format "jdbc:%s:%s" (:subprotocol ~db-spec) (:subname ~db-spec))
-          (properties (dissoc ~db-spec :classname :subprotocol :subname)))]
-       (binding [*db* (assoc *db* :connection con# :level 0)]
-         ~@body))))
+  `(with-connection* ~db-spec (fn [] ~@body)))
 
 (defmacro transaction
-  "Evaluates body as a transaction on the open database connection. Updates
-  are committed together as a group after evaluating body or rolled back on
-  any uncaught exception. Any nested transactions will be absorbed into the
-  outermost transaction."
+  "Evaluates body as a transaction on the open database connection. Any
+  database updates are committed together as a group after evaluating, or
+  rolled back on any uncaught exception. Any nested transactions are
+  absorbed into the outermost transaction."
   [& body]
-  `(let [con# (connection)
-         level# (:level *db*)]
-     (binding [*db* (assoc *db* :level (inc level#))]
-       (let [auto-commit# (.getAutoCommit con#)]
-         (when (zero? level#)
-           (.setAutoCommit con# false))
-         (try
-          (let [value# (do ~@body)]
-            (when (zero? level#)
-              (.commit con#))
-            value#)
-          (catch Exception e#
-            (.rollback con#)
-            (throw (Exception.
-                    (format "transaction rolled back: %s"
-                            (.getMessage e#)) e#)))
-          (finally
-           (when (zero? level#)
-             (.setAutoCommit con# auto-commit#))))))))
+  `(transaction* (fn [] ~@body)))
 
 (defn do-commands
   "Executes SQL commands that don't return results on the open database
   connection"
   [& commands]
-  (with-open [stmt (.createStatement (connection))]
+  (with-open [stmt (create-statement)]
     (doseq [cmd commands]
       (.addBatch stmt cmd))
     (.executeBatch stmt)))
@@ -77,7 +51,7 @@
   "Executes a prepared statement on the open database connection with
   parameter sets"
   [sql & sets]
-  (with-open [stmt (.prepareStatement (connection) sql)]
+  (with-open [stmt (prepare-statement sql)]
     (doseq [set sets]
       (doseq [[index value] (map vector (iterate inc 1) set)]
         (.setObject stmt index value))
@@ -113,10 +87,11 @@
   [table column-names & values]
   (let [count (count (first values))
         template (apply str (interpose "," (replicate count "?")))
-        columns (if (seq column-names)
-               (format "(%s)"
-                 (apply str (interpose "," (map the-str column-names))))
-               "")]
+        columns
+        (if (seq column-names)
+          (format "(%s)"
+                  (apply str (interpose "," (map the-str column-names))))
+          "")]
     (apply do-prepared
            (format "insert into %s %s values (%s)"
                    (the-str table) columns template)
@@ -132,7 +107,7 @@
   "Executes a query and then evaluates body with results bound to a seq of
   the results"
   [results sql & body]
-  `(with-open [stmt# (.prepareStatement (connection) ~sql)]
-     (with-open [rset# (.executeQuery stmt#)]
-       (let [~results (resultset-seq rset#)]
-         ~@body))))
+  `(with-open [stmt# (prepare-statement ~sql)
+               rset# (.executeQuery stmt#)]
+     (let [~results (resultset-seq rset#)]
+       ~@body)))

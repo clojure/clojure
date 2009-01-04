@@ -27,24 +27,27 @@
    (catch Exception e)))
 
 (defn create-fruit []
-  (sql/create-table :fruit
+  (sql/transaction
+   (sql/create-table :fruit
     [:name "varchar(32)" "NOT NULL"]
     [:appearance "varchar(32)"]
     [:cost :int]
-    [:grade :real]))
+    [:grade :real])))
 
 (defn insert-rows-fruit []
-  (sql/insert-rows :fruit
+  (sql/transaction
+   (sql/insert-rows :fruit
     ["Apple" "red" 59 87]
     ["Banana" "yellow" 29 92.2]
     ["Peach" "fuzzy" 139 90.0]
-    ["Orange" "juicy" 89 88.6]))
+    ["Orange" "juicy" 89 88.6])))
 
 (defn insert-values-fruit []
-  (sql/insert-values :fruit
+  (sql/transaction
+   (sql/insert-values :fruit
     [:name :cost]
     ["Mango" 722]
-    ["Feijoa" 441]))
+    ["Feijoa" 441])))
 
 (defn db-write []
   (sql/with-connection db
@@ -64,16 +67,18 @@
 
 (defn db-read-all []
   (sql/with-connection db
-    (sql/with-results res
-     "select * from fruit"
-      (into [] res))))
+    (sql/transaction                       
+     (sql/with-results res
+      "select * from fruit"
+      (into [] res)))))
 
 (defn db-grade-a []
   (sql/with-connection db
-    (sql/with-results res
-     "select name, cost from fruit where grade >= 90"
-      (doseq [rec res]
-        (println rec)))))
+    (sql/transaction
+     (sql/with-results res
+       "select name, cost from fruit where grade >= 90"
+       (doseq [rec res]
+         (println rec))))))
 
 (defn db-exception []
   (sql/with-connection db
