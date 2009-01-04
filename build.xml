@@ -46,6 +46,7 @@
       <arg value="clojure.contrib.mmap"/>
       <arg value="clojure.contrib.ns-utils"/>
       <arg value="clojure.contrib.repl-ln"/>
+      <arg value="clojure.contrib.repl-utils"/>
       <arg value="clojure.contrib.seq-utils"/>
       <arg value="clojure.contrib.sql.internal"/>
       <arg value="clojure.contrib.sql"/>
