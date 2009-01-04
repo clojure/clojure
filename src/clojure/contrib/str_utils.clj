@@ -43,17 +43,39 @@
            (list (.subSequence string prevend (.length string))))))
      0)))
 
-(defn re-gsub
+(defn re-gsub 
   "Replaces all instances of 'pattern' in 'string' with
-  'replacement'.  Like Ruby's 'String#gsub'."
-  [#^Pattern regex replacement #^String string]
-  (.. regex (matcher string) (replaceAll replacement)))
+  'replacement'.  Like Ruby's 'String#gsub'.
+  
+  If (ifn? replacment) is true, the replacement is called with the
+  match.
+  "
+  [#^java.util.regex.Pattern regex replacement #^String string]
+  (if (ifn? replacement)
+    (let [parts (vec (re-partition regex string))]
+      (apply str
+             (reduce (fn [parts match-idx]
+                       (update-in parts [match-idx] replacement))
+                     parts (range 1 (count parts) 2))))
+    (.. regex (matcher string) (replaceAll replacement))))
 
 (defn re-sub
   "Replaces the first instance of 'pattern' in 'string' with
-  'replacement'.  Like Ruby's 'String#sub'."
+  'replacement'.  Like Ruby's 'String#sub'.
+  
+  If (ifn? replacement) is true, the replacement is called with
+  the match.
+  "
   [#^Pattern regex replacement #^String string]
-  (.. regex (matcher string) (replaceFirst replacement)))
+  (if (ifn? replacement)
+    (let [m (re-matcher regex string)]
+      (if (.find m)
+        (str (.subSequence string 0 (.start m))
+             (replacement (re-groups m))
+             (.subSequence string (.end m) (.length string)))
+        string))
+    (.. regex (matcher string) (replaceFirst replacement))))
+
 
 (defn str-join
   "Returns a string of all elements in 'sequence', separated by
