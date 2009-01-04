@@ -89,14 +89,22 @@
     -i     filepath, or
     --init filepath
 
-  by loading the referenced files. Returns a seq of the remaining args."
+  by loading the referenced files, then accepts an optional terminating arg
+  of the form:
+
+    -r, or
+    --repl
+
+  Returns a seq of any remaining args."
   [args]
   (loop [[init filename & more :as args] args]
     (if (#{"-i" "--init"} init)
       (do
         (clojure.main/load-script filename)
         (recur more))
-      args)))
+      (if (#{"-r" "--repl"} init)
+        (rest args)
+        args))))
 
 (defn- process-command-line
   "Args are strings passed in from the command line. Loads any requested
