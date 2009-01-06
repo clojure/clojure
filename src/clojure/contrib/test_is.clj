@@ -15,68 +15,73 @@
 ;; remove this notice, or any other, from this software.
 
 
-;; Inspired by many Common Lisp test frameworks and clojure/test, this
-;; file is a Clojure test framework.
-;;
-;; Define tests as :test metadata on your fns.  Use the "is" macro
-;; for assertions.  Examples:
-;;
-;;     (defn add2
-;;       ([x] (+ x 2))
-;;       {:test (fn [] (is (= (add2 3) 5))
-;;                     (is (= (add2 -4) -2)
-;;                     (is (> (add2 50) 50))))})
-;;
-;; You can also define tests in isolation with the "deftest" macro:
-;;
-;;     (deftest test-new-fn
-;;       (is (= (new-fn) "Awesome")))
-;;
-;; You can test that a function throws an exception with the
-;; "is thrown?" form:
-;;
-;;     (defn factorial
-;;       ([n] (cond
-;;             (zero? n) 1  ; 0!=1 is often defined for convenience
-;;             (> n 0) (* n (factorial (dec n)))
-;;             :else (throw (IllegalArgumentException. "Negative factorial"))))
-;;       {:test (fn [] (is (= (factorial 3) 6))
-;;                     (is (= (factorial 6) 720))
-;;                     (is (thrown? IllegalArgumentException (factorial -2))))}) 
-;;
-;; Run tests with (run-tests). As in any language with macros, you may
-;; need to recompile functions after changing a macro definition.
-;;
-;; If you want write a bunch of tests with the same predicate, use
-;; "are", which takes a template and applies it inside "is".
-;;
-;; Examples:
-;;
-;;     (deftest test-addition
-;;       (are (= _1 _2)
-;;            3 (+ 2 1)
-;;            4 (+ 2 2)
-;;            5 (+ 4 1)))
-;;
-;;     (deftest test-predicates
-;;       (are _  ; the template is just an underscore
-;;            (true? true)
-;;            (false? false)
-;;            (nil? nil)))
+
+(comment
+  ;; Inspired by many Common Lisp test frameworks and clojure/test,
+  ;; this file is a Clojure test framework.
+  ;;
+  ;; Define tests as :test metadata on your fns.  Use the "is" macro
+  ;; for assertions.  Examples:
+
+  (defn add2
+    ([x] (+ x 2))
+    {:test (fn [] (is (= (add2 3) 5))
+	     (is (= (add2 -4) -2)
+		 (is (> (add2 50) 50))))})
+
+  ;; You can also define tests in isolation with the "deftest" macro:
+
+  (deftest test-new-fn
+    (is (= (new-fn) "Awesome")))
+
+  ;; You can test that a function throws an exception with the
+  ;; "is thrown?" form:
+
+  (defn factorial
+    ([n] (cond
+	  (zero? n) 1	       ; 0!=1 is often defined for convenience
+	  (> n 0) (* n (factorial (dec n)))
+	  :else (throw (IllegalArgumentException. "Negative factorial"))))
+    {:test (fn [] (is (= (factorial 3) 6))
+	     (is (= (factorial 6) 720))
+	     (is (thrown? IllegalArgumentException (factorial -2))))}) 
+
+  ;; Run tests with (run-tests). As in any language with macros, you
+  ;; may need to recompile functions after changing a macro
+  ;; definition.
+  ;;
+  ;; If you want write a bunch of tests with the same predicate, use
+  ;; "are", which takes a template and applies it inside "is".
+  ;;
+  ;; Examples:
+
+  (deftest test-addition
+    (are (= _1 _2)
+	 3 (+ 2 1)
+	 4 (+ 2 2)
+	 5 (+ 4 1)))
+
+  (deftest test-predicates
+    (are _ ;; the template is just an underscore
+	 (true? true)
+	 (false? false)
+	 (nil? nil)))
+
+) ;; end comment block
 
 
 
 (ns clojure.contrib.test-is
-    (:require [clojure.contrib.template :as temp]))
+  (:require [clojure.contrib.template :as temp]))
 
 
-(def *report-counters* nil)  ; bound to a ref of a map in test-ns
+(def *report-counters* nil)	  ; bound to a ref of a map in test-ns
 
 (def *testing-vars* (list))  ; bound to hierarchy of vars being tested
 
-(def *testing-contexts* (list))  ; bound to strings of test contexts
+(def *testing-contexts* (list))	   ; bound to strings of test contexts
 
-(defonce *load-tests* true)  ; if false, deftest is ignored
+(defonce *load-tests* true)		; if false, deftest is ignored
 
 
 ;;; REPORTING METHODS
@@ -90,9 +95,9 @@
   current test."
   []
   (str ;;(ns-name (:ns (meta (first *testing-vars*)))) "/ "
-       (reverse (map #(:name (meta %)) *testing-vars*))
-       " (" (:file (meta (first *testing-vars*)))
-       ":" (:line (meta (first *testing-vars*))) ")"))
+   (reverse (map #(:name (meta %)) *testing-vars*))
+   " (" (:file (meta (first *testing-vars*)))
+   ":" (:line (meta (first *testing-vars*))) ")"))
 
 (defn testing-contexts-str
   "Returns a string representation of the current test context. Joins
@@ -246,11 +251,13 @@
   "Defines a test function with no arguments.  Test functions may call
   other tests, so tests may be composed.  If you compose tests, you
   should also define a function named test-ns-hook; run-tests will
-  call this function.
+  call test-ns-hook instead of testing all vars.
 
   Note: Actually, the test body goes in the :test metadata on the var,
   and the real function (the value of the var) calls test-var on
-  itself."
+  itself.
+
+  When *load-tests* is false, deftest is ignored."
   [name & body]
   (when *load-tests*
     `(def ~(with-meta name {:test `(fn [] ~@body)})
@@ -260,11 +267,9 @@
 (defmacro set-test
   "Experimental.
   Sets :test metadata of the named var to a fn with the given body.
-  The var must already exist.  Does not modify the value of the var.
-  Note: loses the var's original :line and :arglists metadata."
+  The var must already exist.  Does not modify the value of the var."
   [name & body]
-  `(def ~(with-meta name (assoc ^name :test `(fn [] ~@body)))
-        ~name))
+  `(alter-meta! (var ~name) assoc :test (fn [] ~@body)))
 
 
 ;;; RUNNING TESTS
@@ -274,12 +279,12 @@
   with *testing-vars* bound to (conj *testing-vars* v)."
   [v]
   (when-let [t (:test (meta v))]
-      (binding [*testing-vars* (conj *testing-vars* v)]
-        (report-count :test)
-        (try (t)
-             (catch Throwable e
-               (report :error "Uncaught exception, not in assertion."
-                       nil e))))))
+    (binding [*testing-vars* (conj *testing-vars* v)]
+      (report-count :test)
+      (try (t)
+	   (catch Throwable e
+	     (report :error "Uncaught exception, not in assertion."
+		     nil e))))))
 
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
@@ -292,10 +297,10 @@
       (report :info (str "Testing " ns) nil nil)
       ;; If ns has a test-ns-hook function, call that:
       (if-let [v (find-var (symbol (str (ns-name ns)) "test-ns-hook"))]
-          ((var-get v))
+	((var-get v))
         ;; Otherwise, just test every var in the ns.
         (doseq [v (vals (ns-interns ns))]
-            (test-var v))))
+	  (test-var v))))
     @*report-counters*))
 
 (defn print-results
@@ -311,7 +316,7 @@
   Defaults to current namespace if none given."
   ([] (run-tests *ns*))
   ([& namespaces]
-      (print-results (apply merge-with + (map test-ns namespaces)))))
+     (print-results (apply merge-with + (map test-ns namespaces)))))
 
 (defn run-all-tests
   "Runs all tests in all namespaces; prints results."
