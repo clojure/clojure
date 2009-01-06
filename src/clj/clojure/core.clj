@@ -381,7 +381,7 @@
     (spread (cons item more)))
 
 (defmacro delay
-  "Takes a body of expressions and yields a Delay object than will
+  "Takes a body of expressions and yields a Delay object that will
   invoke the body only the first time it is forced (with force), and
   will cache the result and return it on all subsequent force calls"
   [& body] 
