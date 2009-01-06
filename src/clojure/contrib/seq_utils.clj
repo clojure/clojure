@@ -1,7 +1,7 @@
 ;;; seq_utils.clj -- Sequence utilities for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; last updated December 16, 2008
+;; last updated January 05, 2009
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -79,3 +79,39 @@
   (reduce (fn [counts x]
               (assoc counts x (inc (get counts x 0))))
           {} coll))
+
+;; recursive sequence helpers by Christophe Grand
+;; see http://clj-me.blogspot.com/2009/01/recursive-seqs.html
+(defmacro rec-cat 
+ "Similar to lazy-cat but binds the resulting sequence using the supplied 
+  binding-form, allowing recursive expressions. The first collection 
+  expression must not be recursive and must yield a non-nil seq."
+ [binding-form expr & rec-exprs]
+  `(let [rec-rest# (atom nil)
+         result# (lazy-cat ~expr (force @rec-rest#))
+         ~binding-form result#]
+     (swap! rec-rest# (constantly (delay (lazy-cat ~@rec-exprs))))
+     result#))
+         
+(defmacro rec-cons 
+ "Similar to lazy-cons but binds the resulting sequence using the supplied 
+  binding-form, allowing recursive expressions. The first expression must 
+  not be recursive."
+ [binding-form expr & rec-exprs]
+  `(let [rec-rest# (atom nil)
+         result# (lazy-cons ~expr (force @rec-rest#))
+         ~binding-form result#]
+     (swap! rec-rest# (constantly (delay (lazy-cat ~@rec-exprs))))
+     result#))
+     
+;; reductions by Chris Houser
+;; see http://groups.google.com/group/clojure/browse_thread/thread/3edf6e82617e18e0/58d9e319ad92aa5f?#58d9e319ad92aa5f
+(defn reductions
+  "Returns a lazy seq of the intermediate values of the reduction (as
+  per reduce) of coll by f, starting with init."
+  ([f coll]
+   (if (seq coll)
+     (rec-cons self (first coll) (map f self (rest coll)))
+     (cons (f) nil)))
+  ([f init coll]
+   (rec-cons self init (map f self coll))))
