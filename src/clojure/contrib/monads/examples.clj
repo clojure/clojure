@@ -1,0 +1,252 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Monad application examples
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use 'clojure.contrib.monads)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Sequence manipulations with the sequence monad
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Note: in the Haskell world, this monad is called the list monad.
+; The Clojure equivalent to Haskell's lists are (possibly lazy)
+; sequences. This is why I call this monad "sequence". All sequences
+; created by sequence monad operations are lazy.
+
+; Monad comprehensions in the sequence monad work exactly the same
+; as Clojure's 'for' construct, except that :while clauses are not
+; available.
+(domonad sequence
+   [x (range 5)
+    y (range 3)]
+    (+ x y))
+
+; Inside a with-monad block, domonad is used without the monad name.
+(with-monad sequence
+  (domonad
+     [x (range 5)
+      y (range 3)]
+     (+ x y)))
+
+(domonad sequence
+   [x  (range 5)
+    y  (range (+ 1 x))
+    :when  (= (+ x y) 2)]
+   (list x y))
+
+; An example of a sequence function defined in terms of a lift operation.
+; We use m-lift2 because we have to lift a function of two arguments.
+(with-monad sequence
+   (defn pairs [xs]
+      ((m-lift 2 #(list %1 %2)) xs xs)))
+
+(pairs (range 5))
+
+; Another way to define pairs is through the m-seq operation. It takes
+; a sequence of monadic values and returns a monadic value containing
+; the sequence of the underlying values, obtained from chaining together
+; from left to right the monadic values in the sequence.
+(with-monad sequence
+   (defn pairs [xs]
+      (m-seq (list xs xs))))
+
+(pairs (range 5))
+
+; This definition suggests a generalization:
+(with-monad sequence
+   (defn ntuples [n xs]
+      (m-seq (replicate n xs))))
+
+(ntuples 2 (range 5))
+(ntuples 3 (range 5))
+
+; Lift operations can also be used inside a monad comprehension:
+(domonad sequence
+   [x  ((m-lift 1 (partial * 2)) (range 5))
+    y  (range 2)]
+    [x y])
+
+; The m-plus operation does concatenation in the sequence monad.
+(domonad sequence
+   [x  ((m-lift 2 +) (range 5) (range 3))
+    y  (m-plus (range 2) '(10 11))]
+   [x y])
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Handling failures with the maybe monad
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Maybe monad versions of basic arithmetic
+(with-monad maybe
+   (def m+ (m-lift 2 +))
+   (def m- (m-lift 2 -))
+   (def m* (m-lift 2 *)))
+
+; Division is special for two reasons: we can't call it m/ because that's
+; not a legal Clojure symbol, and we want it to fail if a division by zero
+; is attempted. It can be defined explictly:
+(with-monad maybe
+   (defn safe-div [x y]
+      (cond (= m-zero x)     m-zero
+	    (= m-zero y)     m-zero
+	    (= (first y) 0)  m-zero
+	    :else            (m-result (/ (first x) (first y))))))
+
+; It can also be defined as a monad comprehension that performs the test
+; in a :when clause:
+(defn safe-div [x y]
+  (domonad maybe
+     [a x
+      b y
+      :when (not (zero? b))]
+     (/ a b)))
+
+; Now do some non-trivial computation with division
+; It fails for (1) x = 0, (2) y = 0 or (3) y = -x.
+(with-monad maybe
+   (defn some-function [x y]
+      (let [one (m-result 1)]
+ 	   (safe-div one (m+ (safe-div one (m-result x))
+			     (safe-div one (m-result y)))))))
+
+; An example that doesn't fail:
+(some-function 2 3)
+; And two that do fail, at different places:
+(some-function 2 0)
+(some-function 2 -2)
+
+; In the maybe monad, m-plus selects the first monadic value that
+; holds a valid value.
+(with-monad maybe
+   (m-plus (some-function 2 0) (some-function 2 -2) (some-function 2 3)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Random numbers with the state monad
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; A state monad item represents a computation that changes a state and
+; returns a value. Its structure is a function that takes a state argument
+; and returns a two-item list containing the value and the updated state.
+; It is important to realize that everything you put into a state monad
+; expression is a state monad item (thus a function), and everything you
+; get out as well. A state monad does not perform a calculation, it
+; constructs a function that does the computation when called.
+
+; First, we define a simple random number generator with explicit state.
+; rng is a function of its state (an integer) that returns the
+; pseudo-random value derived from this state and the updated state 
+; for the next iteration. This is exactly the structure of a state
+;  monad item.
+(defn rng [seed]
+  (let [m      259200
+	value  (/ (float seed) (float m))
+	next   (rem (+ 54773 (* 7141 seed)) m)]
+    (list value next)))
+
+; We define a convenience function that creates an infinite lazy seq
+; of values obtained from iteratively applying a state monad value.
+(defn value-seq [f seed]
+  (let [[value next] (f seed)]
+    (lazy-cons value (value-seq f next))))
+
+; Next, we define basic statistics functions to check our random numbers
+(defn sum [xs]  (apply + xs))
+(defn mean [xs]  (/ (sum xs) (count xs)))
+(defn variance [xs]
+  (let [m (mean xs)
+	sq #(* % %)]
+    (mean (for [x xs] (sq (- x m))))))
+
+; rng implements a uniform distribution in the interval [0., 1.), so
+; ideally, the mean would be 1/2 (0.5) and the variance 1/12 (0.8333).
+(mean (take 1000 (value-seq rng 1)))
+(variance (take 1000 (value-seq rng 1)))
+
+; We make use of the state monad to implement a simple (but often sufficient)
+; approximation to a Gaussian distribution: the sum of 12 random numbers
+; from rng's distribution, shifted by -6, has a distribution that is
+; approximately Gaussian with 0 mean and variance 1, by virtue of the central
+; limit theorem.
+; In the first version, we call rng 12 times explicitly and calculate the
+; shifted sum in a monad comprehension:
+(def gaussian1
+   (domonad state
+      [x1  rng
+       x2  rng
+       x3  rng
+       x4  rng
+       x5  rng
+       x6  rng
+       x7  rng
+       x8  rng
+       x9  rng
+       x10 rng
+       x11 rng
+       x12 rng]
+      (- (+ x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12) 6.)))
+
+; Let's test it:
+(mean (take 1000 (value-seq gaussian1 1)))
+(variance (take 1000 (value-seq gaussian1 1)))
+
+; Of course, we'd rather have a loop construct for creating the 12
+; random numbers. This would be easy if we could define a summation
+; operation on random-number generators, which would then be used in
+; combination with reduce. The lift operation gives us exactly that.
+; More precisely, we need (m-lift 2 +), because we want both arguments
+; of + to be lifted to the state monad:
+(def gaussian2
+   (domonad state
+      [sum12 (reduce (m-lift 2 +) (replicate 12 rng))]
+      (- sum12 6.)))
+
+; The statistics should be strictly the same as above, as long as
+; we use the same seed:
+(mean (take 1000 (value-seq gaussian2 1)))
+(variance (take 1000 (value-seq gaussian2 1)))
+
+; We can also do the subtraction of 6 in a lifted function, and get rid
+; of the monad comprehension altogether:
+(with-monad state
+   (def gaussian3
+        ((m-lift 1 #(- % 6.))
+           (reduce (m-lift 2 +) (replicate 12 rng)))))
+
+; Again, the statistics are the same:
+(mean (take 1000 (value-seq gaussian3 1)))
+(variance (take 1000 (value-seq gaussian3 1)))
+
+; For a random point in two dimensions, we'd like a random number generator
+; that yields a list of two random numbers. The m-seq operation can easily
+; provide it:
+(with-monad state
+   (def rng2 (m-seq (list rng rng))))
+
+; Let's test it:
+(rng2 1)
+
+; fetch-state and get-state can be used to save the seed of the random
+; number generator and go back to that saved seed later on:
+(def identical-random-seqs
+  (domonad state
+    [seed (fetch-state)
+     x1   rng
+     x2   rng
+     _    (set-state seed)
+     y1   rng
+     y2   rng]
+    (list [x1 x2] [y1 y2])))
+
+(identical-random-seqs 1)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
