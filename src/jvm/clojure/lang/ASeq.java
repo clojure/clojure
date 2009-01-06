@@ -52,15 +52,16 @@ public boolean equals(Object obj){
 public int hashCode(){
 	if(_hash == -1)
 		{
-		int hash = 0;
+		int hash = 1;
 		for(ISeq s = seq(); s != null; s = s.rest())
 			{
-			hash = Util.hashCombine(hash, Util.hash(s.first()));
+			hash = 31 * hash + (s.first() == null ? 0 : s.first().hashCode());
 			}
 		this._hash = hash;
 		}
 	return _hash;
 }
+
 
 //public Object reduce(IFn f) throws Exception{
 //	Object ret = first();

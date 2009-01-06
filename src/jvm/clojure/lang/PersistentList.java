@@ -114,6 +114,11 @@ public Object reduce(IFn f, Object start) throws Exception{
 
 static class EmptyList extends Obj implements IPersistentList, Collection{
 
+	@Override
+	public int hashCode(){
+		return 1;
+	}
+
 	EmptyList(IPersistentMap meta){
 		super(meta);
 	}
