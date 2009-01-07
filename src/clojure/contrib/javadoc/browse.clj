@@ -10,7 +10,14 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.contrib.javadoc.browse
-    (:import (java.net URI)))
+  (:require [clojure.contrib.shell-out :as sh]) 
+  (:import (java.net URI)))
+
+(defn- macosx? []
+  (-> "os.name" System/getProperty .toLowerCase
+    (.startsWith "mac os x")))
+
+(def *open-url-script* (when (macosx?) "/usr/bin/open"))
 
 (defn open-url-in-browser
   "Opens url (a string) in the default system web browser.  May not
@@ -45,4 +52,4 @@
       (.show))))
 
 (defn browse-url [url]
-  (or (open-url-in-browser url) (open-url-in-swing url)))
+  (or (open-url-in-browser url) (when *open-url-script* (sh/sh *open-url-script* (str url)) true) (open-url-in-swing url)))
