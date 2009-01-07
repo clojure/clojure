@@ -346,11 +346,13 @@ static public long lastModified(URL url,String libfile) throws Exception{
 		{
 		return ((JarURLConnection)url.openConnection()).getJarFile().getEntry(libfile).getTime();
 		}
-	else
+	else if(url.getProtocol().equals("file"))
 		{
 		File f = new File(url.toURI());
 		return f.lastModified();
 		}
+    else
+        return 0;
 }
 
 static void compile(String cljfile) throws Exception{
