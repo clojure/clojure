@@ -70,7 +70,7 @@ static class Action implements Runnable{
                 if(changed)
                     action.agent.notifyWatches();
 				}
-			catch(Exception e)
+			catch(Throwable e)
 				{
 				//todo report/callback
 				action.agent.errors = RT.cons(e, action.agent.errors);
