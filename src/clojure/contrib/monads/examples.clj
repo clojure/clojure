@@ -93,16 +93,8 @@
 
 ; Division is special for two reasons: we can't call it m/ because that's
 ; not a legal Clojure symbol, and we want it to fail if a division by zero
-; is attempted. It can be defined explictly:
-(with-monad maybe
-   (defn safe-div [x y]
-      (cond (= m-zero x)     m-zero
-	    (= m-zero y)     m-zero
-	    (= (first y) 0)  m-zero
-	    :else            (m-result (/ (first x) (first y))))))
-
-; It can also be defined as a monad comprehension that performs the test
-; in a :when clause:
+; is attempted. It is best defined by a monad comprehension with a
+; :when clause:
 (defn safe-div [x y]
   (domonad maybe
      [a x

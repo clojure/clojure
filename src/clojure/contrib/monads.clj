@@ -1,9 +1,9 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated December 30, 2008
+;; last updated January 8, 2009
 
-;; Copyright (c) Konrad Hinsen, 2008. All rights reserved.  The use
+;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
@@ -24,9 +24,15 @@
     are written like bindings to the monad operations m-bind and
     m-result (required) and m-zero and m-plus (optional)."
    [operations]
-   `(let [~'m-zero nil ~'m-plus nil ~@operations]
-      {:m-result ~'m-result :m-bind ~'m-bind 
-       :m-zero ~'m-zero :m-plus ~'m-plus}))
+   `(let [~'m-bind   ::undefined
+	  ~'m-result ::undefined
+	  ~'m-zero   ::undefined
+	  ~'m-plus   ::undefined
+	  ~@operations]
+      {:m-result ~'m-result
+       :m-bind ~'m-bind 
+       :m-zero ~'m-zero
+       :m-plus ~'m-plus}))
 
 (defmacro defmonad
    "Define a named monad by defining the monad operations. The definitions
@@ -53,7 +59,7 @@
   [mexpr step]
   (let [[bform expr] step]
     (if (identical? bform :when)
-      (list 'm-bind `(if ~expr (~'m-result nil) ~'m-zero)
+      (list 'm-bind `(if ~expr (~'m-result ::any) ~'m-zero)
 	    (list 'fn ['_] mexpr))
       (list 'm-bind expr (list 'fn [bform] mexpr)))))
 
@@ -182,18 +188,14 @@
 ; Maybe monad
 (defmonad maybe
    "Monad describing computations with possible failures. Failure is
-    represented by an empty vector, success by a vector with a single
-    element, the resulting value."
-   [m-zero   []
-    m-result (fn m-result-maybe [v]
-	       [v])
+    represented by nil, any other value is considered valid. As soon as
+    a step returns nil, the whole computation will yield nil as well."
+   [m-zero   nil
+    m-result (fn m-result-maybe [v] v)
     m-bind   (fn m-bind-maybe [mv f]
-               (if (= mv m-zero)
-                   m-zero
-		   (f (first mv))))
+               (if (nil? mv) nil (f mv)))
     m-plus   (fn m-plus-maybe [& mvs]
-	       (let [first-valid (first (drop-while empty? mvs))]
-		 (if (nil? first-valid) m-zero first-valid)))
+	       (first (drop-while nil? mvs)))
     ])
 
 ; Sequence monad (called "list monad" in Haskell)
@@ -230,3 +232,24 @@
 
 (defn fetch-state []
   (update-state identity))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Monad transformers
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn maybe-t
+  "Monad transformer that transforms a monad m into a monad in which
+   the base values can be invalid (represented by nil)."
+  [m]
+  (monad [m-result (with-monad m
+		     m-result)
+	  m-bind   (with-monad m
+		     (fn m-bind-maybe-t [mv f]
+		       (m-bind mv
+			       (fn [x]
+				 (if (nil? x) (m-result nil) (f x))))))
+	  m-zero   (with-monad m m-zero)
+	  m-plus   (with-monad m m-plus)]))
