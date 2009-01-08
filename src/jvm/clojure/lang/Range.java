@@ -59,7 +59,11 @@ public Object reduce(IFn f, Object start) throws Exception{
 	return ret;
 }
 
-public IStream stream() throws Exception {
+public int count() {
+    return end - n;
+    }
+
+    public IStream stream() throws Exception {
     final AtomicInteger an = new AtomicInteger(n);
     return new IStream(){
         public Object next() throws Exception {

@@ -1464,10 +1464,12 @@
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
   (exclusive), by step, where start defaults to 0 and step to 1."
-  ([end] (if (and (> end 0) (< end (. Integer MAX_VALUE)))
+  ([end] (if (and (> end 0) (<= end (. Integer MAX_VALUE)))
            (new clojure.lang.Range 0 end)
            (take end (iterate inc 0))))
-  ([start end] (if (and (< start end) (< end (. Integer MAX_VALUE)))
+  ([start end] (if (and (< start end)
+                        (>= start (. Integer MIN_VALUE))
+                        (<= end (. Integer MAX_VALUE)))
                  (new clojure.lang.Range start end)
                  (take (- end start) (iterate inc start))))
   ([start end step]
