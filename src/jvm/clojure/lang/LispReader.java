@@ -679,7 +679,17 @@ public static class SyntaxQuoteReader extends AFn{
 					                                                  + "__" + RT.nextID() + "__auto__")));
 				sym = gs;
 				}
-			else
+			else if(sym.ns == null && sym.name.endsWith("."))
+				{
+				Symbol csym = Symbol.intern(null, sym.name.substring(0, sym.name.length() - 1));
+				csym = Compiler.resolveSymbol(csym);
+				sym = Symbol.intern(null, csym.name.concat("."));
+				}
+			else if(sym.ns == null && sym.name.startsWith("."))
+				{
+				// Simply quote method names.
+ 				}
+            else
 				sym = Compiler.resolveSymbol(sym);
 			ret = RT.list(Compiler.QUOTE, sym);
 			}
