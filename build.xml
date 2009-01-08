@@ -47,6 +47,7 @@
       <arg value="clojure.contrib.macros"/>
       <arg value="clojure.contrib.monads"/>
       <arg value="clojure.contrib.ns-utils"/>
+      <arg value="clojure.contrib.probabilities.dist"/>
       <arg value="clojure.contrib.prxml"/>
       <arg value="clojure.contrib.repl-ln"/>
       <arg value="clojure.contrib.repl-utils"/>
