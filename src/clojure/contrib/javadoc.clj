@@ -22,7 +22,9 @@
  *local-javadocs* (ref (list)))
  
 (def *core-java-api*
-     "http://java.sun.com/javase/6/docs/api/")
+  (if (= "1.5" (System/getProperty "java.specification.version"))
+    "http://java.sun.com/j2se/1.5.0/docs/api/"
+    "http://java.sun.com/javase/6/docs/api/"))
 
 (def
  #^{:doc "Ref to a map from package name prefixes to URLs for remote
