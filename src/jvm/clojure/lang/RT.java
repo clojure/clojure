@@ -15,9 +15,6 @@ package clojure.lang;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Callable;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.jar.JarFile;
-import java.util.jar.JarEntry;
 import java.util.regex.Matcher;
 import java.io.*;
 import java.lang.reflect.Array;
@@ -26,7 +23,6 @@ import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.JarURLConnection;
 import java.nio.charset.Charset;
 
@@ -240,11 +236,11 @@ static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
 };
 
 static AtomicInteger id = new AtomicInteger(1);
-static final public DynamicClassLoader ROOT_CLASSLOADER = new DynamicClassLoader();
+private static DynamicClassLoader ROOT_CLASSLOADER = null;
 
 static public void addURL(Object url) throws Exception{
 	URL u = (url instanceof String) ? (new URL((String) url)) : (URL) url;
-	ROOT_CLASSLOADER.addURL(u);
+	getRootClassLoader().addURL(u);
 }
 
 static
@@ -1492,6 +1488,7 @@ static public Object[] setValues(Object... vals){
 static public ClassLoader makeClassLoader(){
 	return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction(){
 		public Object run(){
+            getRootClassLoader();
 			return new DynamicClassLoader(baseLoader());
 		}
 	});
@@ -1500,12 +1497,14 @@ static public ClassLoader makeClassLoader(){
 static public ClassLoader baseLoader(){
 	if(booleanCast(USE_CONTEXT_CLASSLOADER.get()))
 		return Thread.currentThread().getContextClassLoader();
-	return ROOT_CLASSLOADER;
+    else if(ROOT_CLASSLOADER != null)
+	    return ROOT_CLASSLOADER;
+    return Compiler.class.getClassLoader();
 }
 
 static public Class classForName(String name) throws ClassNotFoundException{
 
-	return Class.forName(name, false, baseLoader());
+	return Class.forName(name, true, baseLoader());
 }
 
 static public Class loadClassForName(String name) throws ClassNotFoundException{
@@ -1702,4 +1701,10 @@ static final public IStream EMPTY_STREAM = new IStream(){
         return eos();
     }
 };
+
+synchronized public static DynamicClassLoader getRootClassLoader() {
+    if(ROOT_CLASSLOADER == null)
+        ROOT_CLASSLOADER = new DynamicClassLoader();
+    return ROOT_CLASSLOADER;
+    }
 }

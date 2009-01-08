@@ -1678,11 +1678,11 @@
           (let [n (name spec)
                 dot (.lastIndexOf n (. clojure.lang.RT (intCast \.)))
                 c (symbol (.substring n (inc dot)))]
-            (. ns (importClass c (. Class (forName (name spec))))))
+            (. ns (importClass c (. clojure.lang.RT (classForName (name spec))))))
           (let [pkg (first spec)
                 classes (rest spec)]
             (doseq [c classes]
-              (. ns (importClass c (. Class (forName (str pkg "." c)))))))))))
+              (. ns (importClass c (. clojure.lang.RT (classForName (str pkg "." c)))))))))))
 
 
 (defn into-array

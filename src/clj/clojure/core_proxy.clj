@@ -158,7 +158,8 @@
                                 mods (. meth (getModifiers))
                                 mk (method-sig meth)]
                             (if (or (considered mk)
-                                    (. Modifier (isPrivate mods)) 
+                                    (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
+                                    ;(. Modifier (isPrivate mods)) 
                                     (. Modifier (isStatic mods))
                                     (. Modifier (isFinal mods))
                                     (= "finalize" (.getName meth)))
@@ -209,7 +210,7 @@
           pname (proxy-name super interfaces)]
       (or (RT/loadClassForName pname)
           (let [[cname bytecode] (generate-proxy super interfaces)]
-            (. RT/ROOT_CLASSLOADER (defineClass pname bytecode))))))
+            (. (RT/getRootClassLoader) (defineClass pname bytecode))))))
 
 (defn construct-proxy
   "Takes a proxy class and any arguments for its superclass ctor and

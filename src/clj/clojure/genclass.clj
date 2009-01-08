@@ -32,7 +32,8 @@
                       mods (. meth (getModifiers))
                       mk (method-sig meth)]
                   (if (or (considered mk)
-                          (. Modifier (isPrivate mods))
+                          (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
+                          ;(. Modifier (isPrivate mods))
                           (. Modifier (isStatic mods))
                           (. Modifier (isFinal mods))
                           (= "finalize" (.getName meth)))
@@ -635,6 +636,6 @@
   [& options]
   (let [options-map (apply hash-map options)
         [cname bytecode] (generate-class options-map)]
-    (.. clojure.lang.RT ROOT_CLASSLOADER (defineClass cname bytecode))))
+    (.. (clojure.lang.RT/getRootClassLoader) (defineClass cname bytecode))))
 
 )
