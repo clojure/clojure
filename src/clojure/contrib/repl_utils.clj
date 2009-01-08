@@ -66,7 +66,7 @@
     (let [ns-name (str (.name (.ns v)))
           path (first (re-seq #"^.*(?=/[^/]*$)" (.replace ns-name "." "/")))
           fname (str path "/" (:file ^v))]
-      (when-let [strm (.getResourceAsStream RT/ROOT_CLASSLOADER fname)]
+      (when-let [strm (.getResourceAsStream (RT/baseLoader) fname)]
         (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
           (dotimes [_ (dec (:line ^v))] (.readLine rdr))
           (let [text (StringBuilder.)
