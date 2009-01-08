@@ -84,9 +84,9 @@
   (sql/with-connection db
     (into []
       (resultset-seq
-       (.getTables
-        (.getMetaData (sql/connection))
-        nil nil nil (into-array ["TABLE" "VIEW"]))))))
+       (-> (sql/connection)
+           (.getMetaData)
+           (.getTables nil nil nil (into-array ["TABLE" "VIEW"])))))))
 
 (defn db-exception []
   (sql/with-connection db
