@@ -358,7 +358,10 @@
   [& clauses]
     (when clauses
       (list 'if (first clauses)
-            (second clauses)
+            (if (rest clauses)
+                (second clauses)
+                (throw (IllegalArgumentException.
+                         "cond requires an even number of forms")))
             (cons 'clojure.core/cond (rest (rest clauses))))))
 
 (defn spread
@@ -1021,6 +1024,14 @@
 
 ;;;;;;;;; var stuff      
 
+(defmacro #^{:private true} assert-args [fnname & pairs]
+  `(do (when-not ~(first pairs)
+         (throw (IllegalArgumentException.
+                  ~(str fnname " requires " (second pairs)))))
+     ~(let [more (rrest pairs)]
+        (when more
+          (list* `assert-args fnname more)))))
+
 (defmacro binding
   "binding => var-symbol init-expr 
 
@@ -1028,6 +1039,9 @@
   supplied initial values, executes the exprs in an implicit do, then
   re-establishes the bindings that existed before."  
   [bindings & body]
+    (assert-args binding
+      (vector? bindings) "a vector for its binding"
+      (even? (count bindings)) "an even number of forms in binding vector")
     (let [var-ize (fn [var-vals]
                     (loop [ret [] vvs (seq var-vals)]
                       (if vvs
@@ -1572,6 +1586,9 @@
   bindings and filtering as provided by \"for\".  Does not retain
   the head of the sequence. Returns nil."
   [seq-exprs & body]
+  (assert-args doseq
+     (vector? seq-exprs) "a vector for its binding"
+     (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [groups (reduce (fn [groups p]
                         (if (keyword? (first p))
                           (conj (pop groups) (apply assoc (peek groups) p))
@@ -1656,16 +1673,16 @@
   Repeatedly executes body (presumably for side-effects) with name
   bound to integers from 0 through n-1."
   [bindings & body]
-  (if (vector? bindings)
-    (let [i (first bindings)
-          n (second bindings)]
-      `(let [n# (int ~n)]
-         (loop [~i (int 0)]
-           (when (< ~i n#)
-             ~@body
-             (recur (unchecked-inc ~i))))))
-    (throw (IllegalArgumentException.
-             "dotimes now requires a vector for its binding"))))
+  (assert-args dotimes
+     (vector? bindings) "a vector for its binding"
+     (even? (count bindings)) "exactly 2 forms in binding vector")
+  (let [i (first bindings)
+        n (second bindings)]
+    `(let [n# (int ~n)]
+       (loop [~i (int 0)]
+         (when (< ~i n#)
+           ~@body
+           (recur (unchecked-inc ~i)))))))
 
 (defn import
   "import-list => (package-symbol class-name-symbols*)
@@ -1917,18 +1934,18 @@
   of the inits, and a finally clause that calls (.close name) on each
   name in reverse order."
   [bindings & body]
-  (if (vector? bindings)
-    (cond
-      (= (count bindings) 0) `(do ~@body)
-      (symbol? (bindings 0)) `(let ~(subvec bindings 0 2)
-                                (try
-                                    (with-open ~(subvec bindings 2) ~@body)
-                                    (finally
-                                      (. ~(bindings 0) close))))
-      :else (throw (IllegalArgumentException.
-                     "with-open only allows Symbols in bindings")))
-    (throw (IllegalArgumentException.
-             "with-open now requires a vector for its binding"))))
+  (assert-args with-open
+     (vector? bindings) "a vector for its binding"
+     (even? (count bindings)) "an even number of forms in binding vector")
+  (cond
+    (= (count bindings) 0) `(do ~@body)
+    (symbol? (bindings 0)) `(let ~(subvec bindings 0 2)
+                              (try
+                                (with-open ~(subvec bindings 2) ~@body)
+                                (finally
+                                  (. ~(bindings 0) close))))
+    :else (throw (IllegalArgumentException.
+                   "with-open only allows Symbols in bindings"))))
 
 (defmacro doto
   "Evaluates x then calls all of the methods and functions with the 
@@ -2315,6 +2332,9 @@
   to the var objects themselves, and must be accessed with var-get and
   var-set"
   [name-vals-vec & body]
+  (assert-args with-local-vars
+     (vector? name-vals-vec) "a vector for its binding"
+     (even? (count name-vals-vec)) "an even number of forms in binding vector")
   `(let [~@(interleave (take-nth 2 name-vals-vec)
                        (repeat '(. clojure.lang.Var (create))))]
      (. clojure.lang.Var (pushThreadBindings (hash-map ~@name-vals-vec)))
@@ -2410,8 +2430,9 @@
   the binding-forms are bound to their respective init-exprs or parts
   therein."
   [bindings & body]
-  (when (odd? (count bindings))
-    (throw (Exception. "Odd number of elements in let bindings")))
+  (assert-args let
+     (vector? bindings) "a vector for its binding"
+     (even? (count bindings)) "an even number of forms in binding vector")
   `(let* ~(destructure bindings) ~@body))
 
 ;redefine fn with destructuring
@@ -2457,6 +2478,9 @@
   the binding-forms are bound to their respective init-exprs or parts
   therein. Acts as a recur target."
   [bindings & body]
+    (assert-args loop
+      (vector? bindings) "a vector for its binding"
+      (even? (count bindings)) "an even number of forms in binding vector")
     (let [db (destructure bindings)]
       (if (= db bindings)
         `(loop* ~bindings ~@body)
@@ -2478,13 +2502,13 @@
 
   Same as (when (seq xs) (let [x (first xs)] body))"
   [bindings & body]
-  (if (vector? bindings)
-    (let [[x xs] bindings]
-      `(when (seq ~xs)
-         (let [~x (first ~xs)]
-           ~@body)))
-    (throw (IllegalArgumentException.
-             "when-first now requires a vector for its binding"))))
+  (assert-args when-first
+     (vector? bindings) "a vector for its binding"
+     (even? (count bindings)) "exactly 2 forms in binding vector")
+  (let [[x xs] bindings]
+    `(when (seq ~xs)
+       (let [~x (first ~xs)]
+         ~@body))))
 
 (defmacro lazy-cat
   "Expands to code which yields a lazy sequence of the concatenation
@@ -2508,6 +2532,9 @@
 
  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
  ([seq-exprs expr]
+  (assert-args for
+     (vector? seq-exprs) "a vector for its binding"
+     (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [to-groups (fn [seq-exprs]
                     (reduce (fn [groups [k v]]
                               (if (keyword? k)
@@ -2814,29 +2841,29 @@
   ([bindings then]
    `(if-let ~bindings ~then nil))
   ([bindings then else & oldform]
-   (if (and (vector? bindings) (nil? oldform))
-     (let [[form tst] bindings]
-       `(let [temp# ~tst]
-          (if temp# 
-            (let [~form temp#]
-              ~then)
-            ~else)))
-     (throw (IllegalArgumentException.
-              "if-let now requires a vector for its binding")))))
+   (assert-args if-let
+     (and (vector? bindings) (nil? oldform)) "a vector for its binding"
+     (even? (count bindings)) "exactly 2 forms in binding vector")
+   (let [[form tst] bindings]
+     `(let [temp# ~tst]
+        (if temp# 
+          (let [~form temp#]
+            ~then)
+          ~else)))))
 
 (defmacro when-let
   "bindings => binding-form test
 
   When test is true, evaluates body with binding-form bound to the value of test"
   [bindings & body]
-  (if (vector? bindings)
-    (let [[form tst] bindings]
-      `(let [temp# ~tst]
-         (when temp#
-           (let [~form temp#]
-             ~@body))))
-    (throw (IllegalArgumentException.
-             "when-let now requires a vector for its binding"))))
+  (assert-args when-let
+     (vector? bindings) "a vector for its binding"
+     (even? (count bindings)) "exactly 2 forms in binding vector")
+  (let [[form tst] bindings]
+    `(let [temp# ~tst]
+       (when temp#
+         (let [~form temp#]
+           ~@body)))))
 
 (defn replace
   "Given a map of replacement pairs and a vector/collection, returns a
