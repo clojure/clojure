@@ -457,7 +457,10 @@ final static class IntegerOps implements Ops{
 
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
-		return -x.intValue();
+		int val = x.intValue();
+		if(val > Integer.MIN_VALUE)
+			return -val;
+		return -((long) val);
 	}
 
 	public Number inc(Number x){
@@ -583,7 +586,10 @@ final static class LongOps implements Ops{
 
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
-		return -x.longValue();
+		long val = x.longValue();
+		if(val > Long.MIN_VALUE)
+			return -val;
+		return BigInteger.valueOf(val).negate();
 	}
 
 	public Number inc(Number x){
