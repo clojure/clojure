@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Callable;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
                                                                List,
@@ -358,17 +359,24 @@ public int compareTo(Object o){
 	return 0;
 }
 
-public IStream stream() throws Exception {
-    final AtomicInteger ai = new AtomicInteger(0);
-    return new IStream(){
-        public Object next() throws Exception {
-            int i = ai.getAndIncrement();
-            if(i < count())
-                return nth(i);
+public AStream stream() throws Exception {
+    return new AStream(new Src(this));
+}
+
+    static class Src implements Callable{
+        final IPersistentVector v;
+        int i = 0;
+
+        Src(IPersistentVector v) {
+            this.v = v;
+        }
+
+        public Object call() throws Exception {
+            if (i < v.count())
+                return v.nth(i++);
             return RT.eos();
         }
-    };
-}
+    }
 
     static class Seq extends ASeq implements IndexedSeq, IReduce{
 	//todo - something more efficient

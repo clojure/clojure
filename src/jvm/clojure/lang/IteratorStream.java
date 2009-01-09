@@ -13,17 +13,22 @@
 package clojure.lang;
 
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 
-public class IteratorStream implements IStream{
-    final Iterator iter;
+public class IteratorStream implements Callable{
+final Iterator iter;
 
-    public IteratorStream(Iterator iter) {
-        this.iter = iter;
-    }
+static public AStream create(Iterator iter){
+	return new AStream(new IteratorStream(iter));
+}
 
-    synchronized public Object next() throws Exception {
-        if(iter.hasNext())
-            return iter.next();
-        return RT.eos();
-    }
+IteratorStream(Iterator iter){
+	this.iter = iter;
+}
+
+public Object call() throws Exception{
+	if(iter.hasNext())
+		return iter.next();
+	return RT.eos();
+}
 }

@@ -447,29 +447,23 @@ static public ISeq seq(Object coll){
 		return null;
 	else if(coll instanceof ISeq)
 		return (ISeq) coll;
-	else if(coll instanceof IPersistentCollection)
-		return ((IPersistentCollection) coll).seq();
+	else if(coll instanceof Seqable)
+		return ((Seqable) coll).seq();
 	else
 		return seqFrom(coll);
 }
 
-static public IStream stream(final Object coll) throws Exception{
+static public AStream stream(final Object coll) throws Exception{
 	if(coll == null)
 		return EMPTY_STREAM;
-    else if(coll instanceof IStream)
-        return (IStream) coll;
+    else if(coll instanceof AStream)
+        return (AStream) coll;
+    else if(coll instanceof Fn)
+        return new AStream((Callable)coll);
 	else if(coll instanceof Streamable)
 		return ((Streamable)coll).stream();
-    else if(coll instanceof Fn)
-        {
-        return new IStream(){
-            public Object next() throws Exception {
-                return ((IFn)coll).invoke();
-            }
-        };
-        }
     else if(coll instanceof Iterable)
-		return new IteratorStream(((Iterable) coll).iterator());
+		return IteratorStream.create(((Iterable) coll).iterator());
     else if (coll.getClass().isArray())
         return ArrayStream.createFromObject(coll);
     else if (coll instanceof String)
@@ -1686,8 +1680,8 @@ static public int alength(Object xs){
 }
 
 final static private Object EOS = new Object();
-    
-final static public Object eos() {
+
+static public Object eos() {
         return EOS;
     }
 
@@ -1695,12 +1689,11 @@ static public boolean isEOS(Object o){
         return o == EOS;
     }
 
-static final public IStream EMPTY_STREAM = new IStream(){
-
-    public Object next() throws Exception {
+static final public AStream EMPTY_STREAM = new AStream(new Callable(){
+    synchronized public Object call() throws Exception {
         return eos();
     }
-};
+});
 
 synchronized public static DynamicClassLoader getRootClassLoader() {
     if(ROOT_CLASSLOADER == null)

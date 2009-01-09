@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Callable;
 
 public class Range extends ASeq implements IReduce, Streamable{
 final int end;
@@ -63,15 +63,23 @@ public int count() {
     return end - n;
     }
 
-    public IStream stream() throws Exception {
-    final AtomicInteger an = new AtomicInteger(n);
-    return new IStream(){
-        public Object next() throws Exception {
-            int i = an.getAndIncrement();
-            if (i < end)
-                return i;
+public AStream stream() throws Exception {
+    return new AStream(new Src(n,end));
+}
+
+    static class Src implements Callable{
+        int n;
+        final int end;
+
+        public Src(int n, int end) {
+            this.n = n;
+            this.end = end;
+        }
+
+        public Object call() throws Exception {
+            if(n < end)
+                return n++;
             return RT.eos();
         }
-    };
-}
+    }
 }

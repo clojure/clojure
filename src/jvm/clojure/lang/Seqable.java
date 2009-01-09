@@ -8,10 +8,10 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Dec 7, 2008 */
+/* rich Dec 14, 2008 */
 
 package clojure.lang;
 
-public interface IStream {
-    Object next() throws Exception;
+public interface Seqable {
+    ISeq seq();
 }

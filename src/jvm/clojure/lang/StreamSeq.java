@@ -13,11 +13,11 @@
 package clojure.lang;
 
 public class StreamSeq extends ASeq {
-    IStream stream;
+    AStream stream;
     final Object _first;
     ISeq _rest;
 
-    static public StreamSeq create(IStream stream) throws Exception {
+    static public StreamSeq create(AStream stream) throws Exception {
         Object x = stream.next();
         if (RT.isEOS(x))
             return null;
@@ -31,7 +31,7 @@ public class StreamSeq extends ASeq {
         this.stream = null;
     }
 
-    StreamSeq(Object first, IStream stream) {
+    StreamSeq(Object first, AStream stream) {
         this._first = first;
         this.stream = stream;
     }
