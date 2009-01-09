@@ -53,7 +53,7 @@
   will be returned which at the REPL will cause more detail to be
   printed.
 
-  Examples: (show Intger)  (show [])"
+  Examples: (show Integer)  (show [])  (show String 23)"
   ([x] (show x nil))
   ([x i]
       (let [c (if (class? x) x (class x))
