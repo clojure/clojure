@@ -71,3 +71,14 @@
      `(let [v# (def ~name (. (var ~orig) (get)))]
         (. v# (setMeta (merge (meta (var ~orig)) (assoc (meta (var ~name)) :doc ~doc))))
         v#)))
+
+; defhinted by Chouser:
+(defmacro defhinted
+  "Defines a var with a type hint matching the class of the given
+  init.  Be careful about using any form of 'def' or 'binding' to a
+  value of a different type.  See http://paste.lisp.org/display/73344"
+  [sym init]
+  `(do
+     (def ~sym ~init)
+     (alter-meta! (var ~sym) assoc :tag (class ~sym))
+     (var ~sym)))
