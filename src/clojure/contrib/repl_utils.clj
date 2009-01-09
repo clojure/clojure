@@ -47,6 +47,13 @@
     [[(not static?) method? (sortable text)] text m]))
 
 (defn show
+  "With one arg, lists all static and instance members of the given
+  class, or the class of the given object.  Each entry is listed with
+  a number.  Use that number as the second argument, and that member
+  will be returned which at the REPL will cause more detail to be
+  printed.
+
+  Examples: (show Intger)  (show [])"
   ([x] (show x nil))
   ([x i]
       (let [c (if (class? x) x (class x))
@@ -61,7 +68,15 @@
             (doseq [[i e] (indexed items)]
               (printf "[%2d] %s\n" i (second e))))))))
 
-(defn get-source [x]
+(defn get-source
+  "Returns a string of the source code for the given symbol, if it can
+  find it.  This requires that the symbol resolve to a Var defined in
+  a namespace for which the .clj is in the classpath.  Returns nil if
+  it can't find the source.  For most REPL usage, 'source' is more
+  convenient.
+  
+  Example: (get-source 'filter)"
+  [x]
   (when-let [v (resolve x)]
     (let [ns-name (str (.name (.ns v)))
           path (first (re-seq #"^.*(?=/[^/]*$)" (.replace ns-name "." "/")))
@@ -77,5 +92,11 @@
             (read (PushbackReader. pbr))
             (str text)))))))
 
-(defmacro source [n]
+(defmacro source
+  "Prints the source code for the given symbol, if it can find it.
+  This requires that the symbol resolve to a Var defined in a
+  namespace for which the .clj is in the classpath.
+  
+  Example: (source filter)"
+  [n]
   `(println (or (get-source '~n) (str "Source not found"))))
