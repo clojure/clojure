@@ -1,7 +1,7 @@
 ;;; duck_streams.clj -- duck-typed I/O streams for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; December 19, 2008
+;; January 10, 2009
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -26,6 +26,9 @@
 
 ;; CHANGE LOG
 ;;
+;; January 10, 2009: added *default-encoding*, so streams are always
+;; opened as UTF-8.
+;;
 ;; December 19, 2008: rewrote reader and writer as multimethods; added
 ;; slurp*, file, and read-lines
 ;;
@@ -35,12 +38,14 @@
 
 (ns clojure.contrib.duck-streams
     (:import 
-     (java.io Reader InputStream InputStreamReader FileReader
+     (java.io Reader InputStream InputStreamReader 
               BufferedReader File PrintWriter OutputStream
-              OutputStreamWriter BufferedWriter Writer FileWriter)
+              OutputStreamWriter BufferedWriter Writer
+              FileInputStream FileOutputStream)
      (java.net URI URL MalformedURLException)))
 
 
+(def *default-encoding* "UTF-8")
 
 (defn #^File file
   "Concatenates args as strings returns a java.io.File.  Replaces all
@@ -57,9 +62,6 @@
     (File. s)))
 
 
-(defmacro #^{:private true} bufr [reader]
-  `(new java.io.BufferedReader ~reader))
-
 (defmulti #^{:tag BufferedReader
              :doc "Attempts to coerce its argument into an open
   java.io.BufferedReader.  Argument may be an instance of Reader,
@@ -67,40 +69,38 @@
 
   If argument is a String, it tries to resolve it first as a URI, then
   as a local file name.  URIs with a 'file' protocol are converted to
-  local file names.
+  local file names.  Uses *default-encoding* as the text encoding.
 
   Should be used inside with-open to ensure the Reader is properly
   closed."}
   reader class)
 
-(defmethod reader BufferedReader [x] x)
+(defmethod reader Reader [x] x)
 
-(defmethod reader BufferedReader [x] (bufr x))
+(defmethod reader InputStream [x]
+  (BufferedReader. (InputStreamReader. x *default-encoding*)))
 
-(defmethod reader InputStream [x] (bufr (InputStreamReader. x)))
-
-(defmethod reader File [#^File x] (bufr (FileReader. x)))
+(defmethod reader File [#^File x]
+  (reader (FileInputStream. x)))
 
 (defmethod reader URL [#^URL x]
-  (if (= "file" (.getProtocol x))
-    (bufr (FileReader. (.getPath x)))
-    (bufr (InputStreamReader. (.openStream x)))))
+  (reader (if (= "file" (.getProtocol x))
+            (FileInputStream. (.getPath x))
+            (.openStream x))))
 
-(defmethod reader URI [#^URI x] (reader (.toURL x)))
+(defmethod reader URI [#^URI x]
+  (reader (.toURL x)))
 
 (defmethod reader String [#^String x]
   (try (let [url (URL. x)]
          (reader url))
        (catch MalformedURLException e
-         (bufr (FileReader. #^File (file x))))))
+         (reader (file x)))))
 
 (defmethod reader :default [x]
-  (throw (Exception. (str "Cannot open <" (pr-str x) "> as a reader."))))
+  (throw (Exception. (str "Cannot open " (pr-str x) " as a reader."))))
 
 
-
-(defmacro #^{:private true} bufw [writer]
-  `(new java.io.PrintWriter (new java.io.BufferedWriter ~writer)))
 
 (defmulti #^{:tag PrintWriter
              :doc "Attempts to coerce its argument into an open java.io.PrintWriter
@@ -118,24 +118,34 @@
 
 (defmethod writer PrintWriter [x] x)
 
-(defmethod writer BufferedWriter [#^BufferedWriter x] (PrintWriter. x))
+(defmethod writer BufferedWriter [#^BufferedWriter x]
+  (PrintWriter. x))
 
-(defmethod writer Writer [x] (bufw x)) ; includes FileWriter
+(defmethod writer Writer [x]
+  ;; Writer includes sub-classes such as FileWriter
+  (PrintWriter. (BufferedWriter. x)))   
 
-(defmethod writer File [#^File x] (bufw (FileWriter. x)))
+(defmethod writer OutputStream [x]
+  (PrintWriter.
+   (BufferedWriter.
+    (OutputStreamWriter. x *default-encoding*))))
+
+(defmethod writer File [#^File x]
+  (writer (FileOutputStream. x)))
 
 (defmethod writer URL [#^URL x]
   (if (= "file" (.getProtocol x))
-    (bufw (FileWriter. (.getPath x)))
+    (writer (File. (.getPath x)))
     (throw (Exception. (str "Cannot write to non-file URL <" x ">")))))
 
-(defmethod writer URI [#^URI x] (writer (.toURL x)))
+(defmethod writer URI [#^URI x]
+  (writer (.toURL x)))
 
 (defmethod writer String [#^String x]
   (try (let [url (URL. x)]
          (writer url))
        (catch MalformedURLException err
-         (bufw (FileWriter. #^File (file x))))))
+         (writer (file x)))))
 
 (defmethod writer :default [x]
   (throw (Exception. (str "Cannot open <" (pr-str x) "> as a writer."))))
