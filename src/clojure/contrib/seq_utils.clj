@@ -1,7 +1,7 @@
 ;;; seq_utils.clj -- Sequence utilities for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; last updated January 05, 2009
+;; last updated January 10, 2009
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -10,6 +10,15 @@
 ;; distribution.  By using this software in any fashion, you are
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
+
+
+;; Change Log
+;;
+;; January 10, 2009 (Stuart Sierra):
+;;
+;; * BREAKING CHANGE: "includes?" now takes collection as first
+;;   argument.  This is more consistent with Clojure collection
+;;   functions; see discussion at http://groups.google.com/group/clojure/browse_thread/thread/8b2c8dc96b39ddd7/a8866d34b601ff43
 
 
 (ns clojure.contrib.seq-utils)
@@ -32,9 +41,10 @@
   [(filter f s) (filter (complement f) s)])
 
 (defn includes?
-  "Returns true if s contains something equal (with =) to x."
-  [x s]
-  (if (some (fn [y] (= y x)) s)
+  "Returns true if coll contains something equal (with =) to x,
+  in linear time."
+  [coll x]
+  (if (some (fn [y] (= y x)) coll)
     true false))
 
 (defn indexed
