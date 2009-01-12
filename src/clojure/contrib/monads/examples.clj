@@ -241,4 +241,50 @@
     (list [x1 x2] [y1 y2])))
 
 (identical-random-seqs 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Sequences with undefined value: the maybe-t monad transformer
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; A monad transformer is a function that takes a monad argument and
+; returns a monad as its result. The resulting monad adds some
+; specific behaviour aspect to the input monad.
+
+; The simplest monad transformer is maybe-t. It adds the functionality
+; of the maybe monad (handling failures or undefined values) to any other
+; monad. We illustrate this by applying maybe-t to the sequence monad.
+; The result is an enhanced sequence monad in which undefined values
+; (represented by nil) are not subjected to any transformation, but
+; lead immediately to a nil result in the output.
+
+; First we define the combined monad:
+(def seq-maybe (maybe-t sequence))
+
+; As a first illustration, we create a range of integers and replace
+; all even values by nil, using a simple when expression. We use this
+; sequence in a monad comprehension that yields (inc x). The result
+; is a sequence in which inc has been applied to all non-nil values,
+; whereas the nil values appear unmodified in the output:
+(domonad seq-maybe
+  [x  (for [n (range 10)] (when (odd? n) n))]
+  (inc x))
+
+; Next we repeat the definition of the function pairs (see above), but
+; using the seq-maybe monad:
+(with-monad seq-maybe
+   (defn pairs-maybe [xs]
+      (m-seq (list xs xs))))
+
+; Applying this to a sequence containing nils yields the pairs of all
+; non-nil values interspersed with nils that result from any combination
+; in which one or both of the values is nil:
+(pairs-maybe (for [n (range 5)] (when (odd? n) n)))
+
+; It is important to realize that undefined values (nil) are not eliminated
+; from the iterations. They are simply not passed on to any operations.
+; The outcome of any function applied to arguments of which at least one
+; is nil is supposed to be nil as well, and the function is never called.
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

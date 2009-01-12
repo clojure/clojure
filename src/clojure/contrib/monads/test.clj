@@ -1,7 +1,7 @@
 ;; Test routines for monads.clj
 
 ;; by Konrad Hinsen
-;; last updated December 31, 2008
+;; last updated January 12, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,7 +12,9 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-monads
-  (:use clojure.contrib.test-is clojure.contrib.monads))
+  (:use clojure.contrib.test-is
+	clojure.contrib.monads
+	clojure.contrib.macros))
 
 (deftest sequence-monad
   (with-monad sequence 
@@ -43,5 +45,14 @@
 	  m-zero
 	(m-plus m-zero (m-result 1) m-zero (m-result 2))
 	  (m-result 1)))))
+
+(deftest seq-maybe-monad
+  (with-monad (maybe-t sequence)
+    (letfn [pairs [xs] ((m-lift 2 #(list %1 %2)) xs xs)]
+      (are (= _1 _2)
+        ((m-lift 1 inc) (for [n (range 10)] (when (odd? n) n)))
+          '(nil 2 nil 4 nil 6 nil 8 nil 10)
+        (pairs (for [n (range 5)] (when (odd? n) n)))
+          '(nil nil (1 1) nil (1 3) nil nil nil (3 1) nil (3 3) nil nil)))))
 
 (run-tests)
