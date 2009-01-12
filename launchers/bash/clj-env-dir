@@ -44,9 +44,11 @@ set -o nounset
 #set -o xtrace
 
 EXT="$(find ${CLOJURE_EXT} -mindepth 1 -maxdepth 1 -print0 | tr \\0 \:)"
+CLASSPATH="${EXT%:}${CLASSPATH:+:${CLASSPATH}}"
+export CLASSPATH
 
 JAVA=${CLOJURE_JAVA:-java}
 OPTS=${CLOJURE_OPTS:-}
 MAIN=${CLOJURE_MAIN:-clojure.main}
 
-CLASSPATH="${EXT}${CLASSPATH:-}" exec $JAVA $OPTS $MAIN "$@"
+exec $JAVA $OPTS $MAIN "$@"
