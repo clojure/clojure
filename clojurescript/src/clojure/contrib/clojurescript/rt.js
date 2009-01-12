@@ -1,7 +1,7 @@
-//   Copyright (c) Chris Houser, Sep 2008. All rights reserved.
+//   Copyright (c) Chris Houser, Sep 2008 - Jan 2009. All rights reserved.
 //   The use and distribution terms for this software are covered by the
-//   Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
-//   which can be found in the file CPL.TXT at the root of this distribution.
+//   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+//   which can be found in the file epl-v10.html at the root of this distribution.
 //   By using this software in any fashion, you are agreeing to be bound by
 //   the terms of this license.
 //   You must not remove this notice, or any other, from this software.
@@ -504,6 +504,7 @@ clojure.JS.defclass( clojure.JS, "String", {
 });
 
 clojure.JS.definterface( clojure.lang, "IObj" );
+clojure.JS.definterface( clojure.lang, "IMeta" );
 
 clojure.JS.defclass( clojure.lang, "Obj", {
   implement: [ clojure.lang.IObj ],
@@ -1835,6 +1836,9 @@ clojure.JS.defclass( clojure.lang.PersistentHashMap, "HashCollisionNode", {
     getHash: function(){ return this.hash; }
   }
 });
+
+// XXX dirty little hack until such time as PersistentArrayMap is ported
+clojure.lang.PersistentArrayMap = clojure.lang.PersistentHashMap;
 
 clojure.JS.definterface( clojure.lang, "IPersistentSet",
     [ clojure.lang.IPersistentCollection ] );

@@ -1,13 +1,247 @@
-commit 5b84f0b77a1e1b9cc443c64b66e6fbffaa6f17a4
+commit 3a3b1b4f8fad93e54cd3571010bacf787c6a77c8
 Author: Chouser <chouser@n01se.net>
-Date:   Thu Nov 20 11:03:00 2008 -0500
+Date:   Wed Dec 17 15:14:51 2008 -0500
 
     ClojureScript support
 
-diff --git a/src/clj/clojure/core-print.clj b/src/clj/clojure/core-print.clj
-index 05c8abc..0f04558 100644
---- a/src/clj/clojure/core-print.clj
-+++ b/src/clj/clojure/core-print.clj
+diff --git a/src/clj/clojure/core.clj b/src/clj/clojure/core.clj
+index 5a4cef0..1812548 100644
+--- a/src/clj/clojure/core.clj
++++ b/src/clj/clojure/core.clj
+@@ -321,7 +321,7 @@
+           (if more
+             (recur (. sb  (append (str (first more)))) (rest more))
+             (str sb)))
+-      (new StringBuilder #^String (str x)) ys)))
++      (clojure.lang.RT/makeStringBuilder (str x)) ys)))
+ 
+ 
+ (defn symbol?
+@@ -553,7 +553,7 @@
+   {:inline (fn [x y] `(. clojure.lang.Numbers (add ~x ~y)))
+    :inline-arities #{2}}
+   ([] 0)
+-  ([x] (cast Number x))
++  ([x] (clojure.lang.RT/numberCast x))
+   ([x y] (. clojure.lang.Numbers (add x y)))
+   ([x y & more]
+    (reduce + (+ x y) more)))
+@@ -563,7 +563,7 @@
+   {:inline (fn [x y] `(. clojure.lang.Numbers (multiply ~x ~y)))
+    :inline-arities #{2}}
+   ([] 1)
+-  ([x] (cast Number x))
++  ([x] (clojure.lang.RT/numberCast x))
+   ([x y] (. clojure.lang.Numbers (multiply x y)))
+   ([x y & more]
+    (reduce * (* x y) more)))
+@@ -1478,12 +1478,12 @@
+ (defn range
+   "Returns a lazy seq of nums from start (inclusive) to end
+   (exclusive), by step, where start defaults to 0 and step to 1."
+-  ([end] (if (and (> end 0) (<= end (. Integer MAX_VALUE)))
++  ([end] (if (and (> end 0) (<= end clojure.lang.RT/IntegerMaxValue))
+            (new clojure.lang.Range 0 end)
+            (take end (iterate inc 0))))
+   ([start end] (if (and (< start end)
+-                        (>= start (. Integer MIN_VALUE))
+-                        (<= end (. Integer MAX_VALUE)))
++                        (>= start clojure.lang.RT/IntegerMinValue)
++                        (<= end clojure.lang.RT/IntegerMaxValue))
+                  (new clojure.lang.Range start end)
+                  (take (- end start) (iterate inc start))))
+   ([start end step]
+@@ -1550,7 +1550,7 @@
+   ([#^java.util.Comparator comp coll]
+    (when (and coll (not (zero? (count coll))))
+      (let [a (to-array coll)]
+-       (. java.util.Arrays (sort a comp))
++       (clojure.lang.RT/sortArray a comp)
+        (seq a)))))
+ 
+ (defn sort-by
+@@ -1640,7 +1640,7 @@
+   [& agents]
+   (io! "await in transaction"
+     (when *agent*
+-      (throw (new Exception "Can't await in agent action")))
++      (throw (clojure.lang.RT/makeException "Can't await in agent action")))
+     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+           count-down (fn [agent] (. latch (countDown)) agent)]
+       (doseq [agent agents]
+@@ -1660,7 +1660,7 @@
+   [timeout-ms & agents]
+     (io! "await-for in transaction"
+      (when *agent*
+-       (throw (new Exception "Can't await in agent action")))
++       (throw (clojure.lang.RT/makeException "Can't await in agent action")))
+      (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+            count-down (fn [agent] (. latch (countDown)) agent)]
+        (doseq [agent agents]
+@@ -1984,6 +1984,7 @@
+ 
+ 
+ (import '(java.lang.reflect Array))
++(import '(clojure.lang RT))
+ 
+ (defn alength
+   "Returns the length of the Java array. Works on arrays of all
+@@ -2003,7 +2004,7 @@
+   {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
+    :inline-arities #{2}}
+   ([array idx]
+-   (clojure.lang.Reflector/prepRet (. Array (get array idx))))
++   (clojure.lang.Reflector/prepRet (RT/aget array idx)))
+   ([array idx & idxs]
+    (apply aget (aget array idx) idxs)))
+ 
+@@ -2013,7 +2014,7 @@
+   {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a ~i ~v)))
+    :inline-arities #{3}}
+   ([array idx val]
+-   (. Array (set array idx val))
++   (RT/aset array idx val)
+    val)
+   ([array idx idx2 & idxv]
+    (apply aset (aget array idx) idx2 idxv)))
+@@ -2170,6 +2171,10 @@
+   "Returns a set of the distinct elements of coll."
+   [coll] (apply hash-set coll))
+ 
++(defn class?
++  "Returns true if x is an instance of Class"
++  [x] (instance? Class x))
++
+ (defn #^{:private true}
+   filter-key [keyfn pred amap]
+     (loop [ret {} es (seq amap)]
+@@ -2205,7 +2210,7 @@
+   [x]
+   (if (instance? clojure.lang.Namespace x) 
+     x 
+-    (or (find-ns x) (throw (Exception. (str "No namespace: " x " found"))))))
++    (or (find-ns x) (throw (RT/makeException (str "No namespace: " x " found"))))))
+ 
+ (defn ns-name
+   "Returns the name of the namespace, a symbol."
+@@ -2238,7 +2243,7 @@
+ (defn ns-imports
+   "Returns a map of the import mappings for the namespace."
+   [ns]
+-  (filter-key val (partial instance? Class) (ns-map ns)))
++  (filter-key val class? (ns-map ns)))
+ 
+ (defn refer
+   "refers to all public vars of ns, subject to filters.
+@@ -2256,7 +2261,8 @@
+   to a symbol different from the var's name, in order to prevent
+   clashes. Use :use in the ns macro in preference to calling this directly."
+   [ns-sym & filters]
+-    (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
++    (let [ns (or (find-ns ns-sym)
++                 (throw (RT/makeException (str "No namespace: " ns-sym))))
+           fs (apply hash-map filters)
+           nspublics (ns-publics ns)
+           rename (or (:rename fs) {})
+@@ -2388,7 +2394,7 @@
+                                                      true)
+                                 (= firstb :as) (pb ret (second bs) gvec)
+                                 :else (if seen-rest?
+-                                        (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
++                                        (throw (RT/makeException "Unsupported binding form, only :as can follow & parameter"))
+                                         (recur (pb ret firstb  (list `nth gvec n nil))
+                                                (inc n)
+                                                (rest bs)
+@@ -2419,7 +2425,7 @@
+                   (symbol? b) (-> bvec (conj b) (conj v))
+                   (vector? b) (pvec bvec b v)
+                   (map? b) (pmap bvec b v)
+-                  :else (throw (new Exception (str "Unsupported binding form: " b))))))
++                  :else (throw (RT/makeException (str "Unsupported binding form: " b))))))
+         process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
+     (if (every? symbol? (keys bmap))
+       bindings
+@@ -2567,7 +2573,7 @@
+   StringWriter.  Returns the string created by any nested printing
+   calls."
+   [& body]
+-  `(let [s# (new java.io.StringWriter)]
++  `(let [s# (clojure.lang.RT/makeStringWriter)]
+      (binding [*out* s#]
+        ~@body
+        (str s#))))
+@@ -2613,7 +2619,7 @@
+  logical true."
+   [x]
+   `(when-not ~x
+-     (throw (new Exception (str "Assert failed: " (pr-str '~x))))))
++     (throw (clojure.lang.RT/makeException (str "Assert failed: " (pr-str '~x))))))
+ 
+ (defn test
+   "test [v] finds fn at key :test in var metadata and calls it,
+@@ -2687,7 +2693,7 @@
+ (defn rand
+   "Returns a random floating point number between 0 (inclusive) and
+   1 (exclusive)."
+-  ([] (. Math (random)))
++  ([] (RT/random))
+   ([n] (* n (rand))))
+ 
+ (defn rand-int
+@@ -2797,7 +2803,7 @@
+   "Reads the file named by f into a string and returns it."
+   [#^String f]
+   (with-open [r (new java.io.BufferedReader (new java.io.FileReader f))]
+-    (let [sb (new StringBuilder)]
++    (let [sb (RT/makeStringBuilder)]
+       (loop [c (. r (read))]
+         (if (neg? c)
+           (str sb)
+@@ -3081,10 +3087,6 @@
+      (send-off agt fill)
+      (drain))))
+ 
+-(defn class?
+-  "Returns true if x is an instance of Class"
+-  [x] (instance? Class x))
+-
+ (defn alter-var-root
+   "Atomically alters the root binding of var v by applying f to its
+   current value plus any args"
+@@ -3170,7 +3172,7 @@
+   relationships."
+   ([tag] (descendants global-hierarchy tag))
+   ([h tag] (if (class? tag)
+-             (throw (java.lang.UnsupportedOperationException. "Can't get descendants of classes"))
++             (throw (RT/makeUnsupportedException "Can't get descendants of classes"))
+              (not-empty (get (:descendants h) tag)))))
+ 
+ (defn derive
+@@ -3200,9 +3202,9 @@
+      (or 
+       (when-not (contains? (tp tag) parent)
+         (when (contains? (ta tag) parent)
+-          (throw (Exception. (print-str tag "already has" parent "as ancestor"))))
++          (throw (RT/makeException (print-str tag "already has" parent "as ancestor"))))
+         (when (contains? (ta parent) tag)
+-          (throw (Exception. (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))        
++          (throw (RT/makeException (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))
+         {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
+          :ancestors (tf (:ancestors h) tag td parent ta)
+          :descendants (tf (:descendants h) parent ta tag td)})
+@@ -3343,7 +3345,7 @@
+   [pred fmt & args]
+   (when pred
+     (let [message (apply format fmt args)
+-          exception (Exception. message)
++          exception (RT/makeException message)
+           raw-trace (.getStackTrace exception)
+           boring? #(not= (.getMethodName %) "doInvoke")
+           trace (into-array (drop 2 (drop-while boring? raw-trace)))]
+diff --git a/src/clj/clojure/core_print.clj b/src/clj/clojure/core_print.clj
+index 4dc83cf..1d2274b 100644
+--- a/src/clj/clojure/core_print.clj
++++ b/src/clj/clojure/core_print.clj
 @@ -75,14 +75,14 @@
  
  (defn print-ctor [o print-args #^Writer w]
@@ -43,7 +277,7 @@ index 05c8abc..0f04558 100644
    (.write w "/create ")
    (print-map m print-dup w)
    (.write w ")"))
-@@ -268,7 +268,7 @@
+@@ -269,7 +269,7 @@
     Short/TYPE "Short/TYPE"})
  
  (defmethod print-method Class [#^Class c, #^Writer w]
@@ -52,7 +286,7 @@ index 05c8abc..0f04558 100644
  
  (defmethod print-dup Class [#^Class c, #^Writer w]
    (cond
-@@ -278,11 +278,11 @@
+@@ -279,11 +279,11 @@
                         (.write w ")"))
      (.isArray c) (do
                     (.write w "#=(java.lang.Class/forName \"")
@@ -66,258 +300,11 @@ index 05c8abc..0f04558 100644
  
  (defmethod print-method java.math.BigDecimal [b, #^Writer w]
    (.write w (str b))
-@@ -317,4 +317,4 @@
-   (print-dup (.name n) w)
-   (.write w ")"))
- 
--(def #^{:private true} print-initialized true)
-\ No newline at end of file
-+(def #^{:private true} print-initialized true)
-diff --git a/src/clj/clojure/core.clj b/src/clj/clojure/core.clj
-index 1957f4f..0831fee 100644
---- a/src/clj/clojure/core.clj
-+++ b/src/clj/clojure/core.clj
-@@ -319,7 +319,7 @@
-           (if more
-             (recur (. sb  (append (str (first more)))) (rest more))
-             (str sb)))
--      (new StringBuilder #^String (str x)) ys)))
-+      (clojure.lang.RT/makeStringBuilder (str x)) ys)))
- 
- 
- (defn symbol?
-@@ -542,7 +542,7 @@
-   {:inline (fn [x y] `(. clojure.lang.Numbers (add ~x ~y)))
-    :inline-arities #{2}}
-   ([] 0)
--  ([x] (cast Number x))
-+  ([x] (clojure.lang.RT/numberCast x))
-   ([x y] (. clojure.lang.Numbers (add x y)))
-   ([x y & more]
-    (reduce + (+ x y) more)))
-@@ -552,7 +552,7 @@
-   {:inline (fn [x y] `(. clojure.lang.Numbers (multiply ~x ~y)))
-    :inline-arities #{2}}
-   ([] 1)
--  ([x] (cast Number x))
-+  ([x] (clojure.lang.RT/numberCast x))
-   ([x y] (. clojure.lang.Numbers (multiply x y)))
-   ([x y & more]
-    (reduce * (* x y) more)))
-@@ -1042,7 +1042,7 @@
-   ([state] (new clojure.lang.Agent state))
-   ([state validate-fn] (new clojure.lang.Agent state validate-fn)))
- 
--(defn ! [& args] (throw (new Exception "! is now send. See also send-off")))
-+(defn ! [& args] (throw (clojure.lang.RT/makeException "! is now send. See also send-off")))
- 
- (defn send
-   "Dispatch an action to an agent. Returns the agent immediately.
-@@ -1363,10 +1363,10 @@
- (defn range
-   "Returns a lazy seq of nums from start (inclusive) to end
-   (exclusive), by step, where start defaults to 0 and step to 1."
--  ([end] (if (and (> end 0) (< end (. Integer MAX_VALUE)))
-+  ([end] (if (and (> end 0) (< end clojure.lang.RT/IntegerMaxValue))
-            (new clojure.lang.Range 0 end)
-            (take end (iterate inc 0))))
--  ([start end] (if (and (< start end) (< end (. Integer MAX_VALUE)))
-+  ([start end] (if (and (< start end) (< end clojure.lang.RT/IntegerMaxValue))
-                  (new clojure.lang.Range start end)
-                  (take (- end start) (iterate inc start))))
-   ([start end step]
-@@ -1433,7 +1433,7 @@
-   ([#^java.util.Comparator comp coll]
-    (when (and coll (not (zero? (count coll))))
-      (let [a (to-array coll)]
--       (. java.util.Arrays (sort a comp))
-+       (clojure.lang.RT/sortArray a comp)
-        (seq a)))))
- 
- (defn sort-by
-@@ -1517,7 +1517,7 @@
-   occurred."
-   [& agents]
-     (when *agent*
--      (throw (new Exception "Can't await in agent action")))
-+      (throw (clojure.lang.RT/makeException "Can't await in agent action")))
-     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
-           count-down (fn [agent] (. latch (countDown)) agent)]
-       (doseq [agent agents]
-@@ -1536,7 +1536,7 @@
-   to timeout, non-nil otherwise."
-   [timeout-ms & agents]
-     (when *agent*
--      (throw (new Exception "Can't await in agent action")))
-+      (throw (clojure.lang.RT/makeException "Can't await in agent action")))
-     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
-           count-down (fn [agent] (. latch (countDown)) agent)]
-       (doseq [agent agents]
-@@ -1798,6 +1798,7 @@
- 
- 
- (import '(java.lang.reflect Array))
-+(import '(clojure.lang RT))
- 
- (defn alength
-   "Returns the length of the Java array. Works on arrays of all
-@@ -1817,7 +1818,7 @@
-   {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
-    :inline-arities #{2}}
-   ([array idx]
--   (clojure.lang.Reflector/prepRet (. Array (get array idx))))
-+   (clojure.lang.Reflector/prepRet (RT/aget array idx)))
-   ([array idx & idxs]
-    (apply aget (aget array idx) idxs)))
- 
-@@ -1827,7 +1828,7 @@
-   {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a ~i ~v)))
-    :inline-arities #{3}}
-   ([array idx val]
--   (. Array (set array idx val))
-+   (RT/aset array idx val)
-    val)
-   ([array idx idx2 & idxv]
-    (apply aset (aget array idx) idx2 idxv)))
-@@ -1995,6 +1996,10 @@
-   "Returns a set of the distinct elements of coll."
-   [coll] (apply hash-set coll))
- 
-+(defn class?
-+  "Returns true if x is an instance of Class"
-+  [x] (instance? Class x))
-+
- (defn #^{:private true}
-   filter-key [keyfn pred amap]
-     (loop [ret {} es (seq amap)]
-@@ -2027,7 +2032,7 @@
-   the-ns [x]
-   (if (instance? clojure.lang.Namespace x) 
-     x 
--    (or (find-ns x) (throw (Exception. (str "No namespace: " x " found"))))))
-+    (or (find-ns x) (throw (RT/makeException (str "No namespace: " x " found"))))))
- 
- (defn ns-name
-   "Returns the name of the namespace, a symbol."
-@@ -2060,7 +2065,7 @@
- (defn ns-imports
-   "Returns a map of the import mappings for the namespace."
-   [ns]
--  (filter-key val (partial instance? Class) (ns-map ns)))
-+  (filter-key val class? (ns-map ns)))
- 
- (defn refer
-   "refers to all public vars of ns, subject to filters.
-@@ -2078,7 +2083,8 @@
-   to a symbol different from the var's name, in order to prevent
-   clashes. Use :use in the ns macro in preference to calling this directly."
-   [ns-sym & filters]
--    (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
-+    (let [ns (or (find-ns ns-sym)
-+                 (throw (RT/makeException (str "No namespace: " ns-sym))))
-           fs (apply hash-map filters)
-           nspublics (ns-publics ns)
-           rename (or (:rename fs) {})
-@@ -2207,7 +2213,7 @@
-                                                      true)
-                                 (= firstb :as) (pb ret (second bs) gvec)
-                                 :else (if seen-rest?
--                                        (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
-+                                        (throw (RT/makeException "Unsupported binding form, only :as can follow & parameter"))
-                                         (recur (pb ret firstb  (list `nth gvec n nil))
-                                                (inc n)
-                                                (rest bs)
-@@ -2238,7 +2244,7 @@
-                   (symbol? b) (-> bvec (conj b) (conj v))
-                   (vector? b) (pvec bvec b v)
-                   (map? b) (pmap bvec b v)
--                  :else (throw (new Exception (str "Unsupported binding form: " b))))))
-+                  :else (throw (RT/makeException (str "Unsupported binding form: " b))))))
-         process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
-     (if (every? symbol? (keys bmap))
-       bindings
-@@ -2385,7 +2391,7 @@
-   StringWriter.  Returns the string created by any nested printing
-   calls."
-   [& body]
--  `(let [s# (new java.io.StringWriter)]
-+  `(let [s# (clojure.lang.RT/makeStringWriter)]
-      (binding [*out* s#]
-        ~@body
-        (str s#))))
-@@ -2431,7 +2437,7 @@
-  logical true."
-   [x]
-   `(when-not ~x
--     (throw (new Exception (str "Assert failed: " (pr-str '~x))))))
-+     (throw (clojure.lang.RT/makeException (str "Assert failed: " (pr-str '~x))))))
- 
- (defn test
-   "test [v] finds fn at key :test in var metadata and calls it,
-@@ -2503,7 +2509,7 @@
- (defn rand
-   "Returns a random floating point number between 0 (inclusive) and
-   1 (exclusive)."
--  ([] (. Math (random)))
-+  ([] (RT/random))
-   ([n] (* n (rand))))
- 
- (defn rand-int
-@@ -2613,7 +2619,7 @@
-   "Reads the file named by f into a string and returns it."
-   [#^String f]
-   (with-open [r (new java.io.BufferedReader (new java.io.FileReader f))]
--    (let [sb (new StringBuilder)]
-+    (let [sb (RT/makeStringBuilder)]
-       (loop [c (. r (read))]
-         (if (neg? c)
-           (str sb)
-@@ -2897,10 +2903,6 @@
-      (send-off agt fill)
-      (drain))))
- 
--(defn class?
--  "Returns true if x is an instance of Class"
--  [x] (instance? Class x))
--
- (defn alter-var-root
-   "Atomically alters the root binding of var v by applying f to its
-   current value plus any args"
-@@ -2986,7 +2988,7 @@
-   relationships."
-   ([tag] (descendants global-hierarchy tag))
-   ([h tag] (if (class? tag)
--             (throw (java.lang.UnsupportedOperationException. "Can't get descendants of classes"))
-+             (throw (RT/makeUnsupportedException "Can't get descendants of classes"))
-              (not-empty (get (:descendants h) tag)))))
- 
- (defn derive
-@@ -3013,9 +3015,9 @@
-      (or 
-       (when-not (contains? (tp tag) parent)
-         (when (contains? (ta tag) parent)
--          (throw (Exception. (print-str tag "already has" parent "as ancestor"))))
-+          (throw (RT/makeException (print-str tag "already has" parent "as ancestor"))))
-         (when (contains? (ta parent) tag)
--          (throw (Exception. (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))        
-+          (throw (RT/makeException (print-str "Cyclic derivation:" parent "has" tag "as ancestor"))))
-         {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
-          :ancestors (tf (:ancestors h) tag td parent ta)
-          :descendants (tf (:descendants h) parent ta tag td)})
-@@ -3145,7 +3147,7 @@
-   [pred fmt & args]
-   (when pred
-     (let [message (apply format fmt args)
--          exception (Exception. message)
-+          exception (RT/makeException message)
-           raw-trace (.getStackTrace exception)
-           boring? #(not= (.getMethodName %) "doInvoke")
-           trace (into-array (drop 2 (drop-while boring? raw-trace)))]
 diff --git a/src/jvm/clojure/lang/Compiler.java b/src/jvm/clojure/lang/Compiler.java
-index bbb5aff..d4dc231 100644
+index c180201..20a2bef 100644
 --- a/src/jvm/clojure/lang/Compiler.java
 +++ b/src/jvm/clojure/lang/Compiler.java
-@@ -201,7 +201,8 @@ static final public Var NEXT_LOCAL_NUM = Var.create(0);
+@@ -202,7 +202,8 @@ static final public Var NEXT_LOCAL_NUM = Var.create(0);
  static final public Var RET_LOCAL_NUM = Var.create();
  
  //DynamicClassLoader
@@ -328,19 +315,20 @@ index bbb5aff..d4dc231 100644
  public enum C{
  	STATEMENT,  //value ignored
 diff --git a/src/jvm/clojure/lang/RT.java b/src/jvm/clojure/lang/RT.java
-index f6139d1..fab9304 100644
+index 4954028..98981ea 100644
 --- a/src/jvm/clojure/lang/RT.java
 +++ b/src/jvm/clojure/lang/RT.java
-@@ -35,6 +35,8 @@ public class RT{
- static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null, "t"));
+@@ -32,6 +32,9 @@ static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null
  static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.create(null, "t"));
+ static final public String LOADER_SUFFIX = "__init";
  
 +static final public Integer IntegerMaxValue = Integer.MAX_VALUE;
++static final public Integer IntegerMinValue = Integer.MIN_VALUE;
 +
  //simple-symbol->class
  final static IPersistentMap DEFAULT_IMPORTS = map(
  //												  Symbol.create("RT"), "clojure.lang.RT",
-@@ -1060,6 +1062,10 @@ static public double doubleCast(double x){
+@@ -963,6 +966,10 @@ static public double doubleCast(double x){
  	return x;
  }
  
@@ -349,12 +337,12 @@ index f6139d1..fab9304 100644
 +}
 +
  static public IPersistentMap map(Object... init){
- 	if(init != null && init.length == 2)
- 		return new PersistentArrayMap(init);
-@@ -1792,4 +1798,43 @@ static public int alength(Object xs){
- 	return Array.getLength(xs);
- }
- 
+     if(init == null)
+         return PersistentArrayMap.EMPTY;
+@@ -1707,4 +1714,43 @@ synchronized public static DynamicClassLoader getRootClassLoader() {
+         ROOT_CLASSLOADER = new DynamicClassLoader();
+     return ROOT_CLASSLOADER;
+     }
 +
 +////////////// ClojureScript support /////////////////////////////////
 +
