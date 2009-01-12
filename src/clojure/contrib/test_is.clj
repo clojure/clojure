@@ -89,15 +89,22 @@
 ;; These are used in assert-expr methods.  Rebind "report" to plug in
 ;; your own test-reporting framework.
 
+(defn file-position
+  "Returns a vector [filename line-number] for the nth call up the
+  stack."
+  [n]
+  (let [s (nth (.getStackTrace (new java.lang.Throwable)) n)]
+    [(.getFileName s) (.getLineNumber s)]))
+
 (defn testing-vars-str
   "Returns a string representation of the current test.  Renders names
   in *testing-vars* as a list, then the source file and line of
-  current test."
+  current assertion."
   []
-  (str ;;(ns-name (:ns (meta (first *testing-vars*)))) "/ "
-   (reverse (map #(:name (meta %)) *testing-vars*))
-   " (" (:file (meta (first *testing-vars*)))
-   ":" (:line (meta (first *testing-vars*))) ")"))
+  (let [[file line] (file-position 4)]
+    (str ;;(ns-name (:ns (meta (first *testing-vars*)))) "/ "
+     (reverse (map #(:name (meta %)) *testing-vars*))
+     " (" file ":" line ")")))
 
 (defn testing-contexts-str
   "Returns a string representation of the current test context. Joins
