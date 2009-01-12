@@ -43,6 +43,11 @@ set -o errexit
 set -o nounset
 #set -o xtrace
 
+function die { echo "$1" 1>&2; exit 1; }
+
+[ -d "${CLOJURE_EXT:-}" ] || die \
+    "CLOJURE_EXT=\"${CLOJURE_EXT:-}\": directory not found"
+
 EXT="$(find ${CLOJURE_EXT} -mindepth 1 -maxdepth 1 -print0 | tr \\0 \:)"
 CLASSPATH="${EXT%:}${CLASSPATH:+:${CLASSPATH}}"
 export CLASSPATH
