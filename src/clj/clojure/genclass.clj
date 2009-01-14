@@ -135,7 +135,7 @@
                            (when main [main-name])
                            ;(when exposes-methods (map str (vals exposes-methods)))
                            (distinct (concat (keys sigs-by-name)
-                                             (mapcat (fn [[m s]] (map #(overload-name m %) s)) overloads)
+                                             (mapcat (fn [[m s]] (map #(overload-name m (map the-class %)) s)) overloads)
                                              (mapcat (comp (partial map str) vals val) exposes))))
         emit-get-var (fn [gen v]
                        (let [false-label (. gen newLabel)
