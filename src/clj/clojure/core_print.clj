@@ -142,11 +142,6 @@
   (print-sequential "(" print-method " " ")" o w))
 
 
-(defmethod print-method java.util.Collection [o, #^Writer w]
- (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
-
-(prefer-method print-method clojure.lang.IPersistentCollection java.util.Collection)
-
 (defmethod print-dup java.util.Collection [o, #^Writer w]
  (print-ctor o #(print-sequential "[" print-dup " " "]" %1 %2) w))
 
@@ -201,11 +196,6 @@
   (print-meta m w)
   (print-map m pr-on w))
 
-(defmethod print-method java.util.Map [m, #^Writer w]
-  (print-ctor m #(print-map (seq %1) print-method %2) w))
-
-(prefer-method print-method clojure.lang.IPersistentMap java.util.Map)
-
 (defmethod print-dup java.util.Map [m, #^Writer w]
   (print-ctor m #(print-map (seq %1) print-dup %2) w))
 
@@ -222,13 +212,6 @@
 (defmethod print-method clojure.lang.IPersistentSet [s, #^Writer w]
   (print-meta s w)
   (print-sequential "#{" pr-on " " "}" (seq s) w))
-
-(defmethod print-method java.util.Set [s, #^Writer w]
-  (print-ctor s
-              #(print-sequential "#{" print-method " " "}" (seq %1) %2)
-              w))
-
-;(prefer-method print-method clojure.lang.IPersistentSet java.util.Set)
 
 (def #^{:tag String 
         :doc "Returns name string for char or nil if none"} 
