@@ -26,7 +26,7 @@
   []
   (sql/create-table
    :fruit
-   [:name "varchar(32)" "NOT NULL" "PRIMARY KEY"]
+   [:name "varchar(32)" "PRIMARY KEY"]
    [:appearance "varchar(32)"]
    [:cost :int]
    [:grade :real]))
@@ -97,6 +97,16 @@
     (db-update-appearance-cost "Banana" "bruised" 14)
     (db-update-appearance-cost "Feijoa" "green" 400)))
   nil)
+
+(defn db-update-or-insert
+  "Updates or inserts a fruit"
+  [record]
+  (sql/with-connection
+   db
+   (sql/update-or-insert-values
+    :fruit
+    ["name=?" (:name record)]
+    record)))
 
 (defn db-read-all
   "Return all the rows of the fruit table as a vector"

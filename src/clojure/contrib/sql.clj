@@ -86,10 +86,11 @@
    (format "DROP TABLE %s" (the-str name))))
 
 (defn insert-values
-  "Inserts rows with values only for specified columns into a table.
+  "Inserts rows into a table with values for specified columns only.
   column-names is a vector of strings or keywords identifying columns. Each
-  value-group is a vector containing values for each column in order. To
-  insert complete rows (all columns), use insert-rows."
+  value-group is a vector containing a values for each column in
+  order. When inserting complete rows (all columns), consider using
+  insert-rows instead."
   [table column-names & value-groups]
   (let [column-strs (map the-str column-names)
         n (count (first value-groups))
@@ -110,32 +111,46 @@
 
 (defn delete-rows
   "Deletes rows from a table. where-params is a vector containing a string
-  providing (optionally parameterized) criteria to identify the row(s) to
-  delete followed by values for any parameters."
+  providing the (optionally parameterized) selection criteria followed by
+  values for any parameters."
   [table where-params]
   (let [[where & params] where-params]
-    (apply do-prepared
-           (format "DELETE FROM %s WHERE %s"
-                   (the-str table) where)
-           [params])))
+    (do-prepared
+     (format "DELETE FROM %s WHERE %s"
+             (the-str table) where)
+     params)))
 
 (defn update-values
-  "Updates column values in a table. where-params is a vector containing a
-  string providing (optionally parameterized) criteria to identify the
-  row(s) to be updated followed by values for any parameters. record is a
-  map from strings or keywords identifying columns to (new) values."
+  "Updates values on selected rows in a table. where-params is a vector
+  containing a string providing the (optionally parameterized) selection
+  criteria followed by values for any parameters. record is a map from
+  strings or keywords (identifying columns) to updated values."
   [table where-params record]
   (let [[where & params] where-params
         column-strs (map the-str (keys record))
         columns (apply str (concat (interpose "=?, " column-strs) "=?"))]
-    (apply do-prepared
-           (format "UPDATE %s SET %s WHERE %s"
-                   (the-str table) columns where)
-           [(concat (vals record) params)])))
+    (do-prepared
+     (format "UPDATE %s SET %s WHERE %s"
+             (the-str table) columns where)
+     (concat (vals record) params))))
+
+(defn update-or-insert-values
+  "Updates values on selected rows in a table, or inserts a new row when no
+  existing row matches the selection criteria. where-params is a vector
+  containing a string providing the (optionally parameterized) selection
+  criteria followed by values for any parameters. record is a map from
+  strings or keywords (identifying columns) to updated values."
+  [table where-params record]
+  (transaction
+   (let [result (update-values table where-params record)]
+     (if (zero? (first result))
+       (insert-values table (keys record) (vals record))
+       result))))
 
 (defmacro with-query-results
   "Executes a query, then evaluates body with results bound to a seq of the
-  results. sql-params is a vector containing the (optionally parameterized)
-  sql query string followed by values for any parameters."
+  results. sql-params is a vector containing a string providing
+  the (optionally parameterized) SQL query followed by values for any
+  parameters."
   [results sql-params & body]
   `(with-query-results* ~sql-params (fn [~results] ~@body)))
