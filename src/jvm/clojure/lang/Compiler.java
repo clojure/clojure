@@ -3956,7 +3956,13 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 //	else if(fclass == Character.class)
 //		return new CharExpr((Character) form);
 		else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
-			return new EmptyExpr(form);
+            {
+			Expr ret = new EmptyExpr(form);
+            if(RT.meta(form) != null)
+                ret = new MetaExpr(ret, (MapExpr) MapExpr
+					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
+            return ret;
+            }
 		else if(form instanceof ISeq)
 			return analyzeSeq(context, (ISeq) form, name);
 		else if(form instanceof IPersistentVector)
