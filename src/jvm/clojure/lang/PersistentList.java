@@ -119,7 +119,12 @@ static class EmptyList extends Obj implements IPersistentList, Collection{
 		return 1;
 	}
 
-	EmptyList(IPersistentMap meta){
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Sequential && RT.count(o) == 0;
+    }
+
+    EmptyList(IPersistentMap meta){
 		super(meta);
 	}
 
