@@ -48,7 +48,8 @@
   (with-open [stmt (.createStatement (connection))]
     (doseq [cmd commands]
       (.addBatch stmt cmd))
-    (into [] (.executeBatch stmt))))
+    (transaction
+     (seq (.executeBatch stmt)))))
 
 (defn do-prepared
   "Executes an (optionally parameterized) SQL prepared statement on the
@@ -60,7 +61,8 @@
       (doseq [[index value] (map vector (iterate inc 1) param-group)]
         (.setObject stmt index value))
       (.addBatch stmt))
-    (into [] (.executeBatch stmt))))
+    (transaction
+     (seq (.executeBatch stmt)))))
 
 (defn create-table
   "Creates a table on the open database connection given a table name and
