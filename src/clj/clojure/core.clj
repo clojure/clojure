@@ -1675,7 +1675,7 @@
   [bindings & body]
   (assert-args dotimes
      (vector? bindings) "a vector for its binding"
-     (even? (count bindings)) "exactly 2 forms in binding vector")
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [i (first bindings)
         n (second bindings)]
     `(let [n# (int ~n)]
@@ -2504,7 +2504,7 @@
   [bindings & body]
   (assert-args when-first
      (vector? bindings) "a vector for its binding"
-     (even? (count bindings)) "exactly 2 forms in binding vector")
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [[x xs] bindings]
     `(when (seq ~xs)
        (let [~x (first ~xs)]
@@ -2843,7 +2843,7 @@
   ([bindings then else & oldform]
    (assert-args if-let
      (and (vector? bindings) (nil? oldform)) "a vector for its binding"
-     (even? (count bindings)) "exactly 2 forms in binding vector")
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
    (let [[form tst] bindings]
      `(let [temp# ~tst]
         (if temp# 
@@ -2858,7 +2858,7 @@
   [bindings & body]
   (assert-args when-let
      (vector? bindings) "a vector for its binding"
-     (even? (count bindings)) "exactly 2 forms in binding vector")
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [[form tst] bindings]
     `(let [temp# ~tst]
        (when temp#
