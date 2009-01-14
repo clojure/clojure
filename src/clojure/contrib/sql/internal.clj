@@ -15,12 +15,6 @@
 
 (def *db* {:connection nil :level 0})
 
-(defn connection*
-  "Returns the current database connection or throws"
-  []
-  (or (:connection *db*)
-      (throw (Exception. "no current database connection"))))
-
 (defn the-str
   "Returns the name or string representation of x"
   [x]
@@ -38,31 +32,37 @@
       (.setProperty p (the-str key) (the-str val)))
     p))
 
+(defn connection*
+  "Returns the current database connection or throws"
+  []
+  (or (:connection *db*)
+      (throw (Exception. "no current database connection"))))
+
 (defn with-connection*
-  "Evaluates thunk in the context of a new connection to a database then
+  "Evaluates func in the context of a new connection to a database then
   closes the connection. db-spec is a map containing string values for
   these required keys:
     :classname     the jdbc driver class name
     :subprotocol   the jdbc subprotocol
     :subname       the jdbc subname
-  db-spec may contain additional key-value pairs that are passed along to
-  the driver as properties such as :user, :password, etc."
-  [db-spec thunk]
-  (clojure.lang.RT/loadClassForName (:classname db-spec))
+  If db-spec contains additional keys (such as :user, :password, etc.) and
+  associated values, they will be passed along to the driver as properties."
+  [{:keys [classname subprotocol subname] :as db-spec} func]
+  (clojure.lang.RT/loadClassForName classname)
   (with-open
       [con
        (java.sql.DriverManager/getConnection
-        (format "jdbc:%s:%s" (:subprotocol db-spec) (:subname db-spec))
+        (format "jdbc:%s:%s" subprotocol subname)
         (properties (dissoc db-spec :classname :subprotocol :subname)))]
     (binding [*db* (assoc *db* :connection con :level 0)]
-      (thunk))))
+      (func))))
 
 (defn transaction*
-  "Evaluates thunk as a transaction on the open database connection.
-  Any database updates are committed together as a group after evaluating,
-  or rolled back on any uncaught exception. Any nested transactions are
-  absorbed into the outermost transaction."
-  [thunk]
+  "Evaluates func as a transaction on the open database connection. Any
+  nested transactions are absorbed into the outermost transaction. All
+  database updates are committed together as a group after evaluating the
+  outermost func, or rolled back on any uncaught exception."
+  [func]
   (let [con (connection*)
         outermost (zero? (:level *db*))
         auto-commit (when outermost (.getAutoCommit con))]
@@ -70,7 +70,7 @@
       (when outermost
         (.setAutoCommit con false))
       (try
-       (let [value (thunk)]
+       (let [value (func)]
          (when outermost
            (.commit con))
          value)
@@ -82,3 +82,14 @@
        (finally
         (when outermost
           (.setAutoCommit con auto-commit)))))))
+
+(defn with-query-results*
+  "Executes a query, then evaluates func passing in a seq of the results as
+  an argument. The first argument is a vector containing the (optionally
+  parameterized) sql query string followed by values for any parameters."
+  [[sql & params] func]
+  (with-open [stmt (.prepareStatement (connection*) sql)]
+    (doseq [[index value] (map vector (iterate inc 1) params)]
+      (.setObject stmt index value))
+    (with-open [rset (.executeQuery stmt)]
+      (func (resultset-seq rset)))))

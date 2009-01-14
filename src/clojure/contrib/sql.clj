@@ -29,77 +29,78 @@
     :classname     the jdbc driver class name
     :subprotocol   the jdbc subprotocol
     :subname       the jdbc subname
-  db-spec may contain additional key-value pairs that are passed along to
-  the driver as properties such as :user, :password, etc."
+  If db-spec contains additional keys (such as :user, :password, etc.) and
+  associated values, they will be passed along to the driver as properties."
   [db-spec & body]
   `(with-connection* ~db-spec (fn [] ~@body)))
 
 (defmacro transaction
   "Evaluates body as a transaction on the open database connection. Any
-  database updates are committed together as a group after evaluating, or
-  rolled back on any uncaught exception. Any nested transactions are
-  absorbed into the outermost transaction."
+  nested transactions are absorbed into the outermost transaction. All
+  database updates are committed together as a group after evaluating the
+  outermost body, or rolled back on any uncaught exception."
   [& body]
   `(transaction* (fn [] ~@body)))
 
 (defn do-commands
-  "Executes SQL commands that don't return results on the open database
-  connection"
+  "Executes SQL commands on the open database connection."
   [& commands]
   (with-open [stmt (.createStatement (connection))]
     (doseq [cmd commands]
       (.addBatch stmt cmd))
-    (.executeBatch stmt)))
+    (into [] (.executeBatch stmt))))
 
 (defn do-prepared
-  "Executes a prepared statement on the open database connection with
-  parameter sets"
-  [sql & sets]
+  "Executes an (optionally parameterized) SQL prepared statement on the
+  open database connection. Each param-group is a seq of values for all of
+  the parameters."
+  [sql & param-groups]
   (with-open [stmt (.prepareStatement (connection) sql)]
-    (doseq [set sets]
-      (doseq [[index value] (map vector (iterate inc 1) set)]
+    (doseq [param-group param-groups]
+      (doseq [[index value] (map vector (iterate inc 1) param-group)]
         (.setObject stmt index value))
       (.addBatch stmt))
-    (.executeBatch stmt)))
+    (into [] (.executeBatch stmt))))
 
 (defn create-table
-  "Creates a table on the open database connection given a name (a string
-  or keyword) and column specs. A column spec is a vector containing a name
-  and optionally a type and other items such as constraints, each a string
-  or keyword."
-  [name & column-specs]
+  "Creates a table on the open database connection given a table name and
+  specs. Each spec is either a column spec: a vector containing a column
+  name and optionally a type and other constraints, or a table-level
+  constraint: a vector containing words that express the constraint. All
+  words used to describe the table may be supplied as strings or keywords."
+  [name & specs]
   (do-commands
-   (format "create table %s (%s)"
+   (format "CREATE TABLE %s (%s)"
            (the-str name)
            (apply str
              (map the-str
               (apply concat
                (interpose [", "]
-                (map (partial interpose " ") column-specs))))))))
+                (map (partial interpose " ") specs))))))))
 
 (defn drop-table
-  "Drops a table on the open database connection given its name (a string
-  or keyword)"
+  "Drops a table on the open database connection given its name, a string
+  or keyword"
   [name]
   (do-commands
-   (format "drop table %s" (the-str name))))
+   (format "DROP TABLE %s" (the-str name))))
 
 (defn insert-values
-  "Inserts values into columns of a table. columns is a vector of column
-  names (strings or keywords) and each value is a vector of values for
-  those columns. To insert complete rows (all columns), use insert-rows."
-  [table column-names & values]
-  (let [count (count (first values))
-        template (apply str (interpose "," (replicate count "?")))
-        columns
-        (if (seq column-names)
-          (format "(%s)"
-                  (apply str (interpose "," (map the-str column-names))))
-          "")]
+  "Inserts rows with values only for specified columns into a table.
+  column-names is a vector of strings or keywords identifying columns. Each
+  value-group is a vector containing values for each column in order. To
+  insert complete rows (all columns), use insert-rows."
+  [table column-names & value-groups]
+  (let [column-strs (map the-str column-names)
+        n (count (first value-groups))
+        template (apply str (interpose "," (replicate n "?")))
+        columns (if (seq column-names)
+                  (format "(%s)" (apply str (interpose "," column-strs)))
+                  "")]
     (apply do-prepared
-           (format "insert into %s %s values (%s)"
+           (format "INSERT INTO %s %s VALUES (%s)"
                    (the-str table) columns template)
-           values)))
+           value-groups)))
 
 (defn insert-rows
   "Inserts complete rows into a table. Each row is a vector of values for
@@ -107,11 +108,34 @@
   [table & rows]
   (apply insert-values table nil rows))
 
-(defmacro with-results
-  "Executes a query and then evaluates body with results bound to a seq of
-  the results"
-  [results sql & body]
-  `(with-open [stmt# (.prepareStatement (connection) ~sql)
-               rset# (.executeQuery stmt#)]
-     (let [~results (resultset-seq rset#)]
-       ~@body)))
+(defn delete-rows
+  "Deletes rows from a table. where-params is a vector containing a string
+  providing (optionally parameterized) criteria to identify the row(s) to
+  delete followed by values for any parameters."
+  [table where-params]
+  (let [[where & params] where-params]
+    (apply do-prepared
+           (format "DELETE FROM %s WHERE %s"
+                   (the-str table) where)
+           [params])))
+
+(defn update-values
+  "Updates column values in a table. where-params is a vector containing a
+  string providing (optionally parameterized) criteria to identify the
+  row(s) to be updated followed by values for any parameters. record is a
+  map from strings or keywords identifying columns to (new) values."
+  [table where-params record]
+  (let [[where & params] where-params
+        column-strs (map the-str (keys record))
+        columns (apply str (concat (interpose "=?, " column-strs) "=?"))]
+    (apply do-prepared
+           (format "UPDATE %s SET %s WHERE %s"
+                   (the-str table) columns where)
+           [(concat (vals record) params)])))
+
+(defmacro with-query-results
+  "Executes a query, then evaluates body with results bound to a seq of the
+  results. sql-params is a vector containing the (optionally parameterized)
+  sql query string followed by values for any parameters."
+  [results sql-params & body]
+  `(with-query-results* ~sql-params (fn [~results] ~@body)))

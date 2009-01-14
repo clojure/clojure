@@ -21,78 +21,135 @@
          :subname "/tmp/clojure.contrib.sql.test.db"
          :create true})
 
-(defn drop-fruit []
+(defn create-fruit
+  "Create a table"
+  []
+  (sql/create-table
+   :fruit
+   [:name "varchar(32)" "NOT NULL" "PRIMARY KEY"]
+   [:appearance "varchar(32)"]
+   [:cost :int]
+   [:grade :real]))
+
+(defn drop-fruit
+  "Drop a table"
+  []
   (try
    (sql/drop-table :fruit)
-   (catch Exception e)))
+   (catch Exception _)))
 
-(defn create-fruit []
-  (sql/transaction
-   (sql/create-table :fruit
-    [:name "varchar(32)" "NOT NULL"]
-    [:appearance "varchar(32)"]
-    [:cost :int]
-    [:grade :real])))
+(defn insert-rows-fruit
+  "Insert complete rows"
+  []
+  (sql/insert-rows
+   :fruit
+   ["Apple" "red" 59 87]
+   ["Banana" "yellow" 29 92.2]
+   ["Peach" "fuzzy" 139 90.0]
+   ["Orange" "juicy" 89 88.6]))
 
-(defn insert-rows-fruit []
-  (sql/transaction
-   (sql/insert-rows :fruit
-    ["Apple" "red" 59 87]
-    ["Banana" "yellow" 29 92.2]
-    ["Peach" "fuzzy" 139 90.0]
-    ["Orange" "juicy" 89 88.6])))
+(defn insert-values-fruit
+  "Insert rows with values for only specific columns"
+  []
+  (sql/insert-values
+   :fruit
+   [:name :cost]
+   ["Mango" 722]
+   ["Feijoa" 441]))
 
-(defn insert-values-fruit []
-  (sql/transaction
-   (sql/insert-values :fruit
-    [:name :cost]
-    ["Mango" 722]
-    ["Feijoa" 441])))
-
-(defn db-write []
-  (sql/with-connection db
-    (sql/transaction
-     (drop-fruit)
-     (create-fruit)
-     (insert-rows-fruit)
-     (insert-values-fruit)))
+(defn db-write
+  "Write initial values to the database as a transaction"
+  []
+  (sql/with-connection
+   db
+   (sql/transaction
+    (drop-fruit)
+    (create-fruit)
+    (insert-rows-fruit)
+    (insert-values-fruit)))
   nil)
 
-(defn db-read []
-  (sql/with-connection db
-    (sql/with-results res
-     "select * from fruit"
-      (doseq [rec res]
-        (println rec)))))
+(defn db-read
+  "Read the entire fruit table"
+  []
+  (sql/with-connection
+   db
+   (sql/with-query-results
+    res
+    ["SELECT * FROM fruit"]
+    (doseq [rec res]
+      (println rec)))))
 
-(defn db-read-all []
-  (sql/with-connection db
-    (sql/transaction                       
-     (sql/with-results res
-      "select * from fruit"
-      (into [] res)))))
+(defn db-update-appearance-cost
+  "Update the appearance and cost of the named fruit"
+  [name appearance cost]
+  (sql/update-values
+   :fruit
+   ["name=?" name]
+   {:appearance appearance :cost cost}))
 
-(defn db-grade-a []
-  (sql/with-connection db
-    (sql/transaction
-     (sql/with-results res
-       "select name, cost from fruit where grade >= 90"
-       (doseq [rec res]
-         (println rec))))))
+(defn db-update
+  "Update two fruits as a transaction"
+  []
+  (sql/with-connection
+   db
+   (sql/transaction
+    (db-update-appearance-cost "Banana" "bruised" 14)
+    (db-update-appearance-cost "Feijoa" "green" 400)))
+  nil)
 
-(defn db-get-tables []
-  (sql/with-connection db
-    (into []
-      (resultset-seq
-       (-> (sql/connection)
-           (.getMetaData)
-           (.getTables nil nil nil (into-array ["TABLE" "VIEW"])))))))
+(defn db-read-all
+  "Return all the rows of the fruit table as a vector"
+  []
+  (sql/with-connection
+   db
+   (sql/with-query-results
+    res
+    ["SELECT * FROM fruit"]
+    (into [] res))))
 
-(defn db-exception []
-  (sql/with-connection db
-    (sql/transaction
-      (sql/insert-values :fruit
-        [:name :appearance]
-        ["Grape" "yummy"]
-        ["Pear" "bruised"])
-      (throw (Exception. "an exception")))))
+(defn db-grade-range
+  "Print rows describing fruit that are within a grade range"
+  [min max]
+  (sql/with-connection
+   db
+   (sql/with-query-results
+    res
+    [(str "SELECT name, cost, grade "
+          "FROM fruit "
+          "WHERE grade >= ? AND grade <= ?")
+     min max]
+    (doseq [rec res]
+      (println rec)))))
+
+(defn db-grade-a 
+  "Print rows describing all grade a fruit (grade between 90 and 100)"
+  []
+  (db-grade-range 90 100))
+
+(defn db-get-tables
+  "Demonstrate getting table info"
+  []
+  (sql/with-connection
+   db
+   (into []
+         (resultset-seq
+          (-> (sql/connection)
+              (.getMetaData)
+              (.getTables nil nil nil (into-array ["TABLE" "VIEW"])))))))
+
+(defn db-exception
+  "Demonstrate rolling back a partially completed transaction"
+  []
+  (sql/with-connection
+   db
+   (sql/transaction
+    (sql/insert-values
+     :fruit
+     [:name :appearance]
+     ["Grape" "yummy"]
+     ["Pear" "bruised"])
+    ;; at this point the insert-values call is complete, but the transaction
+    ;; is not. the exception will cause it to roll back leaving the database
+    ;; untouched.
+    (throw (Exception. "sql/test exception")))))
