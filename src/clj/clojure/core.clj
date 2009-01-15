@@ -873,8 +873,12 @@
 ;;map stuff
 
 (defn contains?
-  "Returns true if key is present, else false."
-  [map key] (. clojure.lang.RT (contains map key)))
+  "Returns true if key is present in the given collection, otherwise
+  returns false.  Note that for numerically indexed collections like
+  vectors and Java arrays, this tests if the numeric key is within the
+  range of indexes. 'contains?' operates constant or logarithmic time;
+  it will not perform a linear search for a value.  See also 'some'."
+  [coll key] (. clojure.lang.RT (contains coll key)))
 
 (defn get
   "Returns the value mapped to key, not-found or nil if key not present."
@@ -1349,7 +1353,9 @@
 
 (defn some
   "Returns the first logical true value of (pred x) for any x in coll,
-  else nil."
+  else nil.  One common idiom is to use a set as pred, for example
+  this will return true if :fred is in the sequence, otherwise nil:
+  (some #{:fred} coll)"
   [pred coll]
     (when (seq coll)
       (or (pred (first coll)) (recur pred (rest coll)))))
