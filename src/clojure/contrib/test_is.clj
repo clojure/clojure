@@ -72,7 +72,8 @@
 
 
 (ns clojure.contrib.test-is
-  (:require [clojure.contrib.template :as temp]))
+  (:require [clojure.contrib.template :as temp]
+            [clojure.contrib.stacktrace :as stack]))
 
 
 (def *report-counters* nil)	  ; bound to a ref of a map in test-ns
@@ -142,7 +143,10 @@
   (when (seq *testing-contexts*) (println (testing-contexts-str)))
   (when msg (println msg))
   (println "expected:" (pr-str expected))
-  (println "  actual:" (pr-str actual)))
+  (print "  actual: ")
+  (if (instance? Throwable actual)
+    (stack/print-cause-trace actual 5)
+    (prn actual)))
 
 
 
