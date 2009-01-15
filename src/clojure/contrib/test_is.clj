@@ -1,7 +1,7 @@
 ;;; test_is.clj: test framework for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; December 3, 2008
+;; January 15, 2009
 
 ;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
 ;; contributions and suggestions.
@@ -161,30 +161,34 @@
     (cond
      (nil? form) :always-fail
      (seq? form) (first form)
-     :else :default)))
+     :else :single)))
 
 (defmethod assert-expr :default [msg form]
-  ;; Default test: evaluate the form (which may be a bare symbol), and
-  ;; pass if it is logical true.
-  `(let [value# ~form]
-     (if value#
-       (report :pass ~msg '~form value#)
-       (report :fail ~msg '~form value#))
-     value#))
+  ;; Generic assertion for any functional predicate.  The 'expected'
+  ;; argument to 'report' contains the original form, the 'actual'
+  ;; argument contains the form with all its sub-forms evaluated.  If
+  ;; the predicate returns false, the 'actual' form is wrapped in
+  ;; (not...).
+  (let [args (rest form)
+        pred (first form)]
+     `(let [values# (list ~@args)
+            result# (apply ~pred values#)]
+        (if result#
+          (report :pass ~msg '~form (cons ~pred values#))
+          (report :fail ~msg '~form (list '~'not (cons '~pred values#))))
+        result#)))
 
 (defmethod assert-expr :always-fail [msg form]
   ;; nil test: always fail
   `(report :fail ~msg nil nil))
 
-(defmethod assert-expr '= [msg form]
-  ;; Equality test.  Doesn't care about argument order: 
-  ;; (is (= expected actual))  or  (is (= actual expected))
-  `(let [values# (list ~@(rest form))]
-     (let [result# (apply = values#)]
-       (if result#
-         (report :pass ~msg '~form (cons '~'= values#))
-         (report :fail ~msg '~form (cons '~'not= values#)))
-       result#)))
+(defmethod assert-expr :single [msg form]
+  ;; Evaluate a bare symbol and pass if it is logical true.
+  `(let [value# ~form]
+     (if value#
+       (report :pass ~msg '~form value#)
+       (report :fail ~msg '~form value#))
+     value#))
 
 (defmethod assert-expr 'instance? [msg form]
   ;; Test if x is an instance of y.
@@ -210,7 +214,6 @@
 
 ;; New assertions coming soon:
 ;; * thrown-with-msg?
-;; * re-matches
 
 
 ;;; CATCHING UNEXPECTED EXCEPTIONS
@@ -312,11 +315,16 @@
 	     (report :error "Uncaught exception, not in assertion."
 		     nil e))))))
 
+(defn test-all-vars
+  "Calls test-var on every var interned in the namespace."
+  [ns]
+  (doseq [v (vals (ns-interns ns))]
+    (test-var v)))
+
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
-  Otherwise, calls test-var on all vars in the namespace. Returns a
-  map of counts for :test, :pass, :fail, and :error results."
-  [ns]
+  Otherwise, calls test-all-vars on the namespace. Returns a map of
+  counts for :test, :pass, :fail, and :error results."  [ns]
   (binding [*report-counters* (ref {:test 0, :pass 0,
                                     :fail 0, :error 0})]
     (let [ns (if (symbol? ns) (find-ns ns) ns)]
@@ -325,8 +333,7 @@
       (if-let [v (find-var (symbol (str (ns-name ns)) "test-ns-hook"))]
 	((var-get v))
         ;; Otherwise, just test every var in the ns.
-        (doseq [v (vals (ns-interns ns))]
-	  (test-var v))))
+        (test-all-vars ns)))
     @*report-counters*))
 
 (defn print-results
