@@ -52,7 +52,7 @@ static boolean doEquals(IPersistentVector v, Object obj){
 		for(Iterator i1 = ((List) v).iterator(), i2 = ma.iterator();
 		    i1.hasNext();)
 			{
-			if(!Util.equal(i1.next(), i2.next()))
+			if(!Util.equals(i1.next(), i2.next()))
 				return false;
 			}
 		return true;
@@ -75,7 +75,50 @@ static boolean doEquals(IPersistentVector v, Object obj){
 		ISeq ms = ((IPersistentCollection) obj).seq();
 		for(int i = 0; i < v.count(); i++, ms = ms.rest())
 			{
-			if(ms == null || !Util.equal(v.nth(i), ms.first()))
+			if(ms == null || !Util.equals(v.nth(i), ms.first()))
+				return false;
+			}
+		if(ms != null)
+			return false;
+		}
+
+	return true;
+
+}
+
+static boolean doEquiv(IPersistentVector v, Object obj){
+	if(obj instanceof List || obj instanceof IPersistentVector)
+		{
+		Collection ma = (Collection) obj;
+		if(ma.size() != v.count())
+			return false;
+		for(Iterator i1 = ((List) v).iterator(), i2 = ma.iterator();
+		    i1.hasNext();)
+			{
+			if(!Util.equiv(i1.next(), i2.next()))
+				return false;
+			}
+		return true;
+		}
+//	if(obj instanceof IPersistentVector)
+//		{
+//		IPersistentVector ma = (IPersistentVector) obj;
+//		if(ma.count() != v.count() || ma.hashCode() != v.hashCode())
+//			return false;
+//		for(int i = 0; i < v.count(); i++)
+//			{
+//			if(!Util.equal(v.nth(i), ma.nth(i)))
+//				return false;
+//			}
+//		}
+	else
+		{
+		if(!(obj instanceof Sequential))
+			return false;
+		ISeq ms = ((IPersistentCollection) obj).seq();
+		for(int i = 0; i < v.count(); i++, ms = ms.rest())
+			{
+			if(ms == null || !Util.equiv(v.nth(i), ms.first()))
 				return false;
 			}
 		if(ms != null)
@@ -88,6 +131,10 @@ static boolean doEquals(IPersistentVector v, Object obj){
 
 public boolean equals(Object obj){
 	return doEquals(this, obj);
+}
+
+public boolean equiv(Object obj){
+	return doEquiv(this, obj);
 }
 
 public int hashCode(){
@@ -120,14 +167,14 @@ public Object remove(int i){
 
 public int indexOf(Object o){
 	for(int i = 0; i < count(); i++)
-		if(Util.equal(nth(i), o))
+		if(Util.equiv(nth(i), o))
 			return i;
 	return -1;
 }
 
 public int lastIndexOf(Object o){
 	for(int i = count() - 1; i >= 0; i--)
-		if(Util.equal(nth(i), o))
+		if(Util.equiv(nth(i), o))
 			return i;
 	return -1;
 }
@@ -333,7 +380,7 @@ public boolean isEmpty(){
 public boolean contains(Object o){
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
-		if(Util.equal(s.first(), o))
+		if(Util.equiv(s.first(), o))
 			return true;
 		}
 	return false;

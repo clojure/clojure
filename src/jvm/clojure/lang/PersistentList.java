@@ -12,7 +12,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public class PersistentList extends ASeq implements IPersistentList, IReduce{
+public class PersistentList extends ASeq implements IPersistentList, IReduce, List{
 
 private final Object _first;
 private final IPersistentList _rest;
@@ -112,18 +112,22 @@ public Object reduce(IFn f, Object start) throws Exception{
 	return ret;
 }
 
-static class EmptyList extends Obj implements IPersistentList, Collection{
 
-	@Override
+
+static class EmptyList extends Obj implements IPersistentList, List{
+
 	public int hashCode(){
 		return 1;
 	}
 
-    @Override
     public boolean equals(Object o) {
-        return o instanceof Sequential && RT.count(o) == 0;
+        return (o instanceof Sequential || o instanceof List) && RT.count(o) == 0;
     }
 
+	public boolean equiv(Object o){
+		return equals(o);
+	}
+	
     EmptyList(IPersistentMap meta){
 		super(meta);
 	}
@@ -225,6 +229,59 @@ static class EmptyList extends Obj implements IPersistentList, Collection{
 			objects[0] = null;
 		return objects;
 	}
+
+	//////////// List stuff /////////////////
+	private List reify(){
+		return new ArrayList(this);
+	}
+
+	public List subList(int fromIndex, int toIndex){
+		return reify().subList(fromIndex, toIndex);
+	}
+
+	public Object set(int index, Object element){
+		throw new UnsupportedOperationException();
+	}
+
+	public Object remove(int index){
+		throw new UnsupportedOperationException();
+	}
+
+	public int indexOf(Object o){
+		ISeq s = seq();
+		for(int i = 0; s != null; s = s.rest(), i++)
+			{
+			if(Util.equiv(s.first(), o))
+				return i;
+			}
+		return -1;
+	}
+
+	public int lastIndexOf(Object o){
+		return reify().lastIndexOf(o);
+	}
+
+	public ListIterator listIterator(){
+		return reify().listIterator();
+	}
+
+	public ListIterator listIterator(int index){
+		return reify().listIterator(index);
+	}
+
+	public Object get(int index){
+		return RT.nth(this, index);
+	}
+
+	public void add(int index, Object element){
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean addAll(int index, Collection c){
+		throw new UnsupportedOperationException();
+	}
+
+
 }
 
 }

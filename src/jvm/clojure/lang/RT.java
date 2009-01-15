@@ -705,7 +705,7 @@ static public Object nth(Object coll, int n){
 		return Character.valueOf(((String) coll).charAt(n));
 	else if(coll.getClass().isArray())
 		return Reflector.prepRet(Array.get(coll, n));
-	else if(coll instanceof List)
+	else if(coll instanceof RandomAccess)
 		return ((List) coll).get(n);
 	else if(coll instanceof Matcher)
 		return ((Matcher) coll).group(n);
@@ -815,7 +815,7 @@ static public Object assocN(int n, Object val, Object coll){
 }
 
 static boolean hasTag(Object o, Object tag){
-	return Util.equal(tag, RT.get(RT.meta(o), TAG_KEY));
+	return Util.equals(tag, RT.get(RT.meta(o), TAG_KEY));
 }
 
 /**
@@ -1410,7 +1410,7 @@ static public Object format(Object o, String s, Object... args) throws Exception
 	Writer w;
 	if(o == null)
 		w = new StringWriter();
-	else if(Util.equal(o, T))
+	else if(Util.equals(o, T))
 		w = (Writer) OUT.get();
 	else
 		w = (Writer) o;

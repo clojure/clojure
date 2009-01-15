@@ -65,13 +65,32 @@ public boolean equals(Object obj){
 		Map.Entry e = (Map.Entry) s.first();
 		boolean found = m.containsKey(e.getKey());
 
-		if(!found || !Util.equal(e.getValue(), m.get(e.getKey())))
+		if(!found || !Util.equals(e.getValue(), m.get(e.getKey())))
 			return false;
 		}
 
 	return true;
 }
 
+public boolean equiv(Object obj){
+	if(!(obj instanceof Map))
+		return false;
+	Map m = (Map) obj;
+
+	if(m.size() != size())
+		return false;
+
+	for(ISeq s = seq(); s != null; s = s.rest())
+		{
+		Map.Entry e = (Map.Entry) s.first();
+		boolean found = m.containsKey(e.getKey());
+
+		if(!found || !Util.equiv(e.getValue(), m.get(e.getKey())))
+			return false;
+		}
+
+	return true;
+}
 public int hashCode(){
 	if(_hash == -1)
 		{
@@ -190,7 +209,7 @@ public Set entrySet(){
 				{
 				Entry e = (Entry) o;
 				Entry found = entryAt(e.getKey());
-				if(found != null && Util.equal(found.getValue(), e.getValue()))
+				if(found != null && Util.equals(found.getValue(), e.getValue()))
 					return true;
 				}
 			return false;

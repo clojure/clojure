@@ -1808,7 +1808,7 @@ public static class TryExpr implements Expr{
 				{
 				Object f = fs.first();
 				Object op = (f instanceof ISeq) ? ((ISeq) f).first() : null;
-				if(!Util.equal(op, CATCH) && !Util.equal(op, FINALLY))
+				if(!Util.equals(op, CATCH) && !Util.equals(op, FINALLY))
 					{
 					if(caught)
 						throw new Exception("Only catch or finally clause can follow catch in try expression");
@@ -1816,7 +1816,7 @@ public static class TryExpr implements Expr{
 					}
 				else
 					{
-					if(Util.equal(op, CATCH))
+					if(Util.equals(op, CATCH))
 						{
 						Class c = HostExpr.maybeClass(RT.second(f), false);
 						if(c == null)
@@ -3627,7 +3627,7 @@ public static class BodyExpr implements Expr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frms) throws Exception{
 			ISeq forms = (ISeq) frms;
-			if(Util.equal(RT.first(forms), DO))
+			if(Util.equals(RT.first(forms), DO))
 				forms = RT.rest(forms);
 			PersistentVector exprs = PersistentVector.EMPTY;
 			for(; forms != null; forms = forms.rest())

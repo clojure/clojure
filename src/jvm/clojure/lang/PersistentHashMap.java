@@ -536,7 +536,7 @@ final static class LeafNode extends AMapEntry implements INode{
 	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
 		if(hash == this.hash)
 			{
-			if(Util.equal(key, this.key))
+			if(Util.equals(key, this.key))
 				{
 				if(val == this.val)
 					return this;
@@ -552,13 +552,13 @@ final static class LeafNode extends AMapEntry implements INode{
 	}
 
 	public INode without(int hash, Object key){
-		if(hash == this.hash && Util.equal(key, this.key))
+		if(hash == this.hash && Util.equals(key, this.key))
 			return null;
 		return this;
 	}
 
 	public LeafNode find(int hash, Object key){
-		if(hash == this.hash && Util.equal(key, this.key))
+		if(hash == this.hash && Util.equals(key, this.key))
 			return this;
 		return null;
 	}

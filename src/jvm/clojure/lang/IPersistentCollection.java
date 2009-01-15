@@ -20,4 +20,6 @@ ISeq seq();
 IPersistentCollection cons(Object o);
 
 IPersistentCollection empty();
+
+boolean equiv(Object o);
 }

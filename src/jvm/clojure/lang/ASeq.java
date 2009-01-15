@@ -10,11 +10,9 @@
 
 package clojure.lang;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 
-public abstract class ASeq extends Obj implements ISeq, Collection, Streamable{
+public abstract class ASeq extends Obj implements ISeq, List, Streamable{
 transient int _hash = -1;
 
 public String toString(){
@@ -33,20 +31,32 @@ protected ASeq(IPersistentMap meta){
 protected ASeq(){
 }
 
-public boolean equals(Object obj){
+public boolean equiv(Object obj){
 
-	if(!(obj instanceof Sequential))
+	if(!(obj instanceof Sequential || obj instanceof List))
 		return false;
-	ISeq ms = ((IPersistentCollection) obj).seq();
+	ISeq ms = RT.seq(obj);
 	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
 		{
-		if(ms == null || !Util.equal(s.first(), ms.first()))
+		if(ms == null || !Util.equiv(s.first(), ms.first()))
 			return false;
 		}
-	if(ms != null)
-		return false;
+	return ms == null;
 
-	return true;
+}
+
+public boolean equals(Object obj){
+
+	if(!(obj instanceof Sequential || obj instanceof List))
+		return false;
+	ISeq ms = RT.seq(obj);
+	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+		{
+		if(ms == null || !Util.equals(s.first(), ms.first()))
+			return false;
+		}
+	return ms == null;
+
 }
 
 public int hashCode(){
@@ -166,7 +176,7 @@ public boolean isEmpty(){
 public boolean contains(Object o){
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
-		if(Util.equal(s.first(), o))
+		if(Util.equiv(s.first(), o))
 			return true;
 		}
 	return false;
@@ -176,6 +186,8 @@ public boolean contains(Object o){
 public Iterator iterator(){
 	return new SeqIterator(this);
 }
+
+
 
 public IStream stream() throws Exception {
     return new Stream(this);
@@ -198,4 +210,57 @@ public IStream stream() throws Exception {
         return RT.eos();
     }
 }
+
+
+//////////// List stuff /////////////////
+private List reify(){
+	return new ArrayList(this);
+}
+
+public List subList(int fromIndex, int toIndex){
+	return reify().subList(fromIndex, toIndex);
+}
+
+public Object set(int index, Object element){
+	throw new UnsupportedOperationException();
+}
+
+public Object remove(int index){
+	throw new UnsupportedOperationException();
+}
+
+public int indexOf(Object o){
+	ISeq s = seq();
+	for(int i = 0; s != null; s = s.rest(), i++)
+		{
+		if(Util.equiv(s.first(), o))
+			return i;
+		}
+	return -1;
+}
+
+public int lastIndexOf(Object o){
+	return reify().lastIndexOf(o);
+}
+
+public ListIterator listIterator(){
+	return reify().listIterator();
+}
+
+public ListIterator listIterator(int index){
+	return reify().listIterator(index);
+}
+
+public Object get(int index){
+	return RT.nth(this, index);
+}
+
+public void add(int index, Object element){
+	throw new UnsupportedOperationException();
+}
+
+public boolean addAll(int index, Collection c){
+	throw new UnsupportedOperationException();
+}
+
 }

@@ -15,16 +15,24 @@ package clojure.lang;
 import java.math.BigInteger;
 
 public class Util{
-static public boolean equal(Object k1, Object k2){
+static public boolean equiv(Object k1, Object k2){
 	if(k1 == k2)
 		return true;
 	if(k1 != null)
 		{
 		if(k1 instanceof Number)
 			return Numbers.equiv(k1, k2);
+		else if(k1 instanceof IPersistentCollection && k2 instanceof IPersistentCollection)
+			return ((IPersistentCollection)k1).equiv(k2);
 		return k1.equals(k2);
 		}
 	return false;
+}
+
+static public boolean equals(Object k1, Object k2){
+	if(k1 == k2)
+		return true;
+	return k1 != null && k1.equals(k2);
 }
 
 static public int compare(Object k1, Object k2){

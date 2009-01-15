@@ -37,6 +37,20 @@ PersistentQueue(IPersistentMap meta, ISeq f, PersistentVector r){
 	this.r = r;
 }
 
+public boolean equiv(Object obj){
+
+	if(!(obj instanceof Sequential))
+		return false;
+	ISeq ms = ((IPersistentCollection) obj).seq();
+	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+		{
+		if(ms == null || !Util.equiv(s.first(), ms.first()))
+			return false;
+		}
+	return ms.rest() == null;
+
+}
+
 public boolean equals(Object obj){
 
 	if(!(obj instanceof Sequential))
@@ -44,7 +58,7 @@ public boolean equals(Object obj){
 	ISeq ms = ((IPersistentCollection) obj).seq();
 	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
 		{
-		if(ms == null || !Util.equal(s.first(), ms.first()))
+		if(ms == null || !Util.equals(s.first(), ms.first()))
 			return false;
 		}
 	return ms.rest() == null;
@@ -214,7 +228,7 @@ public boolean isEmpty(){
 public boolean contains(Object o){
 	for(ISeq s = seq(); s != null; s = s.rest())
 		{
-		if(Util.equal(s.first(), o))
+		if(Util.equiv(s.first(), o))
 			return true;
 		}
 	return false;

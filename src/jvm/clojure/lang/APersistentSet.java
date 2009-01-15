@@ -71,6 +71,10 @@ public boolean equals(Object obj){
 	return true;
 }
 
+public boolean equiv(Object o){
+	return equals(o);
+}
+
 public int hashCode(){
 	if(_hash == -1)
 		{

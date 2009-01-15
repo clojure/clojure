@@ -458,14 +458,14 @@
 (defn =
   "Equality. Returns true if x equals y, false if not. Same as
   Java x.equals(y) except it also works for nil, and compares
-  numbers in a type-independent manner.  Clojure's immutable data
+  numbers and collections in a type-independent manner.  Clojure's immutable data
   structures define equals() (and thus =) as a value, not an identity,
   comparison."
   {:tag Boolean
-   :inline (fn [x y] `(. clojure.lang.Util equal ~x ~y))
+   :inline (fn [x y] `(. clojure.lang.Util equiv ~x ~y))
    :inline-arities #{2}} 
   ([x] true)
-  ([x y] (. clojure.lang.Util (equal x y)))
+  ([x y] (clojure.lang.Util/equiv x y))
   ([x y & more]
    (if (= x y)
      (if (rest more)
@@ -486,8 +486,8 @@
 (defn compare
   "Comparator. Returns 0 if x equals y, -1 if x is logically 'less
   than' y, else 1. Same as Java x.compareTo(y) except it also works
-  for nil, and compares numbers in a type-independent manner. x must
-  implement Comparable"
+  for nil, and compares numbers and collections in a type-independent
+  manner. x must implement Comparable" 
   {:tag Integer
    :inline (fn [x y] `(. clojure.lang.Util compare ~x ~y))} 
   [x y] (. clojure.lang.Util (compare x y)))
@@ -3237,7 +3237,7 @@
 
 
 (defn distinct?
-  "Returns true if no two of the arguments are equal"
+  "Returns true if no two of the arguments are ="
   {:tag Boolean}
   ([x] true)
   ([x y] (not (= x y)))
