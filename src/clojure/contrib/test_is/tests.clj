@@ -47,6 +47,10 @@
 (deftest can-catch-unexpected-exceptions
   (is (= 1 (throw (Exception.))) "Should error"))
 
+(deftest can-test-method-call
+  (is (.startsWith "abc" "a") "Should pass")
+  (is (.startsWith "abc" "d") "Should fail"))
+
 
 ;; Here, we create an alternate version of test-is/report, that
 ;; compares the event with the message.  The alternate calls the
