@@ -1,7 +1,7 @@
 ;;; test_is/tests.clj: unit tests for test_is.clj
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 15, 2009
+;; January 16, 2009
 
 ;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
 ;; contributions and suggestions.
@@ -55,10 +55,16 @@
   (is (#(.startsWith % "a") "abc") "Should pass")
   (is (#(.startsWith % "d") "abc") "Should fail"))
 
+(deftest can-test-regexps
+  (is (re-matches #"^ab.*$" "abbabba") "Should pass")
+  (is (re-matches #"^cd.*$" "abbabba") "Should fail")
+  (is (re-find #"ab" "abbabba") "Should pass")
+  (is (re-find #"cd" "abbabba") "Should fail"))
+
 
 ;; Here, we create an alternate version of test-is/report, that
-;; compares the event with the message.  The alternate calls the
-;; original with modified arguments.
+;; compares the event with the message, then calls the original
+;; 'report' with modified arguments.
 
 (declare original-report)
 
