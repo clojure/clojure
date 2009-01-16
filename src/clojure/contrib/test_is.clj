@@ -163,7 +163,9 @@
      (seq? form) (first form)
      :else :single)))
 
-(defmethod assert-expr :default [msg form]
+;; Not currently used -- how can we determine if predicate is a normal
+;; function and not a macro or method call?
+(defmethod assert-expr :predicate [msg form]
   ;; Generic assertion for any functional predicate.  The 'expected'
   ;; argument to 'report' contains the original form, the 'actual'
   ;; argument contains the form with all its sub-forms evaluated.  If
@@ -182,8 +184,8 @@
   ;; nil test: always fail
   `(report :fail ~msg nil nil))
 
-(defmethod assert-expr :single [msg form]
-  ;; Evaluate a bare symbol and pass if it is logical true.
+(defmethod assert-expr :default [msg form]
+  ;; Evaluate any expression and pass if it is logical true.
   `(let [value# ~form]
      (if value#
        (report :pass ~msg '~form value#)
