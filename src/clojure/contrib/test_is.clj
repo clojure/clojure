@@ -76,19 +76,28 @@
             [clojure.contrib.stacktrace :as stack]))
 
 
+(defonce
+  #^{:doc "True by default.  If set to false, no test functions will
+   be created by deftest, set-test, or with-test.  Use this to omit
+   tests when compiling or loading production code."}
+  *load-tests* true)
+
+
+
+;;; PRIVATE GLOBALS
+
 (def *report-counters* nil)	  ; bound to a ref of a map in test-ns
 
 (def *testing-vars* (list))  ; bound to hierarchy of vars being tested
 
 (def *testing-contexts* (list))	   ; bound to strings of test contexts
 
-(defonce *load-tests* true)		; if false, deftest is ignored
+(def *initial-report-counters*  ; used to initialize *report-counters*
+     {:test 0, :pass 0, :fail 0, :error 0})
 
 
-;;; REPORTING METHODS
 
-;; These are used in assert-expr methods.  Rebind "report" to plug in
-;; your own test-reporting framework.
+;;; UTILITIES USED BY TEST REPORTING FUNCTIONS
 
 (defn file-position
   "Returns a vector [filename line-number] for the nth call up the
@@ -103,7 +112,9 @@
   current assertion."
   []
   (let [[file line] (file-position 4)]
-    (str ;;(ns-name (:ns (meta (first *testing-vars*)))) "/ "
+    (str
+     ;; Uncomment to include namespace in failure report:
+     ;;(ns-name (:ns (meta (first *testing-vars*)))) "/ "
      (reverse (map #(:name (meta %)) *testing-vars*))
      " (" file ":" line ")")))
 
@@ -114,13 +125,29 @@
   (apply str (interpose " " (reverse *testing-contexts*))))
 
 (defn report-count
-  "Increments the named counter in *report-counters*."
+  "Increments the named counter in *report-counters*, a ref to a map.
+  Does nothing if *report-counters* is nil."
   [name]
   (when *report-counters*
     (dosync (commute *report-counters* assoc name
                      (inc (or (*report-counters* name) 0))))))
 
-(defmulti report (fn [event msg expected actual] event))
+
+
+;;; TEST RESULT REPORTING
+
+(defmulti
+  #^{:doc "Handles the result of a single assertion.  'event' is one
+   of :pass, :fail, or :error.  'msg' is a comment string associated
+   with the assertion.  'expected' and 'actual' are quoted forms,
+   which will be rendered with pr-str.
+
+   Special case: if 'event' is :info, just the 'msg' will be
+   printed.
+
+   You can rebind this function during testing to plug in your own
+   test-reporting framework."}
+  report (fn [event msg expected actual] event))
 
 (defmethod report :info [event msg expected actual]
   (newline)
@@ -246,7 +273,8 @@
   ([form msg] `(try-expr ~msg ~form)))
 
 (defmacro are
-  "Checks multiple assertions with a template expression.
+  "Experimental.  May be removed in the future.
+  Checks multiple assertions with a template expression.
   Example: (are (= _1 _2)  2 (+ 1 1),  4 (+ 2 2))
   See clojure.contrib.template for documentation of templates."
   [expr & args]
@@ -292,8 +320,7 @@
 
 
 (defmacro with-test
-  "Experimental.
-  Takes any definition form (that returns a Var) as the first argument.
+  "Takes any definition form (that returns a Var) as the first argument.
   Remaining body goes in the :test metadata function for that Var.
 
   When *load-tests* is false, only evaluates the definition, ignoring
@@ -302,6 +329,8 @@
   (if *load-tests*
     `(doto ~definition (alter-meta! assoc :test (fn [] ~@body)))
     definition))
+
+
 
 ;;; RUNNING TESTS
 
@@ -326,9 +355,11 @@
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
   Otherwise, calls test-all-vars on the namespace. Returns a map of
-  counts for :test, :pass, :fail, and :error results."  [ns]
-  (binding [*report-counters* (ref {:test 0, :pass 0,
-                                    :fail 0, :error 0})]
+  counts for :test, :pass, :fail, and :error results.
+
+  'ns' is a namespace object or a symbol."
+  [ns]
+  (binding [*report-counters* (ref *initial-report-counters*)]
     (let [ns (if (symbol? ns) (find-ns ns) ns)]
       (report :info (str "Testing " ns) nil nil)
       ;; If ns has a test-ns-hook function, call that:
