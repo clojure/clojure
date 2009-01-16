@@ -62,6 +62,16 @@
   (is (re-find #"cd" "abbabba") "Should fail"))
 
 
+;; still have to declare the symbol before testing unbound symbols
+(declare does-not-exist) 
+
+(deftest can-test-unbound-symbol
+  (is (= nil does-not-exist) "Should error"))
+
+(deftest can-test-unbound-function
+  (is (does-not-exist) "Should error"))
+
+
 ;; Here, we create an alternate version of test-is/report, that
 ;; compares the event with the message, then calls the original
 ;; 'report' with modified arguments.

@@ -1,7 +1,7 @@
 ;;; test_is.clj: test framework for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 15, 2009
+;; January 16, 2009
 
 ;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
 ;; contributions and suggestions.
@@ -97,7 +97,7 @@
 
 
 
-;;; UTILITIES USED BY TEST REPORTING FUNCTIONS
+;;; UTILITIES FOR REPORTING FUNCTIONS
 
 (defn file-position
   "Returns a vector [filename line-number] for the nth call up the
@@ -124,7 +124,7 @@
   []
   (apply str (interpose " " (reverse *testing-contexts*))))
 
-(defn report-count
+(defn inc-report-counter
   "Increments the named counter in *report-counters*, a ref to a map.
   Does nothing if *report-counters* is nil."
   [name]
@@ -154,10 +154,10 @@
   (println msg))
 
 (defmethod report :pass [event msg expected actual]
-  (report-count :pass))
+  (inc-report-counter :pass))
 
 (defmethod report :fail [event msg expected actual]
-  (report-count :fail)
+  (inc-report-counter :fail)
   (println "\nFAIL in" (testing-vars-str))
   (when (seq *testing-contexts*) (println (testing-contexts-str)))
   (when msg (println msg))
@@ -165,7 +165,7 @@
   (println "  actual:" (pr-str actual)))
 
 (defmethod report :error [event msg expected actual]
-  (report-count :error)
+  (inc-report-counter :error)
   (println "\nERROR in" (testing-vars-str))
   (when (seq *testing-contexts*) (println (testing-contexts-str)))
   (when msg (println msg))
@@ -174,6 +174,54 @@
   (if (instance? Throwable actual)
     (stack/print-cause-trace actual 5)
     (prn actual)))
+
+
+
+;;; UTILITIES FOR ASSERTIONS
+
+(defn get-possibly-unbound-var
+  "Like var-get but returns nil if the var is unbound."
+  [v]
+  (try (var-get v)
+       (catch IllegalStateException e
+         nil)))
+
+(defn function?
+  "Returns true if argument is a function or a symbol that resolves to
+  a function (not a macro)."
+  [x]
+  (if (symbol? x)
+    (when-let [v (resolve x)]
+      (when-let [value (get-possibly-unbound-var v)]
+        (and (fn? value)
+             (not (:macro (meta v))))))
+    (fn? x)))
+
+(defn assert-predicate
+  "Returns generic assertion code for any functional predicate.  The
+  'expected' argument to 'report' will contains the original form, the
+  'actual' argument will contain the form with all its sub-forms
+  evaluated.  If the predicate returns false, the 'actual' form will
+  be wrapped in (not...)."
+  [msg form]
+  (let [args (rest form)
+        pred (first form)]
+     `(let [values# (list ~@args)
+            result# (apply ~pred values#)]
+        (if result#
+          (report :pass ~msg '~form (cons ~pred values#))
+          (report :fail ~msg '~form (list '~'not (cons '~pred values#))))
+        result#)))
+
+(defn assert-any
+  "Returns generic assertion code for any test, including macros, Java
+  method calls, or isolated symbols."
+  [msg form]
+  `(let [value# ~form]
+     (if value#
+       (report :pass ~msg '~form value#)
+       (report :fail ~msg '~form value#))
+     value#))
 
 
 
@@ -188,36 +236,16 @@
     (cond
      (nil? form) :always-fail
      (seq? form) (first form)
-     :else :single)))
-
-;; Not currently used -- how can we determine if predicate is a normal
-;; function and not a macro or method call?
-(defmethod assert-expr :predicate [msg form]
-  ;; Generic assertion for any functional predicate.  The 'expected'
-  ;; argument to 'report' contains the original form, the 'actual'
-  ;; argument contains the form with all its sub-forms evaluated.  If
-  ;; the predicate returns false, the 'actual' form is wrapped in
-  ;; (not...).
-  (let [args (rest form)
-        pred (first form)]
-     `(let [values# (list ~@args)
-            result# (apply ~pred values#)]
-        (if result#
-          (report :pass ~msg '~form (cons ~pred values#))
-          (report :fail ~msg '~form (list '~'not (cons '~pred values#))))
-        result#)))
+     :else :default)))
 
 (defmethod assert-expr :always-fail [msg form]
   ;; nil test: always fail
   `(report :fail ~msg nil nil))
 
 (defmethod assert-expr :default [msg form]
-  ;; Evaluate any expression and pass if it is logical true.
-  `(let [value# ~form]
-     (if value#
-       (report :pass ~msg '~form value#)
-       (report :fail ~msg '~form value#))
-     value#))
+  (if (and (sequential? form) (function? (first form)))
+    (assert-predicate msg form)
+    (assert-any msg form)))
 
 (defmethod assert-expr 'instance? [msg form]
   ;; Test if x is an instance of y.
@@ -243,6 +271,7 @@
 
 ;; New assertions coming soon:
 ;; * thrown-with-msg?
+
 
 
 ;;; CATCHING UNEXPECTED EXCEPTIONS
@@ -340,7 +369,7 @@
   [v]
   (when-let [t (:test (meta v))]
     (binding [*testing-vars* (conj *testing-vars* v)]
-      (report-count :test)
+      (inc-report-counter :test)
       (try (t)
 	   (catch Throwable e
 	     (report :error "Uncaught exception, not in assertion."
