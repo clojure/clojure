@@ -51,6 +51,10 @@
   (is (.startsWith "abc" "a") "Should pass")
   (is (.startsWith "abc" "d") "Should fail"))
 
+(deftest can-test-anonymous-fn
+  (is (#(.startsWith % "a") "abc") "Should pass")
+  (is (#(.startsWith % "d") "abc") "Should fail"))
+
 
 ;; Here, we create an alternate version of test-is/report, that
 ;; compares the event with the message.  The alternate calls the
