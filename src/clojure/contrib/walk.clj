@@ -114,3 +114,9 @@
   replacement at the leaves of the tree first."
   [smap form]
   (postwalk (fn [x] (if (contains? smap x) (smap x) x)) form))
+
+(defn macroexpand-all
+  "Recursively performs all possible macroexpansions in form."
+  [form]
+  (prewalk (fn [x] (if (list? x) (macroexpand x) x)) form))
+
