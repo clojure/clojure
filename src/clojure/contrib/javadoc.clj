@@ -62,7 +62,7 @@
                    (filter #(.exists %)
                            (map #(File. % (str file-path ".html"))
                                 @*local-javadocs*)))]
-      (str "file://" (.getAbsolutePath file))
+      (-> file .toURI str)
       ;; If no local file, try remote URLs:
       (some (fn [[prefix url]]
                 (when (.startsWith classname prefix)
