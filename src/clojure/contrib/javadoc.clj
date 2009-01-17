@@ -55,13 +55,14 @@
 (defn find-javadoc-url
   "Searches for a URL for the given class name.  Tries
   *local-javadocs* first, then *remote-javadocs*.  Returns a string."
-  [classname]
+  {:tag String}
+  [#^String classname]
   (let [file-path (.replace classname \. File/separatorChar)
         url-path (.replace classname \. \/)]
-    (if-let [file (first
-                   (filter #(.exists %)
-                           (map #(File. % (str file-path ".html"))
-                                @*local-javadocs*)))]
+    (if-let [file #^File (first
+                           (filter #(.exists #^File %)
+                             (map #(File. (str %) (str file-path ".html"))
+                               @*local-javadocs*)))]
       (-> file .toURI str)
       ;; If no local file, try remote URLs:
       (some (fn [[prefix url]]
@@ -73,9 +74,9 @@
   "Opens a browser window displaying the javadoc for the argument.
   Tries *local-javadocs* first, then *remote-javadocs*."
   [class-or-object]
-  (let [c (if (instance? Class class-or-object) 
-            class-or-object 
-            (class class-or-object))]
+  (let [#^Class c (if (instance? Class class-or-object) 
+                    class-or-object 
+                    (class class-or-object))]
     (if-let [url (find-javadoc-url (.getName c))]
         (browse-url url)
       (println "Could not find Javadoc for" c))))
