@@ -63,25 +63,26 @@
   database updates are committed together as a group after evaluating the
   outermost func, or rolled back on any uncaught exception."
   [func]
-  (let [con (connection*)
-        outermost (zero? (:level *db*))
-        auto-commit (when outermost (.getAutoCommit con))]
-    (binding [*db* (update-in *db* [:level] inc)]
-      (when outermost
-        (.setAutoCommit con false))
-      (try
-       (let [value (func)]
+  (io!
+   (let [con (connection*)
+         outermost (zero? (:level *db*))
+         auto-commit (when outermost (.getAutoCommit con))]
+     (binding [*db* (update-in *db* [:level] inc)]
+       (when outermost
+         (.setAutoCommit con false))
+       (try
+        (let [value (func)]
+          (when outermost
+            (.commit con))
+          value)
+        (catch Exception e
+          (.rollback con)
+          (throw (Exception.
+                  (format "transaction rolled back: %s"
+                          (.getMessage e)) e)))
+        (finally
          (when outermost
-           (.commit con))
-         value)
-       (catch Exception e
-         (.rollback con)
-         (throw (Exception.
-                 (format "transaction rolled back: %s"
-                         (.getMessage e)) e)))
-       (finally
-        (when outermost
-          (.setAutoCommit con auto-commit)))))))
+           (.setAutoCommit con auto-commit))))))))
 
 (defn with-query-results*
   "Executes a query, then evaluates func passing in a seq of the results as
