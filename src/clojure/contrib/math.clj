@@ -53,7 +53,10 @@
 (derive java.lang.Double ::inexact)
 (derive java.lang.Float ::inexact)
 
-(defmulti expt (fn [x y] [(class x) (class y)]))
+(defmulti #^{:arglists '([base pow])
+	     :doc "(expt base pow) is base to the pow power.
+Returns an exact number if the base is an exact number and the power is an integer, otherwise returns a double."}
+  expt (fn [x y] [(class x) (class y)]))
 
 (defn- expt-int [base pow]
   (loop [n pow, y 1, z base]
@@ -78,7 +81,10 @@
    (neg? n) (- n)
    :else n))
 
-(defmulti floor class)
+(defmulti #^{:arglists '([n])
+	     :doc "(floor n) returns the greatest integer less than or equal to n.
+If n is an exact number, floor returns an integer, otherwise a double."}
+  floor class)
 (defmethod floor ::integer [n] n)
 (defmethod floor java.math.BigDecimal [n] (.. n (setScale 0 BigDecimal/ROUND_FLOOR) (toBigInteger)))
 (defmethod floor clojure.lang.Ratio [n]
@@ -87,7 +93,10 @@
 (defmethod floor :default [n]
   (Math/floor n))
 
-(defmulti ceil class)
+(defmulti #^{:arglists '([n])
+	     :doc "(ceil n) returns the least integer greater than or equal to n.
+If n is an exact number, ceil returns an integer, otherwise a double."}
+  ceil class)
 (defmethod ceil ::integer [n] n)
 (defmethod ceil java.math.BigDecimal [n] (.. n (setScale 0 BigDecimal/ROUND_CEILING) (toBigInteger)))
 (defmethod ceil clojure.lang.Ratio [n]
@@ -96,7 +105,10 @@
 (defmethod ceil :default [n]
   (Math/ceil n))
 
-(defmulti round class)
+(defmulti #^{:arglists '([n])
+	     :doc "(round n) rounds to the nearest integer.
+round always returns an integer.  Rounds up for values exactly in between two integers."}
+  round class)
 (defmethod round ::integer [n] n)
 (defmethod round java.math.BigDecimal [n] (floor (+ n 0.5M)))
 (defmethod round clojure.lang.Ratio [n] (floor (+ n 1/2)))
@@ -155,7 +167,9 @@ For example, (exact-integer-sqrt 15) is [3 6] because 15 = 3^2+6."
 	  error (- n (* isqrt isqrt))]
       [isqrt error])))
 
-(defmulti sqrt class)
+(defmulti #^{:arglists '([n])
+	     :doc "Square root, but returns exact number if possible."}
+  sqrt class)
 (defmethod sqrt ::integer [n]
   (if (neg? n) Double/NaN
       (let [isqrt (integer-sqrt n),
