@@ -149,7 +149,7 @@
               (.getTables nil nil nil (into-array ["TABLE" "VIEW"])))))))
 
 (defn db-exception
-  "Demonstrate rolling back a partially completed transaction"
+  "Demonstrate rolling back a partially completed transaction on exception"
   []
   (sql/with-connection
    db
@@ -163,3 +163,29 @@
     ;; is not. the exception will cause it to roll back leaving the database
     ;; untouched.
     (throw (Exception. "sql/test exception")))))
+
+(defn db-rollback
+  "Demonstrate a rollback-only trasaction"
+  []
+  (sql/with-connection
+   db
+   (sql/transaction
+    (prn "is-rollback-only" (sql/is-rollback-only))
+    (sql/set-rollback-only)
+    (sql/insert-values
+     :fruit
+     [:name :appearance]
+     ["Grape" "yummy"]
+     ["Pear" "bruised"])
+    (prn "is-rollback-only" (sql/is-rollback-only))
+    (sql/with-query-results
+     res
+     ["SELECT * FROM fruit"]
+     (doseq [rec res]
+      (println rec))))
+   (prn)
+   (sql/with-query-results
+    res
+    ["SELECT * FROM fruit"]
+    (doseq [rec res]
+      (println rec)))))

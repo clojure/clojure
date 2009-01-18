@@ -16,12 +16,11 @@
 ;;  Created 2 April 2008
 
 (ns clojure.contrib.sql
-  (:use [clojure.contrib.def :only (defvar)])
+  (:use [clojure.contrib.def :only (defalias)])
   (:use clojure.contrib.sql.internal))
 
-(defvar connection connection*
-  "Returns the current database connection (or throws if there is none)")
-
+(defalias connection connection*)
+  
 (defmacro with-connection
   "Evaluates body in the context of a new connection to a database then
   closes the connection. db-spec is a map containing string values for
@@ -41,6 +40,10 @@
   outermost body, or rolled back on any uncaught exception."
   [& body]
   `(transaction* (fn [] ~@body)))
+
+(defalias set-rollback-only set-rollback-only*)
+
+(defalias is-rollback-only is-rollback-only*)
 
 (defn do-commands
   "Executes SQL commands on the open database connection."

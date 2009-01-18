@@ -33,10 +33,22 @@
     p))
 
 (defn connection*
-  "Returns the current database connection or throws"
+  "Returns the current database connection (or throws if there is none)"
   []
   (or (:connection *db*)
       (throw (Exception. "no current database connection"))))
+
+(defn set-rollback-only*
+  "Marks the current stack of nested transactions such that they will
+  rollback rather than commit when complete"
+  []
+  (update-in *db* [:rollback-only] swap! (fn [_] true)))
+
+(defn is-rollback-only*
+  "Returns true if the current stack of nested transactions will rollback
+  rather than commit when complete"
+  []
+  @(:rollback-only *db*))
 
 (defn with-connection*
   "Evaluates func in the context of a new connection to a database then
@@ -54,7 +66,8 @@
        (java.sql.DriverManager/getConnection
         (format "jdbc:%s:%s" subprotocol subname)
         (properties (dissoc db-spec :classname :subprotocol :subname)))]
-    (binding [*db* (assoc *db* :connection con :level 0)]
+    (binding [*db* (assoc *db* :connection con :level 0
+                          :rollback-only (atom false))]
       (func))))
 
 (defn transaction*
@@ -73,13 +86,18 @@
        (try
         (let [value (func)]
           (when outermost
-            (.commit con))
+            (if (is-rollback-only*)
+              (.rollback con)
+              (.commit con)))
           value)
         (catch Exception e
-          (.rollback con)
-          (throw (Exception.
-                  (format "transaction rolled back: %s"
-                          (.getMessage e)) e)))
+          (if outermost
+            (do
+              (.rollback con)
+              (throw (Exception.
+                      (format "transaction rolled back: %s"
+                              (.getMessage e)) e)))
+            (throw e)))
         (finally
          (when outermost
            (.setAutoCommit con auto-commit))))))))
