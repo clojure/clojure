@@ -38,17 +38,12 @@
   (or (:connection *db*)
       (throw (Exception. "no current database connection"))))
 
-(defn set-rollback-only*
-  "Marks the current stack of nested transactions such that they will
-  rollback rather than commit when complete"
-  []
-  (update-in *db* [:rollback-only] swap! (fn [_] true)))
-
-(defn is-rollback-only*
-  "Returns true if the current stack of nested transactions will rollback
-  rather than commit when complete"
-  []
-  @(:rollback-only *db*))
+(defn rollback-only
+  "Accessor for the rollback-only flag on the current connection"
+  ([]
+     @(:rollback-only *db*))
+  ([val]
+     (update-in *db* [:rollback-only] swap! (fn [_] val))))
 
 (defn with-connection*
   "Evaluates func in the context of a new connection to a database then
@@ -86,7 +81,7 @@
        (try
         (let [value (func)]
           (when outermost
-            (if (is-rollback-only*)
+            (if (rollback-only)
               (.rollback con)
               (.commit con)))
           value)
@@ -100,6 +95,7 @@
             (throw e)))
         (finally
          (when outermost
+           (rollback-only false)
            (.setAutoCommit con auto-commit))))))))
 
 (defn with-query-results*

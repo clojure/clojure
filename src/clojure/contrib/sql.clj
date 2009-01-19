@@ -41,9 +41,17 @@
   [& body]
   `(transaction* (fn [] ~@body)))
 
-(defalias set-rollback-only set-rollback-only*)
+(defn set-rollback-only
+  "Marks the outermost transaction such that it will rollback rather than
+  commit when complete"
+  []
+  (rollback-only true))
 
-(defalias is-rollback-only is-rollback-only*)
+(defn is-rollback-only
+  "Returns true if the outermost transaction will rollback rather than
+  commit when complete"
+  []
+  (rollback-only))
 
 (defn do-commands
   "Executes SQL commands on the open database connection."
