@@ -41,9 +41,9 @@
 (defn rollback-only
   "Accessor for the rollback-only flag on the current connection"
   ([]
-     @(:rollback-only *db*))
+     (deref (:rollback-only *db*)))
   ([val]
-     (update-in *db* [:rollback-only] swap! (fn [_] val))))
+     (swap! (:rollback-only *db*) (fn [_] val))))
 
 (defn with-connection*
   "Evaluates func in the context of a new connection to a database then
