@@ -19,8 +19,9 @@
   (:use [clojure.contrib.def :only (defalias)])
   (:use clojure.contrib.sql.internal))
 
+(defalias find-connection find-connection*)
 (defalias connection connection*)
-  
+
 (defmacro with-connection
   "Evaluates body in the context of a new connection to a database then
   closes the connection. db-spec is a map containing string values for

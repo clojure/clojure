@@ -32,10 +32,15 @@
       (.setProperty p (the-str key) (the-str val)))
     p))
 
+(defn find-connection*
+  "Returns the current database connection (or nil if there is none)"
+  []
+  (:connection *db*))
+
 (defn connection*
   "Returns the current database connection (or throws if there is none)"
   []
-  (or (:connection *db*)
+  (or (find-connection*)
       (throw (Exception. "no current database connection"))))
 
 (defn rollback-only
