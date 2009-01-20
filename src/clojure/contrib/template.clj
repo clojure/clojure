@@ -1,9 +1,9 @@
 ;;; template.clj - anonymous functions that pre-evaluate sub-expressions
 
 ;; By Stuart Sierra, http://stuartsierra.com/
-;; December 15, 2008
+;; January 20, 2009
 
-;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
+;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
@@ -13,6 +13,16 @@
 
 
 
+;; CHANGE LOG
+;;
+;; January 20, 2009: added "template?" and checks for valid template
+;; expressions.
+;;
+;; December 15, 2008: first version
+
+
+;; DOCUMENTATION
+;;
 ;; This file defines macros for using template expressions.  These are
 ;; useful for writing macros.
 ;;
@@ -89,11 +99,18 @@
   (reduce (fn [coll [k v]] (conj coll k v))
           [] m))
 
+(defn template?
+  "Returns true if form is a valid template expression."
+  [form]
+  (if (seq (find-holes form)) true false))
+
 (defmacro template
   "Expands to a fn using _1, _2, _3, etc. as arguments (_ is the same
   as _1).  Any sub-expressions without any _* variables are evaluated
   when the fn is created, not when it is called."
   [& form]
+  (when-not (template? form)
+    (throw (IllegalArgumentException. (str (pr-str form) " is not a valid template."))))
   (let [form (postwalk-replace {'_ '_1} form)
         holes (find-holes form)
         pures (find-pure-exprs form)
@@ -112,6 +129,8 @@
   "Replaces _1, _2, _3, etc. in expr with corresponding elements of
   values.  Returns the modified expression.  For use in macros."
   [expr values]
+  (when-not (template? expr)
+    (throw (IllegalArgumentException. (str (pr-str expr) " is not a valid template."))))
   (let [expr (postwalk-replace {'_ '_1} expr)
         holes (find-holes expr)
         smap (zipmap holes values)]
@@ -123,6 +142,8 @@
   Example: (do-template (check _1 _2) :a :b :c :d)
   expands to (do (check :a :b) (check :c :d))"
   [expr & args]
+  (when-not (template? expr)
+    (throw (IllegalArgumentException. (str (pr-str expr) " is not a valid template."))))
   (let [expr (postwalk-replace {'_ '_1} expr)
         argcount (count (find-holes expr))]
     `(do ~@(map (fn [a] (apply-template expr a))
