@@ -1197,7 +1197,10 @@
   (apply f current-value-of-atom args). Note that f may be called
   multiple times, and thus should be free of side effects.  Returns
   the value that was swapped in."  
-  [#^clojure.lang.Atom atom f & args] (.swap atom f args))
+  ([#^clojure.lang.Atom atom f] (.swap atom f))
+  ([#^clojure.lang.Atom atom f x] (.swap atom f x))
+  ([#^clojure.lang.Atom atom f x y] (.swap atom f x y))
+  ([#^clojure.lang.Atom atom f x y & args] (.swap atom f x y args)))
 
 (defn compare-and-set! 
   "Atomically sets the value of atom to newval if and only if the

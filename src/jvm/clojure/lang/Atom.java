@@ -30,11 +30,56 @@ public class Atom extends ARef{
         return state.get();
     }
 
-    public Object swap(IFn f, ISeq args) throws Exception {
+    public Object swap(IFn f) throws Exception {
         for(;;)
             {
             Object v = get();
-            Object newv = f.applyTo(new Cons(v, args));
+            Object newv = f.invoke(v);
+            validate(newv);
+            if(state.compareAndSet(v,newv))
+                {
+                if(v != newv)
+                    notifyWatches();
+                return newv;
+                }
+            }
+    }
+
+    public Object swap(IFn f, Object arg) throws Exception {
+        for(;;)
+            {
+            Object v = get();
+            Object newv = f.invoke(v,arg);
+            validate(newv);
+            if(state.compareAndSet(v,newv))
+                {
+                if(v != newv)
+                    notifyWatches();
+                return newv;
+                }
+            }
+    }
+
+    public Object swap(IFn f, Object arg1, Object arg2) throws Exception {
+        for(;;)
+            {
+            Object v = get();
+            Object newv = f.invoke(v, arg1, arg2);
+            validate(newv);
+            if(state.compareAndSet(v,newv))
+                {
+                if(v != newv)
+                    notifyWatches();
+                return newv;
+                }
+            }
+    }
+
+    public Object swap(IFn f, Object x, Object y, ISeq args) throws Exception {
+        for(;;)
+            {
+            Object v = get();
+            Object newv = f.applyTo(RT.listStar(v, x, y, args));
             validate(newv);
             if(state.compareAndSet(v,newv))
                 {

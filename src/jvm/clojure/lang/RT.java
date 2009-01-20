@@ -760,7 +760,7 @@ static public Object nth(Object coll, int n, Object notFound){
 			return Reflector.prepRet(Array.get(coll, n));
 		return notFound;
 		}
-	else if(coll instanceof List)
+	else if(coll instanceof RandomAccess)
 		{
 		List list = (List) coll;
 		if(n < list.size())
