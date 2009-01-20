@@ -4419,10 +4419,17 @@ static Namespace currentNS(){
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
-	if(b != null && method != null && RT.get(method.locals, b) == null)
+	if(b != null && method != null)
 		{
-		method.fn.closes = (IPersistentMap) RT.assoc(method.fn.closes, b, b);
-		closeOver(b, method.parent);
+		if(RT.get(method.locals, b) == null)
+			{
+			method.fn.closes = (IPersistentMap) RT.assoc(method.fn.closes, b, b);
+			closeOver(b, method.parent);
+			}
+		else if(IN_CATCH_FINALLY.get() != null)
+			{
+			method.localsUsedInCatchFinally = (PersistentHashSet) method.localsUsedInCatchFinally.cons(b.idx);
+			}
 		}
 }
 
@@ -4435,10 +4442,6 @@ static LocalBinding referenceLocal(Symbol sym) throws Exception{
 		{
 		FnMethod method = (FnMethod) METHOD.get();
 		closeOver(b, method);
-		if(RT.get(method.locals, b) != null && IN_CATCH_FINALLY.get() != null)
-			{
-			method.localsUsedInCatchFinally = (PersistentHashSet) method.localsUsedInCatchFinally.cons(b.idx);
-			}
 		}
 	return b;
 }
