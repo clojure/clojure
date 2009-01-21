@@ -43,12 +43,12 @@
   (or (find-connection*)
       (throw (Exception. "no current database connection"))))
 
-(defn rollback-only
-  "Accessor for the rollback-only flag on the current connection"
+(defn rollback
+  "Accessor for the rollback flag on the current connection"
   ([]
-     (deref (:rollback-only *db*)))
+     (deref (:rollback *db*)))
   ([val]
-     (swap! (:rollback-only *db*) (fn [_] val))))
+     (swap! (:rollback *db*) (fn [_] val))))
 
 (defn get-connection
   "Creates a connection to a database. db-spec is a map containing values
@@ -81,8 +81,8 @@
   closes the connection."
   [db-spec func]
   (with-open [con (get-connection db-spec)]
-    (binding [*db* (assoc *db* :connection con :level 0
-                          :rollback-only (atom false))]
+    (binding [*db* (assoc *db*
+                     :connection con :level 0 :rollback (atom false))]
       (func))))
 
 (defn transaction*
@@ -90,9 +90,9 @@
   nested transactions are absorbed into the outermost transaction. By
   default, all database updates are committed together as a group after
   evaluating the outermost body, or rolled back on any uncaught
-  exception. If rollback-only is set within scope of the outermost
-  transaction, the entire transaction will be rolled back rather than
-  committed when complete."
+  exception. If rollback is set within scope of the outermost transaction,
+  the entire transaction will be rolled back rather than committed when
+  complete."
   [func]
   (binding [*db* (update-in *db* [:level] inc)]
     (if (= (:level *db*) 1)
@@ -101,18 +101,17 @@
         (io!
          (.setAutoCommit con false)
          (try
-          (let [value (func)]
-            (if (rollback-only)
-              (.rollback con)
-              (.commit con))
-            value)
+          (func)
           (catch Exception e
-            (.rollback con)
-            (throw (Exception.
-                    (format "transaction rolled back: %s"
-                            (.getMessage e)) e)))
+            (rollback true)
+            (throw
+             (Exception. (format "transaction rolled back: %s"
+                                 (.getMessage e)) e)))
           (finally
-           (rollback-only false)
+           (if (rollback)
+             (.rollback con)
+             (.commit con))
+           (rollback false)
            (.setAutoCommit con auto-commit)))))
       (func))))
 

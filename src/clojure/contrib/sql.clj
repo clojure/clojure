@@ -55,13 +55,13 @@
   "Marks the outermost transaction such that it will rollback rather than
   commit when complete"
   []
-  (rollback-only true))
+  (rollback true))
 
 (defn is-rollback-only
   "Returns true if the outermost transaction will rollback rather than
   commit when complete"
   []
-  (rollback-only))
+  (rollback))
 
 (defn do-commands
   "Executes SQL commands on the open database connection."
