@@ -1026,6 +1026,14 @@
   [multifn dispatch-val-x dispatch-val-y]
   (. multifn preferMethod dispatch-val-x dispatch-val-y))
 
+(defn methods
+  "Given a multimethod, returns a map of dispatch values -> dispatch fns"
+  [multifn] (.getMethodTable multifn))
+
+(defn prefers
+  "Given a multimethod, returns a map of preferred value -> set of other values"
+  [multifn] (.getPreferTable multifn))
+  
 ;;;;;;;;; var stuff      
 
 (defmacro #^{:private true} assert-args [fnname & pairs]
