@@ -87,9 +87,12 @@
 
 (defn transaction*
   "Evaluates func as a transaction on the open database connection. Any
-  nested transactions are absorbed into the outermost transaction. All
-  database updates are committed together as a group after evaluating the
-  outermost func, or rolled back on any uncaught exception."
+  nested transactions are absorbed into the outermost transaction. By
+  default, all database updates are committed together as a group after
+  evaluating the outermost body, or rolled back on any uncaught
+  exception. If rollback-only is set within scope of the outermost
+  transaction, the entire transaction will be rolled back rather than
+  committed when complete."
   [func]
   (io!
    (let [con (connection*)

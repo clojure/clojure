@@ -42,9 +42,12 @@
 
 (defmacro transaction
   "Evaluates body as a transaction on the open database connection. Any
-  nested transactions are absorbed into the outermost transaction. All
-  database updates are committed together as a group after evaluating the
-  outermost body, or rolled back on any uncaught exception."
+  nested transactions are absorbed into the outermost transaction. By
+  default, all database updates are committed together as a group after
+  evaluating the outermost body, or rolled back on any uncaught
+  exception. If set-rollback-only is called within scope of the outermost
+  transaction, the entire transaction will be rolled back rather than
+  committed when complete."
   [& body]
   `(transaction* (fn [] ~@body)))
 
