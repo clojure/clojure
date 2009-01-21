@@ -24,13 +24,19 @@
 
 (defmacro with-connection
   "Evaluates body in the context of a new connection to a database then
-  closes the connection. db-spec is a map containing string values for
-  these required keys:
-    :classname     the jdbc driver class name
-    :subprotocol   the jdbc subprotocol
-    :subname       the jdbc subname
-  If db-spec contains additional keys (such as :user, :password, etc.) and
-  associated values, they will be passed along to the driver as properties."
+  closes the connection. db-spec is a map containing values for one of the
+  following parameter sets:
+
+  DataSource:
+    :datasource  (required) a javax.sql.DataSource
+    :username    (optional) a String
+    :password    (optional) a String
+
+  DriverManager:
+    :classname   (required) a String, the jdbc driver class name
+    :subprotocol (required) a String, the jdbc subprotocol
+    :subname     (required) a String, the jdbc subname
+    (others)     (optional) passed to the driver as properties."
   [db-spec & body]
   `(with-connection* ~db-spec (fn [] ~@body)))
 

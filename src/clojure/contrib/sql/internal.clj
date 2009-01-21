@@ -52,23 +52,35 @@
 
 (defn with-connection*
   "Evaluates func in the context of a new connection to a database then
-  closes the connection. db-spec is a map containing string values for
-  these required keys:
-    :classname     the jdbc driver class name
-    :subprotocol   the jdbc subprotocol
-    :subname       the jdbc subname
-  If db-spec contains additional keys (such as :user, :password, etc.) and
-  associated values, they will be passed along to the driver as properties."
-  [{:keys [classname subprotocol subname] :as db-spec} func]
-  (clojure.lang.RT/loadClassForName classname)
-  (with-open
-      [con
-       (java.sql.DriverManager/getConnection
-        (format "jdbc:%s:%s" subprotocol subname)
-        (properties (dissoc db-spec :classname :subprotocol :subname)))]
-    (binding [*db* (assoc *db* :connection con :level 0
-                          :rollback-only (atom false))]
-      (func))))
+  closes the connection. db-spec is a map containing values for one of the
+  following parameter sets:
+
+  DataSource:
+    :datasource  (required) a javax.sql.DataSource
+    :username    (optional) a String
+    :password    (optional) a String
+
+  DriverManager:
+    :classname   (required) a String, the jdbc driver class name
+    :subprotocol (required) a String, the jdbc subprotocol
+    :subname     (required) a String, the jdbc subname
+    (others)     (optional) passed to the driver as properties."
+  [{:keys [datasource username password classname subprotocol subname]
+    :as db-spec} func]
+  (when-not datasource
+    (clojure.lang.RT/loadClassForName classname))
+  (let [con
+        (if datasource
+          (if username
+            (.getConnection datasource username password)
+            (.getConnection datasource))
+          (java.sql.DriverManager/getConnection
+           (format "jdbc:%s:%s" subprotocol subname)
+           (properties (dissoc db-spec :classname :subprotocol :subname))))]
+    (with-open [con con]
+      (binding [*db* (assoc *db* :connection con :level 0
+                            :rollback-only (atom false))]
+        (func)))))
 
 (defn transaction*
   "Evaluates func as a transaction on the open database connection. Any
