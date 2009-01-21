@@ -32,7 +32,7 @@
                                [] (.getParameterTypes m))))
   ")"))
 
-(defn- member-vec [m]
+(defn- member-details [m]
   (let [static? (Modifier/isStatic (.getModifiers m))
         method? (instance? Method m)
         ctor?   (instance? Constructor m)
@@ -44,29 +44,45 @@
                  (if method?
                    (str (.getSimpleName (.getReturnType m)) (param-str m))
                    (str (.getSimpleName (.getType m))))))]
-    [[(not static?) method? (sortable text)] text m]))
+    (assoc (bean m)
+           :sort-val [(not static?) method? (sortable text)]
+           :text text
+           :member m)))
 
 (defn show
-  "With one arg, lists all static and instance members of the given
-  class, or the class of the given object.  Each entry is listed with
-  a number.  Use that number as the second argument, and that member
-  will be returned which at the REPL will cause more detail to be
-  printed.
+  "With one arg prints all static and instance members of x or (class x).
+  Each member is listed with a number which can be given as 'selector'
+  to return the member object -- the REPL will print more details for
+  that member.
 
-  Examples: (show Integer)  (show [])  (show String 23)"
-  ([x] (show x nil))
-  ([x i]
+  The selector also may be a string or regex, in which case only
+  members whose names match 'selector' as a case-insensitive regex
+  will be printed.
+
+  Finally, the selector also may be a predicate, in which case only
+  members for which the predicate returns true will be printed.  The
+  predicate will be passed a single argument, a map that includes the
+  :text that will be printed and the :member object itself, as well as
+  all the properies of the member object as translated by 'bean'.
+
+  Examples: (show Integer)  (show [])  (show String 23)  (show String \"case\")"
+  ([x] (show x (constantly true)))
+  ([x selector]
       (let [c (if (class? x) x (class x))
-            items (sort (for [m (concat (.getFields c)
-                                        (.getMethods c)
-                                        (.getConstructors c))]
-                          (member-vec m)))]
-        (if i
-          (last (nth items i))
-          (do
+            members (sort-by :sort-val
+                             (map member-details
+                                  (concat (.getFields c)
+                                          (.getMethods c)
+                                          (.getConstructors c))))]
+        (if (number? selector)
+          (:member (nth members selector))
+          (let [pred (if (ifn? selector)
+                       selector
+                       #(re-seq (re-pattern (str "(?i)" selector)) (:name %)))]
             (println "=== " (Modifier/toString (.getModifiers c)) c " ===")
-            (doseq [[i e] (indexed items)]
-              (printf "[%2d] %s\n" i (second e))))))))
+            (doseq [[i m] (indexed members)]
+              (when (pred m)
+                (printf "[%2d] %s\n" i (:text m)))))))))
 
 (defn get-source
   "Returns a string of the source code for the given symbol, if it can
