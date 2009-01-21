@@ -1,7 +1,7 @@
 ;;; test_is.clj: test framework for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 16, 2009
+;; January 21, 2009
 
 ;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
 ;; contributions and suggestions.
@@ -20,54 +20,173 @@
   ;; Inspired by many Common Lisp test frameworks and clojure/test,
   ;; this file is a Clojure test framework.
   ;;
-  ;; Define tests as :test metadata on your fns.  Use the "is" macro
-  ;; for assertions.  Examples:
+  ;;
+  ;;
+  ;; ASSERTIONS
+  ;;
+  ;; The core of the library is the "is" macro, which lets you make
+  ;; assertions of any arbitrary expression:
 
-  (defn add2
-    ([x] (+ x 2))
-    {:test (fn [] (is (= (add2 3) 5))
-	     (is (= (add2 -4) -2)
-		 (is (> (add2 50) 50))))})
+  (is (= 4 (+ 2 2)))
+  (is (instance? Integer 256))
+  (is (.startsWith "abcde" "ab"))
 
-  ;; You can also define tests in isolation with the "deftest" macro:
+  ;; You can type an "is" expression directly at the REPL, which will
+  ;; print a message if it fails.
+  ;;
+  ;;     user> (is (= 5 (+ 2 2)))
+  ;;
+  ;;     FAIL in  (:1)
+  ;;     expected: (= 5 (+ 2 2))
+  ;;       actual: (not (= 5 4))
+  ;;     false
+  ;;
+  ;; The "expected:" line shows you the original expression, and the
+  ;; "actual:" shows you what actually happened.  In this case, it
+  ;; shows that (+ 2 2) returned 4, which is not = to 5.  Finally, the
+  ;; "false" on the last line is the value returned from the
+  ;; expression.  The "is" macro always returns the result of the
+  ;; inner expression.
+  ;;
+  ;; There are two special assertions for testing exceptions.  The
+  ;;  "(is (thrown? c ...))" form tests if an exception of class c is
+  ;;  thrown:
 
-  (deftest test-new-fn
-    (is (= (new-fn) "Awesome")))
+  (is (thrown? ArithmeticException (/ 1 0))) 
 
-  ;; You can test that a function throws an exception with the
-  ;; "is thrown?" form:
+  ;; "(is (thrown-with-msg? c re ...))" does the same thing and also
+  ;; tests that the message on the exception matches the regular
+  ;; expression re:
 
-  (defn factorial
-    ([n] (cond
-	  (zero? n) 1	       ; 0!=1 is often defined for convenience
-	  (> n 0) (* n (factorial (dec n)))
-	  :else (throw (IllegalArgumentException. "Negative factorial"))))
-    {:test (fn [] (is (= (factorial 3) 6))
-	     (is (= (factorial 6) 720))
-	     (is (thrown? IllegalArgumentException (factorial -2))))}) 
+  (is (thrown-with-msg? ArithmeticException #"Divide by zero"
+                        (/ 1 0)))
 
-  ;; Run tests with (run-tests). As in any language with macros, you
-  ;; may need to recompile functions after changing a macro
+  ;;
+  ;;
+  ;;
+  ;; DOCUMENTING TESTS
+  ;;
+  ;; "is" takes an optional second argument, a string describing the
+  ;; assertion.  This message will be included in the error report.
+
+  (is (= 5 (+ 2 2)) "Crazy arithmetic")
+
+  ;; In addition, you can document groups of assertions with the
+  ;; "testing" macro, which takes a string followed by any number of
+  ;; "is" assertions.  The string will be included in failure reports.
+  ;; Calls to "testing" may be nested, and all of the strings will be
+  ;; joined together with spaces in the final report, in a style
+  ;; similar to RSpec <http://rspec.info/>
+
+  (testing "Arithmetic"
+    (testing "with positive integers"
+      (= 4 (+ 2 2))
+      (= 7 (+ 3 4)))
+    (testing "with negative integers"
+      (= -4 (+ -2 -2))
+      (= -1 (+ 3 -4))))
+
+  ;; Note that, unlike RSpec, the "testing" macro may only be used
+  ;; INSIDE a "deftest" or "with-test" form (see below).
+  ;;
+  ;;
+  ;;
+  ;; DEFINING TESTS
+  ;;
+  ;; There are two ways to define tests.  The "with-test" macro takes
+  ;; a defn or def form as its first argument, followed by any number
+  ;; of assertions.  The tests will be stored as metadata on the
   ;; definition.
+
+  (with-test
+      (defn my-function [x y]
+        (+ x y))
+    (is (= 4 (my-function 2 2)))
+    (is (= 7 (my-function 3 4))))
+
+  ;; As of Clojure SVN rev. 1221, this does not work with defmacro.
+  ;; See http://code.google.com/p/clojure/issues/detail?id=51
   ;;
-  ;; If you want write a bunch of tests with the same predicate, use
-  ;; "are", which takes a template and applies it inside "is".
+  ;; The other way lets you define tests separately from the rest of
+  ;; your code, even in a different namespace:
+
+  (deftest addition
+    (is (= 4 (+ 2 2)))
+    (is (= 7 (+ 3 4))))
+
+  (deftest subtraction
+    (is (= 1 (- 4 3)))
+    (is (= 3 (- 7 4))))
+
+  ;; This creates functions named "addition" and "subtraction", which
+  ;; can be called like any other function.  Therefore, tests can be
+  ;; grouped and composed, in a style similar to the test framework in
+  ;; Peter Seibel's "Practical Common Lisp"
+  ;; <http://www.gigamonkeys.com/book/practical-building-a-unit-test-framework.html>
+
+  (deftest arithmetic
+    (addition)
+    (subtraction))
+
+  ;; The names of the nested tests will be joined in a list, like
+  ;; "(arithmetic addition)", in failure reports.  You can use nested
+  ;; tests to set up a context shared by several tests.
   ;;
-  ;; Examples:
+  ;;
+  ;;
+  ;; RUNNING TESTS
+  ;;
+  ;; Run tests with the function "(run-tests namespaces...)":
 
-  (deftest test-addition
-    (are (= _1 _2)
-	 3 (+ 2 1)
-	 4 (+ 2 2)
-	 5 (+ 4 1)))
+  (run-tests 'your.namespace 'some.other.namespace)
 
-  (deftest test-predicates
-    (are _ ;; the template is just an underscore
-	 (true? true)
-	 (false? false)
-	 (nil? nil)))
+  ;; If you don't specify any namespaces, the current namespace is
+  ;; used.  To run all tests in all namespaces, use "(run-all-tests)".
+  ;;
+  ;; By default, these functions will search for all tests defined in
+  ;; a namespace and run them in an undefined order.  However, if you
+  ;; are composing tests, as in the "arithmetic" example above, you
+  ;; probably do not want the "addition" and "subtraction" tests run
+  ;; separately.  In that case, you must define a special function
+  ;; named "test-ns-hook" that runs your tests in the correct order:
 
-) ;; end comment block
+  (defn test-ns-hook []
+    (arithmetic))
+
+  ;;
+  ;;
+  ;;
+  ;; OMITTING TESTS FROM PRODUCTION CODE
+  ;;
+  ;; You can bind the variable "*load-tests*" to false when loading or
+  ;; compiling code in production.  This will prevent any tests from
+  ;; being created by "with-test" or "deftest".
+  ;;
+  ;;
+  ;;
+  ;; EXTENDING TEST-IS (ADVANCED)
+  ;;
+  ;; You can extend the behavior of the "is" macro by defining new
+  ;; methods for the "assert-expr" multimethod.  These methods are
+  ;; called during expansion of the "is" macro, so they should return
+  ;; quoted forms to be evaluated.
+  ;;
+  ;; You can plug in your own test-reporting framework by rebinding
+  ;; the "report" function: (report event msg expected actual)
+  ;;
+  ;; "report" will be called once for each assertion.  The "event"
+  ;; argument will give the outcome of the assertion: one of :pass,
+  ;; :fail, or :error.  The "msg" argument will be the message given
+  ;; to the "is" macro.  The "expected" argument will be a quoted form
+  ;; of the original assertion.  The "actual" argument will be a
+  ;; quoted form indicating what actually occurred.  The "testing"
+  ;; strings will be a list in "*testing-contexts*", and the vars
+  ;; being tested will be a list in "*testing-vars*".
+  ;;
+  ;; (report :info msg nil nil) is used to print informational
+  ;; messages, such as the name of the namespace being tested.
+
+  ) ;; end comment
 
 
 
@@ -75,6 +194,11 @@
   (:require [clojure.contrib.template :as temp]
             [clojure.contrib.stacktrace :as stack]))
 
+;; Nothing is marked "private" here, so you can rebind things to plug
+;; in your own testing or reporting frameworks.
+
+
+;;; USER-MODIFIABLE GLOBALS
 
 (defonce
   #^{:doc "True by default.  If set to false, no test functions will
@@ -84,16 +208,16 @@
 
 
 
-;;; PRIVATE GLOBALS
+;;; GLOBALS USED BY THE REPORTING FUNCTIONS
 
 (def *report-counters* nil)	  ; bound to a ref of a map in test-ns
 
-(def *testing-vars* (list))  ; bound to hierarchy of vars being tested
-
-(def *testing-contexts* (list))	   ; bound to strings of test contexts
-
 (def *initial-report-counters*  ; used to initialize *report-counters*
      {:test 0, :pass 0, :fail 0, :error 0})
+
+(def *testing-vars* (list))  ; bound to hierarchy of vars being tested
+
+(def *testing-contexts* (list))           ; bound to "testing" strings
 
 
 
@@ -206,12 +330,12 @@
   [msg form]
   (let [args (rest form)
         pred (first form)]
-     `(let [values# (list ~@args)
-            result# (apply ~pred values#)]
-        (if result#
-          (report :pass ~msg '~form (cons ~pred values#))
-          (report :fail ~msg '~form (list '~'not (cons '~pred values#))))
-        result#)))
+    `(let [values# (list ~@args)
+           result# (apply ~pred values#)]
+       (if result#
+         (report :pass ~msg '~form (cons ~pred values#))
+         (report :fail ~msg '~form (list '~'not (cons '~pred values#))))
+       result#)))
 
 (defn assert-any
   "Returns generic assertion code for any test, including macros, Java
@@ -287,9 +411,6 @@
             e#))))
 
 
-
-;;; CATCHING UNEXPECTED EXCEPTIONS
-
 (defmacro try-expr
   "Used by the 'is' macro to catch unexpected exceptions.
   You don't call this."
@@ -302,7 +423,7 @@
 
 ;;; ASSERTION MACROS
 
-;; you use these in your tests
+;; You use these in your tests.
 
 (defmacro is
   "Generic assertion macro.  'form' is any predicate test.
@@ -332,7 +453,19 @@
 
 
 
-;;; DEFINING TESTS INDEPENDENT OF FUNCTIONS
+;;; DEFINING TESTS
+
+(defmacro with-test
+  "Takes any definition form (that returns a Var) as the first argument.
+  Remaining body goes in the :test metadata function for that Var.
+
+  When *load-tests* is false, only evaluates the definition, ignoring
+  the tests."
+  [definition & body]
+  (if *load-tests*
+    `(doto ~definition (alter-meta! assoc :test (fn [] ~@body)))
+    definition))
+
 
 (defmacro deftest
   "Defines a test function with no arguments.  Test functions may call
@@ -362,20 +495,8 @@
     `(alter-meta! (var ~name) assoc :test (fn [] ~@body))))
 
 
-(defmacro with-test
-  "Takes any definition form (that returns a Var) as the first argument.
-  Remaining body goes in the :test metadata function for that Var.
 
-  When *load-tests* is false, only evaluates the definition, ignoring
-  the tests."
-  [definition & body]
-  (if *load-tests*
-    `(doto ~definition (alter-meta! assoc :test (fn [] ~@body)))
-    definition))
-
-
-
-;;; RUNNING TESTS
+;;; RUNNING TESTS: LOW-LEVEL FUNCTIONS
 
 (defn test-var
   "If v has a function in its :test metadata, calls that function,
@@ -397,10 +518,12 @@
 
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
-  Otherwise, calls test-all-vars on the namespace. Returns a map of
-  counts for :test, :pass, :fail, and :error results.
+  Otherwise, calls test-all-vars on the namespace.  'ns' is a
+  namespace object or a symbol.
 
-  'ns' is a namespace object or a symbol."
+  Internally binds *report-counters* to a ref initialized to
+  *inital-report-counters*.  Returns the final, dereferenced state of
+  *report-counters*."
   [ns]
   (binding [*report-counters* (ref *initial-report-counters*)]
     (let [ns (if (symbol? ns) (find-ns ns) ns)]
@@ -413,12 +536,16 @@
     @*report-counters*))
 
 (defn print-results
-  "Prints formatted results message based on the reported
-  counts in r."
+  "Prints formatted results message based on the reported counts
+  returned by test-ns."
   [r]
   (println "\nRan" (:test r) "tests containing"
            (+ (:pass r) (:fail r) (:error r)) "assertions.")
   (println (:fail r) "failures," (:error r) "errors."))
+
+
+
+;;; RUNNING TESTS: HIGH-LEVEL FUNCTIONS
 
 (defn run-tests
   "Runs all tests in the given namespaces; prints results.
