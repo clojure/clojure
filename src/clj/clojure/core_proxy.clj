@@ -314,7 +314,7 @@
 			 (let [name (. pd (getName))
 			       method (. pd (getReadMethod))]
 			   (if (and method (zero? (alength (. method (getParameterTypes)))))
-			     (assoc m (keyword name) (fn [] (. method (invoke x nil))))
+			     (assoc m (keyword name) (fn [] (clojure.lang.Reflector/prepRet (. method (invoke x nil)))))
 			     m)))
 		     {}
 		     (seq (.. java.beans.Introspector
