@@ -50,10 +50,9 @@
   ([val]
      (swap! (:rollback-only *db*) (fn [_] val))))
 
-(defn with-connection*
-  "Evaluates func in the context of a new connection to a database then
-  closes the connection. db-spec is a map containing values for one of the
-  following parameter sets:
+(defn get-connection
+  "Creates a connection to a database. db-spec is a map containing values
+  for one of the following parameter sets:
 
   DataSource:
     :datasource  (required) a javax.sql.DataSource
@@ -66,21 +65,25 @@
     :subname     (required) a String, the jdbc subname
     (others)     (optional) passed to the driver as properties."
   [{:keys [datasource username password classname subprotocol subname]
-    :as db-spec} func]
+    :as db-spec}]
   (when classname
     (clojure.lang.RT/loadClassForName classname))
-  (let [con
-        (if datasource
-          (if username
-            (.getConnection datasource username password)
-            (.getConnection datasource))
-          (java.sql.DriverManager/getConnection
-           (format "jdbc:%s:%s" subprotocol subname)
-           (properties (dissoc db-spec :classname :subprotocol :subname))))]
-    (with-open [con con]
-      (binding [*db* (assoc *db* :connection con :level 0
-                            :rollback-only (atom false))]
-        (func)))))
+  (if datasource
+    (if username
+      (.getConnection datasource username password)
+      (.getConnection datasource))
+    (java.sql.DriverManager/getConnection
+     (format "jdbc:%s:%s" subprotocol subname)
+     (properties (dissoc db-spec :classname :subprotocol :subname)))))
+
+(defn with-connection*
+  "Evaluates func in the context of a new connection to a database then
+  closes the connection."
+  [db-spec func]
+  (with-open [con (get-connection db-spec)]
+    (binding [*db* (assoc *db* :connection con :level 0
+                          :rollback-only (atom false))]
+      (func))))
 
 (defn transaction*
   "Evaluates func as a transaction on the open database connection. Any
