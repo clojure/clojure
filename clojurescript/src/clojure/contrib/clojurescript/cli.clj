@@ -15,34 +15,6 @@
         [clojure.contrib.clojurescript :only (formtojs filetojs)])
   (:require [clojure.contrib.duck-streams :as ds]))
 
-(defn start-server [port]
-  ;(println "Opening port" port)
-  (loop [server (java.net.ServerSocket. port)] ; TODO bind only to 127.0.0.1
-    (send-off (agent (.accept server))
-      (fn [socket]
-        (with-open [socket socket]
-          (binding [*out* (-> socket .getOutputStream ds/writer)]
-            (try
-              (print "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n")
-              (let [line1 (-> socket .getInputStream ds/reader .readLine)
-                    [_ url] (re-find #"^GET /\?(.*?) HTTP" line1)
-                    codestr (URLDecoder/decode url)
-                    js (with-out-str (filetojs (StringReader. codestr)
-                                               :debug-fn-names false
-                                               :debug-comments false
-                                               :eval-defmacro false))]
-                (println "jsrepl.state('compiled');try{")
-                (println "jsrepl.lastval=" js )
-                (println "jsrepl.state('done');}catch(e){jsrepl.err(e)};"))
-              (catch Exception e
-                (if (= (.getMessage e) "EOF while reading")
-                  (println "jsrepl.state('incomplete');")
-                  (let [trace (with-out-str
-                                (.printStackTrace e (PrintWriter. *out*)))]
-                    (println "jsrepl.state('error',\""
-                             (.replace trace "\n" "\\n") "\");")))))))))
-    (recur server)))
-
 (defn mkcore []
   (binding [*out* (ds/writer "core.js")]
     (doseq [file ["clojure/core.clj" "clojure/core_print.clj"]]
@@ -83,13 +55,11 @@
   (with-command-line *command-line-args*
     "clojurescript.cli -- Compile ClojureScript to JavaScript"
     [[simple? "Runs some simple built-in tests"]
-     [serve   "Starts a repl server on the given port" 8081]
      [mkcore? "Generates a core.js file"]
      [v?      "Includes extra fn names and comments in js"]
      filenames]
     (cond
       simple? (simple-tests)
-      serve   (start-server (Integer/parseInt serve))
       mkcore? (mkcore)
       :else   (doseq [filename filenames]
                 (filetojs filename :debug-fn-names v? :debug-comments v?)))))

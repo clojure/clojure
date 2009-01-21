@@ -20,72 +20,56 @@
     (.appendChild parent i))
   parent)
 
-(def elems)
-(def lastval)
 (def *print-class* nil)
 
-(defn repl-print [text]
-  (let [log (:log elems)]
-    (doseq [line (.split text #"\n")]
-      (append-dom log
-        [:div {:class (str "cg "
-                           (when *print-class*
-                             (str " " *print-class*)))}
-         line]))
-    (set! (.scrollTop log) (.scrollHeight log))))
+(defn repl-print [log text]
+  (doseq [line (.split text #"\n")]
+    (append-dom log
+      [:div {:class (str "cg "
+                         (when *print-class*
+                           (str " " *print-class*)))}
+       line]))
+  (set! (.scrollTop log) (.scrollHeight log)))
 
-(defn postexpr []
-  (append-dom (:log elems)
+(defn postexpr [log input]
+  (append-dom log
     [:table
      [:tbody
       [:tr
        [:td {:class "cg"} "user=> "]
-       [:td (-> :input elems .value (.replace #"\n$" ""))]]]])
-  (set! (-> :scripts elems .innerHTML) "")
-  (set! (-> :input elems .value) ""))
+       [:td (.replace (.value input) #"\n$" "")]]]]))
 
 (defmacro print-with-class [c m]
   `(binding [*print-class* ~c]
      (println ~m)))
 
-(defn show-state [url]
-  (set! (-> :status elems .src) url))
-
-(defn state [status msg]
-  (cond
-    (= status "incomplete") (show-state "dots.png")
-    (= status "done") (prn lastval)
-    (= status "error") (do
-                         (postexpr)
-                         (show-state "blank.gif")
-                         (print-with-class "err" msg))
-    (= status "compiled") (do
-                            (postexpr)
-                            (setTimeout #(show-state "blank.gif") 0))))
-
-(defn err [e]
-  (print-with-class "err" e)
-  (set! *e e))
-
 (set! *print-length* 103)
 
+(defmacro let-elem-ids [ids & body]
+  `(let ~(vec (mapcat #(list % (list '.getElementById 'document (str %))) ids))
+     ~@body))
+
 (set! (.onload window) (fn []
-  ; no refs yet, so just re-def
-  (set! elems (into {} (for [n '(log input status scripts)]
-                      [(keyword n) (.getElementById document (str n))])))
+  (let-elem-ids [log input status applet]
+    (set! (.print window) #(repl-print log %))
 
-  (set! (.print window) repl-print)
+    (set! (.onkeypress input)
+          (fn [ev]
+            (when (== (.keyCode (or ev event)) 13)
+              (let [[status-name text] (.tojs applet (.value input))]
+                (if (= status-name "incomplete")
+                  (set! (.src status) "dots.png")
+                  (do
+                    (postexpr log input)
+                    (if (= status-name "js")
+                      (try (prn (.eval window text))
+                        (catch Exception e
+                          (print-with-class "err" e)
+                          (set! *e e)))
+                      (print-with-class "err" text))
+                    (setTimeout #(set! (.value input) "") 0)
+                    (set! (.src status) "blank.gif")))))))
 
-  (set! (.onkeypress (:input elems))
-        (fn [e]
-          (let [e (or e event)]
-            (when (== (.keyCode e) 13)
-              (set! (-> :status elems .src) "clojure-logo-anim-03.gif")
-              (append-dom (:scripts elems)
-                [:script {:src (str "http://clojurescript.n01se.net:8081/?"
-                                    (-> :input elems .value escape
-                                        (.replace #"\+" "%2b")))}])))))
+    (println "ClojureScript")
 
-  (println "ClojureScript")
-
-  (.focus (:input elems))))
+    (.focus input))))

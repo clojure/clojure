@@ -19,6 +19,13 @@ Now that you've got the .js file, you can test using Rhino:
   -f src/clojure/contrib/clojurescript/core.js \
   -f t03.js
 
+To build the applet from the compiled .class files, don't forget to:
+
+- Extract clojure code into the classes dir
+  (cd classes; jar -x < ~/build/clojure/clojure.jar)
+- Produce the jar:
+  jar cmf MANIFEST.MF clojurescript-applet.jar -C classes .
+
 There's plenty more to do.  If you'd like to help, contact the Clojure
 Google group: clojure@googlegroups.com
 

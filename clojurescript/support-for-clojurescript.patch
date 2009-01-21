@@ -1,11 +1,11 @@
-commit 3a3b1b4f8fad93e54cd3571010bacf787c6a77c8
+commit f4468e8764c62122b91ba991a102c7ab0ca67a9c
 Author: Chouser <chouser@n01se.net>
-Date:   Wed Dec 17 15:14:51 2008 -0500
+Date:   Fri Jan 16 02:47:42 2009 -0500
 
     ClojureScript support
 
 diff --git a/src/clj/clojure/core.clj b/src/clj/clojure/core.clj
-index 5a4cef0..1812548 100644
+index d21c3f0..e5f294a 100644
 --- a/src/clj/clojure/core.clj
 +++ b/src/clj/clojure/core.clj
 @@ -321,7 +321,7 @@
@@ -35,7 +35,7 @@ index 5a4cef0..1812548 100644
    ([x y] (. clojure.lang.Numbers (multiply x y)))
    ([x y & more]
     (reduce * (* x y) more)))
-@@ -1478,12 +1478,12 @@
+@@ -1484,12 +1484,12 @@
  (defn range
    "Returns a lazy seq of nums from start (inclusive) to end
    (exclusive), by step, where start defaults to 0 and step to 1."
@@ -51,7 +51,7 @@ index 5a4cef0..1812548 100644
                   (new clojure.lang.Range start end)
                   (take (- end start) (iterate inc start))))
    ([start end step]
-@@ -1550,7 +1550,7 @@
+@@ -1556,7 +1556,7 @@
    ([#^java.util.Comparator comp coll]
     (when (and coll (not (zero? (count coll))))
       (let [a (to-array coll)]
@@ -60,7 +60,7 @@ index 5a4cef0..1812548 100644
         (seq a)))))
  
  (defn sort-by
-@@ -1640,7 +1640,7 @@
+@@ -1646,7 +1646,7 @@
    [& agents]
    (io! "await in transaction"
      (when *agent*
@@ -69,7 +69,7 @@ index 5a4cef0..1812548 100644
      (let [latch (new java.util.concurrent.CountDownLatch (count agents))
            count-down (fn [agent] (. latch (countDown)) agent)]
        (doseq [agent agents]
-@@ -1660,7 +1660,7 @@
+@@ -1666,7 +1666,7 @@
    [timeout-ms & agents]
      (io! "await-for in transaction"
       (when *agent*
@@ -78,7 +78,7 @@ index 5a4cef0..1812548 100644
       (let [latch (new java.util.concurrent.CountDownLatch (count agents))
             count-down (fn [agent] (. latch (countDown)) agent)]
         (doseq [agent agents]
-@@ -1984,6 +1984,7 @@
+@@ -1990,6 +1990,7 @@
  
  
  (import '(java.lang.reflect Array))
@@ -86,7 +86,7 @@ index 5a4cef0..1812548 100644
  
  (defn alength
    "Returns the length of the Java array. Works on arrays of all
-@@ -2003,7 +2004,7 @@
+@@ -2009,7 +2010,7 @@
    {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
     :inline-arities #{2}}
    ([array idx]
@@ -95,7 +95,7 @@ index 5a4cef0..1812548 100644
    ([array idx & idxs]
     (apply aget (aget array idx) idxs)))
  
-@@ -2013,7 +2014,7 @@
+@@ -2019,7 +2020,7 @@
    {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a ~i ~v)))
     :inline-arities #{3}}
    ([array idx val]
@@ -104,7 +104,7 @@ index 5a4cef0..1812548 100644
     val)
    ([array idx idx2 & idxv]
     (apply aset (aget array idx) idx2 idxv)))
-@@ -2170,6 +2171,10 @@
+@@ -2176,6 +2177,10 @@
    "Returns a set of the distinct elements of coll."
    [coll] (apply hash-set coll))
  
@@ -115,7 +115,7 @@ index 5a4cef0..1812548 100644
  (defn #^{:private true}
    filter-key [keyfn pred amap]
      (loop [ret {} es (seq amap)]
-@@ -2205,7 +2210,7 @@
+@@ -2211,7 +2216,7 @@
    [x]
    (if (instance? clojure.lang.Namespace x) 
      x 
@@ -124,7 +124,7 @@ index 5a4cef0..1812548 100644
  
  (defn ns-name
    "Returns the name of the namespace, a symbol."
-@@ -2238,7 +2243,7 @@
+@@ -2244,7 +2249,7 @@
  (defn ns-imports
    "Returns a map of the import mappings for the namespace."
    [ns]
@@ -133,7 +133,7 @@ index 5a4cef0..1812548 100644
  
  (defn refer
    "refers to all public vars of ns, subject to filters.
-@@ -2256,7 +2261,8 @@
+@@ -2262,7 +2267,8 @@
    to a symbol different from the var's name, in order to prevent
    clashes. Use :use in the ns macro in preference to calling this directly."
    [ns-sym & filters]
@@ -143,7 +143,7 @@ index 5a4cef0..1812548 100644
            fs (apply hash-map filters)
            nspublics (ns-publics ns)
            rename (or (:rename fs) {})
-@@ -2388,7 +2394,7 @@
+@@ -2394,7 +2400,7 @@
                                                       true)
                                  (= firstb :as) (pb ret (second bs) gvec)
                                  :else (if seen-rest?
@@ -152,7 +152,7 @@ index 5a4cef0..1812548 100644
                                          (recur (pb ret firstb  (list `nth gvec n nil))
                                                 (inc n)
                                                 (rest bs)
-@@ -2419,7 +2425,7 @@
+@@ -2425,7 +2431,7 @@
                    (symbol? b) (-> bvec (conj b) (conj v))
                    (vector? b) (pvec bvec b v)
                    (map? b) (pmap bvec b v)
@@ -161,7 +161,7 @@ index 5a4cef0..1812548 100644
          process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
      (if (every? symbol? (keys bmap))
        bindings
-@@ -2567,7 +2573,7 @@
+@@ -2573,7 +2579,7 @@
    StringWriter.  Returns the string created by any nested printing
    calls."
    [& body]
@@ -170,7 +170,7 @@ index 5a4cef0..1812548 100644
       (binding [*out* s#]
         ~@body
         (str s#))))
-@@ -2613,7 +2619,7 @@
+@@ -2619,7 +2625,7 @@
   logical true."
    [x]
    `(when-not ~x
@@ -179,7 +179,7 @@ index 5a4cef0..1812548 100644
  
  (defn test
    "test [v] finds fn at key :test in var metadata and calls it,
-@@ -2687,7 +2693,7 @@
+@@ -2693,7 +2699,7 @@
  (defn rand
    "Returns a random floating point number between 0 (inclusive) and
    1 (exclusive)."
@@ -188,7 +188,7 @@ index 5a4cef0..1812548 100644
    ([n] (* n (rand))))
  
  (defn rand-int
-@@ -2797,7 +2803,7 @@
+@@ -2803,7 +2809,7 @@
    "Reads the file named by f into a string and returns it."
    [#^String f]
    (with-open [r (new java.io.BufferedReader (new java.io.FileReader f))]
@@ -197,7 +197,7 @@ index 5a4cef0..1812548 100644
        (loop [c (. r (read))]
          (if (neg? c)
            (str sb)
-@@ -3081,10 +3087,6 @@
+@@ -3087,10 +3093,6 @@
       (send-off agt fill)
       (drain))))
  
@@ -208,7 +208,7 @@ index 5a4cef0..1812548 100644
  (defn alter-var-root
    "Atomically alters the root binding of var v by applying f to its
    current value plus any args"
-@@ -3170,7 +3172,7 @@
+@@ -3176,7 +3178,7 @@
    relationships."
    ([tag] (descendants global-hierarchy tag))
    ([h tag] (if (class? tag)
@@ -217,7 +217,7 @@ index 5a4cef0..1812548 100644
               (not-empty (get (:descendants h) tag)))))
  
  (defn derive
-@@ -3200,9 +3202,9 @@
+@@ -3206,9 +3208,9 @@
       (or 
        (when-not (contains? (tp tag) parent)
          (when (contains? (ta tag) parent)
@@ -229,7 +229,7 @@ index 5a4cef0..1812548 100644
          {:parents (assoc (:parents h) tag (conj (get tp tag #{}) parent))     
           :ancestors (tf (:ancestors h) tag td parent ta)
           :descendants (tf (:descendants h) parent ta tag td)})
-@@ -3343,7 +3345,7 @@
+@@ -3349,7 +3351,7 @@
    [pred fmt & args]
    (when pred
      (let [message (apply format fmt args)
@@ -239,7 +239,7 @@ index 5a4cef0..1812548 100644
            boring? #(not= (.getMethodName %) "doInvoke")
            trace (into-array (drop 2 (drop-while boring? raw-trace)))]
 diff --git a/src/clj/clojure/core_print.clj b/src/clj/clojure/core_print.clj
-index 4dc83cf..1d2274b 100644
+index 7a79a90..1ecc597 100644
 --- a/src/clj/clojure/core_print.clj
 +++ b/src/clj/clojure/core_print.clj
 @@ -75,14 +75,14 @@
@@ -259,7 +259,7 @@ index 4dc83cf..1d2274b 100644
    (.write w " ")
    (.write w (str o))
    (.write w ">"))
-@@ -153,7 +153,7 @@
+@@ -148,7 +148,7 @@
  (defmethod print-dup clojure.lang.IPersistentCollection [o, #^Writer w]
    (print-meta o w)
    (.write w "#=(")
@@ -268,7 +268,7 @@ index 4dc83cf..1d2274b 100644
    (.write w "/create ")
    (print-sequential "[" print-dup " " "]" o w)
    (.write w ")"))
-@@ -212,7 +212,7 @@
+@@ -202,7 +202,7 @@
  (defmethod print-dup clojure.lang.IPersistentMap [m, #^Writer w]
    (print-meta m w)
    (.write w "#=(")
@@ -277,7 +277,7 @@ index 4dc83cf..1d2274b 100644
    (.write w "/create ")
    (print-map m print-dup w)
    (.write w ")"))
-@@ -269,7 +269,7 @@
+@@ -252,7 +252,7 @@
     Short/TYPE "Short/TYPE"})
  
  (defmethod print-method Class [#^Class c, #^Writer w]
@@ -286,7 +286,7 @@ index 4dc83cf..1d2274b 100644
  
  (defmethod print-dup Class [#^Class c, #^Writer w]
    (cond
-@@ -279,11 +279,11 @@
+@@ -262,11 +262,11 @@
                         (.write w ")"))
      (.isArray c) (do
                     (.write w "#=(java.lang.Class/forName \"")
@@ -301,7 +301,7 @@ index 4dc83cf..1d2274b 100644
  (defmethod print-method java.math.BigDecimal [b, #^Writer w]
    (.write w (str b))
 diff --git a/src/jvm/clojure/lang/Compiler.java b/src/jvm/clojure/lang/Compiler.java
-index c180201..20a2bef 100644
+index cee5002..e303b4f 100644
 --- a/src/jvm/clojure/lang/Compiler.java
 +++ b/src/jvm/clojure/lang/Compiler.java
 @@ -202,7 +202,8 @@ static final public Var NEXT_LOCAL_NUM = Var.create(0);
@@ -314,8 +314,18 @@ index c180201..20a2bef 100644
  
  public enum C{
  	STATEMENT,  //value ignored
+@@ -2975,7 +2976,8 @@ static public class FnExpr implements Expr{
+ 			{
+ 			Var.popThreadBindings();
+ 			}
+-		fn.compile();
++		if(! RT.booleanCast(RT.COMPILER_ANALYZE_ONLY.get()))
++			fn.compile();
+ 		return fn;
+ 	}
+ 
 diff --git a/src/jvm/clojure/lang/RT.java b/src/jvm/clojure/lang/RT.java
-index 4954028..98981ea 100644
+index f5d97e8..c5b3ef4 100644
 --- a/src/jvm/clojure/lang/RT.java
 +++ b/src/jvm/clojure/lang/RT.java
 @@ -32,6 +32,9 @@ static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null
@@ -328,7 +338,15 @@ index 4954028..98981ea 100644
  //simple-symbol->class
  final static IPersistentMap DEFAULT_IMPORTS = map(
  //												  Symbol.create("RT"), "clojure.lang.RT",
-@@ -963,6 +966,10 @@ static public double doubleCast(double x){
+@@ -202,6 +205,7 @@ final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-r
+ final static Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), F);
+ final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
+ final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), F);
++final static Var COMPILER_ANALYZE_ONLY = Var.intern(CLOJURE_NS, Symbol.create("*compiler-analyze-only*"), F);
+ 
+ final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), F);
+ final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("ns"), F);
+@@ -963,6 +967,10 @@ static public double doubleCast(double x){
  	return x;
  }
  
@@ -339,7 +357,7 @@ index 4954028..98981ea 100644
  static public IPersistentMap map(Object... init){
      if(init == null)
          return PersistentArrayMap.EMPTY;
-@@ -1707,4 +1714,43 @@ synchronized public static DynamicClassLoader getRootClassLoader() {
+@@ -1707,4 +1715,43 @@ synchronized public static DynamicClassLoader getRootClassLoader() {
          ROOT_CLASSLOADER = new DynamicClassLoader();
      return ROOT_CLASSLOADER;
      }

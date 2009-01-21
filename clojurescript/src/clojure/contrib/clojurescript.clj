@@ -304,30 +304,31 @@
 
 (defn formtojs [f]
   (when-not (and (coll? f) (= 'definline (first f)))
-    (binding [*allow-unresolved-vars* true
-              *private-compiler-loader* (clojure.lang.RT/makeClassLoader)]
-      (let [expr (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f)))
-            mainexpr (-> expr .fexpr .methods first .body .exprs first)
-            defmacro?  (and (instance? Compiler$BodyExpr mainexpr)
-                            (instance? Compiler$DefExpr (first (.exprs mainexpr)))
-                            (instance? Compiler$InstanceMethodExpr (second (.exprs mainexpr)))
-                            (= "setMacro" (.methodName (second (.exprs mainexpr)))))]
-        (if defmacro?
-          (when *eval-defmacro*
-            (eval f)
-            nil)
-          (when-not (or (and (instance? Compiler$DefExpr mainexpr)
-                            (skip-def (:name ^(.var mainexpr))))
-                        (and (instance? Compiler$InstanceMethodExpr mainexpr)
-                            (or (= "setMacro" (.methodName mainexpr))
-                                (and (= "addMethod" (.methodName mainexpr))
-                                      (skip-method (tojs (first (.args mainexpr))
-                                                        nil)))))
-                        (and (instance? Compiler$BodyExpr mainexpr)
-                            (instance? Compiler$DefExpr (first (.exprs mainexpr)))
-                            (instance? Compiler$InstanceMethodExpr (second (.exprs mainexpr)))
-                            (= "setMacro" (.methodName (second (.exprs mainexpr))))))
-            (tojs expr {:localmap {}})))))))
+    (let [expr (binding [*allow-unresolved-vars* true
+                         *compiler-analyze-only* true
+                         *private-compiler-loader* (clojure.lang.RT/baseLoader)]
+                 (Compiler/analyze Compiler$C/STATEMENT `((fn [] ~f))))
+          mainexpr (-> expr .fexpr .methods first .body .exprs first)
+          defmacro?  (and (instance? Compiler$BodyExpr mainexpr)
+                          (instance? Compiler$DefExpr (first (.exprs mainexpr)))
+                          (instance? Compiler$InstanceMethodExpr (second (.exprs mainexpr)))
+                          (= "setMacro" (.methodName (second (.exprs mainexpr)))))]
+      (if defmacro?
+        (when *eval-defmacro*
+          (eval f)
+          nil)
+        (when-not (or (and (instance? Compiler$DefExpr mainexpr)
+                          (skip-def (:name ^(.var mainexpr))))
+                      (and (instance? Compiler$InstanceMethodExpr mainexpr)
+                          (or (= "setMacro" (.methodName mainexpr))
+                              (and (= "addMethod" (.methodName mainexpr))
+                                    (skip-method (tojs (first (.args mainexpr))
+                                                      nil)))))
+                      (and (instance? Compiler$BodyExpr mainexpr)
+                          (instance? Compiler$DefExpr (first (.exprs mainexpr)))
+                          (instance? Compiler$InstanceMethodExpr (second (.exprs mainexpr)))
+                          (= "setMacro" (.methodName (second (.exprs mainexpr))))))
+          (tojs expr {:localmap {}}))))))
 
 (defn filetojs [filename & optseq]
   (let [reader (java.io.PushbackReader. (ds/reader filename))
