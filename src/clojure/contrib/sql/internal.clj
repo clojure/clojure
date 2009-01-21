@@ -67,7 +67,7 @@
     (others)     (optional) passed to the driver as properties."
   [{:keys [datasource username password classname subprotocol subname]
     :as db-spec} func]
-  (when-not datasource
+  (when classname
     (clojure.lang.RT/loadClassForName classname))
   (let [con
         (if datasource
