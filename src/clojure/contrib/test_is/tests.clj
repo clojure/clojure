@@ -41,8 +41,19 @@
 
 (deftest can-test-thrown
   (is (thrown? ArithmeticException (/ 1 0)) "Should pass")
+  ;; No exception is thrown:
   (is (thrown? Exception (+ 1 1)) "Should fail")
+  ;; Wrong class of exception is thrown:
   (is (thrown? ArithmeticException (throw (RuntimeException.))) "Should error"))
+
+(deftest can-test-thrown-with-msg
+  (is (thrown-with-msg? ArithmeticException #"Divide by zero" (/ 1 0)) "Should pass")
+  ;; Wrong message string:
+  (is (thrown-with-msg? ArithmeticException #"Something else" (/ 1 0)) "Should fail")
+  ;; No exception is thrown:
+  (is (thrown? Exception (+ 1 1)) "Should fail")
+  ;; Wrong class of exception is thrown:
+  (is (thrown-with-msg? IllegalArgumentException #"Divide by zero" (/ 1 0)) "Should error"))
 
 (deftest can-catch-unexpected-exceptions
   (is (= 1 (throw (Exception.))) "Should error"))

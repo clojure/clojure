@@ -269,8 +269,22 @@
             (report :pass ~msg '~form e#)
             e#))))
 
-;; New assertions coming soon:
-;; * thrown-with-msg?
+(defmethod assert-expr 'thrown-with-msg? [msg form]
+  ;; (is (thrown-with-msg? c re expr))
+  ;; Asserts that evaluating expr throws an exception of class c.
+  ;; Also asserts that the message string of the exception matches
+  ;; (with re-matches) the regular expression re.
+  (let [klass (nth form 1)
+        re (nth form 2)
+        body (nthrest form 3)]
+    `(try ~@body
+          (report :fail ~msg '~form nil)
+          (catch ~klass e#
+            (let [m# (.getMessage e#)]
+              (if (re-matches ~re m#)
+                (report :pass ~msg '~form e#)
+                (report :fail ~msg '~form e#)))
+            e#))))
 
 
 
