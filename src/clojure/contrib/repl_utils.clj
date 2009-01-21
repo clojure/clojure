@@ -94,8 +94,11 @@
   Example: (get-source 'filter)"
   [x]
   (when-let [v (resolve x)]
-    (let [ns-name (str (.name (.ns v)))
-          path (first (re-seq #"^.*(?=/[^/]*$)" (.replace ns-name "." "/")))
+    (let [ns-str (str (ns-name (:ns ^v)))
+          path (first (re-seq #"^.*(?=/[^/]*$)"
+                              (-> ns-str
+                                (.replace "." "/")
+                                (.replace "-" "_"))))
           fname (str path "/" (:file ^v))]
       (when-let [strm (.getResourceAsStream (RT/baseLoader) fname)]
         (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
