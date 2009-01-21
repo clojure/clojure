@@ -12,7 +12,6 @@ package clojure.lang;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.Callable;
 
 public abstract class ASeq extends Obj implements ISeq, Collection, Streamable{
 transient int _hash = -1;
@@ -181,21 +180,21 @@ public AStream stream() throws Exception {
     return new AStream(new Src(this));
 }
 
-static class Src implements Callable{
+static class Src extends AFn{
     ISeq s;
 
     public Src(ISeq s) {
         this.s = s;
     }
 
-	public Object call() throws Exception {
+	public Object invoke(Object eos) throws Exception {
         if(s != null)
             {
             Object ret = s.first();
             s = s.rest();
             return ret;
             }
-        return RT.eos();
+        return eos;
     }
 }
 }

@@ -448,6 +448,31 @@
                        (recur (first zs) (rest zs)))))]
        (cat (concat x y) zs))))
  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; streams ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn stream
+  "Creates a stream of the items in coll."
+  {:tag clojure.lang.AStream}
+  [coll] (clojure.lang.RT/stream coll))
+
+(defn stream-iter
+  "Returns an iter on (stream coll). Only one iter on a stream is
+  supported at a time."  
+  {:tag clojure.lang.AStream$Iter}
+  [coll] (.iter (stream coll)))
+
+(defn next!
+  "Takes a stream iter and an eos value, returns (and consumes) the next element in the stream, or eos."
+  [#^clojure.lang.AStream$Iter iter eos] (.next iter eos))
+
+(defn push-back!
+  "Takes a stream iter and pushes x onto front of stream, returns iter."
+  [#^clojure.lang.AStream$Iter iter x] (.pushBack iter x))
+
+(defn detach!
+  "Takes a stream iter and disconnects it from the underlying stream,
+  returning the stream. All further operations on the iter will fail."
+  [#^clojure.lang.AStream$Iter iter] (.detach iter))
+
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 (defmacro if-not
   "Evaluates test. If logical false, evaluates and returns then expr, otherwise else expr, if supplied, else nil."
@@ -1274,6 +1299,8 @@
     (. ref (touch))
     (. ref (get)))
 
+(def #^{:private true :tag clojure.lang.Closer} *io-context* nil)
+
 (defmacro sync
   "transaction-flags => TBD, pass nil for now
 
@@ -1281,23 +1308,15 @@
   exprs and any nested calls.  Starts a transaction if none is already
   running on this thread. Any uncaught exception will abort the
   transaction and flow out of sync. The exprs may be run more than
-  once, but any effects on Refs will be atomic."
+  once, but any effects on Refs will be atomic. Transactions are not
+  allowed in io! blocks - will throw IllegalStateException."  
   [flags-ignored-for-now & body]
-  `(. clojure.lang.LockingTransaction
-      (runInTransaction (fn [] ~@body))))
+  `(if *io-context*
+     (throw (IllegalStateException. "Transaction in io!"))
+     (. clojure.lang.LockingTransaction
+        (runInTransaction (fn [] ~@body)))))
 
 
-(defmacro io! 
-  "If an io! block occurs in a transaction, throws an
-  IllegalStateException, else runs body in an implicit do. If the
-  first expression in body is a literal string, will use that as the
-  exception message."
-  [& body]
-  (let [message (when (string? (first body)) (first body))
-        body (if message (rest body) body)]
-    `(if (clojure.lang.LockingTransaction/isRunning)
-       (throw (new IllegalStateException ~(or message "I/O in transaction")))
-       (do ~@body))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
@@ -1380,9 +1399,43 @@
                 (map f (rest c1) (rest c2) (rest c3)))))
   ([f c1 c2 c3 & colls]
    (let [step (fn step [cs]
-                  (when (every? seq cs)
+                 (when (every? seq cs)
                     (lazy-cons (map first cs) (step (map rest cs)))))]
      (map #(apply f %) (step (conj colls c3 c2 c1))))))
+
+(defn map-stream
+  "Returns a stream consisting of the result of applying f to the
+  set of first items of each coll, followed by applying f to the set
+  of second items in each coll, until any one of the colls is
+  exhausted.  Any remaining items in other colls are ignored. Function
+  f should accept number-of-colls arguments."
+  ([f coll]
+     (identity (let [iter (stream-iter coll)]
+       (stream
+        #(let [x (next! iter %)]
+          (if (= % x) x (f x)))))))
+  ([f c1 c2]
+    (identity (let [s1 (stream-iter c1), s2 (stream-iter c2)]
+      (stream
+       #(let [x1 (next! s1 %), x2 (next! s2 %)]
+          (if (or (= % x1) (= % x2)) 
+            % 
+            (f x1 x2)))))))
+  ([f c1 c2 c3]
+    (identity (let [s1 (stream-iter c1), s2 (stream-iter c2), s3 (stream-iter c3)]
+      (stream
+       #(let [x1 (next! s1 %), x2 (next! s2 %), x3 (next! s3 %)]
+          (if (or (= % x1) (= % x2) (= % x3))
+            % 
+            (f x1 x2 x3)))))))
+  ([f c1 c2 c3 & colls]
+    (identity (let [iters (map stream-iter (list* c1 c2 c3 colls))]
+      (stream
+       (fn [eos]
+           (let [xs (seq (map #(next! % eos) iters))]
+                 (if (some #{eos} xs) 
+                   eos 
+                   (apply f xs)))))))))
 
 (defn mapcat
   "Returns the result of applying concat to the result of applying map
@@ -1391,13 +1444,25 @@
     (apply concat (apply map f colls)))
 
 (defn filter
-  "Returns a lazy seq of the items in coll for which
+  "Returns a stream of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   [pred coll]
-    (when (seq coll)
-      (if (pred (first coll))
-        (lazy-cons (first coll) (filter pred (rest coll)))
-        (recur pred (rest coll)))))
+  (seq
+   (let [iter (stream-iter coll)]
+     (stream
+      #(let [x (next! iter %)]
+         (if (or (= % x) (pred x)) 
+           x 
+           (recur %)))))))
+
+;(defn filter
+;  "Returns a lazy seq of the items in coll for which
+;  (pred item) returns true. pred must be free of side-effects."
+;  [pred coll]
+;    (when (seq coll)
+;      (if (pred (first coll))
+;        (lazy-cons (first coll) (filter pred (rest coll)))
+;        (recur pred (rest coll)))))
 
 (defn remove
   "Returns a lazy seq of the items in coll for which
@@ -1633,39 +1698,6 @@
    (dorun n coll)
    coll))
 
-(defn await
-  "Blocks the current thread (indefinitely!) until all actions
-  dispatched thus far, from this thread or agent, to the agent(s) have
-  occurred."
-  [& agents]
-  (io! "await in transaction"
-    (when *agent*
-      (throw (new Exception "Can't await in agent action")))
-    (let [latch (new java.util.concurrent.CountDownLatch (count agents))
-          count-down (fn [agent] (. latch (countDown)) agent)]
-      (doseq [agent agents]
-        (send agent count-down))
-      (. latch (await)))))
-
-(defn await1 [#^clojure.lang.Agent a]
-  (when (pos? (.getQueueCount a))
-    (await a))
-    a)
-
-(defn await-for
-  "Blocks the current thread until all actions dispatched thus
-  far (from this thread or agent) to the agents have occurred, or the
-  timeout (in milliseconds) has elapsed. Returns nil if returning due
-  to timeout, non-nil otherwise."
-  [timeout-ms & agents]
-    (io! "await-for in transaction"
-     (when *agent*
-       (throw (new Exception "Can't await in agent action")))
-     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
-           count-down (fn [agent] (. latch (countDown)) agent)]
-       (doseq [agent agents]
-           (send agent count-down))
-       (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS))))))
   
 (defmacro dotimes
   "bindings => name n
@@ -1946,6 +1978,97 @@
                                   (. ~(bindings 0) close))))
     :else (throw (IllegalArgumentException.
                    "with-open only allows Symbols in bindings"))))
+
+
+(defmacro io! 
+  "If an io! block occurs in a transaction, throws an
+  IllegalStateException, else runs body in an implicit do. If the
+  first expression in body is a literal string, will use that as the
+  exception message. Establishes a dynamic io context for use with io-scope."  
+  [& body]
+  (let [message (when (string? (first body)) (first body))
+        body (if message (rest body) body)]
+    `(if (clojure.lang.LockingTransaction/isRunning)
+       (throw (new IllegalStateException ~(or message "I/O in transaction")))
+       (binding [*io-context* (clojure.lang.Closer.)]
+         (try
+          ~@body
+          (finally 
+           (.close *io-context*)))))))
+
+(def *scope* nil)
+
+(defn run-scope-actions []
+  (let [failed (= (first *scope*) :failed)
+        entries (if failed (rest *scope*) *scope*)]
+    (doseq [e entries]
+        (let [cause (first e)
+              action (second e)]
+          (when (or (= cause :exits)
+                    (and (= cause :fails) failed)
+                    (and (= cause :succeeds) (not failed)))
+            (action))))))
+
+(defmacro scope
+  "Creates a scope for use with when-scope."
+  [& body]
+  `(binding [*scope* (list)]
+     (try
+      ~@body
+      (catch Throwable t#
+        (set! *scope* (conj *scope* :failed))
+        (throw t#))
+      (finally
+       (run-scope-actions)))))
+
+(defmacro when-scope 
+  "Causes a body of expressions to be executed at the termination of
+  the nearest dynamically enclosing scope (created with scope). If no
+  scope is in effect, throws IllegalStateException. Cause must be one of:
+
+  :exits - will run unconditionally on scope exit
+  :fails - will run only if scope exits due to an exception
+  :succeeds - will run only if scope exits normally"
+
+  [cause & body]
+  `(do
+     (when-not *scope*
+       (throw (IllegalStateException. "No scope in effect")))
+     (set! *scope* (conj *scope* [~cause (fn [] ~@body)]))))
+
+(defn await
+  "Blocks the current thread (indefinitely!) until all actions
+  dispatched thus far, from this thread or agent, to the agent(s) have
+  occurred."
+  [& agents]
+  (io! "await in transaction"
+    (when *agent*
+      (throw (new Exception "Can't await in agent action")))
+    (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+          count-down (fn [agent] (. latch (countDown)) agent)]
+      (doseq [agent agents]
+        (send agent count-down))
+      (. latch (await)))))
+
+(defn await1 [#^clojure.lang.Agent a]
+  (when (pos? (.getQueueCount a))
+    (await a))
+    a)
+
+(defn await-for
+  "Blocks the current thread until all actions dispatched thus
+  far (from this thread or agent) to the agents have occurred, or the
+  timeout (in milliseconds) has elapsed. Returns nil if returning due
+  to timeout, non-nil otherwise."
+  [timeout-ms & agents]
+    (io! "await-for in transaction"
+     (when *agent*
+       (throw (new Exception "Can't await in agent action")))
+     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+           count-down (fn [agent] (. latch (countDown)) agent)]
+       (doseq [agent agents]
+           (send agent count-down))
+       (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS))))))
 
 (defmacro doto
   "Evaluates x then calls all of the methods and functions with the 
@@ -2883,7 +3006,8 @@
   exprs and any nested calls.  Starts a transaction if none is already
   running on this thread. Any uncaught exception will abort the
   transaction and flow out of dosync. The exprs may be run more than
-  once, but any effects on Refs will be atomic."
+  once, but any effects on Refs will be atomic. Transactions are not
+  allowed in io! blocks - will throw IllegalStateException."
   [& exprs]
   `(sync nil ~@exprs))
 
@@ -3770,5 +3894,6 @@
 (load "core_proxy")
 (load "core_print")
 (load "genclass")
+
 
 

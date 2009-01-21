@@ -67,7 +67,7 @@ public AStream stream() throws Exception {
     return new AStream(new Src(n,end));
 }
 
-    static class Src implements Callable{
+    static class Src extends AFn{
         int n;
         final int end;
 
@@ -76,10 +76,10 @@ public AStream stream() throws Exception {
             this.end = end;
         }
 
-        public Object call() throws Exception {
+        public Object invoke(Object eos) throws Exception {
             if(n < end)
                 return n++;
-            return RT.eos();
+            return eos;
         }
     }
 }

@@ -8,26 +8,26 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Dec 7, 2008 */
+/* rich Jan 10, 2009 */
 
 package clojure.lang;
 
-import java.util.Iterator;
+import java.io.Closeable;
+import java.io.IOException;
 
-public class IteratorStream extends AFn{
-final Iterator iter;
+public class Closer implements Closeable{
+    ISeq closes;
 
-static public AStream create(Iterator iter){
-	return new AStream(new IteratorStream(iter));
-}
 
-IteratorStream(Iterator iter){
-	this.iter = iter;
-}
+    public void close() throws IOException {
+        for(ISeq s = closes;s!=null;s = s.rest())
+            {
+            ((Closeable)s.first()).close();
+            }
+    }
 
-public Object invoke(Object eos) throws Exception{
-	if(iter.hasNext())
-		return iter.next();
-	return eos;
-}
+    public Closer register(Closeable c) {
+        closes = new Cons(c, closes);
+        return this;
+    }
 }

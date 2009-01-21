@@ -12,9 +12,7 @@
 
 package clojure.lang;
 
-import java.util.concurrent.Callable;
-
-public class ArrayStream implements Callable{
+public class ArrayStream extends AFn{
 
 int i = 0;
 final Object[] array;
@@ -23,10 +21,10 @@ public ArrayStream(Object[] array){
 	this.array = array;
 }
 
-public Object call() throws Exception{
+public Object invoke(Object eos) throws Exception{
 	if(i < array.length)
 		return array[i++];
-	return RT.eos();
+	return eos;
 }
 
 static AStream createFromObject(Object array){
@@ -52,7 +50,7 @@ static AStream createFromObject(Object array){
 	throw new IllegalArgumentException(String.format("Unsupported array type %s", array));
 }
 
-static public class ArrayStream_int implements Callable{
+static public class ArrayStream_int extends AFn{
 
 	int i = 0;
 	final int[] array;
@@ -61,14 +59,14 @@ static public class ArrayStream_int implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 
-static public class ArrayStream_long implements Callable{
+static public class ArrayStream_long extends AFn{
 
 	int i = 0;
 	final long[] array;
@@ -77,14 +75,14 @@ static public class ArrayStream_long implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 
-static public class ArrayStream_float implements Callable{
+static public class ArrayStream_float extends AFn{
 
 	int i = 0;
 	final float[] array;
@@ -93,14 +91,14 @@ static public class ArrayStream_float implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 
-static public class ArrayStream_double implements Callable{
+static public class ArrayStream_double extends AFn{
 
 	int i = 0;
 	final double[] array;
@@ -109,14 +107,14 @@ static public class ArrayStream_double implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 
-static public class ArrayStream_char implements Callable{
+static public class ArrayStream_char extends AFn{
 
 	int i = 0;
 	final char[] array;
@@ -125,14 +123,14 @@ static public class ArrayStream_char implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 
-static public class ArrayStream_byte implements Callable{
+static public class ArrayStream_byte extends AFn{
 
 	int i = 0;
 	final byte[] array;
@@ -141,14 +139,14 @@ static public class ArrayStream_byte implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 
-static public class ArrayStream_short implements Callable{
+static public class ArrayStream_short extends AFn{
 
 	int i = 0;
 	final short[] array;
@@ -157,14 +155,14 @@ static public class ArrayStream_short implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 
-static public class ArrayStream_boolean implements Callable{
+static public class ArrayStream_boolean extends AFn{
 
 	int i = 0;
 	final boolean[] array;
@@ -173,10 +171,10 @@ static public class ArrayStream_boolean implements Callable{
 		this.array = array;
 	}
 
-	public Object call() throws Exception{
+	public Object invoke(Object eos) throws Exception{
 		if(i < array.length)
 			return array[i++];
-		return RT.eos();
+		return eos;
 	}
 }
 

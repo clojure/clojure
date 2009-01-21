@@ -3721,7 +3721,7 @@ public static class LetExpr implements Expr{
 
 			ISeq body = RT.rest(RT.rest(form));
 
-			if(context == C.EVAL)
+			if(context == C.EVAL || (context == C.EXPRESSION && isLoop))
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
 			IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),

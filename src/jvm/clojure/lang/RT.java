@@ -243,6 +243,12 @@ static public void addURL(Object url) throws Exception{
 	getRootClassLoader().addURL(u);
 }
 
+static final public IFn EMPTY_GEN = new AFn(){
+    synchronized public Object invoke(Object eos) throws Exception {
+        return eos;
+    }
+};
+    
 static
 	{
 	Keyword dockw = Keyword.intern(null, "doc");
@@ -455,21 +461,19 @@ static public ISeq seq(Object coll){
 
 static public AStream stream(final Object coll) throws Exception{
 	if(coll == null)
-		return EMPTY_STREAM;
-    else if(coll instanceof AStream)
-        return (AStream) coll;
+		return new AStream(EMPTY_GEN);
+    else if(coll instanceof Streamable)
+        return ((Streamable) coll).stream();
     else if(coll instanceof Fn)
-        return new AStream((Callable)coll);
-	else if(coll instanceof Streamable)
-		return ((Streamable)coll).stream();
+        return new AStream((IFn)coll);
     else if(coll instanceof Iterable)
 		return IteratorStream.create(((Iterable) coll).iterator());
     else if (coll.getClass().isArray())
         return ArrayStream.createFromObject(coll);
     else if (coll instanceof String)
         return ArrayStream.createFromObject(((String)coll).toCharArray());
-
-    throw new IllegalArgumentException("Don't know how to create IStream from: " + coll.getClass().getSimpleName());
+    else
+        return new AStream(new ASeq.Src(RT.seq(coll)));
 }
 
 static ISeq seqFrom(Object coll){
@@ -1208,7 +1212,7 @@ static public void print(Object x, Writer w) throws Exception{
 		}
 	if(x == null)
 		w.write("nil");
-	else if(x instanceof ISeq || x instanceof IPersistentList)
+	else if(x instanceof ISeq || x instanceof IPersistentList || x instanceof AStream)
 		{
 		w.write('(');
 		printInnerSeq(seq(x), w);
@@ -1679,21 +1683,7 @@ static public int alength(Object xs){
 	return Array.getLength(xs);
 }
 
-final static private Object EOS = new Object();
 
-static public Object eos() {
-        return EOS;
-    }
-
-static public boolean isEOS(Object o){
-        return o == EOS;
-    }
-
-static final public AStream EMPTY_STREAM = new AStream(new Callable(){
-    synchronized public Object call() throws Exception {
-        return eos();
-    }
-});
 
 synchronized public static DynamicClassLoader getRootClassLoader() {
     if(ROOT_CLASSLOADER == null)

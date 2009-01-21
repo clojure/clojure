@@ -13,8 +13,6 @@
 package clojure.lang;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.Callable;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
                                                                List,
@@ -363,7 +361,7 @@ public AStream stream() throws Exception {
     return new AStream(new Src(this));
 }
 
-    static class Src implements Callable{
+    static class Src extends AFn{
         final IPersistentVector v;
         int i = 0;
 
@@ -371,10 +369,10 @@ public AStream stream() throws Exception {
             this.v = v;
         }
 
-        public Object call() throws Exception {
+        public Object invoke(Object eos) throws Exception {
             if (i < v.count())
                 return v.nth(i++);
-            return RT.eos();
+            return eos;
         }
     }
 

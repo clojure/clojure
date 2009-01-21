@@ -29,11 +29,11 @@ public Cons(IPersistentMap meta, Object _first, ISeq _rest){
 	this._rest = _rest;
 }
 
-public Object first(){
+final public Object first(){
 	return _first;
 }
 
-public ISeq rest(){
+final public ISeq rest(){
 	return _rest;
 }
 

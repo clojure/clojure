@@ -12,87 +12,146 @@
 
 package clojure.lang;
 
-import java.util.concurrent.Callable;
+final public class AStream implements Seqable, Streamable {
 
-final public class AStream implements Seqable {
+    static final ISeq NO_SEQ = new Cons(null, null);
 
-    ISeq seq = null;
-    Callable src;
+    ISeq seq = NO_SEQ;
+    final IFn src;
+    Cons pushed = null;
+    Iter iter = null;
 
-    public AStream(Callable src){
-	    this.src = src;
+    public AStream(IFn src) {
+        this.src = src;
     }
 
-    final synchronized public ISeq seq(){
-        if (src != null)
+    final synchronized public ISeq seq() {
+        if (seq == NO_SEQ)
             {
-            seq = Seq.create(src);
-            src = null;
+            iter();
+            seq = Seq.create(pushed,src);
             }
         return seq;
     }
 
-    final synchronized public Object next() throws Exception {
-        if (src == null)
-            return RT.eos();
-        return src.call();
+    final synchronized public AStream stream() throws Exception {
+        if (seq == NO_SEQ)
+            return this;
+        return RT.stream(seq);
+    }
+
+    final synchronized public Iter iter() {
+        if (iter != null)
+            throw new IllegalStateException("Already iterating");
+
+        return iter = new Iter(this);
+    }
+
+    static public class Iter {
+        final AStream s;
+
+        Iter(AStream s) {
+            this.s = s;
+        }
+
+        final public Iter pushBack(Object x) throws Exception {
+            synchronized (s)
+                {
+                if (s.iter != this)
+                    throw new IllegalAccessError("Invalid iterator");
+                s.pushed = new Cons(x,s.pushed);
+                return this;
+                }
+        }
+
+        final public AStream detach() {
+            synchronized (s)
+                {
+                if (s.iter != this)
+                    throw new IllegalAccessError("Invalid iterator");
+                s.iter = null;
+                return s;
+                }
+        }
+
+        final public Object next(Object eos) {
+            synchronized (s)
+                {
+                if (s.iter != this)
+                    throw new IllegalAccessError("Invalid iterator");
+                if (s.pushed != null)
+                    {
+                    Object ret = s.pushed.first();
+                    s.pushed = (Cons) s.pushed.rest();
+                    return ret;
+                    }
+                try
+                    {
+                    return s.src.invoke(eos);
+                    }
+                catch (Exception e)
+                    {
+                    throw new RuntimeException(e);
+                    }
+                }
+        }
+
     }
 
     static class Seq extends ASeq {
-        Callable src;
-        final Object _first;
-        ISeq _rest;
+        static final Object EOS = new Object();
 
-        static Seq create(Callable src) {
-            Object x;
-            try
-                {
-                x = src.call();
-                }
-            catch (Exception e)
-                {
-                throw new RuntimeException(e);
-                }
-            if (RT.isEOS(x))
-                return null;
-	        else
-                 return new Seq(x, src);
+        final Object _first;
+        ISeq _rest = NO_SEQ;
+        final ISeq pushed;
+        final IFn src;
+
+        Seq(Object first, ISeq pushed, IFn src) {
+            _first = first;
+            this.pushed = pushed;
+            this.src = src;
         }
 
         Seq(IPersistentMap meta, Object _first, ISeq _rest) {
             super(meta);
             this._first = _first;
             this._rest = _rest;
+            this.pushed = null;
             this.src = null;
         }
 
-        Seq(Object first, Callable src) {
-            this._first = first;
-            this.src = src;
-        }
-
-
-        public Object first() {
+        final public Object first() {
             return _first;
         }
 
-        synchronized public ISeq rest() {
-            if (src != null)
+        final synchronized public ISeq rest() {
+            if (_rest == NO_SEQ)
                 {
-                _rest = create(src);
-                src = null;
+                _rest = create(pushed, src);
                 }
             return _rest;
         }
 
-        synchronized public Obj withMeta(IPersistentMap meta) {
-            if (meta != this.meta())
+        static Seq create(ISeq pushed, IFn src) {
+            if(pushed != null)
+                return new Seq(pushed.first(),pushed.rest(),src);
+            try
                 {
-                rest();
-                return new Seq(meta, _first, _rest);
+                Object x = src.invoke(EOS);
+                if (x == EOS)
+                    return null;
+                return new Seq(x, null, src);
                 }
-            return this;
+            catch (Exception e)
+                {
+                throw new RuntimeException(e);
+                }
         }
-    }
 
+        public Obj withMeta(IPersistentMap meta) {
+            rest();
+            return new Seq(meta, _first, _rest);
+        }
+
+    }
 }
