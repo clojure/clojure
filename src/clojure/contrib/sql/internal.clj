@@ -94,32 +94,27 @@
   transaction, the entire transaction will be rolled back rather than
   committed when complete."
   [func]
-  (io!
-   (let [con (connection*)
-         outermost (zero? (:level *db*))
-         auto-commit (when outermost (.getAutoCommit con))]
-     (binding [*db* (update-in *db* [:level] inc)]
-       (when outermost
-         (.setAutoCommit con false))
-       (try
-        (let [value (func)]
-          (when outermost
+  (binding [*db* (update-in *db* [:level] inc)]
+    (if (= (:level *db*) 1)
+      (let [con (connection*)
+            auto-commit (.getAutoCommit con)]
+        (io!
+         (.setAutoCommit con false)
+         (try
+          (let [value (func)]
             (if (rollback-only)
               (.rollback con)
-              (.commit con)))
-          value)
-        (catch Exception e
-          (if outermost
-            (do
-              (.rollback con)
-              (throw (Exception.
-                      (format "transaction rolled back: %s"
-                              (.getMessage e)) e)))
-            (throw e)))
-        (finally
-         (when outermost
+              (.commit con))
+            value)
+          (catch Exception e
+            (.rollback con)
+            (throw (Exception.
+                    (format "transaction rolled back: %s"
+                            (.getMessage e)) e)))
+          (finally
            (rollback-only false)
-           (.setAutoCommit con auto-commit))))))))
+           (.setAutoCommit con auto-commit)))))
+      (func))))
 
 (defn with-query-results*
   "Executes a query, then evaluates func passing in a seq of the results as
