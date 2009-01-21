@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-final public class AStream implements Seqable, Streamable {
+final public class AStream implements Seqable, Streamable, Sequential {
 
     static final ISeq NO_SEQ = new Cons(null, null);
 

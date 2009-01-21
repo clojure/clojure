@@ -720,7 +720,7 @@ static public Object nth(Object coll, int n){
 
 	else if(coll instanceof Sequential)
 		{
-		ISeq seq = ((IPersistentCollection) coll).seq();
+		ISeq seq = RT.seq(coll);
         coll = null;
         for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
 			{
@@ -783,7 +783,7 @@ static public Object nth(Object coll, int n, Object notFound){
 		}
 	else if(coll instanceof Sequential)
 		{
-		ISeq seq = ((IPersistentCollection) coll).seq();
+        ISeq seq = RT.seq(coll);
         coll = null;
         for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
 			{

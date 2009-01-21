@@ -1299,7 +1299,7 @@
     (. ref (touch))
     (. ref (get)))
 
-(def #^{:private true :tag clojure.lang.Closer} *io-context* nil)
+(def #^{:tag clojure.lang.Closer} *io-context* nil)
 
 (defmacro sync
   "transaction-flags => TBD, pass nil for now
@@ -1436,6 +1436,17 @@
                  (if (some #{eos} xs) 
                    eos 
                    (apply f xs)))))))))
+
+(defn map
+  "Returns a lazy seq consisting of the result of applying f to the
+  set of first items of each coll, followed by applying f to the set
+  of second items in each coll, until any one of the colls is
+  exhausted.  Any remaining items in other colls are ignored. Function
+  f should accept number-of-colls arguments."
+  ([f coll] (seq (map-stream f coll)))
+  ([f c1 c2] (seq (map-stream f c1 c2)))
+  ([f c1 c2 c3] (seq (map-stream f c1 c2 c3)))
+  ([f c1 c2 c3 & colls] (seq (apply map-stream f c1 c2 c3 colls))))
 
 (defn mapcat
   "Returns the result of applying concat to the result of applying map
