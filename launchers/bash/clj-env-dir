@@ -21,9 +21,10 @@
 #
 #  CLOJURE_EXT  The path to a directory containing (either directly or as
 #               symbolic links) jar files and/or directories whose paths
-#               should be included in CLASSPATH. These paths will be
-#               prepended to any prior definition of the CLASSPATH
-#               environment variable.
+#               should be in Clojure's classpath. The value of the
+#               CLASSPATH environment variable for Clojure will be a list
+#               of these paths followed by the previous value of CLASSPATH
+#               (if any).
 #
 # Optional:
 #
