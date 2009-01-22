@@ -378,6 +378,12 @@
   [#^clojure.lang.IFn f & args]
     (. f (applyTo (spread args))))
 
+(defn vary-meta
+ "Returns an object of the same type and value as obj, with
+  (apply f (meta obj) args) as its metadata."
+ [obj f & args]
+  (with-meta obj (apply f (meta obj) args)))
+
 (defn list*
   "Creates a new list containing the item prepended to more."
   [item & more]
