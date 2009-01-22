@@ -34,6 +34,7 @@
         <path location="${clojure.jar}"/>
       </classpath>
       <sysproperty key="clojure.compile.path" value="${build}"/>
+      <arg value="clojure.contrib.accumulators"/>
       <arg value="clojure.contrib.command-line"/>
       <arg value="clojure.contrib.cond"/>
       <arg value="clojure.contrib.def"/>
