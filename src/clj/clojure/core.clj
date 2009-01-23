@@ -1845,6 +1845,16 @@
       (instance? Short n)
       (instance? Byte n)))
 
+(defn mod 
+  "modulus of num and div."
+  [num div]
+  (cond
+   (or (not (integer? num)) (not (integer? div))) 
+     (throw (IllegalArgumentException.
+           "mod requires two integers"))
+   (or (< num 0 div) (< div 0 num)) (+ (rem num div) div)
+   :else (rem num div)))
+
 (defn ratio?
   "Returns true if n is a Ratio"
   [n] (instance? clojure.lang.Ratio n))
