@@ -3804,6 +3804,77 @@
            ~gexpr ~expr]
        ~(emit gpred gexpr clauses))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; var documentation ;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro add-doc {:private true} [name docstring]
+  `(alter-meta! (var ~name)  assoc :doc ~docstring))
+
+(add-doc *file*
+  "The path of the file being evaluated, as a String.
+
+  Evaluates to nil when there is no file, eg. in the REPL.")
+
+(add-doc *command-line-args*
+  "A sequence of the supplied command line arguments, or nil if 
+  none were supplied")
+
+(add-doc *warn-on-reflection*
+  "When set to true, the compiler will emit warnings when reflection is
+  needed to resolve Java method calls or field accesses.
+
+  Defaults to false.")
+
+(add-doc *compile-path*
+  "Specifies the directory where 'compile' will write out .class
+  files. This directory must be in the classpath for 'compile' to
+  work.
+
+  Defaults to \"classes\"")
+
+(add-doc *compile-files*
+  "Set to true when compiling files, false otherwise.")
+
+(add-doc *ns*
+  "A clojure.lang.Namespace object representing the current namespace.")
+
+(add-doc *in*
+  "A java.io.Reader object representing standard input for read operations.
+
+  Defaults to System/in, wrapped in a LineNumberingPushbackReader")
+
+(add-doc *out*
+  "A java.io.Writer object representing standard output for print operations.
+
+  Defaults to System/out")
+
+(add-doc *err*
+  "A java.io.Writer object representing standard error for print operations.
+
+  Defaults to System/err, wrapped in a PrintWriter")
+
+(add-doc *flush-on-newline*
+  "When set to true, output will be flushed whenever a newline is printed.
+
+  Defaults to true.")
+
+(add-doc *print-meta*
+  "If set to logical true, when printing an object, its metadata will also
+  be printed in a form that can be read back by the reader.
+
+  Defaults to false.")
+
+(add-doc *print-dup*
+  "When set to logical true, objects will be printed in a way that preserves
+  their type when read in later.
+
+  Defaults to false.")
+
+(add-doc *print-readably*
+  "When set to logical false, strings and characters will be printed with
+  non-alphanumeric characters converted to the appropriate escape sequences.
+
+  Defaults to true")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 (load "core_proxy")
