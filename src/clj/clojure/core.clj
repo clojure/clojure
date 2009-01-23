@@ -1008,14 +1008,40 @@
 
 ;;multimethods
 (defmacro defmulti
-  "Creates a new multimethod with the associated dispatch function. If
-  default-dispatch-val is supplied it becomes the default dispatch
-  value of the multimethod, otherwise the default dispatch value
-  is :default."
-  ([name dispatch-fn] `(defmulti ~name ~dispatch-fn :default))
-  ([name dispatch-fn default-val]
-   `(def ~(with-meta name (assoc ^name :tag 'clojure.lang.MultiFn)) 
-         (new clojure.lang.MultiFn ~dispatch-fn ~default-val))))
+  "Creates a new multimethod with the associated dispatch function.
+  The docstring and attribute-map are optional.
+
+  Options are key-value pairs and may be one of:
+    :default    the default dispatch value, defaults to :default"
+  {:arglists '([name docstring? attr-map? dispatch-fn & options])}
+  [mm-name & options]
+  (let [docstring   (if (string? (first options))
+                      (first options)
+                      nil)
+        options     (if (string? (first options))
+                      (rest options)
+                      options)
+        m           (if (map? (first options))
+                      (first options)
+                      {})
+        options     (if (map? (first options))
+                      (rest options)
+                      options)
+        dispatch-fn (first options)
+        options     (rest options)
+        m           (assoc m :tag 'clojure.lang.MultiFn)
+        m           (if docstring
+                      (assoc m :doc docstring)
+                      m)
+        m           (if (meta mm-name)
+                      (conj (meta mm-name) m)
+                      m)]
+    (when (= (count options) 1)
+      (throw (Exception. "The syntax for defmulti has changed. Example: (defmulti name dispatch-fn :default dispatch-value)")))
+    (let [options (apply hash-map options)
+          default (get options :default :default)]
+      `(def ~(with-meta mm-name m)
+         (new clojure.lang.MultiFn ~dispatch-fn ~default)))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
