@@ -27,6 +27,7 @@ public String toString(){
 }
 
 Namespace(Symbol name){
+	super(name.meta());
 	this.name = name;
 	mappings.set(RT.DEFAULT_IMPORTS);
 	aliases.set(RT.map());

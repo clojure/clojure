@@ -2762,6 +2762,13 @@
   (println type)
   (println (str "  Please see http://clojure.org/special_forms#" anchor)))
 
+(defn print-namespace-doc
+  "Print the documentation string of a Namespace."
+  [nspace]
+  (println "-------------------------")
+  (println (str (ns-name nspace)))
+  (println " " (:doc ^nspace)))
+
 (defmacro doc
   "Prints documentation for a var or special form given its name"
   [name]
@@ -2771,7 +2778,10 @@
    (syntax-symbol-anchor `~name)
    `(print-special-doc '~name "Syntax Symbol" (syntax-symbol-anchor '~name))
    :else
-   `(print-doc (var ~name))))
+    (let [nspace (find-ns name)]
+      (if nspace
+        `(print-namespace-doc ~nspace)
+        `(print-doc (var ~name))))))
 
 (defn tree-seq
   "returns a lazy sequence of the nodes in a tree, via a depth-first walk.
@@ -3319,6 +3329,12 @@
         (fn [[kname & args]]
           `(~(symbol "clojure.core" (clojure.core/name kname))
              ~@(map #(list 'quote %) args)))
+        docstring  (when (string? (first references)) (first references))
+        references (if docstring (rest references) references)
+        name (if docstring
+               (with-meta name (assoc (meta name)
+                                      :doc docstring))
+               name)
         gen-class-clause (first (filter #(= :gen-class (first %)) references))
         gen-class-call
           (when gen-class-clause
@@ -3789,7 +3805,7 @@
        ~(emit gpred gexpr clauses))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+(alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 (load "core_proxy")
 (load "core_print")
 (load "genclass")
