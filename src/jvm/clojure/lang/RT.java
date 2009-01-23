@@ -703,7 +703,7 @@ static public Object nth(Object coll, int n){
 		return Character.valueOf(((String) coll).charAt(n));
 	else if(coll.getClass().isArray())
 		return Reflector.prepRet(Array.get(coll, n));
-	else if(coll instanceof List)
+	else if(coll instanceof RandomAccess)
 		return ((List) coll).get(n);
 	else if(coll instanceof Matcher)
 		return ((Matcher) coll).group(n);
@@ -758,7 +758,7 @@ static public Object nth(Object coll, int n, Object notFound){
 			return Reflector.prepRet(Array.get(coll, n));
 		return notFound;
 		}
-	else if(coll instanceof List)
+	else if(coll instanceof RandomAccess)
 		{
 		List list = (List) coll;
 		if(n < list.size())

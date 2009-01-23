@@ -35,9 +35,9 @@ final public class AStream implements Seqable, Streamable, Sequential {
     }
 
     final synchronized public AStream stream() throws Exception {
-        if (seq == NO_SEQ)
+//        if (seq == NO_SEQ)
             return this;
-        return RT.stream(seq);
+//        return RT.stream(seq);
     }
 
     final synchronized public Iter iter() {
