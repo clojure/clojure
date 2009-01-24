@@ -275,7 +275,8 @@
  defmacro (fn [name & args]
             (list 'do
                   (cons `defn (cons name args))
-                  (list '. (list 'var name) '(setMacro)))))
+                  (list '. (list 'var name) '(setMacro))
+                  (list 'var name))))
 
 (. (var defmacro) (setMacro))
 
