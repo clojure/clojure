@@ -19,24 +19,26 @@
 (defn method-sig [#^java.lang.reflect.Method meth]
   [(. meth (getName)) (seq (. meth (getParameterTypes))) (. meth getReturnType)])
 
-(defn proxy-name [super interfaces]
+(defn proxy-name
+ {:tag String} 
+ [#^Class super interfaces]
   (apply str "clojure.proxy."
          (.getName super)
          (interleave (repeat "$")
-                     (sort (map #(.getSimpleName %) interfaces)))))
+                     (sort (map #(.getSimpleName #^Class %) interfaces)))))
 
-(defn- generate-proxy [super interfaces]
+(defn- generate-proxy [#^Class super interfaces]
   (let [cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
         cname (.replace (proxy-name super interfaces) \. \/) ;(str "clojure/lang/" (gensym "Proxy__"))
         ctype (. Type (getObjectType cname))
-        iname (fn [c] (.. Type (getType c) (getInternalName)))
+        iname (fn [#^Class c] (.. Type (getType c) (getInternalName)))
         fmap "__clojureFnMap"
-        totype (fn [c] (. Type (getType c)))
+        totype (fn [#^Class c] (. Type (getType c)))
         to-types (fn [cs] (if (pos? (count cs))
                             (into-array (map totype cs))
                             (make-array Type 0)))
-        super-type (totype super)
-        imap-type (totype IPersistentMap)
+        super-type #^Type (totype super)
+        imap-type #^Type (totype IPersistentMap)
         ifn-type (totype clojure.lang.IFn)
         obj-type (totype Object)
         sym-type (totype clojure.lang.Symbol)
@@ -46,7 +48,7 @@
         (fn [#^java.lang.reflect.Method meth else-gen]
             (let [pclasses (. meth (getParameterTypes))
                   ptypes (to-types pclasses)
-                  rtype (totype (. meth (getReturnType)))
+                  rtype #^Type (totype (. meth (getReturnType)))
                   m (new Method (. meth (getName)) rtype ptypes)
                   gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
                   else-label (. gen (newLabel))
@@ -171,7 +173,7 @@
                                         ;add methods matching supers', if no mapping -> call super
       (doseq [#^java.lang.reflect.Method meth (vals mm)]
           (gen-method meth 
-                      (fn [gen m]
+                      (fn [#^GeneratorAdapter gen #^Method m]
                           (. gen (loadThis))
                                         ;push args
                         (. gen (loadArgs))
@@ -187,7 +189,7 @@
             (let [msig (method-sig meth)]
               (when-not (or (contains? mm msig) (contains? considered msig))
                 (gen-method meth 
-                            (fn [gen m]
+                            (fn [#^GeneratorAdapter gen #^Method m]
                                 (. gen (throwException ex-type (. m (getName)))))))))))
     
                                         ;finish class def
@@ -195,7 +197,7 @@
     [cname (. cv toByteArray)]))
 
 (defn- get-super-and-interfaces [bases]
-  (if (. (first bases) (isInterface))
+  (if (. #^Class (first bases) (isInterface))
     [Object bases]
     [(first bases) (rest bases)]))
 
