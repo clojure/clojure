@@ -15,7 +15,7 @@
 (ns clojure.contrib.test-contrib
   (:use clojure.contrib.test-is))
 
-(def tests [:str-utils])
+(def tests [:str-utils :shell-out])
 
 (defn test-name
   [test]
