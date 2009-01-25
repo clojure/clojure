@@ -1299,7 +1299,7 @@
     (. ref (touch))
     (. ref (get)))
 
-(def #^{:tag clojure.lang.Closer} *io-context* nil)
+(def *io-context* nil)
 
 (defmacro sync
   "transaction-flags => TBD, pass nil for now
@@ -1315,8 +1315,6 @@
      (throw (IllegalStateException. "Transaction in io!"))
      (. clojure.lang.LockingTransaction
         (runInTransaction (fn [] ~@body)))))
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
@@ -1995,17 +1993,14 @@
   "If an io! block occurs in a transaction, throws an
   IllegalStateException, else runs body in an implicit do. If the
   first expression in body is a literal string, will use that as the
-  exception message. Establishes a dynamic io context for use with io-scope."  
+  exception message."  
   [& body]
   (let [message (when (string? (first body)) (first body))
         body (if message (rest body) body)]
     `(if (clojure.lang.LockingTransaction/isRunning)
        (throw (new IllegalStateException ~(or message "I/O in transaction")))
-       (binding [*io-context* (clojure.lang.Closer.)]
-         (try
-          ~@body
-          (finally 
-           (.close *io-context*)))))))
+       (binding [*io-context* true]
+         ~@body))))
 
 (def *scope* nil)
 

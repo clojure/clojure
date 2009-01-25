@@ -47,7 +47,7 @@ final public class AStream implements Seqable, Streamable, Sequential {
         return iter = new Iter(this);
     }
 
-    static public class Iter {
+    static public class Iter extends AFn{
         final AStream s;
 
         Iter(AStream s) {
@@ -96,6 +96,9 @@ final public class AStream implements Seqable, Streamable, Sequential {
                 }
         }
 
+        public Object invoke(Object arg1) throws Exception {
+            return next(arg1);
+        }
     }
 
     static class Seq extends ASeq {
