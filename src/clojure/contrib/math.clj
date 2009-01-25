@@ -114,15 +114,6 @@ round always returns an integer.  Rounds up for values exactly in between two in
 (defmethod round clojure.lang.Ratio [n] (floor (+ n 1/2)))
 (defmethod round :default [n] (Math/round n))
 
-; mod is private because it is likely to be incorporated into Clojure's core
-(defn- mod [a b]
-  (cond
-   (or (not (integer? a)) (not (integer? b))) (throw (IllegalArgumentException.
-						      "mod requires two integers"))
-
-   (or (< a 0 b) (< b 0 a)) (+ (rem a b) b)
-   :else (rem a b)))
-
 (defn gcd "(gcd a b) returns the greatest common divisor of a and b" [a b]
   (if (or (not (integer? a)) (not (integer? b)))
     (throw (IllegalArgumentException. "gcd requires two integers"))  
