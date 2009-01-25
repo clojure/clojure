@@ -233,6 +233,19 @@ clojure = {
         return seed ^ (hash + 0x9e3779b9 + (seed << 6) + (seed >> 2));
       },
       equal: function(x,y) { return x == y; },
+      equiv: function(x,y) {
+        if( x == y )
+          return true;
+        if( x !== null ) {
+          if( typeof x == clojure.JS.numberType )
+            return clojure.lang.Numbers.equiv(x,y);
+          else if( x.equiv && y.equiv )
+            return x.equiv( y );
+          else if( x.equals )
+            return x.equals( y );
+        }
+        return false;
+      },
       isInteger: function(x) { return typeof x == clojure.JS.numberType; }
     },
     RT: {
