@@ -24,6 +24,35 @@
     <delete dir="${build}"/>
   </target>
 
+  <target name="test_clojure"
+	  description = "Run clojure tests"
+	  if="hasclojure">
+    <java classname="clojure.main">
+      <classpath>
+        <path location="${build}"/>
+        <path location="${src}"/>
+        <path location="${clojure.jar}"/>
+      </classpath>
+      <arg value="src/clojure/contrib/test_clojure.clj"/>
+    </java>
+  </target>
+
+  <target name="test_contrib"
+	  description = "Run contrib tests"
+	  if="hasclojure">
+    <java classname="clojure.main">
+      <classpath>
+        <path location="${build}"/>
+        <path location="${src}"/>
+        <path location="${clojure.jar}"/>
+      </classpath>
+      <arg value="src/clojure/contrib/test_contrib.clj"/>
+    </java>
+  </target>
+
+  <target name="test" depends="test_clojure,test_contrib"
+	  description="Run all tests"/>
+
   <target name="compile_clojure" depends="init"
           description="Compile Clojure sources."
           if="hasclojure">
