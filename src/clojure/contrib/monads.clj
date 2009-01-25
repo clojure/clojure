@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated January 8, 2009
+;; last updated January 24, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,7 +11,8 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.monads)
+(ns clojure.contrib.monads
+  (:require [clojure.contrib.accumulators]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -233,6 +234,32 @@
 (defn fetch-state []
   (update-state identity))
 
+; Writer monad
+(defn writer
+  "Monad describing computations that accumulate data on the side, e.g. for
+   logging. The monadic values have the structure [value log]. Any of the
+   accumulators from clojure.contrib.accumulators can be used for storing the
+   log data. Its empty value is passed as a parameter."
+  [empty-accumulator]
+  (monad
+     [m-result  (fn m-result-writer [v]
+	          [v empty-accumulator])
+      m-bind    (fn m-bind-writer [mv f]
+	          (let [[v1 a1] mv
+			[v2 a2] (f v1)]
+		    [v2 (clojure.contrib.accumulators/combine a1 a2)]))
+     ]))
+
+(defmonadfn write [v]
+  (let [[_ a] (m-result nil)]
+    [nil (clojure.contrib.accumulators/add a v)]))
+
+(defn listen [mv]
+  (let [[v a] mv] [[v a] a]))
+
+(defn censor [f mv]
+  (let [[v a] mv] [v (f a)]))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -242,14 +269,57 @@
 
 (defn maybe-t
   "Monad transformer that transforms a monad m into a monad in which
-   the base values can be invalid (represented by nil)."
+   the base values can be invalid (represented by nothing, which defaults
+   to nil). The third argument chooses if m-zero and m-plus are inherited
+   from the base monad (use :m-plus-from-base) or adopt maybe-like
+   behaviour (use :m-plus-from-maybe)."
+  ([m] (maybe-t m nil :m-plus-from-base))
+  ([m nothing which-m-plus]
+   (let [combined-m-zero
+	 (cond
+	  (identical? which-m-plus :m-plus-from-base)
+	  (with-monad m m-zero)
+	  (identical? which-m-plus :m-plus-from-maybe)
+	  (with-monad m (m-result nothing))
+	  :else ::undefined)
+	 combined-m-plus
+	 (cond
+	  (identical? which-m-plus :m-plus-from-base)
+	  (with-monad m m-plus)
+	  (identical? which-m-plus :m-plus-from-maybe)
+	  (with-monad m
+	    (fn [& mvs]
+	      (m-result (loop [mv (first mvs)]
+			  (if (nil? mv)
+			    nothing
+			    (let [v (m-bind mv identity)]
+			      (if (identical? v nothing)
+				(recur (rest mvs))
+				v)))))))
+	  :else ::undefined)]
+     (monad [m-result (with-monad m
+		        m-result)
+	     m-bind   (with-monad m
+		        (fn m-bind-maybe-t [mv f]
+			  (m-bind mv
+				  (fn [x]
+				    (if (identical? x nothing)
+				      (m-result nothing)
+				      (f x))))))
+	     m-zero   combined-m-zero
+	     m-plus   combined-m-plus
+	     ]))))
+
+(defn sequence-t
+  "Monad transformer that transforms a monad m into a monad in which
+   the base values are sequences."
   [m]
   (monad [m-result (with-monad m
-		     m-result)
+		     (fn m-result-sequence-t [v]
+		       (m-result (list v))))
 	  m-bind   (with-monad m
-		     (fn m-bind-maybe-t [mv f]
+		     (fn m-bind-sequence-t [mv f]
 		       (m-bind mv
-			       (fn [x]
-				 (if (nil? x) (m-result nil) (f x))))))
-	  m-zero   (with-monad m m-zero)
-	  m-plus   (with-monad m m-plus)]))
+			       (fn [xs]
+				 (apply concat (map f xs))))))
+	  ]))

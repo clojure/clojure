@@ -6,7 +6,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use 'clojure.contrib.monads)
+(ns clojure.contrib.monads.examples
+  (:use clojure.contrib.monads)
+  (:require (clojure.contrib [accumulators :as accu])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -241,6 +243,63 @@
     (list [x1 x2] [y1 y2])))
 
 (identical-random-seqs 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Logging with the writer monad
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; A basic logging example
+(domonad (writer accu/empty-string)
+  [x (m-result 1)
+   _ (write "first step\n")
+   y (m-result 2)
+   _ (write "second step\n")]
+  (+ x y))
+
+; For a more elaborate application, let's trace the recursive calls of
+; a naive implementation of a Fibonacci function. The starting point is:
+(defn fib [n]
+  (if (< n 2)
+    n
+    (let [n1 (dec n)
+	  n2 (dec n1)]
+      (+ (fib n1) (fib n2)))))
+
+; First we rewrite it to make every computational step explicit
+; in a let expression:
+(defn fib [n]
+  (if (< n 2)
+    n
+    (let [n1 (dec n)
+	  n2 (dec n1)
+	  f1 (fib n1)
+	  f2 (fib n2)]
+      (+ f1 f2))))
+
+; Next, we replace the let by a domonad in a writer monad that uses a
+; vector accumulator. We can then place calls to write in between the
+; steps, and obtain as a result both the return value of the function
+; and the accumulated trace values.
+(with-monad (writer accu/empty-vector)
+
+  (defn fib-trace [n]
+    (if (< n 2)
+      (m-result n)
+      (domonad
+        [n1 (m-result (dec n))
+	 n2 (m-result (dec n1))
+	 f1 (fib-trace n1)
+	 _  (write [n1 f1])
+	 f2 (fib-trace n2)
+	 _  (write [n2 f2])
+	 ]
+	(+ f1 f2))))
+
+)
+
+(fib-trace 5)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
