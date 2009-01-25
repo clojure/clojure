@@ -4159,7 +4159,7 @@ static String errorMsg(String source, int line, String s){
 
 public static Object eval(Object form) throws Exception{
 	boolean createdLoader = false;
-	if(!LOADER.isBound())
+	if(true)//!LOADER.isBound())
 		{
 		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
 		createdLoader = true;
