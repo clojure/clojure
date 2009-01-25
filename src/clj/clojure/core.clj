@@ -3031,14 +3031,13 @@
 (defmacro definline
   "Experimental - like defmacro, except defines a named function whose
   body is the expansion, calls to which may be expanded inline as if
-  it were a macro. Cannot be used with variadic (&) args."
+  it were a macro. Cannot be used with variadic (&) args." 
   [name & decl]
-  (let [[args expr] (drop-while (comp not vector?) decl)
-        inline (eval (list `fn args expr))]
+  (let [[pre-args [args expr]] (split-with (comp not vector?) decl)]
     `(do
-       (defn ~name ~args ~(apply inline args))
-       (let [v# (var ~name)]
-         (.setMeta v# (assoc ^v# :inline ~inline))))))
+       (defn ~name ~@pre-args ~args ~(apply (eval (list `fn args expr)) args))
+       (alter-meta! (var ~name) assoc :inline (fn ~args ~expr))
+       (var ~name))))
 
 (defn empty
   "Returns an empty collection of the same category as coll, or nil"
