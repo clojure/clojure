@@ -11,7 +11,8 @@
 ;;  scgilardi (gmail)
 ;;  Created 3 October 2008
 
-(ns clojure.contrib.sql.internal)
+(ns clojure.contrib.sql.internal
+  (:use [clojure.contrib.except :only (throw-arg)]))
 
 (def *db* {:connection nil :level 0})
 
@@ -119,7 +120,14 @@
   "Executes a query, then evaluates func passing in a seq of the results as
   an argument. The first argument is a vector containing the (optionally
   parameterized) sql query string followed by values for any parameters."
-  [[sql & params] func]
+  [[sql & params :as sql-params] func]
+  (when-not (vector? sql-params)
+    (throw-arg "\"%s\" expected %s %s, found %s %s"
+               "sql-params"
+               "vector"
+               "[sql param*]"
+               (.getName (class sql-params))
+               (pr-str sql-params)))
   (with-open [stmt (.prepareStatement (connection*) sql)]
     (doseq [[index value] (map vector (iterate inc 1) params)]
       (.setObject stmt index value))
