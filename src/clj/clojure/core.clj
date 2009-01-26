@@ -3704,6 +3704,19 @@
  "Returns true if coll implements Reversible"
   [coll] (instance? clojure.lang.Reversible coll))
 
+(defn pcalls
+  "Executes the no-arg fns in parallel, returning a lazy sequence of
+  their values" 
+  [& fns]
+  (let [futs (.invokeAll clojure.lang.Agent/pooledExecutor fns)]
+    (map #(.get %) futs)))
+
+(defmacro pvalues
+  "Returns a lazy sequence of the values of the exprs, which are
+  evaluated in parallel" 
+  [& exprs]
+  `(pcalls ~@(map #(list `fn [] %) exprs)))
+
 (defn pmap
   "Like map, except f is applied in parallel. Semi-lazy in that the
   parallel computation stays ahead of the consumption, but doesn't
