@@ -1,4 +1,4 @@
-;;; print_json.clj: JavaScript Object Notation (JSON) generator
+;;; json/write.clj: JavaScript Object Notation (JSON) generator
 
 ;; by Stuart Sierra, http://stuartsierra.com/
 ;; January 26, 2009
@@ -17,7 +17,7 @@
 
 
 
-(ns clojure.contrib.print-json
+(ns clojure.contrib.json.write
   (:use [clojure.contrib.test-is :only (deftest is)]))
 
 (defmulti
