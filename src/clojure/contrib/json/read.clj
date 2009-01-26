@@ -23,7 +23,7 @@
 
 (declare read-json)
 
-(defn- read-json-array [stream]
+(defn- read-json-array [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
   (loop [i (.read stream), result []]
@@ -31,13 +31,13 @@
       (cond
        (= i -1) (throw (EOFException. "JSON error (end-of-file inside array)"))
        (Character/isWhitespace c) (recur (.read stream) result)
-       (= c \,) (recur (char (.read stream)) result)
+       (= c \,) (recur (.read stream) result)
        (= c \]) result
        :else (do (.unread stream (int c))
                  (let [element (read-json stream)]
                    (recur (.read stream) (conj result element))))))))
 
-(defn- read-json-object [stream]
+(defn- read-json-object [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
   (loop [i (.read stream), key nil, result {}]
@@ -68,7 +68,7 @@
   java.io.PushbackReader."
   ([] (read-json *in* true nil))
   ([stream] (read-json stream true nil))
-  ([stream eof-error? eof-value]
+  ([#^PushbackReader stream eof-error? eof-value]
      (loop [i (.read stream)]
        (let [c (char i)]
          (cond
