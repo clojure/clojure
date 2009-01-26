@@ -9,7 +9,7 @@
 ;;  Server socket library - includes REPL on socket
 
 (ns clojure.contrib.server-socket
-  (:import (java.net ServerSocket Socket SocketException)
+  (:import (java.net InetAddress ServerSocket Socket SocketException)
            (java.io InputStreamReader OutputStream OutputStreamWriter PrintWriter)
            (clojure.lang LineNumberingPushbackReader))
   (:use clojure.main))
@@ -37,22 +37,30 @@
                   (dosync (commute connections disj s))))))
 
 (defstruct server-def :server-socket :connections)
- 
-(defn create-server 
-  "Creates a server socket on port. Upon accept, a new thread is
-  created which calls:
 
-  (fun input-stream output-stream)"
-  [port fun]
-  (let [ss (ServerSocket. port)
-        connections (ref #{})]
+(defn- create-server-aux [fun #^ServerSocket ss]
+  (let [connections (ref #{})]
     (on-thread #(when-not (.isClosed ss)
                   (try 
                    (accept-fn (.accept ss) connections fun)
                    (catch SocketException e))
                   (recur)))
     (struct-map server-def :server-socket ss :connections connections)))
+ 
+(defn create-server 
+  "Creates a server socket on port. Upon accept, a new thread is
+  created which calls:
 
+  (fun input-stream output-stream)
+
+  Optional arguments support specifying a listen backlog and binding
+  to a specific endpoint."
+  ([port fun backlog #^InetAddress bind-addr] 
+     (create-server-aux fun (ServerSocket. port backlog bind-addr)))
+  ([port fun backlog]
+     (create-server-aux fun (ServerSocket. port backlog)))
+  ([port fun]
+     (create-server-aux fun (ServerSocket. port))))
 
 (defn close-server [server]
   (doseq [s @(:connections server)]
@@ -75,5 +83,9 @@
 
 (defn create-repl-server 
   "create a repl on a socket"
-  [port]
-  (create-server port socket-repl))
+  ([port backlog #^InetAddress bind-addr] 
+     (create-server port socket-repl backlog bind-addr))
+  ([port backlog] 
+     (create-server port socket-repl backlog))
+  ([port] 
+     (create-server port socket-repl)))
