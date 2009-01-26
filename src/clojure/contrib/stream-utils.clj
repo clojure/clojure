@@ -43,22 +43,12 @@
 
 ;; Stream transformers
 
-; Going from a stream through an iter to another stream requires at
-; one point to wrap the iter in a function that provides the generator
-; interface. Life would be easier if iterators were callable and thus
-; usable directly as generators! This function (1) creates an iter on
-; its stream argument and (2) wraps that iter into a function with a
-; generator interface.
-(defn iter-as-generator [s]
-  "Return a generator that returns items obtained from an iterator on s"
-  (let [iter (stream-iter s)]
-    (fn [eos] (next! iter eos))))
-
 (defn drop-first
   "Return a stream that returns the elements of s except for the first n ones."
   [n s]
   (let [eos (Object.)
-	gen (iter-as-generator s)]
+	iter (stream-iter s)
+	gen (fn [eos] (next! iter eos))]
     (doseq [_ (range n)] (gen eos))
     (stream gen)))
 
@@ -101,7 +91,7 @@
 ; and converts the resulting generator into a stream.
 (defmacro stream-transformer
   [stream-args & body]
-  `(stream (let [~stream-args (map iter-as-generator ~stream-args)]
+  `(stream (let [~stream-args (map stream-iter ~stream-args)]
 	     (with-monad generator ~@body))))
 
 
@@ -122,7 +112,7 @@
 (defmacro stream-transformer-cond
   [stream-args & body]
   `(stream (remove-skip
-    (let [~stream-args (map iter-as-generator ~stream-args)]
+    (let [~stream-args (map stream-iter ~stream-args)]
       (with-monad generator-cond ~@body)))))
 
 
