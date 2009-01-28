@@ -41,7 +41,7 @@ public boolean equiv(Object obj){
 
 	if(!(obj instanceof Sequential))
 		return false;
-	ISeq ms = ((IPersistentCollection) obj).seq();
+	ISeq ms = RT.seq(obj);
 	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
 		{
 		if(ms == null || !Util.equiv(s.first(), ms.first()))
@@ -55,7 +55,7 @@ public boolean equals(Object obj){
 
 	if(!(obj instanceof Sequential))
 		return false;
-	ISeq ms = ((IPersistentCollection) obj).seq();
+	ISeq ms = RT.seq(obj);
 	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
 		{
 		if(ms == null || !Util.equals(s.first(), ms.first()))

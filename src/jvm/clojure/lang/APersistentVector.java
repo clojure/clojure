@@ -72,7 +72,7 @@ static boolean doEquals(IPersistentVector v, Object obj){
 		{
 		if(!(obj instanceof Sequential))
 			return false;
-		ISeq ms = ((IPersistentCollection) obj).seq();
+		ISeq ms = RT.seq(obj);
 		for(int i = 0; i < v.count(); i++, ms = ms.rest())
 			{
 			if(ms == null || !Util.equals(v.nth(i), ms.first()))
@@ -115,7 +115,7 @@ static boolean doEquiv(IPersistentVector v, Object obj){
 		{
 		if(!(obj instanceof Sequential))
 			return false;
-		ISeq ms = ((IPersistentCollection) obj).seq();
+		ISeq ms = RT.seq(obj);
 		for(int i = 0; i < v.count(); i++, ms = ms.rest())
 			{
 			if(ms == null || !Util.equiv(v.nth(i), ms.first()))

@@ -11,11 +11,9 @@ package clojure.lang;
  */
 
 
-public interface IPersistentCollection {
+public interface IPersistentCollection extends Seqable {
 
 int count();
-
-ISeq seq();
 
 IPersistentCollection cons(Object o);
 
