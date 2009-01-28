@@ -23,7 +23,8 @@
 ;;
 ;;  rotations - returns a lazy seq of all the rotations of a seq
 ;;
-;;  permutations - returns a lazy seq of all the permutations of a seq
+;;  (permutations and combinations used to be here, but have
+;;  been moved to combinatorics.clj)
 ;;
 ;;  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
 ;;  [2] http://clj-me.blogspot.com/2008/06/primes.html
@@ -66,23 +67,26 @@
      (iterate inc 0) x)
     (list nil)))
 
-(defn permutations
-  "Returns a lazy seq of all permutations of a seq"
-  [x]
-  (if (seq x)
-    (mapcat
-     (fn [[f & r]]
-       (map #(cons f %) (permutations r)))
-     (rotations x))
-    (list nil)))
 
-(defn combinations
-  "Returns a lazy seq of all combinations built of one item from each seq given.
-   See also (doc for)"
-  [& acs]
-  (let [step (fn step [head [s & cs :as acs]]
-               (if acs
-                 (mapcat #(step (conj head %) cs) s)
-                 (list head)))]
-    (when acs
-      (step [] acs))))
+;; See combinatorics.clj for faster versions of these functions.
+
+;; (defn permutations
+;;   "Returns a lazy seq of all permutations of a seq"
+;;   [x]
+;;   (if (seq x)
+;;     (mapcat
+;;      (fn [[f & r]]
+;;        (map #(cons f %) (permutations r)))
+;;      (rotations x))
+;;     (list nil)))
+
+;; (defn combinations
+;;   "Returns a lazy seq of all combinations built of one item from each seq given.
+;;    See also (doc for)"
+;;   [& acs]
+;;   (let [step (fn step [head [s & cs :as acs]]
+;;                (if acs
+;;                  (mapcat #(step (conj head %) cs) s)
+;;                  (list head)))]
+;;     (when acs
+;;       (step [] acs))))
