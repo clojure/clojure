@@ -2817,6 +2817,7 @@ static public class FnExpr implements Expr{
 	int line;
 	PersistentVector constants;
 	int constantsID;
+    boolean onceOnly = false;
 
 	public final IPersistentCollection methods(){
 		return methods;
@@ -2898,6 +2899,7 @@ static public class FnExpr implements Expr{
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr(tagOf(form));
 		FnMethod enclosingMethod = (FnMethod) METHOD.get();
+        fn.onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), Keyword.intern(null, "once")));
 		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
@@ -3209,6 +3211,21 @@ static public class FnExpr implements Expr{
             {
             Var.popThreadBindings();
             }
+    }
+
+    void emitClearCloses(GeneratorAdapter gen){
+        int a = 1;
+        for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
+			{
+			LocalBinding lb = (LocalBinding) s.first();
+			Class primc = lb.getPrimitiveType();
+			if(primc == null)
+				{
+                gen.loadThis();
+                gen.visitInsn(Opcodes.ACONST_NULL);
+                gen.putField(fntype, lb.name, OBJECT_TYPE);
+				}
+			}
     }
 
 	synchronized Class getCompiledClass(){
@@ -3537,6 +3554,10 @@ public static class FnMethod{
                     }
 				}
 			}
+        if(fn.onceOnly)
+            {
+            fn.emitClearCloses(gen);
+            }
 	}
 }
 
