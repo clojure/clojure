@@ -53,19 +53,31 @@
   (is (instance? Integer -1))
   (is (instance? Integer -2147483648))
 
+  ; Read Long
+  (is (instance? Long 2147483648))
+  (is (instance? Long -2147483649))
+  (is (instance? Long 9223372036854775807))
+  (is (instance? Long -9223372036854775808))
+
   ; Read BigInteger
-  (is (instance? BigInteger 2147483648))
-  (is (instance? BigInteger -2147483649))
+  (is (instance? BigInteger 9223372036854775808))
+  (is (instance? BigInteger -9223372036854775809))
+  (is (instance? BigInteger 10000000000000000000000000000000000000000000000000))
+  (is (instance? BigInteger -10000000000000000000000000000000000000000000000000))
 
   ; Read Double
+  (is (instance? Double +1.0e1))
   (is (instance? Double +1.0))
   (is (instance? Double 1.0))
   (is (instance? Double +0.0))
   (is (instance? Double 0.0))
   (is (instance? Double -0.0))
   (is (instance? Double -1.0))
+  (is (instance? Double -1.0e1))
 
   ; Read BigDecimal
+  (is (instance? BigDecimal 9223372036854775808M))
+  (is (instance? BigDecimal -9223372036854775809M))
   (is (instance? BigDecimal 2147483647M))
   (is (instance? BigDecimal +1M))
   (is (instance? BigDecimal 1M))
