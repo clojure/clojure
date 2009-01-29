@@ -76,11 +76,8 @@
   [f coll]
   (when-let [s (seq coll)]
     (let [fv (f (first s))
-          ends (drop-while #(= fv (f %)) (rest s))
-          tw (fn this [s]
-               (when-not (identical? s ends)
-                 (lazy-cons (first s) (this (rest s)))))]
-      (lazy-cons (tw s) (partition-by f ends)))))
+          run (take-while #(= fv (f %)) s)]
+      (lazy-cons run (partition-by f (drop (count run) s))))))
 
 (defn frequencies
   "Returns a map from distinct items in coll to the number of times
