@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated January 24, 2009
+;; last updated January 29, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -180,6 +180,18 @@
 	  m-result
 	  steps))
 
+(defmacro m-when
+  "If test if logical true, return monadic value m-expr, else return
+   (m-result nil)."
+  [test m-expr]
+  `(if ~test ~m-expr (~'m-result nil)))
+
+(defmacro m-when-not
+  "If test if logical false, return monadic value m-expr, else return
+   (m-result nil)."
+  [test m-expr]
+  `(if ~test (~'m-result nil) ~m-expr))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Commonly used monads
@@ -259,6 +271,35 @@
 
 (defn censor [f mv]
   (let [[v a] mv] [v (f a)]))
+
+; Continuation monad
+
+(defmonad cont
+  "Monad describing computations in continuation-passing style. The monadic
+   values are functions that are called with a single argument representing
+   the continuation of the computation, to which they pass their result."
+  [m-result   (fn [v]
+		(fn [c] (c v)))
+   m-bind     (fn [mv f]
+		(fn [c]
+		  (mv (fn [a] ((f a) c)))))
+   ])
+
+(defn run-cont
+  "Execute the computation c in the cont monad and return its result."
+  [c]
+  (c identity))
+
+(defn call-cc
+  "A computation in the cont monad that calls function f with a single
+   argument representing the current continuation. The function f should
+   return a continuation (which becomes the return value of call-cc),
+   or call the passed-in current continuation to terminate."
+  [f]
+  (fn [c]
+    (let [cc (fn cc [a] (fn [_] (c a)))
+	  rc (f cc)]
+      (rc c))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
