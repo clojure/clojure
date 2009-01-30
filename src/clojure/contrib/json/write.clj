@@ -18,7 +18,7 @@
 
 
 (ns clojure.contrib.json.write
-  (:use [clojure.contrib.test-is :only (deftest is)]))
+  (:use [clojure.contrib.test-is :only (deftest- is)]))
 
 (defmulti
   #^{:doc "Prints Clojure data types as JSON.  Nil becomes JSON null.
@@ -76,26 +76,26 @@
 ;; Bind clojure.contrib.test-is/*load-tests* to false to omit these
 ;; tests from production code.
 
-(deftest can-print-json-strings
+(deftest- can-print-json-strings
   (is (= "\"Hello, World!\"" (json-str "Hello, World!")))
   (is (= "\"\\\"Embedded\\\" Quotes\"" (json-str "\"Embedded\" Quotes"))))
 
-(deftest can-print-json-null
+(deftest- can-print-json-null
   (is (= "null" (json-str nil))))
 
-(deftest can-print-json-arrays
+(deftest- can-print-json-arrays
   (is (= "[1,2,3]" (json-str [1 2 3])))
   (is (= "[1,2,3]" (json-str (list 1 2 3))))
   (is (= "[1,2,3]" (json-str (sorted-set 1 2 3))))
   (is (= "[1,2,3]" (json-str (seq [1 2 3])))))
 
-(deftest can-print-empty-arrays
+(deftest- can-print-empty-arrays
   (is (= "[]" (json-str [])))
   (is (= "[]" (json-str (list))))
   (is (= "[]" (json-str #{}))))
 
-(deftest can-print-json-objects
+(deftest- can-print-json-objects
   (is (= "{\"a\":1,\"b\":2}" (json-str (sorted-map :a 1 :b 2)))))
 
-(deftest can-print-empty-objects
+(deftest- can-print-empty-objects
   (is (= "{}" (json-str {}))))

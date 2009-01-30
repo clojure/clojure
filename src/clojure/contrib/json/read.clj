@@ -19,7 +19,7 @@
 
 (ns clojure.contrib.json.read
   (:import (java.io PushbackReader StringReader EOFException))
-  (:use [clojure.contrib.test-is :only (deftest is)]))
+  (:use [clojure.contrib.test-is :only (deftest- is)]))
 
 (declare read-json)
 
@@ -127,44 +127,44 @@
 
 ;;; TESTS
 
-(deftest can-read-numbers
+(deftest- can-read-numbers
   (is (= 42 (read-json-string "42")))
   (is (= -3 (read-json-string "-3")))
   (is (= 3.14159 (read-json-string "3.14159")))
   (is (= 6.022e23 (read-json-string "6.022e23"))))
 
-(deftest can-read-null
+(deftest- can-read-null
   (is (= nil (read-json-string "null"))))
 
-(deftest can-read-strings
+(deftest- can-read-strings
   (is (= "Hello, World!" (read-json-string "\"Hello, World!\""))))
 
-(deftest can-read-booleans
+(deftest- can-read-booleans
   (is (= true (read-json-string "true")))
   (is (= false (read-json-string "false"))))
 
-(deftest can-ignore-whitespace
+(deftest- can-ignore-whitespace
   (is (= nil (read-json-string "\r\n   null"))))
 
-(deftest can-read-arrays
+(deftest- can-read-arrays
   (is (= [1 2 3] (read-json-string "[1,2,3]")))
   (is (= ["Ole" "Lena"] (read-json-string "[\"Ole\", \r\n \"Lena\"]"))))
 
-(deftest can-read-objects
+(deftest- can-read-objects
   (is (= {"a" 1, "b" 2} (read-json-string "{\"a\": 1, \"b\": 2}"))))
 
-(deftest can-read-nested-structures
+(deftest- can-read-nested-structures
   (is (= {"a" [1 2 {"b" [3 "four"]} 5.5]}
          (read-json-string "{\"a\":[1,2,{\"b\":[3,\"four\"]},5.5]}"))))
 
-(deftest disallows-non-string-keys
+(deftest- disallows-non-string-keys
   (is (thrown? Exception (read-json-string "{26:\"z\""))))
 
-(deftest disallows-barewords
+(deftest- disallows-barewords
   (is (thrown? Exception (read-json-string "  foo  "))))
 
-(deftest disallows-unclosed-arrays
+(deftest- disallows-unclosed-arrays
   (is (thrown? Exception (read-json-string "[1, 2,  "))))
 
-(deftest disallows-unclosed-objects
+(deftest- disallows-unclosed-objects
   (is (thrown? Exception (read-json-string "{\"a\":1,  "))))
