@@ -528,10 +528,13 @@ static public IPersistentCollection conj(IPersistentCollection coll, Object x){
 }
 
 static public ISeq cons(Object x, Object coll){
-	ISeq y = seq(coll);
-	if(y == null)
+	//ISeq y = seq(coll);
+	if(coll == null)
 		return new PersistentList(x);
-	return y.cons(x);
+    else if (coll instanceof Seqable)
+	    return new Cons(x, (Seqable) coll);
+    else
+        return new Cons(x, seq(coll));        
 }
 
 static public Object first(Object x){
@@ -562,6 +565,15 @@ static public ISeq rest(Object x){
 	if(seq == null)
 		return null;
 	return seq.rest();
+}
+
+static public Seqable more(Object x){
+	if(x instanceof ISeq)
+		return ((ISeq) x).more();
+	ISeq seq = seq(x);
+	if(seq == null)
+		return null;
+	return seq.more();
 }
 
 static public ISeq rrest(Object x){

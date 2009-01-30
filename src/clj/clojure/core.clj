@@ -48,6 +48,12 @@
  rest (fn rest [x] (. clojure.lang.RT (rest x))))
 
 (def
+ #^{:arglists '([coll])
+    :doc "Returns a seqable collection of the items after the first. May return nil. Calls seq on its
+  argument."}  
+ more (fn more [x] (. clojure.lang.RT (more x))))
+
+(def
  #^{:arglists '([coll x] [coll x & xs])
     :doc "conj[oin]. Returns a new collection with the xs
     'added'. (conj nil item) returns (item).  The 'addition' may
@@ -418,6 +424,16 @@
        (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro lazy-seq
+  "Takes a body of expressions that returns an ISeq or nil, and yields
+  a Seqable object that will invoke the body only the first time seq
+  is called, and will cache the result and return it on all subsequent
+  seq calls. Any closed over locals will be cleared prior to the tail
+  call of body."  
+  [& body]
+    (list 'new 'clojure.lang.Delay$Seq (list* `#^{:once true} fn* [] body)))
+
 (defmacro delay
   "Takes a body of expressions and yields a Delay object that will
   invoke the body only the first time it is forced (with force), and
@@ -1393,26 +1409,30 @@
  not-any? (comp not some))
 
 (defn map
-  "Returns a lazy seq consisting of the result of applying f to the
+  "Returns a lazy sequence consisting of the result of applying f to the
   set of first items of each coll, followed by applying f to the set
   of second items in each coll, until any one of the colls is
   exhausted.  Any remaining items in other colls are ignored. Function
   f should accept number-of-colls arguments."
   ([f coll]
-   (when (seq coll)
-     (lazy-cons (f (first coll)) (map f (rest coll)))))
+   (lazy-seq
+    (when (seq coll)
+     (cons (f (first coll)) (map f (more coll))))))
   ([f c1 c2]
-   (when (and (seq c1) (seq c2))
-     (lazy-cons (f (first c1) (first c2))
-                (map f (rest c1) (rest c2)))))
+   (lazy-seq
+    (when (and (seq c1) (seq c2))
+      (cons (f (first c1) (first c2))
+            (map f (more c1) (more c2))))))
   ([f c1 c2 c3]
-   (when (and (seq c1) (seq c2) (seq c3))
-     (lazy-cons (f (first c1) (first c2) (first c3))
-                (map f (rest c1) (rest c2) (rest c3)))))
+   (lazy-seq
+    (when (and (seq c1) (seq c2) (seq c3))
+      (cons (f (first c1) (first c2) (first c3))
+        (map f (more c1) (more c2) (more c3))))))
   ([f c1 c2 c3 & colls]
    (let [step (fn step [cs]
-                  (when (every? seq cs)
-                    (lazy-cons (map first cs) (step (map rest cs)))))]
+                 (lazy-seq
+                   (when (every? seq cs)
+                     (cons (map first cs) (step (map more cs))))))]
      (map #(apply f %) (step (conj colls c3 c2 c1))))))
 
 (defn mapcat
@@ -1422,13 +1442,16 @@
     (apply concat (apply map f colls)))
 
 (defn filter
-  "Returns a lazy seq of the items in coll for which
+  "Returns a lazy sequence of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   [pred coll]
-    (when (seq coll)
-      (if (pred (first coll))
-        (lazy-cons (first coll) (filter pred (rest coll)))
-        (recur pred (rest coll)))))
+  (let [step (fn [pred coll]
+                 (when (seq coll)
+                   (if (pred (first coll))
+                     (clojure.lang.Cons. (first coll) (filter pred (more coll)))
+                     (recur pred (more coll)))))]
+    (lazy-seq (step pred coll))))
+
 
 (defn remove
   "Returns a lazy seq of the items in coll for which
