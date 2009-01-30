@@ -1,7 +1,7 @@
 ;; Finite probability distributions
 
 ;; by Konrad Hinsen
-;; last updated January 8, 2009
+;; last updated January 30, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -43,17 +43,37 @@
   (maybe-t dist)
   "Variant of the dist monad that can handle undefined values.")
 
-(defn normalize [cdist]
+; Normalization
+
+(defn- scale-by
+  "Multiply each entry in dist by the scale factor s and remove zero entries."
+  [dist s]
+  (into {}
+	(for [[val p] dist :when (> p 0)]
+	  [val (* p s)])))
+
+(defn normalize-cond [cdist]
   "Normalize a probability distribution resulting from a computation in
    the cond-dist monad by re-distributing the weight of the invalid values
    over the valid ones."
   (let [missing (get cdist nil 0)
 	dist    (dissoc cdist nil)]
-    (cond (= 1 missing)   {}
-	  (zero? missing) dist
+    (cond (zero? missing) dist
+	  (= 1 missing)   {}
 	  :else (let [scale  (/ 1 (- 1 missing))]
-		  (into {} (for [[val p] dist :when (> p 0)]
-			     [val (* p scale)]))))))
+		  (scale-by dist scale)))))
+
+(defn normalize
+  "Convert a weight map (e.g. a map of counter values) to a distribution
+   by multiplying with a normalization factor. If the map has a key
+   :total, its value is assumed to be the sum over all the other values and
+   it is used for normalization. Otherwise, the sum is calculated
+   explicitly. The :total key is removed from the resulting distribution."
+  [weights]
+  (let [total (:total weights)
+	w (dissoc weights :total)
+	s (/ 1 (if (nil? total) (reduce + (vals w)) total))]
+    (scale-by w s)))
 
 ; Functions that construct distributions
 
@@ -97,7 +117,7 @@
   "Returns the conditional probability for the values in dist that satisfy
    the predicate pred."
   [pred dist]
-  (normalize
+  (normalize-cond
     (with-monad cond-dist
       (m-bind dist (fn [v] (m-result (when (pred v) v)))))))
 

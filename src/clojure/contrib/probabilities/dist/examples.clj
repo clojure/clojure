@@ -8,6 +8,7 @@
 
 (use 'clojure.contrib.probabilities.dist
      'clojure.contrib.monads)
+(require 'clojure.contrib.accumulators)
 
 ;; Simple examples using dice
 
@@ -56,6 +57,23 @@
 (assert (= two-dice (dice 2)))
 
 (dice 3)
+
+
+;; Construct an empirical distribution from counters
+
+; Using an ordinary counter:
+(def dist1
+  (normalize
+    (clojure.contrib.accumulators/add-coll
+      clojure.contrib.accumulators/empty-counter
+      (for [_ (range 1000)] (rand-int 5)))))
+
+; Or, more efficiently, using a counter that already keeps track of its total:
+(def dist2
+  (normalize
+    (clojure.contrib.accumulators/add-coll
+      clojure.contrib.accumulators/empty-counter-with-total
+      (for [_ (range 1000)] (rand-int 5)))))
 
 
 ;; The Monty Hall game
@@ -151,7 +169,7 @@
 ; 3) Eliminate (replace by nil) the trials that do not match the observation.
 ; 4) Normalize the distribution for the non-nil values.
 (defn add-observation [prior observation]
-  (normalize
+  (normalize-cond
     (domonad cond-dist
       [die    prior
        number (get dice die)]
@@ -172,7 +190,7 @@
 (defn add-observations [prior observations]
   (with-monad cond-dist
     (let [n-nums #(m-seq (replicate (count observations) (get dice %)))]
-      (normalize
+      (normalize-cond
         (domonad
           [die    prior
            nums   (n-nums die)]
