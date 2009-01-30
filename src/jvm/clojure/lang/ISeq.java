@@ -22,6 +22,8 @@ Object first();
 
 ISeq rest();
 
+Seqable more();
+
 ISeq cons(Object o);
 
 }

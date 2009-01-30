@@ -391,30 +391,6 @@
   [item & more]
     (spread (cons item more)))
 
-(defmacro delay
-  "Takes a body of expressions and yields a Delay object that will
-  invoke the body only the first time it is forced (with force), and
-  will cache the result and return it on all subsequent force calls"
-  [& body]
-    (list 'new 'clojure.lang.Delay (list* `fn [] body)))
-
-(defn delay?
-  "returns true if x is a Delay created with delay"
-  [x] (instance? clojure.lang.Delay x))
-
-(defn force
-  "If x is a Delay, returns the (possibly cached) value of its expression, else returns x"
-  [x] (. clojure.lang.Delay (force x)))
-
-(defn fnseq
-  "Returns a seq object whose first is first and whose rest is the
-  value produced by calling restfn with no arguments. restfn will be
-  called at most once per step in the sequence, e.g. calling rest
-  repeatedly on the head of the seq calls restfn once - the value it
-  yields is cached."
-  [first restfn]
-    (new clojure.lang.FnSeq first restfn))
-
 (defmacro lazy-cons
   "Expands to code which produces a seq object whose first is
   first-expr and whose rest is rest-expr, neither of which is
@@ -424,21 +400,6 @@
   cached."
  [first-expr & rest-expr]
  (list 'new 'clojure.lang.LazyCons (list `fn (list [] first-expr) (list* [(gensym)] rest-expr))))
-
-;(defmacro lazy-seq
-;  "Expands to code which produces a seq object whose first is the
-;  value of first-expr and whose rest is the value of rest-expr,
-;  neither of which is evaluated until first/rest is called. Each expr
-;  will be evaluated every step in the sequence, e.g. calling
-;  first/rest repeatedly on the same node of the seq evaluates
-;  first/rest-expr repeatedly - the values they yield are not cached."
-; [first-expr rest-expr]
-;  (list 'new 'clojure.lang.LazySeq (list `fn (list [] first-expr) (list [(gensym)] rest-expr))))
-
-(defn cache-seq
-  "Given a seq s, returns a lazy seq that will touch each element of s
-  at most once, caching the results."
-  [s] (when s (clojure.lang.CachedSeq. s)))
 
 (defn concat
   "Returns a lazy seq representing the concatenation of	the elements in the supplied colls."
@@ -457,6 +418,23 @@
        (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
+(defmacro delay
+  "Takes a body of expressions and yields a Delay object that will
+  invoke the body only the first time it is forced (with force), and
+  will cache the result and return it on all subsequent force
+  calls. Any closed over locals will be cleared prior to the tail call
+  of body, (i.e. they will not be retained)."  
+  [& body]
+    (list 'new 'clojure.lang.Delay (list* `#^{:once true} fn* [] body)))
+
+(defn delay?
+  "returns true if x is a Delay created with delay"
+  [x] (instance? clojure.lang.Delay x))
+
+(defn force
+  "If x is a Delay, returns the (possibly cached) value of its expression, else returns x"
+  [x] (. clojure.lang.Delay (force x)))
+
 (defmacro if-not
   "Evaluates test. If logical false, evaluates and returns then expr, otherwise else expr, if supplied, else nil."
   ([test then] `(if-not ~test ~then nil))

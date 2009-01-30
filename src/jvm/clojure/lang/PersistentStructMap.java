@@ -216,7 +216,7 @@ static class Seq extends ASeq{
 		return new MapEntry(keys.first(), vals[i]);
 	}
 
-	public ISeq rest(){
+	public Seqable more(){
 		if(i + 1 < vals.length)
 			return new Seq(_meta, keys.rest(), vals, i + 1, ext);
 		return ext.seq();

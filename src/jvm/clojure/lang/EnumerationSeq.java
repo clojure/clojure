@@ -52,7 +52,7 @@ public Object first(){
 	return state.val;
 }
 
-public ISeq rest(){
+public Seqable more(){
 	if(state._rest == state)
 		synchronized(state)
 			{

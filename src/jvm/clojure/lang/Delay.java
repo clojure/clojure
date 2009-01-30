@@ -35,4 +35,21 @@ synchronized Object get() throws Exception{
 		}
 	return val;
 }
+
+    static public class Seq extends Delay implements Seqable{
+        public Seq(IFn fn) {
+            super(fn);
+        }
+
+        public ISeq seq() {
+            try
+                {
+                return (ISeq) get();
+                }
+            catch (Exception e)
+                {
+                throw new RuntimeException(e);
+                }
+        }
+    }
 }

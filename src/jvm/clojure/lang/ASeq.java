@@ -110,6 +110,10 @@ public ISeq cons(Object o){
 	return new Cons(o, this);
 }
 
+public ISeq rest(){
+    return RT.seq(more());
+}
+
 // java.util.Collection implementation
 
 public Object[] toArray(){
