@@ -60,17 +60,20 @@
      (list `defonce (with-meta name (assoc (meta name) :private true :doc doc)) expr)))
 
 (defmacro defalias
-  "Defines an alias for a var: a new var with the same value and metadata
-  as another with the exception of :namespace, :name, :file, :line, and
-  optionally :doc which are those of new var."
+  "Defines an alias for a var: a new var with the same root binding (if
+  any) and similar metadata. The metadata of the alias is its initial
+  metadata (as provided by def) merged into the metadata of the original."
   ([name orig]
-     `(let [o# #'~orig v# (def ~name @o#)]
-        (alter-meta! v# merge ^o# ^v#)
-        v#))
+     `(do
+        (alter-meta!
+         (if (.hasRoot (var ~orig))
+           (def ~name (.getRoot (var ~orig)))
+           (def ~name))
+         conj
+         (apply dissoc (meta (var ~orig)) (keys (meta (var ~name)))))
+        (var ~name)))
   ([name orig doc]
-     `(let [o# #'~orig v# (def ~name @o#)]
-        (alter-meta! v# merge ^o# ^v# {:doc ~doc})
-        v#)))
+     (list `defalias (with-meta name (assoc (meta name) :doc doc)) orig)))
 
 ; defhinted by Chouser:
 (defmacro defhinted
