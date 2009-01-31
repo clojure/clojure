@@ -3725,7 +3725,7 @@
   the coordination overhead."
   ([f coll]
    (let [n (inc (.. Runtime getRuntime availableProcessors))
-         agents (doall (map #(agent (f %)) (take n coll)))
+         agents (doall (map #(send (agent %) f) (take n coll)))
          wget (fn [a] (await1 a) @a)
          step (fn step [[x & xs :as s]
                         [a & as :as acycle]]
