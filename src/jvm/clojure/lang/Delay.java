@@ -38,7 +38,7 @@ public class Delay {
         return val;
     }
 
-    static public class Seq extends Delay implements IPersistentCollection, List {
+    static public class Seq extends Delay implements IPersistentCollection, List, Sequential, Sequence {
         public Seq(IFn fn) {
             super(fn);
         }

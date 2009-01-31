@@ -407,23 +407,6 @@
  [first-expr & rest-expr]
  (list 'new 'clojure.lang.LazyCons (list `fn (list [] first-expr) (list* [(gensym)] rest-expr))))
 
-(defn concat
-  "Returns a lazy seq representing the concatenation of	the elements in the supplied colls."
-  ([] nil)
-  ([x] (seq x))
-  ([x y]
-     (if (seq x)
-       (lazy-cons (first x) (concat (rest x) y))
-       (seq y)))
-  ([x y & zs]
-     (let [cat (fn cat [xys zs]
-                   (if (seq xys)
-                     (lazy-cons (first xys) (cat (rest xys) zs))
-                     (when zs
-                       (recur (first zs) (rest zs)))))]
-       (cat (concat x y) zs))))
-
-;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro lazy-seq
   "Takes a body of expressions that returns an ISeq or nil, and yields
@@ -432,7 +415,28 @@
   seq calls. Any closed over locals will be cleared prior to the tail
   call of body."  
   [& body]
-    (list 'new 'clojure.lang.Delay$Seq (list* `#^{:once true} fn* [] body)))
+    (list 'new 'clojure.lang.Delay$Seq (list* '#^{:once true} fn* [] body)))
+
+(defn concat
+  "Returns a lazy sequence representing the concatenation of the elements in the supplied colls."
+  ([] nil)
+  ([x] (seq x))
+  ([x y]
+     (lazy-seq
+      (if (seq x)
+        (cons (first x) (concat (more x) y))
+        (seq y))))
+  ([x y & zs]
+     (let [cat (fn cat [xys zs]
+                 (lazy-seq
+                  (if (seq xys)
+                    (cons (first xys) (cat (more xys) zs))
+                    (when zs
+                      (seq (cat (first zs) (rest zs)))))))]
+       (cat (concat x y) zs))))
+
+;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defmacro delay
   "Takes a body of expressions and yields a Delay object that will
@@ -3726,7 +3730,7 @@
   the coordination overhead."
   ([f coll]
    (let [n (inc (.. Runtime getRuntime availableProcessors))
-         agents (doall (map #(agent (f %)) (take n coll)))
+         agents (doall (map #(send (agent %) f) (take n coll)))
          wget (fn [a] (await1 a) @a)
          step (fn step [[x & xs :as s]
                         [a & as :as acycle]]

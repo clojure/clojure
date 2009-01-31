@@ -3960,6 +3960,8 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	//todo symbol macro expansion?
 	try
 		{
+        if(form instanceof Sequence)
+            form = RT.seq(form);
 		if(form == null)
 			return NIL_EXPR;
 		else if(form == Boolean.TRUE)

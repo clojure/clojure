@@ -28,6 +28,7 @@ static final Symbol THE_VAR = Symbol.create("var");
 static Symbol UNQUOTE = Symbol.create("clojure.core", "unquote");
 //static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
 static Symbol CONCAT = Symbol.create("clojure.core", "concat");
+static Symbol SEQ = Symbol.create("clojure.core", "seq");
 static Symbol LIST = Symbol.create("clojure.core", "list");
 static Symbol APPLY = Symbol.create("clojure.core", "apply");
 static Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
@@ -61,7 +62,7 @@ static Var GENSYM_ENV = Var.create(null);
 //sorted-map num->gensymbol
 static Var ARG_ENV = Var.create(null);
 
-static
+    static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
@@ -702,20 +703,23 @@ public static class SyntaxQuoteReader extends AFn{
 			if(form instanceof IPersistentMap)
 				{
 				IPersistentVector keyvals = flattenMap(form);
-				ret = RT.list(APPLY, HASHMAP, RT.cons(CONCAT, sqExpandList(keyvals.seq())));
+                ret = RT.list(APPLY, HASHMAP, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
 				}
 			else if(form instanceof IPersistentVector)
-				{
-				ret = RT.list(APPLY, VECTOR, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq())));
-				}
+                {
+                ret = RT.list(APPLY, VECTOR, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq()))));
+                }
 			else if(form instanceof IPersistentSet)
-				{
-				ret = RT.list(APPLY, HASHSET, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq())));
-				}
-			else if(form instanceof ISeq)
+                    {
+                    ret = RT.list(APPLY, HASHSET, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq()))));
+                    }
+			else if(form instanceof Sequence)
 				{
 				ISeq seq = RT.seq(form);
-				ret = RT.cons(CONCAT, sqExpandList(seq));
+                if(seq == null)
+                    ret = RT.cons(LIST,null);
+                else
+                    ret = RT.list(SEQ, RT.cons(CONCAT, sqExpandList(seq)));
 				}
 			else
 				throw new UnsupportedOperationException("Unknown Collection type");
