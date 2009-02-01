@@ -13,33 +13,28 @@
     (:use     (clojure.contrib [str-utils :only (str-join)])))
 
 (defn make-map [args cmdspec]
-  (let [{specs true [rest-name] false} (su/group-by vector? cmdspec)
-         names (assoc (into {} (for [spec specs] 
-                                 (let [[syms [desc default]] 
-                                          (split-with symbol? spec)]
-                                    [(set (map str syms))
-                                       {:sym (first syms) :default default}])))
-                  #{"help?" "h?"} {:sym 'help? :default false})
-         allnames 
-               (reduce clojure.set/union (keys names))
-         get-found (fn [keybase] (some #(and ((key %) keybase) (val %)) names))] 
+  (let [{spec true [rest-sym] false} (su/group-by vector? cmdspec)
+        rest-str (str rest-sym)
+        key-data (into {} (for [[syms [_ default]] (map #(split-with symbol? %)
+                                                        (conj spec '[help? h?]))
+                                sym syms]
+                            [(re-find #"^.*[^?]" (str sym))
+                             {:sym (str (first syms)) :default default}]))]
     (loop [[argkey & [argval :as r]] (if (seq args) args ["--help"])
-           cmdmap {:cmdspec cmdspec rest-name []}]
+           cmdmap {:cmdspec cmdspec rest-str []}]
       (if argkey
         (let [[_ & [keybase]] (re-find #"^--?(.*)" argkey)]
           (cond
-            (= keybase nil) (recur r (update-in cmdmap [rest-name] conj argkey))
-            (= keybase "")  (update-in cmdmap [rest-name] #(apply conj % r))
-            (allnames keybase)
-               (let [found (get-found keybase)]
-                 (recur (rest r) (assoc cmdmap (:sym found)
-                                        (if (or (nil? r) (= \- (ffirst r)))
-                                          (:default found)
-                                          (first r)))))
-            (allnames (str keybase "?"))
-               (let [found (get-found (str keybase "?"))]
-                 (recur r (assoc cmdmap (:sym found) true)))
-            :else (throw (Exception. (str "Unknown option " argkey)))))
+            (= keybase nil) (recur r (update-in cmdmap [rest-str] conj argkey))
+            (= keybase "")  (update-in cmdmap [rest-str] #(apply conj % r))
+            :else (if-let [found (key-data keybase)]
+                    (if (= \? (last (:sym found)))
+                      (recur r (assoc cmdmap (:sym found) true))
+                      (recur (rest r) (assoc cmdmap (:sym found)
+                                             (if (or (nil? r) (= \- (ffirst r)))
+                                               (:default found)
+                                               (first r)))))
+                    (throw (Exception. (str "Unknown option " argkey))))))
         cmdmap))))
 
 (defn- align
@@ -94,8 +89,8 @@
                       (if (vector? spec)
                         (first spec)
                         spec)))]
-    `(let [{:syms ~locals :as cmdmap#} (make-map ~args '~cmdspec)]
-       (if (cmdmap# '~'help?)
+    `(let [{:strs ~locals :as cmdmap#} (make-map ~args '~cmdspec)]
+       (if (cmdmap# "help?")
          (print-help ~desc cmdmap#)
          (do ~@body)))))
 

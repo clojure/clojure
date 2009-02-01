@@ -56,7 +56,7 @@
     "clojurescript.cli -- Compile ClojureScript to JavaScript"
     [[simple? "Runs some simple built-in tests"]
      [mkcore? "Generates a core.js file"]
-     [v?      "Includes extra fn names and comments in js"]
+     [v? verbose? "Includes extra fn names and comments in js"]
      filenames]
     (cond
       simple? (simple-tests)
