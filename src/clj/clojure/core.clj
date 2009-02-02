@@ -834,8 +834,12 @@
 (defn complement
   "Takes a fn f and returns a fn that takes the same arguments as f,
   has the same effects, if any, and returns the opposite truth value."
-  [f] (fn [& args]
-        (not (apply f args))))
+  [f] 
+  (fn 
+    ([] (not (f)))
+    ([x] (not (f x)))
+    ([x y] (not (f x y)))
+    ([x y & zs] (not (apply f x y zs)))))
 
 (defn constantly
   "Returns a function that takes any number of arguments and returns x."
@@ -1419,9 +1423,8 @@
   f should accept number-of-colls arguments."
   ([f coll]
    (lazy-seq
-    (let [s (seq coll)]
-      (when s
-     (cons (f (first s)) (map f (more s)))))))
+    (when (seq coll)
+      (cons (f (first coll)) (map f (more coll))))))
   ([f c1 c2]
    (lazy-seq
     (when (and (seq c1) (seq c2))
@@ -1458,47 +1461,50 @@
 
 
 (defn remove
-  "Returns a lazy seq of the items in coll for which
+  "Returns a lazy sequence of the items in coll for which
   (pred item) returns false. pred must be free of side-effects."
   [pred coll]
-    (when (seq coll)
-      (if (pred (first coll))
-        (recur pred (rest coll))
-        (lazy-cons (first coll) (remove pred (rest coll))))))
+  (filter (complement pred) coll))
 
 (defn take
-  "Returns a lazy seq of the first n items in coll, or all items if
+  "Returns a lazy sequence of the first n items in coll, or all items if
   there are fewer than n."
   [n coll]
-    (when (and (pos? n) (seq coll))
-      (lazy-cons (first coll) (when (> n 1) (take (dec n) (rest coll))))))
+  (lazy-seq
+   (when (and (pos? n) (seq coll))
+      (cons (first coll) (take (dec n) (more coll))))))
 
 (defn take-while
-  "Returns a lazy seq of successive items from coll while
+  "Returns a lazy sequence of successive items from coll while
   (pred item) returns true. pred must be free of side-effects."
   [pred coll]
-    (when (and (seq coll) (pred (first coll)))
-      (lazy-cons (first coll) (take-while pred (rest coll)))))
+  (lazy-seq
+   (when (and (seq coll) (pred (first coll)))
+       (cons (first coll) (take-while pred (more coll))))))
 
 (defn drop
-  "Returns a lazy seq of all but the first n items in coll."
+  "Returns a lazy sequence of all but the first n items in coll."
   [n coll]
-    (if (and (pos? n) (seq coll))
-      (recur (dec n) (rest coll))
-      (seq coll)))
+  (let [step (fn [n coll]
+               (if (and (pos? n) (seq coll))
+                 (recur (dec n) (more coll))
+                 (seq coll)))]
+    (lazy-seq (step n coll))))
 
 (defn drop-last
-  "Return a lazy seq of all but the last n (default 1) items in coll"
+  "Return a lazy sequence of all but the last n (default 1) items in coll"
   ([s] (drop-last 1 s))
-  ([n s] (map (fn [x _] x) (seq s) (drop n s))))
+  ([n s] (map (fn [x _] x) s (drop n s))))
 
 (defn drop-while
-  "Returns a lazy seq of the items in coll starting from the first
+  "Returns a lazy sequence of the items in coll starting from the first
   item for which (pred item) returns nil."
   [pred coll]
-    (if (and (seq coll) (pred (first coll)))
-      (recur pred (rest coll))
-      (seq coll)))
+  (let [step (fn [pred coll]
+               (if (and (seq coll) (pred (first coll)))
+                 (recur pred (more coll))
+                 (seq coll)))]
+    (lazy-seq (step pred coll))))
 
 (defn cycle
   "Returns a lazy (infinite!) seq of repetitions of the items in

@@ -438,7 +438,7 @@ public IStream stream() throws Exception {
 		return v.nth(i);
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		if(i + 1 < v.count())
 			return new APersistentVector.Seq(v, i + 1);
 		return null;
@@ -490,7 +490,7 @@ static class RSeq extends ASeq implements IndexedSeq{
 		return v.nth(i);
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		if(i > 0)
 			return new APersistentVector.RSeq(v, i - 1);
 		return null;

@@ -41,7 +41,7 @@ public class StreamSeq extends ASeq {
         return _first;
     }
 
-    synchronized public Seqable more() {
+    synchronized public ISeq rest() {
         if (stream != null) {
             try {
                 _rest = create(stream);

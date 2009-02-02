@@ -49,7 +49,7 @@ public Object first(){
 
 final
 synchronized
-public Seqable more(){
+public ISeq rest(){
 	if(_rest == sentinel)
 		{
 		try

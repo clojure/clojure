@@ -585,7 +585,7 @@ static public Seqable more(Object x){
 		return ((ISeq) x).more();
 	ISeq seq = seq(x);
 	if(seq == null)
-		return null;
+		return PersistentList.EMPTY;
 	return seq.more();
 }
 

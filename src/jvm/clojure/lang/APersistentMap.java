@@ -130,7 +130,7 @@ static public class KeySeq extends ASeq{
 		return ((Map.Entry) seq.first()).getKey();
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		return create(seq.rest());
 	}
 
@@ -161,7 +161,7 @@ static public class ValSeq extends ASeq{
 		return ((Map.Entry) seq.first()).getValue();
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		return create(seq.rest());
 	}
 

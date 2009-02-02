@@ -39,7 +39,7 @@ public Object first(){
 	return n;
 }
 
-public Seqable more(){
+public ISeq rest(){
 	if(n < end-1)
 		return new Range(_meta, n + 1, end);
 	return null;

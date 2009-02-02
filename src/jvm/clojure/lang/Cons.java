@@ -33,7 +33,13 @@ public Object first(){
 	return _first;
 }
 
+public ISeq rest(){
+	return more().seq();
+}
+
 public Seqable more(){
+	if(_more == null)
+		return PersistentList.EMPTY;
 	return _more;
 }
 

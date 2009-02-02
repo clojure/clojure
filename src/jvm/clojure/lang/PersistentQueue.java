@@ -140,7 +140,7 @@ static class Seq extends ASeq{
 		return f.first();
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		ISeq f1 = f.rest();
 		ISeq r1 = rseq;
 		if(f1 == null)

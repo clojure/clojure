@@ -110,12 +110,19 @@ public ISeq cons(Object o){
 	return new Cons(o, this);
 }
 
-final public ISeq rest(){
-    Seqable m = more();
-    if(m == null)
-        return null;
-    return m.seq();
+public Seqable more(){
+    ISeq s = rest();
+    if(s == null)
+        return PersistentList.EMPTY;
+    return s;
 }
+
+//final public ISeq rest(){
+//    Seqable m = more();
+//    if(m == null)
+//        return null;
+//    return m.seq();
+//}
 
 // java.util.Collection implementation
 

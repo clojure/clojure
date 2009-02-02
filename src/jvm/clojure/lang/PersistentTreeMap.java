@@ -781,7 +781,7 @@ static public class Seq extends ASeq{
 		return stack.first();
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		Node t = (Node) stack.first();
 		ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
 		if(nextstack != null)

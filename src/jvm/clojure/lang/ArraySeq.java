@@ -65,7 +65,7 @@ public Object first(){
 	return Reflector.prepRet(Array.get(array, i));
 }
 
-public Seqable more(){
+public ISeq rest(){
 	if(oa != null)
 		{
 		if(i + 1 < oa.length)
@@ -138,7 +138,7 @@ static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
 		return array[i];
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		if(i + 1 < array.length)
 			return new ArraySeq_int(meta(), array, i + 1);
 		return null;
@@ -186,7 +186,7 @@ static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
 		return array[i];
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		if(i + 1 < array.length)
 			return new ArraySeq_float(meta(), array, i + 1);
 		return null;
@@ -233,7 +233,7 @@ static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
 		return array[i];
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		if(i + 1 < array.length)
 			return new ArraySeq_double(meta(), array, i + 1);
 		return null;
@@ -280,7 +280,7 @@ static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
 		return array[i];
 	}
 
-	public Seqable more(){
+	public ISeq rest(){
 		if(i + 1 < array.length)
 			return new ArraySeq_long(meta(), array, i + 1);
 		return null;

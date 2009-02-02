@@ -349,7 +349,7 @@ final static class FullNode implements INode{
 			return s.first();
 		}
 
-		public Seqable more(){
+		public ISeq rest(){
 			ISeq nexts = s.rest();
 			if(nexts != null)
 				return new Seq(nexts, i, node);
@@ -507,7 +507,7 @@ final static class BitmapIndexedNode implements INode{
 			return s.first();
 		}
 
-		public Seqable more(){
+		public ISeq rest(){
 			ISeq nexts = s.rest();
 			if(nexts != null)
 				return new Seq(nexts, i, node);

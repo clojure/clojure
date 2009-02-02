@@ -64,7 +64,7 @@ public Object first(){
 	return _first;
 }
 
-public Seqable more(){
+public ISeq rest(){
 	if(_count == 1)
 		return null;
 	return (ISeq) _rest;
