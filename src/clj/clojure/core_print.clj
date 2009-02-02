@@ -101,12 +101,12 @@
                   (print-dup (str o) w))
               w))
 
-(defmethod print-dup clojure.lang.AFn [o, #^Writer w]
+(defmethod print-dup clojure.lang.Fn [o, #^Writer w]
   (print-ctor o (fn [o w]) w))
 
-(prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.AFn)
-(prefer-method print-dup java.util.Map clojure.lang.AFn)
-(prefer-method print-dup java.util.Collection clojure.lang.AFn)
+(prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.Fn)
+(prefer-method print-dup java.util.Map clojure.lang.Fn)
+(prefer-method print-dup java.util.Collection clojure.lang.Fn)
 
 (defmethod print-method Boolean [o, #^Writer w]
   (.write w (str o)))

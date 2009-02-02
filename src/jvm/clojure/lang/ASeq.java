@@ -110,8 +110,11 @@ public ISeq cons(Object o){
 	return new Cons(o, this);
 }
 
-public ISeq rest(){
-    return RT.seq(more());
+final public ISeq rest(){
+    Seqable m = more();
+    if(m == null)
+        return null;
+    return m.seq();
 }
 
 // java.util.Collection implementation

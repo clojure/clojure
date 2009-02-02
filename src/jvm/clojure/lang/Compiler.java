@@ -2818,6 +2818,7 @@ static public class FnExpr implements Expr{
 	PersistentVector constants;
 	int constantsID;
     boolean onceOnly = false;
+    String superName = null;
 
 	public final IPersistentCollection methods(){
 		return methods;
@@ -2899,7 +2900,11 @@ static public class FnExpr implements Expr{
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr(tagOf(form));
 		FnMethod enclosingMethod = (FnMethod) METHOD.get();
-        fn.onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), Keyword.intern(null, "once")));
+        if(((IMeta)form.first()).meta() != null)
+            {
+            fn.onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), Keyword.intern(null, "once")));
+            fn.superName = (String) RT.get(RT.meta(form.first()), Keyword.intern(null, "super-name"));
+            }
 		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
@@ -3014,7 +3019,8 @@ static public class FnExpr implements Expr{
 //		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,
-		         isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction", null);
+                superName != null ? superName :
+		         (isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction"), null);
 		String source = (String) SOURCE.get();
 		int lineBefore = (Integer) LINE_BEFORE.get();
 		int lineAfter = (Integer) LINE_AFTER.get() + 1;
@@ -3105,7 +3111,9 @@ static public class FnExpr implements Expr{
 		ctorgen.visitLineNumber(line, ctorgen.mark());
 		ctorgen.visitLabel(start);
 		ctorgen.loadThis();
-		if(isVariadic()) //RestFn ctor takes reqArity arg
+        if(superName != null)
+            ctorgen.invokeConstructor(Type.getObjectType(superName),afnctor);
+		else if(isVariadic()) //RestFn ctor takes reqArity arg
 			{
 			ctorgen.push(variadicMethod.reqParms.count());
 			ctorgen.invokeConstructor(restFnType, restfnctor);
@@ -3176,7 +3184,8 @@ static public class FnExpr implements Expr{
 
             for (int i = 0; i < constants.count(); i++)
                 {
-                if (constants.nth(i) instanceof String)
+                Object o = constants.nth(i);
+                if (o instanceof String)
                     {
                     clinitgen.push((String)constants.nth(i));
                     }
@@ -3185,15 +3194,15 @@ static public class FnExpr implements Expr{
                     String cs = null;
                     try
                         {
-                        cs = RT.printString(constants.nth(i));
+                        cs = RT.printString(o);
                         }
                     catch (Exception e)
                         {
                         throw new RuntimeException("Can't embed object in code, maybe print-dup not defined: "
-                                + constants.nth(i));
+                                + o);
                         }
                     if (cs.length() == 0)
-                        throw new RuntimeException("Can't embed unreadable object in code: " + constants.nth(i));
+                        throw new RuntimeException("Can't embed unreadable object in code: " + o);
 
                     if (cs.startsWith("#<"))
                         throw new RuntimeException("Can't embed unreadable object in code: " + cs);

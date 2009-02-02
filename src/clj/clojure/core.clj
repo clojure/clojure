@@ -407,7 +407,6 @@
  [first-expr & rest-expr]
  (list 'new 'clojure.lang.LazyCons (list `fn (list [] first-expr) (list* [(gensym)] rest-expr))))
 
-
 (defmacro lazy-seq
   "Takes a body of expressions that returns an ISeq or nil, and yields
   a Seqable object that will invoke the body only the first time seq
@@ -415,7 +414,7 @@
   seq calls. Any closed over locals will be cleared prior to the tail
   call of body."  
   [& body]
-    (list 'new 'clojure.lang.Delay$Seq (list* '#^{:once true} fn* [] body)))
+    (list* '#^{:once true :super-name "clojure/lang/LazySeq"} fn* [] body))
 
 (defn concat
   "Returns a lazy sequence representing the concatenation of the elements in the supplied colls."
@@ -1420,8 +1419,9 @@
   f should accept number-of-colls arguments."
   ([f coll]
    (lazy-seq
-    (when (seq coll)
-     (cons (f (first coll)) (map f (more coll))))))
+    (let [s (seq coll)]
+      (when s
+     (cons (f (first s)) (map f (more s)))))))
   ([f c1 c2]
    (lazy-seq
     (when (and (seq c1) (seq c2))

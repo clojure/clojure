@@ -497,7 +497,11 @@ static ISeq seqFrom(Object coll){
 	else if(coll instanceof Map)
 		return seq(((Map) coll).entrySet());
 	else
-		throw new IllegalArgumentException("Don't know how to create ISeq from: " + coll.getClass().getSimpleName());
+        {
+        Class c =   coll.getClass();
+        Class sc = c.getSuperclass();
+		throw new IllegalArgumentException("Don't know how to create ISeq from: " + c.getSimpleName());
+        }
 }
 
 static public ISeq keys(Object coll){
@@ -577,22 +581,30 @@ static public ISeq rest(Object x){
 }
 
 static public Seqable more(Object x){
-    Seqable ret = null;
 	if(x instanceof ISeq)
-		ret = ((ISeq) x).more();
-    else
-        {
-	    ISeq seq = seq(x);
-	    if(seq == null)
-		    ret = PersistentList.EMPTY;
-	    else
-            ret = seq.more();
-        }
-    if(ret == null)
-        ret = PersistentList.EMPTY;
-//        throw new IllegalStateException("nil more");
-    return ret;
+		return ((ISeq) x).more();
+	ISeq seq = seq(x);
+	if(seq == null)
+		return null;
+	return seq.more();
 }
+
+//static public Seqable more(Object x){
+//    Seqable ret = null;
+//	if(x instanceof ISeq)
+//		ret = ((ISeq) x).more();
+//    else
+//        {
+//	    ISeq seq = seq(x);
+//	    if(seq == null)
+//		    ret = PersistentList.EMPTY;
+//	    else
+//            ret = seq.more();
+//        }
+//    if(ret == null)
+//        ret = PersistentList.EMPTY;
+//    return ret;
+//}
 
 static public ISeq rrest(Object x){
 	return rest(rest(x));
@@ -1231,7 +1243,9 @@ static public void print(Object x, Writer w) throws Exception{
 	if(x instanceof Obj)
 		{
 		Obj o = (Obj) x;
-		if(RT.count(o.meta()) > 0 && readably && booleanCast(PRINT_META.get()))
+		if(RT.count(o.meta()) > 0 &&
+                ((readably && booleanCast(PRINT_META.get()))
+                || booleanCast(PRINT_DUP.get())))
 			{
 			IPersistentMap meta = o.meta();
 			w.write("#^");

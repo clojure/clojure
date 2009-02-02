@@ -23,10 +23,10 @@ import java.io.IOException;
 public class Compile{
 
 private static final String PATH_PROP = "clojure.compile.path";
-private static final Var compile_path = RT.var("clojure.core", "*compile-path*");
-private static final Var compile = RT.var("clojure.core", "compile");
 
 public static void main(String[] args) throws Exception{
+    final Var compile_path = RT.var("clojure.core", "*compile-path*");
+    final Var compile = RT.var("clojure.core", "compile");
 
 	OutputStreamWriter out = (OutputStreamWriter) RT.OUT.get();
 	PrintWriter err = (PrintWriter) RT.ERR.get();
