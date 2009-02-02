@@ -1442,12 +1442,12 @@
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   [pred coll]
-  (let [step (fn [pred coll]
-                 (when (seq coll)
-                   (if (pred (first coll))
-                     (clojure.lang.Cons. (first coll) (filter pred (more coll)))
-                     (recur pred (more coll)))))]
-    (lazy-seq (step pred coll))))
+  (lazy-seq
+   (loop [coll coll]
+     (when (seq coll)
+       (if (pred (first coll))
+         (cons (first coll) (filter pred (more coll)))
+         (recur (more coll)))))))
 
 
 (defn remove
@@ -1475,11 +1475,11 @@
 (defn drop
   "Returns a lazy sequence of all but the first n items in coll."
   [n coll]
-  (let [step (fn [n coll]
-               (if (and (pos? n) (seq coll))
-                 (recur (dec n) (more coll))
-                 (seq coll)))]
-    (lazy-seq (step n coll))))
+  (lazy-seq
+   (loop [n n coll coll]
+     (if (and (pos? n) (seq coll))
+       (recur (dec n) (more coll))
+       coll))))
 
 (defn drop-last
   "Return a lazy sequence of all but the last n (default 1) items in coll"
@@ -1490,11 +1490,11 @@
   "Returns a lazy sequence of the items in coll starting from the first
   item for which (pred item) returns nil."
   [pred coll]
-  (let [step (fn [pred coll]
-               (if (and (seq coll) (pred (first coll)))
-                 (recur pred (more coll))
-                 (seq coll)))]
-    (lazy-seq (step pred coll))))
+  (lazy-seq
+   (loop [coll coll]
+     (if (and (seq coll) (pred (first coll)))
+       (recur (more coll))
+       coll))))
 
 (defn cycle
   "Returns a lazy (infinite!) sequence of repetitions of the items in coll."  
