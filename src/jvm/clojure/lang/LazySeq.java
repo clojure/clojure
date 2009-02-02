@@ -24,7 +24,7 @@ public class LazySeq extends AFn implements Seqable, IPersistentCollection, List
             {
             try
                 {
-                s = (ISeq) invoke();
+                s = RT.seq(invoke());
                 }
             catch (Exception e)
                 {

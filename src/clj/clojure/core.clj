@@ -418,20 +418,20 @@
 
 (defn concat
   "Returns a lazy sequence representing the concatenation of the elements in the supplied colls."
-  ([] nil)
-  ([x] (seq x))
+  ([] (lazy-seq nil))
+  ([x] (lazy-seq x))
   ([x y]
      (lazy-seq
       (if (seq x)
         (cons (first x) (concat (more x) y))
-        (seq y))))
+        y)))
   ([x y & zs]
      (let [cat (fn cat [xys zs]
                  (lazy-seq
                   (if (seq xys)
                     (cons (first xys) (cat (more xys) zs))
                     (when zs
-                      (seq (cat (first zs) (rest zs)))))))]
+                      (cat (first zs) (rest zs))))))]
        (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
@@ -1507,15 +1507,8 @@
     (lazy-seq (step pred coll))))
 
 (defn cycle
-  "Returns a lazy (infinite!) seq of repetitions of the items in
-  coll."
-  [coll]
-    (when (seq coll)
-      (let [rep (fn thisfn [xs]
-                    (if xs
-                      (lazy-cons (first xs) (thisfn (rest xs)))
-                      (recur (seq coll))))]
-        (rep (seq coll)))))
+  "Returns a lazy (infinite!) sequence of repetitions of the items in coll."  
+  [coll] (lazy-seq (concat coll (cycle coll))))
 
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
@@ -1528,16 +1521,17 @@
     [(take-while pred coll) (drop-while pred coll)])
 
 (defn repeat
-  "Returns a lazy (infinite!) seq of xs."
-  [x] (lazy-cons x (repeat x)))
+  "Returns a lazy (infinite!, or length n if supplied) sequence of xs."
+  ([x] (lazy-seq (cons x (repeat x))))
+  ([n x] (take n (repeat x))))
 
 (defn replicate
   "Returns a lazy seq of n xs."
   [n x] (take n (repeat x)))
 
 (defn iterate
-  "Returns a lazy seq of x, (f x), (f (f x)) etc. f must be free of side-effects"
-  [f x] (lazy-cons x (iterate f (f x))))
+  "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
+  [f x] (cons x (lazy-seq (iterate f (f x)))))
 
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
@@ -1596,8 +1590,9 @@
   rdr must implement java.io.BufferedReader."
   [#^java.io.BufferedReader rdr]
     (let [line  (. rdr (readLine))]
-      (when line
-        (lazy-cons line (line-seq rdr)))))
+      (lazy-seq
+       (when line
+        (cons line (line-seq rdr))))))
 
 (defn comparator
   "Returns an implementation of java.util.Comparator based upon pred."
@@ -1634,10 +1629,11 @@
   ([n coll]
      (partition n n coll))
   ([n step coll]
-   (when (seq coll)
-     (let [p (take n coll)]
-       (when (= n (count p))
-         (lazy-cons  p (partition n step (drop step coll))))))))
+   (lazy-seq
+    (when (seq coll)
+      (let [p (take n coll)]
+        (when (= n (count p))
+          (cons p (partition n step (drop step coll)))))))))
 
 ;; evaluation
 
@@ -2237,8 +2233,9 @@
           row-struct (apply create-struct keys)
           row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
           rows (fn thisfn []
-                   (when (. rs (next))
-		     (lazy-cons (apply struct row-struct (row-values)) (thisfn))))]
+                   (lazy-seq
+                    (when (. rs (next))
+                      (cons (apply struct row-struct (row-values)) (thisfn)))))]
       (rows)))
 
 (defn set
@@ -2381,8 +2378,9 @@
 (defn take-nth
   "Returns a lazy seq of every nth item in coll."
   [n coll]
-    (when (seq coll)
-      (lazy-cons (first coll) (take-nth n (drop n coll)))))
+    (lazy-seq
+     (when (seq coll)
+       (cons (first coll) (take-nth n (drop n coll))))))
 
 (defn interleave
   "Returns a lazy seq of the first item in each coll, then the second
