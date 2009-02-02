@@ -397,16 +397,6 @@
   [item & more]
     (spread (cons item more)))
 
-(defmacro lazy-cons
-  "Expands to code which produces a seq object whose first is
-  first-expr and whose rest is rest-expr, neither of which is
-  evaluated until first/rest is called. Each expr will be evaluated at most
-  once per step in the sequence, e.g. calling first/rest repeatedly on the
-  same node of the seq evaluates first/rest-expr once - the values they yield are
-  cached."
- [first-expr & rest-expr]
- (list 'new 'clojure.lang.LazyCons (list `fn (list [] first-expr) (list* [(gensym)] rest-expr))))
-
 (defmacro lazy-seq
   "Takes a body of expressions that returns an ISeq or nil, and yields
   a Seqable object that will invoke the body only the first time seq
@@ -2586,14 +2576,11 @@
 (defmacro lazy-cat
   "Expands to code which yields a lazy sequence of the concatenation
   of the supplied colls.  Each coll expr is not evaluated until it is
-  needed."
-  ([coll] `(seq ~coll))
-  ([coll & colls]
-   `(let [iter# (fn iter# [coll#]
-		    (if (seq coll#)
-		      (lazy-cons (first coll#) (iter# (rest coll#)))
-		      (lazy-cat ~@colls)))]
-      (iter# ~coll))))
+  needed. 
+
+  (lazy-cat xs ys zs) === (concat (lazy-seq xs) (lazy-seq ys) (lazy-seq zs))" 
+  [& colls]
+  `(concat ~@(map #(list `lazy-seq %) colls)))
 
 (defmacro for
  "List comprehension. Takes a vector of one or more
@@ -2617,17 +2604,19 @@
         emit (fn emit [[group & [{next-seq :seq} :as more-groups]]]
 		  (let [giter (gensym "iter__") gxs (gensym "s__")]
 		    `(fn ~giter [~gxs]
-			 (when-first [~(:bind group) ~gxs]
-                           (when ~(or (:while group) true)
-                             (if ~(or (:when group) true)
-                               ~(if more-groups
-                                  `(let [iterys# ~(emit more-groups)
-                                         fs# (iterys# ~next-seq)]
-                                     (if fs#
-                                       (lazy-cat fs# (~giter (rest ~gxs)))
-                                       (recur (rest ~gxs))))
-                                  `(lazy-cons ~expr (~giter (rest ~gxs))))
-                              (recur (rest ~gxs))))))))]
+			 (lazy-seq
+                          (loop [~gxs ~gxs]
+                            (when-first [~(:bind group) ~gxs]
+                               (when ~(or (:while group) true)
+                                 (if ~(or (:when group) true)
+                                   ~(if more-groups
+                                      `(let [iterys# ~(emit more-groups)
+                                             fs# (seq (iterys# ~next-seq))]
+                                         (if fs#
+                                           (concat fs# (~giter (more ~gxs)))
+                                           (recur (more ~gxs))))
+                                      `(cons ~expr (~giter (more ~gxs))))
+                                   (recur (more ~gxs))))))))))]
     `(let [iter# ~(emit (to-groups seq-exprs))]
 	(iter# ~(second seq-exprs))))))
 
@@ -2733,8 +2722,9 @@
   [#^java.util.regex.Pattern re s]
     (let [m (re-matcher re s)]
       ((fn step []
-           (when (. m (find))
-             (lazy-cons (re-groups m) (step)))))))
+         (lazy-seq
+          (when (. m (find))
+            (cons (re-groups m) (step))))))))
 
 (defn re-matches
   "Returns the match, if any, of string to pattern, using
@@ -2842,9 +2832,10 @@
   tree."  
    [branch? children root]
    (let [walk (fn walk [node]
-                (lazy-cons node
+                (lazy-seq
+                 (cons node
                   (when (branch? node)
-                    (mapcat walk (children node)))))]
+                    (mapcat walk (children node))))))]
      (walk root)))
 
 (defn file-seq
@@ -2907,11 +2898,14 @@
 (defn distinct
   "Returns a lazy sequence of the elements of coll with duplicates removed"
   [coll]
-    (let [step (fn step [[f & r :as xs] seen]
-                   (when xs
-                     (if (seen f) (recur r seen)
-                         (lazy-cons f (step r (conj seen f))))))]
-      (step (seq coll) #{})))
+    (let [step (fn step [xs seen]
+                   (lazy-seq
+                    (loop [[f :as xs] xs seen seen]
+                      (when (seq xs)
+                        (if (seen f) 
+                          (recur (more xs) seen)
+                          (cons f (step (more xs) (conj seen f))))))))]
+      (step coll #{})))
 
 (defmacro if-let
   "bindings => binding-form test
@@ -3021,7 +3015,7 @@
 (defn repeatedly
   "Takes a function of no args, presumably with side effects, and returns an infinite
   lazy sequence of calls to it"
-  [f] (lazy-cons (f) (repeatedly f)))
+  [f] (lazy-seq (cons (f) (repeatedly f))))
 
 (defn add-classpath
   "Adds the url (String or URL object) to the classpath per URLClassLoader.addURL"
@@ -3150,12 +3144,13 @@
                     (.put q q)
                     (throw e))))
          drain (fn drain []
-                 (let [x (.take q)]
-                   (if (identical? x q) ;q itself is eos sentinel
-                     @agt  ;will be nil - touch agent just to propagate errors
-                     (do
-                       (send-off agt fill)
-                       (lazy-cons (if (identical? x NIL) nil x) (drain))))))]
+                 (lazy-seq
+                  (let [x (.take q)]
+                    (if (identical? x q) ;q itself is eos sentinel
+                      @agt  ;will be nil - touch agent just to propagate errors
+                      (do
+                        (send-off agt fill)
+                        (cons (if (identical? x NIL) nil x) (drain)))))))]
      (send-off agt fill)
      (drain))))
 
@@ -3738,16 +3733,18 @@
          wget (fn [a] (await1 a) @a)
          step (fn step [[x & xs :as s]
                         [a & as :as acycle]]
-                  (if s
-                    (let [v (wget a)]
-                      (send a (fn [_] (f x)))
-                      (lazy-cons v (step xs as)))
-                    (map wget (take (count agents) acycle))))]
+                  (lazy-seq
+                   (if s
+                     (let [v (wget a)]
+                       (send a (fn [_] (f x)))
+                       (cons v (step xs as)))
+                     (map wget (take (count agents) acycle)))))]
      (step (drop n coll) (cycle agents))))
   ([f coll & colls]
    (let [step (fn step [cs]
-                  (when (every? seq cs)
-                    (lazy-cons (map first cs) (step (map rest cs)))))]
+                  (lazy-seq
+                   (when (every? seq cs)
+                     (cons (map first cs) (step (map rest cs))))))]
      (pmap #(apply f %) (step (cons coll colls))))))
 
 (def

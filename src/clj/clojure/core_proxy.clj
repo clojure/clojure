@@ -338,9 +338,10 @@
       (assoc [k v] (assoc (snapshot) k v))
       (without [k] (dissoc (snapshot) k))
       (seq [] ((fn thisfn [pseq]
-		  (when pseq
-		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
-			       (thisfn (rest pseq))))) (keys pmap))))))
+		  (lazy-seq
+                   (when pseq
+                     (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
+                           (thisfn (more pseq))))) (keys pmap)))))))
 
 
 
