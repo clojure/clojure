@@ -112,6 +112,11 @@
 
 (def
  #^{:arglists '([x])
+    :doc "Return true if x implements Sequence, true of ISeqs and LazySeqs"}
+ sequence? (fn sequence? [x] (instance? clojure.lang.Sequence x)))
+
+(def
+ #^{:arglists '([x])
     :doc "Return true if x is a String"}
  string? (fn string? [x] (instance? String x)))
 
@@ -129,7 +134,7 @@
  #^{:private true}
  sigs
  (fn [fdecl]
-   (if (seq? (first fdecl))
+   (if (sequence? (first fdecl))
      (loop [ret [] fdecl fdecl]
        (if fdecl
          (recur (conj ret (first (first fdecl))) (rest fdecl))
@@ -996,7 +1001,7 @@
   second item in the first form, making a list of it if it is not a
   list already. If there are more forms, inserts the first form as the
   second item in second form, etc."
-  ([x form] (if (seq? form)
+  ([x form] (if (sequence? form)
               `(~(first form) ~x ~@(rest form))
               (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
@@ -2017,7 +2022,7 @@
     (let [gx (gensym)]
       `(let [~gx ~x]
          ~@(map (fn [f]
-                  (if (seq? f)
+                  (if (sequence? f)
                     `(~(first f) ~gx ~@(rest f))
                     `(~f ~gx)))
                 forms)
