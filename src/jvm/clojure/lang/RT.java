@@ -544,8 +544,8 @@ static public ISeq cons(Object x, Object coll){
 	//ISeq y = seq(coll);
 	if(coll == null)
 		return new PersistentList(x);
-    else if (coll instanceof Seqable)
-	    return new Cons(x, (Seqable) coll);
+    else if (coll instanceof Sequence)
+	    return new Cons(x, (Sequence) coll);
     else
         return new Cons(x, seq(coll));        
 }
@@ -580,7 +580,7 @@ static public ISeq rest(Object x){
 	return seq.rest();
 }
 
-static public Seqable more(Object x){
+static public Sequence more(Object x){
 	if(x instanceof ISeq)
 		return ((ISeq) x).more();
 	ISeq seq = seq(x);

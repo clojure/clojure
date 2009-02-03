@@ -15,15 +15,15 @@ package clojure.lang;
 public class Cons extends ASeq{
 
 private final Object _first;
-private final Seqable _more;
+private final Sequence _more;
 
-public Cons(Object first, Seqable _more){
+public Cons(Object first, Sequence _more){
 	this._first = first;
 	this._more = _more;
 }
 
 
-public Cons(IPersistentMap meta, Object _first, Seqable _more){
+public Cons(IPersistentMap meta, Object _first, Sequence _more){
 	super(meta);
 	this._first = _first;
 	this._more = _more;
@@ -37,7 +37,7 @@ public ISeq rest(){
 	return more().seq();
 }
 
-public Seqable more(){
+public Sequence more(){
 	if(_more == null)
 		return PersistentList.EMPTY;
 	return _more;

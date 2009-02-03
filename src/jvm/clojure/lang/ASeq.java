@@ -110,7 +110,7 @@ public ISeq cons(Object o){
 	return new Cons(o, this);
 }
 
-public Seqable more(){
+public Sequence more(){
     ISeq s = rest();
     if(s == null)
         return PersistentList.EMPTY;

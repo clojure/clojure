@@ -12,5 +12,5 @@
 
 package clojure.lang;
 
-public interface Sequence {
+public interface Sequence extends IPersistentCollection, Sequential{
 }

@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public class LazySeq extends AFn implements Seqable, IPersistentCollection, List, Sequential, Sequence {
+public class LazySeq extends AFn implements List, Sequence {
     static final ISeq DUMMY = new Cons(null, null);
 
     private ISeq s = DUMMY;
