@@ -75,7 +75,8 @@
   closed."}
   reader class)
 
-(defmethod reader Reader [x] x)
+(defmethod reader Reader [x]
+  (BufferedReader. x))
 
 (defmethod reader InputStream [x]
   (BufferedReader. (InputStreamReader. x *default-encoding*)))
