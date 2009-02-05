@@ -2905,11 +2905,12 @@
   [coll]
     (let [step (fn step [xs seen]
                    (lazy-seq
-                    (loop [[f :as xs] xs seen seen]
+                    ((fn [[f :as xs] seen]
                       (when (seq xs)
                         (if (seen f) 
                           (recur (more xs) seen)
-                          (cons f (step (more xs) (conj seen f))))))))]
+                          (cons f (step (more xs) (conj seen f))))))
+                     xs seen)))]
       (step coll #{})))
 
 (defmacro if-let
