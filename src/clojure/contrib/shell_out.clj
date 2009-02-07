@@ -32,6 +32,16 @@
   [stream]
   (take-while #(>= % 0) (repeatedly #(.read stream))))
 
+(defn- aconcat
+  "Concatenates arrays of given type."
+  [type & xs]
+  (let [target (make-array type (apply + (map count xs)))]
+    (loop [i 0 idx 0]
+      (when-let [a (nth xs i nil)]
+        (System/arraycopy a 0 target idx (count a))
+        (recur (inc i) (+ idx (count a)))))
+    target))
+
 (defn- parse-args
   "Takes a seq of 'sh' arguments and returns a map of option keywords
   to option values."
@@ -70,7 +80,7 @@
 
   Options are
 
-  :in    may given followed by a String specifying text to be fed to the 
+  :in    may be given followed by a String specifying text to be fed to the 
          sub-process's stdin.  
   :out   option may be given followed by :bytes or a String. If a String 
          is given, it will be used as a character encoding name (for 
@@ -78,12 +88,17 @@
          sub-process's stdout to a String which is returned.
          If :bytes is given, the sub-process's stdout will be stored in 
          a byte array and returned. 
+  :return-map
+         when followed by boolean true returns a map of
+           :exit => sub-process's exit code
+           :out  => sub-process's stdout (as byte[] or String)
+           :err  => sub-process's stderr (as byte[] or String)
   :env   override the process env with a map (or the underlying Java
          String[] if you are masochist).
   :dir   override the process dir with a String or java.io.File.
 
   You can bind :env or :dir for multiple operations using with-sh-env
-  end with-sh-dir."
+  and with-sh-dir."
   [& args]
   (let [opts (parse-args args)
         proc (.exec (Runtime/getRuntime) 
@@ -96,15 +111,19 @@
         (.write osw (:in opts))))
     (let [stdout (.getInputStream proc)
           stderr (.getErrorStream proc)
-          rtn (if (= (:out opts) :bytes)
-                (into-array Byte/TYPE (map byte (concat (stream-seq stdout)
-                                                        (stream-seq stderr))))
-                (let [isr-out (InputStreamReader. stdout (:out opts))
-                      isr-err (InputStreamReader. stderr (:out opts))]
-                  (apply str (map char (concat (stream-seq isr-out)
-                                               (stream-seq isr-err))))))]
-      (.waitFor proc)
-      rtn)))
+          [[out err] combine-fn]
+            (if (= (:out opts) :bytes)
+              [(for [strm [stdout stderr]]
+                (into-array Byte/TYPE (map byte (stream-seq strm))))
+               #(aconcat Byte/TYPE %1 %2)]
+              [(for [strm [stdout stderr]]
+                (apply str (map char (stream-seq 
+                                       (InputStreamReader. strm (:out opts))))))
+                 str])
+           exit-code  (.waitFor proc)]
+      (if (:return-map opts)
+        {:exit exit-code :out out :err err}
+        (combine-fn out err)))))
 
 (comment
 
