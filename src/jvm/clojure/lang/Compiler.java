@@ -4525,10 +4525,12 @@ static public void writeClassFile(String internalName, byte[] bytecode) throws E
 	String path = genPath + File.separator + internalName + ".class";
 	File cf = new File(path);
 	cf.createNewFile();
-	OutputStream cfs = new FileOutputStream(cf);
+	FileOutputStream cfs = new FileOutputStream(cf);
 	try
 		{
 		cfs.write(bytecode);
+        cfs.flush();
+        cfs.getFD().sync();
 		}
 	finally
 		{
