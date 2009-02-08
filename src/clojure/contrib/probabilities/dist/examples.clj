@@ -64,14 +64,14 @@
 ; Using an ordinary counter:
 (def dist1
   (normalize
-    (clojure.contrib.accumulators/add-coll
+    (clojure.contrib.accumulators/add-items
       clojure.contrib.accumulators/empty-counter
       (for [_ (range 1000)] (rand-int 5)))))
 
 ; Or, more efficiently, using a counter that already keeps track of its total:
 (def dist2
   (normalize
-    (clojure.contrib.accumulators/add-coll
+    (clojure.contrib.accumulators/add-items
       clojure.contrib.accumulators/empty-counter-with-total
       (for [_ (range 1000)] (rand-int 5)))))
 

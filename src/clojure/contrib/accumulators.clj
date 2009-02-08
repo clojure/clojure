@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated January 22, 2009
+;; last updated February 3, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -34,8 +34,8 @@
      :arglists '([acc item])}
   add selector)
 
-(defn add-coll
-  "Add all elements of the collection coll to the accumulator acc."
+(defn add-items
+  "Add all elements of a collection coll to the accumulator acc."
   [acc items]
   (reduce add acc items))
 
@@ -71,6 +71,20 @@
   (apply concat vs))
 
 (defmethod add clojure.lang.IPersistentList
+  [v e]
+  (conj v e))
+
+;
+; Queue accumulator
+;
+(defvar empty-queue clojure.lang.PersistentQueue/EMPTY
+  "An empty queue accumulator. Adding an item appends it at the end.")
+
+(defmethod combine clojure.lang.PersistentQueue
+  [& vs]
+  (add-items (first vs) (apply concat (rest vs))))
+
+(defmethod add clojure.lang.PersistentQueue
   [v e]
   (conj v e))
 
