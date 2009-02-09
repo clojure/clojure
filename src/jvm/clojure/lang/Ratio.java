@@ -13,6 +13,8 @@
 package clojure.lang;
 
 import java.math.BigInteger;
+import java.math.BigDecimal;
+import java.math.MathContext;
 
 public class Ratio extends Number implements Comparable{
 final public BigInteger numerator;
@@ -51,7 +53,18 @@ public float floatValue(){
 }
 
 public double doubleValue(){
-	return numerator.doubleValue() / denominator.doubleValue();
+	return decimalValue(MathContext.DECIMAL64).doubleValue();
+}
+
+public BigDecimal decimalValue(){
+	return decimalValue(MathContext.UNLIMITED);
+}
+
+public BigDecimal decimalValue(MathContext mc){
+	BigDecimal numerator = new BigDecimal(this.numerator);
+	BigDecimal denominator = new BigDecimal(this.denominator);
+
+	return numerator.divide(denominator, mc);
 }
 
 public int compareTo(Object o){
