@@ -26,14 +26,14 @@ public class Atom extends ARef{
         this.state = new AtomicReference(state);
     }
 
-    public Object get() {
+    public Object deref() {
         return state.get();
     }
 
     public Object swap(IFn f) throws Exception {
         for(;;)
             {
-            Object v = get();
+            Object v = deref();
             Object newv = f.invoke(v);
             validate(newv);
             if(state.compareAndSet(v,newv))
@@ -48,7 +48,7 @@ public class Atom extends ARef{
     public Object swap(IFn f, Object arg) throws Exception {
         for(;;)
             {
-            Object v = get();
+            Object v = deref();
             Object newv = f.invoke(v,arg);
             validate(newv);
             if(state.compareAndSet(v,newv))
@@ -63,7 +63,7 @@ public class Atom extends ARef{
     public Object swap(IFn f, Object arg1, Object arg2) throws Exception {
         for(;;)
             {
-            Object v = get();
+            Object v = deref();
             Object newv = f.invoke(v, arg1, arg2);
             validate(newv);
             if(state.compareAndSet(v,newv))
@@ -78,7 +78,7 @@ public class Atom extends ARef{
     public Object swap(IFn f, Object x, Object y, ISeq args) throws Exception {
         for(;;)
             {
-            Object v = get();
+            Object v = deref();
             Object newv = f.applyTo(RT.listStar(v, x, y, args));
             validate(newv);
             if(state.compareAndSet(v,newv))

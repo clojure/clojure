@@ -90,6 +90,7 @@ static
 	dispatchMacros['='] = new EvalReader();
 	dispatchMacros['!'] = new CommentReader();
 	dispatchMacros['<'] = new UnreadableReader();
+	dispatchMacros['_'] = new DiscardReader();
 	}
 
 static boolean isWhitespace(int ch){
@@ -466,6 +467,14 @@ public static class CommentReader extends AFn{
 
 }
 
+public static class DiscardReader extends AFn{
+	public Object invoke(Object reader, Object underscore) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		read(r, true, null, true);
+		return r;
+	}
+}
+
 public static class WrappingReader extends AFn{
 	final Symbol sym;
 
@@ -538,7 +547,7 @@ static Symbol garg(int n){
 public static class FnReader extends AFn{
 	public Object invoke(Object reader, Object lparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		if(ARG_ENV.get() != null)
+		if(ARG_ENV.deref() != null)
 			throw new IllegalStateException("Nested #()s are not allowed");
 		try
 			{
@@ -548,7 +557,7 @@ public static class FnReader extends AFn{
 			Object form = read(r, true, null, true);
 
 			PersistentVector args = PersistentVector.EMPTY;
-			PersistentTreeMap argsyms = (PersistentTreeMap) ARG_ENV.get();
+			PersistentTreeMap argsyms = (PersistentTreeMap) ARG_ENV.deref();
 			ISeq rargs = argsyms.rseq();
 			if(rargs != null)
 				{
@@ -580,7 +589,7 @@ public static class FnReader extends AFn{
 }
 
 static Symbol registerArg(int n){
-	PersistentTreeMap argsyms = (PersistentTreeMap) ARG_ENV.get();
+	PersistentTreeMap argsyms = (PersistentTreeMap) ARG_ENV.deref();
 	if(argsyms == null)
 		{
 		throw new IllegalStateException("arg literal not in #()");
@@ -669,7 +678,7 @@ public static class SyntaxQuoteReader extends AFn{
 			Symbol sym = (Symbol) form;
 			if(sym.ns == null && sym.name.endsWith("#"))
 				{
-				IPersistentMap gmap = (IPersistentMap) GENSYM_ENV.get();
+				IPersistentMap gmap = (IPersistentMap) GENSYM_ENV.deref();
 				if(gmap == null)
 					throw new IllegalStateException("Gensym literal not in syntax-quote");
 				Symbol gs = (Symbol) gmap.valAt(sym);

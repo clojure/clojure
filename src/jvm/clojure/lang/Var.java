@@ -128,6 +128,10 @@ public boolean isBound(){
 }
 
 final public Object get(){
+	return deref();
+}
+
+final public Object deref(){
 	Box b = getThreadBinding();
 	if(b != null)
 		return b.val;
@@ -143,7 +147,7 @@ public void setValidator(IFn vf){
 }
 
 public Object alter(IFn fn, ISeq args) throws Exception{
-	set(fn.applyTo(RT.cons(get(), args)));
+	set(fn.applyTo(RT.cons(deref(), args)));
 	return this;
 }
 
@@ -310,7 +314,7 @@ final Box getThreadBinding(){
 }
 
 final public IFn fn(){
-	return (IFn) get();
+	return (IFn) deref();
 }
 
 public Object call() throws Exception{

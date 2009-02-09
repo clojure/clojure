@@ -28,8 +28,8 @@ private static final Var compile = RT.var("clojure.core", "compile");
 
 public static void main(String[] args) throws Exception{
 
-	OutputStreamWriter out = (OutputStreamWriter) RT.OUT.get();
-	PrintWriter err = (PrintWriter) RT.ERR.get();
+	OutputStreamWriter out = (OutputStreamWriter) RT.OUT.deref();
+	PrintWriter err = (PrintWriter) RT.ERR.deref();
 	String path = System.getProperty(PATH_PROP);
 	int count = args.length;
 

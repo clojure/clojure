@@ -88,12 +88,12 @@ private boolean dominates(Object x, Object y) throws Exception{
 
 private IPersistentMap resetCache(){
 	methodCache = getMethodTable();
-	cachedHierarchy = hierarchy.get();
+	cachedHierarchy = hierarchy.deref();
 	return methodCache;
 }
 
 synchronized private IFn getFn(Object dispatchVal) throws Exception{
-	if(cachedHierarchy != hierarchy.get())
+	if(cachedHierarchy != hierarchy.deref())
 		resetCache();
 	IFn targetFn = (IFn) methodCache.valAt(dispatchVal);
 	if(targetFn != null)
@@ -126,7 +126,7 @@ private IFn findAndCacheBestMethod(Object dispatchVal) throws Exception{
 	if(bestEntry == null)
 		return null;
 	//ensure basis has stayed stable throughout, else redo
-	if(cachedHierarchy == hierarchy.get())
+	if(cachedHierarchy == hierarchy.deref())
 		{
 		//place in cache
 		methodCache = methodCache.assoc(dispatchVal, bestEntry.getValue());

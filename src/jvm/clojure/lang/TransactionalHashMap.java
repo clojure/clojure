@@ -19,7 +19,7 @@ public class TransactionalHashMap<K, V> extends AbstractMap<K, V> implements Con
 final Ref[] bins;
 
 IPersistentMap mapAt(int bin){
-	return (IPersistentMap) bins[bin].get();
+	return (IPersistentMap) bins[bin].deref();
 }
 
 final int binFor(Object k){
@@ -76,7 +76,7 @@ public V get(Object k){
 
 public V put(K k, V v){
 	Ref r = bins[binFor(k)];
-	IPersistentMap map = (IPersistentMap) r.get();
+	IPersistentMap map = (IPersistentMap) r.deref();
 	Object ret = map.valAt(k);
 	r.set(map.assoc(k, v));
 	return (V) ret;
@@ -84,7 +84,7 @@ public V put(K k, V v){
 
 public V remove(Object k){
 	Ref r = bins[binFor(k)];
-	IPersistentMap map = (IPersistentMap) r.get();
+	IPersistentMap map = (IPersistentMap) r.deref();
 	Object ret = map.valAt(k);
 	//checked exceptions are a bad idea, especially in an interface
 	try
@@ -110,7 +110,7 @@ public void clear(){
 	for(int i = 0; i < bins.length; i++)
 		{
 		Ref r = bins[i];
-		IPersistentMap map = (IPersistentMap) r.get();
+		IPersistentMap map = (IPersistentMap) r.deref();
 		if(map.count() > 0)
 			{
 			r.set(PersistentHashMap.EMPTY);
@@ -139,7 +139,7 @@ public Set<Entry<K, V>> entrySet(){
 
 public V putIfAbsent(K k, V v){
 	Ref r = bins[binFor(k)];
-	IPersistentMap map = (IPersistentMap) r.get();
+	IPersistentMap map = (IPersistentMap) r.deref();
 	Entry e = map.entryAt(k);
 	if(e == null)
 		{
@@ -152,7 +152,7 @@ public V putIfAbsent(K k, V v){
 
 public boolean remove(Object k, Object v){
 	Ref r = bins[binFor(k)];
-	IPersistentMap map = (IPersistentMap) r.get();
+	IPersistentMap map = (IPersistentMap) r.deref();
 	Entry e = map.entryAt(k);
 	if(e != null && e.getValue().equals(v))
 		{
@@ -172,7 +172,7 @@ public boolean remove(Object k, Object v){
 
 public boolean replace(K k, V oldv, V newv){
 	Ref r = bins[binFor(k)];
-	IPersistentMap map = (IPersistentMap) r.get();
+	IPersistentMap map = (IPersistentMap) r.deref();
 	Entry e = map.entryAt(k);
 	if(e != null && e.getValue().equals(oldv))
 		{
@@ -184,7 +184,7 @@ public boolean replace(K k, V oldv, V newv){
 
 public V replace(K k, V v){
 	Ref r = bins[binFor(k)];
-	IPersistentMap map = (IPersistentMap) r.get();
+	IPersistentMap map = (IPersistentMap) r.deref();
 	Entry e = map.entryAt(k);
 	if(e != null)
 		{

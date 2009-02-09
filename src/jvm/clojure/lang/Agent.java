@@ -123,7 +123,7 @@ boolean setState(Object newState) throws Exception{
 	return ret;
 }
 
-public Object get() throws Exception{
+public Object deref() throws Exception{
 	if(errors != null)
 		{
 		throw new Exception("Agent has errors", (Exception) RT.first(errors));

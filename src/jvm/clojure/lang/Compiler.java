@@ -361,9 +361,9 @@ static class DefExpr implements Expr{
 					throw new Exception("Can't create defs outside of current ns");
 				}
 			IPersistentMap mm = sym.meta();
-			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, SOURCE.get());
+			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.deref()).assoc(RT.FILE_KEY, SOURCE.deref());
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
-			return new DefExpr((String) SOURCE.get(), (Integer) LINE.get(),
+			return new DefExpr((String) SOURCE.deref(), (Integer) LINE.deref(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
 			                   meta, RT.count(form) == 3);
 		}
@@ -420,7 +420,7 @@ public static class VarExpr implements Expr, AssignableExpr{
 	}
 
 	public Object eval() throws Exception{
-		return var.get();
+		return var.deref();
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -723,8 +723,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				throw new IllegalArgumentException("Malformed member expression, expecting (. target member ...)");
 			//determine static or instance
 			//static target must be symbol, either fully.qualified.Classname or Classname that has been imported
-			int line = (Integer) LINE.get();
-			String source = (String) SOURCE.get();
+			int line = (Integer) LINE.deref();
+			String source = (String) SOURCE.deref();
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -860,9 +860,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.field = targetClass != null ? Reflector.getField(targetClass, fieldName, false) : null;
 		this.fieldName = fieldName;
 		this.line = line;
-		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
+		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.get())
+			((PrintWriter) RT.ERR.deref())
 					.format("Reflection warning, line: %d - reference to field %s can't be resolved.\n", line,
 					        fieldName);
 			}
@@ -1063,7 +1063,7 @@ static abstract class MethodExpr extends HostExpr{
 			catch(Exception e1)
 				{
 				e1.printStackTrace((PrintWriter) RT.ERR
-						.get());  //To change body of catch statement use File | Settings | File Templates.
+						.deref());  //To change body of catch statement use File | Settings | File Templates.
 				}
 
 			}
@@ -1123,9 +1123,9 @@ static class InstanceMethodExpr extends MethodExpr{
 		else
 			method = null;
 
-		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.get())
+			((PrintWriter) RT.ERR.deref())
 					.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
 	}
@@ -1165,7 +1165,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
@@ -1189,7 +1189,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
@@ -1207,7 +1207,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			emitArgsAsArray(args, fn, gen);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
@@ -1264,9 +1264,9 @@ static class StaticMethodExpr extends MethodExpr{
 			methodidx = getMatchingParams(methodName, params, args,rets);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
-		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.get())
+			((PrintWriter) RT.ERR.deref())
 					.format("Reflection warning, line: %d - call to %s can't be resolved.\n", line, methodName);
 			}
 	}
@@ -1302,7 +1302,7 @@ static class StaticMethodExpr extends MethodExpr{
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Type type = Type.getType(c);
@@ -1321,7 +1321,7 @@ static class StaticMethodExpr extends MethodExpr{
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Type type = Type.getType(c);
@@ -1337,7 +1337,7 @@ static class StaticMethodExpr extends MethodExpr{
 			emitArgsAsArray(args, fn, gen);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
@@ -1828,8 +1828,8 @@ public static class TryExpr implements Expr{
 						if(sym.getNamespace() != null)
 							throw new Exception("Can't bind qualified name:" + sym);
 
-						IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
-						                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get(),
+						IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
+						                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref(),
 						                                        IN_CATCH_FINALLY, RT.T);
 						try
 							{
@@ -2095,9 +2095,9 @@ public static class NewExpr implements Expr{
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
-		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.get()))
+		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.get())
+			((PrintWriter) RT.ERR.deref())
 					.format("Reflection warning, line: %d - call to %s ctor can't be resolved.\n", line, c.getName());
 			}
 	}
@@ -2122,7 +2122,7 @@ public static class NewExpr implements Expr{
 			MethodExpr.emitTypedArgs(fn, gen, ctor.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeConstructor(type, new Method("<init>", Type.getConstructorDescriptor(ctor)));
@@ -2134,7 +2134,7 @@ public static class NewExpr implements Expr{
 			MethodExpr.emitArgsAsArray(args, fn, gen);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.get();
+				FnMethod method = (FnMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
@@ -2153,7 +2153,7 @@ public static class NewExpr implements Expr{
 
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
-			int line = (Integer) LINE.get();
+			int line = (Integer) LINE.deref();
 			ISeq form = (ISeq) frm;
 			//(new Classname args...)
 			if(form.count() < 2)
@@ -2396,7 +2396,7 @@ public static class IfExpr implements Expr{
 				throw new Exception("Too many arguments to if");
 			else if(form.count() < 3)
 				throw new Exception("Too few arguments to if");
-			return new IfExpr((Integer) LINE.get(),
+			return new IfExpr((Integer) LINE.deref(),
 			                  analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form)),
 			                  analyze(context, RT.third(form)),
 			                  analyze(context, RT.fourth(form)));
@@ -2724,7 +2724,7 @@ static class InvokeExpr implements Expr{
 
 		if(context == C.RETURN)
 			{
-			FnMethod method = (FnMethod) METHOD.get();
+			FnMethod method = (FnMethod) METHOD.deref();
 			method.emitClearLocals(gen);
 			}
 
@@ -2755,7 +2755,7 @@ static class InvokeExpr implements Expr{
 //			throw new IllegalArgumentException(
 //					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 
-		return new InvokeExpr((String) SOURCE.get(), (Integer) LINE.get(), tagOf(form), fexpr, args);
+		return new InvokeExpr((String) SOURCE.deref(), (Integer) LINE.deref(), tagOf(form), fexpr, args);
 	}
 }
 
@@ -2897,7 +2897,7 @@ static public class FnExpr implements Expr{
 
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr(tagOf(form));
-		FnMethod enclosingMethod = (FnMethod) METHOD.get();
+		FnMethod enclosingMethod = (FnMethod) METHOD.deref();
 		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
 		                  (enclosingMethod.fn.name + "$")
@@ -2929,7 +2929,7 @@ static public class FnExpr implements Expr{
 			//turn former into latter
 			if(RT.second(form) instanceof IPersistentVector)
 				form = RT.list(FN, RT.rest(form));
-			fn.line = (Integer) LINE.get();
+			fn.line = (Integer) LINE.deref();
 			FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
 			FnMethod variadicMethod = null;
 			for(ISeq s = RT.rest(form); s != null; s = RT.rest(s))
@@ -2964,9 +2964,9 @@ static public class FnExpr implements Expr{
 
 			fn.methods = methods;
 			fn.variadicMethod = variadicMethod;
-			fn.keywords = (IPersistentMap) KEYWORDS.get();
-			fn.vars = (IPersistentMap) VARS.get();
-			fn.constants = (PersistentVector) CONSTANTS.get();
+			fn.keywords = (IPersistentMap) KEYWORDS.deref();
+			fn.vars = (IPersistentMap) VARS.deref();
+			fn.constants = (PersistentVector) CONSTANTS.deref();
 			fn.constantsID = RT.nextID();
 //			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
 //			loader.registerConstants(fn.constantsID, fn.constants.toArray());
@@ -3013,11 +3013,11 @@ static public class FnExpr implements Expr{
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,
 		         isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction", null);
-		String source = (String) SOURCE.get();
-		int lineBefore = (Integer) LINE_BEFORE.get();
-		int lineAfter = (Integer) LINE_AFTER.get() + 1;
+		String source = (String) SOURCE.deref();
+		int lineBefore = (Integer) LINE_BEFORE.deref();
+		int lineAfter = (Integer) LINE_AFTER.deref() + 1;
 
-		if(source != null && SOURCE_PATH.get() != null)
+		if(source != null && SOURCE_PATH.deref() != null)
 			{
 		//cv.visitSource(source, null);
 			String smap = "SMAP\n" +
@@ -3029,7 +3029,7 @@ static public class FnExpr implements Expr{
 			              "*S Clojure\n" +
 			              "*F\n" +
 			              "+ 1 " + source + "\n" +
-			              (String) SOURCE_PATH.get() + "\n" +
+			              (String) SOURCE_PATH.deref() + "\n" +
 			              "*L\n" +
 			              String.format("%d#1,%d:%d\n", lineBefore, lineAfter - lineBefore, lineBefore) +
 			              "*E";
@@ -3160,7 +3160,7 @@ static public class FnExpr implements Expr{
 		cv.visitEnd();
 
 		bytecode = cw.toByteArray();
-		if(RT.booleanCast(COMPILE_FILES.get()))
+		if(RT.booleanCast(COMPILE_FILES.deref()))
 			writeClassFile(internalName,bytecode);
 //		else
 //			getCompiledClass();
@@ -3215,11 +3215,11 @@ static public class FnExpr implements Expr{
 		if(compiledClass == null)
 			try
 				{
-				if(RT.booleanCast(COMPILE_FILES.get()))
+				if(RT.booleanCast(COMPILE_FILES.deref()))
 					compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
 				else
 					{
-					loader = (DynamicClassLoader) LOADER.get();
+					loader = (DynamicClassLoader) LOADER.deref();
 					compiledClass = loader.defineClass(name, bytecode);
 					}
 				}
@@ -3417,13 +3417,13 @@ public static class FnMethod{
 		ISeq body = RT.rest(form);
 		try
 			{
-			FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
-			method.line = (Integer) LINE.get();
+			FnMethod method = new FnMethod(fn, (FnMethod) METHOD.deref());
+			method.line = (Integer) LINE.deref();
 			//register as the current method and set up a new env frame
 			Var.pushThreadBindings(
 					RT.map(
 							METHOD, method,
-							LOCAL_ENV, LOCAL_ENV.get(),
+							LOCAL_ENV, LOCAL_ENV.deref(),
 							LOOP_LOCALS, null,
 							NEXT_LOCAL_NUM, 0));
 
@@ -3725,8 +3725,8 @@ public static class LetExpr implements Expr{
 				|| (context == C.EXPRESSION && isLoop))
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
-			IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.get(),
-			                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.get());
+			IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
+			                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref());
 			if(isLoop)
 				dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
 
@@ -3840,7 +3840,7 @@ public static class RecurExpr implements Expr{
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		Label loopLabel = (Label) LOOP_LABEL.get();
+		Label loopLabel = (Label) LOOP_LABEL.deref();
 		if(loopLabel == null)
 			throw new IllegalStateException();
 		for(int i = 0; i < loopLocals.count(); i++)
@@ -3892,10 +3892,10 @@ public static class RecurExpr implements Expr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq form = (ISeq) frm;
-			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
+			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.deref();
 			if(context != C.RETURN || loopLocals == null)
 				throw new UnsupportedOperationException("Can only recur from tail position");
-			if(IN_CATCH_FINALLY.get() != null)
+			if(IN_CATCH_FINALLY.deref() != null)
 				throw new UnsupportedOperationException("Cannot recur from catch/finally");
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
@@ -3914,17 +3914,17 @@ public static class RecurExpr implements Expr{
 private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init) throws Exception{
 	int num = getAndIncLocalNum();
 	LocalBinding b = new LocalBinding(num, sym, tag, init);
-	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
+	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.deref();
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
-	FnMethod method = (FnMethod) METHOD.get();
+	FnMethod method = (FnMethod) METHOD.deref();
 	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
     method.indexlocals = (IPersistentMap) RT.assoc(method.indexlocals, num, b);
 	return b;
 }
 
 private static int getAndIncLocalNum(){
-	int num = ((Number) NEXT_LOCAL_NUM.get()).intValue();
-	FnMethod m = (FnMethod) METHOD.get();
+	int num = ((Number) NEXT_LOCAL_NUM.deref()).intValue();
+	FnMethod m = (FnMethod) METHOD.deref();
 	if(num > m.maxLocal)
 		m.maxLocal = num;
 	NEXT_LOCAL_NUM.set(num + 1);
@@ -3980,7 +3980,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE.get(), (Integer) LINE.get(), e);
+			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
 		else
 			throw (CompilerException) e;
 		}
@@ -4115,7 +4115,7 @@ public static Object macroexpand1(Object x) throws Exception{
 }
 
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
-	Integer line = (Integer) LINE.get();
+	Integer line = (Integer) LINE.deref();
 	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
 		line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
 	Var.pushThreadBindings(
@@ -4143,7 +4143,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE.get(), (Integer) LINE.get(), e);
+			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
 		else
 			throw (CompilerException) e;
 		}
@@ -4183,7 +4183,7 @@ public static Object eval(Object form) throws Exception{
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE.get(), (Integer) LINE.get(), e);
+			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
 		else
 			throw (CompilerException) e;
 		}
@@ -4197,7 +4197,7 @@ public static Object eval(Object form) throws Exception{
 private static int registerConstant(Object o){
 	if(!CONSTANTS.isBound())
 		return -1;
-	PersistentVector v = (PersistentVector) CONSTANTS.get();
+	PersistentVector v = (PersistentVector) CONSTANTS.deref();
     CONSTANTS.set(RT.conj(v, o));
 	return v.count();
 }
@@ -4206,7 +4206,7 @@ private static KeywordExpr registerKeyword(Keyword keyword){
 	if(!KEYWORDS.isBound())
 		return new KeywordExpr(keyword);
 
-	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.get();
+	IPersistentMap keywordsMap = (IPersistentMap) KEYWORDS.deref();
 	Object id = RT.get(keywordsMap, keyword);
 	if(id == null)
 		{
@@ -4236,7 +4236,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 			if(c != null)
 				{
 				if(Reflector.getField(c,sym.name,true)!= null)
-					return new StaticFieldExpr((Integer) LINE.get(), c, sym.name);
+					return new StaticFieldExpr((Integer) LINE.deref(), c, sym.name);
 				}
 			}
 		}
@@ -4315,7 +4315,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) th
 		Object o = n.getMapping(sym);
 		if(o == null)
 			{
-			if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.get()))
+			if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
 				{
 				return sym;
 				}
@@ -4404,7 +4404,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 private static void registerVar(Var var) throws Exception{
 	if(!VARS.isBound())
 		return;
-	IPersistentMap varsMap = (IPersistentMap) VARS.get();
+	IPersistentMap varsMap = (IPersistentMap) VARS.deref();
 	Object id = RT.get(varsMap, var);
 	if(id == null)
 		{
@@ -4415,7 +4415,7 @@ private static void registerVar(Var var) throws Exception{
 }
 
 static Namespace currentNS(){
-	return (Namespace) RT.CURRENT_NS.get();
+	return (Namespace) RT.CURRENT_NS.deref();
 }
 
 static void closeOver(LocalBinding b, FnMethod method){
@@ -4426,7 +4426,7 @@ static void closeOver(LocalBinding b, FnMethod method){
 			method.fn.closes = (IPersistentMap) RT.assoc(method.fn.closes, b, b);
 			closeOver(b, method.parent);
 			}
-		else if(IN_CATCH_FINALLY.get() != null)
+		else if(IN_CATCH_FINALLY.deref() != null)
 			{
 			method.localsUsedInCatchFinally = (PersistentHashSet) method.localsUsedInCatchFinally.cons(b.idx);
 			}
@@ -4437,10 +4437,10 @@ static void closeOver(LocalBinding b, FnMethod method){
 static LocalBinding referenceLocal(Symbol sym) throws Exception{
 	if(!LOCAL_ENV.isBound())
 		return null;
-	LocalBinding b = (LocalBinding) RT.get(LOCAL_ENV.get(), sym);
+	LocalBinding b = (LocalBinding) RT.get(LOCAL_ENV.deref(), sym);
 	if(b != null)
 		{
-		FnMethod method = (FnMethod) METHOD.get();
+		FnMethod method = (FnMethod) METHOD.deref();
 		closeOver(b, method);
 		}
 	return b;
@@ -4485,7 +4485,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 			RT.map(LOADER, RT.makeClassLoader(),
 			       SOURCE_PATH, sourcePath,
 			       SOURCE, sourceName,
-			       RT.CURRENT_NS, RT.CURRENT_NS.get(),
+			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber()
 			));
@@ -4512,7 +4512,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 }
 
 static public void writeClassFile(String internalName, byte[] bytecode) throws Exception{
-	String genPath = (String) COMPILE_PATH.get();
+	String genPath = (String) COMPILE_PATH.deref();
 	if(genPath == null)
 		throw new Exception("*compile-path* not set");
 	String[] dirs = internalName.split("/");
@@ -4544,7 +4544,7 @@ public static void pushNS(){
 }
 
 public static Object compile(Reader rdr, String sourcePath, String sourceName) throws Exception{
-	if(COMPILE_PATH.get() == null)
+	if(COMPILE_PATH.deref() == null)
 		throw new Exception("*compile-path* not set");
 	
 	Object EOF = new Object();
@@ -4555,7 +4555,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 	Var.pushThreadBindings(
 			RT.map(SOURCE_PATH, sourcePath,
 			       SOURCE, sourceName,
-			       RT.CURRENT_NS, RT.CURRENT_NS.get(),
+			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber(),
 			       CONSTANTS, PersistentVector.EMPTY,
@@ -4588,9 +4588,9 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			{
 			LINE_AFTER.set(pushbackReader.getLineNumber());
 			Expr expr = analyze(C.EVAL, r);
-			fn.keywords = (IPersistentMap) KEYWORDS.get();
-			fn.vars = (IPersistentMap) VARS.get();
-			fn.constants = (PersistentVector) CONSTANTS.get();
+			fn.keywords = (IPersistentMap) KEYWORDS.deref();
+			fn.vars = (IPersistentMap) VARS.deref();
+			fn.constants = (PersistentVector) CONSTANTS.deref();
 			expr.emit(C.EXPRESSION, fn, gen);
 			expr.eval();
 			LINE_BEFORE.set(pushbackReader.getLineNumber());

@@ -15,7 +15,6 @@ package clojure.lang;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.UUID;
 
 public class Ref extends ARef implements IFn, Comparable<Ref>, IRef{
     public int compareTo(Ref ref) {
@@ -27,7 +26,7 @@ public class Ref extends ARef implements IFn, Comparable<Ref>, IRef{
             return 1;
     }
 
-    public static class TVal{
+public static class TVal{
 	Object val;
 	long point;
 	long msecs;
@@ -94,7 +93,7 @@ Object currentVal(){
 
 //*
 
-public Object get(){
+public Object deref(){
 	LockingTransaction t = LockingTransaction.getRunning();
 	if(t == null)
 		return currentVal();
@@ -190,7 +189,7 @@ public void trimHistory(){
 
 
 final public IFn fn(){
-	return (IFn) get();
+	return (IFn) deref();
 }
 
 public Object call() throws Exception{

@@ -334,7 +334,7 @@ public static void loadResourceScript(Class c, String name, boolean failIfNotFou
 }
 
 static public void init() throws Exception{
-	((PrintWriter)RT.ERR.get()).println("No need to call RT.init() anymore");
+	((PrintWriter)RT.ERR.deref()).println("No need to call RT.init() anymore");
 }
 
 static public long lastModified(URL url,String libfile) throws Exception{
@@ -389,8 +389,8 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 		try
 			{
 			Var.pushThreadBindings(
-					RT.map(CURRENT_NS, CURRENT_NS.get(),
-					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
+					RT.map(CURRENT_NS, CURRENT_NS.deref(),
+					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
 			loaded = (loadClassForName(scriptbase.replace('/','.') + LOADER_SUFFIX) != null);
 			}
 		finally
@@ -400,7 +400,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 		}
 	if(!loaded && cljURL != null)
 		{
-		if (booleanCast(Compiler.COMPILE_FILES.get()))
+		if (booleanCast(Compiler.COMPILE_FILES.deref()))
 			compile(cljfile);
 		else
 			loadResourceScript(RT.class, cljfile);
@@ -416,8 +416,8 @@ static void doInit() throws Exception{
 	load("clojure/set",false);
 
 	Var.pushThreadBindings(
-			RT.map(CURRENT_NS, CURRENT_NS.get(),
-			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.get()));
+			RT.map(CURRENT_NS, CURRENT_NS.deref(),
+			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
 	try
 		{
 		Symbol USER = Symbol.create("user");
@@ -1193,15 +1193,15 @@ static public Object readString(String s){
 
 static public void print(Object x, Writer w) throws Exception{
 	//call multimethod
-	if(PRINT_INITIALIZED.isBound() && RT.booleanCast(PRINT_INITIALIZED.get()))
+	if(PRINT_INITIALIZED.isBound() && RT.booleanCast(PRINT_INITIALIZED.deref()))
 		PR_ON.invoke(x, w);
 //*
 	else{
-	boolean readably = booleanCast(PRINT_READABLY.get());
+	boolean readably = booleanCast(PRINT_READABLY.deref());
 	if(x instanceof Obj)
 		{
 		Obj o = (Obj) x;
-		if(RT.count(o.meta()) > 0 && readably && booleanCast(PRINT_META.get()))
+		if(RT.count(o.meta()) > 0 && readably && booleanCast(PRINT_META.deref()))
 			{
 			IPersistentMap meta = o.meta();
 			w.write("#^");
@@ -1411,7 +1411,7 @@ static public Object format(Object o, String s, Object... args) throws Exception
 	if(o == null)
 		w = new StringWriter();
 	else if(Util.equals(o, T))
-		w = (Writer) OUT.get();
+		w = (Writer) OUT.deref();
 	else
 		w = (Writer) o;
 	doFormat(w, s, ArraySeq.create(args));
@@ -1495,7 +1495,7 @@ static public ClassLoader makeClassLoader(){
 }
 
 static public ClassLoader baseLoader(){
-	if(booleanCast(USE_CONTEXT_CLASSLOADER.get()))
+	if(booleanCast(USE_CONTEXT_CLASSLOADER.deref()))
 		return Thread.currentThread().getContextClassLoader();
     else if(ROOT_CLASSLOADER != null)
 	    return ROOT_CLASSLOADER;
