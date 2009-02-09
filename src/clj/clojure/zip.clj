@@ -127,12 +127,28 @@
       (when (and path rs)
         (with-meta [r (assoc path :l (conj l node) :r rrest)] ^loc))))
 
+(defn rightmost
+  "Returns the loc of the rightmost sibling of the node at this loc, or self"
+  [loc]
+    (let [[node {l :l r :r :as path}] loc]
+      (if (and path r)
+        (with-meta [(last r) (assoc path :l (apply conj l node (butlast r)) :r nil)] ^loc)
+        loc)))
+
 (defn left
   "Returns the loc of the left sibling of the node at this loc, or nil"
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (when (and path (seq l))
         (with-meta [(peek l) (assoc path :l (pop l) :r (cons node r))] ^loc))))
+
+(defn leftmost
+  "Returns the loc of the leftmost sibling of the node at this loc, or self"
+  [loc]
+    (let [[node {l :l r :r :as path}] loc]
+      (if (and path (seq l))
+        (with-meta [(first l) (assoc path :l [] :r (concat (rest l) [node] r))] ^loc)
+        loc)))
 
 (defn insert-left
   "Inserts the item as the left sibling of the node at this loc,
@@ -190,6 +206,17 @@
            (or (right (up p)) (recur (up p)))
            [(node p) :end])))))
 
+(defn prev
+  "Moves to the previous loc in the hierarchy, depth-first. If already
+  at the root, returns nil."
+  [loc]
+    (if-let [lloc (left loc)]
+      (loop [loc lloc]
+        (if (branch? loc)
+          (recur (-> loc down rightmost))
+          loc))
+      (up loc)))
+
 (defn end?
   "Returns true if loc represents the end of a depth-first walk"
   [loc]
@@ -202,8 +229,11 @@
     (let [[node {l :l, ppath :ppath, pnodes :pnodes, rs :r, :as path}] loc]
       (if (nil? path)
         (throw (new Exception "Remove at top"))
-        (if (pos? (count l)) 
-          (with-meta [(peek l) (assoc path :l (pop l) :changed? true)] ^loc)
+        (if (pos? (count l))
+          (loop [loc (with-meta [(peek l) (assoc path :l (pop l) :changed? true)] ^loc)]
+            (if (branch? loc)
+              (recur (-> loc down rightmost))
+              loc))
           (with-meta [(make-node loc (peek pnodes) rs) 
                       (and ppath (assoc ppath :changed? true))]
                      ^loc)))))

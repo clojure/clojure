@@ -3388,7 +3388,7 @@
        ~@(map process-reference references))))
 
 (defmacro refer-clojure
-  "Same as (refer 'clojure <filters>)"
+  "Same as (refer 'clojure.core <filters>)"
   [& filters]
   `(clojure.core/refer '~'clojure.core ~@filters))
 
