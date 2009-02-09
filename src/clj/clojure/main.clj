@@ -136,7 +136,11 @@
               caught      #(.println *err* (repl-exception %))}}
         (apply hash-map options)]
     (with-bindings
-      (init)
+      (try
+       (init)
+       (catch Throwable e
+	 (caught e)
+	 (set! *e e)))
       (prompt)
       (flush)
       (loop [where (skip-whitespace *in*)]
