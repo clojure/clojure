@@ -26,7 +26,7 @@ static final Symbol QUOTE = Symbol.create("quote");
 static final Symbol THE_VAR = Symbol.create("var");
 //static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
 static Symbol UNQUOTE = Symbol.create("clojure.core", "unquote");
-//static Symbol UNQUOTE_SPLICING = Symbol.create(null, "unquote-splicing");
+static Symbol UNQUOTE_SPLICING = Symbol.create("clojure.core", "unquote-splicing");
 static Symbol CONCAT = Symbol.create("clojure.core", "concat");
 static Symbol LIST = Symbol.create("clojure.core", "list");
 static Symbol APPLY = Symbol.create("clojure.core", "apply");
@@ -704,7 +704,7 @@ public static class SyntaxQuoteReader extends AFn{
 			}
 		else if(isUnquote(form))
 			return RT.second(form);
-		else if(form instanceof UnquoteSplicing)
+		else if(isUnquoteSplicing(form))
 			throw new IllegalStateException("splice not in list");
 		else if(form instanceof IPersistentCollection)
 			{
@@ -757,8 +757,8 @@ public static class SyntaxQuoteReader extends AFn{
 			Object item = seq.first();
 			if(isUnquote(item))
 				ret = ret.cons(RT.list(LIST, RT.second(item)));
-			else if(item instanceof UnquoteSplicing)
-				ret = ret.cons(((UnquoteSplicing) item).o);
+			else if(isUnquoteSplicing(item))
+				ret = ret.cons(RT.second(item));
 			else
 				ret = ret.cons(RT.list(LIST, syntaxQuote(item)));
 			}
@@ -778,13 +778,8 @@ public static class SyntaxQuoteReader extends AFn{
 
 }
 
-
-static class UnquoteSplicing{
-	final Object o;
-
-	public UnquoteSplicing(Object o){
-		this.o = o;
-	}
+static boolean isUnquoteSplicing(Object form){
+	return form instanceof ISeq && RT.first(form).equals(UNQUOTE_SPLICING);
 }
 
 static boolean isUnquote(Object form){
@@ -800,7 +795,7 @@ static class UnquoteReader extends AFn{
 		if(ch == '@')
 			{
 			Object o = read(r, true, null, true);
-			return new UnquoteSplicing(o);
+			return RT.list(UNQUOTE_SPLICING, o);
 			}
 		else
 			{
