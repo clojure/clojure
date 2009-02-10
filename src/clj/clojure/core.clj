@@ -1825,22 +1825,26 @@
 
 (defn short
   "Coerce to short"
-  {:tag Short}
+  {:tag Short
+   :inline (fn  [x] `(. clojure.lang.RT (shortCast ~x)))}
   [#^Number x] (. x (shortValue)))
 
 (defn byte
   "Coerce to byte"
-  {:tag Byte}
+  {:tag Byte
+   :inline (fn  [x] `(. clojure.lang.RT (byteCast ~x)))}
   [#^Number x] (. x (byteValue)))
 
 (defn char
   "Coerce to char"
-  {:tag Character}
+  {:tag Character
+   :inline (fn  [x] `(. clojure.lang.RT (charCast ~x)))}
   [x] (. clojure.lang.RT (charCast x)))
 
 (defn boolean
   "Coerce to boolean"
-  {:tag Boolean}
+  {:tag Boolean
+   :inline (fn  [x] `(. clojure.lang.RT (booleanCast ~x)))}
   [x] (if x true false))
 
 (defn number?
