@@ -1998,7 +1998,7 @@ static class ClassExpr implements Expr{
 }
 */
 
-static boolean subsumes(Class[] c1, Class[] c2){
+static public boolean subsumes(Class[] c1, Class[] c2){
 	//presumes matching lengths
 	Boolean better = false;
 	for(int i = 0; i < c1.length; i++)
@@ -2026,12 +2026,19 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 		{
 		boolean match = true;
 		ISeq aseq = argexprs.seq();
+        int exact = 0;
 		for(int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.rest())
 			{
 			Expr arg = (Expr) aseq.first();
 			Class aclass = arg.hasJavaClass() ? arg.getJavaClass() : Object.class;
-			match = Reflector.paramArgTypeMatch(paramlists.get(i)[p], aclass);
+            Class pclass = paramlists.get(i)[p];
+            if(arg.hasJavaClass() && aclass == pclass)
+                exact++;
+            else
+			    match = Reflector.paramArgTypeMatch(pclass, aclass);
 			}
+        if(exact == argexprs.count())
+            return i;
 		if(match)
 			{
 			if(matchIdx == -1)
