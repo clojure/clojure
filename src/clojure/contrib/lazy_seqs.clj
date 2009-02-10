@@ -26,6 +26,10 @@
 ;;  (permutations and combinations used to be here, but have
 ;;  been moved to combinatorics.clj)
 ;;
+;;  random-permutation - from Jason Wolfe
+;;
+;;  random-element - from Jason Wolfe
+;;
 ;;  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
 ;;  [2] http://clj-me.blogspot.com/2008/06/primes.html
 ;;
@@ -67,26 +71,13 @@
      (iterate inc 0) x)
     (list nil)))
 
+(defn random-permutation
+  "Return a random permutation of coll"
+  [coll]
+  (let [l (java.util.ArrayList. coll)]
+    (java.util.Collections/shuffle l)
+    (seq l)))
 
-;; See combinatorics.clj for faster versions of these functions.
-
-;; (defn permutations
-;;   "Returns a lazy seq of all permutations of a seq"
-;;   [x]
-;;   (if (seq x)
-;;     (mapcat
-;;      (fn [[f & r]]
-;;        (map #(cons f %) (permutations r)))
-;;      (rotations x))
-;;     (list nil)))
-
-;; (defn combinations
-;;   "Returns a lazy seq of all combinations built of one item from each seq given.
-;;    See also (doc for)"
-;;   [& acs]
-;;   (let [step (fn step [head [s & cs :as acs]]
-;;                (if acs
-;;                  (mapcat #(step (conj head %) cs) s)
-;;                  (list head)))]
-;;     (when acs
-;;       (step [] acs))))
+(defn random-element [s]
+  "Return a random element of this seq"
+  (nth s (rand-int (count s))))
