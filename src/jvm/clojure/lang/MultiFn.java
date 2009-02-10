@@ -17,6 +17,7 @@ import java.util.Map;
 public class MultiFn extends AFn{
 final public IFn dispatchFn;
 final public Object defaultDispatchVal;
+final public IRef hierarchy;
 IPersistentMap methodTable;
 IPersistentMap preferTable;
 IPersistentMap methodCache;
@@ -26,14 +27,14 @@ static final Var assoc = RT.var("clojure.core", "assoc");
 static final Var dissoc = RT.var("clojure.core", "dissoc");
 static final Var isa = RT.var("clojure.core", "isa?");
 static final Var parents = RT.var("clojure.core", "parents");
-static final Var hierarchy = RT.var("clojure.core", "global-hierarchy");
 
-public MultiFn(IFn dispatchFn, Object defaultDispatchVal) throws Exception{
+public MultiFn(IFn dispatchFn, Object defaultDispatchVal, IRef hierarchy) throws Exception{
 	this.dispatchFn = dispatchFn;
 	this.defaultDispatchVal = defaultDispatchVal;
 	this.methodTable = PersistentHashMap.EMPTY;
 	this.methodCache = getMethodTable();
 	this.preferTable = PersistentHashMap.EMPTY;
+    this.hierarchy = hierarchy;
 	cachedHierarchy = null;
 }
 
@@ -79,14 +80,14 @@ private boolean prefers(Object x, Object y) throws Exception{
 }
 
 private boolean isA(Object x, Object y) throws Exception{
-	return RT.booleanCast(isa.invoke(x, y));
+    return RT.booleanCast(isa.invoke(hierarchy.deref(), x, y));
 }
 
 private boolean dominates(Object x, Object y) throws Exception{
 	return prefers(x, y) || isA(x, y);
 }
 
-private IPersistentMap resetCache(){
+private IPersistentMap resetCache() throws Exception{
 	methodCache = getMethodTable();
 	cachedHierarchy = hierarchy.deref();
 	return methodCache;

@@ -1011,12 +1011,16 @@
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
 ;;multimethods
+(def global-hierarchy)
+
 (defmacro defmulti
   "Creates a new multimethod with the associated dispatch function.
   The docstring and attribute-map are optional.
 
   Options are key-value pairs and may be one of:
-    :default    the default dispatch value, defaults to :default"
+    :default    the default dispatch value, defaults to :default
+    :hierarchy  the isa? hierarchy to use for dispatching
+                defaults to the global hierarchy"
   {:arglists '([name docstring? attr-map? dispatch-fn & options])}
   [mm-name & options]
   (let [docstring   (if (string? (first options))
@@ -1042,10 +1046,11 @@
                       m)]
     (when (= (count options) 1)
       (throw (Exception. "The syntax for defmulti has changed. Example: (defmulti name dispatch-fn :default dispatch-value)")))
-    (let [options (apply hash-map options)
-          default (get options :default :default)]
+    (let [options   (apply hash-map options)
+          default   (get options :default :default)
+          hierarchy (get options :hierarchy #'global-hierarchy)]
       `(def ~(with-meta mm-name m)
-         (new clojure.lang.MultiFn ~dispatch-fn ~default)))))
+         (new clojure.lang.MultiFn ~dispatch-fn ~default ~hierarchy)))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
