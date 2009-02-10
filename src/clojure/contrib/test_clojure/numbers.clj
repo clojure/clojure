@@ -75,3 +75,50 @@
      (number? v)
      (decimal? v)
      (not (float? v)))))
+
+
+;; *** Number predicates ***
+
+;; pos? zero? neg?
+
+(deftest test-pos?-zero?-neg?
+  (let [nums [[(byte 2) (byte 0) (byte -2)]
+              [(short 3) (short 0) (short -3)]
+              [(int 4) (int 0) (int -4)]
+              [(long 5) (long 0) (long -5)]
+              [(bigint 6) (bigint 0) (bigint -6)]
+              [(float 7) (float 0) (float -7)]
+              [(double 8) (double 0) (double -8)]
+              [(bigdec 9) (bigdec 0) (bigdec -9)]
+              [2/3 0 -2/3]]
+        pred-result [[pos?  [true false false]]
+                     [zero? [false true false]]
+                     [neg?  [false false true]]] ]
+    (doseq [pr pred-result]
+      (doseq [n nums]
+        (is (= (map (first pr) n) (second pr))
+          (pr-str (first pr) n))))))
+
+
+;; even? odd?
+
+(deftest test-even?
+  (are _
+    (even? -4)
+    (not (even? -3))
+    (even? 0)
+    (not (even? 5))
+    (even? 8))
+  (is (thrown? ArithmeticException (even? 1/2)))
+  (is (thrown? ArithmeticException (even? (double 10)))))
+
+(deftest test-odd?
+  (are _
+    (not (odd? -4))
+    (odd? -3)
+    (not (odd? 0))
+    (odd? 5)
+    (not (odd? 8)))
+  (is (thrown? ArithmeticException (odd? 1/2)))
+  (is (thrown? ArithmeticException (odd? (double 10)))))
+

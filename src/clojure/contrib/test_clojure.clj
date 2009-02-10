@@ -16,7 +16,7 @@
 (ns clojure.contrib.test-clojure
   (:use clojure.contrib.test-is))
 
-(def tests [:for :reader :printer :numbers :evaluation :sequences])
+(def tests [:for :reader :printer :numbers :evaluation :sequences :predicates])
 
 (defn test-name
   [test]
