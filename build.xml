@@ -82,6 +82,7 @@
       <arg value="clojure.contrib.repl-ln"/>
       <arg value="clojure.contrib.repl-utils"/>
       <arg value="clojure.contrib.seq-utils"/>
+      <arg value="clojure.contrib.set"/>
       <arg value="clojure.contrib.server-socket"/>
       <arg value="clojure.contrib.sql.internal"/>
       <arg value="clojure.contrib.sql"/>

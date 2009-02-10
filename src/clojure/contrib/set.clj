@@ -18,23 +18,27 @@
 (defn subset? 
   "Is set1 a subset of set2?"
   [set1 set2]
+  {:tag Boolean}
   (and (<= (count set1) (count set2))
        (every? set2 set1)))
 
 (defn superset? 
   "Is set1 a superset of set2?"
   [set1 set2]
+  {:tag Boolean}
   (and (>= (count set1) (count set2))
        (every? set1 set2)))
 
 (defn proper-subset? 
   "Is s1 a proper subset of s2?"
   [set1 set2]
+  {:tag Boolean}
   (and (< (count set1) (count set2))
        (every? set2 set1)))
 
 (defn proper-superset? 
   "Is s1 a proper superset of s2?"
   [set1 set2]
+  {:tag Boolean}
   (and (> (count set1) (count set2))
        (every? set1 set2)))
