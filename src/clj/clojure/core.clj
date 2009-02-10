@@ -3909,8 +3909,8 @@
   (let [fut (.submit clojure.lang.Agent/pooledExecutor f)]
     (proxy [clojure.lang.IDeref java.util.concurrent.Future] []
       (deref [] (.get fut))
-      (get [] (.get fut))
-      (get [timeout unit] (.get fut timeout unit))
+      (get ([] (.get fut))
+           ([timeout unit] (.get fut timeout unit)))
       (isCancelled [] (.isCancelled fut))
       (isDone [] (.isDone fut))
       (cancel [interrupt?] (.cancel fut interrupt?)))))
