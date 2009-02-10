@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated January 29, 2009
+;; last updated February 10, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -73,9 +73,19 @@
    [steps expr]
    (when (odd? (count steps))
      (throw (Exception. "Odd number of elements in monad comprehension steps")))
-   (reduce add-monad-step
-     (list 'm-result expr)
-     (reverse (partition 2 steps))))
+   (let [rsteps (reverse (partition 2 steps))
+	 [lr ls] (first rsteps)]
+     (if (= lr expr)
+       ; Optimization: if the result expression is equal to the result
+       ; of the last computation step, we can eliminate an m-bind to
+       ; m-result.
+       (reduce add-monad-step
+	       ls
+	       (rest rsteps))
+       ; The general case.
+       (reduce add-monad-step
+	       (list 'm-result expr)
+	       rsteps))))
 
 (defmacro with-monad
    "Evaluates an expression after replacing the keywords defining the
@@ -278,11 +288,11 @@
   "Monad describing computations in continuation-passing style. The monadic
    values are functions that are called with a single argument representing
    the continuation of the computation, to which they pass their result."
-  [m-result   (fn [v]
+  [m-result   (fn m-result-cont [v]
 		(fn [c] (c v)))
-   m-bind     (fn [mv f]
+   m-bind     (fn m-bind-cont [mv f]
 		(fn [c]
-		  (mv (fn [a] ((f a) c)))))
+		  (mv (fn [v] ((f v) c)))))
    ])
 
 (defn run-cont
