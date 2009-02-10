@@ -275,3 +275,19 @@
     #{1 2}
     "abc"
     (into-array [1 2])))
+
+
+;; pmap
+;;
+(deftest pmap-does-its-thing
+  ;; regression fixed in r1218; was OutOfMemoryError
+  (is (= '(1) (pmap inc [0]))))
+
+
+;; equality
+;;
+(deftest vectors-equal-other-seqs-by-items-equality
+  ;; regression fixed in r1208; was not equal
+  (is (= '() []))
+
+  (is (= '(1) [1])))
