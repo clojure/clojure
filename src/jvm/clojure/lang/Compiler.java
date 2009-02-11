@@ -2093,7 +2093,7 @@ public static class NewExpr implements Expr{
 				}
 			}
 		if(ctors.isEmpty())
-			throw new IllegalArgumentException("No matching ctor found");
+			throw new IllegalArgumentException("No matching ctor found for " + c);
 
 		int ctoridx = 0;
 		if(ctors.size() > 1)
