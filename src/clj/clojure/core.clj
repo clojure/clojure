@@ -1331,7 +1331,7 @@
   ref. Allows for more concurrency than (ref-set ref @ref)"
   [#^clojure.lang.Ref ref]
     (. ref (touch))
-    (. ref (get)))
+    (. ref (deref)))
 
 (defmacro sync
   "transaction-flags => TBD, pass nil for now
