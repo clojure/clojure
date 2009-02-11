@@ -234,10 +234,10 @@
                             #(identity true))
               prompt      #(clojure.core/print (repl-prompt))
               flush       flush
-              read        read
+              read        clojure.main/repl-read
               eval        eval
               print       prn
-              caught      #(.println *err* (clojure.main/repl-exception %))
+              caught      clojure.main/repl-caught
               name-fmt    (*info* :name-fmt)
               prompt-fmt  (*info* :prompt-fmt)}}
               (apply hash-map options)]
