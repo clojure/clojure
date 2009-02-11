@@ -1,116 +1,74 @@
-<project name="clojure" default="all" xmlns:mvn="urn:maven-artifact-ant">
+<project name="clojure" default="all">
 
-    <description>
-        Build with "ant jar" and then start the REPL with:
-        "java -cp clojure.jar clojure.main" You will need to install the
-        Maven Ant Tasks to ${ant.home}/lib in order to
-        execute the nightly-build or stable-build targets.
-    </description>
+  <description>
+    Build with "ant jar" and then start the REPL with:
+    "java -cp clojure.jar clojure.main"
+  </description>
 
+  <property name="src" location="src"/>
+  <property name="jsrc" location="${src}/jvm"/>
+  <property name="cljsrc" location="${src}/clj"/>
+  <property name="build" location="classes"/>
+  <property name="clojure_jar" location="clojure.jar"/>
+  <property name="slim_jar" location="clojure-slim.jar"/>
 
-    <property name="src" location="src"/>
-    <property name="java.source.dir" location="${src}/jvm"/>
-    <property name="clj.source.dir" location="${src}/clj"/>
+  <target name="init" depends="clean">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
 
-    <property name="target" location="target"/>
+  <target name="compile-java" depends="init"
+          description="Compile Java sources.">
+    <javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes"
+           debug="true" target="1.5"/>
+  </target>
 
-    <property name="classes.dir" location="${target}/classes"/>
+  <target name="compile-clojure" depends="compile-java"
+          description="Compile Clojure sources.">
+    <java classname="clojure.lang.Compile"
+          classpath="${build}:${cljsrc}">
+      <sysproperty key="clojure.compile.path" value="${build}"/>
+      <arg value="clojure.core"/>
+      <arg value="clojure.main"/>
+      <arg value="clojure.set"/>
+      <arg value="clojure.xml"/>
+      <arg value="clojure.zip"/>
+      <arg value="clojure.inspector"/>
+    </java>
+  </target>
 
-    <!-- Normally, I'd put these in ${target} ... -->
+  <target name="clojure" depends="compile-clojure"
+          description="Create clojure jar file.">
+    <jar jarfile="${clojure_jar}" basedir="${build}">
+      <fileset dir="${cljsrc}" includes="**/*.clj"/>
+      <manifest>
+        <attribute name="Main-Class" value="clojure.main"/>
+        <attribute name="Class-Path" value="."/>
+      </manifest>
+    </jar>
+  </target>
 
-    <property name="clojure.jar" location="clojure.jar"/>
-    <property name="clojure.slim.jar" location="clojure-slim.jar"/>
+  <target name="clojure-slim" depends="compile-java"
+          description="Create clojure-slim jar file (omits compiled Clojure code)">
+    <jar jarfile="${slim_jar}">
+      <fileset dir="${build}" includes="clojure/asm/**"/>
+      <fileset dir="${build}" includes="clojure/lang/**"/>
+      <fileset dir="${build}" includes="clojure/main.class"/>
+      <fileset dir="${cljsrc}" includes="**/*.clj"/>
+      <manifest>
+        <attribute name="Main-Class" value="clojure.main"/>
+        <attribute name="Class-Path" value="."/>
+      </manifest>
+    </jar>
+  </target>
 
-    <property name="clojure.sources.jar" location="${target}/clojure-sources.jar"/>
+  <target name="jar" depends="clojure"/>
 
-    <!-- These make sense for building on tapestry.formos.com -->
-
-    <property name="snapshot.repo.dir" location="/var/www/maven-snapshot-repository"/>
-    <property name="stable.repo.dir" location="/var/www/maven-repository"/>
-
-    <target name="init" depends="clean">
-        <tstamp/>
-        <mkdir dir="${classes.dir}"/>
-    </target>
-
-    <target name="compile-java" depends="init"
-            description="Compile Java sources.">
-        <javac srcdir="${java.source.dir}" destdir="${classes.dir}" includeJavaRuntime="yes"
-               debug="true" target="1.5"/>
-    </target>
-
-    <target name="compile-clojure" depends="compile-java"
-            description="Compile Clojure sources.">
-        <java classname="clojure.lang.Compile"
-              classpath="${classes.dir}:${clj.source.dir}">
-            <sysproperty key="clojure.compile.path" value="${classes.dir}"/>
-            <arg value="clojure.core"/>
-            <arg value="clojure.main"/>
-            <arg value="clojure.set"/>
-            <arg value="clojure.xml"/>
-            <arg value="clojure.zip"/>
-            <arg value="clojure.inspector"/>
-        </java>
-    </target>
-
-    <target name="jar" depends="compile-clojure"
-            description="Create binary and source JAR files.">
-        <jar jarfile="${clojure.jar}" basedir="${classes.dir}">
-            <fileset dir="${clj.source.dir}" includes="**/*.clj"/>
-            <manifest>
-                <attribute name="Main-Class" value="clojure.main"/>
-                <attribute name="Class-Path" value="."/>
-            </manifest>
-        </jar>
-
-        <!-- HLS: Complex rules for packaging a JAR (beyond "package this diretory")
-           are a bad design smell for the build.
-           Normally I'd say split the src/jvm folder into two folders:
-           1) common code for both JARS
-           2) extra code for the "fat" (not "slim") JAR
-           ... but that's something to visit later. -->
-        <jar jarfile="${clojure.slim.jar}">
-            <fileset dir="${classes.dir}" includes="clojure/asm/**"/>
-            <fileset dir="${classes.dir}" includes="clojure/lang/**"/>
-            <fileset dir="${classes.dir}" includes="clojure/main.class"/>
-            <fileset dir="${clj.source.dir}" includes="**/*.clj"/>
-            <manifest>
-                <attribute name="Main-Class" value="clojure.main"/>
-                <attribute name="Class-Path" value="."/>
-            </manifest>
-        </jar>
-        
-        <jar jarfile="${clojure.sources.jar}" basedir="${java.source.dir}"/>
-    </target>
-
-    <target name="all" depends="jar"/>
-
-    <target name="clean"
-            description="Remove autogenerated files and directories.">
-        <delete dir="${target}"/>
-        <!-- This leaves clojure.jar and clojure-slim.jar in the current directory! -->
-    </target>
-
-    <macrodef name="deploy">
-        <attribute name="target-dir" description="Root of Maven repository"/>
-        <sequential>
-            <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
-            <mvn:deploy file="${clojure.jar}">
-                <pom file="pom.xml"/>
-                <attach file="${clojure.sources.jar}" classifier="sources"/>
-                <attach file="${clojure.slim.jar}" classifier="slim"/>
-                <remoteRepository url="file:@{target-dir}"/>
-            </mvn:deploy>
-        </sequential>
-    </macrodef>
-
-    <target name="nightly-build" depends="all" description="Build and deploy to nightly (snapshot) repository.">
-        <deploy target-dir="${snapshot.repo.dir}"/>
-    </target>
-
-
-    <target name="stable-build" depends="all" description="Build and deploy to stable repository.">
-        <deploy target-dir="${stable.repo.dir}"/>
-    </target>
+  <target name="all" depends="clojure,clojure-slim"/>
+  
+  <target name="clean"
+          description="Remove autogenerated files and directories.">
+    <delete dir="${build}"/>
+  </target>
 
 </project>
