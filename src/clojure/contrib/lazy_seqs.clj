@@ -23,6 +23,9 @@
 ;;
 ;;  rotations - returns a lazy seq of all the rotations of a seq
 ;;
+;;  partition-all - like built-in partition, but does not throw away
+;;                  the last partition if it is too short 
+;;
 ;;  (permutations and combinations used to be here, but have
 ;;  been moved to combinatorics.clj)
 ;;
@@ -70,6 +73,14 @@
        (lazy-cat (drop n x) (take n x)))
      (iterate inc 0) x)
     (list nil)))
+
+(defn partition-all 
+  "Lazily break s into chunks of length n (or less, for the
+  final chunk)."
+  [n s]
+  (when (seq s)
+    (lazy-cons (take n s)
+               (partition-all n (drop n s)))))
 
 (defn random-permutation
   "Return a random permutation of coll"
