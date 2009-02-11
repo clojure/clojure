@@ -471,7 +471,7 @@ public IStream stream() throws Exception {
 	}
 }
 
-static class RSeq extends ASeq implements IndexedSeq{
+static class RSeq extends ASeq implements IndexedSeq, Counted{
 	final IPersistentVector v;
 	final int i;
 

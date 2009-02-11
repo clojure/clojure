@@ -12,7 +12,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public class PersistentList extends ASeq implements IPersistentList, IReduce, List{
+public class PersistentList extends ASeq implements IPersistentList, IReduce, List, Counted{
 
 private final Object _first;
 private final IPersistentList _rest;
@@ -114,7 +114,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 
 
 
-static class EmptyList extends Obj implements IPersistentList, List{
+static class EmptyList extends Obj implements IPersistentList, List, Counted{
 
 	public int hashCode(){
 		return 1;

@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Range extends ASeq implements IReduce, Streamable{
+public class Range extends ASeq implements IReduce, Streamable, Counted{
 final int end;
 final int n;
 

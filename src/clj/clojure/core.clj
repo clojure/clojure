@@ -3713,6 +3713,10 @@
  "Returns true if coll implements Sorted"
   [coll] (instance? clojure.lang.Sorted coll))
 
+(defn counted?
+ "Returns true if coll implements count in constant time"
+  [coll] (instance? clojure.lang.Counted coll))
+
 (defn reversible?
  "Returns true if coll implements Reversible"
   [coll] (instance? clojure.lang.Reversible coll))

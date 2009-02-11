@@ -37,10 +37,6 @@ public ISeq rest(){
 	return _rest;
 }
 
-public int count(){
-	return 1 + RT.count(_rest);
-}
-
 public ISeq seq(){
 	return this;
 }

@@ -197,7 +197,7 @@ public ISeq seq(){
 	return null;
 }
 
-static class Seq extends ASeq{
+static class Seq extends ASeq implements Counted{
 	final Object[] array;
 	final int i;
 

@@ -98,7 +98,8 @@ public int hashCode(){
 public int count(){
 	int i = 1;
 	for(ISeq s = rest(); s != null; s = s.rest(), i++)
-		;
+		if(s instanceof Counted)
+			return i + s.count();
 	return i;
 }
 

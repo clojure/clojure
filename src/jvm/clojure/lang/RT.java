@@ -508,9 +508,22 @@ static public IPersistentMap meta(Object x){
 public static int count(Object o){
 	if(o == null)
 		return 0;
-	else if(o instanceof IPersistentCollection)
-		return ((IPersistentCollection) o).count();
-	else if(o instanceof String)
+	else if(o instanceof Counted)
+		return ((Counted) o).count();
+    else if(o instanceof IPersistentCollection)
+       {
+       ISeq s = seq(o);
+       o = null;
+       int i = 0;
+       for(;s!=null;s = s.rest())
+           {
+		   if(s instanceof Counted)
+			    return i + s.count();
+           i++;
+           }
+       return i;
+       }
+    else if(o instanceof String)
 		return ((String) o).length();
 	else if(o instanceof Collection)
 		return ((Collection) o).size();
@@ -518,7 +531,8 @@ public static int count(Object o){
 		return ((Map) o).size();
 	else if(o.getClass().isArray())
 		return Array.getLength(o);
-	throw new UnsupportedOperationException("count not supported on this type: " + o.getClass().getSimpleName());
+
+    throw new UnsupportedOperationException("count not supported on this type: " + o.getClass().getSimpleName());
 }
 
 static public IPersistentCollection conj(IPersistentCollection coll, Object x){
