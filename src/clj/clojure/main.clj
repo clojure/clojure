@@ -14,9 +14,6 @@
 
 (declare main)
 
-(def #^{:private true}
-     eof (Object.))
-
 (defmacro with-bindings
   "Executes body in the context of thread-local bindings for several vars
   that often need to be set!: *ns* *warn-on-reflection* *print-meta*
@@ -36,14 +33,10 @@
              *e nil]
      ~@body))
 
-(defn- root-cause
-  "Returns the initial cause of an exception or error by peeling off all of
-  its wrappers"
-  [throwable]
-  (loop [cause throwable]
-    (if-let [cause (.getCause cause)]
-      (recur cause)
-      cause)))
+(defn repl-prompt
+  "Default :prompt hook for repl"
+  []
+  (printf "%s=> " (ns-name *ns*)))
 
 (defn skip-if-eol
   "If the next character on stream s is a newline, skips it, otherwise
@@ -77,6 +70,33 @@
      (or (Character/isWhitespace c) (= c (int \,))) (recur (.read s))
      :else (do (.unread s c) :body))))
 
+(defn repl-read
+  "Default :read hook for repl. Reads from *in* which must either be an
+  instance of LineNumberingPushbackReader or duplicate its behavior of both
+  supporting .unread and collapsing all of CR, LF, and CRLF into a single
+  \\newline. repl-read:
+    - skips whitespace, then
+      - returns request-prompt on start of line, or
+      - returns request-exit on end of stream, or
+      - reads an object from the input stream, then
+        - skips the next input character if it's end of line, then
+        - returns the object."
+  [request-prompt request-exit]
+  (or ({:line-start request-prompt :stream-end request-exit}
+       (skip-whitespace *in*))
+      (let [input (read)]
+        (skip-if-eol *in*)
+        input)))
+
+(defn- root-cause
+  "Returns the initial cause of an exception or error by peeling off all of
+  its wrappers"
+  [throwable]
+  (loop [cause throwable]
+    (if-let [cause (.getCause cause)]
+      (recur cause)
+      cause)))
+
 (defn repl-exception
   "Returns CompilerExceptions in tact, but only the root cause of other
   throwables"
@@ -85,14 +105,21 @@
     throwable
     (root-cause throwable)))
 
-(defn repl
-  "Generic, reusable, read-eval-print loop. Reads from *in* and writes to
-  *out*. *in* must either be an instance of LineNumberingPushbackReader or
-  duplicate its behavior of both supporting .unread and collapsing CR, LF,
-  and CRLF into a single \\newline. Options are sequential keyword-value
-  pairs. Available options and their defaults:
+(defn repl-caught
+  "Default :caught hook for repl"
+  [e]
+  (.println *err* (repl-exception e)))
 
-     - :init, function of no arguments, initialization hook
+(defn repl
+  "Generic, reusable, read-eval-print loop. By default, reads from *in*,
+  writes to *out*, and prints exception summaries to *err*. If you use the
+  default :read hook, *in* must either be an instance of
+  LineNumberingPushbackReader or duplicate its behavior of both supporting
+  .unread and collapsing CR, LF, and CRLF into a single \\newline. Options
+  are sequential keyword-value pairs. Available options and their defaults:
+
+     - :init, function of no arguments, initialization hook called with
+       bindings for set!-able vars in place.
        default: #()
 
      - :need-prompt, function of no arguments, called before each
@@ -103,14 +130,18 @@
                   #(identity true))
 
      - :prompt, function of no arguments, prompts for more input.
-       default: #(printf \"%s=> \" (ns-name *ns*))
+       default: repl-prompt
 
      - :flush, function of no arguments, flushes output
        default: flush
 
-     - :read, function of no arguments, returns the next object read from
-       the input
-       default: read
+     - :read, function of two arguments, reads from *in*:
+         - returns its first argument to request a fresh prompt
+           - depending on need-prompt, this may cause the repl to prompt
+             before reading again
+         - returns its second argument to request an exit from the repl
+         - else returns the next object read from the input stream
+       default: repl-read
 
      - :eval, funtion of one argument, returns the evaluation of its
        argument
@@ -121,46 +152,49 @@
 
      - :caught, function of one argument, a throwable, called when
        read, eval, or print throws an exception or error
-       default: #(.println *err* (repl-exception %))"
+       default: repl-caught"
   [& options]
   (let [{:keys [init need-prompt prompt flush read eval print caught]
          :or {init        #()
               need-prompt (if (instance? LineNumberingPushbackReader *in*)
                             #(.atLineStart *in*)
                             #(identity true))
-              prompt      #(printf "%s=> " (ns-name *ns*))
+              prompt      repl-prompt
               flush       flush
-              read        read
+              read        repl-read
               eval        eval
               print       prn
-              caught      #(.println *err* (repl-exception %))}}
-        (apply hash-map options)]
+              caught      repl-caught}}
+        (apply hash-map options)
+        request-prompt (Object.)
+        request-exit (Object.)
+        read-eval-print
+        (fn []
+          (try
+           (let [input (read request-prompt request-exit)]
+             (or (#{request-prompt request-exit} input)
+                 (let [value (eval input)]
+                   (print value)
+                   (set! *3 *2)
+                   (set! *2 *1)
+                   (set! *1 value))))
+           (catch Throwable e
+             (caught e)
+             (set! *e e))))]
     (with-bindings
-      (try
-       (init)
-       (catch Throwable e
-	 (caught e)
-	 (set! *e e)))
-      (prompt)
-      (flush)
-      (loop [where (skip-whitespace *in*)]
-        (when-not (= where :stream-end)
-          (when (= where :body)
-            (try
-             (let [input (read)]
-               (skip-if-eol *in*)
-               (let [value (eval input)]
-                 (print value)
-                 (set! *3 *2)
-                 (set! *2 *1)
-                 (set! *1 value)))
-             (catch Throwable e
-               (caught e)
-               (set! *e e))))
-          (when (need-prompt)
-            (prompt)
-            (flush))
-          (recur (skip-whitespace *in*)))))))
+     (try
+      (init)
+      (catch Throwable e
+        (caught e)
+        (set! *e e)))
+     (prompt)
+     (flush)
+     (loop []
+       (when-not (= (read-eval-print) request-exit)
+         (when (need-prompt)
+           (prompt)
+           (flush))
+         (recur))))))
 
 (defn load-script
   "Loads Clojure source from a file or resource given its path. Paths
@@ -179,13 +213,14 @@
 (defn- eval-opt
   "Evals expressions in str, prints each non-nil result using prn"
   [str]
-  (with-in-str str
-    (loop [input (read *in* false eof)]
-      (when-not (= input eof)
-        (let [value (eval input)]
-          (when-not (nil? value)
-            (prn value))
-          (recur (read *in* false eof)))))))
+  (let [eof (Object.)]
+    (with-in-str str
+      (loop [input (read *in* false eof)]
+        (when-not (= input eof)
+          (let [value (eval input)]
+            (when-not (nil? value)
+              (prn value))
+            (recur (read *in* false eof))))))))
 
 (defn- init-dispatch
   "Returns the handler associated with an init opt"
