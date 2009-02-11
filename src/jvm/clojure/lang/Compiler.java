@@ -3047,7 +3047,8 @@ static public class FnExpr implements Expr{
 		//static fields for constants
 		for(int i = 0; i < constants.count(); i++)
 			{
-			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, constantName(i), constantType(i).getDescriptor(),
+			cv.visitField(ACC_PUBLIC + ACC_FINAL
+			                + ACC_STATIC, constantName(i), constantType(i).getDescriptor(),
 			              null, null);
 			}
 
@@ -3092,10 +3093,12 @@ static public class FnExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
-				cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
+				cv.visitField(ACC_PUBLIC + ACC_FINAL
+							, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
 				              null, null);
 			else
-				cv.visitField(ACC_PUBLIC + ACC_FINAL, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+				cv.visitField(ACC_PUBLIC + (onceOnly ? 0 : ACC_FINAL)
+						, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 			}
 		//ctor that takes closed-overs and inits base + fields
 //		Method m = new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]);
