@@ -21,9 +21,10 @@
             :evaluation
             :predicates
             :logic
+            :data-structures
             :numbers
-            :for
-            :sequences])
+            :sequences
+            :for])
 
 (defn test-name
   [test]
