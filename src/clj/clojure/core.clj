@@ -417,17 +417,19 @@
   ([x] (lazy-seq x))
   ([x y]
      (lazy-seq
-      (if (seq x)
-        (cons (first x) (concat (more x) y))
-        y)))
+      (let [s (seq x)]
+        (if s
+          (cons (first s) (concat (more s) y))
+          y))))
   ([x y & zs]
      (let [cat (fn cat [xys zs]
                  (lazy-seq
-                  (if (seq xys)
-                    (cons (first xys) (cat (more xys) zs))
-                    (when zs
-                      (cat (first zs) (rest zs))))))]
-       (cat (concat x y) zs))))
+                  (let [xys (seq xys)]
+                    (if xys
+                      (cons (first xys) (cat (more xys) zs))
+                      (when zs
+                        (cat (first zs) (rest zs)))))))]
+           (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1076,6 +1078,37 @@
         (when more
           (list* `assert-args fnname more)))))
 
+(defmacro if-let
+  "bindings => binding-form test
+
+  If test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
+  ([bindings then]
+   `(if-let ~bindings ~then nil))
+  ([bindings then else & oldform]
+   (assert-args if-let
+     (and (vector? bindings) (nil? oldform)) "a vector for its binding"
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
+   (let [form (bindings 0) tst (bindings 1)]
+     `(let [temp# ~tst]
+        (if temp#
+          (let [~form temp#]
+            ~then)
+          ~else)))))
+
+(defmacro when-let
+  "bindings => binding-form test
+
+  When test is true, evaluates body with binding-form bound to the value of test"
+  [bindings & body]
+  (assert-args when-let
+     (vector? bindings) "a vector for its binding"
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
+   (let [form (bindings 0) tst (bindings 1)]
+    `(let [temp# ~tst]
+       (when temp#
+         (let [~form temp#]
+           ~@body)))))
+
 (defmacro binding
   "binding => var-symbol init-expr
 
@@ -1418,23 +1451,26 @@
   f should accept number-of-colls arguments."
   ([f coll]
    (lazy-seq
-    (when (seq coll)
-      (cons (f (first coll)) (map f (more coll))))))
+    (when-let [s (seq coll)]
+      (cons (f (first s)) (map f (more s))))))
   ([f c1 c2]
    (lazy-seq
-    (when (and (seq c1) (seq c2))
-      (cons (f (first c1) (first c2))
-            (map f (more c1) (more c2))))))
+    (let [s1 (seq c1) s2 (seq c2)]
+      (when (and s1 s2)
+        (cons (f (first s1) (first s2))
+              (map f (more s1) (more s2)))))))
   ([f c1 c2 c3]
    (lazy-seq
-    (when (and (seq c1) (seq c2) (seq c3))
-      (cons (f (first c1) (first c2) (first c3))
-        (map f (more c1) (more c2) (more c3))))))
+    (let [s1 (seq c1) s2 (seq c2) s3 (seq c3)]
+      (when (and  s1 s2 s3)
+        (cons (f (first s1) (first s2) (first s3))
+              (map f (more s1) (more s2) (more s3)))))))
   ([f c1 c2 c3 & colls]
    (let [step (fn step [cs]
                  (lazy-seq
-                   (when (every? seq cs)
-                     (cons (map first cs) (step (map more cs))))))]
+                  (let [ss (map seq cs)]
+                    (when (every? identity ss)
+                      (cons (map first ss) (step (map more ss)))))))]
      (map #(apply f %) (step (conj colls c3 c2 c1))))))
 
 (defn mapcat
@@ -1447,11 +1483,11 @@
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   [pred coll]
-  (let [step (fn [pred coll]
-                 (when (seq coll)
-                   (if (pred (first coll))
-                     (clojure.lang.Cons. (first coll) (filter pred (more coll)))
-                     (recur pred (more coll)))))]
+  (let [step (fn [p c]
+                 (when-let [s (seq c)]
+                   (if (p (first s))
+                     (clojure.lang.Cons. (first s) (filter p (more s)))
+                     (recur p (more s)))))]
     (lazy-seq (step pred coll))))
 
 
@@ -1466,24 +1502,27 @@
   there are fewer than n."
   [n coll]
   (lazy-seq
-   (when (and (pos? n) (seq coll))
-      (cons (first coll) (take (dec n) (more coll))))))
+   (when (pos? n) 
+     (when-let [s (seq coll)]
+      (cons (first s) (take (dec n) (more s)))))))
 
 (defn take-while
   "Returns a lazy sequence of successive items from coll while
   (pred item) returns true. pred must be free of side-effects."
   [pred coll]
   (lazy-seq
-   (when (and (seq coll) (pred (first coll)))
-       (cons (first coll) (take-while pred (more coll))))))
+   (when-let [s (seq coll)]
+     (when (pred (first s)))
+       (cons (first s) (take-while pred (more s))))))
 
 (defn drop
   "Returns a lazy sequence of all but the first n items in coll."
   [n coll]
   (let [step (fn [n coll]
-               (if (and (pos? n) (seq coll))
-                 (recur (dec n) (more coll))
-                 (seq coll)))]
+               (let [s (seq coll)]
+                 (if (and (pos? n) s)
+                   (recur (dec n) (more s))
+                   s)))]
     (lazy-seq (step n coll))))
 
 (defn drop-last
@@ -1496,9 +1535,10 @@
   item for which (pred item) returns nil."
   [pred coll]
   (let [step (fn [pred coll]
-               (if (and (seq coll) (pred (first coll)))
-                 (recur pred (more coll))
-                 (seq coll)))]
+               (let [s (seq coll)]
+                 (if (and s (pred (first s)))
+                   (recur pred (more s))
+                   s)))]
     (lazy-seq (step pred coll))))
 
 (defn cycle
@@ -1625,10 +1665,10 @@
      (partition n n coll))
   ([n step coll]
    (lazy-seq
-    (when (seq coll)
-      (let [p (take n coll)]
+    (when-let [s (seq coll)]
+      (let [p (take n s)]
         (when (= n (count p))
-          (cons p (partition n step (drop step coll)))))))))
+          (cons p (partition n step (drop step s)))))))))
 
 ;; evaluation
 
@@ -2374,8 +2414,8 @@
   "Returns a lazy seq of every nth item in coll."
   [n coll]
     (lazy-seq
-     (when (seq coll)
-       (cons (first coll) (take-nth n (drop n coll))))))
+     (when-let [s (seq coll)]
+       (cons (first s) (take-nth n (drop n s))))))
 
 (defn interleave
   "Returns a lazy seq of the first item in each coll, then the second
@@ -2611,17 +2651,18 @@
 		    `(fn ~giter [~gxs]
 			 (lazy-seq
                           (loop [~gxs ~gxs]
-                            (when-first [~(:bind group) ~gxs]
-                               (when ~(or (:while group) true)
-                                 (if ~(or (:when group) true)
-                                   ~(if more-groups
-                                      `(let [iterys# ~(emit more-groups)
-                                             fs# (seq (iterys# ~next-seq))]
-                                         (if fs#
-                                           (concat fs# (~giter (more ~gxs)))
-                                           (recur (more ~gxs))))
-                                      `(cons ~expr (~giter (more ~gxs))))
-                                   (recur (more ~gxs))))))))))]
+                            (let [~gxs (seq ~gxs)]
+                              (when-first [~(:bind group) ~gxs]
+                                (when ~(or (:while group) true)
+                                  (if ~(or (:when group) true)
+                                    ~(if more-groups
+                                       `(let [iterys# ~(emit more-groups)
+                                              fs# (seq (iterys# ~next-seq))]
+                                          (if fs#
+                                            (concat fs# (~giter (more ~gxs)))
+                                            (recur (more ~gxs))))
+                                       `(cons ~expr (~giter (more ~gxs))))
+                                    (recur (more ~gxs)))))))))))]
     `(let [iter# ~(emit (to-groups seq-exprs))]
 	(iter# ~(second seq-exprs))))))
 
@@ -2906,43 +2947,14 @@
     (let [step (fn step [xs seen]
                    (lazy-seq
                     ((fn [[f :as xs] seen]
-                      (when (seq xs)
+                      (when-let [s (seq xs)]
                         (if (seen f) 
-                          (recur (more xs) seen)
-                          (cons f (step (more xs) (conj seen f))))))
+                          (recur (more s) seen)
+                          (cons f (step (more s) (conj seen f))))))
                      xs seen)))]
       (step coll #{})))
 
-(defmacro if-let
-  "bindings => binding-form test
 
-  If test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
-  ([bindings then]
-   `(if-let ~bindings ~then nil))
-  ([bindings then else & oldform]
-   (assert-args if-let
-     (and (vector? bindings) (nil? oldform)) "a vector for its binding"
-     (= 2 (count bindings)) "exactly 2 forms in binding vector")
-   (let [[form tst] bindings]
-     `(let [temp# ~tst]
-        (if temp#
-          (let [~form temp#]
-            ~then)
-          ~else)))))
-
-(defmacro when-let
-  "bindings => binding-form test
-
-  When test is true, evaluates body with binding-form bound to the value of test"
-  [bindings & body]
-  (assert-args when-let
-     (vector? bindings) "a vector for its binding"
-     (= 2 (count bindings)) "exactly 2 forms in binding vector")
-  (let [[form tst] bindings]
-    `(let [temp# ~tst]
-       (when temp#
-         (let [~form temp#]
-           ~@body)))))
 
 (defn replace
   "Given a map of replacement pairs and a vector/collection, returns a
@@ -3740,17 +3752,19 @@
          step (fn step [[x & xs :as s]
                         [a & as :as acycle]]
                   (lazy-seq
-                   (if s
-                     (let [v (wget a)]
-                       (send a (fn [_] (f x)))
-                       (cons v (step xs as)))
-                     (map wget (take (count agents) acycle)))))]
+                   (let [s (seq s)]
+                     (if s
+                       (let [v (wget a)]
+                         (send a (fn [_] (f x)))
+                         (cons v (step xs as)))
+                       (map wget (take (count agents) acycle))))))]
      (step (drop n coll) (cycle agents))))
   ([f coll & colls]
    (let [step (fn step [cs]
                   (lazy-seq
-                   (when (every? seq cs)
-                     (cons (map first cs) (step (map rest cs))))))]
+                   (let [ss (map seq cs)]
+                     (when (every? identity ss)
+                       (cons (map first ss) (step (map rest ss)))))))]
      (pmap #(apply f %) (step (cons coll colls))))))
 
 (def
