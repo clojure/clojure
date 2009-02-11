@@ -290,7 +290,10 @@
                     meths (map (fn [[params & body]]
                                    (cons (apply vector 'this params) body))
                                meths)]
-                (recur (assoc fmap (name sym) (cons `fn meths)) (rest fs)))
+                (if-not (contains? fmap (name sym))		  
+                  (recur (assoc fmap (name sym) (cons `fn meths)) (rest fs))
+		           (throw (IllegalArgumentException.
+			              (str "Method '" (name sym) "' redefined")))))
               fmap)))
         p#)))
 
