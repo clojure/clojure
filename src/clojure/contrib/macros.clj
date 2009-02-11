@@ -19,7 +19,7 @@
   "A variant of let for local function definitions. fn-bindings consists
    of name/args/body triples, with (letfn [name args body] ...)
    being equivalent to (let [name (fn name args body)] ...)."
-  [fn-bindings exprs]
+  [fn-bindings & exprs]
   (let [makefn (fn [[name args body]] (list name (list 'fn name args body)))
 	fns (vec (apply concat (map makefn (partition 3 fn-bindings))))]
-  `(let ~fns ~exprs)))
+  `(let ~fns ~@exprs)))
