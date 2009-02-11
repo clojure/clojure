@@ -63,7 +63,7 @@
      (print-stack-trace tr n)
      (when-let [cause (.getCause tr)]
        (print "Caused by: " )
-       (print-stack-trace cause n))))
+       (recur cause n))))
 
 (defn e
   "REPL utility.  Prints a brief stack trace for the root cause of the
