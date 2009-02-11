@@ -206,6 +206,11 @@
    tests when compiling or loading production code."}
   *load-tests* true)
 
+(def
+ #^{:doc "The maximum depth of stack traces to print when an Exception
+  is thrown during a test.  Defaults to nil, which means print the 
+  complete stack trace."}
+ *stack-trace-depth* nil)
 
 
 ;;; GLOBALS USED BY THE REPORTING FUNCTIONS
@@ -296,7 +301,7 @@
   (println "expected:" (pr-str expected))
   (print "  actual: ")
   (if (instance? Throwable actual)
-    (stack/print-cause-trace actual 5)
+    (stack/print-cause-trace actual *stack-trace-depth*)
     (prn actual)))
 
 
