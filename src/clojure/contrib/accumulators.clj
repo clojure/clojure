@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated February 3, 2009
+;; last updated February 12, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -20,7 +20,7 @@
 
 (ns clojure.contrib.accumulators
   (:use [clojure.contrib.macros :only (letfn)])
-  (:use [clojure.contrib.def :only (defvar defvar- defstruct-)]))
+  (:use [clojure.contrib.def :only (defvar defvar- defmacro-)]))
 
 (defn- selector
   [& vs]
@@ -137,51 +137,46 @@
   (conj v e))
 
 ;
-; Sum accumulator
+; Numerical accumulators: sum, product, minimum, maximum
 ;
-(defstruct- sum :sum)
+(defmacro- defacc
+  [name op empty doc-string]
+  (let [struct-tag (keyword (str name))
+	meta-tag (keyword (str *ns*) (str name))
+	empty-symbol (symbol (str "empty-" name))]
+  `(let [op# ~op
+	 meta-data# {::accumulator ~meta-tag}
+	 struct-basis# (create-struct ~struct-tag)
+	 get-value# (accessor struct-basis# ~struct-tag)
+	 make-fn# (fn [n#] (with-meta (struct struct-basis# n#) meta-data#))]
+     (defvar ~empty-symbol (make-fn# ~empty) ~doc-string)
+     (defmethod combine ~meta-tag [& vs#]
+       (make-fn# (apply op# (map get-value# vs#))))
+     (defmethod add ~meta-tag [v# e#]
+       (make-fn# (op# (get-value# v#) e#))))))
 
-(defvar- get-sum (accessor sum :sum))
-
-(let [sum-tag {::accumulator ::sum}]
-  (defn- make-sum
-    [n]
-    (with-meta (struct sum 0) sum-tag)))
-
-(defvar empty-sum (make-sum 0)
+(defacc sum + 0
   "An empty sum accumulator. Only numbers can be added.")
 
-(defmethod combine ::sum
-  [& vs]
-  (make-sum (apply + (map get-sum vs))))
+(defacc product * 1
+  "An empty sum accumulator. Only numbers can be added.")
 
-(defmethod add ::sum
-  [v e]
-  (make-sum (+ (get-sum v) e)))
+; The empty maximum accumulator should have value -infinity.
+; This is represented by nil and taken into account in an
+; adapted max function. In the minimum accumulator, nil is
+; similarly used to represent +infinity.
 
-;
-; Product accumulator
-;
-(defstruct- product :product)
+(defacc maximum (fn [& xs]
+		  (when-let [xs (filter identity xs)]
+		      (apply max xs)))
+                nil
+  "An empty maximum accumulator. Only numbers can be added.")
 
-(defvar- get-product (accessor product :product))
-
-(let [product-tag {::accumulator ::product}]
-  (defn- make-product
-    [n]
-    (with-meta (struct product n) product-tag)))
-
-(defvar empty-product (make-product 1)
-  "An empty product accumulator. Only numbers can be added. Note that
-   addition means multiplication in this case!")
-
-(defmethod combine ::product
-  [& vs]
-  (make-product (apply * (map get-product vs))))
-
-(defmethod add ::product
-  [v e]
-  (make-product (* (get-product v) e)))
+(defacc minimum (fn [& xs]
+		  (when-let [xs (filter identity xs)]
+		      (apply min xs)))
+                nil
+  "An empty minimum accumulator. Only numbers can be added.")
 
 ;
 ; Counter accumulator
