@@ -75,14 +75,12 @@
     (list nil)))
 
 (defn partition-all 
-  "Lazily break coll into chunks of length n (or less, for the final
-  chunk)."
-  ([n coll]
-     (partition-all n n coll))
-  ([n step coll]
-     (when (seq coll)
-       (lazy-cons (take n coll)
-                  (partition-all n step (drop step coll))))))
+  "Lazily break s into chunks of length n (or less, for the
+  final chunk)."
+  [n s]
+  (when (seq s)
+    (lazy-cons (take n s)
+               (partition-all n (drop n s)))))
 
 (defn random-permutation
   "Return a random permutation of coll"
