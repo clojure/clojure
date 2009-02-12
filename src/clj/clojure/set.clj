@@ -8,20 +8,53 @@
 
 (ns clojure.set)
 
-(defn union
-  "Returns a set that is the union of the two sets."
-  [xset yset]
-    (reduce conj xset yset))
+(defn- bubble-max-key [k coll]
+  "Move a maximal element of coll according to fn k (which returns a number) 
+   to the front of coll."
+  (let [max (apply max-key k coll)]
+    (cons max (remove #(identical? max %) coll))))
 
-(defn difference
-  "Returns a set that is xset without the elements of yset."
-  [xset yset]
-    (reduce disj xset yset))
+(defn union
+  "Return a set that is the union of the input sets"
+  ([] #{})
+  ([s1] s1)
+  ([s1 s2]
+     (if (< (count s1) (count s2))
+       (reduce conj s2 s1)
+       (reduce conj s1 s2)))
+  ([s1 s2 & sets]
+     (let [bubbled-sets (bubble-max-key count (conj sets s2 s1))]
+       (reduce into (first bubbled-sets) (rest bubbled-sets)))))
 
 (defn intersection
-  "Returns a set of the elements present in both xset and yset."
-  [xset yset]
-    (difference xset (difference xset yset)))
+  "Return a set that is the intersection of the input sets"
+  ([s1] s1)
+  ([s1 s2]
+     (if (< (count s2) (count s1))
+       (recur s2 s1)
+       (reduce (fn [result item]
+                   (if (contains? s2 item)
+		     result
+                     (disj result item)))
+	       s1 s1)))
+  ([s1 s2 & sets] 
+     (let [bubbled-sets (bubble-max-key #(- (count %)) (conj sets s2 s1))]
+       (reduce intersection (first bubbled-sets) (rest bubbled-sets)))))
+
+(defn difference
+  "Return a set that is the first set without elements of the remaining sets"
+  ([s1] s1)
+  ([s1 s2] 
+     (if (< (count s1) (count s2))
+       (reduce (fn [result item] 
+                   (if (contains? s2 item) 
+                     (disj result item) 
+                     result))
+               s1 s1)
+       (reduce disj s1 s2)))
+  ([s1 s2 & sets] 
+     (reduce difference s1 (conj sets s2))))
+
 
 (defn select
   "Returns a set of the elements for which pred is true"
