@@ -2913,7 +2913,7 @@
   [coll]
     (let [step (fn step [[f & r :as xs] seen]
                    (when xs
-                     (if (seen f) (recur r seen)
+                     (if (contains? seen f) (recur r seen)
                          (lazy-cons f (step r (conj seen f))))))]
       (step (seq coll) #{})))
 
