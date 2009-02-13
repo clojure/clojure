@@ -53,6 +53,21 @@
       p2 (add-items empty-product [(/ 1 2)])]
   (combine p1 p2))
 
+; Maximum accumulator: combine is max
+(let [m1 (add-items empty-maximum [2 3])
+      m2 (add-items empty-maximum [(/ 1 2)])]
+  (combine m1 m2))
+
+; Minimum accumulator: combine is min
+(let [m1 (add-items empty-minimum [2 3])
+      m2 (add-items empty-minimum [(/ 1 2)])]
+  (combine m1 m2))
+
+; Range accumulator: combination of minimum and maximum
+(let [m1 (add-items empty-range [2 3])
+      m2 (add-items empty-range [(/ 1 2)])]
+  (combine m1 m2))
+
 ; String accumulator: combine is concatenation
 (combine "a" "b" "c" "def")
 (add "a" (char 44))

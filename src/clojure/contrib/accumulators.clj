@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated February 12, 2009
+;; last updated February 13, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -177,6 +177,32 @@
 		      (apply min xs)))
                 nil
   "An empty minimum accumulator. Only numbers can be added.")
+
+;
+; Numeric range accumulator
+; (combination of minimum and maximum)
+;
+(let [range-tag {::accumulator ::range}]
+  (defn- make-range
+    [min max]
+    (with-meta {:minimum min :maximum max} range-tag)))
+
+(defvar empty-range (make-range nil nil)
+  "An empty range accumulator, combining minimum and maximum.
+   Only numbers can be added.")
+
+(defmethod combine ::range
+  [& vs]
+  (let [total-min (apply min (map :minimum vs))
+	total-max (apply max (map :maximum vs))]
+    (make-range total-min total-max)))
+
+(defmethod add ::range
+  [v e]
+  (let [{min-v :minimum max-v :maximum} v
+	new-min (if (nil? min-v) e (min min-v e))
+	new-max (if (nil? max-v) e (max max-v e))]
+    (make-range new-min new-max)))
 
 ;
 ; Counter accumulator
