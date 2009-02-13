@@ -1,7 +1,7 @@
 ;;; json/read.clj: JavaScript Object Notation (JSON) parser
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 26, 2009
+;; February 13, 2009
 
 ;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,8 +12,21 @@
 ;; remove this notice, or any other, from this software.
 
 
+;; Change Log
+;;
+;; February 13, 2009: added custom handler for quoted strings, to
+;; allow escaped forward backslash characters ("\/") in strings.
+;;
+;; January 26, 2009: initial version
+
 
 ;; For more information on JSON, see http://www.json.org/
+;;
+;; This library parses data in JSON format.  This is a fairly strict
+;; implementation of JSON as described at json.org, not a full-fledged
+;; JavaScript parser.  JavaScript functions and object constructors
+;; are not supported.  Object field names must be quoted strings; they
+;; may not be bare symbols.
 
 
 
@@ -63,6 +76,48 @@
                        (throw (Exception. "JSON error (non-string key in object)")))
                      (recur (.read stream) nil (assoc result key element)))))))))
 
+(defn- read-json-hex-character [stream]
+  ;; Expects to be called with the head of the stream AFTER the
+  ;; initial "\u".  Reads the next four characters from the stream.
+  (let [digits [(.read stream)
+                (.read stream)
+                (.read stream)
+                (.read stream)]]
+    (when (some neg? digits)
+      (throw (EOFException. "JSON error (end-of-file inside Unicode character escape)")))
+    (let [chars (map char digits)]
+      (when-not (every? #{\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f \A \B \C \D \E \F}
+                        chars)
+        (throw (Exception. "JSON error (invalid hex character in Unicode character escape)")))
+      (char (Integer/parseInt (apply str chars) 16)))))
+
+(defn- read-json-escaped-character [stream]
+  ;; Expects to be called with the head of the stream AFTER the
+  ;; initial backslash.
+  (let [c (char (.read stream))]
+    (cond
+     (#{\" \\ \/} c) c
+     (= c \b) \backspace
+     (= c \f) \formfeed
+     (= c \n) \newline
+     (= c \r) \return
+     (= c \t) \tab
+     (= c \u) (read-json-hex-character stream))))
+
+(defn- read-json-quoted-string [#^PushbackReader stream]
+  ;; Expects to be called with the head of the stream AFTER the
+  ;; opening quotation mark.
+  (let [buffer (StringBuilder.)]
+    (loop [i (.read stream)]
+      (let [c (char i)]
+        (cond
+         (= i -1) (throw (EOFException. "JSON error (end-of-file inside string)"))
+         (= c \") (str buffer)
+         (= c \\) (do (.append buffer (read-json-escaped-character stream))
+                      (recur (.read stream)))
+         :else (do (.append buffer c)
+                   (recur (.read stream))))))))
+
 (defn read-json
   "Read the next JSON record from stream, which must be an instance of
   java.io.PushbackReader."
@@ -80,10 +135,13 @@
           ;; Ignore whitespace
           (Character/isWhitespace c) (recur (.read stream))
 
-          ;; Read strings, numbers, true, and false with Clojure reader
-          (#{\" \- \0 \1 \2 \3 \4 \5 \6 \7 \8 \9} c)
+          ;; Read numbers, true, and false with Clojure reader
+          (#{\- \0 \1 \2 \3 \4 \5 \6 \7 \8 \9} c)
           (do (.unread stream i)
               (read stream true nil))
+
+          ;; Read strings
+          (= c \") (read-json-quoted-string stream)
 
           ;; Read null as nil
           (= c \n) (let [ull [(char (.read stream))
@@ -139,6 +197,17 @@
 (deftest- can-read-strings
   (is (= "Hello, World!" (read-json-string "\"Hello, World!\""))))
 
+(deftest- handles-escaped-slashes-in-strings
+  (is (= "/foo/bar" (read-json-string "\"\\/foo\\/bar\""))))
+
+(deftest- handles-unicode-escapes
+  (is (= " \u0beb " (read-json-string "\" \\u0bEb \""))))
+
+(deftest- handles-escaped-whitespace
+  (is (= "foo\nbar" (read-json-string "\"foo\\nbar\"")))
+  (is (= "foo\rbar" (read-json-string "\"foo\\rbar\"")))
+  (is (= "foo\tbar" (read-json-string "\"foo\\tbar\""))))
+
 (deftest- can-read-booleans
   (is (= true (read-json-string "true")))
   (is (= false (read-json-string "false"))))
@@ -168,3 +237,4 @@
 
 (deftest- disallows-unclosed-objects
   (is (thrown? Exception (read-json-string "{\"a\":1,  "))))
+
