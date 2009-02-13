@@ -901,6 +901,18 @@ static public int intCast(Object x){
 	return ((Character) x).charValue();
 }
 
+static public int intCast(char x){
+        return x;
+    }
+
+static public int intCast(byte x){
+        return x;
+    }
+
+ static public int intCast(short x){
+        return x;
+    }
+
 static public int intCast(int x){
 	return x;
 }
