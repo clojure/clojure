@@ -1512,8 +1512,8 @@
   [pred coll]
   (lazy-seq
    (when-let [s (seq coll)]
-     (when (pred (first s)))
-       (cons (first s) (take-while pred (more s))))))
+       (when (pred (first s))
+         (cons (first s) (take-while pred (more s)))))))
 
 (defn drop
   "Returns a lazy sequence of all but the first n items in coll."
