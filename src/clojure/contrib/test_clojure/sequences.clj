@@ -15,6 +15,9 @@
 (defn exception []
   (throw (new Exception "Exception which should never occur")))
 
+(defn diff [s1 s2]
+  (seq (reduce disj (set s1) (set s2))))
+
 
 ;; *** Tests ***
 
@@ -35,9 +38,8 @@
     (seq (sorted-set 1 2)) '(1 2)
     (seq (sorted-map :a 1 :b 2)) '([:a 1] [:b 2])
     (seq "abc") '(\a \b \c)
-    (seq (into-array [1 2])) '(1 2)
-  )
-)
+    (seq (into-array [1 2])) '(1 2) ))
+
 
 (deftest test-cons
   (is (thrown? IllegalArgumentException (cons 1 2)))
@@ -59,9 +61,8 @@
     (cons 1 (sorted-set 2 3)) '(1 2 3)
 
     (cons 1 (into-array [])) '(1)
-    (cons 1 (into-array [2 3])) '(1 2 3)
-  )
-)
+    (cons 1 (into-array [2 3])) '(1 2 3) ))
+
 
 (deftest test-first
   (is (thrown? IllegalArgumentException (first)))
@@ -127,9 +128,8 @@
     (first (into-array [1 2 3])) 1
     (first (to-array [nil])) nil
     (first (to-array [1 nil])) 1
-    (first (to-array [nil 2])) nil
-  )
-)
+    (first (to-array [nil 2])) nil ))
+
 
 (deftest test-rest
   (is (thrown? IllegalArgumentException (rest)))
@@ -202,9 +202,8 @@
     (rest (to-array [nil 2])) '(2)
     (rest (to-array [(into-array [])])) nil
     (rest (to-array [(into-array []) nil])) '(nil)
-    (rest (to-array [(into-array []) 2 nil])) '(2 nil)
-  )
-)
+    (rest (to-array [(into-array []) 2 nil])) '(2 nil) ))
+
 
 ;; (ffirst coll) = (first (first coll))
 ;;
@@ -223,9 +222,8 @@
     (ffirst {:a 1}) :a
 
     (ffirst #{}) nil
-    (ffirst #{[1 2]}) 1
-  )
-)
+    (ffirst #{[1 2]}) 1 ))
+
 
 ;; (frest coll) = (first (rest coll)) = (second coll)
 ;;
@@ -248,9 +246,8 @@
 
     (frest #{}) nil
     (frest #{1}) nil
-    (frest (sorted-set 1 2 3 4)) 2
-  )
-)
+    (frest (sorted-set 1 2 3 4)) 2 ))
+
 
 ;; (rfirst coll) = (rest (first coll))
 ;;
@@ -269,9 +266,8 @@
     (rfirst {:a 1}) '(1)
 
     (rfirst #{}) nil
-    (rfirst #{[1 2]}) '(2)
-  )
-)
+    (rfirst #{[1 2]}) '(2) ))
+
 
 ;; (rrest coll) = (rest (rest coll))
 ;;
@@ -298,9 +294,51 @@
     (rrest #{}) nil
     (rrest #{1}) nil
     (rrest (sorted-set 1 2)) nil
-    (rrest (sorted-set 1 2 3 4)) '(3 4)
-  )
-)
+    (rrest (sorted-set 1 2 3 4)) '(3 4) ))
+
+
+; distinct was broken for nil & false:
+;   fixed in rev 1278:
+;   http://code.google.com/p/clojure/source/detail?r=1278
+;
+(deftest test-distinct
+  (are (= _1 _2)
+      (distinct ()) nil
+      (distinct '(1)) '(1)
+      (distinct '(1 2 3)) '(1 2 3)
+      (distinct '(1 2 3 1 1 1)) '(1 2 3)
+      (distinct '(1 1 1 2)) '(1 2)
+      (distinct '(1 2 1 2)) '(1 2)
+
+      (distinct []) nil
+      (distinct [1]) '(1)
+      (distinct [1 2 3]) '(1 2 3)
+      (distinct [1 2 3 1 2 2 1 1]) '(1 2 3)
+      (distinct [1 1 1 2]) '(1 2)
+      (distinct [1 2 1 2]) '(1 2)
+
+      (distinct "") nil
+      (distinct "a") '(\a)
+      (distinct "abc") '(\a \b \c)
+      (distinct "abcabab") '(\a \b \c)
+      (distinct "aaab") '(\a \b)
+      (distinct "abab") '(\a \b) )
+
+  (are (= (distinct [_ _]) [_])   ; (distinct [x x]) = [x]
+      nil
+      false true
+      0 42
+      0.0 3.14
+      2/3
+      0M 1M
+      \c
+      "" "abc"
+      'sym
+      :kw
+      () '(1 2)
+      [] [1 2]
+      {} {:a 1 :b 2}
+      #{} #{1 2} ))
 
 
 (deftest test-interpose
@@ -308,9 +346,8 @@
     (interpose 0 []) nil
     (interpose 0 [1]) '(1)
     (interpose 0 [1 2]) '(1 0 2)
-    (interpose 0 [1 2 3]) '(1 0 2 0 3)
-  )
-)
+    (interpose 0 [1 2 3]) '(1 0 2 0 3) ))
+
 
 (deftest test-interleave
   (are (= _1 _2)
@@ -321,9 +358,8 @@
 
     (interleave [] [3 4]) nil
     (interleave [1 2] []) nil
-    (interleave [] []) nil
-  )
-)
+    (interleave [] []) nil ))
+
 
 (deftest test-concat
   (are (= _1 _2)
@@ -337,9 +373,8 @@
     (concat [1 2] []) '(1 2)
     (concat [] []) nil
 
-    (concat [1 2] [3 4] [5 6]) '(1 2 3 4 5 6)
-  )
-)
+    (concat [1 2] [3 4] [5 6]) '(1 2 3 4 5 6) ))
+
 
 (deftest test-cycle
   (are (= _1 _2)
@@ -348,9 +383,8 @@
     (take 3 (cycle [1])) '(1 1 1)
     (take 5 (cycle [1 2 3])) '(1 2 3 1 2)
 
-    (take 3 (cycle [nil])) '(nil nil nil)
-  )
-)
+    (take 3 (cycle [nil])) '(nil nil nil) ))
+
 
 (deftest test-partition
   (are (= _1 _2)
@@ -369,17 +403,15 @@
 
 ;    (partition 0 [1 2 3]) (repeat nil)   ; infinite sequence of nil
     (partition -1 [1 2 3]) nil
-    (partition -2 [1 2 3]) nil
-  )
-)
+    (partition -2 [1 2 3]) nil ))
+
 
 (deftest test-reverse
   (are (= _1 _2)
     (reverse []) nil
     (reverse [1]) '(1)
-    (reverse [1 2 3]) '(3 2 1)
-  )
-)
+    (reverse [1 2 3]) '(3 2 1) ))
+
 
 (deftest test-take
   (are (= _1 _2)
@@ -390,9 +422,8 @@
 
     (take 0 [1 2 3 4 5]) nil
     (take -1 [1 2 3 4 5]) nil
-    (take -2 [1 2 3 4 5]) nil
-  )
-)
+    (take -2 [1 2 3 4 5]) nil ))
+
 
 (deftest test-drop
   (are (= _1 _2)
@@ -403,9 +434,8 @@
 
     (drop 0 [1 2 3 4 5]) '(1 2 3 4 5)
     (drop -1 [1 2 3 4 5]) '(1 2 3 4 5)
-    (drop -2 [1 2 3 4 5]) '(1 2 3 4 5)
-  )
-)
+    (drop -2 [1 2 3 4 5]) '(1 2 3 4 5) ))
+
 
 (deftest test-take-nth
   (are (= _1 _2)
@@ -420,8 +450,8 @@
      ;(take-nth 0 [1 2 3 4 5])
      ;(take-nth -1 [1 2 3 4 5])
      ;(take-nth -2 [1 2 3 4 5])
-  )
-)
+  ))
+
 
 (deftest test-take-while
   (are (= _1 _2)
@@ -430,9 +460,8 @@
     (take-while pos? [1 2 3 -1]) '(1 2 3)
     (take-while pos? [1 -1 2 3]) '(1)
     (take-while pos? [-1 1 2 3]) nil
-    (take-while pos? [-1 -2 -3]) nil
-  )
-)
+    (take-while pos? [-1 -2 -3]) nil ))
+
 
 (deftest test-drop-while
   (are (= _1 _2)
@@ -441,17 +470,15 @@
     (drop-while pos? [1 2 3 -1]) '(-1)
     (drop-while pos? [1 -1 2 3]) '(-1 2 3)
     (drop-while pos? [-1 1 2 3]) '(-1 1 2 3)
-    (drop-while pos? [-1 -2 -3]) '(-1 -2 -3)
-  )
-)
+    (drop-while pos? [-1 -2 -3]) '(-1 -2 -3) ))
+
 
 (deftest test-butlast
   (are (= _1 _2)
     (butlast []) nil
     (butlast [1]) nil
-    (butlast [1 2 3]) '(1 2)
-  )
-)
+    (butlast [1 2 3]) '(1 2) ))
+
 
 (deftest test-drop-last
   (are (= _1 _2)
@@ -483,9 +510,8 @@
 
     (drop-last -2 []) nil
     (drop-last -2 [1]) '(1)
-    (drop-last -2 [1 2 3]) '(1 2 3)
-  )
-)
+    (drop-last -2 [1 2 3]) '(1 2 3) ))
+
 
 (deftest test-split-at
   (is (vector? (split-at 2 [])))
@@ -498,9 +524,8 @@
     (split-at 5 [1 2 3]) [(list 1 2 3) nil]
     (split-at 0 [1 2 3]) [nil (list 1 2 3)]
     (split-at -1 [1 2 3]) [nil (list 1 2 3)]
-    (split-at -5 [1 2 3]) [nil (list 1 2 3)]
-  )
-)
+    (split-at -5 [1 2 3]) [nil (list 1 2 3)] ))
+
 
 (deftest test-split-with
   (is (vector? (split-with pos? [])))
@@ -511,9 +536,56 @@
     (split-with pos? [1 2 -1 0 3 4]) [(list 1 2) (list -1 0 3 4)]
 
     (split-with pos? [-1 2 3 4 5]) [nil (list -1 2 3 4 5)]
-    (split-with number? [1 -2 "abc" \x]) [(list 1 -2) (list "abc" \x)]
-  )
-)
+    (split-with number? [1 -2 "abc" \x]) [(list 1 -2) (list "abc" \x)] ))
+
+
+(deftest test-vals
+  (are (= _1 _2)      ; other than map data structures
+      (vals ()) nil
+      (vals []) nil
+      (vals #{}) nil
+      (vals "") nil )
+
+  (are (= _1 _2)
+      ; (class {:a 1}) => clojure.lang.PersistentArrayMap
+      (vals {}) nil
+      (vals {:a 1}) '(1)
+      (diff (vals {:a 1 :b 2}) '(1 2)) nil              ; (vals {:a 1 :b 2}) '(1 2)
+
+      ; (class (sorted-map :a 1)) => clojure.lang.PersistentTreeMap
+      (vals (sorted-map)) nil
+      (vals (sorted-map :a 1)) '(1)
+      (diff (vals (sorted-map :a 1 :b 2)) '(1 2)) nil   ; (vals (sorted-map :a 1 :b 2)) '(1 2)
+
+      ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
+      (vals (hash-map)) nil
+      (vals (hash-map :a 1)) '(1)
+      (diff (vals (hash-map :a 1 :b 2)) '(1 2)) nil ))  ; (vals (hash-map :a 1 :b 2)) '(1 2)
+
+
+(deftest test-keys
+  (are (= _1 _2)      ; other than map data structures
+      (keys ()) nil
+      (keys []) nil
+      (keys #{}) nil
+      (keys "") nil )
+
+  (are (= _1 _2)
+      ; (class {:a 1}) => clojure.lang.PersistentArrayMap
+      (keys {}) nil
+      (keys {:a 1}) '(:a)
+      (diff (keys {:a 1 :b 2}) '(:a :b)) nil              ; (keys {:a 1 :b 2}) '(:a :b)
+
+      ; (class (sorted-map :a 1)) => clojure.lang.PersistentTreeMap
+      (keys (sorted-map)) nil
+      (keys (sorted-map :a 1)) '(:a)
+      (diff (keys (sorted-map :a 1 :b 2)) '(:a :b)) nil   ; (keys (sorted-map :a 1 :b 2)) '(:a :b)
+
+      ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
+      (keys (hash-map)) nil
+      (keys (hash-map :a 1)) '(:a)
+      (diff (keys (hash-map :a 1 :b 2)) '(:a :b)) nil ))  ; (keys (hash-map :a 1 :b 2)) '(:a :b)
+
 
 (deftest test-empty?
   (are (empty? _)
@@ -523,14 +595,15 @@
     {}
     #{}
     ""
-    (into-array []))
+    (into-array []) )
+
   (are (not (empty? _))
     '(1 2)
     [1 2]
     {:a 1 :b 2}
     #{1 2}
     "abc"
-    (into-array [1 2])))
+    (into-array [1 2]) ))
 
 
 ;; pmap
@@ -545,5 +618,5 @@
 (deftest vectors-equal-other-seqs-by-items-equality
   ;; regression fixed in r1208; was not equal
   (is (= '() []))
-
   (is (= '(1) [1])))
+
