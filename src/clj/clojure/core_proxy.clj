@@ -155,7 +155,7 @@
                              meths (concat 
                                     (seq (. c (getDeclaredMethods)))
                                     (seq (. c (getMethods))))]
-                        (if meths 
+                        (if (seq meths)
                           (let [#^java.lang.reflect.Method meth (first meths)
                                 mods (. meth (getModifiers))
                                 mk (method-sig meth)]
