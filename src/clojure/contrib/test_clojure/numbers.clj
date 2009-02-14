@@ -107,12 +107,14 @@
     (mod 6 4) 2
     (mod 0 5) 0
 
-    (mod 2 1/2) 0
-    (mod 2/3 1/2) 1/6
-    (mod 1 2/3) 1/3
+;; Removed non-integer tests for Clojure SVN r1227+
 
-    (mod 4.0 2.0) 0.0
-    (mod 4.5 2.0) 0.5
+;;  (mod 2 1/2) 0
+;;  (mod 2/3 1/2) 1/6
+;;  (mod 1 2/3) 1/3
+
+;;  (mod 4.0 2.0) 0.0
+;;  (mod 4.5 2.0) 0.5
 
     ; |num| > |div|, num != k * div
     (mod 42 5) 2      ; (42 / 5) * 5 + (42 mod 5)        = 8 * 5 + 2        = 42
