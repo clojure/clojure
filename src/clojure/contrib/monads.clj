@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated February 10, 2009
+;; last updated February 14, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -207,6 +207,16 @@
 ;; Commonly used monads
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Identity monad
+(defmonad id
+   "Monad describing plain computations. This monad does in fact nothing
+    at all. It is useful for testing, for combination with monad
+    transformers, and for code that is parameterized with a monad."
+  [m-result identity
+   m-bind   (fn m-result-id [mv f]
+	      (f mv))
+  ])
 
 ; Maybe monad
 (defmonad maybe
