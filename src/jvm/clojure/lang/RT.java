@@ -560,24 +560,24 @@ static public Object first(Object x){
 }
 
 static public Object second(Object x){
-	return first(rest(x));
+	return first(next(x));
 }
 
 static public Object third(Object x){
-	return first(rest(rest(x)));
+	return first(next(next(x)));
 }
 
 static public Object fourth(Object x){
-	return first(rest(rest(rest(x))));
+	return first(next(next(next(x))));
 }
 
-static public ISeq rest(Object x){
+static public ISeq next(Object x){
 	if(x instanceof ISeq)
-		return ((ISeq) x).rest();
+		return ((ISeq) x).next();
 	ISeq seq = seq(x);
 	if(seq == null)
 		return null;
-	return seq.rest();
+	return seq.next();
 }
 
 static public Sequence more(Object x){
@@ -585,7 +585,7 @@ static public Sequence more(Object x){
 		return ((ISeq) x).more();
 	ISeq seq = seq(x);
 	if(seq == null)
-		return PersistentList.EMPTY;
+		return LazySeq.EMPTY;
 	return seq.more();
 }
 
@@ -605,10 +605,6 @@ static public Sequence more(Object x){
 //        ret = PersistentList.EMPTY;
 //    return ret;
 //}
-
-static public ISeq rrest(Object x){
-	return rest(rest(x));
-}
 
 static public Object peek(Object x){
 	if(x == null)
@@ -722,12 +718,12 @@ static public Object find(Object coll, Object key){
 static public ISeq findKey(Keyword key, ISeq keyvals) throws Exception{
 	while(keyvals != null)
 		{
-		ISeq r = keyvals.rest();
+		ISeq r = keyvals.next();
 		if(r == null)
 			throw new Exception("Malformed keyword argslist");
 		if(keyvals.first() == key)
 			return r;
-		keyvals = r.rest();
+		keyvals = r.next();
 		}
 	return null;
 }
@@ -766,7 +762,7 @@ static public Object nth(Object coll, int n){
 		{
 		ISeq seq = RT.seq(coll);
         coll = null;
-        for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+        for(int i = 0; i <= n && seq != null; ++i, seq = seq.next())
 			{
 			if(i == n)
 				return seq.first();
@@ -829,7 +825,7 @@ static public Object nth(Object coll, int n, Object notFound){
 		{
 		ISeq seq = RT.seq(coll);
         coll = null;
-        for(int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+        for(int i = 0; i <= n && seq != null; ++i, seq = seq.next())
 			{
 			if(i == n)
 				return seq.first();
@@ -1106,7 +1102,7 @@ static public Object[] toArray(Object coll) throws Exception{
 		{
 		ISeq s = (seq(coll));
 		Object[] ret = new Object[count(s)];
-		for(int i = 0; i < ret.length; i++, s = s.rest())
+		for(int i = 0; i < ret.length; i++, s = s.next())
 			ret[i] = s.first();
 		return ret;
 		}
@@ -1117,7 +1113,7 @@ static public Object[] toArray(Object coll) throws Exception{
 static public Object[] seqToArray(ISeq seq){
 	int len = length(seq);
 	Object[] ret = new Object[len];
-	for(int i = 0; seq != null; ++i, seq = seq.rest())
+	for(int i = 0; seq != null; ++i, seq = seq.next())
 		ret[i] = seq.first();
 	return ret;
 }
@@ -1129,14 +1125,14 @@ static public Object seqToTypedArray(ISeq seq) throws Exception{
 
 static public Object seqToTypedArray(Class type, ISeq seq) throws Exception{
 	Object ret = Array.newInstance(type, length(seq));
-	for(int i = 0; seq != null; ++i, seq = seq.rest())
+	for(int i = 0; seq != null; ++i, seq = seq.next())
 		Array.set(ret, i, seq.first());
 	return ret;
 }
 
 static public int length(ISeq list){
 	int i = 0;
-	for(ISeq c = list; c != null; c = c.rest())
+	for(ISeq c = list; c != null; c = c.next())
 		{
 		i++;
 		}
@@ -1145,7 +1141,7 @@ static public int length(ISeq list){
 
 static public int boundedLength(ISeq list, int limit) throws Exception{
 	int i = 0;
-	for(ISeq c = list; c != null && i <= limit; c = c.rest())
+	for(ISeq c = list; c != null && i <= limit; c = c.next())
 		{
 		i++;
 		}
@@ -1309,13 +1305,13 @@ static public void print(Object x, Writer w) throws Exception{
 	else if(x instanceof IPersistentMap)
 		{
 		w.write('{');
-		for(ISeq s = seq(x); s != null; s = s.rest())
+		for(ISeq s = seq(x); s != null; s = s.next())
 			{
 			IMapEntry e = (IMapEntry) s.first();
 			print(e.key(), w);
 			w.write(' ');
 			print(e.val(), w);
-			if(s.rest() != null)
+			if(s.next() != null)
 				w.write(", ");
 			}
 		w.write('}');
@@ -1335,10 +1331,10 @@ static public void print(Object x, Writer w) throws Exception{
 	else if(x instanceof IPersistentSet)
 		{
 		w.write("#{");
-		for(ISeq s = seq(x); s != null; s = s.rest())
+		for(ISeq s = seq(x); s != null; s = s.next())
 			{
 			print(s.first(), w);
-			if(s.rest() != null)
+			if(s.next() != null)
 				w.write(" ");
 			}
 		w.write('}');
@@ -1397,10 +1393,10 @@ static public void print(Object x, Writer w) throws Exception{
 }
 
 private static void printInnerSeq(ISeq x, Writer w) throws Exception{
-	for(ISeq s = x; s != null; s = s.rest())
+	for(ISeq s = x; s != null; s = s.next())
 		{
 		print(s.first(), w);
-		if(s.rest() != null)
+		if(s.next() != null)
 			w.write(' ');
 		}
 }
@@ -1484,13 +1480,13 @@ static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
 						if(args == null)
 							throw new IllegalArgumentException("Missing argument");
 						RT.formatAesthetic(w, RT.first(args));
-						args = RT.rest(args);
+						args = RT.next(args);
 						break;
 					case 's':
 						if(args == null)
 							throw new IllegalArgumentException("Missing argument");
 						RT.formatStandard(w, RT.first(args));
-						args = RT.rest(args);
+						args = RT.next(args);
 						break;
 					case '{':
 						int j = s.indexOf("~}", i);    //note - does not nest
@@ -1499,7 +1495,7 @@ static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
 						String subs = s.substring(i, j);
 						for(ISeq sargs = RT.seq(RT.first(args)); sargs != null;)
 							sargs = doFormat(w, subs, sargs);
-						args = RT.rest(args);
+						args = RT.next(args);
 						i = j + 2; //skip ~}
 						break;
 					case '^':

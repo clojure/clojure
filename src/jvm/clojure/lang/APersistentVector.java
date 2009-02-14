@@ -73,7 +73,7 @@ static boolean doEquals(IPersistentVector v, Object obj){
 		if(!(obj instanceof Sequential))
 			return false;
 		ISeq ms = RT.seq(obj);
-		for(int i = 0; i < v.count(); i++, ms = ms.rest())
+		for(int i = 0; i < v.count(); i++, ms = ms.next())
 			{
 			if(ms == null || !Util.equals(v.nth(i), ms.first()))
 				return false;
@@ -116,7 +116,7 @@ static boolean doEquiv(IPersistentVector v, Object obj){
 		if(!(obj instanceof Sequential))
 			return false;
 		ISeq ms = RT.seq(obj);
-		for(int i = 0; i < v.count(); i++, ms = ms.rest())
+		for(int i = 0; i < v.count(); i++, ms = ms.next())
 			{
 			if(ms == null || !Util.equiv(v.nth(i), ms.first()))
 				return false;
@@ -357,7 +357,7 @@ public Object[] toArray(Object[] a){
 	if(a.length >= count())
 		{
 		ISeq s = seq();
-		for(int i = 0; s != null; ++i, s = s.rest())
+		for(int i = 0; s != null; ++i, s = s.next())
 			{
 			a[i] = s.first();
 			}
@@ -378,7 +378,7 @@ public boolean isEmpty(){
 }
 
 public boolean contains(Object o){
-	for(ISeq s = seq(); s != null; s = s.rest())
+	for(ISeq s = seq(); s != null; s = s.next())
 		{
 		if(Util.equiv(s.first(), o))
 			return true;
@@ -438,7 +438,7 @@ public IStream stream() throws Exception {
 		return v.nth(i);
 	}
 
-	public ISeq rest(){
+	public ISeq next(){
 		if(i + 1 < v.count())
 			return new APersistentVector.Seq(v, i + 1);
 		return null;
@@ -469,7 +469,7 @@ public IStream stream() throws Exception {
 			ret = f.invoke(ret, v.nth(x));
 		return ret;
 	}
-}
+    }
 
 static class RSeq extends ASeq implements IndexedSeq{
 	final IPersistentVector v;
@@ -490,7 +490,7 @@ static class RSeq extends ASeq implements IndexedSeq{
 		return v.nth(i);
 	}
 
-	public ISeq rest(){
+	public ISeq next(){
 		if(i > 0)
 			return new APersistentVector.RSeq(v, i - 1);
 		return null;

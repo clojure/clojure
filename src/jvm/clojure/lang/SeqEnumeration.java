@@ -27,7 +27,7 @@ public boolean hasMoreElements(){
 
 public Object nextElement(){
 	Object ret = RT.first(seq);
-	seq = RT.rest(seq);
+	seq = RT.next(seq);
 	return ret;
 }
 }

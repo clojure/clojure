@@ -65,12 +65,12 @@ private boolean prefers(Object x, Object y) throws Exception{
 	IPersistentSet xprefs = (IPersistentSet) getPreferTable().valAt(x);
 	if(xprefs != null && xprefs.contains(y))
 		return true;
-	for(ISeq ps = RT.seq(parents.invoke(y)); ps != null; ps = ps.rest())
+	for(ISeq ps = RT.seq(parents.invoke(y)); ps != null; ps = ps.next())
 		{
 		if(prefers(x, ps.first()))
 			return true;
 		}
-	for(ISeq ps = RT.seq(parents.invoke(x)); ps != null; ps = ps.rest())
+	for(ISeq ps = RT.seq(parents.invoke(x)); ps != null; ps = ps.next())
 		{
 		if(prefers(ps.first(), y))
 			return true;

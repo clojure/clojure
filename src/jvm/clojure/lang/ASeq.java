@@ -36,7 +36,7 @@ public boolean equiv(Object obj){
 	if(!(obj instanceof Sequential || obj instanceof List))
 		return false;
 	ISeq ms = RT.seq(obj);
-	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+	for(ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
 		{
 		if(ms == null || !Util.equiv(s.first(), ms.first()))
 			return false;
@@ -50,7 +50,7 @@ public boolean equals(Object obj){
 	if(!(obj instanceof Sequential || obj instanceof List))
 		return false;
 	ISeq ms = RT.seq(obj);
-	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+	for(ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
 		{
 		if(ms == null || !Util.equals(s.first(), ms.first()))
 			return false;
@@ -63,7 +63,7 @@ public int hashCode(){
 	if(_hash == -1)
 		{
 		int hash = 1;
-		for(ISeq s = seq(); s != null; s = s.rest())
+		for(ISeq s = seq(); s != null; s = s.next())
 			{
 			hash = 31 * hash + (s.first() == null ? 0 : s.first().hashCode());
 			}
@@ -97,7 +97,7 @@ public int hashCode(){
 
 public int count(){
 	int i = 1;
-	for(ISeq s = rest(); s != null; s = s.rest(), i++)
+	for(ISeq s = next(); s != null; s = s.next(), i++)
 		;
 	return i;
 }
@@ -111,9 +111,9 @@ public ISeq cons(Object o){
 }
 
 public Sequence more(){
-    ISeq s = rest();
+    ISeq s = next();
     if(s == null)
-        return PersistentList.EMPTY;
+        return LazySeq.EMPTY;
     return s;
 }
 
@@ -167,7 +167,7 @@ public Object[] toArray(Object[] a){
 	if(a.length >= count())
 		{
 		ISeq s = seq();
-		for(int i = 0; s != null; ++i, s = s.rest())
+		for(int i = 0; s != null; ++i, s = s.next())
 			{
 			a[i] = s.first();
 			}
@@ -188,7 +188,7 @@ public boolean isEmpty(){
 }
 
 public boolean contains(Object o){
-	for(ISeq s = seq(); s != null; s = s.rest())
+	for(ISeq s = seq(); s != null; s = s.next())
 		{
 		if(Util.equiv(s.first(), o))
 			return true;
@@ -218,7 +218,7 @@ public IStream stream() throws Exception {
         if(s != null)
             {
             Object ret = s.first();
-            s = s.rest();
+            s = s.next();
             return ret;
             }
         return RT.eos();
@@ -245,7 +245,7 @@ public Object remove(int index){
 
 public int indexOf(Object o){
 	ISeq s = seq();
-	for(int i = 0; s != null; s = s.rest(), i++)
+	for(int i = 0; s != null; s = s.next(), i++)
 		{
 		if(Util.equiv(s.first(), o))
 			return i;

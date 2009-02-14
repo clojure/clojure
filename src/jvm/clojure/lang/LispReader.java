@@ -744,7 +744,7 @@ public static class SyntaxQuoteReader extends AFn{
 
 	private static ISeq sqExpandList(ISeq seq) throws Exception{
 		PersistentVector ret = PersistentVector.EMPTY;
-		for(; seq != null; seq = seq.rest())
+		for(; seq != null; seq = seq.next())
 			{
 			Object item = seq.first();
 			if(isUnquote(item))
@@ -759,7 +759,7 @@ public static class SyntaxQuoteReader extends AFn{
 
 	private static IPersistentVector flattenMap(Object form){
 		IPersistentVector keyvals = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			IMapEntry e = (IMapEntry) s.first();
 			keyvals = (IPersistentVector) keyvals.cons(e.key());
@@ -915,18 +915,18 @@ public static class EvalReader extends AFn{
 				}
 			if(fs.name.endsWith("."))
 				{
-				Object[] args = RT.toArray(RT.rest(o));
+				Object[] args = RT.toArray(RT.next(o));
 				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
 				}
 			if(Compiler.namesStaticMember(fs))
 				{
-				Object[] args = RT.toArray(RT.rest(o));
+				Object[] args = RT.toArray(RT.next(o));
 				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
 				}
 			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
 			if(v instanceof Var)
 				{
-				return ((IFn) v).applyTo(RT.rest(o));
+				return ((IFn) v).applyTo(RT.next(o));
 				}
 			throw new Exception("Can't resolve " + fs);
 			}

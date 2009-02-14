@@ -37,7 +37,6 @@
 package clojure.lang;
 
 import java.util.List;
-import java.util.Collection;
 
 public class PersistentVector extends APersistentVector{
 final int cnt;
@@ -50,7 +49,7 @@ public final static PersistentVector EMPTY = new PersistentVector(0, 5, RT.EMPTY
 
 static public PersistentVector create(ISeq items){
 	PersistentVector ret = EMPTY;
-	for(; items != null; items = items.rest())
+	for(; items != null; items = items.next())
 		ret = ret.cons(items.first());
 	return ret;
 }

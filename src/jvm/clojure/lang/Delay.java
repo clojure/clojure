@@ -56,7 +56,7 @@ public class Delay {
 
         public int count() {
             int c = 0;
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
                 ++c;
             return c;
         }
@@ -127,7 +127,7 @@ public class Delay {
             if (a.length >= count())
                 {
                 ISeq s = seq();
-                for (int i = 0; s != null; ++i, s = s.rest())
+                for (int i = 0; s != null; ++i, s = s.next())
                     {
                     a[i] = s.first();
                     }
@@ -148,7 +148,7 @@ public class Delay {
         }
 
         public boolean contains(Object o) {
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
                 {
                 if (Util.equiv(s.first(), o))
                     return true;
@@ -179,7 +179,7 @@ public class Delay {
 
         public int indexOf(Object o) {
             ISeq s = seq();
-            for (int i = 0; s != null; s = s.rest(), i++)
+            for (int i = 0; s != null; s = s.next(), i++)
                 {
                 if (Util.equiv(s.first(), o))
                     return i;

@@ -20,7 +20,7 @@ public interface ISeq extends Sequence{
 
 Object first();
 
-ISeq rest();
+ISeq next();
 
 Sequence more();
 

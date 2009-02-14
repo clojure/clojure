@@ -13,8 +13,6 @@
 package clojure.lang;
 
 import java.util.List;
-import java.util.Iterator;
-import java.util.Collection;
 
 public class PersistentHashSet extends APersistentSet{
 
@@ -40,7 +38,7 @@ public static PersistentHashSet create(List init){
 
 static public PersistentHashSet create(ISeq items){
 	PersistentHashSet ret = EMPTY;
-	for(; items != null; items = items.rest())
+	for(; items != null; items = items.next())
 		{
 		ret = (PersistentHashSet) ret.cons(items.first());
 		}

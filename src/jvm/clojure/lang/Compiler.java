@@ -749,12 +749,12 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				}
 			else
 				{
-				ISeq call = (ISeq) ((RT.third(form) instanceof ISeq) ? RT.third(form) : RT.rest(RT.rest(form)));
+				ISeq call = (ISeq) ((RT.third(form) instanceof ISeq) ? RT.third(form) : RT.next(RT.next(form)));
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
 				PersistentVector args = PersistentVector.EMPTY;
-				for(ISeq s = RT.rest(call); s != null; s = s.rest())
+				for(ISeq s = RT.next(call); s != null; s = s.next())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
 					return new StaticMethodExpr(source, line, c, sym.name, args);
@@ -1804,7 +1804,7 @@ public static class TryExpr implements Expr{
 
 			int retLocal = getAndIncLocalNum();
 			int finallyLocal = getAndIncLocalNum();
-			for(ISeq fs = form.rest(); fs != null; fs = fs.rest())
+			for(ISeq fs = form.next(); fs != null; fs = fs.next())
 				{
 				Object f = fs.first();
 				Object op = (f instanceof ISeq) ? ((ISeq) f).first() : null;
@@ -1837,7 +1837,7 @@ public static class TryExpr implements Expr{
 							LocalBinding lb = registerLocal(sym,
 							                                (Symbol) (RT.second(f) instanceof Symbol ? RT.second(f)
 							                                          : null), null);
-							Expr handler = (new BodyExpr.Parser()).parse(context, RT.rest(RT.rest(RT.rest(f))));
+							Expr handler = (new BodyExpr.Parser()).parse(context, RT.next(RT.next(RT.next(f))));
 							catches = catches.cons(new CatchClause(c, lb, handler));
 							}
 						finally
@@ -1848,12 +1848,12 @@ public static class TryExpr implements Expr{
 						}
 					else //finally
 						{
-						if(fs.rest() != null)
+						if(fs.next() != null)
 							throw new Exception("finally clause must be last in try expression");
 						try
 							{
 							Var.pushThreadBindings(RT.map(IN_CATCH_FINALLY, RT.T));
-							finallyExpr = (new BodyExpr.Parser()).parse(C.STATEMENT, RT.rest(f));
+							finallyExpr = (new BodyExpr.Parser()).parse(C.STATEMENT, RT.next(f));
 							}
 						finally
 							{
@@ -2026,7 +2026,7 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 		{
 		boolean match = true;
 		ISeq aseq = argexprs.seq();
-		for(int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.rest())
+		for(int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.next())
 			{
 			Expr arg = (Expr) aseq.first();
 			Class aclass = arg.hasJavaClass() ? arg.getJavaClass() : Object.class;
@@ -2162,7 +2162,7 @@ public static class NewExpr implements Expr{
 			if(c == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
 			PersistentVector args = PersistentVector.EMPTY;
-			for(ISeq s = RT.rest(RT.rest(form)); s != null; s = s.rest())
+			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 			return new NewExpr(c, args, line);
 		}
@@ -2562,7 +2562,7 @@ public static class MapExpr implements Expr{
 
 	static public Expr parse(C context, IPersistentMap form) throws Exception{
 		IPersistentVector keyvals = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			IMapEntry e = (IMapEntry) s.first();
 			keyvals = (IPersistentVector) keyvals.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e.key()));
@@ -2611,7 +2611,7 @@ public static class SetExpr implements Expr{
 
 	static public Expr parse(C context, IPersistentSet form) throws Exception{
 		IPersistentVector keys = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			Object e = s.first();
 			keys = (IPersistentVector) keys.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e));
@@ -2747,7 +2747,7 @@ static class InvokeExpr implements Expr{
 			context = C.EXPRESSION;
 		Expr fexpr = analyze(context, form.first());
 		PersistentVector args = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
+		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 			{
 			args = args.cons(analyze(context, s.first()));
 			}
@@ -2929,17 +2929,17 @@ static public class FnExpr implements Expr{
 			if(RT.second(form) instanceof Symbol)
 				{
 				fn.thisName = ((Symbol) RT.second(form)).name;
-				form = RT.cons(FN, RT.rest(RT.rest(form)));
+				form = RT.cons(FN, RT.next(RT.next(form)));
 				}
 
 			//now (fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
 			//turn former into latter
 			if(RT.second(form) instanceof IPersistentVector)
-				form = RT.list(FN, RT.rest(form));
+				form = RT.list(FN, RT.next(form));
 			fn.line = (Integer) LINE.get();
 			FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
 			FnMethod variadicMethod = null;
-			for(ISeq s = RT.rest(form); s != null; s = RT.rest(s))
+			for(ISeq s = RT.next(form); s != null; s = RT.next(s))
 				{
 				FnMethod f = FnMethod.parse(fn, (ISeq) RT.first(s));
 				if(f.isVariadic())
@@ -2994,7 +2994,7 @@ static public class FnExpr implements Expr{
 		if(closes.count() == 0)
 			return ARG_TYPES[0];
 		PersistentVector tv = PersistentVector.EMPTY;
-		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
+		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
@@ -3089,7 +3089,7 @@ static public class FnExpr implements Expr{
 		clinitgen.endMethod();
 //		clinitgen.visitMaxs(1, 1);
 		//instance fields for closed-overs
-		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
+		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
@@ -3124,7 +3124,7 @@ static public class FnExpr implements Expr{
 		else
 			ctorgen.invokeConstructor(aFnType, afnctor);
 		int a = 1;
-		for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
+		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			ctorgen.loadThis();
@@ -3164,7 +3164,7 @@ static public class FnExpr implements Expr{
 		ctorgen.endMethod();
 
 		//override of invoke/doInvoke for each method
-		for(ISeq s = RT.seq(methods); s != null; s = s.rest())
+		for(ISeq s = RT.seq(methods); s != null; s = s.next())
 			{
 			FnMethod method = (FnMethod) s.first();
 			method.emit(this, cv);
@@ -3227,7 +3227,7 @@ static public class FnExpr implements Expr{
 
     void emitClearCloses(GeneratorAdapter gen){
         int a = 1;
-        for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
+        for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			Class primc = lb.getPrimitiveType();
@@ -3269,7 +3269,7 @@ static public class FnExpr implements Expr{
 		getCompiledClass();
 		gen.newInstance(fntype);
 		gen.dup();
-		for(ISeq s = RT.keys(closes); s != null; s = s.rest())
+		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
@@ -3443,7 +3443,7 @@ public static class FnMethod{
 	private static FnMethod parse(FnExpr fn, ISeq form) throws Exception{
 		//([args] body...)
 		IPersistentVector parms = (IPersistentVector) RT.first(form);
-		ISeq body = RT.rest(form);
+		ISeq body = RT.next(form);
 		try
 			{
 			FnMethod method = new FnMethod(fn, (FnMethod) METHOD.get());
@@ -3527,7 +3527,7 @@ public static class FnMethod{
 			body.emit(C.RETURN, fn, gen);
 			Label end = gen.mark();
 			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
-			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.rest())
+			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.next())
 				{
 				LocalBinding lb = (LocalBinding) lbs.first();
 				gen.visitLocalVariable(lb.name, "Ljava/lang/Object;", null, loopLabel, end, lb.idx);
@@ -3661,12 +3661,12 @@ public static class BodyExpr implements Expr{
 		public Expr parse(C context, Object frms) throws Exception{
 			ISeq forms = (ISeq) frms;
 			if(Util.equals(RT.first(forms), DO))
-				forms = RT.rest(forms);
+				forms = RT.next(forms);
 			PersistentVector exprs = PersistentVector.EMPTY;
-			for(; forms != null; forms = forms.rest())
+			for(; forms != null; forms = forms.next())
 				{
 				Expr e = (context != C.EVAL &&
-				          (context == C.STATEMENT || forms.rest() != null)) ?
+				          (context == C.STATEMENT || forms.next() != null)) ?
 				                                                            analyze(C.STATEMENT, forms.first())
 				                                                            :
 				                                                            analyze(context, forms.first());
@@ -3752,7 +3752,7 @@ public static class LetExpr implements Expr{
 			if((bindings.count() % 2) != 0)
 				throw new IllegalArgumentException("Bad binding form, expected matched symbol expression pairs");
 
-			ISeq body = RT.rest(RT.rest(form));
+			ISeq body = RT.next(RT.next(form));
 
 			if(context == C.EVAL
 				|| (context == C.EXPRESSION && isLoop))
@@ -3835,7 +3835,7 @@ public static class LetExpr implements Expr{
 			body.emit(context, fn, gen);
 		Label end = gen.mark();
 //		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
-		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.rest())
+		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.next())
 			{
 			BindingInit bi = (BindingInit) bis.first();
             String lname = bi.binding.name;
@@ -3931,7 +3931,7 @@ public static class RecurExpr implements Expr{
 			if(IN_CATCH_FINALLY.get() != null)
 				throw new UnsupportedOperationException("Cannot recur from catch/finally");
 			PersistentVector args = PersistentVector.EMPTY;
-			for(ISeq s = RT.seq(form.rest()); s != null; s = s.rest())
+			for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 				{
 				args = args.cons(analyze(C.EXPRESSION, s.first()));
 				}
@@ -4090,7 +4090,7 @@ public static Object macroexpand1(Object x) throws Exception{
 			try
 				{
 				Var.pushThreadBindings(RT.map(RT.MACRO_META, RT.meta(form)));
-				return v.applyTo(form.rest());
+				return v.applyTo(form.next());
 				}
 			finally
 				{
@@ -4115,7 +4115,7 @@ public static Object macroexpand1(Object x) throws Exception{
                         {
                         target = RT.list(IDENTITY, target);
                         }
-                    return RT.listStar(DOT, target, meth, form.rest().rest());
+                    return RT.listStar(DOT, target, meth, form.next().next());
 					}
 				else if(namesStaticMember(sym))
 					{
@@ -4124,7 +4124,7 @@ public static Object macroexpand1(Object x) throws Exception{
 					if(c != null)
 						{
 						Symbol meth = Symbol.intern(sym.name);
-						return RT.listStar(DOT, target, meth, form.rest());
+						return RT.listStar(DOT, target, meth, form.next());
 						}
 					}
 				else
@@ -4141,7 +4141,7 @@ public static Object macroexpand1(Object x) throws Exception{
 					//(StringBuilder. "foo") => (new StringBuilder "foo")	
 					//else 
 					if(idx == sname.length() - 1)
-						return RT.listStar(NEW, Symbol.intern(sname.substring(0, idx)), form.rest());
+						return RT.listStar(NEW, Symbol.intern(sname.substring(0, idx)), form.next());
 					}
 				}
 			}
@@ -4164,9 +4164,9 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		Object op = RT.first(form);
 		if(op == null)
 			throw new IllegalArgumentException("Can't call nil");
-		IFn inline = isInline(op, RT.count(RT.rest(form)));
+		IFn inline = isInline(op, RT.count(RT.next(form)));
 		if(inline != null)
-			return analyze(context, inline.applyTo(RT.rest(form)));
+			return analyze(context, inline.applyTo(RT.next(form)));
 		IParser p;
 		if(op.equals(FN))
 			return FnExpr.parse(context, form, name);

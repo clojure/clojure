@@ -41,7 +41,7 @@ public class StreamSeq extends ASeq {
         return _first;
     }
 
-    synchronized public ISeq rest() {
+    synchronized public ISeq next() {
         if (stream != null) {
             try {
                 _rest = create(stream);
@@ -56,7 +56,7 @@ public class StreamSeq extends ASeq {
     public Obj withMeta(IPersistentMap meta) {
         if(meta != this.meta())
             {
-            rest();
+            next();
                 return new StreamSeq(meta, _first, _rest);
             }
         return this;

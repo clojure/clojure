@@ -49,7 +49,7 @@ public Object first(){
 
 final
 synchronized
-public ISeq rest(){
+public ISeq next(){
 	if(_rest == sentinel)
 		{
 		try
@@ -72,7 +72,7 @@ public LazyCons withMeta(IPersistentMap meta){
 	if(meta == meta())
 		return this;
 	//force before copying
-	rest();
+	next();
 	return new LazyCons(meta, _first, _rest);
 }
 }

@@ -37,7 +37,7 @@ static public Def createSlotMap(ISeq keys){
 		throw new IllegalArgumentException("Must supply keys");
 	PersistentHashMap ret = PersistentHashMap.EMPTY;
 	int i = 0;
-	for(ISeq s = keys; s != null; s = s.rest(), i++)
+	for(ISeq s = keys; s != null; s = s.next(), i++)
 		{
 		ret = (PersistentHashMap) ret.assoc(s.first(), i);
 		}
@@ -47,9 +47,9 @@ static public Def createSlotMap(ISeq keys){
 static public PersistentStructMap create(Def def, ISeq keyvals){
 	Object[] vals = new Object[def.keyslots.count()];
 	IPersistentMap ext = PersistentHashMap.EMPTY;
-	for(; keyvals != null; keyvals = keyvals.rest().rest())
+	for(; keyvals != null; keyvals = keyvals.next().next())
 		{
-		if(keyvals.rest() == null)
+		if(keyvals.next() == null)
 			throw new IllegalArgumentException(String.format("No value supplied for key: %s", keyvals.first()));
 		Object k = keyvals.first();
 		Object v = RT.second(keyvals);
@@ -65,7 +65,7 @@ static public PersistentStructMap create(Def def, ISeq keyvals){
 static public PersistentStructMap construct(Def def, ISeq valseq){
 	Object[] vals = new Object[def.keyslots.count()];
 	IPersistentMap ext = PersistentHashMap.EMPTY;
-	for(int i = 0; i < vals.length && valseq != null; valseq = valseq.rest(), i++)
+	for(int i = 0; i < vals.length && valseq != null; valseq = valseq.next(), i++)
 		{
 		vals[i] = valseq.first();
 		}
@@ -216,9 +216,9 @@ static class Seq extends ASeq{
 		return new MapEntry(keys.first(), vals[i]);
 	}
 
-	public ISeq rest(){
+	public ISeq next(){
 		if(i + 1 < vals.length)
-			return new Seq(_meta, keys.rest(), vals, i + 1, ext);
+			return new Seq(_meta, keys.next(), vals, i + 1, ext);
 		return ext.seq();
 	}
 }

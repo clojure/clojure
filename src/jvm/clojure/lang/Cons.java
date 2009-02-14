@@ -33,13 +33,13 @@ public Object first(){
 	return _first;
 }
 
-public ISeq rest(){
+public ISeq next(){
 	return more().seq();
 }
 
 public Sequence more(){
 	if(_more == null)
-		return PersistentList.EMPTY;
+		return LazySeq.EMPTY;
 	return _more;
 }
 

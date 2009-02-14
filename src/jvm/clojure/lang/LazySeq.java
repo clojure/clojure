@@ -16,8 +16,17 @@ import java.util.*;
 
 public class LazySeq extends AFn implements List, Sequence {
     static final ISeq DUMMY = new Cons(null, null);
+    static final LazySeq EMPTY = new LazySeq(null);
 
-    private ISeq s = DUMMY;
+    private ISeq s;
+
+    public LazySeq() {
+        this(DUMMY);
+    }
+
+    LazySeq(ISeq s) {
+        this.s = s;
+    }
 
     final synchronized public ISeq seq() {
         if(s == DUMMY)
@@ -36,7 +45,7 @@ public class LazySeq extends AFn implements List, Sequence {
 
     public int count() {
         int c = 0;
-        for (ISeq s = seq(); s != null; s = s.rest())
+        for (ISeq s = seq(); s != null; s = s.next())
             ++c;
         return c;
     }
@@ -107,7 +116,7 @@ public class LazySeq extends AFn implements List, Sequence {
         if (a.length >= count())
             {
             ISeq s = seq();
-            for (int i = 0; s != null; ++i, s = s.rest())
+            for (int i = 0; s != null; ++i, s = s.next())
                 {
                 a[i] = s.first();
                 }
@@ -128,7 +137,7 @@ public class LazySeq extends AFn implements List, Sequence {
     }
 
     public boolean contains(Object o) {
-        for (ISeq s = seq(); s != null; s = s.rest())
+        for (ISeq s = seq(); s != null; s = s.next())
             {
             if (Util.equiv(s.first(), o))
                 return true;
@@ -159,7 +168,7 @@ public class LazySeq extends AFn implements List, Sequence {
 
     public int indexOf(Object o) {
         ISeq s = seq();
-        for (int i = 0; s != null; s = s.rest(), i++)
+        for (int i = 0; s != null; s = s.next(), i++)
             {
             if (Util.equiv(s.first(), o))
                 return i;
