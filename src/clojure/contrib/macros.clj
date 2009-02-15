@@ -26,3 +26,12 @@
   (let [makefn (fn [[name args body]] (list name (list 'fn name args body)))
 	fns (vec (apply concat (map makefn (partition 3 fn-bindings))))]
   `(let ~fns ~@exprs)))
+
+;; By Konrad Hinsen
+(defmacro lazy-and-standard-branch
+  "Comile the first expression in the lazy branch of Clojure, and the second
+   one in the standard branch."
+  [lazy-expr standard-expr]
+  (if (find (ns-map (find-ns 'clojure.core)) 'lazy-seq)
+    lazy-expr
+    standard-expr))
