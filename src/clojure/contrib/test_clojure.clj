@@ -26,6 +26,7 @@
             :sequences
             :for
             :agents
+            :main
             ])
 
 (defn test-name
