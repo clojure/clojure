@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated February 13, 2009
+;; last updated February 15, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -167,13 +167,13 @@
 ; similarly used to represent +infinity.
 
 (defacc maximum (fn [& xs]
-		  (when-let [xs (filter identity xs)]
+		  (when-let [xs (seq (filter identity xs))]
 		      (apply max xs)))
                 nil
   "An empty maximum accumulator. Only numbers can be added.")
 
 (defacc minimum (fn [& xs]
-		  (when-let [xs (filter identity xs)]
+		  (when-let [xs (seq (filter identity xs))]
 		      (apply min xs)))
                 nil
   "An empty minimum accumulator. Only numbers can be added.")
