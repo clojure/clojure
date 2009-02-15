@@ -361,6 +361,18 @@
     (interleave [] []) nil ))
 
 
+(deftest test-zipmap
+  (are (= _1 _2)
+    (zipmap [:a :b] [1 2]) {:a 1 :b 2}
+
+    (zipmap [:a] [1 2]) {:a 1}
+    (zipmap [:a :b] [1]) {:a 1}
+
+    (zipmap [] [1 2]) {}
+    (zipmap [:a :b] []) {}
+    (zipmap [] []) {} ))
+
+
 (deftest test-concat
   (are (= _1 _2)
     (concat) nil
