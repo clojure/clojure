@@ -110,7 +110,7 @@
       simple? (simple-tests)
       serve   (start-server (Integer/parseInt serve))
       mkboot? (mkboot)
-      :else   (doseq filename filenames
+      :else   (doseq [filename filenames]
                  (filetojs filename)))))
 
 )
