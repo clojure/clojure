@@ -122,3 +122,32 @@
      (cons (f) nil)))
   ([f init coll]
    (rec-cons self init (map f self coll))))
+
+(defn rotations
+  "Returns a lazy seq of all rotations of a seq"
+  [x]
+  (if (seq x)
+    (map
+     (fn [n _]
+       (lazy-cat (drop n x) (take n x)))
+     (iterate inc 0) x)
+    (list nil)))
+
+(defn partition-all 
+  "Lazily break s into chunks of length n (or less, for the
+  final chunk)."
+  [n s]
+  (when (seq s)
+    (lazy-cons (take n s)
+               (partition-all n (drop n s)))))
+
+(defn shuffle
+  "Return a random permutation of coll"
+  [coll]
+  (let [l (java.util.ArrayList. coll)]
+    (java.util.Collections/shuffle l)
+    (seq l)))
+
+(defn rand-elt [s]
+  "Return a random element of this seq"
+  (nth s (rand-int (count s))))
