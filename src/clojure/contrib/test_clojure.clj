@@ -24,7 +24,9 @@
             :data-structures
             :numbers
             :sequences
-            :for])
+            :for
+            :agents
+            ])
 
 (defn test-name
   [test]
