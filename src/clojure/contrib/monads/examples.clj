@@ -7,6 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns clojure.contrib.monads.examples
+  (:use [clojure.contrib.macros :only (lazy-and-standard-branch)])
   (:use clojure.contrib.monads)
   (:require (clojure.contrib [accumulators :as accu])))
 
@@ -150,9 +151,18 @@
 
 ; We define a convenience function that creates an infinite lazy seq
 ; of values obtained from iteratively applying a state monad value.
-(defn value-seq [f seed]
-  (let [[value next] (f seed)]
-    (lazy-cons value (value-seq f next))))
+(lazy-and-standard-branch
+
+  (defn value-seq [f seed]
+    (lazy-seq
+      (let [[value next] (f seed)]
+        (cons value (value-seq f next)))))
+
+  (defn value-seq [f seed]
+    (let [[value next] (f seed)]
+      (lazy-cons value (value-seq f next))))
+
+)
 
 ; Next, we define basic statistics functions to check our random numbers
 (defn sum [xs]  (apply + xs))

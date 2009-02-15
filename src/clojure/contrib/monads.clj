@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated February 14, 2009
+;; last updated February 15, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -169,7 +169,7 @@
   (reduce (fn [q p]
 	    (m-bind p (fn [x]
 			(m-bind q (fn [y]
-				    (m-result (lazy-cons x y)))) )))
+				    (m-result (cons x y)))) )))
 	  (m-result '())
 	  (reverse ms)))
 
