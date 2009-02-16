@@ -113,7 +113,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 }
 
 
-    static class EmptyList extends Obj implements IPersistentList, List, Sequence{
+    static class EmptyList extends Obj implements IPersistentList, List, ISeq{
 
 	public int hashCode(){
 		return 1;
@@ -131,7 +131,19 @@ public Object reduce(IFn f, Object start) throws Exception{
 		super(meta);
 	}
 
-	public PersistentList cons(Object o){
+        public Object first() {
+            return null;
+        }
+
+        public ISeq next() {
+            return null;
+        }
+
+        public ISeq more() {
+            return this;
+        }
+
+        public PersistentList cons(Object o){
 		return new PersistentList(meta(), o, null, 1);
 	}
 

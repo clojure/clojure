@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public class LazySeq extends AFn implements List, Sequence {
+public class LazySeq extends AFn implements ISeq, List {
     static final ISeq DUMMY = new Cons(null, null);
     static final LazySeq EMPTY = new LazySeq(null);
 
@@ -50,7 +50,19 @@ public class LazySeq extends AFn implements List, Sequence {
         return c;
     }
 
-    public IPersistentCollection cons(Object o) {
+    public Object first() {
+        return RT.first(seq());
+    }
+
+    public ISeq next() {
+        return RT.next(seq());
+    }
+
+    public ISeq more() {
+        return RT.more(seq());
+    }
+
+    public ISeq cons(Object o) {
         return RT.cons(o, seq());
     }
 

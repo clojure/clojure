@@ -96,7 +96,7 @@
 
 (def
  #^{:arglists '([coll])
-    :doc "Sequence. Returns a new ISeq on the collection. If the
+    :doc "Returns a new ISeq on the collection. If the
     collection is empty, returns nil.  (seq nil) returns nil. seq also
     works on Strings, native Java arrays (of reference types) and any
     objects that implement Iterable."
@@ -113,11 +113,6 @@
  #^{:arglists '([x])
     :doc "Return true if x implements ISeq"}
  seq? (fn seq? [x] (instance? clojure.lang.ISeq x)))
-
-(def
- #^{:arglists '([x])
-    :doc "Return true if x implements Sequence, true of ISeqs and LazySeqs"}
- sequence? (fn sequence? [x] (instance? clojure.lang.Sequence x)))
 
 (def
  #^{:arglists '([x])
@@ -138,7 +133,7 @@
  #^{:private true}
  sigs
  (fn [fdecl]
-   (if (sequence? (first fdecl))
+   (if (seq? (first fdecl))
      (loop [ret [] fdecl fdecl]
        (if fdecl
          (recur (conj ret (first (first fdecl))) (next fdecl))
@@ -185,7 +180,7 @@
 
 (def 
  #^{:arglists '([coll])
-    :doc "Return a sequence of all but the last item in coll, in linear time"}
+    :doc "Return a seq of all but the last item in coll, in linear time"}
  butlast (fn butlast [s]
            (loop [ret [] s s]
              (if (next s)
@@ -430,7 +425,7 @@
     (list* '#^{:once true :super-name "clojure/lang/LazySeq"} fn* [] body))
 
 (defn concat
-  "Returns a lazy sequence representing the concatenation of the elements in the supplied colls."
+  "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
   ([] (lazy-seq nil))
   ([x] (lazy-seq x))
   ([x y]
@@ -971,8 +966,8 @@
     (. e (getValue)))
 
 (defn rseq
-  "Returns, in constant time, a sequence of the items in rev (which
-  can be a vector or sorted-map), in reverse order."
+  "Returns, in constant time, a seq of the items in rev (which
+  can be a vector or sorted-map), in reverse order. If rev is empty returns nil"
   [#^clojure.lang.Reversible rev]
     (. rev (rseq)))
 
@@ -1021,7 +1016,7 @@
   second item in the first form, making a list of it if it is not a
   list already. If there are more forms, inserts the first form as the
   second item in second form, etc."
-  ([x form] (if (sequence? form)
+  ([x form] (if (seq? form)
               `(~(first form) ~x ~@(next form))
               (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
@@ -2080,7 +2075,7 @@
     (let [gx (gensym)]
       `(let [~gx ~x]
          ~@(map (fn [f]
-                  (if (sequence? f)
+                  (if (seq? f)
                     `(~(first f) ~gx ~@(next f))
                     `(~f ~gx)))
                 forms)

@@ -713,7 +713,7 @@ public static class SyntaxQuoteReader extends AFn{
                     {
                     ret = RT.list(APPLY, HASHSET, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq()))));
                     }
-			else if(form instanceof Sequence)
+			else if(form instanceof ISeq)
 				{
 				ISeq seq = RT.seq(form);
                 if(seq == null)

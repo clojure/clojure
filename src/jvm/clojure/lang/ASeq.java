@@ -110,7 +110,7 @@ public ISeq cons(Object o){
 	return new Cons(o, this);
 }
 
-public Sequence more(){
+public ISeq more(){
     ISeq s = next();
     if(s == null)
         return LazySeq.EMPTY;

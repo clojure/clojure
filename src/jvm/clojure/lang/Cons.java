@@ -12,18 +12,18 @@
 
 package clojure.lang;
 
-public class Cons extends ASeq{
+final public class Cons extends ASeq{
 
 private final Object _first;
-private final Sequence _more;
+private final ISeq _more;
 
-public Cons(Object first, Sequence _more){
+public Cons(Object first, ISeq _more){
 	this._first = first;
 	this._more = _more;
 }
 
 
-public Cons(IPersistentMap meta, Object _first, Sequence _more){
+public Cons(IPersistentMap meta, Object _first, ISeq _more){
 	super(meta);
 	this._first = _first;
 	this._more = _more;
@@ -37,7 +37,7 @@ public ISeq next(){
 	return more().seq();
 }
 
-public Sequence more(){
+public ISeq more(){
 	if(_more == null)
 		return LazySeq.EMPTY;
 	return _more;

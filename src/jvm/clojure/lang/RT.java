@@ -445,22 +445,20 @@ static public int nextID(){
 static public ISeq seq(Object coll){
 	if(coll == null)
 		return null;
-	else if(coll instanceof ISeq)
-		return (ISeq) coll;
-	else if(coll instanceof Seqable)
-		return ((Seqable) coll).seq();
+	else if(coll instanceof ASeq)
+		return (ASeq) coll;
 	else
 		return seqFrom(coll);
 }
 
-static public Sequence sequence(Object coll){
-	if(coll == null)
-		return null;
-	else if(coll instanceof Sequence)
-		return (Sequence) coll;
-    else
-        return seq(coll);
-    }
+//static public Sequence sequence(Object coll){
+//	if(coll == null)
+//		return null;
+//	else if(coll instanceof Sequence)
+//		return (Sequence) coll;
+//    else
+//        return seq(coll);
+//    }
 
 static public IStream stream(final Object coll) throws Exception{
 	if(coll == null)
@@ -488,7 +486,9 @@ static public IStream stream(final Object coll) throws Exception{
 }
 
 static ISeq seqFrom(Object coll){
-	if(coll instanceof Iterable)
+    if(coll instanceof Seqable)
+        return ((Seqable) coll).seq();
+	else if(coll instanceof Iterable)
 		return IteratorSeq.create(((Iterable) coll).iterator());
 	else if(coll.getClass().isArray())
 		return ArraySeq.createFromObject(coll);
@@ -544,8 +544,8 @@ static public ISeq cons(Object x, Object coll){
 	//ISeq y = seq(coll);
 	if(coll == null)
 		return new PersistentList(x);
-    else if (coll instanceof Sequence)
-	    return new Cons(x, (Sequence) coll);
+    else if (coll instanceof ISeq)
+	    return new Cons(x, (ISeq) coll);
     else
         return new Cons(x, seq(coll));        
 }
@@ -580,7 +580,7 @@ static public ISeq next(Object x){
 	return seq.next();
 }
 
-static public Sequence more(Object x){
+static public ISeq more(Object x){
 	if(x instanceof ISeq)
 		return ((ISeq) x).more();
 	ISeq seq = seq(x);
@@ -1254,7 +1254,7 @@ static public void print(Object x, Writer w) throws Exception{
 		}
 	if(x == null)
 		w.write("nil");
-	else if(x instanceof Sequence || x instanceof IPersistentList)
+	else if(x instanceof ISeq || x instanceof IPersistentList)
 		{
 		w.write('(');
 		printInnerSeq(seq(x), w);
