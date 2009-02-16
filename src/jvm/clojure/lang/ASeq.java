@@ -184,7 +184,7 @@ public int size(){
 }
 
 public boolean isEmpty(){
-	return count() == 0;
+	return seq() == null;
 }
 
 public boolean contains(Object o){

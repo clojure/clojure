@@ -145,7 +145,7 @@ public class LazySeq extends AFn implements ISeq, List {
     }
 
     public boolean isEmpty() {
-        return count() == 0;
+        return seq() == null;
     }
 
     public boolean contains(Object o) {
