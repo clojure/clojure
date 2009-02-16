@@ -1499,7 +1499,7 @@
   (let [step (fn [p c]
                  (when-let [s (seq c)]
                    (if (p (first s))
-                     (clojure.lang.Cons. (first s) (filter p (rest s)))
+                     (cons (first s) (filter p (rest s)))
                      (recur p (rest s)))))]
     (lazy-seq (step pred coll))))
 
