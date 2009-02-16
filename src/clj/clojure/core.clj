@@ -47,13 +47,15 @@
 
 (def
  #^{:arglists '([coll])
+    :tag clojure.lang.ISeq
     :doc "Returns a seq of the items after the first. Calls seq on its
   argument.  If there are no more items, returns nil."}  
  next (fn next [x] (. clojure.lang.RT (next x))))
 
 (def
  #^{:arglists '([coll])
-    :doc "Returns a seqable collection of the items after the first. May return nil. Calls seq on its
+    :tag clojure.lang.ISeq
+    :doc "Returns a possibly empty seq of the items after the first. Calls seq on its
   argument."}  
  rest (fn rest [x] (. clojure.lang.RT (more x))))
 
@@ -96,10 +98,10 @@
 
 (def
  #^{:arglists '([coll])
-    :doc "Returns a new ISeq on the collection. If the
-    collection is empty, returns nil.  (seq nil) returns nil. seq also
-    works on Strings, native Java arrays (of reference types) and any
-    objects that implement Iterable."
+    :doc "Returns a seq on the collection. If the collection is
+    empty, returns nil.  (seq nil) returns nil. seq also works on
+    Strings, native Java arrays (of reference types) and any objects
+    that implement Iterable."
     :tag clojure.lang.ISeq}
  seq (fn seq [coll] (. clojure.lang.RT (seq coll))))
 
