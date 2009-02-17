@@ -86,7 +86,7 @@
         ((:unhandled err) err)
         (let [[{:keys [htag] :as handler}] hs]
           (if (and htag (not (isa? err-tag htag)))
-            (recur (rest hs))
+            (recur (next hs))
             (let [rtn ((:hfunc handler) err)]
               (if-not (vector? rtn)
                 (throw-to handler (list rtn))
@@ -97,7 +97,7 @@
                                (do (prn *continues*) (throw
                                  (Exception.
                                    (str "Unbound continue name " (rtn 1))))))
-                  ::do-not-handle (recur (rest hs))
+                  ::do-not-handle (recur (next hs))
                   (throw-to handler (list rtn)))))))))))
 
 (defmacro raise
@@ -176,7 +176,7 @@
                                 :when (= (resolve type) #'bind-continue)]
                             [(list `quote (first more))
                              `{:blockid '~blockid
-                               :rfunc (fn ~@(rest more))}]))]
+                               :rfunc (fn ~@(next more))}]))]
       `(try
          (binding [*handler-stack* (list* ~@handlers @#'*handler-stack*)
                    *continues* (merge @#'*continues* ~@continues)]

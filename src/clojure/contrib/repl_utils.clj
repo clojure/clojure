@@ -78,7 +78,7 @@
           (:member (nth members selector))
           (let [pred (if (ifn? selector)
                        selector
-                       #(re-seq (re-pattern (str "(?i)" selector)) (:name %)))]
+                       #(re-find (re-pattern (str "(?i)" selector)) (:name %)))]
             (println "=== " (Modifier/toString (.getModifiers c)) c " ===")
             (doseq [[i m] (indexed members)]
               (when (pred m)

@@ -50,8 +50,8 @@
     (if-not args
       opts
       (if (keyword? arg)
-        (recur (rrest args) (assoc opts arg (second args)))
-        (recur (rest args) (update-in opts [:cmd] conj arg))))))
+        (recur (nnext args) (assoc opts arg (second args)))
+        (recur (next args) (update-in opts [:cmd] conj arg))))))
 
 (defn- as-env-key [arg]
   "Helper so that callers can use symbols, keywords, or strings

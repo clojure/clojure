@@ -10,7 +10,6 @@
 
 (ns clojure.contrib.lazy-xml
     (:require [clojure.xml :as xml])
-    (:use [clojure.contrib.fcase :only (case)])
     (:import (org.xml.sax Attributes InputSource)
              (org.xml.sax.helpers DefaultHandler)
              (javax.xml.parsers SAXParserFactory)
@@ -25,7 +24,7 @@
 (defn- parse-seq-pull [& _])
 (try (load "lazy_xml/with_pull")
   (catch Exception e
-    (when-not (re-seq #"XmlPullParser" (str e))
+    (when-not (re-find #"XmlPullParser" (str e))
       (throw e))))
 
 (defn startparse-sax [s ch]
@@ -51,9 +50,10 @@
          agt (agent nil)
          s (if (instance? Reader s) (InputSource. s) s)
          step (fn step []
-                (if-let [x (.take q)]
-                  (lazy-cons x (step))
-                  @agt))  ;will be nil, touch agent just to propagate errors
+                (lazy-seq
+                  (if-let [x (.take q)]
+                    (cons x (step))
+                    @agt)))  ;will be nil, touch agent just to propagate errors
          keep-alive (WeakReference. step)
          enqueue (fn [x]
                      (if (.get keep-alive)
@@ -84,22 +84,25 @@
 
 
 (defstruct element :tag :attrs :content)
-(def mktree)
+(declare mktree)
 
-(defn- siblings
-  [[event & rst :as s]]
-    (case (:type event)
-      :characters    (lazy-cons (:str event) (siblings rst))
-      :start-element (let [t (mktree s)]
-                        (lazy-cons (first t) (siblings (rest t))))
-      :end-element   [rst]))
+(defn- siblings [coll]
+  (lazy-seq
+    (when-let [s (seq coll)]
+      (let [event (first s)]
+        (condp = (:type event)
+          :characters    (cons (:str event) (siblings (rest s)))
+          :start-element (let [t (mktree s)]
+                           (cons (first t) (siblings (rest t))))
+          :end-element   [(rest s)])))))
 
 (defn- mktree
   [[elem & events]]
-    (let [sibs (siblings events)]
-      (lazy-cons
-        (struct element (:name elem) (:attrs elem) (drop-last sibs))
-        (last sibs))))
+    (lazy-seq
+      (let [sibs (siblings events)]
+        (cons
+          (struct element (:name elem) (:attrs elem) (drop-last sibs))
+          (last sibs)))))
 
 (defn parse-trim
   "Parses the source s, which can be a File, InputStream or String

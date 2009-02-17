@@ -30,7 +30,7 @@
             :else (if-let [found (key-data keybase)]
                     (if (= \? (last (:sym found)))
                       (recur r (assoc cmdmap (:sym found) true))
-                      (recur (rest r) (assoc cmdmap (:sym found)
+                      (recur (next r) (assoc cmdmap (:sym found)
                                              (if (or (nil? r) (= \- (ffirst r)))
                                                (:default found)
                                                (first r)))))

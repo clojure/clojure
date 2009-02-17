@@ -23,11 +23,11 @@
 
 (defn right-locs
   "Returns a lazy sequence of locations to the right of loc, starting with loc."
-  [loc] (when loc (lazy-cons (auto false loc) (right-locs (zip/right loc)))))
+  [loc] (lazy-seq (when loc (cons (auto false loc) (right-locs (zip/right loc))))))
 
 (defn left-locs
   "Returns a lazy sequence of locations to the left of loc, starting with loc."
-  [loc] (when loc (lazy-cons (auto false loc) (left-locs (zip/left loc)))))
+  [loc] (lazy-seq (when loc (cons (auto false loc) (left-locs (zip/left loc))))))
 
 (defn leftmost?
   "Returns true if there are no more nodes to the left of location loc."
@@ -55,13 +55,13 @@
 (defn descendants
   "Returns a lazy sequence of all descendants of location loc, in
   depth-first order, left-to-right, starting with loc."
-  [loc] (lazy-cons (auto false loc) (mapcat descendants (children loc))))
+  [loc] (lazy-seq (cons (auto false loc) (mapcat descendants (children loc)))))
 
 (defn ancestors
   "Returns a lazy sequence of all ancestors of location loc, starting
   with loc and proceeding to loc's parent node and on through to the
   root of the tree."
-  [loc] (when loc (lazy-cons (auto false loc) (ancestors (zip/up loc)))))
+  [loc] (lazy-seq (when loc (cons (auto false loc) (ancestors (zip/up loc))))))
 
 (defn- fixup-apply
   "Calls (pred loc), and then converts the result to the 'appropriate'
