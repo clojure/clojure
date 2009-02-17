@@ -40,7 +40,7 @@
             (if (some #(zero? (rem n %))
                       (take-while #(<= (* % %) n) primes))
               (recur (+ n f) r)
-              (lazy-cons n (primes-from (+ n f) r))))
+              (lazy-seq (cons n (primes-from (+ n f) r)))))
           wheel (cycle [2 4 2 4 6 2 6 4 2 4 6 6 2 6  4  2
                         6 4 6 8 4 2 4 2 4 8 6 4 6 2  4  6
                         2 6 6 4 2 4 6 2 6 4 2 4 2 10 2 10])]
@@ -52,5 +52,5 @@
   "A lazy sequence of all the fibonacci numbers.")
 
 (defvar powers-of-2
-  (lazy-cons 1 (map #(bit-shift-left % 1) powers-of-2))
+  (lazy-seq (cons 1 (map #(bit-shift-left % 1) powers-of-2)))
   "A lazy sequence of all the powers of 2")
