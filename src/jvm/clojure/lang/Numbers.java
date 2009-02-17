@@ -1416,7 +1416,7 @@ static BitOps bitOps(Object x){
 		else
 			{
 			ISeq s = RT.seq(init);
-			for(int i = 0; i < size && s != null; i++, s = s.rest())
+			for(int i = 0; i < size && s != null; i++, s = s.next())
 				ret[i] = ((Number) s.first()).floatValue();
 			}
 		return ret;
@@ -1430,7 +1430,7 @@ static BitOps bitOps(Object x){
 			ISeq s = RT.seq(sizeOrSeq);
 			int size = s.count();
 			float[] ret = new float[size];
-			for(int i = 0; i < size && s != null; i++, s = s.rest())
+			for(int i = 0; i < size && s != null; i++, s = s.next())
 				ret[i] = ((Number) s.first()).floatValue();
 			return ret;
 			}
@@ -1447,7 +1447,7 @@ static public double[] double_array(int size, Object init){
 	else
 		{
 		ISeq s = RT.seq(init);
-		for(int i = 0; i < size && s != null; i++, s = s.rest())
+		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).doubleValue();
 		}
 	return ret;
@@ -1461,7 +1461,7 @@ static public double[] double_array(Object sizeOrSeq){
 		ISeq s = RT.seq(sizeOrSeq);
 		int size = s.count();
 		double[] ret = new double[size];
-		for(int i = 0; i < size && s != null; i++, s = s.rest())
+		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).doubleValue();
 		return ret;
 		}
@@ -1478,7 +1478,7 @@ static public int[] int_array(int size, Object init){
 	else
 		{
 		ISeq s = RT.seq(init);
-		for(int i = 0; i < size && s != null; i++, s = s.rest())
+		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).intValue();
 		}
 	return ret;
@@ -1492,7 +1492,7 @@ static public int[] int_array(Object sizeOrSeq){
 		ISeq s = RT.seq(sizeOrSeq);
 		int size = s.count();
 		int[] ret = new int[size];
-		for(int i = 0; i < size && s != null; i++, s = s.rest())
+		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).intValue();
 		return ret;
 		}
@@ -1509,7 +1509,7 @@ static public long[] long_array(int size, Object init){
 	else
 		{
 		ISeq s = RT.seq(init);
-		for(int i = 0; i < size && s != null; i++, s = s.rest())
+		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).longValue();
 		}
 	return ret;
@@ -1523,7 +1523,7 @@ static public long[] long_array(Object sizeOrSeq){
 		ISeq s = RT.seq(sizeOrSeq);
 		int size = s.count();
 		long[] ret = new long[size];
-		for(int i = 0; i < size && s != null; i++, s = s.rest())
+		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).longValue();
 		return ret;
 		}

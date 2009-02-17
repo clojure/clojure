@@ -31,7 +31,7 @@ public Object next() throws NoSuchElementException {
 	if(seq == null)
 		throw new NoSuchElementException();
 	Object ret = RT.first(seq);
-	seq = RT.rest(seq);
+	seq = RT.next(seq);
 	return ret;
 }
 

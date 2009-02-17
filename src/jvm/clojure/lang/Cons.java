@@ -12,29 +12,39 @@
 
 package clojure.lang;
 
-public class Cons extends ASeq{
+final public class Cons extends ASeq{
 
 private final Object _first;
-private final ISeq _rest;
+private final ISeq _more;
 
-public Cons(Object first, ISeq rest){
+public Cons(Object first, ISeq _more){
 	this._first = first;
-	this._rest = rest;
+	this._more = _more;
 }
 
 
-public Cons(IPersistentMap meta, Object _first, ISeq _rest){
+public Cons(IPersistentMap meta, Object _first, ISeq _more){
 	super(meta);
 	this._first = _first;
-	this._rest = _rest;
+	this._more = _more;
 }
 
 public Object first(){
 	return _first;
 }
 
-public ISeq rest(){
-	return _rest;
+public ISeq next(){
+	return more().seq();
+}
+
+public ISeq more(){
+	if(_more == null)
+		return LazySeq.EMPTY;
+	return _more;
+}
+
+public int count(){
+	return 1 + RT.count(_more);
 }
 
 public ISeq seq(){
@@ -42,6 +52,6 @@ public ISeq seq(){
 }
 
 public Cons withMeta(IPersistentMap meta){
-	return new Cons(meta, _first, _rest);
+	return new Cons(meta, _first, _more);
 }
 }

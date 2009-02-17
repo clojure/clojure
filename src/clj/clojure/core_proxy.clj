@@ -155,7 +155,7 @@
                              meths (concat 
                                     (seq (. c (getDeclaredMethods)))
                                     (seq (. c (getMethods))))]
-                        (if meths 
+                        (if (seq meths)
                           (let [#^java.lang.reflect.Method meth (first meths)
                                 mods (. meth (getModifiers))
                                 mk (method-sig meth)]
@@ -165,8 +165,8 @@
                                     (. Modifier (isStatic mods))
                                     (. Modifier (isFinal mods))
                                     (= "finalize" (.getName meth)))
-                              (recur mm (conj considered mk) (rest meths))
-                              (recur (assoc mm mk meth) (conj considered mk) (rest meths))))
+                              (recur mm (conj considered mk) (next meths))
+                              (recur (assoc mm mk meth) (conj considered mk) (next meths))))
                           [mm considered]))]
                   (recur mm considered (. c (getSuperclass))))
                 [mm considered]))]
@@ -199,7 +199,7 @@
 (defn- get-super-and-interfaces [bases]
   (if (. #^Class (first bases) (isInterface))
     [Object bases]
-    [(first bases) (rest bases)]))
+    [(first bases) (next bases)]))
 
 (defn get-proxy-class 
   "Takes an optional single class followed by zero or more
@@ -291,7 +291,7 @@
                                    (cons (apply vector 'this params) body))
                                meths)]
                 (if-not (contains? fmap (name sym))		  
-                  (recur (assoc fmap (name sym) (cons `fn meths)) (rest fs))
+                (recur (assoc fmap (name sym) (cons `fn meths)) (next fs))
 		           (throw (IllegalArgumentException.
 			              (str "Method '" (name sym) "' redefined")))))
               fmap)))
@@ -341,9 +341,10 @@
       (assoc [k v] (assoc (snapshot) k v))
       (without [k] (dissoc (snapshot) k))
       (seq [] ((fn thisfn [pseq]
-		  (when pseq
-		    (lazy-cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
-			       (thisfn (rest pseq))))) (keys pmap))))))
+		  (lazy-seq
+                   (when pseq
+                     (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
+                           (thisfn (rest pseq))))) (keys pmap)))))))
 
 
 

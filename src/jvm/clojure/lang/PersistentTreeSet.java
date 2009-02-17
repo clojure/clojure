@@ -13,9 +13,7 @@
 package clojure.lang;
 
 import java.util.List;
-import java.util.Iterator;
 import java.util.Comparator;
-import java.util.Collection;
 
 public class PersistentTreeSet extends APersistentSet implements Reversible, Sorted{
 static public final PersistentTreeSet EMPTY = new PersistentTreeSet(null, PersistentTreeMap.EMPTY);
@@ -40,7 +38,7 @@ public static PersistentTreeSet create(List init){
 
 static public PersistentTreeSet create(ISeq items){
 	PersistentTreeSet ret = EMPTY;
-	for(; items != null; items = items.rest())
+	for(; items != null; items = items.next())
 		{
 		ret = (PersistentTreeSet) ret.cons(items.first());
 		}

@@ -88,7 +88,7 @@ public abstract class ARef extends AReference implements IRef {
         if (ws.count() > 0)
             {
             ISeq args = new Cons(this, null);
-            for (ISeq s = RT.seq(ws); s != null; s = s.rest())
+            for (ISeq s = RT.seq(ws); s != null; s = s.next())
                 {
                 Map.Entry e = (Map.Entry) s.first();
                 Object[] a = (Object[]) e.getValue();

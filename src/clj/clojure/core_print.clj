@@ -101,12 +101,12 @@
                   (print-dup (str o) w))
               w))
 
-(defmethod print-dup clojure.lang.AFn [o, #^Writer w]
+(defmethod print-dup clojure.lang.Fn [o, #^Writer w]
   (print-ctor o (fn [o w]) w))
 
-(prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.AFn)
-(prefer-method print-dup java.util.Map clojure.lang.AFn)
-(prefer-method print-dup java.util.Collection clojure.lang.AFn)
+(prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.Fn)
+(prefer-method print-dup java.util.Map clojure.lang.Fn)
+(prefer-method print-dup java.util.Collection clojure.lang.Fn)
 
 (defmethod print-method Boolean [o, #^Writer w]
   (.write w (str o)))
@@ -136,6 +136,10 @@
 (defmethod print-dup clojure.lang.IPersistentList [o w] (print-method o w))
 (prefer-method print-method clojure.lang.IPersistentList clojure.lang.ISeq)
 (prefer-method print-dup clojure.lang.IPersistentList clojure.lang.ISeq)
+(prefer-method print-method clojure.lang.ISeq clojure.lang.IPersistentCollection)
+(prefer-method print-dup clojure.lang.ISeq clojure.lang.IPersistentCollection)
+(prefer-method print-method clojure.lang.ISeq java.util.Collection)
+(prefer-method print-dup clojure.lang.ISeq java.util.Collection)
 
 (defmethod print-method clojure.lang.IPersistentList [o, #^Writer w]
   (print-meta o w)

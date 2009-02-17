@@ -69,9 +69,9 @@ PersistentTreeMap(IPersistentMap meta, Comparator comp, Node tree, int _count){
 
 static public PersistentTreeMap create(ISeq items){
 	IPersistentMap ret = EMPTY;
-	for(; items != null; items = items.rest().rest())
+	for(; items != null; items = items.next().next())
 		{
-		if(items.rest() == null)
+		if(items.next() == null)
 			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
 		ret = ret.assoc(items.first(), RT.second(items));
 		}
@@ -80,9 +80,9 @@ static public PersistentTreeMap create(ISeq items){
 
 static public PersistentTreeMap create(Comparator comp, ISeq items){
 	IPersistentMap ret = new PersistentTreeMap(comp);
-	for(; items != null; items = items.rest().rest())
+	for(; items != null; items = items.next().next())
 		{
-		if(items.rest() == null)
+		if(items.next() == null)
 			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
 		ret = ret.assoc(items.first(), RT.second(items));
 		}
@@ -781,9 +781,9 @@ static public class Seq extends ASeq{
 		return stack.first();
 	}
 
-	public ISeq rest(){
+	public ISeq next(){
 		Node t = (Node) stack.first();
-		ISeq nextstack = push(asc ? t.right() : t.left(), stack.rest(), asc);
+		ISeq nextstack = push(asc ? t.right() : t.left(), stack.next(), asc);
 		if(nextstack != null)
 			{
 			return new Seq(nextstack, asc, cnt - 1);

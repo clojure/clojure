@@ -16,7 +16,7 @@ public class IteratorSeq extends ASeq{
 final Iterator iter;
 final State state;
 
-static class State{
+    static class State{
 	volatile Object val;
 	volatile Object _rest;
 }
@@ -50,7 +50,7 @@ public Object first(){
 	return state.val;
 }
 
-public ISeq rest(){
+public ISeq next(){
 	if(state._rest == state)
 		synchronized(state)
 			{

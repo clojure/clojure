@@ -38,7 +38,7 @@ public Object first(){
 	return Character.valueOf(s.charAt(i));
 }
 
-public ISeq rest(){
+public ISeq next(){
 	if(i + 1 < s.length())
 		return new StringSeq(_meta, s, i + 1);
 	return null;

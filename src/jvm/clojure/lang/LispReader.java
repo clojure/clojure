@@ -28,6 +28,7 @@ static final Symbol THE_VAR = Symbol.create("var");
 static Symbol UNQUOTE = Symbol.create("clojure.core", "unquote");
 static Symbol UNQUOTE_SPLICING = Symbol.create("clojure.core", "unquote-splicing");
 static Symbol CONCAT = Symbol.create("clojure.core", "concat");
+static Symbol SEQ = Symbol.create("clojure.core", "seq");
 static Symbol LIST = Symbol.create("clojure.core", "list");
 static Symbol APPLY = Symbol.create("clojure.core", "apply");
 static Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
@@ -61,7 +62,7 @@ static Var GENSYM_ENV = Var.create(null);
 //sorted-map num->gensymbol
 static Var ARG_ENV = Var.create(null);
 
-static
+    static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
@@ -711,23 +712,23 @@ public static class SyntaxQuoteReader extends AFn{
 			if(form instanceof IPersistentMap)
 				{
 				IPersistentVector keyvals = flattenMap(form);
-				ret = RT.list(APPLY, HASHMAP, RT.cons(CONCAT, sqExpandList(keyvals.seq())));
+                ret = RT.list(APPLY, HASHMAP, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
 				}
 			else if(form instanceof IPersistentVector)
-				{
-				ret = RT.list(APPLY, VECTOR, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq())));
-				}
+                {
+                ret = RT.list(APPLY, VECTOR, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq()))));
+                }
 			else if(form instanceof IPersistentSet)
-				{
-				ret = RT.list(APPLY, HASHSET, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq())));
-				}
+                    {
+                    ret = RT.list(APPLY, HASHSET, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq()))));
+                    }
 			else if(form instanceof ISeq || form instanceof IPersistentList)
 				{
 				ISeq seq = RT.seq(form);
-				if(seq == null)
-					ret = PersistentList.EMPTY;
-				else
-					ret = RT.cons(CONCAT, sqExpandList(seq));
+                if(seq == null)
+                    ret = RT.cons(LIST,null);
+                else
+                    ret = RT.list(SEQ, RT.cons(CONCAT, sqExpandList(seq)));
 				}
 			else
 				throw new UnsupportedOperationException("Unknown Collection type");
@@ -752,7 +753,7 @@ public static class SyntaxQuoteReader extends AFn{
 
 	private static ISeq sqExpandList(ISeq seq) throws Exception{
 		PersistentVector ret = PersistentVector.EMPTY;
-		for(; seq != null; seq = seq.rest())
+		for(; seq != null; seq = seq.next())
 			{
 			Object item = seq.first();
 			if(isUnquote(item))
@@ -767,7 +768,7 @@ public static class SyntaxQuoteReader extends AFn{
 
 	private static IPersistentVector flattenMap(Object form){
 		IPersistentVector keyvals = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(form); s != null; s = s.rest())
+		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			IMapEntry e = (IMapEntry) s.first();
 			keyvals = (IPersistentVector) keyvals.cons(e.key());
@@ -918,18 +919,18 @@ public static class EvalReader extends AFn{
 				}
 			if(fs.name.endsWith("."))
 				{
-				Object[] args = RT.toArray(RT.rest(o));
+				Object[] args = RT.toArray(RT.next(o));
 				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
 				}
 			if(Compiler.namesStaticMember(fs))
 				{
-				Object[] args = RT.toArray(RT.rest(o));
+				Object[] args = RT.toArray(RT.next(o));
 				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
 				}
 			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
 			if(v instanceof Var)
 				{
-				return ((IFn) v).applyTo(RT.rest(o));
+				return ((IFn) v).applyTo(RT.next(o));
 				}
 			throw new Exception("Can't resolve " + fs);
 			}

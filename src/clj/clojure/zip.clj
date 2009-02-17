@@ -10,7 +10,7 @@
 ;see Huet
 
 (ns clojure.zip
-    (:refer-clojure :exclude (replace remove)))
+    (:refer-clojure :exclude (replace remove next)))
 
 (defn zipper
   "Creates a new zipper structure. 
@@ -89,12 +89,12 @@
   nil if no children"
   [loc]
     (let [[node path] loc
-          [c & crest :as cs] (children loc)]
+          [c & cnext :as cs] (children loc)]
       (when cs
         (with-meta [c {:l [] 
                        :pnodes (if path (conj (:pnodes path) node) [node]) 
                        :ppath path 
-                       :r crest}] ^loc))))
+                       :r cnext}] ^loc))))
 
 (defn up
   "Returns the loc of the parent of the node at this loc, or nil if at
@@ -123,9 +123,9 @@
 (defn right
   "Returns the loc of the right sibling of the node at this loc, or nil"
   [loc]
-    (let [[node {l :l  [r & rrest :as rs] :r :as path}] loc]
+    (let [[node {l :l  [r & rnext :as rs] :r :as path}] loc]
       (when (and path rs)
-        (with-meta [r (assoc path :l (conj l node) :r rrest)] ^loc))))
+        (with-meta [r (assoc path :l (conj l node) :r rnext)] ^loc))))
 
 (defn rightmost
   "Returns the loc of the rightmost sibling of the node at this loc, or self"

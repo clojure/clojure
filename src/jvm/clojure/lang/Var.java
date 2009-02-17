@@ -268,7 +268,7 @@ synchronized public Object alterRoot(IFn fn, ISeq args) throws Exception{
 public static void pushThreadBindings(Associative bindings){
 	Frame f = dvals.get();
 	Associative bmap = f.bindings;
-	for(ISeq bs = bindings.seq(); bs != null; bs = bs.rest())
+	for(ISeq bs = bindings.seq(); bs != null; bs = bs.next())
 		{
 		IMapEntry e = (IMapEntry) bs.first();
 		Var v = (Var) e.key();
@@ -283,7 +283,7 @@ public static void popThreadBindings(){
 	Frame f = dvals.get();
 	if(f.prev == null)
 		throw new IllegalStateException("Pop without matching push");
-	for(ISeq bs = RT.keys(f.frameBindings); bs != null; bs = bs.rest())
+	for(ISeq bs = RT.keys(f.frameBindings); bs != null; bs = bs.next())
 		{
 		Var v = (Var) bs.first();
 		v.count.decrementAndGet();
@@ -295,7 +295,7 @@ public static void releaseThreadBindings(){
 	Frame f = dvals.get();
 	if(f.prev == null)
 		throw new IllegalStateException("Release without full unwind");
-	for(ISeq bs = RT.keys(f.bindings); bs != null; bs = bs.rest())
+	for(ISeq bs = RT.keys(f.bindings); bs != null; bs = bs.next())
 		{
 		Var v = (Var) bs.first();
 		v.count.decrementAndGet();

@@ -41,13 +41,13 @@ public boolean equiv(Object obj){
 
 	if(!(obj instanceof Sequential))
 		return false;
-	ISeq ms = ((IPersistentCollection) obj).seq();
-	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+	ISeq ms = RT.seq(obj);
+	for(ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
 		{
 		if(ms == null || !Util.equiv(s.first(), ms.first()))
 			return false;
 		}
-	return ms.rest() == null;
+	return ms.next() == null;
 
 }
 
@@ -55,13 +55,13 @@ public boolean equals(Object obj){
 
 	if(!(obj instanceof Sequential))
 		return false;
-	ISeq ms = ((IPersistentCollection) obj).seq();
-	for(ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+	ISeq ms = RT.seq(obj);
+	for(ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
 		{
 		if(ms == null || !Util.equals(s.first(), ms.first()))
 			return false;
 		}
-	return ms.rest() == null;
+	return ms.next() == null;
 
 }
 
@@ -69,7 +69,7 @@ public int hashCode(){
 	if(_hash == -1)
 		{
 		int hash = 0;
-		for(ISeq s = seq(); s != null; s = s.rest())
+		for(ISeq s = seq(); s != null; s = s.next())
 			{
 			hash = Util.hashCombine(hash, Util.hash(s.first()));
 			}
@@ -86,7 +86,7 @@ public PersistentQueue pop(){
 	if(f == null)  //hmmm... pop of empty queue -> empty queue?
 		return this;
 	//throw new IllegalStateException("popping empty queue");
-	ISeq f1 = f.rest();
+	ISeq f1 = f.next();
 	PersistentVector r1 = r;
 	if(f1 == null)
 		{
@@ -140,8 +140,8 @@ static class Seq extends ASeq{
 		return f.first();
 	}
 
-	public ISeq rest(){
-		ISeq f1 = f.rest();
+	public ISeq next(){
+		ISeq f1 = f.next();
 		ISeq r1 = rseq;
 		if(f1 == null)
 			{
@@ -205,7 +205,7 @@ public Object[] toArray(Object[] a){
 	if(a.length >= count())
 		{
 		ISeq s = seq();
-		for(int i = 0; s != null; ++i, s = s.rest())
+		for(int i = 0; s != null; ++i, s = s.next())
 			{
 			a[i] = s.first();
 			}
@@ -226,7 +226,7 @@ public boolean isEmpty(){
 }
 
 public boolean contains(Object o){
-	for(ISeq s = seq(); s != null; s = s.rest())
+	for(ISeq s = seq(); s != null; s = s.next())
 		{
 		if(Util.equiv(s.first(), o))
 			return true;

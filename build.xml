@@ -11,6 +11,7 @@
   <property name="build" location="classes"/>
   <property name="clojure_jar" location="clojure.jar"/>
   <property name="slim_jar" location="clojure-slim.jar"/>
+  <property name="clojure.assert-if-lazy-seq" value=""/>
 
   <target name="init" depends="clean">
     <tstamp/>
@@ -28,6 +29,7 @@
     <java classname="clojure.lang.Compile"
           classpath="${build}:${cljsrc}">
       <sysproperty key="clojure.compile.path" value="${build}"/>
+      <sysproperty key="clojure.assert-if-lazy-seq" value="${clojure.assert-if-lazy-seq}"/>
       <arg value="clojure.core"/>
       <arg value="clojure.main"/>
       <arg value="clojure.set"/>

@@ -8,26 +8,10 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Mar 3, 2008 */
+/* rich Jan 28, 2009 */
 
 package clojure.lang;
 
-import java.util.Enumeration;
-
-public class SeqEnumeration implements Enumeration{
-ISeq seq;
-
-public SeqEnumeration(ISeq seq){
-	this.seq = seq;
-}
-
-public boolean hasMoreElements(){
-	return seq != null;
-}
-
-public Object nextElement(){
-	Object ret = RT.first(seq);
-	seq = RT.next(seq);
-	return ret;
-}
+public interface Seqable {
+    ISeq seq();
 }

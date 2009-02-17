@@ -44,7 +44,7 @@ public IPersistentCollection cons(Object o){
 		}
 
 	IPersistentMap ret = this;
-	for(ISeq es = RT.seq(o); es != null; es = es.rest())
+	for(ISeq es = RT.seq(o); es != null; es = es.next())
 		{
 		Map.Entry e = (Map.Entry) es.first();
 		ret = ret.assoc(e.getKey(), e.getValue());
@@ -60,7 +60,7 @@ public boolean equals(Object obj){
 	if(m.size() != size() || m.hashCode() != hashCode())
 		return false;
 
-	for(ISeq s = seq(); s != null; s = s.rest())
+	for(ISeq s = seq(); s != null; s = s.next())
 		{
 		Map.Entry e = (Map.Entry) s.first();
 		boolean found = m.containsKey(e.getKey());
@@ -80,7 +80,7 @@ public boolean equiv(Object obj){
 	if(m.size() != size())
 		return false;
 
-	for(ISeq s = seq(); s != null; s = s.rest())
+	for(ISeq s = seq(); s != null; s = s.next())
 		{
 		Map.Entry e = (Map.Entry) s.first();
 		boolean found = m.containsKey(e.getKey());
@@ -96,7 +96,7 @@ public int hashCode(){
 		{
 		//int hash = count();
 		int hash = 0;
-		for(ISeq s = seq(); s != null; s = s.rest())
+		for(ISeq s = seq(); s != null; s = s.next())
 			{
 			Map.Entry e = (Map.Entry) s.first();
 			hash += (e.getKey() == null ? 0 : e.getKey().hashCode()) ^
@@ -130,8 +130,8 @@ static public class KeySeq extends ASeq{
 		return ((Map.Entry) seq.first()).getKey();
 	}
 
-	public ISeq rest(){
-		return create(seq.rest());
+	public ISeq next(){
+		return create(seq.next());
 	}
 
 	public KeySeq withMeta(IPersistentMap meta){
@@ -161,8 +161,8 @@ static public class ValSeq extends ASeq{
 		return ((Map.Entry) seq.first()).getValue();
 	}
 
-	public ISeq rest(){
-		return create(seq.rest());
+	public ISeq next(){
+		return create(seq.next());
 	}
 
 	public ValSeq withMeta(IPersistentMap meta){
