@@ -93,7 +93,8 @@
          :empty-vector :vector
          :empty-map    :map
          :empty-set    :set]
-  seq? [:list]
+
+  seq?  [:empty-list :list]
   ; array?
 
   fn?  [:fn]
@@ -109,14 +110,20 @@
 
 ;; Test all type predicates against all data types
 ;;
+(defn- get-fn-name [f]
+  (str
+    (apply str (nthnext (first (.split (str f) "_"))
+                        (count "clojure.core$")))
+    "?"))
+
 (deftest test-type-preds
   (doseq [tp type-preds]
     (doseq [dt sample-data]
       (if (some #(= % (first dt)) (second tp))
         (is ((first tp) (second dt))
-          (pr-str (list (first tp) (second dt))))
+          (pr-str (list (get-fn-name (first tp)) (second dt))))
         (is (not ((first tp) (second dt)))
-          (pr-str (list 'not (list (first tp) (second dt)))))))))
+          (pr-str (list 'not (list (get-fn-name (first tp)) (second dt)))))))))
 
 
 ;; Additional tests:
