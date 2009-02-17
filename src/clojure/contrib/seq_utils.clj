@@ -77,7 +77,8 @@
   (when-let [s (seq coll)]
     (let [fv (f (first s))
           run (take-while #(= fv (f %)) s)]
-      (lazy-cons run (partition-by f (drop (count run) s))))))
+      (lazy-seq
+       (cons run (partition-by f (drop (count run) s)))))))
 
 (defn frequencies
   "Returns a map from distinct items in coll to the number of times
@@ -106,7 +107,7 @@
   not be recursive."
  [binding-form expr & rec-exprs]
   `(let [rec-rest# (atom nil)
-         result# (lazy-cons ~expr (force @rec-rest#))
+         result# (lazy-seq (cons ~expr (force @rec-rest#)))
          ~binding-form result#]
      (swap! rec-rest# (constantly (delay (lazy-cat ~@rec-exprs))))
      result#))
@@ -137,9 +138,10 @@
   "Lazily break s into chunks of length n (or less, for the
   final chunk)."
   [n s]
-  (when (seq s)
-    (lazy-cons (take n s)
-               (partition-all n (drop n s)))))
+  (lazy-seq
+   (when (seq s)
+     (cons (take n s)
+           (partition-all n (drop n s))))))
 
 (defn shuffle
   "Return a random permutation of coll"

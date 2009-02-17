@@ -35,12 +35,13 @@
   [#^Pattern re string]
   (let [m (re-matcher re string)]
     ((fn step [prevend]
-       (if (.find m)
-         (lazy-cons (.subSequence string prevend (.start m))
-                    (lazy-cons (re-groups m)
-                               (step (+ (.start m) (count (.group m))))))
-         (when (< prevend (.length string))
-           (list (.subSequence string prevend (.length string))))))
+       (lazy-seq
+        (if (.find m)
+          (cons (.subSequence string prevend (.start m))
+                (cons (re-groups m)
+                      (step (+ (.start m) (count (.group m))))))
+          (when (< prevend (.length string))
+            (list (.subSequence string prevend (.length string)))))))
      0)))
 
 (defn re-gsub 

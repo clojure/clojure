@@ -1,7 +1,7 @@
 ;;; duck_streams.clj -- duck-typed I/O streams for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 10, 2009
+;; February 16, 2009
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -25,6 +25,9 @@
 
 
 ;; CHANGE LOG
+;;
+;; February 16, 2009: (lazy branch) fixed read-lines to work with lazy
+;; Clojure.
 ;;
 ;; January 10, 2009: added *default-encoding*, so streams are always
 ;; opened as UTF-8.
@@ -169,9 +172,10 @@
   closes the reader AFTER YOU CONSUME THE ENTIRE SEQUENCE."
   [f]
   (let [read-line (fn this [#^BufferedReader rdr]
-                    (if-let [line (.readLine rdr)]
-                        (lazy-cons line (this rdr))
-                      (.close rdr)))]
+                    (lazy-seq
+                     (if-let [line (.readLine rdr)]
+                       (cons line (this rdr))
+                       (.close rdr))))]
     (read-line (reader f))))
 
 (defn slurp*

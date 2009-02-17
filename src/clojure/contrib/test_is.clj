@@ -391,7 +391,7 @@
   ;; Asserts that evaluating expr throws an exception of class c.
   ;; Returns the exception thrown.
   (let [klass (second form)
-        body (rrest form)]
+        body (nthnext form 2)]
     `(try ~@body
           (report :fail ~msg '~form nil)
           (catch ~klass e#
@@ -405,7 +405,7 @@
   ;; (with re-matches) the regular expression re.
   (let [klass (nth form 1)
         re (nth form 2)
-        body (nthrest form 3)]
+        body (nthnext form 3)]
     `(try ~@body
           (report :fail ~msg '~form nil)
           (catch ~klass e#

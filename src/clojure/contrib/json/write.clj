@@ -43,9 +43,9 @@
   (loop [x s]
     (when (first x)
       (print-json (first x))
-      (when (rest x)
+      (when (next x)
         (print ",")
-        (recur (rest x)))))
+        (recur (next x)))))
   (print "]"))
 
 (defmethod print-json :object [m]
@@ -56,9 +56,9 @@
         (print-json k)
         (print ":")
         (print-json v))
-      (when (rest x)
+      (when (next x)
         (print ",")
-        (recur (rest x)))))
+        (recur (next x)))))
   (print "}"))
 
 (defn json-str
