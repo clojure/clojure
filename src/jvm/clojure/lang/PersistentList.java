@@ -120,7 +120,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 	}
 
     public boolean equals(Object o) {
-        return (o instanceof Sequential || o instanceof List) && RT.count(o) == 0;
+        return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
     }
 
 	public boolean equiv(Object o){
