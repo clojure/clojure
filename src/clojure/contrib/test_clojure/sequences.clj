@@ -420,7 +420,7 @@
 
 (deftest test-reverse
   (are (= _1 _2)
-    (reverse []) nil
+    (reverse []) ()
     (reverse [1]) '(1)
     (reverse [1 2 3]) '(3 2 1) ))
 
