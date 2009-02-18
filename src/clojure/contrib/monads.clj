@@ -12,6 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.monads
+  (:refer-clojure :exclude (sequence))
   (:require [clojure.contrib.accumulators]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

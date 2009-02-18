@@ -12,6 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.probabilities.dist
+  (:refer-clojure :exclude (sequence))
   (:use clojure.contrib.monads clojure.contrib.macros
 	clojure.contrib.monads clojure.contrib.def))
 
