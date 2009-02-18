@@ -340,11 +340,11 @@
       (count [] (count pmap))
       (assoc [k v] (assoc (snapshot) k v))
       (without [k] (dissoc (snapshot) k))
-      (seq [] ((fn thisfn [pseq]
+      (seq [] ((fn thisfn [plseq]
 		  (lazy-seq
-                   (when pseq
+                   (when-let [pseq (seq plseq)]
                      (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
-                           (thisfn (rest pseq))))) (keys pmap)))))))
+                           (thisfn (rest pseq)))))) (keys pmap))))))
 
 
 
