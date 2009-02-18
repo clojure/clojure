@@ -80,8 +80,6 @@ public class LazySeq extends AFn implements ISeq, List {
 
     public boolean equals(Object o) {
         ISeq s = seq();
-        if( s == o )
-            return true;
         if( s != null )
             return s.equiv(o);
         else
