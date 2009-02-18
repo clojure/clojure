@@ -131,78 +131,78 @@
     (first (to-array [nil 2])) nil ))
 
 
-(deftest test-rest
-  (is (thrown? IllegalArgumentException (rest)))
-  (is (thrown? IllegalArgumentException (rest true)))
-  (is (thrown? IllegalArgumentException (rest false)))
-  (is (thrown? IllegalArgumentException (rest 1)))
-  (is (thrown? IllegalArgumentException (rest 1 2)))
-  (is (thrown? IllegalArgumentException (rest \a)))
-  (is (thrown? IllegalArgumentException (rest 's)))
-  (is (thrown? IllegalArgumentException (rest :k)))
+(deftest test-next
+  (is (thrown? IllegalArgumentException (next)))
+  (is (thrown? IllegalArgumentException (next true)))
+  (is (thrown? IllegalArgumentException (next false)))
+  (is (thrown? IllegalArgumentException (next 1)))
+  (is (thrown? IllegalArgumentException (next 1 2)))
+  (is (thrown? IllegalArgumentException (next \a)))
+  (is (thrown? IllegalArgumentException (next 's)))
+  (is (thrown? IllegalArgumentException (next :k)))
   (are (= _1 _2)
-    (rest nil) nil
+    (next nil) nil
 
     ; string
-    (rest "") nil
-    (rest "a") nil
-    (rest "abc") '(\b \c)
+    (next "") nil
+    (next "a") nil
+    (next "abc") '(\b \c)
 
     ; list
-    (rest ()) nil
-    (rest '(1)) nil
-    (rest '(1 2 3)) '(2 3)
+    (next ()) nil
+    (next '(1)) nil
+    (next '(1 2 3)) '(2 3)
 
-    (rest '(nil)) nil
-    (rest '(1 nil)) '(nil)
-    (rest '(1 ())) '(())
-    (rest '(nil 2)) '(2)
-    (rest '(())) nil
-    (rest '(() nil)) '(nil)
-    (rest '(() 2 nil)) '(2 nil)
+    (next '(nil)) nil
+    (next '(1 nil)) '(nil)
+    (next '(1 ())) '(())
+    (next '(nil 2)) '(2)
+    (next '(())) nil
+    (next '(() nil)) '(nil)
+    (next '(() 2 nil)) '(2 nil)
 
     ; vector
-    (rest []) nil
-    (rest [1]) nil
-    (rest [1 2 3]) [2 3]
+    (next []) nil
+    (next [1]) nil
+    (next [1 2 3]) [2 3]
 
-    (rest [nil]) nil
-    (rest [1 nil]) [nil]
-    (rest [1 []]) [[]]
-    (rest [nil 2]) [2]
-    (rest [[]]) nil
-    (rest [[] nil]) [nil]
-    (rest [[] 2 nil]) [2 nil]
+    (next [nil]) nil
+    (next [1 nil]) [nil]
+    (next [1 []]) [[]]
+    (next [nil 2]) [2]
+    (next [[]]) nil
+    (next [[] nil]) [nil]
+    (next [[] 2 nil]) [2 nil]
 
     ; set
-    (rest #{}) nil
-    (rest #{1}) nil
-    ;(rest #{1 2 3}) 1
+    (next #{}) nil
+    (next #{1}) nil
+    ;(next #{1 2 3}) 1
 
-    (rest #{nil}) nil
-    ;(rest #{1 nil}) 1
-    ;(rest #{nil 2}) nil
-    (rest #{#{}}) nil
-    ;(rest #{#{} nil}) #{}
-    ;(rest #{#{} 2 nil}) #{}
+    (next #{nil}) nil
+    ;(next #{1 nil}) 1
+    ;(next #{nil 2}) nil
+    (next #{#{}}) nil
+    ;(next #{#{} nil}) #{}
+    ;(next #{#{} 2 nil}) #{}
 
     ; map
-    (rest {}) nil
-    (rest (sorted-map :a 1)) nil
-    (rest (sorted-map :a 1 :b 2 :c 3)) '((:b 2) (:c 3))
+    (next {}) nil
+    (next (sorted-map :a 1)) nil
+    (next (sorted-map :a 1 :b 2 :c 3)) '((:b 2) (:c 3))
 
     ; array
-    (rest (into-array [])) nil
-    (rest (into-array [1])) nil
-    (rest (into-array [1 2 3])) '(2 3)
+    (next (into-array [])) nil
+    (next (into-array [1])) nil
+    (next (into-array [1 2 3])) '(2 3)
 
-    (rest (to-array [nil])) nil
-    (rest (to-array [1 nil])) '(nil)
-    ;(rest (to-array [1 (into-array [])])) (list (into-array []))
-    (rest (to-array [nil 2])) '(2)
-    (rest (to-array [(into-array [])])) nil
-    (rest (to-array [(into-array []) nil])) '(nil)
-    (rest (to-array [(into-array []) 2 nil])) '(2 nil) ))
+    (next (to-array [nil])) nil
+    (next (to-array [1 nil])) '(nil)
+    ;(next (to-array [1 (into-array [])])) (list (into-array []))
+    (next (to-array [nil 2])) '(2)
+    (next (to-array [(into-array [])])) nil
+    (next (to-array [(into-array []) nil])) '(nil)
+    (next (to-array [(into-array []) 2 nil])) '(2 nil) ))
 
 
 ;; (ffirst coll) = (first (first coll))
@@ -225,76 +225,76 @@
     (ffirst #{[1 2]}) 1 ))
 
 
-;; (frest coll) = (first (rest coll)) = (second coll)
+;; (fnext coll) = (first (next coll)) = (second coll)
 ;;
-(deftest test-frest
-  (is (thrown? IllegalArgumentException (frest)))
+(deftest test-fnext
+  (is (thrown? IllegalArgumentException (fnext)))
   (are (= _1 _2)
-    (frest nil) nil
+    (fnext nil) nil
 
-    (frest ()) nil
-    (frest '(1)) nil
-    (frest '(1 2 3 4)) 2
+    (fnext ()) nil
+    (fnext '(1)) nil
+    (fnext '(1 2 3 4)) 2
 
-    (frest []) nil
-    (frest [1]) nil
-    (frest [1 2 3 4]) 2
+    (fnext []) nil
+    (fnext [1]) nil
+    (fnext [1 2 3 4]) 2
 
-    (frest {}) nil
-    (frest (sorted-map :a 1)) nil
-    (frest (sorted-map :a 1 :b 2)) [:b 2]
+    (fnext {}) nil
+    (fnext (sorted-map :a 1)) nil
+    (fnext (sorted-map :a 1 :b 2)) [:b 2]
 
-    (frest #{}) nil
-    (frest #{1}) nil
-    (frest (sorted-set 1 2 3 4)) 2 ))
+    (fnext #{}) nil
+    (fnext #{1}) nil
+    (fnext (sorted-set 1 2 3 4)) 2 ))
 
 
-;; (rfirst coll) = (rest (first coll))
+;; (nfirst coll) = (next (first coll))
 ;;
-(deftest test-rfirst
-  (is (thrown? IllegalArgumentException (rfirst)))
+(deftest test-nfirst
+  (is (thrown? IllegalArgumentException (nfirst)))
   (are (= _1 _2)
-    (rfirst nil) nil
+    (nfirst nil) nil
 
-    (rfirst ()) nil
-    (rfirst '((1 2 3) (4 5 6))) '(2 3)
+    (nfirst ()) nil
+    (nfirst '((1 2 3) (4 5 6))) '(2 3)
 
-    (rfirst []) nil
-    (rfirst [[1 2 3] [4 5 6]]) '(2 3)
+    (nfirst []) nil
+    (nfirst [[1 2 3] [4 5 6]]) '(2 3)
 
-    (rfirst {}) nil
-    (rfirst {:a 1}) '(1)
+    (nfirst {}) nil
+    (nfirst {:a 1}) '(1)
 
-    (rfirst #{}) nil
-    (rfirst #{[1 2]}) '(2) ))
+    (nfirst #{}) nil
+    (nfirst #{[1 2]}) '(2) ))
 
 
-;; (rrest coll) = (rest (rest coll))
+;; (nnext coll) = (next (next coll))
 ;;
-(deftest test-rrest
-  (is (thrown? IllegalArgumentException (rrest)))
+(deftest test-nnext
+  (is (thrown? IllegalArgumentException (nnext)))
   (are (= _1 _2)
-    (rrest nil) nil
+    (nnext nil) nil
 
-    (rrest ()) nil
-    (rrest '(1)) nil
-    (rrest '(1 2)) nil
-    (rrest '(1 2 3 4)) '(3 4)
+    (nnext ()) nil
+    (nnext '(1)) nil
+    (nnext '(1 2)) nil
+    (nnext '(1 2 3 4)) '(3 4)
 
-    (rrest []) nil
-    (rrest [1]) nil
-    (rrest [1 2]) nil
-    (rrest [1 2 3 4]) '(3 4)
+    (nnext []) nil
+    (nnext [1]) nil
+    (nnext [1 2]) nil
+    (nnext [1 2 3 4]) '(3 4)
 
-    (rrest {}) nil
-    (rrest (sorted-map :a 1)) nil
-    (rrest (sorted-map :a 1 :b 2)) nil
-    (rrest (sorted-map :a 1 :b 2 :c 3 :d 4)) '([:c 3] [:d 4])
+    (nnext {}) nil
+    (nnext (sorted-map :a 1)) nil
+    (nnext (sorted-map :a 1 :b 2)) nil
+    (nnext (sorted-map :a 1 :b 2 :c 3 :d 4)) '([:c 3] [:d 4])
 
-    (rrest #{}) nil
-    (rrest #{1}) nil
-    (rrest (sorted-set 1 2)) nil
-    (rrest (sorted-set 1 2 3 4)) '(3 4) ))
+    (nnext #{}) nil
+    (nnext #{1}) nil
+    (nnext (sorted-set 1 2)) nil
+    (nnext (sorted-set 1 2 3 4)) '(3 4) ))
 
 
 ; distinct was broken for nil & false:
@@ -303,21 +303,21 @@
 ;
 (deftest test-distinct
   (are (= _1 _2)
-      (distinct ()) nil
+      (distinct ()) ()
       (distinct '(1)) '(1)
       (distinct '(1 2 3)) '(1 2 3)
       (distinct '(1 2 3 1 1 1)) '(1 2 3)
       (distinct '(1 1 1 2)) '(1 2)
       (distinct '(1 2 1 2)) '(1 2)
 
-      (distinct []) nil
+      (distinct []) ()
       (distinct [1]) '(1)
       (distinct [1 2 3]) '(1 2 3)
       (distinct [1 2 3 1 2 2 1 1]) '(1 2 3)
       (distinct [1 1 1 2]) '(1 2)
       (distinct [1 2 1 2]) '(1 2)
 
-      (distinct "") nil
+      (distinct "") ()
       (distinct "a") '(\a)
       (distinct "abc") '(\a \b \c)
       (distinct "abcabab") '(\a \b \c)
@@ -343,7 +343,7 @@
 
 (deftest test-interpose
   (are (= _1 _2)
-    (interpose 0 []) nil
+    (interpose 0 []) ()
     (interpose 0 [1]) '(1)
     (interpose 0 [1 2]) '(1 0 2)
     (interpose 0 [1 2 3]) '(1 0 2 0 3) ))
@@ -356,9 +356,9 @@
     (interleave [1] [3 4]) '(1 3)
     (interleave [1 2] [3]) '(1 3)
 
-    (interleave [] [3 4]) nil
-    (interleave [1 2] []) nil
-    (interleave [] []) nil ))
+    (interleave [] [3 4]) ()
+    (interleave [1 2] []) ()
+    (interleave [] []) () ))
 
 
 (deftest test-zipmap
@@ -375,22 +375,22 @@
 
 (deftest test-concat
   (are (= _1 _2)
-    (concat) nil
+    (concat) ()
 
-    (concat []) nil
+    (concat []) ()
     (concat [1 2]) '(1 2)
 
     (concat [1 2] [3 4]) '(1 2 3 4)
     (concat [] [3 4]) '(3 4)
     (concat [1 2] []) '(1 2)
-    (concat [] []) nil
+    (concat [] []) ()
 
     (concat [1 2] [3 4] [5 6]) '(1 2 3 4 5 6) ))
 
 
 (deftest test-cycle
   (are (= _1 _2)
-    (cycle []) nil
+    (cycle []) ()
 
     (take 3 (cycle [1])) '(1 1 1)
     (take 5 (cycle [1 2 3])) '(1 2 3 1 2)
@@ -402,20 +402,20 @@
   (are (= _1 _2)
     (partition 2 [1 2 3]) '((1 2))
     (partition 2 [1 2 3 4]) '((1 2) (3 4))
-    (partition 2 []) nil
+    (partition 2 []) ()
 
     (partition 2 3 [1 2 3 4 5 6 7]) '((1 2) (4 5))
     (partition 2 3 [1 2 3 4 5 6 7 8]) '((1 2) (4 5) (7 8))
-    (partition 2 3 []) nil
+    (partition 2 3 []) ()
 
-    (partition 1 []) nil
+    (partition 1 []) ()
     (partition 1 [1 2 3]) '((1) (2) (3))
 
-    (partition 5 [1 2 3]) nil
+    (partition 5 [1 2 3]) ()
 
 ;    (partition 0 [1 2 3]) (repeat nil)   ; infinite sequence of nil
-    (partition -1 [1 2 3]) nil
-    (partition -2 [1 2 3]) nil ))
+    (partition -1 [1 2 3]) ()
+    (partition -2 [1 2 3]) () ))
 
 
 (deftest test-reverse
@@ -432,17 +432,17 @@
     (take 5 [1 2 3 4 5]) '(1 2 3 4 5)
     (take 9 [1 2 3 4 5]) '(1 2 3 4 5)
 
-    (take 0 [1 2 3 4 5]) nil
-    (take -1 [1 2 3 4 5]) nil
-    (take -2 [1 2 3 4 5]) nil ))
+    (take 0 [1 2 3 4 5]) ()
+    (take -1 [1 2 3 4 5]) ()
+    (take -2 [1 2 3 4 5]) () ))
 
 
 (deftest test-drop
   (are (= _1 _2)
     (drop 1 [1 2 3 4 5]) '(2 3 4 5)
     (drop 3 [1 2 3 4 5]) '(4 5)
-    (drop 5 [1 2 3 4 5]) nil
-    (drop 9 [1 2 3 4 5]) nil
+    (drop 5 [1 2 3 4 5]) ()
+    (drop 9 [1 2 3 4 5]) ()
 
     (drop 0 [1 2 3 4 5]) '(1 2 3 4 5)
     (drop -1 [1 2 3 4 5]) '(1 2 3 4 5)
@@ -467,18 +467,18 @@
 
 (deftest test-take-while
   (are (= _1 _2)
-    (take-while pos? []) nil
+    (take-while pos? []) ()
     (take-while pos? [1 2 3 4]) '(1 2 3 4)
     (take-while pos? [1 2 3 -1]) '(1 2 3)
     (take-while pos? [1 -1 2 3]) '(1)
-    (take-while pos? [-1 1 2 3]) nil
-    (take-while pos? [-1 -2 -3]) nil ))
+    (take-while pos? [-1 1 2 3]) ()
+    (take-while pos? [-1 -2 -3]) () ))
 
 
 (deftest test-drop-while
   (are (= _1 _2)
-    (drop-while pos? []) nil
-    (drop-while pos? [1 2 3 4]) nil
+    (drop-while pos? []) ()
+    (drop-while pos? [1 2 3 4]) ()
     (drop-while pos? [1 2 3 -1]) '(-1)
     (drop-while pos? [1 -1 2 3]) '(-1 2 3)
     (drop-while pos? [-1 1 2 3]) '(-1 1 2 3)
@@ -495,32 +495,32 @@
 (deftest test-drop-last
   (are (= _1 _2)
     ; as butlast
-    (drop-last []) nil
-    (drop-last [1]) nil
+    (drop-last []) ()
+    (drop-last [1]) ()
     (drop-last [1 2 3]) '(1 2)
 
-    ; as butlast
-    (drop-last 1 []) nil
-    (drop-last 1 [1]) nil
+    ; as butlast, but lazy
+    (drop-last 1 []) ()
+    (drop-last 1 [1]) ()
     (drop-last 1 [1 2 3]) '(1 2)
 
-    (drop-last 2 []) nil
-    (drop-last 2 [1]) nil
+    (drop-last 2 []) ()
+    (drop-last 2 [1]) ()
     (drop-last 2 [1 2 3]) '(1)
 
-    (drop-last 5 []) nil
-    (drop-last 5 [1]) nil
-    (drop-last 5 [1 2 3]) nil
+    (drop-last 5 []) ()
+    (drop-last 5 [1]) ()
+    (drop-last 5 [1 2 3]) ()
 
-    (drop-last 0 []) nil
+    (drop-last 0 []) ()
     (drop-last 0 [1]) '(1)
     (drop-last 0 [1 2 3]) '(1 2 3)
 
-    (drop-last -1 []) nil
+    (drop-last -1 []) ()
     (drop-last -1 [1]) '(1)
     (drop-last -1 [1 2 3]) '(1 2 3)
 
-    (drop-last -2 []) nil
+    (drop-last -2 []) ()
     (drop-last -2 [1]) '(1)
     (drop-last -2 [1 2 3]) '(1 2 3) ))
 
@@ -530,13 +530,13 @@
   (is (vector? (split-at 2 [1 2 3])))
 
   (are (= _1 _2)
-    (split-at 2 []) [nil nil]
+    (split-at 2 []) [() ()]
     (split-at 2 [1 2 3 4 5]) [(list 1 2) (list 3 4 5)]
 
-    (split-at 5 [1 2 3]) [(list 1 2 3) nil]
-    (split-at 0 [1 2 3]) [nil (list 1 2 3)]
-    (split-at -1 [1 2 3]) [nil (list 1 2 3)]
-    (split-at -5 [1 2 3]) [nil (list 1 2 3)] ))
+    (split-at 5 [1 2 3]) [(list 1 2 3) ()]
+    (split-at 0 [1 2 3]) [() (list 1 2 3)]
+    (split-at -1 [1 2 3]) [() (list 1 2 3)]
+    (split-at -5 [1 2 3]) [() (list 1 2 3)] ))
 
 
 (deftest test-split-with
@@ -544,10 +544,10 @@
   (is (vector? (split-with pos? [1 2 -1 0 3 4])))
 
   (are (= _1 _2)
-    (split-with pos? []) [nil nil]
+    (split-with pos? []) [() ()]
     (split-with pos? [1 2 -1 0 3 4]) [(list 1 2) (list -1 0 3 4)]
 
-    (split-with pos? [-1 2 3 4 5]) [nil (list -1 2 3 4 5)]
+    (split-with pos? [-1 2 3 4 5]) [() (list -1 2 3 4 5)]
     (split-with number? [1 -2 "abc" \x]) [(list 1 -2) (list "abc" \x)] ))
 
 
