@@ -90,27 +90,18 @@
 
 ;; recursive sequence helpers by Christophe Grand
 ;; see http://clj-me.blogspot.com/2009/01/recursive-seqs.html
+(defmacro rec-seq 
+ "Similar to lazy-seq but binds the resulting seq to the supplied 
+  binding-name, allowing for recursive expressions."
+ [binding-name & body]
+  (list* '#^{:once true :super-name "clojure/lang/LazySeq"} fn* binding-name [] body))
+  
 (defmacro rec-cat 
- "Similar to lazy-cat but binds the resulting sequence using the supplied 
-  binding-form, allowing recursive expressions. The first collection 
-  expression must not be recursive and must yield a non-nil seq."
- [binding-form expr & rec-exprs]
-  `(let [rec-rest# (atom nil)
-         result# (lazy-cat ~expr (force @rec-rest#))
-         ~binding-form result#]
-     (swap! rec-rest# (constantly (delay (lazy-cat ~@rec-exprs))))
-     result#))
+ "Similar to lazy-cat but binds the resulting sequence to the supplied 
+  binding-name, allowing for recursive expressions."
+ [binding-name & exprs]
+  `(rec-seq ~binding-name (lazy-cat ~@exprs)))
          
-(defmacro rec-cons 
- "Similar to lazy-cons but binds the resulting sequence using the supplied 
-  binding-form, allowing recursive expressions. The first expression must 
-  not be recursive."
- [binding-form expr & rec-exprs]
-  `(let [rec-rest# (atom nil)
-         result# (lazy-seq (cons ~expr (force @rec-rest#)))
-         ~binding-form result#]
-     (swap! rec-rest# (constantly (delay (lazy-cat ~@rec-exprs))))
-     result#))
      
 ;; reductions by Chris Houser
 ;; see http://groups.google.com/group/clojure/browse_thread/thread/3edf6e82617e18e0/58d9e319ad92aa5f?#58d9e319ad92aa5f
@@ -119,10 +110,10 @@
   per reduce) of coll by f, starting with init."
   ([f coll]
    (if (seq coll)
-     (rec-cons self (first coll) (map f self (rest coll)))
+     (rec-seq self (cons (first coll) (map f self (rest coll))))
      (cons (f) nil)))
   ([f init coll]
-   (rec-cons self init (map f self coll))))
+   (rec-seq self (cons init (map f self coll)))))
 
 (defn rotations
   "Returns a lazy seq of all rotations of a seq"
