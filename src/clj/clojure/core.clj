@@ -563,7 +563,7 @@
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
   [coll]
-    (reduce conj nil coll))
+    (reduce conj () coll))
 
 ;;math stuff
 (defn +
@@ -1675,10 +1675,11 @@
   ([coll]
    (sort compare coll))
   ([#^java.util.Comparator comp coll]
-   (when (seq coll)
+   (if (seq coll)
      (let [a (to-array coll)]
        (. java.util.Arrays (sort a comp))
-       (seq a)))))
+       (seq a))
+     ())))
 
 (defn sort-by
   "Returns a sorted sequence of the items in coll, where the sort
