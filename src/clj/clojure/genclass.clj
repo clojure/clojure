@@ -24,9 +24,9 @@
       (let [[mm considered]
             (loop [mm mm
                    considered considered
-                   meths (concat
-                          (seq (. c (getDeclaredMethods)))
-                          (seq (. c (getMethods))))]
+                   meths (seq (concat
+                                (seq (. c (getDeclaredMethods)))
+                                (seq (. c (getMethods)))))]
               (if meths
                 (let [#^java.lang.reflect.Method meth (first meths)
                       mods (. meth (getModifiers))
@@ -215,8 +215,8 @@
                                         ;start class definition
     (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
                  cname nil (iname super)
-                 (when interfaces
-                   (into-array (map iname interfaces)))))
+                 (when-let [ifc (seq interfaces)]
+                   (into-array (map iname ifc)))))
     
                                         ;static fields for vars
     (doseq [v var-fields]
