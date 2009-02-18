@@ -1433,6 +1433,14 @@
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn sequence
+  "Coerces coll to a (possibly empty) sequence, if it is not already
+  one. Will not force a lazy seq. (sequence nil) yields ()"  
+  [coll]
+   (if (seq? coll)
+     coll
+     (or (seq coll) ())))
+
 (defn every?
   "Returns true if (pred x) is logical true for every x in coll, else
   false."
