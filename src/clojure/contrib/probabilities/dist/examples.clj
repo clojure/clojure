@@ -27,13 +27,13 @@
 
 ; The sum of two dice using a monad comprehension
 (assert (= two-dice
-	   (domonad dist
+	   (domonad dist-m
 		    [d1 die
 		     d2 die]
 		    (+ d1 d2))))
 
 ; The two values separately, but as an ordered pair
-(domonad dist
+(domonad dist-m
   [d1 die
    d2 die]
   (if (< d1 d2) (list d1 d2) (list d2 d1)))
@@ -42,7 +42,7 @@
 (cond-prob odd? two-dice)
 
 ; A two-step experiment: throw a die, and then add 1 with probability 1/2
-(domonad dist
+(domonad dist-m
   [d die
    x (choose (/ 1 2)  d
 	     :else    (inc d))]
@@ -50,7 +50,7 @@
 
 ; The sum of n dice
 (defn dice [n]
-   (domonad dist
+   (domonad dist-m
       [ds (m-seq (replicate n die))]
       (apply + ds)))
 
@@ -84,7 +84,7 @@
 (def doors #{:A :B :C})
 
 ; A simulation of the game, step by step:
-(domonad dist
+(domonad dist-m
   [; The prize is hidden behind one of the doors.
    prize  (uniform doors)
    ; The player make his initial choice.
@@ -126,7 +126,7 @@
 
 ; Multiple evolution steps can be chained together with m-chain,
 ; since each step's input is the output of the previous step.
-(with-monad dist
+(with-monad dist-m
   (defn evolve [n tree]
     ((m-chain (replicate n evolve-1)) tree)))
 
@@ -136,7 +136,7 @@
 (evolve 2 new-tree)
 
 ; We can also get a distribution of the height only:
-(with-monad dist
+(with-monad dist-m
   ((m-lift 1 :height) (evolve 2 new-tree)))
 
 
@@ -170,7 +170,7 @@
 ; 4) Normalize the distribution for the non-nil values.
 (defn add-observation [prior observation]
   (normalize-cond
-    (domonad cond-dist
+    (domonad cond-dist-m
       [die    prior
        number (get dice die)]
       (when (= number observation) die))))
@@ -188,7 +188,7 @@
 ; With Bayesian inference, it is most efficient to eliminate choices
 ; as early as possible.
 (defn add-observations [prior observations]
-  (with-monad cond-dist
+  (with-monad cond-dist-m
     (let [n-nums #(m-seq (replicate (count observations) (get dice %)))]
       (normalize-cond
         (domonad

@@ -1,7 +1,7 @@
 ;; Test routines for monads.clj
 
 ;; by Konrad Hinsen
-;; last updated January 12, 2009
+;; last updated February 18, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -17,7 +17,7 @@
 	clojure.contrib.macros))
 
 (deftest sequence-monad
-  (with-monad sequence 
+  (with-monad sequence-m
     (are (= _1 _2)
       (domonad [x (range 3) y (range 2)] (+ x y))
         '(0 1 1 2 2 3)
@@ -33,7 +33,7 @@
         '(0 1 2 0 1))))
 
 (deftest maybe-monad
-  (with-monad maybe
+  (with-monad maybe-m
     (let [m+ (m-lift 2 +)
           mdiv (fn [x y] (domonad [a x  b y  :when (not (zero? b))] (/ a b)))]
       (are (= _1 _2)
@@ -47,7 +47,7 @@
 	  (m-result 1)))))
 
 (deftest seq-maybe-monad
-  (with-monad (maybe-t sequence)
+  (with-monad (maybe-t sequence-m)
     (letfn [pairs [xs] ((m-lift 2 #(list %1 %2)) xs xs)]
       (are (= _1 _2)
         ((m-lift 1 inc) (for [n (range 10)] (when (odd? n) n)))

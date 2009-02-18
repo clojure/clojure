@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated February 15, 2009
+;; last updated February 18, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,7 +12,6 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.monads
-  (:refer-clojure :exclude (sequence))
   (:require [clojure.contrib.accumulators]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -210,7 +209,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Identity monad
-(defmonad id
+(defmonad identity-m
    "Monad describing plain computations. This monad does in fact nothing
     at all. It is useful for testing, for combination with monad
     transformers, and for code that is parameterized with a monad."
@@ -220,7 +219,7 @@
   ])
 
 ; Maybe monad
-(defmonad maybe
+(defmonad maybe-m
    "Monad describing computations with possible failures. Failure is
     represented by nil, any other value is considered valid. As soon as
     a step returns nil, the whole computation will yield nil as well."
@@ -233,7 +232,7 @@
     ])
 
 ; Sequence monad (called "list monad" in Haskell)
-(defmonad sequence
+(defmonad sequence-m
    "Monad describing multi-valued computations, i.e. computations
     that can yield multiple values. Any object implementing the seq
     protocol can be used as a monadic value."
@@ -247,7 +246,7 @@
     ])
 
 ; State monad
-(defmonad state
+(defmonad state-m
    "Monad describing stateful computations. The monadic values have the
     structure (fn [old-state] (list result new-state))."
    [m-result  (fn m-result-state [v]
@@ -268,7 +267,7 @@
   (update-state identity))
 
 ; Writer monad
-(defn writer
+(defn writer-m
   "Monad describing computations that accumulate data on the side, e.g. for
    logging. The monadic values have the structure [value log]. Any of the
    accumulators from clojure.contrib.accumulators can be used for storing the
@@ -295,7 +294,7 @@
 
 ; Continuation monad
 
-(defmonad cont
+(defmonad cont-m
   "Monad describing computations in continuation-passing style. The monadic
    values are functions that are called with a single argument representing
    the continuation of the computation, to which they pass their result."

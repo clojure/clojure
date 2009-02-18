@@ -1,7 +1,7 @@
 ;; Finite probability distributions
 
 ;; by Konrad Hinsen
-;; last updated January 30, 2009
+;; last updated February 18, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,7 +12,6 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.probabilities.dist
-  (:refer-clojure :exclude (sequence))
   (:use clojure.contrib.monads clojure.contrib.macros
 	clojure.contrib.monads clojure.contrib.def))
 
@@ -20,12 +19,12 @@
 ; distributions (e.g. there is a finite number of possible value), which
 ; are represented as maps from values to probabilities.
 
-(defmonad dist
+(defmonad dist-m
   "Monad describing computations on fuzzy quantities, represented by a finite
    probability distribution for the possible values. A distribution is
    represented by a map from values to probabilities."
   [m-result (fn m-result-dist [v]
-       {v 1})
+	      {v 1})
    m-bind   (fn m-bind-dist [mv f]
 	      (letfn [add-prob [dist [x p]]
 		        (assoc dist x (+ (get dist x 0) p))]
@@ -40,8 +39,8 @@
 ; The function normalize takes this probability out of the distribution and
 ; re-distributes its weight over the valid values.
 
-(defvar cond-dist
-  (maybe-t dist)
+(defvar cond-dist-m
+  (maybe-t dist-m)
   "Variant of the dist monad that can handle undefined values.")
 
 ; Normalization
@@ -100,7 +99,7 @@
 		  :else (assoc dist v p))]
     (reduce add-choice {} (partition 2 choices))))
 
-(with-monad dist
+(with-monad dist-m
 
   (defn certainly
     "Returns a distribution in which the single value v has probability 1."
@@ -119,7 +118,7 @@
    the predicate pred."
   [pred dist]
   (normalize-cond
-    (with-monad cond-dist
+    (with-monad cond-dist-m
       (m-bind dist (fn [v] (m-result (when (pred v) v)))))))
 
 ; Select (with equal probability) N items from a sequence
@@ -130,7 +129,7 @@
   (let [[h t] (split-at n xs)]
     (list (first t) (concat h (rest t)))))
 
-(with-monad dist
+(with-monad dist-m
 
   (defn- select-n [n xs]
     (letfn [select-1 [[s xs]]
