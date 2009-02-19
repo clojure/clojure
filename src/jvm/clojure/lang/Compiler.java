@@ -175,7 +175,8 @@ static final public Var METHOD = Var.create(null);
 static final public Var IN_CATCH_FINALLY = Var.create(null);
 
 //String
-static final public Var SOURCE = Var.create("NO_SOURCE_FILE");
+static final public Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                                 Symbol.create("*source-path*"), "NO_SOURCE_FILE");
 
 //String
 static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
