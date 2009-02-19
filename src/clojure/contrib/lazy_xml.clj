@@ -122,7 +122,7 @@
   ([s startparse queue-size]
     (first (mktree (parse-seq s startparse queue-size)))))
 
-(def escape-xml-map {\< "&lt;" \> "&gt;" \" "&quot;" \& "&amp;"})
+(def escape-xml-map (zipmap "'<>\"&" (map #(str \& % \;) '[apos lt gt quot amp])))
 
 (defn escape-xml [text]
   (apply str (map #(escape-xml-map % %) text)))
