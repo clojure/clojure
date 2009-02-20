@@ -3365,7 +3365,9 @@ static public class FnExpr implements Expr{
 		if(Modifier.isPublic(c.getModifiers()))
 			{
 			//can't emit derived fn types due to visibility
-			if(RestFn.class.isAssignableFrom(c))
+			if(LazySeq.class.isAssignableFrom(c))
+				return Type.getType(ISeq.class);
+			else if(RestFn.class.isAssignableFrom(c))
 				return Type.getType(RestFn.class);
 			else if(AFn.class.isAssignableFrom(c))
 				return Type.getType(AFn.class);
@@ -3981,7 +3983,11 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	try
 		{
         if(form instanceof LazySeq)
+	        {
             form = RT.seq(form);
+	        if(form == null)
+		        form = PersistentList.EMPTY;
+	        }
 		if(form == null)
 			return NIL_EXPR;
 		else if(form == Boolean.TRUE)
