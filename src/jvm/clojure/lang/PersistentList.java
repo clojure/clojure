@@ -243,7 +243,7 @@ public Object reduce(IFn f, Object start) throws Exception{
 
 	//////////// List stuff /////////////////
 	private List reify(){
-		return new ArrayList(this);
+		return Collections.unmodifiableList(new ArrayList(this));
 	}
 
 	public List subList(int fromIndex, int toIndex){
