@@ -125,15 +125,16 @@
      (iterate inc 0) x)
     (list nil)))
 
-(defn partition-all 
-  "Lazily break s into chunks of length n (or less, for the
-  final chunk)."
-  [n s]
-  (lazy-seq
-   (when (seq s)
-     (cons (take n s)
-           (partition-all n (drop n s))))))
-
+(defn partition-all
+  "Returns a lazy sequence of lists like clojure.core/partition, but may
+  include lists with fewer than n items at the end."
+  ([n coll]
+     (partition-all n n coll))
+  ([n step coll]
+     (lazy-seq
+      (when-let [s (seq coll)]
+        (cons (take n s) (partition-all n step (drop step s)))))))
+  
 (defn shuffle
   "Return a random permutation of coll"
   [coll]
@@ -141,6 +142,7 @@
     (java.util.Collections/shuffle l)
     (seq l)))
 
-(defn rand-elt [s]
+(defn rand-elt
   "Return a random element of this seq"
+  [s]
   (nth s (rand-int (count s))))
