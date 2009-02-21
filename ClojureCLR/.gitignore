@@ -1,0 +1,7 @@
+#Visual Studio artifacts
+bin
+obj
+*.user
+*.suo
+# Emacs artifacts
+*~

@@ -1,0 +1,11 @@
+Versions currently compiled against:
+
+Visual Studio:	2008 SP 1
+.Net Framework:	3.5 SP 1
+
+NUnit:		2.4.8
+RhinoMocks:		3.5
+
+Clojure:		Rev 1279
+
+DLR:			Changeset 10606

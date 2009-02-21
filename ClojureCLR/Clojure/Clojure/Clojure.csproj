@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B8089F66-DFBD-4906-BEE0-B317689C2524}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>clojure.lang</RootNamespace>
+    <AssemblyName>Clojure</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="vjslib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Lib\Counted.cs" />
+    <Compile Include="Lib\IDeref.cs" />
+    <Compile Include="Readers\LineNumberingReader.cs" />
+    <Compile Include="Runtime\ClojureBinder.cs" />
+    <Compile Include="Runtime\ClojureCommandLine.cs" />
+    <Compile Include="Runtime\ClojureContext.cs" />
+    <Compile Include="Runtime\ClojureParser.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Compiler\Generator.cs" />
+    <Compile Include="Lib\AFn.cs" />
+    <Compile Include="Lib\AFnImpl.cs" />
+    <Compile Include="Lib\AFunction.cs" />
+    <Compile Include="Lib\Agent.cs" />
+    <Compile Include="Lib\AMapEntry.cs" />
+    <Compile Include="Lib\APersistentMap.cs" />
+    <Compile Include="Lib\APersistentSet.cs" />
+    <Compile Include="Lib\APersistentVector.cs" />
+    <Compile Include="Lib\ARef.cs" />
+    <Compile Include="Lib\AReference.cs" />
+    <Compile Include="Lib\ArraySeq.cs" />
+    <Compile Include="Lib\ArrayStream.cs" />
+    <Compile Include="Lib\ASeq.cs" />
+    <Compile Include="Lib\Associative.cs" />
+    <Compile Include="Lib\Atom.cs" />
+    <Compile Include="Lib\AtomicInteger.cs" />
+    <Compile Include="Lib\AtomicLong.cs" />
+    <Compile Include="Lib\AtomicReference.cs" />
+    <Compile Include="Lib\Box.cs" />
+    <Compile Include="Lib\CachedSeq.cs" />
+    <Compile Include="Lib\ClojureException.cs" />
+    <Compile Include="Lib\Compiler.cs" />
+    <Compile Include="Lib\Cons.cs" />
+    <Compile Include="Lib\Delay.cs" />
+    <Compile Include="Lib\Fn.cs" />
+    <Compile Include="Lib\FnSeq.cs" />
+    <Compile Include="Lib\FuncTypes.cs" />
+    <Compile Include="Lib\IFn.cs" />
+    <Compile Include="Lib\IMapEntry.cs" />
+    <Compile Include="Lib\IMeta.cs" />
+    <Compile Include="Lib\IndexedSeq.cs" />
+    <Compile Include="Lib\IObj.cs" />
+    <Compile Include="Lib\IPersistentCollection.cs" />
+    <Compile Include="Lib\IPersistentList.cs" />
+    <Compile Include="Lib\IPersistentMap.cs" />
+    <Compile Include="Lib\IPersistentSet.cs" />
+    <Compile Include="Lib\IPersistentStack.cs" />
+    <Compile Include="Lib\IPersistentVector.cs" />
+    <Compile Include="Lib\IReduce.cs" />
+    <Compile Include="Lib\IRef.cs" />
+    <Compile Include="Lib\IReference.cs" />
+    <Compile Include="Lib\ISeq.cs" />
+    <Compile Include="Lib\IStream.cs" />
+    <Compile Include="Lib\IteratorStream.cs" />
+    <Compile Include="Lib\JavaConcurrentDictionary.cs" />
+    <Compile Include="Lib\Keyword.cs" />
+    <Compile Include="Lib\LazilyPersistentVector.cs" />
+    <Compile Include="Lib\LazyCons.cs" />
+    <Compile Include="Lib\LispReader.cs" />
+    <Compile Include="Lib\LockingTransaction.cs" />
+    <Compile Include="Lib\MapEntry.cs" />
+    <Compile Include="Lib\MapEnumerator.cs" />
+    <Compile Include="Lib\MultiFn.cs" />
+    <Compile Include="Lib\Named.cs" />
+    <Compile Include="Lib\Namespace.cs" />
+    <Compile Include="Lib\Numbers.cs" />
+    <Compile Include="Lib\Obj.cs" />
+    <Compile Include="Lib\PersistentArrayMap.cs" />
+    <Compile Include="Lib\PersistentHashMap.cs" />
+    <Compile Include="Lib\PersistentHashSet.cs" />
+    <Compile Include="Lib\PersistentList.cs" />
+    <Compile Include="Lib\PersistentQueue.cs" />
+    <Compile Include="Lib\PersistentStructMap.cs" />
+    <Compile Include="Lib\PersistentTreeMap.cs" />
+    <Compile Include="Lib\PersistentTreeSet.cs" />
+    <Compile Include="Lib\PersistentVector.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Lib\Range.cs" />
+    <Compile Include="Lib\Ratio.cs" />
+    <Compile Include="Lib\Ref.cs" />
+    <Compile Include="Lib\RestFn.cs" />
+    <Compile Include="Lib\RestFnImpl.cs" />
+    <Compile Include="Lib\Reversible.cs" />
+    <Compile Include="Lib\RT.cs" />
+    <Compile Include="Lib\SeqEnumerator.cs" />
+    <Compile Include="Lib\Sequential.cs" />
+    <Compile Include="Lib\Settable.cs" />
+    <Compile Include="Lib\Sorted.cs" />
+    <Compile Include="Lib\Streamable.cs" />
+    <Compile Include="Lib\StreamSeq.cs" />
+    <Compile Include="Lib\StringSeq.cs" />
+    <Compile Include="Lib\Symbol.cs" />
+    <Compile Include="Lib\Util.cs" />
+    <Compile Include="Lib\Var.cs" />
+    <Compile Include="Runtime\Reflector.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
+      <Project>{2AE75F5A-CD1F-4925-9647-AF4D1C282FB4}</Project>
+      <Name>Microsoft.Scripting.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting.Core\Microsoft.Scripting.ExtensionAttribute.csproj">
+      <Project>{8B0F1074-750E-4D64-BF23-A1E0F54261E5}</Project>
+      <Name>Microsoft.Scripting.ExtensionAttribute</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting\Microsoft.Scripting.csproj">
+      <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
+      <Name>Microsoft.Scripting</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Bootstrap\ants.clj" />
+    <None Include="Bootstrap\core-print.clj" />
+    <None Include="Bootstrap\core.clj" />
+    <None Include="Bootstrap\test.clj" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
