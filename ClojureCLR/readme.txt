@@ -3,6 +3,8 @@ ClojureCLR
 This project is a native implementation of Clojure over the Microsoft .Net Framework 
 programmed in C# and using the Dynamic Language Runtime.
 
+Status: Alpha, developer release
+
 Goals:
 
  -- Implement a feature-complete Clojure on top of CLR/DLR.
@@ -23,6 +25,8 @@ For more information on clojure:  http://clojure.org
 For instructions on installing: .\install.txt
 
 Version information:  .\versions.txt
+
+Todo list:  .\todo.txt
 
 --------------------------------------------------------------------------------------
 
