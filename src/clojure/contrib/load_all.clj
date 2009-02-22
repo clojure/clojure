@@ -36,10 +36,9 @@ auto-agent
 ;; combinatorics
 command-line
 cond
-;; condt
+condt
 def
 duck-streams
-;; enum
 error-kit
 except
 fcase
