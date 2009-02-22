@@ -33,7 +33,8 @@
         <path location="${src}"/>
         <path location="${clojure.jar}"/>
       </classpath>
-      <arg value="src/clojure/contrib/test_clojure.clj"/>
+      <arg value="-e"/>
+      <arg value="(require '(clojure.contrib [test-clojure :as main])) (main/run)"/>
     </java>
   </target>
 
