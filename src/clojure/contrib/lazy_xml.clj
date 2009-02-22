@@ -22,7 +22,8 @@
 ; http://www.extreme.indiana.edu/xgws/xsoap/xpp/
 (def has-pull false)
 (defn- parse-seq-pull [& _])
-(try (load "lazy_xml/with_pull")
+(try
+  (load "lazy_xml/with_pull")
   (catch Exception e
     (when-not (re-find #"XmlPullParser" (str e))
       (throw e))))

@@ -27,22 +27,24 @@
   (into {} (concat (ns-decs xpp) (attrs xpp))))
 
 (defn- pull-step [xpp]
-  (case (.next xpp)
-     XmlPullParser/START_TAG
-        (lazy-cons (struct node :start-element
-                           (keyword (.getName xpp))
-                           (attr-hash xpp))
-                   (pull-step xpp))
-     XmlPullParser/END_TAG
-        (lazy-cons (struct node :end-element
-                           (keyword (.getName xpp)))
-                   (pull-step xpp))
-     XmlPullParser/TEXT
-        (let [text (.trim (.getText xpp))]
-          (if (seq text)
-            (lazy-cons (struct node :characters nil nil text)
-                       (pull-step xpp))
-            (recur xpp)))))
+  (let [step (fn [xpp]
+               (condp = (.next xpp)
+                 XmlPullParser/START_TAG
+                   (cons (struct node :start-element
+                                 (keyword (.getName xpp))
+                                 (attr-hash xpp))
+                         (pull-step xpp))
+                   XmlPullParser/END_TAG
+                   (cons (struct node :end-element
+                                 (keyword (.getName xpp)))
+                         (pull-step xpp))
+                   XmlPullParser/TEXT
+                   (let [text (.trim (.getText xpp))]
+                     (if (empty? text)
+                       (recur xpp)
+                       (cons (struct node :characters nil nil text)
+                             (pull-step xpp))))))]
+    (lazy-seq (step xpp))))
 
 (def #^{:private true} factory
   (doto (XmlPullParserFactory/newInstance)
