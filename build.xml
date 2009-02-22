@@ -87,6 +87,7 @@
       <arg value="clojure.contrib.sql.internal"/>
       <arg value="clojure.contrib.sql"/>
       <arg value="clojure.contrib.str-utils"/>
+      <arg value="clojure.contrib.test-clojure"/>
       <arg value="clojure.contrib.test-is"/>
       <arg value="clojure.contrib.trace"/>
       <arg value="clojure.contrib.zip-filter"/>
