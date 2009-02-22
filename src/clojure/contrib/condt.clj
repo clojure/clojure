@@ -1,7 +1,7 @@
 ;;; condt.clj - generic case-like macro using template expressions
 
 ;; By Stuart Sierra, http://stuartsierra.com/
-;; December 23, 2008
+;; February 21, 2009
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -13,6 +13,8 @@
 
 
 ;; CHANGE LOG
+;;
+;; February 21, 2009: fixed to work with new lazy Clojure
 ;;
 ;; December 23, 2008: renamed to condt, since clojure.core now
 ;; contains a (different) condp as of Clojure SVN rev. 1180
@@ -38,7 +40,7 @@
              (= 1 (count c)) (first c)
              :else (list 'if (list test-fn-sym (first c))
                          (second c)
-                         (this (rrest c)))))]
+                         (this (nthnext c 2)))))]
     `(let [~test-fn-sym (clojure.contrib.template/template ~expr)]
        ~(f clauses))))
 
@@ -52,6 +54,6 @@
                (= 1 (count c)) (throw (IllegalStateException. "Odd number of clauses in econdt."))
                :else (list 'if (list test-fn-sym (first c))
                            (second c)
-                           (this (rrest c)))))]
+                           (this (nthnext c 2)))))]
     `(let [~test-fn-sym (clojure.contrib.template/template ~expr)]
        ~(f clauses))))
