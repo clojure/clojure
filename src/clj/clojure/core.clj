@@ -1742,10 +1742,10 @@
   be used to force any effects. Walks through the successive nexts of
   the seq, does not retain the head and returns nil."
   ([coll]
-   (when (and (seq coll) (or (first coll) true))
+   (when (seq coll)
      (recur (next coll))))
   ([n coll]
-   (when (and (seq coll) (pos? n) (or (first coll) true))
+   (when (and (seq coll) (pos? n))
      (recur (dec n) (next coll)))))
 
 (defn doall
