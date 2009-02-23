@@ -39,16 +39,12 @@ public ISeq next(){
 
 public ISeq more(){
 	if(_more == null)
-		return LazySeq.EMPTY;
+		return PersistentList.EMPTY;
 	return _more;
 }
 
 public int count(){
 	return 1 + RT.count(_more);
-}
-
-public ISeq seq(){
-	return this;
 }
 
 public Cons withMeta(IPersistentMap meta){

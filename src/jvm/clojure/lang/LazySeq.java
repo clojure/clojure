@@ -14,204 +14,220 @@ package clojure.lang;
 
 import java.util.*;
 
-public class LazySeq extends AFn implements ISeq, List {
-    static final ISeq DUMMY = new Cons(null, null);
-    static final LazySeq EMPTY = new LazySeq(null);
+public final class LazySeq extends Obj implements ISeq, List{
 
-    private ISeq s;
+private IFn fn;
+private ISeq s;
 
-    public LazySeq() {
-        this(DUMMY);
-    }
+public LazySeq(IFn fn){
+	this.fn = fn;
+}
 
-    LazySeq(ISeq s) {
-        this.s = s;
-    }
+private LazySeq(IPersistentMap meta, ISeq s){
+	super(meta);
+	this.fn = null;
+	this.s = s;
+}
 
-    final synchronized public ISeq seq() {
-        if(s == DUMMY)
-            {
-            try
-                {
-                s = RT.seq(invoke());
-                }
-            catch (Exception e)
-                {
-                throw new RuntimeException(e);
-                }
-            }
-        return s;
-    }
+public Obj withMeta(IPersistentMap meta){
+	return new LazySeq(meta, seq());
+}
 
-    public int count() {
-        int c = 0;
-        for (ISeq s = seq(); s != null; s = s.next())
-            ++c;
-        return c;
-    }
+final synchronized public ISeq seq(){
+	if(fn != null)
+		{
+		try
+			{
+			s = RT.seq(fn.invoke());
+			fn = null;
+			}
+		catch(Exception e)
+			{
+			throw new RuntimeException(e);
+			}
+		}
+	return s;
+}
 
-    public Object first() {
-        return RT.first(seq());
-    }
+public int count(){
+	int c = 0;
+	for(ISeq s = seq(); s != null; s = s.next())
+		++c;
+	return c;
+}
 
-    public ISeq next() {
-        return RT.next(seq());
-    }
+public Object first(){
+	seq();
+	if(s == null)
+		return null;
+	return s.first();
+}
 
-    public ISeq more() {
-        return RT.more(seq());
-    }
+public ISeq next(){
+	seq();
+	if(s == null)
+		return null;
+	return s.next();	
+}
 
-    public ISeq cons(Object o) {
-        return RT.cons(o, seq());
-    }
+public ISeq more(){
+	seq();
+	if(s == null)
+		return PersistentList.EMPTY;
+	return s.more();
+}
 
-    public IPersistentCollection empty() {
-        return null;
-    }
+public ISeq cons(Object o){
+	return RT.cons(o, seq());
+}
 
-    public boolean equiv(Object o) {
-	    return equals(o);
-    }
+public IPersistentCollection empty(){
+	return null;
+}
 
-    public int hashCode() {
-        return Util.hash(seq());
-    }
+public boolean equiv(Object o){
+	return equals(o);
+}
 
-    public boolean equals(Object o) {
-        ISeq s = seq();
-        if( s != null )
-            return s.equiv(o);
-        else
-	        return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
-    }
+public int hashCode(){
+	return Util.hash(seq());
+}
+
+public boolean equals(Object o){
+	ISeq s = seq();
+	if(s != null)
+		return s.equiv(o);
+	else
+		return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
+}
 
 
 // java.util.Collection implementation
 
-    public Object[] toArray() {
-        return RT.seqToArray(seq());
-    }
+public Object[] toArray(){
+	return RT.seqToArray(seq());
+}
 
-    public boolean add(Object o) {
-        throw new UnsupportedOperationException();
-    }
+public boolean add(Object o){
+	throw new UnsupportedOperationException();
+}
 
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
-    }
+public boolean remove(Object o){
+	throw new UnsupportedOperationException();
+}
 
-    public boolean addAll(Collection c) {
-        throw new UnsupportedOperationException();
-    }
+public boolean addAll(Collection c){
+	throw new UnsupportedOperationException();
+}
 
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
+public void clear(){
+	throw new UnsupportedOperationException();
+}
 
-    public boolean retainAll(Collection c) {
-        throw new UnsupportedOperationException();
-    }
+public boolean retainAll(Collection c){
+	throw new UnsupportedOperationException();
+}
 
-    public boolean removeAll(Collection c) {
-        throw new UnsupportedOperationException();
-    }
+public boolean removeAll(Collection c){
+	throw new UnsupportedOperationException();
+}
 
-    public boolean containsAll(Collection c) {
-        for (Object o : c)
-            {
-            if (!contains(o))
-                return false;
-            }
-        return true;
-    }
+public boolean containsAll(Collection c){
+	for(Object o : c)
+		{
+		if(!contains(o))
+			return false;
+		}
+	return true;
+}
 
-    public Object[] toArray(Object[] a) {
-        if (a.length >= count())
-            {
-            ISeq s = seq();
-            for (int i = 0; s != null; ++i, s = s.next())
-                {
-                a[i] = s.first();
-                }
-            if (a.length > count())
-                a[count()] = null;
-            return a;
-            }
-        else
-            return toArray();
-    }
+public Object[] toArray(Object[] a){
+	if(a.length >= count())
+		{
+		ISeq s = seq();
+		for(int i = 0; s != null; ++i, s = s.next())
+			{
+			a[i] = s.first();
+			}
+		if(a.length > count())
+			a[count()] = null;
+		return a;
+		}
+	else
+		return toArray();
+}
 
-    public int size() {
-        return count();
-    }
+public int size(){
+	return count();
+}
 
-    public boolean isEmpty() {
-        return seq() == null;
-    }
+public boolean isEmpty(){
+	return seq() == null;
+}
 
-    public boolean contains(Object o) {
-        for (ISeq s = seq(); s != null; s = s.next())
-            {
-            if (Util.equiv(s.first(), o))
-                return true;
-            }
-        return false;
-    }
+public boolean contains(Object o){
+	for(ISeq s = seq(); s != null; s = s.next())
+		{
+		if(Util.equiv(s.first(), o))
+			return true;
+		}
+	return false;
+}
 
-    public Iterator iterator() {
-        return new SeqIterator(seq());
-    }
+public Iterator iterator(){
+	return new SeqIterator(seq());
+}
 
-    //////////// List stuff /////////////////
-    private List reify() {
-        return new ArrayList(this);
-    }
+//////////// List stuff /////////////////
+private List reify(){
+	return new ArrayList(this);
+}
 
-    public List subList(int fromIndex, int toIndex) {
-        return reify().subList(fromIndex, toIndex);
-    }
+public List subList(int fromIndex, int toIndex){
+	return reify().subList(fromIndex, toIndex);
+}
 
-    public Object set(int index, Object element) {
-        throw new UnsupportedOperationException();
-    }
+public Object set(int index, Object element){
+	throw new UnsupportedOperationException();
+}
 
-    public Object remove(int index) {
-        throw new UnsupportedOperationException();
-    }
+public Object remove(int index){
+	throw new UnsupportedOperationException();
+}
 
-    public int indexOf(Object o) {
-        ISeq s = seq();
-        for (int i = 0; s != null; s = s.next(), i++)
-            {
-            if (Util.equiv(s.first(), o))
-                return i;
-            }
-        return -1;
-    }
+public int indexOf(Object o){
+	ISeq s = seq();
+	for(int i = 0; s != null; s = s.next(), i++)
+		{
+		if(Util.equiv(s.first(), o))
+			return i;
+		}
+	return -1;
+}
 
-    public int lastIndexOf(Object o) {
-        return reify().lastIndexOf(o);
-    }
+public int lastIndexOf(Object o){
+	return reify().lastIndexOf(o);
+}
 
-    public ListIterator listIterator() {
-        return reify().listIterator();
-    }
+public ListIterator listIterator(){
+	return reify().listIterator();
+}
 
-    public ListIterator listIterator(int index) {
-        return reify().listIterator(index);
-    }
+public ListIterator listIterator(int index){
+	return reify().listIterator(index);
+}
 
-    public Object get(int index) {
-        return RT.nth(this, index);
-    }
+public Object get(int index){
+	return RT.nth(this, index);
+}
 
-    public void add(int index, Object element) {
-        throw new UnsupportedOperationException();
-    }
+public void add(int index, Object element){
+	throw new UnsupportedOperationException();
+}
 
-    public boolean addAll(int index, Collection c) {
-        throw new UnsupportedOperationException();
-    }
+public boolean addAll(int index, Collection c){
+	throw new UnsupportedOperationException();
+}
+
 
 }

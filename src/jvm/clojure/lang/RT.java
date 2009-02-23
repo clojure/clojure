@@ -443,10 +443,10 @@ static public int nextID(){
 ////////////// Collections support /////////////////////////////////
 
 static public ISeq seq(Object coll){
-	if(coll == null)
-		return null;
-	else if(coll instanceof ASeq)
+	if(coll instanceof ASeq)
 		return (ASeq) coll;
+	else if(coll instanceof LazySeq)
+	    return ((LazySeq) coll).seq();
 	else
 		return seqFrom(coll);
 }
@@ -479,6 +479,8 @@ static public IStream stream(final Object coll) throws Exception{
 static ISeq seqFrom(Object coll){
     if(coll instanceof Seqable)
         return ((Seqable) coll).seq();
+	else if(coll == null)
+		return null;
 	else if(coll instanceof Iterable)
 		return IteratorSeq.create(((Iterable) coll).iterator());
 	else if(coll.getClass().isArray())
@@ -590,7 +592,7 @@ static public ISeq more(Object x){
 		return ((ISeq) x).more();
 	ISeq seq = seq(x);
 	if(seq == null)
-		return LazySeq.EMPTY;
+		return PersistentList.EMPTY;
 	return seq.more();
 }
 

@@ -103,7 +103,7 @@ public int count(){
 	return i;
 }
 
-public ISeq seq(){
+final public ISeq seq(){
 	return this;
 }
 
@@ -114,7 +114,7 @@ public ISeq cons(Object o){
 public ISeq more(){
     ISeq s = next();
     if(s == null)
-        return LazySeq.EMPTY;
+        return PersistentList.EMPTY;
     return s;
 }
 

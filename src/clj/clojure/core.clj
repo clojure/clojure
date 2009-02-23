@@ -425,7 +425,7 @@
   seq calls. Any closed over locals will be cleared prior to the tail
   call of body."  
   [& body]
-    (list* '#^{:once true :super-name "clojure/lang/LazySeq"} fn* [] body))
+  (list 'new 'clojure.lang.LazySeq (list* '#^{:once true} fn* [] body)))    
 
 (defn concat
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
