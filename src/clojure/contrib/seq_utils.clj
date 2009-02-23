@@ -94,9 +94,9 @@
  "Similar to lazy-seq but binds the resulting seq to the supplied 
   binding-name, allowing for recursive expressions."
  [binding-name & body]
-  `((fn helper# []
-      (lazy-seq (let [~binding-name (helper#)] ~@body)))))
-        
+  `(let [s# (atom nil)]
+     (swap! s# (constantly (lazy-seq (let [~binding-name @s#] ~@body))))))
+             
 (defmacro rec-cat 
  "Similar to lazy-cat but binds the resulting sequence to the supplied 
   binding-name, allowing for recursive expressions."
