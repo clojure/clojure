@@ -15,9 +15,6 @@
 (defn exception []
   (throw (new Exception "Exception which should never occur")))
 
-(defn diff [s1 s2]
-  (seq (reduce disj (set s1) (set s2))))
-
 
 ;; *** Tests ***
 
@@ -108,14 +105,14 @@
     ; set
     (first #{}) nil
     (first #{1}) 1
-    ;(first #{1 2 3}) 1
+    (first (sorted-set 1 2 3)) 1
 
     (first #{nil}) nil
-    ;(first #{1 nil}) 1
-    ;(first #{nil 2}) nil
+    (first (sorted-set 1 nil)) nil
+    (first (sorted-set nil 2)) nil
     (first #{#{}}) #{}
-    ;(first #{#{} nil}) #{}
-    ;(first #{#{} 2 nil}) #{}
+    (first (sorted-set #{} nil)) nil
+    ;(first (sorted-set #{} 2 nil)) nil
 
     ; map
     (first {}) nil
@@ -177,14 +174,14 @@
     ; set
     (next #{}) nil
     (next #{1}) nil
-    ;(next #{1 2 3}) 1
+    (next (sorted-set 1 2 3)) '(2 3)
 
     (next #{nil}) nil
-    ;(next #{1 nil}) 1
-    ;(next #{nil 2}) nil
+    (next (sorted-set 1 nil)) '(1)
+    (next (sorted-set nil 2)) '(2)
     (next #{#{}}) nil
-    ;(next #{#{} nil}) #{}
-    ;(next #{#{} 2 nil}) #{}
+    (next (sorted-set #{} nil)) '(#{})
+    ;(next (sorted-set #{} 2 nil)) #{}
 
     ; map
     (next {}) nil
@@ -203,6 +200,65 @@
     (next (to-array [(into-array [])])) nil
     (next (to-array [(into-array []) nil])) '(nil)
     (next (to-array [(into-array []) 2 nil])) '(2 nil) ))
+
+
+(deftest test-last
+  (are (= _1 _2)
+      (last nil) nil
+
+      ; list
+      (last ()) nil
+      (last '(1)) 1
+      (last '(1 2 3)) 3
+
+      (last '(nil)) nil
+      (last '(1 nil)) nil
+      (last '(nil 2)) 2
+      (last '(())) ()
+      (last '(() nil)) nil
+      (last '(() 2 nil)) nil
+
+      ; vector
+      (last []) nil
+      (last [1]) 1
+      (last [1 2 3]) 3
+
+      (last [nil]) nil
+      (last [1 nil]) nil
+      (last [nil 2]) 2
+      (last [[]]) []
+      (last [[] nil]) nil
+      (last [[] 2 nil]) nil
+
+      ; set
+      (last #{}) nil
+      (last #{1}) 1
+      (last (sorted-set 1 2 3)) 3
+
+      (last #{nil}) nil
+      (last (sorted-set 1 nil)) 1
+      (last (sorted-set nil 2)) 2
+      (last #{#{}}) #{}
+      (last (sorted-set #{} nil)) #{}
+      ;(last (sorted-set #{} 2 nil)) nil
+
+      ; map
+      (last {}) nil
+      (last (sorted-map :a 1)) [:a 1]
+      (last (sorted-map :a 1 :b 2 :c 3)) [:c 3]
+
+      ; string
+      (last "") nil
+      (last "a") \a
+      (last "abc") \c
+
+      ; array
+      (last (into-array [])) nil
+      (last (into-array [1])) 1
+      (last (into-array [1 2 3])) 3
+      (last (to-array [nil])) nil
+      (last (to-array [1 nil])) nil
+      (last (to-array [nil 2])) 2 ))
 
 
 ;; (ffirst coll) = (first (first coll))
@@ -295,6 +351,93 @@
     (nnext #{1}) nil
     (nnext (sorted-set 1 2)) nil
     (nnext (sorted-set 1 2 3 4)) '(3 4) ))
+
+
+(deftest test-nth
+  ; maps, sets are not supported
+  (is (thrown? UnsupportedOperationException (nth {} 0)))
+  (is (thrown? UnsupportedOperationException (nth {:a 1 :b 2} 0)))
+  (is (thrown? UnsupportedOperationException (nth #{} 0)))
+  (is (thrown? UnsupportedOperationException (nth #{1 2 3} 0)))
+
+  ; out of bounds
+  (is (thrown? IndexOutOfBoundsException (nth '() 0)))
+  (is (thrown? IndexOutOfBoundsException (nth '(1 2 3) 5)))
+  (is (thrown? IndexOutOfBoundsException (nth '() -1)))
+  (is (thrown? IndexOutOfBoundsException (nth '(1 2 3) -1)))
+
+  (is (thrown? IndexOutOfBoundsException (nth [] 0)))
+  (is (thrown? IndexOutOfBoundsException (nth [1 2 3] 5)))
+  (is (thrown? IndexOutOfBoundsException (nth [] -1)))
+  (is (thrown? ArrayIndexOutOfBoundsException (nth [1 2 3] -1)))  ; ???
+
+  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) 0)))
+  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) 5)))
+  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) -1)))
+  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) -1)))
+
+  (is (thrown? StringIndexOutOfBoundsException (nth "" 0)))
+  (is (thrown? StringIndexOutOfBoundsException (nth "abc" 5)))
+  (is (thrown? StringIndexOutOfBoundsException (nth "" -1)))
+  (is (thrown? StringIndexOutOfBoundsException (nth "abc" -1)))
+
+  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. []) 0)))
+  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) 5)))
+  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. []) -1)))       ; ???
+  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) -1)))  ; ???
+
+  (are (= _1 _2)
+      (nth '(1) 0) 1
+      (nth '(1 2 3) 0) 1
+      (nth '(1 2 3 4 5) 1) 2
+      (nth '(1 2 3 4 5) 4) 5
+      (nth '(1 2 3) 5 :not-found) :not-found
+
+      (nth [1] 0) 1
+      (nth [1 2 3] 0) 1
+      (nth [1 2 3 4 5] 1) 2
+      (nth [1 2 3 4 5] 4) 5
+      (nth [1 2 3] 5 :not-found) :not-found
+
+      (nth (into-array [1]) 0) 1
+      (nth (into-array [1 2 3]) 0) 1
+      (nth (into-array [1 2 3 4 5]) 1) 2
+      (nth (into-array [1 2 3 4 5]) 4) 5
+      (nth (into-array [1 2 3]) 5 :not-found) :not-found
+
+      (nth "a" 0) \a
+      (nth "abc" 0) \a
+      (nth "abcde" 1) \b
+      (nth "abcde" 4) \e
+      (nth "abc" 5 :not-found) :not-found
+
+      (nth (java.util.ArrayList. [1]) 0) 1
+      (nth (java.util.ArrayList. [1 2 3]) 0) 1
+      (nth (java.util.ArrayList. [1 2 3 4 5]) 1) 2
+      (nth (java.util.ArrayList. [1 2 3 4 5]) 4) 5
+      (nth (java.util.ArrayList. [1 2 3]) 5 :not-found) :not-found )
+
+  ; regex Matchers
+  (let [m (re-matcher #"(a)(b)" "ababaa")]
+    (re-find m) ; => ["ab" "a" "b"]
+    (are (= _1 _2)
+        (nth m 0) "ab"
+        (nth m 1) "a"
+        (nth m 2) "b"
+        (nth m 3 :not-found) :not-found
+        (nth m -1 :not-found) :not-found )
+    (is (thrown? IndexOutOfBoundsException (nth m 3)))
+    (is (thrown? IndexOutOfBoundsException (nth m -1))))
+
+  (let [m (re-matcher #"c" "ababaa")]
+    (re-find m) ; => nil
+    (are (= _1 _2)
+        (nth m 0 :not-found) :not-found
+        (nth m 2 :not-found) :not-found
+        (nth m -1 :not-found) :not-found )
+    (is (thrown? IllegalStateException (nth m 0)))
+    (is (thrown? IllegalStateException (nth m 2)))
+    (is (thrown? IllegalStateException (nth m -1)))))
 
 
 ; distinct was broken for nil & false:
@@ -551,52 +694,42 @@
     (split-with number? [1 -2 "abc" \x]) [(list 1 -2) (list "abc" \x)] ))
 
 
-(deftest test-vals
-  (are (= _1 _2)      ; other than map data structures
-      (vals ()) nil
-      (vals []) nil
-      (vals #{}) nil
-      (vals "") nil )
-
+(deftest test-range
   (are (= _1 _2)
-      ; (class {:a 1}) => clojure.lang.PersistentArrayMap
-      (vals {}) nil
-      (vals {:a 1}) '(1)
-      (diff (vals {:a 1 :b 2}) '(1 2)) nil              ; (vals {:a 1 :b 2}) '(1 2)
+      (range 0) ()   ; exclusive end!
+      (range 1) '(0)
+      (range 5) '(0 1 2 3 4)
 
-      ; (class (sorted-map :a 1)) => clojure.lang.PersistentTreeMap
-      (vals (sorted-map)) nil
-      (vals (sorted-map :a 1)) '(1)
-      (diff (vals (sorted-map :a 1 :b 2)) '(1 2)) nil   ; (vals (sorted-map :a 1 :b 2)) '(1 2)
+      (range -1) ()
+      (range -3) ()
 
-      ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
-      (vals (hash-map)) nil
-      (vals (hash-map :a 1)) '(1)
-      (diff (vals (hash-map :a 1 :b 2)) '(1 2)) nil ))  ; (vals (hash-map :a 1 :b 2)) '(1 2)
+      (range 2.5) '(0 1)
+      (range 7/3) '(0 1)
 
+      (range 0 3) '(0 1 2)
+      (range 0 1) '(0)
+      (range 0 0) ()
+      (range 0 -3) ()
 
-(deftest test-keys
-  (are (= _1 _2)      ; other than map data structures
-      (keys ()) nil
-      (keys []) nil
-      (keys #{}) nil
-      (keys "") nil )
+      (range 3 6) '(3 4 5)
+      (range 3 4) '(3)
+      (range 3 3) ()
+      (range 3 1) ()
+      (range 3 0) ()
+      (range 3 -2) ()
 
-  (are (= _1 _2)
-      ; (class {:a 1}) => clojure.lang.PersistentArrayMap
-      (keys {}) nil
-      (keys {:a 1}) '(:a)
-      (diff (keys {:a 1 :b 2}) '(:a :b)) nil              ; (keys {:a 1 :b 2}) '(:a :b)
+      (range -2 5) '(-2 -1 0 1 2 3 4)
+      (range -2 0) '(-2 -1)
+      (range -2 -1) '(-2)
+      (range -2 -2) ()
+      (range -2 -5) ()
 
-      ; (class (sorted-map :a 1)) => clojure.lang.PersistentTreeMap
-      (keys (sorted-map)) nil
-      (keys (sorted-map :a 1)) '(:a)
-      (diff (keys (sorted-map :a 1 :b 2)) '(:a :b)) nil   ; (keys (sorted-map :a 1 :b 2)) '(:a :b)
-
-      ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
-      (keys (hash-map)) nil
-      (keys (hash-map :a 1)) '(:a)
-      (diff (keys (hash-map :a 1 :b 2)) '(:a :b)) nil ))  ; (keys (hash-map :a 1 :b 2)) '(:a :b)
+      (range 3 9 0) ()
+      (range 3 9 1) '(3 4 5 6 7 8)
+      (range 3 9 2) '(3 5 7)
+      (range 3 9 3) '(3 6)
+      (range 3 9 10) '(3)
+      (range 3 9 -1) () ))
 
 
 (deftest test-empty?
@@ -623,12 +756,4 @@
 (deftest pmap-does-its-thing
   ;; regression fixed in r1218; was OutOfMemoryError
   (is (= '(1) (pmap inc [0]))))
-
-
-;; equality
-;;
-(deftest vectors-equal-other-seqs-by-items-equality
-  ;; regression fixed in r1208; was not equal
-  (is (= '() []))
-  (is (= '(1) [1])))
 
