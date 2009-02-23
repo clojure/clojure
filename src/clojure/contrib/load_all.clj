@@ -67,7 +67,7 @@ shell-out
 sql
 stacktrace
 str-utils
-;; stream-utils
+stream-utils
 template
 test-is
 test-is.tests
