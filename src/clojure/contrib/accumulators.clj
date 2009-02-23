@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated February 15, 2009
+;; last updated February 23, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -28,22 +28,22 @@
 	tag (get ^fv ::accumulator nil)]
     (if (nil? tag) (class fv) tag)))
 
-(defmulti
-  #^{:doc "Add item to the accumulator acc. The exact meaning of adding an
-           an item depends on the type of the accumulator."
-     :arglists '([acc item])}
-  add selector)
+(defmulti add
+  "Add item to the accumulator acc. The exact meaning of adding an
+   an item depends on the type of the accumulator."
+   {:arglists '([acc item])}
+  selector)
 
 (defn add-items
   "Add all elements of a collection coll to the accumulator acc."
   [acc items]
   (reduce add acc items))
 
-(defmulti
-  #^{:doc "Combine the values of the accumulators acc1 and acc2 into a
-           single accumulator of the same type."
-     :arglists '([acc1 acc2])}
-  combine selector)
+(defmulti combine
+  "Combine the values of the accumulators acc1 and acc2 into a
+   single accumulator of the same type."
+  {:arglists '([acc1 acc2])}
+  selector)
 
 
 ;
