@@ -31,6 +31,12 @@
 
 ;; Literals
 
+(deftest Literals
+  ; 'nil 'false 'true are reserved by Clojure and are not symbols
+  (is (= 'nil nil))
+  (is (= 'false false))
+  (is (= 'true true)) )
+
 ;; Strings
 
 (deftest Strings
@@ -105,7 +111,6 @@
   (is (instance? BigDecimal -0.0M))
   (is (instance? BigDecimal -1.0M))
 )
-
 
 ;; Characters
 
