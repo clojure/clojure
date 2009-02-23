@@ -94,8 +94,9 @@
  "Similar to lazy-seq but binds the resulting seq to the supplied 
   binding-name, allowing for recursive expressions."
  [binding-name & body]
-  (list* '#^{:once true :super-name "clojure/lang/LazySeq"} fn* binding-name [] body))
-  
+  `((fn helper# []
+      (lazy-seq (let [~binding-name (helper#)] ~@body)))))
+        
 (defmacro rec-cat 
  "Similar to lazy-cat but binds the resulting sequence to the supplied 
   binding-name, allowing for recursive expressions."
