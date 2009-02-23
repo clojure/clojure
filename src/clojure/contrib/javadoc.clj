@@ -16,6 +16,9 @@
     (:use clojure.contrib.javadoc.browse)
     (:import (java.io File)))
 
+(def *feeling-lucky-url* "http://www.google.com/search?btnI=I%27m%20Feeling%20Lucky&q=allinurl:")
+(def *feeling-lucky* true)
+
 (def
  #^{:doc "Ref to a list of local paths for Javadoc-generated HTML
   files."}
@@ -65,10 +68,12 @@
                                @*local-javadocs*)))]
       (-> file .toURI str)
       ;; If no local file, try remote URLs:
-      (some (fn [[prefix url]]
-                (when (.startsWith classname prefix)
-                  (str url url-path ".html")))
-            @*remote-javadocs*))))
+      (or (some (fn [[prefix url]]
+                  (when (.startsWith classname prefix)
+                    (str url url-path ".html")))
+            @*remote-javadocs*)
+        ;; if *feeling-lucky* try a web search
+        (when *feeling-lucky* (str *feeling-lucky-url* url-path ".html"))))))
 
 (defn javadoc
   "Opens a browser window displaying the javadoc for the argument.
