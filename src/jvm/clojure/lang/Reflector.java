@@ -31,6 +31,8 @@ public static Object invokeInstanceMethod(Object target, String methodName, Obje
 		{
 		if(e.getCause() instanceof Exception)
 			throw (Exception) e.getCause();
+		else if(e.getCause() instanceof Error)
+			throw (Error) e.getCause();
 		throw e;
 		}
 }
@@ -89,6 +91,8 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		{
 		if(e.getCause() instanceof Exception)
 			throw (Exception) e.getCause();
+		else if(e.getCause() instanceof Error)
+			throw (Error) e.getCause();
 		throw e;
 		}
 
@@ -162,6 +166,8 @@ public static Object invokeConstructor(Class c, Object[] args) throws Exception{
 		{
 		if(e.getCause() instanceof Exception)
 			throw (Exception) e.getCause();
+		else if(e.getCause() instanceof Error)
+			throw (Error) e.getCause();
 		throw e;
 		}
 }
@@ -181,6 +187,8 @@ public static Object invokeStaticMethod(String className, String methodName, Obj
 		{
 		if(e.getCause() instanceof Exception)
 			throw (Exception) e.getCause();
+		else if(e.getCause() instanceof Error)
+			throw (Error) e.getCause();
 		throw e;
 		}
 }
