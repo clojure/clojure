@@ -13,9 +13,7 @@
 ;;  straszheimjeffrey (gmail)
 ;;  Created 23 June 2009
 
-(ns clojure.contrib.graph
-  (use [clojure.contrib.seq-utils :only (flatten indexed)]))
-
+(ns clojure.contrib.graph)
 
 
 (defstruct directed-graph
