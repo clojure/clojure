@@ -67,6 +67,24 @@
          #{#{:h} #{:g} #{:i :j} #{:b :c :a :d :e} #{:f}}))
   (is (empty? (scc empty-graph))))
 
+(deftest test-component-graph
+  (let [cg (component-graph test-graph-2)
+        ecg (component-graph empty-graph)]
+    (is (= (:nodes cg) (set (scc test-graph-2))))
+    (is (= (get-neighbors cg #{:a :b :c :d :e})
+           #{#{:a :b :c :d :e}}))
+    (is (= (get-neighbors cg #{:g})
+           #{#{:a :b :c :d :e} #{:f}}))
+    (is (= (get-neighbors cg #{:i :j})
+           #{#{:i :j}}))
+    (is (= (get-neighbors cg #{:h})
+           #{}))
+    (is (= ecg empty-graph))))
+
+(comment
+  (run-tests)
+)
+
 
 (deftest test-self-recursive-sets
   (is (= (set (self-recursive-sets test-graph-2))
