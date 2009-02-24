@@ -14,21 +14,22 @@
 ;;  Created 23 June 2009
 
 (ns clojure.contrib.graph
-  (use [clojure.contrib.macros :only (letfn)])
   (use [clojure.contrib.seq-utils :only (flatten indexed)]))
 
 
 
 (defstruct directed-graph
-  :count       ; The count of nodes in the graph
-  :neighbors)  ; A function that, given a node (0 .. count-1) returns
-               ; a collection neighbor nodes.
+  :nodes       ; The nodes of the graph, a collection
+  :neighbors)  ; A function that, given a node a collection neighbor
+               ; nodes.
 
 (defn get-neighbors
   "Get the neighbors of a node."
   [g n]
   ((:neighbors g) n))
 
+
+;; Reverse Graph
 
 (defn reverse-graph
   "Given a directed graph, return another directed graph with the
@@ -37,25 +38,13 @@
   (let [op (fn [rna idx]
              (let [ns (get-neighbors g idx)
                    am (fn [m val]
-                        (assoc m val (conj (get m val []) idx)))]
+                        (assoc m val (conj (get m val #{}) idx)))]
                (reduce am rna ns)))
-        rn (reduce op {} (range (:count g)))]
-    (struct directed-graph (:count g) rn)))
+        rn (reduce op {} (:nodes g))]
+    (struct directed-graph (:nodes g) rn)))
 
-(comment
-  (def test-graph-1
-       (struct directed-graph 5
-               {0 [1 2]
-                1 [0 2]
-                2 [3 4]
-                3 [0 1]
-                4 [3]}))
 
-  test-graph-1
-  (reverse-graph test-graph-1)
-  (reverse-graph (reverse-graph test-graph-1))
-  (= test-graph-1 (reverse-graph (reverse-graph test-graph-1)))
-)
+;; Strongly Connected Components
 
 (defn- post-ordered-visit
   "Starting at node n, perform a post-ordered walk."
@@ -72,7 +61,7 @@
   [g]
   (fnext (reduce #(post-ordered-visit g %2 %1)
                  [#{} []]
-                 (range (:count g)))))
+                 (:nodes g))))
 
 (defn scc
   "Returns, as a sequence of sets, the strongly connected components
@@ -94,34 +83,13 @@
   "Returns, as a sequence of sets, the components of a graph that are
    self-recursive."
   [g]
-  (letfn [recursive? [n]
-            (or (> (count n) 1)
-                (some n (get-neighbors g (first n))))]
-     (filter recursive? (scc g))))
+  (let [recursive? (fn [n]
+                     (or (> (count n) 1)
+                         (some n (get-neighbors g (first n)))))]
+    (filter recursive? (scc g))))
                           
-(comment
 
-  (def test-graph-2
-       (struct directed-graph 10
-               {0 [1 2]
-                1 [0 2]
-                2 [3 4]
-                3 [0 1]
-                4 [3]
-                5 [5]
-                6 [0 5]
-                7 []
-                8 [9]
-                9 [8]}))
-
-
-  (post-ordered-visit test-graph-2 0 [#{} []])
-  (post-ordered-nodes test-graph-2)
-  (scc test-graph-2)
-  (self-recursive-sets test-graph-2)
-
-)
-
+;; Dependency Lists
 
 (defn fixed-point
   "Repeatedly apply fun to data until (equal old-data new-data)
@@ -139,11 +107,12 @@
                   
 (defn- fold-into-sets
   [priorities]
-  (let [step (fn [acc [idx dep]]
-               (assoc acc dep (conj (acc dep) idx)))]
+  (let [max (inc (apply max 0 (vals priorities)))
+        step (fn [acc [n dep]]
+               (assoc acc dep (conj (acc dep) n)))]
     (reduce step
-            (vec (replicate (inc (apply max 0 priorities)) #{}))
-            (indexed priorities))))
+            (vec (replicate max #{}))
+            priorities)))
             
 (defn dependency-list
   "Similar to a topological sort, this returns a vector of sets, each
@@ -154,10 +123,10 @@
   (let [step (fn [d]
                (let [update (fn [n]
                               (inc (apply max -1 (map d (get-neighbors g n)))))]
-                 (vec (map update (range (:count g))))))
-        counts (fixed-point (vec (replicate (:count g) 0))
+                 (into {} (map (fn [[k v]] [k (update k)]) d))))
+        counts (fixed-point (zipmap (:nodes g) (repeat 0))
                             step
-                            (inc (:count g))
+                            (inc (count (:nodes g)))
                             =)]
     (fold-into-sets counts)))
     
@@ -168,65 +137,18 @@
    depends on node b (meaning an edge a->b exists) in the second
    graph, node a must be equal or later in the sequence."
   [g1 g2]
-  (assert (= (:count g1) (:count g2)))
+  (assert (= (-> g1 :nodes set) (-> g2 :nodes set)))
   (let [step (fn [d]
-               (letfn [update [n]
-                       (max (inc (apply max -1
-                                        (map d (get-neighbors g1 n))))
-                            (apply max -1 (map d (get-neighbors g2 n))))]
-                  (vec (map update (range (:count g1))))))
-        counts (fixed-point (vec (replicate (:count g1) 0))
+               (let [update (fn [n]
+                              (max (inc (apply max -1
+                                               (map d (get-neighbors g1 n))))
+                                   (apply max -1 (map d (get-neighbors g2 n)))))]
+                 (into {} (map (fn [[k v]] [k (update k)]) d))))
+        counts (fixed-point (zipmap (:nodes g1) (repeat 0))
                             step
-                            (inc (:count g1))
+                            (inc (count (:nodes g1)))
                             =)]
     (fold-into-sets counts)))
-        
-    
-
-(comment
-
-  (dependency-list test-graph-2)
-
-  (def test-graph-3
-       (struct directed-graph 6
-               {0 [1]
-                1 [2]
-                2 [3]
-                3 [4]
-                4 [5]
-                5 []}))
-
-  (dependency-list test-graph-3)
-
-  (def test-graph-4
-       (struct directed-graph 8
-               {0 []
-                1 [0]
-                2 [0]
-                3 [0 1]
-                4 [3 2]
-                5 [4]
-                6 [3]
-                7 [5]}))
-
-  (dependency-list test-graph-4)
-
-  (def test-graph-5
-       (struct directed-graph 8
-               {0 []
-                1 []
-                2 [1]
-                3 []
-                4 []
-                5 []
-                6 [5]
-                7 []}))
-
-  (dependency-list test-graph-5)
-  (stratification-list test-graph-4 test-graph-5)
-
-)
-
 
 
 ;; End of file

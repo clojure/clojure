@@ -14,103 +14,109 @@
 ;;  Created 23 June 2009
 
 (ns clojure.contrib.test-contrib.test-graph
-  (use clojure.contrib.test-is
+  (use :reload clojure.contrib.test-is
        clojure.contrib.graph))
 
 
-(def empty-graph (struct directed-graph 0 {}))
+(def empty-graph (struct directed-graph #{} {}))
 
 (def test-graph-1
-     (struct directed-graph 5
-             {0 [1 2]
-              1 [0 2]
-              2 [3 4]
-              3 [0 1]
-              4 [3]}))
+     (struct directed-graph
+             #{:a :b :c :d :e}
+             {:a #{:b :c}
+              :b #{:a :c}
+              :c #{:d :e}
+              :d #{:a :b}
+              :e #{:d}}))
 
 (deftest test-reverse-graph
   (is (= (reverse-graph test-graph-1)
-         {:count 5, :neighbors {
-                                0 [1 3]
-                                1 [0 3]
-                                2 [0 1]
-                                3 [2 4]
-                                4 [2]}}))
+         (struct directed-graph
+                 #{:a :b :c :d :e}
+                 {:c #{:b :a}
+                  :e #{:c}
+                  :d #{:c :e}
+                  :b #{:d :a}
+                  :a #{:d :b}})))
   (is (= (reverse-graph (reverse-graph test-graph-1))
          test-graph-1))
   (is (= (reverse-graph empty-graph) empty-graph)))
 
 (def test-graph-2
-     (struct directed-graph 10
-             {0 [1 2]
-              1 [0 2]
-              2 [3 4]
-              3 [0 1]
-              4 [3]
-              5 [5]
-              6 [0 5]
-              7 []
-              8 [9]
-              9 [8]}))
+     (struct directed-graph
+             #{:a :b :c :d :e :f :g :h :i :j}
+             {:a #{:b :c}
+              :b #{:a :c} 
+              :c #{:d :e}
+              :d #{:a :b}
+              :e #{:d}
+              :f #{:f}
+              :g #{:a :f}
+              :h #{}
+              :i #{:j}
+              :j #{:i}}))
 
 (deftest test-post-ordered-nodes
-  (is (= (post-ordered-nodes test-graph-2)
-         [3 4 2 1 0 5 6 7 9 8]))
+  (is (= (set (post-ordered-nodes test-graph-2))
+         #{:a :b :c :d :e :f :g :h :i :j}))
   (is (empty? (post-ordered-nodes empty-graph))))
 
 
 (deftest test-scc
-  (is (= (scc test-graph-2)
-         [#{8 9} #{7} #{6} #{5} #{0 1 2 3 4}]))
+  (is (= (set (scc test-graph-2))
+         #{#{:h} #{:g} #{:i :j} #{:b :c :a :d :e} #{:f}}))
   (is (empty? (scc empty-graph))))
 
 
 (deftest test-self-recursive-sets
-  (is (= (self-recursive-sets test-graph-2)
-         [#{8 9} #{5} #{0 1 2 3 4}]))
+  (is (= (set (self-recursive-sets test-graph-2))
+         #{#{:i :j} #{:b :c :a :d :e} #{:f}}))
   (is (empty? (self-recursive-sets empty-graph))))
 
 
 (def test-graph-3
-     (struct directed-graph 6
-             {0 [1]
-              1 [2]
-              2 [3]
-              3 [4]
-              4 [5]
-              5 []}))
+     (struct directed-graph
+             #{:a :b :c :d :e :f}
+             {:a #{:b}
+              :b #{:c}
+              :c #{:d}
+              :d #{:e}
+              :e #{:f}
+              :f #{}}))
 
 (def test-graph-4
-     (struct directed-graph 8
-             {0 []
-              1 [0]
-              2 [0]
-              3 [0 1]
-              4 [3 2]
-              5 [4]
-              6 [3]
-              7 [5]}))
+     (struct directed-graph
+             #{:a :b :c :d :e :f :g :h}
+             {:a #{}
+              :b #{:a}
+              :c #{:a}
+              :d #{:a :b}
+              :e #{:d :c}
+              :f #{:e}
+              :g #{:d}
+              :h #{:f}}))
 
-  (def test-graph-5
-       (struct directed-graph 8
-               {0 []
-                1 []
-                2 [1]
-                3 []
-                4 []
-                5 []
-                6 [5]
-                7 []}))
+(def test-graph-5
+     (struct directed-graph
+             #{:a :b :c :d :e :f :g :h}
+             {:a #{}
+              :b #{}
+              :c #{:b}
+              :d #{}
+              :e #{}
+              :f #{}
+              :g #{:f}
+              :h #{}}))
 
 (deftest test-dependency-list
   (is (thrown-with-msg? Exception #".*Fixed point overflow.*"
                         (dependency-list test-graph-2)))
   (is (= (dependency-list test-graph-3)
-         [#{5} #{4} #{3} #{2} #{1} #{0}]))
+         [#{:f} #{:e} #{:d} #{:c} #{:b} #{:a}]))
   (is (= (dependency-list test-graph-4)
-         [#{0} #{1 2} #{3} #{4 6} #{5} #{7}]))
+         [#{:a} #{:b :c} #{:d} #{:g :e} #{:f} #{:h}]))
   (is (= (dependency-list test-graph-5)
-         [#{0 1 3 4 5 7} #{2 6}]))
+         [#{:f :b :a :d :h :e} #{:g :c}]))
   (is (= (dependency-list empty-graph)
          [#{}])))
 
@@ -118,7 +124,7 @@
   (is (thrown-with-msg? Exception #".*Fixed point overflow.*"
                         (stratification-list test-graph-2 test-graph-2)))
   (is (= (stratification-list test-graph-4 test-graph-5)
-         [#{0} #{1 2} #{3} #{4} #{5 6} #{7}]))
+         [#{:a} #{:b :c} #{:d} #{:e} #{:f :g} #{:h}]))
   (is (= (stratification-list empty-graph empty-graph)
          [#{}])))
 
@@ -127,4 +133,4 @@
 )
 
 
-
+;; End of file
