@@ -161,7 +161,7 @@
                 ptypes (to-types pclasses)
                 rtype #^Type (totype rclass)
                 m (new Method mname rtype ptypes)
-                is-overload (overloads mname)
+                is-overload (contains? overloads mname)
                 gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (if as-static (. Opcodes ACC_STATIC) 0)) 
                          m nil nil cv)
                 found-label (. gen (newLabel))
