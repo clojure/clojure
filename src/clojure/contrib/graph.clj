@@ -13,6 +13,7 @@
 ;;  straszheimjeffrey (gmail)
 ;;  Created 23 June 2009
 
+
 (ns clojure.contrib.graph
   (use [clojure.set :only (union)]))
 
@@ -68,13 +69,11 @@
   ([g n]
      (lazy-walk g [n] #{}))
   ([g ns v]
-     (lazy-seq (let [s (seq ns)
+     (lazy-seq (let [s (seq (remove v ns))
                      n (first s)
-                     ns (rest ns)]
+                     ns (rest s)]
                  (when s
-                   (if (v n)
-                     (lazy-walk g ns v)
-                     (cons n (lazy-walk g (concat (get-neighbors g n) ns) (conj v n)))))))))
+                   (cons n (lazy-walk g (concat (get-neighbors g n) ns) (conj v n))))))))
 
 (defn transitive-closure
   "Returns the transitive closure of a graph.  The neighbors are lazily computed."
