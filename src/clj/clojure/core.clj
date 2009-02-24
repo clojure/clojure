@@ -1930,14 +1930,12 @@
       (instance? Byte n)))
 
 (defn mod
-  "modulus of num and div."
-  [num div]
-  (cond
-   (or (not (integer? num)) (not (integer? div)))
-     (throw (IllegalArgumentException.
-           "mod requires two integers"))
-   (or (< num 0 div) (< div 0 num)) (+ (rem num div) div)
-   :else (rem num div)))
+  "Modulus of num and div. Truncates toward negative infinity." 
+  [num div] 
+  (let [m (rem num div)] 
+    (if (or (zero? m) (pos? (* num div))) 
+      m 
+      (+ m div))))
 
 (defn ratio?
   "Returns true if n is a Ratio"
