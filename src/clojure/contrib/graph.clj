@@ -28,7 +28,7 @@
   ((:neighbors g) n))
 
 
-;; Reverse Graph
+;; Graph Modification
 
 (defn reverse-graph
   "Given a directed graph, return another directed graph with the
@@ -42,7 +42,49 @@
         rn (reduce op {} (:nodes g))]
     (struct directed-graph (:nodes g) rn)))
 
+(defn add-loops
+  "For each node n, add the edge n->n if not already present."
+  [g]
+  (struct directed-graph
+          (:nodes g)
+          (into {} (map (fn [n]
+                          [n (conj (set (get-neighbors g n)) n)]) (:nodes g)))))
 
+(defn remove-loops
+  "For each node n, remove any edges n->n."
+  [g]
+  (struct directed-graph
+          (:nodes g)
+          (into {} (map (fn [n]
+                          [n (disj (set (get-neighbors g n)) n)]) (:nodes g)))))
+
+
+;; Graph Walk
+
+(defn lazy-walk
+  "Return a lazy sequence of the nodes of a graph starting a node n.  Optionally,
+   provide a set of visited notes (v) and a collection of nodes to
+   visit (ns)."
+  ([g n]
+     (lazy-walk g [n] #{}))
+  ([g ns v]
+     (lazy-seq (let [s (seq ns)
+                     n (first s)
+                     ns (rest ns)]
+                 (when s
+                   (if (v n)
+                     (lazy-walk g ns v)
+                     (cons n (lazy-walk g (concat (get-neighbors g n) ns) (conj v n)))))))))
+
+(defn transitive-closure
+  "Returns the transitive closure of a graph.  The neighbors are lazily computed."
+  [g]
+  (let [nbs (into {} (map (fn [n] [n (delay (lazy-walk g n))]) (:nodes g)))]
+    (struct directed-graph
+            (:nodes g)
+            (fn [n] (force (nbs n))))))
+          
+                
 ;; Strongly Connected Components
 
 (defn- post-ordered-visit

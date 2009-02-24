@@ -42,6 +42,17 @@
          test-graph-1))
   (is (= (reverse-graph empty-graph) empty-graph)))
 
+(deftest test-add-loops
+  (let [tg1 (add-loops test-graph-1)]
+    (is (every? (fn [n] (contains? (get-neighbors tg1 n) n)) (:nodes tg1))))
+  (is (= (add-loops empty-graph) empty-graph)))
+
+(deftest test-remove-loops
+  (let [tg1 (remove-loops (add-loops test-graph-1))]
+    (is (not-any? (fn [n] (contains? (get-neighbors tg1 n) n)) (:nodes tg1))))
+  (is (= (remove-loops empty-graph) empty-graph)))
+
+
 (def test-graph-2
      (struct directed-graph
              #{:a :b :c :d :e :f :g :h :i :j}
@@ -55,6 +66,23 @@
               :h #{}
               :i #{:j}
               :j #{:i}}))
+
+
+(deftest test-lazy-walk
+  (is (= (lazy-walk test-graph-2 :h) [:h]))
+  (is (= (lazy-walk test-graph-2 :j) [:j :i])))
+
+(deftest test-transitive-closure
+  (let [tc-1 (transitive-closure test-graph-1)
+        tc-2 (transitive-closure test-graph-2)
+        get (fn [n] (set (get-neighbors tc-2 n)))]
+    (is (every? #(= #{:a :b :c :d :e} (set %))
+                (map (partial get-neighbors tc-1) (:nodes tc-1))))
+    (is (= (get :a) #{:a :b :c :d :e}))
+    (is (= (get :h) #{:h}))
+    (is (= (get :j) #{:i :j}))
+    (is (= (get :g) #{:a :b :c :d :e :f :g}))))
+
 
 (deftest test-post-ordered-nodes
   (is (= (set (post-ordered-nodes test-graph-2))
@@ -81,10 +109,6 @@
            #{}))
     (is (= (apply max (map count (self-recursive-sets cg))) 1))
     (is (= ecg empty-graph))))
-
-(comment
-  (run-tests)
-)
 
 
 (deftest test-self-recursive-sets
