@@ -81,9 +81,9 @@
   "Returns, as a sequence of sets, the components of a graph that are
    self-recursive."
   [g]
-  (let [recursive? (fn [n]
-                     (or (> (count n) 1)
-                         (some n (get-neighbors g (first n)))))]
+  (let [recursive? (fn [ns]
+                     (or (> (count ns) 1)
+                         (some ns (get-neighbors g (first ns)))))]
     (filter recursive? (scc g))))
                           
 
@@ -113,10 +113,11 @@
             priorities)))
             
 (defn dependency-list
-  "Similar to a topological sort, this returns a vector of sets, each
-   a set of nodes that depend on the earlier nodes in the vector.
-   Assume the input graph (which much be acyclic) has an edge a->b
-   when a depend on b."
+  "Similar to a topological sort, this returns a vector of sets. The
+   set of nodes at index 0 are independent.  The set at index 1 depend
+   on index 0; those at 2 depend on 0 and 1, and so on.  Those withing
+   a set have no mutual dependencies.  Assume the input graph (which
+   much be acyclic) has an edge a->b when a depends on b."
   [g]
   (let [step (fn [d]
                (let [update (fn [n]
