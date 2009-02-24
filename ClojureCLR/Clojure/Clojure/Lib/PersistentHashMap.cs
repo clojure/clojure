@@ -88,7 +88,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An IList of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
-        public static PersistentHashMap create(IList init)
+        public static PersistentHashMap create1(IList init)
         {
             IPersistentMap ret = EMPTY;
             for (IEnumerator i = init.GetEnumerator(); i.MoveNext(); )

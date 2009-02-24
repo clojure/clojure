@@ -61,6 +61,7 @@
     <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LibTests\EnumeratorSeqTests.cs" />
     <Compile Include="LibTests\AFnImplTests.cs" />
     <Compile Include="LibTests\AgentTests.cs" />
     <Compile Include="LibTests\APersistentVectorTests.cs" />

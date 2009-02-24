@@ -70,6 +70,17 @@ namespace clojure.console
             return new ClojureCommandLine();
         }
 
+        protected override ScriptRuntimeSetup CreateRuntimeSetup()
+        {
+            ScriptRuntimeSetup setup = base.CreateRuntimeSetup();
+
+            // Set this to true to force snippets to be written out.
+            // Or you can put -D on the command line.
+            setup.DebugMode = false;
+
+            return setup;
+        }
+
         #endregion
 
         #region Main routine
@@ -98,7 +109,8 @@ namespace clojure.console
             try
             {
                 Snippets.SetSaveAssemblies(true, ".");
-                MaybeInitialize(); 
+                MaybeInitialize();
+                RT.PostBootstrapInit();
                 Snippets.SaveAndVerifyAssemblies();
                 base.ExecuteInternal();
             }
@@ -163,7 +175,7 @@ namespace clojure.console
 
         public object LoadFromStream(TextReader rdr)
         {
-            ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<already opened TextReader>");
+            ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<already opened TextReader>",".");
             //PushbackReader pbr = new PushbackReader(rdr);
 
             return LoadFromPushbackReader(scriptSource, rdr, false);
@@ -206,12 +218,5 @@ namespace clojure.console
         }
 
         #endregion
-
-        protected override ScriptRuntimeSetup CreateRuntimeSetup()
-        {
-            ScriptRuntimeSetup setup =  base.CreateRuntimeSetup();
-            setup.DebugMode = true;
-            return setup;
-        }
     }
 }

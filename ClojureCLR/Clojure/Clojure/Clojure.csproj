@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Lib\Counted.cs" />
+    <Compile Include="Lib\EnumeratorSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
     <Compile Include="Readers\LineNumberingReader.cs" />
     <Compile Include="Runtime\ClojureBinder.cs" />

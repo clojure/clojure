@@ -16,7 +16,45 @@ using System.Text;
 namespace clojure.lang
 {
     // TODO: ArrayStream needs some thought.
-    public class ArrayStream
+    public class ArrayStream : IStream
     {
+        #region Data
+
+        readonly AtomicInteger _idx = new AtomicInteger(0);
+        readonly Array _array;
+
+        #endregion
+
+        #region C-tors & factory methods
+
+        public ArrayStream(Array array)
+        {
+            _array = array;
+        }
+
+        public static IStream createFromObject(object array)
+        {
+            if (array.GetType().IsArray)
+                return new ArrayStream((Array)array);
+            // TODO: Decide if we want all the specialized types.
+            // TODO: make sure we don't have a multi-dim array
+
+            throw new ArgumentException(String.Format("Unsupported array type %s", array.GetType()));
+        }
+
+
+        #endregion
+
+        #region IStream Members
+
+        public object next()
+        {
+            int i = _idx.getAndIncrement();
+            if (i < _array.Length)
+                return _array.GetValue(i);
+            return RT.eos();
+        }
+
+        #endregion
     }
 }

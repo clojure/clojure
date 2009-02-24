@@ -29,9 +29,6 @@ namespace clojure.runtime
             //Binder = new ClojureBinder(manager);
             manager.LoadAssembly(typeof(string).Assembly);
             manager.LoadAssembly(typeof(ISeq).Assembly);
-
-            // Set this to true to get Snippets written.
-            //manager.Configuration.DebugMode = true;
         }
 
         protected override Microsoft.Scripting.ScriptCode CompileSourceCode(Microsoft.Scripting.SourceUnit sourceUnit, Microsoft.Scripting.CompilerOptions options, Microsoft.Scripting.ErrorSink errorSink)

@@ -48,7 +48,7 @@ namespace clojure.runtime
 
             if (s == _eof)
             {
-                result = ScriptCodeParseResult.IncompleteStatement;
+                result = ScriptCodeParseResult.IncompleteToken;
                 s = null;
             }
 
