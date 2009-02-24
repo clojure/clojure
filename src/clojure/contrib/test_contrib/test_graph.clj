@@ -79,6 +79,7 @@
            #{#{:i :j}}))
     (is (= (get-neighbors cg #{:h})
            #{}))
+    (is (= (apply max (map count (self-recursive-sets cg))) 1))
     (is (= ecg empty-graph))))
 
 (comment
