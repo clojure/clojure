@@ -93,6 +93,7 @@
       <arg value="clojure.contrib.test-is"/>
       <arg value="clojure.contrib.trace"/>
       <arg value="clojure.contrib.zip-filter"/>
+      <arg value="clojure.contrib.graph"/>
     </java>
   </target>
 
