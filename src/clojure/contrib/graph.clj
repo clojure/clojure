@@ -82,7 +82,7 @@
   "Given a graph, perhaps with cycles, return a reduced graph that is acyclic.
    Each node in the new graph will be a set of nodes from the old.
    These sets are the strongly connected components.  Each edge will
-   be the union of all the edges of the prior graph."
+   be the union of the corresponding edges of the prior graph."
   [g]
   (let [sccs (scc g)
         find-node-set (fn [n]
