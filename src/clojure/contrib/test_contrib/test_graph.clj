@@ -60,7 +60,7 @@
 
 
 (deftest test-scc
-  (is (= (map set (scc test-graph-2))
+  (is (= (scc test-graph-2)
          [#{8 9} #{7} #{6} #{5} #{0 1 2 3 4}]))
   (is (empty? (scc empty-graph))))
 

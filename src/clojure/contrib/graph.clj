@@ -56,8 +56,7 @@
 )
 
 (defn- post-ordered-visit
-  "Starting at node n, return a sequence of a post-ordered walk of the
-   graph."
+  "Starting at node n, perform a post-ordered walk."
   [g n [visited acc :as state]]
   (if (visited n)
     state
@@ -84,7 +83,7 @@
                  acc
                  (let [[nv comp] (post-ordered-visit rev
                                                      (first stack)
-                                                     [visited []])
+                                                     [visited #{}])
                        ns (remove nv stack)]
                    (recur ns nv (conj acc comp)))))]
     (step po #{} [])))
