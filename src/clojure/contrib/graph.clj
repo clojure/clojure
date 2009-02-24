@@ -20,8 +20,8 @@
 
 (defstruct directed-graph
   :nodes       ; The nodes of the graph, a collection
-  :neighbors)  ; A function that, given a node a collection neighbor
-               ; nodes.
+  :neighbors)  ; A function that, given a node returns a collection
+               ; neighbor nodes.
 
 (defn get-neighbors
   "Get the neighbors of a node."
