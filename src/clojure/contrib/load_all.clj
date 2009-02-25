@@ -85,6 +85,7 @@ test-clojure.sequences
 test-contrib.shell-out
 test-contrib.str-utils
 trace
+types
 walk
 zip-filter
 ])

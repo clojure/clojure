@@ -508,6 +508,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.test-contrib
      'clojure.contrib.test-is
      'clojure.contrib.trace
+     'clojure.contrib.types
      'clojure.contrib.walk
      'clojure.contrib.zip-filter
      'clojure.contrib.javadoc.browse
