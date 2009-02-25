@@ -143,7 +143,7 @@
           (doseq [attr (:attrs e)]
             (print (str " " (name (key attr))
                         "='" (escape-xml (val attr)) "'"))))
-        (if (:content e)
+        (if (seq (:content e))
           (do
             (print (str ">" pad))
             (doseq [c (:content e)]
