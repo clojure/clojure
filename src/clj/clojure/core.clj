@@ -1657,10 +1657,10 @@
   "Returns the lines of text from rdr as a lazy sequence of strings.
   rdr must implement java.io.BufferedReader."
   [#^java.io.BufferedReader rdr]
-    (let [line  (. rdr (readLine))]
-      (lazy-seq
-       (when line
-        (cons line (line-seq rdr))))))
+  (lazy-seq
+   (let [line  (. rdr (readLine))]
+     (when line
+       (cons line (line-seq rdr))))))
 
 (defn comparator
   "Returns an implementation of java.util.Comparator based upon pred."
