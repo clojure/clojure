@@ -12,17 +12,18 @@
 ; or API adjustments.
 
 (ns clojure.contrib.error-kit
-  (:use [clojure.contrib.def :only (defvar defvar-)]))
+  (:use [clojure.contrib.def :only (defvar defvar-)]
+        [clojure.contrib.stacktrace :only (root-cause)]))
 
+(defn- make-ctrl-exception [msg data]
+  "Create an exception object with associated data, used for passing
+  control and data to a dynamically containing handler."
+  (proxy [Error clojure.lang.IDeref] [msg]
+    (toString [] (str "Error Kit Control Exception: " msg ", " (pr-str data)))
+    (deref [] data)))
 
-(defvar- thread-data (ThreadLocal.)
-  "Holds data being returned across multiple stack frames.")
-
-(defvar- the-exception
-  (doto (proxy [Error] ["error-kit control obj"])
-    (.setStackTrace (make-array StackTraceElement 0)))
-  "The single Java Exception object used by error-kit for all stack
-  manipulation")
+(defvar- ctrl-exception-class
+  (class (make-ctrl-exception nil nil)))
 
 (defvar- *handler-stack* () "Stack of bound handler symbols")
 
@@ -38,6 +39,7 @@
 
 (defn *error*
   "Base type for all error-kit errors"
+  {::args [:msg :unhandled :tag]}
   [details]
   (merge {:tag `*error* :msg "exception via error-kit"
           :unhandled (throw-msg Exception)}
@@ -72,9 +74,8 @@
            `(derive '~qual-err-name '~(qualify-sym parent)))
        (var ~err-name))))
 
-(defn- throw-to [target-map args]
-  (.set thread-data (assoc target-map :args args))
-  (throw the-exception))
+(defn- throw-to [msg target-map args]
+  (throw (make-ctrl-exception msg (assoc target-map :args args))))
 
 (defn raise*
   "Raise the given error object, best if created by an error
@@ -89,16 +90,16 @@
             (recur (next hs))
             (let [rtn ((:hfunc handler) err)]
               (if-not (vector? rtn)
-                (throw-to handler (list rtn))
+                (throw-to "default" handler (list rtn))
                 (condp = (rtn 0)
                   ::continue-with (rtn 1)
                   ::continue (if-let [continue (*continues* (rtn 1))]
-                               (throw-to continue (rtn 2))
+                               (throw-to "continue" continue (rtn 2))
                                (do (prn *continues*) (throw
                                  (Exception.
                                    (str "Unbound continue name " (rtn 1))))))
                   ::do-not-handle (recur (next hs))
-                  (throw-to handler (list rtn)))))))))))
+                  (throw-to "do-not-handle" handler (list rtn)))))))))))
 
 (defmacro raise
   "Raise an error of the type err-name, constructed with the given args"
@@ -181,11 +182,21 @@
          (binding [*handler-stack* (list* ~@handlers @#'*handler-stack*)
                    *continues* (merge @#'*continues* ~@continues)]
            ~@body)
-         (catch ~(class the-exception) e#
-           (let [td# (.get @#'thread-data)]
-             (if (= '~blockid (:blockid td#))
-               (apply (:rfunc td#) (:args td#))
-               (throw e#))))))))
+         (catch Throwable e#
+           (let [root-cause# (root-cause e#)]
+             (if-not (instance? @#'ctrl-exception-class root-cause#)
+               (throw e#)
+               (let [data# @root-cause#]
+                 (if (= '~blockid (:blockid data#))
+                   (apply (:rfunc data#) (:args data#))
+                   (throw e#))))))))))
+
+(defn rebind-fn [func]
+  (let [a *handler-stack*, b *continues*]
+    (fn [& args]
+      (binding [*handler-stack* a
+                *continues* b]
+        (apply func args)))))
 
 (comment
 
