@@ -140,7 +140,8 @@
   "Is the component (recieved from scc) self recursive?"
   [g ns]
   (or (> (count ns) 1)
-      (some ns (get-neighbors g (first ns)))))
+      (let [n (first ns)]
+        (some #(= % n) (get-neighbors g n)))))
 
 (defn self-recursive-sets
   "Returns, as a sequence of sets, the components of a graph that are
