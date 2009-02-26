@@ -111,9 +111,17 @@
     (is (= ecg empty-graph))))
 
 
+(deftest test-recursive-component?
+  (let [sccs (scc test-graph-2)]
+    (is (= (set (filter (partial recursive-component? test-graph-2) sccs))
+           #{#{:i :j} #{:b :c :a :d :e} #{:f}}))))
+
+
 (deftest test-self-recursive-sets
   (is (= (set (self-recursive-sets test-graph-2))
-         #{#{:i :j} #{:b :c :a :d :e} #{:f}}))
+         (set (filter
+               (partial recursive-component? test-graph-2)
+               (scc test-graph-2)))))
   (is (empty? (self-recursive-sets empty-graph))))
 
 

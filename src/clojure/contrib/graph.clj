@@ -136,14 +136,17 @@
         nm (into {} (map (fn [ns] [ns (find-neighbors ns)]) sccs))]
     (struct directed-graph (set sccs) nm)))
 
+(defn recursive-component?
+  "Is the component (recieved from scc) self recursive?"
+  [g ns]
+  (or (> (count ns) 1)
+      (some ns (get-neighbors g (first ns)))))
+
 (defn self-recursive-sets
   "Returns, as a sequence of sets, the components of a graph that are
    self-recursive."
   [g]
-  (let [recursive? (fn [ns]
-                     (or (> (count ns) 1)
-                         (some ns (get-neighbors g (first ns)))))]
-    (filter recursive? (scc g))))
+  (filter (partial recursive-component? g) (scc g)))
                           
 
 ;; Dependency Lists
