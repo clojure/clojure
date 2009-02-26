@@ -1212,6 +1212,27 @@
   occurring, does nothing. Returns the number of actions dispatched."
   [] (clojure.lang.Agent/releasePendingSends))
 
+(defn add-watch
+  "Experimental.
+  Adds a watch function to an agent/atom/var/ref reference. The watch
+  fn must be a fn of 4 args: a key, the reference, its old-state, its
+  new-state. Whenever the reference's state might have been changed,
+  any registered watches will have their functions sent. The watch fn
+  will be caled synchronously, on the agent's thread if an agent,
+  before any pending sends if agent or ref. Note that an atom's or
+  ref's state may have changed again prior to the fn call, so use
+  old-state rather than derefing the reference. Note also that watch fns
+  may be called from multiple threads simultaneously. Var watchers are
+  triggered only by root binding changes, not thread-local set!s"
+  [#^clojure.lang.IRef reference key fn]
+  (.addWatch reference key fn))
+
+(defn remove-watch
+  "Experimental.
+  Removes a watch (set by add-watch) from a reference"
+  [#^clojure.lang.IRef reference key]
+  (.removeWatch reference key))
+
 (defn add-watcher
   "Experimental.
   Adds a watcher to an agent/atom/var/ref reference. The watcher must
@@ -1222,13 +1243,17 @@
   be sent after the reference's state is changed. Var watchers are
   triggered only by root binding changes, not thread-local set!s"
   [#^clojure.lang.IRef reference send-type watcher-agent action-fn]
-  (.addWatch reference watcher-agent action-fn (= send-type :send-off)))
+  (add-watch reference watcher-agent
+    (fn [watcher-agent reference old-state new-state]
+      (when-not (identical? old-state new-state)
+        ((if (= send-type :send-off) send-off send)
+         watcher-agent action-fn reference)))))
 
 (defn remove-watcher
   "Experimental.
   Removes a watcher (set by add-watcher) from a reference"
-  [#^clojure.lang.IRef reference watcher-agent]
-  (.removeWatch reference watcher-agent))
+  [reference watcher-agent]
+  (remove-watch reference watcher-agent))
 
 (defn agent-errors
   "Returns a sequence of the exceptions thrown during asynchronous
