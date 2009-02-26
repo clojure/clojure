@@ -14,94 +14,91 @@ package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Atom extends ARef{
-    final AtomicReference state;
+final public class Atom extends ARef{
+final AtomicReference state;
 
-    public Atom(Object state) {
-        this.state = new AtomicReference(state);
-    }
+public Atom(Object state){
+	this.state = new AtomicReference(state);
+}
 
-    public Atom(Object state, IPersistentMap meta) {
-        super(meta);
-        this.state = new AtomicReference(state);
-    }
+public Atom(Object state, IPersistentMap meta){
+	super(meta);
+	this.state = new AtomicReference(state);
+}
 
-    public Object deref() {
-        return state.get();
-    }
+public Object deref(){
+	return state.get();
+}
 
-    public Object swap(IFn f) throws Exception {
-        for(;;)
-            {
-            Object v = deref();
-            Object newv = f.invoke(v);
-            validate(newv);
-            if(state.compareAndSet(v,newv))
-                {
-                if(v != newv)
-                    notifyWatches();
-                return newv;
-                }
-            }
-    }
+public Object swap(IFn f) throws Exception{
+	for(; ;)
+		{
+		Object v = deref();
+		Object newv = f.invoke(v);
+		validate(newv);
+		if(state.compareAndSet(v, newv))
+			{
+			notifyWatches(v, newv);
+			return newv;
+			}
+		}
+}
 
-    public Object swap(IFn f, Object arg) throws Exception {
-        for(;;)
-            {
-            Object v = deref();
-            Object newv = f.invoke(v,arg);
-            validate(newv);
-            if(state.compareAndSet(v,newv))
-                {
-                if(v != newv)
-                    notifyWatches();
-                return newv;
-                }
-            }
-    }
+public Object swap(IFn f, Object arg) throws Exception{
+	for(; ;)
+		{
+		Object v = deref();
+		Object newv = f.invoke(v, arg);
+		validate(newv);
+		if(state.compareAndSet(v, newv))
+			{
+			notifyWatches(v, newv);
+			return newv;
+			}
+		}
+}
 
-    public Object swap(IFn f, Object arg1, Object arg2) throws Exception {
-        for(;;)
-            {
-            Object v = deref();
-            Object newv = f.invoke(v, arg1, arg2);
-            validate(newv);
-            if(state.compareAndSet(v,newv))
-                {
-                if(v != newv)
-                    notifyWatches();
-                return newv;
-                }
-            }
-    }
+public Object swap(IFn f, Object arg1, Object arg2) throws Exception{
+	for(; ;)
+		{
+		Object v = deref();
+		Object newv = f.invoke(v, arg1, arg2);
+		validate(newv);
+		if(state.compareAndSet(v, newv))
+			{
+			notifyWatches(v, newv);
+			return newv;
+			}
+		}
+}
 
-    public Object swap(IFn f, Object x, Object y, ISeq args) throws Exception {
-        for(;;)
-            {
-            Object v = deref();
-            Object newv = f.applyTo(RT.listStar(v, x, y, args));
-            validate(newv);
-            if(state.compareAndSet(v,newv))
-                {
-                if(v != newv)
-                    notifyWatches();
-                return newv;
-                }
-            }
-    }
+public Object swap(IFn f, Object x, Object y, ISeq args) throws Exception{
+	for(; ;)
+		{
+		Object v = deref();
+		Object newv = f.applyTo(RT.listStar(v, x, y, args));
+		validate(newv);
+		if(state.compareAndSet(v, newv))
+			{
+			notifyWatches(v, newv);
+			return newv;
+			}
+		}
+}
 
-    public boolean compareAndSet(Object oldv, Object newv){
-        validate(newv);
-        boolean ret = state.compareAndSet(oldv, newv);
-        if (ret && oldv != newv)
-            notifyWatches();
-        return ret;
-    }
+public boolean compareAndSet(Object oldv, Object newv){
+	validate(newv);
+	boolean ret = state.compareAndSet(oldv, newv);
+	if(ret)
+		notifyWatches(oldv, newv);
+	return ret;
+}
 
-    public Object reset(Object newval){
-        validate(newval);
-        state.set(newval);
-        notifyWatches();
-        return newval;
-    }
+public Object reset(Object newval){
+	Object oldval = state.get();
+	validate(newval);
+	state.set(newval);
+	notifyWatches(oldval, newval);
+	return newval;
+}
 }

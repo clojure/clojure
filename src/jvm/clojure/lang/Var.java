@@ -141,7 +141,7 @@ final public Object deref(){
 }
 
 public void setValidator(IFn vf){
-	if(isBound())
+	if(hasRoot())
 		validate(vf, getRoot());
 	validator = vf;
 }
@@ -203,7 +203,9 @@ public boolean isPublic(){
 }
 
 public Object getRoot(){
-	return root;
+	if(hasRoot())
+		return root;
+	throw new IllegalStateException(String.format("Var %s/%s is unbound.", ns, sym));
 }
 
 public Object getTag(){
@@ -228,6 +230,7 @@ final public boolean hasRoot(){
 //binding root always clears macro flag
 synchronized public void bindRoot(Object root){
 	validate(getValidator(), root);
+	Object oldroot = hasRoot()?this.root:null;
 	this.root = root;
     try
         {
@@ -237,13 +240,14 @@ synchronized public void bindRoot(Object root){
         {
         throw new RuntimeException(e);
         }
-    notifyWatches();
+    notifyWatches(oldroot,this.root);
 }
 
 synchronized void swapRoot(Object root){
 	validate(getValidator(), root);
+	Object oldroot = hasRoot()?this.root:null;
 	this.root = root;
-    notifyWatches();
+    notifyWatches(oldroot,root);
 }
 
 synchronized public void unbindRoot(){
@@ -253,15 +257,17 @@ synchronized public void unbindRoot(){
 synchronized public void commuteRoot(IFn fn) throws Exception{
 	Object newRoot = fn.invoke(root);
 	validate(getValidator(), newRoot);
+	Object oldroot = getRoot();
 	this.root = newRoot;
-    notifyWatches();
+    notifyWatches(oldroot,newRoot);
 }
 
 synchronized public Object alterRoot(IFn fn, ISeq args) throws Exception{
 	Object newRoot = fn.applyTo(RT.cons(root, args));
 	validate(getValidator(), newRoot);
+	Object oldroot = getRoot();
 	this.root = newRoot;
-    notifyWatches();
+    notifyWatches(oldroot,newRoot);
 	return newRoot;
 }
 

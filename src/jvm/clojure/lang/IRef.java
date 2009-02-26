@@ -14,15 +14,14 @@ package clojure.lang;
 
 public interface IRef extends IDeref{
 
-void setValidator(IFn vf);
+	void setValidator(IFn vf);
 
     IFn getValidator();
 
     IPersistentMap getWatches();
 
-    IRef addWatch(Agent watcher, IFn action, boolean sendOff);
+    IRef addWatch(Object key, IFn callback);
 
-    IRef removeWatch(Agent watcher);
+    IRef removeWatch(Object key);
 
-    void notifyWatches();
 }

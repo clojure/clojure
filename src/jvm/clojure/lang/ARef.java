@@ -14,94 +14,94 @@ package clojure.lang;
 
 import java.util.Map;
 
-public abstract class ARef extends AReference implements IRef {
-    protected volatile IFn validator = null;
-    private volatile IPersistentMap watchers = PersistentHashMap.EMPTY;
+public abstract class ARef extends AReference implements IRef{
+protected volatile IFn validator = null;
+private volatile IPersistentMap watches = PersistentHashMap.EMPTY;
 
-    public ARef() {
-        super();
-    }
+public ARef(){
+	super();
+}
 
-    public ARef(IPersistentMap meta) {
-        super(meta);
-    }
+public ARef(IPersistentMap meta){
+	super(meta);
+}
 
-    void validate(IFn vf, Object val){
-        try{
-            if(vf != null && !RT.booleanCast(vf.invoke(val)))
-                throw new IllegalStateException("Invalid reference state");
-            }
-        catch(RuntimeException re)
-            {
-            throw re;
-            }
-        catch(Exception e)
-            {
-            throw new IllegalStateException("Invalid reference state", e);
-            }
-    }
+void validate(IFn vf, Object val){
+	try
+		{
+		if(vf != null && !RT.booleanCast(vf.invoke(val)))
+			throw new IllegalStateException("Invalid reference state");
+		}
+	catch(RuntimeException re)
+		{
+		throw re;
+		}
+	catch(Exception e)
+		{
+		throw new IllegalStateException("Invalid reference state", e);
+		}
+}
 
-    void validate(Object val){
-        validate(validator,val);
-    }
+void validate(Object val){
+	validate(validator, val);
+}
 
-    public void setValidator(IFn vf){
-        try
-            {
-            validate(vf, deref());
-            }
-        catch (Exception e)
-            {
-            throw new RuntimeException(e);
-            }
-        validator = vf;
-    }
+public void setValidator(IFn vf){
+	try
+		{
+		validate(vf, deref());
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+	validator = vf;
+}
 
-    public IFn getValidator(){
-        return validator;
-    }
+public IFn getValidator(){
+	return validator;
+}
 
-    public IPersistentMap getWatches(){
-        return watchers;
-    }
-    
-    synchronized public IRef addWatch(Agent watcher, IFn action, boolean sendOff){
-	    watchers = watchers.assoc(watcher, new Object[]{action, sendOff});
-	    return this;
-    }
+public IPersistentMap getWatches(){
+	return watches;
+}
 
-	synchronized public IRef removeWatch(Agent watcher){
-		try
+synchronized public IRef addWatch(Object key, IFn callback){
+	watches = watches.assoc(key, callback);
+	return this;
+}
+
+synchronized public IRef removeWatch(Object key){
+	try
+		{
+		watches = watches.without(key);
+		}
+	catch(Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+
+	return this;
+}
+
+public void notifyWatches(Object oldval, Object newval){
+	IPersistentMap ws = watches;
+	if(ws.count() > 0)
+		{
+		for(ISeq s = ws.seq(); s != null; s = s.next())
 			{
-			watchers = watchers.without(watcher);
+			Map.Entry e = (Map.Entry) s.first();
+			IFn fn = (IFn) e.getValue();
+			try
+				{
+				if(fn != null)
+					fn.invoke(e.getKey(), this, oldval, newval);
+				}
+			catch(Exception e1)
+				{
+				throw new RuntimeException(e1);
+				}
 			}
-		catch(Exception e)
-			{
-			throw new RuntimeException(e);
-			}
-
-		return this;
-	}
-
-    public void notifyWatches() {
-        IPersistentMap ws = watchers;
-        if (ws.count() > 0)
-            {
-            ISeq args = new Cons(this, null);
-            for (ISeq s = RT.seq(ws); s != null; s = s.next())
-                {
-                Map.Entry e = (Map.Entry) s.first();
-                Object[] a = (Object[]) e.getValue();
-                Agent agent = (Agent) e.getKey();
-                try
-                    {
-                    agent.dispatch((IFn) a[0], args, (Boolean)a[1]);
-                    }
-                catch (Exception e1)
-                    {
-                    //eat dispatching exceptions and continue
-                    }
-                }
-            }
-    }
+		}
+}
 }

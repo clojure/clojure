@@ -63,12 +63,12 @@ static class Action implements Runnable{
 			nested.set(PersistentVector.EMPTY);
 
 			boolean hadError = false;
-			boolean changed = false;
 			try
 				{
-				changed = action.agent.setState(action.fn.applyTo(RT.cons(action.agent.state, action.args)));
-                if(changed)
-                    action.agent.notifyWatches();
+				Object oldval = action.agent.state;
+				Object newval =  action.fn.applyTo(RT.cons(action.agent.state, action.args));
+				action.agent.setState(newval);
+                action.agent.notifyWatches(oldval,newval);
 				}
 			catch(Throwable e)
 				{
