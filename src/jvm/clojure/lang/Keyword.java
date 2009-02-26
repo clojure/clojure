@@ -34,6 +34,10 @@ private Keyword(Symbol sym){
 	this.sym = sym;
 }
 
+public int hashCode(){
+	return sym.hashCode() + 0x9e3779b9;
+}
+
 public String toString(){
 	return ":" + sym;
 }
