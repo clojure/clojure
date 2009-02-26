@@ -124,17 +124,18 @@
    Each node in the new graph will be a set of nodes from the old.
    These sets are the strongly connected components.  Each edge will
    be the union of the corresponding edges of the prior graph."
-  [g]
-  (let [sccs (scc g)
-        find-node-set (fn [n]
-                        (some #(if (% n) % nil) sccs))
-        find-neighbors (fn [ns]
-                         (let [nbs1 (map (partial get-neighbors g) ns)
-                               nbs2 (map set nbs1)
-                               nbs3 (apply union nbs2)]
-                           (set (map find-node-set nbs3))))
-        nm (into {} (map (fn [ns] [ns (find-neighbors ns)]) sccs))]
-    (struct directed-graph (set sccs) nm)))
+  ([g]
+     (component-graph g (scc g)))
+  ([g sccs]
+     (let [find-node-set (fn [n]
+                           (some #(if (% n) % nil) sccs))
+           find-neighbors (fn [ns]
+                            (let [nbs1 (map (partial get-neighbors g) ns)
+                                  nbs2 (map set nbs1)
+                                  nbs3 (apply union nbs2)]
+                              (set (map find-node-set nbs3))))
+           nm (into {} (map (fn [ns] [ns (find-neighbors ns)]) sccs))]
+       (struct directed-graph (set sccs) nm))))
 
 (defn recursive-component?
   "Is the component (recieved from scc) self recursive?"
