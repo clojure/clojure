@@ -69,7 +69,7 @@
   ([g n]
      (lazy-walk g [n] #{}))
   ([g ns v]
-     (lazy-seq (let [s (seq (remove v ns))
+     (lazy-seq (let [s (seq (drop-while v ns))
                      n (first s)
                      ns (rest s)]
                  (when s
@@ -78,7 +78,9 @@
 (defn transitive-closure
   "Returns the transitive closure of a graph.  The neighbors are lazily computed."
   [g]
-  (let [nbs (into {} (map (fn [n] [n (delay (lazy-walk g n))]) (:nodes g)))]
+  (let [nns (fn [n]
+              [n (delay (lazy-walk g (get-neighbors g n) #{}))])
+        nbs (into {} (map nns (:nodes g)))]
     (struct directed-graph
             (:nodes g)
             (fn [n] (force (nbs n))))))

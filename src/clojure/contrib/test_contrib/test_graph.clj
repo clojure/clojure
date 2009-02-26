@@ -79,9 +79,9 @@
     (is (every? #(= #{:a :b :c :d :e} (set %))
                 (map (partial get-neighbors tc-1) (:nodes tc-1))))
     (is (= (get :a) #{:a :b :c :d :e}))
-    (is (= (get :h) #{:h}))
+    (is (= (get :h) #{}))
     (is (= (get :j) #{:i :j}))
-    (is (= (get :g) #{:a :b :c :d :e :f :g}))))
+    (is (= (get :g) #{:a :b :c :d :e :f}))))
 
 
 (deftest test-post-ordered-nodes
