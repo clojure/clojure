@@ -1861,6 +1861,11 @@
   "Returns the Class of x"
   [#^Object x] (if (nil? x) x (. x (getClass))))
 
+(defn type 
+  "Returns the :type metadata of x, or its Class if none"
+  [x]
+  (or (:type (meta x)) (class x)))
+
 (defn num
   "Coerce to Number"
   {:tag Number
@@ -1977,7 +1982,7 @@
 
 (def #^{:private true} print-initialized false)
 
-(defmulti print-method (fn [x writer] (class x)))
+(defmulti print-method (fn [x writer] (type x)))
 (defmulti print-dup (fn [x writer] (class x)))
 
 (defn pr-on
