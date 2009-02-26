@@ -1,10 +1,7 @@
 ;; Algebraic data types
 
 ;; by Konrad Hinsen
-;; last updated February 25, 2009
-
-;; WARNING: This is a proof-of-concept implementation of algebratic data
-;; types. Expect this module to change in the near future!
+;; last updated February 26, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -15,46 +12,117 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.types
-  "Algebraic data types
+  "Algebraic data types")
 
-   NOTE: This library is experimental. It may change significantly
-   with future release.
-   
-   NOTE: The major limitation of this implementation of algebraic data
-   types is that the objects created with it are compared for equality
-   by identity, not by value. Equality tests are therefore almost useless.")
+;
+; Defining algebraic types
+;
+(defn- qualified-symbol
+  [s]
+  (symbol (str *ns*) (str s)))
+
+(defn- qualified-keyword
+  [s]
+  (keyword (str *ns*) (str s)))
 
 (defn- constructor-code
-  [constructor]
+  [meta-map-symbol constructor]
   (if (symbol? constructor)
-    `(def ~constructor (~'make (quote ~constructor)))
+    `(def ~constructor
+	  (with-meta (quote ~(qualified-symbol constructor))
+		     ~meta-map-symbol))
     (let [[name & args] constructor]
       (if (empty? args)
-        (throw (IllegalArgumentException. "zero argument constructor"))
-        `(defn ~name ~(vec args) (~'make (quote ~name) ~@args))))))
+	(throw (IllegalArgumentException. "zero argument constructor"))
+	`(defn ~name ~(vec args)
+	   (with-meta [(quote ~(qualified-symbol name)) ~@args]
+		      ~meta-map-symbol))))))
 
 (defmacro deftype
   "Define the algebraic data type name by an exhaustive list of constructors.
    Each constructor can be a symbol (argument-free constructor) or a
    list consisting of a tag symbol followed by the argument symbols.
-   The data type itself is a class object, argument-free constructors
-   become singleton instances of that class, and constructors with arguments
-   are functions that return a new object."
+   The data type itself is a keyword declared as deriving from
+   :clojure.contrib.types/adt."
   [name & constructors]
-  `(let [~'make (fn [~'tag & ~'values]
-                  (fn ~name []
-		    (if (nil? ~'values) ~'tag (cons ~'tag ~'values))))]
-     (def ~name (class (~'make (quote ~name))))
-     ~@(map constructor-code constructors)
-     (defmethod clojure.core/print-method ~name [~'o ~'w]
-       (clojure.core/print-method (~'o) ~'w))
-     (defmethod clojure.core/print-dup ~name [~'o ~'w]
-       (clojure.core/print-dup (~'o) ~'w))))
+  (let [type-tag (qualified-keyword name)
+	meta-map-symbol (gensym "mm")
+	accessor1 (if (and (= 1 (count constructors))
+			   (seq? (first constructors))
+			   (= 2 (count (first constructors))))
+		    `(defmethod get-value ~type-tag [v#]
+		       (second v#))
+		    nil)
+	accessor2 (if (and (= 1 (count constructors))
+			   (seq? (first constructors)))
+		    `(defmethod get-values ~type-tag [v#]
+		       (subvec v# 1))
+		    nil)]
+    `(let [~meta-map-symbol {:type ~type-tag}]
+       (derive ~type-tag ::adt)
+       (def ~name ~type-tag)
+       ~@(map (partial constructor-code meta-map-symbol) constructors)
+       ~accessor1
+       ~accessor2
+       )))
+
+;
+; Printing
+;
+(defn- unqualified-symbol
+  [s]
+  (let [s-str (str s)]
+    (symbol (.substring s-str (inc (.indexOf s-str (int \/)))))))
+
+(defmethod print-method ::adt [o w]
+  (if (symbol? o)
+    (let [tag (unqualified-symbol o)]
+      (print-method tag w))
+    (let [[tag & values] o
+	  tag (unqualified-symbol tag)]
+      (print-method (cons tag values) w))))
+
+;
+; Value access
+;
+(defmulti get-value
+  "Obtain the value stored in an object of an algebraic type.
+   Defined only for types with a single constructor that has
+   one argument."
+  {:arglists '([v])}
+  type)
+
+(defmethod get-value ::adt
+  [v]
+  (throw (Exception.
+	  "defined for types with a single constructor of one argument")))
+
+(defmulti get-values
+  "Obtain the values stored in an object of an algebraic type.
+   Defined only for types with a single constructor that must have
+   at least one argument."
+  {:arglists '([v])}
+  type)
+
+(defmethod get-values ::adt
+  [v]
+  (throw
+   (Exception.
+    "defined for types with a single constructor of at least one argument")))
+
+;
+;  Matching templates
+;
+(defn- resolve-symbol
+  [s]
+  (if-let [var (resolve s)]
+    (symbol (str (.ns var)) (str (.sym var)))
+    s))
 
 (defn- tests-and-bindings
   [template vsymbol]
   (if (symbol? template)
-    [`(= (quote ~template) ~vsymbol)
+    [`(= (quote ~(resolve-symbol template)) ~vsymbol)
      []]
     (let [[tag & values] template
           enum-values (map list values (range 1 (inc (count values))))
@@ -80,8 +148,10 @@
 				 [symbol (list `nth vsymbol (first indices))])
 			       bindings))]
       [(cons `and
-	     (cons `(seq? ~vsymbol)
-		   (cons `(= (quote ~tag) (first ~vsymbol)) tests)))
+	     (cons `(vector? ~vsymbol)
+		   (cons `(= (quote ~(resolve-symbol tag))
+			     (first ~vsymbol))
+			 tests)))
        (vec bindings)])))
 
 (defmacro match
@@ -94,6 +164,8 @@
    the corresponding elements of value must be equal for the template
    to match."
   [value & clauses]
+   (when (odd? (count clauses))
+     (throw (Exception. "Odd number of elements in match expression")))
   (let [vsymbol (gensym)
 	terms (apply concat
 		     (map (fn [[template expr]]
@@ -106,5 +178,6 @@
 				   expr
 				   `(let ~bindings ~expr))])))
 			  (partition 2 clauses)))]
-    `(let [~vsymbol (~value)]
+    `(let [~vsymbol ~value]
        (cond ~@terms))))
+ 
