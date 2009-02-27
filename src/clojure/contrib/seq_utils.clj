@@ -95,7 +95,7 @@
   binding-name, allowing for recursive expressions."
  [binding-name & body]
   `(let [s# (atom nil)]
-     (swap! s# (constantly (lazy-seq (let [~binding-name @s#] ~@body))))))
+     (reset! s# (lazy-seq (let [~binding-name @s#] ~@body)))))
              
 (defmacro rec-cat 
  "Similar to lazy-cat but binds the resulting sequence to the supplied 
