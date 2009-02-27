@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated February 18, 2009
+;; last updated February 25, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -384,3 +384,31 @@
 			       (fn [xs]
 				 (apply concat (map f xs))))))
 	  ]))
+
+;; Contributed by Jim Duey
+(defn state-t
+  "Monad transformer that transforms a monad m into a monad of stateful
+  computations that have the base monad type as their result."
+  [m]
+  (monad [m-result (with-monad m
+		     (fn m-result-state-t [v]
+                       (fn [s]
+			 (m-result (list v s)))))
+	  m-bind   (with-monad m
+                     (fn m-bind-state-t [stm f]
+                       (fn [s]
+                         (m-bind (stm s)
+                                 (fn [[v ss]]
+                                   ((f v) ss))))))
+          m-zero   (with-monad m
+                     (if (= ::undefined m-zero)
+		       ::undefined
+		       (fn [s]
+			 m-zero)))
+          m-plus   (with-monad m
+                     (if (= ::undefined m-plus)
+		       ::undefined
+		       (fn [& stms]
+			 (fn [s]
+			   (apply m-plus (map #(% s) stms))))))
+          ]))
