@@ -63,9 +63,9 @@
       m2 (add-items empty-minimum [(/ 1 2)])]
   (combine m1 m2))
 
-; Range accumulator: combination of minimum and maximum
-(let [m1 (add-items empty-range [2 3])
-      m2 (add-items empty-range [(/ 1 2)])]
+; Min-max accumulator: combination of minimum and maximum
+(let [m1 (add-items empty-min-max [2 3])
+      m2 (add-items empty-min-max [(/ 1 2)])]
   (combine m1 m2))
 
 ; String accumulator: combine is concatenation

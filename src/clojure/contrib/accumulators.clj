@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated February 26, 2009
+;; last updated February 27, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -186,14 +186,14 @@
   "An empty minimum accumulator. Only numbers can be added.")
 
 ;
-; Numeric range accumulator
+; Numeric min-max accumulator
 ; (combination of minimum and maximum)
 ;
 (deftype min-max-type
   (min-max min max))
 
-(defvar empty-range (min-max nil nil)
-  "An empty range accumulator, combining minimum and maximum.
+(defvar empty-min-max (min-max nil nil)
+  "An empty min-max accumulator, combining minimum and maximum.
    Only numbers can be added.")
 
 (defmethod combine min-max-type
@@ -213,63 +213,63 @@
 ;
 ; Counter accumulator
 ;
-(deftype counter-type
-  (counter map))
+(let [type-tag ::counter
+      meta-map {:type type-tag}]
 
-(defvar empty-counter (counter {})
-  "An empty counter accumulator. Its value is a map that stores for
-   every item the number of times it was added.")
+  (defvar empty-counter (with-meta {} meta-map)
+    "An empty counter accumulator. Its value is a map that stores for
+     every item the number of times it was added.")
 
-(defmethod combine counter-type
-  [v & vs]
-  (letfn [add-item [cntr [item n]]
-	    (assoc cntr item (+ n (get cntr item 0)))
-	  add-two [c1 c2] (reduce add-item c1 c2)]
-    (counter (reduce add-two (get-value v) (map get-value vs)))))
+  (defmethod combine type-tag
+    [v & vs]
+    (letfn [add-item [counter [item n]]
+    	        (assoc counter item (+ n (get counter item 0)))
+	    add-two [c1 c2] (reduce add-item c1 c2)]
+	   (reduce add-two v vs)))
 
-(defmethod add counter-type
-  [v e]
-  (let [cntr (get-value v)]
-    (counter (assoc cntr e (inc (get cntr e 0))))))
+  (defmethod add type-tag
+    [v e]
+    (assoc v e (inc (get v e 0)))))
 
 ;
 ; Counter accumulator with total count
 ;
-(deftype counter-with-total-type
-  (counter-with-total map))
 
-(derive counter-with-total-type counter-type)
+(let [type-tag ::counter-with-total
+      meta-map {:type type-tag}]
 
-(defvar empty-counter-with-total (counter-with-total {:total 0})
-  "An empty counter-with-total accumulator. It works like the counter
-   accumulator, except that the total number of items added is stored as the
-   value of the key :totall.")
+  (derive type-tag ::counter)
 
-(defmethod add counter-with-total-type
-  [v e]
-  (let [cntr (get-value v)]
-    (counter-with-total
-      (assoc cntr e (inc (get cntr e 0))
-	     :total (inc (:total cntr))))))
+  (defvar empty-counter-with-total
+    (with-meta {:total 0} meta-map)
+    "An empty counter-with-total accumulator. It works like the counter
+     accumulator, except that the total number of items added is stored as the
+     value of the key :totall.")
+
+  (defmethod add type-tag
+    [v e]
+    (assoc v e (inc (get v e 0))
+	     :total (inc (:total v)))))
 
 ;
 ; Accumulator n-tuple
 ;
-(deftype tuple-type
-  (tuple accs))
+(let [type-tag ::tuple
+      meta-map {:type type-tag}
+      make (fn [s] (with-meta (into [] s) meta-map))]
 
-(defn empty-tuple
-  "Returns an accumulator tuple with the supplied empty-accumulators
-   as its value. Accumulator tuples consist of several accumulators that
-   work in parallel. Added items must be sequences whose number of elements
-   matches the number of sub-accumulators."
-  [empty-accumulators]
-  (tuple empty-accumulators))
+  (defn empty-tuple
+    "Returns an accumulator tuple with the supplied empty-accumulators
+     as its value. Accumulator tuples consist of several accumulators that
+     work in parallel. Added items must be sequences whose number of elements
+     matches the number of sub-accumulators."
+    [empty-accumulators]
+    (make empty-accumulators))
 
-(defmethod combine tuple-type
-  [& vs]
-  (tuple (map combine (get-value vs))))
+  (defmethod combine ::tuple
+    [& vs]
+    (make (map combine vs)))
 
-(defmethod add tuple-type
-  [v e]
-  (tuple (map add (get-value v) e)))
+  (defmethod add ::tuple
+    [v e]
+    (make (map add v e))))
