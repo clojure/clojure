@@ -68,6 +68,9 @@
           (pr-on m w))
       (.write w " "))))
 
+(defmethod print-method :default [o, #^Writer w]
+  (print-method (vary-meta o #(dissoc % :type)) w))
+
 (defmethod print-method nil [o, #^Writer w]
   (.write w "nil"))
 
@@ -80,7 +83,7 @@
   (print-args o w)
   (.write w ")"))
 
-(defmethod print-method :default [o, #^Writer w]
+(defmethod print-method Object [o, #^Writer w]
   (.write w "#<")
   (.write w (.getSimpleName (class o)))
   (.write w " ")
