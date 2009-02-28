@@ -517,6 +517,13 @@ static class SubVector extends APersistentVector{
 
 	public SubVector(IPersistentMap meta, IPersistentVector v, int start, int end){
 		super(meta);
+		if(v instanceof APersistentVector.SubVector)
+			{
+			APersistentVector.SubVector sv = (APersistentVector.SubVector) v;
+			start += sv.start;
+			end += sv.start;
+			v = sv.v;
+			}
 		this.v = v;
 		this.start = start;
 		this.end = end;
