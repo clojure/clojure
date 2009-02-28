@@ -337,18 +337,8 @@ static public void init() throws Exception{
 	((PrintWriter)RT.ERR.deref()).println("No need to call RT.init() anymore");
 }
 
-static public long lastModified(URL url,String libfile) throws Exception{
-	if(url.getProtocol().equals("jar"))
-		{
-		return ((JarURLConnection)url.openConnection()).getJarFile().getEntry(libfile).getTime();
-		}
-	else if(url.getProtocol().equals("file"))
-		{
-		File f = new File(url.toURI());
-		return f.lastModified();
-		}
-    else
-        return 0;
+static public long lastModified(URL url) throws Exception{
+	return url.openConnection().getLastModified();
 }
 
 static void compile(String cljfile) throws Exception{
@@ -383,7 +373,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 
 	if((classURL != null &&
 	    (cljURL == null
-	        || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
+	        || lastModified(classURL) > lastModified(cljURL)))
         || classURL == null)
 		{
 		try
