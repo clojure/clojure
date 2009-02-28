@@ -42,6 +42,7 @@ static final Symbol LOOP = Symbol.create("loop*");
 static final Symbol RECUR = Symbol.create("recur");
 static final Symbol IF = Symbol.create("if*");
 static final Symbol LET = Symbol.create("let*");
+static final Symbol LETFN = Symbol.create("letfn*");
 static final Symbol DO = Symbol.create("do");
 static final Symbol FN = Symbol.create("fn*");
 static final Symbol QUOTE = Symbol.create("quote");
@@ -88,6 +89,7 @@ static final public IPersistentMap specials = PersistentHashMap.create(
 		RECUR, new RecurExpr.Parser(),
 		IF, new IfExpr.Parser(),
 		LET, new LetExpr.Parser(),
+		LETFN, new LetFnExpr.Parser(),
 		DO, new BodyExpr.Parser(),
 		FN, null,
 		QUOTE, new ConstantExpr.Parser(),
@@ -3101,11 +3103,11 @@ static public class FnExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
-				cv.visitField(ACC_PUBLIC + ACC_FINAL
+				cv.visitField(ACC_PUBLIC //+ ACC_FINAL
 							, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
 				              null, null);
 			else
-				cv.visitField(ACC_PUBLIC + (onceOnly ? 0 : ACC_FINAL)
+				cv.visitField(ACC_PUBLIC //+ (onceOnly ? 0 : ACC_FINAL)
 						, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 			}
 		//ctor that takes closed-overs and inits base + fields
@@ -3269,6 +3271,33 @@ static public class FnExpr implements Expr{
 
 	public Object eval() throws Exception{
 		return getCompiledClass().newInstance();
+	}
+
+	public void emitLetFnInits(GeneratorAdapter gen, FnExpr fn, IPersistentSet letFnLocals){
+		//fn arg is enclosing fn, not this
+		gen.checkCast(fntype);
+
+		for(ISeq s = RT.keys(closes); s != null; s = s.next())
+			{
+			LocalBinding lb = (LocalBinding) s.first();
+			if(letFnLocals.contains(lb))
+				{
+				Class primc = lb.getPrimitiveType();
+				gen.dup();
+				if(primc != null)
+					{
+					fn.emitUnboxedLocal(gen, lb);
+					gen.putField(fntype, lb.name, Type.getType(primc));
+					}
+				else
+					{
+					fn.emitLocal(gen, lb);
+					gen.putField(fntype, lb.name, OBJECT_TYPE);
+					}
+				}
+			}
+		gen.pop();
+		
 	}
 
 	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
@@ -3586,7 +3615,7 @@ public static class FnMethod{
 public static class LocalBinding{
 	public final Symbol sym;
 	public final Symbol tag;
-	public final Expr init;
+	public Expr init;
 	public final int idx;
 	public final String name;
 
@@ -3736,6 +3765,130 @@ public static class BindingInit{
 	public BindingInit(LocalBinding binding, Expr init){
 		this.binding = binding;
 		this.init = init;
+	}
+}
+
+public static class LetFnExpr implements Expr{
+	public final PersistentVector bindingInits;
+	public final Expr body;
+
+	public LetFnExpr(PersistentVector bindingInits, Expr body){
+		this.bindingInits = bindingInits;
+		this.body = body;
+	}
+
+	static class Parser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq form = (ISeq) frm;
+			//(letfns* [var (fn [args] body) ...] body...)
+			if(!(RT.second(form) instanceof IPersistentVector))
+				throw new IllegalArgumentException("Bad binding form, expected vector");
+
+			IPersistentVector bindings = (IPersistentVector) RT.second(form);
+			if((bindings.count() % 2) != 0)
+				throw new IllegalArgumentException("Bad binding form, expected matched symbol expression pairs");
+
+			ISeq body = RT.next(RT.next(form));
+
+			if(context == C.EVAL)
+				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+
+			IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
+			                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref());
+
+			try
+				{
+				Var.pushThreadBindings(dynamicBindings);
+
+				//pre-seed env (like Lisp labels)
+				PersistentVector lbs = PersistentVector.EMPTY;
+				for(int i = 0; i < bindings.count(); i += 2)
+					{
+					if(!(bindings.nth(i) instanceof Symbol))
+						throw new IllegalArgumentException(
+								"Bad binding form, expected symbol, got: " + bindings.nth(i));
+					Symbol sym = (Symbol) bindings.nth(i);
+					if(sym.getNamespace() != null)
+						throw new Exception("Can't let qualified name: " + sym);
+					LocalBinding lb = registerLocal(sym, tagOf(sym), null);
+					lbs = lbs.cons(lb);
+					}
+				PersistentVector bindingInits = PersistentVector.EMPTY;
+				for(int i = 0; i < bindings.count(); i += 2)
+					{
+					Symbol sym = (Symbol) bindings.nth(i);
+					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
+					LocalBinding lb = (LocalBinding) lbs.nth(i/2);
+					lb.init = init;
+					BindingInit bi = new BindingInit(lb, init);
+					bindingInits = bindingInits.cons(bi);
+					}
+				return new LetFnExpr(bindingInits, (new BodyExpr.Parser()).parse(context, body));
+				}
+			finally
+				{
+				Var.popThreadBindings();
+				}
+		}
+	}
+
+	public Object eval() throws Exception{
+		throw new UnsupportedOperationException("Can't eval letfns");
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		for(int i = 0; i < bindingInits.count(); i++)
+			{
+			BindingInit bi = (BindingInit) bindingInits.nth(i);
+			gen.visitInsn(Opcodes.ACONST_NULL);
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
+			}
+
+		IPersistentSet lbset = PersistentHashSet.EMPTY;
+
+		for(int i = 0; i < bindingInits.count(); i++)
+			{
+			BindingInit bi = (BindingInit) bindingInits.nth(i);
+			lbset = (IPersistentSet) lbset.cons(bi.binding);
+			bi.init.emit(C.EXPRESSION, fn, gen);
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
+			}
+
+		for(int i = 0; i < bindingInits.count(); i++)
+			{
+			BindingInit bi = (BindingInit) bindingInits.nth(i);
+			FnExpr fe = (FnExpr) bi.init;
+			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), bi.binding.idx);
+			fe.emitLetFnInits(gen,fn,lbset);
+			}
+		
+		Label loopLabel = gen.mark();
+
+		body.emit(context, fn, gen);
+
+		Label end = gen.mark();
+//		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
+		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.next())
+			{
+			BindingInit bi = (BindingInit) bis.first();
+            String lname = bi.binding.name;
+            if(lname.endsWith("__auto__"))
+                lname += RT.nextID();
+			Class primc = maybePrimitiveType(bi.init);
+			if(primc != null)
+				gen.visitLocalVariable(lname, Type.getDescriptor(primc), null, loopLabel, end,
+				                       bi.binding.idx);
+			else
+				gen.visitLocalVariable(lname, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
+			}
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return body.hasJavaClass();
+	}
+
+	public Class getJavaClass() throws Exception{
+		return body.getJavaClass();
 	}
 }
 
