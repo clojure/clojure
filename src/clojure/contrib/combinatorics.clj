@@ -65,21 +65,22 @@ On my own computer, I use versions of all these algorithms that return sequences
 
 (defn- index-combinations
   [n cnt]
-  (let [c (vec (cons nil (for [j (range 1 (inc n))] (+ j cnt (- (inc n)))))),
-	iter-comb
-	(fn iter-comb [c j]
-	  (if (> j n) nil
-	      (let [c (assoc c j (dec (c j)))]
-		(if (< (c j) j) [c (inc j)]
-		    (loop [c c, j j]
-		      (if (= j 1) [c j]
-			  (recur (assoc c (dec j) (dec (c j))) (dec j)))))))),
-	step
-	(fn step [c j]
-	  (cons (rseq (subvec c 1 (inc n)))
-		(lazy-seq (let [next-step (iter-comb c j)]
-			    (when next-step (step (next-step 0) (next-step 1)))))))]
-    (lazy-seq (step c 1))))
+  (lazy-seq
+   (let [c (vec (cons nil (for [j (range 1 (inc n))] (+ j cnt (- (inc n)))))),
+	 iter-comb
+	 (fn iter-comb [c j]
+	   (if (> j n) nil
+	       (let [c (assoc c j (dec (c j)))]
+		 (if (< (c j) j) [c (inc j)]
+		     (loop [c c, j j]
+		       (if (= j 1) [c j]
+			   (recur (assoc c (dec j) (dec (c j))) (dec j)))))))),
+	 step
+	 (fn step [c j]
+	   (cons (rseq (subvec c 1 (inc n)))
+		 (lazy-seq (let [next-step (iter-comb c j)]
+			     (when next-step (step (next-step 0) (next-step 1)))))))]
+     (step c 1))))
 
 (defn combinations
   "All the unique ways of taking n different elements from items"
@@ -104,19 +105,18 @@ On my own computer, I use versions of all these algorithms that return sequences
   (let [v-original-seqs (vec seqs)
 	step
 	(fn step [v-seqs]
-	  (lazy-seq
-	   (let [increment
-		 (fn [v-seqs]
-		   (loop [i (dec (count v-seqs)), v-seqs v-seqs]
-		     (if (= i -1) nil
-			 (if-let [rst (next (v-seqs i))]
-			   (assoc v-seqs i rst)
-			   (recur (dec i) (assoc v-seqs i (v-original-seqs i)))))))]
-	     (when v-seqs
+	  (let [increment
+		(fn [v-seqs]
+		  (loop [i (dec (count v-seqs)), v-seqs v-seqs]
+		    (if (= i -1) nil
+			(if-let [rst (next (v-seqs i))]
+			  (assoc v-seqs i rst)
+			  (recur (dec i) (assoc v-seqs i (v-original-seqs i)))))))]
+	    (when v-seqs
 	       (cons (map first v-seqs)
-		     (step (increment v-seqs)))))))]
+		     (lazy-seq (step (increment v-seqs)))))))]
     (when (every? first seqs)
-      (step v-original-seqs))))
+      (lazy-seq (step v-original-seqs)))))
 
 
 (defn selections
