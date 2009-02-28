@@ -76,7 +76,13 @@
                    (cons n (lazy-walk g (concat (get-neighbors g n) ns) (conj v n))))))))
 
 (defn transitive-closure
-  "Returns the transitive closure of a graph.  The neighbors are lazily computed."
+  "Returns the transitive closure of a graph.  The neighbors are lazily computed.
+
+   Note: some version of this algorithm return all edges a->a
+   regardless of whether such loops exist in the original graph.  This
+   version does not.  Loops will be included only if produced by
+   cycles in the graph.  If you have code that depends on such
+   behavior, call (-> g transitive-closure add-loops)"
   [g]
   (let [nns (fn [n]
               [n (delay (lazy-walk g (get-neighbors g n) #{}))])
