@@ -12,7 +12,7 @@ Example: (combinations [1 2 3] 2) -> ((1 2) (1 3) (2 3))
 
 (subsets items) - A lazy sequence of all the subsets of
 items (but generalized to all sequences, not just sets).
-Example: (subsets [1 2 3]) -> (nil (1) (2) (3) (1 2) (1 3) (2 3) (1 2 3))
+Example: (subsets [1 2 3]) -> (() (1) (2) (3) (1 2) (1 3) (2 3) (1 2 3))
 
 (cartesian-product & seqs) - Takes any number of sequences
 as arguments, and returns a lazy sequence of all the ways
@@ -56,7 +56,7 @@ I also restricted myself to algorithms that return results in a standard order. 
 
 Most of these algorithms are derived from algorithms found in Knuth's wonderful Art of Computer Programming books (specifically, the volume 4 fascicles), which present fast, iterative solutions to these common combinatorial problems.  Unfortunately, these iterative versions are somewhat inscrutable.  If you want to better understand these algorithms, the Knuth books are the place to start.
 
-On my own computer, I use versions of all these algorithms that return sequences built with lazy-seq, an uncached variation of lazy-cons.  Not only does this boost performance, but it's easier to use these rather large sequences more safely (from a memory consumption standpoint).  Since Rich has said he may drop support for lazy-seq in the future, I went back to lazy-cons for this public contrib release.  I hope lazy-seq sticks around, in which case, I will update this accordingly.
+On my own computer, I use versions of all these algorithms that return sequences built with an uncached variation of lazy-seq.  Not only does this boost performance, but it's easier to use these rather large sequences more safely (from a memory consumption standpoint).  If some form of uncached sequences makes it into Clojure, I will update this accordingly.
 "
 )
 
@@ -76,16 +76,16 @@ On my own computer, I use versions of all these algorithms that return sequences
 			  (recur (assoc c (dec j) (dec (c j))) (dec j)))))))),
 	step
 	(fn step [c j]
-	  (lazy-cons (rseq (subvec c 1 (inc n)))
-		     (let [next-step (iter-comb c j)]
-		       (when next-step (step (next-step 0) (next-step 1))))))]
-    (step c 1)))
+	  (cons (rseq (subvec c 1 (inc n)))
+		(lazy-seq (let [next-step (iter-comb c j)]
+			    (when next-step (step (next-step 0) (next-step 1)))))))]
+    (lazy-seq (step c 1))))
 
 (defn combinations
   "All the unique ways of taking n different elements from items"
   [items n]      
   (let [v-items (vec (reverse items))]
-    (if (zero? n) (list nil)
+    (if (zero? n) (list ())
 	(let [cnt (count items)]
 	  (cond (> n cnt) nil
 		(= n cnt) (list (seq items))
@@ -104,16 +104,17 @@ On my own computer, I use versions of all these algorithms that return sequences
   (let [v-original-seqs (vec seqs)
 	step
 	(fn step [v-seqs]
-	  (let [increment
-		(fn [v-seqs]
-		  (loop [i (dec (count v-seqs)), v-seqs v-seqs]
-		    (if (= i -1) nil
-			(if-let [rst (rest (v-seqs i))]
-			  (assoc v-seqs i rst)
-			  (recur (dec i) (assoc v-seqs i (v-original-seqs i)))))))]
-	    (if (nil? v-seqs) nil
-		(lazy-cons (map first v-seqs)
-			   (step (increment v-seqs))))))]
+	  (lazy-seq
+	   (let [increment
+		 (fn [v-seqs]
+		   (loop [i (dec (count v-seqs)), v-seqs v-seqs]
+		     (if (= i -1) nil
+			 (if-let [rst (next (v-seqs i))]
+			   (assoc v-seqs i rst)
+			   (recur (dec i) (assoc v-seqs i (v-original-seqs i)))))))]
+	     (when v-seqs
+	       (cons (map first v-seqs)
+		     (step (increment v-seqs)))))))]
     (when (every? first seqs)
       (step v-original-seqs))))
 
@@ -140,12 +141,16 @@ On my own computer, I use versions of all these algorithms that return sequences
 	    v))))))
 
 (defn- vec-lex-permutations [v]
-  (when v (lazy-cons v (vec-lex-permutations (iter-perm v)))))
+  (when v (cons v (lazy-seq (vec-lex-permutations (iter-perm v))))))
 
 (defn lex-permutations
   "Fast lexicographic permutation generator for a sequence of comparable items"
   [c]
-  (vec-lex-permutations (vec (sort c))))
+  (lazy-seq
+   (let [vec-sorted (vec (sort c))]
+     (if (zero? (count vec-sorted))
+       (list [])
+       (vec-lex-permutations (vec (sort c)))))))
   
 (defn permutations
   "All the permutations of items, lexicographic by index"
