@@ -4056,5 +4056,5 @@
   fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)" 
   [fnspecs & body] 
   `(letfn* ~(vec (interleave (map first fnspecs) 
-                             (map #(cons `fn* %) fnspecs)))
+                             (map #(cons `fn %) fnspecs)))
            ~@body))
