@@ -18,9 +18,9 @@
   (eval expr))
 
 ;; By Konrad Hinsen
-(defmacro letfn
+(defmacro letfn-kh
   "A variant of let for local function definitions. fn-bindings consists
-   of name/args/body triples, with (letfn [name args body] ...)
+   of name/args/body triples, with (letfn-kh [name args body] ...)
    being equivalent to (let [name (fn name args body)] ...)."
   [fn-bindings & exprs]
   (let [makefn (fn [[name args body]] (list name (list 'fn name args body)))

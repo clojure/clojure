@@ -26,7 +26,7 @@
   [m-result (fn m-result-dist [v]
 	      {v 1})
    m-bind   (fn m-bind-dist [mv f]
-	      (letfn [add-prob [dist [x p]]
+	      (letfn-kh [add-prob [dist [x p]]
 		        (assoc dist x (+ (get dist x 0) p))]
 	        (reduce add-prob {}
 		        (for [[x p] mv  [y q] (f x)]
@@ -91,7 +91,7 @@
    pairs. In the last pair, the probability can be given by the keyword
    :else, which stands for 1 minus the total of the other probabilities."
   [& choices]
-  (letfn [add-choice [dist [p v]]
+  (letfn-kh [add-choice [dist [p v]]
 	    (cond (nil? p) dist
 		  (= p :else)
 		       (let [total-p (reduce + (vals dist))]
@@ -132,7 +132,7 @@
 (with-monad dist-m
 
   (defn- select-n [n xs]
-    (letfn [select-1 [[s xs]]
+    (letfn-kh [select-1 [[s xs]]
 	      (uniform (for [i (range (count xs))]
 			 (let [[nth rest] (nth-and-rest i xs)]
 			   (list (cons nth s) rest))))]

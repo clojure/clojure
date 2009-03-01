@@ -20,7 +20,7 @@
 
 (ns clojure.contrib.accumulators
   (:use [clojure.contrib.types :only (deftype get-value get-values)])
-  (:use [clojure.contrib.macros :only (letfn)])
+  (:use [clojure.contrib.macros :only (letfn-kh)])
   (:use [clojure.contrib.def :only (defvar defvar- defmacro-)]))
 
 (defmulti add
@@ -222,7 +222,7 @@
 
   (defmethod combine type-tag
     [v & vs]
-    (letfn [add-item [counter [item n]]
+    (letfn-kh [add-item [counter [item n]]
     	        (assoc counter item (+ n (get counter item 0)))
 	    add-two [c1 c2] (reduce add-item c1 c2)]
 	   (reduce add-two v vs)))

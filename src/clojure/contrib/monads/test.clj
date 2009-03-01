@@ -48,7 +48,7 @@
 
 (deftest seq-maybe-monad
   (with-monad (maybe-t sequence-m)
-    (letfn [pairs [xs] ((m-lift 2 #(list %1 %2)) xs xs)]
+    (letfn-kh [pairs [xs] ((m-lift 2 #(list %1 %2)) xs xs)]
       (are (= _1 _2)
         ((m-lift 1 inc) (for [n (range 10)] (when (odd? n) n)))
           '(nil 2 nil 4 nil 6 nil 8 nil 10)

@@ -53,7 +53,7 @@
    in the form of a vector."
 
   (:use [clojure.contrib.monads])
-  (:use [clojure.contrib.macros :only (letfn)]))
+  (:use [clojure.contrib.macros :only (letfn-kh)]))
 
 
 (let [eos (Object.)
@@ -150,7 +150,7 @@
      stream-m monad) and a vector of stream arguments and returns a stream
      generator function representing the output stream of the transformer."
     [st streams]
-    (letfn [make-gen [s]
+    (letfn-kh [make-gen [s]
 	    (fn [eos]
 	      (loop [s s]
 		(let [[v ns] (st s)]
@@ -207,7 +207,7 @@
    sequences. Flattening is not recursive, only one level of sequences
    will be removed."
   [s]
-  (letfn [buffer-gen [buffer stream]
+  (letfn-kh [buffer-gen [buffer stream]
 	  (fn [eos]
 	    (loop [buffer buffer
 		   stream stream]
