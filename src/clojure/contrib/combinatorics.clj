@@ -40,7 +40,7 @@ Example: (lex-permutations [1 1 2]) -> ([1 1 2] [1 2 1] [2 1 1])
 
 About permutations vs. lex-permutations:
 lex-permutations is faster than permutations, but only works
-on sequences with comparable elements.  They operate differently
+on sequences of numbers.  They operate differently
 on sequences with duplicate items (lex-permutations will only
 give you back distinct permutations).  lex-permutations always
 returns the permutations sorted lexicographically whereas
@@ -144,7 +144,7 @@ On my own computer, I use versions of all these algorithms that return sequences
   (when v (cons v (lazy-seq (vec-lex-permutations (iter-perm v))))))
 
 (defn lex-permutations
-  "Fast lexicographic permutation generator for a sequence of comparable items"
+  "Fast lexicographic permutation generator for a sequence of numbers"
   [c]
   (lazy-seq
    (let [vec-sorted (vec (sort c))]
