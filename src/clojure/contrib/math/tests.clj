@@ -30,7 +30,28 @@
   (are (= _1 _2)
       (gcd 4 3) 1
       (gcd 24 12) 12
-      (gcd 24 27) 3))
+      (gcd 24 27) 3
+      (gcd 1 0) 1
+      (gcd 0 1) 1
+      (gcd 0 0) 0)
+  (is (thrown? IllegalArgumentException (gcd nil 0)))
+  (is (thrown? IllegalArgumentException (gcd 0 nil)))
+  (is (thrown? IllegalArgumentException (gcd 7.0 0))))
+
+(deftest test-lcm
+  (are (= _1 _2)
+       (lcm 2 3) 6
+       (lcm 3 2) 6
+       (lcm -2 3) 6
+       (lcm 2 -3) 6
+       (lcm -2 -3) 6
+       (lcm 4 10) 20
+       (lcm 1 0) 0
+       (lcm 0 1) 0
+       (lcm 0 0))
+  (is (thrown? IllegalArgumentException (lcm nil 0)))
+  (is (thrown? IllegalArgumentException (lcm 0 nil)))
+  (is (thrown? IllegalArgumentException (lcm 7.0 0))))
 
 (deftest test-floor
   (are (= _1 _2)
