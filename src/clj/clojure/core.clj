@@ -3998,7 +3998,7 @@
   return it on all subsequent calls to deref/@. If the computation has
   not yet finished, calls to deref/@ will block."
   [#^Callable f]
-  (let [fut (.submit clojure.lang.Agent/pooledExecutor f)]
+  (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
     (proxy [clojure.lang.IDeref java.util.concurrent.Future] []
       (deref [] (.get fut))
       (get ([] (.get fut))

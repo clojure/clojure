@@ -25,7 +25,7 @@ volatile Object state;
 final public static ExecutorService pooledExecutor =
 		Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
 
-final static ExecutorService soloExecutor = Executors.newCachedThreadPool();
+final public static ExecutorService soloExecutor = Executors.newCachedThreadPool();
 
 final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();
 
