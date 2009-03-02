@@ -14,7 +14,7 @@
 ;;  Created 22 October 2008
 
 (ns clojure.contrib.test-clojure
-  (:use clojure.contrib.test-is)
+  (:use [clojure.contrib.test-is :only (run-tests)])
   (:gen-class))
 
 (def test-names
@@ -40,7 +40,7 @@
   []
   (println "Loading tests...")
   (apply require :reload-all test-namespaces)
-  (apply clojure.contrib.test-is/run-tests test-namespaces))
+  (apply run-tests test-namespaces))
 
 (defn -main
   "Run all defined tests from the command line"
