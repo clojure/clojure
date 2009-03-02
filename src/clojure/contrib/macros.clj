@@ -18,9 +18,14 @@
   (eval expr))
 
 ;; By Konrad Hinsen
-(defmacro letfn-kh
-  "A variant of let for local function definitions. fn-bindings consists
-   of name/args/body triples, with (letfn-kh [name args body] ...)
+; This macro is made obsolete by Clojure's built-in letfn. I renamed it to
+; letfn- (to avoid a name clash) but leave it in for a while, since its
+; syntax is not quite the same as Clojure's. Expect this to disappear
+; in the long run!
+(defmacro letfn-
+  "OBSOLETE: use clojure.core/letfn
+   A variant of let for local function definitions. fn-bindings consists
+   of name/args/body triples, with (letfn [name args body] ...)
    being equivalent to (let [name (fn name args body)] ...)."
   [fn-bindings & exprs]
   (let [makefn (fn [[name args body]] (list name (list 'fn name args body)))

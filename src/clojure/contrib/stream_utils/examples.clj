@@ -6,8 +6,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use 'clojure.contrib.stream-utils)
-(use 'clojure.contrib.monads)
+(ns clojure.contrib.stream-utils.examples
+  (:use [clojure.contrib.stream-utils
+	 :only (defst-seq defst-gen pick pick-all stream-as-seq)])
+  (:use [clojure.contrib.monads :only (domonad)]))
 
 ; Transform a stream of numbers into a stream of sums of
 ; two consecutive numbers.

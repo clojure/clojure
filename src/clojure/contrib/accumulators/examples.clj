@@ -6,7 +6,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use 'clojure.contrib.accumulators)
+(ns clojure.contrib.accumulators.examples
+  (:use [clojure.contrib.accumulators
+	 :only (combine add add-items
+		empty-vector empty-list empty-queue empty-set empty-map
+		empty-counter empty-counter-with-total
+		empty-sum empty-product empty-maximum empty-minimum
+		empty-min-max empty-string empty-tuple)]))
 
 ; Vector accumulator: combine is concat, add is conj
 (combine [:a :b] [:c :d] [:x :y])

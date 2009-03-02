@@ -6,9 +6,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use 'clojure.contrib.probabilities.dist
-     'clojure.contrib.monads)
-(require 'clojure.contrib.accumulators)
+(ns clojure.contrib.probabilities.dist.examples
+ (:use [clojure.contrib.probabilities.dist
+	:only (uniform prob cond-prob join-with dist-m choose
+	      normalize certainly cond-dist-m normalize-cond)])
+ (:use [clojure.contrib.monads
+	:only (domonad with-monad m-seq m-chain m-lift)])
+ (:require clojure.contrib.accumulators))
 
 ;; Simple examples using dice
 

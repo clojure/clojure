@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated February 25, 2009
+;; last updated March 2, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -127,9 +127,8 @@
       `(defmonadfn ~doc-name ~args ~expr)))
 
   ([name args expr]
-   (let [fn-name (symbol (format "m+%s+m" (str name)))]
+   (let [fn-name (symbol (str *ns*) (format "m+%s+m" (str name)))]
    `(do
-      (def ~fn-name nil)
       (defmacro ~name ~args
         (list (quote ~fn-name)
 	      '~'m-bind '~'m-result '~'m-zero '~'m-plus

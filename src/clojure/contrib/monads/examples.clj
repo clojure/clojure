@@ -7,7 +7,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns clojure.contrib.monads.examples
-  (:use clojure.contrib.monads)
+  (:use [clojure.contrib.monads
+	 :only (domonad with-monad m-lift m-seq m-when
+		sequence-m
+		maybe-m
+		state-m fetch-state set-state 
+		writer-m write
+		cont-m run-cont call-cc
+		maybe-t)])
   (:require (clojure.contrib [accumulators :as accu])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -43,7 +50,6 @@
    (list x y))
 
 ; An example of a sequence function defined in terms of a lift operation.
-; We use m-lift2 because we have to lift a function of two arguments.
 (with-monad sequence-m
    (defn pairs [xs]
       ((m-lift 2 #(list %1 %2)) xs xs)))

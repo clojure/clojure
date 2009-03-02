@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated February 27, 2009
+;; last updated March 2, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -20,7 +20,6 @@
 
 (ns clojure.contrib.accumulators
   (:use [clojure.contrib.types :only (deftype get-value get-values)])
-  (:use [clojure.contrib.macros :only (letfn-kh)])
   (:use [clojure.contrib.def :only (defvar defvar- defmacro-)]))
 
 (defmulti add
@@ -222,9 +221,9 @@
 
   (defmethod combine type-tag
     [v & vs]
-    (letfn-kh [add-item [counter [item n]]
-    	        (assoc counter item (+ n (get counter item 0)))
-	    add-two [c1 c2] (reduce add-item c1 c2)]
+    (letfn [(add-item [counter [item n]]
+    	        (assoc counter item (+ n (get counter item 0))))
+	    (add-two [c1 c2] (reduce add-item c1 c2))]
 	   (reduce add-two v vs)))
 
   (defmethod add type-tag

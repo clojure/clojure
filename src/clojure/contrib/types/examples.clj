@@ -7,7 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns clojure.contrib.types.examples
-  (:use clojure.contrib.types))
+  (:use [clojure.contrib.types :only (deftype match get-value get-values)]))
 
 ;
 ; A simple tree structure

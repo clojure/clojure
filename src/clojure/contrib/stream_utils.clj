@@ -1,7 +1,7 @@
 ;; Stream utilities
 
 ;; by Konrad Hinsen
-;; last updated February 23, 2009
+;; last updated March 2, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -52,8 +52,7 @@
    whereas pick-all returns the next value of all stream arguments
    in the form of a vector."
 
-  (:use [clojure.contrib.monads])
-  (:use [clojure.contrib.macros :only (letfn-kh)]))
+  (:use [clojure.contrib.monads :only (defmonad with-monad)]))
 
 
 (let [eos (Object.)
@@ -150,13 +149,13 @@
      stream-m monad) and a vector of stream arguments and returns a stream
      generator function representing the output stream of the transformer."
     [st streams]
-    (letfn-kh [make-gen [s]
-	    (fn [eos]
-	      (loop [s s]
-		(let [[v ns] (st s)]
-		  (cond (stream-eos? v) [eos nil]
-			(stream-skip? v) (recur ns)
-			:else [v (make-gen ns)]))))]
+    (letfn [(make-gen [s]
+	      (fn [eos]
+	        (loop [s s]
+		  (let [[v ns] (st s)]
+		    (cond (stream-eos? v) [eos nil]
+			  (stream-skip? v) (recur ns)
+			  :else [v (make-gen ns)])))))]
       (make-gen streams)))
 )
 
@@ -176,14 +175,14 @@
    The non-stream arguments args and the stream arguments streams
    are given separately, with args being possibly empty."
   [name args streams & body]
-  (defst 'st-as-seq name args streams body))
+  (defst `st-as-seq name args streams body))
 
 (defmacro defst-gen
   "Define the generator-returning stream transformer name by body.
    The non-stream arguments args and the stream arguments streams
    are given separately, with args being possibly empty."
   [name args streams & body]
-  (defst 'st-as-generator name args streams body))
+  (defst `st-as-generator name args streams body))
 
 (defn stream-drop
   "Return a stream containing all but the first n elements of stream."
@@ -207,15 +206,15 @@
    sequences. Flattening is not recursive, only one level of sequences
    will be removed."
   [s]
-  (letfn-kh [buffer-gen [buffer stream]
-	  (fn [eos]
-	    (loop [buffer buffer
-		   stream stream]
-	      (if (nil? buffer)
-		(let [[v new-stream] (stream-next stream)]
-		  (cond (stream-eos? v) [eos nil]
-			(empty? v) (recur nil new-stream)
-			:else (recur v new-stream)))
-		[(first buffer) (buffer-gen (next buffer) stream)])))]
+  (letfn [(buffer-gen [buffer stream]
+	    (fn [eos]
+	      (loop [buffer buffer
+		     stream stream]
+	        (if (nil? buffer)
+		  (let [[v new-stream] (stream-next stream)]
+		    (cond (stream-eos? v) [eos nil]
+			  (empty? v) (recur nil new-stream)
+			  :else (recur v new-stream)))
+		  [(first buffer) (buffer-gen (next buffer) stream)]))))]
     (buffer-gen nil s)))
 

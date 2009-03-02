@@ -1,7 +1,7 @@
 ;; Finite probability distributions
 
 ;; by Konrad Hinsen
-;; last updated February 18, 2009
+;; last updated March 2, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,8 +12,9 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.probabilities.dist
-  (:use clojure.contrib.monads clojure.contrib.macros
-	clojure.contrib.monads clojure.contrib.def))
+  (:use [clojure.contrib.monads
+	 :only (defmonad domonad with-monad maybe-t m-lift m-chain)]
+	 [clojure.contrib.def :only (defvar)]))
 
 ; The probability distribution monad. It is limited to finite probability
 ; distributions (e.g. there is a finite number of possible value), which
@@ -26,8 +27,8 @@
   [m-result (fn m-result-dist [v]
 	      {v 1})
    m-bind   (fn m-bind-dist [mv f]
-	      (letfn-kh [add-prob [dist [x p]]
-		        (assoc dist x (+ (get dist x 0) p))]
+	      (letfn [(add-prob [dist [x p]]
+		         (assoc dist x (+ (get dist x 0) p)))]
 	        (reduce add-prob {}
 		        (for [[x p] mv  [y q] (f x)]
 			  [y (* q p)]))))
@@ -91,12 +92,12 @@
    pairs. In the last pair, the probability can be given by the keyword
    :else, which stands for 1 minus the total of the other probabilities."
   [& choices]
-  (letfn-kh [add-choice [dist [p v]]
+  (letfn [(add-choice [dist [p v]]
 	    (cond (nil? p) dist
 		  (= p :else)
-		       (let [total-p (reduce + (vals dist))]
-		         (assoc dist v (- 1 total-p)))
-		  :else (assoc dist v p))]
+		        (let [total-p (reduce + (vals dist))]
+			  (assoc dist v (- 1 total-p)))
+		  :else (assoc dist v p)))]
     (reduce add-choice {} (partition 2 choices))))
 
 (with-monad dist-m
@@ -132,10 +133,10 @@
 (with-monad dist-m
 
   (defn- select-n [n xs]
-    (letfn-kh [select-1 [[s xs]]
+    (letfn [(select-1 [[s xs]]
 	      (uniform (for [i (range (count xs))]
 			 (let [[nth rest] (nth-and-rest i xs)]
-			   (list (cons nth s) rest))))]
+			   (list (cons nth s) rest)))))]
       ((m-chain (replicate n select-1)) (list '() xs))))
 
   (defn select [n xs]
