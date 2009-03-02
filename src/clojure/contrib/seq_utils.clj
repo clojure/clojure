@@ -1,7 +1,7 @@
 ;;; seq_utils.clj -- Sequence utilities for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; last updated January 10, 2009
+;; last updated March 2, 2009
 
 ;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -147,3 +147,15 @@
   "Return a random element of this seq"
   [s]
   (nth s (rand-int (count s))))
+
+
+;; seq-on writte by Konrad Hinsen
+(defmulti seq-on
+  "Returns a seq on the object s. Works like the built-in seq but as
+   a multimethod that can have implementations for new classes and types."
+  {:arglists '([s])}
+  type)
+
+(defmethod seq-on :default
+  [s]
+  (seq s))
