@@ -1745,22 +1745,32 @@
   (assert-args doseq
      (vector? seq-exprs) "a vector for its binding"
      (even? (count seq-exprs)) "an even number of forms in binding vector")
-  (let [groups (reduce (fn [groups p]
-                        (if (keyword? (first p))
-                          (conj (pop groups) (apply assoc (peek groups) p))
-                          (conj groups {:bind (first p) :seq (second p)})))
-                      [] (partition 2 seq-exprs))
-        emit (fn emit [group & more-groups]
-               `(loop [sq# (seq ~(:seq group))]
-                  (when sq#
-                    (let [~(:bind group) (first sq#)]
-                      (when ~(or (:while group) true)
-                        (when ~(or (:when group) true)
-                          ~(if more-groups
-                             (apply emit more-groups)
-                             `(do ~@body)))
-                        (recur (next sq#)))))))]
-    (apply emit groups)))
+  (let [step (fn step [recform exprs]
+               (if-not exprs
+                 [true `(do ~@body)]
+                 (let [k (first exprs)
+                       v (second exprs)
+                       seqsym (when-not (keyword? k) (gensym))
+                       recform (if (keyword? k) recform `(recur (next ~seqsym)))
+                       steppair (step recform (nnext exprs))
+                       needrec (steppair 0)
+                       subform (steppair 1)]
+                   (cond
+                     (= k :let) [needrec `(let ~v ~subform)]
+                     (= k :while) [false `(when ~v
+                                            ~subform
+                                            ~@(when needrec [recform]))]
+                     (= k :when) [false `(if ~v
+                                           (do
+                                             ~subform
+                                             ~@(when needrec [recform]))
+                                           ~recform)]
+                     :else [true `(loop [~seqsym (seq ~v)]
+                                    (when ~seqsym
+                                      (let [~k (first ~seqsym)]
+                                        ~subform
+                                        ~@(when needrec [recform]))))]))))]
+    (nth (step nil (seq seq-exprs)) 1)))
 
 (defn dorun
   "When lazy sequences are produced via functions that have side
@@ -2697,43 +2707,53 @@
   `(concat ~@(map #(list `lazy-seq %) colls)))
 
 (defmacro for
- "List comprehension. Takes a vector of one or more
- binding-form/collection-expr pairs, each followed by an optional filtering
- :when/:while expression (:when test or :while test), and yields a
- lazy sequence of evaluations of expr. Collections are iterated in a
- nested fashion, rightmost fastest, and nested coll-exprs can refer to
- bindings created in prior binding-forms.
+  "List comprehension. Takes a vector of one or more
+   binding-form/collection-expr pairs, each followed by zero or more
+   modifiers, and yields a lazy sequence of evaluations of expr.
+   Collections are iterated in a nested fashion, rightmost fastest,
+   and nested coll-exprs can refer to bindings created in prior
+   binding-forms.  Supported modifiers are: :let [binding-form expr ...],
+   :while test, :when test.
 
- (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
- ([seq-exprs expr]
+  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
+  [seq-exprs body-expr]
   (assert-args for
      (vector? seq-exprs) "a vector for its binding"
      (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [to-groups (fn [seq-exprs]
                     (reduce (fn [groups [k v]]
                               (if (keyword? k)
-                                (conj (pop groups) (assoc (peek groups) k v))
-                                (conj groups {:bind k :seq v})))
+                                (conj (pop groups) (conj (peek groups) [k v]))
+                                (conj groups [k v])))
                             [] (partition 2 seq-exprs)))
-        emit (fn emit [[group & [{next-seq :seq} :as more-groups]]]
-		  (let [giter (gensym "iter__") gxs (gensym "s__")]
-		    `(fn ~giter [~gxs]
-			 (lazy-seq
-                          (loop [~gxs ~gxs]
-                            (let [~gxs (seq ~gxs)]
-                              (when-first [~(:bind group) ~gxs]
-                                (when ~(or (:while group) true)
-                                  (if ~(or (:when group) true)
-                                    ~(if more-groups
-                                       `(let [iterys# ~(emit more-groups)
-                                              fs# (seq (iterys# ~next-seq))]
-                                          (if fs#
-                                            (concat fs# (~giter (rest ~gxs)))
-                                            (recur (rest ~gxs))))
-                                       `(cons ~expr (~giter (rest ~gxs))))
-                                    (recur (rest ~gxs)))))))))))]
-    `(let [iter# ~(emit (to-groups seq-exprs))]
-	(iter# ~(second seq-exprs))))))
+        err (fn [& msg] (throw (IllegalArgumentException. (apply str msg))))
+        emit-bind (fn emit-bind [[[bind expr & mod-pairs]
+                                  & [[_ next-expr] :as next-groups]]]
+                    (let [giter (gensym "iter__")
+                          gxs (gensym "s__")
+                          do-mod (fn do-mod [[[k v :as pair] & etc]]
+                                   (cond
+                                     (= k :let) `(let ~v ~(do-mod etc))
+                                     (= k :while) `(when ~v ~(do-mod etc))
+                                     (= k :when) `(if ~v
+                                                    ~(do-mod etc)
+                                                    (recur (rest ~gxs)))
+                                     (keyword? k) (err "Invalid 'for' keyword " k)
+                                     next-groups
+                                      `(let [iterys# ~(emit-bind next-groups)
+                                             fs# (seq (iterys# ~next-expr))]
+                                         (if fs#
+                                           (concat fs# (~giter (rest ~gxs)))
+                                           (recur (rest ~gxs))))
+                                     :else `(cons ~body-expr
+                                                  (~giter (rest ~gxs)))))]
+                      `(fn ~giter [~gxs]
+                         (lazy-seq
+                           (loop [~gxs ~gxs]
+                             (when-let [[~bind] (seq ~gxs)]
+                               ~(do-mod mod-pairs)))))))]
+    `(let [iter# ~(emit-bind (to-groups seq-exprs))]
+        (iter# ~(second seq-exprs)))))
 
 (defmacro comment
   "Ignores body, yields nil"
@@ -2890,12 +2910,12 @@
  contains a match for re-string-or-pattern"
   [re-string-or-pattern]
     (let [re  (re-pattern re-string-or-pattern)]
-      (dorun (for [ns (all-ns)
-                   v (sort-by (comp :name meta) (vals (ns-interns ns)))
-                   :when (and (:doc ^v)
-                          (or (re-find (re-matcher re (:doc ^v)))
-                              (re-find (re-matcher re (str (:name ^v))))))]
-               (print-doc v)))))
+      (doseq [ns (all-ns)
+              v (sort-by (comp :name meta) (vals (ns-interns ns)))
+              :when (and (:doc ^v)
+                         (or (re-find (re-matcher re (:doc ^v)))
+                             (re-find (re-matcher re (str (:name ^v))))))]
+               (print-doc v))))
 
 (defn special-form-anchor
   "Returns the anchor tag on http://clojure.org/special_forms for the
