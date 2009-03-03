@@ -33,7 +33,19 @@
              [13 10] [13 11] [13 12]
            [14 0] [14 1] [14 2] [14 3] [14 4] [14 5] [14 6] [14 7] [14 8]))))
 
-(deftest When
+(defmacro deftest-both [txt & ises]
+  `(do
+     (deftest ~(symbol (str "For-" txt)) ~@ises)
+     (deftest ~(symbol (str "Doseq-" txt))
+              ~@(map (fn [[x-is [x-= [x-for binds body] value]]]
+                       (when (and (= x-is 'is) (= x-= '=) (= x-for 'for))
+                         `(is (= (let [acc# (atom [])]
+                                   (doseq ~binds (swap! acc# conj ~body))
+                                   @acc#)
+                                 ~value))))
+                     ises))))
+
+(deftest-both When
   (is (= (for [x (range 10) :when (odd? x)] x) '(1 3 5 7 9)))
   (is (= (for [x (range 4) y (range 4) :when (odd? y)] [x y])
          '([0 1] [0 3] [1 1] [1 3] [2 1] [2 3] [3 1] [3 3])))
@@ -52,7 +64,7 @@
   (lazy-cat (range n)
             (throw (Exception. "consumer went too far in lazy seq"))))
 
-(deftest While
+(deftest-both While
   (is (= (for [x (only 6) :while (< x 5)] x) '(0 1 2 3 4)))
   (is (= (for [x (range 4) y (only 4) :while (< y 3)] [x y])
          '([0 0] [0 1] [0 2] [1 0] [1 1] [1 2]
@@ -70,7 +82,7 @@
   (is (= (for [x (range 4) y (only 4) :while (< y x)] [x y])
          '([1 0] [2 0] [2 1] [3 0] [3 1] [3 2]))))
 
-(deftest While-and-When
+(deftest-both While-and-When
   (is (= (for [x (only 6) :while (< x 5) y (range 4) :when (odd? y)] [x y])
          '([0 1] [0 3] [1 1] [1 3] [2 1] [2 3] [3 1] [3 3] [4 1] [4 3])))
   (is (= (for [x (range 4) :when (odd? x) y (only 6) :while (< y 5)] [x y])
@@ -82,20 +94,30 @@
            [x y])
          '([1 0] [3 0]))))
 
-(deftest While-and-When-Same-Binding
+(deftest-both While-and-When-Same-Binding
   (is (= (for [x (only 6) :while (< x 5) :when (odd? x)] x) '(1 3)))
   (is (= (for [x (only 6)
                :while (< x 5) ; if :while is false, :when should not be evaled
-               :when (do (if (< x 5) (odd? x)))] x) '(1 3))))
+               :when (do (if (< x 5) (odd? x)))] x) '(1 3)))
+  (is (= (for [a (range -2 5)
+               :when (not= a 0) ; :when may guard :while
+               :while (> (Math/abs (/ 1.0 a)) 1/3)] a) '(-2 -1 1 2))))
 
-(deftest Nesting
+(deftest-both Nesting
   (is (= (for [x '(a b) y (interpose x '(1 2)) z (list x y)] [x y z])
          '([a 1 a] [a 1 1] [a a a] [a a a] [a 2 a] [a 2 2]
-           [b 1 b] [b 1 1] [b b b] [b b b] [b 2 b] [b 2 2]))))
+           [b 1 b] [b 1 1] [b b b] [b b b] [b 2 b] [b 2 2])))
+  (is (= (for [x ['a nil] y [x 'b]] [x y])
+         '([a a] [a b] [nil nil] [nil b]))))
 
-(deftest Destructuring
+(deftest-both Destructuring
   (is (= (for [{:syms [a b c]} (map #(zipmap '(a b c) (range % 5)) (range 3))
                x [a b c]]
-           (Integer. (str a b c x))))
-      '(120 121 122 1231 1232 1233 2342 2343 2344)))
+           (Integer. (str a b c x)))
+         '(120 121 122 1231 1232 1233 2342 2343 2344))))
 
+(deftest-both Let
+  (is (= (for [x (range 3) y (range 3) :let [z (+ x y)] :when (odd? z)] [x y z])
+         '([0 1 1] [1 0 1] [1 2 3] [2 1 3])))
+  (is (= (for [x (range 6) :let [y (rem x 2)] :when (even? y) z [8 9]] [x z])
+         '([0 8] [0 9] [2 8] [2 9] [4 8] [4 9]))))
