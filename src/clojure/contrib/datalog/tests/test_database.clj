@@ -102,41 +102,36 @@
                    test-db-1
                    [[:fred {:mary 1 :sue 1}]
                     [:fred {:mary 3 :sue 1}]
-                    [:sally {:jen 1 :bekcy 2 :joan 0}]
-                    [:sally {:jen 1 :bekcy 4 :joan 3}]])]
-    (assert (= db
-               (datalog-database
-                {:sally (datalog-relation
-                         #{:jen :joan :becky}
-                         #{{:jen 1, :joan 0, :becky 3}
-                           {:jen 1, :joan 0, :becky 2}
-                           {:jen 1, :joan 3, :becky 2}
-                           {:jen 1, :joan 3, :becky 4}}
-                         {:becky
-                          {3
-                           #{{:jen 1, :joan 0, :becky 3}}
-                           4
-                           #{{:jen 1, :joan 3, :becky 4}}
-                           2
-                           #{{:jen 1, :joan 0, :becky 2}
-                             {:jen 1, :joan 3, :becky 2}}}
-                          :jen
-                          {1
-                           #{{:jen 1, :joan 0, :becky 3}
-                             {:jen 1, :joan 0, :becky 2}
-                             {:jen 1, :joan 3, :becky 2}
-                             {:jen 1, :joan 3, :becky 4}}}})
-                 :fred (datalog-relation
-                        #{:sue :mary}
-                        #{{:sue 2, :mary 1}
-                          {:sue 3, :mary 2}}
-                        {:mary
-                         {3
-                          #{}
-                          2
-                          #{{:sue 3, :mary 2}}
-                          1
-                          #{{:sue 2, :mary 1}}}})})))))
+                    [:sally {:jen 1 :becky 2 :joan 0}]
+                    [:sally {:jen 1 :becky 4 :joan 3}]])]
+    (is (= db
+           (datalog-database
+            {:sally (datalog-relation
+                     #{:jen :joan :becky}
+                     #{{:jen 1, :joan 0, :becky 3}
+                       {:jen 1, :joan 3, :becky 2}}
+                     {:becky
+                      {3
+                       #{{:jen 1, :joan 0, :becky 3}}
+                       4
+                       #{}
+                       2
+                       #{{:jen 1, :joan 3, :becky 2}}}
+                      :jen
+                      {1
+                       #{{:jen 1, :joan 0, :becky 3}
+                         {:jen 1, :joan 3, :becky 2}}}})
+             :fred (datalog-relation
+                    #{:sue :mary}
+                    #{{:sue 2, :mary 1}
+                      {:sue 3, :mary 2}}
+                    {:mary
+                     {3
+                      #{}
+                      2
+                      #{{:sue 3, :mary 2}}
+                      1
+                      #{{:sue 2, :mary 1}}}})})))))
 
 
 
