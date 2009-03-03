@@ -85,7 +85,6 @@
       <arg value="clojure.contrib.except"/>
       <arg value="clojure.contrib.fcase"/>
       <arg value="clojure.contrib.import-static"/>
-      <arg value="clojure.contrib.javadoc"/>
       <arg value="clojure.contrib.lazy-seqs"/>
       <arg value="clojure.contrib.mmap"/>
       <arg value="clojure.contrib.macros"/>
