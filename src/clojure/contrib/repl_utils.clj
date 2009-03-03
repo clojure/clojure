@@ -9,10 +9,11 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns clojure.contrib.repl-utils
-  (:import (java.io LineNumberReader InputStreamReader PushbackReader)
+  (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
            (clojure.lang RT))
   (:use [clojure.contrib.seq-utils :only (indexed)]
+        [clojure.contrib.javadoc.browse :only (browse-url)]
         [clojure.contrib.str-utils :only (str-join re-sub re-partition)]))
 
 (defn- sortable [t]
@@ -119,3 +120,5 @@
   Example: (source filter)"
   [n]
   `(println (or (get-source '~n) (str "Source not found"))))
+
+(load "repl_utils/javadoc")
