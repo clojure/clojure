@@ -145,14 +145,25 @@
   [db]
   (map-values #(-> % :data count) db))
 
-(defn- add-to-indexes
-  "Adds the tuple to the appropriate keys in the index map"
-  [idxs tuple]
+(defn- modify-indexes
+  "Perform f on the indexed tuple-set.  f should take a set and tuple,
+   and return the new set."
+  [idxs tuple f]
   (into {} (for [ik (keys idxs)]
              (let [im (idxs ik)
                    iv (tuple ik)
                    os (get im iv #{})]
-               [ik (assoc im iv (conj os tuple))]))))
+               [ik (assoc im iv (f os tuple))]))))
+
+(defn- add-to-indexes
+  "Adds the tuple to the appropriate keys in the index map"
+  [idxs tuple]
+  (modify-indexes idxs tuple conj))
+
+(defn- remove-from-indexes
+  "Removes the tuple from the appropriate keys in the index map"
+  [idxs tuple]
+  (modify-indexes idxs tuple disj))
 
 (defn add-tuple
   "Two forms:
@@ -170,8 +181,25 @@
        (if (identical? data new-data) ; optimization hack!
          rel
          (let [idxs (add-to-indexes (:indexes rel) tuple)]
-           (assoc rel :data (conj (:data rel) tuple) :indexes idxs))))))
+           (assoc rel :data new-data :indexes idxs))))))
 
+(defn remove-tuple
+  "Two forms:
+
+   [db relation-name tuple] removes the tuple from the named relation,
+   returns a new database.
+
+   [rel tuple] removes the tuple from the relation.  Returns the new
+   relation."
+  ([db rel-name tuple] (assoc db rel-name (remove-tuple (db rel-name) tuple)))
+  ([rel tuple]
+     (let [data (:data rel)
+           new-data (disj data tuple)]
+       (if (identical? data new-data)
+         rel
+         (let [idxs (remove-from-indexes (:indexes rel) tuple)]
+           (assoc rel :data new-data :indexes idxs))))))
+                      
 (defn add-tuples
   "Adds a collection of tuples to the db, as
    (add-tuples db
