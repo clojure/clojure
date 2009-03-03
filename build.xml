@@ -51,7 +51,20 @@
     </java>
   </target>
 
-  <target name="test" depends="test_clojure,test_contrib"
+  <target name="test_datalog"
+	  description = "Run datalog tests"
+	  if="hasclojure">
+    <java classname="clojure.main">
+      <classpath>
+        <path location="${build}"/>
+        <path location="${src}"/>
+        <path location="${clojure.jar}"/>
+      </classpath>
+      <arg value="src/clojure/contrib/datalog/tests/test.clj"/>
+    </java>
+  </target>
+
+  <target name="test" depends="test_clojure,test_contrib,test_datalog"
 	  description="Run all tests"/>
 
   <target name="compile_clojure" depends="init"
@@ -95,6 +108,13 @@
       <arg value="clojure.contrib.types"/>
       <arg value="clojure.contrib.zip-filter"/>
       <arg value="clojure.contrib.graph"/>
+      <arg value="clojure.contrib.datalog"/>
+      <arg value="clojure.contrib.datalog.database"/>
+      <arg value="clojure.contrib.datalog.literals"/>
+      <arg value="clojure.contrib.datalog.magic"/>
+      <arg value="clojure.contrib.datalog.rules"/>
+      <arg value="clojure.contrib.datalog.softstrat"/>
+      <arg value="clojure.contrib.datalog.util"/>
     </java>
   </target>
 
