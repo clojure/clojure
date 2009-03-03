@@ -2094,7 +2094,10 @@
 
 (defn read-line
   "Reads the next line from stream that is the current value of *in* ."
-  [] (. #^java.io.BufferedReader *in* (readLine)))
+  []
+  (if (instance? clojure.lang.LineNumberingPushbackReader *in*)
+    (.readLine #^clojure.lang.LineNumberingPushbackReader *in*)
+    (.readLine #^java.io.BufferedReader *in*)))
 
 (defn read-string
   "Reads one object from the string s"
