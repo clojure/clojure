@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated March 2, 2009
+;; last updated March 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -60,8 +60,7 @@
   [mexpr step]
   (let [[bform expr] step]
     (if (identical? bform :when)
-      (list 'm-bind `(if ~expr (~'m-result ::any) ~'m-zero)
-	    (list 'fn ['_] mexpr))
+      `(if ~expr ~mexpr ~'m-zero)
       (list 'm-bind expr (list 'fn [bform] mexpr)))))
 
 (defn- monad-expr
