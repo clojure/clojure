@@ -150,7 +150,7 @@ On my own computer, I use versions of all these algorithms that return sequences
    (let [vec-sorted (vec (sort c))]
      (if (zero? (count vec-sorted))
        (list [])
-       (vec-lex-permutations vec-sorted))))))
+       (vec-lex-permutations vec-sorted)))))
   
 (defn permutations
   "All the permutations of items, lexicographic by index"
