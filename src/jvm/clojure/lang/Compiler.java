@@ -28,10 +28,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 //*/
 
 import java.io.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Arrays;
+import java.util.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
@@ -127,6 +124,7 @@ final static Type REFLECTOR_TYPE = Type.getType(Reflector.class);
 final static Type THROWABLE_TYPE = Type.getType(Throwable.class);
 final static Type BOOLEAN_OBJECT_TYPE = Type.getType(Boolean.class);
 final static Type IPERSISTENTMAP_TYPE = Type.getType(IPersistentMap.class);
+final static Type IOBJ_TYPE = Type.getType(IObj.class);
 
 private static final Type[][] ARG_TYPES;
 private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -3190,6 +3188,91 @@ static public class FnExpr implements Expr{
 //			getCompiledClass();
 	}
 
+    void emitListAsObjectArray(Object value, GeneratorAdapter gen) {
+        gen.push(((List)value).size());
+        gen.newArray(OBJECT_TYPE);
+        int i = 0;
+        for (Iterator it = ((List)value).iterator(); it.hasNext(); i++) {
+            gen.dup();
+            gen.push(i);
+            emitValue(it.next(), gen);
+            gen.arrayStore(OBJECT_TYPE);
+        }
+    }
+
+    void emitValue(Object value, GeneratorAdapter gen) {
+        boolean partial = true;
+	    //System.out.println(value.getClass().toString());
+
+        if (value instanceof String) {
+            gen.push((String)value);
+        } else if (value instanceof Integer) {
+	        gen.push(((Integer)value).intValue());
+            gen.invokeStatic(Type.getType(Integer.class), Method.getMethod("Integer valueOf(int)"));
+        } else if (value instanceof Double) {
+            gen.push(((Double)value).doubleValue());
+            gen.invokeStatic(Type.getType(Double.class), Method.getMethod("Double valueOf(double)"));
+        } else if (value instanceof Character) {
+            gen.push(((Character)value).charValue());
+            gen.invokeStatic(Type.getType(Character.class), Method.getMethod("Character valueOf(char)"));
+        } else if (value instanceof Class) {
+            gen.push(((Class)value).getName());
+            gen.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
+        } else if (value instanceof Symbol) {
+	        gen.push(((Symbol)value).ns);
+            gen.push(((Symbol)value).name);
+            gen.invokeStatic(Type.getType(Symbol.class), Method.getMethod("clojure.lang.Symbol create(String,String)"));
+        } else if (value instanceof Keyword) {
+            emitValue(((Keyword)value).sym,gen);
+            gen.invokeStatic(Type.getType(Keyword.class), Method.getMethod("clojure.lang.Keyword intern(clojure.lang.Symbol)"));
+        } else if (value instanceof Var) {
+            Var var = (Var) value;
+            gen.push(var.ns.name.toString());
+            gen.push(var.sym.toString());
+            gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+        } else if (value instanceof IPersistentMap) {
+            List entries = new ArrayList();
+            for (Map.Entry entry : (Set<Map.Entry>) ((Map)value).entrySet()) {
+                entries.add(entry.getKey());
+                entries.add(entry.getValue());
+            }
+            emitListAsObjectArray(entries, gen);
+            gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.IPersistentMap map(Object[])"));
+        } else if (value instanceof IPersistentVector) {
+            emitListAsObjectArray(value, gen);
+            gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.IPersistentVector vector(Object[])"));
+        } else if (value instanceof ISeq || value instanceof IPersistentList) {
+            emitListAsObjectArray(value, gen);
+            gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.ISeq arrayToList(Object[])"));
+        } else {
+            String cs = null;
+            try {
+                cs = RT.printString(value);
+                //System.out.println("WARNING SLOW CODE: " + value.getClass() + " -> " + cs);
+            } catch (Exception e) {
+                throw new RuntimeException("Can't embed object in code, maybe print-dup not defined: " + value);
+            }
+            if (cs.length() == 0)
+                throw new RuntimeException("Can't embed unreadable object in code: " + value);
+
+            if (cs.startsWith("#<"))
+                throw new RuntimeException("Can't embed unreadable object in code: " + cs);
+
+            gen.push(cs);
+            gen.invokeStatic(RT_TYPE, readStringMethod);
+            partial = false;
+        }
+
+        if (partial) {
+            if (value instanceof Obj && RT.count(((Obj)value).meta()) > 0) {
+                gen.checkCast(IOBJ_TYPE);
+                emitValue(((Obj)value).meta(), gen);
+                gen.checkCast(IPERSISTENTMAP_TYPE);
+                gen.invokeInterface(IOBJ_TYPE, Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)"));
+            }
+        }
+    }
+
 
 	void emitConstants(GeneratorAdapter clinitgen){
 		try
@@ -3198,35 +3281,8 @@ static public class FnExpr implements Expr{
 
 			for(int i = 0; i < constants.count(); i++)
 				{
-				Object o = constants.nth(i);
-				if(o instanceof String)
-					{
-					clinitgen.push((String) constants.nth(i));
-					}
-				else
-					{
-					String cs = null;
-					try
-						{
-						cs = RT.printString(o);
-						}
-					catch(Exception e)
-						{
-						throw new RuntimeException("Can't embed object in code, maybe print-dup not defined: "
-						                           + o);
-						}
-					if(cs.length() == 0)
-						throw new RuntimeException("Can't embed unreadable object in code: " + o);
-
-					if(cs.startsWith("#<"))
-						throw new RuntimeException("Can't embed unreadable object in code: " + cs);
-					clinitgen.push(cs);
-					clinitgen.invokeStatic(RT_TYPE, readStringMethod);
-					clinitgen.checkCast(constantType(i));
-					}
-//				clinitgen.dup();
-//				clinitgen.push(i);
-//				clinitgen.arrayLoad(OBJECT_TYPE);
+				emitValue(constants.nth(i), clinitgen);
+				clinitgen.checkCast(constantType(i));
 				clinitgen.putStatic(fntype, constantName(i), constantType(i));
 				}
 			}
@@ -3235,6 +3291,51 @@ static public class FnExpr implements Expr{
 			Var.popThreadBindings();
 			}
 	}
+
+//	void emitConstants(GeneratorAdapter clinitgen){
+//		try
+//			{
+//			Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
+//
+//			for(int i = 0; i < constants.count(); i++)
+//				{
+//				Object o = constants.nth(i);
+//				if(o instanceof String)
+//					{
+//					clinitgen.push((String) constants.nth(i));
+//					}
+//				else
+//					{
+//					String cs = null;
+//					try
+//						{
+//						cs = RT.printString(o);
+//						}
+//					catch(Exception e)
+//						{
+//						throw new RuntimeException("Can't embed object in code, maybe print-dup not defined: "
+//						                           + o);
+//						}
+//					if(cs.length() == 0)
+//						throw new RuntimeException("Can't embed unreadable object in code: " + o);
+//
+//					if(cs.startsWith("#<"))
+//						throw new RuntimeException("Can't embed unreadable object in code: " + cs);
+//					clinitgen.push(cs);
+//					clinitgen.invokeStatic(RT_TYPE, readStringMethod);
+//					clinitgen.checkCast(constantType(i));
+//					}
+////				clinitgen.dup();
+////				clinitgen.push(i);
+////				clinitgen.arrayLoad(OBJECT_TYPE);
+//				clinitgen.putStatic(fntype, constantName(i), constantType(i));
+//				}
+//			}
+//		finally
+//			{
+//			Var.popThreadBindings();
+//			}
+//	}
 
 	void emitClearCloses(GeneratorAdapter gen){
 		int a = 1;
