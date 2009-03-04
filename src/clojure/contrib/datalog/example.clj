@@ -35,6 +35,7 @@
       (index :can-do-job :position)
 
       (relation :job-replacement [:job :can-be-done-by])
+      ;(index :job-replacement :can-be-done-by)
 
       (relation :job-exceptions [:id :job])))
 

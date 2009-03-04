@@ -215,7 +215,7 @@
     nil
     (filter identity (for [key (keys pt)]
                        (if-let [idx-map (idxs key)]
-                         (idx-map (pt key))
+                         (get idx-map (pt key) #{})
                          nil)))))
 
 (defn- match?
@@ -235,12 +235,15 @@
         space (if (empty? idxs)
                 (:data rel) ; table scan :(
                 (reduce intersection idxs))]
+    (trace-datalog (when (empty? idxs)
+                     (println (format "Table scan of %s: %s rows!!!!!"
+                                      rn
+                                      (count space)))))
     (fun #(match? % pt) space)))
     
 (defn select
   "finds all matching tuples to the partial tuple (pt) in the relation named (rn)"
   [db rn pt]
-;  (println "  DB Lookup: " rn pt)
   (scan-space filter db rn pt))
 
 (defn any-match?

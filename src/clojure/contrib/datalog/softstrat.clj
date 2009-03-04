@@ -39,9 +39,11 @@
                (let [rules (pred-map pred)
                      preds (reduce (fn [pds lits]
                                      (reduce (fn [pds lit]
-                                               (conj pds (literal-predicate lit)))
-                                               pds
-                                               lits))
+                                               (if-let [pred (literal-predicate lit)]
+                                                 (conj pds pred)
+                                                 pds))
+                                             pds
+                                             lits))
                                    #{}
                                    (map :body rules))]
                  (assoc nbs pred preds)))
