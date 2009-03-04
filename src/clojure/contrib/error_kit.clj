@@ -37,11 +37,11 @@
   [class-name]
   `(fn [x#] (throw (new ~class-name (:msg x#)))))
 
-(defn *error*
+(defn error
   "Base type for all error-kit errors"
   {::args [:msg :unhandled :tag]}
   [details]
-  (merge {:tag `*error* :msg "exception via error-kit"
+  (merge {:tag `error :msg "exception via error-kit"
           :unhandled (throw-msg Exception)}
          details))
 
@@ -55,7 +55,7 @@
   {:arglists '([name [parent-error?] doc-string? [args*] & body]
                [name [parent-error?] doc-string? args-destruct-map & body])}
   [err-name pvec & decl]
-  (let [pvec (if (empty? pvec) [`*error*] pvec)
+  (let [pvec (if (empty? pvec) [`error] pvec)
         [docstr args & body] (if (string? (first decl)) decl (cons nil decl))
         args (or args [])
         argmap (if (vector? args) `{:keys ~args} args)
@@ -206,11 +206,11 @@
 ; unhandled. action is to throw a Java exception so users of your code
 ; who do not want to use error-kit can still use normal Java try/catch
 ; forms to handle the error.
-(kit/deferror *number-error* [] [n]
+(kit/deferror number-error [] [n]
   {:msg (str "Number error: " n)
    :unhandled (kit/throw-msg NumberFormatException)})
 
-(kit/deferror *odd-number-error* [*number-error*]
+(kit/deferror odd-number-error [number-error]
   "Indicates an odd number was given to an operation that is only
   defined for even numbers."
   [n]
@@ -220,7 +220,7 @@
 (defn int-half [i]
   (if (even? i)
     (quot i 2)
-    (kit/raise *odd-number-error* i)))
+    (kit/raise odd-number-error i)))
 
 ; Throws Java NumberFormatException because there's no 'handle' form
 (vec (map int-half [2 4 5 8]))
@@ -228,28 +228,28 @@
 ; Throws Java Exception with details provided by 'raise'
 (kit/with-handler
   (vec (map int-half [2 4 5 8]))
-  (kit/handle *odd-number-error* [n]
+  (kit/handle odd-number-error [n]
     (throw (Exception. (format "Odd number %d in vector." n)))))
 
 ; The above is equivalent to the more complicated version below:
 (kit/with-handler
   (vec (map int-half [2 4 5 8]))
   (kit/handle {:keys [n tag]}
-    (if (isa? tag `*odd-number-error*)
+    (if (isa? tag `odd-number-error)
       (throw (Exception. (format "Odd number %d in vector." n)))
       (kit/do-not-handle))))
 
 ; Returns "invalid" string instead of a vector when an error is encountered
 (kit/with-handler
   (vec (map int-half [2 4 5 8]))
-  (kit/handle kit/*error* [n]
+  (kit/handle kit/error [n]
     "invalid"))
 
 ; Inserts a zero into the returned vector where there was an error, in
 ; this case [1 2 0 4]
 (kit/with-handler
   (vec (map int-half [2 4 5 8]))
-  (kit/handle *number-error* [n]
+  (kit/handle number-error [n]
     (kit/continue-with 0)))
 
 ; Intermediate continue: [1 2 :oops 5 4]
@@ -263,7 +263,7 @@
 
 (kit/with-handler
   (int-half-vec [2 4 5 8])
-  (kit/handle *number-error* [n]
+  (kit/handle number-error [n]
     (kit/continue instead-of-half :oops n)))
 
 ; Notes:
