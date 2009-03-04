@@ -736,6 +736,7 @@
   (are (empty? _)
     nil
     ()
+    (lazy-seq nil)    ; => ()
     []
     {}
     #{}
@@ -744,6 +745,7 @@
 
   (are (not (empty? _))
     '(1 2)
+    (lazy-seq [1 2])
     [1 2]
     {:a 1 :b 2}
     #{1 2}
