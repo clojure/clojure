@@ -35,21 +35,13 @@
       nil)))        
 
 (defn open-url-in-swing
-  "Opens url (a string) in a Swing window."
-  [url]
-  (let [htmlpane (javax.swing.JEditorPane. url)]
-    (.setEditable htmlpane false)
-    (.addHyperlinkListener htmlpane
-      (proxy [javax.swing.event.HyperlinkListener] []
-        (hyperlinkUpdate [#^javax.swing.event.HyperlinkEvent e]
-          (when (= (.getEventType e) (. javax.swing.event.HyperlinkEvent$EventType ACTIVATED))
-            (if (instance? javax.swing.text.html.HTMLFrameHyperlinkEvent e)
-              (-> htmlpane .getDocument (.processHTMLFrameHyperlinkEvent e))
-              (.setPage htmlpane (.getURL e)))))))
-    (doto (javax.swing.JFrame.)
-      (.setContentPane (javax.swing.JScrollPane. htmlpane))
-      (.setBounds 32 32 700 900)
-      (.show))))
+ "Opens url (a string) in a Swing window."
+ [url]
+  ; the implementation of this function resides in another namespace to be loaded "on demand"
+  ; this fixes a bug on mac os x where requiring repl-utils turns the process into a GUI app
+  ; see http://code.google.com/p/clojure-contrib/issues/detail?id=32
+  (require 'clojure.contrib.javadoc.browse-ui)
+  ((find-var 'clojure.contrib.javadoc.browse-ui/open-url-in-swing) url))
 
 (defn browse-url [url]
   (or (open-url-in-browser url) (when *open-url-script* (sh/sh *open-url-script* (str url)) true) (open-url-in-swing url)))
