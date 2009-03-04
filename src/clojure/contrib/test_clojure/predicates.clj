@@ -40,6 +40,7 @@
   :empty-string ""
   :empty-regex #""
   :empty-list ()
+  :empty-lazy-seq (lazy-seq nil)
   :empty-vector []
   :empty-map {}
   :empty-set #{}
@@ -48,6 +49,7 @@
   :string "abc"
   :regex #"a*b"
   :list '(1 2 3)
+  :lazy-seq (lazy-seq [1 2 3])
   :vector [1 2 3]
   :map {:a 1 :b 2 :c 3}
   :set #{1 2 3}
@@ -84,17 +86,19 @@
   string? [:empty-string :string]
   ; regex?
 
-  list?   [:empty-list :list]
+  list?   [:empty-list   :list]
   vector? [:empty-vector :vector]
-  map?    [:empty-map :map]
-  set?    [:empty-set :set]
+  map?    [:empty-map    :map]
+  set?    [:empty-set    :set]
 
-  coll? [:empty-list   :list
-         :empty-vector :vector
-         :empty-map    :map
-         :empty-set    :set]
+  coll? [:empty-list     :list
+         :empty-lazy-seq :lazy-seq
+         :empty-vector   :vector
+         :empty-map      :map
+         :empty-set      :set]
 
-  seq?  [:empty-list :list]
+  seq?  [:empty-list     :list
+         :empty-lazy-seq :lazy-seq]
   ; array?
 
   fn?  [:fn]

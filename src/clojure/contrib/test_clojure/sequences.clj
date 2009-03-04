@@ -18,7 +18,50 @@
 
 ;; *** Tests ***
 
+(deftest test-equality
+  ; lazy sequences
+  (are (= _1 _2)
+      ; fixed SVN 1288 - LazySeq and EmptyList equals/equiv
+      ; http://groups.google.com/group/clojure/browse_frm/thread/286d807be9cae2a5#
+      (map inc nil) ()
+      (map inc ()) ()
+      (map inc []) ()
+      (map inc #{}) ()
+      (map inc {}) () ))
+
+
+(deftest test-lazy-seq
+  (are (seq? _)
+      (lazy-seq nil)
+      (lazy-seq [])
+      (lazy-seq [1 2]))
+
+  ; SVN 1292: fixed (= (lazy-seq nil) nil)
+  (is (not= (lazy-seq nil) nil))
+
+  (are (= _1 _2)
+      (lazy-seq nil) ()
+      (lazy-seq [nil]) '(nil)
+
+      (lazy-seq ()) ()
+      (lazy-seq []) ()
+      (lazy-seq #{}) ()
+      (lazy-seq {}) ()
+      (lazy-seq "") ()
+      (lazy-seq (into-array [])) ()
+
+      (lazy-seq (list 1 2)) '(1 2)
+      (lazy-seq [1 2]) '(1 2)
+      (lazy-seq (sorted-set 1 2)) '(1 2)
+      (lazy-seq (sorted-map :a 1 :b 2)) '([:a 1] [:b 2])
+      (lazy-seq "abc") '(\a \b \c)
+      (lazy-seq (into-array [1 2])) '(1 2) ))
+
+
 (deftest test-seq
+  (is (not (seq? (seq []))))
+  (is (seq? (seq [1 2])))
+  
   (are (= _1 _2)
     (seq nil) nil
     (seq [nil]) '(nil)
@@ -563,6 +606,7 @@
 
 (deftest test-reverse
   (are (= _1 _2)
+    (reverse nil) ()    ; since SVN 1294
     (reverse []) ()
     (reverse [1]) '(1)
     (reverse [1 2 3]) '(3 2 1) ))
