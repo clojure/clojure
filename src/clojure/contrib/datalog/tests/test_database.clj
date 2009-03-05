@@ -113,8 +113,6 @@
                      {:becky
                       {3
                        #{{:jen 1, :joan 0, :becky 3}}
-                       4
-                       #{}
                        2
                        #{{:jen 1, :joan 3, :becky 2}}}
                       :jen
@@ -126,9 +124,7 @@
                     #{{:sue 2, :mary 1}
                       {:sue 3, :mary 2}}
                     {:mary
-                     {3
-                      #{}
-                      2
+                     {2
                       #{{:sue 3, :mary 2}}
                       1
                       #{{:sue 2, :mary 1}}}})})))))

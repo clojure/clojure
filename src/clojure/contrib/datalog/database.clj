@@ -152,8 +152,11 @@
   (into {} (for [ik (keys idxs)]
              (let [im (idxs ik)
                    iv (tuple ik)
-                   os (get im iv #{})]
-               [ik (assoc im iv (f os tuple))]))))
+                   os (get im iv #{})
+                   ns (f os tuple)]
+               [ik (if (empty? ns)
+                     (dissoc im iv)
+                     (assoc im iv (f os tuple)))]))))
 
 (defn- add-to-indexes
   "Adds the tuple to the appropriate keys in the index map"
