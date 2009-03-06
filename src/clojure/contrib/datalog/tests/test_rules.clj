@@ -38,20 +38,22 @@
 
 (deftest test-sip
   (is (= (compute-sip #{:x} #{:mary :sally} tr-1)
-         (<- ([:fred #{:x}] :x ?x :y ?y) ([:mary #{:x}] :z ?z :x ?x) ([:sally #{:z}] :y ?y :z ?z))))
+         (<- ({:pred :fred :bound #{:x}} :x ?x :y ?y)
+                      ({:pred :mary :bound #{:x}} :z ?z :x ?x)
+                      ({:pred :sally :bound #{:z}} :y ?y :z ?z))))
 
   (is (= (compute-sip #{} #{:mary :sally} tr-1)
-         (<- (:fred :y ?y :x ?x) (:mary :z ?z :x ?x) ([:sally #{:z}] :y ?y :z ?z))))
+         (<- (:fred :y ?y :x ?x) (:mary :z ?z :x ?x) ({:pred :sally :bound #{:z}} :y ?y :z ?z))))
 
   (is (= (compute-sip #{} #{:mary} tr-2)
-         (<- (:fred) (not! [:mary #{:x}] :x 3))))
+         (<- (:fred) (not! {:pred :mary :bound #{:x}} :x 3))))
   
   (is (= (compute-sip #{} #{} tr-2)
          tr-2))
 
   (is (= (display-rule (compute-sip #{:x} #{:mary :sally} tr-3))
-         (display-rule (<- ([:fred #{:x}] :x ?x :y ?y)
-                               ([:mary #{:x}] :x ?x)
+         (display-rule (<- ({:pred :fred :bound #{:x}} :x ?x :y ?y)
+                               ({:pred :mary :bound #{:x}} :x ?x)
                                (:sally :y ?y)
                                (if > ?x ?y))))))
                    ; Display rule is used because = does not work on

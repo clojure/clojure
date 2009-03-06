@@ -261,7 +261,7 @@
         bnds (intersection (literal-columns l) bound)]
     (if (empty? bound)
       l
-      (assoc l :predicate [pred bnds]))))
+      (assoc l :predicate {:pred pred :bound bnds}))))
 
 (defmethod adorned-literal ::conditional
   [l bound]
@@ -271,15 +271,13 @@
 (defn get-adorned-bindings
   "Get the bindings from this adorned literal."
   [pred]
-  (if (vector? pred)
-    (last pred)
-    nil))
+  (:bound pred))
 
 (defn get-base-predicate
   "Get the base predicate from this predicate."
   [pred]
-  (if (vector? pred)
-    (first pred)
+  (if (map? pred)
+    (:pred pred)
     pred))
 
 
@@ -290,18 +288,17 @@
   [l]
   (assert (-> l :literal-type (isa? ::literal)))
   (let [pred (literal-predicate l)
-        base-pred (get-base-predicate pred)
+        pred-map (if (map? pred) pred {:pred pred})
         bound (get-adorned-bindings pred)
         ntb (select-keys (:term-bindings l) bound)]
-    (assoc l :predicate [base-pred :magic bound]  :term-bindings ntb :literal-type ::literal)))
+    (assoc l :predicate (assoc pred-map :magic true) :term-bindings ntb :literal-type ::literal)))
 
 (defn literal-magic?
   "Is this literal magic?"
   [lit]
   (let [pred (literal-predicate lit)]
-    (when (and (vector? pred)
-               (> (count pred) 1))
-      (= (pred 1) :magic))))
+    (when (map? pred)
+      (:magic pred))))
       
 (defn build-seed-bindings
   "Given a seed literal, already adorned and in magic form, convert
@@ -310,6 +307,24 @@
   (assert (-> s :literal-type (isa? ::literal)))
   (let [ntbs (map-values (fn [_] (gensym '?_gen_)) (:term-bindings s))]
     (assoc s :term-bindings ntbs)))
+
+
+;;; Semi-naive support
+
+(defn negated-literal
+  "Given a literal l, return a negated version"
+  [l]
+  (assert (-> l :literal-type (= ::literal)))
+  (conj l :literal-type ::negated))
+
+;(defn delta-literal
+;  "Given a literal l, return a delta version"
+;  [l]
+;  (let [pred (:predicate l)]
+;    (if (vector? pred)
+;      (assoc l :predicate (
+    
+
         
 ;;; Database operations
 

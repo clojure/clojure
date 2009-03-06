@@ -34,31 +34,33 @@
 (deftest test-soft-stratification
   (let [soft (:stratification ws)
         q (:query ws)]
-    (is (= q (?- [:p #{:x}] :x 1)))
+    (is (= q (?- {:pred :p :bound #{:x}} :x 1)))
     (is (= (count soft) 4))
     (is (subset? (rules-set
-                  (<- ([:q #{:x}] :x ?x) ([:q :magic #{:x}] :x ?x) (:d :x ?x))
-                  (<- ([:q :magic #{:x}] :x ?x) ([:p :magic #{:x}] :x ?x)
-                                                (:b :z ?z :y ?y :x ?x)))
+                  (<- ({:pred :q :bound #{:x}} :x ?x) ({:pred :q :magic true :bound #{:x}} :x ?x)
+                                                      (:d :x ?x))
+
+                  (<- ({:pred :q :magic true :bound #{:x}} :x ?x) ({:pred :p :magic true :bound #{:x}} :x ?x)
+                                                                  (:b :z ?z :y ?y :x ?x)))
                  (nth soft 0)))
     (is (= (nth soft 1)
            (rules-set
-            (<- ([:q :magic #{:x}] :x ?y) ([:p :magic #{:x}] :x ?x)
-                                          (:b :z ?z :y ?y :x ?x)
-                                          (not! [:q #{:x}] :x ?x)))))
+            (<- ({:pred :q :magic true :bound #{:x}} :x ?y) ({:pred :p :magic true :bound #{:x}} :x ?x)
+                                                            (:b :z ?z :y ?y :x ?x)
+                                                            (not! {:pred :q :bound #{:x}} :x ?x)))))
     (is (= (nth soft 2)
            (rules-set
-            (<- ([:q :magic #{:x}] :x ?z) ([:p :magic #{:x}] :x ?x)
-                                          (:b :z ?z :y ?y :x ?x)
-                                          (not! [:q #{:x}] :x ?x)
-                                          (not! [:q #{:x}] :x ?y)))))
+            (<- ({:pred :q :magic true :bound #{:x}} :x ?z) ({:pred :p :magic true :bound #{:x}} :x ?x)
+                                                            (:b :z ?z :y ?y :x ?x)
+                                                            (not! {:pred :q :bound #{:x}} :x ?x)
+                                                            (not! {:pred :q :bound #{:x}} :x ?y)))))
     (is (= (nth soft 3)
            (rules-set
-            (<- ([:p #{:x}] :x ?x) ([:p :magic #{:x}] :x ?x)
-                                   (:b :z ?z :y ?y :x ?x)
-                                   (not! [:q #{:x}] :x ?x)
-                                   (not! [:q #{:x}] :x ?y)
-                                   (not! [:q #{:x}] :x ?z)))))))
+            (<- ({:pred :p :bound #{:x}} :x ?x) ({:pred :p :magic true :bound #{:x}} :x ?x)
+                                                (:b :z ?z :y ?y :x ?x)
+                                                (not! {:pred :q :bound #{:x}} :x ?x)
+                                                (not! {:pred :q :bound #{:x}} :x ?y)
+                                                (not! {:pred :q :bound #{:x}} :x ?z)))))))
 
 
 (def tdb-1

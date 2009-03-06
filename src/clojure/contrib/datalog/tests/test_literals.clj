@@ -95,9 +95,9 @@
 
 (deftest test-adorned-literal
   (is (= (literal-predicate (adorned-literal pl #{:x}))
-         [:fred #{:x}]))
+         {:pred :fred :bound #{:x}}))
   (is (= (literal-predicate (adorned-literal nl #{:x :y :q}))
-         [:fred #{:x :y}]))
+         {:pred :fred :bound #{:x :y}}))
   (is (= (:term-bindings (adorned-literal nl #{:x}))
          {:x '?x :y '?y :z 3}))
   (is (= (adorned-literal cl #{})
@@ -117,11 +117,16 @@
 
 (deftest test-magic-literal
   (is (= (magic-literal pl)
-         {:predicate [:fred :magic nil], :term-bindings {}, :literal-type :clojure.contrib.datalog.literals/literal}))
+         {:predicate {:pred :fred :magic true}, :term-bindings {}, :literal-type :clojure.contrib.datalog.literals/literal}))
   (is (= (magic-literal (adorned-literal pl #{:x}))
-         {:predicate [:fred :magic #{:x}],
+         {:predicate {:pred :fred :magic true :bound #{:x}},
           :term-bindings {:x '?x},
           :literal-type :clojure.contrib.datalog.literals/literal})))
+
+(comment
+  (use 'clojure.contrib.stacktrace) (e)
+  (use :reload 'clojure.contrib.datalog.literals)
+)
 
 
 (def db1 (make-database
@@ -151,7 +156,7 @@
          [{'?x 3 '?y 1}])))
          
 (deftest test-project-literal
-  (is (= ((project-literal db2 lit4 [{'?x 1 '?y 3}{'?x 4 '?y 2}]) [:joan #{:x}])
+  (is (= ((project-literal db2 lit4 [{'?x 1 '?y 3}{'?x 4 '?y 2}]) {:pred :joan :bound #{:x}})
          (datalog-relation
           ;; Schema
           #{:y :x}

@@ -57,6 +57,7 @@
                 new-needed (reduce add-preds remaining new-adorned-rules)]
             (recur new-nrs new-needed))))))
 
+
 ;;; Magic !
 
 (defn seed-relation

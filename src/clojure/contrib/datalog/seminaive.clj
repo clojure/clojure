@@ -38,6 +38,12 @@
         head-negated (negated-literal head)
         delta-head (delta-literal head)
         body (:body r)
+        build-body (fn [left lit right]
+                     (assoc r :head delta-head
+                              :body (concat left
+                                            [(delta-literal lit)]
+                                            right
+                                            [head-negated])))
         new-rules (loop [lit (first body)
                         left []
                         right (next body)
@@ -45,12 +51,7 @@
                    (if (nil? lit)
                      results
                      (let [new-results (if (i-preds lit)
-                                         (conj results
-                                               (assoc r :head delta-head
-                                                      :body (concat left
-                                                                    [(delta-literal lit)]
-                                                                    right
-                                                                    [head-negated])))
+                                         (conj results (build-body left lit right))
                                          results)]
                        (recur (first right)
                               (conj left lit)

@@ -33,10 +33,11 @@
 (deftest test-adorn-rules-set
   (is (= ars
          (rules-set
-          (<- ([:p #{:x}] :y ?y :x ?x) ([:e #{:x}] :y ?y :x ?x))
-          (<- ([:p #{:x}] :y ?y :x ?x) ([:e #{:x}] :y ?z :x ?x) ([:p #{:x}] :y ?y :x ?z))
-          (<- ([:e #{:x}] :y ?y :x ?y) (:c :y ?y :x ?x))
-          (<- ([:e #{:x}] :y ?y :x ?x) (:b :y ?y :x ?x))))))
+          (<- ({:pred :p :bound #{:x}} :y ?y :x ?x) ({:pred :e :bound #{:x}} :y ?y :x ?x))
+          (<- ({:pred :p :bound #{:x}} :y ?y :x ?x) ({:pred :e :bound #{:x}} :y ?z :x ?x)
+                                                    ({:pred :p :bound #{:x}} :y ?y :x ?z))
+          (<- ({:pred :e :bound #{:x}} :y ?y :x ?y) (:c :y ?y :x ?x))
+          (<- ({:pred :e :bound #{:x}} :y ?y :x ?x) (:b :y ?y :x ?x))))))
 
 
 (def m (magic-transform ars))
@@ -44,12 +45,21 @@
 (deftest test-magic-transform
   (is (= m
          (rules-set
-          (<- ([:e #{:x}] :y ?y :x ?y) ([:e :magic #{:x}] :x ?y) (:c :y ?y :x ?x))
-          (<- ([:e #{:x}] :y ?y :x ?x) ([:e :magic #{:x}] :x ?x) (:b :y ?y :x ?x))
-          (<- ([:p :magic #{:x}] :x ?z) ([:p :magic #{:x}] :x ?x) ([:e #{:x}] :y ?z :x ?x))
-          (<- ([:p #{:x}] :y ?y :x ?x) ([:p :magic #{:x}] :x ?x) ([:e #{:x}] :y ?z :x ?x) ([:p #{:x}] :y ?y :x ?z))
-          (<- ([:e :magic #{:x}] :x ?x) ([:p :magic #{:x}] :x ?x))
-          (<- ([:p #{:x}] :y ?y :x ?x) ([:p :magic #{:x}] :x ?x) ([:e #{:x}] :y ?y :x ?x))))))
+          (<- ({:pred :e :bound #{:x}} :y ?y :x ?y) ({:pred :e :magic true :bound #{:x}} :x ?y) (:c :y ?y :x ?x))
+
+          (<- ({:pred :e :bound #{:x}} :y ?y :x ?x) ({:pred :e :magic true :bound #{:x}} :x ?x) (:b :y ?y :x ?x))
+
+          (<- ({:pred :p :magic true :bound #{:x}} :x ?z) ({:pred :p :magic true :bound #{:x}} :x ?x)
+                                                          ({:pred :e :bound #{:x}} :y ?z :x ?x))
+
+          (<- ({:pred :p :bound #{:x}} :y ?y :x ?x) ({:pred :p :magic true :bound #{:x}} :x ?x)
+                                                    ({:pred :e :bound #{:x}} :y ?z :x ?x)
+                                                    ({:pred :p :bound #{:x}} :y ?y :x ?z))
+
+          (<- ({:pred :e :magic true :bound #{:x}} :x ?x) ({:pred :p :magic true :bound #{:x}} :x ?x))
+
+          (<- ({:pred :p :bound #{:x}} :y ?y :x ?x) ({:pred :p :magic true :bound #{:x}} :x ?x)
+                                                    ({:pred :e :bound #{:x}} :y ?y :x ?x))))))
 
 
 
