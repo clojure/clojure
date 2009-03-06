@@ -342,6 +342,75 @@
       (find {:a 1 :b 2} nil) nil ))
 
 
+(deftest test-contains?
+  ; contains? is designed to work preferably on maps and sets
+  (are (= _1 _2)
+      (contains? {} :a) false
+      (contains? {} nil) false
+
+      (contains? {:a 1} :a) true
+      (contains? {:a 1} :b) false
+      (contains? {:a 1} nil) false
+
+      (contains? {:a 1 :b 2} :a) true
+      (contains? {:a 1 :b 2} :b) true
+      (contains? {:a 1 :b 2} :c) false
+      (contains? {:a 1 :b 2} nil) false
+
+      ; sets
+      (contains? #{} 1) false
+      (contains? #{} nil) false
+
+      (contains? #{1} 1) true
+      (contains? #{1} 2) false
+      (contains? #{1} nil) false
+
+      (contains? #{1 2 3} 1) true
+      (contains? #{1 2 3} 3) true
+      (contains? #{1 2 3} 10) false
+      (contains? #{1 2 3} nil) false)
+
+  ; numerically indexed collections (e.g. vectors and Java arrays)
+  ; => test if the numeric key is WITHIN THE RANGE OF INDEXES
+  (are (= _1 _2)
+      (contains? [] 0) false
+      (contains? [] -1) false
+      (contains? [] 1) false
+
+      (contains? [1] 0) true
+      (contains? [1] -1) false
+      (contains? [1] 1) false
+
+      (contains? [1 2 3] 0) true
+      (contains? [1 2 3] 2) true
+      (contains? [1 2 3] 3) false
+      (contains? [1 2 3] -1) false
+
+      ; arrays
+      (contains? (into-array []) 0) false
+      (contains? (into-array []) -1) false
+      (contains? (into-array []) 1) false
+
+      (contains? (into-array [1]) 0) true
+      (contains? (into-array [1]) -1) false
+      (contains? (into-array [1]) 1) false
+
+      (contains? (into-array [1 2 3]) 0) true
+      (contains? (into-array [1 2 3]) 2) true
+      (contains? (into-array [1 2 3]) 3) false
+      (contains? (into-array [1 2 3]) -1) false)
+
+  ; 'contains?' operates constant or logarithmic time,
+  ; it WILL NOT perform a linear search for a value.
+  (are (= _ false)
+      (contains? '(1 2 3) 0)
+      (contains? '(1 2 3) 1)
+      (contains? '(1 2 3) 3)
+      (contains? '(1 2 3) 10)
+      (contains? '(1 2 3) nil)
+      (contains? '(1 2 3) ()) ))
+
+
 (deftest test-keys
   (are (= _1 _2)      ; other than map data structures
       (keys ()) nil
