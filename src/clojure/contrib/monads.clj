@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated March 3, 2009
+;; last updated March 6, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -241,6 +241,19 @@
     m-zero   (list)
     m-plus   (fn m-plus-sequence [& mvs]
                (apply concat mvs))
+    ])
+
+; Set monad
+(defmonad set-m
+   "Monad describing multi-valued computations, like sequence-m,
+    but returning sets of results instead of sequences of results."
+   [m-result (fn m-result-set [v]
+	       #{v})
+    m-bind   (fn m-bind-set [mv f]
+               (apply clojure.set/union (map f mv)))
+    m-zero   #{}
+    m-plus   (fn m-plus-set [& mvs]
+               (apply clojure.set/union mvs))
     ])
 
 ; State monad
