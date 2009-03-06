@@ -326,6 +326,22 @@
 
 ;; *** Maps (IPersistentMap) ***
 
+(deftest test-find
+  (are (= _1 _2)
+      (find {} :a) nil
+
+      (find {:a 1} :a) [:a 1]
+      (find {:a 1} :b) nil
+
+      (find {:a 1 :b 2} :a) [:a 1]
+      (find {:a 1 :b 2} :b) [:b 2]
+      (find {:a 1 :b 2} :c) nil
+
+      (find {} nil) nil
+      (find {:a 1} nil) nil
+      (find {:a 1 :b 2} nil) nil ))
+
+
 (deftest test-keys
   (are (= _1 _2)      ; other than map data structures
       (keys ()) nil
