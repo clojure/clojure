@@ -315,15 +315,14 @@
   "Given a literal l, return a negated version"
   [l]
   (assert (-> l :literal-type (= ::literal)))
-  (conj l :literal-type ::negated))
+  (assoc l :literal-type ::negated))
 
-;(defn delta-literal
-;  "Given a literal l, return a delta version"
-;  [l]
-;  (let [pred (:predicate l)]
-;    (if (vector? pred)
-;      (assoc l :predicate (
-    
+(defn delta-literal
+  "Given a literal l, return a delta version"
+  [l]
+  (let [pred* (:predicate l)
+        pred (if (map? pred*) pred* {:pred pred*})]
+    (assoc l :predicate (assoc pred :delta true))))
 
         
 ;;; Database operations

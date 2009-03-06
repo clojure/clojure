@@ -50,7 +50,7 @@
                         results []]
                    (if (nil? lit)
                      results
-                     (let [new-results (if (i-preds lit)
+                     (let [new-results (if (-> lit literal-predicate i-preds)
                                          (conj results (build-body left lit right))
                                          results)]
                        (recur (first right)
@@ -68,6 +68,13 @@
   [rs i-preds]
   (mapcat #(compute-delta-rules* % i-preds) rs))
 
+
+(comment
+  (compute-delta-rules* (<- (:anc :x ?x :y ?y) (:anc :x ?x :y ?z) (:anc :x ?z :y ?y)) #{:anc})
+
+  (use 'clojure.contrib.stacktrace) (e)
+  (use :reload 'clojure.contrib.datalog.literals 'clojure.contrib.datalog.seminaive)
+)
 
 
 ;; End of file
