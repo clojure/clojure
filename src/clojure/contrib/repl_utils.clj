@@ -121,4 +121,36 @@
   [n]
   `(println (or (get-source '~n) (str "Source not found"))))
 
+
+(def #^{:doc "Threads to stop when Ctrl-C is pressed.  See 'add-break-thread!'"}
+  break-threads (ref nil))
+
+(defn start-handling-break
+  "Register INT signal handler.  After calling this, Ctrl-C will cause
+  all break-threads to be stopped.  See 'add-break-thread!'"
+  []
+  (when-not
+    (dosync
+      (let [inited @break-threads]
+        (ref-set break-threads {})
+        inited))
+    (sun.misc.Signal/handle
+      (sun.misc.Signal. "INT")
+      (proxy [sun.misc.SignalHandler] []
+        (handle [sig]
+          (let [exc (Exception. (str sig))]
+            (doseq [tref (vals @break-threads) :when (.get tref)]
+              (.stop (.get tref) exc))))))))
+
+(defn add-break-thread!
+  "Add the given thread to break-threads so that it will be stopped
+  any time the user presses Ctrl-C.  Calls start-handling-break for
+  you.  Adds the current thread if none is give."
+  ([] (add-break-thread! (Thread/currentThread)))
+  ([t]
+    (start-handling-break)
+    (let [tref (java.lang.ref.WeakReference. t)]
+      (dosync (commute break-threads assoc (.getId t) tref)))))
+
+
 (load "repl_utils/javadoc")
