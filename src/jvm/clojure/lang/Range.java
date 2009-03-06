@@ -63,15 +63,23 @@ public int count() {
     return end - n;
     }
 
-    public IStream stream() throws Exception {
-    final AtomicInteger an = new AtomicInteger(n);
-    return new IStream(){
-        public Object next() throws Exception {
-            int i = an.getAndIncrement();
-            if (i < end)
-                return i;
-            return RT.eos();
-        }
-    };
+public Stream stream() throws Exception {
+    return new Stream(new Src(n,end));
 }
+
+    static class Src extends AFn{
+        int n;
+        final int end;
+
+        public Src(int n, int end) {
+            this.n = n;
+            this.end = end;
+        }
+
+        public Object invoke() throws Exception {
+            if(n < end)
+                return n++;
+            return RT.EOS;
+        }
+    }
 }

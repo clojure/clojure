@@ -220,11 +220,10 @@ final static IFn inNamespace = new AFn(){
 public static List<String> processCommandLine(String[] args){
 	List<String> arglist = Arrays.asList(args);
 	int split = arglist.indexOf("--");
-	if(split >= 0)
-		{
+	if(split >= 0) {
 		CMD_LINE_ARGS.bindRoot(RT.seq(arglist.subList(split + 1, args.length)));
 		return arglist.subList(0, split);
-		}
+	}
 	return arglist;
 }
 
@@ -243,8 +242,15 @@ static public void addURL(Object url) throws Exception{
 	getRootClassLoader().addURL(u);
 }
 
-static
-	{
+final static public Object EOS = new Object();
+final static public Object SKIP = new Object();
+static final public IFn EMPTY_GEN = new AFn(){
+    synchronized public Object invoke() throws Exception {
+        return EOS;
+    }
+};
+
+static{
 	Keyword dockw = Keyword.intern(null, "doc");
 	Keyword arglistskw = Keyword.intern(null, "arglists");
 	Symbol namesym = Symbol.create("name");
@@ -277,15 +283,13 @@ static
 	               });
 	v.setMeta(map(dockw, "Tests if 2 arguments are the same object",
 	              arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
-	try
-		{
+	try {
 		doInit();
-		}
-	catch(Exception e)
-		{
-		throw new RuntimeException(e);
-		}
 	}
+	catch(Exception e) {
+		throw new RuntimeException(e);
+	}
+}
 
 
 static public Var var(String ns, String name){
@@ -316,21 +320,17 @@ public static void loadResourceScript(Class c, String name, boolean failIfNotFou
 	int slash = name.lastIndexOf('/');
 	String file = slash >= 0 ? name.substring(slash + 1) : name;
 	InputStream ins = baseLoader().getResourceAsStream(name);
-	if(ins != null)
-		{
-		try
-			{
+	if(ins != null) {
+		try {
 			Compiler.load(new InputStreamReader(ins, UTF8), name, file);
-			}
-		finally
-			{
+		}
+		finally {
 			ins.close();
-			}
 		}
-	else if(failIfNotFound)
-		{
+	}
+	else if(failIfNotFound) {
 		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + name);
-		}
+	}
 }
 
 static public void init() throws Exception{
@@ -338,31 +338,26 @@ static public void init() throws Exception{
 }
 
 static public long lastModified(URL url, String libfile) throws Exception{
-	if(url.getProtocol().equals("jar"))
-		{
+	if(url.getProtocol().equals("jar")) {
 		return ((JarURLConnection) url.openConnection()).getJarFile().getEntry(libfile).getTime();
-		}
-	else
-		{
+	}
+	else {
 		return url.openConnection().getLastModified();
-		}
+	}
 }
 
 static void compile(String cljfile) throws Exception{
 	InputStream ins = baseLoader().getResourceAsStream(cljfile);
-	if(ins != null)
-		{
-		try
-			{
+	if(ins != null) {
+		try {
 			Compiler.compile(new InputStreamReader(ins, UTF8), cljfile,
 			                 cljfile.substring(1 + cljfile.lastIndexOf("/")));
-			}
-		finally
-			{
-			ins.close();
-			}
-
 		}
+		finally {
+			ins.close();
+		}
+
+	}
 	else
 		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + cljfile);
 }
@@ -381,27 +376,23 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 	if((classURL != null &&
 	    (cljURL == null
 	     || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
-	   || classURL == null)
-		{
-		try
-			{
+	   || classURL == null) {
+		try {
 			Var.pushThreadBindings(
 					RT.map(CURRENT_NS, CURRENT_NS.deref(),
 					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
 			loaded = (loadClassForName(scriptbase.replace('/', '.') + LOADER_SUFFIX) != null);
-			}
-		finally
-			{
-			Var.popThreadBindings();
-			}
 		}
-	if(!loaded && cljURL != null)
-		{
+		finally {
+			Var.popThreadBindings();
+		}
+	}
+	if(!loaded && cljURL != null) {
 		if(booleanCast(Compiler.COMPILE_FILES.deref()))
 			compile(cljfile);
 		else
 			loadResourceScript(RT.class, cljfile);
-		}
+	}
 	else if(!loaded && failIfNotFound)
 		throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, cljfile));
 }
@@ -415,8 +406,7 @@ static void doInit() throws Exception{
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.deref(),
 			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
-	try
-		{
+	try {
 		Symbol USER = Symbol.create("user");
 		Symbol CLOJURE = Symbol.create("clojure.core");
 
@@ -425,11 +415,10 @@ static void doInit() throws Exception{
 		in_ns.invoke(USER);
 		refer.invoke(CLOJURE);
 		maybeLoadResourceScript("user.clj");
-		}
-	finally
-		{
+	}
+	finally {
 		Var.popThreadBindings();
-		}
+	}
 }
 
 static public int nextID(){
@@ -448,29 +437,22 @@ static public ISeq seq(Object coll){
 		return seqFrom(coll);
 }
 
-static public IStream stream(final Object coll) throws Exception{
+static public Stream stream(final Object coll) throws Exception{
 	if(coll == null)
-		return EMPTY_STREAM;
-	else if(coll instanceof IStream)
-		return (IStream) coll;
+		return new Stream(EMPTY_GEN);
 	else if(coll instanceof Streamable)
-			return ((Streamable) coll).stream();
-		else if(coll instanceof Fn)
-				{
-				return new IStream(){
-					public Object next() throws Exception{
-						return ((IFn) coll).invoke();
-					}
-				};
-				}
-			else if(coll instanceof Iterable)
-					return new IteratorStream(((Iterable) coll).iterator());
-				else if(coll.getClass().isArray())
-						return ArrayStream.createFromObject(coll);
-					else if(coll instanceof String)
-							return ArrayStream.createFromObject(((String) coll).toCharArray());
+		return ((Streamable) coll).stream();
+	else if(coll instanceof Fn)
+		return new Stream((IFn) coll);
+	else if(coll instanceof Iterable)
+		return new Stream(new IteratorStream(((Iterable) coll).iterator()));
+	else if(coll.getClass().isArray())
+		return ArrayStream.createFromObject(coll);
+	else if(coll instanceof String)
+		return ArrayStream.createFromObject(((String) coll).toCharArray());
+	else
+	    return new Stream(new ASeq.Src(RT.seq(coll)));
 
-	throw new IllegalArgumentException("Don't know how to create IStream from: " + coll.getClass().getSimpleName());
 }
 
 static ISeq seqFrom(Object coll){
@@ -479,19 +461,18 @@ static ISeq seqFrom(Object coll){
 	else if(coll == null)
 		return null;
 	else if(coll instanceof Iterable)
-			return IteratorSeq.create(((Iterable) coll).iterator());
-		else if(coll.getClass().isArray())
-				return ArraySeq.createFromObject(coll);
-			else if(coll instanceof String)
-					return StringSeq.create((String) coll);
-				else if(coll instanceof Map)
-						return seq(((Map) coll).entrySet());
-					else
-						{
-						Class c = coll.getClass();
-						Class sc = c.getSuperclass();
-						throw new IllegalArgumentException("Don't know how to create ISeq from: " + c.getSimpleName());
-						}
+		return IteratorSeq.create(((Iterable) coll).iterator());
+	else if(coll.getClass().isArray())
+		return ArraySeq.createFromObject(coll);
+	else if(coll instanceof String)
+		return StringSeq.create((String) coll);
+	else if(coll instanceof Map)
+		return seq(((Map) coll).entrySet());
+	else {
+		Class c = coll.getClass();
+		Class sc = c.getSuperclass();
+		throw new IllegalArgumentException("Don't know how to create ISeq from: " + c.getSimpleName());
+	}
 }
 
 static public ISeq keys(Object coll){
@@ -513,27 +494,25 @@ public static int count(Object o){
 		return 0;
 	else if(o instanceof Counted)
 		return ((Counted) o).count();
-	else if(o instanceof IPersistentCollection)
-			{
-			ISeq s = seq(o);
-			o = null;
-			int i = 0;
-			for(; s != null; s = s.next())
-				{
-				if(s instanceof Counted)
-					return i + s.count();
-				i++;
-				}
-			return i;
-			}
-		else if(o instanceof String)
-				return ((String) o).length();
-			else if(o instanceof Collection)
-					return ((Collection) o).size();
-				else if(o instanceof Map)
-						return ((Map) o).size();
-					else if(o.getClass().isArray())
-							return Array.getLength(o);
+	else if(o instanceof IPersistentCollection) {
+		ISeq s = seq(o);
+		o = null;
+		int i = 0;
+		for(; s != null; s = s.next()) {
+			if(s instanceof Counted)
+				return i + s.count();
+			i++;
+		}
+		return i;
+	}
+	else if(o instanceof String)
+		return ((String) o).length();
+	else if(o instanceof Collection)
+		return ((Collection) o).size();
+	else if(o instanceof Map)
+		return ((Map) o).size();
+	else if(o.getClass().isArray())
+		return Array.getLength(o);
 
 	throw new UnsupportedOperationException("count not supported on this type: " + o.getClass().getSimpleName());
 }
@@ -627,23 +606,20 @@ static public Object get(Object coll, Object key){
 		return null;
 	else if(coll instanceof Associative)
 		return ((Associative) coll).valAt(key);
-	else if(coll instanceof Map)
-			{
-			Map m = (Map) coll;
-			return m.get(key);
-			}
-		else if(coll instanceof IPersistentSet)
-				{
-				IPersistentSet set = (IPersistentSet) coll;
-				return set.get(key);
-				}
-			else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
-					{
-					int n = ((Number) key).intValue();
-					if(n >= 0 && n < count(coll))
-						return nth(coll, n);
-					return null;
-					}
+	else if(coll instanceof Map) {
+		Map m = (Map) coll;
+		return m.get(key);
+	}
+	else if(coll instanceof IPersistentSet) {
+		IPersistentSet set = (IPersistentSet) coll;
+		return set.get(key);
+	}
+	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
+		int n = ((Number) key).intValue();
+		if(n >= 0 && n < count(coll))
+			return nth(coll, n);
+		return null;
+	}
 
 	return null;
 }
@@ -653,25 +629,22 @@ static public Object get(Object coll, Object key, Object notFound){
 		return notFound;
 	else if(coll instanceof Associative)
 		return ((Associative) coll).valAt(key, notFound);
-	else if(coll instanceof Map)
-			{
-			Map m = (Map) coll;
-			if(m.containsKey(key))
-				return m.get(key);
-			return notFound;
-			}
-		else if(coll instanceof IPersistentSet)
-				{
-				IPersistentSet set = (IPersistentSet) coll;
-				if(set.contains(key))
-					return set.get(key);
-				return notFound;
-				}
-			else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
-					{
-					int n = ((Number) key).intValue();
-					return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
-					}
+	else if(coll instanceof Map) {
+		Map m = (Map) coll;
+		if(m.containsKey(key))
+			return m.get(key);
+		return notFound;
+	}
+	else if(coll instanceof IPersistentSet) {
+		IPersistentSet set = (IPersistentSet) coll;
+		if(set.contains(key))
+			return set.get(key);
+		return notFound;
+	}
+	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
+		int n = ((Number) key).intValue();
+		return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
+	}
 	return notFound;
 
 }
@@ -688,17 +661,15 @@ static public Object contains(Object coll, Object key){
 	else if(coll instanceof Associative)
 		return ((Associative) coll).containsKey(key) ? T : F;
 	else if(coll instanceof IPersistentSet)
-			return ((IPersistentSet) coll).contains(key) ? T : F;
-		else if(coll instanceof Map)
-				{
-				Map m = (Map) coll;
-				return m.containsKey(key) ? T : F;
-				}
-			else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray()))
-					{
-					int n = ((Number) key).intValue();
-					return n >= 0 && n < count(coll);
-					}
+		return ((IPersistentSet) coll).contains(key) ? T : F;
+	else if(coll instanceof Map) {
+		Map m = (Map) coll;
+		return m.containsKey(key) ? T : F;
+	}
+	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
+		int n = ((Number) key).intValue();
+		return n >= 0 && n < count(coll);
+	}
 	return F;
 }
 
@@ -707,28 +678,26 @@ static public Object find(Object coll, Object key){
 		return null;
 	else if(coll instanceof Associative)
 		return ((Associative) coll).entryAt(key);
-	else
-		{
+	else {
 		Map m = (Map) coll;
 		if(m.containsKey(key))
 			return new MapEntry(key, m.get(key));
 		return null;
-		}
+	}
 }
 
 //takes a seq of key,val,key,val
 
 //returns tail starting at val of matching key if found, else null
 static public ISeq findKey(Keyword key, ISeq keyvals) throws Exception{
-	while(keyvals != null)
-		{
+	while(keyvals != null) {
 		ISeq r = keyvals.next();
 		if(r == null)
 			throw new Exception("Malformed keyword argslist");
 		if(keyvals.first() == key)
 			return r;
 		keyvals = r.next();
-		}
+	}
 	return null;
 }
 
@@ -744,38 +713,35 @@ static public Object nth(Object coll, int n){
 	else if(coll instanceof IPersistentVector)
 		return ((IPersistentVector) coll).nth(n);
 	else if(coll instanceof String)
-			return Character.valueOf(((String) coll).charAt(n));
-		else if(coll.getClass().isArray())
-				return Reflector.prepRet(Array.get(coll, n));
-			else if(coll instanceof RandomAccess)
-					return ((List) coll).get(n);
-				else if(coll instanceof Matcher)
-						return ((Matcher) coll).group(n);
+		return Character.valueOf(((String) coll).charAt(n));
+	else if(coll.getClass().isArray())
+		return Reflector.prepRet(Array.get(coll, n));
+	else if(coll instanceof RandomAccess)
+		return ((List) coll).get(n);
+	else if(coll instanceof Matcher)
+		return ((Matcher) coll).group(n);
 
-					else if(coll instanceof Map.Entry)
-							{
-							Map.Entry e = (Map.Entry) coll;
-							if(n == 0)
-								return e.getKey();
-							else if(n == 1)
-								return e.getValue();
-							throw new IndexOutOfBoundsException();
-							}
+	else if(coll instanceof Map.Entry) {
+		Map.Entry e = (Map.Entry) coll;
+		if(n == 0)
+			return e.getKey();
+		else if(n == 1)
+			return e.getValue();
+		throw new IndexOutOfBoundsException();
+	}
 
-						else if(coll instanceof Sequential)
-								{
-								ISeq seq = RT.seq(coll);
-								coll = null;
-								for(int i = 0; i <= n && seq != null; ++i, seq = seq.next())
-									{
-									if(i == n)
-										return seq.first();
-									}
-								throw new IndexOutOfBoundsException();
-								}
-							else
-								throw new UnsupportedOperationException(
-										"nth not supported on this type: " + coll.getClass().getSimpleName());
+	else if(coll instanceof Sequential) {
+		ISeq seq = RT.seq(coll);
+		coll = null;
+		for(int i = 0; i <= n && seq != null; ++i, seq = seq.next()) {
+			if(i == n)
+				return seq.first();
+		}
+		throw new IndexOutOfBoundsException();
+	}
+	else
+		throw new UnsupportedOperationException(
+				"nth not supported on this type: " + coll.getClass().getSimpleName());
 }
 
 static public Object nth(Object coll, int n, Object notFound){
@@ -783,63 +749,55 @@ static public Object nth(Object coll, int n, Object notFound){
 		return notFound;
 	else if(n < 0)
 		return notFound;
-	else if(coll instanceof IPersistentVector)
-			{
-			IPersistentVector v = (IPersistentVector) coll;
-			if(n < v.count())
-				return v.nth(n);
-			return notFound;
-			}
-		else if(coll instanceof String)
-				{
-				String s = (String) coll;
-				if(n < s.length())
-					return Character.valueOf(s.charAt(n));
-				return notFound;
-				}
-			else if(coll.getClass().isArray())
-					{
-					if(n < Array.getLength(coll))
-						return Reflector.prepRet(Array.get(coll, n));
-					return notFound;
-					}
-				else if(coll instanceof RandomAccess)
-						{
-						List list = (List) coll;
-						if(n < list.size())
-							return list.get(n);
-						return notFound;
-						}
-					else if(coll instanceof Matcher)
-							{
-							Matcher m = (Matcher) coll;
-							if(n < m.groupCount())
-								return m.group(n);
-							return notFound;
-							}
-						else if(coll instanceof Map.Entry)
-								{
-								Map.Entry e = (Map.Entry) coll;
-								if(n == 0)
-									return e.getKey();
-								else if(n == 1)
-									return e.getValue();
-								return notFound;
-								}
-							else if(coll instanceof Sequential)
-									{
-									ISeq seq = RT.seq(coll);
-									coll = null;
-									for(int i = 0; i <= n && seq != null; ++i, seq = seq.next())
-										{
-										if(i == n)
-											return seq.first();
-										}
-									return notFound;
-									}
-								else
-									throw new UnsupportedOperationException(
-											"nth not supported on this type: " + coll.getClass().getSimpleName());
+	else if(coll instanceof IPersistentVector) {
+		IPersistentVector v = (IPersistentVector) coll;
+		if(n < v.count())
+			return v.nth(n);
+		return notFound;
+	}
+	else if(coll instanceof String) {
+		String s = (String) coll;
+		if(n < s.length())
+			return Character.valueOf(s.charAt(n));
+		return notFound;
+	}
+	else if(coll.getClass().isArray()) {
+		if(n < Array.getLength(coll))
+			return Reflector.prepRet(Array.get(coll, n));
+		return notFound;
+	}
+	else if(coll instanceof RandomAccess) {
+		List list = (List) coll;
+		if(n < list.size())
+			return list.get(n);
+		return notFound;
+	}
+	else if(coll instanceof Matcher) {
+		Matcher m = (Matcher) coll;
+		if(n < m.groupCount())
+			return m.group(n);
+		return notFound;
+	}
+	else if(coll instanceof Map.Entry) {
+		Map.Entry e = (Map.Entry) coll;
+		if(n == 0)
+			return e.getKey();
+		else if(n == 1)
+			return e.getValue();
+		return notFound;
+	}
+	else if(coll instanceof Sequential) {
+		ISeq seq = RT.seq(coll);
+		coll = null;
+		for(int i = 0; i <= n && seq != null; ++i, seq = seq.next()) {
+			if(i == n)
+				return seq.first();
+		}
+		return notFound;
+	}
+	else
+		throw new UnsupportedOperationException(
+				"nth not supported on this type: " + coll.getClass().getSimpleName());
 }
 
 static public Object assocN(int n, Object val, Object coll){
@@ -847,15 +805,14 @@ static public Object assocN(int n, Object val, Object coll){
 		return null;
 	else if(coll instanceof IPersistentVector)
 		return ((IPersistentVector) coll).assocN(n, val);
-	else if(coll instanceof Object[])
-			{
-			//hmm... this is not persistent
-			Object[] array = ((Object[]) coll);
-			array[n] = val;
-			return array;
-			}
-		else
-			return null;
+	else if(coll instanceof Object[]) {
+		//hmm... this is not persistent
+		Object[] array = ((Object[]) coll);
+		array[n] = val;
+		return array;
+	}
+	else
+		return null;
 }
 
 static boolean hasTag(Object o, Object tag){
@@ -1105,27 +1062,25 @@ static public Object[] toArray(Object coll) throws Exception{
 	else if(coll instanceof Object[])
 		return (Object[]) coll;
 	else if(coll instanceof Collection)
-			return ((Collection) coll).toArray();
-		else if(coll instanceof Map)
-				return ((Map) coll).entrySet().toArray();
-			else if(coll instanceof String)
-					{
-					char[] chars = ((String) coll).toCharArray();
-					Object[] ret = new Object[chars.length];
-					for(int i = 0; i < chars.length; i++)
-						ret[i] = chars[i];
-					return ret;
-					}
-				else if(coll.getClass().isArray())
-						{
-						ISeq s = (seq(coll));
-						Object[] ret = new Object[count(s)];
-						for(int i = 0; i < ret.length; i++, s = s.next())
-							ret[i] = s.first();
-						return ret;
-						}
-					else
-						throw new Exception("Unable to convert: " + coll.getClass() + " to Object[]");
+		return ((Collection) coll).toArray();
+	else if(coll instanceof Map)
+		return ((Map) coll).entrySet().toArray();
+	else if(coll instanceof String) {
+		char[] chars = ((String) coll).toCharArray();
+		Object[] ret = new Object[chars.length];
+		for(int i = 0; i < chars.length; i++)
+			ret[i] = chars[i];
+		return ret;
+	}
+	else if(coll.getClass().isArray()) {
+		ISeq s = (seq(coll));
+		Object[] ret = new Object[count(s)];
+		for(int i = 0; i < ret.length; i++, s = s.next())
+			ret[i] = s.first();
+		return ret;
+	}
+	else
+		throw new Exception("Unable to convert: " + coll.getClass() + " to Object[]");
 }
 
 static public Object[] seqToArray(ISeq seq){
@@ -1150,19 +1105,17 @@ static public Object seqToTypedArray(Class type, ISeq seq) throws Exception{
 
 static public int length(ISeq list){
 	int i = 0;
-	for(ISeq c = list; c != null; c = c.next())
-		{
+	for(ISeq c = list; c != null; c = c.next()) {
 		i++;
-		}
+	}
 	return i;
 }
 
 static public int boundedLength(ISeq list, int limit) throws Exception{
 	int i = 0;
-	for(ISeq c = list; c != null && i <= limit; c = c.next())
-		{
+	for(ISeq c = list; c != null && i <= limit; c = c.next()) {
 		i++;
-		}
+	}
 	return i;
 }
 
@@ -1181,17 +1134,15 @@ static public Character readChar(Reader r) throws Exception{
 
 static public Character peekChar(Reader r) throws Exception{
 	int ret;
-	if(r instanceof PushbackReader)
-		{
+	if(r instanceof PushbackReader) {
 		ret = r.read();
 		((PushbackReader) r).unread(ret);
-		}
-	else
-		{
+	}
+	else {
 		r.mark(1);
 		ret = r.read();
 		r.reset();
-		}
+	}
 
 	return readRet(ret);
 }
@@ -1223,28 +1174,24 @@ static public boolean suppressRead(){
 }
 
 static public String printString(Object x){
-	try
-		{
+	try {
 		StringWriter sw = new StringWriter();
 		print(x, sw);
 		return sw.toString();
-		}
-	catch(Exception e)
-		{
+	}
+	catch(Exception e) {
 		throw new RuntimeException(e);
-		}
+	}
 }
 
 static public Object readString(String s){
 	PushbackReader r = new PushbackReader(new StringReader(s));
-	try
-		{
+	try {
 		return LispReader.read(r, true, null, false);
-		}
-	catch(Exception e)
-		{
+	}
+	catch(Exception e) {
 		throw new RuntimeException(e);
-		}
+	}
 }
 
 static public void print(Object x, Writer w) throws Exception{
@@ -1252,16 +1199,13 @@ static public void print(Object x, Writer w) throws Exception{
 	if(PRINT_INITIALIZED.isBound() && RT.booleanCast(PRINT_INITIALIZED.deref()))
 		PR_ON.invoke(x, w);
 //*
-	else
-		{
+	else {
 		boolean readably = booleanCast(PRINT_READABLY.deref());
-		if(x instanceof Obj)
-			{
+		if(x instanceof Obj) {
 			Obj o = (Obj) x;
 			if(RT.count(o.meta()) > 0 &&
 			   ((readably && booleanCast(PRINT_META.deref()))
-			    || booleanCast(PRINT_DUP.deref())))
-				{
+			    || booleanCast(PRINT_DUP.deref()))) {
 				IPersistentMap meta = o.meta();
 				w.write("#^");
 				if(meta.count() == 1 && meta.containsKey(TAG_KEY))
@@ -1269,155 +1213,137 @@ static public void print(Object x, Writer w) throws Exception{
 				else
 					print(meta, w);
 				w.write(' ');
-				}
 			}
+		}
 		if(x == null)
 			w.write("nil");
-		else if(x instanceof ISeq || x instanceof IPersistentList)
-			{
+		else if(x instanceof ISeq || x instanceof IPersistentList) {
 			w.write('(');
 			printInnerSeq(seq(x), w);
 			w.write(')');
-			}
-		else if(x instanceof String)
-				{
-				String s = (String) x;
-				if(!readably)
-					w.write(s);
-				else
-					{
-					w.write('"');
-					//w.write(x.toString());
-					for(int i = 0; i < s.length(); i++)
-						{
-						char c = s.charAt(i);
-						switch(c)
-							{
-							case '\n':
-								w.write("\\n");
-								break;
-							case '\t':
-								w.write("\\t");
-								break;
-							case '\r':
-								w.write("\\r");
-								break;
-							case '"':
-								w.write("\\\"");
-								break;
-							case '\\':
-								w.write("\\\\");
-								break;
-							case '\f':
-								w.write("\\f");
-								break;
-							case '\b':
-								w.write("\\b");
-								break;
-							default:
-								w.write(c);
-							}
-						}
-					w.write('"');
+		}
+		else if(x instanceof String) {
+			String s = (String) x;
+			if(!readably)
+				w.write(s);
+			else {
+				w.write('"');
+				//w.write(x.toString());
+				for(int i = 0; i < s.length(); i++) {
+					char c = s.charAt(i);
+					switch(c) {
+						case '\n':
+							w.write("\\n");
+							break;
+						case '\t':
+							w.write("\\t");
+							break;
+						case '\r':
+							w.write("\\r");
+							break;
+						case '"':
+							w.write("\\\"");
+							break;
+						case '\\':
+							w.write("\\\\");
+							break;
+						case '\f':
+							w.write("\\f");
+							break;
+						case '\b':
+							w.write("\\b");
+							break;
+						default:
+							w.write(c);
 					}
 				}
-			else if(x instanceof IPersistentMap)
-					{
-					w.write('{');
-					for(ISeq s = seq(x); s != null; s = s.next())
-						{
-						IMapEntry e = (IMapEntry) s.first();
-						print(e.key(), w);
-						w.write(' ');
-						print(e.val(), w);
-						if(s.next() != null)
-							w.write(", ");
-						}
-					w.write('}');
-					}
-				else if(x instanceof IPersistentVector)
-						{
-						IPersistentVector a = (IPersistentVector) x;
-						w.write('[');
-						for(int i = 0; i < a.count(); i++)
-							{
-							print(a.nth(i), w);
-							if(i < a.count() - 1)
-								w.write(' ');
-							}
-						w.write(']');
-						}
-					else if(x instanceof IPersistentSet)
-							{
-							w.write("#{");
-							for(ISeq s = seq(x); s != null; s = s.next())
-								{
-								print(s.first(), w);
-								if(s.next() != null)
-									w.write(" ");
-								}
-							w.write('}');
-							}
-						else if(x instanceof Character)
-								{
-								char c = ((Character) x).charValue();
-								if(!readably)
-									w.write(c);
-								else
-									{
-									w.write('\\');
-									switch(c)
-										{
-										case '\n':
-											w.write("newline");
-											break;
-										case '\t':
-											w.write("tab");
-											break;
-										case ' ':
-											w.write("space");
-											break;
-										case '\b':
-											w.write("backspace");
-											break;
-										case '\f':
-											w.write("formfeed");
-											break;
-										case '\r':
-											w.write("return");
-											break;
-										default:
-											w.write(c);
-										}
-									}
-								}
-							else if(x instanceof Class)
-									{
-									w.write("#=");
-									w.write(((Class) x).getName());
-									}
-								else if(x instanceof BigDecimal && readably)
-										{
-										w.write(x.toString());
-										w.write('M');
-										}
-									else if(x instanceof Var)
-											{
-											Var v = (Var) x;
-											w.write("#=(var " + v.ns.name + "/" + v.sym + ")");
-											}
-										else w.write(x.toString());
+				w.write('"');
+			}
 		}
+		else if(x instanceof IPersistentMap) {
+			w.write('{');
+			for(ISeq s = seq(x); s != null; s = s.next()) {
+				IMapEntry e = (IMapEntry) s.first();
+				print(e.key(), w);
+				w.write(' ');
+				print(e.val(), w);
+				if(s.next() != null)
+					w.write(", ");
+			}
+			w.write('}');
+		}
+		else if(x instanceof IPersistentVector) {
+			IPersistentVector a = (IPersistentVector) x;
+			w.write('[');
+			for(int i = 0; i < a.count(); i++) {
+				print(a.nth(i), w);
+				if(i < a.count() - 1)
+					w.write(' ');
+			}
+			w.write(']');
+		}
+		else if(x instanceof IPersistentSet) {
+			w.write("#{");
+			for(ISeq s = seq(x); s != null; s = s.next()) {
+				print(s.first(), w);
+				if(s.next() != null)
+					w.write(" ");
+			}
+			w.write('}');
+		}
+		else if(x instanceof Character) {
+			char c = ((Character) x).charValue();
+			if(!readably)
+				w.write(c);
+			else {
+				w.write('\\');
+				switch(c) {
+					case '\n':
+						w.write("newline");
+						break;
+					case '\t':
+						w.write("tab");
+						break;
+					case ' ':
+						w.write("space");
+						break;
+					case '\b':
+						w.write("backspace");
+						break;
+					case '\f':
+						w.write("formfeed");
+						break;
+					case '\r':
+						w.write("return");
+						break;
+					default:
+						w.write(c);
+				}
+			}
+		}
+		else if(x instanceof Class) {
+			w.write("#=");
+			w.write(((Class) x).getName());
+		}
+		else if(x instanceof BigDecimal && readably) {
+			w.write(x.toString());
+			w.write('M');
+		}
+		else if(x instanceof Var) {
+			Var v = (Var) x;
+			w.write("#=(var " + v.ns.name + "/" + v.sym + ")");
+		}
+		else w.write(x.toString());
+	}
 	//*/
 }
 
 private static void printInnerSeq(ISeq x, Writer w) throws Exception{
-	for(ISeq s = x; s != null; s = s.next())
-		{
+	for(ISeq s = x; s != null; s = s.next()) {
 		print(s.first(), w);
 		if(s.next() != null)
 			w.write(' ');
-		}
+	}
 }
 
 static public void formatAesthetic(Writer w, Object obj) throws IOException{
@@ -1430,39 +1356,36 @@ static public void formatAesthetic(Writer w, Object obj) throws IOException{
 static public void formatStandard(Writer w, Object obj) throws IOException{
 	if(obj == null)
 		w.write("null");
-	else if(obj instanceof String)
-		{
+	else if(obj instanceof String) {
 		w.write('"');
 		w.write((String) obj);
 		w.write('"');
+	}
+	else if(obj instanceof Character) {
+		w.write('\\');
+		char c = ((Character) obj).charValue();
+		switch(c) {
+			case '\n':
+				w.write("newline");
+				break;
+			case '\t':
+				w.write("tab");
+				break;
+			case ' ':
+				w.write("space");
+				break;
+			case '\b':
+				w.write("backspace");
+				break;
+			case '\f':
+				w.write("formfeed");
+				break;
+			default:
+				w.write(c);
 		}
-	else if(obj instanceof Character)
-			{
-			w.write('\\');
-			char c = ((Character) obj).charValue();
-			switch(c)
-				{
-				case '\n':
-					w.write("newline");
-					break;
-				case '\t':
-					w.write("tab");
-					break;
-				case ' ':
-					w.write("space");
-					break;
-				case '\b':
-					w.write("backspace");
-					break;
-				case '\f':
-					w.write("formfeed");
-					break;
-				default:
-					w.write(c);
-				}
-			}
-		else
-			w.write(obj.toString());
+	}
+	else
+		w.write(obj.toString());
 }
 
 static public Object format(Object o, String s, Object... args) throws Exception{
@@ -1480,15 +1403,12 @@ static public Object format(Object o, String s, Object... args) throws Exception
 }
 
 static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
-	for(int i = 0; i < s.length();)
-		{
+	for(int i = 0; i < s.length();) {
 		char c = s.charAt(i++);
-		switch(Character.toLowerCase(c))
-			{
+		switch(Character.toLowerCase(c)) {
 			case '~':
 				char d = s.charAt(i++);
-				switch(Character.toLowerCase(d))
-					{
+				switch(Character.toLowerCase(d)) {
 					case '%':
 						w.write('\n');
 						break;
@@ -1526,12 +1446,12 @@ static public ISeq doFormat(Writer w, String s, ISeq args) throws Exception{
 						break;
 					default:
 						throw new IllegalArgumentException("Unsupported ~ directive: " + d);
-					}
+				}
 				break;
 			default:
 				w.write(c);
-			}
 		}
+	}
 	return args;
 }
 ///////////////////////////////// values //////////////////////////
@@ -1567,16 +1487,14 @@ static public Class classForName(String name) throws ClassNotFoundException{
 }
 
 static public Class loadClassForName(String name) throws ClassNotFoundException{
-	try
-		{
+	try {
 		return Class.forName(name, true, baseLoader());
-		}
-	catch(ClassNotFoundException e)
-		{
+	}
+	catch(ClassNotFoundException e) {
 		if(e.getCause() == null)
 			return null;
 		throw e;
-		}
+	}
 }
 
 static public float aget(float[] xs, int i){
@@ -1745,22 +1663,8 @@ static public int alength(Object xs){
 	return Array.getLength(xs);
 }
 
-final static private Object EOS = new Object();
 
-final static public Object eos(){
-	return EOS;
-}
 
-static public boolean isEOS(Object o){
-	return o == EOS;
-}
-
-static final public IStream EMPTY_STREAM = new IStream(){
-
-	public Object next() throws Exception{
-		return eos();
-	}
-};
 
 synchronized public static DynamicClassLoader getRootClassLoader(){
 	if(ROOT_CLASSLOADER == null)

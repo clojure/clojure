@@ -14,16 +14,16 @@ package clojure.lang;
 
 import java.util.Iterator;
 
-public class IteratorStream implements IStream{
-    final Iterator iter;
+public class IteratorStream extends AFn{
+final Iterator iter;
 
-    public IteratorStream(Iterator iter) {
-        this.iter = iter;
-    }
+IteratorStream(Iterator iter){
+	this.iter = iter;
+}
 
-    synchronized public Object next() throws Exception {
-        if(iter.hasNext())
-            return iter.next();
-        return RT.eos();
-    }
+public Object invoke() throws Exception{
+	if(iter.hasNext())
+		return iter.next();
+	return RT.EOS;
+}
 }

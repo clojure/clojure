@@ -204,25 +204,26 @@ public Iterator iterator(){
 
 
 
-public IStream stream() throws Exception {
-    return new Stream(this);
+public Stream stream() throws Exception {
+    return new Stream(new Src(this));
 }
 
-    static class Stream implements IStream{
+static class Src extends AFn{
     ISeq s;
 
-    public Stream(ISeq s) {
+    public Src(ISeq s) {
         this.s = s;
     }
 
-    synchronized public Object next() throws Exception {
-        if(s != null)
+	public Object invoke() throws Exception {
+		ISeq sq = RT.seq(s);
+        if(sq != null)
             {
-            Object ret = s.first();
-            s = s.next();
+            Object ret = sq.first();
+            s = sq.more();
             return ret;
             }
-        return RT.eos();
+        return RT.EOS;
     }
 }
 
