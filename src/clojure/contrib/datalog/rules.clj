@@ -198,5 +198,10 @@
        (do (trace-datalog (println bs))
            (project-literal db-2 head bs)))))
 
+(defn apply-rules-set
+  [db rs]
+  (reduce (fn [rdb rule]
+            (apply-rule db rdb rule)) db rs))
+
 
 ;; End of file

@@ -126,11 +126,6 @@
 
 ;;; Evaluate
 
-(defn- apply-rules-set
-  [db rs]
-  (reduce (fn [rdb rule]
-            (apply-rule db rdb rule)) db rs))
-
 (defn- weak-consq-operator
   [db strat]
   (trace-datalog (println)
@@ -145,16 +140,6 @@
               (recur (next strat))
               new-db))
           db)))))
-
-(defn- build-partial-tuple
-  [q bindings]
-  (into {} (remove nil? (map (fn [[k v :as pair]]
-                               (if (is-var? v)
-                                 nil
-                                 (if (is-query-var? v)
-                                   [k (bindings v)]
-                                   pair)))
-                             (:term-bindings q)))))
 
 (defn evaluate-soft-work-set
   ([ws db] (evaluate-soft-work-set ws db {}))

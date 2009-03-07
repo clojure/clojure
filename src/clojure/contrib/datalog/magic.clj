@@ -75,6 +75,18 @@
         sr (seed-relation mq)]
     (build-rule mq [sr])))
 
+(defn build-partial-tuple
+  "Given a query and a set of bindings, build a partial tuple needed
+   to extract the relation from the database."
+  [q bindings]
+  (into {} (remove nil? (map (fn [[k v :as pair]]
+                               (if (is-var? v)
+                                 nil
+                                 (if (is-query-var? v)
+                                   [k (bindings v)]
+                                   pair)))
+                             (:term-bindings q)))))
+
 (defn seed-predicate-for-insertion
   "Given a query, return the predicate to use for database insertion."
   [q]
