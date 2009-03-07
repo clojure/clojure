@@ -109,5 +109,8 @@
 (def wp-3 (build-work-plan rules (?- :bj :name '??name :boss ?x)))
 (run-work-plan wp-3 db {'??name "Albert"})
 
+(def wp-4 (build-work-plan rules (?- :works-for :employee ?x :boss ?y)))
+(run-work-plan wp-4 db {})
+
 
 ;; End of file

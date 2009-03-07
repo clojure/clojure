@@ -206,6 +206,25 @@
   (is (= (evaluate-3 "Albert")
          #{{:name "Albert", :boss "Sameer"}})))
 
+(def ws-4 (build-soft-strat-work-plan rules (?- :works-for :name ?x :boss ?x)))
+
+(deftest test-ws-4
+  (is (= (set (evaluate-soft-work-set ws-4 db {}))
+         #{{:employee "Miki", :boss "Bob"}
+           {:employee "Albert", :boss "Li"}
+           {:employee "Lilian", :boss "Sameer"}
+           {:employee "Li", :boss "Bob"}
+           {:employee "Lilian", :boss "Bob"}
+           {:employee "Brenda", :boss "Fred"}
+           {:employee "Fred", :boss "Bob"}
+           {:employee "John", :boss "Bob"}
+           {:employee "John", :boss "Mary"}
+           {:employee "Albert", :boss "Sameer"}
+           {:employee "Sameer", :boss "Bob"}
+           {:employee "Albert", :boss "Bob"}
+           {:employee "Brenda", :boss "Bob"}
+           {:employee "Mary", :boss "Bob"}
+           {:employee "Li", :boss "Sameer"}})))
 
 (comment
   (run-tests)
