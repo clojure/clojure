@@ -58,7 +58,7 @@
    ["Feijoa" 441]))
 
 (defn insert-records-fruit
-  "Insert records, maps from keys specifying columsn to values"
+  "Insert records, maps from keys specifying columns to values"
   []
   (sql/insert-records
    :fruit
