@@ -132,6 +132,13 @@
   [table & rows]
   (apply insert-values table nil rows))
 
+(defn insert-records
+  "Inserts records into a table. records are maps from strings or
+  keywords (identifying columns) to values."
+  [table & records]
+  (doseq [record records]
+    (insert-values table (keys record) (vals record))))
+
 (defn delete-rows
   "Deletes rows from a table. where-params is a vector containing a string
   providing the (optionally parameterized) selection criteria followed by

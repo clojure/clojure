@@ -14,7 +14,7 @@
 ;;  Created 13 September 2008
 
 (ns clojure.contrib.sql.test
-  (:require [clojure.contrib.sql :as sql]))
+  (:use [clojure.contrib.sql :as sql :only ()]))
 
 (def db {:classname "org.apache.derby.jdbc.EmbeddedDriver"
          :subprotocol "derby"
@@ -57,6 +57,14 @@
    ["Mango" 722]
    ["Feijoa" 441]))
 
+(defn insert-records-fruit
+  "Insert rows with values for only specific columns"
+  []
+  (sql/insert-records
+   :fruit
+   {:name "Pomegranate" :appearance "fresh" :cost 585}
+   {:name "Kiwifruit" :grade 93}))
+
 (defn db-write
   "Write initial values to the database as a transaction"
   []
@@ -66,7 +74,8 @@
     (drop-fruit)
     (create-fruit)
     (insert-rows-fruit)
-    (insert-values-fruit)))
+    (insert-values-fruit)
+    (insert-records-fruit)))
   nil)
 
 (defn db-read
