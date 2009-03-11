@@ -58,18 +58,18 @@
        (#{:layout :column :row} x))))
 
 (defn parse-item-constraints
-  "Iterates over args and builds a map containing :keywords, a map of from
-  keyword-item to constraints string and :components, a vector of vectors
-  each associating a component with its constraints string. :components is
-  a vector because ordering of components matters."
+  "Iterates over args and builds a map containing values associated with
+  :keywords and :components. The value for :keywords is a map from keyword
+  items to constraints strings. The value for :components is a vector of
+  vectors each associating a component with its constraints string."
   [& args]
   (loop [[item & args] args
-         item-constraints {:components [] :keyword-items {}}]
+         item-constraints {:keywords {} :components []}]
     (if item
       (let [[constraints args] (split-with constraint? args)]
         (recur args
           (update-in
            item-constraints
-           [(if (component? item) :components :keyword-items)]
+           [(if (component? item) :components :keywords)]
            conj [item (apply format-constraints constraints)])))
       item-constraints)))

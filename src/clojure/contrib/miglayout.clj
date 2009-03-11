@@ -13,8 +13,8 @@
 ;;
 ;;  Example:
 ;;
-;;    (require '[clojure.contrib.miglayout.test :as mlt])
-;;    (doseq i (range 3) (mlt/run-test i))
+;;    (use '[clojure.contrib.miglayout.test :as mlt :only ()])
+;;    (doseq [i (range 3)] (mlt/run-test i))
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 5 October 2008
@@ -51,13 +51,10 @@
     - A map specifies one or more constraints as keys, each mapped to a
       single argument"
   [#^Container container & args]
-  (let [{:keys [keyword-items components]}
-        (apply parse-item-constraints args)]
-    (.setLayout container
-      (MigLayout.
-       (:layout keyword-items)
-       (:column keyword-items)
-       (:row keyword-items)))
+  (let [item-constraints (apply parse-item-constraints args)
+        {:keys [keywords components]} item-constraints
+        {:keys [layout column row]} keywords]
+    (.setLayout container (MigLayout. layout column row))
     (doseq [[#^Component component constraints] components]
       (.add container component constraints))
     container))
