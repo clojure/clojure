@@ -1,7 +1,7 @@
 ;; Stream utilities
 
 ;; by Konrad Hinsen
-;; last updated March 11, 2009
+;; last updated March 12, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -53,7 +53,7 @@
    the next value of stream argument s, whereas pick-all returns the
    next value of all stream arguments in the form of a vector."
 
-  (:use [clojure.contrib.types :only (deftype)])
+  (:use [clojure.contrib.types :only (deftype deftype-)])
   (:use [clojure.contrib.monads :only (defmonad with-monad)])
   (:use [clojure.contrib.def :only (defvar defvar-)])
   (:require [clojure.contrib.seq-utils]))
@@ -198,7 +198,7 @@
       (recur (dec n) s))))
 
 ; Map a function on a stream
-(deftype ::stream-map stream-map-state)
+(deftype- ::stream-map stream-map-state)
 
 (defstream ::stream-map
   [[f stream]]
@@ -221,7 +221,7 @@
   (stream-map-state [(comp f g) stream]))
 
 ; Filter stream elements
-(deftype ::stream-filter stream-filter-state)
+(deftype- ::stream-filter stream-filter-state)
 
 (defstream ::stream-filter
   [[p stream]]
@@ -246,7 +246,7 @@
   (stream-filter-state [(fn [v] (and (q v) (p v))) stream]))
 
 ; Flatten a stream of sequences
-(deftype ::stream-flatten stream-flatten-state)
+(deftype- ::stream-flatten stream-flatten-state)
 
 (defstream ::stream-flatten
   [[buffer stream]]

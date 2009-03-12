@@ -25,16 +25,20 @@
 
 (defmacro deftype
   "Define a data type by a type tag (a namespace-qualified keyword)
-  and a symbol naming the constructor function. Optionally, a pair
-  of constructor and deconstructor functions can be given as well,
-  the defaults are clojure.core/identity and clojure.core/list.
-  The full constructor associated with constructor-name calls the
-  constructor function and attaches the type tag to its result
-  as metadata. The deconstructor function must return the arguments
-  to be passed to the constructor in order to create an equivalent
-  object. It is used for printing and matching."
+   and a symbol naming the constructor function. Optionally, a
+   constructor and a deconstructor function can be given as well,
+   the defaults being clojure.core/identity and clojure.core/list.
+   The full constructor associated with constructor-name calls the
+   constructor function and attaches the type tag to its result
+   as metadata. The deconstructor function must return the arguments
+   to be passed to the constructor in order to create an equivalent
+   object. It is used for printing and matching."
   ([type-tag constructor-name]
-   `(deftype ~type-tag ~constructor-name identity list))
+   `(deftype ~type-tag ~constructor-name
+      clojure.core/identity clojure.core/list))
+  ([type-tag constructor-name constructor]
+   `(deftype ~type-tag ~constructor-name
+      ~constructor clojure.core/list))
   ([type-tag constructor-name constructor deconstructor]
    `(do
       (derive ~type-tag ::type)
@@ -43,6 +47,13 @@
 	  (comp (fn [~'x] (with-meta ~'x meta-map#)) ~constructor))
 	(defmethod deconstruct ~type-tag [~'x]
 	  (~deconstructor (with-meta ~'x {})))))))
+
+(defmacro deftype-
+  "Same as deftype but the constructor is private."
+  [type-tag constructor-name & optional]
+  `(deftype ~type-tag
+     ~(vary-meta constructor-name assoc :private true)
+     ~@optional))
 
 (defmethod print-method ::type [o w]
   (print-method (cons (::constructor ^o) (deconstruct o)) w))
