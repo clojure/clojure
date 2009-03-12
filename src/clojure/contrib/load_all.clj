@@ -42,6 +42,7 @@ duck-streams
 error-kit
 except
 fcase
+generic.arithmetic
 import-static
 javadoc.browse
 javadoc
