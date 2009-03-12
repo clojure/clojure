@@ -7,12 +7,60 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns clojure.contrib.types.examples
-  (:use [clojure.contrib.types :only (deftype match get-value get-values)]))
+  (:use [clojure.contrib.types
+	 :only (deftype defadt match get-value get-values)]))
 
 ;
-; A simple tree structure
+; Multisets implemented as maps to integers
 ;
-(deftype tree
+
+; The most basic type definition. A more elaborate version could add
+; a constructor that verifies that its argument is a map with integer values.
+(deftype ::multiset multiset)
+
+; Some set operations generalized to multisets
+; Note that the multiset constructor is not called anywhere, as the
+; map operations all preserve the metadata.
+(defmulti my-conj (fn [& args] (type (first args))))
+
+(defmethod my-conj :default
+  [& args]
+  (apply clojure.core/conj args))
+
+(defmethod my-conj ::multiset
+  ([ms x]
+   (assoc ms x (inc (get ms x 0))))
+  ([ms x & xs]
+    (reduce my-conj (my-conj ms x) xs)))
+
+(defmulti union (fn [& sets] (type (first sets))))
+
+(defmethod union clojure.lang.IPersistentSet
+  [& sets]
+  (apply clojure.set/union sets))
+
+; Note: a production-quality implementation should accept standard sets
+; and perhaps other collections for its second argument.
+(defmethod union ::multiset
+  ([ms] ms)
+  ([ms1 ms2]
+     (letfn [(add-item [ms [item n]]
+		       (assoc ms item (+ n (get ms item 0))))]
+       (reduce add-item ms1 ms2)))
+  ([ms1 ms2 & mss]
+     (reduce union (union ms1 ms2) mss)))
+
+; Let's use it:
+(my-conj #{} :a :a :b :c)
+(my-conj (multiset {}) :a :a :b :c)
+
+(union #{:a :b} #{:b :c})
+(union (multiset {:a 1 :b 1}) (multiset {:b 1 :c 2}))
+
+;
+; A simple tree structure defined as an algebraic data type
+;
+(defadt ::tree
   empty-tree
   (leaf value)
   (node left-tree right-tree))
@@ -52,7 +100,7 @@
   (into {} (for [[k v] m] [k (f v)])))
 
 ; Trees
-(defmethod fmap tree
+(defmethod fmap ::tree
   [f t]
   (match t
     empty-tree  empty-tree
@@ -67,7 +115,7 @@
 ;
 ; Nonsense examples to illustrate all the features of match
 ;
-(deftype foo
+(defadt ::foo
   (bar a b c))
 
 (defn foo-to-int
@@ -97,7 +145,7 @@
 (get-value (bar 1 2 3))  ; fails
 (get-values (bar 1 2 3))
 
-(deftype sum-type
+(defadt ::sum
   (sum x))
 
 (get-value (sum 42))

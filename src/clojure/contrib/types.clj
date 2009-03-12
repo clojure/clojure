@@ -1,7 +1,7 @@
-;; Algebraic data types
+;; Data types
 
 ;; by Konrad Hinsen
-;; last updated February 26, 2009
+;; last updated March 12, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,11 +12,46 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.types
-  "Algebraic data types")
+  "General and algebraic data types
+
+   NOTE: This library is experimental. It may change significantly
+   with future release.")
+
+;
+; Data type definition
+;
+(defmulti deconstruct type)
+(defmethod deconstruct :default [x] (list x))
+
+(defmacro deftype
+  "Define a data type by a type tag (a namespace-qualified keyword)
+  and a symbol naming the constructor function. Optionally, a pair
+  of constructor and deconstructor functions can be given as well,
+  the defaults are clojure.core/identity and clojure.core/list.
+  The full constructor associated with constructor-name calls the
+  constructor function and attaches the type tag to its result
+  as metadata. The deconstructor function must return the arguments
+  to be passed to the constructor in order to create an equivalent
+  object. It is used for printing and matching."
+  ([type-tag constructor-name]
+   `(deftype ~type-tag ~constructor-name identity list))
+  ([type-tag constructor-name constructor deconstructor]
+   `(do
+      (derive ~type-tag ::type)
+      (let [meta-map# {:type ~type-tag ::constructor (quote ~constructor-name)}]
+        (def ~constructor-name
+	  (comp (fn [~'x] (with-meta ~'x meta-map#)) ~constructor))
+	(defmethod deconstruct ~type-tag [~'x]
+	  (~deconstructor (with-meta ~'x {})))))))
+
+(defmethod print-method ::type [o w]
+  (print-method (cons (::constructor ^o) (deconstruct o)) w))
 
 ;
 ; Defining algebraic types
 ;
+(derive ::adt ::type)
+
 (defn- qualified-symbol
   [s]
   (symbol (str *ns*) (str s)))
@@ -38,15 +73,13 @@
 	   (with-meta [(quote ~(qualified-symbol name)) ~@args]
 		      ~meta-map-symbol))))))
 
-(defmacro deftype
-  "Define the algebraic data type name by an exhaustive list of constructors.
+(defmacro defadt
+  "Define an algebraic data type name by an exhaustive list of constructors.
    Each constructor can be a symbol (argument-free constructor) or a
    list consisting of a tag symbol followed by the argument symbols.
-   The data type itself is a keyword declared as deriving from
-   :clojure.contrib.types/adt."
-  [name & constructors]
-  (let [type-tag (qualified-keyword name)
-	meta-map-symbol (gensym "mm")
+   The data type tag must be a keyword."
+  [type-tag & constructors]
+  (let [meta-map-symbol (gensym "mm")
 	accessor1 (if (and (= 1 (count constructors))
 			   (seq? (first constructors))
 			   (= 2 (count (first constructors))))
@@ -60,7 +93,6 @@
 		    nil)]
     `(let [~meta-map-symbol {:type ~type-tag}]
        (derive ~type-tag ::adt)
-       (def ~name ~type-tag)
        ~@(map (partial constructor-code meta-map-symbol) constructors)
        ~accessor1
        ~accessor2
@@ -72,7 +104,7 @@
 (defn- unqualified-symbol
   [s]
   (let [s-str (str s)]
-    (symbol (.substring s-str (inc (.indexOf s-str (int \/)))))))
+    (symbol (subs s-str (inc (.indexOf s-str (int \/)))))))
 
 (defmethod print-method ::adt [o w]
   (if (symbol? o)
