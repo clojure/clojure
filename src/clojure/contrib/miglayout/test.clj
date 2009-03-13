@@ -27,15 +27,31 @@
     (.pack)
     (.setVisible true)))
 
+(defn label
+  "Returns a swing label"
+  [text]
+  (JLabel. text))
+
+(defn text-field
+  "Returns a swing text field"
+  ([] (text-field 10))
+  ([width]
+     (JTextField. width)))
+
+(defn sep
+  "Returns a swing separator"
+  []
+  (JSeparator.))
+
 (def tests [
 
   (fn test0
     [panel]
     (miglayout panel
-      (JLabel. "Hello")
-      (JLabel. "World") {:gap :unrelated}
-      (JTextField. 10) :wrap
-      (JLabel. "Bonus!")
+      (label "Hello")
+      (label "World") {:gap :unrelated}
+      (text-field) :wrap
+      (label "Bonus!")
       (JButton. "Bang it") {:wmin :button :grow :x :span 2} :center))
 
   ;; test1 and test2 are based on code from
@@ -45,42 +61,84 @@
   (fn test1
     [panel]
     (miglayout panel
-      :column               "[right]"
-      (JLabel. "General")   "split, span"
-      (JSeparator.)         "growx, wrap"
-      (JLabel. "Company")   "gap 10"
-      (JTextField. "")      "span, growx"
-      (JLabel. "Contact")   "gap 10"
-      (JTextField. "")      "span, growx, wrap"
-      (JLabel. "Propeller") "split, span, gaptop 10"
-      (JSeparator.)         "growx, wrap, gaptop 10"
-      (JLabel. "PTI/kW")    "gapx 10, gapy 15"
-      (JTextField. 10)
-      (JLabel. "Power/kW")  "gap 10"
-      (JTextField. 10)      "wrap"
-      (JLabel. "R/mm")      "gap 10"
-      (JTextField. 10)
-      (JLabel. "D/mm")      "gap 10"
-      (JTextField. 10)))
+      :column             "[right]"
+      (label "General")   "split, span"
+      (sep)               "growx, wrap"
+      (label "Company")   "gap 10"
+      (text-field "")     "span, growx"
+      (label "Contact")   "gap 10"
+      (text-field "")     "span, growx, wrap"
+      (label "Propeller") "split, span, gaptop 10"
+      (sep)               "growx, wrap, gaptop 10"
+      (label "PTI/kW")    "gapx 10, gapy 15"
+      (text-field)
+      (label "Power/kW")  "gap 10"
+      (text-field)        "wrap"
+      (label "R/mm")      "gap 10"
+      (text-field)
+      (label "D/mm")      "gap 10"
+      (text-field)))
 
   ;; the same constraints as strings, keywords, vectors, and maps
   (fn test2
     [panel]
     (miglayout panel
-      :column               "[right]"
-      (JLabel. "General")   "split, span"
-      (JSeparator.)         :growx :wrap
-      (JLabel. "Company")   [:gap 10]
-      (JTextField. "")      :span :growx
-      (JLabel. "Contact")   [:gap 10]
-      (JTextField. "")      :span :growx :wrap
-      (JLabel. "Propeller") :split :span [:gaptop 10]
-      (JSeparator.)         :growx :wrap [:gaptop 10]
-      (JLabel. "PTI/kW")    {:gapx 10 :gapy 15}
-      (JTextField. 10)
-      (JLabel. "Power/kW")  [:gap 10]
-      (JTextField. 10)      :wrap
-      (JLabel. "R/mm")      [:gap 10]
-      (JTextField. 10)
-      (JLabel. "D/mm")      [:gap 10]
-      (JTextField. 10)))])
+      :column             "[right]"
+      (label "General")   "split, span"
+      (sep)               :growx :wrap
+      (label "Company")   [:gap 10]
+      (text-field "")     :span :growx
+      (label "Contact")   [:gap 10]
+      (text-field "")     :span :growx :wrap
+      (label "Propeller") :split :span [:gaptop 10]
+      (sep)               :growx :wrap [:gaptop 10]
+      (label "PTI/kW")    {:gapx 10 :gapy 15}
+      (text-field)
+      (label "Power/kW")  [:gap 10]
+      (text-field)        :wrap
+      (label "R/mm")      [:gap 10]
+      (text-field)
+      (label "D/mm")      [:gap 10]
+      (text-field)))
+
+  ;; the same constraints using symbols to name groups of constraints
+  (fn test3
+    [panel]
+    (let [g [:gap 10]
+          gt [:gaptop 10]
+          gxs #{:growx :span}
+          gxw #{:growx :wrap}
+          gxy {:gapx 10 :gapy 15}
+          right "[right]"
+          ss #{:split :span}
+          w :wrap]
+      (miglayout panel
+        :column             right
+        (label "General")   ss
+        (sep)               gxw
+        (label "Company")   g
+        (text-field "")     gxs
+        (label "Contact")   g
+        (text-field "")     gxs
+        (label "Propeller") ss gt
+        (sep)               gxw g
+        (label "PTI/kW")    gxy
+        (text-field)
+        (label "Power/kW")  g
+        (text-field)        w
+        (label "R/mm")      g
+        (text-field)
+        (label "D/mm")      g
+        (text-field))))
+
+  (fn test4
+    [panel]
+    (miglayout panel
+      (label "First Name")
+      (text-field)
+      (label "Surname")   [:gap :unrelated]
+      (text-field)        :wrap
+      (label "Address")
+      (text-field)        :span :grow))
+
+])

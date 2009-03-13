@@ -17,10 +17,12 @@
   (:import (java.awt Component))
   (:use (clojure.contrib except fcase)))
 
+(declare format-constraints)
+
 (defn format-constraint
   "Returns a vector of vectors representing one or more constraints
   separated by commas. Constraints may be specified in Clojure using
-  strings, keywords, vectors, and/or maps."
+  strings, keywords, vectors, maps, and/or sets."
   [c]
   [[", "]
    (fcase #(%1 %2) c
@@ -28,6 +30,7 @@
      keyword? [c]
      vector?  (interpose " " c)
      map?     (apply concat (interpose [", "] (map #(interpose " " %) c)))
+     set?     (apply concat (interpose [", "] (map format-constraints c)))
      (throwf IllegalArgumentException
              "unrecognized constraint: %s (%s)" c (class c)))])
 
@@ -40,10 +43,13 @@
   "Returns a string representing all the constraints for one keyword-item
   or component formatted for miglayout."
   [& constraints]
-  (apply str
-         (map the-str
-              (rest (reduce concat []
-                            (mapcat format-constraint constraints))))))
+  (let [formatted
+        (apply str
+          (map the-str
+            (rest (reduce concat []
+              (mapcat format-constraint constraints)))))]
+    ;(prn formatted)
+    formatted))
 
 (defn component?
   "Returns true if x is a java.awt.Component"

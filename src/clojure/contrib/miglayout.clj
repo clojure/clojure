@@ -42,14 +42,16 @@
      :column or :row. Constraints for a keyword item affect the entire
       layout.
 
-  Constraint: string, keyword, vector, or map
+  Constraint: string, keyword, vector, map, or set
 
     - A string specifies one or more constraints each with zero or more
       arguments.
     - A keyword specifies a single constraint without arguments
     - A vector specifies a single constraint with one or more arguments
     - A map specifies one or more constraints as keys, each mapped to a
-      single argument"
+      single argument
+    - A set groups two or more constraints, each a string, keyword,
+      vector, map, or set"
   [#^Container container & args]
   (let [item-constraints (apply parse-item-constraints args)
         {:keys [keywords components]} item-constraints
