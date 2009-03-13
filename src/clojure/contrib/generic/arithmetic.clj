@@ -1,7 +1,7 @@
 ;; Generic interfaces for arithmetic operations
 
 ;; by Konrad Hinsen
-;; last updated March 12, 2009
+;; last updated March 13, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -21,7 +21,8 @@
    that can be defined for any type. The minimal required implementations
    for a type are binary + and * plus unary - and /. Everything else
    is derived from these automatically. Explicit binary definitions
-   for - and / can be given for efficiency reasons."
+   for - and / can be provided for efficiency reasons."
+  (:use [clojure.contrib.types :only (defadt)])
   (:refer-clojure :exclude [+ - * /]))
 
 ;
@@ -31,18 +32,16 @@
 ;
 (defn- nary-dispatch
   ([] ::nulary)
-  ([x] [::unary (type x)])
+  ([x] (type x))
   ([x y]
-     (let [tx (type x)
-	   ty (type y)]
-       (cond (isa? tx ty) [::binary ty]
-	     (isa? ty tx) [::binary tx]
-	     ; Should there be clause checking if tx and ty have
-	     ; a common ancestor? This would cover cases like
-	     ; java.lang.Integer and java.lang.Double, which have the
-	     ; common ancestor java.lang.Number.
-	     :else [::binary tx ty])))
+     [(type x) (type y)])
   ([x y & more] ::n-ary))
+
+;
+; Universal zero and one values
+;
+(defadt ::zero zero)
+(defadt ::one one)
 
 ;
 ; We can't use [::binary :default], so we need to define a root type
@@ -51,6 +50,8 @@
 ; Ultimately, a macro might take care of this.
 ;
 (derive Object ::any)
+(derive ::zero ::any)
+(derive ::one ::any)
 
 ;
 ; Addition
@@ -63,10 +64,16 @@
 
 (defmethod + ::nulary
   []
-  ::zero)
+  zero)
 
-(defmethod + [::unary ::any]
+(defmethod + ::any
   [x] x)
+
+(defmethod + [::any ::zero]
+  [x y] x)
+
+(defmethod + [::zero ::any]
+  [x y] y)
 
 (defmethod + ::n-ary
   [x y & more]
@@ -88,7 +95,13 @@
   (throw (java.lang.IllegalArgumentException.
 	  "Wrong number of arguments passed")))
 
-(defmethod - [::binary ::any]
+(defmethod - [::any ::zero]
+  [x y] x)
+
+(defmethod - [::zero ::any]
+  [x y] (- y))
+
+(defmethod - [::any ::any]
   [x y] (+ x (- y)))
 
 (defmethod - ::n-ary
@@ -108,10 +121,16 @@
 
 (defmethod * ::nulary
   []
-  ::one)
+  one)
 
-(defmethod * [::unary ::any]
+(defmethod * ::any
   [x] x)
+
+(defmethod * [::any ::one]
+  [x y] x)
+
+(defmethod * [::one ::any]
+  [x y] y)
 
 (defmethod * ::n-ary
   [x y & more]
@@ -133,7 +152,13 @@
   (throw (java.lang.IllegalArgumentException.
 	  "Wrong number of arguments passed")))
 
-(defmethod / [::binary ::any]
+(defmethod / [::any ::one]
+  [x y] x)
+
+(defmethod / [::one ::any]
+  [x y] (/ y))
+
+(defmethod / [::any ::any]
   [x y] (* x (/ y)))
 
 (defmethod / ::n-ary
@@ -145,15 +170,15 @@
 ;
 ; Minimal implementations for java.lang.Number
 ;
-(defmethod + [::binary java.lang.Number]
+(defmethod + [java.lang.Number java.lang.Number]
   [x y] (clojure.core/+ x y))
 
-(defmethod - [::unary java.lang.Number]
+(defmethod - java.lang.Number
   [x] (clojure.core/- x))
 
-(defmethod * [::binary java.lang.Number]
+(defmethod * [java.lang.Number java.lang.Number]
   [x y] (clojure.core/* x y))
 
-(defmethod / [::unary java.lang.Number]
+(defmethod / java.lang.Number
   [x] (clojure.core// x))
 

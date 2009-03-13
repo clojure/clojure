@@ -43,6 +43,7 @@ error-kit
 except
 fcase
 generic.arithmetic
+generic.math-functions
 import-static
 javadoc.browse
 javadoc
