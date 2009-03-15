@@ -9,24 +9,23 @@
 # from this software.
 #
 # clj-env-dir Launches Clojure, passing along command line arguments. This
-#             launcher is configured using environment variables and sets
-#             up CLASSPATH based on the contents of a specified directory.
+#             launcher can be configured using environment variables and
+#             makes it easy to include directories full of classpath roots
+#             in CLASSPATH.
 #
 # scgilardi (gmail)
 # Created 7 January 2009
 #
-# Environment variables:
+# Environment variables (optional):
 #
-# Required:
-#
-#  CLOJURE_EXT  The path to a directory containing (either directly or as
-#               symbolic links) jar files and/or directories whose paths
-#               should be in Clojure's classpath. The value of the
-#               CLASSPATH environment variable for Clojure will be a list
-#               of these paths followed by the previous value of CLASSPATH
-#               (if any).
-#
-# Optional:
+#  CLOJURE_EXT  Colon-delimited list of paths to directories whose top-level
+#               contents are (either directly or as symbolic links) jar
+#               files and/or directories whose paths will be in Clojure's
+#               classpath. The value of the CLASSPATH environment variable
+#               for Clojure will include these top-level paths followed by
+#               the previous value of CLASSPATH (if any).
+#               default:
+#               example: /usr/local/share/clojure/ext:$HOME/.clojure.d/ext
 #
 #  CLOJURE_JAVA The command to launch a JVM instance for Clojure
 #               default: java
@@ -44,13 +43,17 @@ set -o errexit
 set -o nounset
 #set -o xtrace
 
-function die { echo "$1" 1>&2; exit 1; }
-
-[ -d "${CLOJURE_EXT:-}" ] || die \
-    "CLOJURE_EXT=\"${CLOJURE_EXT:-}\": directory not found"
-
-EXT="$(find -H ${CLOJURE_EXT} -mindepth 1 -maxdepth 1 -print0 | tr \\0 \:)"
-export CLASSPATH="${EXT%:}${CLASSPATH:+:${CLASSPATH}}"
+if [ -n "${CLOJURE_EXT:-}" ]; then
+    OLD="$IFS"
+    IFS=":"
+    EXT="$(find -H $CLOJURE_EXT -mindepth 1 -maxdepth 1 -print0 | tr \\0 \:)"
+    IFS="$OLD"
+    if [ -n "${CLASSPATH:-}" ]; then
+        export CLASSPATH="$EXT$CLASSPATH"
+    else
+        export CLASSPATH="${EXT%:}"
+    fi
+fi
 
 JAVA=${CLOJURE_JAVA:-java}
 OPTS=${CLOJURE_OPTS:-}
