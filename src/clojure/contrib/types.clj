@@ -1,7 +1,7 @@
 ;; Data types
 
 ;; by Konrad Hinsen
-;; last updated March 12, 2009
+;; last updated March 15, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -18,10 +18,37 @@
    with future release.")
 
 ;
+; Utility functions
+;
+(defn- qualified-symbol
+  [s]
+  (symbol (str *ns*) (str s)))
+
+(defn- qualified-keyword
+  [s]
+  (keyword (str *ns*) (str s)))
+
+(defn- unqualified-symbol
+  [s]
+  (let [s-str (str s)]
+    (symbol (subs s-str (inc (.indexOf s-str (int \/)))))))
+
+(defn- resolve-symbol
+  [s]
+  (if-let [var (resolve s)]
+    (symbol (str (.ns var)) (str (.sym var)))
+    s))
+
+;
 ; Data type definition
 ;
 (defmulti deconstruct type)
-(defmethod deconstruct :default [x] (list x))
+
+(defmulti constructor-form type)
+(defmethod constructor-form :default
+  [o] nil)
+(defmethod constructor-form ::type
+  [o] (cons (::constructor ^o) (deconstruct o)))
 
 (defmacro deftype
   "Define a data type by a type tag (a namespace-qualified keyword)
@@ -42,7 +69,9 @@
   ([type-tag constructor-name constructor deconstructor]
    `(do
       (derive ~type-tag ::type)
-      (let [meta-map# {:type ~type-tag ::constructor (quote ~constructor-name)}]
+      (let [meta-map# {:type ~type-tag
+		       ::constructor
+		            (quote ~(qualified-symbol constructor-name))}]
         (def ~constructor-name
 	  (comp (fn [~'x] (with-meta ~'x meta-map#)) ~constructor))
 	(defmethod deconstruct ~type-tag [~'x]
@@ -56,33 +85,35 @@
      ~@optional))
 
 (defmethod print-method ::type [o w]
-  (print-method (cons (::constructor ^o) (deconstruct o)) w))
+  (let [[name & args] (constructor-form o)]
+    (print-method (cons (unqualified-symbol name) args) w)))
 
 ;
-; Defining algebraic types
+; Algebraic types
 ;
 (derive ::adt ::type)
 
-(defn- qualified-symbol
-  [s]
-  (symbol (str *ns*) (str s)))
-
-(defn- qualified-keyword
-  [s]
-  (keyword (str *ns*) (str s)))
+(defmethod constructor-form ::adt
+  [o]
+  (let [v (vals o)]
+    (if (= 1 (count v))
+      (first v)
+      v)))
 
 (defn- constructor-code
   [meta-map-symbol constructor]
   (if (symbol? constructor)
     `(def ~constructor
-	  (with-meta (quote ~(qualified-symbol constructor))
+	  (with-meta {::tag (quote ~(qualified-symbol constructor))}
 		     ~meta-map-symbol))
-    (let [[name & args] constructor]
+    (let [[name & args] constructor
+	  keys (cons ::tag (map (comp keyword str) args))]
       (if (empty? args)
 	(throw (IllegalArgumentException. "zero argument constructor"))
-	`(defn ~name ~(vec args)
-	   (with-meta [(quote ~(qualified-symbol name)) ~@args]
-		      ~meta-map-symbol))))))
+	`(let [~'basis (create-struct ~@keys)]
+	   (defn ~name ~(vec args)
+	     (with-meta (struct ~'basis (quote ~(qualified-symbol name)) ~@args)
+			~meta-map-symbol)))))))
 
 (defmacro defadt
   "Define an algebraic data type name by an exhaustive list of constructors.
@@ -90,78 +121,15 @@
    list consisting of a tag symbol followed by the argument symbols.
    The data type tag must be a keyword."
   [type-tag & constructors]
-  (let [meta-map-symbol (gensym "mm")
-	accessor1 (if (and (= 1 (count constructors))
-			   (seq? (first constructors))
-			   (= 2 (count (first constructors))))
-		    `(defmethod get-value ~type-tag [v#]
-		       (second v#))
-		    nil)
-	accessor2 (if (and (= 1 (count constructors))
-			   (seq? (first constructors)))
-		    `(defmethod get-values ~type-tag [v#]
-		       (subvec v# 1))
-		    nil)]
+  (let [meta-map-symbol (gensym "mm")]
     `(let [~meta-map-symbol {:type ~type-tag}]
        (derive ~type-tag ::adt)
        ~@(map (partial constructor-code meta-map-symbol) constructors)
-       ~accessor1
-       ~accessor2
        )))
-
-;
-; Printing
-;
-(defn- unqualified-symbol
-  [s]
-  (let [s-str (str s)]
-    (symbol (subs s-str (inc (.indexOf s-str (int \/)))))))
-
-(defmethod print-method ::adt [o w]
-  (if (symbol? o)
-    (let [tag (unqualified-symbol o)]
-      (print-method tag w))
-    (let [[tag & values] o
-	  tag (unqualified-symbol tag)]
-      (print-method (cons tag values) w))))
-
-;
-; Value access
-;
-(defmulti get-value
-  "Obtain the value stored in an object of an algebraic type.
-   Defined only for types with a single constructor that has
-   one argument."
-  {:arglists '([v])}
-  type)
-
-(defmethod get-value ::adt
-  [v]
-  (throw (Exception.
-	  "defined for types with a single constructor of one argument")))
-
-(defmulti get-values
-  "Obtain the values stored in an object of an algebraic type.
-   Defined only for types with a single constructor that must have
-   at least one argument."
-  {:arglists '([v])}
-  type)
-
-(defmethod get-values ::adt
-  [v]
-  (throw
-   (Exception.
-    "defined for types with a single constructor of at least one argument")))
 
 ;
 ;  Matching templates
 ;
-(defn- resolve-symbol
-  [s]
-  (if-let [var (resolve s)]
-    (symbol (str (.ns var)) (str (.sym var)))
-    s))
-
 (defn- tests-and-bindings
   [template vsymbol]
   (if (symbol? template)
@@ -191,7 +159,7 @@
 				 [symbol (list `nth vsymbol (first indices))])
 			       bindings))]
       [(cons `and
-	     (cons `(vector? ~vsymbol)
+	     (cons `(seq? ~vsymbol)
 		   (cons `(= (quote ~(resolve-symbol tag))
 			     (first ~vsymbol))
 			 tests)))
@@ -210,17 +178,19 @@
    (when (odd? (count clauses))
      (throw (Exception. "Odd number of elements in match expression")))
   (let [vsymbol (gensym)
+	cfsymbol (gensym)
 	terms (apply concat
 		     (map (fn [[template expr]]
 			    (if (= template :else)
 			      [template expr]
 			      (let [[tests bindings]
-				    (tests-and-bindings template vsymbol)]
+				    (tests-and-bindings template cfsymbol)]
 				[tests
 				 (if (empty? bindings)
 				   expr
 				   `(let ~bindings ~expr))])))
 			  (partition 2 clauses)))]
-    `(let [~vsymbol ~value]
+    `(let [~vsymbol ~value
+	   ~cfsymbol (constructor-form ~vsymbol)]
        (cond ~@terms))))
  

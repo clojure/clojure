@@ -8,7 +8,7 @@
 
 (ns clojure.contrib.types.examples
   (:use [clojure.contrib.types
-	 :only (deftype defadt match get-value get-values)]))
+	 :only (deftype defadt match)]))
 
 ;
 ; Multisets implemented as maps to integers
@@ -133,20 +133,3 @@
 (foo-to-int (bar 3 3 1))
 (foo-to-int (bar 0 3 1))
 (foo-to-int (bar 10 20 30))
-
-;
-; Value accessors are defined only for algebraic data types that have
-; exactly one constructor. get-values is defined if there is at least
-; one argument in the constructor; it returns a vector of values.
-; get-value is defined only for exactly one argument, it returns
-; the value directly.
-;
-
-(get-value (bar 1 2 3))  ; fails
-(get-values (bar 1 2 3))
-
-(defadt ::sum
-  (sum x))
-
-(get-value (sum 42))
-(get-values (sum 42))
