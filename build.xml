@@ -118,6 +118,7 @@
       <arg value="clojure.contrib.datalog.rules"/>
       <arg value="clojure.contrib.datalog.softstrat"/>
       <arg value="clojure.contrib.datalog.util"/>
+      <arg value="clojure.contrib.dataflow"/>
     </java>
   </target>
 
