@@ -13,8 +13,8 @@
 		stream-type defstream
 		stream-drop stream-map stream-filter stream-flatten)])
   (:use [clojure.contrib.monads :only (domonad)])
-  (:use [clojure.contrib.seq-utils :only (seq-on)])
-  (:use [clojure.contrib.types :only (deftype)]))
+  (:use [clojure.contrib.types :only (deftype)])
+  (:require [clojure.contrib.generic.collection :as gc]))
 
 ;
 ; Define a stream of Fibonacci numbers
@@ -28,7 +28,7 @@
 
 (def fib-stream (last-two-fib [0 1]))
 
-(take 10 (seq-on fib-stream))
+(take 10 (gc/seq fib-stream))
 
 ;
 ; A simple random number generator, implemented as a stream
@@ -43,15 +43,15 @@
 	next   (rem (+ 54773 (* 7141 seed)) m)]
     [value (rng-seed next)]))
 
-(take 10 (seq-on (rng-seed 1)))
+(take 10 (gc/seq (rng-seed 1)))
 
 ;
 ; Various stream utilities
 ;
-(take 10 (seq-on (stream-drop 10 (rng-seed 1))))
-(seq-on (stream-map inc (range 5)))
-(seq-on (stream-filter odd? (range 10)))
-(seq-on (stream-flatten (partition 3 (range 9))))
+(take 10 (gc/seq (stream-drop 10 (rng-seed 1))))
+(gc/seq (stream-map inc (range 5)))
+(gc/seq (stream-filter odd? (range 10)))
+(gc/seq (stream-flatten (partition 3 (range 9))))
 
 ;
 ; Stream transformers
@@ -74,7 +74,7 @@
 	(let [[v5 s] (stream-next s)]
 	  [v1 v2 v3 v4 v5])))))
 
-(seq-on s)
+(gc/seq s)
 
 ; Map (for a single stream) written as a stream transformer
 (defst my-map-1 [f] [xs]
@@ -82,7 +82,7 @@
    [x (pick xs)]
    (f x)))
 
-(seq-on (my-map-1 inc [1 2 3]))
+(gc/seq (my-map-1 inc [1 2 3]))
 
 ; Map for two stream arguments
 (defst my-map-2 [f] [xs ys]
@@ -91,7 +91,7 @@
      y (pick ys)]
     (f x y)))
 
-(seq-on (my-map-2 + '(1 2 3 4) '(10 20 30 40)))
+(gc/seq (my-map-2 + '(1 2 3 4) '(10 20 30 40)))
 
 ; Map for any number of stream arguments
 (defst my-map [f] [& streams]
@@ -99,8 +99,8 @@
     [vs pick-all]
     (apply f vs)))
 
-(seq-on (my-map inc [1 2 3]))
-(seq-on (my-map + '(1 2 3 4) '(10 20 30 40)))
+(gc/seq (my-map inc [1 2 3]))
+(gc/seq (my-map + '(1 2 3 4) '(10 20 30 40)))
 
 ; Filter written as a stream transformer
 (defst my-filter [p] [xs]
@@ -108,5 +108,5 @@
    [x (pick xs) :when (p x)]
    x))
 
-(seq-on (my-filter odd? [1 2 3]))
+(gc/seq (my-filter odd? [1 2 3]))
 

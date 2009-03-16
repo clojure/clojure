@@ -1,7 +1,7 @@
 ;; Stream utilities
 
 ;; by Konrad Hinsen
-;; last updated March 12, 2009
+;; last updated March 16, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -56,7 +56,8 @@
   (:use [clojure.contrib.types :only (deftype deftype-)])
   (:use [clojure.contrib.monads :only (defmonad with-monad)])
   (:use [clojure.contrib.def :only (defvar defvar-)])
-  (:require [clojure.contrib.seq-utils]))
+  (:require [clojure.contrib.seq-utils])
+  (:require [clojure.contrib.generic.collection]))
 
 
 ;
@@ -108,7 +109,8 @@
 
 (defn stream-seq
   "Return a lazy seq on the stream. Also accessible via
-   clojure.contrib.seq-utils/seq-on for streams."
+   clojure.contrib.seq-utils/seq-on and
+   clojure.contrib.generic.collection/seq for streams."
   [s]
   (lazy-seq
    (let [[v ns] (stream-next s)]
@@ -117,6 +119,10 @@
        (cons v (stream-seq ns))))))
 
 (defmethod clojure.contrib.seq-utils/seq-on stream-type
+  [s]
+  (stream-seq s))
+
+(defmethod clojure.contrib.generic.collection/seq stream-type
   [s]
   (stream-seq s))
 

@@ -8,7 +8,8 @@
 
 (ns clojure.contrib.types.examples
   (:use [clojure.contrib.types
-	 :only (deftype defadt match)]))
+	 :only (deftype defadt match)])
+  (:require [clojure.contrib.generic.collection :as gc]))
 
 ;
 ; Multisets implemented as maps to integers
@@ -19,19 +20,13 @@
 (deftype ::multiset multiset)
 
 ; Some set operations generalized to multisets
-; Note that the multiset constructor is not called anywhere, as the
+; Note that the multiset constructor is nowhere called explicitly, as the
 ; map operations all preserve the metadata.
-(defmulti my-conj (fn [& args] (type (first args))))
-
-(defmethod my-conj :default
-  [& args]
-  (apply clojure.core/conj args))
-
-(defmethod my-conj ::multiset
+(defmethod gc/conj ::multiset
   ([ms x]
    (assoc ms x (inc (get ms x 0))))
   ([ms x & xs]
-    (reduce my-conj (my-conj ms x) xs)))
+    (reduce gc/conj (gc/conj ms x) xs)))
 
 (defmulti union (fn [& sets] (type (first sets))))
 
@@ -51,8 +46,8 @@
      (reduce union (union ms1 ms2) mss)))
 
 ; Let's use it:
-(my-conj #{} :a :a :b :c)
-(my-conj (multiset {}) :a :a :b :c)
+(gc/conj #{} :a :a :b :c)
+(gc/conj (multiset {}) :a :a :b :c)
 
 (union #{:a :b} #{:b :c})
 (union (multiset {:a 1 :b 1}) (multiset {:b 1 :c 2}))
@@ -79,38 +74,15 @@
 (depth empty-tree)
 (depth a-tree)
 
-;
-; Algebraic data types with multimethods: Haskell-style functors
-;
-(defmulti fmap (fn [f s] (type s)))
-
-; Sequences
-(defmethod fmap clojure.lang.ISeq
-  [f s]
-  (map f s))
-
-; Vectors
-(defmethod fmap clojure.lang.IPersistentVector
-  [f v]
-  (into [] (map f v)))
-
-; Maps
-(defmethod fmap clojure.lang.IPersistentMap
-  [f m]
-  (into {} (for [[k v] m] [k (f v)])))
-
-; Trees
-(defmethod fmap ::tree
+; Algebraic data types with multimethods: map on a tree
+(defmethod gc/map ::tree
   [f t]
   (match t
     empty-tree  empty-tree
     (leaf v)    (leaf (f v))
-    (node l r)  (node (fmap f l) (fmap f r))))
+    (node l r)  (node (gc/map f l) (gc/map f r))))
 
-(fmap str '(:a :b :c))
-(fmap str [:a :b :c])
-(fmap str {:a 1 :b 2 :c 3})
-(fmap str a-tree)
+(gc/map str a-tree)
 
 ;
 ; Nonsense examples to illustrate all the features of match

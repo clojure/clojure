@@ -85,6 +85,7 @@
       <arg value="clojure.contrib.except"/>
       <arg value="clojure.contrib.fcase"/>
       <arg value="clojure.contrib.generic.arithmetic"/>
+      <arg value="clojure.contrib.generic.collection"/>
       <arg value="clojure.contrib.generic.math-functions"/>
       <arg value="clojure.contrib.import-static"/>
       <arg value="clojure.contrib.javadoc.browse"/>
