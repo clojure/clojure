@@ -167,7 +167,7 @@
                                 mk (method-sig meth)
                                 sig (pop mk)
                                 rtype (peek mk)]
-                            (if (or (considered mk)
+                            (if (or (considered sig)
                                     (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
                                     ;(. Modifier (isPrivate mods)) 
                                     (. Modifier (isStatic mods))
