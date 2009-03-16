@@ -19,6 +19,12 @@
 (defn method-sig [#^java.lang.reflect.Method meth]
   [(. meth (getName)) (seq (. meth (getParameterTypes))) (. meth getReturnType)])
 
+(defn- most-specific [[rtypea :as a] [rtypeb :as b]]
+  (cond 
+    (isa? rtypea rtypeb) a
+    (isa? rtypeb rtypea) b
+    :else (throw (Exception. "Incompatible return types"))))
+
 (defn proxy-name
  {:tag String} 
  [#^Class super interfaces]
@@ -158,20 +164,32 @@
                         (if (seq meths)
                           (let [#^java.lang.reflect.Method meth (first meths)
                                 mods (. meth (getModifiers))
-                                mk (method-sig meth)]
+                                mk (method-sig meth)
+                                sig (pop mk)
+                                rtype (peek mk)]
                             (if (or (considered mk)
                                     (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
                                     ;(. Modifier (isPrivate mods)) 
                                     (. Modifier (isStatic mods))
                                     (. Modifier (isFinal mods))
                                     (= "finalize" (.getName meth)))
-                              (recur mm (conj considered mk) (next meths))
-                              (recur (assoc mm mk meth) (conj considered mk) (next meths))))
+                              (recur mm (conj considered sig) (next meths))
+                              (recur (assoc mm sig [rtype meth]) (conj considered sig) (next meths))))
                           [mm considered]))]
                   (recur mm considered (. c (getSuperclass))))
-                [mm considered]))]
+                [mm considered]))
+          ifaces-meths (apply merge-with most-specific 
+                         (for [#^Class iface interfaces #^java.lang.reflect.Method meth (. iface (getMethods))]
+                           (let [msig (method-sig meth)]
+                             {(pop msig) [(peek msig) meth]})))
+          [mm ifaces-meths] (reduce (fn [[mm ifaces-meths] [msig [rtype meth] :as iface-meth]]
+                                      (if-let [[rt m] (mm msig)]
+                                        [(if (isa? rt rtype) mm (assoc mm msig iface-meth))
+                                         (dissoc ifaces-meths msig)]
+                                        [mm (if (considered msig) (dissoc ifaces-meths msig) ifaces-meths)]))  
+                              [mm ifaces-meths] ifaces-meths)]
                                         ;add methods matching supers', if no mapping -> call super
-      (doseq [#^java.lang.reflect.Method meth (vals mm)]
+      (doseq [[_ #^java.lang.reflect.Method meth] (vals mm)]
           (gen-method meth 
                       (fn [#^GeneratorAdapter gen #^Method m]
                           (. gen (loadThis))
@@ -184,13 +202,10 @@
                                                 (. m (getDescriptor)))))))
       
                                         ;add methods matching interfaces', if no mapping -> throw
-      (doseq [#^Class iface interfaces]
-          (doseq [#^java.lang.reflect.Method meth (. iface (getMethods))]
-            (let [msig (method-sig meth)]
-              (when-not (or (contains? mm msig) (contains? considered msig))
+      (doseq [[_ #^java.lang.reflect.Method meth] (vals ifaces-meths)]
                 (gen-method meth 
                             (fn [#^GeneratorAdapter gen #^Method m]
-                                (. gen (throwException ex-type (. m (getName)))))))))))
+                                (. gen (throwException ex-type (. m (getName))))))))
     
                                         ;finish class def
     (. cv (visitEnd))
