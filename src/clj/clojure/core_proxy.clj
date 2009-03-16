@@ -61,38 +61,41 @@
                   end-label (. gen (newLabel))
                   decl-type (. Type (getType (. meth (getDeclaringClass))))]
               (. gen (visitCode))
-              (. gen (loadThis))
-              (. gen (getField ctype fmap imap-type))
-                                      
-              (. gen (push (. meth (getName))))
+              (if (> (count pclasses) 18)
+                (else-gen gen m)
+                (do
+                  (. gen (loadThis))
+                  (. gen (getField ctype fmap imap-type))
+                  
+                  (. gen (push (. meth (getName))))
                                         ;lookup fn in map
-              (. gen (invokeStatic rt-type (. Method (getMethod "Object get(Object, Object)"))))
-              (. gen (dup))
-              (. gen (ifNull else-label))
+                  (. gen (invokeStatic rt-type (. Method (getMethod "Object get(Object, Object)"))))
+                  (. gen (dup))
+                  (. gen (ifNull else-label))
                                         ;if found
-              (.checkCast gen ifn-type)
-              (. gen (loadThis))
+                  (.checkCast gen ifn-type)
+                  (. gen (loadThis))
                                         ;box args
-              (dotimes [i (count ptypes)]
-                  (. gen (loadArg i))
-                (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
+                  (dotimes [i (count ptypes)]
+                      (. gen (loadArg i))
+                    (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
                                         ;call fn
-              (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
-                                                    (into-array (cons obj-type 
-                                                                      (replicate (count ptypes) obj-type))))))
+                  (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
+                                                        (into-array (cons obj-type 
+                                                                          (replicate (count ptypes) obj-type))))))
                                         ;unbox return
-              (. gen (unbox rtype))
-              (when (= (. rtype (getSort)) (. Type VOID))
-                (. gen (pop)))
-              (. gen (goTo end-label))
-              
+                  (. gen (unbox rtype))
+                  (when (= (. rtype (getSort)) (. Type VOID))
+                    (. gen (pop)))
+                  (. gen (goTo end-label))
+                  
                                         ;else call supplied alternative generator
-              (. gen (mark else-label))
-              (. gen (pop))
-              
-              (else-gen gen m)
-              
-              (. gen (mark end-label))
+                  (. gen (mark else-label))
+                  (. gen (pop))
+                  
+                  (else-gen gen m)
+                  
+                  (. gen (mark end-label))))
               (. gen (returnValue))
               (. gen (endMethod))))]
     
