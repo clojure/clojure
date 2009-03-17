@@ -20,7 +20,7 @@ public String toString(){
 }
 
 public IPersistentCollection empty(){
-	return null;
+	return PersistentList.EMPTY;
 }
 
 protected ASeq(IPersistentMap meta){

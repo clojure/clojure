@@ -3154,8 +3154,9 @@
 
 (defn empty
   "Returns an empty collection of the same category as coll, or nil"
-  [#^clojure.lang.IPersistentCollection coll]
-  (.empty coll))
+  [coll]
+  (when (instance? clojure.lang.IPersistentCollection coll)
+    (.empty #^clojure.lang.IPersistentCollection coll)))
 
 (defmacro amap
   "Maps an expression across an array a, using an index named idx, and
