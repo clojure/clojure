@@ -82,7 +82,7 @@ public ISeq cons(Object o){
 }
 
 public IPersistentCollection empty(){
-	return null;
+	return PersistentList.EMPTY;
 }
 
 public boolean equiv(Object o){
