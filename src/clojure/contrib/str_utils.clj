@@ -83,3 +83,15 @@
   'separator'.  Like Perl's 'join'."
   [separator sequence]
   (apply str (interpose separator sequence)))
+
+
+(defn chop
+  "Removes the last character of string."
+  [s]
+  (subs s 0 (dec (count s))))
+
+(defn chomp
+  "Removes all trailing newline \\n or return \\r characters from
+  string.  Note: String.trim() is similar and faster."
+  [s]
+  (re-sub #"[\r\n]+$" "" s))
