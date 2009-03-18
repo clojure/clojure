@@ -1,7 +1,7 @@
 ;; Generic interfaces for collection-related functions
 
 ;; by Konrad Hinsen
-;; last updated March 16, 2009
+;; last updated March 18, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -18,8 +18,8 @@
    with future release.
 
    This library defines generic versions of common collection-related functions
-   such as map or conj as multimethods that can be defined for any type."
-  (:refer-clojure :exclude [assoc conj dissoc empty get into map seq]))
+   as multimethods that can be defined for any type."
+  (:refer-clojure :exclude [assoc conj dissoc empty get into seq]))
 
 ;
 ; assoc
@@ -90,42 +90,16 @@
 ;
 ; into
 ;
-; This is a literal copy of into from clojure.core, but it is
-; evaluated with the functions from this namespace here!
-(declare seq)
-(defn into
+(defmulti into
   "Returns a new coll consisting of to-coll with all of the items of
   from-coll conjoined."
+   {:arglists '([to from])}
+  (fn [to from] (type to)))
+
+(declare seq)
+(defmethod into :default
   [to from]
-  (let [ret to items (seq from)]
-    (if items
-      (recur (conj ret (first items)) (next items))
-      ret)))
-
-;
-; map
-;
-(defmulti map
-  "Applies function f to each element of coll and returns a collection
-   of the same kind as coll."
-   {:arglists '([f coll])}
-   (fn [f coll] (type coll)))
-
-(defmethod map clojure.lang.ISeq
-  [f coll]
-  (clojure.core/map f coll))
-
-(defmethod map clojure.lang.IPersistentVector
-  [f v]
-  (clojure.core/into (clojure.core/empty v) (clojure.core/map f v)))
-
-(defmethod map clojure.lang.IPersistentMap
-  [f m]
-  (clojure.core/into (clojure.core/empty m) (for [[k v] m] [k (f v)])))
-
-(defmethod map clojure.lang.IPersistentSet
-  [f s]
-  (clojure.core/into (clojure.core/empty s) (clojure.core/map f s)))
+  (reduce conj to (seq from)))
 
 ;
 ; seq

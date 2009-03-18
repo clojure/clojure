@@ -44,6 +44,7 @@ except
 fcase
 generic.arithmetic
 generic.collection
+generic.functor
 generic.math-functions
 import-static
 javadoc.browse

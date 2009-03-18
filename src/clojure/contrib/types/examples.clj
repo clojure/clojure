@@ -9,7 +9,8 @@
 (ns clojure.contrib.types.examples
   (:use [clojure.contrib.types
 	 :only (deftype defadt match)])
-  (:require [clojure.contrib.generic.collection :as gc]))
+  (:require [clojure.contrib.generic.collection :as gc])
+  (:require [clojure.contrib.generic.functor :as gf]))
 
 ;
 ; Multisets implemented as maps to integers
@@ -74,15 +75,15 @@
 (depth empty-tree)
 (depth a-tree)
 
-; Algebraic data types with multimethods: map on a tree
-(defmethod gc/map ::tree
+; Algebraic data types with multimethods: fmap on a tree
+(defmethod gf/fmap ::tree
   [f t]
   (match t
     empty-tree  empty-tree
     (leaf v)    (leaf (f v))
-    (node l r)  (node (gc/map f l) (gc/map f r))))
+    (node l r)  (node (gf/fmap f l) (gf/fmap f r))))
 
-(gc/map str a-tree)
+(gf/fmap str a-tree)
 
 ;
 ; Nonsense examples to illustrate all the features of match

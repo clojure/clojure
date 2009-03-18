@@ -484,6 +484,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.fcase
      'clojure.contrib.generic.arithmetic
      'clojure.contrib.generic.collection
+     'clojure.contrib.generic.functor
      'clojure.contrib.generic.math-functions
      'clojure.contrib.import-static
      'clojure.contrib.javadoc
