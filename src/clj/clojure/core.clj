@@ -3343,7 +3343,10 @@
   ([h tag] (not-empty
             (let [ta (get (:ancestors h) tag)]
               (if (class? tag)
-                (into (set (supers tag)) ta)
+                (let [superclasses (set (supers tag))]
+                  (reduce into superclasses
+                    (cons ta
+                          (map #(get (:ancestors h) %) superclasses))))
                 ta)))))
 
 (defn descendants
