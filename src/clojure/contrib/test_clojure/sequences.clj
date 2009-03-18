@@ -101,6 +101,69 @@
     (cons 1 (into-array [2 3])) '(1 2 3) ))
 
 
+(deftest test-empty
+  (are (and (= (empty _1) _2)
+            (= (class (empty _1)) (class _2)))
+      nil nil
+
+      () ()
+      '(1 2) ()
+
+      [] []
+      [1 2] []
+
+      {} {}
+      {:a 1 :b 2} {}
+
+      #{} #{}
+      #{1 2} #{}
+
+      (seq ()) nil      ; (seq ()) => nil
+      (seq '(1 2)) ()
+
+      (seq []) nil      ; (seq []) => nil
+      (seq [1 2]) ()
+
+      (seq "") nil      ; (seq "") => nil
+      (seq "ab") ()
+
+      (lazy-seq ()) ()
+      (lazy-seq '(1 2)) ()
+
+      (lazy-seq []) ()
+      (lazy-seq [1 2]) ()
+
+      ; non-coll, non-seq => nil
+      42 nil
+      1.2 nil
+      "abc" nil ))
+
+
+(deftest test-not-empty
+  ; empty coll/seq => nil
+  (are (= (not-empty _) nil)
+      ()
+      []
+      {}
+      #{}
+      (seq ())
+      (seq [])
+      (lazy-seq ())
+      (lazy-seq []) )
+
+  ; non-empty coll/seq => identity
+  (are (and (= (not-empty _) _)
+            (= (class (not-empty _)) (class _)))
+      '(1 2)
+      [1 2]
+      {:a 1}
+      #{1 2}
+      (seq '(1 2))
+      (seq [1 2])
+      (lazy-seq '(1 2))
+      (lazy-seq [1 2]) ))
+
+
 (deftest test-first
   (is (thrown? IllegalArgumentException (first)))
   (is (thrown? IllegalArgumentException (first true)))
@@ -733,6 +796,44 @@
 
     (split-with pos? [-1 2 3 4 5]) [() (list -1 2 3 4 5)]
     (split-with number? [1 -2 "abc" \x]) [(list 1 -2) (list "abc" \x)] ))
+
+
+(deftest test-repeat
+  (is (thrown? IllegalArgumentException (repeat)))
+
+  ; infinite sequence => use take
+  (are (= _1 _2)
+      (take 0 (repeat 7)) ()
+      (take 1 (repeat 7)) '(7)
+      (take 2 (repeat 7)) '(7 7)
+      (take 5 (repeat 7)) '(7 7 7 7 7) )
+
+  ; limited sequence
+  (are (= _1 _2)
+      (repeat 0 7) ()
+      (repeat 1 7) '(7)
+      (repeat 2 7) '(7 7)
+      (repeat 5 7) '(7 7 7 7 7)
+
+      (repeat -1 7) ()
+      (repeat -3 7) () )
+
+  ; test different data types
+  (are (= (repeat 3 _) (list _ _ _))
+      nil
+      false true
+      0 42
+      0.0 3.14
+      2/3
+      0M 1M
+      \c
+      "" "abc"
+      'sym
+      :kw
+      () '(1 2)
+      [] [1 2]
+      {} {:a 1 :b 2}
+      #{} #{1 2} ))
 
 
 (deftest test-range

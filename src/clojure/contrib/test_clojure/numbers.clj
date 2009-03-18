@@ -81,6 +81,108 @@
 
 ;; *** Functions ***
 
+(defonce DELTA 1e-12)
+
+(deftest test-add
+  (are (= _1 _2)
+      (+) 0
+      (+ 1) 1
+      (+ 1 2) 3
+      (+ 1 2 3) 6
+
+      (+ -1) -1
+      (+ -1 -2) -3
+      (+ -1 +2 -3) -2
+
+      (+ 1 -1) 0
+      (+ -1 1) 0
+
+      (+ 2/3) 2/3
+      (+ 2/3 1) 5/3
+      (+ 2/3 1/3) 1 )
+
+  (are (< (- _1 _2) DELTA)
+      (+ 1.2) 1.2
+      (+ 1.1 2.4) 3.5
+      (+ 1.1 2.2 3.3) 6.6 )
+
+  (is (> (+ Integer/MAX_VALUE 10) Integer/MAX_VALUE))  ; no overflow
+  (is (thrown? ClassCastException (+ "ab" "cd"))) )    ; no string concatenation
+
+
+(deftest test-subtract
+  (is (thrown? IllegalArgumentException (-)))
+  (are (= _1 _2)
+      (- 1) -1
+      (- 1 2) -1
+      (- 1 2 3) -4
+
+      (- -2) 2
+      (- 1 -2) 3
+      (- 1 -2 -3) 6
+
+      (- 1 1) 0
+      (- -1 -1) 0
+
+      (- 2/3) -2/3
+      (- 2/3 1) -1/3
+      (- 2/3 1/3) 1/3 )
+
+  (are (< (- _1 _2) DELTA)
+      (- 1.2) -1.2
+      (- 2.2 1.1) 1.1
+      (- 6.6 2.2 1.1) 3.3 )
+
+  (is (< (- Integer/MIN_VALUE 10) Integer/MIN_VALUE)) )  ; no underflow
+
+
+(deftest test-multiply
+  (are (= _1 _2)
+      (*) 1
+      (* 2) 2
+      (* 2 3) 6
+      (* 2 3 4) 24
+
+      (* -2) -2
+      (* 2 -3) -6
+      (* 2 -3 -1) 6
+
+      (* 1/2) 1/2
+      (* 1/2 1/3) 1/6
+      (* 1/2 1/3 -1/4) -1/24 )
+
+  (are (< (- _1 _2) DELTA)
+      (* 1.2) 1.2
+      (* 2.0 1.2) 2.4
+      (* 3.5 2.0 1.2) 8.4 )
+
+  (is (> (* 3 (int (/ Integer/MAX_VALUE 2.0))) Integer/MAX_VALUE)) )  ; no overflow
+
+
+(deftest test-divide
+  (are (= _1 _2)
+      (/ 1) 1
+      (/ 2) 1/2
+      (/ 3 2) 3/2
+      (/ 4 2) 2
+      (/ 24 3 2) 4
+      (/ 24 3 2 -1) -4
+
+      (/ -1) -1
+      (/ -2) -1/2
+      (/ -3 -2) 3/2
+      (/ -4 -2) 2
+      (/ -4 2) -2 )
+
+  (are (< (- _1 _2) DELTA)
+      (/ 4.5 3) 1.5
+      (/ 4.5 3.0 3.0) 0.5 )
+
+  (is (thrown? ArithmeticException (/ 0)))
+  (is (thrown? ArithmeticException (/ 2 0)))
+  (is (thrown? IllegalArgumentException (/))) )
+
+
 ;; mod
 ;; http://en.wikipedia.org/wiki/Modulo_operation
 ;; http://mathforum.org/library/drmath/view/52343.html
