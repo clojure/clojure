@@ -28,6 +28,13 @@
       \space
       "" #""
       () [] #{} {}
+      (lazy-seq nil)  ; SVN 1292: fixed (= (lazy-seq nil) nil)
+      (lazy-seq ())
+      (lazy-seq [])
+      (lazy-seq {})
+      (lazy-seq #{})
+      (lazy-seq "")
+      (lazy-seq (into-array []))
       (new Object) )
 
   ; numbers equality across types (see tests below - NOT IMPLEMENTED YET)

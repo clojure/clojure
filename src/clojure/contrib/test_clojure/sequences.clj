@@ -36,9 +36,6 @@
       (lazy-seq [])
       (lazy-seq [1 2]))
 
-  ; SVN 1292: fixed (= (lazy-seq nil) nil)
-  (is (not= (lazy-seq nil) nil))
-
   (are (= _1 _2)
       (lazy-seq nil) ()
       (lazy-seq [nil]) '(nil)
