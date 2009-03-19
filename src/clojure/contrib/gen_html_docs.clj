@@ -482,8 +482,10 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.error-kit
      'clojure.contrib.except
      'clojure.contrib.fcase
+     'clojure.contrib.generic
      'clojure.contrib.generic.arithmetic
      'clojure.contrib.generic.collection
+     'clojure.contrib.generic.comparison
      'clojure.contrib.generic.functor
      'clojure.contrib.generic.math-functions
      'clojure.contrib.import-static

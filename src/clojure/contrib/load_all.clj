@@ -42,8 +42,10 @@ duck-streams
 error-kit
 except
 fcase
+generic
 generic.arithmetic
 generic.collection
+generic.comparison
 generic.functor
 generic.math-functions
 import-static

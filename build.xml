@@ -84,8 +84,10 @@
       <arg value="clojure.contrib.duck-streams"/>
       <arg value="clojure.contrib.except"/>
       <arg value="clojure.contrib.fcase"/>
+      <arg value="clojure.contrib.generic"/>
       <arg value="clojure.contrib.generic.arithmetic"/>
       <arg value="clojure.contrib.generic.collection"/>
+      <arg value="clojure.contrib.generic.comparison"/>
       <arg value="clojure.contrib.generic.functor"/>
       <arg value="clojure.contrib.generic.math-functions"/>
       <arg value="clojure.contrib.import-static"/>

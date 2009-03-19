@@ -1,7 +1,7 @@
 ;; Generic interfaces for arithmetic operations
 
 ;; by Konrad Hinsen
-;; last updated March 13, 2009
+;; last updated March 19, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -22,20 +22,10 @@
    for a type are binary + and * plus unary - and /. Everything else
    is derived from these automatically. Explicit binary definitions
    for - and / can be provided for efficiency reasons."
-  (:use [clojure.contrib.types :only (defadt)])
+  (:use [clojure.contrib.generic
+	 :only (root-type nulary-type nary-type nary-dispatch)]
+	[clojure.contrib.types :only (defadt)])
   (:refer-clojure :exclude [+ - * /]))
-
-;
-; A dispatch function that separates nulary, unary, binary, and
-; higher arity calls and also selects on type for unary and binary
-; calls.
-;
-(defn- nary-dispatch
-  ([] ::nulary)
-  ([x] (type x))
-  ([x y]
-     [(type x) (type y)])
-  ([x y & more] ::n-ary))
 
 ;
 ; Universal zero and one values
@@ -43,15 +33,8 @@
 (defadt ::zero zero)
 (defadt ::one one)
 
-;
-; We can't use [::binary :default], so we need to define a root type
-; of the type hierarcy. The derivation for Object covers all classes,
-; but all non-class types will need an explicit derive clause.
-; Ultimately, a macro might take care of this.
-;
-(derive Object ::any)
-(derive ::zero ::any)
-(derive ::one ::any)
+(derive ::zero root-type)
+(derive ::one root-type)
 
 ;
 ; Addition
@@ -62,20 +45,20 @@
 ;
 (defmulti + nary-dispatch)
 
-(defmethod + ::nulary
+(defmethod + nulary-type
   []
   zero)
 
-(defmethod + ::any
+(defmethod + root-type
   [x] x)
 
-(defmethod + [::any ::zero]
+(defmethod + [root-type ::zero]
   [x y] x)
 
-(defmethod + [::zero ::any]
+(defmethod + [::zero root-type]
   [x y] y)
 
-(defmethod + ::n-ary
+(defmethod + nary-type
   [x y & more]
   (if more
     (recur (+ x y) (first more) (next more))
@@ -84,27 +67,27 @@
 ;
 ; Subtraction
 ;
-; The minimal implementation is for [::unary my-type]. A default binary
+; The minimal implementation is for unary my-type. A default binary
 ; implementation is provided as (+ x (- y)), but it is possible to
-; implement [::unary my-type] explicitly for efficiency reasons.
+; implement unary my-type explicitly for efficiency reasons.
 ;
 (defmulti - nary-dispatch)
 
-(defmethod - ::nulary
+(defmethod - nulary-type
   []
   (throw (java.lang.IllegalArgumentException.
 	  "Wrong number of arguments passed")))
 
-(defmethod - [::any ::zero]
+(defmethod - [root-type ::zero]
   [x y] x)
 
-(defmethod - [::zero ::any]
+(defmethod - [::zero root-type]
   [x y] (- y))
 
-(defmethod - [::any ::any]
+(defmethod - [root-type root-type]
   [x y] (+ x (- y)))
 
-(defmethod - ::n-ary
+(defmethod - nary-type
   [x y & more]
   (if more
     (recur (- x y) (first more) (next more))
@@ -113,26 +96,26 @@
 ;
 ; Multiplication
 ;
-; The minimal implementation is for [::binary my-type]. It is possible
-; in principle to implement [::unary my-type] as well, though this
+; The minimal implementation is for binary [my-type my-type]. It is possible
+; in principle to implement unary my-type as well, though this
 ; doesn't make any sense.
 ;
 (defmulti * nary-dispatch)
 
-(defmethod * ::nulary
+(defmethod * nulary-type
   []
   one)
 
-(defmethod * ::any
+(defmethod * root-type
   [x] x)
 
-(defmethod * [::any ::one]
+(defmethod * [root-type ::one]
   [x y] x)
 
-(defmethod * [::one ::any]
+(defmethod * [::one root-type]
   [x y] y)
 
-(defmethod * ::n-ary
+(defmethod * nary-type
   [x y & more]
   (if more
     (recur (* x y) (first more) (next more))
@@ -141,31 +124,43 @@
 ;
 ; Division
 ;
-; The minimal implementation is for [::unary my-type]. A default binary
+; The minimal implementation is for unary my-type. A default binary
 ; implementation is provided as (* x (/ y)), but it is possible to
-; implement [::unary my-type] explicitly for efficiency reasons.
+; implement binary [my-type my-type] explicitly for efficiency reasons.
 ;
 (defmulti / nary-dispatch)
 
-(defmethod / ::nulary
+(defmethod / nulary-type
   []
   (throw (java.lang.IllegalArgumentException.
 	  "Wrong number of arguments passed")))
 
-(defmethod / [::any ::one]
+(defmethod / [root-type ::one]
   [x y] x)
 
-(defmethod / [::one ::any]
+(defmethod / [::one root-type]
   [x y] (/ y))
 
-(defmethod / [::any ::any]
+(defmethod / [root-type root-type]
   [x y] (* x (/ y)))
 
-(defmethod / ::n-ary
+(defmethod / nary-type
   [x y & more]
   (if more
     (recur (/ x y) (first more) (next more))
     (/ x y)))
+
+;
+; Macros to permit access to the / multimethod via namespace qualification
+;
+(defmacro defmethod*
+  [ns name & args]
+  (let [qsym (symbol (str ns) (str name))]
+    `(defmethod ~qsym ~@args)))
+
+(defmacro qsym
+  [ns sym]
+  (symbol (str ns) (str sym)))
 
 ;
 ; Minimal implementations for java.lang.Number
