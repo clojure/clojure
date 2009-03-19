@@ -35,6 +35,7 @@ apply-macro
 auto-agent
 ;; combinatorics
 command-line
+complex-numbers
 cond
 condt
 def

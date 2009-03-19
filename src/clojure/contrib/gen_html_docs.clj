@@ -474,6 +474,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.auto-agent
      'clojure.contrib.combinatorics
      'clojure.contrib.command-line
+     'clojure.contrib.complex-numbers
      'clojure.contrib.cond
      'clojure.contrib.condt
      'clojure.contrib.def

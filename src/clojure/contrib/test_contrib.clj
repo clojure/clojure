@@ -15,7 +15,7 @@
 (ns clojure.contrib.test-contrib
   (:use clojure.contrib.test-is))
 
-(def tests [:str-utils :shell-out :test-graph :test-dataflow])
+(def tests [:complex-numbers :str-utils :shell-out :test-graph :test-dataflow])
 
 (defn test-name
   [test]
