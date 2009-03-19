@@ -145,7 +145,7 @@
 (defn add-break-thread!
   "Add the given thread to break-threads so that it will be stopped
   any time the user presses Ctrl-C.  Calls start-handling-break for
-  you.  Adds the current thread if none is give."
+  you.  Adds the current thread if none is given."
   ([] (add-break-thread! (Thread/currentThread)))
   ([t]
     (start-handling-break)
