@@ -1,7 +1,7 @@
 ;; Test routines for monads.clj
 
 ;; by Konrad Hinsen
-;; last updated March 2, 2009
+;; last updated March 19, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,7 +11,7 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.monads.test
+(ns clojure.contrib.test-contrib.monads
   (:use [clojure.contrib.test-is :only (deftest are run-tests)]
 	[clojure.contrib.monads
 	 :only (with-monad domonad m-lift m-seq m-chain
@@ -55,5 +55,3 @@
           '(nil 2 nil 4 nil 6 nil 8 nil 10)
         (pairs (for [n (range 5)] (when (odd? n) n)))
           '(nil nil (1 1) nil (1 3) nil nil nil (3 1) nil (3 3) nil nil)))))
-
-(run-tests)
