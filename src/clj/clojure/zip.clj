@@ -212,8 +212,8 @@
   [loc]
     (if-let [lloc (left loc)]
       (loop [loc lloc]
-        (if (branch? loc)
-          (recur (-> loc down rightmost))
+        (if-let [child (and (branch? loc) (down loc))]
+          (recur (rightmost child))
           loc))
       (up loc)))
 
@@ -231,8 +231,8 @@
         (throw (new Exception "Remove at top"))
         (if (pos? (count l))
           (loop [loc (with-meta [(peek l) (assoc path :l (pop l) :changed? true)] ^loc)]
-            (if (branch? loc)
-              (recur (-> loc down rightmost))
+            (if-let [child (and (branch? loc) (down loc))]
+              (recur (rightmost child))
               loc))
           (with-meta [(make-node loc (peek pnodes) rs) 
                       (and ppath (assoc ppath :changed? true))]
