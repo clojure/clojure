@@ -27,3 +27,15 @@
     (send agt nil?)
     (await agt)
     (is (true? @agt))))
+
+
+; http://clojure.org/agents
+
+; agent
+; deref, @-reader-macro, agent-errors
+; send send-off clear-agent-errors
+; await await-for
+; set-validator get-validator
+; add-watch remove-watch
+; shutdown-agents
+

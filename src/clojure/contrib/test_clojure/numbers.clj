@@ -14,6 +14,11 @@
   (:use clojure.contrib.test-is))
 
 
+; TODO:
+; ==
+; and more...
+
+
 ;; *** Types ***
 
 (deftest Coerced-Byte

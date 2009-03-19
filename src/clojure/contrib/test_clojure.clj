@@ -21,13 +21,22 @@
      [:reader
       :printer
       :evaluation
-      :predicates
+      :special
+      :ns-libs
       :logic
+      :predicates
+      :control
       :data-structures
       :numbers
       :sequences
       :for
+      :multimethods
+      :other-functions
+      :vars
+      :refs
       :agents
+      :atoms
+      :java-interop
       :main
       ])
 

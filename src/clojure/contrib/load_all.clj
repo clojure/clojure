@@ -51,7 +51,7 @@ generic.functor
 generic.math-functions
 import-static
 javadoc.browse
-javadoc
+;; javadoc - moved to repl-utils
 javalog
 json.read
 json.write
@@ -79,16 +79,25 @@ template
 test-is
 test-is.tests
 test-clojure.agents
+test-clojure.atoms
+test-clojure.control
 test-clojure.data-structures
 test-clojure.evaluation
 test-clojure.for
+test-clojure.java-interop
 test-clojure.logic
 test-clojure.main
+test-clojure.multimethods
+test-clojure.ns-libs
 test-clojure.numbers
+test-clojure.other-functions
 test-clojure.predicates
 test-clojure.printer
 test-clojure.reader
+test-clojure.refs
 test-clojure.sequences
+test-clojure.special
+test-clojure.vars
 test-contrib.shell-out
 test-contrib.str-utils
 trace

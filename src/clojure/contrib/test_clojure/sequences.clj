@@ -18,6 +18,11 @@
 
 ;; *** Tests ***
 
+; TODO:
+; apply, map, reduce, filter, remove
+; and more...
+
+
 (deftest test-equality
   ; lazy sequences
   (are (= _1 _2)
