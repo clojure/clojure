@@ -900,6 +900,92 @@
     (into-array [1 2]) ))
 
 
+(deftest test-every?
+  ; always true for nil or empty coll/seq
+  (are (= (every? pos? _) true)
+      nil
+      () [] {} #{}
+      (lazy-seq [])
+      (into-array []) )
+
+  (are (= _1 _2)
+      true (every? pos? [1])
+      true (every? pos? [1 2])
+      true (every? pos? [1 2 3 4 5])
+
+      false (every? pos? [-1])
+      false (every? pos? [-1 -2])
+      false (every? pos? [-1 -2 3])
+      false (every? pos? [-1 2])
+      false (every? pos? [1 -2])
+      false (every? pos? [1 2 -3])
+      false (every? pos? [1 2 -3 4]) )
+
+  (are (= _1 _2)
+      true (every? #{:a} [:a :a])
+;!      false (every? #{:a} [:a :b])   ; Issue 68: every? returns nil instead of false
+;!      false (every? #{:a} [:b :b])   ; http://code.google.com/p/clojure/issues/detail?id=68
+  ))
+
+
+(deftest test-not-every?
+  ; always false for nil or empty coll/seq
+  (are (= (not-every? pos? _) false)
+      nil
+      () [] {} #{}
+      (lazy-seq [])
+      (into-array []) )
+
+  (are (= _1 _2)
+      false (not-every? pos? [1])
+      false (not-every? pos? [1 2])
+      false (not-every? pos? [1 2 3 4 5])
+
+      true (not-every? pos? [-1])
+      true (not-every? pos? [-1 -2])
+      true (not-every? pos? [-1 -2 3])
+      true (not-every? pos? [-1 2])
+      true (not-every? pos? [1 -2])
+      true (not-every? pos? [1 2 -3])
+      true (not-every? pos? [1 2 -3 4]) )
+
+  (are (= _1 _2)
+      false (not-every? #{:a} [:a :a])
+      true (not-every? #{:a} [:a :b])
+      true (not-every? #{:a} [:b :b]) ))
+
+
+(deftest test-not-any?
+  ; always true for nil or empty coll/seq
+  (are (= (not-any? pos? _) true)
+      nil
+      () [] {} #{}
+      (lazy-seq [])
+      (into-array []) )
+
+  (are (= _1 _2)
+      false (not-any? pos? [1])
+      false (not-any? pos? [1 2])
+      false (not-any? pos? [1 2 3 4 5])
+
+      true (not-any? pos? [-1])
+      true (not-any? pos? [-1 -2])
+
+      false (not-any? pos? [-1 -2 3])
+      false (not-any? pos? [-1 2])
+      false (not-any? pos? [1 -2])
+      false (not-any? pos? [1 2 -3])
+      false (not-any? pos? [1 2 -3 4]) )
+
+  (are (= _1 _2)
+      false (not-any? #{:a} [:a :a])
+      false (not-any? #{:a} [:a :b])
+      true (not-any? #{:a} [:b :b]) ))
+
+
+; TODO: some
+
+
 ;; pmap
 ;;
 (deftest pmap-does-its-thing
