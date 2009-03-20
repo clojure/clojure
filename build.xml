@@ -47,7 +47,8 @@
         <path location="${src}"/>
         <path location="${clojure.jar}"/>
       </classpath>
-      <arg value="src/clojure/contrib/test_contrib.clj"/>
+      <arg value="-e"/>
+      <arg value="(require '(clojure.contrib [test-contrib :as main])) (main/run)"/>
     </java>
   </target>
 
@@ -60,7 +61,8 @@
         <path location="${src}"/>
         <path location="${clojure.jar}"/>
       </classpath>
-      <arg value="src/clojure/contrib/datalog/tests/test.clj"/>
+      <arg value="-e"/>
+      <arg value="(require '(clojure.contrib.datalog.tests [test :as main])) (main/run)"/>
     </java>
   </target>
 

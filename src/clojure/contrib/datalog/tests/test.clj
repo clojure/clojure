@@ -13,25 +13,33 @@
 ;;  straszheimjeffrey (gmail)
 ;;  Created 11 Feburary 2009
 
-(ns clojure.contrib.datalog.tests.test.clj
-  (:use clojure.contrib.test-is))
+(ns clojure.contrib.datalog.tests.test
+  (:use [clojure.contrib.test-is :only (run-tests)])
+  (:gen-class))
 
-(def tests [:test-util
-            :test-database
-            :test-literals
-            :test-rules
-            :test-magic
-            :test-softstrat])
+(def test-names [:test-util
+                 :test-database
+                 :test-literals
+                 :test-rules
+                 :test-magic
+                 :test-softstrat])
 
-(defn test-name
-  [test]
-  (symbol (str "clojure.contrib.datalog.tests." (name test))))
+(def test-namespaces
+     (map #(symbol (str "clojure.contrib.datalog.tests." (name %)))
+          test-names))
 
-(doseq [test tests]
-  (require (test-name test)))
+(defn run
+  "Runs all defined tests"
+  []
+  (println "Loading tests...")
+  (apply require :reload-all test-namespaces)
+  (apply run-tests test-namespaces))
 
-(apply run-tests (map test-name tests))
-
+(defn -main
+  "Run all defined tests from the command line"
+  [& args]
+  (run)
+  (System/exit 0))
 
 
 ;; End of file

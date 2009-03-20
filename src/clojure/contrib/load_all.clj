@@ -33,7 +33,7 @@
 accumulators
 apply-macro
 auto-agent
-;; combinatorics
+combinatorics
 command-line
 complex-numbers
 cond
@@ -78,6 +78,7 @@ stream-utils
 template
 test-is
 test-is.tests
+test-clojure
 test-clojure.agents
 test-clojure.atoms
 test-clojure.control
@@ -98,6 +99,7 @@ test-clojure.refs
 test-clojure.sequences
 test-clojure.special
 test-clojure.vars
+test-contrib
 test-contrib.shell-out
 test-contrib.str-utils
 trace

@@ -13,15 +13,24 @@
 ;;  stuart.halloway (gmail)
 
 (ns clojure.contrib.test-contrib
-  (:use clojure.contrib.test-is))
+  (:use [clojure.contrib.test-is :only (run-tests)])
+  (:gen-class))
 
-(def tests [:complex-numbers :monads :str-utils :shell-out :test-graph :test-dataflow])
+(def test-names [:complex-numbers :monads :str-utils :shell-out :test-graph :test-dataflow])
 
-(defn test-name
-  [test]
-  (symbol (str "clojure.contrib.test-contrib." (name test))))
+(def test-namespaces
+     (map #(symbol (str "clojure.contrib.test-contrib." (name %)))
+          test-names))
 
-(doseq [test tests]
-  (require (test-name test)))
+(defn run
+  "Runs all defined tests"
+  []
+  (println "Loading tests...")
+  (apply require :reload-all test-namespaces)
+  (apply run-tests test-namespaces))
 
-(apply run-tests (map test-name tests))
+(defn -main
+  "Run all defined tests from the command line"
+  [& args]
+  (run)
+  (System/exit 0))
