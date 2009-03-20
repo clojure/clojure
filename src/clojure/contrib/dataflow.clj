@@ -408,11 +408,12 @@
                      (let [[changed ov] (try
                                          (eval-cell df data old cell)
                                          (catch Exception e
-                                           (throw (Exception. (str cell) e))))]
+                                           (throw (Exception. (str cell) e))))
+                           nn (disj needed cell)]
                        (if changed
-                         [(union needed (get-neighbors (:fore-graph @df) cell))
+                         [(union nn (get-neighbors (:fore-graph @df) cell))
                           (assoc old (:name cell) ov)]
-                         [needed old])))
+                         [nn old])))
               [new-needed new-old] (reduce step
                                            [needed old]
                                            (intersection now needed))]
@@ -490,7 +491,7 @@
   (get-value df 'sally)
   (get-value df 'greg)
 
-  (use :reload 'jls.dataflow.dataflow)
+  (use :reload 'clojure.contrib.dataflow)
   (use 'clojure.contrib.stacktrace) (e)
   (use 'clojure.contrib.trace)
 )

@@ -80,7 +80,7 @@
 (comment
   (run-tests)
 
-  (use :reload 'jls.dataflow.dataflow)
+  (use :reload 'clojure.contrib.dataflow)
   (use 'clojure.contrib.stacktrace) (e)
   (use 'clojure.contrib.trace)
 
