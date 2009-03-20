@@ -152,7 +152,7 @@
   (let [m      259200
 	value  (/ (float seed) (float m))
 	next   (rem (+ 54773 (* 7141 seed)) m)]
-    (list value next)))
+    [value next]))
 
 ; We define a convenience function that creates an infinite lazy seq
 ; of values obtained from iteratively applying a state monad value.

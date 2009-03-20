@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated March 6, 2009
+;; last updated March 20, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -261,7 +261,7 @@
    "Monad describing stateful computations. The monadic values have the
     structure (fn [old-state] (list result new-state))."
    [m-result  (fn m-result-state [v]
-	        (fn [s] (list v s)))
+	        (fn [s] [v s]))
     m-bind    (fn m-bind-state [mv f]
 	        (fn [s]
 		  (let [[v ss] (mv s)]
@@ -269,13 +269,40 @@
    ])
 
 (defn update-state [f]
-  (fn [s] (list s (f s))))
+  "Return a state-monad function that replaces the current state by the
+   result of f applied to the current state and that returns the old state."
+  (fn [s] [s (f s)]))
 
 (defn set-state [s]
+  "Return a state-monad function that replaces the current state by s and
+   returns the previous state."
   (update-state (fn [_] s)))
 
 (defn fetch-state []
+  "Return a state-monad function that returns the current state and does not
+   modify it."
   (update-state identity))
+
+(defn fetch-val [key]
+  "Return a state-monad function that assumes the state to be a map and
+   returns the value corresponding to the given key. The state is not modified."
+  (domonad state-m
+    [s (fetch-state)]
+    (key s)))
+
+(defn update-val [key f]
+  "Return a state-monad function that assumes the state to be a map and
+   replaces the value associated with the given key by the return value
+   of f applied to the old value. The old value is returned."
+  (fn [s]
+    (let [old-val (get s key)
+	  new-s   (assoc s key (f old-val))]
+      [old-val new-s])))
+
+(defn set-val [key val]
+  "Return a state-monad function that assumes the state to be a map and
+   replaces the value associated with key by val. The old value is returned."
+  (update-val key (fn [_] val)))
 
 ; Writer monad
 (defn writer-m
@@ -404,7 +431,7 @@
   (monad [m-result (with-monad m
 		     (fn m-result-state-t [v]
                        (fn [s]
-			 (m-result (list v s)))))
+			 (m-result [v s]))))
 	  m-bind   (with-monad m
                      (fn m-bind-state-t [stm f]
                        (fn [s]
