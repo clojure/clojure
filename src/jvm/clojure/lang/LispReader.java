@@ -780,11 +780,11 @@ public static class SyntaxQuoteReader extends AFn{
 }
 
 static boolean isUnquoteSplicing(Object form){
-	return form instanceof ISeq && RT.first(form).equals(UNQUOTE_SPLICING);
+	return form instanceof ISeq && Util.equals(RT.first(form),UNQUOTE_SPLICING);
 }
 
 static boolean isUnquote(Object form){
-	return form instanceof ISeq && RT.first(form).equals(UNQUOTE);
+	return form instanceof ISeq && Util.equals(RT.first(form),UNQUOTE);
 }
 
 static class UnquoteReader extends AFn{
