@@ -81,6 +81,7 @@ test-is.tests
 test-clojure
 test-clojure.agents
 test-clojure.atoms
+test-clojure.clojure-main
 test-clojure.clojure-set
 test-clojure.clojure-xml
 test-clojure.clojure-zip
@@ -90,7 +91,6 @@ test-clojure.evaluation
 test-clojure.for
 test-clojure.java-interop
 test-clojure.logic
-test-clojure.main
 test-clojure.multimethods
 test-clojure.ns-libs
 test-clojure.numbers

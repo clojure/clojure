@@ -37,8 +37,8 @@
       :agents
       :atoms
       :java-interop
-      :main
       ;; libraries
+      :clojure-main
       :clojure-set
       :clojure-xml
       :clojure-zip

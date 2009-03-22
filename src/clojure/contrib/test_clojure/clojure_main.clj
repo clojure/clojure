@@ -6,9 +6,9 @@
 ;;  terms of this license.  You must not remove this notice, or any other,
 ;;  from this software.
 
-(ns clojure.contrib.test-clojure.main
-  (:use clojure.contrib.test-is
-        clojure.main))
+(ns clojure.contrib.test-clojure.clojure-main
+  (:use clojure.contrib.test-is)
+  (:require [clojure.main :as main]))
 
 (defn- set-properties
   [settings]
@@ -36,5 +36,5 @@
 (deftest compile-path-respects-java-property
   ;; Bug fixed in r1177; previously was hardwired to the compile-time path.
   (with-properties ["clojure.compile.path" "compile path test"]
-    (with-bindings
+    (main/with-bindings
       (is (= "compile path test" *compile-path*)))))
