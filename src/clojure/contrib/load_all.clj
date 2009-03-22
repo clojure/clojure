@@ -81,6 +81,9 @@ test-is.tests
 test-clojure
 test-clojure.agents
 test-clojure.atoms
+test-clojure.clojure-set
+test-clojure.clojure-xml
+test-clojure.clojure-zip
 test-clojure.control
 test-clojure.data-structures
 test-clojure.evaluation

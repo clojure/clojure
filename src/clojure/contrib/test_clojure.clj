@@ -38,6 +38,10 @@
       :atoms
       :java-interop
       :main
+      ;; libraries
+      :clojure-set
+      :clojure-xml
+      :clojure-zip
       ])
 
 (def test-namespaces
