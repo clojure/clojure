@@ -189,7 +189,10 @@
 ;; Syntax-quote (`, note, the "backquote" character), Unquote (~) and
 ;; Unquote-splicing (~@)
 
-(deftest t-Syntax-quote)
+(deftest t-Syntax-quote
+  (are (= _1 _2)
+      `() ()    ; was NPE before SVN r1337
+  ))
 
 ;; (read)
 ;; (read stream)
