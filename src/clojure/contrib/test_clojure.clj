@@ -36,6 +36,7 @@
       :refs
       :agents
       :atoms
+      :parallel
       :java-interop
       ;; libraries
       :clojure-main

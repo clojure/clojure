@@ -5,29 +5,22 @@
 ;;  using this software in any fashion, you are agreeing to be bound by the
 ;;  terms of this license.  You must not remove this notice, or any other,
 ;;  from this software.
-;;
-;;  Test special forms, macros and metadata
-;;
 
-(ns clojure.contrib.test-clojure.special
+(ns clojure.contrib.test-clojure.parallel
   (:use clojure.contrib.test-is))
 
-; http://clojure.org/special_forms
+;; !! Tests for the parallel library will be in a separate file clojure_parallel.clj !!
 
-; let, letfn
-; quote
-; var
-; fn
-
-
-; http://clojure.org/macros
-
-; ->
-; defmacro definline macroexpand-1 macroexpand
+; future-call
+; future
+; pmap
+; pcalls
+; pvalues
 
 
-; http://clojure.org/metadata
-
-; meta
-; with-meta
+;; pmap
+;;
+(deftest pmap-does-its-thing
+  ;; regression fixed in r1218; was OutOfMemoryError
+  (is (= '(1) (pmap inc [0]))))
 

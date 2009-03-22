@@ -95,6 +95,7 @@ test-clojure.multimethods
 test-clojure.ns-libs
 test-clojure.numbers
 test-clojure.other-functions
+test-clojure.parallel
 test-clojure.predicates
 test-clojure.printer
 test-clojure.reader

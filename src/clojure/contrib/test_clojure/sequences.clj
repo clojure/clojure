@@ -985,10 +985,3 @@
 
 ; TODO: some
 
-
-;; pmap
-;;
-(deftest pmap-does-its-thing
-  ;; regression fixed in r1218; was OutOfMemoryError
-  (is (= '(1) (pmap inc [0]))))
-
