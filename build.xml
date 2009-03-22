@@ -83,6 +83,7 @@
       <arg value="clojure.contrib.command-line"/>
       <arg value="clojure.contrib.complex-numbers"/>
       <arg value="clojure.contrib.cond"/>
+      <arg value="clojure.contrib.core"/>
       <arg value="clojure.contrib.def"/>
       <arg value="clojure.contrib.duck-streams"/>
       <arg value="clojure.contrib.except"/>
