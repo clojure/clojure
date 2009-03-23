@@ -1,7 +1,7 @@
 ;; Test routines for complex-numbers.clj
 
 ;; by Konrad Hinsen
-;; last updated March 19, 2009
+;; last updated March 23, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,13 +12,15 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-contrib.complex-numbers
-  (:refer-clojure :exclude [+ - * / =])
+  (:refer-clojure :exclude [+ - * / = < > <= >=])
   (:use [clojure.contrib.test-is
 	 :only (deftest is are run-tests)]
 	[clojure.contrib.generic.arithmetic
 	 :only (+ - * /)]
 	[clojure.contrib.generic.comparison
-	 :only (=)]
+	 :only (= < > <= >=)]
+	[clojure.contrib.generic.math-functions
+	 :only (abs approx= conjugate sqr sqrt)]
 	[clojure.contrib.complex-numbers
 	 :only (complex imaginary real imag)]))
 
@@ -269,3 +271,21 @@
   (is (= (/ (imaginary 5) (imaginary -2)) -5/2))
   (is (= (/ (imaginary -2) (imaginary 5)) -2/5))
   (is (= (/ (imaginary 5) (imaginary 5)) 1)))
+
+(deftest complex-conjugate
+  (is (= (conjugate (complex 1 2)) (complex 1 -2)))
+  (is (= (conjugate (complex -3 -7)) (complex -3 7)))
+  (is (= (conjugate (imaginary -2)) (imaginary 2)))
+  (is (= (conjugate (imaginary 5)) (imaginary -5))))
+
+(deftest complex-abs
+  (doseq [c [(complex 1 2) (complex -3 -7) (imaginary -2) (imaginary 5)]]
+    (is (approx= (* c (conjugate c))
+		 (sqr (abs c))
+		 1e-14))))
+
+(deftest complex-sqrt
+  (doseq [c [(complex 1 2) (complex -3 -7) (imaginary -2) (imaginary 5)]]
+    (let [r (sqrt c)]
+      (is (approx= c (sqr r) 1e-14))
+      (is (>= (real r) 0)))))

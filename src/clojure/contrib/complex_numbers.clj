@@ -1,7 +1,7 @@
 ;; Complex numbers
 
 ;; by Konrad Hinsen
-;; last updated March 19, 2009
+;; last updated March 23, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -222,3 +222,37 @@
 ; can be added later...
 ;
 
+;
+; Conjugation
+;
+(defmethod gm/conjugate ::complex
+  [x]
+  (let [[r i] (vals x)]
+    (complex r (ga/- i))))
+
+(defmethod gm/conjugate ::pure-imaginary
+  [x]
+  (imaginary (ga/- (imag x))))
+
+;
+; Absolute value
+;
+(defmethod gm/abs ::complex
+  [x]
+  (let [[r i] (vals x)]
+    (gm/sqrt (ga/+ (ga/* r r) (ga/* i i)))))
+
+(defmethod gm/abs ::pure-imaginary
+  [x]
+  (gm/abs (imag x)))
+
+;
+; Square root
+;
+(defmethod gm/sqrt ::complex
+  [{r :real i :imag}]
+  (let [abs (gm/sqrt (ga/+ (ga/* r r) (ga/* i i)))
+	p   (gm/sqrt ((ga/qsym ga /) (ga/+ abs r) 2))
+	q   (ga/* (gm/sgn i) 
+		  (gm/sqrt ((ga/qsym ga /) (ga/- abs r) 2)))]
+    (complex p q)))

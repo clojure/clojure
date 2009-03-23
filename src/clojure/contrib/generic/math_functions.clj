@@ -1,7 +1,7 @@
 ;; Generic interfaces for mathematical functions
 
 ;; by Konrad Hinsen
-;; last updated March 13, 2009
+;; last updated March 23, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -19,7 +19,9 @@
 
    This library defines generic versions of common mathematical functions
    such as sqrt or sin as multimethods that can be defined for any type."
-  (:use [clojure.contrib.def :only (defmacro-)]))
+  (:use [clojure.contrib.def :only (defmacro-)])
+  (:require [clojure.contrib.generic.arithmetic :as ga]
+	    [clojure.contrib.generic.comparison :as gc]))
 
 (defmacro- defmathfn-1
   [name]
@@ -59,3 +61,39 @@
 (defmathfn-1 sin)
 (defmathfn-1 sqrt)
 (defmathfn-1 tan)
+
+;
+; Sign
+;
+(defmulti sgn type)
+(defmethod sgn :default
+  [x]
+  (cond (gc/zero? x) 0
+	(gc/> x 0) 1
+	:else -1))
+
+;
+; Conjugation
+;
+(defmulti conjugate type)
+
+(defmethod conjugate :default
+  [x] x)
+
+;
+; Square
+;
+(defmulti sqr type)
+
+(defmethod sqr :default
+  [x]
+  (ga/* x x))
+
+;
+; Approximate equality for use with floating point types
+;
+(defn approx=
+  "Return true if the absolute value of the difference between x and y
+   is less than eps"
+  [x y eps]
+  (gc/< (abs (ga/- x y)) eps))
