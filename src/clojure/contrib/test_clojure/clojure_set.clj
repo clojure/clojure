@@ -20,7 +20,7 @@
       (set/union #{1}) #{1}
       (set/union #{1 2 3}) #{1 2 3}
 
-      ; 2 sets, union with empty set
+      ; 2 sets, at least one is empty
       (set/union #{} #{}) #{}
       (set/union #{} #{1}) #{1}
       (set/union #{} #{1 2 3}) #{1 2 3}
@@ -34,7 +34,7 @@
       (set/union #{1 2} #{3}) #{1 2 3}
       (set/union #{1 2} #{2 3}) #{1 2 3}
 
-      ; 3 sets, union with empty set(s)
+      ; 3 sets, some are empty
       (set/union #{} #{} #{}) #{}
       (set/union #{1} #{} #{}) #{1}
       (set/union #{} #{1} #{}) #{1}
@@ -61,7 +61,50 @@
 ))
 
 
-; intersection
+(deftest test-intersection
+  ; at least one argument is needed
+  (is (thrown? IllegalArgumentException (set/intersection)))
+  
+  (are (= _1 _2)
+      ; identity
+      (set/intersection #{}) #{}
+      (set/intersection #{1}) #{1}
+      (set/intersection #{1 2 3}) #{1 2 3}
+      
+      ; 2 sets, at least one is empty
+      (set/intersection #{} #{}) #{}
+      (set/intersection #{} #{1}) #{}
+      (set/intersection #{} #{1 2 3}) #{}
+      (set/intersection #{1} #{}) #{}
+      (set/intersection #{1 2 3} #{}) #{}
+
+      ; 2 sets
+      (set/intersection #{1 2} #{1 2}) #{1 2}
+      (set/intersection #{1 2} #{3 4}) #{}
+      (set/intersection #{1 2} #{1}) #{1}
+      (set/intersection #{1 2} #{2}) #{2}
+      (set/intersection #{1 2 4} #{2 3 4 5}) #{2 4}
+
+      ; 3 sets, some are empty
+      (set/intersection #{} #{} #{}) #{}
+      (set/intersection #{1} #{} #{}) #{}
+      (set/intersection #{1} #{1} #{}) #{}
+      (set/intersection #{1} #{} #{1}) #{}
+      (set/intersection #{1 2} #{2 3} #{}) #{}
+
+      ; 3 sets
+      (set/intersection #{1 2} #{2 3} #{5 2}) #{2}
+      (set/intersection #{1 2 3} #{1 3 4} #{1 3}) #{1 3}
+      (set/intersection #{1 2 3} #{3 4 5} #{8 2 3}) #{3}
+
+      ; different types of sets
+      (set/intersection (hash-set 1 2) (hash-set 2 3)) #{2}
+      (set/intersection (sorted-set 1 2) (sorted-set 2 3)) #{2}
+      (set/intersection
+        (hash-set 1 2) (hash-set 2 3)
+        (sorted-set 1 2) (sorted-set 2 3)) #{2} ))
+
+
 ; difference
 ;
 ; select
