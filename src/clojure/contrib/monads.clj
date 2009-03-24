@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated March 20, 2009
+;; last updated March 24, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -59,9 +59,9 @@
    monad comprehension expression mexpr."
   [mexpr step]
   (let [[bform expr] step]
-    (if (identical? bform :when)
-      `(if ~expr ~mexpr ~'m-zero)
-      (list 'm-bind expr (list 'fn [bform] mexpr)))))
+    (cond (identical? bform :when)  `(if ~expr ~mexpr ~'m-zero)
+	  (identical? bform :let)   `(let ~expr ~mexpr)
+	  :else (list 'm-bind expr (list 'fn [bform] mexpr)))))
 
 (defn- monad-expr
    "Transforms a monad comprehension, consisting of a list of steps
@@ -101,10 +101,13 @@
    "Monad comprehension. Takes the name of a monad, a vector of steps
     given as binding-form/monadic-expression pairs, and a result value
     specified by expr. The monadic-expression terms can use the binding
-    variables of the previous steps. If the monad contains a definition
-    of :zero, the step list can also contain conditions of the form [:when p],
-    where the predicate p can contain the binding variables from all previous
-    steps."
+    variables of the previous steps.
+    If the monad contains a definition of m-zero, the step list can also
+    contain conditions of the form :when p, where the predicate p can
+    contain the binding variables from all previous steps.
+    A clause of the form :let [binding-form expr ...], where the bindings
+    are given as a vector as for the use in let, establishes additional
+    bindings that can be used in the following steps."
    ([steps expr]
     (monad-expr steps expr))
    ([name steps expr]

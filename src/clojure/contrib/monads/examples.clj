@@ -43,11 +43,21 @@
       y (range 3)]
      (+ x y)))
 
+; Conditions are written with :when, as in Clojure's for form:
 (domonad sequence-m
    [x  (range 5)
     y  (range (+ 1 x))
-    :when  (= (+ x y) 2)]
+    :when (= (+ x y) 2)]
    (list x y))
+
+; :let is also supported like in for:
+(domonad sequence-m
+   [x  (range 5)
+    y  (range (+ 1 x))
+    :let [sum (+ x y)
+	  diff (- x y)]
+    :when  (= sum 2)]
+   (list diff))
 
 ; An example of a sequence function defined in terms of a lift operation.
 (with-monad sequence-m
