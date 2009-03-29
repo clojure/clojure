@@ -1,7 +1,7 @@
 ;;; test_is.clj: test framework for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 21, 2009
+;; March 28, 2009
 
 ;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
 ;; contributions and suggestions.
@@ -161,6 +161,41 @@
   ;; You can bind the variable "*load-tests*" to false when loading or
   ;; compiling code in production.  This will prevent any tests from
   ;; being created by "with-test" or "deftest".
+  ;;
+  ;;
+  ;;
+  ;; FIXTURES (new)
+  ;;
+  ;; Fixtures allow you to run code before and after tests, to set up
+  ;; the context in which tests should be run.
+  ;;
+  ;; A fixture is just a function that calls another function passed as
+  ;; an argument.  It looks like this:
+  (defn my-fixture [f]
+    ;; Perform setup, establish bindings, whatever.
+    (f) ;; Then call the function we were passed.
+    ;; Tear-down / clean-up code here.
+    )
+
+  ;; Fixtures are attached to namespaces in one of two ways.  "each"
+  ;; fixtures are run repeatedly, once for each test function created
+  ;; with "deftest" or "with-test".  "each" fixtures are useful for
+  ;; establishing a consistent before/after state for each test, like
+  ;; clearing out database tables.
+  ;;
+  ;; "each" fixtures can be attached to the current namespace like this:
+  (use-fixtures :each fixture1 fixture2 ...)
+  ;; The fixture1, fixture2 are just functions like the example above.
+  ;; They can also be anonymous functions, like this:
+  (use-fixtures :each (fn [f] setup... (f) cleanup...))
+  ;;
+  ;; The other kind of fixture, a "once" fixture, is only run once,
+  ;; around ALL the tests in the namespace.  "once" fixtures are useful
+  ;; for tasks that only need to be performed once, like establishing
+  ;; database connections, or for time-consuming tasks.
+  ;;
+  ;; Attach "once" fixtures to the current namespace like this:
+  (use-fixtures :once fixture1 fixture2 ...)
   ;;
   ;;
   ;;
@@ -436,16 +471,30 @@
   
   Example: (is (= 4 (+ 2 2)) \"Two plus two should be 4\")
 
-  Special form (is (thrown? c body)) checks that an instance of c is
-  thrown from body, fails if not; then returns the thing thrown."
+  Special forms:
+
+  (is (thrown? c body)) checks that an instance of c is thrown from
+  body, fails if not; then returns the thing thrown.
+
+  (is (thrown-with-msg? c re body)) checks that an instance of c is
+  thrown AND that the message on the exception matches (with
+  re-matches) the regular expression re."
   ([form] `(is ~form nil))
   ([form msg] `(try-expr ~msg ~form)))
 
 (defmacro are
-  "Experimental.  May be removed in the future.
-  Checks multiple assertions with a template expression.
-  Example: (are (= _1 _2)  2 (+ 1 1),  4 (+ 2 2))
-  See clojure.contrib.template for documentation of templates."
+  "Checks multiple assertions with a template expression.
+  See clojure.contrib.template/do-template for an explanation of
+  templates.
+
+  Example: (are (= _1 _2)  
+                2 (+ 1 1)
+                4 (* 2 2))
+  Expands to: 
+           (do (is (= 2 (+ 1 1)))
+               (is (= 4 (* 2 2))))
+
+  Note: This breaks some reporting features, such as line numbers."
   [expr & args]
   `(temp/do-template (is ~expr) ~@args))
 
@@ -508,6 +557,42 @@
 
 
 
+;;; DEFINING FIXTURES
+
+(defn- add-ns-meta
+  "Adds elements in coll to the current namespace metadata as the
+  value of key."
+  [key coll]
+  (alter-meta! *ns* assoc key (concat (key (meta *ns*)) coll)))
+
+(defmulti use-fixtures (fn [fixture-type & args] fixture-type))
+
+(defmethod use-fixtures :each [fixture-type & args]
+  (add-ns-meta ::each-fixtures args))
+
+(defmethod use-fixtures :once [fixture-type & args]
+  (add-ns-meta ::once-fixtures args))
+
+(defn- default-fixture
+  "The default, empty, fixture function.  Just calls its argument."
+  [f]
+  (f))
+
+(defn compose-fixtures
+  "Composes two fixture functions, creating a new fixture function
+  that combines their behavior."
+  [f1 f2]
+  (fn [g] (f1 (fn [] (f2 g)))))
+
+(defn join-fixtures
+  "Composes a collection of fixtures, in order.  Always returns a valid
+  fixture function, even if the collection is empty."
+  [fixtures]
+  (reduce compose-fixtures default-fixture fixtures))
+
+
+
+
 ;;; RUNNING TESTS: LOW-LEVEL FUNCTIONS
 
 (defn test-var
@@ -518,15 +603,20 @@
     (binding [*testing-vars* (conj *testing-vars* v)]
       (inc-report-counter :test)
       (try (t)
-	   (catch Throwable e
-	     (report :error "Uncaught exception, not in assertion."
-		     nil e))))))
+           (catch Throwable e
+             (report :error "Uncaught exception, not in assertion."
+                     nil e))))))
 
 (defn test-all-vars
-  "Calls test-var on every var interned in the namespace."
+  "Calls test-var on every var interned in the namespace, with fixtures."
   [ns]
-  (doseq [v (vals (ns-interns ns))]
-    (test-var v)))
+  (let [once-fixture-fn (join-fixtures (::once-fixtures (meta ns)))
+        each-fixture-fn (join-fixtures (::each-fixtures (meta ns)))]
+    (once-fixture-fn
+     (fn []
+       (doseq [v (vals (ns-interns ns))]
+         (when (:test (meta v))
+           (each-fixture-fn (fn [] (test-var v)))))))))
 
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
