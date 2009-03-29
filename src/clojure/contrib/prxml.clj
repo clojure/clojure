@@ -1,7 +1,7 @@
 ;;; prxml.clj -- compact syntax for generating XML
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 4, 2009
+;; March 29, 2009
 
 ;; Copyright (c) 2009 Stuart Sierra. All rights reserved.  The use and
 ;; distribution terms for this software are covered by the Eclipse
@@ -12,16 +12,32 @@
 ;; remove this notice, or any other, from this software.
 
 
+;; Change Log
+;;
+;; March 29, 2009: added *prxml-indent*
+;;
+;; January 4, 2009: initial version
+
+
 ;; See function "prxml" at the bottom of this file for documentation.
 
 
 (ns clojure.contrib.prxml
   (:use [clojure.contrib.lazy-xml :only (escape-xml)]))
 
+(def
+ #^{:doc "If true, empty tags will have a space before the closing />"}
+ *html-compatible* false)
+
+(def
+ #^{:doc "The number of spaces to indent sub-tags.  nil for no indent
+  and no extra line-breaks."}
+ *prxml-indent* nil)
+
 (defn- namestr [x]
   (if (or (symbol? x) (keyword? x)) (name x) (str x)))
 
-(def *html-compatible* false)
+(def #^{:private true} *prxml-tag-depth* 0)
 
 (def #^{:private true} print-xml)  ; forward declaration
 
@@ -69,17 +85,27 @@
 
 (defmethod print-xml-tag :default [tag attrs contents]
   (let [tag-name (namestr tag)]
+    (when *prxml-indent*
+      (newline)
+      (dotimes [n (* *prxml-tag-depth* *prxml-indent*)] (print " ")))
     (print "<")
     (print tag-name)
     (doseq [[name value] attrs]
       (prxml-attribute name value))
     (if (seq contents)
-      (do  ; not an empty tag
+      (do  ;; not an empty tag
         (print ">")
-        (doseq [c contents] (print-xml c))
-        (print "</")
-        (print tag-name)
-        (print ">"))
+        (if (every? string? contents)
+          ;; tag only contains strings:
+          (do (doseq [c contents] (print-xml c))
+              (print "</") (print tag-name) (print ">"))
+          ;; tag contains sub-tags:
+          (do (binding [*prxml-tag-depth* (inc *prxml-tag-depth*)]
+                (doseq [c contents] (print-xml c)))
+              (when *prxml-indent*
+                (newline)
+                (dotimes [n (* *prxml-tag-depth* *prxml-indent*)] (print " ")))
+              (print "</") (print tag-name) (print ">"))))
       ;; empty tag:
       (print (if *html-compatible* " />" "/>")))))
 
