@@ -114,5 +114,5 @@
 (deftest test-exact-integer-sqrt
   (are (= _1 _2)
    (exact-integer-sqrt 15) [3 6]
-   (exact-integer-sqrt (inc (expt 2 64))) [(expt 2 32) 1])
-   (exact-integer-sqrt 1000000000000) [1000000 0])
+   (exact-integer-sqrt (inc (expt 2 64))) [(expt 2 32) 1]
+   (exact-integer-sqrt 1000000000000) [1000000 0]))
