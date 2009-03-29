@@ -41,7 +41,7 @@
 
 (ns clojure.contrib.duck-streams
     (:import 
-     (java.io Reader InputStream InputStreamReader 
+     (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File PrintWriter OutputStream
               OutputStreamWriter BufferedWriter Writer
               FileInputStream FileOutputStream)
@@ -155,7 +155,6 @@
   (throw (Exception. (str "Cannot open <" (pr-str x) "> as a writer."))))
 
 
-
 (defn write-lines
   "Writes lines (a seq) to f, separated by newlines.  f is opened with
   writer."
@@ -201,3 +200,19 @@
   Note: In Java, you cannot change the current working directory."
   []
   (System/getProperty "user.dir"))
+
+
+
+(defmacro with-out-writer
+  "Opens a writer on f, binds it to *out*, and evalutes body."
+  [f & body]
+  `(with-open [stream# (writer ~f)]
+     (binding [*out* stream#]
+       ~@body)))
+
+(defmacro with-in-reader
+  "Opens a PushbackReader on f, binds it to *in*, and evaluates body."
+  [f & body]
+  `(with-open [stream# (PushbackReader. (reader ~f))]
+     (binding [*in* stream#]
+       ~@body)))
