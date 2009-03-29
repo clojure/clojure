@@ -136,7 +136,7 @@ round always returns an integer.  Rounds up for values exactly in between two in
 (defmethod integer-length java.lang.Integer [n]
   (count (Integer/toBinaryString n)))
 (defmethod integer-length java.lang.Long [n]
-  (count (Integer/toBinaryString n)))
+  (count (Long/toBinaryString n)))
 (defmethod integer-length java.math.BigInteger [n]
   (count (. n toString 2)))
 
