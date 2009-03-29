@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Application examples for algebraic data types
+;; Application examples for data types
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -73,6 +73,7 @@
     (node l r)  (inc (max (depth l) (depth r)))))
 
 (depth empty-tree)
+(depth (leaf 42))
 (depth a-tree)
 
 ; Algebraic data types with multimethods: fmap on a tree
@@ -87,6 +88,7 @@
 
 ;
 ; Nonsense examples to illustrate all the features of match
+; for type constructors.
 ;
 (defadt ::foo
   (bar a b c))
@@ -100,9 +102,45 @@
     (bar a b 1)  (* a b)
     :else        42))
 
-(foo-to-int (bar 0 0 0))
-(foo-to-int (bar 0 5 6))
-(foo-to-int (bar 1 2 3))
-(foo-to-int (bar 3 3 1))
-(foo-to-int (bar 0 3 1))
-(foo-to-int (bar 10 20 30))
+(foo-to-int (bar 0 0 0))    ; 0
+(foo-to-int (bar 0 5 6))    ; 11
+(foo-to-int (bar 1 2 3))    ; -1
+(foo-to-int (bar 3 3 1))    ; 9
+(foo-to-int (bar 0 3 1))    ; 4
+(foo-to-int (bar 10 20 30)) ; 42
+
+;
+; Match can also be used for lists, vectors, and maps. Note that since
+; algebraic data types are represented as maps, they can be matched
+; either with their type constructor and positional arguments, or
+; with a map template.
+;
+
+; Tree depth once again with map templates
+(defn depth
+  [t]
+  (match t
+    empty-tree  0
+    {:value _}  1
+    {:left-tree l :right-tree r}  (inc (max (depth l) (depth r)))))
+
+(depth empty-tree)
+(depth (leaf 42))
+(depth a-tree)
+
+; Match for lists, vectors, and maps:
+
+(for [x ['(1 2 3)
+	 [1 2 3]
+	 {:x 1 :y 2 :z 3}
+	 '(1 1 1)
+	 [2 1 2]
+	 {:x 1 :y 1 :z 2}]]
+  (match x
+    '(a a a)  	 'list-of-three-equal-values
+    '(a b c)  	 'list
+    [a a a]   	 'vector-of-three-equal-values
+    [a b a]   	 'vector-of-three-with-first-and-last-equal
+    [a b c]      'vector
+    {:x a :y z}  'map-with-x-equal-y
+    {}           'any-map))
