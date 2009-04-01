@@ -1085,6 +1085,11 @@
   "Given a multimethod, returns a map of dispatch values -> dispatch fns"
   [#^clojure.lang.MultiFn multifn] (.getMethodTable multifn))
 
+(defn get-method
+  "Given a multimethod and a dispatch value, returns the dispatch fn
+  that would apply to that value, or nil if none apply and no default"
+  [#^clojure.lang.MultiFn multifn dispatch-val] (.getMethod multifn dispatch-val))
+
 (defn prefers
   "Given a multimethod, returns a map of preferred value -> set of other values"
   [#^clojure.lang.MultiFn multifn] (.getPreferTable multifn))

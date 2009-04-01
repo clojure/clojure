@@ -93,7 +93,7 @@ private IPersistentMap resetCache() throws Exception{
 	return methodCache;
 }
 
-synchronized private IFn getFn(Object dispatchVal) throws Exception{
+synchronized public IFn getMethod(Object dispatchVal) throws Exception{
 	if(cachedHierarchy != hierarchy.deref())
 		resetCache();
 	IFn targetFn = (IFn) methodCache.valAt(dispatchVal);
@@ -103,6 +103,11 @@ synchronized private IFn getFn(Object dispatchVal) throws Exception{
 	if(targetFn != null)
 		return targetFn;
 	targetFn = (IFn) getMethodTable().valAt(defaultDispatchVal);
+	return targetFn;
+}
+
+private IFn getFn(Object dispatchVal) throws Exception{
+	IFn targetFn = getMethod(dispatchVal);
 	if(targetFn == null)
 		throw new IllegalArgumentException(String.format("No method for dispatch value: %s", dispatchVal));
 	return targetFn;
