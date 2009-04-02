@@ -1,7 +1,7 @@
 ;; Complex numbers
 
 ;; by Konrad Hinsen
-;; last updated March 23, 2009
+;; last updated April 2, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -249,10 +249,42 @@
 ;
 ; Square root
 ;
-(defmethod gm/sqrt ::complex
-  [{r :real i :imag}]
-  (let [abs (gm/sqrt (ga/+ (ga/* r r) (ga/* i i)))
-	p   (gm/sqrt ((ga/qsym ga /) (ga/+ abs r) 2))
-	q   (ga/* (gm/sgn i) 
-		  (gm/sqrt ((ga/qsym ga /) (ga/- abs r) 2)))]
-    (complex p q)))
+(let [one-half   (/ 1 2)
+      one-eighth (/ 1 8)]
+  (defmethod gm/sqrt ::complex
+    [x]
+    (let [[r i] (vals x)]
+      (if (and (gc/zero? r) (gc/zero? i))
+        0
+        (let [; The basic formula would say
+              ;    abs (gm/sqrt (ga/+ (ga/* r r) (ga/* i i)))
+	      ;    p   (gm/sqrt (ga/* one-half (ga/+ abs r)))
+	      ; but the slightly more complicated one below
+	      ; avoids overflow for large r or i.
+	      ar  (gm/abs r)
+	      ai  (gm/abs i)
+	      r8  (ga/* one-eighth ar)
+	      i8  (ga/* one-eighth ai)
+	      abs (gm/sqrt (ga/+ (ga/* r8 r8) (ga/* i8 i8)))
+	      p   (ga/* 2 (gm/sqrt (ga/+ abs r8)))
+	      q   ((ga/qsym ga /) ai (ga/* 2 p))
+	      s   (gm/sgn i)]
+	  (if (gc/< r 0)
+	    (complex q (ga/* s p))
+	    (complex p (ga/* s q))))))))
+
+;
+; Exponential function
+;
+(defmethod gm/exp ::complex
+  [x]
+  (let [[r i] (vals x)
+	exp-r (gm/exp r)
+	cos-i (gm/cos i)
+	sin-i (gm/sin i)]
+    (complex (ga/* exp-r cos-i) (ga/* exp-r sin-i))))
+
+(defmethod gm/exp ::pure-imaginary
+  [x]
+  (let [i (imag x)]
+    (complex (gm/cos i) (gm/sin i))))
