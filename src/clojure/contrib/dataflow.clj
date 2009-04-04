@@ -97,11 +97,16 @@
      (> (count cells) 1) (throwf Exception "Cell %s has multiple instances" name)
      :otherwise (throwf Exception "Cell %s is undefined" name))))
 
+(defn source-cell?
+  "Is this cell a source cell?"
+  [cell]
+  (isa? (:cell-type cell) ::source-cell))
+
 (defn get-source-cells
   "Returns a collection of source cells from the dataflow"
   [df]
   (for [cell (:cells @df)
-        :when (isa? (:cell-type cell) ::source-cell)]
+        :when (source-cell? cell)]
     cell))
 
 (defn get-value
