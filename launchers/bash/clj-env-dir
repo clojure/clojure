@@ -40,7 +40,7 @@
 #               example: clojure.contrib.repl_ln
 
 set -o errexit
-set -o nounset
+#set -o nounset
 #set -o xtrace
 
 if [ -n "${CLOJURE_EXT:-}" ]; then
