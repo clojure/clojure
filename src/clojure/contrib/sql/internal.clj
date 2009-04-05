@@ -12,8 +12,9 @@
 ;;  Created 3 October 2008
 
 (ns clojure.contrib.sql.internal
-  (:use [clojure.contrib.except :only (throw-arg)]
-	[clojure.contrib.java-utils :only (the-str)]))
+  (:use (clojure.contrib
+         [except :only (throw-arg)]
+         [java-utils :only (the-str)])))
 
 (def *db* {:connection nil :level 0})
 
