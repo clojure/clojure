@@ -16,9 +16,10 @@
 ;;  Created 2 April 2008
 
 (ns clojure.contrib.sql
-  (:use [clojure.contrib.def :only (defalias)]
-	[clojure.contrib.java-utils :only (the-str)]
-         clojure.contrib.sql.internal))
+  (:use (clojure.contrib
+         [def :only (defalias)]
+         [java-utils :only (the-str)])
+        clojure.contrib.sql.internal))
 
 (defalias find-connection find-connection*)
 (defalias connection connection*)
