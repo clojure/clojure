@@ -15,7 +15,10 @@
 
 (ns clojure.contrib.miglayout.internal
   (:import (java.awt Component))
-  (:use (clojure.contrib except fcase)))
+  (:use (clojure.contrib
+         [except :only (throwf)]
+         [fcase :only (fcase)]
+         [java-utils :only (the-str)])))
 
 (declare format-constraints)
 
@@ -33,11 +36,6 @@
      set?     (apply concat (interpose [", "] (map format-constraints c)))
      (throwf IllegalArgumentException
              "unrecognized constraint: %s (%s)" c (class c)))])
-
-(defn the-str
-  "Returns the string for x--its name if it's a keyword."
-  [x]
-  ((if (keyword? x) name str) x))
 
 (defn format-constraints
   "Returns a string representing all the constraints for one keyword-item
