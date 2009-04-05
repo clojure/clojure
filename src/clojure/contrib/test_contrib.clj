@@ -16,7 +16,7 @@
   (:use [clojure.contrib.test-is :only (run-tests)])
   (:gen-class))
 
-(def test-names [:complex-numbers :monads :str-utils :shell-out :test-graph :test-dataflow])
+(def test-names [:complex-numbers :monads :str-utils :shell-out :test-graph :test-dataflow :test-java-utils])
 
 (def test-namespaces
      (map #(symbol (str "clojure.contrib.test-contrib." (name %)))
@@ -34,3 +34,5 @@
   [& args]
   (run)
   (System/exit 0))
+
+(run)
