@@ -1,4 +1,4 @@
-;   Copyright (c) Stuart Halloway, April 2009. All rights reserved.
+;   Copyright (c) Stuart Halloway & Contributors, April 2009. All rights reserved.
 ;   The use and distribution terms for this software are covered by the
 ;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;   which can be found in the file epl-v10.html at the root of this distribution.
@@ -23,6 +23,12 @@
 ;
 ;   If something in this module violates the principle of least surprise, please 
 ;   let me (Stu) and the Clojure community know via the mailing list.
+;
+;   Contributors:
+;
+;   Stuart Halloway
+;   Stephen C. Gilardi
+;   Shawn Hoover
 
 (ns clojure.contrib.java-utils
   (:import [java.io File]))
@@ -56,5 +62,44 @@
      (File. (as-file parent) (relative-path-string child)))
   ([parent child & more]
      (reduce file (file parent child) more)))
+
+(defn the-str
+  "Returns the name or string representation of x"
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
+
+(defn get-system-property [stringable]
+  (System/getProperty (the-str stringable)))
+
+(defn set-system-properties
+  [settings]
+  "Set some system properties. Nil clears a property."
+  (doseq [[name val] settings]
+    (if val
+      (System/setProperty (the-str name) val)
+      (System/clearProperty (the-str name)))))
+
+(defmacro with-system-properties
+  "setting => property-name value
+
+  Sets the system properties to the supplied values, executes the body, and
+  sets the properties back to their original values. Values of nil are
+  translated to a clearing of the property."
+  [settings & body]
+  `(let [settings# ~settings
+         current# (reduce (fn [coll# k#]
+			    (assoc coll# k# (get-system-property k#)))
+			  {}
+			  (keys settings#))]
+     (set-system-properties settings#)       
+     (try
+      ~@body
+      (finally
+       (set-system-properties current#)))))
+
+
+
   
      

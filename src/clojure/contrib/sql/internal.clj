@@ -12,17 +12,12 @@
 ;;  Created 3 October 2008
 
 (ns clojure.contrib.sql.internal
-  (:use [clojure.contrib.except :only (throw-arg)]))
+  (:use [clojure.contrib.except :only (throw-arg)]
+	[clojure.contrib.java-utils :only (the-str)]))
 
 (def *db* {:connection nil :level 0})
 
-(defn the-str
-  "Returns the name or string representation of x"
-  [x]
-  (if (instance? clojure.lang.Named x)
-    (name x)
-    (str x)))
-
+; TODO: test and move to clojure.contrib.java-utils? 
 (defn properties
   "Converts a map from keywords, symbols, or strings to values into a
   java.util.Properties object that maps the key names to the values with

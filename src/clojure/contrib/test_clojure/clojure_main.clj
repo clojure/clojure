@@ -7,34 +7,12 @@
 ;;  from this software.
 
 (ns clojure.contrib.test-clojure.clojure-main
-  (:use clojure.contrib.test-is)
+  (:use [clojure.contrib.java-utils :only (with-system-properties)]
+	clojure.contrib.test-is)
   (:require [clojure.main :as main]))
-
-(defn- set-properties
-  [settings]
-  (doseq [[name val] settings]
-    (if val
-      (System/setProperty name val)
-      (System/clearProperty name))))
-
-(defmacro with-properties
-  "setting => property-name value
-
-  Sets the system properties to the supplied values, executes the body, and
-  sets the properties back to their original values. Values of nil are
-  translated to a clearing of the property."
-  [settings & body]
-  `(let [settings# ~(apply hash-map settings)
-         current# (map (fn [p#] [p# (System/getProperty p#)])
-                       (keys settings#))]
-     (set-properties settings#)       
-     (try
-      ~@body
-      (finally
-       (set-properties current#)))))
 
 (deftest compile-path-respects-java-property
   ;; Bug fixed in r1177; previously was hardwired to the compile-time path.
-  (with-properties ["clojure.compile.path" "compile path test"]
+  (with-system-properties {:clojure.compile.path "compile path test"}
     (main/with-bindings
       (is (= "compile path test" *compile-path*)))))
