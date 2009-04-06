@@ -69,7 +69,15 @@
   <target name="test" depends="test_clojure,test_contrib,test_datalog"
 	  description="Run all tests"/>
 
-  <target name="compile_clojure" depends="init"
+  <target name="check_hasclojure" depends="init"
+          description="Print a warning message if clojure.jar is undefined"
+          unless="hasclojure">
+    <echo>WARNING: You have not defined a path to clojure.jar so I can't compile files.
+         This will cause some parts of clojure.contrib not to work (e.g., pretty print).
+         To enable compiling run "ant -Dclojure.jar=&lt;...path to clojure.jar..&gt;"
+    </echo>
+  </target>
+  <target name="compile_clojure" depends="init,check_hasclojure"
           description="Compile Clojure sources."
           if="hasclojure">
     <java classname="clojure.lang.Compile">
