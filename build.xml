@@ -104,6 +104,8 @@
       <arg value="clojure.contrib.ns-utils"/>
       <arg value="clojure.contrib.pprint.ColumnWriter"/>
       <arg value="clojure.contrib.pprint.PrettyWriter"/>
+      <arg value="clojure.contrib.pprint"/>
+      <arg value="clojure.contrib.pprint.utilities"/>
       <arg value="clojure.contrib.probabilities.dist"/>
       <arg value="clojure.contrib.prxml"/>
       <arg value="clojure.contrib.repl-ln"/>
