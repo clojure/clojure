@@ -16,7 +16,8 @@
   (:use [clojure.contrib.test-is :only (run-tests)])
   (:gen-class))
 
-(def test-names [:complex-numbers :monads :str-utils :shell-out :test-graph :test-dataflow :test-java-utils])
+(def test-names [:complex-numbers :monads :pprint.pretty :pprint.cl-format
+                 :str-utils :shell-out :test-graph :test-dataflow :test-java-utils])
 
 (def test-namespaces
      (map #(symbol (str "clojure.contrib.test-contrib." (name %)))
