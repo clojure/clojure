@@ -1,3 +1,8 @@
+;;; cl-format.clj -- part of the pretty printer for Clojure
+
+;; by Tom Faulhaber
+;; April 3, 2009
+
 ;   Copyright (c) Tom Faulhaber, Dec 2008. All rights reserved.
 ;   The use and distribution terms for this software are covered by the
 ;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
@@ -5,6 +10,10 @@
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
+
+;; This module implements the Common Lisp compatible format function as documented
+;; in "Common Lisp the Language, 2nd edition", Chapter 22 (available online at:
+;; http://www.cs.cmu.edu/afs/cs.cmu.edu/project/ai-repository/ai/html/cltl/clm/node200.html#SECTION002633000000000000000)
 
 (in-ns 'clojure.contrib.pprint)
 
