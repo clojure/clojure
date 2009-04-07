@@ -1,9 +1,9 @@
-<project name="clojure-contrib" default="jar">
+<project name="clojure-contrib" default="jar" xmlns:mvn="urn:maven-artifact-ant">
 
   <description>
     Pack all clojure-contrib sources into a JAR. Compile those that can
     be compiled standalone if the clojure.jar property points us to
-    clojure.jar .
+    clojure.jar.
   </description>
 
   <property name="src" location="src"/>
@@ -13,6 +13,12 @@
 
   <!-- The JAR file to create. -->
   <property name="jarfile" location="clojure-contrib.jar"/>
+  <property name="slimjarfile" location="clojure-contrib-slim.jar"/>
+
+  <!-- These make sense for building on tapestry.formos.com -->
+
+  <property name="snapshot.repo.dir" location="/var/www/maven-snapshot-repository"/>
+  <property name="stable.repo.dir" location="/var/www/maven-repository"/>
 
   <target name="init">
     <tstamp/>
@@ -21,6 +27,7 @@
 
   <target name="clean" description="Remove generated files and directories.">
     <delete file="${jarfile}"/>
+    <delete file="${slimjarfile}"/>
     <delete dir="${build}"/>
   </target>
 
@@ -143,7 +150,7 @@
     </java>
   </target>
 
-  <target name="jar" description="Create jar file." depends="compile_clojure">
+  <target name="jar" description="Create jar files." depends="compile_clojure">
     <jar jarfile="${jarfile}">
       <fileset file="epl-v10.html"/>
       <fileset dir="${src}" includes="**/*.clj"/>
@@ -152,6 +159,48 @@
         <attribute name="Class-Path" value="."/>
       </manifest>
     </jar>
+
+    <jar jarfile="${slimjarfile}">
+      <fileset file="epl-v10.html"/>
+      <fileset dir="${src}" includes="**/*.clj"/>
+      <manifest>
+        <attribute name="Class-Path" value="."/>
+      </manifest>
+    </jar>
+
   </target>
+
+  <target name="clean-build" depends="clean,compile_clojure,test,jar"
+	  description="Clean build with tests."/>
+
+   <macrodef name="build-and-deploy">
+     <attribute name="target-dir" description="Root of Maven repository"/>
+     <sequential>
+	<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
+
+	<mvn:pom file="pom.xml" id="contrib.pom"/>
+
+       <mvn:dependencies pomRefId="contrib.pom"/>
+
+       <antcall target="clean-build">
+	 <param name="clojure.jar" value="${org.clojure:clojure-lang:jar}"/>
+       </antcall>
+
+       <mvn:deploy file="${jarfile}" pomrefid="contrib.pom">
+	 <attach file="${slimjarfile}" classifier="slim"/>
+	 <remoteRepository url="file:@{target-dir}"/>
+       </mvn:deploy>
+     </sequential>
+   </macrodef>
+
+  <target name="nightly-build" 
+	  description="Build and deploy to nightly (snapshot) repository.">
+    <build-and-deploy target-dir="${snapshot.repo.dir}"/>
+  </target>
+
+  <target name="stable-build" description="Build and deploy to stable repository.">
+    <build-and-deploy target-dir="${stable.repo.dir}"/>
+  </target>
+
 
 </project>
