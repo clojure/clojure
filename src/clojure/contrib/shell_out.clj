@@ -87,14 +87,17 @@
          example \"UTF-8\" or \"ISO-8859-1\") to convert the 
          sub-process's stdout to a String which is returned.
          If :bytes is given, the sub-process's stdout will be stored in 
-         a byte array and returned. 
+         a byte array and returned.  Defaults to UTF-8.
   :return-map
-         when followed by boolean true returns a map of
+         when followed by boolean true, sh returns a map of
            :exit => sub-process's exit code
            :out  => sub-process's stdout (as byte[] or String)
            :err  => sub-process's stderr (as byte[] or String)
+         when not given or followed by false, sh returns a single
+         array or String of the sub-process's stdout followed by its
+         stderr
   :env   override the process env with a map (or the underlying Java
-         String[] if you are masochist).
+         String[] if you are a masochist).
   :dir   override the process dir with a String or java.io.File.
 
   You can bind :env or :dir for multiple operations using with-sh-env
