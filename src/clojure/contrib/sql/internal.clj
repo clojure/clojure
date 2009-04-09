@@ -14,7 +14,7 @@
 (ns clojure.contrib.sql.internal
   (:use (clojure.contrib
          [except :only (throw-arg)]
-         [java-utils :only (the-str)])))
+         [java-utils :only (as-str)])))
 
 (def *db* {:connection nil :level 0})
 
@@ -26,7 +26,7 @@
   [m]
   (let [p (java.util.Properties.)]
     (doseq [[key val] (seq m)]
-      (.setProperty p (the-str key) (the-str val)))
+      (.setProperty p (as-str key) (as-str val)))
     p))
 
 (defn find-connection*

@@ -18,7 +18,7 @@
 (ns clojure.contrib.sql
   (:use (clojure.contrib
          [def :only (defalias)]
-         [java-utils :only (the-str)])
+         [java-utils :only (as-str)])
         clojure.contrib.sql.internal))
 
 (defalias find-connection find-connection*)
@@ -96,9 +96,9 @@
   [name & specs]
   (do-commands
    (format "CREATE TABLE %s (%s)"
-           (the-str name)
+           (as-str name)
            (apply str
-             (map the-str
+             (map as-str
               (apply concat
                (interpose [", "]
                 (map (partial interpose " ") specs))))))))
@@ -108,7 +108,7 @@
   or keyword"
   [name]
   (do-commands
-   (format "DROP TABLE %s" (the-str name))))
+   (format "DROP TABLE %s" (as-str name))))
 
 (defn insert-values
   "Inserts rows into a table with values for specified columns only.
@@ -117,7 +117,7 @@
   order. When inserting complete rows (all columns), consider using
   insert-rows instead."
   [table column-names & value-groups]
-  (let [column-strs (map the-str column-names)
+  (let [column-strs (map as-str column-names)
         n (count (first value-groups))
         template (apply str (interpose "," (replicate n "?")))
         columns (if (seq column-names)
@@ -125,7 +125,7 @@
                   "")]
     (apply do-prepared
            (format "INSERT INTO %s %s VALUES (%s)"
-                   (the-str table) columns template)
+                   (as-str table) columns template)
            value-groups)))
 
 (defn insert-rows
@@ -149,7 +149,7 @@
   (let [[where & params] where-params]
     (do-prepared
      (format "DELETE FROM %s WHERE %s"
-             (the-str table) where)
+             (as-str table) where)
      params)))
 
 (defn update-values
@@ -159,11 +159,11 @@
   strings or keywords (identifying columns) to updated values."
   [table where-params record]
   (let [[where & params] where-params
-        column-strs (map the-str (keys record))
+        column-strs (map as-str (keys record))
         columns (apply str (concat (interpose "=?, " column-strs) "=?"))]
     (do-prepared
      (format "UPDATE %s SET %s WHERE %s"
-             (the-str table) columns where)
+             (as-str table) columns where)
      (concat (vals record) params))))
 
 (defn update-or-insert-values

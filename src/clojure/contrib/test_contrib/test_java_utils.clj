@@ -32,15 +32,15 @@
     (is (thrown? IllegalArgumentException (file "foo" "bar" "/boom" "baz" "quux"))))
 )
 
-(deftest test-the-str
+(deftest test-as-str
   (testing "keyword to string"
-    (is (= "foo") (the-str :foo)))
+    (is (= "foo") (as-str :foo)))
   (testing "symbol to string"
-    (is (= "foo") (the-str 'foo)))
+    (is (= "foo") (as-str 'foo)))
   (testing "string to string"
-    (is (= "foo") (the-str "foo")))
+    (is (= "foo") (as-str "foo")))
   (testing "stringifying non-namish things"
-    (is (= "42") (the-str 42)))
+    (is (= "42") (as-str 42)))
 )
 
 (deftest test-get-system-property

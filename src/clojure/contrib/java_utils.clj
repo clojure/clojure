@@ -63,7 +63,7 @@
   ([parent child & more]
      (reduce file (file parent child) more)))
 
-(defn the-str
+(defn as-str
   "Returns the name or string representation of x"
   [x]
   (if (instance? clojure.lang.Named x)
@@ -71,15 +71,15 @@
     (str x)))
 
 (defn get-system-property [stringable]
-  (System/getProperty (the-str stringable)))
+  (System/getProperty (as-str stringable)))
 
 (defn set-system-properties
   [settings]
   "Set some system properties. Nil clears a property."
   (doseq [[name val] settings]
     (if val
-      (System/setProperty (the-str name) val)
-      (System/clearProperty (the-str name)))))
+      (System/setProperty (as-str name) val)
+      (System/clearProperty (as-str name)))))
 
 (defmacro with-system-properties
   "setting => property-name value

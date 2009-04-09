@@ -18,7 +18,7 @@
   (:use (clojure.contrib
          [except :only (throwf)]
          [fcase :only (fcase)]
-         [java-utils :only (the-str)])))
+         [java-utils :only (as-str)])))
 
 (declare format-constraints)
 
@@ -43,7 +43,7 @@
   [& constraints]
   (let [formatted
         (apply str
-          (map the-str
+          (map as-str
             (rest (reduce concat []
               (mapcat format-constraint constraints)))))]
     ;(prn formatted)
