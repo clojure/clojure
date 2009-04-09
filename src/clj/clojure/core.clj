@@ -1064,7 +1064,7 @@
           default   (get options :default :default)
           hierarchy (get options :hierarchy #'global-hierarchy)]
       `(def ~(with-meta mm-name m)
-         (new clojure.lang.MultiFn ~dispatch-fn ~default ~hierarchy)))))
+         (new clojure.lang.MultiFn ~(name mm-name) ~dispatch-fn ~default ~hierarchy)))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "

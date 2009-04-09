@@ -18,6 +18,7 @@ public class MultiFn extends AFn{
 final public IFn dispatchFn;
 final public Object defaultDispatchVal;
 final public IRef hierarchy;
+final String name;
 IPersistentMap methodTable;
 IPersistentMap preferTable;
 IPersistentMap methodCache;
@@ -28,7 +29,8 @@ static final Var dissoc = RT.var("clojure.core", "dissoc");
 static final Var isa = RT.var("clojure.core", "isa?");
 static final Var parents = RT.var("clojure.core", "parents");
 
-public MultiFn(IFn dispatchFn, Object defaultDispatchVal, IRef hierarchy) throws Exception{
+public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hierarchy) throws Exception{
+	this.name = name;
 	this.dispatchFn = dispatchFn;
 	this.defaultDispatchVal = defaultDispatchVal;
 	this.methodTable = PersistentHashMap.EMPTY;
@@ -53,7 +55,8 @@ synchronized public MultiFn removeMethod(Object dispatchVal) throws Exception{
 synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) throws Exception{
 	if(prefers(dispatchValY, dispatchValX))
 		throw new IllegalStateException(
-				String.format("Preference conflict: %s is already preferred to %s", dispatchValY, dispatchValX));
+				String.format("Preference conflict in multimethod '%s': %s is already preferred to %s",
+				              name, dispatchValY, dispatchValX));
 	preferTable = getPreferTable().assoc(dispatchValX, RT.conj((IPersistentCollection) RT.get(getPreferTable(),
 	                                                                                     dispatchValX,
 	                                                                                     PersistentHashSet.EMPTY),
@@ -109,7 +112,8 @@ synchronized public IFn getMethod(Object dispatchVal) throws Exception{
 private IFn getFn(Object dispatchVal) throws Exception{
 	IFn targetFn = getMethod(dispatchVal);
 	if(targetFn == null)
-		throw new IllegalArgumentException(String.format("No method for dispatch value: %s", dispatchVal));
+		throw new IllegalArgumentException(String.format("No method in multimethod '%s' for dispatch value: %s",
+		                                                 name, dispatchVal));
 	return targetFn;
 }
 
@@ -125,8 +129,8 @@ private IFn findAndCacheBestMethod(Object dispatchVal) throws Exception{
 			if(!dominates(bestEntry.getKey(), e.getKey()))
 				throw new IllegalArgumentException(
 						String.format(
-								"Multiple methods match dispatch value: %s -> %s and %s, and neither is preferred",
-								dispatchVal, e.getKey(), bestEntry.getKey()));
+								"Multiple methods in multimethod '%s' match dispatch value: %s -> %s and %s, and neither is preferred",
+								name, dispatchVal, e.getKey(), bestEntry.getKey()));
 			}
 		}
 	if(bestEntry == null)
