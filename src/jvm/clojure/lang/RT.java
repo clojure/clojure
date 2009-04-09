@@ -1487,14 +1487,15 @@ static public Class classForName(String name) throws ClassNotFoundException{
 }
 
 static public Class loadClassForName(String name) throws ClassNotFoundException{
-	try {
-		return Class.forName(name, true, baseLoader());
-	}
-	catch(ClassNotFoundException e) {
-		if(e.getCause() == null)
-			return null;
-		throw e;
-	}
+	try
+		{
+		Class.forName(name, false, baseLoader());
+		}
+	catch(ClassNotFoundException e)
+		{
+		return null;
+		}
+	return Class.forName(name, true, baseLoader());
 }
 
 static public float aget(float[] xs, int i){
