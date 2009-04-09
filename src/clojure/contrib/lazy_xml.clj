@@ -101,9 +101,10 @@
   [[elem & events]]
     (lazy-seq
       (let [sibs (siblings events)]
+        ;(prn :elem elem)
         (cons
           (struct element (:name elem) (:attrs elem) (drop-last sibs))
-          (last sibs)))))
+          (lazy-seq (last sibs))))))
 
 (defn parse-trim
   "Parses the source s, which can be a File, InputStream or String
