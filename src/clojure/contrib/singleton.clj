@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns singleton)
+(ns clojure.contrib.singleton)
 
 (defn singleton
   "Returns a memoized version of a function with no arguments.  The
