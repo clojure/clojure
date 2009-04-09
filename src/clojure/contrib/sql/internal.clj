@@ -14,20 +14,9 @@
 (ns clojure.contrib.sql.internal
   (:use (clojure.contrib
          [except :only (throw-arg)]
-         [java-utils :only (as-str)])))
+         [java-utils :only (as-properties)])))
 
 (def *db* {:connection nil :level 0})
-
-; TODO: test and move to clojure.contrib.java-utils? 
-(defn properties
-  "Converts a map from keywords, symbols, or strings to values into a
-  java.util.Properties object that maps the key names to the values with
-  all represented as strings."
-  [m]
-  (let [p (java.util.Properties.)]
-    (doseq [[key val] (seq m)]
-      (.setProperty p (as-str key) (as-str val)))
-    p))
 
 (defn find-connection*
   "Returns the current database connection (or nil if there is none)"
@@ -71,7 +60,7 @@
       (.getConnection datasource))
     (java.sql.DriverManager/getConnection
      (format "jdbc:%s:%s" subprotocol subname)
-     (properties (dissoc db-spec :classname :subprotocol :subname)))))
+     (as-properties (dissoc db-spec :classname :subprotocol :subname)))))
 
 (defn with-connection*
   "Evaluates func in the context of a new connection to a database then
