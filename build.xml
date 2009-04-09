@@ -8,6 +8,7 @@
 
   <property name="src" location="src"/>
   <property name="build" location="classes"/>
+  <property name="test.temp.dir" location="test/tmp"/>
 
   <available property="hasclojure" file="${clojure.jar}"/>
 
@@ -48,6 +49,7 @@
   <target name="test_contrib"
 	  description = "Run contrib tests"
 	  if="hasclojure">
+    <mkdir dir="${test.temp.dir}"/>
     <java classname="clojure.main">
       <classpath>
         <path location="${build}"/>

@@ -29,9 +29,11 @@
 ;   Stuart Halloway
 ;   Stephen C. Gilardi
 ;   Shawn Hoover
+;   Perry Trolard
 
 (ns clojure.contrib.java-utils
-  (:import [java.io File]))
+  (:import [java.io File]
+	   [java.util Properties]))
 
 (defmulti relative-path-string 
   "Interpret a String or java.io.File as a relative path string. 
@@ -99,6 +101,33 @@
       (finally
        (set-system-properties current#)))))
 
+
+; Not there is no corresponding props->map. Just destructure!
+(defn as-properties
+  "Convert any seq of pairs to a java.utils.Properties instance.
+   Uses as-str to convert both keys and values into strings."
+  {:tag Properties}
+  [m]
+  (let [p (Properties.)]
+    (doseq [[k v] m]
+      (.setProperty p (as-str k) (as-str v)))
+    p))
+
+(defn read-properties
+  "Read properties from file-able."
+  [file-able]
+  (with-open [f (java.io.FileInputStream. (file file-able))]
+    (doto (Properties.)
+      (.load f))))
+
+(defn write-properties
+  "Write properties to file-able."
+  {:tag Properties}
+  ([m file-able] (write-properties m file-able nil))
+  ([m file-able comments]
+    (with-open [f (java.io.FileOutputStream. (file file-able))]
+      (doto (as-properties m)
+        (.store f comments)))))
 
 
   

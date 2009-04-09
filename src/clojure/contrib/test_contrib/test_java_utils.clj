@@ -1,7 +1,8 @@
 (ns clojure.contrib.test-contrib.test-java-utils
   (:use clojure.contrib.test-is
 	clojure.contrib.java-utils)
-  (:import [java.io File]))
+  (:import [java.io File]
+	   [java.util Properties]))
 
 (deftest test-relative-path-string
   (testing "strings"
@@ -75,8 +76,25 @@
       (is (= propcount (count (System/getProperties))))))
 )
 	   
+(deftest test-as-properties
+  (let [expected (doto (Properties.)
+		   (.setProperty "a" "b")
+		   (.setProperty "c" "d"))]
+    (testing "with a map"
+      (is (= expected
+	     (as-properties {:a "b" :c "d"}))))
+    (testing "with a sequence of pairs"
+      (is (= expected
+	     (as-properties [[:a :b] [:c :d]]))))))
+
+(deftest test-read-properties
+  (is (= {"a" "b" "c" "d"}
+	 (read-properties (file "test/fixtures/test_java_utils.properties")))))
 	   
-	   
+(deftest test-write-properties
+  (write-properties [['a 'b] ['c 'd]] (file "test/tmp/test_java_utils_write_properties.properties"))
+  (is (= {"a" "b" "c" "d"}
+	 (read-properties (file "test/tmp/test_java_utils_write_properties.properties")))))
 	   
 
 
