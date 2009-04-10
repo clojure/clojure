@@ -1,5 +1,6 @@
 (ns clojure.contrib.test-contrib.test-java-utils
   (:use clojure.contrib.test-is
+	[clojure.contrib.duck-streams :only (spit)]
 	clojure.contrib.java-utils)
   (:import [java.io File]
 	   [java.util Properties]))
@@ -88,13 +89,16 @@
 	     (as-properties [[:a :b] [:c :d]]))))))
 
 (deftest test-read-properties
-  (is (= {"a" "b" "c" "d"}
-	 (read-properties (file "test/fixtures/test_java_utils.properties")))))
+  (let [f (File/createTempFile "test" "properties")]
+    (spit f "a=b\nc=d")
+    (is (= {"a" "b" "c" "d"}
+	   (read-properties f)))))
 	   
 (deftest test-write-properties
-  (write-properties [['a 'b] ['c 'd]] (file "test/tmp/test_java_utils_write_properties.properties"))
-  (is (= {"a" "b" "c" "d"}
-	 (read-properties (file "test/tmp/test_java_utils_write_properties.properties")))))
+  (let [f (File/createTempFile "test" "properties")]
+    (write-properties [['a 'b] ['c 'd]] f)
+    (is (= {"a" "b" "c" "d"}
+	   (read-properties f)))))
 	   
 
 
