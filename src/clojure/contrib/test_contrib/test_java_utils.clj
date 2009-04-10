@@ -49,13 +49,17 @@
   (testing "works the same with keywords, symbols, and strings"
     (is (= (get-system-property "java.home") (get-system-property 'java.home)))
     (is (= (get-system-property "java.home") (get-system-property :java.home))))
+  (testing "treats second arg as default"
+    (is (= "default" (get-system-property "testing.test-system-property" "default"))))
+  (testing "returns nil for missing properties"
+    (is (nil? (get-system-property "testing.test-system-property"))))
 )
     
 (deftest test-set-system-properties 
-  (testing "set and then unset a property"
+  (testing "set and then unset a property using keywords"
     (let [propname :clojure.contrib.java-utils.test-set-system-properties]
       (is (nil? (get-system-property propname)))
-      (set-system-properties {propname "foo"})
+      (set-system-properties {propname :foo})
       (is (= "foo") (get-system-property propname))
       (set-system-properties {propname nil})
       (is (nil? (get-system-property propname)))))

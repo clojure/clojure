@@ -72,15 +72,19 @@
     (name x)
     (str x)))
 
-(defn get-system-property [stringable]
-  (System/getProperty (as-str stringable)))
+(defn get-system-property 
+  "Get a system property."
+  ([stringable]
+   (System/getProperty (as-str stringable)))
+  ([stringable default]
+   (System/getProperty (as-str stringable) default)))
 
 (defn set-system-properties
-  [settings]
   "Set some system properties. Nil clears a property."
+  [settings]
   (doseq [[name val] settings]
     (if val
-      (System/setProperty (as-str name) val)
+      (System/setProperty (as-str name) (as-str val))
       (System/clearProperty (as-str name)))))
 
 (defmacro with-system-properties
