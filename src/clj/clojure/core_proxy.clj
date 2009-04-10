@@ -314,7 +314,8 @@
   to protected members, nor to super, as these capabilities cannot be
   proxied."
   [class-and-interfaces args & fs]
-   (let [bases (map resolve class-and-interfaces)
+   (let [bases (map #(or (resolve %) (throw (Exception. (str "Can't resolve: " %)))) 
+                    class-and-interfaces)
          [super interfaces] (get-super-and-interfaces bases)
          compile-effect (when *compile-files*
                           (let [[cname bytecode] (generate-proxy super interfaces)]
