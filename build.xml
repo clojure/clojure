@@ -32,8 +32,8 @@
   </target>
 
   <target name="test_clojure"
-	  description = "Run clojure tests"
-	  if="hasclojure">
+          description="Run clojure tests"
+          if="hasclojure">
     <java classname="clojure.main">
       <classpath>
         <path location="${build}"/>
@@ -46,8 +46,8 @@
   </target>
 
   <target name="test_contrib"
-	  description = "Run contrib tests"
-	  if="hasclojure">
+          description="Run contrib tests"
+          if="hasclojure">
     <java classname="clojure.main">
       <classpath>
         <path location="${build}"/>
@@ -60,8 +60,8 @@
   </target>
 
   <target name="test_datalog"
-	  description = "Run datalog tests"
-	  if="hasclojure">
+          description="Run datalog tests"
+          if="hasclojure">
     <java classname="clojure.main">
       <classpath>
         <path location="${build}"/>
@@ -74,14 +74,14 @@
   </target>
 
   <target name="test" depends="test_clojure,test_contrib,test_datalog"
-	  description="Run all tests"/>
+          description="Run all tests"/>
 
   <target name="check_hasclojure"
           description="Print a warning message if clojure.jar is undefined"
           unless="hasclojure">
     <echo>WARNING: You have not defined a path to clojure.jar so I can't compile files.
-         This will cause some parts of clojure.contrib not to work (e.g., pretty print).
-         To enable compiling, run "ant -Dclojure.jar=&lt;...path to clojure.jar..&gt;"
+      This will cause some parts of clojure.contrib not to work (e.g., pretty print).
+      To enable compiling, run "ant -Dclojure.jar=&lt;...path to clojure.jar..&gt;"
     </echo>
   </target>
 
@@ -170,36 +170,44 @@
 
   </target>
 
-  <target name="clean-build" depends="clean,compile_clojure,test,jar"
-	  description="Clean build with tests."/>
+  <target name="-setup-maven" description="Load Maven typedefs, read POM, establish dependencies.">
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
 
-   <macrodef name="build-and-deploy">
-     <attribute name="target-dir" description="Root of Maven repository"/>
-     <sequential>
-	<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
+    <mvn:pom file="pom.xml" id="contrib.pom"/>
 
-	<mvn:pom file="pom.xml" id="contrib.pom"/>
-
-       <mvn:dependencies pomRefId="contrib.pom"/>
-
-       <antcall target="clean-build">
-	 <param name="clojure.jar" value="${org.clojure:clojure-lang:jar}"/>
-       </antcall>
-
-       <mvn:deploy file="${jarfile}" pomrefid="contrib.pom">
-	 <attach file="${slimjarfile}" classifier="slim"/>
-	 <remoteRepository url="file:@{target-dir}"/>
-       </mvn:deploy>
-     </sequential>
-   </macrodef>
-
-  <target name="nightly-build" 
-	  description="Build and deploy to nightly (snapshot) repository.">
-    <build-and-deploy target-dir="${snapshot.repo.dir}"/>
+    <mvn:dependencies pomRefId="contrib.pom"/>
   </target>
 
-  <target name="stable-build" description="Build and deploy to stable repository.">
-    <build-and-deploy target-dir="${stable.repo.dir}"/>
+  <target name="clean-build" depends="clean,compile_clojure,test,jar"
+          description="Builds clojure-contrib from scratch and runs all tests."/>
+
+  <target name="ci-build" depends="-setup-maven"
+          description="Build clojure-contrib using Clojure obtained via Maven.">
+    <antcall target="clean-build">
+      <param name="clojure.jar" value="${org.clojure:clojure-lang:jar}"/>
+    </antcall>
+    <mvn:install file="${jarfile}" pomrefid="contrib.pom">
+      <attach file="${slimjarfile}" classifier="slim"/>
+    </mvn:install>
+  </target>
+
+  <macrodef name="deploy">
+    <attribute name="target-dir" description="Root of Maven repository"/>
+    <sequential>
+      <mvn:deploy file="${jarfile}" pomrefid="contrib.pom">
+        <attach file="${slimjarfile}" classifier="slim"/>
+        <remoteRepository url="file:@{target-dir}"/>
+      </mvn:deploy>
+    </sequential>
+  </macrodef>
+
+  <target name="nightly-build" depends="ci-build"
+          description="Build and deploy to nightly (snapshot) repository.">
+    <deploy target-dir="${snapshot.repo.dir}"/>
+  </target>
+
+  <target name="stable-build" depends="ci-build" description="Build and deploy to stable repository.">
+    <deploy target-dir="${stable.repo.dir}"/>
   </target>
 
 
