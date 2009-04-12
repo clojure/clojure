@@ -405,22 +405,32 @@
                                         ;field exposers
     (doseq [[f {getter :get setter :set}] exposes]
       (let [fld (find-field super (str f))
-            ftype (totype (.getType fld))]
+            ftype (totype (.getType fld))
+            static? (Modifier/isStatic (.getModifiers fld))
+            acc (+ Opcodes/ACC_PUBLIC (if static? Opcodes/ACC_STATIC 0))]
         (when getter
           (let [m (new Method (str getter) ftype (to-types []))
-                gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+                gen (new GeneratorAdapter acc m nil nil cv)]
             (. gen (visitCode))
-            (. gen loadThis)
-            (. gen getField ctype (str f) ftype)
+            (if static?
+              (. gen getStatic ctype (str f) ftype)
+              (do
+                (. gen loadThis)
+                (. gen getField ctype (str f) ftype)))
             (. gen (returnValue))
             (. gen (endMethod))))
         (when setter
-          (let [m (new Method (str setter) (. Type VOID_TYPE) (into-array [ftype]))
-                gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+          (let [m (new Method (str setter) Type/VOID_TYPE (into-array [ftype]))
+                gen (new GeneratorAdapter acc m nil nil cv)]
             (. gen (visitCode))
-            (. gen loadThis)
-            (. gen loadArgs)
-            (. gen putField ctype (str f) ftype)
+            (if static?
+              (do
+                (. gen loadArgs)
+                (. gen putStatic ctype (str f) ftype))
+              (do
+                (. gen loadThis)
+                (. gen loadArgs)
+                (. gen putField ctype (str f) ftype)))
             (. gen (returnValue))
             (. gen (endMethod))))))
                                         ;finish class def
