@@ -68,6 +68,7 @@
 (dosync (alter *simple-dispatch* conj [list? pprint-list]))
 (dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.Cons %) pprint-list]))
 (dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.LazySeq %) pprint-list]))
+(dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.ArraySeq %) pprint-list]))
 
 (def pprint-vector (formatter "~<[~;~@{~w~^ ~_~}~;]~:>"))
 (dosync (alter *simple-dispatch* conj [vector? pprint-vector]))
@@ -314,6 +315,7 @@
 (dosync (alter *code-dispatch* conj [list? pprint-code-list]))
 (dosync (alter *code-dispatch* conj [#(instance? clojure.lang.Cons %) pprint-code-list]))
 (dosync (alter *code-dispatch* conj [#(instance? clojure.lang.LazySeq %) pprint-code-list]))
+(dosync (alter *code-dispatch* conj [#(instance? clojure.lang.ArraySeq %) pprint-code-list]))
 
 (defn pprint-code-symbol [writer sym] 
   (if-let [arg-num (sym *symbol-map*)]
