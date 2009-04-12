@@ -903,6 +903,11 @@ static class CtorReader extends AFn{
 
 public static class EvalReader extends AFn{
 	public Object invoke(Object reader, Object eq) throws Exception{
+		if (!RT.booleanCast(RT.READEVAL.deref()))
+	    {
+		  throw new Exception("EvalReader not allowed when *read-eval* is false.");
+	    }
+		
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
 		if(o instanceof Symbol)

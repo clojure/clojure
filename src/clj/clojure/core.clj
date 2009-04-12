@@ -4019,6 +4019,13 @@
 
   Defaults to true")
 
+(add-doc *read-eval*
+  "When set to logical false, the EvalReader (#=(...)) is disabled in the 
+  read/load in the thread-local binding.
+  Example: (binding [*read-eval* false] (read-string \"#=(eval (def x 3))\"))
+
+  Defaults to true")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 (load "core_proxy")
