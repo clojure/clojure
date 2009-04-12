@@ -17,7 +17,8 @@
 ;; home to San Francisco.
 
 (ns clojure.contrib.pprint.examples.hexdump
-  (:use clojure.contrib.pprint)
+  (:use clojure.contrib.pprint
+        clojure.contrib.pprint.utilities)
   (:gen-class (:main true)))
 
 (def *buffer-length* 1024)
