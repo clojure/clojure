@@ -362,7 +362,9 @@ static class DefExpr implements Expr{
 					throw new Exception("Can't create defs outside of current ns");
 				}
 			IPersistentMap mm = sym.meta();
-			mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.deref()).assoc(RT.FILE_KEY, SOURCE.deref());
+            Object source_path = SOURCE_PATH.get();
+            source_path = source_path == null ? "NO_SOURCE_FILE" : source_path;
+            mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, source_path);
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr((String) SOURCE.deref(), (Integer) LINE.deref(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
