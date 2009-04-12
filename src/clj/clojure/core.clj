@@ -2344,22 +2344,6 @@
                 (clojure.lang.LineNumberingPushbackReader.))]
     (load-reader rdr)))
 
-(defn resultset-seq
-  "Creates and returns a lazy sequence of structmaps corresponding to
-  the rows in the java.sql.ResultSet rs"
-  [#^java.sql.ResultSet rs]
-    (let [rsmeta (. rs (getMetaData))
-          idxs (range 1 (inc (. rsmeta (getColumnCount))))
-          keys (map (comp keyword #(.toLowerCase #^String %))
-                    (map (fn [i] (. rsmeta (getColumnName i))) idxs))
-          row-struct (apply create-struct keys)
-          row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
-          rows (fn thisfn []
-                   (lazy-seq
-                    (when (. rs (next))
-                      (cons (apply struct row-struct (row-values)) (thisfn)))))]
-      (rows)))
-
 (defn set
   "Returns a set of the distinct elements of coll."
   [coll] (apply hash-set coll))
@@ -3436,6 +3420,25 @@
            (recur (conj s x) etc))
          true))
      false)))
+
+(defn resultset-seq
+  "Creates and returns a lazy sequence of structmaps corresponding to
+  the rows in the java.sql.ResultSet rs"
+  [#^java.sql.ResultSet rs]
+    (let [rsmeta (. rs (getMetaData))
+          idxs (range 1 (inc (. rsmeta (getColumnCount))))
+          keys (map (comp keyword #(.toLowerCase #^String %))
+                    (map (fn [i] (. rsmeta (getColumnLabel i))) idxs))
+          check-keys
+                (or (apply distinct? keys)
+                    (throw (Exception. "ResultSet must have unique column labels")))
+          row-struct (apply create-struct keys)
+          row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
+          rows (fn thisfn []
+                   (lazy-seq
+                    (when (. rs (next))
+                      (cons (apply struct row-struct (row-values)) (thisfn)))))]
+      (rows)))
 
 (defn iterator-seq
   "Returns a seq on a java.util.Iterator. Note that most collections
