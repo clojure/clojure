@@ -93,7 +93,7 @@
 (defn- generate-class [options-map]
   (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
         {:keys [name extends implements constructors methods main factory state init exposes 
-                exposes-methods prefix load-impl-ns impl-ns]} 
+                exposes-methods prefix load-impl-ns impl-ns post-init]} 
           (merge default-options options-map)
         name (str name)
         super (if extends (the-class extends) Object)
@@ -117,6 +117,7 @@
                             (make-array Type 0)))
         super-type #^Type (totype super)
         init-name (str init)
+        post-init-name (str post-init)
         factory-name (str factory)
         state-name (str state)
         main-name "main"
@@ -132,6 +133,7 @@
         sigs-by-name (apply merge-with concat {} all-sigs)
         overloads (into {} (filter (fn [[m s]] (next s)) sigs-by-name))
         var-fields (concat (when init [init-name]) 
+                           (when post-init [post-init-name])
                            (when main [main-name])
                            ;(when exposes-methods (map str (vals exposes-methods)))
                            (distinct (concat (keys sigs-by-name)
@@ -267,6 +269,8 @@
             gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
             no-init-label (. gen newLabel)
             end-label (. gen newLabel)
+            no-post-init-label (. gen newLabel)
+            end-post-init-label (. gen newLabel)
             nth-method (. Method (getMethod "Object nth(Object,int)"))
             local (. gen newLocal obj-type)]
         (. gen (visitCode))
@@ -317,6 +321,26 @@
               (. gen (loadArgs))
               (. gen (invokeConstructor super-type super-m)))
             (throw (new Exception ":init not specified, but ctor and super ctor args differ"))))
+
+        (when post-init
+          (emit-get-var gen post-init-name)
+          (. gen dup)
+          (. gen ifNull no-post-init-label)
+          (.checkCast gen ifn-type)
+          (. gen (loadThis))
+                                       ;box init args
+          (dotimes [i (count pclasses)]
+            (. gen (loadArg i))
+            (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
+                                       ;call init fn
+          (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
+                                                (arg-types (inc (count ptypes))))))
+          (. gen pop)
+          (. gen goTo end-post-init-label)
+                                       ;no init found
+          (. gen mark no-post-init-label)
+          (. gen (throwException ex-type (str impl-pkg-name "/" prefix post-init-name " not defined")))
+          (. gen mark end-post-init-label))
 
         (. gen (returnValue))
         (. gen (endMethod))
@@ -494,6 +518,14 @@
   providing a mapping from a constructor signature to a superclass
   constructor signature. When you supply this, you must supply an :init
   specifier. 
+
+  :post-init name
+
+  If supplied, names a function that will be called with the object as
+  the first argument, followed by the arguments to the constructor.
+  It will be called every time an object of this class is created,
+  immediately after all the inherited constructors have completed.
+  It's return value is ignored.
 
   :methods [ [name [param-types] return-type], ...]
 
