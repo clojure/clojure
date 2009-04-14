@@ -332,6 +332,6 @@
          (recur more (conj inits [opt arg]))
          ((main-dispatch opt) args inits)))
      (repl-opt nil nil))
-   (catch Exception e
-     (.printStackTrace e *err*)))
-  (flush))
+   (finally 
+     (flush))))
+
