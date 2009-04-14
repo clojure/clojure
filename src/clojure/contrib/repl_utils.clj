@@ -95,22 +95,16 @@
   Example: (get-source 'filter)"
   [x]
   (when-let [v (resolve x)]
-    (let [ns-str (str (ns-name (:ns ^v)))
-          path (first (re-seq #"^.*(?=/[^/]*$)"
-                              (-> ns-str
-                                (.replace "." "/")
-                                (.replace "-" "_"))))
-          fname (str path "/" (:file ^v))]
-      (when-let [strm (.getResourceAsStream (RT/baseLoader) fname)]
-        (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
-          (dotimes [_ (dec (:line ^v))] (.readLine rdr))
-          (let [text (StringBuilder.)
-                pbr (proxy [PushbackReader] [rdr]
-                      (read [] (let [i (proxy-super read)]
-                                 (.append text (char i))
-                                 i)))]
-            (read (PushbackReader. pbr))
-            (str text)))))))
+    (when-let [strm (.getResourceAsStream (RT/baseLoader) (:file ^v))]
+      (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
+        (dotimes [_ (dec (:line ^v))] (.readLine rdr))
+        (let [text (StringBuilder.)
+              pbr (proxy [PushbackReader] [rdr]
+                    (read [] (let [i (proxy-super read)]
+                               (.append text (char i))
+                               i)))]
+          (read (PushbackReader. pbr))
+          (str text))))))
 
 (defmacro source
   "Prints the source code for the given symbol, if it can find it.
