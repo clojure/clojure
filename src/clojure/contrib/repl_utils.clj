@@ -125,9 +125,9 @@
   []
   (when-not
     (dosync
-      (let [inited @break-threads]
-        (ref-set break-threads {})
-        inited))
+      (if-let [inited @break-threads]
+        inited
+        (ref-set break-threads {})))
     (sun.misc.Signal/handle
       (sun.misc.Signal. "INT")
       (proxy [sun.misc.SignalHandler] []
