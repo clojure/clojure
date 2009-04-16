@@ -1,7 +1,7 @@
 ;; Data types
 
 ;; by Konrad Hinsen
-;; last updated March 29, 2009
+;; last updated April 16, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -60,22 +60,39 @@
    as metadata. The deconstructor function must return the arguments
    to be passed to the constructor in order to create an equivalent
    object. It is used for printing and matching."
-  ([type-tag constructor-name]
-   `(deftype ~type-tag ~constructor-name
-      clojure.core/identity clojure.core/list))
-  ([type-tag constructor-name constructor]
-   `(deftype ~type-tag ~constructor-name
-      ~constructor clojure.core/list))
-  ([type-tag constructor-name constructor deconstructor]
-   `(do
-      (derive ~type-tag ::type)
-      (let [meta-map# {:type ~type-tag
-		       ::constructor
-		            (quote ~(qualified-symbol constructor-name))}]
-        (def ~constructor-name
-	  (comp (fn [~'x] (with-meta ~'x meta-map#)) ~constructor))
-	(defmethod deconstruct ~type-tag [~'x]
-	  (~deconstructor (with-meta ~'x {})))))))
+  {:arglists
+  '([type-tag constructor-name docstring? attr-map?]
+    [type-tag constructor-name docstring? attr-map? constructor]
+    [type-tag constructor-name docstring? attr-map? constructor deconstructor])}
+  [type-tag constructor-name & options]
+  (let [[docstring options] 	    (if (string? (first options))
+				      [(first options) (next options)]
+				      [nil options])
+	[attr options] 	            (if (map? (first options))
+				      [(first options) (next options)]
+				      [{} options])
+	[constructor deconstructor] options
+	constructor   		    (if (nil? constructor)
+		      		      'clojure.core/identity
+		      		      constructor)
+	deconstructor 		    (if (nil? deconstructor)
+		      		     'clojure.core/list
+		      		     deconstructor)
+	attr                        (if docstring
+				      (assoc attr :doc docstring)
+				      attr)
+	attr                        (if (meta constructor-name)
+				      (conj (meta constructor-name) attr)
+				      attr)]
+    `(do
+       (derive ~type-tag ::type)
+       (let [meta-map# {:type ~type-tag
+			::constructor
+			    (quote ~(qualified-symbol constructor-name))}]
+	 (def ~(with-meta constructor-name attr)
+	      (comp (fn [~'x] (with-meta ~'x meta-map#)) ~constructor))
+	 (defmethod deconstruct ~type-tag [~'x]
+	   (~deconstructor (with-meta ~'x {})))))))
 
 (defmacro deftype-
   "Same as deftype but the constructor is private."

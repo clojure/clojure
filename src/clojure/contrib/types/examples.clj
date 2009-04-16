@@ -18,7 +18,8 @@
 
 ; The most basic type definition. A more elaborate version could add
 ; a constructor that verifies that its argument is a map with integer values.
-(deftype ::multiset multiset)
+(deftype ::multiset multiset
+  "Multiset (demo implementation)")
 
 ; Some set operations generalized to multisets
 ; Note that the multiset constructor is nowhere called explicitly, as the
