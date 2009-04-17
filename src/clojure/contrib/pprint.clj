@@ -17,17 +17,27 @@
 ;;    Clojure is using the name "format" for its own format.
 ;;
 ;; The most complete documentation can be found at http://github.com/tomfaulhaber/cl-format
-;; where I the markdown README is currently displayed. I will be moving it into 
+;; where the markdown README is currently displayed. I will be moving it into 
 ;; clojure.contrib (either to the wiki or some other document structure) RSN.
 
 (ns 
-    #^{:doc "This module comprises two elements:
+    #^{:author "Tom Faulhaber",
+       :doc "This module comprises two elements:
 1) A pretty printer for Clojure data structures, implemented in the function \"pprint\"
 2) A Common Lisp compatible format function, implemented as \"cl-format\" because
    Clojure is using the name \"format\" for its own format.
 
 The most complete documentation can be found at http://github.com/tomfaulhaber/cl-format
-where I the markdown README is currently displayed. I will be moving it into 
+where the markdown README is currently displayed. I will be moving it into 
+clojure.contrib (either to the wiki or some other document structure) RSN.
+",
+       :wiki-doc "This module comprises two elements:
+# A pretty printer for Clojure data structures, implemented in the function \"pprint\"
+# A Common Lisp compatible format function, implemented as \"cl-format\" because
+Clojure is using the name \"format\" for its own format.
+
+The most complete documentation can be found at http://github.com/tomfaulhaber/cl-format
+where the markdown README is currently displayed. I will be moving it into 
 clojure.contrib (either to the wiki or some other document structure) RSN.
 "}
     clojure.contrib.pprint
