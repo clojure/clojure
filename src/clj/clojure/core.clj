@@ -3447,7 +3447,7 @@
   (clojure.lang.IteratorSeq/create iter))
 
 (defn enumeration-seq
-  "Returns a seq on a java.lang.Enumeration"
+  "Returns a seq on a java.util.Enumeration"
   [e]
   (clojure.lang.EnumerationSeq/create e))
 
