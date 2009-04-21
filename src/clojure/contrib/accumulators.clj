@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated April 17, 2009
+;; last updated April 21, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -216,6 +216,45 @@
 	new-min (if (nil? min-v) e (min min-v e))
 	new-max (if (nil? max-v) e (max max-v e))]
     (min-max new-min new-max)))
+
+;
+; Mean and variance accumulator
+;
+(deftype ::mean-variance mean-variance)
+
+(derive ::mean-variance ::accumulator)
+
+(defvar empty-mean-variance (mean-variance {:n 0 :mean 0 :variance 0})
+  "An empty mean-variance accumulator, combining sample mean and
+   sample variance. Only numbers can be added.")
+
+(defmethod combine ::mean-variance
+  ([mv]
+   mv)
+
+  ([mv1 mv2]
+   (let [{n1 :n mean1 :mean var1 :variance} mv1
+	 {n2 :n mean2 :mean var2 :variance} mv2
+	 n (+ n1 n2)
+	 mean (/ (+ (* n1 mean1) (* n2 mean2)) n)
+	 sq #(* % %)
+	 c    (+ (* n1 (sq (- mean mean1))) (* n2 (sq (- mean mean2))))
+	 var  (if (< n 2)
+		0
+		(/ (+ c (* (dec n1) var1) (* (dec n2) var2)) (dec n)))]
+     (mean-variance {:n n :mean mean :variance var})))
+   
+  ([mv1 mv2 & mvs]
+   (reduce combine (combine mv1 mv2) mvs)))
+
+(defmethod add ::mean-variance
+  [mv x]
+  (let [{n :n mean :mean var :variance} mv
+	n1 (inc n)
+	d (- x mean)
+	new-mean (+ mean (/ d n1))
+	new-var (if (zero? n) 0 (/ (+ (* (dec n) var) (* d (- x new-mean))) n))]
+    (mean-variance {:n n1 :mean new-mean :variance new-var})))
 
 ;
 ; Counter accumulator
