@@ -8,7 +8,7 @@
 
 (ns clojure.contrib.monads.examples
   (:use [clojure.contrib.monads
-	 :only (domonad with-monad m-lift m-seq m-when
+	 :only (domonad with-monad m-lift m-seq m-reduce m-when
 		sequence-m
 		maybe-m
 		state-m fetch-state set-state 
@@ -222,6 +222,13 @@
       [sum12 (reduce (m-lift 2 +) (replicate 12 rng))]
       (- sum12 6.)))
 
+; Such a reduction is often quite useful, so there's m-reduce predefined
+; to simplify it:
+(def gaussian2
+   (domonad state-m
+      [sum12 (m-reduce + (replicate 12 rng))]
+      (- sum12 6.)))
+
 ; The statistics should be strictly the same as above, as long as
 ; we use the same seed:
 (mean (take 1000 (value-seq gaussian2 1)))
@@ -232,7 +239,7 @@
 (with-monad state-m
    (def gaussian3
         ((m-lift 1 #(- % 6.))
-           (reduce (m-lift 2 +) (replicate 12 rng)))))
+           (m-reduce + (replicate 12 rng)))))
 
 ; Again, the statistics are the same:
 (mean (take 1000 (value-seq gaussian3 1)))

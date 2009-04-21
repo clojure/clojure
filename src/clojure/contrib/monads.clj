@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated March 24, 2009
+;; last updated April 21, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,7 +12,8 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.monads
-  (:require [clojure.contrib.accumulators]))
+  (:require [clojure.contrib.accumulators])
+  (:use [clojure.contrib.def :only (name-with-attributes)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -123,19 +124,34 @@
 (defmacro defmonadfn
   "Like defn, but for functions that use monad operations and are used inside
    a with-monad block."
+  {:arglists '([name docstring? attr-map? args expr]
+	       [name docstring? attr-map? (args expr) ...])}
+  [name & options]
+  (let [[name options]  (name-with-attributes name options)
+	fn-name (symbol (str *ns*) (format "m+%s+m" (str name)))
+	make-macro-body (fn [args]
+			  (list args `(list (quote ~fn-name)
+					    '~'m-bind '~'m-result
+					    '~'m-zero '~'m-plus
+					    ~@args)))
+	make-fn-body    (fn [args expr]
+			  (list (vec (concat ['m-bind 'm-result
+					      'm-zero 'm-plus] args))
+				expr))]
+    (if (list? (first options))
+      ; multiple arities
+      (let [arglists        (map first options)
+	    exprs           (map second options)
+	    ]
+	`(do
+	   (defmacro ~name ~@(map make-macro-body arglists))
+	   (defn ~fn-name ~@(map make-fn-body arglists exprs))))
+      ; single arity
+      (let [[args expr] options]
+	`(do
+	   (defmacro ~name ~@(make-macro-body args))
+	   (defn ~fn-name ~@(make-fn-body args expr)))))))
 
-  ([name doc-string args expr]
-    (let [doc-name (with-meta name {:doc doc-string})]
-      `(defmonadfn ~doc-name ~args ~expr)))
-
-  ([name args expr]
-   (let [fn-name (symbol (str *ns*) (format "m+%s+m" (str name)))]
-   `(do
-      (defmacro ~name ~args
-        (list (quote ~fn-name)
-	      '~'m-bind '~'m-result '~'m-zero '~'m-plus
-	      ~@args))
-      (defn ~fn-name [~'m-bind ~'m-result ~'m-zero ~'m-plus ~@args] ~expr)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -190,6 +206,19 @@
 	    (fn [v] (m-bind (chain-expr v) step)))
 	  m-result
 	  steps))
+
+(defmonadfn m-reduce
+  "Return the reduction of (m-lift 2 f) over the list of monadic values mvs
+   with initial value (m-result val)."
+  ([f mvs]
+   (if (empty? mvs)
+     (m-result (f))
+     (let [m-f (m-lift 2 f)]
+       (reduce m-f mvs))))
+  ([f val mvs]
+   (let [m-f    (m-lift 2 f)
+	 m-val  (m-result val)]
+     (reduce m-f m-val mvs))))
 
 (defmacro m-when
   "If test if logical true, return monadic value m-expr, else return
