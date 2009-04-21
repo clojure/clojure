@@ -1,7 +1,7 @@
 ;; Data types
 
 ;; by Konrad Hinsen
-;; last updated April 16, 2009
+;; last updated April 21, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -15,7 +15,8 @@
   "General and algebraic data types
 
    NOTE: This library is experimental. It may change significantly
-   with future release.")
+   with future release."
+  (:use [clojure.contrib.def :only (name-with-attributes)]))
 
 ;
 ; Utility functions
@@ -65,31 +66,21 @@
     [type-tag constructor-name docstring? attr-map? constructor]
     [type-tag constructor-name docstring? attr-map? constructor deconstructor])}
   [type-tag constructor-name & options]
-  (let [[docstring options] 	    (if (string? (first options))
-				      [(first options) (next options)]
-				      [nil options])
-	[attr options] 	            (if (map? (first options))
-				      [(first options) (next options)]
-				      [{} options])
+  (let [[constructor-name options]  (name-with-attributes
+				      constructor-name options)
 	[constructor deconstructor] options
 	constructor   		    (if (nil? constructor)
 		      		      'clojure.core/identity
 		      		      constructor)
 	deconstructor 		    (if (nil? deconstructor)
 		      		     'clojure.core/list
-		      		     deconstructor)
-	attr                        (if docstring
-				      (assoc attr :doc docstring)
-				      attr)
-	attr                        (if (meta constructor-name)
-				      (conj (meta constructor-name) attr)
-				      attr)]
+		      		     deconstructor)]
     `(do
        (derive ~type-tag ::type)
        (let [meta-map# {:type ~type-tag
 			::constructor
 			    (quote ~(qualified-symbol constructor-name))}]
-	 (def ~(with-meta constructor-name attr)
+	 (def ~constructor-name
 	      (comp (fn [~'x] (with-meta ~'x meta-map#)) ~constructor))
 	 (defmethod deconstruct ~type-tag [~'x]
 	   (~deconstructor (with-meta ~'x {})))))))
