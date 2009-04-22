@@ -122,7 +122,9 @@
       <arg value="clojure.contrib.pprint.PrettyWriter"/>
       <arg value="clojure.contrib.pprint"/>
       <arg value="clojure.contrib.pprint.utilities"/>
-      <arg value="clojure.contrib.probabilities.dist"/>
+      <arg value="clojure.contrib.probabilities.finite-distributions"/>
+      <arg value="clojure.contrib.probabilities.monte-carlo"/>
+      <arg value="clojure.contrib.probabilities.random-numbers"/>
       <arg value="clojure.contrib.prxml"/>
       <arg value="clojure.contrib.repl-ln"/>
       <arg value="clojure.contrib.repl-utils"/>

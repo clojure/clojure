@@ -6,8 +6,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns clojure.contrib.probabilities.dist.examples
- (:use [clojure.contrib.probabilities.dist
+(ns clojure.contrib.probabilities.examples-finite-distributions
+ (:use [clojure.contrib.probabilities.finite-distributions
 	:only (uniform prob cond-prob join-with dist-m choose
 	      normalize certainly cond-dist-m normalize-cond)])
  (:use [clojure.contrib.monads

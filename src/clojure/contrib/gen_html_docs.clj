@@ -523,8 +523,9 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.json.write
      'clojure.contrib.lazy-xml.with-pull
      'clojure.contrib.miglayout.internal
-     'clojure.contrib.probabilities.dist
-     'clojure.contrib.probabilities.dist.examples
+     'clojure.contrib.probabilities.finite-distributions
+     'clojure.contrib.probabilities.monte-carlo
+     'clojure.contrib.probabilities.random-numbers
      'clojure.contrib.sql.internal
      'clojure.contrib.test-clojure.evaluation
      'clojure.contrib.test-clojure.for

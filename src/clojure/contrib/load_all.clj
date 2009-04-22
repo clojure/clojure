@@ -63,7 +63,9 @@ math
 mmap
 monads
 ns-utils
-probabilities.dist
+probabilities.finite-distributions
+probabilities.monte-carlo
+probabilities.random-numbers
 prxml
 repl-ln
 repl-utils
