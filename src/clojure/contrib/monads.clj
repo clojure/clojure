@@ -410,28 +410,28 @@
   ([m nothing] (maybe-t m nothing :m-plus-default))
   ([m nothing which-m-plus]
    (let [which-m-plus    (cond (= which-m-plus :m-plus-default)
-			       (if (= ::undefined (with-monad m m-plus))
-				 :m-plus-from-maybe
-				 :m-plus-from-base)
+			         (if (= ::undefined (with-monad m m-plus))
+				   :m-plus-from-maybe
+				   :m-plus-from-base)
 			       (or (= which-m-plus :m-plus-from-base) 
 				   (= which-m-plus :m-plus-from-maybe))
-			       which-m-plus
-			       :else (throw (java.lang.IllegalArgumentException.
-					     "undefined m-plus choice")))
+			         which-m-plus
+			       :else
+			         (throw (java.lang.IllegalArgumentException.
+					 "undefined m-plus choice")))
 	 combined-m-zero   (if (= which-m-plus :m-plus-from-base)
 			     (with-monad m m-zero)
 			     (with-monad m (m-result nothing)))
 	 combined-m-plus   (if (= which-m-plus :m-plus-from-base)
 			     (with-monad m m-plus)
 			     (with-monad m
+			       ; Note: this works only if the monadic values
+                               ; can be equality-tested. It will thus not
+                               ; work as expected with the state monad,
+                               ; whose monadic values are functions.
 			       (fn [& mvs]
-				 (m-result (loop [mv (first mvs)]
-					     (if (nil? mv)
-					       nothing
-					       (let [v (m-bind mv identity)]
-						 (if (identical? v nothing)
-						   (recur (rest mvs))
-						   v))))))))]
+				 (first
+				   (drop-while #(= % combined-m-zero) mvs)))))]
      (monad [m-result (with-monad m
 		        m-result)
 	     m-bind   (with-monad m
