@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated April 21, 2009
+;; last updated April 23, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -403,31 +403,35 @@
    the base values can be invalid (represented by nothing, which defaults
    to nil). The third argument chooses if m-zero and m-plus are inherited
    from the base monad (use :m-plus-from-base) or adopt maybe-like
-   behaviour (use :m-plus-from-maybe)."
-  ([m] (maybe-t m nil :m-plus-from-base))
+   behaviour (use :m-plus-from-maybe). The default is :m-plus-from-base
+   if the base monad m has a definition for m-plus, and :m-plus-from-maybe
+   otherwise."
+  ([m] (maybe-t m nil :m-plus-default))
+  ([m nothing] (maybe-t m nothing :m-plus-default))
   ([m nothing which-m-plus]
-   (let [combined-m-zero
-	 (cond
-	  (identical? which-m-plus :m-plus-from-base)
-	  (with-monad m m-zero)
-	  (identical? which-m-plus :m-plus-from-maybe)
-	  (with-monad m (m-result nothing))
-	  :else ::undefined)
-	 combined-m-plus
-	 (cond
-	  (identical? which-m-plus :m-plus-from-base)
-	  (with-monad m m-plus)
-	  (identical? which-m-plus :m-plus-from-maybe)
-	  (with-monad m
-	    (fn [& mvs]
-	      (m-result (loop [mv (first mvs)]
-			  (if (nil? mv)
-			    nothing
-			    (let [v (m-bind mv identity)]
-			      (if (identical? v nothing)
-				(recur (rest mvs))
-				v)))))))
-	  :else ::undefined)]
+   (let [which-m-plus    (cond (= which-m-plus :m-plus-default)
+			       (if (= ::undefined (with-monad m m-plus))
+				 :m-plus-from-maybe
+				 :m-plus-from-base)
+			       (or (= which-m-plus :m-plus-from-base) 
+				   (= which-m-plus :m-plus-from-maybe))
+			       which-m-plus
+			       :else (throw (java.lang.IllegalArgumentException.
+					     "undefined m-plus choice")))
+	 combined-m-zero   (if (= which-m-plus :m-plus-from-base)
+			     (with-monad m m-zero)
+			     (with-monad m (m-result nothing)))
+	 combined-m-plus   (if (= which-m-plus :m-plus-from-base)
+			     (with-monad m m-plus)
+			     (with-monad m
+			       (fn [& mvs]
+				 (m-result (loop [mv (first mvs)]
+					     (if (nil? mv)
+					       nothing
+					       (let [v (m-bind mv identity)]
+						 (if (identical? v nothing)
+						   (recur (rest mvs))
+						   v))))))))]
      (monad [m-result (with-monad m
 		        m-result)
 	     m-bind   (with-monad m

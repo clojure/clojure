@@ -176,8 +176,9 @@
   (normalize-cond
     (domonad cond-dist-m
       [die    prior
-       number (get dice die)]
-      (when (= number observation) die))))
+       number (get dice die)
+       :when  (= number observation) ]
+      die)))
 
 ; Add one observation.
 (add-observation prior 1)
@@ -197,7 +198,8 @@
       (normalize-cond
         (domonad
           [die    prior
-           nums   (n-nums die)]
-	  (when (= nums observations) die))))))
+           nums   (n-nums die)
+	   :when  (= nums observations)]
+	  die)))))
 
 (add-observations prior [1 3 7])

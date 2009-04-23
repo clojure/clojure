@@ -114,13 +114,16 @@
 
 )
 
-(defn cond-prob
-  "Returns the conditional probability for the values in dist that satisfy
-   the predicate pred."
-  [pred dist]
-  (normalize-cond
-    (with-monad cond-dist-m
-      (m-bind dist (fn [v] (m-result (when (pred v) v)))))))
+(with-monad cond-dist-m
+  (defn cond-prob
+    "Returns the conditional probability for the values in dist that satisfy
+     the predicate pred."
+    [pred dist]
+    (normalize-cond
+      (domonad
+        [v dist
+	 :when (pred v)]
+	v))))
 
 ; Select (with equal probability) N items from a sequence
 
