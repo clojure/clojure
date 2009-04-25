@@ -146,8 +146,10 @@
 
 (defmethod write-token :nl [#^clojure.contrib.pprint.PrettyWriter this token]
 ;  (prlabel wt @(:done-nl (:logical-block token)))
-  (if (and (not (= (:type token) :fill))
-           @(:done-nl (:logical-block token)))
+;  (prlabel wt (:type token) (= (:type token) :mandatory))
+  (if (or (= (:type token) :mandatory)
+           (and (not (= (:type token) :fill))
+                @(:done-nl (:logical-block token))))
     (emit-nl this token)
     (if-let [#^String tws (getf :trailing-white-space)]
       (.col-write this tws)))

@@ -47,6 +47,15 @@
     (cl-format nil "~:<LIST ~@_~W ~@_~W ~@_~W~:>" '(first second third)))
   "(LIST first second third)")
 
+(simple-tests mandatory-fill-test
+  (cl-format nil
+             "<pre>~%~<Usage: ~:I~@{*~a*~^~:@_~}~:>~%</pre>~%"
+             [ "hello" "gooodbye" ])
+  "<pre>
+Usage: *hello*
+       *gooodbye*
+</pre>
+")
 
 (simple-tests prefix-suffix-test
   (binding [*print-pprint-dispatch* *simple-dispatch*
