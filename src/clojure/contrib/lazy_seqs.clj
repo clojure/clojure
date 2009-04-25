@@ -15,7 +15,7 @@
 ;;           7 from consideration by incrementing past them. Also inspired
 ;;           by code from Christophe Grand in [2].
 ;;
-;;  fibs   - attributed to 'every haskell beginner tutorial'
+;;  fibs   - all the Fibonacci numbers
 ;;
 ;;  powers-of-2 - all the powers of 2
 ;;
@@ -53,12 +53,12 @@
       (primes-from 11 wheel))))
   "Lazy sequence of all the prime numbers.")
 
-(defn fibs []
+(defn fibs
   "Returns a lazy sequence of all the Fibonacci numbers."
+  []
   (map first (iterate (fn [[a b]] [b (+ a b)]) [0 1])))
 
-(defn powers-of-2 []
+(defn powers-of-2
   "Returns a lazy sequence of all the powers of 2"
+  []
   (iterate #(bit-shift-left % 1) 1))
-
-
