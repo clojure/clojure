@@ -16,10 +16,9 @@ final public class Stream implements Seqable, Streamable, Sequential {
 
     static final ISeq NO_SEQ = new Cons(null, null);
 
-    ISeq seq = NO_SEQ;
+    ISeq sequence = NO_SEQ;
     final IFn src;
 	final IFn xform;
-    Cons pushed = null;
     IFn tap = null;
 
 	public Stream(IFn src){
@@ -32,27 +31,28 @@ final public class Stream implements Seqable, Streamable, Sequential {
 		this.xform = xform;
     }
 
-	final synchronized public ISeq seq(){
-		if(seq == NO_SEQ)
-			{
-			tap();
-			seq = makeSeq(tap);
-			}
-		return seq;
+	final public ISeq seq(){
+		return sequence().seq();
 	}
 
-	static ISeq makeSeq(final IFn tap){
-		return RT.seq(new LazySeq(new AFn(){
+	final synchronized public ISeq sequence(){
+		if(sequence == NO_SEQ)
+			{
+			tap();
+			sequence = makeSequence(tap);
+			}
+		return sequence;
+	}
+
+	static ISeq makeSequence(final IFn tap){
+		return new LazySeq(new AFn(){
 				public Object invoke() throws Exception{
-					Object v;
-					do {
-						v = tap.invoke();
-					} while(v == RT.SKIP);
+					Object v = tap.invoke();
 					if(v == RT.EOS)
 						return null;
 					return new Cons(v, new LazySeq(this));
 				}
-			}));
+			});
 	}
 
     final synchronized public Stream stream() throws Exception {
@@ -68,16 +68,21 @@ final public class Stream implements Seqable, Streamable, Sequential {
 
 	static IFn makeTap(final IFn xform, final IFn src){
 		return new AFn(){
-			public Object invoke() throws Exception{
+			final synchronized public Object invoke() throws Exception{
+				if(xform == null)
+					return src.invoke();
 				Object v;
+				Object xv;
 				do {
 					v = src.invoke();
-				} while(v == RT.SKIP);
-				if(xform == null || v == RT.EOS)
-					return v;
-				return xform.invoke(v);
+					if(v == RT.EOS)
+						return v;
+					xv = xform.invoke(v);
+				} while(xv == RT.SKIP);
+				return xv;
 			}
 		};
 	}
+
 
 }

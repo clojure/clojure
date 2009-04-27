@@ -423,8 +423,7 @@
   "Takes a body of expressions that returns an ISeq or nil, and yields
   a Seqable object that will invoke the body only the first time seq
   is called, and will cache the result and return it on all subsequent
-  seq calls. Any closed over locals will be cleared prior to the tail
-  call of body."  
+  seq calls."  
   [& body]
   (list 'new 'clojure.lang.LazySeq (list* '#^{:once true} fn* [] body)))    
 
@@ -455,8 +454,7 @@
   "Takes a body of expressions and yields a Delay object that will
   invoke the body only the first time it is forced (with force), and
   will cache the result and return it on all subsequent force
-  calls. Any closed over locals will be cleared prior to the tail call
-  of body, (i.e. they will not be retained)."  
+  calls."  
   [& body]
     (list 'new 'clojure.lang.Delay (list* `#^{:once true} fn* [] body)))
 
@@ -1465,14 +1463,19 @@
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
+(defn stream? 
+  "Returns true if x is an instance of Stream"
+  [x] (instance? clojure.lang.Stream x))
+
 
 (defn sequence
   "Coerces coll to a (possibly empty) sequence, if it is not already
   one. Will not force a lazy seq. (sequence nil) yields ()"  
   [coll]
-   (if (seq? coll)
-     coll
-     (or (seq coll) ())))
+   (cond 
+    (seq? coll) coll
+    (stream? coll) (.sequence #^clojure.lang.Stream coll)
+    :else (or (seq coll) ())))
 
 (defn every?
   "Returns true if (pred x) is logical true for every x in coll, else
@@ -3936,7 +3939,7 @@
                        (split-at (if (= :>> (second args)) 3 2) args)
                        n (count clause)]
                  (cond
-                  (= 0 n) `(throw (IllegalArgumentException. "No matching clause"))
+                  (= 0 n) `(throw (IllegalArgumentException. (str "No matching clause: " ~expr)))
                   (= 1 n) a
                   (= 2 n) `(if (~pred ~a ~expr)
                              ~b
