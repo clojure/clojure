@@ -6,7 +6,7 @@
     <groupId>org.clojure</groupId>
     <artifactId>clojure-lang</artifactId>
     <name>clojure-lang</name>
-    <version>1.0-SNAPSHOT</version>
+    <version>@clojure-version@</version>
     <url>http://clojure.org/</url>
 
     <description>Clojure core environment and runtime library.</description>

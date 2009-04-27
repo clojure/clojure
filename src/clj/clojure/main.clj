@@ -243,7 +243,7 @@
   present"
   [[_ & args] inits]
   (when-not (some #(= eval-opt (init-dispatch (first %))) inits)
-    (println "Clojure"))
+    (println "Clojure" (clojure-version)))
   (repl :init #(initialize args inits))
   (prn)
   (System/exit 0))
@@ -320,7 +320,7 @@
 
   The init options may be repeated and mixed freely, but must appear before
   any main option. The appearance of any eval option before running a repl
-  suppresses the usual repl greeting message: \"Clojure\".
+  suppresses the usual repl greeting message: \"Clojure ~(clojure-version)\".
 
   Paths may be absolute or relative in the filesystem or relative to
   classpath. Classpath-relative paths have prefix of @ or @/"
