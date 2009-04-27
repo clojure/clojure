@@ -199,6 +199,15 @@
   ;;
   ;;
   ;;
+  ;; SAVING TEST OUTPUT TO A FILE
+  ;;
+  ;; All the test reporting functions write to the var *test-out*.  By
+  ;; default, this is the same as *out*, but you can rebind it to any
+  ;; PrintWriter.  For example, it could be a file opened with
+  ;; clojure.contrib.duck-streams/writer.
+  ;;
+  ;;
+  ;;
   ;; EXTENDING TEST-IS (ADVANCED)
   ;;
   ;; You can extend the behavior of the "is" macro by defining new
@@ -207,19 +216,27 @@
   ;; quoted forms to be evaluated.
   ;;
   ;; You can plug in your own test-reporting framework by rebinding
-  ;; the "report" function: (report event msg expected actual)
+  ;; the "report" function: (report event)
   ;;
-  ;; "report" will be called once for each assertion.  The "event"
-  ;; argument will give the outcome of the assertion: one of :pass,
-  ;; :fail, or :error.  The "msg" argument will be the message given
-  ;; to the "is" macro.  The "expected" argument will be a quoted form
-  ;; of the original assertion.  The "actual" argument will be a
-  ;; quoted form indicating what actually occurred.  The "testing"
-  ;; strings will be a list in "*testing-contexts*", and the vars
-  ;; being tested will be a list in "*testing-vars*".
+  ;; The 'event' argument is a map.  It will always have a :type key,
+  ;; whose value will be a keyword signaling the type of event being
+  ;; reported.  Standard events with :type value of :pass, :fail, and
+  ;; :error are called when an assertion passes, fails, and throws an
+  ;; exception, respectively.  In that case, the event will also have
+  ;; the following keys:
   ;;
-  ;; (report :info msg nil nil) is used to print informational
-  ;; messages, such as the name of the namespace being tested.
+  ;;   :expected   The form that was expected to be true
+  ;;   :actual     A form representing what actually occurred
+  ;;   :message    The string message given as an argument to 'is'
+  ;;
+  ;; The "testing" strings will be a list in "*testing-contexts*", and
+  ;; the vars being tested will be a list in "*testing-vars*".
+  ;;
+  ;; Your "report" function should wrap any printing calls in the
+  ;; "with-test-out" macro, which rebinds *out* to the current value
+  ;; of *test-out*.
+  ;;
+  ;; For additional event types, see the examples in the code below.
 
   ) ;; end comment
 
