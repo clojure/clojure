@@ -37,7 +37,7 @@ public class Compiler implements Opcodes{
 static final Symbol DEF = Symbol.create("def");
 static final Symbol LOOP = Symbol.create("loop*");
 static final Symbol RECUR = Symbol.create("recur");
-static final Symbol IF = Symbol.create("if*");
+static final Symbol IF = Symbol.create("if");
 static final Symbol LET = Symbol.create("let*");
 static final Symbol LETFN = Symbol.create("letfn*");
 static final Symbol DO = Symbol.create("do");

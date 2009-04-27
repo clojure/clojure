@@ -38,10 +38,6 @@
  fn (fn* fn [& decl] (cons 'fn* decl)))
 
 (def
- #^{:macro true}
- if (fn* if [& decl] (cons 'if* decl)))
-
-(def
  #^{:arglists '([coll])
     :doc "Returns the first item in the collection. Calls seq on its
     argument. If coll is nil, returns nil."}
@@ -293,20 +289,6 @@
                   (list 'var name))))
 
 (. (var defmacro) (setMacro))
-
-(defmacro assert-if-lazy-seq? {:private true} []
-  (let [prop (System/getProperty "clojure.assert-if-lazy-seq")]
-    (if prop
-      (if (clojure.lang.Util/equals prop "") nil true))))
-
-(defmacro if [tst & etc]
-  (if* (assert-if-lazy-seq?)
-    (let [tstsym 'G__0_0]
-      (list 'clojure.core/let [tstsym tst]
-	(list 'if* (list 'clojure.core/instance? clojure.lang.LazySeq tstsym)
-           (list 'throw (list 'new Exception "LazySeq used in 'if'"))
-	   (cons 'if* (cons tstsym etc)))))
-    (cons 'if* (cons tst etc))))
 
 (defmacro when
   "Evaluates test. If logical true, evaluates body in an implicit do."

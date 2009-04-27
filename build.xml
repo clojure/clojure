@@ -15,7 +15,6 @@
   <property name="clojure_jar" location="clojure.jar"/>
   <property name="slim_jar" location="clojure-slim.jar"/>
   <property name="src_jar" location="clojure-sources.jar"/>
-  <property name="clojure.assert-if-lazy-seq" value=""/>
 
   <!-- These make sense for building on tapestry.formos.com -->
 
@@ -38,7 +37,6 @@
     <java classname="clojure.lang.Compile"
           classpath="${build}:${cljsrc}">
       <sysproperty key="clojure.compile.path" value="${build}"/>
-      <sysproperty key="clojure.assert-if-lazy-seq" value="${clojure.assert-if-lazy-seq}"/>
       <arg value="clojure.core"/>
       <arg value="clojure.main"/>
       <arg value="clojure.set"/>
