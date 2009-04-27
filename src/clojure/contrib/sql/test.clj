@@ -173,6 +173,29 @@
     ;; untouched.
     (throw (Exception. "sql/test exception")))))
 
+(defn db-sql-exception
+  "Demonstrate an sql exception"
+  []
+  (sql/with-connection
+   db
+   (sql/transaction
+    (sql/insert-values
+     :fruit
+     [:name :appearance]
+     ["Grape" "yummy"]
+     ["Pear" "bruised"]
+     ["Apple" "strange" "whoops"]))))
+
+(defn db-batchupdate-exception
+  "Demonstrate a batch update exception"
+  []
+  (sql/with-connection
+   db
+   (sql/transaction
+    (sql/do-commands
+     "DROP TABLE fruit"
+     "DROP TABLE fruit"))))
+
 (defn db-rollback
   "Demonstrate a rollback-only trasaction"
   []
