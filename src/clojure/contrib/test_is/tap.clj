@@ -66,45 +66,47 @@
   (println "not ok" msg))
 
 ;; This multimethod will override test-is/report
-(defmulti tap-report (fn [event msg expected actual] event))
+(defmulti tap-report (fn [data] (:type data)))
 
-(defmethod tap-report :info [event msg expected actual]
-  (print-tap-diagnostic msg))
+(defmethod tap-report :default [data]
+  (t/with-test-out
+   (print-tap-diagnostic (pr-str data))))
 
-(defmethod tap-report :pass [event msg expected actual]
-  (t/inc-report-counter :pass)
-  (print-tap-pass (t/testing-vars-str))
-  (when (seq t/*testing-contexts*)
-    (print-tap-diagnostic (t/testing-contexts-str)))
-  (when msg
-    (print-tap-diagnostic msg))
-  (print-tap-diagnostic (str "expected:" (pr-str expected)))
-  (print-tap-diagnostic (str "  actual:" (pr-str actual))))
+(defmethod tap-report :pass [data]
+  (t/with-test-out
+   (t/inc-report-counter :pass)
+   (print-tap-pass (t/testing-vars-str))
+   (when (seq t/*testing-contexts*)
+     (print-tap-diagnostic (t/testing-contexts-str)))
+   (when (:message data)
+     (print-tap-diagnostic (:message data)))
+   (print-tap-diagnostic (str "expected:" (pr-str (:expected data))))
+   (print-tap-diagnostic (str "  actual:" (pr-str (:actual data))))))
 
-(defmethod tap-report :error [event msg expected actual]
-  (t/inc-report-counter :error)
-  (print-tap-fail (t/testing-vars-str))
-  (when (seq t/*testing-contexts*)
-    (print-tap-diagnostic (t/testing-contexts-str)))
-  (when msg
-    (print-tap-diagnostic msg))
-  (print-tap-diagnostic "expected:" (pr-str expected))
-  (print-tap-diagnostic "  actual: ")
-  (print-tap-diagnostic
-   (with-out-str
-    (if (instance? Throwable actual)
-      (stack/print-cause-trace actual t/*stack-trace-depth*)
-      (prn actual)))))
+(defmethod tap-report :error [data]
+  (t/with-test-out
+   (t/inc-report-counter :error)
+   (print-tap-fail (t/testing-vars-str))
+   (when (seq t/*testing-contexts*)
+     (print-tap-diagnostic (t/testing-contexts-str)))
+   (when (:message data)
+     (print-tap-diagnostic (:message data)))
+   (print-tap-diagnostic "expected:" (pr-str (:expected data)))
+   (print-tap-diagnostic "  actual: ")
+   (print-tap-diagnostic
+    (with-out-str
+      (if (instance? Throwable (:actual data))
+        (stack/print-cause-trace (:actual data) t/*stack-trace-depth*)
+        (prn (:actual data)))))))
 
-;; This function will overriede test-is/print-results
-(defn tap-print-results [r]
-  (print-tap-plan (+ (:pass r) (:fail r) (:error r))))
+(defmethod tap-report :summary [data]
+  (t/with-test-out
+   (print-tap-plan (+ (:pass data) (:fail data) (:error data)))))
 
 
 (defmacro with-tap-output
   "Execute body with modified test-is reporting functions that produce
   TAP output"
   [& body]
-  `(binding [t/report tap-report
-             t/print-results tap-print-results]
+  `(binding [t/report tap-report]
      ~@body))

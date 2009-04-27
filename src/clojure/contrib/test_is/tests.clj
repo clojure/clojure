@@ -89,12 +89,21 @@
 
 (declare original-report)
 
-(defn custom-report [event msg expected actual]
-  (if (or (and (= event :fail) (= msg "Should fail"))
-          (and (= event :pass) (= msg "Should pass"))
-          (and (= event :error) (= msg "Should error")))
-    (original-report :pass msg expected actual)
-    (original-report :fail (str msg " but got " event) expected actual)))
+(defn custom-report [data]
+  (let [event (:type data)
+        msg (:message data)
+        expected (:expected data)
+        actual (:actual data)
+        passed (cond
+                 (= event :fail) (= msg "Should fail")
+                 (= event :pass) (= msg "Should pass")
+                 (= event :error) (= msg "Should error")
+                 :else true)]
+    (if passed
+      (original-report {:type :pass, :message msg,
+                        :expected expected, :actual actual})
+      (original-report {:type :fail, :message (str msg " but got " event)
+                        :expected expected, :actual actual}))))
 
 ;; test-ns-hook will be used by test-is/test-ns to run tests in this
 ;; namespace.
