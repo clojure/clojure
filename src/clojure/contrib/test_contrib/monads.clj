@@ -1,7 +1,7 @@
 ;; Test routines for monads.clj
 
 ;; by Konrad Hinsen
-;; last updated March 19, 2009
+;; last updated March 28, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,10 +12,10 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-contrib.monads
-  (:use [clojure.contrib.test-is :only (deftest are run-tests)]
+  (:use [clojure.contrib.test-is :only (deftest is are run-tests)]
 	[clojure.contrib.monads
 	 :only (with-monad domonad m-lift m-seq m-chain
-		sequence-m maybe-m maybe-t)]))
+		sequence-m maybe-m state-m maybe-t sequence-t)]))
 
 (deftest sequence-monad
   (with-monad sequence-m
@@ -55,3 +55,24 @@
           '(nil 2 nil 4 nil 6 nil 8 nil 10)
         (pairs (for [n (range 5)] (when (odd? n) n)))
           '(nil nil (1 1) nil (1 3) nil nil nil (3 1) nil (3 3) nil nil)))))
+
+(deftest state-maybe-monad
+  (with-monad (maybe-t state-m)
+    (is (= (for [[a b c d] (list [1 2 3 4] [nil 2 3 4] [ 1 nil 3 4]
+				 [nil nil 3 4] [1 2 nil nil])]
+	     (let [f (domonad
+		       [x (m-plus (m-result a) (m-result b))
+			y (m-plus (m-result c) (m-result d))]
+		       (+ x y))]
+	       (f :state)))
+	   (list [4 :state] [5 :state] [4 :state] [nil :state] [nil :state])))))
+
+(deftest state-seq-monad
+  (with-monad (sequence-t state-m)
+    (is (= (let [[a b c d] [1 2 10 20]
+		 f (domonad
+		     [x (m-plus (m-result a) (m-result b))
+		      y (m-plus (m-result c) (m-result d))]
+		     (+ x y))]
+	     (f :state)))
+	(list [(list 11 21 12 22) :state]))))

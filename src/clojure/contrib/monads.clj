@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated April 23, 2009
+;; last updated April 28, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -398,66 +398,85 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defmacro monad-transformer
+   "Define a monad transforer in terms of the monad operations and the base
+    monad. The argument which-m-plus chooses if m-zero and m-plus are taken
+    from the base monad or from the transformer."
+  [base which-m-plus operations]
+  `(let [which-m-plus# (cond (= ~which-m-plus :m-plus-default)
+			       (if (= ::undefined (with-monad ~base ~'m-plus))
+			         :m-plus-from-transformer
+			         :m-plus-from-base)
+			     (or (= ~which-m-plus :m-plus-from-base)
+				 (= ~which-m-plus :m-plus-from-transformer))
+			       ~which-m-plus
+			     :else
+			       (throw (java.lang.IllegalArgumentException.
+				       "undefined m-plus choice")))
+	 combined-monad# (monad ~operations)]
+    (if (= which-m-plus# :m-plus-from-base)
+      (assoc combined-monad#
+	:m-zero (with-monad ~base ~'m-zero)
+	:m-plus (with-monad ~base ~'m-plus))
+      combined-monad#)))
+       
 (defn maybe-t
   "Monad transformer that transforms a monad m into a monad in which
    the base values can be invalid (represented by nothing, which defaults
    to nil). The third argument chooses if m-zero and m-plus are inherited
    from the base monad (use :m-plus-from-base) or adopt maybe-like
-   behaviour (use :m-plus-from-maybe). The default is :m-plus-from-base
-   if the base monad m has a definition for m-plus, and :m-plus-from-maybe
-   otherwise."
+   behaviour (use :m-plus-from-transformer). The default is :m-plus-from-base
+   if the base monad m has a definition for m-plus, and
+   :m-plus-from-transformer otherwise."
   ([m] (maybe-t m nil :m-plus-default))
   ([m nothing] (maybe-t m nothing :m-plus-default))
   ([m nothing which-m-plus]
-   (let [which-m-plus    (cond (= which-m-plus :m-plus-default)
-			         (if (= ::undefined (with-monad m m-plus))
-				   :m-plus-from-maybe
-				   :m-plus-from-base)
-			       (or (= which-m-plus :m-plus-from-base) 
-				   (= which-m-plus :m-plus-from-maybe))
-			         which-m-plus
-			       :else
-			         (throw (java.lang.IllegalArgumentException.
-					 "undefined m-plus choice")))
-	 combined-m-zero   (if (= which-m-plus :m-plus-from-base)
-			     (with-monad m m-zero)
-			     (with-monad m (m-result nothing)))
-	 combined-m-plus   (if (= which-m-plus :m-plus-from-base)
-			     (with-monad m m-plus)
-			     (with-monad m
-			       ; Note: this works only if the monadic values
-                               ; can be equality-tested. It will thus not
-                               ; work as expected with the state monad,
-                               ; whose monadic values are functions.
-			       (fn [& mvs]
-				 (first
-				   (drop-while #(= % combined-m-zero) mvs)))))]
-     (monad [m-result (with-monad m
-		        m-result)
-	     m-bind   (with-monad m
-		        (fn m-bind-maybe-t [mv f]
-			  (m-bind mv
-				  (fn [x]
-				    (if (identical? x nothing)
-				      (m-result nothing)
-				      (f x))))))
-	     m-zero   combined-m-zero
-	     m-plus   combined-m-plus
-	     ]))))
+   (monad-transformer m which-m-plus
+     [m-result (with-monad m m-result)
+      m-bind   (with-monad m
+		 (fn m-bind-maybe-t [mv f]
+		   (m-bind mv
+			   (fn [x]
+			     (if (identical? x nothing)
+			       (m-result nothing)
+			       (f x))))))
+      m-zero   (with-monad m (m-result nothing))
+      m-plus   (with-monad m
+	         (fn m-plus-maybe-t [& mvs]
+		   (if (empty? mvs)
+		     (m-result nothing)
+		     (m-bind (first mvs)
+			     (fn [v]
+			       (if (= v nothing)
+				 (apply m-plus-maybe-t (rest mvs))
+				 (m-result v)))))))
+      ])))
 
 (defn sequence-t
   "Monad transformer that transforms a monad m into a monad in which
-   the base values are sequences."
-  [m]
-  (monad [m-result (with-monad m
-		     (fn m-result-sequence-t [v]
-		       (m-result (list v))))
-	  m-bind   (with-monad m
-		     (fn m-bind-sequence-t [mv f]
-		       (m-bind mv
-			       (fn [xs]
-				 (apply concat (map f xs))))))
-	  ]))
+   the base values are sequences. The argument which-m-plus chooses
+   if m-zero and m-plus are inherited from the base monad
+   (use :m-plus-from-base) or adopt sequence-like
+   behaviour (use :m-plus-from-transformer). The default is :m-plus-from-base
+   if the base monad m has a definition for m-plus, and
+   :m-plus-from-transformer otherwise."
+  ([m] (sequence-t m :m-plus-default))
+  ([m which-m-plus]
+   (monad-transformer m which-m-plus
+     [m-result (with-monad m
+	         (fn m-result-sequence-t [v]
+		   (m-result (list v))))
+      m-bind   (with-monad m
+		 (fn m-bind-sequence-t [mv f]
+		   (m-bind mv
+			   (fn [xs]
+			     (m-fmap #(apply concat %)
+				     (m-map f xs))))))
+      m-zero   (with-monad m (m-result (list)))
+      m-plus   (with-monad m
+                 (fn m-plus-sequence-t [& mvs]
+		   (m-reduce concat (list) mvs)))
+      ])))
 
 ;; Contributed by Jim Duey
 (defn state-t
