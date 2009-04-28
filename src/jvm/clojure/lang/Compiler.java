@@ -4594,6 +4594,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 				{
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr((Integer) LINE.deref(), c, sym.name);
+				throw new Exception("Unable to find static field: " + sym.name + " in " + c);
 				}
 			}
 		}
