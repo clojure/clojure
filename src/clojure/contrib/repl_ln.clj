@@ -135,7 +135,7 @@
   [& args]
   (repl :init
         (fn []
-          (println "Clojure")
+          (println "Clojure" (clojure-version))
           (in-ns 'user)
           (process-command-line args))))
 
