@@ -46,6 +46,9 @@
     <filter token="clojure-version" value="${clojure.version.label}"/>
   </filterset>
 	
+  <property name="clojure_noversion_jar" location="clojure.jar"/>
+  <property name="slim_noversion_jar" location="clojure-slim.jar"/>
+  <property name="src_noversion_jar" location="clojure-sources.jar"/>
   <property name="clojure_jar" location="clojure-${clojure.version.label}.jar"/>
   <property name="slim_jar" location="clojure-slim-${clojure.version.label}.jar"/>
   <property name="src_jar" location="clojure-sources-${clojure.version.label}.jar"/>
@@ -104,6 +107,7 @@
         <attribute name="Class-Path" value="."/>
       </manifest>
     </jar>
+    <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}" />
   </target>
 
   <target name="clojure-slim" depends="compile-java"
@@ -121,6 +125,7 @@
         <attribute name="Class-Path" value="."/>
       </manifest>
     </jar>
+    <copy file="${slim_jar}" tofile="${slim_noversion_jar}" />
   </target>
 
   <target name="clojure-sources" depends="init"
@@ -129,6 +134,7 @@
       <fileset dir="${cljsrc}"
                includes="clojure/version.properties"/>
     </jar>
+    <copy file="${src_jar}" tofile="${src_noversion_jar}" />
   </target>
 
   <target name="jar" depends="clojure"/>

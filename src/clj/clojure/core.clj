@@ -4091,9 +4091,9 @@
                                            "clojure/version.properties")
       properties     (doto (new java.util.Properties) (.load version-stream))
       prop (fn [k] (.getProperty properties (str "clojure.version." k)))
-      clojure-version {:major       (prop "major")
-                       :minor       (prop "minor")
-                       :incremental (prop "incremental")
+      clojure-version {:major       (Integer/valueOf (prop "major"))
+                       :minor       (Integer/valueOf (prop "minor"))
+                       :incremental (Integer/valueOf (prop "incremental"))
                        :qualifier   (prop "qualifier")}]
   (def *clojure-version* 
     (if (not (= (prop "interim") "false"))
