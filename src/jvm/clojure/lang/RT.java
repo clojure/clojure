@@ -169,13 +169,13 @@ static public Charset UTF8 = Charset.forName("UTF-8");
 static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure.core"));
 //static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
 final static public Var OUT =
-		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out, UTF8));
+		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out));
 final static public Var IN =
 		Var.intern(CLOJURE_NS, Symbol.create("*in*"),
-		           new LineNumberingPushbackReader(new InputStreamReader(System.in, UTF8)));
+		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
 final static public Var ERR =
 		Var.intern(CLOJURE_NS, Symbol.create("*err*"),
-		           new PrintWriter(new OutputStreamWriter(System.err, UTF8), true));
+		           new PrintWriter(new OutputStreamWriter(System.err), true));
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
 final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), T);
