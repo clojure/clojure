@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated April 28, 2009
+;; last updated April 29, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -234,6 +234,20 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
+;; Utility functions used in monad definitions
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- flatten
+  "Like #(apply concat %), but fully lazy: it evaluates each sublist
+   only when it is needed."
+  [ss]
+  (lazy-seq
+   (when-let [s (seq ss)]
+     (concat (first s) (flatten (rest s))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; Commonly used monads
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -269,10 +283,10 @@
    [m-result (fn m-result-sequence [v]
 	       (list v))
     m-bind   (fn m-bind-sequence [mv f]
-               (apply concat (map f mv)))
+               (flatten (map f mv)))
     m-zero   (list)
     m-plus   (fn m-plus-sequence [& mvs]
-               (apply concat mvs))
+               (flatten mvs))
     ])
 
 ; Set monad
@@ -470,7 +484,7 @@
 		 (fn m-bind-sequence-t [mv f]
 		   (m-bind mv
 			   (fn [xs]
-			     (m-fmap #(apply concat %)
+			     (m-fmap flatten
 				     (m-map f xs))))))
       m-zero   (with-monad m (m-result (list)))
       m-plus   (with-monad m
