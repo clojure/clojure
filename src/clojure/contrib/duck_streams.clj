@@ -1,9 +1,9 @@
 ;;; duck_streams.clj -- duck-typed I/O streams for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; February 16, 2009
+;; May 3, 2009
 
-;; Copyright (c) Stuart Sierra, 2008. All rights reserved.  The use
+;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
@@ -25,6 +25,10 @@
 
 
 ;; CHANGE LOG
+;;
+;; May 3, 2009: renamed file to file-str, for compatibility with
+;; clojure.contrib.java-utils.  reader/writer no longer use this
+;; function.
 ;;
 ;; February 16, 2009: (lazy branch) fixed read-lines to work with lazy
 ;; Clojure.
@@ -50,17 +54,16 @@
 
 (def *default-encoding* "UTF-8")
 
-(defn #^File file
+(defn #^File file-str
   "Concatenates args as strings returns a java.io.File.  Replaces all
   / and \\ with File/separatorChar.  Replaces ~ at the start of the
   path with the user.home system property."
   [& args]
   (let [#^String s (apply str args)
-        s (.replace s \/ File/separatorChar)
-        s (.replace s \\ File/separatorChar)
+        s (.replaceAll (re-matcher #"[/\\]" s) File/separator)
         s (if (.startsWith s "~")
             (str (System/getProperty "user.home")
-                 File/separatorChar (subs s 1))
+                 File/separator (subs s 1))
             s)]
     (File. s)))
 
@@ -99,7 +102,7 @@
   (try (let [url (URL. x)]
          (reader url))
        (catch MalformedURLException e
-         (reader (file x)))))
+         (reader (File. x)))))
 
 (defmethod reader :default [x]
   (throw (Exception. (str "Cannot open " (pr-str x) " as a reader."))))
@@ -149,7 +152,7 @@
   (try (let [url (URL. x)]
          (writer url))
        (catch MalformedURLException err
-         (writer (file x)))))
+         (writer (File. x)))))
 
 (defmethod writer :default [x]
   (throw (Exception. (str "Cannot open <" (pr-str x) "> as a writer."))))
@@ -157,7 +160,7 @@
 
 (defn write-lines
   "Writes lines (a seq) to f, separated by newlines.  f is opened with
-  writer."
+  writer, and automatically closed at the end of the sequence."
   [f lines]
   (with-open [#^PrintWriter writer (writer f)]
     (loop [lines lines]
