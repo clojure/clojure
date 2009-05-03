@@ -55,9 +55,9 @@
 (def *default-encoding* "UTF-8")
 
 (defn #^File file-str
-  "Concatenates args as strings returns a java.io.File.  Replaces all
-  / and \\ with File/separatorChar.  Replaces ~ at the start of the
-  path with the user.home system property."
+  "Concatenates args as strings and returns a java.io.File.  Replaces
+  all / and \\ with File/separatorChar.  Replaces ~ at the start of
+  the path with the user.home system property."
   [& args]
   (let [#^String s (apply str args)
         s (.replaceAll (re-matcher #"[/\\]" s) File/separator)
