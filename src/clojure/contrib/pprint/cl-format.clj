@@ -24,11 +24,40 @@
 ;;; End forward references
 
 (defn cl-format 
-  "An implementation of a Common Lisp compatible format function"
-  [stream format-in & args]
+  "An implementation of a Common Lisp compatible format function. cl-format formats its
+arguments to an output stream or string based on the format control string given. It 
+supports sophisticated formatting of structured data.
+
+Writer is an instance of java.io.Writer, true to output to *out* or nil to output 
+to a string, format-in is the format control string and the remaining arguments 
+are the data to be formatted.
+
+The format control string is a string to be output with embedded 'format directives' 
+describing how to format the various arguments passed in.
+
+If writer is nil, cl-format returns the formatted result string. Otherwise, cl-format 
+returns nil.
+
+For example:
+ (let [results [46 38 22]]
+        (cl-format true \"There ~[are~;is~:;are~]~:* ~d result~:p: ~{~d~^, ~}~%\" 
+                   (count results) results))
+
+Prints to *out*:
+ There are 3 results: 46, 38, 22
+
+Detailed documentation on format control strings is available in the \"Common Lisp the Language, 2nd edition\", Chapter 22 (available online at:
+http://www.cs.cmu.edu/afs/cs.cmu.edu/project/ai-repository/ai/html/cltl/clm/node200.html#SECTION002633000000000000000) 
+and in the Common Lisp HyperSpec at http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
+"
+  {:see-also [["http://www.cs.cmu.edu/afs/cs.cmu.edu/project/ai-repository/ai/html/cltl/clm/node200.html#SECTION002633000000000000000" 
+               "Common Lisp the Language"]
+              ["http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm"
+               "Common Lisp HyperSpec"]]}
+  [writer format-in & args]
   (let [compiled-format (if (string? format-in) (compile-format format-in) format-in)
         navigator (init-navigator args)]
-    (execute-format stream compiled-format navigator)))
+    (execute-format writer compiled-format navigator)))
 
 (def #^{:private true} *format-str* nil)
 
@@ -46,8 +75,10 @@
 (defstruct #^{:private true}
   arg-navigator :seq :rest :pos )
 
-(defn init-navigator [s]
+(defn init-navigator 
   "Create a new arg-navigator from the sequence with the position set to 0"
+  {:skip-wiki true}
+  [s]
   (let [s (seq s)]
     (struct arg-navigator s s 0)))
 
@@ -56,7 +87,7 @@
   (let [ rst (:rest navigator) ]
     (if rst
       [(first rst) (struct arg-navigator (:seq navigator ) (next rst) (inc (:pos navigator)))]
-      (throw (new Exception  "Not enough arguments for format definition")))))
+     (throw (new Exception  "Not enough arguments for format definition")))))
 
 (defn- next-arg-or-nil [navigator]
   (let [rst (:rest navigator)]
@@ -148,8 +179,9 @@
 ;;; of ~R
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- integral? [x]
+(defn- integral?
   "returns true if a number is actually an integer (that is, has no fractional part)"
+  [x]
   (cond
    (integer? x) true
    (decimal? x) (>= (.ulp (.stripTrailingZeros (bigdec 0))) 1) ; true iff no fractional part
@@ -158,8 +190,9 @@
                   (= 0 (rem (.numerator r) (.denominator r))))
    :else        false))
 
-(defn- remainders [base val]
+(defn- remainders
   "Return the list of remainders (essentially the 'digits') of val in the given base"
+  [base val]
   (reverse 
    (first 
     (consume #(if (pos? %) 
@@ -167,8 +200,9 @@
                 [nil nil]) 
              val))))
 
-(defn- base-str [base val]
+(defn- base-str
   "Return val as a string in the given base"
+  [base val]
   (let [xlated-val (cond
                     (float? val) (bigdec val)
                     (ratio? val) (let [#^clojure.lang.Ratio r val] 
@@ -182,9 +216,10 @@
 (def #^{:private true}
      java-base-formats {8 "%o", 10 "%d", 16 "%x"})
 
-(defn- opt-base-str [base val]
+(defn- opt-base-str
   "Return val as a string in the given base, using clojure.core/format if supported
 for improved performance"
+  [base val]
   (let [format-str (get java-base-formats base)]
     (if (and format-str (integer? val))
       (clojure.core/format format-str val)
@@ -258,8 +293,9 @@ for improved performance"
       "quindecillion" "sexdecillion" "septendecillion" 
       "octodecillion" "novemdecillion" "vigintillion"])
 
-(defn- format-simple-cardinal [num]
+(defn- format-simple-cardinal
   "Convert a number less than 1000 to a cardinal english string"
+  [num]
   (let [hundreds (quot num 100)
         tens (rem num 100)]
     (str
@@ -275,9 +311,10 @@ for improved performance"
             (if (and (pos? ten-digit) (pos? unit-digit)) "-")
             (if (pos? unit-digit) (nth english-cardinal-units unit-digit)))))))))
 
-(defn- add-english-scales [parts offset]
+(defn- add-english-scales
   "Take a sequence of parts, add scale numbers (e.g., million) and combine into a string
 offset is a factor of 10^3 to multiply by"
+  [parts offset]
   (let [cnt (count parts)]
     (loop [acc []
            pos (dec cnt)
@@ -314,9 +351,10 @@ offset is a factor of 10^3 to multiply by"
            { :mincol 0, :padchar 0, :commachar 0 :commainterval 0}))))
     navigator))
 
-(defn- format-simple-ordinal [num]
+(defn- format-simple-ordinal
   "Convert a number less than 1000 to a ordinal english string
 Note this should only be used for the last one in the sequence"
+  [num]
   (let [hundreds (quot num 100)
         tens (rem num 100)]
     (str
@@ -386,8 +424,9 @@ Note this should only be used for the last one in the sequence"
       [ "C" "CC" "CCC" "CD" "D" "DC" "DCC" "DCCC" "CM"]
       [ "M" "MM" "MMM"]])
 
-(defn- format-roman [table params navigator offsets]
+(defn- format-roman
   "Format a roman numeral using the specified look-up table"
+  [table params navigator offsets]
   (let [[arg navigator] (next-arg navigator)]
     (if (and (number? arg) (> arg 0) (< arg 4000))
       (let [digits (remainders 10 arg)]
@@ -487,8 +526,9 @@ Note this should only be used for the last one in the sequence"
       [(str (subs s 0 1) (subs s 2 exploc)) (subs s (inc exploc))])))
 
 
-(defn- float-parts [f]
+(defn- float-parts
   "Take care of leading and trailing zeros in decomposed floats"
+  [f]
   (let [[m #^String e] (float-parts-base f)
         m1 (rtrim m \0)
         m2 (ltrim m1 \0)
@@ -534,8 +574,9 @@ Note this should only be used for the last one in the sequence"
       (str m1 (apply str (repeat (- target-len len) \0))) 
       m1)))
 
-(defn- insert-decimal [m e]
+(defn- insert-decimal
   "Insert the decimal point at the right spot in the number to match an exponent"
+  [m e]
   (if (neg? e)
     (str "." m)
     (let [loc (inc e)]
@@ -544,8 +585,9 @@ Note this should only be used for the last one in the sequence"
 (defn- get-fixed [m e d]
   (insert-decimal (expand-fixed m e d) e))
 
-(defn- insert-scaled-decimal [m k]
+(defn- insert-scaled-decimal
   "Insert the decimal point at the right spot in the number to match an exponent"
+  [m k]
   (if (neg? k)
     (str "." m)
     (str (subs m 0 k) "." (subs m k))))
@@ -1081,9 +1123,10 @@ Note this should only be used for the last one in the sequence"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; TODO: make an automatic newline for non-ColumnWriters
-(defn fresh-line []
+(defn fresh-line
   "Make a newline if the Writer is not already at the beginning of the line.
 N.B. Only works on ColumnWriters right now."
+  []
   (if (not (= 0 (.getColumn #^PrettyWriter *out*)))
     (prn)))
 
@@ -1468,9 +1511,10 @@ N.B. Only works on ColumnWriters right now."
 (defn- extract-params [s offset] 
   (consume extract-param [s offset false]))
 
-(defn- translate-param [[#^String p offset]]
+(defn- translate-param
   "Translate the string representation of a param to the internalized
                                       representation"
+  [[#^String p offset]]
   [(cond 
     (= (.length p) 0) nil
     (and (= (.length p) 1) (contains? #{\v \V} (nth p 0))) :parameter-from-args
@@ -1510,11 +1554,12 @@ N.B. Only works on ColumnWriters right now."
                          (:directive def) "\"")
                     (min (nth (:colon flags) 1) (nth (:at flags) 1))))))
 
-(defn- map-params [def params flags offset]
+(defn- map-params
   "Takes a directive definition and the list of actual parameters and
 a map of flags and returns a map of the parameters and flags with defaults
 filled in. We check to make sure that there are the right types and number
 of parameters as well."
+  [def params flags offset]
   (check-flags def flags)
   (if (> (count params) (count (:params def)))
     (format-error 
@@ -1702,7 +1747,11 @@ column number or pretty printing"
         true
         (recur (next format))))))
 
-(defn execute-format [stream format args]
+(defn execute-format 
+  "Executes the format with the arguments. This should never be used directly, but is public
+because the formtter macro uses it."
+  {:skip-wiki true}
+  [stream format args]
   (let [#^java.io.Writer real-stream (cond 
                                        (not stream) (java.io.StringWriter.)
                                        (true? stream) *out*

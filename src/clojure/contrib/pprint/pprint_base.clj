@@ -113,8 +113,13 @@ pretty printing the results of macro expansions"}
                    #(when-let [v (get t (key %))] [(find-var v) (val %)]) 
                    m)))
 
-(defn pretty-writer? [x] (instance? PrettyWriter x))
-(defn make-pretty-writer [base-writer right-margin miser-width]
+(defn- pretty-writer? 
+  "Return true iff x is a PrettyWriter"
+  [x] (instance? PrettyWriter x))
+
+(defn- make-pretty-writer 
+  "Wrap base-writer in a PrettyWriter with the specified right-margin and miser-width"
+  [base-writer right-margin miser-width]
   (PrettyWriter. base-writer right-margin miser-width))
 
 (defmacro #^{:private true} with-pretty-writer [base-writer & body]
@@ -127,8 +132,25 @@ pretty printing the results of macro expansions"}
 
 (defn write 
   "Write an object subject to the current bindings of the printer control variables.
-Use the options argument to override individual variables for this call (and any 
-recursive calls). Returns the string result if :stream is nil or nil otherwise."
+Use the kw-args argument to override individual variables for this call (and any 
+recursive calls). Returns the string result if :stream is nil or nil otherwise.
+
+The following keyword arguments can be passed with values:
+  Keyword              Meaning                              Default value
+  :stream              Writer for output or nil             true (indicates *out*)
+  :circle*             If true, mark circular structures    Current value of *print-circle*
+  :length              Maximum elements to show in sublists Current value of *print-length*
+  :level               Maximum depth                        Current value of *print-level*
+  :lines*              Maximum lines of output              Current value of *print-lines*
+  :miser-width         Width to enter miser mode            Current value of *print-miser-width*
+  :dispatch            The pretty print dispatch function   Current value of *print-pprint-dispatch*
+  :pretty              If true, do pretty printing          Current value of *print-pretty*
+  :readably*           If true, print readably              Current value of *print-readably*
+  :right-margin        The column for the right margin      Current value of *print-right-margin*
+  :suppress-namespaces If true, no namespaces in symbols    Current value of *print-suppress-namespaces*
+
+  * = not yet supported
+"
   [object & kw-args]
   (let [options (merge {:stream true} (apply hash-map kw-args))]
     (binding-map (table-ize write-option-table options) 
