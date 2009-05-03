@@ -26,7 +26,20 @@
 
 
 
-(ns clojure.contrib.auto-agent
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "This is superficially similar to Ken Tilton's \"Cells\" library for
+Common Lisp.  But Cells is single-threaded and synchronous.  This
+version is built on Clojure agents, so it is multi-threaded and
+asynchronous.
+
+An auto-agent is an agent whose value is the result of an
+expression.  That expression can include other mutable Clojure
+types -- agents, atoms, and refs -- dereferenced with \"deref\" or
+\"@\".  Whenever one of those derefernced things changes, the
+auto-agent will be automatically updated to reflect the new value.
+"}  
+  clojure.contrib.auto-agent
   (:use [clojure.contrib.walk :only (macroexpand-all)]
         [clojure.contrib.test-is :only (deftest- is)]))
 

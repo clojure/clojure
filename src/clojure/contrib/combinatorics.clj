@@ -61,7 +61,11 @@ On my own computer, I use versions of all these algorithms that return sequences
 )
 
 
-(ns clojure.contrib.combinatorics)
+(ns
+  #^{:author "Mark Engelberg",
+     :doc "Efficient, functional algorithms for generating lazy
+sequences for common combinatorial functions. (See the source code for a longer description.)"}
+  clojure.contrib.combinatorics)
 
 (defn- index-combinations
   [n cnt]

@@ -8,7 +8,10 @@
 
 ; Process command-line arguments according to a given cmdspec
 
-(ns clojure.contrib.command-line
+(ns 
+    #^{:author "Chris Houser", 
+       :doc "Process command-line arguments according to a given cmdspec"}
+    clojure.contrib.command-line
     (:require (clojure.contrib [seq-utils :as su]))
     (:use     (clojure.contrib [str-utils :only (str-join)])))
 

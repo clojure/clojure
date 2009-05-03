@@ -12,7 +12,10 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.classpath
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Utilities for dealing with the JVM's classpath"}
+  clojure.contrib.classpath
   (:require [clojure.contrib.jar :as jar])
   (:import (java.io File)
            (java.util.jar JarFile)))

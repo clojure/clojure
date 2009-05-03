@@ -12,7 +12,11 @@
 
 ;; note to other contrib members: feel free to add to this lib
 
-(ns clojure.contrib.core
+(ns
+  #^{:author "Laurent Petit (and others)"
+     :doc "Functions/macros variants of the ones that can be found in clojure.core 
+ (note to other contrib members: feel free to add to this lib)"}
+  clojure.contrib.core
   (:use clojure.contrib.def))
 
 (defmacro- defnilsafe [docstring non-safe-name nil-safe-name]

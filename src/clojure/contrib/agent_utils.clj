@@ -12,7 +12,12 @@
 
 ;; note to other contrib members: feel free to add to this lib
 
-(ns clojure.contrib.agent-utils)
+(ns
+    #^{:author "Cheistophe Grande",
+       :doc "Miscellaneous agent utilities
+ (note to other contrib members: feel free to add to this lib)",
+}
+  clojure.contrib.agent-utils)
 
 (defmacro capture-and-send
  "Capture the current value of the specified vars and rebind 

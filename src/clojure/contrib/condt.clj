@@ -22,7 +22,10 @@
 ;; December 15, 2008: original version, named "condp"
 
 
-(ns clojure.contrib.condt
+(ns 
+    #{:author "Stuart Sierra"
+      :doc "Generic case-like macro using template expressions"}
+    clojure.contrib.condt
     (:require clojure.contrib.template))
 
 (defmacro condt

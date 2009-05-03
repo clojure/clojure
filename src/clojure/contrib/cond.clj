@@ -11,7 +11,9 @@
 ;;  scgilardi (gmail)
 ;;  2 October 2008
 
-(ns clojure.contrib.cond)
+(ns #^{:author "Stephen C. Gilardi"
+       :doc "Extensions to the basic cond function."} 
+  clojure.contrib.cond)
 
 (defmacro cond-let
   "Takes a binding-form and a set of test/expr pairs. Evaluates each test
