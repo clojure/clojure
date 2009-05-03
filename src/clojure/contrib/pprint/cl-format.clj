@@ -46,9 +46,11 @@ For example:
 Prints to *out*:
  There are 3 results: 46, 38, 22
 
-Detailed documentation on format control strings is available in the \"Common Lisp the Language, 2nd edition\", Chapter 22 (available online at:
+Detailed documentation on format control strings is available in the \"Common Lisp the 
+Language, 2nd edition\", Chapter 22 (available online at:
 http://www.cs.cmu.edu/afs/cs.cmu.edu/project/ai-repository/ai/html/cltl/clm/node200.html#SECTION002633000000000000000) 
-and in the Common Lisp HyperSpec at http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
+and in the Common Lisp HyperSpec at 
+http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 "
   {:see-also [["http://www.cs.cmu.edu/afs/cs.cmu.edu/project/ai-repository/ai/html/cltl/clm/node200.html#SECTION002633000000000000000" 
                "Common Lisp the Language"]
