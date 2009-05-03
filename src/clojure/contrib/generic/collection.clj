@@ -1,7 +1,7 @@
 ;; Generic interfaces for collection-related functions
 
 ;; by Konrad Hinsen
-;; last updated March 18, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,14 +11,13 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.generic.collection
-  "Generic collection function interface
-
-   NOTE: This library is VERY experimental. It WILL change significantly
-   with future release.
-
-   This library defines generic versions of common collection-related functions
-   as multimethods that can be defined for any type."
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Generic arithmetic interface
+           This library defines generic versions of common
+           collection-related functions as multimethods that can be
+           defined for any type."}
+  clojure.contrib.generic.collection
   (:refer-clojure :exclude [assoc conj dissoc empty get into seq]))
 
 ;

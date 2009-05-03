@@ -6,7 +6,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns clojure.contrib.probabilities.random.examples-monte-carlo
+(ns
+  #^{:author "Konrad Hinsen"
+     :skip-wiki true
+     :doc "Examples for monte carlo methods"}
+  clojure.contrib.probabilities.random.examples-monte-carlo
   (:require [clojure.contrib.generic.collection :as gc])
   (:use [clojure.contrib.probabilities.random-numbers
 	 :only (lcg rand-stream)])

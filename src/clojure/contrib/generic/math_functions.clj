@@ -1,7 +1,7 @@
 ;; Generic interfaces for mathematical functions
 
 ;; by Konrad Hinsen
-;; last updated March 23, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,14 +11,13 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.generic.math-functions
-  "Generic math function interface
-
-   NOTE: This library is VERY experimental. It WILL change significantly
-   with future release.
-
-   This library defines generic versions of common mathematical functions
-   such as sqrt or sin as multimethods that can be defined for any type."
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Generic math function interface
+           This library defines generic versions of common mathematical
+           functions such as sqrt or sin as multimethods that can be
+           defined for any type."}
+  clojure.contrib.generic.math-functions
   (:use [clojure.contrib.def :only (defmacro-)])
   (:require [clojure.contrib.generic.arithmetic :as ga]
 	    [clojure.contrib.generic.comparison :as gc]))

@@ -6,7 +6,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns clojure.contrib.accumulators.examples
+(ns
+  #^{:author "Konrad Hinsen"
+     :skip-wiki true
+     :doc "Examples for using accumulators"}
+  clojure.contrib.accumulators.examples
   (:use [clojure.contrib.accumulators
 	 :only (combine add add-items
 		empty-vector empty-list empty-queue empty-set empty-map

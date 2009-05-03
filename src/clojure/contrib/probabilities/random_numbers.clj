@@ -1,7 +1,7 @@
 ;; Random number generators
 
 ;; by Konrad Hinsen
-;; last updated April 16, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,14 +11,19 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.probabilities.random-numbers
-  "Random number streams
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Random number streams
 
-   This library provides various random number generators with a common
-   stream interface. They all produce pseudo-random numbers that are uniformly
-   distributed in the interval [0, 1), i.e. 0 is a possible value but 1 isn't.
-   For transformations to other distributions, see
-   clojure.contrib.probabilities.monte-carlo."
+           This library provides random number generators with a common
+           stream interface. They all produce pseudo-random numbers that are
+           uniformly distributed in the interval [0, 1), i.e. 0 is a
+           possible value but 1 isn't. For transformations to other
+           distributions, see clojure.contrib.probabilities.monte-carlo.
+
+           At the moment, the only generator provided is a rather simple
+           linear congruential generator."}
+  clojure.contrib.probabilities.random-numbers
   (:use [clojure.contrib.types :only (deftype)])
   (:use [clojure.contrib.stream-utils :only (defstream)])
   (:use [clojure.contrib.def :only (defvar)]))

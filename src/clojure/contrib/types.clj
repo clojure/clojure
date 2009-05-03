@@ -1,7 +1,7 @@
 ;; Data types
 
 ;; by Konrad Hinsen
-;; last updated April 21, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,11 +11,10 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.types
-  "General and algebraic data types
-
-   NOTE: This library is experimental. It may change significantly
-   with future release."
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "General and algebraic data types"}
+  clojure.contrib.types
   (:use [clojure.contrib.def :only (name-with-attributes)]))
 
 ;

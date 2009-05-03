@@ -1,7 +1,7 @@
 ;; Stream utilities
 
 ;; by Konrad Hinsen
-;; last updated March 16, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,48 +11,50 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.stream-utils
-  "Functions for setting up computational pipelines via data streams.
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Functions for setting up computational pipelines via data streams.
 
-   NOTE: This library is experimental. It may change significantly
-   with future release.
+           NOTE: This library is experimental. It may change significantly
+                 with future release.
 
-   This library defines:
-   - an abstract stream type, whose interface consists of the
-     multimethod stream-next
-   - a macro for implementing streams
-   - implementations of stream for
-     1) Clojure sequences, and vectors
-     2) nil, representing an empty stream
-   - tools for writing stream transformers, including the monad stream-m
-   - various utility functions for working with streams
+           This library defines:
+           - an abstract stream type, whose interface consists of the
+             multimethod stream-next
+           - a macro for implementing streams
+           - implementations of stream for
+             1) Clojure sequences, and vectors
+             2) nil, representing an empty stream
+           - tools for writing stream transformers, including the
+             monad stream-m
+           - various utility functions for working with streams
 
-   Streams are building blocks in the construction of computational
-   pipelines. A stream is represented by its current state plus
-   a function that takes a stream state and obtains the next item
-   in the stream as well as the new stream state. The state is implemented
-   as a Java class or a Clojure type (as defined by the function
-   clojure.core/type), and the function is provided as an implementation
-   of the multimethod stream-next for this class or type.
+           Streams are building blocks in the construction of computational
+           pipelines. A stream is represented by its current state plus
+           a function that takes a stream state and obtains the next item
+           in the stream as well as the new stream state. The state is
+           implemented as a Java class or a Clojure type (as defined by the
+           function clojure.core/type), and the function is provided as an
+           implementation of the multimethod stream-next for this class or type.
 
-   While setting up pipelines using this mechanism is somewhat more
-   cumbersome than using Clojure's lazy seq mechanisms, there are a
-   few advantages:
-   - The state of a stream can be stored in any Clojure data structure,
-     and the stream can be re-generated from it any number of times.
-     Any number of states can be stored this way.
-   - The elements of the stream are never cached, so keeping a reference
-     to a stream state does not incur an uncontrollable memory penalty.
+           While setting up pipelines using this mechanism is somewhat more
+           cumbersome than using Clojure's lazy seq mechanisms, there are a
+           few advantages:
+           - The state of a stream can be stored in any Clojure data structure,
+             and the stream can be re-generated from it any number of times.
+             Any number of states can be stored this way.
+           - The elements of the stream are never cached, so keeping a reference
+             to a stream state does not incur an uncontrollable memory penalty.
 
-   Note that the stream mechanism is thread-safe as long as the
-   concrete stream implementations do not use any mutable state.
+           Note that the stream mechanism is thread-safe as long as the
+           concrete stream implementations do not use any mutable state.
 
-   Stream transformers take any number of input streams and produce one
-   output stream. They are typically written using the stream-m
-   monad. In the definition of a stream transformer, (pick s) returns
-   the next value of stream argument s, whereas pick-all returns the
-   next value of all stream arguments in the form of a vector."
-
+           Stream transformers take any number of input streams and produce one
+           output stream. They are typically written using the stream-m
+           monad. In the definition of a stream transformer, (pick s) returns
+           the next value of stream argument s, whereas pick-all returns the
+           next value of all stream arguments in the form of a vector."}
+  clojure.contrib.stream-utils
   (:use [clojure.contrib.types :only (deftype deftype-)])
   (:use [clojure.contrib.monads :only (defmonad with-monad)])
   (:use [clojure.contrib.def :only (defvar defvar-)])

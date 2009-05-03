@@ -1,7 +1,7 @@
 ;; Monte-Carlo algorithms
 
 ;; by Konrad Hinsen
-;; last updated April 21, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,24 +11,26 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.probabilities.monte-carlo
-  "Monte-Carlo method support
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Monte-Carlo method support
 
-   Monte-Carlo methods transform an input random number stream
-   (usually having a continuous uniform distribution in the interval [0, 1))
-   into a random number stream whose distribution satisfies certain
-   conditions (usually the expectation value is equal to some desired
-   quantity). They are thus transformations from one probability distribution
-   to another one.
+           Monte-Carlo methods transform an input random number stream
+           (usually having a continuous uniform distribution in the
+           interval [0, 1)) into a random number stream whose distribution
+           satisfies certain conditions (usually the expectation value
+           is equal to some desired quantity). They are thus
+           transformations from one probability distribution to another one.
 
-   This library represents a Monte-Carlo method by a function that takes
-   as input the state of a random number stream with uniform distribution
-   (see clojure.contrib.probabilities.random-numbers) and returns a
-   vector containing one sample value of the desired output distribution 
-   and the final state of the input random number stream. Such functions
-   are state monad values and can be composed using operations defined
-   in clojure.contrib.monads.
-   "
+           This library represents a Monte-Carlo method by a function that
+           takes as input the state of a random number stream with
+           uniform distribution (see
+           clojure.contrib.probabilities.random-numbers) and returns a
+           vector containing one sample value of the desired output
+           distribution and the final state of the input random number
+           stream. Such functions are state monad values and can be
+           composed using operations defined in clojure.contrib.monads."}
+  clojure.contrib.probabilities.monte-carlo
   (:use [clojure.contrib.macros :only (const)])
   (:use [clojure.contrib.types :only (deftype)])
   (:use [clojure.contrib.stream-utils :only (defstream stream-next)])

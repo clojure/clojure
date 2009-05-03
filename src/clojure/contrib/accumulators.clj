@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated April 21, 2009
+;; last updated May 3, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -18,7 +18,11 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.accumulators
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "A generic accumulator interface and implementations of various
+           accumulators."}
+  clojure.contrib.accumulators
   (:use [clojure.contrib.types :only (deftype)])
   (:use [clojure.contrib.def :only (defvar defvar- defmacro-)])
   (:require [clojure.contrib.generic.arithmetic :as ga]))

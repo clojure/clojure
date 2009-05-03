@@ -1,7 +1,7 @@
 ;; Finite probability distributions
 
 ;; by Konrad Hinsen
-;; last updated April 16, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,7 +11,12 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.probabilities.finite-distributions
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Finite probability distributions
+           This library defines a monad for combining finite probability
+           distributions."}
+  clojure.contrib.probabilities.finite-distributions
   (:use [clojure.contrib.monads
 	 :only (defmonad domonad with-monad maybe-t m-lift m-chain)]
 	 [clojure.contrib.def :only (defvar)]))

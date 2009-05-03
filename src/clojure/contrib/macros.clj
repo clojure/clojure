@@ -9,7 +9,10 @@
 ;; agreeing to be bound by the terms of this license. You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.macros)
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Various small macros"}
+  clojure.contrib.macros)
 
 ;; By Konrad Hinsen
 (defmacro const

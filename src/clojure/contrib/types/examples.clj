@@ -6,7 +6,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns clojure.contrib.types.examples
+(ns
+  #^{:author "Konrad Hinsen"
+     :skip-wiki true
+     :doc "Examples for data type definitions"}
+  clojure.contrib.types.examples
   (:use [clojure.contrib.types
 	 :only (deftype defadt match)])
   (:require [clojure.contrib.generic.collection :as gc])

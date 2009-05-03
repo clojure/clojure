@@ -6,13 +6,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns clojure.contrib.probabilities.examples-finite-distributions
- (:use [clojure.contrib.probabilities.finite-distributions
-	:only (uniform prob cond-prob join-with dist-m choose
-	      normalize certainly cond-dist-m normalize-cond)])
- (:use [clojure.contrib.monads
-	:only (domonad with-monad m-seq m-chain m-lift)])
- (:require clojure.contrib.accumulators))
+(ns
+  #^{:author "Konrad Hinsen"
+     :skip-wiki true
+     :doc "Examples for finite probability distribution"}
+  clojure.contrib.probabilities.examples-finite-distributions
+  (:use [clojure.contrib.probabilities.finite-distributions
+	 :only (uniform prob cond-prob join-with dist-m choose
+	        normalize certainly cond-dist-m normalize-cond)])
+  (:use [clojure.contrib.monads
+	 :only (domonad with-monad m-seq m-chain m-lift)])
+  (:require clojure.contrib.accumulators))
 
 ;; Simple examples using dice
 

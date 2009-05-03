@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated April 29, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,7 +11,16 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.monads
+(ns
+  #^{:author "Konrad Hinsen"
+     :see-also [["http://onclojure.com/2009/03/05/a-monad-tutorial-for-clojure-programmers-part-1/" "Monad tutorial part 1"]
+		["http://onclojure.com/2009/03/06/a-monad-tutorial-for-clojure-programmers-part-2/" "Monad tutorial part 2"]
+		["http://onclojure.com/2009/03/23/a-monad-tutorial-for-clojure-programmers-part-3/" "Monad tutorial part 3"]
+		["http://onclojure.com/2009/04/24/a-monad-tutorial-for-clojure-programmers-part-4/" "Monad tutorial part 4"]]
+     :doc "This library contains the most commonly used monads as well
+           as macros for defining and using monads and useful monadic
+           functions."}
+  clojure.contrib.monads
   (:require [clojure.contrib.accumulators])
   (:use [clojure.contrib.def :only (name-with-attributes)]))
 

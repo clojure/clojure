@@ -1,7 +1,7 @@
 ;; Generic interface for functors
 
 ;; by Konrad Hinsen
-;; last updated March 23, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,8 +11,10 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.generic.functor
-  "Generic functor interface")
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Generic functor interface (fmap)"}
+  clojure.contrib.generic.functor)
 
 
 (defmulti fmap

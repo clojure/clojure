@@ -6,7 +6,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns clojure.contrib.monads.examples
+(ns
+  #^{:author "Konrad Hinsen"
+     :skip-wiki true
+     :doc "Examples for using monads"}
+  clojure.contrib.monads.examples
   (:use [clojure.contrib.monads
 	 :only (domonad with-monad m-lift m-seq m-reduce m-when
 		sequence-m

@@ -1,7 +1,7 @@
 ;; Generic interfaces for arithmetic operations
 
 ;; by Konrad Hinsen
-;; last updated March 19, 2009
+;; last updated May 3, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -11,17 +11,16 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.generic.arithmetic
-  "Generic arithmetic interface
-
-   NOTE: This library is VERY experimental. It WILL change significantly
-   with future release.
-
-   This library defines generic versions of + - * / as multimethods
-   that can be defined for any type. The minimal required implementations
-   for a type are binary + and * plus unary - and /. Everything else
-   is derived from these automatically. Explicit binary definitions
-   for - and / can be provided for efficiency reasons."
+(ns
+  #^{:author "Konrad Hinsen"
+     :doc "Generic arithmetic interface
+           This library defines generic versions of + - * / as multimethods
+           that can be defined for any type. The minimal required 
+           implementations for a type are binary + and * plus unary - and /.
+           Everything else is derived from these automatically. Explicit
+           binary definitions for - and / can be provided for
+           efficiency reasons."}
+  clojure.contrib.generic.arithmetic
   (:use [clojure.contrib.generic
 	 :only (root-type nulary-type nary-type nary-dispatch)]
 	[clojure.contrib.types :only (defadt)])
