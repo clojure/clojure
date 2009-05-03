@@ -85,6 +85,21 @@
     </echo>
   </target>
 
+  <target name="compile_classes" depends="init,check_hasclojure"
+          description="Compile the clojure files that have gen-class."
+          if="hasclojure">
+    <java classname="clojure.lang.Compile">
+      <classpath>
+        <path location="${build}"/>
+        <path location="${src}"/>
+        <path location="${clojure.jar}"/>
+      </classpath>
+      <sysproperty key="clojure.compile.path" value="${build}"/>
+      <arg value="clojure.contrib.pprint.ColumnWriter"/>
+      <arg value="clojure.contrib.pprint.PrettyWriter"/>
+    </java>
+  </target>
+
   <target name="compile_clojure" depends="init,check_hasclojure"
           description="Compile Clojure sources."
           if="hasclojure">
