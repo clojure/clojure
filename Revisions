@@ -5,3 +5,5 @@ src/clojure/contrib. Please udpate your clojure classpaths accordingly.
 non-namespace-directory-aware libs at the top level of this repository. At
 the time of this writing, Clojure's SVN version is 1001.
 
+2009-05-04 Revision 756 is the one that was current at the time
+Clojure 1.0.0 was released.
