@@ -17,7 +17,11 @@
 ;;; Please see the example.clj file in the datalog folder
 
 
-(ns clojure.contrib.datalog
+(ns 
+  #^{:author "Jeffrey Straszheim",
+     :doc "A Clojure implementation of Datalog"
+     :see-also ["DatalogOverview"]} 
+  clojure.contrib.datalog
   (:use clojure.contrib.datalog.rules
         clojure.contrib.datalog.softstrat
         clojure.contrib.datalog.database)

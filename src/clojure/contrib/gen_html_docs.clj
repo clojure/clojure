@@ -41,7 +41,11 @@
 ;; * Add license statement
 ;; * Remove the whojure dependency
 
-(ns clojure.contrib.gen-html-docs
+(ns 
+  #^{:author "Craig Andera",
+     :doc "Generates a single HTML page that contains the documentation for
+one or more Clojure libraries."} 
+  clojure.contrib.gen-html-docs
   (:require [clojure.contrib.duck-streams :as duck-streams])
   (:use [clojure.contrib seq-utils str-utils repl-utils def prxml])
   (:import [java.lang Exception]

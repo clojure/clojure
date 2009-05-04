@@ -11,7 +11,13 @@
 ; Please contact Chouser if you have any suggestions for better names
 ; or API adjustments.
 
-(ns clojure.contrib.error-kit
+(ns 
+  #^{:author "Chris Houser",
+     :doc "EXPERIMENTAL
+System for defining and using custom errors
+Please contact Chouser if you have any suggestions for better names
+or API adjustments."} 
+  clojure.contrib.error-kit
   (:use [clojure.contrib.def :only (defvar defvar-)]
         [clojure.contrib.stacktrace :only (root-cause)]))
 

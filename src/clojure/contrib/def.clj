@@ -14,7 +14,11 @@
 ;;  scgilardi (gmail)
 ;;  17 May 2008
 
-(ns clojure.contrib.def)
+(ns 
+  #^{:author "Stephen C. Gilardi",
+    :doc "def.clj provides variants of def that make including doc strings and
+making private definitions more succinct."} 
+  clojure.contrib.def)
 
 (defmacro defvar
   "Defines a var with an optional intializer and doc string"

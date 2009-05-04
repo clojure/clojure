@@ -14,7 +14,10 @@
 ;;  Created 10 March 2009
 
 
-(ns clojure.contrib.dataflow
+(ns
+  #^{:author "Jeffrey Straszheim",
+     :doc "A library to support a dataflow model of state"}
+  clojure.contrib.dataflow
   (:use [clojure.set :only (union intersection difference)])
   (:use [clojure.contrib.graph :only (directed-graph
                                       reverse-graph

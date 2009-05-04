@@ -43,7 +43,19 @@
 
 
 
-(ns clojure.contrib.duck-streams
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "This file defines \"duck-typed\" I/O utility functions for Clojure.
+           The 'reader' and 'writer' functions will open and return an
+           instance of java.io.BufferedReader and java.io.PrintWriter,
+           respectively, for a variety of argument types -- filenames as
+           strings, URLs, java.io.File's, etc.  'reader' even works on http
+           URLs.
+
+           Note: this is not really \"duck typing\" as implemented in languages
+           like Ruby.  A better name would have been \"do-what-I-mean-streams\"
+           or \"just-give-me-a-stream\", but ducks are funnier."} 
+    clojure.contrib.duck-streams
     (:import 
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File PrintWriter OutputStream

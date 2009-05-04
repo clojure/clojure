@@ -15,7 +15,12 @@
 ;;  scgilardi (gmail)
 ;;  Created 07 July 2008
 
-(ns clojure.contrib.except
+(ns 
+  #^{:author "Stephen C. Gilardi",
+     :doc "Provides functions that make it easy to specify the class and message
+when throwing an Exception or Error. The optional message is formatted
+using clojure/format."} 
+  clojure.contrib.except
   (:import (clojure.lang Reflector)))
 
 (declare throwable)

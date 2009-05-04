@@ -12,7 +12,10 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.find-namespaces
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Search for ns declarations in dirs, JARs, or CLASSPATH"} 
+  clojure.contrib.find-namespaces
   (:require [clojure.contrib.classpath :as cp]
             [clojure.contrib.jar :as jar])
   (import (java.io File FileReader BufferedReader PushbackReader

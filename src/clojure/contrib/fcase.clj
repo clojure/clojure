@@ -22,7 +22,17 @@
 ;; inclusion of "condp" in clojure.core as of Clojure SVN rev. 1180.
 
 
-(ns clojure.contrib.fcase)
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "This file defines a generic \"case\" macro called \"fcase\" which takes
+the equality-testing function as an argument.  It also defines a
+traditional \"case\" macro that tests using \"=\" and variants that
+test for regular expressions and class membership.
+
+
+Note (December 23, 2008): This library has been supplanted by the
+inclusion of \"condp\" in clojure.core as of Clojure SVN rev. 1180."} 
+  clojure.contrib.fcase)
 
 
 (defmacro fcase
