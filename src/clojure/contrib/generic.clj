@@ -1,7 +1,7 @@
 ;; Support code for generic interfaces
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 4, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -14,9 +14,14 @@
 (ns
   #^{:author "Konrad Hinsen"
      :skip-wiki true
-     :doc "Generic interface support code
-           NOTE: This library is VERY experimental. It WILL change
-                 significantly with future release."}
+     :doc "Generic interfaces
+           This library provides generic interfaces in the form of
+           multimethods that can be implemented for any type.
+           The interfaces partly duplicate existing non-generic
+           functions in clojure.core (arithmetic, comparison,
+           collections) and partly provide additional functions that
+           can be defined for a wide variety of types (functors, math
+           functions). More functions will be added in the future."}
   clojure.contrib.generic
   (:use [clojure.contrib.types :only (defadt)]))
 

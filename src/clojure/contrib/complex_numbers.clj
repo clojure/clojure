@@ -1,7 +1,7 @@
 ;; Complex numbers
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 4, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -14,8 +14,8 @@
 (ns
   #^{:author "Konrad Hinsen"
      :doc "Complex numbers
-           NOTE: This library is in evolution.
-                 It may change with future releases."}
+           NOTE: This library is in evolution. Most math functions are
+                 not implemented yet."}
   clojure.contrib.complex-numbers
   (:use [clojure.contrib.types :only (deftype)]
 	[clojure.contrib.generic :only (root-type)])
