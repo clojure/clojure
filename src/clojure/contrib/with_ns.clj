@@ -12,7 +12,10 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.with-ns)
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Temporary namespace macro"}
+  clojure.contrib.with-ns)
 
 (defmacro with-ns
   "Evaluates body in another namespace.  ns is either a namespace

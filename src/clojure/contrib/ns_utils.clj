@@ -36,7 +36,10 @@
 ;;  scgilardi (gmail)
 ;;  23 April 2008
 
-(ns clojure.contrib.ns-utils
+(ns 
+  #^{:author "Stephen C. Gilardi",
+     :doc "Namespace utilities"}
+  clojure.contrib.ns-utils
   (:use clojure.contrib.except))
 
 ;; Namespace Utilities

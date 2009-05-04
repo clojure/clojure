@@ -22,7 +22,11 @@
 ;; See function "prxml" at the bottom of this file for documentation.
 
 
-(ns clojure.contrib.prxml
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Compact syntax for generating XML. See the documentation of \"prxml\" 
+for details."}
+  clojure.contrib.prxml
   (:use [clojure.contrib.lazy-xml :only (escape-xml)]))
 
 (def

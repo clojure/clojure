@@ -20,7 +20,10 @@
 ;; April 9, 2009: initial version
 
 
-(ns clojure.contrib.singleton)
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Singleton functions"}
+  clojure.contrib.singleton)
 
 (defn global-singleton
   "Returns a global singleton function.  f is a function of no

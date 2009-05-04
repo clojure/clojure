@@ -31,7 +31,10 @@
 ;; <http://commons.apache.org/logging/>, which has a nicer API.
 
 
-(ns clojure.contrib.javalog
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Convenient access to java.util.logging in Clojure"}
+  clojure.contrib.javalog
             (:import 
              (java.util.logging Logger Level ConsoleHandler
                                 FileHandler SimpleFormatter)))

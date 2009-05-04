@@ -13,7 +13,10 @@
 ;;  jason at w01fe dot com
 ;;  Created 25 Feb 2009
 
-(ns clojure.contrib.map-utils)
+(ns 
+  #^{:author "Jason Wolfe, Chris Houser",
+     :doc "Utilities for operating on Clojure maps."}
+  clojure.contrib.map-utils)
 
 
 (defmacro lazy-get 
@@ -36,7 +39,7 @@
 
 ; by Chouser:
 (defn deep-merge-with
-  "Like merge-with, but merges maps recursively, appling the given fn
+  "Like merge-with, but merges maps recursively, applying the given fn
   only when there's a non-map at a particular level.
 
   (deepmerge + {:a {:b {:c 1 :d {:x 1 :y 2}} :e 3} :f 4}

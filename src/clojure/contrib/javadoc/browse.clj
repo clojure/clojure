@@ -9,7 +9,10 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.contrib.javadoc.browse
+(ns 
+  #^{:author "Start a web browser from Clojure",
+     :doc "Christophe Grand"}
+  clojure.contrib.javadoc.browse
   (:require [clojure.contrib.shell-out :as sh]) 
   (:import (java.net URI)))
 

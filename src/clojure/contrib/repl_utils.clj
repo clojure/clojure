@@ -8,7 +8,10 @@
 
 ; Utilities meant to be used interactively at the REPL
 
-(ns clojure.contrib.repl-utils
+(ns 
+  #^{:author "Chris Houser",
+     :doc "Utilities meant to be used interactively at the REPL"}
+  clojure.contrib.repl-utils
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
            (clojure.lang RT))

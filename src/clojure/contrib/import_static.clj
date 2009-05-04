@@ -13,7 +13,10 @@
 
 
 
-(ns clojure.contrib.import-static
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Import static Java methods/fields into Clojure"}
+  clojure.contrib.import-static
             (:use clojure.set))
 
 (defmacro import-static

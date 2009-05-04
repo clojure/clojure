@@ -31,7 +31,29 @@
 ;   Shawn Hoover
 ;   Perry Trolard
 
-(ns clojure.contrib.java-utils
+(ns 
+  #^{:author "Stuart Halloway, Stephen C. Gilardi, Shawn Hoover, Perry Trolard",
+     :doc "A set of utilties for dealing with Java stuff like files and properties.
+
+   Design goals:
+
+   (1) Ease-of-use. These APIs should be convenient. Performance is secondary.
+
+   (2) Duck typing. I hate having to think about the difference between
+       a string that names a file, and a File. Ditto for a ton of other 
+       wrapper classes in the Java world (URL, InternetAddress). With these
+       APIs you should be able to think about domain equivalence, not type
+       equivalence.
+
+   (3) No bossiness. I am not marking any of these functions as private
+       the docstrings will tell you the intended usage but do what works for you. 					
+
+   Feedback welcome!
+
+   If something in this module violates the principle of least surprise, please 
+   let me (Stu) and the Clojure community know via the mailing list.
+"}
+  clojure.contrib.java-utils
   (:import [java.io File]
 	   [java.util Properties]))
 

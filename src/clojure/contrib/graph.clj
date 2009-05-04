@@ -14,7 +14,10 @@
 ;;  Created 23 June 2009
 
 
-(ns clojure.contrib.graph
+(ns 
+  #^{:author "Jeffrey Straszheim",
+     :doc "Basic graph theory algorithms"}
+  clojure.contrib.graph
   (use [clojure.set :only (union)]))
 
 

@@ -31,7 +31,11 @@
 
 
 
-(ns clojure.contrib.trace)
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "This file defines simple \"tracing\" macros to help you see what your
+code is doing."}
+  clojure.contrib.trace)
 
 (def
  #^{:doc "Current stack depth of traced function calls."}

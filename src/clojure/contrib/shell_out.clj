@@ -11,7 +11,11 @@
 ; Conveniently launch a sub-process providing to its stdin and
 ; collecting its stdout
 
-(ns clojure.contrib.shell-out
+(ns 
+  #^{:author "Chris Houser",
+     :doc "Conveniently launch a sub-process providing to its stdin and
+collecting its stdout"}
+  clojure.contrib.shell-out
   (:import (java.io InputStreamReader OutputStreamWriter)))
 
 (def *sh-dir* nil)

@@ -19,7 +19,18 @@
 ;;  scgilardi (gmail)
 ;;  Created 5 October 2008
 
-(ns clojure.contrib.miglayout
+(ns 
+  #^{:author "Stephen C. Gilardi",
+     :doc "Clojure support for the MiGLayout layout manager
+http://www.miglayout.com/
+
+Example:
+
+  (use '[clojure.contrib.miglayout.test :as mlt :only ()])
+  (doseq [i (range 3)] (mlt/run-test i))
+
+"}
+  clojure.contrib.miglayout
   (:import (java.awt Container Component)
            (net.miginfocom.swing MigLayout))
   (:use clojure.contrib.miglayout.internal))

@@ -15,7 +15,14 @@
 ;;  scgilardi (gmail)
 ;;  Created 2 April 2008
 
-(ns clojure.contrib.sql
+(ns 
+  #^{:author "Stephen C. Gilardi",
+     :doc "A Clojure interface to sql databases via jdbc
+
+           See clojure.contrib.sql.test for an example"
+     :see-also [["http://code.google.com/p/clojure-contrib/source/browse/trunk/src/clojure/contrib/sql/test.clj" 
+                 "Example code"]]}
+  clojure.contrib.sql
   (:use (clojure.contrib
          [def :only (defalias)]
          [java-utils :only (as-str)])

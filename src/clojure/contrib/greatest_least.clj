@@ -1,4 +1,7 @@
-(ns clojure.contrib.greatest-least)
+(ns 
+  #^{:author "Vincent Foley",
+     :doc "Various functions for finding greatest and least values in a collection"}
+  clojure.contrib.greatest-least)
 
 (defn- boundary
   [cmp-fn f & args]

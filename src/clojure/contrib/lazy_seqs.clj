@@ -30,7 +30,28 @@
 ;;  scgilardi (gmail)
 ;;  Created 07 June 2008
 
-(ns clojure.contrib.lazy-seqs
+(ns 
+  #^{:author "Stephen C. Gilardi",
+     :doc "==== Lazy sequences ====
+
+ primes - based on the \"naive\" implemention described in [1] plus a
+          small \"wheel\" which eliminates multiples of 2, 3, 5, and
+          7 from consideration by incrementing past them. Also inspired
+          by code from Christophe Grand in [2].
+
+ fibs   - all the Fibonacci numbers
+
+ powers-of-2 - all the powers of 2
+
+ ==== Lazy sequence functions ====
+
+ (rotations, partition-all, shuffle, rand-elt  moved to seq_utils.clj)
+ (permutations and combinations moved to combinatorics.clj)
+
+ [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
+ [2] http://clj-me.blogspot.com/2008/06/primes.html
+"}
+  clojure.contrib.lazy-seqs
   (:use clojure.contrib.def))
 
 ; primes cannot be written efficiently as a function, because

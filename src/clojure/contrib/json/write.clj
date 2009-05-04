@@ -17,14 +17,19 @@
 
 
 
-(ns clojure.contrib.json.write
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "JavaScript Object Notation (JSON) generator",
+     :see-also ["http://www.json.org", "JSON Home Page"]}
+  clojure.contrib.json.write
   (:use [clojure.contrib.test-is :only (deftest- is)]))
 
 (defmulti
   #^{:doc "Prints Clojure data types as JSON.  Nil becomes JSON null.
   Keywords become strings, without the leading colon.  Maps become
   JSON objects, all other collection types become JSON arrays.
-  Strings and numbers print as with pr."}
+  Strings and numbers print as with pr."
+     :arglists '([x])}
   print-json (fn [x]
                (cond (nil? x) nil
                      (map? x) :object

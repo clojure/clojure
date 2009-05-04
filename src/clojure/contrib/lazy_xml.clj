@@ -8,7 +8,10 @@
 
 ; Functions to parse xml lazily and emit back to text.
 
-(ns clojure.contrib.lazy-xml
+(ns 
+    #^{:author "Chris Houser",
+       :doc "Functions to parse xml lazily and emit back to text."}
+    clojure.contrib.lazy-xml
     (:require [clojure.xml :as xml])
     (:import (org.xml.sax Attributes InputSource)
              (org.xml.sax.helpers DefaultHandler)

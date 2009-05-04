@@ -9,7 +9,11 @@
 ; Functions for memory-mapping files, plus some functions that use a
 ; mmaped file for "normal" activies -- slurp, load-file, etc.
 
-(ns clojure.contrib.mmap
+(ns 
+  #^{:author "Chris Houser",
+     :doc "Functions for memory-mapping files, plus some functions that use a
+mmaped file for \"normal\" activies -- slurp, load-file, etc."}
+  clojure.contrib.mmap
     (:refer-clojure :exclude (slurp load-file))
     (:import (java.nio ByteBuffer CharBuffer)
              (java.io PushbackReader InputStream InputStreamReader

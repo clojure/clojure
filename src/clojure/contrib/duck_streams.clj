@@ -90,7 +90,8 @@
   local file names.  Uses *default-encoding* as the text encoding.
 
   Should be used inside with-open to ensure the Reader is properly
-  closed."}
+  closed."
+             :arglists '([x])}
   reader class)
 
 (defmethod reader Reader [x]
@@ -132,7 +133,8 @@
   local file names.
 
   Should be used inside with-open to ensure the Writer is properly
-  closed."}
+  closed."
+             :arglists '([x])}
   writer class)
 
 (defmethod writer PrintWriter [x] x)

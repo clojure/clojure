@@ -30,7 +30,19 @@
 ;; * December 9, 2008: first version
 
 
-(ns clojure.contrib.walk)
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "This file defines a generic tree walker for Clojure data
+structures.  It takes any data structure (list, vector, map, set,
+seq), calls a function on every element, and uses the return value
+of the function in place of the original.  This makes it fairly
+easy to write recursive search-and-replace functions, as shown in
+the examples.
+
+Note: \"walk\" supports all Clojure data structures EXCEPT maps
+created with sorted-map-by.  There is no (obvious) way to retrieve
+the sorting function."}
+  clojure.contrib.walk)
 
 (defn walk
   "Traverses form, an arbitrary data structure.  inner and outer are

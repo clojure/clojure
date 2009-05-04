@@ -23,8 +23,8 @@
 
 
 (ns 
-    #{:author "Stuart Sierra"
-      :doc "Generic case-like macro using template expressions"}
+    #^{:author "Stuart Sierra"
+       :doc "Generic case-like macro using template expressions"}
     clojure.contrib.condt
     (:require clojure.contrib.template))
 

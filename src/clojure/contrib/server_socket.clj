@@ -8,7 +8,10 @@
 
 ;;  Server socket library - includes REPL on socket
 
-(ns clojure.contrib.server-socket
+(ns 
+  #^{:author "Craig McDaniel",
+     :doc "Server socket library - includes REPL on socket"}
+  clojure.contrib.server-socket
   (:import (java.net InetAddress ServerSocket Socket SocketException)
            (java.io InputStreamReader OutputStream OutputStreamWriter PrintWriter)
            (clojure.lang LineNumberingPushbackReader))

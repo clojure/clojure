@@ -71,8 +71,53 @@
 
 
 
-(ns clojure.contrib.template
-    (:use clojure.contrib.walk))
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Anonymous functions that pre-evaluate sub-expressions
+
+           This file defines macros for using template expressions.  These are
+           useful for writing macros.
+
+           A template is an expression containing \"holes\" represented by the
+           symbols _1, _2, _3, and so on.  (\"_\" is a synonym for \"_1\".)
+
+           The \"template\" macro is similar to #().  It returns an anonymous
+           function containing the body of the template.  Unlike #() or \"fn\",
+           however, any expressions that do not have any holes will be
+           evaluated only once, at the time the function is created, not every
+           time the function is called.
+
+           Examples:
+
+           Assume we have some big, slow calculation.
+             (defn think-hard []
+               (Thread/sleep 1000)
+               1000)
+
+           With #(), think-hard gets called every time.
+             (time (doall (map #(+ % (think-hard))
+                               (range 5))))
+             => \"Elapsed time: 5001.33455 msecs\"
+             => (1000 1001 1002 1003 1004)
+
+           With a template, think-hard only gets called once.
+             (time (doall (map (template (+ _ (think-hard)))
+                               (range 5))))
+             => \"Elapsed time: 1000.907326 msecs\"
+             => (1000 1001 1002 1003 1004)
+
+           There is also the do-template macro, which works differently.  It
+           calls the same template multiple times, filling in values, and puts
+           it all inside a \"do\" block.  It will split up the values based on
+           the number of holes in the template.
+
+             (do-template (foo _1 _2) :a :b :c :d)
+             expands to: (do (foo :a :b) (foo :c :d))
+
+             (do-template (foo _1 _2 _3) 10 11 12 13 14 15)
+             expands to: (foo 10 11 12) (foo 13 14 15)"}
+  clojure.contrib.template
+  (:use clojure.contrib.walk))
 
 (defn find-symbols
   "Recursively finds all symbols in form."

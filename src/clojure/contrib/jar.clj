@@ -12,7 +12,10 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.jar
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "Utilities for working with Java JAR files"}
+  clojure.contrib.jar
   (:import (java.io File)
            (java.util.jar JarFile)))
 

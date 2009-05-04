@@ -12,7 +12,11 @@
 ;;  scgilardi (gmail)
 ;;  Created 28 November 2008
 
-(ns clojure.contrib.repl-ln
+(ns 
+  #^{:author "Stephen C. Gilardi",
+     :doc "A repl with that provides support for lines and line numbers in the
+           input stream."}
+  clojure.contrib.repl-ln
   (:gen-class)
   (:import (clojure.lang Compiler LineNumberingPushbackReader RT Var)
            (java.io InputStreamReader OutputStreamWriter PrintWriter)

@@ -21,7 +21,10 @@
 ;;   functions; see discussion at http://groups.google.com/group/clojure/browse_thread/thread/8b2c8dc96b39ddd7/a8866d34b601ff43
 
 
-(ns clojure.contrib.seq-utils)
+(ns 
+  #^{:author "Stuart Sierra (and others)",
+     :doc "Sequence utilities for Clojure"}
+  clojure.contrib.seq-utils)
 
 
 ;; 'flatten' written by Rich Hickey,
@@ -149,7 +152,7 @@
   (nth s (rand-int (count s))))
 
 
-;; seq-on writte by Konrad Hinsen
+;; seq-on written by Konrad Hinsen
 (defmulti seq-on
   "Returns a seq on the object s. Works like the built-in seq but as
    a multimethod that can have implementations for new classes and types."

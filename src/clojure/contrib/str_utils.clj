@@ -12,8 +12,11 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.str-utils
-    (:import (java.util.regex Pattern)))
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "String utilities for Clojure"}
+  clojure.contrib.str-utils
+  (:import (java.util.regex Pattern)))
 
 (defn re-split
   "Splits the string on instances of 'pattern'.  Returns a sequence of

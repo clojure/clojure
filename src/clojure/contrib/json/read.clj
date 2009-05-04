@@ -30,7 +30,19 @@
 
 
 
-(ns clojure.contrib.json.read
+(ns 
+  #^{:author "Stuart Sierra",
+     :doc "JavaScript Object Notation (JSON) parser
+
+           For more information on JSON, see http://www.json.org/
+
+           This library parses data in JSON format.  This is a fairly strict
+           implementation of JSON as described at json.org, not a full-fledged
+           JavaScript parser.  JavaScript functions and object constructors
+           are not supported.  Object field names must be quoted strings; they
+           may not be bare symbols.",
+     :see-also ["http://www.json.org", "JSON Home Page"]}
+  clojure.contrib.json.read
   (:import (java.io PushbackReader StringReader EOFException))
   (:use [clojure.contrib.test-is :only (deftest- is)]))
 

@@ -13,7 +13,10 @@
 ;;  jason at w01fe dot com
 ;;  Created 2 Feb 2009
 
-(ns clojure.contrib.set)
+(ns 
+  #^{:author "Jason Wolfe",
+     :doc "Clojure functions for operating on sets (supplemental to clojure.set)"}
+  clojure.contrib.set)
 
 (defn subset? 
   "Is set1 a subset of set2?"
