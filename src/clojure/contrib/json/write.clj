@@ -20,7 +20,7 @@
 (ns 
   #^{:author "Stuart Sierra",
      :doc "JavaScript Object Notation (JSON) generator",
-     :see-also ["http://www.json.org", "JSON Home Page"]}
+     :see-also [["http://www.json.org", "JSON Home Page"]]}
   clojure.contrib.json.write
   (:use [clojure.contrib.test-is :only (deftest- is)]))
 

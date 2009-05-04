@@ -32,7 +32,8 @@
 
 (ns 
   #^{:author "Stephen C. Gilardi",
-     :doc "==== Lazy sequences ====
+     :doc "
+==== Lazy sequences ====
 
  primes - based on the \"naive\" implemention described in [1] plus a
           small \"wheel\" which eliminates multiples of 2, 3, 5, and

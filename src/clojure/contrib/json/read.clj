@@ -41,7 +41,7 @@
            JavaScript parser.  JavaScript functions and object constructors
            are not supported.  Object field names must be quoted strings; they
            may not be bare symbols.",
-     :see-also ["http://www.json.org", "JSON Home Page"]}
+     :see-also [["http://www.json.org", "JSON Home Page"]]}
   clojure.contrib.json.read
   (:import (java.io PushbackReader StringReader EOFException))
   (:use [clojure.contrib.test-is :only (deftest- is)]))
