@@ -87,14 +87,59 @@
   (is (instance? BigInteger -10000000000000000000000000000000000000000000000000))
 
   ; Read Double
+  (is (instance? Double +1.0e+1))
+  (is (instance? Double +1.e+1))
+  (is (instance? Double +1e+1))
+
   (is (instance? Double +1.0e1))
-  (is (instance? Double +1.0))
-  (is (instance? Double 1.0))
-  (is (instance? Double +0.0))
-  (is (instance? Double 0.0))
-  (is (instance? Double -0.0))
-  (is (instance? Double -1.0))
+  (is (instance? Double +1.e1))
+  (is (instance? Double +1e1))
+
+  (is (instance? Double +1.0e-1))
+  (is (instance? Double +1.e-1))
+  (is (instance? Double +1e-1))
+
+  (is (instance? Double 1.0e+1))
+  (is (instance? Double 1.e+1))
+  (is (instance? Double 1e+1))
+
+  (is (instance? Double 1.0e1))
+  (is (instance? Double 1.e1))
+  (is (instance? Double 1e1))
+
+  (is (instance? Double 1.0e-1))
+  (is (instance? Double 1.e-1))
+  (is (instance? Double 1e-1))
+
+  (is (instance? Double -1.0e+1))
+  (is (instance? Double -1.e+1))
+  (is (instance? Double -1e+1))
+
   (is (instance? Double -1.0e1))
+  (is (instance? Double -1.e1))
+  (is (instance? Double -1e1))
+
+  (is (instance? Double -1.0e-1))
+  (is (instance? Double -1.e-1))
+  (is (instance? Double -1e-1))
+
+  (is (instance? Double +1.0))
+  (is (instance? Double +1.))
+
+  (is (instance? Double 1.0))
+  (is (instance? Double 1.))
+
+  (is (instance? Double +0.0))
+  (is (instance? Double +0.))
+
+  (is (instance? Double 0.0))
+  (is (instance? Double 0.))
+
+  (is (instance? Double -0.0))
+  (is (instance? Double -0.))
+
+  (is (instance? Double -1.0))
+  (is (instance? Double -1.))
 
   ; Read BigDecimal
   (is (instance? BigDecimal 9223372036854775808M))
@@ -107,12 +152,60 @@
   (is (instance? BigDecimal -0M))
   (is (instance? BigDecimal -1M))
   (is (instance? BigDecimal -2147483648M))
+
+  (is (instance? BigDecimal +1.0e+1M))
+  (is (instance? BigDecimal +1.e+1M))
+  (is (instance? BigDecimal +1e+1M))
+
+  (is (instance? BigDecimal +1.0e1M))
+  (is (instance? BigDecimal +1.e1M))
+  (is (instance? BigDecimal +1e1M))
+
+  (is (instance? BigDecimal +1.0e-1M))
+  (is (instance? BigDecimal +1.e-1M))
+  (is (instance? BigDecimal +1e-1M))
+
+  (is (instance? BigDecimal 1.0e+1M))
+  (is (instance? BigDecimal 1.e+1M))
+  (is (instance? BigDecimal 1e+1M))
+
+  (is (instance? BigDecimal 1.0e1M))
+  (is (instance? BigDecimal 1.e1M))
+  (is (instance? BigDecimal 1e1M))
+
+  (is (instance? BigDecimal 1.0e-1M))
+  (is (instance? BigDecimal 1.e-1M))
+  (is (instance? BigDecimal 1e-1M))
+
+  (is (instance? BigDecimal -1.0e+1M))
+  (is (instance? BigDecimal -1.e+1M))
+  (is (instance? BigDecimal -1e+1M))
+
+  (is (instance? BigDecimal -1.0e1M))
+  (is (instance? BigDecimal -1.e1M))
+  (is (instance? BigDecimal -1e1M))
+
+  (is (instance? BigDecimal -1.0e-1M))
+  (is (instance? BigDecimal -1.e-1M))
+  (is (instance? BigDecimal -1e-1M))
+
   (is (instance? BigDecimal +1.0M))
+  (is (instance? BigDecimal +1.M))
+
   (is (instance? BigDecimal 1.0M))
+  (is (instance? BigDecimal 1.M))
+
   (is (instance? BigDecimal +0.0M))
+  (is (instance? BigDecimal +0.M))
+
   (is (instance? BigDecimal 0.0M))
+  (is (instance? BigDecimal 0.M))
+
   (is (instance? BigDecimal -0.0M))
+  (is (instance? BigDecimal -0.M))
+
   (is (instance? BigDecimal -1.0M))
+  (is (instance? BigDecimal -1.M))
 )
 
 ;; Characters
