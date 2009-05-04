@@ -63,6 +63,7 @@ math
 mmap
 monads
 ns-utils
+pprint
 probabilities.finite-distributions
 probabilities.monte-carlo
 probabilities.random-numbers
