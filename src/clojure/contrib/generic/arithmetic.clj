@@ -78,6 +78,7 @@
   "Return the difference of the first argument and the sum of all other
    arguments. The minimal implementation for type ::my-type is the binary
    form with dispatch value [::my-type ::my-type]."
+  {:arglists '([x] [x y] [x y & more])}
   nary-dispatch)
 
 (defmethod - nulary-type
@@ -110,6 +111,7 @@
 (defmulti *
   "Return the product of all arguments. The minimal implementation for type
    ::my-type is the binary form with dispatch value [::my-type ::my-type]."
+  {:arglists '([x] [x y] [x y & more])}
   nary-dispatch)
 
 (defmethod * nulary-type
@@ -142,6 +144,7 @@
   "Return the quotient of the first argument and the product of all other
    arguments. The minimal implementation for type ::my-type is the binary
    form with dispatch value [::my-type ::my-type]."
+  {:arglists '([x] [x y] [x y & more])}
   nary-dispatch)
 
 (defmethod / nulary-type

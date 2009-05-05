@@ -57,6 +57,7 @@
   "Return true if each argument is larger than the following ones.
    The minimal implementation for type ::my-type is the binary form
    with dispatch value [::my-type ::my-type]."
+  {:arglists '([x] [x y] [x y & more])}
   nary-dispatch)
 
 (defmethod > root-type
@@ -78,6 +79,7 @@
    The minimal implementation for type ::my-type is the binary form
    with dispatch value [::my-type ::my-type]. A default implementation
    is provided in terms of >."
+  {:arglists '([x] [x y] [x y & more])}
   nary-dispatch)
 
 (defmethod < root-type
@@ -103,6 +105,7 @@
    ones. The minimal implementation for type ::my-type is the binary form
    with dispatch value [::my-type ::my-type]. A default implementation
    is provided in terms of <."
+  {:arglists '([x] [x y] [x y & more])}
   nary-dispatch)
 
 (defmethod >= root-type
@@ -128,6 +131,7 @@
    ones. The minimal implementation for type ::my-type is the binary form
    with dispatch value [::my-type ::my-type]. A default implementation
    is provided in terms of >."
+  {:arglists '([x] [x y] [x y & more])}
   nary-dispatch)
 
 (defmethod <= root-type

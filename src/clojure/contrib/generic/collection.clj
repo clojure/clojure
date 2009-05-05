@@ -41,6 +41,7 @@
 ;
 (defmulti conj
   "Returns a new collection resulting from adding all xs to coll."
+   {:arglists '([coll & xs])}
   (fn [coll & xs] (type coll)))
 
 (defmethod conj :default
