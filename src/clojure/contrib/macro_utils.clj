@@ -47,32 +47,41 @@
 ; Symbols defined inside let forms or function arguments.
 (defvar- protected-symbols #{})
 
+(defn- reserved?
+  [symbol]
+  "Return true if symbol is a reserved symbol (starting or ending with a dot)."
+  (let [s (str symbol)]
+    (or (= "." (subs s 0 1))
+	(= "." (subs s (dec (count s)))))))
+
+(defn- expand-symbol
+  "Expand symbol macros"
+  [symbol]
+  (cond (contains? protected-symbols symbol) symbol
+	(reserved? symbol)                   symbol
+	(contains? macro-symbols symbol)     (get macro-symbols symbol)
+	:else (let [v (resolve symbol)
+		    m (meta v)]
+		(if (:symbol-macro m)
+		  (var-get v)
+		  symbol))))
+
 (defn- expand-1
   "Perform a single non-recursive macro expansion of form."
   [form]
   (cond
     (seq? form)
       (let [f (first form)]
-        (cond (contains? special-forms f)
-	        form
-	      (contains? macro-fns f)
-	        (apply (get macro-fns f) (rest form))
-	      (contains? macro-symbols f)
-	        (cons (get macro-symbols f) (rest form))
-	      :else
-	        ; handle defmacro macros and Java method special forms
-	        (clojure.core/macroexpand-1 form)))
+        (cond (contains? special-forms f) form
+	      (contains? macro-fns f)     (apply (get macro-fns f) (rest form))
+	      (symbol? f)                 (let [exp (expand-symbol f)]
+					    (if (= exp f)
+					      (clojure.core/macroexpand-1 form)
+					      (cons exp (rest form))))
+	      ; handle defmacro macros and Java method special forms
+	      :else (clojure.core/macroexpand-1 form)))
     (symbol? form)
-      (cond (contains? protected-symbols form)
-	      form
-	    (contains? macro-symbols form)
-	      (get macro-symbols form)
-	    :else
-	      (let [v (resolve form)
-		    m (meta v)]
-		(if (:symbol-macro m)
-		  (var-get v)
-		  form)))
+      (expand-symbol form)
      :else
        form))
 
