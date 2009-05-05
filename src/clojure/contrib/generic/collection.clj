@@ -1,7 +1,7 @@
 ;; Generic interfaces for collection-related functions
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 5, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -39,7 +39,9 @@
 ;
 ; conj
 ;
-(defmulti conj (fn [coll & xs] (type coll)))
+(defmulti conj
+  "Returns a new collection resulting from adding all xs to coll."
+  (fn [coll & xs] (type coll)))
 
 (defmethod conj :default
   [coll & xs]

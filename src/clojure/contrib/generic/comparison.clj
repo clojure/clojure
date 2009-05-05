@@ -1,7 +1,7 @@
 ;; Generic interfaces for comparison operations
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 5, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -25,12 +25,19 @@
 ;
 ; zero?
 ;
-(defmulti zero? type)
+(defmulti zero?
+  "Return true of x is zero."
+  {:arglists '([x])}
+  type)
 
 ;
 ; Equality
 ;
-(defmulti = nary-dispatch)
+(defmulti =
+  "Return true if all arguments are equal. The minimal implementation for type
+   ::my-type is the binary form with dispatch value [::my-type ::my-type]."
+  {:arglists '([x] [x y] [x y & more])}
+  nary-dispatch)
 
 (defmethod = root-type
   [x] true)
@@ -46,7 +53,11 @@
 ;
 ; Greater-than
 ;
-(defmulti > nary-dispatch)
+(defmulti >
+  "Return true if each argument is larger than the following ones.
+   The minimal implementation for type ::my-type is the binary form
+   with dispatch value [::my-type ::my-type]."
+  nary-dispatch)
 
 (defmethod > root-type
   [x] true)
@@ -62,7 +73,12 @@
 ;
 ; Less-than defaults to greater-than with arguments inversed
 ;
-(defmulti < nary-dispatch)
+(defmulti <
+  "Return true if each argument is smaller than the following ones.
+   The minimal implementation for type ::my-type is the binary form
+   with dispatch value [::my-type ::my-type]. A default implementation
+   is provided in terms of >."
+  nary-dispatch)
 
 (defmethod < root-type
   [x] true)
@@ -82,7 +98,12 @@
 ;
 ; Greater-or-equal defaults to (complement <)
 ;
-(defmulti >= nary-dispatch)
+(defmulti >=
+  "Return true if each argument is larger than or equal to the following
+   ones. The minimal implementation for type ::my-type is the binary form
+   with dispatch value [::my-type ::my-type]. A default implementation
+   is provided in terms of <."
+  nary-dispatch)
 
 (defmethod >= root-type
   [x] true)
@@ -102,7 +123,12 @@
 ;
 ; Less-than defaults to (complement >)
 ;
-(defmulti <= nary-dispatch)
+(defmulti <=
+  "Return true if each arguments is smaller than or equal to the following
+   ones. The minimal implementation for type ::my-type is the binary form
+   with dispatch value [::my-type ::my-type]. A default implementation
+   is provided in terms of >."
+  nary-dispatch)
 
 (defmethod <= root-type
   [x] true)

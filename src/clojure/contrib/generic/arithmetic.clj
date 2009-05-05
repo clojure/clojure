@@ -1,7 +1,7 @@
 ;; Generic interfaces for arithmetic operations
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 5, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -38,11 +38,15 @@
 ;
 ; Addition
 ;
-; The minimal implementation is for [::binary my-type]. It is possible
+; The minimal implementation is for binary my-type. It is possible
 ; in principle to implement [::unary my-type] as well, though this
 ; doesn't make any sense.
 ;
-(defmulti + nary-dispatch)
+(defmulti + 
+  "Return the sum of all arguments. The minimal implementation for type
+   ::my-type is the binary form with dispatch value [::my-type ::my-type]."
+  {:arglists '([x] [x y] [x y & more])}
+  nary-dispatch)
 
 (defmethod + nulary-type
   []
@@ -70,7 +74,11 @@
 ; implementation is provided as (+ x (- y)), but it is possible to
 ; implement unary my-type explicitly for efficiency reasons.
 ;
-(defmulti - nary-dispatch)
+(defmulti -
+  "Return the difference of the first argument and the sum of all other
+   arguments. The minimal implementation for type ::my-type is the binary
+   form with dispatch value [::my-type ::my-type]."
+  nary-dispatch)
 
 (defmethod - nulary-type
   []
@@ -99,7 +107,10 @@
 ; in principle to implement unary my-type as well, though this
 ; doesn't make any sense.
 ;
-(defmulti * nary-dispatch)
+(defmulti *
+  "Return the product of all arguments. The minimal implementation for type
+   ::my-type is the binary form with dispatch value [::my-type ::my-type]."
+  nary-dispatch)
 
 (defmethod * nulary-type
   []
@@ -127,7 +138,11 @@
 ; implementation is provided as (* x (/ y)), but it is possible to
 ; implement binary [my-type my-type] explicitly for efficiency reasons.
 ;
-(defmulti / nary-dispatch)
+(defmulti /
+  "Return the quotient of the first argument and the product of all other
+   arguments. The minimal implementation for type ::my-type is the binary
+   form with dispatch value [::my-type ::my-type]."
+  nary-dispatch)
 
 (defmethod / nulary-type
   []
@@ -153,11 +168,16 @@
 ; Macros to permit access to the / multimethod via namespace qualification
 ;
 (defmacro defmethod*
+  "Define a method implementation for the multimethod name in namespace ns.
+   Required for implementing the division function from another namespace."
   [ns name & args]
   (let [qsym (symbol (str ns) (str name))]
     `(defmethod ~qsym ~@args)))
 
 (defmacro qsym
+  "Create the qualified symbol corresponding to sym in namespace ns.
+   Required to access the division function from another namespace,
+   e.g. as (qsym clojure.contrib.generic.arithmetic /)."
   [ns sym]
   (symbol (str ns) (str sym)))
 

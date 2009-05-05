@@ -1,7 +1,7 @@
 ;; Generic interfaces for mathematical functions
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 5, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -26,7 +26,10 @@
   [name]
   (let [java-symbol (symbol "java.lang.Math" (str name))]
     `(do
-       (defmulti ~name type)
+       (defmulti ~name
+	 ~(str "Return the " name " of x.")
+	 {:arglists '([~'x])}
+	 type)
        (defmethod ~name java.lang.Number
 	 [~'x]
 	 (~java-symbol ~'x)))))
@@ -37,7 +40,10 @@
   [name]
   (let [java-symbol (symbol "java.lang.Math" (str name))]
     `(do
-       (defmulti ~name two-types)
+       (defmulti ~name
+	 ~(str "Return the " name " of x and y.")
+	 {:arglists '([~'x ~'y])}
+	 two-types)
        (defmethod ~name [java.lang.Number java.lang.Number]
 	 [~'x ~'y]
 	 (~java-symbol ~'x ~'y)))))
@@ -64,7 +70,11 @@
 ;
 ; Sign
 ;
-(defmulti sgn type)
+(defmulti sgn
+  "Return the sign of x (-1, 0, or 1)."
+  {:arglists '([x])}
+  type)
+
 (defmethod sgn :default
   [x]
   (cond (gc/zero? x) 0
@@ -74,7 +84,10 @@
 ;
 ; Conjugation
 ;
-(defmulti conjugate type)
+(defmulti conjugate
+  "Return the conjugate of x."
+  {:arglists '([x])}
+  type)
 
 (defmethod conjugate :default
   [x] x)
@@ -82,7 +95,10 @@
 ;
 ; Square
 ;
-(defmulti sqr type)
+(defmulti sqr
+  "Return the square of x."
+  {:arglists '([x])}
+  type)
 
 (defmethod sqr :default
   [x]
@@ -93,6 +109,6 @@
 ;
 (defn approx=
   "Return true if the absolute value of the difference between x and y
-   is less than eps"
+   is less than eps."
   [x y eps]
   (gc/< (abs (ga/- x y)) eps))
