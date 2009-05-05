@@ -892,13 +892,16 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   *report-counters*."
   [ns]
   (binding [*report-counters* (ref *initial-report-counters*)]
-    (let [ns (if (symbol? ns) (find-ns ns) ns)]
+    (let [current-ns *ns*
+	  ns (if (symbol? ns) (find-ns ns) ns)]
       (report {:type :begin-test-ns, :ns ns})
+      (in-ns (ns-name ns))
       ;; If ns has a test-ns-hook function, call that:
       (if-let [v (find-var (symbol (str (ns-name ns)) "test-ns-hook"))]
 	((var-get v))
         ;; Otherwise, just test every var in the ns.
         (test-all-vars ns))
+      (in-ns (ns-name current-ns))
       (report {:type :end-test-ns, :ns ns}))
     @*report-counters*))
 
