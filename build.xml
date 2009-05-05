@@ -130,6 +130,7 @@
       <arg value="clojure.contrib.javadoc.browse-ui"/>
       <arg value="clojure.contrib.lazy-seqs"/>
       <arg value="clojure.contrib.mmap"/>
+      <arg value="clojure.contrib.macro-utils"/>
       <arg value="clojure.contrib.macros"/>
       <arg value="clojure.contrib.monads"/>
       <arg value="clojure.contrib.ns-utils"/>

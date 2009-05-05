@@ -57,6 +57,7 @@ json.read
 json.write
 lazy-seqs
 lazy-xml
+macro-utils
 macros
 math
 ;; miglayout

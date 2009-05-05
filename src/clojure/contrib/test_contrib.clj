@@ -16,7 +16,7 @@
   (:use [clojure.contrib.test-is :only (run-tests)])
   (:gen-class))
 
-(def test-names [:complex-numbers :monads :pprint.pretty :pprint.cl-format
+(def test-names [:complex-numbers :macro-utils :monads :pprint.pretty :pprint.cl-format
                  :str-utils :shell-out :test-graph :test-dataflow :test-java-utils
 		 :test-lazy-seqs])
 

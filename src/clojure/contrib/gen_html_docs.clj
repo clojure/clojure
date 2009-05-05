@@ -498,6 +498,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.javalog
      'clojure.contrib.lazy-seqs
      'clojure.contrib.lazy-xml
+     'clojure.contrib.macro-utils
      'clojure.contrib.macros
      'clojure.contrib.math
      'clojure.contrib.miglayout
