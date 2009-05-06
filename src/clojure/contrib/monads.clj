@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated May 4, 2009
+;; last updated May 6, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -24,6 +24,7 @@
            functions."}
   clojure.contrib.monads
   (:require [clojure.contrib.accumulators])
+  (:use [clojure.contrib.macro-utils :only (with-symbol-macros defsymbolmacro)])
   (:use [clojure.contrib.def :only (name-with-attributes)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -102,12 +103,13 @@
    "Evaluates an expression after replacing the keywords defining the
     monad operations by the functions associated with these keywords
     in the monad definition given by name."
-   [name & exprs]
-   `(let [~'m-bind   (:m-bind ~name)
-	  ~'m-result (:m-result ~name)
-	  ~'m-zero   (:m-zero ~name)
-	  ~'m-plus   (:m-plus ~name)]
-      (do ~@exprs)))
+   [monad & exprs]
+   `(let [name#      ~monad
+	  ~'m-bind   (:m-bind name#)
+	  ~'m-result (:m-result name#)
+	  ~'m-zero   (:m-zero name#)
+	  ~'m-plus   (:m-plus name#)]
+      (with-symbol-macros ~@exprs)))
 
 (defmacro domonad
    "Monad comprehension. Takes the name of a monad, a vector of steps
@@ -140,27 +142,24 @@
   [name & options]
   (let [[name options]  (name-with-attributes name options)
 	fn-name (symbol (str *ns*) (format "m+%s+m" (str name)))
-	make-macro-body (fn [args]
-			  (list args `(list (quote ~fn-name)
-					    '~'m-bind '~'m-result
-					    '~'m-zero '~'m-plus
-					    ~@args)))
 	make-fn-body    (fn [args expr]
 			  (list (vec (concat ['m-bind 'm-result
 					      'm-zero 'm-plus] args))
-				expr))]
+				(list `with-symbol-macros expr)))]
     (if (list? (first options))
       ; multiple arities
       (let [arglists        (map first options)
 	    exprs           (map second options)
 	    ]
 	`(do
-	   (defmacro ~name ~@(map make-macro-body arglists))
+	   (defsymbolmacro ~name (partial ~fn-name ~'m-bind ~'m-result 
+                                                   ~'m-zero ~'m-plus))
 	   (defn ~fn-name ~@(map make-fn-body arglists exprs))))
       ; single arity
       (let [[args expr] options]
 	`(do
-	   (defmacro ~name ~@(make-macro-body args))
+	   (defsymbolmacro ~name (partial ~fn-name ~'m-bind ~'m-result 
+                                                   ~'m-zero ~'m-plus))
 	   (defn ~fn-name ~@(make-fn-body args expr)))))))
 
 

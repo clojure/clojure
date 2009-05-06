@@ -1,7 +1,7 @@
 ;; Test routines for macro_utils.clj
 
 ;; by Konrad Hinsen
-;; last updated May 4, 2009
+;; last updated May 6, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2008. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -45,15 +45,13 @@
 	   '(symbol-macrolet [x foo z bar]
 	      (fn f ([x y] [x y z]) ([x y z] [x y z]))))
 	 '(do (fn* f ([x y] [x y bar]) ([x y z] [x y z])))))
-  (is (= (macroexpand-1
-	   '(symbol-macrolet [x xx y yy z zz]
-	      (domonad m [a x b y x z] [a b x z])))
-	 '(do (let* [m-bind (:m-bind m) m-result (:m-result m)
-		     m-zero (:m-zero m) m-plus (:m-plus m)]
-	        (do (m-bind xx (fn* ([a]
-		    (m-bind yy (fn* ([b]
-		    (m-bind zz (fn* ([x]
-		    (m-result [a b x zz]))))))))))))))))
+  (is (= (nth (second (macroexpand-1
+		       '(symbol-macrolet [x xx y yy z zz]
+			  (domonad m [a x b y x z] [a b x z])))) 2)
+	 '(do (m-bind xx (fn* ([a]
+	      (m-bind yy (fn* ([b]
+	      (m-bind zz (fn* ([x]
+	      (m-result [a b x zz]))))))))))))))
 
 (deftest symbol-test
   (defsymbolmacro sum-2-3 (plus 2 3))
