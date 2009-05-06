@@ -12,12 +12,16 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-contrib.macro-utils
-  (:use [clojure.contrib.test-is :only (deftest is are run-tests)]
+  (:use [clojure.contrib.test-is :only (deftest is are run-tests use-fixtures)]
 	[clojure.contrib.macro-utils
 	 :only (macrolet symbol-macrolet defsymbolmacro with-symbol-macros
 		mexpand-1 mexpand mexpand-all)]
 	[clojure.contrib.monads
 	 :only (with-monad domonad)]))
+
+(use-fixtures :each
+  (fn [f] (binding [*ns* (the-ns 'clojure.contrib.test-contrib.macro-utils)]
+	    (f))))
 
 (deftest macrolet-test
   (is (= (macroexpand-1
@@ -60,3 +64,4 @@
   (is (= (macroexpand '(macrolet [(plus [a b] `(+ ~a ~b))] (+ 1 sum-2-3)))
 	 '(do (+ 1 (clojure.core/+ 2 3)))))
   (ns-unmap *ns* 'sum-2-3))
+
