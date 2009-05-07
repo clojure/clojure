@@ -674,7 +674,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
        (if result#
          (report {:type :pass, :message ~msg,
                   :expected '~form, :actual (class object#)})
-         (report {type, :fail, :message ~msg,
+         (report {:type :fail, :message ~msg,
                   :expected '~form, :actual (class object#)}))
        result#)))
 
