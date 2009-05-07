@@ -701,7 +701,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
         re (nth form 2)
         body (nthnext form 3)]
     `(try ~@body
-          (report :fail ~msg '~form nil)
+          (report {:type :fail, :message ~msg, :expected '~form, :actual nil})
           (catch ~klass e#
             (let [m# (.getMessage e#)]
               (if (re-matches ~re m#)
