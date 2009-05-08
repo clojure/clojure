@@ -15,6 +15,12 @@
 
 ;; For more information on JSON, see http://www.json.org/
 
+;; This is a very simple implementation of JSON.  It does NOT
+;; guarantee round-trip equality, i.e. that 
+;; (= x (read-json-string (json-str x))
+
+;; Map keys will be converted to strings.  All keywords will become
+;; strings.  Most other types are printed as with "pr".
 
 
 (ns 
@@ -22,6 +28,7 @@
      :doc "JavaScript Object Notation (JSON) generator",
      :see-also [["http://www.json.org", "JSON Home Page"]]}
   clojure.contrib.json.write
+  (:require [clojure.contrib.java-utils :as j])
   (:use [clojure.contrib.test-is :only (deftest- is)]))
 
 (defmulti
@@ -34,14 +41,15 @@
                (cond (nil? x) nil
                      (map? x) :object
                      (coll? x) :array
-                     (keyword? x) :keyword
+                     (keyword? x) :symbol
+                     (symbol? x) :symbol
                      :else :default)))
 
 (defmethod print-json :default [x] (pr x))
 
 (defmethod print-json nil [x] (print "null"))
 
-(defmethod print-json :keyword [x] (pr (name x)))
+(defmethod print-json :symbol [x] (pr (name x)))
 
 (defmethod print-json :array [s]
   (print "[")
@@ -58,7 +66,7 @@
   (loop [x m]
     (when (first x)
       (let [[k v] (first x)]
-        (print-json k)
+        (print-json (j/as-str k))
         (print ":")
         (print-json v))
       (when (next x)
@@ -101,6 +109,9 @@
 
 (deftest- can-print-json-objects
   (is (= "{\"a\":1,\"b\":2}" (json-str (sorted-map :a 1 :b 2)))))
+
+(deftest- object-keys-must-be-strings
+  (is (= "{\"1\":1,\"2\":2") (json-str (sorted-map 1 1 2 2))))
 
 (deftest- can-print-empty-objects
   (is (= "{}" (json-str {}))))
