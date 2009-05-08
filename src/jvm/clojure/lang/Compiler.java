@@ -53,6 +53,7 @@ static final Symbol FINALLY = Symbol.create("finally");
 static final Symbol THROW = Symbol.create("throw");
 static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
+static final Symbol IMPORT = Symbol.create("clojure.core", "import*");
 //static final Symbol INSTANCE = Symbol.create("instance?");
 
 //static final Symbol THISFN = Symbol.create("thisfn");
@@ -91,6 +92,7 @@ static final public IPersistentMap specials = PersistentHashMap.create(
 		FN, null,
 		QUOTE, new ConstantExpr.Parser(),
 		THE_VAR, new TheVarExpr.Parser(),
+		IMPORT, new ImportExpr.Parser(),
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
 //		TRY_FINALLY, new TryFinallyExpr.Parser(),
@@ -120,6 +122,7 @@ private static final Type SYMBOL_TYPE = Type.getType(Symbol.class);
 private static final Type IFN_TYPE = Type.getType(IFn.class);
 private static final Type RT_TYPE = Type.getType(RT.class);
 final static Type CLASS_TYPE = Type.getType(Class.class);
+final static Type NS_TYPE = Type.getType(Namespace.class);
 final static Type REFLECTOR_TYPE = Type.getType(Reflector.class);
 final static Type THROWABLE_TYPE = Type.getType(Throwable.class);
 final static Type BOOLEAN_OBJECT_TYPE = Type.getType(Boolean.class);
@@ -517,6 +520,48 @@ public static class KeywordExpr implements Expr{
 
 	public Class getJavaClass() throws ClassNotFoundException{
 		return Keyword.class;
+	}
+}
+
+public static class ImportExpr implements Expr{
+	public final String c;
+	final static Method forNameMethod = Method.getMethod("Class forName(String)");
+	final static Method importClassMethod = Method.getMethod("Class importClass(Class)");
+	final static Method derefMethod = Method.getMethod("Object deref()");
+
+	public ImportExpr(String c){
+		this.c = c;
+	}
+
+	public Object eval() throws Exception{
+		Namespace ns = (Namespace) RT.CURRENT_NS.deref();
+		ns.importClass(RT.classForName(c));
+		return null;
+	}
+
+	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+		gen.getStatic(RT_TYPE,"CURRENT_NS",VAR_TYPE);
+		gen.invokeVirtual(VAR_TYPE, derefMethod);
+		gen.checkCast(NS_TYPE);
+		gen.push(c);
+		gen.invokeStatic(CLASS_TYPE, forNameMethod);
+		gen.invokeVirtual(NS_TYPE, importClassMethod);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public boolean hasJavaClass(){
+		return false;
+	}
+
+	public Class getJavaClass() throws ClassNotFoundException{
+		throw new IllegalArgumentException("ImportExpr has no Java class");
+	}
+
+	static class Parser implements IParser{
+		public Expr parse(C context, Object form) throws Exception{
+			return new ImportExpr((String) RT.second(form));
+		}
 	}
 }
 
@@ -952,8 +997,8 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	public final String fieldName;
 	public final Class c;
 	public final java.lang.reflect.Field field;
-	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
-	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
+//	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
+//	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
 	final int line;
 
 	public StaticFieldExpr(int line, Class c, String fieldName) throws Exception{
@@ -1238,8 +1283,9 @@ static class StaticMethodExpr extends MethodExpr{
 	public final String source;
 	public final int line;
 	public final java.lang.reflect.Method method;
+	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 	final static Method invokeStaticMethodMethod =
-			Method.getMethod("Object invokeStaticMethod(String,String,Object[])");
+			Method.getMethod("Object invokeStaticMethod(Class,String,Object[])");
 
 
 	public StaticMethodExpr(String source, int line, Class c, String methodName, IPersistentVector args)
@@ -1338,6 +1384,7 @@ static class StaticMethodExpr extends MethodExpr{
 		else
 			{
 			gen.push(c.getName());
+			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			gen.push(methodName);
 			emitArgsAsArray(args, fn, gen);
 			if(context == C.RETURN)
@@ -2083,7 +2130,8 @@ public static class NewExpr implements Expr{
 	public final Class c;
 	final static Method invokeConstructorMethod =
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
-	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
+//	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
+	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 
 
 	public NewExpr(Class c, IPersistentVector args, int line) throws Exception{
@@ -2149,7 +2197,7 @@ public static class NewExpr implements Expr{
 		else
 			{
 			gen.push(c.getName());
-			gen.invokeStatic(RT_TYPE, forNameMethod);
+			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			MethodExpr.emitArgsAsArray(args, fn, gen);
 			if(context == C.RETURN)
 				{

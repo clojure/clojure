@@ -1840,25 +1840,31 @@
            ~@body
            (recur (unchecked-inc ~i)))))))
 
-(defn import
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  [to from]
+    (let [ret to items (seq from)]
+      (if items
+        (recur (conj ret (first items)) (next items))
+        ret)))
+
+(defmacro import 
   "import-list => (package-symbol class-name-symbols*)
 
   For each name in class-name-symbols, adds a mapping from name to the
   class named by package.name to the current namespace. Use :import in the ns
   macro in preference to calling this directly."
   [& import-symbols-or-lists]
-    (let [#^clojure.lang.Namespace ns *ns*]
-      (doseq [spec import-symbols-or-lists]
-        (if (symbol? spec)
-          (let [n (name spec)
-                dot (.lastIndexOf n (. clojure.lang.RT (intCast \.)))
-                c (symbol (.substring n (inc dot)))]
-            (. ns (importClass c (. clojure.lang.RT (classForName (name spec))))))
-          (let [pkg (first spec)
-                classes (next spec)]
-            (doseq [c classes]
-              (. ns (importClass c (. clojure.lang.RT (classForName (str pkg "." c)))))))))))
-
+  (let [specs (map #(if (and (seq? %) (= 'quote (first %))) (second %) %) 
+                   import-symbols-or-lists)]
+    `(do ~@(map #(list 'clojure.core/import* %)
+                (reduce (fn [v spec] 
+                          (if (symbol? spec)
+                            (conj v (name spec))
+                            (let [p (first spec) cs (rest spec)]
+                              (into v (map #(str p "." %) cs)))))
+                        [] specs)))))
 
 (defn into-array
   "Returns an array with components set to the values in aseq. The array's
@@ -1870,15 +1876,6 @@
      (clojure.lang.RT/seqToTypedArray (seq aseq)))
   ([type aseq]
      (clojure.lang.RT/seqToTypedArray type (seq aseq))))
-
-(defn into
-  "Returns a new coll consisting of to-coll with all of the items of
-  from-coll conjoined."
-  [to from]
-    (let [ret to items (seq from)]
-      (if items
-        (recur (conj ret (first items)) (next items))
-        ret)))
 
 (defn #^{:private true}
   array [& items]

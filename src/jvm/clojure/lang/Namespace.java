@@ -105,6 +105,11 @@ public Class importClass(Symbol sym, Class c){
 
 }
 
+public Class importClass(Class c){
+	String n = c.getName();
+	return importClass(Symbol.intern(n.substring(n.lastIndexOf('.') + 1)), c);
+}
+
 public Var refer(Symbol sym, Var var){
 	return (Var) reference(sym, var);
 

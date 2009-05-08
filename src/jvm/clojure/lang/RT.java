@@ -1475,7 +1475,9 @@ static public ClassLoader makeClassLoader(){
 }
 
 static public ClassLoader baseLoader(){
-	if(booleanCast(USE_CONTEXT_CLASSLOADER.deref()))
+	if(Compiler.LOADER.isBound())
+		return (ClassLoader) Compiler.LOADER.deref();
+	else if(booleanCast(USE_CONTEXT_CLASSLOADER.deref()))
 		return Thread.currentThread().getContextClassLoader();
 	else if(ROOT_CLASSLOADER != null)
 		return ROOT_CLASSLOADER;
