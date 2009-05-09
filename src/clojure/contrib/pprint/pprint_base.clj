@@ -130,6 +130,39 @@ pretty printing the results of macro expansions"}
        ~@body
        (if new-writer# (.flush *out*)))))
 
+(defn write-out 
+  "Write an object to *out* subject to the current bindings of the printer control 
+variables. Use the kw-args argument to override individual variables for this call (and 
+any recursive calls).
+
+*out* must be a PrettyWriter if pretty printing is enabled. This is the responsibility
+of the caller.
+
+This method is primarily intended for use by pretty print dispatch functions that 
+already know that the pretty printer will have set up their environment appropriately.
+Normal library clients should use the standard \"write\" interface. "
+  [object]
+  (let [length-reached (and 
+                        *current-length*
+                        *print-length*
+                        (>= *current-length* *print-length*))]
+    (if-not *print-pretty*
+      (pr object)
+      (if length-reached
+        (print "...")
+        ;; TODO better/faster dispatch mechanism!
+        (do
+          (if *current-length* (set! *current-length* (inc *current-length*)))
+          (loop [dispatch @*print-pprint-dispatch*]
+            (let [[test func] (first dispatch)]
+              (cond
+                (empty? dispatch) (if (and *print-suppress-namespaces* (symbol? object))
+                                    (print (name object))
+                                    (pr object))
+                (test object) (func *out* object)
+                :else (recur (next dispatch))))))))
+    length-reached))
+
 (defn write 
   "Write an object subject to the current bindings of the printer control variables.
 Use the kw-args argument to override individual variables for this call (and any 
@@ -160,40 +193,25 @@ The following keyword arguments can be passed with values:
             base-writer (condp = optval
                           nil (java.io.StringWriter.)
                           true *out*
-                          optval)
-            length-reached (and *current-length* *print-length* (>= *current-length* *print-length*))]
+                          optval)]
         (if *print-pretty*
           (with-pretty-writer base-writer
-            (if length-reached
-              (print "...")
-              ;; TODO better/faster dispatch mechanism!
-              (do
-                (if *current-length* (set! *current-length* (inc *current-length*)))
-                (loop [dispatch @*print-pprint-dispatch*]
-                  (let [[test func] (first dispatch)]
-                    (cond
-                      (empty? dispatch) (if (and *print-suppress-namespaces* (symbol? object))
-                                          (print (name object))
-                                          (pr object))
-                      (test object) (func *out* object)
-                      :else (recur (next dispatch))))))))
+            (write-out object))
           (binding [*out* base-writer]
             (pr object)))
         (if (nil? optval) 
-          (.toString #^java.io.StringWriter base-writer)
-          length-reached)))))
+          (.toString #^java.io.StringWriter base-writer))))))
+
 
 (defn pprint 
   "Pretty print object to the optional output writer. If the writer is not provided, 
 print the object to the currently bound value of *out*."
-  [object & more]
-  (let [base-stream (if (pos? (count more))
-                 (first more)
-                 *out*)]
-    (with-pretty-writer base-stream
-      (write object :pretty true)
-      (if (not (= 0 (.getColumn #^PrettyWriter *out*)))
-        (.write *out* (int \newline))))))
+  ([object] (pprint object *out*)) 
+  ([object writer]
+     (with-pretty-writer writer
+       (write object :pretty true)
+       (if (not (= 0 (.getColumn #^PrettyWriter *out*)))
+         (.write *out* (int \newline))))))
 
 (defmacro pp 
   "A convenience macro that pretty prints the last thing output. This is
