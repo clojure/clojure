@@ -71,17 +71,18 @@
        (assoc ret k (conj (get ret k []) x))))
    (sorted-map) coll))
 
-;; partition-by written by Rich Hickey;
-;; see http://paste.lisp.org/display/64190
+;; partition-by originally written by Rich Hickey;
+;; modified by Stuart Sierra
 (defn partition-by 
   "Applies f to each value in coll, splitting it each time f returns
    a new value.  Returns a lazy seq of lazy seqs."
   [f coll]
   (when-let [s (seq coll)]
-    (let [fv (f (first s))
-          run (take-while #(= fv (f %)) s)]
+    (let [fst (first s)
+          fv (f fst)
+          run (cons fst (take-while #(= fv (f %)) (rest s)))]
       (lazy-seq
-       (cons run (partition-by f (drop (count run) s)))))))
+       (cons run (new-partition-by f (drop (count run) s)))))))
 
 (defn frequencies
   "Returns a map from distinct items in coll to the number of times
