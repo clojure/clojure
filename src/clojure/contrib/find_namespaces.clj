@@ -39,14 +39,27 @@
   (sort-by #(.getAbsolutePath %)
            (filter clojure-source-file? (file-seq dir))))
 
+(defn comment?
+  "Returns true if form is a (comment ...)"
+  [form]
+  (and (list? form) (= 'comment (first form))))
+
+(defn ns-decl?
+  "Returns true if form is a (ns ...) declaration."
+  [form]
+  (and (list? form) (= 'ns (first form))))
+
 (defn read-ns-decl
   "Attempts to read a (ns ...) declaration from rdr, and returns the
-  unevaluated form.  Returns nil if read fails, or if the first form
-  is not a ns declaration."
+  unevaluated form.  Returns nil if read fails or if a ns declaration
+  cannot be found.  The ns declaration must be the first Clojure form
+  in the file, except for (comment ...)  forms."
   [#^PushbackReader rdr]
   (try (let [form (read rdr)]
-         (when (and (list? form) (= 'ns (first form)))
-           form))
+         (cond
+           (ns-decl? form) form
+           (comment? form) (recur rdr)
+           :else nil))
        (catch Exception e nil)))
 
 (defn read-file-ns-decl
