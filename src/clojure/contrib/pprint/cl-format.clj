@@ -1798,8 +1798,7 @@ format-in can be either a control string or a previously compiled format."
   [format-in]
   (let [cf (gensym "compiled-format")]
     `(let [format-in# ~format-in]
-       (do (defonce test-format# format-in#)
-           (defonce ~cf (if (string? format-in#) (compile-format format-in#) format-in#))
+       (do (defonce ~cf (if (string? format-in#) (compile-format format-in#) format-in#))
            (fn [stream# & args#]
              (let [navigator# (init-navigator args#)]
                (execute-format stream# ~cf navigator#)))))))
@@ -1814,8 +1813,7 @@ format-in can be either a control string or a previously compiled format."
   [format-in]
   (let [cf (gensym "compiled-format")]
     `(let [format-in# ~format-in]
-       (do (defonce test-format# format-in#)
-           (defonce ~cf (if (string? format-in#) (compile-format format-in#) format-in#))
+       (do (defonce ~cf (if (string? format-in#) (compile-format format-in#) format-in#))
            (fn [& args#]
              (let [navigator# (init-navigator args#)]
                (execute-format ~cf navigator#)))))))
