@@ -82,7 +82,7 @@
           fv (f fst)
           run (cons fst (take-while #(= fv (f %)) (rest s)))]
       (lazy-seq
-       (cons run (new-partition-by f (drop (count run) s)))))))
+       (cons run (partition-by f (drop (count run) s)))))))
 
 (defn frequencies
   "Returns a map from distinct items in coll to the number of times
