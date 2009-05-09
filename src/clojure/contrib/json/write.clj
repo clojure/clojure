@@ -12,21 +12,31 @@
 ;; remove this notice, or any other, from this software.
 
 
-
-;; For more information on JSON, see http://www.json.org/
-
-;; This is a very simple implementation of JSON.  It does NOT
-;; guarantee round-trip equality, i.e. that 
-;; (= x (read-json-string (json-str x))
-
-;; Map keys will be converted to strings.  All keywords will become
-;; strings.  Most other types are printed as with "pr".
-
-
 (ns 
   #^{:author "Stuart Sierra",
-     :doc "JavaScript Object Notation (JSON) generator",
-     :see-also [["http://www.json.org", "JSON Home Page"]]}
+     :doc "JavaScript Object Notation (JSON) generator.
+
+This is a low-level implementation of JSON.  It only supports basic
+types, arrays, Collections, and Maps.
+
+You can extend the library to handle new types by adding methods to
+the print-json multimethod.
+
+This library does NOT attempt to preserve round-trip equality between
+JSON and Clojure data types.  That is, if you write a JSON string with
+this library, then read it back with clojure.contrib.json.read, you
+won't necessarily get the exact same data structure.
+
+If you want round-trip equality and/or indented output, try Dan
+Larkin's clojure-json library at
+http://github.com/danlarkin/clojure-json
+
+This implementation attempts to follow the description of JSON at
+<http://json.org/>.  Maps become JSON objects, all other collections
+become JSON arrays.  JSON object keys are always converted to strings.
+Within strings, all non-ASCII characters are hexadecimal escaped.
+",
+     :see-also [["http://json.org/", "JSON Home Page"]]}
   clojure.contrib.json.write
   (:require [clojure.contrib.java-utils :as j])
   (:use [clojure.contrib.test-is :only (deftest- is)]))
@@ -37,31 +47,47 @@
   JSON objects, all other collection types become JSON arrays.
   Strings and numbers print as with pr."
      :arglists '([x])}
-  print-json (fn [x]
-               (cond (nil? x) nil
-                     (map? x) :object
-                     (coll? x) :array
-                     (keyword? x) :symbol
-                     (symbol? x) :symbol
-                     :else :default)))
+  print-json (fn [x] (cond
+                       (nil? x) nil  ;; prevent NullPointerException on next line
+                       (.isArray (class x)) ::array
+                       :else (type x))))
 
-(defmethod print-json :default [x] (pr x))
+
+;; Primitive types can be printed with Clojure's pr function.
+(derive java.lang.Boolean ::pr)
+(derive java.lang.Byte ::pr)
+(derive java.lang.Short ::pr)
+(derive java.lang.Integer ::pr)
+(derive java.lang.Long ::pr)
+(derive java.lang.Float ::pr)
+(derive java.lang.Double ::pr)
+
+;; Collection types can be printed as JSON objects or arrays.
+(derive java.util.Map ::object)
+(derive java.util.Collection ::array)
+
+;; Symbols and keywords are converted to strings.
+(derive clojure.lang.Symbol ::symbol)
+(derive clojure.lang.Keyword ::symbol)
+
+
+(defmethod print-json ::pr [x] (pr x))
 
 (defmethod print-json nil [x] (print "null"))
 
-(defmethod print-json :symbol [x] (pr (name x)))
+(defmethod print-json ::symbol [x] (pr (name x)))
 
-(defmethod print-json :array [s]
+(defmethod print-json ::array [s]
   (print "[")
   (loop [x s]
-    (when (first x)
-      (print-json (first x))
-      (when (next x)
+    (when-let [fst (first x)]
+      (print-json fst)
+      (when-let [nxt (next x)]
         (print ",")
-        (recur (next x)))))
+        (recur nxt))))
   (print "]"))
 
-(defmethod print-json :object [m]
+(defmethod print-json ::object [m]
   (print "{")
   (loop [x m]
     (when (first x)
@@ -73,6 +99,27 @@
         (print ",")
         (recur (next x)))))
   (print "}"))
+
+(defmethod print-json java.lang.CharSequence [s]
+  (print \")
+  (dotimes [i (count s)]
+    (let [cp (Character/codePointAt s i)]
+      (cond
+        ;; Handle printable JSON escapes before ASCII
+        (= cp 34) (print "\\\"")
+        (= cp 92) (print "\\\\")
+        (= cp 47) (print "\\/")
+        ;; Print simple ASCII characters
+        (< 31 cp 127) (print (.charAt s i))
+        ;; Handle non-printable JSON escapes
+        (= cp 8) (print "\\b")
+        (= cp 12) (print "\\f")
+        (= cp 10) (print "\\n")
+        (= cp 13) (print "\\r")
+        (= cp 9) (print "\\t")
+        ;; Any other character is printed as Hexadecimal escape
+        :else (printf "\\u%04x" cp))))
+  (print \"))
 
 (defn json-str
   "Converts Clojure data structures to a JSON-formatted string."
@@ -93,6 +140,9 @@
   (is (= "\"Hello, World!\"" (json-str "Hello, World!")))
   (is (= "\"\\\"Embedded\\\" Quotes\"" (json-str "\"Embedded\" Quotes"))))
 
+(deftest- can-print-unicode
+  (is (= "\"\\u1234\\u4567\"" (json-str "\u1234\u4567"))))
+
 (deftest- can-print-json-null
   (is (= "null" (json-str nil))))
 
@@ -101,6 +151,9 @@
   (is (= "[1,2,3]" (json-str (list 1 2 3))))
   (is (= "[1,2,3]" (json-str (sorted-set 1 2 3))))
   (is (= "[1,2,3]" (json-str (seq [1 2 3])))))
+
+(deftest- can-print-java-arrays
+  (is (= "[1,2,3]" (json-str (into-array [1 2 3])))))
 
 (deftest- can-print-empty-arrays
   (is (= "[]" (json-str [])))
