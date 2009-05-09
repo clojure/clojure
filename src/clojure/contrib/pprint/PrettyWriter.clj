@@ -174,9 +174,11 @@
 
 
 (defn- tokens-fit? [#^clojure.contrib.pprint.PrettyWriter this tokens]
-;  (prlabel tf? (.getColumn this) (buffer-length tokens))
-  (< (+ (.getColumn this) (buffer-length tokens))
-     (.getMaxColumn this)))
+;;;  (prlabel tf? (.getColumn this) (buffer-length tokens))
+  (let [maxcol (.getMaxColumn this)]
+    (or 
+     (nil? maxcol) 
+     (< (+ (.getColumn this) (buffer-length tokens)) maxcol))))
 
 (defn- linear-nl? [this lb section]
 ;  (prlabel lnl? @(:done-nl lb) (tokens-fit? this section))
@@ -184,9 +186,10 @@
       (not (tokens-fit? this section))))
 
 (defn- miser-nl? [#^clojure.contrib.pprint.PrettyWriter this lb section]
-  (let [miser-width (.getMiserWidth this)]
-    (and miser-width
-         (>= @(:start-col lb) (- (.getMaxColumn this) miser-width))
+  (let [miser-width (.getMiserWidth this)
+        maxcol (.getMaxColumn this)]
+    (and miser-width maxcol
+         (>= @(:start-col lb) (- maxcol miser-width))
          (linear-nl? this lb section))))
 
 (defmulti emit-nl? (fn [t _ _ _] (:type t)))
