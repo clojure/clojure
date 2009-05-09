@@ -1170,7 +1170,7 @@ N.B. Only works on ColumnWriters right now."
                 (> clause-count 2) (:string (:params (first (nth clauses 2))))
                 (:colon params) ")")
         [arg navigator] (next-arg navigator)]
-    (pprint-logical-block *out* :prefix prefix :suffix suffix
+    (pprint-logical-block :prefix prefix :suffix suffix
       (execute-sub-format 
        body 
        (init-navigator arg)
@@ -1251,12 +1251,12 @@ N.B. Only works on ColumnWriters right now."
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    (do
-     (cond                            ; ~R is overloaded with bizareness
-      (first (:base params))     #(format-integer (:base %1) %1 %2 %3)
-      (and (:at params) (:colon params))   #(format-old-roman %1 %2 %3)
-      (:at params)               #(format-new-roman %1 %2 %3)
-      (:colon params)            #(format-ordinal-english %1 %2 %3)
-      true                       #(format-cardinal-english %1 %2 %3))))
+     (cond                          ; ~R is overloaded with bizareness
+       (first (:base params))     #(format-integer (:base %1) %1 %2 %3)
+       (and (:at params) (:colon params))   #(format-old-roman %1 %2 %3)
+       (:at params)               #(format-new-roman %1 %2 %3)
+       (:colon params)            #(format-ordinal-english %1 %2 %3)
+       true                       #(format-cardinal-english %1 %2 %3))))
 
   (\P
    [ ]
@@ -1272,9 +1272,9 @@ N.B. Only works on ColumnWriters right now."
    [:char-format [nil Character]]
    #{ :at :colon :both } {}
    (cond
-    (:colon params) pretty-character
-    (:at params) readable-character
-    :else plain-character))
+     (:colon params) pretty-character
+     (:at params) readable-character
+     :else plain-character))
 
   (\F
    [ :w [nil Integer] :d [nil Integer] :k [0 Integer] :overflowchar [nil Character] 
@@ -1364,10 +1364,10 @@ N.B. Only works on ColumnWriters right now."
    [ ] 
    #{ :at } {}
    (if (:at params)
-     (fn [params navigator offsets]        ; args from main arg list
+     (fn [params navigator offsets]     ; args from main arg list
        (let [[subformat navigator] (get-format-arg navigator)]
          (execute-sub-format subformat navigator  (:base-args params))))
-     (fn [params navigator offsets]        ; args from sub-list
+     (fn [params navigator offsets]     ; args from sub-list
        (let [[subformat navigator] (get-format-arg navigator)
              [subargs navigator] (next-arg navigator)
              sub-navigator (init-navigator subargs)]
@@ -1379,17 +1379,17 @@ N.B. Only works on ColumnWriters right now."
    [ ]
    #{ :colon :at :both} { :right \), :allows-separator nil, :else nil }
    (let [mod-case-writer (cond
-                          (and (:at params) (:colon params))
-                          upcase-writer
+                           (and (:at params) (:colon params))
+                           upcase-writer
 
-                          (:colon params)
-                          capitalize-word-writer
+                           (:colon params)
+                           capitalize-word-writer
 
-                          (:at params)
-                          init-cap-writer
+                           (:at params)
+                           init-cap-writer
 
-                          :else
-                          downcase-writer)]
+                           :else
+                           downcase-writer)]
      #(modify-case mod-case-writer %1 %2 %3)))
 
   (\) [] #{} {} nil) 
@@ -1398,14 +1398,14 @@ N.B. Only works on ColumnWriters right now."
    [ :selector [nil Integer] ]
    #{ :colon :at } { :right \], :allows-separator true, :else :last }
    (cond
-    (:colon params)
-    boolean-conditional
+     (:colon params)
+     boolean-conditional
 
-    (:at params)
-    check-arg-conditional
+     (:at params)
+     check-arg-conditional
 
-    true
-    choice-conditional))
+     true
+     choice-conditional))
 
   (\; [:min-remaining [nil Integer] :max-columns [nil Integer]] 
    #{ :colon } { :separator true } nil) 
@@ -1416,17 +1416,17 @@ N.B. Only works on ColumnWriters right now."
    [ :max-iterations [nil Integer] ]
    #{ :colon :at :both} { :right \}, :allows-separator false }
    (cond
-    (and (:at params) (:colon params))
-    iterate-main-sublists
+     (and (:at params) (:colon params))
+     iterate-main-sublists
 
-    (:colon params)
-    iterate-list-of-sublists
+     (:colon params)
+     iterate-list-of-sublists
 
-    (:at params)
-    iterate-main-list
+     (:at params)
+     iterate-main-list
 
-    true
-    iterate-sublist))
+     true
+     iterate-sublist))
 
    
   (\} [] #{:colon} {} nil) 
@@ -1447,30 +1447,36 @@ N.B. Only works on ColumnWriters right now."
            arg3 (:arg3 params)
            exit (if (:colon params) :colon-up-arrow :up-arrow)]
        (cond
-        (and arg1 arg2 arg3)
-        (if (<= arg1 arg2 arg3) [exit navigator] navigator)
+         (and arg1 arg2 arg3)
+         (if (<= arg1 arg2 arg3) [exit navigator] navigator)
 
-        (and arg1 arg2)
-        (if (= arg1 arg2) [exit navigator] navigator)
+         (and arg1 arg2)
+         (if (= arg1 arg2) [exit navigator] navigator)
 
-        arg1
-        (if (= arg1 0) [exit navigator] navigator)
+         arg1
+         (if (= arg1 0) [exit navigator] navigator)
 
-        true          ; TODO: handle looking up the arglist stack for info
-        (if (if (:colon params) 
-              (empty? (:rest (:base-args params)))
-              (empty? (:rest navigator)))
-          [exit navigator] navigator))))) 
+         true     ; TODO: handle looking up the arglist stack for info
+         (if (if (:colon params) 
+               (empty? (:rest (:base-args params)))
+               (empty? (:rest navigator)))
+           [exit navigator] navigator))))) 
 
   (\W 
    [] 
    #{:at :colon :both} {}
-   (let [bindings (concat
-                   (if (:at params) [:level nil :length nil] [])
-                   (if (:colon params) [:pretty true] []))]
+   (if (or (:at params) (:colon params))
+     (let [bindings (concat
+                     (if (:at params) [:level nil :length nil] [])
+                     (if (:colon params) [:pretty true] []))]
+       (fn [params navigator offsets]
+         (let [[arg navigator] (next-arg navigator)]
+           (if (apply write arg bindings)
+             [:up-arrow navigator]
+             navigator))))
      (fn [params navigator offsets]
        (let [[arg navigator] (next-arg navigator)]
-         (if (apply write arg bindings)
+         (if (write-out arg)
            [:up-arrow navigator]
            navigator)))))
 
@@ -1486,7 +1492,7 @@ N.B. Only works on ColumnWriters right now."
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Code to manage the parameters and flags accociated with each
+;;; Code to manage the parameters and flags associated with each
 ;;; directive in the format string.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1751,34 +1757,36 @@ column number or pretty printing"
 
 (defn execute-format 
   "Executes the format with the arguments. This should never be used directly, but is public
-because the formtter macro uses it."
+because the formatter macro uses it."
   {:skip-wiki true}
-  [stream format args]
-  (let [#^java.io.Writer real-stream (cond 
-                                       (not stream) (java.io.StringWriter.)
-                                       (true? stream) *out*
-                                       :else stream)
-        #^java.io.Writer wrapped-stream (if (and (needs-pretty format) 
-                                                 (not (instance? PrettyWriter real-stream)))
-                                          (pretty-writer real-stream)
-                                          real-stream)]
-    (binding [*out* wrapped-stream]
-      (try
-       (map-passing-context 
-        (fn [element context]
-          (if (abort? context)
-            [nil context]
-            (let [[params args] (realize-parameter-list 
-                                 (:params element) context)
-                  [params offsets] (unzip-map params)
-                  params (assoc params :base-args args)]
-              [nil (apply (:func element) [params args offsets])])))
-        args
-        format)
-       (finally
-        (if-not (identical? real-stream wrapped-stream)
-          (.flush wrapped-stream))))
-      (if (not stream) (.toString real-stream)))))
+  ([stream format args]
+     (let [#^java.io.Writer real-stream (cond 
+                                         (not stream) (java.io.StringWriter.)
+                                         (true? stream) *out*
+                                         :else stream)
+           #^java.io.Writer wrapped-stream (if (and (needs-pretty format) 
+                                                    (not (instance? PrettyWriter real-stream)))
+                                             (pretty-writer real-stream)
+                                             real-stream)]
+       (binding [*out* wrapped-stream]
+         (try
+          (execute-format format args)
+          (finally
+           (if-not (identical? real-stream wrapped-stream)
+             (.flush wrapped-stream))))
+         (if (not stream) (.toString real-stream)))))
+  ([format args]
+     (map-passing-context 
+      (fn [element context]
+        (if (abort? context)
+          [nil context]
+          (let [[params args] (realize-parameter-list 
+                               (:params element) context)
+                [params offsets] (unzip-map params)
+                params (assoc params :base-args args)]
+            [nil (apply (:func element) [params args offsets])])))
+      args
+      format)))
 
 
 (defmacro formatter
@@ -1795,3 +1803,19 @@ format-in can be either a control string or a previously compiled format."
            (fn [stream# & args#]
              (let [navigator# (init-navigator args#)]
                (execute-format stream# ~cf navigator#)))))))
+
+(defmacro formatter-out
+  "Makes a function which can directly run format-in. The function is
+fn [& args] ... and returns nil. This version of the formatter macro is
+designed to be used with *out* set to an appropriate Writer. In particular,
+this is meant to be used as part of a pretty printer dispatch method.
+
+format-in can be either a control string or a previously compiled format."
+  [format-in]
+  (let [cf (gensym "compiled-format")]
+    `(let [format-in# ~format-in]
+       (do (defonce test-format# format-in#)
+           (defonce ~cf (if (string? format-in#) (compile-format format-in#) format-in#))
+           (fn [& args#]
+             (let [navigator# (init-navigator args#)]
+               (execute-format ~cf navigator#)))))))

@@ -16,12 +16,14 @@
 
 (in-ns 'clojure.contrib.pprint)
 
+(defn use-method
+  "Installs a function as a new method of multimethod associated with dispatch-value. "
+  [multifn dispatch-val func]
+  (. multifn addMethod dispatch-val func))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Implementations of specific dispatch table entries
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def *simple-dispatch* (ref []))
-(def *code-dispatch* (ref []))
 
 ;;; Handle forms that can be "back-translated" to reader macros
 ;;; Not all reader macros can be dealt with this way or at all. 
@@ -31,7 +33,7 @@
 ;;;      and regular quotes).
 ;;; ~@ - Also fully eaten by the processing of ` and can't be used outside.
 ;;; ,  - is whitespace and is lost (like all other whitespace). Formats can generate commas
-;;;      where they deem them to help readability.
+;;;      where they deem them useful to help readability.
 ;;; #^ - Adding metadata completely disappears at read time and the data appears to be
 ;;;      completely lost.
 ;;;
@@ -42,13 +44,12 @@
 (def reader-macros
      {'quote "'", 'clojure.core/meta "^", 'clojure.core/deref "@", 
       'var "#'", 'clojure.core/unquote "~"})
-(defn pprint-reader-macro [#^java.io.Writer writer alis]
+(defn pprint-reader-macro [alis]
   (let [#^String macro-char (reader-macros (first alis))]
-    (if (and macro-char (= 2 (count alis)))
-      (do
-        (.write writer macro-char)
-        (write (second alis) :stream writer)
-        true))))
+    (when (and macro-char (= 2 (count alis)))
+      (.write #^java.io.Writer *out* macro-char)
+      (write-out (second alis))
+      true)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dispatch for the basic data types when interpreted
@@ -59,41 +60,46 @@
 ;;; are a little easier on the stack. (Or, do "real" compilation, a
 ;;; la Common Lisp)
 
-(def pprint-simple-list (formatter "~:<~@{~w~^ ~_~}~:>"))
-(defn pprint-list [writer alis]
-  (if-not (pprint-reader-macro writer alis)
-    (pprint-simple-list writer alis)))
-(dosync (alter *simple-dispatch* conj [list? pprint-list]))
-(dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.Cons %) pprint-list]))
-(dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.LazySeq %) pprint-list]))
-(dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.ArraySeq %) pprint-list]))
+(def pprint-simple-list (formatter-out "~:<~@{~w~^ ~_~}~:>"))
+(defn pprint-list [alis]
+  (if-not (pprint-reader-macro alis)
+    (pprint-simple-list alis)))
+(def pprint-vector (formatter-out "~<[~;~@{~w~^ ~_~}~;]~:>"))
+(def pprint-array (formatter-out "~<[~;~@{~w~^, ~:_~}~;]~:>"))
+(def pprint-map (formatter-out "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
+(def pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
+(defn pprint-ref [ref]
+  (pprint-logical-block  :prefix "#<Ref " :suffix ">"
+    (write-out @ref)))
+(defn pprint-atom [ref]
+  (pprint-logical-block :prefix "#<Atom " :suffix ">"
+    (write-out @ref)))
+(defn pprint-agent [ref]
+  (pprint-logical-block :prefix "#<Agent " :suffix ">"
+    (write-out @ref)))
 
-(def pprint-vector (formatter "~<[~;~@{~w~^ ~_~}~;]~:>"))
-(dosync (alter *simple-dispatch* conj [vector? pprint-vector]))
+(defn pprint-simple-default [obj]
+  (cond 
+    (.isArray (class obj)) (pprint-array obj)
+    (and *print-suppress-namespaces* (symbol? obj)) (print (name obj))
+    :else (pr obj)))
 
-(def pprint-array (formatter "~<[~;~@{~w~^, ~:_~}~;]~:>"))
-(dosync (alter *simple-dispatch* conj [#(and % (.isArray (class %))) pprint-array]))
 
-(def pprint-map (formatter "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
-(dosync (alter *simple-dispatch* conj [map? pprint-map]))
+(defmulti 
+  *simple-dispatch*
+  "The pretty print dispatch function for simple data structure format."
+  {:arglists '[[object]]} 
+  class)
 
-(def pprint-set (formatter "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
-(dosync (alter *simple-dispatch* conj [set? pprint-set]))
-
-(defn pprint-ref [writer ref]
-  (pprint-logical-block writer :prefix "#<Ref " :suffix ">"
-    (write @ref)))
-(dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.Ref %) pprint-ref]))
-
-(defn pprint-atom [writer ref]
-  (pprint-logical-block writer :prefix "#<Atom " :suffix ">"
-    (write @ref)))
-(dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.Atom %) pprint-atom]))
-
-(defn pprint-agent [writer ref]
-  (pprint-logical-block writer :prefix "#<Agent " :suffix ">"
-    (write @ref :stream writer)))
-(dosync (alter *simple-dispatch* conj [#(instance? clojure.lang.Agent %) pprint-agent]))
+(use-method *simple-dispatch* clojure.lang.ISeq pprint-list)
+(use-method *simple-dispatch* clojure.lang.IPersistentVector pprint-vector)
+(use-method *simple-dispatch* clojure.lang.IPersistentMap pprint-map)
+(use-method *simple-dispatch* clojure.lang.IPersistentSet pprint-set)
+(use-method *simple-dispatch* clojure.lang.Ref pprint-ref)
+(use-method *simple-dispatch* clojure.lang.Atom pprint-atom)
+(use-method *simple-dispatch* clojure.lang.Agent pprint-agent)
+(use-method *simple-dispatch* nil pr)
+(use-method *simple-dispatch* :default pprint-simple-default)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dispatch for the code table
@@ -101,21 +107,12 @@
 
 (declare pprint-simple-code-list)
 
-(dosync (alter *code-dispatch* conj [vector? pprint-vector]))
-(dosync (alter *code-dispatch* conj [#(and % (.isArray (class %))) pprint-array]))
-(dosync (alter *code-dispatch* conj [map? pprint-map]))
-(dosync (alter *code-dispatch* conj [set? pprint-set]))
-(dosync (alter *code-dispatch* conj [#(instance? clojure.lang.Ref %) pprint-ref]))
-(dosync (alter *code-dispatch* conj [#(instance? clojure.lang.Atom %) pprint-atom]))
-(dosync (alter *code-dispatch* conj [#(instance? clojure.lang.Agent %) pprint-agent]))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Format something that looks like a simple def (sans metadata, since the reader
 ;;; won't give it to us now).
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def pprint-hold-first (formatter "~:<~w~^ ~@_~w~^ ~_~@{~w~^ ~_~}~:>"))
+(def pprint-hold-first (formatter-out "~:<~w~^ ~@_~w~^ ~_~@{~w~^ ~_~}~:>"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Format something that looks like a defn or defmacro
@@ -126,18 +123,18 @@
   (if (seq alis)
     (do
       (if has-doc-str?
-        ((formatter " ~_") true)
-        ((formatter " ~@_") true))
-      ((formatter "~{~w~^ ~_~}") true alis))))
+        ((formatter-out " ~_"))
+        ((formatter-out " ~@_")))
+      ((formatter-out "~{~w~^ ~_~}") alis))))
 
 ;;; Format the param and body sublists of a defn with multiple arities
 (defn- multi-defn [alis has-doc-str?]
   (if (seq alis)
-    ((formatter " ~_~{~w~^ ~_~}") true alis)))
+    ((formatter-out " ~_~{~w~^ ~_~}") alis)))
 
 ;;; TODO: figure out how to support capturing metadata in defns (we might need a 
 ;;; special reader)
-(defn pprint-defn [writer alis]
+(defn pprint-defn [alis]
   (if (next alis) 
     (let [[defn-sym defn-name & stuff] alis
           [doc-str stuff] (if (string? (first stuff))
@@ -146,97 +143,97 @@
           [attr-map stuff] (if (map? (first stuff))
                              [(first stuff) (next stuff)]
                              [nil stuff])]
-      (pprint-logical-block writer :prefix "(" :suffix ")"
-        ((formatter "~w ~1I~@_~w") true defn-sym defn-name)
+      (pprint-logical-block :prefix "(" :suffix ")"
+        ((formatter-out "~w ~1I~@_~w") defn-sym defn-name)
         (if doc-str
-          ((formatter " ~_~w") true doc-str))
+          ((formatter-out " ~_~w") doc-str))
         (if attr-map
-          ((formatter " ~_~w") true attr-map))
+          ((formatter-out " ~_~w") attr-map))
         ;; Note: the multi-defn case will work OK for malformed defns too
         (cond
          (vector? (first stuff)) (single-defn stuff (or doc-str attr-map))
          :else (multi-defn stuff (or doc-str attr-map)))))
-    (pprint-simple-code-list writer alis)))
+    (pprint-simple-code-list alis)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Format something with a binding form
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn pprint-binding-form [writer binding-vec]
-  (pprint-logical-block writer :prefix "[" :suffix "]"
+(defn pprint-binding-form [binding-vec]
+  (pprint-logical-block :prefix "[" :suffix "]"
     (loop [binding binding-vec]
       (when (seq binding)
-        (pprint-logical-block *out* binding
-          (write (first binding))
+        (pprint-logical-block binding
+          (write-out (first binding))
           (when (next binding)
-            (.write *out* " ")
+            (.write #^java.io.Writer *out* " ")
             (pprint-newline :miser)
-            (write (second binding))))
+            (write-out (second binding))))
         (when (next (rest binding))
-          (.write *out* " ")
+          (.write #^java.io.Writer *out* " ")
           (pprint-newline :linear)
           (recur (next (rest binding))))))))
 
-(defn pprint-let [writer alis]
+(defn pprint-let [alis]
   (let [base-sym (first alis)]
-    (pprint-logical-block writer :prefix "(" :suffix ")"
+    (pprint-logical-block :prefix "(" :suffix ")"
       (if (and (next alis) (vector? (second alis)))
         (do
-          ((formatter "~w ~1I~@_") true base-sym)
-          (pprint-binding-form *out* (second alis))
-          ((formatter " ~_~{~w~^ ~_~}") true (next (rest alis))))
-        (pprint-simple-code-list *out* alis)))))
+          ((formatter-out "~w ~1I~@_") base-sym)
+          (pprint-binding-form (second alis))
+          ((formatter-out " ~_~{~w~^ ~_~}") (next (rest alis))))
+        (pprint-simple-code-list alis)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Format something that looks like "if"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def pprint-if (formatter "~:<~1I~w~^ ~@_~w~@{ ~_~w~}~:>"))
+(def pprint-if (formatter-out "~:<~1I~w~^ ~@_~w~@{ ~_~w~}~:>"))
 
-(defn pprint-cond [writer alis]
-  (pprint-logical-block writer :prefix "(" :suffix ")"
+(defn pprint-cond [alis]
+  (pprint-logical-block :prefix "(" :suffix ")"
     (pprint-indent :block 1)
-    (write (first alis))
+    (write-out (first alis))
     (when (next alis)
-      (.write *out* " ")
+      (.write #^java.io.Writer *out* " ")
       (pprint-newline :linear)
      (loop [alis (next alis)]
        (when alis
-         (pprint-logical-block *out* alis
-          (write (first alis))
+         (pprint-logical-block alis
+          (write-out (first alis))
           (when (next alis)
-            (.write *out* " ")
+            (.write #^java.io.Writer *out* " ")
             (pprint-newline :miser)
-            (write (second alis))))
+            (write-out (second alis))))
          (when (next (rest alis))
-           (.write *out* " ")
+           (.write #^java.io.Writer *out* " ")
            (pprint-newline :linear)
            (recur (next (rest alis)))))))))
 
-(defn pprint-condp [writer alis]
+(defn pprint-condp [alis]
   (if (> (count alis) 3) 
-    (pprint-logical-block writer :prefix "(" :suffix ")"
+    (pprint-logical-block :prefix "(" :suffix ")"
       (pprint-indent :block 1)
-      (apply (formatter "~w ~@_~w ~@_~w ~_") true alis)
+      (apply (formatter-out "~w ~@_~w ~@_~w ~_") alis)
       (loop [alis (seq (drop 3 alis))]
         (when alis
-          (pprint-logical-block *out* alis
-            (write (first alis))
+          (pprint-logical-block alis
+            (write-out (first alis))
             (when (next alis)
-              (.write *out* " ")
+              (.write #^java.io.Writer *out* " ")
               (pprint-newline :miser)
-              (write (second alis))))
+              (write-out (second alis))))
           (when (next (rest alis))
-            (.write *out* " ")
+            (.write #^java.io.Writer *out* " ")
             (pprint-newline :linear)
             (recur (next (rest alis)))))))
-    (pprint-simple-code-list writer alis)))
+    (pprint-simple-code-list alis)))
 
 ;;; The map of symbols that are defined in an enclosing #() anonymous function
 (def *symbol-map* {})
 
-(defn pprint-anon-func [writer alis]
+(defn pprint-anon-func [alis]
   (let [args (second alis)
         nlis (first (rest (rest alis)))]
     (if (vector? args)
@@ -247,25 +244,25 @@
                                       #(vector %1 (str \% %2)) 
                                       args 
                                       (range 1 (inc (count args))))))]
-        ((formatter "~<#(~;~@{~w~^ ~_~}~;)~:>") writer nlis))
-      (pprint-simple-code-list writer alis))))
+        ((formatter-out "~<#(~;~@{~w~^ ~_~}~;)~:>") nlis))
+      (pprint-simple-code-list alis))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; The master definitions for formatting lists in code (that is, (fn args...) or
 ;;; special forms).
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; This is the equivalent of (formatter "~:<~1I~@{~w~^ ~_~}~:>"), but is
+;;; This is the equivalent of (formatter-out "~:<~1I~@{~w~^ ~_~}~:>"), but is
 ;;; easier on the stack.
 
-(defn pprint-simple-code-list [writer alis]
-  (pprint-logical-block writer :prefix "(" :suffix ")"
+(defn pprint-simple-code-list [alis]
+  (pprint-logical-block :prefix "(" :suffix ")"
     (pprint-indent :block 1)
     (loop [alis (seq alis)]
       (when alis
-	(write (first alis))
+	(write-out (first alis))
 	(when (next alis)
-	  (.write *out* " ")
+	  (.write #^java.io.Writer *out* " ")
 	  (pprint-newline :linear)
 	  (recur (next alis)))))))
 
@@ -304,24 +301,37 @@
         'struct-map pprint-hold-first, 
         })))
 
-(defn pprint-code-list [writer alis]
-  (if-not (pprint-reader-macro writer alis) 
+(defn pprint-code-list [alis]
+  (if-not (pprint-reader-macro alis) 
     (if-let [special-form (*code-table* (first alis))]
-      (special-form writer alis)
-      (pprint-simple-code-list writer alis))))
+      (special-form alis)
+      (pprint-simple-code-list alis))))
 
-(dosync (alter *code-dispatch* conj [list? pprint-code-list]))
-(dosync (alter *code-dispatch* conj [#(instance? clojure.lang.Cons %) pprint-code-list]))
-(dosync (alter *code-dispatch* conj [#(instance? clojure.lang.LazySeq %) pprint-code-list]))
-(dosync (alter *code-dispatch* conj [#(instance? clojure.lang.ArraySeq %) pprint-code-list]))
-
-(defn pprint-code-symbol [writer sym] 
+(defn pprint-code-symbol [sym] 
   (if-let [arg-num (sym *symbol-map*)]
     (print arg-num)
     (if *print-suppress-namespaces* 
       (print (name sym))
       (pr sym))))
-(dosync (alter *code-dispatch* conj [symbol? pprint-code-symbol]))
+
+(defmulti 
+  *code-dispatch*
+  "The pretty print dispatch function for pretty printing Clojure code."
+  {:arglists '[[object]]} 
+  class)
+
+(use-method *code-dispatch* clojure.lang.ISeq pprint-code-list)
+(use-method *code-dispatch* clojure.lang.Symbol pprint-code-symbol)
+
+;; The following are all exact copies of *simple-dispatch*
+(use-method *code-dispatch* clojure.lang.IPersistentVector pprint-vector)
+(use-method *code-dispatch* clojure.lang.IPersistentMap pprint-map)
+(use-method *code-dispatch* clojure.lang.IPersistentSet pprint-set)
+(use-method *code-dispatch* clojure.lang.Ref pprint-ref)
+(use-method *code-dispatch* clojure.lang.Atom pprint-atom)
+(use-method *code-dispatch* clojure.lang.Agent pprint-agent)
+(use-method *code-dispatch* nil pr)
+(use-method *code-dispatch* :default pprint-simple-default)
 
 (set-pprint-dispatch *simple-dispatch*)
 

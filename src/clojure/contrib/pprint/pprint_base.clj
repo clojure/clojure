@@ -30,10 +30,10 @@
  #^{ :doc "Bind to true if you want write to use pretty printing"}
  *print-pretty* true)
 
-;;; TODO: implement true data-driven dispatch
 (defonce ; If folks have added stuff here, don't overwrite
- #^{ :doc "The pretty print dispatch table"}
- *print-pprint-dispatch* (ref []))
+ #^{ :doc "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch
+to modify."}
+ *print-pprint-dispatch* nil)
 
 (def
  #^{ :doc "Pretty printing will try to avoid anything going beyond this column."}
@@ -150,17 +150,9 @@ Normal library clients should use the standard \"write\" interface. "
       (pr object)
       (if length-reached
         (print "...")
-        ;; TODO better/faster dispatch mechanism!
         (do
           (if *current-length* (set! *current-length* (inc *current-length*)))
-          (loop [dispatch @*print-pprint-dispatch*]
-            (let [[test func] (first dispatch)]
-              (cond
-                (empty? dispatch) (if (and *print-suppress-namespaces* (symbol? object))
-                                    (print (name object))
-                                    (pr object))
-                (test object) (func *out* object)
-                :else (recur (next dispatch))))))))
+          (*print-pprint-dispatch* object))))
     length-reached))
 
 (defn write 
@@ -209,7 +201,8 @@ print the object to the currently bound value of *out*."
   ([object] (pprint object *out*)) 
   ([object writer]
      (with-pretty-writer writer
-       (write object :pretty true)
+       (binding [*print-pretty* true]
+         (write-out object))
        (if (not (= 0 (.getColumn #^PrettyWriter *out*)))
          (.write *out* (int \newline))))))
 
@@ -219,16 +212,20 @@ exactly equivalent to (pprint *1)."
   [] `(pprint *1))
 
 (defn set-pprint-dispatch  
-  "Set the pretty print dispatch table to TABLE. Currently the supported values are
-*simple-dispatch* or *code-dispatch*. In the future, this will support custom tables."
-  [table]
-  (dosync (ref-set *print-pprint-dispatch* @table))
+  "Set the pretty print dispatch function to a function matching (fn [obj] ...)
+where obj is the object to pretty print. That function will be called with *out* set
+to a pretty printing writer to which it should do its printing.
+
+For example functions, see *simple-dispatch* and *code-dispatch* in 
+clojure.contrib.pprint.dispatch.clj."
+  [function]
+  (def *print-pprint-dispatch* function)
   nil)
 
 (defmacro with-pprint-dispatch 
-  "Execute body with the pretty print dispatch table bound to table."
-  [table & body]
-  `(binding [*print-pprint-dispatch* ~table]
+  "Execute body with the pretty print dispatch function bound to function."
+  [function & body]
+  `(binding [*print-pprint-dispatch* ~function]
      ~@body))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -251,39 +248,32 @@ exactly equivalent to (pprint *1)."
 
 (defmacro pprint-logical-block 
   "Execute the body as a pretty printing logical block with output to *out* which 
-is a pretty printing writer wrapping base-stream (unless base-stream is already a pretty 
-printing writer in which case *out* is just bound to base-stream). 
+must be a pretty printing writer. When used from pprint or cl-format, this can be 
+assumed. 
 
-After the writer, the caller can optionally specify :prefix, :per-line-prefix, and
-:suffix."
-  [base-stream & body]
-  (let [[options body] (parse-lb-options #{:prefix :per-line-prefix :suffix} body)]
-    `(with-pretty-writer ~base-stream
-       (if (and *print-level* (>= *current-level* *print-level*)) 
-         (.write #^PrettyWriter *out* "#")
-         (binding [*current-level* (inc *current-level*)
-                   *current-length* 0] 
-           (.startBlock #^PrettyWriter *out*
-                        ~(:prefix options) ~(:per-line-prefix options) ~(:suffix options))
-           ~@body
-           (.endBlock #^PrettyWriter *out*)))
-       nil)))
+Before the body, the caller can optionally specify options: :prefix, :per-line-prefix, 
+and :suffix."
+  {:arglists '[[options* body]]}
+  [& args]
+  (let [[options body] (parse-lb-options #{:prefix :per-line-prefix :suffix} args)]
+    `(do (if (and *print-level* (>= *current-level* *print-level*)) 
+           (.write #^PrettyWriter *out* "#")
+           (binding [*current-level* (inc *current-level*)
+                     *current-length* 0] 
+             (.startBlock #^PrettyWriter *out*
+                          ~(:prefix options) ~(:per-line-prefix options) ~(:suffix options))
+             ~@body
+             (.endBlock #^PrettyWriter *out*)))
+         nil)))
 
 (defn pprint-newline
   "Print a conditional newline to a pretty printing stream. kind specifies if the 
 newline is :linear, :miser, :fill, or :mandatory. 
 
-Optionally, a second argument which is a stream may be used. If supplied, that is 
-the writer to which the newline is sent, otherwise *out* is used.
-
-If the requested stream is not a PrettyWriter, this function does nothing."
-  [kind & more] 
+Output is sent to *out* which must be a pretty printing writer."
+  [kind] 
   (check-enumerated-arg kind #{:linear :miser :fill :mandatory})
-  (let [stream (if (pos? (count more))
-                 (first more)
-                 *out*)]
-    (if (instance? PrettyWriter stream)
-      (.newline #^PrettyWriter stream kind))))
+  (.newline #^PrettyWriter *out* kind))
 
 (defn pprint-indent 
   "Create an indent at this point in the pretty printing stream. This defines how 
@@ -291,17 +281,10 @@ following lines are indented. relative-to can be either :block or :current depen
 whether the indent should be computed relative to the start of the logical block or
 the current column position. n is an offset. 
 
-Optionally, a third argument which is a stream may be used. If supplied, that is 
-the writer indented, otherwise *out* is used.
-
-If the requested stream is not a PrettyWriter, this function does nothing."
-  [relative-to n & more] 
+Output is sent to *out* which must be a pretty printing writer."
+  [relative-to n] 
   (check-enumerated-arg relative-to #{:block :current})
-  (let [stream (if (pos? (count more))
-                 (first more)
-                 *out*)]
-    (if (instance? PrettyWriter stream)
-      (.indent #^PrettyWriter stream relative-to n))))
+  (.indent #^PrettyWriter *out* relative-to n))
 
 ;; TODO a real implementation for pprint-tab
 (defn pprint-tab 
@@ -311,19 +294,12 @@ is :line, :section, :line-relative, or :section-relative.
 Colnum and colinc specify the target column and the increment to move the target
 forward if the output is already past the original target.
 
-Optionally, a fourth argument which is a stream may be used. If supplied, that is 
-the writer indented, otherwise *out* is used.
-
-If the requested stream is not a PrettyWriter, this function does nothing.
+Output is sent to *out* which must be a pretty printing writer.
 
 THIS FUNCTION IS NOT YET IMPLEMENTED."
-  [kind colnum colinc & more] 
+  [kind colnum colinc] 
   (check-enumerated-arg kind #{:line :section :line-relative :section-relative})
-  (let [stream (if (pos? (count more))
-                 (first more)
-                 *out*)]
-    (if (instance? PrettyWriter stream)
-      (throw (UnsupportedOperationException. "pprint-tab is not yet implemented")))))
+  (throw (UnsupportedOperationException. "pprint-tab is not yet implemented")))
 
 
 nil

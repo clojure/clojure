@@ -29,8 +29,7 @@
 
 The most complete documentation can be found at http://github.com/tomfaulhaber/cl-format
 where the markdown README is currently displayed. I will be moving it into the
-clojure.contrib wiki RSN.
-",
+clojure.contrib wiki RSN.",
 }
     clojure.contrib.pprint
   (:use clojure.contrib.pprint.utilities)
