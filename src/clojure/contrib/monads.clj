@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated May 6, 2009
+;; last updated May 10, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -168,6 +168,14 @@
 ;; Commonly used monad functions
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Define the four basic monad operations as symbol macros that
+; expand to their unqualified symbol equivalents. This makes it possible
+; to use them inside macro templates without having to quote them.
+(defsymbolmacro m-result m-result)
+(defsymbolmacro m-bind m-bind)
+(defsymbolmacro m-zero m-zero)
+(defsymbolmacro m-plus m-plus)
 
 (defmacro m-lift
   "Converts a function f of n arguments into a function of n
