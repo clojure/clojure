@@ -147,7 +147,6 @@
       <arg value="clojure.contrib.java-utils"/>
       <arg value="clojure.contrib.javadoc.browse"/>
       <arg value="clojure.contrib.javadoc.browse-ui"/>
-      <arg value="clojure.contrib.javalog"/>
       <arg value="clojure.contrib.json.read"/>
       <arg value="clojure.contrib.json.write"/>
       <arg value="clojure.contrib.lazy-seqs"/>
