@@ -1,7 +1,7 @@
 ;;; json/write.clj: JavaScript Object Notation (JSON) generator
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; January 26, 2009
+;; May 9, 2009
 
 ;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -16,11 +16,9 @@
   #^{:author "Stuart Sierra",
      :doc "JavaScript Object Notation (JSON) generator.
 
-This is a low-level implementation of JSON.  It only supports basic
-types, arrays, Collections, and Maps.
-
-You can extend the library to handle new types by adding methods to
-the print-json multimethod.
+This is a low-level implementation of JSON.  It supports basic types,
+arrays, Collections, and Maps.  You can extend it to handle new types
+by adding methods to print-json.
 
 This library does NOT attempt to preserve round-trip equality between
 JSON and Clojure data types.  That is, if you write a JSON string with
@@ -42,10 +40,11 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
   (:use [clojure.contrib.test-is :only (deftest- is)]))
 
 (defmulti
-  #^{:doc "Prints Clojure data types as JSON.  Nil becomes JSON null.
-  Keywords become strings, without the leading colon.  Maps become
-  JSON objects, all other collection types become JSON arrays.
-  Strings and numbers print as with pr."
+  #^{:doc "Prints x as JSON.  Nil becomes JSON null.  Keywords become
+  strings, without the leading colon.  Maps become JSON objects, all
+  other collection types become JSON arrays.  Java arrays become JSON
+  arrays.  Unicode characters in strings are escaped as \\uXXXX.
+  Numbers print as with pr."
      :arglists '([x])}
   print-json (fn [x] (cond
                        (nil? x) nil  ;; prevent NullPointerException on next line
@@ -78,27 +77,27 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
 (defmethod print-json ::symbol [x] (pr (name x)))
 
 (defmethod print-json ::array [s]
-  (print "[")
+  (print \[)
   (loop [x s]
     (when-let [fst (first x)]
       (print-json fst)
       (when-let [nxt (next x)]
-        (print ",")
+        (print \,)
         (recur nxt))))
-  (print "]"))
+  (print \]))
 
 (defmethod print-json ::object [m]
-  (print "{")
+  (print \{)
   (loop [x m]
     (when (first x)
       (let [[k v] (first x)]
         (print-json (j/as-str k))
-        (print ":")
+        (print \:)
         (print-json v))
       (when (next x)
-        (print ",")
+        (print \,)
         (recur (next x)))))
-  (print "}"))
+  (print \}))
 
 (defmethod print-json java.lang.CharSequence [s]
   (print \")
@@ -122,7 +121,7 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
   (print \"))
 
 (defn json-str
-  "Converts Clojure data structures to a JSON-formatted string."
+  "Converts x to a JSON-formatted string."
   [x]
   (with-out-str (print-json x)))
 
