@@ -1,7 +1,7 @@
 ;; Finite probability distributions
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 11, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -105,12 +105,53 @@
 		  :else (assoc dist v p)))]
     (reduce add-choice {} (partition 2 choices))))
 
-(with-monad dist-m
+(defn bernoulli
+  [p]
+  "Returns the Bernoulli distribution for probability p."
+  (choose p 1 :else 0))
 
-  (defn certainly
-    "Returns a distribution in which the single value v has probability 1."
-    [v]
-    (m-result v))
+(defn rademacher
+  []
+  "Returns the Rademacher distribution."
+  (choose (/ 1 2) -1 :else 1))
+
+(defn- bc
+  [n]
+  "Returns the binomial coefficients for a given n."
+  (let [r (inc n)]
+     (loop [c 1
+	    f (list 1)]
+       (if (> c n)
+	 f
+	 (recur (inc c) (cons (* (/ (- r c) c) (first f)) f))))))
+
+(defn binomial
+  [n p]
+  "Returns the binomial distribution, which is the distribution of the
+   number of successes in a series of n experiments whose individual
+   success probability is p."
+  (let [q (- 1 p)
+	n1 (inc n)
+	k (range n1)
+	pk (take n1 (iterate #(* p %) 1))
+	ql (reverse (take n1 (iterate #(* q %) 1)))
+	f (bc n)]
+    (into {} (map vector k (map * f pk ql)))))
+
+(defn zipf
+  "Returns the Zipf distribution in which the numbers k=1..n have
+   probabilities proportional to 1/k^s."
+  [s n]
+  (normalize
+    (into {} (for [k (range 1 (inc n))] [k (/ (java.lang.Math/pow k s))]))))
+
+
+(defn certainly
+  "Returns a distribution in which the single value v has probability 1."
+  [v]
+  {v 1})
+
+(with-monad dist-m
 
   (defn join-with
     "Returns the distribution of (f x y) with x from dist1 and y from dist2."
