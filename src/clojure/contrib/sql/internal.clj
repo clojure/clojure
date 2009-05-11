@@ -12,11 +12,17 @@
 ;;  Created 3 October 2008
 
 (ns clojure.contrib.sql.internal
-  (:use (clojure.contrib
-         [except :only (throw-arg)]
-         [java-utils :only (as-properties)]
-         [seq-utils :only (indexed)]))
-  (:import (java.sql Statement SQLException BatchUpdateException)))
+  (:use
+   (clojure.contrib
+    [except :only (throw-arg)]
+    [java-utils :only (as-properties)]
+    [seq-utils :only (indexed)]))
+  (:import
+   (clojure.lang RT)
+   (java.sql BatchUpdateException DriverManager SQLException Statement)
+   (java.util Hashtable Map)
+   (javax.naming InitialContext Name)
+   (javax.sql DataSource)))
 
 (def *db* {:connection nil :level 0})
 
@@ -46,28 +52,42 @@
   "Creates a connection to a database. db-spec is a map containing values
   for one of the following parameter sets:
 
-  DataSource:
-    :datasource  (required) a javax.sql.DataSource
-    :username    (optional) a String
-    :password    (optional) a String
-
   DriverManager:
     :classname   (required) a String, the jdbc driver class name
     :subprotocol (required) a String, the jdbc subprotocol
     :subname     (required) a String, the jdbc subname
-    (others)     (optional) passed to the driver as properties."
-  [{:keys [datasource username password classname subprotocol subname]
-    :as db-spec}]
-  (when classname
-    (clojure.lang.RT/loadClassForName classname))
-  (if datasource
-    (if username
-      (.getConnection datasource username password)
-      (.getConnection datasource))
-    (java.sql.DriverManager/getConnection
-     (format "jdbc:%s:%s" subprotocol subname)
-     (as-properties (dissoc db-spec :classname :subprotocol :subname)))))
+    (others)     (optional) passed to the driver as properties.
 
+  DataSource:
+    :datasource  (required) a javax.sql.DataSource
+    :username    (optional) a String
+    :password    (optional) a String, required if :username is supplied
+
+  JNDI:
+    :name        (required) a String or javax.naming.Name
+    :environment (optional) a java.util.Map"
+  [{:keys [classname subprotocol subname
+           datasource username password
+           name environment]
+    :as db-spec}]
+  (cond
+    (and classname subprotocol subname)
+    (let [url (format "jdbc:%s:%s" subprotocol subname)
+          etc (dissoc db-spec :classname :subprotocol :subname)]
+      (RT/loadClassForName classname)
+      (DriverManager/getConnection url (as-properties etc)))
+    (and datasource username password)
+    (.getConnection datasource username password)
+    datasource
+    (.getConnection datasource)
+    name
+    (let [env (and environment (Hashtable. environment))
+          context (InitialContext. env)
+          datasource (.lookup context name)]
+      (.getConnection datasource))
+    :else
+    (throw-arg "db-spec %s is missing a required parameter" db-spec)))
+     
 (defn with-connection*
   "Evaluates func in the context of a new connection to a database then
   closes the connection."

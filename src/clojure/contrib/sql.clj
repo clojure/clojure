@@ -36,16 +36,20 @@
   closes the connection. db-spec is a map containing values for one of the
   following parameter sets:
 
-  DataSource:
-    :datasource  (required) a javax.sql.DataSource
-    :username    (optional) a String
-    :password    (optional) a String
-
   DriverManager:
     :classname   (required) a String, the jdbc driver class name
     :subprotocol (required) a String, the jdbc subprotocol
     :subname     (required) a String, the jdbc subname
-    (others)     (optional) passed to the driver as properties."
+    (others)     (optional) passed to the driver as properties.
+
+  DataSource:
+    :datasource  (required) a javax.sql.DataSource
+    :username    (optional) a String
+    :password    (optional) a String, required if :username is supplied
+
+  JNDI:
+    :name        (required) a String or javax.naming.Name
+    :environment (optional) a java.util.Map"
   [db-spec & body]
   `(with-connection* ~db-spec (fn [] ~@body)))
 
