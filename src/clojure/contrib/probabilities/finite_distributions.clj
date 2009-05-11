@@ -110,11 +110,6 @@
   "Returns the Bernoulli distribution for probability p."
   (choose p 1 :else 0))
 
-(defn rademacher
-  []
-  "Returns the Rademacher distribution."
-  (choose (/ 1 2) -1 :else 1))
-
 (defn- bc
   [n]
   "Returns the binomial coefficients for a given n."
@@ -138,13 +133,17 @@
 	f (bc n)]
     (into {} (map vector k (map * f pk ql)))))
 
+(defn make-distribution
+  "Returns the distribution in which each element x of the collection
+   has a probability proportional to (f x)"
+  [coll f]
+  (normalize (into {} (for [k coll] [k (f k)]))))
+
 (defn zipf
   "Returns the Zipf distribution in which the numbers k=1..n have
    probabilities proportional to 1/k^s."
   [s n]
-  (normalize
-    (into {} (for [k (range 1 (inc n))] [k (/ (java.lang.Math/pow k s))]))))
-
+  (make-distribution (range 1 (inc n)) #(/ (java.lang.Math/pow % s))))
 
 (defn certainly
   "Returns a distribution in which the single value v has probability 1."
