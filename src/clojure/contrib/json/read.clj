@@ -40,7 +40,11 @@
            implementation of JSON as described at json.org, not a full-fledged
            JavaScript parser.  JavaScript functions and object constructors
            are not supported.  Object field names must be quoted strings; they
-           may not be bare symbols.",
+           may not be bare symbols.
+
+           If you want to convert map keys from strings to keywords, use
+           clojure.contrib.walk/keywordize-keys
+",
      :see-also [["http://www.json.org", "JSON Home Page"]]}
   clojure.contrib.json.read
   (:import (java.io PushbackReader StringReader EOFException))
