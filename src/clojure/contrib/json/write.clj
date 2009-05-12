@@ -79,11 +79,13 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
 (defmethod print-json ::array [s]
   (print \[)
   (loop [x s]
-    (when-let [fst (first x)]
-      (print-json fst)
-      (when-let [nxt (next x)]
-        (print \,)
-        (recur nxt))))
+    (when (> (count x) 0)
+     (let [fst (first x)]
+       (print-json fst)
+       (let [nxt (next x)]
+         (when (> (count nxt) 0)
+          (print \,)
+          (recur nxt))))))
   (print \]))
 
 (defmethod print-json ::object [m]
