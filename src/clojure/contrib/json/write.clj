@@ -79,26 +79,29 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
 (defmethod print-json ::array [s]
   (print \[)
   (loop [x s]
-    (when (> (count x) 0)
-     (let [fst (first x)]
+    (when (seq x)
+     (let [fst (first x)
+           nxt (next x)]
        (print-json fst)
-       (let [nxt (next x)]
-         (when (> (count nxt) 0)
-          (print \,)
-          (recur nxt))))))
+       (when (seq nxt)
+         (print \,)
+         (recur nxt)))))
   (print \]))
 
 (defmethod print-json ::object [m]
   (print \{)
   (loop [x m]
-    (when (first x)
+    (when (seq m)
       (let [[k v] (first x)]
+        (when (nil? k)
+          (throw (Exception. "JSON object keys cannot be nil/null")))
         (print-json (j/as-str k))
         (print \:)
         (print-json v))
-      (when (next x)
-        (print \,)
-        (recur (next x)))))
+      (let [nxt (next x)]
+        (when (seq nxt)
+          (print \,)
+          (recur nxt)))))
   (print \}))
 
 (defmethod print-json java.lang.CharSequence [s]
@@ -169,3 +172,9 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
 
 (deftest- can-print-empty-objects
   (is (= "{}" (json-str {}))))
+
+(deftest- accept-sequence-of-nils
+  (is (= "[null,null,null]" (json-str [nil nil nil]))))
+
+(deftest- error-on-nil-keys
+  (is (thrown? Exception (json-str {nil 1}))))
