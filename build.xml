@@ -155,6 +155,7 @@
       <arg value="clojure.contrib.macros"/>
       <arg value="clojure.contrib.map-utils"/>
       <arg value="clojure.contrib.math"/>
+      <arg value="clojure.contrib.miglayout"/>
       <arg value="clojure.contrib.miglayout.internal"/>
       <arg value="clojure.contrib.mmap"/>
       <arg value="clojure.contrib.monads"/>

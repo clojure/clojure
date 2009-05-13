@@ -14,7 +14,7 @@
 ;;  Example:
 ;;
 ;;    (use '[clojure.contrib.miglayout.test :as mlt :only ()])
-;;    (doseq [i (range 3)] (mlt/run-test i))
+;;    (dotimes [i 5] (mlt/run-test i))
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 5 October 2008
@@ -27,12 +27,12 @@ http://www.miglayout.com/
 Example:
 
   (use '[clojure.contrib.miglayout.test :as mlt :only ()])
-  (doseq [i (range 3)] (mlt/run-test i))
+  (dotimes [i 5] (mlt/run-test i))
 
 "}
   clojure.contrib.miglayout
   (:import (java.awt Container Component)
-           (net.miginfocom.swing MigLayout))
+           (clojure.lang RT))
   (:use clojure.contrib.miglayout.internal))
 
 (defn miglayout
@@ -66,8 +66,14 @@ Example:
   [#^Container container & args]
   (let [item-constraints (apply parse-item-constraints args)
         {:keys [keywords components]} item-constraints
-        {:keys [layout column row]} keywords]
-    (.setLayout container (MigLayout. layout column row))
+        {:keys [layout column row]} keywords
+        class (RT/classForName "net.miginfocom.swing.MigLayout")
+        layout-manager (.newInstance class)]
+    (doto layout-manager
+      (.setLayoutConstraints layout)
+      (.setColumnConstraints column)
+      (.setRowConstraints row))
+    (.setLayout container layout-manager)
     (doseq [[#^Component component constraints] components]
       (.add container component constraints))
     container))
