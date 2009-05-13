@@ -3447,6 +3447,15 @@
 
 (def gen-class)
 
+(defmacro with-loading-context [& body]
+  `((fn this# [] 
+        (. clojure.lang.Var (pushThreadBindings {clojure.lang.Compiler/LOADER  
+                                                 (-> this# .getClass .getClassLoader)}))
+        (try
+         ~@body
+         (finally
+          (. clojure.lang.Var (popThreadBindings)))))))
+
 (defmacro ns
   "Sets *ns* to the namespace named by name (unevaluated), creating it
   if needed.  references can be zero or more of: (:refer-clojure ...)
@@ -3485,7 +3494,7 @@
           (when gen-class-clause
             (list* `gen-class :name (.replace (str name) \- \_) :impl-ns name :main true (next gen-class-clause)))
         references (remove #(= :gen-class (first %)) references)]
-    `(do
+    `(with-loading-context
        (clojure.core/in-ns '~name)
        ~@(when gen-class-call (list gen-class-call))
        ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
@@ -3642,6 +3651,7 @@
             (apply load-lib prefix (prependss arg opts))))))))
 
 ;; Public
+
 
 (defn require
   "Loads libs, skipping any that are already loaded. Each argument is
