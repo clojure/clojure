@@ -1,7 +1,7 @@
 ;;; duck_streams.clj -- duck-typed I/O streams for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; May 3, 2009
+;; May 13, 2009
 
 ;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -25,6 +25,8 @@
 
 
 ;; CHANGE LOG
+;;
+;; May 13, 2009: added functions to open writers for appending
 ;;
 ;; May 3, 2009: renamed file to file-str, for compatibility with
 ;; clojure.contrib.java-utils.  reader/writer no longer use this
@@ -121,6 +123,11 @@
   (throw (Exception. (str "Cannot open " (pr-str x) " as a reader."))))
 
 
+(def
+ #^{:doc "If true, writer and spit will open files in append mode.
+ Defaults to false.  Use append-writer or append-spit."}
+ *append-to-writer* false)
+
 
 (defmulti #^{:tag PrintWriter
              :doc "Attempts to coerce its argument into an open java.io.PrintWriter
@@ -137,22 +144,33 @@
              :arglists '([x])}
   writer class)
 
-(defmethod writer PrintWriter [x] x)
+(defn- assert-not-appending []
+  (when *append-to-writer*
+    (throw (Exception. "Cannot change an open stream to append mode."))))
+
+(defmethod writer PrintWriter [x]
+  (assert-not-appending)
+  x)
 
 (defmethod writer BufferedWriter [#^BufferedWriter x]
+  (assert-not-appending)
   (PrintWriter. x))
 
 (defmethod writer Writer [x]
+  (assert-not-appending)
   ;; Writer includes sub-classes such as FileWriter
   (PrintWriter. (BufferedWriter. x)))   
 
 (defmethod writer OutputStream [x]
+  (assert-not-appending)
   (PrintWriter.
    (BufferedWriter.
     (OutputStreamWriter. x *default-encoding*))))
 
 (defmethod writer File [#^File x]
-  (writer (FileOutputStream. x)))
+  (let [stream (FileOutputStream. x *append-to-writer*)]
+    (binding [*append-to-writer* false]
+      (writer stream))))
 
 (defmethod writer URL [#^URL x]
   (if (= "file" (.getProtocol x))
@@ -170,6 +188,14 @@
 
 (defmethod writer :default [x]
   (throw (Exception. (str "Cannot open <" (pr-str x) "> as a writer."))))
+
+
+(defn append-writer
+  "Like writer but opens file for appending.  Does not work on streams
+  that are already open."
+  [x]
+  (binding [*append-to-writer* true]
+    (writer x)))
 
 
 (defn write-lines
@@ -212,6 +238,12 @@
   (with-open [#^PrintWriter w (writer f)]
       (.print w content)))
 
+(defn append-spit
+  "Like spit but appends to file."
+  [f content]
+  (with-open [#^PrintWriter w (append-writer f)]
+    (.print w content)))
+
 (defn pwd
   "Returns current working directory as a String.  (Like UNIX 'pwd'.)
   Note: In Java, you cannot change the current working directory."
@@ -221,9 +253,17 @@
 
 
 (defmacro with-out-writer
-  "Opens a writer on f, binds it to *out*, and evalutes body."
+  "Opens a writer on f, binds it to *out*, and evalutes body.
+  Anything printed within body will be written to f."
   [f & body]
   `(with-open [stream# (writer ~f)]
+     (binding [*out* stream#]
+       ~@body)))
+
+(defmacro with-out-append-writer
+  "Like with-out-writer but appends to file."
+  [f & body]
+  `(with-open [stream# (append-writer ~f)]
      (binding [*out* stream#]
        ~@body)))
 
