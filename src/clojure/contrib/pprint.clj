@@ -28,7 +28,7 @@
    Clojure is using the name \"format\" for its own format.
 
 Complete documentation is available on the wiki at the contrib google code site.",
-       :see-also [["PrettyPrinter" "Documentation for the pretty printer"]
+       :see-also [["PrettyPrinting" "Documentation for the pretty printer"]
                   ["CommonLispFormat" "Documentation for Common Lisp format function"]]
        }
     clojure.contrib.pprint
