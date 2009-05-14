@@ -13,7 +13,34 @@
 
 ; [= not= (tests in data_structures.clj and elsewhere)]
 
-; identity
+
+(deftest test-identity
+  ; exactly 1 argument needed
+  (is (thrown? IllegalArgumentException (identity)))
+  (is (thrown? IllegalArgumentException (identity 1 2)))
+
+  (are (= (identity _) _)
+      nil
+      false true
+      0 42
+      0.0 3.14
+      2/3
+      0M 1M
+      \c
+      "" "abc"
+      'sym
+      :kw
+      () '(1 2)
+      [] [1 2]
+      {} {:a 1 :b 2}
+      #{} #{1 2} )
+
+  ; evaluation
+  (are (= (identity _1) _2)
+      (+ 1 2) 3
+      (> 5 0) true ))
+
+
 ; time assert comment doc
 
 ; partial
