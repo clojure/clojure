@@ -52,6 +52,10 @@
 
 (declare read-json)
 
+(def #^{:doc "If true, JSON object keys will be converted to keywords
+  instead of strings.  Defaults to false.  There are no checks that the strings form valid
+  keywords."} *json-keyword-keys* false)
+
 (defn- read-json-array [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
@@ -90,7 +94,9 @@
                      (if (string? element)
                        (recur (.read stream) element result)
                        (throw (Exception. "JSON error (non-string key in object)")))
-                     (recur (.read stream) nil (assoc result key element)))))))))
+                     (recur (.read stream) nil
+                            (assoc result (if *json-keyword-keys* (keyword key) key)
+                                   element)))))))))
 
 (defn- read-json-hex-character [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
@@ -253,6 +259,11 @@
 
 (deftest- disallows-unclosed-objects
   (is (thrown? Exception (read-json-string "{\"a\":1,  "))))
+
+(deftest- can-get-keyword-keys
+  (is (= {:a [1 2 {:b [3 "four"]} 5.5]}
+         (binding [*json-keyword-keys* true]
+           (read-json-string "{\"a\":[1,2,{\"b\":[3,\"four\"]},5.5]}")))))
 
 (declare *pass1-string*)
 
