@@ -16,17 +16,25 @@
   #^{:author "Stuart Sierra",
      :doc "JavaScript Object Notation (JSON) generator.
 
-This is a low-level implementation of JSON.  It supports basic types,
-arrays, Collections, and Maps.  You can extend it to handle new types
-by adding methods to print-json.
+This library will generate JSON from the following types:
+ * nil
+ * all primitives (Boolean, Byte, Short, Integer, Long, Float, Double)
+ * String (actually any CharSequence)
+ * java.util.Map (including Clojure maps)
+ * java.util.Collection (including Clojure vectors, lists, and sets)
+ * Java arrays
+
+You can extend this library to handle new types by adding methods to
+print-json.
 
 This library does NOT attempt to preserve round-trip equality between
-JSON and Clojure data types.  That is, if you write a JSON string with
+JSON and Clojure data types. That is, if you write a JSON string with
 this library, then read it back with clojure.contrib.json.read, you
-won't necessarily get the exact same data structure.
+won't necessarily get the exact same data structure.  For example,
+Clojure sets are written as JSON arrays, which will be read back as
+Clojure vectors.
 
-If you want round-trip equality and/or indented output, try Dan
-Larkin's clojure-json library at
+If you want indented output, try the clojure-json library at
 http://github.com/danlarkin/clojure-json
 
 This implementation attempts to follow the description of JSON at
