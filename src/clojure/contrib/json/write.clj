@@ -112,7 +112,7 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
           (recur nxt)))))
   (print \}))
 
-(defmethod print-json java.lang.CharSequence [s]
+(defmethod print-json java.lang.CharSequence [#^CharSequence s]
   (print \")
   (dotimes [i (count s)]
     (let [cp (Character/codePointAt s i)]
