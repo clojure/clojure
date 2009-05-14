@@ -27,10 +27,10 @@
 2) A Common Lisp compatible format function, implemented as \"cl-format\" because
    Clojure is using the name \"format\" for its own format.
 
-The most complete documentation can be found at http://github.com/tomfaulhaber/cl-format
-where the markdown README is currently displayed. I will be moving it into the
-clojure.contrib wiki RSN.",
-}
+Complete documentation is available on the wiki at the contrib google code site.",
+       :see-also [["PrettyPrinter" "Documentation for the pretty printer"]
+                  ["CommonLispFormat" "Documentation for Common Lisp format function"]]
+       }
     clojure.contrib.pprint
   (:use clojure.contrib.pprint.utilities)
   (:import [clojure.contrib.pprint PrettyWriter]))
