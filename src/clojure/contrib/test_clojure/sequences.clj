@@ -10,11 +10,6 @@
 (ns clojure.contrib.test-clojure.sequences
   (:use clojure.contrib.test-is))
 
-;; *** Helper functions ***
-
-(defn exception []
-  (throw (new Exception "Exception which should never occur")))
-
 
 ;; *** Tests ***
 

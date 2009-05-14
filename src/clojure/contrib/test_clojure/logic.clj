@@ -9,12 +9,8 @@
 ;;  Created 1/29/2009
 
 (ns clojure.contrib.test-clojure.logic
-  (:use clojure.contrib.test-is))
-
-;; *** Helper functions ***
-
-(defn exception []
-  (throw (new Exception "Exception which should never occur")))
+  (:use clojure.contrib.test-is
+        [clojure.contrib.test-clojure.test-utils :only (exception)]))
 
 
 ;; *** Tests ***
