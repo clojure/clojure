@@ -92,7 +92,7 @@
                        (throw (Exception. "JSON error (non-string key in object)")))
                      (recur (.read stream) nil (assoc result key element)))))))))
 
-(defn- read-json-hex-character [stream]
+(defn- read-json-hex-character [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; initial "\u".  Reads the next four characters from the stream.
   (let [digits [(.read stream)
@@ -107,7 +107,7 @@
         (throw (Exception. "JSON error (invalid hex character in Unicode character escape)")))
       (char (Integer/parseInt (apply str chars) 16)))))
 
-(defn- read-json-escaped-character [stream]
+(defn- read-json-escaped-character [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; initial backslash.
   (let [c (char (.read stream))]
