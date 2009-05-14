@@ -53,8 +53,8 @@
 (declare read-json)
 
 (def #^{:doc "If true, JSON object keys will be converted to keywords
-  instead of strings.  Defaults to false.  There are no checks that the strings form valid
-  keywords."} *json-keyword-keys* false)
+  instead of strings.  Defaults to false.  There are no checks that
+  the strings form valid keywords."} *json-keyword-keys* false)
 
 (defn- read-json-array [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
