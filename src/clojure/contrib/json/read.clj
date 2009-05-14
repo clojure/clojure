@@ -141,10 +141,12 @@
                    (recur (.read stream))))))))
 
 (defn read-json
-  "Read the next JSON record from stream, which must be an instance of
+  "Read one JSON record from s, which may be a String or a
   java.io.PushbackReader."
   ([] (read-json *in* true nil))
-  ([stream] (read-json stream true nil))
+  ([s] (if (string? s)
+         (read-json (PushbackReader. (StringReader. s)) true nil)
+         (read-json s true nil)))
   ([#^PushbackReader stream eof-error? eof-value]
      (loop [i (.read stream)]
        (let [c (char i)]
@@ -208,67 +210,67 @@
 ;;; TESTS
 
 (deftest- can-read-numbers
-  (is (= 42 (read-json-string "42")))
-  (is (= -3 (read-json-string "-3")))
-  (is (= 3.14159 (read-json-string "3.14159")))
-  (is (= 6.022e23 (read-json-string "6.022e23"))))
+  (is (= 42 (read-json "42")))
+  (is (= -3 (read-json "-3")))
+  (is (= 3.14159 (read-json "3.14159")))
+  (is (= 6.022e23 (read-json "6.022e23"))))
 
 (deftest- can-read-null
-  (is (= nil (read-json-string "null"))))
+  (is (= nil (read-json "null"))))
 
 (deftest- can-read-strings
-  (is (= "Hello, World!" (read-json-string "\"Hello, World!\""))))
+  (is (= "Hello, World!" (read-json "\"Hello, World!\""))))
 
 (deftest- handles-escaped-slashes-in-strings
-  (is (= "/foo/bar" (read-json-string "\"\\/foo\\/bar\""))))
+  (is (= "/foo/bar" (read-json "\"\\/foo\\/bar\""))))
 
 (deftest- handles-unicode-escapes
-  (is (= " \u0beb " (read-json-string "\" \\u0bEb \""))))
+  (is (= " \u0beb " (read-json "\" \\u0bEb \""))))
 
 (deftest- handles-escaped-whitespace
-  (is (= "foo\nbar" (read-json-string "\"foo\\nbar\"")))
-  (is (= "foo\rbar" (read-json-string "\"foo\\rbar\"")))
-  (is (= "foo\tbar" (read-json-string "\"foo\\tbar\""))))
+  (is (= "foo\nbar" (read-json "\"foo\\nbar\"")))
+  (is (= "foo\rbar" (read-json "\"foo\\rbar\"")))
+  (is (= "foo\tbar" (read-json "\"foo\\tbar\""))))
 
 (deftest- can-read-booleans
-  (is (= true (read-json-string "true")))
-  (is (= false (read-json-string "false"))))
+  (is (= true (read-json "true")))
+  (is (= false (read-json "false"))))
 
 (deftest- can-ignore-whitespace
-  (is (= nil (read-json-string "\r\n   null"))))
+  (is (= nil (read-json "\r\n   null"))))
 
 (deftest- can-read-arrays
-  (is (= [1 2 3] (read-json-string "[1,2,3]")))
-  (is (= ["Ole" "Lena"] (read-json-string "[\"Ole\", \r\n \"Lena\"]"))))
+  (is (= [1 2 3] (read-json "[1,2,3]")))
+  (is (= ["Ole" "Lena"] (read-json "[\"Ole\", \r\n \"Lena\"]"))))
 
 (deftest- can-read-objects
-  (is (= {"a" 1, "b" 2} (read-json-string "{\"a\": 1, \"b\": 2}"))))
+  (is (= {"a" 1, "b" 2} (read-json "{\"a\": 1, \"b\": 2}"))))
 
 (deftest- can-read-nested-structures
   (is (= {"a" [1 2 {"b" [3 "four"]} 5.5]}
-         (read-json-string "{\"a\":[1,2,{\"b\":[3,\"four\"]},5.5]}"))))
+         (read-json "{\"a\":[1,2,{\"b\":[3,\"four\"]},5.5]}"))))
 
 (deftest- disallows-non-string-keys
-  (is (thrown? Exception (read-json-string "{26:\"z\""))))
+  (is (thrown? Exception (read-json "{26:\"z\""))))
 
 (deftest- disallows-barewords
-  (is (thrown? Exception (read-json-string "  foo  "))))
+  (is (thrown? Exception (read-json "  foo  "))))
 
 (deftest- disallows-unclosed-arrays
-  (is (thrown? Exception (read-json-string "[1, 2,  "))))
+  (is (thrown? Exception (read-json "[1, 2,  "))))
 
 (deftest- disallows-unclosed-objects
-  (is (thrown? Exception (read-json-string "{\"a\":1,  "))))
+  (is (thrown? Exception (read-json "{\"a\":1,  "))))
 
 (deftest- can-get-keyword-keys
   (is (= {:a [1 2 {:b [3 "four"]} 5.5]}
          (binding [*json-keyword-keys* true]
-           (read-json-string "{\"a\":[1,2,{\"b\":[3,\"four\"]},5.5]}")))))
+           (read-json "{\"a\":[1,2,{\"b\":[3,\"four\"]},5.5]}")))))
 
 (declare *pass1-string*)
 
 (deftest- pass1-test
-  (let [input (read-json-string *pass1-string*)]
+  (let [input (read-json *pass1-string*)]
     (is (= "JSON Test Pattern pass1" (first input)))
     (is (= "array with 1 element" (get-in input [1 "object with 1 member" 0])))
     (is (= 1234567890 (get-in input [8 "integer"])))
