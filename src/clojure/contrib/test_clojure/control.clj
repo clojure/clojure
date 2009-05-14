@@ -63,7 +63,48 @@
 ; [if (logic.clj)], if-not, if-let
 ; when, when-not, when-let, when-first
 
-; cond, condp
+
+(deftest test-cond
+  (are (= _1 _2)
+      (cond) nil
+
+      (cond nil true) nil
+      (cond false true) nil
+      
+      (cond true 1 true (exception)) 1
+      (cond nil 1 false 2 true 3 true 4) 3
+      (cond nil 1 false 2 true 3 true (exception)) 3 )
+
+  ; false
+  (are (= (cond _ :a true :b) :b)
+      nil false )
+
+  ; true
+  (are (= (cond _ :a true :b) :a)
+      true
+      0 42
+      0.0 3.14
+      2/3
+      0M 1M
+      \c
+      "" "abc"
+      'sym
+      :kw
+      () '(1 2)
+      [] [1 2]
+      {} {:a 1 :b 2}
+      #{} #{1 2} )
+
+  ; evaluation
+  (are (= _1 _2)
+      (cond (> 3 2) (+ 1 2) true :result true (exception)) 3
+      (cond (< 3 2) (+ 1 2) true :result true (exception)) :result )
+
+  ; identity (= (cond true x) x)
+  (maintains-identity (fn [_] (cond true _))) )
+
+
+; condp
 
 ; [for, doseq (for.clj)]
 
