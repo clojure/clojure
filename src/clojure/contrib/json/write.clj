@@ -74,7 +74,7 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
 
 (defmethod print-json nil [x] (print "null"))
 
-(defmethod print-json ::symbol [x] (pr (name x)))
+(defmethod print-json ::symbol [x] (print-json (name x)))
 
 (defmethod print-json ::array [s]
   (print \[)
@@ -178,3 +178,6 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
 
 (deftest- error-on-nil-keys
   (is (thrown? Exception (json-str {nil 1}))))
+
+(deftest- characters-in-symbols-are-escaped
+  (is (= "\"foo\\u1b1b\"" (json-str (symbol "foo\u1b1b")))))
