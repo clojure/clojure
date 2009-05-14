@@ -11,18 +11,16 @@
 package clojure;
 
 import clojure.lang.Symbol;
-import clojure.lang.Namespace;
 import clojure.lang.Var;
 import clojure.lang.RT;
 
 public class main{
 
-final static private Symbol CLOJURE_MAIN = Symbol.create("clojure.main");
-final static private Namespace CLOJURE_MAIN_NS = Namespace.findOrCreate(CLOJURE_MAIN);
-final static private Var REQUIRE = Var.intern(RT.CLOJURE_NS, Symbol.create("require"));
-final static private Var LEGACY_REPL = Var.intern(CLOJURE_MAIN_NS, Symbol.create("legacy-repl"));
-final static private Var LEGACY_SCRIPT = Var.intern(CLOJURE_MAIN_NS, Symbol.create("legacy-script"));
-final static private Var MAIN = Var.intern(CLOJURE_MAIN_NS, Symbol.create("main"));
+final static private Symbol CLOJURE_MAIN = Symbol.intern("clojure.main");
+final static private Var REQUIRE = RT.var("clojure.core", "require");
+final static private Var LEGACY_REPL = RT.var("clojure.main", "legacy-repl");
+final static private Var LEGACY_SCRIPT = RT.var("clojure.main", "legacy-script");
+final static private Var MAIN = RT.var("clojure.main", "main");
 
 public static void legacy_repl(String[] args) throws Exception{
     REQUIRE.invoke(CLOJURE_MAIN);
