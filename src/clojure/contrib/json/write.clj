@@ -113,25 +113,27 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
   (print \}))
 
 (defmethod print-json java.lang.CharSequence [#^CharSequence s]
-  (print \")
-  (dotimes [i (count s)]
-    (let [cp (Character/codePointAt s i)]
-      (cond
-        ;; Handle printable JSON escapes before ASCII
-        (= cp 34) (print "\\\"")
-        (= cp 92) (print "\\\\")
-        (= cp 47) (print "\\/")
-        ;; Print simple ASCII characters
-        (< 31 cp 127) (print (.charAt s i))
-        ;; Handle non-printable JSON escapes
-        (= cp 8) (print "\\b")
-        (= cp 12) (print "\\f")
-        (= cp 10) (print "\\n")
-        (= cp 13) (print "\\r")
-        (= cp 9) (print "\\t")
-        ;; Any other character is printed as Hexadecimal escape
-        :else (printf "\\u%04x" cp))))
-  (print \"))
+  (let [sb (StringBuilder. (count s))]
+    (.append sb \")
+    (dotimes [i (count s)]
+      (let [cp (Character/codePointAt s i)]
+        (cond
+         ;; Handle printable JSON escapes before ASCII
+         (= cp 34) (.append sb "\\\"")
+         (= cp 92) (.append sb "\\\\")
+         (= cp 47) (.append sb "\\/")
+         ;; Print simple ASCII characters
+         (< 31 cp 127) (.append sb (.charAt s i))
+         ;; Handle non-printable JSON escapes
+         (= cp 8) (.append sb "\\b")
+         (= cp 12) (.append sb "\\f")
+         (= cp 10) (.append sb "\\n")
+         (= cp 13) (.append sb "\\r")
+         (= cp 9) (.append sb "\\t")
+         ;; Any other character is Hexadecimal-escaped
+         :else (.append sb (format "\\u%04x" cp)))))
+    (.append sb \")
+    (print (str sb))))
 
 (defn json-str
   "Converts x to a JSON-formatted string."
