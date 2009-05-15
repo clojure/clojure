@@ -1468,8 +1468,14 @@ static public Object[] setValues(Object... vals){
 static public ClassLoader makeClassLoader(){
 	return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction(){
 		public Object run(){
-			getRootClassLoader();
+            try{
+            Var.pushThreadBindings(RT.map(USE_CONTEXT_CLASSLOADER, RT.T));
+//			getRootClassLoader();
 			return new DynamicClassLoader(baseLoader());
+            }
+                finally{
+            Var.popThreadBindings();
+            }
 		}
 	});
 }
