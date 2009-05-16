@@ -4519,6 +4519,13 @@ public static Object macroexpand1(Object x) throws Exception{
 	return x;
 }
 
+static Object macroexpand(Object form) throws Exception{
+	Object exf = macroexpand1(form);
+	if(exf != form)
+		return macroexpand(exf);
+	return form;
+}
+
 private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
 	Integer line = (Integer) LINE.deref();
 	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
@@ -4569,22 +4576,26 @@ public static Object eval(Object form) throws Exception{
 		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
 		createdLoader = true;
 		}
-	try
-		{
-		if(form instanceof IPersistentCollection
+	try {
+		form = macroexpand(form);
+		if(form instanceof IPersistentCollection && Util.equals(RT.first(form), DO)) {
+			ISeq s = RT.next(form);
+			for(;RT.next(s) != null;s = RT.next(s))
+				eval(RT.first(s));
+			return eval(RT.first(s));
+		}
+		else if(form instanceof IPersistentCollection
 		   && !(RT.first(form) instanceof Symbol
-		        && ((Symbol) RT.first(form)).name.startsWith("def")))
-			{
+		        && ((Symbol) RT.first(form)).name.startsWith("def"))) {
 			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
 			IFn fn = (IFn) fexpr.eval();
 			return fn.invoke();
-			}
-		else
-			{
+		}
+		else {
 			Expr expr = analyze(C.EVAL, form);
 			return expr.eval();
-			}
 		}
+	}
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
@@ -4949,6 +4960,23 @@ public static void pushNS(){
 	                                                           Symbol.create("*ns*")), null));
 }
 
+static void compile1(GeneratorAdapter gen, FnExpr fn, Object form) throws Exception{
+	form = macroexpand(form);
+	if(form instanceof IPersistentCollection && Util.equals(RT.first(form), DO)) {
+		for(ISeq s = RT.next(form); s != null; s = RT.next(s)) {
+			compile1(gen, fn, RT.first(s));
+		}
+	}
+	else {
+			Expr expr = analyze(C.EVAL, form);
+			fn.keywords = (IPersistentMap) KEYWORDS.deref();
+			fn.vars = (IPersistentMap) VARS.deref();
+			fn.constants = (PersistentVector) CONSTANTS.deref();
+			expr.emit(C.EXPRESSION, fn, gen);
+			expr.eval();
+	}
+}
+
 public static Object compile(Reader rdr, String sourcePath, String sourceName) throws Exception{
 	if(COMPILE_PATH.deref() == null)
 		throw new Exception("*compile-path* not set");
@@ -4992,14 +5020,9 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
 		    r = LispReader.read(pushbackReader, false, EOF, false))
 			{
-			LINE_AFTER.set(pushbackReader.getLineNumber());
-			Expr expr = analyze(C.EVAL, r);
-			fn.keywords = (IPersistentMap) KEYWORDS.deref();
-			fn.vars = (IPersistentMap) VARS.deref();
-			fn.constants = (PersistentVector) CONSTANTS.deref();
-			expr.emit(C.EXPRESSION, fn, gen);
-			expr.eval();
-			LINE_BEFORE.set(pushbackReader.getLineNumber());
+				LINE_AFTER.set(pushbackReader.getLineNumber());
+				compile1(gen, fn, r);
+				LINE_BEFORE.set(pushbackReader.getLineNumber());
 			}
 		//end of load
 		gen.returnValue();
