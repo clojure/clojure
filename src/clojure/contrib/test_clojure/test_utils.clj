@@ -16,3 +16,18 @@
   []
   (throw (new Exception "Exception which should never occur")))
 
+
+(defmacro all-are
+  "Test all-with-all.
+  (all-are (= _1 _2)
+    a b c)
+  =>
+  (do
+    (is (= a b))
+    (is (= a c))
+    (is (= b c)))"
+  [expr & args]
+  (concat
+    (list 'clojure.contrib.template/do-template (list 'clojure.contrib.test-is/is expr))
+    (apply concat (combinations args 2))))
+

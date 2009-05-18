@@ -8,7 +8,9 @@
 ;;
 
 (ns clojure.contrib.test-clojure.data-structures
-  (:use clojure.contrib.test-is))
+  (:use clojure.contrib.test-is
+        [clojure.contrib.test-clojure.test-utils :only (all-are)]))
+
 
 ;; *** Helper functions ***
 
@@ -67,30 +69,37 @@
       '(1) #{1}
       [1] #{1} )
 
-  ; sorted-map, hash-map and array-map - classes differ, but maps they are equal
-  (is (not= (class (sorted-map :a 1)) (class (hash-map :a 1))))
-  (is (not= (class (sorted-map :a 1)) (class (array-map :a 1))))
-  (is (not= (class (hash-map :a 1)) (class (array-map :a 1))))
-  (are (= _1 _2 _3)
-    (sorted-map) (hash-map) (array-map)
-    (sorted-map :a 1) (hash-map :a 1) (array-map :a 1)
-    (sorted-map :a 1 :z 3 :c 2) (hash-map :a 1 :z 3 :c 2) (array-map :a 1 :z 3 :c 2))
+  ; sorted-map, hash-map and array-map - classes differ, but content is equal
+  (all-are (not= (class _1) (class _2))
+      (sorted-map :a 1)
+      (hash-map   :a 1)
+      (array-map  :a 1))
+  (all-are (= _1 _2)
+      (sorted-map)
+      (hash-map)
+      (array-map))
+  (all-are (= _1 _2)
+      (sorted-map :a 1)
+      (hash-map   :a 1)
+      (array-map  :a 1))
+  (all-are (= _1 _2)
+      (sorted-map :a 1 :z 3 :c 2)
+      (hash-map   :a 1 :z 3 :c 2)
+      (array-map  :a 1 :z 3 :c 2))
 
   ; struct-map vs. sorted-map, hash-map and array-map
-  (is (not= (class (struct equality-struct 1 2)) (class (sorted-map :a 1 :b 2))))
-  (is (not= (class (struct equality-struct 1 2)) (class (hash-map :a 1 :b 2))))
-  (is (not= (class (struct equality-struct 1 2)) (class (array-map :a 1 :b 2))))
-  (are (= (struct equality-struct 1 2) _)
-     (sorted-map :a 1 :b 2)
-     (hash-map :a 1 :b 2)
-     (array-map :a 1 :b 2) )
+  (are (and (not= (class (struct equality-struct 1 2)) (class _))
+            (= (struct equality-struct 1 2) _))
+      (sorted-map :a 1 :b 2)
+      (hash-map   :a 1 :b 2)
+      (array-map  :a 1 :b 2))
 
-  ; sorted-set and hash-set are equal
+  ; sorted-set vs. hash-set
   (is (not= (class (sorted-set 1)) (class (hash-set 1))))
   (are (= _1 _2)
-    (sorted-set) (hash-set)
-    (sorted-set 1) (hash-set 1)
-    (sorted-set 3 2 1) (hash-set 3 2 1) ))
+      (sorted-set) (hash-set)
+      (sorted-set 1) (hash-set 1)
+      (sorted-set 3 2 1) (hash-set 3 2 1) ))
 
 
 ;; *** Collections ***
