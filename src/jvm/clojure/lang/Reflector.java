@@ -79,10 +79,12 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
 		{
 		//public method of non-public class, try to find it in hierarchy
+		Method oldm = m;
 		m = getAsMethodOfPublicBase(m.getDeclaringClass(), m);
+		if(m == null)
+			throw new IllegalArgumentException("Can't call public method of non-public class: " +
+			                                    oldm.toString());
 		}
-	if(m == null)
-		throw new IllegalArgumentException(noMethodReport(methodName,target));
 	try
 		{
 		return prepRet(m.invoke(target, boxedArgs));
