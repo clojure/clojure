@@ -1,7 +1,7 @@
 ;; Accumulators
 
 ;; by Konrad Hinsen
-;; last updated May 3, 2009
+;; last updated May 19, 2009
 
 ;; This module defines various accumulators (list, vector, map,
 ;; sum, product, counter, and combinations thereof) with a common
@@ -61,7 +61,7 @@
 
 (defmethod combine ::accumulator
   [& as]
-  (apply (get-method add (class (first as))) as))
+  (apply (get-method combine (class (first as))) as))
 
 (defmethod ga/+ ::accumulator
   [x y]
