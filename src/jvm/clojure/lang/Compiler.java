@@ -4576,26 +4576,41 @@ public static Object eval(Object form) throws Exception{
 		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
 		createdLoader = true;
 		}
-	try {
-		form = macroexpand(form);
-		if(form instanceof IPersistentCollection && Util.equals(RT.first(form), DO)) {
-			ISeq s = RT.next(form);
-			for(;RT.next(s) != null;s = RT.next(s))
-				eval(RT.first(s));
-			return eval(RT.first(s));
+	try
+		{
+		Integer line = (Integer) LINE.deref();
+		if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+			line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
+		Var.pushThreadBindings(RT.map(LINE, line));
+		try
+			{
+			form = macroexpand(form);
+			if(form instanceof IPersistentCollection && Util.equals(RT.first(form), DO))
+				{
+				ISeq s = RT.next(form);
+				for(; RT.next(s) != null; s = RT.next(s))
+					eval(RT.first(s));
+				return eval(RT.first(s));
+				}
+			else if(form instanceof IPersistentCollection
+			        && !(RT.first(form) instanceof Symbol
+			             && ((Symbol) RT.first(form)).name.startsWith("def")))
+				{
+				FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
+				IFn fn = (IFn) fexpr.eval();
+				return fn.invoke();
+				}
+			else
+				{
+				Expr expr = analyze(C.EVAL, form);
+				return expr.eval();
+				}
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
 		}
-		else if(form instanceof IPersistentCollection
-		   && !(RT.first(form) instanceof Symbol
-		        && ((Symbol) RT.first(form)).name.startsWith("def"))) {
-			FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
-			IFn fn = (IFn) fexpr.eval();
-			return fn.invoke();
-		}
-		else {
-			Expr expr = analyze(C.EVAL, form);
-			return expr.eval();
-		}
-	}
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
@@ -4961,20 +4976,35 @@ public static void pushNS(){
 }
 
 static void compile1(GeneratorAdapter gen, FnExpr fn, Object form) throws Exception{
-	form = macroexpand(form);
-	if(form instanceof IPersistentCollection && Util.equals(RT.first(form), DO)) {
-		for(ISeq s = RT.next(form); s != null; s = RT.next(s)) {
-			compile1(gen, fn, RT.first(s));
-		}
-	}
-	else {
+	Integer line = (Integer) LINE.deref();
+	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+		line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
+	Var.pushThreadBindings(
+			RT.map(LINE, line));
+	try
+		{
+		form = macroexpand(form);
+		if(form instanceof IPersistentCollection && Util.equals(RT.first(form), DO))
+			{
+			for(ISeq s = RT.next(form); s != null; s = RT.next(s))
+				{
+				compile1(gen, fn, RT.first(s));
+				}
+			}
+		else
+			{
 			Expr expr = analyze(C.EVAL, form);
 			fn.keywords = (IPersistentMap) KEYWORDS.deref();
 			fn.vars = (IPersistentMap) VARS.deref();
 			fn.constants = (PersistentVector) CONSTANTS.deref();
 			expr.emit(C.EXPRESSION, fn, gen);
 			expr.eval();
-	}
+			}
+		}
+	finally
+		{
+		Var.popThreadBindings();
+		}
 }
 
 public static Object compile(Reader rdr, String sourcePath, String sourceName) throws Exception{
