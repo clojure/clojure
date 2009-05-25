@@ -1131,7 +1131,7 @@
                         (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
                                 (next (next vvs)))
                         (seq ret))))]
-      `(do
+      `(let []
          (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
          (try
           ~@body
