@@ -1137,10 +1137,8 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.args = args;
 		this.methodName = methodName;
 		this.target = target;
-		if(target.hasJavaClass())
+		if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
-			if(target.getJavaClass() == null)
-				throw new IllegalArgumentException("Attempt to call instance method '" + methodName + "' on nil");
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
 			if(methods.isEmpty())
 				method = null;
