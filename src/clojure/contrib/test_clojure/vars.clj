@@ -16,6 +16,13 @@
 
 ; declare intern binding find-var var
 
+(def a)
+(deftest test-binding
+  (are (= _1 _2)
+      (eval `(binding [a 4] a)) 4     ; regression in Clojure SVN r1370
+  ))
+
+
 ; with-local-vars var-get var-set alter-var-root [var? (predicates.clj)]
 ; with-in-str with-out-str
 ; with-open

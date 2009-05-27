@@ -5,17 +5,28 @@
 ;;  using this software in any fashion, you are agreeing to be bound by the
 ;;  terms of this license.  You must not remove this notice, or any other,
 ;;  from this software.
-;;
-;;  Test special forms, macros and metadata
-;;
 
-(ns clojure.contrib.test-clojure.special
+(ns clojure.contrib.test-clojure.compilation
   (:use clojure.contrib.test-is))
 
-; http://clojure.org/special_forms
+; http://clojure.org/compilation
 
-; let, letfn
-; quote
-; var
-; fn
+; compile
+; gen-class, gen-interface
+
+
+(deftest test-compiler-metadata
+  (let [m ^#'when]
+    (are (= _1 _2)
+        (list? (:arglists m)) true
+
+        (string? (:doc m)) true
+        (string? (:file m)) true
+
+        (integer? (:line m)) true
+        (> (:line m) 0) true
+
+        (:macro m) true
+        (:name m) 'when )))
+
 

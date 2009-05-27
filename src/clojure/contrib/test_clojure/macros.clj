@@ -5,17 +5,12 @@
 ;;  using this software in any fashion, you are agreeing to be bound by the
 ;;  terms of this license.  You must not remove this notice, or any other,
 ;;  from this software.
-;;
-;;  Test special forms, macros and metadata
-;;
 
-(ns clojure.contrib.test-clojure.special
+(ns clojure.contrib.test-clojure.macros
   (:use clojure.contrib.test-is))
 
-; http://clojure.org/special_forms
+; http://clojure.org/macros
 
-; let, letfn
-; quote
-; var
-; fn
+; ->
+; defmacro definline macroexpand-1 macroexpand
 

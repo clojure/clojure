@@ -16,6 +16,23 @@
 ; . ..
 ; doto
 
+(deftest test-dot
+  (are (= _1 _2)
+      (. Integer MAX_VALUE) Integer/MAX_VALUE
+      (. Integer MAX_VALUE) java.lang.Integer/MAX_VALUE ))
+
+(deftest test-double-dot
+  (is (= (.. System (getProperties) (get "os.name"))
+         (. (. System (getProperties)) (get "os.name")))))
+
+(deftest test-doto
+  (let [doto-map (doto (new java.util.HashMap)
+                   (.put "a" 1)
+                   (.put "b" 2))]
+    (is (= (class doto-map) java.util.HashMap))
+    (is (= doto-map {"a" 1 "b" 2}))))
+
+
 ; new
 
 ; instance?
@@ -26,8 +43,6 @@
 
 ; bean
 ; proxy, proxy-super
-; gen-class, gen-interface
-; compile
 
 ; bases, supers
 
@@ -41,6 +56,3 @@
 ; Coercions: int, long, float, double, char, boolean, short, byte
 ;   num
 ;   ints/longs/floats/doubles
-
-; Simple XML Support: xml/parse
-

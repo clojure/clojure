@@ -20,8 +20,11 @@
 (def test-names
      [:reader
       :printer
+      :compilation
       :evaluation
       :special
+      :macros
+      :metadata
       :ns-libs
       :logic
       :predicates

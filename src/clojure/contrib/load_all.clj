@@ -50,9 +50,10 @@ generic.comparison
 generic.functor
 generic.math-functions
 import-static
-javadoc.browse
+jar
 ;; javadoc - moved to repl-utils
-javalog
+javadoc.browse
+;; javalog
 json.read
 json.write
 lazy-seqs
@@ -89,12 +90,15 @@ test-clojure.clojure-main
 test-clojure.clojure-set
 test-clojure.clojure-xml
 test-clojure.clojure-zip
+test-clojure.compilation
 test-clojure.control
 test-clojure.data-structures
 test-clojure.evaluation
 test-clojure.for
 test-clojure.java-interop
 test-clojure.logic
+test-clojure.macros
+test-clojure.metadata
 test-clojure.multimethods
 test-clojure.ns-libs
 test-clojure.numbers
