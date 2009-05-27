@@ -184,7 +184,7 @@ final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.create("*ma
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 final static public Var USE_CONTEXT_CLASSLOADER =
-		Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), null);
+		Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), T);
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure.core", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 
@@ -236,11 +236,14 @@ static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
 };
 
 static AtomicInteger id = new AtomicInteger(1);
-private static DynamicClassLoader ROOT_CLASSLOADER = null;
 
 static public void addURL(Object url) throws Exception{
 	URL u = (url instanceof String) ? (new URL((String) url)) : (URL) url;
-	getRootClassLoader().addURL(u);
+	ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+	if(ccl instanceof DynamicClassLoader)
+		((DynamicClassLoader)ccl).addURL(u);
+	else
+		throw new IllegalAccessError("Context classloader is not a DynamicClassLoader");
 }
 
 final static public Object EOS = new Object();
@@ -1485,8 +1488,6 @@ static public ClassLoader baseLoader(){
 		return (ClassLoader) Compiler.LOADER.deref();
 	else if(booleanCast(USE_CONTEXT_CLASSLOADER.deref()))
 		return Thread.currentThread().getContextClassLoader();
-	else if(ROOT_CLASSLOADER != null)
-		return ROOT_CLASSLOADER;
 	return Compiler.class.getClassLoader();
 }
 
@@ -1673,12 +1674,4 @@ static public int alength(Object xs){
 	return Array.getLength(xs);
 }
 
-
-
-
-synchronized public static DynamicClassLoader getRootClassLoader(){
-	if(ROOT_CLASSLOADER == null)
-		ROOT_CLASSLOADER = new DynamicClassLoader();
-	return ROOT_CLASSLOADER;
-}
 }

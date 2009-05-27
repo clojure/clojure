@@ -154,6 +154,8 @@
        read, eval, or print throws an exception or error
        default: repl-caught"
   [& options]
+  (let [cl (.getContextClassLoader (Thread/currentThread))]
+    (.setContextClassLoader (Thread/currentThread) (clojure.lang.DynamicClassLoader. cl)))
   (let [{:keys [init need-prompt prompt flush read eval print caught]
          :or {init        #()
               need-prompt (if (instance? LineNumberingPushbackReader *in*)
