@@ -8,35 +8,30 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich May 24, 2009 */
+/* rich May 26, 2009 */
 
 package clojure.lang;
 
-public final class ArrayChunk implements Indexed{
+final public class ChunkBuffer implements Counted{
+	Object[] buffer;
+	int offset;
 
-final Object[] array;
-final int off;
-final int end;
-
-public ArrayChunk(Object[] array){
-	this(array, 0, array.length);
+public ChunkBuffer(int capacity){
+	buffer = new Object[capacity];
+	offset = 0;
 }
 
-public ArrayChunk(Object[] array, int off){
-	this(array, off, array.length);
+public void add(Object o){
+	buffer[offset++] = o;
 }
 
-public ArrayChunk(Object[] array, int off, int end){
-	this.array = array;
-	this.off = off;
-	this.end = end;
-}
-
-public Object nth(int i){
-	return array[off + i];
+public Indexed chunk(){
+	ArrayChunk ret = new ArrayChunk(buffer, 0, offset);
+	buffer = null;
+	return ret;
 }
 
 public int count(){
-	return end - off;
+	return offset;
 }
 }
