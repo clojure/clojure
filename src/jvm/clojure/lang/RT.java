@@ -493,6 +493,12 @@ static public IPersistentMap meta(Object x){
 	return null;
 }
 
+public static int count(Counted o){
+	if(o != null)
+		return o.count();
+	return 0;
+}
+
 public static int count(Object o){
 	if(o instanceof Counted)
 		return ((Counted) o).count();
@@ -709,6 +715,12 @@ static public Object dissoc(Object coll, Object key) throws Exception{
 	if(coll == null)
 		return null;
 	return ((IPersistentMap) coll).without(key);
+}
+
+static public Object nth(Indexed coll, int n){
+	if(coll != null)
+		return coll.nth(n);
+	return null;
 }
 
 static public Object nth(Object coll, int n){

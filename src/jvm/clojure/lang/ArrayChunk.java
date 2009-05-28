@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public class ArrayChunk implements Indexed{
+public final class ArrayChunk implements Indexed{
 
 final Object[] array;
 final int off;
