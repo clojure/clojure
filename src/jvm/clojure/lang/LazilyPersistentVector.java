@@ -34,6 +34,81 @@ LazilyPersistentVector(IPersistentMap meta, Object[] array, PersistentVector v){
 	this.v = v;
 }
 
+public ISeq seq(){
+	if(array.length == 0)
+		return null;
+	return new ChunkedSeq(array);
+}
+
+static class ChunkedSeq extends ASeq implements IChunkedSeq, IndexedSeq{
+	final Object[] array;
+	final int offset;
+	final int end;
+	static final int BLOCK = 32;
+
+	ChunkedSeq(IPersistentMap meta, Object[] array, int offset, int end){
+		super(meta);
+		this.array = array;
+		this.offset = offset;
+		this.end = end;
+	}
+
+	ChunkedSeq(Object[] array){
+		this(array, 0);
+	}
+
+	ChunkedSeq(Object[] array, int offset){
+		this(array,offset,Math.min(offset + BLOCK, array.length));
+	}
+
+	ChunkedSeq(Object[] array, int offset, int end){
+		this.array = array;
+		this.offset = offset;
+		this.end = end;
+	}
+
+	public Obj withMeta(IPersistentMap meta){
+		if(meta != _meta)
+			return new ChunkedSeq(meta, array,offset,end);
+		return this;
+	}
+
+	public Object first(){
+		return array[offset];
+	}
+
+	public ISeq next(){
+		if(offset + 1 < end)
+			return new ChunkedSeq(array,offset + 1,end);
+		return chunkedNext();
+	}
+
+	public Indexed chunkedFirst(){
+		return new ArrayChunk(array, offset, end);
+	}
+
+	public ISeq chunkedNext(){
+		if(end < array.length)
+			return new ChunkedSeq(array,end);
+		return null;
+		}
+
+	public ISeq chunkedMore(){
+		ISeq s = chunkedNext();
+		if(s == null)
+			return PersistentList.EMPTY;
+		return s;
+	}
+
+	public int index(){
+		return offset;
+	}
+
+	public int count(){
+		return array.length - offset;
+	}
+}
+
 public Object[] toArray(){
 	return array.clone();
 }

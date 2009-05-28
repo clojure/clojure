@@ -174,6 +174,10 @@ public IChunkedSeq chunkedSeq(){
 	return new ChunkedSeq(this,0,0);
 }
 
+public ISeq seq(){
+	return chunkedSeq();
+}
+
 static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
 
 	final PersistentVector vec;
