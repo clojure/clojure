@@ -89,17 +89,22 @@ final int tailoff(){
 	return cnt - tail.length;
 }
 
-public Object nth(int i){
+public Object[] nodeFor(int i){
 	if(i >= 0 && i < cnt)
 		{
 		if(i >= tailoff())
-			return tail[i & 0x01f];
+			return tail;
 		Object[] arr = root;
 		for(int level = shift; level > 0; level -= 5)
 			arr = (Object[]) arr[(i >>> level) & 0x01f];
-		return arr[i & 0x01f];
+		return arr;
 		}
 	throw new IndexOutOfBoundsException();
+}
+
+public Object nth(int i){
+	Object[] node = nodeFor(i);
+	return node[i & 0x01f];
 }
 
 public PersistentVector assocN(int i, Object val){
@@ -161,6 +166,75 @@ public PersistentVector cons(Object val){
 		newshift += 5;
 		}
 	return new PersistentVector(meta(), cnt + 1, newshift, newroot, new Object[]{val});
+}
+
+public IChunkedSeq chunkedSeq(){
+	if(count() == 0)
+		return null;
+	return new ChunkedSeq(this,0,0);
+}
+
+static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
+
+	final PersistentVector vec;
+	final Object[] node;
+	final int i;
+	final int offset;
+
+	public ChunkedSeq(PersistentVector vec, int i, int offset){
+		this.vec = vec;
+		this.i = i;
+		this.offset = offset;
+		this.node = vec.nodeFor(i);
+	}
+
+	ChunkedSeq(IPersistentMap meta, PersistentVector vec, Object[] node, int i, int offset){
+		super(meta);
+		this.vec = vec;
+		this.node = node;
+		this.i = i;
+		this.offset = offset;
+	}
+
+	ChunkedSeq(PersistentVector vec, Object[] node, int i, int offset){
+		this.vec = vec;
+		this.node = node;
+		this.i = i;
+		this.offset = offset;
+	}
+
+	public Indexed chunkedFirst() throws Exception{
+		return new ArrayChunk(node, offset);
+		}
+
+	public ISeq chunkedNext(){
+		if(i + node.length < vec.cnt)
+			return new ChunkedSeq(vec,i+ node.length,0);
+		return null;
+		}
+
+	public ISeq chunkedMore(){
+		ISeq s = chunkedNext();
+		if(s == null)
+			return PersistentList.EMPTY;
+		return s;
+	}
+
+	public Obj withMeta(IPersistentMap meta){
+		if(meta == this._meta)
+			return this;
+		return new ChunkedSeq(meta, vec, node, i, offset);
+	}
+
+	public Object first(){
+		return node[offset];
+	}
+
+	public ISeq next(){
+		if(offset + 1 < node.length)
+			return new ChunkedSeq(vec, node, i, offset + 1);
+		return chunkedNext();
+	}
 }
 
 public IPersistentCollection empty(){

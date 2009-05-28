@@ -494,10 +494,10 @@ static public IPersistentMap meta(Object x){
 }
 
 public static int count(Object o){
+	if(o instanceof Counted)
+		return ((Counted) o).count();
 	if(o == null)
 		return 0;
-	else if(o instanceof Counted)
-		return ((Counted) o).count();
 	else if(o instanceof IPersistentCollection) {
 		ISeq s = seq(o);
 		o = null;
@@ -712,10 +712,10 @@ static public Object dissoc(Object coll, Object key) throws Exception{
 }
 
 static public Object nth(Object coll, int n){
+	if(coll instanceof Indexed)
+		return ((Indexed) coll).nth(n);
 	if(coll == null)
 		return null;
-	else if(coll instanceof IPersistentVector)
-		return ((IPersistentVector) coll).nth(n);
 	else if(coll instanceof String)
 		return Character.valueOf(((String) coll).charAt(n));
 	else if(coll.getClass().isArray())

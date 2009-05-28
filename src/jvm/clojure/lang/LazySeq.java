@@ -17,6 +17,7 @@ import java.util.*;
 public final class LazySeq extends Obj implements ISeq, List{
 
 private IFn fn;
+private Object sv;
 private ISeq s;
 
 public LazySeq(IFn fn){
@@ -33,12 +34,12 @@ public Obj withMeta(IPersistentMap meta){
 	return new LazySeq(meta, seq());
 }
 
-final synchronized public ISeq seq(){
+final synchronized Object sval(){
 	if(fn != null)
 		{
 		try
 			{
-			s = RT.seq(fn.invoke());
+			sv = fn.invoke();
 			fn = null;
 			}
 		catch(Exception e)
@@ -46,13 +47,30 @@ final synchronized public ISeq seq(){
 			throw new RuntimeException(e);
 			}
 		}
+	if(sv != null)
+		return sv;
+	return s;
+}
+
+final synchronized public ISeq seq(){
+	sval();
+	if(sv != null)
+		{
+		Object ls = sv;
+		sv = null;
+		while(ls instanceof LazySeq)
+			{
+			ls = ((LazySeq)ls).sval();
+			}
+		s = RT.seq(ls);
+		}
 	return s;
 }
 
 public int count(){
 	int c = 0;
 	for(ISeq s = seq(); s != null; s = s.next())
-		++c;
+		++c;                                                                                
 	return c;
 }
 

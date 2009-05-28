@@ -11,6 +11,11 @@
     <setting name="buildJar" value="true" />
     <setting name="mainClass" value="clojure.lang.Compiler" />
   </component>
+  <component name="FacetManager">
+    <facet type="Clojure" name="Clojure">
+      <configuration />
+    </facet>
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/classes" />
     <exclude-output />

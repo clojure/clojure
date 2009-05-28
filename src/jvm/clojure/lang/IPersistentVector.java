@@ -10,10 +10,8 @@ package clojure.lang;
  * You must not remove this notice, or any other, from this software.
  */
 
-public interface IPersistentVector extends Associative, Sequential, IPersistentStack, Reversible, Counted{
+public interface IPersistentVector extends Associative, Sequential, IPersistentStack, Reversible, Indexed{
 int length();
-
-Object nth(int i);
 
 IPersistentVector assocN(int i, Object val);
 
