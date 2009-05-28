@@ -143,14 +143,14 @@ static public Number quotient(Number x, Number y){
 	Ops yops = ops(y);
 	if(yops.isZero(y))
 		throw new ArithmeticException("Divide by zero");
-	return ops(x).combine(yops).quotient(x, y);
+	return reduce(ops(x).combine(yops).quotient(x, y));
 }
 
 static public Number remainder(Number x, Number y){
 	Ops yops = ops(y);
 	if(yops.isZero(y))
 		throw new ArithmeticException("Divide by zero");
-	return ops(x).combine(yops).remainder(x, y);
+	return reduce(ops(x).combine(yops).remainder(x, y));
 }
 
 static Number quotient(double n, double d){
@@ -258,6 +258,14 @@ static public Number rationalize(Number x){
 			return divide(bv, BigInteger.TEN.pow(scale));
 		}
 	return x;
+}
+
+static public Number reduce(Number val){
+	if(val instanceof Long)
+		return reduce(val.longValue());
+	else if (val instanceof BigInteger)
+		return reduce((BigInteger) val);
+	return val;
 }
 
 static public Number reduce(BigInteger val){
