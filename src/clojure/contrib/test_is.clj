@@ -73,18 +73,18 @@
 
   ;; In addition, you can document groups of assertions with the
   ;; "testing" macro, which takes a string followed by any number of
-  ;; "is" assertions.  The string will be included in failure reports.
+  ;; assertions.  The string will be included in failure reports.
   ;; Calls to "testing" may be nested, and all of the strings will be
   ;; joined together with spaces in the final report, in a style
   ;; similar to RSpec <http://rspec.info/>
 
   (testing "Arithmetic"
     (testing "with positive integers"
-      (= 4 (+ 2 2))
-      (= 7 (+ 3 4)))
+      (is (= 4 (+ 2 2)))
+      (is (= 7 (+ 3 4))))
     (testing "with negative integers"
-      (= -4 (+ -2 -2))
-      (= -1 (+ 3 -4))))
+      (is (= -4 (+ -2 -2)))
+      (is (= -1 (+ 3 -4)))))
 
   ;; Note that, unlike RSpec, the "testing" macro may only be used
   ;; INSIDE a "deftest" or "with-test" form (see below).
@@ -296,18 +296,18 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
 
    In addition, you can document groups of assertions with the
    \"testing\" macro, which takes a string followed by any number of
-   \"is\" assertions.  The string will be included in failure reports.
+   assertions.  The string will be included in failure reports.
    Calls to \"testing\" may be nested, and all of the strings will be
    joined together with spaces in the final report, in a style
    similar to RSpec <http://rspec.info/>
 
    (testing \"Arithmetic\"
      (testing \"with positive integers\"
-       (= 4 (+ 2 2))
-       (= 7 (+ 3 4)))
+       (is (= 4 (+ 2 2)))
+       (is (= 7 (+ 3 4))))
      (testing \"with negative integers\"
-       (= -4 (+ -2 -2))
-       (= -1 (+ 3 -4))))
+       (is (= -4 (+ -2 -2)))
+       (is (= -1 (+ 3 -4)))))
 
    Note that, unlike RSpec, the \"testing\" macro may only be used
    INSIDE a \"deftest\" or \"with-test\" form (see below).
