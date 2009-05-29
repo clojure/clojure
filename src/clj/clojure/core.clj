@@ -849,8 +849,6 @@
 (defn count
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings, arrays, and Java Collections and Maps"
-  {:tag Integer
-   :inline (fn  [x] `(. clojure.lang.RT (count ~x)))}
   [coll] (. clojure.lang.RT (count coll)))
 
 ;;list stuff
