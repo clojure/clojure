@@ -32,7 +32,6 @@
 (def *all-contrib-libs* '[
 accumulators
 apply-macro
-auto-agent
 combinatorics
 command-line
 complex-numbers
@@ -61,7 +60,7 @@ lazy-xml
 macro-utils
 macros
 math
-;; miglayout
+miglayout
 mmap
 monads
 ns-utils
