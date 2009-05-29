@@ -14,13 +14,29 @@
 ;;  Created 13 October 2008
 
 (ns clojure.contrib.miglayout.internal
-  (:import (java.awt Component))
+  (:import (java.awt Container Component)
+           clojure.lang.RT)
   (:use (clojure.contrib
          [except :only (throwf)]
          [fcase :only (fcase)]
          [java-utils :only (as-str)])))
 
 (declare format-constraints)
+
+(defn new-instance
+  "Returns a new instance of MigLayout with the specified constraints"
+  [layout column row]
+  (doto (.newInstance (RT/classForName "net.miginfocom.swing.MigLayout"))
+    (.setLayoutConstraints layout)
+    (.setColumnConstraints column)
+    (.setRowConstraints row)))
+
+(defn add-components
+  "Adds components with constraints to a container"
+  [#^Container container components]
+  (doseq [[#^Component component constraints] components]
+    (.add container component constraints))
+  container)
 
 (defn format-constraint
   "Returns a vector of vectors representing one or more constraints

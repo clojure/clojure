@@ -20,8 +20,8 @@
 ;;  Created 5 October 2008
 
 (ns 
-  #^{:author "Stephen C. Gilardi",
-     :doc "Clojure support for the MiGLayout layout manager
+    #^{:author "Stephen C. Gilardi",
+       :doc "Clojure support for the MiGLayout layout manager
 http://www.miglayout.com/
 
 Example:
@@ -31,8 +31,7 @@ Example:
 
 "}
   clojure.contrib.miglayout
-  (:import (java.awt Container Component)
-           (clojure.lang RT))
+  (:import java.awt.Container)
   (:use clojure.contrib.miglayout.internal))
 
 (defn miglayout
@@ -66,14 +65,7 @@ Example:
   [#^Container container & args]
   (let [item-constraints (apply parse-item-constraints args)
         {:keys [keywords components]} item-constraints
-        {:keys [layout column row]} keywords
-        class (RT/classForName "net.miginfocom.swing.MigLayout")
-        layout-manager (.newInstance class)]
-    (doto layout-manager
-      (.setLayoutConstraints layout)
-      (.setColumnConstraints column)
-      (.setRowConstraints row))
-    (.setLayout container layout-manager)
-    (doseq [[#^Component component constraints] components]
-      (.add container component constraints))
-    container))
+        {:keys [layout column row]} keywords]
+    (doto container
+      (.setLayout (new-instance layout column row))
+      (add-components components))))
