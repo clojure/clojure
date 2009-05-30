@@ -60,4 +60,11 @@
       m)
     (dissoc m k)))
 
+(defn new-by-name
+  "Constructs a Java object whose class is specified by a String."
+  [class-name & args]
+  (clojure.lang.Reflector/invokeConstructor
+   (clojure.lang.RT/classForName class-name)
+   (into-array Object args)))
+
 ;; ----------------------------------------------------------------------
