@@ -79,6 +79,7 @@ sql
 stacktrace
 str-utils
 stream-utils
+swing-utils
 template
 test-is
 test-is.tests

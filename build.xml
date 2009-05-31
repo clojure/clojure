@@ -180,6 +180,7 @@
       <arg value="clojure.contrib.stacktrace"/>
       <arg value="clojure.contrib.str-utils"/>
       <arg value="clojure.contrib.stream-utils"/>
+      <arg value="clojure.contrib.swing-utils"/>
       <arg value="clojure.contrib.template"/>
       <arg value="clojure.contrib.test-is"/>
       <arg value="clojure.contrib.test-is.tap"/>
