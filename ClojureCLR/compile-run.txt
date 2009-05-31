@@ -1,0 +1,33 @@
+
+Compiling
+---------
+
+Adding AOT-compilation allows pre-compilation of the *.clj environment bootstrap files.
+I have not had time to automate the build process fully, so there are some manual steps.
+
+  (1) Build the whole project.
+  (2) Copy all Clojure\Boostrap\*.clj files into BootstrapCompile\bin\Debug\clojure.  
+  (3) Run the BootstrapCompile program.
+  (4) Copy the .dll and .pdb files from BootstrapCompile\bin\Debug\clojure 
+      to Simple.Console\bin\Debug\clojure and Clojure.Main\bin\Debug\clojure.
+
+Then you should be good to go.
+
+
+Running
+-------
+
+Clojure.Main is set as the startup project in Visual Studio.  This will load the Clojure environment,
+including main.clj, and then run the main repl loop.  Essentially this is equivalent to the ClojureJVM:
+
+    java -cp clojure.jar clojure.main
+
+
+Simple.Console is useful for developers when you have been breaking things and don't want to rely on main.clj working.
+At minimum, you need core.clj.dll or core.clj and core_print.clj.dll or core_print.clj in the clojure subdirectory 
+below the executable.
+
+There being no direct equivalent to CLASSPATH, you can instead set the environment variable clojure.load.path to 
+the a semicolon-separated list of directories to probe for .clj and .clj.dll files to load. 
+
+
