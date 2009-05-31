@@ -18,31 +18,34 @@
   (:import (javax.swing JButton JFrame JLabel JPanel JTextField))
   (:use (clojure.contrib
          [miglayout :only (miglayout components)]
-         [swing-utils :only (add-action-listener)])))
+         [swing-utils :only (add-key-typed-listener)])))
 
 (defn fahrenheit
   "Converts a Celsius temperature to Fahrenheit. Input and output are
   strings. Returns \"input?\" if the input can't be parsed as a Double."
   [celsius]
   (try
-   (format "%.2f \u00b0Fahrenheit"
-           (+ 32 (* 1.8 (Double/parseDouble celsius))))
-   (catch NumberFormatException _
-     "input?")))
+   (format "%.2f" (+ 32 (* 1.8 (Double/parseDouble celsius))))
+   (catch NumberFormatException _ "input?")))
+
+(defn- handle-key
+  [evt in out]
+  (.setText out
+    (if (= (.getKeyChar evt) \newline)
+      (fahrenheit (.getText in))
+      "")))
 
 (defn main
-  "Lays out and displays the Temperature Converter UI"
+  "Lays out and shows a Temperature Converter UI"
   []
   (let [panel
         (miglayout (JPanel.)
-         (JTextField.) {:id :input :width 120}
+         (JTextField. 6) {:id :input}
          (JLabel. "\u00b0Celsius") :wrap
-         (JButton. "Convert") {:id :convert}
-         (JLabel. "\u00b0Fahrenheit") {:id :output :width 120})
-        {:keys [convert input output]} (components panel)]
-    (add-action-listener convert
-      (fn [evt in out] (.setText out (fahrenheit (.getText in))))
-      input output)
+         (JLabel.) {:id :output}
+         (JLabel. "\u00b0Fahrenheit"))
+        {:keys [input output]} (components panel)]
+    (add-key-typed-listener input handle-key input output)
     (doto (JFrame. "Temperature Converter")
       (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
       (.add panel)
