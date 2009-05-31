@@ -15,7 +15,8 @@
 ;;  Created 31 May 2009
 
 (ns clojure.contrib.miglayout.example
-  (:import (javax.swing JButton JFrame JLabel JPanel JTextField))
+  (:import (javax.swing JButton JFrame JLabel JPanel JTextField
+                        SwingUtilities))
   (:use (clojure.contrib
          [miglayout :only (miglayout components)]
          [swing-utils :only (add-key-typed-listener)])))
@@ -29,14 +30,14 @@
    (catch NumberFormatException _ "input?")))
 
 (defn- handle-key
-  "Clear output on most keys, show conversion on \"Enter\""
-  [event in out]
+  "Clears output on most keys, shows conversion on \"Enter\""
+  [event out]
   (.setText out
     (if (= (.getKeyChar event) \newline)
-      (fahrenheit (.getText in))
+      (fahrenheit (-> event .getComponent .getText))
       "")))
 
-(defn main
+(defn converter-ui
   "Lays out and shows a Temperature Converter UI"
   []
   (let [panel
@@ -46,9 +47,14 @@
          (JLabel.) {:id :output}
          (JLabel. "\u00b0Fahrenheit"))
         {:keys [input output]} (components panel)]
-    (add-key-typed-listener input handle-key input output)
+    (add-key-typed-listener input handle-key output)
     (doto (JFrame. "Temperature Converter")
       (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
       (.add panel)
       (.pack)
       (.setVisible true))))
+
+(defn main
+  "Invokes converter-ui in the AWT Event thread"
+  []
+  (SwingUtilities/invokeLater converter-ui))
