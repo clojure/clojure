@@ -29,9 +29,10 @@
    (catch NumberFormatException _ "input?")))
 
 (defn- handle-key
-  [evt in out]
+  "Clear output on most keys, show coversion on \"Enter\""
+  [event in out]
   (.setText out
-    (if (= (.getKeyChar evt) \newline)
+    (if (= (.getKeyChar event) \newline)
       (fahrenheit (.getText in))
       "")))
 
