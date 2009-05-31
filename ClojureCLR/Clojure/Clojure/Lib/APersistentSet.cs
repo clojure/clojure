@@ -70,7 +70,7 @@ namespace clojure.lang
             if (_hash == -1)
             {
                 int hash = 0;
-                for (ISeq s = seq(); s != null; s = s.rest())
+                for (ISeq s = seq(); s != null; s = s.next())
                 {
                     object e = s.first();
                     hash += Util.Hash(e);
@@ -99,7 +99,7 @@ namespace clojure.lang
             if (s.count() != count() || s.GetHashCode() != GetHashCode())
                 return false;
 
-            for (ISeq seq = s.seq(); seq != null; seq = seq.rest())
+            for (ISeq seq = s.seq(); seq != null; seq = seq.next())
                 if (!contains(seq.first()))
                     return false;
 

@@ -21,7 +21,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements a stream running over an IEnumerator.
     /// </summary>
-    public class IteratorStream : IStream
+    public class IteratorStream : AFn
     {
         #region Data
 
@@ -45,22 +45,15 @@ namespace clojure.lang
 
         #endregion
 
-        #region IStream Members
+        #region Implementation
 
-        /// <summary>
-        /// Get the next value in the stream.
-        /// </summary>
-        /// <returns>The next value.</returns>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public object next()
+        public override object invoke()
         {
             if (_iter.MoveNext())
                 return _iter.Current;
-            return RT.eos();
+            return RT.EOS;       
         }
-
-       
-
+ 
         #endregion
     }
 }

@@ -340,13 +340,13 @@ namespace clojure.lang
                     Agent.Nested = PersistentVector.EMPTY;
 
                     bool hadError = false;
-                    bool changed = false;
 
                     try
                     {
-                        changed = _agent.SetState(_fn.applyTo(RT.cons(_agent.State, _args)));
-                        if (changed)
-                            _agent.notifyWatches();
+                        object oldval = _agent.State;
+                        object newval = _fn.applyTo(RT.cons(_agent.State, _args));
+                        _agent.SetState(newval);
+                        _agent.notifyWatches(oldval,newval);
                     }
                     catch (Exception e)
                     {

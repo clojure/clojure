@@ -21,19 +21,13 @@ namespace clojure.lang
     /// <remarks>
     /// <para>Lowercase-named methods for compatibility with JVM code.</para>
     /// </remarks>
-    public interface IPersistentCollection
+    public interface IPersistentCollection : Seqable
     {
         /// <summary>
         /// Gets the number of items in the collection.
         /// </summary>
         /// <returns>The number of items in the collection.</returns>
         int count();
-
-        /// <summary>
-        /// Gets an <see cref="ISeq">ISeq</see> to allow first/rest iteration through the collection.
-        /// </summary>
-        /// <returns>An <see cref="ISeq">ISeq</see> for iteration.</returns>
-        ISeq seq();
 
         /// <summary>
         /// Returns a new collection that has the given element cons'd on front of the existing collection.

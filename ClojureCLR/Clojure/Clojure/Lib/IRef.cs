@@ -57,22 +57,16 @@ namespace clojure.lang
         /// <summary>
         /// Adds a new watcher.
         /// </summary>
-        /// <param name="watcher">The <see cref="Agent">Agent</see> doing the watching.</param>
-        /// <param name="action">The 'message' to send when the value changes.</param>
-        /// <param name="sendOff">If true, use <see cref="Agent.sendOff">send-off</see> to send the message, else use <see cref="Agent.send()">send</see>.</param>
+        /// <param name="key">A key for referring to the watcher.</param>
+        /// <param name="callback">The 'message' to send when the value changes.</param>
         /// <returns></returns>
-        IRef addWatch(Agent watcher, IFn action, bool sendOff);
+        IRef addWatch(object key, IFn callback);
 
         /// <summary>
         /// Remove a watcher.
         /// </summary>
-        /// <param name="watcher">The <see cref="Agent">Agent</see> to be removed.</param>
+        /// <param name="key">The key for the watcher to be removed.</param>
         /// <returns>This IRef (for chaining).</returns>
-        IRef removeWatch(Agent watcher);
-
-        /// <summary>
-        /// Notify all watchers.
-        /// </summary>
-        void notifyWatches();
+        IRef removeWatch(object key);
     }
 }

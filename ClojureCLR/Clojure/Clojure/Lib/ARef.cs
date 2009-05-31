@@ -32,7 +32,7 @@ namespace clojure.lang
         /// <summary>
         /// The set of watchers for the reference.
         /// </summary>
-        private volatile IPersistentMap _watchers = PersistentHashMap.EMPTY;
+        private volatile IPersistentMap _watches = PersistentHashMap.EMPTY;
 
         #endregion
 
@@ -137,7 +137,7 @@ namespace clojure.lang
         /// <returns>An immutable map of watchers (key=Agent, value=IFn). </returns>
         public IPersistentMap getWatches()
         {
-            return _watchers;
+            return _watches;
         }
 
 
@@ -145,15 +145,14 @@ namespace clojure.lang
          /// Adds a new watcher.
          /// </summary>
          /// <param name="watcher">The <see cref="Agent">Agent</see> doing the watching.</param>
-         /// <param name="action">The 'message' to send when the value changes.</param>
-         /// <param name="sendOff">If true, use <see cref="Agent.sendOff">send-off</see> to send the message, else use <see cref="Agent.send()">send</see>.</param>
+        /// <param name="callback">The 'message' to send when the value changes.</param>
          /// <returns></returns>
-         [MethodImpl( MethodImplOptions.Synchronized)]
-         public IRef addWatch(Agent watcher, IFn action, bool sendOff)
-         {
-            _watchers = _watchers.assoc(watcher, new object[] { action, sendOff });
-             return this;
-         }
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public IRef addWatch(object key, IFn callback)
+        {
+            _watches = _watches.assoc(key, callback);
+            return this;
+        }
 
 
          /// <summary>
@@ -162,9 +161,9 @@ namespace clojure.lang
          /// <param name="watcher">The <see cref="Agent">Agent</see> to be removed.</param>
          /// <returns>This IRef (for chaining).</returns>
          [MethodImpl(MethodImplOptions.Synchronized)]
-         public IRef removeWatch(Agent watcher)
+         public IRef removeWatch(object key)
          {
-             _watchers = _watchers.without(watcher);
+             _watches = _watches.without(key);
              return this;
          }
 
@@ -172,25 +171,17 @@ namespace clojure.lang
          /// <summary>
          /// Notify all watchers.
          /// </summary>
-         public void notifyWatches()
+         public void notifyWatches(object oldval, object newval)
          {
-             IPersistentMap ws = _watchers;
+             IPersistentMap ws = _watches;
              if (ws.count() > 0)
              {
-                 ISeq args = new Cons(this, null);
-                 for (ISeq s = RT.seq(ws); s != null; s = s.rest())
+                 for (ISeq s = ws.seq(); s != null; s = s.next())
                  {
                      IMapEntry me = (IMapEntry)s.first();
-                     object[] a = (object[])me.val();
-                     Agent agent = (Agent)me.key();
-                     try
-                     {
-                         agent.dispatch((IFn)a[0], args, (Boolean)a[1]);
-                     }
-                     catch (Exception)
-                     {
-                         // eat dispatching exceptions and continue
-                     }
+                     IFn fn = (IFn)me.val();
+                     if (fn != null)
+                         fn.invoke(me.key(), this, oldval, newval);
                  }
              }
          }

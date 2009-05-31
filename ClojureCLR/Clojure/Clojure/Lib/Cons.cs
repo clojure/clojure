@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements an immutable cons cell.
     /// </summary>
-    public class Cons: ASeq
+    public sealed class Cons: ASeq
     {
         // Any reason not to seal this class?
 
@@ -32,7 +32,7 @@ namespace clojure.lang
         /// <summary>
         /// Holds the rest value. (= CDR)
         /// </summary>
-        private readonly ISeq _rest;
+        private readonly ISeq _more;
 
         #endregion
 
@@ -43,26 +43,24 @@ namespace clojure.lang
         /// </summary>
         /// <param name="meta">The metadata to attach.</param>
         /// <param name="first">The first value.</param>
-        /// <param name="rest">The rest of the sequence.</param>
-        public Cons(IPersistentMap meta, object first, ISeq rest)
+        /// <param name="more">The rest of the sequence.</param>
+        public Cons(IPersistentMap meta, object first, ISeq more)
             : base(meta)
         {
             _first = first;
-            _rest = rest;
+            _more = more;
         }
 
         /// <summary>
         /// Initializes a <see cref="Cons">Cons</see> with null metadata and given first/rest.
         /// </summary>
         /// <param name="first">The first value.</param>
-        /// <param name="rest">The rest of the sequence.</param>
-        public Cons(object first, ISeq rest)
+        /// <param name="more">The rest of the sequence.</param>
+        public Cons(object first, ISeq more)
         {
             _first = first;
-            _rest = rest;
+            _more = more;
         }
-
-
 
         #endregion
 
@@ -78,7 +76,7 @@ namespace clojure.lang
             // Java doesn't make the identity test: return new Cons(meta, _first, _rest);
             return (meta == _meta)
                 ? this
-                : new Cons(meta, _first, _rest);
+                : new Cons(meta, _first, _more);
         }
 
         #endregion
@@ -94,13 +92,22 @@ namespace clojure.lang
             return _first;
         }
 
+
          /// <summary>
-         /// Gets the rest of the sequence.
+         /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
          /// </summary>
-         /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-         public override ISeq rest()
+         /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+         public override ISeq next()
+         {
+             return more().seq();
+         }
+
+
+         public override ISeq more()
         {
-            return _rest;
+            return (_more == null )
+             ? PersistentList.EMPTY
+             : _more;
         }
 
         #endregion
@@ -108,13 +115,13 @@ namespace clojure.lang
         #region IPersistentCollection members
 
          /// <summary>
-         /// Gets an ISeq to allow first/rest iteration through the collection.
+         /// Gets the number of items in the collection.
          /// </summary>
-         /// <returns>An ISeq for iteration.</returns>
-         public override ISeq seq()
-        {
-            return this;
-        }
+         /// <returns>The number of items in the collection.</returns>
+         public override int count()
+         {
+             return 1 + RT.count(_more);
+         }
 
         #endregion
     }

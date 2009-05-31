@@ -89,7 +89,7 @@ namespace clojure.lang
                 _seq = _origSeq;
             else
             {
-                _seq = _seq.rest();
+                _seq = _seq.next();
                 if (_seq == null)
                     _isAtEnd = true;
             }

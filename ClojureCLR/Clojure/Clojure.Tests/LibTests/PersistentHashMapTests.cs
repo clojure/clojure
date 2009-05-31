@@ -59,7 +59,7 @@ namespace Clojure.Tests.LibTests
         public void CreateOnEmptyListReturnsEmptyMap()
         {
             ArrayList a = new ArrayList();
-            IPersistentMap m = PersistentHashMap.create(a);
+            IPersistentMap m = PersistentHashMap.create1(a);
 
             Expect(m.count(), EqualTo(0));
         }
@@ -70,7 +70,7 @@ namespace Clojure.Tests.LibTests
             object[] items = new object[] { 1, "a", 2, "b" };
             ArrayList a = new ArrayList(items);
          
-            IPersistentMap m = PersistentHashMap.create(a);
+            IPersistentMap m = PersistentHashMap.create1(a);
 
             Expect(m.count(), EqualTo(2));
             Expect(m.valAt(1), EqualTo("a"));
@@ -202,7 +202,7 @@ namespace Clojure.Tests.LibTests
                 Expect(m.valAt(key),EqualTo(key));
             }
 
-            for ( ISeq s = m.seq(); s != null; s = s.rest() )
+            for ( ISeq s = m.seq(); s != null; s = s.next() )
                 Expect(dict.ContainsKey((int)((IMapEntry)s.first()).key()));
 
         }

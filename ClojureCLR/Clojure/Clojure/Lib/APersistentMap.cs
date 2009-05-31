@@ -89,7 +89,7 @@ namespace clojure.lang
             //if (d.Count != this.Count)
             //    return false;
 
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
             {
                 IMapEntry me = (IMapEntry)s.first();
                 bool found = d.Contains(me.key());
@@ -110,7 +110,7 @@ namespace clojure.lang
             if (_hash == -1)
             {
                 int hash = 0;
-                for (ISeq s = seq(); s != null; s = s.rest())
+                for (ISeq s = seq(); s != null; s = s.next())
                 {
                     IMapEntry me = (IMapEntry)s.first();
                     hash += (me.key() == null ? 0 : me.key().GetHashCode())
@@ -137,6 +137,12 @@ namespace clojure.lang
 
         #endregion
 
+        #region Seqable members
+
+        abstract public ISeq seq();
+
+        #endregion
+
         #region IPersistentCollection Members
 
         /// <summary>
@@ -150,7 +156,6 @@ namespace clojure.lang
         }
 
         abstract public int count();
-        abstract public ISeq seq();
         abstract public IPersistentCollection empty();
 
         /// <summary>
@@ -181,7 +186,7 @@ namespace clojure.lang
             if (d.Count != this.Count)
                 return false;
 
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
             {
                 IMapEntry me = (IMapEntry)s.first();
                 bool found = d.Contains(me.key());
@@ -240,7 +245,7 @@ namespace clojure.lang
             }
 
             IPersistentMap ret = this;
-            for (ISeq s = RT.seq(o); s != null; s = s.rest())
+            for (ISeq s = RT.seq(o); s != null; s = s.next())
             {
                 IMapEntry me = (IMapEntry)s.first();
                 ret = ret.assoc(me.key(), me.val());
@@ -398,9 +403,9 @@ namespace clojure.lang
                 return ((IMapEntry)_seq.first()).key();
             }
 
-            public override ISeq rest()
+            public override ISeq next()
             {
-                return create(_seq.rest());
+                return create(_seq.next());
             }
 
             #endregion
@@ -455,9 +460,9 @@ namespace clojure.lang
                 return ((IMapEntry)_seq.first()).val();
             }
 
-            public override ISeq rest()
+            public override ISeq next()
             {
-                return create(_seq.rest());
+                return create(_seq.next());
             }
 
             #endregion
@@ -477,7 +482,7 @@ namespace clojure.lang
 
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
                 yield return (IMapEntry)s.first();
         }
 

@@ -16,7 +16,7 @@ using System.Text;
 namespace clojure.lang
 {
     /// <summary>
-    /// Represents an immutable first/rest sequence.
+    /// A persistent, functional, sequence interface.  Immutable values, not changed by any method in the interface.
     /// </summary>
     /// <remarks><para>Being a non-null ISeq implies that there is at least one element.  
     /// A null value for <c>rest()</c> implies the end of the sequence.</para>
@@ -36,11 +36,19 @@ namespace clojure.lang
         /// <returns>The first item.</returns>
         object first();
 
+        ///// <summary>
+        ///// Gets the rest of the sequence.
+        ///// </summary>
+        ///// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
+        //ISeq rest();
+
         /// <summary>
-        /// Gets the rest of the sequence.
+        /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
         /// </summary>
-        /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-        ISeq rest();
+        /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+        ISeq next();
+
+        ISeq more();
 
         /// <summary>
         /// Adds an item to the beginning of the sequence.

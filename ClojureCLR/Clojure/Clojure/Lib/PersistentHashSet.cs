@@ -71,7 +71,7 @@ namespace clojure.lang
         public static PersistentHashSet create(ISeq items)
         {
             PersistentHashSet ret = EMPTY;
-            for (; items != null; items = items.rest())
+            for (; items != null; items = items.next())
                 ret = (PersistentHashSet)ret.cons(items.first());
             return ret;
         }

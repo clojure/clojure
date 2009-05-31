@@ -38,7 +38,7 @@ namespace clojure.runtime
 
             try
             {
-                s = LispReader.read(new StringReader(_text), false, _eof, false);
+                s = LispReader.read(new PushbackTextReader(new StringReader(_text)), false, _eof, false);
             }
             catch (Exception)
             {
@@ -60,12 +60,13 @@ namespace clojure.runtime
             IPersistentVector pv = PersistentVector.EMPTY;
 
             StringReader sr = new StringReader(_text);
+            PushbackTextReader pr = new PushbackTextReader(sr);
 
             pv = pv.cons(Compiler.DO);
 
             object eofVal = new object();
             object form;
-            while ((form = LispReader.read(sr, false, eofVal, false)) != eofVal)
+            while ((form = LispReader.read(pr, false, eofVal, false)) != eofVal)
                 pv = pv.cons(form);
 
             return pv.seq();

@@ -283,9 +283,9 @@ namespace Clojure.Tests.LibTests
             ISeq s = v.seq();
 
             Expect(s.first(), EqualTo(1));
-            Expect(s.rest().first(), EqualTo(2));
-            Expect(s.rest().rest().first(), EqualTo(3));
-            Expect(s.rest().rest().rest(), Null);
+            Expect(s.next().first(), EqualTo(2));
+            Expect(s.next().next().first(), EqualTo(3));
+            Expect(s.next().next().next(), Null);
         }
 
         [Test]
@@ -302,9 +302,9 @@ namespace Clojure.Tests.LibTests
             ISeq s2 = c2.seq();
 
             Expect(s2.first(), EqualTo(1));
-            Expect(s2.rest().first(), EqualTo(2));
-            Expect(s2.rest().rest().first(), EqualTo(3));
-            Expect(s2.rest().rest().rest(), Null);
+            Expect(s2.next().first(), EqualTo(2));
+            Expect(s2.next().next().first(), EqualTo(3));
+            Expect(s2.next().next().next(), Null);
         }
 
         #endregion
@@ -334,9 +334,9 @@ namespace Clojure.Tests.LibTests
             ISeq s = v.rseq();
 
             Expect(s.first(), EqualTo(3));
-            Expect(s.rest().first(), EqualTo(2));
-            Expect(s.rest().rest().first(), EqualTo(1));
-            Expect(s.rest().rest().rest(), Null);
+            Expect(s.next().first(), EqualTo(2));
+            Expect(s.next().next().first(), EqualTo(1));
+            Expect(s.next().next().next(), Null);
         }
 
 
@@ -528,9 +528,9 @@ namespace Clojure.Tests.LibTests
             ISeq s = v.seq();
 
             Expect(s.first(), EqualTo(4));
-            Expect(s.rest().first(), EqualTo(5));
-            Expect(s.rest().rest().first(), EqualTo(6));
-            Expect(s.rest().rest().rest(), Null);
+            Expect(s.next().first(), EqualTo(5));
+            Expect(s.next().next().first(), EqualTo(6));
+            Expect(s.next().next().next(), Null);
         }
 
         [Test]
@@ -540,7 +540,7 @@ namespace Clojure.Tests.LibTests
             ISeq s0 = v.seq();
             IndexedSeq i0 = s0 as IndexedSeq;
 
-            ISeq s1 = s0.rest();
+            ISeq s1 = s0.next();
             IndexedSeq i1 = s1 as IndexedSeq;
 
             Expect(i0.index(), EqualTo(0));
@@ -554,8 +554,8 @@ namespace Clojure.Tests.LibTests
             ISeq s = v.seq();
 
             Expect(s.count(), EqualTo(3));
-            Expect(s.rest().count(), EqualTo(2));
-            Expect(s.rest().rest().count(), EqualTo(1));
+            Expect(s.next().count(), EqualTo(2));
+            Expect(s.next().next().count(), EqualTo(1));
         }
 
         [Test]
@@ -621,9 +621,9 @@ namespace Clojure.Tests.LibTests
             ISeq s = v.rseq();
 
             Expect(s.first(), EqualTo(6));
-            Expect(s.rest().first(), EqualTo(5));
-            Expect(s.rest().rest().first(), EqualTo(4));
-            Expect(s.rest().rest().rest(), Null);
+            Expect(s.next().first(), EqualTo(5));
+            Expect(s.next().next().first(), EqualTo(4));
+            Expect(s.next().next().next(), Null);
         }
 
         [Test]
@@ -633,7 +633,7 @@ namespace Clojure.Tests.LibTests
             ISeq s0 = v.rseq();
             IndexedSeq i0 = s0 as IndexedSeq;
 
-            ISeq s1 = s0.rest();
+            ISeq s1 = s0.next();
             IndexedSeq i1 = s1 as IndexedSeq;
 
             Expect(i0.index(), EqualTo(0));
@@ -647,8 +647,8 @@ namespace Clojure.Tests.LibTests
             ISeq s = v.rseq();
 
             Expect(s.count(), EqualTo(3));
-            Expect(s.rest().count(), EqualTo(2));
-            Expect(s.rest().rest().count(), EqualTo(1));
+            Expect(s.next().count(), EqualTo(2));
+            Expect(s.next().next().count(), EqualTo(1));
         }
 
         [Test]

@@ -4,8 +4,8 @@ Visual Studio:	2008 SP 1
 .Net Framework:	3.5 SP 1
 
 NUnit:		2.4.8
-RhinoMocks:		3.5
+RhinoMocks:	3.5
 
-Clojure:		Rev 1279
+Clojure:	Rev 1369
 
-DLR:			Changeset 10606
+DLR:		Changeset 24353 

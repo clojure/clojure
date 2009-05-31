@@ -30,7 +30,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentVector">PersistentVector</see>.
         /// </summary>
-        static public readonly PersistentVector EMPTY = new PersistentVector(0,5,RT.EMPTY_ARRAY,RT.EMPTY_ARRAY);
+        static public readonly PersistentVector EMPTY = new PersistentVector(0,5,RT.EMPTY_OBJECT_ARRAY,RT.EMPTY_OBJECT_ARRAY);
 
         #endregion
 
@@ -44,7 +44,7 @@ namespace clojure.lang
         static public PersistentVector create(ISeq items)
         {
             IPersistentVector ret = EMPTY;
-            for (; items != null; items = items.rest())
+            for (; items != null; items = items.next())
                 ret = ret.cons(items.first());
             return (PersistentVector)ret;
         }
@@ -295,7 +295,7 @@ namespace clojure.lang
             object[] newroot = popTail(_shift-5,_root,ptail);
             int newshift = _shift;
             if ( newroot == null )
-                newroot = RT.EMPTY_ARRAY;
+                newroot = RT.EMPTY_OBJECT_ARRAY;
             if ( _shift > 5 && newroot.Length == 1 )
             {
                 newroot = (Object[])newroot[0];

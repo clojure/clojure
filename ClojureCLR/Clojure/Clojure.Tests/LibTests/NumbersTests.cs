@@ -128,8 +128,8 @@ namespace Clojure.Tests.LibTests
             Expect(o, TypeOf(typeof(Ratio)));
             
             Ratio r = o as Ratio;
-            Expect(r.Numerator, EqualTo(new BigInteger("7")));
-            Expect(r.Denominator, EqualTo(new BigInteger("5")));
+            Expect(r.numerator, EqualTo(new BigInteger("7")));
+            Expect(r.denominator, EqualTo(new BigInteger("5")));
         }
 
         #endregion

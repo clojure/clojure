@@ -471,16 +471,32 @@ namespace clojure.lang
             return t.run(fn);
         }
 
+        class Notify
+        {
+            public readonly Ref _ref;
+            public readonly object _oldval;
+            public readonly object _newval;
+
+            public Notify(Ref r, object oldval, object newval)
+            {
+                _ref = r;
+                _oldval = oldval;
+                _newval = newval;
+            }
+        }
+
+
         /// <summary>
         /// Start a transaction and invoke a function.
         /// </summary>
-        /// <param name="fn">The fucntion to invoke.</param>
+        /// <param name="fn">The function to invoke.</param>
         /// <returns>The value computed by the function.</returns>
         object run(IFn fn)
         {
             bool done = false;
             object ret = null;
             List<Ref> locked = new List<Ref>();
+            List<Notify> notify = new List<Notify>();
 
             for (int i = 0; !done && i < RETRY_LIMIT; i++)
             {
@@ -532,7 +548,6 @@ namespace clojure.lang
                         {
                             Ref r = pair.Key;
                             r.Validate(pair.Value);
-                            r.notifyWatches();
                         }
 
                         // at this point, all values calced, all refs to be written locked
@@ -542,8 +557,11 @@ namespace clojure.lang
                         foreach (KeyValuePair<Ref, object> pair in _vals)
                         {
                             Ref r = pair.Key;
-                            object val = pair.Value;
-                            r.SetValue(val, commitPoint, msecs);
+                            object oldval = r.TryGetVal();
+                            object newval = pair.Value;
+                            r.SetValue(newval, commitPoint, msecs);
+                            if (r.getWatches().count() > 0)
+                                notify.Add(new Notify(r, oldval, newval));
                         }
 
                         done = true;
@@ -573,14 +591,25 @@ namespace clojure.lang
                     }
                     locked.Clear();
                     stop(done ? COMMITTED : RETRY);
-                    if (done) // re-dispatch out of transaction
+                    try
                     {
-                        foreach (Agent.Action action in _actions)
+                        if (done) // re-dispatch out of transaction
                         {
-                            Agent.DispatchAction(action);
+                            foreach (Notify n in notify)
+                            {
+                                n._ref.notifyWatches(n._oldval, n._newval);
+                            }
+                            foreach (Agent.Action action in _actions)
+                            {
+                                Agent.DispatchAction(action);
+                            }
                         }
                     }
-                    _actions.Clear();
+                    finally
+                    {
+                        notify.Clear();
+                        _actions.Clear();
+                    }
                 }
             }
             if (!done)
@@ -705,8 +734,8 @@ namespace clojure.lang
                 }
                 _vals[r] = val;
             }
-            List<CFn> fns = _commutes[r];
-            if (fns == null)
+            List<CFn> fns; ;
+            if (! _commutes.TryGetValue(r, out fns))
                 _commutes[r] = fns = new List<CFn>();
             fns.Add(new CFn(fn, args));
             object ret = fn.applyTo(RT.cons(_vals[r], args));

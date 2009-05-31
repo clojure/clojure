@@ -77,56 +77,36 @@ namespace clojure.lang
         static public bool doEquals(IPersistentVector v, object obj)
         {
 
-            if ( obj is IList || obj is IPersistentVector )
+            if (obj is IList || obj is IPersistentVector)
             {
                 IList ma = obj as IList;
 
                 if (ma.Count != v.count() || ma.GetHashCode() != v.GetHashCode())
                     return false;
 
-                for ( int i=0; i<v.count(); i++ )
+                for (int i = 0; i < v.count(); i++)
                 {
                     if (!Util.equals(v.nth(i), ma[i]))
                         return false;
                 }
                 return true;
             }
-         
-            // Example in original code of Sequential/IPersistentVector conflation.
-
-            //if(!(obj instanceof Sequential))
-            //        return false;
-            //    ISeq ms = ((IPersistentCollection) obj).seq();
-            //    for(int i = 0; i < v.count(); i++, ms = ms.rest())
-            //        {
-            //        if(ms == null || !Util.equals(v.nth(i), ms.first()))
-            //            return false;
-            //        }
-            //    if(ms != null)
-            //        return false;
-            //    }
-
-            //return true;
-
-            ISeq ms = obj as ISeq;
-            if (ms == null)
+            else
             {
-                IPersistentCollection mc = obj as IPersistentCollection;
-                if (mc == null)
+                if (!(obj is Sequential))
                     return false;
-                ms = mc.seq();
-            }
 
-            // Once we have the ISeq, we're ready to go.
+                ISeq ms = RT.seq(obj);
 
-            for (int i = 0; i < v.count(); i++, ms = ms.rest())
-            {
-                if (ms == null || !Util.equals(v.nth(i), ms.first()))
+
+                for (int i = 0; i < v.count(); i++, ms = ms.next())
+                {
+                    if (ms == null || !Util.equals(v.nth(i), ms.first()))
+                        return false;
+                }
+                if (ms != null)
                     return false;
             }
-            if (ms != null)
-                return false;
-            
             return true;
         }
 
@@ -217,23 +197,13 @@ namespace clojure.lang
             }
             else
             {
-                // Example in Java of Sequential / IPersistentCollection conflation
-                //if (!(obj is Sequential))
-                //    return false;
-                //ISeq ms = ((IPersistentCollection)obj).seq();
+                if (!(obj is Sequential))
+                    return false;
 
-                ISeq ms = obj as ISeq;
-                if (ms == null)
-                {
-                    IPersistentCollection mc = obj as IPersistentCollection;
-                    if (mc == null)
-                        return false;
-                    ms = mc.seq();
-                }
+                ISeq ms = RT.seq(obj);
 
-                // Once we have the ISeq, we're ready to go.
 
-                for (int i = 0; i < v.count(); i++, ms = ms.rest())
+                for (int i = 0; i < v.count(); i++, ms = ms.next())
                 {
                     if (ms == null || !Util.equiv(v.nth(i), ms.first()))
                         return false;
@@ -241,7 +211,6 @@ namespace clojure.lang
                 if (ms != null)
                     return false;
             }
-
             return true;
 
         }
@@ -371,33 +340,31 @@ namespace clojure.lang
         #region Streamable Members
 
         /// <summary>
-        /// Internal class to implement <see cref="IStream">IStream</see> capabilities 
+        /// Internal class to implement a <see cref="Stream">Stream</see> source. 
         /// for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
-        private class IPVStream : IStream
+        private class Src : AFn
         {
-            private readonly IPersistentVector _ipv;
-            private readonly AtomicInteger _ai;
+            private readonly IPersistentVector _v;
+            private int _i = 0;
 
-            public IPVStream(IPersistentVector ipv)
+            public Src(IPersistentVector v)
             {
-                _ipv = ipv;
-                _ai = new AtomicInteger(0);
+                _v = v;
             }
 
-            public object next()
+            public override object invoke()
             {
-                int i = (int)_ai.getAndIncrement();
-                if (i < _ipv.count())
-                    return _ipv.nth(i);
-                return RT.eos();
+                if (_i < _v.count())
+                    return _v.nth(_i++);
+                return RT.EOS;
             }
 
         }
 
-        public IStream stream()
+        public Stream stream()
         {
-            return new IPVStream(this);
+            return new Stream(new Src(this));
         }
 
         #endregion
@@ -416,7 +383,7 @@ namespace clojure.lang
 
         public bool Contains(object value)
         {
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
                 if (Util.equals(s.first(), value))
                     return true;
             return false;
@@ -486,7 +453,7 @@ namespace clojure.lang
                 throw new ArgumentException();
 
             for (int i = 0; i < count(); i++)
-                array.SetValue(nth(i), i);
+                array.SetValue(nth(i), i+index);
         }
 
         public int Count
@@ -510,7 +477,7 @@ namespace clojure.lang
 
         public IEnumerator GetEnumerator()
         {
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
                 yield return s.first();
         }
 
@@ -605,10 +572,10 @@ namespace clojure.lang
             }
 
             /// <summary>
-            /// Gets the rest of the sequence.
+            /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
             /// </summary>
-            /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-            public override ISeq rest()
+            /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+            public override ISeq next()
             {
                 return _i + 1 < _v.count()
                     ? new Seq(_v, _i+1)
@@ -751,10 +718,10 @@ namespace clojure.lang
             }
 
             /// <summary>
-            /// Gets the rest of the sequence.
+            /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
             /// </summary>
-            /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-            public override ISeq rest()
+            /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+            public override ISeq next()
             {
                  return _i > 0
                     ? new RSeq(_v, _i-1)
@@ -876,6 +843,13 @@ namespace clojure.lang
             public SubVector(IPersistentMap meta, IPersistentVector v, int start, int end)
                 : base(meta)
             {
+                if (v is SubVector)
+                {
+                    SubVector sv = (SubVector)v;
+                    start += sv._start;
+                    end += sv._start;
+                    v = sv._v;
+                }
                 _v = v;
                 _start = start;
                 _end = end;

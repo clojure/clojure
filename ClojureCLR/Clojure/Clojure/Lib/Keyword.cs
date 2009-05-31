@@ -35,7 +35,7 @@ namespace clojure.lang
         private static JavaConcurrentDictionary<Symbol,Keyword> _symKeyMap 
             = new JavaConcurrentDictionary<Symbol,Keyword>();
 
-        protected Symbol Symbol
+        internal Symbol Symbol
         {
           get { return _sym; }
         }
@@ -114,7 +114,7 @@ namespace clojure.lang
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            return Util.HashCombine(0,_sym.GetHashCode());
+            return (int)(_sym.GetHashCode() + 0x9e3779b9);
         }
 
         #endregion

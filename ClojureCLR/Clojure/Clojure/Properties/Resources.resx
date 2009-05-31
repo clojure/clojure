@@ -125,9 +125,15 @@
     <value>..\Bootstrap\core.clj;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="core_print" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Bootstrap\core-print.clj;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>..\Bootstrap\core_print.clj;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="set" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Bootstrap\set.clj;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="test" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Bootstrap\test.clj;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="version" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bootstrap\version.properties;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>

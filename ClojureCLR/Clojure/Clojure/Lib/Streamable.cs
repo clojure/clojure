@@ -21,9 +21,9 @@ namespace clojure.lang
     public interface Streamable
     {
         /// <summary>
-        /// Gets an <see cref="IStream">IStream/see> for this object.
+        /// Gets a <see cref="Stream">Stream/see> for this object.
         /// </summary>
-        /// <returns>The <see cref="IStream">IStream/see>.</returns>
-        IStream stream();
+        /// <returns>The <see cref="Stream">Stream</see>.</returns>
+        Stream stream();
     }
 }

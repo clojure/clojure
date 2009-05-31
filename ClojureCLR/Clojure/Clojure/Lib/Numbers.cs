@@ -206,6 +206,7 @@ namespace clojure.lang
             if (x is BigInteger)
                 return (BigInteger)x;
             else
+                // TODO: determine if we should just cast.
                 return BigInteger.valueOf(Convert.ToInt64(x));
         }
 
@@ -216,6 +217,7 @@ namespace clojure.lang
             else if ( x is BigInteger)
                 return new BigDecimal((BigInteger)x);
             else
+                // TODO: determine if we should just cast.
                 return BigDecimal.valueOf(Convert.ToInt64(x));
         }
 
@@ -258,7 +260,6 @@ namespace clojure.lang
 
         public static object reduce(BigInteger val)
         {
-            //return (val.bitLength() < 32) ? (object)val.intValue() : val;
             int bitLength = val.bitLength();
             return (bitLength < 32)
                 ? (object)val.intValue()
@@ -368,92 +369,6 @@ namespace clojure.lang
 
         #endregion
 
-        #region Unchecked arithmetic
-
-
-        public static int unchecked_add(int x, int y)
-        {
-            return x + y;
-        }
-
-        public static int unchecked_subtract(int x, int y)
-        {
-            return x - y;
-        }
-
-        public static int unchecked_negate(int x)
-        {
-            return -x;
-        }
-
-        public static int unchecked_inc(int x)
-        {
-            return x + 1;
-        }
-
-        public static int unchecked_dec(int x)
-        {
-            return x - 1;
-        }
-
-        public static int unchecked_multiply(int x, int y)
-        {
-            return x * y;
-        }
-
-        public static int unchecked_divide(int x, int y)
-        {
-            return x / y;
-        }
-
-        public static int unchecked_remainder(int x, int y)
-        {
-            return x % y;
-        }
-
-
-        public static long unchecked_add(long x, long y)
-        {
-            return x + y;
-        }
-
-        public static long unchecked_subtract(long x, long y)
-        {
-            return x - y;
-        }
-
-        public static long unchecked_negate(long x)
-        {
-            return -x;
-        }
-
-        public static long unchecked_inc(long x)
-        {
-            return x + 1;
-        }
-
-        public static long unchecked_dec(long x)
-        {
-            return x - 1;
-        }
-
-        public static long unchecked_multiply(long x, long y)
-        {
-            return x * y;
-        }
-
-        public static long unchecked_divide(long x, long y)
-        {
-            return x / y;
-        }
-
-        public static long unchecked_remainder(long x, long y)
-        {
-            return x % y;
-        }
-
-        #endregion
-
         #region Ops/BitOps dispatching
 
         static readonly IntegerOps INTEGER_OPS = new IntegerOps();
@@ -534,7 +449,7 @@ namespace clojure.lang
 
         #endregion
 
-        class IntegerOps : Ops
+        sealed class IntegerOps : Ops
         {
             #region Ops Members
 
@@ -687,7 +602,7 @@ namespace clojure.lang
             #endregion
         }
 
-        class LongOps : Ops
+        sealed class LongOps : Ops
         {
             #region Ops Members
 
@@ -1061,7 +976,7 @@ namespace clojure.lang
 
             public object dec(object x)
             {
-                return Convert.ToDouble(x) + 1;
+                return Convert.ToDouble(x) - 1;
             }
 
             #endregion
@@ -1113,52 +1028,52 @@ namespace clojure.lang
             public bool isZero(object x)
             {
                 Ratio r =  toRatio(x);
-                return r.Numerator.signum()== 0;
+                return r.numerator.signum()== 0;
             }
 
             public bool isPos(object x)
             {
                 Ratio r = toRatio(x);
-                return r.Numerator.signum() > 0;
+                return r.numerator.signum() > 0;
             }
 
             public bool isNeg(object x)
             {
                 Ratio r = toRatio(x);
-                return r.Numerator.signum() < 0;
+                return r.numerator.signum() < 0;
             }
 
             public object add(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return divide(ry.Numerator.multiply(rx.Denominator)
-                    .add(rx.Numerator.multiply(ry.Denominator)),
-                    ry.Denominator.multiply(rx.Denominator));
+                return divide(ry.numerator.multiply(rx.denominator)
+                    .add(rx.numerator.multiply(ry.denominator)),
+                    ry.denominator.multiply(rx.denominator));
             }
 
             public object multiply(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.divide(ry.Numerator.multiply(rx.Numerator),
-                    ry.Denominator.multiply(rx.Denominator));
+                return Numbers.divide(ry.numerator.multiply(rx.numerator),
+                    ry.denominator.multiply(rx.denominator));
             }
 
             public object divide(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.divide(ry.Denominator.multiply(rx.Numerator),
-                    ry.Numerator.multiply(rx.Denominator));
+                return Numbers.divide(ry.denominator.multiply(rx.numerator),
+                    ry.numerator.multiply(rx.denominator));
             }
 
             public object quotient(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                BigInteger q = rx.Numerator.multiply(ry.Denominator)
-                    .divide(rx.Denominator.multiply(ry.Numerator));
+                BigInteger q = rx.numerator.multiply(ry.denominator)
+                    .divide(rx.denominator.multiply(ry.numerator));
                 return reduce(q);
             }
 
@@ -1166,8 +1081,8 @@ namespace clojure.lang
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                BigInteger q = rx.Numerator.multiply(ry.Denominator)
-                    .divide(rx.Denominator.multiply(ry.Numerator));
+                BigInteger q = rx.numerator.multiply(ry.denominator)
+                    .divide(rx.denominator.multiply(ry.numerator));
                 return Numbers.minus(x, Numbers.multiply(q, y));
             }
 
@@ -1175,22 +1090,22 @@ namespace clojure.lang
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return rx.Numerator.Equals(ry.Numerator)
-                    && rx.Denominator.Equals(ry.Denominator);
+                return rx.numerator.Equals(ry.numerator)
+                    && rx.denominator.Equals(ry.denominator);
             }
 
             public bool lt(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.lt(rx.Numerator.multiply(ry.Denominator),
-                    ry.Numerator.multiply(rx.Denominator));
+                return Numbers.lt(rx.numerator.multiply(ry.denominator),
+                    ry.numerator.multiply(rx.denominator));
             }
 
             public object negate(object x)
             {
                 Ratio rx = toRatio(x);
-                return new Ratio(rx.Numerator.negate(), rx.Denominator);
+                return new Ratio(rx.numerator.negate(), rx.denominator);
             }
 
             public object inc(object x)
@@ -1394,7 +1309,7 @@ namespace clojure.lang
                 return toBigDecimal(x).multiply(toBigDecimal(y));
             }
 
-            // TODO: fiture out what the rounding mode should be
+            // TODO: figure out what the rounding mode should be
             public object divide(object x, object y)
             {
                 return toBigDecimal(x).divide(toBigDecimal(y), BigDecimal.ROUND_HALF_EVEN);
@@ -1732,6 +1647,1531 @@ namespace clojure.lang
 
             #endregion
         }
-       
+        
+        #region Array c-tors
+
+        static public float[] float_array(int size, object init)
+        {
+            float[] ret = new float[size];
+            if (Util.IsNumeric(init))
+            {
+                float f = Util.ConvertToFloat(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToFloat(s.first());
+            }
+            return ret;
+        }
+
+        static public float[] float_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new float[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = s.count();
+                float[] ret = new float[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToFloat(s.first());
+                return ret;
+            }
+        }
+
+        static public double[] double_array(int size, Object init)
+        {
+            double[] ret = new double[size];
+            if (Util.IsNumeric(init))
+            {
+                double f = Util.ConvertToDouble(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToDouble(s.first());
+            }
+            return ret;
+        }
+
+        static public double[] double_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new double[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = s.count();
+                double[] ret = new double[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToDouble(s.first());
+                return ret;
+            }
+        }
+
+        static public int[] int_array(int size, Object init)
+        {
+            int[] ret = new int[size];
+            if (Util.IsNumeric(init))
+            {
+                int f = Util.ConvertToInt(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToInt(s.first());
+            }
+            return ret;
+        }
+
+        static public int[] int_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new int[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = s.count();
+                int[] ret = new int[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToInt(s.first());
+                return ret;
+            }
+        }
+
+        static public long[] long_array(int size, Object init)
+        {
+            long[] ret = new long[size];
+            if (Util.IsNumeric(init))
+            {
+                long f = Util.ConvertToLong(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToLong(s.first());
+            }
+            return ret;
+        }
+
+        static public long[] long_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new long[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = s.count();
+                long[] ret = new long[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToLong(s.first());
+                return ret;
+            }
+        }
+
+        static public float[] floats(Object array)
+        {
+            return (float[])array;
+        }
+
+        static public double[] doubles(Object array)
+        {
+            return (double[])array;
+        }
+
+        static public int[] ints(Object array)
+        {
+            return (int[])array;
+        }
+
+        static public long[] longs(Object array)
+        {
+            return (long[])array;
+        }
+
+        #endregion
+
+        #region Float overloads for basic ops
+
+        static public float add(float x, float y)
+        {
+            return x + y;
+        }
+
+        static public float minus(float x, float y)
+        {
+            return x - y;
+        }
+
+        static public float minus(float x)
+        {
+            return -x;
+        }
+
+        static public float inc(float x)
+        {
+            return x + 1;
+        }
+
+        static public float dec(float x)
+        {
+            return x - 1;
+        }
+
+        static public float multiply(float x, float y)
+        {
+            return x * y;
+        }
+
+        static public float divide(float x, float y)
+        {
+            return x / y;
+        }
+
+        static public bool equiv(float x, float y)
+        {
+            return x == y;
+        }
+
+        static public bool lt(float x, float y)
+        {
+            return x < y;
+        }
+
+        static public bool lte(float x, float y)
+        {
+            return x <= y;
+        }
+
+        static public bool gt(float x, float y)
+        {
+            return x > y;
+        }
+
+        static public bool gte(float x, float y)
+        {
+            return x >= y;
+        }
+
+        static public bool isPos(float x)
+        {
+            return x > 0;
+        }
+
+        static public bool isNeg(float x)
+        {
+            return x < 0;
+        }
+
+        static public bool isZero(float x)
+        {
+            return x == 0;
+        }
+
+        #endregion
+
+        #region Double overloads for basic ops
+
+        static public double add(double x, double y)
+        {
+            return x + y;
+        }
+
+        static public double minus(double x, double y)
+        {
+            return x - y;
+        }
+
+        static public double minus(double x)
+        {
+            return -x;
+        }
+
+        static public double inc(double x)
+        {
+            return x + 1;
+        }
+
+        static public double dec(double x)
+        {
+            return x - 1;
+        }
+
+        static public double multiply(double x, double y)
+        {
+            return x * y;
+        }
+
+        static public double divide(double x, double y)
+        {
+            return x / y;
+        }
+
+        static public bool equiv(double x, double y)
+        {
+            return x == y;
+        }
+
+        static public bool lt(double x, double y)
+        {
+            return x < y;
+        }
+
+        static public bool lte(double x, double y)
+        {
+            return x <= y;
+        }
+
+        static public bool gt(double x, double y)
+        {
+            return x > y;
+        }
+
+        static public bool gte(double x, double y)
+        {
+            return x >= y;
+        }
+
+        static public bool isPos(double x)
+        {
+            return x > 0;
+        }
+
+        static public bool isNeg(double x)
+        {
+            return x < 0;
+        }
+
+        static public bool isZero(double x)
+        {
+            return x == 0;
+        }
+
+        #endregion
+
+        #region Int overloads for basic ops
+
+        static int throwIntOverflow()
+        {
+            throw new ArithmeticException("integer overflow");
+        }
+
+        static public int unchecked_add(int x, int y)
+        {
+            return x + y;
+        }
+
+        static public int unchecked_subtract(int x, int y)
+        {
+            return x - y;
+        }
+
+        static public int unchecked_negate(int x)
+        {
+            return -x;
+        }
+
+        static public int unchecked_inc(int x)
+        {
+            return x + 1;
+        }
+
+        static public int unchecked_dec(int x)
+        {
+            return x - 1;
+        }
+
+        static public int unchecked_multiply(int x, int y)
+        {
+            return x * y;
+        }
+
+        static public int add(int x, int y)
+        {
+            int ret = x + y;
+            if ((ret ^ x) < 0 && (ret ^ y) < 0)
+                return throwIntOverflow();
+            return ret;
+        }
+
+        static public int not(int x)
+        {
+            return ~x;
+        }
+
+        static public int and(int x, int y)
+        {
+            return x & y;
+        }
+
+        static public int or(int x, int y)
+        {
+            return x | y;
+        }
+
+        static public int xor(int x, int y)
+        {
+            return x ^ y;
+        }
+
+        static public int minus(int x, int y)
+        {
+            int ret = x - y;
+            if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
+                return throwIntOverflow();
+            return ret;
+        }
+
+        static public int minus(int x)
+        {
+            if (x == Int32.MinValue)
+                return throwIntOverflow();
+            return -x;
+        }
+
+        static public int inc(int x)
+        {
+            if (x == Int32.MaxValue)
+                return throwIntOverflow();
+            return x + 1;
+        }
+
+        static public int dec(int x)
+        {
+            if (x == Int32.MinValue)
+                return throwIntOverflow();
+            return x - 1;
+        }
+
+        static public int multiply(int x, int y)
+        {
+            int ret = x * y;
+            if (y != 0 && ret / y != x)
+                return throwIntOverflow();
+            return ret;
+        }
+
+        static public int unchecked_divide(int x, int y)
+        {
+            return x / y;
+        }
+
+        static public int unchecked_remainder(int x, int y)
+        {
+            return x % y;
+        }
+
+        static public bool equiv(int x, int y)
+        {
+            return x == y;
+        }
+
+        static public bool lt(int x, int y)
+        {
+            return x < y;
+        }
+
+        static public bool lte(int x, int y)
+        {
+            return x <= y;
+        }
+
+        static public bool gt(int x, int y)
+        {
+            return x > y;
+        }
+
+        static public bool gte(int x, int y)
+        {
+            return x >= y;
+        }
+
+        static public bool isPos(int x)
+        {
+            return x > 0;
+        }
+
+        static public bool isNeg(int x)
+        {
+            return x < 0;
+        }
+
+        static public bool isZero(int x)
+        {
+            return x == 0;
+        }
+
+        #endregion
+
+        #region Long overloads for basic ops
+
+        static public long unchecked_add(long x, long y)
+        {
+            return x + y;
+        }
+
+        static public long unchecked_subtract(long x, long y)
+        {
+            return x - y;
+        }
+
+        static public long unchecked_negate(long x)
+        {
+            return -x;
+        }
+
+        static public long unchecked_inc(long x)
+        {
+            return x + 1;
+        }
+
+        static public long unchecked_dec(long x)
+        {
+            return x - 1;
+        }
+
+        static public long unchecked_multiply(long x, long y)
+        {
+            return x * y;
+        }
+
+        static public long add(long x, long y)
+        {
+            long ret = x + y;
+            if ((ret ^ x) < 0 && (ret ^ y) < 0)
+                return throwIntOverflow();
+            return ret;
+        }
+
+        static public long minus(long x, long y)
+        {
+            long ret = x - y;
+            if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
+                return throwIntOverflow();
+            return ret;
+        }
+
+        static public long minus(long x)
+        {
+            if (x == Int64.MinValue)
+                return throwIntOverflow();
+            return -x;
+        }
+
+        static public long inc(long x)
+        {
+            if (x == Int64.MaxValue)
+                return throwIntOverflow();
+            return x + 1;
+        }
+
+        static public long dec(long x)
+        {
+            if (x == Int64.MinValue)
+                return throwIntOverflow();
+            return x - 1;
+        }
+
+        static public long multiply(long x, long y)
+        {
+            long ret = x * y;
+            if (y != 0 && ret / y != x)
+                return throwIntOverflow();
+            return ret;
+        }
+
+        static public long unchecked_divide(long x, long y)
+        {
+            return x / y;
+        }
+
+        static public long unchecked_remainder(long x, long y)
+        {
+            return x % y;
+        }
+
+        static public bool equiv(long x, long y)
+        {
+            return x == y;
+        }
+
+        static public bool lt(long x, long y)
+        {
+            return x < y;
+        }
+
+        static public bool lte(long x, long y)
+        {
+            return x <= y;
+        }
+
+        static public bool gt(long x, long y)
+        {
+            return x > y;
+        }
+
+        static public bool gte(long x, long y)
+        {
+            return x >= y;
+        }
+
+        static public bool isPos(long x)
+        {
+            return x > 0;
+        }
+
+        static public bool isNeg(long x)
+        {
+            return x < 0;
+        }
+
+        static public bool isZero(long x)
+        {
+            return x == 0;
+        }
+
+        #endregion
+
+        #region Overload resolution
+
+        static public object add(int x, Object y)
+        {
+            return add((Object)x, y);
+        }
+
+        static public object add(Object x, int y)
+        {
+            return add(x, (Object)y);
+        }
+
+        static public object and(int x, Object y)
+        {
+            return and((Object)x, y);
+        }
+
+        static public object and(Object x, int y)
+        {
+            return and(x, (Object)y);
+        }
+
+        static public object or(int x, Object y)
+        {
+            return or((Object)x, y);
+        }
+
+        static public object or(Object x, int y)
+        {
+            return or(x, (Object)y);
+        }
+
+        static public object xor(int x, Object y)
+        {
+            return xor((Object)x, y);
+        }
+
+        static public object xor(Object x, int y)
+        {
+            return xor(x, (Object)y);
+        }
+
+        static public object add(float x, Object y)
+        {
+            return add((Object)x, y);
+        }
+
+        static public object add(Object x, float y)
+        {
+            return add(x, (Object)y);
+        }
+
+        static public object add(long x, Object y)
+        {
+            return add((Object)x, y);
+        }
+
+        static public object add(Object x, long y)
+        {
+            return add(x, (Object)y);
+        }
+
+        static public object add(double x, Object y)
+        {
+            return add((Object)x, y);
+        }
+
+        static public object add(Object x, double y)
+        {
+            return add(x, (Object)y);
+        }
+
+        static public object minus(int x, Object y)
+        {
+            return minus((Object)x, y);
+        }
+
+        static public object minus(Object x, int y)
+        {
+            return minus(x, (Object)y);
+        }
+
+        static public object minus(float x, Object y)
+        {
+            return minus((Object)x, y);
+        }
+
+        static public object minus(Object x, float y)
+        {
+            return minus(x, (Object)y);
+        }
+
+        static public object minus(long x, Object y)
+        {
+            return minus((Object)x, y);
+        }
+
+        static public object minus(Object x, long y)
+        {
+            return minus(x, (Object)y);
+        }
+
+        static public object minus(double x, Object y)
+        {
+            return minus((Object)x, y);
+        }
+
+        static public object minus(Object x, double y)
+        {
+            return minus(x, (Object)y);
+        }
+
+        static public object multiply(int x, Object y)
+        {
+            return multiply((Object)x, y);
+        }
+
+        static public object multiply(Object x, int y)
+        {
+            return multiply(x, (Object)y);
+        }
+
+        static public object multiply(float x, Object y)
+        {
+            return multiply((Object)x, y);
+        }
+
+        static public object multiply(Object x, float y)
+        {
+            return multiply(x, (Object)y);
+        }
+
+        static public object multiply(long x, Object y)
+        {
+            return multiply((Object)x, y);
+        }
+
+        static public object multiply(Object x, long y)
+        {
+            return multiply(x, (Object)y);
+        }
+
+        static public object multiply(double x, Object y)
+        {
+            return multiply((Object)x, y);
+        }
+
+        static public object multiply(Object x, double y)
+        {
+            return multiply(x, (Object)y);
+        }
+
+        static public object divide(int x, Object y)
+        {
+            return divide((Object)x, y);
+        }
+
+        static public object divide(Object x, int y)
+        {
+            return divide(x, (Object)y);
+        }
+
+        static public object divide(float x, Object y)
+        {
+            return divide((Object)x, y);
+        }
+
+        static public object divide(Object x, float y)
+        {
+            return divide(x, (Object)y);
+        }
+
+        static public object divide(long x, Object y)
+        {
+            return divide((Object)x, y);
+        }
+
+        static public object divide(Object x, long y)
+        {
+            return divide(x, (Object)y);
+        }
+
+        static public object divide(double x, Object y)
+        {
+            return divide((Object)x, y);
+        }
+
+        static public object divide(Object x, double y)
+        {
+            return divide(x, (Object)y);
+        }
+
+        static public bool lt(int x, Object y)
+        {
+            return lt((Object)x, y);
+        }
+
+        static public bool lt(Object x, int y)
+        {
+            return lt(x, (Object)y);
+        }
+
+        static public bool lt(float x, Object y)
+        {
+            return lt((Object)x, y);
+        }
+
+        static public bool lt(Object x, float y)
+        {
+            return lt(x, (Object)y);
+        }
+
+        static public bool lt(long x, Object y)
+        {
+            return lt((Object)x, y);
+        }
+
+        static public bool lt(Object x, long y)
+        {
+            return lt(x, (Object)y);
+        }
+
+        static public bool lt(double x, Object y)
+        {
+            return lt((Object)x, y);
+        }
+
+        static public bool lt(Object x, double y)
+        {
+            return lt(x, (Object)y);
+        }
+
+        static public bool lte(int x, Object y)
+        {
+            return lte((Object)x, y);
+        }
+
+        static public bool lte(Object x, int y)
+        {
+            return lte(x, (Object)y);
+        }
+
+        static public bool lte(float x, Object y)
+        {
+            return lte((Object)x, y);
+        }
+
+        static public bool lte(Object x, float y)
+        {
+            return lte(x, (Object)y);
+        }
+
+        static public bool lte(long x, Object y)
+        {
+            return lte((Object)x, y);
+        }
+
+        static public bool lte(Object x, long y)
+        {
+            return lte(x, (Object)y);
+        }
+
+        static public bool lte(double x, Object y)
+        {
+            return lte((Object)x, y);
+        }
+
+        static public bool lte(Object x, double y)
+        {
+            return lte(x, (Object)y);
+        }
+
+        static public bool gt(int x, Object y)
+        {
+            return gt((Object)x, y);
+        }
+
+        static public bool gt(Object x, int y)
+        {
+            return gt(x, (Object)y);
+        }
+
+        static public bool gt(float x, Object y)
+        {
+            return gt((Object)x, y);
+        }
+
+        static public bool gt(Object x, float y)
+        {
+            return gt(x, (Object)y);
+        }
+
+        static public bool gt(long x, Object y)
+        {
+            return gt((Object)x, y);
+        }
+
+        static public bool gt(Object x, long y)
+        {
+            return gt(x, (Object)y);
+        }
+
+        static public bool gt(double x, Object y)
+        {
+            return gt((Object)x, y);
+        }
+
+        static public bool gt(Object x, double y)
+        {
+            return gt(x, (Object)y);
+        }
+
+        static public bool gte(int x, Object y)
+        {
+            return gte((Object)x, y);
+        }
+
+        static public bool gte(Object x, int y)
+        {
+            return gte(x, (Object)y);
+        }
+
+        static public bool gte(float x, Object y)
+        {
+            return gte((Object)x, y);
+        }
+
+        static public bool gte(Object x, float y)
+        {
+            return gte(x, (Object)y);
+        }
+
+        static public bool gte(long x, Object y)
+        {
+            return gte((Object)x, y);
+        }
+
+        static public bool gte(Object x, long y)
+        {
+            return gte(x, (Object)y);
+        }
+
+        static public bool gte(double x, Object y)
+        {
+            return gte((Object)x, y);
+        }
+
+        static public bool gte(Object x, double y)
+        {
+            return gte(x, (Object)y);
+        }
+
+
+        static public bool equiv(int x, Object y)
+        {
+            return equiv((Object)x, y);
+        }
+
+        static public bool equiv(Object x, int y)
+        {
+            return equiv(x, (Object)y);
+        }
+
+        static public bool equiv(float x, Object y)
+        {
+            return equiv((Object)x, y);
+        }
+
+        static public bool equiv(Object x, float y)
+        {
+            return equiv(x, (Object)y);
+        }
+
+        static public bool equiv(long x, Object y)
+        {
+            return equiv((Object)x, y);
+        }
+
+        static public bool equiv(Object x, long y)
+        {
+            return equiv(x, (Object)y);
+        }
+
+        static public bool equiv(double x, Object y)
+        {
+            return equiv((Object)x, y);
+        }
+
+        static public bool equiv(Object x, double y)
+        {
+            return equiv(x, (Object)y);
+        }
+
+
+        static public float add(int x, float y)
+        {
+            return add((float)x, y);
+        }
+
+        static public float add(float x, int y)
+        {
+            return add(x, (float)y);
+        }
+
+        static public double add(int x, double y)
+        {
+            return add((double)x, y);
+        }
+
+        static public double add(double x, int y)
+        {
+            return add(x, (double)y);
+        }
+
+        static public long add(int x, long y)
+        {
+            return add((long)x, y);
+        }
+
+        static public long add(long x, int y)
+        {
+            return add(x, (long)y);
+        }
+
+        static public float add(long x, float y)
+        {
+            return add((float)x, y);
+        }
+
+        static public float add(float x, long y)
+        {
+            return add(x, (float)y);
+        }
+
+        static public double add(long x, double y)
+        {
+            return add((double)x, y);
+        }
+
+        static public double add(double x, long y)
+        {
+            return add(x, (double)y);
+        }
+
+        static public double add(float x, double y)
+        {
+            return add((double)x, y);
+        }
+
+        static public double add(double x, float y)
+        {
+            return add(x, (double)y);
+        }
+
+        static public float minus(int x, float y)
+        {
+            return minus((float)x, y);
+        }
+
+        static public float minus(float x, int y)
+        {
+            return minus(x, (float)y);
+        }
+
+        static public double minus(int x, double y)
+        {
+            return minus((double)x, y);
+        }
+
+        static public double minus(double x, int y)
+        {
+            return minus(x, (double)y);
+        }
+
+        static public long minus(int x, long y)
+        {
+            return minus((long)x, y);
+        }
+
+        static public long minus(long x, int y)
+        {
+            return minus(x, (long)y);
+        }
+
+        static public float minus(long x, float y)
+        {
+            return minus((float)x, y);
+        }
+
+        static public float minus(float x, long y)
+        {
+            return minus(x, (float)y);
+        }
+
+        static public double minus(long x, double y)
+        {
+            return minus((double)x, y);
+        }
+
+        static public double minus(double x, long y)
+        {
+            return minus(x, (double)y);
+        }
+
+        static public double minus(float x, double y)
+        {
+            return minus((double)x, y);
+        }
+
+        static public double minus(double x, float y)
+        {
+            return minus(x, (double)y);
+        }
+
+        static public float multiply(int x, float y)
+        {
+            return multiply((float)x, y);
+        }
+
+        static public float multiply(float x, int y)
+        {
+            return multiply(x, (float)y);
+        }
+
+        static public double multiply(int x, double y)
+        {
+            return multiply((double)x, y);
+        }
+
+        static public double multiply(double x, int y)
+        {
+            return multiply(x, (double)y);
+        }
+
+        static public long multiply(int x, long y)
+        {
+            return multiply((long)x, y);
+        }
+
+        static public long multiply(long x, int y)
+        {
+            return multiply(x, (long)y);
+        }
+
+        static public float multiply(long x, float y)
+        {
+            return multiply((float)x, y);
+        }
+
+        static public float multiply(float x, long y)
+        {
+            return multiply(x, (float)y);
+        }
+
+        static public double multiply(long x, double y)
+        {
+            return multiply((double)x, y);
+        }
+
+        static public double multiply(double x, long y)
+        {
+            return multiply(x, (double)y);
+        }
+
+        static public double multiply(float x, double y)
+        {
+            return multiply((double)x, y);
+        }
+
+        static public double multiply(double x, float y)
+        {
+            return multiply(x, (double)y);
+        }
+
+        static public float divide(int x, float y)
+        {
+            return divide((float)x, y);
+        }
+
+        static public float divide(float x, int y)
+        {
+            return divide(x, (float)y);
+        }
+
+        static public double divide(int x, double y)
+        {
+            return divide((double)x, y);
+        }
+
+        static public double divide(double x, int y)
+        {
+            return divide(x, (double)y);
+        }
+
+        static public float divide(long x, float y)
+        {
+            return divide((float)x, y);
+        }
+
+        static public float divide(float x, long y)
+        {
+            return divide(x, (float)y);
+        }
+
+        static public double divide(long x, double y)
+        {
+            return divide((double)x, y);
+        }
+
+        static public double divide(double x, long y)
+        {
+            return divide(x, (double)y);
+        }
+
+        static public double divide(float x, double y)
+        {
+            return divide((double)x, y);
+        }
+
+        static public double divide(double x, float y)
+        {
+            return divide(x, (double)y);
+        }
+
+        static public bool lt(int x, float y)
+        {
+            return lt((float)x, y);
+        }
+
+        static public bool lt(float x, int y)
+        {
+            return lt(x, (float)y);
+        }
+
+        static public bool lt(int x, double y)
+        {
+            return lt((double)x, y);
+        }
+
+        static public bool lt(double x, int y)
+        {
+            return lt(x, (double)y);
+        }
+
+        static public bool lt(int x, long y)
+        {
+            return lt((long)x, y);
+        }
+
+        static public bool lt(long x, int y)
+        {
+            return lt(x, (long)y);
+        }
+
+        static public bool lt(long x, float y)
+        {
+            return lt((float)x, y);
+        }
+
+        static public bool lt(float x, long y)
+        {
+            return lt(x, (float)y);
+        }
+
+        static public bool lt(long x, double y)
+        {
+            return lt((double)x, y);
+        }
+
+        static public bool lt(double x, long y)
+        {
+            return lt(x, (double)y);
+        }
+
+        static public bool lt(float x, double y)
+        {
+            return lt((double)x, y);
+        }
+
+        static public bool lt(double x, float y)
+        {
+            return lt(x, (double)y);
+        }
+
+
+        static public bool lte(int x, float y)
+        {
+            return lte((float)x, y);
+        }
+
+        static public bool lte(float x, int y)
+        {
+            return lte(x, (float)y);
+        }
+
+        static public bool lte(int x, double y)
+        {
+            return lte((double)x, y);
+        }
+
+        static public bool lte(double x, int y)
+        {
+            return lte(x, (double)y);
+        }
+
+        static public bool lte(int x, long y)
+        {
+            return lte((long)x, y);
+        }
+
+        static public bool lte(long x, int y)
+        {
+            return lte(x, (long)y);
+        }
+
+        static public bool lte(long x, float y)
+        {
+            return lte((float)x, y);
+        }
+
+        static public bool lte(float x, long y)
+        {
+            return lte(x, (float)y);
+        }
+
+        static public bool lte(long x, double y)
+        {
+            return lte((double)x, y);
+        }
+
+        static public bool lte(double x, long y)
+        {
+            return lte(x, (double)y);
+        }
+
+        static public bool lte(float x, double y)
+        {
+            return lte((double)x, y);
+        }
+
+        static public bool lte(double x, float y)
+        {
+            return lte(x, (double)y);
+        }
+
+        static public bool gt(int x, float y)
+        {
+            return gt((float)x, y);
+        }
+
+        static public bool gt(float x, int y)
+        {
+            return gt(x, (float)y);
+        }
+
+        static public bool gt(int x, double y)
+        {
+            return gt((double)x, y);
+        }
+
+        static public bool gt(double x, int y)
+        {
+            return gt(x, (double)y);
+        }
+
+        static public bool gt(int x, long y)
+        {
+            return gt((long)x, y);
+        }
+
+        static public bool gt(long x, int y)
+        {
+            return gt(x, (long)y);
+        }
+
+        static public bool gt(long x, float y)
+        {
+            return gt((float)x, y);
+        }
+
+        static public bool gt(float x, long y)
+        {
+            return gt(x, (float)y);
+        }
+
+        static public bool gt(long x, double y)
+        {
+            return gt((double)x, y);
+        }
+
+        static public bool gt(double x, long y)
+        {
+            return gt(x, (double)y);
+        }
+
+        static public bool gt(float x, double y)
+        {
+            return gt((double)x, y);
+        }
+
+        static public bool gt(double x, float y)
+        {
+            return gt(x, (double)y);
+        }
+
+        static public bool gte(int x, float y)
+        {
+            return gte((float)x, y);
+        }
+
+        static public bool gte(float x, int y)
+        {
+            return gte(x, (float)y);
+        }
+
+        static public bool gte(int x, double y)
+        {
+            return gte((double)x, y);
+        }
+
+        static public bool gte(double x, int y)
+        {
+            return gte(x, (double)y);
+        }
+
+        static public bool gte(int x, long y)
+        {
+            return gte((long)x, y);
+        }
+
+        static public bool gte(long x, int y)
+        {
+            return gte(x, (long)y);
+        }
+
+        static public bool gte(long x, float y)
+        {
+            return gte((float)x, y);
+        }
+
+        static public bool gte(float x, long y)
+        {
+            return gte(x, (float)y);
+        }
+
+        static public bool gte(long x, double y)
+        {
+            return gte((double)x, y);
+        }
+
+        static public bool gte(double x, long y)
+        {
+            return gte(x, (double)y);
+        }
+
+        static public bool gte(float x, double y)
+        {
+            return gte((double)x, y);
+        }
+
+        static public bool gte(double x, float y)
+        {
+            return gte(x, (double)y);
+        }
+
+        static public bool equiv(int x, float y)
+        {
+            return equiv((float)x, y);
+        }
+
+        static public bool equiv(float x, int y)
+        {
+            return equiv(x, (float)y);
+        }
+
+        static public bool equiv(int x, double y)
+        {
+            return equiv((double)x, y);
+        }
+
+        static public bool equiv(double x, int y)
+        {
+            return equiv(x, (double)y);
+        }
+
+        static public bool equiv(int x, long y)
+        {
+            return equiv((long)x, y);
+        }
+
+        static public bool equiv(long x, int y)
+        {
+            return equiv(x, (long)y);
+        }
+
+        static public bool equiv(long x, float y)
+        {
+            return equiv((float)x, y);
+        }
+
+        static public bool equiv(float x, long y)
+        {
+            return equiv(x, (float)y);
+        }
+
+        static public bool equiv(long x, double y)
+        {
+            return equiv((double)x, y);
+        }
+
+        static public bool equiv(double x, long y)
+        {
+            return equiv(x, (double)y);
+        }
+
+        static public bool equiv(float x, double y)
+        {
+            return equiv((double)x, y);
+        }
+
+        static public bool equiv(double x, float y)
+        {
+            return equiv(x, (double)y);
+        }
+
+
+        #endregion
+
     }
 }

@@ -254,6 +254,19 @@ namespace clojure.lang
             return (Type)reference(sym, t);
         }
 
+
+        /// <summary>
+        /// Map a symbol to a Type (import) using the type name for the symbol name.
+        /// </summary>
+        /// <param name="t">The type to associate with the symbol</param>
+        /// <returns>The Type.</returns>
+        /// <remarks>Named importClass instead of ImportType for core.clj compatibility.</remarks>
+        public Type importClass(Type t)
+        {
+            string n = t.Name;
+            return importClass(Symbol.intern(n), t);
+        }
+
         /// <summary>
         /// Add a <see cref="Symbol">Symbol</see> to <see cref="Var">Var</see> reference.
         /// </summary>

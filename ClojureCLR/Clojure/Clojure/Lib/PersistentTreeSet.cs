@@ -66,7 +66,7 @@ namespace clojure.lang
         public static PersistentTreeSet create(ISeq init)
         {
             PersistentTreeSet ret = EMPTY;
-           for (ISeq s = init; s != null; s = s.rest() )
+           for (ISeq s = init; s != null; s = s.next() )
                 ret = (PersistentTreeSet)ret.cons(s.first());
             return ret;
         }

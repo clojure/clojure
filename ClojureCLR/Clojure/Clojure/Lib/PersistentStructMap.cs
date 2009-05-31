@@ -110,7 +110,7 @@ namespace clojure.lang
                 throw new ArgumentException("Must supply keys");
             IPersistentMap map = PersistentHashMap.EMPTY;
             int i = 0;
-            for (ISeq s = keys; s != null; s = s.rest(), i++)
+            for (ISeq s = keys; s != null; s = s.next(), i++)
                 map = map.assoc(s.first(), i);
             return new Def(keys, map);
         }
@@ -125,12 +125,12 @@ namespace clojure.lang
         {
             object[] vals = new object[def.Keyslots.count()];
             IPersistentMap ext = PersistentHashMap.EMPTY;
-            for (; keyvals != null; keyvals = keyvals.rest().rest())
+            for (; keyvals != null; keyvals = keyvals.next().next())
             {
-                if (keyvals.rest() == null)
+                if (keyvals.next() == null)
                     throw new ArgumentException(String.Format("No value supplied for key: {0}", keyvals.first()));
                 object k = keyvals.first();
-                object v = keyvals.rest().first();
+                object v = RT.second(keyvals);
                 IMapEntry me = def.Keyslots.entryAt(k);
                 if (me != null)
                     vals[Util.ConvertToInt(me.val())] = v;
@@ -150,7 +150,7 @@ namespace clojure.lang
         {
             object[] vals = new object[def.Keyslots.count()];
             IPersistentMap ext = PersistentHashMap.EMPTY;
-            for (int i = 0; i < vals.Length && valseq != null; valseq = valseq.rest(), i++)
+            for (int i = 0; i < vals.Length && valseq != null; valseq = valseq.next(), i++)
             {
                 vals[i] = valseq.first();
             }
@@ -502,13 +502,13 @@ namespace clojure.lang
             }
 
             /// <summary>
-            /// Gets the rest of the sequence.
+            /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
             /// </summary>
-            /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-            public override ISeq rest()
+            /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+            public override ISeq next()
             {
                 return (_i + 1 < _vals.Length)
-                    ? new Seq(_meta, _keys.rest(), _vals, _i + 1, _ext)
+                    ? new Seq(_meta, _keys.next(), _vals, _i + 1, _ext)
                     : _ext.seq();
             }
 

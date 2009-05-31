@@ -149,7 +149,7 @@ namespace Clojure.Tests.LibTests
                 Expect(m.contains(key));
             }
 
-            for (ISeq s = m.seq(); s != null; s = s.rest())
+            for (ISeq s = m.seq(); s != null; s = s.next())
                 Expect(dict.ContainsKey((int)s.first()));
 
         }

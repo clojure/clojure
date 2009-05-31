@@ -3,51 +3,26 @@ This list is most definitely incomplete.
 These are in no particular order.
 
 
-- Add other bootstrap *.clj files (beyond core.clj and core-print.clj).
+- Look closely at all code generation to find areas for speedup
+
+- Add other bootstrap *.clj files (remaining are: clojure.xml and inspector.xml)
 
 - Add more unit tests for the basic data structures.
 
 - Test against all the clojure/contrib/test_clojure/*.clj files.
 
-- Bring clojure-contrib into the load.
-
-- Bring the code up to rev with the lazy version of clojure.
-
-- Add file compilation (AOT compilation).
-    -- The shortest path to this will be through ScripCode.SaveToAssembly
-       and ScriptCode.LoadFromAssembly.  While not full compilation to 
-       MSIL, it will be interesting to see (a) if we can get it to work,
-       and (b) what degree of speedup we get over loading .clj files.
-    -- The much longer path is to write compiled code to an assembly.
-       This can be done in the same way Snippets work.
-
---  Change IFn handling away from the current method:
-      = each IFn is an instance of AFnImpl or RestFnImpl
-    to
-      = each IFn has its own class with fn methods as either field values or static methods
-        (current limitation of DLR prevents compiling ExpressionTrees to instance methods)
 - Add gen-class.
 
-- Add proxies.
+- Add proxies. 
 
-- Implement lib loading. As part of this, 
-    -- make sure all the namespace functionality really works.
-    --  
+
+- Add missing array support, including
+    -- figure out how to handle ragged n-dim arrays versus true multi-dim arrays.
+
 
 - Add callsites for host expression calls.  See MethodBinder.
     -- As part of this, look at the type handling in selecting a target method
        based on argument types in host calls.
-
-- Finish basic REPL
-    -- need *1, *2, *3, *e, better error handling, etc.
-
-- Add EvalReader to the LispReader.
-
-- Add primitive-type array support.
-
-- Add array support, including
-    -- figure out how to handle ragged n-dim arrays versus true multi-dim arrays.
-
 
 Far away in the distance:
 

@@ -189,7 +189,7 @@ namespace Clojure.Tests.LibTests
                 Expect(m.valAt(key), EqualTo(key));
             }
 
-            for (ISeq s = m.seq(); s != null; s = s.rest())
+            for (ISeq s = m.seq(); s != null; s = s.next())
                 Expect(dict.ContainsKey((int)((IMapEntry)s.first()).key()));
 
         }

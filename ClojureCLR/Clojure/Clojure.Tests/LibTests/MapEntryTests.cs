@@ -281,8 +281,8 @@ namespace Clojure.Tests.LibTests
 
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo("abc"));
-            Expect(s.rest().first(), EqualTo(1));
-            Expect(s.rest().rest(), Null);
+            Expect(s.next().first(), EqualTo(1));
+            Expect(s.next().next(), Null);
         }
         
         #endregion
@@ -304,8 +304,8 @@ namespace Clojure.Tests.LibTests
 
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(1));
-            Expect(s.rest().first(), EqualTo("abc"));
-            Expect(s.rest().rest(), Null);
+            Expect(s.next().first(), EqualTo("abc"));
+            Expect(s.next().next(), Null);
         }
 
         [Test]
@@ -330,9 +330,9 @@ namespace Clojure.Tests.LibTests
 
             Expect(s.count(), EqualTo(3));
             Expect(s.first(), EqualTo(1));
-            Expect(s.rest().first(), EqualTo("abc"));
-            Expect(s.rest().rest().first(), EqualTo(2));
-            Expect(s.rest().rest().rest(), Null);
+            Expect(s.next().first(), EqualTo("abc"));
+            Expect(s.next().next().first(), EqualTo(2));
+            Expect(s.next().next().next(), Null);
         }
         
         #endregion

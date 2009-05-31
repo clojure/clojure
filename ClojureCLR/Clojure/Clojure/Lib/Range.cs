@@ -98,10 +98,10 @@ namespace clojure.lang
         }
 
         /// <summary>
-        /// Gets the rest of the sequence.
+        /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
         /// </summary>
-        /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-        public override ISeq rest()
+        /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+        public override ISeq next()
         {
             return (_n < _end - 1)
                 ? new Range(_meta, _n + 1, _end)
@@ -164,54 +164,40 @@ namespace clojure.lang
         /// <summary>
         /// Implements a stream over a <see cref="Range">Range</see>.
         /// </summary>
-        private class RangeStream : IStream
+        private new class Src : AFn
         {
             /// <summary>
             /// Current position.
             /// </summary>
-            private readonly AtomicLong _an;
+            private int _n;
 
             /// <summary>
             /// Final position.
             /// </summary>
             private readonly long _end;
 
-            /// <summary>
-            /// Initialize a <see cref="RangeStream">RangeStream</see>.
-            /// </summary>
-            /// <param name="n">Initial position.</param>
-            /// <param name="end">Final position.</param>
-            public RangeStream(long n, long end)
+
+            public Src(int n, int end)
             {
-                _an = new AtomicLong(n);
+                _n = n;
                 _end = end;
             }
 
-
-            #region IStream Members
-
-            /// <summary>
-            /// Get the next value in the stream.
-            /// </summary>
-            /// <returns>The next value.</returns>
-            public object next()
+            public override object invoke()
             {
-                long i = _an.getAndIncrement();
-                return (i < _end)
-                    ? i
-                    : RT.eos();
+                return (_n < _end)
+                    ? _n++
+                    : RT.EOS;
             }
-
-            #endregion
         }
 
         /// <summary>
-        /// Gets an <see cref="IStream">IStream/see> for this object.
+        /// Gets a <see cref="Stream"/> for this object.
         /// </summary>
-        /// <returns>The <see cref="IStream">IStream/see>.</returns>
-        public override IStream stream()
+        /// <returns>The <see cref="Stream"/>.</returns>
+        public override Stream stream()
         {
-            return new RangeStream(_n, _end);
+            return new Stream(new Src(_n, _end));
         }
 
         #endregion

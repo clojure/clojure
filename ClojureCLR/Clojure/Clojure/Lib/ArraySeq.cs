@@ -119,7 +119,7 @@ namespace clojure.lang
                 return _ilist[_i];  //rev 1112 wraps this in RT.prepRet, don't know why
         }
 
-        public override ISeq rest()
+        public override ISeq next()
         {
             if (_oa != null)
             {

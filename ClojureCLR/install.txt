@@ -2,7 +2,7 @@ Installing Clojure/CLR:
 
 At present, this is a developer-only distribution.  Roll up your sleeves.
 
-
+ 
 Platform:
 ---------
 
@@ -47,27 +47,31 @@ Download, unzip, compile it in VS.
 Clojure/CLR
 -----------
 
-Download the code from the clojure-contrib distribution: http://code.google.com/p/clojure-contrib/ClojureCLR
-The most up-to-date version will be at github/TBD.
+Download the code.  The most up-to-date code is on github.
+Homepage:          http://github.com/dmiller/ClojureCLR
+Public Clone URL:  git://github.com/dmiller/ClojureCLR.git
+
+
+The version in the clojure-contrib distribution (http://code.google.com/p/clojure-contrib/ClojureCLR) is not updated very frequently.
+
 
 Being a developer's release, DLR dlls are not distributed.  Instead, it is expected you will link in the DLR project.  
 You will need only the Microsoft.Scripting.Core, Microsoft.Scripting and Microsoft.Scripting.ExtensionAttribute projects.
 (I link in the whole solution to simplify browsing IronPython and IronRuby code for inspiration.)
 You are responsible for clearing out the links to my install of DLR and putting in your own.  
 
-You will need to make sure Clojure/CLR projects have the proper references:
+You will need to make sure the projects have the proper references:
 
 Clojure:  
 	Microsoft.Scripting.Core
 	Microsoft.Scripting
-	Microsoft.Scripting.ExtensionAttribute 
 	vjslib
 
-Clojure.Console
+Simple.Console
 	Clojure
 	Microsoft.Scripting.Core
 	Microsoft.Scripting
-	Microsoft.Scripting.ExtensionAttribute 	
+
 
 Clojure.Tests
 	Clojure
@@ -77,7 +81,14 @@ Clojure.Tests
 	Castle.DynamicProxy2
 	Rhino.Mocks
 
-After that, you should be good to go.
+BootstrapCompile
+	Clojure
+
+Clojure.Main
+	Clojure
+	Microsoft.Scripting.Core
+	Microsoft.Scripting
+
 
 
 Recommended

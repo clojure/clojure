@@ -19,10 +19,17 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
 using System.Diagnostics;
-
+using System.Runtime.CompilerServices;
+using RTProperties = clojure.runtime.Properties;
 
 namespace clojure.lang
 {
+    public static class RT_Bootstrap_Flag
+    {
+        public static bool _doRTBootstrap = true;
+
+    }
+
     public static class RT
     {
         #region Default symbol-to-class map
@@ -251,14 +258,21 @@ namespace clojure.lang
             // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
             Symbol.create("StringBuilder"), typeof(StringBuilder),
             Symbol.create("BigInteger"), typeof(java.math.BigInteger),
-            Symbol.create("BigDecimal"), typeof(java.math.BigDecimal)
+            Symbol.create("BigDecimal"), typeof(java.math.BigDecimal),
+            Symbol.create("Environment"), typeof(System.Environment)
      );
 
         #endregion
 
         #region Some misc. goodies
 
-        static public readonly object[] EMPTY_ARRAY = new Object[] { };
+        public static readonly object[] EMPTY_OBJECT_ARRAY = new Object[] { };
+
+        static RTProperties _versionProperties = new RTProperties();
+
+        public static RTProperties GetVersionProperties() { return _versionProperties; }
+
+        public const string CLOJURE_LOAD_PATH = "clojure.load.path";
 
         #endregion
 
@@ -328,15 +342,15 @@ namespace clojure.lang
         
         public static readonly Var IN =
             Var.intern(CLOJURE_NS, Symbol.create("*in*"),
-            new clojure.lang.Readers.LineNumberingReader(System.Console.In));
+            new clojure.lang.LineNumberingTextReader(System.Console.In));
 
         static readonly Var PRINT_READABLY 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
         
-        static readonly Var PRINT_META 
+        public static readonly Var PRINT_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
         
-        static readonly Var PRINT_DUP 
+        public static readonly Var PRINT_DUP 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), F);
         
         static readonly Var FLUSH_ON_NEWLINE 
@@ -348,15 +362,22 @@ namespace clojure.lang
         static readonly Var PR_ON 
             = Var.intern(CLOJURE_NS, Symbol.create("pr-on"));
 
+        public static readonly Var PRINT_LENGTH
+            = Var.intern(CLOJURE_NS, Symbol.create("*print-length*"),null);
+
+        public static readonly Var PRINT_LEVEL
+            = Var.intern(CLOJURE_NS, Symbol.create("*print-length*"),null);
+
+
         #endregion
 
         #region Vars (miscellaneous)
 
         public static readonly Var ALLOW_UNRESOLVED_VARS 
             = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), F);
-        
-        public static readonly Var WARN_ON_REFLECTION 
-            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
+
+        public static readonly Var WARN_ON_REFLECTION
+            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), T); // DEBUG_ONLY, should be F in production.
 
         public static readonly Var MACRO_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
@@ -366,6 +387,9 @@ namespace clojure.lang
         
         public static readonly Var AGENT 
             = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
+
+        public static readonly Var READEVAL
+            = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), T);
 
         public static readonly Var CMD_LINE_ARGS 
             = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
@@ -395,7 +419,11 @@ namespace clojure.lang
         {
             public override object invoke(object arg1, object arg2)
             {
-                return Object.ReferenceEquals(arg1, arg2) ? RT.T : RT.F;
+                //return Object.ReferenceEquals(arg1, arg2) ? RT.T : RT.F;
+                if ( arg1 is ValueType )
+                    return arg1.Equals(arg2) ? RT.T : RT.F;
+                else
+                    return arg1 == arg2 ? RT.T : RT.F;
             }
         }
 
@@ -416,15 +444,18 @@ namespace clojure.lang
 
         static RT()
         {
+
+            _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version); 
+
             Keyword dockw = Keyword.intern(null, "doc");
             Keyword arglistskw = Keyword.intern(null, "arglists");
             Symbol namesym = Symbol.create("name");
 
             OUT.Tag = Symbol.create("System.IO.TextWriter");
 
-            CURRENT_NS.Tag = Symbol.create("closure.lang.Namespace");
+            CURRENT_NS.Tag = Symbol.create("clojure.lang.Namespace");
 
-            AGENT.SetMeta(map(dockw, "The agent currently running an action on this thread, else nil."));
+            AGENT.setMeta(map(dockw, "The agent currently running an action on this thread, else nil."));
             AGENT.Tag = Symbol.create("clojure.lang.Agent");
 
             // We don't have MathContext (yet)
@@ -436,32 +467,29 @@ namespace clojure.lang
 
             Var v;
             v = Var.intern(CLOJURE_NS, IN_NAMESPACE, new InNamespaceFn());
-            v.SetMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
+            v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
                 arglistskw, list(vector(namesym))));
 
             v = Var.intern(CLOJURE_NS, LOAD_FILE, new LoadFileFn());
-            v.SetMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
+            v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
                 arglistskw, list(vector(namesym))));
 
             v = Var.intern(CLOJURE_NS, IDENTICAL, new IdenticalFn());
-            v.SetMeta(map(dockw, "tests if 2 arguments are the same object",
+            v.setMeta(map(dockw, "tests if 2 arguments are the same object",
                 arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
 
-            DoInit();
+            if ( RT_Bootstrap_Flag._doRTBootstrap )
+                DoInit();
         }
 
-        //  The original Java is doing this here.
-        // We're pushing this over to the console, for now.
-        // Eventually, we'll push it back here because it is always needed.
         static void DoInit()
         {
-            // Eventually, load core.clj and other support files from here (?)
-            //load("clojure/core");
-            //load("clojure/zip", false);
+            load("clojure/core");
+            load("clojure/zip", false);
             //load("clojure/xml", false);
-            //load("clojure/set", false);
+            load("clojure/set", false);
 
-            //PostBootstrapInit();
+            PostBootstrapInit();
         }
 
         public static void PostBootstrapInit()
@@ -478,7 +506,7 @@ namespace clojure.lang
                 Var refer = var("clojure.core", "refer");
                 in_ns.invoke(USER);
                 refer.invoke(CLOJURE);
-                //maybeLoadResourceScript("user.clj");
+                MaybeLoadCljScript("user.clj");
             }
             finally
             {
@@ -520,19 +548,21 @@ namespace clojure.lang
 
         public static ISeq seq(object coll)
         {
-            if (coll == null)
-                return null;
-            else if (coll is ISeq)
-                return (ISeq)coll;
-            else if (coll is IPersistentCollection)
-                return ((IPersistentCollection)coll).seq();
+            if (coll is ASeq)
+                return (ASeq)coll;
+            else if (coll is LazySeq)
+                return ((LazySeq)coll).seq();
             else
                 return seqFrom(coll);
         }
 
         private static ISeq seqFrom(object coll)
         {
-            if (coll is IEnumerable)  // java: Iterable
+            if (coll is Seqable)
+                return ((Seqable)coll).seq();
+            else if (coll == null)
+                return null;
+            else if (coll is IEnumerable)  // java: Iterable
                 return EnumeratorSeq.create(((IEnumerable)coll).GetEnumerator());  // IteratorSeq
             else if (coll.GetType().IsArray)
                 return ArraySeq.createFromObject(coll);
@@ -541,31 +571,30 @@ namespace clojure.lang
             // The equivalent for Java:Map is IDictionary.  IDictionary is IEnumerable, so is handled above.
             //else if(coll isntanceof Map)  
             //     return seq(((Map) coll).entrySet());
-            else if (coll is IEnumerator)  // java: Iterator
-                return EnumeratorSeq.create((IEnumerator)coll);
-             else
+            // Used to be in the java version:
+            //else if (coll is IEnumerator)  // java: Iterator
+            //    return EnumeratorSeq.create((IEnumerator)coll);
+            else
                 throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().Name);
         }
 
 
 
-        static public IStream stream(object coll) {
+        static public Stream stream(object coll) {
             if (coll == null)
-                return EMPTY_STREAM;
-            else if (coll is IStream)
-                return (IStream)coll;
+                return new Stream(EMPTY_GEN);
             else if (coll is Streamable)
                 return ((Streamable)coll).stream();
             else if (coll is Fn)  // TODO: Note use of Fn to imply castable to IFn.  Should we do this? Why not just check for IFn?
-                return new FnStream((IFn)coll);
+                return new Stream((IFn)coll);
             else if (coll is IEnumerable)  // java: Iterable
-                return new IteratorStream(((IEnumerable)coll).GetEnumerator());  // java: IteratorStream
+                return new Stream(new IteratorStream(((IEnumerable)coll).GetEnumerator()));  // java: IteratorStream
             else if (coll.GetType().IsArray)
                 return ArrayStream.createFromObject(coll);
             else if (coll is String)
                 return ArrayStream.createFromObject(((String)coll).ToCharArray());
-
-            throw new ArgumentException("Don't know how to create IStream from: " + coll.GetType().Name);
+            else
+                return new Stream(new ASeq.Src(RT.seq(coll)));
         }
 
 
@@ -599,7 +628,7 @@ namespace clojure.lang
                 ISeq s = seq(o);
                 o = null;
                 int i = 0;
-                for (; s != null; s = s.rest())
+                for (; s != null; s = s.next())
                 {
                     if (s is Counted)
                         return i + s.count();
@@ -628,10 +657,13 @@ namespace clojure.lang
 
         public static ISeq cons(object x, object coll)
         {
-            ISeq y = seq(coll);
-            return y == null
-                ? new PersistentList(x)
-                : y.cons(x);
+            //ISeq y = seq(coll);
+            if (coll == null)
+                return new PersistentList(x);
+            else if (coll is ISeq)
+                return new Cons(x, (ISeq)coll);
+            else
+                return new Cons(x, seq(coll));
         }
 
         public static object first(object x)
@@ -646,33 +678,40 @@ namespace clojure.lang
 
         public static object second(object x)
         {
-            return first(rest(x));
+            return first(next(x));
         }
 
         public static object third(object x)
         {
-            return first(rest(rest(x)));
+            return first(next(next(x)));
         }
 
         public static object fourth(object x)
         {
-            return first(rest(rest(rest(x))));
+            return first(next(next(next(x))));
         }
 
-        public static ISeq rest(object x)
+        public static ISeq next(object x)
         {
             if (x is ISeq)
-                return ((ISeq)x).rest();
+                return ((ISeq)x).next();
             ISeq seq = RT.seq(x);
             if (seq == null)
                 return null;
-            return seq.rest();
+            return seq.next();
         }
 
-        public static ISeq rrest(object x)
+        public static ISeq more(object x)
         {
-            return rest(rest(x));
+            if (x is ISeq)
+                return ((ISeq)x).more();
+            ISeq seq = RT.seq(x);
+            if (seq == null)
+                return PersistentList.EMPTY;
+            return seq.more();
         }
+
+
 
         public static object peek(object x)
         {
@@ -834,10 +873,9 @@ namespace clojure.lang
             }
             else if (coll is Sequential)
             {
-                // TODO: FIX: Another assumption that Sequential implies castable to IPersistentCollection
-                ISeq seq = ((IPersistentCollection)coll).seq();
+                ISeq seq = RT.seq(coll);
                 coll = null;  
-                for (int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+                for (int i = 0; i <= n && seq != null; ++i, seq = seq.next())
                 {
                     if (i == n)
                         return seq.first();
@@ -918,10 +956,9 @@ namespace clojure.lang
             }
             else if (coll is Sequential)
             {
-                // TODO: FIX: ANother place where Sequential => IPersistentCollection
-                ISeq seq = ((IPersistentCollection)coll).seq();
+                ISeq seq = RT.seq(coll);
                 coll = null;  // release in case GC
-                for (int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+                for (int i = 0; i <= n && seq != null; ++i, seq = seq.next())
                 {
                     if (i == n)
                         return seq.first();
@@ -1180,7 +1217,7 @@ namespace clojure.lang
         public static object[] toArray(object coll)
         {
             if (coll == null)
-                return EMPTY_ARRAY;
+                return EMPTY_OBJECT_ARRAY;
             else if (coll is object[])
                 return (object[])coll;
             // In CLR, ICollection does not have a toArray.  
@@ -1209,7 +1246,7 @@ namespace clojure.lang
             {
                 ISeq s = (seq(coll));
                 object[] ret = new object[count(s)];
-                for (int i = 0; i < ret.Length; i++, s = s.rest())
+                for (int i = 0; i < ret.Length; i++, s = s.next())
                     ret[i] = s.first();
                 return ret;
             }
@@ -1242,7 +1279,7 @@ namespace clojure.lang
 
             T[] array = new T[RT.Length(x)];
             int i = 0;
-            for (ISeq s = x; s != null; s = s.rest(), i++)
+            for (ISeq s = x; s != null; s = s.next(), i++)
                 array[i] = (T)s.first();
             return array;
         }
@@ -1258,7 +1295,7 @@ namespace clojure.lang
         static public object seqToTypedArray(Type type, ISeq seq)
         {
             Array ret = Array.CreateInstance(type, seq == null ? 0 : seq.count());
-            for (int i = 0; seq != null; ++i, seq = seq.rest())
+            for (int i = 0; seq != null; ++i, seq = seq.next())
                 ret.SetValue(seq.first(), i);
             return ret;
         }
@@ -1266,7 +1303,7 @@ namespace clojure.lang
         static public int Length(ISeq list)
         {
             int i = 0;
-            for (ISeq c = list; c != null; c = c.rest())
+            for (ISeq c = list; c != null; c = c.next())
                 i++;
             return i;
         }
@@ -1274,7 +1311,7 @@ namespace clojure.lang
         public static int BoundedLength(ISeq list, int limit)
         {
             int i = 0;
-            for (ISeq c = list; c != null && i <= limit; c = c.rest())
+            for (ISeq c = list; c != null && i <= limit; c = c.next())
             {
                 i++;
             }
@@ -1293,15 +1330,17 @@ namespace clojure.lang
 
         static public string printString(object x)
         {
-            StringWriter sw = new StringWriter();
-            print(x, sw);
-            return sw.ToString();
+            using (StringWriter sw = new StringWriter())
+            {
+                print(x, sw);
+                return sw.ToString();
+            }
         }
 
         static public Object readString(String s)
         {
-            TextReader r = new StringReader(s);
-            return LispReader.read(r, true, null, false);
+            using (PushbackTextReader r = new PushbackTextReader(new StringReader(s)))
+                return LispReader.read(r, true, null, false);
         }
 
         static public void print(Object x, TextWriter w)
@@ -1319,7 +1358,9 @@ namespace clojure.lang
             if (x is Obj)
             {
                 Obj o = x as Obj;
-                if (RT.count(o.meta()) > 0 && readably && booleanCast(PRINT_META.deref()))
+                if (RT.count(o.meta()) > 0 && 
+                     ((readably && booleanCast(PRINT_META.deref()))
+                    || booleanCast(PRINT_DUP.deref())))
                 {
                     IPersistentMap meta = o.meta();
                     w.Write("#^");
@@ -1383,13 +1424,13 @@ namespace clojure.lang
             else if (x is IPersistentMap)
             {
                 w.Write('{');
-                for (ISeq s = seq(x); s != null; s = s.rest())
+                for (ISeq s = seq(x); s != null; s = s.next())
                 {
                     IMapEntry e = (IMapEntry)s.first();
                     print(e.key(), w);
                     w.Write(' ');
                     print(e.val(), w);
-                    if (s.rest() != null)
+                    if (s.next() != null)
                         w.Write(", ");
                 }
                 w.Write('}');
@@ -1410,10 +1451,10 @@ namespace clojure.lang
             else if (x is IPersistentSet)
             {
                 w.Write("#{");
-                for (ISeq s = seq(x); s != null; s = s.rest())
+                for (ISeq s = seq(x); s != null; s = s.next())
                 {
                     print(s.first(), w);
-                    if (s.rest() != null)
+                    if (s.next() != null)
                         w.Write(" ");
                 }
                 w.Write('}');
@@ -1467,6 +1508,22 @@ namespace clojure.lang
                 Var v = x as Var;
                 w.Write("#=(var {0}/{1})", v.Namespace.Name, v.Symbol);
             }
+            //else
+            //    w.Write(x.ToString());
+            // The clause above is what Java has, and would have been nice.
+            // Doesn't work for me, for one reason:  
+            // When generating initializations for static variables in the classes representing IFns,
+            //    let's say the value is the double 7.0.
+            //    we generate code that says   (double)RT.readFromString("7")
+            //    so we get a boxed int, which CLR won't cast to double.  Sigh.
+            //    So I need double/float to print a trailing .0 even when integer-valued.
+            else if (x is double || x is float)
+            {
+                string s = x.ToString();
+                if (!s.Contains('.') && !s.Contains('E'))
+                    s = s + ".0";
+                w.Write(s);
+            }
             else
                 w.Write(x.ToString());
         }
@@ -1474,10 +1531,10 @@ namespace clojure.lang
 
         private static void printInnerSeq(ISeq x, TextWriter w)
         {
-            for (ISeq s = x; s != null; s = s.rest())
+            for (ISeq s = x; s != null; s = s.next())
             {
                 print(s.first(), w);
-                if (s.rest() != null)
+                if (s.next() != null)
                     w.Write(' ');
             }
         }
@@ -1574,59 +1631,19 @@ namespace clojure.lang
 
         #region Stream support
 
-        private static readonly object EOS = new object();
+        public static readonly object EOS = new object();
+        public static readonly object SKIP = new object();
 
-        public static object eos()
+
+        public static readonly IFn EMPTY_GEN = new EmptyGen();
+
+        private class EmptyGen: AFn
         {
-            return EOS;
-        }
-
-        public static bool isEOS(object o)
-        {
-            return o == EOS;
-        }
-
-        public static readonly IStream EMPTY_STREAM = new EmptyStream();
-
-        private class EmptyStream : IStream
-        {
-            #region IStream Members
-
-            public object next()
+            [MethodImpl(MethodImplOptions.Synchronized)]  // TODO: Why is this synchronized?
+            public override object invoke()
             {
-                return eos();
+                return EOS;
             }
-
-            #endregion
-        }
-
-
-        private class FnStream : IStream
-        {
-
-            #region Data
-
-            IFn _fn;
-
-            #endregion
-
-            #region C-tors
-
-            public FnStream(IFn fn)
-            {
-                _fn = fn;
-            }
-
-            #endregion
-
-            #region IStream Members
-
-            public object next()
-            {
-                return _fn.invoke();
-            }
-
-            #endregion
         }
 
 
@@ -1761,15 +1778,112 @@ namespace clojure.lang
             }
         }
 
-        // TODO: Figure out how to do a load.
-        public static object load(object pathname)
+        #endregion
+
+        #region Loading/compiling
+
+        public static void load(String pathname)
         {
+            load(pathname, true);
+        }
+
+        public static void load(String pathname, Boolean failIfNotFound)
+        {
+            string assemblyname = pathname + ".clj.dll";
+            string cljname = pathname + ".clj";
+
+            FileInfo assyInfo = FindFile(assemblyname);
+            FileInfo cljInfo = FindFile(cljname);
+
+            bool loaded = false;
+
+            if ((assyInfo != null &&
+                (cljInfo == null || assyInfo.LastWriteTime > cljInfo.LastWriteTime)))
+            {
+                try
+                {
+                    Var.pushThreadBindings(RT.map(CURRENT_NS, CURRENT_NS.deref(),
+                        WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+                    loaded = Compiler.LoadAssembly(assyInfo);
+                }
+                finally
+                {
+                    Var.popThreadBindings();
+                }
+            }
+
+            if (!loaded && cljInfo != null)
+            {
+                if (booleanCast(Compiler.COMPILE_FILES.deref()))
+                    Compile(cljInfo);
+                else
+                    LoadScript(cljInfo); ;
+            }
+            else if (!loaded && failIfNotFound)
+                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
+
+
+        }
+
+        private static void MaybeLoadCljScript(string cljname)
+        {
+            LoadCljScript(cljname, false);
+        }
+
+        static void LoadCljScript(string cljname)
+        {
+            LoadCljScript(cljname, true);
+        }
+
+        static void LoadCljScript(string cljname, bool failIfNotFound)
+        {
+            FileInfo cljInfo = FindFile(cljname);
+            if (cljInfo != null)
+                LoadScript(cljInfo);
+            else if (failIfNotFound)
+                throw new FileNotFoundException(String.Format("Could not locate Clojure resource on {0}", CLOJURE_LOAD_PATH));
+        }
+
+
+        public  static void LoadScript(FileInfo cljInfo)
+        {
+            using (TextReader rdr = cljInfo.OpenText())
+                Compiler.load(rdr, cljInfo.FullName, cljInfo.Name);
+        }
+
+
+        private static void Compile(FileInfo cljInfo)
+        {
+            using ( TextReader rdr = cljInfo.OpenText() )
+                Compiler.Compile(rdr, cljInfo.Directory.FullName, cljInfo.Name);
+        }
+
+
+        static FileInfo FindFile(string filename)
+        {
+            // check the current directory, then any directory in environment variable clojure.load.path
+            string currDir = Directory.GetCurrentDirectory();
+            string probePath = ConvertPath(currDir + "\\" + filename);  // TODO: Something other than hardwired \\?
+            if (File.Exists(probePath))
+                return new FileInfo(probePath);
+
+            string rawpaths = (string)System.Environment.GetEnvironmentVariables()[CLOJURE_LOAD_PATH];
+            if (rawpaths == null)
+                return null;
+            string[] paths = rawpaths.Split(Path.PathSeparator);
+            foreach (string path in paths)
+            {
+                probePath = ConvertPath(path + "\\" + filename);
+                if (File.Exists(probePath))
+                    return new FileInfo(probePath);
+            }
+
             return null;
         }
 
-        public static void LookAtMe(object o)
+        static string ConvertPath(string path)
         {
-            Console.WriteLine("Here it is: {0}", o);
+            return path.Replace('/', '\\');
         }
 
         #endregion

@@ -61,6 +61,7 @@
     <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FixtureSetupClass.cs" />
     <Compile Include="LibTests\EnumeratorSeqTests.cs" />
     <Compile Include="LibTests\AFnImplTests.cs" />
     <Compile Include="LibTests\AgentTests.cs" />
@@ -73,13 +74,12 @@
     <Compile Include="LibTests\CachedSeqTests.cs" />
     <Compile Include="LibTests\ConsTests.cs" />
     <Compile Include="LibTests\DelayTests.cs" />
-    <Compile Include="LibTests\FnSeqTests.cs" />
     <Compile Include="LibTests\IObjTests.cs" />
     <Compile Include="LibTests\ISeqTestHelper.cs" />
     <Compile Include="LibTests\IteratorStreamTests.cs" />
     <Compile Include="LibTests\KeywordTests.cs" />
     <Compile Include="LibTests\LazilyPersistentVectorTests.cs" />
-    <Compile Include="LibTests\LazyConsTests.cs" />
+    <Compile Include="LibTests\LazySeqTests.cs" />
     <Compile Include="LibTests\LispReaderTests.cs" />
     <Compile Include="LibTests\LockingTransactionTests.cs" />
     <Compile Include="LibTests\MapEntryTests.cs" />
@@ -100,10 +100,11 @@
     <Compile Include="LibTests\RefTests.cs" />
     <Compile Include="LibTests\RestFnImplTests.cs" />
     <Compile Include="LibTests\RestFnTests.cs" />
-    <Compile Include="LibTests\StreamSeqTests.cs" />
+    <Compile Include="LibTests\StreamTests.cs" />
     <Compile Include="LibTests\StringSeqTests.cs" />
     <Compile Include="LibTests\SymbolTests.cs" />
     <Compile Include="LibTests\TestTest.cs" />
+    <Compile Include="ReaderTests\LineNumberingTextReaderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Clojure\Clojure.csproj">

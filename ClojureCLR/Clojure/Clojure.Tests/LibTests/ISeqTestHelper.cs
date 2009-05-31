@@ -23,7 +23,7 @@ namespace Clojure.Tests.LibTests
         {
             int i=0;
 
-            for (; s != null; s = s.rest(), i++)
+            for (; s != null; s = s.next(), i++)
                 Expect(s.first(), EqualTo(values[i]));
 
             Expect(i, EqualTo(values.Count));
@@ -34,21 +34,21 @@ namespace Clojure.Tests.LibTests
             ISeq newSeq = s.cons(newVal);
 
             Expect(newSeq.first(), EqualTo(newVal));
-            VerifyISeqContents(newSeq.rest(), values);
+            VerifyISeqContents(newSeq.next(), values);
         }
 
         public void VerifyISeqRestTypes(ISeq s, Type type)
         {
-            for ( ; s.rest() != null; s = s.rest())
-                Expect(s.rest(), InstanceOfType(type));
+            for ( ; s.next() != null; s = s.next())
+                Expect(s.next(), InstanceOfType(type));
         }
 
         public void VerifyISeqRestMaintainsMeta(ISeq s)
         {
             IPersistentMap meta = ((IMeta)s).meta();
 
-            for (; s.rest() != null; s = s.rest())
-                Expect(((IMeta)s.rest()).meta(), EqualTo(meta));
+            for (; s.next() != null; s = s.next())
+                Expect(((IMeta)s.next()).meta(), EqualTo(meta));
         }
     }
 }

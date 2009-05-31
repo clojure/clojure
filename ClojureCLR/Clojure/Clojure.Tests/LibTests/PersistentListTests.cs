@@ -34,7 +34,7 @@ namespace Clojure.Tests.LibTests
             PersistentList p = new PersistentList("abc");
 
             Expect(p.first(), EqualTo("abc"));
-            Expect(p.rest(), Null);
+            Expect(p.next(), Null);
             Expect(p.count(), EqualTo(1));
         }
 
@@ -48,10 +48,10 @@ namespace Clojure.Tests.LibTests
 
             ISeq s = p.seq();
             Expect(s.first(), EqualTo(1));
-            Expect(s.rest().first(), EqualTo("abc"));
-            Expect(s.rest().rest().first(), EqualTo(2));
-            Expect(s.rest().rest().rest().first(), EqualTo("def"));
-            Expect(s.rest().rest().rest().rest(), Null);
+            Expect(s.next().first(), EqualTo("abc"));
+            Expect(s.next().next().first(), EqualTo(2));
+            Expect(s.next().next().next().first(), EqualTo("def"));
+            Expect(s.next().next().next().next(), Null);
         }
 
 

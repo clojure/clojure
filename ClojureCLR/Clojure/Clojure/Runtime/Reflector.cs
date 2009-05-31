@@ -13,8 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using clojure.lang;
 
-namespace clojure.runtime
+namespace clojure.lang
 {
     public sealed class Reflector
     {
@@ -52,8 +53,49 @@ namespace clojure.runtime
             //return InvokeMatchingMethod(methodName, infos, t, null, args);
         }
 
+        public static Object InvokeStaticMethod(String typeName, String methodName, Object[] args)
+        {
+            Type t = RT.classForName(typeName);
+            return InvokeStaticMethod(t, methodName, args);
+        }
 
+        public static Object InvokeStaticMethod(Type t, String methodName, Object[] args)
+        {
+            if (methodName.Equals("new"))
+                return InvokeConstructor(t, args);
+            List<MethodInfo> methods = GetMethods(t, args.Length, methodName, true);
+            return InvokeMatchingMethod(methodName,methods, t, null, args);
+        }
 
+        public static object SetInstanceFieldOrMethod(object target, string fieldname, object val)
+        {
+            Type t = target.GetType();
+            FieldInfo field = t.GetField(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            if (field != null)
+            {
+                field.SetValue(target, val);
+                return val;
+            }
+            PropertyInfo prop = t.GetProperty(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            if (prop != null)
+            {
+                prop.SetValue(target, val, new object[0]);
+                return val;
+            }
+            throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
+        }
+
+        public static List<MethodInfo> GetMethods(Type t, int arity, string name, bool getStatics)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+            if (getStatics)
+                flags |= BindingFlags.Static;
+
+            IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == arity);
+            List<MethodInfo> infos = new List<MethodInfo>(einfo);
+
+            return infos;
+        }
 
         public static object CallInstanceMethod(string methodName, object target, params object[] args)
         {
@@ -166,7 +208,7 @@ namespace clojure.runtime
         }
 
 
-        private static bool Subsumes(ParameterInfo[] c1, ParameterInfo[] c2)
+        internal static bool Subsumes(ParameterInfo[] c1, ParameterInfo[] c2)
         {
             //presumes matching lengths
             Boolean better = false;
@@ -251,11 +293,22 @@ namespace clojure.runtime
             return ret;
         }
 
-        private static bool ParamArgTypeMatch(Type paramType, Type argType)
+        internal static bool ParamArgTypeMatch(Type paramType, Type argType)
         {
             if (argType == null)
                 return !paramType.IsPrimitive;
             return AreAssignable(paramType, argType);
+        }
+
+
+        // Java version has this in Reflector, but that is in my SimpleREPL. DOn't want to embed calls there.
+        public static Object prepRet(Object x)
+        {
+            //	if(c == boolean.class)
+            //		return ((Boolean) x).booleanValue() ? RT.T : null;
+            if (x is Boolean)
+                return ((Boolean)x) ? RT.T : RT.F;
+            return x;
         }
 
         // Stolen from DLR TypeUtils

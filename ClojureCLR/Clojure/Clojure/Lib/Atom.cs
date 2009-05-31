@@ -85,8 +85,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    if (v != newv)
-                        notifyWatches();
+                    notifyWatches(v,newv);
                     return newv;
                 }
             }
@@ -108,8 +107,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    if (v != newv)
-                        notifyWatches();
+                    notifyWatches(v,newv);
                     return newv;
                 }
             }
@@ -132,8 +130,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    if (v != newv)
-                        notifyWatches();
+                    notifyWatches(v, newv);
                     return newv;
                 }
             }
@@ -157,8 +154,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    if (v != newv)
-                        notifyWatches();
+                    notifyWatches(v, newv);
                     return newv;
                 }
             }
@@ -174,8 +170,8 @@ namespace clojure.lang
         {
             Validate(newv);
             bool ret =  _state.CompareAndSet(oldv, newv);
-            if (ret && oldv != newv)
-                notifyWatches();
+            if (ret )
+                notifyWatches(oldv, newv);
             return ret;
         }
 
@@ -187,9 +183,10 @@ namespace clojure.lang
         /// <returns>The new value.</returns>
         public object reset(object newv)
         {
+            object oldv = _state.Get();
             Validate(newv);
             _state.Set(newv);
-            notifyWatches();
+            notifyWatches(oldv, newv);
             return newv;
         }
 

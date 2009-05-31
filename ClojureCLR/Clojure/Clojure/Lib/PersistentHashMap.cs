@@ -111,11 +111,11 @@ namespace clojure.lang
         public static PersistentHashMap create(ISeq items)
         {
             IPersistentMap ret = EMPTY;
-            for ( ; items != null; items = items.rest().rest() )
+            for ( ; items != null; items = items.next().next() )
             {
-                if ( items.rest() == null )
+                if ( items.next() == null )
                     throw new ArgumentException(String.Format("No value supplied for key: {0}", items.first()));
-                ret = ret.assoc(items.first(), items.rest().first() );
+                ret = ret.assoc(items.first(), RT.second(items) );
             }
             return (PersistentHashMap)ret;
         }
@@ -523,9 +523,9 @@ namespace clojure.lang
                     return _s.first();
                 }
 
-                public override ISeq rest()
+                public override ISeq next()
                 {
-                    ISeq nexts = _s.rest();
+                    ISeq nexts = _s.next();
                     return nexts != null
                         ? new Seq(nexts, _i, _node)
                         : create(_node, _i + 1);
@@ -808,9 +808,9 @@ namespace clojure.lang
                     return _s.first();
                 }
 
-                public override ISeq rest()
+                public override ISeq next()
                 {
-                    ISeq nexts = _s.rest();
+                    ISeq nexts = _s.next();
                     return ( nexts != null )
                         ? new Seq(nexts,_i,_node)
                         : create(_node, _i+1);

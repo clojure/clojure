@@ -77,15 +77,14 @@ namespace clojure.lang
         /// <returns><value>true</value> if they are the same; <value>false</value> otherwise.</returns>
         public override bool Equals(object obj)
         {
-            // TODO: Another example of Sequential/IPersistentCollection identity
             if (!(obj is Sequential))
                 return false;
 
-            ISeq ms = ((IPersistentCollection)obj).seq();
-            for (ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+            ISeq ms = RT.seq(obj);
+            for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
                 if (ms == null || !Util.equals(s.first(), ms.first()))
                     return false;
-            return ms.rest() == null;
+            return ms.next() == null;
         }
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace clojure.lang
             if (_hash == -1)
             {
                 int hash = 0;
-                for (ISeq s = seq(); s != null; s = s.rest())
+                for (ISeq s = seq(); s != null; s = s.next())
                     hash = Util.HashCombine(hash, Util.Hash(s.first()));
                 _hash = hash;
             }
@@ -143,7 +142,7 @@ namespace clojure.lang
         {
             if (_f == null) //Java code: hmmmm... pop of empty queue => empty queue?
                 return this;
-            ISeq f1 = _f.rest();
+            ISeq f1 = _f.next();
             IPersistentVector r1 = _r;
             if ( f1 == null )
             {
@@ -197,15 +196,14 @@ namespace clojure.lang
 
         public bool equiv(object o)
         {
-            // TODO: Another example of Sequential/IPersistentCollection identity
             if (!(o is Sequential))
                 return false;
 
-            ISeq ms = ((IPersistentCollection)o).seq();
-            for ( ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+            ISeq ms = RT.seq(o);
+            for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
                 if ( ms == null || ! Util.equiv(s.first(),ms.first()))
                     return false;
-            return ms.rest() == null;
+            return ms.next() == null;
         }
 
 
@@ -217,10 +215,10 @@ namespace clojure.lang
         {
             int i = index;
             ISeq s;
-            for ( s = _f; s != null; s = s.rest(), i++)
+            for ( s = _f; s != null; s = s.next(), i++)
                 array.SetValue(s.first(), i);
 
-            for (s = _r.seq(); s != null; s = s.rest(), i++)
+            for (s = _r.seq(); s != null; s = s.next(), i++)
                 array.SetValue(s.first(), i);    
         }
 
@@ -246,10 +244,10 @@ namespace clojure.lang
         public IEnumerator GetEnumerator()
         {
             ISeq s;
-            for (s = _f; s != null; s = s.rest())
+            for (s = _f; s != null; s = s.next())
                 yield return s.first();
 
-            for (s = _r.seq(); s != null; s = s.rest())
+            for (s = _r.seq(); s != null; s = s.next())
                 yield return s.first();
         }
 
@@ -341,12 +339,12 @@ namespace clojure.lang
             }
 
             /// <summary>
-            /// Gets the rest of the sequence.
+            /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
             /// </summary>
-            /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-            public override ISeq rest()
+            /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+            public override ISeq next()
             {
-                ISeq f1 = _f.rest();
+                ISeq f1 = _f.next();
                 ISeq r1 = _rseq;
                 if (f1 == null)
                 {

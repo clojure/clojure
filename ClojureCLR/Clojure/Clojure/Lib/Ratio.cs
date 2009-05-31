@@ -31,7 +31,8 @@ namespace clojure.lang
         /// <summary>
         /// Get the numerator.
         /// </summary>
-        public BigInteger Numerator
+        /// <remarks>Initial lowercase for core.clj compatibility.</remarks>
+        public BigInteger numerator
         {
             get { return _numerator; }
         }
@@ -44,7 +45,8 @@ namespace clojure.lang
         /// <summary>
         /// Get the denominator.
         /// </summary>
-        public BigInteger Denominator
+        /// <remarks>Initial lowercase for core.clj compatibility.</remarks>
+        public BigInteger denominator
         {
             get { return _denominator; }
         } 
@@ -202,8 +204,8 @@ namespace clojure.lang
         // TODO: Look at all these conversions.
         public BigDecimal ToBigDecimal()
         {
-            BigDecimal numerator = new BigDecimal(this.Numerator);
-            BigDecimal denominator = new BigDecimal(this.Denominator);
+            BigDecimal numerator = new BigDecimal(this.numerator);
+            BigDecimal denominator = new BigDecimal(this.denominator);
             return numerator.divide(denominator, 0);
         }
 

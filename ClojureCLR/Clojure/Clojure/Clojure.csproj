@@ -37,6 +37,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -48,20 +51,76 @@
     <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CljCompiler\Ast\AFnImplGenerator.cs" />
+    <Compile Include="CljCompiler\Ast\AssignableExpr.cs" />
+    <Compile Include="CljCompiler\Ast\AssignExpr.cs" />
+    <Compile Include="CljCompiler\Ast\BindingInit.cs" />
+    <Compile Include="CljCompiler\Ast\BooleanExpr.cs" />
+    <Compile Include="CljCompiler\Ast\ConstantExpr.cs" />
+    <Compile Include="CljCompiler\Ast\DefExpr.cs" />
+    <Compile Include="CljCompiler\Ast\BodyExpr.cs" />
+    <Compile Include="CljCompiler\Ast\EmptyExpr.cs" />
+    <Compile Include="CljCompiler\Ast\Expr.cs" />
+    <Compile Include="CljCompiler\Ast\FieldExpr.cs" />
+    <Compile Include="CljCompiler\Ast\FnExpr.cs" />
+    <Compile Include="CljCompiler\Ast\FnMethod.cs" />
+    <Compile Include="CljCompiler\Ast\GenContext.cs" />
+    <Compile Include="CljCompiler\Ast\HostExpr.cs" />
+    <Compile Include="CljCompiler\Ast\IfExpr.cs" />
+    <Compile Include="CljCompiler\Ast\ImportExpr.cs" />
+    <Compile Include="CljCompiler\Ast\InstanceFieldExpr.cs" />
+    <Compile Include="CljCompiler\Ast\InstanceMethodExpr.cs" />
+    <Compile Include="CljCompiler\Ast\InvokeExpr.cs" />
+    <Compile Include="CljCompiler\Ast\IParser.cs" />
+    <Compile Include="CljCompiler\Ast\KeywordExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LetExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LetFnExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LiteralExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LocalBinding.cs" />
+    <Compile Include="CljCompiler\Ast\LocalBindingExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MapExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MaybePrimitiveExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MetaExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MethodExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MonitorEnterExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MonitorExitExpr.cs" />
+    <Compile Include="CljCompiler\Ast\NewExpr.cs" />
+    <Compile Include="CljCompiler\Ast\NilExpr.cs" />
+    <Compile Include="CljCompiler\Ast\Node.cs" />
+    <Compile Include="CljCompiler\Ast\RecurExpr.cs" />
+    <Compile Include="CljCompiler\Ast\SetExpr.cs" />
+    <Compile Include="CljCompiler\Ast\StaticFieldExpr.cs" />
+    <Compile Include="CljCompiler\Ast\StaticMethodExpr.cs" />
+    <Compile Include="CljCompiler\Ast\TheVarExpr.cs" />
+    <Compile Include="CljCompiler\Ast\ThrowExpr.cs" />
+    <Compile Include="CljCompiler\Ast\TryExpr.cs" />
+    <Compile Include="CljCompiler\Ast\UnresolvedVarExpr.cs" />
+    <Compile Include="CljCompiler\Ast\UntypedExpr.cs" />
+    <Compile Include="CljCompiler\Ast\VarExpr.cs" />
+    <Compile Include="CljCompiler\Ast\VectorExpr.cs" />
+    <Compile Include="CljCompiler\Ast\StringExpr.cs" />
+    <Compile Include="Lib\ArrayHelper.cs" />
     <Compile Include="Lib\Counted.cs" />
     <Compile Include="Lib\EnumeratorSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
-    <Compile Include="Readers\LineNumberingReader.cs" />
+    <Compile Include="Lib\LazySeq.cs" />
+    <Compile Include="Lib\Seqable.cs" />
+    <Compile Include="Lib\Stream.cs" />
+    <Compile Include="Readers\LineNumberingTextReader.cs" />
+    <Compile Include="Readers\PushbackTextReader.cs" />
     <Compile Include="Runtime\ClojureBinder.cs" />
     <Compile Include="Runtime\ClojureCommandLine.cs" />
+    <Compile Include="Runtime\ClojureConsoleOptions.cs" />
     <Compile Include="Runtime\ClojureContext.cs" />
+    <Compile Include="Runtime\ClojureHostUtils.cs" />
+    <Compile Include="Runtime\ClojureOptionsParser.cs" />
     <Compile Include="Runtime\ClojureParser.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Compiler\Generator.cs" />
+    <Compile Include="CljCompiler\Generator.cs" />
     <Compile Include="Lib\AFn.cs" />
     <Compile Include="Lib\AFnImpl.cs" />
     <Compile Include="Lib\AFunction.cs" />
@@ -81,13 +140,11 @@
     <Compile Include="Lib\AtomicLong.cs" />
     <Compile Include="Lib\AtomicReference.cs" />
     <Compile Include="Lib\Box.cs" />
-    <Compile Include="Lib\CachedSeq.cs" />
     <Compile Include="Lib\ClojureException.cs" />
-    <Compile Include="Lib\Compiler.cs" />
+    <Compile Include="CljCompiler\Compiler.cs" />
     <Compile Include="Lib\Cons.cs" />
     <Compile Include="Lib\Delay.cs" />
     <Compile Include="Lib\Fn.cs" />
-    <Compile Include="Lib\FnSeq.cs" />
     <Compile Include="Lib\FuncTypes.cs" />
     <Compile Include="Lib\IFn.cs" />
     <Compile Include="Lib\IMapEntry.cs" />
@@ -104,12 +161,10 @@
     <Compile Include="Lib\IRef.cs" />
     <Compile Include="Lib\IReference.cs" />
     <Compile Include="Lib\ISeq.cs" />
-    <Compile Include="Lib\IStream.cs" />
     <Compile Include="Lib\IteratorStream.cs" />
     <Compile Include="Lib\JavaConcurrentDictionary.cs" />
     <Compile Include="Lib\Keyword.cs" />
     <Compile Include="Lib\LazilyPersistentVector.cs" />
-    <Compile Include="Lib\LazyCons.cs" />
     <Compile Include="Lib\LispReader.cs" />
     <Compile Include="Lib\LockingTransaction.cs" />
     <Compile Include="Lib\MapEntry.cs" />
@@ -141,11 +196,11 @@
     <Compile Include="Lib\Settable.cs" />
     <Compile Include="Lib\Sorted.cs" />
     <Compile Include="Lib\Streamable.cs" />
-    <Compile Include="Lib\StreamSeq.cs" />
     <Compile Include="Lib\StringSeq.cs" />
     <Compile Include="Lib\Symbol.cs" />
     <Compile Include="Lib\Util.cs" />
     <Compile Include="Lib\Var.cs" />
+    <Compile Include="Runtime\Properties.cs" />
     <Compile Include="Runtime\Reflector.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -155,24 +210,29 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
-      <Project>{2AE75F5A-CD1F-4925-9647-AF4D1C282FB4}</Project>
-      <Name>Microsoft.Scripting.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting.Core\Microsoft.Scripting.ExtensionAttribute.csproj">
-      <Project>{8B0F1074-750E-4D64-BF23-A1E0F54261E5}</Project>
-      <Name>Microsoft.Scripting.ExtensionAttribute</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting\Microsoft.Scripting.csproj">
-      <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
-      <Name>Microsoft.Scripting</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="app.config" />
     <None Include="Bootstrap\ants.clj" />
     <None Include="Bootstrap\core-print.clj" />
     <None Include="Bootstrap\core.clj" />
     <None Include="Bootstrap\test.clj" />
+    <None Include="Bootstrap\version.properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Bootstrap\core_print.clj" />
+    <None Include="Bootstrap\main.clj" />
+    <None Include="Bootstrap\set.clj" />
+    <None Include="Bootstrap\zip.clj" />
+    <None Include="Resources\version.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
+      <Project>{2AE75F5A-CD1F-4925-9647-AF4D1C282FB4}</Project>
+      <Name>Microsoft.Scripting.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Scripting\Microsoft.Scripting.csproj">
+      <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
+      <Name>Microsoft.Scripting</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

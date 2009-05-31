@@ -74,7 +74,7 @@ namespace Clojure.Tests.LibTests
         public void Index_of_rest_is_one()
         {
             StringSeq s = StringSeq.create("abc");
-            IndexedSeq i = (IndexedSeq)s.rest();
+            IndexedSeq i = (IndexedSeq)s.next();
 
             Expect(i.index(), EqualTo(1));
         }

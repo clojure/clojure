@@ -75,11 +75,11 @@ namespace clojure.lang
         public static PersistentTreeMap create(ISeq items)
         {
             IPersistentMap ret = EMPTY;
-            for (; items != null; items = items.rest().rest())
+            for (; items != null; items = items.next().next())
             {
-                if (items.rest() == null)
+                if (items.next() == null)
                     throw new ArgumentException(string.Format("No value supplied for key: %s", items.first()));
-                ret = ret.assoc(items.first(), items.rest().first());
+                ret = ret.assoc(items.first(), items.next().first());
             }
             return (PersistentTreeMap)ret;
         }
@@ -94,11 +94,11 @@ namespace clojure.lang
         public static PersistentTreeMap create(IComparer comp, ISeq items)
         {
             IPersistentMap ret = new PersistentTreeMap(comp);
-            for (; items != null; items = items.rest().rest())
+            for (; items != null; items = items.next().next())
             {
-                if (items.rest() == null)
+                if (items.next() == null)
                     throw new ArgumentException(string.Format("No value supplied for key: %s", items.first()));
-                ret = ret.assoc(items.first(), items.rest().first());
+                ret = ret.assoc(items.first(), RT.second(items));
             }
             return (PersistentTreeMap)ret;
         }
@@ -1025,10 +1025,10 @@ namespace clojure.lang
                 return _stack.first();
             }
 
-            public override ISeq rest()
+            public override ISeq next()
             {
                 Node t = (Node)_stack.first();
-                ISeq nextStack = push(_asc ? t.Right : t.Left, _stack.rest(), _asc);
+                ISeq nextStack = push(_asc ? t.Right : t.Left, _stack.next(), _asc);
                 return nextStack != null
                     ? new Seq(nextStack, _asc, _cnt - 1)
                     : null;
@@ -1082,7 +1082,6 @@ namespace clojure.lang
             }
 
             #endregion
-
 
             #region IDictionaryEnumerator Members
 

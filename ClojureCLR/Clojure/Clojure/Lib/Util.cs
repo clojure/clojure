@@ -89,6 +89,22 @@ namespace clojure.lang
             return (int)Convert.ToDouble(o);
         }
 
+        public static long ConvertToLong(object o)
+        {
+            // ToInt64 rounds.  We need truncation.
+            return (long)Convert.ToDouble(o);
+        }
+
+        public static float ConvertToFloat(object o)
+        {
+            return (float)Convert.ToDouble(o);
+        }
+
+        public static double ConvertToDouble(object o)
+        {
+            return ConvertToDouble(o);
+        }
+
         public static bool IsNumeric(object o)
         {
             return o != null && IsNumeric(o.GetType());
@@ -106,6 +122,12 @@ namespace clojure.lang
         public static int Mask(int hash, int shift)
         {
         	return (hash >> shift) & 0x01f;
+        }
+
+
+        public static bool IsPrimitive(Type t)
+        {
+            return t != null && t.IsPrimitive && t != typeof(void);
         }
 
         #region core.clj compatibility
@@ -181,5 +203,10 @@ namespace clojure.lang
 
         #endregion
 
+
+        internal static Exception UnreachableCode()
+        {
+            return new InvalidOperationException("Invalid value in switch: default should not be reached.");
+        }
     }
 }

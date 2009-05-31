@@ -230,8 +230,8 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             ISeq s = m.seq();
             IMapEntry me1 = (IMapEntry)s.first();
-            IMapEntry me2 = (IMapEntry)s.rest().first();
-            ISeq end = s.rest().rest();
+            IMapEntry me2 = (IMapEntry)s.next().first();
+            ISeq end = s.next().next();
 
             Expect(s.count(), EqualTo(2));
             Expect(me1.key(), EqualTo(1) | EqualTo(2));
