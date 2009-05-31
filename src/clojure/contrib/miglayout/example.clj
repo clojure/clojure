@@ -8,8 +8,8 @@
 ;;
 ;;  clojure.contrib.miglayout.example
 ;;
-;;  Temperature converter using miglayout. Demonstrates accessing components
-;;  by their id constraint.
+;;  A temperature converter using miglayout. Demonstrates accessing
+;;  components by their id constraint.
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 31 May 2009
@@ -29,7 +29,7 @@
    (catch NumberFormatException _ "input?")))
 
 (defn- handle-key
-  "Clear output on most keys, show coversion on \"Enter\""
+  "Clear output on most keys, show conversion on \"Enter\""
   [event in out]
   (.setText out
     (if (= (.getKeyChar event) \newline)
