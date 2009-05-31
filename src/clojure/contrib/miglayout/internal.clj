@@ -14,29 +14,20 @@
 ;;  Created 13 October 2008
 
 (ns clojure.contrib.miglayout.internal
-  (:import (java.awt Container Component)
-           clojure.lang.RT)
+  (:import (clojure.lang RT Reflector)
+           java.awt.Component
+           javax.swing.JComponent)
   (:use (clojure.contrib
+         [core :only (new-by-name)]
          [except :only (throwf)]
          [fcase :only (fcase)]
          [java-utils :only (as-str)])))
 
+(def MigLayout "net.miginfocom.swing.MigLayout")
+(def LayoutCallback "net.miginfocom.layout.LayoutCallback")
+(def ConstraintParser "net.miginfocom.layout.ConstraintParser")
+
 (declare format-constraints)
-
-(defn new-instance
-  "Returns a new instance of MigLayout with the specified constraints"
-  [layout column row]
-  (doto (.newInstance (RT/classForName "net.miginfocom.swing.MigLayout"))
-    (.setLayoutConstraints layout)
-    (.setColumnConstraints column)
-    (.setRowConstraints row)))
-
-(defn add-components
-  "Adds components with constraints to a container"
-  [#^Container container components]
-  (doseq [[#^Component component constraints] components]
-    (.add container component constraints))
-  container)
 
 (defn format-constraint
   "Returns a vector of vectors representing one or more constraints
@@ -62,7 +53,7 @@
           (map as-str
             (rest (reduce concat []
               (mapcat format-constraint constraints)))))]
-    ;(prn formatted)
+;;  (prn formatted)
     formatted))
 
 (defn component?
@@ -93,3 +84,37 @@
            [(if (component? item) :components :keywords)]
            conj [item (apply format-constraints constraints)])))
       item-constraints)))
+
+(defn parse-component-constraint
+  "Parses a component constraint string returning a CC object"
+  [constraint]
+  (Reflector/invokeStaticMethod
+   ConstraintParser "parseComponentConstraint" (into-array [constraint])))
+
+(defn add-components
+  "Adds components with constraints to a container"
+  [#^JComponent container components]
+  (loop [[[#^Component component constraint] & components] components
+         id-map nil]
+    (if component
+      (let [cc (parse-component-constraint constraint)]
+        (.add container component cc)
+        (recur
+         components
+         (if-let [id (.getId cc)]
+           (assoc id-map (keyword id) component)
+           id-map)))
+      (doto container (.putClientProperty ::components id-map)))))
+
+(defn get-components
+  "Returns a map from id to component for all components with an id"
+  [#^JComponent container]
+  (.getClientProperty container ::components))
+
+(defn do-layout
+  "Attaches a MigLayout layout manager to container and adds components
+  with constraints"
+  [#^JComponent container layout column row components]
+  (doto container
+    (.setLayout (new-by-name MigLayout layout column row))
+    (add-components components)))

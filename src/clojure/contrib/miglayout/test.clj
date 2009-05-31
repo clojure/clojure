@@ -22,10 +22,12 @@
 
 (defn run-test
   [index]
-  (doto (JFrame. (format "MigLayout Test %d" index))
-    (.add ((tests index) (JPanel.)))
-    (.pack)
-    (.setVisible true)))
+  (let [panel ((tests index) (JPanel.))]
+    (println index (components panel))
+    (doto (JFrame. (format "MigLayout Test %d" index))
+      (.add panel)
+      (.pack)
+      (.setVisible true))))
 
 (defn label
   "Returns a swing label"
@@ -134,11 +136,10 @@
   (fn test4
     [panel]
     (miglayout panel
-      (label "First Name")
-      (text-field)
+      (label "First Name") 
+      (text-field)        {:id :firstname}
       (label "Surname")   [:gap :unrelated]
-      (text-field)        :wrap
+      (text-field)        {:id :surname} :wrap
       (label "Address")
-      (text-field)        :span :grow))
-
+      (text-field)        {:id :address} :span :grow))
 ])

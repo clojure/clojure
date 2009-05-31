@@ -31,7 +31,7 @@ Example:
 
 "}
   clojure.contrib.miglayout
-  (:import java.awt.Container)
+  (:import javax.swing.JComponent)
   (:use clojure.contrib.miglayout.internal))
 
 (defn miglayout
@@ -61,11 +61,19 @@ Example:
     - A map specifies one or more constraints as keys, each mapped to a
       single argument
     - A set groups two or more constraints, each a string, keyword,
-      vector, map, or set"
-  [#^Container container & args]
+      vector, map, or set
+
+  Any items marked with an \"id\" constraint will be included in a map from
+  id to component attached to the container. The map can be retrieved using
+  clojure.contrib.miglayout/components."
+  [#^JComponent container & args]
   (let [item-constraints (apply parse-item-constraints args)
         {:keys [keywords components]} item-constraints
         {:keys [layout column row]} keywords]
-    (doto container
-      (.setLayout (new-instance layout column row))
-      (add-components components))))
+    (do-layout container layout column row components)))
+
+(defn components
+  "Returns a map from id (a keyword) to component for all components with
+  an id constraint set"
+  [#^JComponent container]
+  (get-components container))
