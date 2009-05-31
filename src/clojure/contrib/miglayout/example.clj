@@ -36,8 +36,7 @@
   "Creates a converter UI"
   []
   (let [panel
-        (miglayout
-         (JPanel.)
+        (miglayout (JPanel.)
          (JTextField.) {:id :input :width 120}
          (JLabel. "\u00b0Celsius") :wrap
          (JButton. "Convert") {:id :convert}
