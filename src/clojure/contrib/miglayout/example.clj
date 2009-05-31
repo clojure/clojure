@@ -44,6 +44,7 @@
       (fn [evt in out] (.setText out (fahrenheit (.getText in))))
       input output)
     (doto (JFrame. "Temperature Converter")
+      (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
       (.add panel)
       (.pack)
       (.setVisible true))))
