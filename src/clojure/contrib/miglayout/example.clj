@@ -15,25 +15,23 @@
 ;;  Created 31 May 2009
 
 (ns clojure.contrib.miglayout.example
-  (:import (javax.swing JButton JFrame JLabel JPanel JTextField)
-           (java.awt.event ActionListener))
+  (:import (javax.swing JButton JFrame JLabel JPanel JTextField))
   (:use (clojure.contrib
          [miglayout :only (miglayout components)]
          [swing-utils :only (add-action-listener)])))
 
 (defn fahrenheit
-  "Converts a string containing a Celsius temperature to a string
-  containing a Fahrenheit temperature. Returns \"input?\" if the
-  input can't be read"
-  [c-str]
+  "Converts a Celsius temperature to Fahrenheit. Input and output are
+  strings. Returns \"input?\" if the input can't be parsed as a Double."
+  [celsius]
   (try
    (format "%.2f \u00b0Fahrenheit"
-           (+ 32 (* 1.8 (Double/parseDouble c-str))))
+           (+ 32 (* 1.8 (Double/parseDouble celsius))))
    (catch NumberFormatException _
      "input?")))
 
 (defn main
-  "Creates a converter UI"
+  "Lays out and displays the Temperature Converter UI"
   []
   (let [panel
         (miglayout (JPanel.)
