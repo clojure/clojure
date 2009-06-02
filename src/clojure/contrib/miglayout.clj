@@ -35,7 +35,7 @@ Example:
   (:use clojure.contrib.miglayout.internal))
 
 (defn miglayout
-  "Adds java.awt.Components to a java.awt.Container with constraints
+  "Adds java.awt.Components to a javax.swing.JComponent with constraints
   formatted for the MiGLayout layout manager.
 
   Arguments: container [item constraint*]*
