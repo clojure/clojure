@@ -149,5 +149,22 @@
     (let [tref (java.lang.ref.WeakReference. t)]
       (dosync (commute break-threads assoc (.getId t) tref)))))
 
+;; ----------------------------------------------------------------------
+;; scgilardi at gmail
+
+(defn run*
+  "Loads the specified namespace and invokes its \"main\" function with
+  optional args."
+  [ns-sym & args]
+  (require ns-sym :reload-all)
+  (apply (ns-resolve ns-sym 'main) args))
+
+(defmacro run
+  "Loads the specified namespace and invokes its \"main\" function with
+  optional args. ns-name is not evaluated."
+  [ns-name & args]
+  `(run* '~ns-name ~@args))
+
+;; ----------------------------------------------------------------------
 
 (load "repl_utils/javadoc")
