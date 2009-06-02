@@ -1,4 +1,4 @@
-;;; test_is/test_fixtures.clj: unit tests for fixtures in test_is.clj
+;;; test_is_fixtures.clj: unit tests for fixtures in test_is.clj
 
 ;; by Stuart Sierra, http://stuartsierra.com/
 ;; March 28, 2009
@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.test-is.test-fixtures
+(ns clojure.contrib.test-contrib.test-is-fixtures
   (:use clojure.contrib.test-is))
 
 (declare *a* *b* *c* *d*)

@@ -1,4 +1,4 @@
-;;; test_is/tests.clj: unit tests for test_is.clj
+;;; test_contrib/test_is.clj: unit tests for test_is.clj
 
 ;; by Stuart Sierra, http://stuartsierra.com/
 ;; January 16, 2009
@@ -15,7 +15,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.test-is.tests
+(ns clojure.contrib.test-contrib.test-is
   (:use clojure.contrib.test-is))
 
 (deftest can-test-symbol
@@ -110,4 +110,4 @@
 (defn test-ns-hook []
   (binding [original-report report
             report custom-report]
-    (test-all-vars (find-ns 'clojure.contrib.test-is.tests))))
+    (test-all-vars (find-ns 'clojure.contrib.test-contrib.test-is))))
