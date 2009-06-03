@@ -184,7 +184,6 @@
       <arg value="clojure.contrib.template"/>
       <arg value="clojure.contrib.test-is"/>
       <arg value="clojure.contrib.test-is.tap"/>
-      <arg value="clojure.contrib.test-is.test-fixtures"/>
       <arg value="clojure.contrib.trace"/>
       <arg value="clojure.contrib.types"/>
       <arg value="clojure.contrib.walk"/>
