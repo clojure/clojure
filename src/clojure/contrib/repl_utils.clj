@@ -9,15 +9,18 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns 
-  #^{:author "Chris Houser",
+  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi",
      :doc "Utilities meant to be used interactively at the REPL"}
   clojure.contrib.repl-utils
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
-           (clojure.lang RT))
+           (clojure.lang RT Compiler Compiler$C))
   (:use [clojure.contrib.seq-utils :only (indexed)]
         [clojure.contrib.javadoc.browse :only (browse-url)]
         [clojure.contrib.str-utils :only (str-join re-sub re-partition)]))
+
+;; ----------------------------------------------------------------------
+;; Examine Java classes
 
 (defn- sortable [t]
   (apply str (map (fn [[a b]] (str a (format "%04d" (Integer. b))))
@@ -88,6 +91,9 @@
               (when (pred m)
                 (printf "[%2d] %s\n" i (:text m)))))))))
 
+;; ----------------------------------------------------------------------
+;; Examine Clojure functions (Vars, really)
+
 (defn get-source
   "Returns a string of the source code for the given symbol, if it can
   find it.  This requires that the symbol resolve to a Var defined in
@@ -118,6 +124,8 @@
   [n]
   `(println (or (get-source '~n) (str "Source not found"))))
 
+;; ----------------------------------------------------------------------
+;; Handle Ctrl-C keystrokes
 
 (def #^{:doc "Threads to stop when Ctrl-C is pressed.  See 'add-break-thread!'"}
   break-threads (ref nil))
@@ -150,6 +158,24 @@
       (dosync (commute break-threads assoc (.getId t) tref)))))
 
 ;; ----------------------------------------------------------------------
+;; Compiler hooks
+
+(defn expression-info
+  "Uses the Clojure compiler to analyze the given s-expr.  Returns
+  a map with keys :class and :primitive? indicating what the compiler
+  concluded about the return value of the expression.  Returns nil if
+  not type info can be determined at compile-time.
+  
+  Example: (expression-info '(+ (int 5) (float 10)))
+  Returns: {:class float, :primitive? true}"
+  [expr]
+  (let [fn-ast (Compiler/analyze Compiler$C/EXPRESSION `(fn [] ~expr))
+        expr-ast (.body (first (.methods fn-ast)))]
+    (when (.hasJavaClass expr-ast)
+      {:class (.getJavaClass expr-ast)
+       :primitive? (.isPrimitive (.getJavaClass expr-ast))})))
+
+;; ----------------------------------------------------------------------
 ;; scgilardi at gmail
 
 (defn run*
@@ -165,6 +191,5 @@
   [ns-name & args]
   `(run* '~ns-name ~@args))
 
-;; ----------------------------------------------------------------------
 
 (load "repl_utils/javadoc")
