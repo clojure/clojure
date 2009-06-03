@@ -133,6 +133,7 @@
       <arg value="clojure.contrib.except"/>
       <arg value="clojure.contrib.fcase"/>
       <arg value="clojure.contrib.find-namespaces"/>
+      <arg value="clojure.contrib.fnmap"/>
       <arg value="clojure.contrib.gen-html-docs"/>
       <arg value="clojure.contrib.generic"/>
       <arg value="clojure.contrib.generic.arithmetic"/>
