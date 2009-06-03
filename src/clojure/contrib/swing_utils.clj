@@ -18,15 +18,20 @@
 
 (defn add-action-listener
   "Adds an ActionLister to component. When the action fires, f will be
-  invoked with the event as its first argument followed by args"
+  invoked with the event as its first argument followed by args.
+  Returns the listener."
   [component f & args]
-  (.addActionListener component (proxy [ActionListener] []
-    (actionPerformed [event] (apply f event args)))))
+  (let [listener (proxy [ActionListener] []
+                   (actionPerformed [event] (apply f event args)))]
+    (.addActionListener component listener)
+    listener))
 
 (defn add-key-typed-listener
   "Adds a KeyListener to component that only responds to KeyTyped events.
   When a key is typed, f is invoked with the KeyEvent as its first argument
-  followed by args"
+  followed by args. Returns the listener."
   [component f & args]
-  (.addKeyListener component (proxy [KeyAdapter] []
-    (keyTyped [event] (apply f event args)))))
+  (let [listener (proxy [KeyAdapter] []
+                   (keyTyped [event] (apply f event args)))]
+    (.addKeyListener component listener)
+    listener))
