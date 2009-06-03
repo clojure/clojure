@@ -67,4 +67,15 @@
    (clojure.lang.RT/classForName class-name)
    (into-array Object args)))
 
+(defn seqable?
+  "Returns true if (seq x) will succeed, false otherwise."
+  [x]
+  (or (seq? x)
+      (instance? clojure.lang.Seqable x)
+      (nil? x)
+      (instance? Iterable x)
+      (-> x .getClass .isArray)
+      (string? x)
+      (instance? java.util.Map x)))
+
 ;; ----------------------------------------------------------------------
