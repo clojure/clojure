@@ -22,9 +22,12 @@
                                                         (conj spec '[help? h?]))
                                 sym syms]
                             [(re-find #"^.*[^?]" (str sym))
-                             {:sym (str (first syms)) :default default}]))]
+                             {:sym (str (first syms)) :default default}]))
+        defaults (into {} (for [[_ {:keys [default sym]}] key-data
+                                :when default]
+                            [sym default]))]
     (loop [[argkey & [argval :as r]] (if (seq args) args ["--help"])
-           cmdmap {:cmdspec cmdspec rest-str []}]
+           cmdmap (assoc defaults :cmdspec cmdspec rest-str [])]
       (if argkey
         (let [[_ & [keybase]] (re-find #"^--?(.*)" argkey)]
           (cond
