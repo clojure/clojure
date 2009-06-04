@@ -103,15 +103,36 @@ making private definitions more succinct."}
    arguments."
   [name macro-args]
   (let [[docstring macro-args] (if (string? (first macro-args))
-				 [(first macro-args) (next macro-args)]
-				 [nil macro-args])
-	[attr macro-args]      (if (map? (first macro-args))
-				 [(first macro-args) (next macro-args)]
-				 [{} macro-args])
-	attr                   (if docstring
-				 (assoc attr :doc docstring)
-				 attr)
-	attr                   (if (meta name)
-				 (conj (meta name) attr)
-				 attr)]
+                 [(first macro-args) (next macro-args)]
+                 [nil macro-args])
+    [attr macro-args]      (if (map? (first macro-args))
+                 [(first macro-args) (next macro-args)]
+                 [{} macro-args])
+    attr                   (if docstring
+                 (assoc attr :doc docstring)
+                 attr)
+    attr                   (if (meta name)
+                 (conj (meta name) attr)
+                 attr)]
     [(with-meta name attr) macro-args]))
+
+; defnk by Meikel Brandmeyer:
+(defmacro defnk
+ "Define a function accepting keyword arguments. Symbols up to the first
+ keyword in the parameter list are taken as positional arguments.  Then
+ an alternating sequence of keywords and defaults values is expected. The
+ values of the keyword arguments are available in the function body by
+ virtue of the symbol corresponding to the keyword (cf. :keys destructuring).
+ defnk accepts an optional docstring as well as an optional metadata map."
+ [fn-name & fn-tail]
+ (let [[fn-name [args & body]] (name-with-attributes fn-name fn-tail)
+       [pos kw-vals]           (split-with symbol? args)
+       syms                    (map #(-> % name symbol) (take-nth 2 kw-vals))
+       values                  (take-nth 2 (rest kw-vals))
+       sym-vals                (apply hash-map (interleave syms values))
+       de-map                  {:keys (vec syms)
+                                :or   sym-vals}]
+   `(defn ~fn-name
+      [~@pos & options#]
+      (let [~de-map (apply hash-map options#)]
+        ~@body))))
