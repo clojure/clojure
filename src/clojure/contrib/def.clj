@@ -103,17 +103,17 @@ making private definitions more succinct."}
    arguments."
   [name macro-args]
   (let [[docstring macro-args] (if (string? (first macro-args))
-                 [(first macro-args) (next macro-args)]
-                 [nil macro-args])
-    [attr macro-args]      (if (map? (first macro-args))
-                 [(first macro-args) (next macro-args)]
-                 [{} macro-args])
-    attr                   (if docstring
-                 (assoc attr :doc docstring)
-                 attr)
-    attr                   (if (meta name)
-                 (conj (meta name) attr)
-                 attr)]
+                                 [(first macro-args) (next macro-args)]
+                                 [nil macro-args])
+    [attr macro-args]          (if (map? (first macro-args))
+                                 [(first macro-args) (next macro-args)]
+                                 [{} macro-args])
+    attr                       (if docstring
+                                 (assoc attr :doc docstring)
+                                 attr)
+    attr                       (if (meta name)
+                                 (conj (meta name) attr)
+                                 attr)]
     [(with-meta name attr) macro-args]))
 
 ; defnk by Meikel Brandmeyer:
