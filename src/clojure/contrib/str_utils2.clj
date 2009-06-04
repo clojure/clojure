@@ -101,7 +101,8 @@
 
 (defmulti
   #^{:doc "Replaces all instances of a in s with b.  a and b may be
-  Characters, Strings, Pattern/String, or Pattern/Fn."}
+  Characters, Strings, Pattern/String, or Pattern/Fn."
+     :arglists '([s a b])}
   replace
   (fn [#^String s a b]
     [(class a) (class b)]))
@@ -127,7 +128,8 @@
 
 (defmulti
   #^{:doc "Replaces the first instance of a in s with b.  a must be
-  Pattern, b may be String or Fn."}
+  Pattern, b may be String or Fn."
+     :arglists '([s a b])}
   replace-first
   (fn [s a b]
     [(class a) (class b)]))
