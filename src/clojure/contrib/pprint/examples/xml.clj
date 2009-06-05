@@ -56,35 +56,36 @@
   ((formatter-out "<[!DOCTYPE [~{~a~}]]>") contents))
 
 (defmethod print-xml-tag :default [tag attrs contents]
-  (let [tag-name (as-str tag)]
-    (if (seq? contents)
+  (let [tag-name (as-str tag)
+        xlated-attrs (map #(vector (as-str (key %)) (as-str (val %))) attrs)]
+    (if (seq contents)
       ((formatter-out "~<~<<~a~1:i~{ ~:_~{~a=\"~a\"~}~}>~:>~vi~{~_~w~}~0i~_</~a>~:>")
-       [[tag-name (map #(vector (as-str (key %)) (as-str (val %))) attrs)] *prxml-indent* contents tag-name])
-      ((formatter-out "~<<~a~1:i~{~:_ ~{~a=\"~a\"~}~}/>~:>") [tag-name attrs]))))
+       [[tag-name xlated-attrs] *prxml-indent* contents tag-name])
+      ((formatter-out "~<<~a~1:i~{~:_ ~{~a=\"~a\"~}~}/>~:>") [tag-name xlated-attrs]))))
 
 
-(defmulti #^{:private true} print-xml class)
+(defmulti xml-dispatch class)
 
-(defmethod print-xml clojure.lang.IPersistentVector [x]
+(defmethod xml-dispatch clojure.lang.IPersistentVector [x]
   (let [[tag & contents] x
         [attrs content] (if (map? (first contents))
                           [(first contents) (rest contents)]
                           [{} contents])]
     (print-xml-tag tag attrs content)))
 
-(defmethod print-xml clojure.lang.ISeq [x]
+(defmethod xml-dispatch clojure.lang.ISeq [x]
   ;; Recurse into sequences, so we can use (map ...) inside prxml.
-  (doseq [c x] (print-xml c)))
+  (doseq [c x] (xml-dispatch c)))
 
-(defmethod print-xml clojure.lang.Keyword [x]
+(defmethod xml-dispatch clojure.lang.Keyword [x]
   (print-xml-tag x {} nil))
 
-(defmethod print-xml String [x]
+(defmethod xml-dispatch String [x]
   (print (escape-xml x)))
 
-(defmethod print-xml nil [x])
+(defmethod xml-dispatch nil [x])
 
-(defmethod print-xml :default [x]
+(defmethod xml-dispatch :default [x]
   (print x))
 
 
@@ -112,5 +113,5 @@
     (prxml [:decl! {:version \"1.1\"}])
     ; => <?xml version=\"1.1\" encoding=\"UTF-8\"?>"
   [& args]
-  (doseq [arg args] (write arg :dispatch print-xml))
+  (doseq [arg args] (write arg :dispatch xml-dispatch))
   (when (pos? (count args)) (newline)))
