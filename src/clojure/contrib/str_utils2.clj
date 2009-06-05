@@ -245,13 +245,19 @@
 (defn swap-case [#^String s]
   (throw (IllegalStateException. "swap-case not implemented yet.")))
 
-(defn ltrim [#^String s]
+(defn ltrim
+  "Removes whitespace from the left side of string."
+  [#^String s]
   (replace s #"^\s+" ""))
 
-(defn rtrim [#^String s]
+(defn rtrim
+  "Removes whitespace from the right side of string."
+  [#^String s]
   (replace s #"\s+$" ""))
 
-(defn split-lines [#^String s]
+(defn split-lines
+  "Splits s on \\n or \\r\\n."
+  [#^String s]
   (seq (.split #"\r?\n" s)))
 
 
@@ -261,22 +267,34 @@
 ;; functions.  They are included here for completeness, and for use
 ;; when mapping over a collection of strings.
 
-(defn upper-case [#^String s]
+(defn upper-case
+  "Converts string to all upper-case."
+  [#^String s]
   (.toUpperCase s))
 
-(defn lower-case [#^String s]
+(defn lower-case
+  "Converts string to all lower-case."
+  [#^String s]
   (.toLowerCase s))
 
 (defn split
+  "Splits string on a regular expression.  Optional argument limit is
+  the maximum number of splits."
   ([#^String s #^Pattern re] (seq (.split re s)))
   ([#^String s #^Pattern re limit] (seq (.split re s limit))))
 
-(defn trim [#^String s]
+(defn trim
+  "Removes whitespace from both ends of string."
+  [#^String s]
   (.trim s))
 
-(defn contains? [#^String s substring]
+(defn contains?
+  "True if s contains the substring."
+  [#^String s substring]
   (.contains s substring))
 
-(defn get [#^String s i]
+(defn get
+  "Gets the i'th character in string."
+  [#^String s i]
   (.charAt s i))
 
