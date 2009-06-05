@@ -98,11 +98,6 @@
         (.append buffer c)))
     (.toString buffer)))
 
-(defn as-pattern [re]
-  (if (instance? Pattern re)
-    re
-    (Pattern/compile (Pattern/quote (j/as-str re)))))
-
 (defn blank?
   "True if s is nil, empty, or contains only whitespace."
   [#^String s]
