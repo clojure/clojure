@@ -62,7 +62,8 @@
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File PrintWriter OutputStream
               OutputStreamWriter BufferedWriter Writer
-              FileInputStream FileOutputStream ByteArrayOutputStream)
+              FileInputStream FileOutputStream ByteArrayOutputStream
+              StringReader ByteArrayInputStream)
      (java.net URI URL MalformedURLException)))
 
 
@@ -75,6 +76,11 @@
  #^{:doc "Size, in bytes or characters, of the buffer used when
   copying streams."}
  *buffer-size* 1024)
+
+(def
+ #^{:doc "Type object for a Java primitive byte array."}
+ *byte-array-type* (class (make-array Byte/TYPE 0)))
+
 
 (defn #^File file-str
   "Concatenates args as strings and returns a java.io.File.  Replaces
@@ -284,7 +290,7 @@
 
 (defmulti
   #^{:doc "Copies input to output.  Returns nil.
-  Input may be an InputStream, Reader, or File.
+  Input may be an InputStream, Reader, File, byte[], or String.
   Output may be an OutputStream, Writer, or File.
 
   Does not close any streams except those it opens itself 
@@ -350,10 +356,24 @@
               out (FileOutputStream. output)]
     (copy in out)))
 
+(defmethod copy [String OutputStream] [input output]
+  (copy (StringReader. input) output))
 
-(def
- #^{:doc "Type object for a Java primitive byte array."}
- *byte-array-type* (class (make-array Byte/TYPE 0)))
+(defmethod copy [String Writer] [input output]
+  (copy (StringReader. input) output))
+
+(defmethod copy [String File] [input output]
+  (copy (StringReader. input) output))
+
+(defmethod copy [*byte-array-type* OutputStream] [input output]
+  (copy (ByteArrayInputStream. input) output))
+
+(defmethod copy [*byte-array-type* Writer] [input output]
+  (copy (ByteArrayInputStream. input) output))
+
+(defmethod copy [*byte-array-type* File] [input output]
+  (copy (ByteArrayInputStream. input) output))
+
 
 (defn make-parents
   "Creates all parent directories of file."
