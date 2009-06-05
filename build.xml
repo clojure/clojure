@@ -97,6 +97,7 @@
       <sysproperty key="clojure.compile.path" value="${build}"/>
       <arg value="clojure.contrib.pprint.ColumnWriter"/>
       <arg value="clojure.contrib.pprint.PrettyWriter"/>
+      <arg value="clojure.contrib.fnmap.PersistentFnMap"/>
     </java>
   </target>
 
