@@ -43,6 +43,7 @@
   [bindings & body]
   (assert (vector bindings))
   (assert (= 2 (count bindings)))
+  ;; This seems to be the fastest way to iterate over characters.
   `(let [#^String s# ~(second bindings)]
      (dotimes [i# (.length s#)]
        (let [~(first bindings) (.charAt s# i#)]
@@ -58,7 +59,6 @@
   [bindings & body]
   (assert (vector bindings))
   (assert (= 2 (count bindings)))
-  ;; This seems to be the fastest way to iterate over characters.
   (let [character (first bindings)
         string (second bindings)]
     `(let [#^String s# ~string
