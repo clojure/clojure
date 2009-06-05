@@ -62,11 +62,19 @@
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File PrintWriter OutputStream
               OutputStreamWriter BufferedWriter Writer
-              FileInputStream FileOutputStream)
+              FileInputStream FileOutputStream ByteArrayOutputStream)
      (java.net URI URL MalformedURLException)))
 
 
-(def *default-encoding* "UTF-8")
+(def
+ #^{:doc "Name of the default encoding to use when reading & writing.
+  Default is UTF-8."}
+ *default-encoding* "UTF-8")
+
+(def
+ #^{:doc "Size, in bytes or characters, of the buffer used when
+  copying streams."}
+ *buffer-size* 1024)
 
 (defn #^File file-str
   "Concatenates args as strings and returns a java.io.File.  Replaces
@@ -273,3 +281,108 @@
   `(with-open [stream# (PushbackReader. (reader ~f))]
      (binding [*in* stream#]
        ~@body)))
+
+(defmulti
+  #^{:doc "Copies input to output.  Returns nil.
+  Input may be an InputStream, Reader, or File.
+  Output may be an OutputStream, Writer, or File.
+
+  Does not close any streams except those it opens itself 
+  (on a File).
+
+  Writing a File fails if the parent directory does not exist."
+     :arglists '([input output])}
+  copy
+  (fn [input output] [(type input) (type output)]))
+
+(defmethod copy [InputStream OutputStream] [input output]
+  (let [buffer (make-array Byte/TYPE *buffer-size*)]
+    (loop []
+      (let [size (.read input buffer)]
+        (when (pos? size)
+          (do (.write output buffer 0 size)
+              (recur)))))))
+
+(defmethod copy [InputStream Writer] [input output]
+  (let [buffer (make-array Byte/TYPE *buffer-size*)]
+    (loop []
+      (let [size (.read input buffer)]
+        (when (pos? size)
+          (let [chars (.toCharArray (String. buffer *default-encoding*))]
+            (do (.write output chars)
+                (recur))))))))
+
+(defmethod copy [InputStream File] [input output]
+  (with-open [out (FileOutputStream. output)]
+    (copy input out)))
+
+(defmethod copy [Reader OutputStream] [input output]
+  (let [buffer (make-array Character/TYPE *buffer-size*)]
+    (loop []
+      (let [size (.read input buffer)]
+        (when (pos? size)
+          (let [bytes (.getBytes (String. buffer 0 size) *default-encoding*)]
+            (do (.write output bytes)
+                (recur))))))))
+
+(defmethod copy [Reader Writer] [input output]
+  (let [buffer (make-array Character/TYPE *buffer-size*)]
+    (loop []
+      (let [size (.read input buffer)]
+        (when (pos? size)
+          (do (.write output buffer 0 size)
+              (recur)))))))
+
+(defmethod copy [Reader File] [input output]
+  (with-open [out (FileOutputStream. output)]
+    (copy input out)))
+
+(defmethod copy [File OutputStream] [input output]
+  (with-open [in (FileInputStream. input)]
+    (copy in output)))
+
+(defmethod copy [File Writer] [input output]
+  (with-open [in (FileInputStream. input)]
+    (copy in output)))
+
+(defmethod copy [File File] [input output]
+  (with-open [in (FileInputStream. input)
+              out (FileOutputStream. output)]
+    (copy in out)))
+
+
+(def
+ #^{:doc "Type object for a Java primitive byte array."}
+ *byte-array-type* (class (make-array Byte/TYPE 0)))
+
+(defn make-parents
+  "Creates all parent directories of file."
+  [#^File file]
+  (.mkdirs (.getParentFile file)))
+
+(defmulti
+  #^{:doc "Converts argument into a Java byte array.  Argument may be
+  a String, File, InputStream, or Reader.  If the argument is already
+  a byte array, returns it."
+    :arglists '([arg])}
+  to-byte-array type)
+
+(defmethod to-byte-array *byte-array-type* [x] x)
+
+(defmethod to-byte-array String [x]
+  (.getBytes x *default-encoding*))
+
+(defmethod to-byte-array File [x]
+  (with-open [input (FileInputStream. x)
+              buffer (ByteArrayOutputStream.)]
+    (copy input buffer)
+    (.toByteArray buffer)))
+
+(defmethod to-byte-array InputStream [x]
+  (let [buffer (ByteArrayOutputStream.)]
+    (copy x buffer)
+    (.toByteArray buffer)))
+
+(defmethod to-byte-array Reader [x]
+  (.getBytes (slurp* x) *default-encoding*))
+
