@@ -37,3 +37,8 @@
 (deftest t-replace-first
   (is (= "barbarfoo" (s/replace-first "foobarfoo" #"foo" "bar")))
   (is (= "FOObarfoo" (s/replace-first "foobarfoo" #"foo" s/upper-case))))
+
+(deftest t-codepoints
+  (is (= (list 102 111 111 65536 98 97 114)
+         (s/codepoints "foo\uD800\uDC00bar"))
+      "Handles Unicode supplementary characters")))

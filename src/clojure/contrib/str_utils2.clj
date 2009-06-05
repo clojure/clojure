@@ -33,17 +33,59 @@
  (:require [clojure.contrib.java-utils :as j])
  (:import (java.util.regex Pattern)))
 
-(defmacro dochars
+
+(defmacro dochars 
   "bindings => [name string]
+
   Repeatedly executes body, with name bound to each character in
-  string."
+  string.  Does NOT handle Unicode supplementary characters (above
+  U+FFFF)."
   [bindings & body]
   (assert (vector bindings))
   (assert (= 2 (count bindings)))
   `(let [#^String s# ~(second bindings)]
-     (dotimes [i# (.length ~(second bindings))]
+     (dotimes [i# (.length s#)]
        (let [~(first bindings) (.charAt s# i#)]
          ~@body))))
+
+
+(defmacro docodepoints
+  "bindings => [name string]
+
+  Repeatedly executes body, with name bound to the integer code point
+  of each Unicode character in the string.  Handles Unicode
+  supplementary characters (above U+FFFF) correctly."
+  [bindings & body]
+  (assert (vector bindings))
+  (assert (= 2 (count bindings)))
+  ;; This seems to be the fastest way to iterate over characters.
+  (let [character (first bindings)
+        string (second bindings)]
+    `(let [#^String s# ~string
+           len# (.length s#)]
+       (loop [i# 0]
+         (when (< i# len#)
+           (let [~character (.charAt s# i#)]
+             (if (Character/isHighSurrogate ~character)
+               (let [~character (.codePointAt s# i#)]
+                 ~@body
+                 (recur (+ 2 i#)))
+               (let [~character (int ~character)]
+                 ~@body
+                 (recur (inc i#))))))))))
+
+(defn codepoints
+  "Returns a sequence of integer Unicode code points in s.  Handles
+  Unicode supplementary characters (above U+FFFF) correctly."
+  [#^String s]
+  (let [len (.length s)
+        f (fn thisfn [#^String s i]
+            (when (< i len)
+              (let [c (.charAt s i)]
+                (if (Character/isHighSurrogate c)
+                  (cons (.codePointAt s i) (thisfn s (+ 2 i)))
+                  (cons (int c) (thisfn s (inc i)))))))]
+    (lazy-seq (f s 0))))
 
 (defn escape
   "Escapes characters in string according to a cmap, a function or map
@@ -56,14 +98,10 @@
         (.append buffer c)))
     (.toString buffer)))
 
-(defn escape-pattern [#^String s]
-  (escape s (fn [c] (when (#{\\ \[ \] \. \^ \$ \? \* \+ \( \)} c)
-                      (str \\ c)))))
-
 (defn as-pattern [re]
   (if (instance? Pattern re)
     re
-    (Pattern/compile (escape-pattern (j/as-str re)))))
+    (Pattern/compile (Pattern/quote (j/as-str re)))))
 
 (defn blank?
   "True if s is nil, empty, or contains only whitespace."
@@ -100,12 +138,20 @@
     (.substring s (- (count s) n))))
 
 (defmulti
-  #^{:doc "Replaces all instances of a in s with b.  a and b may be
-  Characters, Strings, Pattern/String, or Pattern/Fn."
-     :arglists '([s a b])}
+  #^{:doc "Replaces all instances of pattern in string with replacement.  
+  
+  Allowed argument types for pattern and replacement are:
+   1. String and String
+   2. Character and Character
+   3. regex Pattern and String
+      (Uses java.util.regex.Matcher.replaceAll)
+   4. regex Pattern and function
+      (Calls function with re-groups of each match, uses return 
+       value as replacement.)"
+     :arglists '([string pattern replacement])}
   replace
-  (fn [#^String s a b]
-    [(class a) (class b)]))
+  (fn [#^String string pattern replacement]
+    [(class pattern) (class replacement)]))
 
 (defmethod replace [String String] [#^String s #^String a #^String b]
   (.replace s a b))
@@ -127,14 +173,23 @@
               (.toString buffer)))))))
 
 (defmulti
-  #^{:doc "Replaces the first instance of a in s with b.  a must be
-  Pattern, b may be String or Fn."
-     :arglists '([s a b])}
-  replace-first
-  (fn [s a b]
-    [(class a) (class b)]))
+  #^{:doc "Replaces the first instance of pattern in s with replacement.
 
-(defmethod replace-first [Pattern String] [#^String s #^Pattern re replacement]
+  Allowed argument types for pattern and replacement are:
+   1. String and String
+   2. regex Pattern and String
+      (Uses java.util.regex.Matcher.replaceAll)
+   3. regex Pattern and function
+"
+     :arglists '([s pattern replacement])}
+  replace-first
+  (fn [s pattern replacement]
+    [(class pattern) (class replacement)]))
+
+(defmethod replace-first [String String] [#^String s pattern replacement]
+  (.replaceFirst (re-matcher (Pattern/quote pattern) s) replacement))
+
+(defmethod replace-first [Pattern String] [#^String s re replacement]
   (.replaceFirst (re-matcher re s) replacement))
 
 (defmethod replace-first [Pattern clojure.lang.IFn] [#^String s #^Pattern re f]
