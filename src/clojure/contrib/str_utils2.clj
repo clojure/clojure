@@ -137,7 +137,7 @@
 (defmethod replace-first [Pattern String] [#^String s #^Pattern re replacement]
   (.replaceFirst (re-matcher re s) replacement))
 
-(defmethod replace-first [Pattern IFn] [#^String s #^Pattern re f]
+(defmethod replace-first [Pattern clojure.lang.IFn] [#^String s #^Pattern re f]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer.)]
       (if (.find m)
