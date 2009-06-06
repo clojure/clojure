@@ -68,26 +68,23 @@
 (defn db-write
   "Write initial values to the database as a transaction"
   []
-  (sql/with-connection
-   db
-   (sql/transaction
-    (drop-fruit)
-    (create-fruit)
-    (insert-rows-fruit)
-    (insert-values-fruit)
-    (insert-records-fruit)))
+  (sql/with-connection db
+    (sql/transaction
+     (drop-fruit)
+     (create-fruit)
+     (insert-rows-fruit)
+     (insert-values-fruit)
+     (insert-records-fruit)))
   nil)
 
 (defn db-read
   "Read the entire fruit table"
   []
-  (sql/with-connection
-   db
-   (sql/with-query-results
-    res
-    ["SELECT * FROM fruit"]
-    (doseq [rec res]
-      (println rec)))))
+  (sql/with-connection db
+    (sql/with-query-results res
+      ["SELECT * FROM fruit"]
+      (doseq [rec res]
+        (println rec)))))
 
 (defn db-update-appearance-cost
   "Update the appearance and cost of the named fruit"
@@ -100,46 +97,40 @@
 (defn db-update
   "Update two fruits as a transaction"
   []
-  (sql/with-connection
-   db
-   (sql/transaction
-    (db-update-appearance-cost "Banana" "bruised" 14)
-    (db-update-appearance-cost "Feijoa" "green" 400)))
+  (sql/with-connection db
+    (sql/transaction
+     (db-update-appearance-cost "Banana" "bruised" 14)
+     (db-update-appearance-cost "Feijoa" "green" 400)))
   nil)
 
 (defn db-update-or-insert
   "Updates or inserts a fruit"
   [record]
-  (sql/with-connection
-   db
-   (sql/update-or-insert-values
-    :fruit
-    ["name=?" (:name record)]
-    record)))
+  (sql/with-connection db
+    (sql/update-or-insert-values
+     :fruit
+     ["name=?" (:name record)]
+     record)))
 
 (defn db-read-all
   "Return all the rows of the fruit table as a vector"
   []
-  (sql/with-connection
-   db
-   (sql/with-query-results
-    res
-    ["SELECT * FROM fruit"]
-    (into [] res))))
+  (sql/with-connection db
+    (sql/with-query-results res
+      ["SELECT * FROM fruit"]
+      (into [] res))))
 
 (defn db-grade-range
   "Print rows describing fruit that are within a grade range"
   [min max]
-  (sql/with-connection
-   db
-   (sql/with-query-results
-    res
-    [(str "SELECT name, cost, grade "
-          "FROM fruit "
-          "WHERE grade >= ? AND grade <= ?")
-     min max]
-    (doseq [rec res]
-      (println rec)))))
+  (sql/with-connection db
+    (sql/with-query-results res
+      [(str "SELECT name, cost, grade "
+            "FROM fruit "
+            "WHERE grade >= ? AND grade <= ?")
+       min max]
+      (doseq [rec res]
+        (println rec)))))
 
 (defn db-grade-a 
   "Print rows describing all grade a fruit (grade between 90 and 100)"
@@ -149,75 +140,68 @@
 (defn db-get-tables
   "Demonstrate getting table info"
   []
-  (sql/with-connection
-   db
-   (into []
-         (resultset-seq
-          (-> (sql/connection)
-              (.getMetaData)
-              (.getTables nil nil nil (into-array ["TABLE" "VIEW"])))))))
+  (sql/with-connection db
+    (into []
+          (resultset-seq
+           (-> (sql/connection)
+               (.getMetaData)
+               (.getTables nil nil nil (into-array ["TABLE" "VIEW"])))))))
 
 (defn db-exception
   "Demonstrate rolling back a partially completed transaction on exception"
   []
-  (sql/with-connection
-   db
-   (sql/transaction
-    (sql/insert-values
-     :fruit
-     [:name :appearance]
-     ["Grape" "yummy"]
-     ["Pear" "bruised"])
-    ;; at this point the insert-values call is complete, but the transaction
-    ;; is not. the exception will cause it to roll back leaving the database
-    ;; untouched.
-    (throw (Exception. "sql/test exception")))))
+  (sql/with-connection db
+    (sql/transaction
+     (sql/insert-values
+      :fruit
+      [:name :appearance]
+      ["Grape" "yummy"]
+      ["Pear" "bruised"])
+     ;; at this point the insert-values call is complete, but the transaction
+     ;; is not. the exception will cause it to roll back leaving the database
+     ;; untouched.
+     (throw (Exception. "sql/test exception")))))
 
 (defn db-sql-exception
   "Demonstrate an sql exception"
   []
-  (sql/with-connection
-   db
-   (sql/transaction
-    (sql/insert-values
-     :fruit
-     [:name :appearance]
-     ["Grape" "yummy"]
-     ["Pear" "bruised"]
-     ["Apple" "strange" "whoops"]))))
+  (sql/with-connection db
+    (sql/transaction
+     (sql/insert-values
+      :fruit
+      [:name :appearance]
+      ["Grape" "yummy"]
+      ["Pear" "bruised"]
+      ["Apple" "strange" "whoops"]))))
 
 (defn db-batchupdate-exception
   "Demonstrate a batch update exception"
   []
-  (sql/with-connection
-   db
-   (sql/transaction
-    (sql/do-commands
-     "DROP TABLE fruit"
-     "DROP TABLE fruit"))))
+  (sql/with-connection db
+    (sql/transaction
+     (sql/do-commands
+      "DROP TABLE fruit"
+      "DROP TABLE fruit"))))
 
 (defn db-rollback
   "Demonstrate a rollback-only trasaction"
   []
-  (sql/with-connection
-   db
-   (sql/transaction
-    (prn "is-rollback-only" (sql/is-rollback-only))
-    (sql/set-rollback-only)
-    (sql/insert-values
-     :fruit
-     [:name :appearance]
-     ["Grape" "yummy"]
-     ["Pear" "bruised"])
-    (prn "is-rollback-only" (sql/is-rollback-only))
-    (sql/with-query-results
-     res
-     ["SELECT * FROM fruit"]
-     (doseq [rec res]
-      (println rec))))
-   (prn)
-   (sql/with-query-results
-    res
-    ["SELECT * FROM fruit"]
-    (doseq [rec res]
-      (println rec)))))
+  (sql/with-connection db
+    (sql/transaction
+     (prn "is-rollback-only" (sql/is-rollback-only))
+     (sql/set-rollback-only)
+     (sql/insert-values
+      :fruit
+      [:name :appearance]
+      ["Grape" "yummy"]
+      ["Pear" "bruised"])
+     (prn "is-rollback-only" (sql/is-rollback-only))
+     (sql/with-query-results res
+       ["SELECT * FROM fruit"]
+       (doseq [rec res]
+         (println rec))))
+    (prn)
+    (sql/with-query-results res
+      ["SELECT * FROM fruit"]
+      (doseq [rec res]
+        (println rec)))))
