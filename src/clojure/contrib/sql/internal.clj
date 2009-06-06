@@ -14,7 +14,7 @@
 (ns clojure.contrib.sql.internal
   (:use
    (clojure.contrib
-    [except :only (throw-arg)]
+    [except :only (throwf throw-arg)]
     [java-utils :only (as-properties)]
     [seq-utils :only (indexed)]))
   (:import
@@ -39,7 +39,7 @@
   "Returns the current database connection (or throws if there is none)"
   []
   (or (find-connection*)
-      (throw (Exception. "no current database connection"))))
+      (throwf "no current database connection")))
 
 (defn rollback
   "Accessor for the rollback flag on the current connection"
@@ -132,8 +132,7 @@
   "Sets rollback and throws a wrapped exception"
   [e]
   (rollback true)
-  (throw
-   (Exception. (format "transaction rolled back: %s" (.getMessage e)) e)))
+  (throwf e "transaction rolled back: %s" (.getMessage e)))
 
 (defn transaction*
   "Evaluates func as a transaction on the open database connection. Any
