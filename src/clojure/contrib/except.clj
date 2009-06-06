@@ -8,18 +8,18 @@
 ;;
 ;;  except.clj
 ;;
-;;  Provides functions that make it easy to specify the class and message
-;;  when throwing an Exception or Error. The optional message is formatted
-;;  using clojure/format.
+;;  Provides functions that make it easy to specify the class, cause, and
+;;  message when throwing an Exception or Error. The optional message is
+;;  formatted using clojure.core/format.
 ;;
 ;;  scgilardi (gmail)
 ;;  Created 07 July 2008
 
 (ns 
   #^{:author "Stephen C. Gilardi",
-     :doc "Provides functions that make it easy to specify the class and message
-when throwing an Exception or Error. The optional message is formatted
-using clojure/format."} 
+     :doc "Provides functions that make it easy to specify the class, cause, and
+message when throwing an Exception or Error. The optional message is
+formatted using clojure.core/format."}
   clojure.contrib.except
   (:import (clojure.lang Reflector)))
 
@@ -27,13 +27,14 @@ using clojure/format."}
 
 (defn throwf
   "Throws an Exception or Error with an optional message formatted using
-  clojure/format. All arguments are optional:
+  clojure.core/format. All arguments are optional:
 
-      class? format? format-args*
+      class? cause? format? format-args*
 
   - class defaults to Exception, if present it must name a kind of
     Throwable
-  - format is a format string for clojure/format
+  - cause defaults to nil, if present it must be a Throwable
+  - format is a format string for clojure.core/format
   - format-args are objects that correspond to format specifiers in
     format."
   [& args]
@@ -56,23 +57,31 @@ using clojure/format."}
 (defn throw-arg
   "Throws an IllegalArgumentException. All arguments are optional:
 
-        format? format-args*
+        cause? format? format-args*
 
-  - format is a format string for clojure/format
+  - cause defaults to nil, if present it must be a Throwable
+  - format is a format string for clojure.core/format
   - format-args are objects that correspond to format specifiers in
     format."
   [& args]
   (throw (throwable (cons IllegalArgumentException args))))
 
+(defn- throwable?
+  "Returns true if x is a Throwable"
+  [x]
+  (instance? Throwable x))
+
 (defn- throwable
-  "Constructs a Throwable with an optional formatted message. Its stack
-  trace will begin with our caller's caller. Args are as described for
-  throwf except throwable accepts them as list rather than inline."
+  "Constructs a Throwable with optional cause and formatted message. Its
+  stack trace will begin with our caller's caller. Args are as described
+  for throwf except throwable accepts them as list rather than inline."
   [args]
-  (let [[class & [fmt & fmt-args]] (if (class? (first args))
-                                     args
-                                     (cons Exception args))
-        ctor-args (into-array (if fmt [(apply format fmt fmt-args)] []))
+  (let [[arg] args
+        [class & args] (if (class? arg) args (cons Exception args))
+        [arg] args
+        [cause & args] (if (throwable? arg) args (cons nil args))
+        message (when args (apply format args))
+        ctor-args (into-array Object [message cause])
         throwable (Reflector/invokeConstructor class ctor-args)
         our-prefix "clojure.contrib.except$throwable"
         not-us? #(not (.startsWith (.getClassName %) our-prefix))
