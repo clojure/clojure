@@ -81,7 +81,10 @@ formatted using clojure.core/format."}
         [arg] args
         [cause & args] (if (throwable? arg) args (cons nil args))
         message (when args (apply format args))
-        ctor-args (into-array Object [message cause])
+        ctor-args (into-array Object
+                              (cond (and message cause) [message cause]
+                                    message [message]
+                                    cause [cause]))
         throwable (Reflector/invokeConstructor class ctor-args)
         our-prefix "clojure.contrib.except$throwable"
         not-us? #(not (.startsWith (.getClassName %) our-prefix))
