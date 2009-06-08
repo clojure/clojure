@@ -30,9 +30,10 @@
 ;   Stephen C. Gilardi
 ;   Shawn Hoover
 ;   Perry Trolard
+;   Stuart Sierra
 
 (ns 
-  #^{:author "Stuart Halloway, Stephen C. Gilardi, Shawn Hoover, Perry Trolard",
+  #^{:author "Stuart Halloway, Stephen C. Gilardi, Shawn Hoover, Perry Trolard, Stuart Sierra",
      :doc "A set of utilties for dealing with Java stuff like files and properties.
 
    Design goals:
@@ -55,7 +56,8 @@
 "}
   clojure.contrib.java-utils
   (:import [java.io File]
-	   [java.util Properties]))
+	   [java.util Properties]
+           [java.net URI URL]))
 
 (defmulti relative-path-string 
   "Interpret a String or java.io.File as a relative path string. 
@@ -155,6 +157,14 @@
       (doto (as-properties m)
         (.store f comments)))))
 
+(defmulti
+  #^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
+     :arglists '([arg])}
+  as-url type)
 
-  
-     
+(defmethod as-url URL [x] x)
+
+(defmethod as-url URI [#^URI x] (.toURL x))
+
+(defmethod as-url String [#^String x] (URL. x))
+
