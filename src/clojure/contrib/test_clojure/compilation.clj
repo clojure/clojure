@@ -19,9 +19,13 @@
   (let [m ^#'when]
     (are (= _1 _2)
         (list? (:arglists m)) true
+        (> (count (:arglists m)) 0) true
 
         (string? (:doc m)) true
+        (> (.length (:doc m)) 0) true
+        
         (string? (:file m)) true
+        (> (.length (:file m)) 0) true
 
         (integer? (:line m)) true
         (> (:line m) 0) true
