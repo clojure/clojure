@@ -26,7 +26,7 @@
 
 (defn- success? [conn]
   ;; Is the response in the 2xx range?
-  (= 2 (unchecked-divide (.getResponseCode conn)) 100))
+  (= 2 (unchecked-divide (.getResponseCode conn) 100)))
 
 (defn- do-http-agent-request [state options]
   (let [conn (::connection state)]
