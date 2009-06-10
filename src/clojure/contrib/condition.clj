@@ -16,6 +16,9 @@
 ;;
 ;;  Note: requires AOT compilation.
 ;;
+;;  Based on an idea from Chouser:
+;;  http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5
+;;
 ;;  scgilardi (gmail)
 ;;  Created 09 June 2009
 
@@ -26,7 +29,10 @@ containing:
   - keys and values specified as arguments to raise, and
   - a stack trace at key :stack-trace.
 
-Note: requires AOT compilation."}
+Note: requires AOT compilation.
+
+Based on an idea from Chouser:
+http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   clojure.contrib.condition
   (:require clojure.contrib.condition.Condition)
   (:import clojure.contrib.condition.Condition))
