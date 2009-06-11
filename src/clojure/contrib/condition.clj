@@ -22,7 +22,7 @@
 ;;  scgilardi (gmail)
 ;;  Created 09 June 2009
 
-(ns #^{:author "Stephen C. Gilardi",
+(ns #^{:author "Stephen C. Gilardi"
        :doc "Flexible raising and handling of conditions. A condition is a map
 containing:
 
@@ -46,32 +46,35 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   dispatch-fn for *condition*")
 
 (defvar *condition-object*
-  "While a handler is running, bound to the Condition object being
-  handled")
+  "While a handler is running, bound to the Condition object whose metadata
+  is the condition being handled")
+
+(defvar *full-stack-traces* false
+  "Bind to true to include clojure.{core,lang,main} frames in stack
+  traces")
 
 (defmacro raise
   "Raises a condition with the supplied mappings. With no arguments,
   re-raises the current condition. (keyval => key val)"
-  [& keyvals]
-  `(let [m# (hash-map ~@keyvals)]
-     (throw (if (seq m#)
-              (Condition. m#)
-              *condition-object*))))
+  ([]
+     `(throw *condition-object*))
+  ([& keyvals]
+     `(throw (Condition. (hash-map ~@keyvals)))))
 
 (defmacro handler-case
-  "Executes body in a context in which raised conditions can be handled.
+  "Executes body in a context where raised conditions can be handled.
 
   dispatch-fn accepts a raised condition (a map) and returns a selector
-  value used to choose a handler.
+  used to choose a handler.
 
   Handlers are forms within body:
 
     (handle key
       ...)
 
-  If a condition is raised, handler-case executes the body of the first
-  handler whose key satisfies (isa? selector key). If no handlers match,
-  the condition is re-raised.
+  If a condition is raised, executes the body of the first handler whose
+  key satisfies (isa? selector key). If no handlers match, re-raises the
+  condition.
 
   While a handler is running, *condition* is bound to the condition being
   handled and *selector* is bound to to the value returned by dispatch-fn
@@ -82,11 +85,12 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
     (if (seq body)
       (recur
        forms
-       (if (and (list? form) (= (first form) 'handle))
-         (let [[_ key & body] form
-               handler `[(isa? *selector* ~key) (do ~@body)]]
-           (update-in m [:handlers] concat handler))
-         (update-in m [:code] conj form)))
+       (apply update-in m
+              (if (and (list? form) (= (first form) 'handle))
+                (let [[_ key & body] form]
+                  [[:handlers] concat
+                   `[(isa? *selector* ~key) (do ~@body)]])
+                [[:code] conj form])))
       `(try
         ~@(:code m)
         (catch Condition c#
@@ -98,12 +102,19 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
              :else (raise))))))))
 
 (defn print-stack-trace
-  "Prints the stack trace for a condition"
+  "Prints the stack trace for a condition. Skips frames for classes in
+  clojure.{core,lang,main} unless the *full-stack-traces* is bound to
+  logical true"
   [condition]
-  (printf "condition\n")
+  (printf "condition: %s\n"
+          (dissoc condition :stack-trace))
   (doseq [frame (:stack-trace condition)]
-    (printf "        at %s.%s(%s:%s)\n"
-            (.getClassName frame)
-            (.getMethodName frame)
-            (.getFileName frame)
-            (.getLineNumber frame))))
+    (let [classname (.getClassName frame)]
+      (if (or *full-stack-traces*
+              (not (re-matches
+                    #"clojure.(?:core|lang|main)[.$].+" classname)))
+        (printf "        at %s/%s(%s:%s)\n"
+                classname
+                (.getMethodName frame)
+                (.getFileName frame)
+                (.getLineNumber frame))))))

@@ -16,7 +16,7 @@
 
 (defn func [x y]
   (if (neg? x)
-    (raise :source ::Args :arg 'x :value x :message "shouldn't be negative")
+    (raise :reason :illegal-argument :arg 'x :value x :message "cannot be negative")
     (+ x y)))
 
 (defn main
@@ -24,25 +24,40 @@
   
   ;; simple handler
   
-  (handler-case :source
+  (handler-case :reason
     (println (func 3 4))
     (println (func -5 10))
-    (handle ::Args
-      (printf "Bad argument: %s\n" *condition*)))
+    (handle :illegal-argument
+      (print-stack-trace *condition*))
+    (println 3))
 
-  ;; demonstrate nested handlers
+  ;; multiple handlers
+  
+  (handler-case :reason
+    (println (func 4 1))
+    (println (func -3 22))
+    (handle :overflow
+      (print-stack-trace *condition*))
+    (handle :illegal-argument
+      (print-stack-trace *condition*)))
 
-  (handler-case :source
-    (handler-case :source
+  ;; nested handlers
+
+  (handler-case :reason
+    (handler-case :reason
       nil
       nil
+      (println 1)
+      (println 2)
+      (println 3)
       (println (func 8 2))
       (println (func -6 17))
-      ;; no handler for ::Args
-      (handle ::nested
-        (printf "I'm nested: %s\n" *condition*)))
+      ;; no handler for :illegal-argument
+      (handle :overflow
+        (println "nested")
+        (print-stack-trace *condition*)))
     (println (func 3 4))
     (println (func -5 10))
-    (handle ::Args
-      (print-stack-trace *condition*)
-      (printf "Bad argument: %s\n" *condition*))))
+    (handle :illegal-argument
+      (println "outer")
+      (print-stack-trace *condition*))))
