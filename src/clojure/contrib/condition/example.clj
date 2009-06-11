@@ -21,8 +21,25 @@
 
 (defn main
   []
-  (handler-case :source condition
+  
+  ;; simple handler
+  
+  (handler-case :source
     (println (func 3 4))
     (println (func -5 10))
     (handle ::Args
-      (printf "Bad argument: %s\n" condition))))
+      (printf "Bad argument: %s\n" *condition*)))
+
+  ;; demonstrate nested handlers
+
+  (handler-case :source
+    (handler-case :source
+      (println (func 8 2))
+      (println (func -6 17))
+      ;; no handler for ::Args
+      (handle ::nested
+        (printf "I'm nested: %s\n" *condition*)))
+    (println (func 3 4))
+    (println (func -5 10))
+    (handle ::Args
+      (printf "Bad argument: %s\n" *condition*))))
