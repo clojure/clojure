@@ -77,9 +77,9 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   handled and *selector* is bound to to the value returned by dispatch-fn
   that matched the handler's key."
   [dispatch-fn & body]
-  (loop [[form & forms] body
+  (loop [[form & forms :as body] body
          m {:code [] :handlers []}]
-    (if form
+    (if (seq body)
       (recur
        forms
        (if (and (list? form) (= (first form) 'handle))
@@ -96,3 +96,14 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
             (cond
              ~@(:handlers m)
              :else (raise))))))))
+
+(defn print-stack-trace
+  "Prints the stack trace for a condition"
+  [condition]
+  (printf "condition\n")
+  (doseq [frame (:stack-trace condition)]
+    (printf "        at %s.%s(%s:%s)\n"
+            (.getClassName frame)
+            (.getMethodName frame)
+            (.getFileName frame)
+            (.getLineNumber frame))))

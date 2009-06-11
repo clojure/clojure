@@ -34,6 +34,8 @@
 
   (handler-case :source
     (handler-case :source
+      nil
+      nil
       (println (func 8 2))
       (println (func -6 17))
       ;; no handler for ::Args
@@ -42,4 +44,5 @@
     (println (func 3 4))
     (println (func -5 10))
     (handle ::Args
+      (print-stack-trace *condition*)
       (printf "Bad argument: %s\n" *condition*))))
