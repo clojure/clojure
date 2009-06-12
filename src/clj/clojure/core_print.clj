@@ -312,6 +312,6 @@
   (print-sequential (format "#<%s@%x: "
                             (.getSimpleName (class o))
                             (System/identityHashCode o))
-                    pr-on, "", ">", (list @o), w))
+                    pr-on, "", ">", (list (if (and (future? o) (not (future-done? o))) :pending @o)), w))
 
 (def #^{:private true} print-initialized true)
