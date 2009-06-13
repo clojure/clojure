@@ -36,7 +36,9 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   clojure.contrib.condition
   (:require clojure.contrib.condition.Condition)
   (:import clojure.contrib.condition.Condition)
-  (:use [clojure.contrib.def :only (defvar)]))
+  (:use (clojure.contrib
+         [def :only (defvar)]
+         [seq-utils :only (separate)])))
 
 (defvar *condition*
   "While a handler is running, bound to the condition being handled")
@@ -54,12 +56,15 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   traces")
 
 (defmacro raise
-  "Raises a condition with the supplied mappings. With no arguments,
-  re-raises the current condition. (keyval => key val)"
+  "Raises a condition. With no arguments, re-raises the current condition.
+  With one argument (a map), raises the argument. With two or more
+  arguments, raises a map with keys and values from the arguments."
   ([]
      `(throw *condition-object*))
-  ([& keyvals]
-     `(throw (Condition. (hash-map ~@keyvals)))))
+  ([m]
+     `(throw (Condition. m)))
+  ([key val & keyvals]
+     `(throw (Condition. (hash-map ~key ~val ~@keyvals)))))
 
 (defmacro handler-case
   "Executes body in a context where raised conditions can be handled.
@@ -80,26 +85,20 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   handled and *selector* is bound to to the value returned by dispatch-fn
   that matched the handler's key."
   [dispatch-fn & body]
-  (loop [[form & forms :as body] body
-         m {:code [] :handlers []}]
-    (if (seq body)
-      (recur
-       forms
-       (apply update-in m
-              (if (and (list? form) (= (first form) 'handle))
-                (let [[_ key & body] form]
-                  [[:handlers] concat
-                   `[(isa? *selector* ~key) (do ~@body)]])
-                [[:code] conj form])))
-      `(try
-        ~@(:code m)
-        (catch Condition c#
-          (binding [*condition-object* c#
-                    *condition* ^c#
-                    *selector* (~dispatch-fn ^c#)]
-            (cond
-             ~@(:handlers m)
-             :else (raise))))))))
+  (let [[handlers code]
+        (separate #(and (list? %) (= 'handle (first %))) body)]
+    `(try
+      ~@code
+      (catch Condition c#
+        (binding [*condition-object* c#
+                  *condition* ^c#
+                  *selector* (~dispatch-fn ^c#)]
+          (cond
+           ~@(mapcat
+              (fn [[_ key & body]]
+                `[(isa? *selector* ~key) (do ~@body)])
+              handlers)
+           :else (raise)))))))
 
 (defn print-stack-trace
   "Prints the stack trace for a condition. Skips frames for classes in
