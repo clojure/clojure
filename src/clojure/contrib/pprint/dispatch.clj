@@ -60,13 +60,49 @@
 ;;; are a little easier on the stack. (Or, do "real" compilation, a
 ;;; la Common Lisp)
 
-(def pprint-simple-list (formatter-out "~:<~@{~w~^ ~_~}~:>"))
+;;; (def pprint-simple-list (formatter-out "~:<~@{~w~^ ~_~}~:>"))
+(defn pprint-simple-list [alis]
+  (pprint-logical-block :prefix "(" :suffix ")"
+    (loop [alis (seq alis)]
+      (when alis
+	(write-out (first alis))
+	(when (next alis)
+	  (.write #^java.io.Writer *out* " ")
+	  (pprint-newline :linear)
+	  (recur (next alis)))))))
+
 (defn pprint-list [alis]
   (if-not (pprint-reader-macro alis)
     (pprint-simple-list alis)))
-(def pprint-vector (formatter-out "~<[~;~@{~w~^ ~_~}~;]~:>"))
+
+;;; (def pprint-vector (formatter-out "~<[~;~@{~w~^ ~_~}~;]~:>"))
+(defn pprint-vector [avec]
+  (pprint-logical-block :prefix "[" :suffix "]"
+    (loop [aseq (seq avec)]
+      (when aseq
+	(write-out (first aseq))
+	(when (next aseq)
+	  (.write #^java.io.Writer *out* " ")
+	  (pprint-newline :linear)
+	  (recur (next aseq)))))))
+
 (def pprint-array (formatter-out "~<[~;~@{~w~^, ~:_~}~;]~:>"))
-(def pprint-map (formatter-out "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
+
+;;; (def pprint-map (formatter-out "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
+(defn pprint-map [amap]
+  (pprint-logical-block :prefix "{" :suffix "}"
+    (loop [aseq (seq amap)]
+      (when aseq
+	(pprint-logical-block 
+          (write-out (ffirst aseq))
+          (.write #^java.io.Writer *out* " ")
+          (pprint-newline :linear)
+          (write-out (fnext (first aseq))))
+        (when (next aseq)
+          (.write #^java.io.Writer *out* ", ")
+          (pprint-newline :linear)
+          (recur (next aseq)))))))
+
 (def pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
 (defn pprint-ref [ref]
   (pprint-logical-block  :prefix "#<Ref " :suffix ">"
