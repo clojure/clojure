@@ -111,7 +111,7 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
     (let [classname (.getClassName frame)]
       (if (or *full-stack-traces*
               (not (re-matches
-                    #"clojure.(?:core|lang|main)[.$].+" classname)))
+                    #"clojure.(?:core|lang|main).*" classname)))
         (printf "        at %s/%s(%s:%s)\n"
                 classname
                 (.getMethodName frame)
