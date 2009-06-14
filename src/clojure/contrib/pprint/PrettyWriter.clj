@@ -73,28 +73,23 @@
 
 (defstruct #^{:private true} section :parent)
 
-(defmulti blob-length :type-tag)
-(defmethod blob-length :default [_] 0)
-
-(defn buffer-length [l] (reduce + (map blob-length l)))
+(defn buffer-length [l] 
+  (let [l (seq l)]
+    (if l 
+      (- (:end-pos (last l)) (:start-pos (first l)))
+      0)))
 
 ; A blob of characters (aka a string)
-(deftype buffer-blob :data :trailing-white-space)
-(defmethod blob-length :buffer-blob [b]
-  (+
-   (count (:data b))
-   (count (:trailing-white-space b))))
+(deftype buffer-blob :data :trailing-white-space :start-pos :end-pos)
 
 ; A newline
-(deftype nl :type :logical-block)
+(deftype nl :type :logical-block :start-pos :end-pos)
 
-(deftype start-block :logical-block)
-(defmethod blob-length :start-block [b] (count (:prefix (:logical-block b))))
+(deftype start-block :logical-block :start-pos :end-pos)
 
-(deftype end-block :logical-block)
-(defmethod blob-length :end-block [b] (count (:suffix (:logical-block b))))
+(deftype end-block :logical-block :start-pos :end-pos)
 
-(deftype indent :logical-block :relative-to :offset)
+(deftype indent :logical-block :relative-to :offset :start-pos :end-pos)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Initialize the PrettyWriter instance
@@ -111,7 +106,8 @@
            :buffer-block lb
            :buffer-level 1
            :miser-width miser-width
-           :trailing-white-space nil}))])
+           :trailing-white-space nil
+           :pos 0}))])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Functions to write tokens in the output buffer
@@ -337,13 +333,15 @@
     (if (= (count lines) 1)
       s
       (dosync 
-       (let [#^String prefix (:per-line-prefix (first (getf :logical-blocks)))] 
+       (let [#^String prefix (:per-line-prefix (first (getf :logical-blocks)))
+             #^String l (first lines)] 
          (if (= :buffering (getf :mode))
-           (do
-             (add-to-buffer this (make-buffer-blob (first lines) nil))
+           (let [oldpos (getf :pos)
+                 newpos (+ oldpos (count l))]
+             (setf :pos newpos)
+             (add-to-buffer this (make-buffer-blob l nil oldpos newpos))
              (write-buffered-output this))
-           (let [#^String l (first lines)]
-	     (.col-write this l)))
+           (.col-write this l))
          (.col-write this (int \newline))
          (doseq [#^String l (next (butlast lines))]
            (.col-write this l)
@@ -375,12 +373,16 @@
 	     #^String s (.replaceFirst s0 "\\s+$" "")
 	     white-space (.substring s0 (count s))
 	     mode (getf :mode)]
-	 (if (= mode :writing)
-	   (dosync
-	    (write-white-space this)
-	    (.col-write this s)
-	    (setf :trailing-white-space white-space))
-	   (add-to-buffer this (make-buffer-blob s white-space))))
+	 (dosync
+          (if (= mode :writing)
+            (do
+             (write-white-space this)
+             (.col-write this s)
+             (setf :trailing-white-space white-space))
+            (let [oldpos (getf :pos)
+                  newpos (+ oldpos (count s0))]
+              (setf :pos newpos)
+              (add-to-buffer this (make-buffer-blob s white-space oldpos newpos))))))
 
        Integer
        (write-char this x))))
@@ -392,7 +394,11 @@
       (.col-write this c))
     (if (= c \newline)
       (write-initial-lines this "\n")
-      (add-to-buffer this (make-buffer-blob (str (char c)) nil)))))
+      (let [oldpos (getf :pos)
+            newpos (inc oldpos)]
+        (dosync
+         (setf :pos newpos)
+         (add-to-buffer this (make-buffer-blob (str (char c)) nil oldpos newpos)))))))
 
 (defn- -flush [#^clojure.contrib.pprint.PrettyWriter this]
   (if (= (getf :mode) :buffering)
@@ -424,23 +430,31 @@
          (let [col (.getColumn this)]
            (ref-set (:start-col lb) col)
            (ref-set (:indent lb) col)))
-       (add-to-buffer this (make-start-block lb))))))
+       (let [oldpos (getf :pos)
+             newpos (+ oldpos (if prefix (count prefix) 0))]
+         (setf :pos newpos)
+         (add-to-buffer this (make-start-block lb oldpos newpos)))))))
 
 (defn- -endBlock [#^clojure.contrib.pprint.PrettyWriter this]
   (dosync
-   (let [lb (getf :logical-blocks)]
+   (let [lb (getf :logical-blocks)
+         #^String suffix (:suffix lb)]
      (if (= (getf :mode) :writing)
        (do
          (write-white-space this)
-         (if-let [#^String suffix (:suffix lb)]
+         (if suffix
            (.col-write this suffix)))
-       (add-to-buffer this (make-end-block lb)))
+       (let [oldpos (getf :pos)
+             newpos (+ oldpos (if suffix (count suffix) 0))]
+         (setf :pos newpos)
+         (add-to-buffer this (make-end-block lb oldpos newpos))))
      (setf :logical-blocks (:parent lb)))))
 
 (defn- -newline [#^clojure.contrib.pprint.PrettyWriter this type]
   (dosync 
    (setf :mode :buffering)
-   (add-to-buffer this (make-nl type (getf :logical-blocks)))))
+   (let [pos (getf :pos)]
+     (add-to-buffer this (make-nl type (getf :logical-blocks) pos pos)))))
 
 (defn- -indent [#^clojure.contrib.pprint.PrettyWriter this relative-to offset]
   (dosync 
@@ -452,7 +466,8 @@
                   (+ offset (condp = relative-to
 			      :block @(:start-col lb)
 			      :current (.getColumn this)))))
-       (add-to-buffer this (make-indent lb relative-to offset))))))
+       (let [pos (getf :pos)]
+         (add-to-buffer this (make-indent lb relative-to offset pos pos)))))))
 
 (defn- -getMiserWidth [#^clojure.contrib.pprint.PrettyWriter this]
   (getf :miser-width))
