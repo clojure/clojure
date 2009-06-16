@@ -16,16 +16,28 @@
 (ns clojure.contrib.condition.Condition
   (:gen-class :extends Throwable
               :implements [clojure.lang.IMeta]
-              :state _meta
+              :state state
               :init init
-              :constructors
-              {[clojure.lang.IPersistentMap] []}))
+              :post-init post-init
+              :constructors {[clojure.lang.IPersistentMap]
+                             [String Throwable]}))
 
 (defn -init
-  [meta]
-  [[] meta])
+  "Constructs a Condition object with condition (a map) as its
+  metadata. Also initializes the superclass with the values at :message
+  and :cause, if any, so they are also available via .getMessage and
+  .getCause."
+  [condition]
+  [[(:message condition) (:cause condition)] (atom condition)])
+
+(defn -post-init
+  "Adds :stack-trace to the condition. Drops the bottom 3 frames because
+  they are always the same: implementation details of Condition and raise."
+  [this condition]
+  (swap! (.state this) assoc
+         :stack-trace (into-array (drop 3 (.getStackTrace this)))))
 
 (defn -meta
+  "Returns this object's metadata, the condition"
   [this]
-  (assoc (._meta this)
-    :stack-trace (into-array (drop 3 (.getStackTrace this)))))
+  @(.state this))

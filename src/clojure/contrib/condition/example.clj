@@ -12,28 +12,31 @@
 ;;  Created 09 June 2009
 
 (ns clojure.contrib.condition.example
-  (:use clojure.contrib.condition))
+  (:use (clojure.contrib
+         [condition
+          :only (handler-case print-stack-trace raise *condition*)])))
 
 (defn func [x y]
-  (if (neg? x)
-    (raise :reason :illegal-argument :arg 'x :value x :message "cannot be negative")
-    (+ x y)))
+  "Raises an exception if x is negative"
+  (when (neg? x)
+    (raise :type :illegal-argument :arg 'x :value x))
+  (+ x y))
 
 (defn main
   []
   
   ;; simple handler
   
-  (handler-case :reason
+  (handler-case :type
     (println (func 3 4))
     (println (func -5 10))
     (handle :illegal-argument
-      (print-stack-trace *condition*))
+            (print-stack-trace *condition*))
     (println 3))
 
   ;; multiple handlers
   
-  (handler-case :reason
+  (handler-case :type
     (println (func 4 1))
     (println (func -3 22))
     (handle :overflow
@@ -43,8 +46,8 @@
 
   ;; nested handlers
 
-  (handler-case :reason
-    (handler-case :reason
+  (handler-case :type
+    (handler-case :type
       nil
       nil
       (println 1)

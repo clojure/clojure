@@ -8,26 +8,27 @@
 ;;
 ;;  condition.clj
 ;;
-;;  Flexible raising and handling of conditions. A condition is a map
-;;  containing:
-;;
-;;    - keys and values specified as arguments to raise, and
-;;    - a stack trace at key :stack-trace.
-;;
-;;  Note: requires AOT compilation.
-;;
-;;  Based on an idea from Chouser:
-;;  http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5
-;;
 ;;  scgilardi (gmail)
 ;;  Created 09 June 2009
 
 (ns #^{:author "Stephen C. Gilardi"
-       :doc "Flexible raising and handling of conditions. A condition is a map
-containing:
+       :doc "Flexible raising and handling of conditions:
 
-  - keys and values specified as arguments to raise, and
-  - a stack trace at key :stack-trace.
+Functions:
+
+              raise: raises a condition
+       handler-case: dispatches raised conditions to appropriate handlers
+  print-stack-trace: prints abbreviated or full condition stack traces
+
+Data:
+
+  A condition is a map containing values for these keys:
+
+    - :type, a condition type specifier, typically a keyword
+    - :stack-trace, a stack trace to the site of the raise
+    - :message, a human-readable message (optional)
+    - :cause, a wrapped exception or condition (optional)
+    - other keys given as arguments to raise (optional)
 
 Note: requires AOT compilation.
 
@@ -35,7 +36,8 @@ Based on an idea from Chouser:
 http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   clojure.contrib.condition
   (:require clojure.contrib.condition.Condition)
-  (:import clojure.contrib.condition.Condition)
+  (:import clojure.contrib.condition.Condition
+           clojure.lang.IPersistentMap)
   (:use (clojure.contrib
          [def :only (defvar)]
          [seq-utils :only (separate)])))
@@ -44,12 +46,12 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   "While a handler is running, bound to the condition being handled")
 
 (defvar *selector*
-  "While a handler is running, bound to the selector returned by
-  dispatch-fn for *condition*")
+  "While a handler is running, bound to the selector returned by the
+  handler-case dispatch-fn for *condition*")
 
 (defvar *condition-object*
   "While a handler is running, bound to the Condition object whose metadata
-  is the condition being handled")
+  is the condition")
 
 (defvar *full-stack-traces* false
   "Bind to true to include clojure.{core,lang,main} frames in stack
@@ -62,15 +64,16 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
   ([]
      `(throw *condition-object*))
   ([m]
-     `(throw (Condition. m)))
+     `(throw (Condition. ~m)))
   ([key val & keyvals]
-     `(throw (Condition. (hash-map ~key ~val ~@keyvals)))))
+     `(raise (hash-map ~key ~val ~@keyvals))))
 
 (defmacro handler-case
   "Executes body in a context where raised conditions can be handled.
 
   dispatch-fn accepts a raised condition (a map) and returns a selector
-  used to choose a handler.
+  used to choose a handler. Commonly, dispatch-fn will be :type to dispatch
+  on the condition's :type value.
 
   Handlers are forms within body:
 
@@ -100,20 +103,45 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
               handlers)
            :else (raise)))))))
 
-(defn print-stack-trace
-  "Prints the stack trace for a condition. Skips frames for classes in
-  clojure.{core,lang,main} unless the *full-stack-traces* is bound to
-  logical true"
+(defmulti stack-trace-info
+  "Returns header, stack-trace, and cause info from conditions and
+  Throwables"
+  class)
+
+(defmethod stack-trace-info IPersistentMap
   [condition]
-  (printf "condition: %s\n"
-          (dissoc condition :stack-trace))
-  (doseq [frame (:stack-trace condition)]
-    (let [classname (.getClassName frame)]
-      (if (or *full-stack-traces*
-              (not (re-matches
-                    #"clojure.(?:core|lang|main).*" classname)))
-        (printf "        at %s/%s(%s:%s)\n"
-                classname
-                (.getMethodName frame)
-                (.getFileName frame)
-                (.getLineNumber frame))))))
+  [(format "condition: %s, %s" (:type condition)
+           (dissoc condition :type :stack-trace :cause))
+   (:stack-trace condition)
+   (:cause condition)])
+
+(defmethod stack-trace-info Condition
+  [condition]
+  (stack-trace-info ^condition))
+
+(defmethod stack-trace-info Throwable
+  [throwable]
+  [(str throwable)
+   (.getStackTrace throwable)
+   (.getCause throwable)])
+
+(defn print-stack-trace
+  "Prints a stack trace for a condition or Throwable. Skips frames for
+  classes in clojure.{core,lang,main} unless the *full-stack-traces* is
+  bound to logical true"
+  [x]
+  (let [[header frames cause] (stack-trace-info x)]
+    (printf "%s\n" header)
+    (doseq [frame frames]
+      (let [classname (.getClassName frame)]
+        (if (or *full-stack-traces*
+                (not (re-matches
+                      #"clojure.(?:core|lang|main).*" classname)))
+          (printf "        at %s/%s(%s:%s)\n"
+                  classname
+                  (.getMethodName frame)
+                  (.getFileName frame)
+                  (.getLineNumber frame)))))
+    (when cause
+      (printf "caused by: ")
+      (recur cause))))
