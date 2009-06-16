@@ -68,7 +68,7 @@
   (loop [child (:parent child)]
     (cond 
      (nil? child) false
-     (= parent child) true
+     (identical? parent child) true
      :else (recur (:parent child)))))
 
 (defstruct #^{:private true} section :parent)
