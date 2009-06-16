@@ -3680,11 +3680,11 @@
   All definitions a lib makes should be in its associated namespace.
 
   'require loads a lib by loading its root resource. The root resource path
-  is derived from the root directory path by repeating its last component
-  and appending '.clj'. For example, the lib 'x.y.z has root directory
-  <classpath>/x/y/z; root resource <classpath>/x/y/z/z.clj. The root
-  resource should contain code to create the lib's namespace and load any
-  additional lib resources.
+  is derived from the lib name in the following manner:
+  Consider a lib named by the symbol 'x.y.z; it has the root directory
+  <classpath>/x/y/, and its root resource is <classpath>/x/y/z.clj. The root
+  resource should contain code to create the lib's namespace (usually by using
+  the ns macro) and load any additional lib resources.
 
   Libspecs
 
@@ -3711,7 +3711,14 @@
     already loaded
   :reload-all implies :reload and also forces loading of all libs that the
     identified libs directly or indirectly load via require or use
-  :verbose triggers printing information about each load, alias, and refer"
+  :verbose triggers printing information about each load, alias, and refer
+
+  Example:
+
+  The following would load the libraries clojure.zip and clojure.set
+  abbreviated as 's'.
+
+  (require '(clojure zip [set :as s]))"
 
   [& args]
   (apply load-libs :require args))
