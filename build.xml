@@ -112,6 +112,7 @@
         <path location="${clojure.jar}"/>
       </classpath>
       <sysproperty key="clojure.compile.path" value="${build}"/>
+      <sysproperty key="java.awt.headless" value="true"/>
       <arg value="clojure.contrib.accumulators"/>
       <arg value="clojure.contrib.agent-utils"/>
       <arg value="clojure.contrib.classpath"/>
