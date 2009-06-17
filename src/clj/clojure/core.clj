@@ -266,24 +266,30 @@
   "Returns a new hash set with supplied keys."
   ([] #{})
   ([& keys]
-   (. clojure.lang.PersistentHashSet (create keys))))
+   (clojure.lang.PersistentHashSet/create keys)))
 
 (defn sorted-map
   "keyval => key val
   Returns a new sorted map with supplied mappings."
   ([& keyvals]
-   (. clojure.lang.PersistentTreeMap (create keyvals))))
-
-(defn sorted-set
-  "Returns a new sorted set with supplied keys."
-  ([& keys]
-   (. clojure.lang.PersistentTreeSet (create keys))))
+   (clojure.lang.PersistentTreeMap/create keyvals)))
 
 (defn sorted-map-by
   "keyval => key val
   Returns a new sorted map with supplied mappings, using the supplied comparator."
   ([comparator & keyvals]
-   (. clojure.lang.PersistentTreeMap (create comparator keyvals))))
+   (clojure.lang.PersistentTreeMap/create comparator keyvals)))
+
+(defn sorted-set
+  "Returns a new sorted set with supplied keys."
+  ([& keys]
+   (clojure.lang.PersistentTreeSet/create keys)))
+
+(defn sorted-set-by
+  "Returns a new sorted set with supplied keys, using the supplied comparator."
+  ([comparator & keys]
+   (clojure.lang.PersistentTreeSet/create comparator keys)))
+
  
 ;;;;;;;;;;;;;;;;;;;;
 (def
