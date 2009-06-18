@@ -1493,6 +1493,38 @@
     :arglists '([pred coll])}
  not-any? (comp not some))
 
+(defn chunk-buffer [capacity]
+  (clojure.lang.ChunkBuffer. capacity))
+
+(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
+  (.add b x))
+
+(defn chunk [#^clojure.lang.ChunkBuffer b]
+  (.chunk b))
+
+(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
+  (.chunkedFirst s))
+
+(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
+  (.chunkedMore s))
+
+(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
+  (.chunkedNext s))
+
+(defn chunk-cons [chunk rest]
+  (if (zero? (count chunk))
+    rest
+    (clojure.lang.ChunkedCons. chunk rest)))
+  
+(defn chunked-seq? [s]
+  (instance? clojure.lang.IChunkedSeq s))
+
+(defn int
+  "Coerce to int"
+  {:tag Integer
+   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
+  [x] (. clojure.lang.RT (intCast x)))
+
 (defn map
   "Returns a lazy sequence consisting of the result of applying f to the
   set of first items of each coll, followed by applying f to the set
@@ -1502,7 +1534,16 @@
   ([f coll]
    (lazy-seq
     (when-let [s (seq coll)]
-      (cons (f (first s)) (map f (rest s))))))
+      (if (chunked-seq? s)
+        (let [c (chunk-first s)
+              size (int (count c))
+              b (chunk-buffer size)]
+          (loop [i (int 0)]
+            (when (< i size)
+              (chunk-append b (f (nth c i)))
+              (recur (inc i))))
+          (chunk-cons (chunk b) (map f (chunk-rest s))))
+        (cons (f (first s)) (map f (rest s)))))))
   ([f c1 c2]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2)]
@@ -1897,12 +1938,6 @@
   {:tag Number
    :inline (fn  [x] `(. clojure.lang.Numbers (num ~x)))}
   [x] (. clojure.lang.Numbers (num x)))
-
-(defn int
-  "Coerce to int"
-  {:tag Integer
-   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
-  [x] (. clojure.lang.RT (intCast x)))
 
 (defn long
   "Coerce to long"
@@ -4154,7 +4189,7 @@
   Returns a promise object that can be read with deref/@, and set,
   once only, with deliver. Calls to deref/@ prior to delivery will
   block. All subsequent derefs will return the same delivered value
-  without blocking."  
+  without blocking."
   []
   (let [d (java.util.concurrent.CountDownLatch. 1)
         v (atom nil)]

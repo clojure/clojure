@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public final class ArrayChunk implements Indexed{
+public final class ArrayChunk implements IChunk{
 
 final Object[] array;
 final int off;
@@ -39,4 +39,11 @@ public Object nth(int i){
 public int count(){
 	return end - off;
 }
+
+public IChunk dropFirst(){
+	if(off==end)
+		throw new IllegalStateException("dropFirst of empty chunk");
+	return new ArrayChunk(array, off + 1, end);
+}
+
 }

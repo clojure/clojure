@@ -207,7 +207,7 @@ static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
 		this.offset = offset;
 	}
 
-	public Indexed chunkedFirst() throws Exception{
+	public IChunk chunkedFirst() throws Exception{
 		return new ArrayChunk(node, offset);
 		}
 

@@ -8,16 +8,12 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich May 24, 2009 */
+/* rich Jun 18, 2009 */
 
 package clojure.lang;
 
-public interface IChunkedSeq extends ISeq{
+public interface IChunk extends Indexed{
 
-IChunk chunkedFirst() throws Exception;
-
-ISeq chunkedNext() throws Exception;
-
-ISeq chunkedMore() throws Exception;
+IChunk dropFirst();
 
 }
