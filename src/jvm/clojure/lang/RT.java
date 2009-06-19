@@ -717,13 +717,13 @@ static public Object dissoc(Object coll, Object key) throws Exception{
 	return ((IPersistentMap) coll).without(key);
 }
 
-static public Object nth(Indexed coll, int n){
-	if(coll != null)
-		return coll.nth(n);
-	return null;
+static public Object nth(Object coll, int n){
+	if(coll instanceof Indexed)
+		return ((Indexed) coll).nth(n);
+	return do_nth(coll,n);
 }
 
-static public Object nth(Object coll, int n){
+static public Object do_nth(Object coll, int n){
 	if(coll instanceof Indexed)
 		return ((Indexed) coll).nth(n);
 	if(coll == null)
