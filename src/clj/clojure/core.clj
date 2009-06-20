@@ -1684,19 +1684,24 @@
   "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
   [f x] (cons x (lazy-seq (iterate f (f x)))))
 
-(defn range
+(defn range 
   "Returns a lazy seq of nums from start (inclusive) to end
   (exclusive), by step, where start defaults to 0 and step to 1."
-  ([end] (if (and (> end 0) (<= end (. Integer MAX_VALUE)))
-           (new clojure.lang.Range 0 end)
-           (take end (iterate inc 0))))
-  ([start end] (if (and (< start end)
-                        (>= start (. Integer MIN_VALUE))
-                        (<= end (. Integer MAX_VALUE)))
-                 (new clojure.lang.Range start end)
-                 (take (- end start) (iterate inc start))))
+  ([end] (range 0 end 1))
+  ([start end] (range start end 1))
   ([start end step]
-   (take-while (partial (if (pos? step) > <) end) (iterate (partial + step) start))))
+   (lazy-seq
+    (let [b (chunk-buffer 32)
+          comp (if (pos? step) < >)]
+      (loop [i start]
+        (if (and (< (count b) 32)
+                 (comp i end))
+          (do
+            (chunk-append b i)
+            (recur (+ i step)))
+          (chunk-cons (chunk b) 
+                      (when (comp i end) 
+                        (range i end step)))))))))
 
 (defn merge
   "Returns a map that consists of the rest of the maps conj-ed onto
