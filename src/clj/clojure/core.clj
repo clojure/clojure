@@ -1525,6 +1525,21 @@
    :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
   [x] (. clojure.lang.RT (intCast x)))
 
+;will be redefed later with arg checks
+(defmacro dotimes
+  "bindings => name n
+
+  Repeatedly executes body (presumably for side-effects) with name
+  bound to integers from 0 through n-1."
+  [bindings & body]
+  (let [i (first bindings)
+        n (second bindings)]
+    `(let [n# (int ~n)]
+       (loop [~i (int 0)]
+         (when (< ~i n#)
+           ~@body
+           (recur (inc ~i)))))))
+
 (defn map
   "Returns a lazy sequence consisting of the result of applying f to the
   set of first items of each coll, followed by applying f to the set
@@ -1538,10 +1553,8 @@
         (let [c (chunk-first s)
               size (int (count c))
               b (chunk-buffer size)]
-          (loop [i (int 0)]
-            (when (< i size)
-              (chunk-append b (f (nth c i)))
-              (recur (inc i))))
+          (dotimes [i size]
+              (chunk-append b (f (nth c i))))
           (chunk-cons (chunk b) (map f (chunk-rest s))))
         (cons (f (first s)) (map f (rest s)))))))
   ([f c1 c2]
@@ -1571,15 +1584,21 @@
     (apply concat (apply map f colls)))
 
 (defn filter
-  "Returns a lazy sequence of the items in coll for which
-  (pred item) returns true. pred must be free of side-effects."
-  [pred coll]
-  (let [step (fn [p c]
-                 (when-let [s (seq c)]
-                   (if (p (first s))
-                     (cons (first s) (filter p (rest s)))
-                     (recur p (rest s)))))]
-    (lazy-seq (step pred coll))))
+  ([pred coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (if (chunked-seq? s)
+        (let [c (chunk-first s)
+              size (count c)
+              b (chunk-buffer size)]
+          (dotimes [i size]
+              (when (pred (nth c i))
+                (chunk-append b (nth c i))))
+          (chunk-cons (chunk b) (filter pred (chunk-rest s))))
+        (let [f (first s) r (rest s)]
+          (if (pred f)
+            (cons f (filter pred r))
+            (filter pred r))))))))
 
 
 (defn remove
