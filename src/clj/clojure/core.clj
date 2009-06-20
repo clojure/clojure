@@ -2975,16 +2975,20 @@
   [v] (instance? clojure.lang.Var v))
 
 (defn slurp
-  "Reads the file named by f into a string and returns it."
-  [#^String f]
-  (with-open [r (new java.io.BufferedReader (new java.io.FileReader f))]
+  "Reads the file named by f using the encoding enc into a string
+  and returns it."
+  ([f] (slurp f (.name (java.nio.charset.Charset/defaultCharset))))
+  ([#^String f #^String enc]
+  (with-open [r (new java.io.BufferedReader
+                  (new java.io.InputStreamReader
+                    (new java.io.FileInputStream f) enc))]
     (let [sb (new StringBuilder)]
-      (loop [c (. r (read))]
+      (loop [c (.read r)]
         (if (neg? c)
           (str sb)
           (do
-            (. sb (append (char c)))
-            (recur (. r (read)))))))))
+            (.append sb (char c))
+            (recur (.read r)))))))))
 
 (defn subs
   "Returns the substring of s beginning at start inclusive, and ending
