@@ -1465,10 +1465,10 @@
   false."
   {:tag Boolean}
   [pred coll]
-    (if (seq coll)
-      (and (pred (first coll))
-           (recur pred (next coll)))
-      true))
+  (cond
+   (nil? (seq coll)) true
+   (pred (first coll)) (recur pred (next coll))
+   :else false))
 
 (def
  #^{:tag Boolean
