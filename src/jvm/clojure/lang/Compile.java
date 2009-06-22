@@ -68,7 +68,6 @@ public static void main(String[] args) throws Exception{
 			{
 			e.printStackTrace(err);
 			}
-        Agent.shutdown();
 		}
 }
 }
