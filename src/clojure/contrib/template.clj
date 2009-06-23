@@ -1,4 +1,30 @@
-(ns clojure.contrib.template
+;;; template.clj - anonymous functions that pre-evaluate sub-expressions
+
+;; By Stuart Sierra, http://stuartsierra.com/
+;; June 23, 2009
+
+;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
+;; and distribution terms for this software are covered by the Eclipse
+;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;; which can be found in the file epl-v10.html at the root of this
+;; distribution.  By using this software in any fashion, you are
+;; agreeing to be bound by the terms of this license.  You must not
+;; remove this notice, or any other, from this software.
+
+;; CHANGE LOG
+;;
+;; June 23, 2009: complete rewrite, eliminated _1,_2,... argument
+;; syntax
+;;
+;; January 20, 2009: added "template?" and checks for valid template
+;; expressions.
+;;
+;; December 15, 2008: first version
+
+
+(ns #^{:author "Stuart Sierra"
+       :doc "Macros that expand to repeated copies of a template expression."}
+  clojure.contrib.template
   (:require [clojure.contrib.walk :as walk]))
 
 (defn apply-template
