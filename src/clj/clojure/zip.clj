@@ -66,7 +66,9 @@
 (defn children
   "Returns a seq of the children of node at loc, which must be a branch"
   [loc]
-    ((:zip/children ^loc) (node loc)))
+    (if (branch? loc)
+      ((:zip/children ^loc) (node loc))
+      (throw (Exception. "called children on a leaf node"))))
 
 (defn make-node
   "Returns a new branch node, given an existing node and new
