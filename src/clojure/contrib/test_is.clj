@@ -749,7 +749,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   See clojure.contrib.template/do-template for an explanation of
   templates.
 
-  Example: (are (= _1 _2)  
+  Example: (are [x y] (= x y)  
                 2 (+ 1 1)
                 4 (* 2 2))
   Expands to: 
@@ -757,8 +757,8 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
                (is (= 4 (* 2 2))))
 
   Note: This breaks some reporting features, such as line numbers."
-  [expr & args]
-  `(temp/do-template (is ~expr) ~@args))
+  [argv expr & args]
+  `(temp/do-template ~argv (is ~expr) ~@args))
 
 (defmacro testing
   "Adds a new string to the list of testing contexts.  May be nested,
