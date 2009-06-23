@@ -121,7 +121,6 @@
       <arg value="clojure.contrib.complex-numbers"/>
       <arg value="clojure.contrib.cond"/>
       <arg value="clojure.contrib.condition"/>
-      <arg value="clojure.contrib.condt"/>
       <arg value="clojure.contrib.core"/>
       <arg value="clojure.contrib.dataflow"/>
       <arg value="clojure.contrib.datalog"/>
