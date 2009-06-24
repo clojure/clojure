@@ -8,8 +8,7 @@
 ;;
 
 (ns clojure.contrib.test-clojure.data-structures
-  (:use clojure.contrib.test-is
-        [clojure.contrib.test-clojure.test-utils :only (all-are)]))
+  (:use clojure.contrib.test-is))
 
 
 ;; *** Helper functions ***

@@ -6,28 +6,25 @@
 ;;  terms of this license.  You must not remove this notice, or any other,
 ;;  from this software.
 
-(ns clojure.contrib.test-clojure.test-utils
-  (:use [clojure.contrib.combinatorics :only (combinations)]))
+(ns clojure.contrib.test-clojure.test-utils)
 
-
-(defn exception
-  "Use this function to ensure that execution of a program doesn't
+  (defn exception
+    "Use this function to ensure that execution of a program doesn't
   reach certain point."
-  []
-  (throw (new Exception "Exception which should never occur")))
+    []
+    (throw (new Exception "Exception which should never occur")))
 
 
-(defmacro all-are
-  "Test all-with-all.
-  (all-are (= _1 _2)
-    a b c)
-  =>
-  (do
-    (is (= a b))
-    (is (= a c))
-    (is (= b c)))"
-  [expr & args]
-  (concat
-    (list 'clojure.contrib.template/do-template (list 'clojure.contrib.test-is/is expr))
-    (apply concat (combinations args 2))))
-
+;;   (defmacro all-are
+;;     "Test all-with-all.
+;;   (all-are (= _1 _2)
+;;     a b c)
+;;   =>
+;;   (do
+;;     (is (= a b))
+;;     (is (= a c))
+;;     (is (= b c)))"
+;;     [expr & args]
+;;     (concat
+;;      (list 'clojure.contrib.template/do-template (list 'clojure.contrib.test-is/is expr))
+;;      (apply concat (combinations args 2)))))
