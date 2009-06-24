@@ -559,7 +559,7 @@
   {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))}
   [x] (. clojure.lang.Numbers (inc x)))
 
-(defn chunk-buffer [capacity]
+(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
   (clojure.lang.ChunkBuffer. capacity))
 
 (defn chunk-append [#^clojure.lang.ChunkBuffer b x]
@@ -608,7 +608,7 @@
                   (let [c (chunk-first s)]
                     (loop [val val i (int 0)]
                       (if (< i (count c))
-                        (recur (f val (nth c i)) (inc i))
+                        (recur (f val (.nth c i)) (inc i))
                         val)))
                   (chunk-next s))
            (recur f (f val (first s)) (next s)))
@@ -1558,7 +1558,7 @@
               size (int (count c))
               b (chunk-buffer size)]
           (dotimes [i size]
-              (chunk-append b (f (nth c i))))
+              (chunk-append b (f (.nth c i))))
           (chunk-cons (chunk b) (map f (chunk-rest s))))
         (cons (f (first s)) (map f (rest s)))))))
   ([f c1 c2]
@@ -1596,8 +1596,8 @@
               size (count c)
               b (chunk-buffer size)]
           (dotimes [i size]
-              (when (pred (nth c i))
-                (chunk-append b (nth c i))))
+              (when (pred (.nth c i))
+                (chunk-append b (.nth c i))))
           (chunk-cons (chunk b) (filter pred (chunk-rest s))))
         (let [f (first s) r (rest s)]
           (if (pred f)
