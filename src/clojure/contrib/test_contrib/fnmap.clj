@@ -4,16 +4,16 @@
 
 (deftest acts-like-map
   (let [m1 (fnmap get assoc :key1 1 :key2 2)]
-    (are (= _2 (get m1 _1))
+    (are [k v] (= v (get m1 k))
          :key1 1
          :key2 2
          :nonexistent-key nil)
-    (are (= _2 (_1 m1))
+    (are [k v] (= v (k m1))
          :key1 1
          :key2 2
          :nonexistent-key nil)
     (let [m2 (assoc m1 :key3 3 :key4 4)]
-      (are (= _2 (get m2 _1))
+      (are [k v] (= v (get m2 k))
            :key1 1
            :key2 2
            :key3 3
