@@ -1,5 +1,5 @@
 (ns clojure.contrib.test-contrib.str-utils
-    (:use clojure.contrib.test-is
+    (:use clojure.test
           clojure.contrib.str-utils))
 
 

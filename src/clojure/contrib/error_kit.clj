@@ -19,7 +19,7 @@ Please contact Chouser if you have any suggestions for better names
 or API adjustments."} 
   clojure.contrib.error-kit
   (:use [clojure.contrib.def :only (defvar defvar-)]
-        [clojure.contrib.stacktrace :only (root-cause)]))
+        [clojure.stacktrace :only (root-cause)]))
 
 (defn- make-ctrl-exception [msg data]
   "Create an exception object with associated data, used for passing

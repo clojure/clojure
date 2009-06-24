@@ -1,5 +1,5 @@
 (ns clojure.contrib.test-contrib.shell-out
-  (:use clojure.contrib.test-is
+  (:use clojure.test
 	clojure.contrib.shell-out)
   (:import (java.io File)))
 

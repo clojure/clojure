@@ -15,7 +15,7 @@
 
 
 (ns clojure.contrib.test-contrib.test-dataflow
-  (:use clojure.contrib.test-is)
+  (:use clojure.test)
   (:use clojure.contrib.dataflow))
 
 (def df-1

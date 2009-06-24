@@ -1,5 +1,5 @@
 (ns clojure.contrib.test-contrib.test-java-utils
-  (:use clojure.contrib.test-is
+  (:use clojure.test
 	[clojure.contrib.duck-streams :only (spit)]
 	clojure.contrib.java-utils)
   (:import [java.io File]

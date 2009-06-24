@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-contrib.monads
-  (:use [clojure.contrib.test-is :only (deftest is are run-tests)]
+  (:use [clojure.test :only (deftest is are run-tests)]
 	[clojure.contrib.monads
 	 :only (with-monad domonad m-lift m-seq m-chain
 		sequence-m maybe-m state-m maybe-t sequence-t)]))

@@ -13,14 +13,13 @@
 ;;  stuart.halloway (gmail)
 
 (ns clojure.contrib.test-contrib
-  (:use [clojure.contrib.test-is :only (run-tests)])
+  (:use [clojure.test :only (run-tests)])
   (:gen-class))
 
 (def test-names
      [:complex-numbers :fnmap :macro-utils :monads :pprint.pretty
       :pprint.cl-format :str-utils :shell-out :test-graph
-      :test-dataflow :test-java-utils :test-lazy-seqs :test-is
-      :test-is-fixtures])
+      :test-dataflow :test-java-utils :test-lazy-seqs])
 
 (def test-namespaces
      (map #(symbol (str "clojure.contrib.test-contrib." (name %)))

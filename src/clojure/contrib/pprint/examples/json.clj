@@ -20,7 +20,7 @@ This is an example of using a pretty printer dispatch function to generate JSON 
      :see-also [["http://json.org/", "JSON Home Page"]]}
   clojure.contrib.pprint.examples.json
   (:require [clojure.contrib.java-utils :as j])
-  (:use [clojure.contrib.test-is :only (deftest- is)]
+  (:use [clojure.test :only (deftest- is)]
         [clojure.contrib.pprint :only (write formatter-out)]))
 
 
@@ -104,9 +104,9 @@ This is an example of using a pretty printer dispatch function to generate JSON 
 ;;; TESTS
 
 ;; Run these tests with
-;; (clojure.contrib.test-is/run-tests 'clojure.contrib.print-json)
+;; (clojure.test/run-tests 'clojure.contrib.print-json)
 
-;; Bind clojure.contrib.test-is/*load-tests* to false to omit these
+;; Bind clojure.test/*load-tests* to false to omit these
 ;; tests from production code.
 
 (deftest- can-print-json-strings

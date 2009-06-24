@@ -1,6 +1,6 @@
 (ns clojure.contrib.test-contrib.walk
   (:require [clojure.contrib.walk :as w])
-  (:use clojure.contrib.test-is))
+  (:use clojure.test))
 
 (deftest t-prewalk-replace
   (is (= (w/prewalk-replace {:a :b} [:a {:a :a} (list 3 :c :a)])

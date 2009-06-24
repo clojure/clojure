@@ -1,6 +1,6 @@
 (ns clojure.contrib.test-contrib.fnmap
   (:use clojure.contrib.fnmap
-        clojure.contrib.test-is))
+        clojure.test))
 
 (deftest acts-like-map
   (let [m1 (fnmap get assoc :key1 1 :key2 2)]

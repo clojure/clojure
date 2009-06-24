@@ -14,7 +14,7 @@
 ;;  Created 23 June 2009
 
 (ns clojure.contrib.test-contrib.test-graph
-  (use clojure.contrib.test-is
+  (use clojure.test
        clojure.contrib.graph))
 
 
