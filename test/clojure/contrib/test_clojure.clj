@@ -42,7 +42,6 @@
       :parallel
       :java-interop
       ;; libraries
-      :clojure-main
       :clojure-set
       :clojure-xml
       :clojure-zip
