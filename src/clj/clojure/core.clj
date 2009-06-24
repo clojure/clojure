@@ -605,11 +605,7 @@
        (if s
          (if (chunked-seq? s)
            (recur f 
-                  (let [c (chunk-first s)]
-                    (loop [val val i (int 0)]
-                      (if (< i (count c))
-                        (recur (f val (.nth c i)) (inc i))
-                        val)))
+                  (.reduce (chunk-first s) f val)
                   (chunk-next s))
            (recur f (f val (first s)) (next s)))
          val))))
