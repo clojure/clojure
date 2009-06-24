@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated May 10, 2009
+;; last updated June 23, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -238,8 +238,20 @@
 	 m-val  (m-result val)]
      (reduce m-f m-val mvs))))
 
+(defmonadfn m-until
+  "While (p x) is false, replace x by the value returned by the
+   monadic computation (f x). Return (m-result x) for the first
+   x for which (p x) is true."
+  [p f x]
+  (if (p x)
+    (m-result x)
+    (domonad
+      [y (f x)
+       z (m-until p f y)]
+      z)))
+
 (defmacro m-when
-  "If test if logical true, return monadic value m-expr, else return
+  "If test is logical true, return monadic value m-expr, else return
    (m-result nil)."
   [test m-expr]
   `(if ~test ~m-expr (~'m-result nil)))
@@ -332,41 +344,70 @@
 		    ((f v) ss))))
    ])
 
-(defn update-state [f]
+(defn update-state
   "Return a state-monad function that replaces the current state by the
    result of f applied to the current state and that returns the old state."
+  [f]
   (fn [s] [s (f s)]))
 
-(defn set-state [s]
+(defn set-state
   "Return a state-monad function that replaces the current state by s and
    returns the previous state."
+  [s]
   (update-state (fn [_] s)))
 
-(defn fetch-state []
+(defn fetch-state
   "Return a state-monad function that returns the current state and does not
    modify it."
+  []
   (update-state identity))
 
-(defn fetch-val [key]
+(defn fetch-val
   "Return a state-monad function that assumes the state to be a map and
    returns the value corresponding to the given key. The state is not modified."
+  [key]
   (domonad state-m
     [s (fetch-state)]
     (key s)))
 
-(defn update-val [key f]
+(defn update-val
   "Return a state-monad function that assumes the state to be a map and
    replaces the value associated with the given key by the return value
    of f applied to the old value. The old value is returned."
+  [key f]
   (fn [s]
     (let [old-val (get s key)
 	  new-s   (assoc s key (f old-val))]
       [old-val new-s])))
 
-(defn set-val [key val]
+(defn set-val
   "Return a state-monad function that assumes the state to be a map and
    replaces the value associated with key by val. The old value is returned."
+  [key val]
   (update-val key (fn [_] val)))
+
+(defn with-state-field
+  "Returns a state-monad function that expects a map as its state and
+   runs statement (another state-monad function) on the state defined by
+   the map entry corresponding to key. The map entry is updated with the
+   new state returned by statement."
+  [key statement]
+  (fn [s]
+    (let [substate (get s key nil)
+	  [result new-substate] (statement substate)
+	  new-state (assoc s key new-substate)]
+      [result new-state])))
+
+(defn state-m-until
+  "An optimized implementation of m-until for the state monad that
+   replaces recursion by a loop."
+  [p f x]
+  (letfn [(until [p f x s]
+	    (if (p x)
+	      [x s]
+	      (let [[x s] ((f x) s)]
+		(recur p f x s))))]
+    (fn [s] (until p f x s))))
 
 ; Writer monad
 (defn writer-m
