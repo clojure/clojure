@@ -2607,7 +2607,7 @@
      (even? (count bindings)) "an even number of forms in binding vector")
   `(let* ~(destructure bindings) ~@body))
 
-;redefine fn with destructuring
+;redefine fn with destructuring and pre/post conditions
 (defmacro fn
   "(fn name? [params* ] exprs*)
   (fn name? ([params* ] exprs*)+)
@@ -2623,9 +2623,26 @@
           sigs (if name (next sigs) sigs)
           sigs (if (vector? (first sigs)) (list sigs) sigs)
           psig (fn [sig]
-                 (let [[params & body] sig]
+                 (let [[params & body] sig
+                       conds (when (and (next body) (map? (first body))) 
+                                           (first body))
+                       body (if conds (next body) body)
+                       conds (or conds ^params)
+                       pre (:pre conds)
+                       post (:post conds)                       
+                       body (if post
+                              `((let [~'% ~(if (< 1 (count body)) 
+                                            `(do ~@body) 
+                                            (first body))]
+                                 ~@(map (fn [c] `(assert ~c)) post)
+                                 ~'%))
+                              body)
+                       body (if pre
+                              (concat (map (fn [c] `(assert ~c)) pre) 
+                                      body)
+                              body)]
                    (if (every? symbol? params)
-                     sig
+                     (cons params body)
                      (loop [params params
                             new-params []
                             lets []]
@@ -2794,8 +2811,9 @@
   "Evaluates expr and throws an exception if it does not evaluate to
  logical true."
   [x]
-  `(when-not ~x
-     (throw (new Exception (str "Assert failed: " (pr-str '~x))))))
+  (when *assert*
+    `(when-not ~x
+       (throw (new Exception (str "Assert failed: " (pr-str '~x)))))))
 
 (defn test
   "test [v] finds fn at key :test in var metadata and calls it,
