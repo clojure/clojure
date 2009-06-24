@@ -93,11 +93,11 @@
       <arg value="clojure.xml"/>
       <arg value="clojure.zip"/>
       <arg value="clojure.inspector"/>
-      <arg value="clojure.contrib.walk"/>
-      <arg value="clojure.contrib.stacktrace"/>
-      <arg value="clojure.contrib.template"/>
-      <arg value="clojure.contrib.test-is"/>
-      <arg value="clojure.contrib.test-is.tap"/>
+      <arg value="clojure.walk"/>
+      <arg value="clojure.stacktrace"/>
+      <arg value="clojure.template"/>
+      <arg value="clojure.test"/>
+      <arg value="clojure.test.tap"/>
     </java>
   </target>
 
@@ -125,7 +125,7 @@
         <path location="${clojure_jar}"/>
       </classpath>
       <arg value="-e"/>
-      <arg value="(require '(clojure.contrib [test-clojure :as main])) (main/run)"/>
+      <arg value="(require '(clojure [test-clojure :as main])) (main/run)"/>
     </java>
   </target>
 
