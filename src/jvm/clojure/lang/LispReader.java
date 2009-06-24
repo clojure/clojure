@@ -607,6 +607,10 @@ static Symbol registerArg(int n){
 static class ArgReader extends AFn{
 	public Object invoke(Object reader, Object pct) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
+		if(ARG_ENV.deref() == null)
+			{
+			return interpretToken(readToken(r, '%'));
+			}
 		int ch = r.read();
 		unread(r, ch);
 		//% alone is first arg
