@@ -24,7 +24,7 @@
 
 (deftest test-equality
   ; nil is not equal to any other value
-  (are (not (= nil _))
+  (are [x] (not (= nil x))
       true false
       0 0.0
       \space
@@ -47,7 +47,7 @@
   (is (not= 2/3 0.6666666666666666))
 
   ; vectors equal other seqs by items equality
-  (are (= _1 _2)
+  (are [x y] (= x y)
       '() []        ; regression fixed in r1208; was not equal
       '(1) [1]
       '(1 2) [1 2]
@@ -58,7 +58,7 @@
   (is (not= [1 2] '(2 1)))  ; order of items matters
 
   ; list and vector vs. set and map
-  (are (not= _1 _2)
+  (are [x y] (not= x y)
       ; only () equals []
       () #{}
       () {}
@@ -70,33 +70,35 @@
       [1] #{1} )
 
   ; sorted-map, hash-map and array-map - classes differ, but content is equal
-  (all-are (not= (class _1) (class _2))
-      (sorted-map :a 1)
-      (hash-map   :a 1)
-      (array-map  :a 1))
-  (all-are (= _1 _2)
-      (sorted-map)
-      (hash-map)
-      (array-map))
-  (all-are (= _1 _2)
-      (sorted-map :a 1)
-      (hash-map   :a 1)
-      (array-map  :a 1))
-  (all-are (= _1 _2)
-      (sorted-map :a 1 :z 3 :c 2)
-      (hash-map   :a 1 :z 3 :c 2)
-      (array-map  :a 1 :z 3 :c 2))
+  
+;; TODO: reimplement all-are with new do-template?  
+;;   (all-are (not= (class _1) (class _2))
+;;       (sorted-map :a 1)
+;;       (hash-map   :a 1)
+;;       (array-map  :a 1))
+;;   (all-are (= _1 _2)
+;;       (sorted-map)
+;;       (hash-map)
+;;       (array-map))
+;;   (all-are (= _1 _2)
+;;       (sorted-map :a 1)
+;;       (hash-map   :a 1)
+;;       (array-map  :a 1))
+;;   (all-are (= _1 _2)
+;;       (sorted-map :a 1 :z 3 :c 2)
+;;       (hash-map   :a 1 :z 3 :c 2)
+;;       (array-map  :a 1 :z 3 :c 2))
 
   ; struct-map vs. sorted-map, hash-map and array-map
-  (are (and (not= (class (struct equality-struct 1 2)) (class _))
-            (= (struct equality-struct 1 2) _))
+  (are [x] (and (not= (class (struct equality-struct 1 2)) (class x))
+                (= (struct equality-struct 1 2) x))
       (sorted-map :a 1 :b 2)
       (hash-map   :a 1 :b 2)
       (array-map  :a 1 :b 2))
 
   ; sorted-set vs. hash-set
   (is (not= (class (sorted-set 1)) (class (hash-set 1))))
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (sorted-set) (hash-set)
       (sorted-set 1) (hash-set 1)
       (sorted-set 3 2 1) (hash-set 3 2 1) ))
@@ -105,7 +107,7 @@
 ;; *** Collections ***
 
 (deftest test-count
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (count nil) 0
 
       (count ()) 0
@@ -141,7 +143,7 @@
       (count (java.util.HashMap. {:a 1 :b 2 :c 3})) 3 )
 
   ; different types
-  (are (= (count [_]) 1)
+  (are [x]  (= (count [x]) 1)
       nil true false
       0 0.0 "" \space
       () [] #{} {}  ))
@@ -152,7 +154,7 @@
   (is (thrown? ClassCastException (conj "" \a)))
   (is (thrown? ClassCastException (conj (into-array []) 1)))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (conj nil 1) '(1)
       (conj nil 3 2 1) '(1 2 3)
 
@@ -232,7 +234,7 @@
   (is (thrown? ClassCastException (peek #{1})))
   (is (thrown? ClassCastException (peek {:a 1})))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (peek nil) nil
 
       ; list = first
@@ -269,7 +271,7 @@
   (is (thrown? IllegalStateException (pop ())))
   (is (thrown? IllegalStateException (pop [])))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (pop nil) nil
 
       ; list - pop first
@@ -298,18 +300,18 @@
 ;; *** Lists (IPersistentList) ***
 
 (deftest test-list
-  (are (list? _)
+  (are [x]  (list? x)
       ()
       '()
       (list)
       (list 1 2 3) )
 
   ; order is important
-  (are (not (= _1 _2))
+  (are [x y] (not (= x y))
       (list 1 2) (list 2 1)
       (list 3 1 2) (list 1 2 3) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       '() ()
       (list) '()
       (list 1) '(1)
@@ -343,7 +345,7 @@
 ;; *** Maps (IPersistentMap) ***
 
 (deftest test-find
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (find {} :a) nil
 
       (find {:a 1} :a) [:a 1]
@@ -360,7 +362,7 @@
 
 (deftest test-contains?
   ; contains? is designed to work preferably on maps and sets
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (contains? {} :a) false
       (contains? {} nil) false
 
@@ -388,7 +390,7 @@
 
   ; numerically indexed collections (e.g. vectors and Java arrays)
   ; => test if the numeric key is WITHIN THE RANGE OF INDEXES
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (contains? [] 0) false
       (contains? [] -1) false
       (contains? [] 1) false
@@ -418,7 +420,7 @@
 
   ; 'contains?' operates constant or logarithmic time,
   ; it WILL NOT perform a linear search for a value.
-  (are (= _ false)
+  (are [x]  (= x false)
       (contains? '(1 2 3) 0)
       (contains? '(1 2 3) 1)
       (contains? '(1 2 3) 3)
@@ -428,13 +430,13 @@
 
 
 (deftest test-keys
-  (are (= _1 _2)      ; other than map data structures
+  (are [x y] (= x y)      ; other than map data structures
       (keys ()) nil
       (keys []) nil
       (keys #{}) nil
       (keys "") nil )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       ; (class {:a 1}) => clojure.lang.PersistentArrayMap
       (keys {}) nil
       (keys {:a 1}) '(:a)
@@ -452,13 +454,13 @@
 
 
 (deftest test-vals
-  (are (= _1 _2)      ; other than map data structures
+  (are [x y] (= x y)      ; other than map data structures
       (vals ()) nil
       (vals []) nil
       (vals #{}) nil
       (vals "") nil )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       ; (class {:a 1}) => clojure.lang.PersistentArrayMap
       (vals {}) nil
       (vals {:a 1}) '(1)
@@ -476,7 +478,7 @@
 
 
 (deftest test-key
-  (are (= (key (first (hash-map _ :value))) _)
+  (are [x]  (= (key (first (hash-map x :value))) x)
       nil
       false true
       0 42
@@ -494,7 +496,7 @@
 
 
 (deftest test-val
-  (are (= (val (first (hash-map :key _))) _)
+  (are [x]  (= (val (first (hash-map :key x))) x)
       nil
       false true
       0 42
@@ -514,22 +516,22 @@
 ;; *** Sets ***
 
 (deftest test-hash-set
-  (are (set? _)
+  (are [x] (set? x)
       #{}
       #{1 2}
       (hash-set)
       (hash-set 1 2) )
 
   ; order isn't important
-  (are (= _1 _2)
+  (are [x y] (= x y)
       #{1 2} #{2 1}
       #{3 1 2} #{1 2 3}
       (hash-set 1 2) (hash-set 2 1)
       (hash-set 3 1 2) (hash-set 1 2 3) )
 
   ; equal and unique
-  (are (and (= (hash-set _)   #{_})
-            (= (hash-set _ _) #{_}))
+  (are [x] (and (= (hash-set x)   #{x})
+                (= (hash-set x x) #{x}))
       nil
       false true
       0 42
@@ -545,7 +547,7 @@
       {} {:a 1 :b 2}
       #{} #{1 2} )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       ; equal classes
       (class #{}) (class (hash-set))
       (class #{1 2}) (class (hash-set 1 2))
@@ -586,13 +588,13 @@
   (is (thrown? ClassCastException (sorted-set '(1 2) [3 4])))
 
   ; creates set?
-  (are (set? _)
-      (sorted-set)
-      (sorted-set 1 2) )
+  (are [x] (set? x)
+       (sorted-set)
+       (sorted-set 1 2) )
 
   ; equal and unique
-  (are (and (= (sorted-set _) #{_})
-            (= (sorted-set _ _) (sorted-set _)))
+  (are [x] (and (= (sorted-set x) #{x})
+                (= (sorted-set x x) (sorted-set x)))
       nil
       false true
       0 42
@@ -613,7 +615,7 @@
   (is (thrown? ClassCastException (sorted-set {:a 1 :b 2} {:a 1 :b 2})))
   (is (thrown? ClassCastException (sorted-set #{1 2} #{1 2})))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       ; generating
       (sorted-set) #{}
       (sorted-set 1) #{1}
@@ -631,7 +633,7 @@
 
 (deftest test-set
   ; set?
-  (are (set? (set _))
+  (are [x] (set? (set x))
       () '(1 2)
       [] [1 2]
       #{} #{1 2}
@@ -640,7 +642,7 @@
       "" "abc" )
 
   ; unique
-  (are (= (set [_ _]) #{_})
+  (are [x] (= (set [x x]) #{x})
       nil
       false true
       0 42
@@ -657,7 +659,7 @@
       #{} #{1 2} )
 
   ; conversion
-  (are (= (set _1) _2)
+  (are [x y] (= (set x) y)
       () #{}
       '(1 2) #{1 2}
 
@@ -684,7 +686,7 @@
   (is (thrown? ClassCastException (disj {:a 1} :a)))
 
   ; identity
-  (are (= (disj _) _)
+  (are [x] (= (disj x) x)
       #{}
       #{1 2 3}
       ; different data types
@@ -703,13 +705,13 @@
         #{} #{1 2}} )
 
   ; type identity
-  (are (= (class (disj _)) (class _))
+  (are [x] (= (class (disj x)) (class x))
       (hash-set)
       (hash-set 1 2)
       (sorted-set)
       (sorted-set 1 2) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (disj #{} :a) #{}
       (disj #{} :a :b) #{}
 

@@ -17,7 +17,7 @@
 
 (deftest test-if
   ; true/false/nil
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (if true :t) :t
       (if true :t :f) :t
       (if true :t (exception)) :t
@@ -31,7 +31,7 @@
       (if nil (exception) :f) :f )
 
   ; zero/empty is true
-  (are (= (if _ :t :f) :t)
+  (are [x] (= (if x :t :f) :t)
       (byte 0)
       (short 0)
       (int 0)
@@ -53,7 +53,7 @@
       (into-array []) )
 
   ; anything except nil/false is true
-  (are (= (if _ :t :f) :t)
+  (are [x]  (= (if x :t :f) :t)
       (byte 2)
       (short 2)
       (int 2)
@@ -80,7 +80,7 @@
 
 
 (deftest test-nil-punning
-  (are (= (if _1 :no :yes) _2)
+  (are [x y]  (= (if x :no :yes) y)
     (first []) :yes
     (next [1]) :yes
     (rest [1]) :no
@@ -111,7 +111,7 @@
 
 
 (deftest test-and
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (and) true
       (and true) true
       (and nil) nil
@@ -130,7 +130,7 @@
 
 
 (deftest test-or
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (or) nil
       (or true) true
       (or nil) nil
@@ -151,10 +151,10 @@
 
 (deftest test-not
   (is (thrown? IllegalArgumentException (not)))
-  (are (= (not _) true)
+  (are [x] (= (not x) true)
       nil
       false )
-  (are (= (not _) false)
+  (are [x]  (= (not x) false)
       true
 
       ; numbers

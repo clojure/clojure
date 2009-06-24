@@ -23,7 +23,7 @@
 
 (deftest Coerced-Byte
   (let [v (byte 3)]
-    (are _
+    (are [x]
      (instance? Byte v)
      (number? v)
      (integer? v)
@@ -31,7 +31,7 @@
 
 (deftest Coerced-Short
   (let [v (short 3)]
-    (are _
+    (are [x]
      (instance? Short v)
      (number? v)
      (integer? v)
@@ -39,7 +39,7 @@
 
 (deftest Coerced-Integer
   (let [v (int 3)]
-    (are _
+    (are [x]
      (instance? Integer v)
      (number? v)
      (integer? v)
@@ -47,7 +47,7 @@
 
 (deftest Coerced-Long
   (let [v (long 3)]
-    (are _
+    (are [x]
      (instance? Long v)
      (number? v)
      (integer? v)
@@ -55,7 +55,7 @@
 
 (deftest Coerced-BigInteger
   (let [v (bigint 3)]
-    (are _
+    (are [x]
      (instance? BigInteger v)
      (number? v)
      (integer? v)
@@ -63,21 +63,21 @@
 
 (deftest Coerced-Float
   (let [v (float 3)]
-    (are _
+    (are [x]
      (instance? Float v)
      (number? v)
      (float? v))))
 
 (deftest Coerced-Double
   (let [v (double 3)]
-    (are _
+    (are [x]
      (instance? Double v)
      (number? v)
      (float? v))))
 
 (deftest Coerced-BigDecimal
   (let [v (bigdec 3)]
-    (are _
+    (are [x]
      (instance? BigDecimal v)
      (number? v)
      (decimal? v)
@@ -89,7 +89,7 @@
 (defonce DELTA 1e-12)
 
 (deftest test-add
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (+) 0
       (+ 1) 1
       (+ 1 2) 3
@@ -106,7 +106,7 @@
       (+ 2/3 1) 5/3
       (+ 2/3 1/3) 1 )
 
-  (are (< (- _1 _2) DELTA)
+  (are [x y] (< (- x y) DELTA)
       (+ 1.2) 1.2
       (+ 1.1 2.4) 3.5
       (+ 1.1 2.2 3.3) 6.6 )
@@ -117,7 +117,7 @@
 
 (deftest test-subtract
   (is (thrown? IllegalArgumentException (-)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (- 1) -1
       (- 1 2) -1
       (- 1 2 3) -4
@@ -133,7 +133,7 @@
       (- 2/3 1) -1/3
       (- 2/3 1/3) 1/3 )
 
-  (are (< (- _1 _2) DELTA)
+  (are [x y] (< (- x y) DELTA)
       (- 1.2) -1.2
       (- 2.2 1.1) 1.1
       (- 6.6 2.2 1.1) 3.3 )
@@ -142,7 +142,7 @@
 
 
 (deftest test-multiply
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (*) 1
       (* 2) 2
       (* 2 3) 6
@@ -156,7 +156,7 @@
       (* 1/2 1/3) 1/6
       (* 1/2 1/3 -1/4) -1/24 )
 
-  (are (< (- _1 _2) DELTA)
+  (are [x y] (< (- x y) DELTA)
       (* 1.2) 1.2
       (* 2.0 1.2) 2.4
       (* 3.5 2.0 1.2) 8.4 )
@@ -165,7 +165,7 @@
 
 
 (deftest test-divide
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (/ 1) 1
       (/ 2) 1/2
       (/ 3 2) 3/2
@@ -179,7 +179,7 @@
       (/ -4 -2) 2
       (/ -4 2) -2 )
 
-  (are (< (- _1 _2) DELTA)
+  (are [x y] (< (- x y) DELTA)
       (/ 4.5 3) 1.5
       (/ 4.5 3.0 3.0) 0.5 )
 
@@ -208,7 +208,7 @@
   (is (thrown? ArithmeticException (mod 9 0)))
   (is (thrown? ArithmeticException (mod 0 0)))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (mod 4 2) 0
     (mod 3 2) 1
     (mod 6 4) 2
@@ -258,7 +258,7 @@
   (is (thrown? ArithmeticException (rem 9 0)))
   (is (thrown? ArithmeticException (rem 0 0)))
   
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (rem 4 2) 0
     (rem 3 2) 1
     (rem 6 4) 2
@@ -305,7 +305,7 @@
   (is (thrown? ArithmeticException (quot 9 0)))
   (is (thrown? ArithmeticException (quot 0 0)))
   
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (quot 4 2) 2
     (quot 3 2) 1
     (quot 6 4) 1
@@ -369,7 +369,7 @@
 ;; even? odd?
 
 (deftest test-even?
-  (are _
+  (are [x]
     (even? -4)
     (not (even? -3))
     (even? 0)
@@ -379,7 +379,7 @@
   (is (thrown? ArithmeticException (even? (double 10)))))
 
 (deftest test-odd?
-  (are _
+  (are [x]
     (not (odd? -4))
     (odd? -3)
     (not (odd? 0))

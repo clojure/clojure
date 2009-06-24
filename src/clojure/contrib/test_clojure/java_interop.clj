@@ -15,30 +15,30 @@
 
 (deftest test-dot
   ; (.instanceMember instance args*)
-  (are (= _ "FRED")
+  (are [x] (= x "FRED")
       (.toUpperCase "fred") 
       (. "fred" toUpperCase)
       (. "fred" (toUpperCase)) )
 
-  (are (= _ true)
+  (are [x] (= x true)
       (.startsWith "abcde" "ab")
       (. "abcde" startsWith "ab")
       (. "abcde" (startsWith "ab")) )
 
   ; (.instanceMember Classname args*)
-  (are (= _ "java.lang.String")
+  (are [x] (= x "java.lang.String")
       (.getName String)
       (. (identity String) getName)
       (. (identity String) (getName)) )
 
   ; (Classname/staticMethod args*)
-  (are (= _ 7)
+  (are [x] (= x 7)
       (Math/abs -7)
       (. Math abs -7)
       (. Math (abs -7)) )
 
   ; Classname/staticField
-  (are (= _ 2147483647)
+  (are [x] (= x 2147483647)
       Integer/MAX_VALUE
       (. Integer MAX_VALUE) ))
 
@@ -52,32 +52,32 @@
   (let [m (doto (new java.util.HashMap)
             (.put "a" 1)
             (.put "b" 2))]
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (class m) java.util.HashMap
         m {"a" 1 "b" 2} )))
 
 
 (deftest test-new
   ; Integer
-  (are (and (= (class _1) _2)
-            (= _1 _3))
+  (are [expr cls value] (and (= (class expr) cls)
+                            (= expr value))
       (new java.lang.Integer 42) java.lang.Integer 42
       (java.lang.Integer. 123) java.lang.Integer 123 )
 
   ; Date
-  (are (= (class _) java.util.Date)
+  (are [x] (= (class x) java.util.Date)
       (new java.util.Date)
       (java.util.Date.) ))
 
 
 (deftest test-instance?
   ; evaluation
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (instance? java.lang.Integer (+ 1 2)) true
       (instance? java.lang.Long (+ 1 2)) false )
 
   ; different types
-  (are (instance? _2 _1)
+  (are [type literal] (instance? literal type)
       1   java.lang.Integer
       1.0 java.lang.Double
       1M  java.math.BigDecimal
@@ -85,7 +85,7 @@
       "a" java.lang.String )
 
   ; it is an int, nothing else
-  (are (= (instance? _1 42) _2)
+  (are [x y] (= (instance? x 42) y)
       java.lang.Integer true
       java.lang.Long false
       java.lang.Character false
@@ -99,7 +99,7 @@
 
 (deftest test-bean
   (let [b (bean java.awt.Color/black)]
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (map? b) true
 
         (:red b) 0
@@ -117,14 +117,14 @@
 
 
 (deftest test-bases
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (bases java.lang.Math)
         (list java.lang.Object)
       (bases java.lang.Integer)
         (list java.lang.Number java.lang.Comparable) ))
 
 (deftest test-supers
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (supers java.lang.Math)
         #{java.lang.Object}
       (supers java.lang.Integer)
@@ -142,25 +142,25 @@
       (is (= (class (first (~type-array [1 2]))) (class (~type 1))))
 
       ; given size (and empty)
-      (are (and (= (alength (~type-array _)) _)
-                (= (vec (~type-array _)) (repeat _ 0)))
+      (are [x] (and (= (alength (~type-array x)) x)
+                (= (vec (~type-array x)) (repeat x 0)))
           0 1 5 )
 
       ; copy of a sequence
-      (are (and (= (alength (~type-array _)) (count _))
-                (= (vec (~type-array _)) _))
+      (are [x] (and (= (alength (~type-array x)) (count x))
+                    (= (vec (~type-array x)) x))
 ;;        []    ;; ERROR
           [1]
           [1 -2 3 0 5] )
 
       ; given size and init-value
-      (are (and (= (alength (~type-array _ 42)) _)
-                (= (vec (~type-array _ 42)) (repeat _ 42)))
+      (are [x] (and (= (alength (~type-array x 42)) x)
+                    (= (vec (~type-array x 42)) (repeat x 42)))
           0 1 5 )
 
       ; given size and init-seq
-      (are (and (= (alength (~type-array _1 _2)) _1)
-                (= (vec (~type-array _1 _2)) _3))
+      (are [x y z] (and (= (alength (~type-array x y)) x)
+                        (= (vec (~type-array x y)) z))
           0 [] []
           0 [1] []
           0 [1 2 3] []
@@ -180,11 +180,11 @@
 
 ; separate test for exceptions (doesn't work with above macro...)
 (deftest test-type-array-exceptions
-  (are (thrown? NegativeArraySizeException _)
-      (int-array -1)
-      (long-array -1)
-      (float-array -1)
-      (double-array -1) ))
+  (are [x] (thrown? NegativeArraySizeException x)
+       (int-array -1)
+       (long-array -1)
+       (float-array -1)
+       (double-array -1) ))
 
 
 (deftest test-make-array
@@ -192,19 +192,19 @@
   (is (thrown? NegativeArraySizeException (make-array Integer -1)))
 
   ; one-dimensional
-  (are (= (alength (make-array Integer _)) _)
+  (are [x] (= (alength (make-array Integer x)) x)
       0 1 5 )
 
   (let [a (make-array Integer 5)]
     (aset a 3 42)
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (aget a 3) 42
         (class (aget a 3)) Integer ))
       
   ; multi-dimensional
   (let [a (make-array Integer 3 2 4)]
     (aset a 0 1 2 987)
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (alength a) 3
         (alength (first a)) 2
         (alength (first (first a))) 4
@@ -216,7 +216,7 @@
 (deftest test-to-array
   (let [v [1 "abc" :kw \c []]
         a (to-array v)]
-    (are (= _1 _2)
+    (are [x y] (= x y)
         ; length
         (alength a) (count v)
 
@@ -229,8 +229,8 @@
         (class (aget a 4)) (class (nth v 4)) ))
 
   ; different kinds of collections
-  (are (and (= (alength (to-array _)) (count _))
-            (= (vec (to-array _)) (vec _)))
+  (are [x] (and (= (alength (to-array x)) (count x))
+                (= (vec (to-array x)) (vec x)))
       ()
       '(1 2)
       []
@@ -254,23 +254,23 @@
   ; simple case
   (let [v [1 2 3 4 5]
         a (into-array v)]
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (alength a) (count v)
         (vec a) v
         (class (first a)) (class (first v)) ))
 
   ; given type
   (let [a (into-array Integer/TYPE [(byte 2) (short 3) (int 4)])]
-    (are (= _ Integer)
+    (are [x] (= x Integer)
         (class (aget a 0))
         (class (aget a 1))
         (class (aget a 2)) ))
 
   ; different kinds of collections
-  (are (and (= (alength (into-array _)) (count _))
-            (= (vec (into-array _)) (vec _))
-            (= (alength (into-array Integer/TYPE _)) (count _))
-            (= (vec (into-array Integer/TYPE _)) (vec _)))
+  (are [x] (and (= (alength (into-array x)) (count x))
+                (= (vec (into-array x)) (vec x))
+                (= (alength (into-array Integer/TYPE x)) (count x))
+                (= (vec (into-array Integer/TYPE x)) (vec x)))
       ()
       '(1 2)
       []
@@ -292,7 +292,7 @@
   ; ragged array
   (let [v [[1] [2 3] [4 5 6]]
         a (to-array-2d v)]
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (alength a) (count v)
         (alength (aget a 0)) (count (nth v 0))
         (alength (aget a 1)) (count (nth v 1))
@@ -304,13 +304,13 @@
 
   ; empty array
   (let [a (to-array-2d [])]
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (alength a) 0
         (vec a) [] )))
 
 
 (deftest test-alength
-  (are (= (alength _) 0)
+  (are [x] (= (alength x) 0)
       (int-array 0)
       (long-array 0)
       (float-array 0)
@@ -320,7 +320,7 @@
       (into-array [])
       (to-array-2d []) )
 
-  (are (= (alength _) 1)
+  (are [x] (= (alength x) 1)
       (int-array 1)
       (long-array 1)
       (float-array 1)
@@ -330,7 +330,7 @@
       (into-array [1])
       (to-array-2d [[1]]) )
 
-  (are (= (alength _) 3)
+  (are [x] (= (alength x) 3)
       (int-array 3)
       (long-array 3)
       (float-array 3)
@@ -343,8 +343,8 @@
 
 (deftest test-aclone
   ; clone all arrays except 2D
-  (are (and (= (alength (aclone _)) (alength _))
-            (= (vec (aclone _)) (vec _)))
+  (are [x] (and (= (alength (aclone x)) (alength x))
+                (= (vec (aclone x)) (vec x)))
       (int-array 0)
       (long-array 0)
       (float-array 0)
@@ -362,9 +362,9 @@
       (into-array [1 2 3]) )
 
   ; clone 2D
-  (are (and (= (alength (aclone _)) (alength _))
-            (= (map alength (aclone _)) (map alength _))
-            (= (map vec (aclone _)) (map vec _)))
+  (are [x] (and (= (alength (aclone x)) (alength x))
+                (= (map alength (aclone x)) (map alength x))
+                (= (map vec (aclone x)) (map vec x)))
       (to-array-2d [])
       (to-array-2d [[1] [2 3] [4 5 6]]) ))
 
@@ -377,8 +377,8 @@
 ;   ints/longs/floats/doubles
 
 (deftest test-boolean
-  (are (and (instance? java.lang.Boolean (boolean _1))
-            (= (boolean _1) _2))
+  (are [x y] (and (instance? java.lang.Boolean (boolean x))
+                  (= (boolean x) y))
       nil false
       false false
       true true

@@ -19,7 +19,7 @@
   (is (thrown? IllegalArgumentException (identity)))
   (is (thrown? IllegalArgumentException (identity 1 2)))
 
-  (are (= (identity _) _)
+  (are [x] (= (identity x) x)
       nil
       false true
       0 42
@@ -36,7 +36,7 @@
       #{} #{1 2} )
 
   ; evaluation
-  (are (= (identity _1) _2)
+  (are [x y] (= (identity x) y)
       (+ 1 2) 3
       (> 5 0) true ))
 

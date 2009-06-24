@@ -12,7 +12,7 @@
 
 
 (deftest test-union
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (set/union) #{}
 
       ; identity
@@ -65,7 +65,7 @@
   ; at least one argument is needed
   (is (thrown? IllegalArgumentException (set/intersection)))
   
-  (are (= _1 _2)
+  (are [x y] (= x y)
       ; identity
       (set/intersection #{}) #{}
       (set/intersection #{1}) #{1}

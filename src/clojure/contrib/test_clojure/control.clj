@@ -16,7 +16,7 @@
 ;; *** Helper functions ***
 
 (defn maintains-identity [f]
-  (are (= (f _) _)
+  (are [x] (= (f x) x)
       nil
       false true
       0 42
@@ -37,7 +37,7 @@
 ; http://clojure.org/macros
 
 (deftest test-do
-  (are (= _1 _2)
+  (are [x y] (= x y)
       ; no params => nil
       (do) nil
       
@@ -65,7 +65,7 @@
 
 
 (deftest test-cond
-  (are (= _1 _2)
+  (are [x y]  (= x y)
       (cond) nil
 
       (cond nil true) nil
@@ -76,11 +76,11 @@
       (cond nil 1 false 2 true 3 true (exception)) 3 )
 
   ; false
-  (are (= (cond _ :a true :b) :b)
+  (are [x]  (= (cond x :a true :b) :b)
       nil false )
 
   ; true
-  (are (= (cond _ :a true :b) :a)
+  (are [x]  (= (cond x :a true :b) :a)
       true
       0 42
       0.0 3.14
@@ -96,7 +96,7 @@
       #{} #{1 2} )
 
   ; evaluation
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (cond (> 3 2) (+ 1 2) true :result true (exception)) 3
       (cond (< 3 2) (+ 1 2) true :result true (exception)) :result )
 

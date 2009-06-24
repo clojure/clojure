@@ -20,7 +20,7 @@
 
 (deftest test-equality
   ; lazy sequences
-  (are (= _1 _2)
+  (are [x y] (= x y)
       ; fixed SVN 1288 - LazySeq and EmptyList equals/equiv
       ; http://groups.google.com/group/clojure/browse_frm/thread/286d807be9cae2a5#
       (map inc nil) ()
@@ -31,12 +31,12 @@
 
 
 (deftest test-lazy-seq
-  (are (seq? _)
+  (are [x] (seq? x)
       (lazy-seq nil)
       (lazy-seq [])
       (lazy-seq [1 2]))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (lazy-seq nil) ()
       (lazy-seq [nil]) '(nil)
 
@@ -59,7 +59,7 @@
   (is (not (seq? (seq []))))
   (is (seq? (seq [1 2])))
   
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (seq nil) nil
     (seq [nil]) '(nil)
 
@@ -80,7 +80,7 @@
 
 (deftest test-cons
   (is (thrown? IllegalArgumentException (cons 1 2)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (cons 1 nil) '(1)
     (cons nil nil) '(nil)
 
@@ -102,8 +102,8 @@
 
 
 (deftest test-empty
-  (are (and (= (empty _1) _2)
-            (= (class (empty _1)) (class _2)))
+  (are [x y] (and (= (empty x) y)
+                  (= (class (empty x)) (class y)))
       nil nil
 
       () ()
@@ -141,7 +141,7 @@
 
 (deftest test-not-empty
   ; empty coll/seq => nil
-  (are (= (not-empty _) nil)
+  (are [x] (= (not-empty x) nil)
       ()
       []
       {}
@@ -152,8 +152,8 @@
       (lazy-seq []) )
 
   ; non-empty coll/seq => identity
-  (are (and (= (not-empty _) _)
-            (= (class (not-empty _)) (class _)))
+  (are [x] (and (= (not-empty x) x)
+                (= (class (not-empty x)) (class x)))
       '(1 2)
       [1 2]
       {:a 1}
@@ -173,7 +173,7 @@
   (is (thrown? IllegalArgumentException (first \a)))
   (is (thrown? IllegalArgumentException (first 's)))
   (is (thrown? IllegalArgumentException (first :k)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (first nil) nil
 
     ; string
@@ -240,7 +240,7 @@
   (is (thrown? IllegalArgumentException (next \a)))
   (is (thrown? IllegalArgumentException (next 's)))
   (is (thrown? IllegalArgumentException (next :k)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (next nil) nil
 
     ; string
@@ -306,7 +306,7 @@
 
 
 (deftest test-last
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (last nil) nil
 
       ; list
@@ -368,7 +368,7 @@
 ;;
 (deftest test-ffirst
   (is (thrown? IllegalArgumentException (ffirst)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (ffirst nil) nil
 
     (ffirst ()) nil
@@ -388,7 +388,7 @@
 ;;
 (deftest test-fnext
   (is (thrown? IllegalArgumentException (fnext)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (fnext nil) nil
 
     (fnext ()) nil
@@ -412,7 +412,7 @@
 ;;
 (deftest test-nfirst
   (is (thrown? IllegalArgumentException (nfirst)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (nfirst nil) nil
 
     (nfirst ()) nil
@@ -432,7 +432,7 @@
 ;;
 (deftest test-nnext
   (is (thrown? IllegalArgumentException (nnext)))
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (nnext nil) nil
 
     (nnext ()) nil
@@ -489,7 +489,7 @@
   (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. []) -1)))       ; ???
   (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) -1)))  ; ???
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (nth '(1) 0) 1
       (nth '(1 2 3) 0) 1
       (nth '(1 2 3 4 5) 1) 2
@@ -523,7 +523,7 @@
   ; regex Matchers
   (let [m (re-matcher #"(a)(b)" "ababaa")]
     (re-find m) ; => ["ab" "a" "b"]
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (nth m 0) "ab"
         (nth m 1) "a"
         (nth m 2) "b"
@@ -534,7 +534,7 @@
 
   (let [m (re-matcher #"c" "ababaa")]
     (re-find m) ; => nil
-    (are (= _1 _2)
+    (are [x y] (= x y)
         (nth m 0 :not-found) :not-found
         (nth m 2 :not-found) :not-found
         (nth m -1 :not-found) :not-found )
@@ -548,7 +548,7 @@
 ;   http://code.google.com/p/clojure/source/detail?r=1278
 ;
 (deftest test-distinct
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (distinct ()) ()
       (distinct '(1)) '(1)
       (distinct '(1 2 3)) '(1 2 3)
@@ -570,7 +570,7 @@
       (distinct "aaab") '(\a \b)
       (distinct "abab") '(\a \b) )
 
-  (are (= (distinct [_ _]) [_])   ; (distinct [x x]) = [x]
+  (are [x] (= (distinct [x x]) [x])   
       nil
       false true
       0 42
@@ -588,7 +588,7 @@
 
 
 (deftest test-interpose
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (interpose 0 []) ()
     (interpose 0 [1]) '(1)
     (interpose 0 [1 2]) '(1 0 2)
@@ -596,7 +596,7 @@
 
 
 (deftest test-interleave
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (interleave [1 2] [3 4]) '(1 3 2 4)
 
     (interleave [1] [3 4]) '(1 3)
@@ -608,7 +608,7 @@
 
 
 (deftest test-zipmap
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (zipmap [:a :b] [1 2]) {:a 1 :b 2}
 
     (zipmap [:a] [1 2]) {:a 1}
@@ -620,7 +620,7 @@
 
 
 (deftest test-concat
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (concat) ()
 
     (concat []) ()
@@ -635,7 +635,7 @@
 
 
 (deftest test-cycle
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (cycle []) ()
 
     (take 3 (cycle [1])) '(1 1 1)
@@ -645,7 +645,7 @@
 
 
 (deftest test-partition
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (partition 2 [1 2 3]) '((1 2))
     (partition 2 [1 2 3 4]) '((1 2) (3 4))
     (partition 2 []) ()
@@ -665,7 +665,7 @@
 
 
 (deftest test-reverse
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (reverse nil) ()    ; since SVN 1294
     (reverse []) ()
     (reverse [1]) '(1)
@@ -673,7 +673,7 @@
 
 
 (deftest test-take
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (take 1 [1 2 3 4 5]) '(1)
     (take 3 [1 2 3 4 5]) '(1 2 3)
     (take 5 [1 2 3 4 5]) '(1 2 3 4 5)
@@ -685,7 +685,7 @@
 
 
 (deftest test-drop
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (drop 1 [1 2 3 4 5]) '(2 3 4 5)
     (drop 3 [1 2 3 4 5]) '(4 5)
     (drop 5 [1 2 3 4 5]) ()
@@ -697,7 +697,7 @@
 
 
 (deftest test-take-nth
-  (are (= _1 _2)
+  (are [x y] (= x y)
      (take-nth 1 [1 2 3 4 5]) '(1 2 3 4 5)
      (take-nth 2 [1 2 3 4 5]) '(1 3 5)
      (take-nth 3 [1 2 3 4 5]) '(1 4)
@@ -713,7 +713,7 @@
 
 
 (deftest test-take-while
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (take-while pos? []) ()
     (take-while pos? [1 2 3 4]) '(1 2 3 4)
     (take-while pos? [1 2 3 -1]) '(1 2 3)
@@ -723,7 +723,7 @@
 
 
 (deftest test-drop-while
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (drop-while pos? []) ()
     (drop-while pos? [1 2 3 4]) ()
     (drop-while pos? [1 2 3 -1]) '(-1)
@@ -733,14 +733,14 @@
 
 
 (deftest test-butlast
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (butlast []) nil
     (butlast [1]) nil
     (butlast [1 2 3]) '(1 2) ))
 
 
 (deftest test-drop-last
-  (are (= _1 _2)
+  (are [x y] (= x y)
     ; as butlast
     (drop-last []) ()
     (drop-last [1]) ()
@@ -776,7 +776,7 @@
   (is (vector? (split-at 2 [])))
   (is (vector? (split-at 2 [1 2 3])))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (split-at 2 []) [() ()]
     (split-at 2 [1 2 3 4 5]) [(list 1 2) (list 3 4 5)]
 
@@ -790,7 +790,7 @@
   (is (vector? (split-with pos? [])))
   (is (vector? (split-with pos? [1 2 -1 0 3 4])))
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
     (split-with pos? []) [() ()]
     (split-with pos? [1 2 -1 0 3 4]) [(list 1 2) (list -1 0 3 4)]
 
@@ -802,14 +802,14 @@
   (is (thrown? IllegalArgumentException (repeat)))
 
   ; infinite sequence => use take
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (take 0 (repeat 7)) ()
       (take 1 (repeat 7)) '(7)
       (take 2 (repeat 7)) '(7 7)
       (take 5 (repeat 7)) '(7 7 7 7 7) )
 
   ; limited sequence
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (repeat 0 7) ()
       (repeat 1 7) '(7)
       (repeat 2 7) '(7 7)
@@ -819,7 +819,7 @@
       (repeat -3 7) () )
 
   ; test different data types
-  (are (= (repeat 3 _) (list _ _ _))
+  (are [x] (= (repeat 3 x) (list x x x))
       nil
       false true
       0 42
@@ -837,7 +837,7 @@
 
 
 (deftest test-range
-  (are (= _1 _2)
+  (are [x y] (= x y)
       (range 0) ()   ; exclusive end!
       (range 1) '(0)
       (range 5) '(0 1 2 3 4)
@@ -875,7 +875,7 @@
 
 
 (deftest test-empty?
-  (are (empty? _)
+  (are [x] (empty? x)
     nil
     ()
     (lazy-seq nil)    ; => ()
@@ -885,7 +885,7 @@
     ""
     (into-array []) )
 
-  (are (not (empty? _))
+  (are [x] (not (empty? x))
     '(1 2)
     (lazy-seq [1 2])
     [1 2]
@@ -897,13 +897,13 @@
 
 (deftest test-every?
   ; always true for nil or empty coll/seq
-  (are (= (every? pos? _) true)
+  (are [x] (= (every? pos? x) true)
       nil
       () [] {} #{}
       (lazy-seq [])
       (into-array []) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       true (every? pos? [1])
       true (every? pos? [1 2])
       true (every? pos? [1 2 3 4 5])
@@ -916,7 +916,7 @@
       false (every? pos? [1 2 -3])
       false (every? pos? [1 2 -3 4]) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       true (every? #{:a} [:a :a])
 ;!      false (every? #{:a} [:a :b])   ; Issue 68: every? returns nil instead of false
 ;!      false (every? #{:a} [:b :b])   ; http://code.google.com/p/clojure/issues/detail?id=68
@@ -925,13 +925,13 @@
 
 (deftest test-not-every?
   ; always false for nil or empty coll/seq
-  (are (= (not-every? pos? _) false)
+  (are [x] (= (not-every? pos? x) false)
       nil
       () [] {} #{}
       (lazy-seq [])
       (into-array []) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       false (not-every? pos? [1])
       false (not-every? pos? [1 2])
       false (not-every? pos? [1 2 3 4 5])
@@ -944,7 +944,7 @@
       true (not-every? pos? [1 2 -3])
       true (not-every? pos? [1 2 -3 4]) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       false (not-every? #{:a} [:a :a])
       true (not-every? #{:a} [:a :b])
       true (not-every? #{:a} [:b :b]) ))
@@ -952,13 +952,13 @@
 
 (deftest test-not-any?
   ; always true for nil or empty coll/seq
-  (are (= (not-any? pos? _) true)
+  (are [x] (= (not-any? pos? x) true)
       nil
       () [] {} #{}
       (lazy-seq [])
       (into-array []) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       false (not-any? pos? [1])
       false (not-any? pos? [1 2])
       false (not-any? pos? [1 2 3 4 5])
@@ -972,7 +972,7 @@
       false (not-any? pos? [1 2 -3])
       false (not-any? pos? [1 2 -3 4]) )
 
-  (are (= _1 _2)
+  (are [x y] (= x y)
       false (not-any? #{:a} [:a :a])
       false (not-any? #{:a} [:a :b])
       true (not-any? #{:a} [:b :b]) ))
