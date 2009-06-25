@@ -116,7 +116,7 @@
     <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}" />
   </target>
 
-  <target name="test-clojure"
+  <target name="test"
           description="Run clojure tests">
 <!--           depends="clojure"> -->
     <java classname="clojure.main">
