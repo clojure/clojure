@@ -1,6 +1,6 @@
 (ns clojure.contrib.test-contrib.str-utils2
   (:require [clojure.contrib.str-utils2 :as s])
-  (:use clojure.contrib.test-is))
+  (:use clojure.test))
 
 (deftest t-blank
   (is (s/blank? nil))

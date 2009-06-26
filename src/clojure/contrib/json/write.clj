@@ -45,7 +45,7 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
      :see-also [["http://json.org/", "JSON Home Page"]]}
   clojure.contrib.json.write
   (:require [clojure.contrib.java-utils :as j])
-  (:use [clojure.contrib.test-is :only (deftest- is)]))
+  (:use [clojure.test :only (deftest- is)]))
 
 (defmulti
   #^{:doc "Prints x as JSON.  Nil becomes JSON null.  Keywords become
@@ -145,9 +145,9 @@ Within strings, all non-ASCII characters are hexadecimal escaped.
 ;;; TESTS
 
 ;; Run these tests with
-;; (clojure.contrib.test-is/run-tests 'clojure.contrib.print-json)
+;; (clojure.test/run-tests 'clojure.contrib.print-json)
 
-;; Bind clojure.contrib.test-is/*load-tests* to false to omit these
+;; Bind clojure.test/*load-tests* to false to omit these
 ;; tests from production code.
 
 (deftest- can-print-json-strings

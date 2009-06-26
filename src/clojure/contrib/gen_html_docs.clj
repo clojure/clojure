@@ -512,16 +512,11 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.server-socket
      'clojure.contrib.shell-out
      'clojure.contrib.sql
-     'clojure.contrib.stacktrace
      'clojure.contrib.stream-utils
      'clojure.contrib.str-utils
-     'clojure.contrib.template
-     'clojure.contrib.test-clojure
      'clojure.contrib.test-contrib
-     'clojure.contrib.test-is
      'clojure.contrib.trace
      'clojure.contrib.types
-     'clojure.contrib.walk
      'clojure.contrib.zip-filter
      'clojure.contrib.javadoc.browse
      'clojure.contrib.json.read

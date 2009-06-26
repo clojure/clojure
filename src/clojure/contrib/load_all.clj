@@ -22,7 +22,7 @@
 ;; errors, not that they work correctly.  If the libraries have tests
 ;; defined using test-is, you can run them with:
 ;;
-;; (clojure.contrib.test-is/run-all-tests)
+;; (clojure.test/run-all-tests)
 ;;
 ;; If you write a new lib, please add it to the list in this file.
 

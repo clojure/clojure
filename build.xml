@@ -31,20 +31,6 @@
     <delete dir="${build}"/>
   </target>
 
-  <target name="test_clojure"
-          description="Run clojure tests"
-          if="hasclojure">
-    <java classname="clojure.main">
-      <classpath>
-        <path location="${build}"/>
-        <path location="${src}"/>
-        <path location="${clojure.jar}"/>
-      </classpath>
-      <arg value="-e"/>
-      <arg value="(require '(clojure.contrib [test-clojure :as main])) (main/run)"/>
-    </java>
-  </target>
-
   <target name="test_contrib"
           description="Run contrib tests"
           if="hasclojure">
@@ -73,7 +59,7 @@
     </java>
   </target>
 
-  <target name="test" depends="test_clojure,test_contrib,test_datalog"
+  <target name="test" depends="test_contrib,test_datalog"
           description="Run all tests"/>
 
   <target name="check_hasclojure"
@@ -121,7 +107,6 @@
       <arg value="clojure.contrib.complex-numbers"/>
       <arg value="clojure.contrib.cond"/>
       <arg value="clojure.contrib.condition"/>
-      <arg value="clojure.contrib.condt"/>
       <arg value="clojure.contrib.core"/>
       <arg value="clojure.contrib.dataflow"/>
       <arg value="clojure.contrib.datalog"/>
@@ -182,16 +167,11 @@
       <arg value="clojure.contrib.singleton"/>
       <arg value="clojure.contrib.sql"/>
       <arg value="clojure.contrib.sql.internal"/>
-      <arg value="clojure.contrib.stacktrace"/>
       <arg value="clojure.contrib.str-utils"/>
       <arg value="clojure.contrib.stream-utils"/>
       <arg value="clojure.contrib.swing-utils"/>
-      <arg value="clojure.contrib.template"/>
-      <arg value="clojure.contrib.test-is"/>
-      <arg value="clojure.contrib.test-is.tap"/>
       <arg value="clojure.contrib.trace"/>
       <arg value="clojure.contrib.types"/>
-      <arg value="clojure.contrib.walk"/>
       <arg value="clojure.contrib.with-ns"/>
       <arg value="clojure.contrib.zip-filter"/>
       <arg value="clojure.contrib.zip-filter.xml"/>

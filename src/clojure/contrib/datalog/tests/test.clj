@@ -14,7 +14,7 @@
 ;;  Created 11 Feburary 2009
 
 (ns clojure.contrib.datalog.tests.test
-  (:use [clojure.contrib.test-is :only (run-tests)])
+  (:use [clojure.test :only (run-tests)])
   (:gen-class))
 
 (def test-names [:test-util

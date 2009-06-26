@@ -48,7 +48,7 @@
      :see-also [["http://www.json.org", "JSON Home Page"]]}
   clojure.contrib.json.read
   (:import (java.io PushbackReader StringReader EOFException))
-  (:use [clojure.contrib.test-is :only (deftest- is)]))
+  (:use [clojure.test :only (deftest- is)]))
 
 (declare read-json)
 

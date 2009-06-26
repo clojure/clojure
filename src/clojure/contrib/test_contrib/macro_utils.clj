@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-contrib.macro-utils
-  (:use [clojure.contrib.test-is :only (deftest is are run-tests use-fixtures)]
+  (:use [clojure.test :only (deftest is are run-tests use-fixtures)]
 	[clojure.contrib.macro-utils
 	 :only (macrolet symbol-macrolet defsymbolmacro with-symbol-macros
 		mexpand-1 mexpand mexpand-all)]

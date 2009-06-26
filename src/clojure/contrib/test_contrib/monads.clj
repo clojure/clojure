@@ -12,14 +12,14 @@
 ;; remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-contrib.monads
-  (:use [clojure.contrib.test-is :only (deftest is are run-tests)]
+  (:use [clojure.test :only (deftest is are run-tests)]
 	[clojure.contrib.monads
 	 :only (with-monad domonad m-lift m-seq m-chain
 		sequence-m maybe-m state-m maybe-t sequence-t)]))
 
 (deftest sequence-monad
   (with-monad sequence-m
-    (are (= _1 _2)
+    (are [a b] (= a b)
       (domonad [x (range 3) y (range 2)] (+ x y))
         '(0 1 1 2 2 3)
       (domonad [x (range 5) y (range (+ 1 x)) :when  (= (+ x y) 2)] (list x y))
@@ -37,7 +37,7 @@
   (with-monad maybe-m
     (let [m+ (m-lift 2 +)
           mdiv (fn [x y] (domonad [a x  b y  :when (not (zero? b))] (/ a b)))]
-      (are (= _1 _2)
+      (are [a b] (= a b)
         (m+ (m-result 1) (m-result 3))
 	  (m-result 4)
         (mdiv (m-result 1) (m-result 3))
@@ -50,7 +50,7 @@
 (deftest seq-maybe-monad
   (with-monad (maybe-t sequence-m)
     (letfn [(pairs [xs] ((m-lift 2 #(list %1 %2)) xs xs))]
-      (are (= _1 _2)
+      (are [a b] (= a b)
         ((m-lift 1 inc) (for [n (range 10)] (when (odd? n) n)))
           '(nil 2 nil 4 nil 6 nil 8 nil 10)
         (pairs (for [n (range 5)] (when (odd? n) n)))

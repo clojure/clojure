@@ -13,7 +13,7 @@
 
 (ns clojure.contrib.test-contrib.complex-numbers
   (:refer-clojure :exclude [+ - * / = < > <= >=])
-  (:use [clojure.contrib.test-is
+  (:use [clojure.test
 	 :only (deftest is are run-tests)]
 	[clojure.contrib.generic.arithmetic
 	 :only (+ - * /)]

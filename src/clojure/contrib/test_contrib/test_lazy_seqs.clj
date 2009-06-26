@@ -1,5 +1,5 @@
 (ns clojure.contrib.test-contrib.test-lazy-seqs
-  (:use clojure.contrib.test-is
+  (:use clojure.test
 	clojure.contrib.lazy-seqs))
 
 (deftest test-fibs

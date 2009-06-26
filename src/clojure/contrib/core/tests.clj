@@ -13,7 +13,7 @@
 ;; note to other contrib members: feel free to add to this lib
 
 (ns clojure.contrib.core.tests
-  (:use clojure.contrib.test-is)
+  (:use clojure.test)
   (:use clojure.contrib.core))
 
 (deftest test-classic-versions

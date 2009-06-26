@@ -14,7 +14,7 @@
 ;;  Created 28 Feburary 2009
 
 (ns clojure.contrib.datalog.tests.test-softstrat
-  (:use clojure.contrib.test-is)
+  (:use clojure.test)
   (:use clojure.contrib.datalog.softstrat
         clojure.contrib.datalog.magic
         clojure.contrib.datalog.rules

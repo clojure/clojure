@@ -12,7 +12,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.contrib.test-contrib.pprint.pretty
-  (:use [clojure.contrib.test-is :only (deftest are run-tests)]
+  (:use [clojure.test :only (deftest are run-tests)]
         clojure.contrib.test-contrib.pprint.helper
         clojure.contrib.pprint))
 

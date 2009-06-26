@@ -15,7 +15,7 @@
 
 
 (ns clojure.contrib.datalog.tests.test-literals
-  (:use clojure.contrib.test-is)
+  (:use clojure.test)
   (:use clojure.contrib.datalog.literals
         clojure.contrib.datalog.database))
 

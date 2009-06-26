@@ -14,7 +14,7 @@
 ;;  Created 11 Feburary 2009
 
 (ns clojure.contrib.datalog.tests.test-util
-  (:use clojure.contrib.test-is
+  (:use clojure.test
 	clojure.contrib.datalog.util)
   (:use [clojure.contrib.except :only (throwf)]))
 

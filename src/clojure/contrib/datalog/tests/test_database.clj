@@ -15,7 +15,7 @@
 
 
 (ns clojure.contrib.datalog.tests.test-database
-  (:use clojure.contrib.test-is
+  (:use clojure.test
 	clojure.contrib.datalog.database))
 
 

@@ -1,6 +1,6 @@
 (ns clojure.contrib.test-contrib.greatest-least
   (:use clojure.contrib.greatest-least
-        [clojure.contrib.test-is :only (is deftest run-tests)]))
+        [clojure.test :only (is deftest run-tests)]))
 
 (deftest test-greatest
   (is (nil? (greatest)) "greatest with no arguments is nil")

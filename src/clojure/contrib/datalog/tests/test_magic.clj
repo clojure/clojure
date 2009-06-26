@@ -14,7 +14,7 @@
 ;;  Created 18 Feburary 2009
 
 (ns clojure.contrib.datalog.tests.test-magic
-  (:use clojure.contrib.test-is)
+  (:use clojure.test)
   (:use clojure.contrib.datalog.magic
         clojure.contrib.datalog.rules))
 

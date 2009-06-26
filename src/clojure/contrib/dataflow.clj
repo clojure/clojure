@@ -23,7 +23,7 @@
                                       reverse-graph
                                       dependency-list
                                       get-neighbors)])
-  (:use [clojure.contrib.walk :only (postwalk)])
+  (:use [clojure.walk :only (postwalk)])
   (:use [clojure.contrib.except :only (throwf)]))
 
 
@@ -500,7 +500,7 @@
   (get-value df 'greg)
 
   (use :reload 'clojure.contrib.dataflow)
-  (use 'clojure.contrib.stacktrace) (e)
+  (use 'clojure.stacktrace) (e)
   (use 'clojure.contrib.trace)
 )
     

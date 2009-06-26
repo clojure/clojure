@@ -14,8 +14,8 @@
 ;; This is just a macro to make my tests a little cleaner
 
 (ns clojure.contrib.test-contrib.pprint.helper
-  (:use [clojure.contrib.test-is :only (deftest are run-tests)]))
+  (:use [clojure.test :only (deftest are run-tests)]))
 
 (defmacro simple-tests [name & test-pairs]
-  `(deftest ~name (are (= _1 _2) ~@test-pairs)))
+  `(deftest ~name (are [x y] (= x y) ~@test-pairs)))
 

@@ -1,5 +1,5 @@
 (ns clojure.contrib.math.tests
-  (:use clojure.contrib.test-is
+  (:use clojure.test
 	clojure.contrib.math))
 
 (deftest test-expt
