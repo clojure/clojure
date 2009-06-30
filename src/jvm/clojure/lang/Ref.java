@@ -26,6 +26,24 @@ public class Ref extends ARef implements IFn, Comparable<Ref>, IRef{
             return 1;
     }
 
+public int getMinHistory(){
+	return minHistory;
+}
+
+public Ref setMinHistory(int minHistory){
+	this.minHistory = minHistory;
+	return this;
+}
+
+public int getMaxHistory(){
+	return maxHistory;
+}
+
+public Ref setMaxHistory(int maxHistory){
+	this.maxHistory = maxHistory;
+	return this;
+}
+
 public static class TVal{
 	Object val;
 	long point;
@@ -59,6 +77,9 @@ final ReentrantReadWriteLock lock;
 LockingTransaction.Info tinfo;
 //IFn validator;
 final long id;
+
+volatile int minHistory = 0;
+volatile int maxHistory = 10;
 
 static final AtomicLong ids = new AtomicLong();
 
@@ -187,6 +208,29 @@ public void trimHistory(){
 		}
 }
 
+public int getHistoryCount(){
+	try
+		{
+		lock.writeLock().lock();
+		return histCount();
+		}
+	finally
+		{
+		lock.writeLock().unlock();
+		}	
+}
+
+int histCount(){
+	if(tvals == null)
+		return 0;
+	else
+		{
+		int count = 0;
+		for(TVal tv = tvals.next;tv != tvals;tv = tv.next)
+			count++;
+		return count;
+		}
+}
 
 final public IFn fn(){
 	return (IFn) deref();
