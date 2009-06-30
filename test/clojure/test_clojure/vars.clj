@@ -25,6 +25,11 @@
       (eval `(binding [a 4] a)) 4     ; regression in Clojure SVN r1370
   ))
 
+; with-local-vars var-get var-set alter-var-root [var? (predicates.clj)]
+; with-in-str with-out-str
+; with-open
+; with-precision
+
 (deftest test-with-precision
   (are [x y] (= x y)
        (with-precision 4 (+ 3.5555555M 1)) 4.556M
@@ -44,11 +49,6 @@
          (set! *math-context* (java.math.MathContext. 8))
          (+ 3.55555555555555M 1))
        4.5555556M)))
-
-; with-local-vars var-get var-set alter-var-root [var? (predicates.clj)]
-; with-in-str with-out-str
-; with-open
-; with-precision
 
 ; set-validator get-validator
 
