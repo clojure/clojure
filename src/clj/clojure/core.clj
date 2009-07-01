@@ -129,17 +129,6 @@
  vector? (fn vector? [x] (instance? clojure.lang.IPersistentVector x)))
 
 (def
- #^{:private true}
- sigs
- (fn [fdecl]
-   (if (seq? (first fdecl))
-     (loop [ret [] fdecl fdecl]
-       (if fdecl
-         (recur (conj ret (first (first fdecl))) (next fdecl))
-         (seq ret)))
-     (list (first fdecl)))))
-
-(def
  #^{:arglists '([map key val] [map key val & kvs])
     :doc "assoc[iate]. When applied to a map, returns a new map of the
     same (hashed/sorted) type, that contains the mapping of key(s) to
@@ -168,6 +157,27 @@
     map m as its metadata."}
  with-meta (fn with-meta [#^clojure.lang.IObj x m]
              (. x (withMeta m))))
+
+(def
+ #^{:private true}
+ sigs
+ (fn [fdecl]
+   (let [asig 
+         (fn [fdecl]
+           (let [arglist (first fdecl)
+                 body (next fdecl)]
+             (if (map? (first body))
+               (if (next body)
+                 (with-meta arglist (conj (if (meta arglist) (meta arglist) {}) (first body)))
+                 arglist)
+               arglist)))]
+     (if (seq? (first fdecl))
+       (loop [ret [] fdecls fdecl]
+         (if fdecls
+           (recur (conj ret (asig (first fdecls))) (next fdecls))
+           (seq ret)))
+       (list (asig fdecl))))))
+
 
 (def 
  #^{:arglists '([coll])
