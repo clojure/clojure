@@ -1525,7 +1525,6 @@
                       options)
         dispatch-fn (first options)
         options     (next options)
-        m           (assoc m :tag 'clojure.lang.MultiFn)
         m           (if docstring
                       (assoc m :doc docstring)
                       m)
