@@ -128,24 +128,23 @@
 ;; Handle Ctrl-C keystrokes
 
 (def #^{:doc "Threads to stop when Ctrl-C is pressed.  See 'add-break-thread!'"}
-  break-threads (ref nil))
+  break-threads (atom {}))
 
-(defn start-handling-break
-  "Register INT signal handler.  After calling this, Ctrl-C will cause
-  all break-threads to be stopped.  See 'add-break-thread!'"
-  []
-  (when-not
-    (dosync
-      (if-let [inited @break-threads]
-        inited
-        (ref-set break-threads {})))
-    (sun.misc.Signal/handle
-      (sun.misc.Signal. "INT")
-      (proxy [sun.misc.SignalHandler] []
-        (handle [sig]
-          (let [exc (Exception. (str sig))]
-            (doseq [tref (vals @break-threads) :when (.get tref)]
-              (.stop (.get tref) exc))))))))
+(let [first-time (atom true)]
+  (defn start-handling-break
+    "Register INT signal handler.  After calling this, Ctrl-C will cause
+    all break-threads to be stopped.  See 'add-break-thread!'"
+    []
+    (when (= :need-init
+             (swap! first-time
+                    {:need-init false, false false, true :need-init}))
+      (sun.misc.Signal/handle
+        (sun.misc.Signal. "INT")
+        (proxy [sun.misc.SignalHandler] []
+          (handle [sig]
+            (let [exc (Exception. (str sig))]
+              (doseq [tref (vals @break-threads) :when (.get tref)]
+                (.stop (.get tref) exc)))))))))
 
 (defn add-break-thread!
   "Add the given thread to break-threads so that it will be stopped
@@ -155,7 +154,7 @@
   ([t]
     (start-handling-break)
     (let [tref (java.lang.ref.WeakReference. t)]
-      (dosync (commute break-threads assoc (.getId t) tref)))))
+      (swap! break-threads assoc (.getId t) tref))))
 
 ;; ----------------------------------------------------------------------
 ;; Compiler hooks
