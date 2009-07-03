@@ -971,7 +971,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
 	                       Expr val){
 		gen.visitLineNumber(line, gen.mark());
-		if(targetClass != null)
+		if(targetClass != null && field != null)
 			{
 			target.emit(C.EXPRESSION, fn, gen);
 			gen.checkCast(Type.getType(targetClass));
