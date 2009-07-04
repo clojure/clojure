@@ -721,12 +721,6 @@ static public Object dissoc(Object coll, Object key) throws Exception{
 static public Object nth(Object coll, int n){
 	if(coll instanceof Indexed)
 		return ((Indexed) coll).nth(n);
-	return do_nth(coll,n);
-}
-
-static public Object do_nth(Object coll, int n){
-	if(coll instanceof Indexed)
-		return ((Indexed) coll).nth(n);
 	if(coll == null)
 		return null;
 	else if(coll instanceof String)
