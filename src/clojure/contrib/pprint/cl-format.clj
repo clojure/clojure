@@ -202,18 +202,21 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
                 [nil nil]) 
              val))))
 
+;;; TODO: xlated-val does not seem to be used here.
 (defn- base-str
   "Return val as a string in the given base"
   [base val]
-  (let [xlated-val (cond
-                    (float? val) (bigdec val)
-                    (ratio? val) (let [#^clojure.lang.Ratio r val] 
-                                   (/ (.numerator r) (.denominator r)))
-                    :else val)] 
-    (apply str 
-          (map 
-           #(if (< % 10) (char (+ (int \0) %)) (char (+ (int \a) (- % 10)))) 
-           (remainders base val)))))
+  (if (zero? val)
+    "0"
+    (let [xlated-val (cond
+                       (float? val) (bigdec val)
+                       (ratio? val) (let [#^clojure.lang.Ratio r val] 
+                                      (/ (.numerator r) (.denominator r)))
+                       :else val)] 
+      (apply str 
+             (map 
+              #(if (< % 10) (char (+ (int \0) %)) (char (+ (int \a) (- % 10)))) 
+              (remainders base val))))))
 
 (def #^{:private true}
      java-base-formats {8 "%o", 10 "%d", 16 "%x"})
