@@ -25,7 +25,8 @@
              [newline [clojure.lang.Keyword] void]
              [indent [clojure.lang.Keyword Integer] void]
              [getMiserWidth [] Object]
-             [setMiserWidth [Object] void]]
+             [setMiserWidth [Object] void]
+             [setLogicalBlockCallback [clojure.lang.IFn] void]]
    :exposes-methods {write col-write}
    :state pwstate))
 
@@ -62,7 +63,8 @@
 (defstruct #^{:private true} logical-block
            :parent :section :start-col :indent
            :done-nl :intra-block-nl
-           :prefix :per-line-prefix :suffix)
+           :prefix :per-line-prefix :suffix
+           :logical-block-callback)
 
 (defn ancestor? [parent child]
   (loop [child (:parent child)]
@@ -117,16 +119,18 @@
 
 (defmulti write-token #(:type-tag %2))
 (defmethod write-token :start-block [#^clojure.contrib.pprint.PrettyWriter this token]
-  (let [lb (:logical-block token)]
+   (when-let [cb (getf :logical-block-callback)] (cb :start))
+   (let [lb (:logical-block token)]
     (dosync
-     (if-let [#^String prefix (:prefix lb)] 
+     (when-let [#^String prefix (:prefix lb)] 
        (.col-write this prefix))
      (let [col (.getColumn this)]
        (ref-set (:start-col lb) col)
        (ref-set (:indent lb) col)))))
 
 (defmethod write-token :end-block [#^clojure.contrib.pprint.PrettyWriter this token]
-  (if-let [#^String suffix (:suffix (:logical-block token))] 
+  (when-let [cb (getf :logical-block-callback)] (cb :end))
+  (when-let [#^String suffix (:suffix (:logical-block token))] 
     (.col-write this suffix)))
 
 (defmethod write-token :indent [#^clojure.contrib.pprint.PrettyWriter this token]
@@ -414,7 +418,7 @@
 ;;; Methods for PrettyWriter
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- -startBlock 
+(defn -startBlock 
   [#^clojure.contrib.pprint.PrettyWriter this 
    #^String prefix #^String per-line-prefix #^String suffix]
   (dosync 
@@ -425,7 +429,8 @@
      (if (= (getf :mode) :writing)
        (do
          (write-white-space this)
-         (if prefix 
+          (when-let [cb (getf :logical-block-callback)] (cb :start))
+          (if prefix 
            (.col-write this prefix))
          (let [col (.getColumn this)]
            (ref-set (:start-col lb) col)
@@ -435,7 +440,7 @@
          (setf :pos newpos)
          (add-to-buffer this (make-start-block lb oldpos newpos)))))))
 
-(defn- -endBlock [#^clojure.contrib.pprint.PrettyWriter this]
+(defn -endBlock [#^clojure.contrib.pprint.PrettyWriter this]
   (dosync
    (let [lb (getf :logical-blocks)
          #^String suffix (:suffix lb)]
@@ -443,7 +448,8 @@
        (do
          (write-white-space this)
          (if suffix
-           (.col-write this suffix)))
+           (.col-write this suffix))
+         (when-let [cb (getf :logical-block-callback)] (cb :end)))
        (let [oldpos (getf :pos)
              newpos (+ oldpos (if suffix (count suffix) 0))]
          (setf :pos newpos)
@@ -475,3 +481,5 @@
 (defn- -setMiserWidth [#^clojure.contrib.pprint.PrettyWriter this new-miser-width]
   (dosync (setf :miser-width new-miser-width)))
 
+(defn- -setLogicalBlockCallback [#^clojure.contrib.pprint.PrettyWriter this f]
+  (dosync (setf :logical-block-callback f)))

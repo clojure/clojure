@@ -125,12 +125,13 @@ pretty printing the results of macro expansions"}
   (PrettyWriter. base-writer right-margin miser-width))
 
 (defmacro #^{:private true} with-pretty-writer [base-writer & body]
-  `(let [new-writer# (not (pretty-writer? ~base-writer))]
+  `(let [base-writer# ~base-writer
+         new-writer# (not (pretty-writer? base-writer#))]
      (binding [*out* (if new-writer#
-                      (make-pretty-writer ~base-writer *print-right-margin* *print-miser-width*)
-                      ~base-writer)]
+                      (make-pretty-writer base-writer# *print-right-margin* *print-miser-width*)
+                      base-writer#)]
        ~@body
-       (if new-writer# (.flush *out*)))))
+       (.flush *out*))))
 
 (defn write-out 
   "Write an object to *out* subject to the current bindings of the printer control 
@@ -248,6 +249,9 @@ clojure.contrib.pprint.dispatch.clj."
             ;; TODO clean up choices string
             (str "Bad argument: " arg ". It must be one of " choices)))))
 
+(defn level-exceeded []
+  (and *print-level* (>= *current-level* *print-level*)))
+
 (defmacro pprint-logical-block 
   "Execute the body as a pretty printing logical block with output to *out* which 
 must be a pretty printing writer. When used from pprint or cl-format, this can be 
@@ -258,7 +262,7 @@ and :suffix."
   {:arglists '[[options* body]]}
   [& args]
   (let [[options body] (parse-lb-options #{:prefix :per-line-prefix :suffix} args)]
-    `(do (if (and *print-level* (>= *current-level* *print-level*)) 
+    `(do (if (level-exceeded) 
            (.write #^PrettyWriter *out* "#")
            (binding [*current-level* (inc *current-level*)
                      *current-length* 0] 
