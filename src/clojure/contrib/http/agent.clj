@@ -20,7 +20,7 @@
 (defn- setup-http-connection
   [conn options]
   (.setRequestMethod conn (:method options))
-  (.setInstanceFollowRedirects (:follow-redirects options))
+  (.setInstanceFollowRedirects conn (:follow-redirects options))
   (doseq [[name value] (:headers options)]
     (.setRequestProperty conn name value)))
 

@@ -33,6 +33,10 @@
   (cl-format nil "~D" 'fred) "fred"
 )
 
+(simple-tests base-tests
+  (cl-format nil "~{~2r~^ ~}~%" (range 10))
+  "0 1 10 11 100 101 110 111 1000 1001\n")
+
 (simple-tests cardinal-tests
   (cl-format nil "~R" 0) "zero"
   (cl-format nil "~R" 4) "four"
