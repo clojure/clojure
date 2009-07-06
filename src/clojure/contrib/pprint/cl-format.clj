@@ -158,9 +158,29 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 ;;; Common handling code for ~A and ~S
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(declare *print-base* *print-radix*)
+(declare opt-base-str)
+
+(def #^{:private true}
+     special-radix-markers {2 "#b" 8 "#o", 16 "#x"})
+
+(defn- format-simple-number [n]
+  (cond 
+    (integer? n) (if (= *print-base* 10)
+                   (str n (if *print-radix* "."))
+                   (str
+                    (if *print-radix* (or (get special-radix-markers *print-base*) (str "#" *print-base* "r")))
+                    (opt-base-str *print-base* n)))
+    (ratio? n) (str
+                (if *print-radix* (or (get special-radix-markers *print-base*) (str "#" *print-base* "r")))
+                (opt-base-str *print-base* (.numerator n))
+                "/"
+                (opt-base-str *print-base* (.denominator n)))
+    :else nil))
+
 (defn- format-ascii [print-func params arg-navigator offsets]
   (let [ [arg arg-navigator] (next-arg arg-navigator) 
-         #^String base-output (print-func arg)
+         #^String base-output (or (format-simple-number arg) (print-func arg))
          base-width (.length base-output)
          min-width (+ base-width (:minpad params))
          width (if (>= min-width (:mincol params)) 

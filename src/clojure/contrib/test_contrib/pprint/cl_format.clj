@@ -35,7 +35,30 @@
 
 (simple-tests base-tests
   (cl-format nil "~{~2r~^ ~}~%" (range 10))
-  "0 1 10 11 100 101 110 111 1000 1001\n")
+  "0 1 10 11 100 101 110 111 1000 1001\n"
+  (with-out-str
+    (dotimes [i 35]
+      (binding [*print-base* (+ i 2)]       ;print the decimal number 40 
+        (write 40)                          ;in each base from 2 to 36
+        (if (zero? (mod i 10)) (prn) (cl-format true " ")))))
+  "101000
+1111 220 130 104 55 50 44 40 37 34
+31 2c 2a 28 26 24 22 20 1j 1i
+1h 1g 1f 1e 1d 1c 1b 1a 19 18
+17 16 15 14 "
+  (with-out-str
+    (doseq [pb [2 3 8 10 16]]               
+      (binding [*print-radix* true      ;print the integer 10 and 
+            *print-base* pb]            ;the ratio 1/10 in bases 2, 
+        (cl-format true "~&~S  ~S~%" 10 1/10))))        ;3, 8, 10, 16
+  "#b1010  #b1/1010
+#3r101  #3r1/101
+#o12  #o1/12
+10.  #10r1/10
+#xa  #x1/a
+")
+
+
 
 (simple-tests cardinal-tests
   (cl-format nil "~R" 0) "zero"

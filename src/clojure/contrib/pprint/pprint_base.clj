@@ -67,6 +67,20 @@ levels of nesting."}
 pretty printing the results of macro expansions"}
  *print-suppress-namespaces* nil)
 
+;;; TODO: support print-base and print-radix in cl-format
+;;; TODO: support print-base and print-radix in rationals
+(def
+ #^{ :doc "Print a radix specifier in front of integers and rationals. If *print-base* is 2, 8, 
+or 16, then the radix specifier used is #b, #o, or #x, respectively. Otherwise the 
+radix specifier is in the form #XXr where XX is the decimal value of *print-base* "}
+ *print-radix* nil)
+
+(def
+ #^{ :doc "The base to use for printing integers and rationals."}
+ *print-base* 10)
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Internal variables that keep track of where we are in the 
 ;; structure
@@ -82,9 +96,18 @@ pretty printing the results of macro expansions"}
 ;; Support for the write function
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(declare format-simple-number)
+
+(def #^{:private true} orig-pr pr)
+
+(defn- pr-with-base [x]
+  (if-let [s (format-simple-number x)]
+    (print s)
+    (orig-pr x)))
+
 (def #^{:private true} write-option-table
      {;:array            *print-array*
-      ;;:base             *print-base*,
+      :base             'clojure.contrib.pprint/*print-base*,
       ;;:case             *print-case*,
       :circle           'clojure.contrib.pprint/*print-circle*,
       ;;:escape           *print-escape*,
@@ -95,7 +118,7 @@ pretty printing the results of macro expansions"}
       :miser-width      'clojure.contrib.pprint/*print-miser-width*,
       :dispatch         'clojure.contrib.pprint/*print-pprint-dispatch*,
       :pretty           'clojure.contrib.pprint/*print-pretty*,
-      ;;:radix            *print-radix*,
+      :radix            'clojure.contrib.pprint/*print-radix*,
       :readably         'clojure.core/*print-readably*,
       :right-margin     'clojure.contrib.pprint/*print-right-margin*,
       :suppress-namespaces 'clojure.contrib.pprint/*print-suppress-namespaces*})
@@ -133,6 +156,8 @@ pretty printing the results of macro expansions"}
        ~@body
        (.flush *out*))))
 
+
+;;;TODO: if pretty print is not set, don't use pr but rather something that respects *print-base*, etc.
 (defn write-out 
   "Write an object to *out* subject to the current bindings of the printer control 
 variables. Use the kw-args argument to override individual variables for this call (and 
@@ -166,6 +191,7 @@ recursive calls). Returns the string result if :stream is nil or nil otherwise.
 The following keyword arguments can be passed with values:
   Keyword              Meaning                              Default value
   :stream              Writer for output or nil             true (indicates *out*)
+  :base                Base to use for writing rationals    Current value of *print-base*
   :circle*             If true, mark circular structures    Current value of *print-circle*
   :length              Maximum elements to show in sublists Current value of *print-length*
   :level               Maximum depth                        Current value of *print-level*
@@ -173,6 +199,7 @@ The following keyword arguments can be passed with values:
   :miser-width         Width to enter miser mode            Current value of *print-miser-width*
   :dispatch            The pretty print dispatch function   Current value of *print-pprint-dispatch*
   :pretty              If true, do pretty printing          Current value of *print-pretty*
+  :radix               If true, prepend a radix specifier   Current value of *print-radix*
   :readably*           If true, print readably              Current value of *print-readably*
   :right-margin        The column for the right margin      Current value of *print-right-margin*
   :suppress-namespaces If true, no namespaces in symbols    Current value of *print-suppress-namespaces*
@@ -182,20 +209,21 @@ The following keyword arguments can be passed with values:
   [object & kw-args]
   (let [options (merge {:stream true} (apply hash-map kw-args))]
     (binding-map (table-ize write-option-table options) 
-      (let [optval (if (contains? options :stream) 
-                     (:stream options)
-                     true) 
-            base-writer (condp = optval
-                          nil (java.io.StringWriter.)
-                          true *out*
-                          optval)]
-        (if *print-pretty*
-          (with-pretty-writer base-writer
-            (write-out object))
-          (binding [*out* base-writer]
-            (pr object)))
-        (if (nil? optval) 
-          (.toString #^java.io.StringWriter base-writer))))))
+      (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
+        (let [optval (if (contains? options :stream) 
+                       (:stream options)
+                       true) 
+              base-writer (condp = optval
+                            nil (java.io.StringWriter.)
+                            true *out*
+                            optval)]
+          (if *print-pretty*
+            (with-pretty-writer base-writer
+              (write-out object))
+            (binding [*out* base-writer]
+              (pr object)))
+          (if (nil? optval) 
+            (.toString #^java.io.StringWriter base-writer)))))))
 
 
 (defn pprint 
@@ -205,7 +233,8 @@ print the object to the currently bound value of *out*."
   ([object writer]
      (with-pretty-writer writer
        (binding [*print-pretty* true]
-         (write-out object))
+         (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
+           (write-out object)))
        (if (not (= 0 (.getColumn #^PrettyWriter *out*)))
          (.write *out* (int \newline))))))
 
