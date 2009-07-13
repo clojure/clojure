@@ -85,7 +85,8 @@
   <target name="compile-clojure" depends="compile-java"
           description="Compile Clojure sources.">
     <java classname="clojure.lang.Compile"
-          classpath="${build}:${cljsrc}">
+          classpath="${build}:${cljsrc}"
+          failonerror="true">
       <sysproperty key="clojure.compile.path" value="${build}"/>
       <arg value="clojure.core"/>
       <arg value="clojure.main"/>
@@ -119,13 +120,13 @@
   <target name="test"
           description="Run clojure tests">
 <!--           depends="clojure"> -->
-    <java classname="clojure.main">
+    <java classname="clojure.main" failonerror="true">
       <classpath>
         <path location="${test}"/>
         <path location="${clojure_jar}"/>
       </classpath>
       <arg value="-e"/>
-      <arg value="(require '(clojure [test-clojure :as main])) (main/run)"/>
+      <arg value="(require '(clojure [test-clojure :as main])) (main/run-ant)"/>
     </java>
   </target>
 
