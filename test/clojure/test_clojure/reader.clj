@@ -222,7 +222,18 @@
 
 ;; Keywords
 
-(deftest t-Keywords)
+(deftest t-Keywords
+  (is (= :abc (keyword "abc")))
+  (is (= :abc (keyword 'abc)))
+  (is (= :*+!-_? (keyword "*+!-_?")))
+  (is (= :abc:def:ghi (keyword "abc:def:ghi")))
+  (is (= :abc/def (keyword "abc" "def")))
+  (is (= :abc/def (keyword 'abc/def)))
+  (is (= :abc.def/ghi (keyword "abc.def" "ghi")))
+  (is (= :abc/def.ghi (keyword "abc" "def.ghi")))
+  (is (= :abc:def/ghi:jkl.mno (keyword "abc:def" "ghi:jkl.mno")))
+  (is (instance? clojure.lang.Keyword :alphabet))
+  )
 
 ;; Lists
 

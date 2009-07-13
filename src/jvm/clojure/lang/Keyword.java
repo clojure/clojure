@@ -30,6 +30,10 @@ public static Keyword intern(String ns, String name){
 	return intern(Symbol.intern(ns, name));
 }
 
+public static Keyword intern(String nsname){
+	return intern(Symbol.intern(nsname));
+}
+
 private Keyword(Symbol sym){
 	this.sym = sym;
 }

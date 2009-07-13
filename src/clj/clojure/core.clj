@@ -355,14 +355,14 @@
 
 (defn symbol
   "Returns a Symbol with the given namespace and name."
-  ([name] (if (symbol? name) name (. clojure.lang.Symbol (intern name))))
-  ([ns name] (. clojure.lang.Symbol (intern ns name))))
+  ([name] (if (symbol? name) name (clojure.lang.Symbol/intern name)))
+  ([ns name] (clojure.lang.Symbol/intern ns name)))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
   in the keyword strings, it will be added automatically."
-  ([name] (if (keyword? name) name (. clojure.lang.Keyword (intern nil name))))
-  ([ns name] (. clojure.lang.Keyword (intern ns name))))
+  ([name] (if (keyword? name) name (clojure.lang.Keyword/intern name)))
+  ([ns name] (clojure.lang.Keyword/intern ns name)))
 
 (defn gensym
   "Returns a new symbol with a unique name. If a prefix string is
