@@ -281,11 +281,14 @@ Object run(Callable fn) throws Exception{
 					Ref ref = e.getKey();
 					Object oldval = ref.tvals == null ? null : ref.tvals.val;
 					Object newval = e.getValue();
+					int hcount = ref.histCount();
+
 					if(ref.tvals == null)
 						{
 						ref.tvals = new Ref.TVal(newval, commitPoint, msecs);
 						}
-					else if(ref.faults.get() > 0)
+					else if((ref.faults.get() > 0 && hcount < ref.maxHistory)
+							|| hcount < ref.minHistory)
 						{
 						ref.tvals = new Ref.TVal(newval, commitPoint, msecs, ref.tvals);
 						ref.faults.set(0);

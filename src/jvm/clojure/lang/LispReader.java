@@ -47,9 +47,9 @@ static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?([\\D&&[^/]][^/
 //static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern intPat =
 		Pattern.compile(
-				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)\\.?");
+				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
-static Pattern floatPat = Pattern.compile("[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?");
+static Pattern floatPat = Pattern.compile("([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?");
 static final Symbol SLASH = Symbol.create("/");
 static final Symbol CLOJURE_SLASH = Symbol.create("clojure.core","/");
 //static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
@@ -344,8 +344,8 @@ private static Object matchNumber(String s){
 	m = floatPat.matcher(s);
 	if(m.matches())
 		{
-		if(s.charAt(s.length() - 1) == 'M')
-			return new BigDecimal(s.substring(0, s.length() - 1));
+		if(m.group(4) != null)
+			return new BigDecimal(m.group(1));
 		return Double.parseDouble(s);
 		}
 	m = ratioPat.matcher(s);
@@ -607,6 +607,10 @@ static Symbol registerArg(int n){
 static class ArgReader extends AFn{
 	public Object invoke(Object reader, Object pct) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
+		if(ARG_ENV.deref() == null)
+			{
+			return interpretToken(readToken(r, '%'));
+			}
 		int ch = r.read();
 		unread(r, ch);
 		//% alone is first arg

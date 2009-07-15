@@ -9,6 +9,7 @@
   </description>
 
   <property name="src" location="src"/>
+  <property name="test" location="test"/>
   <property name="jsrc" location="${src}/jvm"/>
   <property name="cljsrc" location="${src}/clj"/>
   <property name="build" location="classes"/>
@@ -92,6 +93,11 @@
       <arg value="clojure.xml"/>
       <arg value="clojure.zip"/>
       <arg value="clojure.inspector"/>
+      <arg value="clojure.walk"/>
+      <arg value="clojure.stacktrace"/>
+      <arg value="clojure.template"/>
+      <arg value="clojure.test"/>
+      <arg value="clojure.test.tap"/>
     </java>
   </target>
 
@@ -108,6 +114,19 @@
       </manifest>
     </jar>
     <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}" />
+  </target>
+
+  <target name="test"
+          description="Run clojure tests">
+<!--           depends="clojure"> -->
+    <java classname="clojure.main">
+      <classpath>
+        <path location="${test}"/>
+        <path location="${clojure_jar}"/>
+      </classpath>
+      <arg value="-e"/>
+      <arg value="(require '(clojure [test-clojure :as main])) (main/run)"/>
+    </java>
   </target>
 
   <target name="clojure-slim" depends="compile-java"
