@@ -121,11 +121,12 @@
     (.getResponseMessage (::connection @a))))
 
 (defn response-headers
-  "Returns a String=>String map of HTTP response headers.  If a header
-  appears more than once, only the last value is returned."
+  "Returns a String=>String map of HTTP response headers.  Header
+  names are converted to all lower-case.  If a header appears more
+  than once, only the last value is returned."
   [a]
-  (reduce (fn [m [k v]]
-            (assoc m k (last v)))
+  (reduce (fn [m [#^String k v]]
+            (assoc m (when k (.toLowerCase k)) (last v)))
           {} (.getHeaderFields (::connection @a))))
 
 (defn response-headers-seq
