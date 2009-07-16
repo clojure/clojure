@@ -1,35 +1,11 @@
 /**
- Copyright (c) 2007-2008, Rich Hickey
- All rights reserved.
-
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions
- are met:
-
- * Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
- * Redistributions in binary form must reproduce the above
-   copyright notice, this list of conditions and the following
-   disclaimer in the documentation and/or other materials provided
-   with the distribution.
-
- * Neither the name of Clojure nor the names of its contributors
-   may be used to endorse or promote products derived from this
-   software without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- POSSIBILITY OF SUCH DAMAGE.
+ *   Copyright (c) Rich Hickey. All rights reserved.
+ *   The use and distribution terms for this software are covered by the
+ *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ *   which can be found in the file epl-v10.html at the root of this distribution.
+ *   By using this software in any fashion, you are agreeing to be bound by
+ * 	 the terms of this license.
+ *   You must not remove this notice, or any other, from this software.
  **/
 
 /* rich Jul 5, 2007 */
@@ -37,15 +13,36 @@
 package clojure.lang;
 
 import java.util.List;
+//import java.util.Vector;
+//import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PersistentVector extends APersistentVector{
+
+static class Node{
+	final AtomicBoolean edit;
+	final Object[] array;
+
+	Node(AtomicBoolean edit, Object[] array){
+		this.edit = edit;
+		this.array = array;
+	}
+
+	Node(AtomicBoolean edit){
+		this.edit = edit;
+		this.array = new Object[32];
+	}
+}
+
+final static AtomicBoolean NOEDIT = new AtomicBoolean(false);
+final static Node EMPTY_NODE = new Node(NOEDIT, new Object[32]);
+
 final int cnt;
 final int shift;
-final Object[] root;
+final Node root;
 final Object[] tail;
 
-public final static PersistentVector EMPTY = new PersistentVector(0, 5, RT.EMPTY_ARRAY, RT.EMPTY_ARRAY);
-
+public final static PersistentVector EMPTY = new PersistentVector(0, 5, EMPTY_NODE, new Object[]{});
 
 static public PersistentVector create(ISeq items){
 	PersistentVector ret = EMPTY;
@@ -68,7 +65,7 @@ static public PersistentVector create(Object... items){
 	return ret;
 }
 
-PersistentVector(int cnt, int shift, Object[] root, Object[] tail){
+PersistentVector(int cnt, int shift, Node root, Object[] tail){
 	super(null);
 	this.cnt = cnt;
 	this.shift = shift;
@@ -77,7 +74,7 @@ PersistentVector(int cnt, int shift, Object[] root, Object[] tail){
 }
 
 
-PersistentVector(IPersistentMap meta, int cnt, int shift, Object[] root, Object[] tail){
+PersistentVector(IPersistentMap meta, int cnt, int shift, Node root, Object[] tail){
 	super(meta);
 	this.cnt = cnt;
 	this.shift = shift;
@@ -89,21 +86,21 @@ final int tailoff(){
 	return cnt - tail.length;
 }
 
-public Object[] nodeFor(int i){
+public Object[] arrayFor(int i){
 	if(i >= 0 && i < cnt)
 		{
 		if(i >= tailoff())
 			return tail;
-		Object[] arr = root;
+		Node node = root;
 		for(int level = shift; level > 0; level -= 5)
-			arr = (Object[]) arr[(i >>> level) & 0x01f];
-		return arr;
+			node = (Node) node.array[(i >>> level) & 0x01f];
+		return node.array;
 		}
 	throw new IndexOutOfBoundsException();
 }
 
 public Object nth(int i){
-	Object[] node = nodeFor(i);
+	Object[] node = arrayFor(i);
 	return node[i & 0x01f];
 }
 
@@ -126,16 +123,16 @@ public PersistentVector assocN(int i, Object val){
 	throw new IndexOutOfBoundsException();
 }
 
-private static Object[] doAssoc(int level, Object[] arr, int i, Object val){
-	Object[] ret = arr.clone();
+private static Node doAssoc(int level, Node node, int i, Object val){
+	Node ret = new Node(node.edit,node.array.clone());
 	if(level == 0)
 		{
-		ret[i & 0x01f] = val;
+		ret.array[i & 0x01f] = val;
 		}
 	else
 		{
 		int subidx = (i >>> level) & 0x01f;
-		ret[subidx] = doAssoc(level - 5, (Object[]) arr[subidx], i, val);
+		ret.array[subidx] = doAssoc(level - 5, (Node) node.array[subidx], i, val);
 		}
 	return ret;
 }
@@ -150,6 +147,8 @@ public PersistentVector withMeta(IPersistentMap meta){
 
 
 public PersistentVector cons(Object val){
+	int i = cnt;
+	//room in tail?
 	if(tail.length < 32)
 		{
 		Object[] newTail = new Object[tail.length + 1];
@@ -157,15 +156,52 @@ public PersistentVector cons(Object val){
 		newTail[tail.length] = val;
 		return new PersistentVector(meta(), cnt + 1, shift, root, newTail);
 		}
-	Box expansion = new Box(null);
-	Object[] newroot = pushTail(shift - 5, root, tail, expansion);
+	//full tail, push into tree
+	Node newroot;
+	Node tailnode = new Node(root.edit,tail);
 	int newshift = shift;
-	if(expansion.val != null)
+	//overflow root?
+	if((cnt >>> 5) > (1 << shift))
 		{
-		newroot = new Object[]{newroot, expansion.val};
+		newroot = new Node(root.edit);
+		newroot.array[0] = root;
+		newroot.array[1] = newPath(shift, tailnode);
 		newshift += 5;
 		}
+	else
+		newroot = pushTail(shift, root, tailnode);
 	return new PersistentVector(meta(), cnt + 1, newshift, newroot, new Object[]{val});
+}
+
+private Node pushTail(int level, Node parent, Node tailnode){
+	//if parent is leaf, insert node,
+	// else does it map to an existing child? -> nodeToInsert = pushNode one more level
+	// else alloc new path
+	//return  nodeToInsert placed in copy of parent
+	int subidx = ((cnt - 1) >>> level) & 0x01f;
+	Node ret = new Node(parent.edit, parent.array.clone());
+	Node nodeToInsert;
+	if(level == 5)
+		{
+		nodeToInsert = tailnode;
+		}
+	else
+		{
+		Node child = (Node) parent.array[subidx];
+		nodeToInsert = (child != null)?
+		                pushTail(level-5,child, tailnode)
+		                :newPath(level-5, tailnode);
+		}
+	ret.array[subidx] = nodeToInsert;
+	return ret;
+}
+
+private Node newPath(int level, Node node){
+	if(level == 0)
+		return node;
+	Node ret = new Node(root.edit);
+	ret.array[0] = newPath(level - 5, node);
+	return ret;
 }
 
 public IChunkedSeq chunkedSeq(){
@@ -189,7 +225,7 @@ static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
 		this.vec = vec;
 		this.i = i;
 		this.offset = offset;
-		this.node = vec.nodeFor(i);
+		this.node = vec.arrayFor(i);
 	}
 
 	ChunkedSeq(IPersistentMap meta, PersistentVector vec, Object[] node, int i, int offset){
@@ -245,36 +281,36 @@ public IPersistentCollection empty(){
 	return EMPTY.withMeta(meta());
 }
 
-private Object[] pushTail(int level, Object[] arr, Object[] tailNode, Box expansion){
-	Object newchild;
-	if(level == 0)
-		{
-		newchild = tailNode;
-		}
-	else
-		{
-		newchild = pushTail(level - 5, (Object[]) arr[arr.length - 1], tailNode, expansion);
-		if(expansion.val == null)
-			{
-			Object[] ret = arr.clone();
-			ret[arr.length - 1] = newchild;
-			return ret;
-			}
-		else
-			newchild = expansion.val;
-		}
-	//expansion
-	if(arr.length == 32)
-		{
-		expansion.val = new Object[]{newchild};
-		return arr;
-		}
-	Object[] ret = new Object[arr.length + 1];
-	System.arraycopy(arr, 0, ret, 0, arr.length);
-	ret[arr.length] = newchild;
-	expansion.val = null;
-	return ret;
-}
+//private Node pushTail(int level, Node node, Object[] tailNode, Box expansion){
+//	Object newchild;
+//	if(level == 0)
+//		{
+//		newchild = tailNode;
+//		}
+//	else
+//		{
+//		newchild = pushTail(level - 5, (Object[]) arr[arr.length - 1], tailNode, expansion);
+//		if(expansion.val == null)
+//			{
+//			Object[] ret = arr.clone();
+//			ret[arr.length - 1] = newchild;
+//			return ret;
+//			}
+//		else
+//			newchild = expansion.val;
+//		}
+//	//expansion
+//	if(arr.length == 32)
+//		{
+//		expansion.val = new Object[]{newchild};
+//		return arr;
+//		}
+//	Object[] ret = new Object[arr.length + 1];
+//	System.arraycopy(arr, 0, ret, 0, arr.length);
+//	ret[arr.length] = newchild;
+//	expansion.val = null;
+//	return ret;
+//}
 
 public PersistentVector pop(){
 	if(cnt == 0)
@@ -287,40 +323,44 @@ public PersistentVector pop(){
 		System.arraycopy(tail, 0, newTail, 0, newTail.length);
 		return new PersistentVector(meta(), cnt - 1, shift, root, newTail);
 		}
-	Box ptail = new Box(null);
-	Object[] newroot = popTail(shift - 5, root, ptail);
+	Object[] newtail = arrayFor(cnt - 2);
+
+	Node newroot = popTail(shift, root);
 	int newshift = shift;
 	if(newroot == null)
 		{
-		newroot = RT.EMPTY_ARRAY;
+		newroot = EMPTY_NODE;
 		}
-	if(shift > 5 && newroot.length == 1)
+	if(shift > 5 && newroot.array[1] == null)
 		{
-		newroot = (Object[]) newroot[0];
+		newroot = (Node) newroot.array[0];
 		newshift -= 5;
 		}
-	return new PersistentVector(meta(), cnt - 1, newshift, newroot, (Object[]) ptail.val);
+	return new PersistentVector(meta(), cnt - 1, newshift, newroot, newtail);
 }
 
-private Object[] popTail(int shift, Object[] arr, Box ptail){
-	if(shift > 0)
+private Node popTail(int level, Node node){
+	int subidx = ((cnt-2) >>> level) & 0x01f;
+	if(level > 5)
 		{
-		Object[] newchild = popTail(shift - 5, (Object[]) arr[arr.length - 1], ptail);
-		if(newchild != null)
+		Node newchild = popTail(level - 5, (Node) node.array[subidx]);
+		if(newchild == null && subidx == 0)
+			return null;
+		else
 			{
-			Object[] ret = arr.clone();
-			ret[arr.length - 1] = newchild;
+			Node ret = new Node(root.edit, node.array.clone());
+			ret.array[subidx] = newchild;
 			return ret;
 			}
 		}
-	if(shift == 0)
-		ptail.val = arr[arr.length - 1];
-	//contraction
-	if(arr.length == 1)
+	else if(subidx == 0)
 		return null;
-	Object[] ret = new Object[arr.length - 1];
-	System.arraycopy(arr, 0, ret, 0, ret.length);
-	return ret;
+	else
+		{
+		Node ret = new Node(root.edit, node.array.clone());
+		ret.array[subidx] = null;
+		return ret;
+		}
 }
 
 /*
@@ -394,5 +434,5 @@ static public void main(String[] args){
 	System.out.println("Done: " + tv + ", " + tp);
 
 }
-  */
+//  */
 }
