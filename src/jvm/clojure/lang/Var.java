@@ -309,6 +309,19 @@ public static void releaseThreadBindings(){
 	dvals.set(null);
 }
 
+public static Associative getThreadBindings(){
+	Frame f = dvals.get();
+	IPersistentMap ret = PersistentHashMap.EMPTY;
+	for(ISeq bs = f.bindings.seq(); bs != null; bs = bs.next())
+		{
+		IMapEntry e = (IMapEntry) bs.first();
+		Var v = (Var) e.key();
+		Box b = (Box) e.val();
+		ret = ret.assoc(v, b.val);
+		}
+	return ret;
+}
+
 final Box getThreadBinding(){
 	if(count.get() > 0)
 		{
