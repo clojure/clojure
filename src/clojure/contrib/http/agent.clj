@@ -48,6 +48,13 @@
    :read-timeout 0
    :follow-redirects true})
 
+(defn- completed-watch [success-fn failure-fn key http-agnt old-state new-state]
+  (when (and (= (::state new-state) ::completed)
+             (not= (::state old-state) ::completed))
+   (if (success? (::connection new-state))
+     (when success-fn (success-fn http-agnt))
+     (when failure-fn (failure-fn http-agnt)))))
+
 (defn http-agent
   "Creates (and immediately returns) an Agent representing an HTTP
   request running in a new thread.
@@ -82,11 +89,34 @@
 
   If true, HTTP 3xx redirects will be followed automatically.  Default
   is true.
+
+  :on-success f
+
+  Function to be called when the request succeeds with a 2xx response
+  code.  Default is nil, do nothing.  The function will be called with
+  the HTTP agent as its argument.  Any exceptions thrown by this
+  function will be added to the agent's error queue (see
+  agent-errors).
+
+  :on-failure f
+
+  Function to be called when the request fails with a 4xx or 5xx
+  response code.  Default is nil, do nothing.  The function will be
+  called with the HTTP agent as its argument.  Any exceptions thrown
+  by this function will become agent-errors.  Any exceptions thrown by
+  this function will be added to the agent's error queue (see
+  agent-errors).
   "
   ([url & options]
      (let [opts (merge *http-request-defaults* (apply array-map options))]
        (let [a (agent {::connection (c/http-connection url)
-                       ::state ::created})]
+                       ::state ::created
+                       ::url url
+                       ::options opts})]
+         (when (or (:on-success opts) (:on-failure opts))
+           (add-watch a ::completed-watch
+                      (partial completed-watch
+                               (:on-success opts) (:on-failure opts))))
          (send-off a do-http-agent-request opts)))))
 
 (defn response-body-bytes
