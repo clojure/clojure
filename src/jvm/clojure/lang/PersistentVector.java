@@ -82,8 +82,8 @@ PersistentVector(IPersistentMap meta, int cnt, int shift, Node root, Object[] ta
 	this.tail = tail;
 }
 
-public Mutable mutable(){
-	return new Mutable(this);
+public MutableVector mutable(){
+	return new MutableVector(this);
 }
 
 final int tailoff(){
@@ -371,20 +371,20 @@ private Node popTail(int level, Node node){
 		}
 }
 
-static class Mutable implements IMutableVector, Counted{
+static class MutableVector implements IMutableVector, Counted{
 	int cnt;
 	int shift;
 	Node root;
 	Object[] tail;
 
-	Mutable(int cnt, int shift, Node root, Object[] tail){
+	MutableVector(int cnt, int shift, Node root, Object[] tail){
 		this.cnt = cnt;
 		this.shift = shift;
 		this.root = root;
 		this.tail = tail;
 	}
 
-	Mutable(PersistentVector v){
+	MutableVector(PersistentVector v){
 		this(v.cnt, v.shift, editable(v.root), editableTail(v.tail));
 	}
 
@@ -420,7 +420,7 @@ static class Mutable implements IMutableVector, Counted{
 		return ret;
 	}
 
-	public Mutable conj(Object val){
+	public MutableVector conj(Object val){
 		ensureEditable();
 		int i = cnt;
 		//room in tail?
@@ -510,7 +510,7 @@ static class Mutable implements IMutableVector, Counted{
 		return node[i & 0x01f];
 	}
 
-	public Mutable assocN(int i, Object val){
+	public MutableVector assocN(int i, Object val){
 		ensureEditable();
 		if(i >= 0 && i < cnt)
 			{
@@ -528,7 +528,7 @@ static class Mutable implements IMutableVector, Counted{
 		throw new IndexOutOfBoundsException();
 	}
 
-	public Mutable assoc(Object key, Object val){
+	public MutableVector assoc(Object key, Object val){
 		if(Util.isInteger(key))
 			{
 			int i = ((Number) key).intValue();
@@ -552,7 +552,7 @@ static class Mutable implements IMutableVector, Counted{
 		return ret;
 	}
 
-	public Mutable pop(){
+	public MutableVector pop(){
 		ensureEditable();
 		if(cnt == 0)
 			throw new IllegalStateException("Can't pop empty vector");
@@ -629,7 +629,7 @@ static public void main(String[] args){
 	//v.setSize(size);
 	//PersistentArray p = new PersistentArray(size);
 	PersistentVector p = PersistentVector.EMPTY;
-	Mutable mp = p.mutable();
+	MutableVector mp = p.mutable();
 
 	for(int i = 0; i < size; i++)
 		{
