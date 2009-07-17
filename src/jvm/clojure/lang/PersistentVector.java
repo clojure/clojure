@@ -13,11 +13,11 @@
 package clojure.lang;
 
 import java.util.List;
-//import java.util.Vector;
-//import java.util.Random;
+import java.util.Random;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class PersistentVector extends APersistentVector{
+public class PersistentVector extends APersistentVector implements IEditableCollection{
 
 static class Node{
 	final AtomicBoolean edit;
@@ -82,8 +82,14 @@ PersistentVector(IPersistentMap meta, int cnt, int shift, Node root, Object[] ta
 	this.tail = tail;
 }
 
+public Mutable mutable(){
+	return new Mutable(this);
+}
+
 final int tailoff(){
-	return cnt - tail.length;
+	if(cnt < 32)
+		return 0;
+	return ((cnt - 1) >>> 5) << 5;
 }
 
 public Object[] arrayFor(int i){
@@ -149,7 +155,8 @@ public PersistentVector withMeta(IPersistentMap meta){
 public PersistentVector cons(Object val){
 	int i = cnt;
 	//room in tail?
-	if(tail.length < 32)
+//	if(tail.length < 32)
+	if(cnt - tailoff() < 32)
 		{
 		Object[] newTail = new Object[tail.length + 1];
 		System.arraycopy(tail, 0, newTail, 0, tail.length);
@@ -165,7 +172,7 @@ public PersistentVector cons(Object val){
 		{
 		newroot = new Node(root.edit);
 		newroot.array[0] = root;
-		newroot.array[1] = newPath(shift, tailnode);
+		newroot.array[1] = newPath(root.edit,shift, tailnode);
 		newshift += 5;
 		}
 	else
@@ -190,17 +197,17 @@ private Node pushTail(int level, Node parent, Node tailnode){
 		Node child = (Node) parent.array[subidx];
 		nodeToInsert = (child != null)?
 		                pushTail(level-5,child, tailnode)
-		                :newPath(level-5, tailnode);
+		                :newPath(root.edit,level-5, tailnode);
 		}
 	ret.array[subidx] = nodeToInsert;
 	return ret;
 }
 
-private Node newPath(int level, Node node){
+private static Node newPath(AtomicBoolean edit,int level, Node node){
 	if(level == 0)
 		return node;
-	Node ret = new Node(root.edit);
-	ret.array[0] = newPath(level - 5, node);
+	Node ret = new Node(edit);
+	ret.array[0] = newPath(edit, level - 5, node);
 	return ret;
 }
 
@@ -317,7 +324,8 @@ public PersistentVector pop(){
 		throw new IllegalStateException("Can't pop empty vector");
 	if(cnt == 1)
 		return EMPTY.withMeta(meta());
-	if(tail.length > 1)
+	//if(tail.length > 1)
+	if(cnt-tailoff() > 1)
 		{
 		Object[] newTail = new Object[tail.length - 1];
 		System.arraycopy(tail, 0, newTail, 0, newTail.length);
@@ -363,7 +371,250 @@ private Node popTail(int level, Node node){
 		}
 }
 
-/*
+static class Mutable implements IMutableVector, Counted{
+	int cnt;
+	int shift;
+	Node root;
+	Object[] tail;
+
+	Mutable(int cnt, int shift, Node root, Object[] tail){
+		this.cnt = cnt;
+		this.shift = shift;
+		this.root = root;
+		this.tail = tail;
+	}
+
+	Mutable(PersistentVector v){
+		this(v.cnt, v.shift, editable(v.root), editableTail(v.tail));
+	}
+
+	public int count(){
+		return cnt;
+	}
+	
+	Node ensureEditable(Node node){
+		if(node.edit == root.edit)
+			return node;
+		return new Node(root.edit, node.array.clone());
+	}
+
+	void ensureEditable(){
+		if(root.edit.get())
+			return;
+		root = editable(root);
+		tail = editableTail(tail);
+	}
+
+	static Node editable(Node node){
+		return new Node(new AtomicBoolean(true), node.array.clone());
+	}
+
+	public PersistentVector immutable(){
+		root.edit.set(false);
+		return new PersistentVector(cnt, shift, root, tail);
+	}
+
+	static Object[] editableTail(Object[] tl){
+		Object[] ret = new Object[32];
+		System.arraycopy(tl,0,ret,0,tl.length);
+		return ret;
+	}
+
+	public Mutable conj(Object val){
+		ensureEditable();
+		int i = cnt;
+		//room in tail?
+		if(i - tailoff() < 32)
+			{
+			tail[i & 0x01f] = val;
+			++cnt;
+			return this;
+			}
+		//full tail, push into tree
+		Node newroot;
+		Node tailnode = new Node(root.edit, tail);
+		tail = new Object[32];
+		tail[0] = val;
+		int newshift = shift;
+		//overflow root?
+		if((cnt >>> 5) > (1 << shift))
+			{
+			newroot = new Node(root.edit);
+			newroot.array[0] = root;
+			newroot.array[1] = newPath(root.edit,shift, tailnode);
+			newshift += 5;
+			}
+		else
+			newroot = pushTail(shift, root, tailnode);
+		root = newroot;
+		shift = newshift;
+		++cnt;
+		return this;
+	}
+
+	private Node pushTail(int level, Node parent, Node tailnode){
+		//if parent is leaf, insert node,
+		// else does it map to an existing child? -> nodeToInsert = pushNode one more level
+		// else alloc new path
+		//return  nodeToInsert placed in parent
+		parent = ensureEditable(parent);
+		int subidx = ((cnt - 1) >>> level) & 0x01f;
+		Node ret = parent;
+		Node nodeToInsert;
+		if(level == 5)
+			{
+			nodeToInsert = tailnode;
+			}
+		else
+			{
+			Node child = (Node) parent.array[subidx];
+			nodeToInsert = (child != null) ?
+			               pushTail(level - 5, child, tailnode)
+			                               : newPath(root.edit, level - 5, tailnode);
+			}
+		ret.array[subidx] = nodeToInsert;
+		return ret;
+	}
+
+	final int tailoff(){
+		if(cnt < 32)
+			return 0;
+		return ((cnt-1) >>> 5) << 5;
+	}
+
+	private Object[] arrayFor(int i){
+		if(i >= 0 && i < cnt)
+			{
+			if(i >= tailoff())
+				return tail;
+			Node node = root;
+			for(int level = shift; level > 0; level -= 5)
+				node = (Node) node.array[(i >>> level) & 0x01f];
+			return node.array;
+			}
+		throw new IndexOutOfBoundsException();
+	}
+
+	public Object valAt(Object key){
+		if(Util.isInteger(key))
+			{
+			int i = ((Number) key).intValue();
+			if(i >= 0 && i < count())
+				return nth(i);
+			}
+		return null;
+	}
+
+	public Object nth(int i){
+		Object[] node = arrayFor(i);
+		return node[i & 0x01f];
+	}
+
+	public Mutable assocN(int i, Object val){
+		ensureEditable();
+		if(i >= 0 && i < cnt)
+			{
+			if(i >= tailoff())
+				{
+				tail[i & 0x01f] = val;
+				return this;
+				}
+
+			root = doAssoc(shift, root, i, val);
+			return this;
+			}
+		if(i == cnt)
+			return conj(val);
+		throw new IndexOutOfBoundsException();
+	}
+
+	public Mutable assoc(Object key, Object val){
+		if(Util.isInteger(key))
+			{
+			int i = ((Number) key).intValue();
+			return assocN(i, val);
+			}
+		throw new IllegalArgumentException("Key must be integer");
+	}
+
+	private Node doAssoc(int level, Node node, int i, Object val){
+		node = ensureEditable(node);
+		Node ret = node;
+		if(level == 0)
+			{
+			ret.array[i & 0x01f] = val;
+			}
+		else
+			{
+			int subidx = (i >>> level) & 0x01f;
+			ret.array[subidx] = doAssoc(level - 5, (Node) node.array[subidx], i, val);
+			}
+		return ret;
+	}
+
+	public Mutable pop(){
+		ensureEditable();
+		if(cnt == 0)
+			throw new IllegalStateException("Can't pop empty vector");
+		if(cnt == 1)
+			{
+			cnt = 0;
+			return this;
+			}
+		int i = cnt - 1;
+		//pop in tail?
+		if((i & 0x01f) > 0)
+			{
+			--cnt;
+			return this;
+			}
+
+		Object[] newtail = arrayFor(cnt - 2);
+
+		Node newroot = popTail(shift, root);
+		int newshift = shift;
+		if(newroot == null)
+			{
+			newroot = EMPTY_NODE;
+			}
+		if(shift > 5 && newroot.array[1] == null)
+			{
+			newroot = (Node) newroot.array[0];
+			newshift -= 5;
+			}
+		root = newroot;
+		shift = newshift;
+		--cnt;
+		tail = newtail;
+		return this;
+	}
+
+	private Node popTail(int level, Node node){
+		node = ensureEditable(node);
+		int subidx = ((cnt - 2) >>> level) & 0x01f;
+		if(level > 5)
+			{
+			Node newchild = popTail(level - 5, (Node) node.array[subidx]);
+			if(newchild == null && subidx == 0)
+				return null;
+			else
+				{
+				Node ret = node;
+				ret.array[subidx] = newchild;
+				return ret;
+				}
+			}
+		else if(subidx == 0)
+			return null;
+		else
+			{
+			Node ret = node;
+			ret.array[subidx] = null;
+			return ret;
+			}
+	}
+}
+//*
 static public void main(String[] args){
 	if(args.length != 3)
 		{
@@ -373,23 +624,27 @@ static public void main(String[] args){
 	int size = Integer.parseInt(args[0]);
 	int writes = Integer.parseInt(args[1]);
 	int reads = Integer.parseInt(args[2]);
-	Vector v = new Vector(size);
-	v.setSize(size);
+	//Vector v = new Vector(size);
+	ArrayList v = new ArrayList(size);
+	//v.setSize(size);
 	//PersistentArray p = new PersistentArray(size);
 	PersistentVector p = PersistentVector.EMPTY;
+	Mutable mp = p.mutable();
 
 	for(int i = 0; i < size; i++)
 		{
-		v.set(i, i);
+		v.add(i);
+//		v.set(i, i);
 		//p = p.set(i, 0);
-		p = p.cons(i);
+//		p = p.cons(i);
+		mp = mp.conj(i);
 		}
 
 	Random rand;
 
 	rand = new Random(42);
 	long tv = 0;
-	System.out.println("Vector");
+	System.out.println("ArrayList");
 	long startTime = System.nanoTime();
 	for(int i = 0; i < writes; i++)
 		{
@@ -409,23 +664,31 @@ static public void main(String[] args){
 //	PersistentVector oldp = p;
 	//Random rand2 = new Random(42);
 
+//	IMutableVector mp = p.mutable();
 	for(int i = 0; i < writes; i++)
 		{
-		p = p.assocN(rand.nextInt(size), i);
+//		p = p.assocN(rand.nextInt(size), i);
+		mp = mp.assocN(rand.nextInt(size), i);
+//		mp = mp.assoc(rand.nextInt(size), i);
 		//dummy set to force perverse branching
 		//oldp =	oldp.assocN(rand2.nextInt(size), i);
 		}
 	for(int i = 0; i < reads; i++)
 		{
-		tp += (Integer) p.nth(rand.nextInt(size));
+//		tp += (Integer) p.nth(rand.nextInt(size));
+		tp += (Integer) mp.nth(rand.nextInt(size));
 		}
+//	p = mp.immutable();
+	//mp.cons(42);
 	estimatedTime = System.nanoTime() - startTime;
 	System.out.println("time: " + estimatedTime / 1000000);
 	for(int i = 0; i < size / 2; i++)
 		{
-		p = p.pop();
+		mp = mp.pop();
+//		p = p.pop();
 		v.remove(v.size() - 1);
 		}
+	p = (PersistentVector) mp.immutable();
 	for(int i = 0; i < size / 2; i++)
 		{
 		tp += (Integer) p.nth(i);
