@@ -4360,3 +4360,18 @@
   "Returns the value mapped to key, nil if key not present."
   [#^clojure.lang.IMutableAssociative coll key]
   (.valAt coll key))
+
+;redef into with batch support
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  [to from]
+  (if (instance? clojure.lang.IEditableCollection to)
+    (#(loop [ret (mutable to) items (seq from)]
+        (if items
+          (recur (conj! ret (first items)) (next items))
+          (immutable! ret))))
+    (#(loop [ret to items (seq from)]
+        (if items
+          (recur (conj ret (first items)) (next items))
+          ret)))))
