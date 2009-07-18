@@ -45,24 +45,24 @@ final Object[] tail;
 public final static PersistentVector EMPTY = new PersistentVector(0, 5, EMPTY_NODE, new Object[]{});
 
 static public PersistentVector create(ISeq items){
-	PersistentVector ret = EMPTY;
+	MutableVector ret = EMPTY.mutable();
 	for(; items != null; items = items.next())
-		ret = ret.cons(items.first());
-	return ret;
+		ret = ret.conj(items.first());
+	return ret.immutable();
 }
 
 static public PersistentVector create(List items){
-	PersistentVector ret = EMPTY;
+	MutableVector ret = EMPTY.mutable();
 	for(Object item : items)
-		ret = ret.cons(item);
-	return ret;
+		ret = ret.conj(item);
+	return ret.immutable();
 }
 
 static public PersistentVector create(Object... items){
-	PersistentVector ret = EMPTY;
+	MutableVector ret = EMPTY.mutable();
 	for(Object item : items)
-		ret = ret.cons(item);
-	return ret;
+		ret = ret.conj(item);
+	return ret.immutable();
 }
 
 PersistentVector(int cnt, int shift, Node root, Object[] tail){
@@ -411,7 +411,9 @@ static class MutableVector implements IMutableVector, Counted{
 
 	public PersistentVector immutable(){
 		root.edit.set(false);
-		return new PersistentVector(cnt, shift, root, tail);
+		Object[] trimmedTail = new Object[cnt-tailoff()];
+		System.arraycopy(tail,0,trimmedTail,0,trimmedTail.length);
+		return new PersistentVector(cnt, shift, root, trimmedTail);
 	}
 
 	static Object[] editableTail(Object[] tl){
