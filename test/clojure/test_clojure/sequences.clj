@@ -474,12 +474,12 @@
   (is (thrown? IndexOutOfBoundsException (nth [] 0)))
   (is (thrown? IndexOutOfBoundsException (nth [1 2 3] 5)))
   (is (thrown? IndexOutOfBoundsException (nth [] -1)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth [1 2 3] -1)))  ; ???
+  (is (thrown? IndexOutOfBoundsException (nth [1 2 3] -1)))  ; ???
 
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) 0)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) 5)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) -1)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) -1)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array []) 0)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array [1 2 3]) 5)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array []) -1)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array [1 2 3]) -1)))
 
   (is (thrown? StringIndexOutOfBoundsException (nth "" 0)))
   (is (thrown? StringIndexOutOfBoundsException (nth "abc" 5)))
@@ -488,8 +488,8 @@
 
   (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. []) 0)))
   (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) 5)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. []) -1)))       ; ???
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) -1)))  ; ???
+  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. []) -1)))       ; ???
+  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) -1)))  ; ???
 
   (are [x y] (= x y)
       (nth '(1) 0) 1
