@@ -614,7 +614,7 @@ static class MutableVector implements IMutableVector, Counted{
 			}
 	}
 }
-//*
+/*
 static public void main(String[] args){
 	if(args.length != 3)
 		{

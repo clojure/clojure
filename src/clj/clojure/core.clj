@@ -4322,7 +4322,7 @@
   [#^clojure.lang.IEditableCollection coll] 
   (.mutable coll))
 
-(defn immutable 
+(defn immutable! 
   "Returns a new, immutable version of the mutable collection, in constant time."
   [#^clojure.lang.IMutableCollection coll] 
   (.immutable coll))
