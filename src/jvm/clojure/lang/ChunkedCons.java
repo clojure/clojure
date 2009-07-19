@@ -14,51 +14,44 @@ package clojure.lang;
 
 final public class ChunkedCons extends ASeq implements IChunkedSeq{
 
-final Indexed chunk;
+final IChunk chunk;
 final ISeq _more;
-final int offset;
 
-ChunkedCons(IPersistentMap meta, Indexed chunk, int offset, ISeq more){
+ChunkedCons(IPersistentMap meta, IChunk chunk, ISeq more){
 	super(meta);
 	this.chunk = chunk;
-	this.offset = offset;
 	this._more = more;
-}
-public ChunkedCons(Indexed chunk, ISeq more){
-	this(chunk, 0, more);
 }
 
-public ChunkedCons(Indexed chunk, int offset, ISeq more){
-	this.chunk = chunk;
-	this.offset = offset;
-	this._more = more;
+public ChunkedCons(IChunk chunk, ISeq more){
+	this(null,chunk, more);
 }
 
 public Obj withMeta(IPersistentMap meta){
 	if(meta != _meta)
-		return new ChunkedCons(meta, chunk, offset, _more);
+		return new ChunkedCons(meta, chunk, _more);
 	return this;
 }
 
 public Object first(){
-	return chunk.nth(offset);
+	return chunk.nth(0);
 }
 
 public ISeq next(){
-	if(offset + 1 < chunk.count())
-		return new ChunkedCons(chunk, offset + 1, _more);
+	if(chunk.count() > 1)
+		return new ChunkedCons(chunk.dropFirst(), _more);
 	return chunkedNext();
 }
 
 public ISeq more(){
-	if(offset + 1 < chunk.count())
-		return new ChunkedCons(chunk, offset + 1, _more);
+	if(chunk.count() > 1)
+		return new ChunkedCons(chunk.dropFirst(), _more);
 	if(_more == null)
 		return PersistentList.EMPTY;
 	return _more;
 }
 
-public Indexed chunkedFirst(){
+public IChunk chunkedFirst(){
 	return chunk;
 }
 

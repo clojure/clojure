@@ -847,8 +847,8 @@
       (range -1) ()
       (range -3) ()
 
-      (range 2.5) '(0 1)
-      (range 7/3) '(0 1)
+      (range 2.5) '(0 1 2)
+      (range 7/3) '(0 1 2)
 
       (range 0 3) '(0 1 2)
       (range 0 1) '(0)

@@ -523,6 +523,78 @@
          (if or# or# (or ~@next)))))
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
+(defn zero?
+  "Returns true if num is zero, else false"
+  {:tag Boolean
+   :inline (fn [x] `(. clojure.lang.Numbers (isZero ~x)))}
+  [x] (. clojure.lang.Numbers (isZero x)))
+
+(defn count
+  "Returns the number of items in the collection. (count nil) returns
+  0.  Also works on strings, arrays, and Java Collections and Maps"
+  [coll] (clojure.lang.RT/count coll))
+
+(defn int
+  "Coerce to int"
+  {:tag Integer
+   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
+  [x] (. clojure.lang.RT (intCast x)))
+
+(defn nth
+  "Returns the value at the index. get returns nil if index out of
+  bounds, nth throws an exception unless not-found is supplied.  nth
+  also works for strings, Java arrays, regex Matchers and Lists, and,
+  in O(n) time, for sequences."
+  {:inline (fn  [c i] `(. clojure.lang.RT (nth ~c ~i)))
+   :inline-arities #{2}}
+  ([coll index] (. clojure.lang.RT (nth coll index)))
+  ([coll index not-found] (. clojure.lang.RT (nth coll index not-found))))
+
+(defn <
+  "Returns non-nil if nums are in monotonically increasing order,
+  otherwise false."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (lt ~x ~y)))
+   :inline-arities #{2}}
+  ([x] true)
+  ([x y] (. clojure.lang.Numbers (lt x y)))
+  ([x y & more]
+   (if (< x y)
+     (if (next more)
+       (recur y (first more) (next more))
+       (< y (first more)))
+     false)))
+
+(defn inc
+  "Returns a number one greater than num."
+  {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))}
+  [x] (. clojure.lang.Numbers (inc x)))
+
+(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
+  (clojure.lang.ChunkBuffer. capacity))
+
+(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
+  (.add b x))
+
+(defn chunk [#^clojure.lang.ChunkBuffer b]
+  (.chunk b))
+
+(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
+  (.chunkedFirst s))
+
+(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
+  (.chunkedMore s))
+
+(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
+  (.chunkedNext s))
+
+(defn chunk-cons [chunk rest]
+  (if (zero? (count chunk))
+    rest
+    (clojure.lang.ChunkedCons. chunk rest)))
+  
+(defn chunked-seq? [s]
+  (instance? clojure.lang.IChunkedSeq s))
+
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then
@@ -536,19 +608,17 @@
   ([f coll]
    (let [s (seq coll)]
      (if s
-       (if (instance? clojure.lang.IReduce s)
-         (. #^clojure.lang.IReduce s (reduce f))
-         (reduce f (first s) (next s)))
+       (reduce f (first s) (next s))
        (f))))
   ([f val coll]
      (let [s (seq coll)]
-       (if (instance? clojure.lang.IReduce s)
-         (. #^clojure.lang.IReduce s (reduce f val))
-         ((fn [f val s]
-            (if s
-              (recur f (f val (first s)) (next s))
-              val))
-          f val s)))))
+       (if s
+         (if (chunked-seq? s)
+           (recur f 
+                  (.reduce (chunk-first s) f val)
+                  (chunk-next s))
+           (recur f (f val (first s)) (next s)))
+         val))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
@@ -595,20 +665,6 @@
   ([x y] (. clojure.lang.Numbers (minus x y)))
   ([x y & more]
    (reduce - (- x y) more)))
-
-(defn <
-  "Returns non-nil if nums are in monotonically increasing order,
-  otherwise false."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (lt ~x ~y)))
-   :inline-arities #{2}}
-  ([x] true)
-  ([x y] (. clojure.lang.Numbers (lt x y)))
-  ([x y & more]
-   (if (< x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (< y (first more)))
-     false)))
 
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
@@ -679,11 +735,6 @@
   ([x y & more]
    (reduce min (min x y) more)))
 
-(defn inc
-  "Returns a number one greater than num."
-  {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))}
-  [x] (. clojure.lang.Numbers (inc x)))
-
 (defn dec
   "Returns a number one less than num."
   {:inline (fn [x] `(. clojure.lang.Numbers (dec ~x)))}
@@ -748,12 +799,6 @@
   {:tag Boolean
    :inline (fn [x] `(. clojure.lang.Numbers (isNeg ~x)))}
   [x] (. clojure.lang.Numbers (isNeg x)))
-
-(defn zero?
-  "Returns true if num is zero, else false"
-  {:tag Boolean
-   :inline (fn [x] `(. clojure.lang.Numbers (isZero ~x)))}
-  [x] (. clojure.lang.Numbers (isZero x)))
 
 (defn quot
   "quot[ient] of dividing numerator by denominator."
@@ -856,10 +901,7 @@
 
 
 
-(defn count
-  "Returns the number of items in the collection. (count nil) returns
-  0.  Also works on strings, arrays, and Java Collections and Maps"
-  [coll] (. clojure.lang.RT (count coll)))
+
 
 ;;list stuff
 (defn peek
@@ -873,16 +915,6 @@
   the collection is empty, throws an exception.  Note - not the same
   as next/butlast."
   [coll] (. clojure.lang.RT (pop coll)))
-
-(defn nth
-  "Returns the value at the index. get returns nil if index out of
-  bounds, nth throws an exception unless not-found is supplied.  nth
-  also works for strings, Java arrays, regex Matchers and Lists, and,
-  in O(n) time, for sequences."
-  {:inline (fn  [c i] `(. clojure.lang.RT (nth ~c ~i)))
-   :inline-arities #{2}}
-  ([coll index] (. clojure.lang.RT (nth coll index)))
-  ([coll index not-found] (. clojure.lang.RT (nth coll index not-found))))
 
 ;;map stuff
 
@@ -1538,6 +1570,21 @@
     :arglists '([pred coll])}
  not-any? (comp not some))
 
+;will be redefed later with arg checks
+(defmacro dotimes
+  "bindings => name n
+
+  Repeatedly executes body (presumably for side-effects) with name
+  bound to integers from 0 through n-1."
+  [bindings & body]
+  (let [i (first bindings)
+        n (second bindings)]
+    `(let [n# (int ~n)]
+       (loop [~i (int 0)]
+         (when (< ~i n#)
+           ~@body
+           (recur (inc ~i)))))))
+
 (defn map
   "Returns a lazy sequence consisting of the result of applying f to the
   set of first items of each coll, followed by applying f to the set
@@ -1547,7 +1594,14 @@
   ([f coll]
    (lazy-seq
     (when-let [s (seq coll)]
-      (cons (f (first s)) (map f (rest s))))))
+      (if (chunked-seq? s)
+        (let [c (chunk-first s)
+              size (int (count c))
+              b (chunk-buffer size)]
+          (dotimes [i size]
+              (chunk-append b (f (.nth c i))))
+          (chunk-cons (chunk b) (map f (chunk-rest s))))
+        (cons (f (first s)) (map f (rest s)))))))
   ([f c1 c2]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2)]
@@ -1575,15 +1629,21 @@
     (apply concat (apply map f colls)))
 
 (defn filter
-  "Returns a lazy sequence of the items in coll for which
-  (pred item) returns true. pred must be free of side-effects."
-  [pred coll]
-  (let [step (fn [p c]
-                 (when-let [s (seq c)]
-                   (if (p (first s))
-                     (cons (first s) (filter p (rest s)))
-                     (recur p (rest s)))))]
-    (lazy-seq (step pred coll))))
+  ([pred coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (if (chunked-seq? s)
+        (let [c (chunk-first s)
+              size (count c)
+              b (chunk-buffer size)]
+          (dotimes [i size]
+              (when (pred (.nth c i))
+                (chunk-append b (.nth c i))))
+          (chunk-cons (chunk b) (filter pred (chunk-rest s))))
+        (let [f (first s) r (rest s)]
+          (if (pred f)
+            (cons f (filter pred r))
+            (filter pred r))))))))
 
 
 (defn remove
@@ -1665,19 +1725,24 @@
   "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
   [f x] (cons x (lazy-seq (iterate f (f x)))))
 
-(defn range
+(defn range 
   "Returns a lazy seq of nums from start (inclusive) to end
   (exclusive), by step, where start defaults to 0 and step to 1."
-  ([end] (if (and (> end 0) (<= end (. Integer MAX_VALUE)))
-           (new clojure.lang.Range 0 end)
-           (take end (iterate inc 0))))
-  ([start end] (if (and (< start end)
-                        (>= start (. Integer MIN_VALUE))
-                        (<= end (. Integer MAX_VALUE)))
-                 (new clojure.lang.Range start end)
-                 (take (- end start) (iterate inc start))))
+  ([end] (range 0 end 1))
+  ([start end] (range start end 1))
   ([start end step]
-   (take-while (partial (if (pos? step) > <) end) (iterate (partial + step) start))))
+   (lazy-seq
+    (let [b (chunk-buffer 32)
+          comp (if (pos? step) < >)]
+      (loop [i start]
+        (if (and (< (count b) 32)
+                 (comp i end))
+          (do
+            (chunk-append b i)
+            (recur (+ i step)))
+          (chunk-cons (chunk b) 
+                      (when (comp i end) 
+                        (range i end step)))))))))
 
 (defn merge
   "Returns a map that consists of the rest of the maps conj-ed onto
@@ -1951,12 +2016,6 @@
   {:tag Number
    :inline (fn  [x] `(. clojure.lang.Numbers (num ~x)))}
   [x] (. clojure.lang.Numbers (num x)))
-
-(defn int
-  "Coerce to int"
-  {:tag Integer
-   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
-  [x] (. clojure.lang.RT (intCast x)))
 
 (defn long
   "Coerce to long"
@@ -4237,7 +4296,7 @@
   Returns a promise object that can be read with deref/@, and set,
   once only, with deliver. Calls to deref/@ prior to delivery will
   block. All subsequent derefs will return the same delivered value
-  without blocking."  
+  without blocking."
   []
   (let [d (java.util.concurrent.CountDownLatch. 1)
         v (atom nil)]

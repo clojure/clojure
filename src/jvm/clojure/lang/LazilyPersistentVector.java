@@ -83,7 +83,7 @@ static class ChunkedSeq extends ASeq implements IChunkedSeq, IndexedSeq{
 		return chunkedNext();
 	}
 
-	public Indexed chunkedFirst(){
+	public IChunk chunkedFirst(){
 		return new ArrayChunk(array, offset, end);
 	}
 
