@@ -137,6 +137,6 @@
 ;; http://groups.google.com/group/clojure/browse_thread/thread/537761a06edb4b06/bfd4f0705b746a38
 ;;
 (deftest test-string?-more
-  (are (not (string? _))
+  (are [x] (not (string? x))
     (new java.lang.StringBuilder "abc")
     (new java.lang.StringBuffer "xyz")))

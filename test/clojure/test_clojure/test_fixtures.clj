@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 ;
-;;; test_is_fixtures.clj: unit tests for fixtures in test_is.clj
+;;; test_fixtures.clj: unit tests for fixtures in test.clj
 
 ;; by Stuart Sierra
 ;; March 28, 2009

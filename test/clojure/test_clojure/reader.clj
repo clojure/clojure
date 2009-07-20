@@ -297,7 +297,7 @@
 ;; Unquote-splicing (~@)
 
 (deftest t-Syntax-quote
-  (are (= _1 _2)
+  (are [x y] (= x y)
       `() ()    ; was NPE before SVN r1337
   ))
 

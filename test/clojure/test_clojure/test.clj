@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-;;; test_contrib/test_is.clj: unit tests for test_is.clj
+;;; test_clojure/test.clj: unit tests for test.clj
 
 ;; by Stuart Sierra
 ;; January 16, 2009
@@ -83,7 +83,7 @@
   (is (does-not-exist) "Should error"))
 
 
-;; Here, we create an alternate version of test-is/report, that
+;; Here, we create an alternate version of test/report, that
 ;; compares the event with the message, then calls the original
 ;; 'report' with modified arguments.
 
@@ -105,7 +105,7 @@
       (original-report {:type :fail, :message (str msg " but got " event)
                         :expected expected, :actual actual}))))
 
-;; test-ns-hook will be used by test-is/test-ns to run tests in this
+;; test-ns-hook will be used by test/test-ns to run tests in this
 ;; namespace.
 (defn test-ns-hook []
   (binding [original-report report
