@@ -18,31 +18,35 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PersistentVector extends APersistentVector implements IEditableCollection{
+public static final int CHUNK = 32;
+public static final int SHIFT = 5;
+public static final int MASK = 0x01f;
 
-static class Node{
-	final AtomicBoolean edit;
-	final Object[] array;
+//note: public fields/classes/ctors for use by Clojure lib only
+static public class Node{
+	public final AtomicBoolean edit;
+	public final Object[] array;
 
-	Node(AtomicBoolean edit, Object[] array){
+	public Node(AtomicBoolean edit, Object[] array){
 		this.edit = edit;
 		this.array = array;
 	}
 
 	Node(AtomicBoolean edit){
 		this.edit = edit;
-		this.array = new Object[32];
+		this.array = new Object[CHUNK];
 	}
 }
 
 final static AtomicBoolean NOEDIT = new AtomicBoolean(false);
-final static Node EMPTY_NODE = new Node(NOEDIT, new Object[32]);
+final static Node EMPTY_NODE = new Node(NOEDIT, new Object[CHUNK]);
 
-final int cnt;
-final int shift;
-final Node root;
-final Object[] tail;
+public final int cnt;
+public final int shift;
+public final Node root;
+public final Object[] tail;
 
-public final static PersistentVector EMPTY = new PersistentVector(0, 5, EMPTY_NODE, new Object[]{});
+public final static PersistentVector EMPTY = new PersistentVector(0, SHIFT, EMPTY_NODE, new Object[]{});
 
 static public PersistentVector create(ISeq items){
 	MutableVector ret = EMPTY.mutable();
@@ -65,7 +69,7 @@ static public PersistentVector create(Object... items){
 	return ret.immutable();
 }
 
-PersistentVector(int cnt, int shift, Node root, Object[] tail){
+public PersistentVector(int cnt, int shift, Node root, Object[] tail){
 	super(null);
 	this.cnt = cnt;
 	this.shift = shift;
@@ -87,9 +91,9 @@ public MutableVector mutable(){
 }
 
 final int tailoff(){
-	if(cnt < 32)
+	if(cnt < CHUNK)
 		return 0;
-	return ((cnt - 1) >>> 5) << 5;
+	return ((cnt - 1) >>> SHIFT) << SHIFT;
 }
 
 public Object[] arrayFor(int i){
@@ -98,8 +102,8 @@ public Object[] arrayFor(int i){
 		if(i >= tailoff())
 			return tail;
 		Node node = root;
-		for(int level = shift; level > 0; level -= 5)
-			node = (Node) node.array[(i >>> level) & 0x01f];
+		for(int level = shift; level > 0; level -= SHIFT)
+			node = (Node) node.array[(i >>> level) & MASK];
 		return node.array;
 		}
 	throw new IndexOutOfBoundsException();
@@ -107,7 +111,7 @@ public Object[] arrayFor(int i){
 
 public Object nth(int i){
 	Object[] node = arrayFor(i);
-	return node[i & 0x01f];
+	return node[i & MASK];
 }
 
 public PersistentVector assocN(int i, Object val){
@@ -117,7 +121,7 @@ public PersistentVector assocN(int i, Object val){
 			{
 			Object[] newTail = new Object[tail.length];
 			System.arraycopy(tail, 0, newTail, 0, tail.length);
-			newTail[i & 0x01f] = val;
+			newTail[i & MASK] = val;
 
 			return new PersistentVector(meta(), cnt, shift, root, newTail);
 			}
@@ -133,12 +137,12 @@ private static Node doAssoc(int level, Node node, int i, Object val){
 	Node ret = new Node(node.edit,node.array.clone());
 	if(level == 0)
 		{
-		ret.array[i & 0x01f] = val;
+		ret.array[i & MASK] = val;
 		}
 	else
 		{
-		int subidx = (i >>> level) & 0x01f;
-		ret.array[subidx] = doAssoc(level - 5, (Node) node.array[subidx], i, val);
+		int subidx = (i >>> level) & MASK;
+		ret.array[subidx] = doAssoc(level - SHIFT, (Node) node.array[subidx], i, val);
 		}
 	return ret;
 }
@@ -156,7 +160,7 @@ public PersistentVector cons(Object val){
 	int i = cnt;
 	//room in tail?
 //	if(tail.length < 32)
-	if(cnt - tailoff() < 32)
+	if(cnt - tailoff() < CHUNK)
 		{
 		Object[] newTail = new Object[tail.length + 1];
 		System.arraycopy(tail, 0, newTail, 0, tail.length);
@@ -168,12 +172,12 @@ public PersistentVector cons(Object val){
 	Node tailnode = new Node(root.edit,tail);
 	int newshift = shift;
 	//overflow root?
-	if((cnt >>> 5) > (1 << shift))
+	if((cnt >>> SHIFT) > (1 << shift))
 		{
 		newroot = new Node(root.edit);
 		newroot.array[0] = root;
 		newroot.array[1] = newPath(root.edit,shift, tailnode);
-		newshift += 5;
+		newshift += SHIFT;
 		}
 	else
 		newroot = pushTail(shift, root, tailnode);
@@ -185,10 +189,10 @@ private Node pushTail(int level, Node parent, Node tailnode){
 	// else does it map to an existing child? -> nodeToInsert = pushNode one more level
 	// else alloc new path
 	//return  nodeToInsert placed in copy of parent
-	int subidx = ((cnt - 1) >>> level) & 0x01f;
+	int subidx = ((cnt - 1) >>> level) & MASK;
 	Node ret = new Node(parent.edit, parent.array.clone());
 	Node nodeToInsert;
-	if(level == 5)
+	if(level == SHIFT)
 		{
 		nodeToInsert = tailnode;
 		}
@@ -196,8 +200,8 @@ private Node pushTail(int level, Node parent, Node tailnode){
 		{
 		Node child = (Node) parent.array[subidx];
 		nodeToInsert = (child != null)?
-		                pushTail(level-5,child, tailnode)
-		                :newPath(root.edit,level-5, tailnode);
+		                pushTail(level- SHIFT,child, tailnode)
+		                :newPath(root.edit,level- SHIFT, tailnode);
 		}
 	ret.array[subidx] = nodeToInsert;
 	return ret;
@@ -207,7 +211,7 @@ private static Node newPath(AtomicBoolean edit,int level, Node node){
 	if(level == 0)
 		return node;
 	Node ret = new Node(edit);
-	ret.array[0] = newPath(edit, level - 5, node);
+	ret.array[0] = newPath(edit, level - SHIFT, node);
 	return ret;
 }
 
@@ -339,19 +343,19 @@ public PersistentVector pop(){
 		{
 		newroot = EMPTY_NODE;
 		}
-	if(shift > 5 && newroot.array[1] == null)
+	if(shift > SHIFT && newroot.array[1] == null)
 		{
 		newroot = (Node) newroot.array[0];
-		newshift -= 5;
+		newshift -= SHIFT;
 		}
 	return new PersistentVector(meta(), cnt - 1, newshift, newroot, newtail);
 }
 
 private Node popTail(int level, Node node){
-	int subidx = ((cnt-2) >>> level) & 0x01f;
-	if(level > 5)
+	int subidx = ((cnt-2) >>> level) & MASK;
+	if(level > SHIFT)
 		{
-		Node newchild = popTail(level - 5, (Node) node.array[subidx]);
+		Node newchild = popTail(level - SHIFT, (Node) node.array[subidx]);
 		if(newchild == null && subidx == 0)
 			return null;
 		else
@@ -417,7 +421,7 @@ static class MutableVector implements IMutableVector, Counted{
 	}
 
 	static Object[] editableTail(Object[] tl){
-		Object[] ret = new Object[32];
+		Object[] ret = new Object[CHUNK];
 		System.arraycopy(tl,0,ret,0,tl.length);
 		return ret;
 	}
@@ -426,25 +430,25 @@ static class MutableVector implements IMutableVector, Counted{
 		ensureEditable();
 		int i = cnt;
 		//room in tail?
-		if(i - tailoff() < 32)
+		if(i - tailoff() < CHUNK)
 			{
-			tail[i & 0x01f] = val;
+			tail[i & MASK] = val;
 			++cnt;
 			return this;
 			}
 		//full tail, push into tree
 		Node newroot;
 		Node tailnode = new Node(root.edit, tail);
-		tail = new Object[32];
+		tail = new Object[CHUNK];
 		tail[0] = val;
 		int newshift = shift;
 		//overflow root?
-		if((cnt >>> 5) > (1 << shift))
+		if((cnt >>> SHIFT) > (1 << shift))
 			{
 			newroot = new Node(root.edit);
 			newroot.array[0] = root;
 			newroot.array[1] = newPath(root.edit,shift, tailnode);
-			newshift += 5;
+			newshift += SHIFT;
 			}
 		else
 			newroot = pushTail(shift, root, tailnode);
@@ -460,10 +464,10 @@ static class MutableVector implements IMutableVector, Counted{
 		// else alloc new path
 		//return  nodeToInsert placed in parent
 		parent = ensureEditable(parent);
-		int subidx = ((cnt - 1) >>> level) & 0x01f;
+		int subidx = ((cnt - 1) >>> level) & MASK;
 		Node ret = parent;
 		Node nodeToInsert;
-		if(level == 5)
+		if(level == SHIFT)
 			{
 			nodeToInsert = tailnode;
 			}
@@ -471,17 +475,17 @@ static class MutableVector implements IMutableVector, Counted{
 			{
 			Node child = (Node) parent.array[subidx];
 			nodeToInsert = (child != null) ?
-			               pushTail(level - 5, child, tailnode)
-			                               : newPath(root.edit, level - 5, tailnode);
+			               pushTail(level - SHIFT, child, tailnode)
+			                               : newPath(root.edit, level - SHIFT, tailnode);
 			}
 		ret.array[subidx] = nodeToInsert;
 		return ret;
 	}
 
 	final int tailoff(){
-		if(cnt < 32)
+		if(cnt < CHUNK)
 			return 0;
-		return ((cnt-1) >>> 5) << 5;
+		return ((cnt-1) >>> SHIFT) << SHIFT;
 	}
 
 	private Object[] arrayFor(int i){
@@ -490,8 +494,8 @@ static class MutableVector implements IMutableVector, Counted{
 			if(i >= tailoff())
 				return tail;
 			Node node = root;
-			for(int level = shift; level > 0; level -= 5)
-				node = (Node) node.array[(i >>> level) & 0x01f];
+			for(int level = shift; level > 0; level -= SHIFT)
+				node = (Node) node.array[(i >>> level) & MASK];
 			return node.array;
 			}
 		throw new IndexOutOfBoundsException();
@@ -509,7 +513,7 @@ static class MutableVector implements IMutableVector, Counted{
 
 	public Object nth(int i){
 		Object[] node = arrayFor(i);
-		return node[i & 0x01f];
+		return node[i & MASK];
 	}
 
 	public MutableVector assocN(int i, Object val){
@@ -518,7 +522,7 @@ static class MutableVector implements IMutableVector, Counted{
 			{
 			if(i >= tailoff())
 				{
-				tail[i & 0x01f] = val;
+				tail[i & MASK] = val;
 				return this;
 				}
 
@@ -544,12 +548,12 @@ static class MutableVector implements IMutableVector, Counted{
 		Node ret = node;
 		if(level == 0)
 			{
-			ret.array[i & 0x01f] = val;
+			ret.array[i & MASK] = val;
 			}
 		else
 			{
-			int subidx = (i >>> level) & 0x01f;
-			ret.array[subidx] = doAssoc(level - 5, (Node) node.array[subidx], i, val);
+			int subidx = (i >>> level) & MASK;
+			ret.array[subidx] = doAssoc(level - SHIFT, (Node) node.array[subidx], i, val);
 			}
 		return ret;
 	}
@@ -565,7 +569,7 @@ static class MutableVector implements IMutableVector, Counted{
 			}
 		int i = cnt - 1;
 		//pop in tail?
-		if((i & 0x01f) > 0)
+		if((i & MASK) > 0)
 			{
 			--cnt;
 			return this;
@@ -579,10 +583,10 @@ static class MutableVector implements IMutableVector, Counted{
 			{
 			newroot = EMPTY_NODE;
 			}
-		if(shift > 5 && newroot.array[1] == null)
+		if(shift > SHIFT && newroot.array[1] == null)
 			{
 			newroot = (Node) newroot.array[0];
-			newshift -= 5;
+			newshift -= SHIFT;
 			}
 		root = newroot;
 		shift = newshift;
@@ -593,10 +597,10 @@ static class MutableVector implements IMutableVector, Counted{
 
 	private Node popTail(int level, Node node){
 		node = ensureEditable(node);
-		int subidx = ((cnt - 2) >>> level) & 0x01f;
-		if(level > 5)
+		int subidx = ((cnt - 2) >>> level) & MASK;
+		if(level > SHIFT)
 			{
-			Node newchild = popTail(level - 5, (Node) node.array[subidx]);
+			Node newchild = popTail(level - SHIFT, (Node) node.array[subidx]);
 			if(newchild == null && subidx == 0)
 				return null;
 			else
