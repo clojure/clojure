@@ -251,7 +251,9 @@
 (defn vec
   "Creates a new vector containing the contents of coll."
   ([coll]
-   (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll)))))
+   (if (instance? java.util.Collection coll)
+     (clojure.lang.LazilyPersistentVector/create coll)
+     (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll))))))
 
 (defn hash-map
   "keyval => key val
