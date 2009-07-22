@@ -79,13 +79,13 @@
   <target name="compile-java" depends="init"
           description="Compile Java sources.">
     <javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes"
-           debug="true" target="1.5"/>
+           debug="true" target="1.5" classpath="jsr166y.jar"/>
   </target>
 
   <target name="compile-clojure" depends="compile-java"
           description="Compile Clojure sources.">
     <java classname="clojure.lang.Compile"
-          classpath="${build}:${cljsrc}">
+          classpath="${build}:${cljsrc}:jsr166y.jar">
       <sysproperty key="clojure.compile.path" value="${build}"/>
       <arg value="clojure.core"/>
       <arg value="clojure.main"/>
@@ -98,6 +98,7 @@
       <arg value="clojure.template"/>
       <arg value="clojure.test"/>
       <arg value="clojure.test.tap"/>
+      <arg value="clojure.par"/>
     </java>
   </target>
 

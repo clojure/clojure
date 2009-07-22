@@ -12,6 +12,8 @@
 
 package clojure.lang;
 
+import jsr166y.ForkJoinPool;
+
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.Map;
@@ -22,13 +24,28 @@ volatile Object state;
 
     volatile ISeq errors = null;
 
-final public static ExecutorService pooledExecutor =
-		Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
-
+//these are public for diagnostic reasons, don't mess with them otherwise
+volatile public static ExecutorService pooledExecutor;
 final public static ExecutorService soloExecutor = Executors.newCachedThreadPool();
 
 final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();
 
+static
+	{
+	boolean gotfj = true;
+	try
+		{
+		Class fjpool = Class.forName("jsr166y.ForkJoinPool");
+		pooledExecutor = (ExecutorService) fjpool.newInstance();
+		((ForkJoinPool)pooledExecutor).setAsyncMode(true);
+		}
+	catch(Exception e)
+		{
+		gotfj = false;
+		}
+	if(!gotfj)
+		pooledExecutor = Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
+	}
 
 public static void shutdown(){
 	soloExecutor.shutdown();
