@@ -72,7 +72,6 @@ This is an example of using a pretty printer dispatch function to generate JSON 
         ;; Handle printable JSON escapes before ASCII
         (= cp 34) (print "\\\"")
         (= cp 92) (print "\\\\")
-        (= cp 47) (print "\\/")
         ;; Print simple ASCII characters
         (< 31 cp 127) (print (.charAt s i))
         ;; Handle non-printable JSON escapes
