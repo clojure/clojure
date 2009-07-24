@@ -4305,8 +4305,8 @@
       (invoke [x]
         (locking d
           (if (pos? (.getCount d))
-            (do (.countDown d)
-                (reset! v x)
+            (do (reset! v x)
+                (.countDown d)
                 this)
             (throw (IllegalStateException. "Multiple deliver calls to a promise"))))))))
 
