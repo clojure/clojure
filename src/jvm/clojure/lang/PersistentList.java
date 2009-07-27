@@ -18,8 +18,12 @@ private final Object _first;
 private final IPersistentList _rest;
 private final int _count;
 
-public static IFn creator = new RestFn(0){
-	protected Object doInvoke(Object args) throws Exception{
+public static IFn creator = new RestFn(){
+	final public int getRequiredArity(){
+		return 0;
+	}
+
+	final protected Object doInvoke(Object args) throws Exception{
 		if(args instanceof ArraySeq)
 			{
 			Object[] argsarray = (Object[]) ((ArraySeq) args).array;

@@ -11,11 +11,7 @@ package clojure.lang;
 
 public abstract class RestFn extends AFunction{
 
-protected int reqArity;
-
-public RestFn(int reqArity){
-	this.reqArity = reqArity;
-}
+abstract public int getRequiredArity();
 
 protected Object doInvoke(Object args) throws Exception{
 	return null;
@@ -132,11 +128,11 @@ protected Object doInvoke(Object arg1, Object arg2, Object arg3, Object arg4, Ob
 
 
 public Object applyTo(ISeq args) throws Exception{
-	if(RT.boundedLength(args, reqArity) <= reqArity)
+	if(RT.boundedLength(args, getRequiredArity()) <= getRequiredArity())
 		{
 		return AFn.applyToHelper(this, args);
 		}
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(args);
@@ -396,7 +392,7 @@ public Object applyTo(ISeq args) throws Exception{
 }
 
 public Object invoke() throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(null);
@@ -407,7 +403,7 @@ public Object invoke() throws Exception{
 }
 
 public Object invoke(Object arg1) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1));
@@ -420,7 +416,7 @@ public Object invoke(Object arg1) throws Exception{
 }
 
 public Object invoke(Object arg1, Object arg2) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2));
@@ -435,7 +431,7 @@ public Object invoke(Object arg1, Object arg2) throws Exception{
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3));
@@ -452,7 +448,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4));
@@ -471,7 +467,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5));
@@ -492,7 +488,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6));
@@ -516,7 +512,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
 		throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7));
@@ -542,7 +538,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
@@ -570,7 +566,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
@@ -600,7 +596,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
@@ -632,7 +628,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
@@ -666,7 +662,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
@@ -703,7 +699,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
 		throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(
@@ -755,7 +751,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
 		throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
@@ -811,7 +807,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
@@ -870,7 +866,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
@@ -932,7 +928,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
@@ -997,7 +993,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
@@ -1066,7 +1062,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
@@ -1142,7 +1138,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
 		throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
@@ -1225,7 +1221,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20, Object... args)
 		throws Exception{
-	switch(reqArity)
+	switch(getRequiredArity())
 		{
 		case 0:
 			return doInvoke(ontoArrayPrepend(args, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
@@ -1330,6 +1326,7 @@ protected static ISeq findKey(Object key, ISeq args){
 		}
 	return null;
 }
+
 
 }
 

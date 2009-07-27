@@ -218,7 +218,7 @@ public enum C{
 interface Expr{
 	Object eval() throws Exception;
 
-	void emit(C context, FnExpr fn, GeneratorAdapter gen);
+	void emit(C context, ObjExpr objx, GeneratorAdapter gen);
 
 	boolean hasJavaClass() throws Exception;
 
@@ -315,18 +315,18 @@ static class DefExpr implements Expr{
 			}
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitVar(gen, var);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		objx.emitVar(gen, var);
 		if(initProvided)
 			{
 			gen.dup();
-			init.emit(C.EXPRESSION, fn, gen);
+			init.emit(C.EXPRESSION, objx, gen);
 			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
 			}
 		if(meta != null)
 			{
 			gen.dup();
-			meta.emit(C.EXPRESSION, fn, gen);
+			meta.emit(C.EXPRESSION, objx, gen);
 			gen.checkCast(IPERSISTENTMAP_TYPE);
 			gen.invokeVirtual(VAR_TYPE, setMetaMethod);
 			}
@@ -389,8 +389,8 @@ public static class AssignExpr implements Expr{
 		return target.evalAssign(val);
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		target.emitAssign(context, fn, gen, val);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		target.emitAssign(context, objx, gen, val);
 	}
 
 	public boolean hasJavaClass() throws Exception{
@@ -429,8 +429,8 @@ public static class VarExpr implements Expr, AssignableExpr{
 		return var.deref();
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitVar(gen, var);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		objx.emitVar(gen, var);
 		gen.invokeVirtual(VAR_TYPE, getMethod);
 		if(context == C.STATEMENT)
 			{
@@ -450,10 +450,10 @@ public static class VarExpr implements Expr, AssignableExpr{
 		return var.set(val.eval());
 	}
 
-	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
+	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen,
 	                       Expr val){
-		fn.emitVar(gen, var);
-		val.emit(C.EXPRESSION, fn, gen);
+		objx.emitVar(gen, var);
+		val.emit(C.EXPRESSION, objx, gen);
 		gen.invokeVirtual(VAR_TYPE, setMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -471,8 +471,8 @@ public static class TheVarExpr implements Expr{
 		return var;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitVar(gen, var);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		objx.emitVar(gen, var);
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -507,8 +507,8 @@ public static class KeywordExpr implements Expr{
 		return k;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitKeyword(gen, k);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		objx.emitKeyword(gen, k);
 		if(context == C.STATEMENT)
 			gen.pop();
 
@@ -539,7 +539,7 @@ public static class ImportExpr implements Expr{
 		return null;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.getStatic(RT_TYPE,"CURRENT_NS",VAR_TYPE);
 		gen.invokeVirtual(VAR_TYPE, derefMethod);
 		gen.checkCast(NS_TYPE);
@@ -576,11 +576,11 @@ public static abstract class LiteralExpr implements Expr{
 static interface AssignableExpr{
 	Object evalAssign(Expr val) throws Exception;
 
-	void emitAssign(C context, FnExpr fn, GeneratorAdapter gen, Expr val);
+	void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen, Expr val);
 }
 
 static public interface MaybePrimitiveExpr{
-	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen);
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen);
 }
 
 static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
@@ -617,57 +617,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	final static Method fromDoubleMethod = Method.getMethod("clojure.lang.Num from(double)");
 
 
-	/*
-	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
-		if(returnType.isPrimitive())
-			{
-			if(returnType == boolean.class)
-				{
-				Label falseLabel = gen.newLabel();
-				Label endLabel = gen.newLabel();
-				gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
-				gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
-				gen.goTo(endLabel);
-				gen.mark(falseLabel);
-				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
-				gen.mark(endLabel);
-				}
-			else if(returnType == void.class)
-				{
-				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
-				}
-			else if(returnType == char.class)
-				{
-				gen.invokeStatic(CHAR_TYPE, charValueOfMethod);
-				}
-			else if(returnType == int.class)
-				gen.invokeStatic(INTEGER_TYPE, intValueOfMethod);
-				//m = fromIntMethod;
-			else
-				{
-				Method m = fromIntMethod;
-				if(returnType == int.class)
-					m = fromIntMethod;
-				else if(returnType == float.class)
-					{
-					gen.visitInsn(F2D);
-					m = fromDoubleMethod;
-					}
-				else if(returnType == double.class)
-					m = fromDoubleMethod;
-				else if(returnType == long.class)
-					m = fromLongMethod;
-				else if(returnType == byte.class)
-					m = fromIntMethod;
-				else if(returnType == short.class)
-					m = fromIntMethod;
-				gen.invokeStatic(NUM_TYPE, m);
-				}
-			}
-	}
-  */
 	//*
-	public static void emitBoxReturn(FnExpr fn, GeneratorAdapter gen, Class returnType){
+	public static void emitBoxReturn(ObjExpr objx, GeneratorAdapter gen, Class returnType){
 		if(returnType.isPrimitive())
 			{
 			if(returnType == boolean.class)
@@ -684,7 +635,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				}
 			else if(returnType == void.class)
 				{
-				NIL_EXPR.emit(C.EXPRESSION, fn, gen);
+				NIL_EXPR.emit(C.EXPRESSION, objx, gen);
 				}
 			else if(returnType == char.class)
 					{
@@ -714,7 +665,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	//*/
-	public static void emitUnboxArg(FnExpr fn, GeneratorAdapter gen, Class paramType){
+	public static void emitUnboxArg(ObjExpr objx, GeneratorAdapter gen, Class paramType){
 		if(paramType.isPrimitive())
 			{
 			if(paramType == boolean.class)
@@ -920,11 +871,11 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		return Reflector.invokeNoArgInstanceMember(target.eval(), fieldName);
 	}
 
-	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
 			{
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			gen.checkCast(Type.getType(targetClass));
 			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
 			}
@@ -932,15 +883,15 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			throw new UnsupportedOperationException("Unboxed emit of unknown member");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
 			{
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			gen.checkCast(Type.getType(targetClass));
 			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
 			//if(context != C.STATEMENT)
-			HostExpr.emitBoxReturn(fn, gen, field.getType());
+			HostExpr.emitBoxReturn(objx, gen, field.getType());
 			if(context == C.STATEMENT)
 				{
 				gen.pop();
@@ -948,7 +899,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			}
 		else
 			{
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			gen.push(fieldName);
 			gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
 			if(context == C.STATEMENT)
@@ -968,23 +919,23 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		return Reflector.setInstanceField(target.eval(), fieldName, val.eval());
 	}
 
-	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
+	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen,
 	                       Expr val){
 		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
 			{
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			gen.checkCast(Type.getType(targetClass));
-			val.emit(C.EXPRESSION, fn, gen);
+			val.emit(C.EXPRESSION, objx, gen);
 			gen.dupX1();
-			HostExpr.emitUnboxArg(fn, gen, field.getType());
+			HostExpr.emitUnboxArg(objx, gen, field.getType());
 			gen.putField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
 			}
 		else
 			{
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			gen.push(fieldName);
-			val.emit(C.EXPRESSION, fn, gen);
+			val.emit(C.EXPRESSION, objx, gen);
 			gen.invokeStatic(REFLECTOR_TYPE, setInstanceFieldMethod);
 			}
 		if(context == C.STATEMENT)
@@ -1014,17 +965,17 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 		return Reflector.getStaticField(c, fieldName);
 	}
 
-	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 
 		gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
 		//if(context != C.STATEMENT)
-		HostExpr.emitBoxReturn(fn, gen, field.getType());
+		HostExpr.emitBoxReturn(objx, gen, field.getType());
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -1048,12 +999,12 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 		return Reflector.setStaticField(c, fieldName, val.eval());
 	}
 
-	public void emitAssign(C context, FnExpr fn, GeneratorAdapter gen,
+	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen,
 	                       Expr val){
 		gen.visitLineNumber(line, gen.mark());
-		val.emit(C.EXPRESSION, fn, gen);
+		val.emit(C.EXPRESSION, objx, gen);
 		gen.dup();
-		HostExpr.emitUnboxArg(fn, gen, field.getType());
+		HostExpr.emitUnboxArg(objx, gen, field.getType());
 		gen.putStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -1080,19 +1031,19 @@ static Class maybePrimitiveType(Expr e){
 }
 
 static abstract class MethodExpr extends HostExpr{
-	static void emitArgsAsArray(IPersistentVector args, FnExpr fn, GeneratorAdapter gen){
+	static void emitArgsAsArray(IPersistentVector args, ObjExpr objx, GeneratorAdapter gen){
 		gen.push(args.count());
 		gen.newArray(OBJECT_TYPE);
 		for(int i = 0; i < args.count(); i++)
 			{
 			gen.dup();
 			gen.push(i);
-			((Expr) args.nth(i)).emit(C.EXPRESSION, fn, gen);
+			((Expr) args.nth(i)).emit(C.EXPRESSION, objx, gen);
 			gen.arrayStore(OBJECT_TYPE);
 			}
 	}
 
-	public static void emitTypedArgs(FnExpr fn, GeneratorAdapter gen, Class[] parameterTypes, IPersistentVector args){
+	public static void emitTypedArgs(ObjExpr objx, GeneratorAdapter gen, Class[] parameterTypes, IPersistentVector args){
 		for(int i = 0; i < parameterTypes.length; i++)
 			{
 			Expr e = (Expr) args.nth(i);
@@ -1100,12 +1051,12 @@ static abstract class MethodExpr extends HostExpr{
 				{
 				if(maybePrimitiveType(e) == parameterTypes[i])
 					{
-					((MaybePrimitiveExpr) e).emitUnboxed(C.EXPRESSION, fn, gen);
+					((MaybePrimitiveExpr) e).emitUnboxed(C.EXPRESSION, objx, gen);
 					}
 				else
 					{
-					e.emit(C.EXPRESSION, fn, gen);
-					HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
+					e.emit(C.EXPRESSION, objx, gen);
+					HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
 					}
 				}
 			catch(Exception e1)
@@ -1203,18 +1154,18 @@ static class InstanceMethodExpr extends MethodExpr{
 			}
 	}
 
-	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
 			Type type = Type.getType(method.getDeclaringClass());
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			//if(!method.getDeclaringClass().isInterface())
 			gen.checkCast(type);
-			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
@@ -1227,18 +1178,18 @@ static class InstanceMethodExpr extends MethodExpr{
 			throw new UnsupportedOperationException("Unboxed emit of unknown member");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
 			Type type = Type.getType(method.getDeclaringClass());
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			//if(!method.getDeclaringClass().isInterface())
 			gen.checkCast(type);
-			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
@@ -1247,16 +1198,16 @@ static class InstanceMethodExpr extends MethodExpr{
 			else
 				gen.invokeVirtual(type, m);
 			//if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
-			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			HostExpr.emitBoxReturn(objx, gen, method.getReturnType());
 			}
 		else
 			{
-			target.emit(C.EXPRESSION, fn, gen);
+			target.emit(C.EXPRESSION, objx, gen);
 			gen.push(methodName);
-			emitArgsAsArray(args, fn, gen);
+			emitArgsAsArray(args, objx, gen);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
@@ -1345,15 +1296,15 @@ static class StaticMethodExpr extends MethodExpr{
 			}
 	}
 
-	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
-			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Type type = Type.getType(c);
@@ -1364,32 +1315,32 @@ static class StaticMethodExpr extends MethodExpr{
 			throw new UnsupportedOperationException("Unboxed emit of unknown member");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
-			MethodExpr.emitTypedArgs(fn, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			Type type = Type.getType(c);
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			gen.invokeStatic(type, m);
 			//if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
-			HostExpr.emitBoxReturn(fn, gen, method.getReturnType());
+			HostExpr.emitBoxReturn(objx, gen, method.getReturnType());
 			}
 		else
 			{
 			gen.push(c.getName());
 			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			gen.push(methodName);
-			emitArgsAsArray(args, fn, gen);
+			emitArgsAsArray(args, objx, gen);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
@@ -1423,7 +1374,7 @@ static class UnresolvedVarExpr implements Expr{
 				"UnresolvedVarExpr has no Java class");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 	}
 
 	public Object eval() throws Exception{
@@ -1450,8 +1401,8 @@ static class ConstantExpr extends LiteralExpr{
 		return v;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitConstant(gen, id);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		objx.emitConstant(gen, id);
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -1502,7 +1453,7 @@ static class NilExpr extends LiteralExpr{
 		return null;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitInsn(Opcodes.ACONST_NULL);
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -1531,7 +1482,7 @@ static class BooleanExpr extends LiteralExpr{
 		return val ? RT.T : RT.F;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(val)
 			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
 		else
@@ -1565,7 +1516,7 @@ static class StringExpr extends LiteralExpr{
 		return str;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
 			gen.push(str);
 	}
@@ -1579,104 +1530,7 @@ static class StringExpr extends LiteralExpr{
 	}
 }
 
-/*
-static class NumExpr extends LiteralExpr{
-	final Num num;
-	final static Method numFromIntMethod = Method.getMethod("clojure.lang.Num from(int)");
-	final static Method numFromDoubleMethod = Method.getMethod("clojure.lang.Num from(double)");
-	final static Method numFromBigIntMethod = Method.getMethod("clojure.lang.Num from(java.math.BigInteger)");
-	final static Method numDivideMethod =
-			Method.getMethod("clojure.lang.Num divide(java.math.BigInteger,java.math.BigInteger)");
-	final static Type BIGINT_TYPE = Type.getType(BigInteger.class);
-	final static Method bigintFromStringCtor = Method.getMethod("void <init>(String)");
 
-	public NumExpr(Num num){
-		this.num = num;
-	}
-
-	Object val(){
-		return num;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			{
-			Class nclass = num.getClass();
-			if(nclass == FixNum.class)
-				{
-				gen.push(num.intValue());
-				gen.invokeStatic(NUM_TYPE, numFromIntMethod);
-				}
-			else if(nclass == DoubleNum.class)
-				{
-				gen.push(num.doubleValue());
-				gen.invokeStatic(NUM_TYPE, numFromDoubleMethod);
-				}
-			else if(nclass == BigNum.class)
-				{
-				emitBigInteger(gen, num);
-				gen.invokeStatic(NUM_TYPE, numFromBigIntMethod);
-				}
-			else if(nclass == RatioNum.class)
-				{
-				RatioNum r = (RatioNum) num;
-				emitBigInteger(gen, r.numerator);
-				emitBigInteger(gen, r.denominator);
-				gen.invokeStatic(NUM_TYPE, numDivideMethod);
-				}
-			else
-				throw new UnsupportedOperationException("Unknown Num type");
-			}
-	}
-
-	public boolean hasJavaClass(){
-		return true;
-	}
-
-	public Class getJavaClass() throws Exception{
-		return Num.class;
-	}
-
-	static void emitBigInteger(GeneratorAdapter gen, Num num){
-		gen.newInstance(BIGINT_TYPE);
-		gen.dup();
-		gen.push(num.toString());
-		gen.invokeConstructor(BIGINT_TYPE, bigintFromStringCtor);
-	}
-}
-
-
-
-static class CharExpr extends LiteralExpr{
-	final Character ch;
-	final static Type CHARACTER_TYPE = Type.getObjectType("java/lang/Character");
-	final static Method charValueOfMethod = Method.getMethod("Character valueOf(char)");
-
-	public CharExpr(Character ch){
-		this.ch = ch;
-	}
-
-	Object val(){
-		return ch;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			{
-			gen.push(ch.charValue());
-			gen.invokeStatic(CHARACTER_TYPE, charValueOfMethod);
-			}
-	}
-
-	public boolean hasJavaClass(){
-		return true;
-	}
-
-	public Class getJavaClass() throws Exception{
-		return Character.class;
-	}
-}
- */
 static class MonitorEnterExpr extends UntypedExpr{
 	final Expr target;
 
@@ -1688,10 +1542,10 @@ static class MonitorEnterExpr extends UntypedExpr{
 		throw new UnsupportedOperationException("Can't eval monitor-enter");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		target.emit(C.EXPRESSION, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		target.emit(C.EXPRESSION, objx, gen);
 		gen.monitorEnter();
-		NIL_EXPR.emit(context, fn, gen);
+		NIL_EXPR.emit(context, objx, gen);
 	}
 
 	static class Parser implements IParser{
@@ -1712,10 +1566,10 @@ static class MonitorExitExpr extends UntypedExpr{
 		throw new UnsupportedOperationException("Can't eval monitor-exit");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		target.emit(C.EXPRESSION, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		target.emit(C.EXPRESSION, objx, gen);
 		gen.monitorExit();
-		NIL_EXPR.emit(context, fn, gen);
+		NIL_EXPR.emit(context, objx, gen);
 	}
 
 	static class Parser implements IParser{
@@ -1761,7 +1615,7 @@ public static class TryExpr implements Expr{
 		throw new UnsupportedOperationException("Can't eval try");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		Label startTry = gen.newLabel();
 		Label endTry = gen.newLabel();
 		Label endTryCatch = gen.newLabel();
@@ -1776,12 +1630,12 @@ public static class TryExpr implements Expr{
 			}
 
 		gen.mark(startTry);
-		tryExpr.emit(context, fn, gen);
+		tryExpr.emit(context, objx, gen);
 		if(context != C.STATEMENT)
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), retLocal);
 		gen.mark(endTry);
 		if(finallyExpr != null)
-			finallyExpr.emit(C.STATEMENT, fn, gen);
+			finallyExpr.emit(C.STATEMENT, objx, gen);
 		gen.goTo(ret);
 
 		for(int i = 0; i < catchExprs.count(); i++)
@@ -1791,13 +1645,13 @@ public static class TryExpr implements Expr{
 			//exception should be on stack
 			//put in clause local
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), clause.lb.idx);
-			clause.handler.emit(context, fn, gen);
+			clause.handler.emit(context, objx, gen);
 			if(context != C.STATEMENT)
 				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), retLocal);
 			gen.mark(clause.endLabel);
 
 			if(finallyExpr != null)
-				finallyExpr.emit(C.STATEMENT, fn, gen);
+				finallyExpr.emit(C.STATEMENT, objx, gen);
 			gen.goTo(ret);
 			}
 		gen.mark(endTryCatch);
@@ -1806,7 +1660,7 @@ public static class TryExpr implements Expr{
 			gen.mark(finallyLabel);
 			//exception should be on stack
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), finallyLocal);
-			finallyExpr.emit(C.STATEMENT, fn, gen);
+			finallyExpr.emit(C.STATEMENT, objx, gen);
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), finallyLocal);
 			gen.throwException();
 			}
@@ -1990,8 +1844,8 @@ static class ThrowExpr extends UntypedExpr{
 		throw new Exception("Can't eval throw");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		excExpr.emit(C.EXPRESSION, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		excExpr.emit(C.EXPRESSION, objx, gen);
 		gen.checkCast(THROWABLE_TYPE);
 		gen.throwException();
 	}
@@ -2005,50 +1859,6 @@ static class ThrowExpr extends UntypedExpr{
 	}
 }
 
-/*
-static class ClassExpr implements Expr{
-	final Class c;
-	final static Method forNameMethod = Method.getMethod("Class forName(String)");
-
-
-	public ClassExpr(Class c){
-		this.c = c;
-	}
-
-	public Object eval() throws Exception{
-		return c;
-	}
-
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		if(context != C.STATEMENT)
-			{
-			gen.push(c.getName());
-			gen.invokeStatic(CLASS_TYPE, forNameMethod);
-			}
-	}
-
-	public boolean hasJavaClass(){
-		return true;
-	}
-
-	public Class getJavaClass() throws Exception{
-		return Class.class;
-	}
-
-	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
-			ISeq form = (ISeq) frm;
-			//(class Classname)
-			if(form.count() != 2)
-				throw new Exception("wrong number of arguments, expecting: (class Classname)");
-			Class c = HostExpr.maybeClass(RT.second(form), true);
-			if(c == null)
-				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
-			return new ClassExpr(c);
-		}
-	}
-}
-*/
 
 static public boolean subsumes(Class[] c1, Class[] c2){
 	//presumes matching lengths
@@ -2180,16 +1990,16 @@ public static class NewExpr implements Expr{
 		return Reflector.invokeConstructor(c, argvals);
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(this.ctor != null)
 			{
 			Type type = Type.getType(c);
 			gen.newInstance(type);
 			gen.dup();
-			MethodExpr.emitTypedArgs(fn, gen, ctor.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, ctor.getParameterTypes(), args);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeConstructor(type, new Method("<init>", Type.getConstructorDescriptor(ctor)));
@@ -2198,10 +2008,10 @@ public static class NewExpr implements Expr{
 			{
 			gen.push(c.getName());
 			gen.invokeStatic(CLASS_TYPE, forNameMethod);
-			MethodExpr.emitArgsAsArray(args, fn, gen);
+			MethodExpr.emitArgsAsArray(args, objx, gen);
 			if(context == C.RETURN)
 				{
-				FnMethod method = (FnMethod) METHOD.deref();
+				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
@@ -2222,6 +2032,8 @@ public static class NewExpr implements Expr{
 		public Expr parse(C context, Object frm) throws Exception{
 			int line = (Integer) LINE.deref();
 			ISeq form = (ISeq) frm;
+			if(RT.second(frm) instanceof IPersistentVector)
+				return (new NewInstanceExpr.Parser()).parse(context, frm);
 			//(new Classname args...)
 			if(form.count() < 2)
 				throw new Exception("wrong number of arguments, expecting: (new Classname args...)");
@@ -2236,113 +2048,6 @@ public static class NewExpr implements Expr{
 	}
 
 }
-
-//static class IdenticalExpr implements Expr{
-//	final Expr expr1;
-//	final Expr expr2;
-//
-//
-//	public IdenticalExpr(Expr expr1, Expr expr2){
-//		this.expr1 = expr1;
-//		this.expr2 = expr2;
-//	}
-//
-//	public boolean hasJavaClass(){
-//		return true;
-//	}
-//
-//	public Class getJavaClass(){
-//		return Boolean.class;
-//	}
-//
-//	public Object eval() throws Exception{
-//		return expr1.eval() == expr2.eval() ?
-//		       RT.T : RT.F;
-//	}
-//
-//	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-//		if(context != C.STATEMENT)
-//			{
-//			Label not = gen.newLabel();
-//			Label end = gen.newLabel();
-//			expr1.emit(C.EXPRESSION, fn, gen);
-//			expr2.emit(C.EXPRESSION, fn, gen);
-//			gen.visitJumpInsn(IF_ACMPNE, not);
-//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
-////			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
-//			gen.goTo(end);
-//			gen.mark(not);
-//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
-////			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
-//			gen.mark(end);
-//			}
-//	}
-//
-//	static class Parser implements IParser{
-//		public Expr parse(C context, Object frm) throws Exception{
-//			ISeq form = (ISeq) frm;
-//			if(form.count() != 3)
-//				throw new Exception("wrong number of arguments, expecting: (identical? x y)");
-//
-//			return new IdenticalExpr(analyze(C.EXPRESSION, RT.second(form)), analyze(C.EXPRESSION, RT.third(form)));
-//		}
-//	}
-//}
-
-//static class InstanceExpr implements Expr{
-//	final Expr expr;
-//	final Class c;
-//
-//
-//	public InstanceExpr(Expr expr, Class c){
-//		this.expr = expr;
-//		this.c = c;
-//	}
-//
-//	public Object eval() throws Exception{
-//		return c.isInstance(expr.eval()) ?
-//		       RT.T : RT.F;
-//	}
-//
-//	public boolean hasJavaClass(){
-//		return true;
-//	}
-//
-//	public Class getJavaClass(){
-//		return Boolean.class;
-//	}
-//
-//	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-//		if(context != C.STATEMENT)
-//			{
-//			Label not = gen.newLabel();
-//			Label end = gen.newLabel();
-//			expr.emit(C.EXPRESSION, fn, gen);
-//			gen.instanceOf(Type.getType(c));
-//			gen.ifZCmp(GeneratorAdapter.EQ, not);
-//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
-////			gen.getStatic(RT_TYPE, "T", KEYWORD_TYPE);
-//			gen.goTo(end);
-//			gen.mark(not);
-//			gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
-////			NIL_EXPR.emit(C.EXPRESSION, fn, gen);
-//			gen.mark(end);
-//			}
-//	}
-//
-//	static class Parser implements IParser{
-//		public Expr parse(C context, Object frm) throws Exception{
-//			ISeq form = (ISeq) frm;
-//			//(instance? x Classname)
-//			if(form.count() != 3)
-//				throw new Exception("wrong number of arguments, expecting: (instance? x Classname)");
-//			Class c = HostExpr.maybeClass(RT.third(form), true);
-//			if(c == null)
-//				throw new IllegalArgumentException("Unable to resolve classname: " + RT.third(form));
-//			return new InstanceExpr(analyze(C.EXPRESSION, RT.second(form)), c);
-//		}
-//	}
-//}
 
 public static class MetaExpr implements Expr{
 	public final Expr expr;
@@ -2360,10 +2065,10 @@ public static class MetaExpr implements Expr{
 		return ((IObj) expr.eval()).withMeta((IPersistentMap) meta.eval());
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		expr.emit(C.EXPRESSION, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		expr.emit(C.EXPRESSION, objx, gen);
 		gen.checkCast(IOBJ_TYPE);
-		meta.emit(C.EXPRESSION, fn, gen);
+		meta.emit(C.EXPRESSION, objx, gen);
 		gen.checkCast(IPERSISTENTMAP_TYPE);
 		gen.invokeInterface(IOBJ_TYPE, withMetaMethod);
 		if(context == C.STATEMENT)
@@ -2402,7 +2107,7 @@ public static class IfExpr implements Expr{
 		return elseExpr.eval();
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		Label nullLabel = gen.newLabel();
 		Label falseLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
@@ -2414,12 +2119,12 @@ public static class IfExpr implements Expr{
 			if(testExpr instanceof MaybePrimitiveExpr && testExpr.hasJavaClass() &&
 			   testExpr.getJavaClass() == boolean.class)
 				{
-				((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, fn, gen);
+				((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, objx, gen);
 				gen.ifZCmp(gen.EQ, falseLabel);
 				}
 			else
 				{
-				testExpr.emit(C.EXPRESSION, fn, gen);
+				testExpr.emit(C.EXPRESSION, objx, gen);
 				gen.dup();
 				gen.ifNull(nullLabel);
 				gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
@@ -2430,12 +2135,12 @@ public static class IfExpr implements Expr{
 			{
 			throw new RuntimeException(e);
 			}
-		thenExpr.emit(context, fn, gen);
+		thenExpr.emit(context, objx, gen);
 		gen.goTo(endLabel);
 		gen.mark(nullLabel);
 		gen.pop();
 		gen.mark(falseLabel);
-		elseExpr.emit(context, fn, gen);
+		elseExpr.emit(context, objx, gen);
 		gen.mark(endLabel);
 	}
 
@@ -2527,7 +2232,7 @@ public static class EmptyExpr implements Expr{
 		return coll;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(coll instanceof IPersistentList)
 			gen.getStatic(LIST_TYPE, "EMPTY", EMPTY_LIST_TYPE);
 		else if(coll instanceof IPersistentVector)
@@ -2578,8 +2283,8 @@ public static class ListExpr implements Expr{
 		return ret.seq();
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		MethodExpr.emitArgsAsArray(args, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(args, objx, gen);
 		gen.invokeStatic(RT_TYPE, arrayToListMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -2611,8 +2316,8 @@ public static class MapExpr implements Expr{
 		return RT.map(ret);
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		MethodExpr.emitArgsAsArray(keyvals, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(keyvals, objx, gen);
 		gen.invokeStatic(RT_TYPE, mapMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -2660,8 +2365,8 @@ public static class SetExpr implements Expr{
 		return RT.set(ret);
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		MethodExpr.emitArgsAsArray(keys, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(keys, objx, gen);
 		gen.invokeStatic(RT_TYPE, setMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -2708,8 +2413,8 @@ public static class VectorExpr implements Expr{
 		return ret;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
-		MethodExpr.emitArgsAsArray(args, fn, gen);
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		MethodExpr.emitArgsAsArray(args, objx, gen);
 		gen.invokeStatic(RT_TYPE, vectorMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
@@ -2770,14 +2475,14 @@ static class InvokeExpr implements Expr{
 			}
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
-		fexpr.emit(C.EXPRESSION, fn, gen);
+		fexpr.emit(C.EXPRESSION, objx, gen);
 		gen.checkCast(IFN_TYPE);
 		for(int i = 0; i < Math.min(MAX_POSITIONAL_ARITY, args.count()); i++)
 			{
 			Expr e = (Expr) args.nth(i);
-			e.emit(C.EXPRESSION, fn, gen);
+			e.emit(C.EXPRESSION, objx, gen);
 			}
 		if(args.count() > MAX_POSITIONAL_ARITY)
 			{
@@ -2786,12 +2491,12 @@ static class InvokeExpr implements Expr{
 				{
 				restArgs = restArgs.cons(args.nth(i));
 				}
-			MethodExpr.emitArgsAsArray(restArgs, fn, gen);
+			MethodExpr.emitArgsAsArray(restArgs, objx, gen);
 			}
 
 		if(context == C.RETURN)
 			{
-			FnMethod method = (FnMethod) METHOD.deref();
+			ObjMethod method = (ObjMethod) METHOD.deref();
 			method.emitClearLocals(gen);
 			}
 
@@ -2837,144 +2542,50 @@ static class SourceDebugExtensionAttribute extends Attribute{
 	}
 }
 
-static class FnLoaderThunk extends RestFn{
-	FnExpr fx;
-	Var v;
-	IFn f;
-
-	FnLoaderThunk(FnExpr fx, Var v){
-		super(0);
-		this.fx = fx;
-		this.v = v;
-	}
-
-	protected Object doInvoke(Object args) throws Exception{
-		IFn f = loadFn();
-		return f.applyTo((ISeq) args);
-	}
-
-	synchronized private IFn loadFn() throws Exception{
-		if(f == null)
-			{
-			Class fc = fx.getCompiledClass();
-			f = (IFn) fc.newInstance();
-			v.swapRoot(f);
-			}
-		return f;
-	}
-}
-
-static public class FnExpr implements Expr{
-	static final String CONST_PREFIX = "const__";
-	IPersistentCollection methods;
-	//if there is a variadic overload (there can only be one) it is stored here
-	FnMethod variadicMethod = null;
-	String name;
-	String simpleName;
-	String internalName;
-	String thisName;
-	Type fntype;
-	public final Object tag;
-	//localbinding->itself
-	IPersistentMap closes = PersistentHashMap.EMPTY;
-	//Keyword->KeywordExpr
-	IPersistentMap keywords = PersistentHashMap.EMPTY;
-	IPersistentMap vars = PersistentHashMap.EMPTY;
-	Class compiledClass;
-	int line;
-	PersistentVector constants;
-	int constantsID;
-	boolean onceOnly = false;
-	String superName = null;
-
-	public final IPersistentCollection methods(){
-		return methods;
-	}
-
-	public final FnMethod variadicMethod(){
-		return variadicMethod;
-	}
-
-	public final String name(){
-		return name;
-	}
-
-	public final String simpleName(){
-		return simpleName;
-	}
-
-	public final String internalName(){
-		return internalName;
-	}
-
-	public final String thisName(){
-		return thisName;
-	}
-
-	public final Type fntype(){
-		return fntype;
-	}
-
-	public final IPersistentMap closes(){
-		return closes;
-	}
-
-	public final IPersistentMap keywords(){
-		return keywords;
-	}
-
-	public final IPersistentMap vars(){
-		return vars;
-	}
-
-	public final Class compiledClass(){
-		return compiledClass;
-	}
-
-	public final int line(){
-		return line;
-	}
-
-	public final PersistentVector constants(){
-		return constants;
-	}
-
-	public final int constantsID(){
-		return constantsID;
-	}
-
-	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
-	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
-	final static Method varintern =
-			Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol, clojure.lang.Symbol)");
-	final static Method afnctor = Method.getMethod("void <init>()");
-	final static Method restfnctor = Method.getMethod("void <init>(int)");
+static public class FnExpr extends ObjExpr{
 	final static Type aFnType = Type.getType(AFunction.class);
 	final static Type restFnType = Type.getType(RestFn.class);
-
-	final static Type DYNAMIC_CLASSLOADER_TYPE = Type.getType(DynamicClassLoader.class);
-	final static Method getClassMethod = Method.getMethod("Class getClass()");
-	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
-	final static Method getConstantsMethod = Method.getMethod("Object[] getConstants(int)");
-	final static Method readStringMethod = Method.getMethod("Object readString(String)");
-	private DynamicClassLoader loader;
-	private byte[] bytecode;
+	//if there is a variadic overload (there can only be one) it is stored here
+	ObjMethod variadicMethod = null;
+	IPersistentCollection methods;
 
 	public FnExpr(Object tag){
-		this.tag = tag;
+		super(tag);
+	}
+
+	protected void emitMethods(ClassVisitor cv){
+		//override of invoke/doInvoke for each method
+		for(ISeq s = RT.seq(methods); s != null; s = s.next())
+			{
+			ObjMethod method = (ObjMethod) s.first();
+			method.emit(this, cv);
+			}
+
+		if(isVariadic())
+			{
+			GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+			                                            Method.getMethod("int getRequiredArity()"),
+			                                            null,
+			                                            null,
+			                                            cv);
+			gen.visitCode();
+			gen.push(variadicMethod.reqParms.count());
+			gen.returnValue();
+			gen.endMethod();
+			}
 	}
 
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		FnExpr fn = new FnExpr(tagOf(form));
-		FnMethod enclosingMethod = (FnMethod) METHOD.deref();
+		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
 		if(((IMeta) form.first()).meta() != null)
 			{
 			fn.onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), Keyword.intern(null, "once")));
-			fn.superName = (String) RT.get(RT.meta(form.first()), Keyword.intern(null, "super-name"));
+//			fn.superName = (String) RT.get(RT.meta(form.first()), Keyword.intern(null, "super-name"));
 			}
 		//fn.thisName = name;
 		String basename = enclosingMethod != null ?
-		                  (enclosingMethod.fn.name + "$")
+		                  (enclosingMethod.objx.name + "$")
 		                                          : //"clojure.fns." +
 		                  (munge(currentNS().name.name) + "$");
 		if(RT.second(form) instanceof Symbol)
@@ -2984,7 +2595,7 @@ static public class FnExpr implements Expr{
 		                 + "__" + RT.nextID());
 		fn.name = basename + fn.simpleName;
 		fn.internalName = fn.name.replace('.', '/');
-		fn.fntype = Type.getObjectType(fn.internalName);
+		fn.objtype = Type.getObjectType(fn.internalName);
 		try
 			{
 			Var.pushThreadBindings(
@@ -3004,11 +2615,11 @@ static public class FnExpr implements Expr{
 			if(RT.second(form) instanceof IPersistentVector)
 				form = RT.list(FN, RT.next(form));
 			fn.line = (Integer) LINE.deref();
-			FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
-			FnMethod variadicMethod = null;
+			ObjMethod[] methodArray = new ObjMethod[MAX_POSITIONAL_ARITY + 1];
+			ObjMethod variadicMethod = null;
 			for(ISeq s = RT.next(form); s != null; s = RT.next(s))
 				{
-				FnMethod f = FnMethod.parse(fn, (ISeq) RT.first(s));
+				ObjMethod f = ObjMethod.parse(fn, (ISeq) RT.first(s));
 				if(f.isVariadic())
 					{
 					if(variadicMethod == null)
@@ -3049,13 +2660,111 @@ static public class FnExpr implements Expr{
 			{
 			Var.popThreadBindings();
 			}
-		fn.compile();
+		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",null);
 		return fn;
+	}
+
+	public final ObjMethod variadicMethod(){
+		return variadicMethod;
 	}
 
 	boolean isVariadic(){
 		return variadicMethod != null;
 	}
+
+	public final IPersistentCollection methods(){
+		return methods;
+	}
+}
+
+static public class ObjExpr implements Expr{
+	static final String CONST_PREFIX = "const__";
+	String name;
+	String simpleName;
+	String internalName;
+	String thisName;
+	Type objtype;
+	public final Object tag;
+	//localbinding->itself
+	IPersistentMap closes = PersistentHashMap.EMPTY;
+	//Keyword->KeywordExpr
+	IPersistentMap keywords = PersistentHashMap.EMPTY;
+	IPersistentMap vars = PersistentHashMap.EMPTY;
+	Class compiledClass;
+	int line;
+	PersistentVector constants;
+	int constantsID;
+//	String superName = null;
+	boolean onceOnly = false;
+
+
+	final static Method voidctor = Method.getMethod("void <init>()");
+
+	public final String name(){
+		return name;
+	}
+
+	public final String simpleName(){
+		return simpleName;
+	}
+
+	public final String internalName(){
+		return internalName;
+	}
+
+	public final String thisName(){
+		return thisName;
+	}
+
+	public final Type objtype(){
+		return objtype;
+	}
+
+	public final IPersistentMap closes(){
+		return closes;
+	}
+
+	public final IPersistentMap keywords(){
+		return keywords;
+	}
+
+	public final IPersistentMap vars(){
+		return vars;
+	}
+
+	public final Class compiledClass(){
+		return compiledClass;
+	}
+
+	public final int line(){
+		return line;
+	}
+
+	public final PersistentVector constants(){
+		return constants;
+	}
+
+	public final int constantsID(){
+		return constantsID;
+	}
+
+	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
+	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
+	final static Method varintern =
+			Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol, clojure.lang.Symbol)");
+
+	final static Type DYNAMIC_CLASSLOADER_TYPE = Type.getType(DynamicClassLoader.class);
+	final static Method getClassMethod = Method.getMethod("Class getClass()");
+	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
+	final static Method getConstantsMethod = Method.getMethod("Object[] getConstants(int)");
+	final static Method readStringMethod = Method.getMethod("Object readString(String)");
+	private DynamicClassLoader loader;
+	private byte[] bytecode;
+
+	public ObjExpr(Object tag){
+		this.tag = tag;
+	}
+
 
 	Type[] ctorTypes(){
 		if(closes.count() == 0)
@@ -3075,7 +2784,7 @@ static public class FnExpr implements Expr{
 		return ret;
 	}
 
-	private void compile() throws Exception{
+	void compile(String superName, String[] interfaceNames) throws Exception{
 		//create bytecode for a class
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
@@ -3085,9 +2794,9 @@ static public class FnExpr implements Expr{
 		ClassVisitor cv = cw;
 //		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,
-		         superName != null ? superName :
-		         (isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction"), null);
+		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,superName,interfaceNames);
+//		         superName != null ? superName :
+//		         (isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction"), null);
 		String source = (String) SOURCE.deref();
 		int lineBefore = (Integer) LINE_BEFORE.deref();
 		int lineAfter = (Integer) LINE_AFTER.deref() + 1;
@@ -3119,22 +2828,6 @@ static public class FnExpr implements Expr{
 			              null, null);
 			}
 
-/*
-		//static fields for keywords
-		for(ISeq s = RT.keys(keywords); s != null; s = s.rest())
-			{
-			Keyword k = (Keyword) s.first();
-			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(k.sym.toString()),
-			              KEYWORD_TYPE.getDescriptor(), null, null);
-			}
-		//static fields for vars
-		for(ISeq s = RT.keys(vars); s != null; s = s.rest())
-			{
-			Var v = (Var) s.first();
-			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, munge(v.sym.toString()),
-			              VAR_TYPE.getDescriptor(), null, null);
-			}
-			*/
 		//static init for constants, keywords and vars
 		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
 		                                                  Method.getMethod("void <clinit> ()"),
@@ -3143,8 +2836,6 @@ static public class FnExpr implements Expr{
 		                                                  cv);
 		clinitgen.visitCode();
 		clinitgen.visitLineNumber(line, clinitgen.mark());
-//		Label begin = clinitgen.newLabel();
-//		Label end = clinitgen.newLabel();
 
 		if(constants.count() > 0)
 			{
@@ -3154,7 +2845,6 @@ static public class FnExpr implements Expr{
 		clinitgen.returnValue();
 
 		clinitgen.endMethod();
-//		clinitgen.visitMaxs(1, 1);
 		//instance fields for closed-overs
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
@@ -3168,7 +2858,6 @@ static public class FnExpr implements Expr{
 						, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 			}
 		//ctor that takes closed-overs and inits base + fields
-//		Method m = new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]);
 		Method m = new Method("<init>", Type.VOID_TYPE, ctorTypes());
 		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
 		                                                m,
@@ -3181,15 +2870,15 @@ static public class FnExpr implements Expr{
 		ctorgen.visitLineNumber(line, ctorgen.mark());
 		ctorgen.visitLabel(start);
 		ctorgen.loadThis();
-		if(superName != null)
-			ctorgen.invokeConstructor(Type.getObjectType(superName), afnctor);
-		else if(isVariadic()) //RestFn ctor takes reqArity arg
-			{
-			ctorgen.push(variadicMethod.reqParms.count());
-			ctorgen.invokeConstructor(restFnType, restfnctor);
-			}
-		else
-			ctorgen.invokeConstructor(aFnType, afnctor);
+//		if(superName != null)
+			ctorgen.invokeConstructor(Type.getObjectType(superName), voidctor);
+//		else if(isVariadic()) //RestFn ctor takes reqArity arg
+//			{
+//			ctorgen.push(variadicMethod.reqParms.count());
+//			ctorgen.invokeConstructor(restFnType, restfnctor);
+//			}
+//		else
+//			ctorgen.invokeConstructor(aFnType, voidctor);
 		int a = 1;
 		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
 			{
@@ -3199,43 +2888,23 @@ static public class FnExpr implements Expr{
 			if(primc != null)
 				{
 				ctorgen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), a);
-				ctorgen.putField(fntype, lb.name, Type.getType(primc));
+				ctorgen.putField(objtype, lb.name, Type.getType(primc));
 				if(primc == Long.TYPE || primc == Double.TYPE)
 					++a;
 				}
 			else
 				{
 				ctorgen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), a);
-				ctorgen.putField(fntype, lb.name, OBJECT_TYPE);
+				ctorgen.putField(objtype, lb.name, OBJECT_TYPE);
 				}
 			}
 		ctorgen.visitLabel(end);
-//		a = 1;
-//		for(ISeq s = RT.keys(closes); s != null; s = s.rest(), ++a)
-//			{
-//			LocalBinding lb = (LocalBinding) s.first();
-//			Class primc = lb.getPrimitiveType();
-//			if(primc != null)
-//				{
-//				ctorgen.visitLocalVariable(lb.name, Type.getDescriptor(primc), null, start, end, a);
-//				if(primc == Long.TYPE || primc == Double.TYPE)
-//					++a;
-//				}
-//			else
-//				{
-//				ctorgen.visitLocalVariable(lb.name, "Ljava/lang/Object;", null, start, end, a);
-//				}
-//			}
+
 		ctorgen.returnValue();
-		//	ctorgen.visitMaxs(1, 1);
 		ctorgen.endMethod();
 
-		//override of invoke/doInvoke for each method
-		for(ISeq s = RT.seq(methods); s != null; s = s.next())
-			{
-			FnMethod method = (FnMethod) s.first();
-			method.emit(this, cv);
-			}
+		emitMethods(cv);
+
 		//end of class
 		cv.visitEnd();
 
@@ -3244,6 +2913,9 @@ static public class FnExpr implements Expr{
 			writeClassFile(internalName, bytecode);
 //		else
 //			getCompiledClass();
+	}
+
+	protected void emitMethods(ClassVisitor gen){
 	}
 
 	void emitListAsObjectArray(Object value, GeneratorAdapter gen){
@@ -3384,7 +3056,7 @@ static public class FnExpr implements Expr{
 				{
 				emitValue(constants.nth(i), clinitgen);
 				clinitgen.checkCast(constantType(i));
-				clinitgen.putStatic(fntype, constantName(i), constantType(i));
+				clinitgen.putStatic(objtype, constantName(i), constantType(i));
 				}
 			}
 		finally
@@ -3448,7 +3120,7 @@ static public class FnExpr implements Expr{
 				{
 				gen.loadThis();
 				gen.visitInsn(Opcodes.ACONST_NULL);
-				gen.putField(fntype, lb.name, OBJECT_TYPE);
+				gen.putField(objtype, lb.name, OBJECT_TYPE);
 				}
 			}
 	}
@@ -3476,9 +3148,9 @@ static public class FnExpr implements Expr{
 		return getCompiledClass().newInstance();
 	}
 
-	public void emitLetFnInits(GeneratorAdapter gen, FnExpr fn, IPersistentSet letFnLocals){
-		//fn arg is enclosing fn, not this
-		gen.checkCast(fntype);
+	public void emitLetFnInits(GeneratorAdapter gen, ObjExpr objx, IPersistentSet letFnLocals){
+		//objx arg is enclosing objx, not this
+		gen.checkCast(objtype);
 
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
@@ -3489,13 +3161,13 @@ static public class FnExpr implements Expr{
 				gen.dup();
 				if(primc != null)
 					{
-					fn.emitUnboxedLocal(gen, lb);
-					gen.putField(fntype, lb.name, Type.getType(primc));
+					objx.emitUnboxedLocal(gen, lb);
+					gen.putField(objtype, lb.name, Type.getType(primc));
 					}
 				else
 					{
-					fn.emitLocal(gen, lb);
-					gen.putField(fntype, lb.name, OBJECT_TYPE);
+					objx.emitLocal(gen, lb);
+					gen.putField(objtype, lb.name, OBJECT_TYPE);
 					}
 				}
 			}
@@ -3503,22 +3175,22 @@ static public class FnExpr implements Expr{
 
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
-		//fn arg is enclosing fn, not this
+		//objx arg is enclosing objx, not this
 		getCompiledClass();
-		gen.newInstance(fntype);
+		gen.newInstance(objtype);
 		gen.dup();
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
-				fn.emitUnboxedLocal(gen, lb);
+				objx.emitUnboxedLocal(gen, lb);
 			else
-				fn.emitLocal(gen, lb);
+				objx.emitLocal(gen, lb);
 			}
 //		gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
-		gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ctorTypes()));
+		gen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes()));
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -3540,11 +3212,11 @@ static public class FnExpr implements Expr{
 			gen.loadThis();
 			if(primc != null)
 				{
-				gen.getField(fntype, lb.name, Type.getType(primc));
+				gen.getField(objtype, lb.name, Type.getType(primc));
 				HostExpr.emitBoxReturn(this, gen, primc);
 				}
 			else
-				gen.getField(fntype, lb.name, OBJECT_TYPE);
+				gen.getField(objtype, lb.name, OBJECT_TYPE);
 			}
 		else
 			{
@@ -3564,7 +3236,7 @@ static public class FnExpr implements Expr{
 		if(closes.containsKey(lb))
 			{
 			gen.loadThis();
-			gen.getField(fntype, lb.name, Type.getType(primc));
+			gen.getField(objtype, lb.name, Type.getType(primc));
 			}
 		else
 			gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), lb.idx);
@@ -3583,7 +3255,7 @@ static public class FnExpr implements Expr{
 	}
 
 	public void emitConstant(GeneratorAdapter gen, int id){
-		gen.getStatic(fntype, constantName(id), constantType(id));
+		gen.getStatic(objtype, constantName(id), constantType(id));
 	}
 
 
@@ -3614,15 +3286,48 @@ static public class FnExpr implements Expr{
 
 }
 
+static public class NewInstanceExpr extends ObjExpr{
+	boolean onceOnly = false;
+	final static Method afnctor = Method.getMethod("void <init>()");
+	final static Method restfnctor = Method.getMethod("void <init>(int)");
+	final static Type aFnType = Type.getType(AFunction.class);
+	final static Type restFnType = Type.getType(RestFn.class);
+//if there is a variadic overload (there can only be one) it is stored here
+ObjMethod variadicMethod = null;
+	IPersistentCollection methods;
+
+	public NewInstanceExpr(Object tag){
+		super(tag);
+	}
+
+	public final ObjMethod variadicMethod(){
+		return variadicMethod;
+	}
+
+	boolean isVariadic(){
+		return variadicMethod != null;
+	}
+
+	public final IPersistentCollection methods(){
+		return methods;
+	}
+
+	static public class Parser implements IParser{
+		public Expr parse(C c, Object form){
+			return null;
+		}
+	}
+}
+
 enum PSTATE{
 	REQ, REST, DONE
 }
 
 
-public static class FnMethod{
+public static class ObjMethod{
 	//when closures are defined inside other closures,
-	//the closed over locals need to be propagated to the enclosing fn
-	public final FnMethod parent;
+	//the closed over locals need to be propagated to the enclosing objx
+	public final ObjMethod parent;
 	//localbinding->localbinding
 	IPersistentMap locals = null;
 	//num->localbinding
@@ -3631,7 +3336,7 @@ public static class FnMethod{
 	PersistentVector reqParms = PersistentVector.EMPTY;
 	LocalBinding restParm = null;
 	Expr body = null;
-	FnExpr fn;
+	ObjExpr objx;
 	PersistentVector argLocals;
 	int maxLocal = 0;
 	int line;
@@ -3653,8 +3358,8 @@ public static class FnMethod{
 		return body;
 	}
 
-	public final FnExpr fn(){
-		return fn;
+	public final ObjExpr objx(){
+		return objx;
 	}
 
 	public final PersistentVector argLocals(){
@@ -3669,9 +3374,9 @@ public static class FnMethod{
 		return line;
 	}
 
-	public FnMethod(FnExpr fn, FnMethod parent){
+	public ObjMethod(ObjExpr objx, ObjMethod parent){
 		this.parent = parent;
-		this.fn = fn;
+		this.objx = objx;
 	}
 
 	boolean isVariadic(){
@@ -3682,13 +3387,13 @@ public static class FnMethod{
 		return reqParms.count() + (isVariadic() ? 1 : 0);
 	}
 
-	private static FnMethod parse(FnExpr fn, ISeq form) throws Exception{
+	private static ObjMethod parse(ObjExpr objx, ISeq form) throws Exception{
 		//([args] body...)
 		IPersistentVector parms = (IPersistentVector) RT.first(form);
 		ISeq body = RT.next(form);
 		try
 			{
-			FnMethod method = new FnMethod(fn, (FnMethod) METHOD.deref());
+			ObjMethod method = new ObjMethod(objx, (ObjMethod) METHOD.deref());
 			method.line = (Integer) LINE.deref();
 			//register as the current method and set up a new env frame
 			Var.pushThreadBindings(
@@ -3700,7 +3405,7 @@ public static class FnMethod{
 
 			//register 'this' as local 0
 			//registerLocal(THISFN, null, null);
-			registerLocal(Symbol.intern(fn.thisName != null ? fn.thisName : "fn__" + RT.nextID()), null, null);
+			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "fn__" + RT.nextID()), null, null);
 
 			PSTATE state = PSTATE.REQ;
 			PersistentVector argLocals = PersistentVector.EMPTY;
@@ -3751,7 +3456,7 @@ public static class FnMethod{
 			}
 	}
 
-	public void emit(FnExpr fn, ClassVisitor cv){
+	public void emit(ObjExpr fn, ClassVisitor cv){
 		Method m = new Method(isVariadic() ? "doInvoke" : "invoke",
 		                      OBJECT_TYPE, ARG_TYPES[numParams()]);
 
@@ -3808,9 +3513,9 @@ public static class FnMethod{
 					}
 				}
 			}
-		if(fn.onceOnly)
+		if(objx.onceOnly)
 			{
-			fn.emitClearCloses(gen);
+			objx.emitClearCloses(gen);
 			}
 	}
 }
@@ -3866,13 +3571,13 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
 		throw new UnsupportedOperationException("Can't eval locals");
 	}
 
-	public void emitUnboxed(C context, FnExpr fn, GeneratorAdapter gen){
-		fn.emitUnboxedLocal(gen, b);
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+		objx.emitUnboxedLocal(gen, b);
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
-			fn.emitLocal(gen, b);
+			objx.emitLocal(gen, b);
 	}
 
 	public boolean hasJavaClass() throws Exception{
@@ -3930,14 +3635,14 @@ public static class BodyExpr implements Expr{
 		return ret;
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		for(int i = 0; i < exprs.count() - 1; i++)
 			{
 			Expr e = (Expr) exprs.nth(i);
-			e.emit(C.STATEMENT, fn, gen);
+			e.emit(C.STATEMENT, objx, gen);
 			}
 		Expr last = (Expr) exprs.nth(exprs.count() - 1);
-		last.emit(context, fn, gen);
+		last.emit(context, objx, gen);
 	}
 
 	public boolean hasJavaClass() throws Exception{
@@ -4039,7 +3744,7 @@ public static class LetFnExpr implements Expr{
 		throw new UnsupportedOperationException("Can't eval letfns");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
@@ -4053,21 +3758,21 @@ public static class LetFnExpr implements Expr{
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
 			lbset = (IPersistentSet) lbset.cons(bi.binding);
-			bi.init.emit(C.EXPRESSION, fn, gen);
+			bi.init.emit(C.EXPRESSION, objx, gen);
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 			}
 
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
-			FnExpr fe = (FnExpr) bi.init;
+			ObjExpr fe = (ObjExpr) bi.init;
 			gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), bi.binding.idx);
-			fe.emitLetFnInits(gen, fn, lbset);
+			fe.emitLetFnInits(gen, objx, lbset);
 			}
 
 		Label loopLabel = gen.mark();
 
-		body.emit(context, fn, gen);
+		body.emit(context, objx, gen);
 
 		Label end = gen.mark();
 //		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
@@ -4168,19 +3873,19 @@ public static class LetExpr implements Expr{
 		throw new UnsupportedOperationException("Can't eval let/loop");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
 			Class primc = maybePrimitiveType(bi.init);
 			if(primc != null)
 				{
-				((MaybePrimitiveExpr) bi.init).emitUnboxed(C.EXPRESSION, fn, gen);
+				((MaybePrimitiveExpr) bi.init).emitUnboxed(C.EXPRESSION, objx, gen);
 				gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ISTORE), bi.binding.idx);
 				}
 			else
 				{
-				bi.init.emit(C.EXPRESSION, fn, gen);
+				bi.init.emit(C.EXPRESSION, objx, gen);
 				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 				}
 			}
@@ -4190,7 +3895,7 @@ public static class LetExpr implements Expr{
 			try
 				{
 				Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
-				body.emit(context, fn, gen);
+				body.emit(context, objx, gen);
 				}
 			finally
 				{
@@ -4198,7 +3903,7 @@ public static class LetExpr implements Expr{
 				}
 			}
 		else
-			body.emit(context, fn, gen);
+			body.emit(context, objx, gen);
 		Label end = gen.mark();
 //		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
 		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.next())
@@ -4238,7 +3943,7 @@ public static class RecurExpr implements Expr{
 		throw new UnsupportedOperationException("Can't eval recur");
 	}
 
-	public void emit(C context, FnExpr fn, GeneratorAdapter gen){
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		Label loopLabel = (Label) LOOP_LABEL.deref();
 		if(loopLabel == null)
 			throw new IllegalStateException();
@@ -4259,11 +3964,11 @@ public static class RecurExpr implements Expr{
 					{
 					throw new RuntimeException(e);
 					}
-				((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, fn, gen);
+				((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx, gen);
 				}
 			else
 				{
-				arg.emit(C.EXPRESSION, fn, gen);
+				arg.emit(C.EXPRESSION, objx, gen);
 				}
 			}
 
@@ -4315,7 +4020,7 @@ private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init) thr
 	LocalBinding b = new LocalBinding(num, sym, tag, init);
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.deref();
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
-	FnMethod method = (FnMethod) METHOD.deref();
+	ObjMethod method = (ObjMethod) METHOD.deref();
 	method.locals = (IPersistentMap) RT.assoc(method.locals, b, b);
 	method.indexlocals = (IPersistentMap) RT.assoc(method.indexlocals, num, b);
 	return b;
@@ -4323,7 +4028,7 @@ private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init) thr
 
 private static int getAndIncLocalNum(){
 	int num = ((Number) NEXT_LOCAL_NUM.deref()).intValue();
-	FnMethod m = (FnMethod) METHOD.deref();
+	ObjMethod m = (ObjMethod) METHOD.deref();
 	if(num > m.maxLocal)
 		m.maxLocal = num;
 	NEXT_LOCAL_NUM.set(num + 1);
@@ -4596,7 +4301,7 @@ public static Object eval(Object form) throws Exception{
 			        && !(RT.first(form) instanceof Symbol
 			             && ((Symbol) RT.first(form)).name.startsWith("def")))
 				{
-				FnExpr fexpr = (FnExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
+				ObjExpr fexpr = (ObjExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
 				IFn fn = (IFn) fexpr.eval();
 				return fn.invoke();
 				}
@@ -4850,12 +4555,12 @@ static Namespace currentNS(){
 	return (Namespace) RT.CURRENT_NS.deref();
 }
 
-static void closeOver(LocalBinding b, FnMethod method){
+static void closeOver(LocalBinding b, ObjMethod method){
 	if(b != null && method != null)
 		{
 		if(RT.get(method.locals, b) == null)
 			{
-			method.fn.closes = (IPersistentMap) RT.assoc(method.fn.closes, b, b);
+			method.objx.closes = (IPersistentMap) RT.assoc(method.objx.closes, b, b);
 			closeOver(b, method.parent);
 			}
 		else if(IN_CATCH_FINALLY.deref() != null)
@@ -4872,7 +4577,7 @@ static LocalBinding referenceLocal(Symbol sym) throws Exception{
 	LocalBinding b = (LocalBinding) RT.get(LOCAL_ENV.deref(), sym);
 	if(b != null)
 		{
-		FnMethod method = (FnMethod) METHOD.deref();
+		ObjMethod method = (ObjMethod) METHOD.deref();
 		closeOver(b, method);
 		}
 	return b;
@@ -4975,7 +4680,7 @@ public static void pushNS(){
 	                                                           Symbol.create("*ns*")), null));
 }
 
-static void compile1(GeneratorAdapter gen, FnExpr fn, Object form) throws Exception{
+static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) throws Exception{
 	Integer line = (Integer) LINE.deref();
 	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
 		line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
@@ -4988,16 +4693,16 @@ static void compile1(GeneratorAdapter gen, FnExpr fn, Object form) throws Except
 			{
 			for(ISeq s = RT.next(form); s != null; s = RT.next(s))
 				{
-				compile1(gen, fn, RT.first(s));
+				compile1(gen, objx, RT.first(s));
 				}
 			}
 		else
 			{
 			Expr expr = analyze(C.EVAL, form);
-			fn.keywords = (IPersistentMap) KEYWORDS.deref();
-			fn.vars = (IPersistentMap) VARS.deref();
-			fn.constants = (PersistentVector) CONSTANTS.deref();
-			expr.emit(C.EXPRESSION, fn, gen);
+			objx.keywords = (IPersistentMap) KEYWORDS.deref();
+			objx.vars = (IPersistentMap) VARS.deref();
+			objx.constants = (PersistentVector) CONSTANTS.deref();
+			expr.emit(C.EXPRESSION, objx, gen);
 			expr.eval();
 			}
 		}
@@ -5030,14 +4735,14 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 	try
 		{
 		//generate loader class
-		FnExpr fn = new FnExpr(null);
-		fn.internalName = sourcePath.replace(File.separator, "/").substring(0, sourcePath.lastIndexOf('.'))
+		ObjExpr objx = new ObjExpr(null);
+		objx.internalName = sourcePath.replace(File.separator, "/").substring(0, sourcePath.lastIndexOf('.'))
 		                  + RT.LOADER_SUFFIX;
 
-		fn.fntype = Type.getObjectType(fn.internalName);
+		objx.objtype = Type.getObjectType(objx.internalName);
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		ClassVisitor cv = cw;
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, fn.internalName, null, "java/lang/Object", null);
+		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, objx.internalName, null, "java/lang/Object", null);
 
 		//static load method
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
@@ -5051,7 +4756,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		    r = LispReader.read(pushbackReader, false, EOF, false))
 			{
 				LINE_AFTER.set(pushbackReader.getLineNumber());
-				compile1(gen, fn, r);
+				compile1(gen, objx, r);
 				LINE_BEFORE.set(pushbackReader.getLineNumber());
 			}
 		//end of load
@@ -5059,9 +4764,9 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		gen.endMethod();
 
 		//static fields for constants
-		for(int i = 0; i < fn.constants.count(); i++)
+		for(int i = 0; i < objx.constants.count(); i++)
 			{
-			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, fn.constantName(i), fn.constantType(i).getDescriptor(),
+			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, objx.constantName(i), objx.constantType(i).getDescriptor(),
 			              null, null);
 			}
 
@@ -5077,13 +4782,13 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		Label end = clinitgen.newLabel();
 		Label finallyLabel = clinitgen.newLabel();
 
-		if(fn.constants.count() > 0)
+		if(objx.constants.count() > 0)
 			{
-			fn.emitConstants(clinitgen);
+			objx.emitConstants(clinitgen);
 			}
 		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void pushNS()"));
 		clinitgen.mark(startTry);
-		clinitgen.invokeStatic(fn.fntype, Method.getMethod("void load()"));
+		clinitgen.invokeStatic(objx.objtype, Method.getMethod("void load()"));
 		clinitgen.mark(endTry);
 		clinitgen.invokeStatic(VAR_TYPE, Method.getMethod("void popThreadBindings()"));
 		clinitgen.goTo(end);
@@ -5102,7 +4807,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		//end of class
 		cv.visitEnd();
 
-		writeClassFile(fn.internalName, cw.toByteArray());
+		writeClassFile(objx.internalName, cw.toByteArray());
 		}
 	catch(LispReader.ReaderException e)
 		{
