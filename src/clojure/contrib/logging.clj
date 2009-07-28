@@ -1,15 +1,25 @@
+;;; logging.clj -- delegated logging for Clojure
+ 
+;; by Alex Taggart
+;; July 27, 2009
+ 
+;; Copyright (c) Alex Taggart, July 2009. All rights reserved.  The use
+;; and distribution terms for this software are covered by the Eclipse
+;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;; which can be found in the file epl-v10.html at the root of this
+;; distribution.  By using this software in any fashion, you are
+;; agreeing to be bound by the terms of this license.  You must not
+;; remove this notice, or any other, from this software.
+
 (ns 
   #^{:author "Alex Taggart, Timothy Pratley",
-     :doc "Logging macros which delegate to a specific logging implementation. 
-  At runtime a specific implementation is selected from, in order, Apache 
-  commons-logging, log4j, and finally java.util.logging.
+     :doc "Logging macros which delegate to a specific logging 
+  implementation. At runtime a specific implementation is selected from, in 
+  order, Apache commons-logging, log4j, and finally java.util.logging.
   
   Logging levels are specified by clojure keywords corresponding to the 
   values used in log4j/commons-logging:
     :trace, :debug, :info, :warn, :error, :fatal  
-  
-  Unless otherwise specified, the current namespace will be used as the log-name
-  (similar to how the java class name is usually used).
   
   Logging occurs with the log macro which writes either directly or via an 
   agent.  By default direct logging is disabled, but can be enabled via the 
@@ -19,13 +29,19 @@
   The logging macros will not evaluate their 'message' unless the specific 
   logging level is in effect.
   
+  Alternately, you can use the spy function when you have code that needs to be
+  evaluated, and also want to output its result to the debug log,
+  
+  Unless otherwise specified, the current namespace (as identified by *ns*) will
+  be used as the log-name (similar to how the java class name is usually used).
+  
   Use the enabled? function to write conditional code against the logging level 
-  (beyond simply whether or not to call log/send-log).
+  (beyond simply whether or not to call log, which is handled automatically).
   
   You can redirect all java writes of System.out and System.err to the log 
   system by calling log-capture!.  To rebind *out* and *err* to the log system 
-  invoke with-logs."
-  }
+  invoke with-logs.  In both cases a log-name (e.g., 'com.example.captured') 
+  needs to be specified to namespace the output."}
   clojure.contrib.logging)
 
 
@@ -120,7 +136,8 @@
 
 
 (defmacro send-log
-  "Sends the message to a logging agent. Use the log macro in preference to 
+  "Sends the message to a logging agent, which will in turn write to the log if 
+  the specific logging level is enabled. Use the log macro in preference to 
   this."
   [level message throwable log-name system-agent]
   (defn agent-log [sys# lvl# msg# th# ln#]
@@ -156,7 +173,9 @@
 
 
 (defn enabled?
-  "Returns true if the specific logging level is enabled."
+  "Returns true if the specific logging level is enabled.  This function should 
+  only be necessary if one needs to execute alternate code paths beyond whether 
+  the log should be written to."
   ([level]
     (enabled? level (str *ns*)))
   ([level log-name]
@@ -197,7 +216,7 @@
   (dosync
     (let [new-out (log-stream :info log-name)
           new-err (log-stream :error log-name)]
-      ; don't overwrite if something is already there
+      ; don't overwrite the original values
       (if (nil? @*old-std-streams*)
         (ref-set *old-std-streams* {:out System/out :err System/err})) 
       (System/setOut new-out)
