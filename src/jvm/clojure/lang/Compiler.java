@@ -5075,7 +5075,7 @@ public static class NewInstanceMethod extends ObjMethod{
 					{
 					gen.pop();
 					}
-				else if(retClass.isPrimitive())
+				else
 					gen.unbox(retType);
 				}
 
@@ -5132,5 +5132,12 @@ static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		throw new RuntimeException("Can't emit");
 	}
+}
+
+static void gatherMethods(Class c, Map mm, Set considered){
+	for(;c != null;c = c.getSuperclass())
+		{
+		
+		}
 }
 }
