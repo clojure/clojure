@@ -5007,7 +5007,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			}
 	}
 
-	public void emit(ObjExpr fn, ClassVisitor cv){
+	public void emit(ObjExpr obj, ClassVisitor cv){
 		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
 
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
@@ -5022,7 +5022,7 @@ public static class NewInstanceMethod extends ObjMethod{
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
-			body.emit(C.RETURN, fn, gen);
+			body.emit(C.RETURN, obj, gen);
 			if(retClass == void.class)
 				{
 				gen.pop();
@@ -5031,11 +5031,11 @@ public static class NewInstanceMethod extends ObjMethod{
 				gen.unbox(retType);
 			
 			Label end = gen.mark();
-			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
+			gen.visitLocalVariable("this", obj.objtype.getDescriptor(), null, loopLabel, end, 0);
 			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.next())
 				{
 				LocalBinding lb = (LocalBinding) lbs.first();
-				gen.visitLocalVariable(lb.name, "Ljava/lang/Object;", null, loopLabel, end, lb.idx);
+				gen.visitLocalVariable(lb.name, argTypes[lb.idx-1].getDescriptor(), null, loopLabel, end, lb.idx);
 				}
 			}
 		finally
@@ -5049,7 +5049,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	}
 }
 
-static public class MethodParamExpr implements Expr{
+static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 	final Class c;
 
 	public MethodParamExpr(Class c){
@@ -5070,6 +5070,10 @@ static public class MethodParamExpr implements Expr{
 
 	public Class getJavaClass() throws Exception{
 		return c;
+	}
+
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+		throw new RuntimeException("Can't emit");
 	}
 }
 }
