@@ -382,7 +382,8 @@ static Object boxArg(Class paramType, Object arg){
 		else if(paramType == byte.class)
 			return n.byteValue();
 		}
-	throw new IllegalArgumentException("Unexpected param type");
+	throw new IllegalArgumentException("Unexpected param type, expected: " + paramType +
+	                                   ", given: " + arg.getClass().getName());
 }
 
 static Object[] boxArgs(Class[] params, Object[] args){
