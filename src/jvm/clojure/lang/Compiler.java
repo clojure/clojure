@@ -4866,6 +4866,10 @@ static public class NewInstanceExpr extends ObjExpr{
 			superClass = Object.class;
 			superAndInterfaces = RT.cons(superClass, superAndInterfaces);
 			}
+		ISeq interfaces = RT.next(superAndInterfaces);
+		Map[] mc = gatherMethods(superClass,interfaces);
+		Map overrideables = mc[0];
+		Map allmethods = mc[1];
 
 		ISeq rform = RT.next(RT.next(form));
 
@@ -4895,7 +4899,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			IPersistentCollection methods = null;
 			for(ISeq s = rform; s != null; s = RT.next(s))
 				{
-				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s));
+				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),overrideables, allmethods);
 				methods = RT.conj(methods, m);
 				}
 
@@ -4929,6 +4933,48 @@ static public class NewInstanceExpr extends ObjExpr{
 			ObjMethod method = (ObjMethod) s.first();
 			method.emit(this, cv);
 			}
+	}
+
+	static public IPersistentVector msig(java.lang.reflect.Method m){
+		return RT.vector(m.getName(), RT.seq(m.getParameterTypes()));
+	}
+
+	static void considerMethod(java.lang.reflect.Method m, Map mm, Map considered){
+		IPersistentVector mk = msig(m);
+		int mods = m.getModifiers();
+
+		if(considered.containsKey(mk)
+		   || !(Modifier.isPublic(mods) || Modifier.isProtected(mods))
+		   || Modifier.isStatic(mods)
+		   || Modifier.isFinal(mods))
+			{
+			if(!Modifier.isStatic(mods))
+				considered.put(mk, m);
+			}
+		else
+			{
+			considered.put(mk, m);
+			mm.put(mk, m);
+			}
+	}
+
+	static void gatherMethods(Class c, Map mm, Map considered){
+		for(; c != null; c = c.getSuperclass())
+			{
+			for(java.lang.reflect.Method m : c.getDeclaredMethods())
+				considerMethod(m, mm, considered);
+			for(java.lang.reflect.Method m : c.getMethods())
+				considerMethod(m, mm, considered);
+			}
+	}
+
+	static public Map[] gatherMethods(Class sc, ISeq interfaces){
+		Map mm = new HashMap();
+		Map considered = new HashMap();
+		gatherMethods(sc, mm, considered);
+		for(; interfaces != null; interfaces = interfaces.next())
+			gatherMethods((Class) interfaces.first(), mm, considered);
+		return new Map[]{mm, considered};
 	}
 }
 
@@ -4993,8 +5039,12 @@ public static class NewInstanceMethod extends ObjMethod{
 			c = HostExpr.tagToClass(tag);
 		return c;
 	}
-	
-	static NewInstanceMethod parse(ObjExpr objx, ISeq form) throws Exception{
+
+	static public IPersistentVector msig(String name,Class[] paramTypes){
+		return RT.vector(name,RT.seq(paramTypes));
+	}
+
+	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Map overrideables, Map allmethods) throws Exception{
 		//(methodname [args] body...)
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
 		Symbol name = (Symbol)RT.first(form);
@@ -5016,21 +5066,78 @@ public static class NewInstanceMethod extends ObjMethod{
 
 			PersistentVector argLocals = PersistentVector.EMPTY;
 			method.retClass = tagClass(tagOf(name));
-			method.retType = Type.getType(method.retClass);
 			method.argTypes = new Type[parms.count()];
+			boolean hinted = tagOf(name) != null;
+			Class[] pclasses = new Class[parms.count()];
+			Symbol[] psyms = new Symbol[parms.count()];
+
 			for(int i = 0; i < parms.count(); i++)
 				{
 				if(!(parms.nth(i) instanceof Symbol))
 					throw new IllegalArgumentException("params must be Symbols");
 				Symbol p = (Symbol) parms.nth(i);
 				Object tag = tagOf(p);
+				if(tag != null)
+					hinted = true;
 				if(p.getNamespace() != null)
 					p = Symbol.create(p.name);
 				Class pclass = tagClass(tag);
-				LocalBinding lb = registerLocal(p, null, new MethodParamExpr(pclass));
-				argLocals = argLocals.assocN(i,lb);
-				method.argTypes[i] = Type.getType(pclass);
+				pclasses[i] = pclass;
+				psyms[i] = p;
 				}
+			Map matches = findMethodsWithNameAndArity(name.name, parms.count(), overrideables);
+			Object mk = msig(name.name, pclasses);
+			if(matches.size() > 0)
+				{
+				//multiple methods
+				if(matches.size() > 1)
+					{
+					//must be hinted and match one method
+					if(!hinted)
+						throw new IllegalArgumentException("Must hint overloaded method: " + name.name);
+					java.lang.reflect.Method m = (java.lang.reflect.Method) matches.get(mk);
+					if(m == null)
+						throw new IllegalArgumentException("Can't find matching overloaded method: " + name.name);
+					if(m.getReturnType() != method.retClass)
+						throw new IllegalArgumentException("Mismatched return type: " + name.name +
+						", expected: " + m.getReturnType().getName()  + ", had: " + method.retClass.getName());
+					}
+				else  //one match
+					{
+					//if hinted, validate match,
+					if(hinted)
+						{
+						java.lang.reflect.Method m = (java.lang.reflect.Method) matches.get(mk);
+						if(m == null)
+							throw new IllegalArgumentException("Can't find matching method: " + name.name +
+							                                   ", leave off hints for auto match.");
+					if(m.getReturnType() != method.retClass)
+						throw new IllegalArgumentException("Mismatched return type: " + name.name +
+						", expected: " + m.getReturnType().getName()  + ", had: " + method.retClass.getName());
+						}
+					else //adopt found method sig
+						{
+						java.lang.reflect.Method m = (java.lang.reflect.Method) matches.values().iterator().next();
+						method.retClass = m.getReturnType();
+						pclasses = m.getParameterTypes();
+						}
+					}
+				}
+			else if(findMethodsWithName(name.name,allmethods).size()>0)
+				throw new IllegalArgumentException("Can't override/overload method: " + name.name);
+			//todo
+			//else
+				//validate unque name+arity among additional methods
+
+			method.retType = Type.getType(method.retClass);
+
+			for(int i = 0; i < parms.count(); i++)
+				{
+				LocalBinding lb = registerLocal(psyms[i], null, new MethodParamExpr(pclasses[i]));
+				argLocals = argLocals.assocN(i,lb);
+				method.argTypes[i] = Type.getType(pclasses[i]);
+				}
+
 			LOOP_LOCALS.set(argLocals);
 			method.name = name.name;
 			method.argLocals = argLocals;
@@ -5041,6 +5148,30 @@ public static class NewInstanceMethod extends ObjMethod{
 			{
 			Var.popThreadBindings();
 			}
+	}
+
+	private static Map findMethodsWithNameAndArity(String name, int arity, Map mm){
+		Map ret = new HashMap();
+		for(Object o : mm.entrySet())
+			{
+			Map.Entry e = (Map.Entry) o;
+			java.lang.reflect.Method m = (java.lang.reflect.Method) e.getValue();
+			if(name.equals(m.getName()) && m.getParameterTypes().length == arity)
+				ret.put(e.getKey(), e.getValue());
+			}
+		return ret;
+	}
+
+	private static Map findMethodsWithName(String name, Map mm){
+		Map ret = new HashMap();
+		for(Object o : mm.entrySet())
+			{
+			Map.Entry e = (Map.Entry) o;
+			java.lang.reflect.Method m = (java.lang.reflect.Method) e.getValue();
+			if(name.equals(m.getName()))
+				ret.put(e.getKey(), e.getValue());
+			}
+		return ret;
 	}
 
 	public void emit(ObjExpr obj, ClassVisitor cv){
@@ -5134,10 +5265,5 @@ static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 	}
 }
 
-static void gatherMethods(Class c, Map mm, Set considered){
-	for(;c != null;c = c.getSuperclass())
-		{
-		
-		}
-}
+
 }
