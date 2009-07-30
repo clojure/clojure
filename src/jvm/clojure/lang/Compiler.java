@@ -579,7 +579,8 @@ static interface AssignableExpr{
 	void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen, Expr val);
 }
 
-static public interface MaybePrimitiveExpr{
+static public interface MaybePrimitiveExpr extends Expr{
+	public boolean canEmitPrimitive();
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen);
 }
 
@@ -871,6 +872,11 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		return Reflector.invokeNoArgInstanceMember(target.eval(), fieldName);
 	}
 
+	public boolean canEmitPrimitive(){
+		return targetClass != null && field != null &&
+		       Util.isPrimitive(field.getType());
+	}
+
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
@@ -963,6 +969,10 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 
 	public Object eval() throws Exception{
 		return Reflector.getStaticField(c, fieldName);
+	}
+
+	public boolean canEmitPrimitive(){
+		return Util.isPrimitive(field.getType());
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
@@ -1154,6 +1164,10 @@ static class InstanceMethodExpr extends MethodExpr{
 			}
 	}
 
+	public boolean canEmitPrimitive(){
+		return method != null && Util.isPrimitive(method.getReturnType());
+	}
+
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
@@ -1294,6 +1308,10 @@ static class StaticMethodExpr extends MethodExpr{
 			else
 				throw (CompilerException) e;
 			}
+	}
+
+	public boolean canEmitPrimitive(){
+		return method != null && Util.isPrimitive(method.getReturnType());
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
@@ -3544,6 +3562,10 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
 		throw new UnsupportedOperationException("Can't eval locals");
 	}
 
+	public boolean canEmitPrimitive(){
+		return b.getPrimitiveType() != null;
+	}
+
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		objx.emitUnboxedLocal(gen, b);
 	}
@@ -3566,7 +3588,7 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
 
 }
 
-public static class BodyExpr implements Expr{
+public static class BodyExpr implements Expr, MaybePrimitiveExpr{
 	PersistentVector exprs;
 
 	public final PersistentVector exprs(){
@@ -3606,6 +3628,20 @@ public static class BodyExpr implements Expr{
 			ret = e.eval();
 			}
 		return ret;
+	}
+
+	public boolean canEmitPrimitive(){
+		return lastExpr() instanceof MaybePrimitiveExpr && ((MaybePrimitiveExpr)lastExpr()).canEmitPrimitive();
+	}
+
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+		for(int i = 0; i < exprs.count() - 1; i++)
+			{
+			Expr e = (Expr) exprs.nth(i);
+			e.emit(C.STATEMENT, objx, gen);
+			}
+		MaybePrimitiveExpr last = (MaybePrimitiveExpr) exprs.nth(exprs.count() - 1);
+		last.emitUnboxed(context, objx, gen);
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
@@ -5022,14 +5058,27 @@ public static class NewInstanceMethod extends ObjMethod{
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
-			body.emit(C.RETURN, obj, gen);
-			if(retClass == void.class)
+			MaybePrimitiveExpr be = (MaybePrimitiveExpr) body;
+			if(Util.isPrimitive(retClass) && be.canEmitPrimitive())
 				{
-				gen.pop();
+				if(be.getJavaClass() == retClass)
+					be.emitUnboxed(C.RETURN,obj,gen);
+				//todo - support the standard widening conversions
+				else
+					throw new IllegalArgumentException("Mismatched primitive return, expected: "
+					                                   + retClass + ", had: " + be.getJavaClass());
 				}
-			else if(retClass.isPrimitive())
-				gen.unbox(retType);
-			
+			else
+				{
+				body.emit(C.RETURN, obj, gen);
+				if(retClass == void.class)
+					{
+					gen.pop();
+					}
+				else if(retClass.isPrimitive())
+					gen.unbox(retType);
+				}
+
 			Label end = gen.mark();
 			gen.visitLocalVariable("this", obj.objtype.getDescriptor(), null, loopLabel, end, 0);
 			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.next())
@@ -5037,6 +5086,10 @@ public static class NewInstanceMethod extends ObjMethod{
 				LocalBinding lb = (LocalBinding) lbs.first();
 				gen.visitLocalVariable(lb.name, argTypes[lb.idx-1].getDescriptor(), null, loopLabel, end, lb.idx);
 				}
+			}
+		catch(Exception e)
+			{
+			throw new RuntimeException(e);
 			}
 		finally
 			{
@@ -5070,6 +5123,10 @@ static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 
 	public Class getJavaClass() throws Exception{
 		return c;
+	}
+
+	public boolean canEmitPrimitive(){
+		return Util.isPrimitive(c);
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
