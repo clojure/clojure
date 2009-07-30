@@ -2032,8 +2032,8 @@ public static class NewExpr implements Expr{
 		public Expr parse(C context, Object frm) throws Exception{
 			int line = (Integer) LINE.deref();
 			ISeq form = (ISeq) frm;
-			if(RT.second(frm) instanceof IPersistentVector)
-				return (new NewInstanceExpr.Parser()).parse(context, frm);
+			if(RT.second(form) instanceof IPersistentVector)
+				return NewInstanceExpr.parse(context, form);	
 			//(new Classname args...)
 			if(form.count() < 2)
 				throw new Exception("wrong number of arguments, expecting: (new Classname args...)");
@@ -2546,8 +2546,10 @@ static public class FnExpr extends ObjExpr{
 	final static Type aFnType = Type.getType(AFunction.class);
 	final static Type restFnType = Type.getType(RestFn.class);
 	//if there is a variadic overload (there can only be one) it is stored here
-	ObjMethod variadicMethod = null;
+	FnMethod variadicMethod = null;
 	IPersistentCollection methods;
+	//	String superName = null;
+	boolean onceOnly = false;
 
 	public FnExpr(Object tag){
 		super(tag);
@@ -2590,10 +2592,10 @@ static public class FnExpr extends ObjExpr{
 		                  (munge(currentNS().name.name) + "$");
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
-		fn.simpleName = ((name != null ?
+		String simpleName = ((name != null ?
 		                  munge(name).replace(".", "_DOT_") : "fn")
 		                 + "__" + RT.nextID());
-		fn.name = basename + fn.simpleName;
+		fn.name = basename + simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.objtype = Type.getObjectType(fn.internalName);
 		try
@@ -2615,11 +2617,11 @@ static public class FnExpr extends ObjExpr{
 			if(RT.second(form) instanceof IPersistentVector)
 				form = RT.list(FN, RT.next(form));
 			fn.line = (Integer) LINE.deref();
-			ObjMethod[] methodArray = new ObjMethod[MAX_POSITIONAL_ARITY + 1];
-			ObjMethod variadicMethod = null;
+			FnMethod[] methodArray = new FnMethod[MAX_POSITIONAL_ARITY + 1];
+			FnMethod variadicMethod = null;
 			for(ISeq s = RT.next(form); s != null; s = RT.next(s))
 				{
-				ObjMethod f = ObjMethod.parse(fn, (ISeq) RT.first(s));
+				FnMethod f = FnMethod.parse(fn, (ISeq) RT.first(s));
 				if(f.isVariadic())
 					{
 					if(variadicMethod == null)
@@ -2660,7 +2662,7 @@ static public class FnExpr extends ObjExpr{
 			{
 			Var.popThreadBindings();
 			}
-		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",null);
+		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",null,fn.onceOnly);
 		return fn;
 	}
 
@@ -2680,7 +2682,7 @@ static public class FnExpr extends ObjExpr{
 static public class ObjExpr implements Expr{
 	static final String CONST_PREFIX = "const__";
 	String name;
-	String simpleName;
+	//String simpleName;
 	String internalName;
 	String thisName;
 	Type objtype;
@@ -2694,8 +2696,6 @@ static public class ObjExpr implements Expr{
 	int line;
 	PersistentVector constants;
 	int constantsID;
-//	String superName = null;
-	boolean onceOnly = false;
 
 
 	final static Method voidctor = Method.getMethod("void <init>()");
@@ -2704,9 +2704,9 @@ static public class ObjExpr implements Expr{
 		return name;
 	}
 
-	public final String simpleName(){
-		return simpleName;
-	}
+//	public final String simpleName(){
+//		return simpleName;
+//	}
 
 	public final String internalName(){
 		return internalName;
@@ -2765,6 +2765,12 @@ static public class ObjExpr implements Expr{
 		this.tag = tag;
 	}
 
+	static String trimGenID(String name){
+		int i = name.lastIndexOf("__");
+		return i==-1?name:name.substring(0,i);
+	}
+	
+
 
 	Type[] ctorTypes(){
 		if(closes.count() == 0)
@@ -2784,7 +2790,7 @@ static public class ObjExpr implements Expr{
 		return ret;
 	}
 
-	void compile(String superName, String[] interfaceNames) throws Exception{
+	void compile(String superName, String[] interfaceNames, boolean oneTimeUse) throws Exception{
 		//create bytecode for a class
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
@@ -2807,7 +2813,8 @@ static public class ObjExpr implements Expr{
 			String smap = "SMAP\n" +
 			              ((source.lastIndexOf('.') > 0) ?
 			               source.substring(0, source.lastIndexOf('.'))
-			                                             : simpleName)
+			                :source)
+			                       //                      : simpleName)
 			              + ".java\n" +
 			              "Clojure\n" +
 			              "*S Clojure\n" +
@@ -2850,11 +2857,11 @@ static public class ObjExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(lb.getPrimitiveType() != null)
-				cv.visitField(ACC_PUBLIC //+ ACC_FINAL
+				cv.visitField(ACC_PUBLIC + ACC_FINAL
 						, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
 						      null, null);
 			else
-				cv.visitField(ACC_PUBLIC //+ (onceOnly ? 0 : ACC_FINAL)
+				cv.visitField(ACC_PUBLIC + (oneTimeUse ? 0 : ACC_FINAL)
 						, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 			}
 		//ctor that takes closed-overs and inits base + fields
@@ -3065,50 +3072,6 @@ static public class ObjExpr implements Expr{
 			}
 	}
 
-//	void emitConstants(GeneratorAdapter clinitgen){
-//		try
-//			{
-//			Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
-//
-//			for(int i = 0; i < constants.count(); i++)
-//				{
-//				Object o = constants.nth(i);
-//				if(o instanceof String)
-//					{
-//					clinitgen.push((String) constants.nth(i));
-//					}
-//				else
-//					{
-//					String cs = null;
-//					try
-//						{
-//						cs = RT.printString(o);
-//						}
-//					catch(Exception e)
-//						{
-//						throw new RuntimeException("Can't embed object in code, maybe print-dup not defined: "
-//						                           + o);
-//						}
-//					if(cs.length() == 0)
-//						throw new RuntimeException("Can't embed unreadable object in code: " + o);
-//
-//					if(cs.startsWith("#<"))
-//						throw new RuntimeException("Can't embed unreadable object in code: " + cs);
-//					clinitgen.push(cs);
-//					clinitgen.invokeStatic(RT_TYPE, readStringMethod);
-//					clinitgen.checkCast(constantType(i));
-//					}
-////				clinitgen.dup();
-////				clinitgen.push(i);
-////				clinitgen.arrayLoad(OBJECT_TYPE);
-//				clinitgen.putStatic(fntype, constantName(i), constantType(i));
-//				}
-//			}
-//		finally
-//			{
-//			Var.popThreadBindings();
-//			}
-//	}
 
 	void emitClearCloses(GeneratorAdapter gen){
 		int a = 1;
@@ -3189,7 +3152,6 @@ static public class ObjExpr implements Expr{
 			else
 				objx.emitLocal(gen, lb);
 			}
-//		gen.invokeConstructor(fntype, new Method("<init>", Type.VOID_TYPE, ARG_TYPES[closes.count()]));
 		gen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes()));
 		if(context == C.STATEMENT)
 			{
@@ -3286,114 +3248,26 @@ static public class ObjExpr implements Expr{
 
 }
 
-static public class NewInstanceExpr extends ObjExpr{
-	boolean onceOnly = false;
-	final static Method afnctor = Method.getMethod("void <init>()");
-	final static Method restfnctor = Method.getMethod("void <init>(int)");
-	final static Type aFnType = Type.getType(AFunction.class);
-	final static Type restFnType = Type.getType(RestFn.class);
-//if there is a variadic overload (there can only be one) it is stored here
-ObjMethod variadicMethod = null;
-	IPersistentCollection methods;
-
-	public NewInstanceExpr(Object tag){
-		super(tag);
-	}
-
-	public final ObjMethod variadicMethod(){
-		return variadicMethod;
-	}
-
-	boolean isVariadic(){
-		return variadicMethod != null;
-	}
-
-	public final IPersistentCollection methods(){
-		return methods;
-	}
-
-	static public class Parser implements IParser{
-		public Expr parse(C c, Object form){
-			return null;
-		}
-	}
-}
-
 enum PSTATE{
 	REQ, REST, DONE
 }
 
-
-public static class ObjMethod{
-	//when closures are defined inside other closures,
-	//the closed over locals need to be propagated to the enclosing objx
-	public final ObjMethod parent;
-	//localbinding->localbinding
-	IPersistentMap locals = null;
-	//num->localbinding
-	IPersistentMap indexlocals = null;
+public static class FnMethod extends ObjMethod{
 	//localbinding->localbinding
 	PersistentVector reqParms = PersistentVector.EMPTY;
 	LocalBinding restParm = null;
-	Expr body = null;
-	ObjExpr objx;
-	PersistentVector argLocals;
-	int maxLocal = 0;
-	int line;
-	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
 
-	public final IPersistentMap locals(){
-		return locals;
+	public FnMethod(ObjExpr objx, ObjMethod parent){
+		super(objx, parent);
 	}
 
-	public final PersistentVector reqParms(){
-		return reqParms;
-	}
-
-	public final LocalBinding restParm(){
-		return restParm;
-	}
-
-	public final Expr body(){
-		return body;
-	}
-
-	public final ObjExpr objx(){
-		return objx;
-	}
-
-	public final PersistentVector argLocals(){
-		return argLocals;
-	}
-
-	public final int maxLocal(){
-		return maxLocal;
-	}
-
-	public final int line(){
-		return line;
-	}
-
-	public ObjMethod(ObjExpr objx, ObjMethod parent){
-		this.parent = parent;
-		this.objx = objx;
-	}
-
-	boolean isVariadic(){
-		return restParm != null;
-	}
-
-	int numParams(){
-		return reqParms.count() + (isVariadic() ? 1 : 0);
-	}
-
-	private static ObjMethod parse(ObjExpr objx, ISeq form) throws Exception{
+	static FnMethod parse(ObjExpr objx, ISeq form) throws Exception{
 		//([args] body...)
 		IPersistentVector parms = (IPersistentVector) RT.first(form);
 		ISeq body = RT.next(form);
 		try
 			{
-			ObjMethod method = new ObjMethod(objx, (ObjMethod) METHOD.deref());
+			FnMethod method = new FnMethod(objx, (ObjMethod) METHOD.deref());
 			method.line = (Integer) LINE.deref();
 			//register as the current method and set up a new env frame
 			Var.pushThreadBindings(
@@ -3456,13 +3330,118 @@ public static class ObjMethod{
 			}
 	}
 
+	public final PersistentVector reqParms(){
+		return reqParms;
+	}
+
+	public final LocalBinding restParm(){
+		return restParm;
+	}
+
+	boolean isVariadic(){
+		return restParm != null;
+	}
+
+	int numParams(){
+		return reqParms.count() + (isVariadic() ? 1 : 0);
+	}
+
+	String getMethodName(){
+		return isVariadic()?"doInvoke":"invoke";
+	}
+
+	Type getReturnType(){
+		return OBJECT_TYPE;
+	}
+
+	Type[] getArgTypes(){
+		return  ARG_TYPES[numParams()];
+	}
+
+	void emitClearLocals(GeneratorAdapter gen){
+		for(int i = 1; i < numParams() + 1; i++)
+			{
+			if(!localsUsedInCatchFinally.contains(i))
+				{
+				gen.visitInsn(Opcodes.ACONST_NULL);
+				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+				}
+			}
+		for(int i = numParams() + 1; i < maxLocal + 1; i++)
+			{
+			if(!localsUsedInCatchFinally.contains(i))
+				{
+				LocalBinding b = (LocalBinding) RT.get(indexlocals, i);
+				if(b == null || maybePrimitiveType(b.init) == null)
+					{
+					gen.visitInsn(Opcodes.ACONST_NULL);
+					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+					}
+				}
+			}
+		if(((FnExpr)objx).onceOnly)
+			{
+			objx.emitClearCloses(gen);
+			}
+	}
+}
+
+abstract public static class ObjMethod{
+	//when closures are defined inside other closures,
+	//the closed over locals need to be propagated to the enclosing objx
+	public final ObjMethod parent;
+	//localbinding->localbinding
+	IPersistentMap locals = null;
+	//num->localbinding
+	IPersistentMap indexlocals = null;
+	Expr body = null;
+	ObjExpr objx;
+	PersistentVector argLocals;
+	int maxLocal = 0;
+	int line;
+	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
+
+	public final IPersistentMap locals(){
+		return locals;
+	}
+
+	public final Expr body(){
+		return body;
+	}
+
+	public final ObjExpr objx(){
+		return objx;
+	}
+
+	public final PersistentVector argLocals(){
+		return argLocals;
+	}
+
+	public final int maxLocal(){
+		return maxLocal;
+	}
+
+	public final int line(){
+		return line;
+	}
+
+	public ObjMethod(ObjExpr objx, ObjMethod parent){
+		this.parent = parent;
+		this.objx = objx;
+	}
+
+	abstract int numParams();
+	abstract String getMethodName();
+	abstract Type getReturnType();
+	abstract Type[] getArgTypes();
+
 	public void emit(ObjExpr fn, ClassVisitor cv){
-		Method m = new Method(isVariadic() ? "doInvoke" : "invoke",
-		                      OBJECT_TYPE, ARG_TYPES[numParams()]);
+		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
 
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
 		                                            m,
 		                                            null,
+		                                            //todo don't hardwire this
 		                                            EXCEPTION_TYPES,
 		                                            cv);
 		gen.visitCode();
@@ -3491,14 +3470,12 @@ public static class ObjMethod{
 	}
 
 	void emitClearLocals(GeneratorAdapter gen){
-		//this seems shaky given primitive locals - revisit
 		for(int i = 1; i < numParams() + 1; i++)
 			{
 			if(!localsUsedInCatchFinally.contains(i))
 				{
 				gen.visitInsn(Opcodes.ACONST_NULL);
 				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
-//				gen.storeArg(i);
 				}
 			}
 		for(int i = numParams() + 1; i < maxLocal + 1; i++)
@@ -3512,10 +3489,6 @@ public static class ObjMethod{
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
 					}
 				}
-			}
-		if(objx.onceOnly)
-			{
-			objx.emitClearCloses(gen);
 			}
 	}
 }
@@ -4820,4 +4793,283 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 	return ret;
 }
 
+
+static public class NewInstanceExpr extends ObjExpr{
+	IPersistentMap optionsMap = PersistentArrayMap.EMPTY;
+	IPersistentCollection methods;
+
+	public NewInstanceExpr(Object tag){
+		super(tag);
+	}
+
+	static Expr parse(C context, ISeq form) throws Exception{
+		//(new [super then interfaces] this-name? {options}? (method-name [args] body)*)
+
+		NewInstanceExpr ret = new NewInstanceExpr(null);
+		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
+		String basename = enclosingMethod != null ?
+		                  (trimGenID(enclosingMethod.objx.name) + "$")
+		                 : (munge(currentNS().name.name) + "$");
+		String simpleName = "obj__" + RT.nextID();
+		ret.name = basename + simpleName;
+		ret.internalName = ret.name.replace('.', '/');
+		ret.objtype = Type.getObjectType(ret.internalName);
+
+		PersistentVector v = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(RT.second(form));s!=null;s = s.next())
+			{
+			Class c = (Class) resolve((Symbol) s.first());
+			if(!c.isInterface() && v.count() > 0)
+				throw new IllegalArgumentException("superclass must be first");
+			v = v.cons(c);
+			}
+		ISeq superAndInterfaces = RT.seq(v);
+		Class superClass = (Class) RT.first(superAndInterfaces);
+		if(superClass == null || superClass.isInterface())
+			{
+			superClass = Object.class;
+			superAndInterfaces = RT.cons(superClass, superAndInterfaces);
+			}
+
+		ISeq rform = RT.next(RT.next(form));
+
+		//supers might be followed by symbol naming this
+		if(RT.first(rform) instanceof Symbol)
+			{
+			ret.thisName = ((Symbol) RT.first(rform)).name;
+			rform = RT.next(rform);
+			}
+
+		//might be followed by map of options
+		if(RT.first(rform) instanceof IPersistentMap)
+			{
+			ret.optionsMap = ((IPersistentMap) RT.first(rform));
+			rform = RT.next(rform);
+			}
+		
+		try
+			{
+			Var.pushThreadBindings(
+					RT.map(CONSTANTS, PersistentVector.EMPTY,
+					       KEYWORDS, PersistentHashMap.EMPTY,
+					       VARS, PersistentHashMap.EMPTY));
+
+			//now (methodname [args] body)*
+			ret.line = (Integer) LINE.deref();
+			IPersistentCollection methods = null;
+			for(ISeq s = rform; s != null; s = RT.next(s))
+				{
+				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s));
+				methods = RT.conj(methods, m);
+				}
+
+			ret.methods = methods;
+			ret.keywords = (IPersistentMap) KEYWORDS.deref();
+			ret.vars = (IPersistentMap) VARS.deref();
+			ret.constants = (PersistentVector) CONSTANTS.deref();
+			ret.constantsID = RT.nextID();
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
+
+		int icnt = RT.count(RT.next(superAndInterfaces));
+		String[] inames = icnt > 0 ? new String[icnt] : null;
+		for(int i=0;i<icnt;i++)
+			inames[i] = slashname((Class) RT.nth(RT.next(superAndInterfaces), i));
+		ret.compile(slashname(superClass),inames,false);
+		return ret;
+	}
+
+	static String slashname(Class c){
+		return c.getName().replace('.', '/');
+	}
+
+
+	protected void emitMethods(ClassVisitor cv){
+		for(ISeq s = RT.seq(methods); s != null; s = s.next())
+			{
+			ObjMethod method = (ObjMethod) s.first();
+			method.emit(this, cv);
+			}
+	}
+}
+
+public static class NewInstanceMethod extends ObjMethod{
+	String name;
+	Type[] argTypes;
+	Type retType;
+	Class retClass;
+
+	public NewInstanceMethod(ObjExpr objx, ObjMethod parent){
+		super(objx, parent);
+	}
+
+	int numParams(){
+		return argLocals.count();
+	}
+
+	String getMethodName(){
+		return name;
+	}
+
+	Type getReturnType(){
+		return retType;
+	}
+
+	Type[] getArgTypes(){
+		return argTypes;
+	}
+
+	static Class primClass(Symbol sym){
+		if(sym == null)
+			return null;
+		Class c = null;
+		if(sym.name.equals("int"))
+			c = int.class;
+		else if(sym.name.equals("long"))
+			c = long.class;
+		else if(sym.name.equals("float"))
+			c = float.class;
+		else if(sym.name.equals("double"))
+			c = double.class;
+		else if(sym.name.equals("char"))
+			c = char.class;
+		else if(sym.name.equals("short"))
+			c = short.class;
+		else if(sym.name.equals("byte"))
+			c = byte.class;
+		else if(sym.name.equals("boolean"))
+			c = boolean.class;
+		else if(sym.name.equals("void"))
+			c = void.class;
+		return c;
+	}
+
+	static Class tagClass(Object tag) throws Exception{
+		if(tag == null)
+			return Object.class;
+		Class c = null;
+		if(tag instanceof Symbol)
+			c = primClass((Symbol) tag);
+		if(c == null)
+			c = HostExpr.tagToClass(tag);
+		return c;
+	}
+	
+	static NewInstanceMethod parse(ObjExpr objx, ISeq form) throws Exception{
+		//(methodname [args] body...)
+		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
+		Symbol name = (Symbol)RT.first(form);
+		IPersistentVector parms = (IPersistentVector) RT.second(form);
+		ISeq body = RT.next(RT.next(form));
+		try
+			{
+			method.line = (Integer) LINE.deref();
+			//register as the current method and set up a new env frame
+			Var.pushThreadBindings(
+					RT.map(
+							METHOD, method,
+							LOCAL_ENV, LOCAL_ENV.deref(),
+							LOOP_LOCALS, null,
+							NEXT_LOCAL_NUM, 0));
+
+			//register 'this' as local 0
+			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "obj__" + RT.nextID()), null, null);
+
+			PersistentVector argLocals = PersistentVector.EMPTY;
+			method.retClass = tagClass(tagOf(name));
+			method.retType = Type.getType(method.retClass);
+			method.argTypes = new Type[parms.count()];
+			for(int i = 0; i < parms.count(); i++)
+				{
+				if(!(parms.nth(i) instanceof Symbol))
+					throw new IllegalArgumentException("params must be Symbols");
+				Symbol p = (Symbol) parms.nth(i);
+				Object tag = tagOf(p);
+				if(p.getNamespace() != null)
+					p = Symbol.create(p.name);
+				Class pclass = tagClass(tag);
+				LocalBinding lb = registerLocal(p, null, new MethodParamExpr(pclass));
+				argLocals = argLocals.assocN(i,lb);
+				method.argTypes[i] = Type.getType(pclass);
+				}
+			LOOP_LOCALS.set(argLocals);
+			method.name = name.name;
+			method.argLocals = argLocals;
+			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
+			return method;
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
+	}
+
+	public void emit(ObjExpr fn, ClassVisitor cv){
+		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
+
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+		                                            m,
+		                                            null,
+		                                            //todo don't hardwire this
+		                                            EXCEPTION_TYPES,
+		                                            cv);
+		gen.visitCode();
+		Label loopLabel = gen.mark();
+		gen.visitLineNumber(line, loopLabel);
+		try
+			{
+			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
+			body.emit(C.RETURN, fn, gen);
+			if(retClass == void.class)
+				{
+				gen.pop();
+				}
+			else if(retClass.isPrimitive())
+				gen.unbox(retType);
+			
+			Label end = gen.mark();
+			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
+			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.next())
+				{
+				LocalBinding lb = (LocalBinding) lbs.first();
+				gen.visitLocalVariable(lb.name, "Ljava/lang/Object;", null, loopLabel, end, lb.idx);
+				}
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
+
+		gen.returnValue();
+		//gen.visitMaxs(1, 1);
+		gen.endMethod();
+	}
+}
+
+static public class MethodParamExpr implements Expr{
+	final Class c;
+
+	public MethodParamExpr(Class c){
+		this.c = c;
+	}
+
+	public Object eval() throws Exception{
+		throw new Exception("Can't eval");
+	}
+
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		throw new RuntimeException("Can't emit");
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return c != null;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return c;
+	}
+}
 }
