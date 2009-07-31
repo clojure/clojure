@@ -12,7 +12,8 @@
     #^{:author "Chris Houser",
        :doc "Functions to parse xml lazily and emit back to text."}
     clojure.contrib.lazy-xml
-    (:require [clojure.xml :as xml])
+    (:use [clojure.xml :as xml :only []]
+          [clojure.contrib.seq-utils :only [fill-queue]])
     (:import (org.xml.sax Attributes InputSource)
              (org.xml.sax.helpers DefaultHandler)
              (javax.xml.parsers SAXParserFactory)
@@ -41,7 +42,7 @@
   parsers can be supplied by passing startparse, a fn taking a source
   and a ContentHandler and returning a parser. If a parser is
   specified, it will be run in a separate thread and be allowed to get
-  ahead by queue-size items, which defaults to maxing.  If no parser
+  ahead by queue-size items, which defaults to maxint.  If no parser
   is specified and org.xmlpull.v1.XmlPullParser is in the classpath,
   this superior pull parser will be used."
   ([s] (if has-pull
@@ -49,42 +50,24 @@
          (parse-seq s startparse-sax)))
   ([s startparse] (parse-seq s startparse Integer/MAX_VALUE))
   ([s startparse queue-size]
-   (let [q (LinkedBlockingQueue. queue-size)
-         NIL (Object.) ;nil sentinel since LBQ doesn't support nils
-         agt (agent nil)
-         s (if (instance? Reader s) (InputSource. s) s)
-         step (fn step []
-                (lazy-seq
-                  (if-let [x (.take q)]
-                    (cons x (step))
-                    @agt)))  ;will be nil, touch agent just to propagate errors
-         keep-alive (WeakReference. step)
-         enqueue (fn [x]
-                     (if (.get keep-alive)
-                       (when-not (.offer q x 1 TimeUnit/SECONDS)
-                                 (recur x))
-                       (throw (Exception. "abandoned"))))]
-     (send-off agt
-       (fn [_]
-         (try
-           (startparse s (proxy [DefaultHandler] []
-             (startElement [uri local-name q-name #^Attributes atts]
-               ;(prn :start-element q-name)(flush)
-               (let [attrs (into {} (for [i (range (.getLength atts))]
-                                         [(keyword (.getQName atts i))
-                                          (.getValue atts i)]))]
-                 (enqueue (struct node :start-element (keyword q-name) attrs))))
-             (endElement [uri local-name q-name]
-               ;(prn :end-element q-name)(flush)
-               (enqueue (struct node :end-element (keyword q-name))))
-             (characters [ch start length]
-               ;(prn :characters)(flush)
-               (let [st (String. ch start length)]
-                 (when (seq (.trim st))
-                   (enqueue (struct node :characters nil nil st)))))))
-           (finally
-             (.put q false)))))
-     (step))))
+   (let [s (if (instance? Reader s) (InputSource. s) s)
+         f (fn filler-func [fill]
+             (startparse s (proxy [DefaultHandler] []
+               (startElement [uri local-name q-name #^Attributes atts]
+                 ;(prn :start-element q-name)(flush)
+                 (let [attrs (into {} (for [i (range (.getLength atts))]
+                                           [(keyword (.getQName atts i))
+                                            (.getValue atts i)]))]
+                   (fill (struct node :start-element (keyword q-name) attrs))))
+               (endElement [uri local-name q-name]
+                 ;(prn :end-element q-name)(flush)
+                 (fill (struct node :end-element (keyword q-name))))
+               (characters [ch start length]
+                 ;(prn :characters)(flush)
+                 (let [st (String. ch start length)]
+                   (when (seq (.trim st))
+                     (fill (struct node :characters nil nil st))))))))]
+     (fill-queue f :queue-size queue-size))))
 
 
 (defstruct element :tag :attrs :content)
