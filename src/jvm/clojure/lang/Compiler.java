@@ -1760,7 +1760,8 @@ public static class TryExpr implements Expr{
 							Var.pushThreadBindings(dynamicBindings);
 							LocalBinding lb = registerLocal(sym,
 							                                (Symbol) (RT.second(f) instanceof Symbol ? RT.second(f)
-							                                                                         : null), null);
+							                                                                         : null),
+							                                null,false);
 							Expr handler = (new BodyExpr.Parser()).parse(context, RT.next(RT.next(RT.next(f))));
 							catches = catches.cons(new CatchClause(c, lb, handler));
 							}
@@ -3201,13 +3202,22 @@ static public class ObjExpr implements Expr{
 		else
 			{
 			Class primc = lb.getPrimitiveType();
-			if(primc != null)
+			if(lb.isArg)
 				{
-				gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), lb.idx);
-				HostExpr.emitBoxReturn(this, gen, primc);
+				gen.loadArg(lb.idx-1);
+				if(primc != null)
+					HostExpr.emitBoxReturn(this, gen, primc);
 				}
 			else
-				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
+				{
+				if(primc != null)
+					{
+					gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), lb.idx);
+					HostExpr.emitBoxReturn(this, gen, primc);
+					}
+				else
+					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
+				}
 			}
 	}
 
@@ -3218,6 +3228,8 @@ static public class ObjExpr implements Expr{
 			gen.loadThis();
 			gen.getField(objtype, lb.name, Type.getType(primc));
 			}
+		else if(lb.isArg)
+			gen.loadArg(lb.idx-1);
 		else
 			gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD), lb.idx);
 	}
@@ -3297,7 +3309,7 @@ public static class FnMethod extends ObjMethod{
 
 			//register 'this' as local 0
 			//registerLocal(THISFN, null, null);
-			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "fn__" + RT.nextID()), null, null);
+			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "fn__" + RT.nextID()), null, null,false);
 
 			PSTATE state = PSTATE.REQ;
 			PersistentVector argLocals = PersistentVector.EMPTY;
@@ -3318,7 +3330,7 @@ public static class FnMethod extends ObjMethod{
 
 				else
 					{
-					LocalBinding lb = registerLocal(p, state == PSTATE.REST ? ISEQ : tagOf(p), null);
+					LocalBinding lb = registerLocal(p, state == PSTATE.REST ? ISEQ : tagOf(p), null,true);
 					argLocals = argLocals.cons(lb);
 					switch(state)
 						{
@@ -3488,14 +3500,24 @@ abstract public static class ObjMethod{
 	}
 
 	void emitClearLocals(GeneratorAdapter gen){
-		for(int i = 1; i < numParams() + 1; i++)
+		for(int i=0;i<argLocals.count();i++)
 			{
-			if(!localsUsedInCatchFinally.contains(i))
+			LocalBinding lb = (LocalBinding) argLocals.nth(i);
+			if(!localsUsedInCatchFinally.contains(lb.idx) && lb.getPrimitiveType() == null)
 				{
 				gen.visitInsn(Opcodes.ACONST_NULL);
-				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+				gen.storeArg(lb.idx - 1);				
 				}
+
 			}
+//		for(int i = 1; i < numParams() + 1; i++)
+//			{
+//			if(!localsUsedInCatchFinally.contains(i))
+//				{
+//				gen.visitInsn(Opcodes.ACONST_NULL);
+//				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+//				}
+//			}
 		for(int i = numParams() + 1; i < maxLocal + 1; i++)
 			{
 			if(!localsUsedInCatchFinally.contains(i))
@@ -3517,14 +3539,16 @@ public static class LocalBinding{
 	public Expr init;
 	public final int idx;
 	public final String name;
+	public final boolean isArg;
 
-	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init) throws Exception{
+	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg) throws Exception{
 		if(maybePrimitiveType(init) != null && tag != null)
 			throw new UnsupportedOperationException("Can't type hint a local with a primitive initializer");
 		this.idx = num;
 		this.sym = sym;
 		this.tag = tag;
 		this.init = init;
+		this.isArg = isArg;
 		name = munge(sym.name);
 	}
 
@@ -3727,7 +3751,7 @@ public static class LetFnExpr implements Expr{
 					Symbol sym = (Symbol) bindings.nth(i);
 					if(sym.getNamespace() != null)
 						throw new Exception("Can't let qualified name: " + sym);
-					LocalBinding lb = registerLocal(sym, tagOf(sym), null);
+					LocalBinding lb = registerLocal(sym, tagOf(sym), null,false);
 					lbs = lbs.cons(lb);
 					}
 				PersistentVector bindingInits = PersistentVector.EMPTY;
@@ -3859,7 +3883,7 @@ public static class LetExpr implements Expr{
 						throw new Exception("Can't let qualified name: " + sym);
 					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 					//sequential enhancement of env (like Lisp let*)
-					LocalBinding lb = registerLocal(sym, tagOf(sym), init);
+					LocalBinding lb = registerLocal(sym, tagOf(sym), init,false);
 					BindingInit bi = new BindingInit(lb, init);
 					bindingInits = bindingInits.cons(bi);
 
@@ -3985,10 +4009,15 @@ public static class RecurExpr implements Expr{
 			{
 			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
 			Class primc = lb.getPrimitiveType();
-			if(primc != null)
-				gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ISTORE), lb.idx);
+			if(lb.isArg)
+				gen.storeArg(lb.idx-1);
 			else
-				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
+				{
+				if(primc != null)
+					gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ISTORE), lb.idx);
+				else
+					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
+				}
 			}
 
 		gen.goTo(loopLabel);
@@ -4024,9 +4053,9 @@ public static class RecurExpr implements Expr{
 	}
 }
 
-private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init) throws Exception{
+private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init, boolean isArg) throws Exception{
 	int num = getAndIncLocalNum();
-	LocalBinding b = new LocalBinding(num, sym, tag, init);
+	LocalBinding b = new LocalBinding(num, sym, tag, init, isArg);
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.deref();
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
 	ObjMethod method = (ObjMethod) METHOD.deref();
@@ -5062,7 +5091,8 @@ public static class NewInstanceMethod extends ObjMethod{
 							NEXT_LOCAL_NUM, 0));
 
 			//register 'this' as local 0
-			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "obj__" + RT.nextID()), null, null);
+			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "obj__" + RT.nextID()),
+			              null, null,false);
 
 			PersistentVector argLocals = PersistentVector.EMPTY;
 			method.retClass = tagClass(tagOf(name));
@@ -5133,11 +5163,15 @@ public static class NewInstanceMethod extends ObjMethod{
 
 			for(int i = 0; i < parms.count(); i++)
 				{
-				LocalBinding lb = registerLocal(psyms[i], null, new MethodParamExpr(pclasses[i]));
+				LocalBinding lb = registerLocal(psyms[i], null, new MethodParamExpr(pclasses[i]),true);
 				argLocals = argLocals.assocN(i,lb);
 				method.argTypes[i] = Type.getType(pclasses[i]);
 				}
-
+			for(int i = 0; i < parms.count(); i++)
+				{
+				if(pclasses[i] == long.class || pclasses[i] == double.class)
+					getAndIncLocalNum();
+				}
 			LOOP_LOCALS.set(argLocals);
 			method.name = name.name;
 			method.argLocals = argLocals;
