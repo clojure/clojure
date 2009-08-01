@@ -174,7 +174,8 @@
   [pred coll]
   (first (filter pred coll)))
 
-; based on work related to seque.  blame Chouser
+; based on work related to Rich Hickey's seque.
+; blame Chouser for anything broken or ugly.
 (defn fill-queue
   "filler-func will be called in another thread with a single arg
   'fill'.  filler-func may call fill repeatedly with one arg each
