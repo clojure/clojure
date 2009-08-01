@@ -73,6 +73,8 @@ static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 static final Keyword inlineKey = Keyword.intern(null, "inline");
 static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 
+static final Keyword volatileKey = Keyword.intern(null, "volatile");
+
 static final Symbol NS = Symbol.create("ns");
 static final Symbol IN_NS = Symbol.create("in-ns");
 
@@ -2707,6 +2709,10 @@ static public class ObjExpr implements Expr{
 	public final Object tag;
 	//localbinding->itself
 	IPersistentMap closes = PersistentHashMap.EMPTY;
+
+	//symbols
+	IPersistentSet volatiles = PersistentHashSet.EMPTY;
+
 	//Keyword->KeywordExpr
 	IPersistentMap keywords = PersistentHashMap.EMPTY;
 	IPersistentMap vars = PersistentHashMap.EMPTY;
@@ -2874,8 +2880,9 @@ static public class ObjExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
+
 			if(lb.getPrimitiveType() != null)
-				cv.visitField(ACC_PUBLIC + ACC_FINAL
+				cv.visitField(ACC_PUBLIC + (isVolatile(lb) ? ACC_VOLATILE : ACC_FINAL)
 						, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
 						      null, null);
 			else
@@ -3090,6 +3097,9 @@ static public class ObjExpr implements Expr{
 			}
 	}
 
+	boolean isVolatile(LocalBinding lb){
+		return closes.containsKey(lb) && volatiles.contains(lb.sym);
+	}
 
 	void emitClearCloses(GeneratorAdapter gen){
 		int a = 1;
@@ -3183,6 +3193,26 @@ static public class ObjExpr implements Expr{
 
 	public Class getJavaClass() throws Exception{
 		return (tag != null) ? HostExpr.tagToClass(tag) : IFn.class;
+	}
+
+	public void emitAssignLocal(GeneratorAdapter gen, LocalBinding lb,Expr val){
+		if(!isVolatile(lb))
+			throw new IllegalArgumentException("Cannot assign to non-volatile: " + lb.name);
+		Class primc = lb.getPrimitiveType();
+		gen.loadThis();
+		if(primc != null)
+			{
+			MaybePrimitiveExpr me = (MaybePrimitiveExpr) val;
+			if(!me.canEmitPrimitive())
+				throw new IllegalArgumentException("Must assign primitive to primitive volatile: " + lb.name);
+			me.emitUnboxed(C.EXPRESSION, this, gen);
+			gen.putField(objtype, lb.name, Type.getType(primc));
+			}
+		else
+			{
+			val.emit(C.EXPRESSION, this, gen);
+			gen.putField(objtype, lb.name, OBJECT_TYPE);
+			}
 	}
 
 	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
@@ -3570,7 +3600,7 @@ public static class LocalBinding{
 	}
 }
 
-public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
+public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, AssignableExpr{
 	public final LocalBinding b;
 	public final Symbol tag;
 
@@ -3594,6 +3624,16 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		if(context != C.STATEMENT)
+			objx.emitLocal(gen, b);
+	}
+
+	public Object evalAssign(Expr val) throws Exception{
+		throw new UnsupportedOperationException("Can't eval locals");
+	}
+
+	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen, Expr val){
+		objx.emitAssignLocal(gen, b,val);
 		if(context != C.STATEMENT)
 			objx.emitLocal(gen, b);
 	}
@@ -4914,7 +4954,12 @@ static public class NewInstanceExpr extends ObjExpr{
 			ret.optionsMap = ((IPersistentMap) RT.first(rform));
 			rform = RT.next(rform);
 			}
-		
+
+		if(RT.get(ret.optionsMap, volatileKey) != null)
+			{
+			ret.volatiles = PersistentHashSet.create(RT.seq(RT.get(ret.optionsMap, volatileKey)));
+			}
+
 		try
 			{
 			Var.pushThreadBindings(
@@ -4930,6 +4975,7 @@ static public class NewInstanceExpr extends ObjExpr{
 				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),overrideables, allmethods);
 				methods = RT.conj(methods, m);
 				}
+
 
 			ret.methods = methods;
 			ret.keywords = (IPersistentMap) KEYWORDS.deref();
