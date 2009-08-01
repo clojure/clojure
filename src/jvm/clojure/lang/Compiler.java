@@ -1026,7 +1026,7 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 static Class maybePrimitiveType(Expr e){
 	try
 		{
-		if(e instanceof MaybePrimitiveExpr && e.hasJavaClass())
+		if(e instanceof MaybePrimitiveExpr && e.hasJavaClass() && ((MaybePrimitiveExpr)e).canEmitPrimitive())
 			{
 			Class c = e.getJavaClass();
 			if(Util.isPrimitive(c))
@@ -2135,8 +2135,7 @@ public static class IfExpr implements Expr{
 
 		try
 			{
-			if(testExpr instanceof MaybePrimitiveExpr && testExpr.hasJavaClass() &&
-			   testExpr.getJavaClass() == boolean.class)
+			if(maybePrimitiveType(testExpr) == boolean.class)
 				{
 				((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, objx, gen);
 				gen.ifZCmp(gen.EQ, falseLabel);
