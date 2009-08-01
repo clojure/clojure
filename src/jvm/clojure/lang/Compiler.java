@@ -3287,8 +3287,27 @@ static public class FnExpr implements Expr{
 					}
 				else if(value instanceof Class)
 						{
-						gen.push(((Class) value).getName());
-						gen.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
+                                                Class cc = (Class)value;
+                                                if(cc.isPrimitive())
+                                                        {
+                                                        Type bt;
+                                                        if ( cc == boolean.class ) bt = Type.getType(Boolean.class);
+                                                        else if ( cc == byte.class ) bt = Type.getType(Byte.class);
+                                                        else if ( cc == char.class ) bt = Type.getType(Character.class);
+                                                        else if ( cc == double.class ) bt = Type.getType(Double.class);
+                                                        else if ( cc == float.class ) bt = Type.getType(Float.class);
+                                                        else if ( cc == int.class ) bt = Type.getType(Integer.class);
+                                                        else if ( cc == long.class ) bt = Type.getType(Long.class);
+                                                        else if ( cc == short.class ) bt = Type.getType(Short.class);
+                                                        else throw new RuntimeException(
+                                                                "Can't embed unknown primitive in code: " + value);
+                                                        gen.getStatic( bt, "TYPE", Type.getType(Class.class) );
+                                                        }
+                                                else
+                                                        {
+                                                        gen.push(cc.getName());
+                                                        gen.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
+                                                        }
 						}
 					else if(value instanceof Symbol)
 							{
