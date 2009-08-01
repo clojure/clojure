@@ -4187,10 +4187,10 @@
   not yet finished, calls to deref/@ will block."
   [#^Callable f]
   (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
-    (proxy [clojure.lang.IDeref java.util.concurrent.Future] []
+    (new [clojure.lang.IDeref java.util.concurrent.Future]
       (deref [] (.get fut))
-      (get ([] (.get fut))
-           ([timeout unit] (.get fut timeout unit)))
+      (get [] (.get fut))
+      (get [timeout unit] (.get fut timeout unit))
       (isCancelled [] (.isCancelled fut))
       (isDone [] (.isDone fut))
       (cancel [interrupt?] (.cancel fut interrupt?)))))
@@ -4300,7 +4300,7 @@
   []
   (let [d (java.util.concurrent.CountDownLatch. 1)
         v (atom nil)]
-    (proxy [clojure.lang.AFn clojure.lang.IDeref] []
+    (new [clojure.lang.AFn clojure.lang.IDeref] this
       (deref [] (.await d) @v)
       (invoke [x]
         (locking d
