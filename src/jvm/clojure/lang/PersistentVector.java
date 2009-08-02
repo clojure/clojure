@@ -13,28 +13,26 @@
 package clojure.lang;
 
 import java.util.List;
-import java.util.Random;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IEditableCollection{
 
 static class Node{
-	final AtomicBoolean edit;
+	final AtomicReference<Thread> edit;
 	final Object[] array;
 
-	Node(AtomicBoolean edit, Object[] array){
+	Node(AtomicReference<Thread> edit, Object[] array){
 		this.edit = edit;
 		this.array = array;
 	}
 
-	Node(AtomicBoolean edit){
+	Node(AtomicReference<Thread> edit){
 		this.edit = edit;
 		this.array = new Object[32];
 	}
 }
 
-final static AtomicBoolean NOEDIT = new AtomicBoolean(false);
+final static AtomicReference<Thread> NOEDIT = new AtomicReference<Thread>(null);
 final static Node EMPTY_NODE = new Node(NOEDIT, new Object[32]);
 
 final int cnt;
@@ -203,7 +201,7 @@ private Node pushTail(int level, Node parent, Node tailnode){
 	return ret;
 }
 
-private static Node newPath(AtomicBoolean edit,int level, Node node){
+private static Node newPath(AtomicReference<Thread> edit,int level, Node node){
 	if(level == 0)
 		return node;
 	Node ret = new Node(edit);
@@ -371,7 +369,7 @@ private Node popTail(int level, Node node){
 		}
 }
 
-static class MutableVector implements IMutableVector, Counted{
+static final class MutableVector implements IMutableVector, Counted{
 	int cnt;
 	int shift;
 	Node root;
@@ -385,10 +383,11 @@ static class MutableVector implements IMutableVector, Counted{
 	}
 
 	MutableVector(PersistentVector v){
-		this(v.cnt, v.shift, editable(v.root), editableTail(v.tail));
+		this(v.cnt, v.shift, editableRoot(v.root), editableTail(v.tail));
 	}
 
 	public int count(){
+		ensureEditable();
 		return cnt;
 	}
 	
@@ -399,18 +398,29 @@ static class MutableVector implements IMutableVector, Counted{
 	}
 
 	void ensureEditable(){
-		if(root.edit.get())
+		Thread owner = root.edit.get();
+		if(owner == Thread.currentThread())
 			return;
-		root = editable(root);
-		tail = editableTail(tail);
+		if(owner != null)
+			throw new IllegalAccessError("Mutable used by non-owner thread");
+		throw new IllegalAccessError("Mutable used after immutable call");
+
+//		root = editableRoot(root);
+//		tail = editableTail(tail);
 	}
 
-	static Node editable(Node node){
-		return new Node(new AtomicBoolean(true), node.array.clone());
+	static Node editableRoot(Node node){
+		return new Node(new AtomicReference<Thread>(Thread.currentThread()), node.array.clone());
 	}
 
 	public PersistentVector immutable(){
-		root.edit.set(false);
+		ensureEditable();
+//		Thread owner = root.edit.get();
+//		if(owner != null && owner != Thread.currentThread())
+//			{
+//			throw new IllegalAccessError("Mutation release by non-owner thread");
+//			}
+		root.edit.set(null);
 		Object[] trimmedTail = new Object[cnt-tailoff()];
 		System.arraycopy(tail,0,trimmedTail,0,trimmedTail.length);
 		return new PersistentVector(cnt, shift, root, trimmedTail);
@@ -478,7 +488,7 @@ static class MutableVector implements IMutableVector, Counted{
 		return ret;
 	}
 
-	final int tailoff(){
+	final private int tailoff(){
 		if(cnt < 32)
 			return 0;
 		return ((cnt-1) >>> 5) << 5;
@@ -498,16 +508,18 @@ static class MutableVector implements IMutableVector, Counted{
 	}
 
 	public Object valAt(Object key){
+		ensureEditable();
 		if(Util.isInteger(key))
 			{
 			int i = ((Number) key).intValue();
-			if(i >= 0 && i < count())
+			if(i >= 0 && i < cnt)
 				return nth(i);
 			}
 		return null;
 	}
 
 	public Object nth(int i){
+		ensureEditable();
 		Object[] node = arrayFor(i);
 		return node[i & 0x01f];
 	}
@@ -531,6 +543,7 @@ static class MutableVector implements IMutableVector, Counted{
 	}
 
 	public MutableVector assoc(Object key, Object val){
+		//note - relies on ensureEditable in assocN
 		if(Util.isInteger(key))
 			{
 			int i = ((Number) key).intValue();
@@ -626,20 +639,20 @@ static public void main(String[] args){
 	int size = Integer.parseInt(args[0]);
 	int writes = Integer.parseInt(args[1]);
 	int reads = Integer.parseInt(args[2]);
-	//Vector v = new Vector(size);
+//	Vector v = new Vector(size);
 	ArrayList v = new ArrayList(size);
-	//v.setSize(size);
+//	v.setSize(size);
 	//PersistentArray p = new PersistentArray(size);
 	PersistentVector p = PersistentVector.EMPTY;
-	MutableVector mp = p.mutable();
+//	MutableVector mp = p.mutable();
 
 	for(int i = 0; i < size; i++)
 		{
 		v.add(i);
 //		v.set(i, i);
 		//p = p.set(i, 0);
-//		p = p.cons(i);
-		mp = mp.conj(i);
+		p = p.cons(i);
+//		mp = mp.conj(i);
 		}
 
 	Random rand;
@@ -666,7 +679,7 @@ static public void main(String[] args){
 //	PersistentVector oldp = p;
 	//Random rand2 = new Random(42);
 
-//	IMutableVector mp = p.mutable();
+	MutableVector mp = p.mutable();
 	for(int i = 0; i < writes; i++)
 		{
 //		p = p.assocN(rand.nextInt(size), i);
@@ -691,6 +704,7 @@ static public void main(String[] args){
 		v.remove(v.size() - 1);
 		}
 	p = (PersistentVector) mp.immutable();
+	//mp.pop();  //should fail
 	for(int i = 0; i < size / 2; i++)
 		{
 		tp += (Integer) p.nth(i);
