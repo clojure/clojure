@@ -68,7 +68,7 @@
 (defonce- *private* {}
   "Private info for this repl")
 
-(defmacro- assoc!
+(defmacro- update
   "Replaces the map thread-locally bound to map-var with a copy that
   includes updated and/or new values from keys and vals."
   [map-var & key-vals]
@@ -166,14 +166,14 @@
   ([]
      (set-repl-name (+info-defaults+ :name-fmt)))
   ([name-fmt]
-     (assoc! *info* :name-fmt name-fmt)
+     (update *info* :name-fmt name-fmt)
      (loop [[[code fmt] & more] (seq +name-formats+)
             name-fmt name-fmt]
        (if code
          (recur more (.replace name-fmt code fmt))
-         (assoc! *private* :name-fmt name-fmt)))
+         (update *private* :name-fmt name-fmt)))
      (let [name (repl-name)]
-       (assoc! *info* :name name)
+       (update *info* :name name)
        (var-set Compiler/SOURCE name))
      nil))
 
@@ -191,12 +191,12 @@
   ([]
      (set-repl-prompt (+info-defaults+ :prompt-fmt)))
   ([prompt-fmt]
-     (assoc! *info* :prompt-fmt prompt-fmt)
+     (update *info* :prompt-fmt prompt-fmt)
      (loop [[[code fmt] & more] (seq +prompt-formats+)
             prompt-fmt prompt-fmt]
        (if code
          (recur more (.replace prompt-fmt code fmt))
-         (assoc! *private* :prompt-fmt prompt-fmt)))
+         (update *private* :prompt-fmt prompt-fmt)))
      nil))
 
 (defn repl-info
@@ -251,12 +251,12 @@
        Compiler/LINE (var-get Compiler/LINE)
        (var *info*) *info*
        (var *private*) {}})
-     (assoc! *info*
+     (update *info*
              :started (Date.)
              :serial (swap! *serial-number* inc)
              :thread (.getId (Thread/currentThread))
              :depth (inc (*info* :depth)))
-     (assoc! *private*
+     (update *private*
              :prompt prompt)
      (set-repl-name name-fmt)
      (set-repl-prompt prompt-fmt)
