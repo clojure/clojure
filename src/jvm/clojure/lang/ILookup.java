@@ -8,11 +8,12 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Jul 17, 2009 */
+/* rich Aug 2, 2009 */
 
 package clojure.lang;
 
-public interface IMutableAssociative extends IMutableCollection, ILookup{
+public interface ILookup{
+Object valAt(Object key);
 
-IMutableAssociative assoc(Object key, Object val);
+Object valAt(Object key, Object notFound);
 }

@@ -12,9 +12,7 @@
 
 package clojure.lang;
 
-public interface IMutableVector extends IMutableAssociative{
-
-Object nth(int i);
+public interface IMutableVector extends IMutableAssociative, Indexed{
 
 IMutableVector assocN(int i, Object val);
 

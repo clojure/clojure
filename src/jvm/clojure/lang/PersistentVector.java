@@ -369,7 +369,7 @@ private Node popTail(int level, Node node){
 		}
 }
 
-static final class MutableVector implements IMutableVector, Counted{
+static final class MutableVector extends AFn implements IMutableVector, Counted{
 	int cnt;
 	int shift;
 	Node root;
@@ -508,6 +508,11 @@ static final class MutableVector implements IMutableVector, Counted{
 	}
 
 	public Object valAt(Object key){
+		//note - relies on ensureEditable in 2-arg valAt
+		return valAt(key, null);
+	}
+
+	public Object valAt(Object key, Object notFound){
 		ensureEditable();
 		if(Util.isInteger(key))
 			{
@@ -515,7 +520,14 @@ static final class MutableVector implements IMutableVector, Counted{
 			if(i >= 0 && i < cnt)
 				return nth(i);
 			}
-		return null;
+		return notFound;
+	}
+
+	public Object invoke(Object arg1) throws Exception{
+		//note - relies on ensureEditable in nth
+		if(Util.isInteger(arg1))
+			return nth(((Number) arg1).intValue());
+		throw new IllegalArgumentException("Key must be integer");
 	}
 
 	public Object nth(int i){
