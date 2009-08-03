@@ -26,11 +26,11 @@
   *allow-direct-logging* boolean ref.  If log is invoked within a transaction it
   will always use an agent.
   
-  The logging macros will not evaluate their 'message' unless the specific 
-  logging level is in effect.
+  The log macro will not evaluate its 'message' unless the specific logging
+  level is in effect.
   
   Alternately, you can use the spy function when you have code that needs to be
-  evaluated, and also want to output its result to the debug log,
+  evaluated, and also want to output its result to the debug log.
   
   Unless otherwise specified, the current namespace (as identified by *ns*) will
   be used as the log-name (similar to how the java class name is usually used).
@@ -40,21 +40,25 @@
   
   You can redirect all java writes of System.out and System.err to the log 
   system by calling log-capture!.  To rebind *out* and *err* to the log system 
-  invoke with-logs.  In both cases a log-name (e.g., 'com.example.captured') 
+  invoke with-logs.  In both cases a log-name (e.g., \"com.example.captured\")
   needs to be specified to namespace the output."}
   clojure.contrib.logging)
 
 
-(defstruct log-system
-  :name     ; the name of the logging system used
-  :get-log  ; fn [name] to obtain a log by string name
-  :enabled? ; fn [log lvl] to check if a particular level is emabled
-  :write)   ; fn [log lvl msg ex] to a log a message
+(defstruct #^{:doc
+  "A struct to abstract the functionality common to all implementations.
+  The keys are as follows:
+    :name     ; the name of the logging system used
+    :get-log  ; fn [name] to obtain a log by string name
+    :enabled? ; fn [log lvl] to check if a particular level is emabled
+    :write    ; fn [log lvl msg ex] to a log a message"}
+  log-system
+  :name :get-log :enabled? :write)
 
 
 (defmacro commons-logging
   "Creates a log-system struct using the Apache commons-logging API, 
-  if present; otherwise nil."
+  if present; otherwise nil. End-users should not need to invoke this macro."
   []
   (try
     (import (org.apache.commons.logging LogFactory Log))
@@ -81,7 +85,8 @@
 
 
 (defmacro log4j-logging
-  "Creates a log-system struct using the log4j API, if present; otherwise nil."
+  "Creates a log-system struct using the log4j API, if present; otherwise nil.
+   End-users should not need to invoke this macro."
   []
   (try
     (import (org.apache.log4j Logger Level))
@@ -104,7 +109,8 @@
 
 
 (defmacro java-logging
-  "Creates a log-system struct using the java.util.logging API."
+  "Creates a log-system struct using the java.util.logging API.  End-users
+  should not need to invoke this macro."
   []
   (try
     (import (java.util.logging Logger Level))
@@ -126,37 +132,35 @@
     (catch Exception e nil)))
 
 
-(defmacro direct-log
-  "Logs the message immediately if the specific logging level is enabled. Use 
-  the log macro in prefernce to this."
-  [level message throwable log-name system]
-  `(let [log# ((~system :get-log) ~log-name)]
-    (if ((~system :enabled?) log# ~level)
-      ((~system :write) log# ~level ~message ~throwable))))
+(defn do-log
+  "Logs the message immediately if the specific logging level is enabled. Use
+  the log macro in preference to this function."
+  [system-ref level message throwable log-name]
+  (let [system @system-ref
+        log ((system :get-log) log-name)]
+    (if ((system :enabled?) log level)
+      (do ((system :write) log level (force message) throwable)
+          system-ref))))
 
 
-(defmacro send-log
-  "Sends the message to a logging agent, which will in turn write to the log if 
-  the specific logging level is enabled. Use the log macro in preference to 
-  this."
-  [level message throwable log-name system-agent]
-  (defn agent-log [sys# lvl# msg# th# ln#]
-    (let [log# ((sys# :get-log) ln#)]
-      (if ((sys# :enabled?) log# lvl#)
-        ((sys# :write) log# lvl# (force msg#) th#))
-      sys#))
-  `(send-off ~system-agent 
-      agent-log ~level (delay ~message) ~throwable ~log-name))
+(def #^{:doc
+  "The default log-system initialized to the first implementation found from:
+  Apache commons-logging, log4j, java.util.logging."}
+  *log-system*
+  (atom (some eval ['(commons-logging)
+                    '(log4j-logging)
+                    '(java-logging)])))
 
 
-(def *log-system*
-  (ref (some eval ['(commons-logging)
-                   '(log4j-logging)
-                   '(java-logging)])))
-               
-(def *log-system-agent* (agent *log-system*))
+(def #^{:doc
+  "The default agent referecing *log-system*."}
+  *log-system-agent* (agent *log-system*))
 
-(def *allow-direct-logging* (ref false))
+
+(def #^{:doc
+  "A flag indicating wether logging can be directly (as opposed to via an agent)
+  when not operating from within a transaction. Defaults to false."}
+  *allow-direct-logging* (atom false))
 
 
 (defmacro log
@@ -167,9 +171,10 @@
     `(log ~level ~message ~throwable (str *ns*)))
   ([level message throwable log-name]
     `(if (and @*allow-direct-logging*
-                (not (clojure.lang.LockingTransaction/isRunning)))
-        (direct-log ~level ~message ~throwable ~log-name @*log-system*)
-        (send-log ~level ~message ~throwable ~log-name *log-system-agent*))))
+              (not (clojure.lang.LockingTransaction/isRunning)))
+        (do-log *log-system* ~level (delay ~message) ~throwable ~log-name)
+        (send-off *log-system-agent*
+          do-log ~level (delay ~message) ~throwable ~log-name))))
 
 
 (defn enabled?
@@ -191,7 +196,8 @@
 
 
 (defn log-stream
-  "Creates a logging output stream that will output to the log."
+  "Creates a PrintStream that will output to the log. End-users should not need
+  to invoke this function."
   [level log-name]
   (java.io.PrintStream.
     (proxy [java.io.ByteArrayOutputStream] []
@@ -204,14 +210,17 @@
     true))
 
 
-(def *old-std-streams* (ref nil))
+(def #^{:doc
+  "Used by log-capture! to maintain a reference to the original System.out and
+  System.err streams."}
+  *old-std-streams* (ref nil))
 
 
 (defn log-capture!
-  "Captures System/out and System/err, redirecting all writes of those streams 
+  "Captures System.out and System.err, redirecting all writes of those streams
   to :info and :error logging, respectively. The specified log-name value will 
-  be used for all redirected logging. NOTE: this will not redirect output of 
-  *out* or *err*; for that use with-logs" 
+  be used to namespace all redirected logging. NOTE: this will not redirect
+  output of *out* or *err*; for that, use with-logs."
   [log-name]
   (dosync
     (let [new-out (log-stream :info log-name)
@@ -234,13 +243,13 @@
 
 
 (defmacro with-logs
-  "Evaluates exprs in a context in which *out* and *err* are bound to :info and 
-  :error logging, respectively."
+  "Evaluates exprs in a context in which *out* and *err* are bound to :info and
+  :error logging, respectively. The specified log-name value will be used to
+  namespace all redirected logging."
   [log-name & body]
-  `(let [new-out# (java.io.PrintWriter. 
-                    (log-stream :info ~log-name) true)
-         new-err# (java.io.PrintWriter. 
-                    (log-stream :error ~log-name) true)]
-    (binding [*out* new-out# 
-              *err* new-err#]
+  (if (and log-name (seq body))
+    `(binding [*out* (java.io.OutputStreamWriter.
+                       (log-stream :info ~log-name))
+               *err* (java.io.OutputStreamWriter.
+                       (log-stream :error ~log-name))]
       ~@body)))
