@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class LockingTransaction{
@@ -104,13 +105,32 @@ final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
 final HashSet<Ref> sets = new HashSet<Ref>();
 final TreeMap<Ref, ArrayList<CFn>> commutes = new TreeMap<Ref, ArrayList<CFn>>();
 
+final HashSet<Ref> ensures = new HashSet<Ref>();   //all hold readLock
+
+
+void tryWriteLock(Ref ref){
+	try
+		{
+		if(!ref.lock.writeLock().tryLock(LOCK_WAIT_MSECS, TimeUnit.MILLISECONDS))
+			throw retryex;
+		}
+	catch(InterruptedException e)
+		{
+		throw retryex;
+		}
+}
 
 //returns the most recent val
 Object lock(Ref ref){
-	boolean unlocked = false;
+	//can't upgrade readLock, so release it
+	releaseIfEnsured(ref);
+
+	boolean unlocked = true;
 	try
 		{
-		ref.lock.writeLock().lock();
+		tryWriteLock(ref);
+		unlocked = false;
+
 		if(ref.tvals != null && ref.tvals.point > readPoint)
 			throw retryex;
 		Info refinfo = ref.tinfo;
@@ -122,22 +142,7 @@ Object lock(Ref ref){
 				{
 				ref.lock.writeLock().unlock();
 				unlocked = true;
-				//stop prior to blocking
-				stop(RETRY);
-				synchronized(refinfo)
-					{
-					if(refinfo.running())
-						{
-						try
-							{
-							refinfo.wait(LOCK_WAIT_MSECS);
-							}
-						catch(InterruptedException e)
-							{
-							}
-						}
-					}
-				throw retryex;
+				return blockAndBail(refinfo);
 				}
 			}
 		ref.tinfo = info;
@@ -147,6 +152,33 @@ Object lock(Ref ref){
 		{
 		if(!unlocked)
 			ref.lock.writeLock().unlock();
+		}
+}
+
+private Object blockAndBail(Info refinfo){
+//stop prior to blocking
+	stop(RETRY);
+	synchronized(refinfo)
+					{
+					if(refinfo.running())
+						{
+						try
+							{
+							refinfo.wait(LOCK_WAIT_MSECS);
+							}
+						catch(InterruptedException e)
+				{
+				}
+			}
+		}
+	throw retryex;
+}
+
+private void releaseIfEnsured(Ref ref){
+	if(ensures.contains(ref))
+		{
+		ensures.remove(ref);
+		ref.lock.readLock().unlock();
 		}
 }
 
@@ -240,10 +272,14 @@ Object run(Callable fn) throws Exception{
 				for(Map.Entry<Ref, ArrayList<CFn>> e : commutes.entrySet())
 					{
 					Ref ref = e.getKey();
-					if(sets.contains(ref)) continue;
-
-					ref.lock.writeLock().lock();
+					boolean wasEnsured = ensures.contains(ref);
+					//can't upgrade readLock, so release it
+					releaseIfEnsured(ref);
+					tryWriteLock(ref);
 					locked.add(ref);
+					if(wasEnsured && ref.tvals != null && ref.tvals.point > readPoint)
+						throw retryex;
+
 					Info refinfo = ref.tinfo;
 					if(refinfo != null && refinfo != info && refinfo.running())
 						{
@@ -251,7 +287,8 @@ Object run(Callable fn) throws Exception{
 							throw retryex;
 						}
 					Object val = ref.tvals == null ? null : ref.tvals.val;
-					vals.put(ref, val);
+					if(!sets.contains(ref))
+						vals.put(ref, val);
 					for(CFn f : e.getValue())
 						{
 						vals.put(ref, f.fn.applyTo(RT.cons(vals.get(ref), f.args)));
@@ -259,8 +296,11 @@ Object run(Callable fn) throws Exception{
 					}
 				for(Ref ref : sets)
 					{
-					ref.lock.writeLock().lock();
-					locked.add(ref);
+					if(!commutes.containsKey(ref))
+						{
+						tryWriteLock(ref);
+						locked.add(ref);
+						}
 					}
 
 				//validate and enqueue notifications
@@ -317,6 +357,11 @@ Object run(Callable fn) throws Exception{
 				locked.get(k).lock.writeLock().unlock();
 				}
 			locked.clear();
+			for(Ref r : ensures)
+				{
+				r.lock.readLock().unlock();
+				}
+			ensures.clear();
 			stop(done ? COMMITTED : RETRY);
 			try
 				{
@@ -389,10 +434,27 @@ Object doSet(Ref ref, Object val){
 	return val;
 }
 
-void doTouch(Ref ref){
+void doEnsure(Ref ref){
 	if(!info.running())
 		throw retryex;
-	lock(ref);
+	if(ensures.contains(ref))
+		return;
+	ref.lock.readLock().lock();
+
+	Info refinfo = ref.tinfo;
+
+	//writer exists
+	if(refinfo != null && refinfo.running())
+		{
+		ref.lock.readLock().unlock();
+
+		if(refinfo != info) //not us, ensure is doomed
+			{
+			blockAndBail(refinfo); 
+			}
+		}
+	else
+		ensures.add(ref);
 }
 
 Object doCommute(Ref ref, IFn fn, ISeq args) throws Exception{

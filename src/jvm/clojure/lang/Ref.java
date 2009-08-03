@@ -175,7 +175,7 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 }
 
 public void touch(){
-	LockingTransaction.getEx().doTouch(this);
+	LockingTransaction.getEx().doEnsure(this);
 }
 
 //*/
