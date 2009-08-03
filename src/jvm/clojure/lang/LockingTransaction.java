@@ -240,6 +240,8 @@ Object run(Callable fn) throws Exception{
 				for(Map.Entry<Ref, ArrayList<CFn>> e : commutes.entrySet())
 					{
 					Ref ref = e.getKey();
+					if(sets.contains(ref)) continue;
+
 					ref.lock.writeLock().lock();
 					locked.add(ref);
 					Info refinfo = ref.tinfo;
@@ -249,8 +251,7 @@ Object run(Callable fn) throws Exception{
 							throw retryex;
 						}
 					Object val = ref.tvals == null ? null : ref.tvals.val;
-					if(!sets.contains(ref))
-						vals.put(ref, val);
+					vals.put(ref, val);
 					for(CFn f : e.getValue())
 						{
 						vals.put(ref, f.fn.applyTo(RT.cons(vals.get(ref), f.args)));
@@ -258,11 +259,8 @@ Object run(Callable fn) throws Exception{
 					}
 				for(Ref ref : sets)
 					{
-					if(!commutes.containsKey(ref))
-						{
-						ref.lock.writeLock().lock();
-						locked.add(ref);
-						}
+					ref.lock.writeLock().lock();
+					locked.add(ref);
 					}
 
 				//validate and enqueue notifications
