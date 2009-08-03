@@ -251,7 +251,9 @@
 (defn vec
   "Creates a new vector containing the contents of coll."
   ([coll]
-   (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll)))))
+   (if (instance? java.util.Collection coll)
+     (clojure.lang.LazilyPersistentVector/create coll)
+     (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll))))))
 
 (defn hash-map
   "keyval => key val
@@ -4315,3 +4317,52 @@
   Delivers the supplied value to the promise, releasing any pending
   derefs. A subsequent call to deliver on a promise will throw an exception."  
   [promise val] (promise val))
+
+;;;;;;;;;;;;;;;;;;;;; editable collections ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn mutable 
+  "Returns a new, mutable version of the collection, in constant time."
+  [#^clojure.lang.IEditableCollection coll] 
+  (.mutable coll))
+
+(defn immutable! 
+  "Returns a new, immutable version of the mutable collection, in constant time."
+  [#^clojure.lang.IMutableCollection coll] 
+  (.immutable coll))
+
+(defn conj!
+  "Adds x to the mutable collection, and return coll. The 'addition'
+  may happen at different 'places' depending on the concrete type."
+  [#^clojure.lang.IMutableCollection coll x]
+  (.conj coll x))
+
+(defn assoc!
+  "When applied to a mutable map, adds mapping of key(s) to
+  val(s). When applied to a mutable vector, sets the val at index.
+  Note - index must be <= (count vector). Returns coll."
+  ([#^clojure.lang.IMutableAssociative coll key val] (.assoc coll key val))
+  ([#^clojure.lang.IMutableAssociative coll key val & kvs]
+   (let [ret (.assoc coll key val)]
+     (if kvs
+       (recur ret (first kvs) (second kvs) (nnext kvs))
+       ret))))
+
+(defn pop!
+  "Removes the last item from a mutable vector. If
+  the collection is empty, throws an exception. Returns coll"
+  [#^clojure.lang.IMutableVector coll] 
+  (.pop coll)) 
+
+;redef into with batch support
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  [to from]
+  (if (instance? clojure.lang.IEditableCollection to)
+    (#(loop [ret (mutable to) items (seq from)]
+        (if items
+          (recur (conj! ret (first items)) (next items))
+          (immutable! ret))))
+    (#(loop [ret to items (seq from)]
+        (if items
+          (recur (conj ret (first items)) (next items))
+          ret)))))

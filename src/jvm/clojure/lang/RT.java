@@ -615,8 +615,8 @@ static public Object pop(Object x){
 static public Object get(Object coll, Object key){
 	if(coll == null)
 		return null;
-	else if(coll instanceof Associative)
-		return ((Associative) coll).valAt(key);
+	else if(coll instanceof ILookup)
+		return ((ILookup) coll).valAt(key);
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		return m.get(key);
@@ -638,8 +638,8 @@ static public Object get(Object coll, Object key){
 static public Object get(Object coll, Object key, Object notFound){
 	if(coll == null)
 		return notFound;
-	else if(coll instanceof Associative)
-		return ((Associative) coll).valAt(key, notFound);
+	else if(coll instanceof ILookup)
+		return ((ILookup) coll).valAt(key, notFound);
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		if(m.containsKey(key))

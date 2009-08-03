@@ -9,14 +9,11 @@ package clojure.lang;
  * the terms of this license.
  * You must not remove this notice, or any other, from this software.
  */
-public interface Associative extends IPersistentCollection{
+public interface Associative extends IPersistentCollection, ILookup{
 boolean containsKey(Object key);
 
 IMapEntry entryAt(Object key);
 
 Associative assoc(Object key, Object val);
 
-Object valAt(Object key);
-
-Object valAt(Object key, Object notFound);
 }
