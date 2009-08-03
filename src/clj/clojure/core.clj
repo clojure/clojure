@@ -4319,37 +4319,39 @@
   [promise val] (promise val))
 
 ;;;;;;;;;;;;;;;;;;;;; editable collections ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn mutable 
-  "Returns a new, mutable version of the collection, in constant time."
+(defn transient 
+  "Returns a new, transient version of the collection, in constant time."
   [#^clojure.lang.IEditableCollection coll] 
-  (.mutable coll))
+  (.asTransient coll))
 
-(defn immutable! 
-  "Returns a new, immutable version of the mutable collection, in constant time."
-  [#^clojure.lang.IMutableCollection coll] 
-  (.immutable coll))
+(defn persistent! 
+  "Returns a new, persistent version of the transient collection, in
+  constant time. The transient collection cannot be used after this
+  call, any such use will throw an exception."
+  [#^clojure.lang.ITransientCollection coll]
+  (.persistent coll))
 
 (defn conj!
-  "Adds x to the mutable collection, and return coll. The 'addition'
+  "Adds x to the transient collection, and return coll. The 'addition'
   may happen at different 'places' depending on the concrete type."
-  [#^clojure.lang.IMutableCollection coll x]
+  [#^clojure.lang.ITransientCollection coll x]
   (.conj coll x))
 
 (defn assoc!
-  "When applied to a mutable map, adds mapping of key(s) to
-  val(s). When applied to a mutable vector, sets the val at index.
+  "When applied to a transient map, adds mapping of key(s) to
+  val(s). When applied to a transient vector, sets the val at index.
   Note - index must be <= (count vector). Returns coll."
-  ([#^clojure.lang.IMutableAssociative coll key val] (.assoc coll key val))
-  ([#^clojure.lang.IMutableAssociative coll key val & kvs]
+  ([#^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
+  ([#^clojure.lang.ITransientAssociative coll key val & kvs]
    (let [ret (.assoc coll key val)]
      (if kvs
        (recur ret (first kvs) (second kvs) (nnext kvs))
        ret))))
 
 (defn pop!
-  "Removes the last item from a mutable vector. If
+  "Removes the last item from a transient vector. If
   the collection is empty, throws an exception. Returns coll"
-  [#^clojure.lang.IMutableVector coll] 
+  [#^clojure.lang.ITransientVector coll] 
   (.pop coll)) 
 
 ;redef into with batch support
@@ -4358,10 +4360,10 @@
   from-coll conjoined."
   [to from]
   (if (instance? clojure.lang.IEditableCollection to)
-    (#(loop [ret (mutable to) items (seq from)]
+    (#(loop [ret (transient to) items (seq from)]
         (if items
           (recur (conj! ret (first items)) (next items))
-          (immutable! ret))))
+          (persistent! ret))))
     (#(loop [ret to items (seq from)]
         (if items
           (recur (conj ret (first items)) (next items))

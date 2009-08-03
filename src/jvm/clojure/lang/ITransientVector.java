@@ -12,9 +12,9 @@
 
 package clojure.lang;
 
-public interface IMutableVector extends IMutableAssociative, Indexed{
+public interface ITransientVector extends ITransientAssociative, Indexed{
 
-IMutableVector assocN(int i, Object val);
+ITransientVector assocN(int i, Object val);
 
-IMutableVector pop();
+ITransientVector pop();
 }

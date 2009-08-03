@@ -43,24 +43,24 @@ final Object[] tail;
 public final static PersistentVector EMPTY = new PersistentVector(0, 5, EMPTY_NODE, new Object[]{});
 
 static public PersistentVector create(ISeq items){
-	MutableVector ret = EMPTY.mutable();
+	TransientVector ret = EMPTY.asTransient();
 	for(; items != null; items = items.next())
 		ret = ret.conj(items.first());
-	return ret.immutable();
+	return ret.persistent();
 }
 
 static public PersistentVector create(List items){
-	MutableVector ret = EMPTY.mutable();
+	TransientVector ret = EMPTY.asTransient();
 	for(Object item : items)
 		ret = ret.conj(item);
-	return ret.immutable();
+	return ret.persistent();
 }
 
 static public PersistentVector create(Object... items){
-	MutableVector ret = EMPTY.mutable();
+	TransientVector ret = EMPTY.asTransient();
 	for(Object item : items)
 		ret = ret.conj(item);
-	return ret.immutable();
+	return ret.persistent();
 }
 
 PersistentVector(int cnt, int shift, Node root, Object[] tail){
@@ -80,8 +80,8 @@ PersistentVector(IPersistentMap meta, int cnt, int shift, Node root, Object[] ta
 	this.tail = tail;
 }
 
-public MutableVector mutable(){
-	return new MutableVector(this);
+public TransientVector asTransient(){
+	return new TransientVector(this);
 }
 
 final int tailoff(){
@@ -369,20 +369,20 @@ private Node popTail(int level, Node node){
 		}
 }
 
-static final class MutableVector extends AFn implements IMutableVector, Counted{
+static final class TransientVector extends AFn implements ITransientVector, Counted{
 	int cnt;
 	int shift;
 	Node root;
 	Object[] tail;
 
-	MutableVector(int cnt, int shift, Node root, Object[] tail){
+	TransientVector(int cnt, int shift, Node root, Object[] tail){
 		this.cnt = cnt;
 		this.shift = shift;
 		this.root = root;
 		this.tail = tail;
 	}
 
-	MutableVector(PersistentVector v){
+	TransientVector(PersistentVector v){
 		this(v.cnt, v.shift, editableRoot(v.root), editableTail(v.tail));
 	}
 
@@ -413,7 +413,7 @@ static final class MutableVector extends AFn implements IMutableVector, Counted{
 		return new Node(new AtomicReference<Thread>(Thread.currentThread()), node.array.clone());
 	}
 
-	public PersistentVector immutable(){
+	public PersistentVector persistent(){
 		ensureEditable();
 //		Thread owner = root.edit.get();
 //		if(owner != null && owner != Thread.currentThread())
@@ -432,7 +432,7 @@ static final class MutableVector extends AFn implements IMutableVector, Counted{
 		return ret;
 	}
 
-	public MutableVector conj(Object val){
+	public TransientVector conj(Object val){
 		ensureEditable();
 		int i = cnt;
 		//room in tail?
@@ -536,7 +536,7 @@ static final class MutableVector extends AFn implements IMutableVector, Counted{
 		return node[i & 0x01f];
 	}
 
-	public MutableVector assocN(int i, Object val){
+	public TransientVector assocN(int i, Object val){
 		ensureEditable();
 		if(i >= 0 && i < cnt)
 			{
@@ -554,7 +554,7 @@ static final class MutableVector extends AFn implements IMutableVector, Counted{
 		throw new IndexOutOfBoundsException();
 	}
 
-	public MutableVector assoc(Object key, Object val){
+	public TransientVector assoc(Object key, Object val){
 		//note - relies on ensureEditable in assocN
 		if(Util.isInteger(key))
 			{
@@ -579,7 +579,7 @@ static final class MutableVector extends AFn implements IMutableVector, Counted{
 		return ret;
 	}
 
-	public MutableVector pop(){
+	public TransientVector pop(){
 		ensureEditable();
 		if(cnt == 0)
 			throw new IllegalStateException("Can't pop empty vector");

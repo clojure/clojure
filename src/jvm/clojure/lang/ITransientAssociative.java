@@ -12,9 +12,7 @@
 
 package clojure.lang;
 
-public interface IMutableCollection{
+public interface ITransientAssociative extends ITransientCollection, ILookup{
 
-IMutableCollection conj(Object val);
-
-IPersistentCollection immutable();
+ITransientAssociative assoc(Object key, Object val);
 }
