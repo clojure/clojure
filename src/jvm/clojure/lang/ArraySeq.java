@@ -42,6 +42,12 @@ static ISeq createFromObject(Object array){
 		return new ArraySeq_double(null, (double[]) array, 0);
 	if(aclass == long[].class)
 		return new ArraySeq_long(null, (long[]) array, 0);
+	if(aclass == byte[].class)
+		return new ArraySeq_byte(null, (byte[]) array, 0);
+	if(aclass == char[].class)
+		return new ArraySeq_char(null, (char[]) array, 0);
+	if(aclass == boolean[].class)
+		return new ArraySeq_boolean(null, (boolean[]) array, 0);
 	return new ArraySeq(array, 0);
 }
 
@@ -122,6 +128,39 @@ public Object reduce(IFn f, Object start) throws Exception{
 	return ret;
 }
 
+public int indexOf(Object o) {
+	if (oa != null) {
+		for (int j = i; j < oa.length; j++)
+			if (Util.equals(o, oa[j])) return j - i;
+	} else {
+		int n = Array.getLength(array); 
+		for (int j = i; j < n; j++)
+			if (Util.equals(o, Reflector.prepRet(Array.get(array, j)))) return j - i;
+	}
+	return -1;
+}
+
+public int lastIndexOf(Object o) {
+	if (oa != null) {
+		if (o == null) {
+			for (int j = oa.length - 1 ; j >= i; j--)
+				if (oa[j] == null) return j - i;
+		} else {
+			for (int j = oa.length - 1 ; j >= i; j--)
+				if (o.equals(oa[j])) return j - i;
+		}
+	} else {
+		if (o == null) {
+			for (int j = Array.getLength(array) - 1 ; j >= i; j--)
+				if (Reflector.prepRet(Array.get(array, j)) == null) return j - i;
+		} else {
+			for (int j = Array.getLength(array) - 1 ; j >= i; j--)
+				if (o.equals(Reflector.prepRet(Array.get(array, j)))) return j - i;
+		}
+	}
+	return -1;
+}
+
 //////////////////////////////////// specialized primitive versions ///////////////////////////////
 
 static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
@@ -168,6 +207,34 @@ static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
 		for(int x = i + 1; x < array.length; x++)
 			ret = f.invoke(ret, array[x]);
 		return ret;
+	}
+
+	public int indexOf(Object o) {
+		if (o instanceof Integer) {
+			int k = ((Integer) o).intValue();
+			for (int j = i; j < array.length; j++)
+				if (k == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+	
+	public int lastIndexOf(Object o) {
+		if (o instanceof Integer) {
+			int k = ((Integer) o).intValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (k == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
 	}
 }
 
@@ -217,6 +284,34 @@ static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
 			ret = f.invoke(ret, array[x]);
 		return ret;
 	}
+
+	public int indexOf(Object o) {
+		if (o instanceof Float) {
+			float f = ((Float) o).floatValue();
+			for (int j = i; j < array.length; j++)
+				if (f == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+	
+	public int lastIndexOf(Object o) {
+		if (o instanceof Float) {
+			float f = ((Float) o).floatValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (f == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
 }
 
 static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
@@ -264,6 +359,34 @@ static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
 			ret = f.invoke(ret, array[x]);
 		return ret;
 	}
+
+	public int indexOf(Object o) {
+		if (o instanceof Double) {
+			double d = ((Double) o).doubleValue();
+			for (int j = i; j < array.length; j++)
+				if (d == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+	
+	public int lastIndexOf(Object o) {
+		if (o instanceof Double) {
+			double d = ((Double) o).doubleValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (d == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
 }
 
 static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
@@ -310,6 +433,259 @@ static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
 		for(int x = i + 1; x < array.length; x++)
 			ret = f.invoke(ret, array[x]);
 		return ret;
+	}
+
+	public int indexOf(Object o) {
+		if (o instanceof Long) {
+			long l = ((Long) o).longValue();
+			for (int j = i; j < array.length; j++)
+				if (l == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+	
+	public int lastIndexOf(Object o) {
+		if (o instanceof Long) {
+			long l = ((Long) o).longValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (l == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+}
+
+static public class ArraySeq_byte extends ASeq implements IndexedSeq, IReduce{
+	final byte[] array;
+	final int i;
+
+	ArraySeq_byte(IPersistentMap meta, byte[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
+
+	public Object first(){
+		return array[i];
+	}
+
+	public ISeq next(){
+		if(i + 1 < array.length)
+			return new ArraySeq_byte(meta(), array, i + 1);
+		return null;
+	}
+
+	public int count(){
+		return array.length - i;
+	}
+
+	public int index(){
+		return i;
+	}
+
+	public ArraySeq_byte withMeta(IPersistentMap meta){
+		return new ArraySeq_byte(meta, array, i);
+	}
+
+	public Object reduce(IFn f) throws Exception{
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+
+	public Object reduce(IFn f, Object start) throws Exception{
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+
+	public int indexOf(Object o) {
+		if (o instanceof Byte) {
+			byte b = ((Byte) o).byteValue();
+			for (int j = i; j < array.length; j++)
+				if (b == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+	
+	public int lastIndexOf(Object o) {
+		if (o instanceof Byte) {
+			byte b = ((Byte) o).byteValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (b == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+}
+
+static public class ArraySeq_char extends ASeq implements IndexedSeq, IReduce{
+	final char[] array;
+	final int i;
+
+	ArraySeq_char(IPersistentMap meta, char[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
+
+	public Object first(){
+		return array[i];
+	}
+
+	public ISeq next(){
+		if(i + 1 < array.length)
+			return new ArraySeq_char(meta(), array, i + 1);
+		return null;
+	}
+
+	public int count(){
+		return array.length - i;
+	}
+
+	public int index(){
+		return i;
+	}
+
+	public ArraySeq_char withMeta(IPersistentMap meta){
+		return new ArraySeq_char(meta, array, i);
+	}
+
+	public Object reduce(IFn f) throws Exception{
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+
+	public Object reduce(IFn f, Object start) throws Exception{
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+	
+	public int indexOf(Object o) {
+		if (o instanceof Character) {
+			char c = ((Character) o).charValue();
+			for (int j = i; j < array.length; j++)
+				if (c == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+	
+	public int lastIndexOf(Object o) {
+		if (o instanceof Character) {
+			char c = ((Character) o).charValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (c == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+}
+
+static public class ArraySeq_boolean extends ASeq implements IndexedSeq, IReduce{
+	final boolean[] array;
+	final int i;
+
+	ArraySeq_boolean(IPersistentMap meta, boolean[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
+
+	public Object first(){
+		return array[i];
+	}
+
+	public ISeq next(){
+		if(i + 1 < array.length)
+			return new ArraySeq_boolean(meta(), array, i + 1);
+		return null;
+	}
+
+	public int count(){
+		return array.length - i;
+	}
+
+	public int index(){
+		return i;
+	}
+
+	public ArraySeq_boolean withMeta(IPersistentMap meta){
+		return new ArraySeq_boolean(meta, array, i);
+	}
+
+	public Object reduce(IFn f) throws Exception{
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+
+	public Object reduce(IFn f, Object start) throws Exception{
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+	
+	public int indexOf(Object o) {
+		if (o instanceof Boolean) {
+			boolean b = ((Boolean) o).booleanValue();
+			for (int j = i; j < array.length; j++)
+				if (b == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+	
+	public int lastIndexOf(Object o) {
+		if (o instanceof Boolean) {
+			boolean b = ((Boolean) o).booleanValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (b == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
 	}
 }
 
