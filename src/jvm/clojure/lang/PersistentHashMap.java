@@ -38,6 +38,9 @@ package clojure.lang;
 
 import java.util.*;
 //this stuff is just for the test main()
+import java.util.concurrent.atomic.AtomicReference;
+
+import clojure.lang.PersistentVector.Node;
 
 /*
  A persistent rendition of Phil Bagwell's Hash Array Mapped Trie
@@ -49,7 +52,7 @@ import java.util.*;
  Any errors are my own
  */
 
-public class PersistentHashMap extends APersistentMap{
+public class PersistentHashMap extends APersistentMap implements IEditableCollection {
 
 final int count;
 final INode root;
@@ -193,6 +196,112 @@ public PersistentHashMap withMeta(IPersistentMap meta){
 	return new PersistentHashMap(meta, count, root);
 }
 
+public TransientHashMap asTransient() {
+	return new TransientHashMap(this);
+}
+
+static final class TransientHashMap extends AFn implements ITransientMap {
+	AtomicReference<Thread> edit;
+	INode root;
+	int count;
+	
+	TransientHashMap(PersistentHashMap m) {
+		this(new AtomicReference<Thread>(Thread.currentThread()), m.root, m.count);
+	}
+	
+	TransientHashMap(AtomicReference<Thread> edit, INode root, int count) {
+		this.edit = edit;
+		this.root = root; 
+		this.count = count; 
+	}
+
+	public ITransientMap assoc(Object key, Object val) {
+		ensureEditable();
+		Box addedLeaf = new Box(null);
+		this.root = root.assoc(edit, 0, Util.hash(key), key, val, addedLeaf);
+		if (addedLeaf.val != null) this.count++;
+		return this;
+	}
+
+	public ITransientMap without(Object key) {
+		ensureEditable();
+		Box removedLeaf = new Box(null);
+		INode newroot = root.without(edit, Util.hash(key), key, removedLeaf);
+		this.root = newroot == null ? EMPTY.root : newroot;
+		if (removedLeaf != null) this.count--;
+		return this;
+	}
+
+	public ITransientMap conj(Object o) {
+		ensureEditable();
+		if(o instanceof Map.Entry)
+			{
+			Map.Entry e = (Map.Entry) o;
+		
+			return assoc(e.getKey(), e.getValue());
+			}
+		else if(o instanceof IPersistentVector)
+			{
+			IPersistentVector v = (IPersistentVector) o;
+			if(v.count() != 2)
+				throw new IllegalArgumentException("Vector arg to map conj must be a pair");
+			return assoc(v.nth(0), v.nth(1));
+			}
+		
+		ITransientMap ret = this;
+		for(ISeq es = RT.seq(o); es != null; es = es.next())
+			{
+			Map.Entry e = (Map.Entry) es.first();
+			ret = ret.assoc(e.getKey(), e.getValue());
+			}
+		return ret;
+	}
+
+	public IPersistentMap persistent() {
+		ensureEditable();
+		edit.set(null);
+		return new PersistentHashMap(count, root);
+	}
+
+	public IMapEntry entryAt(Object key){
+		return root.find(Util.hash(key), key);
+	}
+
+	public Object valAt(Object key) {
+		return valAt(key, null);
+	}
+
+	public Object valAt(Object key, Object notFound) {
+		ensureEditable();
+		IMapEntry e = entryAt(key);
+		if(e != null)
+			return e.val();
+		return notFound;
+	}
+
+	public Object invoke(Object arg1) throws Exception{
+		return valAt(arg1);
+	}
+
+	public Object invoke(Object arg1, Object notFound) throws Exception{
+		return valAt(arg1, notFound);
+	}
+
+	public int count() {
+		ensureEditable();
+		return count;
+	}
+	
+	void ensureEditable(){
+		Thread owner = edit.get();
+		if(owner == Thread.currentThread())
+			return;
+		if(owner != null)
+			throw new IllegalAccessError("Mutable used by non-owner thread");
+		throw new IllegalAccessError("Mutable used after immutable call");
+	}
+}
+
 /*
 final static int[] pathmasks = new int[32];
 static{
@@ -220,6 +329,10 @@ static interface INode{
 	ISeq nodeSeq();
 
 	int getHash();
+
+	INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf);
+
+	INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf);
 }
 
 /*
@@ -231,7 +344,7 @@ static interface ILeaf extends INode{
 final static class EmptyNode implements INode{
 
 	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
-		INode ret = new LeafNode(hash, key, val);
+		INode ret = new LeafNode(null, hash, key, val);
 		addedLeaf.val = ret;
 		return ret;
 	}
@@ -251,22 +364,31 @@ final static class EmptyNode implements INode{
 	public int getHash(){
 		return 0;
 	}
+	
+	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+		return assoc(shift, hash, key, val, addedLeaf);
+	}	
+
+	public INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf){
+		return this;
+	}
 }
 
 final static class FullNode implements INode{
 	final INode[] nodes;
 	final int shift;
 	final int _hash;
-
+	final AtomicReference<Thread> edit;
 
 	static int bitpos(int hash, int shift){
 		return 1 << mask(hash, shift);
 	}
 
-	FullNode(INode[] nodes, int shift){
+	FullNode(AtomicReference<Thread> edit, INode[] nodes, int shift){
 		this.nodes = nodes;
 		this.shift = shift;
 		this._hash = nodes[0].getHash();
+		this.edit = edit;
 	}
 
 	public INode assoc(int levelShift, int hash, Object key, Object val, Box addedLeaf){
@@ -281,7 +403,7 @@ final static class FullNode implements INode{
 			{
 			INode[] newnodes = nodes.clone();
 			newnodes[idx] = n;
-			return new FullNode(newnodes, shift);
+			return new FullNode(null, newnodes, shift);
 			}
 	}
 
@@ -297,11 +419,11 @@ final static class FullNode implements INode{
 				INode[] newnodes = new INode[nodes.length - 1];
 				System.arraycopy(nodes, 0, newnodes, 0, idx);
 				System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
-				return new BitmapIndexedNode(~bitpos(hash, shift), newnodes, shift);
+				return new BitmapIndexedNode(null, ~bitpos(hash, shift), newnodes, shift);
 				}
 			INode[] newnodes = nodes.clone();
 			newnodes[idx] = n;
-			return new FullNode(newnodes, shift);
+			return new FullNode(null, newnodes, shift);
 			}
 		return this;
 	}
@@ -324,7 +446,6 @@ final static class FullNode implements INode{
 		final ISeq s;
 		final int i;
 		final FullNode node;
-
 
 		Seq(ISeq s, int i, FullNode node){
 			this.s = s;
@@ -361,7 +482,44 @@ final static class FullNode implements INode{
 		}
     }
 
+	FullNode ensureEditable(AtomicReference<Thread> edit){
+		if(this.edit == edit)
+			return this;
+		return new FullNode(edit, this.nodes.clone(), shift);
+	}
 
+	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+		int idx = mask(hash, shift);
+
+		INode n = nodes[idx].assoc(edit, shift + 5, hash, key, val, addedLeaf);
+		if(n == nodes[idx])
+			return this;
+		else
+			{
+			FullNode node = this.ensureEditable(edit);
+			node.nodes[idx] = n;
+			return node;
+			}
+	}	
+
+	public INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf){
+		int idx = mask(hash, shift);
+		INode n = nodes[idx].without(edit, hash, key, removedLeaf);
+		if(n != nodes[idx])
+			{
+			if(n == null)
+				{
+				INode[] newnodes = new INode[nodes.length - 1];
+				System.arraycopy(nodes, 0, newnodes, 0, idx);
+				System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
+				return new BitmapIndexedNode(edit, ~bitpos(hash, shift), newnodes, shift);
+				}
+			FullNode node = ensureEditable(edit);
+			node.nodes[idx] = n;
+			return node;
+			}
+		return this;
+	}
 }
 
 final static class BitmapIndexedNode implements INode{
@@ -369,6 +527,7 @@ final static class BitmapIndexedNode implements INode{
 	final INode[] nodes;
 	final int shift;
 	final int _hash;
+	final AtomicReference<Thread> edit;
 
 	static int bitpos(int hash, int shift){
 		return 1 << mask(hash, shift);
@@ -378,28 +537,28 @@ final static class BitmapIndexedNode implements INode{
 		return Integer.bitCount(bitmap & (bit - 1));
 	}
 
-
-	BitmapIndexedNode(int bitmap, INode[] nodes, int shift){
+	BitmapIndexedNode(AtomicReference<Thread> edit, int bitmap, INode[] nodes, int shift){
 		this.bitmap = bitmap;
 		this.nodes = nodes;
 		this.shift = shift;
 		this._hash = nodes[0].getHash();
+		this.edit = edit;
 	}
 
-	static INode create(int bitmap, INode[] nodes, int shift){
+	static INode create(AtomicReference<Thread> edit, int bitmap, INode[] nodes, int shift){
 		if(bitmap == -1)
-			return new FullNode(nodes, shift);
-		return new BitmapIndexedNode(bitmap, nodes, shift);
+			return new FullNode(edit, nodes, shift);
+		return new BitmapIndexedNode(edit, bitmap, nodes, shift);
 	}
 
-	static INode create(int shift, INode branch, int hash, Object key, Object val, Box addedLeaf){
+	static INode create(AtomicReference<Thread> edit, int shift, INode branch, int hash, Object key, Object val, Box addedLeaf){
 //		int hx = branch.getHash()^hash;
 //		while(mask(hx,shift) == 0)
 //			shift += 5;
 //		if(mask(branch.getHash(),shift) == mask(hash,shift))
 //			return create(shift+5,branch,hash,key,val,addedLeaf);
-		return (new BitmapIndexedNode(bitpos(branch.getHash(), shift), new INode[]{branch}, shift))
-				.assoc(shift, hash, key, val, addedLeaf);
+		BitmapIndexedNode node = new BitmapIndexedNode(edit, bitpos(branch.getHash(), shift), new INode[]{branch}, shift); 
+		return edit == null ? node.assoc(shift, hash, key, val, addedLeaf) : node.assoc(edit, shift, hash, key, val, addedLeaf);
 	}
 
 	public INode assoc(int levelShift, int hash, Object key, Object val, Box addedLeaf){
@@ -416,16 +575,16 @@ final static class BitmapIndexedNode implements INode{
 				{
 				INode[] newnodes = nodes.clone();
 				newnodes[idx] = n;
-				return new BitmapIndexedNode(bitmap, newnodes, shift);
+				return new BitmapIndexedNode(null, bitmap, newnodes, shift);
 				}
 			}
 		else
 			{
 			INode[] newnodes = new INode[nodes.length + 1];
 			System.arraycopy(nodes, 0, newnodes, 0, idx);
-			addedLeaf.val = newnodes[idx] = new LeafNode(hash, key, val);
+			addedLeaf.val = newnodes[idx] = new LeafNode(null, hash, key, val);
 			System.arraycopy(nodes, idx, newnodes, idx + 1, nodes.length - idx);
-			return create(bitmap | bit, newnodes, shift);
+			return create(null, bitmap | bit, newnodes, shift);
 			}
 	}
 
@@ -448,11 +607,11 @@ final static class BitmapIndexedNode implements INode{
 					INode[] newnodes = new INode[nodes.length - 1];
 					System.arraycopy(nodes, 0, newnodes, 0, idx);
 					System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
-					return new BitmapIndexedNode(bitmap & ~bit, newnodes, shift);
+					return new BitmapIndexedNode(null, bitmap & ~bit, newnodes, shift);
 					}
 				INode[] newnodes = nodes.clone();
 				newnodes[idx] = n;
-				return new BitmapIndexedNode(bitmap, newnodes, shift);
+				return new BitmapIndexedNode(null, bitmap, newnodes, shift);
 				}
 			}
 		return this;
@@ -518,16 +677,73 @@ final static class BitmapIndexedNode implements INode{
 			return new Seq(meta, s, i, node);
 		}
     }
+	
+	BitmapIndexedNode ensureEditable(AtomicReference<Thread> edit){
+		if(this.edit == edit)
+			return this;
+		return new BitmapIndexedNode(edit, bitmap, nodes.clone(), shift);
+	}
 
+	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+		int bit = bitpos(hash, shift);
+		int idx = index(bit);
+		if((bitmap & bit) != 0)
+			{
+			INode n = nodes[idx].assoc(shift + 5, hash, key, val, addedLeaf);
+			if(n == nodes[idx])
+				return this;
+			else
+				{
+				BitmapIndexedNode node = ensureEditable(edit);
+				node.nodes[idx] = n;
+				return node;
+				}
+			}
+		else
+			{
+			// TODO can do better
+			INode[] newnodes = new INode[nodes.length + 1];
+			System.arraycopy(nodes, 0, newnodes, 0, idx);
+			addedLeaf.val = newnodes[idx] = new LeafNode(null, hash, key, val);
+			System.arraycopy(nodes, idx, newnodes, idx + 1, nodes.length - idx);
+			return create(edit, bitmap | bit, newnodes, shift);
+			}
+	}
 
+	public INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf){
+		int bit = bitpos(hash, shift);
+		if((bitmap & bit) != 0)
+			{
+			int idx = index(bit);
+			INode n = nodes[idx].without(edit, hash, key, removedLeaf);
+			if(n != nodes[idx])
+				{
+				if(n == null)
+					{
+					if(bitmap == bit)
+						return null;
+					INode[] newnodes = new INode[nodes.length - 1];
+					System.arraycopy(nodes, 0, newnodes, 0, idx);
+					System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
+					return new BitmapIndexedNode(edit, bitmap & ~bit, newnodes, shift);
+					}
+				BitmapIndexedNode node = ensureEditable(edit);
+				node.nodes[idx] = n;
+				return node;
+				}
+			}
+		return this;
+	}
 }
 
 final static class LeafNode extends AMapEntry implements INode{
 	final int hash;
 	final Object key;
-	final Object val;
+	Object val;
+	final AtomicReference<Thread> edit; 
 
-	public LeafNode(int hash, Object key, Object val){
+	public LeafNode(AtomicReference<Thread> edit, int hash, Object key, Object val){
+		this.edit = edit;
 		this.hash = hash;
 		this.key = key;
 		this.val = val;
@@ -541,14 +757,14 @@ final static class LeafNode extends AMapEntry implements INode{
 				if(val == this.val)
 					return this;
 				//note  - do not set addedLeaf, since we are replacing
-				return new LeafNode(hash, key, val);
+				return new LeafNode(null, hash, key, val);
 				}
 			//hash collision - same hash, different keys
-			LeafNode newLeaf = new LeafNode(hash, key, val);
+			LeafNode newLeaf = new LeafNode(null, hash, key, val);
 			addedLeaf.val = newLeaf;
-			return new HashCollisionNode(hash, this, newLeaf);
+			return new HashCollisionNode(null, hash, this, newLeaf);
 			}
-		return BitmapIndexedNode.create(shift, this, hash, key, val, addedLeaf);
+		return BitmapIndexedNode.create(null, shift, this, hash, key, val, addedLeaf);
 	}
 
 	public INode without(int hash, Object key){
@@ -586,14 +802,50 @@ final static class LeafNode extends AMapEntry implements INode{
 	public Object getValue(){
 		return this.val;
 	}
+	
+	LeafNode ensureEditable(AtomicReference<Thread> edit){
+		if(this.edit == edit)
+			return this;
+		return new LeafNode(edit, this.hash, this.key, this.val);
+	}
+
+	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+		if(hash == this.hash)
+			{
+			if(Util.equals(key, this.key))
+				{
+				if(val == this.val)
+					return this;
+				LeafNode node = ensureEditable(edit);
+				node.val = val;
+				//note  - do not set addedLeaf, since we are replacing
+				return node;
+				}
+			//hash collision - same hash, different keys
+			LeafNode newLeaf = new LeafNode(edit, hash, key, val);
+			addedLeaf.val = newLeaf;
+			return new HashCollisionNode(edit, hash, this, newLeaf);
+			}
+		return BitmapIndexedNode.create(edit, shift, this, hash, key, val, addedLeaf);
+	}	
+
+	public INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf){
+		if(hash == this.hash && Util.equals(key, this.key)) {
+			removedLeaf.val = this;
+			return null;
+		}
+		return this;
+	}
 }
 
 final static class HashCollisionNode implements INode{
 
 	final int hash;
 	final LeafNode[] leaves;
+	final AtomicReference<Thread> edit;
 
-	public HashCollisionNode(int hash, LeafNode... leaves){
+	public HashCollisionNode(AtomicReference<Thread> edit, int hash, LeafNode... leaves){
+		this.edit = edit;
 		this.hash = hash;
 		this.leaves = leaves;
 	}
@@ -608,15 +860,15 @@ final static class HashCollisionNode implements INode{
 					return this;
 				LeafNode[] newLeaves = leaves.clone();
 				//note  - do not set addedLeaf, since we are replacing
-				newLeaves[idx] = new LeafNode(hash, key, val);
-				return new HashCollisionNode(hash, newLeaves);
+				newLeaves[idx] = new LeafNode(null, hash, key, val);
+				return new HashCollisionNode(null, hash, newLeaves);
 				}
 			LeafNode[] newLeaves = new LeafNode[leaves.length + 1];
 			System.arraycopy(leaves, 0, newLeaves, 0, leaves.length);
-			addedLeaf.val = newLeaves[leaves.length] = new LeafNode(hash, key, val);
-			return new HashCollisionNode(hash, newLeaves);
+			addedLeaf.val = newLeaves[leaves.length] = new LeafNode(null, hash, key, val);
+			return new HashCollisionNode(null, hash, newLeaves);
 			}
-		return BitmapIndexedNode.create(shift, this, hash, key, val, addedLeaf);
+		return BitmapIndexedNode.create(null, shift, this, hash, key, val, addedLeaf);
 	}
 
 	public INode without(int hash, Object key){
@@ -628,7 +880,7 @@ final static class HashCollisionNode implements INode{
 		LeafNode[] newLeaves = new LeafNode[leaves.length - 1];
 		System.arraycopy(leaves, 0, newLeaves, 0, idx);
 		System.arraycopy(leaves, idx + 1, newLeaves, idx, leaves.length - (idx + 1));
-		return new HashCollisionNode(hash, newLeaves);
+		return new HashCollisionNode(null, hash, newLeaves);
 	}
 
 	public LeafNode find(int hash, Object key){
@@ -653,6 +905,49 @@ final static class HashCollisionNode implements INode{
 
 	public int getHash(){
 		return hash;
+	}
+
+	HashCollisionNode ensureEditable(AtomicReference<Thread> edit){
+		if(this.edit == edit)
+			return this;
+		return new HashCollisionNode(edit, hash, leaves);
+	}
+
+	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+		if(hash == this.hash)
+			{
+			int idx = findIndex(hash, key);
+			if(idx != -1)
+				{
+				if(leaves[idx].val == val)
+					return this;
+				LeafNode leaf = leaves[idx].ensureEditable(edit);
+				leaf.val = val;
+				if (leaves[idx] == leaf)
+					return this;
+				HashCollisionNode node = ensureEditable(edit);
+				node.leaves[idx] = leaf;
+				return node;
+				}
+			LeafNode[] newLeaves = new LeafNode[leaves.length + 1];
+			System.arraycopy(leaves, 0, newLeaves, 0, leaves.length);
+			addedLeaf.val = newLeaves[leaves.length] = new LeafNode(null, hash, key, val);
+			return new HashCollisionNode(edit, hash, newLeaves);
+			}
+		return BitmapIndexedNode.create(edit, shift, this, hash, key, val, addedLeaf);
+	}	
+
+	public INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf){
+		int idx = findIndex(hash, key);
+		if(idx == -1)
+			return this;
+		removedLeaf.val = leaves[idx];
+		if(leaves.length == 2)
+			return idx == 0 ? leaves[1] : leaves[0];
+		LeafNode[] newLeaves = new LeafNode[leaves.length - 1];
+		System.arraycopy(leaves, 0, newLeaves, 0, idx);
+		System.arraycopy(leaves, idx + 1, newLeaves, idx, leaves.length - (idx + 1));
+		return new HashCollisionNode(edit, hash, newLeaves);
 	}
 }
 

@@ -4348,6 +4348,15 @@
        (recur ret (first kvs) (second kvs) (nnext kvs))
        ret))))
 
+(defn dissoc!
+  "Returns a transient map that doesn't contain a mapping for key(s)."
+  ([#^clojure.lang.ITransientMap map key] (.without map key))
+  ([#^clojure.lang.ITransientMap map key & ks]
+   (let [ret (.without map key)]
+     (if ks
+       (recur ret (first ks) (next ks))
+       ret))))
+
 (defn pop!
   "Removes the last item from a transient vector. If
   the collection is empty, throws an exception. Returns coll"
