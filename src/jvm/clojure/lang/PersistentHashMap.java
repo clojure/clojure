@@ -66,7 +66,7 @@ static public IPersistentMap create(Map other){
 		Map.Entry e = (Entry) o;
 		ret = ret.assoc(e.getKey(), e.getValue());
 		}
-	return (IPersistentMap) ret.persistent();
+	return ret.persistent();
 }
 
 /*
