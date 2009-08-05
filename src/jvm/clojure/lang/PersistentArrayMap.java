@@ -329,8 +329,10 @@ static final class TransientArrayMap extends ATransientMap {
 		return len / 2;
 	}
 	
-	IPersistentMap doPersistent() {
-		return new PersistentArrayMap(Arrays.copyOf(array, len));
+	IPersistentMap doPersistent(){
+		Object[] a = new Object[len];
+		System.arraycopy(array,0,a,0,len);
+		return new PersistentArrayMap(a);
 	}
 
 	void ensureEditable(){
