@@ -210,16 +210,14 @@ static final class TransientHashMap extends ATransientMap {
 		this.count = count; 
 	}
 
-	public ITransientMap assoc(Object key, Object val) {
-		ensureEditable();
+	ITransientMap doAssoc(Object key, Object val) {
 		Box addedLeaf = new Box(null);
 		this.root = root.assoc(edit, 0, Util.hash(key), key, val, addedLeaf);
 		if (addedLeaf.val != null) this.count++;
 		return this;
 	}
 
-	public ITransientMap without(Object key) {
-		ensureEditable();
+	ITransientMap doWithout(Object key) {
 		Box removedLeaf = new Box(null);
 		INode newroot = root.without(edit, Util.hash(key), key, removedLeaf);
 		this.root = newroot == null ? EMPTY.root : newroot;
@@ -227,26 +225,23 @@ static final class TransientHashMap extends ATransientMap {
 		return this;
 	}
 
-	public IPersistentMap persistent() {
-		ensureEditable();
+	IPersistentMap doPersistent() {
 		edit.set(null);
 		return new PersistentHashMap(count, root);
 	}
 
-	public IMapEntry entryAt(Object key){
+	private IMapEntry entryAt(Object key){
 		return root.find(Util.hash(key), key);
 	}
 
-	public Object valAt(Object key, Object notFound) {
-		ensureEditable();
+	Object doValAt(Object key, Object notFound) {
 		IMapEntry e = entryAt(key);
 		if(e != null)
 			return e.val();
 		return notFound;
 	}
 
-	public int count() {
-		ensureEditable();
+	int doCount() {
 		return count;
 	}
 	

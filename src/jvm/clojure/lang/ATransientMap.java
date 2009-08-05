@@ -12,8 +12,15 @@ package clojure.lang;
 
 import java.util.Map;
 
-public abstract class ATransientMap extends AFn implements ITransientMap {
+import clojure.lang.PersistentHashMap.INode;
+
+abstract class ATransientMap extends AFn implements ITransientMap {
 	abstract void ensureEditable();
+	abstract ITransientMap doAssoc(Object key, Object val);
+	abstract ITransientMap doWithout(Object key);
+	abstract Object doValAt(Object key, Object notFound);
+	abstract int doCount();
+	abstract IPersistentMap doPersistent();
 
 	public ITransientMap conj(Object o) {
 		ensureEditable();
@@ -40,7 +47,40 @@ public abstract class ATransientMap extends AFn implements ITransientMap {
 		return ret;
 	}
 
-	public Object valAt(Object key) {
+	public final Object invoke(Object arg1) throws Exception{
+		return valAt(arg1);
+	}
+
+	public final Object invoke(Object arg1, Object notFound) throws Exception{
+		return valAt(arg1, notFound);
+	}
+
+	public final Object valAt(Object key) {
 		return valAt(key, null);
+	}
+
+	public final ITransientMap assoc(Object key, Object val) {
+		ensureEditable();
+		return doAssoc(key, val);
+	}
+
+	public final ITransientMap without(Object key) {
+		ensureEditable();
+		return doWithout(key);
+	}
+
+	public final IPersistentMap persistent() {
+		ensureEditable();
+		return doPersistent();
+	}
+
+	public final Object valAt(Object key, Object notFound) {
+		ensureEditable();
+		return doValAt(key, notFound);
+	}
+
+	public final int count() {
+		ensureEditable();
+		return doCount();
 	}
 }

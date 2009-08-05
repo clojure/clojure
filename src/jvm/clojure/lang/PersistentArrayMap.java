@@ -13,7 +13,6 @@ package clojure.lang;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Simple implementation of persistent map on an array
@@ -288,8 +287,7 @@ static final class TransientArrayMap extends ATransientMap {
 		return -1;
 	}
 
-	public ITransientMap assoc(Object key, Object val){
-		ensureEditable();
+	ITransientMap doAssoc(Object key, Object val){
 		int i = indexOf(key);
 		if(i >= 0) //already have key,
 			{
@@ -306,8 +304,7 @@ static final class TransientArrayMap extends ATransientMap {
 		return this;
 	}
 
-	public ITransientMap without(Object key) {
-		ensureEditable();
+	ITransientMap doWithout(Object key) {
 		int i = indexOf(key);
 		if(i >= 0) //have key, will remove
 			{
@@ -321,21 +318,18 @@ static final class TransientArrayMap extends ATransientMap {
 		return this;
 	}
 
-	public Object valAt(Object key, Object notFound) {
-		ensureEditable();
+	Object doValAt(Object key, Object notFound) {
 		int i = indexOf(key);
 		if (i >= 0)
 			return array[i + 1];
 		return notFound;
 	}
 
-	public int count() {
-		ensureEditable();
+	int doCount() {
 		return len / 2;
 	}
 	
-	public IPersistentMap persistent() {
-		ensureEditable();
+	IPersistentMap doPersistent() {
 		return new PersistentArrayMap(Arrays.copyOf(array, len));
 	}
 
