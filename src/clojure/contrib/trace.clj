@@ -77,6 +77,9 @@ code is doing."}
   arguments.  Nested calls to deftrace'd functions will print a
   tree-like structure."
   [name & definition]
-  `(let [f# (fn ~@definition)]
-     (defn ~name [& args#]
-       (trace-fn-call '~name f# args#))))
+  `(do
+     (def ~name)
+     (let [f# (fn ~@definition)]
+       (defn ~name [& args#]
+         (trace-fn-call '~name f# args#)))))
+
