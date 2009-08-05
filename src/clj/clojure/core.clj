@@ -225,7 +225,16 @@
               fdecl (if (map? (last fdecl))
                       (butlast fdecl)
                       fdecl)
-              m (conj {:arglists (list 'quote (sigs fdecl))} m)]
+              m (conj {:arglists (list 'quote (sigs fdecl))} m)
+              m (let [inline (:inline m)
+                      ifn (first inline)
+                      iname (second inline)]
+                  ;; same as: (if (and (= 'fn ifn) (not (symbol? iname))) ...)
+                  (if (if (clojure.lang.Util/equiv 'fn ifn)
+                        (if (instance? clojure.lang.Symbol iname) false true))
+                    ;; inserts the same fn name to the inline fn if it does not have one
+                    (assoc m :inline (cons ifn (cons name (next inline))))
+                    m))]
           (list 'def (with-meta name (conj (if (meta name) (meta name) {}) m))
                 (cons `fn fdecl)))))
 
@@ -3491,7 +3500,7 @@
   (let [[pre-args [args expr]] (split-with (comp not vector?) decl)]
     `(do
        (defn ~name ~@pre-args ~args ~(apply (eval (list `fn args expr)) args))
-       (alter-meta! (var ~name) assoc :inline (fn ~args ~expr))
+       (alter-meta! (var ~name) assoc :inline (fn ~name ~args ~expr))
        (var ~name))))
 
 (defn empty
