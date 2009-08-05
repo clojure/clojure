@@ -10,8 +10,10 @@
 
 package clojure.lang;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Simple implementation of persistent map on an array
@@ -24,7 +26,7 @@ import java.util.Map;
  * null keys and values are ok, but you won't be able to distinguish a null value via valAt - use contains/entryAt
  */
 
-public class PersistentArrayMap extends APersistentMap{
+public class PersistentArrayMap extends APersistentMap implements IEditableCollection {
 
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 16;
@@ -32,13 +34,13 @@ static final int HASHTABLE_THRESHOLD = 16;
 public static final PersistentArrayMap EMPTY = new PersistentArrayMap();
 
 static public IPersistentMap create(Map other){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(Object o : other.entrySet())
 		{
 		Map.Entry e = (Entry) o;
 		ret = ret.assoc(e.getKey(), e.getValue());
 		}
-	return ret;
+	return ret.persistent();
 }
 
 protected PersistentArrayMap(){
@@ -181,7 +183,7 @@ private int indexOf(Object key){
 	return -1;
 }
 
-boolean equalKey(Object k1, Object k2){
+static boolean equalKey(Object k1, Object k2){
 	if(k1 == null)
 		return k2 == null;
 	return k1.equals(k2);
@@ -259,5 +261,90 @@ static class Iter implements Iterator{
 		throw new UnsupportedOperationException();
 	}
 
+}
+
+public ITransientMap asTransient(){
+	return new TransientArrayMap(array);
+}
+
+static final class TransientArrayMap extends ATransientMap {
+	int len;
+	final Object[] array;
+	final Thread owner;
+
+	public TransientArrayMap(Object[] array){
+		this.owner = Thread.currentThread();
+		this.array = new Object[Math.max(HASHTABLE_THRESHOLD, array.length)];
+		System.arraycopy(array, 0, this.array, 0, array.length);
+		this.len = array.length;
+	}
+	
+	private int indexOf(Object key){
+		for(int i = 0; i < len; i += 2)
+			{
+			if(equalKey(array[i], key))
+				return i;
+			}
+		return -1;
+	}
+
+	public ITransientMap assoc(Object key, Object val){
+		ensureEditable();
+		int i = indexOf(key);
+		if(i >= 0) //already have key,
+			{
+			if(array[i + 1] != val) //no change, no op
+				array[i + 1] = val;
+			}
+		else //didn't have key, grow
+			{
+			if(len >= array.length)
+				return PersistentHashMap.create(array).asTransient().assoc(key, val);
+			array[len++] = key;
+			array[len++] = val;
+			}
+		return this;
+	}
+
+	public ITransientMap without(Object key) {
+		ensureEditable();
+		int i = indexOf(key);
+		if(i >= 0) //have key, will remove
+			{
+			if (len >= 2)
+				{
+					array[i] = array[len - 2];
+					array[i + 1] = array[len - 1];
+				}
+			len -= 2;
+			}
+		return this;
+	}
+
+	public Object valAt(Object key, Object notFound) {
+		ensureEditable();
+		int i = indexOf(key);
+		if (i >= 0)
+			return array[i + 1];
+		return notFound;
+	}
+
+	public int count() {
+		ensureEditable();
+		return len / 2;
+	}
+	
+	public IPersistentMap persistent() {
+		ensureEditable();
+		return new PersistentArrayMap(Arrays.copyOf(array, len));
+	}
+
+	void ensureEditable(){
+		if(owner == Thread.currentThread())
+			return;
+		if(owner != null)
+			throw new IllegalAccessError("Mutable used by non-owner thread");
+		throw new IllegalAccessError("Mutable used after immutable call");
+	}
 }
 }
