@@ -60,29 +60,29 @@ final INode root;
 final public static PersistentHashMap EMPTY = new PersistentHashMap(0, new EmptyNode());
 
 static public IPersistentMap create(Map other){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(Object o : other.entrySet())
 		{
 		Map.Entry e = (Entry) o;
 		ret = ret.assoc(e.getKey(), e.getValue());
 		}
-	return ret;
+	return (IPersistentMap) ret.persistent();
 }
 
 /*
  * @param init {key1,val1,key2,val2,...}
  */
 public static PersistentHashMap create(Object... init){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(int i = 0; i < init.length; i += 2)
 		{
 		ret = ret.assoc(init[i], init[i + 1]);
 		}
-	return (PersistentHashMap) ret;
+	return (PersistentHashMap) ret.persistent();
 }
 
 public static PersistentHashMap create(List init){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(Iterator i = init.iterator(); i.hasNext();)
 		{
 		Object key = i.next();
@@ -91,30 +91,25 @@ public static PersistentHashMap create(List init){
 		Object val = i.next();
 		ret = ret.assoc(key, val);
 		}
-	return (PersistentHashMap) ret;
+	return (PersistentHashMap) ret.persistent();
 }
 
 static public PersistentHashMap create(ISeq items){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(; items != null; items = items.next().next())
 		{
 		if(items.next() == null)
 			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
 		ret = ret.assoc(items.first(), RT.second(items));
 		}
-	return (PersistentHashMap) ret;
+	return (PersistentHashMap) ret.persistent();
 }
 
 /*
  * @param init {key1,val1,key2,val2,...}
  */
 public static PersistentHashMap create(IPersistentMap meta, Object... init){
-	IPersistentMap ret = EMPTY.withMeta(meta);
-	for(int i = 0; i < init.length; i += 2)
-		{
-		ret = ret.assoc(init[i], init[i + 1]);
-		}
-	return (PersistentHashMap) ret;
+	return create(init).withMeta(meta);
 }
 
 PersistentHashMap(int count, INode root){
