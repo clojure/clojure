@@ -221,7 +221,7 @@ static final class TransientHashMap extends ATransientMap {
 		Box removedLeaf = new Box(null);
 		INode newroot = root.without(edit, Util.hash(key), key, removedLeaf);
 		this.root = newroot == null ? EMPTY.root : newroot;
-		if (removedLeaf != null) this.count--;
+		if (removedLeaf.val != null) this.count--;
 		return this;
 	}
 
