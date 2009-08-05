@@ -195,7 +195,7 @@ public TransientHashMap asTransient() {
 	return new TransientHashMap(this);
 }
 
-static final class TransientHashMap extends AFn implements ITransientMap {
+static final class TransientHashMap extends ATransientMap {
 	AtomicReference<Thread> edit;
 	INode root;
 	int count;
@@ -227,31 +227,6 @@ static final class TransientHashMap extends AFn implements ITransientMap {
 		return this;
 	}
 
-	public ITransientMap conj(Object o) {
-		ensureEditable();
-		if(o instanceof Map.Entry)
-			{
-			Map.Entry e = (Map.Entry) o;
-		
-			return assoc(e.getKey(), e.getValue());
-			}
-		else if(o instanceof IPersistentVector)
-			{
-			IPersistentVector v = (IPersistentVector) o;
-			if(v.count() != 2)
-				throw new IllegalArgumentException("Vector arg to map conj must be a pair");
-			return assoc(v.nth(0), v.nth(1));
-			}
-		
-		ITransientMap ret = this;
-		for(ISeq es = RT.seq(o); es != null; es = es.next())
-			{
-			Map.Entry e = (Map.Entry) es.first();
-			ret = ret.assoc(e.getKey(), e.getValue());
-			}
-		return ret;
-	}
-
 	public IPersistentMap persistent() {
 		ensureEditable();
 		edit.set(null);
@@ -262,24 +237,12 @@ static final class TransientHashMap extends AFn implements ITransientMap {
 		return root.find(Util.hash(key), key);
 	}
 
-	public Object valAt(Object key) {
-		return valAt(key, null);
-	}
-
 	public Object valAt(Object key, Object notFound) {
 		ensureEditable();
 		IMapEntry e = entryAt(key);
 		if(e != null)
 			return e.val();
 		return notFound;
-	}
-
-	public Object invoke(Object arg1) throws Exception{
-		return valAt(arg1);
-	}
-
-	public Object invoke(Object arg1, Object notFound) throws Exception{
-		return valAt(arg1, notFound);
 	}
 
 	public int count() {
