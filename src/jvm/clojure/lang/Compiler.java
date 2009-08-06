@@ -2880,13 +2880,14 @@ static public class ObjExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-
+			//todo - only enable this non-private+writability for letfns where we need it
 			if(lb.getPrimitiveType() != null)
-				cv.visitField(ACC_PUBLIC + (isVolatile(lb) ? ACC_VOLATILE : ACC_FINAL)
+//				cv.visitField(ACC_PUBLIC + (isVolatile(lb) ? ACC_VOLATILE : ACC_FINAL)
+				cv.visitField(0 + (isVolatile(lb) ? ACC_VOLATILE : 0)
 						, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
 						      null, null);
 			else
-				cv.visitField(ACC_PUBLIC + (oneTimeUse ? 0 : ACC_FINAL)
+				cv.visitField(0 //+ (oneTimeUse ? 0 : ACC_FINAL)
 						, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 			}
 		//ctor that takes closed-overs and inits base + fields
