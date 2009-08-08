@@ -19,7 +19,7 @@
   Apache commons-logging, log4j, and finally java.util.logging.
   
   Logging levels are specified by clojure keywords corresponding to the
-  values used in log4j/commons-logging:
+  values used in log4j and commons-logging:
     :trace, :debug, :info, :warn, :error, :fatal
   
   Logging occurs with the log macro, or the level-specific convenience macros,
@@ -28,13 +28,16 @@
   logging is invoked within a transaction it will always use an agent.
   
   The log macros will not evaluate their 'message' unless the specific logging
-  level is in effect.
-  
-  Alternately, you can use the spy macro when you have code that needs to be
-  evaluated, and also want to output the code and its result to the debug log.
+  level is in effect. Alternately, you can use the spy macro when you have code
+  that needs to be evaluated, and also want to output the code and its result to
+  the debug log.
   
   Unless otherwise specified, the current namespace (as identified by *ns*) will
   be used as the log-ns (similar to how the java class name is usually used).
+  Note: your log configuration should display the name that was passed to the
+  logging implementation, and not perform stack-inspection, otherwise you'll see
+  something like \"clojure.contrib.logging$fn__72$write__39__auto____81 invoke\"
+  in your logs.
   
   Use the enabled? function to write conditional code against the logging level
   (beyond simply whether or not to call log, which is handled automatically).
@@ -64,8 +67,8 @@
   (try
     (import (org.apache.commons.logging LogFactory Log))
     `(letfn [(get-log# [log-ns#]
-               (LogFactory/getLog log-ns#))
-             (enabled?# [log# level#]
+               (LogFactory/getLog #^String log-ns#))
+             (enabled?# [#^org.apache.commons.logging.Log log# level#]
                (condp = level#
                  :trace (.isTraceEnabled log#)
                  :debug (.isDebugEnabled log#)
@@ -73,7 +76,7 @@
                  :warn  (.isWarnEnabled  log#)
                  :error (.isErrorEnabled log#)
                  :fatal (.isFatalEnabled log#)))
-             (write# [log# level# msg# e#]
+             (write# [#^org.apache.commons.logging.Log log# level# msg# e#]
                (condp = level#
                  :trace (.trace log# msg# e#)
                  :debug (.debug log# msg# e#)
@@ -98,10 +101,10 @@
                     :error Level/ERROR
                     :fatal Level/FATAL}]
       (letfn [(get-log# [log-ns#]
-                (Logger/getLogger log-ns#))
-              (enabled?# [log# level#]
+                (org.apache.log4j.Logger/getLogger #^String log-ns#))
+              (enabled?# [#^org.apache.log4j.Logger log# level#]
                 (.isEnabledFor log# (levels# level#)))
-              (write# [log# level# msg# e#]
+              (write# [#^org.apache.log4j.Logger log# level# msg# e#]
                 (if-not e#
                   (.log log# (levels# level#) msg#)
                   (.log log# (levels# level#) msg# e#)))]
@@ -122,13 +125,15 @@
                     :error Level/SEVERE
                     :fatal Level/SEVERE}]
       (letfn [(get-log# [log-ns#]
-                (Logger/getLogger log-ns#))
-              (enabled?# [log# level#] 
+                (java.util.logging.Logger/getLogger log-ns#))
+              (enabled?# [#^java.util.logging.Logger log# level#]
                 (.isLoggable log# (levels# level#)))
-              (write# [log# level# msg# e#]
+              (write# [#^java.util.logging.Logger log# level# msg# e#]
                 (if-not e#
-                  (.log log# (levels# level#) (str msg#))
-                  (.log log# (levels# level#) (str msg#) e#)))]
+                  (.log log# #^java.util.logging.Level (levels# level#)
+                             #^String (str msg#))
+                  (.log log# #^java.util.logging.Level (levels# level#)
+                             #^String (str msg#) #^Throwable e#)))]
         (struct log-system "java-logging" get-log# enabled?# write#)))
     (catch Exception e nil)))
 
@@ -208,7 +213,7 @@
     (proxy [java.io.ByteArrayOutputStream] []
       (flush []
         (proxy-super flush)
-        (let [s (.trim (.toString this))]
+        (let [s (.trim (.toString #^java.io.ByteArrayOutputStream this))]
           (proxy-super reset)
           (if (> (.length s) 0)
             (log level s nil log-ns)))))
