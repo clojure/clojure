@@ -980,5 +980,29 @@
       true (not-any? #{:a} [:b :b]) ))
 
 
-; TODO: some
-
+(deftest test-some
+  ;; always nil for nil or empty coll/seq
+  (are [x] (= (some pos? x) nil)
+       nil
+       () [] {} #{}
+       (lazy-seq [])
+       (into-array []))
+  
+  (are [x y] (= x y)
+       nil (some nil nil)
+       
+       true (some pos? [1])
+       true (some pos? [1 2])
+       
+       nil (some pos? [-1])
+       nil (some pos? [-1 -2])
+       true (some pos? [-1 2])
+       true (some pos? [1 -2])
+       
+       :a (some #{:a} [:a :a])
+       :a (some #{:a} [:b :a])
+       nil (some #{:a} [:b :b])
+       
+       :a (some #{:a} '(:a :b))
+       :a (some #{:a} #{:a :b})
+       ))

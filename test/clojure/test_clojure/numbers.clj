@@ -389,3 +389,32 @@
   (is (thrown? ArithmeticException (odd? 1/2)))
   (is (thrown? ArithmeticException (odd? (double 10)))))
 
+(defn- expt
+  "clojure.contrib.math/expt is a better and much faster impl, but this works.
+Math/pow overflows to Infinity."
+  [x n] (apply * (replicate n x)))
+
+(deftest test-bit-shift-left
+  (are [x y] (= x y)
+       2r10 (bit-shift-left 2r1 1)
+       2r100 (bit-shift-left 2r1 2)
+       2r1000 (bit-shift-left 2r1 3)
+       2r00101110 (bit-shift-left 2r00010111 1)
+       2r00101110 (apply bit-shift-left [2r00010111 1])
+       2r01 (bit-shift-left 2r10 -1)
+       (expt 2 32) (bit-shift-left 1 32)
+       (expt 2 10000) (bit-shift-left 1 10000)
+       ))
+
+(deftest test-bit-shift-right
+  (are [x y] (= x y)
+       2r0 (bit-shift-right 2r1 1)
+       2r010 (bit-shift-right 2r100 1)
+       2r001 (bit-shift-right 2r100 2)
+       2r000 (bit-shift-right 2r100 3)
+       2r0001011 (bit-shift-right 2r00010111 1)
+       2r0001011 (apply bit-shift-right [2r00010111 1])
+       2r100 (bit-shift-right 2r10 -1)
+       1 (bit-shift-right (expt 2 32) 32)
+       1 (bit-shift-right (expt 2 10000) 10000)
+       ))
