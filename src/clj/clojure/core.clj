@@ -1191,6 +1191,34 @@
          (let [~form temp#]
            ~@body)))))
 
+(defn push-thread-bindings
+  "WARNING: This is a low-level function. Prefer high-level macros like
+  binding where ever possible.
+
+  Takes a map of Var/value pairs. Binds each Var to the associated value for
+  the current thread. Each call *MUST* be accompanied by a matching call to
+  pop-thread-bindings wrapped in a try-finally!
+  
+      (push-thread-bindings bindings)
+      (try
+        ...
+        (finally
+          (pop-thread-bindings)))"
+  [bindings]
+  (clojure.lang.Var/pushThreadBindings bindings))
+
+(defn pop-thread-bindings
+  "Pop one set of bindings pushed with push-binding before. It is an error to
+  pop bindings without pushing before."
+  []
+  (clojure.lang.Var/popThreadBindings))
+
+(defn get-thread-bindings
+  "Get a map with the Var/value pairs which is currently in effect for the
+  current thread."
+  []
+  (clojure.lang.Var/getThreadBindings))
+
 (defmacro binding
   "binding => var-symbol init-expr
 
@@ -1200,21 +1228,21 @@
   are made in parallel (unlike let); all init-exprs are evaluated
   before the vars are bound to their new values."
   [bindings & body]
-    (assert-args binding
-      (vector? bindings) "a vector for its binding"
-      (even? (count bindings)) "an even number of forms in binding vector")
-    (let [var-ize (fn [var-vals]
-                    (loop [ret [] vvs (seq var-vals)]
-                      (if vvs
-                        (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
-                                (next (next vvs)))
-                        (seq ret))))]
-      `(let []
-         (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
-         (try
-          ~@body
-          (finally
-           (. clojure.lang.Var (popThreadBindings)))))))
+  (assert-args binding
+    (vector? bindings) "a vector for its binding"
+    (even? (count bindings)) "an even number of forms in binding vector")
+  (let [var-ize (fn [var-vals]
+                  (loop [ret [] vvs (seq var-vals)]
+                    (if vvs
+                      (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
+                             (next (next vvs)))
+                      (seq ret))))]
+    `(let []
+       (push-thread-bindings (hash-map ~@(var-ize bindings)))
+       (try
+         ~@body
+         (finally
+           (pop-thread-bindings))))))
 
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
