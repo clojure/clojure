@@ -145,8 +145,8 @@
   (let [system @system-ref
         log ((system :get-log) log-ns)]
     (if ((system :enabled?) log level)
-      (do ((system :write) log level (force message) throwable)
-          system-ref))))
+      ((system :write) log level (force message) throwable))
+    system-ref))
 
 
 (def #^{:doc
