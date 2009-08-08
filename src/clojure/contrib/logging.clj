@@ -178,7 +178,7 @@
   ([level message]
     `(log ~level ~message nil))
   ([level message throwable]
-    `(log ~level ~message ~throwable (str *ns*)))
+    `(log ~level ~message ~throwable ~(str *ns*)))
   ([level message throwable log-ns]
     `(if (and @*allow-direct-logging*
               (not (clojure.lang.LockingTransaction/isRunning)))
@@ -187,15 +187,15 @@
           do-log ~level (delay ~message) ~throwable ~log-ns))))
 
 
-(defn enabled?
+(defmacro enabled?
   "Returns true if the specific logging level is enabled.  Use of this function
   should only be necessary if one needs to execute alternate code paths beyond
   whether the log should be written to."
   ([level]
-    (enabled? level (str *ns*)))
+    `(enabled? ~level ~(str *ns*)))
   ([level log-ns]
-    (let [sys @*log-system*]
-      ((sys :enabled?) ((sys :get-log) log-ns) level))))
+    `(let [sys# @*log-system*]
+      ((sys# :enabled?) ((sys# :get-log) ~log-ns) ~level))))
 
 
 (defmacro spy
