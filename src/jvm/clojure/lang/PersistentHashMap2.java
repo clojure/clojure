@@ -327,8 +327,10 @@ final static class ArrayNode implements INode{
 		int idx = mask(hash, shift);
 
 		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null) 
-			return new ArrayNode(null, cloneAndSet(array, 2*idx, key, 2*idx+1, val));
+		if(keyOrNode == null) {
+			addedLeaf.val = val;
+			return new ArrayNode(null, cloneAndSet(array, 2*idx, key, 2*idx+1, val));			
+		}
 		if(keyOrNode instanceof INode) {
 			INode n = ((INode) keyOrNode).assoc(shift + 5, hash, key, val, addedLeaf);
 			if(n == keyOrNode)
@@ -340,6 +342,7 @@ final static class ArrayNode implements INode{
 				return this;
 			return new ArrayNode(null, cloneAndSet(array, 2*idx+1, val));
 		}
+		addedLeaf.val = val;
 		return new ArrayNode(null, cloneAndSet(array, 
 				2*idx, createNode(shift + 5, keyOrNode, array[2*idx+1], hash, key, val), 
 				2*idx+1, null));
@@ -460,11 +463,13 @@ final static class BitmapIndexedNode implements INode{
 					return this;
 				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx+1, val));
 			} 
+			addedLeaf.val = val;
 			return new BitmapIndexedNode(null, bitmap, 
 					cloneAndSet(array, 
 							2*idx, createNode(shift + 5, keyOrNode, array[2*idx+1], hash, key, val), 
 							2*idx+1, null));
 		} else {
+			addedLeaf.val = val;
 			int n = Integer.bitCount(bitmap);
 			if(n >= 16) {
 				Object[] newArray = new Object[64];
