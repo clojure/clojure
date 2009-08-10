@@ -375,13 +375,13 @@ final static class ArrayNode implements INode{
 		return Seq.create(array);
 	}
 
-	ArrayNode ensureEditable(AtomicReference<Thread> edit){
+	private ArrayNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
 			return this;
 		return new ArrayNode(edit, count, this.array.clone());
 	}
 	
-	ArrayNode editAndSet(AtomicReference<Thread> edit, int i, INode n){
+	private ArrayNode editAndSet(AtomicReference<Thread> edit, int i, INode n){
 		ArrayNode editable = ensureEditable(edit);
 		editable.array[i] = n;
 		return editable;
@@ -600,7 +600,7 @@ final static class BitmapIndexedNode implements INode{
 		return NodeSeq.create(array);
 	}
 
-	BitmapIndexedNode ensureEditable(AtomicReference<Thread> edit){
+	private BitmapIndexedNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
 			return this;
 		int n = Integer.bitCount(bitmap);
@@ -609,20 +609,20 @@ final static class BitmapIndexedNode implements INode{
 		return new BitmapIndexedNode(edit, bitmap, newArray);
 	}
 	
-	BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
+	private BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
 		BitmapIndexedNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		return editable;
 	}
 
-	BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
+	private BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
 		BitmapIndexedNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		editable.array[j] = b;
 		return editable;
 	}
 
-	BitmapIndexedNode editAndRemovePair(AtomicReference<Thread> edit, int bit, int i) {
+	private BitmapIndexedNode editAndRemovePair(AtomicReference<Thread> edit, int bit, int i) {
 		if (bitmap == bit) 
 			return null;
 		BitmapIndexedNode editable = ensureEditable(edit);
@@ -792,13 +792,13 @@ final static class HashCollisionNode implements INode{
 		return -1;
 	}
 
-	HashCollisionNode ensureEditable(AtomicReference<Thread> edit){
+	private HashCollisionNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
 			return this;
 		return new HashCollisionNode(edit, count, hash, array);
 	}
 
-	HashCollisionNode ensureEditable(AtomicReference<Thread> edit, int count, Object[] array){
+	private HashCollisionNode ensureEditable(AtomicReference<Thread> edit, int count, Object[] array){
 		if(this.edit == edit) {
 			this.array = array;
 			return this;
@@ -806,13 +806,13 @@ final static class HashCollisionNode implements INode{
 		return new HashCollisionNode(edit, count, hash, array);
 	}
 
-	HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
+	private HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
 		HashCollisionNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		return editable;
 	}
 
-	HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
+	private HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
 		HashCollisionNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		editable.array[j] = b;
