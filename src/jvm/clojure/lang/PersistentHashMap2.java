@@ -277,6 +277,13 @@ static final class TransientHashMap extends ATransientMap {
 	}
 
 	Object doValAt(Object key, Object notFound) {
+		if (key == null)
+			if (hasNull)
+				return nullValue;
+			else
+				return notFound;
+		if (root == null)
+			return null;
 		return root.find(0, Util.hash(key), key, notFound);
 	}
 
@@ -367,41 +374,34 @@ final static class ArrayNode implements INode{
 			return this;
 		return new ArrayNode(edit, this.array.clone());
 	}
+	
+	ArrayNode editAndSet(AtomicReference<Thread> edit, int i, INode n){
+		ArrayNode editable = ensureEditable(edit);
+		editable.array[i] = n;
+		return editable;
+	}
 
 	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
 		int idx = mask(hash, shift);
 		INode node = array[idx];
-		if(node == null) {
-			ArrayNode editable = ensureEditable(edit);
-			editable.array[idx] = BitmapIndexedNode.EMPTY.assoc(edit, shift + 5, hash, key, val, addedLeaf);
-			return editable;
-		}
+		if(node == null)
+			return editAndSet(edit, idx, BitmapIndexedNode.EMPTY.assoc(edit, shift + 5, hash, key, val, addedLeaf));
 		INode n = node.assoc(edit, shift + 5, hash, key, val, addedLeaf);
 		if(n == node)
 			return this;
-		ArrayNode editable = ensureEditable(edit);
-		editable.array[idx] = n;
-		return editable;
+		return editAndSet(edit, idx, n);
 	}	
 
 	public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf){
-		return null;
-//		int idx = mask(hash, shift);
-//		INode n = nodes[idx].without(edit, null, hash, key, removedLeaf);
-//		if(n != nodes[idx])
-//			{
-//			if(n == null)
-//				{
-//				INode[] newnodes = new INode[nodes.length - 1];
-//				System.arraycopy(nodes, 0, newnodes, 0, idx);
-//				System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
-//				return new BitmapIndexedNode(edit, ~bitpos(hash, shift), newnodes, shift);
-//				}
-//			ArrayNode node = ensureEditable(edit);
-//			node.nodes[idx] = n;
-//			return node;
-//			}
-//		return this;
+		int idx = mask(hash, shift);
+		INode node = array[idx];
+		if(node == null)
+			return this;
+		INode n = node.without(edit, shift + 5, hash, key, removedLeaf);
+		if(n == node)
+			return this;
+		// TODO: shrink if underflow
+		return editAndSet(edit, idx, n);
 	}
 	
 	static class Seq extends ASeq {
@@ -577,16 +577,27 @@ final static class BitmapIndexedNode implements INode{
 		return new BitmapIndexedNode(edit, bitmap, newArray);
 	}
 	
-	BitmapIndexedNode editAndSet(int i, Object a) {
+	BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
 		BitmapIndexedNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		return editable;
 	}
 
-	BitmapIndexedNode editAndSet(int i, Object a, int j, Object b) {
+	BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
 		BitmapIndexedNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		editable.array[j] = b;
+		return editable;
+	}
+
+	BitmapIndexedNode editAndRemovePair(AtomicReference<Thread> edit, int bit, int i) {
+		if (bitmap == bit) 
+			return null;
+		BitmapIndexedNode editable = ensureEditable(edit);
+		editable.bitmap ^= bit;
+		System.arraycopy(editable.array, 2*(i+1), editable.array, 2*i, editable.array.length - 2*(i+1));
+		editable.array[editable.array.length - 2] = null;
+		editable.array[editable.array.length - 1] = null;
 		return editable;
 	}
 
@@ -600,15 +611,15 @@ final static class BitmapIndexedNode implements INode{
 				INode n = ((INode) valOrNode).assoc(edit, shift + 5, hash, key, val, addedLeaf);
 				if(n == valOrNode)
 					return this;
-				return editAndSet(2*idx+1, n);
+				return editAndSet(edit, 2*idx+1, n);
 			} 
 			if(Util.equals(key, keyOrNull)) {
 				if(val == valOrNode)
 					return this;
-				return editAndSet(2*idx+1, val);
+				return editAndSet(edit, 2*idx+1, val);
 			} 
 			addedLeaf.val = val;
-			return editAndSet(2*idx, null, 2*idx+1, 
+			return editAndSet(edit, 2*idx, null, 2*idx+1, 
 					createNode(edit, shift + 5, keyOrNull, valOrNode, hash, key, val)); 
 		} else {
 			int n = Integer.bitCount(bitmap);
@@ -650,42 +661,43 @@ final static class BitmapIndexedNode implements INode{
 	}
 
 	public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf){
-		return null;
-		// TODO
-//		int bit = bitpos(hash, shift);
-//		if((bitmap & bit) != 0)
-//			{
-//			int idx = index(bit);
-//			INode n = nodes[idx].without(edit, null, hash, key, removedLeaf);
-//			if(n != nodes[idx])
-//				{
-//				if(n == null)
-//					{
-//					if(bitmap == bit)
-//						return null;
-//					INode[] newnodes = new INode[nodes.length - 1];
-//					System.arraycopy(nodes, 0, newnodes, 0, idx);
-//					System.arraycopy(nodes, idx + 1, newnodes, idx, nodes.length - (idx + 1));
-//					return new BitmapIndexedNode(edit, bitmap & ~bit, newnodes, shift);
-//					}
-//				BitmapIndexedNode node = ensureEditable(edit);
-//				node.nodes[idx] = n;
-//				return node;
-//				}
-//			}
-//		return this;
+		int bit = bitpos(hash, shift);
+		if((bitmap & bit) == 0)
+			return this;
+		int idx = index(bit);
+		Object keyOrNull = array[2*idx];
+		Object valOrNode = array[2*idx+1];
+		if(keyOrNull == null) {
+			INode n = ((INode) valOrNode).without(edit, shift + 5, hash, key, removedLeaf);
+			if (n == valOrNode)
+				return this;
+			if (n != null)
+				return editAndSet(edit, 2*idx+1, n); 
+			if (bitmap == bit) 
+				return null;
+			removedLeaf.val = valOrNode;
+			return editAndRemovePair(edit, bit, idx); 
+		}
+		if(Util.equals(key, keyOrNull)) {
+			removedLeaf.val = key; // key can't be null
+			// TODO: collapse
+			return editAndRemovePair(edit, bit, idx); 			
+		}
+		return this;
 	}
 }
 
 final static class HashCollisionNode implements INode{
 
 	final int hash;
+	int count;
 	Object[] array;
 	final AtomicReference<Thread> edit;
 
-	HashCollisionNode(AtomicReference<Thread> edit, int hash, Object... array){
+	HashCollisionNode(AtomicReference<Thread> edit, int hash, int count, Object... array){
 		this.edit = edit;
 		this.hash = hash;
+		this.count = count;
 		this.array = array;
 	}
 
@@ -695,13 +707,13 @@ final static class HashCollisionNode implements INode{
 			if(idx != -1) {
 				if(array[idx + 1] == val)
 					return this;
-				return new HashCollisionNode(null, hash, cloneAndSet(array, idx + 1, val));
+				return new HashCollisionNode(null, hash, count, cloneAndSet(array, idx + 1, val));
 			}
 			Object[] newArray = new Object[array.length + 2];
 			System.arraycopy(array, 0, newArray, 0, array.length);
 			newArray[array.length] = key;
 			newArray[array.length + 1] = val;
-			return new HashCollisionNode(edit, hash, newArray);
+			return new HashCollisionNode(edit, hash, count + 1, newArray);
 		}
 		// nest it in a bitmap node
 		return new BitmapIndexedNode(null, bitpos(this.hash, shift), new Object[] {this})
@@ -712,7 +724,7 @@ final static class HashCollisionNode implements INode{
 		int idx = findIndex(key);
 		if(idx == -1)
 			return this;
-		if(array.length == 2)
+		if(count == 1)
 			return null;
 		return new HashCollisionNode(null, hash, count - 1, removePair(array, idx/2));
 	}
@@ -751,24 +763,24 @@ final static class HashCollisionNode implements INode{
 	HashCollisionNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
 			return this;
-		return new HashCollisionNode(edit, hash, array);
+		return new HashCollisionNode(edit, count, hash, array);
 	}
 
-	HashCollisionNode ensureEditable(AtomicReference<Thread> edit, Object[] array){
+	HashCollisionNode ensureEditable(AtomicReference<Thread> edit, int count, Object[] array){
 		if(this.edit == edit) {
 			this.array = array;
 			return this;
 		}
-		return new HashCollisionNode(edit, hash, array);
+		return new HashCollisionNode(edit, count, hash, array);
 	}
 
-	HashCollisionNode editAndSet(int i, Object a) {
+	HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
 		HashCollisionNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		return editable;
 	}
 
-	HashCollisionNode editAndSet(int i, Object a, int j, Object b) {
+	HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
 		HashCollisionNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		editable.array[j] = b;
@@ -782,13 +794,13 @@ final static class HashCollisionNode implements INode{
 			if(idx != -1) {
 				if(array[idx + 1] == val)
 					return this;
-				return editAndSet(idx+1, val); 
+				return editAndSet(edit, idx+1, val); 
 			}
 			Object[] newArray = new Object[array.length + 2];
 			System.arraycopy(array, 0, newArray, 0, array.length);
 			newArray[array.length] = key;
 			newArray[array.length + 1] = val;
-			return ensureEditable(edit, newArray);
+			return ensureEditable(edit, count + 1, newArray);
 		}
 		// nest it in a bitmap node
 		return new BitmapIndexedNode(edit, bitpos(this.hash, shift), new Object[] {this})
@@ -796,18 +808,17 @@ final static class HashCollisionNode implements INode{
 	}	
 
 	public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf){
-		return null;
-		// TODO
-//		int idx = findIndex(hash, key);
-//		if(idx == -1)
-//			return this;
-//		removedLeaf.val = leaves[idx];
-//		if(leaves.length == 2)
-//			return idx == 0 ? leaves[1] : leaves[0];
-//		IMapEntry[] newLeaves = new IMapEntry[leaves.length - 1];
-//		System.arraycopy(leaves, 0, newLeaves, 0, idx);
-//		System.arraycopy(leaves, idx + 1, newLeaves, idx, leaves.length - (idx + 1));
-//		return new HashCollisionNode(edit, hash, newLeaves);
+		int idx = findIndex(key);
+		if(idx == -1)
+			return this;
+		if(array.length == 2)
+			return null;
+		HashCollisionNode editable = ensureEditable(edit);
+		editable.array[idx] = editable.array[2*count-2];
+		editable.array[idx+1] = editable.array[2*count-1];
+		editable.array[2*count-2] = editable.array[2*count-1] = null;
+		editable.count--;
+		return editable;
 	}
 }
 
@@ -927,7 +938,7 @@ private static Object[] removePair(Object[] array, int i) {
 private static INode createNode(int shift, Object key1, Object val1, int key2hash, Object key2, Object val2) {
 	int key1hash = Util.hash(key1);
 	if(key1hash == key2hash)
-		return new HashCollisionNode(null, key1hash, new Object[] {key1, val1, key2, val2});
+		return new HashCollisionNode(null, key1hash, 2, new Object[] {key1, val1, key2, val2});
 	// TODO: optimize;
 	Box _ = new Box(null);
 	return BitmapIndexedNode.EMPTY
@@ -938,7 +949,7 @@ private static INode createNode(int shift, Object key1, Object val1, int key2has
 private static INode createNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2) {
 	int key1hash = Util.hash(key1);
 	if(key1hash == key2hash)
-		return new HashCollisionNode(null, key1hash, new Object[] {key1, val1, key2, val2});
+		return new HashCollisionNode(null, key1hash, 2, new Object[] {key1, val1, key2, val2});
 	Box _ = new Box(null);
 	return BitmapIndexedNode.EMPTY
 		.assoc(edit, shift, key1hash, key1, val1, _)
