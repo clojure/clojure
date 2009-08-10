@@ -714,7 +714,7 @@ final static class HashCollisionNode implements INode{
 			return this;
 		if(array.length == 2)
 			return null;
-		return new HashCollisionNode(null, hash, removePair(array, idx));
+		return new HashCollisionNode(null, hash, count - 1, removePair(array, idx/2));
 	}
 
 	public IMapEntry find(int shift, int hash, Object key){
