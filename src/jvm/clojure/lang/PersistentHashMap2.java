@@ -784,7 +784,7 @@ final static class HashCollisionNode implements INode{
 	}
 
 	public int findIndex(Object key){
-		for(int i = 0; i < array.length; i+=2)
+		for(int i = 0; i < 2*count; i+=2)
 			{
 			if(Util.equals(key, array[i]))
 				return i;
@@ -828,6 +828,11 @@ final static class HashCollisionNode implements INode{
 					return this;
 				return editAndSet(edit, idx+1, val); 
 			}
+			if (array.length > 2*count) {
+				HashCollisionNode editable = editAndSet(edit, 2*count, key, 2*count+1, val);
+				editable.count++;
+				return editable;
+			}
 			Object[] newArray = new Object[array.length + 2];
 			System.arraycopy(array, 0, newArray, 0, array.length);
 			newArray[array.length] = key;
@@ -843,7 +848,7 @@ final static class HashCollisionNode implements INode{
 		int idx = findIndex(key);
 		if(idx == -1)
 			return this;
-		if(array.length == 2)
+		if(count == 1)
 			return null;
 		HashCollisionNode editable = ensureEditable(edit);
 		editable.array[idx] = editable.array[2*count-2];
