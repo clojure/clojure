@@ -318,23 +318,25 @@ static interface INode{
 }
 
 final static class ArrayNode implements INode{
+	int count;
 	final INode[] array;
 	final AtomicReference<Thread> edit;
 
-	ArrayNode(AtomicReference<Thread> edit, INode[] array){
+	ArrayNode(AtomicReference<Thread> edit, int count, INode[] array){
 		this.array = array;
 		this.edit = edit;
+		this.count = count;
 	}
 
 	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
 		int idx = mask(hash, shift);
 		INode node = array[idx];
 		if(node == null)
-			return new ArrayNode(null, cloneAndSet(array, idx, BitmapIndexedNode.EMPTY.assoc(shift + 5, hash, key, val, addedLeaf)));			
+			return new ArrayNode(null, count + 1, cloneAndSet(array, idx, BitmapIndexedNode.EMPTY.assoc(shift + 5, hash, key, val, addedLeaf)));			
 		INode n = node.assoc(shift + 5, hash, key, val, addedLeaf);
 		if(n == node)
 			return this;
-		return new ArrayNode(null, cloneAndSet(array, idx, n));
+		return new ArrayNode(null, count, cloneAndSet(array, idx, n));
 	}
 
 	public INode without(int shift, int hash, Object key){
@@ -345,8 +347,12 @@ final static class ArrayNode implements INode{
 		INode n = node.without(shift + 5, hash, key);
 		if(n == node)
 			return this;
-		// TODO: shrink if underflow
-		return new ArrayNode(null, cloneAndSet(array, idx, n));
+		if (n == null) {
+			if (count <= 12) // shrink
+				return pack(null, idx);
+			return new ArrayNode(null, count - 1, cloneAndSet(array, idx, n));
+		} else 
+			return new ArrayNode(null, count, cloneAndSet(array, idx, n));
 	}
 
 	public IMapEntry find(int shift, int hash, Object key){
@@ -372,13 +378,33 @@ final static class ArrayNode implements INode{
 	ArrayNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
 			return this;
-		return new ArrayNode(edit, this.array.clone());
+		return new ArrayNode(edit, count, this.array.clone());
 	}
 	
 	ArrayNode editAndSet(AtomicReference<Thread> edit, int i, INode n){
 		ArrayNode editable = ensureEditable(edit);
 		editable.array[i] = n;
 		return editable;
+	}
+
+
+	private INode pack(AtomicReference<Thread> edit, int idx) {
+		Object[] newArray = new Object[2*(count - 1)];
+		int j = 1;
+		int bitmap = 0;
+		for(int i = 0; i < idx; i++)
+			if (array[i] != null) {
+				newArray[j] = array[i];
+				bitmap |= 1 << i;
+				j += 2;
+			}
+		for(int i = idx + 1; i < array.length; i++)
+			if (array[i] != null) {
+				newArray[j] = array[i];
+				bitmap |= 1 << i;
+				j += 2;
+			}
+		return new BitmapIndexedNode(edit, bitmap, newArray);
 	}
 
 	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
@@ -400,7 +426,13 @@ final static class ArrayNode implements INode{
 		INode n = node.without(edit, shift + 5, hash, key, removedLeaf);
 		if(n == node)
 			return this;
-		// TODO: shrink if underflow
+		if(n == null) {
+			if (count <= 12) // shrink
+				return pack(edit, idx);
+			ArrayNode editable = editAndSet(edit, idx, n);
+			editable.count--;
+			return editable;
+		}
 		return editAndSet(edit, idx, n);
 	}
 	
@@ -501,7 +533,7 @@ final static class BitmapIndexedNode implements INode{
 							nodes[i] = EMPTY.assoc(shift + 5, Util.hash(array[j]), array[j], array[j+1], addedLeaf);
 						j += 2;
 					}
-				return new ArrayNode(null, nodes);
+				return new ArrayNode(null, n + 1, nodes);
 			} else {
 				Object[] newArray = new Object[2*(n+1)];
 				System.arraycopy(array, 0, newArray, 0, 2*idx);
@@ -645,7 +677,7 @@ final static class BitmapIndexedNode implements INode{
 							nodes[i] = EMPTY.assoc(edit, shift + 5, Util.hash(array[j]), array[j], array[j+1], addedLeaf);
 						j += 2;
 					}
-				return new ArrayNode(edit, nodes);
+				return new ArrayNode(edit, n + 1, nodes);
 			} else {
 				Object[] newArray = new Object[2*(n+2)];
 				System.arraycopy(array, 0, newArray, 0, 2*idx);
