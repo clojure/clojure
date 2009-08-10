@@ -93,7 +93,7 @@
 (defn- root-cause
   "Returns the initial cause of an exception or error by peeling off all of
   its wrappers"
-  [throwable]
+  [#^Throwable throwable]
   (loop [cause throwable]
     (if-let [cause (.getCause cause)]
       (recur cause)
@@ -161,7 +161,7 @@
   (let [{:keys [init need-prompt prompt flush read eval print caught]
          :or {init        #()
               need-prompt (if (instance? LineNumberingPushbackReader *in*)
-                            #(.atLineStart *in*)
+                            #(.atLineStart #^LineNumberingPushbackReader *in*)
                             #(identity true))
               prompt      repl-prompt
               flush       flush
@@ -203,7 +203,7 @@
 (defn load-script
   "Loads Clojure source from a file or resource given its path. Paths
   beginning with @ or @/ are considered relative to classpath."
-  [path]
+  [#^String path]
   (if (.startsWith path "@")
     (RT/loadResourceScript
      (.substring path (if (.startsWith path "@/") 2 1)))

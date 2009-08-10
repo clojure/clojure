@@ -357,12 +357,14 @@
 
 (defn symbol
   "Returns a Symbol with the given namespace and name."
+  {:tag clojure.lang.Symbol}
   ([name] (if (symbol? name) name (clojure.lang.Symbol/intern name)))
   ([ns name] (clojure.lang.Symbol/intern ns name)))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
   in the keyword strings, it will be added automatically."
+  {:tag clojure.lang.Keyword}
   ([name] (if (keyword? name) name (clojure.lang.Keyword/intern name)))
   ([ns name] (clojure.lang.Keyword/intern ns name)))
 
@@ -2976,7 +2978,7 @@
                                 (conj (pop groups) (conj (peek groups) [k v]))
                                 (conj groups [k v])))
                             [] (partition 2 seq-exprs)))
-        err (fn [& msg] (throw (IllegalArgumentException. (apply str msg))))
+        err (fn [& msg] (throw (IllegalArgumentException. #^String (apply str msg))))
         emit-bind (fn emit-bind [[[bind expr & mod-pairs]
                                   & [[_ next-expr] :as next-groups]]]
                     (let [giter (gensym "iter__")
@@ -3768,7 +3770,7 @@
 (defmacro with-loading-context [& body]
   `((fn loading# [] 
         (. clojure.lang.Var (pushThreadBindings {clojure.lang.Compiler/LOADER  
-                                                 (-> loading# .getClass .getClassLoader)}))
+                                                 (.getClassLoader (.getClass #^Object loading#))}))
         (try
          ~@body
          (finally
@@ -4443,9 +4445,9 @@
                                            "clojure/version.properties")
       properties     (doto (new java.util.Properties) (.load version-stream))
       prop (fn [k] (.getProperty properties (str "clojure.version." k)))
-      clojure-version {:major       (Integer/valueOf (prop "major"))
-                       :minor       (Integer/valueOf (prop "minor"))
-                       :incremental (Integer/valueOf (prop "incremental"))
+      clojure-version {:major       (Integer/valueOf #^String (prop "major"))
+                       :minor       (Integer/valueOf #^String (prop "minor"))
+                       :incremental (Integer/valueOf #^String (prop "incremental"))
                        :qualifier   (prop "qualifier")}]
   (def *clojure-version* 
     (if (not (= (prop "interim") "false"))

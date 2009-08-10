@@ -88,6 +88,7 @@
           classpath="${build}:${cljsrc}"
           failonerror="true">
       <sysproperty key="clojure.compile.path" value="${build}"/>
+      <!-- <sysproperty key="clojure.compile.warn-on-reflection" value="true"/> -->
       <arg value="clojure.core"/>
       <arg value="clojure.main"/>
       <arg value="clojure.set"/>
