@@ -939,11 +939,11 @@ private static INode createNode(int shift, Object key1, Object val1, int key2has
 	int key1hash = Util.hash(key1);
 	if(key1hash == key2hash)
 		return new HashCollisionNode(null, key1hash, 2, new Object[] {key1, val1, key2, val2});
-	// TODO: optimize;
 	Box _ = new Box(null);
+	AtomicReference<Thread> edit = new AtomicReference<Thread>();
 	return BitmapIndexedNode.EMPTY
-		.assoc(shift, key1hash, key1, val1, _)
-		.assoc(shift, key2hash, key2, val2, _);
+		.assoc(edit, shift, key1hash, key1, val1, _)
+		.assoc(edit, shift, key2hash, key2, val2, _);
 }
 
 private static INode createNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2) {
