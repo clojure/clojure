@@ -473,23 +473,24 @@ final static class BitmapIndexedNode implements INode{
 		int bit = bitpos(hash, shift);
 		int idx = index(bit);
 		if((bitmap & bit) != 0) {
-			Object keyOrNode = array[2*idx];
-			if(keyOrNode instanceof INode) {
-				INode n = ((INode) keyOrNode).assoc(shift + 5, hash, key, val, addedLeaf);
-				if(n == keyOrNode)
+			Object keyOrNull = array[2*idx];
+			Object valOrNode = array[2*idx+1];
+			if(keyOrNull == null) {
+				INode n = ((INode) valOrNode).assoc(shift + 5, hash, key, val, addedLeaf);
+				if(n == valOrNode)
 					return this;
-				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx, n));
+				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx+1, n));
 			} 
-			if(Util.equals(key, keyOrNode)) {
-				if(val == array[2*idx+1])
+			if(Util.equals(key, keyOrNull)) {
+				if(val == valOrNode)
 					return this;
 				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx+1, val));
 			} 
 			addedLeaf.val = val;
 			return new BitmapIndexedNode(null, bitmap, 
 					cloneAndSet(array, 
-							2*idx, createNode(shift + 5, keyOrNode, array[2*idx+1], hash, key, val), 
-							2*idx+1, null));
+							2*idx, null, 
+							2*idx+1, createNode(shift + 5, keyOrNull, valOrNode, hash, key, val)));
 		} else {
 			int n = Integer.bitCount(bitmap);
 			if(n >= 16) {
@@ -499,8 +500,8 @@ final static class BitmapIndexedNode implements INode{
 				int j = 0;
 				for(int i = 0; i < 32; i++)
 					if(((bitmap >>> i) & 1) != 0) {
-						if (array[j] instanceof INode)
-							nodes[i] = (INode) array[j];
+						if (array[j] == null)
+							nodes[i] = (INode) array[j+1];
 						else
 							nodes[i] = EMPTY.assoc(shift + 5, Util.hash(array[j]), array[j], array[j+1], addedLeaf);
 						j += 2;
@@ -523,22 +524,19 @@ final static class BitmapIndexedNode implements INode{
 		if((bitmap & bit) == 0)
 			return this;
 		int idx = index(bit);
-		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null)
-			return this;
-		if(keyOrNode instanceof INode) {
-			INode n = ((INode) keyOrNode).without(shift + 5, hash, key);
-			if(n == keyOrNode)
+		Object keyOrNull = array[2*idx];
+		Object valOrNode = array[2*idx+1];
+		if(keyOrNull == null) {
+			INode n = ((INode) valOrNode).without(shift + 5, hash, key);
+			if (n == valOrNode)
 				return this;
-			if(n == null) {
-				if(array.length == 2)
-					return null;
-				// TODO: collapse
-				return new BitmapIndexedNode(null, bitmap ^ bit, removePair(array, idx));
-			}
-			return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx, n));
+			if (n != null)
+				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx+1, n));
+			if (bitmap == bit) 
+				return null;
+			return new BitmapIndexedNode(null, bitmap ^ bit, removePair(array, idx));
 		}
-		if(Util.equals(key, keyOrNode))
+		if(Util.equals(key, keyOrNull))
 			// TODO: collapse
 			return new BitmapIndexedNode(null, bitmap ^ bit, removePair(array, idx));
 		return this;
@@ -549,13 +547,12 @@ final static class BitmapIndexedNode implements INode{
 		if((bitmap & bit) == 0)
 			return null;
 		int idx = index(bit);
-		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null)
-			return null;
-		if(keyOrNode instanceof INode)
-			return ((INode) keyOrNode).find(shift + 5, hash, key);
-		if(Util.equals(key, keyOrNode))
-			return new MapEntry(keyOrNode, array[2*idx+1]);
+		Object keyOrNull = array[2*idx];
+		Object valOrNode = array[2*idx+1];
+		if(keyOrNull == null)
+			return ((INode) valOrNode).find(shift + 5, hash, key);
+		if(Util.equals(key, keyOrNull))
+			return new MapEntry(keyOrNull, valOrNode);
 		return null;
 	}
 
@@ -564,13 +561,12 @@ final static class BitmapIndexedNode implements INode{
 		if((bitmap & bit) == 0)
 			return notFound;
 		int idx = index(bit);
-		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null)
-			return notFound;
-		if(keyOrNode instanceof INode)
-			return ((INode) keyOrNode).find(shift + 5, hash, key, notFound);
-		if(Util.equals(key, keyOrNode))
-			return array[2*idx+1];
+		Object keyOrNull = array[2*idx];
+		Object valOrNode = array[2*idx+1];
+		if(keyOrNull == null)
+			return ((INode) valOrNode).find(shift + 5, hash, key, notFound);
+		if(Util.equals(key, keyOrNull))
+			return valOrNode;
 		return notFound;
 	}
 
@@ -908,13 +904,14 @@ static final class NodeSeq extends ASeq {
 		if(s != null)
 			return new NodeSeq(null, array, i, s);
 		for(int j = i; j < array.length; j+=2) {
-			Object keyOrNode = array[j];
-			if(keyOrNode instanceof INode) {
-				ISeq nodeSeq = ((INode) keyOrNode).nodeSeq();
+			if(array[j] != null)
+				return new NodeSeq(null, array, j, null);
+			INode node = (INode) array[j+1];
+			if (node != null) {
+				ISeq nodeSeq = node.nodeSeq();
 				if(nodeSeq != null)
 					return new NodeSeq(null, array, j + 2, nodeSeq);
-			} else if(keyOrNode != null) 
-				return new NodeSeq(null, array, j, null);
+			}
 		}
 		return null;
 	}
