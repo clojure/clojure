@@ -37,6 +37,7 @@ package clojure.lang;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
 /*
@@ -60,29 +61,29 @@ final public static PersistentHashMap2 EMPTY = new PersistentHashMap2(0, null, f
 final private static Object NOT_FOUND = new Object();
 
 static public IPersistentMap create(Map other){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(Object o : other.entrySet())
 		{
 		Map.Entry e = (Entry) o;
 		ret = ret.assoc(e.getKey(), e.getValue());
 		}
-	return ret;
+	return ret.persistent();
 }
 
 /*
  * @param init {key1,val1,key2,val2,...}
  */
 public static PersistentHashMap2 create(Object... init){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(int i = 0; i < init.length; i += 2)
 		{
 		ret = ret.assoc(init[i], init[i + 1]);
 		}
-	return (PersistentHashMap2) ret;
+	return (PersistentHashMap2) ret.persistent();
 }
 
 public static PersistentHashMap2 create(List init){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(Iterator i = init.iterator(); i.hasNext();)
 		{
 		Object key = i.next();
@@ -91,30 +92,25 @@ public static PersistentHashMap2 create(List init){
 		Object val = i.next();
 		ret = ret.assoc(key, val);
 		}
-	return (PersistentHashMap2) ret;
+	return (PersistentHashMap2) ret.persistent();
 }
 
 static public PersistentHashMap2 create(ISeq items){
-	IPersistentMap ret = EMPTY;
+	ITransientMap ret = EMPTY.asTransient();
 	for(; items != null; items = items.next().next())
 		{
 		if(items.next() == null)
 			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
 		ret = ret.assoc(items.first(), RT.second(items));
 		}
-	return (PersistentHashMap2) ret;
+	return (PersistentHashMap2) ret.persistent();
 }
 
 /*
  * @param init {key1,val1,key2,val2,...}
  */
 public static PersistentHashMap2 create(IPersistentMap meta, Object... init){
-	IPersistentMap ret = EMPTY.withMeta(meta);
-	for(int i = 0; i < init.length; i += 2)
-		{
-		ret = ret.assoc(init[i], init[i + 1]);
-		}
-	return (PersistentHashMap2) ret;
+	return create(init).withMeta(meta);
 }
 
 PersistentHashMap2(int count, INode root, boolean hasNull, Object nullValue){
