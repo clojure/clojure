@@ -344,7 +344,7 @@ final static class ArrayNode implements INode{
 		if(n == node)
 			return this;
 		if (n == null) {
-			if (count <= 12) // shrink
+			if (count <= 8) // shrink
 				return pack(null, idx);
 			return new ArrayNode(null, count - 1, cloneAndSet(array, idx, n));
 		} else 
@@ -426,7 +426,7 @@ final static class ArrayNode implements INode{
 		if(n == node)
 			return this;
 		if(n == null) {
-			if (count <= 12) // shrink
+			if (count <= 8) // shrink
 				return pack(edit, idx);
 			ArrayNode editable = editAndSet(edit, idx, n);
 			editable.count--;
