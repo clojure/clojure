@@ -36,11 +36,10 @@
 
 package clojure.lang;
 
-import java.util.*;
-//this stuff is just for the test main()
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
-import clojure.lang.PersistentVector.Node;
 
 /*
  A persistent rendition of Phil Bagwell's Hash Array Mapped Trie
@@ -315,10 +314,10 @@ static interface INode{
 }
 
 final static class ArrayNode implements INode{
-	final Object[] array;
+	final INode[] array;
 	final AtomicReference<Thread> edit;
 
-	ArrayNode(AtomicReference<Thread> edit, Object[] array){
+	ArrayNode(AtomicReference<Thread> edit, INode[] array){
 		this.array = array;
 		this.edit = edit;
 	}
@@ -326,64 +325,45 @@ final static class ArrayNode implements INode{
 	public INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf){
 		int idx = mask(hash, shift);
 
-		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null) {
-			addedLeaf.val = val;
-			return new ArrayNode(null, cloneAndSet(array, 2*idx, key, 2*idx+1, val));			
-		}
-		if(keyOrNode instanceof INode) {
-			INode n = ((INode) keyOrNode).assoc(shift + 5, hash, key, val, addedLeaf);
-			if(n == keyOrNode)
-				return this;
-			return new ArrayNode(null, cloneAndSet(array, 2*idx, n));
-		}
-		if(Util.equals(key, keyOrNode)) {
-			if(val == array[2*idx+1])
-				return this;
-			return new ArrayNode(null, cloneAndSet(array, 2*idx+1, val));
-		}
-		addedLeaf.val = val;
-		return new ArrayNode(null, cloneAndSet(array, 
-				2*idx, createNode(shift + 5, keyOrNode, array[2*idx+1], hash, key, val), 
-				2*idx+1, null));
+		INode node = array[idx];
+		if(node == null)
+			return new ArrayNode(null, cloneAndSet(array, idx, BitmapIndexedNode.EMPTY.assoc(shift + 5, hash, key, val, addedLeaf)));			
+		INode n = node.assoc(shift + 5, hash, key, val, addedLeaf);
+		if(n == node)
+			return this;
+		return new ArrayNode(null, cloneAndSet(array, idx, n));
 	}
 
 	public INode without(int shift, int hash, Object key){
 		int idx = mask(hash, shift);
-		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null)
+		INode node = array[idx];
+		if(node == null)
 			return this;
-		if(keyOrNode instanceof INode) {
-			INode n = ((INode) keyOrNode).without(shift + 5, hash, key);
-			if(n == keyOrNode)
-				return this;
-			// TODO: shrink if null
-			return new ArrayNode(null, cloneAndSet(array, 2*idx, n));
-		}
-		if(Util.equals(key, keyOrNode))
-			// TODO: shrink
-			return new ArrayNode(null, cloneAndSet(array, 2*idx, null, 2*idx+1, null));
-		return this;
+		INode n = node.without(shift + 5, hash, key);
+		if(n == node)
+			return this;
+		// TODO: shrink if underflow
+		return new ArrayNode(null, cloneAndSet(array, idx, n));
 	}
 
 	public IMapEntry find(int shift, int hash, Object key){
 		int idx = mask(hash, shift);
-		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null)
+		INode node = array[idx];
+		if(node == null)
 			return null;
-		return deepFind(shift, hash, keyOrNode, array[2*idx+1], key);
+		return node.find(shift + 5, hash, key); 
 	}
 
 	public Object find(int shift, int hash, Object key, Object notFound){
 		int idx = mask(hash, shift);
-		Object keyOrNode = array[2*idx];
-		if(keyOrNode == null)
+		INode node = array[idx];
+		if(node == null)
 			return notFound;
-		return deepFind(shift, hash, keyOrNode, array[2*idx+1], key, notFound);
+		return node.find(shift + 5, hash, key, notFound); 
 	}
 	
 	public ISeq nodeSeq(){
-		return NodeSeq.create(array);
+		return Seq.create(array);
 	}
 
 	ArrayNode ensureEditable(AtomicReference<Thread> edit){
@@ -428,6 +408,48 @@ final static class ArrayNode implements INode{
 //			}
 //		return this;
 	}
+	
+	static class Seq extends ASeq {
+		final INode[] nodes;
+		final int i;
+		final ISeq s; 
+		
+		static ISeq create(INode[] nodes) {
+			return create(null, nodes, 0, null);
+		}
+		
+		private static ISeq create(IPersistentMap meta, INode[] nodes, int i, ISeq s) {
+			if (s != null)
+				return new Seq(meta, nodes, i, s);
+			for(int j = i; j < nodes.length; j++)
+				if (nodes[j] != null)
+					return new Seq(meta, nodes, j + 1, nodes[j].nodeSeq());
+			return null;
+		}
+		
+		private Seq(IPersistentMap meta, INode[] nodes, int i, ISeq s) {
+			super(meta);
+			this.nodes = nodes;
+			this.i = i;
+			this.s = s;
+		}
+
+		public Obj withMeta(IPersistentMap meta) {
+			return new Seq(meta, nodes, i, s);
+		}
+
+		public Object first() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public ISeq next() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
 }
 
 final static class BitmapIndexedNode implements INode{
@@ -469,21 +491,21 @@ final static class BitmapIndexedNode implements INode{
 							2*idx, createNode(shift + 5, keyOrNode, array[2*idx+1], hash, key, val), 
 							2*idx+1, null));
 		} else {
-			addedLeaf.val = val;
 			int n = Integer.bitCount(bitmap);
 			if(n >= 16) {
-				Object[] newArray = new Object[64];
+				INode[] nodes = new INode[32];
 				int jdx = mask(hash, shift);
-				newArray[2*jdx] = key;  
-				newArray[2*jdx+1] = val;
+				nodes[jdx] = EMPTY.assoc(shift + 5, hash, key, val, addedLeaf);  
 				int j = 0;
 				for(int i = 0; i < 32; i++)
 					if(((bitmap >>> i) & 1) != 0) {
-						newArray[2*i] = array[j];
-						newArray[2*i+1] = array[j+1];
+						if (array[j] instanceof INode)
+							nodes[i] = (INode) array[j];
+						else
+							nodes[i] = EMPTY.assoc(shift + 5, Util.hash(array[j]), array[j], array[j+1], addedLeaf);
 						j += 2;
 					}
-				return new ArrayNode(null, newArray);
+				return new ArrayNode(null, nodes);
 			} else {
 				int len = Integer.bitCount(bitmap);
 				Object[] newArray = new Object[2*(len+1)];
@@ -527,7 +549,14 @@ final static class BitmapIndexedNode implements INode{
 		if((bitmap & bit) == 0)
 			return null;
 		int idx = index(bit);
-		return deepFind(shift, hash, array[2*idx], array[2*idx+1], key);
+		Object keyOrNode = array[2*idx];
+		if(keyOrNode == null)
+			return null;
+		if(keyOrNode instanceof INode)
+			return ((INode) keyOrNode).find(shift + 5, hash, key);
+		if(Util.equals(key, keyOrNode))
+			return new MapEntry(keyOrNode, array[2*idx+1]);
+		return null;
 	}
 
 	public Object find(int shift, int hash, Object key, Object notFound){
@@ -535,7 +564,14 @@ final static class BitmapIndexedNode implements INode{
 		if((bitmap & bit) == 0)
 			return notFound;
 		int idx = index(bit);
-		return deepFind(shift, hash, array[2*idx], array[2*idx+1], key, notFound);
+		Object keyOrNode = array[2*idx];
+		if(keyOrNode == null)
+			return notFound;
+		if(keyOrNode instanceof INode)
+			return ((INode) keyOrNode).find(shift + 5, hash, key, notFound);
+		if(Util.equals(key, keyOrNode))
+			return array[2*idx+1];
+		return notFound;
 	}
 
 	public ISeq nodeSeq(){
@@ -814,6 +850,12 @@ public static void main(String[] args){
 }
 */
 
+private static INode[] cloneAndSet(INode[] array, int i, INode a) {
+	INode[] clone = array.clone();
+	clone[i] = a;
+	return clone;
+}
+
 private static Object[] cloneAndSet(Object[] array, int i, Object a) {
 	Object[] clone = array.clone();
 	clone[i] = a;
@@ -843,26 +885,6 @@ private static INode createNode(int shift, Object key1, Object val1, int key2has
 	return BitmapIndexedNode.EMPTY
 		.assoc(shift, key1hash, key1, val1, _)
 		.assoc(shift, key2hash, key2, val2, _);
-}
-
-private static Object deepFind(int shift, int hash, Object keyOrNode, Object maybeVal, Object key, Object notFound) {
-	if(keyOrNode == null)
-		return notFound;
-	if(keyOrNode instanceof INode)
-		return ((INode) keyOrNode).find(shift + 5, hash, key, notFound);
-	if(Util.equals(key, keyOrNode))
-		return maybeVal;
-	return notFound;
-}
-
-private static IMapEntry deepFind(int shift, int hash, Object keyOrNode, Object maybeVal, Object key) {
-	if(keyOrNode == null)
-		return null;
-	if(keyOrNode instanceof INode)
-		return ((INode) keyOrNode).find(shift + 5, hash, key);
-	if(Util.equals(key, keyOrNode))
-		return new MapEntry(keyOrNode, maybeVal);
-	return null;
 }
 
 private static int bitpos(int hash, int shift){
