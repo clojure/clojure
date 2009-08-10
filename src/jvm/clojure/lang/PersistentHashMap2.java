@@ -406,8 +406,11 @@ final static class ArrayNode implements INode{
 	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
 		int idx = mask(hash, shift);
 		INode node = array[idx];
-		if(node == null)
-			return editAndSet(edit, idx, BitmapIndexedNode.EMPTY.assoc(edit, shift + 5, hash, key, val, addedLeaf));
+		if(node == null) {
+			ArrayNode editable = editAndSet(edit, idx, BitmapIndexedNode.EMPTY.assoc(edit, shift + 5, hash, key, val, addedLeaf));
+			editable.count++;
+			return editable;			
+		}
 		INode n = node.assoc(edit, shift + 5, hash, key, val, addedLeaf);
 		if(n == node)
 			return this;
