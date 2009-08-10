@@ -417,8 +417,11 @@ final static class ArrayNode implements INode{
 			if (s != null)
 				return new Seq(meta, nodes, i, s);
 			for(int j = i; j < nodes.length; j++)
-				if (nodes[j] != null)
-					return new Seq(meta, nodes, j + 1, nodes[j].nodeSeq());
+				if (nodes[j] != null) {
+					ISeq ns = nodes[j].nodeSeq();
+					if (ns != null)
+						return new Seq(meta, nodes, j + 1, ns);
+				}
 			return null;
 		}
 		
@@ -434,14 +437,11 @@ final static class ArrayNode implements INode{
 		}
 
 		public Object first() {
-			// TODO Auto-generated method stub
-			return null;
+			return s.first();
 		}
 
-		@Override
 		public ISeq next() {
-			// TODO Auto-generated method stub
-			return null;
+			return create(null, nodes, i, s.next());
 		}
 		
 	}
