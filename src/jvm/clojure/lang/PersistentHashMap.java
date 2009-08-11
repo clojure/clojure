@@ -839,7 +839,7 @@ final static class HashCollisionNode implements INode{
 			return ensureEditable(edit, count + 1, newArray);
 		}
 		// nest it in a bitmap node
-		return new BitmapIndexedNode(edit, bitpos(this.hash, shift), new Object[] {null, this})
+		return new BitmapIndexedNode(edit, bitpos(this.hash, shift), new Object[] {null, this, null, null})
 			.assoc(edit, shift, hash, key, val, addedLeaf);
 	}	
 
