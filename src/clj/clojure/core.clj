@@ -4544,6 +4544,18 @@
   [#^clojure.lang.ITransientVector coll] 
   (.pop coll)) 
 
+(defn disj!
+  "disj[oin]. Returns a transient set of the same (hashed/sorted) type, that
+  does not contain key(s)."
+  ([set] set)
+  ([#^clojure.lang.ITransientSet set key]
+   (. set (disjoin key)))
+  ([set key & ks]
+   (let [ret (disj set key)]
+     (if ks
+       (recur ret (first ks) (next ks))
+       ret))))
+
 ;redef into with batch support
 (defn into
   "Returns a new coll consisting of to-coll with all of the items of
