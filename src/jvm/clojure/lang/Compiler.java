@@ -866,7 +866,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) tag;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				if(sym.name.equals("ints"))
+				if(sym.name.equals("objects"))
+					c = Object[].class;
+				else if(sym.name.equals("ints"))
 					c = int[].class;
 				else if(sym.name.equals("longs"))
 					c = long[].class;
