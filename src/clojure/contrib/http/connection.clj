@@ -28,7 +28,7 @@
   send-request-entity (fn [conn entity] (type entity)))
 
 (defmethod send-request-entity duck/*byte-array-type* [conn entity]
-  (.setFixedLenghtStreamingMode conn (count entity))
+  (.setFixedLengthStreamingMode conn (count entity))
   (duck/copy entity (.getOutputStream conn)))
 
 (defmethod send-request-entity String [conn entity]
