@@ -29,6 +29,7 @@
 
 (defmethod send-request-entity duck/*byte-array-type* [conn entity]
   (.setFixedLengthStreamingMode conn (count entity))
+  (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
 (defmethod send-request-entity String [conn entity]
@@ -36,14 +37,17 @@
 
 (defmethod send-request-entity File [conn entity]
   (.setFixedLengthStreamingMode conn (.length entity))
+  (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
 (defmethod send-request-entity InputStream [conn entity]
   (.setChunkedStreamingMode conn -1)
+  (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
 (defmethod send-request-entity Reader [conn entity]
   (.setChunkedStreamingMode conn -1)
+  (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
 (defn start-http-connection
@@ -51,6 +55,5 @@
   ([conn request-entity-body]
      (if request-entity-body
        (do (.setDoOutput conn true)
-           (.connect conn)
            (send-request-entity conn request-entity-body))
        (.connect conn))))
