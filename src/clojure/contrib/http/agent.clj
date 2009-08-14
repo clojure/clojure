@@ -126,17 +126,22 @@
     (::response-body-bytes @a)))
 
 (defn response-body-str
-  "Returns the HTTP response body as a string.  The string will be
-  created using the encoding specified by the server, or
-  *default-encoding* if it is not specified."
-  [a]
-  (let [da @a]
-    (when (= (::state da) ::completed)
-      (let [conn (::connection da)
-            bytes (::response-body-bytes da)
-            encoding (or (.getContentEncoding conn)
-                         duck/*default-encoding*)]
-        (String. bytes encoding)))))
+  "Returns the HTTP response body as a string, using the given
+  encoding.
+
+  If no encoding is given, uses the encoding specified in the server
+  headers, or clojure.contrib.duck-streams/*default-encoding* if it is
+  not specified."
+  ([http-agnt]
+     (response-body-str http-agnt
+                        (or (.getContentEncoding (::connection @http-agnt))
+                            duck/*default-encoding*)))
+  ([http-agnt encoding]
+     (let [a @http-agnt]
+       (when (= (::state a) ::completed)
+         (let [conn (::connection a)
+               bytes (::response-body-bytes a)]
+           (String. bytes encoding))))))
 
 (defn response-status
   "Returns the Integer response status code (e.g. 200, 404) for this request."
