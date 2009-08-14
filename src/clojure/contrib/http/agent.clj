@@ -24,7 +24,7 @@
   (doseq [[name value] (:headers options)]
     (.setRequestProperty conn name value)))
 
-(defn- success? [conn]
+(defn- connection-success? [conn]
   ;; Is the response in the 2xx range?
   (= 2 (unchecked-divide (.getResponseCode conn) 100)))
 
@@ -32,7 +32,7 @@
   (let [conn (::connection state)]
     (setup-http-connection conn options)
     (c/start-http-connection conn (:body options))
-    (let [bytes (if (success? conn)
+    (let [bytes (if (connection-success? conn)
                   (duck/to-byte-array (.getInputStream conn))
                   (duck/to-byte-array (.getErrorStream conn)))]
       (.disconnect conn)
@@ -51,7 +51,7 @@
 (defn- completed-watch [success-fn failure-fn key http-agnt old-state new-state]
   (when (and (= (::state new-state) ::completed)
              (not= (::state old-state) ::completed))
-   (if (success? (::connection new-state))
+   (if (connection-success? (::connection new-state))
      (when success-fn (success-fn http-agnt))
      (when failure-fn (failure-fn http-agnt)))))
 
@@ -171,3 +171,8 @@
               (cons [(.getHeaderFieldKey conn i) value]
                     (thisfn (inc i)))))]
     (lazy-seq (f 0))))
+
+(defn response-success?
+  "Returns true if the HTTP response code was in the 200-299 range."
+  [http-agnt]
+  (connection-success? (::connection @http-agnt)))
