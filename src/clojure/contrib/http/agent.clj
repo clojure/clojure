@@ -177,7 +177,37 @@
                     (thisfn (inc i)))))]
     (lazy-seq (f 0))))
 
-(defn response-success?
+(defn- response-in-range? [digit http-agnt]
+  (= digit (unchecked-divide (.getResponseCode (::connection @http-agnt))
+                             100)))
+
+(defn success?
   "Returns true if the HTTP response code was in the 200-299 range."
   [http-agnt]
-  (connection-success? (::connection @http-agnt)))
+  (response-in-range? 2 http-agnt))
+
+(defn redirect?
+  "Returns true if the HTTP response code was in the 300-399 range.
+
+  Note: if the :follow-redirects option was true (the default),
+  redirects will be followed automatically and a the agent will never
+  return a 3xx response code."
+  [http-agnt]
+  (response-in-range? 3 http-agnt))
+
+(defn client-error?
+  "Returns true if the HTTP response code was in the 400-499 range."
+  [http-agnt]
+  (response-in-range? 4 http-agnt))
+
+(defn server-error?
+  "Returns true if the HTTP response code was in the 500-599 range."
+  [http-agnt]
+  (response-in-range? 5 http-agnt))
+
+(defn error?
+  "Returns true if the HTTP response code was in the 400-499 range OR
+  the 500-599 range."
+  [http-agnt]
+  (or (client-error? http-agnt)
+      (server-error? http-agnt)))
