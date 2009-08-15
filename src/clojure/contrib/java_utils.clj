@@ -168,3 +168,4 @@
 
 (defmethod as-url String [#^String x] (URL. x))
 
+(defmethod as-url File [#^File x] (.toURL x))

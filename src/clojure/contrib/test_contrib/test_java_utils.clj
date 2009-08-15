@@ -3,6 +3,7 @@
 	[clojure.contrib.duck-streams :only (spit)]
 	clojure.contrib.java-utils)
   (:import [java.io File]
+           [java.net URL URI]
 	   [java.util Properties]))
 
 (deftest test-relative-path-string
@@ -22,6 +23,13 @@
   (testing "Files"
     (is (= (File. "bar") (as-file (File. "bar")))))
 )
+
+(deftest test-as-url
+  (are [result expr] (= result expr)
+       (URL. "http://foo") (as-url (URL. "http://foo"))
+       (URL. "http://foo") (as-url "http://foo")
+       (URL. "http://foo") (as-url (URI. "http://foo"))
+       (URL. "file:/foo") (as-url (File. "/foo"))))
 
 (deftest test-file
   (testing "single argument"
