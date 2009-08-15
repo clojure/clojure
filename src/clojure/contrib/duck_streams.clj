@@ -69,7 +69,8 @@
 
 (def
  #^{:doc "Name of the default encoding to use when reading & writing.
-  Default is UTF-8."}
+  Default is UTF-8."
+    :tag "java.lang.String"}
  *default-encoding* "UTF-8")
 
 (def
@@ -113,7 +114,7 @@
 (defmethod reader Reader [x]
   (BufferedReader. x))
 
-(defmethod reader InputStream [x]
+(defmethod reader InputStream [#^InputStream x]
   (BufferedReader. (InputStreamReader. x *default-encoding*)))
 
 (defmethod reader File [#^File x]
@@ -139,7 +140,8 @@
 
 (def
  #^{:doc "If true, writer and spit will open files in append mode.
- Defaults to false.  Use append-writer or append-spit."}
+ Defaults to false.  Use append-writer or append-spit."
+    :tag "java.lang.Boolean"}
  *append-to-writer* false)
 
 
@@ -175,7 +177,7 @@
   ;; Writer includes sub-classes such as FileWriter
   (PrintWriter. (BufferedWriter. x)))   
 
-(defmethod writer OutputStream [x]
+(defmethod writer OutputStream [#^OutputStream x]
   (assert-not-appending)
   (PrintWriter.
    (BufferedWriter.
@@ -234,7 +236,7 @@
                        (.close rdr))))]
     (read-line (reader f))))
 
-(defn slurp*
+(defn #^String slurp*
   "Like clojure.core/slurp but opens f with reader."
   [f]
   (with-open [#^BufferedReader r (reader f)]
@@ -301,7 +303,7 @@
   copy
   (fn [input output] [(type input) (type output)]))
 
-(defmethod copy [InputStream OutputStream] [input output]
+(defmethod copy [InputStream OutputStream] [#^InputStream input #^OutputStream output]
   (let [buffer (make-array Byte/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
@@ -309,8 +311,8 @@
           (do (.write output buffer 0 size)
               (recur)))))))
 
-(defmethod copy [InputStream Writer] [input output]
-  (let [buffer (make-array Byte/TYPE *buffer-size*)]
+(defmethod copy [InputStream Writer] [#^InputStream input #^Writer output]
+  (let [#^"[B" buffer (make-array Byte/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
@@ -318,12 +320,12 @@
             (do (.write output chars)
                 (recur))))))))
 
-(defmethod copy [InputStream File] [input output]
+(defmethod copy [InputStream File] [#^InputStream input #^File output]
   (with-open [out (FileOutputStream. output)]
     (copy input out)))
 
-(defmethod copy [Reader OutputStream] [input output]
-  (let [buffer (make-array Character/TYPE *buffer-size*)]
+(defmethod copy [Reader OutputStream] [#^Reader input #^OutputStream output]
+  (let [#^"[C" buffer (make-array Character/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
@@ -331,47 +333,47 @@
             (do (.write output bytes)
                 (recur))))))))
 
-(defmethod copy [Reader Writer] [input output]
-  (let [buffer (make-array Character/TYPE *buffer-size*)]
+(defmethod copy [Reader Writer] [#^Reader input #^Writer output]
+  (let [#^"[C" buffer (make-array Character/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
           (do (.write output buffer 0 size)
               (recur)))))))
 
-(defmethod copy [Reader File] [input output]
+(defmethod copy [Reader File] [#^Reader input #^File output]
   (with-open [out (FileOutputStream. output)]
     (copy input out)))
 
-(defmethod copy [File OutputStream] [input output]
+(defmethod copy [File OutputStream] [#^File input #^OutputStream output]
   (with-open [in (FileInputStream. input)]
     (copy in output)))
 
-(defmethod copy [File Writer] [input output]
+(defmethod copy [File Writer] [#^File input #^Writer output]
   (with-open [in (FileInputStream. input)]
     (copy in output)))
 
-(defmethod copy [File File] [input output]
+(defmethod copy [File File] [#^File input #^File output]
   (with-open [in (FileInputStream. input)
               out (FileOutputStream. output)]
     (copy in out)))
 
-(defmethod copy [String OutputStream] [input output]
+(defmethod copy [String OutputStream] [#^String input #^OutputStream output]
   (copy (StringReader. input) output))
 
-(defmethod copy [String Writer] [input output]
+(defmethod copy [String Writer] [#^String input #^Writer output]
   (copy (StringReader. input) output))
 
-(defmethod copy [String File] [input output]
+(defmethod copy [String File] [#^String input #^File output]
   (copy (StringReader. input) output))
 
-(defmethod copy [*byte-array-type* OutputStream] [input output]
+(defmethod copy [*byte-array-type* OutputStream] [#^"[B" input #^OutputStream output]
   (copy (ByteArrayInputStream. input) output))
 
-(defmethod copy [*byte-array-type* Writer] [input output]
+(defmethod copy [*byte-array-type* Writer] [#^"[B" input #^Writer output]
   (copy (ByteArrayInputStream. input) output))
 
-(defmethod copy [*byte-array-type* File] [input output]
+(defmethod copy [*byte-array-type* File] [#^"[B" input #^Writer output]
   (copy (ByteArrayInputStream. input) output))
 
 
@@ -389,20 +391,20 @@
 
 (defmethod to-byte-array *byte-array-type* [x] x)
 
-(defmethod to-byte-array String [x]
+(defmethod to-byte-array String [#^String x]
   (.getBytes x *default-encoding*))
 
-(defmethod to-byte-array File [x]
+(defmethod to-byte-array File [#^File x]
   (with-open [input (FileInputStream. x)
               buffer (ByteArrayOutputStream.)]
     (copy input buffer)
     (.toByteArray buffer)))
 
-(defmethod to-byte-array InputStream [x]
+(defmethod to-byte-array InputStream [#^InputStream x]
   (let [buffer (ByteArrayOutputStream.)]
     (copy x buffer)
     (.toByteArray buffer)))
 
-(defmethod to-byte-array Reader [x]
+(defmethod to-byte-array Reader [#^Reader x]
   (.getBytes (slurp* x) *default-encoding*))
 
