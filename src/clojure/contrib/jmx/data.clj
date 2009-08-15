@@ -24,7 +24,8 @@
        (format "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi" (opts :host) (opts :port)))))
 
 (defmulti as-object-name
-  "Interpret an object as a JMX ObjectName"
+  "Interpret an object as a JMX ObjectName."
+  { :arglists '([string-or-name]) }
   class)
 (defmethod as-object-name String [n] (ObjectName. n))
 (defmethod as-object-name ObjectName [n] n)
@@ -61,7 +62,9 @@
              (.keySet td))))
 
 (defmulti jmx->clj
-  "Coerce JMX data structures into Clojure data"
+  "Coerce JMX data structures into Clojure data.
+  Handles CompositeData, TabularData, maps, and atoms."
+  { :argslists '([jmx-data-structure]) }
   (fn [x]
     (cond
      (instance? javax.management.openmbean.CompositeData x) :composite

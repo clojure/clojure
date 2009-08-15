@@ -1,7 +1,3 @@
-;; JMX support for Clojure
-
-;; by Stuart Halloway
-
 ;; Copyright (c) Stuart Halloway, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
@@ -10,69 +6,70 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-;; READ THESE CAVEATS:
-;; Requires post-Clojure 1.0 git edge for clojure.test, clojure.backtrace.
-;; This is prerelease.
-;; This API will change.
-;; A few features currently require Java 6 or later.
-;; Send reports to stu@thinkrelevance.com.
 
-;; Usage
-;;   (require '[clojure.contrib.jmx :as jmx])
+(ns #^{:author "Stuart Halloway"
+       :doc "JMX support for Clojure
 
-;; What beans do I have?
-;;
-;;   (jmx/mbean-names "*:*")
-;;   -> #<HashSet [java.lang:type=MemoryPool,name=CMS Old Gen, 
-;;                 java.lang:type=Memory, ...]
+  Requires post-Clojure 1.0 git edge for clojure.test, clojure.backtrace.
+  This is prerelease.
+  This API will change.
+  Send reports to stu@thinkrelevance.com.
 
-;; What attributes does a bean have?
-;;
-;;    (jmx/attribute-names "java.lang:type=Memory")
-;;    -> (:Verbose :ObjectPendingFinalizationCount 
-;;        :HeapMemoryUsage :NonHeapMemoryUsage)
+  Usage
+    (require '[clojure.contrib.jmx :as jmx])
 
-;; What is the value of an attribute? 
-;;
-;;   (jmx/read "java.lang:type=Memory" :ObjectPendingFinalizationCount)
-;;   -> 0
+  What beans do I have?
 
-;; Can't I just have *all* the attributes in a Clojure map?
-;;
-;;   (jmx/mbean "java.lang:type=Memory")
-;;   -> {:NonHeapMemoryUsage
-;;        {:used 16674024, :max 138412032, :init 24317952, :committed 24317952},
-;;       :HeapMemoryUsage
-;;        {:used 18619064, :max 85393408, :init 0, :committed 83230720},
-;;       :ObjectPendingFinalizationCount 0,
-;;       :Verbose false}
+    (jmx/mbean-names \"*:*\")
+    -> #<HashSet [java.lang:type=MemoryPool,name=CMS Old Gen, 
+                  java.lang:type=Memory, ...]
 
-;; Can I find and invoke an operation?
-;;
-;;   (jmx/operation-names "java.lang:type=Memory")
-;;   -> (:gc)  
-;;   (jmx/invoke "java.lang:type=Memory" :gc)
-;;   -> nil
+  What attributes does a bean have?
+
+    (jmx/attribute-names \"java.lang:type=Memory\")
+    -> (:Verbose :ObjectPendingFinalizationCount 
+        :HeapMemoryUsage :NonHeapMemoryUsage)
+
+  What is the value of an attribute? 
+
+    (jmx/read \"java.lang:type=Memory\" :ObjectPendingFinalizationCount)
+    -> 0
+
+  Can't I just have *all* the attributes in a Clojure map?
+
+    (jmx/mbean \"java.lang:type=Memory\")
+    -> {:NonHeapMemoryUsage
+         {:used 16674024, :max 138412032, :init 24317952, :committed 24317952},
+        :HeapMemoryUsage
+         {:used 18619064, :max 85393408, :init 0, :committed 83230720},
+        :ObjectPendingFinalizationCount 0,
+        :Verbose false}
+
+  Can I find and invoke an operation?
+
+    (jmx/operation-names \"java.lang:type=Memory\")
+    -> (:gc)  
+    (jmx/invoke \"java.lang:type=Memory\" :gc)
+    -> nil
   
-;; What about some other process? Just run *any* of the above code
-;;   inside a with-connection:
-;;
-;;   (jmx/with-connection {:host "localhost", :port 3000} 
-;;     (jmx/mbean "java.lang:type=Memory"))
-;;   -> {:ObjectPendingFinalizationCount 0, 
-;;       :HeapMemoryUsage ... etc.}
+  What about some other process? Just run *any* of the above code
+  inside a with-connection:
 
-;; Can I serve my own beans?  Sure, just drop a Clojure ref
-;;   into an instance of clojure.contrib.jmx.Bean, and the bean
-;;   will expose read-only attributes for every key/value pair
-;;   in the ref:
-;;
-;;    (jmx/register-mbean
-;;      (Bean.
-;;       (ref {:string-attribute "a-string"}))
-;;      "my.namespace:name=Value")
+    (jmx/with-connection {:host \"localhost\", :port 3000} 
+      (jmx/mbean \"java.lang:type=Memory\"))
+    -> {:ObjectPendingFinalizationCount 0, 
+        :HeapMemoryUsage ... etc.}
 
-(ns clojure.contrib.jmx
+  Can I serve my own beans?  Sure, just drop a Clojure ref
+  into an instance of clojure.contrib.jmx.Bean, and the bean
+  will expose read-only attributes for every key/value pair
+  in the ref:
+
+    (jmx/register-mbean
+       (Bean.
+       (ref {:string-attribute \"a-string\"}))
+       \"my.namespace:name=Value\")"}
+  clojure.contrib.jmx
   (:refer-clojure :exclude [read])
   (:use clojure.contrib.def
         [clojure.contrib.java-utils :only [as-str]]
