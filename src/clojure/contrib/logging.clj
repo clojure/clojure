@@ -10,7 +10,6 @@
 ;; distribution.  By using this software in any fashion, you are
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
-
 (ns 
   #^{:author "Alex Taggart, Timothy Pratley",
      :doc
@@ -23,9 +22,10 @@
     :trace, :debug, :info, :warn, :error, :fatal
   
   Logging occurs with the log macro, or the level-specific convenience macros,
-  which write either directly or via an agent.  By default direct logging is
-  disabled, but can be enabled via the *allow-direct-logging* boolean atom. If
-  logging is invoked within a transaction it will always use an agent.
+  which write either directly or via an agent.  For performance reasons, direct
+  logging is enabled by default, but setting the *allow-direct-logging* boolean
+  atom to false will disable it. If logging is invoked within a transaction it
+  will always use an agent.
   
   The log macros will not evaluate their 'message' unless the specific logging
   level is in effect. Alternately, you can use the spy macro when you have code
@@ -36,10 +36,9 @@
   be used as the log-ns (similar to how the java class name is usually used).
   Note: your log configuration should display the name that was passed to the
   logging implementation, and not perform stack-inspection, otherwise you'll see
-  something like \"clojure.contrib.logging$fn__72$write__39__auto____81 invoke\"
-  in your logs.
+  something like \"fn__72$impl_write_BANG__39__auto____81\" in your logs.
   
-  Use the enabled? function to write conditional code against the logging level
+  Use the enabled? macro to write conditional code against the logging level
   (beyond simply whether or not to call log, which is handled automatically).
   
   You can redirect all java writes of System.out and System.err to the log
@@ -48,143 +47,186 @@
   needs to be specified to namespace the output."}
   clojure.contrib.logging)
 
+(declare *impl-name* impl-get-log impl-enabled? impl-write!)
 
-(defstruct #^{:doc
-  "A struct to abstract the functionality common to all logging implementations.
-  The keys are as follows:
-    :name     ; the name of the logging system used
-    :get-log  ; fn [log-ns] to obtain a log by string namespace
-    :enabled? ; fn [log lvl] to check if a particular level is emabled
-    :write    ; fn [log lvl msg ex] to a log a message"}
-  log-system
-  :name :get-log :enabled? :write)
+;; Macros used so that implementation-specific functions all have the same meta.
 
+(defmacro def-impl-name
+  #^{:private true} [& body]
+  `(def
+    #^{:doc "The name of the logging implementation used."}
+    *impl-name*
+    ~@body))
+
+(defmacro def-impl-get-log
+  #^{:private true} [& body]
+  `(def
+    #^{:doc
+  "Returns an implementation-specific log by string namespace. End-users should
+  not need to call this function."
+       :arglist '([~'log-ns])}
+    impl-get-log
+    (memoize ~@body)))
+
+(defmacro def-impl-enabled?
+  #^{:private true} [& body]
+  `(def
+    #^{:doc
+  "Implementation-specific check if a particular level is enabled. End-users
+  should not need to call this function."
+       :arglist '([~'log ~'level])}
+    impl-enabled?
+    ~@body))
+
+(defmacro def-impl-write!
+  #^{:private true} [& body]
+  `(def
+    #^{:doc
+  "Implementation-specific write of a log message. End-users should not need to
+  call this function."
+       :arglist '([~'log ~'level ~'message ~'throwable])}
+    impl-write!
+    ~@body))
 
 (defmacro commons-logging
-  "Creates a log-system struct using the Apache commons-logging API, 
-  if present, otherwise nil. End-users should not need to invoke this macro."
+  "Defines the commons-logging-based implementations of the core logging
+  functions. End-users should never need to call this macro."
+  #^{:private true}
   []
   (try
     (import (org.apache.commons.logging LogFactory Log))
-    `(letfn [(get-log# [log-ns#]
-               (LogFactory/getLog #^String log-ns#))
-             (enabled?# [#^org.apache.commons.logging.Log log# level#]
-               (condp = level#
-                 :trace (.isTraceEnabled log#)
-                 :debug (.isDebugEnabled log#)
-                 :info  (.isInfoEnabled  log#)
-                 :warn  (.isWarnEnabled  log#)
-                 :error (.isErrorEnabled log#)
-                 :fatal (.isFatalEnabled log#)))
-             (write# [#^org.apache.commons.logging.Log log# level# msg# e#]
-               (condp = level#
-                 :trace (.trace log# msg# e#)
-                 :debug (.debug log# msg# e#)
-                 :info  (.info  log# msg# e#)
-                 :warn  (.warn  log# msg# e#)
-                 :error (.error log# msg# e#)
-                 :fatal (.fatal log# msg# e#)))]
-      (struct log-system "commons-logging" get-log# enabled?# write#))
+    `(do
+      (def-impl-name "org.apache.commons.logging")
+      (def-impl-get-log
+        (fn [log-ns#]
+          (org.apache.commons.logging.LogFactory/getLog #^String log-ns#)))
+      (def-impl-enabled?
+        (fn [#^org.apache.commons.logging.Log log# level#]
+          (condp = level#
+            :trace (.isTraceEnabled log#)
+            :debug (.isDebugEnabled log#)
+            :info  (.isInfoEnabled  log#)
+            :warn  (.isWarnEnabled  log#)
+            :error (.isErrorEnabled log#)
+            :fatal (.isFatalEnabled log#))))
+      (def-impl-write!
+        (fn [#^org.apache.commons.logging.Log log# level# msg# e#]
+          (condp = level#
+            :trace (.trace log# msg# e#)
+            :debug (.debug log# msg# e#)
+            :info  (.info  log# msg# e#)
+            :warn  (.warn  log# msg# e#)
+            :error (.error log# msg# e#)
+            :fatal (.fatal log# msg# e#))))
+      true)
     (catch Exception e nil)))
 
 
 (defmacro log4j-logging
-  "Creates a log-system struct using the log4j API, if present, otherwise nil.
-   End-users should not need to invoke this macro."
+  "Defines the log4j-based implementations of the core logging functions.
+   End-users should never need to call this macro."
+  #^{:private true}
   []
   (try
     (import (org.apache.log4j Logger Level))
-    `(let [levels# {:trace Level/TRACE
-                    :debug Level/DEBUG
-                    :info  Level/INFO
-                    :warn  Level/WARN
-                    :error Level/ERROR
-                    :fatal Level/FATAL}]
-      (letfn [(get-log# [log-ns#]
-                (org.apache.log4j.Logger/getLogger #^String log-ns#))
-              (enabled?# [#^org.apache.log4j.Logger log# level#]
-                (.isEnabledFor log# (levels# level#)))
-              (write# [#^org.apache.log4j.Logger log# level# msg# e#]
-                (if-not e#
-                  (.log log# (levels# level#) msg#)
-                  (.log log# (levels# level#) msg# e#)))]
-        (struct log-system "log4j-logging" get-log# enabled?# write#)))
+    `(do
+      (def-impl-name "org.apache.log4j")
+      (def-impl-get-log
+        (fn [log-ns#]
+          (org.apache.log4j.Logger/getLogger #^String log-ns#)))
+      (let [levels# {:trace org.apache.log4j.Level/TRACE
+                     :debug org.apache.log4j.Level/DEBUG
+                     :info  org.apache.log4j.Level/INFO
+                     :warn  org.apache.log4j.Level/WARN
+                     :error org.apache.log4j.Level/ERROR
+                     :fatal org.apache.log4j.Level/FATAL}]
+        (def-impl-enabled?
+          (fn [#^org.apache.log4j.Logger log# level#]
+            (.isEnabledFor log# (levels# level#))))
+        (def-impl-write!
+          (fn [#^org.apache.log4j.Logger log# level# msg# e#]
+            (if-not e#
+              (.log log# (levels# level#) msg#)
+              (.log log# (levels# level#) msg# e#)))))
+      true)
     (catch Exception e nil)))
 
 
 (defmacro java-logging
-  "Creates a log-system struct using the java.util.logging API.  End-users
-  should not need to invoke this macro."
+  "Defines the java-logging-based implementations of the core logging
+  functions. End-users should never need to call this macro."
+  #^{:private true}
   []
   (try
     (import (java.util.logging Logger Level))
-    `(let [levels# {:trace Level/FINEST
-                    :debug Level/FINE
-                    :info  Level/INFO
-                    :warn  Level/WARNING
-                    :error Level/SEVERE
-                    :fatal Level/SEVERE}]
-      (letfn [(get-log# [log-ns#]
-                (java.util.logging.Logger/getLogger log-ns#))
-              (enabled?# [#^java.util.logging.Logger log# level#]
-                (.isLoggable log# (levels# level#)))
-              (write# [#^java.util.logging.Logger log# level# msg# e#]
-                (if-not e#
-                  (.log log# #^java.util.logging.Level (levels# level#)
-                             #^String (str msg#))
-                  (.log log# #^java.util.logging.Level (levels# level#)
-                             #^String (str msg#) #^Throwable e#)))]
-        (struct log-system "java-logging" get-log# enabled?# write#)))
+    `(do
+      (def-impl-name "java.util.logging")
+      (def-impl-get-log
+        (fn [log-ns#]
+          (java.util.logging.Logger/getLogger log-ns#)))
+      (let [levels# {:trace java.util.logging.Level/FINEST
+                     :debug java.util.logging.Level/FINE
+                     :info  java.util.logging.Level/INFO
+                     :warn  java.util.logging.Level/WARNING
+                     :error java.util.logging.Level/SEVERE
+                     :fatal java.util.logging.Level/SEVERE}]
+        (def-impl-enabled?
+          (fn [#^java.util.logging.Logger log# level#]
+            (.isLoggable log# (levels# level#))))
+        (def-impl-write!
+          (fn [#^java.util.logging.Logger log# level# msg# e#]
+            (if-not e#
+              (.log log# #^java.util.logging.Level (levels# level#)
+                         #^String (str msg#))
+              (.log log# #^java.util.logging.Level (levels# level#)
+                         #^String (str msg#) #^Throwable e#)))))
+      true)
     (catch Exception e nil)))
 
 
-(defn do-log
-  "Logs the message immediately if the specific logging level is enabled. Use
-  the log macro in preference to this function."
-  [system-ref level message throwable log-ns]
-  (let [system @system-ref
-        log ((system :get-log) log-ns)]
-    (if ((system :enabled?) log level)
-      ((system :write) log level (force message) throwable))
-    system-ref))
+;; Initialize implementation-specific functions
+(or (commons-logging)
+    (log4j-logging)
+    (java-logging)
+    (throw ; this should never happen in 1.5+
+      (RuntimeException.
+        "Valid logging implementation could not be found.")))
 
 
 (def #^{:doc
-  "An atom holding the default log-system initialized to the first
-  implementation found from: Apache commons-logging, log4j, java.util.logging."}
-  *log-system*
-  (atom (or (commons-logging)
-            (log4j-logging)
-            (java-logging)
-            (throw ; this should never happen in 1.5+
-              (RuntimeException.
-                "Valid logging implementation could not be found.")))))
+  "The default agent used for performing logging durng a transaction or when
+  direct logging is disabled."}
+  *logging-agent* (agent nil))
 
 
 (def #^{:doc
-  "The default agent referencing *log-system*."}
-  *log-system-agent* (agent *log-system*))
+  "A boolean indicating whether direct logging (as opposed to via an agent) is
+  allowed when not operating from within a transaction. Defaults to true."}
+  *allow-direct-logging* (atom true))
 
 
-(def #^{:doc
-  "A boolean atom indicating whether direct logging (as opposed to via an agent)
-  is allowed when not operating from within a transaction. Defaults to false."}
-  *allow-direct-logging* (atom false))
+(defn agent-write!
+  "Writes the message immediately, and ignores the first argument. Used by the
+  logging agent. End-users should never need to call this function."
+  [_ log level message throwable]
+  (impl-write! log level message throwable))
 
 
 (defmacro log
-  "Logs a message, either directly or via an agent. See also the level-specific
+  "Logs a message, either directly or via an agent. Also see the level-specific
   convenience macros."
   ([level message]
     `(log ~level ~message nil))
   ([level message throwable]
     `(log ~level ~message ~throwable ~(str *ns*)))
   ([level message throwable log-ns]
-    `(if (and @*allow-direct-logging*
-              (not (clojure.lang.LockingTransaction/isRunning)))
-        (do-log *log-system* ~level (delay ~message) ~throwable ~log-ns)
-        (send-off *log-system-agent*
-          do-log ~level (delay ~message) ~throwable ~log-ns))))
+    `(let [log# (impl-get-log ~log-ns)]
+      (if (impl-enabled? log# ~level)
+        (if (and @*allow-direct-logging*
+                 (not (clojure.lang.LockingTransaction/isRunning)))
+          (impl-write! log# ~level ~message ~throwable)
+          (send-off *logging-agent*
+            agent-write! log# ~level ~message ~throwable))))))
 
 
 (defmacro enabled?
@@ -194,8 +236,7 @@
   ([level]
     `(enabled? ~level ~(str *ns*)))
   ([level log-ns]
-    `(let [sys# @*log-system*]
-      ((sys# :enabled?) ((sys# :get-log) ~log-ns) ~level))))
+    `(impl-enabled? (impl-get-log ~log-ns) ~level)))
 
 
 (defmacro spy
@@ -222,7 +263,8 @@
 
 (def #^{:doc
   "A ref used by log-capture! to maintain a reference to the original System.out
-  and System.err streams."}
+  and System.err streams."
+  :private true}
   *old-std-streams* (ref nil))
 
 
@@ -305,4 +347,3 @@
     `(log :fatal ~message))
   ([message throwable]
     `(log :fatal ~message ~throwable)))
-
