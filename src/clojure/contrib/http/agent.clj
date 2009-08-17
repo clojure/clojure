@@ -50,13 +50,14 @@
 
     (http-agent \"http...\" :method \"POST\" :body \"foo=1\")
 
-  And you could write the response directly to a file like this (requires
-  clojure.contrib.duck-streams/copy):
+  And you could write the response directly to a file like this:
+
+    (require '[clojure.contrib.duck-streams :as d])
 
     (http-agent \"http...\"
                 :handler (fn [agnt] 
-                           (with-open [w (writer \"/tmp/out\")] 
-                             (copy (stream agnt) w))))
+                           (with-open [w (d/writer \"/tmp/out\")] 
+                             (d/copy (stream agnt) w))))
 "}
 
   clojure.contrib.http.agent
