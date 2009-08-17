@@ -90,7 +90,7 @@
     </java>
   </target>
 
-  <target name="compile_clojure" depends="init,check_hasclojure"
+  <target name="compile_clojure" depends="init,check_hasclojure,compile_classes"
           description="Compile Clojure sources."
           if="hasclojure">
     <java classname="clojure.lang.Compile">

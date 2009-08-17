@@ -14,13 +14,14 @@
 (ns 
     #^{:author "Tom Faulhaber",
        :doc "This module comprises two elements:
-1) A pretty printer for Clojure data structures, implemented in the function \"pprint\"
-2) A Common Lisp compatible format function, implemented as \"cl-format\" because
-   Clojure is using the name \"format\" for its own format.
+1) A pretty printer for Clojure data structures, implemented in the 
+   function \"pprint\"
+2) A Common Lisp compatible format function, implemented as 
+   \"cl-format\" because Clojure is using the name \"format\" 
+   for its Java-based format function.
 
-Complete documentation is available on the wiki at the contrib google code site.",
-       :see-also [["PrettyPrinting" "Documentation for the pretty printer"]
-                  ["CommonLispFormat" "Documentation for Common Lisp format function"]]
+See documentation for those functions for more information or complete 
+documentation on the the clojure-contrib web site on github.",
        }
     clojure.contrib.pprint
   (:use clojure.contrib.pprint.utilities)

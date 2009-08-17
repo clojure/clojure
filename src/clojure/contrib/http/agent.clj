@@ -1,7 +1,7 @@
 ;;; http/agent.clj: agent-based asynchronous HTTP client
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; June 8, 2009
+;; August 17, 2009
 
 ;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,32 +12,90 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns #^{:doc "Agent-based asynchronous HTTP client."}
+(ns #^{:doc "Agent-based asynchronous HTTP client.
+
+  This is a HTTP client library based on Java's HttpURLConnection
+  class and Clojure's Agent system.  It allows you to make multiple
+  HTTP requests in parallel.
+
+  Start an HTTP request with the 'http-agent' function, which
+  immediately returns a Clojure Agent.  You will never deref this
+  agent; that is handled by the accessor functions.  The agent will
+  execute the HTTP request on a separate thread.
+
+  If you pass a :handler function to http-agent, that function will be
+  called as soon as the HTTP response body is ready.  The handler
+  function is called with one argument, the HTTP agent itself.  The
+  handler can read the response body by calling the 'stream' function
+  on the agent.
+
+  The value returned by the handler function becomes part of the state
+  of the agent, and you can retrieve it with the 'result' function.
+  If you call 'result' before the HTTP request has finished, it will
+  block until the handler function returns.
+
+  If you don't provide a handler function, the default handler will
+  buffer the entire response body in memory, which you can retrieve
+  with the 'bytes', 'string', or 'stream' functions.  Like 'result',
+  these functions will block until the HTTP request is completed.
+
+  If you want to check if an HTTP request is finished without
+  blocking, use the 'done?' function.
+
+  A single GET request could be as simple as:
+
+    (string (http-agent \"http://www.stuartsierra.com/\"))
+
+  A simple POST might look like:
+
+    (http-agent \"http...\" :method \"POST\" :body \"foo=1\")
+
+  And you could write the response directly to a file like this:
+
+    (require '[clojure.contrib.duck-streams :as d])
+
+    (http-agent \"http...\"
+                :handler (fn [agnt] 
+                           (with-open [w (d/writer \"/tmp/out\")] 
+                             (d/copy (stream agnt) w))))
+"}
+
   clojure.contrib.http.agent
   (:require [clojure.contrib.http.connection :as c]
             [clojure.contrib.duck-streams :as duck])
-  (:import (java.io ByteArrayOutputStream)))
+  (:import (java.io ByteArrayOutputStream ByteArrayInputStream)))
+
+
+;;; PRIVATE
+
+(declare result stream)
 
 (defn- setup-http-connection
+  "Sets the instance method, redirect behavior, and request headers of
+  the HttpURLConnection."
   [conn options]
   (.setRequestMethod conn (:method options))
   (.setInstanceFollowRedirects conn (:follow-redirects options))
   (doseq [[name value] (:headers options)]
     (.setRequestProperty conn name value)))
 
-(defn- connection-success? [conn]
-  ;; Is the response in the 2xx range?
-  (= 2 (unchecked-divide (.getResponseCode conn) 100)))
-
-(defn- start-request [state options]
-  (prn "start-request")
+(defn- start-request
+  "Agent action that starts sending the HTTP request."
+  [state options]
   (let [conn (::connection state)]
     (setup-http-connection conn options)
     (c/start-http-connection conn (:body options))
     (assoc state ::state ::started)))
 
-(defn- open-response [state options]
-  (prn "open-response")
+(defn- connection-success? [conn]
+  "Returns true if the HttpURLConnection response code is in the 2xx
+  range."
+  (= 2 (unchecked-divide (.getResponseCode conn) 100)))
+
+(defn- open-response
+  "Agent action that opens the response body stream on the HTTP
+  request; this will block until the response stream is available."
+  [state options]
   (let [conn (::connection state)]
     (assoc state
       ::response-stream (if (connection-success? conn)
@@ -45,38 +103,51 @@
                           (.getErrorStream conn))
       ::state ::receiving)))
 
-(defn- handle-response [state success-handler failure-handler options]
-  (prn "handle-response")
+(defn- handle-response
+  "Agent action that calls the provided handler function, with no
+  arguments, and sets the ::result key of the agent to the handler's
+  return value."
+  [state handler options]
   (let [conn (::connection state)]
     (assoc state
-      ::result (if (connection-success? conn)
-                   (success-handler)
-                   (failure-handler))
+      ::result (handler)
       ::state ::finished)))
 
-(defn- disconnect [state options]
-  (prn "disconnect")
+(defn- disconnect
+  "Agent action that closes the response body stream and disconnects
+  the HttpURLConnection."
+  [state options]
   (.close (::response-stream state))
   (.disconnect (::connection state))
   (assoc state
     ::response-stream nil
     ::state ::disconnected))
 
-(defn response-body-stream
-  "Returns an InputStream of the HTTP response body."
-  [http-agnt]
-  (let [a @http-agnt]
-    (if (= (::state a) ::receiving)
-      (::response-stream a)
-      (throw (Exception. "response-body-stream may only be called from a callback function passed to http-agent")))))
+(defn- status-in-range?
+  "Returns true if the response status of the HTTP agent begins with
+  digit, an Integer."
+  [digit http-agnt]
+  (= digit (unchecked-divide (.getResponseCode (::connection @http-agnt))
+                             100)))
+
+(defn- get-byte-buffer [http-agnt]
+  (let [buffer (result http-agnt)]
+    (if (instance? ByteArrayOutputStream buffer)
+      buffer
+      (throw (Exception. "Handler result was not a ByteArrayOutputStream")))))
+
 
 (defn buffer-bytes
   "The default HTTP agent result handler; it collects the response
-  body in a java.io.ByteArrayOutputStream."
+  body in a java.io.ByteArrayOutputStream, which can later be
+  retrieved with the 'stream', 'string', and 'bytes' functions."
   [http-agnt]
   (let [output (ByteArrayOutputStream.)]
-    (duck/copy (response-body-stream http-agnt) output)
+    (duck/copy (stream http-agnt) output)
     output))
+
+
+;;; CONSTRUCTOR
 
 (def *http-agent-defaults*
   {:method "GET"
@@ -85,8 +156,7 @@
    :connect-timeout 0
    :read-timeout 0
    :follow-redirects true
-   :on-success buffer-bytes
-   :on-failure buffer-bytes})
+   :handler buffer-bytes})
 
 (defn http-agent
   "Creates (and immediately returns) an Agent representing an HTTP
@@ -123,55 +193,62 @@
   If true, HTTP 3xx redirects will be followed automatically.  Default
   is true.
 
-  :on-success f
+  :handler f
 
-  Function to be called when the request succeeds with a 2xx response
-  code.  The function will be called with the HTTP agent as its
-  argument, and can use the response-body-stream function to read the
-  response body.  The return value of this function will be stored in
-  the state of the agent and can be retrieved with the 'result'
-  function.  Any exceptions thrown by this function will be added to
-  the agent's error queue (see agent-errors).  The default function
-  collects the response stream into a byte array.
+  Function to be called when the HTTP response body is ready.  If you
+  do not provide a handler function, the default is to buffer the
+  entire response body in memory.
 
-  :on-failure f
-
-  Like :on-success but this function will be called when the request
-  fails with a 4xx or 5xx response code.
+  The handler function will be called with the HTTP agent as its
+  argument, and can use the 'stream' function to read the response
+  body.  The return value of this function will be stored in the state
+  of the agent and can be retrieved with the 'result' function.  Any
+  exceptions thrown by this function will be added to the agent's
+  error queue (see agent-errors).  The default function collects the
+  response stream in a memory buffer.
   "
-  ([url & options]
+  ([uri & options]
      (let [opts (merge *http-agent-defaults* (apply array-map options))]
-       (let [a (agent {::connection (c/http-connection url)
+       (let [a (agent {::connection (c/http-connection uri)
                        ::state ::created
-                       ::url url
+                       ::uri uri
                        ::options opts})]
          (send-off a start-request opts)
          (send-off a open-response opts)
-         (send-off a handle-response
-                   (partial (:on-success opts) a)
-                   (partial (:on-failure opts) a)
-                   opts)
+         (send-off a handle-response (partial (:handler opts) a) opts)
          (send-off a disconnect opts)))))
 
-(defn result
-  "Returns the value returned by the :on-success or :on-failure
-  handler function of the HTTP agent; nil if the handler function has
-  not yet finished.  The default handler function returns a
-  ByteArrayOutputStream."
-  [http-agnt]
-  (when (#{::disconnected ::finished} (::state @http-agnt))
-    (::result @http-agnt)))
 
-(defn response-body-bytes
+;;; RESPONSE BODY ACCESSORS
+
+(defn result
+  "Returns the value returned by the :handler function of the HTTP
+  agent; blocks until the HTTP request is completed.  The default
+  handler function returns a ByteArrayOutputStream."
+  [http-agnt]
+  (await http-agnt)
+  (::result @http-agnt))
+
+(defn stream
+  "Returns an InputStream of the HTTP response body.  When called by
+  the handler function passed to http-agent, this is the raw
+  HttpURLConnection stream.
+
+  If the default handler function was used, this function returns a
+  ByteArrayInputStream on the buffered response body."
+  [http-agnt]
+  (let [a @http-agnt]
+    (if (= (::state a) ::receiving)
+      (::response-stream a)
+      (ByteArrayInputStream. (.toByteArray (result http-agnt))))))
+
+(defn bytes
   "Returns a Java byte array of the content returned by the server;
   nil if the content is not yet available."
   [http-agnt]
-  (when-let [buffer (result http-agnt)]
-    (if (instance? ByteArrayOutputStream buffer)
-      (.toByteArray buffer)
-      (throw (Exception. "Result was not a ByteArrayOutputStream")))))
+  (.toByteArray (get-byte-buffer http-agnt)))
 
-(defn response-body-str
+(defn string
   "Returns the HTTP response body as a string, using the given
   encoding.
 
@@ -179,37 +256,71 @@
   headers, or clojure.contrib.duck-streams/*default-encoding* if it is
   not specified."
   ([http-agnt]
-     (response-body-str http-agnt
-                        (or (.getContentEncoding (::connection @http-agnt))
+     (string http-agnt (or (.getContentEncoding (::connection @http-agnt))
                             duck/*default-encoding*)))
   ([http-agnt encoding]
-     (when-let [buffer (result http-agnt)]
-       (if (instance? ByteArrayOutputStream buffer)
-         (.toString buffer encoding)
-         (throw (Exception. "Result was not a ByteArrayOutputStream"))))))
+     (.toString (get-byte-buffer http-agnt) encoding)))
 
-(defn response-status
-  "Returns the Integer response status code (e.g. 200, 404) for this request."
-  [a]
-  (when (= (::state @a) ::completed)
-    (.getResponseCode (::connection @a))))
 
-(defn response-message
-  "Returns the HTTP response message (e.g. 'Not Found'), for this request."
-  [a]
-  (when (= (::state @a) ::completed)
-    (.getResponseMessage (::connection @a))))
+;;; REQUEST ACCESSORS
 
-(defn response-headers
-  "Returns a String=>String map of HTTP response headers.  Header
-  names are converted to all lower-case.  If a header appears more
-  than once, only the last value is returned."
-  [a]
+(defn request-uri
+  "Returns the URI/URL requested by this HTTP agent, as a String."
+  [http-agnt]
+  (::uri @http-agnt))
+
+(defn request-headers
+  "Returns the request headers specified for this HTTP agent."
+  [http-agnt]
+  (:headers (::options @http-agnt)))
+
+(defn method
+  "Returns the HTTP method name used by this HTTP agent, as a String."
+  [http-agnt]
+  (:method (::options @http-agnt)))
+
+(defn request-body
+  "Returns the HTTP request body given to this HTTP agent.  
+
+  Note: if the request body was an InputStream or a Reader, it will no
+  longer be usable."
+  [http-agnt]
+  (:body (::options @http-agnt)))
+
+
+;;; RESPONSE ACCESSORS
+
+(defn done?
+  "Returns true if the HTTP request/response has completed."
+  [http-agnt]
+  (if (#{::finished ::disconnected} (::state @http-agnt))
+    true false))
+
+(defn status
+  "Returns the HTTP response status code (e.g. 200, 404) for this
+  request, as an Integer, or nil if the status has not yet been
+  received."
+  [http-agnt]
+  (when (done? http-agnt)
+    (.getResponseCode (::connection @http-agnt))))
+
+(defn message
+  "Returns the HTTP response message (e.g. 'Not Found'), for this
+  request, or nil if the response has not yet been received."
+  [http-agnt]
+  (when (done? http-agnt)
+    (.getResponseMessage (::connection http-agnt))))
+
+(defn headers
+  "Returns a map of HTTP response headers.  Header names are converted
+  to keywords in all lower-case Header values are strings.  If a
+  header appears more than once, only the last value is returned."
+  [http-agnt]
   (reduce (fn [m [#^String k v]]
-            (assoc m (when k (.toLowerCase k)) (last v)))
-          {} (.getHeaderFields (::connection @a))))
+            (assoc m (when k (keyword (.toLowerCase k))) (last v)))
+          {} (.getHeaderFields (::connection @http-agnt))))
 
-(defn response-headers-seq
+(defn headers-seq
   "Returns the HTTP response headers in order as a sequence of
   [String,String] pairs.  The first 'header' name may be null for the
   HTTP status line."
@@ -222,14 +333,13 @@
                     (thisfn (inc i)))))]
     (lazy-seq (f 0))))
 
-(defn- response-in-range? [digit http-agnt]
-  (= digit (unchecked-divide (.getResponseCode (::connection @http-agnt))
-                             100)))
+
+;;; RESPONSE STATUS CODE ACCESSORS
 
 (defn success?
   "Returns true if the HTTP response code was in the 200-299 range."
   [http-agnt]
-  (response-in-range? 2 http-agnt))
+  (status-in-range? 2 http-agnt))
 
 (defn redirect?
   "Returns true if the HTTP response code was in the 300-399 range.
@@ -238,17 +348,17 @@
   redirects will be followed automatically and a the agent will never
   return a 3xx response code."
   [http-agnt]
-  (response-in-range? 3 http-agnt))
+  (status-in-range? 3 http-agnt))
 
 (defn client-error?
   "Returns true if the HTTP response code was in the 400-499 range."
   [http-agnt]
-  (response-in-range? 4 http-agnt))
+  (status-in-range? 4 http-agnt))
 
 (defn server-error?
   "Returns true if the HTTP response code was in the 500-599 range."
   [http-agnt]
-  (response-in-range? 5 http-agnt))
+  (status-in-range? 5 http-agnt))
 
 (defn error?
   "Returns true if the HTTP response code was in the 400-499 range OR
