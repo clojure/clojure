@@ -316,7 +316,7 @@
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
-          (let [chars (.toCharArray (String. buffer *default-encoding*))]
+          (let [chars (.toCharArray (String. buffer 0 size *default-encoding*))]
             (do (.write output chars)
                 (recur))))))))
 
