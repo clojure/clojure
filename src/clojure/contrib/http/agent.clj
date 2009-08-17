@@ -312,9 +312,9 @@
     (.getResponseMessage (::connection http-agnt))))
 
 (defn headers
-  "Returns a String=>String map of HTTP response headers.  Header
-  names are converted to all lower-case.  If a header appears more
-  than once, only the last value is returned."
+  "Returns a map of HTTP response headers.  Header names are converted
+  to keywords in all lower-case Header values are strings.  If a
+  header appears more than once, only the last value is returned."
   [http-agnt]
   (reduce (fn [m [#^String k v]]
             (assoc m (when k (keyword (.toLowerCase k))) (last v)))
