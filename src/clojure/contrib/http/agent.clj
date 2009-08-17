@@ -1,7 +1,7 @@
 ;;; http/agent.clj: agent-based asynchronous HTTP client
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; June 8, 2009
+;; August 17, 2009
 
 ;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -12,7 +12,53 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns #^{:doc "Agent-based asynchronous HTTP client."}
+(ns #^{:doc "Agent-based asynchronous HTTP client.
+
+  This is a HTTP client library based on Java's HttpURLConnection
+  class and Clojure's Agent system.  It allows you to make multiple
+  HTTP requests in parallel.
+
+  Start an HTTP request with the 'http-agent' function, which
+  immediately returns a Clojure Agent.  You will never deref this
+  agent; that is handled by the accessor functions.  The agent will
+  execute the HTTP request on a separate thread.
+
+  If you pass a :handler function to http-agent, that function will be
+  called as soon as the HTTP response body is ready.  The handler
+  function is called with one argument, the HTTP agent itself.  The
+  handler can read the response body by calling the 'stream' function
+  on the agent.
+
+  The value returned by the handler function becomes part of the state
+  of the agent, and you can retrieve it with the 'result' function.
+  If you call 'result' before the HTTP request has finished, it will
+  block until the handler function returns.
+
+  If you don't provide a handler function, the default handler will
+  buffer the entire response body in memory, which you can retrieve
+  with the 'bytes', 'string', or 'stream' functions.  Like 'result',
+  these functions will block until the HTTP request is completed.
+
+  If you want to check if an HTTP request is finished without
+  blocking, use the 'done?' function.
+
+  A single GET request could be as simple as:
+
+    (string (http-agent \"http://www.stuartsierra.com/\"))
+
+  A simple POST might look like:
+
+    (http-agent \"http...\" :method \"POST\" :body \"foo=1\")
+
+  And you could write the response directly to a file like this (requires
+  clojure.contrib.duck-streams/copy):
+
+    (http-agent \"http...\"
+                :handler (fn [agnt] 
+                           (with-open [w (writer \"/tmp/out\")] 
+                             (copy (stream agnt) w))))
+"}
+
   clojure.contrib.http.agent
   (:require [clojure.contrib.http.connection :as c]
             [clojure.contrib.duck-streams :as duck])
@@ -149,7 +195,7 @@
   :handler f
 
   Function to be called when the HTTP response body is ready.  If you
-  do NOT provide a handler function, the default is to buffer the
+  do not provide a handler function, the default is to buffer the
   entire response body in memory.
 
   The handler function will be called with the HTTP agent as its
@@ -158,7 +204,7 @@
   of the agent and can be retrieved with the 'result' function.  Any
   exceptions thrown by this function will be added to the agent's
   error queue (see agent-errors).  The default function collects the
-  response stream into a byte array.
+  response stream in a memory buffer.
   "
   ([uri & options]
      (let [opts (merge *http-agent-defaults* (apply array-map options))]
