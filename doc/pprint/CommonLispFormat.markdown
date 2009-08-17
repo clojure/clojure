@@ -1,4 +1,4 @@
-# Common Lisp-compatible Format function
+# A Common Lisp-compatible Format Function
 cl-format is an implementation of the incredibly baroque Common Lisp format function as specified 
 in [Common Lisp, the Language, 2nd edition, Chapter 22](http://www.cs.cmu.edu/afs/cs.cmu.edu/project/ai-repository/ai/html/cltl/clm/node200.html#SECTION002633000000000000000).
 
