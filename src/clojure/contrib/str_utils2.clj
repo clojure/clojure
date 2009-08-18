@@ -235,10 +235,34 @@
   (replace s #"[\r\n]+$" ""))
 
 (defn title-case [#^String s]
-  (throw (IllegalStateException. "title-case not implemented yet.")))
+  (throw (Exception. "title-case not implemeted yet")))
 
-(defn swap-case [#^String s]
-  (throw (IllegalStateException. "swap-case not implemented yet.")))
+(defn swap-case
+  "Changes upper case characters to lower case and vice-versa.
+  Handles Unicode supplementary characters correctly.  Uses the
+  locale-sensitive String.toUpperCase() and String.toLowerCase()
+  methods."
+  [#^String s]
+  (let [buffer (StringBuilder. (.length s))
+        ;; array to make a String from one code point
+        array (make-array Integer/TYPE 1)]
+    (docodepoints [c s]
+      (aset-int array 0 c)
+      (if (Character/isLowerCase c)
+        ;; Character.toUpperCase is not locale-sensitive, but
+        ;; String.toUpperCase is; so we use a String.
+        (.append buffer (.toUpperCase (String. array 0 1)))
+        (.append buffer (.toLowerCase (String. array 0 1)))))
+    (.toString buffer)))
+
+(defn capitalize
+  "Converts first character of the string to upper-case, all other
+  characters to lower-case."
+  [#^String s]
+  (if (< (count s) 2)
+    (.toUpperCase s)
+    (str (.toUpperCase (subs s 0 1))
+         (.toLowerCase (subs s 1)))))
 
 (defn ltrim
   "Removes whitespace from the left side of string."
