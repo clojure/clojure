@@ -93,7 +93,7 @@
   [#^String s cmap]
   (let [buffer (StringBuilder. (.length s))]
     (dochars [c s]
-      (if-let [r (cmap s)]
+      (if-let [r (cmap c)]
         (.append buffer r)
         (.append buffer c)))
     (.toString buffer)))

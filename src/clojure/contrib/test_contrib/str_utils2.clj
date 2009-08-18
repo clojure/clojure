@@ -41,4 +41,11 @@
 (deftest t-codepoints
   (is (= (list 102 111 111 65536 98 97 114)
          (s/codepoints "foo\uD800\uDC00bar"))
-      "Handles Unicode supplementary characters")))
+      "Handles Unicode supplementary characters"))
+
+(deftest t-escape
+  (is (= "&lt;foo&amp;bar&gt;"
+         (s/escape "<foo&bar>" {\& "&amp;" \< "&lt;" \> "&gt;"})))
+  (is (= " \\\"foo\\\" "
+         (s/escape " \"foo\" " {\" "\\\""})))
+  (is (= "faabor" (s/escape "foobar" {\a \o, \o \a}))))
