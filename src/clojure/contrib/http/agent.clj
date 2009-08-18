@@ -96,7 +96,7 @@
 
 (defn- open-response
   "Agent action that opens the response body stream on the HTTP
-  request; this will block until the response stream is available."
+  request; this will block until the response stream is available." ;
   [state options]
   (let [#^HttpURLConnection conn (::connection state)]
     (assoc state
@@ -153,13 +153,13 @@
 ;;; CONSTRUCTOR
 
 (def *http-agent-defaults*
-  {:method "GET"
-   :headers {}
-   :body nil
-   :connect-timeout 0
-   :read-timeout 0
-   :follow-redirects true
-   :handler buffer-bytes})
+     {:method "GET"
+      :headers {}
+      :body nil
+      :connect-timeout 0
+      :read-timeout 0
+      :follow-redirects true
+      :handler buffer-bytes})
 
 (defn http-agent
   "Creates (and immediately returns) an Agent representing an HTTP
@@ -262,7 +262,7 @@
   ([http-agnt]
      (string http-agnt (or (.getContentEncoding
                             #^HttpURLConnection (::connection @http-agnt))
-                            duck/*default-encoding*)))
+                           duck/*default-encoding*)))
   ([http-agnt #^String encoding]
      (.toString (get-byte-buffer http-agnt) encoding)))
 
@@ -324,7 +324,7 @@
   (reduce (fn [m [#^String k v]]
             (assoc m (when k (keyword (.toLowerCase k))) (last v)))
           {} (.getHeaderFields
-              #^HttpURLConnection (::connection @http-agnt)))
+              #^HttpURLConnection (::connection @http-agnt))))
 
 (defn headers-seq
   "Returns the HTTP response headers in order as a sequence of
@@ -337,7 +337,7 @@
             (when-let [value (.getHeaderField conn i)]
               (cons [(.getHeaderFieldKey conn i) value]
                     (thisfn (inc i)))))]
-    (lazy-seq (f 0)))))
+    (lazy-seq (f 0))))
 
 
 ;;; RESPONSE STATUS CODE ACCESSORS
