@@ -104,7 +104,10 @@
   (every? (fn [#^Character c] (Character/isWhitespace c)) s))
 
 (defn take
-  "Take first n characters from s, up to the length of s."
+  "Take first n characters from s, up to the length of s.
+
+  Note the argument order is the opposite of clojure.core/take; this
+  is to keep the string as the first argument for use with ->"
   [#^String s n]
   (if (< (count s) n)
     s
@@ -112,14 +115,20 @@
 
 (defn drop [#^String s n]
   "Drops first n characters from s.  Returns an empty string if n is
-  greater than the length of s."
+  greater than the length of s.
+
+  Note the argument order is the opposite of clojure.core/drop; this
+  is to keep the string as the first argument for use with ->"
   (if (< (count s) n)
     ""
     (.substring s n)))
 
 (defn butlast
   "Returns s without the last n characters.  Returns an empty string
-  if n is greater than the length of s."
+  if n is greater than the length of s.
+
+  Note the argument order is the opposite of clojure.core/butlast;
+  this is to keep the string as the first argument for use with ->"
   [#^String s n]
   (if (< (count s) n)
     ""
