@@ -1,7 +1,7 @@
-;;; str_utils2.clj -- experimental new string utilities for Clojure
+;;; str_utils2.clj -- functional string utilities for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
-;; June 4, 2009
+;; August 19, 2009
 
 ;; Copyright (c) Stuart Sierra, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -30,7 +30,6 @@
     http://github.com/francoisdevlin/devlinsf-clojure-utils/"}
  clojure.contrib.str-utils2
  (:refer-clojure :exclude (take replace drop butlast partition contains? get))
- (:require [clojure.contrib.java-utils :as j])
  (:import (java.util.regex Pattern)))
 
 
