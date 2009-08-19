@@ -292,6 +292,20 @@
   [#^String s]
   (seq (.split #"\r?\n" s)))
 
+;; borrowed from compojure.str-utils, by James Reeves, EPL 1.0
+(defn map-str
+  "Apply f to each element of coll, concatenate all results into a
+  String."
+  [f coll]
+  (apply str (map f coll)))
+
+;; borrowed from compojure.str-utils, by James Reeves, EPL 1.0
+(defn grep
+  "Filters elements of coll by a regular expression.  The String
+  representation (with str) of each element is tested with re-find."
+  [re coll]
+  (filter (fn [x] (re-find re (str x))) coll))
+
 
 ;;; WRAPPERS
 
