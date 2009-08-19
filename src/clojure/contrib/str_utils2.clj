@@ -233,9 +233,13 @@
   (apply str (interpose separator coll)))
 
 (defn chop
-  "Removes the last character of string."
+  "Removes the last character of string, does nothing on a zero-length
+  string."
   [#^String s]
-  (subs s 0 (dec (count s))))
+  (let [size (count s)]
+    (if (zero? size)
+      s
+      (subs s 0 (dec (count s))))))
 
 (defn chomp
   "Removes all trailing newline \\n or return \\r characters from
