@@ -41,6 +41,12 @@
   (is (= "foobar" (s/tail "foobar" 9)))
   (is (= "" (s/tail "foobar" 0))))
 
+(deftest t-repeat
+  (is (= "foofoofoo" (s/repeat "foo" 3))))
+
+(deftest t-reverse
+  (is (= "tab" (s/reverse "bat"))))
+
 (deftest t-replace
   (is (= "faabar" (s/replace "foobar" \o \a)))
   (is (= "barbarbar" (s/replace "foobarfoo" "foo" "bar")))

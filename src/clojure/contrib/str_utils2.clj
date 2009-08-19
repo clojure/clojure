@@ -29,7 +29,8 @@
     Some ideas are borrowed from
     http://github.com/francoisdevlin/devlinsf-clojure-utils/"}
  clojure.contrib.str-utils2
- (:refer-clojure :exclude (take replace drop butlast partition contains? get))
+ (:refer-clojure :exclude (take replace drop butlast partition
+                           contains? get repeat reverse))
  (:import (java.util.regex Pattern)))
 
 
@@ -140,6 +141,16 @@
   (if (< (count s) n)
     s
     (.substring s (- (count s) n))))
+
+(defn repeat
+  "Returns a new String containing s repeated n times."
+  [#^String s n]
+  (apply str (clojure.core/repeat n s)))
+
+(defn reverse
+  "Returns s with its characters reversed."
+  [#^String s]
+  (.toString (.reverse (StringBuilder. s))))
 
 (defmulti
   #^{:doc "Replaces all instances of pattern in string with replacement.  
