@@ -254,7 +254,7 @@
   [#^String s]
   (let [buffer (StringBuilder. (.length s))
         ;; array to make a String from one code point
-        array (make-array Integer/TYPE 1)]
+        #^"[I" array (make-array Integer/TYPE 1)]
     (docodepoints [c s]
       (aset-int array 0 c)
       (if (Character/isLowerCase c)
@@ -270,8 +270,8 @@
   [#^String s]
   (if (< (count s) 2)
     (.toUpperCase s)
-    (str (.toUpperCase (subs s 0 1))
-         (.toLowerCase (subs s 1)))))
+    (str (.toUpperCase #^String (subs s 0 1))
+         (.toLowerCase #^String (subs s 1)))))
 
 (defn ltrim
   "Removes whitespace from the left side of string."
