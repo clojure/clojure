@@ -1,7 +1,7 @@
 ;; Macrolet and symbol-macrolet
 
 ;; by Konrad Hinsen
-;; last updated May 25, 2009
+;; last updated August 19, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -26,8 +26,7 @@
            of another macro, they may be used anywhere. Global symbol
            macros can be used only inside a with-symbol-macros form."}
   clojure.contrib.macro-utils
-  (:use [clojure.contrib.def :only (defvar-)])
-  (:use [clojure.walk :only (prewalk)]))
+  (:use [clojure.contrib.def :only (defvar-)]))
 
 ; A set of all special forms. Special forms are not macro-expanded, making
 ; it impossible to shadow them by macro definitions. For most special
