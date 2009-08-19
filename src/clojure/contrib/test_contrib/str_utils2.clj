@@ -2,6 +2,18 @@
   (:require [clojure.contrib.str-utils2 :as s])
   (:use clojure.test))
 
+(deftest t-codepoints
+  (is (= (list 102 111 111 65536 98 97 114)
+         (s/codepoints "foo\uD800\uDC00bar"))
+      "Handles Unicode supplementary characters"))
+
+(deftest t-escape
+  (is (= "&lt;foo&amp;bar&gt;"
+         (s/escape "<foo&bar>" {\& "&amp;" \< "&lt;" \> "&gt;"})))
+  (is (= " \\\"foo\\\" "
+         (s/escape " \"foo\" " {\" "\\\""})))
+  (is (= "faabor" (s/escape "foobar" {\a \o, \o \a}))))
+
 (deftest t-blank
   (is (s/blank? nil))
   (is (s/blank? ""))
@@ -38,14 +50,59 @@
   (is (= "barbarfoo" (s/replace-first "foobarfoo" #"foo" "bar")))
   (is (= "FOObarfoo" (s/replace-first "foobarfoo" #"foo" s/upper-case))))
 
-(deftest t-codepoints
-  (is (= (list 102 111 111 65536 98 97 114)
-         (s/codepoints "foo\uD800\uDC00bar"))
-      "Handles Unicode supplementary characters"))
+(deftest t-partition
+  (is (= (list "" "abc" "123" "def")
+         (s/partition  "abc123def" #"[a-z]+"))))
 
-(deftest t-escape
-  (is (= "&lt;foo&amp;bar&gt;"
-         (s/escape "<foo&bar>" {\& "&amp;" \< "&lt;" \> "&gt;"})))
-  (is (= " \\\"foo\\\" "
-         (s/escape " \"foo\" " {\" "\\\""})))
-  (is (= "faabor" (s/escape "foobar" {\a \o, \o \a}))))
+(deftest t-join
+  (is (= "1,2,3" (s/join \, [1 2 3])))
+  (is (= "" (s/join \, [])))
+  (is (= "1 and-a 2 and-a 3" (s/join " and-a " [1 2 3]))))
+
+(deftest t-chop
+  (is (= "fo" (s/chop "foo")))
+  (is (= "") (s/chop "f"))
+  (is (= "") (s/chop "")))
+
+(deftest t-chomp
+  (is (= "foo" (s/chomp "foo\n")))
+  (is (= "foo" (s/chomp "foo\r\n")))
+  (is (= "foo" (s/chomp "foo")))
+  (is (= "" (s/chomp ""))))
+
+(deftest t-swap-case
+  (is (= "fOO!bAR" (s/swap-case "Foo!Bar")))
+  (is (= "" (s/swap-case ""))))
+
+(deftest t-capitalize
+  (is (= "Foobar" (s/capitalize "foobar")))
+  (is (= "Foobar" (s/capitalize "FOOBAR"))))
+
+(deftest t-ltrim
+  (is (= "foo " (s/ltrim " foo ")))
+  (is (= "" (s/ltrim "   "))))
+
+(deftest t-rtrim
+  (is (= " foo" (s/rtrim " foo ")))
+  (is (= "" (s/rtrim "   "))))
+
+(deftest t-split-lines
+  (is (= (list "one" "two" "three")
+         (s/split-lines "one\ntwo\r\nthree")))
+  (is (= (list "foo") (s/split-lines "foo"))))
+
+(deftest t-upper-case
+  (is (= "FOOBAR" (s/upper-case "Foobar"))))
+
+(deftest t-lower-case
+  (is (= "foobar" (s/lower-case "FooBar"))))
+
+(deftest t-trim
+  (is (= "foo" (s/trim "  foo  \r\n"))))
+
+(deftest t-contains
+  (is (s/contains? "foobar" "foo"))
+  (is (not (s/contains? "foobar" "baz"))))
+
+(deftest t-get
+  (is (= \o (s/get "foo" 1))))
