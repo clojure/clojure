@@ -88,8 +88,9 @@
     (lazy-seq (f s 0))))
 
 (defn escape
-  "Escapes characters in string according to a cmap, a function or map
-  from characters to their replacements."
+  "Returns a new String by applying cmap (a function or a map) to each
+   character in s.  If cmap returns nil, the original character is
+   added to the output unchanged."
   [#^String s cmap]
   (let [buffer (StringBuilder. (.length s))]
     (dochars [c s]
