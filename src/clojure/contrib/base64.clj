@@ -12,7 +12,12 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns clojure.contrib.base64
+(ns #^{:doc "Base-64 encoding and (maybe later) decoding.  
+
+  This is mainly here as an example.  It is much slower than the
+  Apache Commons Codec implementation or sun.misc.BASE64Encoder."
+       :author "Stuart Sierra"}
+    clojure.contrib.base64
   (:import (java.io InputStream Writer ByteArrayInputStream
                     StringWriter)))
 
