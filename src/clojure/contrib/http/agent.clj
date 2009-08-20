@@ -119,7 +119,8 @@
   "Agent action that closes the response body stream and disconnects
   the HttpURLConnection."
   [state options]
-  (.close #^InputStream (::response-stream state))
+  (when (::response-stream state)
+    (.close #^InputStream (::response-stream state)))
   (.disconnect #^HttpURLConnection (::connection state))
   (assoc state
     ::response-stream nil
