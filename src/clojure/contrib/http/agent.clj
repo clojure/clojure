@@ -146,7 +146,7 @@
   retrieved with the 'stream', 'string', and 'bytes' functions."
   [http-agnt]
   (let [output (ByteArrayOutputStream.)]
-    (duck/copy (stream http-agnt) output)
+    (duck/copy (or (stream http-agnt) "") output)
     output))
 
 
