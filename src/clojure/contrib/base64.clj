@@ -29,38 +29,43 @@
     (loop [line 0]
       (let [len (.read input buffer)]
         (when (pos? len)
+          ;; Pre-boxing the bytes as Integers is more efficient for
+          ;; Clojure's bit operations.
+          (let [b0 (Integer/valueOf (int (aget buffer 0)))
+                b1 (Integer/valueOf (int (aget buffer 1)))
+                b2 (Integer/valueOf (int (aget buffer 2)))]
             (cond (= len 3)
-                  (let [s0 (bit-and 0x3F (bit-shift-right (aget buffer 0) 2))
+                  (let [s0 (bit-and 0x3F (bit-shift-right b0 2))
                         s1 (bit-and 0x3F
-                                    (bit-or (bit-shift-left (aget buffer 0) 4)
-                                            (bit-shift-right (aget buffer 1) 4)))
+                                    (bit-or (bit-shift-left b0 4)
+                                            (bit-shift-right b1 4)))
                         s2 (bit-and 0x3F
-                                    (bit-or (bit-shift-left (aget buffer 1) 2)
-                                            (bit-shift-right (aget buffer 2) 6)))
-                        s3 (bit-and 0x3F (aget buffer 2))]
+                                    (bit-or (bit-shift-left b1 2)
+                                            (bit-shift-right b2 6)))
+                        s3 (bit-and 0x3F b2)]
                     (.append output (.charAt alphabet s0))
                     (.append output (.charAt alphabet s1))
                     (.append output (.charAt alphabet s2))
                     (.append output (.charAt alphabet s3)))
 
                   (= len 2)
-                  (let [s0 (bit-and 0x3F (bit-shift-right (aget buffer 0) 2))
+                  (let [s0 (bit-and 0x3F (bit-shift-right b0 2))
                         s1 (bit-and 0x3F
-                                    (bit-or (bit-shift-left (aget buffer 0) 4)
-                                            (bit-shift-right (aget buffer 1) 4)))
-                        s2 (bit-and 0x3F (bit-shift-left (aget buffer 1) 2))]
+                                    (bit-or (bit-shift-left b0 4)
+                                            (bit-shift-right b1 4)))
+                        s2 (bit-and 0x3F (bit-shift-left b1 2))]
                     (.append output (.charAt alphabet s0))
                     (.append output (.charAt alphabet s1))
                     (.append output (.charAt alphabet s2))
                     (.append output (.charAt alphabet 64)))
 
                   (= len 1)
-                  (let [s0 (bit-and 0x3F (bit-shift-right (aget buffer 0) 2))
-                        s1 (bit-and 0x3F (bit-shift-left (aget buffer 0) 4))]
+                  (let [s0 (bit-and 0x3F (bit-shift-right b0 2))
+                        s1 (bit-and 0x3F (bit-shift-left b0 4))]
                     (.append output (.charAt alphabet s0))
                     (.append output (.charAt alphabet s1))
                     (.append output (.charAt alphabet 64))
-                    (.append output (.charAt alphabet 64))))
+                    (.append output (.charAt alphabet 64)))))
             (if (and line-length (> (+ line 4) line-length))
               (do (.append output \newline)
                   (recur 0))
