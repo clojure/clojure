@@ -756,16 +756,17 @@ static public Object nth(Object coll, int n){
 }
 
 static public Object nth(Object coll, int n, Object notFound){
-	if(coll == null)
-		return notFound;
-	else if(n < 0)
-		return notFound;
-	else if(coll instanceof IPersistentVector) {
-		IPersistentVector v = (IPersistentVector) coll;
-		if(n < v.count())
+	if(coll instanceof Indexed) {
+		Indexed v = (Indexed) coll;
+		if(n >= 0 && n < v.count())
 			return v.nth(n);
 		return notFound;
 	}
+	else if(coll == null)
+		return notFound;
+	else if(n < 0)
+		return notFound;
+
 	else if(coll instanceof String) {
 		String s = (String) coll;
 		if(n < s.length())
