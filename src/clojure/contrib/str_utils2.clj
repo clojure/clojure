@@ -30,7 +30,7 @@
     http://github.com/francoisdevlin/devlinsf-clojure-utils/"}
  clojure.contrib.str-utils2
  (:refer-clojure :exclude (take replace drop butlast partition
-                           contains? get repeat reverse))
+                           contains? get repeat reverse partial))
  (:import (java.util.regex Pattern)))
 
 
@@ -316,6 +316,19 @@
   representation (with str) of each element is tested with re-find."
   [re coll]
   (filter (fn [x] (re-find re (str x))) coll))
+
+(defn partial
+  "Like clojure.core/partial for functions that take their primary
+  argument first.
+
+  Takes a function f and its arguments, NOT INCLUDING the first
+  argument.  Returns a new function whose first argument will be the
+  first argument to f.
+
+  Example: (str-utils2/partial str-utils2/take 2)
+           ;;=> (fn [s] (str-utils2/take s 2))"
+  [f & args]
+  (fn [s & more] (apply f s (concat args more))))
 
 
 ;;; WRAPPERS

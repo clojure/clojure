@@ -112,3 +112,8 @@
 
 (deftest t-get
   (is (= \o (s/get "foo" 1))))
+
+(deftest t-partial
+  (is (= "bar" ((s/partial s/drop 3) "foobar")))
+  (is (= "ooba" ((comp (s/partial s/take 4)
+                       (s/partial s/drop 1)) "foobar"))))
