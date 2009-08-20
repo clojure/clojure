@@ -315,7 +315,7 @@
   request, or nil if the response has not yet been received."
   [http-agnt]
   (when (done? http-agnt)
-    (.getResponseMessage #^HttpURLConnection (::connection http-agnt))))
+    (.getResponseMessage #^HttpURLConnection (::connection @http-agnt))))
 
 (defn headers
   "Returns a map of HTTP response headers.  Header names are converted
