@@ -52,14 +52,14 @@
 ;; Macros used so that implementation-specific functions all have the same meta.
 
 (defmacro def-impl-name
-  #^{:private true} [& body]
+  {:private true} [& body]
   `(def
     #^{:doc "The name of the logging implementation used."}
     *impl-name*
     ~@body))
 
 (defmacro def-impl-get-log
-  #^{:private true} [& body]
+  {:private true} [& body]
   `(def
     #^{:doc
   "Returns an implementation-specific log by string namespace. End-users should
@@ -69,7 +69,7 @@
     (memoize ~@body)))
 
 (defmacro def-impl-enabled?
-  #^{:private true} [& body]
+  {:private true} [& body]
   `(def
     #^{:doc
   "Implementation-specific check if a particular level is enabled. End-users
@@ -79,7 +79,7 @@
     ~@body))
 
 (defmacro def-impl-write!
-  #^{:private true} [& body]
+  {:private true} [& body]
   `(def
     #^{:doc
   "Implementation-specific write of a log message. End-users should not need to
@@ -91,7 +91,7 @@
 (defmacro commons-logging
   "Defines the commons-logging-based implementations of the core logging
   functions. End-users should never need to call this macro."
-  #^{:private true}
+  {:private true}
   []
   (try
     (import (org.apache.commons.logging LogFactory Log))
@@ -125,7 +125,7 @@
 (defmacro log4j-logging
   "Defines the log4j-based implementations of the core logging functions.
    End-users should never need to call this macro."
-  #^{:private true}
+  {:private true}
   []
   (try
     (import (org.apache.log4j Logger Level))
@@ -155,7 +155,7 @@
 (defmacro java-logging
   "Defines the java-logging-based implementations of the core logging
   functions. End-users should never need to call this macro."
-  #^{:private true}
+  {:private true}
   []
   (try
     (import (java.util.logging Logger Level))
