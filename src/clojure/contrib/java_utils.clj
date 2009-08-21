@@ -90,11 +90,37 @@
      (reduce file (file parent child) more)))
 
 (defn as-str
-  "Returns the name or string representation of x"
-  [x]
-  (if (instance? clojure.lang.Named x)
-    (name x)
-    (str x)))
+  "Returns the name or string representation of args, concatenated to
+  a single string.  Like clojure.core/str, but uses the names of
+  keywords and symbols instead of their literal representation."
+  [& args]
+  (apply str (map (fn [x] (if (instance? clojure.lang.Named x)
+                            (name x) x))
+                  args)))
+(defn as-str
+  "Like clojure.core/str, but if an argument is a keyword or symbol,
+  its name will be used instead of its literal representation.
+
+  Example:
+     (str :foo :bar)     ;;=> \":foo:bar\"
+     (as-str :foo :bar)  ;;=> \"foobar\" 
+
+  Note that this does not apply to keywords or symbols nested within
+  data structures; they will be rendered as with str.
+
+  Example:
+     (str {:foo :bar})     ;;=> \"{:foo :bar}\"
+     (as-str {:foo :bar})  ;;=> \"{:foo :bar}\" "
+  ([] "")
+  ([x] (if (instance? clojure.lang.Named x)
+         (name x)
+         (str x)))
+  ([x & ys]
+     ((fn [#^StringBuilder sb more]
+        (if more
+          (recur (. sb  (append (as-str (first more)))) (next more))
+          (str sb)))
+      (new StringBuilder #^String (as-str x)) ys)))
 
 (defn get-system-property 
   "Get a system property."
