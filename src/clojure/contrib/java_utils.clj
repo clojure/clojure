@@ -90,14 +90,6 @@
      (reduce file (file parent child) more)))
 
 (defn as-str
-  "Returns the name or string representation of args, concatenated to
-  a single string.  Like clojure.core/str, but uses the names of
-  keywords and symbols instead of their literal representation."
-  [& args]
-  (apply str (map (fn [x] (if (instance? clojure.lang.Named x)
-                            (name x) x))
-                  args)))
-(defn as-str
   "Like clojure.core/str, but if an argument is a keyword or symbol,
   its name will be used instead of its literal representation.
 
