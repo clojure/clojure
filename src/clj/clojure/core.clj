@@ -1897,10 +1897,10 @@
                              (let [~k (.nth ~chunk- ~i-)]
                                ~subform-chunk
                                ~@(when needrec [recform-chunk]))
-                             (when ~seq-
+                             (when-let [~seq- (seq ~seq-)]
                                (if (chunked-seq? ~seq-)
                                  (let [c# (chunk-first ~seq-)]
-                                   (recur (seq (chunk-rest ~seq-)) c#
+                                   (recur (chunk-rest ~seq-) c#
                                           (int (count c#)) (int 0)))
                                  (let [~k (first ~seq-)]
                                    ~subform
