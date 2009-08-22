@@ -420,25 +420,56 @@
   [& body]
   (list 'new 'clojure.lang.LazySeq (list* '#^{:once true} fn* [] body)))    
 
+(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
+  (clojure.lang.ChunkBuffer. capacity))
+
+(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
+  (.add b x))
+
+(defn chunk [#^clojure.lang.ChunkBuffer b]
+  (.chunk b))
+
+(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
+  (.chunkedFirst s))
+
+(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
+  (.chunkedMore s))
+
+(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
+  (.chunkedNext s))
+
+(defn chunk-cons [chunk rest]
+  (if (clojure.lang.Numbers/isZero (clojure.lang.RT/count chunk))
+    rest
+    (clojure.lang.ChunkedCons. chunk rest)))
+  
+(defn chunked-seq? [s]
+  (instance? clojure.lang.IChunkedSeq s))
+
 (defn concat
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
   ([] (lazy-seq nil))
   ([x] (lazy-seq x))
   ([x y]
-     (lazy-seq
+    (lazy-seq
       (let [s (seq x)]
         (if s
-          (cons (first s) (concat (rest s) y))
+          (if (chunked-seq? s)
+            (chunk-cons (chunk-first s) (concat (chunk-rest s) y))
+            (cons (first s) (concat (rest s) y)))
           y))))
   ([x y & zs]
      (let [cat (fn cat [xys zs]
                  (lazy-seq
-                  (let [xys (seq xys)]
-                    (if xys
-                      (cons (first xys) (cat (rest xys) zs))
-                      (when zs
-                        (cat (first zs) (next zs)))))))]
-           (cat (concat x y) zs))))
+                   (let [xys (seq xys)]
+                     (if xys
+                       (if (chunked-seq? xys)
+                         (chunk-cons (chunk-first xys)
+                                     (cat (chunk-rest xys) zs))
+                         (cons (first xys) (cat (rest xys) zs)))
+                       (when zs
+                         (cat (first zs) (next zs)))))))]
+       (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 
@@ -570,32 +601,6 @@
   "Returns a number one greater than num."
   {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))}
   [x] (. clojure.lang.Numbers (inc x)))
-
-(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
-  (clojure.lang.ChunkBuffer. capacity))
-
-(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
-  (.add b x))
-
-(defn chunk [#^clojure.lang.ChunkBuffer b]
-  (.chunk b))
-
-(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
-  (.chunkedFirst s))
-
-(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
-  (.chunkedMore s))
-
-(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
-  (.chunkedNext s))
-
-(defn chunk-cons [chunk rest]
-  (if (zero? (count chunk))
-    rest
-    (clojure.lang.ChunkedCons. chunk rest)))
-  
-(defn chunked-seq? [s]
-  (instance? clojure.lang.IChunkedSeq s))
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
