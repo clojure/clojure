@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class LockingTransaction{
@@ -44,11 +45,13 @@ static class AbortException extends Exception{
 public static class Info{
 	final AtomicInteger status;
 	final long startPoint;
+	final CountDownLatch latch;
 
 
 	public Info(int status, long startPoint){
 		this.status = new AtomicInteger(status);
 		this.startPoint = startPoint;
+		this.latch = new CountDownLatch(1);
 	}
 
 	public boolean running(){
@@ -84,7 +87,7 @@ void stop(int status){
 		synchronized(info)
 			{
 			info.status.set(status);
-			info.notifyAll();
+			info.latch.countDown();
 			}
 		info = null;
 		vals.clear();
@@ -158,18 +161,13 @@ Object lock(Ref ref){
 private Object blockAndBail(Info refinfo){
 //stop prior to blocking
 	stop(RETRY);
-	synchronized(refinfo)
-					{
-					if(refinfo.running())
-						{
-						try
-							{
-							refinfo.wait(LOCK_WAIT_MSECS);
-							}
-						catch(InterruptedException e)
-				{
-				}
-			}
+	try
+		{
+		refinfo.latch.await(LOCK_WAIT_MSECS, TimeUnit.MILLISECONDS);
+		}
+	catch(InterruptedException e)
+		{
+		//ignore
 		}
 	throw retryex;
 }
@@ -197,12 +195,9 @@ private boolean barge(Info refinfo){
 	//  try to abort the other
 	if(bargeTimeElapsed() && startPoint < refinfo.startPoint)
 		{
-		synchronized(refinfo)
-			{
-			barged = refinfo.status.compareAndSet(RUNNING, KILLED);
-			if(barged)
-				refinfo.notifyAll();
-			}
+        barged = refinfo.status.compareAndSet(RUNNING, KILLED);
+        if(barged)
+            refinfo.latch.countDown();
 		}
 	return barged;
 }
