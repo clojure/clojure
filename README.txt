@@ -69,4 +69,3 @@ Chris Houser
 David Miller
 Stuart Sierra
 Frantisek Sodomka
-Jeffrey Straszheim

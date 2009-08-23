@@ -1,4 +1,4 @@
-# An overview of Datalog
+# An Overview of Datalog
 By Jeffrey Straszheim
 
 *What Datalog is, and what it can do for you.*
@@ -17,7 +17,7 @@ The implementation of Datalog that is provided (in this library) departs a bit f
 
 Clojure Datalog supports an in memory relational database format, implemented in clojure.contrib.datalog.database ([here](http://github.com/richhickey/clojure-contrib/blob/master/src/clojure/contrib/datalog/database.clj)).  It supports relations (tables) with named columns and simple hash based indexes.  At the present time it does not support any integrity constraints (perhaps later).
 
-Tables are build with `make-database`, like this:
+Tables are built with `make-database`, like this:
 
     (make-database
           (relation :employee [:id :name :position])
