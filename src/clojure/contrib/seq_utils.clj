@@ -211,3 +211,21 @@
                (cons (if (identical? x NIL) nil x)
                      (drain))))))))))
 
+(defmulti positions
+  "Returns a lazy sequence containing the positions at which item
+   is found in coll. Functions (responding true to fn?) are called
+   against members of the collection, other items are compared for
+   equality."
+  { :arglists '([item-or-pred coll]) }
+  (fn [item-or-pred _]
+    (if (fn? item-or-pred) :pred :item)))
+
+(defmethod positions :pred [pred coll]
+  (for [[idx elt] (indexed coll) :when (pred elt)] idx))
+
+(defmethod positions :item [item coll]
+  (for [[idx elt] (indexed coll) :when (= item elt)] idx))
+
+
+
+
