@@ -9,13 +9,7 @@
         (when more
           (list* `assert-args fnname more)))))
 
-(defn indexes
-  "Returns a lazy sequence of the indexes in coll for which the element
-is equal to v."
-  [coll v]
-  (map #(first %) (filter (fn [[i el]] (= el v)) (indexed coll))))
-
 (defn index-of
   "Returns the first index of value v in the collection or nil."
   [coll v]
-  (first (indexes coll v)))
+  (first (positions v coll)))
