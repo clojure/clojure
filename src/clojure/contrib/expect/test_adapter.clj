@@ -1,4 +1,4 @@
-;;; test_is_adapter.clj: test-is adapter for mocking/expectation framework for Clojure
+;;; test_adapter.clj: clojure.test adapter for mocking/expectation framework for Clojure
 
 ;; by Matt Clark
 
@@ -9,7 +9,7 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.expect.test-is-adapter
+(ns clojure.contrib.expect.test-adapter
  (:require [clojure.contrib.expect :as expect])
  (:use clojure.test
        clojure.contrib.ns-utils))

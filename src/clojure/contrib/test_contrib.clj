@@ -20,7 +20,7 @@
      [:complex-numbers :fnmap :macro-utils :monads :pprint.pretty
       :pprint.cl-format :str-utils :shell-out :test-graph
       :test-dataflow :test-java-utils :test-lazy-seqs
-      :test-trace :test-jmx :java-utils :expect-test])
+      :test-trace :test-jmx :java-utils :expect-test :expect-test.test-adapter-test])
 
 (def test-namespaces
      (map #(symbol (str "clojure.contrib.test-contrib." (name %)))
