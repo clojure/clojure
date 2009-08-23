@@ -63,7 +63,9 @@
   clojure.contrib.http.agent
   (:require [clojure.contrib.http.connection :as c]
             [clojure.contrib.duck-streams :as duck])
-  (:import (java.io ByteArrayOutputStream ByteArrayInputStream)))
+  (:import (java.io InputStream ByteArrayOutputStream
+                    ByteArrayInputStream)
+           (java.net HttpURLConnection)))
 
 
 ;;; PRIVATE
@@ -73,7 +75,7 @@
 (defn- setup-http-connection
   "Sets the instance method, redirect behavior, and request headers of
   the HttpURLConnection."
-  [conn options]
+  [#^HttpURLConnection conn options]
   (.setRequestMethod conn (:method options))
   (.setInstanceFollowRedirects conn (:follow-redirects options))
   (doseq [[name value] (:headers options)]
@@ -87,16 +89,16 @@
     (c/start-http-connection conn (:body options))
     (assoc state ::state ::started)))
 
-(defn- connection-success? [conn]
+(defn- connection-success? [#^HttpURLConnection conn]
   "Returns true if the HttpURLConnection response code is in the 2xx
   range."
   (= 2 (unchecked-divide (.getResponseCode conn) 100)))
 
 (defn- open-response
   "Agent action that opens the response body stream on the HTTP
-  request; this will block until the response stream is available."
+  request; this will block until the response stream is available." ;
   [state options]
-  (let [conn (::connection state)]
+  (let [#^HttpURLConnection conn (::connection state)]
     (assoc state
       ::response-stream (if (connection-success? conn)
                           (.getInputStream conn)
@@ -117,8 +119,9 @@
   "Agent action that closes the response body stream and disconnects
   the HttpURLConnection."
   [state options]
-  (.close (::response-stream state))
-  (.disconnect (::connection state))
+  (when (::response-stream state)
+    (.close #^InputStream (::response-stream state)))
+  (.disconnect #^HttpURLConnection (::connection state))
   (assoc state
     ::response-stream nil
     ::state ::disconnected))
@@ -127,10 +130,11 @@
   "Returns true if the response status of the HTTP agent begins with
   digit, an Integer."
   [digit http-agnt]
-  (= digit (unchecked-divide (.getResponseCode (::connection @http-agnt))
+  (= digit (unchecked-divide (.getResponseCode
+                              #^HttpURLConnection (::connection @http-agnt))
                              100)))
 
-(defn- get-byte-buffer [http-agnt]
+(defn- #^ByteArrayOutputStream get-byte-buffer [http-agnt]
   (let [buffer (result http-agnt)]
     (if (instance? ByteArrayOutputStream buffer)
       buffer
@@ -143,20 +147,20 @@
   retrieved with the 'stream', 'string', and 'bytes' functions."
   [http-agnt]
   (let [output (ByteArrayOutputStream.)]
-    (duck/copy (stream http-agnt) output)
+    (duck/copy (or (stream http-agnt) "") output)
     output))
 
 
 ;;; CONSTRUCTOR
 
 (def *http-agent-defaults*
-  {:method "GET"
-   :headers {}
-   :body nil
-   :connect-timeout 0
-   :read-timeout 0
-   :follow-redirects true
-   :handler buffer-bytes})
+     {:method "GET"
+      :headers {}
+      :body nil
+      :connect-timeout 0
+      :read-timeout 0
+      :follow-redirects true
+      :handler buffer-bytes})
 
 (defn http-agent
   "Creates (and immediately returns) an Agent representing an HTTP
@@ -240,7 +244,8 @@
   (let [a @http-agnt]
     (if (= (::state a) ::receiving)
       (::response-stream a)
-      (ByteArrayInputStream. (.toByteArray (result http-agnt))))))
+      (ByteArrayInputStream.
+       (.toByteArray (get-byte-buffer http-agnt))))))
 
 (defn bytes
   "Returns a Java byte array of the content returned by the server;
@@ -256,9 +261,10 @@
   headers, or clojure.contrib.duck-streams/*default-encoding* if it is
   not specified."
   ([http-agnt]
-     (string http-agnt (or (.getContentEncoding (::connection @http-agnt))
-                            duck/*default-encoding*)))
-  ([http-agnt encoding]
+     (string http-agnt (or (.getContentEncoding
+                            #^HttpURLConnection (::connection @http-agnt))
+                           duck/*default-encoding*)))
+  ([http-agnt #^String encoding]
      (.toString (get-byte-buffer http-agnt) encoding)))
 
 
@@ -302,14 +308,14 @@
   received."
   [http-agnt]
   (when (done? http-agnt)
-    (.getResponseCode (::connection @http-agnt))))
+    (.getResponseCode #^HttpURLConnection (::connection @http-agnt))))
 
 (defn message
   "Returns the HTTP response message (e.g. 'Not Found'), for this
   request, or nil if the response has not yet been received."
   [http-agnt]
   (when (done? http-agnt)
-    (.getResponseMessage (::connection http-agnt))))
+    (.getResponseMessage #^HttpURLConnection (::connection @http-agnt))))
 
 (defn headers
   "Returns a map of HTTP response headers.  Header names are converted
@@ -318,15 +324,16 @@
   [http-agnt]
   (reduce (fn [m [#^String k v]]
             (assoc m (when k (keyword (.toLowerCase k))) (last v)))
-          {} (.getHeaderFields (::connection @http-agnt))))
+          {} (.getHeaderFields
+              #^HttpURLConnection (::connection @http-agnt))))
 
 (defn headers-seq
   "Returns the HTTP response headers in order as a sequence of
   [String,String] pairs.  The first 'header' name may be null for the
   HTTP status line."
   [http-agnt]
-  (let [conn (::connection @http-agnt)
-        f (fn thisfn [i]
+  (let [#^HttpURLConnection conn (::connection @http-agnt)
+        f (fn thisfn [#^Integer i]
             ;; Get value first because first key may be nil.
             (when-let [value (.getHeaderField conn i)]
               (cons [(.getHeaderFieldKey conn i) value]

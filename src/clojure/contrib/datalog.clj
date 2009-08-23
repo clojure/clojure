@@ -19,8 +19,7 @@
 
 (ns 
   #^{:author "Jeffrey Straszheim",
-     :doc "A Clojure implementation of Datalog"
-     :see-also ["DatalogOverview"]} 
+     :doc "A Clojure implementation of Datalog"} 
   clojure.contrib.datalog
   (:use clojure.contrib.datalog.rules
         clojure.contrib.datalog.softstrat

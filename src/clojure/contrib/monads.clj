@@ -1,7 +1,7 @@
 ;; Monads in Clojure
 
 ;; by Konrad Hinsen
-;; last updated June 23, 2009
+;; last updated June 30, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -335,7 +335,7 @@
 ; State monad
 (defmonad state-m
    "Monad describing stateful computations. The monadic values have the
-    structure (fn [old-state] (list result new-state))."
+    structure (fn [old-state] [result new-state])."
    [m-result  (fn m-result-state [v]
 	        (fn [s] [v s]))
     m-bind    (fn m-bind-state [mv f]
