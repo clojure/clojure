@@ -13,7 +13,6 @@ package clojure.lang;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
 /*
@@ -193,8 +192,9 @@ static final class TransientHashMap extends ATransientMap {
 	int count;
 	boolean hasNull;
 	Object nullValue;
-	
-	
+	final Box leafFlag = new Box(null);
+
+
 	TransientHashMap(PersistentHashMap m) {
 		this(new AtomicReference<Thread>(Thread.currentThread()), m.root, m.count, m.hasNull, m.nullValue);
 	}
@@ -217,12 +217,13 @@ static final class TransientHashMap extends ATransientMap {
 			}
 			return this;
 		}
-		Box addedLeaf = new Box(null);
+//		Box leafFlag = new Box(null);
+		leafFlag.val = null;
 		INode n = (root == null ? BitmapIndexedNode.EMPTY : root)
-			.assoc(edit, 0, Util.hash(key), key, val, addedLeaf);
+			.assoc(edit, 0, Util.hash(key), key, val, leafFlag);
 		if (n != this.root)
 			this.root = n; 
-		if(addedLeaf.val != null) this.count++;
+		if(leafFlag.val != null) this.count++;
 		return this;
 	}
 
@@ -235,11 +236,12 @@ static final class TransientHashMap extends ATransientMap {
 			return this;
 		}
 		if (root == null) return this;
-		Box removedLeaf = new Box(null);
-		INode n = root.without(edit, 0, Util.hash(key), key, removedLeaf);
+//		Box leafFlag = new Box(null);
+		leafFlag.val = null;
+		INode n = root.without(edit, 0, Util.hash(key), key, leafFlag);
 		if (n != root)
 			this.root = n;
-		if(removedLeaf.val != null) this.count--;
+		if(leafFlag.val != null) this.count--;
 		return this;
 	}
 
@@ -654,7 +656,7 @@ final static class BitmapIndexedNode implements INode{
 					}
 				return new ArrayNode(edit, n + 1, nodes);
 			} else {
-				Object[] newArray = new Object[2*(n+2)];
+				Object[] newArray = new Object[2*(n+4)];
 				System.arraycopy(array, 0, newArray, 0, 2*idx);
 				newArray[2*idx] = key;
 				addedLeaf.val = newArray[2*idx+1] = val;
