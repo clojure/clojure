@@ -770,7 +770,7 @@ final static class HashCollisionNode implements INode{
 	private HashCollisionNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
 			return this;
-		return new HashCollisionNode(edit, count, hash, array);
+		return new HashCollisionNode(edit, hash, count, array);
 	}
 
 	private HashCollisionNode ensureEditable(AtomicReference<Thread> edit, int count, Object[] array){
@@ -778,7 +778,7 @@ final static class HashCollisionNode implements INode{
 			this.array = array;
 			return this;
 		}
-		return new HashCollisionNode(edit, count, hash, array);
+		return new HashCollisionNode(edit, hash, count, array);
 	}
 
 	private HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
