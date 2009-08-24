@@ -121,3 +121,8 @@
          '([0 1 1] [1 0 1] [1 2 3] [2 1 3])))
   (is (= (for [x (range 6) :let [y (rem x 2)] :when (even? y) z [8 9]] [x z])
          '([0 8] [0 9] [2 8] [2 9] [4 8] [4 9]))))
+
+; :while must skip all subsequent chunks as well as the remainder of
+; the current chunk:
+(deftest-both Chunked-While
+  (is (= (for [x (range 100) :while (even? x)] x) '(0))))
