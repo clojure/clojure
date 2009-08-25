@@ -58,7 +58,9 @@
                 :handler (fn [agnt] 
                            (with-open [w (d/writer \"/tmp/out\")] 
                              (d/copy (stream agnt) w))))
-"}
+"
+       :author "Stuart Sierra"
+       }
 
   clojure.contrib.http.agent
   (:require [clojure.contrib.http.connection :as c]
