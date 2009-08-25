@@ -8,11 +8,17 @@ useful to a large part of the clojure community.
 Clojure-contrib is open source under the Eclipse Public License and is 
 copyrighted by Rich Hickey and the various contributors.
 
-The official repository for clojure-contrib is 
+The official source repository for clojure-contrib is 
 http://github.com/richhickey/clojure-contrib.
+
+Issues are maintained in the Assembla space at http://www.assembla.com/spaces/dashboard/index/clojure-contrib
 
 For the latest documentation of the capabilities and APIs available 
 in clojure-contrib, please see http://richhickey.github.com/clojure-contrib/
+
+General discussion occurs in the Clojure Google group (http://groups.google.com/group/clojure)
+and developer discussions are in the Clojure Dev Google group 
+(http://groups.google.com/group/clojure-dev).
 
 
 Building Clojure-contrib
