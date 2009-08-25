@@ -16,9 +16,9 @@ Issues are maintained in the Assembla space at http://www.assembla.com/spaces/da
 For the latest documentation of the capabilities and APIs available 
 in clojure-contrib, please see http://richhickey.github.com/clojure-contrib/
 
-General discussion occurs in the Clojure Google group (http://groups.google.com/group/clojure)
+General discussion occurs in the Clojure Google group (http://groups.google.com/group/clojure )
 and developer discussions are in the Clojure Dev Google group 
-(http://groups.google.com/group/clojure-dev).
+(http://groups.google.com/group/clojure-dev ).
 
 
 Building Clojure-contrib
@@ -37,7 +37,7 @@ ant -Dclojure.jar=<path>
 This will produce a clojure-contrib.jar file that you can add to your classpath.
 
 The nightly-build and stable-build targets are intended for use on the
-Tapestry360 continuous integration server (http://tapestry.formos.com/bamboo).
+Tapestry360 continuous integration server (http://tapestry.formos.com/bamboo ).
 They require the presense of the Maven Ant Tasks in the Ant lib folder.
 
 
@@ -48,7 +48,7 @@ There are currently two versions of clojure-contrib, stored in separate
 branches on github.
 
 The master branch represents the latest and greatest contrib code and
-is tied to the master branch of clojure (http://github.com/richhickey/clojure).
+is tied to the master branch of clojure (http://github.com/richhickey/clojure ).
 If you're using this branch, you'll want to be sure to keep your clojure
 and clojure-contrib code in sync, though breaking changes between them
 are pretty rare in practice.
