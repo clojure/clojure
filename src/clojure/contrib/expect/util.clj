@@ -12,4 +12,4 @@
 (defn index-of
   "Returns the first index of value v in the collection or nil."
   [coll v]
-  (first (positions v coll)))
+  (first (positions #{v} coll)))
