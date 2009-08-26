@@ -14,7 +14,7 @@
 
 (defmacro assert-called [fn-name called? & body]
   `(let [called-status?# (atom false)]
-     (binding [~fn-name (fn [& args#] (swap! called-status?# (fn [& args#] true)))] ~@body)
+     (binding [~fn-name (fn [& args#] (reset! called-status?# true))] ~@body)
      (is (= ~called? @called-status?#))))
 
 (deftest test-convenience
