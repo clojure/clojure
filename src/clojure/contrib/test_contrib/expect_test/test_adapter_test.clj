@@ -1,6 +1,6 @@
 (ns clojure.contrib.test-contrib.expect-test.test-adapter-test
  (:use clojure.contrib.expect.test-adapter
-   [clojure.contrib.test-contrib.expect-test.util :only (assert-called)]
+   [clojure.contrib.test-contrib.expect-test :only (assert-called)]
    clojure.test))
 
 (deftest test-report-problem-called

@@ -1,6 +1,5 @@
 (ns clojure.contrib.test-contrib.expect-test
- (:use clojure.test
-   clojure.contrib.test-contrib.expect-test.util)
+ (:use clojure.test)
  (:require [clojure.contrib.expect :as expect]))
 
 ; Used as dummy dependency functions
@@ -13,6 +12,10 @@
 ;functions created using fn directly lack the argslist meta data
 (def deffed-differently (fn [x] :ignore))
 
+(defmacro assert-called [fn-name called? & body]
+  `(let [called-status?# (atom false)]
+     (binding [~fn-name (fn [& args#] (swap! called-status?# (fn [& args#] true)))] ~@body)
+     (is (= ~called? @called-status?#))))
 
 (deftest test-convenience
   (testing "once"
