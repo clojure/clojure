@@ -51,7 +51,8 @@
   ) ;; end comment
 
 (ns clojure.contrib.expect
-  (:use clojure.contrib.expect.util))
+  (:use [clojure.contrib.seq-utils :only (positions)]
+        [clojure.contrib.def :only (defmacro-)]))
 
 
 ;;------------------------------------------------------------------------------
@@ -85,9 +86,11 @@
   "Given the sequence of accepted argument vectors for a function,
 returns true if at least one matches the given-count value."
   [arg-lists given-count]
-  (some #(if-let [ind (index-of % '&)]
-           (>= given-count ind)
-           (= (count %) given-count)) arg-lists))
+  (some #(let [[ind] (positions #{'&} %)]
+           (if ind
+             (>= given-count ind)
+             (= (count %) given-count)))
+        arg-lists))
 
 
 (defn has-matching-signature?
@@ -125,6 +128,15 @@ name of the associated dependency and the invocation count as arguments."
     (fn [fn-name v] (if (pred-fn v) true
                       (incorrect-invocation-count fn-name pred-form v)))))
 
+; Borrowed from clojure core. Remove if this ever becomes public there.
+(defmacro- assert-args
+  [fnname & pairs]
+  `(do (when-not ~(first pairs)
+         (throw (IllegalArgumentException.
+                  ~(str fnname " requires " (second pairs)))))
+     ~(let [more (nnext pairs)]
+        (when more
+          (list* `assert-args fnname more)))))
 
 (defn make-mock
   "creates a vector containing the following information for the named function:
