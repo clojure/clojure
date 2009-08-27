@@ -122,8 +122,8 @@
       <arg value="clojure.contrib.duck-streams"/>
       <arg value="clojure.contrib.error-kit"/>
       <arg value="clojure.contrib.except"/>
-      <arg value="clojure.contrib.expect"/>
-      <arg value="clojure.contrib.expect.test-adapter"/>
+      <arg value="clojure.contrib.mock"/>
+      <arg value="clojure.contrib.mock.test-adapter"/>
       <arg value="clojure.contrib.fcase"/>
       <arg value="clojure.contrib.find-namespaces"/>
       <arg value="clojure.contrib.fnmap"/>

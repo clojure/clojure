@@ -9,17 +9,17 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.expect.test-adapter
- (:require [clojure.contrib.expect :as expect])
+(ns clojure.contrib.mock.test-adapter
+ (:require [clojure.contrib.mock :as mock])
  (:use clojure.test
        clojure.contrib.ns-utils))
 
-(immigrate 'clojure.contrib.expect)
+(immigrate 'clojure.contrib.mock)
 
 (defn report-problem
  "This function is designed to be used in a binding macro to override
-the report-problem function in the test-expect namespace. Instead of printing
-the error to the console, the error is logged via test-is."
+the report-problem function in clojure.contrib.mock. Instead of printing
+the error to the console, the error is logged via clojure.test."
  [fn-name expected actual msg]
  (report {:type :fail,
           :message (str msg " Function name: " fn-name),
@@ -28,10 +28,10 @@ the error to the console, the error is logged via test-is."
 
 
 (defmacro expect [& body]
-  "Use this macro instead of the standard test-expect expect macro to have
-failures reported through test-is."
-  `(binding [expect/report-problem report-problem]
-     (expect/expect ~@body)))
+  "Use this macro instead of the standard c.c.mock expect macro to have
+failures reported through clojure.test."
+  `(binding [mock/report-problem report-problem]
+     (mock/expect ~@body)))
 
 
 

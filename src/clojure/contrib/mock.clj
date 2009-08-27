@@ -1,4 +1,4 @@
-;;; clojure.contrib.expect.clj: mocking/expectation framework for Clojure
+;;; clojure.contrib.mock.clj: mocking/expectation framework for Clojure
 
 ;; by Matt Clark
 
@@ -50,7 +50,9 @@
   
   ) ;; end comment
 
-(ns clojure.contrib.expect
+(ns clojure.contrib.mock
+  #^{:author "Matt Clark",
+     :doc "function mocking/expectations for Clojure" }
   (:use [clojure.contrib.seq-utils :only (positions)]
         [clojure.contrib.def :only (defmacro-)]))
 
@@ -269,8 +271,8 @@ Usage:
     "an even number of forms in expectation bindings")
   (let [mock-data (gensym "mock-data_")]
     `(let [~mock-data (map (fn [args#]
-                             (apply clojure.contrib.expect/make-mock args#))
+                             (apply clojure.contrib.mock/make-mock args#))
                         ~(cons 'list (map (fn [[n m]] (vector (list 'quote n) m))
                                        (partition 2 expect-bindings))))]
        (binding ~(make-bindings expect-bindings mock-data) ~@body)
-       (clojure.contrib.expect/validate-counts ~mock-data) true)))
+       (clojure.contrib.mock/validate-counts ~mock-data) true)))
