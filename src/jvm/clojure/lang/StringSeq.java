@@ -47,4 +47,8 @@ public ISeq next(){
 public int index(){
 	return i;
 }
+
+public int count(){
+	return s.length() - i;
+}
 }
