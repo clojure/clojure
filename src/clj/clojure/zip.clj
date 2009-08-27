@@ -96,13 +96,14 @@
   "Returns the loc of the leftmost child of the node at this loc, or
   nil if no children"
   [loc]
-    (let [[node path] loc
-          [c & cnext :as cs] (children loc)]
-      (when cs
-        (with-meta [c {:l [] 
-                       :pnodes (if path (conj (:pnodes path) node) [node]) 
-                       :ppath path 
-                       :r cnext}] ^loc))))
+    (when (branch? loc)
+      (let [[node path] loc
+            [c & cnext :as cs] (children loc)]
+        (when cs
+          (with-meta [c {:l [] 
+                         :pnodes (if path (conj (:pnodes path) node) [node]) 
+                         :ppath path 
+                         :r cnext}] ^loc)))))
 
 (defn up
   "Returns the loc of the parent of the node at this loc, or nil if at
