@@ -87,7 +87,7 @@
                   (cons (int c) (thisfn s (inc i)))))))]
     (lazy-seq (f s 0))))
 
-(defn escape
+(defn #^String escape
   "Returns a new String by applying cmap (a function or a map) to each
    character in s.  If cmap returns nil, the original character is
    added to the output unchanged."
@@ -104,7 +104,7 @@
   [#^String s]
   (every? (fn [#^Character c] (Character/isWhitespace c)) s))
 
-(defn take
+(defn #^String take
   "Take first n characters from s, up to the length of s.
 
   Note the argument order is the opposite of clojure.core/take; this
@@ -114,17 +114,18 @@
     s
     (.substring s 0 n)))
 
-(defn drop [#^String s n]
+(defn #^String drop
   "Drops first n characters from s.  Returns an empty string if n is
   greater than the length of s.
 
   Note the argument order is the opposite of clojure.core/drop; this
   is to keep the string as the first argument for use with ->"
+  [#^String s n]
   (if (< (count s) n)
     ""
     (.substring s n)))
 
-(defn butlast
+(defn #^String butlast
   "Returns s without the last n characters.  Returns an empty string
   if n is greater than the length of s.
 
@@ -135,19 +136,19 @@
     ""
     (.substring s 0 (- (count s) n))))
 
-(defn tail
+(defn #^String tail
   "Returns the last n characters of s."
   [#^String s n]
   (if (< (count s) n)
     s
     (.substring s (- (count s) n))))
 
-(defn repeat
+(defn #^String repeat
   "Returns a new String containing s repeated n times."
   [#^String s n]
   (apply str (clojure.core/repeat n s)))
 
-(defn reverse
+(defn #^String reverse
   "Returns s with its characters reversed."
   [#^String s]
   (.toString (.reverse (StringBuilder. s))))
@@ -163,7 +164,8 @@
    4. regex Pattern and function
       (Calls function with re-groups of each match, uses return 
        value as replacement.)"
-     :arglists '([string pattern replacement])}
+     :arglists '([string pattern replacement])
+     :tag String}
   replace
   (fn [#^String string pattern replacement]
     [(class pattern) (class replacement)]))
@@ -196,7 +198,8 @@
       (Uses java.util.regex.Matcher.replaceAll)
    3. regex Pattern and function
 "
-     :arglists '([s pattern replacement])}
+     :arglists '([s pattern replacement])
+     :tag String}
   replace-first
   (fn [s pattern replacement]
     [(class pattern) (class replacement)]))
@@ -237,13 +240,13 @@
             (list (.subSequence s prevend (.length s)))))))
      0)))
 
-(defn join
+(defn #^String join
   "Returns a string of all elements in coll, separated by
   separator.  Like Perl's join."
   [#^String separator coll]
   (apply str (interpose separator coll)))
 
-(defn chop
+(defn #^String chop
   "Removes the last character of string, does nothing on a zero-length
   string."
   [#^String s]
@@ -252,7 +255,7 @@
       s
       (subs s 0 (dec (count s))))))
 
-(defn chomp
+(defn #^String chomp
   "Removes all trailing newline \\n or return \\r characters from
   string.  Note: String.trim() is similar and faster."
   [#^String s]
@@ -261,7 +264,7 @@
 (defn title-case [#^String s]
   (throw (Exception. "title-case not implemeted yet")))
 
-(defn swap-case
+(defn #^String swap-case
   "Changes upper case characters to lower case and vice-versa.
   Handles Unicode supplementary characters correctly.  Uses the
   locale-sensitive String.toUpperCase() and String.toLowerCase()
@@ -279,7 +282,7 @@
         (.append buffer (.toLowerCase (String. array 0 1)))))
     (.toString buffer)))
 
-(defn capitalize
+(defn #^String capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
   [#^String s]
@@ -288,12 +291,12 @@
     (str (.toUpperCase #^String (subs s 0 1))
          (.toLowerCase #^String (subs s 1)))))
 
-(defn ltrim
+(defn #^String ltrim
   "Removes whitespace from the left side of string."
   [#^String s]
   (replace s #"^\s+" ""))
 
-(defn rtrim
+(defn #^String rtrim
   "Removes whitespace from the right side of string."
   [#^String s]
   (replace s #"\s+$" ""))
@@ -304,7 +307,7 @@
   (seq (.split #"\r?\n" s)))
 
 ;; borrowed from compojure.str-utils, by James Reeves, EPL 1.0
-(defn map-str
+(defn #^String map-str
   "Apply f to each element of coll, concatenate all results into a
   String."
   [f coll]
@@ -337,12 +340,12 @@
 ;; functions.  They are included here for completeness, and for use
 ;; when mapping over a collection of strings.
 
-(defn upper-case
+(defn #^String upper-case
   "Converts string to all upper-case."
   [#^String s]
   (.toUpperCase s))
 
-(defn lower-case
+(defn #^String lower-case
   "Converts string to all lower-case."
   [#^String s]
   (.toLowerCase s))
@@ -353,17 +356,17 @@
   ([#^String s #^Pattern re] (seq (.split re s)))
   ([#^String s #^Pattern re limit] (seq (.split re s limit))))
 
-(defn trim
+(defn #^String trim
   "Removes whitespace from both ends of string."
   [#^String s]
   (.trim s))
 
-(defn contains?
+(defn #^String contains?
   "True if s contains the substring."
   [#^String s substring]
   (.contains s substring))
 
-(defn get
+(defn #^String get
   "Gets the i'th character in string."
   [#^String s i]
   (.charAt s i))
