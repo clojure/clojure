@@ -1546,6 +1546,43 @@
             (recur ((first fs) ret) (next fs))
             ret))))))
 
+(defn juxt 
+  "Alpha - name subject to change.
+  Takes a set of functions and returns a fn that is the juxtaposition
+  of those fns.  The returned fn takes a variable number of args, and
+  returns a vector containing the result of applying each fn to the
+  args (left-to-right).
+  ((juxt a b c) x) => [(a x) (b x) (c x)]"
+  ([f] 
+     (fn
+       ([] [(f)])
+       ([x] [(f x)])
+       ([x y] [(f x y)])
+       ([x y z] [(f x y z)])
+       ([x y z & args] [(apply f x y z args)])))
+  ([f g] 
+     (fn
+       ([] [(f) (g)])
+       ([x] [(f x) (g x)])
+       ([x y] [(f x y) (g x y)])
+       ([x y z] [(f x y z) (g x y z)])
+       ([x y z & args] [(apply f x y z args) (apply g x y z args)])))
+  ([f g h] 
+     (fn
+       ([] [(f) (g) (h)])
+       ([x] [(f x) (g x) (h x)])
+       ([x y] [(f x y) (g x y) (h x y)])
+       ([x y z] [(f x y z) (g x y z) (g x y z)])
+       ([x y z & args] [(apply f x y z args) (apply g x y z args) (apply h x y z args)])))
+  ([f g h & fs]
+     (let [fs (list* f g h fs)]
+       (fn
+         ([] (reduce #(conj %1 (%2)) [] fs))
+         ([x] (reduce #(conj %1 (%2 x)) [] fs))
+         ([x y] (reduce #(conj %1 (%2 x y)) [] fs))
+         ([x y z] (reduce #(conj %1 (%2 x y z)) [] fs))
+         ([x y z & args] (reduce #(conj %1 (apply %2 x y z args)) [] fs))))))
+
 (defn partial
   "Takes a function f and fewer than the normal arguments to f, and
   returns a fn that takes a variable number of additional args. When
