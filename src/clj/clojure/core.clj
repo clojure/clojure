@@ -1572,7 +1572,7 @@
        ([] [(f) (g) (h)])
        ([x] [(f x) (g x) (h x)])
        ([x y] [(f x y) (g x y) (h x y)])
-       ([x y z] [(f x y z) (g x y z) (g x y z)])
+       ([x y z] [(f x y z) (g x y z) (h x y z)])
        ([x y z & args] [(apply f x y z args) (apply g x y z args) (apply h x y z args)])))
   ([f g h & fs]
      (let [fs (list* f g h fs)]
