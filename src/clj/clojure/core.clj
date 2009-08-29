@@ -396,8 +396,9 @@
    :else (cons (first arglist) (spread (next arglist)))))
 
 (defn list*
-  "Creates a new list containing the items prepended to the rest, the last of which will be treated as a sequence."
-  ([args] args)
+  "Creates a new list containing the items prepended to the rest, the
+  last of which will be treated as a sequence."
+  ([args] (seq args))
   ([a args] (cons a args))
   ([a b args] (cons a (cons b args)))
   ([a b c args] (cons a (cons b (cons c args))))
@@ -407,8 +408,16 @@
 (defn apply
   "Applies fn f to the argument list formed by prepending args to argseq."
   {:arglists '([f args* argseq])}
-  [#^clojure.lang.IFn f & args]
-    (. f (applyTo (spread args))))
+  ([#^clojure.lang.IFn f args]
+     (. f (applyTo (seq args))))
+  ([#^clojure.lang.IFn f x args]
+     (. f (applyTo (list* x args))))
+  ([#^clojure.lang.IFn f x y args]
+     (. f (applyTo (list* x y args))))
+  ([#^clojure.lang.IFn f x y z args]
+     (. f (applyTo (list* x y z args))))
+  ([#^clojure.lang.IFn f a b c d & args]
+     (. f (applyTo (cons a (cons b (cons c (cons d (spread args)))))))))
 
 (defn vary-meta
  "Returns an object of the same type and value as obj, with
