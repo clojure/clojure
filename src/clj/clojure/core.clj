@@ -395,6 +395,15 @@
    (nil? (next arglist)) (seq (first arglist))
    :else (cons (first arglist) (spread (next arglist)))))
 
+(defn list*
+  "Creates a new list containing the items prepended to the rest, the last of which will be treated as a sequence."
+  ([args] args)
+  ([a args] (cons a args))
+  ([a b args] (cons a (cons b args)))
+  ([a b c args] (cons a (cons b (cons c args))))
+  ([a b c d & more]
+     (cons a (cons b (cons c (cons d (spread more)))))))
+
 (defn apply
   "Applies fn f to the argument list formed by prepending args to argseq."
   {:arglists '([f args* argseq])}
@@ -407,10 +416,7 @@
  [obj f & args]
   (with-meta obj (apply f (meta obj) args)))
 
-(defn list*
-  "Creates a new list containing the item prepended to more."
-  [item & more]
-    (spread (cons item more)))
+
 
 (defmacro lazy-seq
   "Takes a body of expressions that returns an ISeq or nil, and yields
