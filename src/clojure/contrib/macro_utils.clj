@@ -1,7 +1,7 @@
 ;; Macrolet and symbol-macrolet
 
 ;; by Konrad Hinsen
-;; last updated August 19, 2009
+;; last updated August 31, 2009
 
 ;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -122,8 +122,8 @@
 	exprs    (rest (rest form))
 	expanded (expand-bindings bindings exprs)
 	bindings (vec (apply concat (butlast expanded)))
-	exprs    (first (last expanded))]
-    (list f bindings exprs)))
+	exprs    (last expanded)]
+    (cons f (cons bindings exprs))))
 
 (defn- expand-fn-body
   [[args & exprs]]
