@@ -57,7 +57,7 @@ static final Symbol IMPORT = Symbol.create("clojure.core", "import*");
 //static final Symbol INSTANCE = Symbol.create("instance?");
 
 //static final Symbol THISFN = Symbol.create("thisfn");
-//static final Symbol CLASS = Symbol.create("class");
+static final Symbol CLASS = Symbol.create("Class");
 static final Symbol NEW = Symbol.create("new");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
@@ -4483,7 +4483,7 @@ public static Object macroexpand1(Object x) throws Exception{
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
-						target = RT.list(IDENTITY, target);
+						target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY,CLASS));
 						}
 					return RT.listStar(DOT, target, meth, form.next().next());
 					}
