@@ -177,6 +177,9 @@ static final public Var METHOD = Var.create(null);
 //null or not
 static final public Var IN_CATCH_FINALLY = Var.create(null);
 
+//DynamicClassLoader
+static final public Var LOADER = Var.create();
+
 //String
 static final public Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                             Symbol.create("*source-path*"), "NO_SOURCE_FILE");
@@ -205,8 +208,6 @@ static final public Var NEXT_LOCAL_NUM = Var.create(0);
 //Integer
 static final public Var RET_LOCAL_NUM = Var.create();
 
-//DynamicClassLoader
-static final public Var LOADER = Var.create();
 
 public enum C{
 	STATEMENT,  //value ignored
