@@ -542,10 +542,11 @@
 
 
 (defn compare
-  "Comparator. Returns 0 if x equals y, -1 if x is logically 'less
-  than' y, else 1. Same as Java x.compareTo(y) except it also works
-  for nil, and compares numbers and collections in a type-independent
-  manner. x must implement Comparable"
+  "Comparator. Returns a negative number, zero, or a positive number
+  when x is logically 'less than', 'equal to', or 'greater than'
+  y. Same as Java x.compareTo(y) except it also works for nil, and
+  compares numbers and collections in a type-independent manner. x
+  must implement Comparable"
   {:tag Integer
    :inline (fn [x y] `(. clojure.lang.Util compare ~x ~y))}
   [x y] (. clojure.lang.Util (compare x y)))
