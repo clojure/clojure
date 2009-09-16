@@ -490,7 +490,7 @@ final static class BitmapIndexedNode implements INode{
 					return this;
 				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx+1, val));
 			} 
-			addedLeaf.val = val;
+			addedLeaf.val = addedLeaf;
 			return new BitmapIndexedNode(null, bitmap, 
 					cloneAndSet(array, 
 							2*idx, null, 
@@ -515,7 +515,8 @@ final static class BitmapIndexedNode implements INode{
 				Object[] newArray = new Object[2*(n+1)];
 				System.arraycopy(array, 0, newArray, 0, 2*idx);
 				newArray[2*idx] = key;
-				addedLeaf.val = newArray[2*idx+1] = val;
+				addedLeaf.val = addedLeaf; 
+				newArray[2*idx+1] = val;
 				System.arraycopy(array, 2*idx, newArray, 2*(idx+1), 2*(n-idx));
 				return new BitmapIndexedNode(null, bitmap | bit, newArray);
 			}
@@ -627,13 +628,13 @@ final static class BitmapIndexedNode implements INode{
 					return this;
 				return editAndSet(edit, 2*idx+1, val);
 			} 
-			addedLeaf.val = val;
+			addedLeaf.val = addedLeaf;
 			return editAndSet(edit, 2*idx, null, 2*idx+1, 
 					createNode(edit, shift + 5, keyOrNull, valOrNode, hash, key, val)); 
 		} else {
 			int n = Integer.bitCount(bitmap);
 			if(n*2 < array.length) {
-				addedLeaf.val = val;
+				addedLeaf.val = addedLeaf;
 				BitmapIndexedNode editable = ensureEditable(edit);
 				System.arraycopy(editable.array, 2*idx, editable.array, 2*(idx+1), 2*(n-idx));
 				editable.array[2*idx] = key;
@@ -659,7 +660,8 @@ final static class BitmapIndexedNode implements INode{
 				Object[] newArray = new Object[2*(n+4)];
 				System.arraycopy(array, 0, newArray, 0, 2*idx);
 				newArray[2*idx] = key;
-				addedLeaf.val = newArray[2*idx+1] = val;
+				addedLeaf.val = addedLeaf; 
+				newArray[2*idx+1] = val;
 				System.arraycopy(array, 2*idx, newArray, 2*(idx+1), 2*(n-idx));
 				BitmapIndexedNode editable = ensureEditable(edit);
 				editable.array = newArray;
@@ -684,11 +686,11 @@ final static class BitmapIndexedNode implements INode{
 				return editAndSet(edit, 2*idx+1, n); 
 			if (bitmap == bit) 
 				return null;
-			removedLeaf.val = valOrNode;
+			removedLeaf.val = removedLeaf;
 			return editAndRemovePair(edit, bit, idx); 
 		}
 		if(Util.equals(key, keyOrNull)) {
-			removedLeaf.val = key; // key can't be null
+			removedLeaf.val = removedLeaf;
 			// TODO: collapse
 			return editAndRemovePair(edit, bit, idx); 			
 		}
