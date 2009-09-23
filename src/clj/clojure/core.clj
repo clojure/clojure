@@ -1070,6 +1070,16 @@
               (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
+(defmacro ->>
+  "Threads the expr through the forms. Inserts x as the
+  last item in the first form, making a list of it if it is not a
+  list already. If there are more forms, inserts the first form as the
+  last item in second form, etc."
+  ([x form] (if (seq? form)
+              `(~(first form) ~@(next form)  ~x)
+              (list form x)))
+  ([x form & more] `(->> (->> ~x ~form) ~@more)))
+
 ;;multimethods
 (def global-hierarchy)
 
@@ -4516,3 +4526,4 @@
         (if items
           (recur (conj ret (first items)) (next items))
           ret)))))
+
