@@ -24,8 +24,10 @@
       :seq-utils-test])
 
 (def test-namespaces
-     (map #(symbol (str "clojure.contrib.test-contrib." (name %)))
-          test-names))
+		(concat
+			['clojure.contrib.math.tests 'clojure.contrib.core.tests]
+		(map #(symbol (str "clojure.contrib.test-contrib." (name %)))
+		test-names)))
 
 (defn run
   "Runs all defined tests"

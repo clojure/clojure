@@ -480,7 +480,6 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.command-line
      'clojure.contrib.complex-numbers
      'clojure.contrib.cond
-     'clojure.contrib.condt
      'clojure.contrib.def
      'clojure.contrib.duck-streams
      'clojure.contrib.enum

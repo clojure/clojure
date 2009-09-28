@@ -18,7 +18,7 @@
 ;; go blind.
 
 
-(ns apply-macro)
+(ns clojure.contrib.apply-macro)
 
 ;; Copied from clojure.core/spread, which is private.
 (defn- spread
