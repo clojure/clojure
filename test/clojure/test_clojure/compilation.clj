@@ -36,4 +36,15 @@
         (:macro m) true
         (:name m) 'when )))
 
+(deftest test-embedded-constants
+  (testing "Embedded constants"
+    (are [x] x
+      (eval `(make-array ~Boolean/TYPE 2))
+      (eval `(make-array ~Byte/TYPE 2))
+      (eval `(make-array ~Character/TYPE 2))
+      (eval `(make-array ~Double/TYPE 2))
+      (eval `(make-array ~Float/TYPE 2))
+      (eval `(make-array ~Integer/TYPE 2))
+      (eval `(make-array ~Long/TYPE 2))
+      (eval `(make-array ~Short/TYPE 2)))))
 
