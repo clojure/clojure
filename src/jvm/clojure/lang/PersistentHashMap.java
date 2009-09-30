@@ -724,6 +724,7 @@ final static class HashCollisionNode implements INode{
 			System.arraycopy(array, 0, newArray, 0, array.length);
 			newArray[array.length] = key;
 			newArray[array.length + 1] = val;
+			addedLeaf.val = addedLeaf;
 			return new HashCollisionNode(edit, hash, count + 1, newArray);
 		}
 		// nest it in a bitmap node
@@ -780,6 +781,7 @@ final static class HashCollisionNode implements INode{
 	private HashCollisionNode ensureEditable(AtomicReference<Thread> edit, int count, Object[] array){
 		if(this.edit == edit) {
 			this.array = array;
+			this.count = count;
 			return this;
 		}
 		return new HashCollisionNode(edit, hash, count, array);
@@ -808,6 +810,7 @@ final static class HashCollisionNode implements INode{
 				return editAndSet(edit, idx+1, val); 
 			}
 			if (array.length > 2*count) {
+				addedLeaf.val = addedLeaf;
 				HashCollisionNode editable = editAndSet(edit, 2*count, key, 2*count+1, val);
 				editable.count++;
 				return editable;
@@ -816,6 +819,7 @@ final static class HashCollisionNode implements INode{
 			System.arraycopy(array, 0, newArray, 0, array.length);
 			newArray[array.length] = key;
 			newArray[array.length + 1] = val;
+			addedLeaf.val = addedLeaf;
 			return ensureEditable(edit, count + 1, newArray);
 		}
 		// nest it in a bitmap node
