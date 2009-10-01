@@ -38,6 +38,12 @@
 
 (deftest test-embedded-constants
   (testing "Embedded constants"
-    (are [t] (eval `(= t ~t/TYPE)))
-         Boolean Byte Character Double Float Integer Long Short))
+    (is (eval `(= Boolean/TYPE ~Boolean/TYPE)))
+    (is (eval `(= Byte/TYPE ~Byte/TYPE)))
+    (is (eval `(= Character/TYPE ~Character/TYPE)))
+    (is (eval `(= Double/TYPE ~Double/TYPE)))
+    (is (eval `(= Float/TYPE ~Float/TYPE)))
+    (is (eval `(= Integer/TYPE ~Integer/TYPE)))
+    (is (eval `(= Long/TYPE ~Long/TYPE)))
+    (is (eval `(= Short/TYPE ~Short/TYPE)))))
  
