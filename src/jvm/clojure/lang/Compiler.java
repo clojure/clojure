@@ -352,7 +352,7 @@ static class DefExpr implements Expr{
 			else if(RT.count(form) < 2)
 				throw new Exception("Too few arguments to def");
 			else if(!(RT.second(form) instanceof Symbol))
-					throw new Exception("Second argument to def must be a Symbol");
+					throw new Exception("First argument to def must be a Symbol");
 			Symbol sym = (Symbol) RT.second(form);
 			Var v = lookupVar(sym, true);
 			if(v == null)
