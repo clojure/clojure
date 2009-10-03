@@ -136,11 +136,12 @@
          )))
 
 (deftest test-getAttribute
-  (let [state (ref {:a 1 :b 2})
-        bean (Bean. state)]
-    (testing "accessing values"
-             (are [result expr] (= result expr)
-                  1 (.getAttribute bean "a")))))
+  (doseq [reftype [ref atom agent]]
+    (let [state (reftype {:a 1 :b 2})
+          bean (Bean. state)]
+      (testing (str "accessing values from a " (class state))
+               (are [result expr] (= result expr)
+                    1 (.getAttribute bean "a"))))))
 
 (deftest test-bean-info
   (let [state (ref {:a 1 :b 2})

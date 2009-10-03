@@ -25,7 +25,7 @@
 
 (defn -getAttribute
   [this attr]
-  ((.state this) (keyword attr)))
+  (@(.state this) (keyword attr)))
 
 (defn -getAttributes
   [this attrs]
