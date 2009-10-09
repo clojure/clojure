@@ -88,7 +88,7 @@
         (is (= (inc propcount) (count (System/getProperties)))))
       (is (= propcount (count (System/getProperties))))))
 )
-	   
+
 (deftest test-as-properties
   (let [expected (doto (Properties.)
 		   (.setProperty "a" "b")
@@ -113,4 +113,11 @@
 	   (read-properties f)))))
 	   
 
-
+(deftest test-delete-file
+  (let [file (File/createTempFile "test" "deletion")
+        not-file (File. (str (java.util.UUID/randomUUID)))]
+    (delete-file (.getAbsolutePath file))
+    (is (not (.exists file)))
+    (is (thrown? ArithmeticException (/ 1 0)))
+    (is (thrown? java.io.IOException (delete-file not-file)))
+    (is (delete-file not-file :silently))))

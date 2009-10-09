@@ -175,6 +175,23 @@
       (doto (as-properties m)
         (.store f #^String comments)))))
 
+(defn delete-file
+  "Delete file f. Raise an exception if it fails unless silently is true."
+  [f & [silently]]
+  (or (.delete (file f))
+      silently
+      (throw (java.io.IOException. (str "Couldn't delete " f)))))
+
+(defn delete-file-recursively
+  "Delete file f. If it's a directory, recursively delete all its contents.
+Raise an exception if any deletion fails unless silently is true."
+  [f & [silently]]
+  (let [f (file f)]
+    (if (.isDirectory f)
+      (doseq [child (.listFiles f)]
+        (delete-file-recursively child silently)))
+    (delete-file f silently)))
+
 (defmulti
   #^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
      :arglists '([arg])}
