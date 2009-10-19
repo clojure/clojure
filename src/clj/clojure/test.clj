@@ -796,14 +796,14 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   When *load-tests* is false, deftest is ignored."
   [name & body]
   (when *load-tests*
-    `(def ~(with-meta name {:test `(fn [] ~@body)})
+    `(def ~(vary-meta name assoc :test `(fn [] ~@body))
           (fn [] (test-var (var ~name))))))
 
 (defmacro deftest-
   "Like deftest but creates a private var."
   [name & body]
   (when *load-tests*
-    `(def ~(with-meta name {:test `(fn [] ~@body), :private true})
+    `(def ~(vary-meta name assoc :test `(fn [] ~@body) :private true)
           (fn [] (test-var (var ~name))))))
 
 
