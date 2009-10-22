@@ -1436,7 +1436,7 @@ static BitOps bitOps(Object x){
 		else
 			{
 			ISeq s = RT.seq(sizeOrSeq);
-			int size = s.count();
+			int size = RT.count(s);
 			float[] ret = new float[size];
 			for(int i = 0; i < size && s != null; i++, s = s.next())
 				ret[i] = ((Number) s.first()).floatValue();
@@ -1467,7 +1467,7 @@ static public double[] double_array(Object sizeOrSeq){
 	else
 		{
 		ISeq s = RT.seq(sizeOrSeq);
-		int size = s.count();
+		int size = RT.count(s);
 		double[] ret = new double[size];
 		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).doubleValue();
@@ -1498,7 +1498,7 @@ static public int[] int_array(Object sizeOrSeq){
 	else
 		{
 		ISeq s = RT.seq(sizeOrSeq);
-		int size = s.count();
+		int size = RT.count(s);
 		int[] ret = new int[size];
 		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).intValue();
@@ -1529,7 +1529,7 @@ static public long[] long_array(Object sizeOrSeq){
 	else
 		{
 		ISeq s = RT.seq(sizeOrSeq);
-		int size = s.count();
+		int size = RT.count(s);
 		long[] ret = new long[size];
 		for(int i = 0; i < size && s != null; i++, s = s.next())
 			ret[i] = ((Number) s.first()).longValue();

@@ -31,12 +31,18 @@
 (defn seq-zip
   "Returns a zipper for nested sequences, given a root sequence"
   [root]
-    (zipper seq? identity (fn [node children] children) root))
+    (zipper seq?
+            identity
+            (fn [node children] (with-meta children (meta node)))
+            root))
 
 (defn vector-zip
   "Returns a zipper for nested vectors, given a root vector"
   [root]
-    (zipper vector? seq (fn [node children] (apply vector children)) root))
+    (zipper vector?
+            seq
+            (fn [node children] (with-meta (vec children) (meta node)))
+            root))
 
 (defn xml-zip
   "Returns a zipper for xml elements (as from xml/parse),

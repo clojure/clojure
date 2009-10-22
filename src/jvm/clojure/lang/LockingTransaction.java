@@ -16,6 +16,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class LockingTransaction{
@@ -43,11 +45,13 @@ static class AbortException extends Exception{
 public static class Info{
 	final AtomicInteger status;
 	final long startPoint;
+	final CountDownLatch latch;
 
 
 	public Info(int status, long startPoint){
 		this.status = new AtomicInteger(status);
 		this.startPoint = startPoint;
+		this.latch = new CountDownLatch(1);
 	}
 
 	public boolean running(){
@@ -83,7 +87,7 @@ void stop(int status){
 		synchronized(info)
 			{
 			info.status.set(status);
-			info.notifyAll();
+			info.latch.countDown();
 			}
 		info = null;
 		vals.clear();
@@ -104,13 +108,32 @@ final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
 final HashSet<Ref> sets = new HashSet<Ref>();
 final TreeMap<Ref, ArrayList<CFn>> commutes = new TreeMap<Ref, ArrayList<CFn>>();
 
+final HashSet<Ref> ensures = new HashSet<Ref>();   //all hold readLock
+
+
+void tryWriteLock(Ref ref){
+	try
+		{
+		if(!ref.lock.writeLock().tryLock(LOCK_WAIT_MSECS, TimeUnit.MILLISECONDS))
+			throw retryex;
+		}
+	catch(InterruptedException e)
+		{
+		throw retryex;
+		}
+}
 
 //returns the most recent val
 Object lock(Ref ref){
-	boolean unlocked = false;
+	//can't upgrade readLock, so release it
+	releaseIfEnsured(ref);
+
+	boolean unlocked = true;
 	try
 		{
-		ref.lock.writeLock().lock();
+		tryWriteLock(ref);
+		unlocked = false;
+
 		if(ref.tvals != null && ref.tvals.point > readPoint)
 			throw retryex;
 		Info refinfo = ref.tinfo;
@@ -122,22 +145,7 @@ Object lock(Ref ref){
 				{
 				ref.lock.writeLock().unlock();
 				unlocked = true;
-				//stop prior to blocking
-				stop(RETRY);
-				synchronized(refinfo)
-					{
-					if(refinfo.running())
-						{
-						try
-							{
-							refinfo.wait(LOCK_WAIT_MSECS);
-							}
-						catch(InterruptedException e)
-							{
-							}
-						}
-					}
-				throw retryex;
+				return blockAndBail(refinfo);
 				}
 			}
 		ref.tinfo = info;
@@ -147,6 +155,28 @@ Object lock(Ref ref){
 		{
 		if(!unlocked)
 			ref.lock.writeLock().unlock();
+		}
+}
+
+private Object blockAndBail(Info refinfo){
+//stop prior to blocking
+	stop(RETRY);
+	try
+		{
+		refinfo.latch.await(LOCK_WAIT_MSECS, TimeUnit.MILLISECONDS);
+		}
+	catch(InterruptedException e)
+		{
+		//ignore
+		}
+	throw retryex;
+}
+
+private void releaseIfEnsured(Ref ref){
+	if(ensures.contains(ref))
+		{
+		ensures.remove(ref);
+		ref.lock.readLock().unlock();
 		}
 }
 
@@ -165,12 +195,9 @@ private boolean barge(Info refinfo){
 	//  try to abort the other
 	if(bargeTimeElapsed() && startPoint < refinfo.startPoint)
 		{
-		synchronized(refinfo)
-			{
-			barged = refinfo.status.compareAndSet(RUNNING, KILLED);
-			if(barged)
-				refinfo.notifyAll();
-			}
+        barged = refinfo.status.compareAndSet(RUNNING, KILLED);
+        if(barged)
+            refinfo.latch.countDown();
 		}
 	return barged;
 }
@@ -240,8 +267,16 @@ Object run(Callable fn) throws Exception{
 				for(Map.Entry<Ref, ArrayList<CFn>> e : commutes.entrySet())
 					{
 					Ref ref = e.getKey();
-					ref.lock.writeLock().lock();
+					if(sets.contains(ref)) continue;
+					
+					boolean wasEnsured = ensures.contains(ref);
+					//can't upgrade readLock, so release it
+					releaseIfEnsured(ref);
+					tryWriteLock(ref);
 					locked.add(ref);
+					if(wasEnsured && ref.tvals != null && ref.tvals.point > readPoint)
+						throw retryex;
+
 					Info refinfo = ref.tinfo;
 					if(refinfo != null && refinfo != info && refinfo.running())
 						{
@@ -249,8 +284,7 @@ Object run(Callable fn) throws Exception{
 							throw retryex;
 						}
 					Object val = ref.tvals == null ? null : ref.tvals.val;
-					if(!sets.contains(ref))
-						vals.put(ref, val);
+					vals.put(ref, val);
 					for(CFn f : e.getValue())
 						{
 						vals.put(ref, f.fn.applyTo(RT.cons(vals.get(ref), f.args)));
@@ -258,11 +292,8 @@ Object run(Callable fn) throws Exception{
 					}
 				for(Ref ref : sets)
 					{
-					if(!commutes.containsKey(ref))
-						{
-						ref.lock.writeLock().lock();
-						locked.add(ref);
-						}
+					tryWriteLock(ref);
+					locked.add(ref);
 					}
 
 				//validate and enqueue notifications
@@ -319,6 +350,11 @@ Object run(Callable fn) throws Exception{
 				locked.get(k).lock.writeLock().unlock();
 				}
 			locked.clear();
+			for(Ref r : ensures)
+				{
+				r.lock.readLock().unlock();
+				}
+			ensures.clear();
 			stop(done ? COMMITTED : RETRY);
 			try
 				{
@@ -391,10 +427,33 @@ Object doSet(Ref ref, Object val){
 	return val;
 }
 
-void doTouch(Ref ref){
+void doEnsure(Ref ref){
 	if(!info.running())
 		throw retryex;
-	lock(ref);
+	if(ensures.contains(ref))
+		return;
+	ref.lock.readLock().lock();
+
+	//someone completed a write after our snapshot
+	if(ref.tvals != null && ref.tvals.point > readPoint) {
+        ref.lock.readLock().unlock();
+        throw retryex;
+    }
+
+	Info refinfo = ref.tinfo;
+
+	//writer exists
+	if(refinfo != null && refinfo.running())
+		{
+		ref.lock.readLock().unlock();
+
+		if(refinfo != info) //not us, ensure is doomed
+			{
+			blockAndBail(refinfo); 
+			}
+		}
+	else
+		ensures.add(ref);
 }
 
 Object doCommute(Ref ref, IFn fn, ISeq args) throws Exception{

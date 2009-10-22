@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.List;
 
-public class PersistentHashSet extends APersistentSet{
+public class PersistentHashSet extends APersistentSet implements IEditableCollection {
 
 static public final PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentHashMap.EMPTY);
 
@@ -67,6 +67,20 @@ public IPersistentCollection empty(){
 
 public PersistentHashSet withMeta(IPersistentMap meta){
 	return new PersistentHashSet(meta, impl);
+}
+
+public ITransientCollection asTransient() {
+	return new TransientHashSet(((PersistentHashMap) impl).asTransient());
+}
+
+static final class TransientHashSet extends ATransientSet {
+	TransientHashSet(ITransientMap impl) {
+		super(impl);
+	}
+
+	public IPersistentCollection persistent() {
+		return new PersistentHashSet(null, impl.persistent());
+	}
 }
 
 }

@@ -474,12 +474,12 @@
   (is (thrown? IndexOutOfBoundsException (nth [] 0)))
   (is (thrown? IndexOutOfBoundsException (nth [1 2 3] 5)))
   (is (thrown? IndexOutOfBoundsException (nth [] -1)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth [1 2 3] -1)))  ; ???
+  (is (thrown? IndexOutOfBoundsException (nth [1 2 3] -1)))  ; ???
 
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) 0)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) 5)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) -1)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) -1)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array []) 0)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array [1 2 3]) 5)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array []) -1)))
+  (is (thrown? IndexOutOfBoundsException (nth (into-array [1 2 3]) -1)))
 
   (is (thrown? StringIndexOutOfBoundsException (nth "" 0)))
   (is (thrown? StringIndexOutOfBoundsException (nth "abc" 5)))
@@ -488,8 +488,8 @@
 
   (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. []) 0)))
   (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) 5)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. []) -1)))       ; ???
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) -1)))  ; ???
+  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. []) -1)))       ; ???
+  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) -1)))  ; ???
 
   (are [x y] (= x y)
       (nth '(1) 0) 1
@@ -980,5 +980,29 @@
       true (not-any? #{:a} [:b :b]) ))
 
 
-; TODO: some
-
+(deftest test-some
+  ;; always nil for nil or empty coll/seq
+  (are [x] (= (some pos? x) nil)
+       nil
+       () [] {} #{}
+       (lazy-seq [])
+       (into-array []))
+  
+  (are [x y] (= x y)
+       nil (some nil nil)
+       
+       true (some pos? [1])
+       true (some pos? [1 2])
+       
+       nil (some pos? [-1])
+       nil (some pos? [-1 -2])
+       true (some pos? [-1 2])
+       true (some pos? [1 -2])
+       
+       :a (some #{:a} [:a :a])
+       :a (some #{:a} [:b :a])
+       nil (some #{:a} [:b :b])
+       
+       :a (some #{:a} '(:a :b))
+       :a (some #{:a} #{:a :b})
+       ))

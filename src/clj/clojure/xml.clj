@@ -26,7 +26,7 @@
                        (assoc e :content (conj (or (:content e) []) c)))
         push-chars (fn []
                      (when (and (= *state* :chars)
-                                (some (complement #(. Character (isWhitespace %))) (str *sb*)))
+                                (some (complement #(Character/isWhitespace (char %))) (str *sb*)))
                        (set! *current* (push-content *current* (str *sb*)))))]
     (new clojure.lang.XMLHandler
          (proxy [ContentHandler] []
@@ -34,14 +34,14 @@
              (let [attrs (fn [ret i]
                            (if (neg? i)
                              ret
-                             (recur (assoc ret 
-                                           (. clojure.lang.Keyword (intern (symbol (. atts (getQName i)))))
-                                           (. atts (getValue i)))
+                             (recur (assoc ret
+                                           (clojure.lang.Keyword/intern (symbol (.getQName atts i)))
+                                           (.getValue atts (int i)))
                                     (dec i))))
-                   e (struct element 
+                   e (struct element
                              (. clojure.lang.Keyword (intern (symbol q-name)))
-                             (when (pos? (. atts (getLength)))
-                               (attrs {} (dec (. atts (getLength))))))]
+                             (when (pos? (.getLength atts))
+                               (attrs {} (dec (.getLength atts)))))]
                (push-chars)
                (set! *stack* (conj *stack* *current*))
                (set! *current* e)
@@ -53,11 +53,11 @@
              (set! *stack* (pop *stack*))
              (set! *state* :between)
              nil)
-           (characters [ch start length]
+           (characters [#^chars ch start length]
              (when-not (= *state* :chars)
                (set! *sb* (new StringBuilder)))
              (let [#^StringBuilder sb *sb*]
-               (. sb (append ch start length))
+               (.append sb ch (int start) (int length))
                (set! *state* :chars))
              nil)
            (setDocumentLocator [locator])

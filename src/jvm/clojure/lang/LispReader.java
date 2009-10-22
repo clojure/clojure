@@ -704,7 +704,20 @@ public static class SyntaxQuoteReader extends AFn{
 				// Simply quote method names.
  				}
             else
-				sym = Compiler.resolveSymbol(sym);
+				{
+					Object maybeClass = null;
+					if(sym.ns != null)
+						maybeClass = Compiler.currentNS().getMapping(
+								Symbol.intern(null, sym.ns));
+					if(maybeClass instanceof Class)
+						{
+						// Classname/foo -> package.qualified.Classname/foo
+						sym = Symbol.intern(
+								((Class)maybeClass).getName(), sym.name);
+						}
+					else
+						sym = Compiler.resolveSymbol(sym);
+				}
 			ret = RT.list(Compiler.QUOTE, sym);
 			}
 		else if(isUnquote(form))

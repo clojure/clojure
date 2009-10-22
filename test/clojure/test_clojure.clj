@@ -15,7 +15,7 @@
 ;;  Created 22 October 2008
 
 (ns clojure.test-clojure
-  (:use [clojure.test :only (run-tests)])
+  (:require [clojure.test :as t])
   (:gen-class))
 
 (def test-names
@@ -59,7 +59,23 @@
   []
   (println "Loading tests...")
   (apply require :reload-all test-namespaces)
-  (apply run-tests test-namespaces))
+  (apply t/run-tests test-namespaces))
+
+(defn run-ant
+  "Runs all defined tests, prints report to *err*, throw if failures. This works well for running in an ant java task."
+  []
+  (let [rpt t/report]
+    (binding [;; binding to *err* because, in ant, when the test target
+              ;; runs after compile-clojure, *out* doesn't print anything
+              *out* *err*
+              t/*test-out* *err*
+              t/report (fn report [m]
+                         (if (= :summary (:type m))
+                           (do (rpt m)
+                               (if (or (pos? (:fail m)) (pos? (:error m)))
+                                 (throw (new Exception (str (:fail m) " failures, " (:error m) " errors.")))))
+                           (rpt m)))]
+      (run))))
 
 (defn -main
   "Run all defined tests from the command line"

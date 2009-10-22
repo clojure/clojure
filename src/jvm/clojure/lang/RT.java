@@ -476,7 +476,7 @@ static ISeq seqFrom(Object coll){
 	else {
 		Class c = coll.getClass();
 		Class sc = c.getSuperclass();
-		throw new IllegalArgumentException("Don't know how to create ISeq from: " + c.getSimpleName());
+		throw new IllegalArgumentException("Don't know how to create ISeq from: " + c.getName());
 	}
 }
 
@@ -615,8 +615,8 @@ static public Object pop(Object x){
 static public Object get(Object coll, Object key){
 	if(coll == null)
 		return null;
-	else if(coll instanceof Associative)
-		return ((Associative) coll).valAt(key);
+	else if(coll instanceof ILookup)
+		return ((ILookup) coll).valAt(key);
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		return m.get(key);
@@ -638,8 +638,8 @@ static public Object get(Object coll, Object key){
 static public Object get(Object coll, Object key, Object notFound){
 	if(coll == null)
 		return notFound;
-	else if(coll instanceof Associative)
-		return ((Associative) coll).valAt(key, notFound);
+	else if(coll instanceof ILookup)
+		return ((ILookup) coll).valAt(key, notFound);
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		if(m.containsKey(key))
@@ -756,16 +756,17 @@ static public Object nth(Object coll, int n){
 }
 
 static public Object nth(Object coll, int n, Object notFound){
-	if(coll == null)
-		return notFound;
-	else if(n < 0)
-		return notFound;
-	else if(coll instanceof IPersistentVector) {
-		IPersistentVector v = (IPersistentVector) coll;
-		if(n < v.count())
+	if(coll instanceof Indexed) {
+		Indexed v = (Indexed) coll;
+		if(n >= 0 && n < v.count())
 			return v.nth(n);
 		return notFound;
 	}
+	else if(coll == null)
+		return notFound;
+	else if(n < 0)
+		return notFound;
+
 	else if(coll instanceof String) {
 		String s = (String) coll;
 		if(n < s.length())

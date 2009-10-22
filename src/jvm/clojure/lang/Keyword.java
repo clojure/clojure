@@ -12,10 +12,12 @@
 
 package clojure.lang;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class Keyword implements IFn, Comparable, Named{
+public class Keyword implements IFn, Comparable, Named, Serializable {
 
 private static ConcurrentHashMap<Symbol, Keyword> table = new ConcurrentHashMap();
 public final Symbol sym;
@@ -28,6 +30,10 @@ public static Keyword intern(Symbol sym){
 
 public static Keyword intern(String ns, String name){
 	return intern(Symbol.intern(ns, name));
+}
+
+public static Keyword intern(String nsname){
+	return intern(Symbol.intern(nsname));
 }
 
 private Keyword(Symbol sym){
@@ -70,6 +76,10 @@ public String getNamespace(){
 
 public String getName(){
 	return sym.getName();
+}
+
+private Object readResolve() throws ObjectStreamException{
+	return intern(sym);
 }
 
 /**

@@ -51,7 +51,7 @@
   "Prints a TAP diagnostic line.  data is a (possibly multi-line)
   string."
   [data]
-  (doseq [line (.split data "\n")]
+  (doseq [line (.split #^String data "\n")]
     (println "#" line)))
 
 (defn print-tap-pass

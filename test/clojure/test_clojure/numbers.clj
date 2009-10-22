@@ -24,7 +24,7 @@
 
 (deftest Coerced-Byte
   (let [v (byte 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? Byte v)
      (number? v)
      (integer? v)
@@ -32,7 +32,7 @@
 
 (deftest Coerced-Short
   (let [v (short 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? Short v)
      (number? v)
      (integer? v)
@@ -40,7 +40,7 @@
 
 (deftest Coerced-Integer
   (let [v (int 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? Integer v)
      (number? v)
      (integer? v)
@@ -48,7 +48,7 @@
 
 (deftest Coerced-Long
   (let [v (long 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? Long v)
      (number? v)
      (integer? v)
@@ -56,7 +56,7 @@
 
 (deftest Coerced-BigInteger
   (let [v (bigint 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? BigInteger v)
      (number? v)
      (integer? v)
@@ -64,21 +64,21 @@
 
 (deftest Coerced-Float
   (let [v (float 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? Float v)
      (number? v)
      (float? v))))
 
 (deftest Coerced-Double
   (let [v (double 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? Double v)
      (number? v)
      (float? v))))
 
 (deftest Coerced-BigDecimal
   (let [v (bigdec 3)]
-    (are [x]
+    (are [x] (true? x)
      (instance? BigDecimal v)
      (number? v)
      (decimal? v)
@@ -370,7 +370,7 @@
 ;; even? odd?
 
 (deftest test-even?
-  (are [x]
+  (are [x] (true? x)
     (even? -4)
     (not (even? -3))
     (even? 0)
@@ -380,7 +380,7 @@
   (is (thrown? ArithmeticException (even? (double 10)))))
 
 (deftest test-odd?
-  (are [x]
+  (are [x] (true? x)
     (not (odd? -4))
     (odd? -3)
     (not (odd? 0))
@@ -389,3 +389,32 @@
   (is (thrown? ArithmeticException (odd? 1/2)))
   (is (thrown? ArithmeticException (odd? (double 10)))))
 
+(defn- expt
+  "clojure.contrib.math/expt is a better and much faster impl, but this works.
+Math/pow overflows to Infinity."
+  [x n] (apply * (replicate n x)))
+
+(deftest test-bit-shift-left
+  (are [x y] (= x y)
+       2r10 (bit-shift-left 2r1 1)
+       2r100 (bit-shift-left 2r1 2)
+       2r1000 (bit-shift-left 2r1 3)
+       2r00101110 (bit-shift-left 2r00010111 1)
+       2r00101110 (apply bit-shift-left [2r00010111 1])
+       2r01 (bit-shift-left 2r10 -1)
+       (expt 2 32) (bit-shift-left 1 32)
+       (expt 2 10000) (bit-shift-left 1 10000)
+       ))
+
+(deftest test-bit-shift-right
+  (are [x y] (= x y)
+       2r0 (bit-shift-right 2r1 1)
+       2r010 (bit-shift-right 2r100 1)
+       2r001 (bit-shift-right 2r100 2)
+       2r000 (bit-shift-right 2r100 3)
+       2r0001011 (bit-shift-right 2r00010111 1)
+       2r0001011 (apply bit-shift-right [2r00010111 1])
+       2r100 (bit-shift-right 2r10 -1)
+       1 (bit-shift-right (expt 2 32) 32)
+       1 (bit-shift-right (expt 2 10000) 10000)
+       ))

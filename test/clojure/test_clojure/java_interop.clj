@@ -146,13 +146,13 @@
 
       ; given size (and empty)
       (are [x] (and (= (alength (~type-array x)) x)
-                (= (vec (~type-array x)) (repeat x 0)))
+                    (= (vec (~type-array x)) (repeat x 0)))
           0 1 5 )
 
       ; copy of a sequence
       (are [x] (and (= (alength (~type-array x)) (count x))
                     (= (vec (~type-array x)) x))
-;;        []    ;; ERROR
+          []
           [1]
           [1 -2 3 0 5] )
 

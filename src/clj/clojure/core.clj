@@ -251,7 +251,9 @@
 (defn vec
   "Creates a new vector containing the contents of coll."
   ([coll]
-   (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll)))))
+   (if (instance? java.util.Collection coll)
+     (clojure.lang.LazilyPersistentVector/create coll)
+     (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll))))))
 
 (defn hash-map
   "keyval => key val
@@ -355,14 +357,16 @@
 
 (defn symbol
   "Returns a Symbol with the given namespace and name."
-  ([name] (if (symbol? name) name (. clojure.lang.Symbol (intern name))))
-  ([ns name] (. clojure.lang.Symbol (intern ns name))))
+  {:tag clojure.lang.Symbol}
+  ([name] (if (symbol? name) name (clojure.lang.Symbol/intern name)))
+  ([ns name] (clojure.lang.Symbol/intern ns name)))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
   in the keyword strings, it will be added automatically."
-  ([name] (if (keyword? name) name (. clojure.lang.Keyword (intern nil name))))
-  ([ns name] (. clojure.lang.Keyword (intern ns name))))
+  {:tag clojure.lang.Keyword}
+  ([name] (if (keyword? name) name (clojure.lang.Keyword/intern name)))
+  ([ns name] (clojure.lang.Keyword/intern ns name)))
 
 (defn gensym
   "Returns a new symbol with a unique name. If a prefix string is
@@ -393,11 +397,29 @@
    (nil? (next arglist)) (seq (first arglist))
    :else (cons (first arglist) (spread (next arglist)))))
 
+(defn list*
+  "Creates a new list containing the items prepended to the rest, the
+  last of which will be treated as a sequence."
+  ([args] (seq args))
+  ([a args] (cons a args))
+  ([a b args] (cons a (cons b args)))
+  ([a b c args] (cons a (cons b (cons c args))))
+  ([a b c d & more]
+     (cons a (cons b (cons c (cons d (spread more)))))))
+
 (defn apply
   "Applies fn f to the argument list formed by prepending args to argseq."
   {:arglists '([f args* argseq])}
-  [#^clojure.lang.IFn f & args]
-    (. f (applyTo (spread args))))
+  ([#^clojure.lang.IFn f args]
+     (. f (applyTo (seq args))))
+  ([#^clojure.lang.IFn f x args]
+     (. f (applyTo (list* x args))))
+  ([#^clojure.lang.IFn f x y args]
+     (. f (applyTo (list* x y args))))
+  ([#^clojure.lang.IFn f x y z args]
+     (. f (applyTo (list* x y z args))))
+  ([#^clojure.lang.IFn f a b c d & args]
+     (. f (applyTo (cons a (cons b (cons c (cons d (spread args)))))))))
 
 (defn vary-meta
  "Returns an object of the same type and value as obj, with
@@ -405,10 +427,7 @@
  [obj f & args]
   (with-meta obj (apply f (meta obj) args)))
 
-(defn list*
-  "Creates a new list containing the item prepended to more."
-  [item & more]
-    (spread (cons item more)))
+
 
 (defmacro lazy-seq
   "Takes a body of expressions that returns an ISeq or nil, and yields
@@ -418,25 +437,56 @@
   [& body]
   (list 'new 'clojure.lang.LazySeq (list* '#^{:once true} fn* [] body)))    
 
+(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
+  (clojure.lang.ChunkBuffer. capacity))
+
+(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
+  (.add b x))
+
+(defn chunk [#^clojure.lang.ChunkBuffer b]
+  (.chunk b))
+
+(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
+  (.chunkedFirst s))
+
+(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
+  (.chunkedMore s))
+
+(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
+  (.chunkedNext s))
+
+(defn chunk-cons [chunk rest]
+  (if (clojure.lang.Numbers/isZero (clojure.lang.RT/count chunk))
+    rest
+    (clojure.lang.ChunkedCons. chunk rest)))
+  
+(defn chunked-seq? [s]
+  (instance? clojure.lang.IChunkedSeq s))
+
 (defn concat
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
   ([] (lazy-seq nil))
   ([x] (lazy-seq x))
   ([x y]
-     (lazy-seq
+    (lazy-seq
       (let [s (seq x)]
         (if s
-          (cons (first s) (concat (rest s) y))
+          (if (chunked-seq? s)
+            (chunk-cons (chunk-first s) (concat (chunk-rest s) y))
+            (cons (first s) (concat (rest s) y)))
           y))))
   ([x y & zs]
      (let [cat (fn cat [xys zs]
                  (lazy-seq
-                  (let [xys (seq xys)]
-                    (if xys
-                      (cons (first xys) (cat (rest xys) zs))
-                      (when zs
-                        (cat (first zs) (next zs)))))))]
-           (cat (concat x y) zs))))
+                   (let [xys (seq xys)]
+                     (if xys
+                       (if (chunked-seq? xys)
+                         (chunk-cons (chunk-first xys)
+                                     (cat (chunk-rest xys) zs))
+                         (cons (first xys) (cat (rest xys) zs)))
+                       (when zs
+                         (cat (first zs) (next zs)))))))]
+       (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 
@@ -492,10 +542,11 @@
 
 
 (defn compare
-  "Comparator. Returns 0 if x equals y, -1 if x is logically 'less
-  than' y, else 1. Same as Java x.compareTo(y) except it also works
-  for nil, and compares numbers and collections in a type-independent
-  manner. x must implement Comparable"
+  "Comparator. Returns a negative number, zero, or a positive number
+  when x is logically 'less than', 'equal to', or 'greater than'
+  y. Same as Java x.compareTo(y) except it also works for nil, and
+  compares numbers and collections in a type-independent manner. x
+  must implement Comparable"
   {:tag Integer
    :inline (fn [x y] `(. clojure.lang.Util compare ~x ~y))}
   [x y] (. clojure.lang.Util (compare x y)))
@@ -545,8 +596,8 @@
   bounds, nth throws an exception unless not-found is supplied.  nth
   also works for strings, Java arrays, regex Matchers and Lists, and,
   in O(n) time, for sequences."
-  {:inline (fn  [c i] `(. clojure.lang.RT (nth ~c ~i)))
-   :inline-arities #{2}}
+  {:inline (fn  [c i & nf] `(. clojure.lang.RT (nth ~c ~i ~@nf)))
+   :inline-arities #{2 3}}
   ([coll index] (. clojure.lang.RT (nth coll index)))
   ([coll index not-found] (. clojure.lang.RT (nth coll index not-found))))
 
@@ -568,32 +619,6 @@
   "Returns a number one greater than num."
   {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))}
   [x] (. clojure.lang.Numbers (inc x)))
-
-(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
-  (clojure.lang.ChunkBuffer. capacity))
-
-(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
-  (.add b x))
-
-(defn chunk [#^clojure.lang.ChunkBuffer b]
-  (.chunk b))
-
-(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
-  (.chunkedFirst s))
-
-(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
-  (.chunkedMore s))
-
-(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
-  (.chunkedNext s))
-
-(defn chunk-cons [chunk rest]
-  (if (zero? (count chunk))
-    rest
-    (clojure.lang.ChunkedCons. chunk rest)))
-  
-(defn chunked-seq? [s]
-  (instance? clojure.lang.IChunkedSeq s))
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
@@ -1048,6 +1073,16 @@
               (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
+(defmacro ->>
+  "Threads the expr through the forms. Inserts x as the
+  last item in the first form, making a list of it if it is not a
+  list already. If there are more forms, inserts the first form as the
+  last item in second form, etc."
+  ([x form] (if (seq? form)
+              `(~(first form) ~@(next form)  ~x)
+              (list form x)))
+  ([x form & more] `(->> (->> ~x ~form) ~@more)))
+
 ;;multimethods
 (def global-hierarchy)
 
@@ -1159,28 +1194,58 @@
          (let [~form temp#]
            ~@body)))))
 
+(defn push-thread-bindings
+  "WARNING: This is a low-level function. Prefer high-level macros like
+  binding where ever possible.
+
+  Takes a map of Var/value pairs. Binds each Var to the associated value for
+  the current thread. Each call *MUST* be accompanied by a matching call to
+  pop-thread-bindings wrapped in a try-finally!
+  
+      (push-thread-bindings bindings)
+      (try
+        ...
+        (finally
+          (pop-thread-bindings)))"
+  [bindings]
+  (clojure.lang.Var/pushThreadBindings bindings))
+
+(defn pop-thread-bindings
+  "Pop one set of bindings pushed with push-binding before. It is an error to
+  pop bindings without pushing before."
+  []
+  (clojure.lang.Var/popThreadBindings))
+
+(defn get-thread-bindings
+  "Get a map with the Var/value pairs which is currently in effect for the
+  current thread."
+  []
+  (clojure.lang.Var/getThreadBindings))
+
 (defmacro binding
   "binding => var-symbol init-expr
 
   Creates new bindings for the (already-existing) vars, with the
   supplied initial values, executes the exprs in an implicit do, then
-  re-establishes the bindings that existed before."
+  re-establishes the bindings that existed before.  The new bindings
+  are made in parallel (unlike let); all init-exprs are evaluated
+  before the vars are bound to their new values."
   [bindings & body]
-    (assert-args binding
-      (vector? bindings) "a vector for its binding"
-      (even? (count bindings)) "an even number of forms in binding vector")
-    (let [var-ize (fn [var-vals]
-                    (loop [ret [] vvs (seq var-vals)]
-                      (if vvs
-                        (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
-                                (next (next vvs)))
-                        (seq ret))))]
-      `(let []
-         (. clojure.lang.Var (pushThreadBindings (hash-map ~@(var-ize bindings))))
-         (try
-          ~@body
-          (finally
-           (. clojure.lang.Var (popThreadBindings)))))))
+  (assert-args binding
+    (vector? bindings) "a vector for its binding"
+    (even? (count bindings)) "an even number of forms in binding vector")
+  (let [var-ize (fn [var-vals]
+                  (loop [ret [] vvs (seq var-vals)]
+                    (if vvs
+                      (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
+                             (next (next vvs)))
+                      (seq ret))))]
+    `(let []
+       (push-thread-bindings (hash-map ~@(var-ize bindings)))
+       (try
+         ~@body
+         (finally
+           (pop-thread-bindings))))))
 
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
@@ -1501,13 +1566,65 @@
   of those fns.  The returned fn takes a variable number of args,
   applies the rightmost of fns to the args, the next
   fn (right-to-left) to the result, etc."
-  [& fs]
-    (let [fs (reverse fs)]
+  ([f] f)
+  ([f g] 
+     (fn 
+       ([] (f (g)))
+       ([x] (f (g x)))
+       ([x y] (f (g x y)))
+       ([x y z] (f (g x y z)))
+       ([x y z & args] (f (apply g x y z args)))))
+  ([f g h] 
+     (fn 
+       ([] (f (g (h))))
+       ([x] (f (g (h x))))
+       ([x y] (f (g (h x y))))
+       ([x y z] (f (g (h x y z))))
+       ([x y z & args] (f (g (apply h x y z args))))))
+  ([f1 f2 f3 & fs]
+    (let [fs (reverse (list* f1 f2 f3 fs))]
       (fn [& args]
         (loop [ret (apply (first fs) args) fs (next fs)]
           (if fs
             (recur ((first fs) ret) (next fs))
-            ret)))))
+            ret))))))
+
+(defn juxt 
+  "Alpha - name subject to change.
+  Takes a set of functions and returns a fn that is the juxtaposition
+  of those fns.  The returned fn takes a variable number of args, and
+  returns a vector containing the result of applying each fn to the
+  args (left-to-right).
+  ((juxt a b c) x) => [(a x) (b x) (c x)]"
+  ([f] 
+     (fn
+       ([] [(f)])
+       ([x] [(f x)])
+       ([x y] [(f x y)])
+       ([x y z] [(f x y z)])
+       ([x y z & args] [(apply f x y z args)])))
+  ([f g] 
+     (fn
+       ([] [(f) (g)])
+       ([x] [(f x) (g x)])
+       ([x y] [(f x y) (g x y)])
+       ([x y z] [(f x y z) (g x y z)])
+       ([x y z & args] [(apply f x y z args) (apply g x y z args)])))
+  ([f g h] 
+     (fn
+       ([] [(f) (g) (h)])
+       ([x] [(f x) (g x) (h x)])
+       ([x y] [(f x y) (g x y) (h x y)])
+       ([x y z] [(f x y z) (g x y z) (h x y z)])
+       ([x y z & args] [(apply f x y z args) (apply g x y z args) (apply h x y z args)])))
+  ([f g h & fs]
+     (let [fs (list* f g h fs)]
+       (fn
+         ([] (reduce #(conj %1 (%2)) [] fs))
+         ([x] (reduce #(conj %1 (%2 x)) [] fs))
+         ([x y] (reduce #(conj %1 (%2 x y)) [] fs))
+         ([x y z] (reduce #(conj %1 (%2 x y z)) [] fs))
+         ([x y z & args] (reduce #(conj %1 (apply %2 x y z args)) [] fs))))))
 
 (defn partial
   "Takes a function f and fewer than the normal arguments to f, and
@@ -1685,6 +1802,15 @@
   ([s] (drop-last 1 s))
   ([n s] (map (fn [x _] x) s (drop n s))))
 
+(defn take-last
+  "Returns a seq of the last n items in coll.  Depending on the type
+  of coll may be no better than linear time.  For vectors, see also subvec."
+  [n coll]
+  (loop [s (seq coll), lead (seq (drop n coll))]
+    (if lead
+      (recur (next s) (next lead))
+      s)))
+
 (defn drop-while
   "Returns a lazy sequence of the items in coll starting from the first
   item for which (pred item) returns nil."
@@ -1860,27 +1986,49 @@
                (if-not exprs
                  [true `(do ~@body)]
                  (let [k (first exprs)
-                       v (second exprs)
-                       seqsym (when-not (keyword? k) (gensym))
-                       recform (if (keyword? k) recform `(recur (next ~seqsym)))
-                       steppair (step recform (nnext exprs))
-                       needrec (steppair 0)
-                       subform (steppair 1)]
-                   (cond
-                     (= k :let) [needrec `(let ~v ~subform)]
-                     (= k :while) [false `(when ~v
-                                            ~subform
-                                            ~@(when needrec [recform]))]
-                     (= k :when) [false `(if ~v
-                                           (do
-                                             ~subform
-                                             ~@(when needrec [recform]))
-                                           ~recform)]
-                     :else [true `(loop [~seqsym (seq ~v)]
-                                    (when ~seqsym
-                                      (let [~k (first ~seqsym)]
-                                        ~subform
-                                        ~@(when needrec [recform]))))]))))]
+                       v (second exprs)]
+                   (if (keyword? k)
+                     (let [steppair (step recform (nnext exprs))
+                           needrec (steppair 0)
+                           subform (steppair 1)]
+                       (cond
+                         (= k :let) [needrec `(let ~v ~subform)]
+                         (= k :while) [false `(when ~v
+                                                ~subform
+                                                ~@(when needrec [recform]))]
+                         (= k :when) [false `(if ~v
+                                               (do
+                                                 ~subform
+                                                 ~@(when needrec [recform]))
+                                               ~recform)]))
+                     (let [seq- (gensym "seq_")
+                           chunk- (with-meta (gensym "chunk_")
+                                             {:tag 'clojure.lang.IChunk})
+                           count- (gensym "count_")
+                           i- (gensym "i_")
+                           recform `(recur (next ~seq-) nil (int 0) (int 0))
+                           steppair (step recform (nnext exprs))
+                           needrec (steppair 0)
+                           subform (steppair 1)
+                           recform-chunk 
+                             `(recur ~seq- ~chunk- ~count- (unchecked-inc ~i-))
+                           steppair-chunk (step recform-chunk (nnext exprs))
+                           subform-chunk (steppair-chunk 1)]
+                       [true
+                        `(loop [~seq- (seq ~v), ~chunk- nil,
+                                ~count- (int 0), ~i- (int 0)]
+                           (if (< ~i- ~count-)
+                             (let [~k (.nth ~chunk- ~i-)]
+                               ~subform-chunk
+                               ~@(when needrec [recform-chunk]))
+                             (when-let [~seq- (seq ~seq-)]
+                               (if (chunked-seq? ~seq-)
+                                 (let [c# (chunk-first ~seq-)]
+                                   (recur (chunk-rest ~seq-) c#
+                                          (int (count c#)) (int 0)))
+                                 (let [~k (first ~seq-)]
+                                   ~subform
+                                   ~@(when needrec [recform]))))))])))))]
     (nth (step nil (seq seq-exprs)) 1)))
 
 (defn dorun
@@ -2586,10 +2734,18 @@
        (cons (first s) (take-nth n (drop n s))))))
 
 (defn interleave
-  "Returns a lazy seq of the first item in each coll, then the second
-  etc."
-  [& colls]
-    (apply concat (apply map list colls)))
+  "Returns a lazy seq of the first item in each coll, then the second etc."
+  ([c1 c2]
+     (lazy-seq
+      (let [s1 (seq c1) s2 (seq c2)]
+        (when (and s1 s2)
+          (cons (first s1) (cons (first s2) 
+                                 (interleave (rest s1) (rest s2))))))))
+  ([c1 c2 & colls] 
+     (lazy-seq 
+      (let [ss (map seq (conj colls c2 c1))]
+        (when (every? identity ss)
+          (concat (map first ss) (apply interleave (map rest ss))))))))
 
 (defn var-get
   "Gets the value in the var object"
@@ -2821,7 +2977,7 @@
    binding-forms.  Supported modifiers are: :let [binding-form expr ...],
    :while test, :when test.
 
-  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
+  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)] [x y]))"
   [seq-exprs body-expr]
   (assert-args for
      (vector? seq-exprs) "a vector for its binding"
@@ -2832,7 +2988,7 @@
                                 (conj (pop groups) (conj (peek groups) [k v]))
                                 (conj groups [k v])))
                             [] (partition 2 seq-exprs)))
-        err (fn [& msg] (throw (IllegalArgumentException. (apply str msg))))
+        err (fn [& msg] (throw (IllegalArgumentException. #^String (apply str msg))))
         emit-bind (fn emit-bind [[[bind expr & mod-pairs]
                                   & [[_ next-expr] :as next-groups]]]
                     (let [giter (gensym "iter__")
@@ -2853,11 +3009,48 @@
                                            (recur (rest ~gxs))))
                                      :else `(cons ~body-expr
                                                   (~giter (rest ~gxs)))))]
-                      `(fn ~giter [~gxs]
-                         (lazy-seq
-                           (loop [~gxs ~gxs]
-                             (when-first [~bind ~gxs]
-                               ~(do-mod mod-pairs)))))))]
+                      (if next-groups
+                        #_"not the inner-most loop"
+                        `(fn ~giter [~gxs]
+                           (lazy-seq
+                             (loop [~gxs ~gxs]
+                               (when-first [~bind ~gxs]
+                                 ~(do-mod mod-pairs)))))
+                        #_"inner-most loop"
+                        (let [gi (gensym "i__")
+                              gb (gensym "b__")
+                              do-cmod (fn do-cmod [[[k v :as pair] & etc]]
+                                        (cond
+                                          (= k :let) `(let ~v ~(do-cmod etc))
+                                          (= k :while) `(when ~v ~(do-cmod etc))
+                                          (= k :when) `(if ~v
+                                                         ~(do-cmod etc)
+                                                         (recur
+                                                           (unchecked-inc ~gi)))
+                                          (keyword? k)
+                                            (err "Invalid 'for' keyword " k)
+                                          :else
+                                            `(do (chunk-append ~gb ~body-expr)
+                                                 (recur (unchecked-inc ~gi)))))]
+                          `(fn ~giter [~gxs]
+                             (lazy-seq
+                               (loop [~gxs ~gxs]
+                                 (when-let [~gxs (seq ~gxs)]
+                                   (if (chunked-seq? ~gxs)
+                                     (let [c# (chunk-first ~gxs)
+                                           size# (int (count c#))
+                                           ~gb (chunk-buffer size#)]
+                                       (if (loop [~gi (int 0)]
+                                             (if (< ~gi size#)
+                                               (let [~bind (.nth c# ~gi)]
+                                                 ~(do-cmod mod-pairs))
+                                               true))
+                                         (chunk-cons
+                                           (chunk ~gb)
+                                           (~giter (chunk-rest ~gxs)))
+                                         (chunk-cons (chunk ~gb) nil)))
+                                     (let [~bind (first ~gxs)]
+                                       ~(do-mod mod-pairs)))))))))))]
     `(let [iter# ~(emit-bind (to-groups seq-exprs))]
         (iter# ~(second seq-exprs)))))
 
@@ -3587,7 +3780,7 @@
 (defmacro with-loading-context [& body]
   `((fn loading# [] 
         (. clojure.lang.Var (pushThreadBindings {clojure.lang.Compiler/LOADER  
-                                                 (-> loading# .getClass .getClassLoader)}))
+                                                 (.getClassLoader (.getClass #^Object loading#))}))
         (try
          ~@body
          (finally
@@ -4262,9 +4455,9 @@
                                            "clojure/version.properties")
       properties     (doto (new java.util.Properties) (.load version-stream))
       prop (fn [k] (.getProperty properties (str "clojure.version." k)))
-      clojure-version {:major       (Integer/valueOf (prop "major"))
-                       :minor       (Integer/valueOf (prop "minor"))
-                       :incremental (Integer/valueOf (prop "incremental"))
+      clojure-version {:major       (Integer/valueOf #^String (prop "major"))
+                       :minor       (Integer/valueOf #^String (prop "minor"))
+                       :incremental (Integer/valueOf #^String (prop "incremental"))
                        :qualifier   (prop "qualifier")}]
   (def *clojure-version* 
     (if (not (= (prop "interim") "false"))
@@ -4315,3 +4508,76 @@
   Delivers the supplied value to the promise, releasing any pending
   derefs. A subsequent call to deliver on a promise will throw an exception."  
   [promise val] (promise val))
+
+;;;;;;;;;;;;;;;;;;;;; editable collections ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn transient 
+  "Returns a new, transient version of the collection, in constant time."
+  [#^clojure.lang.IEditableCollection coll] 
+  (.asTransient coll))
+
+(defn persistent! 
+  "Returns a new, persistent version of the transient collection, in
+  constant time. The transient collection cannot be used after this
+  call, any such use will throw an exception."
+  [#^clojure.lang.ITransientCollection coll]
+  (.persistent coll))
+
+(defn conj!
+  "Adds x to the transient collection, and return coll. The 'addition'
+  may happen at different 'places' depending on the concrete type."
+  [#^clojure.lang.ITransientCollection coll x]
+  (.conj coll x))
+
+(defn assoc!
+  "When applied to a transient map, adds mapping of key(s) to
+  val(s). When applied to a transient vector, sets the val at index.
+  Note - index must be <= (count vector). Returns coll."
+  ([#^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
+  ([#^clojure.lang.ITransientAssociative coll key val & kvs]
+   (let [ret (.assoc coll key val)]
+     (if kvs
+       (recur ret (first kvs) (second kvs) (nnext kvs))
+       ret))))
+
+(defn dissoc!
+  "Returns a transient map that doesn't contain a mapping for key(s)."
+  ([#^clojure.lang.ITransientMap map key] (.without map key))
+  ([#^clojure.lang.ITransientMap map key & ks]
+   (let [ret (.without map key)]
+     (if ks
+       (recur ret (first ks) (next ks))
+       ret))))
+
+(defn pop!
+  "Removes the last item from a transient vector. If
+  the collection is empty, throws an exception. Returns coll"
+  [#^clojure.lang.ITransientVector coll] 
+  (.pop coll)) 
+
+(defn disj!
+  "disj[oin]. Returns a transient set of the same (hashed/sorted) type, that
+  does not contain key(s)."
+  ([set] set)
+  ([#^clojure.lang.ITransientSet set key]
+   (. set (disjoin key)))
+  ([set key & ks]
+   (let [ret (disj set key)]
+     (if ks
+       (recur ret (first ks) (next ks))
+       ret))))
+
+;redef into with batch support
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  [to from]
+  (if (instance? clojure.lang.IEditableCollection to)
+    (#(loop [ret (transient to) items (seq from)]
+        (if items
+          (recur (conj! ret (first items)) (next items))
+          (persistent! ret))))
+    (#(loop [ret to items (seq from)]
+        (if items
+          (recur (conj ret (first items)) (next items))
+          ret)))))
+

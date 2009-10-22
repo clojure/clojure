@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-; Author: Frantisek Sodomka
+; Author: Frantisek Sodomka, Stephen C. Gilardi
 
 
 (ns clojure.test-clojure.vars
@@ -21,7 +21,7 @@
 
 (def a)
 (deftest test-binding
-  (are [_1 _2] (= _1 _2)
+  (are [x y] (= x y)
       (eval `(binding [a 4] a)) 4     ; regression in Clojure SVN r1370
   ))
 

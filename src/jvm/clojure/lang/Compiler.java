@@ -57,7 +57,7 @@ static final Symbol IMPORT = Symbol.create("clojure.core", "import*");
 //static final Symbol INSTANCE = Symbol.create("instance?");
 
 //static final Symbol THISFN = Symbol.create("thisfn");
-//static final Symbol CLASS = Symbol.create("class");
+static final Symbol CLASS = Symbol.create("Class");
 static final Symbol NEW = Symbol.create("new");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
@@ -179,6 +179,9 @@ static final public Var METHOD = Var.create(null);
 //null or not
 static final public Var IN_CATCH_FINALLY = Var.create(null);
 
+//DynamicClassLoader
+static final public Var LOADER = Var.create();
+
 //String
 static final public Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                             Symbol.create("*source-path*"), "NO_SOURCE_FILE");
@@ -207,8 +210,6 @@ static final public Var NEXT_LOCAL_NUM = Var.create(0);
 //Integer
 static final public Var RET_LOCAL_NUM = Var.create();
 
-//DynamicClassLoader
-static final public Var LOADER = Var.create();
 
 public enum C{
 	STATEMENT,  //value ignored
@@ -819,7 +820,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) tag;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				if(sym.name.equals("ints"))
+				if(sym.name.equals("objects"))
+					c = Object[].class;
+				else if(sym.name.equals("ints"))
 					c = int[].class;
 				else if(sym.name.equals("longs"))
 					c = long[].class;
@@ -2989,8 +2992,27 @@ static public class ObjExpr implements Expr{
 					}
 				else if(value instanceof Class)
 						{
-						gen.push(((Class) value).getName());
-						gen.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
+                                                Class cc = (Class)value;
+                                                if(cc.isPrimitive())
+                                                        {
+                                                        Type bt;
+                                                        if ( cc == boolean.class ) bt = Type.getType(Boolean.class);
+                                                        else if ( cc == byte.class ) bt = Type.getType(Byte.class);
+                                                        else if ( cc == char.class ) bt = Type.getType(Character.class);
+                                                        else if ( cc == double.class ) bt = Type.getType(Double.class);
+                                                        else if ( cc == float.class ) bt = Type.getType(Float.class);
+                                                        else if ( cc == int.class ) bt = Type.getType(Integer.class);
+                                                        else if ( cc == long.class ) bt = Type.getType(Long.class);
+                                                        else if ( cc == short.class ) bt = Type.getType(Short.class);
+                                                        else throw new RuntimeException(
+                                                                "Can't embed unknown primitive in code: " + value);
+                                                        gen.getStatic( bt, "TYPE", Type.getType(Class.class) );
+                                                        }
+                                                else
+                                                        {
+                                                        gen.push(cc.getName());
+                                                        gen.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
+                                                        }
 						}
 					else if(value instanceof Symbol)
 							{
@@ -4266,7 +4288,7 @@ public static Object macroexpand1(Object x) throws Exception{
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
-						target = RT.list(IDENTITY, target);
+						target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY,CLASS));
 						}
 					return RT.listStar(DOT, target, meth, form.next().next());
 					}
