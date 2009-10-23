@@ -1074,8 +1074,9 @@
   second item in the first form, making a list of it if it is not a
   list already. If there are more forms, inserts the first form as the
   second item in second form, etc."
+  ([x] x)
   ([x form] (if (seq? form)
-              `(~(first form) ~x ~@(next form))
+              (with-meta `(~(first form) ~x ~@(next form)) (meta form))
               (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
@@ -1085,7 +1086,7 @@
   list already. If there are more forms, inserts the first form as the
   last item in second form, etc."
   ([x form] (if (seq? form)
-              `(~(first form) ~@(next form)  ~x)
+              (with-meta `(~(first form) ~@(next form)  ~x) (meta form))
               (list form x)))
   ([x form & more] `(->> (->> ~x ~form) ~@more)))
 
