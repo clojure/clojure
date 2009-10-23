@@ -791,10 +791,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(maybeField)    //field
 				{
 				Symbol sym = (Symbol) RT.third(form);
-				if(c != null)
-					return new StaticFieldExpr(line, c, sym.name);
-				else
-					return new InstanceFieldExpr(line, instance, sym.name);
+				Symbol tag = tagOf(form);
+				if(c != null) {
+					return new StaticFieldExpr(line, c, sym.name, tag);
+				} else
+					return new InstanceFieldExpr(line, instance, sym.name, tag);
 				}
 			else
 				{
@@ -802,13 +803,14 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
+				Symbol tag = tagOf(form);
 				PersistentVector args = PersistentVector.EMPTY;
 				for(ISeq s = RT.next(call); s != null; s = s.next())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
-					return new StaticMethodExpr(source, line, c, sym.name, args);
+					return new StaticMethodExpr(source, line, tag, c, sym.name, args);
 				else
-					return new InstanceMethodExpr(source, line, instance, sym.name, args);
+					return new InstanceMethodExpr(source, line, tag, instance, sym.name, args);
 				}
 		}
 	}
@@ -901,16 +903,18 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	public final java.lang.reflect.Field field;
 	public final String fieldName;
 	public final int line;
+	public final Symbol tag;
 	final static Method invokeNoArgInstanceMember = Method.getMethod("Object invokeNoArgInstanceMember(Object,String)");
 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
 
-	public InstanceFieldExpr(int line, Expr target, String fieldName) throws Exception{
+	public InstanceFieldExpr(int line, Expr target, String fieldName, Symbol tag) throws Exception{
 		this.target = target;
 		this.targetClass = target.hasJavaClass() ? target.getJavaClass() : null;
 		this.field = targetClass != null ? Reflector.getField(targetClass, fieldName, false) : null;
 		this.fieldName = fieldName;
 		this.line = line;
+		this.tag = tag;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
 			((PrintWriter) RT.ERR.deref())
@@ -960,11 +964,11 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public boolean hasJavaClass() throws Exception{
-		return field != null;
+		return field != null || tag != null;
 	}
 
 	public Class getJavaClass() throws Exception{
-		return field.getType();
+		return tag != null ? HostExpr.tagToClass(tag) : field.getType();
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
@@ -1000,17 +1004,19 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	public final String fieldName;
 	public final Class c;
 	public final java.lang.reflect.Field field;
+	public final Symbol tag;
 //	final static Method getStaticFieldMethod = Method.getMethod("Object getStaticField(String,String)");
 //	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
 	final int line;
 
-	public StaticFieldExpr(int line, Class c, String fieldName) throws Exception{
+	public StaticFieldExpr(int line, Class c, String fieldName, Symbol tag) throws Exception{
 		//this.className = className;
 		this.fieldName = fieldName;
 		this.line = line;
 		//c = Class.forName(className);
 		this.c = c;
 		field = c.getField(fieldName);
+		this.tag = tag;
 	}
 
 	public Object eval() throws Exception{
@@ -1044,7 +1050,7 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	public Class getJavaClass() throws Exception{
 		//Class c = Class.forName(className);
 		//java.lang.reflect.Field field = c.getField(fieldName);
-		return field.getType();
+		return tag != null ? HostExpr.tagToClass(tag) : field.getType();
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
@@ -1127,19 +1133,21 @@ static class InstanceMethodExpr extends MethodExpr{
 	public final IPersistentVector args;
 	public final String source;
 	public final int line;
+	public final Symbol tag;
 	public final java.lang.reflect.Method method;
 
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(String source, int line, Expr target, String methodName, IPersistentVector args)
+	public InstanceMethodExpr(String source, int line, Symbol tag, Expr target, String methodName, IPersistentVector args)
 			throws Exception{
 		this.source = source;
 		this.line = line;
 		this.args = args;
 		this.methodName = methodName;
 		this.target = target;
+		this.tag = tag;
 		if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
@@ -1269,11 +1277,11 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 
 	public boolean hasJavaClass(){
-		return method != null;
+		return method != null || tag != null;
 	}
 
 	public Class getJavaClass() throws Exception{
-		return method.getReturnType();
+		return tag != null ? HostExpr.tagToClass(tag) : method.getReturnType();
 	}
 }
 
@@ -1286,18 +1294,20 @@ static class StaticMethodExpr extends MethodExpr{
 	public final String source;
 	public final int line;
 	public final java.lang.reflect.Method method;
+	public final Symbol tag;
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(Class,String,Object[])");
 
 
-	public StaticMethodExpr(String source, int line, Class c, String methodName, IPersistentVector args)
+	public StaticMethodExpr(String source, int line, Symbol tag, Class c, String methodName, IPersistentVector args)
 			throws Exception{
 		this.c = c;
 		this.methodName = methodName;
 		this.args = args;
 		this.source = source;
 		this.line = line;
+		this.tag = tag;
 
 		List methods = Reflector.getMethods(c, args.count(), methodName, true);
 		if(methods.isEmpty())
@@ -1402,11 +1412,11 @@ static class StaticMethodExpr extends MethodExpr{
 	}
 
 	public boolean hasJavaClass(){
-		return method != null;
+		return method != null || tag != null;
 	}
 
 	public Class getJavaClass() throws Exception{
-		return method.getReturnType();
+		return tag != null ? HostExpr.tagToClass(tag) : method.getReturnType();
 	}
 }
 
@@ -4468,6 +4478,15 @@ public static boolean namesStaticMember(Symbol sym){
 	return sym.ns != null && namespaceFor(sym) == null;
 }
 
+public static Object preserveTag(ISeq src, Object dst) {
+	Symbol tag = tagOf(src);
+	if (tag != null && dst instanceof IObj) {
+		IPersistentMap meta = RT.meta(dst);
+		return ((IObj) dst).withMeta((IPersistentMap) RT.assoc(meta, RT.TAG_KEY, tag));
+	}
+	return dst;
+}
+
 public static Object macroexpand1(Object x) throws Exception{
 	if(x instanceof ISeq)
 		{
@@ -4507,7 +4526,7 @@ public static Object macroexpand1(Object x) throws Exception{
 						{
 						target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY,CLASS));
 						}
-					return RT.listStar(DOT, target, meth, form.next().next());
+					return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()));
 					}
 				else if(namesStaticMember(sym))
 					{
@@ -4516,7 +4535,7 @@ public static Object macroexpand1(Object x) throws Exception{
 					if(c != null)
 						{
 						Symbol meth = Symbol.intern(sym.name);
-						return RT.listStar(DOT, target, meth, form.next());
+						return preserveTag(form, RT.listStar(DOT, target, meth, form.next()));
 						}
 					}
 				else
@@ -4565,7 +4584,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 			throw new IllegalArgumentException("Can't call nil");
 		IFn inline = isInline(op, RT.count(RT.next(form)));
 		if(inline != null)
-			return analyze(context, inline.applyTo(RT.next(form)));
+			return analyze(context, preserveTag(form, inline.applyTo(RT.next(form))));
 		IParser p;
 		if(op.equals(FN))
 			return FnExpr.parse(context, form, name);
@@ -4689,7 +4708,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 			if(c != null)
 				{
 				if(Reflector.getField(c, sym.name, true) != null)
-					return new StaticFieldExpr((Integer) LINE.deref(), c, sym.name);
+					return new StaticFieldExpr((Integer) LINE.deref(), c, sym.name, tag);
 				throw new Exception("Unable to find static field: " + sym.name + " in " + c);
 				}
 			}
