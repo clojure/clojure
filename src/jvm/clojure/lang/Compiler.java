@@ -4928,7 +4928,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 
 
 static public class NewInstanceExpr extends ObjExpr{
-	IPersistentMap optionsMap = PersistentArrayMap.EMPTY;
+	//IPersistentMap optionsMap = PersistentArrayMap.EMPTY;
 	IPersistentCollection methods;
 
 	public NewInstanceExpr(Object tag){
@@ -4938,56 +4938,57 @@ static public class NewInstanceExpr extends ObjExpr{
 	static Expr parse(C context, ISeq form) throws Exception{
 		//(new [super then interfaces] this-name? {options}? (method-name [args] body)*)
 
-		NewInstanceExpr ret = new NewInstanceExpr(null);
 		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
 		String basename = enclosingMethod != null ?
 		                  (trimGenID(enclosingMethod.objx.name) + "$")
 		                 : (munge(currentNS().name.name) + "$");
 		String simpleName = "obj__" + RT.nextID();
-		ret.name = basename + simpleName;
-		ret.internalName = ret.name.replace('.', '/');
-		ret.objtype = Type.getObjectType(ret.internalName);
+		String classname = basename + simpleName;
+		IPersistentVector interfaces = (IPersistentVector) RT.second(form);
 
-		PersistentVector v = PersistentVector.EMPTY;
-		for(ISeq s = RT.seq(RT.second(form));s!=null;s = s.next())
-			{
-			Class c = (Class) resolve((Symbol) s.first());
-			if(!c.isInterface() && v.count() > 0)
-				throw new IllegalArgumentException("superclass must be first");
-			v = v.cons(c);
-			}
-		ISeq superAndInterfaces = RT.seq(v);
-		Class superClass = (Class) RT.first(superAndInterfaces);
-		if(superClass == null || superClass.isInterface())
-			{
-			superClass = Object.class;
-			superAndInterfaces = RT.cons(superClass, superAndInterfaces);
-			}
-		ISeq interfaces = RT.next(superAndInterfaces);
-		Map[] mc = gatherMethods(superClass,interfaces);
-		Map overrideables = mc[0];
-		Map allmethods = mc[1];
 
 		ISeq rform = RT.next(RT.next(form));
 
 		//supers might be followed by symbol naming this
+		Symbol thisSym = null;
 		if(RT.first(rform) instanceof Symbol)
 			{
-			ret.thisName = ((Symbol) RT.first(rform)).name;
+			thisSym = (Symbol) RT.first(rform);
 			rform = RT.next(rform);
 			}
 
-		//might be followed by map of options
-		if(RT.first(rform) instanceof IPersistentMap)
-			{
-			ret.optionsMap = ((IPersistentMap) RT.first(rform));
-			rform = RT.next(rform);
-			}
+		return build(interfaces, null, thisSym, classname, null, rform);
+	}
 
-		if(RT.get(ret.optionsMap, volatileKey) != null)
+	static Expr build(IPersistentVector interfaceSyms, IPersistentVector fieldsSyms, Symbol thisSym, String className,
+	                  Symbol typeTag, ISeq methodForms) throws Exception{
+		NewInstanceExpr ret = new NewInstanceExpr(null);
+
+		ret.name = className;
+		ret.internalName = ret.name.replace('.', '/');
+		ret.objtype = Type.getObjectType(ret.internalName);
+
+		ret.internalName = ret.name.replace('.', '/');
+		ret.objtype = Type.getObjectType(ret.internalName);
+
+		if(thisSym != null)
+			ret.thisName = thisSym.name;
+
+		//todo - set up volatiles
+//		ret.volatiles = PersistentHashSet.create(RT.seq(RT.get(ret.optionsMap, volatileKey)));
+
+		PersistentVector interfaces = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(interfaceSyms);s!=null;s = s.next())
 			{
-			ret.volatiles = PersistentHashSet.create(RT.seq(RT.get(ret.optionsMap, volatileKey)));
+			Class c = (Class) resolve((Symbol) s.first());
+			if(!c.isInterface())
+				throw new IllegalArgumentException("only interfaces are supported, had: " + c.getName());
+			interfaces = interfaces.cons(c);
 			}
+		Class superClass = Object.class;
+		Map[] mc = gatherMethods(superClass,RT.seq(interfaces));
+		Map overrideables = mc[0];
+		Map allmethods = mc[1];
 
 		try
 			{
@@ -4999,7 +5000,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			//now (methodname [args] body)*
 			ret.line = (Integer) LINE.deref();
 			IPersistentCollection methods = null;
-			for(ISeq s = rform; s != null; s = RT.next(s))
+			for(ISeq s = methodForms; s != null; s = RT.next(s))
 				{
 				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),overrideables, allmethods);
 				methods = RT.conj(methods, m);
@@ -5017,14 +5018,15 @@ static public class NewInstanceExpr extends ObjExpr{
 			Var.popThreadBindings();
 			}
 
-		int icnt = RT.count(RT.next(superAndInterfaces));
+		int icnt = interfaces.count();
 		String[] inames = icnt > 0 ? new String[icnt] : null;
 		for(int i=0;i<icnt;i++)
-			inames[i] = slashname((Class) RT.nth(RT.next(superAndInterfaces), i));
+			inames[i] = slashname((Class) interfaces.nth(i));
 		ret.compile(slashname(superClass),inames,false);
 		ret.getCompiledClass();
 		return ret;
-	}
+		}
+
 
 	static String slashname(Class c){
 		return c.getName().replace('.', '/');

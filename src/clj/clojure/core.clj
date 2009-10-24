@@ -4493,7 +4493,7 @@
   []
   (let [d (java.util.concurrent.CountDownLatch. 1)
         v (atom nil)]
-    (new [clojure.lang.AFn clojure.lang.IDeref] this
+    (new [clojure.lang.IFn clojure.lang.IDeref] this
       (deref [] (.await d) @v)
       (invoke [x]
         (locking d
