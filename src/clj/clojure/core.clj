@@ -3903,8 +3903,8 @@
     (:require (clojure.contrib sql sql.tests))
     (:use (my.lib this that))
     (:import (java.util Date Timer Random)
-              (java.sql Connection Statement)))"
-
+             (java.sql Connection Statement)))"
+  {:arglists '([name docstring? attr-map? & references])}
   [name & references]
   (let [process-reference
         (fn [[kname & args]]
@@ -3913,8 +3913,12 @@
         docstring  (when (string? (first references)) (first references))
         references (if docstring (next references) references)
         name (if docstring
-               (with-meta name (assoc (meta name)
-                                      :doc docstring))
+               (vary-meta name assoc :doc docstring)
+               name)
+        metadata   (when (map? (first references)) (first references))
+        references (if metadata (next references) references)
+        name (if metadata
+               (vary-meta name merge metadata)
                name)
         gen-class-clause (first (filter #(= :gen-class (first %)) references))
         gen-class-call
