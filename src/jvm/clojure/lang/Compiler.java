@@ -2686,6 +2686,8 @@ static public class FnExpr extends ObjExpr{
 			Var.popThreadBindings();
 			}
 		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",null,fn.onceOnly);
+		fn.getCompiledClass();
+
 		return fn;
 	}
 
@@ -3192,7 +3194,7 @@ static public class ObjExpr implements Expr{
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//objx arg is enclosing objx, not this
-		getCompiledClass();
+//		getCompiledClass();
 		gen.newInstance(objtype);
 		gen.dup();
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
@@ -4375,8 +4377,12 @@ static String errorMsg(String source, int line, String s){
 }
 
 public static Object eval(Object form) throws Exception{
+	return eval(form, true);
+}
+
+public static Object eval(Object form, boolean freshLoader) throws Exception{
 	boolean createdLoader = false;
-	if(true)//!LOADER.isBound())
+	if(freshLoader)//!LOADER.isBound())
 		{
 		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
 		createdLoader = true;
@@ -4733,7 +4739,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 		    r = LispReader.read(pushbackReader, false, EOF, false))
 			{
 			LINE_AFTER.set(pushbackReader.getLineNumber());
-			ret = eval(r);
+			ret = eval(r,false);
 			LINE_BEFORE.set(pushbackReader.getLineNumber());
 			}
 		}
@@ -5016,6 +5022,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		for(int i=0;i<icnt;i++)
 			inames[i] = slashname((Class) RT.nth(RT.next(superAndInterfaces), i));
 		ret.compile(slashname(superClass),inames,false);
+		ret.getCompiledClass();
 		return ret;
 	}
 
