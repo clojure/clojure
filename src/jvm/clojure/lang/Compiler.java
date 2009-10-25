@@ -55,10 +55,12 @@ static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
 static final Symbol IMPORT = Symbol.create("clojure.core", "import*");
 //static final Symbol INSTANCE = Symbol.create("instance?");
+static final Symbol DEFCLASS = Symbol.create("defclass*");
 
 //static final Symbol THISFN = Symbol.create("thisfn");
 static final Symbol CLASS = Symbol.create("Class");
 static final Symbol NEW = Symbol.create("new");
+static final Symbol THIS = Symbol.create("this");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
 //static final Symbol SYNTAX_QUOTE = Symbol.create("clojure.core", "syntax-quote");
@@ -74,6 +76,7 @@ static final Keyword inlineKey = Keyword.intern(null, "inline");
 static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 
 static final Keyword volatileKey = Keyword.intern(null, "volatile");
+static final Keyword implementsKey = Keyword.intern(null, "implements");
 
 static final Symbol NS = Symbol.create("ns");
 static final Symbol IN_NS = Symbol.create("in-ns");
@@ -97,6 +100,7 @@ static final public IPersistentMap specials = PersistentHashMap.create(
 		IMPORT, new ImportExpr.Parser(),
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
+		DEFCLASS, new NewInstanceExpr.DefclassParser(),
 //		TRY_FINALLY, new TryFinallyExpr.Parser(),
 TRY, new TryExpr.Parser(),
 THROW, new ThrowExpr.Parser(),
@@ -2718,6 +2722,9 @@ static public class ObjExpr implements Expr{
 	//symbols
 	IPersistentSet volatiles = PersistentHashSet.EMPTY;
 
+	//symbol->lb
+	IPersistentMap fields = null;
+
 	//Keyword->KeywordExpr
 	IPersistentMap keywords = PersistentHashMap.EMPTY;
 	IPersistentMap vars = PersistentHashMap.EMPTY;
@@ -2885,15 +2892,29 @@ static public class ObjExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			//todo - only enable this non-private+writability for letfns where we need it
-			if(lb.getPrimitiveType() != null)
-//				cv.visitField(ACC_PUBLIC + (isVolatile(lb) ? ACC_VOLATILE : ACC_FINAL)
-				cv.visitField(0 + (isVolatile(lb) ? ACC_VOLATILE : 0)
-						, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
-						      null, null);
+			if(isDefclass())
+				{
+				int access = isVolatile(lb) ? ACC_VOLATILE : (ACC_PUBLIC + ACC_FINAL);
+				if(lb.getPrimitiveType() != null)
+					cv.visitField(access
+							, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
+								  null, null);
+				else
+				//todo - when closed-overs are fields, use more specific types here and in ctor and emitLocal?
+					cv.visitField(access
+							, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+				}
 			else
-				cv.visitField(0 //+ (oneTimeUse ? 0 : ACC_FINAL)
-						, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+				{
+				//todo - only enable this non-private+writability for letfns where we need it
+				if(lb.getPrimitiveType() != null)
+					cv.visitField(0 + (isVolatile(lb) ? ACC_VOLATILE : 0)
+							, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
+								  null, null);
+				else
+					cv.visitField(0 //+ (oneTimeUse ? 0 : ACC_FINAL)
+							, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+				}
 			}
 		//ctor that takes closed-overs and inits base + fields
 		Method m = new Method("<init>", Type.VOID_TYPE, ctorTypes());
@@ -3126,6 +3147,10 @@ static public class ObjExpr implements Expr{
 		return closes.containsKey(lb) && volatiles.contains(lb.sym);
 	}
 
+	boolean isDefclass(){
+		return fields != null;
+	}
+
 	void emitClearCloses(GeneratorAdapter gen){
 		int a = 1;
 		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
@@ -3161,6 +3186,8 @@ static public class ObjExpr implements Expr{
 	}
 
 	public Object eval() throws Exception{
+		if(isDefclass())
+			return null;
 		return getCompiledClass().newInstance();
 	}
 
@@ -3195,21 +3222,26 @@ static public class ObjExpr implements Expr{
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//objx arg is enclosing objx, not this
 //		getCompiledClass();
-		gen.newInstance(objtype);
-		gen.dup();
-		for(ISeq s = RT.keys(closes); s != null; s = s.next())
+		if(isDefclass())
 			{
-			LocalBinding lb = (LocalBinding) s.first();
-			if(lb.getPrimitiveType() != null)
-				objx.emitUnboxedLocal(gen, lb);
-			else
-				objx.emitLocal(gen, lb);
+			gen.visitInsn(Opcodes.ACONST_NULL);
 			}
-		gen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes()));
+		else
+			{
+			gen.newInstance(objtype);
+			gen.dup();
+			for(ISeq s = RT.keys(closes); s != null; s = s.next())
+				{
+				LocalBinding lb = (LocalBinding) s.first();
+				if(lb.getPrimitiveType() != null)
+					objx.emitUnboxedLocal(gen, lb);
+				else
+					objx.emitLocal(gen, lb);
+				}
+			gen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes()));
+			}
 		if(context == C.STATEMENT)
-			{
 			gen.pop();
-			}
 	}
 
 	public boolean hasJavaClass() throws Exception{
@@ -4935,6 +4967,27 @@ static public class NewInstanceExpr extends ObjExpr{
 		super(tag);
 	}
 
+	static class DefclassParser implements IParser{
+		public Expr parse(C context, Object frm) throws Exception{
+			ISeq rform = (ISeq) frm;
+			//(defclass* classname [fields] :implements [interfaces] :tag tagname methods*)
+			rform = RT.next(rform);
+			String classname = ((Symbol) rform.first()).toString();
+			rform = rform.next();
+			IPersistentVector fields = (IPersistentVector) rform.first();
+			rform = rform.next();
+			IPersistentMap opts = PersistentHashMap.EMPTY;
+			while(rform != null && rform.first() instanceof Keyword)
+				{
+				opts = opts.assoc(rform.first(), RT.second(rform));
+				rform = rform.next().next();
+				}
+
+			return build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,THIS,classname,
+			             (Symbol) RT.get(opts,RT.TAG_KEY),rform);
+		}
+	}
+
 	static Expr parse(C context, ISeq form) throws Exception{
 		//(new [super then interfaces] this-name? {options}? (method-name [args] body)*)
 
@@ -4960,7 +5013,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		return build(interfaces, null, thisSym, classname, null, rform);
 	}
 
-	static Expr build(IPersistentVector interfaceSyms, IPersistentVector fieldsSyms, Symbol thisSym, String className,
+	static Expr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym, String className,
 	                  Symbol typeTag, ISeq methodForms) throws Exception{
 		NewInstanceExpr ret = new NewInstanceExpr(null);
 
@@ -4974,6 +5027,25 @@ static public class NewInstanceExpr extends ObjExpr{
 		if(thisSym != null)
 			ret.thisName = thisSym.name;
 
+		if(fieldSyms != null)
+			{
+			IPersistentMap fmap = PersistentHashMap.EMPTY;
+			Object[] closesvec = new Object[2 * fieldSyms.count()];
+			for(int i=0;i<fieldSyms.count();i++)
+				{
+				Symbol sym = (Symbol) fieldSyms.nth(i);
+				LocalBinding lb = new LocalBinding(-1, sym, null,
+				                                   new MethodParamExpr(tagClass(tagOf(sym))),false);
+				fmap = fmap.assoc(sym, lb);
+				closesvec[i*2] = lb;
+				closesvec[i*2 + 1] = lb;
+				}
+
+			//todo - inject __meta et al into closes - when?
+			//use array map to preserve ctor order
+			ret.closes = new PersistentArrayMap(closesvec);
+			ret.fields = fmap;
+			}
 		//todo - set up volatiles
 //		ret.volatiles = PersistentHashSet.create(RT.seq(RT.get(ret.optionsMap, volatileKey)));
 
@@ -4996,6 +5068,10 @@ static public class NewInstanceExpr extends ObjExpr{
 					RT.map(CONSTANTS, PersistentVector.EMPTY,
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY));
+			if(ret.isDefclass())
+				{
+				Var.pushThreadBindings(RT.map(METHOD,null,LOCAL_ENV,ret.fields));
+				}
 
 			//now (methodname [args] body)*
 			ret.line = (Integer) LINE.deref();
@@ -5015,6 +5091,8 @@ static public class NewInstanceExpr extends ObjExpr{
 			}
 		finally
 			{
+			if(ret.isDefclass())
+				Var.popThreadBindings();
 			Var.popThreadBindings();
 			}
 
@@ -5110,41 +5188,7 @@ public static class NewInstanceMethod extends ObjMethod{
 		return argTypes;
 	}
 
-	static Class primClass(Symbol sym){
-		if(sym == null)
-			return null;
-		Class c = null;
-		if(sym.name.equals("int"))
-			c = int.class;
-		else if(sym.name.equals("long"))
-			c = long.class;
-		else if(sym.name.equals("float"))
-			c = float.class;
-		else if(sym.name.equals("double"))
-			c = double.class;
-		else if(sym.name.equals("char"))
-			c = char.class;
-		else if(sym.name.equals("short"))
-			c = short.class;
-		else if(sym.name.equals("byte"))
-			c = byte.class;
-		else if(sym.name.equals("boolean"))
-			c = boolean.class;
-		else if(sym.name.equals("void"))
-			c = void.class;
-		return c;
-	}
 
-	static Class tagClass(Object tag) throws Exception{
-		if(tag == null)
-			return Object.class;
-		Class c = null;
-		if(tag instanceof Symbol)
-			c = primClass((Symbol) tag);
-		if(c == null)
-			c = HostExpr.tagToClass(tag);
-		return c;
-	}
 
 	static public IPersistentVector msig(String name,Class[] paramTypes){
 		return RT.vector(name,RT.seq(paramTypes));
@@ -5343,6 +5387,42 @@ public static class NewInstanceMethod extends ObjMethod{
 		gen.endMethod();
 	}
 }
+
+	static Class primClass(Symbol sym){
+		if(sym == null)
+			return null;
+		Class c = null;
+		if(sym.name.equals("int"))
+			c = int.class;
+		else if(sym.name.equals("long"))
+			c = long.class;
+		else if(sym.name.equals("float"))
+			c = float.class;
+		else if(sym.name.equals("double"))
+			c = double.class;
+		else if(sym.name.equals("char"))
+			c = char.class;
+		else if(sym.name.equals("short"))
+			c = short.class;
+		else if(sym.name.equals("byte"))
+			c = byte.class;
+		else if(sym.name.equals("boolean"))
+			c = boolean.class;
+		else if(sym.name.equals("void"))
+			c = void.class;
+		return c;
+	}
+
+	static Class tagClass(Object tag) throws Exception{
+		if(tag == null)
+			return Object.class;
+		Class c = null;
+		if(tag instanceof Symbol)
+			c = primClass((Symbol) tag);
+		if(c == null)
+			c = HostExpr.tagToClass(tag);
+		return c;
+	}
 
 static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 	final Class c;
