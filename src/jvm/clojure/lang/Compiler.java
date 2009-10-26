@@ -77,6 +77,7 @@ static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 
 static final Keyword volatileKey = Keyword.intern(null, "volatile");
 static final Keyword implementsKey = Keyword.intern(null, "implements");
+static final String COMPILE_STUB_PREFIX = "compile__stub";
 
 static final Symbol NS = Symbol.create("ns");
 static final Symbol IN_NS = Symbol.create("in-ns");
@@ -213,6 +214,10 @@ static final public Var NEXT_LOCAL_NUM = Var.create(0);
 
 //Integer
 static final public Var RET_LOCAL_NUM = Var.create();
+
+
+static final public Var COMPILE_STUB_SYM = Var.create(null);
+static final public Var COMPILE_STUB_CLASS = Var.create(null);
 
 
 public enum C{
@@ -780,6 +785,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) form;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
+				if(Util.equals(sym,COMPILE_STUB_SYM.get()))
+					return (Class) COMPILE_STUB_CLASS.get();
 				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 					c = RT.classForName(sym.name);
 				else
@@ -891,8 +898,8 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		if(targetClass != null && field != null)
 			{
 			target.emit(C.EXPRESSION, objx, gen);
-			gen.checkCast(Type.getType(targetClass));
-			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
+			gen.checkCast(getType(targetClass));
+			gen.getField(getType(targetClass), fieldName, Type.getType(field.getType()));
 			}
 		else
 			throw new UnsupportedOperationException("Unboxed emit of unknown member");
@@ -903,8 +910,8 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		if(targetClass != null && field != null)
 			{
 			target.emit(C.EXPRESSION, objx, gen);
-			gen.checkCast(Type.getType(targetClass));
-			gen.getField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
+			gen.checkCast(getType(targetClass));
+			gen.getField(getType(targetClass), fieldName, Type.getType(field.getType()));
 			//if(context != C.STATEMENT)
 			HostExpr.emitBoxReturn(objx, gen, field.getType());
 			if(context == C.STATEMENT)
@@ -3033,7 +3040,7 @@ static public class ObjExpr implements Expr{
                                                         }
                                                 else
                                                         {
-                                                        gen.push(cc.getName());
+                                                        gen.push(destubClassName(cc.getName()));
                                                         gen.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
                                                         }
 						}
@@ -4537,6 +4544,20 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 
 }
 
+static String destubClassName(String className){
+	//skip over prefix + '.' or '/'
+	if(className.startsWith(COMPILE_STUB_PREFIX))
+		return className.substring(COMPILE_STUB_PREFIX.length()+1);
+	return className;
+}
+
+static Type getType(Class c){
+	String descriptor = Type.getType(c).getDescriptor();
+	if(descriptor.startsWith("L"))
+		descriptor = "L" + destubClassName(descriptor.substring(1));
+	return Type.getType(descriptor);
+}
+
 static Object resolve(Symbol sym, boolean allowPrivate) throws Exception{
 	return resolveIn(currentNS(), sym, allowPrivate);
 }
@@ -4587,6 +4608,8 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) th
 				return RT.IN_NS_VAR;
 			else
 				{
+				if(Util.equals(sym,COMPILE_STUB_SYM.get()))
+					return COMPILE_STUB_CLASS.get();
 				Object o = n.getMapping(sym);
 				if(o == null)
 					{
@@ -5061,7 +5084,15 @@ static public class NewInstanceExpr extends ObjExpr{
 		Map[] mc = gatherMethods(superClass,RT.seq(interfaces));
 		Map overrideables = mc[0];
 		Map allmethods = mc[1];
+		String[] inames = interfaceNames(interfaces);
 
+		Symbol thistag = null;
+		Class stub = null;
+		if(ret.isDefclass())
+			{
+			stub = compileStub(slashname(superClass),ret, inames);
+			thistag = Symbol.intern(null,stub.getName());
+			}
 		try
 			{
 			Var.pushThreadBindings(
@@ -5070,7 +5101,10 @@ static public class NewInstanceExpr extends ObjExpr{
 					       VARS, PersistentHashMap.EMPTY));
 			if(ret.isDefclass())
 				{
-				Var.pushThreadBindings(RT.map(METHOD,null,LOCAL_ENV,ret.fields));
+				Var.pushThreadBindings(RT.map(METHOD,null,
+				                              LOCAL_ENV,ret.fields
+											,COMPILE_STUB_SYM, Symbol.intern(null,stub.getSimpleName())
+											,COMPILE_STUB_CLASS, stub));
 				}
 
 			//now (methodname [args] body)*
@@ -5078,7 +5112,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			IPersistentCollection methods = null;
 			for(ISeq s = methodForms; s != null; s = RT.next(s))
 				{
-				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),overrideables, allmethods);
+				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),thistag, overrideables, allmethods);
 				methods = RT.conj(methods, m);
 				}
 
@@ -5096,14 +5130,67 @@ static public class NewInstanceExpr extends ObjExpr{
 			Var.popThreadBindings();
 			}
 
-		int icnt = interfaces.count();
-		String[] inames = icnt > 0 ? new String[icnt] : null;
-		for(int i=0;i<icnt;i++)
-			inames[i] = slashname((Class) interfaces.nth(i));
 		ret.compile(slashname(superClass),inames,false);
 		ret.getCompiledClass();
 		return ret;
 		}
+
+	/***
+	 * Current host interop uses reflection, which requires pre-existing classes
+	 * Work around this by:
+	 * Generate a stub class that has the same interfaces and fields as the class we are generating.
+	 * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
+	 * Unmunge the name (using a magic prefix) on any code gen for classes
+	 */
+	static Class compileStub(String superName, NewInstanceExpr ret, String[] interfaceNames){
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		ClassVisitor cv = cw;
+		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, COMPILE_STUB_PREFIX + "/" + ret.internalName,
+		         null,superName,interfaceNames);
+
+		//instance fields for closed-overs
+		for(ISeq s = RT.keys(ret.closes); s != null; s = s.next())
+			{
+			LocalBinding lb = (LocalBinding) s.first();
+			int access = ACC_PUBLIC + (ret.isVolatile(lb) ? ACC_VOLATILE : ACC_FINAL);
+			if(lb.getPrimitiveType() != null)
+				cv.visitField(access
+						, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
+							  null, null);
+			else
+			//todo - when closed-overs are fields, use more specific types here and in ctor and emitLocal?
+				cv.visitField(access
+						, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+			}
+
+		//ctor that takes closed-overs and does nothing
+		Method m = new Method("<init>", Type.VOID_TYPE, ret.ctorTypes());
+		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
+		                                                m,
+		                                                null,
+		                                                null,
+		                                                cv);
+		ctorgen.visitCode();
+		ctorgen.loadThis();
+		ctorgen.invokeConstructor(Type.getObjectType(superName), voidctor);
+		ctorgen.returnValue();
+		ctorgen.endMethod();
+
+		//end of class
+		cv.visitEnd();
+
+		byte[] bytecode = cw.toByteArray();
+		DynamicClassLoader loader = (DynamicClassLoader) LOADER.deref();
+		return loader.defineClass(COMPILE_STUB_PREFIX + "." + ret.name, bytecode);		
+	}
+
+	static String[] interfaceNames(IPersistentVector interfaces){
+		int icnt = interfaces.count();
+		String[] inames = icnt > 0 ? new String[icnt] : null;
+		for(int i=0;i<icnt;i++)
+			inames[i] = slashname((Class) interfaces.nth(i));
+		return inames;
+	}
 
 
 	static String slashname(Class c){
@@ -5194,7 +5281,8 @@ public static class NewInstanceMethod extends ObjMethod{
 		return RT.vector(name,RT.seq(paramTypes));
 	}
 
-	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Map overrideables, Map allmethods) throws Exception{
+	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Symbol thistag,
+	                               Map overrideables, Map allmethods) throws Exception{
 		//(methodname [args] body...)
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
 		Symbol name = (Symbol)RT.first(form);
@@ -5213,7 +5301,7 @@ public static class NewInstanceMethod extends ObjMethod{
 
 			//register 'this' as local 0
 			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "obj__" + RT.nextID()),
-			              null, null,false);
+			              thistag, null,false);
 
 			PersistentVector argLocals = PersistentVector.EMPTY;
 			method.retClass = tagClass(tagOf(name));
@@ -5277,6 +5365,9 @@ public static class NewInstanceMethod extends ObjMethod{
 			else if(findMethodsWithName(name.name,allmethods).size()>0)
 				throw new IllegalArgumentException("Can't override/overload method: " + name.name);
 			//todo
+			else
+				throw new IllegalArgumentException("Can't define method not in interfaces: " + name.name);
+
 			//else
 				//validate unque name+arity among additional methods
 
