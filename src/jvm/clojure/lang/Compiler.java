@@ -4986,6 +4986,9 @@ static public class NewInstanceExpr extends ObjExpr{
 	//IPersistentMap optionsMap = PersistentArrayMap.EMPTY;
 	IPersistentCollection methods;
 
+	Map<IPersistentVector,java.lang.reflect.Method> mmap;
+	Map<IPersistentVector,Set<Class>> covariants;
+
 	public NewInstanceExpr(Object tag){
 		super(tag);
 	}
@@ -5083,7 +5086,10 @@ static public class NewInstanceExpr extends ObjExpr{
 		Class superClass = Object.class;
 		Map[] mc = gatherMethods(superClass,RT.seq(interfaces));
 		Map overrideables = mc[0];
-		Map allmethods = mc[1];
+		Map covariants = mc[1];
+		ret.mmap = overrideables;
+		ret.covariants = covariants;
+		
 		String[] inames = interfaceNames(interfaces);
 
 		Symbol thistag = null;
@@ -5112,7 +5118,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			IPersistentCollection methods = null;
 			for(ISeq s = methodForms; s != null; s = RT.next(s))
 				{
-				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),thistag, overrideables, allmethods);
+				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),thistag, overrideables);
 				methods = RT.conj(methods, m);
 				}
 
@@ -5204,48 +5210,102 @@ static public class NewInstanceExpr extends ObjExpr{
 			ObjMethod method = (ObjMethod) s.first();
 			method.emit(this, cv);
 			}
+		//emit bridge methods
+		for(Map.Entry<IPersistentVector,Set<Class>> e : covariants.entrySet())
+			{
+			java.lang.reflect.Method m = mmap.get(e.getKey());
+			Class[] params = m.getParameterTypes();
+			Type[] argTypes = new Type[params.length];
+
+			for(int i = 0; i < params.length; i++)
+				{
+				argTypes[i] = Type.getType(params[i]);
+				}
+
+			Method target = new Method(m.getName(), Type.getType(m.getReturnType()), argTypes);
+
+			for(Class retType : e.getValue())
+				{
+ 		        Method meth = new Method(m.getName(), Type.getType(retType), argTypes);
+
+				GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_BRIDGE,
+		                                            meth,
+		                                            null,
+		                                            //todo don't hardwire this
+		                                            EXCEPTION_TYPES,
+		                                            cv);
+				gen.visitCode();
+				gen.loadThis();
+				gen.loadArgs();
+				gen.invokeInterface(Type.getType(m.getDeclaringClass()),target);
+				gen.returnValue();
+				gen.endMethod();
+				}
+			}
 	}
 
 	static public IPersistentVector msig(java.lang.reflect.Method m){
-		return RT.vector(m.getName(), RT.seq(m.getParameterTypes()));
+		return RT.vector(m.getName(), RT.seq(m.getParameterTypes()),m.getReturnType());
 	}
 
-	static void considerMethod(java.lang.reflect.Method m, Map mm, Map considered){
+	static void considerMethod(java.lang.reflect.Method m, Map mm){
 		IPersistentVector mk = msig(m);
 		int mods = m.getModifiers();
 
-		if(considered.containsKey(mk)
-		   || !(Modifier.isPublic(mods) || Modifier.isProtected(mods))
-		   || Modifier.isStatic(mods)
-		   || Modifier.isFinal(mods))
+		if(!(mm.containsKey(mk)
+		    || !(Modifier.isPublic(mods) || Modifier.isProtected(mods))
+		    || Modifier.isStatic(mods)
+		    || Modifier.isFinal(mods)))
 			{
-			if(!Modifier.isStatic(mods))
-				considered.put(mk, m);
-			}
-		else
-			{
-			considered.put(mk, m);
-			mm.put(mk, m);
+				mm.put(mk, m);
 			}
 	}
 
-	static void gatherMethods(Class c, Map mm, Map considered){
+	static void gatherMethods(Class c, Map mm){
 		for(; c != null; c = c.getSuperclass())
 			{
 			for(java.lang.reflect.Method m : c.getDeclaredMethods())
-				considerMethod(m, mm, considered);
+				considerMethod(m, mm);
 			for(java.lang.reflect.Method m : c.getMethods())
-				considerMethod(m, mm, considered);
+				considerMethod(m, mm);
 			}
 	}
 
 	static public Map[] gatherMethods(Class sc, ISeq interfaces){
-		Map mm = new HashMap();
-		Map considered = new HashMap();
-		gatherMethods(sc, mm, considered);
+		Map allm = new HashMap();
+		gatherMethods(sc, allm);
 		for(; interfaces != null; interfaces = interfaces.next())
-			gatherMethods((Class) interfaces.first(), mm, considered);
-		return new Map[]{mm, considered};
+			gatherMethods((Class) interfaces.first(), allm);
+
+		Map<IPersistentVector,java.lang.reflect.Method> mm = new HashMap<IPersistentVector,java.lang.reflect.Method>();
+		Map<IPersistentVector,Set<Class>> covariants = new HashMap<IPersistentVector,Set<Class>>();
+		for(Object o : allm.entrySet())
+			{
+			Map.Entry e = (Map.Entry) o;
+			IPersistentVector mk = (IPersistentVector) e.getKey();
+			mk = (IPersistentVector) mk.pop();
+			java.lang.reflect.Method m = (java.lang.reflect.Method) e.getValue();
+			if(mm.containsKey(mk)) //covariant return
+				{
+				Set<Class> cvs = covariants.get(mk);
+				if(cvs == null)
+					{
+					cvs = new HashSet<Class>();
+					covariants.put(mk,cvs);
+					}
+				java.lang.reflect.Method om = mm.get(mk);
+				if(om.getReturnType().isAssignableFrom(m.getReturnType()))
+					{
+					cvs.add(om.getReturnType());
+					mm.put(mk, m);
+					}
+				else
+					cvs.add(m.getReturnType());
+				}
+			else
+				mm.put(mk, m);
+			}
+		return new Map[]{mm,covariants};
 	}
 }
 
@@ -5282,7 +5342,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	}
 
 	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Symbol thistag,
-	                               Map overrideables, Map allmethods) throws Exception{
+	                               Map overrideables) throws Exception{
 		//(methodname [args] body...)
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
 		Symbol name = (Symbol)RT.first(form);
@@ -5350,9 +5410,9 @@ public static class NewInstanceMethod extends ObjMethod{
 						if(m == null)
 							throw new IllegalArgumentException("Can't find matching method: " + name.name +
 							                                   ", leave off hints for auto match.");
-					if(m.getReturnType() != method.retClass)
-						throw new IllegalArgumentException("Mismatched return type: " + name.name +
-						", expected: " + m.getReturnType().getName()  + ", had: " + method.retClass.getName());
+						if(m.getReturnType() != method.retClass)
+							throw new IllegalArgumentException("Mismatched return type: " + name.name +
+							", expected: " + m.getReturnType().getName()  + ", had: " + method.retClass.getName());
 						}
 					else //adopt found method sig
 						{
@@ -5362,9 +5422,8 @@ public static class NewInstanceMethod extends ObjMethod{
 						}
 					}
 				}
-			else if(findMethodsWithName(name.name,allmethods).size()>0)
-				throw new IllegalArgumentException("Can't override/overload method: " + name.name);
-			//todo
+//			else if(findMethodsWithName(name.name,allmethods).size()>0)
+//				throw new IllegalArgumentException("Can't override/overload method: " + name.name);
 			else
 				throw new IllegalArgumentException("Can't define method not in interfaces: " + name.name);
 
