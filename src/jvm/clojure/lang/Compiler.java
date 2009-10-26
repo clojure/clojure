@@ -2028,7 +2028,7 @@ public static class NewExpr implements Expr{
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(this.ctor != null)
 			{
-			Type type = Type.getType(c);
+			Type type = getType(c);
 			gen.newInstance(type);
 			gen.dup();
 			MethodExpr.emitTypedArgs(objx, gen, ctor.getParameterTypes(), args);
@@ -2041,7 +2041,7 @@ public static class NewExpr implements Expr{
 			}
 		else
 			{
-			gen.push(c.getName());
+			gen.push(destubClassName(c.getName()));
 			gen.invokeStatic(CLASS_TYPE, forNameMethod);
 			MethodExpr.emitArgsAsArray(args, objx, gen);
 			if(context == C.RETURN)
