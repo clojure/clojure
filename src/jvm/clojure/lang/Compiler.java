@@ -4439,8 +4439,8 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 				{
 				ISeq s = RT.next(form);
 				for(; RT.next(s) != null; s = RT.next(s))
-					eval(RT.first(s));
-				return eval(RT.first(s));
+					eval(RT.first(s),false);
+				return eval(RT.first(s),false);
 				}
 			else if(form instanceof IPersistentCollection
 			        && !(RT.first(form) instanceof Symbol

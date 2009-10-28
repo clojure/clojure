@@ -2157,7 +2157,11 @@
 (defn type 
   "Returns the :type metadata of x, or its Class if none"
   [x]
-  (or (:type (meta x)) (class x)))
+  (or (:type (meta x)) 
+      (if (instance? clojure.lang.IDynamicType x)
+        (let [x #^ clojure.lang.IDynamicType x]
+          (.getDynamicType x))
+        (class x))))
 
 (defn num
   "Coerce to Number"
@@ -4366,8 +4370,20 @@
   "Returns true if future f is done"
   [#^java.util.concurrent.Future f] (.isDone f))
 
+
+(defmacro letfn 
+  "Takes a vector of function specs and a body, and generates a set of
+  bindings of functions to their names. All of the names are available
+  in all of the definitions of the functions, as well as the body.
+
+  fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)" 
+  [fnspecs & body] 
+  `(letfn* ~(vec (interleave (map first fnspecs) 
+                             (map #(cons `fn %) fnspecs)))
+           ~@body))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
+(load "core_deftype")
 (load "core_proxy")
 (load "core_print")
 (load "genclass")
@@ -4438,16 +4454,6 @@
   [& exprs]
   `(pcalls ~@(map #(list `fn [] %) exprs)))
 
-(defmacro letfn 
-  "Takes a vector of function specs and a body, and generates a set of
-  bindings of functions to their names. All of the names are available
-  in all of the definitions of the functions, as well as the body.
-
-  fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)" 
-  [fnspecs & body] 
-  `(letfn* ~(vec (interleave (map first fnspecs) 
-                             (map #(cons `fn %) fnspecs)))
-           ~@body))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 
