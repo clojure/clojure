@@ -4381,6 +4381,70 @@
   `(letfn* ~(vec (interleave (map first fnspecs) 
                              (map #(cons `fn %) fnspecs)))
            ~@body))
+
+
+;;;;;;; case ;;;;;;;;;;;;;
+(defn- shift-mask [shift mask x]
+  (-> x (bit-shift-right shift) (bit-and mask)))
+
+(defn- min-hash 
+  "takes a collection of keys and returns [shift mask]"
+  [keys]
+  (let [hashes (map hash keys)
+        cnt (count keys)]
+    (when-not (apply distinct? hashes)
+      (throw (IllegalArgumentException. "Hashes must be distinct")))
+    (or (first 
+         (filter (fn [[s m]]
+                   (apply distinct? (map #(shift-mask s m %) hashes)))
+                 (for [mask (map #(dec (bit-shift-left 1 %)) (range 1 14))
+                       shift (range 0 31)]
+                   [shift mask])))
+        (throw (IllegalArgumentException. "No distinct mapping found")))))
+
+(defmacro case 
+  "Takes an expression, and a set of clauses.
+
+  Each clause can take the form of either:
+
+  test-constant result-expr
+
+  (test-constant1 ... test-constantN)  result-expr
+
+  The test-constants are not evaluated. They must be compile-time
+  literals, and need not be quoted.  If the expression is equal to a
+  test-constant, the corresponding result-expr is returned. A single
+  default expression can follow the clauses, and its value will be
+  returned if no clause matches. If no default expression is provided
+  and no clause matches, an IllegalArgumentException is thrown.
+
+  Unlike cond and condp, case does a constant-time dispatch, the
+  clauses are not considered sequentially.  All manner of constant
+  expressions are acceptable in case, including numbers, strings,
+  symbols, keywords, and (Clojure) composites thereof. Note that since
+  lists are used to group multiple constants that map to the same
+  expression, a vector can be used to match a list if needed. The
+  test-constants need not be all of the same type."
+
+  [e & clauses]
+  (let [ge (with-meta (gensym) {:tag Object})
+        default (if (odd? (count clauses)) 
+                  (last clauses)
+                  `(throw (IllegalArgumentException. (str "No matching clause: " ~ge))))
+        cases (partition 2 clauses)
+        case-map (reduce (fn [m [test expr]]
+                           (if (seq? test)
+                             (into m (zipmap test (repeat expr)))
+                             (assoc m test expr))) 
+                           {} cases)
+        [shift mask] (min-hash (keys case-map))
+        
+        hmap (reduce (fn [m [test expr :as te]]
+                       (assoc m (shift-mask shift mask (hash test)) te))
+                     (sorted-map) case-map)]
+    `(let [~ge ~e]
+       (case* ~ge ~shift ~mask ~(key (first hmap)) ~(key (last hmap)) ~default ~hmap))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 (load "core_deftype")
@@ -4587,3 +4651,4 @@
           (recur (conj ret (first items)) (next items))
           ret)))))
 
+ 
