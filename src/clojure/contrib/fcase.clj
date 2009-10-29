@@ -32,7 +32,9 @@ test for regular expressions and class membership.
 
 Note (December 23, 2008): This library has been supplanted by the
 inclusion of \"condp\" in clojure.core as of Clojure SVN rev. 1180."} 
-  clojure.contrib.fcase)
+
+  clojure.contrib.fcase
+  (:refer-clojure :exclude (case)))
 
 
 (defmacro fcase
