@@ -24,6 +24,7 @@
            At the moment, the only generator provided is a rather simple
            linear congruential generator."}
   clojure.contrib.probabilities.random-numbers
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.types :only (deftype)])
   (:use [clojure.contrib.stream-utils :only (defstream)])
   (:use [clojure.contrib.def :only (defvar)]))

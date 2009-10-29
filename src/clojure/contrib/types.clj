@@ -15,6 +15,7 @@
   #^{:author "Konrad Hinsen"
      :doc "General and algebraic data types"}
   clojure.contrib.types
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.def :only (name-with-attributes)]))
 
 ;

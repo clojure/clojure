@@ -17,6 +17,7 @@
            NOTE: This library is in evolution. Most math functions are
                  not implemented yet."}
   clojure.contrib.complex-numbers
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.types :only (deftype)]
 	[clojure.contrib.generic :only (root-type)])
   (:require [clojure.contrib.generic.arithmetic :as ga]

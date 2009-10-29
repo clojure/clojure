@@ -11,6 +11,7 @@
      :skip-wiki true
      :doc "Examples for data type definitions"}
   clojure.contrib.types.examples
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.types
 	 :only (deftype defadt match)])
   (:require [clojure.contrib.generic.collection :as gc])

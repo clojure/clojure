@@ -55,6 +55,7 @@
            the next value of stream argument s, whereas pick-all returns the
            next value of all stream arguments in the form of a vector."}
   clojure.contrib.stream-utils
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.types :only (deftype deftype-)])
   (:use [clojure.contrib.monads :only (defmonad with-monad)])
   (:use [clojure.contrib.def :only (defvar defvar-)])

@@ -31,6 +31,7 @@
            stream. Such functions are state monad values and can be
            composed using operations defined in clojure.contrib.monads."}
   clojure.contrib.probabilities.monte-carlo
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.macros :only (const)])
   (:use [clojure.contrib.types :only (deftype)])
   (:use [clojure.contrib.stream-utils :only (defstream stream-next)])

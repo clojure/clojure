@@ -15,6 +15,7 @@
 ;; core of the XP algorithm.
 
 (ns clojure.contrib.pprint.PrettyWriter
+  (:refer-clojure :exclude (deftype))
   (:use clojure.contrib.pprint.utilities)
   (:gen-class
    :extends clojure.contrib.pprint.ColumnWriter

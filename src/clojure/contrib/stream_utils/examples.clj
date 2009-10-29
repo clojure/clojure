@@ -11,6 +11,7 @@
      :skip-wiki true
      :doc "Examples for data streams"}
   clojure.contrib.stream-utils.examples
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.stream-utils
 	 :only (defst stream-next
 		pick pick-all

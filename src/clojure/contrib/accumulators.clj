@@ -23,6 +23,7 @@
      :doc "A generic accumulator interface and implementations of various
            accumulators."}
   clojure.contrib.accumulators
+  (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.types :only (deftype)])
   (:use [clojure.contrib.def :only (defvar defvar- defmacro-)])
   (:require [clojure.contrib.generic.arithmetic :as ga]))
