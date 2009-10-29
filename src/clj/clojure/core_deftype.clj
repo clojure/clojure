@@ -23,6 +23,8 @@
         methodname-set (set (map first methods))
         dynamic-type (contains? interface-set clojure.lang.IDynamicType)
         implement? (fn [iface] (not (contains? interface-set iface)))
+        hinted-fields fields
+        fields (vec (map #(with-meta % nil) fields))
         base-fields fields
         fields (conj fields '__meta '__extmap)]
     (letfn 
@@ -76,7 +78,7 @@
                          (new ~name ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~gk ~gv))))))]
            [i m]))]
      (let [[i m] (-> [interfaces methods] eqhash iobj ilookup associative)]
-       `(defclass* ~classname ~fields 
+       `(defclass* ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))
 
@@ -133,6 +135,8 @@
         classname (symbol (str *ns* "." gname))
         tag (keyword (str *ns*) (str name))
         interfaces (conj interfaces 'clojure.lang.IDynamicType)
+        hinted-fields fields
+        fields (vec (map #(with-meta % nil) fields))
         methods (conj methods 
                       `(~'getDynamicType [] ~tag)
                       `(~'getExtensionMap [] ~'__extmap)
@@ -151,7 +155,7 @@
                                        ~@(map (fn [fld] `(= ~fld (.getDynamicField ~'o ~(keyword fld) ~'this))) fields)
                                        (= ~'__extmap (.getExtensionMap ~'o)))))))))]
     `(do
-       ~(create-defclass* gname (vec fields) (vec interfaces) methods)
+       ~(create-defclass* gname (vec hinted-fields) (vec interfaces) methods)
        (defn ~name
          ([~@fields] (new ~classname ~@fields nil nil))
          ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#))))))
