@@ -4443,7 +4443,8 @@
                        (assoc m (shift-mask shift mask (hash test)) te))
                      (sorted-map) case-map)]
     `(let [~ge ~e]
-       (case* ~ge ~shift ~mask ~(key (first hmap)) ~(key (last hmap)) ~default ~hmap))))
+       (case* ~ge ~shift ~mask ~(key (first hmap)) ~(key (last hmap)) ~default ~hmap 
+              ~(every? keyword? (keys case-map))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")

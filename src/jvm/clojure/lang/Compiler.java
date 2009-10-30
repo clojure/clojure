@@ -5615,15 +5615,17 @@ public static class CaseExpr extends UntypedExpr{
 	public final Expr defaultExpr;
 	public final HashMap<Integer,Expr> tests;
 	public final HashMap<Integer,Expr> thens;
+	public final boolean identity;
 
 	public final int line;
 
 	final static Method hashMethod = Method.getMethod("int hash(Object)");
+	final static Method hashCodeMethod = Method.getMethod("int hashCode()");
 	final static Method equalsMethod = Method.getMethod("boolean equals(Object, Object)");
 
 
 	public CaseExpr(int line, Expr expr, int shift, int mask, int low, int high, Expr defaultExpr,
-	                HashMap<Integer,Expr> tests,HashMap<Integer,Expr> thens){
+	                HashMap<Integer,Expr> tests,HashMap<Integer,Expr> thens, boolean identity){
 		this.expr = expr;
 		this.shift = shift;
 		this.mask = mask;
@@ -5633,6 +5635,7 @@ public static class CaseExpr extends UntypedExpr{
 		this.tests = tests;
 		this.thens = thens;
 		this.line = line;
+		this.identity = identity;
 	}
 
 	public Object eval() throws Exception{
@@ -5658,7 +5661,10 @@ public static class CaseExpr extends UntypedExpr{
 
 		gen.visitLineNumber(line, gen.mark());
 		expr.emit(C.EXPRESSION, objx, gen);
-		gen.invokeStatic(UTIL_TYPE,hashMethod);
+		if(identity)
+			gen.invokeVirtual(OBJECT_TYPE,hashCodeMethod);
+		else
+			gen.invokeStatic(UTIL_TYPE,hashMethod);
 		gen.push(shift);
 		gen.visitInsn(ISHR);
 		gen.push(mask);
@@ -5670,8 +5676,15 @@ public static class CaseExpr extends UntypedExpr{
 			gen.mark(labels.get(i));
 			expr.emit(C.EXPRESSION, objx, gen);
 			tests.get(i).emit(C.EXPRESSION, objx, gen);
-			gen.invokeStatic(UTIL_TYPE, equalsMethod);
-			gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
+			if(identity)
+				{
+				gen.visitJumpInsn(IF_ACMPNE, defaultLabel);
+				}
+			else
+				{
+				gen.invokeStatic(UTIL_TYPE, equalsMethod);
+				gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
+				}
 			thens.get(i).emit(C.EXPRESSION,objx,gen);
 			gen.goTo(endLabel);
 			}
@@ -5684,7 +5697,7 @@ public static class CaseExpr extends UntypedExpr{
 	}
 
 	static class Parser implements IParser{
-		//(case* expr shift mask low high default map<minhash, [test then]>)
+		//(case* expr shift mask low high default map<minhash, [test then]> identity?)
 		//prepared by case macro and presumed correct
 		//case macro binds actual expr in let so expr is always a local,
 		//no need to worry about multiple evaluation
@@ -5713,7 +5726,7 @@ public static class CaseExpr extends UntypedExpr{
 			                  (Integer)args.nth(3),
 			                  (Integer)args.nth(4),
 			                  analyze(C.EXPRESSION, args.nth(5)),
-			                  tests,thens);
+			                  tests,thens,args.nth(7) != RT.F);
 
 		}
 	}

@@ -17,10 +17,11 @@ import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class Keyword implements IFn, Comparable, Named, Serializable {
+public final class Keyword implements IFn, Comparable, Named, Serializable {
 
 private static ConcurrentHashMap<Symbol, Keyword> table = new ConcurrentHashMap();
 public final Symbol sym;
+final int hash;
 
 public static Keyword intern(Symbol sym){
 	Keyword k = new Keyword(sym);
@@ -38,10 +39,11 @@ public static Keyword intern(String nsname){
 
 private Keyword(Symbol sym){
 	this.sym = sym;
+	hash = sym.hashCode() + 0x9e3779b9;
 }
 
-public int hashCode(){
-	return sym.hashCode() + 0x9e3779b9;
+public final int hashCode(){
+	return hash;
 }
 
 public String toString(){
@@ -89,11 +91,15 @@ private Object readResolve() throws ObjectStreamException{
  * @return the value at the key or nil if not found
  * @throws Exception
  */
-public Object invoke(Object obj) throws Exception{
+final public Object invoke(Object obj) throws Exception{
+	if(obj instanceof ILookup)
+		return ((ILookup)obj).valAt(this);
 	return RT.get(obj, this);
 }
 
-public Object invoke(Object obj, Object notFound) throws Exception{
+final public Object invoke(Object obj, Object notFound) throws Exception{
+	if(obj instanceof ILookup)
+		return ((ILookup)obj).valAt(this,notFound);
 	return RT.get(obj, this, notFound);
 }
 

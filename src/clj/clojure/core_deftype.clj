@@ -51,7 +51,7 @@
           [(conj i 'clojure.lang.ILookup)
            (conj m `(~'valAt [k#] (.valAt ~'this k# nil))
                  `(~'valAt [k# else#] 
-                    (condp identical? k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
+                    (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
                                                    base-fields)
                            (get ~'__extmap k# else#))))]
           [i m]))
