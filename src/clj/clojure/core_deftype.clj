@@ -110,7 +110,23 @@
   define value-based equality and hashCode"
  
   [name [& fields] & [[& interfaces] & methods]]
-  (create-defclass* name (vec fields) (vec interfaces) methods))
+  (let [o (gensym)
+        classname (symbol (str *ns* "." name))]
+    `(do
+       ~(create-defclass* name (vec fields) (vec interfaces) methods)
+       (defmethod print-method ~classname [~(with-meta o {:tag classname}) w#]
+         ((var print-defclass)
+            (.__extmap ~o)
+            ~(apply array-map (interleave
+                                (map #(-> % str keyword) fields)
+                                (map #(list '. o %) fields)))
+            ~o w#)))))
+
+(defn- print-defclass [extmap fieldmap o, #^Writer w]
+  (print-meta o w)
+  (.write w "#:")
+  (.write w (.getSimpleName (class o)))
+  (print-map (concat fieldmap extmap) pr-on w))
 
 (defmacro deftype
   "Dynamically generates compiled bytecode for an anonymous class with
@@ -156,6 +172,18 @@
                                        (= ~'__extmap (.getExtensionMap ~'o)))))))))]
     `(do
        ~(create-defclass* gname (vec hinted-fields) (vec interfaces) methods)
+       (defmethod print-method ~tag [o# w#]
+         ((var print-deftype) ~(vec (map #(-> % str keyword) fields)) o# w#))
        (defn ~name
          ([~@fields] (new ~classname ~@fields nil nil))
          ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#))))))
+
+(defn- print-deftype [fields, #^clojure.lang.IDynamicType o, #^Writer w]
+  (print-meta o w)
+  (.write w "#:")
+  (.write w (str (name (.getDynamicType o))))
+  (print-map
+    (concat
+      (map #(clojure.lang.MapEntry. % (.getDynamicField o % nil)) fields)
+      (.getExtensionMap o))
+    pr-on w))
