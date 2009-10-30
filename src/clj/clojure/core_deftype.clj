@@ -41,7 +41,7 @@
                              (and ~@(map (fn [fld] `(= ~fld (. ~'o ~fld))) (remove #{'__meta} fields)))))))))]
           [i m]))
       (iobj [[i m]] 
-        (if (implement? clojure.lang.IObj)
+        (if (and (implement? clojure.lang.IObj) (implement? clojure.lang.IMeta))
           [(conj i 'clojure.lang.IObj)
            (conj m `(~'meta [] ~'__meta)
                  `(~'withMeta [~'m] (new ~name ~@(replace {'__meta 'm} fields))))]
@@ -55,9 +55,9 @@
                                                    base-fields)
                            (get ~'__extmap k# else#))))]
           [i m]))
-      (associative [[i m]] 
-         (if (implement? clojure.lang.Associative)
-           [(conj i 'clojure.lang.Associative 'clojure.lang.Counted)
+      (imap [[i m]] 
+         (if (and (interface-set clojure.lang.IPersistentMap) (not (methodname-set 'assoc)))
+           [i
             (conj m 
                   `(~'count [] (+ ~(count base-fields) (count ~'__extmap)))
                   `(~'empty [] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
@@ -75,39 +75,32 @@
                          ~@(mapcat (fn [fld]
                                      [(keyword fld) (list* `new name (replace {fld gv} fields))])
                                    base-fields)
-                         (new ~name ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~gk ~gv))))))]
+                         (new ~name ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~gk ~gv)))))
+                  `(~'without [k#] (if (contains? #{~@(map keyword base-fields)} k#)
+                                     (dissoc (with-meta (into {} ~'this) ~'__meta) k#)
+                                     (new ~name ~@(remove #{'__extmap} fields) 
+                                          (not-empty (dissoc ~'__extmap k#))))))]
            [i m]))]
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup associative)]
+     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap)]
        `(defclass* ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))
 
 (defmacro defclass 
-  "When compiling, generates compiled bytecode for a class with the
+  "Alpha - subject to change
+  
+  When compiling, generates compiled bytecode for a class with the
   given name (a symbol), prepends the current ns as the package, and
   writes the .class file to the *compile-path* directory.  When not
   compiling, does nothing. 
 
-  A pair of constructors will be defined, overloaded on 2 arities, the
-  first taking the designated fields in the same order specified, and
-  the second taking the fields followed by a metadata map (nil for
-  none) and an extension field map (nil for none).
+  A constructor will be defined, taking the designated fields followed
+  by a metadata map (nil for none) and an extension field map (nil for
+  none). In the method bodies, the (unqualified) name can be used
+  to name the class (for calls to new etc).
 
-  The class will have the (immutable) fields named by fields, which
-  can have type hints. Interfaces and methods are optional. The only
-  methods that can be supplied are those declared in the
-  interfaces. In the method bodies, the (unqualified) name can be used
-  to name the class (for calls to new etc). 'this' is impliclty bound
-  to the target object (i.e. same meaning as in Java). Note that
-  method bodies are not closures, the local environment includes only
-  the named fields.
-
-  The class will have implementations of several interfaces generated
-  automatically: clojure.lang IObj (metadata support), ILookup (get
-  and keyword lookup), Counted, Associative (assoc et al)
-
-  In addition, unless you supply a version of hashCode or equals, will
-  define value-based equality and hashCode"
+  See deftype for a description of fields, methods, equality and
+  generated interfaces."
  
   [name [& fields] & [[& interfaces] & methods]]
   (let [o (gensym)
@@ -129,7 +122,9 @@
   (print-map (concat fieldmap extmap) pr-on w))
 
 (defmacro deftype
-  "Dynamically generates compiled bytecode for an anonymous class with
+  "Alpha - subject to change
+  
+  Dynamically generates compiled bytecode for an anonymous class with
   the given fields, and, optionally, interfaces and methods. The Name
   will be used to create a dynamic type tag keyword of the
   form :current.ns/Name. This tag will be returned from (type
@@ -141,13 +136,28 @@
   by a metadata map (nil for none) and an extension field map (nil for
   none). 
 
-  See defclass for a description of methods and generated
-  interfaces. Note that overriding equals and hashCode is not
-  supported at this time for deftype - you must use the generated
-  versions."
+  The class will have the (immutable) fields named by fields, which
+  can have type hints. Interfaces and methods are optional. The only
+  methods that can be supplied are those declared in the interfaces.
+  'this' is impliclty bound to the target object (i.e. same meaning as
+  in Java). Note that method bodies are not closures, the local
+  environment includes only the named fields, and those fields can be
+  accessed directy, i.e. with just foo, not (.foo this).
+
+  The class will have implementations of two (clojure.lang) interfaces
+  generated automatically: IObj (metadata support), ILookup (get and
+  keyword lookup for fields). If you specify IPersistentMap as an
+  interface, but don't define methods for it, an implementation will
+  be generated automatically.
+
+  In addition, unless you supply a version of hashCode or equals, will
+  define type-and-value-based equality and hashCode.
+
+  Note that overriding equals and hashCode is not supported at this
+  time for deftype - you must use the generated versions."
 
   [name [& fields] & [[& interfaces] & methods]]
-  (let [gname (gensym "deftype__")
+  (let [gname (gensym (str name "__"))
         classname (symbol (str *ns* "." gname))
         tag (keyword (str *ns*) (str name))
         interfaces (conj interfaces 'clojure.lang.IDynamicType)
