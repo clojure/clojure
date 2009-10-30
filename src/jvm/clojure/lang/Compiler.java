@@ -5350,9 +5350,12 @@ public static class NewInstanceMethod extends ObjMethod{
 
 	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Symbol thistag,
 	                               Map overrideables) throws Exception{
-		//(methodname [args] body...)
+		//(.methodname [args] body...)
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
-		Symbol name = (Symbol)RT.first(form);
+		Symbol dotname = (Symbol)RT.first(form);
+		if(!dotname.name.startsWith("."))
+			throw new IllegalArgumentException("Method names must begin with '.': " + dotname);
+		Symbol name = (Symbol) Symbol.intern(null,dotname.name.substring(1)).withMeta(RT.meta(dotname));
 		IPersistentVector parms = (IPersistentVector) RT.second(form);
 		ISeq body = RT.next(RT.next(form));
 		try

@@ -29,11 +29,11 @@
         fields (conj fields '__meta '__extmap)]
     (letfn 
      [(eqhash [[i m]] 
-        (if (not (or (contains? methodname-set 'equals) (contains? methodname-set 'hashCode)))
+        (if (not (or (contains? methodname-set '.equals) (contains? methodname-set '.hashCode)))
           [i
            (conj m 
-                 `(~'hashCode [] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
-                 `(~'equals [~'o] 
+                 `(.hashCode [] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
+                 `(.equals [~'o] 
                     (boolean 
                      (or (identical? ~'this ~'o)
                          (when (instance? ~name ~'o)
@@ -43,40 +43,40 @@
       (iobj [[i m]] 
         (if (and (implement? clojure.lang.IObj) (implement? clojure.lang.IMeta))
           [(conj i 'clojure.lang.IObj)
-           (conj m `(~'meta [] ~'__meta)
-                 `(~'withMeta [~'m] (new ~name ~@(replace {'__meta 'm} fields))))]
+           (conj m `(.meta [] ~'__meta)
+                 `(.withMeta [~'m] (new ~name ~@(replace {'__meta 'm} fields))))]
           [i m]))
       (ilookup [[i m]] 
         (if (implement? clojure.lang.ILookup)
           [(conj i 'clojure.lang.ILookup)
-           (conj m `(~'valAt [k#] (.valAt ~'this k# nil))
-                 `(~'valAt [k# else#] 
+           (conj m `(.valAt [k#] (.valAt ~'this k# nil))
+                 `(.valAt [k# else#] 
                     (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
                                                    base-fields)
                            (get ~'__extmap k# else#))))]
           [i m]))
       (imap [[i m]] 
-         (if (and (interface-set clojure.lang.IPersistentMap) (not (methodname-set 'assoc)))
+         (if (and (interface-set clojure.lang.IPersistentMap) (not (methodname-set '.assoc)))
            [i
             (conj m 
-                  `(~'count [] (+ ~(count base-fields) (count ~'__extmap)))
-                  `(~'empty [] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
-                  `(~'cons [e#] (let [[k# v#] e#] (.assoc ~'this k# v#)))
-                  `(~'equiv [o#] (.equals ~'this o#))
-                  `(~'containsKey [k#] (not (identical? ~'this (.valAt ~'this k# ~'this))))
-                  `(~'entryAt [k#] (let [v# (.valAt ~'this k# ~'this)]
+                  `(.count [] (+ ~(count base-fields) (count ~'__extmap)))
+                  `(.empty [] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
+                  `(.cons [e#] (let [[k# v#] e#] (.assoc ~'this k# v#)))
+                  `(.equiv [o#] (.equals ~'this o#))
+                  `(.containsKey [k#] (not (identical? ~'this (.valAt ~'this k# ~'this))))
+                  `(.entryAt [k#] (let [v# (.valAt ~'this k# ~'this)]
                                      (when-not (identical? ~'this v#)
                                        (clojure.lang.MapEntry. k# v#))))
-                  `(~'seq [] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                  `(.seq [] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                      ~'__extmap))
                   (let [gk (gensym) gv (gensym)]
-                    `(~'assoc [~gk ~gv]
+                    `(.assoc [~gk ~gv]
                        (condp identical? ~gk
                          ~@(mapcat (fn [fld]
                                      [(keyword fld) (list* `new name (replace {fld gv} fields))])
                                    base-fields)
                          (new ~name ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~gk ~gv)))))
-                  `(~'without [k#] (if (contains? #{~@(map keyword base-fields)} k#)
+                  `(.without [k#] (if (contains? #{~@(map keyword base-fields)} k#)
                                      (dissoc (with-meta (into {} ~'this) ~'__meta) k#)
                                      (new ~name ~@(remove #{'__extmap} fields) 
                                           (not-empty (dissoc ~'__extmap k#))))))]
@@ -142,7 +142,15 @@
   'this' is impliclty bound to the target object (i.e. same meaning as
   in Java). Note that method bodies are not closures, the local
   environment includes only the named fields, and those fields can be
-  accessed directy, i.e. with just foo, not (.foo this).
+  accessed directy, i.e. with just foo, instead of (.foo this).
+
+  Method definitions take the form:
+
+  (.methodname [args] body) ;note the dot on the methodname!
+
+  The argument and return types can be hinted on the arg and
+  methodname symbols. If not supplied, they will be inferred, so type
+  hints should be reserved for disambiguation.
 
   The class will have implementations of two (clojure.lang) interfaces
   generated automatically: IObj (metadata support), ILookup (get and
@@ -150,8 +158,8 @@
   interface, but don't define methods for it, an implementation will
   be generated automatically.
 
-  In addition, unless you supply a version of hashCode or equals, will
-  define type-and-value-based equality and hashCode.
+  In addition, unless you supply a version of .hashCode or .equals,
+  deftype/class will define type-and-value-based equality and hashCode.
 
   Note that overriding equals and hashCode is not supported at this
   time for deftype - you must use the generated versions."
@@ -164,15 +172,15 @@
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))
         methods (conj methods 
-                      `(~'getDynamicType [] ~tag)
-                      `(~'getExtensionMap [] ~'__extmap)
-                      `(~'getDynamicField [k# else#] 
+                      `(.getDynamicType [] ~tag)
+                      `(.getExtensionMap [] ~'__extmap)
+                      `(.getDynamicField [k# else#] 
                          (condp identical? k# ~@(mapcat (fn [fld] [(keyword fld) fld]) fields)
                                 (get ~'__extmap k# else#)))
-                      `(~'hashCode [] (-> ~(hash tag) 
+                      `(.hashCode [] (-> ~(hash tag) 
                                           ~@(map #(list `hash-combine %) fields)
                                           (hash-combine ~'__extmap)))
-                      `(~'equals [~'o] 
+                      `(.equals [~'o] 
                          (boolean 
                           (or (identical? ~'this ~'o)
                               (when (instance? clojure.lang.IDynamicType ~'o)
