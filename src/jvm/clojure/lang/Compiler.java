@@ -62,6 +62,7 @@ static final Symbol CASE = Symbol.create("case*");
 static final Symbol CLASS = Symbol.create("Class");
 static final Symbol NEW = Symbol.create("new");
 static final Symbol THIS = Symbol.create("this");
+static final Symbol REIFY = Symbol.create("reify");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
 //static final Symbol SYNTAX_QUOTE = Symbol.create("clojure.core", "syntax-quote");
@@ -104,6 +105,7 @@ static final public IPersistentMap specials = PersistentHashMap.create(
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
 		DEFCLASS, new NewInstanceExpr.DefclassParser(),
+		REIFY, new NewInstanceExpr.ReifyParser(),
 //		TRY_FINALLY, new TryFinallyExpr.Parser(),
 TRY, new TryExpr.Parser(),
 THROW, new ThrowExpr.Parser(),
@@ -2070,8 +2072,6 @@ public static class NewExpr implements Expr{
 		public Expr parse(C context, Object frm) throws Exception{
 			int line = (Integer) LINE.deref();
 			ISeq form = (ISeq) frm;
-			if(RT.second(form) instanceof IPersistentVector)
-				return NewInstanceExpr.parse(context, form);	
 			//(new Classname args...)
 			if(form.count() < 2)
 				throw new Exception("wrong number of arguments, expecting: (new Classname args...)");
@@ -4894,6 +4894,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       CONSTANTS, PersistentVector.EMPTY,
 			       KEYWORDS, PersistentHashMap.EMPTY,
 			       VARS, PersistentHashMap.EMPTY
+			       ,LOADER, RT.makeClassLoader()
 			));
 
 	try
@@ -5017,21 +5018,20 @@ static public class NewInstanceExpr extends ObjExpr{
 		}
 	}
 
-	static Expr parse(C context, ISeq form) throws Exception{
-		//(new [super then interfaces] this-name? {options}? (method-name [args] body)*)
-
+	static class ReifyParser implements IParser{
+	public Expr parse(C context, Object frm) throws Exception{
+		//(reify this-name? [interfaces] (method-name [args] body)*)
+		ISeq form = (ISeq) frm;
 		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
 		String basename = enclosingMethod != null ?
 		                  (trimGenID(enclosingMethod.objx.name) + "$")
 		                 : (munge(currentNS().name.name) + "$");
-		String simpleName = "obj__" + RT.nextID();
+		String simpleName = "reify__" + RT.nextID();
 		String classname = basename + simpleName;
-		IPersistentVector interfaces = (IPersistentVector) RT.second(form);
 
+		ISeq rform = RT.next(form);
 
-		ISeq rform = RT.next(RT.next(form));
-
-		//supers might be followed by symbol naming this
+		//reify might be followed by symbol naming this
 		Symbol thisSym = null;
 		if(RT.first(rform) instanceof Symbol)
 			{
@@ -5039,7 +5039,14 @@ static public class NewInstanceExpr extends ObjExpr{
 			rform = RT.next(rform);
 			}
 
+		IPersistentVector interfaces = (IPersistentVector) RT.first(rform);
+
+
+		rform = RT.next(rform);
+
+
 		return build(interfaces, null, thisSym, classname, null, rform);
+	}
 	}
 
 	static Expr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym, String className,
@@ -5095,25 +5102,22 @@ static public class NewInstanceExpr extends ObjExpr{
 		
 		String[] inames = interfaceNames(interfaces);
 
-		Symbol thistag = null;
-		Class stub = null;
-		if(ret.isDefclass())
-			{
-			stub = compileStub(slashname(superClass),ret, inames);
-			thistag = Symbol.intern(null,stub.getName());
-			}
+		Class stub = compileStub(slashname(superClass),ret, inames);
+		Symbol thistag = Symbol.intern(null,stub.getName());
+
 		try
 			{
 			Var.pushThreadBindings(
 					RT.map(CONSTANTS, PersistentVector.EMPTY,
 					       KEYWORDS, PersistentHashMap.EMPTY,
-					       VARS, PersistentHashMap.EMPTY));
+					       VARS, PersistentHashMap.EMPTY
+							));
 			if(ret.isDefclass())
 				{
-				Var.pushThreadBindings(RT.map(METHOD,null,
-				                              LOCAL_ENV,ret.fields
-											,COMPILE_STUB_SYM, Symbol.intern(null,stub.getSimpleName())
-											,COMPILE_STUB_CLASS, stub));
+				Var.pushThreadBindings(RT.map(METHOD, null,
+				                              LOCAL_ENV, ret.fields
+						, COMPILE_STUB_SYM, Symbol.intern(null, stub.getSimpleName())
+						, COMPILE_STUB_CLASS, stub));
 				}
 
 			//now (methodname [args] body)*
