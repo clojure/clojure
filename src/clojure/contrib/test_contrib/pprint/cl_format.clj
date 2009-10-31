@@ -176,7 +176,22 @@
   (cl-format nil "~3,5,14@$" 22.375) "    +00022.375"
   (cl-format nil "~3,5,14@$" 22.375) "    +00022.375"
   (cl-format nil "~3,5,14@:$" 22.375) "+    00022.375"
-  (cl-format nil "~3,,14@:$" 0.375) "+        0.375")
+  (cl-format nil "~3,,14@:$" 0.375) "+        0.375"
+  (cl-format nil "~1,1$" -12.0) "-12.0"
+  (cl-format nil "~1,1$" 12.0) "12.0"
+  (cl-format nil "~1,1$" 12.0) "12.0"
+  (cl-format nil "~1,1@$" 12.0) "+12.0"
+  (cl-format nil "~1,1,8,' @:$" 12.0) "+   12.0"
+  (cl-format nil "~1,1,8,' @$" 12.0) "   +12.0"
+  (cl-format nil "~1,1,8,' :$" 12.0) "    12.0"
+  (cl-format nil "~1,1,8,' $" 12.0) "    12.0"
+  (cl-format nil "~1,1,8,' @:$" -12.0) "-   12.0"
+  (cl-format nil "~1,1,8,' @$" -12.0) "   -12.0"
+  (cl-format nil "~1,1,8,' :$" -12.0) "-   12.0"
+  (cl-format nil "~1,1,8,' $" -12.0) "   -12.0")
+
+(simple-tests f-tests
+  (cl-format nil "~,1f" -12.0) "-12.0")
 
 (simple-tests ampersand-tests
   (cl-format nil "The quick brown ~a jumped over ~d lazy dogs" 'elephant 5)

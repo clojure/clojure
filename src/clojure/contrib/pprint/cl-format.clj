@@ -759,7 +759,7 @@ Note this should only be used for the last one in the sequence"
         d (:d params) ; digits after the decimal
         n (:n params) ; minimum digits before the decimal
         w (:w params) ; minimum field width
-        add-sign (and (:at params) (not (neg? arg)))
+        add-sign (or (:at params) (neg? arg))
         [rounded-mantissa scaled-exp _] (round-str mantissa exp d nil)
         #^String fixed-repr (get-fixed rounded-mantissa scaled-exp d)
         full-repr (str (apply str (repeat (- n (.indexOf fixed-repr (int \.))) \0)) fixed-repr)
