@@ -188,7 +188,13 @@
   (cl-format nil "~1,1,8,' @:$" -12.0) "-   12.0"
   (cl-format nil "~1,1,8,' @$" -12.0) "   -12.0"
   (cl-format nil "~1,1,8,' :$" -12.0) "-   12.0"
-  (cl-format nil "~1,1,8,' $" -12.0) "   -12.0")
+  (cl-format nil "~1,1,8,' $" -12.0) "   -12.0"
+  (cl-format nil "~1,1$" 0.001) "0.0"
+  (cl-format nil "~2,1$" 0.001) "0.00"
+  (cl-format nil "~1,1,6$" 0.001) "   0.0"
+  (cl-format nil "~1,1,6$" 0.0015) "   0.0"
+  (cl-format nil "~2,1,6$" 0.005) "  0.01"
+  (cl-format nil "~2,1,6$" 0.01) "  0.01")
 
 (simple-tests f-tests
   (cl-format nil "~,1f" -12.0) "-12.0")

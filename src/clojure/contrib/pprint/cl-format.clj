@@ -575,19 +575,21 @@ Note this should only be used for the last one in the sequence"
                                   [(str "0" m) (inc e) 1 (inc len)]
                                   [m e round-pos len])]
       (if round-pos
-        (if (> len round-pos)
-          (let [round-char (nth m1 round-pos)
-                #^String result (subs m1 0 round-pos)]
-            (if (>= (int round-char) (int \5))
-              (let [result-val (Integer/valueOf result)
-                    leading-zeros (subs result 0 (min (prefix-count result \0) (- round-pos 1)))
-                    round-up-result (str leading-zeros
-                                         (String/valueOf (+ result-val 
-                                                            (if (neg? result-val) -1 1))))
-                    expanded (> (count round-up-result) (count result))]
-                [round-up-result e1 expanded])
-              [result e1 false]))
-          [m e false])
+        (if (neg? round-pos)
+          ["0" 0 false]
+          (if (> len round-pos)
+            (let [round-char (nth m1 round-pos)
+                  #^String result (subs m1 0 round-pos)]
+              (if (>= (int round-char) (int \5))
+                (let [result-val (Integer/valueOf result)
+                      leading-zeros (subs result 0 (min (prefix-count result \0) (- round-pos 1)))
+                      round-up-result (str leading-zeros
+                                           (String/valueOf (+ result-val 
+                                                              (if (neg? result-val) -1 1))))
+                      expanded (> (count round-up-result) (count result))]
+                  [round-up-result e1 expanded])
+                [result e1 false]))
+            [m e false]))
         [m e false]))
     [m e false]))
 
