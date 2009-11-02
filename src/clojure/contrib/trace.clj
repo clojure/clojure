@@ -32,7 +32,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  #^{:author "Stuart Sierra, Michel Salim",
      :doc "This file defines simple \"tracing\" macros to help you see what your
 code is doing."}
   clojure.contrib.trace)
@@ -83,3 +83,16 @@ code is doing."}
        (defn ~name [& args#]
          (trace-fn-call '~name f# args#)))))
 
+(defmacro dotrace
+  "Given a sequence of function identifiers, evaluate the body
+   expressions in an environment in which the identifiers are bound to
+   the traced functions.  Does not work on inlined functions,
+   such as clojure.core/+"
+  [fns & exprs]
+  (if (empty? fns)
+    `(do ~@exprs)
+    (let [func  (first fns)
+          fns (next fns)]
+      `(let [f# ~func]
+         (binding [~func (fn [& args#] (trace-fn-call '~func f# args#))]
+           (dotrace ~fns ~@exprs))))))
