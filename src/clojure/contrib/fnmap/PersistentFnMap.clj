@@ -42,9 +42,12 @@
 (defn- -entryAt [this key]
   (clojure.lang.MapEntry. key ((::getter (. this state)) (. this state) key)))
 
-
-(defn -valAt [this key]
-  ((::getter (. this state)) (. this state) key))
+(defn -valAt
+  ([this key]
+     ((::getter (. this state)) (. this state) key))
+  ([this key default]
+     (or ((::getter (. this state)) (. this state) key)
+         default)))
 
 ;; Iterable
 
