@@ -2541,58 +2541,58 @@ static class KeywordInvokeExpr implements Expr{
 	}
 
 }
-static class KeywordSiteInvokeExpr implements Expr{
-	public final Expr site;
-	public final Object tag;
-	public final Expr target;
-	public final int line;
-	public final String source;
-
-	public KeywordSiteInvokeExpr(String source, int line, Symbol tag, Expr site, Expr target){
-		this.source = source;
-		this.site = site;
-		this.target = target;
-		this.line = line;
-		this.tag = tag;
-	}
-
-	public Object eval() throws Exception{
-		try
-			{
-			KeywordCallSite s = (KeywordCallSite) site.eval();
-			return s.thunk.invoke(s,target.eval());
-			}
-		catch(Throwable e)
-			{
-			if(!(e instanceof CompilerException))
-				throw new CompilerException(source, line, e);
-			else
-				throw (CompilerException) e;
-			}
-	}
-
-	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
-		site.emit(C.EXPRESSION, objx, gen);
-		gen.dup();
-		gen.getField(Type.getType(KeywordCallSite.class),"thunk",IFN_TYPE);
-		gen.swap();
-		target.emit(C.EXPRESSION, objx, gen);
-
-		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[2]));
-		if(context == C.STATEMENT)
-			gen.pop();
-	}
-
-	public boolean hasJavaClass() throws Exception{
-		return tag != null;
-	}
-
-	public Class getJavaClass() throws Exception{
-		return HostExpr.tagToClass(tag);
-	}
-
-}
+//static class KeywordSiteInvokeExpr implements Expr{
+//	public final Expr site;
+//	public final Object tag;
+//	public final Expr target;
+//	public final int line;
+//	public final String source;
+//
+//	public KeywordSiteInvokeExpr(String source, int line, Symbol tag, Expr site, Expr target){
+//		this.source = source;
+//		this.site = site;
+//		this.target = target;
+//		this.line = line;
+//		this.tag = tag;
+//	}
+//
+//	public Object eval() throws Exception{
+//		try
+//			{
+//			KeywordCallSite s = (KeywordCallSite) site.eval();
+//			return s.thunk.invoke(s,target.eval());
+//			}
+//		catch(Throwable e)
+//			{
+//			if(!(e instanceof CompilerException))
+//				throw new CompilerException(source, line, e);
+//			else
+//				throw (CompilerException) e;
+//			}
+//	}
+//
+//	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+//		gen.visitLineNumber(line, gen.mark());
+//		site.emit(C.EXPRESSION, objx, gen);
+//		gen.dup();
+//		gen.getField(Type.getType(KeywordCallSite.class),"thunk",IFN_TYPE);
+//		gen.swap();
+//		target.emit(C.EXPRESSION, objx, gen);
+//
+//		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[2]));
+//		if(context == C.STATEMENT)
+//			gen.pop();
+//	}
+//
+//	public boolean hasJavaClass() throws Exception{
+//		return tag != null;
+//	}
+//
+//	public Class getJavaClass() throws Exception{
+//		return HostExpr.tagToClass(tag);
+//	}
+//
+//}
 static class InvokeExpr implements Expr{
 	public final Expr fexpr;
 	public final Object tag;
@@ -3181,12 +3181,12 @@ static public class ObjExpr implements Expr{
 								gen.invokeStatic(Type.getType(Keyword.class),
 								                 Method.getMethod("clojure.lang.Keyword intern(clojure.lang.Symbol)"));
 								}
-						else if(value instanceof KeywordCallSite)
-								{
-								emitValue(((KeywordCallSite) value).k.sym, gen);
-								gen.invokeStatic(Type.getType(KeywordCallSite.class),
-								                 Method.getMethod("clojure.lang.KeywordCallSite create(clojure.lang.Symbol)"));
-								}
+//						else if(value instanceof KeywordCallSite)
+//								{
+//								emitValue(((KeywordCallSite) value).k.sym, gen);
+//								gen.invokeStatic(Type.getType(KeywordCallSite.class),
+//								                 Method.getMethod("clojure.lang.KeywordCallSite create(clojure.lang.Symbol)"));
+//								}
 							else if(value instanceof Var)
 									{
 									Var var = (Var) value;
@@ -3488,8 +3488,8 @@ static public class ObjExpr implements Expr{
 				return Type.getType(ISeq.class);
 			else if(c == Keyword.class)
 				return Type.getType(Keyword.class);
-			else if(c == KeywordCallSite.class)
-				return Type.getType(KeywordCallSite.class);
+//			else if(c == KeywordCallSite.class)
+//				return Type.getType(KeywordCallSite.class);
 			else if(RestFn.class.isAssignableFrom(c))
 				return Type.getType(RestFn.class);
 			else if(AFn.class.isAssignableFrom(c))
