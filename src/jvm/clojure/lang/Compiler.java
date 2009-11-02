@@ -2479,6 +2479,120 @@ public static class VectorExpr implements Expr{
 
 }
 
+static class KeywordInvokeExpr implements Expr{
+	public final KeywordExpr kw;
+	public final Object tag;
+	public final Expr target;
+	public final int line;
+	public final String source;
+	static Type ILOOKUP_TYPE = Type.getType(ILookup.class);
+
+	public KeywordInvokeExpr(String source, int line, Symbol tag, KeywordExpr kw, Expr target){
+		this.source = source;
+		this.kw = kw;
+		this.target = target;
+		this.line = line;
+		this.tag = tag;
+	}
+
+	public Object eval() throws Exception{
+		try
+			{
+			return kw.k.invoke(target.eval());
+			}
+		catch(Throwable e)
+			{
+			if(!(e instanceof CompilerException))
+				throw new CompilerException(source, line, e);
+			else
+				throw (CompilerException) e;
+			}
+	}
+
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		Label slowLabel = gen.newLabel();
+		Label endLabel = gen.newLabel();
+
+		gen.visitLineNumber(line, gen.mark());
+		target.emit(C.EXPRESSION, objx, gen);
+		gen.dup();
+		gen.instanceOf(ILOOKUP_TYPE);
+		gen.ifZCmp(GeneratorAdapter.EQ, slowLabel);
+		kw.emit(C.EXPRESSION, objx, gen);
+		gen.invokeInterface(ILOOKUP_TYPE, new Method("valAt", OBJECT_TYPE, ARG_TYPES[1]));
+		gen.goTo(endLabel);
+
+		gen.mark(slowLabel);
+		kw.emit(C.EXPRESSION, objx, gen);
+		gen.invokeStatic(RT_TYPE, new Method("get", OBJECT_TYPE, ARG_TYPES[2]));
+
+		gen.mark(endLabel);
+
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return tag != null;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return HostExpr.tagToClass(tag);
+	}
+
+}
+static class KeywordSiteInvokeExpr implements Expr{
+	public final Expr site;
+	public final Object tag;
+	public final Expr target;
+	public final int line;
+	public final String source;
+
+	public KeywordSiteInvokeExpr(String source, int line, Symbol tag, Expr site, Expr target){
+		this.source = source;
+		this.site = site;
+		this.target = target;
+		this.line = line;
+		this.tag = tag;
+	}
+
+	public Object eval() throws Exception{
+		try
+			{
+			KeywordCallSite s = (KeywordCallSite) site.eval();
+			return s.thunk.invoke(s,target.eval());
+			}
+		catch(Throwable e)
+			{
+			if(!(e instanceof CompilerException))
+				throw new CompilerException(source, line, e);
+			else
+				throw (CompilerException) e;
+			}
+	}
+
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
+		site.emit(C.EXPRESSION, objx, gen);
+		gen.dup();
+		gen.getField(Type.getType(KeywordCallSite.class),"thunk",IFN_TYPE);
+		gen.swap();
+		target.emit(C.EXPRESSION, objx, gen);
+
+		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[2]));
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return tag != null;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return HostExpr.tagToClass(tag);
+	}
+
+}
 static class InvokeExpr implements Expr{
 	public final Expr fexpr;
 	public final Object tag;
@@ -2555,6 +2669,13 @@ static class InvokeExpr implements Expr{
 		if(context != C.EVAL)
 			context = C.EXPRESSION;
 		Expr fexpr = analyze(context, form.first());
+		if(fexpr instanceof KeywordExpr && RT.count(form) == 2)
+			{
+//			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
+			Expr target = analyze(context, RT.second(form));
+			return new KeywordInvokeExpr((String) SOURCE.deref(), (Integer) LINE.deref(), tagOf(form),
+			                             (KeywordExpr) fexpr, target);
+			}
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 			{
@@ -2846,7 +2967,7 @@ static public class ObjExpr implements Expr{
 		ClassVisitor cv = cw;
 //		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, internalName, null,superName,interfaceNames);
+		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, internalName, null,superName,interfaceNames);
 //		         superName != null ? superName :
 //		         (isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction"), null);
 		String source = (String) SOURCE.deref();
@@ -3059,6 +3180,12 @@ static public class ObjExpr implements Expr{
 								emitValue(((Keyword) value).sym, gen);
 								gen.invokeStatic(Type.getType(Keyword.class),
 								                 Method.getMethod("clojure.lang.Keyword intern(clojure.lang.Symbol)"));
+								}
+						else if(value instanceof KeywordCallSite)
+								{
+								emitValue(((KeywordCallSite) value).k.sym, gen);
+								gen.invokeStatic(Type.getType(KeywordCallSite.class),
+								                 Method.getMethod("clojure.lang.KeywordCallSite create(clojure.lang.Symbol)"));
 								}
 							else if(value instanceof Var)
 									{
@@ -3359,6 +3486,10 @@ static public class ObjExpr implements Expr{
 			//can't emit derived fn types due to visibility
 			if(LazySeq.class.isAssignableFrom(c))
 				return Type.getType(ISeq.class);
+			else if(c == Keyword.class)
+				return Type.getType(Keyword.class);
+			else if(c == KeywordCallSite.class)
+				return Type.getType(KeywordCallSite.class);
 			else if(RestFn.class.isAssignableFrom(c))
 				return Type.getType(RestFn.class);
 			else if(AFn.class.isAssignableFrom(c))
@@ -3367,6 +3498,7 @@ static public class ObjExpr implements Expr{
 						return Type.getType(Var.class);
 					else if(c == String.class)
 							return Type.getType(String.class);
+
 //			return Type.getType(c);
 			}
 		return OBJECT_TYPE;
@@ -5622,7 +5754,7 @@ public static class CaseExpr extends UntypedExpr{
 	public final Expr defaultExpr;
 	public final HashMap<Integer,Expr> tests;
 	public final HashMap<Integer,Expr> thens;
-	public final boolean identity;
+	public final boolean allKeywords;
 
 	public final int line;
 
@@ -5632,7 +5764,7 @@ public static class CaseExpr extends UntypedExpr{
 
 
 	public CaseExpr(int line, Expr expr, int shift, int mask, int low, int high, Expr defaultExpr,
-	                HashMap<Integer,Expr> tests,HashMap<Integer,Expr> thens, boolean identity){
+	                HashMap<Integer,Expr> tests,HashMap<Integer,Expr> thens, boolean allKeywords){
 		this.expr = expr;
 		this.shift = shift;
 		this.mask = mask;
@@ -5642,7 +5774,7 @@ public static class CaseExpr extends UntypedExpr{
 		this.tests = tests;
 		this.thens = thens;
 		this.line = line;
-		this.identity = identity;
+		this.allKeywords = allKeywords;
 	}
 
 	public Object eval() throws Exception{
@@ -5668,9 +5800,6 @@ public static class CaseExpr extends UntypedExpr{
 
 		gen.visitLineNumber(line, gen.mark());
 		expr.emit(C.EXPRESSION, objx, gen);
-		if(identity)
-			gen.invokeVirtual(OBJECT_TYPE,hashCodeMethod);
-		else
 			gen.invokeStatic(UTIL_TYPE,hashMethod);
 		gen.push(shift);
 		gen.visitInsn(ISHR);
@@ -5683,7 +5812,7 @@ public static class CaseExpr extends UntypedExpr{
 			gen.mark(labels.get(i));
 			expr.emit(C.EXPRESSION, objx, gen);
 			tests.get(i).emit(C.EXPRESSION, objx, gen);
-			if(identity)
+			if(allKeywords)
 				{
 				gen.visitJumpInsn(IF_ACMPNE, defaultLabel);
 				}
