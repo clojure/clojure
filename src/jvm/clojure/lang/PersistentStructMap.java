@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.io.Serializable;
 
-public class PersistentStructMap extends APersistentMap{
+final public class PersistentStructMap extends APersistentMap{
 
 public static class Def implements Serializable{
 	final ISeq keys;
@@ -35,13 +35,15 @@ final IPersistentMap ext;
 static public Def createSlotMap(ISeq keys){
 	if(keys == null)
 		throw new IllegalArgumentException("Must supply keys");
-	PersistentHashMap ret = PersistentHashMap.EMPTY;
+	int c = RT.count(keys);
+	Object[] v = new Object[2*c];
 	int i = 0;
 	for(ISeq s = keys; s != null; s = s.next(), i++)
 		{
-		ret = (PersistentHashMap) ret.assoc(s.first(), i);
+		v[2*i] =  s.first();
+		v[2*i+1] = i;
 		}
-	return new Def(keys, ret);
+	return new Def(keys, RT.map(v));
 }
 
 static public PersistentStructMap create(Def def, ISeq keyvals){
@@ -141,19 +143,19 @@ public IPersistentMap assoc(Object key, Object val){
 }
 
 public Object valAt(Object key){
-	Map.Entry e = def.keyslots.entryAt(key);
-	if(e != null)
+	Integer i = (Integer) def.keyslots.valAt(key);
+	if(i != null)
 		{
-		return vals[(Integer) e.getValue()];
+		return vals[i];
 		}
 	return ext.valAt(key);
 }
 
 public Object valAt(Object key, Object notFound){
-	Map.Entry e = def.keyslots.entryAt(key);
-	if(e != null)
+	Integer i = (Integer) def.keyslots.valAt(key);
+	if(i != null)
 		{
-		return vals[(Integer) e.getValue()];
+		return vals[i];
 		}
 	return ext.valAt(key, notFound);
 }
