@@ -263,6 +263,7 @@
   headers, or clojure.contrib.duck-streams/*default-encoding* if it is
   not specified."
   ([http-agnt]
+     (await http-agnt) ;; have to wait for Content-Encoding
      (string http-agnt (or (.getContentEncoding
                             #^HttpURLConnection (::connection @http-agnt))
                            duck/*default-encoding*)))
