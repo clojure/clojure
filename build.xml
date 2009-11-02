@@ -100,6 +100,7 @@
       <arg value="clojure.template"/>
       <arg value="clojure.test"/>
       <arg value="clojure.test.tap"/>
+      <arg value="clojure.test.junit"/>
     </java>
   </target>
 
