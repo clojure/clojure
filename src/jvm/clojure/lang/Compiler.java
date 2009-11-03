@@ -177,6 +177,9 @@ static final public Var LOOP_LABEL = Var.create();
 //vector<object>
 static final public Var CONSTANTS = Var.create();
 
+//vector<keyword>
+static final public Var KEYWORD_CALLSITES = Var.create();
+
 //keyword->constid
 static final public Var KEYWORDS = Var.create();
 
@@ -223,6 +226,7 @@ static final public Var RET_LOCAL_NUM = Var.create();
 
 static final public Var COMPILE_STUB_SYM = Var.create(null);
 static final public Var COMPILE_STUB_CLASS = Var.create(null);
+
 
 
 public enum C{
@@ -2484,6 +2488,7 @@ static class KeywordInvokeExpr implements Expr{
 	public final Object tag;
 	public final Expr target;
 	public final int line;
+	public final int siteIndex;
 	public final String source;
 	static Type ILOOKUP_TYPE = Type.getType(ILookup.class);
 
@@ -2493,6 +2498,7 @@ static class KeywordInvokeExpr implements Expr{
 		this.target = target;
 		this.line = line;
 		this.tag = tag;
+		this.siteIndex = registerKeywordCallsite(kw.k);
 	}
 
 	public Object eval() throws Exception{
@@ -2510,6 +2516,54 @@ static class KeywordInvokeExpr implements Expr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		Label endLabel = gen.newLabel();
+		Label faultLabel = gen.newLabel();
+
+		gen.visitLineNumber(line, gen.mark());
+		target.emit(C.EXPRESSION, objx, gen);
+		gen.dup();
+		gen.getStatic(objx.objtype, objx.thunkNameStatic(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);
+		gen.swap();
+		gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);
+///		gen.loadThis();
+		gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE,
+		                    Method.getMethod("Object get(Object,clojure.lang.ILookupSite)"));
+//		gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE,
+//		                    Method.getMethod("Object get(Object,clojure.lang.ILookupSite,clojure.lang.ILookupHost)"));
+		gen.dup();
+		gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);
+		gen.visitJumpInsn(IF_ACMPEQ, faultLabel);
+		gen.swap();
+		gen.pop();
+		gen.goTo(endLabel);
+
+		gen.mark(faultLabel);
+		gen.swap();
+		gen.loadThis();
+		gen.invokeInterface(ObjExpr.ILOOKUP_SITE_TYPE,
+		                    Method.getMethod("Object fault(Object, clojure.lang.ILookupHost)"));
+				
+		gen.mark(endLabel);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public void emitInstance(C context, ObjExpr objx, GeneratorAdapter gen){
+		gen.visitLineNumber(line, gen.mark());
+		gen.loadThis();
+		gen.getField(objx.objtype, objx.thunkName(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);
+		target.emit(C.EXPRESSION, objx, gen);
+		gen.loadThis();
+		gen.getField(objx.objtype, objx.siteName(siteIndex),ObjExpr.ILOOKUP_SITE_TYPE);
+		gen.loadThis();
+		gen.checkCast(Type.getType(ILookupHost.class));
+		gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE,
+		                    Method.getMethod("Object get(Object,clojure.lang.ILookupSite,clojure.lang.ILookupHost)"));
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public void emitNormal(C context, ObjExpr objx, GeneratorAdapter gen){
 		Label slowLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
 
@@ -2761,7 +2815,8 @@ static public class FnExpr extends ObjExpr{
 			Var.pushThreadBindings(
 					RT.map(CONSTANTS, PersistentVector.EMPTY,
 					       KEYWORDS, PersistentHashMap.EMPTY,
-					       VARS, PersistentHashMap.EMPTY));
+					       VARS, PersistentHashMap.EMPTY,
+					       KEYWORD_CALLSITES, PersistentVector.EMPTY));
 
 			//arglist might be preceded by symbol naming this fn
 			if(RT.second(form) instanceof Symbol)
@@ -2812,6 +2867,8 @@ static public class FnExpr extends ObjExpr{
 			fn.keywords = (IPersistentMap) KEYWORDS.deref();
 			fn.vars = (IPersistentMap) VARS.deref();
 			fn.constants = (PersistentVector) CONSTANTS.deref();
+			fn.keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
+
 			fn.constantsID = RT.nextID();
 //			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
 //			loader.registerConstants(fn.constantsID, fn.constants.toArray());
@@ -2864,6 +2921,7 @@ static public class ObjExpr implements Expr{
 	PersistentVector constants;
 	int constantsID;
 
+	IPersistentVector keywordCallsites;
 
 	final static Method voidctor = Method.getMethod("void <init>()");
 
@@ -2925,6 +2983,11 @@ static public class ObjExpr implements Expr{
 	final static Method getClassLoaderMethod = Method.getMethod("ClassLoader getClassLoader()");
 	final static Method getConstantsMethod = Method.getMethod("Object[] getConstants(int)");
 	final static Method readStringMethod = Method.getMethod("Object readString(String)");
+
+	final static Type ILOOKUP_SITE_TYPE = Type.getType(ILookupSite.class);
+	final static Type ILOOKUP_THUNK_TYPE = Type.getType(ILookupThunk.class);
+	final static Type KEYWORD_LOOKUPSITE_TYPE = Type.getType(KeywordLookupSite.class);
+
 	private DynamicClassLoader loader;
 	private byte[] bytecode;
 
@@ -2962,6 +3025,18 @@ static public class ObjExpr implements Expr{
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
 		//derived from AFn/RestFn
+		if(keywordCallsites.count() > 0)
+			{
+			if(interfaceNames == null)
+				interfaceNames = new String[]{"clojure/lang/ILookupHost"};
+			else
+				{
+				String[] inames = new String[interfaceNames.length + 1];
+				System.arraycopy(interfaceNames,0,inames,0,interfaceNames.length);
+				inames[interfaceNames.length] =  "clojure/lang/ILookupHost";
+				interfaceNames = inames;
+				}
+			}
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
 		ClassVisitor cv = cw;
@@ -3002,6 +3077,16 @@ static public class ObjExpr implements Expr{
 			              null, null);
 			}
 
+		//static fields for lookup sites
+		for(int i = 0; i < keywordCallsites.count(); i++)
+			{
+			cv.visitField(ACC_FINAL
+			              + ACC_STATIC, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE.getDescriptor(),
+			              null, null);
+			cv.visitField(ACC_STATIC, thunkNameStatic(i), ILOOKUP_THUNK_TYPE.getDescriptor(),
+			              null, null);
+			}
+
 		//static init for constants, keywords and vars
 		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
 		                                                  Method.getMethod("void <clinit> ()"),
@@ -3015,6 +3100,9 @@ static public class ObjExpr implements Expr{
 			{
 			emitConstants(clinitgen);
 			}
+
+		if(keywordCallsites.count() > 0)
+			emitKeywordCallsites(clinitgen);
 
 		clinitgen.returnValue();
 
@@ -3047,6 +3135,14 @@ static public class ObjExpr implements Expr{
 							, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 				}
 			}
+
+		//instance fields for callsites and thunks
+		for(int i=0;i<keywordCallsites.count();i++)
+			{
+//			cv.visitField(ACC_FINAL, siteName(i), ILOOKUP_SITE_TYPE.getDescriptor(), null, null);
+//			cv.visitField(ACC_PUBLIC, thunkName(i), ILOOKUP_THUNK_TYPE.getDescriptor(), null, null);
+			}
+
 		//ctor that takes closed-overs and inits base + fields
 		Method m = new Method("<init>", Type.VOID_TYPE, ctorTypes());
 		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
@@ -3088,13 +3184,61 @@ static public class ObjExpr implements Expr{
 				ctorgen.putField(objtype, lb.name, OBJECT_TYPE);
 				}
 			}
+
+		//copy static sites into instance site and thunk
+		for(int i=0;i<keywordCallsites.count();i++)
+			{
+//			ctorgen.loadThis();
+//			ctorgen.getStatic(objtype,siteNameStatic(i),KEYWORD_LOOKUPSITE_TYPE);
+//			ctorgen.putField(objtype, siteName(i),ILOOKUP_SITE_TYPE);
+//			ctorgen.loadThis();
+//			ctorgen.getStatic(objtype,siteNameStatic(i),KEYWORD_LOOKUPSITE_TYPE);
+//			ctorgen.putField(objtype, thunkName(i),ILOOKUP_THUNK_TYPE);
+			}
+		
 		ctorgen.visitLabel(end);
 
 		ctorgen.returnValue();
+
 		ctorgen.endMethod();
 
 		emitMethods(cv);
 
+		if(keywordCallsites.count() > 0)
+			{
+			Method meth = Method.getMethod("void swapThunk(int,clojure.lang.ILookupThunk)");
+
+			GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+												meth,
+												null,
+												null,
+												cv);
+			gen.visitCode();
+			Label endLabel = gen.newLabel();
+
+			Label[] labels = new Label[keywordCallsites.count()];
+			for(int i = 0; i < keywordCallsites.count();i++)
+				{
+				labels[i] = gen.newLabel();
+				}
+			gen.loadArg(0);
+			gen.visitTableSwitchInsn(0,keywordCallsites.count()-1,endLabel,labels);
+
+			for(int i = 0; i < keywordCallsites.count();i++)
+				{
+				gen.mark(labels[i]);
+//				gen.loadThis();
+				gen.loadArg(1);
+				gen.putStatic(objtype, thunkNameStatic(i),ILOOKUP_THUNK_TYPE);
+				gen.goTo(endLabel);
+				}
+
+			gen.mark(endLabel);
+
+			gen.returnValue();
+			gen.endMethod();
+			}
+		
 		//end of class
 		cv.visitEnd();
 
@@ -3103,6 +3247,22 @@ static public class ObjExpr implements Expr{
 			writeClassFile(internalName, bytecode);
 //		else
 //			getCompiledClass();
+	}
+
+	private void emitKeywordCallsites(GeneratorAdapter clinitgen){
+		for(int i=0;i<keywordCallsites.count();i++)
+			{
+			Keyword k = (Keyword) keywordCallsites.nth(i);
+			clinitgen.newInstance(KEYWORD_LOOKUPSITE_TYPE);
+			clinitgen.dup();
+			clinitgen.push(i);
+			emitValue(k,clinitgen);
+			clinitgen.invokeConstructor(KEYWORD_LOOKUPSITE_TYPE,
+			                            Method.getMethod("void <init>(int,clojure.lang.Keyword)"));
+			clinitgen.dup();
+			clinitgen.putStatic(objtype, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE);
+			clinitgen.putStatic(objtype, thunkNameStatic(i), ILOOKUP_THUNK_TYPE);
+			}
 	}
 
 	protected void emitMethods(ClassVisitor gen){
@@ -3476,6 +3636,22 @@ static public class ObjExpr implements Expr{
 
 	String constantName(int id){
 		return CONST_PREFIX + id;
+	}
+
+	String siteName(int n){
+		return "__site__" + n;
+	}
+
+	String siteNameStatic(int n){
+		return siteName(n) + "__";
+	}
+
+	String thunkName(int n){
+		return "__thunk__" + n;
+	}
+
+	String thunkNameStatic(int n){
+		return thunkName(n) + "__";
 	}
 
 	Type constantType(int id){
@@ -4635,6 +4811,17 @@ private static KeywordExpr registerKeyword(Keyword keyword){
 //	return ke;
 }
 
+private static int registerKeywordCallsite(Keyword keyword){
+	if(!KEYWORD_CALLSITES.isBound())
+		throw new IllegalAccessError();
+
+	IPersistentVector keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
+
+	keywordCallsites = keywordCallsites.cons(keyword);
+	KEYWORD_CALLSITES.set(keywordCallsites);
+	return keywordCallsites.count()-1;
+}
+
 private static Expr analyzeSymbol(Symbol sym) throws Exception{
 	Symbol tag = tagOf(sym);
 	if(sym.ns == null) //ns-qualified syms are always Vars
@@ -4976,6 +5163,10 @@ public static void pushNS(){
 	                                                           Symbol.create("*ns*")), null));
 }
 
+public static ILookupThunk getLookupThunk(Object target, Keyword k){
+	return null;  //To change body of created methods use File | Settings | File Templates.
+}
+
 static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) throws Exception{
 	Integer line = (Integer) LINE.deref();
 	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
@@ -5207,6 +5398,8 @@ static public class NewInstanceExpr extends ObjExpr{
 				fmap = fmap.assoc(sym, lb);
 				closesvec[i*2] = lb;
 				closesvec[i*2 + 1] = lb;
+				if(!sym.name.startsWith("__"))
+					compileLookupThunk(ret, sym);
 				}
 
 			//todo - inject __meta et al into closes - when?
@@ -5242,7 +5435,8 @@ static public class NewInstanceExpr extends ObjExpr{
 			Var.pushThreadBindings(
 					RT.map(CONSTANTS, PersistentVector.EMPTY,
 					       KEYWORDS, PersistentHashMap.EMPTY,
-					       VARS, PersistentHashMap.EMPTY
+					       VARS, PersistentHashMap.EMPTY,
+					       KEYWORD_CALLSITES, PersistentVector.EMPTY
 							));
 			if(ret.isDefclass())
 				{
@@ -5267,6 +5461,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			ret.vars = (IPersistentMap) VARS.deref();
 			ret.constants = (PersistentVector) CONSTANTS.deref();
 			ret.constantsID = RT.nextID();
+			ret.keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
 			}
 		finally
 			{
@@ -5327,6 +5522,70 @@ static public class NewInstanceExpr extends ObjExpr{
 		byte[] bytecode = cw.toByteArray();
 		DynamicClassLoader loader = (DynamicClassLoader) LOADER.deref();
 		return loader.defineClass(COMPILE_STUB_PREFIX + "." + ret.name, bytecode);		
+	}
+
+	static Class compileLookupThunk(NewInstanceExpr ret, Symbol fld) throws Exception{
+				//String superName, NewInstanceExpr ret, String[] interfaceNames){
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		ClassVisitor cv = cw;
+		String iname = ret.internalName + "$__lookup__" + fld.name;
+		String cname = ret.name + "$__lookup__" + fld.name;
+		Class fclass = tagClass(tagOf(fld));
+		Type ftype = Type.getType(fclass);
+		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, iname,
+		         null,"java/lang/Object",new String[]{"clojure/lang/ILookupThunk"});
+
+		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
+		                                                voidctor,
+		                                                null,
+		                                                null,
+		                                                cv);
+		ctorgen.visitCode();
+		ctorgen.loadThis();
+		ctorgen.invokeConstructor(OBJECT_TYPE, voidctor);
+		ctorgen.returnValue();
+		ctorgen.endMethod();
+
+		Method meth = Method.getMethod("Object get(Object, clojure.lang.ILookupSite)");
+//		Method meth = Method.getMethod("Object get(Object, clojure.lang.ILookupSite, clojure.lang.ILookupHost)");
+
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+											meth,
+											null,
+											null,
+											cv);
+		gen.visitCode();
+		Label faultLabel = gen.newLabel();
+		Label endLabel = gen.newLabel();
+
+		gen.loadArg(0);
+		gen.dup();
+		gen.instanceOf(ret.objtype);
+		gen.ifZCmp(GeneratorAdapter.EQ, faultLabel);
+		gen.checkCast(ret.objtype);
+		gen.getField(ret.objtype, fld.name, ftype);
+//		gen.getField(ret.objtype, fld.name, ftype);
+		HostExpr.emitBoxReturn(ret,gen,fclass);
+		gen.goTo(endLabel);
+
+		gen.mark(faultLabel);
+		gen.pop();
+		gen.loadArg(1);
+//		gen.swap();
+//		gen.loadArg(2);
+//		gen.invokeInterface(ObjExpr.ILOOKUP_SITE_TYPE,
+//		                    Method.getMethod("Object fault(Object, clojure.lang.ILookupHost)"));
+
+		gen.mark(endLabel);
+		gen.returnValue();
+		gen.endMethod();
+
+		//end of class
+		cv.visitEnd();
+
+		byte[] bytecode = cw.toByteArray();
+		DynamicClassLoader loader = (DynamicClassLoader) LOADER.deref();
+		return loader.defineClass(cname, bytecode);
 	}
 
 	static String[] interfaceNames(IPersistentVector interfaces){
