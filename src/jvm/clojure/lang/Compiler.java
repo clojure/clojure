@@ -5607,6 +5607,8 @@ static public class NewInstanceExpr extends ObjExpr{
 		cv.visitEnd();
 
 		byte[] bytecode = cw.toByteArray();
+		if(RT.booleanCast(COMPILE_FILES.deref()))
+			writeClassFile(iname, bytecode);
 		DynamicClassLoader loader = (DynamicClassLoader) LOADER.deref();
 		return loader.defineClass(cname, bytecode);
 	}
