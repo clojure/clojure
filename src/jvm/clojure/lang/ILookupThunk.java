@@ -14,6 +14,6 @@ package clojure.lang;
 
 public interface ILookupThunk{
 
-Object get(Object target, ILookupSite site);
+Object get(Object target);
 
 }

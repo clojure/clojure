@@ -55,6 +55,18 @@
                                                    base-fields)
                            (get ~'__extmap k# else#))))]
           [i m]))
+      (ikeywordlookup [[i m]]
+        [(conj i 'clojure.lang.IKeywordLookup)
+         (conj m
+               `(.getLookupThunk [k#]
+                  (case k#
+                        ~@(mapcat 
+                           (fn [fld]
+                             (let [cstr (str (clojure.core/name classname) "$__lookup__" (clojure.core/name fld))]
+                               [(keyword fld) 
+                                `(-> ~cstr (Class/forName) (.newInstance))]))
+                             base-fields)
+                        nil)))])
       (imap [[i m]] 
          (if (and (interface-set clojure.lang.IPersistentMap) (not (methodname-set '.assoc)))
            [i
@@ -81,7 +93,7 @@
                                      (new ~name ~@(remove #{'__extmap} fields) 
                                           (not-empty (dissoc ~'__extmap k#))))))]
            [i m]))]
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap)]
+     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap ikeywordlookup)]
        `(defclass* ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))

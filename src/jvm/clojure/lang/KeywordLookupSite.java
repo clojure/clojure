@@ -29,16 +29,13 @@ public Object fault(Object target, ILookupHost host){
 		}
 	else if(target instanceof ILookup)
 		{
-//		final Class c = target.getClass();
+		final Class c = target.getClass();
 		host.swapThunk(n,new ILookupThunk(){
 
-			public Object get(Object target, ILookupSite site){
-					if(target instanceof ILookup)
-						return ((ILookup)target).valAt(k);
-					return RT.get(target, k);
-//				if(target != null && target.getClass() == c)
-//					return ((ILookup) target).valAt(k);
-//				return site;
+			public Object get(Object target){
+				if(target != null && target.getClass() == c)
+					return ((ILookup) target).valAt(k);
+				return this;
 			}
 		});
 		return ((ILookup) target).valAt(k);
@@ -47,15 +44,15 @@ public Object fault(Object target, ILookupHost host){
 	return RT.get(target, k);
 }
 
-public Object get(Object target, ILookupSite site){
+public Object get(Object target){
 	if(target instanceof IKeywordLookup || target instanceof ILookup)
-		return site;
+		return this;
 	return RT.get(target,k);
 }
 
 private Object install(Object target, ILookupHost host){
 	ILookupThunk t = ((IKeywordLookup)target).getLookupThunk(k);
 	host.swapThunk(n,t);
-	return t.get(target, this);
+	return t.get(target);
 }
 }

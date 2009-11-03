@@ -2515,7 +2515,36 @@ static class KeywordInvokeExpr implements Expr{
 			}
 	}
 
-	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+    public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+        Label endLabel = gen.newLabel();
+        Label faultLabel = gen.newLabel();
+
+        gen.visitLineNumber(line, gen.mark());
+        gen.getStatic(objx.objtype, objx.thunkNameStatic(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);
+        gen.dup();
+        target.emit(C.EXPRESSION, objx, gen);
+        gen.dupX2();
+        gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE, Method.getMethod("Object get(Object)"));
+        gen.dupX2();
+        gen.visitJumpInsn(IF_ACMPEQ, faultLabel);
+        gen.pop();
+        gen.goTo(endLabel);
+
+        gen.mark(faultLabel);
+        gen.swap();
+        gen.pop();
+        gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);
+        gen.swap();
+        gen.loadThis();
+        gen.invokeInterface(ObjExpr.ILOOKUP_SITE_TYPE,
+                            Method.getMethod("Object fault(Object, clojure.lang.ILookupHost)"));
+
+        gen.mark(endLabel);
+        if(context == C.STATEMENT)
+            gen.pop();
+    }
+
+	public void emit2(C context, ObjExpr objx, GeneratorAdapter gen){
 		Label endLabel = gen.newLabel();
 		Label faultLabel = gen.newLabel();
 
@@ -5546,8 +5575,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		ctorgen.returnValue();
 		ctorgen.endMethod();
 
-		Method meth = Method.getMethod("Object get(Object, clojure.lang.ILookupSite)");
-//		Method meth = Method.getMethod("Object get(Object, clojure.lang.ILookupSite, clojure.lang.ILookupHost)");
+        Method meth = Method.getMethod("Object get(Object)");
 
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
 											meth,
@@ -5564,17 +5592,12 @@ static public class NewInstanceExpr extends ObjExpr{
 		gen.ifZCmp(GeneratorAdapter.EQ, faultLabel);
 		gen.checkCast(ret.objtype);
 		gen.getField(ret.objtype, fld.name, ftype);
-//		gen.getField(ret.objtype, fld.name, ftype);
 		HostExpr.emitBoxReturn(ret,gen,fclass);
 		gen.goTo(endLabel);
 
 		gen.mark(faultLabel);
 		gen.pop();
-		gen.loadArg(1);
-//		gen.swap();
-//		gen.loadArg(2);
-//		gen.invokeInterface(ObjExpr.ILOOKUP_SITE_TYPE,
-//		                    Method.getMethod("Object fault(Object, clojure.lang.ILookupHost)"));
+		gen.loadThis();
 
 		gen.mark(endLabel);
 		gen.returnValue();
