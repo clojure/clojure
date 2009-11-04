@@ -5737,6 +5737,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	Type[] argTypes;
 	Type retType;
 	Class retClass;
+	Class[] exclasses;
 
 	public NewInstanceMethod(ObjExpr objx, ObjMethod parent){
 		super(objx, parent);
@@ -5812,6 +5813,7 @@ public static class NewInstanceMethod extends ObjMethod{
 				}
 			Map matches = findMethodsWithNameAndArity(name.name, parms.count(), overrideables);
 			Object mk = msig(name.name, pclasses);
+			java.lang.reflect.Method m = null;
 			if(matches.size() > 0)
 				{
 				//multiple methods
@@ -5820,7 +5822,7 @@ public static class NewInstanceMethod extends ObjMethod{
 					//must be hinted and match one method
 					if(!hinted)
 						throw new IllegalArgumentException("Must hint overloaded method: " + name.name);
-					java.lang.reflect.Method m = (java.lang.reflect.Method) matches.get(mk);
+					m = (java.lang.reflect.Method) matches.get(mk);
 					if(m == null)
 						throw new IllegalArgumentException("Can't find matching overloaded method: " + name.name);
 					if(m.getReturnType() != method.retClass)
@@ -5832,7 +5834,7 @@ public static class NewInstanceMethod extends ObjMethod{
 					//if hinted, validate match,
 					if(hinted)
 						{
-						java.lang.reflect.Method m = (java.lang.reflect.Method) matches.get(mk);
+						m = (java.lang.reflect.Method) matches.get(mk);
 						if(m == null)
 							throw new IllegalArgumentException("Can't find matching method: " + name.name +
 							                                   ", leave off hints for auto match.");
@@ -5842,7 +5844,7 @@ public static class NewInstanceMethod extends ObjMethod{
 						}
 					else //adopt found method sig
 						{
-						java.lang.reflect.Method m = (java.lang.reflect.Method) matches.values().iterator().next();
+						m = (java.lang.reflect.Method) matches.values().iterator().next();
 						method.retClass = m.getReturnType();
 						pclasses = m.getParameterTypes();
 						}
@@ -5857,6 +5859,7 @@ public static class NewInstanceMethod extends ObjMethod{
 				//validate unque name+arity among additional methods
 
 			method.retType = Type.getType(method.retClass);
+			method.exclasses = m.getExceptionTypes();
 
 			for(int i = 0; i < parms.count(); i++)
 				{
@@ -5908,11 +5911,17 @@ public static class NewInstanceMethod extends ObjMethod{
 	public void emit(ObjExpr obj, ClassVisitor cv){
 		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
 
+		Type[] extypes = null;
+		if(exclasses.length > 0)
+			{
+			extypes = new Type[exclasses.length];
+			for(int i=0;i<exclasses.length;i++)
+				extypes[i] = Type.getType(exclasses[i]);
+			}
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
 		                                            m,
 		                                            null,
-		                                            //todo don't hardwire this
-		                                            EXCEPTION_TYPES,
+		                                            extypes,
 		                                            cv);
 		gen.visitCode();
 		Label loopLabel = gen.mark();
