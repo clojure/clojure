@@ -106,10 +106,11 @@
   writes the .class file to the *compile-path* directory.  When not
   compiling, does nothing. 
 
-  A constructor will be defined, taking the designated fields followed
-  by a metadata map (nil for none) and an extension field map (nil for
-  none). In the method bodies, the (unqualified) name can be used
-  to name the class (for calls to new etc).
+  Two constructors will be defined, one taking the designated fields
+  followed by a metadata map (nil for none) and an extension field
+  map (nil for none), and one taking only the fields (using nil for
+  meta and extension fields). In the method bodies, the (unqualified)
+  name can be used to name the class (for calls to new etc).
 
   See deftype for a description of fields, methods, equality and
   generated interfaces."

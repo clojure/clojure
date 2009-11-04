@@ -2949,6 +2949,7 @@ static public class ObjExpr implements Expr{
 	int line;
 	PersistentVector constants;
 	int constantsID;
+	int altCtorDrops = 0;
 
 	IPersistentVector keywordCallsites;
 
@@ -3230,6 +3231,31 @@ static public class ObjExpr implements Expr{
 		ctorgen.returnValue();
 
 		ctorgen.endMethod();
+
+		if(altCtorDrops > 0)
+			{
+					//ctor that takes closed-overs and inits base + fields
+			Type[] ctorTypes = ctorTypes();
+			Type[] altCtorTypes = new Type[ctorTypes.length-altCtorDrops];
+			for(int i=0;i<altCtorTypes.length;i++)
+				altCtorTypes[i] = ctorTypes[i];
+			Method alt = new Method("<init>", Type.VOID_TYPE, altCtorTypes);
+			ctorgen = new GeneratorAdapter(ACC_PUBLIC,
+															alt,
+															null,
+															null,
+															cv);
+			ctorgen.visitCode();
+			ctorgen.loadThis();
+			ctorgen.loadArgs();
+			for(int i=0;i<altCtorDrops;i++)
+				ctorgen.visitInsn(Opcodes.ACONST_NULL);
+
+			ctorgen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes));
+
+			ctorgen.returnValue();
+			ctorgen.endMethod();
+			}
 
 		emitMethods(cv);
 
@@ -5401,7 +5427,7 @@ static public class NewInstanceExpr extends ObjExpr{
 	}
 	}
 
-	static Expr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym, String className,
+	static ObjExpr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym, String className,
 	                  Symbol typeTag, ISeq methodForms) throws Exception{
 		NewInstanceExpr ret = new NewInstanceExpr(null);
 
@@ -5435,6 +5461,8 @@ static public class NewInstanceExpr extends ObjExpr{
 			//use array map to preserve ctor order
 			ret.closes = new PersistentArrayMap(closesvec);
 			ret.fields = fmap;
+			for(int i=fieldSyms.count()-1;i >= 0 && ((Symbol)fieldSyms.nth(i)).name.startsWith("__");--i)
+				ret.altCtorDrops++;
 			}
 		//todo - set up volatiles
 //		ret.volatiles = PersistentHashSet.create(RT.seq(RT.get(ret.optionsMap, volatileKey)));
@@ -5545,6 +5573,30 @@ static public class NewInstanceExpr extends ObjExpr{
 		ctorgen.returnValue();
 		ctorgen.endMethod();
 
+		if(ret.altCtorDrops > 0)
+			{
+			Type[] ctorTypes = ret.ctorTypes();
+			Type[] altCtorTypes = new Type[ctorTypes.length-ret.altCtorDrops];
+			for(int i=0;i<altCtorTypes.length;i++)
+				altCtorTypes[i] = ctorTypes[i];
+			Method alt = new Method("<init>", Type.VOID_TYPE, altCtorTypes);
+			ctorgen = new GeneratorAdapter(ACC_PUBLIC,
+															alt,
+															null,
+															null,
+															cv);
+			ctorgen.visitCode();
+			ctorgen.loadThis();
+			ctorgen.loadArgs();
+			for(int i=0;i<ret.altCtorDrops;i++)
+				ctorgen.visitInsn(Opcodes.ACONST_NULL);
+
+			ctorgen.invokeConstructor(Type.getObjectType(COMPILE_STUB_PREFIX + "/" + ret.internalName),
+			                          new Method("<init>", Type.VOID_TYPE, ctorTypes));
+
+			ctorgen.returnValue();
+			ctorgen.endMethod();
+			}
 		//end of class
 		cv.visitEnd();
 
