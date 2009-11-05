@@ -5612,6 +5612,11 @@ static public class NewInstanceExpr extends ObjExpr{
 		String iname = ret.internalName + "$__lookup__" + fld.name;
 		String cname = ret.name + "$__lookup__" + fld.name;
 		Class fclass = tagClass(tagOf(fld));
+
+		//workaround until full support for type-hinted non-primitive fields
+		if(!fclass.isPrimitive())
+			fclass = Object.class;
+
 		Type ftype = Type.getType(fclass);
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, iname,
 		         null,"java/lang/Object",new String[]{"clojure/lang/ILookupThunk"});
