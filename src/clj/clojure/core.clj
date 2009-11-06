@@ -4437,14 +4437,17 @@
                              (into m (zipmap test (repeat expr)))
                              (assoc m test expr))) 
                            {} cases)
-        [shift mask] (min-hash (keys case-map))
+        [shift mask] (if (seq case-map) (min-hash (keys case-map)) [0 0])
         
         hmap (reduce (fn [m [test expr :as te]]
                        (assoc m (shift-mask shift mask (hash test)) te))
                      (sorted-map) case-map)]
     `(let [~ge ~e]
-       (case* ~ge ~shift ~mask ~(key (first hmap)) ~(key (last hmap)) ~default ~hmap 
-              ~(every? keyword? (keys case-map))))))
+       ~(condp = (count clauses)
+          0 default
+          1 default
+          :else `(case* ~ge ~shift ~mask ~(key (first hmap)) ~(key (last hmap)) ~default ~hmap 
+                        ~(every? keyword? (keys case-map)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
