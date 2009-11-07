@@ -204,3 +204,20 @@ Raise an exception if any deletion fails unless silently is true."
 (defmethod as-url String [#^String x] (URL. x))
 
 (defmethod as-url File [#^File x] (.toURL x))
+
+(defn wall-hack-method
+  "Calls a private or protected method.
+   params is a vector of class which correspond to the arguments to the method
+   obj is nil for static methods, the instance object otherwise
+   the method name is given as a symbol or a keyword (something Named)"
+  [class-name method-name params obj & args]
+  (-> class-name (.getDeclaredMethod (name method-name) (into-array Class params))
+    (doto (.setAccessible true))
+    (.invoke obj (into-array Object args))))
+
+(defn wall-hack-field
+  "Access to private or protected field."
+  [class-name field-name obj]
+  (-> class-name (.getDeclaredField (name field-name))
+    (doto (.setAccessible true))
+    (.get obj)))

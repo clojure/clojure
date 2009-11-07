@@ -79,6 +79,7 @@ collecting its stdout"}
    (map? arg) (into-array String (map (fn [[k v]] (str (as-env-key k) "=" v)) arg))
    true arg))
 
+
 (defn sh
   "Passes the given strings to Runtime.exec() to launch a sub-process.
 
@@ -111,26 +112,26 @@ collecting its stdout"}
         proc (.exec (Runtime/getRuntime) 
 		    (into-array (:cmd opts)) 
 		    (as-env-string (:env opts))
-		    (as-file (:dir opts)))
-        in-stream (.getInputStream proc)]
-    (when (:in opts)
+		    (as-file (:dir opts)))]
+    (if (:in opts)
       (with-open [osw (OutputStreamWriter. (.getOutputStream proc))]
-        (.write osw (:in opts))))
-    (let [stdout (.getInputStream proc)
-          stderr (.getErrorStream proc)
-          [[out err] combine-fn]
-            (if (= (:out opts) :bytes)
-              [(for [strm [stdout stderr]]
-                (into-array Byte/TYPE (map byte (stream-seq strm))))
-               #(aconcat Byte/TYPE %1 %2)]
-              [(for [strm [stdout stderr]]
-                (apply str (map char (stream-seq 
-                                       (InputStreamReader. strm (:out opts))))))
-                 str])
-           exit-code  (.waitFor proc)]
-      (if (:return-map opts)
-        {:exit exit-code :out out :err err}
-        (combine-fn out err)))))
+        (.write osw (:in opts)))
+      (.close (.getOutputStream proc)))
+    (with-open [stdout (.getInputStream proc)
+                stderr (.getErrorStream proc)]
+      (let [[[out err] combine-fn]
+                (if (= (:out opts) :bytes)
+                  [(for [strm [stdout stderr]]
+                    (into-array Byte/TYPE (map byte (stream-seq strm))))
+                  #(aconcat Byte/TYPE %1 %2)]
+                  [(for [strm [stdout stderr]]
+                    (apply str (map char (stream-seq 
+                                            (InputStreamReader. strm (:out opts))))))
+                  str])
+              exit-code (.waitFor proc)]
+        (if (:return-map opts)
+          {:exit exit-code :out out :err err}
+          (combine-fn out err))))))
 
 (comment
 
