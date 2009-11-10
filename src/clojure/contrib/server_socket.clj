@@ -15,7 +15,7 @@
   (:import (java.net InetAddress ServerSocket Socket SocketException)
            (java.io InputStreamReader OutputStream OutputStreamWriter PrintWriter)
            (clojure.lang LineNumberingPushbackReader))
-  (:use clojure.main))
+  (:use [clojure.main :only (repl)]))
  
 (defn- on-thread [f]
   (doto (Thread. #^Runnable f) 
