@@ -218,3 +218,200 @@
       (map #(clojure.lang.MapEntry. % (.getDynamicField o % nil)) fields)
       (.getExtensionMap o))
     pr-on w))
+
+;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- expand-method-impl-cache [#^clojure.lang.MethodImplCache cache c f]
+  (let [cs (into {} (remove (fn [[c f]] (nil? f)) (map vec (partition 2 (.table cache)))))
+        cs (assoc cs c f)
+        [shift mask] (min-hash (keys cs))
+        table (make-array Object (* 2 (inc mask)))
+        table (reduce (fn [#^objects t [c f]]
+                        (let [i (int (shift-mask shift mask (hash c)))]
+                          (aset t i c)
+                          (aset t (inc i) f)
+                          t))
+                      table cs)]
+    (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) shift mask table)))
+
+(defn find-protocol-impl [protocol x]
+  (if (and (:on protocol) (instance? (:on protocol) x))
+    x
+    (let [t (type x)
+          c (class x)
+          impl #(get (:impls protocol) %)]
+      (or (impl t)
+          (impl c)
+          ;todo - better path,  how to prioritize supers vs interfaces?
+          (first (remove nil? (map impl (supers c))))))))
+
+(defn find-protocol-method [protocol methodk x]
+  (get (find-protocol-impl protocol x) methodk))
+
+(defn extends? 
+  "Returns true if atype explicitly extends protocol"
+  [protocol atype]
+  (when (get (:impls protocol) atype) true))
+
+(defn extenders 
+  "Returns a collection of the types explicitly extending protocol"
+  [protocol]
+  (keys (:impls protocol)))
+
+(defn satisfies? 
+  "Returns true if x satisfies the protocol"
+  [protocol x]
+  (when 
+      (or (and (:on protocol) (instance? (:on protocol) x))
+          (find-protocol-impl protocol x))
+    true))
+
+(defn -cache-protocol-fn [#^clojure.lang.Box cache-box x]
+  (let [#^clojure.lang.MethodImplCache cache  (.val cache-box)
+        f (find-protocol-method (.protocol cache) (.methodk cache) x)]
+    (when-not f
+      (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache) 
+                                             " of protocol: " (:var (.protocol cache)) 
+                                             " found for class: " (.getName (class x))))))
+    (set! (.val cache-box) (expand-method-impl-cache cache (class x) f))
+    f))
+
+(defn- emit-method-builder [on-interface method on-method arglists]
+  (let [methodk (keyword method)
+        gcache-box (with-meta (gensym "gcache-box__") {:tag 'clojure.lang.Box})]
+    `(fn [~gcache-box]
+       (fn 
+         ~@(map 
+            (fn [args]
+              (let [gargs (map #(gensym (str "g__" % "__")) args)
+                    target (first gargs)]
+                `([~@gargs]
+                    (~@(if on-interface
+                         `(if (instance? ~on-interface ~target)
+                            (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))
+                         `(do))
+                     (let [#^clojure.lang.MethodImplCache cache#  (.val ~gcache-box)
+                           c# (class ~target)
+                           f# (or (.fnFor cache# c#)
+                                  (-cache-protocol-fn ~gcache-box ~target))]
+                       (f# ~@gargs))))))
+            arglists)))))
+
+(defn -reset-methods [protocol]
+  (doseq [[#^clojure.lang.Var v build] (:method-builders protocol)]
+    (let [cache-box (clojure.lang.Box. (clojure.lang.MethodImplCache. protocol (keyword (.sym v))))]
+      (.bindRoot v (build cache-box)))))
+
+(defn- emit-protocol [name opts+sigs]
+  (let [[opts sigs]
+        (loop [opts {} sigs opts+sigs]
+          (condp #(%1 %2) (first sigs) 
+            string? (recur (assoc opts :doc (first sigs)) (next sigs))
+            keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
+            [opts sigs]))
+        sigs (reduce (fn [m s]
+                       (let [mname (with-meta (first s) nil)
+                             arglists (if (vector? (second s)) (list (second s)) (second s))
+                             fx (nth s 2)
+                             doc (when (string? fx) fx)
+                             mopts (apply hash-map (nthnext s (if (string? fx) 3 2)))]
+                         (assoc m (keyword mname) 
+                                (merge mopts 
+                                       {:name (vary-meta mname assoc :doc doc :arglists arglists)
+                                        :arglists arglists
+                                        :doc doc}))))
+                     {} sigs)]
+  `(do
+     (defonce ~name {})
+     (alter-meta! (var ~name) assoc :doc  ~(:doc opts))
+     (alter-var-root (var ~name) merge 
+                     (assoc ~opts 
+                       :sigs '~sigs 
+                       :var (var ~name)
+                       :method-builders 
+                        ~(apply hash-map 
+                                (mapcat 
+                                 (fn [s] 
+                                   [`(intern *ns* '~(:name s)) 
+                                    (emit-method-builder (:on opts) (:name s) (:on s) (:arglists s))])
+                                 (vals sigs)))))
+     (-reset-methods ~name)
+     '~name)))
+
+(defmacro defprotocol 
+  "A protocol is a named set of named methods and their signatures:
+  (defprotocol AProtocolName
+
+  ;optional :on interface  
+  :on AnInterface
+
+  ;optional doc string
+  \"A doc string for AProtocol abstraction\"
+
+  ;method signatures
+  (bar [a b] \"bar docs\" :on barMethod)
+  (baz ([a] [a b] [a b & c]) \"baz docs\"))
+
+  No implementations are provided. Docs can be specified for the
+  protocol overall and for each method. The above yields a set of
+  polymorphic functions and a protocol object. All are
+  namespace-qualified by the ns enclosing the definition The resulting
+  functions dispatch on the type of their first argument, and thus
+  must have at least one argument. defprotocol is dynamic, has no
+  special compile-time effect, and defines no new types or classes
+  Implementations of the protocol methods can be provided using
+  extend.
+
+  If an :on interface is provided, the protocol will have a default
+  mapping to the methods of the specified interface. The interface
+  must exist, it is not defined by defprotocol. By default, methods of
+  the protocol map to methods of the same name in the interface. A
+  different mapping can be provided on a per-method basis using :on
+  inside the signature. Note that if a protocol method is called with
+  an instance of the :on interface, the interface will be used,
+  regardless of any extends clauses that might otherwise apply to the
+  object. The use of an :on interface in no way precludes extending
+  the protocol to other interfaces using extend."
+
+  [name & opts+sigs]
+  (emit-protocol name opts+sigs))
+
+(defn extend 
+  "Implementations of protocol methods can be provided using the extend construct:
+
+  (extend ::AType ;or AClass or AnInterface 
+    AProtocol
+     {:foo an-existing-fn
+      :bar (fn [a b] ...)
+      :baz (fn ([a]...) ([a b] ...)...)}
+    BProtocol 
+      {...} 
+    ...)
+ 
+
+  extend takes a type/class (or interface, see below), and one or more
+  protocol + method map pairs. It will extend the polymorphism of the
+  protocol's methods to call the supplied methods when an AType is
+  provided as the first argument. Note that deftype types are specified
+  using their keyword tags:
+
+  ::MyType or :my.ns/MyType
+
+  Method maps are maps of the keyword-ized method names to ordinary
+  fns. This facilitates easy reuse of existing fns and fn maps, for
+  code reuse/mixins without derivation or composition. You can extend
+  an interface to a protocol. This is primarily to facilitate interop
+  with the host (e.g. Java) but opens the door to incidental multiple
+  inheritance of implementation since a class can inherit from more
+  than one interface, both of which extend the protocol. It is TBD how
+  to specify which impl to use. You can extend a protocol on nil.
+
+  Note that multiple independent extend clauses can exist for the same
+  type, not all protocols need be defined in a single extend call.
+
+  See also:
+  extends?, satisfies?, extenders"
+
+  [atype & proto+mmaps]
+  (doseq [[proto mmap] (partition 2 proto+mmaps)]
+    (-reset-methods (alter-var-root (:var proto) assoc-in [:impls atype] mmap))))
