@@ -418,3 +418,18 @@ Math/pow overflows to Infinity."
        1 (bit-shift-right (expt 2 32) 32)
        1 (bit-shift-right (expt 2 10000) 10000)
        ))
+
+
+;; arrays
+(deftest test-array-types
+  (are [x y z] (= (Class/forName x) (class y) (class z))
+       "[Z" (boolean-array 1) (booleans (boolean-array 1 true))
+       "[B" (byte-array 1) (bytes (byte-array 1 (byte 1)))
+       "[C" (char-array 1) (chars (char-array 1 \a))
+       "[S" (short-array 1) (shorts (short-array 1 (short 1)))
+       "[F" (float-array 1) (floats (float-array 1 1))
+       "[D" (double-array 1) (doubles (double-array 1 1))
+       "[I" (int-array 1) (ints (int-array 1 1))
+       "[J" (long-array 1) (longs (long-array 1 1))))
+
+

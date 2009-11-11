@@ -3546,6 +3546,34 @@
   ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
 
+(defn boolean-array
+  "Creates an array of booleans"
+  {:inline (fn [& args] `(. clojure.lang.Numbers boolean_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers boolean_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers boolean_array size init-val-or-seq)))
+
+(defn byte-array
+  "Creates an array of bytes"
+  {:inline (fn [& args] `(. clojure.lang.Numbers byte_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers byte_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers byte_array size init-val-or-seq)))
+
+(defn char-array
+  "Creates an array of chars"
+  {:inline (fn [& args] `(. clojure.lang.Numbers char_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers char_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers char_array size init-val-or-seq)))
+
+(defn short-array
+  "Creates an array of shorts"
+  {:inline (fn [& args] `(. clojure.lang.Numbers short_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers short_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers short_array size init-val-or-seq)))
+
 (defn double-array
   "Creates an array of doubles"
   {:inline (fn [& args] `(. clojure.lang.Numbers double_array ~@args))
@@ -3561,11 +3589,27 @@
   ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
 
 (defn long-array
-  "Creates an array of ints"
+  "Creates an array of longs"
   {:inline (fn [& args] `(. clojure.lang.Numbers long_array ~@args))
    :inline-arities #{1 2}}
   ([size-or-seq] (. clojure.lang.Numbers long_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers long_array size init-val-or-seq)))
+
+(definline booleans
+  "Casts to boolean[]"
+  [xs] `(. clojure.lang.Numbers booleans ~xs))
+
+(definline bytes
+  "Casts to bytes[]"
+  [xs] `(. clojure.lang.Numbers bytes ~xs))
+
+(definline chars
+  "Casts to chars[]"
+  [xs] `(. clojure.lang.Numbers chars ~xs))
+
+(definline shorts
+  "Casts to shorts[]"
+  [xs] `(. clojure.lang.Numbers shorts ~xs))
 
 (definline floats
   "Casts to float[]"
