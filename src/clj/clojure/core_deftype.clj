@@ -227,7 +227,7 @@
         [shift mask] (min-hash (keys cs))
         table (make-array Object (* 2 (inc mask)))
         table (reduce (fn [#^objects t [c f]]
-                        (let [i (int (shift-mask shift mask (hash c)))]
+                        (let [i (* 2 (int (shift-mask shift mask (hash c))))]
                           (aset t i c)
                           (aset t (inc i) f)
                           t))
