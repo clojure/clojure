@@ -5437,9 +5437,6 @@ static public class NewInstanceExpr extends ObjExpr{
 		ret.internalName = ret.name.replace('.', '/');
 		ret.objtype = Type.getObjectType(ret.internalName);
 
-		ret.internalName = ret.name.replace('.', '/');
-		ret.objtype = Type.getObjectType(ret.internalName);
-
 		if(thisSym != null)
 			ret.thisName = thisSym.name;
 
