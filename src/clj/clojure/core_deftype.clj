@@ -312,7 +312,7 @@
         sigs (reduce (fn [m s]
                        (let [mname (with-meta (first s) nil)
                              arglists (if (vector? (second s)) (list (second s)) (second s))
-                             fx (nth s 2)
+                             fx (nth s 2 nil)
                              doc (when (string? fx) fx)
                              mopts (apply hash-map (nthnext s (if (string? fx) 3 2)))]
                          (assoc m (keyword mname) 
