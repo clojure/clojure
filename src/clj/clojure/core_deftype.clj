@@ -13,10 +13,10 @@
 (defn hash-combine [x y] 
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))
 
-(defn create-defclass* 
-  "Do not use this directly - use defclass/deftype"
-  [name fields interfaces methods]
-  (let [tag (keyword (str *ns*) (str name))
+(defn- emit-deftype* 
+  "Do not use this directly - use deftype"
+  [tagname name fields interfaces methods]
+  (let [tag (keyword (str *ns*) (str tagname))
         classname (symbol (str *ns* "." name))
         interfaces (vec interfaces)
         interface-set (set (map resolve interfaces))
@@ -36,15 +36,17 @@
                  `(.equals [~'o] 
                     (boolean 
                      (or (identical? ~'this ~'o)
-                         (when (instance? ~name ~'o)
-                           (let [~'o ~(with-meta 'o {:tag name})]
-                             (and ~@(map (fn [fld] `(= ~fld (. ~'o ~fld))) (remove #{'__meta} fields)))))))))]
+                         (when (instance? clojure.lang.IDynamicType ~'o)
+                           (let [~'o ~(with-meta 'o {:tag 'clojure.lang.IDynamicType})]
+                             (and (= ~tag (.getDynamicType ~'o)) 
+                                  ~@(map (fn [fld] `(= ~fld (.getDynamicField ~'o ~(keyword fld) ~'this))) base-fields)
+                                  (= ~'__extmap (.getExtensionMap ~'o)))))))))]
           [i m]))
       (iobj [[i m]] 
         (if (and (implement? clojure.lang.IObj) (implement? clojure.lang.IMeta))
           [(conj i 'clojure.lang.IObj)
            (conj m `(.meta [] ~'__meta)
-                 `(.withMeta [~'m] (new ~name ~@(replace {'__meta 'm} fields))))]
+                 `(.withMeta [~'m] (new ~tagname ~@(replace {'__meta 'm} fields))))]
           [i m]))
       (ilookup [[i m]] 
         (if (implement? clojure.lang.ILookup)
@@ -55,6 +57,14 @@
                                                    base-fields)
                            (get ~'__extmap k# else#))))]
           [i m]))
+      (idynamictype [[i m]]
+        [(conj i 'clojure.lang.IDynamicType)
+         (conj m
+               `(.getDynamicType [] ~tag)
+               `(.getExtensionMap [] ~'__extmap)
+               `(.getDynamicField [k# else#] 
+                  (condp identical? k# ~@(mapcat (fn [fld] [(keyword fld) fld]) base-fields)
+                         (get ~'__extmap k# else#))))])
       (ikeywordlookup [[i m]]
         [(conj i 'clojure.lang.IKeywordLookup)
          (conj m
@@ -85,54 +95,18 @@
                     `(.assoc [~gk ~gv]
                        (condp identical? ~gk
                          ~@(mapcat (fn [fld]
-                                     [(keyword fld) (list* `new name (replace {fld gv} fields))])
+                                     [(keyword fld) (list* `new tagname (replace {fld gv} fields))])
                                    base-fields)
-                         (new ~name ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~gk ~gv)))))
+                         (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~gk ~gv)))))
                   `(.without [k#] (if (contains? #{~@(map keyword base-fields)} k#)
                                      (dissoc (with-meta (into {} ~'this) ~'__meta) k#)
-                                     (new ~name ~@(remove #{'__extmap} fields) 
+                                     (new ~tagname ~@(remove #{'__extmap} fields) 
                                           (not-empty (dissoc ~'__extmap k#))))))]
            [i m]))]
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap ikeywordlookup)]
-       `(defclass* ~classname ~(conj hinted-fields '__meta '__extmap) 
+     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap ikeywordlookup idynamictype)]
+       `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))
-
-(defmacro defclass 
-  "Alpha - subject to change
-  
-  When compiling, generates compiled bytecode for a class with the
-  given name (a symbol), prepends the current ns as the package, and
-  writes the .class file to the *compile-path* directory.  When not
-  compiling, does nothing. 
-
-  Two constructors will be defined, one taking the designated fields
-  followed by a metadata map (nil for none) and an extension field
-  map (nil for none), and one taking only the fields (using nil for
-  meta and extension fields). In the method bodies, the (unqualified)
-  name can be used to name the class (for calls to new etc).
-
-  See deftype for a description of fields, methods, equality and
-  generated interfaces."
- 
-  [name [& fields] & [[& interfaces] & methods]]
-  (let [o (gensym)
-        classname (symbol (str *ns* "." name))]
-    `(do
-       ~(create-defclass* name (vec fields) (vec interfaces) methods)
-       (defmethod print-method ~classname [~(with-meta o {:tag classname}) w#]
-         ((var print-defclass)
-            (.__extmap ~o)
-            ~(apply array-map (interleave
-                                (map #(-> % str keyword) fields)
-                                (map #(list '. o %) fields)))
-            ~o w#)))))
-
-(defn- print-defclass [extmap fieldmap o, #^Writer w]
-  (print-meta o w)
-  (.write w "#:")
-  (.write w (.getSimpleName (class o)))
-  (print-map (concat fieldmap extmap) pr-on w))
 
 (defmacro deftype
   "Alpha - subject to change
@@ -165,6 +139,9 @@
   methodname symbols. If not supplied, they will be inferred, so type
   hints should be reserved for disambiguation.
 
+  In the method bodies, the (unqualified) name can be used to name the
+  class (for calls to new, instance? etc).
+
   The class will have implementations of two (clojure.lang) interfaces
   generated automatically: IObj (metadata support), ILookup (get and
   keyword lookup for fields). If you specify IPersistentMap as an
@@ -174,35 +151,24 @@
   In addition, unless you supply a version of .hashCode or .equals,
   deftype/class will define type-and-value-based equality and hashCode.
 
-  Note that overriding equals and hashCode is not supported at this
-  time for deftype - you must use the generated versions."
+  When AOT compiling, generates compiled bytecode for a class with the
+  given name (a symbol), prepends the current ns as the package, and
+  writes the .class file to the *compile-path* directory. When
+  dynamically evaluated, the class will have a generated name.
+
+  Two constructors will be defined, one taking the designated fields
+  followed by a metadata map (nil for none) and an extension field
+  map (nil for none), and one taking only the fields (using nil for
+  meta and extension fields)."
 
   [name [& fields] & [[& interfaces] & methods]]
-  (let [gname (gensym (str name "__"))
+  (let [gname (if *compile-files* name (gensym (str name "__")))
         classname (symbol (str *ns* "." gname))
         tag (keyword (str *ns*) (str name))
-        interfaces (conj interfaces 'clojure.lang.IDynamicType)
         hinted-fields fields
-        fields (vec (map #(with-meta % nil) fields))
-        methods (conj methods 
-                      `(.getDynamicType [] ~tag)
-                      `(.getExtensionMap [] ~'__extmap)
-                      `(.getDynamicField [k# else#] 
-                         (condp identical? k# ~@(mapcat (fn [fld] [(keyword fld) fld]) fields)
-                                (get ~'__extmap k# else#)))
-                      `(.hashCode [] (-> ~(hash tag) 
-                                          ~@(map #(list `hash-combine %) fields)
-                                          (hash-combine ~'__extmap)))
-                      `(.equals [~'o] 
-                         (boolean 
-                          (or (identical? ~'this ~'o)
-                              (when (instance? clojure.lang.IDynamicType ~'o)
-                                (let [~'o ~(with-meta 'o {:tag 'clojure.lang.IDynamicType})]
-                                  (and (= (.getDynamicType ~'this) (.getDynamicType ~'o)) 
-                                       ~@(map (fn [fld] `(= ~fld (.getDynamicField ~'o ~(keyword fld) ~'this))) fields)
-                                       (= ~'__extmap (.getExtensionMap ~'o)))))))))]
+        fields (vec (map #(with-meta % nil) fields))]
     `(do
-       ~(create-defclass* gname (vec hinted-fields) (vec interfaces) methods)
+       ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods)
        (defmethod print-method ~tag [o# w#]
          ((var print-deftype) ~(vec (map #(-> % str keyword) fields)) o# w#))
        (defn ~name
@@ -218,6 +184,7 @@
       (map #(clojure.lang.MapEntry. % (.getDynamicField o % nil)) fields)
       (.getExtensionMap o))
     pr-on w))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 

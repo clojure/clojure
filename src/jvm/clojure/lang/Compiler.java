@@ -55,7 +55,7 @@ static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
 static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
 static final Symbol IMPORT = Symbol.create("clojure.core", "import*");
 //static final Symbol INSTANCE = Symbol.create("instance?");
-static final Symbol DEFCLASS = Symbol.create("defclass*");
+static final Symbol DEFTYPE = Symbol.create("deftype*");
 static final Symbol CASE = Symbol.create("case*");
 
 //static final Symbol THISFN = Symbol.create("thisfn");
@@ -104,7 +104,7 @@ static final public IPersistentMap specials = PersistentHashMap.create(
 		IMPORT, new ImportExpr.Parser(),
 		DOT, new HostExpr.Parser(),
 		ASSIGN, new AssignExpr.Parser(),
-		DEFCLASS, new NewInstanceExpr.DefclassParser(),
+		DEFTYPE, new NewInstanceExpr.DeftypeParser(),
 		REIFY, new NewInstanceExpr.ReifyParser(),
 //		TRY_FINALLY, new TryFinallyExpr.Parser(),
 TRY, new TryExpr.Parser(),
@@ -226,7 +226,6 @@ static final public Var RET_LOCAL_NUM = Var.create();
 
 static final public Var COMPILE_STUB_SYM = Var.create(null);
 static final public Var COMPILE_STUB_CLASS = Var.create(null);
-
 
 
 public enum C{
@@ -3141,7 +3140,7 @@ static public class ObjExpr implements Expr{
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			if(isDefclass())
+			if(isDeftype())
 				{
 				int access = isVolatile(lb) ? ACC_VOLATILE : (ACC_PUBLIC + ACC_FINAL);
 				if(lb.getPrimitiveType() != null)
@@ -3499,7 +3498,7 @@ static public class ObjExpr implements Expr{
 		return closes.containsKey(lb) && volatiles.contains(lb.sym);
 	}
 
-	boolean isDefclass(){
+	boolean isDeftype(){
 		return fields != null;
 	}
 
@@ -3538,7 +3537,7 @@ static public class ObjExpr implements Expr{
 	}
 
 	public Object eval() throws Exception{
-		if(isDefclass())
+		if(isDeftype())
 			return null;
 		return getCompiledClass().newInstance();
 	}
@@ -3574,7 +3573,7 @@ static public class ObjExpr implements Expr{
 		//emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
 		//objx arg is enclosing objx, not this
 //		getCompiledClass();
-		if(isDefclass())
+		if(isDeftype())
 			{
 			gen.visitInsn(Opcodes.ACONST_NULL);
 			}
@@ -5375,11 +5374,13 @@ static public class NewInstanceExpr extends ObjExpr{
 		super(tag);
 	}
 
-	static class DefclassParser implements IParser{
+	static class DeftypeParser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
 			ISeq rform = (ISeq) frm;
-			//(defclass* classname [fields] :implements [interfaces] :tag tagname methods*)
+			//(deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
 			rform = RT.next(rform);
+			String tagname = ((Symbol) rform.first()).toString();
+			rform = rform.next();
 			String classname = ((Symbol) rform.first()).toString();
 			rform = rform.next();
 			IPersistentVector fields = (IPersistentVector) rform.first();
@@ -5391,7 +5392,7 @@ static public class NewInstanceExpr extends ObjExpr{
 				rform = rform.next().next();
 				}
 
-			return build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,THIS,classname,
+			return build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,THIS,tagname, classname,
 			             (Symbol) RT.get(opts,RT.TAG_KEY),rform);
 		}
 	}
@@ -5423,11 +5424,12 @@ static public class NewInstanceExpr extends ObjExpr{
 		rform = RT.next(rform);
 
 
-		return build(interfaces, null, thisSym, classname, null, rform);
+		return build(interfaces, null, thisSym, classname, classname, null, rform);
 	}
 	}
 
-	static ObjExpr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym, String className,
+	static ObjExpr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym,
+	                     String tagName, String className,
 	                  Symbol typeTag, ISeq methodForms) throws Exception{
 		NewInstanceExpr ret = new NewInstanceExpr(null);
 
@@ -5495,11 +5497,11 @@ static public class NewInstanceExpr extends ObjExpr{
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY
 							));
-			if(ret.isDefclass())
+			if(ret.isDeftype())
 				{
 				Var.pushThreadBindings(RT.map(METHOD, null,
 				                              LOCAL_ENV, ret.fields
-						, COMPILE_STUB_SYM, Symbol.intern(null, stub.getSimpleName())
+						, COMPILE_STUB_SYM, Symbol.intern(null, tagName)
 						, COMPILE_STUB_CLASS, stub));
 				}
 
@@ -5522,7 +5524,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			}
 		finally
 			{
-			if(ret.isDefclass())
+			if(ret.isDeftype())
 				Var.popThreadBindings();
 			Var.popThreadBindings();
 			}
