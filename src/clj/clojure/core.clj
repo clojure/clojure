@@ -3593,10 +3593,11 @@
 (defn bases
   "Returns the immediate superclass and direct interfaces of c, if any"
   [#^Class c]
-  (let [i (.getInterfaces c)
-        s (.getSuperclass c)]
-    (not-empty
-     (if s (cons s i) i))))
+  (when c
+    (let [i (.getInterfaces c)
+          s (.getSuperclass c)]
+      (not-empty
+       (if s (cons s i) i)))))
 
 (defn supers
   "Returns the immediate and indirect superclasses and interfaces of c, if any"

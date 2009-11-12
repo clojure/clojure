@@ -213,9 +213,9 @@
           impl #(get (:impls protocol) %)]
       (or (impl t)
           (impl c)
-          (first (remove nil? (map impl (butlast (super-chain c)))))
-          (first (remove nil? (map impl (disj (supers c) Object))))
-          (impl Object)))))
+          (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
+                     (first (remove nil? (map impl (disj (supers c) Object))))
+                     (impl Object)))))))
 
 (defn find-protocol-method [protocol methodk x]
   (get (find-protocol-impl protocol x) methodk))
@@ -244,7 +244,7 @@
     (when-not f
       (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache) 
                                              " of protocol: " (:var (.protocol cache)) 
-                                             " found for class: " (.getName (class x))))))
+                                             " found for class: " (if (nil? x) "nil" (.getName (class x)))))))
     (set! (.val cache-box) (expand-method-impl-cache cache (class x) f))
     f))
 
