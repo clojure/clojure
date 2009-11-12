@@ -201,6 +201,10 @@
                       table cs)]
     (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) shift mask table)))
 
+(defn- super-chain [#^Class c]
+  (when c
+    (cons c (super-chain (.getSuperclass c)))))
+
 (defn find-protocol-impl [protocol x]
   (if (and (:on protocol) (instance? (:on protocol) x))
     x
@@ -209,8 +213,9 @@
           impl #(get (:impls protocol) %)]
       (or (impl t)
           (impl c)
-          ;todo - better path,  how to prioritize supers vs interfaces?
-          (first (remove nil? (map impl (supers c))))))))
+          (first (remove nil? (map impl (butlast (super-chain c)))))
+          (first (remove nil? (map impl (disj (supers c) Object))))
+          (impl Object)))))
 
 (defn find-protocol-method [protocol methodk x]
   (get (find-protocol-impl protocol x) methodk))
