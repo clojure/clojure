@@ -315,6 +315,8 @@
                              fx (nth s 2 nil)
                              doc (when (string? fx) fx)
                              mopts (apply hash-map (nthnext s (if (string? fx) 3 2)))]
+                         (when (some #{0} (map count arglists))
+                           (throw (IllegalArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))
                          (assoc m (keyword mname) 
                                 (merge mopts 
                                        {:name (vary-meta mname assoc :doc doc :arglists arglists)
