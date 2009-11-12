@@ -5648,7 +5648,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		gen.instanceOf(ret.objtype);
 		gen.ifZCmp(GeneratorAdapter.EQ, faultLabel);
 		gen.checkCast(ret.objtype);
-		gen.getField(ret.objtype, fld.name, ftype);
+		gen.getField(ret.objtype, munge(fld.name), ftype);
 		HostExpr.emitBoxReturn(ret,gen,fclass);
 		gen.goTo(endLabel);
 
