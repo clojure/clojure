@@ -8,6 +8,7 @@
 
   <property name="src" location="src"/>
   <property name="build" location="classes"/>
+  <property file="local.properties"/>
 
   <available property="hasclojure" file="${clojure.jar}"/>
 

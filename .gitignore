@@ -1,2 +1,3 @@
-classes/*
 *.jar
+/local.properties
+classes/*
