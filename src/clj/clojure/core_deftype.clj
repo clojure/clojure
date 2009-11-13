@@ -274,6 +274,17 @@
     (let [cache-box (clojure.lang.Box. (clojure.lang.MethodImplCache. protocol (keyword (.sym v))))]
       (.bindRoot v (build cache-box)))))
 
+(defn- assert-same-protocol [protocol-var method-syms]
+  (doseq [m method-syms]
+    (let [v (resolve m)
+          p (:protocol (meta v))]
+      (when-not (or (nil? v) (= protocol-var p))
+        (binding [*out* *err*]
+          (println "Warning: protocol" protocol-var "is overwriting"
+                   (if p
+                     (str "method " (.sym v) " of protocol " (.sym p))
+                     (str "function " (.sym v)))))))))
+
 (defn- emit-protocol [name opts+sigs]
   (let [[opts sigs]
         (loop [opts {} sigs opts+sigs]
@@ -297,7 +308,8 @@
                      {} sigs)]
   `(do
      (defonce ~name {})
-     (alter-meta! (var ~name) assoc :doc  ~(:doc opts))
+     (alter-meta! (var ~name) assoc :doc ~(:doc opts))
+     (#'assert-same-protocol (var ~name) '~(map :name (vals sigs)))
      (alter-var-root (var ~name) merge 
                      (assoc ~opts 
                        :sigs '~sigs 
@@ -306,7 +318,7 @@
                         ~(apply hash-map 
                                 (mapcat 
                                  (fn [s] 
-                                   [`(intern *ns* '~(:name s)) 
+                                   [`(intern *ns* (with-meta '~(:name s) {:protocol (var ~name)}))
                                     (emit-method-builder (:on opts) (:name s) (:on s) (:arglists s))])
                                  (vals sigs)))))
      (-reset-methods ~name)
