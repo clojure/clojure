@@ -64,7 +64,7 @@
               OutputStreamWriter BufferedWriter Writer
               FileInputStream FileOutputStream ByteArrayOutputStream
               StringReader ByteArrayInputStream)
-     (java.net URI URL MalformedURLException)))
+     (java.net URI URL MalformedURLException Socket)))
 
 
 (def
@@ -100,7 +100,7 @@
 (defmulti #^{:tag BufferedReader
              :doc "Attempts to coerce its argument into an open
   java.io.BufferedReader.  Argument may be an instance of Reader,
-  BufferedReader, InputStream, File, URI, URL, or String.
+  BufferedReader, InputStream, File, URI, URL, Socket, or String.
 
   If argument is a String, it tries to resolve it first as a URI, then
   as a local file name.  URIs with a 'file' protocol are converted to
@@ -134,6 +134,9 @@
        (catch MalformedURLException e
          (reader (File. x)))))
 
+(defmethod reader Socket [#^Socket x]
+  (reader (.getInputStream x)))
+
 (defmethod reader :default [x]
   (throw (Exception. (str "Cannot open " (pr-str x) " as a reader."))))
 
@@ -149,7 +152,7 @@
              :doc "Attempts to coerce its argument into an open java.io.PrintWriter
   wrapped around a java.io.BufferedWriter.  Argument may be an
   instance of Writer, PrintWriter, BufferedWriter, OutputStream, File,
-  URI, URL, or String.
+  URI, URL, Socket, or String.
 
   If argument is a String, it tries to resolve it first as a URI, then
   as a local file name.  URIs with a 'file' protocol are converted to
@@ -201,6 +204,9 @@
          (writer url))
        (catch MalformedURLException err
          (writer (File. x)))))
+
+(defmethod writer Socket [#^Socket x]
+  (writer (.getOutputStream x)))
 
 (defmethod writer :default [x]
   (throw (Exception. (str "Cannot open <" (pr-str x) "> as a writer."))))
