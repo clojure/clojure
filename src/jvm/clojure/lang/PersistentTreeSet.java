@@ -18,23 +18,6 @@ import java.util.Comparator;
 public class PersistentTreeSet extends APersistentSet implements Reversible, Sorted{
 static public final PersistentTreeSet EMPTY = new PersistentTreeSet(null, PersistentTreeMap.EMPTY);
 
-public static PersistentTreeSet create(Object... init){
-	PersistentTreeSet ret = EMPTY;
-	for(int i = 0; i < init.length; i++)
-		{
-		ret = (PersistentTreeSet) ret.cons(init[i]);
-		}
-	return ret;
-}
-
-public static PersistentTreeSet create(Comparator comp, Object... init){
-	PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
-	for(int i = 0; i < init.length; i++)
-		{
-		ret = (PersistentTreeSet) ret.cons(init[i]);
-		}
-	return ret;
-}
 
 public static PersistentTreeSet create(List init){
 	PersistentTreeSet ret = EMPTY;

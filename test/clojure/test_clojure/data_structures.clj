@@ -93,6 +93,7 @@
   ; struct-map vs. sorted-map, hash-map and array-map
   (are [x] (and (not= (class (struct equality-struct 1 2)) (class x))
                 (= (struct equality-struct 1 2) x))
+      (sorted-map-by compare :a 1 :b 2)
       (sorted-map :a 1 :b 2)
       (hash-map   :a 1 :b 2)
       (array-map  :a 1 :b 2))
@@ -100,6 +101,9 @@
   ; sorted-set vs. hash-set
   (is (not= (class (sorted-set 1)) (class (hash-set 1))))
   (are [x y] (= x y)
+      (sorted-set-by <) (hash-set)
+      (sorted-set-by < 1) (hash-set 1)
+      (sorted-set-by < 3 2 1) (hash-set 3 2 1)
       (sorted-set) (hash-set)
       (sorted-set 1) (hash-set 1)
       (sorted-set 3 2 1) (hash-set 3 2 1) ))
@@ -630,6 +634,59 @@
       (sorted-set 1 nil) #{nil 1}
       (sorted-set nil 2) #{nil 2}
       (sorted-set #{}) #{#{}} ))
+
+
+(deftest test-sorted-set-by
+  ; only compatible types can be used
+  ; NB: not a ClassCastException, but a RuntimeException is thrown,
+  ; requires discussion on whether this should be symmetric with test-sorted-set
+  (is (thrown? Exception (sorted-set-by < 1 "a")))
+  (is (thrown? Exception (sorted-set-by < '(1 2) [3 4])))
+
+  ; creates set?
+  (are [x] (set? x)
+       (sorted-set-by <)
+       (sorted-set-by < 1 2) )
+
+  ; equal and unique
+  (are [x] (and (= (sorted-set-by compare x) #{x})
+                (= (sorted-set-by compare x x) (sorted-set-by compare x)))
+      nil
+      false true
+      0 42
+      0.0 3.14
+      2/3
+      0M 1M
+      \c
+      "" "abc"
+      'sym
+      :kw
+      ()  ; '(1 2)
+      [] [1 2]
+      {}  ; {:a 1 :b 2}
+      #{} ; #{1 2}
+  )
+  ; cannot be cast to java.lang.Comparable
+  ; NB: not a ClassCastException, but a RuntimeException is thrown,
+  ; requires discussion on whether this should be symmetric with test-sorted-set
+  (is (thrown? Exception (sorted-set-by compare '(1 2) '(1 2))))
+  (is (thrown? Exception (sorted-set-by compare {:a 1 :b 2} {:a 1 :b 2})))
+  (is (thrown? Exception (sorted-set-by compare #{1 2} #{1 2})))
+
+  (are [x y] (= x y)
+      ; generating
+      (sorted-set-by >) #{}
+      (sorted-set-by > 1) #{1}
+      (sorted-set-by > 1 2) #{1 2}
+
+      ; sorting
+      (seq (sorted-set-by < 5 4 3 2 1)) '(1 2 3 4 5)
+
+      ; special cases
+      (sorted-set-by compare nil) #{nil}
+      (sorted-set-by compare 1 nil) #{nil 1}
+      (sorted-set-by compare nil 2) #{nil 2}
+      (sorted-set-by compare #{}) #{#{}} ))
 
 
 (deftest test-set
