@@ -208,6 +208,10 @@ public Object getRoot(){
 	throw new IllegalStateException(String.format("Var %s/%s is unbound.", ns, sym));
 }
 
+public Object getRawRoot(){
+		return root;
+}
+
 public Object getTag(){
 	return meta().valAt(RT.TAG_KEY);
 }
