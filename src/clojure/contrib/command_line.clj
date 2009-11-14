@@ -26,7 +26,7 @@
         defaults (into {} (for [[_ {:keys [default sym]}] key-data
                                 :when default]
                             [sym default]))]
-    (loop [[argkey & [argval :as r]] (if (seq args) args ["--help"])
+    (loop [[argkey & [argval :as r]] args
            cmdmap (assoc defaults :cmdspec cmdspec rest-str [])]
       (if argkey
         (let [[_ & [keybase]] (re-find #"^--?(.*)" argkey)]
