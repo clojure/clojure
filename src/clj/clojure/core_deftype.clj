@@ -235,41 +235,44 @@
           (find-protocol-impl protocol x))
     true))
 
-(defn -cache-protocol-fn [#^clojure.lang.Box cache-box x]
-  (let [#^clojure.lang.MethodImplCache cache  (.val cache-box)
+(defn -cache-protocol-fn [#^clojure.lang.AFunction pf x]
+  (let [cache  (.__methodImplCache pf)
         f (find-protocol-method (.protocol cache) (.methodk cache) x)]
     (when-not f
       (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache) 
                                              " of protocol: " (:var (.protocol cache)) 
                                              " found for class: " (if (nil? x) "nil" (.getName (class x)))))))
-    (set! (.val cache-box) (expand-method-impl-cache cache (class x) f))
+    (set! (.__methodImplCache pf) (expand-method-impl-cache cache (class x) f))
     f))
 
 (defn- emit-method-builder [on-interface method on-method arglists]
   (let [methodk (keyword method)
-        gcache-box (with-meta (gensym "gcache-box__") {:tag 'clojure.lang.Box})]
-    `(fn [~gcache-box]
-       (fn 
-         ~@(map 
-            (fn [args]
-              (let [gargs (map #(gensym (str "g__" % "__")) args)
-                    target (first gargs)]
-                `([~@gargs]
-                    (~@(if on-interface
-                         `(if (instance? ~on-interface ~target)
-                            (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))
-                         `(do))
-                     (let [#^clojure.lang.MethodImplCache cache#  (.val ~gcache-box)
-                           c# (class ~target)
-                           f# (or (.fnFor cache# c#)
-                                  (-cache-protocol-fn ~gcache-box ~target))]
-                       (f# ~@gargs))))))
-            arglists)))))
+        gthis (with-meta (gensym) {:tag 'clojure.lang.AFunction})]
+    `(fn [cache#]
+       (let [#^clojure.lang.AFunction f#
+             (fn ~gthis
+               ~@(map 
+                  (fn [args]
+                    (let [gargs (map #(gensym (str "g__" % "__")) args)
+                          target (first gargs)]
+                      `([~@gargs]
+                          (~@(if on-interface
+                               `(if (instance? ~on-interface ~target)
+                                  (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))
+                               `(do))
+                           (let [cache#  (.__methodImplCache ~gthis)
+                                 c# (class ~target)
+                                 f# (or (.fnFor cache# c#)
+                                        (-cache-protocol-fn ~gthis ~target))]
+                             (f# ~@gargs))))))
+                  arglists))]
+         (set! (.__methodImplCache f#) cache#)
+         f#))))
 
 (defn -reset-methods [protocol]
   (doseq [[#^clojure.lang.Var v build] (:method-builders protocol)]
-    (let [cache-box (clojure.lang.Box. (clojure.lang.MethodImplCache. protocol (keyword (.sym v))))]
-      (.bindRoot v (build cache-box)))))
+    (let [cache (clojure.lang.MethodImplCache. protocol (keyword (.sym v)))]
+      (.bindRoot v (build cache)))))
 
 (defn- assert-same-protocol [protocol-var method-syms]
   (doseq [m method-syms]

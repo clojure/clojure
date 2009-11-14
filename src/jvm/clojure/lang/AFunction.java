@@ -16,6 +16,9 @@ import java.util.Comparator;
 
 public abstract class AFunction extends AFn implements Comparator, Fn{
 
+//note - this is not even volatile by design
+public MethodImplCache __methodImplCache;
+
 public AFunction(IPersistentMap meta){
 	super(meta);
 }
