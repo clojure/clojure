@@ -128,6 +128,8 @@ public boolean isBound(){
 }
 
 final public Object get(){
+	if(count.get() == 0 && root != dvals)
+		return root;
 	return deref();
 }
 

@@ -2755,7 +2755,8 @@ static class InvokeExpr implements Expr{
 		Expr e = (Expr) args.nth(0);
 		e.emit(C.EXPRESSION, objx, gen);
 		gen.dup(); //target, target
-		gen.invokeVirtual(OBJECT_TYPE,Method.getMethod("Class getClass()")); //target,class
+		gen.invokeStatic(UTIL_TYPE,Method.getMethod("Class classOf(Object)")); //target,class
+//		gen.invokeVirtual(OBJECT_TYPE,Method.getMethod("Class getClass()")); //target,class
 		gen.dup(); //target,class,class
 		gen.loadThis();
 		gen.getField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class,class,cached-class
@@ -2778,19 +2779,17 @@ static class InvokeExpr implements Expr{
 		gen.dup(); //target,class,class
 		gen.loadThis();
 		gen.swap();
-		//gen.checkCast(CLASS_TYPE);
 		gen.putField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class
 		objx.emitVar(gen, v);
 		gen.invokeVirtual(VAR_TYPE, Method.getMethod("Object getRawRoot()")); //target, class, proto-fn
 
 		gen.mark(elseLabel); //target, class, proto-fn
+		gen.checkCast(AFUNCTION_TYPE);
 		gen.dup(); //target,class,proto-fn,proto-fn
 		gen.loadThis();
 		gen.swap();
-		gen.checkCast(AFUNCTION_TYPE);
 		gen.putField(objx.objtype, objx.cachedProtoFnName(siteIndex),AFUNCTION_TYPE);  //target, class,  proto-fn
 		gen.dupX1(); //target, proto-fn, class,  proto-fn
-		gen.checkCast(AFUNCTION_TYPE);
 		gen.getField(AFUNCTION_TYPE,"__methodImplCache", Type.getType(MethodImplCache.class)); //target,protofn,class,cache
 		gen.swap(); //target,protofn,cache,class
 		gen.invokeVirtual(Type.getType(MethodImplCache.class),Method.getMethod("clojure.lang.IFn fnFor(Class)")); //target,protofn,impl
@@ -2801,7 +2800,6 @@ static class InvokeExpr implements Expr{
 		gen.dup(); //target,impl, impl
 		gen.loadThis();
 		gen.swap();
-		gen.checkCast(IFN_TYPE);
 		gen.putField(objx.objtype, objx.cachedProtoImplName(siteIndex),IFN_TYPE); //target,impl
 		gen.swap(); //impl,target
 		gen.goTo(callLabel);

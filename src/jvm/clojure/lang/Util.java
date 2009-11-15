@@ -35,6 +35,16 @@ static public boolean equals(Object k1, Object k2){
 	return k1 != null && k1.equals(k2);
 }
 
+static public boolean identical(Object k1, Object k2){
+	return k1 == k2;
+}
+
+static public Class classOf(Object x){
+	if(x != null)
+		return x.getClass();
+	return null;
+}
+
 static public int compare(Object k1, Object k2){
 	if(k1 == k2)
 		return 0;

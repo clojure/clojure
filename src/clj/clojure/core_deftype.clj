@@ -260,11 +260,13 @@
                                `(if (instance? ~on-interface ~target)
                                   (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))
                                `(do))
-                           (let [cache#  (.__methodImplCache ~gthis)
-                                 c# (class ~target)
-                                 f# (or (.fnFor cache# c#)
-                                        (-cache-protocol-fn ~gthis ~target))]
-                             (f# ~@gargs))))))
+                           (let [cache# (.__methodImplCache ~gthis)]
+                             (if (clojure.lang.Util/identical (clojure.lang.Util/classOf ~target)
+                                                              (.lastClass cache#))
+                               ((.lastImpl cache#) ~@gargs)
+                               (let [f# (or (.fnFor cache# (clojure.lang.Util/classOf ~target))
+                                            (-cache-protocol-fn ~gthis ~target))]
+                                 (f# ~@gargs))))))))
                   arglists))]
          (set! (.__methodImplCache f#) cache#)
          f#))))
@@ -287,7 +289,7 @@
 
 (defn- emit-protocol [name opts+sigs]
   (let [[opts sigs]
-        (loop [opts {} sigs opts+sigs]
+        (loop [opts {:on nil} sigs opts+sigs]
           (condp #(%1 %2) (first sigs) 
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
