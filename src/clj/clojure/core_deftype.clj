@@ -203,16 +203,14 @@
     (cons c (super-chain (.getSuperclass c)))))
 
 (defn find-protocol-impl [protocol x]
-  (if (and (:on protocol) (instance? (:on protocol) x))
-    x
-    (let [t (type x)
-          c (class x)
-          impl #(get (:impls protocol) %)]
-      (or (impl t)
-          (impl c)
-          (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
-                     (first (remove nil? (map impl (disj (supers c) Object))))
-                     (impl Object)))))))
+  (let [t (type x)
+        c (class x)
+        impl #(get (:impls protocol) %)]
+    (or (impl t)
+        (impl c)
+        (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
+                   (first (remove nil? (map impl (disj (supers c) Object))))
+                   (impl Object))))))
 
 (defn find-protocol-method [protocol methodk x]
   (get (find-protocol-impl protocol x) methodk))
@@ -230,9 +228,7 @@
 (defn satisfies? 
   "Returns true if x satisfies the protocol"
   [protocol x]
-  (when 
-      (or (and (:on protocol) (instance? (:on protocol) x))
-          (find-protocol-impl protocol x))
+  (when (find-protocol-impl protocol x)
     true))
 
 (defn -cache-protocol-fn [#^clojure.lang.AFunction pf x]
@@ -245,7 +241,7 @@
     (set! (.__methodImplCache pf) (expand-method-impl-cache cache (class x) f))
     f))
 
-(defn- emit-method-builder [on-interface method on-method arglists]
+(defn- emit-method-builder [method arglists]
   (let [methodk (keyword method)
         gthis (with-meta (gensym) {:tag 'clojure.lang.AFunction})]
     `(fn [cache#]
@@ -256,17 +252,13 @@
                     (let [gargs (map #(gensym (str "g__" % "__")) args)
                           target (first gargs)]
                       `([~@gargs]
-                          (~@(if on-interface
-                               `(if (instance? ~on-interface ~target)
-                                  (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))
-                               `(do))
-                           (let [cache# (.__methodImplCache ~gthis)]
-                             (if (clojure.lang.Util/identical (clojure.lang.Util/classOf ~target)
-                                                              (.lastClass cache#))
-                               ((.lastImpl cache#) ~@gargs)
-                               (let [f# (or (.fnFor cache# (clojure.lang.Util/classOf ~target))
-                                            (-cache-protocol-fn ~gthis ~target))]
-                                 (f# ~@gargs))))))))
+                          (let [cache# (.__methodImplCache ~gthis)]
+                            (if (clojure.lang.Util/identical (clojure.lang.Util/classOf ~target)
+                                                             (.lastClass cache#))
+                              ((.lastImpl cache#) ~@gargs)
+                              (let [f# (or (.fnFor cache# (clojure.lang.Util/classOf ~target))
+                                           (-cache-protocol-fn ~gthis ~target))]
+                                (f# ~@gargs)))))))
                   arglists))]
          (set! (.__methodImplCache f#) cache#)
          f#))))
@@ -289,7 +281,7 @@
 
 (defn- emit-protocol [name opts+sigs]
   (let [[opts sigs]
-        (loop [opts {:on nil} sigs opts+sigs]
+        (loop [opts {} sigs opts+sigs]
           (condp #(%1 %2) (first sigs) 
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
@@ -321,7 +313,7 @@
                                 (mapcat 
                                  (fn [s] 
                                    [`(intern *ns* (with-meta '~(:name s) {:protocol (var ~name)}))
-                                    (emit-method-builder (:on opts) (:name s) (:on s) (:arglists s))])
+                                    (emit-method-builder (:name s) (:arglists s))])
                                  (vals sigs)))))
      (-reset-methods ~name)
      '~name)))
@@ -330,14 +322,11 @@
   "A protocol is a named set of named methods and their signatures:
   (defprotocol AProtocolName
 
-  ;optional :on interface  
-  :on AnInterface
-
   ;optional doc string
   \"A doc string for AProtocol abstraction\"
 
   ;method signatures
-  (bar [a b] \"bar docs\" :on barMethod)
+  (bar [a b] \"bar docs\")
   (baz ([a] [a b] [a b & c]) \"baz docs\"))
 
   No implementations are provided. Docs can be specified for the
@@ -348,18 +337,7 @@
   must have at least one argument. defprotocol is dynamic, has no
   special compile-time effect, and defines no new types or classes
   Implementations of the protocol methods can be provided using
-  extend.
-
-  If an :on interface is provided, the protocol will have a default
-  mapping to the methods of the specified interface. The interface
-  must exist, it is not defined by defprotocol. By default, methods of
-  the protocol map to methods of the same name in the interface. A
-  different mapping can be provided on a per-method basis using :on
-  inside the signature. Note that if a protocol method is called with
-  an instance of the :on interface, the interface will be used,
-  regardless of any extends clauses that might otherwise apply to the
-  object. The use of an :on interface in no way precludes extending
-  the protocol to other interfaces using extend."
+  extend."
 
   [name & opts+sigs]
   (emit-protocol name opts+sigs))

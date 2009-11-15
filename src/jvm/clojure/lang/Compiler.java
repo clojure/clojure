@@ -2701,12 +2701,8 @@ static class InvokeExpr implements Expr{
 			Var pvar =  (Var)RT.get(((VarExpr)fexpr).var.meta(), protocolKey);
 			if(pvar != null)
 				{
-				IPersistentMap proto = (IPersistentMap) pvar.get();
-				if(proto.valAt(onKey) == null)
-					{
-					this.isProtocol = true;
-					this.siteIndex = registerProtocolCallsite(((VarExpr)fexpr).var);
-					}
+				this.isProtocol = true;
+				this.siteIndex = registerProtocolCallsite(((VarExpr)fexpr).var);
 				}
 			}
 		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
