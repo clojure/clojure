@@ -372,6 +372,10 @@
   than one interface, both of which extend the protocol. It is TBD how
   to specify which impl to use. You can extend a protocol on nil.
 
+  If you are supplying the definitions explicitly (i.e. not reusing
+  exsting functions or mixin maps), you may find it more convenient to
+  use the extend-type and extend-class macros.
+
   Note that multiple independent extend clauses can exist for the same
   type, not all protocols need be defined in a single extend call.
 
@@ -381,3 +385,67 @@
   [atype & proto+mmaps]
   (doseq [[proto mmap] (partition 2 proto+mmaps)]
     (-reset-methods (alter-var-root (:var proto) assoc-in [:impls atype] mmap))))
+
+(defn- parse-impls [specs]
+  (loop [ret {} s specs]
+    (if (seq s)
+      (recur (assoc ret (first s) (take-while seq? (next s)))
+             (drop-while seq? (next s)))
+      ret)))
+
+(defn- emit-impl [[p fs]]
+  [p (zipmap (map #(-> % first keyword) fs)
+             (map #(cons 'fn (drop 1 %)) fs))])
+
+(defn- emit-hinted-impl [c [p fs]]
+  (let [hint (fn [specs]
+               (let [specs (if (vector? (first specs)) 
+                                        (list specs) 
+                                        specs)]
+                 (map (fn [[[target & args] & body]]
+                        (cons (apply vector (vary-meta target assoc :tag c) args)
+                              body))
+                      specs)))]
+    [p (zipmap (map #(-> % first keyword) fs)
+               (map #(cons 'fn (hint (drop 1 %))) fs))]))
+
+(defn- emit-extend-type [t specs]
+  (let [impls (parse-impls specs)]
+    `(extend ~t
+             ~@(mapcat emit-impl impls))))
+
+(defn- emit-extend-class [c specs]
+  (let [impls (parse-impls specs)]
+    `(extend ~c
+             ~@(mapcat (partial emit-hinted-impl c) impls))))
+
+(defmacro extend-type 
+  "A macro that expands into an extend call. Useful when you are
+  supplying the definitions explicitly inline, extend-type
+  automatically creates the maps required by extend.
+
+  (extend-type ::MyType 
+    Countable
+      (cnt [c] ...)
+    Foo
+      (bar [x y] ...)
+      (baz ([x] ...) ([x y & zs] ...)))
+
+  expands into:
+
+  (extend ::MyType
+   Countable
+     {:cnt (fn [c] ...)}
+   Foo
+     {:baz (fn ([x] ...) ([x y & zs] ...))
+      :bar (fn [x y] ...)})"
+
+  [t & specs]
+  (emit-extend-type t specs))
+
+(defmacro extend-class 
+  "Like extend-type, for the case when the extended type is a
+  class. Propagates the class as a type hint on the first argument of
+  all fns" 
+  [c & specs]
+  (emit-extend-class c specs))
