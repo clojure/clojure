@@ -374,7 +374,7 @@
 
   If you are supplying the definitions explicitly (i.e. not reusing
   exsting functions or mixin maps), you may find it more convenient to
-  use the extend-type and extend-class macros.
+  use the extend-type, extend-class or extend-protocol macros.
 
   Note that multiple independent extend clauses can exist for the same
   type, not all protocols need be defined in a single extend call.
@@ -449,3 +449,52 @@
   all fns" 
   [c & specs]
   (emit-extend-class c specs))
+
+(defn- emit-extend-protocol [p specs]
+  (let [impls (parse-impls specs)]
+    `(do
+       ~@(map (fn [[t fs]]
+                (if (symbol? t)
+                  `(extend-class ~t ~p ~@fs)
+                  `(extend-type ~t ~p ~@fs)))
+              impls))))
+
+(defmacro extend-protocol 
+  "Useful when you want to provide several implementations of the same
+  protocol all at once. Takes a single protocol and the implementation
+  of that protocol for one or more types. Expands into calls to
+  extend-type and extend-class:
+
+  (extend-protocol Protocol
+    ::AType
+      (foo [x] ...)
+      (bar [x y] ...)
+    ::BType
+      (foo [x] ...)
+      (bar [x y] ...)
+    AClass
+      (foo [x] ...)
+      (bar [x y] ...)
+    nil
+      (foo [x] ...)
+      (bar [x y] ...))
+
+  expands into:
+
+  (do
+   (clojure.core/extend-type ::AType Protocol 
+     (foo [x] ...) 
+     (bar [x y] ...))
+   (clojure.core/extend-type ::BType Protocol 
+     (foo [x] ...) 
+     (bar [x y] ...))
+   (clojure.core/extend-class AClass Protocol 
+     (foo [x] ...) 
+     (bar [x y] ...))
+   (clojure.core/extend-type nil Protocol 
+     (foo [x] ...) 
+     (bar [x y] ...)))"
+
+  [p & specs]
+  (emit-extend-protocol p specs))
+
