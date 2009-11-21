@@ -203,6 +203,8 @@
     (cons c (super-chain (.getSuperclass c)))))
 
 (defn find-protocol-impl [protocol x]
+  (if (and (:on protocol) (instance? (:on protocol) x))
+    x
   (let [t (type x)
         c (class x)
         impl #(get (:impls protocol) %)]
@@ -210,7 +212,7 @@
         (impl c)
         (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
                    (first (remove nil? (map impl (disj (supers c) Object))))
-                   (impl Object))))))
+                     (impl Object)))))))
 
 (defn find-protocol-method [protocol methodk x]
   (get (find-protocol-impl protocol x) methodk))
@@ -228,7 +230,9 @@
 (defn satisfies? 
   "Returns true if x satisfies the protocol"
   [protocol x]
-  (when (find-protocol-impl protocol x)
+  (when
+      (or (and (:on protocol) (instance? (:on protocol) x))
+          (find-protocol-impl protocol x))
     true))
 
 (defn -cache-protocol-fn [#^clojure.lang.AFunction pf x]
@@ -241,7 +245,7 @@
     (set! (.__methodImplCache pf) (expand-method-impl-cache cache (class x) f))
     f))
 
-(defn- emit-method-builder [method arglists]
+(defn- emit-method-builder [on-interface method on-method arglists]
   (let [methodk (keyword method)
         gthis (with-meta (gensym) {:tag 'clojure.lang.AFunction})]
     `(fn [cache#]
@@ -252,13 +256,17 @@
                     (let [gargs (map #(gensym (str "g__" % "__")) args)
                           target (first gargs)]
                       `([~@gargs]
+                          (~@(if on-interface
+                               `(if (instance? ~on-interface ~target)
+                                  (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))
+                               `(do))
                           (let [cache# (.__methodImplCache ~gthis)]
                             (if (clojure.lang.Util/identical (clojure.lang.Util/classOf ~target)
                                                              (.lastClass cache#))
                               ((.lastImpl cache#) ~@gargs)
                               (let [f# (or (.fnFor cache# (clojure.lang.Util/classOf ~target))
                                            (-cache-protocol-fn ~gthis ~target))]
-                                (f# ~@gargs)))))))
+                                 (f# ~@gargs))))))))
                   arglists))]
          (set! (.__methodImplCache f#) cache#)
          f#))))
@@ -281,7 +289,7 @@
 
 (defn- emit-protocol [name opts+sigs]
   (let [[opts sigs]
-        (loop [opts {} sigs opts+sigs]
+        (loop [opts {:on nil} sigs opts+sigs]
           (condp #(%1 %2) (first sigs) 
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
@@ -308,12 +316,19 @@
                      (assoc ~opts 
                        :sigs '~sigs 
                        :var (var ~name)
+                       :method-map 
+                         ~(and (:on opts)
+                               (apply hash-map 
+                                      (mapcat 
+                                       (fn [s] 
+                                         [(keyword (:name s)) (keyword (or (:on s) (:name s)))])
+                                       (vals sigs))))
                        :method-builders 
                         ~(apply hash-map 
                                 (mapcat 
                                  (fn [s] 
                                    [`(intern *ns* (with-meta '~(:name s) {:protocol (var ~name)}))
-                                    (emit-method-builder (:name s) (:arglists s))])
+                                    (emit-method-builder (:on opts) (:name s) (:on s) (:arglists s))])
                                  (vals sigs)))))
      (-reset-methods ~name)
      '~name)))

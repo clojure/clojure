@@ -217,6 +217,9 @@ static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.
 static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                                    Symbol.create("*compile-files*"), Boolean.FALSE);
 
+static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                            Symbol.create("instance?"));
+
 //Integer
 static final public Var LINE = Var.create(0);
 
@@ -2682,6 +2685,48 @@ static class KeywordInvokeExpr implements Expr{
 //	}
 //
 //}
+
+public static class InstanceOfExpr implements Expr, MaybePrimitiveExpr{
+	Expr expr;
+	Class c;
+
+	public InstanceOfExpr(Class c, Expr expr){
+		this.expr = expr;
+		this.c = c;
+	}
+
+	public Object eval() throws Exception{
+		if(c.isInstance(expr.eval()))
+			return RT.T;
+		return RT.F;
+	}
+
+	public boolean canEmitPrimitive(){
+		return true;
+	}
+
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+		expr.emit(context,objx,gen);
+		gen.instanceOf(Type.getType(c));
+	}
+
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		emitUnboxed(context,objx,gen);
+		HostExpr.emitBoxReturn(objx,gen,Boolean.TYPE);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return Boolean.TYPE;
+	}
+
+}
+
 static class InvokeExpr implements Expr{
 	public final Expr fexpr;
 	public final Object tag;
@@ -2690,19 +2735,37 @@ static class InvokeExpr implements Expr{
 	public final String source;
 	public boolean isProtocol = false;
 	public int siteIndex = 0;
+	public Class protocolOn;
+	public java.lang.reflect.Method onMethod;
+	static Keyword onKey = Keyword.intern("on");
+	static Keyword methodMapKey = Keyword.intern("method-map");
 
-	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args){
+	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args) throws Exception{
 		this.source = source;
 		this.fexpr = fexpr;
 		this.args = args;
 		this.line = line;
 		if(fexpr instanceof VarExpr)
 			{
-			Var pvar =  (Var)RT.get(((VarExpr)fexpr).var.meta(), protocolKey);
+			Var fvar = ((VarExpr)fexpr).var;
+			Var pvar =  (Var)RT.get(fvar.meta(), protocolKey);
 			if(pvar != null)
 				{
 				this.isProtocol = true;
 				this.siteIndex = registerProtocolCallsite(((VarExpr)fexpr).var);
+				Object pon = RT.get(pvar.get(), onKey);
+				this.protocolOn = HostExpr.maybeClass(pon,false);
+				if(this.protocolOn != null)
+					{
+					IPersistentMap mmap = (IPersistentMap) RT.get(pvar.get(), methodMapKey);
+					String mname = ((Keyword) mmap.valAt(Keyword.intern(fvar.sym))).sym.toString();
+					List methods = Reflector.getMethods(protocolOn, args.count() - 1, mname, false);
+					if(methods.size() != 1)
+						throw new IllegalArgumentException(
+								"No single method: " + mname + " of interface: " + protocolOn.getName() +
+								" found for function: " + fvar.sym + " of protocol: " + pvar.sym);
+					this.onMethod = (java.lang.reflect.Method) methods.get(0);
+					}
 				}
 			}
 		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
@@ -2731,7 +2794,6 @@ static class InvokeExpr implements Expr{
 		if(isProtocol)
 			{
 			emitProto(context,objx,gen);
-			emitArgsAndCall(1, context,objx,gen);
 			}
 		else
 			{
@@ -2739,6 +2801,8 @@ static class InvokeExpr implements Expr{
 			gen.checkCast(IFN_TYPE);
 			emitArgsAndCall(0, context,objx,gen);
 			}
+		if(context == C.STATEMENT)
+			gen.pop();		
 	}
 
 	public void emitProto(C context, ObjExpr objx, GeneratorAdapter gen){
@@ -2746,13 +2810,21 @@ static class InvokeExpr implements Expr{
 		Label notSameClassLabel = gen.newLabel();
 		Label faultLabel = gen.newLabel();
 		Label callLabel = gen.newLabel();
+		Label onLabel = gen.newLabel();
+		Label endLabel = gen.newLabel();
+
 		Var v = ((VarExpr)fexpr).var;
 
 		Expr e = (Expr) args.nth(0);
 		e.emit(C.EXPRESSION, objx, gen);
 		gen.dup(); //target, target
+		if(protocolOn != null)
+			{
+			gen.instanceOf(Type.getType(protocolOn));
+			gen.ifZCmp(GeneratorAdapter.NE, onLabel);
+			gen.dup();
+			}
 		gen.invokeStatic(UTIL_TYPE,Method.getMethod("Class classOf(Object)")); //target,class
-//		gen.invokeVirtual(OBJECT_TYPE,Method.getMethod("Class getClass()")); //target,class
 		gen.dup(); //target,class,class
 		gen.loadThis();
 		gen.getField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class,class,cached-class
@@ -2800,16 +2872,33 @@ static class InvokeExpr implements Expr{
 		gen.swap(); //impl,target
 		gen.goTo(callLabel);
 
-		//not in fn table, null out cached fn and use proto-fn itself (whcih should seed table for next time)
+		//not in fn table, null out cached fn and use proto-fn itself (which should seed table for next time)
 		gen.mark(faultLabel); //target,protofn,null
 		gen.pop(); //target, protofn
 		gen.swap(); //protofn, target
 		gen.loadThis();
 		gen.visitInsn(Opcodes.ACONST_NULL);
 		gen.putField(objx.objtype, objx.cachedProtoFnName(siteIndex), AFUNCTION_TYPE);  //target, class,  proto-fn
-
+		gen.goTo(callLabel);
 
 		gen.mark(callLabel); //impl, target
+		emitArgsAndCall(1, context,objx,gen);
+		gen.goTo(endLabel);
+
+		gen.mark(onLabel); //target
+		if(protocolOn != null)
+			{
+			MethodExpr.emitTypedArgs(objx, gen, onMethod.getParameterTypes(), RT.subvec(args,1,args.count()));
+			if(context == C.RETURN)
+				{
+				ObjMethod method = (ObjMethod) METHOD.deref();
+				method.emitClearLocals(gen);
+				}
+			Method m = new Method(onMethod.getName(), Type.getReturnType(onMethod), Type.getArgumentTypes(onMethod));
+			gen.invokeInterface(Type.getType(protocolOn), m);
+			HostExpr.emitBoxReturn(objx, gen, onMethod.getReturnType());
+			} 
+		gen.mark(endLabel);
 
 	}
 
@@ -2837,8 +2926,6 @@ static class InvokeExpr implements Expr{
 
 		gen.invokeInterface(IFN_TYPE, new Method("invoke", OBJECT_TYPE, ARG_TYPES[Math.min(MAX_POSITIONAL_ARITY + 1,
 		                                                                                   args.count())]));
-		if(context == C.STATEMENT)
-			gen.pop();
 	}
 
 	public boolean hasJavaClass() throws Exception{
@@ -2853,6 +2940,16 @@ static class InvokeExpr implements Expr{
 		if(context != C.EVAL)
 			context = C.EXPRESSION;
 		Expr fexpr = analyze(context, form.first());
+		if(fexpr instanceof VarExpr && ((VarExpr)fexpr).var.equals(INSTANCE))
+			{
+			if(RT.second(form) instanceof Symbol)
+				{
+				Class c = HostExpr.maybeClass(RT.second(form),false);
+				if(c != null)
+					return new InstanceOfExpr(c, analyze(context, RT.third(form)));
+				}
+			}
+
 		if(fexpr instanceof KeywordExpr && RT.count(form) == 2)
 			{
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
