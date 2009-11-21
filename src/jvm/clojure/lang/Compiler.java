@@ -2749,7 +2749,7 @@ static class InvokeExpr implements Expr{
 			{
 			Var fvar = ((VarExpr)fexpr).var;
 			Var pvar =  (Var)RT.get(fvar.meta(), protocolKey);
-			if(pvar != null)
+			if(pvar != null && PROTOCOL_CALLSITES.isBound())
 				{
 				this.isProtocol = true;
 				this.siteIndex = registerProtocolCallsite(((VarExpr)fexpr).var);
@@ -2950,7 +2950,7 @@ static class InvokeExpr implements Expr{
 				}
 			}
 
-		if(fexpr instanceof KeywordExpr && RT.count(form) == 2)
+		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && KEYWORD_CALLSITES.isBound())
 			{
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
 			Expr target = analyze(context, RT.second(form));
