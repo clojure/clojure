@@ -63,6 +63,7 @@
        }
 
   clojure.contrib.http.agent
+  (:refer-clojure :exclude [bytes])
   (:require [clojure.contrib.http.connection :as c]
             [clojure.contrib.duck-streams :as duck])
   (:import (java.io InputStream ByteArrayOutputStream
