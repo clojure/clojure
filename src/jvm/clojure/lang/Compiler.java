@@ -187,6 +187,9 @@ static final public Var KEYWORD_CALLSITES = Var.create();
 //vector<var>
 static final public Var PROTOCOL_CALLSITES = Var.create();
 
+//vector<var>
+static final public Var VAR_CALLSITES = Var.create();
+
 //keyword->constid
 static final public Var KEYWORDS = Var.create();
 
@@ -2734,11 +2737,13 @@ static class InvokeExpr implements Expr{
 	public final int line;
 	public final String source;
 	public boolean isProtocol = false;
-	public int siteIndex = 0;
+	public boolean isDirect = false;
+	public int siteIndex = -1;
 	public Class protocolOn;
 	public java.lang.reflect.Method onMethod;
 	static Keyword onKey = Keyword.intern("on");
 	static Keyword methodMapKey = Keyword.intern("method-map");
+	static Keyword dynamicKey = Keyword.intern("dynamic");
 
 	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args) throws Exception{
 		this.source = source;
@@ -2767,6 +2772,17 @@ static class InvokeExpr implements Expr{
 					this.onMethod = (java.lang.reflect.Method) methods.get(0);
 					}
 				}
+			else if(pvar == null && VAR_CALLSITES.isBound()
+			        && fvar.ns.name.name.startsWith("clojure")
+					&& !RT.booleanCast(RT.get(RT.meta(fvar),dynamicKey))
+//			        && !fvar.sym.name.equals("report")
+//			        && fvar.isBound() && fvar.get() instanceof IFn
+					)
+				{
+				//todo - more specific criteria for binding these
+				this.isDirect = true;
+				this.siteIndex = registerVarCallsite(((VarExpr) fexpr).var);
+				}
 			}
 		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
 	}
@@ -2794,6 +2810,23 @@ static class InvokeExpr implements Expr{
 		if(isProtocol)
 			{
 			emitProto(context,objx,gen);
+			}
+		else if(isDirect)
+			{
+			Label callLabel = gen.newLabel();
+
+			gen.getStatic(objx.objtype, objx.varCallsiteName(siteIndex), IFN_TYPE);
+			gen.dup();
+			gen.ifNonNull(callLabel);
+
+			gen.pop();
+			fexpr.emit(C.EXPRESSION, objx, gen);
+			gen.checkCast(IFN_TYPE);
+//			gen.dup();
+//			gen.putStatic(objx.objtype, objx.varCallsiteName(siteIndex), IFN_TYPE);
+
+			gen.mark(callLabel);
+			emitArgsAndCall(0, context,objx,gen);
 			}
 		else
 			{
@@ -3044,7 +3077,9 @@ static public class FnExpr extends ObjExpr{
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,
-					       PROTOCOL_CALLSITES, PersistentVector.EMPTY));
+					       PROTOCOL_CALLSITES, PersistentVector.EMPTY,
+					       VAR_CALLSITES, PersistentVector.EMPTY
+					));
 
 			//arglist might be preceded by symbol naming this fn
 			if(RT.second(form) instanceof Symbol)
@@ -3097,6 +3132,7 @@ static public class FnExpr extends ObjExpr{
 			fn.constants = (PersistentVector) CONSTANTS.deref();
 			fn.keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
 			fn.protocolCallsites = (IPersistentVector) PROTOCOL_CALLSITES.deref();
+			fn.varCallsites = (IPersistentVector) VAR_CALLSITES.deref();
 
 			fn.constantsID = RT.nextID();
 //			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
@@ -3153,6 +3189,7 @@ static public class ObjExpr implements Expr{
 
 	IPersistentVector keywordCallsites;
 	IPersistentVector protocolCallsites;
+	IPersistentVector varCallsites;
 
 	final static Method voidctor = Method.getMethod("void <init>()");
 
@@ -3318,6 +3355,12 @@ static public class ObjExpr implements Expr{
 			              null, null);
 			}
 
+		for(int i=0;i<varCallsites.count();i++)
+			{
+			cv.visitField(ACC_PRIVATE + ACC_STATIC + ACC_FINAL
+					, varCallsiteName(i), IFN_TYPE.getDescriptor(), null, null);
+			}
+
 		//static init for constants, keywords and vars
 		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
 		                                                  Method.getMethod("void <clinit> ()"),
@@ -3334,6 +3377,29 @@ static public class ObjExpr implements Expr{
 
 		if(keywordCallsites.count() > 0)
 			emitKeywordCallsites(clinitgen);
+
+		for(int i=0;i<varCallsites.count();i++)
+			{
+			Label skipLabel = clinitgen.newLabel();
+			Label endLabel = clinitgen.newLabel();
+			Var var = (Var) varCallsites.nth(i);
+			clinitgen.push(var.ns.name.toString());
+			clinitgen.push(var.sym.toString());
+			clinitgen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+			clinitgen.dup();
+			clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("boolean hasRoot()"));
+			clinitgen.ifZCmp(GeneratorAdapter.EQ,skipLabel);
+
+			clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("Object getRoot()"));
+			clinitgen.checkCast(IFN_TYPE);
+			clinitgen.putStatic(objtype, varCallsiteName(i), IFN_TYPE);
+			clinitgen.goTo(endLabel);
+
+			clinitgen.mark(skipLabel);
+			clinitgen.pop();
+
+			clinitgen.mark(endLabel);
+			}
 
 		clinitgen.returnValue();
 
@@ -3373,11 +3439,6 @@ static public class ObjExpr implements Expr{
 			cv.visitField(ACC_PRIVATE, cachedClassName(i), CLASS_TYPE.getDescriptor(), null, null);
 			cv.visitField(ACC_PRIVATE, cachedProtoFnName(i), AFUNCTION_TYPE.getDescriptor(), null, null);
 			cv.visitField(ACC_PRIVATE, cachedProtoImplName(i), IFN_TYPE.getDescriptor(), null, null);			
-			}
-		for(int i=0;i<keywordCallsites.count();i++)
-			{
-//			cv.visitField(ACC_FINAL, siteName(i), ILOOKUP_SITE_TYPE.getDescriptor(), null, null);
-//			cv.visitField(ACC_PUBLIC, thunkName(i), ILOOKUP_THUNK_TYPE.getDescriptor(), null, null);
 			}
 
 		//ctor that takes closed-overs and inits base + fields
@@ -3422,17 +3483,7 @@ static public class ObjExpr implements Expr{
 				}
 			}
 
-		//copy static sites into instance site and thunk
-		for(int i=0;i<keywordCallsites.count();i++)
-			{
-//			ctorgen.loadThis();
-//			ctorgen.getStatic(objtype,siteNameStatic(i),KEYWORD_LOOKUPSITE_TYPE);
-//			ctorgen.putField(objtype, siteName(i),ILOOKUP_SITE_TYPE);
-//			ctorgen.loadThis();
-//			ctorgen.getStatic(objtype,siteNameStatic(i),KEYWORD_LOOKUPSITE_TYPE);
-//			ctorgen.putField(objtype, thunkName(i),ILOOKUP_THUNK_TYPE);
-			}
-		
+
 		ctorgen.visitLabel(end);
 
 		ctorgen.returnValue();
@@ -3922,6 +3973,10 @@ static public class ObjExpr implements Expr{
 
 	String cachedProtoImplName(int n){
 		return "__cached_proto_impl__" + n;
+	}
+
+	String varCallsiteName(int n){
+		return "__var__callsite__" + n;
 	}
 
 	String thunkNameStatic(int n){
@@ -5087,7 +5142,7 @@ private static KeywordExpr registerKeyword(Keyword keyword){
 
 private static int registerKeywordCallsite(Keyword keyword){
 	if(!KEYWORD_CALLSITES.isBound())
-		throw new IllegalAccessError();
+		throw new IllegalAccessError("KEYWORD_CALLSITES is not bound");
 
 	IPersistentVector keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
 
@@ -5098,7 +5153,7 @@ private static int registerKeywordCallsite(Keyword keyword){
 
 private static int registerProtocolCallsite(Var v){
 	if(!PROTOCOL_CALLSITES.isBound())
-		throw new IllegalAccessError();
+		throw new IllegalAccessError("PROTOCOL_CALLSITES is not bound");
 
 	IPersistentVector protocolCallsites = (IPersistentVector) PROTOCOL_CALLSITES.deref();
 
@@ -5106,6 +5161,18 @@ private static int registerProtocolCallsite(Var v){
 	PROTOCOL_CALLSITES.set(protocolCallsites);
 	return protocolCallsites.count()-1;
 }
+
+private static int registerVarCallsite(Var v){
+	if(!VAR_CALLSITES.isBound())
+		throw new IllegalAccessError("VAR_CALLSITES is not bound");
+
+	IPersistentVector varCallsites = (IPersistentVector) VAR_CALLSITES.deref();
+
+	varCallsites = varCallsites.cons(v);
+	VAR_CALLSITES.set(varCallsites);
+	return varCallsites.count()-1;
+}
+
 
 private static Expr analyzeSymbol(Symbol sym) throws Exception{
 	Symbol tag = tagOf(sym);
@@ -5390,6 +5457,10 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 			RT.map(LOADER, RT.makeClassLoader(),
 			       SOURCE_PATH, sourcePath,
 			       SOURCE, sourceName,
+			       METHOD, null,
+			       LOCAL_ENV, null,
+					LOOP_LOCALS, null,
+					NEXT_LOCAL_NUM, 0,
 			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber()
@@ -5496,6 +5567,10 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 	Var.pushThreadBindings(
 			RT.map(SOURCE_PATH, sourcePath,
 			       SOURCE, sourceName,
+			       METHOD, null,
+			       LOCAL_ENV, null,
+					LOOP_LOCALS, null,
+					NEXT_LOCAL_NUM, 0,
 			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber(),
@@ -5724,7 +5799,8 @@ static public class NewInstanceExpr extends ObjExpr{
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,
-					       PROTOCOL_CALLSITES, PersistentVector.EMPTY
+					       PROTOCOL_CALLSITES, PersistentVector.EMPTY,
+					       VAR_CALLSITES, PersistentVector.EMPTY
 							));
 			if(ret.isDeftype())
 				{
@@ -5751,6 +5827,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			ret.constantsID = RT.nextID();
 			ret.keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
 			ret.protocolCallsites = (IPersistentVector) PROTOCOL_CALLSITES.deref();
+			ret.varCallsites = (IPersistentVector) VAR_CALLSITES.deref();
 			}
 		finally
 			{

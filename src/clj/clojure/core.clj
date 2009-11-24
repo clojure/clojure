@@ -227,7 +227,8 @@
                       fdecl)
               m (conj {:arglists (list 'quote (sigs fdecl))} m)]
           (list 'def (with-meta name (conj (if (meta name) (meta name) {}) m))
-                (cons `fn fdecl)))))
+                (cons `fn (cons name fdecl))))))
+                ;(cons `fn fdecl)))))
 
 (. (var defn) (setMacro))
 
@@ -427,8 +428,6 @@
  [obj f & args]
   (with-meta obj (apply f (meta obj) args)))
 
-
-
 (defmacro lazy-seq
   "Takes a body of expressions that returns an ISeq or nil, and yields
   a Seqable object that will invoke the body only the first time seq
@@ -489,8 +488,6 @@
        (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
-
-
 (defmacro delay
   "Takes a body of expressions and yields a Delay object that will
   invoke the body only the first time it is forced (with force), and
@@ -1908,6 +1905,10 @@
                (next vs))
         map)))
 
+(defmacro declare
+  "defs the supplied var names with no bindings, useful for making forward declarations."
+  [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
+
 (defn line-seq
   "Returns the lines of text from rdr as a lazy sequence of strings.
   rdr must implement java.io.BufferedReader."
@@ -2289,6 +2290,7 @@
   of *out*.  Prints the object(s), separated by spaces if there is
   more than one.  By default, pr and prn print in a way that objects
   can be read by the reader"
+  {:dynamic true}
   ([] nil)
   ([x]
      (pr-on x *out*))
@@ -2886,7 +2888,7 @@
     (let [name (if (symbol? (first sigs)) (first sigs) nil)
           sigs (if name (next sigs) sigs)
           sigs (if (vector? (first sigs)) (list sigs) sigs)
-          psig (fn [sig]
+          psig (fn* [sig]
                  (let [[params & body] sig
                        conds (when (and (next body) (map? (first body))) 
                                            (first body))
@@ -2898,11 +2900,11 @@
                               `((let [~'% ~(if (< 1 (count body)) 
                                             `(do ~@body) 
                                             (first body))]
-                                 ~@(map (fn [c] `(assert ~c)) post)
+                                 ~@(map (fn* [c] `(assert ~c)) post)
                                  ~'%))
                               body)
                        body (if pre
-                              (concat (map (fn [c] `(assert ~c)) pre) 
+                              (concat (map (fn* [c] `(assert ~c)) pre) 
                                       body)
                               body)]
                    (if (every? symbol? params)
@@ -3780,7 +3782,7 @@
   [fmt & args]
   (print (apply format fmt args)))
 
-(def gen-class)
+(declare gen-class)
 
 (defmacro with-loading-context [& body]
   `((fn loading# [] 
@@ -3912,7 +3914,7 @@
   (let [d (root-resource lib)]
     (subs d 0 (.lastIndexOf d "/"))))
 
-(def load)
+(declare load)
 
 (defn- load-one
   "Loads a lib given its name. If need-ns, ensures that the associated
@@ -4186,10 +4188,6 @@
 (def
  #^{:doc "bound in a repl thread to the most recent exception caught by the repl"}
  *e)
-
-(defmacro declare
-  "defs the supplied var names with no bindings, useful for making forward declarations."
-  [& names] `(do ~@(map #(list 'def %) names)))
 
 (defn trampoline
   "trampoline can be used to convert algorithms requiring mutual
