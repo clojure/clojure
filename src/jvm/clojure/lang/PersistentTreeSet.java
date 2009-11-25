@@ -12,47 +12,11 @@
 
 package clojure.lang;
 
-import java.util.List;
 import java.util.Comparator;
 
 public class PersistentTreeSet extends APersistentSet implements Reversible, Sorted{
 static public final PersistentTreeSet EMPTY = new PersistentTreeSet(null, PersistentTreeMap.EMPTY);
 
-public static PersistentTreeSet create(Object... init){
-	PersistentTreeSet ret = EMPTY;
-	for(int i = 0; i < init.length; i++)
-		{
-		ret = (PersistentTreeSet) ret.cons(init[i]);
-		}
-	return ret;
-}
-
-public static PersistentTreeSet create(Comparator comp, Object... init){
-	PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
-	for(int i = 0; i < init.length; i++)
-		{
-		ret = (PersistentTreeSet) ret.cons(init[i]);
-		}
-	return ret;
-}
-
-public static PersistentTreeSet create(List init){
-	PersistentTreeSet ret = EMPTY;
-	for(Object key : init)
-		{
-		ret = (PersistentTreeSet) ret.cons(key);
-		}
-	return ret;
-}
-
-public static PersistentTreeSet create(Comparator comp, List init){
-	PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
-	for(Object key : init)
-		{
-		ret = (PersistentTreeSet) ret.cons(key);
-		}
-	return ret;
-}
 
 static public PersistentTreeSet create(ISeq items){
 	PersistentTreeSet ret = EMPTY;
