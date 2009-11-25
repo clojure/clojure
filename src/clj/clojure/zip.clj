@@ -66,7 +66,9 @@
 (defn children
   "Returns a seq of the children of node at loc, which must be a branch"
   [loc]
-    ((:zip/children ^loc) (node loc)))
+    (if (branch? loc)
+      ((:zip/children ^loc) (node loc))
+      (throw (Exception. "called children on a leaf node"))))
 
 (defn make-node
   "Returns a new branch node, given an existing node and new
@@ -94,13 +96,14 @@
   "Returns the loc of the leftmost child of the node at this loc, or
   nil if no children"
   [loc]
-    (let [[node path] loc
-          [c & cnext :as cs] (children loc)]
-      (when cs
-        (with-meta [c {:l [] 
-                       :pnodes (if path (conj (:pnodes path) node) [node]) 
-                       :ppath path 
-                       :r cnext}] ^loc))))
+    (when (branch? loc)
+      (let [[node path] loc
+            [c & cnext :as cs] (children loc)]
+        (when cs
+          (with-meta [c {:l [] 
+                         :pnodes (if path (conj (:pnodes path) node) [node]) 
+                         :ppath path 
+                         :r cnext}] ^loc)))))
 
 (defn up
   "Returns the loc of the parent of the node at this loc, or nil if at

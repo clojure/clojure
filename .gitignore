@@ -3,3 +3,4 @@ classes/*
 pom.xml
 clojure.iws
 clojure.ipr
+nbproject/private/

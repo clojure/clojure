@@ -16,6 +16,8 @@
 
 (declare *a* *b* *c* *d*)
 
+(def *n* 0)
+
 (defn fixture-a [f]
   (binding [*a* 3] (f)))
 
@@ -28,9 +30,13 @@
 (defn fixture-d [f]
   (binding [*d* 11] (f)))
 
+(defn inc-n-fixture [f]
+  (binding [*n* (inc *n*)] (f)))
+
 (use-fixtures :once fixture-a fixture-b)
 
-(use-fixtures :each fixture-c fixture-d)
+(use-fixtures :each fixture-c fixture-d inc-n-fixture)
+(use-fixtures :each fixture-c fixture-d inc-n-fixture)
 
 (deftest can-use-once-fixtures
   (is (= 3 *a*))
@@ -39,3 +45,6 @@
 (deftest can-use-each-fixtures
   (is (= 7 *c*))
   (is (= 11 *d*)))
+
+(deftest use-fixtures-replaces
+  (is (= *n* 1)))

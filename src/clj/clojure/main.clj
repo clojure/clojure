@@ -9,6 +9,7 @@
 ;; Originally contributed by Stephen C. Gilardi
 
 (ns clojure.main
+  (:refer-clojure :exclude [with-bindings])
   (:import (clojure.lang Compiler Compiler$CompilerException
                          LineNumberingPushbackReader RT)))
 

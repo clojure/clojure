@@ -115,6 +115,11 @@
 
 (def
  #^{:arglists '([x])
+    :doc "Return true if x is a Character"}
+ char? (fn char? [x] (instance? Character x)))
+
+(def
+ #^{:arglists '([x])
     :doc "Return true if x is a String"}
  string? (fn string? [x] (instance? String x)))
 
@@ -225,7 +230,16 @@
               fdecl (if (map? (last fdecl))
                       (butlast fdecl)
                       fdecl)
-              m (conj {:arglists (list 'quote (sigs fdecl))} m)]
+              m (conj {:arglists (list 'quote (sigs fdecl))} m)
+              m (let [inline (:inline m)
+                      ifn (first inline)
+                      iname (second inline)]
+                  ;; same as: (if (and (= 'fn ifn) (not (symbol? iname))) ...)
+                  (if (if (clojure.lang.Util/equiv 'fn ifn)
+                        (if (instance? clojure.lang.Symbol iname) false true))
+                    ;; inserts the same fn name to the inline fn if it does not have one
+                    (assoc m :inline (cons ifn (cons name (next inline))))
+                    m))]
           (list 'def (with-meta name (conj (if (meta name) (meta name) {}) m))
                 (cons `fn (cons name fdecl))))))
                 ;(cons `fn fdecl)))))
@@ -267,24 +281,30 @@
   "Returns a new hash set with supplied keys."
   ([] #{})
   ([& keys]
-   (. clojure.lang.PersistentHashSet (create keys))))
+   (clojure.lang.PersistentHashSet/create keys)))
 
 (defn sorted-map
   "keyval => key val
   Returns a new sorted map with supplied mappings."
   ([& keyvals]
-   (. clojure.lang.PersistentTreeMap (create keyvals))))
-
-(defn sorted-set
-  "Returns a new sorted set with supplied keys."
-  ([& keys]
-   (. clojure.lang.PersistentTreeSet (create keys))))
+   (clojure.lang.PersistentTreeMap/create keyvals)))
 
 (defn sorted-map-by
   "keyval => key val
   Returns a new sorted map with supplied mappings, using the supplied comparator."
   ([comparator & keyvals]
-   (. clojure.lang.PersistentTreeMap (create comparator keyvals))))
+   (clojure.lang.PersistentTreeMap/create comparator keyvals)))
+
+(defn sorted-set
+  "Returns a new sorted set with supplied keys."
+  ([& keys]
+   (clojure.lang.PersistentTreeSet/create keys)))
+
+(defn sorted-set-by
+  "Returns a new sorted set with supplied keys, using the supplied comparator."
+  ([comparator & keys]
+   (clojure.lang.PersistentTreeSet/create comparator keys)))
+
  
 ;;;;;;;;;;;;;;;;;;;;
 (def
@@ -1065,8 +1085,9 @@
   second item in the first form, making a list of it if it is not a
   list already. If there are more forms, inserts the first form as the
   second item in second form, etc."
+  ([x] x)
   ([x form] (if (seq? form)
-              `(~(first form) ~x ~@(next form))
+              (with-meta `(~(first form) ~x ~@(next form)) (meta form))
               (list form x)))
   ([x form & more] `(-> (-> ~x ~form) ~@more)))
 
@@ -1076,7 +1097,7 @@
   list already. If there are more forms, inserts the first form as the
   last item in second form, etc."
   ([x form] (if (seq? form)
-              `(~(first form) ~@(next form)  ~x)
+              (with-meta `(~(first form) ~@(next form)  ~x) (meta form))
               (list form x)))
   ([x form & more] `(->> (->> ~x ~form) ~@more)))
 
@@ -1125,7 +1146,7 @@
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
   [multifn dispatch-val & fn-tail]
-  `(. ~multifn addMethod ~dispatch-val (fn ~@fn-tail)))
+  `(. ~(with-meta multifn {:tag 'clojure.lang.MultiFn}) addMethod ~dispatch-val (fn ~@fn-tail)))
 
 (defn remove-method
   "Removes the method of multimethod associated	with dispatch-value."
@@ -1243,6 +1264,42 @@
          ~@body
          (finally
            (pop-thread-bindings))))))
+
+(defn with-bindings*
+  "Takes a map of Var/value pairs. Installs for the given Vars the associated
+  values as thread-local bindings. Then calls f with the supplied arguments.
+  Pops the installed bindings after f returned. Returns whatever f returns."
+  [binding-map f & args]
+  (push-thread-bindings binding-map)
+  (try
+    (apply f args)
+    (finally
+      (pop-thread-bindings))))
+
+(defmacro with-bindings
+  "Takes a map of Var/value pairs. Installs for the given Vars the associated
+  values as thread-local bindings. The executes body. Pops the installed
+  bindings after body was evaluated. Returns the value of body."
+  [binding-map & body]
+  `(with-bindings* ~binding-map (fn [] ~@body)))
+
+(defn bound-fn*
+  "Returns a function, which will install the same bindings in effect as in
+  the thread at the time bound-fn* was called and then call f with any given
+  arguments. This may be used to define a helper function which runs on a
+  different thread, but needs the same bindings in place."
+  [f]
+  (let [bindings (get-thread-bindings)]
+    (fn [& args]
+      (apply with-bindings* bindings f args))))
+
+(defmacro bound-fn
+  "Returns a function defined by the given fntail, which will install the
+  same bindings in effect as in the thread at the time bound-fn was called.
+  This may be used to define a helper function which runs on a different
+  thread, but needs the same bindings in place."
+  [& fntail]
+  `(bound-fn* (fn ~@fntail)))
 
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
@@ -1671,7 +1728,7 @@
 (defn some
   "Returns the first logical true value of (pred x) for any x in coll,
   else nil.  One common idiom is to use a set as pred, for example
-  this will return true if :fred is in the sequence, otherwise nil:
+  this will return :fred if :fred is in the sequence, otherwise nil:
   (some #{:fred} coll)"
   [pred coll]
     (when (seq coll)
@@ -1913,10 +1970,9 @@
   "Returns the lines of text from rdr as a lazy sequence of strings.
   rdr must implement java.io.BufferedReader."
   [#^java.io.BufferedReader rdr]
-  (lazy-seq
-   (let [line  (. rdr (readLine))]
-     (when line
-       (cons line (line-seq rdr))))))
+  (let [line  (. rdr (readLine))]
+    (when line
+      (lazy-seq (cons line (line-seq rdr))))))
 
 (defn comparator
   "Returns an implementation of java.util.Comparator based upon pred."
@@ -3161,11 +3217,10 @@
   using java.util.regex.Matcher.find(), each such match processed with
   re-groups."
   [#^java.util.regex.Pattern re s]
-    (let [m (re-matcher re s)]
-      ((fn step []
-         (lazy-seq
-          (when (. m (find))
-            (cons (re-groups m) (step))))))))
+  (let [m (re-matcher re s)]
+    ((fn step []
+       (when (. m (find))
+         (lazy-seq (cons (re-groups m) (step))))))))
 
 (defn re-matches
   "Returns the match, if any, of string to pattern, using
@@ -3456,7 +3511,7 @@
   (let [[pre-args [args expr]] (split-with (comp not vector?) decl)]
     `(do
        (defn ~name ~@pre-args ~args ~(apply (eval (list `fn args expr)) args))
-       (alter-meta! (var ~name) assoc :inline (fn ~args ~expr))
+       (alter-meta! (var ~name) assoc :inline (fn ~name ~args ~expr))
        (var ~name))))
 
 (defn empty
@@ -3497,6 +3552,34 @@
   ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
 
+(defn boolean-array
+  "Creates an array of booleans"
+  {:inline (fn [& args] `(. clojure.lang.Numbers boolean_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers boolean_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers boolean_array size init-val-or-seq)))
+
+(defn byte-array
+  "Creates an array of bytes"
+  {:inline (fn [& args] `(. clojure.lang.Numbers byte_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers byte_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers byte_array size init-val-or-seq)))
+
+(defn char-array
+  "Creates an array of chars"
+  {:inline (fn [& args] `(. clojure.lang.Numbers char_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers char_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers char_array size init-val-or-seq)))
+
+(defn short-array
+  "Creates an array of shorts"
+  {:inline (fn [& args] `(. clojure.lang.Numbers short_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers short_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers short_array size init-val-or-seq)))
+
 (defn double-array
   "Creates an array of doubles"
   {:inline (fn [& args] `(. clojure.lang.Numbers double_array ~@args))
@@ -3512,11 +3595,27 @@
   ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
 
 (defn long-array
-  "Creates an array of ints"
+  "Creates an array of longs"
   {:inline (fn [& args] `(. clojure.lang.Numbers long_array ~@args))
    :inline-arities #{1 2}}
   ([size-or-seq] (. clojure.lang.Numbers long_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers long_array size init-val-or-seq)))
+
+(definline booleans
+  "Casts to boolean[]"
+  [xs] `(. clojure.lang.Numbers booleans ~xs))
+
+(definline bytes
+  "Casts to bytes[]"
+  [xs] `(. clojure.lang.Numbers bytes ~xs))
+
+(definline chars
+  "Casts to chars[]"
+  [xs] `(. clojure.lang.Numbers chars ~xs))
+
+(definline shorts
+  "Casts to shorts[]"
+  [xs] `(. clojure.lang.Numbers shorts ~xs))
 
 (definline floats
   "Casts to float[]"
@@ -3754,9 +3853,8 @@
           row-struct (apply create-struct keys)
           row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
           rows (fn thisfn []
-                   (lazy-seq
-                    (when (. rs (next))
-                      (cons (apply struct row-struct (row-values)) (thisfn)))))]
+                 (when (. rs (next))
+                   (lazy-seq (cons (apply struct row-struct (row-values)) (thisfn)))))]
       (rows)))
 
 (defn iterator-seq

@@ -27,6 +27,15 @@ public static PersistentTreeSet create(Object... init){
 	return ret;
 }
 
+public static PersistentTreeSet create(Comparator comp, Object... init){
+	PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
+	for(int i = 0; i < init.length; i++)
+		{
+		ret = (PersistentTreeSet) ret.cons(init[i]);
+		}
+	return ret;
+}
+
 public static PersistentTreeSet create(List init){
 	PersistentTreeSet ret = EMPTY;
 	for(Object key : init)
@@ -36,8 +45,26 @@ public static PersistentTreeSet create(List init){
 	return ret;
 }
 
+public static PersistentTreeSet create(Comparator comp, List init){
+	PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
+	for(Object key : init)
+		{
+		ret = (PersistentTreeSet) ret.cons(key);
+		}
+	return ret;
+}
+
 static public PersistentTreeSet create(ISeq items){
 	PersistentTreeSet ret = EMPTY;
+	for(; items != null; items = items.next())
+		{
+		ret = (PersistentTreeSet) ret.cons(items.first());
+		}
+	return ret;
+}
+
+static public PersistentTreeSet create(Comparator comp, ISeq items){
+	PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
 	for(; items != null; items = items.next())
 		{
 		ret = (PersistentTreeSet) ret.cons(items.first());

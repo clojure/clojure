@@ -797,14 +797,14 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   When *load-tests* is false, deftest is ignored."
   [name & body]
   (when *load-tests*
-    `(def ~(with-meta name {:test `(fn [] ~@body)})
+    `(def ~(vary-meta name assoc :test `(fn [] ~@body))
           (fn [] (test-var (var ~name))))))
 
 (defmacro deftest-
   "Like deftest but creates a private var."
   [name & body]
   (when *load-tests*
-    `(def ~(with-meta name {:test `(fn [] ~@body), :private true})
+    `(def ~(vary-meta name assoc :test `(fn [] ~@body) :private true)
           (fn [] (test-var (var ~name))))))
 
 
@@ -826,9 +826,13 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   "Adds elements in coll to the current namespace metadata as the
   value of key."
   [key coll]
-  (alter-meta! *ns* assoc key (concat (key (meta *ns*)) coll)))
+  (alter-meta! *ns* assoc key coll))
 
-(defmulti use-fixtures (fn [fixture-type & args] fixture-type))
+(defmulti use-fixtures
+  "Wrap test runs in a fixture function to perform setup and
+  teardown. Using a fixture-type of :each wraps every test
+  individually, while:once wraps the whole run in a single function."
+  (fn [fixture-type & args] fixture-type))
 
 (defmethod use-fixtures :each [fixture-type & args]
   (add-ns-meta ::each-fixtures args))
