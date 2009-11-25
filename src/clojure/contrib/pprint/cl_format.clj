@@ -1,4 +1,4 @@
-;;; cl-format.clj -- part of the pretty printer for Clojure
+;;; cl_format.clj -- part of the pretty printer for Clojure
 
 ;; by Tom Faulhaber
 ;; April 3, 2009

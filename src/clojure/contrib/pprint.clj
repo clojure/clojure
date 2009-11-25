@@ -29,7 +29,7 @@ documentation on the the clojure-contrib web site on github.",
 
 
 (load "pprint/pprint_base")
-(load "pprint/cl-format")
+(load "pprint/cl_format")
 (load "pprint/dispatch")
 
 nil
