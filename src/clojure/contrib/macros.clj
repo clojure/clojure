@@ -34,3 +34,51 @@
   (let [makefn (fn [[name args body]] (list name (list 'fn name args body)))
 	fns (vec (apply concat (map makefn (partition 3 fn-bindings))))]
   `(let ~fns ~@exprs)))
+
+ ;; By Konrad Hinsen
+
+ (defn- unqualified-symbol
+  [s]
+  (let [s-str (str s)]
+    (symbol (subs s-str (inc (.indexOf s-str (int \/)))))))
+ 
+(defn- bound-var?
+  [var]
+  (try
+    (do (deref var) true)
+    (catch java.lang.IllegalStateException e false)))
+
+(defn- fns-from-ns
+  [ns ns-symbol]
+  (apply concat
+    (for [[k v] (ns-publics ns)
+          :when (and (bound-var? v)
+                     (fn? @v)
+                     (not (:macro (meta v))))]
+       [k (symbol (str ns-symbol) (str k))])))
+
+(defn- expand-symbol
+  [ns-or-var-sym]
+  (if (= ns-or-var-sym '*ns*)
+    (fns-from-ns *ns* (ns-name *ns*))
+    (if-let [ns (find-ns ns-or-var-sym)]
+      (fns-from-ns ns ns-or-var-sym)
+      (list (unqualified-symbol ns-or-var-sym) ns-or-var-sym))))
+
+(defmacro with-direct-linking
+  "EXPERIMENTAL!
+   Compiles the functions in body with direct links to the functions
+   named in symbols, i.e. without a var lookup for each invocation.
+   Symbols is a vector of symbols that name either vars or namespaces.
+   A namespace reference is replaced by the list of all symbols in the
+   namespace that are bound to functions. If symbols is not provided,
+   the default value ['clojure.core] is used. The symbol *ns* can be
+   used to refer to the current namespace."
+  {:arglists '([symbols? & body])}
+  [& body]
+  (let [[symbols body] (if (vector? (first body))
+                         [(first body) (rest body)]
+                         [['clojure.core] body])
+  			bindings (vec (mapcat expand-symbol symbols))]
+    `(let ~bindings ~@body)))
+ 
