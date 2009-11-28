@@ -62,21 +62,28 @@
 ;; the test framework of your choice, or to simply customize error handling.
 
 (defn report-problem
+  {:dynamic true}
   ([function expected actual]
     (report-problem function expected actual "Expectation not met."))
   ([function expected actual message]
     (prn (str message " Function name: " function
            " expected: " expected " actual: " actual))))
 
-(defn no-matching-function-signature [function expected actual]
+(defn no-matching-function-signature
+  {:dynamic true} 
+  [function expected actual]
   (report-problem function expected actual
     "No matching real function signature for given argument count."))
 
-(defn unexpected-args [function expected actual i]
+(defn unexpected-args 
+  {:dynamic true}
+  [function expected actual i]
   (report-problem function expected actual
     (str "Argument " i " has an unexpected value for function.")))
 
-(defn incorrect-invocation-count [function expected actual]
+(defn incorrect-invocation-count 
+  {:dynamic true}
+  [function expected actual]
   (report-problem function expected actual "Unexpected invocation count."))
 
 

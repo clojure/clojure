@@ -4,8 +4,8 @@
    clojure.test))
 
 (deftest test-report-problem-called
-  (def #^{:private true} fn1 (fn [x] "dummy code"))
-  (def #^{:private true} fn2 (fn [x y] "dummy code2"))
+  (def #^{:private true :dynamic true} fn1 (fn [x] "dummy code"))
+  (def #^{:private true :dynamic true} fn2 (fn [x y] "dummy code2"))
   (let [under-test (fn [x] (fn1 x))]
     (assert-called clojure.contrib.mock.test-adapter/report-problem
       true (expect [fn1 (times 5)] (under-test "hi")))))

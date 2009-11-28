@@ -20,6 +20,7 @@
  "This function is designed to be used in a binding macro to override
 the report-problem function in clojure.contrib.mock. Instead of printing
 the error to the console, the error is logged via clojure.test."
+ {:dynamic true}
  [fn-name expected actual msg]
  (report {:type :fail,
           :message (str msg " Function name: " fn-name),

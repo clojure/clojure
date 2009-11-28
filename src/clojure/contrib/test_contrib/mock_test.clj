@@ -3,14 +3,14 @@
  (:require [clojure.contrib.mock :as mock]))
 
 ; Used as dummy dependency functions
-(defn fn1 [x] :ignore)
-(defn fn2 [x y] :ignore)
-(defn fn3 ([x] :ignore)
+(defn fn1 {:dynamic true} [x] :ignore)
+(defn fn2 {:dynamic true} [x y] :ignore)
+(defn fn3 {:dynamic true} ([x] :ignore)
   ([x y z] :ignore))
-(defn fn4 [x y & r] :ignore)
+(defn fn4 {:dynamic true} [x y & r] :ignore)
 
 ;functions created using fn directly lack the argslist meta data
-(def deffed-differently (fn [x] :ignore))
+(def #^{:dynamic true} deffed-differently (fn [x] :ignore))
 
 (defmacro assert-called [fn-name called? & body]
   `(let [called-status?# (atom false)]
