@@ -130,37 +130,37 @@ protected Object doInvoke(Object arg1, Object arg2, Object arg3, Object arg4, Ob
 public Object applyTo(ISeq args) throws Exception{
 	if(RT.boundedLength(args, getRequiredArity()) <= getRequiredArity())
 		{
-		return AFn.applyToHelper(this, args);
+		return AFn.applyToHelper(this, Util.ret1(args,args = null));
 		}
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(args);
+			return doInvoke(Util.ret1(args,args = null));
 		case 1:
 			return doInvoke(args.first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 2:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 3:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 4:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 5:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 6:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -168,7 +168,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 7:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -177,7 +177,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 8:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -187,7 +187,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 9:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -198,7 +198,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 10:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -210,7 +210,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 11:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -223,7 +223,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 12:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -237,7 +237,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 13:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -252,7 +252,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 14:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -268,7 +268,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 15:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -285,7 +285,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 16:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -303,7 +303,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 17:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -322,7 +322,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 18:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -342,7 +342,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 19:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -363,7 +363,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 		case 20:
 			return doInvoke(args.first()
 					, (args = args.next()).first()
@@ -385,7 +385,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, (args = args.next()).first()
 					, (args = args.next()).first()
 					, (args = args.next()).first()
-					, args.next());
+					, Util.ret1(args.next(),args=null));
 
 		}
 	return throwArity();
@@ -406,9 +406,9 @@ public Object invoke(Object arg1) throws Exception{
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1, arg1 = null)));
 		case 1:
-			return doInvoke(arg1, null);
+			return doInvoke(Util.ret1(arg1, arg1 = null), null);
 		default:
 			return throwArity();
 		}
@@ -419,11 +419,11 @@ public Object invoke(Object arg1, Object arg2) throws Exception{
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2));
+			return doInvoke(Util.ret1(arg1, arg1 = null), ArraySeq.create(Util.ret1(arg2, arg2 = null)));
 		case 2:
-			return doInvoke(arg1, arg2, null);
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), null);
 		default:
 			return throwArity();
 		}
@@ -434,13 +434,17 @@ public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                                Util.ret1(arg3, arg3 = null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3));
+			return doInvoke(Util.ret1(arg1, arg1 = null),
+			                ArraySeq.create(Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                ArraySeq.create(Util.ret1(arg3, arg3 = null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, null);
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                null);
 		default:
 			return throwArity();
 		}
@@ -451,15 +455,21 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                                Util.ret1(arg3, arg3 = null), Util.ret1(arg4, arg4 = null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4));
+			return doInvoke(Util.ret1(arg1, arg1 = null),
+			                ArraySeq.create(Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                                Util.ret1(arg4, arg4 = null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                ArraySeq.create(Util.ret1(arg3, arg3 = null), Util.ret1(arg4, arg4 = null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                ArraySeq.create(Util.ret1(arg4, arg4 = null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, null);
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                Util.ret1(arg4, arg4 = null), null);
 		default:
 			return throwArity();
 		}
@@ -470,17 +480,26 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                                Util.ret1(arg3, arg3 = null), Util.ret1(arg4, arg4 = null),
+			                                Util.ret1(arg5, arg5 = null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5));
+			return doInvoke(Util.ret1(arg1, arg1 = null),
+			                ArraySeq.create(Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                                Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                ArraySeq.create(Util.ret1(arg3, arg3 = null), Util.ret1(arg4, arg4 = null),
+			                                Util.ret1(arg5, arg5 = null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                ArraySeq.create(Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                Util.ret1(arg4, arg4 = null), ArraySeq.create(Util.ret1(arg5, arg5 = null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, null);
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null), null);
 		default:
 			return throwArity();
 		}
@@ -491,19 +510,34 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                                Util.ret1(arg3, arg3 = null), Util.ret1(arg4, arg4 = null),
+			                                Util.ret1(arg5, arg5 = null), Util.ret1(arg6, arg6 = null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6));
+			return doInvoke(Util.ret1(arg1, arg1 = null),
+			                ArraySeq.create(Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                                Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null),
+			                                Util.ret1(arg6, arg6 = null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null),
+			                ArraySeq.create(Util.ret1(arg3, arg3 = null), Util.ret1(arg4, arg4 = null),
+			                                Util.ret1(arg5, arg5 = null), Util.ret1(arg6, arg6 = null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                ArraySeq.create(Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null),
+			                                Util.ret1(arg6, arg6 = null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                Util.ret1(arg4, arg4 = null),
+			                ArraySeq.create(Util.ret1(arg5, arg5 = null), Util.ret1(arg6, arg6 = null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6));
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null),
+			                ArraySeq.create(Util.ret1(arg6, arg6 = null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, null);
+			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
+			                Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null), Util.ret1(arg6, arg6 = null),
+			                null);
 		default:
 			return throwArity();
 		}

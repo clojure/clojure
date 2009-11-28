@@ -81,4 +81,12 @@ static public boolean isInteger(Object x){
 			|| x instanceof BigInteger;
 }
 
+static public Object ret1(Object ret, Object nil){
+		return ret;
+}
+
+static public ISeq ret1(ISeq ret, Object nil){
+		return ret;
+}
+
 }
