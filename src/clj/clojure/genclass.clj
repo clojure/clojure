@@ -86,7 +86,7 @@
    (contains? prim->class x) (prim->class x)
    :else (let [strx (str x)]
            (clojure.lang.RT/classForName 
-            (if (some #{\.} strx)
+            (if (some #{\. \[} strx)
               strx
               (str "java.lang." strx))))))
 
