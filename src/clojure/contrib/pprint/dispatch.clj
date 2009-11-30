@@ -405,7 +405,7 @@
              (if (= mode :writing)
                (dosync
                 (write-white-space this)
-                (.col-write this s)
+                (.col_write this s)
                 (setf :trailing-white-space white-space))
                (add-to-buffer this (make-buffer-blob s white-space))))
 
@@ -414,7 +414,7 @@
              (if (= (getf :mode) :writing)
                (do 
                  (write-white-space this)
-                 (.col-write this x))
+                 (.col_write this x))
                (if (= c (int \newline))
                  (write-initial-lines this "\n")
                  (add-to-buffer this (make-buffer-blob (str (char c)) nil))))))))))

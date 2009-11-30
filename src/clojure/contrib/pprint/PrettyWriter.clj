@@ -28,7 +28,7 @@
              [getMiserWidth [] Object]
              [setMiserWidth [Object] void]
              [setLogicalBlockCallback [clojure.lang.IFn] void]]
-   :exposes-methods {write col-write}
+   :exposes-methods {write col_write}
    :state pwstate))
 
 ;; TODO: Support for tab directives
@@ -124,7 +124,7 @@
    (let [lb (:logical-block token)]
     (dosync
      (when-let [#^String prefix (:prefix lb)] 
-       (.col-write this prefix))
+       (.col_write this prefix))
      (let [col (.getColumn this)]
        (ref-set (:start-col lb) col)
        (ref-set (:indent lb) col)))))
@@ -132,7 +132,7 @@
 (defmethod write-token :end-block [#^clojure.contrib.pprint.PrettyWriter this token]
   (when-let [cb (getf :logical-block-callback)] (cb :end))
   (when-let [#^String suffix (:suffix (:logical-block token))] 
-    (.col-write this suffix)))
+    (.col_write this suffix)))
 
 (defmethod write-token :indent [#^clojure.contrib.pprint.PrettyWriter this token]
   (let [lb (:logical-block token)]
@@ -143,7 +143,7 @@
 		  :current (.getColumn this))))))
 
 (defmethod write-token :buffer-blob [#^clojure.contrib.pprint.PrettyWriter this token]
-  (.col-write this #^String (:data token)))
+  (.col_write this #^String (:data token)))
 
 (defmethod write-token :nl [#^clojure.contrib.pprint.PrettyWriter this token]
 ;  (prlabel wt @(:done-nl (:logical-block token)))
@@ -153,19 +153,19 @@
                 @(:done-nl (:logical-block token))))
     (emit-nl this token)
     (if-let [#^String tws (getf :trailing-white-space)]
-      (.col-write this tws)))
+      (.col_write this tws)))
   (dosync (setf :trailing-white-space nil)))
 
 (defn- write-tokens [#^clojure.contrib.pprint.PrettyWriter this tokens force-trailing-whitespace]
   (doseq [token tokens]
     (if-not (= (:type-tag token) :nl)
       (if-let [#^String tws (getf :trailing-white-space)]
-	(.col-write this tws)))
+	(.col_write this tws)))
     (write-token this token)
     (setf :trailing-white-space (:trailing-white-space token)))
   (let [#^String tws (getf :trailing-white-space)] 
     (when (and force-trailing-whitespace tws)
-      (.col-write this tws)
+      (.col_write this tws)
       (setf :trailing-white-space nil))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -243,15 +243,15 @@
            (recur (:parent lb)))))))
 
 (defn emit-nl [#^clojure.contrib.pprint.PrettyWriter this nl]
-  (.col-write this (int \newline))
+  (.col_write this (int \newline))
   (dosync (setf :trailing-white-space nil))
   (let [lb (:logical-block nl)
         #^String prefix (:per-line-prefix lb)] 
     (if prefix 
-      (.col-write this prefix))
+      (.col_write this prefix))
     (let [#^String istr (apply str (repeat (- @(:indent lb) (count prefix))
 					  \space))] 
-      (.col-write this istr))
+      (.col_write this istr))
     (update-nl-state lb)))
 
 (defn- split-at-newline [tokens]
@@ -346,13 +346,13 @@
              (setf :pos newpos)
              (add-to-buffer this (make-buffer-blob l nil oldpos newpos))
              (write-buffered-output this))
-           (.col-write this l))
-         (.col-write this (int \newline))
+           (.col_write this l))
+         (.col_write this (int \newline))
          (doseq [#^String l (next (butlast lines))]
-           (.col-write this l)
-           (.col-write this (int \newline))
+           (.col_write this l)
+           (.col_write this (int \newline))
            (if prefix
-             (.col-write this prefix)))
+             (.col_write this prefix)))
          (setf :buffering :writing)
          (last lines))))))
 
@@ -360,7 +360,7 @@
 (defn write-white-space [#^clojure.contrib.pprint.PrettyWriter this]
   (if-let [#^String tws (getf :trailing-white-space)]
     (dosync
-     (.col-write this tws)
+     (.col_write this tws)
      (setf :trailing-white-space nil))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -382,7 +382,7 @@
           (if (= mode :writing)
             (do
              (write-white-space this)
-             (.col-write this s)
+             (.col_write this s)
              (setf :trailing-white-space white-space))
             (let [oldpos (getf :pos)
                   newpos (+ oldpos (count s0))]
@@ -396,7 +396,7 @@
   (if (= (getf :mode) :writing)
     (do 
       (write-white-space this)
-      (.col-write this c))
+      (.col_write this c))
     (if (= c \newline)
       (write-initial-lines this "\n")
       (let [oldpos (getf :pos)
@@ -432,7 +432,7 @@
          (write-white-space this)
           (when-let [cb (getf :logical-block-callback)] (cb :start))
           (if prefix 
-           (.col-write this prefix))
+           (.col_write this prefix))
          (let [col (.getColumn this)]
            (ref-set (:start-col lb) col)
            (ref-set (:indent lb) col)))
@@ -449,7 +449,7 @@
        (do
          (write-white-space this)
          (if suffix
-           (.col-write this suffix))
+           (.col_write this suffix))
          (when-let [cb (getf :logical-block-callback)] (cb :end)))
        (let [oldpos (getf :pos)
              newpos (+ oldpos (if suffix (count suffix) 0))]
