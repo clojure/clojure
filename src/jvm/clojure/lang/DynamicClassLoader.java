@@ -13,17 +13,18 @@
 package clojure.lang;
 
 import java.util.HashMap;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 import java.net.URLClassLoader;
 import java.net.URL;
-import java.io.IOException;
-
-//todo: possibly extend URLClassLoader?
+import java.lang.ref.WeakReference;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
-HashMap<String, byte[]> map = new HashMap<String, byte[]>();
+static ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Integer> >classCache =
+        new ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Integer> >();
+
 static final URL[] EMPTY_URLS = new URL[]{};
 
 public DynamicClassLoader(){
@@ -31,7 +32,6 @@ public DynamicClassLoader(){
 	super(EMPTY_URLS,(Thread.currentThread().getContextClassLoader() == null ||
                 Thread.currentThread().getContextClassLoader() == ClassLoader.getSystemClassLoader())?
                 Compiler.class.getClassLoader():Thread.currentThread().getContextClassLoader());
-//	super(EMPTY_URLS,Compiler.class.getClassLoader());
 }
 
 public DynamicClassLoader(ClassLoader parent){
@@ -39,21 +39,30 @@ public DynamicClassLoader(ClassLoader parent){
 }
 
 public Class defineClass(String name, byte[] bytes){
-	return defineClass(name, bytes, 0, bytes.length);
-}
-
-public void addBytecode(String className, byte[] bytes){
-	if(map.containsKey(className))
-		throw new IllegalStateException(String.format("Class %s already present", className));
-	map.put(className, bytes);
+    Map.Entry<WeakReference<Class>,Integer> ce = classCache.get(name);
+    if(ce != null)
+        {
+        WeakReference<Class> cr = ce.getKey();
+        Class c = cr.get();
+        if(c != null && Arrays.hashCode(bytes) == ce.getValue())
+            return c;
+        }
+	Class c = defineClass(name, bytes, 0, bytes.length);
+    classCache.put(name, new MapEntry(new WeakReference(c), Arrays.hashCode(bytes)));
+    return c;
 }
 
 protected Class<?> findClass(String name) throws ClassNotFoundException{
-	byte[] bytes = map.get(name);
-	if(bytes != null)
-		return defineClass(name, bytes, 0, bytes.length);
+    Map.Entry<WeakReference<Class>,Integer> ce = classCache.get(name);
+    if(ce != null)
+        {
+        WeakReference<Class> cr = ce.getKey();
+        Class c = cr.get();
+        if(c != null)
+            return c;
+        classCache.remove(name);
+        }
 	return super.findClass(name);
-	//throw new ClassNotFoundException(name);
 }
 
 public void registerConstants(int id, Object[] val){
