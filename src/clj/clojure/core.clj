@@ -4552,8 +4552,8 @@
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 (load "core_proxy")
 (load "core_print")
-(load "core_deftype")
 (load "genclass")
+(load "core_deftype")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 

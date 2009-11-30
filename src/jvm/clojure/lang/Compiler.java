@@ -768,18 +768,18 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				if(c != null)
-					maybeField = Reflector.getMethods(c, 0, sym.name, true).size() == 0;
+					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
 				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
-					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, sym.name, false).size() == 0;
+					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
 				}
 			if(maybeField)    //field
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				Symbol tag = tagOf(form);
 				if(c != null) {
-					return new StaticFieldExpr(line, c, sym.name, tag);
+					return new StaticFieldExpr(line, c, munge(sym.name), tag);
 				} else
-					return new InstanceFieldExpr(line, instance, sym.name, tag);
+					return new InstanceFieldExpr(line, instance, munge(sym.name), tag);
 				}
 			else
 				{
@@ -792,9 +792,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				for(ISeq s = RT.next(call); s != null; s = s.next())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
-					return new StaticMethodExpr(source, line, tag, c, sym.name, args);
+					return new StaticMethodExpr(source, line, tag, c, munge(sym.name), args);
 				else
-					return new InstanceMethodExpr(source, line, tag, instance, sym.name, args);
+					return new InstanceMethodExpr(source, line, tag, instance, munge(sym.name), args);
 				}
 		}
 	}
@@ -2773,7 +2773,7 @@ static class InvokeExpr implements Expr{
 				if(this.protocolOn != null)
 					{
 					IPersistentMap mmap = (IPersistentMap) RT.get(pvar.get(), methodMapKey);
-					String mname = ((Keyword) mmap.valAt(Keyword.intern(fvar.sym))).sym.toString();
+					String mname = munge(((Keyword) mmap.valAt(Keyword.intern(fvar.sym))).sym.toString());
 					List methods = Reflector.getMethods(protocolOn, args.count() - 1, mname, false);
 					if(methods.size() != 1)
 						throw new IllegalArgumentException(
@@ -6157,7 +6157,7 @@ public static class NewInstanceMethod extends ObjMethod{
 		Symbol dotname = (Symbol)RT.first(form);
 		if(!dotname.name.startsWith("."))
 			throw new IllegalArgumentException("Method names must begin with '.': " + dotname);
-		Symbol name = (Symbol) Symbol.intern(null,dotname.name.substring(1)).withMeta(RT.meta(dotname));
+		Symbol name = (Symbol) Symbol.intern(null,munge(dotname.name.substring(1))).withMeta(RT.meta(dotname));
 		IPersistentVector parms = (IPersistentVector) RT.second(form);
 		ISeq body = RT.next(RT.next(form));
 		try

@@ -13,6 +13,9 @@
 (defn hash-combine [x y] 
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))
 
+(defn munge [s]
+  ((if (symbol? s) symbol str) (clojure.lang.Compiler/munge (str s))))
+
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
@@ -185,6 +188,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn dtype 
+  "Returns the dynamic type of x, or its Class if none"
+  [x]
+  (if (instance? clojure.lang.IDynamicType x)
+    (let [x #^ clojure.lang.IDynamicType x]
+      (.getDynamicType x))
+    (class x)))
+
 (defn- expand-method-impl-cache [#^clojure.lang.MethodImplCache cache c f]
   (let [cs (into {} (remove (fn [[c f]] (nil? f)) (map vec (partition 2 (.table cache)))))
         cs (assoc cs c f)
@@ -205,7 +216,7 @@
 (defn find-protocol-impl [protocol x]
   (if (and (:on protocol) (instance? (:on protocol) x))
     x
-  (let [t (type x)
+  (let [t (dtype x)
         c (class x)
         impl #(get (:impls protocol) %)]
     (or (impl t)
@@ -288,8 +299,9 @@
                      (str "function " (.sym v)))))))))
 
 (defn- emit-protocol [name opts+sigs]
-  (let [[opts sigs]
-        (loop [opts {:on nil} sigs opts+sigs]
+  (let [iname (symbol (str (munge *ns*) "." (munge name)))
+        [opts sigs]
+        (loop [opts {:on iname} sigs opts+sigs]
           (condp #(%1 %2) (first sigs) 
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
@@ -307,9 +319,15 @@
                                        {:name (vary-meta mname assoc :doc doc :arglists arglists)
                                         :arglists arglists
                                         :doc doc}))))
-                     {} sigs)]
+                     {} sigs)
+        meths (mapcat (fn [sig]
+                        (let [m (munge (:name sig))]
+                          (map #(vector m (vec (repeat (dec (count %))'Object)) 'Object) 
+                               (:arglists sig))))
+                      (vals sigs))]
   `(do
      (defonce ~name {})
+     (gen-interface :name ~iname :methods ~meths)
      (alter-meta! (var ~name) assoc :doc ~(:doc opts))
      (#'assert-same-protocol (var ~name) '~(map :name (vals sigs)))
      (alter-var-root (var ~name) merge 
