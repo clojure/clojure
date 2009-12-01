@@ -424,7 +424,7 @@
 
   defprotocol will automatically generate a corresponding interface,
   with the same name as the protocol, i.e. given a protocol
-  my.ns/Protocol, and interface my.ns.MyProtocol. The interface will
+  my.ns/Protocol, an interface my.ns.MyProtocol. The interface will
   have methods corresponding to the protocol functions, and the
   protocol will automatically work with instances of the interface.
 
