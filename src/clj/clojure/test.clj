@@ -683,11 +683,14 @@
 
 (defn run-tests
   "Runs all tests in the given namespaces; prints results.
-  Defaults to current namespace if none given."
+  Defaults to current namespace if none given.  Returns a map
+  summarizing test results."
   ([] (run-tests *ns*))
   ([& namespaces]
-     (report (assoc (apply merge-with + (map test-ns namespaces))
-               :type :summary))))
+     (let [summary (assoc (apply merge-with + (map test-ns namespaces))
+                     :type :summary)]
+       (report summary)
+       summary)))
 
 (defn run-all-tests
   "Runs all tests in all namespaces; prints results.
@@ -696,3 +699,10 @@
   tested."
   ([] (apply run-tests (all-ns)))
   ([re] (apply run-tests (filter #(re-matches re (name (ns-name %))) (all-ns)))))
+
+(defn successful?
+  "Returns true if the given test summary indicates all tests
+  were successful, false otherwise."
+  [summary]
+  (and (zero? (:fail summary))
+       (zero? (:error summary))))
