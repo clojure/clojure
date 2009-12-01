@@ -4564,12 +4564,12 @@
   [#^Callable f]
   (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
     (reify [clojure.lang.IDeref java.util.concurrent.Future]
-      (.deref [] (.get fut))
-      (.get [] (.get fut))
-      (.get [timeout unit] (.get fut timeout unit))
-      (.isCancelled [] (.isCancelled fut))
-      (.isDone [] (.isDone fut))
-      (.cancel [interrupt?] (.cancel fut interrupt?)))))
+      (deref [_] (.get fut))
+      (get [_] (.get fut))
+      (get [_ timeout unit] (.get fut timeout unit))
+      (isCancelled [_] (.isCancelled fut))
+      (isDone [_] (.isDone fut))
+      (cancel [_ interrupt?] (.cancel fut interrupt?)))))
   
 (defmacro future
   "Takes a body of expressions and yields a future object that will
@@ -4666,9 +4666,9 @@
   []
   (let [d (java.util.concurrent.CountDownLatch. 1)
         v (atom nil)]
-    (reify this [clojure.lang.IFn clojure.lang.IDeref]
-      (.deref [] (.await d) @v)
-      (.invoke [x]
+    (reify [clojure.lang.IFn clojure.lang.IDeref]
+      (deref [_] (.await d) @v)
+      (invoke [this x]
         (locking d
           (if (pos? (.getCount d))
             (do (reset! v x)

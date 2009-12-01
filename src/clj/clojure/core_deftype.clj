@@ -9,6 +9,48 @@
 (in-ns 'clojure.core)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; defclass/deftype ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defmacro reify 
+  "reify is a macro with the following structure:
+
+ (reify [protocols-and-interfaces+]
+   (methodName [this-name args*] body)* )
+
+  Methods should be supplied for all methods of the desired
+  protocol(s) and interface(s). You can also define overrides for
+  methods of Object. Note that a parameter must be supplied to
+  correspond to the target object ('this' in Java parlance). It can
+  have any name whatsoever.
+
+  The return type can be indicated by a type hint on the method name,
+  and arg types can be indicated by a type hint on arg names. If you
+  leave out all hints reify will try to match on same name/arity
+  method in the protocol(s)/interface(s) - this is preferred. If you
+  supply any hints at all, no inference is done, so all hints (or
+  default of Object) must be correct, for both arguments and return
+  type. If a method is overloaded in a protocol/interface, multiple
+  independent method definitions must be supplied.  If overloaded with
+  same arity in an interface you must specify complete hints to
+  disambiguate - a missing hint implies Object.
+
+  recur works to method heads The method bodies of reify are lexical
+  closures, and can refer to the surrounding local scope:
+  
+  (str (let [f \"foo\"] 
+       (reify [] 
+         (toString [_] f))))
+  == \"foo\"
+
+  (seq (let [f \"foo\"] 
+       (reify [clojure.lang.Seqable] 
+         (seq [_] (seq f)))))
+  == (\\f \\o \\o)"
+
+  [[& interfaces] & methods]
+  (let [interfaces (map #(if (var? (resolve %)) 
+                           (:on (deref (resolve %)))
+                           %)
+                        interfaces)]
+    `(reify* ~(vec interfaces) ~@methods)))
 
 (defn hash-combine [x y] 
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))
@@ -35,8 +77,8 @@
         (if (not (or (contains? methodname-set '.equals) (contains? methodname-set '.hashCode)))
           [i
            (conj m 
-                 `(.hashCode [] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
-                 `(.equals [~'o] 
+                 `(hashCode [~'this] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
+                 `(equals [~'this ~'o] 
                     (boolean 
                      (or (identical? ~'this ~'o)
                          (when (instance? clojure.lang.IDynamicType ~'o)
@@ -48,18 +90,18 @@
       (iobj [[i m]] 
         (if (and (implement? clojure.lang.IObj) (implement? clojure.lang.IMeta))
           [(conj i 'clojure.lang.IObj)
-           (conj m `(.meta [] ~'__meta)
-                 `(.withMeta [~'m] (new ~tagname ~@(replace {'__meta 'm} fields))))]
+           (conj m `(meta [~'this] ~'__meta)
+                 `(withMeta [~'this ~'m] (new ~tagname ~@(replace {'__meta 'm} fields))))]
           [i m]))
       (ilookup [[i m]] 
         (if (not (methodname-set '.valAt))
           [(conj i 'clojure.lang.ILookup 'clojure.lang.IKeywordLookup)
-           (conj m `(.valAt [k#] (.valAt ~'this k# nil))
-                 `(.valAt [k# else#] 
+           (conj m `(valAt [~'this k#] (.valAt ~'this k# nil))
+                 `(valAt [~'this k# else#] 
                     (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
                                                    base-fields)
                            (get ~'__extmap k# else#)))
-                 `(.getLookupThunk [k#]
+                 `(getLookupThunk [~'this k#]
                     (case k#
                           ~@(mapcat 
                              (fn [fld]
@@ -72,33 +114,33 @@
       (idynamictype [[i m]]
         [(conj i 'clojure.lang.IDynamicType)
          (conj m
-               `(.getDynamicType [] ~tag)
-               `(.getExtensionMap [] ~'__extmap)
-               `(.getDynamicField [k# else#] 
+               `(getDynamicType [~'this] ~tag)
+               `(getExtensionMap [~'this] ~'__extmap)
+               `(getDynamicField [~'this k# else#] 
                   (condp identical? k# ~@(mapcat (fn [fld] [(keyword fld) fld]) base-fields)
                          (get ~'__extmap k# else#))))])
       (imap [[i m]] 
          (if (and (interface-set clojure.lang.IPersistentMap) (not (methodname-set '.assoc)))
            [i
             (conj m 
-                  `(.count [] (+ ~(count base-fields) (count ~'__extmap)))
-                  `(.empty [] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
-                  `(.cons [e#] (let [[k# v#] e#] (.assoc ~'this k# v#)))
-                  `(.equiv [o#] (.equals ~'this o#))
-                  `(.containsKey [k#] (not (identical? ~'this (.valAt ~'this k# ~'this))))
-                  `(.entryAt [k#] (let [v# (.valAt ~'this k# ~'this)]
+                  `(count [~'this] (+ ~(count base-fields) (count ~'__extmap)))
+                  `(empty [~'this] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
+                  `(cons [~'this e#] (let [[k# v#] e#] (.assoc ~'this k# v#)))
+                  `(equiv [~'this o#] (.equals ~'this o#))
+                  `(containsKey [~'this k#] (not (identical? ~'this (.valAt ~'this k# ~'this))))
+                  `(entryAt [~'this k#] (let [v# (.valAt ~'this k# ~'this)]
                                      (when-not (identical? ~'this v#)
                                        (clojure.lang.MapEntry. k# v#))))
-                  `(.seq [] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                  `(seq [~'this] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                      ~'__extmap))
                   (let [gk (gensym) gv (gensym)]
-                    `(.assoc [~gk ~gv]
+                    `(assoc [~'this ~gk ~gv]
                        (condp identical? ~gk
                          ~@(mapcat (fn [fld]
                                      [(keyword fld) (list* `new tagname (replace {fld gv} fields))])
                                    base-fields)
                          (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~gk ~gv)))))
-                  `(.without [k#] (if (contains? #{~@(map keyword base-fields)} k#)
+                  `(without [~'this k#] (if (contains? #{~@(map keyword base-fields)} k#)
                                      (dissoc (with-meta (into {} ~'this) ~'__meta) k#)
                                      (new ~tagname ~@(remove #{'__extmap} fields) 
                                           (not-empty (dissoc ~'__extmap k#))))))]
@@ -111,11 +153,13 @@
 (defmacro deftype
   "Alpha - subject to change
   
+  (deftype name [fields*] [protocols-and-interfaces*]? methods*)
+
   Dynamically generates compiled bytecode for an anonymous class with
-  the given fields, and, optionally, interfaces and methods. The Name
-  will be used to create a dynamic type tag keyword of the
-  form :current.ns/Name. This tag will be returned from (type
-  an-instance). 
+  the given fields, and, optionally, methods for protocols and/or
+  interfaces. The Name will be used to create a dynamic type tag
+  keyword of the form :current.ns/Name. This tag will be returned
+  from (type an-instance).
 
   A factory function of current.ns/Name will be defined,
   overloaded on 2 arities, the first taking the designated fields in
@@ -124,16 +168,16 @@
   none). 
 
   The class will have the (immutable) fields named by fields, which
-  can have type hints. Interfaces and methods are optional. The only
-  methods that can be supplied are those declared in the interfaces.
-  'this' is impliclty bound to the target object (i.e. same meaning as
-  in Java). Note that method bodies are not closures, the local
-  environment includes only the named fields, and those fields can be
-  accessed directy, i.e. with just foo, instead of (.foo this).
+  can have type hints. Protocols/interfaces and methods are
+  optional. The only methods that can be supplied are those declared
+  in the protocols/interfaces.  Note that method bodies are not
+  closures, the local environment includes only the named fields, and
+  those fields can be accessed directy, i.e. with just foo, instead
+  of (.foo this).
 
   Method definitions take the form:
 
-  (.methodname [args] body) ;note the dot on the methodname!
+  (methodname [this-name args*] body)
 
   The argument and return types can be hinted on the arg and
   methodname symbols. If not supplied, they will be inferred, so type
@@ -148,21 +192,27 @@
   interface, but don't define methods for it, an implementation will
   be generated automatically.
 
-  In addition, unless you supply a version of .hashCode or .equals,
-  deftype/class will define type-and-value-based equality and hashCode.
+  In addition, unless you supply a version of hashCode or equals,
+  deftype/class will define type-and-value-based equality and
+  hashCode.
 
   When AOT compiling, generates compiled bytecode for a class with the
   given name (a symbol), prepends the current ns as the package, and
-  writes the .class file to the *compile-path* directory. When
-  dynamically evaluated, the class will have a generated name.
+  writes the .class file to the *compile-path* directory.
 
   Two constructors will be defined, one taking the designated fields
   followed by a metadata map (nil for none) and an extension field
   map (nil for none), and one taking only the fields (using nil for
-  meta and extension fields)."
+  meta and extension fields).
+
+  When dynamically evaluated, the class will have a generated name."
 
   [name [& fields] & [[& interfaces] & methods]]
-  (let [gname (if *compile-files* name (gensym (str name "__")))
+  (let [gname name ;(if *compile-files* name (gensym (str name "__")))
+        interfaces (map #(if (var? (resolve %)) 
+                           (:on (deref (resolve %)))
+                           %)
+                        interfaces)
         classname (symbol (str *ns* "." gname))
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
@@ -301,7 +351,7 @@
 (defn- emit-protocol [name opts+sigs]
   (let [iname (symbol (str (munge *ns*) "." (munge name)))
         [opts sigs]
-        (loop [opts {:on iname} sigs opts+sigs]
+        (loop [opts {:on (list 'quote iname)} sigs opts+sigs]
           (condp #(%1 %2) (first sigs) 
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
@@ -370,7 +420,34 @@
   must have at least one argument. defprotocol is dynamic, has no
   special compile-time effect, and defines no new types or classes
   Implementations of the protocol methods can be provided using
-  extend."
+  extend.
+
+  defprotocol will automatically generate a corresponding interface,
+  with the same name as the protocol, i.e. given a protocol
+  my.ns/Protocol, and interface my.ns.MyProtocol. The interface will
+  have methods corresponding to the protocol functions, and the
+  protocol will automatically work with instances of the interface.
+
+  Note that you do not need to use this interface with deftype or
+  reify, as they support the protocol directly:
+
+  (defprotocol P 
+    (foo [x]) 
+    (bar-me ([x] [x y])))
+
+  (deftype Foo [a b c] [P]
+    (foo [x] a)
+    (bar-me [x] b)
+    (bar-me [x y] (+ c y)))
+  
+  (bar-me (Foo 1 2 3) 42)
+
+  (foo 
+    (let [x 42]
+      (reify [P] 
+        (foo [this] 17)
+        (bar-me [this] x)
+        (bar-me [this y] x))))"
 
   [name & opts+sigs]
   (emit-protocol name opts+sigs))

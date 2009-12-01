@@ -62,7 +62,7 @@ static final Symbol CASE = Symbol.create("case*");
 static final Symbol CLASS = Symbol.create("Class");
 static final Symbol NEW = Symbol.create("new");
 static final Symbol THIS = Symbol.create("this");
-static final Symbol REIFY = Symbol.create("reify");
+static final Symbol REIFY = Symbol.create("reify*");
 //static final Symbol UNQUOTE = Symbol.create("unquote");
 //static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
 //static final Symbol SYNTAX_QUOTE = Symbol.create("clojure.core", "syntax-quote");
@@ -5717,7 +5717,7 @@ static public class NewInstanceExpr extends ObjExpr{
 				rform = rform.next().next();
 				}
 
-			return build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,THIS,tagname, classname,
+			return build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,null,tagname, classname,
 			             (Symbol) RT.get(opts,RT.TAG_KEY),rform);
 		}
 	}
@@ -5735,21 +5735,13 @@ static public class NewInstanceExpr extends ObjExpr{
 
 		ISeq rform = RT.next(form);
 
-		//reify might be followed by symbol naming this
-		Symbol thisSym = null;
-		if(RT.first(rform) instanceof Symbol)
-			{
-			thisSym = (Symbol) RT.first(rform);
-			rform = RT.next(rform);
-			}
-
 		IPersistentVector interfaces = (IPersistentVector) RT.first(rform);
 
 
 		rform = RT.next(rform);
 
 
-		return build(interfaces, null, thisSym, classname, classname, null, rform);
+		return build(interfaces, null, null, classname, classname, null, rform);
 	}
 	}
 
@@ -6152,13 +6144,17 @@ public static class NewInstanceMethod extends ObjMethod{
 
 	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Symbol thistag,
 	                               Map overrideables) throws Exception{
-		//(.methodname [args] body...)
+		//(methodname [this-name args*] body...)
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
 		Symbol dotname = (Symbol)RT.first(form);
-		if(!dotname.name.startsWith("."))
-			throw new IllegalArgumentException("Method names must begin with '.': " + dotname);
-		Symbol name = (Symbol) Symbol.intern(null,munge(dotname.name.substring(1))).withMeta(RT.meta(dotname));
+		Symbol name = (Symbol) Symbol.intern(null,munge(dotname.name)).withMeta(RT.meta(dotname));
 		IPersistentVector parms = (IPersistentVector) RT.second(form);
+		if(parms.count() == 0)
+			{
+			throw new IllegalArgumentException("Must supply at least one argument for 'this' in: " + dotname);
+			}
+		Symbol thisName = (Symbol) parms.nth(0);
+		parms = RT.subvec(parms,1,parms.count());
 		ISeq body = RT.next(RT.next(form));
 		try
 			{
@@ -6172,7 +6168,7 @@ public static class NewInstanceMethod extends ObjMethod{
 							NEXT_LOCAL_NUM, 0));
 
 			//register 'this' as local 0
-			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "obj__" + RT.nextID()),
+			registerLocal(thisName,
 			              thistag, null,false);
 
 			PersistentVector argLocals = PersistentVector.EMPTY;
