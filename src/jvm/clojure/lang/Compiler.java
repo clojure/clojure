@@ -3401,6 +3401,9 @@ static public class ObjExpr implements Expr{
 			clinitgen.ifZCmp(GeneratorAdapter.EQ,skipLabel);
 
 			clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("Object getRoot()"));
+            clinitgen.dup();
+            clinitgen.instanceOf(AFUNCTION_TYPE);
+            clinitgen.ifZCmp(GeneratorAdapter.EQ,skipLabel);
 			clinitgen.checkCast(IFN_TYPE);
 			clinitgen.putStatic(objtype, varCallsiteName(i), IFN_TYPE);
 			clinitgen.goTo(endLabel);
