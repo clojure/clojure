@@ -264,7 +264,7 @@
     (cons c (super-chain (.getSuperclass c)))))
 
 (defn find-protocol-impl [protocol x]
-  (if (and (:on protocol) (instance? (:on protocol) x))
+  (if (and (:on-interface protocol) (instance? (:on-interface protocol) x))
     x
   (let [t (dtype x)
         c (class x)
@@ -292,7 +292,7 @@
   "Returns true if x satisfies the protocol"
   [protocol x]
   (when
-      (or (and (:on protocol) (instance? (:on protocol) x))
+      (or (and (:on-interface protocol) (instance? (:on-interface protocol) x))
           (find-protocol-impl protocol x))
     true))
 
@@ -351,7 +351,7 @@
 (defn- emit-protocol [name opts+sigs]
   (let [iname (symbol (str (munge *ns*) "." (munge name)))
         [opts sigs]
-        (loop [opts {:on (list 'quote iname)} sigs opts+sigs]
+        (loop [opts {:on (list 'quote iname) :on-interface iname} sigs opts+sigs]
           (condp #(%1 %2) (first sigs) 
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
@@ -396,7 +396,7 @@
                                 (mapcat 
                                  (fn [s] 
                                    [`(intern *ns* (with-meta '~(:name s) {:protocol (var ~name)}))
-                                    (emit-method-builder (:on opts) (:name s) (:on s) (:arglists s))])
+                                    (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
                                  (vals sigs)))))
      (-reset-methods ~name)
      '~name)))
