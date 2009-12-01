@@ -208,7 +208,7 @@
   When dynamically evaluated, the class will have a generated name."
 
   [name [& fields] & [[& interfaces] & methods]]
-  (let [gname name ;(if *compile-files* name (gensym (str name "__")))
+  (let [gname (if *compile-files* name (gensym (str name "__")))
         interfaces (map #(if (var? (resolve %)) 
                            (:on (deref (resolve %)))
                            %)
