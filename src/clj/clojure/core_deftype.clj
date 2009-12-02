@@ -405,12 +405,12 @@
   "A protocol is a named set of named methods and their signatures:
   (defprotocol AProtocolName
 
-  ;optional doc string
-  \"A doc string for AProtocol abstraction\"
+    ;optional doc string
+    \"A doc string for AProtocol abstraction\"
 
   ;method signatures
-  (bar [a b] \"bar docs\")
-  (baz ([a] [a b] [a b & c]) \"baz docs\"))
+    (bar [a b] \"bar docs\")
+    (baz ([a] [a b] [a b & c]) \"baz docs\"))
 
   No implementations are provided. Docs can be specified for the
   protocol overall and for each method. The above yields a set of
@@ -424,7 +424,7 @@
 
   defprotocol will automatically generate a corresponding interface,
   with the same name as the protocol, i.e. given a protocol
-  my.ns/Protocol, an interface my.ns.MyProtocol. The interface will
+  my.ns/Protocol, an interface my.ns.Protocol. The interface will
   have methods corresponding to the protocol functions, and the
   protocol will automatically work with instances of the interface.
 
