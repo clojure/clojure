@@ -1,0 +1,18 @@
+/* *** MISC STUFF USED ALL OVER *** */
+.nowrap { white-space: nowrap; }
+.hidden { display: none; }
+tr td .sm { font-size: 90%; }
+.grey { color: #666; }
+.smgrey { color: #666; font-size: 80%; }
+.grey a { color: #666; }
+.textentry { font-family: arial, helvetica, sans-serif; border: 1px solid #999; }
+.nopad { padding: 0; margin: 0; }
+.bblack { color: #000; font-size: 1.1em; font-weight: bold; }
+.bblacklight { color: #000; font-size: 1.1em; }
+
+/* IE6 min-height: http://www.dustindiaz.com/min-height-fast-hack */
+#content_view { display: block; padding-bottom: 2em; width: 100%; min-height: 600px; height: auto !important; height: 600px; }
+
+/* Used with .innerContentBox and #WikiAds to position the ad column */
+.contentBox { position: relative; min-height: 600px; height: auto !important; height: 600px; }
+

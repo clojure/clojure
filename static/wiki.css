@@ -1,0 +1,26 @@
+/* Wiki Rendered Styles */
+.wiki { line-height: 150%; font-family: arial, helvetica, sans-serif; font-size: small; }
+.wiki h1 { font-weight: bold; padding: 5px 0 0 0; margin: 0; font-size: 1.4em; }
+.wiki h2 { font-weight: bold; padding: 5px 0 0 0; margin: 0; font-size: 1.3em; }
+.wiki h3 { font-weight: bold; padding: 5px 0 0 0; margin: 0; font-size: 1.1em; }
+.wiki h4 { font-weight: normal; padding: 5px 0 0 0; margin: 0; font-size: 1.066em; }
+.wiki h5 { font-weight: normal; padding: 5px 0 0 0; margin: 0; font-size: 1.033em; }
+.wiki h6 { font-weight: normal; padding: 5px 0 0 0; margin: 0; font-size: 1.0em; }
+.wiki table { border-collapse: collapse; margin: 10px 0; font-size: small; }
+.wiki p { margin: 0; padding: 0; padding: 5px 0; }
+.wiki td { border: 1px solid #DDD; }
+.wiki #toc { border: 1px solid #AAA; background: #fff; padding: 5px; margin: 0 0 10px 10px; width: 25%; float: right; clear: right;}
+.wiki #toc h1 { font-weight: normal; font-size: 1.2em; padding: 0; }
+.wiki #toc a:hover { color: #00D; background: #FFD; }
+
+.wiki .nob td { border: 0; }
+.wiki hr { height: 1px; color: #AAA; background-color: #AAA; border: 0; margin: 0 10px; }
+.wiki ul { padding: .5em 0 0 3em; margin: 0; }
+.wiki ol { padding: .5em 0 0 3em; margin: 0; }
+.wiki ul.quotelist { list-style: none; }
+.wiki a.ext { background: url(/i/a.gif) center right no-repeat; padding-right: 10px; }
+.wiki a.wiki_link_new { color: #600; }
+.wiki a.wiki_link_ext { background: url(/i/a.gif) center right no-repeat; padding-right: 10px; }
+.wiki tt { font-size: small; }
+.wiki img { border: 0; padding: 4px; }
+

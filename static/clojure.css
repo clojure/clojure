@@ -1,0 +1,53 @@
+
+body {margin: 0;padding: 0;background-color: #e3e3e3;border-top: 4px solid #b3ccfe;color: #272727}
+body, .wiki, #Content, .wikipage {font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 12px;line-height: 18px;}
+#leftcolumn .wiki_link, #toc, #toc a {font-size: 11px;line-height: 18px;text-decoration: none}
+img {border: 0;}
+#AllContentContainer {max-width: 96em;min-width: 663px;background: #fff url(space/content-background.gif) right repeat-y;padding: 0 40px 18px 0;}
+
+#Header {position: relative;clear: both;overflow: auto;height: 110px}
+#Logo {position: absolute;top: 0;left: 0;padding: 10px 0 0 62px;width: 138px;height: 100px}
+#Header h1 {float: left;border: 0;margin: 0;padding: 0;position: absolute;top: 50;left: 200px; height: 60px}
+#Header h1 a:link, #Header h1 a:visited, #Header h1 a:hover {color:#000000; text-decoration: none;}
+#Resources {min-height: 110px;width: 234px;padding: 5px 0;float: right;border-bottom: 1px solid #abc4e2;background: #e4eaf7 url(space/resources-background.gif) repeat-y;overflow: auto;}
+#Resources ul {margin: 0;padding: 0 25px;list-style: none;}
+#ResourcesB {float: right;}
+#Resources a {text-decoration: none;}
+#Resources a:link, #Resources a:visited, #Resources a:hover, #Resources a:active {color: #4c5770;}
+#Resources a:hover {text-decoration: underline;}
+
+#leftcolumn {margin: 0 0 0 22px;float: left;width: 168px;padding-bottom: 18px;background: #c5d2eb url(space/left-nav-bottom.gif) bottom no-repeat;}
+
+#leftcolumn ul {list-style: none;margin: 0;padding: 0;}
+
+#leftcolumn a {font-weight: bold;display: block;background: transparent url(space/left-nav-divider.gif) repeat-x;padding: 6px 0 0 17px;margin: 12px 0 0 0;}
+#leftcolumn li a {font-weight: normal;background:none;margin: 0;padding: 0 0 0 17px;}
+#leftcolumn br {display: none;}
+#leftcolumn .menu {margin-top: 14px;background: #fff url(space/left-nav-background.gif) repeat-y;}
+
+#leftcolumn a:link , #leftcolumn a:visited , #leftcolumn a:active {color: #666;}
+#leftcolumn a:hover {text-decoration: underline;color: #222;}
+
+#rightcolumn {margin-left: 220px;}
+
+.wiki #toc {border: none;margin: 0 0 30px 18px;width: 222px;padding: 0 0 17px 12px;background: transparent url(space/toc-background.gif) repeat-y;border-bottom: 1px solid #d6d6d6;}
+.wiki #toc h1, .wiki #toc div {margin: 0;padding: 0;}
+.wiki #toc h1 {font-size: 14px;line-height: 18px;font-family: Georgia, "Times New Roman", Times, serif;font-style: italic;font-weight: normal;color: #969696;padding: 10px 0 8px 11px;}
+.wiki #toc a:link, .wiki #toc a:visited, .wiki #toc a:active {color: #646464;}
+.wiki #toc a:hover {background: none;color: #333333;}
+
+.wiki pre {font-family: Inconsolata, Monaco, Consolas, "Lucida Console", "Courier New", Courier, monospace;background-color: transparent;border: 0px;color: #000000}
+#DesignedBy { clear: both; text-align: right; margin-top: 18px;}
+#DesignedBy, #DesignedBy a, #DesignedBy a:link, #DesignedBy a:visited, #DesignedBy a:hover, #DesignedBy a:active { color: #999; }
+
+#WikiHeaderNavContainer { height: 36px; position: relative; }
+#leftcolumn .WikiActions a {display: inline;}
+
+.comment { color: gray; }
+.string {	color: teal; }
+.function { color: #00c; }
+.macro, .specialops { color: #60c; }
+.parens { color: #000; }
+.keyword { color: #c09; }
+.brackets { color: #006; }
+.curlybrackets { color: #906; }
