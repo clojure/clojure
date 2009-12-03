@@ -3484,8 +3484,13 @@
   [f] (lazy-seq (cons (f) (repeatedly f))))
 
 (defn add-classpath
-  "Adds the url (String or URL object) to the classpath per URLClassLoader.addURL"
-  [url] (. clojure.lang.RT addURL url))
+  "DEPRECATED 
+
+  Adds the url (String or URL object) to the classpath per
+  URLClassLoader.addURL"
+  [url]
+  (println "WARNING: add-classpath is deprecated")
+  (clojure.lang.RT/addURL url))
 
 
 
