@@ -19,7 +19,7 @@
 
 
 (deftest test-compiler-metadata
-  (let [m ^#'when]
+  (let [m (meta #'when)]
     (are [x y]  (= x y)
         (list? (:arglists m)) true
         (> (count (:arglists m)) 0) true
