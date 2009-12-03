@@ -6,9 +6,11 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.xml
-    (:import (org.xml.sax ContentHandler Attributes SAXException)
-             (javax.xml.parsers SAXParser SAXParserFactory)))
+(ns #^{:doc "XML reading/writing."
+       :author "Rich Hickey"}
+  clojure.xml
+  (:import (org.xml.sax ContentHandler Attributes SAXException)
+           (javax.xml.parsers SAXParser SAXParserFactory)))
 
 (def *stack*)
 (def *current*)

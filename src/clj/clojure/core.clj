@@ -6,7 +6,9 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.core)
+(ns #^{:doc "The core Clojure language."
+       :author "Rich Hickey"}
+  clojure.core)
 
 (def unquote)
 (def unquote-splicing)

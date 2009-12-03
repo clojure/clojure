@@ -6,7 +6,9 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.parallel)
+(ns #^{:doc "DEPRECATED Wrapper of the ForkJoin library (JSR-166)."
+       :author "Rich Hickey"}
+    clojure.parallel)
 (alias 'parallel 'clojure.parallel)
 
 (comment "

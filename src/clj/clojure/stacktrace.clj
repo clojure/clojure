@@ -11,9 +11,8 @@
 ;; by Stuart Sierra
 ;; January 6, 2009
 
-(ns 
-  #^{:author "Stuart Sierra",
-     :doc "Print Clojure-centric stack traces"}
+(ns #^{:doc "Print stack traces oriented towards Clojure, not Java."
+       :author "Stuart Sierra"}
   clojure.stacktrace)
 
 (defn root-cause
