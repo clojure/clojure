@@ -61,20 +61,20 @@
 (defn branch?
   "Returns true if the node at loc is a branch"
   [loc]
-    ((:zip/branch? ^loc) (node loc)))
+    ((:zip/branch? (meta loc)) (node loc)))
 
 (defn children
   "Returns a seq of the children of node at loc, which must be a branch"
   [loc]
     (if (branch? loc)
-      ((:zip/children ^loc) (node loc))
+      ((:zip/children (meta loc)) (node loc))
       (throw (Exception. "called children on a leaf node"))))
 
 (defn make-node
   "Returns a new branch node, given an existing node and new
   children. The loc is only used to supply the constructor."
   [loc node children]
-    ((:zip/make-node ^loc) node children))
+    ((:zip/make-node (meta loc)) node children))
 
 (defn path
   "Returns a seq of nodes leading to this loc"
@@ -103,7 +103,7 @@
           (with-meta [c {:l [] 
                          :pnodes (if path (conj (:pnodes path) node) [node]) 
                          :ppath path 
-                         :r cnext}] ^loc)))))
+                         :r cnext}] (meta loc))))))
 
 (defn up
   "Returns the loc of the parent of the node at this loc, or nil if at
@@ -116,7 +116,7 @@
                        [(make-node loc pnode (concat l (cons node r))) 
                         (and ppath (assoc ppath :changed? true))]
                        [pnode ppath])
-                     ^loc)))))
+                     (meta loc))))))
 
 (defn root
   "zips all the way up and returns the root node, reflecting any
@@ -134,14 +134,14 @@
   [loc]
     (let [[node {l :l  [r & rnext :as rs] :r :as path}] loc]
       (when (and path rs)
-        (with-meta [r (assoc path :l (conj l node) :r rnext)] ^loc))))
+        (with-meta [r (assoc path :l (conj l node) :r rnext)] (meta loc)))))
 
 (defn rightmost
   "Returns the loc of the rightmost sibling of the node at this loc, or self"
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (if (and path r)
-        (with-meta [(last r) (assoc path :l (apply conj l node (butlast r)) :r nil)] ^loc)
+        (with-meta [(last r) (assoc path :l (apply conj l node (butlast r)) :r nil)] (meta loc))
         loc)))
 
 (defn left
@@ -149,14 +149,14 @@
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (when (and path (seq l))
-        (with-meta [(peek l) (assoc path :l (pop l) :r (cons node r))] ^loc))))
+        (with-meta [(peek l) (assoc path :l (pop l) :r (cons node r))] (meta loc)))))
 
 (defn leftmost
   "Returns the loc of the leftmost sibling of the node at this loc, or self"
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (if (and path (seq l))
-        (with-meta [(first l) (assoc path :l [] :r (concat (rest l) [node] r))] ^loc)
+        (with-meta [(first l) (assoc path :l [] :r (concat (rest l) [node] r))] (meta loc))
         loc)))
 
 (defn insert-left
@@ -166,7 +166,7 @@
     (let [[node {l :l :as path}] loc]
       (if (nil? path)
         (throw (new Exception "Insert at top"))
-        (with-meta [node (assoc path :l (conj l item) :changed? true)] ^loc))))
+        (with-meta [node (assoc path :l (conj l item) :changed? true)] (meta loc)))))
 
 (defn insert-right
   "Inserts the item as the right sibling of the node at this loc,
@@ -175,13 +175,13 @@
     (let [[node {r :r :as path}] loc]
       (if (nil? path)
         (throw (new Exception "Insert at top"))
-        (with-meta [node (assoc path :r (cons item r) :changed? true)] ^loc))))
+        (with-meta [node (assoc path :r (cons item r) :changed? true)] (meta loc)))))
 
 (defn replace
   "Replaces the node at this loc, without moving"
   [loc node]
     (let [[_ path] loc]
-      (with-meta [node (assoc path :changed? true)] ^loc)))
+      (with-meta [node (assoc path :changed? true)] (meta loc))))
 
 (defn edit
   "Replaces the node at this loc with the value of (f node args)"
@@ -239,13 +239,13 @@
       (if (nil? path)
         (throw (new Exception "Remove at top"))
         (if (pos? (count l))
-          (loop [loc (with-meta [(peek l) (assoc path :l (pop l) :changed? true)] ^loc)]
+          (loop [loc (with-meta [(peek l) (assoc path :l (pop l) :changed? true)] (meta loc))]
             (if-let [child (and (branch? loc) (down loc))]
               (recur (rightmost child))
               loc))
           (with-meta [(make-node loc (peek pnodes) rs) 
                       (and ppath (assoc ppath :changed? true))]
-                     ^loc)))))
+                     (meta loc))))))
   
 (comment
 

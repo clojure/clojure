@@ -2943,7 +2943,7 @@
                        conds (when (and (next body) (map? (first body))) 
                                            (first body))
                        body (if conds (next body) body)
-                       conds (or conds ^params)
+                       conds (or conds (meta params))
                        pre (:pre conds)
                        post (:post conds)                       
                        body (if post
@@ -3172,7 +3172,7 @@
   "test [v] finds fn at key :test in var metadata and calls it,
   presuming failure will throw exception"
   [v]
-    (let [f (:test ^v)]
+    (let [f (:test (meta v))]
       (if f
         (do (f) :ok)
         :no-test)))
@@ -3254,11 +3254,11 @@
 
 (defn print-doc [v]
   (println "-------------------------")
-  (println (str (ns-name (:ns ^v)) "/" (:name ^v)))
-  (prn (:arglists ^v))
-  (when (:macro ^v)
+  (println (str (ns-name (:ns (meta v))) "/" (:name (meta v))))
+  (prn (:arglists (meta v)))
+  (when (:macro (meta v))
     (println "Macro"))
-  (println " " (:doc ^v)))
+  (println " " (:doc (meta v))))
 
 (defn find-doc
   "Prints documentation for any var whose documentation or name
@@ -3267,9 +3267,9 @@
     (let [re  (re-pattern re-string-or-pattern)]
       (doseq [ns (all-ns)
               v (sort-by (comp :name meta) (vals (ns-interns ns)))
-              :when (and (:doc ^v)
-                         (or (re-find (re-matcher re (:doc ^v)))
-                             (re-find (re-matcher re (str (:name ^v))))))]
+              :when (and (:doc (meta v))
+                         (or (re-find (re-matcher re (:doc (meta v))))
+                             (re-find (re-matcher re (str (:name (meta v)))))))]
                (print-doc v))))
 
 (defn special-form-anchor
@@ -3297,7 +3297,7 @@
   [nspace]
   (println "-------------------------")
   (println (str (ns-name nspace)))
-  (println " " (:doc ^nspace)))
+  (println " " (:doc (meta nspace))))
 
 (defmacro doc
   "Prints documentation for a var or special form given its name"
@@ -4307,11 +4307,11 @@
   metadata from the name symbol.  Returns the var."
   ([ns #^clojure.lang.Symbol name]
      (let [v (clojure.lang.Var/intern (the-ns ns) name)]
-       (when ^name (.setMeta v ^name))
+       (when (meta name) (.setMeta v (meta name)))
        v))
   ([ns name val]
      (let [v (clojure.lang.Var/intern (the-ns ns) name val)]
-       (when ^name (.setMeta v ^name))
+       (when (meta name) (.setMeta v (meta name)))
        v)))
 
 (defmacro while
