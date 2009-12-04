@@ -79,14 +79,14 @@
   closures, and can refer to the surrounding local scope:
   
   (str (let [f \"foo\"] 
-       (reify [] 
-         (toString [_] f))))
+       (reify Object 
+         (toString [] f))))
   == \"foo\"
 
   (seq (let [f \"foo\"] 
-       (reify [clojure.lang.Seqable] 
-         (seq [_] (seq f)))))
-  == (\\f \\o \\o)"
+       (reify clojure.lang.Seqable 
+         (seq [] (seq f)))))
+  == (\\f \\o \\o))"
 
   [& opts+specs]
   (let [[interfaces methods] (parse-opts+specs opts+specs)]
