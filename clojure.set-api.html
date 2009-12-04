@@ -73,14 +73,14 @@ namespace.
 </div>
 </div></div>
                 <div id="content-tag"><div><h1 id="overview">API for <span id="namespace-name">clojure.set</span></h1>
-by <span id="author">Unknown</span><br />
+by <span id="author">Rich Hickey</span><br />
 <br />Usage:
 <pre>
 (ns your-namespace
   (:require <span id="long-name">clojure.set</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr"></pre>
+<pre id="namespace-docstr">Set operations such as union/intersection.</pre>
 <br />
 <h2>Public Variables and Functions</h2>
 <div id="var-entry">
@@ -93,7 +93,7 @@ by <span id="author">Unknown</span><br />
        (difference s1 s2 &amp; sets)
 </pre>
   <pre id="var-docstr">Return a set that is the first set without elements of the remaining sets</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L44" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L46" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -103,7 +103,7 @@ by <span id="author">Unknown</span><br />
 </pre>
   <pre id="var-docstr">Returns a map of the distinct values of ks in the xrel mapped to a
 set of the maps in xrel with the corresponding values of ks.</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L85" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L87" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -114,7 +114,7 @@ set of the maps in xrel with the corresponding values of ks.</pre>
        (intersection s1 s2 &amp; sets)
 </pre>
   <pre id="var-docstr">Return a set that is the intersection of the input sets</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L29" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L31" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -126,7 +126,7 @@ set of the maps in xrel with the corresponding values of ks.</pre>
   <pre id="var-docstr">When passed 2 rels, returns the rel corresponding to the natural
 join. When passed an additional keymap, joins on the corresponding
 keys.</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L99" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L101" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -135,7 +135,7 @@ keys.</pre>
   <pre id="var-usage">Usage: (map-invert m)
 </pre>
   <pre id="var-docstr">Returns the map with the vals mapped to the keys.</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L95" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L97" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -144,7 +144,7 @@ keys.</pre>
   <pre id="var-usage">Usage: (project xrel ks)
 </pre>
   <pre id="var-docstr">Returns a rel of the elements of xrel with only the keys in ks</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L65" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L67" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -153,7 +153,7 @@ keys.</pre>
   <pre id="var-usage">Usage: (rename xrel kmap)
 </pre>
   <pre id="var-docstr">Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L80" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L82" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -162,7 +162,7 @@ keys.</pre>
   <pre id="var-usage">Usage: (rename-keys map kmap)
 </pre>
   <pre id="var-docstr">Returns the map with the keys in kmap renamed to the vals in kmap</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L70" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L72" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -171,7 +171,7 @@ keys.</pre>
   <pre id="var-usage">Usage: (select pred xset)
 </pre>
   <pre id="var-docstr">Returns a set of the elements for which pred is true</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L59" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L61" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -183,7 +183,7 @@ keys.</pre>
        (union s1 s2 &amp; sets)
 </pre>
   <pre id="var-docstr">Return a set that is the union of the input sets</pre>
-  <a href="http://github.com/richhickey/clojure/blob/60e805dc7bd42b7b26fc8c8925bf71079729e0e6/src/clj/clojure/set.clj#L17" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/set.clj#L19" id="var-source">Source</a>
 </div>
 
 

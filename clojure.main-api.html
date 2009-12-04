@@ -92,7 +92,7 @@ by <span id="author">Unknown</span><br />
 </pre>
   <pre id="var-docstr">Loads Clojure source from a file or resource given its path. Paths
 beginning with @ or @/ are considered relative to classpath.</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L204" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L206" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -129,7 +129,7 @@ suppresses the usual repl greeting message: "Clojure ~(clojure-version)".
 
 Paths may be absolute or relative in the filesystem or relative to
 classpath. Classpath-relative paths have prefix of @ or @/</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L302" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L304" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -179,7 +179,7 @@ are sequential keyword-value pairs. Available options and their defaults:
    - :caught, function of one argument, a throwable, called when
      read, eval, or print throws an exception or error
      default: repl-caught</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L116" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L118" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -188,7 +188,7 @@ are sequential keyword-value pairs. Available options and their defaults:
   <pre id="var-usage">Usage: (repl-caught e)
 </pre>
   <pre id="var-docstr">Default :caught hook for repl</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L111" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L113" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -198,7 +198,7 @@ are sequential keyword-value pairs. Available options and their defaults:
 </pre>
   <pre id="var-docstr">Returns CompilerExceptions in tact, but only the root cause of other
 throwables</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L103" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L105" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -207,7 +207,7 @@ throwables</pre>
   <pre id="var-usage">Usage: (repl-prompt)
 </pre>
   <pre id="var-docstr">Default :prompt hook for repl</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L39" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L41" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -225,7 +225,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF into a single
     - reads an object from the input stream, then
       - skips the next input character if it's end of line, then
       - returns the object.</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L76" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L78" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -239,7 +239,7 @@ to indicate the relative location of the next character on s. The stream
 must either be an instance of LineNumberingPushbackReader or duplicate
 its behavior of both supporting .unread and collapsing all of CR, LF, and
 CRLF to a single \newline.</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L44" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L46" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -255,7 +255,7 @@ character of lookahead is available. The stream must either be an
 instance of LineNumberingPushbackReader or duplicate its behavior of both
 supporting .unread and collapsing all of CR, LF, and CRLF to a single
 \newline.</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L58" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L60" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -267,7 +267,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
 that often need to be set!: *ns* *warn-on-reflection* *math-context*
 *print-meta* *print-length* *print-level* *compile-path*
 *command-line-args* *1 *2 *3 *e</pre>
-  <a href="http://github.com/richhickey/clojure/blob/fbacc4a5751fa5c15baa599b5a058cd81b05a247/src/clj/clojure/main.clj#L18" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/main.clj#L20" id="var-source">Source</a>
 </div>
 
 
