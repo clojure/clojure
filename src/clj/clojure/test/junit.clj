@@ -13,28 +13,28 @@
 
 ;; DOCUMENTATION
 ;;
-;; This is an extension to clojure.test that adds support for
-;; JUnit-compatible XML output.
-;;
-;; JUnit (http://junit.org/) is the most popular unit-testing library
-;; for Java.  As such, tool support for JUnit output formats is
-;; common.  By producing compatible output from tests, this tool
-;; support can be exploited.
-;;
-;; To use, wrap any calls to clojure.test/run-tests in the
-;; with-junit-output macro, like this:
-;;
-;;   (use 'clojure.test)
-;;   (use 'clojure.contrib.test.junit)
-;;
-;;   (with-junit-output
-;;     (run-tests 'my.cool.library))
-;;
-;; To write the output to a file, rebind clojure.test/*test-out* to
-;; your own PrintWriter (perhaps opened using
-;; clojure.contrib.duck-streams/writer).
 
-(ns clojure.test.junit
+(ns #^{:doc "clojure.test extension for JUnit-compatible XML output.
+
+  JUnit (http://junit.org/) is the most popular unit-testing library
+  for Java.  As such, tool support for JUnit output formats is
+  common.  By producing compatible output from tests, this tool
+  support can be exploited.
+
+  To use, wrap any calls to clojure.test/run-tests in the
+  with-junit-output macro, like this:
+
+    (use 'clojure.test)
+    (use 'clojure.contrib.test.junit)
+
+    (with-junit-output
+      (run-tests 'my.cool.library))
+
+  To write the output to a file, rebind clojure.test/*test-out* to
+  your own PrintWriter (perhaps opened using
+  clojure.contrib.duck-streams/writer)."
+  :author "Jason Sankey"}
+  clojure.test.junit
   (:require [clojure.stacktrace :as stack]
             [clojure.test :as t]))
 

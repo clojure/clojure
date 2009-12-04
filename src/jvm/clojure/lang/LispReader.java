@@ -68,7 +68,7 @@ static Var ARG_ENV = Var.create(null);
 	macros[';'] = new CommentReader();
 	macros['\''] = new WrappingReader(QUOTE);
 	macros['@'] = new WrappingReader(DEREF);//new DerefReader();
-	macros['^'] = new WrappingReader(META);
+	macros['^'] = new DeprecatedWrappingReader(META, "^");
 	macros['`'] = new SyntaxQuoteReader();
 	macros['~'] = new UnquoteReader();
 	macros['('] = new ListReader();
@@ -484,6 +484,26 @@ public static class WrappingReader extends AFn{
 	}
 
 	public Object invoke(Object reader, Object quote) throws Exception{
+		PushbackReader r = (PushbackReader) reader;
+		Object o = read(r, true, null, true);
+		return RT.list(sym, o);
+	}
+
+}
+
+public static class DeprecatedWrappingReader extends AFn{
+	final Symbol sym;
+        final String macro;
+
+	public DeprecatedWrappingReader(Symbol sym, String macro){
+		this.sym = sym;
+                this.macro = macro;
+	}
+
+	public Object invoke(Object reader, Object quote) throws Exception{
+                System.out.println("WARNING: reader macro " + macro +
+                                   " is deprecated; use " + sym.getName() +
+                                   " instead");
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
 		return RT.list(sym, o);
