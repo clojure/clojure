@@ -6119,6 +6119,8 @@ public static class NewInstanceMethod extends ObjMethod{
 	Class retClass;
 	Class[] exclasses;
 
+	static Symbol dummyThis = Symbol.intern(null,"dummy_this_dlskjsdfower");
+
 	public NewInstanceMethod(ObjExpr objx, ObjMethod parent){
 		super(objx, parent);
 	}
@@ -6148,6 +6150,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Symbol thistag,
 	                               Map overrideables) throws Exception{
 		//(methodname [this-name args*] body...)
+		//this-name might be nil
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
 		Symbol dotname = (Symbol)RT.first(form);
 		Symbol name = (Symbol) Symbol.intern(null,munge(dotname.name)).withMeta(RT.meta(dotname));
@@ -6171,7 +6174,7 @@ public static class NewInstanceMethod extends ObjMethod{
 							NEXT_LOCAL_NUM, 0));
 
 			//register 'this' as local 0
-			registerLocal(thisName,
+			registerLocal((thisName == null) ? dummyThis:thisName,
 			              thistag, null,false);
 
 			PersistentVector argLocals = PersistentVector.EMPTY;

@@ -8,22 +8,65 @@
 
 (in-ns 'clojure.core)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;; defclass/deftype ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; reify/deftype ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- parse-opts [s]
+  (loop [opts {} [k v & rs :as s] s]
+    (if (keyword? k)
+      (recur (assoc opts k v) rs)
+      [opts s])))
+
+(defn- parse-impls [specs]
+  (loop [ret {} s specs]
+    (if (seq s)
+      (recur (assoc ret (first s) (take-while seq? (next s)))
+             (drop-while seq? (next s)))
+      ret)))
+
+(defn- parse-opts+specs [opts+specs]
+  (let [[opts specs] (parse-opts opts+specs)
+        impls (parse-impls specs)
+        interfaces (-> (map #(if (var? (resolve %)) 
+                               (:on (deref (resolve %)))
+                               %)
+                            (keys impls))
+                       set
+                       (disj 'Object 'java.lang.Object)
+                       vec)
+        methods (mapcat #(map (fn [[nm [& args] & body]]
+                                `(~nm [~(:as opts) ~@args] ~@body)) %) 
+                        (vals impls))]  
+    [interfaces methods]))
+
 (defmacro reify 
   "reify is a macro with the following structure:
 
- (reify [protocols-and-interfaces+]
-   (methodName [this-name args*] body)* )
+ (reify options* specs*)
+  
+  Currently there is only one option:
+
+  :as this-name
+
+  which can be used to provide a name to refer to the target
+  object ('this' in Java/C# parlance) within the method bodies, if
+  needed.
+
+  Each spec consists of the protocol or interface name followed by zero
+  or more method bodies:
+
+  protocol-or-interface-or-Object
+  (methodName [args*] body)*
 
   Methods should be supplied for all methods of the desired
   protocol(s) and interface(s). You can also define overrides for
-  methods of Object. Note that a parameter must be supplied to
-  correspond to the target object ('this' in Java parlance). It can
-  have any name whatsoever.
+  methods of Object. Note that no parameter is supplied to correspond
+  to the target object ('this' in Java parlance). Thus methods for
+  protocols will take one fewer arguments than do the
+  protocol functions.
 
   The return type can be indicated by a type hint on the method name,
   and arg types can be indicated by a type hint on arg names. If you
-  leave out all hints reify will try to match on same name/arity
+  leave out all hints, reify will try to match on same name/arity
   method in the protocol(s)/interface(s) - this is preferred. If you
   supply any hints at all, no inference is done, so all hints (or
   default of Object) must be correct, for both arguments and return
@@ -45,12 +88,9 @@
          (seq [_] (seq f)))))
   == (\\f \\o \\o)"
 
-  [[& interfaces] & methods]
-  (let [interfaces (map #(if (var? (resolve %)) 
-                           (:on (deref (resolve %)))
-                           %)
-                        interfaces)]
-    `(reify* ~(vec interfaces) ~@methods)))
+  [& opts+specs]
+  (let [[interfaces methods] (parse-opts+specs opts+specs)]
+    `(reify* ~interfaces ~@methods)))
 
 (defn hash-combine [x y] 
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))
@@ -74,7 +114,7 @@
         fields (conj fields '__meta '__extmap)]
     (letfn 
      [(eqhash [[i m]] 
-        (if (not (or (contains? methodname-set '.equals) (contains? methodname-set '.hashCode)))
+        (if (not (or (contains? methodname-set 'equals) (contains? methodname-set 'hashCode)))
           [i
            (conj m 
                  `(hashCode [~'this] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
@@ -94,7 +134,7 @@
                  `(withMeta [~'this ~'m] (new ~tagname ~@(replace {'__meta 'm} fields))))]
           [i m]))
       (ilookup [[i m]] 
-        (if (not (methodname-set '.valAt))
+        (if (not (methodname-set 'valAt))
           [(conj i 'clojure.lang.ILookup 'clojure.lang.IKeywordLookup)
            (conj m `(valAt [~'this k#] (.valAt ~'this k# nil))
                  `(valAt [~'this k# else#] 
@@ -120,7 +160,7 @@
                   (condp identical? k# ~@(mapcat (fn [fld] [(keyword fld) fld]) base-fields)
                          (get ~'__extmap k# else#))))])
       (imap [[i m]] 
-         (if (and (interface-set clojure.lang.IPersistentMap) (not (methodname-set '.assoc)))
+         (if (and (interface-set clojure.lang.IPersistentMap) (not (methodname-set 'assoc)))
            [i
             (conj m 
                   `(count [~'this] (+ ~(count base-fields) (count ~'__extmap)))
@@ -153,7 +193,21 @@
 (defmacro deftype
   "Alpha - subject to change
   
-  (deftype name [fields*] [protocols-and-interfaces*]? methods*)
+  (deftype name [fields*]  options* specs*)
+  
+  Currently there is only one option:
+
+  :as this-name
+
+  which can be used to provide a name to refer to the target
+  object ('this' in Java/C# parlance) within the method bodies, if
+  needed.
+
+  Each spec consists of a protocol or interface name followed by zero
+  or more method bodies:
+
+  protocol-or-interface-or-Object
+  (methodName [args*] body)*
 
   Dynamically generates compiled bytecode for an anonymous class with
   the given fields, and, optionally, methods for protocols and/or
@@ -172,16 +226,22 @@
   optional. The only methods that can be supplied are those declared
   in the protocols/interfaces.  Note that method bodies are not
   closures, the local environment includes only the named fields, and
-  those fields can be accessed directy, i.e. with just foo, instead
-  of (.foo this).
+  those fields can be accessed directy.
 
   Method definitions take the form:
 
-  (methodname [this-name args*] body)
+  (methodname [args*] body)
 
   The argument and return types can be hinted on the arg and
   methodname symbols. If not supplied, they will be inferred, so type
   hints should be reserved for disambiguation.
+
+  Methods should be supplied for all methods of the desired
+  protocol(s) and interface(s). You can also define overrides for
+  methods of Object. Note that no parameter is supplied to correspond
+  to the target object ('this' in Java parlance). Thus methods for
+  protocols will take one fewer arguments than do the
+  protocol functions.
 
   In the method bodies, the (unqualified) name can be used to name the
   class (for calls to new, instance? etc).
@@ -207,12 +267,9 @@
 
   When dynamically evaluated, the class will have a generated name."
 
-  [name [& fields] & [[& interfaces] & methods]]
+  [name [& fields] & opts+specs]
   (let [gname (if *compile-files* name (gensym (str name "__")))
-        interfaces (map #(if (var? (resolve %)) 
-                           (:on (deref (resolve %)))
-                           %)
-                        interfaces)
+        [interfaces methods] (parse-opts+specs opts+specs)
         classname (symbol (str *ns* "." gname))
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
@@ -358,17 +415,17 @@
             [opts sigs]))
         sigs (reduce (fn [m s]
                        (let [mname (with-meta (first s) nil)
-                             arglists (if (vector? (second s)) (list (second s)) (second s))
-                             fx (nth s 2 nil)
-                             doc (when (string? fx) fx)
-                             mopts (apply hash-map (nthnext s (if (string? fx) 3 2)))]
+                             [arglists doc]
+                               (loop [as [] rs (rest s)]
+                                 (if (vector? (first rs))
+                                   (recur (conj as (first rs)) (next rs))
+                                   [(seq as) (first rs)]))]
                          (when (some #{0} (map count arglists))
                            (throw (IllegalArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))
-                         (assoc m (keyword mname) 
-                                (merge mopts 
-                                       {:name (vary-meta mname assoc :doc doc :arglists arglists)
-                                        :arglists arglists
-                                        :doc doc}))))
+                         (assoc m (keyword mname)  
+                                {:name (vary-meta mname assoc :doc doc :arglists arglists)
+                                 :arglists arglists
+                                 :doc doc})))
                      {} sigs)
         meths (mapcat (fn [sig]
                         (let [m (munge (:name sig))]
@@ -410,7 +467,7 @@
 
   ;method signatures
     (bar [a b] \"bar docs\")
-    (baz ([a] [a b] [a b & c]) \"baz docs\"))
+    (baz [a] [a b] [a b c] \"baz docs\"))
 
   No implementations are provided. Docs can be specified for the
   protocol overall and for each method. The above yields a set of
@@ -423,31 +480,32 @@
   extend.
 
   defprotocol will automatically generate a corresponding interface,
-  with the same name as the protocol, i.e. given a protocol
-  my.ns/Protocol, an interface my.ns.Protocol. The interface will
+  with the same name as the protocol, i.e. given a protocol:
+  my.ns/Protocol, an interface: my.ns.Protocol. The interface will
   have methods corresponding to the protocol functions, and the
   protocol will automatically work with instances of the interface.
 
-  Note that you do not need to use this interface with deftype or
+  Note that you should not use this interface with deftype or
   reify, as they support the protocol directly:
 
   (defprotocol P 
     (foo [x]) 
-    (bar-me ([x] [x y])))
+    (bar-me [x] [x y]))
 
-  (deftype Foo [a b c] [P]
-    (foo [x] a)
-    (bar-me [x] b)
-    (bar-me [x y] (+ c y)))
+  (deftype Foo [a b c] 
+   P
+    (foo [] a)
+    (bar-me [] b)
+    (bar-me [y] (+ c y)))
   
   (bar-me (Foo 1 2 3) 42)
 
   (foo 
     (let [x 42]
-      (reify [P] 
-        (foo [this] 17)
-        (bar-me [this] x)
-        (bar-me [this y] x))))"
+      (reify P 
+        (foo [] 17)
+        (bar-me [] x)
+        (bar-me [y] x))))"
 
   [name & opts+sigs]
   (emit-protocol name opts+sigs))
@@ -495,13 +553,6 @@
   [atype & proto+mmaps]
   (doseq [[proto mmap] (partition 2 proto+mmaps)]
     (-reset-methods (alter-var-root (:var proto) assoc-in [:impls atype] mmap))))
-
-(defn- parse-impls [specs]
-  (loop [ret {} s specs]
-    (if (seq s)
-      (recur (assoc ret (first s) (take-while seq? (next s)))
-             (drop-while seq? (next s)))
-      ret)))
 
 (defn- emit-impl [[p fs]]
   [p (zipmap (map #(-> % first keyword) fs)
