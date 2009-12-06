@@ -7,8 +7,8 @@ img {border: 0;}
 
 #Header {position: relative;clear: both;overflow: auto;height: 110px}
 #Logo {position: absolute;top: 0;left: 0;padding: 10px 0 0 62px;width: 138px;height: 100px}
-#Header h1 {float: left;border: 0;margin: 0;padding: 0;position: absolute;top: 50;left: 200px; height: 60px}
-#Header h1 a:link, #Header h1 a:visited, #Header h1 a:hover {color:#000000; text-decoration: none;}
+#Header h1 {float: left;background:transparent url(/static/clojure-text.gif) no-repeat 8px 36px;border: 0;margin: 0;padding: 0;text-indent:-9999px;position: absolute;top: 0;left: 200px;}
+
 #Resources {min-height: 110px;width: 234px;padding: 5px 0;float: right;border-bottom: 1px solid #abc4e2;background: #e4eaf7 url(space/resources-background.gif) repeat-y;overflow: auto;}
 #Resources ul {margin: 0;padding: 0 25px;list-style: none;}
 #ResourcesB {float: right;}
