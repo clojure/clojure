@@ -241,7 +241,16 @@ static final public Var COMPILE_STUB_SYM = Var.create(null);
 static final public Var COMPILE_STUB_CLASS = Var.create(null);
 
 
-public enum C{
+//PathNode chain
+static final public Var CLEAR_PATH = Var.create(null);
+
+//tail of PathNode chain
+static final public Var CLEAR_ROOT = Var.create(null);
+
+//LocalBinding -> Set<LocalBindingExpr>
+static final public Var CLEAR_SITES = Var.create();
+
+    public enum C{
 	STATEMENT,  //value ignored
 	EXPRESSION, //value required
 	RETURN,      //tail position relative to enclosing recur frame
@@ -1770,6 +1779,7 @@ public static class TryExpr implements Expr{
 
 			PersistentVector body = PersistentVector.EMPTY;
 			PersistentVector catches = PersistentVector.EMPTY;
+            Expr bodyExpr = null;
 			Expr finallyExpr = null;
 			boolean caught = false;
 
@@ -1787,6 +1797,10 @@ public static class TryExpr implements Expr{
 					}
 				else
 					{
+                    if(bodyExpr == null)
+                        {
+                        bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
+                        }
 					if(Util.equals(op, CATCH))
 						{
 						Class c = HostExpr.maybeClass(RT.second(f), false);
@@ -1835,7 +1849,7 @@ public static class TryExpr implements Expr{
 					}
 				}
 
-			return new TryExpr((new BodyExpr.Parser()).parse(context, RT.seq(body)), catches, finallyExpr, retLocal,
+			return new TryExpr(bodyExpr, catches, finallyExpr, retLocal,
 			                   finallyLocal);
 		}
 	}
@@ -2231,10 +2245,29 @@ public static class IfExpr implements Expr{
 				throw new Exception("Too many arguments to if");
 			else if(form.count() < 3)
 				throw new Exception("Too few arguments to if");
+            PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
+            Expr testexpr = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
+            Expr thenexpr, elseexpr;
+            try {
+                Var.pushThreadBindings(
+                        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
+                thenexpr = analyze(context, RT.third(form));
+                }
+            finally{
+                Var.popThreadBindings();
+                }
+            try {
+                Var.pushThreadBindings(
+                        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
+                elseexpr = analyze(context, RT.fourth(form));
+                }
+            finally{
+                Var.popThreadBindings();
+                }
 			return new IfExpr((Integer) LINE.deref(),
-			                  analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form)),
-			                  analyze(context, RT.third(form)),
-			                  analyze(context, RT.fourth(form)));
+			                  testexpr,
+			                  thenexpr,
+			                  elseexpr);
 		}
 	}
 }
@@ -3181,7 +3214,8 @@ static public class ObjExpr implements Expr{
 	public final Object tag;
 	//localbinding->itself
 	IPersistentMap closes = PersistentHashMap.EMPTY;
-
+    //localbndingexprs
+    IPersistentVector closesExprs = PersistentVector.EMPTY;
 	//symbols
 	IPersistentSet volatiles = PersistentHashSet.EMPTY;
 
@@ -3494,6 +3528,7 @@ static public class ObjExpr implements Expr{
 				ctorgen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), a);
 				ctorgen.putField(objtype, lb.name, OBJECT_TYPE);
 				}
+            closesExprs = closesExprs.cons(new LocalBindingExpr(lb, null));
 			}
 
 
@@ -3832,7 +3867,7 @@ static public class ObjExpr implements Expr{
 					}
 				else
 					{
-					objx.emitLocal(gen, lb);
+					objx.emitLocal(gen, lb, false);
 					gen.putField(objtype, lb.name, OBJECT_TYPE);
 					}
 				}
@@ -3853,13 +3888,14 @@ static public class ObjExpr implements Expr{
 			{
 			gen.newInstance(objtype);
 			gen.dup();
-			for(ISeq s = RT.keys(closes); s != null; s = s.next())
+			for(ISeq s = RT.seq(closesExprs); s != null; s = s.next())
 				{
-				LocalBinding lb = (LocalBinding) s.first();
+                LocalBindingExpr lbe = (LocalBindingExpr) s.first();
+				LocalBinding lb = lbe.b;
 				if(lb.getPrimitiveType() != null)
 					objx.emitUnboxedLocal(gen, lb);
 				else
-					objx.emitLocal(gen, lb);
+					objx.emitLocal(gen, lb, lbe.shouldClear);
 				}
 			gen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes()));
 			}
@@ -3895,7 +3931,7 @@ static public class ObjExpr implements Expr{
 			}
 	}
 
-	private void emitLocal(GeneratorAdapter gen, LocalBinding lb){
+	private void emitLocal(GeneratorAdapter gen, LocalBinding lb, boolean clear){
 		if(closes.containsKey(lb))
 			{
 			Class primc = lb.getPrimitiveType();
@@ -3911,11 +3947,23 @@ static public class ObjExpr implements Expr{
 		else
 			{
 			Class primc = lb.getPrimitiveType();
+//            String rep = lb.sym.name + " " + lb.toString().substring(lb.toString().lastIndexOf('@'));
 			if(lb.isArg)
 				{
 				gen.loadArg(lb.idx-1);
 				if(primc != null)
 					HostExpr.emitBoxReturn(this, gen, primc);
+                else
+                    {
+                    if(clear)
+                        {
+//                        System.out.println("clear: " + rep);
+                        gen.visitInsn(Opcodes.ACONST_NULL);
+                        gen.storeArg(lb.idx - 1);
+                        }
+//                    else
+//                        System.out.println("use: " + rep);
+                    }     
 				}
 			else
 				{
@@ -3925,7 +3973,17 @@ static public class ObjExpr implements Expr{
 					HostExpr.emitBoxReturn(this, gen, primc);
 					}
 				else
+                    {
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
+                    if(clear)
+                        {
+//                        System.out.println("clear: " + rep);
+                        gen.visitInsn(Opcodes.ACONST_NULL);
+                        gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
+                        }
+//                    else
+//                        System.out.println("use: " + rep);
+                    }
 				}
 			}
 	}
@@ -4024,6 +4082,24 @@ static public class ObjExpr implements Expr{
 
 }
 
+enum PATHTYPE {
+    PATH, BRANCH;
+}
+
+static class PathNode{
+    final PATHTYPE type;
+    final PathNode parent;
+
+    PathNode(PATHTYPE type, PathNode parent) {
+        this.type = type;
+        this.parent = parent;
+    }
+}
+
+static PathNode clearPathRoot(){
+    return (PathNode) CLEAR_ROOT.get();
+}
+    
 enum PSTATE{
 	REQ, REST, DONE
 }
@@ -4046,12 +4122,17 @@ public static class FnMethod extends ObjMethod{
 			FnMethod method = new FnMethod(objx, (ObjMethod) METHOD.deref());
 			method.line = (Integer) LINE.deref();
 			//register as the current method and set up a new env frame
+            PathNode pnode =  new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
 			Var.pushThreadBindings(
 					RT.map(
 							METHOD, method,
 							LOCAL_ENV, LOCAL_ENV.deref(),
 							LOOP_LOCALS, null,
-							NEXT_LOCAL_NUM, 0));
+							NEXT_LOCAL_NUM, 0
+                            ,CLEAR_PATH, pnode
+                            ,CLEAR_ROOT, pnode
+                            ,CLEAR_SITES, PersistentHashMap.EMPTY
+                        ));
 
 			//register 'this' as local 0
 			//registerLocal(THISFN, null, null);
@@ -4245,7 +4326,10 @@ abstract public static class ObjMethod{
 		gen.endMethod();
 	}
 
-	void emitClearLocals(GeneratorAdapter gen){
+    void emitClearLocals(GeneratorAdapter gen){
+    }
+    
+	void emitClearLocalsOld(GeneratorAdapter gen){
 		for(int i=0;i<argLocals.count();i++)
 			{
 			LocalBinding lb = (LocalBinding) argLocals.nth(i);
@@ -4286,8 +4370,10 @@ public static class LocalBinding{
 	public final int idx;
 	public final String name;
 	public final boolean isArg;
+    public final PathNode clearPathRoot;
 
-	public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg) throws Exception{
+    public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg,PathNode clearPathRoot)
+                throws Exception{
 		if(maybePrimitiveType(init) != null && tag != null)
 			throw new UnsupportedOperationException("Can't type hint a local with a primitive initializer");
 		this.idx = num;
@@ -4295,6 +4381,7 @@ public static class LocalBinding{
 		this.tag = tag;
 		this.init = init;
 		this.isArg = isArg;
+        this.clearPathRoot = clearPathRoot;
 		name = munge(sym.name);
 	}
 
@@ -4321,12 +4408,49 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 	public final LocalBinding b;
 	public final Symbol tag;
 
-	public LocalBindingExpr(LocalBinding b, Symbol tag) throws Exception{
+    public final PathNode clearPath;
+    public final PathNode clearRoot;
+    public boolean shouldClear = false;
+
+
+	public LocalBindingExpr(LocalBinding b, Symbol tag)
+            throws Exception{
 		if(b.getPrimitiveType() != null && tag != null)
 			throw new UnsupportedOperationException("Can't type hint a primitive local");
 		this.b = b;
 		this.tag = tag;
-	}
+
+        this.clearPath = (PathNode)CLEAR_PATH.get();
+        this.clearRoot = (PathNode)CLEAR_ROOT.get();
+        IPersistentCollection sites = (IPersistentCollection) RT.get(CLEAR_SITES.get(),b);
+
+        if(b.idx > 0)
+            {
+//            Object dummy;
+
+            if(sites != null)
+                {
+                for(ISeq s = sites.seq();s!=null;s = s.next())
+                    {
+                    LocalBindingExpr o = (LocalBindingExpr) s.first();
+                    PathNode common = commonPath(clearPath,o.clearPath);
+                    if(common != null && common.type == PATHTYPE.PATH)
+                        o.shouldClear = false;
+//                    else
+//                        dummy = null;
+                    }
+                }
+
+            if(clearRoot == b.clearPathRoot)
+                {
+                this.shouldClear = true;
+                sites = RT.conj(sites,this);
+                CLEAR_SITES.set(RT.assoc(CLEAR_SITES.get(), b, sites));
+                }
+//            else
+//                dummy = null;
+            }
+ 	    }
 
 	public Object eval() throws Exception{
 		throw new UnsupportedOperationException("Can't eval locals");
@@ -4342,7 +4466,7 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(context != C.STATEMENT)
-			objx.emitLocal(gen, b);
+			objx.emitLocal(gen, b, shouldClear);
 	}
 
 	public Object evalAssign(Expr val) throws Exception{
@@ -4352,7 +4476,7 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen, Expr val){
 		objx.emitAssignLocal(gen, b,val);
 		if(context != C.STATEMENT)
-			objx.emitLocal(gen, b);
+			objx.emitLocal(gen, b, false);
 	}
 
 	public boolean hasJavaClass() throws Exception{
@@ -4648,7 +4772,22 @@ public static class LetExpr implements Expr{
 					}
 				if(isLoop)
 					LOOP_LOCALS.set(loopLocals);
-				return new LetExpr(bindingInits, (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body),
+                Expr bodyExpr;
+                try {
+                    if(isLoop)
+                        {
+                        PathNode root = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
+                        Var.pushThreadBindings(
+                            RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,root),
+                                   CLEAR_ROOT, new PathNode(PATHTYPE.PATH,root)));
+                        }
+                    bodyExpr = (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body);
+                    }
+                finally{
+                    if(isLoop)
+                       Var.popThreadBindings();
+                    }
+				return new LetExpr(bindingInits, bodyExpr,
 				                   isLoop);
 				}
 			finally
@@ -4811,7 +4950,7 @@ public static class RecurExpr implements Expr{
 
 private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init, boolean isArg) throws Exception{
 	int num = getAndIncLocalNum();
-	LocalBinding b = new LocalBinding(num, sym, tag, init, isArg);
+	LocalBinding b = new LocalBinding(num, sym, tag, init, isArg, clearPathRoot());
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.deref();
 	LOCAL_ENV.set(RT.assoc(localsMap, b.sym, b));
 	ObjMethod method = (ObjMethod) METHOD.deref();
@@ -5195,6 +5334,25 @@ private static int registerVarCallsite(Var v){
 	return varCallsites.count()-1;
 }
 
+static ISeq fwdPath(PathNode p1){
+    ISeq ret = null;
+    for(;p1 != null;p1 = p1.parent)
+        ret = RT.cons(p1,ret);
+    return ret;
+}
+
+static PathNode commonPath(PathNode n1, PathNode n2){
+    ISeq xp = fwdPath(n1);
+    ISeq yp = fwdPath(n2);
+    if(RT.first(xp) != RT.first(yp))
+        return null;
+    while(RT.second(xp) != null && RT.second(xp) == RT.second(yp))
+        {
+        xp = xp.next();
+        yp = yp.next();
+        }
+    return (PathNode) RT.first(xp);
+}
 
 private static Expr analyzeSymbol(Symbol sym) throws Exception{
 	Symbol tag = tagOf(sym);
@@ -5202,7 +5360,9 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		{
 		LocalBinding b = referenceLocal(sym);
 		if(b != null)
-			return new LocalBindingExpr(b, tag);
+            {
+            return new LocalBindingExpr(b, tag);
+            }
 		}
 	else
 		{
@@ -5768,7 +5928,7 @@ static public class NewInstanceExpr extends ObjExpr{
 				{
 				Symbol sym = (Symbol) fieldSyms.nth(i);
 				LocalBinding lb = new LocalBinding(-1, sym, null,
-				                                   new MethodParamExpr(tagClass(tagOf(sym))),false);
+				                                   new MethodParamExpr(tagClass(tagOf(sym))),false,null);
 				fmap = fmap.assoc(sym, lb);
 				closesvec[i*2] = lb;
 				closesvec[i*2 + 1] = lb;
@@ -6166,12 +6326,17 @@ public static class NewInstanceMethod extends ObjMethod{
 			{
 			method.line = (Integer) LINE.deref();
 			//register as the current method and set up a new env frame
+            PathNode pnode =  new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
 			Var.pushThreadBindings(
 					RT.map(
 							METHOD, method,
 							LOCAL_ENV, LOCAL_ENV.deref(),
 							LOOP_LOCALS, null,
-							NEXT_LOCAL_NUM, 0));
+							NEXT_LOCAL_NUM, 0
+                            ,CLEAR_PATH, pnode
+                            ,CLEAR_ROOT, pnode
+                            ,CLEAR_SITES, PersistentHashMap.EMPTY
+                    ));
 
 			//register 'this' as local 0
 			registerLocal((thisName == null) ? dummyThis:thisName,
@@ -6525,6 +6690,9 @@ public static class CaseExpr extends UntypedExpr{
 			HashMap<Integer,Expr> tests = new HashMap();
 			HashMap<Integer,Expr> thens = new HashMap();
 
+            Expr testexpr = analyze(C.EXPRESSION, args.nth(0));
+            
+            PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
 			for(Object o : ((Map)args.nth(6)).entrySet())
 				{
 				Map.Entry e = (Map.Entry) o;
@@ -6532,16 +6700,35 @@ public static class CaseExpr extends UntypedExpr{
 				MapEntry me = (MapEntry) e.getValue();
 				Expr testExpr = new ConstantExpr(me.getKey());
 				tests.put(minhash, testExpr);
-				Expr thenExpr = analyze(C.EXPRESSION, me.getValue());
+                Expr thenExpr;
+                try {
+                    Var.pushThreadBindings(
+                            RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
+                    thenExpr = analyze(C.EXPRESSION, me.getValue());
+                    }
+                finally{
+                    Var.popThreadBindings();
+                    }
 				thens.put(minhash, thenExpr);
 				}
+            
+            Expr defaultExpr;
+            try {
+                Var.pushThreadBindings(
+                        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
+                defaultExpr = analyze(C.EXPRESSION, args.nth(5));
+                }
+            finally{
+                Var.popThreadBindings();
+                }
+
 			return new CaseExpr((Integer) LINE.deref(),
-			                  analyze(C.EXPRESSION, args.nth(0)),
+			                  testexpr,
 			                  (Integer)args.nth(1),
 			                  (Integer)args.nth(2),
 			                  (Integer)args.nth(3),
 			                  (Integer)args.nth(4),
-			                  analyze(C.EXPRESSION, args.nth(5)),
+			                  defaultExpr,
 			                  tests,thens,args.nth(7) != RT.F);
 
 		}
