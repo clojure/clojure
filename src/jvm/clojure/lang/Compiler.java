@@ -248,7 +248,7 @@ static final public Var CLEAR_PATH = Var.create(null);
 static final public Var CLEAR_ROOT = Var.create(null);
 
 //LocalBinding -> Set<LocalBindingExpr>
-static final public Var CLEAR_SITES = Var.create();
+static final public Var CLEAR_SITES = Var.create(null);
 
     public enum C{
 	STATEMENT,  //value ignored
