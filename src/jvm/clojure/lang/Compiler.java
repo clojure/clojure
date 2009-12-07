@@ -1798,9 +1798,7 @@ public static class TryExpr implements Expr{
 				else
 					{
                     if(bodyExpr == null)
-                        {
                         bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
-                        }
 					if(Util.equals(op, CATCH))
 						{
 						Class c = HostExpr.maybeClass(RT.second(f), false);
@@ -1848,6 +1846,8 @@ public static class TryExpr implements Expr{
 						}
 					}
 				}
+            if(bodyExpr == null)
+                bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
 
 			return new TryExpr(bodyExpr, catches, finallyExpr, retLocal,
 			                   finallyLocal);
@@ -3961,8 +3961,10 @@ static public class ObjExpr implements Expr{
                         gen.visitInsn(Opcodes.ACONST_NULL);
                         gen.storeArg(lb.idx - 1);
                         }
-//                    else
+                    else
+                        {
 //                        System.out.println("use: " + rep);
+                        }
                     }     
 				}
 			else
@@ -3981,8 +3983,10 @@ static public class ObjExpr implements Expr{
                         gen.visitInsn(Opcodes.ACONST_NULL);
                         gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), lb.idx);
                         }
-//                    else
+                    else
+                        {
 //                        System.out.println("use: " + rep);
+                        }
                     }
 				}
 			}
