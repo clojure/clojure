@@ -6598,7 +6598,7 @@ static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 }
 
 public static class CaseExpr extends UntypedExpr{
-	public final Expr expr;
+	public final LocalBindingExpr expr;
 	public final int shift, mask, low, high;
 	public final Expr defaultExpr;
 	public final HashMap<Integer,Expr> tests;
@@ -6612,7 +6612,7 @@ public static class CaseExpr extends UntypedExpr{
 	final static Method equalsMethod = Method.getMethod("boolean equals(Object, Object)");
 
 
-	public CaseExpr(int line, Expr expr, int shift, int mask, int low, int high, Expr defaultExpr,
+	public CaseExpr(int line, LocalBindingExpr expr, int shift, int mask, int low, int high, Expr defaultExpr,
 	                HashMap<Integer,Expr> tests,HashMap<Integer,Expr> thens, boolean allKeywords){
 		this.expr = expr;
 		this.shift = shift;
@@ -6694,7 +6694,8 @@ public static class CaseExpr extends UntypedExpr{
 			HashMap<Integer,Expr> tests = new HashMap();
 			HashMap<Integer,Expr> thens = new HashMap();
 
-            Expr testexpr = analyze(C.EXPRESSION, args.nth(0));
+            LocalBindingExpr testexpr = (LocalBindingExpr) analyze(C.EXPRESSION, args.nth(0));
+			testexpr.shouldClear = false;
             
             PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
 			for(Object o : ((Map)args.nth(6)).entrySet())
