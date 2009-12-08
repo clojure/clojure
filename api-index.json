@@ -43,7 +43,7 @@
    "doc":
    "Macros that expand to repeated copies of a template expression."},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib/clojure.test-api.html",
    "name":"clojure.test",
@@ -4469,7 +4469,7 @@
    "Repeatedly copies expr (in a do block) for each group of arguments\nin values.  values are automatically partitioned by the number of\narguments in argv, an argument vector as in defn.\n\nExample: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))\n         ;=> (do (+ 4 2) (+ 5 3))",
    "name":"do-template"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L239",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L239",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/*load-tests*",
    "namespace":"clojure.test",
@@ -4477,7 +4477,7 @@
    "True by default.  If set to false, no test functions will\nbe created by deftest, set-test, or with-test.  Use this to omit\ntests when compiling or loading production code.",
    "name":"*load-tests*"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L245",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L245",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/*stack-trace-depth*",
    "namespace":"clojure.test",
@@ -4485,7 +4485,7 @@
    "The maximum depth of stack traces to print when an Exception\nis thrown during a test.  Defaults to nil, which means print the \ncomplete stack trace.",
    "name":"*stack-trace-depth*"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L518",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L518",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/are",
    "namespace":"clojure.test",
@@ -4494,7 +4494,7 @@
    "Checks multiple assertions with a template expression.\nSee clojure.template/do-template for an explanation of\ntemplates.\n\nExample: (are [x y] (= x y)  \n              2 (+ 1 1)\n              4 (* 2 2))\nExpands to: \n         (do (is (= 2 (+ 1 1)))\n             (is (= 4 (* 2 2))))\n\nNote: This breaks some reporting features, such as line numbers.",
    "name":"are"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L404",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L404",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/assert-any",
    "namespace":"clojure.test",
@@ -4503,7 +4503,7 @@
    "Returns generic assertion code for any test, including macros, Java\nmethod calls, or isolated symbols.",
    "name":"assert-any"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L386",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L386",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/assert-predicate",
    "namespace":"clojure.test",
@@ -4512,7 +4512,7 @@
    "Returns generic assertion code for any functional predicate.  The\n'expected' argument to 'report' will contains the original form, the\n'actual' argument will contain the form with all its sub-forms\nevaluated.  If the predicate returns false, the 'actual' form will\nbe wrapped in (not...).",
    "name":"assert-predicate"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L618",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L618",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/compose-fixtures",
    "namespace":"clojure.test",
@@ -4521,7 +4521,7 @@
    "Composes two fixture functions, creating a new fixture function\nthat combines their behavior.",
    "name":"compose-fixtures"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L557",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L557",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/deftest",
    "namespace":"clojure.test",
@@ -4530,7 +4530,7 @@
    "Defines a test function with no arguments.  Test functions may call\nother tests, so tests may be composed.  If you compose tests, you\nshould also define a function named test-ns-hook; run-tests will\ncall test-ns-hook instead of testing all vars.\n\nNote: Actually, the test body goes in the :test metadata on the var,\nand the real function (the value of the var) calls test-var on\nitself.\n\nWhen *load-tests* is false, deftest is ignored.",
    "name":"deftest"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L573",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L573",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/deftest-",
    "namespace":"clojure.test",
@@ -4538,7 +4538,7 @@
    "doc":"Like deftest but creates a private var.",
    "name":"deftest-"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L275",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L275",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/file-position",
    "namespace":"clojure.test",
@@ -4547,7 +4547,7 @@
    "Returns a vector [filename line-number] for the nth call up the\nstack.",
    "name":"file-position"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L375",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L375",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/function?",
    "namespace":"clojure.test",
@@ -4556,7 +4556,7 @@
    "Returns true if argument is a function or a symbol that resolves to\na function (not a macro).",
    "name":"function?"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L368",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L368",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/get-possibly-unbound-var",
    "namespace":"clojure.test",
@@ -4564,7 +4564,7 @@
    "doc":"Like var-get but returns nil if the var is unbound.",
    "name":"get-possibly-unbound-var"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L300",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L300",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/inc-report-counter",
    "namespace":"clojure.test",
@@ -4573,7 +4573,7 @@
    "Increments the named counter in *report-counters*, a ref to a map.\nDoes nothing if *report-counters* is nil.",
    "name":"inc-report-counter"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L501",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L501",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/is",
    "namespace":"clojure.test",
@@ -4582,7 +4582,7 @@
    "Generic assertion macro.  'form' is any predicate test.\n'msg' is an optional message to attach to the assertion.\n\nExample: (is (= 4 (+ 2 2)) \"Two plus two should be 4\")\n\nSpecial forms:\n\n(is (thrown? c body)) checks that an instance of c is thrown from\nbody, fails if not; then returns the thing thrown.\n\n(is (thrown-with-msg? c re body)) checks that an instance of c is\nthrown AND that the message on the exception matches (with\nre-matches) the regular expression re.",
    "name":"is"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L624",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L624",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/join-fixtures",
    "namespace":"clojure.test",
@@ -4591,7 +4591,7 @@
    "Composes a collection of fixtures, in order.  Always returns a valid\nfixture function, even if the collection is empty.",
    "name":"join-fixtures"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L312",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L312",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/report",
    "namespace":"clojure.test",
@@ -4599,7 +4599,7 @@
    "Generic reporting function, may be overridden to plug in\ndifferent report formats (e.g., TAP, JUnit).  Assertions such as\n'is' call 'report' to indicate results.  The argument given to\n'report' will be a map with a :type key.  See the documentation at\nthe top of test_is.clj for more information on the types of\narguments for 'report'.",
    "name":"report"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L692",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L695",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/run-all-tests",
    "namespace":"clojure.test",
@@ -4608,16 +4608,16 @@
    "Runs all tests in all namespaces; prints results.\nOptional argument is a regular expression; only namespaces with\nnames matching the regular expression (with re-matches) will be\ntested.",
    "name":"run-all-tests"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L684",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L684",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/run-tests",
    "namespace":"clojure.test",
    "arglists":[[], ["&", "namespaces"]],
    "doc":
-   "Runs all tests in the given namespaces; prints results.\nDefaults to current namespace if none given.",
+   "Runs all tests in the given namespaces; prints results.\nDefaults to current namespace if none given.  Returns a map\nsummarizing test results.",
    "name":"run-tests"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L581",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L581",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/set-test",
    "namespace":"clojure.test",
@@ -4626,7 +4626,16 @@
    "Experimental.\nSets :test metadata of the named var to a fn with the given body.\nThe var must already exist.  Does not modify the value of the var.\n\nWhen *load-tests* is false, set-test is ignored.",
    "name":"set-test"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L649",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L703",
+   "wiki-url":
+   "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/successful?",
+   "namespace":"clojure.test",
+   "arglists":[["summary"]],
+   "doc":
+   "Returns true if the given test summary indicates all tests\nwere successful, false otherwise.",
+   "name":"successful?"},
+  {"source-url":
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L649",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/test-all-vars",
    "namespace":"clojure.test",
@@ -4635,7 +4644,7 @@
    "Calls test-var on every var interned in the namespace, with fixtures.",
    "name":"test-all-vars"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L660",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L660",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/test-ns",
    "namespace":"clojure.test",
@@ -4644,7 +4653,7 @@
    "If the namespace defines a function named test-ns-hook, calls that.\nOtherwise, calls test-all-vars on the namespace.  'ns' is a\nnamespace object or a symbol.\n\nInternally binds *report-counters* to a ref initialized to\n*inital-report-counters*.  Returns the final, dereferenced state of\n*report-counters*.",
    "name":"test-ns"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L635",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L635",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/test-var",
    "namespace":"clojure.test",
@@ -4653,7 +4662,7 @@
    "If v has a function in its :test metadata, calls that function,\nwith *testing-vars* bound to (conj *testing-vars* v).",
    "name":"test-var"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L534",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L534",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/testing",
    "namespace":"clojure.test",
@@ -4662,7 +4671,7 @@
    "Adds a new string to the list of testing contexts.  May be nested,\nbut must occur inside a test function (deftest).",
    "name":"testing"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L294",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L294",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/testing-contexts-str",
    "namespace":"clojure.test",
@@ -4671,7 +4680,7 @@
    "Returns a string representation of the current test context. Joins\nstrings in *testing-contexts* with spaces.",
    "name":"testing-contexts-str"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L282",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L282",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/testing-vars-str",
    "namespace":"clojure.test",
@@ -4680,7 +4689,7 @@
    "Returns a string representation of the current test.  Renders names\nin *testing-vars* as a list, then the source file and line of\ncurrent assertion.",
    "name":"testing-vars-str"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L486",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L486",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/try-expr",
    "namespace":"clojure.test",
@@ -4689,7 +4698,7 @@
    "Used by the 'is' macro to catch unexpected exceptions.\nYou don't call this.",
    "name":"try-expr"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L601",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L601",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/use-fixtures",
    "namespace":"clojure.test",
@@ -4697,7 +4706,7 @@
    "Wrap test runs in a fixture function to perform setup and\nteardown. Using a fixture-type of :each wraps every test\nindividually, while:once wraps the whole run in a single function.",
    "name":"use-fixtures"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L545",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L545",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/with-test",
    "namespace":"clojure.test",
@@ -4706,7 +4715,7 @@
    "Takes any definition form (that returns a Var) as the first argument.\nRemaining body goes in the :test metadata function for that Var.\n\nWhen *load-tests* is false, only evaluates the definition, ignoring\nthe tests.",
    "name":"with-test"},
   {"source-url":
-   "http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/test.clj#L265",
+   "http://github.com/richhickey/clojure/blob/607389029cfec50f32b73c00a6f66d0a1dbcda23/src/clj/clojure/test.clj#L265",
    "wiki-url":
    "http://richhickey.github.com/clojure-contrib//clojure.test-api.html#clojure.test/with-test-out",
    "namespace":"clojure.test",
