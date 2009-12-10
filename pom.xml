@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http//www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.clojure</groupId>
   <artifactId>clojure-contrib</artifactId>
@@ -22,7 +23,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.1.0-alpha-SNAPSHOT</version>
+      <version>1.1.0-master-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -30,8 +31,8 @@
 
   <repositories>
     <repository>
-      <id>tapestry-snapshots</id>
-      <url>http://tapestry.formos.com/maven-snapshot-repository/</url>
+      <id>clojure-snapshots</id>
+      <url>http://build.clojure.org/snapshots</url>
     </repository>
   </repositories>
 
