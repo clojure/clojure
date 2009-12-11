@@ -94,8 +94,8 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
       ~@code
       (catch Condition c#
         (binding [*condition-object* c#
-                  *condition* ^c#
-                  *selector* (~dispatch-fn ^c#)]
+                  *condition* (meta c#)
+                  *selector* (~dispatch-fn (meta c#))]
           (cond
            ~@(mapcat
               (fn [[_ key & body]]
@@ -117,7 +117,7 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
 
 (defmethod stack-trace-info Condition
   [condition]
-  (stack-trace-info ^condition))
+  (stack-trace-info (meta condition)))
 
 (defmethod stack-trace-info Throwable
   [throwable]

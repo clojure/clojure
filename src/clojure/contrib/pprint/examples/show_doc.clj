@@ -37,7 +37,7 @@
        #(vector (ns-name %) 
                 (map
                  (fn [f] 
-                   (let [f-meta ^(find-var (symbol (str (ns-name %)) (str f)))] 
+                   (let [f-meta (meta (find-var (symbol (str (ns-name %)) (str f))))] 
                      [f (:arglists f-meta) (:doc f-meta)]))
                  (filter 
                   (fn [a] (instance? clojure.lang.IFn a)) 

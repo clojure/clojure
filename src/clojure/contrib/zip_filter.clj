@@ -21,10 +21,10 @@ general, and xml trees in particular.
 ; This uses the negative form (no-auto) so that the result from any
 ; naive function, including user functions, defaults to "auto".
 (defn auto
-  [v x] (with-meta x ((if v dissoc assoc) ^x :zip-filter/no-auto? true)))
+  [v x] (with-meta x ((if v dissoc assoc) (meta x) :zip-filter/no-auto? true)))
 
 (defn auto?
-  [x] (not (:zip-filter/no-auto? ^x)))
+  [x] (not (:zip-filter/no-auto? (meta x))))
 
 (defn right-locs
   "Returns a lazy sequence of locations to the right of loc, starting with loc."
@@ -74,7 +74,7 @@ general, and xml trees in particular.
   #^{:private true}
   [pred loc]
       (let [rtn (pred loc)]
-        (cond (and (map? ^rtn) (:zip-filter/is-node? ^rtn)) (list rtn)
+        (cond (and (map? (meta rtn)) (:zip-filter/is-node? (meta rtn))) (list rtn)
               (= rtn true)                (list loc)
               (= rtn false)               nil
               (nil? rtn)                  nil
@@ -86,7 +86,7 @@ general, and xml trees in particular.
   [loc preds mkpred]
     (reduce (fn [prevseq expr]
                 (mapcat #(fixup-apply (or (mkpred expr) expr) %) prevseq))
-            (list (with-meta loc (assoc ^loc :zip-filter/is-node? true)))
+            (list (with-meta loc (assoc (meta loc) :zip-filter/is-node? true)))
             preds))
 
 ; see clojure.contrib.zip-filter.xml for examples

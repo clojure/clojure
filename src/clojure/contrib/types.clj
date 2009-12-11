@@ -49,7 +49,7 @@
 (defmethod constructor-form :default
   [o] nil)
 (defmethod constructor-form ::type
-  [o] (cons (::constructor ^o) (deconstruct o)))
+  [o] (cons (::constructor (meta o)) (deconstruct o)))
 
 (defmacro deftype
   "Define a data type by a type tag (a namespace-qualified keyword)

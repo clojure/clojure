@@ -54,7 +54,7 @@ or API adjustments."}
 (defn- qualify-sym [sym]
   (let [v (resolve sym)]
     (assert v)
-    (apply symbol (map #(str (% ^v)) [:ns :name]))))
+    (apply symbol (map #(str (% (meta v))) [:ns :name]))))
 
 (defmacro deferror
   "Define a new error type"
@@ -110,7 +110,7 @@ or API adjustments."}
 (defmacro raise
   "Raise an error of the type err-name, constructed with the given args"
   [err-name & args]
-  `(raise* (~err-name ~(zipmap (::args ^(resolve err-name))
+  `(raise* (~err-name ~(zipmap (::args (meta (resolve err-name)))
                                args))))
 
 ; It'd be nice to assert that these are used in a tail position of a handler

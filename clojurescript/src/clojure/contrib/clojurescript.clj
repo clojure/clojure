@@ -147,7 +147,7 @@
       n)))
 
 (defn- var-parts [e]
-  (let [{:keys [name ns]} ^(.var e)]
+  (let [{:keys [name ns]} (meta (.var e))]
     [(Compiler/munge (str (.getName ns))) (var-munge name)]))
 
 (defmethod tojs clojure.lang.Compiler$UnresolvedVarExpr [e ctx]
@@ -318,7 +318,7 @@
           (eval f)
           nil)
         (when-not (or (and (instance? Compiler$DefExpr mainexpr)
-                          (skip-def (:name ^(.var mainexpr))))
+                          (skip-def (:name (meta (.var mainexpr)))))
                       (and (instance? Compiler$InstanceMethodExpr mainexpr)
                           (or (= "setMacro" (.methodName mainexpr))
                               (and (= "addMethod" (.methodName mainexpr))

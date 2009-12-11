@@ -107,7 +107,7 @@
     (when-let [filepath (:file (meta v))]
       (when-let [strm (.getResourceAsStream (RT/baseLoader) filepath)]
         (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
-          (dotimes [_ (dec (:line ^v))] (.readLine rdr))
+          (dotimes [_ (dec (:line (meta v)))] (.readLine rdr))
           (let [text (StringBuilder.)
                 pbr (proxy [PushbackReader] [rdr]
                       (read [] (let [i (proxy-super read)]
