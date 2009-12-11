@@ -13,7 +13,6 @@
   (:use clojure.test)
   (:require [clojure.set :as set]))
 
-
 (deftest test-union
   (are [x y] (= x y)
       (set/union) #{}
@@ -63,7 +62,6 @@
           (hash-set 1 2 3 4 5 6)  ; also equals (sorted-set 1 2 3 4 5 6)
 ))
 
-
 (deftest test-intersection
   ; at least one argument is needed
   (is (thrown? IllegalArgumentException (set/intersection)))
@@ -107,14 +105,78 @@
         (hash-set 1 2) (hash-set 2 3)
         (sorted-set 1 2) (sorted-set 2 3)) #{2} ))
 
+(deftest test-difference
+  (are [x y] (= x y)
+      ; identity
+      (set/difference #{}) #{}
+      (set/difference #{1}) #{1}
+      (set/difference #{1 2 3}) #{1 2 3}
 
-; difference
-;
-; select
-; project
-; rename-keys
-; rename
-; index
-; map-invert
-; join
+      ; 2 sets
+      (set/difference #{1 2} #{1 2}) #{}
+      (set/difference #{1 2} #{3 4}) #{1 2}
+      (set/difference #{1 2} #{1}) #{2}
+      (set/difference #{1 2} #{2}) #{1}
+      (set/difference #{1 2 4} #{2 3 4 5}) #{1}
 
+       ; 3 sets
+      (set/difference #{1 2} #{2 3} #{5 2}) #{1}
+      (set/difference #{1 2 3} #{1 3 4} #{1 3}) #{2}
+      (set/difference #{1 2 3} #{3 4 5} #{8 2 3}) #{1} ))
+
+(deftest test-select
+  (are [x y] (= x y)
+    (set/select integer? #{}) #{}
+    (set/select integer? #{1 2}) #{1 2}
+    (set/select integer? #{1 2 :a :b :c}) #{1 2}
+    (set/select integer? #{:a :b :c}) #{}) )
+
+(def compositions
+  #{{:name "Art of the Fugue" :composer "J. S. Bach"}
+    {:name "Musical Offering" :composer "J. S. Bach"}
+    {:name "Requiem" :composer "Giuseppe Verdi"}
+    {:name "Requiem" :composer "W. A. Mozart"}})
+
+(deftest test-project
+  (are [x y] (= x y)
+    (set/project compositions [:name]) #{{:name "Art of the Fugue"}
+                                         {:name "Requiem"}
+                                         {:name "Musical Offering"}}
+    (set/project compositions [:composer]) #{{:composer "W. A. Mozart"}
+                                             {:composer "Giuseppe Verdi"}
+                                             {:composer "J. S. Bach"}}
+    (set/project compositions [:year]) #{{}}
+    (set/project #{{}} [:name]) #{{}} ))
+
+(deftest test-rename
+  (are [x y] (= x y)
+    (set/rename compositions {:name :title}) #{{:title "Art of the Fugue" :composer "J. S. Bach"}
+                                               {:title "Musical Offering" :composer "J. S. Bach"}
+                                               {:title "Requiem" :composer "Giuseppe Verdi"}
+                                               {:title "Requiem" :composer "W. A. Mozart"}}
+    (set/rename compositions {:year :decade}) #{{:name "Art of the Fugue" :composer "J. S. Bach" :decade nil}
+                                                {:name "Musical Offering" :composer "J. S. Bach" :decade nil}
+                                                {:name "Requiem" :composer "Giuseppe Verdi" :decade nil}
+                                                {:name "Requiem" :composer "W. A. Mozart" :decade nil}}
+    (set/rename #{{}} {:year :decade}) #{{:decade nil}}))
+
+(deftest test-rename-keys
+  (are [x y] (= x y)
+    (set/rename-keys {:a "one" :b "two"} {:a :z}) {:z "one" :b "two"}
+    ))
+
+(deftest test-index
+  (are [x y] (= x y)
+    (set/index  #{{:c 2} {:b 1} {:a 1 :b 2}} [:b]) {{:b 2} #{{:a 1 :b 2}}, {:b 1} #{{:b 1}} {} #{{:c 2}}}
+  ))
+
+(deftest test-join
+  (are [x y] (= x y)
+    (set/join compositions compositions) compositions
+    (set/join compositions #{{:name "Art of the Fugue" :genre "Classical"}})
+                           #{{:name "Art of the Fugue" :composer "J. S. Bach" :genre "Classical"}}
+    ))
+
+(deftest test-map-invert
+  (are [x y] (= x y)
+    (set/map-invert {:a "one" :b "two"}) {"one" :a "two" :b}))
