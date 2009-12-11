@@ -251,7 +251,9 @@ to a pretty printing writer to which it should do its printing.
 For example functions, see *simple-dispatch* and *code-dispatch* in 
 clojure.contrib.pprint.dispatch.clj."
   [function]
-  (def *print-pprint-dispatch* function)
+  (let [old-meta (meta #'*print-pprint-dispatch*)]
+    (alter-var-root #'*print-pprint-dispatch* (constantly function))
+    (alter-meta! #'*print-pprint-dispatch* (constantly old-meta)))
   nil)
 
 (defmacro with-pprint-dispatch 

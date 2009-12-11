@@ -158,7 +158,6 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 ;;; Common handling code for ~A and ~S
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(declare *print-base* *print-radix*)
 (declare opt-base-str)
 
 (def #^{:private true}
