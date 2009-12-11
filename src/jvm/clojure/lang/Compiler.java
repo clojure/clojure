@@ -3955,7 +3955,7 @@ static public class ObjExpr implements Expr{
 					HostExpr.emitBoxReturn(this, gen, primc);
                 else
                     {
-                    if(clear)
+                    if(clear && lb.canBeCleared)
                         {
 //                        System.out.println("clear: " + rep);
                         gen.visitInsn(Opcodes.ACONST_NULL);
@@ -3977,7 +3977,7 @@ static public class ObjExpr implements Expr{
 				else
                     {
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
-                    if(clear)
+                    if(clear && lb.canBeCleared)
                         {
 //                        System.out.println("clear: " + rep);
                         gen.visitInsn(Opcodes.ACONST_NULL);
@@ -4375,6 +4375,7 @@ public static class LocalBinding{
 	public final String name;
 	public final boolean isArg;
     public final PathNode clearPathRoot;
+	public boolean canBeCleared = true;
 
     public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg,PathNode clearPathRoot)
                 throws Exception{
@@ -4636,6 +4637,7 @@ public static class LetFnExpr implements Expr{
 					if(sym.getNamespace() != null)
 						throw new Exception("Can't let qualified name: " + sym);
 					LocalBinding lb = registerLocal(sym, tagOf(sym), null,false);
+					lb.canBeCleared = false;
 					lbs = lbs.cons(lb);
 					}
 				PersistentVector bindingInits = PersistentVector.EMPTY;
