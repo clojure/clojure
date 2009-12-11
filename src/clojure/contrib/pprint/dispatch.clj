@@ -1,4 +1,4 @@
-;;; dispatch.clj -- part of the pretty printer for Clojure
+;; dispatch.clj -- part of the pretty printer for Clojure
 
 ;; by Tom Faulhaber
 ;; April 3, 2009
@@ -42,8 +42,9 @@
 ;;; :keyword, \char, or ""). The notable exception is #() which is special-cased.
 
 (def reader-macros
-     {'quote "'", 'clojure.core/meta "^", 'clojure.core/deref "@", 
+     {'quote "'", 'clojure.core/deref "@", 
       'var "#'", 'clojure.core/unquote "~"})
+
 (defn pprint-reader-macro [alis]
   (let [#^String macro-char (reader-macros (first alis))]
     (when (and macro-char (= 2 (count alis)))

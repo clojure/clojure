@@ -116,11 +116,6 @@ Usage: *hello*
   "(map #(first %) [[1 2 3] [4 5 6] [7]])"
 
   (with-pprint-dispatch *code-dispatch*
-    (write (read-string "^#'first")
-	   :stream nil))
-  "^#'first"
-
-  (with-pprint-dispatch *code-dispatch*
     (write (read-string "@@(ref (ref 1))")
 	   :stream nil))
   "@@(ref (ref 1))"
