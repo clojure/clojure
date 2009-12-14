@@ -52,6 +52,10 @@
   "Creates a connection to a database. db-spec is a map containing values
   for one of the following parameter sets:
 
+  Factory:
+    :factory     (required) a function of one argument, a map of params
+    (others)     (optional) passed to the factory function in a map
+
   DriverManager:
     :classname   (required) a String, the jdbc driver class name
     :subprotocol (required) a String, the jdbc subprotocol
@@ -66,28 +70,31 @@
   JNDI:
     :name        (required) a String or javax.naming.Name
     :environment (optional) a java.util.Map"
-  [{:keys [classname subprotocol subname
+  [{:keys [factory
+           classname subprotocol subname
            datasource username password
            name environment]
     :as db-spec}]
   (cond
-    (and classname subprotocol subname)
-    (let [url (format "jdbc:%s:%s" subprotocol subname)
-          etc (dissoc db-spec :classname :subprotocol :subname)]
-      (RT/loadClassForName classname)
-      (DriverManager/getConnection url (as-properties etc)))
-    (and datasource username password)
-    (.getConnection datasource username password)
-    datasource
-    (.getConnection datasource)
-    name
-    (let [env (and environment (Hashtable. environment))
-          context (InitialContext. env)
-          datasource (.lookup context name)]
-      (.getConnection datasource))
-    :else
-    (throw-arg "db-spec %s is missing a required parameter" db-spec)))
-     
+   factory
+   (factory (dissoc db-spec :factory))
+   (and classname subprotocol subname)
+   (let [url (format "jdbc:%s:%s" subprotocol subname)
+         etc (dissoc db-spec :classname :subprotocol :subname)]
+     (RT/loadClassForName classname)
+     (DriverManager/getConnection url (as-properties etc)))
+   (and datasource username password)
+   (.getConnection datasource username password)
+   datasource
+   (.getConnection datasource)
+   name
+   (let [env (and environment (Hashtable. environment))
+         context (InitialContext. env)
+         datasource (.lookup context name)]
+     (.getConnection datasource))
+   :else
+   (throw-arg "db-spec %s is missing a required parameter" db-spec)))
+
 (defn with-connection*
   "Evaluates func in the context of a new connection to a database then
   closes the connection."

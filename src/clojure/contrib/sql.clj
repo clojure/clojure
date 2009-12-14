@@ -15,12 +15,12 @@
 ;;  scgilardi (gmail)
 ;;  Created 2 April 2008
 
-(ns 
+(ns
   #^{:author "Stephen C. Gilardi",
      :doc "A Clojure interface to sql databases via jdbc
 
            See clojure.contrib.sql.test for an example"
-     :see-also [["http://code.google.com/p/clojure-contrib/source/browse/trunk/src/clojure/contrib/sql/test.clj" 
+     :see-also [["http://code.google.com/p/clojure-contrib/source/browse/trunk/src/clojure/contrib/sql/test.clj"
                  "Example code"]]}
   clojure.contrib.sql
   (:use (clojure.contrib
@@ -35,6 +35,10 @@
   "Evaluates body in the context of a new connection to a database then
   closes the connection. db-spec is a map containing values for one of the
   following parameter sets:
+
+  Factory:
+    :factory     (required) a function of one argument, a map of params
+    (others)     (optional) passed to the factory function in a map
 
   DriverManager:
     :classname   (required) a String, the jdbc driver class name
