@@ -2067,9 +2067,8 @@
   "Returns the lines of text from rdr as a lazy sequence of strings.
   rdr must implement java.io.BufferedReader."
   [#^java.io.BufferedReader rdr]
-  (let [line  (. rdr (readLine))]
-    (when line
-      (lazy-seq (cons line (line-seq rdr))))))
+  (when-let [line (.readLine rdr)]
+    (cons line (lazy-seq (line-seq rdr)))))
 
 (defn comparator
   "Returns an implementation of java.util.Comparator based upon pred."
@@ -3318,7 +3317,7 @@
   (let [m (re-matcher re s)]
     ((fn step []
        (when (. m (find))
-         (lazy-seq (cons (re-groups m) (step))))))))
+         (cons (re-groups m) (lazy-seq (step))))))))
 
 (defn re-matches
   "Returns the match, if any, of string to pattern, using
@@ -3958,7 +3957,7 @@
           row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
           rows (fn thisfn []
                  (when (. rs (next))
-                   (lazy-seq (cons (apply struct row-struct (row-values)) (thisfn)))))]
+                   (cons (apply struct row-struct (row-values)) (lazy-seq (thisfn)))))]
       (rows)))
 
 (defn iterator-seq
