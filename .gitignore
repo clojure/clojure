@@ -4,3 +4,5 @@ pom.xml
 clojure.iws
 clojure.ipr
 nbproject/private/
+*.zip
+dist
