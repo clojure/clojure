@@ -291,6 +291,9 @@
   "Called by the clojure.lang.Repl.main stub to run a repl with args
   specified the old way"
   [args]
+  (println "WARNING: clojure.lang.Repl is deprecated.
+Instead, use clojure.main like this:
+java -cp clojure.jar clojure.main -i init.clj -r args...")
   (let [[inits [sep & args]] (split-with (complement #{"--"}) args)]
     (repl-opt (concat ["-r"] args) (map vector (repeat "-i") inits))))
 
@@ -298,6 +301,9 @@
   "Called by the clojure.lang.Script.main stub to run a script with args
   specified the old way"
   [args]
+  (println "WARNING: clojure.lang.Script is deprecated.
+Instead, use clojure.main like this:
+java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   (let [[inits [sep & args]] (split-with (complement #{"--"}) args)]
     (null-opt args (map vector (repeat "-i") inits))))
 
