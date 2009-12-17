@@ -1366,7 +1366,7 @@
   [] (clojure.lang.Agent/releasePendingSends))
 
 (defn add-watch
-  "Experimental.
+  "Alpha - subject to change.
   Adds a watch function to an agent/atom/var/ref reference. The watch
   fn must be a fn of 4 args: a key, the reference, its old-state, its
   new-state. Whenever the reference's state might have been changed,
@@ -1383,32 +1383,11 @@
   [#^clojure.lang.IRef reference key fn] (.addWatch reference key fn))
 
 (defn remove-watch
-  "Experimental.
+  "Alpha - subject to change.
   Removes a watch (set by add-watch) from a reference"
   [#^clojure.lang.IRef reference key]
   (.removeWatch reference key))
 
-(defn add-watcher
-  "Experimental.
-  Adds a watcher to an agent/atom/var/ref reference. The watcher must
-  be an Agent, and the action a function of the agent's state and one
-  additional arg, the reference. Whenever the reference's state
-  changes, any registered watchers will have their actions
-  sent. send-type must be one of :send or :send-off. The actions will
-  be sent after the reference's state is changed. Var watchers are
-  triggered only by root binding changes, not thread-local set!s"
-  [#^clojure.lang.IRef reference send-type watcher-agent action-fn]
-  (add-watch reference watcher-agent
-    (fn [watcher-agent reference old-state new-state]
-      (when-not (identical? old-state new-state)
-        ((if (= send-type :send-off) send-off send)
-         watcher-agent action-fn reference)))))
-
-(defn remove-watcher
-  "Experimental.
-  Removes a watcher (set by add-watcher) from a reference"
-  [reference watcher-agent]
-  (remove-watch reference watcher-agent))
 
 (defn agent-errors
   "Returns a sequence of the exceptions thrown during asynchronous
@@ -4592,7 +4571,7 @@
          "-SNAPSHOT")))
 
 (defn promise
-  "Experimental.
+  "Alpha - subject to change.
   Returns a promise object that can be read with deref/@, and set,
   once only, with deliver. Calls to deref/@ prior to delivery will
   block. All subsequent derefs will return the same delivered value
@@ -4611,32 +4590,36 @@
             (throw (IllegalStateException. "Multiple deliver calls to a promise"))))))))
 
 (defn deliver
-  "Experimental.
+  "Alpha - subject to change.
   Delivers the supplied value to the promise, releasing any pending
   derefs. A subsequent call to deliver on a promise will throw an exception."  
   [promise val] (promise val))
 
 ;;;;;;;;;;;;;;;;;;;;; editable collections ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn transient 
-  "Returns a new, transient version of the collection, in constant time."
+  "Alpha - subject to change.
+  Returns a new, transient version of the collection, in constant time."
   [#^clojure.lang.IEditableCollection coll] 
   (.asTransient coll))
 
 (defn persistent! 
-  "Returns a new, persistent version of the transient collection, in
+  "Alpha - subject to change.
+  Returns a new, persistent version of the transient collection, in
   constant time. The transient collection cannot be used after this
   call, any such use will throw an exception."
   [#^clojure.lang.ITransientCollection coll]
   (.persistent coll))
 
 (defn conj!
-  "Adds x to the transient collection, and return coll. The 'addition'
+  "Alpha - subject to change.
+  Adds x to the transient collection, and return coll. The 'addition'
   may happen at different 'places' depending on the concrete type."
   [#^clojure.lang.ITransientCollection coll x]
   (.conj coll x))
 
 (defn assoc!
-  "When applied to a transient map, adds mapping of key(s) to
+  "Alpha - subject to change.
+  When applied to a transient map, adds mapping of key(s) to
   val(s). When applied to a transient vector, sets the val at index.
   Note - index must be <= (count vector). Returns coll."
   ([#^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
@@ -4647,7 +4630,8 @@
        ret))))
 
 (defn dissoc!
-  "Returns a transient map that doesn't contain a mapping for key(s)."
+  "Alpha - subject to change.
+  Returns a transient map that doesn't contain a mapping for key(s)."
   ([#^clojure.lang.ITransientMap map key] (.without map key))
   ([#^clojure.lang.ITransientMap map key & ks]
    (let [ret (.without map key)]
@@ -4656,13 +4640,15 @@
        ret))))
 
 (defn pop!
-  "Removes the last item from a transient vector. If
+  "Alpha - subject to change.
+  Removes the last item from a transient vector. If
   the collection is empty, throws an exception. Returns coll"
   [#^clojure.lang.ITransientVector coll] 
   (.pop coll)) 
 
 (defn disj!
-  "disj[oin]. Returns a transient set of the same (hashed/sorted) type, that
+  "Alpha - subject to change.
+  disj[oin]. Returns a transient set of the same (hashed/sorted) type, that
   does not contain key(s)."
   ([set] set)
   ([#^clojure.lang.ITransientSet set key]
