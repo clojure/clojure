@@ -224,6 +224,9 @@
         <exclude name="pom.xml"/>
         <exclude name="**/.git/**"/>
         <exclude name="**/*.class"/>
+        <exclude name="**/*.iml"/>
+        <exclude name="**/*.ipr"/>
+        <exclude name="**/*.iws"/>
         <exclude name="**/*.jar"/>
       </fileset>
     </copy>
