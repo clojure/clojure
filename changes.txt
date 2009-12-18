@@ -1,11 +1,13 @@
-﻿Changes to Clojure in Version 1.1 
+Changes to Clojure in Version 1.1 
 
 = CONTENTS =
 
- 1 Deprecated Features
-    1.1 add-classpath
-    1.2 ^ reader macro
-    1.3 clojure.parallel
+ 1 Deprecated and Removed Features
+    1.1 add-watcher, remove-watcher
+    1.2 add-classpath
+    1.3 ^ reader macro
+    1.4 clojure.parallel
+    1.5 clojure.lang.Repl, clojure.lang.Script
  2 New Features in clojure.core
     2.1  Primitive Array Generators
     2.2  Casting to Primitive Arrays
@@ -27,31 +29,52 @@
  4 Closed Tickets
 
 
-= 1 Deprecated Features =
 
-== 1.1 add-classpath ==
+= 1 Deprecated and Removed Features =
 
-This function can not be made to work in many environments.   
-Always use Java's built-in mechanisms to control the 
-classpath.
+== 1.1 add-watcher, remove-watcher ==
 
-== 1.2 ^ reader macro ==
+The functions add-watcher and remove-watcher are gone, but they can be
+implemented in terms of add-watch and remove-watch.
 
-The ^ reader macro has been deprecated as a shortcut for meta
-in the hopes that it can eventually replace the #^ reader macro.
+The difference is that a "watcher" was only activated when the watched
+reference changed to a *different* state, whereas a "watch" is
+activated whenever the reference *might* have changed state.
 
-== 1.3 clojure.parallel ==
+Watches are still considered an experimental feature.
 
-The clojure.parallel namespace has been deprecated. Eventually it
-will be replaced with a faster and more idiomatic alternative
-based on the JDK7 ForkJoin library. A preview of this work is
-already available in the 'par' branch of Clojure.
+
+== 1.2 add-classpath ==
+
+This function can not be made to work in many environments.  Always
+use Java's built-in mechanisms to control the classpath.
+
+
+== 1.3 ^ reader macro ==
+
+The ^ reader macro has been deprecated as a shortcut for meta in the
+hopes that it can eventually replace the #^ reader macro.
+
+
+== 1.4 clojure.parallel ==
+
+The clojure.parallel namespace has been deprecated. Eventually it will
+be replaced with a faster and more idiomatic alternative based on the
+JDK7 ForkJoin library. A preview of this work is already available in
+the 'par' branch of Clojure.
+
+
+== 1.5 clojure.lang.Repl, clojure.lang.Script ==
+
+The launch classes clojure.lang.Repl and clojure.lang.Script are both
+deprecated in favor of clojure.main.  Run clojure.main with the -h
+argument for the new command-line syntax.
+
 
 
 = 2 New Features in clojure.core =
 
 == 2.1 Primitive Array Generators ==
-
 
 (just like int-array, double-array)
 
@@ -63,7 +86,6 @@ already available in the 'par' branch of Clojure.
 
 == 2.2 Casting To Primitive Arrays ==
 
-
 (just like ints, doubles)
 
   * booleans : New
@@ -74,24 +96,26 @@ already available in the 'par' branch of Clojure.
 
 == 2.3 Chunked Seqs ==
 
+Some Clojure data structures now yield chunked seqs, which, in
+addition to satisfying the normal item-at-a-time seq interface, also
+support processing data sequentially by small blocks called
+'chunks'. This can provide greater efficiency by leveraging the
+structure of the data and amortizing the overhead of sequential
+access. Some of the sequence processing functions (like map and
+filter) are now chunk-aware and leverage this efficiency.
 
-Some Clojure data structures now yield chunked seqs, which, in addition
-to satisfying the normal item-at-a-time seq interface, also support processing  
-data sequentially by small blocks called 'chunks'. This can provide greater  
-efficiency by leveraging the structure of the data and amortizing the overhead  
-of sequential access. Some of the sequence processing functions (like map and filter)  
-are now chunk-aware and leverage this efficiency. 
+Consumption of chunked-seqs as normal seqs should be completely
+transparent. However, note that some sequence processing will occur up
+to 32 elements at a time. This could matter to you if you are relying
+on full laziness to preclude the generation of any non-consumed
+results. An interface to force single-item consumption of chunked seqs
+is still being designed. Please share any use cases where chunked
+processing has resulted in behavioral differences that matter to you
+on the Clojure Google group.
 
-Consumption of chunked-seqs as normal seqs should be completely transparent. However,  
-note that some sequence processing will occur up to 32 elements at a time. This could  
-matter to you if you are relying on full laziness to preclude the generation of any  
-non-consumed results. An interface to force single-item consumption of chunked seqs is  
-still being designed. Please share any use cases where chunked processing has resulted  
-in behavioral differences that matter to you on the Clojure google group. 
-
-The following fns should be considered implementation details subject to change,  
-but can be used for experimentation with building your own chunked-seq  
-functions from scratch. See map and filter as examples.
+The following fns should be considered implementation details subject
+to change, but can be used for experimentation with building your own
+chunked-seq functions from scratch. See map and filter as examples.
 
   * chunk : New
   * chunk-buffer : New
@@ -105,9 +129,8 @@ functions from scratch. See map and filter as examples.
 
 == 2.4 Futures ==
 
-
-Futures represent asynchronous computations. They are away to get  
-code to run in another thread, and obtain the result. 
+Futures represent asynchronous computations. They are a way to get
+code to run in another thread, and obtain the result.
 
   * future : New
   * future? : New
@@ -118,20 +141,19 @@ code to run in another thread, and obtain the result.
 
 == 2.5 Promises ==
 
-
-A promise is a synchronization construct that can be used to deliver a value  
-from one thread to another. Until the value has been delivered, any attempt  
-to dereference the promise will block. It thus enables dataflow-style programming. 
+A promise is a synchronization construct that can be used to deliver a
+value from one thread to another. Until the value has been delivered,
+any attempt to dereference the promise will block. It thus enables
+dataflow-style programming.
 
   * promise : New
   * deliver : New
 
 
-
 == 2.6 Futures vs. Promises ==
 
-
-A future is associated with a computation, whereas a promise is just a handoff reference. 
+A future is associated with a computation, whereas a promise is just a
+handoff reference.
 
 
 == 2.7 Transients ==
@@ -168,8 +190,9 @@ See: http://clojure.org/transients
 
 == 2.10 Function pre- and postconditions ==
 
-  Functions support specifying runtime pre- and postconditions.
-  See: http://clojure.org/special_forms
+Functions support specifying runtime pre- and postconditions.
+
+See: http://clojure.org/special_forms
 
 
 == 2.11 Miscellaneous ==
@@ -180,10 +203,13 @@ See: http://clojure.org/transients
   * slurp : Now with encoding parameter
   * with-loading-context : New
 
+
+
 = 3 New Namespaces =
 
-Complete documentation for all namespaces is in the source and API docs.
-http://richhickey.github.com/clojure/
+Complete documentation for all namespaces is in the source and API
+docs: http://richhickey.github.com/clojure/
+
 
 == 3.1 clojure.test ==
 
@@ -192,15 +218,14 @@ The test framework formerly known as clojure.contrib.test-is.
 
 == 3.2 clojure.test.junit ==
 
-An extension to clojure.test for JUnit-style XML output.  This
-enables you to use JUnit reporting tools with clojure.test.
+An extension to clojure.test for JUnit-style XML output.  This enables
+using JUnit reporting tools with clojure.test.
 
 
 == 3.3 clojure.stacktrace ==
 
-A few utility functions for printing Java stacktraces in a
-format that distinguishes between Clojure function calls
-and Java method calls.
+A few utility functions for printing Java stacktraces in a format that
+distinguishes between Clojure function calls and Java method calls.
 
 
 == 3.4 clojure.walk ==
@@ -210,16 +235,17 @@ intent to clojure.zip, but less flexible.  Useful when you want to
 call a function on every value in a complex, nested data structure.
 
 Includes some examples such as stringify-keys, which replaces all
-keywords in a map with strings, and macroexpand-all, a
-quick-and-dirty macroexpansion tester.  Note: macroexpand-all is
-NOT 100% correct, it just recursively tries to macroexpand a form;
-it does not correctly interpret special forms such as let.
+keywords in a map with strings, and macroexpand-all, a quick-and-dirty
+macroexpansion tester.  Note: macroexpand-all is NOT 100% correct, it
+just recursively tries to macroexpand a form; it does not correctly
+interpret special forms such as let.
 
 
 == 3.5 clojure.template ==
 
-Macros that apply a "template expression" to a list of forms.
-Used to implement the "are" macro in clojure.test.
+Macros that apply a "template expression" to a list of forms.  Used to
+implement the "are" macro in clojure.test.
+
 
 
 = 4 Closed Tickets =
