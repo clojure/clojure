@@ -117,8 +117,14 @@
       {} {}
       {:a 1 :b 2} {}
 
+      (sorted-map) (sorted-map)
+      (sorted-map :a 1 :b 2) (sorted-map)
+
       #{} #{}
       #{1 2} #{}
+
+      (sorted-set) (sorted-set)
+      (sorted-set 1 2) (sorted-set)
 
       (seq ()) nil      ; (seq ()) => nil
       (seq '(1 2)) ()
