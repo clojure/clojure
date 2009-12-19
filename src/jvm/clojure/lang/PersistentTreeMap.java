@@ -137,7 +137,7 @@ public ISeq seq(){
 }
 
 public IPersistentCollection empty(){
-	return EMPTY.withMeta(meta());	
+	return new PersistentTreeMap(meta(), comp);	
 }
 
 public ISeq rseq() throws Exception{
