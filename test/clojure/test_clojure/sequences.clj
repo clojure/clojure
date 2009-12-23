@@ -117,8 +117,14 @@
       {} {}
       {:a 1 :b 2} {}
 
+      (sorted-map) (sorted-map)
+      (sorted-map :a 1 :b 2) (sorted-map)
+
       #{} #{}
       #{1 2} #{}
+
+      (sorted-set) (sorted-set)
+      (sorted-set 1 2) (sorted-set)
 
       (seq ()) nil      ; (seq ()) => nil
       (seq '(1 2)) ()
@@ -139,6 +145,18 @@
       42 nil
       1.2 nil
       "abc" nil ))
+
+;Tests that the comparator is preservered
+;The first element should be the same in each set if preserved.
+(deftest test-empty-sorted
+  (let [inv-compare (comp - compare)]
+    (are [x y] (= (first (into (empty x) x)) 
+		  (first y))
+	 (sorted-set 1 2 3) (sorted-set 1 2 3)
+	 (sorted-set-by inv-compare 1 2 3) (sorted-set-by inv-compare 1 2 3)
+
+	 (sorted-map 1 :a 2 :b 3 :c) (sorted-map 1 :a 2 :b 3 :c)
+	 (sorted-map-by inv-compare 1 :a 2 :b 3 :c) (sorted-map-by inv-compare 1 :a 2 :b 3 :c))))
 
 
 (deftest test-not-empty
