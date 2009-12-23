@@ -269,7 +269,7 @@ public ITransientMap asTransient(){
 static final class TransientArrayMap extends ATransientMap {
 	int len;
 	final Object[] array;
-	final Thread owner;
+	Thread owner;
 
 	public TransientArrayMap(Object[] array){
 		this.owner = Thread.currentThread();
@@ -330,6 +330,8 @@ static final class TransientArrayMap extends ATransientMap {
 	}
 	
 	IPersistentMap doPersistent(){
+		ensureEditable();
+		owner = null;
 		Object[] a = new Object[len];
 		System.arraycopy(array,0,a,0,len);
 		return new PersistentArrayMap(a);
@@ -339,8 +341,8 @@ static final class TransientArrayMap extends ATransientMap {
 		if(owner == Thread.currentThread())
 			return;
 		if(owner != null)
-			throw new IllegalAccessError("Mutable used by non-owner thread");
-		throw new IllegalAccessError("Mutable used after immutable call");
+			throw new IllegalAccessError("Transient used by non-owner thread");
+		throw new IllegalAccessError("Transient used after persistent! call");
 	}
 }
 }
