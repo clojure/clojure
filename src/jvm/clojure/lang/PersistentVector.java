@@ -402,8 +402,8 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 		if(owner == Thread.currentThread())
 			return;
 		if(owner != null)
-			throw new IllegalAccessError("Mutable used by non-owner thread");
-		throw new IllegalAccessError("Mutable used after immutable call");
+			throw new IllegalAccessError("Transient used by non-owner thread");
+		throw new IllegalAccessError("Transient used after persistent! call");
 
 //		root = editableRoot(root);
 //		tail = editableTail(tail);

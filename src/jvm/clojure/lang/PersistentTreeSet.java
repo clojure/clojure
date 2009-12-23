@@ -53,7 +53,7 @@ public IPersistentSet cons(Object o){
 }
 
 public IPersistentCollection empty(){
-	return EMPTY.withMeta(meta());	
+	return new PersistentTreeSet(meta(),(PersistentTreeMap)impl.empty());
 }
 
 public ISeq rseq() throws Exception{

@@ -10,7 +10,7 @@
 Docs: http://clojure.org
 Feedback: http://groups.google.com/group/clojure
 
-To Run java -cp clojure.jar clojure.lang.Repl
+To Run: java -cp clojure.jar clojure.main
 To Build: ant
 
 --------------------------------------------------------------------------
