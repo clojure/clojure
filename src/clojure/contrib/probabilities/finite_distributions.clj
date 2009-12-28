@@ -32,11 +32,9 @@
   [m-result (fn m-result-dist [v]
 	      {v 1})
    m-bind   (fn m-bind-dist [mv f]
-	      (letfn [(add-prob [dist [x p]]
-		         (assoc dist x (+ (get dist x 0) p)))]
-	        (reduce add-prob {}
-		        (for [[x p] mv  [y q] (f x)]
-			  [y (* q p)]))))
+	      (reduce (partial merge-with +)
+		      (for [[x p] mv  [y q] (f x)]
+			[y (* q p)])))
    ])
 
 ; Applying the monad transformer maybe-t to the basic dist monad results
