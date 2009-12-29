@@ -32,7 +32,7 @@
           (= (get-value df-1 'product) 0)))
   (is (do (update-values df-1 {'base 2})
           (= (get-value df-1 'product) 18)))
-  (is (thrown? Exception (update-values df-1 {'base 0})))
+  (is (thrown? AssertionError (update-values df-1 {'base 0})))
   (is (= (get-value df-1 'product) 18)))
 
 (def df-2

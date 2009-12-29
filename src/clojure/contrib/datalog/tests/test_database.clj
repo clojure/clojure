@@ -44,12 +44,12 @@
 (deftest test-ensure-relation
   (is (contains? (ensure-relation test-db :bob [:sam :george] [:sam]) :bob))
   (is (contains? (ensure-relation test-db :fred [:mary :sue] [:mary]) :fred))
-  (is (thrown? Exception (ensure-relation test-db :fred [:bob :joe] []))))
+  (is (thrown? AssertionError (ensure-relation test-db :fred [:bob :joe] []))))
 
 (deftest test-add-tuple
   (let [new-db (add-tuple test-db :fred {:mary 1 :sue 2})]
     (is (= (select new-db :fred {:mary 1}) [{:mary 1 :sue 2}])))
-  (is (thrown? Exception (add-tuple test-db :fred {:mary 1}))))
+  (is (thrown? AssertionError (add-tuple test-db :fred {:mary 1}))))
 
 (def test-db-1
      (add-tuples test-db
