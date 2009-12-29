@@ -3158,7 +3158,7 @@
   [x]
   (when *assert*
     `(when-not ~x
-       (throw (new Exception (str "Assert failed: " (pr-str '~x)))))))
+       (throw (new AssertionError (str "Assert failed: " (pr-str '~x)))))))
 
 (defn test
   "test [v] finds fn at key :test in var metadata and calls it,
