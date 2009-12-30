@@ -29,9 +29,10 @@
   "Evaluates body in an anonymous namespace, which is then immediately
   removed.  The temporary namespace will 'refer' clojure.core."
   [& body]
-  `(do (create-ns 'sym#)
-       (let [result# (with-ns 'sym#
-                      (clojure.core/refer-clojure)
-                      ~@body)]
-         (remove-ns 'sym#)
-         result#)))
+  `(try
+    (create-ns 'sym#)
+    (let [result# (with-ns 'sym#
+                    (clojure.core/refer-clojure)
+                    ~@body)]
+      result#)
+    (finally (remove-ns 'sym#))))

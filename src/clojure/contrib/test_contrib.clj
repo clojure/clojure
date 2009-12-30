@@ -21,7 +21,7 @@
       :pprint.cl-format :str-utils :shell-out :test-graph
       :test-dataflow :test-java-utils :test-lazy-seqs
       :test-trace :test-jmx :java-utils :mock-test :mock-test.test-adapter-test
-      :seq-utils-test])
+      :seq-utils-test :with-ns-test])
 
 (def test-namespaces
 		(concat
