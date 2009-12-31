@@ -4570,7 +4570,7 @@
        (when-let [i (:incremental *clojure-version*)]
          (str "." i))
        (when-let [q (:qualifier *clojure-version*)]
-         (str "-" q))
+         (when (pos? (count q)) (str "-" q)))
        (when (:interim *clojure-version*)
          "-SNAPSHOT")))
 
