@@ -119,6 +119,7 @@
         <exclude name="**/repl_utils/javadoc.clj"/>
         <exclude name="clojure/contrib/load_all.clj"/>
         <exclude name="**/tests.clj"/>
+        <exclude name="clojure/contrib/logging.clj"/>
       </fileset>
       <chainedmapper>
         <packagemapper from="${src}/*.clj" to="*" />
