@@ -1,9 +1,9 @@
 ;; Finite probability distributions
 
 ;; by Konrad Hinsen
-;; last updated May 11, 2009
+;; last updated January 8, 2010
 
-;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
+;; Copyright (c) Konrad Hinsen, 2009-2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
@@ -34,7 +34,7 @@
    m-bind   (fn m-bind-dist [mv f]
 	      (reduce (partial merge-with +)
 		      (for [[x p] mv  [y q] (f x)]
-			[y (* q p)])))
+			{y (* q p)})))
    ])
 
 ; Applying the monad transformer maybe-t to the basic dist monad results
