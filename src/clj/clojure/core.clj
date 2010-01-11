@@ -1329,14 +1329,29 @@
 
   :validator validate-fn
 
+  :error-handler handler-fn
+
+  :error-mode mode-keyword
+
   If metadata-map is supplied, it will be come the metadata on the
   agent. validate-fn must be nil or a side-effect-free fn of one
   argument, which will be passed the intended new state on any state
   change. If the new state is unacceptable, the validate-fn should
-  return false or throw an exception."
-  ([state] (new clojure.lang.Agent state))
+  return false or throw an exception.  handler-fn is called if an
+  action throws an exception or if validate-fn rejects a new state --
+  see set-error-handler! for details.  The mode-keyword may be either
+  :continue (the default if an error-handler is given) or :fail (the
+  default if no error-handler is given) -- see set-error-mode! for
+  details."
   ([state & options]
-     (setup-reference (agent state) options)))
+     (let [a (new clojure.lang.Agent state)
+           opts (apply hash-map options)]
+       (setup-reference a options)
+       (when (:error-handler opts)
+         (.setErrorHandler a (:error-handler opts)))
+       (.setErrorMode a (or (:error-mode opts)
+                            (if (:error-handler opts) :continue :fail)))
+       a)))
 
 (defn send
   "Dispatch an action to an agent. Returns the agent immediately.
@@ -1388,16 +1403,73 @@
   [#^clojure.lang.IRef reference key]
   (.removeWatch reference key))
 
+(defn agent-error
+  "Returns the exception thrown during an asynchronous action of the
+  agent if the agent is failed.  Returns nil if the agent is not
+  failed."
+  [#^clojure.lang.Agent a] (.getError a))
+
+(defn restart-agent
+  "When an agent is failed, changes the agent state to new-state and
+  then un-fails the agent so that sends are allowed again.  If
+  a :clear-actions true option is given, any actions queued on the
+  agent that were being held while it was failed will be discarded,
+  otherwise those held actions will proceed.  The new-state must pass
+  the validator if any, or restart will throw an exception and the
+  agent will remain failed with its old state and error.  Watchers, if
+  any, will NOT be notified of the new state.  Throws an exception if
+  the agent is not failed."
+  [#^clojure.lang.Agent a, new-state & options]
+  (let [opts (apply hash-map options)]
+    (.restart a new-state (if (:clear-actions opts) true false))))
+
+(defn set-error-handler!
+  "Sets the error-handler of agent a to handler-fn.  If an action
+  being run by the agent throws an exception or doesn't pass the
+  validator fn, handler-fn will be called with two arguments: the
+  agent and the exception."
+  [#^clojure.lang.Agent a, handler-fn]
+  (.setErrorHandler a handler-fn))
+
+(defn error-handler
+  "Returns the error-handler of agent a, or nil if there is none.
+  See set-error-handler!"
+  [#^clojure.lang.Agent a]
+  (.getErrorHandler a))
+
+(defn set-error-mode!
+  "Sets the error-mode of agent a to mode-keyword, which must be
+  either :fail or :continue.  If an action being run by the agent
+  throws an exception or doesn't pass the validator fn, an
+  error-handler may be called (see set-error-handler!), after which,
+  if the mode is :continue, the agent will continue as if neither the
+  action that caused the error nor the error itself ever happened.
+  
+  If the mode is :fail, the agent will become failed and will stop
+  accepting new 'send' and 'send-off' actions, and any previously
+  queued actions will be held until a 'restart-agent'.  Deref will
+  still work, returning the state of the agent before the error."
+  [#^clojure.lang.Agent a, mode-keyword]
+  (.setErrorMode a mode-keyword))
+
+(defn error-mode
+  "Returns the error-mode of agent a.  See set-error-mode!"
+  [#^clojure.lang.Agent a]
+  (.getErrorMode a))
 
 (defn agent-errors
-  "Returns a sequence of the exceptions thrown during asynchronous
+  "DEPRECATED: Use 'agent-error' instead.
+  Returns a sequence of the exceptions thrown during asynchronous
   actions of the agent."
-  [#^clojure.lang.Agent a] (. a (getErrors)))
+  [a]
+  (when-let [e (agent-error a)]
+    (list e)))
 
 (defn clear-agent-errors
-  "Clears any exceptions thrown during asynchronous actions of the
+  "DEPRECATED: Use 'restart-agent' instead.
+  Clears any exceptions thrown during asynchronous actions of the
   agent, allowing subsequent actions to occur."
-  [#^clojure.lang.Agent a] (. a (clearErrors)))
+  [#^clojure.lang.Agent a] (restart-agent a (.deref a)))
 
 (defn shutdown-agents
   "Initiates a shutdown of the thread pools that back the agent
@@ -2104,7 +2176,8 @@
 (defn await
   "Blocks the current thread (indefinitely!) until all actions
   dispatched thus far, from this thread or agent, to the agent(s) have
-  occurred."
+  occurred.  Will block on failed agents.  Will never return if
+  a failed agent is restarted with :clear-actions true."
   [& agents]
   (io! "await in transaction"
     (when *agent*

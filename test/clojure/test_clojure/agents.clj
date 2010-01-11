@@ -18,7 +18,7 @@
     (send agt (fn [state] (throw (Throwable. "just testing Throwables"))))
     (try
      ;; Let the action finish; eat the "agent has errors" error that bubbles up
-     (await agt)
+     (await-for 100 agt)
      (catch RuntimeException _))
     (is (instance? Throwable (first (agent-errors agt))))
     (is (= 1 (count (agent-errors agt))))
@@ -27,9 +27,86 @@
     (clear-agent-errors agt)
     (is (= nil @agt))
     (send agt nil?)
-    (await agt)
+    (is (true? (await-for 100 agt)))
     (is (true? @agt))))
 
+(deftest default-modes
+  (is (= :fail (error-mode (agent nil))))
+  (is (= :continue (error-mode (agent nil :error-handler println)))))
+
+(deftest continue-handler
+  (let [err (atom nil)
+        agt (agent 0 :error-mode :continue :error-handler #(reset! err %&))]
+    (send agt /)
+    (is (true? (await-for 100 agt)))
+    (is (= 0 @agt))
+    (is (nil? (agent-error agt)))
+    (is (= agt (first @err)))
+  (is (true? (instance? ArithmeticException (second @err))))))
+
+(deftest fail-handler
+  (let [err (atom nil)
+        agt (agent 0 :error-mode :fail :error-handler #(reset! err %&))]
+    (send agt /)
+    (Thread/sleep 100)
+    (is (true? (instance? ArithmeticException (agent-error agt))))
+    (is (= 0 @agt))
+    (is (= agt (first @err)))
+    (is (true? (instance? ArithmeticException (second @err))))
+    (is (thrown? RuntimeException (send agt inc)))))
+
+(deftest restart-no-clear
+  (let [p (promise)
+        agt (agent 1 :error-mode :fail)]
+    (send agt (fn [v] @p))
+    (send agt /)
+    (send agt inc)
+    (send agt inc)
+    (deliver p 0)
+    (Thread/sleep 100)
+    (is (= 0 @agt))
+    (is (= ArithmeticException (class (agent-error agt))))
+    (restart-agent agt 10)
+    (is (true? (await-for 100 agt)))
+    (is (= 12 @agt))
+    (is (nil? (agent-error agt)))))
+
+(deftest restart-clear
+  (let [p (promise)
+        agt (agent 1 :error-mode :fail)]
+    (send agt (fn [v] @p))
+    (send agt /)
+    (send agt inc)
+    (send agt inc)
+    (deliver p 0)
+    (Thread/sleep 100)
+    (is (= 0 @agt))
+    (is (= ArithmeticException (class (agent-error agt))))
+    (restart-agent agt 10 :clear-actions true)
+    (is (true? (await-for 100 agt)))
+    (is (= 10 @agt))
+    (is (nil? (agent-error agt)))
+    (send agt inc)
+    (is (true? (await-for 100 agt)))
+    (is (= 11 @agt))
+    (is (nil? (agent-error agt)))))
+
+(deftest invalid-restart
+  (let [p (promise)
+        agt (agent 2 :error-mode :fail :validator even?)]
+    (is (thrown? RuntimeException (restart-agent agt 4)))
+    (send agt (fn [v] @p))
+    (send agt (partial + 2))
+    (send agt (partial + 2))
+    (deliver p 3)
+    (Thread/sleep 100)
+    (is (= 2 @agt))
+    (is (= IllegalStateException (class (agent-error agt))))
+    (is (thrown? RuntimeException (restart-agent agt 5)))
+    (restart-agent agt 6)
+    (is (true? (await-for 100 agt)))
+    (is (= 10 @agt))
+    (is (nil? (agent-error agt)))))
 
 ; http://clojure.org/agents
 
