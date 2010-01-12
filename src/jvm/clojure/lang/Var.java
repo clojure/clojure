@@ -328,7 +328,7 @@ public static Associative getThreadBindings(){
 	return ret;
 }
 
-final Box getThreadBinding(){
+public final Box getThreadBinding(){
 	if(count.get() > 0)
 		{
 		IMapEntry e = dvals.get().bindings.entryAt(this);

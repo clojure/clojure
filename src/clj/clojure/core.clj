@@ -3819,6 +3819,18 @@
   current value plus any args"
   [#^clojure.lang.Var v f & args] (.alterRoot v f args))
 
+(defn bound?
+  "Returns true if all of the vars provided as arguments have any bound value, root or thread-local.
+   Implies that deref'ing the provided vars will succeed. Returns true if no vars are provided."
+  [& vars]
+  (every? #(.isBound #^clojure.lang.Var %) vars))
+
+(defn thread-bound?
+  "Returns true if all of the vars provided as arguments have thread-local bindings.
+   Implies that set!'ing the provided vars will succeed.  Returns true if no vars are provided."
+  [& vars]
+  (every? #(.getThreadBinding #^clojure.lang.Var %) vars))
+
 (defn make-hierarchy
   "Creates a hierarchy object for use with derive, isa? etc."
   [] {:parents {} :descendants {} :ancestors {}})
