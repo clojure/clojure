@@ -3904,7 +3904,7 @@
     (:use (my.lib this that))
     (:import (java.util Date Timer Random)
              (java.sql Connection Statement)))"
-  {:arglists '([name docstring? attr-map? & references])}
+  {:arglists '([name docstring? attr-map? references*])}
   [name & references]
   (let [process-reference
         (fn [[kname & args]]
