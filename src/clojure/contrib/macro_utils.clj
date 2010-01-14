@@ -1,9 +1,9 @@
 ;; Macrolet and symbol-macrolet
 
 ;; by Konrad Hinsen
-;; last updated August 31, 2009
+;; last updated January 14, 2010
 
-;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
+;; Copyright (c) Konrad Hinsen, 2009-2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
@@ -33,8 +33,9 @@
 ; forms, all the arguments are simply macro-expanded, but some forms
 ; get special treatment.
 (defvar- special-forms
-  #{'def 'loop* 'recur 'if 'let* 'letfn* 'do 'fn* 'quote 'var '. 'set!
-    'try 'catch 'finally 'throw 'monitor-enter 'monitor-exit 'new '&})
+  (into #{} (keys clojure.lang.Compiler/specials)))
+; Value in the Clojure 1.2 branch:
+; #{deftype* new quote & var set! monitor-enter recur . case* clojure.core/import* reify* do fn* throw monitor-exit letfn* finally let* loop* try catch if def}
 
 ; The following three vars are constantly redefined using the binding
 ; form, imitating dynamic scoping.
@@ -144,6 +145,26 @@
       (cons f bodies)
       (cons f (cons name bodies)))))
 
+(defn- expand-method
+  "Handle a method in a deftype* or reify* form."
+  [m]
+  (rest (expand-fn (cons 'fn* m))))
+
+(defn- expand-deftype
+  "Handle deftype* forms."
+  [[symbol typename classname fields implements interfaces & methods]]
+  (assert (= implements :implements))
+  (let [expanded-methods (map expand-method methods)]
+    (concat
+     (list symbol typename classname fields implements interfaces)
+     expanded-methods)))
+
+(defn- expand-reify
+  "Handle reify* forms."
+  [[symbol interfaces & methods]]
+  (let [expanded-methods (map expand-method methods)]
+    (cons symbol (cons interfaces expanded-methods))))
+
 ; Handlers for special forms that require special treatment. The default
 ; is expand-args.
 (defvar- special-form-handlers
@@ -153,7 +174,9 @@
    'new           #(expand-args % 2)
    'let*          expand-with-bindings
    'loop*         expand-with-bindings
-   'fn*           expand-fn})
+   'fn*           expand-fn
+   'deftype*      expand-deftype
+   'reify*        expand-reify})
 
 (defn- expand-list
   "Recursively expand a form that is a list or a cons."
