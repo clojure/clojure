@@ -4140,8 +4140,10 @@ public static class FnMethod extends ObjMethod{
 
 			//register 'this' as local 0
 			//registerLocal(THISFN, null, null);
-			registerLocal(Symbol.intern(objx.thisName != null ? objx.thisName : "fn__" + RT.nextID()), null, null,false);
-
+			if(objx.thisName != null)
+				registerLocal(Symbol.intern(objx.thisName), null, null,false);
+			else
+				getAndIncLocalNum();
 			PSTATE state = PSTATE.REQ;
 			PersistentVector argLocals = PersistentVector.EMPTY;
 			for(int i = 0; i < parms.count(); i++)
@@ -6345,8 +6347,10 @@ public static class NewInstanceMethod extends ObjMethod{
                     ));
 
 			//register 'this' as local 0
-			registerLocal((thisName == null) ? dummyThis:thisName,
-			              thistag, null,false);
+			if(thisName != null)
+				registerLocal((thisName == null) ? dummyThis:thisName,thistag, null,false);
+			else
+				getAndIncLocalNum();
 
 			PersistentVector argLocals = PersistentVector.EMPTY;
 			method.retClass = tagClass(tagOf(name));
