@@ -5112,15 +5112,7 @@ public static Object macroexpand1(Object x) throws Exception{
 		Var v = isMacro(op);
 		if(v != null)
 			{
-			try
-				{
-				Var.pushThreadBindings(RT.map(RT.MACRO_META, RT.meta(form)));
-				return v.applyTo(form.next());
-				}
-			finally
-				{
-				Var.popThreadBindings();
-				}
+			return v.applyTo(RT.cons(form,RT.cons(LOCAL_ENV.get(),form.next())));
 			}
 		else
 			{

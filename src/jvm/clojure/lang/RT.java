@@ -180,7 +180,6 @@ final static Keyword TAG_KEY = Keyword.intern(null, "tag");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
 final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), T);
 final static public Var ASSERT = Var.intern(CLOJURE_NS, Symbol.create("*assert*"), T);
-final static public Var MACRO_META = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
 final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
@@ -212,6 +211,15 @@ static final Var PR_ON = Var.intern(CLOJURE_NS, Symbol.create("pr-on"));
 //final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
+		Symbol nsname = (Symbol) arg1;
+		Namespace ns = Namespace.findOrCreate(nsname);
+		CURRENT_NS.set(ns);
+		return ns;
+	}
+};
+
+final static IFn bootNamespace = new AFn(){
+	public Object invoke(Object __form, Object __env,Object arg1) throws Exception{
 		Symbol nsname = (Symbol) arg1;
 		Namespace ns = Namespace.findOrCreate(nsname);
 		CURRENT_NS.set(ns);
@@ -264,8 +272,7 @@ static{
 	AGENT.setMeta(map(dockw, "The agent currently running an action on this thread, else nil"));
 	AGENT.setTag(Symbol.create("clojure.lang.Agent"));
 	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
-	//during bootstrap ns same as in-ns
-	Var nv = Var.intern(CLOJURE_NS, NAMESPACE, inNamespace);
+	Var nv = Var.intern(CLOJURE_NS, NAMESPACE, bootNamespace);
 	nv.setMacro();
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
