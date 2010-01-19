@@ -174,6 +174,10 @@
    (let [asig 
          (fn [fdecl]
            (let [arglist (first fdecl)
+                 ;elide implicit macro args
+                 arglist (if (clojure.lang.Util/equals '&form (first arglist)) 
+                           (clojure.lang.RT/subvec arglist 2 (clojure.lang.RT/count arglist))
+                           arglist)
                  body (next fdecl)]
              (if (map? (first body))
                (if (next body)
