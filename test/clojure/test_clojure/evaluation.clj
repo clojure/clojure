@@ -184,10 +184,6 @@
 (defstruct struct-with-symbols (with-meta 'k {:a "A"}))
 
 (deftest Metadata
-  (test-that 
-    "If a Symbol has metadata, it will not be part of the resulting value"
-    (is (not (nil? (meta (with-meta (symbol "test") {:doc "doc"})))))
-    (is (nil? (meta (eval (with-meta (symbol "test") {:doc "doc"}))))))
 
   (test-that
     "find returns key symbols and their metadata"

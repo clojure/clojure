@@ -25,12 +25,13 @@ import java.util.concurrent.atomic.AtomicReference;
  Any errors are my own
  */
 
-public class PersistentHashMap extends APersistentMap implements IEditableCollection {
+public class PersistentHashMap extends APersistentMap implements IEditableCollection, IObj {
 
 final int count;
 final INode root;
 final boolean hasNull;
 final Object nullValue;
+final IPersistentMap _meta;
 
 final public static PersistentHashMap EMPTY = new PersistentHashMap(0, null, false, null);
 final private static Object NOT_FOUND = new Object();
@@ -93,10 +94,11 @@ PersistentHashMap(int count, INode root, boolean hasNull, Object nullValue){
 	this.root = root;
 	this.hasNull = hasNull;
 	this.nullValue = nullValue;
+	this._meta = null;
 }
 
 public PersistentHashMap(IPersistentMap meta, int count, INode root, boolean hasNull, Object nullValue){
-	super(meta);
+	this._meta = meta;
 	this.count = count;
 	this.root = root;
 	this.hasNull = hasNull;
@@ -184,6 +186,10 @@ public PersistentHashMap withMeta(IPersistentMap meta){
 
 public TransientHashMap asTransient() {
 	return new TransientHashMap(this);
+}
+
+public IPersistentMap meta(){
+	return _meta;
 }
 
 static final class TransientHashMap extends ATransientMap {

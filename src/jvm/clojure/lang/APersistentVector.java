@@ -13,19 +13,11 @@
 package clojure.lang;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
                                                                List,
                                                                RandomAccess, Comparable, Streamable{
 int _hash = -1;
-
-public APersistentVector(IPersistentMap meta){
-	super(meta);
-}
-
-protected APersistentVector(){
-}
 
 public String toString(){
 	return RT.printString(this);
@@ -516,14 +508,17 @@ static class RSeq extends ASeq implements IndexedSeq, Counted{
 	}
 }
 
-static class SubVector extends APersistentVector{
+static class SubVector extends APersistentVector implements IObj{
 	final IPersistentVector v;
 	final int start;
 	final int end;
+	final IPersistentMap _meta;
+
 
 
 	public SubVector(IPersistentMap meta, IPersistentVector v, int start, int end){
-		super(meta);
+		this._meta = meta;
+
 		if(v instanceof APersistentVector.SubVector)
 			{
 			APersistentVector.SubVector sv = (APersistentVector.SubVector) v;
@@ -574,6 +569,10 @@ static class SubVector extends APersistentVector{
 		if(meta == _meta)
 			return this;
 		return new SubVector(meta, v, start, end);
+	}
+
+	public IPersistentMap meta(){
+		return _meta;
 	}
 }
 }

@@ -14,9 +14,11 @@ package clojure.lang;
 
 import java.util.List;
 
-public class PersistentHashSet extends APersistentSet implements IEditableCollection {
+public class PersistentHashSet extends APersistentSet implements IObj, IEditableCollection {
 
 static public final PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentHashMap.EMPTY);
+
+final IPersistentMap _meta;
 
 public static PersistentHashSet create(Object... init){
 	PersistentHashSet ret = EMPTY;
@@ -46,7 +48,8 @@ static public PersistentHashSet create(ISeq items){
 }
 
 PersistentHashSet(IPersistentMap meta, IPersistentMap impl){
-	super(meta, impl);
+	super(impl);
+	this._meta = meta;
 }
 
 public IPersistentSet disjoin(Object key) throws Exception{
@@ -71,6 +74,10 @@ public PersistentHashSet withMeta(IPersistentMap meta){
 
 public ITransientCollection asTransient() {
 	return new TransientHashSet(((PersistentHashMap) impl).asTransient());
+}
+
+public IPersistentMap meta(){
+	return _meta;
 }
 
 static final class TransientHashSet extends ATransientSet {

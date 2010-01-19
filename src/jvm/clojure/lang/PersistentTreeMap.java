@@ -22,11 +22,12 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap extends APersistentMap implements Reversible, Sorted{
+public class PersistentTreeMap extends APersistentMap implements IObj, Reversible, Sorted{
 
 public final Comparator comp;
 public final Node tree;
 public final int _count;
+final IPersistentMap _meta;
 
 final static public PersistentTreeMap EMPTY = new PersistentTreeMap();
 
@@ -54,14 +55,14 @@ private PersistentTreeMap(Comparator comp){
 
 
 public PersistentTreeMap(IPersistentMap meta, Comparator comp){
-	super(meta);
 	this.comp = comp;
+	this._meta = meta;
 	tree = null;
 	_count = 0;
 }
 
 PersistentTreeMap(IPersistentMap meta, Comparator comp, Node tree, int _count){
-	super(meta);
+	this._meta = meta;
 	this.comp = comp;
 	this.tree = tree;
 	this._count = _count;
@@ -441,7 +442,7 @@ Node replace(Node t, Object key, Object val){
 }
 
 PersistentTreeMap(Comparator comp, Node tree, int count, IPersistentMap meta){
-	super(meta);
+	this._meta = meta;
 	this.comp = comp;
 	this.tree = tree;
 	this._count = count;
@@ -469,6 +470,10 @@ static Black black(Object key, Object val, Node left, Node right){
 	if(val == null)
 		return new BlackBranch(key, left, right);
 	return new BlackBranchVal(key, val, left, right);
+}
+
+public IPersistentMap meta(){
+	return _meta;
 }
 
 static abstract class Node extends AMapEntry{

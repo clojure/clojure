@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.io.Serializable;
 
-public class PersistentStructMap extends APersistentMap{
+public class PersistentStructMap extends APersistentMap implements IObj{
 
 public static class Def implements Serializable{
 	final ISeq keys;
@@ -31,6 +31,8 @@ public static class Def implements Serializable{
 final Def def;
 final Object[] vals;
 final IPersistentMap ext;
+final IPersistentMap _meta;
+
 
 static public Def createSlotMap(ISeq keys){
 	if(keys == null)
@@ -94,7 +96,7 @@ static public IFn getAccessor(final Def def, Object key){
 }
 
 protected PersistentStructMap(IPersistentMap meta, Def def, Object[] vals, IPersistentMap ext){
-	super(meta);
+	this._meta = meta;
 	this.ext = ext;
 	this.def = def;
 	this.vals = vals;
@@ -111,10 +113,14 @@ protected PersistentStructMap makeNew(IPersistentMap meta, Def def, Object[] val
 	return new PersistentStructMap(meta, def, vals, ext);
 }
 
-public Obj withMeta(IPersistentMap meta){
+public IObj withMeta(IPersistentMap meta){
 	if(meta == _meta)
 		return this;
 	return makeNew(meta, def, vals, ext);
+}
+
+public IPersistentMap meta(){
+	return _meta;
 }
 
 public boolean containsKey(Object key){

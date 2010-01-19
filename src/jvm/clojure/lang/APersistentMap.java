@@ -15,15 +15,6 @@ import java.util.*;
 public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable{
 int _hash = -1;
 
-
-protected APersistentMap(IPersistentMap meta){
-	super(meta);
-}
-
-
-protected APersistentMap(){
-}
-
 public String toString(){
 	return RT.printString(this);
 }

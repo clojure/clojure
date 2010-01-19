@@ -181,6 +181,9 @@ static final public Var LOOP_LABEL = Var.create();
 //vector<object>
 static final public Var CONSTANTS = Var.create();
 
+//IdentityHashMap
+static final public Var CONSTANT_IDS = Var.create();
+
 //vector<keyword>
 static final public Var KEYWORD_CALLSITES = Var.create();
 
@@ -359,18 +362,18 @@ static class DefExpr implements Expr{
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		objx.emitVar(gen, var);
-		if(initProvided)
-			{
-			gen.dup();
-			init.emit(C.EXPRESSION, objx, gen);
-			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
-			}
 		if(meta != null)
 			{
 			gen.dup();
 			meta.emit(C.EXPRESSION, objx, gen);
 			gen.checkCast(IPERSISTENTMAP_TYPE);
 			gen.invokeVirtual(VAR_TYPE, setMetaMethod);
+			}
+		if(initProvided)
+			{
+			gen.dup();
+			init.emit(C.EXPRESSION, objx, gen);
+			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
 			}
 
 		if(context == C.STATEMENT)
@@ -3070,6 +3073,14 @@ static public class FnExpr extends ObjExpr{
 		super(tag);
 	}
 
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return AFunction.class;
+	}
+
 	protected void emitMethods(ClassVisitor cv){
 		//override of invoke/doInvoke for each method
 		for(ISeq s = RT.seq(methods); s != null; s = s.next())
@@ -3093,6 +3104,7 @@ static public class FnExpr extends ObjExpr{
 	}
 
 	static Expr parse(C context, ISeq form, String name) throws Exception{
+		ISeq origForm = form;
 		FnExpr fn = new FnExpr(tagOf(form));
 		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
 		if(((IMeta) form.first()).meta() != null)
@@ -3117,6 +3129,7 @@ static public class FnExpr extends ObjExpr{
 			{
 			Var.pushThreadBindings(
 					RT.map(CONSTANTS, PersistentVector.EMPTY,
+					       CONSTANT_IDS, new IdentityHashMap(),
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,
@@ -3188,7 +3201,11 @@ static public class FnExpr extends ObjExpr{
 		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",null,fn.onceOnly);
 		fn.getCompiledClass();
 
-		return fn;
+		if(origForm instanceof IObj && ((IObj) origForm).meta() != null)
+			return new MetaExpr(fn, (MapExpr) MapExpr
+					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) origForm).meta()));
+		else
+			return fn;
 	}
 
 	public final ObjMethod variadicMethod(){
@@ -3315,9 +3332,7 @@ static public class ObjExpr implements Expr{
 
 
 	Type[] ctorTypes(){
-		if(closes.count() == 0)
-			return ARG_TYPES[0];
-		PersistentVector tv = PersistentVector.EMPTY;
+		IPersistentVector tv = isDeftype()?PersistentVector.EMPTY:RT.vector(IPERSISTENTMAP_TYPE);
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
@@ -3451,6 +3466,10 @@ static public class ObjExpr implements Expr{
 		clinitgen.returnValue();
 
 		clinitgen.endMethod();
+		if(!isDeftype())
+			{
+			cv.visitField(ACC_FINAL, "__meta", IPERSISTENTMAP_TYPE.getDescriptor(), null, null);
+			}
 		//instance fields for closed-overs
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
@@ -3510,7 +3529,14 @@ static public class ObjExpr implements Expr{
 //			}
 //		else
 //			ctorgen.invokeConstructor(aFnType, voidctor);
-		int a = 1;
+		if(!isDeftype())
+			{
+			ctorgen.loadThis();
+			ctorgen.visitVarInsn(IPERSISTENTMAP_TYPE.getOpcode(Opcodes.ILOAD), 1);
+			ctorgen.putField(objtype, "__meta", IPERSISTENTMAP_TYPE);
+			}
+
+		int a = isDeftype()?1:2;
 		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
 			{
 			LocalBinding lb = (LocalBinding) s.first();
@@ -3563,6 +3589,76 @@ static public class ObjExpr implements Expr{
 			ctorgen.endMethod();
 			}
 
+		if(!isDeftype())
+			{
+					//ctor that takes closed-overs but not meta
+			Type[] ctorTypes = ctorTypes();
+			Type[] noMetaCtorTypes = new Type[ctorTypes.length-1];
+			for(int i=1;i<ctorTypes.length;i++)
+				noMetaCtorTypes[i-1] = ctorTypes[i];
+			Method alt = new Method("<init>", Type.VOID_TYPE, noMetaCtorTypes);
+			ctorgen = new GeneratorAdapter(ACC_PUBLIC,
+															alt,
+															null,
+															null,
+															cv);
+			ctorgen.visitCode();
+			ctorgen.loadThis();
+			ctorgen.visitInsn(Opcodes.ACONST_NULL);	//null meta
+			ctorgen.loadArgs();
+			ctorgen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes));
+
+			ctorgen.returnValue();
+			ctorgen.endMethod();
+
+			//meta()
+			Method meth = Method.getMethod("clojure.lang.IPersistentMap meta()");
+
+			GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+												meth,
+												null,
+												null,
+												cv);
+			gen.visitCode();
+			gen.loadThis();
+			gen.getField(objtype,"__meta",IPERSISTENTMAP_TYPE);
+
+			gen.returnValue();
+			gen.endMethod();
+
+			//withMeta()
+			meth = Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)");
+
+			gen = new GeneratorAdapter(ACC_PUBLIC,
+												meth,
+												null,
+												null,
+												cv);
+			gen.visitCode();
+			gen.newInstance(objtype);
+			gen.dup();
+			gen.loadArg(0);
+
+			for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
+				{
+				LocalBinding lb = (LocalBinding) s.first();
+				gen.loadThis();
+				Class primc = lb.getPrimitiveType();
+				if(primc != null)
+					{
+					gen.getField(objtype, lb.name, Type.getType(primc));
+					}
+				else
+					{
+					gen.getField(objtype, lb.name, OBJECT_TYPE);
+					}
+				}
+
+			gen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE, ctorTypes));
+			gen.returnValue();
+			gen.endMethod();
+			}
+		
 		emitMethods(cv);
 
 		if(keywordCallsites.count() > 0)
@@ -3888,6 +3984,7 @@ static public class ObjExpr implements Expr{
 			{
 			gen.newInstance(objtype);
 			gen.dup();
+			gen.visitInsn(Opcodes.ACONST_NULL);				
 			for(ISeq s = RT.seq(closesExprs); s != null; s = s.next())
 				{
                 LocalBindingExpr lbe = (LocalBindingExpr) s.first();
@@ -5280,7 +5377,12 @@ private static int registerConstant(Object o){
 	if(!CONSTANTS.isBound())
 		return -1;
 	PersistentVector v = (PersistentVector) CONSTANTS.deref();
+	IdentityHashMap<Object,Integer> ids = (IdentityHashMap<Object,Integer>) CONSTANT_IDS.deref();
+	Integer i = ids.get(o);
+	if(i != null)
+		return i;
 	CONSTANTS.set(RT.conj(v, o));
+	ids.put(o, v.count());
 	return v.count();
 }
 
@@ -5757,6 +5859,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber(),
 			       CONSTANTS, PersistentVector.EMPTY,
+			       CONSTANT_IDS, new IdentityHashMap(),
 			       KEYWORDS, PersistentHashMap.EMPTY,
 			       VARS, PersistentHashMap.EMPTY
 			       ,LOADER, RT.makeClassLoader()
@@ -5970,6 +6073,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			{
 			Var.pushThreadBindings(
 					RT.map(CONSTANTS, PersistentVector.EMPTY,
+					       CONSTANT_IDS, new IdentityHashMap(),
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,

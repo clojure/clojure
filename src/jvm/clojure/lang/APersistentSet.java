@@ -20,8 +20,7 @@ public abstract class APersistentSet extends AFn implements IPersistentSet, Coll
 int _hash = -1;
 final IPersistentMap impl;
 
-protected APersistentSet(IPersistentMap meta, IPersistentMap impl){
-	super(meta);
+protected APersistentSet(IPersistentMap impl){
 	this.impl = impl;
 }
 

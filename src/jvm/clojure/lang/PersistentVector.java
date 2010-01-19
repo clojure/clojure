@@ -15,7 +15,7 @@ package clojure.lang;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PersistentVector extends APersistentVector implements IEditableCollection{
+public class PersistentVector extends APersistentVector implements IObj, IEditableCollection{
 
 static class Node{
 	final AtomicReference<Thread> edit;
@@ -39,6 +39,8 @@ final int cnt;
 final int shift;
 final Node root;
 final Object[] tail;
+final IPersistentMap _meta;
+
 
 public final static PersistentVector EMPTY = new PersistentVector(0, 5, EMPTY_NODE, new Object[]{});
 
@@ -64,7 +66,7 @@ static public PersistentVector create(Object... items){
 }
 
 PersistentVector(int cnt, int shift, Node root, Object[] tail){
-	super(null);
+	this._meta = null;
 	this.cnt = cnt;
 	this.shift = shift;
 	this.root = root;
@@ -73,7 +75,7 @@ PersistentVector(int cnt, int shift, Node root, Object[] tail){
 
 
 PersistentVector(IPersistentMap meta, int cnt, int shift, Node root, Object[] tail){
-	super(meta);
+	this._meta = meta;
 	this.cnt = cnt;
 	this.shift = shift;
 	this.root = root;
@@ -147,6 +149,10 @@ public int count(){
 
 public PersistentVector withMeta(IPersistentMap meta){
 	return new PersistentVector(meta, cnt, shift, root, tail);
+}
+
+public IPersistentMap meta(){
+	return _meta;
 }
 
 

@@ -25,12 +25,13 @@ import java.util.Map;
  * null keys and values are ok, but you won't be able to distinguish a null value via valAt - use contains/entryAt
  */
 
-public class PersistentArrayMap extends APersistentMap implements IEditableCollection {
+public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection {
 
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 16;
 
 public static final PersistentArrayMap EMPTY = new PersistentArrayMap();
+private final IPersistentMap _meta;
 
 static public IPersistentMap create(Map other){
 	ITransientMap ret = EMPTY.asTransient();
@@ -44,6 +45,7 @@ static public IPersistentMap create(Map other){
 
 protected PersistentArrayMap(){
 	this.array = new Object[]{};
+	this._meta = null;
 }
 
 public PersistentArrayMap withMeta(IPersistentMap meta){
@@ -65,11 +67,12 @@ IPersistentMap createHT(Object[] init){
  */
 public PersistentArrayMap(Object[] init){
 	this.array = init;
+	this._meta = null;
 }
 
 
 public PersistentArrayMap(IPersistentMap meta, Object[] init){
-	super(meta);
+	this._meta = meta;
 	this.array = init;
 }
 
@@ -196,6 +199,10 @@ public ISeq seq(){
 	if(array.length > 0)
 		return new Seq(array, 0);
 	return null;
+}
+
+public IPersistentMap meta(){
+	return _meta;
 }
 
 static class Seq extends ASeq implements Counted{

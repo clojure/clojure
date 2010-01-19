@@ -14,18 +14,7 @@ package clojure.lang;
 
 import java.io.Serializable;
 
-public abstract class AFn extends Obj implements IFn, Serializable{
-
-public AFn(IPersistentMap meta){
-	super(meta);
-}
-
-public AFn(){
-}
-
-public Obj withMeta(IPersistentMap meta){
-	throw new UnsupportedOperationException();
-}
+public abstract class AFn implements IFn, Serializable{
 
 public Object call() throws Exception{
 	return invoke();

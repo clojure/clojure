@@ -14,18 +14,10 @@ package clojure.lang;
 
 import java.util.Comparator;
 
-public abstract class AFunction extends AFn implements Comparator, Fn{
+public abstract class AFunction extends AFn implements IObj, Comparator, Fn{
 
 //note - this is not even volatile by design
 public MethodImplCache __methodImplCache;
-
-public AFunction(IPersistentMap meta){
-	super(meta);
-}
-
-public AFunction(){
-	super();
-}
 
 public int compare(Object o1, Object o2){
 	try

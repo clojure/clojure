@@ -14,8 +14,9 @@ package clojure.lang;
 
 import java.util.Comparator;
 
-public class PersistentTreeSet extends APersistentSet implements Reversible, Sorted{
+public class PersistentTreeSet extends APersistentSet implements IObj, Reversible, Sorted{
 static public final PersistentTreeSet EMPTY = new PersistentTreeSet(null, PersistentTreeMap.EMPTY);
+final IPersistentMap _meta;
 
 
 static public PersistentTreeSet create(ISeq items){
@@ -37,7 +38,8 @@ static public PersistentTreeSet create(Comparator comp, ISeq items){
 }
 
 PersistentTreeSet(IPersistentMap meta, IPersistentMap impl){
-	super(meta, impl);
+	super(impl);
+	this._meta = meta;
 }
 
 public IPersistentSet disjoin(Object key) throws Exception{
@@ -82,4 +84,7 @@ public ISeq seqFrom(Object key, boolean ascending){
 	return RT.keys(m.seqFrom(key,ascending));
 }
 
+public IPersistentMap meta(){
+	return _meta;
+}
 }
