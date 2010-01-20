@@ -1,3 +1,1 @@
-*.jar
-/local.properties
-classes/*
+target
