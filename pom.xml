@@ -44,6 +44,7 @@
             <namespace>!clojure\.contrib\.javadoc</namespace>
             <namespace>!clojure\.contrib\.logging</namespace>
             <namespace>!clojure\.contrib\.load-all</namespace>
+            <namespace>!clojure\.contrib\.pprint</namespace>
           </namespaces>
         </configuration>
         <executions>
