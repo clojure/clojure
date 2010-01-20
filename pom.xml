@@ -66,4 +66,14 @@
       </plugin>
     </plugins>
   </build>
+  <distributionManagement>
+    <repository>
+      <id>clojure-releases</id>
+      <url>scp://build.clojure.org/srv/www/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>clojure-snapshots</id>
+      <url>scp://build.clojure.org/srv/www/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
