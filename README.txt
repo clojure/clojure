@@ -26,19 +26,13 @@ Building Clojure-contrib
 
 To build clojure-contrib, download the files or clone the git repository.
 
-This library, clojure-contrib, has a dependency on Clojure: the clojure-lang
-JAR file. This is needed to compile the Clojure classes. Normally, it is specified
-using -Dclojure.jar=<path>.
+You will need Apache Maven (2.0 or higher) to run the build. Run the
+following in this directory:
 
-The build works as follows:
+   mvn package
 
-ant -Dclojure.jar=<path>
-
-This will produce a clojure-contrib.jar file that you can add to your classpath.
-
-The nightly-build and stable-build targets are intended for use on the
-Tapestry360 continuous integration server (http://tapestry.formos.com/bamboo ).
-They require the presense of the Maven Ant Tasks in the Ant lib folder.
+This will produce a target/clojure-contrib-{VERSION}.jar file that
+you can add to your classpath.
 
 
 Clojure-contrib Versions
