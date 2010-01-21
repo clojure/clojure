@@ -25,6 +25,7 @@ and developer discussions are in the Clojure Dev Google group at
 http://groups.google.com/group/clojure-dev
 
 
+
 Building Clojure-contrib ------------------------
 
 To build clojure-contrib, download the files or clone the git
@@ -33,12 +34,31 @@ repository.
 You will need Apache Maven (2.0 or higher) to run the build. 
 See http://maven.apache.org/
 
-Run the following in this directory:
+Run the following command in this directory:
 
     mvn package
 
-This will produce a target/clojure-contrib-{VERSION}.jar file that you
-can add to your classpath.
+This will produce the file target/clojure-contrib-${VERSION}.jar that
+you can add to your Java classpath.
+
+Additional build commands are available:
+
+    mvn clojure:repl
+    To start a Clojure REPL (Read-Eval-Print Loop)
+
+    mvn compile
+    To compile sources code without building a JAR
+
+    mvn test
+    To run unit tests
+
+    mvn assembly:assembly
+    To build ZIP/tar distributions containing source and JARs
+
+By default, the "package" and "assembly:assembly" targets will fail if
+any unit tests fail.  To omit this testing phase from the build, add
+"-Dmaven.test.skip=true" to the mvn command line.
+
 
 
 Clojure-contrib Versions ------------------------
@@ -60,11 +80,19 @@ wish to stay on a "standard release" of clojure, this is the branch
 for you.
 
 
+
 Clojure-contrib Committers --------------------------
 
 The following people are committers to the official clojure-contrib
 repositiory:
 
-Tom Faulhaber Stephen Gilardi Christophe Grand Rich Hickey Konrad
-Hinsen Stuart Holloway Chris Houser David Miller Stuart Sierra
+Tom Faulhaber
+Stephen Gilardi
+Christophe Grand
+Rich Hickey
+Konrad Hinsen
+Stuart Holloway
+Chris Houser
+David Miller
+Stuart Sierra
 Frantisek Sodomka
