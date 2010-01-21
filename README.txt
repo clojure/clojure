@@ -2,7 +2,7 @@ Clojure-contrib ---------------
 
 The user contributions library, clojure.contrib, is a collection of
 namespaces each of which implements features that we believe may be
-useful to a large part of the clojure community.
+useful to a large part of the Clojure community.
 
 Clojure-contrib is open source under the Eclipse Public License and is
 copyrighted by Rich Hickey and the various contributors.
@@ -10,17 +10,19 @@ copyrighted by Rich Hickey and the various contributors.
 The official source repository for clojure-contrib is
 http://github.com/richhickey/clojure-contrib.
 
-Issues are maintained in the Assembla space at
-http://www.assembla.com/spaces/dashboard/index/clojure-contrib
+Pre-built binary packages are available at
+http://code.google.com/p/clojure-contrib/downloads
 
-For the latest documentation of the capabilities and APIs available in
-clojure-contrib, please see
+Documentation and APIs are available at
 http://richhickey.github.com/clojure-contrib/
 
-General discussion occurs in the Clojure Google group
-(http://groups.google.com/group/clojure ) and developer discussions
-are in the Clojure Dev Google group
-(http://groups.google.com/group/clojure-dev ).
+Issues are maintained in the Assembla space at
+http://www.assembla.com/spaces/clojure-contrib
+
+General discussion occurs in the Clojure Google group at
+http://groups.google.com/group/clojure
+and developer discussions are in the Clojure Dev Google group at
+http://groups.google.com/group/clojure-dev
 
 
 Building Clojure-contrib ------------------------
@@ -28,10 +30,12 @@ Building Clojure-contrib ------------------------
 To build clojure-contrib, download the files or clone the git
 repository.
 
-You will need Apache Maven (2.0 or higher) to run the build. Run the
-following in this directory:
+You will need Apache Maven (2.0 or higher) to run the build. 
+See http://maven.apache.org/
 
-   mvn package
+Run the following in this directory:
+
+    mvn package
 
 This will produce a target/clojure-contrib-{VERSION}.jar file that you
 can add to your classpath.
