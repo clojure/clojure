@@ -34,6 +34,19 @@
     </repository>
   </repositories>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/clojure</directory>
+      </resource>
+      <resource>
+        <directory>src/examples/clojure</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/clojure</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>com.theoryinpractise</groupId>
