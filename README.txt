@@ -1,4 +1,4 @@
-Clojure-contrib ---------------
+= Clojure-contrib =
 
 The user contributions library, clojure.contrib, is a collection of
 namespaces each of which implements features that we believe may be
@@ -26,7 +26,7 @@ http://groups.google.com/group/clojure-dev
 
 
 
-Building Clojure-contrib ------------------------
+= Building Clojure-contrib =
 
 To build clojure-contrib, download the files or clone the git
 repository.
@@ -61,7 +61,7 @@ any unit tests fail.  To omit this testing phase from the build, add
 
 
 
-Clojure-contrib Versions ------------------------
+= Clojure-contrib Versions =
 
 There are currently two versions of clojure-contrib, stored in
 separate branches on github.
@@ -81,7 +81,7 @@ for you.
 
 
 
-Clojure-contrib Committers --------------------------
+= Clojure-contrib Committers =
 
 The following people are committers to the official clojure-contrib
 repositiory:
