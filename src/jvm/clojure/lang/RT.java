@@ -1075,6 +1075,10 @@ static public ISeq arrayToList(Object[] a) throws Exception{
 	return ret;
 }
 
+static public Object[] objectArray(int n){
+	return new Object[n];
+}
+
 static public Object[] toArray(Object coll) throws Exception{
 	if(coll == null)
 		return EMPTY_ARRAY;
