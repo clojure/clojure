@@ -47,7 +47,7 @@ Additional build commands are available:
     To start a Clojure REPL (Read-Eval-Print Loop)
 
     mvn compile
-    To compile sources code without building a JAR
+    To compile sources without building a JAR
 
     mvn test
     To run unit tests
