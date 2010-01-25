@@ -63,21 +63,17 @@ any unit tests fail.  To omit this testing phase from the build, add
 
 = Clojure-contrib Versions =
 
-There are currently two versions of clojure-contrib, stored in
-separate branches on github.
+Versions of clojure-contrib are matched to versions of Clojure.
 
-The master branch represents the latest and greatest contrib code and
-is tied to the master branch of clojure
-(http://github.com/richhickey/clojure ).  If you're using this branch,
-you'll want to be sure to keep your clojure and clojure-contrib code
-in sync, though breaking changes between them are pretty rare in
-practice.
+If you are using Clojure 1.0, use clojure-contrib 1.0.*
 
-The clojure-1.0-compatible branch is designed to stay compatible with
-clojure release 1.0. New contrib features may be added to this branch,
-at the discretion of the contributors, but not necessarily. If you
-wish to stay on a "standard release" of clojure, this is the branch
-for you.
+If you are using Clojure 1.1, use clojure-contrib 1.1.*
+
+If you are using Clojure from the "master" branch on Github, use
+clojure-contrib from the "master" branch on Github.
+
+If you are using Clojure from the "new" branch on Github, use
+clojure-contrib from the "new" branch on Github.
 
 
 
