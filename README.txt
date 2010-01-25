@@ -28,11 +28,11 @@ http://groups.google.com/group/clojure-dev
 
 = Building Clojure-contrib =
 
-To build clojure-contrib, download the files or clone the git
-repository.
+If you downloaded a pre-build binary distribution of clojure-contrib,
+you don't need to do anything.
 
-You will need Apache Maven (2.0 or higher) to run the build. 
-See http://maven.apache.org/
+If you downloaded the sources from Github, you will need Apache Maven
+(2.0 or higher) to run the build.  See http://maven.apache.org/
 
 Run the following command in this directory:
 
@@ -55,9 +55,13 @@ Additional build commands are available:
     mvn assembly:assembly
     To build ZIP/tar distributions containing source and JARs
 
-By default, the "package" and "assembly:assembly" targets will fail if
-any unit tests fail.  To omit this testing phase from the build, add
-"-Dmaven.test.skip=true" to the mvn command line.
+To skip the testing phase when building, add "-Dmaven.test.skip=true"
+to the mvn command line.
+
+To specify a different version of Clojure (the language) when
+building, add "-Dclojure.version=NUMBER" to the mvn command line,
+where NUMBER is a the version string of a Clojure release or
+development snapshot.
 
 
 
