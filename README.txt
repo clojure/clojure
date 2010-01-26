@@ -58,10 +58,27 @@ Additional build commands are available:
 To skip the testing phase when building, add "-Dmaven.test.skip=true"
 to the mvn command line.
 
-To specify a different version of Clojure (the language) when
-building, add "-Dclojure.version=NUMBER" to the mvn command line,
-where NUMBER is a the version string of a Clojure release or
+
+
+== Choosing a Clojure Version ==
+
+If you want to compile/build against a specific version of Clojure
+(the language), add "-Dclojure.version=NUMBER" to the mvn command
+line, where NUMBER is the version string of a Clojure release or
 development snapshot.
+
+Or, to compile against a locally-modified version of Clojure, do the
+following:
+
+ 1. Download the maven-ant-tasks JAR from
+    http://maven.apache.org/ant-tasks/
+
+ 2. In the Clojure project directory, run the following:
+
+      ant clean 
+      ant -lib /path/to/maven-ant-tasks.jar ci-build 
+
+ 3. In the clojure-contrib directory, run "mvn package"
 
 
 
