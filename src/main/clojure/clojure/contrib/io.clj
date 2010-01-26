@@ -63,7 +63,8 @@
               BufferedReader File PrintWriter OutputStream
               OutputStreamWriter BufferedWriter Writer
               FileInputStream FileOutputStream ByteArrayOutputStream
-              StringReader ByteArrayInputStream)
+              StringReader ByteArrayInputStream
+              BufferedInputStream BufferedOutputStream)
      (java.net URI URL MalformedURLException Socket)))
 
 
@@ -98,6 +99,51 @@
     (File. s)))
 
 
+(defmulti #^{:tag BufferedInputStream
+             :doc "Attempts to coerce its argument into an open
+  java.io.BufferedInputStream.  Argument may be an instance of
+  BufferedInputStream, InputStream, File, URI, URL, Socket, or String.
+
+  If argument is a String, it tries to resolve it first as a URI, then
+  as a local file name.  URIs with a 'file' protocol are converted to
+  local file names. If this fails, a final attempt is made to resolve
+  the string as a resource on the CLASSPATH.
+
+  Should be used inside with-open to ensure the InputStream is properly
+  closed."
+             :arglists '([x])}
+  input-stream class)
+
+(defmethod input-stream BufferedInputStream [x]
+  x)
+
+(defmethod input-stream InputStream [x]
+  (BufferedInputStream. x))
+
+(defmethod input-stream File [#^File x]
+  (input-stream (FileInputStream. x)))
+
+(defmethod input-stream URL [#^URL x]
+  (input-stream (if (= "file" (.getProtocol x))
+                  (FileInputStream. (.getPath x))
+                  (.openStream x))))
+
+(defmethod input-stream URI [#^URI x]
+  (input-stream (.toURL x)))
+
+(defmethod input-stream String [#^String x]
+  (try (let [url (URL. x)]
+         (input-stream url))
+       (catch MalformedURLException e
+         (input-stream (File. x)))))
+
+(defmethod input-stream Socket [#^Socket x]
+  (input-stream (.getInputStream x)))
+
+(defmethod input-stream :default [x]
+  (throw (Exception. (str "Cannot open " (pr-str x) " as an InputStream."))))
+
+
 (defmulti #^{:tag BufferedReader
              :doc "Attempts to coerce its argument into an open
   java.io.BufferedReader.  Argument may be an instance of Reader,
@@ -105,48 +151,93 @@
 
   If argument is a String, it tries to resolve it first as a URI, then
   as a local file name.  URIs with a 'file' protocol are converted to
-  local file names.  Uses *default-encoding* as the text encoding.
+  local file names.  If this fails, a final attempt is made to resolve
+  the string as a resource on the CLASSPATH.
+
+  Uses *default-encoding* as the text encoding.
 
   Should be used inside with-open to ensure the Reader is properly
   closed."
              :arglists '([x])}
   reader class)
 
+(defmethod reader BufferedReader [x]
+  x)
+
 (defmethod reader Reader [x]
   (BufferedReader. x))
 
 (defmethod reader InputStream [#^InputStream x]
-  (BufferedReader. (InputStreamReader. x *default-encoding*)))
-
-(defmethod reader File [#^File x]
-  (reader (FileInputStream. x)))
-
-(defmethod reader URL [#^URL x]
-  (reader (if (= "file" (.getProtocol x))
-            (FileInputStream. (.getPath x))
-            (.openStream x))))
-
-(defmethod reader URI [#^URI x]
-  (reader (.toURL x)))
-
-(defmethod reader String [#^String x]
-  (try (let [url (URL. x)]
-         (reader url))
-       (catch MalformedURLException e
-         (reader (File. x)))))
-
-(defmethod reader Socket [#^Socket x]
-  (reader (.getInputStream x)))
+  (reader (InputStreamReader. x *default-encoding*)))
 
 (defmethod reader :default [x]
-  (throw (Exception. (str "Cannot open " (pr-str x) " as a reader."))))
-
+  ; input-stream throws if it can't hanlde x.
+  (reader (input-stream x)))
 
 (def
- #^{:doc "If true, writer and spit will open files in append mode.
- Defaults to false.  Use append-writer or append-spit."
+ #^{:doc "If true, writer, output-stream and spit will open files in append mode.
+ Defaults to false.  Instead of binding this var directly, use append-writer,
+ append-output-stream or append-spit."
     :tag "java.lang.Boolean"}
- *append-to-writer* false)
+ *append* false)
+
+(defn- assert-not-appending []
+  (when *append*
+    (throw (Exception. "Cannot change an open stream to append mode."))))
+
+(defmulti #^{:tag OutputStream
+             :doc "Attempts to coerce its argument into an open
+  java.io.OutputStream or java.io.BufferedOutputStream. Argument may
+  be an instance of OutputStream, File, URI, URL, Socket, or String.
+
+  If argument is a String, it tries to resolve it first as a URI, then
+  as a local file name.  URIs with a 'file' protocol are converted to
+  local file names.
+
+  Should be used inside with-open to ensure the OutputStream is
+  properly closed."
+             :arglists '([x])}
+  output-stream class)
+
+(defmethod output-stream BufferedOutputStream [#^BufferedOutputStream x]
+  (assert-not-appending)
+  x)
+
+(defmethod output-stream OutputStream [#^OutputStream x]
+  (assert-not-appending)
+  (BufferedOutputStream. x))
+
+(defmethod output-stream File [#^File x]
+  (let [stream (FileOutputStream. x *append*)]
+    (binding [*append* false]
+      (output-stream stream))))
+
+(defmethod output-stream URL [#^URL x]
+  (if (= "file" (.getProtocol x))
+    (output-stream (File. (.getPath x)))
+    (throw (Exception. (str "Can not write to non-file URL <" x ">")))))
+
+(defmethod output-stream URI [#^URI x]
+  (output-stream (.toURL x)))
+
+(defmethod output-stream String [#^String x]
+  (try (let [url (URL. x)]
+         (output-stream url))
+       (catch MalformedURLException err
+         (output-stream (File. x)))))
+
+(defmethod output-stream Socket [#^Socket x]
+  (output-stream (.getOutputStream x)))
+
+(defmethod output-stream :default [x]
+  (throw (Exception. (str "Cannot open <" (pr-str x) "> as an output stream."))))
+
+(defn append-output-stream
+  "Like output-stream but opens file for appending.  Does not work on streams
+  that are already open."
+  [x]
+  (binding [*append* true]
+    (output-stream x)))
 
 
 (defmulti #^{:tag PrintWriter
@@ -164,10 +255,6 @@
              :arglists '([x])}
   writer class)
 
-(defn- assert-not-appending []
-  (when *append-to-writer*
-    (throw (Exception. "Cannot change an open stream to append mode."))))
-
 (defmethod writer PrintWriter [x]
   (assert-not-appending)
   x)
@@ -179,26 +266,16 @@
 (defmethod writer Writer [x]
   (assert-not-appending)
   ;; Writer includes sub-classes such as FileWriter
-  (PrintWriter. (BufferedWriter. x)))   
+  (writer (BufferedWriter. x)))
 
 (defmethod writer OutputStream [#^OutputStream x]
   (assert-not-appending)
-  (PrintWriter.
-   (BufferedWriter.
-    (OutputStreamWriter. x *default-encoding*))))
+  (writer (OutputStreamWriter. x *default-encoding*)))
 
 (defmethod writer File [#^File x]
-  (let [stream (FileOutputStream. x *append-to-writer*)]
-    (binding [*append-to-writer* false]
+  (let [stream (FileOutputStream. x *append*)]
+    (binding [*append* false]
       (writer stream))))
-
-(defmethod writer URL [#^URL x]
-  (if (= "file" (.getProtocol x))
-    (writer (File. (.getPath x)))
-    (throw (Exception. (str "Cannot write to non-file URL <" x ">")))))
-
-(defmethod writer URI [#^URI x]
-  (writer (.toURL x)))
 
 (defmethod writer String [#^String x]
   (try (let [url (URL. x)]
@@ -206,18 +283,14 @@
        (catch MalformedURLException err
          (writer (File. x)))))
 
-(defmethod writer Socket [#^Socket x]
-  (writer (.getOutputStream x)))
-
 (defmethod writer :default [x]
-  (throw (Exception. (str "Cannot open <" (pr-str x) "> as a writer."))))
-
+  (writer (output-stream x)))
 
 (defn append-writer
   "Like writer but opens file for appending.  Does not work on streams
   that are already open."
   [x]
-  (binding [*append-to-writer* true]
+  (binding [*append* true]
     (writer x)))
 
 
