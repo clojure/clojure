@@ -48,13 +48,13 @@
   (is (= "tab" (s/reverse "bat"))))
 
 (deftest t-replace
-  (is (= "faabar" (s/replace \o \a "foobar")))
-  (is (= "barbarbar" (s/replace "foo" "bar" "foobarfoo")))
-  (is (= "FOObarFOO" (s/replace #"foo" s/upper-case  "foobarfoo"))))
+  (is (= "faabar" (s/replace-char \o \a "foobar")))
+  (is (= "barbarbar" (s/replace-str "foo" "bar" "foobarfoo")))
+  (is (= "FOObarFOO" (s/replace-by #"foo" s/upper-case  "foobarfoo"))))
 
 (deftest t-replace-first
-  (is (= "barbarfoo" (s/replace-first #"foo" "bar" "foobarfoo")))
-  (is (= "FOObarfoo" (s/replace-first #"foo" s/upper-case "foobarfoo"))))
+  (is (= "barbarfoo" (s/replace-first-re #"foo" "bar" "foobarfoo")))
+  (is (= "FOObarfoo" (s/replace-first-by #"foo" s/upper-case "foobarfoo"))))
 
 (deftest t-partition
   (is (= (list "" "abc" "123" "def")

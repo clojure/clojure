@@ -144,63 +144,48 @@
   [#^String s]
   (.toString (.reverse (StringBuilder. s))))
 
-(defmulti
-  #^{:doc "Replaces all instances of pattern in string with replacement.  
-  
-  Allowed argument types for pattern and replacement are:
-   1. String and String
-   2. Character and Character
-   3. regex Pattern and String
-      (Uses java.util.regex.Matcher.replaceAll)
-   4. regex Pattern and function
-      (Calls function with re-groups of each match, uses return 
-       value as replacement.)"
-     :arglists '([pattern replacement string])
-     :tag String}
-  replace
-  (fn [pattern replacement #^String string]
-    [(class pattern) (class replacement)]))
-
-(defmethod replace [String String] [#^String a #^String b #^String s]
+(defn replace-str
+  "Replaces all instances of substring a with b in s."
+  [#^String a #^String b #^String s]
   (.replace s a b))
 
-(defmethod replace [Character Character] [#^Character a #^Character b #^String s]
+(defn replace-char
+  "Replaces all instances of character a with character b in s."
+  [#^Character a #^Character b #^String s]
   (.replace s a b))
 
-(defmethod replace [Pattern String] [re replacement #^String s]
+(defn replace-re
+  "Replaces all matches of re with replacement in s."
+  [re replacement #^String s]
   (.replaceAll (re-matcher re s) replacement))
 
-(defmethod replace [Pattern clojure.lang.IFn] [re replacement #^String s]
+(defn replace-by
+  "Replaces all matches of re in s with the result of 
+  (f (re-groups the-match))."
+  [re f #^String s]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer. (.length s))]
       (loop []
         (if (.find m)
-          (do (.appendReplacement m buffer (replacement (re-groups m)))
+          (do (.appendReplacement m buffer (f (re-groups m)))
               (recur))
           (do (.appendTail m buffer)
               (.toString buffer)))))))
 
-(defmulti
-  #^{:doc "Replaces the first instance of pattern in s with replacement.
+(defn replace-first-str
+  "Replace first occurance of substring a with b in s."
+  [#^String a #^String b #^String s]
+  (.replaceFirst (re-matcher (Pattern/quote a) s) b))
 
-  Allowed argument types for pattern and replacement are:
-   1. String and String
-   2. regex Pattern and String
-      (Uses java.util.regex.Matcher.replaceFirst)
-   3. regex Pattern and function"
-     :arglists '([pattern replacement s])
-     :tag String}
-  replace-first
-  (fn [pattern replacement s]
-    [(class pattern) (class replacement)]))
-
-(defmethod replace-first [String String] [pattern replacement #^String s]
-  (.replaceFirst (re-matcher (Pattern/quote pattern) s) replacement))
-
-(defmethod replace-first [Pattern String] [re replacement #^String s]
+(defn replace-first-re
+  "Replace first match of re in s."
+  [#^Pattern re #^Replacement replacement #^String s]
   (.replaceFirst (re-matcher re s) replacement))
 
-(defmethod replace-first [Pattern clojure.lang.IFn] [#^Pattern re f #^String s]
+(defn replace-first-by
+  "Replace first match of re in s with the result of
+  (f (re-groups the-match))."
+  [#^Pattern re f #^String s]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer.)]
       (if (.find m)
@@ -249,7 +234,7 @@
   "Removes all trailing newline \\n or return \\r characters from
   string.  Note: String.trim() is similar and faster."
   [#^String s]
-  (replace #"[\r\n]+$" "" s))
+  (replace-re #"[\r\n]+$" "" s))
 
 (defn title-case [#^String s]
   (throw (Exception. "title-case not implemeted yet")))
@@ -284,12 +269,12 @@
 (defn #^String ltrim
   "Removes whitespace from the left side of string."
   [#^String s]
-  (replace #"^\s+" "" s))
+  (replace-re #"^\s+" "" s))
 
 (defn #^String rtrim
   "Removes whitespace from the right side of string."
   [#^String s]
-  (replace #"\s+$" "" s))
+  (replace-re #"\s+$" "" s))
 
 (defn split-lines
   "Splits s on \\n or \\r\\n."
