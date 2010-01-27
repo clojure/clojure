@@ -1048,6 +1048,10 @@ public static class UnreadableReader extends AFn{
 }
 
 public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) throws Exception{
+	final int firstline =
+		(r instanceof LineNumberingPushbackReader) ?
+		((LineNumberingPushbackReader) r).getLineNumber() : -1;
+
 	ArrayList a = new ArrayList();
 
 	for(; ;)
@@ -1058,7 +1062,12 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 			ch = r.read();
 
 		if(ch == -1)
-			throw new Exception("EOF while reading");
+			{
+			if(firstline < 0)
+				throw new Exception("EOF while reading");
+			else
+				throw new Exception("EOF while reading, starting at line " + firstline);
+			}
 
 		if(ch == delim)
 			break;
