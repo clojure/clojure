@@ -7,11 +7,11 @@ useful to a large part of the Clojure community.
 Clojure-contrib is open source under the Eclipse Public License and is
 copyrighted by Rich Hickey and the various contributors.
 
-The official source repository for clojure-contrib is
-http://github.com/richhickey/clojure-contrib.
-
-Pre-built binary packages are available at
+Download releases from
 http://code.google.com/p/clojure-contrib/downloads
+
+The official source repository for clojure-contrib is
+http://github.com/richhickey/clojure-contrib
 
 Documentation and APIs are available at
 http://richhickey.github.com/clojure-contrib/
@@ -24,12 +24,15 @@ http://groups.google.com/group/clojure
 and developer discussions are in the Clojure Dev Google group at
 http://groups.google.com/group/clojure-dev
 
+Compiled JARs of development snapshots are available at
+http://build.clojure.org/
+
 
 
 = Building Clojure-contrib =
 
-If you downloaded a pre-build binary distribution of clojure-contrib,
-you don't need to do anything.
+If you downloaded a release distribution or pre-compiled JAR, you
+don't need to do anything.
 
 If you downloaded the sources from Github, you will need Apache Maven
 (2.0 or higher) to run the build.  See http://maven.apache.org/
