@@ -36,25 +36,21 @@ the sorting function."}
   "Traverses form, an arbitrary data structure.  inner and outer are
   functions.  Applies inner to each element of form, building up a
   data structure of the same type, then applies outer to the result.
-  Recognizes all Clojure data structures except sorted-map-by.
-  Consumes seqs as with doall."
+  Recognizes all Clojure data structures. Consumes seqs as with doall."
+
   {:added "1.1"}
   [inner outer form]
   (cond
    (list? form) (outer (apply list (map inner form)))
+   (instance? clojure.lang.IMapEntry form) (outer (vec (map inner form)))
    (seq? form) (outer (doall (map inner form)))
-   (vector? form) (outer (vec (map inner form)))
-   (map? form) (outer (into (if (sorted? form) (sorted-map) {})
-                            (map inner form)))
-   (set? form) (outer (into (if (sorted? form) (sorted-set) #{})
-                            (map inner form)))
+   (coll? form) (outer (into (empty form) (map inner form)))
    :else (outer form)))
 
 (defn postwalk
   "Performs a depth-first, post-order traversal of form.  Calls f on
   each sub-form, uses f's return value in place of the original.
-  Recognizes all Clojure data structures except sorted-map-by.
-  Consumes seqs as with doall."
+  Recognizes all Clojure data structures. Consumes seqs as with doall."
   {:added "1.1"}
   [f form]
   (walk (partial postwalk f) f form))

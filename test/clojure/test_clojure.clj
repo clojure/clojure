@@ -67,6 +67,7 @@
       :data
       :reflect
       :errors
+      :clojure-walk
       ])
 
 (def test-namespaces
