@@ -78,7 +78,9 @@ following:
       ant clean 
       ant -lib /path/to/maven-ant-tasks.jar ci-build 
 
- 3. In the clojure-contrib directory, run "mvn package"
+ 3. In the clojure-contrib directory, run the following:
+
+      mvn package --offline
 
 
 
