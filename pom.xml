@@ -5,6 +5,7 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
   <properties>
     <clojure.version>1.2.0-master-SNAPSHOT</clojure.version>
+    <clojure.jar>${basedir}/../clojure/clojure.jar</clojure.jar>
   </properties>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.clojure</groupId>
@@ -19,13 +20,39 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  <dependencies>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-      <version>${clojure.version}</version>
-    </dependency>
-  </dependencies>
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+          <version>${clojure.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>local</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>local</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+          <version>${clojure.version}</version>
+          <scope>system</scope>
+          <systemPath>${clojure.jar}</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
   <repositories>
     <repository>
       <id>clojure-snapshots</id>
