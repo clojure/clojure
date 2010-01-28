@@ -60,27 +60,15 @@ to the mvn command line.
 
 
 
-== Choosing a Clojure Version ==
+== Compiling with Local clojure.jar ==
 
-If you want to compile/build against a specific version of Clojure
-(the language), add "-Dclojure.version=NUMBER" to the mvn command
-line, where NUMBER is the version string of a Clojure release or
-development snapshot.
+If you want to compile/build with a customized clojure.jar file, use
+the following command:
 
-Or, to compile against a locally-modified version of Clojure, do the
-following:
+    mvn -Denv=local -Dclojure.jar=/path/to/clojure.jar package
 
- 1. Download the maven-ant-tasks JAR from
-    http://maven.apache.org/ant-tasks/
-
- 2. In the Clojure project directory, run the following:
-
-      ant clean 
-      ant -lib /path/to/maven-ant-tasks.jar ci-build 
-
- 3. In the clojure-contrib directory, run the following:
-
-      mvn package --offline
+The /path/to/clojure.jar MUST be an absolute path.  It defaults to
+${current-dir}/../clojure/clojure.jar if you do not specify it.
 
 
 
