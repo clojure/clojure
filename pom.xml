@@ -14,6 +14,7 @@
   <version>1.2.0-SNAPSHOT</version>
   <url>http://clojure.org/</url>
   <description>Clojure user contributions library.</description>
+  <name>${artifactId}</name>
   <licenses>
     <license>
       <name>Eclipse Public License 1.0</name>
@@ -21,47 +22,33 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  <profiles>
-    <profile>
-      <id>default</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.clojure</groupId>
-          <artifactId>clojure</artifactId>
-          <version>${clojure.version}</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>local</id>
-      <activation>
-        <property>
-          <name>env</name>
-          <value>local</value>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.clojure</groupId>
-          <artifactId>clojure</artifactId>
-          <version>${clojure.version}</version>
-          <scope>system</scope>
-          <systemPath>${clojure.jar}</systemPath>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
+  <dependencies>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>${clojure.version}</version>
+    </dependency>
+  </dependencies>
   <repositories>
     <repository>
       <id>clojure-snapshots</id>
       <url>http://build.clojure.org/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
     <repository>
       <id>clojure-releases</id>
-      <url>http://build.clojure.org/releases</url>
+      <url>http://build.clojure.org/snapshots</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
   </repositories>
   <build>
@@ -82,13 +69,15 @@
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
-        <version>1.3.1</version>
         <configuration>
+          <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
           <namespaces>
-            <namespace>!clojure\.contrib\.javadoc</namespace>
-            <namespace>!clojure\.contrib\.logging</namespace>
-            <namespace>!clojure\.contrib\.load-all</namespace>
-            <namespace>!clojure\.contrib\.pprint</namespace>
+            <namespace>clojure\.contrib\.jmx\.Bean</namespace>
+            <namespace>clojure\.contrib\.fnmap\.PersistentFnMap</namespace>
+            <namespace>clojure\.contrib\.conditition\.Condition</namespace>
+            <namespace>clojure\.contrib\.repl-ln</namespace>
+            <namespace>clojure\.contrib\.pprint\.ColumnWriter</namespace>
+            <namespace>clojure\.contrib\.pprint\.PrettyWriter</namespace>
           </namespaces>
         </configuration>
         <executions>
@@ -123,9 +112,5 @@
       <id>clojure-releases</id>
       <url>scp://build.clojure.org/srv/www/releases</url>
     </repository>
-    <snapshotRepository>
-      <id>clojure-snapshots</id>
-      <url>scp://build.clojure.org/srv/www/snapshots</url>
-    </snapshotRepository>
   </distributionManagement>
 </project>
