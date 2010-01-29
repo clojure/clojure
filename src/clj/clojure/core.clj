@@ -2402,6 +2402,18 @@
   "Returns true if n is a Ratio"
   [n] (instance? clojure.lang.Ratio n))
 
+(defn numerator
+ "Returns the numerator part of a Ratio."
+ {:tag BigInteger}
+ [r]
+  (.numerator #^clojure.lang.Ratio r))
+
+(defn denominator
+ "Returns the denominator part of a Ratio."
+ {:tag BigInteger}
+ [r]
+  (.denominator #^clojure.lang.Ratio r))
+
 (defn decimal?
   "Returns true if n is a BigDecimal"
   [n] (instance? BigDecimal n))

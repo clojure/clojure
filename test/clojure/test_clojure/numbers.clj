@@ -433,3 +433,6 @@ Math/pow overflows to Infinity."
        "[J" (long-array 1) (longs (long-array 1 1))))
 
 
+(deftest test-ratios
+  (is (= (denominator 1/2) 2))
+  (is (= (numerator 1/2) 1)))
