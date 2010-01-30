@@ -16,6 +16,7 @@
 
 (ns clojure.contrib.pprint.PrettyWriter
   (:refer-clojure :exclude (deftype))
+  (:require clojure.contrib.pprint.ColumnWriter)
   (:use clojure.contrib.pprint.utilities)
   (:gen-class
    :extends clojure.contrib.pprint.ColumnWriter
