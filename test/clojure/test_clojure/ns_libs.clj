@@ -26,3 +26,11 @@
 ; require use
 ; loaded-libs
 
+(deftest test-require
+         (is (thrown? Exception (require :foo)))
+         (is (thrown? Exception (require))))
+
+(deftest test-use
+         (is (thrown? Exception (use :foo)))
+         (is (thrown? Exception (use))))
+

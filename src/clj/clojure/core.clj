@@ -4206,6 +4206,14 @@
   (let [flags (filter keyword? args)
         opts (interleave flags (repeat true))
         args (filter (complement keyword?) args)]
+    ; check for unsupported options
+    (let [supported #{:as :reload :reload-all :require :use :verbose} 
+          unsupported (seq (remove supported flags))]
+      (throw-if unsupported
+                (apply str "Unsupported option(s) supplied: "
+                     (interpose \, unsupported))))
+    ; check a load target was specified
+    (throw-if (not (seq args)) "Nothing specified to load")
     (doseq [arg args]
       (if (libspec? arg)
         (apply load-lib nil (prependss arg opts))
