@@ -68,9 +68,10 @@ to the mvn command line.
 If you want to compile/build with a customized clojure.jar file, use
 the following command:
 
-    mvn package -Dclojure.jar=/path/to/clojure.jar
+    mvn -Denv=local -Dclojure.jar=/path/to/clojure.jar package
 
-The /path/to/clojure.jar MUST be an absolute path.
+The /path/to/clojure.jar MUST be an absolute path.  It defaults to
+${current-dir}/../clojure/clojure.jar if you do not specify it.
 
 
 
