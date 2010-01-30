@@ -76,8 +76,6 @@
             <namespace>clojure\.contrib\.fnmap\.PersistentFnMap</namespace>
             <namespace>clojure\.contrib\.conditition\.Condition</namespace>
             <namespace>clojure\.contrib\.repl-ln</namespace>
-            <namespace>clojure\.contrib\.pprint\.ColumnWriter</namespace>
-            <namespace>clojure\.contrib\.pprint\.PrettyWriter</namespace>
           </namespaces>
         </configuration>
         <executions>
