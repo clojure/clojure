@@ -4907,10 +4907,15 @@
 ;;;;;;;;;;;;; nested associative ops ;;;;;;;;;;;
 
 (defn get-in
-  "returns the value in a nested associative structure, where ks is a sequence of keys"
-  {:added "1.0"}
-  [m ks]
-  (reduce get m ks))
+  "Returns the value in a nested associative structure,
+  where ks is a sequence of ke(ys. Returns nil if the key is not present,
+  or the not-found value if supplied."
+  ([m ks]
+   (reduce get m ks))
+  ([m ks not-found]
+   (if (seq ks)
+     (get (reduce get m (butlast ks)) (last ks) not-found)
+     m)))
 
 (defn assoc-in
   "Associates a value in a nested associative structure, where ks is a
