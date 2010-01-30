@@ -50,6 +50,17 @@
        "bar" 'bar
        "quux" "quux"))
 
+(deftest test-fnil
+  (are [x y] (= x y)
+       ((fnil + 0) nil 42) 42
+       ((fnil conj []) nil 42) [42]
+       (reduce #(update-in %1 [%2] (fnil inc 0)) {} 
+               ["fun" "counting" "words" "fun"])
+       {"words" 1, "counting" 1, "fun" 2}
+       (reduce #(update-in %1 [(first %2)] (fnil conj []) (second %2)) {} 
+               [[:a 1] [:a 2] [:b 3]])
+       {:b [3], :a [1 2]}))
+
 ; time assert comment doc
 
 ; partial
