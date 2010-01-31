@@ -20,6 +20,8 @@
   (:require [clojure.contrib.java-utils :as j])
   (:import (java.io PushbackReader StringReader Reader EOFException)))
 
+;;; JSON READER
+
 (declare read-json-reader)
 
 (defn- read-json-array [#^PushbackReader stream keywordize?]
@@ -106,7 +108,7 @@
          :else (do (.append buffer c)
                    (recur (.read stream))))))))
 
-(defn read-json-reader
+(defn- read-json-reader
   ([#^PushbackReader stream keywordize? eof-error? eof-value]
      (loop [i (.read stream)]
        (let [c (char i)]
@@ -194,103 +196,92 @@
   ([input keywordize? eof-error? eof-value]
      (read-json-from input keywordize? eof-error? eof-value)))
 
+
+;;; JSON PRINTER
+
 (defprotocol Print-JSON
   (print-json [object]
               "Print object to *out* as JSON"))
 
-(extend-protocol
- Print-JSON
+(defn- print-json-string [#^CharSequence s]
+  (let [sb (StringBuilder. #^Integer (count s))]
+    (.append sb \")
+    (dotimes [i (count s)]
+      (let [cp (Character/codePointAt s i)]
+        (cond
+         ;; Handle printable JSON escapes before ASCII
+         (= cp 34) (.append sb "\\\"")
+         (= cp 92) (.append sb "\\\\")
+         (= cp 47) (.append sb "\\/")
+         ;; Print simple ASCII characters
+         (< 31 cp 127) (.append sb (.charAt s i))
+         ;; Handle non-printable JSON escapes
+         (= cp 8) (.append sb "\\b")
+         (= cp 12) (.append sb "\\f")
+         (= cp 10) (.append sb "\\n")
+         (= cp 13) (.append sb "\\r")
+         (= cp 9) (.append sb "\\t")
+         ;; Any other character is Hexadecimal-escaped
+         :else (.append sb (format "\\u%04x" cp)))))
+    (.append sb \")
+    (print (str sb))))
 
- nil
- (print-json [x] (print "null"))
+(defn- print-json-object [m] 
+  (print \{)
+  (loop [x m]
+    (when (seq m)
+      (let [[k v] (first x)]
+        (when (nil? k)
+          (throw (Exception. "JSON object keys cannot be nil/null")))
+        (print-json (j/as-str k))
+        (print \:)
+        (print-json v))
+      (let [nxt (next x)]
+        (when (seq nxt)
+          (print \,)
+          (recur nxt)))))
+  (print \}))
 
- clojure.lang.Named
- (print-json [x] (print-json (name x)))
+(defn- print-json-array [s]
+  (print \[)
+  (loop [x s]
+    (when (seq x)
+      (let [fst (first x)
+            nxt (next x)]
+        (print-json fst)
+        (when (seq nxt)
+          (print \,)
+          (recur nxt)))))
+  (print \]))
 
- java.lang.Boolean
- (print-json [x] (pr x))
+(defn- print-json-bignum [x]
+  (print (str x)))
 
- java.lang.Number
- (print-json [x] (pr x))
-
- java.math.BigInteger
- (print-json [x] (print (str x)))
-
- java.math.BigDecimal
- (print-json [x] (print (str x)))
-
- java.lang.CharSequence
- (print-json [s]
-             (let [sb (StringBuilder. #^Integer (count s))]
-               (.append sb \")
-               (dotimes [i (count s)]
-                 (let [cp (Character/codePointAt s i)]
-                   (cond
-                    ;; Handle printable JSON escapes before ASCII
-                    (= cp 34) (.append sb "\\\"")
-                    (= cp 92) (.append sb "\\\\")
-                    (= cp 47) (.append sb "\\/")
-                    ;; Print simple ASCII characters
-                    (< 31 cp 127) (.append sb (.charAt s i))
-                    ;; Handle non-printable JSON escapes
-                    (= cp 8) (.append sb "\\b")
-                    (= cp 12) (.append sb "\\f")
-                    (= cp 10) (.append sb "\\n")
-                    (= cp 13) (.append sb "\\r")
-                    (= cp 9) (.append sb "\\t")
-                    ;; Any other character is Hexadecimal-escaped
-                    :else (.append sb (format "\\u%04x" cp)))))
-               (.append sb \")
-               (print (str sb))))
-
- java.util.Map
- (print-json [m] 
-             (print \{)
-             (loop [x m]
-               (when (seq m)
-                 (let [[k v] (first x)]
-                   (when (nil? k)
-                     (throw (Exception. "JSON object keys cannot be nil/null")))
-                   (print-json (j/as-str k))
-                   (print \:)
-                   (print-json v))
-                 (let [nxt (next x)]
-                   (when (seq nxt)
-                     (print \,)
-                     (recur nxt)))))
-             (print \}))
-
- java.util.Collection
- (print-json [s]
-             (print \[)
-             (loop [x s]
-               (when (seq x)
-                 (let [fst (first x)
-                       nxt (next x)]
-                   (print-json fst)
-                   (when (seq nxt)
-                     (print \,)
-                     (recur nxt)))))
-             (print \]))
-
- clojure.lang.ISeq
- (print-json [s]
-             (print \[)
-             (loop [x s]
-               (when (seq x)
-                 (let [fst (first x)
-                       nxt (next x)]
-                   (print-json fst)
-                   (when (seq nxt)
-                     (print \,)
-                     (recur nxt)))))
-             (print \])) 
-
- java.lang.Object
- (print-json [x]
-             (if (.isArray (class x))
-               (print-json (seq x))
-               (throw (Exception. "Don't know how to print JSON of " (class x))))))
+(extend nil Print-JSON
+        {:print-json (fn [x] (print "null"))})
+(extend clojure.lang.Named Print-JSON
+        {:print-json (fn [x] (print-json (name x)))})
+(extend java.lang.Boolean Print-JSON
+        {:print-json pr})
+(extend java.lang.Number Print-JSON
+        {:print-json pr})
+(extend java.math.BigInteger Print-JSON
+        {:print-json print-json-bignum})
+(extend java.math.BigDecimal Print-JSON
+        {:print-json print-json-bignum})
+(extend java.lang.CharSequence Print-JSON
+        {:print-json print-json-string})
+(extend java.util.Map Print-JSON
+        {:print-json print-json-object})
+(extend java.util.Collection Print-JSON
+        {:print-json print-json-array})
+(extend clojure.lang.ISeq Print-JSON
+        {:print-json print-json-array})
+(extend java.lang.Object Print-JSON
+        {:print-json (fn [x]
+                       (if (.isArray (class x))
+                         (print-json (seq x))
+                         (throw (Exception. "Don't know how to print JSON of " (class x)))))})
 
 (defn json-str
   "Converts x to a JSON-formatted string."
