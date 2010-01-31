@@ -77,6 +77,8 @@
             <namespace>clojure\.contrib\.conditition\.Condition</namespace>
             <namespace>clojure\.contrib\.repl-ln</namespace>
             <namespace>clojure\.contrib\.pprint\.gen-class</namespace>
+            <namespace>clojure\.contrib\.test-contrib\..*</namespace>
+            <namespace>!clojure\.contrib\.test-contrib\.pprint\..*</namespace>
           </namespaces>
         </configuration>
         <executions>
