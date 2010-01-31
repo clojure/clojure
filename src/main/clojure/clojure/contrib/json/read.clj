@@ -59,21 +59,21 @@
 (defn- read-json-array [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
-  (loop [i (.read stream), result []]
+  (loop [i (.read stream), result (transient [])]
     (let [c (char i)]
       (cond
        (= i -1) (throw (EOFException. "JSON error (end-of-file inside array)"))
        (Character/isWhitespace c) (recur (.read stream) result)
        (= c \,) (recur (.read stream) result)
-       (= c \]) result
+       (= c \]) (persistent! result)
        :else (do (.unread stream (int c))
                  (let [element (read-json stream)]
-                   (recur (.read stream) (conj result element))))))))
+                   (recur (.read stream) (conj! result element))))))))
 
 (defn- read-json-object [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
-  (loop [i (.read stream), key nil, result {}]
+  (loop [i (.read stream), key nil, result (transient {})]
     (let [c (char i)]
       (cond
        (= i -1) (throw (EOFException. "JSON error (end-of-file inside object)"))
@@ -85,7 +85,7 @@
        (= c \:) (recur (.read stream) key result)
 
        (= c \}) (if (nil? key)
-                  result
+                  (persistent! result)
                   (throw (Exception. "JSON error (key missing value in object)")))
 
        :else (do (.unread stream i)
@@ -95,8 +95,8 @@
                        (recur (.read stream) element result)
                        (throw (Exception. "JSON error (non-string key in object)")))
                      (recur (.read stream) nil
-                            (assoc result (if *json-keyword-keys* (keyword key) key)
-                                   element)))))))))
+                            (assoc! result (if *json-keyword-keys* (keyword key) key)
+                                    element)))))))))
 
 (defn- read-json-hex-character [#^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
