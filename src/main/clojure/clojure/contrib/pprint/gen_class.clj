@@ -16,7 +16,7 @@
            :state state)
 
 (gen-class :name clojure.contrib.pprint.PrettyWriter
-           :impl-ns clojure.contrib.pprint.ColumnWriter
+           :impl-ns clojure.contrib.pprint.PrettyWriter
            :extends clojure.contrib.pprint.ColumnWriter
            :init init
            :constructors {[java.io.Writer Integer Object] [java.io.Writer Integer]}
