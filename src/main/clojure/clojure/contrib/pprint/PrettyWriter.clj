@@ -16,21 +16,7 @@
 
 (ns clojure.contrib.pprint.PrettyWriter
   (:refer-clojure :exclude (deftype))
-  (:require clojure.contrib.pprint.ColumnWriter)
-  (:use clojure.contrib.pprint.utilities)
-  (:gen-class
-   :extends clojure.contrib.pprint.ColumnWriter
-   :init init
-   :constructors {[java.io.Writer Integer Object] [java.io.Writer Integer]}
-   :methods [[startBlock [String String String] void]
-             [endBlock [] void]
-             [newline [clojure.lang.Keyword] void]
-             [indent [clojure.lang.Keyword Integer] void]
-             [getMiserWidth [] Object]
-             [setMiserWidth [Object] void]
-             [setLogicalBlockCallback [clojure.lang.IFn] void]]
-   :exposes-methods {write col_write}
-   :state pwstate))
+  (:use clojure.contrib.pprint.utilities))
 
 ;; TODO: Support for tab directives
 

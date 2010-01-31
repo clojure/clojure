@@ -13,18 +13,7 @@
 
 ;; This module implements a column-aware wrapper around an instance of java.io.Writer
 
-(ns clojure.contrib.pprint.ColumnWriter
-  (:gen-class
-   :extends java.io.Writer
-   :init init
-   :constructors {[java.io.Writer Integer] [], 
-                  [java.io.Writer] []}
-   :methods [[getColumn [] Integer]
-             [getLine [] Integer]
-             [getMaxColumn [] Integer]
-             [setMaxColumn [Integer] Void]
-             [getWriter [] java.io.Writer]]
-   :state state))
+(ns clojure.contrib.pprint.ColumnWriter)
 
 (def *default-page-width* 72)
 
