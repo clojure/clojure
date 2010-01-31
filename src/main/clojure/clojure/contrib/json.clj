@@ -14,11 +14,12 @@
 (ns #^{:author "Stuart Sierra"
        :doc "JavaScript Object Notation (JSON) parser/writer.
   See http://www.json.org/
-  To write JSON, use json-str, write-json, or print-json.
+  To write JSON, use json-str, write-json, or write-json.
   To read JSON, use read-json."}
     clojure.contrib.json
   (:require [clojure.contrib.java-utils :as j])
-  (:import (java.io PushbackReader StringReader Reader EOFException)))
+  (:import (java.io PrintWriter PushbackReader StringWriter
+                    StringReader Reader EOFException)))
 
 ;;; JSON READER
 
@@ -199,11 +200,11 @@
 
 ;;; JSON PRINTER
 
-(defprotocol Print-JSON
-  (print-json [object]
-              "Print object to *out* as JSON"))
+(defprotocol Write-JSON
+  (write-json [object out]
+              "Print object to PrintWriter out as JSON"))
 
-(defn- print-json-string [#^CharSequence s]
+(defn- write-json-string [#^CharSequence s #^PrintWriter out]
   (let [sb (StringBuilder. #^Integer (count s))]
     (.append sb \")
     (dotimes [i (count s)]
@@ -224,72 +225,80 @@
          ;; Any other character is Hexadecimal-escaped
          :else (.append sb (format "\\u%04x" cp)))))
     (.append sb \")
-    (print (str sb))))
+    (.print out (str sb))))
 
-(defn- print-json-object [m] 
-  (print \{)
+(defn- write-json-object [m #^PrintWriter out] 
+  (.print out \{)
   (loop [x m]
     (when (seq m)
       (let [[k v] (first x)]
         (when (nil? k)
           (throw (Exception. "JSON object keys cannot be nil/null")))
-        (print-json (j/as-str k))
-        (print \:)
-        (print-json v))
+        (.print out \")
+        (.print out (j/as-str k))
+        (.print out \")
+        (.print out \:)
+        (write-json v out))
       (let [nxt (next x)]
         (when (seq nxt)
-          (print \,)
+          (.print out \,)
           (recur nxt)))))
-  (print \}))
+  (.print out \}))
 
-(defn- print-json-array [s]
-  (print \[)
+(defn- write-json-array [s #^PrintWriter out]
+  (.print out \[)
   (loop [x s]
     (when (seq x)
       (let [fst (first x)
             nxt (next x)]
-        (print-json fst)
+        (write-json fst out)
         (when (seq nxt)
-          (print \,)
+          (.print out \,)
           (recur nxt)))))
-  (print \]))
+  (.print out \]))
 
-(defn- print-json-bignum [x]
-  (print (str x)))
+(defn- write-json-bignum [x #^PrintWriter out]
+  (.print out (str x)))
 
-(extend nil Print-JSON
-        {:print-json (fn [x] (print "null"))})
-(extend clojure.lang.Named Print-JSON
-        {:print-json (fn [x] (print-json (name x)))})
-(extend java.lang.Boolean Print-JSON
-        {:print-json pr})
-(extend java.lang.Number Print-JSON
-        {:print-json pr})
-(extend java.math.BigInteger Print-JSON
-        {:print-json print-json-bignum})
-(extend java.math.BigDecimal Print-JSON
-        {:print-json print-json-bignum})
-(extend java.lang.CharSequence Print-JSON
-        {:print-json print-json-string})
-(extend java.util.Map Print-JSON
-        {:print-json print-json-object})
-(extend java.util.Collection Print-JSON
-        {:print-json print-json-array})
-(extend clojure.lang.ISeq Print-JSON
-        {:print-json print-json-array})
-(extend java.lang.Object Print-JSON
-        {:print-json (fn [x]
+(defn- write-json-plain [x #^PrintWriter out]
+  (.print out x))
+
+(extend nil Write-JSON
+        {:write-json (fn [x #^PrintWriter out] (.print out "null"))})
+(extend clojure.lang.Named Write-JSON
+        {:write-json (fn [x #^PrintWriter out]
+                       (write-json-string (name x) out))})
+(extend java.lang.Boolean Write-JSON
+        {:write-json write-json-plain})
+(extend java.lang.Number Write-JSON
+        {:write-json write-json-plain})
+(extend java.math.BigInteger Write-JSON
+        {:write-json write-json-bignum})
+(extend java.math.BigDecimal Write-JSON
+        {:write-json write-json-bignum})
+(extend java.lang.CharSequence Write-JSON
+        {:write-json write-json-string})
+(extend java.util.Map Write-JSON
+        {:write-json write-json-object})
+(extend java.util.Collection Write-JSON
+        {:write-json write-json-array})
+(extend clojure.lang.ISeq Write-JSON
+        {:write-json write-json-array})
+(extend java.lang.Object Write-JSON
+        {:write-json (fn [x out]
                        (if (.isArray (class x))
-                         (print-json (seq x))
+                         (write-json (seq x) out)
                          (throw (Exception. "Don't know how to print JSON of " (class x)))))})
 
 (defn json-str
   "Converts x to a JSON-formatted string."
   [x]
-  (with-out-str (print-json x)))
+  (let [sw (StringWriter.)
+        out (PrintWriter. sw)]
+    (write-json x out)
+    (.toString sw)))
 
-(defn write-json
-  "Writes JSON-formatted text to out."
-  [x out]
-  (binding [*out* out]
-    (print-json x)))
+(defn print-json
+  "Write JSON-formatted output to *out*"
+  [x]
+  (write-json x *out*))
