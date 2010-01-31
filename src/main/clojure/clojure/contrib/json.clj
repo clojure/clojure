@@ -11,7 +11,6 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-
 (ns #^{:author "Stuart Sierra"
        :doc "JavaScript Object Notation (JSON) parser/writer.
   See http://www.json.org/
@@ -222,7 +221,7 @@
 
  java.lang.CharSequence
  (print-json [s]
-             (let [sb (StringBuilder. (count s))]
+             (let [sb (StringBuilder. #^Integer (count s))]
                (.append sb \")
                (dotimes [i (count s)]
                  (let [cp (Character/codePointAt s i)]
