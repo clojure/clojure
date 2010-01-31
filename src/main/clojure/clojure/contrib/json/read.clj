@@ -47,7 +47,7 @@
 ",
      :see-also [["http://www.json.org", "JSON Home Page"]]}
   clojure.contrib.json.read
-  (:import (java.io PushbackReader StringReader EOFException))
+  (:import (java.io PushbackReader StringReader Reader EOFException))
   (:use [clojure.test :only (deftest- is)]))
 
 (declare read-json)
@@ -144,9 +144,14 @@
   "Read one JSON record from s, which may be a String or a
   java.io.PushbackReader."
   ([] (read-json *in* true nil))
-  ([s] (if (string? s)
-         (read-json (PushbackReader. (StringReader. s)) true nil)
-         (read-json s true nil)))
+  ([s] (cond (string? s)
+             (read-json (PushbackReader. (StringReader. s)) true nil)
+             
+             (instance? PushbackReader s)
+             (read-json s true nil)
+             
+             (instance? Reader s)
+             (read-json (PushbackReader. s) true nil)))
   ([#^PushbackReader stream eof-error? eof-value]
      (loop [i (.read stream)]
        (let [c (char i)]
