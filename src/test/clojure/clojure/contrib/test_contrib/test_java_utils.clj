@@ -1,7 +1,7 @@
-(ns clojure.contrib.test-contrib.test-java-utils
+(ns clojure.contrib.test-contrib.test-java
   (:use clojure.test
-	[clojure.contrib.duck-streams :only (spit)]
-	clojure.contrib.java-utils)
+	[clojure.contrib.io :only (spit)]
+	clojure.contrib.java)
   (:import [java.io File]
            [java.net URL URI]
 	   [java.util Properties]))
@@ -65,7 +65,7 @@
     
 (deftest test-set-system-properties 
   (testing "set and then unset a property using keywords"
-    (let [propname :clojure.contrib.java-utils.test-set-system-properties]
+    (let [propname :clojure.contrib.java.test-set-system-properties]
       (is (nil? (get-system-property propname)))
       (set-system-properties {propname :foo})
       (is (= "foo") (get-system-property propname))
@@ -74,7 +74,7 @@
 )
 
 (deftest test-with-system-properties
-  (let [propname :clojure.contrib.java-utils.test-with-system-properties]
+  (let [propname :clojure.contrib.java.test-with-system-properties]
     (testing "sets a property only for the duration of a block"
       (is (= "foo" 
 	     (with-system-properties {propname "foo"}
@@ -82,7 +82,7 @@
       (is (nil? (get-system-property propname)))))
   (testing "leaves other properties alone"
     ; TODO: write this test better, using a properties -> map function
-    (let [propname :clojure.contrib.java-utils.test-with-system-properties
+    (let [propname :clojure.contrib.java.test-with-system-properties
           propcount (count (System/getProperties))]
       (with-system-properties {propname "foo"}
         (is (= (inc propcount) (count (System/getProperties)))))

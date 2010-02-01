@@ -15,7 +15,7 @@
 
 
 (ns clojure.contrib.datalog.util
-  (:use [clojure.contrib.seq-utils :only (separate)]))
+  (:use [clojure.contrib.seq :only (separate)]))
 
 
 

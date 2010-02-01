@@ -21,7 +21,7 @@
         clojure.contrib.datalog.rules
         clojure.contrib.datalog.magic)
   (:use [clojure.set :only (union intersection difference)])
-  (:use [clojure.contrib.seq-utils :only (indexed)])
+  (:use [clojure.contrib.seq :only (indexed)])
   (:require [clojure.contrib.graph :as graph]))
 
 

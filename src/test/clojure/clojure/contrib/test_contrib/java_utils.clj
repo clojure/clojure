@@ -1,5 +1,5 @@
-(ns clojure.contrib.test-contrib.java-utils
-  (:use clojure.test clojure.contrib.java-utils))
+(ns clojure.contrib.test-contrib.java
+  (:use clojure.test clojure.contrib.java))
 
 (deftest t-as-str
   (is (= "foo" (as-str "foo")))

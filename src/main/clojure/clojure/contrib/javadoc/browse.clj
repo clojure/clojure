@@ -13,7 +13,7 @@
   #^{:author "Christophe Grand",
      :doc "Start a web browser from Clojure"}
   clojure.contrib.javadoc.browse
-  (:require [clojure.contrib.shell-out :as sh]) 
+  (:require [clojure.contrib.shell :as sh]) 
   (:import (java.net URI)))
 
 (defn- macosx? []

@@ -53,7 +53,7 @@
 (ns clojure.contrib.mock
   #^{:author "Matt Clark",
      :doc "function mocking/expectations for Clojure" }
-  (:use [clojure.contrib.seq-utils :only (positions)]
+  (:use [clojure.contrib.seq :only (positions)]
         [clojure.contrib.def :only (defmacro-)]))
 
 

@@ -52,7 +52,7 @@
 
   And you could write the response directly to a file like this:
 
-    (require '[clojure.contrib.duck-streams :as d])
+    (require '[clojure.contrib.io :as d])
 
     (http-agent \"http...\"
                 :handler (fn [agnt] 
@@ -65,7 +65,7 @@
   clojure.contrib.http.agent
   (:refer-clojure :exclude [bytes])
   (:require [clojure.contrib.http.connection :as c]
-            [clojure.contrib.duck-streams :as duck])
+            [clojure.contrib.io :as duck])
   (:import (java.io InputStream ByteArrayOutputStream
                     ByteArrayInputStream)
            (java.net HttpURLConnection)))
@@ -261,7 +261,7 @@
   encoding.
 
   If no encoding is given, uses the encoding specified in the server
-  headers, or clojure.contrib.duck-streams/*default-encoding* if it is
+  headers, or clojure.contrib.io/*default-encoding* if it is
   not specified."
   ([http-agnt]
      (await http-agnt) ;; have to wait for Content-Encoding

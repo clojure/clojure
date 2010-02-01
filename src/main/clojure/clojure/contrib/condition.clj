@@ -40,7 +40,7 @@ http://groups.google.com/group/clojure/browse_frm/thread/da1285c538f22bb5"}
            clojure.lang.IPersistentMap)
   (:use (clojure.contrib
          [def :only (defvar)]
-         [seq-utils :only (separate)])))
+         [seq :only (separate)])))
 
 (defvar *condition*
   "While a handler is running, bound to the condition being handled")

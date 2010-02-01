@@ -15,7 +15,7 @@
   #^{:author "Chris Houser",
      :doc "Conveniently launch a sub-process providing to its stdin and
 collecting its stdout"}
-  clojure.contrib.shell-out
+  clojure.contrib.shell
   (:import (java.io InputStreamReader OutputStreamWriter)))
 
 (def *sh-dir* nil)

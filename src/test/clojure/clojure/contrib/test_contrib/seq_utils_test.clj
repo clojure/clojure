@@ -1,6 +1,6 @@
-(ns clojure.contrib.test-contrib.seq-utils-test
+(ns clojure.contrib.test-contrib.seq-test
   (:use clojure.test
-	clojure.contrib.seq-utils))
+	clojure.contrib.seq))
 
 
 (deftest test-positions

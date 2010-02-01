@@ -1,7 +1,7 @@
 (ns clojure.contrib.test-contrib.with-ns-test
   (:use clojure.test
 	clojure.contrib.with-ns
-        [clojure.contrib.seq-utils :only (includes?)]))
+        [clojure.contrib.seq :only (includes?)]))
 
 (deftest test-namespace-gets-removed
   (let [all-ns-names (fn [] (map #(.name %) (all-ns)))]

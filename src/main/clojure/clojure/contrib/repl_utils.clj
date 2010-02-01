@@ -15,7 +15,7 @@
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
            (clojure.lang RT Compiler Compiler$C))
-  (:use [clojure.contrib.seq-utils :only (indexed)]
+  (:use [clojure.contrib.seq :only (indexed)]
         [clojure.contrib.javadoc.browse :only (browse-url)]
         [clojure.contrib.str-utils :only (str-join re-sub re-partition)]))
 

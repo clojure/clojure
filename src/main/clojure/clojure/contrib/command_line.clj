@@ -12,7 +12,7 @@
     #^{:author "Chris Houser", 
        :doc "Process command-line arguments according to a given cmdspec"}
     clojure.contrib.command-line
-    (:require (clojure.contrib [seq-utils :as su]))
+    (:require (clojure.contrib [seq :as su]))
     (:use     (clojure.contrib [str-utils :only (str-join)])))
 
 (defn make-map [args cmdspec]

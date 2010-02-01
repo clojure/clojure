@@ -24,7 +24,7 @@
 (ns 
   #^{:author "Stuart Sierra (and others)",
      :doc "Sequence utilities for Clojure"}
-  clojure.contrib.seq-utils
+  clojure.contrib.seq
   (:import (java.util.concurrent LinkedBlockingQueue TimeUnit)
            (java.lang.ref WeakReference)))
 

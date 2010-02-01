@@ -15,8 +15,8 @@
   (:use
    (clojure.contrib
     [except :only (throwf throw-arg)]
-    [java-utils :only (as-properties)]
-    [seq-utils :only (indexed)]))
+    [java :only (as-properties)]
+    [seq :only (indexed)]))
   (:import
    (clojure.lang RT)
    (java.sql BatchUpdateException DriverManager SQLException Statement)

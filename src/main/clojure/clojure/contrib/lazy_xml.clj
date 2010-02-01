@@ -13,7 +13,7 @@
        :doc "Functions to parse xml lazily and emit back to text."}
     clojure.contrib.lazy-xml
     (:use [clojure.xml :as xml :only []]
-          [clojure.contrib.seq-utils :only [fill-queue]])
+          [clojure.contrib.seq :only [fill-queue]])
     (:import (org.xml.sax Attributes InputSource)
              (org.xml.sax.helpers DefaultHandler)
              (javax.xml.parsers SAXParserFactory)

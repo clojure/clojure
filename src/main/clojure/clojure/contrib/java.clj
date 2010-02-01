@@ -54,14 +54,14 @@
    If something in this module violates the principle of least surprise, please 
    let me (Stu) and the Clojure community know via the mailing list.
 "}
-  clojure.contrib.java-utils
+  clojure.contrib.java
   (:import [java.io File FileOutputStream]
 	   [java.util Properties]
            [java.net URI URL]))
 
 (defmulti relative-path-string 
   "Interpret a String or java.io.File as a relative path string. 
-   Building block for clojure.contrib.java-utils/file."
+   Building block for clojure.contrib.java/file."
   class)
 
 (defmethod relative-path-string String [#^String s]
@@ -74,7 +74,7 @@
 
 (defmulti #^File as-file 
   "Interpret a String or a java.io.File as a File. Building block
-   for clojure.contrib.java-utils/file, which you should prefer
+   for clojure.contrib.java/file, which you should prefer
    in most cases."
   class)
 (defmethod as-file String [#^String s] (File. s))

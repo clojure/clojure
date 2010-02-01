@@ -29,7 +29,7 @@
 ;; May 13, 2009: added functions to open writers for appending
 ;;
 ;; May 3, 2009: renamed file to file-str, for compatibility with
-;; clojure.contrib.java-utils.  reader/writer no longer use this
+;; clojure.contrib.java.  reader/writer no longer use this
 ;; function.
 ;;
 ;; February 16, 2009: (lazy branch) fixed read-lines to work with lazy
@@ -57,7 +57,7 @@
            Note: this is not really \"duck typing\" as implemented in languages
            like Ruby.  A better name would have been \"do-what-I-mean-streams\"
            or \"just-give-me-a-stream\", but ducks are funnier."} 
-    clojure.contrib.duck-streams
+    clojure.contrib.io
     (:import 
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File PrintWriter OutputStream

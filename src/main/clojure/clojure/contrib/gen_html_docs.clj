@@ -46,8 +46,8 @@
      :doc "Generates a single HTML page that contains the documentation for
 one or more Clojure libraries."} 
   clojure.contrib.gen-html-docs
-  (:require [clojure.contrib.duck-streams :as duck-streams])
-  (:use [clojure.contrib seq-utils str-utils repl-utils def prxml])
+  (:require [clojure.contrib.io :as io])
+  (:use [clojure.contrib seq str-utils repl-utils def prxml])
   (:import [java.lang Exception]
 	   [java.util.regex Pattern]))
 
@@ -457,7 +457,7 @@ libraries."
   "Calls generate-documentation on the libraries named by libs and
 emits the generated HTML to the path named by path."
   [path libs]
-  (duck-streams/spit path (generate-documentation libs)))
+  (io/spit path (generate-documentation libs)))
 
 (comment 
   (generate-documentation-to-file 
@@ -481,7 +481,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.complex-numbers
      'clojure.contrib.cond
      'clojure.contrib.def
-     'clojure.contrib.duck-streams
+     'clojure.contrib.io
      'clojure.contrib.enum
      'clojure.contrib.error-kit
      'clojure.contrib.except
@@ -507,9 +507,9 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.prxml
      'clojure.contrib.repl-ln
      'clojure.contrib.repl-utils
-     'clojure.contrib.seq-utils
+     'clojure.contrib.seq
      'clojure.contrib.server-socket
-     'clojure.contrib.shell-out
+     'clojure.contrib.shell
      'clojure.contrib.sql
      'clojure.contrib.stream-utils
      'clojure.contrib.str-utils
@@ -532,7 +532,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.test-clojure.printer
      'clojure.contrib.test-clojure.reader
      'clojure.contrib.test-clojure.sequences
-     'clojure.contrib.test-contrib.shell-out
+     'clojure.contrib.test-contrib.shell
      'clojure.contrib.test-contrib.str-utils
      'clojure.contrib.zip-filter.xml
      ]))

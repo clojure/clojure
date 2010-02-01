@@ -59,7 +59,7 @@
   (:use [clojure.contrib.types :only (deftype deftype-)])
   (:use [clojure.contrib.monads :only (defmonad with-monad)])
   (:use [clojure.contrib.def :only (defvar defvar-)])
-  (:require [clojure.contrib.seq-utils])
+  (:require [clojure.contrib.seq])
   (:require [clojure.contrib.generic.collection]))
 
 
@@ -112,7 +112,7 @@
 
 (defn stream-seq
   "Return a lazy seq on the stream. Also accessible via
-   clojure.contrib.seq-utils/seq-on and
+   clojure.contrib.seq/seq-on and
    clojure.contrib.generic.collection/seq for streams."
   [s]
   (lazy-seq
@@ -121,7 +121,7 @@
        nil
        (cons v (stream-seq ns))))))
 
-(defmethod clojure.contrib.seq-utils/seq-on stream-type
+(defmethod clojure.contrib.seq/seq-on stream-type
   [s]
   (stream-seq s))
 

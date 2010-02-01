@@ -13,8 +13,8 @@
 
 (ns #^{:doc "Low-level HTTP client API around HttpURLConnection"}
   clojure.contrib.http.connection
-  (:require [clojure.contrib.duck-streams :as duck]
-            [clojure.contrib.java-utils :as j])
+  (:require [clojure.contrib.io :as duck]
+            [clojure.contrib.java :as j])
   (:import (java.net URI URL HttpURLConnection)
            (java.io File InputStream Reader)))
 

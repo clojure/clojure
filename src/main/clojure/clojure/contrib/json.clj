@@ -17,7 +17,7 @@
   To write JSON, use json-str, write-json, or write-json.
   To read JSON, use read-json."}
     clojure.contrib.json
-  (:require [clojure.contrib.java-utils :as j])
+  (:require [clojure.contrib.java :as j])
   (:import (java.io PrintWriter PushbackReader StringWriter
                     StringReader Reader EOFException)))
 

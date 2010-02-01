@@ -1,12 +1,12 @@
-(ns clojure.contrib.test-contrib.shell-out
+(ns clojure.contrib.test-contrib.shell
   (:use clojure.test
-	clojure.contrib.shell-out)
+	clojure.contrib.shell)
   (:import (java.io File)))
 
 ; workaroung to access private parse-args. Better way?
-(def parse-args ((ns-interns 'clojure.contrib.shell-out) 'parse-args))
-(def as-file ((ns-interns 'clojure.contrib.shell-out) 'as-file))
-(def as-env-string ((ns-interns 'clojure.contrib.shell-out) 'as-env-string))
+(def parse-args ((ns-interns 'clojure.contrib.shell) 'parse-args))
+(def as-file ((ns-interns 'clojure.contrib.shell) 'as-file))
+(def as-env-string ((ns-interns 'clojure.contrib.shell) 'as-env-string))
 
 (deftest test-parse-args
   (are [x y] (= x y)

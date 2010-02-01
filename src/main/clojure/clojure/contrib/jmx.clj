@@ -72,7 +72,7 @@
   clojure.contrib.jmx
   (:refer-clojure :exclude [read])
   (:use clojure.contrib.def
-        [clojure.contrib.java-utils :only [as-str]]
+        [clojure.contrib.java :only [as-str]]
         [clojure.stacktrace :only (root-cause)]
         [clojure.walk :only [postwalk]])
   (:import [clojure.lang Associative]

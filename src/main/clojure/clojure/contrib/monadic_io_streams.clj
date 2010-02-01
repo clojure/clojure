@@ -26,7 +26,7 @@
   (:use [clojure.contrib.monads
 	 :only (with-monad domonad state-m state-m-until)])
   (:use [clojure.contrib.generic.functor :only (fmap)])
-  (:use [clojure.contrib.duck-streams :only (reader writer)]))
+  (:use [clojure.contrib.io :only (reader writer)]))
 
 ;
 ; Wrap the state into a closure to make sure that "evil" code
@@ -82,7 +82,7 @@
   (defn with-reader
     "Create a reader from reader-spec, run the monadic I/O statement
      on it, and close the reader. reader-spec can be any object accepted
-     by clojure.contrib.duck-streams/reader."
+     by clojure.contrib.io/reader."
     [reader-spec statement]
     (with-open [r (reader reader-spec)]
       (first (statement (lock r)))))
@@ -90,7 +90,7 @@
   (defn with-writer
     "Create a writer from writer-spec, run the monadic I/O statement
      on it, and close the writer. writer-spec can be any object accepted
-     by clojure.contrib.duck-streams/writer."
+     by clojure.contrib.io/writer."
     [writer-spec statement]
     (with-open [w (writer writer-spec)]
       (first (statement (lock w)))))
@@ -101,8 +101,8 @@
      a binding-like vector in which each stream is specified by
      three element: a keyword by which the stream can be referred to,
      the stream mode (:read or :write), and a stream specification as
-     accepted by clojure.contrib.duck-streams/reader (mode :read) or
-     clojure.contrib.duck-streams/writer (mode :write). The statement
+     accepted by clojure.contrib.io/reader (mode :read) or
+     clojure.contrib.io/writer (mode :write). The statement
      is run on a state which is a map from keywords to corresponding
      streams. Single-stream monadic I/O statements must be wrapped
      with clojure.contrib.monads/with-state-field."

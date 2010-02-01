@@ -20,7 +20,7 @@
      :doc "A version of prxml that uses a pretty print dispatch function."}
   clojure.contrib.pprint.examples.xml
   (:use [clojure.contrib.lazy-xml :only (escape-xml)]
-        [clojure.contrib.java-utils :only (as-str)]
+        [clojure.contrib.java :only (as-str)]
         [clojure.contrib.pprint :only (formatter-out write)]
         [clojure.contrib.pprint.utilities :only (prlabel)]))
 
