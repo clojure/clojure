@@ -1,6 +1,6 @@
 (ns clojure.contrib.test-trace
   (:use clojure.test
-        [clojure.contrib trace string]))
+        clojure.contrib.trace))
 
 (deftrace call-myself [n]
   (when-not (< n 1)

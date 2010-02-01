@@ -13,7 +13,7 @@
 
 (ns clojure.contrib.pprint.test-pretty
   (:use [clojure.test :only (deftest are run-tests)]
-        clojure.contrib.test-contrib.pprint.helper
+        clojure.contrib.pprint.test-helper
         clojure.contrib.pprint))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

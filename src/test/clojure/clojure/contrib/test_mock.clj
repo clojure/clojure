@@ -57,19 +57,19 @@
 
 (deftest test-has-matching-signature
   (assert-called mock/no-matching-function-signature true
-    (mock/has-matching-signature? 'clojure.contrib.test-contrib.mock-test/fn2 [1]))
+    (mock/has-matching-signature? 'clojure.contrib.test-mock/fn2 [1]))
   (assert-called mock/no-matching-function-signature true
-    (mock/has-matching-signature? 'clojure.contrib.test-contrib.mock-test/fn3 [1 3]))
+    (mock/has-matching-signature? 'clojure.contrib.test-mock/fn3 [1 3]))
   (assert-called mock/no-matching-function-signature false
-    (mock/has-matching-signature? 'clojure.contrib.test-contrib.mock-test/fn3 [1 3 5]))
+    (mock/has-matching-signature? 'clojure.contrib.test-mock/fn3 [1 3 5]))
   (assert-called mock/no-matching-function-signature false
-    (mock/has-matching-signature? 'clojure.contrib.test-contrib.mock-test/fn4 [1 3 5 7 9]))
+    (mock/has-matching-signature? 'clojure.contrib.test-mock/fn4 [1 3 5 7 9]))
   (assert-called mock/no-matching-function-signature false
-    (mock/has-matching-signature? 'clojure.contrib.test-contrib.mock-test/fn4 [1 3]))
+    (mock/has-matching-signature? 'clojure.contrib.test-mock/fn4 [1 3]))
   (assert-called mock/no-matching-function-signature true
-    (mock/has-matching-signature? 'clojure.contrib.test-contrib.mock-test/fn4 [1]))
+    (mock/has-matching-signature? 'clojure.contrib.test-mock/fn4 [1]))
   (assert-called mock/no-matching-function-signature false
-    (mock/has-matching-signature? 'clojure.contrib.test-contrib.mock-test/deffed-differently [1])))
+    (mock/has-matching-signature? 'clojure.contrib.test-mock/deffed-differently [1])))
 
 
 (deftest test-times

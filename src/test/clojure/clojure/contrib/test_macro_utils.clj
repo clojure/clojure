@@ -20,7 +20,7 @@
 	 :only (with-monad domonad)]))
 
 (use-fixtures :each
-  (fn [f] (binding [*ns* (the-ns 'clojure.contrib.test-contrib.macro-utils)]
+  (fn [f] (binding [*ns* (the-ns 'clojure.contrib.test-macro-utils)]
 	    (f))))
 
 (deftest macrolet-test

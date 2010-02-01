@@ -16,7 +16,7 @@
 (ns clojure.contrib.pprint.test-cl-format
   (:refer-clojure :exclude [format])
   (:use [clojure.test :only (deftest are run-tests)]
-        clojure.contrib.test-contrib.pprint.helper
+        clojure.contrib.pprint.test-helper
         clojure.contrib.pprint))
 
 (def format cl-format)
