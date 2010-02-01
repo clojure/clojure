@@ -69,6 +69,7 @@
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
+        <version>1.3.1</version>
         <configuration>
           <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
           <namespaces>
