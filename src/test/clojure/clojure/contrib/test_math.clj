@@ -1,4 +1,4 @@
-(ns clojure.contrib.math.tests
+(ns clojure.contrib.test-math
   (:use clojure.test
 	clojure.contrib.math))
 

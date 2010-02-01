@@ -1,10 +1,123 @@
-(ns clojure.contrib.test-contrib.java
-  (:use clojure.test clojure.contrib.java))
+(ns clojure.contrib.test-java
+  (:use clojure.test
+	[clojure.contrib.io :only (spit)]
+	clojure.contrib.java)
+  (:import [java.io File]
+           [java.net URL URI]
+	   [java.util Properties]))
 
-(deftest t-as-str
-  (is (= "foo" (as-str "foo")))
-  (is (= "foo" (as-str 'foo)))
-  (is (= "foo" (as-str :foo)))
-  (is (= "[1 2 3]" (as-str [1 2 3])))
-  (is (= "Hello, World!" (as-str "Hello, " :World \!)))
-  (is (= (str {:foo :bar}) (as-str {:foo :bar}))))
+(deftest test-relative-path-string
+  (testing "strings"
+    (is (= "foo" (relative-path-string "foo"))))
+  (testing "absolute path strings are forbidden"
+    (is (thrown? IllegalArgumentException (relative-path-string "/baz"))))
+  (testing "relative File paths"
+    (is (= "bar" (relative-path-string (File. "bar")))))
+  (testing "absolute File paths are forbidden"
+    (is (thrown? IllegalArgumentException (relative-path-string (File. "/quux")))))
+)
+
+(deftest test-as-file
+  (testing "strings"
+    (is (= (File. "foo") (as-file "foo"))))
+  (testing "Files"
+    (is (= (File. "bar") (as-file (File. "bar")))))
+)
+
+(deftest test-as-url
+  (are [result expr] (= result expr)
+       (URL. "http://foo") (as-url (URL. "http://foo"))
+       (URL. "http://foo") (as-url "http://foo")
+       (URL. "http://foo") (as-url (URI. "http://foo"))
+       (URL. "file:/foo") (as-url (File. "/foo"))))
+
+(deftest test-file
+  (testing "single argument"
+    (is (= (File. "foo") (file "foo"))))
+  (testing "two arguments"
+    (is (= (File. "foo/bar") (file "foo" "bar"))))
+  (testing "N arguments"
+    (is (= (File. "foo/bar/baz/quux") (file "foo" "bar" "baz" "quux"))))
+  (testing "no sneaking in absolute paths!"
+    (is (thrown? IllegalArgumentException (file "foo" "bar" "/boom" "baz" "quux"))))
+)
+
+(deftest test-as-str
+  (testing "keyword to string"
+    (is (= "foo") (as-str :foo)))
+  (testing "symbol to string"
+    (is (= "foo") (as-str 'foo)))
+  (testing "string to string"
+    (is (= "foo") (as-str "foo")))
+  (testing "stringifying non-namish things"
+    (is (= "42") (as-str 42)))
+)
+
+(deftest test-get-system-property
+  (testing "works the same with keywords, symbols, and strings"
+    (is (= (get-system-property "java.home") (get-system-property 'java.home)))
+    (is (= (get-system-property "java.home") (get-system-property :java.home))))
+  (testing "treats second arg as default"
+    (is (= "default" (get-system-property "testing.test-system-property" "default"))))
+  (testing "returns nil for missing properties"
+    (is (nil? (get-system-property "testing.test-system-property"))))
+)
+    
+(deftest test-set-system-properties 
+  (testing "set and then unset a property using keywords"
+    (let [propname :clojure.contrib.java.test-set-system-properties]
+      (is (nil? (get-system-property propname)))
+      (set-system-properties {propname :foo})
+      (is (= "foo") (get-system-property propname))
+      (set-system-properties {propname nil})
+      (is (nil? (get-system-property propname)))))
+)
+
+(deftest test-with-system-properties
+  (let [propname :clojure.contrib.java.test-with-system-properties]
+    (testing "sets a property only for the duration of a block"
+      (is (= "foo" 
+	     (with-system-properties {propname "foo"}
+	       (get-system-property propname))))
+      (is (nil? (get-system-property propname)))))
+  (testing "leaves other properties alone"
+    ; TODO: write this test better, using a properties -> map function
+    (let [propname :clojure.contrib.java.test-with-system-properties
+          propcount (count (System/getProperties))]
+      (with-system-properties {propname "foo"}
+        (is (= (inc propcount) (count (System/getProperties)))))
+      (is (= propcount (count (System/getProperties))))))
+)
+
+(deftest test-as-properties
+  (let [expected (doto (Properties.)
+		   (.setProperty "a" "b")
+		   (.setProperty "c" "d"))]
+    (testing "with a map"
+      (is (= expected
+	     (as-properties {:a "b" :c "d"}))))
+    (testing "with a sequence of pairs"
+      (is (= expected
+	     (as-properties [[:a :b] [:c :d]]))))))
+
+(deftest test-read-properties
+  (let [f (File/createTempFile "test" "properties")]
+    (spit f "a=b\nc=d")
+    (is (= {"a" "b" "c" "d"}
+	   (read-properties f)))))
+	   
+(deftest test-write-properties
+  (let [f (File/createTempFile "test" "properties")]
+    (write-properties [['a 'b] ['c 'd]] f)
+    (is (= {"a" "b" "c" "d"}
+	   (read-properties f)))))
+	   
+
+(deftest test-delete-file
+  (let [file (File/createTempFile "test" "deletion")
+        not-file (File. (str (java.util.UUID/randomUUID)))]
+    (delete-file (.getAbsolutePath file))
+    (is (not (.exists file)))
+    (is (thrown? ArithmeticException (/ 1 0)))
+    (is (thrown? java.io.IOException (delete-file not-file)))
+    (is (delete-file not-file :silently))))

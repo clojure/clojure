@@ -11,7 +11,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.contrib.test-contrib.pprint.pretty
+(ns clojure.contrib.pprint.test-pretty
   (:use [clojure.test :only (deftest are run-tests)]
         clojure.contrib.test-contrib.pprint.helper
         clojure.contrib.pprint))

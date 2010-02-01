@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.test-lazy-seqs
+(ns clojure.contrib.test-lazy-seqs
   (:use clojure.test
 	clojure.contrib.lazy-seqs))
 

@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.seq-test
+(ns clojure.contrib.test-seq
   (:use clojure.test
 	clojure.contrib.seq))
 

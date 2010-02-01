@@ -13,7 +13,7 @@
 
 ;; This test set tests the basic cl-format functionality
 
-(ns clojure.contrib.test-contrib.pprint.cl-format
+(ns clojure.contrib.pprint.test-cl-format
   (:refer-clojure :exclude [format])
   (:use [clojure.test :only (deftest are run-tests)]
         clojure.contrib.test-contrib.pprint.helper

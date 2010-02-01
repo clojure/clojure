@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.test-trace
+(ns clojure.contrib.test-trace
   (:use clojure.test
         [clojure.contrib trace string]))
 

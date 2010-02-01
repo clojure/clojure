@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.string
+(ns clojure.contrib.test-string
   (:require [clojure.contrib.string :as s])
   (:use clojure.test))
 

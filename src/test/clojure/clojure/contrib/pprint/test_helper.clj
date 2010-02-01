@@ -13,7 +13,7 @@
 
 ;; This is just a macro to make my tests a little cleaner
 
-(ns clojure.contrib.test-contrib.pprint.helper
+(ns clojure.contrib.contrib.pprint.test-helper
   (:use [clojure.test :only (deftest are run-tests)]))
 
 (defmacro simple-tests [name & test-pairs]

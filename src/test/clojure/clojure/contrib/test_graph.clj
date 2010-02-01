@@ -13,7 +13,7 @@
 ;;  straszheimjeffrey (gmail)
 ;;  Created 23 June 2009
 
-(ns clojure.contrib.test-contrib.test-graph
+(ns clojure.contrib.test-graph
   (use clojure.test
        clojure.contrib.graph))
 

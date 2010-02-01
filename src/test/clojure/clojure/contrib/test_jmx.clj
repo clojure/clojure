@@ -10,7 +10,7 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns clojure.contrib.test-contrib.test-jmx
+(ns clojure.contrib.test-jmx
   (:import javax.management.openmbean.CompositeDataSupport
            [javax.management MBeanAttributeInfo AttributeList]
            [java.util.logging LogManager Logger]

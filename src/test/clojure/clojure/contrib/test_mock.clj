@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.mock-test
+(ns clojure.contrib.test-mock
  (:use clojure.test)
  (:require [clojure.contrib.mock :as mock]))
 

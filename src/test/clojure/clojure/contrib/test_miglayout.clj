@@ -13,7 +13,7 @@
 ;;  scgilardi (gmail)
 ;;  Created 5 October 2008
 
-(ns clojure.contrib.miglayout.test
+(ns clojure.contrib.test-miglayout
   (:import (javax.swing JButton JFrame JLabel JList JPanel
                         JScrollPane JTabbedPane JTextField JSeparator))
   (:use clojure.contrib.miglayout))

@@ -14,7 +14,7 @@
 ;;  Created 11 March 2009
 
 
-(ns clojure.contrib.test-contrib.test-dataflow
+(ns clojure.contrib.test-dataflow
   (:use clojure.test)
   (:use clojure.contrib.dataflow))
 

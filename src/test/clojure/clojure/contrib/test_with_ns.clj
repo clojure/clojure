@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.with-ns-test
+(ns clojure.contrib.test-with-ns
   (:use clojure.test
 	clojure.contrib.with-ns
         [clojure.contrib.seq :only (includes?)]))

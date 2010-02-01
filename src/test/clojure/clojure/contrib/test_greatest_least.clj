@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.greatest-least
+(ns clojure.contrib.test-greatest-least
   (:use clojure.contrib.greatest-least
         [clojure.test :only (is deftest run-tests)]))
 

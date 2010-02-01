@@ -13,7 +13,7 @@
 ;;  scgilardi (gmail)
 ;;  Created 13 September 2008
 
-(ns clojure.contrib.sql.test
+(ns clojure.contrib.test-sql
   (:use [clojure.contrib.sql :as sql :only ()]))
 
 (def db {:classname "org.apache.derby.jdbc.EmbeddedDriver"

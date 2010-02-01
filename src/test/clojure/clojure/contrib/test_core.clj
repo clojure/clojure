@@ -12,7 +12,7 @@
 
 ;; note to other contrib members: feel free to add to this lib
 
-(ns clojure.contrib.core.tests
+(ns clojure.contrib.test-core
   (:use clojure.test)
   (:use clojure.contrib.core))
 

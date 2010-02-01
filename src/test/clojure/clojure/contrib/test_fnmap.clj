@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.fnmap
+(ns clojure.contrib.test-fnmap
   (:use clojure.contrib.fnmap
         clojure.test))
 

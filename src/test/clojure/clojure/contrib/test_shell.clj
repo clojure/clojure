@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.shell
+(ns clojure.contrib.test-shell
   (:use clojure.test
 	clojure.contrib.shell)
   (:import (java.io File)))

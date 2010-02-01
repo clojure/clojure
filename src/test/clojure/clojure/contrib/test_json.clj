@@ -1,4 +1,4 @@
-(ns clojure.contrib.test-contrib.test-json
+(ns clojure.contrib.test-json
   (:use clojure.test clojure.contrib.json))
 
 (deftest can-read-numbers
