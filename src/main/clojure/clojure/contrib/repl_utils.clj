@@ -17,7 +17,7 @@
            (clojure.lang RT Compiler Compiler$C))
   (:use [clojure.contrib.seq :only (indexed)]
         [clojure.contrib.javadoc.browse :only (browse-url)]
-        [clojure.contrib.str-utils :only (str-join re-sub re-partition)]))
+        [clojure.contrib.string :only (str-join re-sub re-partition)]))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Java classes

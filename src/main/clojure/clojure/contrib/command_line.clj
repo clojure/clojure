@@ -13,7 +13,7 @@
        :doc "Process command-line arguments according to a given cmdspec"}
     clojure.contrib.command-line
     (:require (clojure.contrib [seq :as su]))
-    (:use     (clojure.contrib [str-utils :only (str-join)])))
+    (:use     (clojure.contrib [string :only (str-join)])))
 
 (defn make-map [args cmdspec]
   (let [{spec true [rest-sym] false} (su/group-by vector? cmdspec)

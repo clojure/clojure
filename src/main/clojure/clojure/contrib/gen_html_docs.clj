@@ -47,7 +47,7 @@
 one or more Clojure libraries."} 
   clojure.contrib.gen-html-docs
   (:require [clojure.contrib.io :as io])
-  (:use [clojure.contrib seq str-utils repl-utils def prxml])
+  (:use [clojure.contrib seq string repl-utils def prxml])
   (:import [java.lang Exception]
 	   [java.util.regex Pattern]))
 
@@ -512,7 +512,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.shell
      'clojure.contrib.sql
      'clojure.contrib.stream-utils
-     'clojure.contrib.str-utils
+     'clojure.contrib.string
      'clojure.contrib.test-contrib
      'clojure.contrib.trace
      'clojure.contrib.types
@@ -533,7 +533,7 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.test-clojure.reader
      'clojure.contrib.test-clojure.sequences
      'clojure.contrib.test-contrib.shell
-     'clojure.contrib.test-contrib.str-utils
+     'clojure.contrib.test-contrib.string
      'clojure.contrib.zip-filter.xml
      ]))
   )

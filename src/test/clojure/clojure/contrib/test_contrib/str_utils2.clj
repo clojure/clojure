@@ -1,5 +1,5 @@
-(ns clojure.contrib.test-contrib.str-utils2
-  (:require [clojure.contrib.str-utils2 :as s])
+(ns clojure.contrib.test-contrib.string
+  (:require [clojure.contrib.string :as s])
   (:use clojure.test))
 
 (deftest t-codepoints

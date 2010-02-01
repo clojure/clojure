@@ -1,6 +1,6 @@
-(ns clojure.contrib.test-contrib.str-utils
+(ns clojure.contrib.test-contrib.string
     (:use clojure.test
-          clojure.contrib.str-utils))
+          clojure.contrib.string))
 
 
 (deftest test-re-gsub

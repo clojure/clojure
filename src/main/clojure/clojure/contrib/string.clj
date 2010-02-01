@@ -14,11 +14,11 @@
 
 (ns #^{:author "Stuart Sierra"
        :doc "This is a library of string manipulation functions.  It
-    is intented as a replacement for clojure.contrib.str-utils.
+    is intented as a replacement for clojure.contrib.string.
 
-    You cannot (use 'clojure.contrib.str-utils3) because it defines
+    You cannot (use 'clojure.contrib.string) because it defines
     functions with the same names as functions in clojure.core.
-    Instead, do (require '[clojure.contrib.str-utils3 :as s]) 
+    Instead, do (require '[clojure.contrib.string :as s]) 
     or something similar.
 
     Goals:
@@ -28,7 +28,7 @@
 
     Some ideas are borrowed from
     http://github.com/francoisdevlin/devlinsf-clojure-utils/"}
- clojure.contrib.str-utils3
+ clojure.contrib.string
  (:refer-clojure :exclude (take replace drop butlast partition
                            contains? get repeat reverse partial))
  (:import (java.util.regex Pattern)))
@@ -281,14 +281,14 @@
   [#^String s]
   (seq (.split #"\r?\n" s)))
 
-;; borrowed from compojure.str-utils, by James Reeves, EPL 1.0
+;; borrowed from compojure.string, by James Reeves, EPL 1.0
 (defn #^String map-str
   "Apply f to each element of coll, concatenate all results into a
   String."
   [f coll]
   (apply str (map f coll)))
 
-;; borrowed from compojure.str-utils, by James Reeves, EPL 1.0
+;; borrowed from compojure.string, by James Reeves, EPL 1.0
 (defn grep
   "Filters elements of coll by a regular expression.  The String
   representation (with str) of each element is tested with re-find."

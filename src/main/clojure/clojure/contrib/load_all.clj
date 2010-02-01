@@ -75,13 +75,13 @@ server-socket
 set
 shell
 sql
-str-utils
-str-utils2
+string
+string
 stream-utils
 swing-utils
 test-contrib
 test-contrib.shell
-test-contrib.str-utils
+test-contrib.string
 trace
 types
 zip-filter
