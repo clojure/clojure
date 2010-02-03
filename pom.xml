@@ -5,7 +5,6 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
   <properties>
     <clojure.version>1.2.0-master-SNAPSHOT</clojure.version>
-    <clojure.jar>${basedir}/../clojure/clojure.jar</clojure.jar>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <modelVersion>4.0.0</modelVersion>
@@ -51,6 +50,25 @@
       </snapshots>
     </repository>
   </repositories>
+  <profiles>
+    <profile>
+      <id>local</id>
+      <activation>
+        <property>
+          <name>clojure.jar</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+          <version>${clojure.version}</version>
+          <scope>system</scope>
+          <systemPath>${clojure.jar}</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
   <build>
     <resources>
       <resource>
