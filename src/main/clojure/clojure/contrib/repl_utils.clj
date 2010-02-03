@@ -17,21 +17,21 @@
            (clojure.lang RT Compiler Compiler$C))
   (:use [clojure.contrib.seq :only (indexed)]
         [clojure.contrib.javadoc.browse :only (browse-url)]
-        [clojure.contrib.string :only (str-join re-sub re-partition)]))
+        [clojure.contrib.string :as s :only ()]))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Java classes
 
 (defn- sortable [t]
   (apply str (map (fn [[a b]] (str a (format "%04d" (Integer. b))))
-                  (partition 2 (concat (re-partition #"\d+" t) [0])))))
+                  (partition 2 (concat (s/partition #"\d+" t) [0])))))
 
 (defn- param-str [m]
-  (str " (" (str-join
+  (str " (" (s/join
               "," (map (fn [[c i]]
                          (if (> i 3)
                            (str (.getSimpleName c) "*" i)
-                           (str-join "," (replicate i (.getSimpleName c)))))
+                           (s/join "," (replicate i (.getSimpleName c)))))
                        (reduce (fn [pairs y] (let [[x i] (peek pairs)]
                                                (if (= x y)
                                                  (conj (pop pairs) [y (inc i)])

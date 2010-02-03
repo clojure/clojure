@@ -201,7 +201,7 @@
   before the first match, or an empty string if the beginning of the
   string matches.
 
-  For example: (partition \"abc123def\" #\"[a-z]+\")
+  For example: (partition #\"[a-z]+\" \"abc123def\")
   returns: (\"\" \"abc\" \"123\" \"def\")"
   [#^Pattern re #^String s]
   (let [m (re-matcher re s)]

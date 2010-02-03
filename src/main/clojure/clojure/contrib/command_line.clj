@@ -13,7 +13,7 @@
        :doc "Process command-line arguments according to a given cmdspec"}
     clojure.contrib.command-line
     (:require (clojure.contrib [seq :as su]))
-    (:use     (clojure.contrib [string :only (str-join)])))
+    (:use     (clojure.contrib [string :only (join)])))
 
 (defn make-map [args cmdspec]
   (let [{spec true [rest-sym] false} (su/group-by vector? cmdspec)
@@ -49,13 +49,13 @@
    [spec & rows]
    (let [maxes (vec (for [n (range (count (first rows)))]
                         (apply max (map (comp count #(nth % n)) rows))))
-         fmt (str-join " " 
+         fmt (join " " 
                   (for [n (range (count maxes))] 
                      (str "%" 
                         (when-not (zero? (maxes n))
                            (str (when (= (spec n) :l) "-") (maxes n))) 
                           "s")))]
-      (str-join "\n"
+      (join "\n"
          (for [row rows]
             (apply format fmt row)))))
 
@@ -77,7 +77,7 @@
                                  (str (first argnames)))
                   argnames  (map (comp rmv-q str) argnames)
                   argnames
-                        (str-join ", "
+                        (join ", "
                           (for [arg argnames]
                             (if (= 1 (count arg))
                               (str "-" arg)
