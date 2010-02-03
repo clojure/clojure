@@ -415,3 +415,62 @@
 (defmethod to-byte-array Reader [#^Reader x]
   (.getBytes (slurp* x) *default-encoding*))
 
+(defmulti relative-path-string 
+  "Interpret a String or java.io.File as a relative path string. 
+   Building block for clojure.contrib.java/file."
+  class)
+
+(defmethod relative-path-string String [#^String s]
+  (relative-path-string (File. s)))
+
+(defmethod relative-path-string File [#^File f]
+  (if (.isAbsolute f)
+    (throw (IllegalArgumentException. (str f " is not a relative path")))
+    (.getPath f)))
+
+(defmulti #^File as-file 
+  "Interpret a String or a java.io.File as a File. Building block
+   for clojure.contrib.java/file, which you should prefer
+   in most cases."
+  class)
+(defmethod as-file String [#^String s] (File. s))
+(defmethod as-file File [f] f)
+
+(defn #^File file
+  "Returns a java.io.File from string or file args."
+  ([arg]                      
+     (as-file arg))
+  ([parent child]             
+     (File. #^File (as-file parent) #^String (relative-path-string child)))
+  ([parent child & more]
+     (reduce file (file parent child) more)))
+
+(defn delete-file
+  "Delete file f. Raise an exception if it fails unless silently is true."
+  [f & [silently]]
+  (or (.delete (file f))
+      silently
+      (throw (java.io.IOException. (str "Couldn't delete " f)))))
+
+(defn delete-file-recursively
+  "Delete file f. If it's a directory, recursively delete all its contents.
+Raise an exception if any deletion fails unless silently is true."
+  [f & [silently]]
+  (let [f (file f)]
+    (if (.isDirectory f)
+      (doseq [child (.listFiles f)]
+        (delete-file-recursively child silently)))
+    (delete-file f silently)))
+
+(defmulti
+  #^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
+     :arglists '([arg])}
+  as-url type)
+
+(defmethod as-url URL [x] x)
+
+(defmethod as-url URI [#^URI x] (.toURL x))
+
+(defmethod as-url String [#^String x] (URL. x))
+
+(defmethod as-url File [#^File x] (.toURL x))
