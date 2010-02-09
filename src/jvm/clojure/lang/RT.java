@@ -1075,8 +1075,18 @@ static public ISeq arrayToList(Object[] a) throws Exception{
 	return ret;
 }
 
-static public Object[] objectArray(int n){
-	return new Object[n];
+static public Object[] object_array(Object sizeOrSeq){
+	if(sizeOrSeq instanceof Number)
+		return new Object[((Number) sizeOrSeq).intValue()];
+	else
+		{
+		ISeq s = RT.seq(sizeOrSeq);
+		int size = RT.count(s);
+		Object[] ret = new Object[size];
+		for(int i = 0; i < size && s != null; i++, s = s.next())
+			ret[i] = s.first();
+		return ret;
+		}
 }
 
 static public Object[] toArray(Object coll) throws Exception{

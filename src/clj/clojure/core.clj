@@ -3690,6 +3690,12 @@
   ([size-or-seq] (. clojure.lang.Numbers double_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers double_array size init-val-or-seq)))
 
+(defn object-array
+  "Creates an array of objects"
+  {:inline (fn [arg] `(. clojure.lang.RT object_array ~arg))
+   :inline-arities #{1}}
+  ([size-or-seq] (. clojure.lang.RT object_array size-or-seq)))
+
 (defn int-array
   "Creates an array of ints"
   {:inline (fn [& args] `(. clojure.lang.Numbers int_array ~@args))
