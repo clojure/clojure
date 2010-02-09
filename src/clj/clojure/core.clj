@@ -423,13 +423,6 @@
   ([name] (if (symbol? name) name (clojure.lang.Symbol/intern name)))
   ([ns name] (clojure.lang.Symbol/intern ns name)))
 
-(defn keyword
-  "Returns a Keyword with the given namespace and name.  Do not use :
-  in the keyword strings, it will be added automatically."
-  {:tag clojure.lang.Keyword}
-  ([name] (if (keyword? name) name (clojure.lang.Keyword/intern name)))
-  ([ns name] (clojure.lang.Keyword/intern ns name)))
-
 (defn gensym
   "Returns a new symbol with a unique name. If a prefix string is
   supplied, the name is prefix# where # is some unique number. If
@@ -450,6 +443,15 @@
                 (throw (IllegalArgumentException.
                          "cond requires an even number of forms")))
             (cons 'clojure.core/cond (next (next clauses))))))
+
+(defn keyword
+  "Returns a Keyword with the given namespace and name.  Do not use :
+  in the keyword strings, it will be added automatically."
+  {:tag clojure.lang.Keyword}
+  ([name] (cond (keyword? name) name
+                (symbol? name) (clojure.lang.Keyword/intern #^clojure.lang.Symbol name)
+                (string? name) (clojure.lang.Keyword/intern #^String name)))
+  ([ns name] (clojure.lang.Keyword/intern ns name)))
 
 (defn spread
   {:private true}
