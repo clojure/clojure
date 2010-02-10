@@ -3733,19 +3733,23 @@
 
 (defn ns-resolve
   "Returns the var or Class to which a symbol will be resolved in the
-  namespace, else nil.  Note that if the symbol is fully qualified,
-  the var/Class to which it resolves need not be present in the
-  namespace."
+  namespace (unless found in the environement), else nil.  Note that
+  if the symbol is fully qualified, the var/Class to which it resolves
+  need not be present in the namespace."
   {:added "1.0"
    :static true}
-  [ns sym]
-  (clojure.lang.Compiler/maybeResolveIn (the-ns ns) sym))
+  ([ns sym]
+    (ns-resolve ns nil sym))
+  ([ns env sym]
+    (when-not (contains? env sym)
+      (clojure.lang.Compiler/maybeResolveIn (the-ns ns) sym))))
 
 (defn resolve
-  "same as (ns-resolve *ns* symbol)"
+  "same as (ns-resolve *ns* symbol) or (ns-resolve *ns* &env symbol)"
   {:added "1.0"
    :static true}
-  [sym] (ns-resolve *ns* sym))
+  ([sym] (ns-resolve *ns* sym))
+  ([env sym] (ns-resolve *ns* env sym)))
 
 (defn array-map
   "Constructs an array-map."
