@@ -348,10 +348,17 @@ static public Number shiftLeft(Number x, int n){
 	return bitOps(x).shiftLeft(x, n);
 }
 
+static public int shiftLeft(int x, int n){
+	return x << n;
+}
+
 static public Number shiftRight(Number x, int n){
 	return bitOps(x).shiftRight(x, n);
 }
 
+static public int shiftRight(int x, int n){
+	return x >> n;
+}
 
 final static class IntegerOps implements Ops{
 	public Ops combine(Ops y){

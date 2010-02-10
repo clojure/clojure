@@ -501,12 +501,6 @@ static public IPersistentMap meta(Object x){
 	return null;
 }
 
-public static int count(Counted o){
-	if(o != null)
-		return o.count();
-	return 0;
-}
-
 public static int count(Object o){
 	if(o instanceof Counted)
 		return ((Counted) o).count();

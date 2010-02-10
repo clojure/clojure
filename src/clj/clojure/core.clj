@@ -948,10 +948,12 @@
 
 (defn bit-shift-left
   "Bitwise shift left"
+  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftLeft ~x ~n)))}
   [x n] (. clojure.lang.Numbers shiftLeft x n))
 
 (defn bit-shift-right
   "Bitwise shift right"
+  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftRight ~x ~n)))}
   [x n] (. clojure.lang.Numbers shiftRight x n))
 
 (defn even?

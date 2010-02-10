@@ -8,6 +8,16 @@
 
 (in-ns 'clojure.core)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; definterface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;for now, built on gen-interface
+(defmacro definterface 
+  [name & sigs]
+  (let [tag (fn [x] (or (:tag (meta x)) Object))
+        psig (fn [[name [& args]]]
+               (vector name (vec (map tag args)) (tag name)))]
+    `(gen-interface :name ~(symbol (str *ns* "." name)) :methods ~(vec (map psig sigs)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; reify/deftype ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- parse-opts [s]
@@ -36,7 +46,7 @@
         methods (mapcat #(map (fn [[nm [& args] & body]]
                                 `(~nm [~(:as opts) ~@args] ~@body)) %) 
                         (vals impls))]  
-    [interfaces methods]))
+    [interfaces methods opts]))
 
 (defmacro reify 
   "reify is a macro with the following structure:
@@ -269,7 +279,7 @@
 
   [name [& fields] & opts+specs]
   (let [gname (if *compile-files* name (gensym (str name "__")))
-        [interfaces methods] (parse-opts+specs opts+specs)
+        [interfaces methods opts] (parse-opts+specs opts+specs)
         classname (symbol (str *ns* "." gname))
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
