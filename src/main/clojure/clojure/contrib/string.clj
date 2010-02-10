@@ -179,7 +179,7 @@
 
 (defn replace-first-re
   "Replace first match of re in s."
-  [#^Pattern re #^Replacement replacement #^String s]
+  [#^Pattern re #^String replacement #^String s]
   (.replaceFirst (re-matcher re s) replacement))
 
 (defn replace-first-by
