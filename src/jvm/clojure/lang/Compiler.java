@@ -5611,7 +5611,8 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 			return null;
 		return v;
 		}
-	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".") 
+			|| sym.name.charAt(0) == '[')
 		{
 		return RT.classForName(sym.name);
 		}
