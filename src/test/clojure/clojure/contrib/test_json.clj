@@ -170,3 +170,9 @@
 
 (deftest characters-in-symbols-are-escaped
   (is (= "\"foo\\u1b1b\"" (json-str (symbol "foo\u1b1b")))))
+
+;;; Pretty-printer
+
+(deftest pretty-printing
+  (let [x (read-json *pass1-string* false)]
+    (is (= x (read-json (with-out-str (pprint-json x)) false)))))

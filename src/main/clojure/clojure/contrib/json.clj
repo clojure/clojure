@@ -273,7 +273,7 @@
 (defn- write-json-generic [x out]
   (if (.isArray (class x))
     (write-json (seq x) out)
-    (throw (Exception. "Don't know how to write JSON of " (class x)))))
+    (throw (Exception. (str "Don't know how to write JSON of " (class x))))))
   
 (extend nil Write-JSON
         {:write-json write-json-null})
@@ -310,3 +310,32 @@
   "Write JSON-formatted output to *out*"
   [x]
   (write-json x *out*))
+
+
+;;; JSON PRETTY-PRINTER
+
+;; Based on code by Tom Faulhaber
+
+(defn- pprint-json-array [s] 
+  ((formatter-out "~<[~;~@{~w~^, ~:_~}~;]~:>") s))
+
+(defn- pprint-json-object [m]
+  ((formatter-out "~<{~;~@{~<~w:~_~w~:>~^, ~_~}~;}~:>") 
+   (for [[k v] m] [(as-str k) v])))
+
+(defn- pprint-json-generic [x]
+  (if (.isArray (class x))
+    (pprint-json-array (seq x))
+    (print (json-str x))))
+  
+(defn- pprint-json-dispatch [x]
+  (cond (nil? x) (print "null")
+        (instance? java.util.Map x) (pprint-json-object x)
+        (instance? java.util.Collection x) (pprint-json-array x)
+        (instance? clojure.lang.ISeq x) (pprint-json-array x)
+        :else (pprint-json-generic x)))
+
+(defn pprint-json
+  "Pretty-prints JSON representation of x to *out*"
+  [x]
+  (write x :dispatch pprint-json-dispatch))
