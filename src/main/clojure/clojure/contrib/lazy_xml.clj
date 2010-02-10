@@ -110,40 +110,64 @@
   ([s startparse queue-size]
     (first (mktree (parse-seq s startparse queue-size)))))
 
-(def escape-xml-map (zipmap "'<>\"&" (map #(str \& % \;) '[apos lt gt quot amp])))
+(defn attributes [e]
+  (let [v (vec (:attrs e))]
+    (reify org.xml.sax.Attributes
+      (getLength [] (count v))
+      (getURI [i] (namespace (key (v i))))
+      (getLocalName [i] (name (key (v i))))
+      (getQName [i] (name (key (v i))))
+      (#^String getValue [#^int i] (val (v i)))
+      (#^String getType [#^int i] "CDATA"))))
 
-(defn escape-xml [text]
-  (apply str (map #(escape-xml-map % %) text)))
-
-(defn emit-element
+(defn- emit-element
   "Recursively prints as XML text the element struct e.  To have it
   print extra whitespace like clojure.xml/emit, use the :pad true
   option."
-  [e & opts]
-  (let [opts (apply hash-set opts)
-        pad (if (:pad opts) "\n" "")]
-    (if (instance? String e)
-      (print (str (escape-xml e) pad))
-      (do
-        (print (str "<" (name (:tag e))))
-        (when (:attrs e)
-          (doseq [attr (:attrs e)]
-            (print (str " " (name (key attr))
-                        "='" (escape-xml (val attr)) "'"))))
-        (if (seq (:content e))
-          (do
-            (print (str ">" pad))
-            (doseq [c (:content e)]
-              (emit-element c))
-            (print (str "</" (name (:tag e)) ">" pad)))
-          (print (str "/>" pad)))))))
+  [e ch]
+  (if (instance? String e)
+    (.characters ch (.toCharArray #^String e) 0 (count e))
+    (let [nspace (namespace (:tag e))
+          qname (name (:tag e))]
+      (.startElement ch nspace qname qname (attributes e))
+      (doseq [c (:content e)]
+        (emit-element c ch))
+      (.endElement ch nspace qname qname))))
 
 (defn emit
-  "Prints an <?xml?> declaration line, and then calls emit-element"
-  [x & opts]
-  (println "<?xml version='1.0' encoding='UTF-8'?>")
-  (apply emit-element x opts)
-  (println))
+  [e & optseq]
+  (let [opts (apply array-map optseq)
+        content-handler (atom nil)
+        trans (-> (javax.xml.transform.TransformerFactory/newInstance)
+                .newTransformer)]
+
+    (when (:indent opts)
+      (.setOutputProperty trans "indent" "yes")
+      (.setOutputProperty trans "{http://xml.apache.org/xslt}indent-amount"
+                          (str (:indent opts))))
+
+    (when (contains? opts :xml-declaration)
+      (.setOutputProperty trans "omit-xml-declaration" 
+                          (if (:xml-declaration opts) "no" "yes")))
+
+    (when (:encoding opts)
+      (.setOutputProperty trans "encoding" (:encoding opts)))
+
+    (.transform
+      trans
+      (javax.xml.transform.sax.SAXSource.
+        (reify org.xml.sax.XMLReader
+          (getContentHandler [] @content-handler)
+          (setDTDHandler [handler])
+          (setFeature [name value])
+          (setProperty [name value])
+          (setContentHandler [ch] (reset! content-handler ch))
+          (#^void parse [#^org.xml.sax.InputSource _]
+            (.startDocument @content-handler)
+            (emit-element e @content-handler)
+            (.endDocument @content-handler)))
+        (org.xml.sax.InputSource.))
+      (javax.xml.transform.stream.StreamResult. *out*))))
 
 (comment
 
