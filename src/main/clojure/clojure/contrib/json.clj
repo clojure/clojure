@@ -17,7 +17,8 @@
   To write JSON, use json-str, write-json, or write-json.
   To read JSON, use read-json."}
     clojure.contrib.json
-  (:require [clojure.contrib.java :as j])
+  (:use [clojure.contrib.pprint :only (write formatter-out)]
+        [clojure.contrib.java :only (as-str)])
   (:import (java.io PrintWriter PushbackReader StringWriter
                     StringReader Reader EOFException)))
 
@@ -235,7 +236,7 @@
         (when (nil? k)
           (throw (Exception. "JSON object keys cannot be nil/null")))
         (.print out \")
-        (.print out (j/as-str k))
+        (.print out (as-str k))
         (.print out \")
         (.print out \:)
         (write-json v out))
@@ -263,11 +264,21 @@
 (defn- write-json-plain [x #^PrintWriter out]
   (.print out x))
 
+(defn- write-json-null [x #^PrintWriter out]
+  (.print out "null"))
+
+(defn- write-json-named [x #^PrintWriter out]
+  (write-json-string (name x) out))
+
+(defn- write-json-generic [x out]
+  (if (.isArray (class x))
+    (write-json (seq x) out)
+    (throw (Exception. "Don't know how to write JSON of " (class x)))))
+  
 (extend nil Write-JSON
-        {:write-json (fn [x #^PrintWriter out] (.print out "null"))})
+        {:write-json write-json-null})
 (extend clojure.lang.Named Write-JSON
-        {:write-json (fn [x #^PrintWriter out]
-                       (write-json-string (name x) out))})
+        {:write-json write-json-named})
 (extend java.lang.Boolean Write-JSON
         {:write-json write-json-plain})
 (extend java.lang.Number Write-JSON
@@ -285,10 +296,7 @@
 (extend clojure.lang.ISeq Write-JSON
         {:write-json write-json-array})
 (extend java.lang.Object Write-JSON
-        {:write-json (fn [x out]
-                       (if (.isArray (class x))
-                         (write-json (seq x) out)
-                         (throw (Exception. "Don't know how to print JSON of " (class x)))))})
+        {:write-json write-json-generic})
 
 (defn json-str
   "Converts x to a JSON-formatted string."
