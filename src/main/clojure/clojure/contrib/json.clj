@@ -18,7 +18,7 @@
   To read JSON, use read-json."}
     clojure.contrib.json
   (:use [clojure.contrib.pprint :only (write formatter-out)]
-        [clojure.contrib.java :only (as-str)])
+        [clojure.contrib.string :only (as-str)])
   (:import (java.io PrintWriter PushbackReader StringWriter
                     StringReader Reader EOFException)))
 
