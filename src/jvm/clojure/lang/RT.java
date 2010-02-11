@@ -878,7 +878,12 @@ static public Number box(double x){
 static public char charCast(Object x){
 	if(x instanceof Character)
 		return ((Character) x).charValue();
-	return (char) ((Number) x).intValue();
+
+	long n = ((Number) x).longValue();
+	if(n < Character.MIN_VALUE || n > Character.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for char: " + x);
+
+	return (char) n;
 }
 
 static public boolean booleanCast(Object x){
@@ -888,16 +893,24 @@ static public boolean booleanCast(Object x){
 }
 
 static public byte byteCast(Object x){
-	return ((Number) x).byteValue();
+	long n = ((Number) x).longValue();
+	if(n < Byte.MIN_VALUE || n > Byte.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for byte: " + x);
+
+	return (byte) n;
 }
 
 static public short shortCast(Object x){
-	return ((Number) x).shortValue();
+	long n = ((Number) x).longValue();
+	if(n < Short.MIN_VALUE || n > Short.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for short: " + x);
+
+	return (short) n;
 }
 
 static public int intCast(Object x){
 	if(x instanceof Number)
-		return ((Number) x).intValue();
+		return intCast(((Number) x).longValue());
 	return ((Character) x).charValue();
 }
 
@@ -918,14 +931,20 @@ static public int intCast(int x){
 }
 
 static public int intCast(float x){
+	if(x < Integer.MIN_VALUE || x > Integer.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for int: " + x);
 	return (int) x;
 }
 
 static public int intCast(long x){
+	if(x < Integer.MIN_VALUE || x > Integer.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for int: " + x);
 	return (int) x;
 }
 
 static public int intCast(double x){
+	if(x < Integer.MIN_VALUE || x > Integer.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for int: " + x);
 	return (int) x;
 }
 
@@ -938,6 +957,8 @@ static public long longCast(int x){
 }
 
 static public long longCast(float x){
+	if(x < Long.MIN_VALUE || x > Long.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for long: " + x);
 	return (long) x;
 }
 
@@ -946,11 +967,21 @@ static public long longCast(long x){
 }
 
 static public long longCast(double x){
+	if(x < Long.MIN_VALUE || x > Long.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for long: " + x);
 	return (long) x;
 }
 
 static public float floatCast(Object x){
-	return ((Number) x).floatValue();
+	if(x instanceof Float)
+		return ((Float) x).floatValue();
+
+	double n = ((Number) x).doubleValue();
+	if(n < -Float.MAX_VALUE || n > Float.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for float: " + x);
+
+	return (float) n;
+
 }
 
 static public float floatCast(int x){
@@ -966,6 +997,9 @@ static public float floatCast(long x){
 }
 
 static public float floatCast(double x){
+	if(x < -Float.MAX_VALUE || x > Float.MAX_VALUE)
+		throw new IllegalArgumentException("Value out of range for float: " + x);
+	
 	return (float) x;
 }
 
