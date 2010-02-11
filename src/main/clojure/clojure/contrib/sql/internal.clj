@@ -15,7 +15,7 @@
   (:use
    (clojure.contrib
     [except :only (throwf throw-arg)]
-    [java :only (as-properties)]
+    [properties :only (as-properties)]
     [seq :only (indexed)]))
   (:import
    (clojure.lang RT)

@@ -25,7 +25,7 @@
   clojure.contrib.sql
   (:use (clojure.contrib
          [def :only (defalias)]
-         [java :only (as-str)])
+         [string :only (as-str)])
         clojure.contrib.sql.internal))
 
 (defalias find-connection find-connection*)
