@@ -89,7 +89,8 @@
   the path with the user.home system property."
   [& args]
   (let [#^String s (apply str args)
-        s (.replaceAll (re-matcher #"[/\\]" s) File/separator)
+        s (.replace s \\ File/separatorChar)
+        s (.replace s \/ File/separatorChar)
         s (if (.startsWith s "~")
             (str (System/getProperty "user.home")
                  File/separator (subs s 1))
