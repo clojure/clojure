@@ -4669,7 +4669,7 @@
 (load "core_print")
 (load "genclass")
 (load "core_deftype")
-
+(load "gvec")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 
   "Takes a function of no args and yields a future object that will
