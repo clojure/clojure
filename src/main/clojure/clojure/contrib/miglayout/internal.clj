@@ -21,7 +21,7 @@
          [core :only (new-by-name)]
          [except :only (throwf)]
          [fcase :only (fcase)]
-         [java :only (as-str)])))
+         [string :only (as-str)])))
 
 (def MigLayout "net.miginfocom.swing.MigLayout")
 (def LayoutCallback "net.miginfocom.layout.LayoutCallback")
