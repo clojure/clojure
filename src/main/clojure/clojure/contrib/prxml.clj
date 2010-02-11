@@ -27,7 +27,8 @@
      :doc "Compact syntax for generating XML. See the documentation of \"prxml\" 
 for details."}
   clojure.contrib.prxml
-  (:use [clojure.contrib.lazy-xml :only (escape-xml)]))
+  (:use [clojure.contrib.string :only (escape)]
+        [clojure.contrib.java :only (as-str)]))
 
 (def
  #^{:doc "If true, empty tags will have a space before the closing />"}
@@ -38,16 +39,20 @@ for details."}
   and no extra line-breaks."}
  *prxml-indent* nil)
 
-(defn- namestr [x]
-  (if (or (symbol? x) (keyword? x)) (name x) (str x)))
-
 (def #^{:private true} *prxml-tag-depth* 0)
 
 (def #^{:private true} print-xml)  ; forward declaration
 
+(defn- escape-xml [s]
+  (escape {\< "&lt;"
+           \> "&gt;"
+           \& "&amp;"
+           \' "&apos;"
+           \" "&quot;"} s))
+
 (defn- prxml-attribute [name value]
   (print " ")
-  (print (namestr name))
+  (print (as-str name))
   (print "=\"")
   (print (escape-xml (str value)))
   (print "\""))
@@ -88,7 +93,7 @@ for details."}
   (print ">"))
 
 (defmethod print-xml-tag :default [tag attrs contents]
-  (let [tag-name (namestr tag)]
+  (let [tag-name (as-str tag)]
     (when *prxml-indent*
       (newline)
       (dotimes [n (* *prxml-tag-depth* *prxml-indent*)] (print " ")))
