@@ -113,3 +113,12 @@
 (deftest t-get
   (is (= \o (s/get "foo" 1))))
 
+(deftest t-as-str
+  (testing "keyword to string"
+    (is (= "foo") (s/as-str :foo)))
+  (testing "symbol to string"
+    (is (= "foo") (s/as-str 'foo)))
+  (testing "string to string"
+    (is (= "foo") (s/as-str "foo")))
+  (testing "stringifying non-namish things"
+    (is (= "42") (s/as-str 42))))
