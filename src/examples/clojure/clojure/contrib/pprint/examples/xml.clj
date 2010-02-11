@@ -19,8 +19,7 @@
   #^{:author "Tom Faulhaber, based on the original by Stuart Sierra",
      :doc "A version of prxml that uses a pretty print dispatch function."}
   clojure.contrib.pprint.examples.xml
-  (:use [clojure.contrib.lazy-xml :only (escape-xml)]
-        [clojure.contrib.java :only (as-str)]
+  (:use [clojure.contrib.string :only (as-str escape)]
         [clojure.contrib.pprint :only (formatter-out write)]
         [clojure.contrib.pprint.utilities :only (prlabel)]))
 
@@ -80,8 +79,13 @@
 (defmethod xml-dispatch clojure.lang.Keyword [x]
   (print-xml-tag x {} nil))
 
+
 (defmethod xml-dispatch String [x]
-  (print (escape-xml x)))
+  (print (escape {\< "&lt;"
+                  \> "&gt;"
+                  \& "&amp;"
+                  \' "&apos;"
+                  \" "&quot;"} x)))
 
 (defmethod xml-dispatch nil [x])
 

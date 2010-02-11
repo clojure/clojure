@@ -19,8 +19,8 @@
 This is an example of using a pretty printer dispatch function to generate JSON output",
      :see-also [["http://json.org/", "JSON Home Page"]]}
   clojure.contrib.pprint.examples.json
-  (:require [clojure.contrib.java :as j])
   (:use [clojure.test :only (deftest- is)]
+        [clojure.contrib.string :only (as-str)]
         [clojure.contrib.pprint :only (write formatter-out)]))
 
 
@@ -62,7 +62,7 @@ This is an example of using a pretty printer dispatch function to generate JSON 
 
 (defmethod dispatch-json ::object [m]
   ((formatter-out "~<{~;~@{~<~w:~_~w~:>~^, ~_~}~;}~:>") 
-   (for [[k v] m] [(j/as-str k) v])))
+   (for [[k v] m] [(as-str k) v])))
 
 (defmethod dispatch-json java.lang.CharSequence [s]
   (print \")
