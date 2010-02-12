@@ -204,6 +204,15 @@
 
   (valAt [k] (.valAt this k nil))
 
+  clojure.lang.IFn
+  (invoke [k]
+    (if (clojure.lang.Util/isInteger k)
+      (let [i (int k)]
+        (if (and (>= i 0) (< i cnt))
+          (.nth this i)
+          (throw (IndexOutOfBoundsException.))))
+      (throw (IllegalArgumentException. "Key must be integer"))))
+
   
   clojure.lang.Seqable
   (seq [] 
