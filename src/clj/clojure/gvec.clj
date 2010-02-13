@@ -281,6 +281,67 @@
             subidx (bit-and (bit-shift-right i level) (int 0x1f))]
         (aset arr subidx (.doAssoc this (- level (int 5)) (aget arr subidx) i val))
         (VecNode (:edit node) arr))))
+
+  java.lang.Iterable
+  (iterator []
+    (let [i (java.util.concurrent.atomic.AtomicInteger. 0)]
+      (reify java.util.Iterator
+        (hasNext [] (< (.get i) cnt))
+        (next [] (.nth this (dec (.incrementAndGet i))))
+        (remove [] (throw (UnsupportedOperationException.))))))
+
+  java.util.Collection
+  (contains [o] (boolean (some #(= % o) this)))
+  (containsAll [c] (every? #(.contains this %) c))
+  (isEmpty [] (zero? cnt))
+  (toArray [] (into-array Object this))
+  (toArray [arr]
+    (if (>= (count arr) cnt)
+      (do
+        (dotimes [i cnt]
+          (aset arr i (.nth this i)))
+        arr)
+      (into-array Object this)))
+  (size [] cnt)
+  (add [o] (throw (UnsupportedOperationException.)))
+  (addAll [c] (throw (UnsupportedOperationException.)))
+  (clear [] (throw (UnsupportedOperationException.)))
+  (#^boolean remove [o] (throw (UnsupportedOperationException.)))
+  (removeAll [c] (throw (UnsupportedOperationException.)))
+  (retainAll [c] (throw (UnsupportedOperationException.)))
+
+  java.util.List
+  (get [i] (.nth this i))
+  (indexOf [o]
+    (loop [i (int 0)]
+      (cond
+        (== i cnt) -1
+        (= o (.nth this i)) i
+        :else (recur (inc i)))))
+  (lastIndexOf [o]
+    (loop [i (dec cnt)]
+      (cond
+        (< i 0) -1
+        (= o (.nth this i)) i
+        :else (recur (dec i)))))
+  (listIterator [] (.listIterator this 0))
+  (listIterator [i]
+    (let [i (java.util.concurrent.atomic.AtomicInteger. i)]
+      (reify java.util.ListIterator
+        (hasNext [] (< (.get i) cnt))
+        (hasPrevious [] (pos? i))
+        (next [] (.nth this (dec (.incrementAndGet i))))
+        (nextIndex [] (.get i))
+        (previous [] (.nth this (.decrementAndGet i)))
+        (previousIndex [] (dec (.get i)))
+        (add [e] (throw (UnsupportedOperationException.)))
+        (remove [] (throw (UnsupportedOperationException.)))
+        (set [e] (throw (UnsupportedOperationException.))))))
+  (subList [a z] (subvec this a z))
+  (add [i o] (throw (UnsupportedOperationException.)))
+  (addAll [i c] (throw (UnsupportedOperationException.)))
+  (#^Object remove [#^int i] (throw (UnsupportedOperationException.)))
+  (set [i e] (throw (UnsupportedOperationException.)))
 )
 
 (defmethod print-method ::Vec [v w]
