@@ -88,9 +88,10 @@ code is doing."}
    expressions in an environment in which the identifiers are bound to
    the traced functions.  Does not work on inlined functions,
    such as clojure.core/+"
-  [fn-names & exprs]
-  `(binding [~@(interleave fn-names
-                           (for [func fn-names]
-                             `(fn [& args#]
-                                (trace-fn-call '~func (var ~func) args#))))]
+  [fnames & exprs]
+  `(binding [~@(interleave fnames
+                           (for [fname fnames]
+                             `(let [f# @(var ~fname)]
+                                (fn [& args#]
+                                  (trace-fn-call '~fname f# args#)))))]
      ~@exprs))
