@@ -3476,7 +3476,9 @@ static public class ObjExpr implements Expr{
 			LocalBinding lb = (LocalBinding) s.first();
 			if(isDeftype())
 				{
-				int access = isVolatile(lb) ? ACC_VOLATILE : (ACC_PUBLIC + ACC_FINAL);
+				int access = isVolatile(lb) ? ACC_VOLATILE :
+				             isMutable(lb) ? 0 :
+				             (ACC_PUBLIC + ACC_FINAL);
 				if(lb.getPrimitiveType() != null)
 					cv.visitField(access
 							, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
@@ -3897,8 +3899,15 @@ static public class ObjExpr implements Expr{
 			}
 	}
 
+	boolean isMutable(LocalBinding lb){
+		return isVolatile(lb) ||
+		       RT.booleanCast(RT.contains(fields, lb.sym)) &&
+		       RT.booleanCast(RT.get(lb.sym.meta(), Keyword.intern("unsynchronized-mutable")));
+	}
+
 	boolean isVolatile(LocalBinding lb){
-		return closes.containsKey(lb) && volatiles.contains(lb.sym);
+		return RT.booleanCast(RT.contains(fields, lb.sym)) &&
+		       RT.booleanCast(RT.get(lb.sym.meta(), Keyword.intern("volatile-mutable")));
 	}
 
 	boolean isDeftype(){
@@ -4009,15 +4018,15 @@ static public class ObjExpr implements Expr{
 	}
 
 	public void emitAssignLocal(GeneratorAdapter gen, LocalBinding lb,Expr val){
-		if(!isVolatile(lb))
-			throw new IllegalArgumentException("Cannot assign to non-volatile: " + lb.name);
+		if(!isMutable(lb))
+			throw new IllegalArgumentException("Cannot assign to non-mutable: " + lb.name);
 		Class primc = lb.getPrimitiveType();
 		gen.loadThis();
 		if(primc != null)
 			{
+			if(!(val instanceof MaybePrimitiveExpr && ((MaybePrimitiveExpr) val).canEmitPrimitive()))
+				throw new IllegalArgumentException("Must assign primitive to primitive mutable: " + lb.name);
 			MaybePrimitiveExpr me = (MaybePrimitiveExpr) val;
-			if(!me.canEmitPrimitive())
-				throw new IllegalArgumentException("Must assign primitive to primitive volatile: " + lb.name);
 			me.emitUnboxed(C.EXPRESSION, this, gen);
 			gen.putField(objtype, lb.name, Type.getType(primc));
 			}
@@ -6136,7 +6145,9 @@ static public class NewInstanceExpr extends ObjExpr{
 		for(ISeq s = RT.keys(ret.closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
-			int access = ACC_PUBLIC + (ret.isVolatile(lb) ? ACC_VOLATILE : ACC_FINAL);
+			int access = ACC_PUBLIC + (ret.isVolatile(lb) ? ACC_VOLATILE :
+			                           ret.isMutable(lb) ? 0 :
+			                           ACC_FINAL);
 			if(lb.getPrimitiveType() != null)
 				cv.visitField(access
 						, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
