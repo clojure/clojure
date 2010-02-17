@@ -174,9 +174,9 @@ This is API documentation for the latest committed checkin of the Clojure core.
   <br />
   <hr />
   <h2 id="clojure.set">clojure.set</h2>
-  by <span id="author">unknown author</span><br />
+  by <span id="author">Rich Hickey</span><br />
   <a href="clojure.set-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Set operations such as union/intersection.</pre>
   
   Public variables and functions:
   <span id="var-link"><a href="clojure.set-api.html#clojure.set/difference" id="var-tag">difference</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/index" id="var-tag">index</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/intersection" id="var-tag">intersection</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/join" id="var-tag">join</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/map-invert" id="var-tag">map-invert</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/project" id="var-tag">project</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/rename" id="var-tag">rename</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/rename-keys" id="var-tag">rename-keys</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/select" id="var-tag">select</a> </span><span id="var-link"><a href="clojure.set-api.html#clojure.set/union" id="var-tag">union</a> </span><br />
@@ -446,9 +446,18 @@ For additional event types, see the examples in the code.</pre>
   <br />
   <hr />
   <h2 id="clojure.walk">clojure.walk</h2>
-  by <span id="author">unknown author</span><br />
+  by <span id="author">Stuart Sierra</span><br />
   <a href="clojure.walk-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">This file defines a generic tree walker for Clojure data
+structures.  It takes any data structure (list, vector, map, set,
+seq), calls a function on every element, and uses the return value
+of the function in place of the original.  This makes it fairly
+easy to write recursive search-and-replace functions, as shown in
+the examples.
+
+Note: "walk" supports all Clojure data structures EXCEPT maps
+created with sorted-map-by.  There is no (obvious) way to retrieve
+the sorting function.</pre>
   
   Public variables and functions:
   <span id="var-link"><a href="clojure.walk-api.html#clojure.walk/keywordize-keys" id="var-tag">keywordize-keys</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/macroexpand-all" id="var-tag">macroexpand-all</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/postwalk" id="var-tag">postwalk</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/postwalk-demo" id="var-tag">postwalk-demo</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/postwalk-replace" id="var-tag">postwalk-replace</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/prewalk" id="var-tag">prewalk</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/prewalk-demo" id="var-tag">prewalk-demo</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/prewalk-replace" id="var-tag">prewalk-replace</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/stringify-keys" id="var-tag">stringify-keys</a> </span><span id="var-link"><a href="clojure.walk-api.html#clojure.walk/walk" id="var-tag">walk</a> </span><br />
@@ -457,9 +466,9 @@ For additional event types, see the examples in the code.</pre>
   <br />
   <hr />
   <h2 id="clojure.xml">clojure.xml</h2>
-  by <span id="author">unknown author</span><br />
+  by <span id="author">Rich Hickey</span><br />
   <a href="clojure.xml-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">XML reading/writing.</pre>
   
   Public variables and functions:
   <span id="var-link"><a href="clojure.xml-api.html#clojure.xml/parse" id="var-tag">parse</a> </span><br />
@@ -468,9 +477,10 @@ For additional event types, see the examples in the code.</pre>
   <br />
   <hr />
   <h2 id="clojure.zip">clojure.zip</h2>
-  by <span id="author">unknown author</span><br />
+  by <span id="author">Rich Hickey</span><br />
   <a href="clojure.zip-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Functional hierarchical zipper, with navigation, editing, 
+and enumeration.  See Huet</pre>
   
   Public variables and functions:
   <span id="var-link"><a href="clojure.zip-api.html#clojure.zip/append-child" id="var-tag">append-child</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/branch?" id="var-tag">branch?</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/children" id="var-tag">children</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/down" id="var-tag">down</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/edit" id="var-tag">edit</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/end?" id="var-tag">end?</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/insert-child" id="var-tag">insert-child</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/insert-left" id="var-tag">insert-left</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/insert-right" id="var-tag">insert-right</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/left" id="var-tag">left</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/leftmost" id="var-tag">leftmost</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/lefts" id="var-tag">lefts</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/make-node" id="var-tag">make-node</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/next" id="var-tag">next</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/node" id="var-tag">node</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/path" id="var-tag">path</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/prev" id="var-tag">prev</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/remove" id="var-tag">remove</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/replace" id="var-tag">replace</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/right" id="var-tag">right</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/rightmost" id="var-tag">rightmost</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/rights" id="var-tag">rights</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/root" id="var-tag">root</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/seq-zip" id="var-tag">seq-zip</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/up" id="var-tag">up</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/vector-zip" id="var-tag">vector-zip</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/xml-zip" id="var-tag">xml-zip</a> </span><span id="var-link"><a href="clojure.zip-api.html#clojure.zip/zipper" id="var-tag">zipper</a> </span><br />
