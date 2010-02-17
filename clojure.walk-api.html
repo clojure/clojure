@@ -80,14 +80,23 @@ namespace.
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.walk</span>
   <span id="branch-name">(master branch)</span></h1>
-by <span id="author">Unknown</span><br />
+by <span id="author">Stuart Sierra</span><br />
 <br />Usage:
 <pre>
 (ns your-namespace
   (:require <span id="long-name">clojure.walk</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr"></pre>
+<pre id="namespace-docstr">This file defines a generic tree walker for Clojure data
+structures.  It takes any data structure (list, vector, map, set,
+seq), calls a function on every element, and uses the return value
+of the function in place of the original.  This makes it fairly
+easy to write recursive search-and-replace functions, as shown in
+the examples.
+
+Note: "walk" supports all Clojure data structures EXCEPT maps
+created with sorted-map-by.  There is no (obvious) way to retrieve
+the sorting function.</pre>
 <br />
 <h2>Public Variables and Functions</h2>
 <div id="var-entry">
