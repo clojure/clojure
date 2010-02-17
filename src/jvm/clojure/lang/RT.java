@@ -286,15 +286,6 @@ static{
 	               });
 	v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
 	              arglistskw, list(vector(namesym))));
-	v = Var.intern(CLOJURE_NS, IDENTICAL,
-	               new AFn(){
-		               public Object invoke(Object arg1, Object arg2)
-				               throws Exception{
-			               return arg1 == arg2 ? RT.T : RT.F;
-		               }
-	               });
-	v.setMeta(map(dockw, "Tests if 2 arguments are the same object",
-	              arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
 	try {
 		doInit();
 	}

@@ -318,7 +318,7 @@
 (defn nil?
   "Returns true if x is nil, false otherwise."
   {:tag Boolean}
-  [x] (identical? x nil))
+  [x] (clojure.lang.Util/identical x nil))
 
 (def
 
@@ -381,12 +381,12 @@
 (defn false?
   "Returns true if x is the value false, false otherwise."
   {:tag Boolean}
-  [x] (identical? x false))
+  [x] (clojure.lang.Util/identical x false))
 
 (defn true?
   "Returns true if x is the value true, false otherwise."
   {:tag Boolean}
-  [x] (identical? x true))
+  [x] (clojure.lang.Util/identical x true))
 
 (defn not
   "Returns true if x is logical false, false otherwise."
@@ -573,6 +573,13 @@
   ([test then] `(if-not ~test ~then nil))
   ([test then else]
    `(if (not ~test) ~then ~else)))
+
+(defn identical?
+  "Tests if 2 arguments are the same object"
+  {:tag Boolean
+   :inline (fn [x y] `(. clojure.lang.Util identical ~x ~y))
+   :inline-arities #{2}}
+  ([x y] (clojure.lang.Util/identical x y)))
 
 (defn =
   "Equality. Returns true if x equals y, false if not. Same as
