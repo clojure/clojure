@@ -633,7 +633,7 @@
 
 ;;; RUNNING TESTS: LOW-LEVEL FUNCTIONS
 
-(defn test-var
+(defn #^{:dynamic true} test-var
   "If v has a function in its :test metadata, calls that function,
   with *testing-vars* bound to (conj *testing-vars* v)."
   [v]
