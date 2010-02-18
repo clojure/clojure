@@ -14,22 +14,25 @@
 
 (in-ns 'clojure.contrib.jmx)
 
-; TODO: needs an integration test
-; TODO: why full package needed for JMXConnectorFactory?
 (defmacro with-connection
-  "Execute body with JMX connection specified by opts (:port)."
+  "Execute body with JMX connection specified by opts. opts can also
+   include an optional :environment key which is passed as the
+   environment arg to JMXConnectorFactory/connect."
   [opts & body]
-  `(with-open [connector# (javax.management.remote.JMXConnectorFactory/connect
-                           (JMXServiceURL. (jmx-url ~opts)) {})]
-     (binding [*connection* (.getMBeanServerConnection connector#)]
-       ~@body)))
+  `(let [opts# ~opts
+         env# (get opts# :environment {})
+         opts# (dissoc opts# :environment)]
+     (with-open [connector# (javax.management.remote.JMXConnectorFactory/connect
+                             (JMXServiceURL. (jmx-url opts#)) env#)]
+       (binding [*connection* (.getMBeanServerConnection connector#)]
+         ~@body))))
 
 (defn mbean-info [n]
   (.getMBeanInfo *connection* (as-object-name n)))
 
 (defn raw-read
-  "Read an mbean property. Returns low-level Java object model for composites, tabulars, etc.
-   Most callers should use read."
+  "Read an mbean property. Returns low-level Java object model for
+   composites, tabulars, etc. Most callers should use read."
   [n attr]
   (.getAttribute *connection* (as-object-name n) (as-str attr)))
 
@@ -43,14 +46,16 @@
    java.io.NotSerializableException
    java.lang.ClassNotFoundException
    javax.management.AttributeNotFoundException]
-  "Exceptions that might be thrown if you try to read an unsupported attribute.
-   by testing agains jconsole and Tomcat. This is dreadful and ad-hoc but I did not
-   want to swallow all exceptions.")
+  "Exceptions that might be thrown if you try to read an unsupported
+   attribute. Found these by testing agains jconsole and Tomcat. This
+   is dreadful and ad-hoc but I did not want to swallow all
+   exceptions.")
 
 (defn read-supported
-  "Calls read to read an mbean property, *returning* unsupported operation exceptions instead of throwing them.
-   Used to keep mbean from blowing up. Note that some terribly-behaved mbeans use java.lang.InternalError to
-   indicate an unsupported operation!"
+  "Calls read to read an mbean property, *returning* unsupported
+   operation exceptions instead of throwing them. Used to keep mbean
+   from blowing up. Note that some terribly-behaved mbeans use
+   java.lang.InternalError to indicate an unsupported operation!"
   [n attr]
   (try
    (read n attr)
@@ -67,7 +72,7 @@
    (Attribute. (as-str attr) value)))
 
 (defn attribute-info
-  "Get the MBeanAttributeInfo for an attribute"
+  "Get the MBeanAttributeInfo for an attribute."
   [object-name attr-name]
   (filter #(= (as-str attr-name) (.getName %))
           (.getAttributes (mbean-info object-name))))
@@ -83,12 +88,13 @@
   (.getOperations (mbean-info n)))
 
 (defn operation
-  "The MBeanOperationInfo for operation op on mbean n. Used for invoke."
+  "The MBeanOperationInfo for operation op on mbean n. Used by invoke."
   [n op]
   (first  (filter #(= (-> % .getName keyword) op) (operations n))))
 
 (defn op-param-types 
-  "The parameter types (as class name strings) for operation op on n. Used for invoke."
+  "The parameter types (as class name strings) for operation op on n.
+   Used for invoke."
   [n op]
   (map #(-> % .getType) (.getSignature (operation n op))))
 
