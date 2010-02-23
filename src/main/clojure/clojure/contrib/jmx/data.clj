@@ -20,8 +20,8 @@
   "Build a JMX URL from options."
   ([] (jmx-url {}))
   ([overrides]
-     (let [opts (merge {:host "localhost", :port "3000"} overrides)]
-       (format "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi" (opts :host) (opts :port)))))
+     (let [opts (merge {:host "localhost", :port "3000", :jndi-path "jmxrmi"} overrides)]
+       (format "service:jmx:rmi:///jndi/rmi://%s:%s/%s" (opts :host) (opts :port) (opts :jndi-path)))))
 
 (defmulti as-object-name
   "Interpret an object as a JMX ObjectName."

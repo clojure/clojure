@@ -117,9 +117,14 @@
 
 (deftest test-jmx-url
   (testing "creates default url"
-           (is (= "service:jmx:rmi:///jndi/rmi://localhost:3000/jmxrmi" (jmx/jmx-url))))
+    (is (= "service:jmx:rmi:///jndi/rmi://localhost:3000/jmxrmi"
+           (jmx/jmx-url))))
   (testing "creates custom url"
-           (is (= "service:jmx:rmi:///jndi/rmi://example.com:4000/jmxrmi" (jmx/jmx-url {:host "example.com" :port 4000})))))
+    (is (= "service:jmx:rmi:///jndi/rmi://example.com:4000/jmxrmi"
+           (jmx/jmx-url {:host "example.com" :port 4000}))))
+  (testing "creates custom jndi path"
+    (is (= "service:jmx:rmi:///jndi/rmi://example.com:4000/jmxconnector"
+           (jmx/jmx-url {:host "example.com" :port 4000 :jndi-path "jmxconnector"})))))
 
 ;; ----------------------------------------------------------------------
 ;; tests for clojure.contrib.jmx.Bean.
