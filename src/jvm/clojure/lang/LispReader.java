@@ -562,7 +562,7 @@ public static class DispatchReader extends AFn{
 }
 
 static Symbol garg(int n){
-	return Symbol.intern(null, (n == -1 ? "rest" : ("p" + n)) + "__" + RT.nextID());
+	return Symbol.intern(null, (n == -1 ? "rest" : ("p" + n)) + "__" + RT.nextID() + "#");
 }
 
 public static class FnReader extends AFn{
