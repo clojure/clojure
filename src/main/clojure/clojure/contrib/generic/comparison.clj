@@ -1,9 +1,9 @@
 ;; Generic interfaces for comparison operations
 
 ;; by Konrad Hinsen
-;; last updated May 5, 2009
+;; last updated March 4, 2010
 
-;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
+;; Copyright (c) Konrad Hinsen, 2009-2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
@@ -18,15 +18,25 @@
            as multimethods that can be defined for any type. Of the
            greater/less-than relations, types must minimally implement >."}
   clojure.contrib.generic.comparison
-  (:refer-clojure :exclude [= < > <= >= zero?])
+  (:refer-clojure :exclude [= < > <= >= zero? pos? neg? min max])
   (:use [clojure.contrib.generic
 	 :only (root-type nulary-type nary-type nary-dispatch)]))
 
 ;
-; zero?
+; zero? pos? neg?
 ;
 (defmulti zero?
   "Return true of x is zero."
+  {:arglists '([x])}
+  type)
+
+(defmulti pos?
+  "Return true of x is positive."
+  {:arglists '([x])}
+  type)
+
+(defmulti neg?
+  "Return true of x is negative."
   {:arglists '([x])}
   type)
 
@@ -137,7 +147,7 @@
 (defmethod <= root-type
   [x] true)
 
-(defmethod >= [root-type root-type]
+(defmethod <= [root-type root-type]
   [x y]
   (not (> x y)))
 
@@ -155,6 +165,14 @@
 (defmethod zero? java.lang.Number
   [x]
   (clojure.core/zero? x))
+
+(defmethod pos? java.lang.Number
+  [x]
+  (clojure.core/pos? x))
+
+(defmethod neg? java.lang.Number
+  [x]
+  (clojure.core/neg? x))
 
 (defmethod = [Object Object]
   [x y]
@@ -175,3 +193,22 @@
 (defmethod <= [Object Object]
   [x y]
   (clojure.core/<= x y))
+
+;
+; Functions defined in terms of the comparison operators
+;
+(defn max
+  "Returns the greatest of its arguments. Like clojure.core/max except that
+   is uses generic comparison functions implementable for any data type."
+  ([x] x)
+  ([x y] (if (> x y) x y))
+  ([x y & more]
+   (reduce max (max x y) more)))
+
+(defn min
+  "Returns the least of its arguments. Like clojure.core/min except that
+   is uses generic comparison functions implementable for any data type."
+  ([x] x)
+  ([x y] (if (< x y) x y))
+  ([x y & more]
+   (reduce min (min x y) more)))
