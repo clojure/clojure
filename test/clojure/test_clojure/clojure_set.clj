@@ -154,11 +154,11 @@
                                                {:title "Musical Offering" :composer "J. S. Bach"}
                                                {:title "Requiem" :composer "Giuseppe Verdi"}
                                                {:title "Requiem" :composer "W. A. Mozart"}}
-    (set/rename compositions {:year :decade}) #{{:name "Art of the Fugue" :composer "J. S. Bach" :decade nil}
-                                                {:name "Musical Offering" :composer "J. S. Bach" :decade nil}
-                                                {:name "Requiem" :composer "Giuseppe Verdi" :decade nil}
-                                                {:name "Requiem" :composer "W. A. Mozart" :decade nil}}
-    (set/rename #{{}} {:year :decade}) #{{:decade nil}}))
+    (set/rename compositions {:year :decade}) #{{:name "Art of the Fugue" :composer "J. S. Bach"}
+                                                {:name "Musical Offering" :composer "J. S. Bach"}
+                                                {:name "Requiem" :composer "Giuseppe Verdi"}
+                                                {:name "Requiem" :composer "W. A. Mozart"}}
+    (set/rename #{{}} {:year :decade}) #{{}}))
 
 (deftest test-rename-keys
   (are [x y] (= x y)
