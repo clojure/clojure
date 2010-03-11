@@ -476,14 +476,14 @@ final static class IntegerOps implements Ops{
 		int val = x.intValue();
 		if(val < Integer.MAX_VALUE)
 			return val + 1;
-		return BigInteger.valueOf((long) val + 1);
+		return (long) val + 1;
 	}
 
 	public Number dec(Number x){
 		int val = x.intValue();
 		if(val > Integer.MIN_VALUE)
 			return val - 1;
-		return BigInteger.valueOf((long) val - 1);
+		return (long) val - 1;
 	}
 }
 
