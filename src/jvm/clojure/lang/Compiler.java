@@ -5185,8 +5185,8 @@ static public IFn isInline(Object op, int arity) throws Exception{
 			IFn ret = (IFn) RT.get(v.meta(), inlineKey);
 			if(ret != null)
 				{
-				IPersistentSet arities = (IPersistentSet) RT.get(v.meta(), inlineAritiesKey);
-				if(arities == null || arities.contains(arity))
+				IFn arityPred = (IFn) RT.get(v.meta(), inlineAritiesKey);
+				if(arityPred == null || RT.booleanCast(arityPred.invoke(arity)))
 					return ret;
 				}
 			}
