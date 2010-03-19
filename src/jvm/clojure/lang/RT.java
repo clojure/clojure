@@ -467,8 +467,8 @@ static ISeq seqFrom(Object coll){
 		return IteratorSeq.create(((Iterable) coll).iterator());
 	else if(coll.getClass().isArray())
 		return ArraySeq.createFromObject(coll);
-	else if(coll instanceof String)
-		return StringSeq.create((String) coll);
+	else if(coll instanceof CharSequence)
+		return StringSeq.create((CharSequence) coll);
 	else if(coll instanceof Map)
 		return seq(((Map) coll).entrySet());
 	else {
@@ -508,8 +508,8 @@ public static int count(Object o){
 		}
 		return i;
 	}
-	else if(o instanceof String)
-		return ((String) o).length();
+	else if(o instanceof CharSequence)
+		return ((CharSequence) o).length();
 	else if(o instanceof Collection)
 		return ((Collection) o).size();
 	else if(o instanceof Map)
@@ -715,8 +715,8 @@ static public Object nth(Object coll, int n){
 		return ((Indexed) coll).nth(n);
 	if(coll == null)
 		return null;
-	else if(coll instanceof String)
-		return Character.valueOf(((String) coll).charAt(n));
+	else if(coll instanceof CharSequence)
+		return Character.valueOf(((CharSequence) coll).charAt(n));
 	else if(coll.getClass().isArray())
 		return Reflector.prepRet(Array.get(coll, n));
 	else if(coll instanceof RandomAccess)
@@ -759,8 +759,8 @@ static public Object nth(Object coll, int n, Object notFound){
 	else if(n < 0)
 		return notFound;
 
-	else if(coll instanceof String) {
-		String s = (String) coll;
+	else if(coll instanceof CharSequence) {
+		CharSequence s = (CharSequence) coll;
 		if(n < s.length())
 			return Character.valueOf(s.charAt(n));
 		return notFound;
