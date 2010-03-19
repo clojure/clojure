@@ -1,6 +1,14 @@
 (ns clojure.contrib.test-json
   (:use clojure.test clojure.contrib.json))
 
+(deftest can-read-from-pushback-reader
+  (let [s (java.io.PushbackReader. (java.io.StringReader. "42"))]
+    (is (= 42 (read-json s)))))
+
+(deftest can-read-from-reader
+  (let [s (java.io.StringReader. "42")]
+    (is (= 42 (read-json s)))))
+
 (deftest can-read-numbers
   (is (= 42 (read-json "42")))
   (is (= -3 (read-json "-3")))

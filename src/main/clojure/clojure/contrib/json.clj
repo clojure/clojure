@@ -179,7 +179,7 @@
                                    keywordize? eof-error? eof-value))
  PushbackReader
  (read-json-from [input keywordize? eof-error? eof-value]
-                 (read-json-reader (PushbackReader. (StringReader. input))
+                 (read-json-reader input
                                    keywordize? eof-error? eof-value))
  Reader
  (read-json-from [input keywordize? eof-error? eof-value]
