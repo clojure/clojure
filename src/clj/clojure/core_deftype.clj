@@ -100,7 +100,7 @@
 
   [& opts+specs]
   (let [[interfaces methods] (parse-opts+specs opts+specs)]
-    `(reify* ~interfaces ~@methods)))
+    (with-meta `(reify* ~interfaces ~@methods) (meta &form))))
 
 (defn hash-combine [x y] 
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))

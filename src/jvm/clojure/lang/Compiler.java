@@ -6010,13 +6010,18 @@ static public class NewInstanceExpr extends ObjExpr{
 
 		ISeq rform = RT.next(form);
 
-		IPersistentVector interfaces = (IPersistentVector) RT.first(rform);
+		IPersistentVector interfaces = ((IPersistentVector) RT.first(rform)).cons(Symbol.intern("clojure.lang.IObj"));
 
 
 		rform = RT.next(rform);
 
 
-		return build(interfaces, null, null, classname, classname, null, rform);
+		Expr ret = build(interfaces, null, null, classname, classname, null, rform);
+		if(frm instanceof IObj && ((IObj) frm).meta() != null)
+			return new MetaExpr(ret, (MapExpr) MapExpr
+					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) frm).meta()));
+		else
+			return ret;
 	}
 	}
 
