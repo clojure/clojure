@@ -3012,7 +3012,8 @@
                      (fn [bvec b v]
                        (let [gmap (or (:as b) (gensym "map__"))
                              defaults (:or b)]
-                         (loop [ret (-> bvec (conj gmap) (conj v))
+                         (loop [ret (-> bvec (conj gmap) (conj v)
+                                        (conj gmap) (conj `(if (seq? ~gmap) (apply hash-map ~gmap) ~gmap)))
                                 bes (reduce
                                      (fn [bes entry]
                                        (reduce #(assoc %1 %2 ((val entry) %2))
