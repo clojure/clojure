@@ -5774,7 +5774,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
+			throw new CompilerException((String) SOURCE_PATH.deref(), (Integer) LINE.deref(), e);
 		else
 			throw (CompilerException) e;
 		}
@@ -5947,7 +5947,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 	catch(Throwable e)
 		{
 		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
+			throw new CompilerException((String) SOURCE_PATH.deref(), (Integer) LINE.deref(), e);
 		else
 			throw (CompilerException) e;
 		}
@@ -6434,7 +6434,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 		}
 	catch(LispReader.ReaderException e)
 		{
-		throw new CompilerException(sourceName, e.line, e.getCause());
+		throw new CompilerException(sourcePath, e.line, e.getCause());
 		}
 	finally
 		{
@@ -6653,7 +6653,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		}
 	catch(LispReader.ReaderException e)
 		{
-		throw new CompilerException(sourceName, e.line, e.getCause());
+		throw new CompilerException(sourcePath, e.line, e.getCause());
 		}
 	finally
 		{
