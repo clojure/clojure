@@ -97,6 +97,9 @@
             <namespace>clojure\.contrib\.repl-ln</namespace>
             <namespace>clojure\.contrib\.pprint\.gen-class</namespace>
           </namespaces>
+          <testNamespaces>
+            <namespace>!clojure\.contrib\.test-jmx</namespace>
+          </testNamespaces>
         </configuration>
         <executions>
           <execution>
