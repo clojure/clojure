@@ -40,31 +40,16 @@
   (comp jmx->clj raw-read)
   "Read an mbean property.")
 
-(defvar read-exceptions
-  [UnsupportedOperationException
-   InternalError
-   java.io.NotSerializableException
-   java.lang.ClassNotFoundException
-   javax.management.AttributeNotFoundException
-   javax.management.RuntimeMBeanException]
-  "Exceptions that might be thrown if you try to read an unsupported
-   attribute. Found these by testing agains jconsole and Tomcat. This
-   is dreadful and ad-hoc but I did not want to swallow all
-   exceptions.")
-
 (defn read-supported
   "Calls read to read an mbean property, *returning* unsupported
    operation exceptions instead of throwing them. Used to keep mbean
-   from blowing up. Note that some terribly-behaved mbeans use
-   java.lang.InternalError to indicate an unsupported operation!"
+   from blowing up. Note: There is no good exception that aggregates
+   unsupported operations, hence the overly-general catch block."
   [n attr]
   (try
    (read n attr)
-   (catch Throwable t
-     (let [cause (root-cause t)]
-       (if (some #(instance? % cause) read-exceptions)
-         cause
-         (throw t))))))
+   (catch Exception e
+     e)))
 
 (defn write! [n attr value]
   (.setAttribute

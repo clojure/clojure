@@ -113,7 +113,7 @@
 (deftest various-beans-are-readable
   (testing "that all java.lang beans can be read without error"
            (doseq [mb (jmx/mbean-names "*:*")]
-             (jmx/mbean mb))))
+             (is (map? (jmx/mbean mb)) mb))))
 
 (deftest test-jmx-url
   (testing "creates default url"
