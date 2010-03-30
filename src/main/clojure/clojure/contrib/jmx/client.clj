@@ -45,7 +45,7 @@
    InternalError
    java.io.NotSerializableException
    java.lang.ClassNotFoundException
-   javax.management.AttributeNotFoundExceptiont
+   javax.management.AttributeNotFoundException
    javax.management.RuntimeMBeanException]
   "Exceptions that might be thrown if you try to read an unsupported
    attribute. Found these by testing agains jconsole and Tomcat. This
