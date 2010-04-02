@@ -43,9 +43,9 @@
                        set
                        (disj 'Object 'java.lang.Object)
                        vec)
-        methods (mapcat #(map (fn [[nm [& args] & body]]
-                                `(~nm [~(:as opts) ~@args] ~@body)) %) 
-                        (vals impls))]  
+        methods (apply concat (vals impls))]
+    (when-let [bad-opts (seq (remove #{:no-print} (keys opts)))]
+      (throw (IllegalArgumentException. (apply print-str "Unsupported option(s) -" bad-opts))))
     [interfaces methods opts]))
 
 (defmacro reify 
@@ -53,13 +53,7 @@
 
  (reify options* specs*)
   
-  Currently there is only one option:
-
-  :as this-name
-
-  which can be used to provide a name to refer to the target
-  object ('this' in Java/C# parlance) within the method bodies, if
-  needed.
+  Currently there are no options.
 
   Each spec consists of the protocol or interface name followed by zero
   or more method bodies:
@@ -69,10 +63,12 @@
 
   Methods should be supplied for all methods of the desired
   protocol(s) and interface(s). You can also define overrides for
-  methods of Object. Note that no parameter is supplied to correspond
-  to the target object ('this' in Java parlance). Thus methods for
-  protocols will take one fewer arguments than do the
-  protocol functions.
+  methods of Object. Note that a parameter must be supplied to
+  correspond to the target object ('this' in Java parlance). Thus
+  methods for interfaces will take one more argument than do the
+  interface declarations.  Note also that recur calls to the method
+  head should *not* pass the target object, it will be supplied
+  automatically and can not be substituted.
 
   The return type can be indicated by a type hint on the method name,
   and arg types can be indicated by a type hint on arg names. If you
@@ -205,13 +201,7 @@
   
   (deftype name [fields*]  options* specs*)
   
-  Currently there is only one option:
-
-  :as this-name
-
-  which can be used to provide a name to refer to the target
-  object ('this' in Java/C# parlance) within the method bodies, if
-  needed.
+  Currently there are no options.
 
   Each spec consists of a protocol or interface name followed by zero
   or more method bodies:
@@ -256,10 +246,12 @@
 
   Methods should be supplied for all methods of the desired
   protocol(s) and interface(s). You can also define overrides for
-  methods of Object. Note that no parameter is supplied to correspond
-  to the target object ('this' in Java parlance). Thus methods for
-  protocols will take one fewer arguments than do the
-  protocol functions.
+  methods of Object. Note that a parameter must be supplied to
+  correspond to the target object ('this' in Java parlance). Thus
+  methods for interfaces will take one more argument than do the
+  interface declarations. Note also that recur calls to the method
+  head should *not* pass the target object, it will be supplied
+  automatically and can not be substituted.
 
   In the method bodies, the (unqualified) name can be used to name the
   class (for calls to new, instance? etc).

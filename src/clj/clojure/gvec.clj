@@ -34,17 +34,17 @@
 (deftype ArrayChunk [#^clojure.core.ArrayManager am arr #^int off #^int end]
   
   clojure.lang.Indexed
-  (nth [i] (.aget am arr (+ off i)))
+  (nth [_ i] (.aget am arr (+ off i)))
   
-  (count [] (- end off))
+  (count [_] (- end off))
 
   clojure.lang.IChunk
-  (dropFirst []
+  (dropFirst [_]
     (if (= off end)
       (throw (IllegalStateException. "dropFirst of empty chunk"))
       (new ArrayChunk am arr (inc off) end)))
   
-  (reduce [f init]
+  (reduce [_ f init]
     (loop [ret init i off]
       (if (< i end)
         (recur (f ret (.aget am arr i)) (inc i))
@@ -52,29 +52,28 @@
   )
 
 (deftype VecSeq [#^clojure.core.ArrayManager am #^clojure.core.IVecImpl vec anode #^int i #^int offset] 
-  :as this
   :no-print true
 
   clojure.lang.ISeq
-  (first [] (.aget am anode offset))
-  (next [] 
+  (first [_] (.aget am anode offset))
+  (next [this] 
     (if (< (inc offset) (.alength am anode))
       (new VecSeq am vec anode i (inc offset))
       (.chunkedNext this)))
-  (more []
+  (more [this]
     (let [s (.next this)]
       (or s (clojure.lang.PersistentList/EMPTY))))
 
   clojure.lang.Seqable
-  (seq [] this)
+  (seq [this] this)
 
   clojure.lang.IChunkedSeq
-  (chunkedFirst [] (ArrayChunk am anode offset (.alength am anode)))
-  (chunkedNext [] 
+  (chunkedFirst [_] (ArrayChunk am anode offset (.alength am anode)))
+  (chunkedNext [_] 
    (let [nexti (+ i (.alength am anode))]
      (when (< nexti (count vec))
        (new VecSeq am vec (.arrayFor vec nexti) nexti 0))))
-  (chunkedMore []
+  (chunkedMore [this]
     (let [s (.chunkedNext this)]
       (or s (clojure.lang.PersistentList/EMPTY)))))
 
@@ -82,11 +81,10 @@
   ((get (methods print-method) clojure.lang.ISeq) v w))
 
 (deftype Vec [#^clojure.core.ArrayManager am #^int cnt #^int shift root tail]
-  :as this
   :no-print true
 
   Object
-  (equals [o]
+  (equals [this o]
     (cond 
      (or (instance? clojure.lang.IPersistentVector o) (instance? java.util.RandomAccess o))
        (and (= cnt (count o))
@@ -100,7 +98,7 @@
      :else false))
 
   ;todo - cache
-  (hashCode []
+  (hashCode [this]
     (loop [hash (int 1) i (int 0)]
       (if (= i cnt)
         hash
@@ -110,15 +108,15 @@
                  (inc i))))))
 
   clojure.lang.Counted
-  (count [] cnt)
+  (count [_] cnt)
 
   clojure.lang.Indexed
-  (nth [i]
+  (nth [this i]
     (let [a (.arrayFor this i)]
       (.aget am a (bit-and i (int 0x1f)))))
 
   clojure.lang.IPersistentCollection
-  (cons [val]
+  (cons [this val]
      (if (< (- cnt (.tailoff this)) (int 32))
       (let [new-tail (.array am (inc (.alength am tail)))]
         (System/arraycopy tail 0 new-tail 0 (.alength am tail))
@@ -134,8 +132,8 @@
           (new Vec am (inc cnt) shift (.pushTail this shift root tail-node) 
                  (let [tl (.array am 1)] (.aset am  tl 0 val) tl) (meta this) nil)))))
 
-  (empty [] (new Vec am 0 5 EMPTY-NODE (.array am 0)))                             
-  (equiv [o]
+  (empty [_] (new Vec am 0 5 EMPTY-NODE (.array am 0)))                             
+  (equiv [this o]
     (cond 
      (or (instance? clojure.lang.IPersistentVector o) (instance? java.util.RandomAccess o))
        (and (= cnt (count o))
@@ -149,11 +147,11 @@
      :else false))
   
   clojure.lang.IPersistentStack
-  (peek []
+  (peek [this]
     (when (> cnt (int 0)) 
       (.nth this (dec cnt))))
 
-  (pop []
+  (pop [this]
    (cond
     (zero? cnt) 
       (throw (IllegalStateException. "Can't pop empty vector"))
@@ -175,7 +173,7 @@
            (new Vec am (dec cnt) shift new-root new-tail (meta this) nil)))))
 
   clojure.lang.IPersistentVector
-  (assocN [i val]
+  (assocN [this i val]
     (cond 
      (and (<= (int 0) i) (< i cnt))
        (if (>= i (.tailoff this))
@@ -188,13 +186,13 @@
      :else (throw (IndexOutOfBoundsException.))))
 
   clojure.lang.Associative
-  (assoc [k v]
+  (assoc [this k v]
     (if (clojure.lang.Util/isInteger k)
       (.assocN this k v)
       (throw (IllegalArgumentException. "Key must be integer"))))
 
   clojure.lang.ILookup
-  (valAt [k not-found]
+  (valAt [this k not-found]
     (if (clojure.lang.Util/isInteger k)
       (let [i (int k)]
         (if (and (>= i 0) (< i cnt))
@@ -202,10 +200,10 @@
           not-found))
       not-found))
 
-  (valAt [k] (.valAt this k nil))
+  (valAt [this k] (.valAt this k nil))
 
   clojure.lang.IFn
-  (invoke [k]
+  (invoke [this k]
     (if (clojure.lang.Util/isInteger k)
       (let [i (int k)]
         (if (and (>= i 0) (< i cnt))
@@ -215,7 +213,7 @@
 
   
   clojure.lang.Seqable
-  (seq [] 
+  (seq [this] 
     (if (zero? cnt) 
       nil
       (VecSeq am this (.arrayFor this 0) 0 0)))
@@ -223,10 +221,10 @@
   clojure.lang.Sequential ;marker, no methods
 
   clojure.core.IVecImpl
-  (tailoff [] 
+  (tailoff [_] 
     (- cnt (alength tail)))
 
-  (arrayFor [i]
+  (arrayFor [this i]
     (if (and  (<= (int 0) i) (< i cnt))
       (if (>= i (.tailoff this))
         tail
@@ -237,7 +235,7 @@
                    (- level (int 5))))))
       (throw (IndexOutOfBoundsException.))))
 
-  (pushTail [level parent tailnode]
+  (pushTail [this level parent tailnode]
     (let [subidx (bit-and (bit-shift-right (dec cnt) level) (int 0x1f))
           ret (VecNode (:edit parent) (aclone #^objects (:arr parent)))
           node-to-insert (if (= level (int 5))
@@ -249,7 +247,7 @@
       (aset #^objects (:arr ret) subidx node-to-insert)
       ret))
 
-  (popTail [level node]
+  (popTail [this level node]
     (let [subidx (bit-and (bit-shift-right (- cnt 2) level) (int 0x1f))]
       (cond
        (> level 5) 
@@ -264,14 +262,14 @@
                (aset arr subidx nil)
                (VecNode (:edit root) arr)))))
 
-  (newPath [edit #^int level node]
+  (newPath [this edit #^int level node]
     (if (zero? level)
       node
       (let [ret (VecNode edit (object-array 32))]
         (aset #^objects (:arr ret) 0 (.newPath this edit (- level (int 5)) node))
         ret)))
 
-  (doAssoc [level node i val] 
+  (doAssoc [this level node i val] 
     (if (zero? level)
       ;on this branch, array will need val type
       (let [arr (.aclone am (:arr node))]
@@ -283,65 +281,65 @@
         (VecNode (:edit node) arr))))
 
   java.lang.Iterable
-  (iterator []
+  (iterator [this]
     (let [i (java.util.concurrent.atomic.AtomicInteger. 0)]
       (reify java.util.Iterator
-        (hasNext [] (< (.get i) cnt))
-        (next [] (.nth this (dec (.incrementAndGet i))))
-        (remove [] (throw (UnsupportedOperationException.))))))
+        (hasNext [_] (< (.get i) cnt))
+        (next [_] (.nth this (dec (.incrementAndGet i))))
+        (remove [_] (throw (UnsupportedOperationException.))))))
 
   java.util.Collection
-  (contains [o] (boolean (some #(= % o) this)))
-  (containsAll [c] (every? #(.contains this %) c))
-  (isEmpty [] (zero? cnt))
-  (toArray [] (into-array Object this))
-  (toArray [arr]
+  (contains [this o] (boolean (some #(= % o) this)))
+  (containsAll [this c] (every? #(.contains this %) c))
+  (isEmpty [_] (zero? cnt))
+  (toArray [this] (into-array Object this))
+  (toArray [this arr]
     (if (>= (count arr) cnt)
       (do
         (dotimes [i cnt]
           (aset arr i (.nth this i)))
         arr)
       (into-array Object this)))
-  (size [] cnt)
-  (add [o] (throw (UnsupportedOperationException.)))
-  (addAll [c] (throw (UnsupportedOperationException.)))
-  (clear [] (throw (UnsupportedOperationException.)))
-  (#^boolean remove [o] (throw (UnsupportedOperationException.)))
-  (removeAll [c] (throw (UnsupportedOperationException.)))
-  (retainAll [c] (throw (UnsupportedOperationException.)))
+  (size [_] cnt)
+  (add [_ o] (throw (UnsupportedOperationException.)))
+  (addAll [_ c] (throw (UnsupportedOperationException.)))
+  (clear [_] (throw (UnsupportedOperationException.)))
+  (#^boolean remove [_ o] (throw (UnsupportedOperationException.)))
+  (removeAll [_ c] (throw (UnsupportedOperationException.)))
+  (retainAll [_ c] (throw (UnsupportedOperationException.)))
 
   java.util.List
-  (get [i] (.nth this i))
-  (indexOf [o]
+  (get [this i] (.nth this i))
+  (indexOf [this o]
     (loop [i (int 0)]
       (cond
         (== i cnt) -1
         (= o (.nth this i)) i
         :else (recur (inc i)))))
-  (lastIndexOf [o]
+  (lastIndexOf [this o]
     (loop [i (dec cnt)]
       (cond
         (< i 0) -1
         (= o (.nth this i)) i
         :else (recur (dec i)))))
-  (listIterator [] (.listIterator this 0))
-  (listIterator [i]
+  (listIterator [this] (.listIterator this 0))
+  (listIterator [this i]
     (let [i (java.util.concurrent.atomic.AtomicInteger. i)]
       (reify java.util.ListIterator
-        (hasNext [] (< (.get i) cnt))
-        (hasPrevious [] (pos? i))
-        (next [] (.nth this (dec (.incrementAndGet i))))
-        (nextIndex [] (.get i))
-        (previous [] (.nth this (.decrementAndGet i)))
-        (previousIndex [] (dec (.get i)))
-        (add [e] (throw (UnsupportedOperationException.)))
-        (remove [] (throw (UnsupportedOperationException.)))
-        (set [e] (throw (UnsupportedOperationException.))))))
-  (subList [a z] (subvec this a z))
-  (add [i o] (throw (UnsupportedOperationException.)))
-  (addAll [i c] (throw (UnsupportedOperationException.)))
-  (#^Object remove [#^int i] (throw (UnsupportedOperationException.)))
-  (set [i e] (throw (UnsupportedOperationException.)))
+        (hasNext [_] (< (.get i) cnt))
+        (hasPrevious [_] (pos? i))
+        (next [_] (.nth this (dec (.incrementAndGet i))))
+        (nextIndex [_] (.get i))
+        (previous [_] (.nth this (.decrementAndGet i)))
+        (previousIndex [_] (dec (.get i)))
+        (add [_ e] (throw (UnsupportedOperationException.)))
+        (remove [_] (throw (UnsupportedOperationException.)))
+        (set [_ e] (throw (UnsupportedOperationException.))))))
+  (subList [this a z] (subvec this a z))
+  (add [_ i o] (throw (UnsupportedOperationException.)))
+  (addAll [_ i c] (throw (UnsupportedOperationException.)))
+  (#^Object remove [_ #^int i] (throw (UnsupportedOperationException.)))
+  (set [_ i e] (throw (UnsupportedOperationException.)))
 )
 
 (defmethod print-method ::Vec [v w]
@@ -351,11 +349,11 @@
   (let [garr (gensym)
         tgarr (with-meta garr {:tag (symbol (str t "s"))})]
     `(reify clojure.core.ArrayManager
-            (array [size#] (~(symbol (str t "-array")) size#))
-            (alength [~garr] (alength ~tgarr))
-            (aclone [~garr] (aclone ~tgarr))
-            (aget [~garr i#] (aget ~tgarr i#))
-            (aset [~garr i# val#] (aset ~tgarr i# (~t val#))))))
+            (array [_ size#] (~(symbol (str t "-array")) size#))
+            (alength [_ ~garr] (alength ~tgarr))
+            (aclone [_ ~garr] (aclone ~tgarr))
+            (aget [_ ~garr i#] (aget ~tgarr i#))
+            (aset [_ ~garr i# val#] (aset ~tgarr i# (~t val#))))))
 
 (def #^{:private true} ams
      {:int (mk-am int)
