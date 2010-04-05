@@ -1023,7 +1023,7 @@ static public IPersistentMap map(Object... init){
 }
 
 static public IPersistentSet set(Object... init){
-	return PersistentHashSet.create(init);
+	return PersistentHashSet.createWithCheck(init);
 }
 
 static public IPersistentVector vector(Object... init){

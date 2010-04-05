@@ -289,7 +289,7 @@
   "Returns a new hash set with supplied keys."
   ([] #{})
   ([& keys]
-   (clojure.lang.PersistentHashSet/create keys)))
+   (clojure.lang.PersistentHashSet/createWithCheck keys)))
 
 (defn sorted-map
   "keyval => key val
@@ -2773,7 +2773,7 @@
 
 (defn set
   "Returns a set of the distinct elements of coll."
-  [coll] (apply hash-set coll))
+  [coll] (clojure.lang.PersistentHashSet/create #^clojure.lang.ISeq (seq coll)))
 
 (defn #^{:private true}
   filter-key [keyfn pred amap]

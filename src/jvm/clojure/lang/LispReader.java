@@ -1008,7 +1008,7 @@ public static class MapReader extends AFn{
 public static class SetReader extends AFn{
 	public Object invoke(Object reader, Object leftbracket) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		return PersistentHashSet.create(readDelimitedList('}', r, true));
+		return PersistentHashSet.createWithCheck(readDelimitedList('}', r, true));
 	}
 
 }

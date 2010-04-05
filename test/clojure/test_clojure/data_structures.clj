@@ -534,23 +534,6 @@
       (hash-set 1 2) (hash-set 2 1)
       (hash-set 3 1 2) (hash-set 1 2 3) )
 
-  ; equal and unique
-  (are [x] (and (= (hash-set x)   #{x})
-                (= (hash-set x x) #{x}))
-      nil
-      false true
-      0 42
-      0.0 3.14
-      2/3
-      0M 1M
-      \c
-      "" "abc"
-      'sym
-      :kw
-      () '(1 2)
-      [] [1 2]
-      {} {:a 1 :b 2}
-      #{} #{1 2} )
 
   (are [x y] (= x y)
       ; equal classes

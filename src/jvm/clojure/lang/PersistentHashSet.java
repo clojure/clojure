@@ -47,6 +47,41 @@ static public PersistentHashSet create(ISeq items){
 	return ret;
 }
 
+public static PersistentHashSet createWithCheck(Object... init){
+	PersistentHashSet ret = EMPTY;
+	for(int i = 0; i < init.length; i++)
+		{
+		ret = (PersistentHashSet) ret.cons(init[i]);
+		if(ret.count() != i + 1)
+			throw new IllegalArgumentException("Duplicate key: " + init[i]);
+		}
+	return ret;
+}
+
+public static PersistentHashSet createWithCheck(List init){
+	PersistentHashSet ret = EMPTY;
+	int i=0;
+	for(Object key : init)
+		{
+		ret = (PersistentHashSet) ret.cons(key);
+		if(ret.count() != i + 1)
+			throw new IllegalArgumentException("Duplicate key: " + key);		
+		++i;
+		}
+	return ret;
+}
+
+static public PersistentHashSet createWithCheck(ISeq items){
+	PersistentHashSet ret = EMPTY;
+	for(int i=0; items != null; items = items.next(), ++i)
+		{
+		ret = (PersistentHashSet) ret.cons(items.first());
+		if(ret.count() != i + 1)
+			throw new IllegalArgumentException("Duplicate key: " + items.first());
+		}
+	return ret;
+}
+
 PersistentHashSet(IPersistentMap meta, IPersistentMap impl){
 	super(impl);
 	this._meta = meta;
