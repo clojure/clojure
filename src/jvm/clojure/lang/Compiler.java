@@ -6049,8 +6049,6 @@ static public class NewInstanceExpr extends ObjExpr{
 				fmap = fmap.assoc(sym, lb);
 				closesvec[i*2] = lb;
 				closesvec[i*2 + 1] = lb;
-				if(!sym.name.startsWith("__"))
-					compileLookupThunk(ret, sym);
 				}
 
 			//todo - inject __meta et al into closes - when?
@@ -6206,71 +6204,6 @@ static public class NewInstanceExpr extends ObjExpr{
 		byte[] bytecode = cw.toByteArray();
 		DynamicClassLoader loader = (DynamicClassLoader) LOADER.deref();
 		return loader.defineClass(COMPILE_STUB_PREFIX + "." + ret.name, bytecode);		
-	}
-
-	static Class compileLookupThunk(NewInstanceExpr ret, Symbol fld) throws Exception{
-				//String superName, NewInstanceExpr ret, String[] interfaceNames){
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		ClassVisitor cv = cw;
-		String iname = ret.internalName + "$__lookup__" + fld.name;
-		String cname = ret.name + "$__lookup__" + fld.name;
-		Class fclass = tagClass(tagOf(fld));
-
-		//workaround until full support for type-hinted non-primitive fields
-		if(!fclass.isPrimitive())
-			fclass = Object.class;
-
-		Type ftype = Type.getType(fclass);
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, iname,
-		         null,"java/lang/Object",new String[]{"clojure/lang/ILookupThunk"});
-
-		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
-		                                                voidctor,
-		                                                null,
-		                                                null,
-		                                                cv);
-		ctorgen.visitCode();
-		ctorgen.loadThis();
-		ctorgen.invokeConstructor(OBJECT_TYPE, voidctor);
-		ctorgen.returnValue();
-		ctorgen.endMethod();
-
-        Method meth = Method.getMethod("Object get(Object)");
-
-		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
-											meth,
-											null,
-											null,
-											cv);
-		gen.visitCode();
-		Label faultLabel = gen.newLabel();
-		Label endLabel = gen.newLabel();
-
-		gen.loadArg(0);
-		gen.dup();
-		gen.instanceOf(ret.objtype);
-		gen.ifZCmp(GeneratorAdapter.EQ, faultLabel);
-		gen.checkCast(ret.objtype);
-		gen.getField(ret.objtype, munge(fld.name), ftype);
-		HostExpr.emitBoxReturn(ret,gen,fclass);
-		gen.goTo(endLabel);
-
-		gen.mark(faultLabel);
-		gen.pop();
-		gen.loadThis();
-
-		gen.mark(endLabel);
-		gen.returnValue();
-		gen.endMethod();
-
-		//end of class
-		cv.visitEnd();
-
-		byte[] bytecode = cw.toByteArray();
-		if(RT.booleanCast(COMPILE_FILES.deref()))
-			writeClassFile(iname, bytecode);
-		DynamicClassLoader loader = (DynamicClassLoader) LOADER.deref();
-		return loader.defineClass(cname, bytecode);
 	}
 
 	static String[] interfaceNames(IPersistentVector interfaces){

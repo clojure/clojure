@@ -149,13 +149,15 @@
                            (get ~'__extmap k# else#)))
                  `(getLookupThunk [~'this k#]
                     (case k#
-                          ~@(mapcat 
-                             (fn [fld]
-                               (let [cstr (str (clojure.core/name classname) "$__lookup__" (clojure.core/name fld))]
-                                 [(keyword fld) 
-                                  `(-> ~cstr (Class/forName) (.newInstance))]))
-                             base-fields)
-                          nil)))]
+                      ~@(let [gtarget (gensym) 
+                              hinted-target (with-meta gtarget {:tag tagname})] 
+                          (mapcat 
+                           (fn [fld]
+                             [(keyword fld) 
+                              `(reify clojure.lang.ILookupThunk 
+                                      (get [_ ~gtarget] (. ~hinted-target ~fld)))])
+                           base-fields))
+                      nil)))]
           [i m]))
       (idynamictype [[i m]]
         [(conj i 'clojure.lang.IDynamicType)
