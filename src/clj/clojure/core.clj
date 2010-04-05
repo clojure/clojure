@@ -283,7 +283,7 @@
   Returns a new hash map with supplied mappings."
   ([] {})
   ([& keyvals]
-   (. clojure.lang.PersistentHashMap (create keyvals))))
+   (. clojure.lang.PersistentHashMap (createWithCheck keyvals))))
 
 (defn hash-set
   "Returns a new hash set with supplied keys."
@@ -2971,7 +2971,7 @@
 (defn array-map
   "Constructs an array-map."
   ([] (. clojure.lang.PersistentArrayMap EMPTY))
-  ([& keyvals] (new clojure.lang.PersistentArrayMap (to-array keyvals))))
+  ([& keyvals] (clojure.lang.PersistentArrayMap/createWithCheck (to-array keyvals))))
 
 (defn nthnext
   "Returns the nth next of coll, (seq coll) when n is 0."
@@ -2984,7 +2984,7 @@
 
 ;redefine let and loop  with destructuring
 (defn destructure [bindings]
-  (let [bmap (apply array-map bindings)
+  (let [bents (partition 2 bindings)
         pb (fn pb [bvec b v]
                (let [pvec
                      (fn [bvec b val]
@@ -3035,10 +3035,10 @@
                   (vector? b) (pvec bvec b v)
                   (map? b) (pmap bvec b v)
                   :else (throw (new Exception (str "Unsupported binding form: " b))))))
-        process-entry (fn [bvec b] (pb bvec (key b) (val b)))]
-    (if (every? symbol? (keys bmap))
+        process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
+    (if (every? symbol? (map first bents))
       bindings
-      (reduce process-entry [] bmap))))
+      (reduce process-entry [] bents))))
 
 (defmacro let
   "Evaluates the exprs in a lexical context in which the symbols in

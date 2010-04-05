@@ -1018,8 +1018,8 @@ static public IPersistentMap map(Object... init){
 	if(init == null)
 		return PersistentArrayMap.EMPTY;
 	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
-		return new PersistentArrayMap(init);
-	return PersistentHashMap.create(init);
+		return PersistentArrayMap.createWithCheck(init);
+	return PersistentHashMap.createWithCheck(init);
 }
 
 static public IPersistentSet set(Object... init){

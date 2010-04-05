@@ -58,15 +58,13 @@ public static PersistentHashMap create(Object... init){
 	return (PersistentHashMap) ret.persistent();
 }
 
-public static PersistentHashMap create(List init){
+public static PersistentHashMap createWithCheck(Object... init){
 	ITransientMap ret = EMPTY.asTransient();
-	for(Iterator i = init.iterator(); i.hasNext();)
+	for(int i = 0; i < init.length; i += 2)
 		{
-		Object key = i.next();
-		if(!i.hasNext())
-			throw new IllegalArgumentException(String.format("No value supplied for key: %s", key));
-		Object val = i.next();
-		ret = ret.assoc(key, val);
+		ret = ret.assoc(init[i], init[i + 1]);
+		if(ret.count() != i/2 + 1)
+			throw new IllegalArgumentException("Duplicate key: " + init[i]);
 		}
 	return (PersistentHashMap) ret.persistent();
 }
@@ -78,6 +76,19 @@ static public PersistentHashMap create(ISeq items){
 		if(items.next() == null)
 			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
 		ret = ret.assoc(items.first(), RT.second(items));
+		}
+	return (PersistentHashMap) ret.persistent();
+}
+
+static public PersistentHashMap createWithCheck(ISeq items){
+	ITransientMap ret = EMPTY.asTransient();
+	for(int i=0; items != null; items = items.next().next(), ++i)
+		{
+		if(items.next() == null)
+			throw new IllegalArgumentException(String.format("No value supplied for key: %s", items.first()));
+		ret = ret.assoc(items.first(), RT.second(items));
+		if(ret.count() != i + 1)
+			throw new IllegalArgumentException("Duplicate key: " + items.first());
 		}
 	return (PersistentHashMap) ret.persistent();
 }

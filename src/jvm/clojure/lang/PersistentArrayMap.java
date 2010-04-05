@@ -60,6 +60,17 @@ IPersistentMap createHT(Object[] init){
 	return PersistentHashMap.create(meta(), init);
 }
 
+static public PersistentArrayMap createWithCheck(Object[] init){
+	for(int i=0;i< init.length;i += 2)
+		{
+		for(int j=i+2;j<init.length;j += 2)
+			{
+			if(equalKey(init[i],init[j]))
+				throw new IllegalArgumentException("Duplicate key: " + init[i]);
+			}
+		}
+	return new PersistentArrayMap(init);
+}
 /**
  * This ctor captures/aliases the passed array, so do not modify later
  *
