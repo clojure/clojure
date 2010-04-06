@@ -1709,17 +1709,5 @@ static public Object[] aclone(Object[] xs){
 	return xs.clone();
 }
 
-static public Object aget(Object xs, int i){
-	return Reflector.prepRet(Array.get(xs, i));
-}
-
-static public Object aset(Object xs, int i, Object v){
-	Array.set(xs, i, v);
-	return v;
-}
-
-static public int alength(Object xs){
-	return Array.getLength(xs);
-}
 
 }
