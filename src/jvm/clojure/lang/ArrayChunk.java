@@ -36,6 +36,12 @@ public Object nth(int i){
 	return array[off + i];
 }
 
+public Object nth(int i, Object notFound){
+	if(i >= 0 && i < count())
+		return nth(i);
+	return notFound;
+}
+
 public int count(){
 	return end - off;
 }

@@ -495,6 +495,10 @@ static public IPersistentMap meta(Object x){
 public static int count(Object o){
 	if(o instanceof Counted)
 		return ((Counted) o).count();
+	return countFrom(o);
+}
+
+static int countFrom(Object o){
 	if(o == null)
 		return 0;
 	else if(o instanceof IPersistentCollection) {
@@ -605,10 +609,14 @@ static public Object pop(Object x){
 }
 
 static public Object get(Object coll, Object key){
+	if(coll instanceof ILookup)
+		return ((ILookup) coll).valAt(key);
+	return getFrom(coll, key);
+}
+
+static Object getFrom(Object coll, Object key){
 	if(coll == null)
 		return null;
-	else if(coll instanceof ILookup)
-		return ((ILookup) coll).valAt(key);
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		return m.get(key);
@@ -628,10 +636,14 @@ static public Object get(Object coll, Object key){
 }
 
 static public Object get(Object coll, Object key, Object notFound){
+	if(coll instanceof ILookup)
+		return ((ILookup) coll).valAt(key, notFound);
+	return getFrom(coll, key, notFound);
+}
+
+static Object getFrom(Object coll, Object key, Object notFound){
 	if(coll == null)
 		return notFound;
-	else if(coll instanceof ILookup)
-		return ((ILookup) coll).valAt(key, notFound);
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		if(m.containsKey(key))
@@ -713,6 +725,10 @@ static public Object dissoc(Object coll, Object key) throws Exception{
 static public Object nth(Object coll, int n){
 	if(coll instanceof Indexed)
 		return ((Indexed) coll).nth(n);
+	return nthFrom(coll, n);
+}
+
+static Object nthFrom(Object coll, int n){
 	if(coll == null)
 		return null;
 	else if(coll instanceof CharSequence)
@@ -750,11 +766,13 @@ static public Object nth(Object coll, int n){
 static public Object nth(Object coll, int n, Object notFound){
 	if(coll instanceof Indexed) {
 		Indexed v = (Indexed) coll;
-		if(n >= 0 && n < v.count())
-			return v.nth(n);
-		return notFound;
+			return v.nth(n, notFound);
 	}
-	else if(coll == null)
+	return nthFrom(coll, n, notFound);
+}
+
+static Object nthFrom(Object coll, int n, Object notFound){
+	if(coll == null)
 		return notFound;
 	else if(n < 0)
 		return notFound;
@@ -900,6 +918,8 @@ static public short shortCast(Object x){
 }
 
 static public int intCast(Object x){
+	if(x instanceof Integer)
+		return ((Integer)x).intValue();
 	if(x instanceof Number)
 		return intCast(((Number) x).longValue());
 	return ((Character) x).charValue();

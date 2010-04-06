@@ -114,6 +114,11 @@
   (nth [this i]
     (let [a (.arrayFor this i)]
       (.aget am a (bit-and i (int 0x1f)))))
+  (nth [this i not-found]
+       (let [z (int 0)]
+         (if (and (>= i z) (< i (.count this)))
+           (.nth this i)
+           not-found)))
 
   clojure.lang.IPersistentCollection
   (cons [this val]
@@ -222,7 +227,7 @@
 
   clojure.core.IVecImpl
   (tailoff [_] 
-    (- cnt (alength tail)))
+    (- cnt (.alength am tail)))
 
   (arrayFor [this i]
     (if (and  (<= (int 0) i) (< i cnt))

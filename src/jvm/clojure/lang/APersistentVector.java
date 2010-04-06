@@ -153,6 +153,12 @@ public Object get(int index){
 	return nth(index);
 }
 
+public Object nth(int i, Object notFound){
+	if(i >= 0 && i < count())
+		return nth(i);
+	return notFound;
+}
+
 public Object remove(int i){
 	throw new UnsupportedOperationException();
 }

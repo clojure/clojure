@@ -651,6 +651,8 @@
 (defn count
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings, arrays, and Java Collections and Maps"
+  {:tag Integer
+   :inline (fn  [x] `(. clojure.lang.RT (count ~x)))}
   [coll] (clojure.lang.RT/count coll))
 
 (defn int
@@ -1023,6 +1025,8 @@
 
 (defn get
   "Returns the value mapped to key, not-found or nil if key not present."
+  {:inline (fn  [m k & nf] `(. clojure.lang.RT (get ~m ~k ~@nf)))
+   :inline-arities #{2 3}}
   ([map key]
    (. clojure.lang.RT (get map key)))
   ([map key not-found]
