@@ -147,17 +147,22 @@
                     (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
                                                    base-fields)
                            (get ~'__extmap k# else#)))
-                 `(getLookupThunk [~'this k#]
-                    (case k#
-                      ~@(let [gtarget (gensym) 
-                              hinted-target (with-meta gtarget {:tag tagname})] 
-                          (mapcat 
-                           (fn [fld]
-                             [(keyword fld) 
-                              `(reify clojure.lang.ILookupThunk 
-                                      (get [_ ~gtarget] (. ~hinted-target ~fld)))])
-                           base-fields))
-                      nil)))]
+                 (let [gclass (gensym)] 
+                   `(getLookupThunk [~'this k#]
+                       (let [~gclass (class ~'this)]              
+                         (case k#
+                            ~@(let [gtarget (gensym) 
+                                    hinted-target (with-meta gtarget {:tag tagname})] 
+                                (mapcat 
+                                 (fn [fld]
+                                   [(keyword fld) 
+                                    `(reify clojure.lang.ILookupThunk 
+                                       (get [thunk# ~gtarget] 
+                                            (if (identical? (class ~gtarget) ~gclass) 
+                                              (. ~hinted-target ~fld)
+                                              thunk#)))])
+                                 base-fields))
+                            nil)))))]
           [i m]))
       (idynamictype [[i m]]
         [(conj i 'clojure.lang.IDynamicType)
