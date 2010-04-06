@@ -54,6 +54,21 @@
 (deftype VecSeq [#^clojure.core.ArrayManager am #^clojure.core.IVecImpl vec anode #^int i #^int offset] 
   :no-print true
 
+  clojure.core.protocols.InternalReduce
+  (internal-reduce
+   [_ f val]
+   (loop [result val
+          aidx offset]
+     (if (< aidx (count vec))
+       (let [node (.arrayFor vec aidx)
+             result (loop [result result
+                           node-idx (bit-and (int 0x1f) aidx)]
+                      (if (< node-idx (.alength am node))
+                        (recur (f result (.aget am node node-idx)) (inc node-idx))
+                        result))]
+         (recur result (bit-and (int 0xffe0) (+ aidx (int 32)))))
+       result)))
+  
   clojure.lang.ISeq
   (first [_] (.aget am anode offset))
   (next [this] 

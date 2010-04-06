@@ -15,7 +15,7 @@ package clojure.lang;
 import java.lang.reflect.Array;
 
 public class ArraySeq extends ASeq implements IndexedSeq, IReduce{
-final Object array;
+public final Object array;
 final int i;
 final Object[] oa;
 //ISeq _rest;
@@ -164,7 +164,7 @@ public int lastIndexOf(Object o) {
 //////////////////////////////////// specialized primitive versions ///////////////////////////////
 
 static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
-	final int[] array;
+	public final int[] array;
 	final int i;
 
 	ArraySeq_int(IPersistentMap meta, int[] array, int i){
@@ -240,7 +240,7 @@ static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
 
 
 static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
-	final float[] array;
+	public final float[] array;
 	final int i;
 
 	ArraySeq_float(IPersistentMap meta, float[] array, int i){
@@ -315,7 +315,7 @@ static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
 }
 
 static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
-	final double[] array;
+	public final double[] array;
 	final int i;
 
 	ArraySeq_double(IPersistentMap meta, double[] array, int i){
@@ -390,7 +390,7 @@ static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
 }
 
 static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
-	final long[] array;
+	public final long[] array;
 	final int i;
 
 	ArraySeq_long(IPersistentMap meta, long[] array, int i){
@@ -465,7 +465,7 @@ static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
 }
 
 static public class ArraySeq_byte extends ASeq implements IndexedSeq, IReduce{
-	final byte[] array;
+	public final byte[] array;
 	final int i;
 
 	ArraySeq_byte(IPersistentMap meta, byte[] array, int i){
@@ -540,7 +540,7 @@ static public class ArraySeq_byte extends ASeq implements IndexedSeq, IReduce{
 }
 
 static public class ArraySeq_char extends ASeq implements IndexedSeq, IReduce{
-	final char[] array;
+	public final char[] array;
 	final int i;
 
 	ArraySeq_char(IPersistentMap meta, char[] array, int i){
@@ -615,7 +615,7 @@ static public class ArraySeq_char extends ASeq implements IndexedSeq, IReduce{
 }
 
 static public class ArraySeq_boolean extends ASeq implements IndexedSeq, IReduce{
-	final boolean[] array;
+	public final boolean[] array;
 	final int i;
 
 	ArraySeq_boolean(IPersistentMap meta, boolean[] array, int i){

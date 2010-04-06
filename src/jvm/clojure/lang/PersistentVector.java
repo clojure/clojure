@@ -233,10 +233,10 @@ public ISeq seq(){
 
 static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
 
-	final PersistentVector vec;
+	public final PersistentVector vec;
 	final Object[] node;
 	final int i;
-	final int offset;
+	public final int offset;
 
 	public ChunkedSeq(PersistentVector vec, int i, int offset){
 		this.vec = vec;
