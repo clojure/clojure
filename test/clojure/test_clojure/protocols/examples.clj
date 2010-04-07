@@ -1,6 +1,6 @@
 (ns clojure.test-clojure.protocols.examples)
 
-(defprotocol AnExampleProtocol
+(defprotocol ExampleProtocol
   "example protocol used by clojure tests"
 
   (foo [a] "method with one arg")

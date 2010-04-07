@@ -108,6 +108,7 @@
 
   <target name="compile-tests" 
           description="Compile the subset of tests that require compilation.">
+    <delete dir="${test-classes}"/>
     <mkdir dir="${test-classes}"/>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
@@ -133,7 +134,8 @@
   </target>
 
   <target name="test"
-          description="Run clojure tests">
+          description="Run clojure tests"
+          depends="compile-tests">
 <!--           depends="clojure"> -->
     <java classname="clojure.main" failonerror="true">
       <classpath>
