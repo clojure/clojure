@@ -45,7 +45,7 @@ public int intValue(){
 }
 
 public long longValue(){
-	return (long) doubleValue();
+	return bigIntegerValue().longValue();
 }
 
 public float floatValue(){
@@ -65,6 +65,10 @@ public BigDecimal decimalValue(MathContext mc){
 	BigDecimal denominator = new BigDecimal(this.denominator);
 
 	return numerator.divide(denominator, mc);
+}
+
+public BigInteger bigIntegerValue(){
+	return numerator.divide(denominator);
 }
 
 public int compareTo(Object o){

@@ -2426,6 +2426,7 @@
   [x] (cond
        (instance? BigInteger x) x
        (decimal? x) (.toBigInteger #^BigDecimal x)
+       (ratio? x) (.bigIntegerValue #^clojure.lang.Ratio x)
        (number? x) (BigInteger/valueOf (long x))
        :else (BigInteger. x)))
 
