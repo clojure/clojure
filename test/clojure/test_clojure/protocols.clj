@@ -81,5 +81,39 @@
      {:foo identity})
     (is (true? (extends? other/SimpleProtocol ::Whatzit)))))
 
+(deftest extenders-test
+  (reload-example-protocols)
+  (testing "a fresh protocol has no extenders"
+    (is (nil? (extenders ExampleProtocol))))
+  (testing "extending with no methods doesn't count!"
+    (deftype Something [])
+    (extend ::Something ExampleProtocol)
+    (is (nil? (extenders ExampleProtocol))))
+  (testing "extending a protocol (and including an impl) adds an entry to extenders"
+    (deftype Whatzit [])
+    (extend ::Whatzit ExampleProtocol {:foo identity})
+    (is (= [::Whatzit] (extenders ExampleProtocol)))))
+
+(deftest satisifies?-test
+  (reload-example-protocols)
+  (deftype Whatzit []
+    ExampleProtocol)
+  (let [whatzit (Whatzit)]
+    (testing "returns nil if a type does not implement the protocol at all"
+      (is (nil? (satisfies? other/SimpleProtocol whatzit))))
+    (testing "returns true if a type implements the protocol directly"
+      (is (true? (satisfies? ExampleProtocol whatzit))))
+    (testing "returns true if a type explicitly extends protocol"
+      (extend
+       ::Whatzit
+       other/SimpleProtocol
+       {:foo identity})
+      (is (true? (satisfies? other/SimpleProtocol whatzit)))))  )
+
+;; todo
 ;; what happens if you extend after implementing directly?
-;; todo: investigate how nil-handling changes error handling
+;; investigate how nil-handling changes error handling
+;; extend-type extend-protocol extend-class
+;; maybe: find-protocol-impl find-protocol-method
+;; deftype, printable forms
+;; reify, definterface
