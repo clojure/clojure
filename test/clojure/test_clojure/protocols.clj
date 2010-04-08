@@ -12,6 +12,17 @@
   (:use clojure.test clojure.test-clojure.protocols.examples)
   (:require [clojure.test-clojure.protocols.more-examples :as other]))
 
+;; temporary hack until I decide how to cleanly reload protocol
+(defn reload-example-protocols
+  []
+  (alter-var-root #'clojure.test-clojure.protocols.examples/ExampleProtocol
+                  assoc :impls {})
+  (alter-var-root #'clojure.test-clojure.protocols.more-examples/SimpleProtocol
+                  assoc :impls {})
+  (require :reload
+           'clojure.test-clojure.protocols.examples
+           'clojure.test-clojure.protocols.more-examples))
+
 (defn method-names
   "return sorted list of method names on a class"
   [c]
@@ -55,8 +66,20 @@
      {:foo (fn [this] (str "widget " (:name this)))})
     (is (= "widget z" (foo (Widget "z"))))))
 
-  
-
+(deftest extends?-test
+  (reload-example-protocols)
+  (deftype Whatzit []
+    ExampleProtocol)
+  (testing "returns nil if a type does not implement the protocol at all"
+    (is (nil? (extends? other/SimpleProtocol ::Whatzit))))
+  (testing "returns nil if a type implements the protocol directly" ;; TBD false?
+    (is (nil? (extends? ExampleProtocol ::Whatzit))))
+  (testing "returns true if a type explicitly extends protocol"
+    (extend
+     ::Whatzit
+     other/SimpleProtocol
+     {:foo identity})
+    (is (true? (extends? other/SimpleProtocol ::Whatzit)))))
 
 ;; what happens if you extend after implementing directly?
 ;; todo: investigate how nil-handling changes error handling
