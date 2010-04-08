@@ -42,6 +42,10 @@ final synchronized Object sval(){
 			sv = fn.invoke();
 			fn = null;
 			}
+		catch(RuntimeException e)
+			{
+			throw e;
+			}
 		catch(Exception e)
 			{
 			throw new RuntimeException(e);
