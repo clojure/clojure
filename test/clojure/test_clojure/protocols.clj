@@ -129,9 +129,45 @@
       (is (= "second bar" (bar whatzit nil)))
       (is (= "second baz" (baz whatzit))))))
 
+(deftest deftype-factory-test
+  (deftype Whatzit [a b])
+  (testing "with arglist factory"
+    (let [whatzit (Whatzit 1 2)]
+      (testing "field access"
+        (is (= 1 (.a whatzit)))
+        (is (= 2 (.b whatzit))))
+      (testing "type information"
+        (is (= ::Whatzit (type whatzit))))
+      (testing "instance hast no metadata"
+        (is (nil? (meta whatzit))))))
+  (testing "with arglist + meta + extension factory"
+    ;; TODO: test extension map. move to defrecord?
+    (let [whatzit (Whatzit 1 2 {:awesome true} {:extra 5})] 
+      (println (meta whatzit))
+      (testing "field access"
+        (is (= 1 (.a whatzit)))
+        (is (= 2 (.b whatzit))))
+      (testing "type information"
+        (is (= ::Whatzit (type whatzit))))
+      (testing "gets metadata from factory call"
+        (is (= {:awesome true} (meta whatzit)))))))
+
+(deftest deftype-object-methods-test
+  (deftype Foo [a])
+  (deftype Bar [a])
+  (testing ".equals depends on fields and type"
+    (is (true? (.equals (Foo 1) (Foo 1))))
+    (is (false? (.equals (Foo 1) (Foo 2))))
+    (is (false? (.equals (Foo 1) (Bar 1)))))
+  (testing ".hashCode depends on fields and type"
+    (is (= (.hashCode (Foo 1)) (.hashCode (Foo 1))))
+    (is (= (.hashCode (Foo 2)) (.hashCode (Foo 2))))
+    (is (not= (.hashCode (Foo 1)) (.hashCode (Foo 2))))
+    (is (= (.hashCode (Bar 1)) (.hashCode (Bar 1))))
+    (is (not= (.hashCode (Foo 1)) (.hashCode (Bar 1))))))
+
 ;; todo
 ;; what happens if you extend after implementing directly? Extend is ignored!!
-;; investigate how nil-handling changes error handling
 ;; extend-type extend-protocol extend-class
 ;; maybe: find-protocol-impl find-protocol-method
 ;; deftype, printable forms
