@@ -110,8 +110,27 @@
        {:foo identity})
       (is (true? (satisfies? other/SimpleProtocol whatzit)))))  )
 
+(deftest re-extending-test
+  (reload-example-protocols)
+  (deftype Whatzit [])
+  (extend
+   ::Whatzit
+   ExampleProtocol
+   {:foo (fn [_] "first foo")
+    :baz (fn [_] "first baz")})
+  (testing "if you re-extend, the old implementation is replaced (not merged!)"
+    (extend
+     ::Whatzit
+     ExampleProtocol
+     {:baz (fn [_] "second baz")
+      :bar (fn [_ _] "second bar")})
+    (let [whatzit (Whatzit)]
+      (is (thrown? IllegalArgumentException (foo whatzit)))
+      (is (= "second bar" (bar whatzit nil)))
+      (is (= "second baz" (baz whatzit))))))
+
 ;; todo
-;; what happens if you extend after implementing directly?
+;; what happens if you extend after implementing directly? Extend is ignored!!
 ;; investigate how nil-handling changes error handling
 ;; extend-type extend-protocol extend-class
 ;; maybe: find-protocol-impl find-protocol-method
