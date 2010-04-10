@@ -113,31 +113,32 @@
 (defn attributes [e]
   (let [v (vec (:attrs e))]
     (reify org.xml.sax.Attributes
-      (getLength [] (count v))
-      (getURI [i] (namespace (key (v i))))
-      (getLocalName [i] (name (key (v i))))
-      (getQName [i] (name (key (v i))))
-      (#^String getValue [#^int i] (val (v i)))
-      (#^String getType [#^int i] "CDATA"))))
+      (getLength [_] (count v))
+      (getURI [_ i] (namespace (key (v i))))
+      (getLocalName [_ i] (name (key (v i))))
+      (getQName [_ i] (name (key (v i))))
+      (getValue [_ uri name] (get (:attrs e) name))
+      (#^String getValue [_ #^int i] (val (v i)))
+      (#^String getType [_ #^int i] "CDATA"))))
 
 (defn- emit-element
   "Recursively prints as XML text the element struct e.  To have it
   print extra whitespace like clojure.xml/emit, use the :pad true
   option."
-  [e ch]
+  [e #^org.xml.sax.ContentHandler ch]
   (if (instance? String e)
     (.characters ch (.toCharArray #^String e) 0 (count e))
     (let [nspace (namespace (:tag e))
           qname (name (:tag e))]
-      (.startElement ch nspace qname qname (attributes e))
+      (.startElement ch (or nspace "") qname qname (attributes e))
       (doseq [c (:content e)]
         (emit-element c ch))
-      (.endElement ch nspace qname qname))))
+      (.endElement ch (or nspace "") qname qname))))
+  
 
 (defn emit
-  [e & optseq]
-  (let [opts (apply array-map optseq)
-        content-handler (atom nil)
+  [e & {:as opts}]
+  (let [content-handler (atom nil)
         trans (-> (javax.xml.transform.TransformerFactory/newInstance)
                 .newTransformer)]
 
@@ -157,15 +158,16 @@
       trans
       (javax.xml.transform.sax.SAXSource.
         (reify org.xml.sax.XMLReader
-          (getContentHandler [] @content-handler)
-          (setDTDHandler [handler])
-          (setFeature [name value])
-          (setProperty [name value])
-          (setContentHandler [ch] (reset! content-handler ch))
-          (#^void parse [#^org.xml.sax.InputSource _]
-            (.startDocument @content-handler)
-            (emit-element e @content-handler)
-            (.endDocument @content-handler)))
+          (getContentHandler [_] @content-handler)
+          (setDTDHandler [_ handler])
+          (setFeature [_ name value])
+          (setProperty [_ name value])
+          (setContentHandler [_ ch] (reset! content-handler ch))
+          (#^void parse [_ #^org.xml.sax.InputSource _]
+            (when @content-handler
+              (.startDocument @content-handler)
+              (emit-element e @content-handler)
+              (.endDocument @content-handler))))
         (org.xml.sax.InputSource.))
       (javax.xml.transform.stream.StreamResult. *out*))))
 
