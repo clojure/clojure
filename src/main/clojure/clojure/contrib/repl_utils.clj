@@ -9,15 +9,15 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns 
-  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi",
+  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim",
      :doc "Utilities meant to be used interactively at the REPL"}
   clojure.contrib.repl-utils
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
            (clojure.lang RT Compiler Compiler$C))
+  (:require [clojure.contrib.string :as s])
   (:use [clojure.contrib.seq :only (indexed)]
-        [clojure.contrib.javadoc.browse :only (browse-url)]
-        [clojure.contrib.string :as s :only ()]))
+        [clojure.contrib.javadoc.browse :only (browse-url)]))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Java classes
@@ -124,6 +124,18 @@
   Example: (source filter)"
   [n]
   `(println (or (get-source '~n) (str "Source not found"))))
+
+(defn apropos
+  "Given a regular expression or stringable thing, return a seq of 
+all definitions in all currently-loaded namespaces that match the
+str-or-pattern."
+  [str-or-pattern]
+  (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
+                   #(re-find str-or-pattern (str %))
+                   #(s/substring? (str str-or-pattern) (str %)))]
+    (mapcat (fn [ns]
+              (filter matches? (keys (ns-publics ns))))
+            (all-ns))))
 
 ;; ----------------------------------------------------------------------
 ;; Handle Ctrl-C keystrokes
