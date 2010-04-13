@@ -36,6 +36,7 @@ public ISeq rseq(){
 }
 
 static boolean doEquals(IPersistentVector v, Object obj){
+	if(v == obj) return true;
 	if(obj instanceof List || obj instanceof IPersistentVector)
 		{
 		Collection ma = (Collection) obj;

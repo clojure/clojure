@@ -84,6 +84,7 @@
   Object
   (equals [this o]
     (cond 
+     (identical? this o) true
      (or (instance? clojure.lang.IPersistentVector o) (instance? java.util.RandomAccess o))
        (and (= cnt (count o))
             (loop [i (int 0)]

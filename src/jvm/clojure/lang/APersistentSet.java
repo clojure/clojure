@@ -49,6 +49,7 @@ public Object invoke(Object arg1) throws Exception{
 }
 
 public boolean equals(Object obj){
+	if(this == obj) return true;
 	if(!(obj instanceof Set))
 		return false;
 	Set m = (Set) obj;

@@ -46,7 +46,7 @@ public boolean equiv(Object obj){
 }
 
 public boolean equals(Object obj){
-
+	if(this == obj) return true;
 	if(!(obj instanceof Sequential || obj instanceof List))
 		return false;
 	ISeq ms = RT.seq(obj);
