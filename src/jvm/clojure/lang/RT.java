@@ -495,7 +495,7 @@ static public IPersistentMap meta(Object x){
 public static int count(Object o){
 	if(o instanceof Counted)
 		return ((Counted) o).count();
-	return countFrom(o);
+	return countFrom(Util.ret1(o, o = null));
 }
 
 static int countFrom(Object o){
@@ -725,7 +725,7 @@ static public Object dissoc(Object coll, Object key) throws Exception{
 static public Object nth(Object coll, int n){
 	if(coll instanceof Indexed)
 		return ((Indexed) coll).nth(n);
-	return nthFrom(coll, n);
+	return nthFrom(Util.ret1(coll, coll = null), n);
 }
 
 static Object nthFrom(Object coll, int n){
