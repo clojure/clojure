@@ -12,7 +12,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public abstract class ASeq extends Obj implements ISeq, List, Streamable{
+public abstract class ASeq extends Obj implements ISeq, List{
 transient int _hash = -1;
 
 public String toString(){
@@ -202,30 +202,6 @@ public Iterator iterator(){
 	return new SeqIterator(this);
 }
 
-
-
-public Stream stream() throws Exception {
-    return new Stream(new Src(this));
-}
-
-static class Src extends AFn{
-    ISeq s;
-
-    public Src(ISeq s) {
-        this.s = s;
-    }
-
-	public Object invoke() throws Exception {
-		ISeq sq = RT.seq(s);
-        if(sq != null)
-            {
-            Object ret = sq.first();
-            s = sq.more();
-            return ret;
-            }
-        return RT.EOS;
-    }
-}
 
 
 //////////// List stuff /////////////////

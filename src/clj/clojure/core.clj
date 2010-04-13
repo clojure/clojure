@@ -1804,19 +1804,12 @@
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
-(defn stream? 
-  "Returns true if x is an instance of Stream"
-  [x] (instance? clojure.lang.Stream x))
-
-
 (defn sequence
   "Coerces coll to a (possibly empty) sequence, if it is not already
   one. Will not force a lazy seq. (sequence nil) yields ()"  
   [coll]
-   (cond 
-    (seq? coll) coll
-    (stream? coll) (.sequence #^clojure.lang.Stream coll)
-    :else (or (seq coll) ())))
+   (if (seq? coll) coll
+    (or (seq coll) ())))
 
 (defn every?
   "Returns true if (pred x) is logical true for every x in coll, else

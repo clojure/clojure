@@ -255,14 +255,6 @@ static public void addURL(Object url) throws Exception{
 		throw new IllegalAccessError("Context classloader is not a DynamicClassLoader");
 }
 
-final static public Object EOS = new Object();
-final static public Object SKIP = new Object();
-static final public IFn EMPTY_GEN = new AFn(){
-    synchronized public Object invoke() throws Exception {
-        return EOS;
-    }
-};
-
 static{
 	Keyword dockw = Keyword.intern(null, "doc");
 	Keyword arglistskw = Keyword.intern(null, "arglists");
@@ -438,24 +430,6 @@ static public ISeq seq(Object coll){
 		return ((LazySeq) coll).seq();
 	else
 		return seqFrom(coll);
-}
-
-static public Stream stream(final Object coll) throws Exception{
-	if(coll == null)
-		return new Stream(EMPTY_GEN);
-	else if(coll instanceof Streamable)
-		return ((Streamable) coll).stream();
-	else if(coll instanceof Fn)
-		return new Stream((IFn) coll);
-	else if(coll instanceof Iterable)
-		return new Stream(new IteratorStream(((Iterable) coll).iterator()));
-	else if(coll.getClass().isArray())
-		return ArrayStream.createFromObject(coll);
-	else if(coll instanceof String)
-		return ArrayStream.createFromObject(((String) coll).toCharArray());
-	else
-	    return new Stream(new ASeq.Src(RT.seq(coll)));
-
 }
 
 static ISeq seqFrom(Object coll){

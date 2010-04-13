@@ -16,7 +16,7 @@ import java.util.*;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
                                                                List,
-                                                               RandomAccess, Comparable, Streamable{
+                                                               RandomAccess, Comparable{
 int _hash = -1;
 
 public String toString(){
@@ -402,25 +402,6 @@ public int compareTo(Object o){
 		}
 	return 0;
 }
-
-public Stream stream() throws Exception {
-    return new Stream(new Src(this));
-}
-
-    static class Src extends AFn{
-        final IPersistentVector v;
-        int i = 0;
-
-        Src(IPersistentVector v) {
-            this.v = v;
-        }
-
-        public Object invoke() throws Exception {
-            if (i < v.count())
-                return v.nth(i++);
-            return RT.EOS;
-        }
-    }
 
     static class Seq extends ASeq implements IndexedSeq, IReduce{
 	//todo - something more efficient
