@@ -31,3 +31,13 @@
     (is (thrown? ArithmeticException (/ 1 0)))
     (is (thrown? java.io.IOException (delete-file not-file)))
     (is (delete-file not-file :silently))))
+
+(deftest test-relative-path-string
+  (testing "strings"
+    (is (= "foo" (relative-path-string "foo"))))
+  (testing "absolute path strings are forbidden"
+    (is (thrown? IllegalArgumentException (relative-path-string (str File/separator "baz")))))
+  (testing "relative File paths"
+    (is (= "bar" (relative-path-string (File. "bar")))))
+  (testing "absolute File paths are forbidden"
+    (is (thrown? IllegalArgumentException (relative-path-string (File. (str File/separator "quux")))))))
