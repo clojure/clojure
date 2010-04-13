@@ -43,6 +43,14 @@
    "
    .. .?.)
 
+(defnilsafe
+  "Same as clojure.core/->> but returns nil as soon as the threaded value is nil itself (thus short-circuiting any pending computation).
+   Examples :
+   (-?>> (range 5) (map inc)) returns (1 2 3 4 5)
+   (-?>> [] seq (map inc)) returns nil
+   "
+  ->> -?>>)
+
 ;; ----------------------------------------------------------------------
 ;; scgilardi at gmail
 

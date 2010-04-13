@@ -25,11 +25,17 @@
     (is (thrown? NullPointerException (.. [nil] (get 0) toString)))))
 
 (deftest test-new-versions
-  (testing "Version -?> returns nil if passed nil"
+  (testing "Version -?>> falls out on nil"
+    (is (nil? (-?>> nil .toString)))
+    (is (nil? (-?>> [] seq (map inc))))
+    (is (= [] (->> [] seq (map inc)))))
+  (testing "Version -?>> completes for non-nil"
+    (is (= [3 4] (-?>> [1 2] (map inc) (map inc)))))
+  (testing "Version -?> falls out on nil"
     (is (nil? (-?> nil .toString)))
     (is (nil? (-?> "foo" seq next next next .toString))))
-  (testing "Version -?> works well for some basic use cases"
-    (is (= (list \O \O) (-?> "foo" .toUpperCase rest))))
+  (testing "Version -?> completes for non-nil"
+    (is (= [\O \O] (-?> "foo" .toUpperCase rest))))
   (testing "Version .?. returns nil if one of the intermediate threaded values is nil"
     (is (nil? (.?. nil toString)))
     (is (nil? (.?. [nil] (get 0) toString)))))
