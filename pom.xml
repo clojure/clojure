@@ -93,7 +93,7 @@
           <namespaces>
             <namespace>clojure\.contrib\.jmx\.Bean</namespace>
             <namespace>clojure\.contrib\.fnmap\.PersistentFnMap</namespace>
-            <namespace>clojure\.contrib\.conditition\.Condition</namespace>
+            <namespace>clojure\.contrib\.condition\.Condition</namespace>
             <namespace>clojure\.contrib\.repl-ln</namespace>
             <namespace>clojure\.contrib\.pprint\.gen-class</namespace>
           </namespaces>

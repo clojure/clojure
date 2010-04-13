@@ -46,8 +46,9 @@
      :doc "Generates a single HTML page that contains the documentation for
 one or more Clojure libraries."} 
   clojure.contrib.gen-html-docs
-  (:require [clojure.contrib.io :as io])
-  (:use [clojure.contrib seq string repl-utils def prxml])
+  (:require [clojure.contrib.io :as io]
+            [clojure.contrib.string :as s])
+  (:use [clojure.contrib seq repl-utils def prxml])
   (:import [java.lang Exception]
 	   [java.util.regex Pattern]))
 
@@ -226,7 +227,7 @@ function toggle(targetid, linkid, textWhenOpen, textWhenClosed)
 	(if (= 0 (count l)) 
 	  [:span {:class "library-member-doc-whitespace"} " "] ; We need something here to make the blank line show up
 	  l)]) 
-     (re-split #"\n" docs)) 
+     (s/split #"\n" docs)) 
     ""))
 
 (defn- member-type 
@@ -270,7 +271,7 @@ function toggle(targetid, linkid, textWhenOpen, textWhenClosed)
 (defn- elide-to-one-line 
   "Elides a string down to one line."
   [s]
-  (re-sub #"(\n.*)+" "..." s))
+  (s/replace-re #"(\n.*)+" "..." s))
 
 (defn- elide-string 
   "Returns a string that is at most the first limit characters of s"
@@ -282,7 +283,7 @@ function toggle(targetid, linkid, textWhenOpen, textWhenClosed)
 (defn- doc-elided-src 
   "Returns the src with the docs elided."
   [docs src]
-  (re-sub (re-pattern (str "\"" (Pattern/quote docs) "\"")) 
+  (s/replace-re (re-pattern (str "\"" (Pattern/quote docs) "\"")) 
 	  (str "\""
 		  (elide-to-one-line docs)
 ;; 	          (elide-string docs 10)
