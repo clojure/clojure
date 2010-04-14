@@ -164,6 +164,10 @@
 
   (is (> (* 3 (int (/ Integer/MAX_VALUE 2.0))) Integer/MAX_VALUE)) )  ; no overflow
 
+(deftest test-ratios-simplify-to-ints-where-appropriate
+  (testing "negative denominator (assembla #275)"
+    (is (integer? (/ 1 -1/2)))
+    (is (integer? (/ 0 -1/2)))))
 
 (deftest test-divide
   (are [x y] (= x y)
