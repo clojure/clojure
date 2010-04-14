@@ -4014,7 +4014,9 @@ static public class ObjExpr implements Expr{
 	}
 
 	public Class getJavaClass() throws Exception{
-		return (tag != null) ? HostExpr.tagToClass(tag) : IFn.class;
+		return (compiledClass != null) ? compiledClass
+			: (tag != null) ? HostExpr.tagToClass(tag)
+			: IFn.class;
 	}
 
 	public void emitAssignLocal(GeneratorAdapter gen, LocalBinding lb,Expr val){
