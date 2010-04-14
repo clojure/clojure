@@ -414,7 +414,12 @@ static class DefExpr implements Expr{
 
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) throws Exception{
-			//(def x) or (def x initexpr)
+			//(def x) or (def x initexpr) or (def x "docstring" initexpr)
+			String docstring = null;
+			if(RT.count(form) == 4 && (RT.third(form) instanceof String)) {
+				docstring = (String) RT.third(form);
+				form = RT.list(RT.first(form), RT.second(form), RT.fourth(form));
+			}
 			if(RT.count(form) > 3)
 				throw new Exception("Too many arguments to def");
 			else if(RT.count(form) < 2)
@@ -446,6 +451,8 @@ static class DefExpr implements Expr{
             Object source_path = SOURCE_PATH.get();
             source_path = source_path == null ? "NO_SOURCE_FILE" : source_path;
             mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, source_path);
+			if (docstring != null)
+			  mm = (IPersistentMap) RT.assoc(mm, RT.DOC_KEY, docstring);
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr((String) SOURCE.deref(), (Integer) LINE.deref(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
