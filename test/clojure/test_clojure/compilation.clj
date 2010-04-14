@@ -47,3 +47,6 @@
     (is (eval `(= Long/TYPE ~Long/TYPE)))
     (is (eval `(= Short/TYPE ~Short/TYPE)))))
  
+(deftest test-compiler-resolution
+  (testing "resolve nonexistent class create should return nil (assembla #262)"
+    (is (nil? (resolve 'NonExistentClass.)))))
