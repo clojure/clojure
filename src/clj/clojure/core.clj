@@ -553,7 +553,7 @@
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 (defmacro delay
   "Takes a body of expressions and yields a Delay object that will
-  invoke the body only the first time it is forced (with force), and
+  invoke the body only the first time it is forced (with force or deref/@), and
   will cache the result and return it on all subsequent force
   calls."  
   [& body]
@@ -3818,6 +3818,18 @@
   "Atomically alters the root binding of var v by applying f to its
   current value plus any args"
   [#^clojure.lang.Var v f & args] (.alterRoot v f args))
+
+(defn bound?
+  "Returns true if all of the vars provided as arguments have any bound value, root or thread-local.
+   Implies that deref'ing the provided vars will succeed. Returns true if no vars are provided."
+  [& vars]
+  (every? #(.isBound #^clojure.lang.Var %) vars))
+
+(defn thread-bound?
+  "Returns true if all of the vars provided as arguments have thread-local bindings.
+   Implies that set!'ing the provided vars will succeed.  Returns true if no vars are provided."
+  [& vars]
+  (every? #(.getThreadBinding #^clojure.lang.Var %) vars))
 
 (defn make-hierarchy
   "Creates a hierarchy object for use with derive, isa? etc."
