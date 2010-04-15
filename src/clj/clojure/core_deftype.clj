@@ -115,8 +115,6 @@
         interfaces (vec interfaces)
         interface-set (set (map resolve interfaces))
         methodname-set (set (map first methods))
-        dynamic-type (contains? interface-set clojure.lang.IDynamicType)
-        implement? (fn [iface] (not (contains? interface-set iface)))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))
         base-fields fields
@@ -364,14 +362,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn dtype 
-  "Returns the dynamic type of x, or its Class if none"
-  [x]
-  (if (instance? clojure.lang.IDynamicType x)
-    (let [x #^ clojure.lang.IDynamicType x]
-      (.getDynamicType x))
-    (class x)))
-
 (defn- expand-method-impl-cache [#^clojure.lang.MethodImplCache cache c f]
   (let [cs (into {} (remove (fn [[c f]] (nil? f)) (map vec (partition 2 (.table cache)))))
         cs (assoc cs c f)
@@ -390,24 +380,24 @@
     (cons c (super-chain (.getSuperclass c)))))
 
 (defn find-protocol-impl [protocol x]
-  (if (and (:on-interface protocol) (instance? (:on-interface protocol) x))
+  (if (instance? (:on-interface protocol) x)
     x
-  (let [t (dtype x)
-        c (class x)
-        impl #(get (:impls protocol) %)]
-    (or (impl t)
-        (impl c)
-        (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
-                   (first (remove nil? (map impl (disj (supers c) Object))))
+    (let [c (class x)
+          impl #(get (:impls protocol) %)]
+      (or (impl c)
+                                        ;todo - fix this so takes most-derived interface as well
+          (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
+                     (first (remove nil? (map impl (disj (supers c) Object))))
                      (impl Object)))))))
 
 (defn find-protocol-method [protocol methodk x]
   (get (find-protocol-impl protocol x) methodk))
 
 (defn extends? 
-  "Returns true if atype explicitly extends protocol"
+  "Returns true if atype extends protocol"
   [protocol atype]
-  (when (get (:impls protocol) atype) true))
+  (boolean (or (.isAssignableFrom #^Class (:on-interface protocol) atype) 
+               (get (:impls protocol) atype))))
 
 (defn extenders 
   "Returns a collection of the types explicitly extending protocol"
@@ -417,10 +407,7 @@
 (defn satisfies? 
   "Returns true if x satisfies the protocol"
   [protocol x]
-  (when
-      (or (and (:on-interface protocol) (instance? (:on-interface protocol) x))
-          (find-protocol-impl protocol x))
-    true))
+  (boolean (find-protocol-impl protocol x)))
 
 (defn -cache-protocol-fn [#^clojure.lang.AFunction pf x]
   (let [cache  (.__methodImplCache pf)
@@ -582,7 +569,7 @@
 (defn extend 
   "Implementations of protocol methods can be provided using the extend construct:
 
-  (extend ::AType ;or AClass or AnInterface 
+  (extend AType
     AProtocol
      {:foo an-existing-fn
       :bar (fn [a b] ...)
@@ -591,14 +578,10 @@
       {...} 
     ...)
  
-
   extend takes a type/class (or interface, see below), and one or more
   protocol + method map pairs. It will extend the polymorphism of the
   protocol's methods to call the supplied methods when an AType is
-  provided as the first argument. Note that deftype types are specified
-  using their keyword tags:
-
-  ::MyType or :my.ns/MyType
+  provided as the first argument. 
 
   Method maps are maps of the keyword-ized method names to ordinary
   fns. This facilitates easy reuse of existing fns and fn maps, for
@@ -611,7 +594,7 @@
 
   If you are supplying the definitions explicitly (i.e. not reusing
   exsting functions or mixin maps), you may find it more convenient to
-  use the extend-type, extend-class or extend-protocol macros.
+  use the extend-type or extend-protocol macros.
 
   Note that multiple independent extend clauses can exist for the same
   type, not all protocols need be defined in a single extend call.
@@ -639,12 +622,7 @@
     [p (zipmap (map #(-> % first keyword) fs)
                (map #(cons 'fn (hint (drop 1 %))) fs))]))
 
-(defn- emit-extend-type [t specs]
-  (let [impls (parse-impls specs)]
-    `(extend ~t
-             ~@(mapcat emit-impl impls))))
-
-(defn- emit-extend-class [c specs]
+(defn- emit-extend-type [c specs]
   (let [impls (parse-impls specs)]
     `(extend ~c
              ~@(mapcat (partial emit-hinted-impl c) impls))))
@@ -652,9 +630,10 @@
 (defmacro extend-type 
   "A macro that expands into an extend call. Useful when you are
   supplying the definitions explicitly inline, extend-type
-  automatically creates the maps required by extend.
+  automatically creates the maps required by extend.  Propagates the
+  class as a type hint on the first argument of all fns.
 
-  (extend-type ::MyType 
+  (extend-type MyType 
     Countable
       (cnt [c] ...)
     Foo
@@ -663,7 +642,7 @@
 
   expands into:
 
-  (extend ::MyType
+  (extend MyType
    Countable
      {:cnt (fn [c] ...)}
    Foo
@@ -673,20 +652,11 @@
   [t & specs]
   (emit-extend-type t specs))
 
-(defmacro extend-class 
-  "Like extend-type, for the case when the extended type is a
-  class. Propagates the class as a type hint on the first argument of
-  all fns" 
-  [c & specs]
-  (emit-extend-class c specs))
-
 (defn- emit-extend-protocol [p specs]
   (let [impls (parse-impls specs)]
     `(do
        ~@(map (fn [[t fs]]
-                (if (symbol? t)
-                  `(extend-class ~t ~p ~@fs)
-                  `(extend-type ~t ~p ~@fs)))
+                `(extend-type ~t ~p ~@fs))
               impls))))
 
 (defmacro extend-protocol 
