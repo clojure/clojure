@@ -1,6 +1,6 @@
 (ns clojure.contrib.test-io
   (:use clojure.test clojure.contrib.io)
-  (:import (java.io File)
+  (:import (java.io File FileInputStream BufferedInputStream)
            (java.net URL URI)))
 
 (deftest file-str-backslash
@@ -41,3 +41,24 @@
     (is (= "bar" (relative-path-string (File. "bar")))))
   (testing "absolute File paths are forbidden"
     (is (thrown? IllegalArgumentException (relative-path-string (File. (str File/separator "quux")))))))
+
+(defn stream-should-have [stream expected-bytes msg]
+  (let [actual-bytes (byte-array (alength expected-bytes))]
+    (.read stream actual-bytes)
+    (is (= -1 (.read stream)) (str msg " : should be end of stream"))
+    (is (= (seq expected-bytes) (seq actual-bytes)) (str msg " : byte arrays should match"))))
+
+(deftest test-input-stream
+  (let [file (File/createTempFile "test-input-stream" "txt")
+        bytes (.getBytes "foobar")]
+    (spit file "foobar")
+    (doseq [[expr msg]
+            [[file File]
+             [(FileInputStream. file) FileInputStream]
+             [(BufferedInputStream. (FileInputStream. file)) BufferedInputStream]
+             [(.. file toURI) URI]
+             [(.. file toURI toURL) URL]
+             [(.. file toURI toURL toString) "URL as String"]
+             [(.. file toString) "File as String"]]]
+      (with-open [s (input-stream expr)]
+        (stream-should-have s bytes msg)))))
