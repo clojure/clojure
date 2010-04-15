@@ -448,7 +448,7 @@
   (doseq [m method-syms]
     (let [v (resolve m)
           p (:protocol (meta v))]
-      (when-not (or (nil? v) (= protocol-var p))
+      (when (and v (bound? v) (not= protocol-var p))
         (binding [*out* *err*]
           (println "Warning: protocol" protocol-var "is overwriting"
                    (if p
