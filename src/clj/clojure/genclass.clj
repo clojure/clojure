@@ -666,7 +666,7 @@
       (if *compile-files*
         (clojure.lang.Compiler/writeClassFile cname bytecode)
         (.defineClass #^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) 
-                      (str (:name options-map)) bytecode)))) 
+                      (str (:name options-map)) bytecode options)))) 
 
 (comment
 
@@ -681,6 +681,6 @@
   [& options]
   (let [options-map (apply hash-map options)
         [cname bytecode] (generate-class options-map)]
-    (.. (clojure.lang.RT/getRootClassLoader) (defineClass cname bytecode))))
+    (.. (clojure.lang.RT/getRootClassLoader) (defineClass cname bytecode options))))
 
 )

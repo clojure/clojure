@@ -3106,6 +3106,7 @@ static public class FnExpr extends ObjExpr{
 	static Expr parse(C context, ISeq form, String name) throws Exception{
 		ISeq origForm = form;
 		FnExpr fn = new FnExpr(tagOf(form));
+		fn.src = form;
 		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
 		if(((IMeta) form.first()).meta() != null)
 			{
@@ -3251,6 +3252,8 @@ static public class ObjExpr implements Expr{
 	IPersistentVector keywordCallsites;
 	IPersistentVector protocolCallsites;
 	IPersistentVector varCallsites;
+
+	Object src;
 
 	final static Method voidctor = Method.getMethod("void <init>()");
 
@@ -3938,7 +3941,7 @@ static public class ObjExpr implements Expr{
 				else
 					{
 					loader = (DynamicClassLoader) LOADER.deref();
-					compiledClass = loader.defineClass(name, bytecode);
+					compiledClass = loader.defineClass(name, bytecode, src);
 					}
 				}
 			catch(Exception e)
@@ -5977,7 +5980,7 @@ static public class NewInstanceExpr extends ObjExpr{
 	}
 
 	static class DeftypeParser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, final Object frm) throws Exception{
 			ISeq rform = (ISeq) frm;
 			//(deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
 			rform = RT.next(rform);
@@ -5994,8 +5997,9 @@ static public class NewInstanceExpr extends ObjExpr{
 				rform = rform.next().next();
 				}
 
-			return build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,null,tagname, classname,
-			             (Symbol) RT.get(opts,RT.TAG_KEY),rform);
+			ObjExpr ret = build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,null,tagname, classname,
+			             (Symbol) RT.get(opts,RT.TAG_KEY),rform, frm);
+			return ret;
 		}
 	}
 
@@ -6018,7 +6022,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		rform = RT.next(rform);
 
 
-		Expr ret = build(interfaces, null, null, classname, classname, null, rform);
+		ObjExpr ret = build(interfaces, null, null, classname, classname, null, rform, frm);
 		if(frm instanceof IObj && ((IObj) frm).meta() != null)
 			return new MetaExpr(ret, (MapExpr) MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) frm).meta()));
@@ -6029,9 +6033,10 @@ static public class NewInstanceExpr extends ObjExpr{
 
 	static ObjExpr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym,
 	                     String tagName, String className,
-	                  Symbol typeTag, ISeq methodForms) throws Exception{
+	                  Symbol typeTag, ISeq methodForms, Object frm) throws Exception{
 		NewInstanceExpr ret = new NewInstanceExpr(null);
 
+		ret.src = frm;
 		ret.name = className;
 		ret.internalName = ret.name.replace('.', '/');
 		ret.objtype = Type.getObjectType(ret.internalName);
@@ -6080,7 +6085,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		
 		String[] inames = interfaceNames(interfaces);
 
-		Class stub = compileStub(slashname(superClass),ret, inames);
+		Class stub = compileStub(slashname(superClass),ret, inames, frm);
 		Symbol thistag = Symbol.intern(null,stub.getName());
 
 		try
@@ -6140,7 +6145,7 @@ static public class NewInstanceExpr extends ObjExpr{
 	 * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
 	 * Unmunge the name (using a magic prefix) on any code gen for classes
 	 */
-	static Class compileStub(String superName, NewInstanceExpr ret, String[] interfaceNames){
+	static Class compileStub(String superName, NewInstanceExpr ret, String[] interfaceNames, Object frm){
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		ClassVisitor cv = cw;
 		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, COMPILE_STUB_PREFIX + "/" + ret.internalName,
@@ -6205,7 +6210,7 @@ static public class NewInstanceExpr extends ObjExpr{
 
 		byte[] bytecode = cw.toByteArray();
 		DynamicClassLoader loader = (DynamicClassLoader) LOADER.deref();
-		return loader.defineClass(COMPILE_STUB_PREFIX + "." + ret.name, bytecode);		
+		return loader.defineClass(COMPILE_STUB_PREFIX + "." + ret.name, bytecode, frm);
 	}
 
 	static String[] interfaceNames(IPersistentVector interfaces){

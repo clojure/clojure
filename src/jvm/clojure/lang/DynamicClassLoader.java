@@ -22,8 +22,8 @@ import java.lang.ref.WeakReference;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
-static ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Integer> >classCache =
-        new ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Integer> >();
+static ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Object> >classCache =
+        new ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Object> >();
 
 static final URL[] EMPTY_URLS = new URL[]{};
 
@@ -38,22 +38,22 @@ public DynamicClassLoader(ClassLoader parent){
 	super(EMPTY_URLS,parent);
 }
 
-public Class defineClass(String name, byte[] bytes){
-    Map.Entry<WeakReference<Class>,Integer> ce = classCache.get(name);
+public Class defineClass(String name, byte[] bytes, Object srcForm){
+    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
     if(ce != null)
         {
         WeakReference<Class> cr = ce.getKey();
         Class c = cr.get();
-        if(c != null && Arrays.hashCode(bytes) == ce.getValue())
+        if((c != null) && srcForm.equals(ce.getValue()))
             return c;
         }
 	Class c = defineClass(name, bytes, 0, bytes.length);
-    classCache.put(name, new MapEntry(new WeakReference(c), Arrays.hashCode(bytes)));
+    classCache.put(name, new MapEntry(new WeakReference(c), srcForm));
     return c;
 }
 
 protected Class<?> findClass(String name) throws ClassNotFoundException{
-    Map.Entry<WeakReference<Class>,Integer> ce = classCache.get(name);
+    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
     if(ce != null)
         {
         WeakReference<Class> cr = ce.getKey();
