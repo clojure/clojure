@@ -204,12 +204,6 @@
   given fields, and, optionally, methods for protocols and/or
   interfaces.
 
-  A factory function of current.ns/Name will be defined,
-  overloaded on 2 arities, the first taking the designated fields in
-  the same order specified, and the second taking the fields followed
-  by a metadata map (nil for none) and an extension field map (nil for
-  none). 
-
   The class will have the (immutable) fields named by
   fields, which can have type hints. Protocols/interfaces and methods
   are optional. The only methods that can be supplied are those
@@ -346,7 +340,7 @@
   One constructors will be defined, taking the designated fields."
 
   [name [& fields] & opts+specs]
-  (let [gname name ;(if *compile-files* name (gensym (str name "__")))
+  (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
         classname (symbol (str *ns* "." gname))
         tag (keyword (str *ns*) (str name))
