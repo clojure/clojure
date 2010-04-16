@@ -3067,7 +3067,6 @@ static public class FnExpr extends ObjExpr{
 	FnMethod variadicMethod = null;
 	IPersistentCollection methods;
 	//	String superName = null;
-	boolean onceOnly = false;
 
 	public FnExpr(Object tag){
 		super(tag);
@@ -3252,6 +3251,7 @@ static public class ObjExpr implements Expr{
 	IPersistentVector keywordCallsites;
 	IPersistentVector protocolCallsites;
 	IPersistentVector varCallsites;
+	boolean onceOnly = false;
 
 	Object src;
 
@@ -3918,18 +3918,18 @@ static public class ObjExpr implements Expr{
 	}
 
 	void emitClearCloses(GeneratorAdapter gen){
-		int a = 1;
-		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
-			{
-			LocalBinding lb = (LocalBinding) s.first();
-			Class primc = lb.getPrimitiveType();
-			if(primc == null)
-				{
-				gen.loadThis();
-				gen.visitInsn(Opcodes.ACONST_NULL);
-				gen.putField(objtype, lb.name, OBJECT_TYPE);
-				}
-			}
+//		int a = 1;
+//		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
+//			{
+//			LocalBinding lb = (LocalBinding) s.first();
+//			Class primc = lb.getPrimitiveType();
+//			if(primc == null)
+//				{
+//				gen.loadThis();
+//				gen.visitInsn(Opcodes.ACONST_NULL);
+//				gen.putField(objtype, lb.name, OBJECT_TYPE);
+//				}
+//			}
 	}
 
 	synchronized Class getCompiledClass(){
@@ -4053,7 +4053,15 @@ static public class ObjExpr implements Expr{
 				HostExpr.emitBoxReturn(this, gen, primc);
 				}
 			else
+				{
 				gen.getField(objtype, lb.name, OBJECT_TYPE);
+				if(onceOnly && clear && lb.canBeCleared)
+					{
+					gen.loadThis();
+					gen.visitInsn(Opcodes.ACONST_NULL);
+					gen.putField(objtype, lb.name, OBJECT_TYPE);
+					}
+				}
 			}
 		else
 			{
@@ -4237,7 +4245,9 @@ public static class FnMethod extends ObjMethod{
 			FnMethod method = new FnMethod(objx, (ObjMethod) METHOD.deref());
 			method.line = (Integer) LINE.deref();
 			//register as the current method and set up a new env frame
-            PathNode pnode =  new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
+            PathNode pnode =  (PathNode) CLEAR_PATH.get();
+			if(pnode == null)
+				pnode = new PathNode(PATHTYPE.PATH,null);
 			Var.pushThreadBindings(
 					RT.map(
 							METHOD, method,
@@ -4333,30 +4343,30 @@ public static class FnMethod extends ObjMethod{
 	}
 
 	void emitClearLocals(GeneratorAdapter gen){
-		for(int i = 1; i < numParams() + 1; i++)
-			{
-			if(!localsUsedInCatchFinally.contains(i))
-				{
-				gen.visitInsn(Opcodes.ACONST_NULL);
-				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
-				}
-			}
-		for(int i = numParams() + 1; i < maxLocal + 1; i++)
-			{
-			if(!localsUsedInCatchFinally.contains(i))
-				{
-				LocalBinding b = (LocalBinding) RT.get(indexlocals, i);
-				if(b == null || maybePrimitiveType(b.init) == null)
-					{
-					gen.visitInsn(Opcodes.ACONST_NULL);
-					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
-					}
-				}
-			}
-		if(((FnExpr)objx).onceOnly)
-			{
-			objx.emitClearCloses(gen);
-			}
+//		for(int i = 1; i < numParams() + 1; i++)
+//			{
+//			if(!localsUsedInCatchFinally.contains(i))
+//				{
+//				gen.visitInsn(Opcodes.ACONST_NULL);
+//				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+//				}
+//			}
+//		for(int i = numParams() + 1; i < maxLocal + 1; i++)
+//			{
+//			if(!localsUsedInCatchFinally.contains(i))
+//				{
+//				LocalBinding b = (LocalBinding) RT.get(indexlocals, i);
+//				if(b == null || maybePrimitiveType(b.init) == null)
+//					{
+//					gen.visitInsn(Opcodes.ACONST_NULL);
+//					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), i);
+//					}
+//				}
+//			}
+//		if(((FnExpr)objx).onceOnly)
+//			{
+//			objx.emitClearCloses(gen);
+//			}
 	}
 }
 
