@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-; Author: Frantisek Sodomka, Mike Hinchey
+; Author: Frantisek Sodomka, Mike Hinchey, Stuart Halloway
 
 ;;
 ;;  Test "flow control" constructs.
@@ -268,3 +268,66 @@
 
 ; locking, monitor-enter, monitor-exit
 
+; case 
+(deftest test-case
+  (testing "can match many kinds of things"
+    (let [two 2
+          test-fn
+          #(case %
+                 1 :number
+                 "foo" :string
+                 \a :char
+                 pow :symbol
+                 :zap :keyword
+                 (2 \b "bar") :one-of-many
+                 [1 2] :sequential-thing
+                 {:a 2} :map
+                 {:r 2 :d 2} :droid
+                 #{2 3 4 5} :set
+                 [1 [[[2]]]] :deeply-nested
+                 :default)]
+      (are [result input] (= result (test-fn input))
+           :number 1
+           :string "foo"
+           :char \a
+           :keyword :zap
+           :symbol 'pow
+           :one-of-many 2
+           :one-of-many \b
+           :one-of-many "bar"
+           :sequential-thing [1 2]
+           :sequential-thing (list 1 2)
+           :sequential-thing [1 two]
+           :map {:a 2}
+           :map {:a two}
+           :set #{2 3 4 5}
+           :set #{two 3 4 5}
+           :default #{2 3 4 5 6}
+           :droid {:r 2 :d 2}
+           :deeply-nested [1 [[[two]]]]
+           :default :anything-not-appearing-above)))
+  (testing "throws IllegalArgumentException if no match"
+    (is (thrown-with-msg?
+          IllegalArgumentException #"No matching clause: 2"
+          (case 2 1 :ok))))
+  (testing "sorting doesn't matter"
+    (let [test-fn
+          #(case %
+                {:b 2 :a 1} :map
+                #{3 2 1} :set
+                :default)]
+      (are [result input] (= result (test-fn input))
+           :map {:a 1 :b 2}
+           :map (sorted-map :a 1 :b 2)
+           :set #{3 2 1}
+           :set (sorted-set 2 1 3))))
+  (testing "test constants are *not* evaluated"
+    (let [test-fn
+          ;; never write code like this...
+          #(case %
+                 (throw (RuntimeException. "boom")) :piece-of-throw-expr
+                 :no-match)]
+      (are [result input] (= result (test-fn input))
+           :piece-of-throw-expr 'throw
+           :piece-of-throw-expr '[RuntimeException. "boom"]
+           :no-match nil))))
