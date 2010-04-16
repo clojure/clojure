@@ -6767,7 +6767,7 @@ public static class CaseExpr extends UntypedExpr{
                 try {
                     Var.pushThreadBindings(
                             RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                    thenExpr = analyze(C.EXPRESSION, me.getValue());
+                    thenExpr = analyze(context, me.getValue());
                     }
                 finally{
                     Var.popThreadBindings();
@@ -6779,7 +6779,7 @@ public static class CaseExpr extends UntypedExpr{
             try {
                 Var.pushThreadBindings(
                         RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                defaultExpr = analyze(C.EXPRESSION, args.nth(5));
+                defaultExpr = analyze(context, args.nth(5));
                 }
             finally{
                 Var.popThreadBindings();
