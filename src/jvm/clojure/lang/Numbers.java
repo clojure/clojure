@@ -295,6 +295,8 @@ static public Number divide(BigInteger n, BigInteger d){
 	d = d.divide(gcd);
 	if(d.equals(BigInteger.ONE))
 		return reduce(n);
+	else if(d.equals(BigInteger.ONE.negate()))
+		return reduce(n.negate());
 	return new Ratio((d.signum() < 0 ? n.negate() : n),
 	                 (d.signum() < 0 ? d.negate() : d));
 }
