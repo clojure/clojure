@@ -49,6 +49,7 @@
       (is (= "two-arg baz!" (baz obj nil)))
       (is (thrown? AbstractMethodError (baz obj))))))
 
+(deftype ExtendTestWidget [name])
 (deftest extend-test
   (testing "you can extend a protocol to a class"
     (extend String ExampleProtocol
@@ -59,28 +60,28 @@
      {:foo (fn [s] (.toUpperCase s))})
     (is (= "POW" (other/foo "pow"))))
   (testing "you can extend deftype types"
-    (deftype Widget [name])
     (extend
-     ::Widget
+     ExtendTestWidget
      ExampleProtocol
-     {:foo (fn [this] (str "widget " (:name this)))})
-    (is (= "widget z" (foo (Widget "z"))))))
+     {:foo (fn [this] (str "widget " (.name this)))})
+    (is (= "widget z" (foo (ExtendTestWidget. "z"))))))
 
+(deftype ExtendsTestWidget []
+  ExampleProtocol)
 (deftest extends?-test
   (reload-example-protocols)
-  (deftype Whatzit []
-    ExampleProtocol)
-  (testing "returns nil if a type does not implement the protocol at all"
-    (is (nil? (extends? other/SimpleProtocol ::Whatzit))))
-  (testing "returns nil if a type implements the protocol directly" ;; TBD false?
-    (is (nil? (extends? ExampleProtocol ::Whatzit))))
+  (testing "returns false if a type does not implement the protocol at all"
+    (is (false? (extends? other/SimpleProtocol ExtendsTestWidget))))
+  (testing "returns true if a type implements the protocol directly" ;; semantics changed 4/15/2010
+    (is (true? (extends? ExampleProtocol ExtendsTestWidget))))
   (testing "returns true if a type explicitly extends protocol"
     (extend
-     ::Whatzit
+     ExtendsTestWidget
      other/SimpleProtocol
      {:foo identity})
-    (is (true? (extends? other/SimpleProtocol ::Whatzit)))))
+    (is (true? (extends? other/SimpleProtocol ExtendsTestWidget)))))
 
+(deftype ExtendersTestWidget [])
 (deftest extenders-test
   (reload-example-protocols)
   (testing "a fresh protocol has no extenders"
@@ -90,81 +91,57 @@
     (extend ::Something ExampleProtocol)
     (is (nil? (extenders ExampleProtocol))))
   (testing "extending a protocol (and including an impl) adds an entry to extenders"
-    (deftype Whatzit [])
-    (extend ::Whatzit ExampleProtocol {:foo identity})
-    (is (= [::Whatzit] (extenders ExampleProtocol)))))
+    (extend ExtendersTestWidget ExampleProtocol {:foo identity})
+    (is (= [ExtendersTestWidget] (extenders ExampleProtocol)))))
 
+(deftype SatisfiesTestWidget []
+  ExampleProtocol)
 (deftest satisifies?-test
   (reload-example-protocols)
-  (deftype Whatzit []
-    ExampleProtocol)
-  (let [whatzit (Whatzit)]
-    (testing "returns nil if a type does not implement the protocol at all"
-      (is (nil? (satisfies? other/SimpleProtocol whatzit))))
+  (let [whatzit (SatisfiesTestWidget.)]
+    (testing "returns false if a type does not implement the protocol at all"
+      (is (false? (satisfies? other/SimpleProtocol whatzit))))
     (testing "returns true if a type implements the protocol directly"
       (is (true? (satisfies? ExampleProtocol whatzit))))
     (testing "returns true if a type explicitly extends protocol"
       (extend
-       ::Whatzit
+       SatisfiesTestWidget
        other/SimpleProtocol
        {:foo identity})
       (is (true? (satisfies? other/SimpleProtocol whatzit)))))  )
 
+(deftype ReExtendingTestWidget [])
 (deftest re-extending-test
   (reload-example-protocols)
-  (deftype Whatzit [])
   (extend
-   ::Whatzit
+   ReExtendingTestWidget
    ExampleProtocol
    {:foo (fn [_] "first foo")
     :baz (fn [_] "first baz")})
   (testing "if you re-extend, the old implementation is replaced (not merged!)"
     (extend
-     ::Whatzit
+     ReExtendingTestWidget
      ExampleProtocol
      {:baz (fn [_] "second baz")
       :bar (fn [_ _] "second bar")})
-    (let [whatzit (Whatzit)]
+    (let [whatzit (ReExtendingTestWidget.)]
       (is (thrown? IllegalArgumentException (foo whatzit)))
       (is (= "second bar" (bar whatzit nil)))
       (is (= "second baz" (baz whatzit))))))
 
-(deftest deftype-factory-test
-  (deftype Whatzit [a b])
-  (testing "with arglist factory"
-    (let [whatzit (Whatzit 1 2)]
-      (testing "field access"
-        (is (= 1 (.a whatzit)))
-        (is (= 2 (.b whatzit))))
-      (testing "type information"
-        (is (= ::Whatzit (type whatzit))))
-      (testing "instance hast no metadata"
-        (is (nil? (meta whatzit))))))
-  (testing "with arglist + meta + extension factory"
-    ;; TODO: test extension map. move to defrecord?
-    (let [whatzit (Whatzit 1 2 {:awesome true} {:extra 5})] 
-      (println (meta whatzit))
-      (testing "field access"
-        (is (= 1 (.a whatzit)))
-        (is (= 2 (.b whatzit))))
-      (testing "type information"
-        (is (= ::Whatzit (type whatzit))))
-      (testing "gets metadata from factory call"
-        (is (= {:awesome true} (meta whatzit)))))))
-
-(deftest deftype-object-methods-test
-  (deftype Foo [a])
-  (deftype Bar [a])
+(defrecord DefrecordObjectMethodsWidgetA [a])
+(defrecord DefrecordObjectMethodsWidgetB [a])
+(deftest defrecord-object-methods-test
   (testing ".equals depends on fields and type"
-    (is (true? (.equals (Foo 1) (Foo 1))))
-    (is (false? (.equals (Foo 1) (Foo 2))))
-    (is (false? (.equals (Foo 1) (Bar 1)))))
+    (is (true? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 1))))
+    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 2))))
+    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetB. 1)))))
   (testing ".hashCode depends on fields and type"
-    (is (= (.hashCode (Foo 1)) (.hashCode (Foo 1))))
-    (is (= (.hashCode (Foo 2)) (.hashCode (Foo 2))))
-    (is (not= (.hashCode (Foo 1)) (.hashCode (Foo 2))))
-    (is (= (.hashCode (Bar 1)) (.hashCode (Bar 1))))
-    (is (not= (.hashCode (Foo 1)) (.hashCode (Bar 1))))))
+    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 1))))
+    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 2)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
+    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
+    (is (= (.hashCode (DefrecordObjectMethodsWidgetB. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))
+    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))))
 
 ;; todo
 ;; what happens if you extend after implementing directly? Extend is ignored!!
