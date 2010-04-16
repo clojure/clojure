@@ -147,12 +147,12 @@
         (System/arraycopy tail 0 new-tail 0 (.alength am tail))
         (.aset am new-tail (.alength am tail) val)
         (new Vec am (inc cnt) shift root new-tail (meta this)))
-      (let [tail-node (VecNode. (:edit root) tail)] 
+      (let [tail-node (VecNode. (.edit root) tail)] 
         (if (> (bit-shift-right cnt (int 5)) (bit-shift-left (int 1) shift)) ;overflow root?
-          (let [new-root (VecNode. (:edit root) (object-array 32))]
-            (doto #^objects (:arr new-root)
+          (let [new-root (VecNode. (.edit root) (object-array 32))]
+            (doto #^objects (.arr new-root)
               (aset 0 root)
-              (aset 1 (.newPath this (:edit root) shift tail-node)))
+              (aset 1 (.newPath this (.edit root) shift tail-node)))
             (new Vec am (inc cnt) (+ shift (int 5)) new-root (let [tl (.array am 1)] (.aset am  tl 0 val) tl) (meta this)))
           (new Vec am (inc cnt) shift (.pushTail this shift root tail-node) 
                  (let [tl (.array am 1)] (.aset am  tl 0 val) tl) (meta this))))))
@@ -192,8 +192,8 @@
         (cond
          (nil? new-root) 
            (new Vec am (dec cnt) shift EMPTY-NODE new-tail (meta this))
-         (and (> shift 5) (nil? (aget #^objects (:arr new-root) 1)))
-           (new Vec am (dec cnt) (- shift 5) (aget #^objects (:arr new-root) 0) new-tail (meta this))
+         (and (> shift 5) (nil? (aget #^objects (.arr new-root) 1)))
+           (new Vec am (dec cnt) (- shift 5) (aget #^objects (.arr new-root) 0) new-tail (meta this))
          :else
            (new Vec am (dec cnt) shift new-root new-tail (meta this))))))
 
@@ -255,55 +255,55 @@
         tail
         (loop [node root level shift]
           (if (zero? level)
-            (:arr node)
-            (recur (aget #^objects (:arr node) (bit-and (bit-shift-right i level) (int 0x1f))) 
+            (.arr node)
+            (recur (aget #^objects (.arr node) (bit-and (bit-shift-right i level) (int 0x1f))) 
                    (- level (int 5))))))
       (throw (IndexOutOfBoundsException.))))
 
   (pushTail [this level parent tailnode]
     (let [subidx (bit-and (bit-shift-right (dec cnt) level) (int 0x1f))
-          ret (VecNode. (:edit parent) (aclone #^objects (:arr parent)))
+          ret (VecNode. (.edit parent) (aclone #^objects (.arr parent)))
           node-to-insert (if (= level (int 5))
                            tailnode
-                           (let [child (aget #^objects (:arr parent) subidx)]
+                           (let [child (aget #^objects (.arr parent) subidx)]
                              (if child
                                (.pushTail this (- level (int 5)) child tailnode)
-                               (.newPath this (:edit root) (- level (int 5)) tailnode))))]
-      (aset #^objects (:arr ret) subidx node-to-insert)
+                               (.newPath this (.edit root) (- level (int 5)) tailnode))))]
+      (aset #^objects (.arr ret) subidx node-to-insert)
       ret))
 
   (popTail [this level node]
     (let [subidx (bit-and (bit-shift-right (- cnt 2) level) (int 0x1f))]
       (cond
        (> level 5) 
-         (let [new-child (.popTail this (- level 5) (aget #^objects (:arr node) subidx))]
+         (let [new-child (.popTail this (- level 5) (aget #^objects (.arr node) subidx))]
            (if (and (nil? new-child) (zero? subidx))
              nil
-             (let [arr (aclone #^objects (:arr node))]
+             (let [arr (aclone #^objects (.arr node))]
                (aset arr subidx new-child)
-               (VecNode. (:edit root) arr))))
+               (VecNode. (.edit root) arr))))
        (zero? subidx) nil
-       :else (let [arr (aclone #^objects (:arr node))]
+       :else (let [arr (aclone #^objects (.arr node))]
                (aset arr subidx nil)
-               (VecNode. (:edit root) arr)))))
+               (VecNode. (.edit root) arr)))))
 
   (newPath [this edit #^int level node]
     (if (zero? level)
       node
       (let [ret (VecNode. edit (object-array 32))]
-        (aset #^objects (:arr ret) 0 (.newPath this edit (- level (int 5)) node))
+        (aset #^objects (.arr ret) 0 (.newPath this edit (- level (int 5)) node))
         ret)))
 
   (doAssoc [this level node i val] 
     (if (zero? level)
       ;on this branch, array will need val type
-      (let [arr (.aclone am (:arr node))]
+      (let [arr (.aclone am (.arr node))]
         (.aset am arr (bit-and i (int 0x1f)) val)
-        (VecNode. (:edit node) arr))
-      (let [arr (aclone #^objects (:arr node))
+        (VecNode. (.edit node) arr))
+      (let [arr (aclone #^objects (.arr node))
             subidx (bit-and (bit-shift-right i level) (int 0x1f))]
         (aset arr subidx (.doAssoc this (- level (int 5)) (aget arr subidx) i val))
-        (VecNode. (:edit node) arr))))
+        (VecNode. (.edit node) arr))))
 
   java.lang.Iterable
   (iterator [this]
