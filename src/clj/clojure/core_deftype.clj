@@ -388,7 +388,7 @@
   (get (find-protocol-impl protocol x) methodk))
 
 (defn- implements? [protocol atype]
-  (.isAssignableFrom #^Class (:on-interface protocol) atype))
+  (and atype (.isAssignableFrom #^Class (:on-interface protocol) atype)))
 
 (defn extends? 
   "Returns true if atype extends protocol"
