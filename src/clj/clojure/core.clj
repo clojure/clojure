@@ -2724,7 +2724,9 @@
   ([x & more]
    (pr x)
    (. *out* (append \space))
-   (apply pr more)))
+   (if-let [nmore (next more)]
+     (recur (first more) nmore)
+     (apply pr more))))
 
 (defn newline
   "Writes a newline to the output stream that is the current value of
