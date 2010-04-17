@@ -220,14 +220,14 @@
 (defn- eval-opt
   "Evals expressions in str, prints each non-nil result using prn"
   [str]
-  (let [eof (Object.)]
-    (with-in-str str
-      (loop [input (read *in* false eof)]
+  (let [eof (Object.)
+        reader (LineNumberingPushbackReader. (java.io.StringReader. str))]
+      (loop [input (read reader false eof)]
         (when-not (= input eof)
           (let [value (eval input)]
             (when-not (nil? value)
               (prn value))
-            (recur (read *in* false eof))))))))
+            (recur (read reader false eof)))))))
 
 (defn- init-dispatch
   "Returns the handler associated with an init opt"
