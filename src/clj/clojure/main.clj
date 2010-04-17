@@ -104,11 +104,11 @@
   [e]
   (let [ex (repl-exception e)
         el (aget (.getStackTrace ex) 0)]
-    (.println *err*
-              (str (-> ex class .getSimpleName)
-                   " " (.getMessage ex) " "
-                   (when-not (instance? clojure.lang.Compiler$CompilerException ex)
-                     (str " " (stack-element-str el)))))))
+    (binding [*out* *err*]
+      (println (str (-> ex class .getSimpleName)
+                    " " (.getMessage ex) " "
+                    (when-not (instance? clojure.lang.Compiler$CompilerException ex)
+                      (str " " (stack-element-str el))))))))
 
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
