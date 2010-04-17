@@ -13,8 +13,8 @@
 package clojure.lang;
 
 public class StringSeq extends ASeq implements IndexedSeq{
-final CharSequence s;
-final int i;
+public final CharSequence s;
+public final int i;
 
 static public StringSeq create(CharSequence s){
 	if(s.length() == 0)

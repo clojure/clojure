@@ -7,18 +7,73 @@
 ;   You must not remove this notice, or any other, from this software.
 
 ; Author: Frantisek Sodomka
-
+; Contributors: Stuart Halloway
 
 (ns clojure.test-clojure.sequences
   (:use clojure.test))
 
-
 ;; *** Tests ***
 
 ; TODO:
-; apply, map, reduce, filter, remove
+; apply, map, filter, remove
 ; and more...
 
+(deftest test-reduce
+  (let [int+ (fn [a b] (+ (int a) (int b)))
+        arange (range 100) ;; enough to cross nodes
+        avec (into [] arange)
+        alist (into () arange)
+        obj-array (into-array arange)
+        int-array (into-array Integer/TYPE arange)
+        long-array (into-array Long/TYPE arange)
+        float-array (into-array Float/TYPE arange)
+        char-array (into-array Character/TYPE (map char arange))
+        double-array (into-array Double/TYPE arange)
+        byte-array (into-array Byte/TYPE (map byte arange))
+        int-vec (into (vector-of :int) arange)
+        long-vec (into (vector-of :long) arange)
+        float-vec (into (vector-of :float) arange)
+        char-vec (into (vector-of :char) (map char arange))
+        double-vec (into (vector-of :double) arange)
+        byte-vec (into (vector-of :byte) (map byte arange))
+        all-true (into-array Boolean/TYPE (repeat 10 true))]
+    (is (= 4950
+           (reduce + arange)
+           (reduce + avec)
+           (reduce + alist)
+           (reduce + obj-array)
+           (reduce + int-array)
+           (reduce + long-array)
+           (reduce + float-array)
+           (reduce int+ char-array)
+           (reduce + double-array)
+           (reduce int+ byte-array)
+           (reduce + int-vec)
+           (reduce + long-vec)
+           (reduce + float-vec)
+           (reduce int+ char-vec)
+           (reduce + double-vec)
+           (reduce int+ byte-vec)))
+    (is (= 4951
+           (reduce + 1 arange)
+           (reduce + 1 avec)
+           (reduce + 1 alist)
+           (reduce + 1 obj-array)
+           (reduce + 1 int-array)
+           (reduce + 1 long-array)
+           (reduce + 1 float-array)
+           (reduce int+ 1 char-array)
+           (reduce + 1 double-array)
+           (reduce int+ 1 byte-array)
+           (reduce + 1 int-vec)
+           (reduce + 1 long-vec)
+           (reduce + 1 float-vec)
+           (reduce int+ 1 char-vec)
+           (reduce + 1 double-vec)
+           (reduce int+ 1 byte-vec)))
+    (is (= true
+           (reduce #(and %1 %2) all-true)
+           (reduce #(and %1 %2) true all-true)))))
 
 (deftest test-equality
   ; lazy sequences
