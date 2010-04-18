@@ -16,8 +16,7 @@ import java.util.Comparator;
 
 public abstract class AFunction extends AFn implements IObj, Comparator, Fn{
 
-//note - this is not even volatile by design
-public MethodImplCache __methodImplCache;
+public volatile MethodImplCache __methodImplCache;
 
 public int compare(Object o1, Object o2){
 	try

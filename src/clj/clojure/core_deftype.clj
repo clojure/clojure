@@ -430,7 +430,7 @@
              (fn ~gthis
                ~@(map 
                   (fn [args]
-                    (let [gargs (map #(gensym (str "g__" % "__")) args)
+                    (let [gargs (map #(gensym (str "gf__" % "__")) args)
                           target (first gargs)]
                       `([~@gargs]
                           (~@(if on-interface
@@ -438,12 +438,11 @@
                                   (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))
                                `(do))
                           (let [cache# (.__methodImplCache ~gthis)]
-                            (if (clojure.lang.Util/identical (clojure.lang.Util/classOf ~target)
-                                                             (.lastClass cache#))
-                              ((.lastImpl cache#) ~@gargs)
-                              (let [f# (or (.fnFor cache# (clojure.lang.Util/classOf ~target))
-                                           (-cache-protocol-fn ~gthis ~target))]
-                                 (f# ~@gargs))))))))
+                            ;(assert cache#)                            
+                            (let [f# (or (.fnFor cache# (clojure.lang.Util/classOf ~target))
+                                         (-cache-protocol-fn ~gthis ~target))]
+                              ;(assert f#)
+                              (f# ~@gargs)))))))
                   arglists))]
          (set! (.__methodImplCache f#) cache#)
          f#))))

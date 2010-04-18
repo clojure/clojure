@@ -19,10 +19,6 @@ public final int shift;
 public final int mask;
 public final Object[] table;    //[class, fn. class, fn ...]
 
-//these are not volatile by design
-public Object lastClass;
-public IFn lastImpl;
-
 public MethodImplCache(IPersistentMap protocol, Keyword methodk){
 	this(protocol, methodk, 0, 0, RT.EMPTY_ARRAY);
 }
@@ -33,18 +29,13 @@ public MethodImplCache(IPersistentMap protocol, Keyword methodk, int shift, int 
 	this.shift = shift;
 	this.mask = mask;
 	this.table = table;
-	this.lastClass = this;
 }
 
 public IFn fnFor(Class c){
-	if(c == lastClass)
-		return lastImpl;
 	int idx = ((Util.hash(c) >> shift) & mask) << 1;
 	if(idx < table.length && table[idx] == c)
 		{
-		lastClass = c;
-		return lastImpl = 
-				(IFn) table[idx + 1];
+		return  (IFn) table[idx + 1];
 		}
 	return null;
 }
