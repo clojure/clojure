@@ -2755,7 +2755,7 @@ public static class InstanceOfExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
-		expr.emit(context,objx,gen);
+		expr.emit(C.EXPRESSION,objx,gen);
 		gen.instanceOf(Type.getType(c));
 	}
 
