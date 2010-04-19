@@ -13,11 +13,24 @@
 package clojure.lang;
 
 public final class MethodImplCache{
+
+static public class Entry{
+	final public Class c;
+	final public IFn fn;
+
+	public Entry(Class c, IFn fn){
+		this.c = c;
+		this.fn = fn;
+	}
+}
+
 public final IPersistentMap protocol;
 public final Keyword methodk;
 public final int shift;
 public final int mask;
-public final Object[] table;    //[class, fn. class, fn ...]
+public final Object[] table;    //[class, entry. class, entry ...]
+
+volatile Entry mre = null;
 
 public MethodImplCache(IPersistentMap protocol, Keyword methodk){
 	this(protocol, methodk, 0, 0, RT.EMPTY_ARRAY);
@@ -32,12 +45,22 @@ public MethodImplCache(IPersistentMap protocol, Keyword methodk, int shift, int 
 }
 
 public IFn fnFor(Class c){
+	Entry last = mre;
+	if(last != null && last.c == c)
+		return last.fn;
+	return findFnFor(c);
+}
+
+IFn findFnFor(Class c){
 	int idx = ((Util.hash(c) >> shift) & mask) << 1;
 	if(idx < table.length && table[idx] == c)
 		{
-		return  (IFn) table[idx + 1];
+		Entry e = ((Entry) table[idx + 1]);
+		mre = e;
+		return  e != null ? e.fn : null;
 		}
 	return null;
 }
+
 
 }

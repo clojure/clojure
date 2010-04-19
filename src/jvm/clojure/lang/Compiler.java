@@ -2885,11 +2885,8 @@ static class InvokeExpr implements Expr{
 	}
 
 	public void emitProto(C context, ObjExpr objx, GeneratorAdapter gen){
-		Label elseLabel = gen.newLabel();
-		Label notSameClassLabel = gen.newLabel();
-		Label faultLabel = gen.newLabel();
-		Label callLabel = gen.newLabel();
 		Label onLabel = gen.newLabel();
+		Label callLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
 
 		Var v = ((VarExpr)fexpr).var;
@@ -2897,70 +2894,26 @@ static class InvokeExpr implements Expr{
 		Expr e = (Expr) args.nth(0);
 		e.emit(C.EXPRESSION, objx, gen);
 		gen.dup(); //target, target
+		gen.invokeStatic(UTIL_TYPE,Method.getMethod("Class classOf(Object)")); //target,class
+		gen.loadThis();
+		gen.getField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class,cached-class
+		gen.visitJumpInsn(IF_ACMPEQ, callLabel); //target
 		if(protocolOn != null)
 			{
+			gen.dup(); //target, target			
 			gen.instanceOf(Type.getType(protocolOn));
 			gen.ifZCmp(GeneratorAdapter.NE, onLabel);
-			gen.dup();
 			}
+
+		gen.mark(callLabel); //target
+		gen.dup(); //target, target
 		gen.invokeStatic(UTIL_TYPE,Method.getMethod("Class classOf(Object)")); //target,class
-		gen.dup(); //target,class,class
 		gen.loadThis();
-		gen.getField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class,class,cached-class
-		gen.visitJumpInsn(IF_ACMPNE, notSameClassLabel); //target,class
+		gen.swap();
+		gen.putField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target
 		objx.emitVar(gen, v);
-		gen.invokeVirtual(VAR_TYPE, Method.getMethod("Object getRawRoot()")); //target, class, proto-fn
-		gen.dup(); //target, class, proto-fn, proto-fn
-		gen.loadThis();
-		gen.getField(objx.objtype, objx.cachedProtoFnName(siteIndex),AFUNCTION_TYPE); //target,class, proto-fn,proto-fn,cached-proto-fn
-		gen.visitJumpInsn(IF_ACMPNE, elseLabel); //target,class, proto-fn
-		gen.pop(); //target,class
-		gen.pop(); //target
-		gen.loadThis();
-		gen.getField(objx.objtype, objx.cachedProtoImplName(siteIndex),IFN_TYPE); //target,proto-impl
-		gen.swap(); //proto-impl, target
-		gen.goTo(callLabel);
-
-
-		gen.mark(notSameClassLabel); //target,class
-		gen.dup(); //target,class,class
-		gen.loadThis();
+		gen.invokeVirtual(VAR_TYPE, Method.getMethod("Object getRawRoot()")); //target, proto-fn
 		gen.swap();
-		gen.putField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class
-		objx.emitVar(gen, v);
-		gen.invokeVirtual(VAR_TYPE, Method.getMethod("Object getRawRoot()")); //target, class, proto-fn
-
-		gen.mark(elseLabel); //target, class, proto-fn
-		gen.checkCast(AFUNCTION_TYPE);
-		gen.dup(); //target,class,proto-fn,proto-fn
-		gen.loadThis();
-		gen.swap();
-		gen.putField(objx.objtype, objx.cachedProtoFnName(siteIndex),AFUNCTION_TYPE);  //target, class,  proto-fn
-		gen.dupX1(); //target, proto-fn, class,  proto-fn
-		gen.getField(AFUNCTION_TYPE,"__methodImplCache", Type.getType(MethodImplCache.class)); //target,protofn,class,cache
-		gen.swap(); //target,protofn,cache,class
-		gen.invokeVirtual(Type.getType(MethodImplCache.class),Method.getMethod("clojure.lang.IFn fnFor(Class)")); //target,protofn,impl
-		gen.dup(); //target,protofn,impl, impl
-		gen.ifNull(faultLabel); //target,protofn,impl
-		gen.swap();     //target,impl, protofn
-		gen.pop(); //target, impl
-		gen.dup(); //target,impl, impl
-		gen.loadThis();
-		gen.swap();
-		gen.putField(objx.objtype, objx.cachedProtoImplName(siteIndex),IFN_TYPE); //target,impl
-		gen.swap(); //impl,target
-		gen.goTo(callLabel);
-
-		//not in fn table, null out cached fn and use proto-fn itself (which should seed table for next time)
-		gen.mark(faultLabel); //target,protofn,null
-		gen.pop(); //target, protofn
-		gen.swap(); //protofn, target
-		gen.loadThis();
-		gen.visitInsn(Opcodes.ACONST_NULL);
-		gen.putField(objx.objtype, objx.cachedProtoFnName(siteIndex), AFUNCTION_TYPE);  //target, class,  proto-fn
-		gen.goTo(callLabel);
-
-		gen.mark(callLabel); //impl, target
 		emitArgsAndCall(1, context,objx,gen);
 		gen.goTo(endLabel);
 
@@ -2976,9 +2929,8 @@ static class InvokeExpr implements Expr{
 			Method m = new Method(onMethod.getName(), Type.getReturnType(onMethod), Type.getArgumentTypes(onMethod));
 			gen.invokeInterface(Type.getType(protocolOn), m);
 			HostExpr.emitBoxReturn(objx, gen, onMethod.getReturnType());
-			} 
+			}
 		gen.mark(endLabel);
-
 	}
 
 	void emitArgsAndCall(int firstArgToEmit, C context, ObjExpr objx, GeneratorAdapter gen){
