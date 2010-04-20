@@ -1189,13 +1189,20 @@
     (let [options   (apply hash-map options)
           default   (get options :default :default)
           hierarchy (get options :hierarchy #'global-hierarchy)]
-      `(def ~(with-meta mm-name m)
-         (new clojure.lang.MultiFn ~(name mm-name) ~dispatch-fn ~default ~hierarchy)))))
+      `(let [v# (def ~mm-name)]
+         (when-not (and (.hasRoot v#) (instance? clojure.lang.MultiFn (deref v#)))
+           (def ~(with-meta mm-name m)
+                (new clojure.lang.MultiFn ~(name mm-name) ~dispatch-fn ~default ~hierarchy)))))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
   [multifn dispatch-val & fn-tail]
   `(. ~(with-meta multifn {:tag 'clojure.lang.MultiFn}) addMethod ~dispatch-val (fn ~@fn-tail)))
+
+(defn remove-all-methods
+  "Removes all of the methods of multimethod."
+ [#^clojure.lang.MultiFn multifn]
+ (.reset multifn))
 
 (defn remove-method
   "Removes the method of multimethod associated with dispatch-value."

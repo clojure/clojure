@@ -137,16 +137,11 @@
 
 (defmethod print-dup clojure.lang.ISeq [o w] (print-method o w))
 (defmethod print-dup clojure.lang.IPersistentList [o w] (print-method o w))
-(prefer-method print-method clojure.lang.IPersistentList clojure.lang.ISeq)
-(prefer-method print-dup clojure.lang.IPersistentList clojure.lang.ISeq)
 (prefer-method print-method clojure.lang.ISeq clojure.lang.IPersistentCollection)
 (prefer-method print-dup clojure.lang.ISeq clojure.lang.IPersistentCollection)
 (prefer-method print-method clojure.lang.ISeq java.util.Collection)
 (prefer-method print-dup clojure.lang.ISeq java.util.Collection)
 
-(defmethod print-method clojure.lang.IPersistentList [o, #^Writer w]
-  (print-meta o w)
-  (print-sequential "(" print-method " " ")" o w))
 
 
 (defmethod print-dup java.util.Collection [o, #^Writer w]

@@ -40,6 +40,12 @@ public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hier
 	cachedHierarchy = null;
 }
 
+synchronized public MultiFn reset(){
+	methodTable = methodCache = preferTable = PersistentHashMap.EMPTY;
+	cachedHierarchy = null;
+	return this;
+}
+
 synchronized public MultiFn addMethod(Object dispatchVal, IFn method) throws Exception{
 	methodTable = getMethodTable().assoc(dispatchVal, method);
 	resetCache();
