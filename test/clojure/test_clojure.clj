@@ -49,6 +49,7 @@
       :clojure-xml
       :clojure-zip
       :protocols
+      :genclass
       ])
 
 (def test-namespaces

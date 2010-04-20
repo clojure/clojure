@@ -116,6 +116,7 @@
           failonerror="true">
       <sysproperty key="clojure.compile.path" value="${test-classes}"/>
       <arg value="clojure.test-clojure.protocols.examples"/>
+      <arg value="clojure.test-clojure.genclass.examples"/>
     </java>
   </target>
 

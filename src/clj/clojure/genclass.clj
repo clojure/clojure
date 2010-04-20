@@ -121,7 +121,7 @@
         factory-name (str factory)
         state-name (str state)
         main-name "main"
-        var-name (fn [s] (str s "__var"))
+        var-name (fn [s] (clojure.lang.Compiler/munge (str s "__var")))
         class-type  (totype Class)
         rt-type  (totype clojure.lang.RT)
         var-type #^Type (totype clojure.lang.Var)
