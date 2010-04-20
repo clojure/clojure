@@ -50,6 +50,7 @@
       :clojure-zip
       :protocols
       :genclass
+      :main
       ])
 
 (def test-namespaces
