@@ -589,7 +589,7 @@
   
   [& options]
     (when *compile-files*
-      (let [options-map (apply hash-map options)
+      (let [options-map (into {} (map vec (partition 2 options)))
             [cname bytecode] (generate-class options-map)]
         (clojure.lang.Compiler/writeClassFile cname bytecode))))
 
