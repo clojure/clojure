@@ -78,6 +78,30 @@
   (more [this]
     (let [s (.next this)]
       (or s (clojure.lang.PersistentList/EMPTY))))
+  (cons [this o]
+    (clojure.lang.Cons. o this))
+  (count [this]
+    (loop [i 1
+           s (next this)]
+      (if s
+        (if (instance? clojure.lang.Counted s)
+          (+ i (.count s))
+          (recur (inc i) (next s)))
+        i)))
+  (equiv [this o]
+    (cond
+     (identical? this o) true
+     (or (instance? clojure.lang.Sequential o) (instance? java.util.List o))
+     (loop [me this
+            you (seq o)]
+       (if (nil? me)
+         (nil? you)
+         (and (clojure.lang.Util/equiv (first me) (first you))
+              (recur (next me) (next you)))))
+     :else false))
+  (empty [_]
+    clojure.lang.PersistentList/EMPTY)
+
 
   clojure.lang.Seqable
   (seq [this] this)

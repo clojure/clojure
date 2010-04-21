@@ -51,6 +51,7 @@
       :protocols
       :genclass
       :main
+      :vectors
       ])
 
 (def test-namespaces
