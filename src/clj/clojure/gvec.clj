@@ -335,6 +335,23 @@
         (aset arr subidx (.doAssoc this (- level (int 5)) (aget arr subidx) i val))
         (VecNode. (.edit node) arr))))
 
+  java.lang.Comparable
+  (compareTo [this o]
+    (if (identical? this o)
+      0
+      (let [ocnt (.count (cast clojure.lang.IPersistentVector o))]
+        (cond
+          (< cnt ocnt) -1
+          (> cnt ocnt) 1
+          :else
+            (loop [i (int 0)]
+              (if (= i cnt)
+                0
+                (let [comp (clojure.lang.Util/compare (.nth this i) (.nth o i))]
+                  (if (= 0 comp)
+                    (recur (inc i))
+                    comp))))))))
+
   java.lang.Iterable
   (iterator [this]
     (let [i (java.util.concurrent.atomic.AtomicInteger. 0)]

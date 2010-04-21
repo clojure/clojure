@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-; Author: Stuart Halloway
+; Author: Stuart Halloway, Daniel Solano Gómez
 
 (ns clojure.test-clojure.vectors
   (:use clojure.test))
@@ -78,3 +78,199 @@
            vs vs-32
            vs-32 vs
            vs nil))))
+
+(deftest test-vec
+  (let [ nums      (range 1 100)
+        ; randomly replaces a single item with the given value
+        rand-replace  (fn[val]
+                        (let [r (rand-int 100)]
+                          (concat (take r nums) [val] (drop (inc r) nums))))
+        ; all num sequences in map
+        num-seqs      {:standard       nums
+                       :empty          '()
+                       ; different lengths
+                       :longer         (concat nums [100])
+                       :shorter        (drop-last nums)
+                       ; greater by value
+                       :first-greater  (concat [100] (next nums))
+                       :last-greater   (concat (drop-last nums) [100])
+                       :rand-greater-1 (rand-replace 100)
+                       :rand-greater-2 (rand-replace 100)
+                       :rand-greater-3 (rand-replace 100)
+                       ; lesser by value
+                       :first-lesser   (concat [0] (next nums))
+                       :last-lesser    (concat (drop-last nums) [0])
+                       :rand-lesser-1  (rand-replace 0)
+                       :rand-lesser-2  (rand-replace 0)
+                       :rand-lesser-3  (rand-replace 0)}
+        ; a way to create compare values based on num-seqs
+        create-vals   (fn[base-val]
+                        (zipmap (keys num-seqs)
+                                (map #(into base-val %1) (vals num-seqs))))
+        ; Vecs made of int primitives
+        int-vecs      (create-vals (vector-of :int))
+        ; Vecs made of long primitives
+        long-vecs     (create-vals (vector-of :long))
+        ; standard boxing vectors
+        regular-vecs  (create-vals [])
+        ; the standard int Vec for comparisons
+        int-vec       (:standard int-vecs)]
+    (testing "compare"
+      (testing "identical"
+        (is (= 0 (compare int-vec int-vec))))
+      (testing "equivalent"
+        (are [x y] (= 0 (compare x y))
+             ; standard
+             int-vec (:standard long-vecs)
+             (:standard long-vecs) int-vec
+             int-vec (:standard regular-vecs)
+             (:standard regular-vecs) int-vec
+             ; empty
+             (:empty int-vecs) (:empty long-vecs)
+             (:empty long-vecs) (:empty int-vecs)))
+      (testing "lesser"
+        (are [x] (= -1 (compare int-vec x))
+             (:longer int-vecs)
+             (:longer long-vecs)
+             (:longer regular-vecs)
+             (:first-greater int-vecs)
+             (:first-greater long-vecs)
+             (:first-greater regular-vecs)
+             (:last-greater int-vecs)
+             (:last-greater long-vecs)
+             (:last-greater regular-vecs)
+             (:rand-greater-1 int-vecs)
+             (:rand-greater-1 long-vecs)
+             (:rand-greater-1 regular-vecs)
+             (:rand-greater-2 int-vecs)
+             (:rand-greater-2 long-vecs)
+             (:rand-greater-2 regular-vecs)
+             (:rand-greater-3 int-vecs)
+             (:rand-greater-3 long-vecs)
+             (:rand-greater-3 regular-vecs))
+        (are [x] (= -1 (compare x int-vec))
+             nil
+             (:empty int-vecs)
+             (:empty long-vecs)
+             (:empty regular-vecs)
+             (:shorter int-vecs)
+             (:shorter long-vecs)
+             (:shorter regular-vecs)
+             (:first-lesser int-vecs)
+             (:first-lesser long-vecs)
+             (:first-lesser regular-vecs)
+             (:last-lesser int-vecs)
+             (:last-lesser long-vecs)
+             (:last-lesser regular-vecs)
+             (:rand-lesser-1 int-vecs)
+             (:rand-lesser-1 long-vecs)
+             (:rand-lesser-1 regular-vecs)
+             (:rand-lesser-2 int-vecs)
+             (:rand-lesser-2 long-vecs)
+             (:rand-lesser-2 regular-vecs)
+             (:rand-lesser-3 int-vecs)
+             (:rand-lesser-3 long-vecs)
+             (:rand-lesser-3 regular-vecs)))
+      (testing "greater"
+        (are [x] (= 1 (compare int-vec x))
+             nil
+             (:empty int-vecs)
+             (:empty long-vecs)
+             (:empty regular-vecs)
+             (:shorter int-vecs)
+             (:shorter long-vecs)
+             (:shorter regular-vecs)
+             (:first-lesser int-vecs)
+             (:first-lesser long-vecs)
+             (:first-lesser regular-vecs)
+             (:last-lesser int-vecs)
+             (:last-lesser long-vecs)
+             (:last-lesser regular-vecs)
+             (:rand-lesser-1 int-vecs)
+             (:rand-lesser-1 long-vecs)
+             (:rand-lesser-1 regular-vecs)
+             (:rand-lesser-2 int-vecs)
+             (:rand-lesser-2 long-vecs)
+             (:rand-lesser-2 regular-vecs)
+             (:rand-lesser-3 int-vecs)
+             (:rand-lesser-3 long-vecs)
+             (:rand-lesser-3 regular-vecs))
+        (are [x] (= 1 (compare x int-vec))
+             (:longer int-vecs)
+             (:longer long-vecs)
+             (:longer regular-vecs)
+             (:first-greater int-vecs)
+             (:first-greater long-vecs)
+             (:first-greater regular-vecs)
+             (:last-greater int-vecs)
+             (:last-greater long-vecs)
+             (:last-greater regular-vecs)
+             (:rand-greater-1 int-vecs)
+             (:rand-greater-1 long-vecs)
+             (:rand-greater-1 regular-vecs)
+             (:rand-greater-2 int-vecs)
+             (:rand-greater-2 long-vecs)
+             (:rand-greater-2 regular-vecs)
+             (:rand-greater-3 int-vecs)
+             (:rand-greater-3 long-vecs)
+             (:rand-greater-3 regular-vecs))))
+    (testing "Comparable.compareTo"
+      (testing "incompatible"
+        (is (thrown? NullPointerException (.compareTo int-vec nil)))
+        (are [x] (thrown? ClassCastException (.compareTo int-vec x))
+             '()
+             {}
+             #{}
+             (sorted-set)
+             (sorted-map)
+             nums
+             1))
+      (testing "identical"
+        (is (= 0 (.compareTo int-vec int-vec))))
+      (testing "equivalent"
+        (are [x] (= 0 (.compareTo int-vec x))
+             (:standard long-vecs)
+             (:standard regular-vecs)))
+      (testing "lesser"
+        (are [x] (= -1 (.compareTo int-vec x))
+             (:longer int-vecs)
+             (:longer long-vecs)
+             (:longer regular-vecs)
+             (:first-greater int-vecs)
+             (:first-greater long-vecs)
+             (:first-greater regular-vecs)
+             (:last-greater int-vecs)
+             (:last-greater long-vecs)
+             (:last-greater regular-vecs)
+             (:rand-greater-1 int-vecs)
+             (:rand-greater-1 long-vecs)
+             (:rand-greater-1 regular-vecs)
+             (:rand-greater-2 int-vecs)
+             (:rand-greater-2 long-vecs)
+             (:rand-greater-2 regular-vecs)
+             (:rand-greater-3 int-vecs)
+             (:rand-greater-3 long-vecs)
+             (:rand-greater-3 regular-vecs)))
+      (testing "greater"
+        (are [x] (= 1 (.compareTo int-vec x))
+             (:empty int-vecs)
+             (:empty long-vecs)
+             (:empty regular-vecs)
+             (:shorter int-vecs)
+             (:shorter long-vecs)
+             (:shorter regular-vecs)
+             (:first-lesser int-vecs)
+             (:first-lesser long-vecs)
+             (:first-lesser regular-vecs)
+             (:last-lesser int-vecs)
+             (:last-lesser long-vecs)
+             (:last-lesser regular-vecs)
+             (:rand-lesser-1 int-vecs)
+             (:rand-lesser-1 long-vecs)
+             (:rand-lesser-1 regular-vecs)
+             (:rand-lesser-2 int-vecs)
+             (:rand-lesser-2 long-vecs)
+             (:rand-lesser-2 regular-vecs)
+             (:rand-lesser-3 int-vecs)
+             (:rand-lesser-3 long-vecs)
+             (:rand-lesser-3 regular-vecs))))))
