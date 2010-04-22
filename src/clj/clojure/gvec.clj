@@ -194,7 +194,7 @@
      (or (instance? clojure.lang.Sequential o) (instance? java.util.List o))
        (= (seq this) (seq o))
      :else false))
-  
+
   clojure.lang.IPersistentStack
   (peek [this]
     (when (> cnt (int 0)) 
@@ -233,7 +233,13 @@
          (new Vec am cnt shift (.doAssoc this shift root i val) tail (meta this)))
      (= i cnt) (.cons this val)
      :else (throw (IndexOutOfBoundsException.))))
-
+  
+  clojure.lang.Reversible
+  (rseq [this]
+        (if (> (.count this) 0)
+          (clojure.lang.APersistentVector$RSeq. this (dec (.count this)))
+          nil))
+  
   clojure.lang.Associative
   (assoc [this k v]
     (if (clojure.lang.Util/isInteger k)

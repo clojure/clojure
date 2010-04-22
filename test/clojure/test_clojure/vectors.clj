@@ -11,6 +11,25 @@
 (ns clojure.test-clojure.vectors
   (:use clojure.test))
 
+(deftest test-reversed-vec
+  (let [r (range 6)
+        v (into (vector-of :int) r)
+        reversed (.rseq v)]
+    (testing "returns the right impl"
+      (is (= clojure.lang.APersistentVector$RSeq (class reversed))))
+    (testing "RSeq methods"
+      (is (= [5 4 3 2 1 0] reversed))
+      (is (= 5 (.index reversed)))
+      (is (= 5 (.first reversed)))
+      (is (= [4 3 2 1 0] (.next reversed)))
+      (is (= [3 2 1 0] (.. reversed next next)))
+      (is (= 6 (.count reversed))))
+    (testing "clojure calling through"
+      (is (= 5 (first reversed)))
+      (is (= 5 (nth reversed 0))))
+    (testing "empty reverses to nil"
+      (is (nil? (.. v empty rseq))))))
+
 (deftest test-vecseq
   (let [r (range 100)
         vs (into (vector-of :int) r)

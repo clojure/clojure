@@ -458,11 +458,11 @@ public int compareTo(Object o){
 	}
     }
 
-static class RSeq extends ASeq implements IndexedSeq, Counted{
+public static class RSeq extends ASeq implements IndexedSeq, Counted{
 	final IPersistentVector v;
 	final int i;
 
-	RSeq(IPersistentVector vector, int i){
+	public RSeq(IPersistentVector vector, int i){
 		this.v = vector;
 		this.i = i;
 	}
