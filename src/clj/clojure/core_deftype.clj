@@ -18,7 +18,6 @@
                (vector name (vec (map tag args)) (tag name)))
         cname (with-meta (symbol (str *ns* "." name)) (meta name))]
     `(do (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
-         (ns-unmap (find-ns '~(ns-name *ns*)) '~name)
          (import ~cname))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; reify/deftype ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -289,7 +288,6 @@
        ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods)
        (defmethod print-method ~classname [o# w#]
            ((var print-defrecord) o# w#))
-       (ns-unmap (find-ns '~(ns-name *ns*)) '~name)
        (import ~classname)
        #_(defn ~name
          ([~@fields] (new ~classname ~@fields nil nil))
@@ -379,7 +377,6 @@
         fields (vec (map #(with-meta % nil) fields))]
     `(do
        ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods)
-       (ns-unmap (find-ns '~(ns-name *ns*)) '~name)
        (import ~classname))))
 
 

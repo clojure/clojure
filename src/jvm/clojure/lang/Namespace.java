@@ -86,6 +86,30 @@ Object reference(Symbol sym, Object val){
 	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
 }
 
+public static boolean areDifferentInstancesOfSameClassName(Class cls1, Class cls2) {
+    return (cls1 != cls2) && (cls1.getName().equals(cls2.getName()));
+}
+
+Class referenceClass(Symbol sym, Class val){
+    if(sym.ns != null)
+        {
+        throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
+        }
+    IPersistentMap map = getMappings();
+    Class c = (Class) map.valAt(sym);
+    while((c == null) || (areDifferentInstancesOfSameClassName(c, val)))
+        {
+        IPersistentMap newMap = map.assoc(sym, val);
+        mappings.compareAndSet(map, newMap);
+        map = getMappings();
+        c = (Class) map.valAt(sym);
+        }
+    if(c == val)
+        return c;
+
+    throw new IllegalStateException(sym + " already refers to: " + c + " in namespace: " + name);
+}
+
 public void unmap(Symbol sym) throws Exception{
 	if(sym.ns != null)
 		{
@@ -101,7 +125,7 @@ public void unmap(Symbol sym) throws Exception{
 }
 
 public Class importClass(Symbol sym, Class c){
-	return (Class) reference(sym, c);
+	return referenceClass(sym, c);
 
 }
 

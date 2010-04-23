@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-; Author: Frantisek Sodomka
+; Authors: Frantisek Sodomka, Stuart Halloway
 
 (ns clojure.test-clojure.ns-libs
   (:use clojure.test))
@@ -34,3 +34,40 @@
          (is (thrown? Exception (use :foo)))
          (is (thrown? Exception (use))))
 
+(deftest reimporting-deftypes
+  (let [inst1 (binding [*ns* *ns*]
+                (eval '(do (ns exporter)
+                           (defrecord ReimportMe [a])
+                           (ns importer)
+                           (import exporter.ReimportMe)
+                           (ReimportMe. 1))))
+        inst2 (binding [*ns* *ns*]
+                (eval '(do (ns exporter)
+                           (defrecord ReimportMe [a b])
+                           (ns importer)
+                           (import exporter.ReimportMe)
+                           (ReimportMe. 1 2))))]
+    (testing "you can reimport a changed class and see the changes"
+      (is (= [:a] (keys inst1)))
+      (is (= [:a :b] (keys inst2))))
+    (testing "you cannot import same local name from a different namespace"
+      (is (thrown? clojure.lang.Compiler$CompilerException
+                  #"ReimportMe already refers to: class exporter.ReimportMe in namespace: importer"
+                  (binding [*ns* *ns*]
+                    (eval '(do (ns exporter-2)
+                               (defrecord ReimportMe [a b])
+                               (ns importer)
+                               (import exporter-2.ReimportMe)
+                               (ReimportMe. 1 2)))))))))
+
+(deftest naming-types
+  (testing "you cannot use a name already referred from another namespace"
+    (is (thrown? IllegalStateException
+                 #"String already refers to: class java.lang.String"
+                 (definterface String)))
+    (is (thrown? IllegalStateException
+                 #"StringBuffer already refers to: class java.lang.StringBuffer"
+                 (deftype StringBuffer [])))
+    (is (thrown? IllegalStateException
+                 #"Integer already refers to: class java.lang.Integer"
+                 (defrecord Integer [])))))
