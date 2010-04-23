@@ -16,7 +16,7 @@
   (let [tag (fn [x] (or (:tag (meta x)) Object))
         psig (fn [[name [& args]]]
                (vector name (vec (map tag args)) (tag name)))
-        cname (symbol (str *ns* "." name))]
+        cname (with-meta (symbol (str *ns* "." name)) (meta name))]
     `(do (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
          (ns-unmap (find-ns '~(ns-name *ns*)) '~name)
          (import ~cname))))
@@ -111,7 +111,7 @@
   "Do not use this directly - use defrecord"
   [tagname name fields interfaces methods]
   (let [tag (keyword (str *ns*) (str tagname))
-        classname (symbol (str *ns* "." name))
+        classname (with-meta (symbol (str *ns* "." name)) (meta name))
         interfaces (vec interfaces)
         interface-set (set (map resolve interfaces))
         methodname-set (set (map first methods))
@@ -275,7 +275,7 @@
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
-  (let [classname (symbol (str *ns* "." name))]
+  (let [classname (with-meta (symbol (str *ns* "." name)) (meta name))]
     `(deftype* ~tagname ~classname ~fields 
        :implements ~interfaces 
        ~@methods)))
