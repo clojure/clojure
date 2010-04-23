@@ -107,6 +107,22 @@
 (defn munge [s]
   ((if (symbol? s) symbol str) (clojure.lang.Compiler/munge (str s))))
 
+(defn- imap-cons
+  [#^IPersistentMap this o]
+  (cond
+   (instance? java.util.Map$Entry o)
+     (let [#^java.util.Map$Entry pair o]
+       (.assoc this (.getKey pair) (.getValue pair)))
+   (instance? clojure.lang.IPersistentVector o)
+     (let [#^clojure.lang.IPersistentVector vec o]
+       (.assoc this (.nth vec 0) (.nth vec 1)))
+   :else (loop [this this
+                o o]
+      (if (seq o)
+        (let [#^java.util.Map$Entry pair (first o)]
+          (recur (.assoc this (.getKey pair) (.getValue pair)) (rest o)))
+        this))))
+
 (defn- emit-defrecord 
   "Do not use this directly - use defrecord"
   [tagname name fields interfaces methods]
@@ -163,7 +179,7 @@
              (conj m 
                    `(count [~'this] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [~'this] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
-                   `(cons [~'this ~'e] (let [[~'k ~'v] ~'e] (.assoc ~'this ~'k ~'v)))
+                   `(cons [~'this ~'e] ((var imap-cons) ~'this ~'e))
                    `(equiv [~'this ~'o] (.equals ~'this ~'o))
                    `(containsKey [~'this ~'k] (not (identical? ~'this (.valAt ~'this ~'k ~'this))))
                    `(entryAt [~'this ~'k] (let [~'v (.valAt ~'this ~'k ~'this)]
