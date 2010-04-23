@@ -621,6 +621,7 @@
        iname nil "java/lang/Object"
        (when (seq extends)
          (into-array (map #(.getInternalName (asm-type %)) extends))))
+    (add-annotations cv (meta name))
     (doseq [[mname pclasses rclass] methods]
       (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
          (str mname)

@@ -3803,6 +3803,57 @@
   "Returns true if x is an instance of Class"
   [x] (instance? Class x))
 
+(defn- is-annotation? [c]
+  (and (class? c)
+       (.isAssignableFrom java.lang.annotation.Annotation c)))
+
+(defn- is-runtime-annotation? [#^Class c]
+  (boolean 
+   (and (is-annotation? c)
+        (when-let [#^java.lang.annotation.Retention r 
+                   (.getAnnotation c java.lang.annotation.Retention)] 
+          (= (.value r) java.lang.annotation.RetentionPolicy/RUNTIME)))))
+
+(defn- descriptor [#^Class c] (clojure.asm.Type/getDescriptor c))
+
+(declare process-annotation)
+(defn- add-annotation [#^clojure.asm.AnnotationVisitor av name v]
+  (cond
+   (vector? v) (let [avec (.visitArray av name)]
+                 (doseq [vval v]
+                   (add-annotation avec "value" vval))
+                 (.visitEnd avec))
+   (symbol? v) (let [ev (eval v)]
+                 (cond 
+                  (instance? java.lang.Enum ev)
+                  (.visitEnum av name (descriptor (class ev)) (str ev))
+                  (class? ev) (.visit av name (clojure.asm.Type/getType ev))
+                  :else (throw (IllegalArgumentException. 
+                                (str "Unsupported annotation value: " v " of class " (class ev))))))
+   (seq? v) (let [[nested nv] v
+                  c (resolve nested)
+                  nav (.visitAnnotation av name (descriptor c))]
+              (process-annotation nav nv)
+              (.visitEnd nav))
+   :else (.visit av name v)))
+
+(defn- process-annotation [av v]
+  (if (map? v) 
+    (doseq [[k v] v]
+      (add-annotation av (name k) v))
+    (add-annotation av "value" v)))
+
+(defn- add-annotations [visitor m]
+  (doseq [[k v] m]
+    (when (symbol? k)
+      (when-let [c (resolve k)]
+        (when (is-annotation? c)
+          ;this is known duck/reflective as no common base of ASM Visitors
+          (let [av (.visitAnnotation visitor (descriptor c) 
+                                     (is-runtime-annotation? c))]
+            (process-annotation av v)
+            (.visitEnd av)))))))
+
 (defn alter-var-root
   "Atomically alters the root binding of var v by applying f to its
   current value plus any args"

@@ -226,6 +226,9 @@ static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol
 static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                             Symbol.create("instance?"));
 
+static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                            Symbol.create("add-annotations"));
+
 //Integer
 static final public Var LINE = Var.create(0);
 
@@ -3208,6 +3211,7 @@ static public class ObjExpr implements Expr{
 	Object src;
 
 	final static Method voidctor = Method.getMethod("void <init>()");
+	protected IPersistentMap classMeta;
 
 	public final String name(){
 		return name;
@@ -3350,7 +3354,7 @@ static public class ObjExpr implements Expr{
 			              "*E";
 			cv.visitSource(source, smap);
 			}
-
+		addAnnotation(cv, classMeta);
 		//static fields for constants
 		for(int i = 0; i < constants.count(); i++)
 			{
@@ -3434,14 +3438,16 @@ static public class ObjExpr implements Expr{
 				int access = isVolatile(lb) ? ACC_VOLATILE :
 				             isMutable(lb) ? 0 :
 				             (ACC_PUBLIC + ACC_FINAL);
+				FieldVisitor fv;
 				if(lb.getPrimitiveType() != null)
-					cv.visitField(access
+					fv = cv.visitField(access
 							, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
 								  null, null);
 				else
 				//todo - when closed-overs are fields, use more specific types here and in ctor and emitLocal?
-					cv.visitField(access
+					fv = cv.visitField(access
 							, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
+				addAnnotation(fv, RT.meta(lb.sym));
 				}
 			else
 				{
@@ -4336,6 +4342,7 @@ abstract public static class ObjMethod{
 	int maxLocal = 0;
 	int line;
 	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
+	protected IPersistentMap methodMeta;
 
 	public final IPersistentMap locals(){
 		return locals;
@@ -5432,6 +5439,17 @@ static PathNode commonPath(PathNode n1, PathNode n2){
     return (PathNode) RT.first(xp);
 }
 
+static void addAnnotation(Object visitor, IPersistentMap meta){
+	try{
+	if(ADD_ANNOTATIONS.isBound())
+		 ADD_ANNOTATIONS.invoke(visitor, meta);
+	}
+	catch (Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
+
 private static Expr analyzeSymbol(Symbol sym) throws Exception{
 	Symbol tag = tagOf(sym);
 	if(sym.ns == null) //ns-qualified syms are always Vars
@@ -5949,7 +5967,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			rform = RT.next(rform);
 			String tagname = ((Symbol) rform.first()).toString();
 			rform = rform.next();
-			String classname = ((Symbol) rform.first()).toString();
+			Symbol classname = (Symbol) rform.first();
 			rform = rform.next();
 			IPersistentVector fields = (IPersistentVector) rform.first();
 			rform = rform.next();
@@ -5985,7 +6003,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		rform = RT.next(rform);
 
 
-		ObjExpr ret = build(interfaces, null, null, classname, classname, null, rform, frm);
+		ObjExpr ret = build(interfaces, null, null, classname, Symbol.intern(classname), null, rform, frm);
 		if(frm instanceof IObj && ((IObj) frm).meta() != null)
 			return new MetaExpr(ret, (MapExpr) MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) frm).meta()));
@@ -5995,12 +6013,13 @@ static public class NewInstanceExpr extends ObjExpr{
 	}
 
 	static ObjExpr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym,
-	                     String tagName, String className,
+	                     String tagName, Symbol className,
 	                  Symbol typeTag, ISeq methodForms, Object frm) throws Exception{
 		NewInstanceExpr ret = new NewInstanceExpr(null);
 
 		ret.src = frm;
-		ret.name = className;
+		ret.name = className.toString();
+		ret.classMeta = RT.meta(className);
 		ret.internalName = ret.name.replace('.', '/');
 		ret.objtype = Type.getObjectType(ret.internalName);
 
@@ -6451,6 +6470,7 @@ public static class NewInstanceMethod extends ObjMethod{
 				}
 			LOOP_LOCALS.set(argLocals);
 			method.name = name.name;
+			method.methodMeta = RT.meta(name);
 			method.argLocals = argLocals;
 			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
 			return method;
@@ -6500,6 +6520,7 @@ public static class NewInstanceMethod extends ObjMethod{
 		                                            null,
 		                                            extypes,
 		                                            cv);
+		addAnnotation(gen,methodMeta);
 		gen.visitCode();
 		Label loopLabel = gen.mark();
 		gen.visitLineNumber(line, loopLabel);
