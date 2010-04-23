@@ -196,8 +196,23 @@
                    `(without [~'this ~'k] (if (contains? #{~@(map keyword base-fields)} ~'k)
                                             (dissoc (with-meta (into {} ~'this) ~'__meta) ~'k)
                                             (new ~tagname ~@(remove #{'__extmap} fields) 
-                                                 (not-empty (dissoc ~'__extmap ~'k))))))])]
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap)]
+                                                 (not-empty (dissoc ~'__extmap ~'k))))))])
+      (ijavamap [[i m]]
+                [(conj i 'java.util.Map)
+                 (conj m
+                       `(size [~'this] (.count ~'this))
+                       `(isEmpty [~'this] (= 0 (.count ~'this)))
+                       `(containsValue [~'this ~'v] (-> ~'this vals (.contains ~'v)))
+                       `(get [~'this ~'k] (.valAt ~'this ~'k))
+                       `(put [~'this ~'k ~'v] (throw (UnsupportedOperationException.)))
+                       `(remove [~'this ~'k] (throw (UnsupportedOperationException.)))
+                       `(putAll [~'this ~'m] (throw (UnsupportedOperationException.)))
+                       `(clear [~'this] (throw (UnsupportedOperationException.)))
+                       `(keySet [~'this] (set (keys ~'this)))
+                       `(values [~'this] (vals ~'this))
+                       `(entrySet [~'this] (set ~'this)))])
+      ]
+     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap ijavamap)]
        `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))

@@ -30,6 +30,7 @@
      (map #(.getName %))
      (sort)))
 
+(defrecord EmptyRecord [])
 (defrecord TestRecord [a b])
 (defn r
   ([a b] (TestRecord. a b))
@@ -157,6 +158,26 @@
     (is (= (r 1 3 {} {:c 4}) (merge rec {:b 3 :c 4})))))
 
 (deftest defrecord-interfaces-test
+  (testing "java.util.Map"
+    (let [rec (r 1 2)]
+      (is (= 2 (.size rec)))
+      (is (= 3 (.size (assoc rec :c 3))))
+      (is (not (.isEmpty rec)))
+      (is (.isEmpty (EmptyRecord.)))
+      (is (.containsKey rec :a))
+      (is (not (.containsKey rec :c)))
+      (is (.containsValue rec 1))
+      (is (not (.containsValue rec 3)))
+      (is (= 1 (.get rec :a)))
+      (is (thrown? UnsupportedOperationException (.put rec :a 1)))
+      (is (thrown? UnsupportedOperationException (.remove rec :a)))
+      (is (thrown? UnsupportedOperationException (.putAll rec {})))
+      (is (thrown? UnsupportedOperationException (.clear rec)))
+      (is (= #{:a :b} (.keySet rec)))
+      (is (= #{1 2} (set (.values rec))))
+      (is (= #{[:a 1] [:b 2]} (.entrySet rec)))
+      
+      ))
   (testing "IPersistentCollection"
     (testing ".cons"
       (let [rec (r 1 2)]
