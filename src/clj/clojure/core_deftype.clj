@@ -10,13 +10,18 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; definterface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn namespace-munge
+  "Convert a Clojure namespace name to a legal Java package name."
+  [ns]
+  (.replace (str ns) \- \_))
+
 ;for now, built on gen-interface
 (defmacro definterface 
   [name & sigs]
   (let [tag (fn [x] (or (:tag (meta x)) Object))
         psig (fn [[name [& args]]]
                (vector name (vec (map tag args)) (tag name)))
-        cname (with-meta (symbol (str *ns* "." name)) (meta name))]
+        cname (symbol (str (namespace-munge *ns*) "." name))]
     `(do (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
          (import ~cname))))
 

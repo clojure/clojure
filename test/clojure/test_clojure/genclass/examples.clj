@@ -5,8 +5,8 @@
   (foo [a b])
   (foo [a #^int b]))
 
-(gen-class :name clojure.test-clojure.genclass.examples.ExampleClass
-           :implements [clojure.test-clojure.genclass.examples.ExampleInterface])
+(gen-class :name clojure.test_clojure.genclass.examples.ExampleClass
+           :implements [clojure.test_clojure.genclass.examples.ExampleInterface])
 
 ;; -foo-Object unimplemented to test missing fn case
 

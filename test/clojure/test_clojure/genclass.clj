@@ -10,7 +10,7 @@
 
 (ns clojure.test-clojure.genclass
   (:use clojure.test)
-  (:import clojure.test-clojure.genclass.examples.ExampleClass))
+  (:import clojure.test_clojure.genclass.examples.ExampleClass))
 
 ;; pull this up to a suite-wide helper if you find other tests need it!
 (defn get-field
