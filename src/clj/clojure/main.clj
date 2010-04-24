@@ -258,6 +258,14 @@
   (prn)
   (System/exit 0))
 
+(defn- main-opt
+  "Run the -main function from a given namespace with arguments taken from
+  the command line."
+  [[_ main-ns & args] inits]
+  (with-bindings
+    (initialize args inits)
+    (apply (ns-resolve (doto (symbol main-ns) require) '-main) args)))
+
 (defn- script-opt
   "Run a script from a file, resource, or standard in with args and inits"
   [[path & args] inits]
@@ -284,6 +292,8 @@
   (or
    ({"-r"     repl-opt
      "--repl" repl-opt
+     "-m"     main-opt
+     "--main" main-opt
      nil      null-opt
      "-h"     help-opt
      "--help" help-opt
@@ -322,6 +332,7 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   main options:
     -r, --repl        Run a repl
     path              Run a script from from a file or resource
+    -m, --main        Run the -main function from a given namespace
     -                 Run a script from standard input
     -h, -?, --help    Print this help message and exit
 
