@@ -339,15 +339,16 @@
   (compareTo [this o]
     (if (identical? this o)
       0
-      (let [ocnt (.count (cast clojure.lang.IPersistentVector o))]
+      (let [#^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
+            vcnt (.count v)]
         (cond
-          (< cnt ocnt) -1
-          (> cnt ocnt) 1
+          (< cnt vcnt) -1
+          (> cnt vcnt) 1
           :else
             (loop [i (int 0)]
               (if (= i cnt)
                 0
-                (let [comp (clojure.lang.Util/compare (.nth this i) (.nth o i))]
+                (let [comp (clojure.lang.Util/compare (.nth this i) (.nth v i))]
                   (if (= 0 comp)
                     (recur (inc i))
                     comp))))))))
