@@ -245,6 +245,14 @@
     (if (clojure.lang.Util/isInteger k)
       (.assocN this k v)
       (throw (IllegalArgumentException. "Key must be integer"))))
+  (containsKey [this k]
+    (and (clojure.lang.Util/isInteger k)
+         (<= 0 (int k))
+         (< (int k) cnt)))
+  (entryAt [this k]
+    (if (.containsKey this k)
+      (clojure.lang.MapEntry. k (.nth this (int k)))
+      nil))
 
   clojure.lang.ILookup
   (valAt [this k not-found]

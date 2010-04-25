@@ -274,3 +274,31 @@
              (:rand-lesser-3 int-vecs)
              (:rand-lesser-3 long-vecs)
              (:rand-lesser-3 regular-vecs))))))
+
+(deftest test-vec
+  (let [empty-v (vector-of :long)
+        v       (into empty-v (range 1 6))]
+    (testing "Associative.containsKey"
+      (are [x] (.containsKey v x)
+           0 1 2 3 4)
+      (are [x] (not (.containsKey v x))
+           -1 -100 nil [] "" #"" #{} 5 100)
+      (are [x] (not (.containsKey empty-v x))
+           0 1))
+    (testing "contains?"
+      (are [x] (contains? v x)
+           0 2 4)
+      (are [x] (not (contains? v x))
+           -1 -100 nil "" 5 100)
+      (are [x] (not (contains? empty-v x))
+           0 1))
+    (testing "Associative.entryAt"
+      (are [idx val] (= (clojure.lang.MapEntry. idx val)
+                        (.entryAt v idx))
+           0 1
+           2 3
+           4 5)
+      (are [idx] (nil? (.entryAt v idx))
+           -5 -1 5 10 nil "")
+      (are [idx] (nil? (.entryAt empty-v idx))
+           0 1))))
