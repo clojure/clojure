@@ -622,14 +622,18 @@
        (when (seq extends)
          (into-array (map #(.getInternalName (asm-type %)) extends))))
     (add-annotations cv (meta name))
-    (doseq [[mname pclasses rclass] methods]
-      (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
-         (str mname)
-         (Type/getMethodDescriptor (asm-type rclass) 
-                                   (if pclasses
-                                     (into-array Type (map asm-type pclasses))
-                                     (make-array Type 0)))
-         nil nil))
+    (doseq [[mname pclasses rclass pmetas] methods]
+      (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
+                  (str mname)
+                  (Type/getMethodDescriptor (asm-type rclass) 
+                                            (if pclasses
+                                              (into-array Type (map asm-type pclasses))
+                                              (make-array Type 0)))
+                  nil nil)]
+        (add-annotations mv (meta mname))
+        (dotimes [i (count pmetas)]
+          (add-annotations mv (nth pmetas i) i))
+        (. mv visitEnd)))
     (. cv visitEnd)
     [iname (. cv toByteArray)]))
 
