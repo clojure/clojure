@@ -11,7 +11,7 @@
 ;; by Stuart Sierra
 ;; January 6, 2009
 
-(ns #^{:doc "Print stack traces oriented towards Clojure, not Java."
+(ns ^{:doc "Print stack traces oriented towards Clojure, not Java."
        :author "Stuart Sierra"}
   clojure.stacktrace)
 

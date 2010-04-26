@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns #^{:doc "XML reading/writing."
+(ns ^{:doc "XML reading/writing."
        :author "Rich Hickey"}
   clojure.xml
   (:import (org.xml.sax ContentHandler Attributes SAXException)
@@ -32,7 +32,7 @@
                        (set! *current* (push-content *current* (str *sb*)))))]
     (new clojure.lang.XMLHandler
          (proxy [ContentHandler] []
-           (startElement [uri local-name q-name #^Attributes atts]
+           (startElement [uri local-name q-name ^Attributes atts]
              (let [attrs (fn [ret i]
                            (if (neg? i)
                              ret
@@ -55,10 +55,10 @@
              (set! *stack* (pop *stack*))
              (set! *state* :between)
              nil)
-           (characters [#^chars ch start length]
+           (characters [^chars ch start length]
              (when-not (= *state* :chars)
                (set! *sb* (new StringBuilder)))
-             (let [#^StringBuilder sb *sb*]
+             (let [^StringBuilder sb *sb*]
                (.append sb ch (int start) (int length))
                (set! *state* :chars))
              nil)

@@ -15,7 +15,7 @@
 ;; contributions and suggestions.
 
 (ns 
-  #^{:author "Stuart Sierra, with contributions and suggestions by 
+  ^{:author "Stuart Sierra, with contributions and suggestions by 
   Chas Emerick, Allen Rohner, and Stuart Halloway",
      :doc "A unit testing framework.
 
@@ -237,13 +237,13 @@
 ;;; USER-MODIFIABLE GLOBALS
 
 (defonce
-  #^{:doc "True by default.  If set to false, no test functions will
+  ^{:doc "True by default.  If set to false, no test functions will
    be created by deftest, set-test, or with-test.  Use this to omit
    tests when compiling or loading production code."}
   *load-tests* true)
 
 (def
- #^{:doc "The maximum depth of stack traces to print when an Exception
+ ^{:doc "The maximum depth of stack traces to print when an Exception
   is thrown during a test.  Defaults to nil, which means print the 
   complete stack trace."}
  *stack-trace-depth* nil)
@@ -276,7 +276,7 @@
   "Returns a vector [filename line-number] for the nth call up the
   stack."
   [n]
-  (let [#^StackTraceElement s (nth (.getStackTrace (new java.lang.Throwable)) n)]
+  (let [^StackTraceElement s (nth (.getStackTrace (new java.lang.Throwable)) n)]
     [(.getFileName s) (.getLineNumber s)]))
 
 (defn testing-vars-str
@@ -310,7 +310,7 @@
 ;;; TEST RESULT REPORTING
 
 (defmulti
-  #^{:doc "Generic reporting function, may be overridden to plug in
+  ^{:doc "Generic reporting function, may be overridden to plug in
    different report formats (e.g., TAP, JUnit).  Assertions such as
    'is' call 'report' to indicate results.  The argument given to
    'report' will be a map with a :type key.  See the documentation at
@@ -633,7 +633,7 @@
 
 ;;; RUNNING TESTS: LOW-LEVEL FUNCTIONS
 
-(defn #^{:dynamic true} test-var
+(defn ^{:dynamic true} test-var
   "If v has a function in its :test metadata, calls that function,
   with *testing-vars* bound to (conj *testing-vars* v)."
   [v]

@@ -17,21 +17,21 @@
 (def EMPTY-NODE (VecNode. nil (object-array 32)))
 
 (definterface IVecImpl
-  (#^int tailoff [])
-  (arrayFor [#^int i])
-  (pushTail [#^int level parent tailnode])
-  (popTail [#^int level node])
-  (newPath [edit #^int level node])
-  (doAssoc [#^int level node #^int i val]))
+  (^int tailoff [])
+  (arrayFor [^int i])
+  (pushTail [^int level parent tailnode])
+  (popTail [^int level node])
+  (newPath [edit ^int level node])
+  (doAssoc [^int level node ^int i val]))
 
 (definterface ArrayManager
-  (array [#^int size])
-  (#^int alength [arr])
+  (array [^int size])
+  (^int alength [arr])
   (aclone [arr])
-  (aget [arr #^int i])
-  (aset [arr #^int i val]))
+  (aget [arr ^int i])
+  (aset [arr ^int i val]))
 
-(deftype ArrayChunk [#^clojure.core.ArrayManager am arr #^int off #^int end]
+(deftype ArrayChunk [^clojure.core.ArrayManager am arr ^int off ^int end]
   
   clojure.lang.Indexed
   (nth [_ i] (.aget am arr (+ off i)))
@@ -51,7 +51,7 @@
         ret)))
   )
 
-(deftype VecSeq [#^clojure.core.ArrayManager am #^clojure.core.IVecImpl vec anode #^int i #^int offset] 
+(deftype VecSeq [^clojure.core.ArrayManager am ^clojure.core.IVecImpl vec anode ^int i ^int offset] 
   :no-print true
 
   clojure.core.protocols.InternalReduce
@@ -119,7 +119,7 @@
 (defmethod print-method ::VecSeq [v w]
   ((get (methods print-method) clojure.lang.ISeq) v w))
 
-(deftype Vec [#^clojure.core.ArrayManager am #^int cnt #^int shift root tail _meta]
+(deftype Vec [^clojure.core.ArrayManager am ^int cnt ^int shift root tail _meta]
   Object
   (equals [this o]
     (cond 
@@ -174,7 +174,7 @@
       (let [tail-node (VecNode. (.edit root) tail)] 
         (if (> (bit-shift-right cnt (int 5)) (bit-shift-left (int 1) shift)) ;overflow root?
           (let [new-root (VecNode. (.edit root) (object-array 32))]
-            (doto #^objects (.arr new-root)
+            (doto ^objects (.arr new-root)
               (aset 0 root)
               (aset 1 (.newPath this (.edit root) shift tail-node)))
             (new Vec am (inc cnt) (+ shift (int 5)) new-root (let [tl (.array am 1)] (.aset am  tl 0 val) tl) (meta this)))
@@ -216,8 +216,8 @@
         (cond
          (nil? new-root) 
            (new Vec am (dec cnt) shift EMPTY-NODE new-tail (meta this))
-         (and (> shift 5) (nil? (aget #^objects (.arr new-root) 1)))
-           (new Vec am (dec cnt) (- shift 5) (aget #^objects (.arr new-root) 0) new-tail (meta this))
+         (and (> shift 5) (nil? (aget ^objects (.arr new-root) 1)))
+           (new Vec am (dec cnt) (- shift 5) (aget ^objects (.arr new-root) 0) new-tail (meta this))
          :else
            (new Vec am (dec cnt) shift new-root new-tail (meta this))))))
 
@@ -286,42 +286,42 @@
         (loop [node root level shift]
           (if (zero? level)
             (.arr node)
-            (recur (aget #^objects (.arr node) (bit-and (bit-shift-right i level) (int 0x1f))) 
+            (recur (aget ^objects (.arr node) (bit-and (bit-shift-right i level) (int 0x1f))) 
                    (- level (int 5))))))
       (throw (IndexOutOfBoundsException.))))
 
   (pushTail [this level parent tailnode]
     (let [subidx (bit-and (bit-shift-right (dec cnt) level) (int 0x1f))
-          ret (VecNode. (.edit parent) (aclone #^objects (.arr parent)))
+          ret (VecNode. (.edit parent) (aclone ^objects (.arr parent)))
           node-to-insert (if (= level (int 5))
                            tailnode
-                           (let [child (aget #^objects (.arr parent) subidx)]
+                           (let [child (aget ^objects (.arr parent) subidx)]
                              (if child
                                (.pushTail this (- level (int 5)) child tailnode)
                                (.newPath this (.edit root) (- level (int 5)) tailnode))))]
-      (aset #^objects (.arr ret) subidx node-to-insert)
+      (aset ^objects (.arr ret) subidx node-to-insert)
       ret))
 
   (popTail [this level node]
     (let [subidx (bit-and (bit-shift-right (- cnt 2) level) (int 0x1f))]
       (cond
        (> level 5) 
-         (let [new-child (.popTail this (- level 5) (aget #^objects (.arr node) subidx))]
+         (let [new-child (.popTail this (- level 5) (aget ^objects (.arr node) subidx))]
            (if (and (nil? new-child) (zero? subidx))
              nil
-             (let [arr (aclone #^objects (.arr node))]
+             (let [arr (aclone ^objects (.arr node))]
                (aset arr subidx new-child)
                (VecNode. (.edit root) arr))))
        (zero? subidx) nil
-       :else (let [arr (aclone #^objects (.arr node))]
+       :else (let [arr (aclone ^objects (.arr node))]
                (aset arr subidx nil)
                (VecNode. (.edit root) arr)))))
 
-  (newPath [this edit #^int level node]
+  (newPath [this edit ^int level node]
     (if (zero? level)
       node
       (let [ret (VecNode. edit (object-array 32))]
-        (aset #^objects (.arr ret) 0 (.newPath this edit (- level (int 5)) node))
+        (aset ^objects (.arr ret) 0 (.newPath this edit (- level (int 5)) node))
         ret)))
 
   (doAssoc [this level node i val] 
@@ -330,7 +330,7 @@
       (let [arr (.aclone am (.arr node))]
         (.aset am arr (bit-and i (int 0x1f)) val)
         (VecNode. (.edit node) arr))
-      (let [arr (aclone #^objects (.arr node))
+      (let [arr (aclone ^objects (.arr node))
             subidx (bit-and (bit-shift-right i level) (int 0x1f))]
         (aset arr subidx (.doAssoc this (- level (int 5)) (aget arr subidx) i val))
         (VecNode. (.edit node) arr))))
@@ -359,7 +359,7 @@
   (add [_ o] (throw (UnsupportedOperationException.)))
   (addAll [_ c] (throw (UnsupportedOperationException.)))
   (clear [_] (throw (UnsupportedOperationException.)))
-  (#^boolean remove [_ o] (throw (UnsupportedOperationException.)))
+  (^boolean remove [_ o] (throw (UnsupportedOperationException.)))
   (removeAll [_ c] (throw (UnsupportedOperationException.)))
   (retainAll [_ c] (throw (UnsupportedOperationException.)))
 
@@ -393,7 +393,7 @@
   (subList [this a z] (subvec this a z))
   (add [_ i o] (throw (UnsupportedOperationException.)))
   (addAll [_ i c] (throw (UnsupportedOperationException.)))
-  (#^Object remove [_ #^int i] (throw (UnsupportedOperationException.)))
+  (^Object remove [_ ^int i] (throw (UnsupportedOperationException.)))
   (set [_ i e] (throw (UnsupportedOperationException.)))
 )
 
@@ -410,7 +410,7 @@
             (aget [_ ~garr i#] (aget ~tgarr i#))
             (aset [_ ~garr i# val#] (aset ~tgarr i# (~t val#))))))
 
-(def #^{:private true} ams
+(def ^{:private true} ams
      {:int (mk-am int)
       :long (mk-am long)
       :float (mk-am float)
@@ -426,5 +426,5 @@
   resulting vector complies with the interface of vectors in general,
   but stores the values unboxed internally."  
   [t]
-  (let [am #^clojure.core.ArrayManager (ams t)]
+  (let [am ^clojure.core.ArrayManager (ams t)]
     (Vec. am 0 5 EMPTY-NODE (.array am 0) nil)))

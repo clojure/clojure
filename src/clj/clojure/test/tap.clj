@@ -20,7 +20,7 @@
 
 
 
-(ns #^{:doc "clojure.test extensions for the Test Anything Protocol (TAP)
+(ns ^{:doc "clojure.test extensions for the Test Anything Protocol (TAP)
 
   TAP is a simple text-based syntax for reporting test results.  TAP
   was originally develped for Perl, and now has implementations in
@@ -51,7 +51,7 @@
   "Prints a TAP diagnostic line.  data is a (possibly multi-line)
   string."
   [data]
-  (doseq [line (.split #^String data "\n")]
+  (doseq [line (.split ^String data "\n")]
     (println "#" line)))
 
 (defn print-tap-pass

@@ -112,18 +112,18 @@
   ((if (symbol? s) symbol str) (clojure.lang.Compiler/munge (str s))))
 
 (defn- imap-cons
-  [#^IPersistentMap this o]
+  [^IPersistentMap this o]
   (cond
    (instance? java.util.Map$Entry o)
-     (let [#^java.util.Map$Entry pair o]
+     (let [^java.util.Map$Entry pair o]
        (.assoc this (.getKey pair) (.getValue pair)))
    (instance? clojure.lang.IPersistentVector o)
-     (let [#^clojure.lang.IPersistentVector vec o]
+     (let [^clojure.lang.IPersistentVector vec o]
        (.assoc this (.nth vec 0) (.nth vec 1)))
    :else (loop [this this
                 o o]
       (if (seq o)
-        (let [#^java.util.Map$Entry pair (first o)]
+        (let [^java.util.Map$Entry pair (first o)]
           (recur (.assoc this (.getKey pair) (.getValue pair)) (rest o)))
         this))))
 
@@ -298,7 +298,7 @@
          ([~@fields] (new ~classname ~@fields nil nil))
          ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#))))))
 
-(defn- print-defrecord [o #^Writer w]
+(defn- print-defrecord [o ^Writer w]
   (print-meta o w)
   (.write w "#:")
   (.write w (.getName (class o)))
@@ -389,12 +389,12 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- expand-method-impl-cache [#^clojure.lang.MethodImplCache cache c f]
+(defn- expand-method-impl-cache [^clojure.lang.MethodImplCache cache c f]
   (let [cs (into {} (remove (fn [[c e]] (nil? e)) (map vec (partition 2 (.table cache)))))
         cs (assoc cs c (clojure.lang.MethodImplCache$Entry. c f))
         [shift mask] (min-hash (keys cs))
         table (make-array Object (* 2 (inc mask)))
-        table (reduce (fn [#^objects t [c e]]
+        table (reduce (fn [^objects t [c e]]
                         (let [i (* 2 (int (shift-mask shift mask (hash c))))]
                           (aset t i c)
                           (aset t (inc i) e)
@@ -402,14 +402,14 @@
                       table cs)]
     (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) shift mask table)))
 
-(defn- super-chain [#^Class c]
+(defn- super-chain [^Class c]
   (when c
     (cons c (super-chain (.getSuperclass c)))))
 
 (defn- pref
   ([] nil)
   ([a] a) 
-  ([#^Class a #^Class b]
+  ([^Class a ^Class b]
      (if (.isAssignableFrom a b) b a)))
 
 (defn find-protocol-impl [protocol x]
@@ -427,7 +427,7 @@
   (get (find-protocol-impl protocol x) methodk))
 
 (defn- implements? [protocol atype]
-  (and atype (.isAssignableFrom #^Class (:on-interface protocol) atype)))
+  (and atype (.isAssignableFrom ^Class (:on-interface protocol) atype)))
 
 (defn extends? 
   "Returns true if atype extends protocol"
@@ -445,7 +445,7 @@
   [protocol x]
   (boolean (find-protocol-impl protocol x)))
 
-(defn -cache-protocol-fn [#^clojure.lang.AFunction pf x #^Class c #^clojure.lang.IFn interf]
+(defn -cache-protocol-fn [^clojure.lang.AFunction pf x ^Class c ^clojure.lang.IFn interf]
   (let [cache  (.__methodImplCache pf)
         f (if (.isInstance c x)
             interf 
@@ -471,7 +471,7 @@
                       `([~@gargs]
                           (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))))
                   arglists))
-             #^clojure.lang.AFunction f#
+             ^clojure.lang.AFunction f#
              (fn ~gthis
                ~@(map 
                   (fn [args]
@@ -488,7 +488,7 @@
          f#))))
 
 (defn -reset-methods [protocol]
-  (doseq [[#^clojure.lang.Var v build] (:method-builders protocol)]
+  (doseq [[^clojure.lang.Var v build] (:method-builders protocol)]
     (let [cache (clojure.lang.MethodImplCache. protocol (keyword (.sym v)))]
       (.bindRoot v (build cache)))))
 

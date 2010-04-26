@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns #^{:doc "Set operations such as union/intersection."
+(ns ^{:doc "Set operations such as union/intersection."
        :author "Rich Hickey"}
        clojure.set)
 

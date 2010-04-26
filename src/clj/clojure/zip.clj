@@ -9,7 +9,7 @@
 ;functional hierarchical zipper, with navigation, editing and enumeration
 ;see Huet
 
-(ns #^{:doc "Functional hierarchical zipper, with navigation, editing, 
+(ns ^{:doc "Functional hierarchical zipper, with navigation, editing,
   and enumeration.  See Huet"
        :author "Rich Hickey"}
   clojure.zip
@@ -28,7 +28,7 @@
   children, returns a new branch node with the supplied children.
   root is the root node."  
   [branch? children make-node root]
-    #^{:zip/branch? branch? :zip/children children :zip/make-node make-node} 
+    ^{:zip/branch? branch? :zip/children children :zip/make-node make-node}
     [root nil])
 
 (defn seq-zip

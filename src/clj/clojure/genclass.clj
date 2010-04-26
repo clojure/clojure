@@ -13,10 +13,10 @@
         '(clojure.asm.commons Method GeneratorAdapter)
         '(clojure.lang IPersistentMap))
 
-;(defn method-sig [#^java.lang.reflect.Method meth]
+;(defn method-sig [^java.lang.reflect.Method meth]
 ;  [(. meth (getName)) (seq (. meth (getParameterTypes)))])
 
-(defn- non-private-methods [#^Class c]
+(defn- non-private-methods [^Class c]
   (loop [mm {}
          considered #{}
          c c]
@@ -28,7 +28,7 @@
                                 (seq (. c (getDeclaredMethods)))
                                 (seq (. c (getMethods)))))]
               (if meths
-                (let [#^java.lang.reflect.Method meth (first meths)
+                (let [^java.lang.reflect.Method meth (first meths)
                       mods (. meth (getModifiers))
                       mk (method-sig meth)]
                   (if (or (considered mk)
@@ -43,12 +43,12 @@
         (recur mm considered (. c (getSuperclass))))
       mm)))
 
-(defn- ctor-sigs [#^Class super]
-  (for [#^Constructor ctor (. super (getDeclaredConstructors))
+(defn- ctor-sigs [^Class super]
+  (for [^Constructor ctor (. super (getDeclaredConstructors))
         :when (not (. Modifier (isPrivate (. ctor (getModifiers)))))]
     (apply vector (. ctor (getParameterTypes)))))
 
-(defn- escape-class-name [#^Class c]
+(defn- escape-class-name [^Class c]
   (.. (.getSimpleName c) 
       (replace "[]" "<>")))
 
@@ -58,18 +58,18 @@
                                  (map escape-class-name pclasses)))
     (str mname "-void")))
 
-(defn- #^java.lang.reflect.Field find-field [#^Class c f]
+(defn- ^java.lang.reflect.Field find-field [^Class c f]
   (let [start-class c]
     (loop [c c]
       (if (= c Object)
         (throw (new Exception (str "field, " f ", not defined in class, " start-class ", or its ancestors")))
         (let [dflds (.getDeclaredFields c)
-              rfld (first (filter #(= f (.getName #^java.lang.reflect.Field %)) dflds))]
+              rfld (first (filter #(= f (.getName ^java.lang.reflect.Field %)) dflds))]
           (or rfld (recur (.getSuperclass c))))))))
 
 ;(distinct (map first(keys (mapcat non-private-methods [Object IPersistentMap]))))
 
-(def #^{:private true} prim->class
+(def ^{:private true} prim->class
      {'int Integer/TYPE
       'long Long/TYPE
       'float Float/TYPE
@@ -80,7 +80,7 @@
       'byte Byte/TYPE
       'char Character/TYPE})
 
-(defn- #^Class the-class [x] 
+(defn- ^Class the-class [x] 
   (cond 
    (class? x) x
    (contains? prim->class x) (prim->class x)
@@ -106,16 +106,16 @@
         impl-pkg-name (str impl-ns)
         impl-cname (.. impl-pkg-name (replace "." "/") (replace \- \_))
         ctype (. Type (getObjectType cname))
-        iname (fn [#^Class c] (.. Type (getType c) (getInternalName)))
-        totype (fn [#^Class c] (. Type (getType c)))
+        iname (fn [^Class c] (.. Type (getType c) (getInternalName)))
+        totype (fn [^Class c] (. Type (getType c)))
         to-types (fn [cs] (if (pos? (count cs))
                             (into-array (map totype cs))
                             (make-array Type 0)))
-        obj-type #^Type (totype Object)
+        obj-type ^Type (totype Object)
         arg-types (fn [n] (if (pos? n)
                             (into-array (replicate n obj-type))
                             (make-array Type 0)))
-        super-type #^Type (totype super)
+        super-type ^Type (totype super)
         init-name (str init)
         post-init-name (str post-init)
         factory-name (str factory)
@@ -124,7 +124,7 @@
         var-name (fn [s] (clojure.lang.Compiler/munge (str s "__var")))
         class-type  (totype Class)
         rt-type  (totype clojure.lang.RT)
-        var-type #^Type (totype clojure.lang.Var)
+        var-type ^Type (totype clojure.lang.Var)
         ifn-type (totype clojure.lang.IFn)
         iseq-type (totype clojure.lang.ISeq)
         ex-type  (totype java.lang.UnsupportedOperationException)
@@ -139,7 +139,7 @@
                            (distinct (concat (keys sigs-by-name)
                                              (mapcat (fn [[m s]] (map #(overload-name m (map the-class %)) s)) overloads)
                                              (mapcat (comp (partial map str) vals val) exposes))))
-        emit-get-var (fn [#^GeneratorAdapter gen v]
+        emit-get-var (fn [^GeneratorAdapter gen v]
                        (let [false-label (. gen newLabel)
                              end-label (. gen newLabel)]
                          (. gen getStatic ctype (var-name v) var-type)
@@ -152,7 +152,7 @@
                          (. gen pop)
                          (. gen visitInsn (. Opcodes ACONST_NULL))
                          (. gen mark end-label)))
-        emit-unsupported (fn [#^GeneratorAdapter gen #^Method m]
+        emit-unsupported (fn [^GeneratorAdapter gen ^Method m]
                            (. gen (throwException ex-type (str (. m (getName)) " ("
                                                                impl-pkg-name "/" prefix (.getName m)
                                                                " not defined?)"))))
@@ -161,7 +161,7 @@
           (let [pclasses (map the-class pclasses)
                 rclass (the-class rclass)
                 ptypes (to-types pclasses)
-                rtype #^Type (totype rclass)
+                rtype ^Type (totype rclass)
                 m (new Method mname rtype ptypes)
                 is-overload (seq (overloads mname))
                 gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (if as-static (. Opcodes ACC_STATIC) 0)) 
@@ -359,9 +359,9 @@
     
                                         ;add methods matching supers', if no fn -> call super
     (let [mm (non-private-methods super)]
-      (doseq [#^java.lang.reflect.Method meth (vals mm)]
+      (doseq [^java.lang.reflect.Method meth (vals mm)]
              (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
-                                     (fn [#^GeneratorAdapter gen #^Method m]
+                                     (fn [^GeneratorAdapter gen ^Method m]
                                        (. gen (loadThis))
                                         ;push args
                                        (. gen (loadArgs))
@@ -371,20 +371,20 @@
                                                                (. m (getName))
                                                                (. m (getDescriptor)))))))
                                         ;add methods matching interfaces', if no fn -> throw
-      (reduce (fn [mm #^java.lang.reflect.Method meth]
+      (reduce (fn [mm ^java.lang.reflect.Method meth]
                 (if (contains? mm (method-sig meth))
                   mm
                   (do
                     (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
                                             emit-unsupported)
                     (assoc mm (method-sig meth) meth))))
-              mm (mapcat #(.getMethods #^Class %) interfaces))
+              mm (mapcat #(.getMethods ^Class %) interfaces))
                                         ;extra methods
        (doseq [[mname pclasses rclass :as msig] methods]
          (emit-forwarding-method (str mname) pclasses rclass (:static (meta msig))
                                  emit-unsupported))
                                         ;expose specified overridden superclass methods
-       (doseq [[local-mname #^java.lang.reflect.Method m] (reduce (fn [ms [[name _ _] m]]
+       (doseq [[local-mname ^java.lang.reflect.Method m] (reduce (fn [ms [[name _ _] m]]
                               (if (contains? exposes-methods (symbol name))
                                 (conj ms [((symbol name) exposes-methods) m])
                                 ms)) [] (seq mm))]
@@ -532,7 +532,7 @@
   The generated class automatically defines all of the non-private
   methods of its superclasses/interfaces. This parameter can be used
   to specify the signatures of additional methods of the generated
-  class. Static methods can be specified with #^{:static true} in the
+  class. Static methods can be specified with ^{:static true} in the
   signature's metadata. Do not repeat superclass/interface signatures
   here.
 
@@ -596,7 +596,7 @@
 ;;;;;;;;;;;;;;;;;;;; gen-interface ;;;;;;;;;;;;;;;;;;;;;;
 ;; based on original contribution by Chris Houser
 
-(defn- #^Type asm-type
+(defn- ^Type asm-type
   "Returns an asm Type object for c, which may be a primitive class
   (such as Integer/TYPE), any other class (such as Double), or a
   fully-qualified class name given as a string or symbol
@@ -666,7 +666,7 @@
           [cname bytecode] (generate-interface options-map)]
       (if *compile-files*
         (clojure.lang.Compiler/writeClassFile cname bytecode)
-        (.defineClass #^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) 
+        (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) 
                       (str (:name options-map)) bytecode options)))) 
 
 (comment

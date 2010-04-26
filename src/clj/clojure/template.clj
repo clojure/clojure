@@ -22,7 +22,7 @@
 ;; December 15, 2008: first version
 
 
-(ns #^{:doc "Macros that expand to repeated copies of a template expression."
+(ns ^{:doc "Macros that expand to repeated copies of a template expression."
        :author "Stuart Sierra"}
   clojure.template
   (:require [clojure.walk :as walk]))

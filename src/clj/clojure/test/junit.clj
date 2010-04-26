@@ -14,7 +14,7 @@
 ;; DOCUMENTATION
 ;;
 
-(ns #^{:doc "clojure.test extension for JUnit-compatible XML output.
+(ns ^{:doc "clojure.test extension for JUnit-compatible XML output.
 
   JUnit (http://junit.org/) is the most popular unit-testing library
   for Java.  As such, tool support for JUnit output formats is
@@ -39,7 +39,7 @@
             [clojure.test :as t]))
 
 ;; copied from clojure.contrib.lazy-xml
-(def #^{:private true}
+(def ^{:private true}
      escape-xml-map
      (zipmap "'<>\"&" (map #(str \& % \;) '[apos lt gt quot amp])))
 (defn- escape-xml [text]
