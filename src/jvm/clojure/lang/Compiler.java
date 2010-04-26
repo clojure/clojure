@@ -5441,8 +5441,19 @@ static PathNode commonPath(PathNode n1, PathNode n2){
 
 static void addAnnotation(Object visitor, IPersistentMap meta){
 	try{
-	if(ADD_ANNOTATIONS.isBound())
+	if(meta != null && ADD_ANNOTATIONS.isBound())
 		 ADD_ANNOTATIONS.invoke(visitor, meta);
+	}
+	catch (Exception e)
+		{
+		throw new RuntimeException(e);
+		}
+}
+
+static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i){
+	try{
+	if(meta != null && ADD_ANNOTATIONS.isBound())
+		 ADD_ANNOTATIONS.invoke(visitor, meta, i);
 	}
 	catch (Exception e)
 		{
@@ -6322,6 +6333,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	Class[] exclasses;
 
 	static Symbol dummyThis = Symbol.intern(null,"dummy_this_dlskjsdfower");
+	private IPersistentVector parms;
 
 	public NewInstanceMethod(ObjExpr objx, ObjMethod parent){
 		super(objx, parent);
@@ -6471,6 +6483,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			LOOP_LOCALS.set(argLocals);
 			method.name = name.name;
 			method.methodMeta = RT.meta(name);
+			method.parms = parms;
 			method.argLocals = argLocals;
 			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
 			return method;
@@ -6521,6 +6534,11 @@ public static class NewInstanceMethod extends ObjMethod{
 		                                            extypes,
 		                                            cv);
 		addAnnotation(gen,methodMeta);
+		for(int i = 0; i < parms.count(); i++)
+			{
+			IPersistentMap meta = RT.meta(parms.nth(i));
+			addParameterAnnotation(gen, meta, i);
+			}
 		gen.visitCode();
 		Label loopLabel = gen.mark();
 		gen.visitLineNumber(line, loopLabel);

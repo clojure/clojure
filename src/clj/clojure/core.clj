@@ -3843,16 +3843,21 @@
       (add-annotation av (name k) v))
     (add-annotation av "value" v)))
 
-(defn- add-annotations [visitor m]
-  (doseq [[k v] m]
-    (when (symbol? k)
-      (when-let [c (resolve k)]
-        (when (is-annotation? c)
-          ;this is known duck/reflective as no common base of ASM Visitors
-          (let [av (.visitAnnotation visitor (descriptor c) 
-                                     (is-runtime-annotation? c))]
-            (process-annotation av v)
-            (.visitEnd av)))))))
+(defn- add-annotations
+  ([visitor m] (add-annotations visitor m nil))
+  ([visitor m i]
+     (doseq [[k v] m]
+       (when (symbol? k)
+         (when-let [c (resolve k)]
+           (when (is-annotation? c)
+                                        ;this is known duck/reflective as no common base of ASM Visitors
+             (let [av (if i
+                        (.visitParameterAnnotation visitor i (descriptor c) 
+                                                   (is-runtime-annotation? c))
+                        (.visitAnnotation visitor (descriptor c) 
+                                          (is-runtime-annotation? c)))]
+               (process-annotation av v)
+               (.visitEnd av))))))))
 
 (defn alter-var-root
   "Atomically alters the root binding of var v by applying f to its
