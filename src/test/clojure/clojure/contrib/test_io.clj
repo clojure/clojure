@@ -62,3 +62,34 @@
              [(.. file toString) "File as String"]]]
       (with-open [s (input-stream expr)]
         (stream-should-have s bytes msg)))))
+
+(deftest test-streams-buffering
+  (let [data (.getBytes "")]
+    (is (instance? java.io.BufferedReader (reader data)))
+    (is (instance? java.io.BufferedWriter (writer (java.io.ByteArrayOutputStream.))))
+    (is (instance? java.io.BufferedInputStream (input-stream data)))
+    (is (instance? java.io.BufferedOutputStream (output-stream (java.io.ByteArrayOutputStream.))))))
+
+(deftest test-streams-defaults
+  (let [f (File/createTempFile "clojure.contrib" "test-reader-writer")
+        content "test\u2099ing"]
+    (try
+      (is (thrown? Exception (reader (Object.))))
+      (is (thrown? Exception (writer (Object.))))
+
+      (are [write-to read-from] (= content (do
+                                             (spit write-to content)
+                                             (slurp* (or read-from write-to))))
+        f nil
+        (.getAbsolutePath f) nil
+        (.toURL f) nil
+        (.toURI f) nil
+        (java.io.FileOutputStream. f) f
+        (java.io.OutputStreamWriter. (java.io.FileOutputStream. f) "UTF-8") f
+        f (java.io.FileInputStream. f)
+        f (java.io.InputStreamReader. (java.io.FileInputStream. f) "UTF-8"))
+
+      (is (= content (slurp* (.getBytes content "UTF-8"))))
+      (is (= content (slurp* (.toCharArray content))))
+      (finally
+        (.delete f)))))
