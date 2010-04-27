@@ -204,7 +204,7 @@
                                             (new ~tagname ~@(remove #{'__extmap} fields) 
                                                  (not-empty (dissoc ~'__extmap ~'k))))))])
       (ijavamap [[i m]]
-                [(conj i 'java.util.Map)
+                [(conj i 'java.util.Map 'java.io.Serializable)
                  (conj m
                        `(size [~'this] (.count ~'this))
                        `(isEmpty [~'this] (= 0 (.count ~'this)))
