@@ -6,11 +6,16 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-; Author: Stuart Halloway
-
-(ns clojure.test-clojure.genclass
+(ns ^{:doc "Tests for clojure.core/gen-class"
+      :author "Stuart Halloway, Daniel Solano Gómez"}
+  clojure.test-clojure.genclass
   (:use clojure.test)
-  (:import clojure.test_clojure.genclass.examples.ExampleClass))
+  (:import [clojure.test_clojure.genclass.examples ExampleClass
+                                                   ExampleAnnotationClass]
+           [java.lang.annotation ElementType
+                                 Retention
+                                 RetentionPolicy
+                                 Target]))
 
 ;; pull this up to a suite-wide helper if you find other tests need it!
 (defn get-field
@@ -36,3 +41,32 @@
            (get-field ExampleClass 'foo_Object_int__var)))
     (is (= #'clojure.test-clojure.genclass.examples/-toString
            (get-field ExampleClass 'toString__var)))))
+
+(deftest test-annotations
+  (let [annot-class ExampleAnnotationClass
+        foo-method          (.getDeclaredMethod annot-class "foo" (into-array [String]))]
+    (testing "Class annotations:"
+      (is (= 2 (count (.getDeclaredAnnotations annot-class))))
+      (testing "@Deprecated"
+        (let [deprecated (.getAnnotation annot-class Deprecated)]
+          (is deprecated)))
+      (testing "@Target([])"
+        (let [resource (.getAnnotation annot-class Target)]
+          (is (= 0 (count (.value resource)))))))
+    (testing "Method annotations:"
+      (testing "@Deprecated void foo(String):"
+        (is (= 1 (count (.getDeclaredAnnotations foo-method))))
+        (is (.getAnnotation foo-method Deprecated))))
+    (testing "Parameter annotations:"
+      (let [param-annots (.getParameterAnnotations foo-method)]
+        (is (= 1 (alength param-annots)))
+        (let [first-param-annots (aget param-annots 0)]
+          (is (= 2 (alength first-param-annots)))
+          (testing "void foo(@Retention(…) String)"
+            (let [retention (aget first-param-annots 0)]
+              (is (instance? Retention retention))
+              (= RetentionPolicy/SOURCE (.value retention))))
+          (testing "void foo(@Target(…) String)"
+            (let [target (aget first-param-annots 1)]
+              (is (instance? Target target))
+              (is (= [ElementType/TYPE ElementType/PARAMETER] (seq (.value target)))))))))))

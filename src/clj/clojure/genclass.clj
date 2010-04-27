@@ -95,6 +95,7 @@
         {:keys [name extends implements constructors methods main factory state init exposes 
                 exposes-methods prefix load-impl-ns impl-ns post-init]} 
           (merge default-options options-map)
+        name-meta (meta name)
         name (str name)
         super (if extends (the-class extends) Object)
         interfaces (map the-class implements)
@@ -157,8 +158,10 @@
                                                                impl-pkg-name "/" prefix (.getName m)
                                                                " not defined?)"))))
         emit-forwarding-method
-        (fn [mname pclasses rclass as-static else-gen]
-          (let [pclasses (map the-class pclasses)
+        (fn [name pclasses rclass as-static else-gen]
+          (let [mname (str name)
+                pmetas (map meta pclasses)
+                pclasses (map the-class pclasses)
                 rclass (the-class rclass)
                 ptypes (to-types pclasses)
                 rtype ^Type (totype rclass)
@@ -169,6 +172,9 @@
                 found-label (. gen (newLabel))
                 else-label (. gen (newLabel))
                 end-label (. gen (newLabel))]
+            (add-annotations gen (meta name))
+            (dotimes [i (count pmetas)]
+              (add-annotations gen (nth pmetas i) i))
             (. gen (visitCode))
             (if (> (count pclasses) 18)
               (else-gen gen m)
@@ -219,6 +225,9 @@
                  cname nil (iname super)
                  (when-let [ifc (seq interfaces)]
                    (into-array (map iname ifc)))))
+
+                                        ; class annotations
+    (add-annotations cv name-meta)
     
                                         ;static fields for vars
     (doseq [v var-fields]
@@ -381,7 +390,7 @@
               mm (mapcat #(.getMethods ^Class %) interfaces))
                                         ;extra methods
        (doseq [[mname pclasses rclass :as msig] methods]
-         (emit-forwarding-method (str mname) pclasses rclass (:static (meta msig))
+         (emit-forwarding-method mname pclasses rclass (:static (meta msig))
                                  emit-unsupported))
                                         ;expose specified overridden superclass methods
        (doseq [[local-mname ^java.lang.reflect.Method m] (reduce (fn [ms [[name _ _] m]]
