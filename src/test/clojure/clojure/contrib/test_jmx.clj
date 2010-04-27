@@ -15,12 +15,18 @@
            [javax.management MBeanAttributeInfo AttributeList]
            [java.util.logging LogManager Logger]
            clojure.contrib.jmx.Bean)
-  (:use clojure.test)
+  (:use clojure.test [clojure.contrib.seq :only (includes?)])
   (:require [clojure.contrib [jmx :as jmx]]))
 
 
 (defn =set [a b]
   (= (set a) (set b)))
+
+(defn includes-all?
+  "Does container contain every item in containee?
+   Not fast. Testing use only"
+  [container containee]
+  (every? #(includes? container %) containee))
 
 (deftest finding-mbeans
   (testing "as-object-name"
@@ -32,15 +38,20 @@
                 (= cnames (map #(.getCanonicalName %) object-name))
                 ["java.lang:type=Memory"] (jmx/mbean-names "java.lang:type=Memory"))))
 
-; don't know which attributes are common on all JVM platforms. May
-; need to change expectations.
-(deftest reflecting-on-capabilities
-  (are [attr-list mbean-name]
-       (= (set attr-list) (set (jmx/attribute-names mbean-name)))
-       [:Verbose :ObjectPendingFinalizationCount :HeapMemoryUsage :NonHeapMemoryUsage] "java.lang:type=Memory")
-  (are [a b]
-       (= (set a) (set b))
-       [:gc] (jmx/operation-names "java.lang:type=Memory")))
+; These actual beans may differ on different JVM platforms.
+; Tested April 2010 to work on Sun and IBM JDKs.
+(deftest testing-actual-beans
+  (testing "reflecting on capabilities"
+    (are [attr-list mbean-name]
+         (includes-all? (jmx/attribute-names mbean-name) attr-list)
+         [:Verbose :ObjectPendingFinalizationCount :HeapMemoryUsage :NonHeapMemoryUsage] "java.lang:type=Memory")
+    (are [op-list mbean-name]
+         (includes-all? (jmx/operation-names mbean-name) op-list)
+         [:gc] "java.lang:type=Memory"))
+  (testing "mbean-from-oname"
+    (are [key-names oname]
+         (includes-all? (keys (jmx/mbean oname)) key-names)
+         [:Verbose :ObjectPendingFinalizationCount :HeapMemoryUsage :NonHeapMemoryUsage]  "java.lang:type=Memory")))
 
 (deftest raw-reading-attributes
   (let [mem "java.lang:type=Memory"
@@ -60,11 +71,6 @@
                 [:used :max :init :committed] (jmx/read "java.lang:type=Memory" :HeapMemoryUsage)))
   (testing "tabular attributes"
            (is (map? (jmx/read "java.lang:type=Runtime" :SystemProperties)))))
-
-(deftest mbean-from-oname
-  (are [oname key-names]
-       (= (set key-names) (set (keys (jmx/mbean oname))))
-       "java.lang:type=Memory" [:Verbose :ObjectPendingFinalizationCount :HeapMemoryUsage :NonHeapMemoryUsage]))
 
 (deftest writing-attributes
   (let [mem "java.lang:type=Memory"]
