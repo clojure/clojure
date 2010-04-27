@@ -2330,31 +2330,31 @@
   "Coerce to long"
   {:tag Long
    :inline (fn  [x] `(. clojure.lang.RT (longCast ~x)))}
-  [^Number x] (. x (longValue)))
+  [^Number x] (clojure.lang.RT/longCast x))
 
 (defn float
   "Coerce to float"
   {:tag Float
    :inline (fn  [x] `(. clojure.lang.RT (floatCast ~x)))}
-  [^Number x] (. x (floatValue)))
+  [^Number x] (clojure.lang.RT/floatCast x))
 
 (defn double
   "Coerce to double"
   {:tag Double
    :inline (fn  [x] `(. clojure.lang.RT (doubleCast ~x)))}
-  [^Number x] (. x (doubleValue)))
+  [^Number x] (clojure.lang.RT/doubleCast x))
 
 (defn short
   "Coerce to short"
   {:tag Short
    :inline (fn  [x] `(. clojure.lang.RT (shortCast ~x)))}
-  [^Number x] (. x (shortValue)))
+  [^Number x] (clojure.lang.RT/shortCast x))
 
 (defn byte
   "Coerce to byte"
   {:tag Byte
    :inline (fn  [x] `(. clojure.lang.RT (byteCast ~x)))}
-  [^Number x] (. x (byteValue)))
+  [^Number x] (clojure.lang.RT/byteCast x))
 
 (defn char
   "Coerce to char"
@@ -2366,7 +2366,7 @@
   "Coerce to boolean"
   {:tag Boolean
    :inline (fn  [x] `(. clojure.lang.RT (booleanCast ~x)))}
-  [x] (if x true false))
+  [x] (clojure.lang.RT/booleanCast x))
 
 (defn number?
   "Returns true if x is a Number"
