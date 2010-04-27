@@ -3043,6 +3043,24 @@
      (even? (count bindings)) "an even number of forms in binding vector")
   `(let* ~(destructure bindings) ~@body))
 
+(defn ^{:private true}
+  maybe-destructured
+  [params body]
+  (if (every? symbol? params)
+    (cons params body)
+    (loop [params params
+           new-params []
+           lets []]
+      (if params
+        (if (symbol? (first params))
+          (recur (next params) (conj new-params (first params)) lets)
+          (let [gparam (gensym "p__")]
+            (recur (next params) (conj new-params gparam)
+                   (-> lets (conj (first params)) (conj gparam)))))
+        `(~new-params
+          (let ~lets
+            ~@body))))))
+
 ;redefine fn with destructuring and pre/post conditions
 (defmacro fn
   "(fn name? [params* ] exprs*)
@@ -3077,20 +3095,7 @@
                               (concat (map (fn* [c] `(assert ~c)) pre) 
                                       body)
                               body)]
-                   (if (every? symbol? params)
-                     (cons params body)
-                     (loop [params params
-                            new-params []
-                            lets []]
-                       (if params
-                         (if (symbol? (first params))
-                           (recur (next params) (conj new-params (first params)) lets)
-                           (let [gparam (gensym "p__")]
-                             (recur (next params) (conj new-params gparam)
-                                    (-> lets (conj (first params)) (conj gparam)))))
-                         `(~new-params
-                           (let ~lets
-                             ~@body)))))))
+                   (maybe-destructured params body)))
           new-sigs (map psig sigs)]
       (with-meta
         (if name

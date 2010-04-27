@@ -50,7 +50,9 @@
                        set
                        (disj 'Object 'java.lang.Object)
                        vec)
-        methods (apply concat (vals impls))]
+        methods (map (fn [[name params & body]]
+                       (cons name (maybe-destructured params body)))
+                     (apply concat (vals impls)))]
     (when-let [bad-opts (seq (remove #{:no-print} (keys opts)))]
       (throw (IllegalArgumentException. (apply print-str "Unsupported option(s) -" bad-opts))))
     [interfaces methods opts]))
