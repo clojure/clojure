@@ -4995,14 +4995,8 @@
   from-coll conjoined."
   [to from]
   (if (instance? clojure.lang.IEditableCollection to)
-    (#(loop [ret (transient to) items (seq from)]
-        (if items
-          (recur (conj! ret (first items)) (next items))
-          (persistent! ret))))
-    (#(loop [ret to items (seq from)]
-        (if items
-          (recur (conj ret (first items)) (next items))
-          ret)))))
+    (persistent! (reduce conj! (transient to) from))
+    (reduce conj to from)))
 
 (defn flatten
   "Takes any nested combination of sequential things (lists, vectors,
@@ -5089,3 +5083,65 @@
     (java.util.Collections/shuffle al)
     (clojure.lang.RT/vector (.toArray al))))
 
+(defn map-indexed
+  "Returns a lazy sequence consisting of the result of applying f to 0
+  and the first item of coll, followed by applying f to 1 and the second
+  item in coll, etc, until coll is exhausted. Thus function f should
+  accept 2 arguments, index and item."
+  [f coll]
+  (letfn [(mapi [idx coll]
+            (lazy-seq
+             (when-let [s (seq coll)]
+               (if (chunked-seq? s)
+                 (let [c (chunk-first s)
+                       size (int (count c))
+                       b (chunk-buffer size)]
+                   (dotimes [i size]
+                     (chunk-append b (f (+ idx i) (.nth c i))))
+                   (chunk-cons (chunk b) (mapi (+ idx size) (chunk-rest s))))
+                 (cons (f idx (first s)) (mapi (inc idx) (rest s)))))))]
+    (mapi 0 coll)))
+
+(defn keep
+  "Returns a lazy sequence of the non-nil results of (f item). Note,
+  this means false return values will be included.  f must be free of
+  side-effects."
+  ([f coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (if (chunked-seq? s)
+        (let [c (chunk-first s)
+              size (count c)
+              b (chunk-buffer size)]
+          (dotimes [i size]
+            (let [x (f (.nth c i))]
+              (when-not (nil? x)
+                (chunk-append b x))))
+          (chunk-cons (chunk b) (keep f (chunk-rest s))))
+        (let [x (f (first s))]
+          (if (nil? x)
+            (keep f (rest s))
+            (cons x (keep f (rest s))))))))))
+
+(defn keep-indexed
+  "Returns a lazy sequence of the non-nil results of (f index item). Note,
+  this means false return values will be included.  f must be free of
+  side-effects."
+  ([f coll]
+     (letfn [(keepi [idx coll]
+               (lazy-seq
+                (when-let [s (seq coll)]
+                  (if (chunked-seq? s)
+                    (let [c (chunk-first s)
+                          size (count c)
+                          b (chunk-buffer size)]
+                      (dotimes [i size]
+                        (let [x (f (+ idx i) (.nth c i))]
+                          (when-not (nil? x)
+                            (chunk-append b x))))
+                      (chunk-cons (chunk b) (keepi (+ idx size) (chunk-rest s))))
+                    (let [x (f idx (first s))]
+                      (if (nil? x)
+                        (keepi f (inc idx) (rest s))
+                        (cons x (keepi f (rest s)))))))))]
+       (keepi 0 coll))))
