@@ -245,6 +245,14 @@
     (if (clojure.lang.Util/isInteger k)
       (.assocN this k v)
       (throw (IllegalArgumentException. "Key must be integer"))))
+  (containsKey [this k]
+    (and (clojure.lang.Util/isInteger k)
+         (<= 0 (int k))
+         (< (int k) cnt)))
+  (entryAt [this k]
+    (if (.containsKey this k)
+      (clojure.lang.MapEntry. k (.nth this (int k)))
+      nil))
 
   clojure.lang.ILookup
   (valAt [this k not-found]
@@ -334,6 +342,24 @@
             subidx (bit-and (bit-shift-right i level) (int 0x1f))]
         (aset arr subidx (.doAssoc this (- level (int 5)) (aget arr subidx) i val))
         (VecNode. (.edit node) arr))))
+
+  java.lang.Comparable
+  (compareTo [this o]
+    (if (identical? this o)
+      0
+      (let [#^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
+            vcnt (.count v)]
+        (cond
+          (< cnt vcnt) -1
+          (> cnt vcnt) 1
+          :else
+            (loop [i (int 0)]
+              (if (= i cnt)
+                0
+                (let [comp (clojure.lang.Util/compare (.nth this i) (.nth v i))]
+                  (if (= 0 comp)
+                    (recur (inc i))
+                    comp))))))))
 
   java.lang.Iterable
   (iterator [this]
