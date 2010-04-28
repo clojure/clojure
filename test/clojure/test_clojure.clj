@@ -52,7 +52,7 @@
       :genclass
       :main
       :vectors
-      :annotations
+      ;:annotations
       ])
 
 (def test-namespaces
