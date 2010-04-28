@@ -21,7 +21,9 @@
 ;;
 ;;  == Lazy sequence functions ==
 ;;
-;;  (rotations, partition-all, shuffle, rand-elt  moved to seq_utils.clj)
+;;  (partition-all, shuffle moved to clojure.core)
+;;  (rand-elt moved to clojure.core/rand-nth)
+;;  (rotations, moved to seq_utils.clj)
 ;;  (permutations and combinations moved to combinatorics.clj)
 ;;
 ;;  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
@@ -46,7 +48,9 @@
 
  ==== Lazy sequence functions ====
 
- (rotations, partition-all, shuffle, rand-elt  moved to seq_utils.clj)
+ (partition-all, shuffle moved to clojure.core)
+ (rand-elt moved to clojure.core/rand-nth)
+ (rotations, rand-elt  moved to seq_utils.clj)
  (permutations and combinations moved to combinatorics.clj)
 
  [1] http://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf

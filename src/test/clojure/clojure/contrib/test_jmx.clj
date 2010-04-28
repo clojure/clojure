@@ -15,18 +15,18 @@
            [javax.management MBeanAttributeInfo AttributeList]
            [java.util.logging LogManager Logger]
            clojure.contrib.jmx.Bean)
-  (:use clojure.test [clojure.contrib.seq :only (includes?)])
+  (:use clojure.test)
   (:require [clojure.contrib [jmx :as jmx]]))
 
 
 (defn =set [a b]
   (= (set a) (set b)))
 
-(defn includes-all?
+(defn seq-contains-all?
   "Does container contain every item in containee?
    Not fast. Testing use only"
   [container containee]
-  (every? #(includes? container %) containee))
+  (every? #(seq-contains? container %) containee))
 
 (deftest finding-mbeans
   (testing "as-object-name"
@@ -43,14 +43,14 @@
 (deftest testing-actual-beans
   (testing "reflecting on capabilities"
     (are [attr-list mbean-name]
-         (includes-all? (jmx/attribute-names mbean-name) attr-list)
+         (seq-contains-all? (jmx/attribute-names mbean-name) attr-list)
          [:Verbose :ObjectPendingFinalizationCount :HeapMemoryUsage :NonHeapMemoryUsage] "java.lang:type=Memory")
     (are [op-list mbean-name]
-         (includes-all? (jmx/operation-names mbean-name) op-list)
+         (seq-contains-all? (jmx/operation-names mbean-name) op-list)
          [:gc] "java.lang:type=Memory"))
   (testing "mbean-from-oname"
     (are [key-names oname]
-         (includes-all? (keys (jmx/mbean oname)) key-names)
+         (seq-contains-all? (keys (jmx/mbean oname)) key-names)
          [:Verbose :ObjectPendingFinalizationCount :HeapMemoryUsage :NonHeapMemoryUsage]  "java.lang:type=Memory")))
 
 (deftest raw-reading-attributes

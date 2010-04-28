@@ -18,8 +18,7 @@
   (:use clojure.contrib.datalog.util)
   (:use clojure.contrib.datalog.database)
   (:use [clojure.set :only (intersection)])
-  (:use [clojure.contrib.set :only (subset?)])
-  (:use [clojure.contrib.seq :only (flatten)]))
+  (:use [clojure.contrib.set :only (subset?)]))
 
 
 ;;; Type Definitions

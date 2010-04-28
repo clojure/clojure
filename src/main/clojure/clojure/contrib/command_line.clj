@@ -12,11 +12,10 @@
     #^{:author "Chris Houser", 
        :doc "Process command-line arguments according to a given cmdspec"}
     clojure.contrib.command-line
-    (:require (clojure.contrib [seq :as su]))
     (:use     (clojure.contrib [string :only (join)])))
 
 (defn make-map [args cmdspec]
-  (let [{spec true [rest-sym] false} (su/group-by vector? cmdspec)
+  (let [{spec true [rest-sym] false} (group-by vector? cmdspec)
         rest-str (str rest-sym)
         key-data (into {} (for [[syms [_ default]] (map #(split-with symbol? %)
                                                         (conj spec '[help? h?]))

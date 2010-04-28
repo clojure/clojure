@@ -249,7 +249,7 @@ for improved performance"
       (clojure.core/format format-str val)
       (base-str base val))))
 
-(defn- group-by [unit lis]
+(defn- group-by* [unit lis]
   (reverse
    (first
     (consume (fn [x] [(seq (reverse (take unit x))) (seq (drop unit x))]) (reverse lis)))))
@@ -261,7 +261,7 @@ for improved performance"
             pos-arg (if neg (- arg) arg)
             raw-str (opt-base-str base pos-arg)
             group-str (if (:colon params)
-                        (let [groups (map #(apply str %) (group-by (:commainterval params) raw-str))
+                        (let [groups (map #(apply str %) (group-by* (:commainterval params) raw-str))
                               commas (repeat (count groups) (:commachar params))]
                           (apply str (next (interleave commas groups))))
                         raw-str)
