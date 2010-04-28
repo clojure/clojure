@@ -268,8 +268,12 @@
 (defn vector
   "Creates a new vector containing the args."
   ([] [])
-  ([& args]
-   (. clojure.lang.LazilyPersistentVector (create args))))
+  ([a] [a])
+  ([a b] [a b])
+  ([a b c] [a b c])
+  ([a b c d] [a b c d])
+  ([a b c d & args]
+     (. clojure.lang.LazilyPersistentVector (create (cons a (cons b (cons c (cons d args))))))))
 
 (defn vec
   "Creates a new vector containing the contents of coll."
@@ -1012,7 +1016,8 @@
   returns false.  Note that for numerically indexed collections like
   vectors and Java arrays, this tests if the numeric key is within the
   range of indexes. 'contains?' operates constant or logarithmic time;
-  it will not perform a linear search for a value.  See also 'some'."
+  it will not perform a linear search for a value.  See also
+  'seq-contains?' and 'some'."
   [coll key] (. clojure.lang.RT (contains coll key)))
 
 (defn get
@@ -2011,7 +2016,9 @@
 
 (defn range 
   "Returns a lazy seq of nums from start (inclusive) to end
-  (exclusive), by step, where start defaults to 0 and step to 1."
+  (exclusive), by step, where start defaults to 0, step to 1, and end
+  to infinity."
+  ([] (range 0 Double/POSITIVE_INFINITY 1))
   ([end] (range 0 end 1))
   ([start end] (range start end 1))
   ([start end step]
@@ -4997,4 +5004,88 @@
           (recur (conj ret (first items)) (next items))
           ret)))))
 
- 
+(defn flatten
+  "Takes any nested combination of sequential things (lists, vectors,
+  etc.) and returns their contents as a single, flat sequence.
+  (flatten nil) returns nil."
+  [x]
+  (filter (complement sequential?)
+          (rest (tree-seq sequential? seq x))))
+
+(defn group-by 
+  "Returns a map of the elements of coll keyed by the result of
+  f on each element. The value at each key will be a vector of the
+  corresponding elements, in the order they appeared in coll."
+  [f coll]  
+  (persistent!
+   (reduce
+    (fn [ret x]
+      (let [k (f x)]
+        (assoc! ret k (conj (get ret k []) x))))
+    (transient {}) coll)))
+
+(defn partition-by 
+  "Applies f to each value in coll, splitting it each time f returns
+   a new value.  Returns a lazy seq of partitions."
+  [f coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (let [fst (first s)
+           fv (f fst)
+           run (cons fst (take-while #(= fv (f %)) (rest s)))]
+       (cons run (partition-by f (drop (count run) s)))))))
+
+(defn frequencies
+  "Returns a map from distinct items in coll to the number of times
+  they appear."
+  [coll]
+  (persistent!
+   (reduce (fn [counts x]
+             (assoc! counts x (inc (get counts x 0))))
+           (transient {}) coll)))
+
+(defn reductions
+  "Returns a lazy seq of the intermediate values of the reduction (as
+  per reduce) of coll by f, starting with init."
+  ([f coll]
+     (lazy-seq
+      (if-let [s (seq coll)]
+        (reductions f (first s) (rest s))
+        (f))))
+  ([f init coll]
+     (cons init
+           (lazy-seq
+            (when-let [s (seq coll)]
+              (reductions f (f init (first s)) (rest s)))))))
+
+(defn rand-nth
+  "Return a random element of the (sequential) collection. Will have
+  the same performance characteristics as nth for the given
+  collection."
+  [coll]
+  (nth coll (rand-int (count coll))))
+
+(defn seq-contains?
+  "Returns true if sequential search of coll contains something equal (with =) to x,
+  in linear time."
+  [coll x]
+  (if (some (fn [y] (= y x)) coll)
+    true false))
+
+(defn partition-all
+  "Returns a lazy sequence of lists like partition, but may include
+  partitions with fewer than n items at the end."
+  ([n coll]
+     (partition-all n n coll))
+  ([n step coll]
+     (lazy-seq
+      (when-let [s (seq coll)]
+        (cons (take n s) (partition-all n step (drop step s)))))))
+
+(defn shuffle
+  "Return a random permutation of coll"
+  [coll]
+  (let [al (java.util.ArrayList. coll)]
+    (java.util.Collections/shuffle al)
+    (clojure.lang.RT/vector (.toArray al))))
+
