@@ -5142,6 +5142,6 @@
                       (chunk-cons (chunk b) (keepi (+ idx size) (chunk-rest s))))
                     (let [x (f idx (first s))]
                       (if (nil? x)
-                        (keepi f (inc idx) (rest s))
-                        (cons x (keepi f (rest s)))))))))]
+                        (keepi (inc idx) (rest s))
+                        (cons x (keepi (inc idx) (rest s)))))))))]
        (keepi 0 coll))))
