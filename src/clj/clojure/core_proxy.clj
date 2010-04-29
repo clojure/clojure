@@ -252,7 +252,8 @@
   interfaces. If not supplied class defaults to Object.  Creates an
   returns an instance of a proxy class derived from the supplied
   classes. The resulting value is cached and used for any subsequent
-  requests for the same class set. Returns a Class object."  
+  requests for the same class set. Returns a Class object."
+  {:added "1.0"}
   [& bases]
     (let [[super interfaces] (get-super-and-interfaces bases)
           pname (proxy-name super interfaces)]
@@ -262,7 +263,8 @@
 
 (defn construct-proxy
   "Takes a proxy class and any arguments for its superclass ctor and
-  creates and returns an instance of the proxy."  
+  creates and returns an instance of the proxy."
+  {:added "1.0"}
   [c & ctor-args]
     (. Reflector (invokeConstructor c (to-array ctor-args))))
 
@@ -272,6 +274,7 @@
   fns (which must take arguments matching the corresponding method,
   plus an additional (explicit) first arg corresponding to this, and
   sets the proxy's fn map."
+  {:added "1.0"}
   [^IProxy proxy mappings]
     (. proxy (__initClojureFnMappings mappings)))
 
@@ -284,11 +287,13 @@
   a fn, in which case the corresponding method will revert to the
   default behavior. Note that this function can be used to update the
   behavior of an existing instance without changing its identity."
+  {:added "1.0"}
   [^IProxy proxy mappings]
     (. proxy (__updateClojureFnMappings mappings)))
 
 (defn proxy-mappings
   "Takes a proxy instance and returns the proxy's fn map."
+  {:added "1.0"}
   [^IProxy proxy]
     (. proxy (__getClojureFnMappings)))
 
@@ -316,6 +321,7 @@
   be provided to override protected methods, they have no other access
   to protected members, nor to super, as these capabilities cannot be
   proxied."
+  {:added "1.0"}
   [class-and-interfaces args & fs]
    (let [bases (map #(or (resolve %) (throw (Exception. (str "Can't resolve: " %)))) 
                     class-and-interfaces)
@@ -354,12 +360,14 @@
 (defmacro proxy-super 
   "Use to call a superclass method in the body of a proxy method. 
   Note, expansion captures 'this"
+  {:added "1.0"}
   [meth & args]
  `(proxy-call-with-super (fn [] (. ~'this ~meth ~@args))  ~'this ~(name meth)))
 
 (defn bean
   "Takes a Java object and returns a read-only implementation of the
   map abstraction based upon its JavaBean properties."
+  {:added "1.0"}
   [^Object x]
   (let [c (. x (getClass))
 	pmap (reduce (fn [m ^java.beans.PropertyDescriptor pd]

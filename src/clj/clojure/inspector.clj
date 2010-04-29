@@ -86,6 +86,7 @@
       
 (defn inspect-tree 
   "creates a graphical (Swing) inspector on the supplied hierarchical data"
+  {:added "1.0"}
   [data]
   (doto (JFrame. "Clojure Inspector")
     (.add (JScrollPane. (JTree. (tree-model data))))
@@ -96,6 +97,7 @@
   "creates a graphical (Swing) inspector on the supplied regular
   data, which must be a sequential data structure of data structures
   of equal length"
+  {:added "1.0"}
     [data]
   (doto (JFrame. "Clojure Inspector")
     (.add (JScrollPane. (JTable. (old-table-model data))))
@@ -147,6 +149,7 @@
 
 (defn inspect
   "creates a graphical (Swing) inspector on the supplied object"
+  {:added "1.0"}
   [x]
   (doto (JFrame. "Clojure Inspector")
     (.add

@@ -19,7 +19,8 @@
   number of items of each collection to print. If a collection contains
   more items, the printer will print items up to the limit followed by
   '...' to represent the remaining items. The root binding is nil
-  indicating no limit."}
+  indicating no limit."
+   :added "1.0"}
  *print-length* nil)
 
 (def
@@ -30,7 +31,8 @@
   collection, its items are at level 1; and so on. If an object is a
   collection and is at a level greater than or equal to the value bound to
   *print-level*, the printer prints '#' to represent it. The root binding
-  is nil indicating no limit."}
+  is nil indicating no limit."
+   :added "1.0"}
 *print-level* nil)
 
 (defn- print-sequential [^String begin, print-one, ^String sep, ^String end, sequence, ^Writer w]
@@ -158,7 +160,8 @@
 (prefer-method print-dup clojure.lang.IPersistentCollection java.util.Collection)
 
 (def ^{:tag String 
-        :doc "Returns escape string for char or nil if none"}
+       :doc "Returns escape string for char or nil if none"
+       :added "1.0"}
   char-escape-string
     {\newline "\\n"
      \tab  "\\t"
@@ -216,7 +219,8 @@
   (print-sequential "#{" pr-on " " "}" (seq s) w))
 
 (def ^{:tag String 
-        :doc "Returns name string for char or nil if none"} 
+       :doc "Returns name string for char or nil if none"
+       :added "1.0"} 
  char-name-string
    {\newline "newline"
     \tab "tab"

@@ -6,14 +6,29 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-; Author: Frantisek Sodomka
+; Authors: Stuart Halloway, Frantisek Sodomka
 
 (ns clojure.test-clojure.metadata
   (:use clojure.test))
 
+(def public-namespaces
+  '[clojure.core
+    clojure.inspector
+    clojure.set
+    clojure.stacktrace
+    clojure.test
+    clojure.walk
+    clojure.xml
+    clojure.zip])
 
-; http://clojure.org/metadata
+(doseq [ns public-namespaces]
+  (require ns))
 
-; meta
-; with-meta
+(def public-vars
+  (mapcat #(vals (ns-publics %)) public-namespaces))
 
+(def public-vars-with-docstrings
+  (filter (comp :doc meta) public-vars))
+
+(deftest public-vars-with-docstrings-have-added
+  (is (= [] (remove (comp :added meta) public-vars-with-docstrings))))

@@ -450,7 +450,8 @@
   "Creates a new vector of a single primitive type t, where t is one
   of :int :long :float :double :byte :short :char or :boolean. The
   resulting vector complies with the interface of vectors in general,
-  but stores the values unboxed internally."  
+  but stores the values unboxed internally."
+  {:added "1.2"}
   [t]
   (let [am ^clojure.core.ArrayManager (ams t)]
     (Vec. am 0 5 EMPTY-NODE (.array am 0) nil)))

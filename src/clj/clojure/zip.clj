@@ -26,13 +26,15 @@
 
   make-node is a fn that, given an existing node and a seq of
   children, returns a new branch node with the supplied children.
-  root is the root node."  
+  root is the root node."
+  {:added "1.0"}
   [branch? children make-node root]
     ^{:zip/branch? branch? :zip/children children :zip/make-node make-node}
     [root nil])
 
 (defn seq-zip
   "Returns a zipper for nested sequences, given a root sequence"
+  {:added "1.0"}
   [root]
     (zipper seq?
             identity
@@ -41,6 +43,7 @@
 
 (defn vector-zip
   "Returns a zipper for nested vectors, given a root vector"
+  {:added "1.0"}
   [root]
     (zipper vector?
             seq
@@ -50,6 +53,7 @@
 (defn xml-zip
   "Returns a zipper for xml elements (as from xml/parse),
   given a root element"
+  {:added "1.0"}
   [root]
     (zipper (complement string?) 
             (comp seq :content)
@@ -59,15 +63,18 @@
 
 (defn node
   "Returns the node at loc"
+  {:added "1.0"}
   [loc] (loc 0))
 
 (defn branch?
   "Returns true if the node at loc is a branch"
+  {:added "1.0"}
   [loc]
     ((:zip/branch? (meta loc)) (node loc)))
 
 (defn children
   "Returns a seq of the children of node at loc, which must be a branch"
+  {:added "1.0"}
   [loc]
     (if (branch? loc)
       ((:zip/children (meta loc)) (node loc))
@@ -76,21 +83,25 @@
 (defn make-node
   "Returns a new branch node, given an existing node and new
   children. The loc is only used to supply the constructor."
+  {:added "1.0"}
   [loc node children]
     ((:zip/make-node (meta loc)) node children))
 
 (defn path
   "Returns a seq of nodes leading to this loc"
+  {:added "1.0"}
   [loc]
     (:pnodes (loc 1)))
 
 (defn lefts
   "Returns a seq of the left siblings of this loc"
+  {:added "1.0"}
   [loc]
     (seq (:l (loc 1))))
 
 (defn rights
   "Returns a seq of the right siblings of this loc"
+  {:added "1.0"}
   [loc]
     (:r (loc 1)))
 
@@ -98,6 +109,7 @@
 (defn down
   "Returns the loc of the leftmost child of the node at this loc, or
   nil if no children"
+  {:added "1.0"}
   [loc]
     (when (branch? loc)
       (let [[node path] loc
@@ -111,6 +123,7 @@
 (defn up
   "Returns the loc of the parent of the node at this loc, or nil if at
   the top"
+  {:added "1.0"}
   [loc]
     (let [[node {l :l, ppath :ppath, pnodes :pnodes r :r, changed? :changed?, :as path}] loc]
       (when pnodes
@@ -124,6 +137,7 @@
 (defn root
   "zips all the way up and returns the root node, reflecting any
  changes."
+  {:added "1.0"}
   [loc]
     (if (= :end (loc 1))
       (node loc)
@@ -134,6 +148,7 @@
 
 (defn right
   "Returns the loc of the right sibling of the node at this loc, or nil"
+  {:added "1.0"}
   [loc]
     (let [[node {l :l  [r & rnext :as rs] :r :as path}] loc]
       (when (and path rs)
@@ -141,6 +156,7 @@
 
 (defn rightmost
   "Returns the loc of the rightmost sibling of the node at this loc, or self"
+  {:added "1.0"}
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (if (and path r)
@@ -149,6 +165,7 @@
 
 (defn left
   "Returns the loc of the left sibling of the node at this loc, or nil"
+  {:added "1.0"}
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (when (and path (seq l))
@@ -156,6 +173,7 @@
 
 (defn leftmost
   "Returns the loc of the leftmost sibling of the node at this loc, or self"
+  {:added "1.0"}
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (if (and path (seq l))
@@ -165,6 +183,7 @@
 (defn insert-left
   "Inserts the item as the left sibling of the node at this loc,
  without moving"
+  {:added "1.0"}
   [loc item]
     (let [[node {l :l :as path}] loc]
       (if (nil? path)
@@ -174,6 +193,7 @@
 (defn insert-right
   "Inserts the item as the right sibling of the node at this loc,
   without moving"
+  {:added "1.0"}
   [loc item]
     (let [[node {r :r :as path}] loc]
       (if (nil? path)
@@ -182,24 +202,28 @@
 
 (defn replace
   "Replaces the node at this loc, without moving"
+  {:added "1.0"}
   [loc node]
     (let [[_ path] loc]
       (with-meta [node (assoc path :changed? true)] (meta loc))))
 
 (defn edit
   "Replaces the node at this loc with the value of (f node args)"
+  {:added "1.0"}
   [loc f & args]
     (replace loc (apply f (node loc) args)))
 
 (defn insert-child
   "Inserts the item as the leftmost child of the node at this loc,
   without moving"
+  {:added "1.0"}
   [loc item]
     (replace loc (make-node loc (node loc) (cons item (children loc)))))
 
 (defn append-child
   "Inserts the item as the rightmost child of the node at this loc,
   without moving"
+  {:added "1.0"}
   [loc item]
     (replace loc (make-node loc (node loc) (concat (children loc) [item]))))
 
@@ -207,6 +231,7 @@
   "Moves to the next loc in the hierarchy, depth-first. When reaching
   the end, returns a distinguished loc detectable via end?. If already
   at the end, stays there."
+  {:added "1.0"}
   [loc]
     (if (= :end (loc 1))
       loc
@@ -221,6 +246,7 @@
 (defn prev
   "Moves to the previous loc in the hierarchy, depth-first. If already
   at the root, returns nil."
+  {:added "1.0"}
   [loc]
     (if-let [lloc (left loc)]
       (loop [loc lloc]
@@ -231,12 +257,14 @@
 
 (defn end?
   "Returns true if loc represents the end of a depth-first walk"
+  {:added "1.0"}
   [loc]
     (= :end (loc 1)))
 
 (defn remove
   "Removes the node at loc, returning the loc that would have preceded
   it in a depth-first walk."
+  {:added "1.0"}
   [loc]
     (let [[node {l :l, ppath :ppath, pnodes :pnodes, rs :r, :as path}] loc]
       (if (nil? path)
