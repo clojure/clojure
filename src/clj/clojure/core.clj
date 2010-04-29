@@ -314,6 +314,7 @@
 
 (defn sorted-set-by
   "Returns a new sorted set with supplied keys, using the supplied comparator."
+  {:added "1.1"} 
   ([comparator & keys]
    (clojure.lang.PersistentTreeSet/create comparator keys)))
 
@@ -1150,6 +1151,7 @@
   last item in the first form, making a list of it if it is not a
   list already. If there are more forms, inserts the first form as the
   last item in second form, etc."
+  {:added "1.1"} 
   ([x form] (if (seq? form)
               (with-meta `(~(first form) ~@(next form)  ~x) (meta form))
               (list form x)))
@@ -1206,6 +1208,7 @@
 
 (defn remove-all-methods
   "Removes all of the methods of multimethod."
+  {:added "1.2"} 
  [^clojure.lang.MultiFn multifn]
  (.reset multifn))
 
@@ -1288,18 +1291,21 @@
         ...
         (finally
           (pop-thread-bindings)))"
+  {:added "1.1"} 
   [bindings]
   (clojure.lang.Var/pushThreadBindings bindings))
 
 (defn pop-thread-bindings
   "Pop one set of bindings pushed with push-binding before. It is an error to
   pop bindings without pushing before."
+  {:added "1.1"}
   []
   (clojure.lang.Var/popThreadBindings))
 
 (defn get-thread-bindings
   "Get a map with the Var/value pairs which is currently in effect for the
   current thread."
+  {:added "1.1"}
   []
   (clojure.lang.Var/getThreadBindings))
 
@@ -1332,6 +1338,7 @@
   "Takes a map of Var/value pairs. Installs for the given Vars the associated
   values as thread-local bindings. Then calls f with the supplied arguments.
   Pops the installed bindings after f returned. Returns whatever f returns."
+  {:added "1.1"}
   [binding-map f & args]
   (push-thread-bindings binding-map)
   (try
@@ -1343,6 +1350,7 @@
   "Takes a map of Var/value pairs. Installs for the given Vars the associated
   values as thread-local bindings. The executes body. Pops the installed
   bindings after body was evaluated. Returns the value of body."
+  {:added "1.1"}
   [binding-map & body]
   `(with-bindings* ~binding-map (fn [] ~@body)))
 
@@ -1351,6 +1359,7 @@
   the thread at the time bound-fn* was called and then call f with any given
   arguments. This may be used to define a helper function which runs on a
   different thread, but needs the same bindings in place."
+  {:added "1.1"}
   [f]
   (let [bindings (get-thread-bindings)]
     (fn [& args]
@@ -1361,6 +1370,7 @@
   same bindings in effect as in the thread at the time bound-fn was called.
   This may be used to define a helper function which runs on a different
   thread, but needs the same bindings in place."
+  {:added "1.1"}
   [& fntail]
   `(bound-fn* (fn ~@fntail)))
 
@@ -1465,6 +1475,7 @@
   "Returns the exception thrown during an asynchronous action of the
   agent if the agent is failed.  Returns nil if the agent is not
   failed."
+  {:added "1.2"}
   [^clojure.lang.Agent a] (.getError a))
 
 (defn restart-agent
@@ -1477,6 +1488,7 @@
   agent will remain failed with its old state and error.  Watchers, if
   any, will NOT be notified of the new state.  Throws an exception if
   the agent is not failed."
+  {:added "1.2"}
   [^clojure.lang.Agent a, new-state & options]
   (let [opts (apply hash-map options)]
     (.restart a new-state (if (:clear-actions opts) true false))))
@@ -1486,12 +1498,14 @@
   being run by the agent throws an exception or doesn't pass the
   validator fn, handler-fn will be called with two arguments: the
   agent and the exception."
+  {:added "1.2"}
   [^clojure.lang.Agent a, handler-fn]
   (.setErrorHandler a handler-fn))
 
 (defn error-handler
   "Returns the error-handler of agent a, or nil if there is none.
   See set-error-handler!"
+  {:added "1.2"}
   [^clojure.lang.Agent a]
   (.getErrorHandler a))
 
@@ -1507,11 +1521,13 @@
   accepting new 'send' and 'send-off' actions, and any previously
   queued actions will be held until a 'restart-agent'.  Deref will
   still work, returning the state of the agent before the error."
+  {:added "1.2"}
   [^clojure.lang.Agent a, mode-keyword]
   (.setErrorMode a mode-keyword))
 
 (defn error-mode
   "Returns the error-mode of agent a.  See set-error-mode!"
+  {:added "1.2"}
   [^clojure.lang.Agent a]
   (.getErrorMode a))
 
@@ -1676,11 +1692,13 @@
 
 (defn ref-history-count
   "Returns the history count of a ref"
+  {:added "1.1"}
   [^clojure.lang.Ref ref]
     (.getHistoryCount ref))
 
 (defn ref-min-history
   "Gets the min-history of a ref, or sets it and returns the ref"
+  {:added "1.1"}
   ([^clojure.lang.Ref ref]
     (.getMinHistory ref))
   ([^clojure.lang.Ref ref n]
@@ -1688,6 +1706,7 @@
 
 (defn ref-max-history
   "Gets the max-history of a ref, or sets it and returns the ref"
+  {:added "1.1"}
   ([^clojure.lang.Ref ref]
     (.getMaxHistory ref))
   ([^clojure.lang.Ref ref n]
@@ -1764,6 +1783,7 @@
   returns a vector containing the result of applying each fn to the
   args (left-to-right).
   ((juxt a b c) x) => [(a x) (b x) (c x)]"
+  {:added "1.1"}
   ([f] 
      (fn
        ([] [(f)])
@@ -1968,6 +1988,7 @@
 (defn take-last
   "Returns a seq of the last n items in coll.  Depending on the type
   of coll may be no better than linear time.  For vectors, see also subvec."
+  {:added "1.1"}
   [n coll]
   (loop [s (seq coll), lead (seq (drop n coll))]
     (if lead
@@ -2366,7 +2387,8 @@
 (defn char
   "Coerce to char"
   {:tag Character
-   :inline (fn  [x] `(. clojure.lang.RT (charCast ~x)))}
+   :inline (fn  [x] `(. clojure.lang.RT (charCast ~x)))
+   :added "1.1"}
   [x] (. clojure.lang.RT (charCast x)))
 
 (defn boolean
@@ -2402,15 +2424,17 @@
   [n] (instance? clojure.lang.Ratio n))
 
 (defn numerator
- "Returns the numerator part of a Ratio."
- {:tag BigInteger}
- [r]
+  "Returns the numerator part of a Ratio."
+  {:tag BigInteger
+   :added "1.2"}
+  [r]
   (.numerator ^clojure.lang.Ratio r))
 
 (defn denominator
- "Returns the denominator part of a Ratio."
- {:tag BigInteger}
- [r]
+  "Returns the denominator part of a Ratio."
+  {:tag BigInteger
+   :added "1.2"}
+  [r]
   (.denominator ^clojure.lang.Ratio r))
 
 (defn decimal?
@@ -2509,7 +2533,6 @@
   [& more]
     (binding [*print-readably* nil]
       (apply prn more)))
-
 
 (defn read
   "Reads the next object from stream, which must be an instance of
@@ -3689,28 +3712,32 @@
 (defn boolean-array
   "Creates an array of booleans"
   {:inline (fn [& args] `(. clojure.lang.Numbers boolean_array ~@args))
-   :inline-arities #{1 2}}
+   :inline-arities #{1 2}
+   :added "1.1"}
   ([size-or-seq] (. clojure.lang.Numbers boolean_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers boolean_array size init-val-or-seq)))
 
 (defn byte-array
   "Creates an array of bytes"
   {:inline (fn [& args] `(. clojure.lang.Numbers byte_array ~@args))
-   :inline-arities #{1 2}}
+   :inline-arities #{1 2}
+   :added "1.1"}
   ([size-or-seq] (. clojure.lang.Numbers byte_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers byte_array size init-val-or-seq)))
 
 (defn char-array
   "Creates an array of chars"
   {:inline (fn [& args] `(. clojure.lang.Numbers char_array ~@args))
-   :inline-arities #{1 2}}
+   :inline-arities #{1 2}
+   :added "1.1"}
   ([size-or-seq] (. clojure.lang.Numbers char_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers char_array size init-val-or-seq)))
 
 (defn short-array
   "Creates an array of shorts"
   {:inline (fn [& args] `(. clojure.lang.Numbers short_array ~@args))
-   :inline-arities #{1 2}}
+   :inline-arities #{1 2}
+   :added "1.1"}
   ([size-or-seq] (. clojure.lang.Numbers short_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers short_array size init-val-or-seq)))
 
@@ -3724,7 +3751,8 @@
 (defn object-array
   "Creates an array of objects"
   {:inline (fn [arg] `(. clojure.lang.RT object_array ~arg))
-   :inline-arities #{1}}
+   :inline-arities #{1}
+   :added "1.2"}
   ([size-or-seq] (. clojure.lang.RT object_array size-or-seq)))
 
 (defn int-array
@@ -3743,18 +3771,22 @@
 
 (definline booleans
   "Casts to boolean[]"
+  {:added "1.1"}
   [xs] `(. clojure.lang.Numbers booleans ~xs))
 
 (definline bytes
   "Casts to bytes[]"
+  {:added "1.1"}
   [xs] `(. clojure.lang.Numbers bytes ~xs))
 
 (definline chars
   "Casts to chars[]"
+  {:added "1.1"}
   [xs] `(. clojure.lang.Numbers chars ~xs))
 
 (definline shorts
   "Casts to shorts[]"
+  {:added "1.1"}
   [xs] `(. clojure.lang.Numbers shorts ~xs))
 
 (definline floats
@@ -3879,12 +3911,14 @@
 (defn bound?
   "Returns true if all of the vars provided as arguments have any bound value, root or thread-local.
    Implies that deref'ing the provided vars will succeed. Returns true if no vars are provided."
+  {:added "1.2"}
   [& vars]
   (every? #(.isBound ^clojure.lang.Var %) vars))
 
 (defn thread-bound?
   "Returns true if all of the vars provided as arguments have thread-local bindings.
    Implies that set!'ing the provided vars will succeed.  Returns true if no vars are provided."
+  {:added "1.2"}
   [& vars]
   (every? #(.getThreadBinding ^clojure.lang.Var %) vars))
 
@@ -4681,10 +4715,12 @@
 
 (defn future?
   "Returns true if x is a future"
+  {:added "1.1"}
   [x] (instance? java.util.concurrent.Future x))
 
 (defn future-done?
   "Returns true if future f is done"
+  {:added "1.1"}
   [^java.util.concurrent.Future f] (.isDone f))
 
 
@@ -4742,6 +4778,7 @@
   lists are used to group multiple constants that map to the same
   expression, a vector can be used to match a list if needed. The
   test-constants need not be all of the same type."
+  {:added "1.2"}
 
   [e & clauses]
   (let [ge (with-meta (gensym) {:tag Object})
@@ -4800,6 +4837,7 @@
   invoke the function in another thread, and will cache the result and
   return it on all subsequent calls to deref/@. If the computation has
   not yet finished, calls to deref/@ will block."
+  {:added "1.1"}
   [^Callable f]
   (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
     (reify 
@@ -4816,16 +4854,19 @@
   "Takes a body of expressions and yields a future object that will
   invoke the body in another thread, and will cache the result and
   return it on all subsequent calls to deref/@. If the computation has
-  not yet finished, calls to deref/@ will block."  
+  not yet finished, calls to deref/@ will block."
+  {:added "1.1"}
   [& body] `(future-call (fn [] ~@body)))
 
 
 (defn future-cancel
   "Cancels the future, if possible."
+  {:added "1.1"}
   [^java.util.concurrent.Future f] (.cancel f true))
 
 (defn future-cancelled?
   "Returns true if future f is cancelled"
+  {:added "1.1"}
   [^java.util.concurrent.Future f] (.isCancelled f))
 
 (defn pmap
@@ -4904,6 +4945,7 @@
   once only, with deliver. Calls to deref/@ prior to delivery will
   block. All subsequent derefs will return the same delivered value
   without blocking."
+  {:added "1.1"}
   []
   (let [d (java.util.concurrent.CountDownLatch. 1)
         v (atom nil)]
@@ -4922,13 +4964,15 @@
 (defn deliver
   "Alpha - subject to change.
   Delivers the supplied value to the promise, releasing any pending
-  derefs. A subsequent call to deliver on a promise will throw an exception."  
+  derefs. A subsequent call to deliver on a promise will throw an exception."
+  {:added "1.1"}
   [promise val] (promise val))
 
 ;;;;;;;;;;;;;;;;;;;;; editable collections ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn transient 
   "Alpha - subject to change.
   Returns a new, transient version of the collection, in constant time."
+  {:added "1.1"}
   [^clojure.lang.IEditableCollection coll] 
   (.asTransient coll))
 
@@ -4937,6 +4981,7 @@
   Returns a new, persistent version of the transient collection, in
   constant time. The transient collection cannot be used after this
   call, any such use will throw an exception."
+  {:added "1.1"}
   [^clojure.lang.ITransientCollection coll]
   (.persistent coll))
 
@@ -4944,6 +4989,7 @@
   "Alpha - subject to change.
   Adds x to the transient collection, and return coll. The 'addition'
   may happen at different 'places' depending on the concrete type."
+  {:added "1.1"}
   [^clojure.lang.ITransientCollection coll x]
   (.conj coll x))
 
@@ -4952,6 +4998,7 @@
   When applied to a transient map, adds mapping of key(s) to
   val(s). When applied to a transient vector, sets the val at index.
   Note - index must be <= (count vector). Returns coll."
+  {:added "1.1"}
   ([^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
   ([^clojure.lang.ITransientAssociative coll key val & kvs]
    (let [ret (.assoc coll key val)]
@@ -4962,6 +5009,7 @@
 (defn dissoc!
   "Alpha - subject to change.
   Returns a transient map that doesn't contain a mapping for key(s)."
+  {:added "1.1"}
   ([^clojure.lang.ITransientMap map key] (.without map key))
   ([^clojure.lang.ITransientMap map key & ks]
    (let [ret (.without map key)]
@@ -4973,6 +5021,7 @@
   "Alpha - subject to change.
   Removes the last item from a transient vector. If
   the collection is empty, throws an exception. Returns coll"
+  {:added "1.1"}
   [^clojure.lang.ITransientVector coll] 
   (.pop coll)) 
 
@@ -4980,6 +5029,7 @@
   "Alpha - subject to change.
   disj[oin]. Returns a transient set of the same (hashed/sorted) type, that
   does not contain key(s)."
+  {:added "1.1"}
   ([set] set)
   ([^clojure.lang.ITransientSet set key]
    (. set (disjoin key)))
@@ -5002,6 +5052,7 @@
   "Takes any nested combination of sequential things (lists, vectors,
   etc.) and returns their contents as a single, flat sequence.
   (flatten nil) returns nil."
+  {:added "1.2"}
   [x]
   (filter (complement sequential?)
           (rest (tree-seq sequential? seq x))))
@@ -5010,6 +5061,7 @@
   "Returns a map of the elements of coll keyed by the result of
   f on each element. The value at each key will be a vector of the
   corresponding elements, in the order they appeared in coll."
+  {:added "1.2"}
   [f coll]  
   (persistent!
    (reduce
@@ -5021,6 +5073,7 @@
 (defn partition-by 
   "Applies f to each value in coll, splitting it each time f returns
    a new value.  Returns a lazy seq of partitions."
+  {:added "1.2"}
   [f coll]
   (lazy-seq
    (when-let [s (seq coll)]
@@ -5032,6 +5085,7 @@
 (defn frequencies
   "Returns a map from distinct items in coll to the number of times
   they appear."
+  {:added "1.2"}
   [coll]
   (persistent!
    (reduce (fn [counts x]
@@ -5041,6 +5095,7 @@
 (defn reductions
   "Returns a lazy seq of the intermediate values of the reduction (as
   per reduce) of coll by f, starting with init."
+  {:added "1.2"}
   ([f coll]
      (lazy-seq
       (if-let [s (seq coll)]
@@ -5056,12 +5111,14 @@
   "Return a random element of the (sequential) collection. Will have
   the same performance characteristics as nth for the given
   collection."
+  {:added "1.2"}
   [coll]
   (nth coll (rand-int (count coll))))
 
 (defn seq-contains?
   "Returns true if sequential search of coll contains something equal (with =) to x,
   in linear time."
+  {:added "1.2"}
   [coll x]
   (if (some (fn [y] (= y x)) coll)
     true false))
@@ -5069,6 +5126,7 @@
 (defn partition-all
   "Returns a lazy sequence of lists like partition, but may include
   partitions with fewer than n items at the end."
+  {:added "1.2"}
   ([n coll]
      (partition-all n n coll))
   ([n step coll]
@@ -5078,6 +5136,7 @@
 
 (defn shuffle
   "Return a random permutation of coll"
+  {:added "1.2"}
   [coll]
   (let [al (java.util.ArrayList. coll)]
     (java.util.Collections/shuffle al)

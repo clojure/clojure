@@ -38,6 +38,7 @@ the sorting function."}
   data structure of the same type, then applies outer to the result.
   Recognizes all Clojure data structures except sorted-map-by.
   Consumes seqs as with doall."
+  {:added "1.1"}
   [inner outer form]
   (cond
    (list? form) (outer (apply list (map inner form)))
@@ -54,11 +55,13 @@ the sorting function."}
   each sub-form, uses f's return value in place of the original.
   Recognizes all Clojure data structures except sorted-map-by.
   Consumes seqs as with doall."
+  {:added "1.1"}
   [f form]
   (walk (partial postwalk f) f form))
 
 (defn prewalk
   "Like postwalk, but does pre-order traversal."
+  {:added "1.1"}
   [f form]
   (walk (partial prewalk f) identity (f form)))
 
@@ -78,17 +81,20 @@ the sorting function."}
 (defn postwalk-demo
   "Demonstrates the behavior of postwalk by printing each form as it is
   walked.  Returns form."
+  {:added "1.1"}
   [form]
   (postwalk (fn [x] (print "Walked: ") (prn x) x) form))
 
 (defn prewalk-demo
   "Demonstrates the behavior of prewalk by printing each form as it is
   walked.  Returns form."
+  {:added "1.1"}
   [form]
   (prewalk (fn [x] (print "Walked: ") (prn x) x) form))
 
 (defn keywordize-keys
   "Recursively transforms all map keys from strings to keywords."
+  {:added "1.1"}
   [m]
   (let [f (fn [[k v]] (if (string? k) [(keyword k) v] [k v]))]
     ;; only apply to maps
@@ -96,6 +102,7 @@ the sorting function."}
 
 (defn stringify-keys
   "Recursively transforms all map keys from keywords to strings."
+  {:added "1.1"}
   [m]
   (let [f (fn [[k v]] (if (keyword? k) [(name k) v] [k v]))]
     ;; only apply to maps
@@ -105,6 +112,7 @@ the sorting function."}
   "Recursively transforms form by replacing keys in smap with their
   values.  Like clojure/replace but works on any data structure.  Does
   replacement at the root of the tree first."
+  {:added "1.1"}
   [smap form]
   (prewalk (fn [x] (if (contains? smap x) (smap x) x)) form))
 
@@ -112,11 +120,13 @@ the sorting function."}
   "Recursively transforms form by replacing keys in smap with their
   values.  Like clojure/replace but works on any data structure.  Does
   replacement at the leaves of the tree first."
+  {:added "1.1"}
   [smap form]
   (postwalk (fn [x] (if (contains? smap x) (smap x) x)) form))
 
 (defn macroexpand-all
   "Recursively performs all possible macroexpansions in form."
+  {:added "1.1"}
   [form]
   (prewalk (fn [x] (if (seq? x) (macroexpand x) x)) form))
 

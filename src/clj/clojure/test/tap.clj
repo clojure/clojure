@@ -44,23 +44,27 @@
 
 (defn print-tap-plan
   "Prints a TAP plan line like '1..n'.  n is the number of tests"
+  {:added "1.1"}
   [n]
   (println (str "1.." n)))
 
 (defn print-tap-diagnostic
   "Prints a TAP diagnostic line.  data is a (possibly multi-line)
   string."
+  {:added "1.1"}
   [data]
   (doseq [line (.split ^String data "\n")]
     (println "#" line)))
 
 (defn print-tap-pass
   "Prints a TAP 'ok' line.  msg is a string, with no line breaks"
+  {:added "1.1"}
   [msg]
   (println "ok" msg))
 
 (defn print-tap-fail 
   "Prints a TAP 'not ok' line.  msg is a string, with no line breaks"
+  {:added "1.1"}
   [msg]
   (println "not ok" msg))
 
@@ -106,6 +110,7 @@
 (defmacro with-tap-output
   "Execute body with modified test reporting functions that produce
   TAP output"
+  {:added "1.1"}
   [& body]
   `(binding [t/report tap-report]
      ~@body))

@@ -12,6 +12,7 @@
 
 (defn namespace-munge
   "Convert a Clojure namespace name to a legal Java package name."
+  {:added "1.2"}
   [ns]
   (.replace (str ns) \- \_))
 
@@ -102,7 +103,7 @@
        (reify clojure.lang.Seqable 
          (seq [] (seq f)))))
   == (\\f \\o \\o))"
-
+  {:added "1.2"} 
   [& opts+specs]
   (let [[interfaces methods] (parse-opts+specs opts+specs)]
     (with-meta `(reify* ~interfaces ~@methods) (meta &form))))
@@ -131,6 +132,7 @@
 
 (defn- emit-defrecord 
   "Do not use this directly - use defrecord"
+  {:added "1.2"}
   [tagname name fields interfaces methods]
   (let [tag (keyword (str *ns*) (str tagname))
         classname (with-meta (symbol (str *ns* "." name)) (meta name))
@@ -283,6 +285,7 @@
   followed by a metadata map (nil for none) and an extension field
   map (nil for none), and one taking only the fields (using nil for
   meta and extension fields)."
+  {:added "1.2"}
 
   [name [& fields] & opts+specs]
   (let [gname name
@@ -374,6 +377,7 @@
   writes the .class file to the *compile-path* directory.
 
   One constructors will be defined, taking the designated fields."
+  {:added "1.2"}
 
   [name [& fields] & opts+specs]
   (let [gname name
@@ -433,17 +437,20 @@
 
 (defn extends? 
   "Returns true if atype extends protocol"
+  {:added "1.2"}
   [protocol atype]
   (boolean (or (implements? protocol atype) 
                (get (:impls protocol) atype))))
 
 (defn extenders 
   "Returns a collection of the types explicitly extending protocol"
+  {:added "1.2"}
   [protocol]
   (keys (:impls protocol)))
 
 (defn satisfies? 
   "Returns true if x satisfies the protocol"
+  {:added "1.2"}
   [protocol x]
   (boolean (find-protocol-impl protocol x)))
 
@@ -606,7 +613,7 @@
         (foo [] 17)
         (bar-me [] x)
         (bar-me [y] x))))"
-
+  {:added "1.2"} 
   [name & opts+sigs]
   (emit-protocol name opts+sigs))
 
@@ -645,7 +652,7 @@
 
   See also:
   extends?, satisfies?, extenders"
-
+  {:added "1.2"} 
   [atype & proto+mmaps]
   (doseq [[proto mmap] (partition 2 proto+mmaps)]
     (when (implements? proto atype)
@@ -696,7 +703,7 @@
    Foo
      {:baz (fn ([x] ...) ([x y & zs] ...))
       :bar (fn [x y] ...)})"
-
+  {:added "1.2"} 
   [t & specs]
   (emit-extend-type t specs))
 
@@ -742,6 +749,7 @@
    (clojure.core/extend-type nil Protocol 
      (foo [x] ...) 
      (bar [x y] ...)))"
+  {:added "1.2"}
 
   [p & specs]
   (emit-extend-protocol p specs))
