@@ -248,6 +248,14 @@
   (doseq [[opt arg] inits]
     ((init-dispatch opt) arg)))
 
+(defn- main-opt
+  "Call the -main function from a namespace with string arguments from
+  the command line."
+  [[_ main-ns & args] inits]
+  (with-bindings
+    (initialize args inits)
+    (apply (ns-resolve (doto (symbol main-ns) require) '-main) args)))
+
 (defn- repl-opt
   "Start a repl with args and inits. Print greeting if no eval options were
   present"
@@ -257,14 +265,6 @@
   (repl :init #(initialize args inits))
   (prn)
   (System/exit 0))
-
-(defn- main-opt
-  "Run the -main function from a given namespace with arguments taken from
-  the command line."
-  [[_ main-ns & args] inits]
-  (with-bindings
-    (initialize args inits)
-    (apply (ns-resolve (doto (symbol main-ns) require) '-main) args)))
 
 (defn- script-opt
   "Run a script from a file, resource, or standard in with args and inits"
@@ -326,15 +326,15 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   With no options or args, runs an interactive Read-Eval-Print Loop
 
   init options:
-    -i, --init path   Load a file or resource
-    -e, --eval string Evaluate expressions in string; print non-nil values
+    -i, --init path     Load a file or resource
+    -e, --eval string   Evaluate expressions in string; print non-nil values
 
   main options:
-    -r, --repl        Run a repl
-    path              Run a script from from a file or resource
-    -m, --main        Run the -main function from a given namespace
-    -                 Run a script from standard input
-    -h, -?, --help    Print this help message and exit
+    -m, --main ns-name  Call the -main function from a namespace with args
+    -r, --repl          Run a repl
+    path                Run a script from from a file or resource
+    -                   Run a script from standard input
+    -h, -?, --help      Print this help message and exit
 
   operation:
 
@@ -343,7 +343,7 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
     - Binds *command-line-args* to a seq of strings containing command line
       args that appear after any main option
     - Runs all init options in order
-    - Runs a repl or script if requested
+    - Calls a -main function or runs a repl or script if requested
 
   The init options may be repeated and mixed freely, but must appear before
   any main option. The appearance of any eval option before running a repl
