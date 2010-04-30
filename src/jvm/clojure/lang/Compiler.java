@@ -778,8 +778,10 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Expr instance = null;
 			if(c == null)
 				instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
-			boolean maybeField = RT.length(form) == 3 && RT.third(form) instanceof Symbol;
-			if(maybeField)
+			boolean maybeField = RT.length(form) == 3 &&
+			                     (RT.third(form) instanceof Symbol
+									|| RT.third(form) instanceof Keyword);
+			if(maybeField && !(RT.third(form) instanceof Keyword))
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				if(c != null)
@@ -789,7 +791,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				}
 			if(maybeField)    //field
 				{
-				Symbol sym = (Symbol) RT.third(form);
+				Symbol sym = (RT.third(form) instanceof Keyword)?
+				             ((Keyword)RT.third(form)).sym
+							:(Symbol) RT.third(form);
 				Symbol tag = tagOf(form);
 				if(c != null) {
 					return new StaticFieldExpr(line, c, munge(sym.name), tag);

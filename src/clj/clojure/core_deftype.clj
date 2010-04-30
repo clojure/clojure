@@ -178,7 +178,7 @@
                                    `(reify clojure.lang.ILookupThunk 
                                            (get [~'thunk ~'gtarget] 
                                                 (if (identical? (class ~'gtarget) ~'gclass) 
-                                                  (. ~hinted-target ~fld)
+                                                  (. ~hinted-target ~(keyword fld))
                                                   ~'thunk)))])
                                 base-fields))
                            nil))))])
