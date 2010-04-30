@@ -20,7 +20,7 @@ static public boolean equiv(Object k1, Object k2){
 		return true;
 	if(k1 != null)
 		{
-		if(k1 instanceof Number)
+		if(k1 instanceof Number && k2 instanceof Number)
 			return Numbers.equiv(k1, k2);
 		else if(k1 instanceof IPersistentCollection && k2 instanceof IPersistentCollection)
 			return ((IPersistentCollection)k1).equiv(k2);

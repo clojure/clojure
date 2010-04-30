@@ -179,8 +179,7 @@ static Number remainder(double n, double d){
 }
 
 static public boolean equiv(Object x, Object y){
-	return y instanceof Number && x instanceof Number
-	       && equiv((Number) x, (Number) y);
+	return equiv((Number) x, (Number) y);
 }
 
 static public boolean equiv(Number x, Number y){
