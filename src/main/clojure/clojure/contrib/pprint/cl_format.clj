@@ -963,7 +963,7 @@ Note this should only be used for the last one in the sequence"
         navigator (or new-navigator navigator)
         min-remaining (or (first (:min-remaining else-params)) 0)
         max-columns (or (first (:max-columns else-params))
-                        (.getMaxColumn #^PrettyWriter *out*))
+                        (get-max-column *out*))
         clauses (:clauses params)
         [strs navigator] (render-clauses clauses navigator (:base-args params))
         slots (max 1
@@ -981,7 +981,7 @@ Note this should only be used for the last one in the sequence"
         pad (max minpad (quot total-pad slots))
         extra-pad (- total-pad (* pad slots))
         pad-str (apply str (repeat pad (:padchar params)))]
-    (if (and eol-str (> (+ (.getColumn #^PrettyWriter *out*) min-remaining result-columns) 
+    (if (and eol-str (> (+ (get-column (:base @@*out*)) min-remaining result-columns) 
                         max-columns))
       (print eol-str))
     (loop [slots slots
@@ -1139,10 +1139,10 @@ Note this should only be used for the last one in the sequence"
 ;;; If necessary, wrap the writer in a PrettyWriter object
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn pretty-writer [writer]
-  (if (instance? PrettyWriter writer) 
+(defn get-pretty-writer [writer]
+  (if (pretty-writer? writer) 
     writer
-    (PrettyWriter. writer *print-right-margin* *print-miser-width*)))
+    (pretty-writer writer *print-right-margin* *print-miser-width*)))
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Support for column-aware operations ~&, ~T
@@ -1153,13 +1153,13 @@ Note this should only be used for the last one in the sequence"
   "Make a newline if the Writer is not already at the beginning of the line.
 N.B. Only works on ColumnWriters right now."
   []
-  (if (not (= 0 (.getColumn #^PrettyWriter *out*)))
+  (if (not (= 0 (get-column (:base @@*out*))))
     (prn)))
 
 (defn- absolute-tabulation [params navigator offsets]
   (let [colnum (:colnum params) 
         colinc (:colinc params)
-        current (.getColumn #^PrettyWriter *out*)
+        current (get-column (:base @@*out*))
         space-count (cond
                      (< current colnum) (- colnum current)
                      (= colinc 0) 0
@@ -1170,7 +1170,7 @@ N.B. Only works on ColumnWriters right now."
 (defn- relative-tabulation [params navigator offsets]
   (let [colrel (:colnum params) 
         colinc (:colinc params)
-        start-col (+ colrel (.getColumn #^PrettyWriter *out*))
+        start-col (+ colrel (get-column (:base @@*out*)))
         offset (if (pos? colinc) (rem start-col colinc) 0)
         space-count (+ colrel (if (= 0 offset) 0 (- colinc offset)))]
     (print (apply str (repeat space-count \space))))
@@ -1789,8 +1789,8 @@ because the formatter macro uses it."
                                          (true? stream) *out*
                                          :else stream)
            #^java.io.Writer wrapped-stream (if (and (needs-pretty format) 
-                                                    (not (instance? PrettyWriter real-stream)))
-                                             (pretty-writer real-stream)
+                                                    (not (pretty-writer? real-stream)))
+                                             (get-pretty-writer real-stream)
                                              real-stream)]
        (binding [*out* wrapped-stream]
          (try

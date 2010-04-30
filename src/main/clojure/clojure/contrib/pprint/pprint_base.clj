@@ -140,12 +140,12 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
 
 (defn- pretty-writer? 
   "Return true iff x is a PrettyWriter"
-  [x] (instance? PrettyWriter x))
+  [x] (and (instance? clojure.lang.IDeref x) (:pretty-writer @@x)))
 
 (defn- make-pretty-writer 
   "Wrap base-writer in a PrettyWriter with the specified right-margin and miser-width"
   [base-writer right-margin miser-width]
-  (PrettyWriter. base-writer right-margin miser-width))
+  (pretty-writer base-writer right-margin miser-width))
 
 (defmacro #^{:private true} with-pretty-writer [base-writer & body]
   `(let [base-writer# ~base-writer
@@ -235,7 +235,7 @@ print the object to the currently bound value of *out*."
        (binding [*print-pretty* true]
          (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
            (write-out object)))
-       (if (not (= 0 (.getColumn #^PrettyWriter *out*)))
+       (if (not (= 0 (get-column *out*)))
          (.write *out* (int \newline))))))
 
 (defmacro pp 
@@ -294,13 +294,13 @@ and :suffix."
   [& args]
   (let [[options body] (parse-lb-options #{:prefix :per-line-prefix :suffix} args)]
     `(do (if (level-exceeded) 
-           (.write #^PrettyWriter *out* "#")
+           (.write #^java.io.Writer *out* "#")
            (binding [*current-level* (inc *current-level*)
                      *current-length* 0] 
-             (.startBlock #^PrettyWriter *out*
+             (start-block *out*
                           ~(:prefix options) ~(:per-line-prefix options) ~(:suffix options))
              ~@body
-             (.endBlock #^PrettyWriter *out*)))
+             (end-block *out*)))
          nil)))
 
 (defn pprint-newline
@@ -310,7 +310,7 @@ newline is :linear, :miser, :fill, or :mandatory.
 Output is sent to *out* which must be a pretty printing writer."
   [kind] 
   (check-enumerated-arg kind #{:linear :miser :fill :mandatory})
-  (.newline #^PrettyWriter *out* kind))
+  (nl *out* kind))
 
 (defn pprint-indent 
   "Create an indent at this point in the pretty printing stream. This defines how 
@@ -321,7 +321,7 @@ the current column position. n is an offset.
 Output is sent to *out* which must be a pretty printing writer."
   [relative-to n] 
   (check-enumerated-arg relative-to #{:block :current})
-  (.indent #^PrettyWriter *out* relative-to n))
+  (indent *out* relative-to n))
 
 ;; TODO a real implementation for pprint-tab
 (defn pprint-tab 

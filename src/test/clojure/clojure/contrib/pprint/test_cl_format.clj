@@ -445,14 +445,14 @@
 (cl-format true "~%;; ~{~<~%;; ~:; ~A~>~}.~%" (into [] (.split "This function computes the circular thermodynamic coefficient of the thrombulator angle for use in determining the reaction distance." "\\s"))))
 
 (defn list-to-table [aseq column-width]
-  (let [stream (pretty-writer (java.io.StringWriter.))]
+  (let [stream (get-pretty-writer (java.io.StringWriter.))]
     (binding [*out* stream]
      (doseq [row aseq]
        (doseq [col row]
          (cl-format true "~4D~7,vT" col column-width))
        (prn)))
     (.flush stream)
-    (.toString (.getWriter stream))))
+    (.toString (:base @@(:base @@stream)))))
 
 (simple-tests column-writer-test
   (list-to-table (map #(vector % (* % %) (* % % %)) (range 1 21)) 8)

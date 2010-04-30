@@ -25,7 +25,8 @@ documentation on the the clojure-contrib web site on github.",
        }
     clojure.contrib.pprint
   (:use clojure.contrib.pprint.utilities)
-  (:import [clojure.contrib.pprint PrettyWriter]))
+  (:use clojure.contrib.pprint.pretty-writer
+        clojure.contrib.pprint.column-writer))
 
 
 (load "pprint/pprint_base")
