@@ -72,6 +72,8 @@ by <span id="author">Stuart Sierra</span><br />
 </pre><pre>
 </pre><h2>Overview</h2>
 <pre id="namespace-docstr">Macros that expand to repeated copies of a template expression.</pre>
+
+
 <br />
 <h2>Public Variables and Functions</h2>
 <div id="var-entry">
@@ -90,6 +92,8 @@ with their corresponding values, returning a modified expr.
 
 Example: (apply-template '[x] '(+ x x) '[2])
          ;=&gt; (+ 2 2)</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L30" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -104,6 +108,8 @@ arguments in argv, an argument vector as in defn.
 
 Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
          ;=&gt; (do (+ 4 2) (+ 5 3))</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L45" id="var-source">Source</a>
 </div>
 

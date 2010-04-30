@@ -97,6 +97,8 @@ the examples.
 Note: "walk" supports all Clojure data structures EXCEPT maps
 created with sorted-map-by.  There is no (obvious) way to retrieve
 the sorting function.</pre>
+
+
 <br />
 <h2>Public Variables and Functions</h2>
 <div id="var-entry">
@@ -107,6 +109,8 @@ the sorting function.</pre>
   <pre id="var-usage">Usage: (keywordize-keys m)
 </pre>
   <pre id="var-docstr">Recursively transforms all map keys from strings to keywords.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L90" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -116,6 +120,8 @@ the sorting function.</pre>
   <pre id="var-usage">Usage: (macroexpand-all form)
 </pre>
   <pre id="var-docstr">Recursively performs all possible macroexpansions in form.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L118" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -128,6 +134,8 @@ the sorting function.</pre>
 each sub-form, uses f's return value in place of the original.
 Recognizes all Clojure data structures except sorted-map-by.
 Consumes seqs as with doall.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L52" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -138,6 +146,8 @@ Consumes seqs as with doall.</pre>
 </pre>
   <pre id="var-docstr">Demonstrates the behavior of postwalk by printing each form as it is
 walked.  Returns form.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L78" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -149,6 +159,8 @@ walked.  Returns form.</pre>
   <pre id="var-docstr">Recursively transforms form by replacing keys in smap with their
 values.  Like clojure/replace but works on any data structure.  Does
 replacement at the leaves of the tree first.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L111" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -158,6 +170,8 @@ replacement at the leaves of the tree first.</pre>
   <pre id="var-usage">Usage: (prewalk f form)
 </pre>
   <pre id="var-docstr">Like postwalk, but does pre-order traversal.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L60" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -168,6 +182,8 @@ replacement at the leaves of the tree first.</pre>
 </pre>
   <pre id="var-docstr">Demonstrates the behavior of prewalk by printing each form as it is
 walked.  Returns form.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L84" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -179,6 +195,8 @@ walked.  Returns form.</pre>
   <pre id="var-docstr">Recursively transforms form by replacing keys in smap with their
 values.  Like clojure/replace but works on any data structure.  Does
 replacement at the root of the tree first.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L104" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -188,6 +206,8 @@ replacement at the root of the tree first.</pre>
   <pre id="var-usage">Usage: (stringify-keys m)
 </pre>
   <pre id="var-docstr">Recursively transforms all map keys from keywords to strings.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L97" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
@@ -201,6 +221,8 @@ functions.  Applies inner to each element of form, building up a
 data structure of the same type, then applies outer to the result.
 Recognizes all Clojure data structures except sorted-map-by.
 Consumes seqs as with doall.</pre>
+  
+  
   <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/walk.clj#L35" id="var-source">Source</a>
 </div>
 
