@@ -585,8 +585,7 @@ Note this should only be used for the last one in the sequence"
                       round-up-result (str leading-zeros
                                            (String/valueOf (+ result-val 
                                                               (if (neg? result-val) -1 1))))
-                      expanded (> (count round-up-result) (count result))
-                      _ (prlabel round-str round-up-result e1 expanded)]
+                      expanded (> (count round-up-result) (count result))]
                   [round-up-result e1 expanded])
                 [result e1 false]))
             [m e false]))
@@ -632,7 +631,6 @@ Note this should only be used for the last one in the sequence"
         append-zero (and (not d) (<= (dec (count mantissa)) scaled-exp))
         [rounded-mantissa scaled-exp expanded] (round-str mantissa scaled-exp 
                                                           d (if w (- w (if add-sign 1 0))))
-        _ (prlabel f-f mantissa exp rounded-mantissa scaled-exp)
         fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
         prepend-zero (= (first fixed-repr) \.)]
     (if w
