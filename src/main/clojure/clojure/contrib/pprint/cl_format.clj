@@ -585,7 +585,8 @@ Note this should only be used for the last one in the sequence"
                       round-up-result (str leading-zeros
                                            (String/valueOf (+ result-val 
                                                               (if (neg? result-val) -1 1))))
-                      expanded (> (count round-up-result) (count result))]
+                      expanded (> (count round-up-result) (count result))
+                      _ (prlabel round-str round-up-result e1 expanded)]
                   [round-up-result e1 expanded])
                 [result e1 false]))
             [m e false]))
@@ -624,19 +625,21 @@ Note this should only be used for the last one in the sequence"
   (let [w (:w params)
         d (:d params)
         [arg navigator] (next-arg navigator)
-        [mantissa exp] (float-parts arg)
+        [sign abs] (if (neg? arg) ["-" (- arg)] ["+" arg])
+        [mantissa exp] (float-parts abs)
         scaled-exp (+ exp (:k params))
-        add-sign (and (:at params) (not (neg? arg)))
-        prepend-zero (< -1.0 arg 1.0)
+        add-sign (or (:at params) (neg? arg))
         append-zero (and (not d) (<= (dec (count mantissa)) scaled-exp))
-        [rounded-mantissa scaled-exp] (round-str mantissa scaled-exp 
-                                                 d (if w (- w (if add-sign 1 0))))
-        fixed-repr (get-fixed rounded-mantissa scaled-exp d)]
+        [rounded-mantissa scaled-exp expanded] (round-str mantissa scaled-exp 
+                                                          d (if w (- w (if add-sign 1 0))))
+        _ (prlabel f-f mantissa exp rounded-mantissa scaled-exp)
+        fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
+        prepend-zero (= (first fixed-repr) \.)]
     (if w
       (let [len (count fixed-repr)
             signed-len (if add-sign (inc len) len)
-            prepend-zero (and prepend-zero (not (= signed-len w)))
-            append-zero (and append-zero (not (= signed-len w)))
+            prepend-zero (and prepend-zero (not (>= signed-len w)))
+            append-zero (and append-zero (not (>= signed-len w)))
             full-len (if (or prepend-zero append-zero)
                        (inc signed-len) 
                        signed-len)]
@@ -644,12 +647,12 @@ Note this should only be used for the last one in the sequence"
           (print (apply str (repeat w (:overflowchar params))))
           (print (str
                   (apply str (repeat (- w full-len) (:padchar params)))
-                  (if add-sign "+") 
+                  (if add-sign sign) 
                   (if prepend-zero "0")
                   fixed-repr
                   (if append-zero "0")))))
       (print (str
-              (if add-sign "+") 
+              (if add-sign sign) 
               (if prepend-zero "0")
               fixed-repr
               (if append-zero "0"))))
@@ -761,8 +764,8 @@ Note this should only be used for the last one in the sequence"
         n (:n params) ; minimum digits before the decimal
         w (:w params) ; minimum field width
         add-sign (or (:at params) (neg? arg))
-        [rounded-mantissa scaled-exp _] (round-str mantissa exp d nil)
-        #^String fixed-repr (get-fixed rounded-mantissa scaled-exp d)
+        [rounded-mantissa scaled-exp expanded] (round-str mantissa exp d nil)
+        #^String fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
         full-repr (str (apply str (repeat (- n (.indexOf fixed-repr (int \.))) \0)) fixed-repr)
         full-len (+ (count full-repr) (if add-sign 1 0))]
     (print (str
