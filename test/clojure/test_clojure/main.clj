@@ -10,7 +10,8 @@
 
 
 (ns clojure.test-clojure.main
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.main :as main]))
 
 (deftest eval-opt
   (testing "evals and prints forms"
@@ -22,3 +23,28 @@
   (testing "does not block access to *in* (#299)"
     (with-in-str "(+ 1 1)"
       (is (= "(+ 1 1)\n" (with-out-str (#'clojure.main/eval-opt "(read)")))))))
+
+(defmacro with-err-str
+  "Evaluates exprs in a context in which *err* is bound to a fresh
+  StringWriter.  Returns the string created by any nested printing
+  calls."
+  [& body]
+  `(let [s# (new java.io.StringWriter)
+         p# (new java.io.PrintWriter s#)]
+     (binding [*err* p#]
+       ~@body
+       (str s#))))
+
+(defn run-repl-and-return-err
+  "Run repl, swallowing stdout and returing stderr."
+  [in-str]
+  (with-err-str
+    (with-out-str
+      (with-in-str in-str
+        (main/repl)))))
+
+(deftest repl-exception-safety
+  (testing "catches and prints exception on bad equals"
+    (is (= "java.lang.NullPointerException\n"
+           (run-repl-and-return-err
+            "(proxy [Object] [] (equals [o] (.toString nil)))")))))
