@@ -26,7 +26,8 @@
   "Does container contain every item in containee?
    Not fast. Testing use only"
   [container containee]
-  (every? #(seq-contains? container %) containee))
+  (let [container (set container)]
+    (every? #(contains? container %) containee)))
 
 (deftest finding-mbeans
   (testing "as-object-name"

@@ -5,16 +5,16 @@
 (deftest test-apropos
   (testing "with a regular expression"
     (is (= '[defmacro] (apropos #"^defmacro$")))
-    (is (seq-contains? (apropos #"def.acr.") 'defmacro))
+    (is (some '#{defmacro} (apropos #"def.acr.")))
     (is (= [] (apropos #"nothing-has-this-name"))))
   
 
   (testing "with a string"
-    (is (seq-contains? (apropos "defmacro") 'defmacro))
-    (is (seq-contains? (apropos "efmac") 'defmacro))
+    (is (some '#{defmacro} (apropos "defmacro")))
+    (is (some '#{defmacro} (apropos "efmac")))
     (is (= [] (apropos "nothing-has-this-name"))))
 
   (testing "with a symbol"
-    (is (seq-contains? (apropos 'defmacro) 'defmacro))
-    (is (seq-contains? (apropos 'efmac) 'defmacro))
+    (is (some '#{defmacro} (apropos 'defmacro)))
+    (is (some '#{defmacro} (apropos 'efmac)))
     (is (= [] (apropos 'nothing-has-this-name)))))
