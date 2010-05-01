@@ -1017,8 +1017,7 @@
   returns false.  Note that for numerically indexed collections like
   vectors and Java arrays, this tests if the numeric key is within the
   range of indexes. 'contains?' operates constant or logarithmic time;
-  it will not perform a linear search for a value.  See also
-  'seq-contains?' and 'some'."
+  it will not perform a linear search for a value.  See also 'some'."
   [coll key] (. clojure.lang.RT (contains coll key)))
 
 (defn get
@@ -5114,14 +5113,6 @@
   {:added "1.2"}
   [coll]
   (nth coll (rand-int (count coll))))
-
-(defn seq-contains?
-  "Returns true if sequential search of coll contains something equal (with =) to x,
-  in linear time."
-  {:added "1.2"}
-  [coll x]
-  (if (some (fn [y] (= y x)) coll)
-    true false))
 
 (defn partition-all
   "Returns a lazy sequence of lists like partition, but may include

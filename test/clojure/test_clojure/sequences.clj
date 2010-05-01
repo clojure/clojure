@@ -1147,10 +1147,6 @@
   (let [elt (rand-nth [:a :b :c :d])]
     (is (#{:a :b :c :d} elt))))
 
-(deftest test-seq-contains?
-  (is (seq-contains? [1 2 3 4 5] 5))
-  (is (not (seq-contains? [1 2 3 4 5] 6))))
-
 (deftest test-partition-all
   (is (= (partition-all 4 [1 2 3 4 5 6 7 8 9])
 	 [[1 2 3 4] [5 6 7 8] [9]]))
