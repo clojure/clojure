@@ -47,7 +47,7 @@ public boolean equiv(Object obj){
 		if(ms == null || !Util.equiv(s.first(), ms.first()))
 			return false;
 		}
-	return ms.next() == null;
+	return ms == null;
 
 }
 
@@ -61,7 +61,7 @@ public boolean equals(Object obj){
 		if(ms == null || !Util.equals(s.first(), ms.first()))
 			return false;
 		}
-	return ms.next() == null;
+	return ms == null;
 
 }
 

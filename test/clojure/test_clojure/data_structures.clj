@@ -774,3 +774,23 @@
       (disj #{#{nil}} #{nil}) #{} ))
 
 
+;; *** Queues ***
+
+(deftest test-queues
+  (let [EMPTY clojure.lang.PersistentQueue/EMPTY]
+    (are [x y] (= x y)
+      EMPTY EMPTY
+      (into EMPTY (range 50)) (into EMPTY (range 50))
+      (range 5) (into EMPTY (range 5))
+      (range 1 6) (-> EMPTY
+                    (into (range 6))
+                    pop))
+    (are [x y] (not= x y)
+      (range 5) (into EMPTY (range 6))
+      (range 6) (into EMPTY (range 5))
+      (range 0 6) (-> EMPTY
+                    (into (range 6))
+                    pop)
+      (range 1 6) (-> EMPTY
+                    (into (range 7))
+                    pop))))
