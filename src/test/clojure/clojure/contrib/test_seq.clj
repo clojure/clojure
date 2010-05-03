@@ -72,3 +72,12 @@
 (deftest test-find-first
   (is (= (find-first even? [1 2 3 4 5]) 2))
   (is (= (find-first even? '(1 2 3 4 5)) 2)))
+
+(deftest test-includes
+  (are [coll k] (false? (includes? coll k))
+       [1 2 3] 0
+       [] nil
+       [:a :b] :c)
+  (are [coll k] (true? (includes? coll k))
+       [1 2 3] 1
+       [:a :b] :b))

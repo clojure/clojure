@@ -140,7 +140,13 @@
   [pred coll]
   (for [[idx elt] (indexed coll) :when (pred elt)] idx))
 
-
+(defn includes?
+  "Returns true if coll contains something equal (with =) to x,
+  in linear time. Deprecated. prefer 'contains?' for key testing,
+  or 'some' for ad hoc linear searches."
+  {:deprecated true}
+  [coll x]
+  (boolean (some (fn [y] (= y x)) coll)))
 
 
 
