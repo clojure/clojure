@@ -13,6 +13,7 @@
 
 (def public-namespaces
   '[clojure.core
+    clojure.pprint
     clojure.inspector
     clojure.set
     clojure.stacktrace
