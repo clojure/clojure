@@ -12,7 +12,9 @@
 
 package clojure.lang;
 
-public final class ArrayChunk implements IChunk{
+import java.io.Serializable;
+
+public final class ArrayChunk implements IChunk, Serializable {
 
 final Object[] array;
 final int off;

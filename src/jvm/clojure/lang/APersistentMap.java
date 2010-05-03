@@ -10,9 +10,10 @@
 
 package clojure.lang;
 
+import java.io.Serializable;
 import java.util.*;
 
-public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable{
+public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable {
 int _hash = -1;
 
 public String toString(){

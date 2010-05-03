@@ -12,6 +12,8 @@
 
 package clojure.lang;
 
+import java.io.IOException;
+import java.io.NotSerializableException;
 import java.util.Enumeration;
 
 public class EnumerationSeq extends ASeq{
@@ -68,4 +70,9 @@ public ISeq next(){
 public EnumerationSeq withMeta(IPersistentMap meta){
 	return new EnumerationSeq(meta, iter, state);
 }
+
+private void writeObject (java.io.ObjectOutputStream out) throws IOException {
+    throw new NotSerializableException(getClass().getName());
+}
+
 }

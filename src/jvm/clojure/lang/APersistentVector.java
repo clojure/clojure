@@ -12,11 +12,13 @@
 
 package clojure.lang;
 
+import java.io.Serializable;
 import java.util.*;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
                                                                List,
-                                                               RandomAccess, Comparable{
+                                                               RandomAccess, Comparable,
+                                                               Serializable {
 int _hash = -1;
 
 public String toString(){

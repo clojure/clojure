@@ -12,9 +12,7 @@
 
 package clojure.lang;
 
-import java.io.Serializable;
-
-public abstract class AFn implements IFn, Serializable{
+public abstract class AFn implements IFn {
 
 public Object call() throws Exception{
 	return invoke();

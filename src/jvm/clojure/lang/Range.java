@@ -12,8 +12,6 @@
 
 package clojure.lang;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Range extends ASeq implements IReduce, Counted{
 final int end;
 final int n;

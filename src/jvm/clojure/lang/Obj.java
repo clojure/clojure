@@ -12,7 +12,9 @@
 
 package clojure.lang;
 
-public abstract class Obj implements IObj{
+import java.io.Serializable;
+
+public abstract class Obj implements IObj, Serializable {
 
 final IPersistentMap _meta;
 

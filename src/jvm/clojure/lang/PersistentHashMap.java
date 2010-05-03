@@ -10,6 +10,7 @@
 
 package clojure.lang;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -292,7 +293,7 @@ static final class TransientHashMap extends ATransientMap {
 	}
 }
 
-static interface INode{
+static interface INode extends Serializable {
 	INode assoc(int shift, int hash, Object key, Object val, Box addedLeaf);
 
 	INode without(int shift, int hash, Object key);

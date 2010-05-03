@@ -12,13 +12,15 @@
 
 package clojure.lang;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Namespace extends AReference{
+public class Namespace extends AReference implements Serializable {
 final public Symbol name;
-final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
-final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();
+transient final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
+transient final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();
 
 final static ConcurrentHashMap<Symbol, Namespace> namespaces = new ConcurrentHashMap<Symbol, Namespace>();
 
@@ -203,5 +205,11 @@ public void removeAlias(Symbol alias) throws Exception{
 		aliases.compareAndSet(map, newMap);
 		map = getAliases();
 		}
+}
+
+private Object readResolve() throws ObjectStreamException {
+    // ensures that serialized namespaces are "deserialized" to the
+    // namespace in the present runtime
+    return findOrCreate(name);
 }
 }

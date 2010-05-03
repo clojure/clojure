@@ -10,6 +10,8 @@
 
 package clojure.lang;
 
+import java.io.IOException;
+import java.io.NotSerializableException;
 import java.util.Iterator;
 
 public class IteratorSeq extends ASeq{
@@ -65,5 +67,9 @@ public ISeq next(){
 
 public IteratorSeq withMeta(IPersistentMap meta){
 	return new IteratorSeq(meta, iter, state);
+}
+
+private void writeObject (java.io.ObjectOutputStream out) throws IOException {
+    throw new NotSerializableException(getClass().getName());
 }
 }

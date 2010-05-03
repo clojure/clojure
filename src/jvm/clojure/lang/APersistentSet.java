@@ -12,11 +12,12 @@
 
 package clojure.lang;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-public abstract class APersistentSet extends AFn implements IPersistentSet, Collection, Set{
+public abstract class APersistentSet extends AFn implements IPersistentSet, Collection, Set, Serializable {
 int _hash = -1;
 final IPersistentMap impl;
 

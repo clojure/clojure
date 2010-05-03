@@ -12,13 +12,14 @@
 
 package clojure.lang;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection{
 
-static class Node{
-	final AtomicReference<Thread> edit;
+static class Node implements Serializable {
+	transient final AtomicReference<Thread> edit;
 	final Object[] array;
 
 	Node(AtomicReference<Thread> edit, Object[] array){

@@ -12,7 +12,9 @@
 
 package clojure.lang;
 
-final public class Cons extends ASeq{
+import java.io.Serializable;
+
+final public class Cons extends ASeq implements Serializable {
 
 private final Object _first;
 private final ISeq _more;

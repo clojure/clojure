@@ -238,11 +238,19 @@ public static List<String> processCommandLine(String[] args){
 }
 
 static public final Object[] EMPTY_ARRAY = new Object[]{};
-static public final Comparator DEFAULT_COMPARATOR = new Comparator(){
-	public int compare(Object o1, Object o2){
+static public final Comparator DEFAULT_COMPARATOR = new DefaultComparator();
+
+private static final class DefaultComparator implements Comparator, Serializable {
+    public int compare(Object o1, Object o2){
 		return Util.compare(o1, o2);
 	}
-};
+
+    private Object readResolve() throws ObjectStreamException {
+        // ensures that we aren't hanging onto a new default comparator for every
+        // sorted set, etc., we deserialize
+        return DEFAULT_COMPARATOR;
+    }
+}
 
 static AtomicInteger id = new AtomicInteger(1);
 

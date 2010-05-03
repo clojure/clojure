@@ -10,9 +10,10 @@
 
 package clojure.lang;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class PersistentList extends ASeq implements IPersistentList, IReduce, List, Counted{
+public class PersistentList extends ASeq implements IPersistentList, IReduce, List, Counted {
 
 private final Object _first;
 private final IPersistentList _rest;
