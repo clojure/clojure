@@ -53,6 +53,7 @@
       :main
       :vectors
       :annotations
+      :pprint
       ])
 
 (def test-namespaces
