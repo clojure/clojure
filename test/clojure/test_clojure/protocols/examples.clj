@@ -8,3 +8,7 @@
   (baz [a] [a b] "method with multiple arities")
   (with-quux [a] "method name with a hyphen"))
 
+(definterface ExampleInterface
+  (hinted [^int i])
+  (hinted [^String s]))
+

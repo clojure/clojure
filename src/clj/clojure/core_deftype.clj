@@ -432,6 +432,10 @@
 (defn find-protocol-method [protocol methodk x]
   (get (find-protocol-impl protocol x) methodk))
 
+(defn- protocol?
+  [maybe-p]
+  (boolean (:on-interface maybe-p)))
+
 (defn- implements? [protocol atype]
   (and atype (.isAssignableFrom ^Class (:on-interface protocol) atype)))
 
@@ -655,6 +659,9 @@
   {:added "1.2"} 
   [atype & proto+mmaps]
   (doseq [[proto mmap] (partition 2 proto+mmaps)]
+    (when-not (protocol? proto)
+      (throw (IllegalArgumentException.
+              (str proto " is not a protocol"))))
     (when (implements? proto atype)
       (throw (IllegalArgumentException. 
               (str atype " already directly implements " (:on-interface proto) " for protocol:"  
