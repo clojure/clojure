@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -66,7 +67,23 @@ public Var intern(Symbol sym){
 	if(o instanceof Var && ((Var) o).ns == this)
 		return (Var) o;
 
-	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+//	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+
+	if(v == null)
+		v = new Var(this, sym);
+
+	warnOnReplace(sym, o, v);
+
+
+	while(!mappings.compareAndSet(map, map.assoc(sym, v)))
+		map = getMappings();
+
+	return v;
+}
+
+private void warnOnReplace(Symbol sym, Object o, Object v){
+	((PrintWriter) RT.ERR.deref()).println("WARNING: " + sym + " already refers to: " + o + " in namespace: " + name
+		+ ", being replaced by: " + v);
 }
 
 Object reference(Symbol sym, Object val){
@@ -85,7 +102,14 @@ Object reference(Symbol sym, Object val){
 	if(o == val)
 		return o;
 
-	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+//	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+	warnOnReplace(sym, o, val);
+
+	while(!mappings.compareAndSet(map, map.assoc(sym, val)))
+		map = getMappings();
+
+	return val;
+
 }
 
 public static boolean areDifferentInstancesOfSameClassName(Class cls1, Class cls2) {
