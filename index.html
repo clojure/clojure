@@ -40,7 +40,7 @@ namespace.
     <a class="wiki_link" href="api-index.html">API Index</a><br />
     <a class="wiki_link" href="#">Namespaces:</a>
     <ul id="left-sidebar-list">
-      <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
+      <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
     </ul>
   </div>
 </div>
@@ -61,6 +61,10 @@ namespace.
     <br />
   </div><div style="margin-left: 1em;" class="toc-section">
     <a href="#clojure.main">clojure.main</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#clojure.pprint">clojure.pprint</a>
     
     <br />
   </div><div style="margin-left: 1em;" class="toc-section">
@@ -181,6 +185,38 @@ This is API documentation for the latest committed checkin of the Clojure core.
   
   Public variables and functions:
   <span id="var-link"><a href="clojure.main-api.html#clojure.main/load-script" id="var-tag">load-script</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/main" id="var-tag">main</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/repl" id="var-tag">repl</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/repl-caught" id="var-tag">repl-caught</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/repl-exception" id="var-tag">repl-exception</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/repl-prompt" id="var-tag">repl-prompt</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/repl-read" id="var-tag">repl-read</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/skip-if-eol" id="var-tag">skip-if-eol</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/skip-whitespace" id="var-tag">skip-whitespace</a> </span><span id="var-link"><a href="clojure.main-api.html#clojure.main/with-bindings" id="var-tag">with-bindings</a> </span><br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.pprint">clojure.pprint</h2>
+  by <span id="author">Tom Faulhaber</span><br />
+  <a href="clojure.pprint-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr">A Pretty Printer for Clojure
+
+clojure.pprint implements a flexible system for printing structured data
+in a pleasing, easy-to-understand format. Basic use of the pretty printer is 
+simple, just call pprint instead of println. More advanced users can use 
+the building blocks provided to create custom output formats. 
+
+Out of the box, pprint supports a simple structured format for basic data 
+and a specialized format for Clojure source code. More advanced formats, 
+including formats that don't look like Clojure data at all like XML and 
+JSON, can be rendered by creating custom dispatch functions. 
+
+In addition to the pprint function, this module contains cl-format, a text 
+formatting function which is fully compatible with the format function in 
+Common Lisp. Because pretty printing directives are directly integrated with
+cl-format, it supports very concise custom dispatch. It also provides
+a more powerful alternative to Clojure's standard format function.
+
+See documentation for pprint and cl-format for more information or 
+complete documentation on the the clojure web site on github.</pre>
+  <span class="ns-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+  
+  
+  Public variables and functions:
+  <span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/*print-base*" id="var-tag">*print-base*</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/*print-miser-width*" id="var-tag">*print-miser-width*</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/*print-pprint-dispatch*" id="var-tag">*print-pprint-dispatch*</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/*print-pretty*" id="var-tag">*print-pretty*</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/*print-radix*" id="var-tag">*print-radix*</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/*print-right-margin*" id="var-tag">*print-right-margin*</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/*print-suppress-namespaces*" id="var-tag">*print-suppress-namespaces*</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/cl-format" id="var-tag">cl-format</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/formatter" id="var-tag">formatter</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/formatter-out" id="var-tag">formatter-out</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/fresh-line" id="var-tag">fresh-line</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/get-pretty-writer" id="var-tag">get-pretty-writer</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/pp" id="var-tag">pp</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/pprint" id="var-tag">pprint</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/pprint-indent" id="var-tag">pprint-indent</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/pprint-logical-block" id="var-tag">pprint-logical-block</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/pprint-newline" id="var-tag">pprint-newline</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/pprint-tab" id="var-tag">pprint-tab</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/set-pprint-dispatch" id="var-tag">set-pprint-dispatch</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/with-pprint-dispatch" id="var-tag">with-pprint-dispatch</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/write" id="var-tag">write</a> </span><span id="var-link"><a href="clojure.pprint-api.html#clojure.pprint/write-out" id="var-tag">write-out</a> </span><br />
   
 </div><div id="namespace-entry">
   <br />
