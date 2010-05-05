@@ -1681,7 +1681,8 @@
   "DEPRECATED: Use 'agent-error' instead.
   Returns a sequence of the exceptions thrown during asynchronous
   actions of the agent."
-  {:added "1.0"}
+  {:added "1.0"
+   :deprecated "1.2"}
   [a]
   (when-let [e (agent-error a)]
     (list e)))
@@ -1690,7 +1691,8 @@
   "DEPRECATED: Use 'restart-agent' instead.
   Clears any exceptions thrown during asynchronous actions of the
   agent, allowing subsequent actions to occur."
-  {:added "1.0"}
+  {:added "1.0"
+   :deprecated "1.2"}
   [^clojure.lang.Agent a] (restart-agent a (.deref a)))
 
 (defn shutdown-agents
@@ -3981,7 +3983,8 @@
 
   Adds the url (String or URL object) to the classpath per
   URLClassLoader.addURL"
-  {:added "1.0"}
+  {:added "1.0"
+   :deprecated "1.1"}
   [url]
   (println "WARNING: add-classpath is deprecated")
   (clojure.lang.RT/addURL url))
