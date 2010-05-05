@@ -139,6 +139,22 @@
                    ret)))
              #{} s))))
 
+(defn subset? 
+  "Is set1 a subset of set2?"
+  {:added "1.2",
+   :tag Boolean}
+  [set1 set2]
+  (and (<= (count set1) (count set2))
+       (every? set2 set1)))
+
+(defn superset? 
+  "Is set1 a superset of set2?"
+  {:added "1.2",
+   :tag Boolean}
+  [set1 set2]
+  (and (>= (count set1) (count set2))
+       (every? set1 set2)))
+
 (comment
 (refer 'set)
 (def xs #{{:a 11 :b 1 :c 1 :d 4}

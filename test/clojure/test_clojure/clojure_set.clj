@@ -179,4 +179,28 @@
 
 (deftest test-map-invert
   (are [x y] (= x y)
-    (set/map-invert {:a "one" :b "two"}) {"one" :a "two" :b}))
+       (set/map-invert {:a "one" :b "two"}) {"one" :a "two" :b}))
+
+(deftest test-subset?
+  (are [sub super] (set/subset? sub super)
+       #{} #{}
+       #{} #{1}
+       #{1} #{1}
+       #{1 2} #{1 2}
+       #{1 2} #{1 2 42})
+  (are [notsub super] (not (set/subset? notsub super))
+       #{1} #{}
+       #{2} #{1}
+       #{1 3} #{1}))
+
+(deftest test-superset?
+  (are [super sub] (set/superset? super sub)
+       #{} #{}
+       #{1} #{}
+       #{1} #{1}
+       #{1 2} #{1 2}
+       #{1 2 42} #{1 2})
+  (are [notsuper sub] (not (set/superset? notsuper sub))
+       #{} #{1}
+       #{2} #{1}
+       #{1} #{1 3}))
