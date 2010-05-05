@@ -48,7 +48,7 @@ one or more Clojure libraries."}
   clojure.contrib.gen-html-docs
   (:require [clojure.contrib.io :as io]
             [clojure.contrib.string :as s])
-  (:use [clojure.contrib seq repl-utils def prxml])
+  (:use [clojure.contrib repl-utils def prxml])
   (:import [java.lang Exception]
 	   [java.util.regex Pattern]))
 
