@@ -79,11 +79,11 @@
            vs-32 vs
            vs nil))))
 
-(deftest test-vec
-  (let [ nums      (range 1 100)
+(deftest test-vec-compare
+  (let [nums      (range 1 100)
         ; randomly replaces a single item with the given value
         rand-replace  (fn[val]
-                        (let [r (rand-int 100)]
+                        (let [r (rand-int 99)]
                           (concat (take r nums) [val] (drop (inc r) nums))))
         ; all num sequences in map
         num-seqs      {:standard       nums
@@ -275,7 +275,7 @@
              (:rand-lesser-3 long-vecs)
              (:rand-lesser-3 regular-vecs))))))
 
-(deftest test-vec
+(deftest test-vec-associative
   (let [empty-v (vector-of :long)
         v       (into empty-v (range 1 6))]
     (testing "Associative.containsKey"
