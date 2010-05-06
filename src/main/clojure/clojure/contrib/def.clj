@@ -73,8 +73,10 @@ making private definitions more succinct."}
          (if (.hasRoot (var ~orig))
            (def ~name (.getRoot (var ~orig)))
            (def ~name))
-         conj
-         (apply dissoc (meta (var ~orig)) (keys (meta (var ~name)))))
+         ;; When copying metadata, disregard {:macro false}.
+         ;; Workaround for http://www.assembla.com/spaces/clojure/tickets/273
+         #(conj (dissoc % :macro)
+                (apply dissoc (meta (var ~orig)) (remove #{:macro} (keys %)))))
         (var ~name)))
   ([name orig doc]
      (list `defalias (with-meta name (assoc (meta name) :doc doc)) orig)))
