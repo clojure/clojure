@@ -237,6 +237,16 @@ public static List<String> processCommandLine(String[] args){
 	return arglist;
 }
 
+// duck typing stderr plays nice with e.g. swank 
+public static PrintWriter errPrintWriter(){
+    Writer w = (Writer) ERR.deref();
+    if (w instanceof PrintWriter) {
+        return (PrintWriter) w;
+    } else {
+        return new PrintWriter(w);
+    }
+}
+
 static public final Object[] EMPTY_ARRAY = new Object[]{};
 static public final Comparator DEFAULT_COMPARATOR = new DefaultComparator();
 
@@ -337,7 +347,7 @@ public static void loadResourceScript(Class c, String name, boolean failIfNotFou
 }
 
 static public void init() throws Exception{
-	((PrintWriter) RT.ERR.deref()).println("No need to call RT.init() anymore");
+	RT.errPrintWriter().println("No need to call RT.init() anymore");
 }
 
 static public long lastModified(URL url, String libfile) throws Exception{

@@ -14,7 +14,6 @@ package clojure.lang;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -82,7 +81,7 @@ public Var intern(Symbol sym){
 }
 
 private void warnOnReplace(Symbol sym, Object o, Object v){
-	((PrintWriter) RT.ERR.deref()).println("WARNING: " + sym + " already refers to: " + o + " in namespace: " + name
+	RT.errPrintWriter().println("WARNING: " + sym + " already refers to: " + o + " in namespace: " + name
 		+ ", being replaced by: " + v);
 }
 

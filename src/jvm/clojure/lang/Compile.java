@@ -31,7 +31,7 @@ private static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-r
 public static void main(String[] args) throws Exception{
 
 	OutputStreamWriter out = (OutputStreamWriter) RT.OUT.deref();
-	PrintWriter err = (PrintWriter) RT.ERR.deref();
+	PrintWriter err = RT.errPrintWriter();
 	String path = System.getProperty(PATH_PROP);
 	int count = args.length;
 
