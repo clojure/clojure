@@ -249,7 +249,7 @@
       (is (false? (.isEmpty r)))))
   (testing "you can't define a method twice"
     (is (fails-with-cause?
-         java.lang.ClassFormatError #"^Duplicate method name"
+         java.lang.ClassFormatError #"^(Repetitive|Duplicate) method name"
          (eval '(reify
                  java.util.List
                  (size [_] 10)
