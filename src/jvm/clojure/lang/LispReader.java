@@ -307,7 +307,10 @@ private static Object matchSymbol(String s){
 			else
 				kns = Compiler.currentNS();
 			//auto-resolving keyword
-			return Keyword.intern(kns.name.name,ks.name);
+            if (kns != null)
+			    return Keyword.intern(kns.name.name,ks.name);
+            else
+                return null;    
 			}
 		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));

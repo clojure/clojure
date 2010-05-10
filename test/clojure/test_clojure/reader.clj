@@ -235,6 +235,15 @@
   (is (instance? clojure.lang.Keyword :alphabet))
   )
 
+(deftest reading-keywords
+  (are [x y] (= x (read-string y))
+       :foo ":foo"
+       :foo/bar ":foo/bar"
+       :user/foo "::foo")
+  (are [err msg form] (thrown-with-msg? err msg (read-string form))
+       Exception #"Invalid token: foo:" "foo:"
+       Exception #"Invalid token: :bar/" ":bar/"
+       Exception #"Invalid token: ::does.not/exist" "::does.not/exist"))
 ;; Lists
 
 (deftest t-Lists)
