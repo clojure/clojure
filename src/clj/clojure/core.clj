@@ -3918,23 +3918,6 @@
   {:added "1.0"}
   [v] (instance? clojure.lang.Var v))
 
-(defn slurp
-  "Reads the file named by f using the encoding enc into a string
-  and returns it."
-  {:added "1.0"}
-  ([f] (slurp f (.name (java.nio.charset.Charset/defaultCharset))))
-  ([^String f ^String enc]
-  (with-open [r (new java.io.BufferedReader
-                  (new java.io.InputStreamReader
-                    (new java.io.FileInputStream f) enc))]
-    (let [sb (new StringBuilder)]
-      (loop [c (.read r)]
-        (if (neg? c)
-          (str sb)
-          (do
-            (.append sb (char c))
-            (recur (.read r)))))))))
-
 (defn subs
   "Returns the substring of s beginning at start inclusive, and ending
   at end (defaults to length of string), exclusive."
@@ -5337,6 +5320,39 @@
   ([f val coll]
      (let [s (seq coll)]
        (clojure.core.protocols/internal-reduce s f val))))
+
+(require '[clojure.java.io :as jio])
+
+(defn- normalize-slurp-opts
+  [opts]
+  (if (string? (first opts))
+    (do
+      (println "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).")
+      [:encoding (first opts)])
+    opts))
+
+(defn slurp
+  "Reads the file named by f using the encoding enc into a string
+  and returns it."
+  {:added "1.0"}
+  ([f & opts]
+     (let [opts (normalize-slurp-opts opts)
+           sb (StringBuilder.)]
+       (with-open [#^java.io.Reader r (apply jio/reader f opts)]
+         (loop [c (.read r)]
+           (if (neg? c)
+             (str sb)
+             (do
+               (.append sb (char c))
+               (recur (.read r)))))))))
+
+(defn spit
+  "Opposite of slurp.  Opens f with writer, writes content, then
+  closes f."
+  {:added "1.2"}
+  [f content & options]
+  (with-open [#^java.io.Writer w (apply jio/writer f options)]
+    (.write w content)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 

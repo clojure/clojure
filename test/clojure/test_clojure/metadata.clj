@@ -20,7 +20,8 @@
     clojure.test
     clojure.walk
     clojure.xml
-    clojure.zip])
+    clojure.zip
+    clojure.java.io])
 
 (doseq [ns public-namespaces]
   (require ns))
