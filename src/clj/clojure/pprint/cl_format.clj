@@ -1884,13 +1884,7 @@ format-in can be either a control string or a previously compiled format."
   {:added "1.2"}
   [format-in]
   `(let [format-in# ~format-in
-         my-c-c# (var-get (get (ns-interns (the-ns 'clojure.pprint))
-                               '~'cached-compile))
-         my-e-f# (var-get (get (ns-interns (the-ns 'clojure.pprint))
-                               '~'execute-format))
-         my-i-n# (var-get (get (ns-interns (the-ns 'clojure.pprint))
-                               '~'init-navigator))
-         cf# (if (string? format-in#) (my-c-c# format-in#) format-in#)]
+         cf# (if (string? format-in#) (#'clojure.pprint/cached-compile format-in#) format-in#)]
      (fn [& args#]
-       (let [navigator# (my-i-n# args#)]
-         (my-e-f# cf# navigator#)))))
+       (let [navigator# (#'clojure.pprint/init-navigator args#)]
+         (#'clojure.pprint/execute-format cf# navigator#)))))

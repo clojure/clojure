@@ -106,15 +106,36 @@
           (recur (next aseq)))))))
 
 (def ^{:private true} pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
-(defn- pprint-ref [ref]
-  (pprint-logical-block  :prefix "#<Ref " :suffix ">"
-    (write-out @ref)))
-(defn- pprint-atom [ref]
-  (pprint-logical-block :prefix "#<Atom " :suffix ">"
-    (write-out @ref)))
-(defn- pprint-agent [ref]
-  (pprint-logical-block :prefix "#<Agent " :suffix ">"
-    (write-out @ref)))
+
+;;; TODO: don't block on promise (currently impossible)
+
+(def ^{:private true} 
+     type-map {"core$future_call" "Future",
+               "core$promise" "Promise"})
+
+(defn- map-ref-type 
+  "Map ugly type names to something simpler"
+  [name]
+  (or (when-let [match (re-find #"^[^$]+\$[^$]+" name)]
+        (type-map match))
+      name))
+
+(defn- pprint-ideref [o]
+  (let [prefix (format "#<%s@%x%s: "
+                       (map-ref-type (.getSimpleName (class o)))
+                       (System/identityHashCode o)
+                       (if (and (instance? clojure.lang.Agent o)
+                                (agent-error o))
+                         " FAILED"
+                         ""))]
+    (pprint-logical-block  :prefix prefix :suffix ">"
+                           (pprint-indent :block (-> (count prefix) (- 2) -))
+                           (pprint-newline :linear)
+                           (write-out (cond 
+                                       (and (future? o) (not (future-done? o))) :pending
+                                       :else @o)))))
+
+(def ^{:private true} pprint-pqueue (formatter-out "~<<-(~;~@{~w~^ ~_~}~;)-<~:>"))
 
 (defn- pprint-simple-default [obj]
   (cond 
@@ -133,9 +154,8 @@
 (use-method simple-dispatch clojure.lang.IPersistentVector pprint-vector)
 (use-method simple-dispatch clojure.lang.IPersistentMap pprint-map)
 (use-method simple-dispatch clojure.lang.IPersistentSet pprint-set)
-(use-method simple-dispatch clojure.lang.Ref pprint-ref)
-(use-method simple-dispatch clojure.lang.Atom pprint-atom)
-(use-method simple-dispatch clojure.lang.Agent pprint-agent)
+(use-method simple-dispatch clojure.lang.PersistentQueue pprint-pqueue)
+(use-method simple-dispatch clojure.lang.IDeref pprint-ideref)
 (use-method simple-dispatch nil pr)
 (use-method simple-dispatch :default pprint-simple-default)
 
@@ -365,9 +385,8 @@
 (use-method code-dispatch clojure.lang.IPersistentVector pprint-vector)
 (use-method code-dispatch clojure.lang.IPersistentMap pprint-map)
 (use-method code-dispatch clojure.lang.IPersistentSet pprint-set)
-(use-method code-dispatch clojure.lang.Ref pprint-ref)
-(use-method code-dispatch clojure.lang.Atom pprint-atom)
-(use-method code-dispatch clojure.lang.Agent pprint-agent)
+(use-method code-dispatch clojure.lang.PersistentQueue pprint-pqueue)
+(use-method code-dispatch clojure.lang.IDeref pprint-ideref)
 (use-method code-dispatch nil pr)
 (use-method code-dispatch :default pprint-simple-default)
 
