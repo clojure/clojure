@@ -33,8 +33,8 @@
 
 (defprotocol ^{:added "1.2"} Coercions
   "Coerce between various 'resource-namish' things."
-  (as-file [x] "Coerce argument to a file.")
-  (as-url [x] "Coerce argument to a URL."))
+  (^File as-file [x] "Coerce argument to a file.")
+  (^URL as-url [x] "Coerce argument to a URL."))
 
 (extend-protocol Coercions
   nil
@@ -60,16 +60,26 @@
   (as-url [u] (.toURL u))
   (as-file [u] (as-file (as-url u))))
 
-(defprotocol IOFactory
-  (make-reader [x opts])
-  (make-writer [x opts])
-  (make-input-stream [x opts])
-  (make-output-stream [x opts]))
+(defprotocol ^{:added "1.2"} IOFactory
+  "Factory functions that create ready-to-use, buffered versions of
+   the various Java I/O stream types, on top of anything that can
+   be unequivocally converted to the requested kind of stream.
+
+   Common options include
+   
+     :append    true to open stream in append mode
+     :encoding  string name of encoding to use, e.g. \"UTF-8\".
+
+   Callers should generally prefer the higher level API provided by
+   reader, writer, input-stream, and output-stream."
+  (make-reader [x opts] "Creates a BufferedReader. See also IOFactory docs.")
+  (make-writer [x opts] "Creates a BufferedWriter. See also IOFactory docs.")
+  (make-input-stream [x opts] "Creates a BufferedInputStream. See also IOFactory docs.")
+  (make-output-stream [x opts] "Creates a BufferedOutputStream. See also IOFactory docs."))
 
 (defn ^Reader reader
   "Attempts to coerce its argument into an open java.io.Reader.
-   The default implementations of this protocol always return a
-   java.io.BufferedReader.
+   Default implementations always return a java.io.BufferedReader.
 
    Default implementations are provided for Reader, BufferedReader,
    InputStream, File, URI, URL, Socket, byte arrays, character arrays,
@@ -87,8 +97,7 @@
 
 (defn ^Writer writer
   "Attempts to coerce its argument into an open java.io.Writer.
-   The default implementations of this protocol always return a
-   java.io.BufferedWriter.
+   Default implementations always return a java.io.BufferedWriter.
 
    Default implementations are provided for Writer, BufferedWriter,
    OutputStream, File, URI, URL, Socket, and String.
@@ -105,8 +114,7 @@
 
 (defn ^InputStream input-stream
   "Attempts to coerce its argument into an open java.io.InputStream.
-   The default implementations of this protocol always return a
-   java.io.BufferedInputStream.
+   Default implementations always return a java.io.BufferedInputStream.
 
    Default implementations are defined for OutputStream, File, URI, URL,
    Socket, byte array, and String arguments.
@@ -123,8 +131,7 @@
 
 (defn ^OutputStream output-stream
   "Attempts to coerce its argument into an open java.io.OutputStream.
-   The default implementations of this protocol always return a
-   java.io.BufferedOutputStream.
+   Default implementations always return a java.io.BufferedOutputStream.
 
    Default implementations are defined for OutputStream, File, URI, URL,
    Socket, and String arguments.
@@ -386,7 +393,9 @@
       (.getPath f))))
 
 (defn ^File file
-  "Returns a java.io.File from string or file args."
+  "Returns a java.io.File, passing each arg to as-file.  Multiple-arg
+   versions treat the first argument as parent and subsequent args as
+   children relative to the parent."
   {:added "1.2"}
   ([arg]                      
      (as-file arg))

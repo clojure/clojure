@@ -11,7 +11,7 @@
     (.deleteOnExit)))
 
 (deftest test-spit-and-slurp
-  (let [f (temp-file "clojure.contrib" "text")]
+  (let [f (temp-file "clojure.java.io" "test")]
     (spit f "foobar")
     (is (= "foobar" (slurp f)))
     (spit f "foobar" :encoding "UTF-16")
@@ -23,7 +23,7 @@
              (is (= "foobar" (slurp f "UTF-16")))))))))
   
 (deftest test-streams-defaults
-  (let [f (temp-file "clojure.contrib" "test-reader-writer")
+  (let [f (temp-file "clojure.java.io" "test-reader-writer")
         content "testing"]
     (try
       (is (thrown? Exception (reader (Object.))))
