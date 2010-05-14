@@ -412,20 +412,9 @@
       silently
       (throw (java.io.IOException. (str "Couldn't delete " f)))))
 
-(defn delete-file-recursively
-  "Delete file f. If it's a directory, recursively delete all its contents.
-   Raise an exception if any deletion fails unless silently is true."
-  {:added "1.2"}
-  [f & [silently]]
-  (let [f (file f)]
-    (if (.isDirectory f)
-      (doseq [child (.listFiles f)]
-        (delete-file-recursively child silently)))
-    (delete-file f silently)))
-
 (defn make-parents
-  "Create all parent directories of file. Pass extra args
-   as you would to file."
+  "Given the same arg(s) as for file, creates all parent directories of
+   the file they represent."
   {:added "1.2"}
   [f & more]
   (.mkdirs (.getParentFile ^File (apply file f more))))

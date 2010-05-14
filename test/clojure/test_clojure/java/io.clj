@@ -178,8 +178,11 @@
 
 (deftest test-make-parents
   (let [tmp (System/getProperty "java.io.tmpdir")]
-    (delete-file-recursively (file tmp "test-make-parents") :silently)
+    (delete-file (file tmp "test-make-parents" "child" "grandchild") :silently)
+    (delete-file (file tmp "test-make-parents" "child") :silently)
+    (delete-file (file tmp "test-make-parents") :silently)
     (make-parents tmp "test-make-parents" "child" "grandchild")
     (is (.isDirectory (file tmp "test-make-parents" "child")))
     (is (not (.isDirectory (file tmp "test-make-parents" "child" "grandchild"))))
-    (delete-file-recursively (file tmp "test-make-parents"))))
+    (delete-file (file tmp "test-make-parents" "child"))
+    (delete-file (file tmp "test-make-parents"))))
