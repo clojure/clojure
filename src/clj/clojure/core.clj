@@ -5251,9 +5251,9 @@
      (if-let [s (seq coll)]
        (reduce f (first s) (next s))
        (f)))
-  ([f start coll]
+  ([f val coll]
      (let [s (seq coll)]
-       (clojure.core.protocols/internal-reduce s f start))))
+       (clojure.core.protocols/internal-reduce s f val))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 
