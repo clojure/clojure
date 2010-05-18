@@ -5313,7 +5313,7 @@ public static Object eval(Object form) throws Exception{
 
 public static Object eval(Object form, boolean freshLoader) throws Exception{
 	boolean createdLoader = false;
-	if(freshLoader)//!LOADER.isBound())
+	if(true)//!LOADER.isBound())
 		{
 		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
 		createdLoader = true;
