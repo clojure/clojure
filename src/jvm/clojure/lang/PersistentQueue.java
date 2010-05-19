@@ -17,22 +17,24 @@ import java.util.Iterator;
 /**
  * conses onto rear, peeks/pops from front
  * See Okasaki's Batched Queues
- * This differs in that it uses a PersistentArrayList as the rear, which is in-order,
+ * This differs in that it uses a PersistentVector as the rear, which is in-order,
  * so no reversing or suspensions required for persistent use
  */
 
-public class PersistentQueue extends Obj implements IPersistentList, Collection{
+public class PersistentQueue extends Obj implements IPersistentList, Collection, Counted{
 
-final public static PersistentQueue EMPTY = new PersistentQueue(null, null, null);
+final public static PersistentQueue EMPTY = new PersistentQueue(null, 0, null, null);
 
 //*
+final int cnt;
 final ISeq f;
 final PersistentVector r;
 //static final int INITIAL_REAR_SIZE = 4;
 int _hash = -1;
 
-PersistentQueue(IPersistentMap meta, ISeq f, PersistentVector r){
+PersistentQueue(IPersistentMap meta, int cnt, ISeq f, PersistentVector r){
 	super(meta);
+	this.cnt = cnt;
 	this.f = f;
 	this.r = r;
 }
@@ -93,11 +95,11 @@ public PersistentQueue pop(){
 		f1 = RT.seq(r);
 		r1 = null;
 		}
-	return new PersistentQueue(meta(), f1, r1);
+	return new PersistentQueue(meta(), cnt - 1, f1, r1);
 }
 
 public int count(){
-	return RT.count(f) + RT.count(r);
+	return cnt;
 }
 
 public ISeq seq(){
@@ -108,17 +110,17 @@ public ISeq seq(){
 
 public PersistentQueue cons(Object o){
 	if(f == null)     //empty
-		return new PersistentQueue(meta(), RT.list(o), null);
+		return new PersistentQueue(meta(), cnt + 1, RT.list(o), null);
 	else
-		return new PersistentQueue(meta(), f, (r != null ? r : PersistentVector.EMPTY).cons(o));
+		return new PersistentQueue(meta(), cnt + 1, f, (r != null ? r : PersistentVector.EMPTY).cons(o));
 }
 
 public IPersistentCollection empty(){
-	return EMPTY.withMeta(meta());	
+	return EMPTY.withMeta(meta());
 }
 
 public PersistentQueue withMeta(IPersistentMap meta){
-	return new PersistentQueue(meta, f, r);
+	return new PersistentQueue(meta, cnt, f, r);
 }
 
 static class Seq extends ASeq{
