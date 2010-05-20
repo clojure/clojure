@@ -198,7 +198,12 @@
      (prompt)
      (flush)
      (loop []
-       (when-not (= (read-eval-print) request-exit)
+       (when-not 
+       	 (try (= (read-eval-print) request-exit)
+	  (catch Throwable e
+	   (caught e)
+	   (set! *e e)
+	   nil))
          (when (need-prompt)
            (prompt)
            (flush))
