@@ -32,110 +32,110 @@ public void run(){
 
 
 public Object invoke() throws Exception{
-	return throwArity();
+	return throwArity(0);
 }
 
 public Object invoke(Object arg1) throws Exception{
-	return throwArity();
+	return throwArity(1);
 }
 
 public Object invoke(Object arg1, Object arg2) throws Exception{
-	return throwArity();
+	return throwArity(2);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
-	return throwArity();
+	return throwArity(3);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception{
-	return throwArity();
+	return throwArity(4);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception{
-	return throwArity();
+	return throwArity(5);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) throws Exception{
-	return throwArity();
+	return throwArity(6);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
 		throws Exception{
-	return throwArity();
+	return throwArity(7);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8) throws Exception{
-	return throwArity();
+	return throwArity(8);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9) throws Exception{
-	return throwArity();
+	return throwArity(9);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10) throws Exception{
-	return throwArity();
+	return throwArity(10);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11) throws Exception{
-	return throwArity();
+	return throwArity(11);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) throws Exception{
-	return throwArity();
+	return throwArity(12);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
 		throws Exception{
-	return throwArity();
+	return throwArity(13);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
 		throws Exception{
-	return throwArity();
+	return throwArity(14);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15) throws Exception{
-	return throwArity();
+	return throwArity(15);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16) throws Exception{
-	return throwArity();
+	return throwArity(16);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17) throws Exception{
-	return throwArity();
+	return throwArity(17);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18) throws Exception{
-	return throwArity();
+	return throwArity(18);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) throws Exception{
-	return throwArity();
+	return throwArity(19);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
 		throws Exception{
-	return throwArity();
+	return throwArity(20);
 }
 
 
@@ -144,7 +144,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20,
                      Object... args)
 		throws Exception{
-	return throwArity();
+	return throwArity(21);
 }
 
 public Object applyTo(ISeq arglist) throws Exception{
@@ -433,10 +433,10 @@ static public Object applyToHelper(IFn ifn, ISeq arglist) throws Exception{
 		}
 }
 
-public Object throwArity(){
+public Object throwArity(int n){
 	String name = getClass().getSimpleName();
 	int suffix = name.lastIndexOf("__");
-	throw new IllegalArgumentException("Wrong number of args passed to: "
+	throw new IllegalArgumentException("Wrong number of args (" + n + ") passed to: "
 	                                   + (suffix == -1 ? name : name.substring(0, suffix)).replace('_', '-'));
 }
 }

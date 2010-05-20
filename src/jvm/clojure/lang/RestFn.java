@@ -388,7 +388,7 @@ public Object applyTo(ISeq args) throws Exception{
 					, Util.ret1(args.next(),args=null));
 
 		}
-	return throwArity();
+	return throwArity(-1);
 }
 
 public Object invoke() throws Exception{
@@ -397,7 +397,7 @@ public Object invoke() throws Exception{
 		case 0:
 			return doInvoke(null);
 		default:
-			return throwArity();
+			return throwArity(0);
 		}
 
 }
@@ -410,7 +410,7 @@ public Object invoke(Object arg1) throws Exception{
 		case 1:
 			return doInvoke(Util.ret1(arg1, arg1 = null), null);
 		default:
-			return throwArity();
+			return throwArity(1);
 		}
 
 }
@@ -425,7 +425,7 @@ public Object invoke(Object arg1, Object arg2) throws Exception{
 		case 2:
 			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), null);
 		default:
-			return throwArity();
+			return throwArity(2);
 		}
 
 }
@@ -446,7 +446,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
 			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
 			                null);
 		default:
-			return throwArity();
+			return throwArity(3);
 		}
 
 }
@@ -471,7 +471,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws 
 			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
 			                Util.ret1(arg4, arg4 = null), null);
 		default:
-			return throwArity();
+			return throwArity(4);
 		}
 
 }
@@ -501,7 +501,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(Util.ret1(arg1, arg1 = null), Util.ret1(arg2, arg2 = null), Util.ret1(arg3, arg3 = null),
 			                Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null), null);
 		default:
-			return throwArity();
+			return throwArity(5);
 		}
 
 }
@@ -539,7 +539,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			                Util.ret1(arg4, arg4 = null), Util.ret1(arg5, arg5 = null), Util.ret1(arg6, arg6 = null),
 			                null);
 		default:
-			return throwArity();
+			return throwArity(6);
 		}
 
 }
@@ -565,7 +565,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		case 7:
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, null);
 		default:
-			return throwArity();
+			return throwArity(7);
 		}
 
 }
@@ -593,7 +593,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		case 8:
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, null);
 		default:
-			return throwArity();
+			return throwArity(8);
 		}
 
 }
@@ -623,7 +623,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		case 9:
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, null);
 		default:
-			return throwArity();
+			return throwArity(9);
 		}
 
 }
@@ -655,7 +655,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		case 10:
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, null);
 		default:
-			return throwArity();
+			return throwArity(10);
 		}
 
 }
@@ -689,7 +689,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		case 11:
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, null);
 		default:
-			return throwArity();
+			return throwArity(11);
 		}
 
 }
@@ -725,7 +725,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		case 12:
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, null);
 		default:
-			return throwArity();
+			return throwArity(12);
 		}
 
 }
@@ -777,7 +777,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		case 13:
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, null);
 		default:
-			return throwArity();
+			return throwArity(13);
 		}
 
 }
@@ -833,7 +833,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                null);
 		default:
-			return throwArity();
+			return throwArity(14);
 		}
 
 }
@@ -892,7 +892,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                arg15, null);
 		default:
-			return throwArity();
+			return throwArity(15);
 		}
 
 }
@@ -954,7 +954,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                arg15, arg16, null);
 		default:
-			return throwArity();
+			return throwArity(16);
 		}
 
 }
@@ -1019,7 +1019,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                arg15, arg16, arg17, null);
 		default:
-			return throwArity();
+			return throwArity(17);
 		}
 
 }
@@ -1088,7 +1088,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                arg15, arg16, arg17, arg18, null);
 		default:
-			return throwArity();
+			return throwArity(18);
 		}
 
 }
@@ -1163,7 +1163,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                arg15, arg16, arg17, arg18, arg19, null);
 		default:
-			return throwArity();
+			return throwArity(19);
 		}
 
 }
@@ -1246,7 +1246,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                arg15, arg16, arg17, arg18, arg19, arg20, null);
 		default:
-			return throwArity();
+			return throwArity(20);
 		}
 
 }
@@ -1337,7 +1337,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                arg15, arg16, arg17, arg18, arg19, arg20, ArraySeq.create(args));
 		default:
-			return throwArity();
+			return throwArity(21);
 		}
 
 }
