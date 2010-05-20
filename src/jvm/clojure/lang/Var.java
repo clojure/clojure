@@ -240,7 +240,7 @@ synchronized public void bindRoot(Object root){
 	this.root = root;
     try
         {
-        alterMeta(assoc, RT.list(macroKey, RT.F));
+        alterMeta(dissoc, RT.list(macroKey));
         }
     catch (Exception e)
         {
@@ -486,6 +486,12 @@ static IFn assoc = new AFn(){
     @Override
     public Object invoke(Object m, Object k, Object v) throws Exception {
         return RT.assoc(m, k, v);
+    }
+};
+static IFn dissoc = new AFn() {
+    @Override
+    public Object invoke(Object c, Object k) throws Exception {
+        return RT.dissoc(c, k);
     }
 };
 }
