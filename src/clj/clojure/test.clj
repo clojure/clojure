@@ -736,5 +736,5 @@
   were successful, false otherwise."
   {:added "1.1"}
   [summary]
-  (and (zero? (:fail summary))
-       (zero? (:error summary))))
+  (and (zero? (:fail summary 0))
+       (zero? (:error summary 0))))

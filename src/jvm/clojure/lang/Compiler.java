@@ -3078,9 +3078,11 @@ static public class FnExpr extends ObjExpr{
 		                  (munge(currentNS().name.name) + "$");
 		if(RT.second(form) instanceof Symbol)
 			name = ((Symbol) RT.second(form)).name;
-		String simpleName = ((name != null ?
-		                  munge(name).replace(".", "_DOT_") : "fn")
-		                 + "__" + RT.nextID());
+		String simpleName = name != null ?
+		                    (munge(name).replace(".", "_DOT_")
+		                    + (enclosingMethod != null ? "__" + RT.nextID() : ""))
+		                    : ("fn"
+		                      + "__" + RT.nextID());
 		fn.name = basename + simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.objtype = Type.getObjectType(fn.internalName);
@@ -3898,9 +3900,9 @@ static public class ObjExpr implements Expr{
 		if(compiledClass == null)
 			try
 				{
-				if(RT.booleanCast(COMPILE_FILES.deref()))
-					compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
-				else
+//				if(RT.booleanCast(COMPILE_FILES.deref()))
+//					compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
+//				else
 					{
 					loader = (DynamicClassLoader) LOADER.deref();
 					compiledClass = loader.defineClass(name, bytecode, src);
@@ -5338,7 +5340,8 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 			        && !(RT.first(form) instanceof Symbol
 			             && ((Symbol) RT.first(form)).name.startsWith("def")))
 				{
-				ObjExpr fexpr = (ObjExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
+				ObjExpr fexpr = (ObjExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form),
+				                                  "eval" + RT.nextID());
 				IFn fn = (IFn) fexpr.eval();
 				return fn.invoke();
 				}
@@ -5829,7 +5832,9 @@ static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) throws Exc
 	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
 		line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
 	Var.pushThreadBindings(
-			RT.map(LINE, line));
+			RT.map(LINE, line
+			       ,LOADER, RT.makeClassLoader()
+			));
 	try
 		{
 		form = macroexpand(form);
@@ -5879,7 +5884,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       CONSTANT_IDS, new IdentityHashMap(),
 			       KEYWORDS, PersistentHashMap.EMPTY,
 			       VARS, PersistentHashMap.EMPTY
-			       ,LOADER, RT.makeClassLoader()
+			   //    ,LOADER, RT.makeClassLoader()
 			));
 
 	try
