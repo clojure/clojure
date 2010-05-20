@@ -273,7 +273,8 @@
                   (if (if (clojure.lang.Util/equiv 'fn ifn)
                         (if (instance? clojure.lang.Symbol iname) false true))
                     ;; inserts the same fn name to the inline fn if it does not have one
-                    (assoc m :inline (cons ifn (cons name (next inline))))
+                    (assoc m :inline (cons ifn (cons (clojure.lang.Symbol/intern (.concat (.getName name) "__inliner"))
+                                                     (next inline))))
                     m))
               m (conj (if (meta name) (meta name) {}) m)]
           (list 'def (with-meta name m)
@@ -767,21 +768,22 @@
   [x] (. clojure.lang.Numbers (inc x)))
 
 ;; reduce is defined again later after InternalReduce loads
-(defn reduce
-  ([f coll]
-   (let [s (seq coll)]
-     (if s
-       (reduce f (first s) (next s))
-       (f))))
-  ([f val coll]
-     (let [s (seq coll)]
-       (if s
-         (if (chunked-seq? s)
-           (recur f 
-                  (.reduce (chunk-first s) f val)
-                  (chunk-next s))
-           (recur f (f val (first s)) (next s)))
-         val))))
+(def reduce
+     (fn r
+       ([f coll]
+             (let [s (seq coll)]
+               (if s
+                 (r f (first s) (next s))
+                 (f))))
+       ([f val coll]
+          (let [s (seq coll)]
+            (if s
+              (if (chunked-seq? s)
+                (recur f 
+                       (.reduce (chunk-first s) f val)
+                       (chunk-next s))
+                (recur f (f val (first s)) (next s)))
+              val)))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
@@ -2505,7 +2507,7 @@
            ~@body
            (recur (unchecked-inc ~i)))))))
 
-(defn into
+#_(defn into
   "Returns a new coll consisting of to-coll with all of the items of
   from-coll conjoined."
   {:added "1.0"}
@@ -2514,6 +2516,87 @@
       (if items
         (recur (conj ret (first items)) (next items))
         ret)))
+
+;;;;;;;;;;;;;;;;;;;;; editable collections ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn transient 
+  "Alpha - subject to change.
+  Returns a new, transient version of the collection, in constant time."
+  {:added "1.1"}
+  [^clojure.lang.IEditableCollection coll] 
+  (.asTransient coll))
+
+(defn persistent! 
+  "Alpha - subject to change.
+  Returns a new, persistent version of the transient collection, in
+  constant time. The transient collection cannot be used after this
+  call, any such use will throw an exception."
+  {:added "1.1"}
+  [^clojure.lang.ITransientCollection coll]
+  (.persistent coll))
+
+(defn conj!
+  "Alpha - subject to change.
+  Adds x to the transient collection, and return coll. The 'addition'
+  may happen at different 'places' depending on the concrete type."
+  {:added "1.1"}
+  [^clojure.lang.ITransientCollection coll x]
+  (.conj coll x))
+
+(defn assoc!
+  "Alpha - subject to change.
+  When applied to a transient map, adds mapping of key(s) to
+  val(s). When applied to a transient vector, sets the val at index.
+  Note - index must be <= (count vector). Returns coll."
+  {:added "1.1"}
+  ([^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
+  ([^clojure.lang.ITransientAssociative coll key val & kvs]
+   (let [ret (.assoc coll key val)]
+     (if kvs
+       (recur ret (first kvs) (second kvs) (nnext kvs))
+       ret))))
+
+(defn dissoc!
+  "Alpha - subject to change.
+  Returns a transient map that doesn't contain a mapping for key(s)."
+  {:added "1.1"}
+  ([^clojure.lang.ITransientMap map key] (.without map key))
+  ([^clojure.lang.ITransientMap map key & ks]
+   (let [ret (.without map key)]
+     (if ks
+       (recur ret (first ks) (next ks))
+       ret))))
+
+(defn pop!
+  "Alpha - subject to change.
+  Removes the last item from a transient vector. If
+  the collection is empty, throws an exception. Returns coll"
+  {:added "1.1"}
+  [^clojure.lang.ITransientVector coll] 
+  (.pop coll)) 
+
+(defn disj!
+  "Alpha - subject to change.
+  disj[oin]. Returns a transient set of the same (hashed/sorted) type, that
+  does not contain key(s)."
+  {:added "1.1"}
+  ([set] set)
+  ([^clojure.lang.ITransientSet set key]
+   (. set (disjoin key)))
+  ([set key & ks]
+   (let [ret (disj set key)]
+     (if ks
+       (recur ret (first ks) (next ks))
+       ret))))
+
+;redef into with batch support
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  {:added "1.0"}
+  [to from]
+  (if (instance? clojure.lang.IEditableCollection to)
+    (persistent! (reduce conj! (transient to) from))
+    (reduce conj to from)))
 
 (defmacro import 
   "import-list => (package-symbol class-name-symbols*)
@@ -5397,86 +5480,7 @@
   {:added "1.1"}
   [promise val] (promise val))
 
-;;;;;;;;;;;;;;;;;;;;; editable collections ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn transient 
-  "Alpha - subject to change.
-  Returns a new, transient version of the collection, in constant time."
-  {:added "1.1"}
-  [^clojure.lang.IEditableCollection coll] 
-  (.asTransient coll))
 
-(defn persistent! 
-  "Alpha - subject to change.
-  Returns a new, persistent version of the transient collection, in
-  constant time. The transient collection cannot be used after this
-  call, any such use will throw an exception."
-  {:added "1.1"}
-  [^clojure.lang.ITransientCollection coll]
-  (.persistent coll))
-
-(defn conj!
-  "Alpha - subject to change.
-  Adds x to the transient collection, and return coll. The 'addition'
-  may happen at different 'places' depending on the concrete type."
-  {:added "1.1"}
-  [^clojure.lang.ITransientCollection coll x]
-  (.conj coll x))
-
-(defn assoc!
-  "Alpha - subject to change.
-  When applied to a transient map, adds mapping of key(s) to
-  val(s). When applied to a transient vector, sets the val at index.
-  Note - index must be <= (count vector). Returns coll."
-  {:added "1.1"}
-  ([^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
-  ([^clojure.lang.ITransientAssociative coll key val & kvs]
-   (let [ret (.assoc coll key val)]
-     (if kvs
-       (recur ret (first kvs) (second kvs) (nnext kvs))
-       ret))))
-
-(defn dissoc!
-  "Alpha - subject to change.
-  Returns a transient map that doesn't contain a mapping for key(s)."
-  {:added "1.1"}
-  ([^clojure.lang.ITransientMap map key] (.without map key))
-  ([^clojure.lang.ITransientMap map key & ks]
-   (let [ret (.without map key)]
-     (if ks
-       (recur ret (first ks) (next ks))
-       ret))))
-
-(defn pop!
-  "Alpha - subject to change.
-  Removes the last item from a transient vector. If
-  the collection is empty, throws an exception. Returns coll"
-  {:added "1.1"}
-  [^clojure.lang.ITransientVector coll] 
-  (.pop coll)) 
-
-(defn disj!
-  "Alpha - subject to change.
-  disj[oin]. Returns a transient set of the same (hashed/sorted) type, that
-  does not contain key(s)."
-  {:added "1.1"}
-  ([set] set)
-  ([^clojure.lang.ITransientSet set key]
-   (. set (disjoin key)))
-  ([set key & ks]
-   (let [ret (disj set key)]
-     (if ks
-       (recur ret (first ks) (next ks))
-       ret))))
-
-;redef into with batch support
-(defn into
-  "Returns a new coll consisting of to-coll with all of the items of
-  from-coll conjoined."
-  {:added "1.0"}
-  [to from]
-  (if (instance? clojure.lang.IEditableCollection to)
-    (persistent! (reduce conj! (transient to) from))
-    (reduce conj to from)))
 
 (defn flatten
   "Takes any nested combination of sequential things (lists, vectors,
