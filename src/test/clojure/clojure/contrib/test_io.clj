@@ -1,4 +1,5 @@
 (ns clojure.contrib.test-io
+  (:refer-clojure :exclude (spit))
   (:use clojure.test clojure.contrib.io)
   (:import (java.io File FileInputStream BufferedInputStream)
            (java.net URL URI)))

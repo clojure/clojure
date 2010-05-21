@@ -57,14 +57,15 @@
            Note: this is not really \"duck typing\" as implemented in languages
            like Ruby.  A better name would have been \"do-what-I-mean-streams\"
            or \"just-give-me-a-stream\", but ducks are funnier."} 
-    clojure.contrib.duck-streams
-    (:import 
-     (java.io Reader InputStream InputStreamReader PushbackReader
-              BufferedReader File PrintWriter OutputStream
-              OutputStreamWriter BufferedWriter Writer
-              FileInputStream FileOutputStream ByteArrayOutputStream
-              StringReader ByteArrayInputStream)
-     (java.net URI URL MalformedURLException Socket)))
+  clojure.contrib.duck-streams
+  (:refer-clojure :exclude (spit))
+  (:import 
+   (java.io Reader InputStream InputStreamReader PushbackReader
+            BufferedReader File PrintWriter OutputStream
+            OutputStreamWriter BufferedWriter Writer
+            FileInputStream FileOutputStream ByteArrayOutputStream
+            StringReader ByteArrayInputStream)
+   (java.net URI URL MalformedURLException Socket)))
 
 
 (def

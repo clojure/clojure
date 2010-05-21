@@ -54,16 +54,17 @@
            BufferedInputStream and BufferedOutputStream instances (respectively),
            with default implementations extended to a variety of argument
            types: URLs or filenames as strings, java.io.File's, Sockets, etc."}
-    clojure.contrib.io
-    (:import 
-     (java.io Reader InputStream InputStreamReader PushbackReader
-              BufferedReader File OutputStream
-              OutputStreamWriter BufferedWriter Writer
-              FileInputStream FileOutputStream ByteArrayOutputStream
-              StringReader ByteArrayInputStream
-              BufferedInputStream BufferedOutputStream
-              CharArrayReader)
-     (java.net URI URL MalformedURLException Socket)))
+  clojure.contrib.io
+  (:refer-clojure :exclude (spit))
+  (:import 
+   (java.io Reader InputStream InputStreamReader PushbackReader
+            BufferedReader File OutputStream
+            OutputStreamWriter BufferedWriter Writer
+            FileInputStream FileOutputStream ByteArrayOutputStream
+            StringReader ByteArrayInputStream
+            BufferedInputStream BufferedOutputStream
+            CharArrayReader)
+   (java.net URI URL MalformedURLException Socket)))
 
 
 (def

@@ -1,4 +1,5 @@
 (ns clojure.contrib.test-properties
+  (:refer-clojure :exclude (spit))
   (:use clojure.test clojure.contrib.properties
         [clojure.contrib.io :only (spit)])
   (:import (java.util Properties)
