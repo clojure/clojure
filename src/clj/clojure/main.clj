@@ -194,7 +194,7 @@
       (catch Throwable e
         (caught e)
         (set! *e e)))
-     (use 'clojure.repl)
+     (use '[clojure.repl :only (source-fn source apropos dir-fn dir)])
      (prompt)
      (flush)
      (loop []

@@ -30,6 +30,14 @@
        ~@body
        (str s#))))
 
+(defn temp-ns
+  "Create and return a temporary ns, using clojure.core + uses"
+  [& uses]
+  (binding [*ns* *ns*]
+    (in-ns (gensym))
+    (apply clojure.core/use 'clojure.core uses)
+    *ns*))
+
 (defmacro eval-in-temp-ns [form]
   `(binding [*ns* *ns*]
      (in-ns (gensym))
@@ -45,7 +53,7 @@
     (is (re-matches msg-re (with-err-print-writer (eval-in-temp-ns form))))))
 
 (deftest error-messages
-  (testing "binding a var that already refers to something"
+  (testing "binding a core var that already refers to something"
     (should-print-err-message
      #"WARNING: prefers already refers to: #'clojure.core/prefers in namespace: .*\n"
      (defn prefers [] (throw (RuntimeException. "rebound!")))))
@@ -72,3 +80,24 @@
   (is (contains? (meta #'example-var) :macro))
   (.bindRoot #'example-var 0)
   (is (not (contains? (meta #'example-var) :macro))))
+
+(deftest last-var-wins-for-core
+  (testing "you can replace a core name, with warning"
+    (let [ns (temp-ns 'clojure.set)
+        replacement (gensym)]
+      (with-err-string-writer (intern ns 'prefers replacement))
+      (is (= replacement @('prefers (ns-publics ns))))))
+  (testing "you cannot intern over an existing non-core name"
+    (let [ns (temp-ns 'clojure.set)
+          replacement (gensym)]
+      (is (thrown? IllegalStateException
+                   (intern ns 'subset? replacement)))
+      (is (nil? ('subset? (ns-publics ns))))
+      (is (= #'clojure.set/subset? ('subset? (ns-refers ns))))))
+  (testing "you cannot refer over an existing non-core name"
+    (let [ns (temp-ns 'clojure.set)
+          replacement (gensym)]
+      (is (thrown? IllegalStateException
+                   (.refer ns 'subset? #'clojure.set/intersection)))
+      (is (nil? ('subset? (ns-publics ns))))
+      (is (= #'clojure.set/subset? ('subset? (ns-refers ns)))))))

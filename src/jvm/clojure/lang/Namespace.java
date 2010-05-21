@@ -66,12 +66,10 @@ public Var intern(Symbol sym){
 	if(o instanceof Var && ((Var) o).ns == this)
 		return (Var) o;
 
-//	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
-
 	if(v == null)
 		v = new Var(this, sym);
 
-	warnOnReplace(sym, o, v);
+	warnOrFailOnReplace(sym, o, v);
 
 
 	while(!mappings.compareAndSet(map, map.assoc(sym, v)))
@@ -80,7 +78,12 @@ public Var intern(Symbol sym){
 	return v;
 }
 
-private void warnOnReplace(Symbol sym, Object o, Object v){
+private void warnOrFailOnReplace(Symbol sym, Object o, Object v){
+    if (o instanceof Var) {
+        if (((Var)o).ns != RT.CLOJURE_NS) {
+            throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+        }
+    }
 	RT.errPrintWriter().println("WARNING: " + sym + " already refers to: " + o + " in namespace: " + name
 		+ ", being replaced by: " + v);
 }
@@ -101,8 +104,7 @@ Object reference(Symbol sym, Object val){
 	if(o == val)
 		return o;
 
-//	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
-	warnOnReplace(sym, o, val);
+	warnOrFailOnReplace(sym, o, val);
 
 	while(!mappings.compareAndSet(map, map.assoc(sym, val)))
 		map = getMappings();
