@@ -2816,8 +2816,15 @@ static class InvokeExpr implements Expr{
 				if(this.protocolOn != null)
 					{
 					IPersistentMap mmap = (IPersistentMap) RT.get(pvar.get(), methodMapKey);
-					String mname = munge(((Keyword) mmap.valAt(Keyword.intern(fvar.sym))).sym.toString());
-					List methods = Reflector.getMethods(protocolOn, args.count() - 1, mname, false);
+                    Keyword mmapVal = (Keyword) mmap.valAt(Keyword.intern(fvar.sym));
+                    if (mmapVal == null) {
+                        throw new IllegalArgumentException(
+                              "No method of interface: " + protocolOn.getName() +
+                              " found for function: " + fvar.sym + " of protocol: " + pvar.sym +
+                              " (The protocol method may have been defined before and removed.)");
+                    }
+                    String mname = munge(mmapVal.sym.toString());
+ 					List methods = Reflector.getMethods(protocolOn, args.count() - 1, mname, false);
 					if(methods.size() != 1)
 						throw new IllegalArgumentException(
 								"No single method: " + mname + " of interface: " + protocolOn.getName() +
