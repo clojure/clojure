@@ -33,8 +33,8 @@
 
 (defprotocol ^{:added "1.2"} Coercions
   "Coerce between various 'resource-namish' things."
-  (^File as-file [x] "Coerce argument to a file.")
-  (^URL as-url [x] "Coerce argument to a URL."))
+  (^{:tag File, :added "1.2"} as-file [x] "Coerce argument to a file.")
+  (^{:tag URL, :added "1.2"} as-url [x] "Coerce argument to a URL."))
 
 (extend-protocol Coercions
   nil
@@ -72,10 +72,10 @@
 
    Callers should generally prefer the higher level API provided by
    reader, writer, input-stream, and output-stream."
-  (make-reader [x opts] "Creates a BufferedReader. See also IOFactory docs.")
-  (make-writer [x opts] "Creates a BufferedWriter. See also IOFactory docs.")
-  (make-input-stream [x opts] "Creates a BufferedInputStream. See also IOFactory docs.")
-  (make-output-stream [x opts] "Creates a BufferedOutputStream. See also IOFactory docs."))
+  (^{:added "1.2"} make-reader [x opts] "Creates a BufferedReader. See also IOFactory docs.")
+  (^{:added "1.2"} make-writer [x opts] "Creates a BufferedWriter. See also IOFactory docs.")
+  (^{:added "1.2"} make-input-stream [x opts] "Creates a BufferedInputStream. See also IOFactory docs.")
+  (^{:added "1.2"} make-output-stream [x opts] "Creates a BufferedOutputStream. See also IOFactory docs."))
 
 (defn ^Reader reader
   "Attempts to coerce its argument into an open java.io.Reader.
