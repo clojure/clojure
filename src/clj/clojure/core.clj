@@ -3229,6 +3229,15 @@
   [ns]
   (filter-key val (partial instance? Class) (ns-map ns)))
 
+(defn ns-interns
+  "Returns a map of the intern mappings for the namespace."
+  {:added "1.0"}
+  [ns]
+  (let [ns (the-ns ns)]
+    (filter-key val (fn [^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
+                                 (= ns (.ns v))))
+                (ns-map ns))))
+
 (defn refer
   "refers to all public vars of ns, subject to filters.
   filters can include at most one each of:
@@ -3256,7 +3265,10 @@
         (when-not (exclude sym)
           (let [v (nspublics sym)]
             (when-not v
-              (throw (new java.lang.IllegalAccessError (str sym " is not public"))))
+              (throw (new java.lang.IllegalAccessError
+                          (if (get (ns-interns ns) sym)
+                            (str sym " is not public")
+                            (str sym " does not exist")))))
             (. *ns* (refer (or (rename sym) sym) v)))))))
 
 (defn ns-refers
@@ -3266,15 +3278,6 @@
   (let [ns (the-ns ns)]
     (filter-key val (fn [^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
                                  (not= ns (.ns v))))
-                (ns-map ns))))
-
-(defn ns-interns
-  "Returns a map of the intern mappings for the namespace."
-  {:added "1.0"}
-  [ns]
-  (let [ns (the-ns ns)]
-    (filter-key val (fn [^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
-                                 (= ns (.ns v))))
                 (ns-map ns))))
 
 (defn alias
