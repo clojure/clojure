@@ -345,16 +345,16 @@ static public boolean testBit(Number x, int n){
 	return bitOps(x).testBit(x, n);
 }
 
-static public Number shiftLeft(Number x, int n){
-	return bitOps(x).shiftLeft(x, n);
+static public Number shiftLeft(Object x, Object n){
+	return bitOps(x).shiftLeft((Number)x, ((Number)n).intValue());
 }
 
 static public int shiftLeft(int x, int n){
 	return x << n;
 }
 
-static public Number shiftRight(Number x, int n){
-	return bitOps(x).shiftRight(x, n);
+static public Number shiftRight(Object x, Object n){
+	return bitOps(x).shiftRight((Number)x, ((Number)n).intValue());
 }
 
 static public int shiftRight(int x, int n){
