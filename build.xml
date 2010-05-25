@@ -105,6 +105,8 @@
       <arg value="clojure.test.tap"/>
       <arg value="clojure.test.junit"/>
       <arg value="clojure.pprint"/>
+      <arg value="clojure.java.io"/>
+      <arg value="clojure.repl"/>
     </java>
   </target>
 
