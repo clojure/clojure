@@ -1,7 +1,7 @@
 ;; Generic interfaces for comparison operations
 
 ;; by Konrad Hinsen
-;; last updated March 4, 2010
+;; last updated May 25, 2010
 
 ;; Copyright (c) Konrad Hinsen, 2009-2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -178,19 +178,19 @@
   [x y]
   (clojure.core/= x y))
 
-(defmethod > [Object Object]
+(defmethod > [java.lang.Number java.lang.Number]
   [x y]
   (clojure.core/> x y))
 
-(defmethod < [Object Object]
+(defmethod < [java.lang.Number java.lang.Number]
   [x y]
   (clojure.core/< x y))
 
-(defmethod >= [Object Object]
+(defmethod >= [java.lang.Number java.lang.Number]
   [x y]
   (clojure.core/>= x y))
 
-(defmethod <= [Object Object]
+(defmethod <= [java.lang.Number java.lang.Number]
   [x y]
   (clojure.core/<= x y))
 
