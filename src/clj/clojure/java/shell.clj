@@ -10,7 +10,7 @@
   #^{:author "Chris Houser, Stuart Halloway",
      :doc "Conveniently launch a sub-process providing its stdin and
 collecting its stdout"}
-  clojure.shell
+  clojure.java.shell
   (:use [clojure.java.io :only (as-file)])
   (:import (java.io InputStreamReader OutputStreamWriter)))
 
@@ -67,7 +67,6 @@ collecting its stdout"}
    (nil? arg) nil
    (map? arg) (into-array String (map (fn [[k v]] (str (as-env-key k) "=" v)) arg))
    true arg))
-
 
 (defn sh
   "Passes the given strings to Runtime.exec() to launch a sub-process.
