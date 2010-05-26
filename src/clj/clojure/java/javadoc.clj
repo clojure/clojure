@@ -16,19 +16,14 @@
 (def *feeling-lucky-url* "http://www.google.com/search?btnI=I%27m%20Feeling%20Lucky&q=allinurl:")
 (def *feeling-lucky* true)
 
-(def
-    #^{:doc "Ref to a list of local paths for Javadoc-generated HTML files."}
- *local-javadocs* (ref (list)))
+(def *local-javadocs* (ref (list)))
  
 (def *core-java-api*
   (if (= "1.5" (System/getProperty "java.specification.version"))
     "http://java.sun.com/j2se/1.5.0/docs/api/"
     "http://java.sun.com/javase/6/docs/api/"))
 
-(def
- #^{:doc "Ref to a map from package name prefixes to URLs for remote
-  Javadocs."}
- *remote-javadocs*
+(def *remote-javadocs*
  (ref (sorted-map
        "java." *core-java-api*
        "javax." *core-java-api*
@@ -42,24 +37,27 @@
 
 (defn add-local-javadoc
   "Adds to the list of local Javadoc paths."
+  {:added "1.2"}
   [path]
   (dosync (commute *local-javadocs* conj path)))
 
 (defn add-remote-javadoc
   "Adds to the list of remote Javadoc URLs.  package-prefix is the
   beginning of the package name that has docs at this URL."
+  {:added "1.2"}
   [package-prefix url]
   (dosync (commute *remote-javadocs* assoc package-prefix url)))
 
-(defn- find-javadoc-url
+(defn- javadoc-url
   "Searches for a URL for the given class name.  Tries
   *local-javadocs* first, then *remote-javadocs*.  Returns a string."
-  {:tag String}
-  [#^String classname]
+  {:tag String,
+   :added "1.2"}
+  [^String classname]
   (let [file-path (.replace classname \. File/separatorChar)
         url-path (.replace classname \. \/)]
-    (if-let [file #^File (first
-                           (filter #(.exists #^File %)
+    (if-let [file ^File (first
+                           (filter #(.exists ^File %)
                              (map #(File. (str %) (str file-path ".html"))
                                @*local-javadocs*)))]
       (-> file .toURI str)
@@ -74,10 +72,11 @@
 (defn javadoc
   "Opens a browser window displaying the javadoc for the argument.
   Tries *local-javadocs* first, then *remote-javadocs*."
+  {:added "1.2"}
   [class-or-object]
-  (let [#^Class c (if (instance? Class class-or-object) 
+  (let [^Class c (if (instance? Class class-or-object) 
                     class-or-object 
                     (class class-or-object))]
-    (if-let [url (find-javadoc-url (.getName c))]
+    (if-let [url (javadoc-url (.getName c))]
       (browse-url url)
       (println "Could not find Javadoc for" c))))

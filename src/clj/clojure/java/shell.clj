@@ -7,8 +7,8 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns 
-  #^{:author "Chris Houser, Stuart Halloway",
-     :doc "Conveniently launch a sub-process providing its stdin and
+  ^{:author "Chris Houser, Stuart Halloway",
+    :doc "Conveniently launch a sub-process providing its stdin and
 collecting its stdout"}
   clojure.java.shell
   (:use [clojure.java.io :only (as-file)])
@@ -17,13 +17,17 @@ collecting its stdout"}
 (def *sh-dir* nil)
 (def *sh-env* nil)
 
-(defmacro with-sh-dir [dir & forms]
+(defmacro with-sh-dir
   "Sets the directory for use with sh, see sh for details."
+  {:added "1.2"}
+  [dir & forms]
   `(binding [*sh-dir* ~dir]
      ~@forms))
 
-(defmacro with-sh-env [env & forms]
+(defmacro with-sh-env
   "Sets the environment for use with sh, see sh for details."
+  {:added "1.2"}
+  [env & forms]
   `(binding [*sh-env* ~env]
      ~@forms))
      
@@ -43,26 +47,23 @@ collecting its stdout"}
     target))
 
 (defn- parse-args
-  "Takes a seq of 'sh' arguments and returns a map of option keywords
-  to option values."
   [args]
-  (loop [[arg :as args] args opts {:cmd [] :out "UTF-8" :dir *sh-dir* :env *sh-env*}]
-    (if-not args
-      opts
-      (if (keyword? arg)
-        (recur (nnext args) (assoc opts arg (second args)))
-        (recur (next args) (update-in opts [:cmd] conj arg))))))
+  (let [default-opts {:out "UTF-8" :dir *sh-dir* :env *sh-env*}
+        [cmd opts] (split-with string? args)]
+    [cmd (merge default-opts (apply hash-map opts))]))
 
-(defn- as-env-key [arg]
+(defn- as-env-key 
   "Helper so that callers can use symbols, keywords, or strings
    when building an environment map."
+  [arg]
   (cond
    (symbol? arg) (name arg)
    (keyword? arg) (name arg)
    (string? arg) arg))
 
-(defn- as-env-string [arg]
-  "Helper so that callers can pass a Clojure map for the :env to sh." 
+(defn- as-env-string 
+  "Helper so that callers can pass a Clojure map for the :env to sh."
+  [arg]
   (cond
    (nil? arg) nil
    (map? arg) (into-array String (map (fn [[k v]] (str (as-env-key k) "=" v)) arg))
@@ -92,12 +93,14 @@ collecting its stdout"}
     :exit => sub-process's exit code
     :out  => sub-process's stdout (as byte[] or String)
     :err  => sub-process's stderr (as byte[] or String)"
+  {:added "1.2"}
   [& args]
-  (let [opts (parse-args args)
+  (let [[cmd opts] (parse-args args)
         proc (.exec (Runtime/getRuntime) 
-		    (into-array (:cmd opts)) 
+		    (into-array cmd) 
 		    (as-env-string (:env opts))
 		    (as-file (:dir opts)))]
+    (println opts)
     (if (:in opts)
       (with-open [osw (OutputStreamWriter. (.getOutputStream proc))]
         (.write osw (:in opts)))

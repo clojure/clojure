@@ -21,7 +21,10 @@
     clojure.walk
     clojure.xml
     clojure.zip
-    clojure.java.io])
+    clojure.java.io
+    clojure.java.browse
+    clojure.java.javadoc
+    clojure.java.shell])
 
 (doseq [ns public-namespaces]
   (require ns))

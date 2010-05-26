@@ -7,8 +7,8 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns 
-  #^{:author "Christophe Grand",
-     :doc "Start a web browser from Clojure"}
+  ^{:author "Christophe Grand",
+    :doc "Start a web browser from Clojure"}
   clojure.java.browse
   (:require [clojure.java.shell :as sh]) 
   (:import (java.net URI)))
@@ -43,7 +43,10 @@
   (require 'clojure.contrib.javadoc.browse-ui)
   ((find-var 'clojure.contrib.javadoc.browse-ui/open-url-in-swing) url))
 
-(defn browse-url [url]
+(defn browse-url
+  "Open url in a browser"
+  {:added "1.2"}
+  [url]
   (or (open-url-in-browser url)
       (when *open-url-script* (sh/sh *open-url-script* (str url)) true)
       (open-url-in-swing url)))

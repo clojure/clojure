@@ -107,6 +107,10 @@
       <arg value="clojure.pprint"/>
       <arg value="clojure.java.io"/>
       <arg value="clojure.repl"/>
+      <arg value="clojure.java.browse"/>
+      <arg value="clojure.java.javadoc"/>
+      <arg value="clojure.java.shell"/>
+      <arg value="clojure.java.browse-ui"/>
     </java>
   </target>
 
