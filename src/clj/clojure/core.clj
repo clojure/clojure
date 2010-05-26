@@ -1222,11 +1222,11 @@
     (. rev (rseq)))
 
 (defn name
-  "Returns the name String of a symbol or keyword."
+  "Returns the name String of a string, symbol or keyword."
   {:tag String
    :added "1.0"}
   [^clojure.lang.Named x]
-    (. x (getName)))
+  (if (string? x) x (. x (getName))))
 
 (defn namespace
   "Returns the namespace String of a symbol or keyword, or nil if not present."

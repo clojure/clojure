@@ -52,21 +52,12 @@ collecting its stdout"}
         [cmd opts] (split-with string? args)]
     [cmd (merge default-opts (apply hash-map opts))]))
 
-(defn- as-env-key 
-  "Helper so that callers can use symbols, keywords, or strings
-   when building an environment map."
-  [arg]
-  (cond
-   (symbol? arg) (name arg)
-   (keyword? arg) (name arg)
-   (string? arg) arg))
-
 (defn- as-env-string 
   "Helper so that callers can pass a Clojure map for the :env to sh."
   [arg]
   (cond
    (nil? arg) nil
-   (map? arg) (into-array String (map (fn [[k v]] (str (as-env-key k) "=" v)) arg))
+   (map? arg) (into-array String (map (fn [[k v]] (str (name k) "=" v)) arg))
    true arg))
 
 (defn sh

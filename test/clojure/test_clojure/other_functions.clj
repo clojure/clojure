@@ -44,6 +44,12 @@
       (> 5 0) true ))
 
 
+(deftest test-name
+  (are [x y] (= x (name y))
+       "foo" :foo
+       "bar" 'bar
+       "quux" "quux"))
+
 ; time assert comment doc
 
 ; partial
