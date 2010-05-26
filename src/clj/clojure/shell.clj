@@ -11,6 +11,7 @@
      :doc "Conveniently launch a sub-process providing its stdin and
 collecting its stdout"}
   clojure.shell
+  (:use [clojure.java.io :only (as-file)])
   (:import (java.io InputStreamReader OutputStreamWriter)))
 
 (def *sh-dir* nil)
@@ -60,13 +61,6 @@ collecting its stdout"}
    (keyword? arg) (name arg)
    (string? arg) arg))
 
-(defn- as-file [arg]
-  "Helper so that callers can pass a String for the :dir to sh."   
-  (cond
-   (string? arg) (java.io.File. arg)
-   (nil? arg) nil
-   (instance? java.io.File arg) arg))
-   
 (defn- as-env-string [arg]
   "Helper so that callers can pass a Clojure map for the :env to sh." 
   (cond
@@ -88,20 +82,17 @@ collecting its stdout"}
          sub-process's stdout to a String which is returned.
          If :bytes is given, the sub-process's stdout will be stored in 
          a byte array and returned.  Defaults to UTF-8.
-  :return-map
-         when followed by boolean true, sh returns a map of
-           :exit => sub-process's exit code
-           :out  => sub-process's stdout (as byte[] or String)
-           :err  => sub-process's stderr (as byte[] or String)
-         when not given or followed by false, sh returns a single
-         array or String of the sub-process's stdout followed by its
-         stderr
   :env   override the process env with a map (or the underlying Java
          String[] if you are a masochist).
   :dir   override the process dir with a String or java.io.File.
 
   You can bind :env or :dir for multiple operations using with-sh-env
-  and with-sh-dir."
+  and with-sh-dir.
+
+  sh returns a map of
+    :exit => sub-process's exit code
+    :out  => sub-process's stdout (as byte[] or String)
+    :err  => sub-process's stderr (as byte[] or String)"
   [& args]
   (let [opts (parse-args args)
         proc (.exec (Runtime/getRuntime) 
@@ -114,19 +105,15 @@ collecting its stdout"}
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
-      (let [[[out err] combine-fn]
-                (if (= (:out opts) :bytes)
-                  [(for [strm [stdout stderr]]
-                    (into-array Byte/TYPE (map byte (stream-seq strm))))
-                  #(aconcat Byte/TYPE %1 %2)]
-                  [(for [strm [stdout stderr]]
-                    (apply str (map char (stream-seq 
-                                            (InputStreamReader. strm (:out opts))))))
-                  str])
-              exit-code (.waitFor proc)]
-        (if (:return-map opts)
-          {:exit exit-code :out out :err err}
-          (combine-fn out err))))))
+      (let [[out err]
+            (if (= (:out opts) :bytes)
+              (for [strm [stdout stderr]]
+                (into-array Byte/TYPE (map byte (stream-seq strm))))
+              (for [strm [stdout stderr]]
+                (apply str (map char (stream-seq 
+                                      (InputStreamReader. strm (:out opts)))))))
+            exit-code (.waitFor proc)]
+        {:exit exit-code :out out :err err}))))
 
 (comment
 
