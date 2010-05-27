@@ -728,6 +728,7 @@
 
   ; identity
   (are [x] (= (disj x) x)
+      nil
       #{}
       #{1 2 3}
       ; different data types
@@ -753,6 +754,9 @@
       (sorted-set 1 2) )
 
   (are [x y] (= x y)
+      (disj nil :a) nil
+      (disj nil :a :b) nil
+
       (disj #{} :a) #{}
       (disj #{} :a :b) #{}
 

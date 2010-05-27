@@ -1168,12 +1168,14 @@
   {:added "1.0"}
   ([set] set)
   ([^clojure.lang.IPersistentSet set key]
-   (. set (disjoin key)))
+   (when set
+     (. set (disjoin key))))
   ([set key & ks]
-   (let [ret (disj set key)]
-     (if ks
-       (recur ret (first ks) (next ks))
-       ret))))
+   (when set
+     (let [ret (disj set key)]
+       (if ks
+         (recur ret (first ks) (next ks))
+         ret)))))
 
 (defn find
   "Returns the map entry for key, or nil if key not present."
