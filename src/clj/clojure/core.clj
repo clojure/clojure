@@ -5555,7 +5555,7 @@
      (lazy-seq
       (if-let [s (seq coll)]
         (reductions f (first s) (rest s))
-        (f))))
+        (list (f)))))
   ([f init coll]
      (cons init
            (lazy-seq

@@ -1138,6 +1138,8 @@
        {1 4 2 2 3 1} '(1 1 1 1 2 2 3)))
 
 (deftest test-reductions
+  (is (= (reductions + nil)
+         [0]))
   (is (= (reductions + [1 2 3 4 5])
 	 [1 3 6 10 15]))
   (is (= (reductions + 10 [1 2 3 4 5])
