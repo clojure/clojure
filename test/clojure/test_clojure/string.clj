@@ -15,9 +15,16 @@
   (is (= "FOObarfoo" (s/replace-first-by #"foo" s/upper-case "foobarfoo"))))
 
 (deftest t-join
-  (is (= "1,2,3" (s/join \, [1 2 3])))
-  (is (= "" (s/join \, [])))
-  (is (= "1 and-a 2 and-a 3" (s/join " and-a " [1 2 3]))))
+  (are [x coll] (= x (s/join coll))
+       "" nil
+       "" []
+       "1" [1]
+       "12" [1 2])
+  (are [x sep coll] (= x (s/join sep coll))
+       "1,2,3" \, [1 2 3]
+       "" \, []
+       "1" \, [1]
+       "1 and-a 2 and-a 3" " and-a " [1 2 3]))
 
 (deftest t-chop
   (is (= "fo" (s/chop "foo")))

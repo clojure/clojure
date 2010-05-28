@@ -70,8 +70,17 @@
 (defn ^String join
   "Returns a string of all elements in coll, separated by
   separator.  Like Perl's join."
-  [^String separator coll]
-  (apply str (interpose separator coll)))
+  ([coll]
+     (apply str coll))
+  ([separator [x & more]]
+     (loop [sb (StringBuilder. (str x))
+            more more
+            sep (str separator)]
+       (if more
+         (recur (-> sb (.append sep) (.append (str (first more))))
+                (next more)
+                sep)
+         (str sb)))))
 
 (defn ^String chop
   "Removes the last character of string, does nothing on a zero-length
