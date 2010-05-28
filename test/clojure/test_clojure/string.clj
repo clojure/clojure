@@ -27,16 +27,11 @@
        "1" \, [1]
        "1 and-a 2 and-a 3" " and-a " [1 2 3]))
 
-(deftest t-chop
-  (is (= "fo" (s/chop "foo")))
-  (is (= "") (s/chop "f"))
-  (is (= "") (s/chop "")))
-
-(deftest t-chomp
-  (is (= "foo" (s/chomp "foo\n")))
-  (is (= "foo" (s/chomp "foo\r\n")))
-  (is (= "foo" (s/chomp "foo")))
-  (is (= "" (s/chomp ""))))
+(deftest t-trim-nl
+  (is (= "foo" (s/trim-nl "foo\n")))
+  (is (= "foo" (s/trim-nl "foo\r\n")))
+  (is (= "foo" (s/trim-nl "foo")))
+  (is (= "" (s/trim-nl ""))))
 
 (deftest t-capitalize
   (is (= "Foobar" (s/capitalize "foobar")))

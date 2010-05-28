@@ -118,26 +118,23 @@
 (defn ^String triml
   "Removes whitespace from the left side of string."
   [^String s]
-  (replace-re #"^\s+" "" s))
+  (replace s #"^\s+" ""))
 
 (defn ^String trimr
   "Removes whitespace from the right side of string."
   [^String s]
-  (replace-re #"\s+$" "" s))
+  (replace s #"\s+$" ""))
 
-(defn ^String chop
-  "Removes the last character of string, does nothing on a zero-length
-  string."
-  [^String s]
-  (let [size (count s)]
-    (if (zero? size)
-      s
-      (subs s 0 (dec (count s))))))
-
-(defn ^String chomp
+(defn ^String trim-nl
   "Removes all trailing newline \\n or return \\r characters from
   string.  Note: String.trim() is similar and faster."
   [^String s]
-  (replace-re #"[\r\n]+$" "" s))
+  (loop [offset (.length s)]
+    (if (zero? offset)
+      ""
+      (let [ch (.charAt s (dec offset))]
+        (if (or (= ch \newline) (= ch \return))
+          (recur (dec offset))
+          (.substring s 0 offset))))))
 
 
