@@ -25,3 +25,27 @@
      (eval
       '(do ~@forms))))
 
+(defn causes
+  [^Throwable throwable]
+  (loop [causes []
+         t throwable]
+    (if t (recur (conj causes t) (.getCause t)) causes)))
+
+;; this is how I wish clojure.test/thrown? worked...
+;; Does body throw expected exception, anywhere in the .getCause chain?
+(defmethod assert-expr 'fails-with-cause?
+  [msg [_ exception-class msg-re & body :as form]]
+  `(try
+   ~@body
+   (report {:type :fail, :message ~msg, :expected '~form, :actual nil})
+   (catch Throwable t#
+     (if (some (fn [cause#]
+                 (and
+                  (= ~exception-class (class cause#))
+                  (re-find ~msg-re (.getMessage cause#))))
+               (causes t#))
+       (report {:type :pass, :message ~msg,
+                :expected '~form, :actual t#})
+       (report {:type :fail, :message ~msg,
+                :expected '~form, :actual t#})))))
+

@@ -10,32 +10,9 @@
 
 (ns clojure.test-clojure.protocols
   (:use clojure.test clojure.test-clojure.protocols.examples)
-  (:require [clojure.test-clojure.protocols.more-examples :as other])
+  (:require [clojure.test-clojure.protocols.more-examples :as other]
+            clojure.test-clojure.helpers)
   (:import [clojure.test_clojure.protocols.examples ExampleInterface]))
-
-(defn causes
-  [^Throwable throwable]
-  (loop [causes []
-         t throwable]
-    (if t (recur (conj causes t) (.getCause t)) causes)))
-
-;; this is how I wish clojure.test/thrown? worked...
-;; Does body throw expected exception, anywhere in the .getCause chain?
-(defmethod assert-expr 'fails-with-cause?
-  [msg [_ exception-class msg-re & body :as form]]
-  `(try
-   ~@body
-   (report {:type :fail, :message ~msg, :expected '~form, :actual nil})
-   (catch Throwable t#
-     (if (some (fn [cause#]
-                 (and
-                  (= ~exception-class (class cause#))
-                  (re-find ~msg-re (.getMessage cause#))))
-               (causes t#))
-       (report {:type :pass, :message ~msg,
-                :expected '~form, :actual t#})
-       (report {:type :fail, :message ~msg,
-                :expected '~form, :actual t#})))))
 
 ;; temporary hack until I decide how to cleanly reload protocol
 (defn reload-example-protocols
