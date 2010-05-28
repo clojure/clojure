@@ -6,9 +6,9 @@
   (is (= "tab" (s/reverse "bat"))))
 
 (deftest t-replace
-  (is (= "faabar" (s/replace-char \o \a "foobar")))
-  (is (= "barbarbar" (s/replace-str "foo" "bar" "foobarfoo")))
-  (is (= "FOObarFOO" (s/replace-by #"foo" s/upper-case  "foobarfoo"))))
+  (is (= "faabar" (s/replace "foobar" \o \a)))
+  (is (= "barbarbar" (s/replace "foobarfoo" "foo" "bar")))
+  (is (= "FOObarFOO" (s/replace "foobarfoo" #"foo" s/upper-case))))
 
 (deftest t-replace-first
   (is (= "barbarfoo" (s/replace-first-re #"foo" "bar" "foobarfoo")))

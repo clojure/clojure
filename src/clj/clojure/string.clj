@@ -17,25 +17,8 @@
   [^String s]
   (.toString (.reverse (StringBuilder. s))))
 
-(defn replace-str
-  "Replaces all instances of substring a with b in s."
-  [^String a ^String b ^String s]
-  (.replace s a b))
-
-(defn replace-char
-  "Replaces all instances of character a with character b in s."
-  [^Character a ^Character b ^String s]
-  (.replace s a b))
-
-(defn replace-re
-  "Replaces all matches of re with replacement in s."
-  [re replacement ^String s]
-  (.replaceAll (re-matcher re s) replacement))
-
-(defn replace-by
-  "Replaces all matches of re in s with the result of 
-  (f (re-groups the-match))."
-  [re f ^String s]
+(defn- replace-by
+  [^String s re f]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer. (.length s))]
       (loop []
@@ -44,6 +27,23 @@
               (recur))
           (do (.appendTail m buffer)
               (.toString buffer)))))))
+
+(defn replace
+  "Replaces all instance of match with replacement in s.
+
+   match/replacement can be:
+
+   string / string
+   char / char
+   pattern / (string or function of match)"
+  [^String s match replacement]
+  (cond 
+   (instance? Character match) (.replace s ^Character match ^Character replacement)
+   (instance? String match) (.replace s ^String match ^String replacement)
+   (instance? Pattern match) (if (string? replacement)
+                               (.replaceAll (re-matcher ^Pattern match s) ^String replacement)
+                               (replace-by s match replacement))
+   :default (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
 
 (defn replace-first-str
   "Replace first occurance of substring a with b in s."
