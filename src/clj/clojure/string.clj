@@ -43,7 +43,7 @@
    (instance? Pattern match) (if (string? replacement)
                                (.replaceAll (re-matcher ^Pattern match s) ^String replacement)
                                (replace-by s match replacement))
-   :default (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
+   :else (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
 
 (defn- replace-first-by
   "Replace first match of re in s with the result of
