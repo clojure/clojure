@@ -12,30 +12,30 @@
   (:refer-clojure :exclude (replace reverse))
   (:import (java.util.regex Pattern)))
 
-(defn #^String reverse
+(defn ^String reverse
   "Returns s with its characters reversed."
-  [#^String s]
+  [^String s]
   (.toString (.reverse (StringBuilder. s))))
 
 (defn replace-str
   "Replaces all instances of substring a with b in s."
-  [#^String a #^String b #^String s]
+  [^String a ^String b ^String s]
   (.replace s a b))
 
 (defn replace-char
   "Replaces all instances of character a with character b in s."
-  [#^Character a #^Character b #^String s]
+  [^Character a ^Character b ^String s]
   (.replace s a b))
 
 (defn replace-re
   "Replaces all matches of re with replacement in s."
-  [re replacement #^String s]
+  [re replacement ^String s]
   (.replaceAll (re-matcher re s) replacement))
 
 (defn replace-by
   "Replaces all matches of re in s with the result of 
   (f (re-groups the-match))."
-  [re f #^String s]
+  [re f ^String s]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer. (.length s))]
       (loop []
@@ -47,18 +47,18 @@
 
 (defn replace-first-str
   "Replace first occurance of substring a with b in s."
-  [#^String a #^String b #^String s]
+  [^String a ^String b ^String s]
   (.replaceFirst (re-matcher (Pattern/quote a) s) b))
 
 (defn replace-first-re
   "Replace first match of re in s."
-  [#^Pattern re #^String replacement #^String s]
+  [^Pattern re ^String replacement ^String s]
   (.replaceFirst (re-matcher re s) replacement))
 
 (defn replace-first-by
   "Replace first match of re in s with the result of
   (f (re-groups the-match))."
-  [#^Pattern re f #^String s]
+  [^Pattern re f ^String s]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer.)]
       (if (.find m)
@@ -67,64 +67,64 @@
           (.appendTail m buffer)
           (str buffer))))))
 
-(defn #^String join
+(defn ^String join
   "Returns a string of all elements in coll, separated by
   separator.  Like Perl's join."
-  [#^String separator coll]
+  [^String separator coll]
   (apply str (interpose separator coll)))
 
-(defn #^String chop
+(defn ^String chop
   "Removes the last character of string, does nothing on a zero-length
   string."
-  [#^String s]
+  [^String s]
   (let [size (count s)]
     (if (zero? size)
       s
       (subs s 0 (dec (count s))))))
 
-(defn #^String chomp
+(defn ^String chomp
   "Removes all trailing newline \\n or return \\r characters from
   string.  Note: String.trim() is similar and faster."
-  [#^String s]
+  [^String s]
   (replace-re #"[\r\n]+$" "" s))
 
-(defn #^String capitalize
+(defn ^String capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
-  [#^String s]
+  [^String s]
   (if (< (count s) 2)
     (.toUpperCase s)
-    (str (.toUpperCase #^String (subs s 0 1))
-         (.toLowerCase #^String (subs s 1)))))
+    (str (.toUpperCase ^String (subs s 0 1))
+         (.toLowerCase ^String (subs s 1)))))
 
-(defn #^String ltrim
+(defn ^String ltrim
   "Removes whitespace from the left side of string."
-  [#^String s]
+  [^String s]
   (replace-re #"^\s+" "" s))
 
-(defn #^String rtrim
+(defn ^String rtrim
   "Removes whitespace from the right side of string."
-  [#^String s]
+  [^String s]
   (replace-re #"\s+$" "" s))
 
-(defn #^String upper-case
+(defn ^String upper-case
   "Converts string to all upper-case."
-  [#^String s]
+  [^String s]
   (.toUpperCase s))
 
-(defn #^String lower-case
+(defn ^String lower-case
   "Converts string to all lower-case."
-  [#^String s]
+  [^String s]
   (.toLowerCase s))
 
 (defn split
   "Splits string on a regular expression.  Optional argument limit is
   the maximum number of splits."
-  ([#^Pattern re #^String s] (seq (.split re s)))
-  ([#^Pattern re limit #^String s] (seq (.split re s limit))))
+  ([^Pattern re ^String s] (seq (.split re s)))
+  ([^Pattern re limit ^String s] (seq (.split re s limit))))
 
-(defn #^String trim
+(defn ^String trim
   "Removes whitespace from both ends of string."
-  [#^String s]
+  [^String s]
   (.trim s))
 
