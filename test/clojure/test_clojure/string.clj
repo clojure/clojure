@@ -11,8 +11,9 @@
   (is (= "FOObarFOO" (s/replace "foobarfoo" #"foo" s/upper-case))))
 
 (deftest t-replace-first
-  (is (= "barbarfoo" (s/replace-first-re #"foo" "bar" "foobarfoo")))
-  (is (= "FOObarfoo" (s/replace-first-by #"foo" s/upper-case "foobarfoo"))))
+  (is (= "barbarfoo" (s/replace-first "foobarfoo" "foo" "bar")))
+  (is (= "barbarfoo" (s/replace-first "foobarfoo" #"foo" "bar")))
+  (is (= "FOObarfoo" (s/replace-first "foobarfoo" #"foo" s/upper-case))))
 
 (deftest t-join
   (are [x coll] (= x (s/join coll))

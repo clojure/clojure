@@ -45,20 +45,10 @@
                                (replace-by s match replacement))
    :default (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
 
-(defn replace-first-str
-  "Replace first occurance of substring a with b in s."
-  [^String a ^String b ^String s]
-  (.replaceFirst (re-matcher (Pattern/quote a) s) b))
-
-(defn replace-first-re
-  "Replace first match of re in s."
-  [^Pattern re ^String replacement ^String s]
-  (.replaceFirst (re-matcher re s) replacement))
-
-(defn replace-first-by
+(defn- replace-first-by
   "Replace first match of re in s with the result of
   (f (re-groups the-match))."
-  [^Pattern re f ^String s]
+  [^String s ^Pattern re f]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer.)]
       (if (.find m)
@@ -66,6 +56,19 @@
           (.appendReplacement m buffer rep)
           (.appendTail m buffer)
           (str buffer))))))
+
+(defn replace-first
+  ""
+  [^String s match replacement]
+  (cond
+   (instance? String match)
+   (.replaceFirst s (Pattern/quote ^String match) ^String replacement)
+   (instance? Pattern match)
+   (if (string? replacement)
+     (.replaceFirst (re-matcher ^Pattern match s) ^String replacement)
+     (replace-first-by s match replacement))
+   :default (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
+
 
 (defn ^String join
   "Returns a string of all elements in coll, separated by
