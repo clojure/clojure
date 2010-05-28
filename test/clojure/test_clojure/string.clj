@@ -41,13 +41,13 @@
   (is (= "Foobar" (s/capitalize "foobar")))
   (is (= "Foobar" (s/capitalize "FOOBAR"))))
 
-(deftest t-ltrim
-  (is (= "foo " (s/ltrim " foo ")))
-  (is (= "" (s/ltrim "   "))))
+(deftest t-triml
+  (is (= "foo " (s/triml " foo ")))
+  (is (= "" (s/triml "   "))))
 
-(deftest t-rtrim
-  (is (= " foo" (s/rtrim " foo ")))
-  (is (= "" (s/rtrim "   "))))
+(deftest t-trimr
+  (is (= " foo" (s/trimr " foo ")))
+  (is (= "" (s/trimr "   "))))
 
 (deftest t-trim
   (is (= "foo" (s/trim "  foo  \r\n"))))

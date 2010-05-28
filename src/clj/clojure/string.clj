@@ -82,21 +82,6 @@
                 sep)
          (str sb)))))
 
-(defn ^String chop
-  "Removes the last character of string, does nothing on a zero-length
-  string."
-  [^String s]
-  (let [size (count s)]
-    (if (zero? size)
-      s
-      (subs s 0 (dec (count s))))))
-
-(defn ^String chomp
-  "Removes all trailing newline \\n or return \\r characters from
-  string.  Note: String.trim() is similar and faster."
-  [^String s]
-  (replace-re #"[\r\n]+$" "" s))
-
 (defn ^String capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
@@ -105,16 +90,6 @@
     (.toUpperCase s)
     (str (.toUpperCase ^String (subs s 0 1))
          (.toLowerCase ^String (subs s 1)))))
-
-(defn ^String ltrim
-  "Removes whitespace from the left side of string."
-  [^String s]
-  (replace-re #"^\s+" "" s))
-
-(defn ^String rtrim
-  "Removes whitespace from the right side of string."
-  [^String s]
-  (replace-re #"\s+$" "" s))
 
 (defn ^String upper-case
   "Converts string to all upper-case."
@@ -136,4 +111,30 @@
   "Removes whitespace from both ends of string."
   [^String s]
   (.trim s))
+
+(defn ^String triml
+  "Removes whitespace from the left side of string."
+  [^String s]
+  (replace-re #"^\s+" "" s))
+
+(defn ^String trimr
+  "Removes whitespace from the right side of string."
+  [^String s]
+  (replace-re #"\s+$" "" s))
+
+(defn ^String chop
+  "Removes the last character of string, does nothing on a zero-length
+  string."
+  [^String s]
+  (let [size (count s)]
+    (if (zero? size)
+      s
+      (subs s 0 (dec (count s))))))
+
+(defn ^String chomp
+  "Removes all trailing newline \\n or return \\r characters from
+  string.  Note: String.trim() is similar and faster."
+  [^String s]
+  (replace-re #"[\r\n]+$" "" s))
+
 
