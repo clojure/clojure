@@ -220,6 +220,15 @@
         (is (= (r 1 4) (.cons rec [:b 4])))
         (is (= (r 1 5) (.cons rec (MapEntry. :b 5))))))))
 
+(defrecord RecordWithSpecificFieldNames [this that k m o])
+(deftest defrecord-with-specific-field-names
+  (let [rec (new RecordWithSpecificFieldNames 1 2 3 4 5)]
+    (is (= rec rec))
+    (is (= 1 (:this (with-meta rec {:foo :bar}))))
+    (is (= 3 (get rec :k)))
+    (is (= (seq rec) '([:this 1] [:that 2] [:k 3] [:m 4] [:o 5])))
+    (is (= (dissoc rec :k) {:this 1, :that 2, :m 4, :o 5}))))
+
 (deftest reify-test
   (testing "of an interface"
     (let [s :foo
