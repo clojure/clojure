@@ -183,6 +183,7 @@ final static public Var ASSERT = Var.intern(CLOJURE_NS, Symbol.create("*assert*"
 final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
+static Keyword DECLARED_KEY = Keyword.intern(null, "declared");
 final static public Var USE_CONTEXT_CLASSLOADER =
 		Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), T);
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure.core", "current-module"),

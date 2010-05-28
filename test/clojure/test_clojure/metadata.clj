@@ -9,7 +9,8 @@
 ; Authors: Stuart Halloway, Frantisek Sodomka
 
 (ns clojure.test-clojure.metadata
-  (:use clojure.test))
+  (:use clojure.test
+        [clojure.test-clojure.helpers :only (eval-in-temp-ns)]))
 
 (def public-namespaces
   '[clojure.core
@@ -37,3 +38,38 @@
 
 (deftest public-vars-with-docstrings-have-added
   (is (= [] (remove (comp :added meta) public-vars-with-docstrings))))
+
+(deftest interaction-of-def-with-metadata
+  (testing "initial def sets metadata"
+    (let [v (eval-in-temp-ns
+             (def ^{:a 1} foo 0)
+             #'foo)]
+      (is (= 1 (-> v meta :a)))))
+  (testing "subsequent declare doesn't overwrite metadata"
+    (let [v (eval-in-temp-ns
+             (def ^{:b 2} bar 0)
+             (declare bar)
+             #'bar)]
+      (is (= 2 (-> v meta :b))))
+    (testing "when compiled"
+      (let [v (eval-in-temp-ns
+               (def ^{:c 3} bar 0)
+               (defn declare-bar []
+                 (declare bar))
+               (declare-bar)
+               #'bar)]
+        (is (= 3 (-> v meta :c))))))
+  (testing "subsequent def with init-expr *does* overwrite metadata"
+    (let [v (eval-in-temp-ns
+             (def ^{:d 4} quux 0)
+             (def quux 1)
+             #'quux)]
+      (is (nil? (-> v meta :d))))
+    (testing "when compiled"
+      (let [v (eval-in-temp-ns
+               (def ^{:e 5} quux 0)
+               (defn def-quux []
+                 (def quux 1))
+               (def-quux)
+               #'quux)]
+        (is (nil? (-> v meta :e)))))))

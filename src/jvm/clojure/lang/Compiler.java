@@ -338,7 +338,19 @@ static class DefExpr implements Expr{
 		this.initProvided = initProvided;
 	}
 
-	public Object eval() throws Exception{
+    private boolean includesExplicitMetadata(MapExpr expr) {
+        for(int i=0; i < expr.keyvals.count(); i += 2)
+            {
+                Keyword k  = ((KeywordExpr) expr.keyvals.nth(i)).k;
+                if ((k != RT.FILE_KEY) &&
+                    (k != RT.DECLARED_KEY) &&
+                    (k != RT.LINE_KEY))
+                    return true;
+            }
+        return false;
+    }
+
+    public Object eval() throws Exception{
 		try
 			{
 			if(initProvided)
@@ -350,7 +362,9 @@ static class DefExpr implements Expr{
 				}
 			if(meta != null)
 				{
-				var.setMeta((IPersistentMap) meta.eval());
+                IPersistentMap metaMap = (IPersistentMap) meta.eval();
+                if (initProvided || includesExplicitMetadata((MapExpr) meta))
+				    var.setMeta((IPersistentMap) meta.eval());
 				}
 			return var;
 			}
@@ -367,10 +381,13 @@ static class DefExpr implements Expr{
 		objx.emitVar(gen, var);
 		if(meta != null)
 			{
-			gen.dup();
-			meta.emit(C.EXPRESSION, objx, gen);
-			gen.checkCast(IPERSISTENTMAP_TYPE);
-			gen.invokeVirtual(VAR_TYPE, setMetaMethod);
+            if (initProvided || includesExplicitMetadata((MapExpr) meta))
+                {
+                gen.dup();
+                meta.emit(C.EXPRESSION, objx, gen);
+                gen.checkCast(IPERSISTENTMAP_TYPE);
+                gen.invokeVirtual(VAR_TYPE, setMetaMethod);
+                }
 			}
 		if(initProvided)
 			{

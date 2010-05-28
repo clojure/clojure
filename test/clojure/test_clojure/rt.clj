@@ -9,7 +9,7 @@
 ; Author: Stuart Halloway
 
 (ns clojure.test-clojure.rt
-  (:use clojure.test))
+  (:use clojure.test clojure.test-clojure.helpers))
 
 (defmacro with-err-print-writer
   "Evaluate with err pointing to a temporary PrintWriter, and
@@ -30,27 +30,13 @@
        ~@body
        (str s#))))
 
-(defn temp-ns
-  "Create and return a temporary ns, using clojure.core + uses"
-  [& uses]
-  (binding [*ns* *ns*]
-    (in-ns (gensym))
-    (apply clojure.core/use 'clojure.core uses)
-    *ns*))
-
-(defmacro eval-in-temp-ns [form]
-  `(binding [*ns* *ns*]
-     (in-ns (gensym))
-     (clojure.core/use 'clojure.core)
-     (eval ~form)))
-
 (defmacro should-print-err-message
   "Turn on all warning flags, and test that error message prints
    correctly for all semi-reasonable bindings of *err*."
   [msg-re form]
-  (binding [*warn-on-reflection* true]
-    (is (re-matches msg-re (with-err-string-writer (eval-in-temp-ns form))))
-    (is (re-matches msg-re (with-err-print-writer (eval-in-temp-ns form))))))
+  `(binding [*warn-on-reflection* true]
+    (is (re-matches ~msg-re (with-err-string-writer (eval-in-temp-ns ~form))))
+    (is (re-matches ~msg-re (with-err-print-writer (eval-in-temp-ns ~form))))))
 
 (deftest error-messages
   (testing "binding a core var that already refers to something"
@@ -59,19 +45,19 @@
      (defn prefers [] (throw (RuntimeException. "rebound!")))))
   (testing "reflection cannot resolve field"
     (should-print-err-message
-     #"Reflection warning, clojure/test_clojure/rt.clj:\d+ - reference to field blah can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - reference to field blah can't be resolved.\n"
      (defn foo [x] (.blah x))))
   (testing "reflection cannot resolve instance method"
     (should-print-err-message
-     #"Reflection warning, clojure/test_clojure/rt.clj:\d+ - call to zap can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to zap can't be resolved.\n"
      (defn foo [x] (.zap x 1))))
   (testing "reflection cannot resolve static method"
     (should-print-err-message
-     #"Reflection warning, clojure/test_clojure/rt.clj:\d+ - call to valueOf can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to valueOf can't be resolved.\n"
      (defn foo [] (Integer/valueOf #"boom"))))
-  (testing "reflection cannot resolved constructor"
+  (testing "reflection cannot resolve constructor"
     (should-print-err-message
-     #"Reflection warning, clojure/test_clojure/rt.clj:\d+ - call to java.lang.String ctor can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to java.lang.String ctor can't be resolved.\n"
      (defn foo [] (String. 1 2 3)))))
 
 (def example-var)
