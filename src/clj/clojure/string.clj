@@ -67,7 +67,7 @@
    (if (string? replacement)
      (.replaceFirst (re-matcher ^Pattern match s) ^String replacement)
      (replace-first-by s match replacement))
-   :default (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
+   :else (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
 
 
 (defn ^String join
@@ -118,23 +118,33 @@
 (defn ^String triml
   "Removes whitespace from the left side of string."
   [^String s]
-  (replace s #"^\s+" ""))
+  (loop [index (int 0)]
+    (if (= (.length s) index)
+      ""
+      (if (Character/isWhitespace (.charAt s index))
+        (recur (inc index))
+        (.substring s index)))))
 
 (defn ^String trimr
   "Removes whitespace from the right side of string."
   [^String s]
-  (replace s #"\s+$" ""))
+  (loop [index (.length s)]
+    (if (zero? index)
+      ""
+      (if (Character/isWhitespace (.charAt s (dec index)))
+        (recur (dec index))
+        (.substring s 0 index)))))
 
-(defn ^String trim-nl
+(defn ^String trim-newline
   "Removes all trailing newline \\n or return \\r characters from
   string.  Note: String.trim() is similar and faster."
   [^String s]
-  (loop [offset (.length s)]
-    (if (zero? offset)
+  (loop [index (.length s)]
+    (if (zero? index)
       ""
-      (let [ch (.charAt s (dec offset))]
+      (let [ch (.charAt s (dec index))]
         (if (or (= ch \newline) (= ch \return))
-          (recur (dec offset))
-          (.substring s 0 offset))))))
+          (recur (dec index))
+          (.substring s 0 index))))))
 
 

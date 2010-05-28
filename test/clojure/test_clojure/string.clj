@@ -27,11 +27,11 @@
        "1" \, [1]
        "1 and-a 2 and-a 3" " and-a " [1 2 3]))
 
-(deftest t-trim-nl
-  (is (= "foo" (s/trim-nl "foo\n")))
-  (is (= "foo" (s/trim-nl "foo\r\n")))
-  (is (= "foo" (s/trim-nl "foo")))
-  (is (= "" (s/trim-nl ""))))
+(deftest t-trim-newline
+  (is (= "foo" (s/trim-newline "foo\n")))
+  (is (= "foo" (s/trim-newline "foo\r\n")))
+  (is (= "foo" (s/trim-newline "foo")))
+  (is (= "" (s/trim-newline ""))))
 
 (deftest t-capitalize
   (is (= "Foobar" (s/capitalize "foobar")))
