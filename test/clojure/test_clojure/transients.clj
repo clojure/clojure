@@ -3,8 +3,10 @@
 
 (deftest popping-off
   (testing "across a node boundary"
-    (let [v (-> (range 33) vec)]
-      (is (= (subvec v 0 31) (-> v transient pop! pop! persistent!)))))
+    (are [n] 
+      (let [v (-> (range n) vec)]
+        (= (subvec v 0 (- n 2)) (-> v transient pop! pop! persistent!)))
+      33 (+ 32 (inc (* 32 32))) (+ 32 (inc (* 32 32 32)))))
   (testing "off the end"
     (is (thrown-with-msg? IllegalStateException #"Can't pop empty vector"
           (-> [] transient pop!)))))
