@@ -14,6 +14,7 @@
 
 (defn ^String reverse
   "Returns s with its characters reversed."
+  {:added "1.2"}
   [^String s]
   (.toString (.reverse (StringBuilder. s))))
 
@@ -35,7 +36,10 @@
 
    string / string
    char / char
-   pattern / (string or function of match)"
+   pattern / (string or function of match).
+
+   See also replace-first."
+  {:added "1.2"}
   [^String s match replacement]
   (cond 
    (instance? Character match) (.replace s ^Character match ^Character replacement)
@@ -58,7 +62,16 @@
           (str buffer))))))
 
 (defn replace-first
-  ""
+  "Replaces the first instance of match with replacement in s.
+
+   match/replacement can be:
+
+   string / string
+   char / char
+   pattern / (string or function of match).
+
+   See also replace-all."
+  {:added "1.2"}
   [^String s match replacement]
   (cond
    (instance? String match)
@@ -72,7 +85,8 @@
 
 (defn ^String join
   "Returns a string of all elements in coll, separated by
-  separator.  Like Perl's join."
+   an optional separator.  Like Perl's join."
+  {:added "1.2"}
   ([coll]
      (apply str coll))
   ([separator [x & more]]
@@ -88,6 +102,7 @@
 (defn ^String capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
+  {:added "1.2"}
   [^String s]
   (if (< (count s) 2)
     (.toUpperCase s)
@@ -96,27 +111,32 @@
 
 (defn ^String upper-case
   "Converts string to all upper-case."
+  {:added "1.2"}
   [^String s]
   (.toUpperCase s))
 
 (defn ^String lower-case
   "Converts string to all lower-case."
+  {:added "1.2"}
   [^String s]
   (.toLowerCase s))
 
 (defn split
   "Splits string on a regular expression.  Optional argument limit is
   the maximum number of splits."
+  {:added "1.2"}
   ([^Pattern re ^String s] (seq (.split re s)))
   ([^Pattern re limit ^String s] (seq (.split re s limit))))
 
 (defn ^String trim
   "Removes whitespace from both ends of string."
+  {:added "1.2"}
   [^String s]
   (.trim s))
 
 (defn ^String triml
   "Removes whitespace from the left side of string."
+  {:added "1.2"}
   [^String s]
   (loop [index (int 0)]
     (if (= (.length s) index)
@@ -127,6 +147,7 @@
 
 (defn ^String trimr
   "Removes whitespace from the right side of string."
+  {:added "1.2"}
   [^String s]
   (loop [index (.length s)]
     (if (zero? index)
@@ -137,7 +158,8 @@
 
 (defn ^String trim-newline
   "Removes all trailing newline \\n or return \\r characters from
-  string.  Note: String.trim() is similar and faster."
+  string.  Similar to Perl's chomp."
+  {:added "1.2"}
   [^String s]
   (loop [index (.length s)]
     (if (zero? index)
