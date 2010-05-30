@@ -10,7 +10,8 @@
        :author "Stuart Sierra"}
   clojure.string
   (:refer-clojure :exclude (replace reverse))
-  (:import (java.util.regex Pattern)))
+  (:import (java.util.regex Pattern)
+           clojure.lang.LazilyPersistentVector))
 
 (defn ^String reverse
   "Returns s with its characters reversed."
@@ -123,10 +124,12 @@
 
 (defn split
   "Splits string on a regular expression.  Optional argument limit is
-  the maximum number of splits."
+  the maximum number of splits. Not lazy. Returns vector of the splits."
   {:added "1.2"}
-  ([^Pattern re ^String s] (seq (.split re s)))
-  ([^Pattern re limit ^String s] (seq (.split re s limit))))
+  ([^String s ^Pattern re]
+     (LazilyPersistentVector/createOwning (.split re s)))
+  ([ ^String s ^Pattern re limit]
+     (LazilyPersistentVector/createOwning (.split re s limit))))
 
 (defn ^String trim
   "Removes whitespace from both ends of string."

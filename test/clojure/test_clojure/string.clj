@@ -2,6 +2,11 @@
   (:require [clojure.string :as s])
   (:use clojure.test))
 
+(deftest t-split
+  (is (= ["a" "b"] (s/split "a-b" #"-")))
+  (is (= ["a" "b-c"] (s/split "a-b-c" #"-" 2)))
+  (is (vector? (s/split "abc" #"-"))))
+
 (deftest t-reverse
   (is (= "tab" (s/reverse "bat"))))
 
