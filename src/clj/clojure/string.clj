@@ -6,21 +6,39 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns ^{:doc "String utilities"
-       :author "Stuart Sierra"}
+(ns ^{:doc "Clojure String utilities
+
+clojure.string adheres to the following design principles:
+
+1. Strings are objects (as opposed to sequences). As such, the
+   string being manipulated is the first argument to a function;
+   passing nil will result in a NullPointerException. If you
+   want sequence-y behavior instead, use a sequence.
+
+2. Functions are generally not lazy, and call straight to host
+   methods where those are available and efficient.
+
+3. When a function is documented to accept a string argument, it
+   will take any implementation of the correct *interface* on the
+   host platform. In Java, this is CharSequence, which is more
+   general than String. In ordinary usage you will almost always
+   pass concrete strings. If you are doing something unusual,
+   e.g. passing a mutable implementation of CharSequence, then
+   thead-safety is your responsibility."
+      :author "Stuart Sierra, Stuart Halloway, David Liebke"}
   clojure.string
   (:refer-clojure :exclude (replace reverse))
   (:import (java.util.regex Pattern)
            clojure.lang.LazilyPersistentVector))
 
-(defn ^String reverse
+(defn ^CharSequence reverse
   "Returns s with its characters reversed."
   {:added "1.2"}
-  [^String s]
+  [^CharSequence s]
   (.toString (.reverse (StringBuilder. s))))
 
 (defn- replace-by
-  [^String s re f]
+  [^CharSequence s re f]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer. (.length s))]
       (loop []
@@ -41,19 +59,18 @@
 
    See also replace-first."
   {:added "1.2"}
-  [^String s match replacement]
-  (cond 
-   (instance? Character match) (.replace s ^Character match ^Character replacement)
-   (instance? String match) (.replace s ^String match ^String replacement)
-   (instance? Pattern match) (if (string? replacement)
-                               (.replaceAll (re-matcher ^Pattern match s) ^String replacement)
-                               (replace-by s match replacement))
-   :else (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
+  [^CharSequence s match replacement]
+  (let [s (.toString s)]
+    (cond 
+     (instance? Character match) (.replace s ^Character match ^Character replacement)
+     (instance? CharSequence match) (.replace s ^CharSequence match ^CharSequence replacement)
+     (instance? Pattern match) (if (string? replacement)
+                                 (.replaceAll (re-matcher ^Pattern match s) ^CharSequence replacement)
+                                 (replace-by s match replacement))
+     :else (throw (IllegalArgumentException. (str "Invalid match arg: " match))))))
 
 (defn- replace-first-by
-  "Replace first match of re in s with the result of
-  (f (re-groups the-match))."
-  [^String s ^Pattern re f]
+  [^CharSequence s ^Pattern re f]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer.)]
       (if (.find m)
@@ -62,29 +79,42 @@
           (.appendTail m buffer)
           (str buffer))))))
 
+(defn- replace-first-char
+  [^CharSequence s ^Character match replace]
+  (let [s (.toString s)
+        i (.indexOf s (int match))]
+    (if (= -1 i)
+      s
+      (str (subs s 0 i) replace (subs s (inc i))))))
+
 (defn replace-first
   "Replaces the first instance of match with replacement in s.
 
    match/replacement can be:
 
-   string / string
    char / char
+   string / string
    pattern / (string or function of match).
 
    See also replace-all."
   {:added "1.2"}
-  [^String s match replacement]
-  (cond
-   (instance? String match)
-   (.replaceFirst s (Pattern/quote ^String match) ^String replacement)
-   (instance? Pattern match)
-   (if (string? replacement)
-     (.replaceFirst (re-matcher ^Pattern match s) ^String replacement)
-     (replace-first-by s match replacement))
-   :else (throw (IllegalArgumentException. (str "Invalid match arg: " match)))))
+  [^CharSequence s match replacement]
+  (let [s (.toString s)]
+    (cond
+     (instance? Character match)
+     (replace-first-char s match replacement)
+     (instance? CharSequence match)
+     (.replaceFirst s (Pattern/quote (.toString ^CharSequence match))
+                    (.toString ^CharSequence replacement))
+     (instance? Pattern match)
+     (if (instance? CharSequence replacement)
+       (.replaceFirst (re-matcher ^Pattern match s)
+                      (.toString ^CharSequence replacement))
+       (replace-first-by s match replacement))
+     :else (throw (IllegalArgumentException. (str "Invalid match arg: " match))))))
 
 
-(defn ^String join
+(defn ^CharSequence join
   "Returns a string of all elements in coll, separated by
    an optional separator.  Like Perl's join."
   {:added "1.2"}
@@ -100,76 +130,77 @@
                 sep)
          (str sb)))))
 
-(defn ^String capitalize
+(defn ^CharSequence capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
   {:added "1.2"}
-  [^String s]
-  (if (< (count s) 2)
-    (.toUpperCase s)
-    (str (.toUpperCase ^String (subs s 0 1))
-         (.toLowerCase ^String (subs s 1)))))
+  [^CharSequence s]
+  (let [s (.toString s)]
+    (if (< (count s) 2)
+      (.toUpperCase s)
+      (str (.toUpperCase (subs s 0 1))
+           (.toLowerCase (subs s 1))))))
 
-(defn ^String upper-case
+(defn ^CharSequence upper-case
   "Converts string to all upper-case."
   {:added "1.2"}
-  [^String s]
-  (.toUpperCase s))
+  [^CharSequence s]
+  (.. s toString toUpperCase))
 
-(defn ^String lower-case
+(defn ^CharSequence lower-case
   "Converts string to all lower-case."
   {:added "1.2"}
-  [^String s]
-  (.toLowerCase s))
+  [^CharSequence s]
+  (.. s toString toLowerCase))
 
 (defn split
   "Splits string on a regular expression.  Optional argument limit is
   the maximum number of splits. Not lazy. Returns vector of the splits."
   {:added "1.2"}
-  ([^String s ^Pattern re]
+  ([^CharSequence s ^Pattern re]
      (LazilyPersistentVector/createOwning (.split re s)))
-  ([ ^String s ^Pattern re limit]
+  ([ ^CharSequence s ^Pattern re limit]
      (LazilyPersistentVector/createOwning (.split re s limit))))
 
-(defn ^String trim
+(defn ^CharSequence trim
   "Removes whitespace from both ends of string."
   {:added "1.2"}
-  [^String s]
-  (.trim s))
+  [^CharSequence s]
+  (.. s toString trim))
 
-(defn ^String triml
+(defn ^CharSequence triml
   "Removes whitespace from the left side of string."
   {:added "1.2"}
-  [^String s]
+  [^CharSequence s]
   (loop [index (int 0)]
     (if (= (.length s) index)
       ""
       (if (Character/isWhitespace (.charAt s index))
         (recur (inc index))
-        (.substring s index)))))
+        (.. s (subSequence index (.length s)) toString)))))
 
-(defn ^String trimr
+(defn ^CharSequence trimr
   "Removes whitespace from the right side of string."
   {:added "1.2"}
-  [^String s]
+  [^CharSequence s]
   (loop [index (.length s)]
     (if (zero? index)
       ""
       (if (Character/isWhitespace (.charAt s (dec index)))
         (recur (dec index))
-        (.substring s 0 index)))))
+        (.. s (subSequence 0 index) toString)))))
 
-(defn ^String trim-newline
+(defn ^CharSequence trim-newline
   "Removes all trailing newline \\n or return \\r characters from
   string.  Similar to Perl's chomp."
   {:added "1.2"}
-  [^String s]
+  [^CharSequence s]
   (loop [index (.length s)]
     (if (zero? index)
       ""
       (let [ch (.charAt s (dec index))]
         (if (or (= ch \newline) (= ch \return))
           (recur (dec index))
-          (.substring s 0 index))))))
+          (.. s (subSequence 0 index) toString))))))
 
 

@@ -3925,7 +3925,7 @@
   {:added "1.0"}
   [v] (instance? clojure.lang.Var v))
 
-(defn subs
+(defn ^String subs
   "Returns the substring of s beginning at start inclusive, and ending
   at end (defaults to length of string), exclusive."
   {:added "1.0"}

@@ -18,6 +18,7 @@
 (deftest t-replace-first
   (is (= "barbarfoo" (s/replace-first "foobarfoo" "foo" "bar")))
   (is (= "barbarfoo" (s/replace-first "foobarfoo" #"foo" "bar")))
+  (is (= "z.ology" (s/replace-first "zoology" \o \.)))
   (is (= "FOObarfoo" (s/replace-first "foobarfoo" #"foo" s/upper-case))))
 
 (deftest t-join
@@ -73,3 +74,21 @@
        s/triml [nil]
        s/trimr [nil]
        s/trim-newline [nil]))
+
+(deftest char-sequence-handling
+  (are [result f args] (let [[^CharSequence s & more] args]
+                         (= result (apply f (StringBuffer. s) more)))
+       "paz" s/reverse ["zap"]
+       "foo:bar" s/replace ["foo-bar" \- \:]
+       "ABC" s/replace ["abc" #"\w" s/upper-case]
+       "baz::quux" s/replace-first ["baz--quux" #"--" "::"]
+       "baz::quux" s/replace-first ["baz--quux" (StringBuffer. "--") (StringBuffer. "::")]
+       "zim-zam" s/replace-first ["zim zam" #" " (StringBuffer. "-")]
+       "Pow" s/capitalize ["POW"]
+       "BOOM" s/upper-case ["boom"]
+       "whimper" s/lower-case ["whimPER"]
+       ["foo" "bar"] s/split ["foo-bar" #"-"]
+       "calvino" s/trim ["  calvino  "]
+       "calvino  " s/triml ["  calvino  "]
+       "  calvino" s/trimr ["  calvino  "]
+       "the end" s/trim-newline ["the end\r\n\r\r\n"]))
