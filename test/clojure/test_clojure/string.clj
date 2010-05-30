@@ -59,3 +59,17 @@
 (deftest t-lower-case
   (is (= "foobar" (s/lower-case "FooBar"))))
 
+(deftest nil-handling
+  (are [f args] (thrown? NullPointerException (apply f args))
+       s/reverse [nil]
+       s/replace [nil #"foo" "bar"]
+       s/replace-first [nil #"foo" "bar"]
+       s/capitalize [nil]
+       s/upper-case [nil]
+       s/lower-case [nil]
+       s/split [nil #"-"]
+       s/split [nil #"-" 1]
+       s/trim [nil]
+       s/triml [nil]
+       s/trimr [nil]
+       s/trim-newline [nil]))
