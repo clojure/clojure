@@ -31,7 +31,7 @@ clojure.string adheres to the following design principles:
   (:import (java.util.regex Pattern)
            clojure.lang.LazilyPersistentVector))
 
-(defn ^CharSequence reverse
+(defn ^String reverse
   "Returns s with its characters reversed."
   {:added "1.2"}
   [^CharSequence s]
@@ -48,7 +48,7 @@ clojure.string adheres to the following design principles:
           (do (.appendTail m buffer)
               (.toString buffer)))))))
 
-(defn replace
+(defn ^String replace
   "Replaces all instance of match with replacement in s.
 
    match/replacement can be:
@@ -72,7 +72,7 @@ clojure.string adheres to the following design principles:
 (defn- replace-first-by
   [^CharSequence s ^Pattern re f]
   (let [m (re-matcher re s)]
-    (let [buffer (StringBuffer.)]
+    (let [buffer (StringBuffer. (.length s))]
       (if (.find m)
         (let [rep (f (re-groups m))]
           (.appendReplacement m buffer rep)
@@ -87,7 +87,7 @@ clojure.string adheres to the following design principles:
       s
       (str (subs s 0 i) replace (subs s (inc i))))))
 
-(defn replace-first
+(defn ^String replace-first
   "Replaces the first instance of match with replacement in s.
 
    match/replacement can be:
@@ -114,7 +114,7 @@ clojure.string adheres to the following design principles:
      :else (throw (IllegalArgumentException. (str "Invalid match arg: " match))))))
 
 
-(defn ^CharSequence join
+(defn ^String join
   "Returns a string of all elements in coll, separated by
    an optional separator.  Like Perl's join."
   {:added "1.2"}
@@ -130,7 +130,7 @@ clojure.string adheres to the following design principles:
                 sep)
          (str sb)))))
 
-(defn ^CharSequence capitalize
+(defn ^String capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
   {:added "1.2"}
@@ -141,13 +141,13 @@ clojure.string adheres to the following design principles:
       (str (.toUpperCase (subs s 0 1))
            (.toLowerCase (subs s 1))))))
 
-(defn ^CharSequence upper-case
+(defn ^String upper-case
   "Converts string to all upper-case."
   {:added "1.2"}
   [^CharSequence s]
   (.. s toString toUpperCase))
 
-(defn ^CharSequence lower-case
+(defn ^String lower-case
   "Converts string to all lower-case."
   {:added "1.2"}
   [^CharSequence s]
@@ -162,13 +162,13 @@ clojure.string adheres to the following design principles:
   ([ ^CharSequence s ^Pattern re limit]
      (LazilyPersistentVector/createOwning (.split re s limit))))
 
-(defn ^CharSequence trim
+(defn ^String trim
   "Removes whitespace from both ends of string."
   {:added "1.2"}
   [^CharSequence s]
   (.. s toString trim))
 
-(defn ^CharSequence triml
+(defn ^String triml
   "Removes whitespace from the left side of string."
   {:added "1.2"}
   [^CharSequence s]
@@ -179,7 +179,7 @@ clojure.string adheres to the following design principles:
         (recur (inc index))
         (.. s (subSequence index (.length s)) toString)))))
 
-(defn ^CharSequence trimr
+(defn ^String trimr
   "Removes whitespace from the right side of string."
   {:added "1.2"}
   [^CharSequence s]
@@ -190,7 +190,7 @@ clojure.string adheres to the following design principles:
         (recur (dec index))
         (.. s (subSequence 0 index) toString)))))
 
-(defn ^CharSequence trim-newline
+(defn ^String trim-newline
   "Removes all trailing newline \\n or return \\r characters from
   string.  Similar to Perl's chomp."
   {:added "1.2"}
