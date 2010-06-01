@@ -39,16 +39,16 @@ public DynamicClassLoader(ClassLoader parent){
 }
 
 public Class defineClass(String name, byte[] bytes, Object srcForm){
-    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
-    if(ce != null)
-        {
-        WeakReference<Class> cr = ce.getKey();
-        Class c = cr.get();
-        if((c != null) && srcForm.equals(ce.getValue()))
-            return c;
-        }
+//    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
+//    if(ce != null)
+//        {
+//        WeakReference<Class> cr = ce.getKey();
+//        Class c = cr.get();
+//        if((c != null) && srcForm.equals(ce.getValue()))
+//            return c;
+//        }
 	Class c = defineClass(name, bytes, 0, bytes.length);
-    classCache.put(name, new MapEntry(new WeakReference(c), srcForm));
+    classCache.put(name, new MapEntry(new WeakReference(c), null));
     return c;
 }
 
