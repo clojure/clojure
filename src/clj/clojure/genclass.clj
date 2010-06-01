@@ -642,6 +642,9 @@
 
 (defn- generate-interface
   [{:keys [name extends methods]}]
+  (when (some #(-> % first clojure.core/name (.contains "-")) methods)
+    (throw
+      (IllegalArgumentException. "Interface methods must not contain '-'")))
   (let [iname (.replace (str name) "." "/")
         cv (ClassWriter. ClassWriter/COMPUTE_MAXS)]
     (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC 
