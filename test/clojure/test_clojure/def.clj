@@ -14,3 +14,15 @@
   (testing "bad arglist forms"
     (is (fails-with-cause? IllegalArgumentException '#"Parameter declaration arg1 should be a vector"
           (eval-in-temp-ns (defn foo (arg1 arg2)))))))
+
+(deftest dynamic-redefinition
+  ;; too many contextual things for this kind of caching to work...
+  (testing "classes are never cached, even if their bodies are the same"
+    (is (= :b
+           (eval
+            '(do
+               (defmacro my-macro [] :a)
+               (defn do-macro [] (my-macro))
+               (defmacro my-macro [] :b)
+               (defn do-macro [] (my-macro))
+               (do-macro)))))))
