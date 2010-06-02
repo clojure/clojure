@@ -106,6 +106,8 @@ namespace.
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.test/try-expr">try-expr</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.test/use-fixtures">use-fixtures</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.test/with-test">with-test</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.test/with-test-out">with-test-out</a>
@@ -320,7 +322,7 @@ SAVING TEST OUTPUT TO A FILE
 All the test reporting functions write to the var *test-out*.  By
 default, this is the same as *out*, but you can rebind it to any
 PrintWriter.  For example, it could be a file opened with
-clojure.contrib.duck-streams/writer.
+clojure.java.io/writer.
 
 
 EXTENDING TEST-IS (ADVANCED)
@@ -367,7 +369,7 @@ be created by deftest, set-test, or with-test.  Use this to omit
 tests when compiling or loading production code.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L239" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L239" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -379,7 +381,7 @@ is thrown during a test.  Defaults to nil, which means print the
 complete stack trace.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L246" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L246" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -401,7 +403,7 @@ Expands to:
 Note: This breaks some reporting features, such as line numbers.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L533" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L533" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -413,7 +415,7 @@ Note: This breaks some reporting features, such as line numbers.</pre>
 method calls, or isolated symbols.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L416" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L416" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -428,7 +430,7 @@ evaluated.  If the predicate returns false, the 'actual' form will
 be wrapped in (not...).</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L397" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L397" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -440,7 +442,7 @@ be wrapped in (not...).</pre>
 that combines their behavior.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L642" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L642" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -460,7 +462,7 @@ itself.
 When *load-tests* is false, deftest is ignored.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L575" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L575" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -471,7 +473,7 @@ When *load-tests* is false, deftest is ignored.</pre>
   <pre id="var-docstr">Like deftest but creates a private var.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L592" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L592" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -483,7 +485,7 @@ When *load-tests* is false, deftest is ignored.</pre>
 stack.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L278" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L278" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -495,7 +497,7 @@ stack.</pre>
 a function (not a macro).</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L385" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L385" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -506,7 +508,7 @@ a function (not a macro).</pre>
   <pre id="var-docstr">Like var-get but returns nil if the var is unbound.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L377" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L377" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -518,7 +520,7 @@ a function (not a macro).</pre>
 Does nothing if *report-counters* is nil.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L306" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L306" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -542,7 +544,7 @@ thrown AND that the message on the exception matches (with
 re-find) the regular expression re.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L515" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L515" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -554,7 +556,7 @@ re-find) the regular expression re.</pre>
 fixture function, even if the collection is empty.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L649" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L649" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -569,7 +571,7 @@ the top of test_is.clj for more information on the types of
 arguments for 'report'.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L319" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L319" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -584,7 +586,7 @@ names matching the regular expression (with re-matches) will be
 tested.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L725" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L725" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -598,7 +600,7 @@ Defaults to current namespace if none given.  Returns a map
 summarizing test results.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L713" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L713" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -613,7 +615,7 @@ The var must already exist.  Does not modify the value of the var.
 When *load-tests* is false, set-test is ignored.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L601" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L601" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -625,7 +627,7 @@ When *load-tests* is false, set-test is ignored.</pre>
 were successful, false otherwise.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L734" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L734" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -636,7 +638,7 @@ were successful, false otherwise.</pre>
   <pre id="var-docstr">Calls test-var on every var interned in the namespace, with fixtures.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L676" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L676" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -653,7 +655,7 @@ Internally binds *report-counters* to a ref initialized to
 *report-counters*.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L688" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L688" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -665,7 +667,7 @@ Internally binds *report-counters* to a ref initialized to
 with *testing-vars* bound to (conj *testing-vars* v).</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L661" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L661" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -677,7 +679,7 @@ with *testing-vars* bound to (conj *testing-vars* v).</pre>
 but must occur inside a test function (deftest).</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L550" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L550" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -689,7 +691,7 @@ but must occur inside a test function (deftest).</pre>
 strings in *testing-contexts* with spaces.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L299" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L299" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -702,7 +704,7 @@ in *testing-vars* as a list, then the source file and line of
 current assertion.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L286" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L286" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -714,7 +716,19 @@ current assertion.</pre>
 You don't call this.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L499" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L499" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.test/use-fixtures">use-fixtures</h2>
+  <span id="var-type">multimethod</span><br />
+  <pre id="var-usage">No usage documentation available</pre>
+  <pre id="var-docstr">Wrap test runs in a fixture function to perform setup and
+teardown. Using a fixture-type of :each wraps every test
+individually, while:once wraps the whole run in a single function.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+  
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L623" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -729,7 +743,7 @@ When *load-tests* is false, only evaluates the definition, ignoring
 the tests.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L562" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L562" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -740,7 +754,7 @@ the tests.</pre>
   <pre id="var-docstr">Runs body with *out* bound to the value of *test-out*.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/52e630f7bc251f451dd09a25d46f97bd5348b9c3/src/clj/clojure/test.clj#L267" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test.clj#L267" id="var-source">Source</a>
 </div>
 <h2 id="namespace-name">clojure.test.junit</h2>
 <pre id="namespace-docstr">clojure.test extension for JUnit-compatible XML output.
@@ -754,14 +768,14 @@ To use, wrap any calls to clojure.test/run-tests in the
 with-junit-output macro, like this:
 
   (use 'clojure.test)
-  (use 'clojure.contrib.test.junit)
+  (use 'clojure.test.junit)
 
   (with-junit-output
     (run-tests 'my.cool.library))
 
 To write the output to a file, rebind clojure.test/*test-out* to
 your own PrintWriter (perhaps opened using
-clojure.contrib.duck-streams/writer).</pre>
+clojure.java.io/writer).</pre>
 
 
 <br />
@@ -775,7 +789,7 @@ clojure.contrib.duck-streams/writer).</pre>
 JUnit-compatible XML output.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/test/junit.clj#L182" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/fbe0183713b92b2f96a68e2a0d0d654bb7ce93ff/src/clj/clojure/test/junit.clj#L182" id="var-source">Source</a>
 </div>
 <h2 id="namespace-name">clojure.test.tap</h2>
 <pre id="namespace-docstr">clojure.test extensions for the Test Anything Protocol (TAP)

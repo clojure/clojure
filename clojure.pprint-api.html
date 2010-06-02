@@ -70,6 +70,8 @@ namespace.
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.pprint/cl-format">cl-format</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.pprint/code-dispatch">code-dispatch</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.pprint/formatter">formatter</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.pprint/formatter-out">formatter-out</a>
@@ -91,6 +93,8 @@ namespace.
       <a href="#clojure.pprint/pprint-tab">pprint-tab</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.pprint/set-pprint-dispatch">set-pprint-dispatch</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.pprint/simple-dispatch">simple-dispatch</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.pprint/with-pprint-dispatch">with-pprint-dispatch</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
@@ -256,6 +260,17 @@ and in the Common Lisp HyperSpec at
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
   <a href="http://github.com/richhickey/clojure/blob/d1e39b1ec7fc65907b13458d7ec70b0839f3f85e/src/clj/clojure/pprint/cl_format.clj#L27" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.pprint/code-dispatch">code-dispatch</h2>
+  <span id="var-type">multimethod</span><br />
+  <pre id="var-usage">Usage: (code-dispatch object)
+</pre>
+  <pre id="var-docstr">The pretty print dispatch function for pretty printing Clojure code.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+  
+  <a href="http://github.com/richhickey/clojure/blob/d1e39b1ec7fc65907b13458d7ec70b0839f3f85e/src/clj/clojure/pprint/dispatch.clj#L375" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -454,6 +469,17 @@ clojure.pprint.dispatch.clj.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
   <a href="http://github.com/richhickey/clojure/blob/10f849fad0d8e61b5c8a47075a34ca78a0ffc298/src/clj/clojure/pprint/pprint_base.clj#L260" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.pprint/simple-dispatch">simple-dispatch</h2>
+  <span id="var-type">multimethod</span><br />
+  <pre id="var-usage">Usage: (simple-dispatch object)
+</pre>
+  <pre id="var-docstr">The pretty print dispatch function for simple data structure format.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+  
+  <a href="http://github.com/richhickey/clojure/blob/d1e39b1ec7fc65907b13458d7ec70b0839f3f85e/src/clj/clojure/pprint/dispatch.clj#L147" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
