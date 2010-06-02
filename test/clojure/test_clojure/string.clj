@@ -81,6 +81,7 @@
        "paz" s/reverse ["zap"]
        "foo:bar" s/replace ["foo-bar" \- \:]
        "ABC" s/replace ["abc" #"\w" s/upper-case]
+       "faa" s/replace ["foo" #"o" (StringBuffer. "a")]
        "baz::quux" s/replace-first ["baz--quux" #"--" "::"]
        "baz::quux" s/replace-first ["baz--quux" (StringBuffer. "--") (StringBuffer. "::")]
        "zim-zam" s/replace-first ["zim zam" #" " (StringBuffer. "-")]

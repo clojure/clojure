@@ -111,6 +111,7 @@
       <arg value="clojure.java.javadoc"/>
       <arg value="clojure.java.shell"/>
       <arg value="clojure.java.browse-ui"/>
+      <arg value="clojure.string"/>
     </java>
   </target>
 

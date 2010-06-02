@@ -64,8 +64,9 @@ clojure.string adheres to the following design principles:
     (cond 
      (instance? Character match) (.replace s ^Character match ^Character replacement)
      (instance? CharSequence match) (.replace s ^CharSequence match ^CharSequence replacement)
-     (instance? Pattern match) (if (string? replacement)
-                                 (.replaceAll (re-matcher ^Pattern match s) ^CharSequence replacement)
+     (instance? Pattern match) (if (instance? CharSequence replacement)
+                                 (.replaceAll (re-matcher ^Pattern match s)
+                                              (.toString replacement))
                                  (replace-by s match replacement))
      :else (throw (IllegalArgumentException. (str "Invalid match arg: " match))))))
 
