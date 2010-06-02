@@ -40,8 +40,8 @@
   ; the implementation of this function resides in another namespace to be loaded "on demand"
   ; this fixes a bug on mac os x where the process turns into a GUI app
   ; see http://code.google.com/p/clojure-contrib/issues/detail?id=32
-  (require 'clojure.contrib.javadoc.browse-ui)
-  ((find-var 'clojure.contrib.javadoc.browse-ui/open-url-in-swing) url))
+  (require 'clojure.java.browse-ui)
+  ((find-var 'clojure.java.browse-ui/open-url-in-swing) url))
 
 (defn browse-url
   "Open url in a browser"

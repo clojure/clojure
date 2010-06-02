@@ -25,14 +25,14 @@
   with-junit-output macro, like this:
 
     (use 'clojure.test)
-    (use 'clojure.contrib.test.junit)
+    (use 'clojure.test.junit)
 
     (with-junit-output
       (run-tests 'my.cool.library))
 
   To write the output to a file, rebind clojure.test/*test-out* to
   your own PrintWriter (perhaps opened using
-  clojure.contrib.duck-streams/writer)."
+  clojure.java.io/writer)."
   :author "Jason Sankey"}
   clojure.test.junit
   (:require [clojure.stacktrace :as stack]
