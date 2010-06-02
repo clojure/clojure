@@ -894,6 +894,10 @@ static public boolean booleanCast(Object x){
 	return x != null;
 }
 
+static public boolean booleanCast(boolean x){
+	return x;
+}
+
 static public byte byteCast(Object x){
 	long n = ((Number) x).longValue();
 	if(n < Byte.MIN_VALUE || n > Byte.MAX_VALUE)

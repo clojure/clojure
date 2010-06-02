@@ -2191,7 +2191,7 @@ public static class MetaExpr implements Expr{
 	}
 }
 
-public static class IfExpr implements Expr{
+public static class IfExpr implements Expr, MaybePrimitiveExpr{
 	public final Expr testExpr;
 	public final Expr thenExpr;
 	public final Expr elseExpr;
@@ -2213,6 +2213,14 @@ public static class IfExpr implements Expr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		doEmit(context, objx, gen,false);
+	}
+
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+		doEmit(context, objx, gen, true);
+	}
+
+	public void doEmit(C context, ObjExpr objx, GeneratorAdapter gen, boolean emitUnboxed){
 		Label nullLabel = gen.newLabel();
 		Label falseLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
@@ -2239,12 +2247,18 @@ public static class IfExpr implements Expr{
 			{
 			throw new RuntimeException(e);
 			}
-		thenExpr.emit(context, objx, gen);
+		if(emitUnboxed)
+			((MaybePrimitiveExpr)thenExpr).emitUnboxed(context, objx, gen);
+		else
+			thenExpr.emit(context, objx, gen);
 		gen.goTo(endLabel);
 		gen.mark(nullLabel);
 		gen.pop();
 		gen.mark(falseLabel);
-		elseExpr.emit(context, objx, gen);
+		if(emitUnboxed)
+			((MaybePrimitiveExpr)elseExpr).emitUnboxed(context, objx, gen);
+		else
+			elseExpr.emit(context, objx, gen);
 		gen.mark(endLabel);
 	}
 
@@ -2253,8 +2267,23 @@ public static class IfExpr implements Expr{
 		       && elseExpr.hasJavaClass()
 		       &&
 		       (thenExpr.getJavaClass() == elseExpr.getJavaClass()
-		        || thenExpr.getJavaClass() == null
-		        || elseExpr.getJavaClass() == null);
+		        || (thenExpr.getJavaClass() == null && !elseExpr.getJavaClass().isPrimitive())
+		        || (elseExpr.getJavaClass() == null && !thenExpr.getJavaClass().isPrimitive()));
+	}
+
+	public boolean canEmitPrimitive(){
+		try
+			{
+			return thenExpr instanceof MaybePrimitiveExpr
+			       && elseExpr instanceof MaybePrimitiveExpr
+			       && thenExpr.getJavaClass() == elseExpr.getJavaClass()
+			       && ((MaybePrimitiveExpr)thenExpr).canEmitPrimitive()
+				   && ((MaybePrimitiveExpr)elseExpr).canEmitPrimitive();
+			}
+		catch(Exception e)
+			{
+			return false;
+			}
 	}
 
 	public Class getJavaClass() throws Exception{
@@ -4838,7 +4867,7 @@ public static class LetFnExpr implements Expr{
 	}
 }
 
-public static class LetExpr implements Expr{
+public static class LetExpr implements Expr, MaybePrimitiveExpr{
 	public final PersistentVector bindingInits;
 	public final Expr body;
 	public final boolean isLoop;
@@ -4927,6 +4956,15 @@ public static class LetExpr implements Expr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		doEmit(context, objx, gen, false);
+	}
+
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+		doEmit(context, objx, gen, true);
+	}
+
+
+	public void doEmit(C context, ObjExpr objx, GeneratorAdapter gen, boolean emitUnboxed){
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
@@ -4948,7 +4986,10 @@ public static class LetExpr implements Expr{
 			try
 				{
 				Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel));
-				body.emit(context, objx, gen);
+				if(emitUnboxed)
+					((MaybePrimitiveExpr)body).emitUnboxed(context, objx, gen);
+				else
+					body.emit(context, objx, gen);
 				}
 			finally
 				{
@@ -4956,7 +4997,12 @@ public static class LetExpr implements Expr{
 				}
 			}
 		else
-			body.emit(context, objx, gen);
+			{
+			if(emitUnboxed)
+				((MaybePrimitiveExpr)body).emitUnboxed(context, objx, gen);
+			else
+				body.emit(context, objx, gen);
+			}
 		Label end = gen.mark();
 //		gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
 		for(ISeq bis = bindingInits.seq(); bis != null; bis = bis.next())
@@ -4981,6 +5027,11 @@ public static class LetExpr implements Expr{
 	public Class getJavaClass() throws Exception{
 		return body.getJavaClass();
 	}
+
+	public boolean canEmitPrimitive(){
+		return body instanceof MaybePrimitiveExpr && ((MaybePrimitiveExpr)body).canEmitPrimitive();
+	}
+
 }
 
 public static class RecurExpr implements Expr{

@@ -645,8 +645,7 @@
 
 (defn identical?
   "Tests if 2 arguments are the same object"
-  {:tag Boolean
-   :inline (fn [x y] `(. clojure.lang.Util identical ~x ~y))
+  {:inline (fn [x y] `(. clojure.lang.Util identical ~x ~y))
    :inline-arities #{2}
    :added "1.0"}
   ([x y] (clojure.lang.Util/identical x y)))
@@ -657,8 +656,7 @@
   numbers and collections in a type-independent manner.  Clojure's immutable data
   structures define equals() (and thus =) as a value, not an identity,
   comparison."
-  {:tag Boolean
-   :inline (fn [x y] `(. clojure.lang.Util equiv ~x ~y))
+  {:inline (fn [x y] `(. clojure.lang.Util equiv ~x ~y))
    :inline-arities #{2}
    :added "1.0"}
   ([x] true)
@@ -687,7 +685,7 @@
   y. Same as Java x.compareTo(y) except it also works for nil, and
   compares numbers and collections in a type-independent manner. x
   must implement Comparable"
-  {:tag Integer
+  {
    :inline (fn [x y] `(. clojure.lang.Util compare ~x ~y))
    :added "1.0"}
   [x y] (. clojure.lang.Util (compare x y)))
@@ -719,7 +717,7 @@
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 (defn zero?
   "Returns true if num is zero, else false"
-  {:tag Boolean
+  {
    :inline (fn [x] `(. clojure.lang.Numbers (isZero ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (isZero x)))
@@ -727,14 +725,14 @@
 (defn count
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings, arrays, and Java Collections and Maps"
-  {:tag Integer
+  {
    :inline (fn  [x] `(. clojure.lang.RT (count ~x)))
    :added "1.0"}
   [coll] (clojure.lang.RT/count coll))
 
 (defn int
   "Coerce to int"
-  {:tag Integer
+  {
    :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (intCast x)))
@@ -979,14 +977,14 @@
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
-  {:tag Boolean
+  {
    :inline (fn [x] `(. clojure.lang.Numbers (isPos ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (isPos x)))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
-  {:tag Boolean
+  {
    :inline (fn [x] `(. clojure.lang.Numbers (isNeg ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (isNeg x)))
@@ -2698,7 +2696,7 @@
 
 (defn boolean
   "Coerce to boolean"
-  {:tag Boolean
+  {
    :inline (fn  [x] `(. clojure.lang.RT (booleanCast ~x)))
    :added "1.0"}
   [x] (clojure.lang.RT/booleanCast x))
