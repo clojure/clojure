@@ -38,6 +38,20 @@
     (is (re-matches ~msg-re (with-err-string-writer (eval-in-temp-ns ~form))))
     (is (re-matches ~msg-re (with-err-print-writer (eval-in-temp-ns ~form))))))
 
+(defn bare-rt-print
+  "Return string RT would print prior to print-initialize"
+  [x]
+  (with-out-str
+    (try
+     (push-thread-bindings {#'clojure.core/print-initialized false})
+     (clojure.lang.RT/print x *out*)
+     (finally
+      (pop-thread-bindings)))))
+
+(deftest rt-print-prior-to-print-initialize
+  (testing "pattern literals"
+    (is (= "#\"foo\"" (bare-rt-print #"foo")))))
+
 (deftest error-messages
   (testing "binding a core var that already refers to something"
     (should-print-err-message
