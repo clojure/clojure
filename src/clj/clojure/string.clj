@@ -8,17 +8,29 @@
 
 (ns ^{:doc "Clojure String utilities
 
-clojure.string adheres to the following design principles:
+It is poor form to (:use clojure.string). Instead, use require
+with :as to specify a prefix, e.g.
+
+(ns your.namespace.here
+  (:require '[clojure.string :as str]))
+
+Design notes for clojure.string:
 
 1. Strings are objects (as opposed to sequences). As such, the
    string being manipulated is the first argument to a function;
-   passing nil will result in a NullPointerException. If you
-   want sequence-y behavior instead, use a sequence.
+   passing nil will result in a NullPointerException unless
+   documented otherwise. If you want sequence-y behavior instead,
+   use a sequence.
 
 2. Functions are generally not lazy, and call straight to host
    methods where those are available and efficient.
 
-3. When a function is documented to accept a string argument, it
+3. Functions take advantage of String implementation details to
+   write high-performing loop/recurs instead of using higher-order
+   functions. (This is not idiomatic in general-purpose application
+   code.)
+
+4. When a function is documented to accept a string argument, it
    will take any implementation of the correct *interface* on the
    host platform. In Java, this is CharSequence, which is more
    general than String. In ordinary usage you will almost always
@@ -66,7 +78,7 @@ clojure.string adheres to the following design principles:
      (instance? CharSequence match) (.replace s ^CharSequence match ^CharSequence replacement)
      (instance? Pattern match) (if (instance? CharSequence replacement)
                                  (.replaceAll (re-matcher ^Pattern match s)
-                                              (.toString replacement))
+                                              (.toString ^CharSequence replacement))
                                  (replace-by s match replacement))
      :else (throw (IllegalArgumentException. (str "Invalid match arg: " match))))))
 
@@ -163,6 +175,12 @@ clojure.string adheres to the following design principles:
   ([ ^CharSequence s ^Pattern re limit]
      (LazilyPersistentVector/createOwning (.split re s limit))))
 
+(defn split-lines
+  "Splits s on \\n or \\r\\n."
+  {:added "1.2"}
+  [^CharSequence s]
+  (split s #"\r?\n"))
+
 (defn ^String trim
   "Removes whitespace from both ends of string."
   {:added "1.2"}
@@ -204,4 +222,33 @@ clojure.string adheres to the following design principles:
           (recur (dec index))
           (.. s (subSequence 0 index) toString))))))
 
+(defn blank?
+  "True if s is nil, empty, or contains only whitespace."
+  {:added "1.2"}
+  [^CharSequence s]
+  (if s
+    (loop [index (int 0)]
+      (if (= (.length s) index)
+        true
+        (if (Character/isWhitespace (.charAt s index))
+          (recur (inc index))
+          false)))
+    true))
 
+(defn ^String escape
+  "Return a new string, using cmap to escape each character ch
+   from s as follows:
+   
+   If (cmap ch) is nil, append ch to the new string.
+   If (cmap ch) is non-nil, append (str (cmap ch)) instead."
+  {:added "1.2"}
+  [^CharSequence s cmap]
+  (loop [index (int 0)
+         buffer (StringBuilder. (.length s))]
+    (if (= (.length s) index)
+      (.toString buffer)
+      (let [ch (.charAt s index)]
+        (if-let [replacement (cmap ch)]
+          (.append buffer replacement)
+          (.append buffer ch))
+        (recur (inc index) buffer)))))

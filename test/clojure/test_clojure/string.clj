@@ -92,4 +92,29 @@
        "calvino" s/trim ["  calvino  "]
        "calvino  " s/triml ["  calvino  "]
        "  calvino" s/trimr ["  calvino  "]
-       "the end" s/trim-newline ["the end\r\n\r\r\n"]))
+       "the end" s/trim-newline ["the end\r\n\r\r\n"]
+       true s/blank? [" "]
+       ["a" "b"] s/split-lines ["a\nb"]
+       "fa la la" s/escape ["fo lo lo" {\o \a}]))
+
+(deftest t-escape
+  (is (= "&lt;foo&amp;bar&gt;"
+         (s/escape "<foo&bar>" {\& "&amp;" \< "&lt;" \> "&gt;"})))
+  (is (= " \\\"foo\\\" "
+         (s/escape " \"foo\" " {\" "\\\""})))
+  (is (= "faabor"
+         (s/escape "foobar" {\a \o, \o \a}))))
+
+(deftest t-blank
+  (is (s/blank? nil))
+  (is (s/blank? ""))
+  (is (s/blank? " "))
+  (is (s/blank? " \t \n  \r "))
+  (is (not (s/blank? "  foo  "))))
+
+(deftest t-split-lines
+  (let [result (s/split-lines "one\ntwo\r\nthree")]
+    (is (= ["one" "two" "three"] result))
+    (is (vector? result)))
+  (is (= (list "foo") (s/split-lines "foo"))))
+
