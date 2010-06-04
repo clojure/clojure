@@ -51,6 +51,15 @@
        "quux" "quux"))
 
 (deftest test-fnil
+  (let [f1 (fnil vector :a)
+        f2 (fnil vector :a :b)
+        f3 (fnil vector :a :b :c)]
+    (are [result input] (= result [(apply f1 input) (apply f2 input) (apply f3 input)])
+         [[1 2 3 4] [1 2 3 4] [1 2 3 4]]  [1 2 3 4]
+         [[:a 2 3 4] [:a 2 3 4] [:a 2 3 4]] [nil 2 3 4]
+         [[:a nil 3 4] [:a :b 3 4] [:a :b 3 4]] [nil nil 3 4]
+         [[:a nil nil 4] [:a :b nil 4] [:a :b :c 4]] [nil nil nil 4]
+         [[:a nil nil nil] [:a :b nil nil] [:a :b :c nil]] [nil nil nil nil]))
   (are [x y] (= x y)
        ((fnil + 0) nil 42) 42
        ((fnil conj []) nil 42) [42]

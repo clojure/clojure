@@ -5675,6 +5675,7 @@
   versions can replace arguments in the second and third
   positions (y, z). Note that the function f can take any number of
   arguments, not just the one(s) being nil-patched."
+  {:added "1.2"}
   ([f x]
    (fn
      ([a] (f (if (nil? a) x a)))
