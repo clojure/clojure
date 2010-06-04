@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>clojure.template API reference (Clojure)</title>
+    <title>clojure.java.shell API reference (Clojure)</title>
     <link href="static/favicon.png" rel="icon" />
     <link href="static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
@@ -54,24 +54,27 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.template/apply-template">apply-template</a>
+      <a href="#clojure.java.shell/sh">sh</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.template/do-template">do-template</a>
+      <a href="#clojure.java.shell/with-sh-dir">with-sh-dir</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.java.shell/with-sh-env">with-sh-env</a>
     </div>
     <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.template</span>
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.java.shell</span>
   <span id="branch-name">(master branch)</span></h1>
-by <span id="author">Stuart Sierra</span><br />
+by <span id="author">Chris Houser, Stuart Halloway</span><br />
 <br />Usage:
 <pre>
 (ns your-namespace
-  (:require <span id="long-name">clojure.template</span>))
+  (:require <span id="long-name">clojure.java.shell</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr">Macros that expand to repeated copies of a template expression.</pre>
+<pre id="namespace-docstr">Conveniently launch a sub-process providing its stdin and
+collecting its stdout</pre>
 
 
 <br />
@@ -79,38 +82,58 @@ by <span id="author">Stuart Sierra</span><br />
 <div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.template/apply-template">apply-template</h2>
+  <h2 id="clojure.java.shell/sh">sh</h2>
   <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (apply-template argv expr values)
+  <pre id="var-usage">Usage: (sh &amp; args)
 </pre>
-  <pre id="var-docstr">For use in macros.  argv is an argument list, as in defn.  expr is
-a quoted expression using the symbols in argv.  values is a sequence
-of values to be used for the arguments.
+  <pre id="var-docstr">Passes the given strings to Runtime.exec() to launch a sub-process.
 
-apply-template will recursively replace argument symbols in expr
-with their corresponding values, returning a modified expr.
+Options are
 
-Example: (apply-template '[x] '(+ x x) '[2])
-         ;=&gt; (+ 2 2)</pre>
+:in    may be given followed by a String specifying text to be fed to the 
+       sub-process's stdin.  
+:out   option may be given followed by :bytes or a String. If a String 
+       is given, it will be used as a character encoding name (for 
+       example "UTF-8" or "ISO-8859-1") to convert the 
+       sub-process's stdout to a String which is returned.
+       If :bytes is given, the sub-process's stdout will be stored in 
+       a byte array and returned.  Defaults to UTF-8.
+:env   override the process env with a map (or the underlying Java
+       String[] if you are a masochist).
+:dir   override the process dir with a String or java.io.File.
+
+You can bind :env or :dir for multiple operations using with-sh-env
+and with-sh-dir.
+
+sh returns a map of
+  :exit =&gt; sub-process's exit code
+  :out  =&gt; sub-process's stdout (as byte[] or String)
+  :err  =&gt; sub-process's stderr (as byte[] or String)</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  
-  <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L30" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/4bea7a529bb14b99d48758cfaf0d71af0997f0ff/src/clj/clojure/java/shell.clj#L63" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.template/do-template">do-template</h2>
+  <h2 id="clojure.java.shell/with-sh-dir">with-sh-dir</h2>
   <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (do-template argv expr &amp; values)
+  <pre id="var-usage">Usage: (with-sh-dir dir &amp; forms)
 </pre>
-  <pre id="var-docstr">Repeatedly copies expr (in a do block) for each group of arguments
-in values.  values are automatically partitioned by the number of
-arguments in argv, an argument vector as in defn.
-
-Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
-         ;=&gt; (do (+ 4 2) (+ 5 3))</pre>
+  <pre id="var-docstr">Sets the directory for use with sh, see sh for details.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
+  <a href="http://github.com/richhickey/clojure/blob/4bea7a529bb14b99d48758cfaf0d71af0997f0ff/src/clj/clojure/java/shell.clj#L20" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.java.shell/with-sh-env">with-sh-env</h2>
+  <span id="var-type">macro</span><br />
+  <pre id="var-usage">Usage: (with-sh-env env &amp; forms)
+</pre>
+  <pre id="var-docstr">Sets the environment for use with sh, see sh for details.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L45" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/4bea7a529bb14b99d48758cfaf0d71af0997f0ff/src/clj/clojure/java/shell.clj#L27" id="var-source">Source</a>
 </div>
 
 

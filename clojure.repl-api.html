@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>clojure.template API reference (Clojure)</title>
+    <title>clojure.repl API reference (Clojure)</title>
     <link href="static/favicon.png" rel="icon" />
     <link href="static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
@@ -54,24 +54,30 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.template/apply-template">apply-template</a>
+      <a href="#clojure.repl/apropos">apropos</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.template/do-template">do-template</a>
+      <a href="#clojure.repl/dir">dir</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.repl/dir-fn">dir-fn</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.repl/source">source</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.repl/source-fn">source-fn</a>
     </div>
     <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.template</span>
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.repl</span>
   <span id="branch-name">(master branch)</span></h1>
-by <span id="author">Stuart Sierra</span><br />
+by <span id="author">Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim, Christophe Grande</span><br />
 <br />Usage:
 <pre>
 (ns your-namespace
-  (:require <span id="long-name">clojure.template</span>))
+  (:require <span id="long-name">clojure.repl</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr">Macros that expand to repeated copies of a template expression.</pre>
+<pre id="namespace-docstr">Utilities meant to be used interactively at the REPL</pre>
 
 
 <br />
@@ -79,38 +85,71 @@ by <span id="author">Stuart Sierra</span><br />
 <div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.template/apply-template">apply-template</h2>
+  <h2 id="clojure.repl/apropos">apropos</h2>
   <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (apply-template argv expr values)
+  <pre id="var-usage">Usage: (apropos str-or-pattern)
 </pre>
-  <pre id="var-docstr">For use in macros.  argv is an argument list, as in defn.  expr is
-a quoted expression using the symbols in argv.  values is a sequence
-of values to be used for the arguments.
-
-apply-template will recursively replace argument symbols in expr
-with their corresponding values, returning a modified expr.
-
-Example: (apply-template '[x] '(+ x x) '[2])
-         ;=&gt; (+ 2 2)</pre>
+  <pre id="var-docstr">Given a regular expression or stringable thing, return a seq of
+all definitions in all currently-loaded namespaces that match the
+str-or-pattern.</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L30" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L52" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.template/do-template">do-template</h2>
+  <h2 id="clojure.repl/dir">dir</h2>
   <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (do-template argv expr &amp; values)
+  <pre id="var-usage">Usage: (dir nsname)
 </pre>
-  <pre id="var-docstr">Repeatedly copies expr (in a do block) for each group of arguments
-in values.  values are automatically partitioned by the number of
-arguments in argv, an argument vector as in defn.
+  <pre id="var-docstr">Prints a sorted directory of public vars in a namespace</pre>
+  
+  
+  <a href="http://github.com/richhickey/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L70" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.repl/dir-fn">dir-fn</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (dir-fn ns)
+</pre>
+  <pre id="var-docstr">Returns a sorted seq of symbols naming public vars in
+a namespace</pre>
+  
+  
+  <a href="http://github.com/richhickey/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L64" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.repl/source">source</h2>
+  <span id="var-type">macro</span><br />
+  <pre id="var-usage">Usage: (source n)
+</pre>
+  <pre id="var-docstr">Prints the source code for the given symbol, if it can find it.
+This requires that the symbol resolve to a Var defined in a
+namespace for which the .clj is in the classpath.
 
-Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
-         ;=&gt; (do (+ 4 2) (+ 5 3))</pre>
+Example: (source filter)</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L45" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L43" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.repl/source-fn">source-fn</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (source-fn x)
+</pre>
+  <pre id="var-docstr">Returns a string of the source code for the given symbol, if it can
+find it.  This requires that the symbol resolve to a Var defined in
+a namespace for which the .clj is in the classpath.  Returns nil if
+it can't find the source.  For most REPL usage, 'source' is more
+convenient.
+
+Example: (source-fn 'filter)</pre>
+  
+  
+  <a href="http://github.com/richhickey/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L21" id="var-source">Source</a>
 </div>
 
 

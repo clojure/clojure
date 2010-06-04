@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>clojure.template API reference (Clojure)</title>
+    <title>clojure.java.javadoc API reference (Clojure)</title>
     <link href="static/favicon.png" rel="icon" />
     <link href="static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
@@ -54,24 +54,26 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.template/apply-template">apply-template</a>
+      <a href="#clojure.java.javadoc/add-local-javadoc">add-local-javadoc</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.template/do-template">do-template</a>
+      <a href="#clojure.java.javadoc/add-remote-javadoc">add-remote-javadoc</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.java.javadoc/javadoc">javadoc</a>
     </div>
     <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.template</span>
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.java.javadoc</span>
   <span id="branch-name">(master branch)</span></h1>
-by <span id="author">Stuart Sierra</span><br />
+by <span id="author">Christophe Grand, Stuart Sierra</span><br />
 <br />Usage:
 <pre>
 (ns your-namespace
-  (:require <span id="long-name">clojure.template</span>))
+  (:require <span id="long-name">clojure.java.javadoc</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr">Macros that expand to repeated copies of a template expression.</pre>
+<pre id="namespace-docstr">A repl helper to quickly open javadocs.</pre>
 
 
 <br />
@@ -79,38 +81,38 @@ by <span id="author">Stuart Sierra</span><br />
 <div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.template/apply-template">apply-template</h2>
+  <h2 id="clojure.java.javadoc/add-local-javadoc">add-local-javadoc</h2>
   <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (apply-template argv expr values)
+  <pre id="var-usage">Usage: (add-local-javadoc path)
 </pre>
-  <pre id="var-docstr">For use in macros.  argv is an argument list, as in defn.  expr is
-a quoted expression using the symbols in argv.  values is a sequence
-of values to be used for the arguments.
-
-apply-template will recursively replace argument symbols in expr
-with their corresponding values, returning a modified expr.
-
-Example: (apply-template '[x] '(+ x x) '[2])
-         ;=&gt; (+ 2 2)</pre>
+  <pre id="var-docstr">Adds to the list of local Javadoc paths.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  
-  <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L30" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/89ed54ec8850bb3012c89c91d076a34837ca737e/src/clj/clojure/java/javadoc.clj#L38" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.template/do-template">do-template</h2>
-  <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (do-template argv expr &amp; values)
+  <h2 id="clojure.java.javadoc/add-remote-javadoc">add-remote-javadoc</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (add-remote-javadoc package-prefix url)
 </pre>
-  <pre id="var-docstr">Repeatedly copies expr (in a do block) for each group of arguments
-in values.  values are automatically partitioned by the number of
-arguments in argv, an argument vector as in defn.
-
-Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
-         ;=&gt; (do (+ 4 2) (+ 5 3))</pre>
+  <pre id="var-docstr">Adds to the list of remote Javadoc URLs.  package-prefix is the
+beginning of the package name that has docs at this URL.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
+  <a href="http://github.com/richhickey/clojure/blob/89ed54ec8850bb3012c89c91d076a34837ca737e/src/clj/clojure/java/javadoc.clj#L44" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.java.javadoc/javadoc">javadoc</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (javadoc class-or-object)
+</pre>
+  <pre id="var-docstr">Opens a browser window displaying the javadoc for the argument.
+Tries *local-javadocs* first, then *remote-javadocs*.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/richhickey/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L45" id="var-source">Source</a>
+  <a href="http://github.com/richhickey/clojure/blob/89ed54ec8850bb3012c89c91d076a34837ca737e/src/clj/clojure/java/javadoc.clj#L72" id="var-source">Source</a>
 </div>
 
 
