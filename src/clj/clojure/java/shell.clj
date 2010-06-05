@@ -11,8 +11,9 @@
     :doc "Conveniently launch a sub-process providing its stdin and
 collecting its stdout"}
   clojure.java.shell
-  (:use [clojure.java.io :only (as-file)])
-  (:import (java.io InputStreamReader OutputStreamWriter)))
+  (:use [clojure.java.io :only (as-file copy)])
+  (:import (java.io OutputStreamWriter ByteArrayOutputStream StringWriter)
+           (java.nio.charset Charset)))
 
 (def *sh-dir* nil)
 (def *sh-env* nil)
@@ -48,7 +49,8 @@ collecting its stdout"}
 
 (defn- parse-args
   [args]
-  (let [default-opts {:out "UTF-8" :dir *sh-dir* :env *sh-env*}
+  (let [default-encoding (.name (Charset/defaultCharset))
+        default-opts {:outenc default-encoding :inenc default-encoding :dir *sh-dir* :env *sh-env*}
         [cmd opts] (split-with string? args)]
     [cmd (merge default-opts (apply hash-map opts))]))
 
@@ -60,22 +62,41 @@ collecting its stdout"}
    (map? arg) (into-array String (map (fn [[k v]] (str (name k) "=" v)) arg))
    true arg))
 
+(defn- stream-to-bytes
+  [in]
+  (with-open [bout (ByteArrayOutputStream.)]
+    (copy in bout)
+    (.toByteArray bout)))
+
+(defn- stream-to-string
+  [in enc]
+  (with-open [bout (StringWriter.)]
+    (copy in bout :encoding enc)
+    (.toString bout)))
+
 (defn sh
   "Passes the given strings to Runtime.exec() to launch a sub-process.
 
   Options are
 
-  :in    may be given followed by a String specifying text to be fed to the 
-         sub-process's stdin.  
-  :out   option may be given followed by :bytes or a String. If a String 
-         is given, it will be used as a character encoding name (for 
-         example \"UTF-8\" or \"ISO-8859-1\") to convert the 
-         sub-process's stdout to a String which is returned.
-         If :bytes is given, the sub-process's stdout will be stored in 
-         a byte array and returned.  Defaults to UTF-8.
-  :env   override the process env with a map (or the underlying Java
-         String[] if you are a masochist).
-  :dir   override the process dir with a String or java.io.File.
+  :in      may be given followed by a String or byte array specifying input
+           to be fed to the sub-process's stdin.
+  :inenc   option may be given followed by a String, used as a character
+           encoding name (for example \"UTF-8\" or \"ISO-8859-1\") to
+           convert the input string specified by the :in option to the
+           sub-process's stdin.  Defaults to the platform default encoding.
+           If the :in option provides a byte array, then the bytes are passed
+           unencoded, and this option is ignored.
+  :outenc  option may be given followed by :bytes or a String. If a
+           String is given, it will be used as a character encoding
+           name (for example \"UTF-8\" or \"ISO-8859-1\") to convert
+           the sub-process's stdout to a String which is returned.
+           If :bytes is given, the sub-process's stdout will be stored
+           in a byte array and returned.  Defaults to the platform default
+           encoding.
+  :env     override the process env with a map (or the underlying Java
+           String[] if you are a masochist).
+  :dir     override the process dir with a String or java.io.File.
 
   You can bind :env or :dir for multiple operations using with-sh-env
   and with-sh-dir.
@@ -90,23 +111,24 @@ collecting its stdout"}
         proc (.exec (Runtime/getRuntime) 
 		    (into-array cmd) 
 		    (as-env-string (:env opts))
-		    (as-file (:dir opts)))]
-    (println opts)
-    (if (:in opts)
-      (with-open [osw (OutputStreamWriter. (.getOutputStream proc))]
-        (.write osw (:in opts)))
+		    (as-file (:dir opts)))
+        in (:in opts)]
+    (if in
+      (future
+       (if (instance? (class (byte-array 0)) in)
+         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) (:inenc opts))]
+           (.write osw in))
+         (with-open [os (.getOutputStream proc)]
+           (.write os in))))
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
       (let [[out err]
-            (if (= (:out opts) :bytes)
-              (for [strm [stdout stderr]]
-                (into-array Byte/TYPE (map byte (stream-seq strm))))
-              (for [strm [stdout stderr]]
-                (apply str (map char (stream-seq 
-                                      (InputStreamReader. strm (:out opts)))))))
+            (if (= (:outenc opts) :bytes)
+              (pmap #(stream-to-bytes %) [stdout stderr])
+              (pmap #(stream-to-string % (:outenc opts)) [stdout stderr]))
             exit-code (.waitFor proc)]
-        {:exit exit-code :out out :err err}))))
+        {:exit exit-code :outenc out :err err}))))
 
 (comment
 
@@ -115,7 +137,8 @@ collecting its stdout"}
 (println (sh "sed" "s/[aeiou]/oo/g" :in "hello there\n"))
 (println (sh "cat" :in "x\u25bax\n"))
 (println (sh "echo" "x\u25bax"))
-(println (sh "echo" "x\u25bax" :out "ISO-8859-1")) ; reads 4 single-byte chars
-(println (sh "cat" "myimage.png" :out :bytes)) ; reads binary file into bytes[]
+(println (sh "echo" "x\u25bax" :outenc "ISO-8859-1")) ; reads 4 single-byte chars
+(println (sh "cat" "myimage.png" :outenc :bytes)) ; reads binary file into bytes[]
+(println (sh "cmd" "/c dir 1>&2"))
 
 )
