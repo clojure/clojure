@@ -331,6 +331,8 @@
                             (clojure.lang.Compiler/writeClassFile cname bytecode)))
          pc-effect (apply get-proxy-class bases)
          pname (proxy-name super interfaces)]
+     ;remember the class to prevent it from disappearing before use
+     (intern *ns* (symbol pname) pc-effect)
      `(let [;pc# (get-proxy-class ~@class-and-interfaces)
             p# (new ~(symbol pname) ~@args)] ;(construct-proxy pc# ~@args)]   
         (init-proxy p#

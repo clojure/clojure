@@ -23,8 +23,9 @@
         psig (fn [[name [& args]]]
                (vector name (vec (map tag args)) (tag name) (map meta args)))
         cname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
-    `(do (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
-         (import ~cname))))
+    `(let [] 
+       (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
+       (import ~cname))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; reify/deftype ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -294,7 +295,7 @@
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
-    `(do
+    `(let []
        ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods)
        (defmethod print-method ~classname [o# w#]
            ((var print-defrecord) o# w#))
@@ -386,7 +387,7 @@
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
-    `(do
+    `(let []
        ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods)
        (import ~classname))))
 
