@@ -657,8 +657,10 @@ public static class MetaReader extends AFn{
 		if(r instanceof LineNumberingPushbackReader)
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
 		Object meta = read(r, true, null, true);
-		if(meta instanceof Symbol || meta instanceof Keyword || meta instanceof String)
+		if(meta instanceof Symbol || meta instanceof String)
 			meta = RT.map(RT.TAG_KEY, meta);
+		else if (meta instanceof Keyword)
+			meta = RT.map(meta, true);
 		else if(!(meta instanceof IPersistentMap))
 			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
 
@@ -672,7 +674,12 @@ public static class MetaReader extends AFn{
 				((IReference)o).resetMeta((IPersistentMap) meta);
 				return o;
 				}
-			return ((IObj) o).withMeta((IPersistentMap) meta);
+			Object ometa = RT.meta(o);
+			for(ISeq s = RT.seq(meta); s != null; s = s.next()) {
+				IMapEntry kv = (IMapEntry) s.first(); 
+				ometa = RT.assoc(ometa, kv.getKey(), kv.getValue());
+			}
+			return ((IObj) o).withMeta((IPersistentMap) ometa);
 			}
 		else
 			throw new IllegalArgumentException("Metadata can only be applied to IMetas");

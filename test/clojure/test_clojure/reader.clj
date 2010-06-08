@@ -274,10 +274,6 @@
 
 (deftest t-Comment)
 
-;; Meta (^)
-
-(deftest t-Meta)
-
 ;; Deref (@)
 
 (deftest t-Deref)
@@ -290,9 +286,10 @@
 
 (deftest t-Regex)
 
-;; Metadata (#^)
+;; Metadata (^ or #^ (deprecated))
 
-(deftest t-Metadata)
+(deftest t-Metadata
+  (is (= (meta '^:static ^:awesome ^{:static false :bar :baz} sym) {:awesome true, :bar :baz, :static true})))
 
 ;; Var-quote (#')
 
