@@ -15,12 +15,13 @@
 
 
 (ns clojure.contrib.datalog.rules
-  (use clojure.contrib.datalog.util)
-  (use clojure.contrib.datalog.literals
+  (:use clojure.contrib.datalog.util)
+  (:use clojure.contrib.datalog.literals
        clojure.contrib.datalog.database)
-  (use [clojure.set :only (union intersection difference)])
-  (use [clojure.contrib.set :only (subset?)])
-  (use [clojure.contrib.except :only (throwf)]))
+  (:use [clojure.set :only (union intersection difference)])
+  (:use [clojure.contrib.set :only (subset?)])
+  (:use [clojure.contrib.except :only (throwf)])
+  (:import java.io.Writer))
 
 
 (defstruct datalog-rule

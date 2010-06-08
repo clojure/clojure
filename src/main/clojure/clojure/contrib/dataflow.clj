@@ -24,7 +24,8 @@
                                       dependency-list
                                       get-neighbors)])
   (:use [clojure.walk :only (postwalk)])
-  (:use [clojure.contrib.except :only (throwf)]))
+  (:use [clojure.contrib.except :only (throwf)])
+  (:import java.io.Writer))
 
 
 ;;; Chief Data Structures

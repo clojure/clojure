@@ -18,7 +18,8 @@
   (:use clojure.contrib.datalog.util)
   (:use clojure.contrib.def)
   (:use [clojure.set :only (union intersection difference)])
-  (:use [clojure.contrib.except :only (throwf)]))
+  (:use [clojure.contrib.except :only (throwf)])
+  (:import java.io.Writer))
 
 
 (defstruct relation
