@@ -660,7 +660,7 @@ public static class MetaReader extends AFn{
 		if(meta instanceof Symbol || meta instanceof String)
 			meta = RT.map(RT.TAG_KEY, meta);
 		else if (meta instanceof Keyword)
-			meta = RT.map(meta, true);
+			meta = RT.map(meta, RT.T);
 		else if(!(meta instanceof IPersistentMap))
 			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
 
@@ -676,9 +676,9 @@ public static class MetaReader extends AFn{
 				}
 			Object ometa = RT.meta(o);
 			for(ISeq s = RT.seq(meta); s != null; s = s.next()) {
-				IMapEntry kv = (IMapEntry) s.first(); 
+				IMapEntry kv = (IMapEntry) s.first();
 				ometa = RT.assoc(ometa, kv.getKey(), kv.getValue());
-			}
+				}
 			return ((IObj) o).withMeta((IPersistentMap) ometa);
 			}
 		else
