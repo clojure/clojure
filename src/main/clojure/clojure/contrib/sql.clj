@@ -17,10 +17,8 @@
 
 (ns
   #^{:author "Stephen C. Gilardi",
-     :doc "A Clojure interface to sql databases via jdbc
-
-           See clojure.contrib.sql.test for an example"
-     :see-also [["http://code.google.com/p/clojure-contrib/source/browse/trunk/src/clojure/contrib/sql/test.clj"
+     :doc "A Clojure interface to sql databases via jdbc."
+     :see-also [["http://github.com/richhickey/clojure-contrib/blob/master/src/test/clojure/clojure/contrib/test_sql.clj"
                  "Example code"]]}
   clojure.contrib.sql
   (:use (clojure.contrib
