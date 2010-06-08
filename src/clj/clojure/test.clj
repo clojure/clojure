@@ -271,14 +271,16 @@
   `(binding [*out* *test-out*]
      ~@body))
 
-
-
 ;;; UTILITIES FOR REPORTING FUNCTIONS
 
 (defn file-position
   "Returns a vector [filename line-number] for the nth call up the
-  stack."
-  {:added "1.1"}
+  stack.
+
+  Deprecated in 1.2: The information needed for test reporting is
+  now on :file and :line keys in the result map."
+  {:added "1.1"
+   :deprecated "1.2"}
   [n]
   (let [^StackTraceElement s (nth (.getStackTrace (new java.lang.Throwable)) n)]
     [(.getFileName s) (.getLineNumber s)]))
@@ -288,8 +290,8 @@
   in *testing-vars* as a list, then the source file and line of
   current assertion."
   {:added "1.1"}
-  []
-  (let [[file line] (file-position 4)]
+  [m]
+  (let [{:keys [file line]} m]
     (str
      ;; Uncomment to include namespace in failure report:
      ;;(ns-name (:ns (meta (first *testing-vars*)))) "/ "
@@ -312,8 +314,6 @@
     (dosync (commute *report-counters* assoc name
                      (inc (or (*report-counters* name) 0))))))
 
-
-
 ;;; TEST RESULT REPORTING
 
 (defmulti
@@ -327,6 +327,24 @@
      :added "1.1"}
   report :type)
 
+(defn- file-and-line 
+  [exception depth]
+  (let [^StackTraceElement s (nth (.getStackTrace exception) depth)]
+    {:file (.getFileName s) :line (.getLineNumber s)}))
+
+(defn do-report
+  "Add file and line information to a test result and call report.
+   If you are writing a custom assert-expr method, call this function
+   to pass test results to report."
+  {:added "1.2"}
+  [m]
+  (report
+   (case
+    (:type m)
+    :fail (merge (file-and-line (new java.lang.Throwable) 1) m)
+    :error (merge (file-and-line (:actual m) 0) m) 
+    m)))
+
 (defmethod report :default [m]
   (with-test-out (prn m)))
 
@@ -335,17 +353,17 @@
 
 (defmethod report :fail [m]
   (with-test-out
-   (inc-report-counter :fail)
-   (println "\nFAIL in" (testing-vars-str))
-   (when (seq *testing-contexts*) (println (testing-contexts-str)))
-   (when-let [message (:message m)] (println message))
-   (println "expected:" (pr-str (:expected m)))
-   (println "  actual:" (pr-str (:actual m)))))
+    (inc-report-counter :fail)
+    (println "\nFAIL in" (testing-vars-str m))
+    (when (seq *testing-contexts*) (println (testing-contexts-str)))
+    (when-let [message (:message m)] (println message))
+    (println "expected:" (pr-str (:expected m)))
+    (println "  actual:" (pr-str (:actual m)))))
 
 (defmethod report :error [m]
   (with-test-out
    (inc-report-counter :error)
-   (println "\nERROR in" (testing-vars-str))
+   (println "\nERROR in" (testing-vars-str m))
    (when (seq *testing-contexts*) (println (testing-contexts-str)))
    (when-let [message (:message m)] (println message))
    (println "expected:" (pr-str (:expected m)))
@@ -407,9 +425,9 @@
     `(let [values# (list ~@args)
            result# (apply ~pred values#)]
        (if result#
-         (report {:type :pass, :message ~msg,
+         (do-report {:type :pass, :message ~msg,
                   :expected '~form, :actual (cons ~pred values#)})
-         (report {:type :fail, :message ~msg,
+         (do-report {:type :fail, :message ~msg,
                   :expected '~form, :actual (list '~'not (cons '~pred values#))}))
        result#)))
 
@@ -420,9 +438,9 @@
   [msg form]
   `(let [value# ~form]
      (if value#
-       (report {:type :pass, :message ~msg,
+       (do-report {:type :pass, :message ~msg,
                 :expected '~form, :actual value#})
-       (report {:type :fail, :message ~msg,
+       (do-report {:type :fail, :message ~msg,
                 :expected '~form, :actual value#}))
      value#))
 
@@ -443,7 +461,7 @@
 
 (defmethod assert-expr :always-fail [msg form]
   ;; nil test: always fail
-  `(report {:type :fail, :message ~msg}))
+  `(do-report {:type :fail, :message ~msg}))
 
 (defmethod assert-expr :default [msg form]
   (if (and (sequential? form) (function? (first form)))
@@ -456,9 +474,9 @@
          object# ~(nth form 2)]
      (let [result# (instance? klass# object#)]
        (if result#
-         (report {:type :pass, :message ~msg,
+         (do-report {:type :pass, :message ~msg,
                   :expected '~form, :actual (class object#)})
-         (report {:type :fail, :message ~msg,
+         (do-report {:type :fail, :message ~msg,
                   :expected '~form, :actual (class object#)}))
        result#)))
 
@@ -469,10 +487,10 @@
   (let [klass (second form)
         body (nthnext form 2)]
     `(try ~@body
-          (report {:type :fail, :message ~msg,
+          (do-report {:type :fail, :message ~msg,
                    :expected '~form, :actual nil})
           (catch ~klass e#
-            (report {:type :pass, :message ~msg,
+            (do-report {:type :pass, :message ~msg,
                      :expected '~form, :actual e#})
             e#))))
 
@@ -485,13 +503,13 @@
         re (nth form 2)
         body (nthnext form 3)]
     `(try ~@body
-          (report {:type :fail, :message ~msg, :expected '~form, :actual nil})
+          (do-report {:type :fail, :message ~msg, :expected '~form, :actual nil})
           (catch ~klass e#
             (let [m# (.getMessage e#)]
               (if (re-find ~re m#)
-                (report {:type :pass, :message ~msg,
+                (do-report {:type :pass, :message ~msg,
                          :expected '~form, :actual e#})
-                (report {:type :fail, :message ~msg,
+                (do-report {:type :fail, :message ~msg,
                          :expected '~form, :actual e#})))
             e#))))
 
@@ -503,8 +521,8 @@
   [msg form]
   `(try ~(assert-expr msg form)
         (catch Throwable t#
-          (report {:type :error, :message ~msg,
-                   :expected '~form, :actual t#}))))
+          (do-report {:type :error, :message ~msg,
+                      :expected '~form, :actual t#}))))
 
 
 
@@ -665,13 +683,13 @@
   [v]
   (when-let [t (:test (meta v))]
     (binding [*testing-vars* (conj *testing-vars* v)]
-      (report {:type :begin-test-var, :var v})
+      (do-report {:type :begin-test-var, :var v})
       (inc-report-counter :test)
       (try (t)
            (catch Throwable e
-             (report {:type :error, :message "Uncaught exception, not in assertion."
+             (do-report {:type :error, :message "Uncaught exception, not in assertion."
                       :expected nil, :actual e})))
-      (report {:type :end-test-var, :var v}))))
+      (do-report {:type :end-test-var, :var v}))))
 
 (defn test-all-vars
   "Calls test-var on every var interned in the namespace, with fixtures."
@@ -697,13 +715,13 @@
   [ns]
   (binding [*report-counters* (ref *initial-report-counters*)]
     (let [ns-obj (the-ns ns)]
-      (report {:type :begin-test-ns, :ns ns-obj})
+      (do-report {:type :begin-test-ns, :ns ns-obj})
       ;; If the namespace has a test-ns-hook function, call that:
       (if-let [v (find-var (symbol (str (ns-name ns-obj)) "test-ns-hook"))]
 	((var-get v))
         ;; Otherwise, just test every var in the namespace.
         (test-all-vars ns-obj))
-      (report {:type :end-test-ns, :ns ns-obj}))
+      (do-report {:type :end-test-ns, :ns ns-obj}))
     @*report-counters*))
 
 
@@ -719,7 +737,7 @@
   ([& namespaces]
      (let [summary (assoc (apply merge-with + (map test-ns namespaces))
                      :type :summary)]
-       (report summary)
+       (do-report summary)
        summary)))
 
 (defn run-all-tests
