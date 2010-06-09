@@ -5581,8 +5581,8 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 				{
 				ISeq s = RT.next(form);
 				for(; RT.next(s) != null; s = RT.next(s))
-					eval(RT.first(s),false);
-				return eval(RT.first(s),false);
+					eval(RT.first(s), false);
+				return eval(RT.first(s), false);
 				}
 			else if(form instanceof IPersistentCollection
 			        && !(RT.first(form) instanceof Symbol
@@ -5599,18 +5599,19 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 				return expr.eval();
 				}
 			}
+		catch(Throwable e)
+			{
+			if(!(e instanceof CompilerException))
+				throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
+			else
+				throw (CompilerException) e;
+			}
 		finally
 			{
 			Var.popThreadBindings();
 			}
 		}
-	catch(Throwable e)
-		{
-		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
-		else
-			throw (CompilerException) e;
-		}
+
 	finally
 		{
 		if(createdLoader)
