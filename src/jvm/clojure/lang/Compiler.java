@@ -77,6 +77,7 @@ static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 static final Keyword inlineKey = Keyword.intern(null, "inline");
 static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 static final Keyword staticKey = Keyword.intern(null, "static");
+static final Symbol INVOKE_STATIC = Symbol.create("invokeStatic");
 
 static final Keyword volatileKey = Keyword.intern(null, "volatile");
 static final Keyword implementsKey = Keyword.intern(null, "implements");
@@ -2896,8 +2897,8 @@ static class InvokeExpr implements Expr{
 					)
 				{
 				//todo - more specific criteria for binding these
-				this.isDirect = true;
-				this.siteIndex = registerVarCallsite(((VarExpr) fexpr).var);
+//				this.isDirect = true;
+//				this.siteIndex = registerVarCallsite(((VarExpr) fexpr).var);
 				}
 			}
 		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
@@ -3051,6 +3052,16 @@ static class InvokeExpr implements Expr{
 				}
 			}
 
+		if(fexpr instanceof VarExpr)
+			{
+			Var v = ((VarExpr)fexpr).var;
+			if(RT.booleanCast(RT.get(RT.meta(v),staticKey)))
+				{
+				Symbol cname = Symbol.intern(v.ns.name + "$" + munge(v.sym.name));
+				return analyze(context, RT.listStar(DOT, cname, INVOKE_STATIC, RT.next(form)));
+				}
+			}
+		
 		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && KEYWORD_CALLSITES.isBound())
 			{
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
@@ -5243,7 +5254,7 @@ public static class RecurExpr implements Expr{
 			LocalBinding lb = (LocalBinding) loopLocals.nth(i);
 			Class primc = lb.getPrimitiveType();
 			if(lb.isArg)
-				gen.storeArg(lb.idx-1);
+				gen.storeArg(lb.idx-(objx.isStatic?0:1));
 			else
 				{
 				if(primc != null)
