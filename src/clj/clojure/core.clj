@@ -121,7 +121,7 @@
  nnext (fn ^:static nnext [x] (next (next x))))
 
 (def
- ^{:arglists '([coll])
+ ^{:arglists '(^clojure.lang.ISeq [coll])
    :doc "Returns a seq on the collection. If the collection is
     empty, returns nil.  (seq nil) returns nil. seq also works on
     Strings, native Java arrays (of reference types) and any objects
@@ -179,9 +179,10 @@
     same (hashed/sorted) type, that contains the mapping of key(s) to
     val(s). When applied to a vector, returns a new vector that
     contains val at index. Note - index must be <= (count vector)."
-   :added "1.0"}
+   :added "1.0"
+   :static true}
  assoc
- (fn assoc
+ (fn ^:static assoc
    ([map key val] (. clojure.lang.RT (assoc map key val)))
    ([map key val & kvs]
     (let [ret (assoc map key val)]

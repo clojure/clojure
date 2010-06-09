@@ -77,6 +77,7 @@ static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 static final Keyword inlineKey = Keyword.intern(null, "inline");
 static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 static final Keyword staticKey = Keyword.intern(null, "static");
+static final Keyword arglistsKey = Keyword.intern(null, "arglists");
 static final Symbol INVOKE_STATIC = Symbol.create("invokeStatic");
 
 static final Keyword volatileKey = Keyword.intern(null, "volatile");
@@ -433,6 +434,14 @@ static class DefExpr implements Expr{
 					throw new Exception("Can't create defs outside of current ns");
 				}
 			IPersistentMap mm = sym.meta();
+			if(RT.booleanCast(RT.get(mm, staticKey)))
+				{
+				IPersistentMap vm = v.meta();
+				vm = (IPersistentMap) RT.assoc(vm,staticKey,RT.T);
+				//drop quote
+				vm = (IPersistentMap) RT.assoc(vm,arglistsKey,RT.second(mm.valAt(arglistsKey)));
+				v.setMeta(vm);
+				}
             Object source_path = SOURCE_PATH.get();
             source_path = source_path == null ? "NO_SOURCE_FILE" : source_path;
             mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, source_path);
@@ -2840,6 +2849,157 @@ public static class InstanceOfExpr implements Expr, MaybePrimitiveExpr{
 
 }
 
+static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
+	public final Type target;
+	public final Class retClass;
+	public final Class[] paramclasses;
+	public final Type[] paramtypes;
+	public final IPersistentVector args;
+	public final boolean variadic;
+
+	StaticInvokeExpr(Type target, Class retClass, Class[] paramclasses, Type[] paramtypes, boolean variadic,
+	                 IPersistentVector args){
+		this.target = target;
+		this.retClass = retClass;
+		this.paramclasses = paramclasses;
+		this.paramtypes = paramtypes;
+		this.args = args;
+		this.variadic = variadic;
+	}
+
+	public Object eval() throws Exception{
+		throw new UnsupportedOperationException("Can't eval StaticInvokeExpr");
+	}
+
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		emitUnboxed(context, objx, gen);
+		if(context != C.STATEMENT)
+			HostExpr.emitBoxReturn(objx,gen,retClass);
+		if(context == C.STATEMENT)
+			{
+			if(retClass == long.class || retClass == double.class)
+				gen.pop2();
+			else
+				gen.pop();
+			}
+	}
+
+	public boolean hasJavaClass() throws Exception{
+		return true;
+	}
+
+	public Class getJavaClass() throws Exception{
+		return retClass;
+	}
+
+	public boolean canEmitPrimitive(){
+		return retClass.isPrimitive();
+	}
+
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+		Method ms = new Method("invokeStatic", getReturnType(), paramtypes);
+		if(variadic)
+			{
+			for(int i = 0; i < paramclasses.length - 1; i++)
+				{
+				Expr e = (Expr) args.nth(i);
+				try
+					{
+					if(maybePrimitiveType(e) == paramclasses[i])
+						{
+						((MaybePrimitiveExpr) e).emitUnboxed(C.EXPRESSION, objx, gen);
+						}
+					else
+						{
+						e.emit(C.EXPRESSION, objx, gen);
+						HostExpr.emitUnboxArg(objx, gen, paramclasses[i]);
+						}
+					}
+				catch(Exception ex)
+					{
+					throw new RuntimeException(ex);
+					}
+				}
+			IPersistentVector restArgs = RT.subvec(args,paramclasses.length - 1,args.count());
+			MethodExpr.emitArgsAsArray(restArgs,objx,gen);
+			gen.invokeStatic(Type.getType(ArraySeq.class), Method.getMethod("clojure.lang.ArraySeq create(Object[])"));
+			}
+		else
+			MethodExpr.emitTypedArgs(objx, gen, paramclasses, args);
+
+		gen.invokeStatic(target, ms);
+	}
+
+	private Type getReturnType(){
+		return Type.getType(retClass);
+	}
+
+	public static Expr parse(Var v, ISeq args) throws Exception{
+		IPersistentCollection paramlists = (IPersistentCollection) RT.get(v.meta(), arglistsKey);
+		if(paramlists == null)
+			throw new IllegalStateException("Can't call static fn with no arglists: " + v);
+		IPersistentVector paramlist = null;
+		int argcount = RT.count(args);
+		boolean variadic = false;
+		for(ISeq aseq = RT.seq(paramlists); paramlist == null && aseq != null; aseq = aseq.next())
+			{
+			if(!(aseq.first() instanceof IPersistentVector))
+				throw new IllegalStateException("Expected vector arglist, had: " + aseq.first());
+			IPersistentVector alist = (IPersistentVector) aseq.first();
+			if(alist.count() > 1
+			   && alist.nth(alist.count() - 2).equals(_AMP_))
+				{
+				if(argcount > alist.count() - 2)
+					{
+					paramlist = alist;
+					variadic = true;
+					}
+				}
+			else if(alist.count() == argcount)
+				paramlist = alist;
+			}
+
+		if(paramlist == null)
+			throw new IllegalArgumentException("Invalid arity - can't call: " + v + " with " + argcount + " args");
+
+		Class retClass = tagClass(tagOf(paramlist));
+
+		ArrayList<Class> paramClasses = new ArrayList();
+		ArrayList<Type> paramTypes = new ArrayList();
+
+		if(variadic)
+			{
+			for(int i = 0; i < paramlist.count()-2;i++)
+				{
+				Class pc = tagClass(tagOf(paramlist.nth(i)));
+				paramClasses.add(pc);
+				paramTypes.add(Type.getType(pc));
+				}
+			paramClasses.add(ISeq.class);
+			paramTypes.add(Type.getType(ISeq.class));
+			}
+		else
+			{
+			for(int i = 0; i < argcount;i++)
+				{
+				Class pc = tagClass(tagOf(paramlist.nth(i)));
+				paramClasses.add(pc);
+				paramTypes.add(Type.getType(pc));
+				}
+			}
+
+		String cname = v.ns.name.name.replace('.', '/') + "$" + munge(v.sym.name);
+		Type target = Type.getObjectType(cname);
+
+		PersistentVector argv = PersistentVector.EMPTY;
+		for(ISeq s = RT.seq(args); s != null; s = s.next())
+			argv = argv.cons(analyze(C.EXPRESSION, s.first()));
+
+		return new StaticInvokeExpr(target,retClass,paramClasses.toArray(new Class[paramClasses.size()]),
+		                            paramTypes.toArray(new Type[paramTypes.size()]),variadic, argv);
+	}
+}
+
 static class InvokeExpr implements Expr{
 	public final Expr fexpr;
 	public final Object tag;
@@ -3052,13 +3212,12 @@ static class InvokeExpr implements Expr{
 				}
 			}
 
-		if(fexpr instanceof VarExpr)
+		if(fexpr instanceof VarExpr && context != C.EVAL)
 			{
 			Var v = ((VarExpr)fexpr).var;
 			if(RT.booleanCast(RT.get(RT.meta(v),staticKey)))
 				{
-				Symbol cname = Symbol.intern(v.ns.name + "$" + munge(v.sym.name));
-				return analyze(context, RT.listStar(DOT, cname, INVOKE_STATIC, RT.next(form)));
+				return StaticInvokeExpr.parse(v, RT.next(form));
 				}
 			}
 		
@@ -3211,6 +3370,8 @@ static public class FnExpr extends ObjExpr{
 								"Can't have fixed arity function with more params than variadic function");
 				}
 
+			if(fn.isStatic && fn.closes.count() > 0)
+				throw new IllegalArgumentException("static fns can't be closures");
 			IPersistentCollection methods = null;
 			for(int i = 0; i < methodArray.length; i++)
 				if(methodArray[i] != null)
@@ -4289,7 +4450,6 @@ public static class FnMethod extends ObjMethod{
 		try
 			{
 			FnMethod method = new FnMethod(objx, (ObjMethod) METHOD.deref());
-			method.retClass = tagClass(tagOf(parms));
 			method.line = (Integer) LINE.deref();
 			//register as the current method and set up a new env frame
             PathNode pnode =  (PathNode) CLEAR_PATH.get();
@@ -4305,6 +4465,10 @@ public static class FnMethod extends ObjMethod{
                             ,CLEAR_ROOT, pnode
                             ,CLEAR_SITES, PersistentHashMap.EMPTY
                         ));
+
+			method.retClass = tagClass(tagOf(parms));
+			if(method.retClass.isPrimitive() && !(method.retClass == double.class || method.retClass == long.class))
+				throw new IllegalArgumentException("Only long and double primitives are supported");
 
 			//register 'this' as local 0
 			//registerLocal(THISFN, null, null);
@@ -4328,8 +4492,8 @@ public static class FnMethod extends ObjMethod{
 					throw new Exception("Can't use qualified name as parameter: " + p);
 				if(p.equals(_AMP_))
 					{
-					if(isStatic)
-						throw new Exception("Variadic fns cannot be static");
+//					if(isStatic)
+//						throw new Exception("Variadic fns cannot be static");
 					if(state == PSTATE.REQ)
 						state = PSTATE.REST;
 					else
@@ -4341,6 +4505,13 @@ public static class FnMethod extends ObjMethod{
 					Class pc = tagClass(tagOf(p));
 					if(pc.isPrimitive() && !isStatic)
 						throw new Exception("Non-static fn can't have primitive parameter: " + p);
+					if(pc.isPrimitive() && !(pc == double.class || pc == long.class))
+						throw new IllegalArgumentException("Only long and double primitives are supported: " + p);
+
+					if(state == PSTATE.REST && tagOf(p) != null)
+						throw new Exception("& arg cannot have type hint");
+					if(state == PSTATE.REST)
+						pc = ISeq.class;
 					argtypes.add(Type.getType(pc));
 					argclasses.add(pc);
 					LocalBinding lb = isStatic?
@@ -4443,7 +4614,7 @@ public static class FnMethod extends ObjMethod{
 		gen.endMethod();
 
 	//generate the regular invoke, calling the static method
-		Method m = new Method("invoke", OBJECT_TYPE, getArgTypes());
+		Method m = new Method(getMethodName(), OBJECT_TYPE, getArgTypes());
 
 		gen = new GeneratorAdapter(ACC_PUBLIC,
 		                           m,
