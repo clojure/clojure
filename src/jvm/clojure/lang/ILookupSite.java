@@ -14,6 +14,6 @@ package clojure.lang;
 
 public interface ILookupSite{
 
-Object fault(Object target, ILookupHost host);
+ILookupThunk fault(Object target);
 
 }

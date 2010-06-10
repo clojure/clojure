@@ -2706,99 +2706,32 @@ static class KeywordInvokeExpr implements Expr{
 
         gen.visitLineNumber(line, gen.mark());
         gen.getStatic(objx.objtype, objx.thunkNameStatic(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);
-        gen.dup();
-        target.emit(C.EXPRESSION, objx, gen);
-        gen.dupX2();
-        gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE, Method.getMethod("Object get(Object)"));
-        gen.dupX2();
-        gen.visitJumpInsn(IF_ACMPEQ, faultLabel);
-        gen.pop();
+        gen.dup();  //thunk, thunk
+        target.emit(C.EXPRESSION, objx, gen); //thunk,thunk,target
+        gen.dupX2();                          //target,thunk,thunk,target
+        gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE, Method.getMethod("Object get(Object)")); //target,thunk,result
+        gen.dupX2();                          //result,target,thunk,result
+        gen.visitJumpInsn(IF_ACMPEQ, faultLabel); //result,target
+        gen.pop();                                //result
         gen.goTo(endLabel);
 
-        gen.mark(faultLabel);
-        gen.swap();
-        gen.pop();
-        gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);
-        gen.swap();
-        gen.loadThis();
+        gen.mark(faultLabel);    //result,target
+        gen.swap();              //target,result
+        gen.pop();               //target
+	    gen.dup();               //target,target
+        gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);  //target,target,site
+        gen.swap();              //target,site,target
         gen.invokeInterface(ObjExpr.ILOOKUP_SITE_TYPE,
-                            Method.getMethod("Object fault(Object, clojure.lang.ILookupHost)"));
+                            Method.getMethod("clojure.lang.ILookupThunk fault(Object)"));    //target,new-thunk
+	    gen.dup();   //target,new-thunk,new-thunk
+	    gen.putStatic(objx.objtype, objx.thunkNameStatic(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);  //target,new-thunk
+	    gen.swap();              //new-thunk,target
+	    gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE, Method.getMethod("Object get(Object)")); //result
 
         gen.mark(endLabel);
         if(context == C.STATEMENT)
             gen.pop();
     }
-
-	public void emit2(C context, ObjExpr objx, GeneratorAdapter gen){
-		Label endLabel = gen.newLabel();
-		Label faultLabel = gen.newLabel();
-
-		gen.visitLineNumber(line, gen.mark());
-		target.emit(C.EXPRESSION, objx, gen);
-		gen.dup();
-		gen.getStatic(objx.objtype, objx.thunkNameStatic(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);
-		gen.swap();
-		gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);
-///		gen.loadThis();
-		gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE,
-		                    Method.getMethod("Object get(Object,clojure.lang.ILookupSite)"));
-//		gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE,
-//		                    Method.getMethod("Object get(Object,clojure.lang.ILookupSite,clojure.lang.ILookupHost)"));
-		gen.dup();
-		gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);
-		gen.visitJumpInsn(IF_ACMPEQ, faultLabel);
-		gen.swap();
-		gen.pop();
-		gen.goTo(endLabel);
-
-		gen.mark(faultLabel);
-		gen.swap();
-		gen.loadThis();
-		gen.invokeInterface(ObjExpr.ILOOKUP_SITE_TYPE,
-		                    Method.getMethod("Object fault(Object, clojure.lang.ILookupHost)"));
-				
-		gen.mark(endLabel);
-		if(context == C.STATEMENT)
-			gen.pop();
-	}
-
-	public void emitInstance(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
-		gen.loadThis();
-		gen.getField(objx.objtype, objx.thunkName(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);
-		target.emit(C.EXPRESSION, objx, gen);
-		gen.loadThis();
-		gen.getField(objx.objtype, objx.siteName(siteIndex),ObjExpr.ILOOKUP_SITE_TYPE);
-		gen.loadThis();
-		gen.checkCast(Type.getType(ILookupHost.class));
-		gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE,
-		                    Method.getMethod("Object get(Object,clojure.lang.ILookupSite,clojure.lang.ILookupHost)"));
-		if(context == C.STATEMENT)
-			gen.pop();
-	}
-
-	public void emitNormal(C context, ObjExpr objx, GeneratorAdapter gen){
-		Label slowLabel = gen.newLabel();
-		Label endLabel = gen.newLabel();
-
-		gen.visitLineNumber(line, gen.mark());
-		target.emit(C.EXPRESSION, objx, gen);
-		gen.dup();
-		gen.instanceOf(ILOOKUP_TYPE);
-		gen.ifZCmp(GeneratorAdapter.EQ, slowLabel);
-		kw.emit(C.EXPRESSION, objx, gen);
-		gen.invokeInterface(ILOOKUP_TYPE, new Method("valAt", OBJECT_TYPE, ARG_TYPES[1]));
-		gen.goTo(endLabel);
-
-		gen.mark(slowLabel);
-		kw.emit(C.EXPRESSION, objx, gen);
-		gen.invokeStatic(RT_TYPE, new Method("get", OBJECT_TYPE, ARG_TYPES[2]));
-
-		gen.mark(endLabel);
-
-		if(context == C.STATEMENT)
-			gen.pop();
-	}
 
 	public boolean hasJavaClass() throws Exception{
 		return tag != null;
@@ -3613,18 +3546,6 @@ static public class ObjExpr implements Expr{
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
 		//derived from AFn/RestFn
-		if(keywordCallsites.count() > 0)
-			{
-			if(interfaceNames == null)
-				interfaceNames = new String[]{"clojure/lang/ILookupHost"};
-			else
-				{
-				String[] inames = new String[interfaceNames.length + 1];
-				System.arraycopy(interfaceNames,0,inames,0,interfaceNames.length);
-				inames[interfaceNames.length] =  "clojure/lang/ILookupHost";
-				interfaceNames = inames;
-				}
-			}
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 //		ClassWriter cw = new ClassWriter(0);
 		ClassVisitor cv = cw;
@@ -3977,10 +3898,9 @@ static public class ObjExpr implements Expr{
 			Keyword k = (Keyword) keywordCallsites.nth(i);
 			clinitgen.newInstance(KEYWORD_LOOKUPSITE_TYPE);
 			clinitgen.dup();
-			clinitgen.push(i);
 			emitValue(k,clinitgen);
 			clinitgen.invokeConstructor(KEYWORD_LOOKUPSITE_TYPE,
-			                            Method.getMethod("void <init>(int,clojure.lang.Keyword)"));
+			                            Method.getMethod("void <init>(clojure.lang.Keyword)"));
 			clinitgen.dup();
 			clinitgen.putStatic(objtype, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE);
 			clinitgen.putStatic(objtype, thunkNameStatic(i), ILOOKUP_THUNK_TYPE);

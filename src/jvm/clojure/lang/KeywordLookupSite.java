@@ -14,26 +14,22 @@ package clojure.lang;
 
 public final class KeywordLookupSite implements ILookupSite, ILookupThunk{
 
-final int n;
 final Keyword k;
 
-public KeywordLookupSite(int n, Keyword k){
-	this.n = n;
+public KeywordLookupSite(Keyword k){
 	this.k = k;
 }
 
-public Object fault(Object target, ILookupHost host){
+public ILookupThunk fault(Object target){
 	if(target instanceof IKeywordLookup)
 		{
-		return install(target, host);
+		return install(target);
 		}
 	else if(target instanceof ILookup)
 		{
-		host.swapThunk(n,ilookupThunk(target.getClass()));
-		return ((ILookup) target).valAt(k);
+		return ilookupThunk(target.getClass());
 		}
-	host.swapThunk(n,this);
-	return RT.get(target, k);
+	return this;
 }
 
 public Object get(Object target){
@@ -52,14 +48,10 @@ private ILookupThunk ilookupThunk(final Class c){
 		};
 }
 
-private Object install(Object target, ILookupHost host){
+private ILookupThunk install(Object target){
 	ILookupThunk t = ((IKeywordLookup)target).getLookupThunk(k);
 	if(t != null)
-		{
-		host.swapThunk(n,t);
-		return t.get(target);
-		}
-	host.swapThunk(n,ilookupThunk(target.getClass()));
-	return ((ILookup) target).valAt(k);
+		return t;
+	return ilookupThunk(target.getClass());
 }
 }

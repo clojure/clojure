@@ -1644,7 +1644,7 @@
   default if no error-handler is given) -- see set-error-mode! for
   details."
   {:added "1.0"
-   ;:static true ;can't due to keyword callsite
+   :static true
    }
   ([state & options]
      (let [a (new clojure.lang.Agent state)
@@ -1735,7 +1735,7 @@
   any, will NOT be notified of the new state.  Throws an exception if
   the agent is not failed."
   {:added "1.2"
-   ;:static true ;can't due to keyword callsite
+   :static true
    }
   [^clojure.lang.Agent a, new-state & options]
   (let [opts (apply hash-map options)]
@@ -1833,7 +1833,7 @@
   of after a read fault). History is limited, and the limit can be set
   with :max-history."
   {:added "1.0"
-   ;:static true ;can't due to keyword callsite
+   :static true
    }
   ([x] (new clojure.lang.Ref x))
   ([x & options] 
