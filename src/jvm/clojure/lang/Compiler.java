@@ -4599,6 +4599,11 @@ public static class FnMethod extends ObjMethod{
 				{
 				method.argtypes = argtypes.toArray(new Type[argtypes.size()]);
 				method.argclasses = argclasses.toArray(new Class[argtypes.size()]);
+				for(int i = 0; i < method.argclasses.length; i++)
+					{
+					if(method.argclasses[i] == long.class || method.argclasses[i] == double.class)
+						getAndIncLocalNum();
+					}
 				}
 			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
 			return method;
