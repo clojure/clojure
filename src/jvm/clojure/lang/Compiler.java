@@ -2575,15 +2575,31 @@ public static class SetExpr implements Expr{
 
 	static public Expr parse(C context, IPersistentSet form) throws Exception{
 		IPersistentVector keys = PersistentVector.EMPTY;
+		boolean constant = true;
+
 		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			Object e = s.first();
-			keys = (IPersistentVector) keys.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e));
+			Expr expr = analyze(context == C.EVAL ? context : C.EXPRESSION, e);
+			keys = (IPersistentVector) keys.cons(expr);
+			if(!(expr instanceof LiteralExpr))
+				constant = false;
 			}
 		Expr ret = new SetExpr(keys);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
 			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
+		else if(constant)
+			{
+			IPersistentSet set = PersistentHashSet.EMPTY;
+			for(int i=0;i<keys.count();i++)
+				{
+				LiteralExpr ve = (LiteralExpr)keys.nth(i);
+				set = (IPersistentSet)set.cons(ve.val());
+				}
+//			System.err.println("Constant: " + set);
+			return new ConstantExpr(set);
+			}
 		else
 			return ret;
 	}
@@ -2621,13 +2637,31 @@ public static class VectorExpr implements Expr{
 	}
 
 	static public Expr parse(C context, IPersistentVector form) throws Exception{
+		boolean constant = true;
+
 		IPersistentVector args = PersistentVector.EMPTY;
 		for(int i = 0; i < form.count(); i++)
-			args = (IPersistentVector) args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, form.nth(i)));
+			{
+			Expr v = analyze(context == C.EVAL ? context : C.EXPRESSION, form.nth(i));
+			args = (IPersistentVector) args.cons(v);
+			if(!(v instanceof LiteralExpr))
+				constant = false;
+			}
 		Expr ret = new VectorExpr(args);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
 			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
+		else if (constant)
+			{
+			PersistentVector rv = PersistentVector.EMPTY;
+			for(int i =0;i<args.count();i++)
+				{
+				LiteralExpr ve = (LiteralExpr)args.nth(i);
+				rv = rv.cons(ve.val());
+				}
+//			System.err.println("Constant: " + rv);
+			return new ConstantExpr(rv);
+			}
 		else
 			return ret;
 	}
