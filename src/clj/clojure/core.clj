@@ -488,15 +488,15 @@
   {:tag String
    :added "1.0"
    :static true}
-  ([] "")
-  ([^Object x]
+  (^String [] "")
+  (^String [^Object x]
    (if (nil? x) "" (. x (toString))))
-  ([x & ys]
+  (^String [x & ys]
      ((fn [^StringBuilder sb more]
           (if more
             (recur (. sb  (append (str (first more)))) (next more))
             (str sb)))
-      (new StringBuilder ^String (str x)) ys)))
+      (new StringBuilder (str x)) ys)))
 
 
 (defn symbol?
@@ -607,7 +607,7 @@
   [& body]
   (list 'new 'clojure.lang.LazySeq (list* '^{:once true} fn* [] body)))    
 
-(defn ^:static chunk-buffer [capacity]
+(defn ^:static chunk-buffer ^clojure.lang.ChunkBuffer [capacity]
   (clojure.lang.ChunkBuffer. capacity))
 
 (defn ^:static chunk-append [^clojure.lang.ChunkBuffer b x]
@@ -616,13 +616,13 @@
 (defn ^:static chunk [^clojure.lang.ChunkBuffer b]
   (.chunk b))
 
-(defn ^:static chunk-first [^clojure.lang.IChunkedSeq s]
+(defn ^:static chunk-first ^clojure.lang.IChunk [^clojure.lang.IChunkedSeq s]
   (.chunkedFirst s))
 
-(defn ^:static chunk-rest [^clojure.lang.IChunkedSeq s]
+(defn ^:static chunk-rest ^clojure.lang.ISeq [^clojure.lang.IChunkedSeq s]
   (.chunkedMore s))
 
-(defn ^:static chunk-next [^clojure.lang.IChunkedSeq s]
+(defn ^:static chunk-next ^clojure.lang.ISeq [^clojure.lang.IChunkedSeq s]
   (.chunkedNext s))
 
 (defn ^:static chunk-cons [chunk rest]
@@ -5899,7 +5899,7 @@
   "Return a random permutation of coll"
   {:added "1.2"
    :static true}
-  [coll]
+  [^java.util.Collection coll]
   (let [al (java.util.ArrayList. coll)]
     (java.util.Collections/shuffle al)
     (clojure.lang.RT/vector (.toArray al))))
