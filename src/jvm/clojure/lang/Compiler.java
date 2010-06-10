@@ -2843,15 +2843,17 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 	public final Type[] paramtypes;
 	public final IPersistentVector args;
 	public final boolean variadic;
+	public final Symbol tag;
 
 	StaticInvokeExpr(Type target, Class retClass, Class[] paramclasses, Type[] paramtypes, boolean variadic,
-	                 IPersistentVector args){
+	                 IPersistentVector args,Symbol tag){
 		this.target = target;
 		this.retClass = retClass;
 		this.paramclasses = paramclasses;
 		this.paramtypes = paramtypes;
 		this.args = args;
 		this.variadic = variadic;
+		this.tag = tag;
 	}
 
 	public Object eval() throws Exception{
@@ -2876,7 +2878,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public Class getJavaClass() throws Exception{
-		return retClass;
+		return tag != null ? HostExpr.tagToClass(tag) : retClass;
 	}
 
 	public boolean canEmitPrimitive(){
@@ -2921,7 +2923,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 		return Type.getType(retClass);
 	}
 
-	public static Expr parse(Var v, ISeq args) throws Exception{
+	public static Expr parse(Var v, ISeq args, Symbol tag) throws Exception{
 		IPersistentCollection paramlists = (IPersistentCollection) RT.get(v.meta(), arglistsKey);
 		if(paramlists == null)
 			throw new IllegalStateException("Can't call static fn with no arglists: " + v);
@@ -2987,7 +2989,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 			argv = argv.cons(analyze(C.EXPRESSION, s.first()));
 
 		return new StaticInvokeExpr(target,retClass,paramClasses.toArray(new Class[paramClasses.size()]),
-		                            paramTypes.toArray(new Type[paramTypes.size()]),variadic, argv);
+		                            paramTypes.toArray(new Type[paramTypes.size()]),variadic, argv, tag);
 	}
 }
 
@@ -3208,7 +3210,7 @@ static class InvokeExpr implements Expr{
 			Var v = ((VarExpr)fexpr).var;
 			if(RT.booleanCast(RT.get(RT.meta(v),staticKey)))
 				{
-				return StaticInvokeExpr.parse(v, RT.next(form));
+				return StaticInvokeExpr.parse(v, RT.next(form), tagOf(form));
 				}
 			}
 		
