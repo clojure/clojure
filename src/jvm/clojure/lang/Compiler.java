@@ -366,7 +366,7 @@ static class DefExpr implements Expr{
 			if(meta != null)
 				{
                 IPersistentMap metaMap = (IPersistentMap) meta.eval();
-                if (initProvided || includesExplicitMetadata((MapExpr) meta))
+                if (initProvided || true)//includesExplicitMetadata((MapExpr) meta))
 				    var.setMeta((IPersistentMap) meta.eval());
 				}
 			return var;
@@ -384,7 +384,7 @@ static class DefExpr implements Expr{
 		objx.emitVar(gen, var);
 		if(meta != null)
 			{
-            if (initProvided || includesExplicitMetadata((MapExpr) meta))
+            if (initProvided || true)//includesExplicitMetadata((MapExpr) meta))
                 {
                 gen.dup();
                 meta.emit(C.EXPRESSION, objx, gen);
@@ -573,14 +573,18 @@ public static class TheVarExpr implements Expr{
 	}
 }
 
-public static class KeywordExpr implements Expr{
+public static class KeywordExpr extends LiteralExpr{
 	public final Keyword k;
 
 	public KeywordExpr(Keyword k){
 		this.k = k;
 	}
 
-	public Object eval() throws Exception{
+	Object val(){
+		return k;
+	}
+
+	public Object eval() {
 		return k;
 	}
 
@@ -2176,12 +2180,12 @@ public static class NewExpr implements Expr{
 
 public static class MetaExpr implements Expr{
 	public final Expr expr;
-	public final MapExpr meta;
+	public final Expr meta;
 	final static Type IOBJ_TYPE = Type.getType(IObj.class);
 	final static Method withMetaMethod = Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)");
 
 
-	public MetaExpr(Expr expr, MapExpr meta){
+	public MetaExpr(Expr expr, Expr meta){
 		this.expr = expr;
 		this.meta = meta;
 	}
@@ -2506,16 +2510,32 @@ public static class MapExpr implements Expr{
 
 	static public Expr parse(C context, IPersistentMap form) throws Exception{
 		IPersistentVector keyvals = PersistentVector.EMPTY;
+		boolean constant = true;
 		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			IMapEntry e = (IMapEntry) s.first();
-			keyvals = (IPersistentVector) keyvals.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e.key()));
-			keyvals = (IPersistentVector) keyvals.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, e.val()));
+			Expr k = analyze(context == C.EVAL ? context : C.EXPRESSION, e.key());
+			Expr v = analyze(context == C.EVAL ? context : C.EXPRESSION, e.val());
+			keyvals = (IPersistentVector) keyvals.cons(k);
+			keyvals = (IPersistentVector) keyvals.cons(v);
+			if(!(k instanceof LiteralExpr && v instanceof LiteralExpr))
+				constant = false;
 			}
+
 		Expr ret = new MapExpr(keyvals);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
-			return new MetaExpr(ret, (MapExpr) MapExpr
+			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
+		else if(constant)
+			{
+			IPersistentMap m = PersistentHashMap.EMPTY;
+			for(int i=0;i<keyvals.length();i+= 2)
+				{
+				m = m.assoc(((LiteralExpr)keyvals.nth(i)).val(), ((LiteralExpr)keyvals.nth(i+1)).val());
+				}
+//			System.err.println("Constant: " + m);
+			return new ConstantExpr(m);
+			}
 		else
 			return ret;
 	}
@@ -2562,7 +2582,7 @@ public static class SetExpr implements Expr{
 			}
 		Expr ret = new SetExpr(keys);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
-			return new MetaExpr(ret, (MapExpr) MapExpr
+			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
 		else
 			return ret;
@@ -2606,7 +2626,7 @@ public static class VectorExpr implements Expr{
 			args = (IPersistentVector) args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, form.nth(i)));
 		Expr ret = new VectorExpr(args);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
-			return new MetaExpr(ret, (MapExpr) MapExpr
+			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
 		else
 			return ret;
@@ -2941,7 +2961,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 		IPersistentVector paramlist = null;
 		int argcount = RT.count(args);
 		boolean variadic = false;
-		for(ISeq aseq = RT.seq(paramlists); paramlist == null && aseq != null; aseq = aseq.next())
+		for(ISeq aseq = RT.seq(paramlists); aseq != null; aseq = aseq.next())
 			{
 			if(!(aseq.first() instanceof IPersistentVector))
 				throw new IllegalStateException("Expected vector arglist, had: " + aseq.first());
@@ -2949,14 +2969,18 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 			if(alist.count() > 1
 			   && alist.nth(alist.count() - 2).equals(_AMP_))
 				{
-				if(argcount > alist.count() - 2)
+				if(argcount >= alist.count() - 2)
 					{
 					paramlist = alist;
 					variadic = true;
 					}
 				}
 			else if(alist.count() == argcount)
+				{
 				paramlist = alist;
+				variadic = false;
+				break;
+				}
 			}
 
 		if(paramlist == null)
@@ -3400,7 +3424,7 @@ static public class FnExpr extends ObjExpr{
 		fn.getCompiledClass();
 
 		if(origForm instanceof IObj && ((IObj) origForm).meta() != null)
-			return new MetaExpr(fn, (MapExpr) MapExpr
+			return new MetaExpr(fn, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) origForm).meta()));
 		else
 			return fn;
@@ -5523,7 +5547,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 					{
 					Expr ret = new EmptyExpr(form);
 					if(RT.meta(form) != null)
-						ret = new MetaExpr(ret, (MapExpr) MapExpr
+						ret = new MetaExpr(ret, MapExpr
 								.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
 					return ret;
 					}
@@ -6345,6 +6369,38 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			              null, null);
 			}
 
+		final int INITS_PER = 100;
+		int numInits =  objx.constants.count() / INITS_PER;
+		if(objx.constants.count() % INITS_PER != 0)
+			++numInits;
+
+		for(int n = 0;n<numInits;n++)
+			{
+			GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
+			                                                  Method.getMethod("void __init" + n + "()"),
+			                                                  null,
+			                                                  null,
+			                                                  cv);
+			clinitgen.visitCode();
+			try
+				{
+				Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
+
+				for(int i = n*INITS_PER; i < objx.constants.count() && i < (n+1)*INITS_PER; i++)
+					{
+					objx.emitValue(objx.constants.nth(i), clinitgen);
+					clinitgen.checkCast(objx.constantType(i));
+					clinitgen.putStatic(objx.objtype, objx.constantName(i), objx.constantType(i));
+					}
+				}
+			finally
+				{
+				Var.popThreadBindings();
+				}
+			clinitgen.returnValue();
+			clinitgen.endMethod();
+			}
+
 		//static init for constants, keywords and vars
 		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
 		                                                  Method.getMethod("void <clinit> ()"),
@@ -6357,10 +6413,13 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		Label end = clinitgen.newLabel();
 		Label finallyLabel = clinitgen.newLabel();
 
-		if(objx.constants.count() > 0)
-			{
-			objx.emitConstants(clinitgen);
-			}
+//		if(objx.constants.count() > 0)
+//			{
+//			objx.emitConstants(clinitgen);
+//			}
+		for(int n = 0;n<numInits;n++)
+			clinitgen.invokeStatic(objx.objtype, Method.getMethod("void __init" + n + "()"));
+
 		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void pushNS()"));
 		clinitgen.mark(startTry);
 		clinitgen.invokeStatic(objx.objtype, Method.getMethod("void load()"));
@@ -6452,7 +6511,7 @@ static public class NewInstanceExpr extends ObjExpr{
 
 		ObjExpr ret = build(interfaces, null, null, classname, Symbol.intern(classname), null, rform, frm);
 		if(frm instanceof IObj && ((IObj) frm).meta() != null)
-			return new MetaExpr(ret, (MapExpr) MapExpr
+			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) frm).meta()));
 		else
 			return ret;

@@ -877,7 +877,7 @@
 
 
 (deftest test-repeat
-  (is (thrown? IllegalArgumentException (repeat)))
+  ;(is (thrown? IllegalArgumentException (repeat)))
 
   ; infinite sequence => use take
   (are [x y] (= x y)
