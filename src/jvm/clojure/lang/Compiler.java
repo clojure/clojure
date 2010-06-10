@@ -3046,7 +3046,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 				}
 			}
 
-		String cname = v.ns.name.name.replace('.', '/') + "$" + munge(v.sym.name);
+		String cname = v.ns.name.name.replace('.', '/').replace('-','_') + "$" + munge(v.sym.name);
 		Type target = Type.getObjectType(cname);
 
 		PersistentVector argv = PersistentVector.EMPTY;
