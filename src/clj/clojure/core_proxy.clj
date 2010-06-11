@@ -25,7 +25,7 @@
 
 (defn- group-by-sig [coll]
  "takes a collection of [msig meth] and returns a seq of maps from return-types to meths."
-  (vals (reduce (fn [m [msig meth]]
+  (vals (reduce1 (fn [m [msig meth]]
                   (let [rtype (peek msig)
                         argsig (pop msig)]
                     (assoc m argsig (assoc (m argsig {}) rtype meth))))
@@ -34,7 +34,7 @@
 (defn proxy-name
  {:tag String} 
  [^Class super interfaces]
-  (let [inames (into (sorted-set) (map #(.getName ^Class %) interfaces))]
+  (let [inames (into1 (sorted-set) (map #(.getName ^Class %) interfaces))]
     (apply str (.replace (str *ns*) \- \_) ".proxy"
       (interleave (repeat "$")
         (concat
@@ -206,14 +206,14 @@
                           [mm considered]))]
                   (recur mm considered (. c (getSuperclass))))
                 [mm considered]))
-          ifaces-meths (into {} 
+          ifaces-meths (into1 {} 
                          (for [^Class iface interfaces meth (. iface (getMethods))
                                :let [msig (method-sig meth)] :when (not (considered msig))]
                            {msig meth}))
           mgroups (group-by-sig (concat mm ifaces-meths))
           rtypes (map #(most-specific (keys %)) mgroups)
           mb (map #(vector (%1 %2) (vals (dissoc %1 %2))) mgroups rtypes)
-          bridge? (reduce into #{} (map second mb))
+          bridge? (reduce1 into1 #{} (map second mb))
           ifaces-meths (remove bridge? (vals ifaces-meths))
           mm (remove bridge? (vals mm))]
                                         ;add methods matching supers', if no mapping -> call super
@@ -372,7 +372,7 @@
   {:added "1.0"}
   [^Object x]
   (let [c (. x (getClass))
-	pmap (reduce (fn [m ^java.beans.PropertyDescriptor pd]
+	pmap (reduce1 (fn [m ^java.beans.PropertyDescriptor pd]
 			 (let [name (. pd (getName))
 			       method (. pd (getReadMethod))]
 			   (if (and method (zero? (alength (. method (getParameterTypes)))))
@@ -384,7 +384,7 @@
 			      (getPropertyDescriptors))))
 	v (fn [k] ((pmap k)))
         snapshot (fn []
-                   (reduce (fn [m e]
+                   (reduce1 (fn [m e]
                              (assoc m (key e) ((val e))))
                            {} (seq pmap)))]
     (proxy [clojure.lang.APersistentMap]

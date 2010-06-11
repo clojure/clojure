@@ -398,11 +398,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- expand-method-impl-cache [^clojure.lang.MethodImplCache cache c f]
-  (let [cs (into {} (remove (fn [[c e]] (nil? e)) (map vec (partition 2 (.table cache)))))
+  (let [cs (into1 {} (remove (fn [[c e]] (nil? e)) (map vec (partition 2 (.table cache)))))
         cs (assoc cs c (clojure.lang.MethodImplCache$Entry. c f))
         [shift mask] (min-hash (keys cs))
         table (make-array Object (* 2 (inc mask)))
-        table (reduce (fn [^objects t [c e]]
+        table (reduce1 (fn [^objects t [c e]]
                         (let [i (* 2 (int (shift-mask shift mask (hash c))))]
                           (aset t i c)
                           (aset t (inc i) e)
@@ -427,7 +427,7 @@
           impl #(get (:impls protocol) %)]
       (or (impl c)
           (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
-                     (when-let [t (reduce pref (filter impl (disj (supers c) Object)))]
+                     (when-let [t (reduce1 pref (filter impl (disj (supers c) Object)))]
                        (impl t))
                      (impl Object)))))))
 
@@ -526,7 +526,7 @@
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
             [opts sigs]))
-        sigs (reduce (fn [m s]
+        sigs (reduce1 (fn [m s]
                        (let [name-meta (meta (first s))
                              mname (with-meta (first s) nil)
                              [arglists doc]

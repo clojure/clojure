@@ -132,7 +132,7 @@
         all-sigs (distinct (concat (map #(let[[m p] (key %)] {m [p]}) (mapcat non-private-methods supers))
                                    (map (fn [[m p]] {(str m) [p]}) methods)))
         sigs-by-name (apply merge-with concat {} all-sigs)
-        overloads (into {} (filter (fn [[m s]] (next s)) sigs-by-name))
+        overloads (into1 {} (filter (fn [[m s]] (next s)) sigs-by-name))
         var-fields (concat (when init [init-name]) 
                            (when post-init [post-init-name])
                            (when main [main-name])
@@ -380,7 +380,7 @@
                                                                (. m (getName))
                                                                (. m (getDescriptor)))))))
                                         ;add methods matching interfaces', if no fn -> throw
-      (reduce (fn [mm ^java.lang.reflect.Method meth]
+      (reduce1 (fn [mm ^java.lang.reflect.Method meth]
                 (if (contains? mm (method-sig meth))
                   mm
                   (do
@@ -393,7 +393,7 @@
          (emit-forwarding-method mname pclasses rclass (:static (meta msig))
                                  emit-unsupported))
                                         ;expose specified overridden superclass methods
-       (doseq [[local-mname ^java.lang.reflect.Method m] (reduce (fn [ms [[name _ _] m]]
+       (doseq [[local-mname ^java.lang.reflect.Method m] (reduce1 (fn [ms [[name _ _] m]]
                               (if (contains? exposes-methods (symbol name))
                                 (conj ms [((symbol name) exposes-methods) m])
                                 ms)) [] (seq mm))]
@@ -599,7 +599,7 @@
   
   [& options]
     (when *compile-files*
-      (let [options-map (into {} (map vec (partition 2 options)))
+      (let [options-map (into1 {} (map vec (partition 2 options)))
             [cname bytecode] (generate-class options-map)]
         (clojure.lang.Compiler/writeClassFile cname bytecode))))
 

@@ -818,29 +818,29 @@
   [x] (. clojure.lang.Numbers (inc x)))
 
 ;; reduce is defined again later after InternalReduce loads
-(def reduce
-     (fn r
-       ([f coll]
-             (let [s (seq coll)]
-               (if s
-                 (r f (first s) (next s))
-                 (f))))
-       ([f val coll]
-          (let [s (seq coll)]
-            (if s
-              (if (chunked-seq? s)
-                (recur f 
-                       (.reduce (chunk-first s) f val)
-                       (chunk-next s))
-                (recur f (f val (first s)) (next s)))
-              val)))))
+(defn ^:private ^:static
+  reduce1
+  ([f coll]
+     (let [s (seq coll)]
+       (if s
+         (reduce1 f (first s) (next s))
+         (f))))
+  ([f val coll]
+     (let [s (seq coll)]
+       (if s
+         (if (chunked-seq? s)
+           (recur f 
+                  (.reduce (chunk-first s) f val)
+                  (chunk-next s))
+           (recur f (f val (first s)) (next s)))
+         val))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
   {:added "1.0"
    :static true}
   [coll]
-    (reduce conj () coll))
+    (reduce1 conj () coll))
 
 ;;math stuff
 (defn +
@@ -852,7 +852,7 @@
   ([x] (cast Number x))
   ([x y] (. clojure.lang.Numbers (add x y)))
   ([x y & more]
-   (reduce + (+ x y) more)))
+   (reduce1 + (+ x y) more)))
 
 (defn *
   "Returns the product of nums. (*) returns 1."
@@ -863,7 +863,7 @@
   ([x] (cast Number x))
   ([x y] (. clojure.lang.Numbers (multiply x y)))
   ([x y & more]
-   (reduce * (* x y) more)))
+   (reduce1 * (* x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
@@ -874,7 +874,7 @@
   ([x] (/ 1 x))
   ([x y] (. clojure.lang.Numbers (divide x y)))
   ([x y & more]
-   (reduce / (/ x y) more)))
+   (reduce1 / (/ x y) more)))
 
 (defn -
   "If no ys are supplied, returns the negation of x, else subtracts
@@ -885,7 +885,7 @@
   ([x] (. clojure.lang.Numbers (minus x)))
   ([x y] (. clojure.lang.Numbers (minus x y)))
   ([x y & more]
-   (reduce - (- x y) more)))
+   (reduce1 - (- x y) more)))
 
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
@@ -953,7 +953,7 @@
   ([x] x)
   ([x y] (if (> x y) x y))
   ([x y & more]
-   (reduce max (max x y) more)))
+   (reduce1 max (max x y) more)))
 
 (defn min
   "Returns the least of the nums."
@@ -962,7 +962,7 @@
   ([x] x)
   ([x y] (if (< x y) x y))
   ([x y & more]
-   (reduce min (min x y) more)))
+   (reduce1 min (min x y) more)))
 
 (defn dec
   "Returns a number one less than num."
@@ -2103,11 +2103,11 @@
   ([f g h & fs]
      (let [fs (list* f g h fs)]
        (fn
-         ([] (reduce #(conj %1 (%2)) [] fs))
-         ([x] (reduce #(conj %1 (%2 x)) [] fs))
-         ([x y] (reduce #(conj %1 (%2 x y)) [] fs))
-         ([x y z] (reduce #(conj %1 (%2 x y z)) [] fs))
-         ([x y z & args] (reduce #(conj %1 (apply %2 x y z args)) [] fs))))))
+         ([] (reduce1 #(conj %1 (%2)) [] fs))
+         ([x] (reduce1 #(conj %1 (%2 x)) [] fs))
+         ([x y] (reduce1 #(conj %1 (%2 x y)) [] fs))
+         ([x y z] (reduce1 #(conj %1 (%2 x y z)) [] fs))
+         ([x y z & args] (reduce1 #(conj %1 (apply %2 x y z args)) [] fs))))))
 
 (defn partial
   "Takes a function f and fewer than the normal arguments to f, and
@@ -2403,7 +2403,7 @@
    :static true}
   [& maps]
   (when (some identity maps)
-    (reduce #(conj (or %1 {}) %2) maps)))
+    (reduce1 #(conj (or %1 {}) %2) maps)))
 
 (defn merge-with
   "Returns a map that consists of the rest of the maps conj-ed onto
@@ -2420,8 +2420,8 @@
 			    (assoc m k (f (get m k) v))
 			    (assoc m k v))))
           merge2 (fn [m1 m2]
-		   (reduce merge-entry (or m1 {}) (seq m2)))]
-      (reduce merge2 maps))))
+		   (reduce1 merge-entry (or m1 {}) (seq m2)))]
+      (reduce1 merge2 maps))))
 
 
 
@@ -2755,15 +2755,15 @@
        ret))))
 
 ;redef into with batch support
-(defn into
+(defn ^:private into1
   "Returns a new coll consisting of to-coll with all of the items of
   from-coll conjoined."
   {:added "1.0"
    :static true}
   [to from]
   (if (instance? clojure.lang.IEditableCollection to)
-    (persistent! (reduce conj! (transient to) from))
-    (reduce conj to from)))
+    (persistent! (reduce1 conj! (transient to) from))
+    (reduce1 conj to from)))
 
 (defmacro import 
   "import-list => (package-symbol class-name-symbols*)
@@ -2776,11 +2776,11 @@
   (let [specs (map #(if (and (seq? %) (= 'quote (first %))) (second %) %) 
                    import-symbols-or-lists)]
     `(do ~@(map #(list 'clojure.core/import* %)
-                (reduce (fn [v spec] 
+                (reduce1 (fn [v spec] 
                           (if (symbol? spec)
                             (conj v (name spec))
                             (let [p (first spec) cs (rest spec)]
-                              (into v (map #(str p "." %) cs)))))
+                              (into1 v (map #(str p "." %) cs)))))
                         [] specs)))))
 
 (defn into-array
@@ -3643,9 +3643,9 @@
                              defaults (:or b)]
                          (loop [ret (-> bvec (conj gmap) (conj v)
                                         (conj gmap) (conj `(if (seq? ~gmap) (apply hash-map ~gmap) ~gmap)))
-                                bes (reduce
+                                bes (reduce1
                                      (fn [bes entry]
-                                       (reduce #(assoc %1 %2 ((val entry) %2))
+                                       (reduce1 #(assoc %1 %2 ((val entry) %2))
                                                (dissoc bes (key entry))
                                                ((key entry) bes)))
                                      (dissoc b :as :or)
@@ -3667,7 +3667,7 @@
         process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
     (if (every? symbol? (map first bents))
       bindings
-      (reduce process-entry [] bents))))
+      (reduce1 process-entry [] bents))))
 
 (defmacro let
   "Evaluates the exprs in a lexical context in which the symbols in
@@ -3756,7 +3756,7 @@
         (let [vs (take-nth 2 (drop 1 bindings))
               bs (take-nth 2 bindings)
               gs (map (fn [b] (if (symbol? b) b (gensym))) bs)
-              bfs (reduce (fn [ret [b v g]]
+              bfs (reduce1 (fn [ret [b v g]]
                             (if (symbol? b)
                               (conj ret g v)
                               (conj ret g v b g)))
@@ -3806,7 +3806,7 @@
      (vector? seq-exprs) "a vector for its binding"
      (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [to-groups (fn [seq-exprs]
-                    (reduce (fn [groups [k v]]
+                    (reduce1 (fn [groups [k v]]
                               (if (keyword? k)
                                 (conj (pop groups) (conj (peek groups) [k v]))
                                 (conj groups [k v])))
@@ -4182,7 +4182,7 @@
   ([k x] x)
   ([k x y] (if (> (k x) (k y)) x y))
   ([k x y & more]
-   (reduce #(max-key k %1 %2) (max-key k x y) more)))
+   (reduce1 #(max-key k %1 %2) (max-key k x y) more)))
 
 (defn min-key
   "Returns the x for which (k x), a number, is least."
@@ -4191,7 +4191,7 @@
   ([k x] x)
   ([k x y] (if (< (k x) (k y)) x y))
   ([k x y & more]
-   (reduce #(min-key k %1 %2) (min-key k x y) more)))
+   (reduce1 #(min-key k %1 %2) (min-key k x y) more)))
 
 (defn distinct
   "Returns a lazy sequence of the elements of coll with duplicates removed"
@@ -4218,7 +4218,7 @@
    :static true}
   [smap coll]
     (if (vector? coll)
-      (reduce (fn [v i]
+      (reduce1 (fn [v i]
                 (if-let [e (find smap (nth v i))]
                         (assoc v i (val e))
                         v))
@@ -4644,7 +4644,7 @@
   (loop [ret (set (bases class)) cs ret]
     (if (seq cs)
       (let [c (first cs) bs (bases c)]
-        (recur (into ret bs) (into (disj cs c) bs)))
+        (recur (into1 ret bs) (into1 (disj cs c) bs)))
       (not-empty ret))))
 
 (defn isa?
@@ -4678,7 +4678,7 @@
   ([h tag] (not-empty
             (let [tp (get (:parents h) tag)]
               (if (class? tag)
-                (into (set (bases tag)) tp)
+                (into1 (set (bases tag)) tp)
                 tp)))))
 
 (defn ancestors
@@ -4692,7 +4692,7 @@
             (let [ta (get (:ancestors h) tag)]
               (if (class? tag)
                 (let [superclasses (set (supers tag))]
-                  (reduce into superclasses
+                  (reduce1 into1 superclasses
                     (cons ta
                           (map #(get (:ancestors h) %) superclasses))))
                 ta)))))
@@ -4730,9 +4730,9 @@
          td (:descendants h)
          ta (:ancestors h)
          tf (fn [m source sources target targets]
-              (reduce (fn [ret k]
+              (reduce1 (fn [ret k]
                         (assoc ret k
-                               (reduce conj (get targets k #{}) (cons target (targets target)))))
+                               (reduce1 conj (get targets k #{}) (cons target (targets target)))))
                       m (cons source (sources source))))]
      (or
       (when-not (contains? (tp tag) parent)
@@ -4756,10 +4756,10 @@
          td (:descendants h)
          ta (:ancestors h)
          tf (fn [m source sources target targets]
-              (reduce
+              (reduce1
                (fn [ret k]
                  (assoc ret k
-                        (reduce disj (get targets k) (cons target (targets target)))))
+                        (reduce1 disj (get targets k) (cons target (targets target)))))
                m (cons source (sources source))))]
      (if (contains? (tp tag) parent)
        {:parent (assoc (:parents h) tag (disj (get tp tag) parent))
@@ -4995,7 +4995,7 @@
   can be skipped."
   [lib need-ns require]
   (dosync
-   (commute *loaded-libs* #(reduce conj %1 %2)
+   (commute *loaded-libs* #(reduce1 conj %1 %2)
             (binding [*loaded-libs* (ref (sorted-set))]
               (load-one lib need-ns require)
               @*loaded-libs*))))
@@ -5179,7 +5179,7 @@
   {:added "1.2"
    :static true}
   ([m ks]
-     (reduce get m ks))
+     (reduce1 get m ks))
   ([m ks not-found]
      (loop [sentinel (Object.)
             m m
@@ -5579,14 +5579,14 @@
                   (last clauses)
                   `(throw (IllegalArgumentException. (str "No matching clause: " ~ge))))
         cases (partition 2 clauses)
-        case-map (reduce (fn [m [test expr]]
+        case-map (reduce1 (fn [m [test expr]]
                            (if (seq? test)
-                             (into m (zipmap test (repeat expr)))
+                             (into1 m (zipmap test (repeat expr)))
                              (assoc m test expr))) 
                            {} cases)
         [shift mask] (if (seq case-map) (min-hash (keys case-map)) [0 0])
         
-        hmap (reduce (fn [m [test expr :as te]]
+        hmap (reduce1 (fn [m [test expr :as te]]
                        (assoc m (shift-mask shift mask (hash test)) te))
                      (sorted-map) case-map)]
     `(let [~ge ~e]
@@ -5606,7 +5606,8 @@
 (load "gvec")
 
 ;; redefine reduce with internal-reduce
-#_(defn reduce
+
+(defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then
   applying f to that result and the 3rd item, etc. If coll contains no
@@ -5624,6 +5625,16 @@
   ([f val coll]
      (let [s (seq coll)]
        (clojure.core.protocols/internal-reduce s f val))))
+
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  {:added "1.0"
+   :static true}
+  [to from]
+  (if (instance? clojure.lang.IEditableCollection to)
+    (persistent! (reduce conj! (transient to) from))
+    (reduce conj to from)))
 
 (require '[clojure.java.io :as jio])
 
