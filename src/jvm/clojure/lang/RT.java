@@ -1399,6 +1399,10 @@ static public void print(Object x, Writer w) throws Exception{
 			w.write(x.toString());
 			w.write('M');
 		}
+		else if(x instanceof BigInteger && readably) {
+			w.write(x.toString());
+			w.write('N');
+		}
 		else if(x instanceof Var) {
 			Var v = (Var) x;
 			w.write("#=(var " + v.ns.name + "/" + v.sym + ")");

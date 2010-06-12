@@ -5391,7 +5391,10 @@ public static class RecurExpr implements Expr{
 					{
 					if(!(arg instanceof MaybePrimitiveExpr && arg.hasJavaClass() && arg.getJavaClass() == primc))
 						throw new IllegalArgumentException("recur arg for primitive local: " +
-						                                   lb.name + " must be matching primitive");
+						                                   lb.name + " must be matching primitive, had: " +
+															arg.getJavaClass().getName() +
+															", needed: " +
+															primc.getName());
 					}
 				catch(Exception e)
 					{
@@ -7217,7 +7220,7 @@ public static class CaseExpr extends UntypedExpr{
 			for(Object o : ((Map)args.nth(6)).entrySet())
 				{
 				Map.Entry e = (Map.Entry) o;
-				Integer minhash = (Integer) e.getKey();
+				Integer minhash = ((Number)e.getKey()).intValue();
 				MapEntry me = (MapEntry) e.getValue();
 				Expr testExpr = new ConstantExpr(me.getKey());
 				tests.put(minhash, testExpr);
@@ -7243,12 +7246,12 @@ public static class CaseExpr extends UntypedExpr{
                 Var.popThreadBindings();
                 }
 
-			return new CaseExpr((Integer) LINE.deref(),
+			return new CaseExpr(((Number)LINE.deref()).intValue(),
 			                  testexpr,
-			                  (Integer)args.nth(1),
-			                  (Integer)args.nth(2),
-			                  (Integer)args.nth(3),
-			                  (Integer)args.nth(4),
+			                  ((Number)args.nth(1)).intValue(),
+			                  ((Number)args.nth(2)).intValue(),
+			                  ((Number)args.nth(3)).intValue(),
+			                  ((Number)args.nth(4)).intValue(),
 			                  defaultExpr,
 			                  tests,thens,args.nth(7) != RT.F);
 

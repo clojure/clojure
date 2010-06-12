@@ -47,7 +47,7 @@ static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?([\\D&&[^/]][^/
 //static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern intPat =
 		Pattern.compile(
-				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)");
+				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?");
 static final Symbol SLASH = Symbol.create("/");
@@ -327,7 +327,11 @@ private static Object matchNumber(String s){
 	if(m.matches())
 		{
 		if(m.group(2) != null)
-			return 0;
+			{
+			if(m.group(8) != null)
+				return BigInteger.ZERO;			
+			return new Long(0);
+			}
 		boolean negate = (m.group(1).equals("-"));
 		String n;
 		int radix = 10;
@@ -342,7 +346,9 @@ private static Object matchNumber(String s){
 		if(n == null)
 			return null;
 		BigInteger bn = new BigInteger(n, radix);
-		return Numbers.reduce(negate ? bn.negate() : bn);
+		if(m.group(8) != null)
+			return negate ? bn.negate() : bn;
+		return Numbers.reduceBigInteger(negate ? bn.negate() : bn);
 		}
 	m = floatPat.matcher(s);
 	if(m.matches())
