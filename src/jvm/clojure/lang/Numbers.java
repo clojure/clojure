@@ -137,37 +137,37 @@ static public Number quotient(Number x, Number y){
 	Ops yops = ops(y);
 	if(yops.isZero(y))
 		throw new ArithmeticException("Divide by zero");
-	return reduce(ops(x).combine(yops).quotient(x, y));
+	return ops(x).combine(yops).quotient(x, y);
 }
 
 static public Number remainder(Number x, Number y){
 	Ops yops = ops(y);
 	if(yops.isZero(y))
 		throw new ArithmeticException("Divide by zero");
-	return reduce(ops(x).combine(yops).remainder(x, y));
+	return ops(x).combine(yops).remainder(x, y);
 }
 
 static Number quotient(double n, double d){
 	double q = n / d;
-	if(q <= Integer.MAX_VALUE && q >= Integer.MIN_VALUE)
+	if(q <= Long.MAX_VALUE && q >= Long.MIN_VALUE)
 		{
-		return (int) q;
+		return (long) q;
 		}
 	else
 		{ //bigint quotient
-		return reduceBigInteger(new BigDecimal(q).toBigInteger());
+		return new BigDecimal(q).toBigInteger();
 		}
 }
 
 static Number remainder(double n, double d){
 	double q = n / d;
-	if(q <= Integer.MAX_VALUE && q >= Integer.MIN_VALUE)
+	if(q <= Long.MAX_VALUE && q >= Long.MIN_VALUE)
 		{
 		return (n - ((int) q) * d);
 		}
 	else
 		{ //bigint quotient
-		Number bq = reduceBigInteger(new BigDecimal(q).toBigInteger());
+		Number bq = new BigDecimal(q).toBigInteger();
 		return (n - bq.doubleValue() * d);
 		}
 }
@@ -253,14 +253,6 @@ static public Number rationalize(Number x){
 	return x;
 }
 
-static public Number reduce(Number val){
-	if(val instanceof Long)
-		return reduce(val.longValue());
-	else if (val instanceof BigInteger)
-		return reduceBigInteger((BigInteger) val);
-	return val;
-}
-
 static public Number reduceBigInteger(BigInteger val){
 	int bitLength = val.bitLength();
 	if(bitLength < 32)
@@ -269,13 +261,6 @@ static public Number reduceBigInteger(BigInteger val){
 	if(bitLength < 64)
 		return val.longValue();
 	else
-		return val;
-}
-
-static public Number reduce(long val){
-//	if(val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE)
-//		return (int) val;
-//	else
 		return val;
 }
 
@@ -288,9 +273,9 @@ static public Number divide(BigInteger n, BigInteger d){
 	n = n.divide(gcd);
 	d = d.divide(gcd);
 	if(d.equals(BigInteger.ONE))
-		return reduceBigInteger(n);
+		return n;
 	else if(d.equals(BigInteger.ONE.negate()))
-		return reduceBigInteger(n.negate());
+		return n.negate();
 	return new Ratio((d.signum() < 0 ? n.negate() : n),
 	                 (d.signum() < 0 ? d.negate() : d));
 }
@@ -345,6 +330,10 @@ static public Number shiftLeft(Object x, Object n){
 }
 
 static public int shiftLeft(int x, int n){
+	return x << n;
+}
+
+static public long shiftLeft(long x, int n){
 	return x << n;
 }
 
@@ -609,7 +598,7 @@ final static class RatioOps implements Ops{
 		Ratio ry = toRatio(y);
 		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
 				rx.denominator.multiply(ry.numerator));
-		return reduceBigInteger(q);
+		return q;
 	}
 
 	public Number remainder(Number x, Number y){
@@ -690,11 +679,11 @@ final static class BigIntegerOps implements Ops{
 	}
 
 	final public Number add(Number x, Number y){
-		return reduceBigInteger(toBigInteger(x).add(toBigInteger(y)));
+		return toBigInteger(x).add(toBigInteger(y));
 	}
 
 	final public Number multiply(Number x, Number y){
-		return reduceBigInteger(toBigInteger(x).multiply(toBigInteger(y)));
+		return toBigInteger(x).multiply(toBigInteger(y));
 	}
 
 	public Number divide(Number x, Number y){
@@ -724,12 +713,12 @@ final static class BigIntegerOps implements Ops{
 
 	public Number inc(Number x){
 		BigInteger bx = toBigInteger(x);
-		return reduceBigInteger(bx.add(BigInteger.ONE));
+		return bx.add(BigInteger.ONE);
 	}
 
 	public Number dec(Number x){
 		BigInteger bx = toBigInteger(x);
-		return reduceBigInteger(bx.subtract(BigInteger.ONE));
+		return bx.subtract(BigInteger.ONE);
 	}
 }
 
@@ -907,7 +896,7 @@ final static class LongBitOps implements BitOps{
 	public Number shiftLeft(Number x, int n){
 		if(n < 0)
 			return shiftRight(x, -n);
-		return reduceBigInteger(toBigInteger(x).shiftLeft(n));
+		return Numbers.shiftLeft(x.longValue(),n);
 	}
 
 	public Number shiftRight(Number x, int n){

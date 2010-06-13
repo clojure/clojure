@@ -5392,7 +5392,7 @@ public static class RecurExpr implements Expr{
 					if(!(arg instanceof MaybePrimitiveExpr && arg.hasJavaClass() && arg.getJavaClass() == primc))
 						throw new IllegalArgumentException("recur arg for primitive local: " +
 						                                   lb.name + " must be matching primitive, had: " +
-															arg.getJavaClass().getName() +
+															(arg.hasJavaClass() ? arg.getJavaClass().getName():"Object") +
 															", needed: " +
 															primc.getName());
 					}
