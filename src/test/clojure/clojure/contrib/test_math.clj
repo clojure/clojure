@@ -5,7 +5,7 @@
 (deftest test-expt
   (are [x y] (= x y)
       (expt 2 3) 8
-      (expt (expt 2 32) 2) (expt 2 64)
+      (expt (expt 2 16) 2) (expt 2 32)
       (expt 4/3 2) 16/9
       (expt 2 -10) 1/1024
       (expt 0.5M 2) 0.25M
@@ -114,5 +114,5 @@
 (deftest test-exact-integer-sqrt
   (are [x y] (= x y)
    (exact-integer-sqrt 15) [3 6]
-   (exact-integer-sqrt (inc (expt 2 64))) [(expt 2 32) 1]
+   (exact-integer-sqrt (inc (expt 2 32))) [(expt 2 16) 1]
    (exact-integer-sqrt 1000000000000) [1000000 0]))
