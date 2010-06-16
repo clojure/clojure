@@ -217,11 +217,20 @@ static BigDecimal toBigDecimal(Object x){
 		return (BigDecimal) x;
 	else if(x instanceof BigInteger)
 		return new BigDecimal((BigInteger) x);
+	else if(x instanceof Double)
+		return new BigDecimal(((Number) x).doubleValue());
+	else if(x instanceof Float)
+		return new BigDecimal(((Number) x).doubleValue());
+	else if(x instanceof Ratio)
+		{
+		Ratio r = (Ratio)x;
+		return (BigDecimal)divide(new BigDecimal(r.numerator), r.denominator);
+		}
 	else
 		return BigDecimal.valueOf(((Number) x).longValue());
 }
 
-static Ratio toRatio(Object x){
+static public Ratio toRatio(Object x){
 	if(x instanceof Ratio)
 		return (Ratio) x;
 	else if(x instanceof BigDecimal)
@@ -580,7 +589,7 @@ final static class RatioOps implements Ops{
 	}
 
 	final public Ops opsWith(BigDecimalOps x){
-		return this;
+		return BIGDECIMAL_OPS;
 	}
 
 	public boolean isZero(Number x){
@@ -765,7 +774,7 @@ final static class BigDecimalOps implements Ops{
 	}
 
 	final public Ops opsWith(RatioOps x){
-		return RATIO_OPS;
+		return this;
 	}
 
 	final public Ops opsWith(BigIntegerOps x){
