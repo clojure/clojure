@@ -210,30 +210,22 @@ static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{
 	}
 
 	public int indexOf(Object o) {
-		if (o instanceof Integer) {
-			int k = ((Integer) o).intValue();
+		if (o instanceof Number) {
+			int k = ((Number) o).intValue();
 			for (int j = i; j < array.length; j++)
 				if (k == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = i; j < array.length; j++)
-			if (o.equals(array[j])) return j - i;
+
 		return -1;
 	}
 	
 	public int lastIndexOf(Object o) {
-		if (o instanceof Integer) {
-			int k = ((Integer) o).intValue();
+		if (o instanceof Number) {
+			int k = ((Number) o).intValue();
 			for (int j = array.length - 1; j >= i; j--)
 				if (k == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = array.length - 1; j >= i; j--)
-			if (o.equals(array[j])) return j - i;
+
 		return -1;
 	}
 }
@@ -250,7 +242,7 @@ static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
 	}
 
 	public Object first(){
-		return array[i];
+		return Numbers.num(array[i]);
 	}
 
 	public ISeq next(){
@@ -272,44 +264,34 @@ static public class ArraySeq_float extends ASeq implements IndexedSeq, IReduce{
 	}
 
 	public Object reduce(IFn f) throws Exception{
-		Object ret = array[i];
+		Object ret = Numbers.num(array[i]);
 		for(int x = i + 1; x < array.length; x++)
-			ret = f.invoke(ret, array[x]);
+			ret = f.invoke(ret, Numbers.num(array[x]));
 		return ret;
 	}
 
 	public Object reduce(IFn f, Object start) throws Exception{
-		Object ret = f.invoke(start, array[i]);
+		Object ret = f.invoke(start, Numbers.num(array[i]));
 		for(int x = i + 1; x < array.length; x++)
-			ret = f.invoke(ret, array[x]);
+			ret = f.invoke(ret, Numbers.num(array[x]));
 		return ret;
 	}
 
 	public int indexOf(Object o) {
-		if (o instanceof Float) {
-			float f = ((Float) o).floatValue();
+		if (o instanceof Number) {
+			float f = ((Number) o).floatValue();
 			for (int j = i; j < array.length; j++)
 				if (f == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = i; j < array.length; j++)
-			if (o.equals(array[j])) return j - i;
 		return -1;
 	}
 	
 	public int lastIndexOf(Object o) {
-		if (o instanceof Float) {
-			float f = ((Float) o).floatValue();
+		if (o instanceof Number) {
+			float f = ((Number) o).floatValue();
 			for (int j = array.length - 1; j >= i; j--)
 				if (f == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = array.length - 1; j >= i; j--)
-			if (o.equals(array[j])) return j - i;
 		return -1;
 	}
 }
@@ -361,30 +343,22 @@ static public class ArraySeq_double extends ASeq implements IndexedSeq, IReduce{
 	}
 
 	public int indexOf(Object o) {
-		if (o instanceof Double) {
-			double d = ((Double) o).doubleValue();
+		if (o instanceof Number) {
+			double d = ((Number) o).doubleValue();
 			for (int j = i; j < array.length; j++)
 				if (d == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = i; j < array.length; j++)
-			if (o.equals(array[j])) return j - i;
+
 		return -1;
 	}
 	
 	public int lastIndexOf(Object o) {
-		if (o instanceof Double) {
-			double d = ((Double) o).doubleValue();
+		if (o instanceof Number) {
+			double d = ((Number) o).doubleValue();
 			for (int j = array.length - 1; j >= i; j--)
 				if (d == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = array.length - 1; j >= i; j--)
-			if (o.equals(array[j])) return j - i;
+
 		return -1;
 	}
 }
@@ -400,7 +374,7 @@ static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
 	}
 
 	public Object first(){
-		return array[i];
+		return Numbers.num(array[i]);
 	}
 
 	public ISeq next(){
@@ -422,44 +396,36 @@ static public class ArraySeq_long extends ASeq implements IndexedSeq, IReduce{
 	}
 
 	public Object reduce(IFn f) throws Exception{
-		Object ret = array[i];
+		Object ret = Numbers.num(array[i]);
 		for(int x = i + 1; x < array.length; x++)
-			ret = f.invoke(ret, array[x]);
+			ret = f.invoke(ret, Numbers.num(array[x]));
 		return ret;
 	}
 
 	public Object reduce(IFn f, Object start) throws Exception{
-		Object ret = f.invoke(start, array[i]);
+		Object ret = f.invoke(start, Numbers.num(array[i]));
 		for(int x = i + 1; x < array.length; x++)
-			ret = f.invoke(ret, array[x]);
+			ret = f.invoke(ret, Numbers.num(array[x]));
 		return ret;
 	}
 
 	public int indexOf(Object o) {
-		if (o instanceof Long) {
-			long l = ((Long) o).longValue();
+		if (o instanceof Number) {
+			long l = ((Number) o).longValue();
 			for (int j = i; j < array.length; j++)
 				if (l == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = i; j < array.length; j++)
-			if (o.equals(array[j])) return j - i;
+
 		return -1;
 	}
 	
 	public int lastIndexOf(Object o) {
-		if (o instanceof Long) {
-			long l = ((Long) o).longValue();
+		if (o instanceof Number) {
+			long l = ((Number) o).longValue();
 			for (int j = array.length - 1; j >= i; j--)
 				if (l == array[j]) return j - i;
 		}
-		if (o == null) {
-			return -1;
-		}
-		for (int j = array.length - 1; j >= i; j--)
-			if (o.equals(array[j])) return j - i;
+
 		return -1;
 	}
 }
