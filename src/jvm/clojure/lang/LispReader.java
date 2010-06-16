@@ -360,7 +360,8 @@ private static Object matchNumber(String s){
 	m = ratioPat.matcher(s);
 	if(m.matches())
 		{
-		return Numbers.divide(new BigInteger(m.group(1)), new BigInteger(m.group(2)));
+		return Numbers.divide(Numbers.reduceBigInteger(new BigInteger(m.group(1))),
+		                      Numbers.reduceBigInteger((new BigInteger(m.group(2)))));
 		}
 	return null;
 }

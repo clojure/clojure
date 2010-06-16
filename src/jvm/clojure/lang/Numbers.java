@@ -607,26 +607,37 @@ final static class RatioOps implements Ops{
 		return r.numerator.signum() < 0;
 	}
 
+	static Number normalizeRet(Number ret, Number x, Number y){
+		if(ret instanceof BigInteger && !(x instanceof BigInteger || y instanceof BigInteger))
+			{
+			return reduceBigInteger((BigInteger) ret);
+			}
+		return ret;
+	}
+
 	final public Number add(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
-		return divide(ry.numerator.multiply(rx.denominator)
+		Number ret = divide(ry.numerator.multiply(rx.denominator)
 				.add(rx.numerator.multiply(ry.denominator))
 				, ry.denominator.multiply(rx.denominator));
+		return normalizeRet(ret, x, y);
 	}
 
 	final public Number multiply(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
-		return Numbers.divide(ry.numerator.multiply(rx.numerator)
+		Number ret = Numbers.divide(ry.numerator.multiply(rx.numerator)
 				, ry.denominator.multiply(rx.denominator));
+		return normalizeRet(ret, x, y);
 	}
 
 	public Number divide(Number x, Number y){
 		Ratio rx = toRatio(x);
 		Ratio ry = toRatio(y);
-		return Numbers.divide(ry.denominator.multiply(rx.numerator)
+		Number ret = Numbers.divide(ry.denominator.multiply(rx.numerator)
 				, ry.numerator.multiply(rx.denominator));
+		return normalizeRet(ret, x, y);
 	}
 
 	public Number quotient(Number x, Number y){
@@ -634,7 +645,7 @@ final static class RatioOps implements Ops{
 		Ratio ry = toRatio(y);
 		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
 				rx.denominator.multiply(ry.numerator));
-		return q;
+		return normalizeRet(q, x, y);
 	}
 
 	public Number remainder(Number x, Number y){
@@ -642,7 +653,8 @@ final static class RatioOps implements Ops{
 		Ratio ry = toRatio(y);
 		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
 				rx.denominator.multiply(ry.numerator));
-		return Numbers.minus(x, Numbers.multiply(q, y));
+		Number ret = Numbers.minus(x, Numbers.multiply(q, y));
+		return normalizeRet(ret, x, y);
 	}
 
 	public boolean equiv(Number x, Number y){
@@ -1012,11 +1024,11 @@ static final BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
 static Ops ops(Object x){
 	Class xc = x.getClass();
 
-	if(xc == Long.class)
+	if(xc == Integer.class)
 		return LONG_OPS;
 	else if(xc == Double.class)
 		return DOUBLE_OPS;
-	else if(xc == Integer.class)
+	else if(xc == Long.class)
 		return LONG_OPS;
 	else if(xc == Float.class)
 		return DOUBLE_OPS;
