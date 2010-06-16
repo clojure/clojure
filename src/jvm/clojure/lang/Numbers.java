@@ -147,28 +147,28 @@ static public Number remainder(Number x, Number y){
 	return ops(x).combine(yops).remainder(x, y);
 }
 
-static Number quotient(double n, double d){
+static double quotient(double n, double d){
 	double q = n / d;
 	if(q <= Long.MAX_VALUE && q >= Long.MIN_VALUE)
 		{
-		return box((long) q);
+		return (double)(long) q;
 		}
 	else
 		{ //bigint quotient
-		return new BigDecimal(q).toBigInteger();
+		return new BigDecimal(q).toBigInteger().doubleValue();
 		}
 }
 
-static Number remainder(double n, double d){
+static double remainder(double n, double d){
 	double q = n / d;
 	if(q <= Long.MAX_VALUE && q >= Long.MIN_VALUE)
 		{
-		return Double.valueOf((n - ((int) q) * d));
+		return (n - ((long) q) * d);
 		}
 	else
 		{ //bigint quotient
 		Number bq = new BigDecimal(q).toBigInteger();
-		return Double.valueOf((n - bq.doubleValue() * d));
+		return (n - bq.doubleValue() * d);
 		}
 }
 
