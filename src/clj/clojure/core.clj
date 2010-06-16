@@ -4411,11 +4411,11 @@
   [a idx ret expr]
   `(let [a# ~a
          ~ret (aclone a#)]
-     (loop  [~idx (int 0)]
+     (loop  [~idx 0]
        (if (< ~idx  (alength a#))
          (do
            (aset ~ret ~idx ~expr)
-           (recur (unchecked-inc ~idx)))
+           (recur (unchecked-inc-long ~idx)))
          ~ret))))
 
 (defmacro areduce
@@ -4425,9 +4425,9 @@
   {:added "1.0"}
   [a idx ret init expr]
   `(let [a# ~a]
-     (loop  [~idx (int 0) ~ret ~init]
+     (loop  [~idx 0 ~ret ~init]
        (if (< ~idx  (alength a#))
-         (recur (unchecked-inc ~idx) ~expr)
+         (recur (unchecked-inc-long ~idx) ~expr)
          ~ret))))
 
 (defn float-array
