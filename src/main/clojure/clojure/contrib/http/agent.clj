@@ -99,7 +99,7 @@
 (defn- connection-success? [#^HttpURLConnection conn]
   "Returns true if the HttpURLConnection response code is in the 2xx
   range."
-  (= 2 (unchecked-divide (.getResponseCode conn) 100)))
+  (= 2 (quot (.getResponseCode conn) 100)))
 
 (defn- open-response
   "Agent action that opens the response body stream on the HTTP
@@ -137,7 +137,7 @@
   "Returns true if the response status of the HTTP agent begins with
   digit, an Integer."
   [digit http-agnt]
-  (= digit (unchecked-divide (.getResponseCode
+  (= digit (quot (.getResponseCode
                               #^HttpURLConnection (::connection @http-agnt))
                              100)))
 
