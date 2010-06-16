@@ -299,7 +299,7 @@
                                                   (arg-types (count ptypes)))))
                                         ;expecting [[super-ctor-args] state] returned
             (. gen dup)
-            (. gen push 0)
+            (. gen push (int 0))
             (. gen (invokeStatic rt-type nth-method))
             (. gen storeLocal local)
             
@@ -307,14 +307,14 @@
             (. gen dupX1)
             (dotimes [i (count super-pclasses)]
               (. gen loadLocal local)
-              (. gen push i)
+              (. gen push (int i))
               (. gen (invokeStatic rt-type nth-method))
               (. clojure.lang.Compiler$HostExpr (emitUnboxArg nil gen (nth super-pclasses i))))
             (. gen (invokeConstructor super-type super-m))
             
             (if state
               (do
-                (. gen push 1)
+                (. gen push (int 1))
                 (. gen (invokeStatic rt-type nth-method))
                 (. gen (putField ctype state-name obj-type)))
               (. gen pop))

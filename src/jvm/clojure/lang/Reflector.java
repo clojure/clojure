@@ -405,13 +405,17 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 	if(paramType == argType || paramType.isAssignableFrom(argType))
 		return true;
 	if(paramType == int.class)
-		return argType == Integer.class;// || argType == FixNum.class;
+		return argType == Integer.class
+		       || argType == long.class;// || argType == FixNum.class;
 	else if(paramType == float.class)
-		return argType == Float.class;
+		return argType == Float.class
+				|| argType == double.class;
 	else if(paramType == double.class)
-		return argType == Double.class;// || argType == DoubleNum.class;
+		return argType == Double.class
+				|| argType == float.class;// || argType == DoubleNum.class;
 	else if(paramType == long.class)
-		return argType == Long.class;// || argType == BigNum.class;
+		return argType == Long.class
+				|| argType == int.class;// || argType == BigNum.class;
 	else if(paramType == char.class)
 		return argType == Character.class;
 	else if(paramType == short.class)
@@ -446,6 +450,15 @@ public static Object prepRet(Object x){
 //		return ((Boolean) x).booleanValue() ? RT.T : null;
 	if(x instanceof Boolean)
 		return ((Boolean) x)?Boolean.TRUE:Boolean.FALSE;
+	else if(x instanceof Long)
+		{
+		long val = ((Long)x).longValue();
+		if(val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE)
+			return Integer.valueOf((int) val);
+		return x;
+		}
+	else if(x instanceof Float)
+			return Double.valueOf(((Float) x).doubleValue());
 	return x;
 }
 }

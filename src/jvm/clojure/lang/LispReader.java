@@ -330,7 +330,7 @@ private static Object matchNumber(String s){
 			{
 			if(m.group(8) != null)
 				return BigInteger.ZERO;			
-			return new Long(0);
+			return Numbers.num(0);
 			}
 		boolean negate = (m.group(1).equals("-"));
 		String n;

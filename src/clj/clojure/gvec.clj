@@ -62,11 +62,11 @@
      (if (< aidx (count vec))
        (let [node (.arrayFor vec aidx)
              result (loop [result result
-                           node-idx (bit-and (int 0x1f) aidx)]
+                           node-idx (bit-and 0x1f aidx)]
                       (if (< node-idx (.alength am node))
                         (recur (f result (.aget am node node-idx)) (inc node-idx))
                         result))]
-         (recur result (bit-and (int 0xffe0) (+ aidx (int 32)))))
+         (recur result (bit-and 0xffe0 (+ aidx 32))))
        result)))
   
   clojure.lang.ISeq
@@ -141,7 +141,7 @@
       (if (= i cnt)
         hash
         (let [val (.nth this i)]
-          (recur (unchecked-add (unchecked-multiply (int 31) hash) 
+          (recur (unchecked-add-int (unchecked-multiply-int 31 hash) 
                                 (clojure.lang.Util/hash val)) 
                  (inc i))))))
 

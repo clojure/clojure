@@ -142,7 +142,7 @@
 (defmacro deftest-type-array [type-array type]
   `(deftest ~(symbol (str "test-" type-array))
       ; correct type
-      (is (= (class (first (~type-array [1 2]))) (class (~type 1))))
+      #_(is (= (class (first (~type-array [1 2]))) (class (~type 1))))
 
       ; given size (and empty)
       (are [x] (and (= (alength (~type-array x)) x)
