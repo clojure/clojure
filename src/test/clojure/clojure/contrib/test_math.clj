@@ -54,7 +54,7 @@
   (is (thrown? IllegalArgumentException (lcm 7.0 0))))
 
 (deftest test-floor
-  (are [x y] (= x y)
+  (are [x y] (== x y)
       (floor 6) 6
       (floor -6) -6
       (floor 123456789123456789) 123456789123456789
@@ -67,7 +67,7 @@
       (floor -4.3) -5.0))
 
 (deftest test-ceil
-  (are [x y] (= x y)
+  (are [x y] (== x y)
       (ceil 6) 6
       (ceil -6) -6
       (ceil 123456789123456789) 123456789123456789
@@ -80,7 +80,7 @@
       (ceil -4.3) -4.0))
 
 (deftest test-round
-  (are [x y] (= x y)
+  (are [x y] (== x y)
       (round 6) 6
       (round -6) -6
       (round 123456789123456789) 123456789123456789
