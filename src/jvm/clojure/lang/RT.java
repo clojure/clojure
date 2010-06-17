@@ -900,7 +900,9 @@ static public boolean booleanCast(boolean x){
 }
 
 static public byte byteCast(Object x){
-	long n = ((Number) x).longValue();
+	if(x instanceof Byte)
+		return ((Byte) x).byteValue();
+	long n = longCast(x);
 	if(n < Byte.MIN_VALUE || n > Byte.MAX_VALUE)
 		throw new IllegalArgumentException("Value out of range for byte: " + x);
 
@@ -908,7 +910,9 @@ static public byte byteCast(Object x){
 }
 
 static public short shortCast(Object x){
-	long n = ((Number) x).longValue();
+	if(x instanceof Short)
+		return ((Short) x).shortValue();
+	long n = longCast(x);
 	if(n < Short.MIN_VALUE || n > Short.MAX_VALUE)
 		throw new IllegalArgumentException("Value out of range for short: " + x);
 
@@ -919,7 +923,10 @@ static public int intCast(Object x){
 	if(x instanceof Integer)
 		return ((Integer)x).intValue();
 	if(x instanceof Number)
-		return intCast(((Number) x).longValue());
+		{
+		long n = longCast(x);
+		return intCast(n);
+		}
 	return ((Character) x).charValue();
 }
 
@@ -958,6 +965,16 @@ static public int intCast(double x){
 }
 
 static public long longCast(Object x){
+	if(x instanceof Integer || x instanceof Long)
+		return ((Number) x).longValue();
+	else if (x instanceof BigInteger)
+		{
+		BigInteger bi = (BigInteger) x;
+		if(bi.bitLength() < 64)
+			return bi.longValue();
+		else
+			throw new IllegalArgumentException("Value out of range for long: " + x);
+		}
 	return ((Number) x).longValue();
 }
 

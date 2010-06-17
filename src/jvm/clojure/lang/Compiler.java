@@ -769,21 +769,21 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				}
 			else
 				{
-				Method m = intValueMethod;
+				Method m = null;
 				gen.checkCast(NUMBER_TYPE);
 				if(paramType == int.class)
-					m = intValueMethod;
+					m = Method.getMethod("int intCast(Object)");
 				else if(paramType == float.class)
-					m = floatValueMethod;
+					m = Method.getMethod("float floatCast(Object)");
 				else if(paramType == double.class)
-						m = doubleValueMethod;
-					else if(paramType == long.class)
-							m = longValueMethod;
-						else if(paramType == byte.class)
-								m = byteValueMethod;
-							else if(paramType == short.class)
-									m = shortValueMethod;
-				gen.invokeVirtual(NUMBER_TYPE, m);
+					m = Method.getMethod("double doubleCast(Object)");
+				else if(paramType == long.class)
+					m = Method.getMethod("long longCast(Object)");
+				else if(paramType == byte.class)
+					m = Method.getMethod("byte byteCast(Object)");
+				else if(paramType == short.class)
+					m = Method.getMethod("short shortCast(Object)");
+				gen.invokeStatic(RT_TYPE, m);
 				}
 			}
 		else
