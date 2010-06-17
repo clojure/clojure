@@ -697,6 +697,7 @@
    :added "1.0"}
   ([x y] (clojure.lang.Util/identical x y)))
 
+;equiv-based
 (defn =
   "Equality. Returns true if x equals y, false if not. Same as
   Java x.equals(y) except it also works for nil, and compares
@@ -708,6 +709,25 @@
    :added "1.0"}
   ([x] true)
   ([x y] (clojure.lang.Util/equiv x y))
+  ([x y & more]
+   (if (= x y)
+     (if (next more)
+       (recur y (first more) (next more))
+       (= y (first more)))
+     false)))
+
+;equals-based
+#_(defn =
+  "Equality. Returns true if x equals y, false if not. Same as
+  Java x.equals(y) except it also works for nil, and compares
+  numbers and collections in a type-independent manner.  Clojure's immutable data
+  structures define equals() (and thus =) as a value, not an identity,
+  comparison."
+  {:inline (fn [x y] `(. clojure.lang.Util equals ~x ~y))
+   :inline-arities #{2}
+   :added "1.0"}
+  ([x] true)
+  ([x y] (clojure.lang.Util/equals x y))
   ([x y & more]
    (if (= x y)
      (if (next more)
@@ -2239,8 +2259,8 @@
   [bindings & body]
   (let [i (first bindings)
         n (second bindings)]
-    `(let [n# ~n]
-       (loop [~i (int 0)]
+    `(let [n# (clojure.lang.RT/longCast ~n)]
+       (loop [~i 0]
          (when (< ~i n#)
            ~@body
            (recur (unchecked-inc-long ~i)))))))
@@ -2716,7 +2736,7 @@
      (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [i (first bindings)
         n (second bindings)]
-    `(let [n# ~n]
+    `(let [n# (long ~n)]
        (loop [~i 0]
          (when (< ~i n#)
            ~@body

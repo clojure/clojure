@@ -425,9 +425,9 @@ Note this should only be used for the last one in the sequence"
                     not-teens (or (< 11 low-two-digits) (> 19 low-two-digits))
                     low-digit (rem low-two-digits 10)]
                 (print (cond 
-                        (and (= low-digit 1) not-teens) "st"
-                        (and (= low-digit 2) not-teens) "nd"
-                        (and (= low-digit 3) not-teens) "rd"
+                        (and (== low-digit 1) not-teens) "st"
+                        (and (== low-digit 2) not-teens) "nd"
+                        (and (== low-digit 3) not-teens) "rd"
                         :else "th")))))))
     navigator))
 

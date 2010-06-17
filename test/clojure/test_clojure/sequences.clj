@@ -40,7 +40,7 @@
         double-vec (into (vector-of :double) arange)
         byte-vec (into (vector-of :byte) (map byte arange))
         all-true (into-array Boolean/TYPE (repeat 10 true))]
-    (is (= 4950
+    (is (== 4950
            (reduce + arange)
            (reduce + avec)
            (reduce + alist)
@@ -57,7 +57,7 @@
            (reduce int+ char-vec)
            (reduce + double-vec)
            (reduce int+ byte-vec)))
-    (is (= 4951
+    (is (== 4951
            (reduce + 1 arange)
            (reduce + 1 avec)
            (reduce + 1 alist)
