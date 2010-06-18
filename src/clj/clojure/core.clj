@@ -832,8 +832,15 @@
 
 (defn inc
   "Returns a number one greater than num."
-  {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))
+  {:inline (fn [x] `(. clojure.lang.Numbers (incP ~x)))
    :added "1.0"}
+  [x] (. clojure.lang.Numbers (incP x)))
+
+(defn inc'
+  "Returns a number one greater than num. Does not auto-promote
+  longs, will throw on overflow"
+  {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))
+   :added "1.2"}
   [x] (. clojure.lang.Numbers (inc x)))
 
 ;; reduce is defined again later after InternalReduce loads
@@ -864,25 +871,49 @@
 ;;math stuff
 (defn +
   "Returns the sum of nums. (+) returns 0."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (add ~x ~y)))
+  {:inline (fn [x y] `(. clojure.lang.Numbers (addP ~x ~y)))
    :inline-arities #{2}
    :added "1.0"}
   ([] 0)
   ([x] (cast Number x))
-  ([x y] (. clojure.lang.Numbers (add x y)))
+  ([x y] (. clojure.lang.Numbers (addP x y)))
   ([x y & more]
    (reduce1 + (+ x y) more)))
 
+(defn +'
+  "Returns the sum of nums. (+) returns 0. Does not auto-promote
+  longs, will throw on overflow."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (add ~x ~y)))
+   :inline-arities #{2}
+   :added "1.2"}
+  ([] 0)
+  ([x] (cast Number x))
+  ([x y] (. clojure.lang.Numbers (add x y)))
+  ([x y & more]
+     (reduce1 +' (+' x y) more)))
+
 (defn *
   "Returns the product of nums. (*) returns 1."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (multiply ~x ~y)))
+  {:inline (fn [x y] `(. clojure.lang.Numbers (multiplyP ~x ~y)))
    :inline-arities #{2}
    :added "1.0"}
   ([] 1)
   ([x] (cast Number x))
-  ([x y] (. clojure.lang.Numbers (multiply x y)))
+  ([x y] (. clojure.lang.Numbers (multiplyP x y)))
   ([x y & more]
    (reduce1 * (* x y) more)))
+
+(defn *'
+  "Returns the product of nums. (*) returns 1. Does not auto-promote
+  longs, will throw on overflow."
+  {:inline (fn [x y] `(. clojure.lang.Numbers (multiply ~x ~y)))
+   :inline-arities #{2}
+   :added "1.2"}
+  ([] 1)
+  ([x] (cast Number x))
+  ([x y] (. clojure.lang.Numbers (multiply x y)))
+  ([x y & more]
+     (reduce1 *' (*' x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
@@ -898,13 +929,25 @@
 (defn -
   "If no ys are supplied, returns the negation of x, else subtracts
   the ys from x and returns the result."
-  {:inline (fn [& args] `(. clojure.lang.Numbers (minus ~@args)))
+  {:inline (fn [& args] `(. clojure.lang.Numbers (minusP ~@args)))
    :inline-arities #{1 2}
    :added "1.0"}
+  ([x] (. clojure.lang.Numbers (minusP x)))
+  ([x y] (. clojure.lang.Numbers (minusP x y)))
+  ([x y & more]
+   (reduce1 - (- x y) more)))
+
+(defn -'
+  "If no ys are supplied, returns the negation of x, else subtracts
+  the ys from x and returns the result. Does not auto-promote
+  longs, will throw on overflow."
+  {:inline (fn [& args] `(. clojure.lang.Numbers (minus ~@args)))
+   :inline-arities #{1 2}
+   :added "1.2"}
   ([x] (. clojure.lang.Numbers (minus x)))
   ([x y] (. clojure.lang.Numbers (minus x y)))
   ([x y & more]
-   (reduce1 - (- x y) more)))
+     (reduce1 -' (-' x y) more)))
 
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
@@ -986,8 +1029,15 @@
 
 (defn dec
   "Returns a number one less than num."
-  {:inline (fn [x] `(. clojure.lang.Numbers (dec ~x)))
+  {:inline (fn [x] `(. clojure.lang.Numbers (decP ~x)))
    :added "1.0"}
+  [x] (. clojure.lang.Numbers (decP x)))
+
+(defn dec'
+  "Returns a number one less than num. Does not auto-promote
+  longs, will throw on overflow."
+  {:inline (fn [x] `(. clojure.lang.Numbers (dec ~x)))
+   :added "1.2"}
   [x] (. clojure.lang.Numbers (dec x)))
 
 (defn unchecked-inc-int

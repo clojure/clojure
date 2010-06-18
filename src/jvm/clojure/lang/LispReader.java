@@ -377,7 +377,7 @@ static private boolean isMacro(int ch){
 }
 
 static private boolean isTerminatingMacro(int ch){
-	return (ch != '#' && ch < macros.length && macros[ch] != null);
+	return (ch != '#' && ch != '\'' && isMacro(ch));
 }
 
 public static class RegexReader extends AFn{

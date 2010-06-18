@@ -38,8 +38,10 @@ static interface Ops{
 	public boolean isNeg(Number x);
 
 	public Number add(Number x, Number y);
+	public Number addP(Number x, Number y);
 
 	public Number multiply(Number x, Number y);
+	public Number multiplyP(Number x, Number y);
 
 	public Number divide(Number x, Number y);
 
@@ -52,12 +54,37 @@ static interface Ops{
 	public boolean lt(Number x, Number y);
 
 	public Number negate(Number x);
+	public Number negateP(Number x);
 
 	public Number inc(Number x);
+	public Number incP(Number x);
 
 	public Number dec(Number x);
+	public Number decP(Number x);
 }
 
+static abstract class OpsP implements Ops{
+	public Number addP(Number x, Number y){
+		return add(x, y);
+	}
+
+	public Number multiplyP(Number x, Number y){
+		return multiply(x, y);
+	}
+
+	public Number negateP(Number x){
+		return negate(x);
+	}
+
+	public Number incP(Number x){
+		return inc(x);
+	}
+
+	public Number decP(Number x){
+		return dec(x);
+	}
+
+}
 static interface BitOps{
 	BitOps combine(BitOps y);
 
@@ -105,16 +132,32 @@ static public Number minus(Object x){
 	return ops(x).negate((Number)x);
 }
 
+static public Number minusP(Object x){
+	return ops(x).negateP((Number)x);
+}
+
 static public Number inc(Object x){
 	return ops(x).inc((Number)x);
+}
+
+static public Number incP(Object x){
+	return ops(x).incP((Number)x);
 }
 
 static public Number dec(Object x){
 	return ops(x).dec((Number)x);
 }
 
+static public Number decP(Object x){
+	return ops(x).decP((Number)x);
+}
+
 static public Number add(Object x, Object y){
 	return ops(x).combine(ops(y)).add((Number)x, (Number)y);
+}
+
+static public Number addP(Object x, Object y){
+	return ops(x).combine(ops(y)).addP((Number)x, (Number)y);
 }
 
 static public Number minus(Object x, Object y){
@@ -122,8 +165,17 @@ static public Number minus(Object x, Object y){
 	return ops(x).combine(yops).add((Number)x, yops.negate((Number)y));
 }
 
+static public Number minusP(Object x, Object y){
+	Ops yops = ops(y);
+	return ops(x).combine(yops).addP((Number)x, yops.negateP((Number)y));
+}
+
 static public Number multiply(Object x, Object y){
 	return ops(x).combine(ops(y)).multiply((Number)x, (Number)y);
+}
+
+static public Number multiplyP(Object x, Object y){
+	return ops(x).combine(ops(y)).multiplyP((Number)x, (Number)y);
 }
 
 static public Number divide(Object x, Object y){
@@ -297,13 +349,13 @@ static public Number divide(BigInteger n, BigInteger d){
 		throw new ArithmeticException("Divide by zero");
 	BigInteger gcd = n.gcd(d);
 	if(gcd.equals(BigInteger.ZERO))
-		return BigInteger.ZERO;
+		return 0;
 	n = n.divide(gcd);
 	d = d.divide(gcd);
 	if(d.equals(BigInteger.ONE))
-		return n;
+		return reduceBigInteger(n);
 	else if(d.equals(BigInteger.ONE.negate()))
-		return n.negate();
+		return reduceBigInteger(n.negate());
 	return new Ratio((d.signum() < 0 ? n.negate() : n),
 	                 (d.signum() < 0 ? d.negate() : d));
 }
@@ -422,10 +474,25 @@ final static class LongOps implements Ops{
 		return box(Numbers.add(x.longValue(),y.longValue()));
 	}
 
+	final public Number addP(Number x, Number y){
+		long lx = x.longValue(), ly = y.longValue();
+		long ret = lx + ly;
+		if ((ret ^ lx) < 0 && (ret ^ ly) < 0)
+			return BIGINTEGER_OPS.add(x, y);
+		return box(ret);
+	}
+
 	final public Number multiply(Number x, Number y){
 		return box(Numbers.multiply(x.longValue(), y.longValue()));
 	}
 
+	final public Number multiplyP(Number x, Number y){
+		long lx = x.longValue(), ly = y.longValue();
+		long ret = lx * ly;
+		if (ly != 0 && ret/ly != lx)
+			return BIGINTEGER_OPS.multiply(x, y);
+		return box(ret);
+	}
 	static long gcd(long u, long v){
 		while(v != 0)
 			{
@@ -477,18 +544,38 @@ final static class LongOps implements Ops{
 		return box(Numbers.minus(val));
 	}
 
+	final public Number negateP(Number x){
+		long val = x.longValue();
+		if(val > Long.MIN_VALUE)
+			return box(-val);
+		return BigInteger.valueOf(val).negate();
+	}
 	public Number inc(Number x){
 		long val = x.longValue();
 		return box(Numbers.inc(val));
+	}
+
+	public Number incP(Number x){
+		long val = x.longValue();
+		if(val < Long.MAX_VALUE)
+			return box(val + 1);
+		return BIGINTEGER_OPS.inc(x);
 	}
 
 	public Number dec(Number x){
 		long val = x.longValue();
 		return box(Numbers.dec(val));
 	}
+
+	public Number decP(Number x){
+		long val = x.longValue();
+		if(val > Long.MIN_VALUE)
+			return box(val - 1);
+		return BIGINTEGER_OPS.dec(x);
+	}
 }
 
-final static class DoubleOps implements Ops{
+final static class DoubleOps extends OpsP{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -567,7 +654,7 @@ final static class DoubleOps implements Ops{
 	}
 }
 
-final static class RatioOps implements Ops{
+final static class RatioOps extends OpsP{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -686,7 +773,7 @@ final static class RatioOps implements Ops{
 
 }
 
-final static class BigIntegerOps implements Ops{
+final static class BigIntegerOps extends OpsP{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -727,11 +814,11 @@ final static class BigIntegerOps implements Ops{
 	}
 
 	final public Number add(Number x, Number y){
-		return toBigInteger(x).add(toBigInteger(y));
+		return reduceBigInteger(toBigInteger(x).add(toBigInteger(y)));
 	}
 
 	final public Number multiply(Number x, Number y){
-		return toBigInteger(x).multiply(toBigInteger(y));
+		return reduceBigInteger(toBigInteger(x).multiply(toBigInteger(y)));
 	}
 
 	public Number divide(Number x, Number y){
@@ -739,11 +826,11 @@ final static class BigIntegerOps implements Ops{
 	}
 
 	public Number quotient(Number x, Number y){
-		return toBigInteger(x).divide(toBigInteger(y));
+		return reduceBigInteger(toBigInteger(x).divide(toBigInteger(y)));
 	}
 
 	public Number remainder(Number x, Number y){
-		return toBigInteger(x).remainder(toBigInteger(y));
+		return reduceBigInteger(toBigInteger(x).remainder(toBigInteger(y)));
 	}
 
 	public boolean equiv(Number x, Number y){
@@ -756,21 +843,21 @@ final static class BigIntegerOps implements Ops{
 
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
-		return toBigInteger(x).negate();
+		return reduceBigInteger(toBigInteger(x).negate());
 	}
 
 	public Number inc(Number x){
 		BigInteger bx = toBigInteger(x);
-		return bx.add(BigInteger.ONE);
+		return reduceBigInteger(bx.add(BigInteger.ONE));
 	}
 
 	public Number dec(Number x){
 		BigInteger bx = toBigInteger(x);
-		return bx.subtract(BigInteger.ONE);
+		return reduceBigInteger(bx.subtract(BigInteger.ONE));
 	}
 }
 
-final static class BigDecimalOps implements Ops{
+final static class BigDecimalOps extends OpsP{
 	final static Var MATH_CONTEXT = RT.MATH_CONTEXT;
 
 	public Ops combine(Ops y){
@@ -1370,66 +1457,6 @@ static public Number num(float x){
 	return Double.valueOf(x);
 }
 
-//static public float add(float x, float y){
-//	return x + y;
-//}
-//
-//static public float minus(float x, float y){
-//	return x - y;
-//}
-
-//static public float minus(float x){
-//	return -x;
-//}
-
-//static public float inc(float x){
-//	return x + 1;
-//}
-
-//static public float dec(float x){
-//	return x - 1;
-//}
-
-//static public float multiply(float x, float y){
-//	return x * y;
-//}
-
-//static public float divide(float x, float y){
-//	return x / y;
-//}
-
-//static public boolean equiv(float x, float y){
-//	return x == y;
-//}
-
-//static public boolean lt(float x, float y){
-//	return x < y;
-//}
-
-//static public boolean lte(float x, float y){
-//	return x <= y;
-//}
-
-//static public boolean gt(float x, float y){
-//	return x > y;
-//}
-
-//static public boolean gte(float x, float y){
-//	return x >= y;
-//}
-
-//static public boolean isPos(float x){
-//	return x > 0;
-//}
-
-//static public boolean isNeg(float x){
-//	return x < 0;
-//}
-
-//static public boolean isZero(float x){
-//	return x == 0;
-//}
-
 static public Number num(double x){
 	return Double.valueOf(x);
 }
@@ -1438,7 +1465,15 @@ static public double add(double x, double y){
 	return x + y;
 }
 
+static public double addP(double x, double y){
+	return x + y;
+}
+
 static public double minus(double x, double y){
+	return x - y;
+}
+
+static public double minusP(double x, double y){
 	return x - y;
 }
 
@@ -1446,7 +1481,15 @@ static public double minus(double x){
 	return -x;
 }
 
+static public double minusP(double x){
+	return -x;
+}
+
 static public double inc(double x){
+	return x + 1;
+}
+
+static public double incP(double x){
 	return x + 1;
 }
 
@@ -1454,7 +1497,15 @@ static public double dec(double x){
 	return x - 1;
 }
 
+static public double decP(double x){
+	return x - 1;
+}
+
 static public double multiply(double x, double y){
+	return x * y;
+}
+
+static public double multiplyP(double x, double y){
 	return x * y;
 }
 
@@ -1671,11 +1722,25 @@ static public long add(long x, long y){
 	return ret;
 }
 
+static public Number addP(long x, long y){
+	long ret = x + y;
+	if ((ret ^ x) < 0 && (ret ^ y) < 0)
+		return addP((Number)x,(Number)y);
+	return box(ret);
+}
+
 static public long minus(long x, long y){
 	long ret = x - y;
 	if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
 		return throwIntOverflow();
 	return ret;
+}
+
+static public Number minusP(long x, long y){
+	long ret = x - y;
+	if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
+		return minusP((Number)x,(Number)y);
+	return box(ret);
 }
 
 static public long minus(long x){
@@ -1684,10 +1749,22 @@ static public long minus(long x){
 	return -x;
 }
 
+static public Number minusP(long x){
+	if(x == Long.MIN_VALUE)
+		return BigInteger.valueOf(x).negate();
+	return box(-x);
+}
+
 static public long inc(long x){
 	if(x == Long.MAX_VALUE)
 		return throwIntOverflow();
 	return x + 1;
+}
+
+static public Number incP(long x){
+	if(x == Long.MAX_VALUE)
+		return BIGINTEGER_OPS.inc(x);
+	return box(x + 1);
 }
 
 static public long dec(long x){
@@ -1696,11 +1773,25 @@ static public long dec(long x){
 	return x - 1;
 }
 
+static public Number decP(long x){
+	if(x == Long.MIN_VALUE)
+		return BIGINTEGER_OPS.dec(x);
+	return box(x - 1);
+}
+
+
 static public long multiply(long x, long y){
 	long ret = x * y;
 	if (y != 0 && ret/y != x)
 		return throwIntOverflow();
 	return ret;
+}
+
+static public Number multiplyP(long x, long y){
+	long ret = x * y;
+	if (y != 0 && ret/y != x)
+		return multiplyP((Number)x,(Number)y);
+	return box(ret);
 }
 
 static public long unchecked_long_divide(long x, long y){
@@ -3461,45 +3552,6 @@ static public class L{
 
 //overload resolution
 //*
-//static public Number add(int x, Object y){
-//	return add((Object)x,y);
-//}
-
-//static public Number add(Object x, int y){
-//	return add(x,(Object)y);
-//}
-
-//static public Number and(int x, Object y){
-//	return and((Object)x,y);
-//}
-
-//static public Number and(Object x, int y){
-//	return and(x,(Object)y);
-//}
-
-//static public Number or(int x, Object y){
-//	return or((Object)x,y);
-//}
-
-//static public Number or(Object x, int y){
-//	return or(x,(Object)y);
-//}
-
-//static public Number xor(int x, Object y){
-//	return xor((Object)x,y);
-//}
-
-//static public Number xor(Object x, int y){
-//	return xor(x,(Object)y);
-//}
-
-//static public Number add(float x, Object y){
-//	return add((Object)x,y);
-//}
-
-//static public Number add(Object x, float y){
-//	return add(x,(Object)y);
-//}
 
 static public Number add(long x, Object y){
 	return add((Object)x,y);
@@ -3509,29 +3561,45 @@ static public Number add(Object x, long y){
 	return add(x,(Object)y);
 }
 
-static public Number add(double x, Object y){
-	return add((Object)x,y);
+static public Number addP(long x, Object y){
+	return addP((Object)x,y);
 }
 
-static public Number add(Object x, double y){
-	return add(x,(Object)y);
+static public Number addP(Object x, long y){
+	return addP(x,(Object)y);
 }
 
-//static public Number minus(int x, Object y){
-//	return minus((Object)x,y);
-//}
+static public double add(double x, Object y){
+	return add(x,((Number)y).doubleValue());
+}
 
-//static public Number minus(Object x, int y){
-//	return minus(x,(Object)y);
-//}
+static public double add(Object x, double y){
+	return add(((Number)x).doubleValue(),y);
+}
 
-//static public Number minus(float x, Object y){
-//	return minus((Object)x,y);
-//}
+static public double add(double x, long y){
+	return x + y;
+}
 
-//static public Number minus(Object x, float y){
-//	return minus(x,(Object)y);
-//}
+static public double add(long x, double y){
+	return x + y;
+}
+
+static public double addP(double x, Object y){
+	return addP(x,((Number)y).doubleValue());
+}
+
+static public double addP(Object x, double y){
+	return addP(((Number)x).doubleValue(),y);
+}
+
+static public double addP(double x, long y){
+	return x + y;
+}
+
+static public double addP(long x, double y){
+	return x + y;
+}
 
 static public Number minus(long x, Object y){
 	return minus((Object)x,y);
@@ -3541,29 +3609,45 @@ static public Number minus(Object x, long y){
 	return minus(x,(Object)y);
 }
 
-static public Number minus(double x, Object y){
-	return minus((Object)x,y);
+static public Number minusP(long x, Object y){
+	return minusP((Object)x,y);
 }
 
-static public Number minus(Object x, double y){
-	return minus(x,(Object)y);
+static public Number minusP(Object x, long y){
+	return minusP(x,(Object)y);
 }
 
-//static public Number multiply(int x, Object y){
-//	return multiply((Object)x,y);
-//}
+static public double minus(double x, Object y){
+	return minus(x,((Number)y).doubleValue());
+}
 
-//static public Number multiply(Object x, int y){
-//	return multiply(x,(Object)y);
-//}
+static public double minus(Object x, double y){
+	return minus(((Number)x).doubleValue(),y);
+}
 
-//static public Number multiply(float x, Object y){
-//	return multiply((Object)x,y);
-//}
+static public double minus(double x, long y){
+	return x - y;
+}
 
-//static public Number multiply(Object x, float y){
-//	return multiply(x,(Object)y);
-//}
+static public double minus(long x, double y){
+	return x - y;
+}
+
+static public double minusP(double x, Object y){
+	return minus(x,((Number)y).doubleValue());
+}
+
+static public double minusP(Object x, double y){
+	return minus(((Number)x).doubleValue(),y);
+}
+
+static public double minusP(double x, long y){
+	return x - y;
+}
+
+static public double minusP(long x, double y){
+	return x - y;
+}
 
 static public Number multiply(long x, Object y){
 	return multiply((Object)x,y);
@@ -3573,29 +3657,45 @@ static public Number multiply(Object x, long y){
 	return multiply(x,(Object)y);
 }
 
-static public Number multiply(double x, Object y){
-	return multiply((Object)x,y);
+static public Number multiplyP(long x, Object y){
+	return multiplyP((Object)x,y);
 }
 
-static public Number multiply(Object x, double y){
-	return multiply(x,(Object)y);
+static public Number multiplyP(Object x, long y){
+	return multiplyP(x,(Object)y);
 }
 
-//static public Number divide(int x, Object y){
-//	return divide((Object)x,y);
-//}
+static public double multiply(double x, Object y){
+	return multiply(x,((Number)y).doubleValue());
+}
 
-//static public Number divide(Object x, int y){
-//	return divide(x,(Object)y);
-//}
+static public double multiply(Object x, double y){
+	return multiply(((Number)x).doubleValue(),y);
+}
 
-//static public Number divide(float x, Object y){
-//	return divide((Object)x,y);
-//}
+static public double multiply(double x, long y){
+	return x * y;
+}
 
-//static public Number divide(Object x, float y){
-//	return divide(x,(Object)y);
-//}
+static public double multiply(long x, double y){
+	return x * y;
+}
+
+static public double multiplyP(double x, Object y){
+	return multiplyP(x,((Number)y).doubleValue());
+}
+
+static public double multiplyP(Object x, double y){
+	return multiplyP(((Number)x).doubleValue(),y);
+}
+
+static public double multiplyP(double x, long y){
+	return x * y;
+}
+
+static public double multiplyP(long x, double y){
+	return x * y;
+}
 
 static public Number divide(long x, Object y){
 	return divide((Object)x,y);
@@ -3605,29 +3705,21 @@ static public Number divide(Object x, long y){
 	return divide(x,(Object)y);
 }
 
-static public Number divide(double x, Object y){
-	return divide((Object)x,y);
+static public double divide(double x, Object y){
+	return x / ((Number)y).doubleValue();
 }
 
-static public Number divide(Object x, double y){
-	return divide(x,(Object)y);
+static public double divide(Object x, double y){
+	return ((Number)x).doubleValue() / y;
 }
 
-//static public boolean lt(int x, Object y){
-//	return lt((Object)x,y);
-//}
+static public double divide(double x, long y){
+	return x / y;
+}
 
-//static public boolean lt(Object x, int y){
-//	return lt(x,(Object)y);
-//}
-
-//static public boolean lt(float x, Object y){
-//	return lt((Object)x,y);
-//}
-
-//static public boolean lt(Object x, float y){
-//	return lt(x,(Object)y);
-//}
+static public double divide(long x, double y){
+	return x / y;
+}
 
 static public boolean lt(long x, Object y){
 	return lt((Object)x,y);
@@ -3638,28 +3730,20 @@ static public boolean lt(Object x, long y){
 }
 
 static public boolean lt(double x, Object y){
-	return lt((Object)x,y);
+	return x < ((Number)y).doubleValue();
 }
 
 static public boolean lt(Object x, double y){
-	return lt(x,(Object)y);
+	return ((Number)x).doubleValue() < y;
 }
 
-//static public boolean lte(int x, Object y){
-//	return lte((Object)x,y);
-//}
+static public boolean lt(double x, long y){
+	return x < y;
+}
 
-//static public boolean lte(Object x, int y){
-//	return lte(x,(Object)y);
-//}
-
-//static public boolean lte(float x, Object y){
-//	return lte((Object)x,y);
-//}
-
-//static public boolean lte(Object x, float y){
-//	return lte(x,(Object)y);
-//}
+static public boolean lt(long x, double y){
+	return x < y;
+}
 
 static public boolean lte(long x, Object y){
 	return lte((Object)x,y);
@@ -3670,28 +3754,20 @@ static public boolean lte(Object x, long y){
 }
 
 static public boolean lte(double x, Object y){
-	return lte((Object)x,y);
+	return x <= ((Number)y).doubleValue();
 }
 
 static public boolean lte(Object x, double y){
-	return lte(x,(Object)y);
+	return ((Number)x).doubleValue() <= y;
 }
 
-//static public boolean gt(int x, Object y){
-//	return gt((Object)x,y);
-//}
+static public boolean lte(double x, long y){
+	return x <= y;
+}
 
-//static public boolean gt(Object x, int y){
-//	return gt(x,(Object)y);
-//}
-
-//static public boolean gt(float x, Object y){
-//	return gt((Object)x,y);
-//}
-
-//static public boolean gt(Object x, float y){
-//	return gt(x,(Object)y);
-//}
+static public boolean lte(long x, double y){
+	return x <= y;
+}
 
 static public boolean gt(long x, Object y){
 	return gt((Object)x,y);
@@ -3702,28 +3778,20 @@ static public boolean gt(Object x, long y){
 }
 
 static public boolean gt(double x, Object y){
-	return gt((Object)x,y);
+	return x > ((Number)y).doubleValue();
 }
 
 static public boolean gt(Object x, double y){
-	return gt(x,(Object)y);
+	return ((Number)x).doubleValue() > y;
 }
 
-//static public boolean gte(int x, Object y){
-//	return gte((Object)x,y);
-//}
+static public boolean gt(double x, long y){
+	return x > y;
+}
 
-//static public boolean gte(Object x, int y){
-//	return gte(x,(Object)y);
-//}
-
-//static public boolean gte(float x, Object y){
-//	return gte((Object)x,y);
-//}
-
-//static public boolean gte(Object x, float y){
-//	return gte(x,(Object)y);
-//}
+static public boolean gt(long x, double y){
+	return x > y;
+}
 
 static public boolean gte(long x, Object y){
 	return gte((Object)x,y);
@@ -3734,29 +3802,20 @@ static public boolean gte(Object x, long y){
 }
 
 static public boolean gte(double x, Object y){
-	return gte((Object)x,y);
+	return x >= ((Number)y).doubleValue();
 }
 
 static public boolean gte(Object x, double y){
-	return gte(x,(Object)y);
+	return ((Number)x).doubleValue() >= y;
 }
 
+static public boolean gte(double x, long y){
+	return x >= y;
+}
 
-//static public boolean equiv(int x, Object y){
-//	return equiv((Object)x,y);
-//}
-
-//static public boolean equiv(Object x, int y){
-//	return equiv(x,(Object)y);
-//}
-
-//static public boolean equiv(float x, Object y){
-//	return equiv((Object)x,y);
-//}
-
-//static public boolean equiv(Object x, float y){
-//	return equiv(x,(Object)y);
-//}
+static public boolean gte(long x, double y){
+	return x >= y;
+}
 
 static public boolean equiv(long x, Object y){
 	return equiv((Object)x,y);
@@ -3767,438 +3826,20 @@ static public boolean equiv(Object x, long y){
 }
 
 static public boolean equiv(double x, Object y){
-	return equiv((Object)x,y);
+	return x == ((Number)y).doubleValue();
 }
 
 static public boolean equiv(Object x, double y){
-	return equiv(x,(Object)y);
+	return ((Number)x).doubleValue() == y;
 }
 
-//*/
+static public boolean equiv(double x, long y){
+	return x == y;
+}
 
-//static public float add(int x, float y){
-//	return add((float)x,y);
-//}
+static public boolean equiv(long x, double y){
+	return x == y;
+}
 
-//static public float add(float x, int y){
-//	return add(x,(float)y);
-//}
-
-//static public double add(int x, double y){
-//	return add((double)x,y);
-//}
-
-//static public double add(double x, int y){
-//	return add(x,(double)y);
-//}
-
-//static public long add(int x, long y){
-//	return add((long)x,y);
-//}
-
-//static public long add(long x, int y){
-//	return add(x,(long)y);
-//}
-
-//static public float add(long x, float y){
-//	return add((float)x,y);
-//}
-
-//static public float add(float x, long y){
-//	return add(x,(float)y);
-//}
-
-//static public double add(long x, double y){
-//	return add((double)x,y);
-//}
-
-//static public double add(double x, long y){
-//	return add(x,(double)y);
-//}
-
-//static public double add(float x, double y){
-//	return add((double)x,y);
-//}
-
-//static public double add(double x, float y){
-//	return add(x,(double)y);
-//}
-
-//static public float minus(int x, float y){
-//	return minus((float)x,y);
-//}
-
-//static public float minus(float x, int y){
-//	return minus(x,(float)y);
-//}
-
-//static public double minus(int x, double y){
-//	return minus((double)x,y);
-//}
-
-//static public double minus(double x, int y){
-//	return minus(x,(double)y);
-//}
-
-//static public long minus(int x, long y){
-//	return minus((long)x,y);
-//}
-
-//static public long minus(long x, int y){
-//	return minus(x,(long)y);
-//}
-
-//static public float minus(long x, float y){
-//	return minus((float)x,y);
-//}
-
-//static public float minus(float x, long y){
-//	return minus(x,(float)y);
-//}
-
-//static public double minus(long x, double y){
-//	return minus((double)x,y);
-//}
-
-//static public double minus(double x, long y){
-//	return minus(x,(double)y);
-//}
-
-//static public double minus(float x, double y){
-//	return minus((double)x,y);
-//}
-
-//static public double minus(double x, float y){
-//	return minus(x,(double)y);
-//}
-
-//static public float multiply(int x, float y){
-//	return multiply((float)x,y);
-//}
-
-//static public float multiply(float x, int y){
-//	return multiply(x,(float)y);
-//}
-
-//static public double multiply(int x, double y){
-//	return multiply((double)x,y);
-//}
-
-//static public double multiply(double x, int y){
-//	return multiply(x,(double)y);
-//}
-
-//static public long multiply(int x, long y){
-//	return multiply((long)x,y);
-//}
-
-//static public long multiply(long x, int y){
-//	return multiply(x,(long)y);
-//}
-
-//static public float multiply(long x, float y){
-//	return multiply((float)x,y);
-//}
-
-//static public float multiply(float x, long y){
-//	return multiply(x,(float)y);
-//}
-
-//static public double multiply(long x, double y){
-//	return multiply((double)x,y);
-//}
-
-//static public double multiply(double x, long y){
-//	return multiply(x,(double)y);
-//}
-
-//static public double multiply(float x, double y){
-//	return multiply((double)x,y);
-//}
-
-//static public double multiply(double x, float y){
-//	return multiply(x,(double)y);
-//}
-
-//static public float divide(int x, float y){
-//	return divide((float)x,y);
-//}
-
-//static public float divide(float x, int y){
-//	return divide(x,(float)y);
-//}
-
-//static public double divide(int x, double y){
-//	return divide((double)x,y);
-//}
-
-//static public double divide(double x, int y){
-//	return divide(x,(double)y);
-//}
-
-//static public float divide(long x, float y){
-//	return divide((float)x,y);
-//}
-
-//static public float divide(float x, long y){
-//	return divide(x,(float)y);
-//}
-
-//static public double divide(long x, double y){
-//	return divide((double)x,y);
-//}
-
-//static public double divide(double x, long y){
-//	return divide(x,(double)y);
-//}
-
-//static public double divide(float x, double y){
-//	return divide((double)x,y);
-//}
-
-//static public double divide(double x, float y){
-//	return divide(x,(double)y);
-//}
-
-//static public boolean lt(int x, float y){
-//	return lt((float)x,y);
-//}
-
-//static public boolean lt(float x, int y){
-//	return lt(x,(float)y);
-//}
-
-//static public boolean lt(int x, double y){
-//	return lt((double)x,y);
-//}
-
-//static public boolean lt(double x, int y){
-//	return lt(x,(double)y);
-//}
-
-//static public boolean lt(int x, long y){
-//	return lt((long)x,y);
-//}
-
-//static public boolean lt(long x, int y){
-//	return lt(x,(long)y);
-//}
-
-//static public boolean lt(long x, float y){
-//	return lt((float)x,y);
-//}
-
-//static public boolean lt(float x, long y){
-//	return lt(x,(float)y);
-//}
-
-//static public boolean lt(long x, double y){
-//	return lt((double)x,y);
-//}
-
-//static public boolean lt(double x, long y){
-//	return lt(x,(double)y);
-//}
-
-//static public boolean lt(float x, double y){
-//	return lt((double)x,y);
-//}
-
-//static public boolean lt(double x, float y){
-//	return lt(x,(double)y);
-//}
-
-
-//static public boolean lte(int x, float y){
-//	return lte((float)x,y);
-//}
-
-//static public boolean lte(float x, int y){
-//	return lte(x,(float)y);
-//}
-
-//static public boolean lte(int x, double y){
-//	return lte((double)x,y);
-//}
-
-//static public boolean lte(double x, int y){
-//	return lte(x,(double)y);
-//}
-
-//static public boolean lte(int x, long y){
-//	return lte((long)x,y);
-//}
-
-//static public boolean lte(long x, int y){
-//	return lte(x,(long)y);
-//}
-
-//static public boolean lte(long x, float y){
-//	return lte((float)x,y);
-//}
-
-//static public boolean lte(float x, long y){
-//	return lte(x,(float)y);
-//}
-
-//static public boolean lte(long x, double y){
-//	return lte((double)x,y);
-//}
-
-//static public boolean lte(double x, long y){
-//	return lte(x,(double)y);
-//}
-
-//static public boolean lte(float x, double y){
-//	return lte((double)x,y);
-//}
-
-//static public boolean lte(double x, float y){
-//	return lte(x,(double)y);
-//}
-
-//static public boolean gt(int x, float y){
-//	return gt((float)x,y);
-//}
-
-//static public boolean gt(float x, int y){
-//	return gt(x,(float)y);
-//}
-
-//static public boolean gt(int x, double y){
-//	return gt((double)x,y);
-//}
-
-//static public boolean gt(double x, int y){
-//	return gt(x,(double)y);
-//}
-
-//static public boolean gt(int x, long y){
-//	return gt((long)x,y);
-//}
-
-//static public boolean gt(long x, int y){
-//	return gt(x,(long)y);
-//}
-
-//static public boolean gt(long x, float y){
-//	return gt((float)x,y);
-//}
-
-//static public boolean gt(float x, long y){
-//	return gt(x,(float)y);
-//}
-
-//static public boolean gt(long x, double y){
-//	return gt((double)x,y);
-//}
-
-//static public boolean gt(double x, long y){
-//	return gt(x,(double)y);
-//}
-
-//static public boolean gt(float x, double y){
-//	return gt((double)x,y);
-//}
-
-//static public boolean gt(double x, float y){
-//	return gt(x,(double)y);
-//}
-
-//static public boolean gte(int x, float y){
-//	return gte((float)x,y);
-//}
-
-//static public boolean gte(float x, int y){
-//	return gte(x,(float)y);
-//}
-
-//static public boolean gte(int x, double y){
-//	return gte((double)x,y);
-//}
-
-//static public boolean gte(double x, int y){
-//	return gte(x,(double)y);
-//}
-
-//static public boolean gte(int x, long y){
-//	return gte((long)x,y);
-//}
-
-//static public boolean gte(long x, int y){
-//	return gte(x,(long)y);
-//}
-
-//static public boolean gte(long x, float y){
-//	return gte((float)x,y);
-//}
-
-//static public boolean gte(float x, long y){
-//	return gte(x,(float)y);
-//}
-
-//static public boolean gte(long x, double y){
-//	return gte((double)x,y);
-//}
-
-//static public boolean gte(double x, long y){
-//	return gte(x,(double)y);
-//}
-
-//static public boolean gte(float x, double y){
-//	return gte((double)x,y);
-//}
-
-//static public boolean gte(double x, float y){
-//	return gte(x,(double)y);
-//}
-
-//static public boolean equiv(int x, float y){
-//	return equiv((float)x,y);
-//}
-
-//static public boolean equiv(float x, int y){
-//	return equiv(x,(float)y);
-//}
-
-//static public boolean equiv(int x, double y){
-//	return equiv((double)x,y);
-//}
-
-//static public boolean equiv(double x, int y){
-//	return equiv(x,(double)y);
-//}
-
-//static public boolean equiv(int x, long y){
-//	return equiv((long)x,y);
-//}
-
-//static public boolean equiv(long x, int y){
-//	return equiv(x,(long)y);
-//}
-
-//static public boolean equiv(long x, float y){
-//	return equiv((float)x,y);
-//}
-
-//static public boolean equiv(float x, long y){
-//	return equiv(x,(float)y);
-//}
-
-//static public boolean equiv(long x, double y){
-//	return equiv((double)x,y);
-//}
-
-//static public boolean equiv(double x, long y){
-//	return equiv(x,(double)y);
-//}
-
-//static public boolean equiv(float x, double y){
-//	return equiv((double)x,y);
-//}
-
-//static public boolean equiv(double x, float y){
-//	return equiv(x,(double)y);
-//}
 
 }
