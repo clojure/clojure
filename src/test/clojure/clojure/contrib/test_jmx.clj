@@ -175,4 +175,4 @@
        "int" 10
        "boolean" false
        "java.lang.String" "foo"
-       "long" (Long/valueOf 10)))
+       "long" (Long/valueOf (long 10))))
