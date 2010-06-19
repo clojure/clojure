@@ -830,15 +830,16 @@
        (< y (first more)))
      false)))
 
-(defn inc
-  "Returns a number one greater than num."
+(defn inc'
+  "Returns a number one greater than num. Supports arbitrary precision.
+  See also: inc"
   {:inline (fn [x] `(. clojure.lang.Numbers (incP ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (incP x)))
 
-(defn inc'
+(defn inc
   "Returns a number one greater than num. Does not auto-promote
-  longs, will throw on overflow"
+  longs, will throw on overflow. See also: inc'"
   {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))
    :added "1.2"}
   [x] (. clojure.lang.Numbers (inc x)))
@@ -869,8 +870,9 @@
     (reduce1 conj () coll))
 
 ;;math stuff
-(defn +
-  "Returns the sum of nums. (+) returns 0."
+(defn +'
+  "Returns the sum of nums. (+) returns 0. Supports arbitrary precision.
+  See also: +"
   {:inline (fn [x y] `(. clojure.lang.Numbers (addP ~x ~y)))
    :inline-arities #{2}
    :added "1.0"}
@@ -878,11 +880,11 @@
   ([x] (cast Number x))
   ([x y] (. clojure.lang.Numbers (addP x y)))
   ([x y & more]
-   (reduce1 + (+ x y) more)))
+   (reduce1 +' (+' x y) more)))
 
-(defn +'
+(defn +
   "Returns the sum of nums. (+) returns 0. Does not auto-promote
-  longs, will throw on overflow."
+  longs, will throw on overflow. See also: +'"
   {:inline (fn [x y] `(. clojure.lang.Numbers (add ~x ~y)))
    :inline-arities #{2}
    :added "1.2"}
@@ -890,10 +892,11 @@
   ([x] (cast Number x))
   ([x y] (. clojure.lang.Numbers (add x y)))
   ([x y & more]
-     (reduce1 +' (+' x y) more)))
+     (reduce1 + (+ x y) more)))
 
-(defn *
-  "Returns the product of nums. (*) returns 1."
+(defn *'
+  "Returns the product of nums. (*) returns 1. Supports arbitrary precision.
+  See also: *"
   {:inline (fn [x y] `(. clojure.lang.Numbers (multiplyP ~x ~y)))
    :inline-arities #{2}
    :added "1.0"}
@@ -901,11 +904,11 @@
   ([x] (cast Number x))
   ([x y] (. clojure.lang.Numbers (multiplyP x y)))
   ([x y & more]
-   (reduce1 * (* x y) more)))
+   (reduce1 *' (*' x y) more)))
 
-(defn *'
+(defn *
   "Returns the product of nums. (*) returns 1. Does not auto-promote
-  longs, will throw on overflow."
+  longs, will throw on overflow. See also: *'"
   {:inline (fn [x y] `(. clojure.lang.Numbers (multiply ~x ~y)))
    :inline-arities #{2}
    :added "1.2"}
@@ -913,7 +916,7 @@
   ([x] (cast Number x))
   ([x y] (. clojure.lang.Numbers (multiply x y)))
   ([x y & more]
-     (reduce1 *' (*' x y) more)))
+     (reduce1 * (* x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
@@ -926,28 +929,29 @@
   ([x y & more]
    (reduce1 / (/ x y) more)))
 
-(defn -
+(defn -'
   "If no ys are supplied, returns the negation of x, else subtracts
-  the ys from x and returns the result."
+  the ys from x and returns the result. Supports arbitrary precision.
+  See also: -"
   {:inline (fn [& args] `(. clojure.lang.Numbers (minusP ~@args)))
    :inline-arities #{1 2}
    :added "1.0"}
   ([x] (. clojure.lang.Numbers (minusP x)))
   ([x y] (. clojure.lang.Numbers (minusP x y)))
   ([x y & more]
-   (reduce1 - (- x y) more)))
+   (reduce1 -' (-' x y) more)))
 
-(defn -'
+(defn -
   "If no ys are supplied, returns the negation of x, else subtracts
   the ys from x and returns the result. Does not auto-promote
-  longs, will throw on overflow."
+  longs, will throw on overflow. See also: -'"
   {:inline (fn [& args] `(. clojure.lang.Numbers (minus ~@args)))
    :inline-arities #{1 2}
    :added "1.2"}
   ([x] (. clojure.lang.Numbers (minus x)))
   ([x y] (. clojure.lang.Numbers (minus x y)))
   ([x y & more]
-     (reduce1 -' (-' x y) more)))
+     (reduce1 - (- x y) more)))
 
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
@@ -1027,15 +1031,16 @@
   ([x y & more]
    (reduce1 min (min x y) more)))
 
-(defn dec
-  "Returns a number one less than num."
+(defn dec'
+  "Returns a number one less than num. Supports arbitrary precision.
+  See also: dec"
   {:inline (fn [x] `(. clojure.lang.Numbers (decP ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (decP x)))
 
-(defn dec'
+(defn dec
   "Returns a number one less than num. Does not auto-promote
-  longs, will throw on overflow."
+  longs, will throw on overflow. See also: dec'"
   {:inline (fn [x] `(. clojure.lang.Numbers (dec ~x)))
    :added "1.2"}
   [x] (. clojure.lang.Numbers (dec x)))
