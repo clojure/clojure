@@ -5488,10 +5488,15 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 public static class RecurExpr implements Expr{
 	public final IPersistentVector args;
 	public final IPersistentVector loopLocals;
+	final int line;
+	final String source;
 
-	public RecurExpr(IPersistentVector loopLocals, IPersistentVector args){
+
+	public RecurExpr(IPersistentVector loopLocals, IPersistentVector args, int line, String source){
 		this.loopLocals = loopLocals;
 		this.args = args;
+		this.line = line;
+		this.source = source;
 	}
 
 	public Object eval() throws Exception{
@@ -5536,11 +5541,12 @@ public static class RecurExpr implements Expr{
 						}
 					else
 						{
-						if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+						if(true)//RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 							//throw new IllegalArgumentException
 							RT.errPrintWriter().println
-								("recur arg for primitive local: " +
-						                                   lb.name + " must be matching primitive, had: " +
+								(source + ":" + line +
+								 " recur arg for primitive local: " +
+						                                   lb.name + " is not matching primitive, had: " +
 															(arg.hasJavaClass() ? arg.getJavaClass().getName():"Object") +
 															", needed: " +
 															primc.getName());
@@ -5587,6 +5593,9 @@ public static class RecurExpr implements Expr{
 
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) throws Exception{
+			int line = (Integer) LINE.deref();
+			String source = (String) SOURCE.deref();
+
 			ISeq form = (ISeq) frm;
 			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.deref();
 			if(context != C.RETURN || loopLocals == null)
@@ -5602,7 +5611,7 @@ public static class RecurExpr implements Expr{
 				throw new IllegalArgumentException(
 						String.format("Mismatched argument count to recur, expected: %d args, got: %d",
 						              loopLocals.count(), args.count()));
-			return new RecurExpr(loopLocals, args);
+			return new RecurExpr(loopLocals, args, line, source);
 		}
 	}
 }
