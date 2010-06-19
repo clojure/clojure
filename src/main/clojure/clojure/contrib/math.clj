@@ -104,7 +104,7 @@ Returns an exact number if the base is an exact number and the power is an integ
   expt (fn [x y] [(class x) (class y)]))
 
 (defn- expt-int [base pow]
-  (loop [n pow, y 1, z base]
+  (loop [n pow, y (num 1), z base]
     (let [t (bit-and n 1), n (bit-shift-right n 1)]
       (cond
        (zero? t) (recur n y (* z z))

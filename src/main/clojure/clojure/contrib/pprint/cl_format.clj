@@ -834,7 +834,7 @@ Note this should only be used for the last one in the sequence"
         args (init-navigator arg-list)]
     (loop [count 0
            args args
-           last-pos -1]
+           last-pos (num -1)]
       (if (and (not max-count) (= (:pos args) last-pos) (> count 1))
         ;; TODO get the offset in here and call format exception
         (throw (RuntimeException. "%{ construct not consuming any arguments: Infinite loop!")))
@@ -880,7 +880,7 @@ Note this should only be used for the last one in the sequence"
                              [param-clause navigator])]
     (loop [count 0
            navigator navigator
-           last-pos -1]
+           last-pos (num -1)]
       (if (and (not max-count) (= (:pos navigator) last-pos) (> count 1))
         ;; TODO get the offset in here and call format exception
         (throw (RuntimeException. "%@{ construct not consuming any arguments: Infinite loop!")))
