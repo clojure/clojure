@@ -5541,17 +5541,17 @@ public static class RecurExpr implements Expr{
 						}
 					else
 						{
-						if(true)//RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-							//throw new IllegalArgumentException
-							RT.errPrintWriter().println
-								(source + ":" + line +
+//						if(true)//RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+							throw new IllegalArgumentException
+//							RT.errPrintWriter().println
+								(//source + ":" + line +
 								 " recur arg for primitive local: " +
 						                                   lb.name + " is not matching primitive, had: " +
 															(arg.hasJavaClass() ? arg.getJavaClass().getName():"Object") +
 															", needed: " +
 															primc.getName());
-						arg.emit(C.EXPRESSION, objx, gen);
-						HostExpr.emitUnboxArg(objx,gen,primc);
+//						arg.emit(C.EXPRESSION, objx, gen);
+//						HostExpr.emitUnboxArg(objx,gen,primc);
 						}
 					}
 				catch(Exception e)
