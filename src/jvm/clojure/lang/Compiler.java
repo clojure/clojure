@@ -4968,6 +4968,7 @@ public static class LocalBinding{
 	public final boolean isArg;
     public final PathNode clearPathRoot;
 	public boolean canBeCleared = true;
+	public boolean recurMistmatch = false;
 
     public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg,PathNode clearPathRoot)
                 throws Exception{
@@ -5340,65 +5341,91 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			   || (context == C.EXPRESSION && isLoop))
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 
-			IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
-			                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref());
-			if(isLoop)
-				dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
+			ObjMethod method = (ObjMethod) METHOD.deref();
+			IPersistentMap backupMethodLocals = method.locals;
+			IPersistentMap backupMethodIndexLocals = method.indexlocals;
+			PersistentVector recurMismatches = null;
 
-			try
-				{
-				Var.pushThreadBindings(dynamicBindings);
+			//we might repeat once if a loop with a recurMistmatch, return breaks
+			while(true){
+				IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
+														NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref());
+				method.locals = backupMethodLocals;
+				method.indexlocals = backupMethodIndexLocals;
 
-				PersistentVector bindingInits = PersistentVector.EMPTY;
-				PersistentVector loopLocals = PersistentVector.EMPTY;
-				for(int i = 0; i < bindings.count(); i += 2)
-					{
-					if(!(bindings.nth(i) instanceof Symbol))
-						throw new IllegalArgumentException(
-								"Bad binding form, expected symbol, got: " + bindings.nth(i));
-					Symbol sym = (Symbol) bindings.nth(i);
-					if(sym.getNamespace() != null)
-						throw new Exception("Can't let qualified name: " + sym);
-					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
-					if(isLoop)
-						{
-						if(maybePrimitiveType(init) == int.class)
-							init = new StaticMethodExpr("", 0, null, RT.class, "longCast", RT.vector(init));
-						else if(maybePrimitiveType(init) == float.class)
-							init = new StaticMethodExpr("", 0, null, RT.class, "doubleCast", RT.vector(init));
-						}
-					//sequential enhancement of env (like Lisp let*)
-					LocalBinding lb = registerLocal(sym, tagOf(sym), init,false);
-					BindingInit bi = new BindingInit(lb, init);
-					bindingInits = bindingInits.cons(bi);
-
-					if(isLoop)
-						loopLocals = loopLocals.cons(lb);
-					}
 				if(isLoop)
-					LOOP_LOCALS.set(loopLocals);
-                Expr bodyExpr;
-                try {
-                    if(isLoop)
-                        {
-                        PathNode root = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
-                        Var.pushThreadBindings(
-                            RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,root),
-                                   CLEAR_ROOT, new PathNode(PATHTYPE.PATH,root)));
-                        }
-                    bodyExpr = (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body);
-                    }
-                finally{
-                    if(isLoop)
-                       Var.popThreadBindings();
-                    }
-				return new LetExpr(bindingInits, bodyExpr,
-				                   isLoop);
-				}
-			finally
-				{
-				Var.popThreadBindings();
-				}
+					dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
+
+				try
+					{
+					Var.pushThreadBindings(dynamicBindings);
+
+					PersistentVector bindingInits = PersistentVector.EMPTY;
+					PersistentVector loopLocals = PersistentVector.EMPTY;
+					for(int i = 0; i < bindings.count(); i += 2)
+						{
+						if(!(bindings.nth(i) instanceof Symbol))
+							throw new IllegalArgumentException(
+									"Bad binding form, expected symbol, got: " + bindings.nth(i));
+						Symbol sym = (Symbol) bindings.nth(i);
+						if(sym.getNamespace() != null)
+							throw new Exception("Can't let qualified name: " + sym);
+						Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
+						if(isLoop)
+							{
+							if(recurMismatches != null && ((LocalBinding)recurMismatches.nth(i/2)).recurMistmatch)
+								{
+								init = new StaticMethodExpr("", 0, null, RT.class, "box", RT.vector(init));
+								if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+									RT.errPrintWriter().println("Auto-boxing loop arg: " + sym);
+								}
+							else if(maybePrimitiveType(init) == int.class)
+								init = new StaticMethodExpr("", 0, null, RT.class, "longCast", RT.vector(init));
+							else if(maybePrimitiveType(init) == float.class)
+								init = new StaticMethodExpr("", 0, null, RT.class, "doubleCast", RT.vector(init));
+							}
+						//sequential enhancement of env (like Lisp let*)
+						LocalBinding lb = registerLocal(sym, tagOf(sym), init,false);
+						BindingInit bi = new BindingInit(lb, init);
+						bindingInits = bindingInits.cons(bi);
+
+						if(isLoop)
+							loopLocals = loopLocals.cons(lb);
+						}
+					if(isLoop)
+						LOOP_LOCALS.set(loopLocals);
+					Expr bodyExpr;
+					try {
+						if(isLoop)
+							{
+							PathNode root = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
+							Var.pushThreadBindings(
+								RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,root),
+									   CLEAR_ROOT, new PathNode(PATHTYPE.PATH,root)));
+							}
+						bodyExpr = (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body);
+						}
+					finally{
+						if(isLoop)
+							{
+						    Var.popThreadBindings();
+							recurMismatches = null;
+							for(int i = 0;i< loopLocals.count();i++)
+								{
+								LocalBinding lb = (LocalBinding) loopLocals.nth(i);
+								if(lb.recurMistmatch)
+									recurMismatches = loopLocals;
+								}
+							}
+						}
+					if(recurMismatches == null)
+						return new LetExpr(bindingInits, bodyExpr, isLoop);
+					}
+				finally
+					{
+					Var.popThreadBindings();
+					}
+			}
 		}
 	}
 
@@ -5611,6 +5638,43 @@ public static class RecurExpr implements Expr{
 				throw new IllegalArgumentException(
 						String.format("Mismatched argument count to recur, expected: %d args, got: %d",
 						              loopLocals.count(), args.count()));
+			for(int i = 0;i< loopLocals.count();i++)
+				{
+				LocalBinding lb = (LocalBinding) loopLocals.nth(i);
+				Class primc = lb.getPrimitiveType();
+				if(primc != null)
+					{
+					boolean mismatch = false;
+					final Class pc = maybePrimitiveType((Expr) args.nth(i));
+					if(primc == long.class)
+						{
+						if(!(pc == long.class
+							|| pc == int.class
+							|| pc == short.class
+							|| pc == char.class
+							|| pc == byte.class))
+							mismatch = true;
+						}
+					else if(primc == double.class)
+						{
+						if(!(pc == double.class
+							|| pc == float.class))
+							mismatch = true;
+						}
+					if(mismatch)
+						{
+						lb.recurMistmatch = true;
+						if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+							RT.errPrintWriter().println
+								(source + ":" + line +
+								 " recur arg for primitive local: " +
+						                                   lb.name + " is not matching primitive, had: " +
+															(pc != null ? pc.getName():"Object") +
+															", needed: " +
+															primc.getName());
+						}
+					}
+				}
 			return new RecurExpr(loopLocals, args, line, source);
 		}
 	}
