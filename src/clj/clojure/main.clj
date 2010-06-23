@@ -196,6 +196,7 @@
         (set! *e e)))
      (use '[clojure.repl :only (source apropos dir)])
      (use '[clojure.java.javadoc :only (javadoc)])
+     (use '[clojure.pprint :only (pp pprint)])
      (prompt)
      (flush)
      (loop []
