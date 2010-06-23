@@ -2878,17 +2878,15 @@ static class InvokeExpr implements Expr{
 					this.onMethod = (java.lang.reflect.Method) methods.get(0);
 					}
 				}
-			else if(pvar == null && VAR_CALLSITES.isBound()
-			        && fvar.ns.name.name.startsWith("clojure")
-					&& !RT.booleanCast(RT.get(RT.meta(fvar),dynamicKey))
-//			        && !fvar.sym.name.equals("report")
-//			        && fvar.isBound() && fvar.get() instanceof IFn
-					)
-				{
-				//todo - more specific criteria for binding these
-				this.isDirect = true;
-				this.siteIndex = registerVarCallsite(((VarExpr) fexpr).var);
-				}
+//			else if(pvar == null && VAR_CALLSITES.isBound()
+//			        && fvar.ns.name.name.startsWith("clojure")
+//					&& !RT.booleanCast(RT.get(RT.meta(fvar),dynamicKey))
+//					)
+//				{
+//				//todo - more specific criteria for binding these
+//				this.isDirect = true;
+//				this.siteIndex = registerVarCallsite(((VarExpr) fexpr).var);
+//				}
 			}
 		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
 	}

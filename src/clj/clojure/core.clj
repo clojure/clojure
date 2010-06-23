@@ -5321,7 +5321,7 @@
 (load "gvec")
 
 ;; redefine reduce with internal-reduce
-(defn reduce
+#_(defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then
   applying f to that result and the 3rd item, etc. If coll contains no
