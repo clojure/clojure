@@ -232,6 +232,11 @@ static public boolean equiv(Number x, Number y){
 	return ops(x).combine(ops(y)).equiv(x, y);
 }
 
+static public boolean equal(Number x, Number y){
+	return category(x) == category(y)
+			&& ops(x).combine(ops(y)).equiv(x, y);
+}
+
 static public boolean lt(Object x, Object y){
 	return ops(x).combine(ops(y)).lt((Number)x, (Number)y);
 }
@@ -1108,6 +1113,8 @@ static final BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
 static final LongBitOps LONG_BITOPS = new LongBitOps();
 static final BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
 
+static public enum Category {INTEGER, FLOATING, DECIMAL, RATIO};
+
 static Ops ops(Object x){
 	Class xc = x.getClass();
 
@@ -1127,6 +1134,27 @@ static Ops ops(Object x){
 		return BIGDECIMAL_OPS;
 	else
 		return LONG_OPS;
+}
+
+static Category category(Object x){
+	Class xc = x.getClass();
+
+	if(xc == Integer.class)
+		return Category.INTEGER;
+	else if(xc == Double.class)
+		return Category.FLOATING;
+	else if(xc == Long.class)
+		return Category.INTEGER;
+	else if(xc == Float.class)
+		return Category.FLOATING;
+	else if(xc == BigInteger.class)
+		return Category.INTEGER;
+	else if(xc == Ratio.class)
+		return Category.RATIO;
+	else if(xc == BigDecimal.class)
+		return Category.DECIMAL;
+	else
+		return Category.INTEGER;
 }
 
 static BitOps bitOps(Object x){

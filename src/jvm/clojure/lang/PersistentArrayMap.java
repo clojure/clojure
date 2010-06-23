@@ -198,9 +198,7 @@ private int indexOf(Object key){
 }
 
 static boolean equalKey(Object k1, Object k2){
-	if(k1 == null)
-		return k2 == null;
-	return k1.equals(k2);
+	return Util.equiv(k1, k2);
 }
 
 public Iterator iterator(){

@@ -503,7 +503,7 @@ final static class BitmapIndexedNode implements INode{
 					return this;
 				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx+1, n));
 			} 
-			if(Util.equals(key, keyOrNull)) {
+			if(Util.equiv(key, keyOrNull)) {
 				if(val == valOrNode)
 					return this;
 				return new BitmapIndexedNode(null, bitmap, cloneAndSet(array, 2*idx+1, val));
@@ -558,7 +558,7 @@ final static class BitmapIndexedNode implements INode{
 				return null;
 			return new BitmapIndexedNode(null, bitmap ^ bit, removePair(array, idx));
 		}
-		if(Util.equals(key, keyOrNull))
+		if(Util.equiv(key, keyOrNull))
 			// TODO: collapse
 			return new BitmapIndexedNode(null, bitmap ^ bit, removePair(array, idx));
 		return this;
@@ -573,7 +573,7 @@ final static class BitmapIndexedNode implements INode{
 		Object valOrNode = array[2*idx+1];
 		if(keyOrNull == null)
 			return ((INode) valOrNode).find(shift + 5, hash, key);
-		if(Util.equals(key, keyOrNull))
+		if(Util.equiv(key, keyOrNull))
 			return new MapEntry(keyOrNull, valOrNode);
 		return null;
 	}
@@ -587,7 +587,7 @@ final static class BitmapIndexedNode implements INode{
 		Object valOrNode = array[2*idx+1];
 		if(keyOrNull == null)
 			return ((INode) valOrNode).find(shift + 5, hash, key, notFound);
-		if(Util.equals(key, keyOrNull))
+		if(Util.equiv(key, keyOrNull))
 			return valOrNode;
 		return notFound;
 	}
@@ -641,7 +641,7 @@ final static class BitmapIndexedNode implements INode{
 					return this;
 				return editAndSet(edit, 2*idx+1, n);
 			} 
-			if(Util.equals(key, keyOrNull)) {
+			if(Util.equiv(key, keyOrNull)) {
 				if(val == valOrNode)
 					return this;
 				return editAndSet(edit, 2*idx+1, val);
@@ -707,7 +707,7 @@ final static class BitmapIndexedNode implements INode{
 			removedLeaf.val = removedLeaf;
 			return editAndRemovePair(edit, bit, idx); 
 		}
-		if(Util.equals(key, keyOrNull)) {
+		if(Util.equiv(key, keyOrNull)) {
 			removedLeaf.val = removedLeaf;
 			// TODO: collapse
 			return editAndRemovePair(edit, bit, idx); 			
@@ -763,7 +763,7 @@ final static class HashCollisionNode implements INode{
 		int idx = findIndex(key);
 		if(idx < 0)
 			return null;
-		if(Util.equals(key, array[idx]))
+		if(Util.equiv(key, array[idx]))
 			return new MapEntry(array[idx], array[idx+1]);
 		return null;
 	}
@@ -772,7 +772,7 @@ final static class HashCollisionNode implements INode{
 		int idx = findIndex(key);
 		if(idx < 0)
 			return notFound;
-		if(Util.equals(key, array[idx]))
+		if(Util.equiv(key, array[idx]))
 			return array[idx+1];
 		return notFound;
 	}
@@ -784,7 +784,7 @@ final static class HashCollisionNode implements INode{
 	public int findIndex(Object key){
 		for(int i = 0; i < 2*count; i+=2)
 			{
-			if(Util.equals(key, array[i]))
+			if(Util.equiv(key, array[i]))
 				return i;
 			}
 		return -1;
