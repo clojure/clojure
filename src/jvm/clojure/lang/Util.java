@@ -59,6 +59,30 @@ static public boolean equals(double x, Object y){
 static public boolean equals(Object x, double y){
 	return equals(x,(Double)y);
 }
+
+static public boolean equiv(long x, long y){
+	return x == y;
+}
+
+static public boolean equiv(double x, double y){
+	return x == y;
+}
+
+static public boolean equiv(long x, Object y){
+	return equiv(Numbers.num(x),y);
+}
+
+static public boolean equiv(Object x, long y){
+	return equiv(x,Numbers.num(y));
+}
+
+static public boolean equiv(double x, Object y){
+	return equiv((Double)x,y);
+}
+
+static public boolean equiv(Object x, double y){
+	return equiv(x,(Double)y);
+}
 //*/
 
 static public boolean identical(Object k1, Object k2){

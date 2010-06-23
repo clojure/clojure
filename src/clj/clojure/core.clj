@@ -698,7 +698,7 @@
   ([x y] (clojure.lang.Util/identical x y)))
 
 ;equiv-based
-#_(defn =
+(defn =
   "Equality. Returns true if x equals y, false if not. Same as
   Java x.equals(y) except it also works for nil, and compares
   numbers and collections in a type-independent manner.  Clojure's immutable data
@@ -717,7 +717,7 @@
      false)))
 
 ;equals-based
-(defn =
+#_(defn =
   "Equality. Returns true if x equals y, false if not. Same as Java
   x.equals(y) except it also works for nil. Boxed numbers must have
   same type. Clojure's immutable data structures define equals() (and
