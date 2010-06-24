@@ -61,12 +61,12 @@
              (are [a b] (= a b)
                   false (jmx/raw-read mem :Verbose))
              (are [type attr] (instance? type attr)
-                  Integer (jmx/raw-read mem :ObjectPendingFinalizationCount)))))
+                  Number (jmx/raw-read mem :ObjectPendingFinalizationCount)))))
 
 (deftest reading-attributes
   (testing "simple scalar attributes"
            (are [type attr] (instance? type attr)
-                Integer (jmx/read "java.lang:type=Memory" :ObjectPendingFinalizationCount)))
+                Number (jmx/read "java.lang:type=Memory" :ObjectPendingFinalizationCount)))
   (testing "composite attributes"
            (are [ks attr] (=set ks (keys attr))
                 [:used :max :init :committed] (jmx/read "java.lang:type=Memory" :HeapMemoryUsage)))
@@ -172,7 +172,7 @@
 
 (deftest test-guess-attribute-typename
   (are [x y] (= x (jmx/guess-attribute-typename y))
-       "int" 10
+;       "long" 10
        "boolean" false
        "java.lang.String" "foo"
        "long" (Long/valueOf (long 10))))

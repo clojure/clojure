@@ -75,4 +75,6 @@
                  (.write #^Writer (get-field this :base) s))
 
                Integer
+               (write-char this x)
+               Long
                (write-char this x))))))))
