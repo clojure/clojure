@@ -399,6 +399,8 @@
                    (add-to-buffer this (make-buffer-blob s white-space oldpos newpos))))))
 
             Integer
+            (p-write-char this x)
+            Long
             (p-write-char this x))))
 
       (flush []

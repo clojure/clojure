@@ -406,7 +406,8 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 		return true;
 	if(paramType == int.class)
 		return argType == Integer.class
-		       || argType == long.class;// || argType == FixNum.class;
+		       || argType == long.class
+				|| argType == Long.class;// || argType == FixNum.class;
 	else if(paramType == float.class)
 		return argType == Float.class
 				|| argType == double.class;
@@ -450,12 +451,9 @@ public static Object prepRet(Object x){
 //		return ((Boolean) x).booleanValue() ? RT.T : null;
 	if(x instanceof Boolean)
 		return ((Boolean) x)?Boolean.TRUE:Boolean.FALSE;
-	else if(x instanceof Long)
+	else if(x instanceof Integer)
 		{
-		long val = ((Long)x).longValue();
-		if(val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE)
-			return Integer.valueOf((int) val);
-		return x;
+		return ((Integer)x).longValue();
 		}
 	else if(x instanceof Float)
 			return Double.valueOf(((Float) x).doubleValue());

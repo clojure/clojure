@@ -2953,43 +2953,37 @@
 
 (defn long
   "Coerce to long"
-  {:tag Long
-   :inline (fn  [x] `(. clojure.lang.RT (longCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (longCast ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/longCast x))
 
 (defn float
   "Coerce to float"
-  {:tag Float
-   :inline (fn  [x] `(. clojure.lang.RT (floatCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (floatCast ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/floatCast x))
 
 (defn double
   "Coerce to double"
-  {:tag Double
-   :inline (fn  [x] `(. clojure.lang.RT (doubleCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (doubleCast ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/doubleCast x))
 
 (defn short
   "Coerce to short"
-  {:tag Short
-   :inline (fn  [x] `(. clojure.lang.RT (shortCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (shortCast ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/shortCast x))
 
 (defn byte
   "Coerce to byte"
-  {:tag Byte
-   :inline (fn  [x] `(. clojure.lang.RT (byteCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (byteCast ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/byteCast x))
 
 (defn char
   "Coerce to char"
-  {:tag Character
-   :inline (fn  [x] `(. clojure.lang.RT (charCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (charCast ~x)))
    :added "1.1"}
   [x] (. clojure.lang.RT (charCast x)))
 

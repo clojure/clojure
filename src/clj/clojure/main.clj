@@ -72,7 +72,7 @@
      (= c (int \newline)) :line-start
      (= c -1) :stream-end
      (= c (int \;)) (do (.readLine s) :line-start)
-     (or (Character/isWhitespace c) (= c (int \,))) (recur (.read s))
+     (or (Character/isWhitespace (char c)) (= c (int \,))) (recur (.read s))
      :else (do (.unread s c) :body))))
 
 (defn repl-read

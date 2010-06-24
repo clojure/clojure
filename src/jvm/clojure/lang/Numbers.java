@@ -319,24 +319,21 @@ static public Number rationalize(Number x){
 	return x;
 }
 
-static  Number box(int val){
-		return Integer.valueOf(val);
-}
+//static  Number box(int val){
+//		return Integer.valueOf(val);
+//}
 
-static  Number box(long val){
-	if(val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE)
-		return Integer.valueOf((int) val);
-	else
-		return Long.valueOf(val);
-}
-
-static  Double box(double val){
-		return Double.valueOf(val);
-}
-
-static  Double box(float val){
-		return Double.valueOf((double) val);
-}
+//static  Number box(long val){
+//		return Long.valueOf(val);
+//}
+//
+//static  Double box(double val){
+//		return Double.valueOf(val);
+//}
+//
+//static  Double box(float val){
+//		return Double.valueOf((double) val);
+//}
 
 static public Number reduceBigInteger(BigInteger val){
 	int bitLength = val.bitLength();
@@ -344,7 +341,7 @@ static public Number reduceBigInteger(BigInteger val){
 //		return val.intValue();
 //	else
 	if(bitLength < 64)
-		return box(val.longValue());
+		return num(val.longValue());
 	else
 		return val;
 }
@@ -476,7 +473,7 @@ final static class LongOps implements Ops{
 	}
 
 	final public Number add(Number x, Number y){
-		return box(Numbers.add(x.longValue(),y.longValue()));
+		return num(Numbers.add(x.longValue(),y.longValue()));
 	}
 
 	final public Number addP(Number x, Number y){
@@ -484,11 +481,11 @@ final static class LongOps implements Ops{
 		long ret = lx + ly;
 		if ((ret ^ lx) < 0 && (ret ^ ly) < 0)
 			return BIGINTEGER_OPS.add(x, y);
-		return box(ret);
+		return num(ret);
 	}
 
 	final public Number multiply(Number x, Number y){
-		return box(Numbers.multiply(x.longValue(), y.longValue()));
+		return num(Numbers.multiply(x.longValue(), y.longValue()));
 	}
 
 	final public Number multiplyP(Number x, Number y){
@@ -496,7 +493,7 @@ final static class LongOps implements Ops{
 		long ret = lx * ly;
 		if (ly != 0 && ret/ly != lx)
 			return BIGINTEGER_OPS.multiply(x, y);
-		return box(ret);
+		return num(ret);
 	}
 	static long gcd(long u, long v){
 		while(v != 0)
@@ -513,12 +510,12 @@ final static class LongOps implements Ops{
 		long val = y.longValue();
 		long gcd = gcd(n, val);
 		if(gcd == 0)
-			return Integer.valueOf(0);
+			return num(0);
 
 		n = n / gcd;
 		long d = val / gcd;
 		if(d == 1)
-			return box(n);
+			return num(n);
 		if(d < 0)
 			{
 			n = -n;
@@ -528,11 +525,11 @@ final static class LongOps implements Ops{
 	}
 
 	public Number quotient(Number x, Number y){
-		return box(x.longValue() / y.longValue());
+		return num(x.longValue() / y.longValue());
 	}
 
 	public Number remainder(Number x, Number y){
-		return box(x.longValue() % y.longValue());
+		return num(x.longValue() % y.longValue());
 	}
 
 	public boolean equiv(Number x, Number y){
@@ -546,36 +543,36 @@ final static class LongOps implements Ops{
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
 		long val = x.longValue();
-		return box(Numbers.minus(val));
+		return num(Numbers.minus(val));
 	}
 
 	final public Number negateP(Number x){
 		long val = x.longValue();
 		if(val > Long.MIN_VALUE)
-			return box(-val);
+			return num(-val);
 		return BigInteger.valueOf(val).negate();
 	}
 	public Number inc(Number x){
 		long val = x.longValue();
-		return box(Numbers.inc(val));
+		return num(Numbers.inc(val));
 	}
 
 	public Number incP(Number x){
 		long val = x.longValue();
 		if(val < Long.MAX_VALUE)
-			return box(val + 1);
+			return num(val + 1);
 		return BIGINTEGER_OPS.inc(x);
 	}
 
 	public Number dec(Number x){
 		long val = x.longValue();
-		return box(Numbers.dec(val));
+		return num(Numbers.dec(val));
 	}
 
 	public Number decP(Number x){
 		long val = x.longValue();
 		if(val > Long.MIN_VALUE)
-			return box(val - 1);
+			return num(val - 1);
 		return BIGINTEGER_OPS.dec(x);
 	}
 }
@@ -986,42 +983,42 @@ final static class LongBitOps implements BitOps{
 	}
 
 	public Number not(Number x){
-		return box(~x.longValue());
+		return num(~x.longValue());
 	}
 
 	public Number and(Number x, Number y){
-		return box(x.longValue() & y.longValue());
+		return num(x.longValue() & y.longValue());
 	}
 
 	public Number or(Number x, Number y){
-		return box(x.longValue() | y.longValue());
+		return num(x.longValue() | y.longValue());
 	}
 
 	public Number xor(Number x, Number y){
-		return box(x.longValue() ^ y.longValue());
+		return num(x.longValue() ^ y.longValue());
 	}
 
 	public Number andNot(Number x, Number y){
-		return box(x.longValue() & ~y.longValue());
+		return num(x.longValue() & ~y.longValue());
 	}
 
 	public Number clearBit(Number x, int n){
 		if(n < 63)
-			return (box(x.longValue() & ~(1L << n)));
+			return (num(x.longValue() & ~(1L << n)));
 		else
 			return toBigInteger(x).clearBit(n);
 	}
 
 	public Number setBit(Number x, int n){
 		if(n < 63)
-			return box(x.longValue() | (1L << n));
+			return num(x.longValue() | (1L << n));
 		else
 			return toBigInteger(x).setBit(n);
 	}
 
 	public Number flipBit(Number x, int n){
 		if(n < 63)
-			return box(x.longValue() ^ (1L << n));
+			return num(x.longValue() ^ (1L << n));
 		else
 			return toBigInteger(x).flipBit(n);
 	}
@@ -1036,13 +1033,13 @@ final static class LongBitOps implements BitOps{
 	public Number shiftLeft(Number x, int n){
 		if(n < 0)
 			return shiftRight(x, -n);
-		return box(Numbers.shiftLeft(x.longValue(), n));
+		return num(Numbers.shiftLeft(x.longValue(), n));
 	}
 
 	public Number shiftRight(Number x, int n){
 		if(n < 0)
 			return shiftLeft(x, -n);
-		return box(x.longValue() >> n);
+		return num(x.longValue() >> n);
 	}
 }
 
@@ -1577,9 +1574,9 @@ static int throwIntOverflow(){
 	throw new ArithmeticException("integer overflow");
 }
 
-static public Number num(int x){
-	return Integer.valueOf(x);
-}
+//static public Number num(int x){
+//	return Integer.valueOf(x);
+//}
 
 static public int unchecked_int_add(int x, int y){
 	return x + y;
@@ -1716,7 +1713,7 @@ static public int unchecked_int_remainder(int x, int y){
 //}
 
 static public Number num(long x){
-	return box(x);
+	return Long.valueOf(x);
 }
 
 static public long unchecked_long_add(long x, long y){
@@ -1754,7 +1751,7 @@ static public Number addP(long x, long y){
 	long ret = x + y;
 	if ((ret ^ x) < 0 && (ret ^ y) < 0)
 		return addP((Number)x,(Number)y);
-	return box(ret);
+	return num(ret);
 }
 
 static public long minus(long x, long y){
@@ -1768,7 +1765,7 @@ static public Number minusP(long x, long y){
 	long ret = x - y;
 	if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
 		return minusP((Number)x,(Number)y);
-	return box(ret);
+	return num(ret);
 }
 
 static public long minus(long x){
@@ -1780,7 +1777,7 @@ static public long minus(long x){
 static public Number minusP(long x){
 	if(x == Long.MIN_VALUE)
 		return BigInteger.valueOf(x).negate();
-	return box(-x);
+	return num(-x);
 }
 
 static public long inc(long x){
@@ -1792,7 +1789,7 @@ static public long inc(long x){
 static public Number incP(long x){
 	if(x == Long.MAX_VALUE)
 		return BIGINTEGER_OPS.inc(x);
-	return box(x + 1);
+	return num(x + 1);
 }
 
 static public long dec(long x){
@@ -1804,7 +1801,7 @@ static public long dec(long x){
 static public Number decP(long x){
 	if(x == Long.MIN_VALUE)
 		return BIGINTEGER_OPS.dec(x);
-	return box(x - 1);
+	return num(x - 1);
 }
 
 
@@ -1819,7 +1816,7 @@ static public Number multiplyP(long x, long y){
 	long ret = x * y;
 	if (y != 0 && ret/y != x)
 		return multiplyP((Number)x,(Number)y);
-	return box(ret);
+	return num(ret);
 }
 
 static public long unchecked_long_divide(long x, long y){

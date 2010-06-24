@@ -27,7 +27,7 @@
         avec (into [] arange)
         alist (into () arange)
         obj-array (into-array arange)
-        int-array (into-array Integer/TYPE arange)
+        int-array (into-array Integer/TYPE (map #(Integer. (int %)) arange))
         long-array (into-array Long/TYPE arange)
         float-array (into-array Float/TYPE arange)
         char-array (into-array Character/TYPE (map char arange))

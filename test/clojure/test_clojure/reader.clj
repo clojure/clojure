@@ -53,14 +53,14 @@
 (deftest Numbers
 
   ; Read Integer
-  (is (instance? Integer 2147483647))
-  (is (instance? Integer +1))
-  (is (instance? Integer 1))
-  (is (instance? Integer +0))
-  (is (instance? Integer 0))
-  (is (instance? Integer -0))
-  (is (instance? Integer -1))
-  (is (instance? Integer -2147483648))
+  (is (instance? Long 2147483647))
+  (is (instance? Long +1))
+  (is (instance? Long 1))
+  (is (instance? Long +0))
+  (is (instance? Long 0))
+  (is (instance? Long -0))
+  (is (instance? Long -1))
+  (is (instance? Long -2147483648))
 
   ; Read Long
   (is (instance? Long 2147483648))
@@ -77,7 +77,7 @@
                        (recur (inc i) (conj l i))
                        l))]
       (is (= [4 3 2 1 0] sequence))
-      (is (every? #(instance? Integer %)
+      (is (every? #(instance? Long %)
                   sequence))))
 
   ; Read BigInteger
