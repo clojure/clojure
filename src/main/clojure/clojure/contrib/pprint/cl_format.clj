@@ -245,7 +245,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 for improved performance"
   [base val]
   (let [format-str (get java-base-formats base)]
-    (if (and format-str (integer? val))
+    (if (and format-str (integer? val) (-> val class .getName (.startsWith "java.")))
       (clojure.core/format format-str val)
       (base-str base val))))
 
