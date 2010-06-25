@@ -27,7 +27,7 @@ static interface Ops{
 
 	Ops opsWith(RatioOps x);
 
-	Ops opsWith(BigIntegerOps x);
+	Ops opsWith(BigIntOps x);
 
 	Ops opsWith(BigDecimalOps x);
 
@@ -90,7 +90,7 @@ static interface BitOps{
 
 	BitOps bitOpsWith(LongBitOps x);
 
-	BitOps bitOpsWith(BigIntegerBitOps x);
+	BitOps bitOpsWith(BigIntBitOps x);
 
 	public Number not(Number x);
 
@@ -262,9 +262,20 @@ static public int compare(Number x, Number y){
 	return 0;
 }
 
+static BigInt toBigInt(Object x){
+	if(x instanceof BigInt)
+		return (BigInt) x;
+	if(x instanceof BigInteger)
+		return BigInt.fromBigInteger((BigInteger) x);
+	else
+		return BigInt.fromLong(((Number) x).longValue());
+}
+
 static BigInteger toBigInteger(Object x){
 	if(x instanceof BigInteger)
 		return (BigInteger) x;
+	else if(x instanceof BigInt)
+		return ((BigInt) x).toBigInteger();	
 	else
 		return BigInteger.valueOf(((Number) x).longValue());
 }
@@ -272,6 +283,14 @@ static BigInteger toBigInteger(Object x){
 static BigDecimal toBigDecimal(Object x){
 	if(x instanceof BigDecimal)
 		return (BigDecimal) x;
+	else if(x instanceof BigInt)
+		{
+		BigInt bi = (BigInt) x;
+		if(bi.bipart == null)
+			return BigDecimal.valueOf(bi.lpart);
+		else
+			return new BigDecimal(bi.bipart);
+		}
 	else if(x instanceof BigInteger)
 		return new BigDecimal((BigInteger) x);
 	else if(x instanceof Double)
@@ -312,7 +331,7 @@ static public Number rationalize(Number x){
 		BigInteger bv = bx.unscaledValue();
 		int scale = bx.scale();
 		if(scale < 0)
-			return bv.multiply(BigInteger.TEN.pow(-scale));
+			return BigInt.fromBigInteger(bv.multiply(BigInteger.TEN.pow(-scale)));
 		else
 			return divide(bv, BigInteger.TEN.pow(scale));
 		}
@@ -335,15 +354,11 @@ static public Number rationalize(Number x){
 //		return Double.valueOf((double) val);
 //}
 
-static public Number reduceBigInteger(BigInteger val){
-	int bitLength = val.bitLength();
-//	if(bitLength < 32)
-//		return val.intValue();
-//	else
-	if(bitLength < 64)
-		return num(val.longValue());
+static public Number reduceBigInt(BigInt val){
+	if(val.bipart == null)
+		return num(val.lpart);
 	else
-		return val;
+		return val.bipart;
 }
 
 static public Number divide(BigInteger n, BigInteger d){
@@ -351,13 +366,13 @@ static public Number divide(BigInteger n, BigInteger d){
 		throw new ArithmeticException("Divide by zero");
 	BigInteger gcd = n.gcd(d);
 	if(gcd.equals(BigInteger.ZERO))
-		return 0;
+		return BigInt.ZERO;
 	n = n.divide(gcd);
 	d = d.divide(gcd);
 	if(d.equals(BigInteger.ONE))
-		return reduceBigInteger(n);
+		return BigInt.fromBigInteger(n);
 	else if(d.equals(BigInteger.ONE.negate()))
-		return reduceBigInteger(n.negate());
+		return BigInt.fromBigInteger(n.negate());
 	return new Ratio((d.signum() < 0 ? n.negate() : n),
 	                 (d.signum() < 0 ? d.negate() : d));
 }
@@ -452,8 +467,8 @@ final static class LongOps implements Ops{
 		return RATIO_OPS;
 	}
 
-	final public Ops opsWith(BigIntegerOps x){
-		return BIGINTEGER_OPS;
+	final public Ops opsWith(BigIntOps x){
+		return BIGINT_OPS;
 	}
 
 	final public Ops opsWith(BigDecimalOps x){
@@ -480,7 +495,7 @@ final static class LongOps implements Ops{
 		long lx = x.longValue(), ly = y.longValue();
 		long ret = lx + ly;
 		if ((ret ^ lx) < 0 && (ret ^ ly) < 0)
-			return BIGINTEGER_OPS.add(x, y);
+			return BIGINT_OPS.add(x, y);
 		return num(ret);
 	}
 
@@ -492,7 +507,7 @@ final static class LongOps implements Ops{
 		long lx = x.longValue(), ly = y.longValue();
 		long ret = lx * ly;
 		if (ly != 0 && ret/ly != lx)
-			return BIGINTEGER_OPS.multiply(x, y);
+			return BIGINT_OPS.multiply(x, y);
 		return num(ret);
 	}
 	static long gcd(long u, long v){
@@ -550,7 +565,7 @@ final static class LongOps implements Ops{
 		long val = x.longValue();
 		if(val > Long.MIN_VALUE)
 			return num(-val);
-		return BigInteger.valueOf(val).negate();
+		return BigInt.fromBigInteger(BigInteger.valueOf(val).negate());
 	}
 	public Number inc(Number x){
 		long val = x.longValue();
@@ -561,7 +576,7 @@ final static class LongOps implements Ops{
 		long val = x.longValue();
 		if(val < Long.MAX_VALUE)
 			return num(val + 1);
-		return BIGINTEGER_OPS.inc(x);
+		return BIGINT_OPS.inc(x);
 	}
 
 	public Number dec(Number x){
@@ -573,7 +588,7 @@ final static class LongOps implements Ops{
 		long val = x.longValue();
 		if(val > Long.MIN_VALUE)
 			return num(val - 1);
-		return BIGINTEGER_OPS.dec(x);
+		return BIGINT_OPS.dec(x);
 	}
 }
 
@@ -594,7 +609,7 @@ final static class DoubleOps extends OpsP{
 		return this;
 	}
 
-	final public Ops opsWith(BigIntegerOps x){
+	final public Ops opsWith(BigIntOps x){
 		return this;
 	}
 
@@ -673,7 +688,7 @@ final static class RatioOps extends OpsP{
 		return this;
 	}
 
-	final public Ops opsWith(BigIntegerOps x){
+	final public Ops opsWith(BigIntOps x){
 		return this;
 	}
 
@@ -697,10 +712,10 @@ final static class RatioOps extends OpsP{
 	}
 
 	static Number normalizeRet(Number ret, Number x, Number y){
-		if(ret instanceof BigInteger && !(x instanceof BigInteger || y instanceof BigInteger))
-			{
-			return reduceBigInteger((BigInteger) ret);
-			}
+//		if(ret instanceof BigInteger && !(x instanceof BigInteger || y instanceof BigInteger))
+//			{
+//			return reduceBigInt((BigInteger) ret);
+//			}
 		return ret;
 	}
 
@@ -734,7 +749,7 @@ final static class RatioOps extends OpsP{
 		Ratio ry = toRatio(y);
 		BigInteger q = rx.numerator.multiply(ry.denominator).divide(
 				rx.denominator.multiply(ry.numerator));
-		return normalizeRet(q, x, y);
+		return normalizeRet(BigInt.fromBigInteger(q), x, y);
 	}
 
 	public Number remainder(Number x, Number y){
@@ -775,7 +790,7 @@ final static class RatioOps extends OpsP{
 
 }
 
-final static class BigIntegerOps extends OpsP{
+final static class BigIntOps extends OpsP{
 	public Ops combine(Ops y){
 		return y.opsWith(this);
 	}
@@ -792,7 +807,7 @@ final static class BigIntegerOps extends OpsP{
 		return RATIO_OPS;
 	}
 
-	final public Ops opsWith(BigIntegerOps x){
+	final public Ops opsWith(BigIntOps x){
 		return this;
 	}
 
@@ -801,26 +816,32 @@ final static class BigIntegerOps extends OpsP{
 	}
 
 	public boolean isZero(Number x){
-		BigInteger bx = toBigInteger(x);
-		return bx.signum() == 0;
+		BigInt bx = toBigInt(x);
+		if(bx.bipart == null)
+			return bx.lpart == 0;
+		return bx.bipart.signum() == 0;
 	}
 
 	public boolean isPos(Number x){
-		BigInteger bx = toBigInteger(x);
-		return bx.signum() > 0;
+		BigInt bx = toBigInt(x);
+		if(bx.bipart == null)
+			return bx.lpart > 0;
+		return bx.bipart.signum() > 0;
 	}
 
 	public boolean isNeg(Number x){
-		BigInteger bx = toBigInteger(x);
-		return bx.signum() < 0;
+		BigInt bx = toBigInt(x);
+		if(bx.bipart == null)
+			return bx.lpart < 0;
+		return bx.bipart.signum() < 0;
 	}
 
 	final public Number add(Number x, Number y){
-		return reduceBigInteger(toBigInteger(x).add(toBigInteger(y)));
+		return BigInt.fromBigInteger(toBigInteger(x).add(toBigInteger(y)));
 	}
 
 	final public Number multiply(Number x, Number y){
-		return reduceBigInteger(toBigInteger(x).multiply(toBigInteger(y)));
+		return BigInt.fromBigInteger(toBigInteger(x).multiply(toBigInteger(y)));
 	}
 
 	public Number divide(Number x, Number y){
@@ -828,15 +849,15 @@ final static class BigIntegerOps extends OpsP{
 	}
 
 	public Number quotient(Number x, Number y){
-		return reduceBigInteger(toBigInteger(x).divide(toBigInteger(y)));
+		return BigInt.fromBigInteger(toBigInteger(x).divide(toBigInteger(y)));
 	}
 
 	public Number remainder(Number x, Number y){
-		return reduceBigInteger(toBigInteger(x).remainder(toBigInteger(y)));
+		return BigInt.fromBigInteger(toBigInteger(x).remainder(toBigInteger(y)));
 	}
 
 	public boolean equiv(Number x, Number y){
-		return toBigInteger(x).equals(toBigInteger(y));
+		return toBigInt(x).equals(toBigInt(y));
 	}
 
 	public boolean lt(Number x, Number y){
@@ -845,19 +866,20 @@ final static class BigIntegerOps extends OpsP{
 
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
-		return reduceBigInteger(toBigInteger(x).negate());
+		return BigInt.fromBigInteger(toBigInteger(x).negate());
 	}
 
 	public Number inc(Number x){
 		BigInteger bx = toBigInteger(x);
-		return reduceBigInteger(bx.add(BigInteger.ONE));
+		return BigInt.fromBigInteger(bx.add(BigInteger.ONE));
 	}
 
 	public Number dec(Number x){
 		BigInteger bx = toBigInteger(x);
-		return reduceBigInteger(bx.subtract(BigInteger.ONE));
+		return BigInt.fromBigInteger(bx.subtract(BigInteger.ONE));
 	}
 }
+
 
 final static class BigDecimalOps extends OpsP{
 	final static Var MATH_CONTEXT = RT.MATH_CONTEXT;
@@ -878,7 +900,7 @@ final static class BigDecimalOps extends OpsP{
 		return this;
 	}
 
-	final public Ops opsWith(BigIntegerOps x){
+	final public Ops opsWith(BigIntOps x){
 		return this;
 	}
 
@@ -978,8 +1000,8 @@ final static class LongBitOps implements BitOps{
 		return this;
 	}
 
-	final public BitOps bitOpsWith(BigIntegerBitOps x){
-		return BIGINTEGER_BITOPS;
+	final public BitOps bitOpsWith(BigIntBitOps x){
+		return BIGINT_BITOPS;
 	}
 
 	public Number not(Number x){
@@ -1006,21 +1028,21 @@ final static class LongBitOps implements BitOps{
 		if(n < 63)
 			return (num(x.longValue() & ~(1L << n)));
 		else
-			return toBigInteger(x).clearBit(n);
+			return BigInt.fromBigInteger(toBigInteger(x).clearBit(n));
 	}
 
 	public Number setBit(Number x, int n){
 		if(n < 63)
 			return num(x.longValue() | (1L << n));
 		else
-			return toBigInteger(x).setBit(n);
+			return BigInt.fromBigInteger(toBigInteger(x).setBit(n));
 	}
 
 	public Number flipBit(Number x, int n){
 		if(n < 63)
 			return num(x.longValue() ^ (1L << n));
 		else
-			return toBigInteger(x).flipBit(n);
+			return BigInt.fromBigInteger(toBigInteger(x).flipBit(n));
 	}
 
 	public boolean testBit(Number x, int n){
@@ -1043,7 +1065,7 @@ final static class LongBitOps implements BitOps{
 	}
 }
 
-final static class BigIntegerBitOps implements BitOps{
+final static class BigIntBitOps implements BitOps{
 	public BitOps combine(BitOps y){
 		return y.bitOpsWith(this);
 	}
@@ -1052,40 +1074,40 @@ final static class BigIntegerBitOps implements BitOps{
 		return this;
 	}
 
-	final public BitOps bitOpsWith(BigIntegerBitOps x){
+	final public BitOps bitOpsWith(BigIntBitOps x){
 		return this;
 	}
 
 	public Number not(Number x){
-		return toBigInteger(x).not();
+		return BigInt.fromBigInteger(toBigInteger(x).not());
 	}
 
 	public Number and(Number x, Number y){
-		return toBigInteger(x).and(toBigInteger(y));
+		return BigInt.fromBigInteger(toBigInteger(x).and(toBigInteger(y)));
 	}
 
 	public Number or(Number x, Number y){
-		return toBigInteger(x).or(toBigInteger(y));
+		return BigInt.fromBigInteger(toBigInteger(x).or(toBigInteger(y)));
 	}
 
 	public Number xor(Number x, Number y){
-		return toBigInteger(x).xor(toBigInteger(y));
+		return BigInt.fromBigInteger(toBigInteger(x).xor(toBigInteger(y)));
 	}
 
 	public Number andNot(Number x, Number y){
-		return toBigInteger(x).andNot(toBigInteger(y));
+		return BigInt.fromBigInteger(toBigInteger(x).andNot(toBigInteger(y)));
 	}
 
 	public Number clearBit(Number x, int n){
-		return toBigInteger(x).clearBit(n);
+		return BigInt.fromBigInteger(toBigInteger(x).clearBit(n));
 	}
 
 	public Number setBit(Number x, int n){
-		return toBigInteger(x).setBit(n);
+		return BigInt.fromBigInteger(toBigInteger(x).setBit(n));
 	}
 
 	public Number flipBit(Number x, int n){
-		return toBigInteger(x).flipBit(n);
+		return BigInt.fromBigInteger(toBigInteger(x).flipBit(n));
 	}
 
 	public boolean testBit(Number x, int n){
@@ -1093,22 +1115,22 @@ final static class BigIntegerBitOps implements BitOps{
 	}
 
 	public Number shiftLeft(Number x, int n){
-		return toBigInteger(x).shiftLeft(n);
+		return BigInt.fromBigInteger(toBigInteger(x).shiftLeft(n));
 	}
 
 	public Number shiftRight(Number x, int n){
-		return toBigInteger(x).shiftRight(n);
+		return BigInt.fromBigInteger(toBigInteger(x).shiftRight(n));
 	}
 }
 
 static final LongOps LONG_OPS = new LongOps();
 static final DoubleOps DOUBLE_OPS = new DoubleOps();
 static final RatioOps RATIO_OPS = new RatioOps();
-static final BigIntegerOps BIGINTEGER_OPS = new BigIntegerOps();
+static final BigIntOps BIGINT_OPS = new BigIntOps();
 static final BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
 
 static final LongBitOps LONG_BITOPS = new LongBitOps();
-static final BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
+static final BigIntBitOps BIGINT_BITOPS = new BigIntBitOps();
 
 static public enum Category {INTEGER, FLOATING, DECIMAL, RATIO};
 
@@ -1123,8 +1145,10 @@ static Ops ops(Object x){
 		return LONG_OPS;
 	else if(xc == Float.class)
 		return DOUBLE_OPS;
+	else if(xc == BigInt.class)
+		return BIGINT_OPS;
 	else if(xc == BigInteger.class)
-		return BIGINTEGER_OPS;
+		return BIGINT_OPS;
 	else if(xc == Ratio.class)
 		return RATIO_OPS;
 	else if(xc == BigDecimal.class)
@@ -1144,7 +1168,7 @@ static Category category(Object x){
 		return Category.INTEGER;
 	else if(xc == Float.class)
 		return Category.FLOATING;
-	else if(xc == BigInteger.class)
+	else if(xc == BigInt.class)
 		return Category.INTEGER;
 	else if(xc == Ratio.class)
 		return Category.RATIO;
@@ -1161,38 +1185,15 @@ static BitOps bitOps(Object x){
 		return LONG_BITOPS;
 	else if(xc == Integer.class)
 		return LONG_BITOPS;
+	else if(xc == BigInt.class)
+		return BIGINT_BITOPS;
 	else if(xc == BigInteger.class)
-		return BIGINTEGER_BITOPS;
+		return BIGINT_BITOPS;
 	else if(xc == Double.class || xc == Float.class || xc == BigDecimalOps.class || xc == Ratio.class)
 		throw new ArithmeticException("bit operation on non integer type: " + xc);
 	else
 		return LONG_BITOPS;
 }
-
-//final static ExecutorService executor = Executors.newCachedThreadPool();
-//static public int minChunk = 100;
-//static int chunkSize(int alength){
-//	return Math.max(alength / Runtime.getRuntime().availableProcessors(), minChunk);
-//}
-
-//		}
-//	else
-//		{
-//		LinkedList<Callable<Float>> ops = new LinkedList<Callable<Float>>();
-//		for(int offset = 0;offset < xs.length;offset+=chunk)
-//			{
-//			final int start = offset;
-//			final int end = Math.min(xs.length, start + chunk);
-//			ops.add(new Callable<Float>(){
-//				public Float call() throws Exception{
-//					for(int i=start;i<end;i++)
-//						xs[i] += ys[i];
-//					return null;
-//				}});
-//			}
-//		executor.invokeAll(ops);
-//		}
-
 
 	static public float[] float_array(int size, Object init){
 		float[] ret = new float[size];
@@ -1776,7 +1777,7 @@ static public long minus(long x){
 
 static public Number minusP(long x){
 	if(x == Long.MIN_VALUE)
-		return BigInteger.valueOf(x).negate();
+		return BigInt.fromBigInteger(BigInteger.valueOf(x).negate());
 	return num(-x);
 }
 
@@ -1788,7 +1789,7 @@ static public long inc(long x){
 
 static public Number incP(long x){
 	if(x == Long.MAX_VALUE)
-		return BIGINTEGER_OPS.inc(x);
+		return BIGINT_OPS.inc(x);
 	return num(x + 1);
 }
 
@@ -1800,7 +1801,7 @@ static public long dec(long x){
 
 static public Number decP(long x){
 	if(x == Long.MIN_VALUE)
-		return BIGINTEGER_OPS.dec(x);
+		return BIGINT_OPS.dec(x);
 	return num(x - 1);
 }
 

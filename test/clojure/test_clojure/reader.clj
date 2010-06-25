@@ -17,7 +17,8 @@
 ;;  Created 22 October 2008
 
 (ns clojure.test-clojure.reader
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import clojure.lang.BigInt))
 
 ;; Symbols
 
@@ -81,10 +82,10 @@
                   sequence))))
 
   ; Read BigInteger
-  (is (instance? BigInteger 9223372036854775808))
-  (is (instance? BigInteger -9223372036854775809))
-  (is (instance? BigInteger 10000000000000000000000000000000000000000000000000))
-  (is (instance? BigInteger -10000000000000000000000000000000000000000000000000))
+  (is (instance? BigInt 9223372036854775808))
+  (is (instance? BigInt -9223372036854775809))
+  (is (instance? BigInt 10000000000000000000000000000000000000000000000000))
+  (is (instance? BigInt -10000000000000000000000000000000000000000000000000))
 
   ; Read Double
   (is (instance? Double +1.0e+1))

@@ -3008,6 +3008,7 @@
   [n]
   (or (instance? Integer n)
       (instance? Long n)
+      (instance? clojure.lang.BigInt n)
       (instance? BigInteger n)
       (instance? Short n)
       (instance? Byte n)))
@@ -3065,6 +3066,19 @@
   (or (integer? n) (ratio? n) (decimal? n)))
 
 (defn bigint
+  "Coerce to BigInt"
+  {:tag clojure.lang.BigInt
+   :static true
+   :added "1.3"}
+  [x] (cond
+       (instance? clojure.lang.BigInt x) x
+       (instance? BigInteger x) (clojure.lang.BigInt/fromBigInteger x)
+       (decimal? x) (bigint (.toBigInteger ^BigDecimal x))
+       (ratio? x) (bigint (.bigIntegerValue ^clojure.lang.Ratio x))
+       (number? x) (clojure.lang.BigInt/valueOf (long x))
+       :else (bigint (BigInteger. x))))
+
+(defn biginteger
   "Coerce to BigInteger"
   {:tag BigInteger
    :added "1.0"

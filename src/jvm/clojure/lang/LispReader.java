@@ -329,7 +329,7 @@ private static Object matchNumber(String s){
 		if(m.group(2) != null)
 			{
 			if(m.group(8) != null)
-				return BigInteger.ZERO;			
+				return BigInt.ZERO;
 			return Numbers.num(0);
 			}
 		boolean negate = (m.group(1).equals("-"));
@@ -346,9 +346,13 @@ private static Object matchNumber(String s){
 		if(n == null)
 			return null;
 		BigInteger bn = new BigInteger(n, radix);
+		if(negate)
+			bn = bn.negate();
 		if(m.group(8) != null)
-			return negate ? bn.negate() : bn;
-		return Numbers.reduceBigInteger(negate ? bn.negate() : bn);
+			return BigInt.fromBigInteger(bn);
+		return bn.bitLength() < 64 ?
+		        Numbers.num(bn.longValue())
+				: BigInt.fromBigInteger(bn);
 		}
 	m = floatPat.matcher(s);
 	if(m.matches())
@@ -360,8 +364,8 @@ private static Object matchNumber(String s){
 	m = ratioPat.matcher(s);
 	if(m.matches())
 		{
-		return Numbers.divide(Numbers.reduceBigInteger(new BigInteger(m.group(1))),
-		                      Numbers.reduceBigInteger((new BigInteger(m.group(2)))));
+		return Numbers.divide(Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(m.group(1)))),
+		                      Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(m.group(2)))));
 		}
 	return null;
 }

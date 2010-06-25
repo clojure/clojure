@@ -19,6 +19,10 @@ public final class BigInt extends Number{
 final public long lpart;
 final public BigInteger bipart;
 
+final public static BigInt ZERO = new BigInt(0,null);
+final public static BigInt ONE = new BigInt(1,null);
+
+
 //must follow Long
 public int hashCode(){
 	if(bipart == null)
@@ -104,6 +108,20 @@ public short shortValue(){
 		return (short) lpart;
 	else
 		return bipart.shortValue();
+}
+
+public static BigInt valueOf(long val){
+	return new BigInt(val, null);
+}
+
+public String toString(){
+	if(bipart == null)
+		return String.valueOf(lpart);
+	return bipart.toString();
+}
+
+public int bitLength(){
+	return toBigInteger().bitLength();
 }
 
 }

@@ -343,7 +343,7 @@
 (defn- expt
   "clojure.contrib.math/expt is a better and much faster impl, but this works.
 Math/pow overflows to Infinity."
-  [x n] (apply * (replicate n x)))
+  [x n] (apply *' (replicate n x)))
 
 (deftest test-bit-shift-left
   (are [x y] (= x y)

@@ -967,6 +967,14 @@ static public int intCast(double x){
 static public long longCast(Object x){
 	if(x instanceof Integer || x instanceof Long)
 		return ((Number) x).longValue();
+	else if (x instanceof BigInt)
+		{
+		BigInt bi = (BigInt) x;
+		if(bi.bipart == null)
+			return bi.lpart;
+		else
+			throw new IllegalArgumentException("Value out of range for long: " + x);
+		}
 	else if (x instanceof BigInteger)
 		{
 		BigInteger bi = (BigInteger) x;
@@ -1416,9 +1424,13 @@ static public void print(Object x, Writer w) throws Exception{
 			w.write(x.toString());
 			w.write('M');
 		}
-		else if(x instanceof BigInteger && readably) {
+		else if(x instanceof BigInt && readably) {
 			w.write(x.toString());
 			w.write('N');
+		}
+		else if(x instanceof BigInteger && readably) {
+			w.write(x.toString());
+			w.write("BIGINT");
 		}
 		else if(x instanceof Var) {
 			Var v = (Var) x;
