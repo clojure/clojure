@@ -128,7 +128,7 @@ static class Action implements Runnable{
 				}
 			else
 				{
-				nested.set(PersistentVector.EMPTY);
+				nested.set(null); // allow errorHandler to send
 				if(action.agent.errorHandler != null)
 					{
 					try
