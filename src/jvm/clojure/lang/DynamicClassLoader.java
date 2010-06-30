@@ -19,13 +19,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.net.URLClassLoader;
 import java.net.URL;
 import java.lang.ref.WeakReference;
+import java.lang.ref.ReferenceQueue;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
-static ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Object> >classCache =
-        new ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Object> >();
+static ConcurrentHashMap<String, WeakReference<Class> >classCache =
+        new ConcurrentHashMap<String, WeakReference<Class> >();
 
 static final URL[] EMPTY_URLS = new URL[]{};
+
+static final ReferenceQueue rq = new ReferenceQueue();
 
 public DynamicClassLoader(){
     //pseudo test in lieu of hasContextClassLoader()
@@ -39,29 +42,30 @@ public DynamicClassLoader(ClassLoader parent){
 }
 
 public Class defineClass(String name, byte[] bytes, Object srcForm){
-//    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
-//    if(ce != null)
-//        {
-//        WeakReference<Class> cr = ce.getKey();
-//        Class c = cr.get();
-//        if((c != null) && srcForm.equals(ce.getValue()))
-//            return c;
-//        }
 	Class c = defineClass(name, bytes, 0, bytes.length);
-    classCache.put(name, new MapEntry(new WeakReference(c), null));
+    classCache.put(name, new WeakReference(c,rq));
+	//cleanup any dead entries
+	if(rq.poll() != null)
+		{
+		while(rq.poll() != null)
+			;
+		for(Map.Entry<String,WeakReference<Class>> e : classCache.entrySet())
+			{
+			if(e.getValue().get() == null)
+				classCache.remove(e.getKey(), e.getValue());
+			}
+		}
     return c;
 }
 
 protected Class<?> findClass(String name) throws ClassNotFoundException{
-    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
-    if(ce != null)
-        {
-        WeakReference<Class> cr = ce.getKey();
-        Class c = cr.get();
+    WeakReference<Class> cr = classCache.get(name);
+	if(cr != null)
+		{
+		Class c = cr.get();
         if(c != null)
             return c;
-        classCache.remove(name);
-        }
+		}
 	return super.findClass(name);
 }
 
