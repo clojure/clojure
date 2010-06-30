@@ -82,7 +82,7 @@
      (fn [m [old new]]
        (if (and (not= old new)
                 (contains? m old))
-         (-> m (assoc new (m old)) (dissoc old))
+         (-> m (assoc new (get m old)) (dissoc old))
          m)) 
      map kmap))
 
