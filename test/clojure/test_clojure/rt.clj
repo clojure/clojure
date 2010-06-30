@@ -83,10 +83,18 @@
 
 (deftest last-var-wins-for-core
   (testing "you can replace a core name, with warning"
-    (let [ns (temp-ns 'clojure.set)
+    (let [ns (temp-ns)
         replacement (gensym)]
       (with-err-string-writer (intern ns 'prefers replacement))
       (is (= replacement @('prefers (ns-publics ns))))))
+  (testing "you can replace a name you defined before"
+    (let [ns (temp-ns)
+          s (gensym)
+          v1 (intern ns 'foo s)
+          v2 (intern ns 'bar s)]
+      (with-err-string-writer (.refer ns 'flatten v1))
+      (.refer ns 'flatten v2)
+      (is (= v2 (ns-resolve ns 'flatten)))))
   (testing "you cannot intern over an existing non-core name"
     (let [ns (temp-ns 'clojure.set)
           replacement (gensym)]
