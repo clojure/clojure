@@ -32,11 +32,6 @@ collecting its stdout"}
   `(binding [*sh-env* ~env]
      ~@forms))
      
-(defn- stream-seq
-  "Takes an InputStream and returns a lazy seq of integers from the stream."
-  [stream]
-  (take-while #(>= % 0) (repeatedly #(.read stream))))
-
 (defn- aconcat
   "Concatenates arrays of given type."
   [type & xs]
@@ -54,7 +49,7 @@ collecting its stdout"}
         [cmd opts] (split-with string? args)]
     [cmd (merge default-opts (apply hash-map opts))]))
 
-(defn- as-env-string 
+(defn- ^"[Ljava.lang.String;" as-env-strings 
   "Helper so that callers can pass a Clojure map for the :env to sh."
   [arg]
   (cond
@@ -116,21 +111,21 @@ collecting its stdout"}
   [& args]
   (let [[cmd opts] (parse-args args)
         proc (.exec (Runtime/getRuntime) 
-		    (into-array cmd) 
-		    (as-env-string (:env opts))
+		    ^"[Ljava.lang.String;" (into-array cmd) 
+		    (as-env-strings (:env opts))
 		    (as-file (:dir opts)))
-        in (:in opts)]
+        {:keys [in inenc outenc]} opts]
     (if in
       (future
        (if (instance? (class (byte-array 0)) in)
          (with-open [os (.getOutputStream proc)]
-           (.write os in))
-         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) (:inenc opts))]
-           (.write osw in))))
+           (.write os ^"[B" in))
+         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) ^String inenc)]
+           (.write osw ^String in))))
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
-      (let [out (stream-to-enc stdout (:outenc opts))
+      (let [out (stream-to-enc stdout outenc)
             err (stream-to-string stderr)
             exit-code (.waitFor proc)]
         {:exit exit-code :out out :err err}))))
