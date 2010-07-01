@@ -11,6 +11,7 @@
 (ns clojure.test-clojure.protocols
   (:use clojure.test clojure.test-clojure.protocols.examples)
   (:require [clojure.test-clojure.protocols.more-examples :as other]
+            [clojure.set :as set]
             clojure.test-clojure.helpers)
   (:import [clojure.test_clojure.protocols.examples ExampleInterface]))
 
@@ -188,6 +189,7 @@
 (deftest defrecord-acts-like-a-map
   (let [rec (r 1 2)]
     (is (= (r 1 3 {} {:c 4}) (merge rec {:b 3 :c 4})))
+    (is (= {:foo 1 :b 2} (set/rename-keys rec {:a :foo})))
     (is (= {:a 11 :b 2 :c 10} (merge-with + rec {:a 10 :c 10})))))
 
 (deftest defrecord-interfaces-test
