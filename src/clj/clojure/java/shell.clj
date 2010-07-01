@@ -69,10 +69,17 @@ collecting its stdout"}
     (.toByteArray bout)))
 
 (defn- stream-to-string
-  [in enc]
-  (with-open [bout (StringWriter.)]
-    (copy in bout :encoding enc)
-    (.toString bout)))
+  ([in] (stream-to-string in (.name (Charset/defaultCharset))))
+  ([in enc]
+     (with-open [bout (StringWriter.)]
+       (copy in bout :encoding enc)
+       (.toString bout))))
+
+(defn- stream-to-enc
+  [stream enc]
+  (if (= enc :bytes)
+    (stream-to-bytes stream)
+    (stream-to-string stream enc)))
 
 (defn sh
   "Passes the given strings to Runtime.exec() to launch a sub-process.
@@ -116,19 +123,17 @@ collecting its stdout"}
     (if in
       (future
        (if (instance? (class (byte-array 0)) in)
-         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) (:inenc opts))]
-           (.write osw in))
          (with-open [os (.getOutputStream proc)]
-           (.write os in))))
+           (.write os in))
+         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) (:inenc opts))]
+           (.write osw in))))
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
-      (let [[out err]
-            (if (= (:outenc opts) :bytes)
-              (pmap #(stream-to-bytes %) [stdout stderr])
-              (pmap #(stream-to-string % (:outenc opts)) [stdout stderr]))
+      (let [out (stream-to-enc stdout (:outenc opts))
+            err (stream-to-string stderr)
             exit-code (.waitFor proc)]
-        {:exit exit-code :outenc out :err err}))))
+        {:exit exit-code :out out :err err}))))
 
 (comment
 
