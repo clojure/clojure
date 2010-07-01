@@ -21,8 +21,12 @@
    for its Java-based format function.
 
 See documentation for those functions for more information or complete 
-documentation on the the clojure-contrib web site on github.",
-       }
+documentation on the the clojure-contrib web site on github.
+
+As of the 1.2 release, pprint has been moved to clojure.pprint. Please prefer
+the clojure.pprint version for new code.",
+       :deprecated "1.2"
+      }
     clojure.contrib.pprint
   (:use clojure.contrib.pprint.utilities)
   (:use clojure.contrib.pprint.pretty-writer
