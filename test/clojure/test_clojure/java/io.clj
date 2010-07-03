@@ -124,7 +124,6 @@
 (deftest test-as-url
   (are [file-part input] (= (URL. (str "file:" file-part)) (as-url input))
        "foo" "file:foo"
-       "/foo" (File. "/foo")
        "baz" (URL. "file:baz")
        "quux" (URI. "file:quux"))
   (is (nil? (as-url nil))))
@@ -141,11 +140,11 @@
   (testing "strings"
     (is (= "foo" (as-relative-path "foo"))))
   (testing "absolute path strings are forbidden"
-    (is (thrown? IllegalArgumentException (as-relative-path (str File/separator "baz")))))
+    (is (thrown? IllegalArgumentException (as-relative-path (.getAbsolutePath (File. "baz"))))))
   (testing "relative File paths"
     (is (= "bar" (as-relative-path (File. "bar")))))
   (testing "absolute File paths are forbidden"
-    (is (thrown? IllegalArgumentException (as-relative-path (File. (str File/separator "quux")))))))
+    (is (thrown? IllegalArgumentException (as-relative-path (File. (.getAbsolutePath (File. "quux"))))))))
 
 (defn stream-should-have [stream expected-bytes msg]
   (let [actual-bytes (byte-array (alength expected-bytes))]

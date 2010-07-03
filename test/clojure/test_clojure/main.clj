@@ -45,6 +45,6 @@
 
 (deftest repl-exception-safety
   (testing "catches and prints exception on bad equals"
-    (is (= "java.lang.NullPointerException\n"
+    (is (re-matches #"java\.lang\.NullPointerException\r?\n"
            (run-repl-and-return-err
             "(proxy [Object] [] (equals [o] (.toString nil)))")))))

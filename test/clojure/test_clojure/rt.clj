@@ -55,23 +55,23 @@
 (deftest error-messages
   (testing "binding a core var that already refers to something"
     (should-print-err-message
-     #"WARNING: prefers already refers to: #'clojure.core/prefers in namespace: .*\n"
+     #"WARNING: prefers already refers to: #'clojure.core/prefers in namespace: .*\r?\n"
      (defn prefers [] (throw (RuntimeException. "rebound!")))))
   (testing "reflection cannot resolve field"
     (should-print-err-message
-     #"Reflection warning, NO_SOURCE_PATH:\d+ - reference to field blah can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - reference to field blah can't be resolved\.\r?\n"
      (defn foo [x] (.blah x))))
   (testing "reflection cannot resolve instance method"
     (should-print-err-message
-     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to zap can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to zap can't be resolved\.\r?\n"
      (defn foo [x] (.zap x 1))))
   (testing "reflection cannot resolve static method"
     (should-print-err-message
-     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to valueOf can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to valueOf can't be resolved\.\r?\n"
      (defn foo [] (Integer/valueOf #"boom"))))
   (testing "reflection cannot resolve constructor"
     (should-print-err-message
-     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to java.lang.String ctor can't be resolved.\n"
+     #"Reflection warning, NO_SOURCE_PATH:\d+ - call to java.lang.String ctor can't be resolved\.\r?\n"
      (defn foo [] (String. 1 2 3)))))
 
 (def example-var)
