@@ -15,10 +15,10 @@
 
 (deftest test-parse-args
   (are [x y] (= x y)
-       [[] {:inenc platform-enc :outenc platform-enc :dir nil :env nil}] (#'sh/parse-args [])
-       [["ls"] {:inenc platform-enc :outenc platform-enc :dir nil :env nil}] (#'sh/parse-args ["ls"])
-       [["ls" "-l"] {:inenc platform-enc :outenc platform-enc :dir nil :env nil}] (#'sh/parse-args ["ls" "-l"])
-       [["ls"] {:inenc platform-enc :outenc "ISO-8859-1" :dir nil :env nil}] (#'sh/parse-args ["ls" :outenc "ISO-8859-1"])))
+       [[] {:in-enc platform-enc :out-enc platform-enc :dir nil :env nil}] (#'sh/parse-args [])
+       [["ls"] {:in-enc platform-enc :out-enc platform-enc :dir nil :env nil}] (#'sh/parse-args ["ls"])
+       [["ls" "-l"] {:in-enc platform-enc :out-enc platform-enc :dir nil :env nil}] (#'sh/parse-args ["ls" "-l"])
+       [["ls"] {:in-enc platform-enc :out-enc "ISO-8859-1" :dir nil :env nil}] (#'sh/parse-args ["ls" :out-enc "ISO-8859-1"])))
   
 (deftest test-with-sh-dir
   (are [x y] (= x y)

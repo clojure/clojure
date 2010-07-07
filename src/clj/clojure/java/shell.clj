@@ -45,7 +45,7 @@ collecting its stdout"}
 (defn- parse-args
   [args]
   (let [default-encoding (.name (Charset/defaultCharset))
-        default-opts {:outenc default-encoding :inenc default-encoding :dir *sh-dir* :env *sh-env*}
+        default-opts {:out-enc default-encoding :in-enc default-encoding :dir *sh-dir* :env *sh-env*}
         [cmd opts] (split-with string? args)]
     [cmd (merge default-opts (apply hash-map opts))]))
 
@@ -83,19 +83,18 @@ collecting its stdout"}
 
   :in      may be given followed by a String or byte array specifying input
            to be fed to the sub-process's stdin.
-  :inenc   option may be given followed by a String, used as a character
+  :in-enc  option may be given followed by a String, used as a character
            encoding name (for example \"UTF-8\" or \"ISO-8859-1\") to
            convert the input string specified by the :in option to the
-           sub-process's stdin.  Defaults to the platform default encoding.
+           sub-process's stdin.  Defaults to UTF-8.
            If the :in option provides a byte array, then the bytes are passed
            unencoded, and this option is ignored.
-  :outenc  option may be given followed by :bytes or a String. If a
+  :out-enc option may be given followed by :bytes or a String. If a
            String is given, it will be used as a character encoding
            name (for example \"UTF-8\" or \"ISO-8859-1\") to convert
            the sub-process's stdout to a String which is returned.
            If :bytes is given, the sub-process's stdout will be stored
-           in a byte array and returned.  Defaults to the platform default
-           encoding.
+           in a byte array and returned.  Defaults to UTF-8.
   :env     override the process env with a map (or the underlying Java
            String[] if you are a masochist).
   :dir     override the process dir with a String or java.io.File.
@@ -106,7 +105,7 @@ collecting its stdout"}
   sh returns a map of
     :exit => sub-process's exit code
     :out  => sub-process's stdout (as byte[] or String)
-    :err  => sub-process's stderr (as byte[] or String)"
+    :err  => sub-process's stderr (String via platform default encoding)"
   {:added "1.2"}
   [& args]
   (let [[cmd opts] (parse-args args)
@@ -114,18 +113,18 @@ collecting its stdout"}
 		    ^"[Ljava.lang.String;" (into-array cmd) 
 		    (as-env-strings (:env opts))
 		    (as-file (:dir opts)))
-        {:keys [in inenc outenc]} opts]
+        {:keys [in in-enc out-enc]} opts]
     (if in
       (future
        (if (instance? (class (byte-array 0)) in)
          (with-open [os (.getOutputStream proc)]
            (.write os ^"[B" in))
-         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) ^String inenc)]
+         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) ^String in-enc)]
            (.write osw ^String in))))
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
-      (let [out (stream-to-enc stdout outenc)
+      (let [out (stream-to-enc stdout out-enc)
             err (stream-to-string stderr)
             exit-code (.waitFor proc)]
         {:exit exit-code :out out :err err}))))
@@ -137,8 +136,8 @@ collecting its stdout"}
 (println (sh "sed" "s/[aeiou]/oo/g" :in "hello there\n"))
 (println (sh "cat" :in "x\u25bax\n"))
 (println (sh "echo" "x\u25bax"))
-(println (sh "echo" "x\u25bax" :outenc "ISO-8859-1")) ; reads 4 single-byte chars
-(println (sh "cat" "myimage.png" :outenc :bytes)) ; reads binary file into bytes[]
+(println (sh "echo" "x\u25bax" :out-enc "ISO-8859-1")) ; reads 4 single-byte chars
+(println (sh "cat" "myimage.png" :out-enc :bytes)) ; reads binary file into bytes[]
 (println (sh "cmd" "/c dir 1>&2"))
 
 )
