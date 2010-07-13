@@ -124,10 +124,10 @@ collecting its stdout"}
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
-      (let [out (stream-to-enc stdout out-enc)
-            err (stream-to-string stderr)
+      (let [out (future (stream-to-enc stdout out-enc))
+            err (future (stream-to-string stderr))
             exit-code (.waitFor proc)]
-        {:exit exit-code :out out :err err}))))
+        {:exit exit-code :out @out :err @err}))))
 
 (comment
 
