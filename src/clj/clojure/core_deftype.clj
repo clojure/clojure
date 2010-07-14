@@ -731,13 +731,13 @@
   "Useful when you want to provide several implementations of the same
   protocol all at once. Takes a single protocol and the implementation
   of that protocol for one or more types. Expands into calls to
-  extend-type and extend-class:
+  extend-type:
 
   (extend-protocol Protocol
-    ::AType
+    AType
       (foo [x] ...)
       (bar [x y] ...)
-    ::BType
+    BType
       (foo [x] ...)
       (bar [x y] ...)
     AClass
@@ -750,13 +750,13 @@
   expands into:
 
   (do
-   (clojure.core/extend-type ::AType Protocol 
+   (clojure.core/extend-type AType Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
-   (clojure.core/extend-type ::BType Protocol 
+   (clojure.core/extend-type BType Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
-   (clojure.core/extend-class AClass Protocol 
+   (clojure.core/extend-type AClass Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
    (clojure.core/extend-type nil Protocol 
