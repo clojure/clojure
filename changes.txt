@@ -1,0 +1,257 @@
+Changes to Clojure in Version 1.2
+
+= CONTENTS =
+
+ 1 Deprecated and Removed Features
+    1.1 metadata reader macro is now ^
+ 2 New/Improved Features in clojure.core
+    2.1 Protocols, Records, and Types
+    2.2 Sequence Library
+    2.3 Destructuring
+    2.4 Case
+    2.5 Duplicate Key Prevention
+    2.6 Primitive Vectors
+    2.7 Agent Error Handling
+    2.8 Improved Ratio Support
+    2.9 Macro Implicit Args
+    2.10 Multimethod Enhancements
+    2.11 Function Metadata (Alpha)
+    2.12 Java Annotations
+    2.13 Namespace Collision Warnings
+ 3 New Namespaces
+    3.1 clojure.java.io
+    3.1 clojure.java.javadoc
+    3.3 clojure.java.shell
+    3.4 clojure.pprint
+    3.5 clojure.repl
+    3.6 clojure.string
+ 4 Functions with Improved Performance
+ 5 Bug Fixes
+   
+= 1 Deprecated and Removed Features =
+
+== 1.1 metadata reader macro is now ^ ==
+
+^ is the metadata reader macro. The former syntax #^ is deprecated and
+will be removed in a future version of Clojure.
+
+
+= 2 New Features in clojure.core =
+
+== 2.1 Protocols, Records, Reify, and Types ==
+
+defprotocol provides polymorphism without type intrusion.
+
+defrecord, reify, and deftype provide datatypes. They support, in a
+relatively clean manner, access to the highest-performance primitive
+representation and polymorphism mechanisms of the host.
+
+See http://clojure.org/protocols and http://clojure.org/datatypes for
+a more complete description.
+
+
+== 2.2 Sequence Library ==
+
+The sequence library has several new functions in Clojure 1.2. The
+notes in parentheses indicate differences from the similarly-named
+functions in clojure-contrib.
+
+  * flatten - New
+  * frequencies - New
+  * group-by - New        (note: unsorted)
+  * keep - New
+  * keep-indexed - New    (preferred over contrib's indexed for perf)
+  * map-indexed - New     (preferred over contrib's indexed for perf)
+  * partition-all - New
+  * partition-by - New 
+  * rand-nth - New        (name indicates dependency on nth's perf)
+  * range - Improved      (added zero arity)
+  * reductions - New
+  * repeatedly - Improved! (added "do n times" semantics)
+  * shuffle - New
+
+
+== 2.3 Destructuring Enhanced ==
+
+If you associatively destructure a seq, it will be poured into a map first:
+
+  (defn foo [& {:keys [a b c]}]
+    [a b c])
+
+  (foo :c 3 :b 2)
+  => [nil 2 3]
+
+
+== 2.4 Case ==
+
+Case provides constant time dispatch on its clauses, which can be any
+compile-time literal
+
+  (defn release-status
+    [version]
+    (case version
+     (0.9 1.0 1.1) "History"
+     1.2           "Right now"
+     :sentient     "RSN"))
+
+
+== 2.5 Duplicate Key Prevention ==
+
+Associative literals and their constructor functions hash-map and
+hash-set now prevent duplicate keys:
+
+  #{1 1}
+  => java.lang.IllegalArgumentException: Duplicate key: 1
+
+
+== 2.6 Primitive Vectors ==
+
+vector-of creates a vector of unboxed Java primitives, which follows
+the contract of Clojure vectors.
+
+
+== 2.7 Agent Error Handling ==
+
+Agent error handling has been reworked in Clojure 1.2.
+
+  * agent-error - New
+  * restart-agent - New
+  * set-error-handler - New
+  * error-handler - New
+  * set-error-mode! - New
+  * error-mode - New
+  * await - improved docstring, explains failed agent semantics
+  * agent-errors - DEPRECATED
+  * clear-agent-errors - DEPRECATED
+
+
+== 2.8 Improved Ratio Support ==
+
+  * numerator - New
+  * denominator - New
+  * bigint - Enhanced, now ratio aware
+
+
+== 2.9 Macro Implicit Args ==
+
+Macros now have access to implicit arguments:
+ 
+  * &form - the macro form
+  * &env  - the local bindings
+
+
+== 2.10 Multimethod Enhancements ==
+
+Multimethods have been enhanced to improve interactive development:
+ 
+  * remove-all-methods - New
+  * defmulti - Enhanced to have defonce semantics
+
+
+== 2.11 Function Metadata ==
+
+Clojure functions can now have metadata. Please treat this capability
+as alpha and subject to possible change or removal in a future version
+of Clojure.
+
+
+== 2.12 Java Annotations ==
+
+Java Annotations can be added simply by making a Java annotation
+class a key in a Clojure metadata map:
+
+  ;; Name is deprecated
+  (defrecord ^{Deprecated true} Name [first last])
+
+Please use Java annotations for interop purposes only. 
+
+== 2.13 Namespace Collision Warnings ==
+
+If a namespace defines a Var whose name collides with a name in the
+clojure.core namespace, you will see a warning but the definition will
+be allowed to proceed. This facilitates promoting useful functions
+into clojure.core without causing a breaking change.
+
+Please track down and fix these warnings, as matching names do not
+always imply matching semantics!
+
+
+= 3 New Namespaces =
+
+Complete documentation for all namespaces is in the source and API
+docs: http://richhickey.github.com/clojure/
+
+
+== 3.1 clojure.java.io ==
+
+Java I/O libraries distilled from the duck-streams and io namespaces
+in clojure-contrib.
+
+
+== 3.2 clojure.java.javadoc ==
+
+Launch a Javadoc browser from the REPL, promoted from the javadoc and
+repl-util namespace in clojure-contrib.
+
+
+== 3.3 clojure.java.shell ==
+
+Utilities for launching a subprocess, promoted from shell-out
+namespace in clojure-contrib.
+
+
+== 3.4 clojure.pprint ==
+
+Pretty-printer for Clojure, promoted from pprint in clojure-contrib.
+
+
+== 3.5 clojure.repl ==
+
+Utilities for a more pleasant REPL experience, promoted from the
+repl-utils and ns-utils namespaces in clojure-contrib.
+
+
+== 3.6 clojure.string ==
+
+String utilities promoted from the str-utils, str-utils2, str-utils3,
+and string namespaces in clojure-contrib.
+
+
+= 4 Performance Enhancements =
+
+Many functions have improved performance in Clojure 1.2:
+    
+  aget
+  array-map
+  aset
+  bit-shift-left
+  bit-shift-right
+  boolean
+  byte
+  count
+  count
+  double
+  false?
+  float
+  future-call
+  get
+  get
+  into
+  keyword
+  line-seq
+  long
+  nil?
+  nth
+  promise
+  re-seq
+  reduce
+  resultset-seq
+  set
+  short
+  true?
+  vector
+   
+= 5 Bug Fixes = 
+
+Please see the complete list at 
+https://www.assembla.com/spaces/ticket_reports/show/13167?space_id=clojure.
