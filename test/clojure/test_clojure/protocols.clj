@@ -192,6 +192,11 @@
     (is (= {:foo 1 :b 2} (set/rename-keys rec {:a :foo})))
     (is (= {:a 11 :b 2 :c 10} (merge-with + rec {:a 10 :c 10})))))
 
+(deftest degenerate-defrecord-test
+  (let [empty (EmptyRecord.)]
+    (is (nil? (seq empty)))
+    (is (not (.containsValue empty :a)))))
+
 (deftest defrecord-interfaces-test
   (testing "java.util.Map"
     (let [rec (r 1 2)]
