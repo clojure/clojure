@@ -195,8 +195,8 @@
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
                                               (clojure.lang.MapEntry. k# v#))))
-                   `(seq [this#] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
-                                          ~'__extmap))
+                   `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                                              ~'__extmap)))
                    `(assoc [this# k# ~gs]
                      (condp identical? k#
                        ~@(mapcat (fn [fld]
@@ -212,7 +212,7 @@
                  (conj m
                        `(size [this#] (.count this#))
                        `(isEmpty [this#] (= 0 (.count this#)))
-                       `(containsValue [this# v#] (-> this# vals (.contains v#)))
+                       `(containsValue [this# v#] (boolean (some #{v#} (vals this#))))
                        `(get [this# k#] (.valAt this# k#))
                        `(put [this# k# v#] (throw (UnsupportedOperationException.)))
                        `(remove [this# k#] (throw (UnsupportedOperationException.)))
