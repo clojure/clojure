@@ -13,6 +13,11 @@
 package clojure.lang;
 
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.lang.ref.SoftReference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.Reference;
 
 public class Util{
 static public boolean equiv(Object k1, Object k2){
@@ -89,4 +94,17 @@ static public ISeq ret1(ISeq ret, Object nil){
 		return ret;
 }
 
+static public <K,V> void clearCache(ReferenceQueue rq, ConcurrentHashMap<K, SoftReference<V>> cache){
+		//cleanup any dead entries
+	if(rq.poll() != null)
+		{
+		while(rq.poll() != null)
+			;
+		for(Map.Entry<K, SoftReference<V>> e : cache.entrySet())
+			{
+			if(e.getValue().get() == null)
+				cache.remove(e.getKey(), e.getValue());
+			}
+		}
+}
 }
