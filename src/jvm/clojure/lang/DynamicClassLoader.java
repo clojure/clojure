@@ -14,17 +14,16 @@ package clojure.lang;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.net.URLClassLoader;
 import java.net.URL;
-import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
-static ConcurrentHashMap<String, WeakReference<Class> >classCache =
-        new ConcurrentHashMap<String, WeakReference<Class> >();
+static ConcurrentHashMap<String, SoftReference<Class>>classCache =
+        new ConcurrentHashMap<String, SoftReference<Class> >();
 
 static final URL[] EMPTY_URLS = new URL[]{};
 
@@ -43,13 +42,13 @@ public DynamicClassLoader(ClassLoader parent){
 
 public Class defineClass(String name, byte[] bytes, Object srcForm){
 	Class c = defineClass(name, bytes, 0, bytes.length);
-    classCache.put(name, new WeakReference(c,rq));
+    classCache.put(name, new SoftReference(c,rq));
 	//cleanup any dead entries
 	if(rq.poll() != null)
 		{
 		while(rq.poll() != null)
 			;
-		for(Map.Entry<String,WeakReference<Class>> e : classCache.entrySet())
+		for(Map.Entry<String,SoftReference<Class>> e : classCache.entrySet())
 			{
 			if(e.getValue().get() == null)
 				classCache.remove(e.getKey(), e.getValue());
@@ -59,7 +58,7 @@ public Class defineClass(String name, byte[] bytes, Object srcForm){
 }
 
 protected Class<?> findClass(String name) throws ClassNotFoundException{
-    WeakReference<Class> cr = classCache.get(name);
+    SoftReference<Class> cr = classCache.get(name);
 	if(cr != null)
 		{
 		Class c = cr.get();
