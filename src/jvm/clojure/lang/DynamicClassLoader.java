@@ -41,19 +41,9 @@ public DynamicClassLoader(ClassLoader parent){
 }
 
 public Class defineClass(String name, byte[] bytes, Object srcForm){
+	Util.clearCache(rq, classCache);
 	Class c = defineClass(name, bytes, 0, bytes.length);
     classCache.put(name, new SoftReference(c,rq));
-	//cleanup any dead entries
-	if(rq.poll() != null)
-		{
-		while(rq.poll() != null)
-			;
-		for(Map.Entry<String,SoftReference<Class>> e : classCache.entrySet())
-			{
-			if(e.getValue().get() == null)
-				classCache.remove(e.getKey(), e.getValue());
-			}
-		}
     return c;
 }
 
