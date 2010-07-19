@@ -179,7 +179,7 @@ always imply matching semantics!
 = 3 New Namespaces =
 
 Complete documentation for all namespaces is in the source and API
-docs: http://richhickey.github.com/clojure/
+docs: http://clojure.github.com/clojure/
 
 
 == 3.1 clojure.java.io ==
@@ -229,12 +229,10 @@ Many functions have improved performance in Clojure 1.2:
   boolean
   byte
   count
-  count
   double
   false?
   float
   future-call
-  get
   get
   into
   keyword
