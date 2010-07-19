@@ -207,18 +207,10 @@ to Clojure's assortment of built-in maps (hash-map and sorted-map).
   ; cons defines conj behavior
   (cons [this e] (let [[item priority] e] (.assoc this item priority)))
 
-  ;This implementation of equiv is a direct translation of the one found in APersistentMap
-  (equiv [this o]
-    (cond
-      (not (instance? Map o)) false
-      (not= (count this) (count o)) false
-      :else (loop [s (.seq this)]
-              (if (nil? s) true
-                (let [^java.util.Map$Entry e (first s),
-                      found (.containsKey ^Map o (.getKey e))]
-                  (if (or (not found) (not (clojure.lang.Util/equiv (.getValue e) (.get ^Map o (.getKey e)))))
-                    false
-                    (recur (next s))))))))
+  ; Like sorted maps, priority maps are equal to other maps provided
+  ; their key-value pairs are the same.
+  (equiv [this o] (= item->priority o))
+  (hashCode [this] (.hashCode item->priority))
 
   ;containsKey implements (contains? pm k) behavior
   (containsKey [this item] (contains? item->priority item))
@@ -328,6 +320,7 @@ Returns a new priority map with supplied mappings"
         h {:a 2 :b 1 :c 3 :d 5 :e 4 :f 3}]
     (are [x y] (= x y)
       p {:a 2 :b 1 :c 3 :d 5 :e 4 :f 3}
+      (.hashCode p) (.hashCode {:a 2 :b 1 :c 3 :d 5 :e 4 :f 3})
       (assoc p :g 1) (assoc h :g 1)
       (assoc p :g 0) (assoc h :g 0)
       (assoc p :c 4) (assoc h :c 4)
