@@ -113,7 +113,7 @@ user=> (priority-map-by (comparator >) :a 1 :b 2 :c 3)
 All of these operations are efficient.  Generally speaking, most operations
 are O(log n) where n is the number of distinct priorities.  Some operations
 (for example, straightforward lookup of an item's priority, or testing
-  whether a given item is in the priority map) are as efficient
+whether a given item is in the priority map) are as efficient
 as Clojure's built-in map.
 
 The key to this efficiency is that internally, not only does the priority map store
@@ -137,7 +137,7 @@ it would be if based upon a heap data structure, but I feel this is a small conc
 the blend of persistence, priority reassignment, and priority-sorted seq, which can be
 quite expensive to achieve with a heap (I did actually try this for comparison).  Furthermore,
 this peek's logarithmic behavior is quite good (on my computer I can do a million
-                                                 peeks at a priority map with a million items in 750ms).  Also, consider that peek and pop
+peeks at a priority map with a million items in 750ms).  Also, consider that peek and pop
 usually follow one another, and even with a heap, pop is logarithmic.  So the net combination
 of peek and pop is not much different between this versatile formulation of a priority map and
 a more limited heap-based one.  In a nutshell, peek, although not O(1), is unlikely to be the
