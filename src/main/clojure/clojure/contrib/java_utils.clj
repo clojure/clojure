@@ -6,31 +6,11 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-;   Design goals:
-;
-;   (1) Ease-of-use. These APIs should be convenient. Performance is secondary.
-;
-;   (2) Duck typing. I hate having to think about the difference between
-;       a string that names a file, and a File. Ditto for a ton of other 
-;       wrapper classes in the Java world (URL, InternetAddress). With these
-;       APIs you should be able to think about domain equivalence, not type
-;       equivalence.
-;
-;   (3) No bossiness. I am not marking any of these functions as private;
-;       the docstrings will tell you the intended usage but do what works for you. 					
-;
-;   Feedback welcome!
-;
-;   If something in this module violates the principle of least surprise, please 
-;   let me (Stu) and the Clojure community know via the mailing list.
-;
-;   Contributors:
-;
-;   Stuart Halloway
-;   Stephen C. Gilardi
-;   Shawn Hoover
-;   Perry Trolard
-;   Stuart Sierra
+;;
+;; CHANGELOG
+;;
+;; Most functions deprecated in 1.2. Some already exist in c.c.io, and
+;; some replaced by c.c.reflections
 
 (ns 
   ^{:author "Stuart Halloway, Stephen C. Gilardi, Shawn Hoover, Perry Trolard, Stuart Sierra",
@@ -53,6 +33,13 @@
 
    If something in this module violates the principle of least surprise, please 
    let me (Stu) and the Clojure community know via the mailing list.
+   Contributors:
+
+   Stuart Halloway
+   Stephen C. Gilardi
+   Shawn Hoover
+   Perry Trolard
+   Stuart Sierra
 "}
   clojure.contrib.java-utils
   (:import [java.io File FileOutputStream]
@@ -62,6 +49,7 @@
 (defmulti relative-path-string 
   "Interpret a String or java.io.File as a relative path string. 
    Building block for clojure.contrib.java-utils/file."
+  {:deprecated "1.2"}
   class)
 
 (defmethod relative-path-string String [^String s]
@@ -76,12 +64,14 @@
   "Interpret a String or a java.io.File as a File. Building block
    for clojure.contrib.java-utils/file, which you should prefer
    in most cases."
+  {:deprecated "1.2"}
   class)
 (defmethod as-file String [^String s] (File. s))
 (defmethod as-file File [f] f)
 
 (defn ^File file
   "Returns a java.io.File from string or file args."
+  {:deprecated "1.2"}
   ([arg]                      
      (as-file arg))
   ([parent child]             
@@ -103,6 +93,7 @@
   Example:
      (str {:foo :bar})     ;;=> \"{:foo :bar}\"
      (as-str {:foo :bar})  ;;=> \"{:foo :bar}\" "
+  {:deprecated "1.2"}
   ([] "")
   ([x] (if (instance? clojure.lang.Named x)
          (name x)
@@ -177,6 +168,7 @@
 
 (defn delete-file
   "Delete file f. Raise an exception if it fails unless silently is true."
+  {:deprecated "1.2"}
   [f & [silently]]
   (or (.delete (file f))
       silently
@@ -185,6 +177,7 @@
 (defn delete-file-recursively
   "Delete file f. If it's a directory, recursively delete all its contents.
 Raise an exception if any deletion fails unless silently is true."
+  {:deprecated "1.2"}
   [f & [silently]]
   (let [f (file f)]
     (if (.isDirectory f)
@@ -193,8 +186,9 @@ Raise an exception if any deletion fails unless silently is true."
     (delete-file f silently)))
 
 (defmulti
-  ^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
-     :arglists '([arg])}
+  ^{:deprecated "1.2"
+    :doc "Coerces argument (URL, URI, or String) to a java.net.URL."
+    :arglists '([arg])}
   as-url type)
 
 (defmethod as-url URL [x] x)
@@ -210,6 +204,7 @@ Raise an exception if any deletion fails unless silently is true."
    params is a vector of class which correspond to the arguments to the method
    obj is nil for static methods, the instance object otherwise
    the method name is given as a symbol or a keyword (something Named)"
+  {:deprecated "1.2"}
   [class-name method-name params obj & args]
   (-> class-name (.getDeclaredMethod (name method-name) (into-array Class params))
     (doto (.setAccessible true))
@@ -217,6 +212,7 @@ Raise an exception if any deletion fails unless silently is true."
 
 (defn wall-hack-field
   "Access to private or protected field."
+  {:deprecated "1.2"}
   [class-name field-name obj]
   (-> class-name (.getDeclaredField (name field-name))
     (doto (.setAccessible true))
