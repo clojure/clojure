@@ -26,6 +26,8 @@
 
 ;; CHANGE LOG
 ;;
+;; July 23, 2010: DEPRECATED in 1.2. Use clojure.java.io instead.
+;;
 ;; May 13, 2009: added functions to open writers for appending
 ;;
 ;; May 3, 2009: renamed file to file-str, for compatibility with
@@ -43,10 +45,9 @@
 ;;
 ;; April 8, 2008: first version
 
-
-
 (ns 
-  ^{:author "Stuart Sierra",
+   ^{:author "Stuart Sierra",
+     :deprecated "1.2"
      :doc "This file defines \"duck-typed\" I/O utility functions for Clojure.
            The 'reader' and 'writer' functions will open and return an
            instance of java.io.BufferedReader and java.io.PrintWriter,
