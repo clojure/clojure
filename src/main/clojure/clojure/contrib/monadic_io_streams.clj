@@ -26,7 +26,7 @@
   (:use [clojure.contrib.monads
 	 :only (with-monad domonad state-m state-m-until)])
   (:use [clojure.contrib.generic.functor :only (fmap)])
-  (:use [clojure.contrib.io :only (reader writer)]))
+  (:use [clojure.java.io :only (reader writer)]))
 
 ;
 ; Wrap the state into a closure to make sure that "evil" code
