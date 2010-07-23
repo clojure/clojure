@@ -14,16 +14,20 @@
 
 ;; Change Log
 ;;
+;; DEPRECATED in 1.2. Some functions promoted to clojure.core and some
+;; moved to c.c.seq
+;;
 ;; January 10, 2009 (Stuart Sierra):
 ;;
 ;; * BREAKING CHANGE: "includes?" now takes collection as first
 ;;   argument.  This is more consistent with Clojure collection
 ;;   functions; see discussion at http://groups.google.com/group/clojure/browse_thread/thread/8b2c8dc96b39ddd7/a8866d34b601ff43
-
+;;
 
 (ns 
   ^{:author "Stuart Sierra (and others)",
-     :doc "Sequence utilities for Clojure"}
+    :deprecated "1.2"
+    :doc "Sequence utilities for Clojure"}
   clojure.contrib.seq-utils
   (:import (java.util.concurrent LinkedBlockingQueue TimeUnit)
            (java.lang.ref WeakReference))
