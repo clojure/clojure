@@ -11,10 +11,13 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
+;; DEPRECATED in 1.2: Promoted to clojure.java.string. Note that
+;; many function names and semantics have changed
 
 (ns 
   ^{:author "Stuart Sierra",
-     :doc "String utilities for Clojure"}
+    :deprecated "1.2"
+    :doc "String utilities for Clojure"}
   clojure.contrib.str-utils
   (:import (java.util.regex Pattern)))
 

@@ -1,4 +1,4 @@
-;;; str_utils3.clj -- functional string utilities for Clojure
+;;; string.clj -- functional string utilities for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
 ;; January 26, 2010
@@ -11,6 +11,7 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
+;; DEPRECATED in 1.2: Many functions have moved to clojure.string.
 
 (ns ^{:author "Stuart Sierra"
        :doc "This is a library of string manipulation functions.  It
@@ -91,6 +92,7 @@
   "Returns a new String by applying cmap (a function or a map) to each
    character in s.  If cmap returns nil, the original character is
    added to the output unchanged."
+   {:deprecated "1.2"}
   [cmap ^String s]
   (let [buffer (StringBuilder. (.length s))]
     (dochars [c s]
@@ -101,6 +103,7 @@
 
 (defn blank?
   "True if s is nil, empty, or contains only whitespace."
+  {:deprecated "1.2"}
   [^String s]
   (every? (fn [^Character c] (Character/isWhitespace c)) s))
 
@@ -141,27 +144,32 @@
 
 (defn ^String reverse
   "Returns s with its characters reversed."
+  {:deprecated "1.2"}
   [^String s]
   (.toString (.reverse (StringBuilder. s))))
 
 (defn replace-str
   "Replaces all instances of substring a with b in s."
+  {:deprecated "1.2"}
   [^String a ^String b ^String s]
   (.replace s a b))
 
 (defn replace-char
   "Replaces all instances of character a with character b in s."
+  {:deprecated "1.2"}
   [^Character a ^Character b ^String s]
   (.replace s a b))
 
 (defn replace-re
   "Replaces all matches of re with replacement in s."
+  {:deprecated "1.2"}
   [re replacement ^String s]
   (.replaceAll (re-matcher re s) replacement))
 
 (defn replace-by
   "Replaces all matches of re in s with the result of 
   (f (re-groups the-match))."
+  {:deprecated "1.2"}
   [re f ^String s]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer. (.length s))]
@@ -174,17 +182,20 @@
 
 (defn replace-first-str
   "Replace first occurance of substring a with b in s."
+  {:deprecated "1.2"}
   [^String a ^String b ^String s]
   (.replaceFirst (re-matcher (Pattern/quote a) s) b))
 
 (defn replace-first-re
   "Replace first match of re in s."
+  {:deprecated "1.2"}
   [^Pattern re ^String replacement ^String s]
   (.replaceFirst (re-matcher re s) replacement))
 
 (defn replace-first-by
   "Replace first match of re in s with the result of
   (f (re-groups the-match))."
+  {:deprecated "1.2"}
   [^Pattern re f ^String s]
   (let [m (re-matcher re s)]
     (let [buffer (StringBuffer.)]
@@ -218,6 +229,7 @@
 (defn ^String join
   "Returns a string of all elements in coll, separated by
   separator.  Like Perl's join."
+  {:deprecated "1.2"}
   [^String separator coll]
   (apply str (interpose separator coll)))
 
@@ -232,12 +244,11 @@
 
 (defn ^String chomp
   "Removes all trailing newline \\n or return \\r characters from
-  string.  Note: String.trim() is similar and faster."
+  string.  Note: String.trim() is similar and faster.
+  Deprecated in 1.2. Use clojure.string/trim-newline"
+  {:deprecated "1.2"}
   [^String s]
   (replace-re #"[\r\n]+$" "" s))
-
-(defn title-case [^String s]
-  (throw (Exception. "title-case not implemeted yet")))
 
 (defn ^String swap-case
   "Changes upper case characters to lower case and vice-versa.
@@ -260,6 +271,7 @@
 (defn ^String capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
+  {:deprecated "1.2"}
   [^String s]
   (if (< (count s) 2)
     (.toUpperCase s)
@@ -267,17 +279,22 @@
          (.toLowerCase ^String (subs s 1)))))
 
 (defn ^String ltrim
-  "Removes whitespace from the left side of string."
+  "Removes whitespace from the left side of string.
+   Deprecated in 1.2. Use clojure.string/triml."
+  {:deprecated "1.2"}
   [^String s]
   (replace-re #"^\s+" "" s))
 
 (defn ^String rtrim
-  "Removes whitespace from the right side of string."
+  "Removes whitespace from the right side of string.
+   Deprecated in 1.2. Use clojure.string/trimr."
+  {:deprecated "1.2"}
   [^String s]
   (replace-re #"\s+$" "" s))
 
 (defn split-lines
   "Splits s on \\n or \\r\\n."
+  {:deprecated "1.2"}
   [^String s]
   (seq (.split #"\r?\n" s)))
 
@@ -329,22 +346,26 @@
 
 (defn ^String upper-case
   "Converts string to all upper-case."
+  {:deprecated "1.2"}
   [^String s]
   (.toUpperCase s))
 
 (defn ^String lower-case
   "Converts string to all lower-case."
+  {:deprecated "1.2"}
   [^String s]
   (.toLowerCase s))
 
 (defn split
   "Splits string on a regular expression.  Optional argument limit is
   the maximum number of splits."
+  {:deprecated "1.2"}
   ([^Pattern re ^String s] (seq (.split re s)))
   ([^Pattern re limit ^String s] (seq (.split re s limit))))
 
 (defn ^String trim
   "Removes whitespace from both ends of string."
+  {:deprecated "1.2"}
   [^String s]
   (.trim s))
 
@@ -355,6 +376,7 @@
 
 (defn ^String get
   "Gets the i'th character in string."
+  {:deprecated "1.2"}
   [^String s i]
   (.charAt s i))
 
