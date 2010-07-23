@@ -11,9 +11,10 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
+;; DEPRECATED in 1.2: Moved to clojure.test
 
-
-(ns ^{:doc "Backwards-compatibility for clojure.contrib.test-is
+(ns ^{:deprecated "1.2"
+      :doc "Backwards-compatibility for clojure.contrib.test-is
 
   The clojure.contrib.test-is library moved from Contrib into the
   Clojure distribution as clojure.test.
