@@ -15,8 +15,7 @@
 (ns
   ^{:author "Chas Emerick",
      :doc "String interpolation for Clojure."}
-  clojure.contrib.strint
- (:use [clojure.contrib.io :only (slurp*)]))
+  clojure.contrib.strint)
 
 (defn- silent-read
   "Attempts to clojure.core/read a single form from the provided String, returning
@@ -26,7 +25,7 @@
   [s]
   (try
     (let [r (-> s java.io.StringReader. java.io.PushbackReader.)]
-      [(read r) (slurp* r)])
+      [(read r) (slurp r)])
     (catch Exception e))) ; this indicates an invalid form -- the head of s is just string data
 
 (defn- interpolate
