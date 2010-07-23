@@ -11,9 +11,12 @@
 ; Conveniently launch a sub-process providing to its stdin and
 ; collecting its stdout
 
+;; DEPRECATED in 1.2: Promoted to clojure.java.shell
+
 (ns 
   ^{:author "Chris Houser",
-     :doc "Conveniently launch a sub-process providing to its stdin and
+    :deprecated "1.2"
+    :doc "Conveniently launch a sub-process providing to its stdin and
 collecting its stdout"}
   clojure.contrib.shell
   (:import (java.io InputStreamReader OutputStreamWriter)))
