@@ -1,4 +1,4 @@
-;;; duck_streams.clj -- duck-typed I/O streams for Clojure
+;;; io.clj -- duck-typed I/O streams for Clojure
 
 ;; by Stuart Sierra, http://stuartsierra.com/
 ;; May 13, 2009
@@ -25,6 +25,9 @@
 
 
 ;; CHANGE LOG
+;;
+;; July 23, 2010: Most functions here are deprecated. Use
+;; clojure.java.io
 ;;
 ;; May 13, 2009: added functions to open writers for appending
 ;;
@@ -277,6 +280,7 @@
 (defn append-output-stream
   "Like output-stream but opens file for appending.  Does not work on streams
   that are already open."
+  {:deprecated "1.2"}
   [x]
   (binding [*append* true]
     (output-stream x)))
@@ -284,6 +288,7 @@
 (defn append-writer
   "Like writer but opens file for appending.  Does not work on streams
   that are already open."
+  {:deprecated "1.2"}
   [x]
   (binding [*append* true]
     (writer x)))
@@ -312,6 +317,7 @@
 
 (defn ^String slurp*
   "Like clojure.core/slurp but opens f with reader."
+  {:deprecated "1.2"}
   [f]
   (with-open [^BufferedReader r (reader f)]
       (let [sb (StringBuilder.)]
@@ -324,12 +330,14 @@
 (defn spit
   "Opposite of slurp.  Opens f with writer, writes content, then
   closes f."
+  {:deprecated "1.2"}
   [f content]
   (with-open [^Writer w (writer f)]
     (.write w content)))
 
 (defn append-spit
   "Like spit but appends to file."
+  {:deprecated "1.2"}
   [f content]
   (with-open [^Writer w (append-writer f)]
     (.write w content)))
@@ -337,10 +345,9 @@
 (defn pwd
   "Returns current working directory as a String.  (Like UNIX 'pwd'.)
   Note: In Java, you cannot change the current working directory."
+  {:deprecated "1.2"}
   []
   (System/getProperty "user.dir"))
-
-
 
 (defmacro with-out-writer
   "Opens a writer on f, binds it to *out*, and evalutes body.
@@ -352,6 +359,7 @@
 
 (defmacro with-out-append-writer
   "Like with-out-writer but appends to file."
+  {:deprecated "1.2"}
   [f & body]
   `(with-open [stream# (append-writer ~f)]
      (binding [*out* stream#]
@@ -365,7 +373,8 @@
        ~@body)))
 
 (defmulti
-  ^{:doc "Copies input to output.  Returns nil.
+  ^{:deprecated "1.2"
+    :doc "Copies input to output.  Returns nil.
   Input may be an InputStream, Reader, File, byte[], or String.
   Output may be an OutputStream, Writer, or File.
 
@@ -459,7 +468,6 @@
 (defmethod copy [*byte-array-type* File] [^"[B" input ^Writer output]
   (copy (ByteArrayInputStream. input) output))
 
-
 (defn make-parents
   "Creates all parent directories of file."
   [^File file]
@@ -494,6 +502,7 @@
 (defmulti relative-path-string 
   "Interpret a String or java.io.File as a relative path string. 
    Building block for clojure.contrib.java/file."
+  {:deprecated "1.2"}
   class)
 
 (defmethod relative-path-string String [^String s]
@@ -508,12 +517,14 @@
   "Interpret a String or a java.io.File as a File. Building block
    for clojure.contrib.java/file, which you should prefer
    in most cases."
+  {:deprecated "1.2"}
   class)
 (defmethod as-file String [^String s] (File. s))
 (defmethod as-file File [f] f)
 
 (defn ^File file
   "Returns a java.io.File from string or file args."
+  {:deprecated "1.2"}
   ([arg]                      
      (as-file arg))
   ([parent child]             
@@ -539,8 +550,9 @@ Raise an exception if any deletion fails unless silently is true."
     (delete-file f silently)))
 
 (defmulti
-  ^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
-     :arglists '([arg])}
+  ^{:deprecated "1.2"
+    :doc "Coerces argument (URL, URI, or String) to a java.net.URL."
+    :arglists '([arg])}
   as-url type)
 
 (defmethod as-url URL [x] x)
