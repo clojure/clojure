@@ -1,3 +1,4 @@
-(ns clojure.contrib.javadoc)
+(ns ^{:deprecated "1.2"}
+  clojure.contrib.javadoc)
 
-(throw (Exception. "clojure.contrib.javadoc/javadoc can now be found in clojure.contrib.repl-utils."))
+(throw (Exception. "clojure.contrib.javadoc/javadoc can now be found in clojure.java.javadoc"))

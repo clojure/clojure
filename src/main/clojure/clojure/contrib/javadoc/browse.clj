@@ -11,7 +11,8 @@
 
 (ns 
   ^{:author "Christophe Grand",
-     :doc "Start a web browser from Clojure"}
+    :deprecated "1.2"
+    :doc "Start a web browser from Clojure"}
   clojure.contrib.javadoc.browse
   (:require [clojure.contrib.shell :as sh]) 
   (:import (java.net URI)))

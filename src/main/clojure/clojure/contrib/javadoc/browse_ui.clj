@@ -9,7 +9,8 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.contrib.javadoc.browse-ui)
+(ns ^{:deprecated "1.2"}
+  clojure.contrib.javadoc.browse-ui)
 
 (defn open-url-in-swing
   "Opens url (a string) in a Swing window."
