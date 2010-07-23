@@ -11,8 +11,11 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
+;; DEPRECATED IN 1.2. Use direct Java bits, or take a look at
+;;                    http://github.com/technomancy/clojure-http-client
 
-(ns ^{:doc "Agent-based asynchronous HTTP client.
+(ns ^{:deprecated "1.2"
+      :doc "Agent-based asynchronous HTTP client.
 
   This is a HTTP client library based on Java's HttpURLConnection
   class and Clojure's Agent system.  It allows you to make multiple

@@ -11,7 +11,11 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns ^{:doc "Low-level HTTP client API around HttpURLConnection"}
+;; DEPRECATED IN 1.2. Use direct Java bits, or take a look at
+;;                    http://github.com/technomancy/clojure-http-client
+
+(ns ^{:deprecated "1.2"
+      :doc "Low-level HTTP client API around HttpURLConnection"}
   clojure.contrib.http.connection
   (:require [clojure.contrib.io :as duck])
   (:import (java.net URI URL HttpURLConnection)
