@@ -9,11 +9,15 @@
 ;;   which can be found in the file epl-v10.html at the root of this distribution.
 ;;   By using this software in any fashion, you are agreeing to be bound by
 ;;   the terms of this license.
-;;   You must not remove this notice, or any other, from this software.
+;;   You must not remove this notice, or any other, from this
+;;   software.
+
+;; DEPRECATED in 1.2.  Promoted to clojure.pprint
 
 (ns 
     ^{:author "Tom Faulhaber",
-       :doc "This module comprises two elements:
+      :deprecated "1.2"
+      :doc "This module comprises two elements:
 1) A pretty printer for Clojure data structures, implemented in the 
    function \"pprint\"
 2) A Common Lisp compatible format function, implemented as 
