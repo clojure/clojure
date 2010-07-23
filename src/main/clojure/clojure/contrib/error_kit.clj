@@ -12,7 +12,7 @@
 ; or API adjustments.
 
 (ns 
-  #^{:author "Chris Houser",
+  ^{:author "Chris Houser",
      :doc "EXPERIMENTAL
 System for defining and using custom errors
 Please contact Chouser if you have any suggestions for better names
@@ -135,7 +135,7 @@ or API adjustments."}
   `[::continue '~continue-name [~@args]])
 
 
-(def #^{:doc "Special form to be used inside a 'with-handler'.  When
+(def ^{:doc "Special form to be used inside a 'with-handler'.  When
   any error is 'raised' from withing the dynamic scope of 'body' that
   is of error-name's type or a derived type, the args will be bound
   and the body executed.  If no 'error-name' is given, the body will
@@ -147,7 +147,7 @@ or API adjustments."}
                       [error-name? args-destruct-map-args & body])}
   handle)
 
-(def #^{:doc "Special form to be used inside a 'with-handler'.
+(def ^{:doc "Special form to be used inside a 'with-handler'.
   Control can be passed to this 'continue' form from a 'raise' enclosed
   in this with-handler's dynamic scope, when this 'continue-name' is
   given to a 'continue' form."

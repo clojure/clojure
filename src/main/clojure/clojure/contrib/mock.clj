@@ -51,7 +51,7 @@
   ) ;; end comment
 
 (ns clojure.contrib.mock
-  #^{:author "Matt Clark",
+  ^{:author "Matt Clark",
      :doc "function mocking/expectations for Clojure" }
   (:use [clojure.contrib.seq :only (positions)]
         [clojure.contrib.def :only (defmacro-)]))
@@ -177,7 +177,7 @@ increases count, returns return value.
 count checker for each dependency."
   [mock-data] (doseq [[mfn i checker fn-name] mock-data] (checker fn-name @i)))
 
-(defn #^{:private true} make-bindings [expect-bindings mock-data-sym]
+(defn ^{:private true} make-bindings [expect-bindings mock-data-sym]
   `[~@(interleave (map #(first %) (partition 2 expect-bindings))
         (map (fn [i] `(nth (nth ~mock-data-sym ~i) 0))
           (range (quot (count expect-bindings) 2))))])

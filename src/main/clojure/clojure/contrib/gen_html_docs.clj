@@ -42,7 +42,7 @@
 ;; * Remove the whojure dependency
 
 (ns 
-  #^{:author "Craig Andera",
+  ^{:author "Craig Andera",
      :doc "Generates a single HTML page that contains the documentation for
 one or more Clojure libraries."} 
   clojure.contrib.gen-html-docs

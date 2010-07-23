@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Complex numbers
            NOTE: This library is in evolution. Most math functions are
                  not implemented yet."}

@@ -9,7 +9,7 @@
 ; Process command-line arguments according to a given cmdspec
 
 (ns 
-    #^{:author "Chris Houser", 
+    ^{:author "Chris Houser", 
        :doc "Process command-line arguments according to a given cmdspec"}
     clojure.contrib.command-line
     (:use     (clojure.contrib [string :only (join)])))
@@ -60,7 +60,7 @@
 
 (defn- rmv-q
    "Remove ?"
-   [#^String s]
+   [^String s]
    (if (.endsWith s "?")
       (.substring s 0 (dec (count s)))
       s))

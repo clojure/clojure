@@ -15,7 +15,7 @@
 ;;  17 May 2008
 
 (ns 
-  #^{:author "Stephen C. Gilardi",
+  ^{:author "Stephen C. Gilardi",
     :doc "def.clj provides variants of def that make including doc strings and
 making private definitions more succinct."} 
   clojure.contrib.def)

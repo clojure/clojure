@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Random number streams
 
            This library provides random number generators with a common

@@ -32,13 +32,13 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra, Michel Salim",
+  ^{:author "Stuart Sierra, Michel Salim",
      :doc "This file defines simple \"tracing\" macros to help you see what your
 code is doing."}
   clojure.contrib.trace)
 
 (def
- #^{:doc "Current stack depth of traced function calls."}
+ ^{:doc "Current stack depth of traced function calls."}
  *trace-depth* 0)
 
 (defn tracer

@@ -13,7 +13,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "Utilities for dealing with the JVM's classpath"}
   clojure.contrib.classpath
   (:require [clojure.contrib.jar :as jar])

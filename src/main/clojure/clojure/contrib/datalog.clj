@@ -18,7 +18,7 @@
 
 
 (ns 
-  #^{:author "Jeffrey Straszheim",
+  ^{:author "Jeffrey Straszheim",
      :doc "A Clojure implementation of Datalog"} 
   clojure.contrib.datalog
   (:use clojure.contrib.datalog.rules

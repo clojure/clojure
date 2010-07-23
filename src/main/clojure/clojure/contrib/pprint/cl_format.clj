@@ -61,7 +61,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
         navigator (init-navigator args)]
     (execute-format writer compiled-format navigator)))
 
-(def #^{:private true} *format-str* nil)
+(def ^{:private true} *format-str* nil)
 
 (defn- format-error [message offset] 
   (let [full-message (str message \newline *format-str* \newline 
@@ -74,7 +74,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 ;;; (possibly going forwards and backwards as it does so)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defstruct #^{:private true}
+(defstruct ^{:private true}
   arg-navigator :seq :rest :pos )
 
 (defn init-navigator 
@@ -118,7 +118,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
       (absolute-reposition navigator newpos)
       (struct arg-navigator (:seq navigator) (drop position (:rest navigator)) newpos))))
 
-(defstruct #^{:private true}
+(defstruct ^{:private true}
   compiled-directive :func :def :params :offset)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -160,7 +160,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 
 (declare opt-base-str)
 
-(def #^{:private true}
+(def ^{:private true}
      special-radix-markers {2 "#b" 8 "#o", 16 "#x"})
 
 (defn- format-simple-number [n]
@@ -179,7 +179,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 
 (defn- format-ascii [print-func params arg-navigator offsets]
   (let [ [arg arg-navigator] (next-arg arg-navigator) 
-         #^String base-output (or (format-simple-number arg) (print-func arg))
+         ^String base-output (or (format-simple-number arg) (print-func arg))
          base-width (.length base-output)
          min-width (+ base-width (:minpad params))
          width (if (>= min-width (:mincol params)) 
@@ -207,7 +207,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
    (integer? x) true
    (decimal? x) (>= (.ulp (.stripTrailingZeros (bigdec 0))) 1) ; true iff no fractional part
    (float? x)   (= x (Math/floor x))
-   (ratio? x)   (let [#^clojure.lang.Ratio r x]
+   (ratio? x)   (let [^clojure.lang.Ratio r x]
                   (= 0 (rem (.numerator r) (.denominator r))))
    :else        false))
 
@@ -229,7 +229,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
     "0"
     (let [xlated-val (cond
                        (float? val) (bigdec val)
-                       (ratio? val) (let [#^clojure.lang.Ratio r val] 
+                       (ratio? val) (let [^clojure.lang.Ratio r val] 
                                       (/ (.numerator r) (.denominator r)))
                        :else val)] 
       (apply str 
@@ -237,7 +237,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
               #(if (< % 10) (char (+ (int \0) %)) (char (+ (int \a) (- % 10)))) 
               (remainders base val))))))
 
-(def #^{:private true}
+(def ^{:private true}
      java-base-formats {8 "%o", 10 "%d", 16 "%x"})
 
 (defn- opt-base-str
@@ -265,7 +265,7 @@ for improved performance"
                               commas (repeat (count groups) (:commachar params))]
                           (apply str (next (interleave commas groups))))
                         raw-str)
-            #^String signed-str (cond
+            ^String signed-str (cond
                                   neg (str "-" group-str)
                                   (:at params) (str "+" group-str)
                                   true group-str)
@@ -284,23 +284,23 @@ for improved performance"
 ;;; Support for english formats (~R and ~:R)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def #^{:private true}
+(def ^{:private true}
      english-cardinal-units 
      ["zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine"
       "ten" "eleven" "twelve" "thirteen" "fourteen"
       "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
 
-(def #^{:private true}
+(def ^{:private true}
      english-ordinal-units 
      ["zeroth" "first" "second" "third" "fourth" "fifth" "sixth" "seventh" "eighth" "ninth"
       "tenth" "eleventh" "twelfth" "thirteenth" "fourteenth"
       "fifteenth" "sixteenth" "seventeenth" "eighteenth" "nineteenth"])
 
-(def #^{:private true}
+(def ^{:private true}
      english-cardinal-tens
      ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
 
-(def #^{:private true}
+(def ^{:private true}
      english-ordinal-tens
      ["" "" "twentieth" "thirtieth" "fortieth" "fiftieth"
       "sixtieth" "seventieth" "eightieth" "ninetieth"])
@@ -309,7 +309,7 @@ for improved performance"
 ;; Number names from http://www.jimloy.com/math/billion.htm
 ;; We follow the rules for writing numbers from the Blue Book
 ;; (http://www.grammarbook.com/numbers/numbers.asp)
-(def #^{:private true}
+(def ^{:private true}
      english-scale-numbers 
      ["" "thousand" "million" "billion" "trillion" "quadrillion" "quintillion" 
       "sextillion" "septillion" "octillion" "nonillion" "decillion" 
@@ -434,14 +434,14 @@ Note this should only be used for the last one in the sequence"
 ;;; Support for roman numeral formats (~@R and ~@:R)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def #^{:private true}
+(def ^{:private true}
      old-roman-table
      [[ "I" "II" "III" "IIII" "V" "VI" "VII" "VIII" "VIIII"]
       [ "X" "XX" "XXX" "XXXX" "L" "LX" "LXX" "LXXX" "LXXXX"]
       [ "C" "CC" "CCC" "CCCC" "D" "DC" "DCC" "DCCC" "DCCCC"]
       [ "M" "MM" "MMM"]])
 
-(def #^{:private true}
+(def ^{:private true}
      new-roman-table
      [[ "I" "II" "III" "IV" "V" "VI" "VII" "VIII" "IX"]
       [ "X" "XX" "XXX" "XL" "L" "LX" "LXX" "LXXX" "XC"]
@@ -482,7 +482,7 @@ Note this should only be used for the last one in the sequence"
 ;;; Support for character formats (~C)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def #^{:private true} 
+(def ^{:private true} 
      special-chars { 8 "Backspace", 9 "Tab",  10 "Newline", 13 "Return", 32 "Space"})
 
 (defn- pretty-character [params navigator offsets]
@@ -539,8 +539,8 @@ Note this should only be used for the last one in the sequence"
 ;; TODO - return exponent as int to eliminate double conversion
 (defn- float-parts-base
   "Produce string parts for the mantissa (normalized 1-9) and exponent"
-  [#^Object f]
-  (let [#^String s (.toLowerCase (.toString f))
+  [^Object f]
+  (let [^String s (.toLowerCase (.toString f))
         exploc (.indexOf s (int \e))]
     (if (neg? exploc)
       (let [dotloc (.indexOf s (int \.))]
@@ -553,11 +553,11 @@ Note this should only be used for the last one in the sequence"
 (defn- float-parts
   "Take care of leading and trailing zeros in decomposed floats"
   [f]
-  (let [[m #^String e] (float-parts-base f)
+  (let [[m ^String e] (float-parts-base f)
         m1 (rtrim m \0)
         m2 (ltrim m1 \0)
         delta (- (count m1) (count m2))
-        #^String e (if (and (pos? (count e)) (= (nth e 0) \+)) (subs e 1) e)]
+        ^String e (if (and (pos? (count e)) (= (nth e 0) \+)) (subs e 1) e)]
     (if (empty? m2)
       ["0" 0]
       [m2 (- (Integer/valueOf e) delta)])))
@@ -578,7 +578,7 @@ Note this should only be used for the last one in the sequence"
           ["0" 0 false]
           (if (> len round-pos)
             (let [round-char (nth m1 round-pos)
-                  #^String result (subs m1 0 round-pos)]
+                  ^String result (subs m1 0 round-pos)]
               (if (>= (int round-char) (int \5))
                 (let [result-val (Integer/valueOf result)
                       leading-zeros (subs result 0 (min (prefix-count result \0) (- round-pos 1)))
@@ -670,7 +670,7 @@ Note this should only be used for the last one in the sequence"
             expchar (or (:exponentchar params) \E)
             add-sign (or (:at params) (neg? arg))
             prepend-zero (<= k 0)
-            #^Integer scaled-exp (- exp (dec k))
+            ^Integer scaled-exp (- exp (dec k))
             scaled-exp-str (str (Math/abs scaled-exp))
             scaled-exp-str (str expchar (if (neg? scaled-exp) \- \+) 
                                 (if e (apply str 
@@ -756,14 +756,14 @@ Note this should only be used for the last one in the sequence"
 ;; the function to render ~$ directives
 ;; TODO: support rationals. Back off to ~D/~A is the appropriate cases
 (defn- dollar-float [params navigator offsets]
-  (let [[#^Double arg navigator] (next-arg navigator)
+  (let [[^Double arg navigator] (next-arg navigator)
         [mantissa exp] (float-parts (Math/abs arg))
         d (:d params) ; digits after the decimal
         n (:n params) ; minimum digits before the decimal
         w (:w params) ; minimum field width
         add-sign (or (:at params) (neg? arg))
         [rounded-mantissa scaled-exp expanded] (round-str mantissa exp d nil)
-        #^String fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
+        ^String fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
         full-repr (str (apply str (repeat (- n (.indexOf fixed-repr (int \.))) \0)) fixed-repr)
         full-len (+ (count full-repr) (if add-sign 1 0))]
     (print (str
@@ -1012,45 +1012,45 @@ Note this should only be used for the last one in the sequence"
 
 (defn- downcase-writer 
   "Returns a proxy that wraps writer, converting all characters to lower case"
-  [#^java.io.Writer writer]
+  [^java.io.Writer writer]
   (proxy [java.io.Writer] []
     (close [] (.close writer))
     (flush [] (.flush writer))
-    (write ([#^chars cbuf #^Integer off #^Integer len] 
+    (write ([^chars cbuf ^Integer off ^Integer len] 
               (.write writer cbuf off len))
            ([x]
               (condp = (class x)
 		String 
-		(let [s #^String x]
+		(let [s ^String x]
 		  (.write writer (.toLowerCase s)))
 
 		Integer
-		(let [c #^Character x]
+		(let [c ^Character x]
 		  (.write writer (int (Character/toLowerCase (char c))))))))))
 
 (defn- upcase-writer 
   "Returns a proxy that wraps writer, converting all characters to upper case"
-  [#^java.io.Writer writer]
+  [^java.io.Writer writer]
   (proxy [java.io.Writer] []
     (close [] (.close writer))
     (flush [] (.flush writer))
-    (write ([#^chars cbuf #^Integer off #^Integer len] 
+    (write ([^chars cbuf ^Integer off ^Integer len] 
               (.write writer cbuf off len))
            ([x]
               (condp = (class x)
 		String 
-		(let [s #^String x]
+		(let [s ^String x]
 		  (.write writer (.toUpperCase s)))
 
 		Integer
-		(let [c #^Character x]
+		(let [c ^Character x]
 		  (.write writer (int (Character/toUpperCase (char c))))))))))
 
 (defn- capitalize-string
   "Capitalizes the words in a string. If first? is false, don't capitalize the 
                                       first character of the string even if it's a letter."
   [s first?]
-  (let [#^Character f (first s) 
+  (let [^Character f (first s) 
         s (if (and first? f (Character/isLetter f))
             (str (Character/toUpperCase f) (subs s 1))
             s)]
@@ -1065,51 +1065,51 @@ Note this should only be used for the last one in the sequence"
                        offset (and match (inc (.start m)))]
                    (if offset
                      [(str (subs s 0 offset) 
-                           (Character/toUpperCase #^Character (nth s offset)))
+                           (Character/toUpperCase ^Character (nth s offset)))
                       (subs s (inc offset))]
                      [s nil]))))
              s)))))
 
 (defn- capitalize-word-writer
   "Returns a proxy that wraps writer, captializing all words"
-  [#^java.io.Writer writer]
+  [^java.io.Writer writer]
   (let [last-was-whitespace? (ref true)] 
     (proxy [java.io.Writer] []
       (close [] (.close writer))
       (flush [] (.flush writer))
       (write 
-       ([#^chars cbuf #^Integer off #^Integer len] 
+       ([^chars cbuf ^Integer off ^Integer len] 
           (.write writer cbuf off len))
        ([x]
           (condp = (class x)
             String 
-            (let [s #^String x]
+            (let [s ^String x]
               (.write writer 
-                      #^String (capitalize-string (.toLowerCase s) @last-was-whitespace?))
+                      ^String (capitalize-string (.toLowerCase s) @last-was-whitespace?))
               (dosync 
                (ref-set last-was-whitespace? 
                         (Character/isWhitespace 
-                         #^Character (nth s (dec (count s)))))))
+                         ^Character (nth s (dec (count s)))))))
 
             Integer
             (let [c (char x)]
-              (let [mod-c (if @last-was-whitespace? (Character/toUpperCase #^Character (char x)) c)] 
+              (let [mod-c (if @last-was-whitespace? (Character/toUpperCase ^Character (char x)) c)] 
                 (.write writer (int mod-c))
-                (dosync (ref-set last-was-whitespace? (Character/isWhitespace #^Character (char x))))))))))))
+                (dosync (ref-set last-was-whitespace? (Character/isWhitespace ^Character (char x))))))))))))
 
 (defn- init-cap-writer
   "Returns a proxy that wraps writer, capitalizing the first word"
-  [#^java.io.Writer writer]
+  [^java.io.Writer writer]
   (let [capped (ref false)] 
     (proxy [java.io.Writer] []
       (close [] (.close writer))
       (flush [] (.flush writer))
-      (write ([#^chars cbuf #^Integer off #^Integer len] 
+      (write ([^chars cbuf ^Integer off ^Integer len] 
                 (.write writer cbuf off len))
              ([x]
                 (condp = (class x)
                  String 
-                 (let [s (.toLowerCase #^String x)]
+                 (let [s (.toLowerCase ^String x)]
                    (if (not @capped) 
                      (let [m (re-matcher #"\S" s)
                            match (re-find m)
@@ -1117,14 +1117,14 @@ Note this should only be used for the last one in the sequence"
                        (if offset
                          (do (.write writer 
                                    (str (subs s 0 offset) 
-                                        (Character/toUpperCase #^Character (nth s offset))
-                                        (.toLowerCase #^String (subs s (inc offset)))))
+                                        (Character/toUpperCase ^Character (nth s offset))
+                                        (.toLowerCase ^String (subs s (inc offset)))))
                            (dosync (ref-set capped true)))
                          (.write writer s))) 
                      (.write writer (.toLowerCase s))))
 
                  Integer
-                 (let [c #^Character (char x)]
+                 (let [c ^Character (char x)]
                    (if (and (not @capped) (Character/isLetter c))
                      (do
                        (dosync (ref-set capped true))
@@ -1230,10 +1230,10 @@ N.B. Only works on ColumnWriters right now."
     :bracket-info bracket-info,
     :generator-fn (concat '(fn [ params offset]) generator-fn) }])
 
-(defmacro #^{:private true}
+(defmacro ^{:private true}
   defdirectives 
   [ & directives ]
-  `(def #^{:private true}
+  `(def ^{:private true}
         directive-table (hash-map ~@(mapcat process-directive-table-element directives))))
 
 (defdirectives 
@@ -1521,9 +1521,9 @@ N.B. Only works on ColumnWriters right now."
 ;;; directive in the format string.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def #^{:private true}
+(def ^{:private true}
      param-pattern #"^([vV]|#|('.)|([+-]?\d+)|(?=,))")
-(def #^{:private true}
+(def ^{:private true}
      special-params #{ :parameter-from-args :remaining-arg-count })
 
 (defn- extract-param [[s offset saw-comma]]
@@ -1547,7 +1547,7 @@ N.B. Only works on ColumnWriters right now."
 (defn- translate-param
   "Translate the string representation of a param to the internalized
                                       representation"
-  [[#^String p offset]]
+  [[^String p offset]]
   [(cond 
     (= (.length p) 0) nil
     (and (= (.length p) 1) (contains? #{\v \V} (nth p 0))) :parameter-from-args
@@ -1556,7 +1556,7 @@ N.B. Only works on ColumnWriters right now."
     true (new Integer p))
    offset])
  
-(def #^{:private true}
+(def ^{:private true}
      flag-defs { \: :colon, \@ :at })
 
 (defn- extract-flags [s offset]
@@ -1621,7 +1621,7 @@ of parameters as well."
   (let [[raw-params [rest offset]] (extract-params s offset)
         [_ [rest offset flags]] (extract-flags rest offset)
         directive (first rest)
-        def (get directive-table (Character/toUpperCase #^Character directive))
+        def (get directive-table (Character/toUpperCase ^Character directive))
         params (if def (map-params def (map translate-param raw-params) flags offset))]
     (if (not directive)
       (format-error "Format string ended in the middle of a directive" offset))
@@ -1756,7 +1756,7 @@ performance when you're using the same format string repeatedly"
     (process-nesting
      (first 
       (consume 
-       (fn [[#^String s offset]]
+       (fn [[^String s offset]]
          (if (empty? s)
            [nil s]
            (let [tilde (.indexOf s (int \~))]
@@ -1785,11 +1785,11 @@ column number or pretty printing"
 because the formatter macro uses it."
   {:skip-wiki true}
   ([stream format args]
-     (let [#^java.io.Writer real-stream (cond 
+     (let [^java.io.Writer real-stream (cond 
                                          (not stream) (java.io.StringWriter.)
                                          (true? stream) *out*
                                          :else stream)
-           #^java.io.Writer wrapped-stream (if (and (needs-pretty format) 
+           ^java.io.Writer wrapped-stream (if (and (needs-pretty format) 
                                                     (not (pretty-writer? real-stream)))
                                              (get-pretty-writer real-stream)
                                              real-stream)]

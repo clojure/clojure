@@ -21,7 +21,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "Singleton functions"}
   clojure.contrib.singleton)
 

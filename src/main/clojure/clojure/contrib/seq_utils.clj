@@ -22,7 +22,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra (and others)",
+  ^{:author "Stuart Sierra (and others)",
      :doc "Sequence utilities for Clojure"}
   clojure.contrib.seq-utils
   (:import (java.util.concurrent LinkedBlockingQueue TimeUnit)

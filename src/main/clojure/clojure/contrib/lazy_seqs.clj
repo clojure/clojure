@@ -33,7 +33,7 @@
 ;;  Created 07 June 2008
 
 (ns 
-  #^{:author "Stephen C. Gilardi",
+  ^{:author "Stephen C. Gilardi",
      :doc "
 ==== Lazy sequences ====
 

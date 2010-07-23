@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Generic comparison interface
            This library defines generic versions of = < > <= >= zero?
            as multimethods that can be defined for any type. Of the

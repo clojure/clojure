@@ -15,7 +15,7 @@
 
 
 (ns 
-  #^{:author "Jeffrey Straszheim",
+  ^{:author "Jeffrey Straszheim",
      :doc "Basic graph theory algorithms"}
   clojure.contrib.graph
   (use [clojure.set :only (union)]))

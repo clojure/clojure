@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Functions for setting up computational pipelines via data streams.
 
            NOTE: This library is experimental. It may change significantly

@@ -44,7 +44,7 @@
 ;;   returns the floor of the square root and the "remainder".
 
 (ns 
-  #^{:author "Mark Engelberg",
+  ^{:author "Mark Engelberg",
      :doc "Math functions that deal intelligently with the various
 types in Clojure's numeric tower, as well as math functions
 commonly found in Scheme implementations.
@@ -98,7 +98,7 @@ exact-integer-sqrt - Implements a math function from the R6RS Scheme
 (derive java.lang.Double ::inexact)
 (derive java.lang.Float ::inexact)
 
-(defmulti #^{:arglists '([base pow])
+(defmulti ^{:arglists '([base pow])
 	     :doc "(expt base pow) is base to the pow power.
 Returns an exact number if the base is an exact number and the power is an integer, otherwise returns a double."}
   expt (fn [x y] [(class x) (class y)]))
@@ -126,7 +126,7 @@ Returns an exact number if the base is an exact number and the power is an integ
    (neg? n) (- n)
    :else n))
 
-(defmulti #^{:arglists '([n])
+(defmulti ^{:arglists '([n])
 	     :doc "(floor n) returns the greatest integer less than or equal to n.
 If n is an exact number, floor returns an integer, otherwise a double."}
   floor class)
@@ -138,7 +138,7 @@ If n is an exact number, floor returns an integer, otherwise a double."}
 (defmethod floor :default [n]
   (Math/floor n))
 
-(defmulti #^{:arglists '([n])
+(defmulti ^{:arglists '([n])
 	     :doc "(ceil n) returns the least integer greater than or equal to n.
 If n is an exact number, ceil returns an integer, otherwise a double."}
   ceil class)
@@ -150,7 +150,7 @@ If n is an exact number, ceil returns an integer, otherwise a double."}
 (defmethod ceil :default [n]
   (Math/ceil n))
 
-(defmulti #^{:arglists '([n])
+(defmulti ^{:arglists '([n])
 	     :doc "(round n) rounds to the nearest integer.
 round always returns an integer.  Rounds up for values exactly in between two integers."}
   round class)
@@ -176,7 +176,7 @@ round always returns an integer.  Rounds up for values exactly in between two in
         :else (abs (* b (quot a (gcd a b))))))
 
 ; Length of integer in binary, used as helper function for sqrt.
-(defmulti #^{:private true} integer-length class)
+(defmulti ^{:private true} integer-length class)
 (defmethod integer-length java.lang.Integer [n]
   (count (Integer/toBinaryString n)))
 (defmethod integer-length java.lang.Long [n]
@@ -212,7 +212,7 @@ For example, (exact-integer-sqrt 15) is [3 6] because 15 = 3^2+6."
 	  error (- n (* isqrt isqrt))]
       [isqrt error])))
 
-(defmulti #^{:arglists '([n])
+(defmulti ^{:arglists '([n])
 	     :doc "Square root, but returns exact number if possible."}
   sqrt class)
 (defmethod sqrt ::integer [n]

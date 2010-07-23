@@ -27,56 +27,56 @@
 
 
 (def
- #^{ :doc "Bind to true if you want write to use pretty printing"}
+ ^{ :doc "Bind to true if you want write to use pretty printing"}
  *print-pretty* true)
 
 (defonce ; If folks have added stuff here, don't overwrite
- #^{ :doc "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch
+ ^{ :doc "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch
 to modify."}
  *print-pprint-dispatch* nil)
 
 (def
- #^{ :doc "Pretty printing will try to avoid anything going beyond this column.
+ ^{ :doc "Pretty printing will try to avoid anything going beyond this column.
 Set it to nil to have pprint let the line be arbitrarily long. This will ignore all 
 non-mandatory newlines."}
  *print-right-margin* 72)
 
 (def
- #^{ :doc "The column at which to enter miser style. Depending on the dispatch table, 
+ ^{ :doc "The column at which to enter miser style. Depending on the dispatch table, 
 miser style add newlines in more places to try to keep lines short allowing for further 
 levels of nesting."}
  *print-miser-width* 40)
 
 ;;; TODO implement output limiting
 (def
- #^{ :doc "Maximum number of lines to print in a pretty print instance (N.B. This is not yet used)"}
+ ^{ :doc "Maximum number of lines to print in a pretty print instance (N.B. This is not yet used)"}
  *print-lines* nil)
 
 ;;; TODO: implement circle and shared
 (def
- #^{ :doc "Mark circular structures (N.B. This is not yet used)"}
+ ^{ :doc "Mark circular structures (N.B. This is not yet used)"}
  *print-circle* nil)
 
 ;;; TODO: should we just use *print-dup* here?
 (def
- #^{ :doc "Mark repeated structures rather than repeat them (N.B. This is not yet used)"}
+ ^{ :doc "Mark repeated structures rather than repeat them (N.B. This is not yet used)"}
  *print-shared* nil)
 
 (def
- #^{ :doc "Don't print namespaces with symbols. This is particularly useful when 
+ ^{ :doc "Don't print namespaces with symbols. This is particularly useful when 
 pretty printing the results of macro expansions"}
  *print-suppress-namespaces* nil)
 
 ;;; TODO: support print-base and print-radix in cl-format
 ;;; TODO: support print-base and print-radix in rationals
 (def
- #^{ :doc "Print a radix specifier in front of integers and rationals. If *print-base* is 2, 8, 
+ ^{ :doc "Print a radix specifier in front of integers and rationals. If *print-base* is 2, 8, 
 or 16, then the radix specifier used is #b, #o, or #x, respectively. Otherwise the 
 radix specifier is in the form #XXr where XX is the decimal value of *print-base* "}
  *print-radix* nil)
 
 (def
- #^{ :doc "The base to use for printing integers and rationals."}
+ ^{ :doc "The base to use for printing integers and rationals."}
  *print-base* 10)
 
 
@@ -86,9 +86,9 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
 ;; structure
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def #^{ :private true } *current-level* 0)
+(def ^{ :private true } *current-level* 0)
 
-(def #^{ :private true } *current-length* nil)
+(def ^{ :private true } *current-length* nil)
 
 ;; TODO: add variables for length, lines.
 
@@ -98,14 +98,14 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
 
 (declare format-simple-number)
 
-(def #^{:private true} orig-pr pr)
+(def ^{:private true} orig-pr pr)
 
 (defn- pr-with-base [x]
   (if-let [s (format-simple-number x)]
     (print s)
     (orig-pr x)))
 
-(def #^{:private true} write-option-table
+(def ^{:private true} write-option-table
      {;:array            *print-array*
       :base             'clojure.contrib.pprint/*print-base*,
       ;;:case             *print-case*,
@@ -124,7 +124,7 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
       :suppress-namespaces 'clojure.contrib.pprint/*print-suppress-namespaces*})
 
 
-(defmacro #^{:private true} binding-map [amap & body]
+(defmacro ^{:private true} binding-map [amap & body]
   (let []
     `(do
        (. clojure.lang.Var (pushThreadBindings ~amap))
@@ -147,7 +147,7 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
   [base-writer right-margin miser-width]
   (pretty-writer base-writer right-margin miser-width))
 
-(defmacro #^{:private true} with-pretty-writer [base-writer & body]
+(defmacro ^{:private true} with-pretty-writer [base-writer & body]
   `(let [base-writer# ~base-writer
          new-writer# (not (pretty-writer? base-writer#))]
      (binding [*out* (if new-writer#
@@ -223,7 +223,7 @@ The following keyword arguments can be passed with values:
             (binding [*out* base-writer]
               (pr object)))
           (if (nil? optval) 
-            (.toString #^java.io.StringWriter base-writer)))))))
+            (.toString ^java.io.StringWriter base-writer)))))))
 
 
 (defn pprint 
@@ -294,7 +294,7 @@ and :suffix."
   [& args]
   (let [[options body] (parse-lb-options #{:prefix :per-line-prefix :suffix} args)]
     `(do (if (level-exceeded) 
-           (.write #^java.io.Writer *out* "#")
+           (.write ^java.io.Writer *out* "#")
            (binding [*current-level* (inc *current-level*)
                      *current-length* 0] 
              (start-block *out*

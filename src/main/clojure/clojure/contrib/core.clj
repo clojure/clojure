@@ -13,7 +13,7 @@
 ;; note to other contrib members: feel free to add to this lib
 
 (ns
-  #^{:author "Laurent Petit (and others)"
+  ^{:author "Laurent Petit (and others)"
      :doc "Functions/macros variants of the ones that can be found in clojure.core 
  (note to other contrib members: feel free to add to this lib)"}
   clojure.contrib.core

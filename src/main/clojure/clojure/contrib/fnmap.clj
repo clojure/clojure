@@ -9,7 +9,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns #^{:author "Stuart Sierra"
+(ns ^{:author "Stuart Sierra"
        :doc "Maps that dispatch get/assoc to user-defined functions.
 
   Note: requires AOT-compilation"}

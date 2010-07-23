@@ -14,7 +14,7 @@
 ;;  Created 2 Feb 2009
 
 (ns 
-  #^{:author "Jason Wolfe",
+  ^{:author "Jason Wolfe",
      :doc "Clojure functions for operating on sets (supplemental to clojure.set)"}
   clojure.contrib.set)
 

@@ -14,7 +14,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "Import static Java methods/fields into Clojure"}
   clojure.contrib.import-static
             (:use clojure.set))

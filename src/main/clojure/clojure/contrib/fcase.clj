@@ -23,7 +23,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "This file defines a generic \"case\" macro called \"fcase\" which takes
 the equality-testing function as an argument.  It also defines a
 traditional \"case\" macro that tests using \"=\" and variants that

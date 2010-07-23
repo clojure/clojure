@@ -10,7 +10,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Various small macros"}
   clojure.contrib.macros)
 

@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Monadic I/O with Java input/output streams
            Defines monadic I/O statements to be used in a state monad
            with an input or output stream as the state. The macro
@@ -56,7 +56,7 @@
 
   (defn write
     "Write text (a string)"
-    [#^String text]
+    [^String text]
     (fn [s] [(.write (unlock s) text) s]))
 
   (defn flush

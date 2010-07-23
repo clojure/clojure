@@ -12,7 +12,7 @@
 ; collecting its stdout
 
 (ns 
-  #^{:author "Chris Houser",
+  ^{:author "Chris Houser",
      :doc "Conveniently launch a sub-process providing to its stdin and
 collecting its stdout"}
   clojure.contrib.shell-out

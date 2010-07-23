@@ -11,7 +11,7 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns #^{:author "Stuart Sierra"
+(ns ^{:author "Stuart Sierra"
        :doc "JavaScript Object Notation (JSON) parser/writer.
   See http://www.json.org/
   To write JSON, use json-str, write-json, or write-json.
@@ -26,7 +26,7 @@
 
 (declare read-json-reader)
 
-(defn- read-json-array [#^PushbackReader stream keywordize?]
+(defn- read-json-array [^PushbackReader stream keywordize?]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
   (loop [i (.read stream), result (transient [])]
@@ -40,7 +40,7 @@
                  (let [element (read-json-reader stream keywordize? true nil)]
                    (recur (.read stream) (conj! result element))))))))
 
-(defn- read-json-object [#^PushbackReader stream keywordize?]
+(defn- read-json-object [^PushbackReader stream keywordize?]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
   (loop [i (.read stream), key nil, result (transient {})]
@@ -68,7 +68,7 @@
                             (assoc! result (if keywordize? (keyword key) key)
                                     element)))))))))
 
-(defn- read-json-hex-character [#^PushbackReader stream]
+(defn- read-json-hex-character [^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; initial "\u".  Reads the next four characters from the stream.
   (let [digits [(.read stream)
@@ -83,7 +83,7 @@
         (throw (Exception. "JSON error (invalid hex character in Unicode character escape)")))
       (char (Integer/parseInt (apply str chars) 16)))))
 
-(defn- read-json-escaped-character [#^PushbackReader stream]
+(defn- read-json-escaped-character [^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; initial backslash.
   (let [c (char (.read stream))]
@@ -96,7 +96,7 @@
      (= c \t) \tab
      (= c \u) (read-json-hex-character stream))))
 
-(defn- read-json-quoted-string [#^PushbackReader stream]
+(defn- read-json-quoted-string [^PushbackReader stream]
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening quotation mark.
   (let [buffer (StringBuilder.)]
@@ -111,7 +111,7 @@
                    (recur (.read stream))))))))
 
 (defn- read-json-reader
-  ([#^PushbackReader stream keywordize? eof-error? eof-value]
+  ([^PushbackReader stream keywordize? eof-error? eof-value]
      (loop [i (.read stream)]
        (let [c (char i)]
          (cond
@@ -205,8 +205,8 @@
   (write-json [object out]
               "Print object to PrintWriter out as JSON"))
 
-(defn- write-json-string [#^CharSequence s #^PrintWriter out]
-  (let [sb (StringBuilder. #^Integer (count s))]
+(defn- write-json-string [^CharSequence s ^PrintWriter out]
+  (let [sb (StringBuilder. ^Integer (count s))]
     (.append sb \")
     (dotimes [i (count s)]
       (let [cp (Character/codePointAt s i)]
@@ -228,7 +228,7 @@
     (.append sb \")
     (.print out (str sb))))
 
-(defn- write-json-object [m #^PrintWriter out] 
+(defn- write-json-object [m ^PrintWriter out] 
   (.print out \{)
   (loop [x m]
     (when (seq m)
@@ -246,7 +246,7 @@
           (recur nxt)))))
   (.print out \}))
 
-(defn- write-json-array [s #^PrintWriter out]
+(defn- write-json-array [s ^PrintWriter out]
   (.print out \[)
   (loop [x s]
     (when (seq x)
@@ -258,16 +258,16 @@
           (recur nxt)))))
   (.print out \]))
 
-(defn- write-json-bignum [x #^PrintWriter out]
+(defn- write-json-bignum [x ^PrintWriter out]
   (.print out (str x)))
 
-(defn- write-json-plain [x #^PrintWriter out]
+(defn- write-json-plain [x ^PrintWriter out]
   (.print out x))
 
-(defn- write-json-null [x #^PrintWriter out]
+(defn- write-json-null [x ^PrintWriter out]
   (.print out "null"))
 
-(defn- write-json-named [x #^PrintWriter out]
+(defn- write-json-named [x ^PrintWriter out]
   (write-json-string (name x) out))
 
 (defn- write-json-generic [x out]

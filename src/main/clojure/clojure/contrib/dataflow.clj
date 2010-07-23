@@ -15,7 +15,7 @@
 
 
 (ns
-  #^{:author "Jeffrey Straszheim",
+  ^{:author "Jeffrey Straszheim",
      :doc "A library to support a dataflow model of state"}
   clojure.contrib.dataflow
   (:use [clojure.set :only (union intersection difference)])
@@ -363,7 +363,7 @@
   (list 'cell :validator (:display cell)))
 
 (defmethod print-method ::dataflow-cell
-  [f #^Writer w]
+  [f ^Writer w]
   (binding [*out* w]
     (pr (display-cell f))))
 

@@ -7,7 +7,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns #^{:author "Stuart Halloway"
+(ns ^{:author "Stuart Halloway"
        :doc "JMX support for Clojure
 
   Requires post-Clojure 1.0 git edge for clojure.test, clojure.backtrace.

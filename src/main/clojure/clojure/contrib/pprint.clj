@@ -12,7 +12,7 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns 
-    #^{:author "Tom Faulhaber",
+    ^{:author "Tom Faulhaber",
        :doc "This module comprises two elements:
 1) A pretty printer for Clojure data structures, implemented in the 
    function \"pprint\"

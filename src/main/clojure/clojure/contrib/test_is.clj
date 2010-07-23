@@ -13,7 +13,7 @@
 
 
 
-(ns #^{:doc "Backwards-compatibility for clojure.contrib.test-is
+(ns ^{:doc "Backwards-compatibility for clojure.contrib.test-is
 
   The clojure.contrib.test-is library moved from Contrib into the
   Clojure distribution as clojure.test.

@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns #^{:doc "Base-64 encoding and (maybe later) decoding.  
+(ns ^{:doc "Base-64 encoding and (maybe later) decoding.  
 
   This is mainly here as an example.  It is much slower than the
   Apache Commons Codec implementation or sun.misc.BASE64Encoder."
@@ -29,7 +29,7 @@
   is a 65-character String containing the 64 characters to use in the
   encoding; the 65th character is the pad character.  line-length is
   the maximum number of characters per line, nil for no line breaks."
-  [#^InputStream input #^Writer output #^String alphabet line-length]
+  [^InputStream input ^Writer output ^String alphabet line-length]
   (let [buffer (make-array Byte/TYPE 3)]
     (loop [line 0]
       (let [len (.read input buffer)]
@@ -80,7 +80,7 @@
   "Encodes String in base 64; returns a String.  If not specified,
   encoding is UTF-8 and line-length is nil."
   ([s] (encode-str s "UTF-8" nil))
-  ([#^String s #^String encoding line-length]
+  ([^String s ^String encoding line-length]
      (let [output (StringWriter.)]
        (encode (ByteArrayInputStream. (.getBytes s encoding))
                output *base64-alphabet* line-length)

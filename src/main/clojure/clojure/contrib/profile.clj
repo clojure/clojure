@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns #^{:author "Stuart Sierra"
+(ns ^{:author "Stuart Sierra"
        :doc "Simple code profiling & timing measurement.
 
 Wrap any section of code in the prof macro, giving it a name, like this:
@@ -39,7 +39,7 @@ under the JVM.  See the function documentation for more details.
 
 (def *profile-data* nil)
 
-(def #^{:doc "Set this to false before loading/compiling to omit
+(def ^{:doc "Set this to false before loading/compiling to omit
 profiling code."}  *enable-profiling* true)
 
 (defmacro prof

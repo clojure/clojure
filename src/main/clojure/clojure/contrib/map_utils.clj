@@ -14,7 +14,7 @@
 ;;  Created 25 Feb 2009
 
 (ns 
-  #^{:author "Jason Wolfe, Chris Houser",
+  ^{:author "Jason Wolfe, Chris Houser",
      :doc "Utilities for operating on Clojure maps."}
   clojure.contrib.map-utils)
 

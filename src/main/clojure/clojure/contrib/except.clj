@@ -16,7 +16,7 @@
 ;;  Created 07 July 2008
 
 (ns 
-  #^{:author "Stephen C. Gilardi",
+  ^{:author "Stephen C. Gilardi",
      :doc "Provides functions that make it easy to specify the class, cause, and
 message when throwing an Exception or Error. The optional message is
 formatted using clojure.core/format."}

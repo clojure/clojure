@@ -13,7 +13,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Chas Emerick",
+  ^{:author "Chas Emerick",
      :doc "String interpolation for Clojure."}
   clojure.contrib.strint
  (:use [clojure.contrib.io :only (slurp*)]))
@@ -36,7 +36,7 @@
       (if-let [[form rest] (silent-read (subs s (if atom? 2 1)))]
         (cons form (interpolate (if atom? (subs rest 1) rest)))
         (cons (subs s 0 2) (interpolate (subs s 2))))))
-  ([#^String s]
+  ([^String s]
     (if-let [start (->> ["~{" "~("]
                      (map #(.indexOf s %))
                      (remove #(== -1 %))

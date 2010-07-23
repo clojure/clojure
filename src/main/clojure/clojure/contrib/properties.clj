@@ -47,7 +47,7 @@
 
 
 ; Not there is no corresponding props->map. Just destructure!
-(defn #^Properties as-properties
+(defn ^Properties as-properties
   "Convert any seq of pairs to a java.utils.Properties instance.
    Uses as-str to convert both keys and values into strings."
   {:tag Properties}
@@ -69,6 +69,6 @@
   {:tag Properties}
   ([m file-able] (write-properties m file-able nil))
   ([m file-able comments]
-    (with-open [#^FileOutputStream f (FileOutputStream. (file file-able))]
+    (with-open [^FileOutputStream f (FileOutputStream. (file file-able))]
       (doto (as-properties m)
-        (.store f #^String comments)))))
+        (.store f ^String comments)))))

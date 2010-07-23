@@ -16,7 +16,7 @@
 ;;  Created 2 April 2008
 
 (ns
-  #^{:author "Stephen C. Gilardi",
+  ^{:author "Stephen C. Gilardi",
      :doc "A Clojure interface to sql databases via jdbc."
      :see-also [["http://github.com/richhickey/clojure-contrib/blob/master/src/test/clojure/clojure/contrib/test_sql.clj"
                  "Example code"]]}

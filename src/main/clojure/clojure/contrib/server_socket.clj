@@ -9,7 +9,7 @@
 ;;  Server socket library - includes REPL on socket
 
 (ns 
-  #^{:author "Craig McDaniel",
+  ^{:author "Craig McDaniel",
      :doc "Server socket library - includes REPL on socket"}
   clojure.contrib.server-socket
   (:import (java.net InetAddress ServerSocket Socket SocketException)
@@ -18,17 +18,17 @@
   (:use [clojure.main :only (repl)]))
  
 (defn- on-thread [f]
-  (doto (Thread. #^Runnable f) 
+  (doto (Thread. ^Runnable f) 
     (.start)))
 
-(defn- close-socket [#^Socket s]
+(defn- close-socket [^Socket s]
   (when-not (.isClosed s)    
     (doto s
       (.shutdownInput)
       (.shutdownOutput)
       (.close))))
 
-(defn- accept-fn [#^Socket s connections fun]
+(defn- accept-fn [^Socket s connections fun]
   (let [ins (.getInputStream s)
         outs (.getOutputStream s)]
     (on-thread #(do
@@ -41,7 +41,7 @@
 
 (defstruct server-def :server-socket :connections)
 
-(defn- create-server-aux [fun #^ServerSocket ss]
+(defn- create-server-aux [fun ^ServerSocket ss]
   (let [connections (ref #{})]
     (on-thread #(when-not (.isClosed ss)
                   (try 
@@ -58,7 +58,7 @@
 
   Optional arguments support specifying a listen backlog and binding
   to a specific endpoint."
-  ([port fun backlog #^InetAddress bind-addr] 
+  ([port fun backlog ^InetAddress bind-addr] 
      (create-server-aux fun (ServerSocket. port backlog bind-addr)))
   ([port fun backlog]
      (create-server-aux fun (ServerSocket. port backlog)))
@@ -69,7 +69,7 @@
   (doseq [s @(:connections server)]
     (close-socket s))
   (dosync (ref-set (:connections server) #{}))
-  (.close #^ServerSocket (:server-socket server)))
+  (.close ^ServerSocket (:server-socket server)))
 
 (defn connection-count [server]
   (count @(:connections server)))
@@ -81,12 +81,12 @@
 (defn- socket-repl [ins outs]
   (binding [*in* (LineNumberingPushbackReader. (InputStreamReader. ins))
             *out* (OutputStreamWriter. outs)
-            *err* (PrintWriter. #^OutputStream outs true)]
+            *err* (PrintWriter. ^OutputStream outs true)]
     (repl)))
 
 (defn create-repl-server 
   "create a repl on a socket"
-  ([port backlog #^InetAddress bind-addr] 
+  ([port backlog ^InetAddress bind-addr] 
      (create-server port socket-repl backlog bind-addr))
   ([port backlog] 
      (create-server port socket-repl backlog))

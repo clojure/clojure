@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Generic math function interface
            This library defines generic versions of common mathematical
            functions such as sqrt or sin as multimethods that can be

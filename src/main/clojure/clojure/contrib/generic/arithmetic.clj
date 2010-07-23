@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "Generic arithmetic interface
            This library defines generic versions of + - * / as multimethods
            that can be defined for any type. The minimal required 

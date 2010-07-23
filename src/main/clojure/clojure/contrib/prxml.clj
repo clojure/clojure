@@ -23,24 +23,24 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "Compact syntax for generating XML. See the documentation of \"prxml\" 
 for details."}
   clojure.contrib.prxml
   (:use [clojure.contrib.string :only (escape as-str)]))
 
 (def
- #^{:doc "If true, empty tags will have a space before the closing />"}
+ ^{:doc "If true, empty tags will have a space before the closing />"}
  *html-compatible* false)
 
 (def
- #^{:doc "The number of spaces to indent sub-tags.  nil for no indent
+ ^{:doc "The number of spaces to indent sub-tags.  nil for no indent
   and no extra line-breaks."}
  *prxml-indent* nil)
 
-(def #^{:private true} *prxml-tag-depth* 0)
+(def ^{:private true} *prxml-tag-depth* 0)
 
-(def #^{:private true} print-xml)  ; forward declaration
+(def ^{:private true} print-xml)  ; forward declaration
 
 (defn- escape-xml [s]
   (escape {\< "&lt;"
@@ -56,7 +56,7 @@ for details."}
   (print (escape-xml (str value)))
   (print "\""))
 
-(defmulti #^{:private true} print-xml-tag (fn [tag attrs content] tag))
+(defmulti ^{:private true} print-xml-tag (fn [tag attrs content] tag))
 
 (defmethod print-xml-tag :raw! [tag attrs contents]
   (doseq [c contents] (print c)))
@@ -118,7 +118,7 @@ for details."}
       (print (if *html-compatible* " />" "/>")))))
 
 
-(defmulti #^{:private true} print-xml class)
+(defmulti ^{:private true} print-xml class)
 
 (defmethod print-xml clojure.lang.IPersistentVector [x]
   (let [[tag & contents] x

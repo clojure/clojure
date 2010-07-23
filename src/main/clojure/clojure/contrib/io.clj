@@ -46,7 +46,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "This file defines polymorphic I/O utility functions for Clojure.
 
            The Streams protocol defines reader, writer, input-stream and
@@ -68,31 +68,31 @@
 
 
 (def
- #^{:doc "Name of the default encoding to use when reading & writing.
+ ^{:doc "Name of the default encoding to use when reading & writing.
   Default is UTF-8."
     :tag "java.lang.String"}
  *default-encoding* "UTF-8")
 
 (def
- #^{:doc "Size, in bytes or characters, of the buffer used when
+ ^{:doc "Size, in bytes or characters, of the buffer used when
   copying streams."}
  *buffer-size* 1024)
 
 (def
- #^{:doc "Type object for a Java primitive byte array."}
+ ^{:doc "Type object for a Java primitive byte array."}
  *byte-array-type* (class (make-array Byte/TYPE 0)))
 
 (def
- #^{:doc "Type object for a Java primitive char array."}
+ ^{:doc "Type object for a Java primitive char array."}
  *char-array-type* (class (make-array Character/TYPE 0)))
 
 
-(defn #^File file-str
+(defn ^File file-str
   "Concatenates args as strings and returns a java.io.File.  Replaces
   all / and \\ with File/separatorChar.  Replaces ~ at the start of
   the path with the user.home system property."
   [& args]
-  (let [#^String s (apply str args)
+  (let [^String s (apply str args)
         s (.replace s \\ File/separatorChar)
         s (.replace s \/ File/separatorChar)
         s (if (.startsWith s "~")
@@ -102,7 +102,7 @@
     (File. s)))
 
 (def
- #^{:doc "If true, writer, output-stream and spit will open files in append mode.
+ ^{:doc "If true, writer, output-stream and spit will open files in append mode.
           Defaults to false.  Instead of binding this var directly, use append-writer,
           append-output-stream or append-spit."
     :tag "java.lang.Boolean"}
@@ -186,42 +186,42 @@
 (extend File
   Streams
   (assoc default-streams-impl
-    :input-stream #(input-stream (FileInputStream. #^File %))
-    :output-stream #(let [stream (FileOutputStream. #^File % *append*)]
+    :input-stream #(input-stream (FileInputStream. ^File %))
+    :output-stream #(let [stream (FileOutputStream. ^File % *append*)]
                       (binding [*append* false]
                         (output-stream stream)))))
 (extend URL
   Streams
   (assoc default-streams-impl
-    :input-stream (fn [#^URL x]
+    :input-stream (fn [^URL x]
                     (input-stream (if (= "file" (.getProtocol x))
                                     (FileInputStream. (.getPath x))
                                     (.openStream x))))
-    :output-stream (fn [#^URL x]
+    :output-stream (fn [^URL x]
                      (if (= "file" (.getProtocol x))
                        (output-stream (File. (.getPath x)))
                        (throw (Exception. (str "Can not write to non-file URL <" x ">")))))))
 (extend URI
   Streams
   (assoc default-streams-impl
-    :input-stream #(input-stream (.toURL #^URI %))
-    :output-stream #(output-stream (.toURL #^URI %))))
+    :input-stream #(input-stream (.toURL ^URI %))
+    :output-stream #(output-stream (.toURL ^URI %))))
 (extend String
   Streams
   (assoc default-streams-impl
     :input-stream #(try
                      (input-stream (URL. %))
                      (catch MalformedURLException e
-                       (input-stream (File. #^String %))))
+                       (input-stream (File. ^String %))))
     :output-stream #(try
                       (output-stream (URL. %))
                       (catch MalformedURLException err
-                        (output-stream (File. #^String %))))))
+                        (output-stream (File. ^String %))))))
 (extend Socket
   Streams
   (assoc default-streams-impl
-    :input-stream #(.getInputStream #^Socket %)
-    :output-stream #(output-stream (.getOutputStream #^Socket %))))
+    :input-stream #(.getInputStream ^Socket %)
+    :output-stream #(output-stream (.getOutputStream ^Socket %))))
 (extend *byte-array-type*
   Streams
   (assoc default-streams-impl :input-stream #(input-stream (ByteArrayInputStream. %))))
@@ -239,7 +239,7 @@
   Streams
   (assoc default-streams-impl :reader identity))
 (defn- inputstream->reader
-  [#^InputStream is]
+  [^InputStream is]
   (reader (InputStreamReader. is *default-encoding*)))
 (extend InputStream
   Streams
@@ -259,7 +259,7 @@
   Streams
   (assoc default-streams-impl :writer #(do (assert-not-appending) %)))
 (defn- outputstream->writer
-  [#^OutputStream os]
+  [^OutputStream os]
   (assert-not-appending)
   (writer (OutputStreamWriter. os *default-encoding*)))
 (extend OutputStream
@@ -292,7 +292,7 @@
   "Writes lines (a seq) to f, separated by newlines.  f is opened with
   writer, and automatically closed at the end of the sequence."
   [f lines]
-  (with-open [#^BufferedWriter writer (writer f)]
+  (with-open [^BufferedWriter writer (writer f)]
     (loop [lines lines]
       (when-let [line (first lines)]
         (.write writer (str line))
@@ -303,17 +303,17 @@
   "Like clojure.core/line-seq but opens f with reader.  Automatically
   closes the reader AFTER YOU CONSUME THE ENTIRE SEQUENCE."
   [f]
-  (let [read-line (fn this [#^BufferedReader rdr]
+  (let [read-line (fn this [^BufferedReader rdr]
                     (lazy-seq
                      (if-let [line (.readLine rdr)]
                        (cons line (this rdr))
                        (.close rdr))))]
     (read-line (reader f))))
 
-(defn #^String slurp*
+(defn ^String slurp*
   "Like clojure.core/slurp but opens f with reader."
   [f]
-  (with-open [#^BufferedReader r (reader f)]
+  (with-open [^BufferedReader r (reader f)]
       (let [sb (StringBuilder.)]
         (loop [c (.read r)]
           (if (neg? c)
@@ -325,13 +325,13 @@
   "Opposite of slurp.  Opens f with writer, writes content, then
   closes f."
   [f content]
-  (with-open [#^Writer w (writer f)]
+  (with-open [^Writer w (writer f)]
     (.write w content)))
 
 (defn append-spit
   "Like spit but appends to file."
   [f content]
-  (with-open [#^Writer w (append-writer f)]
+  (with-open [^Writer w (append-writer f)]
     (.write w content)))
 
 (defn pwd
@@ -365,7 +365,7 @@
        ~@body)))
 
 (defmulti
-  #^{:doc "Copies input to output.  Returns nil.
+  ^{:doc "Copies input to output.  Returns nil.
   Input may be an InputStream, Reader, File, byte[], or String.
   Output may be an OutputStream, Writer, or File.
 
@@ -377,7 +377,7 @@
   copy
   (fn [input output] [(type input) (type output)]))
 
-(defmethod copy [InputStream OutputStream] [#^InputStream input #^OutputStream output]
+(defmethod copy [InputStream OutputStream] [^InputStream input ^OutputStream output]
   (let [buffer (make-array Byte/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
@@ -385,8 +385,8 @@
           (do (.write output buffer 0 size)
               (recur)))))))
 
-(defmethod copy [InputStream Writer] [#^InputStream input #^Writer output]
-  (let [#^"[B" buffer (make-array Byte/TYPE *buffer-size*)]
+(defmethod copy [InputStream Writer] [^InputStream input ^Writer output]
+  (let [^"[B" buffer (make-array Byte/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
@@ -394,12 +394,12 @@
             (do (.write output chars)
                 (recur))))))))
 
-(defmethod copy [InputStream File] [#^InputStream input #^File output]
+(defmethod copy [InputStream File] [^InputStream input ^File output]
   (with-open [out (FileOutputStream. output)]
     (copy input out)))
 
-(defmethod copy [Reader OutputStream] [#^Reader input #^OutputStream output]
-  (let [#^"[C" buffer (make-array Character/TYPE *buffer-size*)]
+(defmethod copy [Reader OutputStream] [^Reader input ^OutputStream output]
+  (let [^"[C" buffer (make-array Character/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
@@ -407,66 +407,66 @@
             (do (.write output bytes)
                 (recur))))))))
 
-(defmethod copy [Reader Writer] [#^Reader input #^Writer output]
-  (let [#^"[C" buffer (make-array Character/TYPE *buffer-size*)]
+(defmethod copy [Reader Writer] [^Reader input ^Writer output]
+  (let [^"[C" buffer (make-array Character/TYPE *buffer-size*)]
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
           (do (.write output buffer 0 size)
               (recur)))))))
 
-(defmethod copy [Reader File] [#^Reader input #^File output]
+(defmethod copy [Reader File] [^Reader input ^File output]
   (with-open [out (FileOutputStream. output)]
     (copy input out)))
 
-(defmethod copy [File OutputStream] [#^File input #^OutputStream output]
+(defmethod copy [File OutputStream] [^File input ^OutputStream output]
   (with-open [in (FileInputStream. input)]
     (copy in output)))
 
-(defmethod copy [File Writer] [#^File input #^Writer output]
+(defmethod copy [File Writer] [^File input ^Writer output]
   (with-open [in (FileInputStream. input)]
     (copy in output)))
 
-(defmethod copy [File File] [#^File input #^File output]
+(defmethod copy [File File] [^File input ^File output]
   (with-open [in (FileInputStream. input)
               out (FileOutputStream. output)]
     (copy in out)))
 
-(defmethod copy [String OutputStream] [#^String input #^OutputStream output]
+(defmethod copy [String OutputStream] [^String input ^OutputStream output]
   (copy (StringReader. input) output))
 
-(defmethod copy [String Writer] [#^String input #^Writer output]
+(defmethod copy [String Writer] [^String input ^Writer output]
   (copy (StringReader. input) output))
 
-(defmethod copy [String File] [#^String input #^File output]
+(defmethod copy [String File] [^String input ^File output]
   (copy (StringReader. input) output))
 
-(defmethod copy [*char-array-type* OutputStream] [input #^OutputStream output]
+(defmethod copy [*char-array-type* OutputStream] [input ^OutputStream output]
   (copy (CharArrayReader. input) output))
 
-(defmethod copy [*char-array-type* Writer] [input #^Writer output]
+(defmethod copy [*char-array-type* Writer] [input ^Writer output]
   (copy (CharArrayReader. input) output))
 
-(defmethod copy [*char-array-type* File] [input #^File output]
+(defmethod copy [*char-array-type* File] [input ^File output]
   (copy (CharArrayReader. input) output))
 
-(defmethod copy [*byte-array-type* OutputStream] [#^"[B" input #^OutputStream output]
+(defmethod copy [*byte-array-type* OutputStream] [^"[B" input ^OutputStream output]
   (copy (ByteArrayInputStream. input) output))
 
-(defmethod copy [*byte-array-type* Writer] [#^"[B" input #^Writer output]
+(defmethod copy [*byte-array-type* Writer] [^"[B" input ^Writer output]
   (copy (ByteArrayInputStream. input) output))
 
-(defmethod copy [*byte-array-type* File] [#^"[B" input #^Writer output]
+(defmethod copy [*byte-array-type* File] [^"[B" input ^Writer output]
   (copy (ByteArrayInputStream. input) output))
 
 
 (defn make-parents
   "Creates all parent directories of file."
-  [#^File file]
+  [^File file]
   (.mkdirs (.getParentFile file)))
 
 (defmulti
-  #^{:doc "Converts argument into a Java byte array.  Argument may be
+  ^{:doc "Converts argument into a Java byte array.  Argument may be
   a String, File, InputStream, or Reader.  If the argument is already
   a byte array, returns it."
     :arglists '([arg])}
@@ -474,21 +474,21 @@
 
 (defmethod to-byte-array *byte-array-type* [x] x)
 
-(defmethod to-byte-array String [#^String x]
+(defmethod to-byte-array String [^String x]
   (.getBytes x *default-encoding*))
 
-(defmethod to-byte-array File [#^File x]
+(defmethod to-byte-array File [^File x]
   (with-open [input (FileInputStream. x)
               buffer (ByteArrayOutputStream.)]
     (copy input buffer)
     (.toByteArray buffer)))
 
-(defmethod to-byte-array InputStream [#^InputStream x]
+(defmethod to-byte-array InputStream [^InputStream x]
   (let [buffer (ByteArrayOutputStream.)]
     (copy x buffer)
     (.toByteArray buffer)))
 
-(defmethod to-byte-array Reader [#^Reader x]
+(defmethod to-byte-array Reader [^Reader x]
   (.getBytes (slurp* x) *default-encoding*))
 
 (defmulti relative-path-string 
@@ -496,28 +496,28 @@
    Building block for clojure.contrib.java/file."
   class)
 
-(defmethod relative-path-string String [#^String s]
+(defmethod relative-path-string String [^String s]
   (relative-path-string (File. s)))
 
-(defmethod relative-path-string File [#^File f]
+(defmethod relative-path-string File [^File f]
   (if (.isAbsolute f)
     (throw (IllegalArgumentException. (str f " is not a relative path")))
     (.getPath f)))
 
-(defmulti #^File as-file 
+(defmulti ^File as-file 
   "Interpret a String or a java.io.File as a File. Building block
    for clojure.contrib.java/file, which you should prefer
    in most cases."
   class)
-(defmethod as-file String [#^String s] (File. s))
+(defmethod as-file String [^String s] (File. s))
 (defmethod as-file File [f] f)
 
-(defn #^File file
+(defn ^File file
   "Returns a java.io.File from string or file args."
   ([arg]                      
      (as-file arg))
   ([parent child]             
-     (File. #^File (as-file parent) #^String (relative-path-string child)))
+     (File. ^File (as-file parent) ^String (relative-path-string child)))
   ([parent child & more]
      (reduce file (file parent child) more)))
 
@@ -539,14 +539,14 @@ Raise an exception if any deletion fails unless silently is true."
     (delete-file f silently)))
 
 (defmulti
-  #^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
+  ^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
      :arglists '([arg])}
   as-url type)
 
 (defmethod as-url URL [x] x)
 
-(defmethod as-url URI [#^URI x] (.toURL x))
+(defmethod as-url URI [^URI x] (.toURL x))
 
-(defmethod as-url String [#^String x] (URL. x))
+(defmethod as-url String [^String x] (URL. x))
 
-(defmethod as-url File [#^File x] (.toURL x))
+(defmethod as-url File [^File x] (.toURL x))

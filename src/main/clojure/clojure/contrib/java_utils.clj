@@ -33,7 +33,7 @@
 ;   Stuart Sierra
 
 (ns 
-  #^{:author "Stuart Halloway, Stephen C. Gilardi, Shawn Hoover, Perry Trolard, Stuart Sierra",
+  ^{:author "Stuart Halloway, Stephen C. Gilardi, Shawn Hoover, Perry Trolard, Stuart Sierra",
      :doc "A set of utilties for dealing with Java stuff like files and properties.
 
    Design goals:
@@ -64,28 +64,28 @@
    Building block for clojure.contrib.java-utils/file."
   class)
 
-(defmethod relative-path-string String [#^String s]
+(defmethod relative-path-string String [^String s]
   (relative-path-string (File. s)))
 
-(defmethod relative-path-string File [#^File f]
+(defmethod relative-path-string File [^File f]
   (if (.isAbsolute f)
     (throw (IllegalArgumentException. (str f " is not a relative path")))
     (.getPath f)))
 
-(defmulti #^File as-file 
+(defmulti ^File as-file 
   "Interpret a String or a java.io.File as a File. Building block
    for clojure.contrib.java-utils/file, which you should prefer
    in most cases."
   class)
-(defmethod as-file String [#^String s] (File. s))
+(defmethod as-file String [^String s] (File. s))
 (defmethod as-file File [f] f)
 
-(defn #^File file
+(defn ^File file
   "Returns a java.io.File from string or file args."
   ([arg]                      
      (as-file arg))
   ([parent child]             
-     (File. #^File (as-file parent) #^String (relative-path-string child)))
+     (File. ^File (as-file parent) ^String (relative-path-string child)))
   ([parent child & more]
      (reduce file (file parent child) more)))
 
@@ -108,11 +108,11 @@
          (name x)
          (str x)))
   ([x & ys]
-     ((fn [#^StringBuilder sb more]
+     ((fn [^StringBuilder sb more]
         (if more
           (recur (. sb  (append (as-str (first more)))) (next more))
           (str sb)))
-      (new StringBuilder #^String (as-str x)) ys)))
+      (new StringBuilder ^String (as-str x)) ys)))
 
 (defn get-system-property 
   "Get a system property."
@@ -149,7 +149,7 @@
 
 
 ; Not there is no corresponding props->map. Just destructure!
-(defn #^Properties as-properties
+(defn ^Properties as-properties
   "Convert any seq of pairs to a java.utils.Properties instance.
    Uses as-str to convert both keys and values into strings."
   {:tag Properties}
@@ -171,9 +171,9 @@
   {:tag Properties}
   ([m file-able] (write-properties m file-able nil))
   ([m file-able comments]
-    (with-open [#^FileOutputStream f (FileOutputStream. (file file-able))]
+    (with-open [^FileOutputStream f (FileOutputStream. (file file-able))]
       (doto (as-properties m)
-        (.store f #^String comments)))))
+        (.store f ^String comments)))))
 
 (defn delete-file
   "Delete file f. Raise an exception if it fails unless silently is true."
@@ -193,17 +193,17 @@ Raise an exception if any deletion fails unless silently is true."
     (delete-file f silently)))
 
 (defmulti
-  #^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
+  ^{:doc "Coerces argument (URL, URI, or String) to a java.net.URL."
      :arglists '([arg])}
   as-url type)
 
 (defmethod as-url URL [x] x)
 
-(defmethod as-url URI [#^URI x] (.toURL x))
+(defmethod as-url URI [^URI x] (.toURL x))
 
-(defmethod as-url String [#^String x] (URL. x))
+(defmethod as-url String [^String x] (URL. x))
 
-(defmethod as-url File [#^File x] (.toURL x))
+(defmethod as-url File [^File x] (.toURL x))
 
 (defn wall-hack-method
   "Calls a private or protected method.

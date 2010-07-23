@@ -13,7 +13,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "String utilities for Clojure"}
   clojure.contrib.str-utils
   (:import (java.util.regex Pattern)))
@@ -22,8 +22,8 @@
   "Splits the string on instances of 'pattern'.  Returns a sequence of
   strings.  Optional 'limit' argument is the maximum number of
   splits.  Like Perl's 'split'."
-  ([#^Pattern pattern string] (seq (. pattern (split string))))
-  ([#^Pattern pattern string limit] (seq (. pattern (split string limit)))))
+  ([^Pattern pattern string] (seq (. pattern (split string))))
+  ([^Pattern pattern string limit] (seq (. pattern (split string limit)))))
 
 (defn re-partition
   "Splits the string into a lazy sequence of substrings, alternating
@@ -35,7 +35,7 @@
   For example: (re-partition #\"[a-z]+\" \"abc123def\")
 
   Returns: (\"\" \"abc\" \"123\" \"def\")"
-  [#^Pattern re string]
+  [^Pattern re string]
   (let [m (re-matcher re string)]
     ((fn step [prevend]
        (lazy-seq
@@ -54,7 +54,7 @@
   If (ifn? replacment) is true, the replacement is called with the
   match.
   "
-  [#^java.util.regex.Pattern regex replacement #^String string]
+  [^java.util.regex.Pattern regex replacement ^String string]
   (if (ifn? replacement)
     (let [parts (vec (re-partition regex string))]
       (apply str
@@ -70,7 +70,7 @@
   If (ifn? replacement) is true, the replacement is called with
   the match.
   "
-  [#^Pattern regex replacement #^String string]
+  [^Pattern regex replacement ^String string]
   (if (ifn? replacement)
     (let [m (re-matcher regex string)]
       (if (.find m)

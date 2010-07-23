@@ -31,7 +31,7 @@
 ;;; DDL
 
 (defmethod print-method ::datalog-database
-  [db #^Writer writer]
+  [db ^Writer writer]
   (binding [*out* writer]
     (do
       (println "(datalog-database")
@@ -49,7 +49,7 @@
 (def empty-database (datalog-database {}))
 
 (defmethod print-method ::datalog-relation
-  [rel #^Writer writer]
+  [rel ^Writer writer]
   (binding [*out* writer]
     (do
       (println "(datalog-relation")

@@ -19,7 +19,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :doc "A generic accumulator interface and implementations of various
            accumulators."}
   clojure.contrib.accumulators

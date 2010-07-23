@@ -21,10 +21,10 @@
 
 (def *default-page-width* 72)
 
-(defn- get-field [#^Writer this sym]
+(defn- get-field [^Writer this sym]
   (sym @@this))
 
-(defn- set-field [#^Writer this sym new-val] 
+(defn- set-field [^Writer this sym new-val] 
   (alter @this assoc sym new-val))
 
 (defn get-column [this]
@@ -43,13 +43,13 @@
 (defn get-writer [this]
   (get-field this :base))
 
-(defn- write-char [#^Writer this #^Integer c]
+(defn- write-char [^Writer this ^Integer c]
   (dosync (if (= c (int \newline))
 	    (do
               (set-field this :cur 0)
               (set-field this :line (inc (get-field this :line))))
 	    (set-field this :cur (inc (get-field this :cur)))))
-  (.write #^Writer (get-field this :base) c))
+  (.write ^Writer (get-field this :base) c))
 
 (defn column-writer   
   ([writer] (column-writer writer *default-page-width*))
@@ -58,13 +58,13 @@
        (proxy [Writer IDeref] []
          (deref [] fields)
          (write
-          ([#^chars cbuf #^Integer off #^Integer len] 
-             (let [#^Writer writer (get-field this :base)] 
+          ([^chars cbuf ^Integer off ^Integer len] 
+             (let [^Writer writer (get-field this :base)] 
                (.write writer cbuf off len)))
           ([x]
              (condp = (class x)
                String 
-               (let [#^String s x
+               (let [^String s x
                      nl (.lastIndexOf s (int \newline))]
                  (dosync (if (neg? nl)
                            (set-field this :cur (+ (get-field this :cur) (count s)))
@@ -72,7 +72,7 @@
                              (set-field this :cur (- (count s) nl 1))
                              (set-field this :line (+ (get-field this :line)
                                                       (count (filter #(= % \newline) s)))))))
-                 (.write #^Writer (get-field this :base) s))
+                 (.write ^Writer (get-field this :base) s))
 
                Integer
                (write-char this x)

@@ -13,7 +13,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "Temporary namespace macro"}
   clojure.contrib.with-ns)
 

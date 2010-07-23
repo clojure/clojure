@@ -46,7 +46,7 @@
                              (pull-step xpp))))))]
     (lazy-seq (step xpp))))
 
-(def #^{:private true} factory
+(def ^{:private true} factory
   (doto (XmlPullParserFactory/newInstance)
     (.setNamespaceAware true)))
 

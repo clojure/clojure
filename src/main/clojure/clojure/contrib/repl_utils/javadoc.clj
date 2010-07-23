@@ -16,7 +16,7 @@
 (def *feeling-lucky* true)
 
 (def
- #^{:doc "Ref to a list of local paths for Javadoc-generated HTML
+ ^{:doc "Ref to a list of local paths for Javadoc-generated HTML
   files."}
  *local-javadocs* (ref (list)))
  
@@ -26,7 +26,7 @@
     "http://java.sun.com/javase/6/docs/api/"))
 
 (def
- #^{:doc "Ref to a map from package name prefixes to URLs for remote
+ ^{:doc "Ref to a map from package name prefixes to URLs for remote
   Javadocs."}
  *remote-javadocs*
  (ref (sorted-map
@@ -55,11 +55,11 @@
   "Searches for a URL for the given class name.  Tries
   *local-javadocs* first, then *remote-javadocs*.  Returns a string."
   {:tag String}
-  [#^String classname]
+  [^String classname]
   (let [file-path (.replace classname \. File/separatorChar)
         url-path (.replace classname \. \/)]
-    (if-let [file #^File (first
-                           (filter #(.exists #^File %)
+    (if-let [file ^File (first
+                           (filter #(.exists ^File %)
                              (map #(File. (str %) (str file-path ".html"))
                                @*local-javadocs*)))]
       (-> file .toURI str)
@@ -75,7 +75,7 @@
   "Opens a browser window displaying the javadoc for the argument.
   Tries *local-javadocs* first, then *remote-javadocs*."
   [class-or-object]
-  (let [#^Class c (if (instance? Class class-or-object) 
+  (let [^Class c (if (instance? Class class-or-object) 
                     class-or-object 
                     (class class-or-object))]
     (if-let [url (find-javadoc-url (.getName c))]

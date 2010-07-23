@@ -10,7 +10,7 @@
 ; mmaped file for "normal" activies -- slurp, load-file, etc.
 
 (ns 
-  #^{:author "Chris Houser",
+  ^{:author "Chris Houser",
      :doc "Functions for memory-mapping files, plus some functions that use a
 mmaped file for \"normal\" activies -- slurp, load-file, etc."}
   clojure.contrib.mmap
@@ -21,7 +21,7 @@ mmaped file for \"normal\" activies -- slurp, load-file, etc."}
 
 ;(set! *warn-on-reflection* true)
 
-(def READ_ONLY #^{:private true}
+(def READ_ONLY ^{:private true}
   (java.nio.channels.FileChannel$MapMode/READ_ONLY))
 
 (defn mmap
@@ -32,13 +32,13 @@ mmaped file for \"normal\" activies -- slurp, load-file, etc."}
 
 (defn slurp
   "Reads the file named by f and returns it as a string."
-  [#^String f]
+  [^String f]
   (.. java.nio.charset.Charset (forName "UTF-8")
       (newDecoder) (decode (mmap f))))
 
 (defn buffer-stream
   "Returns an InputStream for a ByteBuffer, such as returned by mmap."
-  [#^ByteBuffer buf]
+  [^ByteBuffer buf]
   (proxy [InputStream] []
     (available [] (.remaining buf))
     (read

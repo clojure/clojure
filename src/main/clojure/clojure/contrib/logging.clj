@@ -11,7 +11,7 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 (ns 
-  #^{:author "Alex Taggart, Timothy Pratley",
+  ^{:author "Alex Taggart, Timothy Pratley",
      :doc
   "Logging macros which delegate to a specific logging implementation. At
   runtime a specific implementation is selected from, in order, Apache
@@ -54,14 +54,14 @@
 (defmacro def-impl-name
   {:private true} [& body]
   `(def
-    #^{:doc "The name of the logging implementation used."}
+    ^{:doc "The name of the logging implementation used."}
     *impl-name*
     ~@body))
 
 (defmacro def-impl-get-log
   {:private true} [& body]
   `(def
-    #^{:doc
+    ^{:doc
   "Returns an implementation-specific log by string namespace. End-users should
   not need to call this."
        :arglist '([~'log-ns])}
@@ -71,7 +71,7 @@
 (defmacro def-impl-enabled?
   {:private true} [& body]
   `(def
-    #^{:doc
+    ^{:doc
   "Implementation-specific check if a particular level is enabled. End-users
   should not need to call this."
        :arglist '([~'log ~'level])}
@@ -81,7 +81,7 @@
 (defmacro def-impl-write!
   {:private true} [& body]
   `(def
-    #^{:doc
+    ^{:doc
   "Implementation-specific write of a log message. End-users should not need to
   call this."
        :arglist '([~'log ~'level ~'message ~'throwable])}
@@ -99,9 +99,9 @@
         (def-impl-name "org.apache.commons.logging")
         (def-impl-get-log
           (fn [log-ns#]
-            (org.apache.commons.logging.LogFactory/getLog #^String log-ns#)))
+            (org.apache.commons.logging.LogFactory/getLog ^String log-ns#)))
         (def-impl-enabled?
-          (fn [#^org.apache.commons.logging.Log log# level#]
+          (fn [^org.apache.commons.logging.Log log# level#]
             (condp = level#
               :trace (.isTraceEnabled log#)
               :debug (.isDebugEnabled log#)
@@ -110,7 +110,7 @@
               :error (.isErrorEnabled log#)
               :fatal (.isFatalEnabled log#))))
         (def-impl-write!
-          (fn [#^org.apache.commons.logging.Log log# level# msg# e#]
+          (fn [^org.apache.commons.logging.Log log# level# msg# e#]
             (condp = level#
               :trace (.trace log# msg# e#)
               :debug (.debug log# msg# e#)
@@ -133,7 +133,7 @@
         (def-impl-name "org.apache.log4j")
         (def-impl-get-log
           (fn [log-ns#]
-            (org.apache.log4j.Logger/getLogger #^String log-ns#)))
+            (org.apache.log4j.Logger/getLogger ^String log-ns#)))
         (let [levels# {:trace org.apache.log4j.Level/TRACE
                        :debug org.apache.log4j.Level/DEBUG
                        :info  org.apache.log4j.Level/INFO
@@ -141,10 +141,10 @@
                        :error org.apache.log4j.Level/ERROR
                        :fatal org.apache.log4j.Level/FATAL}]
           (def-impl-enabled?
-            (fn [#^org.apache.log4j.Logger log# level#]
+            (fn [^org.apache.log4j.Logger log# level#]
               (.isEnabledFor log# (levels# level#))))
           (def-impl-write!
-            (fn [#^org.apache.log4j.Logger log# level# msg# e#]
+            (fn [^org.apache.log4j.Logger log# level# msg# e#]
               (if-not e#
                 (.log log# (levels# level#) msg#)
                 (.log log# (levels# level#) msg# e#)))))
@@ -171,15 +171,15 @@
                        :error java.util.logging.Level/SEVERE
                        :fatal java.util.logging.Level/SEVERE}]
           (def-impl-enabled?
-            (fn [#^java.util.logging.Logger log# level#]
+            (fn [^java.util.logging.Logger log# level#]
               (.isLoggable log# (levels# level#))))
           (def-impl-write!
-            (fn [#^java.util.logging.Logger log# level# msg# e#]
+            (fn [^java.util.logging.Logger log# level# msg# e#]
               (if-not e#
-                (.log log# #^java.util.logging.Level (levels# level#)
-                           #^String (str msg#))
-                (.log log# #^java.util.logging.Level (levels# level#)
-                           #^String (str msg#) #^Throwable e#)))))
+                (.log log# ^java.util.logging.Level (levels# level#)
+                           ^String (str msg#))
+                (.log log# ^java.util.logging.Level (levels# level#)
+                           ^String (str msg#) ^Throwable e#)))))
         true))
     (catch Exception e nil)))
 
@@ -193,13 +193,13 @@
         "Valid logging implementation could not be found.")))
 
 
-(def #^{:doc
+(def ^{:doc
   "The default agent used for performing logging durng a transaction or when
   direct logging is disabled."}
   *logging-agent* (agent nil))
 
 
-(def #^{:doc
+(def ^{:doc
   "A boolean indicating whether direct logging (as opposed to via an agent) is
   allowed when not operating from within a transaction. Defaults to true."}
   *allow-direct-logging* (atom true))
@@ -248,14 +248,14 @@
     (proxy [java.io.ByteArrayOutputStream] []
       (flush []
         (proxy-super flush)
-        (let [s (.trim (.toString #^java.io.ByteArrayOutputStream this))]
+        (let [s (.trim (.toString ^java.io.ByteArrayOutputStream this))]
           (proxy-super reset)
           (if (> (.length s) 0)
             (log level s nil log-ns)))))
     true))
 
 
-(def #^{:doc
+(def ^{:doc
   "A ref used by log-capture! to maintain a reference to the original System.out
   and System.err streams."
   :private true}

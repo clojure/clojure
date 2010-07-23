@@ -11,7 +11,7 @@
 ;;  scgilardi (gmail)
 ;;  2 October 2008
 
-(ns #^{:author "Stephen C. Gilardi"
+(ns ^{:author "Stephen C. Gilardi"
        :doc "Extensions to the basic cond function."} 
   clojure.contrib.cond)
 

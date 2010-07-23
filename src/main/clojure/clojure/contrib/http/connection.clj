@@ -11,7 +11,7 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
-(ns #^{:doc "Low-level HTTP client API around HttpURLConnection"}
+(ns ^{:doc "Low-level HTTP client API around HttpURLConnection"}
   clojure.contrib.http.connection
   (:require [clojure.contrib.io :as duck])
   (:import (java.net URI URL HttpURLConnection)
@@ -23,35 +23,35 @@
   (.openConnection (duck/as-url url)))
 
 (defmulti
-  #^{:doc "Transmits a request entity body."}
+  ^{:doc "Transmits a request entity body."}
   send-request-entity (fn [conn entity] (type entity)))
 
-(defmethod send-request-entity duck/*byte-array-type* [#^HttpURLConnection conn entity]
+(defmethod send-request-entity duck/*byte-array-type* [^HttpURLConnection conn entity]
   (.setFixedLengthStreamingMode conn (count entity))
   (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
-(defmethod send-request-entity String [conn #^String entity]
+(defmethod send-request-entity String [conn ^String entity]
   (send-request-entity conn (.getBytes entity duck/*default-encoding*)))
 
-(defmethod send-request-entity File [#^HttpURLConnection conn #^File entity]
+(defmethod send-request-entity File [^HttpURLConnection conn ^File entity]
   (.setFixedLengthStreamingMode conn (.length entity))
   (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
-(defmethod send-request-entity InputStream [#^HttpURLConnection conn entity]
+(defmethod send-request-entity InputStream [^HttpURLConnection conn entity]
   (.setChunkedStreamingMode conn -1)
   (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
-(defmethod send-request-entity Reader [#^HttpURLConnection conn entity]
+(defmethod send-request-entity Reader [^HttpURLConnection conn entity]
   (.setChunkedStreamingMode conn -1)
   (.connect conn)
   (duck/copy entity (.getOutputStream conn)))
 
 (defn start-http-connection
-  ([#^HttpURLConnection conn] (.connect conn))
-  ([#^HttpURLConnection conn request-entity-body]
+  ([^HttpURLConnection conn] (.connect conn))
+  ([^HttpURLConnection conn request-entity-body]
      (if request-entity-body
        (do (.setDoOutput conn true)
            (send-request-entity conn request-entity-body))

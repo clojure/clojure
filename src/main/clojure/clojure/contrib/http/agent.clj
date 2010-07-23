@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 
-(ns #^{:doc "Agent-based asynchronous HTTP client.
+(ns ^{:doc "Agent-based asynchronous HTTP client.
 
   This is a HTTP client library based on Java's HttpURLConnection
   class and Clojure's Agent system.  It allows you to make multiple
@@ -78,7 +78,7 @@
 (defn- setup-http-connection
   "Sets the instance method, redirect behavior, and request headers of
   the HttpURLConnection."
-  [#^HttpURLConnection conn options]
+  [^HttpURLConnection conn options]
   (when-let [t (:connect-timeout options)]
     (.setConnectTimeout conn t))
   (when-let [t (:read-timeout options)]
@@ -96,7 +96,7 @@
     (c/start-http-connection conn (:body options))
     (assoc state ::state ::started)))
 
-(defn- connection-success? [#^HttpURLConnection conn]
+(defn- connection-success? [^HttpURLConnection conn]
   "Returns true if the HttpURLConnection response code is in the 2xx
   range."
   (= 2 (quot (.getResponseCode conn) 100)))
@@ -105,7 +105,7 @@
   "Agent action that opens the response body stream on the HTTP
   request; this will block until the response stream is available." ;
   [state options]
-  (let [#^HttpURLConnection conn (::connection state)]
+  (let [^HttpURLConnection conn (::connection state)]
     (assoc state
       ::response-stream (if (connection-success? conn)
                           (.getInputStream conn)
@@ -127,8 +127,8 @@
   the HttpURLConnection."
   [state options]
   (when (::response-stream state)
-    (.close #^InputStream (::response-stream state)))
-  (.disconnect #^HttpURLConnection (::connection state))
+    (.close ^InputStream (::response-stream state)))
+  (.disconnect ^HttpURLConnection (::connection state))
   (assoc state
     ::response-stream nil
     ::state ::disconnected))
@@ -138,10 +138,10 @@
   digit, an Integer."
   [digit http-agnt]
   (= digit (quot (.getResponseCode
-                              #^HttpURLConnection (::connection @http-agnt))
+                              ^HttpURLConnection (::connection @http-agnt))
                              100)))
 
-(defn- #^ByteArrayOutputStream get-byte-buffer [http-agnt]
+(defn- ^ByteArrayOutputStream get-byte-buffer [http-agnt]
   (let [buffer (result http-agnt)]
     (if (instance? ByteArrayOutputStream buffer)
       buffer
@@ -270,9 +270,9 @@
   ([http-agnt]
      (await http-agnt) ;; have to wait for Content-Encoding
      (string http-agnt (or (.getContentEncoding
-                            #^HttpURLConnection (::connection @http-agnt))
+                            ^HttpURLConnection (::connection @http-agnt))
                            duck/*default-encoding*)))
-  ([http-agnt #^String encoding]
+  ([http-agnt ^String encoding]
      (.toString (get-byte-buffer http-agnt) encoding)))
 
 
@@ -316,32 +316,32 @@
   received."
   [http-agnt]
   (when (done? http-agnt)
-    (.getResponseCode #^HttpURLConnection (::connection @http-agnt))))
+    (.getResponseCode ^HttpURLConnection (::connection @http-agnt))))
 
 (defn message
   "Returns the HTTP response message (e.g. 'Not Found'), for this
   request, or nil if the response has not yet been received."
   [http-agnt]
   (when (done? http-agnt)
-    (.getResponseMessage #^HttpURLConnection (::connection @http-agnt))))
+    (.getResponseMessage ^HttpURLConnection (::connection @http-agnt))))
 
 (defn headers
   "Returns a map of HTTP response headers.  Header names are converted
   to keywords in all lower-case Header values are strings.  If a
   header appears more than once, only the last value is returned."
   [http-agnt]
-  (reduce (fn [m [#^String k v]]
+  (reduce (fn [m [^String k v]]
             (assoc m (when k (keyword (.toLowerCase k))) (last v)))
           {} (.getHeaderFields
-              #^HttpURLConnection (::connection @http-agnt))))
+              ^HttpURLConnection (::connection @http-agnt))))
 
 (defn headers-seq
   "Returns the HTTP response headers in order as a sequence of
   [String,String] pairs.  The first 'header' name may be null for the
   HTTP status line."
   [http-agnt]
-  (let [#^HttpURLConnection conn (::connection @http-agnt)
-        f (fn thisfn [#^Integer i]
+  (let [^HttpURLConnection conn (::connection @http-agnt)
+        f (fn thisfn [^Integer i]
             ;; Get value first because first key may be nil.
             (when-let [value (.getHeaderField conn i)]
               (cons [(.getHeaderFieldKey conn i) value]

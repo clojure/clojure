@@ -13,7 +13,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "Utilities for working with Java JAR files"}
   clojure.contrib.jar
   (:import (java.io File)
@@ -21,7 +21,7 @@
 
 (defn jar-file?
   "Returns true if file is a normal file with a .jar or .JAR extension."
-  [#^File file]
+  [^File file]
   (and (.isFile file)
        (or (.endsWith (.getName file) ".jar")
            (.endsWith (.getName file) ".JAR"))))
@@ -29,7 +29,7 @@
 (defn filenames-in-jar
   "Returns a sequence of Strings naming the non-directory entries in
   the JAR file."
-  [#^JarFile jar-file]
+  [^JarFile jar-file]
   (map #(.getName %)
        (filter #(not (.isDirectory %))
                (enumeration-seq (.entries jar-file)))))

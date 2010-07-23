@@ -12,7 +12,7 @@
 ;; remove this notice, or any other, from this software.
 
 (ns
-  #^{:author "Konrad Hinsen"
+  ^{:author "Konrad Hinsen"
      :skip-wiki true
      :doc "Generic interfaces
            This library provides generic interfaces in the form of

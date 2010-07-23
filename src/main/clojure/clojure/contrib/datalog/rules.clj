@@ -74,7 +74,7 @@
     `(is-safe? (build-rule ~head [~@body]))))
 
 (defmethod print-method ::datalog-rule
-  [rule #^Writer writer]
+  [rule ^Writer writer]
   (print-method (display-rule rule) writer))
 
 (defn return-rule-data
@@ -89,7 +89,7 @@
   `(with-meta ~qq {:type ::datalog-query})))
 
 (defmethod print-method ::datalog-query
-  [query #^Writer writer]
+  [query ^Writer writer]
   (print-method (display-query query) writer))
 
 
@@ -139,7 +139,7 @@
   (reduce conj empty-rules-set rules))
   
 (defmethod print-method ::datalog-rules-set
-  [rules #^Writer writer]
+  [rules ^Writer writer]
   (binding [*out* writer]
     (do
       (print "(rules-set")

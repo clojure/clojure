@@ -11,7 +11,7 @@
 ;;  scgilardi (gmail)
 ;;  Created 09 June 2009
 
-(ns #^{:author "Stephen C. Gilardi"
+(ns ^{:author "Stephen C. Gilardi"
        :doc "Flexible raising and handling of conditions:
 
 Functions:

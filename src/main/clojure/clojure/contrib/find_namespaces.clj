@@ -13,7 +13,7 @@
 
 
 (ns 
-  #^{:author "Stuart Sierra",
+  ^{:author "Stuart Sierra",
      :doc "Search for ns declarations in dirs, JARs, or CLASSPATH"} 
   clojure.contrib.find-namespaces
   (:require [clojure.contrib.classpath :as cp]
@@ -27,14 +27,14 @@
 
 (defn clojure-source-file?
   "Returns true if file is a normal file with a .clj extension."
-  [#^File file]
+  [^File file]
   (and (.isFile file)
        (.endsWith (.getName file) ".clj")))
 
 (defn find-clojure-sources-in-dir
   "Searches recursively under dir for Clojure source files (.clj).
   Returns a sequence of File objects, in breadth-first sort order."
-  [#^File dir]
+  [^File dir]
   ;; Use sort by absolute path to get breadth-first search.
   (sort-by #(.getAbsolutePath %)
            (filter clojure-source-file? (file-seq dir))))
@@ -54,7 +54,7 @@
   unevaluated form.  Returns nil if read fails or if a ns declaration
   cannot be found.  The ns declaration must be the first Clojure form
   in the file, except for (comment ...)  forms."
-  [#^PushbackReader rdr]
+  [^PushbackReader rdr]
   (try (let [form (read rdr)]
          (cond
            (ns-decl? form) form
@@ -66,20 +66,20 @@
   "Attempts to read a (ns ...) declaration from file, and returns the
   unevaluated form.  Returns nil if read fails, or if the first form
   is not a ns declaration."
-  [#^File file]
+  [^File file]
   (with-open [rdr (PushbackReader. (BufferedReader. (FileReader. file)))]
     (read-ns-decl rdr)))
 
 (defn find-ns-decls-in-dir
   "Searches dir recursively for (ns ...) declarations in Clojure
   source files; returns the unevaluated ns declarations."
-  [#^File dir]
+  [^File dir]
   (filter identity (map read-file-ns-decl (find-clojure-sources-in-dir dir))))
 
 (defn find-namespaces-in-dir
   "Searches dir recursively for (ns ...) declarations in Clojure
   source files; returns the symbol names of the declared namespaces."
-  [#^File dir]
+  [^File dir]
   (map second (find-ns-decls-in-dir dir)))
 
 
@@ -87,14 +87,14 @@
 
 (defn clojure-sources-in-jar
   "Returns a sequence of filenames ending in .clj found in the JAR file."
-  [#^JarFile jar-file]
+  [^JarFile jar-file]
   (filter #(.endsWith % ".clj") (jar/filenames-in-jar jar-file)))
 
 (defn read-ns-decl-from-jarfile-entry
   "Attempts to read a (ns ...) declaration from the named entry in the
   JAR file, and returns the unevaluated form.  Returns nil if the read
   fails, or if the first form is not a ns declaration."
-  [#^JarFile jarfile #^String entry-name]
+  [^JarFile jarfile ^String entry-name]
   (with-open [rdr (PushbackReader.
                    (BufferedReader.
                     (InputStreamReader.
@@ -104,7 +104,7 @@
 (defn find-ns-decls-in-jarfile
   "Searches the JAR file for Clojure source files containing (ns ...)
   declarations; returns the unevaluated ns declarations."
-  [#^JarFile jarfile]
+  [^JarFile jarfile]
   (filter identity
           (map #(read-ns-decl-from-jarfile-entry jarfile %)
                (clojure-sources-in-jar jarfile))))
@@ -113,7 +113,7 @@
   "Searches the JAR file for Clojure source files containing (ns ...)
   declarations.  Returns a sequence of the symbol names of the
   declared namespaces."
-  [#^JarFile jarfile]
+  [^JarFile jarfile]
   (map second (find-ns-decls-in-jarfile jarfile)))
 
 

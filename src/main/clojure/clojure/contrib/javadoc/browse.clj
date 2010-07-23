@@ -10,7 +10,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns 
-  #^{:author "Christophe Grand",
+  ^{:author "Christophe Grand",
      :doc "Start a web browser from Clojure"}
   clojure.contrib.javadoc.browse
   (:require [clojure.contrib.shell :as sh]) 

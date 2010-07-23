@@ -20,7 +20,7 @@
 ;;  Created 5 October 2008
 
 (ns 
-    #^{:author "Stephen C. Gilardi",
+    ^{:author "Stephen C. Gilardi",
        :doc "Clojure support for the MiGLayout layout manager
 http://www.miglayout.com/
 
@@ -66,7 +66,7 @@ Example:
   Any items marked with an \"id\" constraint will be included in a map from
   id to component attached to the container. The map can be retrieved using
   clojure.contrib.miglayout/components."
-  [#^JComponent container & args]
+  [^JComponent container & args]
   (let [item-constraints (apply parse-item-constraints args)
         {:keys [keywords components]} item-constraints
         {:keys [layout column row]} keywords]
@@ -75,5 +75,5 @@ Example:
 (defn components
   "Returns a map from id (a keyword) to component for all components with
   an id constraint set"
-  [#^JComponent container]
+  [^JComponent container]
   (get-components container))

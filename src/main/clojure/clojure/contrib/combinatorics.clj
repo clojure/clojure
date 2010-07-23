@@ -62,7 +62,7 @@ On my own computer, I use versions of all these algorithms that return sequences
 
 
 (ns
-  #^{:author "Mark Engelberg",
+  ^{:author "Mark Engelberg",
      :doc "Efficient, functional algorithms for generating lazy
 sequences for common combinatorial functions. (See the source code 
 for a longer description.)"}

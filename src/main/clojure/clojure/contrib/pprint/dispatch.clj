@@ -34,7 +34,7 @@
 ;;; ~@ - Also fully eaten by the processing of ` and can't be used outside.
 ;;; ,  - is whitespace and is lost (like all other whitespace). Formats can generate commas
 ;;;      where they deem them useful to help readability.
-;;; #^ - Adding metadata completely disappears at read time and the data appears to be
+;;; ^ - Adding metadata completely disappears at read time and the data appears to be
 ;;;      completely lost.
 ;;;
 ;;; Most other syntax stuff is dealt with directly by the formats (like (), [], {}, and #{})
@@ -46,9 +46,9 @@
       'var "#'", 'clojure.core/unquote "~"})
 
 (defn pprint-reader-macro [alis]
-  (let [#^String macro-char (reader-macros (first alis))]
+  (let [^String macro-char (reader-macros (first alis))]
     (when (and macro-char (= 2 (count alis)))
-      (.write #^java.io.Writer *out* macro-char)
+      (.write ^java.io.Writer *out* macro-char)
       (write-out (second alis))
       true)))
 
@@ -68,7 +68,7 @@
       (when alis
 	(write-out (first alis))
 	(when (next alis)
-	  (.write #^java.io.Writer *out* " ")
+	  (.write ^java.io.Writer *out* " ")
 	  (pprint-newline :linear)
 	  (recur (next alis)))))))
 
@@ -83,7 +83,7 @@
       (when aseq
 	(write-out (first aseq))
 	(when (next aseq)
-	  (.write #^java.io.Writer *out* " ")
+	  (.write ^java.io.Writer *out* " ")
 	  (pprint-newline :linear)
 	  (recur (next aseq)))))))
 
@@ -96,11 +96,11 @@
       (when aseq
 	(pprint-logical-block 
           (write-out (ffirst aseq))
-          (.write #^java.io.Writer *out* " ")
+          (.write ^java.io.Writer *out* " ")
           (pprint-newline :linear)
           (write-out (fnext (first aseq))))
         (when (next aseq)
-          (.write #^java.io.Writer *out* ", ")
+          (.write ^java.io.Writer *out* ", ")
           (pprint-newline :linear)
           (recur (next aseq)))))))
 
@@ -203,11 +203,11 @@
         (pprint-logical-block binding
           (write-out (first binding))
           (when (next binding)
-            (.write #^java.io.Writer *out* " ")
+            (.write ^java.io.Writer *out* " ")
             (pprint-newline :miser)
             (write-out (second binding))))
         (when (next (rest binding))
-          (.write #^java.io.Writer *out* " ")
+          (.write ^java.io.Writer *out* " ")
           (pprint-newline :linear)
           (recur (next (rest binding))))))))
 
@@ -233,18 +233,18 @@
     (pprint-indent :block 1)
     (write-out (first alis))
     (when (next alis)
-      (.write #^java.io.Writer *out* " ")
+      (.write ^java.io.Writer *out* " ")
       (pprint-newline :linear)
      (loop [alis (next alis)]
        (when alis
          (pprint-logical-block alis
           (write-out (first alis))
           (when (next alis)
-            (.write #^java.io.Writer *out* " ")
+            (.write ^java.io.Writer *out* " ")
             (pprint-newline :miser)
             (write-out (second alis))))
          (when (next (rest alis))
-           (.write #^java.io.Writer *out* " ")
+           (.write ^java.io.Writer *out* " ")
            (pprint-newline :linear)
            (recur (next (rest alis)))))))))
 
@@ -258,11 +258,11 @@
           (pprint-logical-block alis
             (write-out (first alis))
             (when (next alis)
-              (.write #^java.io.Writer *out* " ")
+              (.write ^java.io.Writer *out* " ")
               (pprint-newline :miser)
               (write-out (second alis))))
           (when (next (rest alis))
-            (.write #^java.io.Writer *out* " ")
+            (.write ^java.io.Writer *out* " ")
             (pprint-newline :linear)
             (recur (next (rest alis)))))))
     (pprint-simple-code-list alis)))
@@ -299,7 +299,7 @@
       (when alis
 	(write-out (first alis))
 	(when (next alis)
-	  (.write #^java.io.Writer *out* " ")
+	  (.write ^java.io.Writer *out* " ")
 	  (pprint-newline :linear)
 	  (recur (next alis)))))))
 
@@ -411,7 +411,7 @@
                (add-to-buffer this (make-buffer-blob s white-space))))
 
            Integer
-           (let [c #^Character x]
+           (let [c ^Character x]
              (if (= (getf :mode) :writing)
                (do 
                  (write-white-space this)

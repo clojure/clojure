@@ -9,7 +9,7 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns 
-  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim",
+  ^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim",
      :doc "Utilities meant to be used interactively at the REPL"}
   clojure.contrib.repl-utils
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
@@ -140,7 +140,7 @@ str-or-pattern."
 ;; ----------------------------------------------------------------------
 ;; Handle Ctrl-C keystrokes
 
-(def #^{:doc "Threads to stop when Ctrl-C is pressed.  See 'add-break-thread!'"}
+(def ^{:doc "Threads to stop when Ctrl-C is pressed.  See 'add-break-thread!'"}
   break-threads (atom {}))
 
 (let [first-time (atom true)]

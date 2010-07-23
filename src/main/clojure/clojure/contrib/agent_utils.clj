@@ -13,7 +13,7 @@
 ;; note to other contrib members: feel free to add to this lib
 
 (ns
-    #^{:author "Christophe Grande",
+    ^{:author "Christophe Grande",
        :doc "Miscellaneous agent utilities
  (note to other contrib members: feel free to add to this lib)",
 }

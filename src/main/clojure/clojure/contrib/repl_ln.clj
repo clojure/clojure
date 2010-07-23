@@ -13,7 +13,7 @@
 ;;  Created 28 November 2008
 
 (ns 
-  #^{:author "Stephen C. Gilardi",
+  ^{:author "Stephen C. Gilardi",
      :doc "A repl with that provides support for lines and line numbers in the
            input stream."}
   clojure.contrib.repl-ln

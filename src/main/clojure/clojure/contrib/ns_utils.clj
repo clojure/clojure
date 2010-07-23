@@ -40,7 +40,7 @@
 ;;  23 April 2008
 
 (ns 
-  #^{:author "Stephen C. Gilardi",
+  ^{:author "Stephen C. Gilardi",
      :doc "Namespace utilities"}
   clojure.contrib.ns-utils
   (:use clojure.contrib.except))

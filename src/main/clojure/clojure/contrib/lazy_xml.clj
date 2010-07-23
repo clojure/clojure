@@ -9,7 +9,7 @@
 ; Functions to parse xml lazily and emit back to text.
 
 (ns 
-    #^{:author "Chris Houser",
+    ^{:author "Chris Houser",
        :doc "Functions to parse xml lazily and emit back to text."}
     clojure.contrib.lazy-xml
     (:use [clojure.xml :as xml :only []]
@@ -53,7 +53,7 @@
    (let [s (if (instance? Reader s) (InputSource. s) s)
          f (fn filler-func [fill]
              (startparse s (proxy [DefaultHandler] []
-               (startElement [uri local-name q-name #^Attributes atts]
+               (startElement [uri local-name q-name ^Attributes atts]
                  ;(prn :start-element q-name)(flush)
                  (let [attrs (into {} (for [i (range (.getLength atts))]
                                            [(keyword (.getQName atts i))
@@ -118,16 +118,16 @@
       (getLocalName [_ i] (name (key (v i))))
       (getQName [_ i] (name (key (v i))))
       (getValue [_ uri name] (get (:attrs e) name))
-      (#^String getValue [_ #^int i] (val (v i)))
-      (#^String getType [_ #^int i] "CDATA"))))
+      (^String getValue [_ ^int i] (val (v i)))
+      (^String getType [_ ^int i] "CDATA"))))
 
 (defn- emit-element
   "Recursively prints as XML text the element struct e.  To have it
   print extra whitespace like clojure.xml/emit, use the :pad true
   option."
-  [e #^org.xml.sax.ContentHandler ch]
+  [e ^org.xml.sax.ContentHandler ch]
   (if (instance? String e)
-    (.characters ch (.toCharArray #^String e) 0 (count e))
+    (.characters ch (.toCharArray ^String e) 0 (count e))
     (let [nspace (namespace (:tag e))
           qname (name (:tag e))]
       (.startElement ch (or nspace "") qname qname (attributes e))
@@ -163,7 +163,7 @@
           (setFeature [_ name value])
           (setProperty [_ name value])
           (setContentHandler [_ ch] (reset! content-handler ch))
-          (#^void parse [_ #^org.xml.sax.InputSource _]
+          (^void parse [_ ^org.xml.sax.InputSource _]
             (when @content-handler
               (.startDocument @content-handler)
               (emit-element e @content-handler)

@@ -93,8 +93,8 @@
 
 (defn add-components
   "Adds components with constraints to a container"
-  [#^JComponent container components]
-  (loop [[[#^Component component constraint] & components] components
+  [^JComponent container components]
+  (loop [[[^Component component constraint] & components] components
          id-map nil]
     (if component
       (let [cc (parse-component-constraint constraint)]
@@ -108,13 +108,13 @@
 
 (defn get-components
   "Returns a map from id to component for all components with an id"
-  [#^JComponent container]
+  [^JComponent container]
   (.getClientProperty container ::components))
 
 (defn do-layout
   "Attaches a MigLayout layout manager to container and adds components
   with constraints"
-  [#^JComponent container layout column row components]
+  [^JComponent container layout column row components]
   (doto container
     (.setLayout (new-by-name MigLayout layout column row))
     (add-components components)))
