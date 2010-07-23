@@ -6,7 +6,10 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.contrib.properties
+;; DEPRECATED in 1.2.  Moved to c.c.java-utils
+
+(ns ^{:deprecated "1.2"}
+  clojure.contrib.properties
   (:use [clojure.contrib.string :only (as-str)]
         [clojure.contrib.io :only (file)])
   (:import (java.util Properties)
