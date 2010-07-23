@@ -13,13 +13,17 @@
 ;;  jason at w01fe dot com
 ;;  Created 2 Feb 2009
 
+;; Deprecations in 1.2: subset and superset have been promoted to
+;; clojure.set
+
 (ns 
   ^{:author "Jason Wolfe",
-     :doc "Clojure functions for operating on sets (supplemental to clojure.set)"}
+    :doc "Clojure functions for operating on sets (supplemental to clojure.set)"}
   clojure.contrib.set)
 
 (defn subset? 
   "Is set1 a subset of set2?"
+  {:deprecated "1.2"}
   [set1 set2]
   {:tag Boolean}
   (and (<= (count set1) (count set2))
@@ -27,6 +31,7 @@
 
 (defn superset? 
   "Is set1 a superset of set2?"
+  {:deprecated "1.2"}
   [set1 set2]
   {:tag Boolean}
   (and (>= (count set1) (count set2))
