@@ -8,6 +8,9 @@
 
 ; Utilities meant to be used interactively at the REPL
 
+;; Deprecated in 1.2: source, get-source, and apropos. These are
+;; available in clojure.repl as source, source-fn, and apropos, respectively.
+
 (ns 
   ^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim",
      :doc "Utilities meant to be used interactively at the REPL"}
@@ -102,6 +105,7 @@
   convenient.
   
   Example: (get-source 'filter)"
+  {:deprecated "1.2"}
   [x]
   (when-let [v (resolve x)]
     (when-let [filepath (:file (meta v))]
@@ -122,6 +126,7 @@
   namespace for which the .clj is in the classpath.
   
   Example: (source filter)"
+  {:deprecated "1.2"}
   [n]
   `(println (or (get-source '~n) (str "Source not found"))))
 
@@ -129,6 +134,7 @@
   "Given a regular expression or stringable thing, return a seq of 
 all definitions in all currently-loaded namespaces that match the
 str-or-pattern."
+  {:deprecated "1.2"}
   [str-or-pattern]
   (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
                    #(re-find str-or-pattern (str %))
