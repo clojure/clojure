@@ -17,8 +17,10 @@
 ;; don't have to, ok?  Look but don't touch.  Use this lib and you'll
 ;; go blind.
 
+;; DEPRECATED in 1.2 with no replacement.
 
-(ns clojure.contrib.apply-macro)
+(ns ^{:deprecated "1.2"}
+  clojure.contrib.apply-macro)
 
 ;; Copied from clojure.core/spread, which is private.
 (defn- spread
