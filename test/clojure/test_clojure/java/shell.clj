@@ -12,13 +12,15 @@
   (:import (java.io File)))
 
 (def platform-enc (.name (java.nio.charset.Charset/defaultCharset)))
+(def default-enc "UTF-8")
 
 (deftest test-parse-args
   (are [x y] (= x y)
-       [[] {:in-enc platform-enc :out-enc platform-enc :dir nil :env nil}] (#'sh/parse-args [])
-       [["ls"] {:in-enc platform-enc :out-enc platform-enc :dir nil :env nil}] (#'sh/parse-args ["ls"])
-       [["ls" "-l"] {:in-enc platform-enc :out-enc platform-enc :dir nil :env nil}] (#'sh/parse-args ["ls" "-l"])
-       [["ls"] {:in-enc platform-enc :out-enc "ISO-8859-1" :dir nil :env nil}] (#'sh/parse-args ["ls" :out-enc "ISO-8859-1"])))
+       [[] {:in-enc default-enc :out-enc default-enc :dir nil :env nil}] (#'sh/parse-args [])
+       [["ls"] {:in-enc default-enc :out-enc default-enc :dir nil :env nil}] (#'sh/parse-args ["ls"])
+       [["ls" "-l"] {:in-enc default-enc :out-enc default-enc :dir nil :env nil}] (#'sh/parse-args ["ls" "-l"])
+       [["ls"] {:in-enc default-enc :out-enc "ISO-8859-1" :dir nil :env nil}] (#'sh/parse-args ["ls" :out-enc "ISO-8859-1"])
+       [[] {:in-enc platform-enc :out-enc platform-enc :dir nil :env nil}] (#'sh/parse-args [:in-enc platform-enc :out-enc platform-enc])))
   
 (deftest test-with-sh-dir
   (are [x y] (= x y)
