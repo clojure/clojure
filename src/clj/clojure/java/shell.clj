@@ -44,7 +44,7 @@ collecting its stdout"}
 
 (defn- parse-args
   [args]
-  (let [default-encoding (.name (Charset/defaultCharset))
+  (let [default-encoding "UTF-8" ;; see sh doc string
         default-opts {:out-enc default-encoding :in-enc default-encoding :dir *sh-dir* :env *sh-env*}
         [cmd opts] (split-with string? args)]
     [cmd (merge default-opts (apply hash-map opts))]))
