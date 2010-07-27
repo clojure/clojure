@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>clojure.zip API reference (Clojure)</title>
+    <title>clojure.zip - Clojure v1.1 API documentation</title>
     <link href="../static/favicon.png" rel="icon" />
     <link href="../static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
@@ -30,18 +30,22 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <div class="BranchTOC">
-      <a class="wiki_link" href="#">Branches</a>
-      <ul id="left-sidebar-branch-list">
-        <li><a href="../index.html" class="wiki_link">master</a></li><li><a href="../branch-1.1.x/index.html" class="wiki_link">1.1.x</a></li>
-      </ul>
-    </div>
-    <a class="wiki_link" href="index.html">Overview</a><br />
-    <a class="wiki_link" href="api-index.html">API Index</a><br />
-    <a class="wiki_link" href="#">Namespaces:</a>
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.1</span> API</span><br />
+    <ul>
+      <li><a class="wiki_link" href="index.html">Overview</a></li>
+      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+    </ul>
+    <span class="toc-header">Namespaces</span>
     <ul id="left-sidebar-list">
       <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
     </ul>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a href="../index.html" class="wiki_link">v1.2 (beta 1)</a></li><li><a href="../branch-master/index.html" class="wiki_link">next (in development)</a></li>
+      </ul>
+    </div>
+    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
   </div>
 </div>
 </div>
@@ -115,7 +119,8 @@ namespace.
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.zip</span>
-  <span id="branch-name">(1.1.x branch)</span></h1>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.1</span> (<span id="header-status">stable</span>)
+  </h1>
 <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
 <br />Usage:
 <pre>
@@ -140,7 +145,7 @@ and enumeration.  See Huet</pre>
 without moving</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L200" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L200" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -151,7 +156,7 @@ without moving</pre>
   <pre id="var-docstr">Returns true if the node at loc is a branch</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L64" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L64" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -162,7 +167,7 @@ without moving</pre>
   <pre id="var-docstr">Returns a seq of the children of node at loc, which must be a branch</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L69" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L69" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -174,7 +179,7 @@ without moving</pre>
 nil if no children</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L98" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L98" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -185,7 +190,7 @@ nil if no children</pre>
   <pre id="var-docstr">Replaces the node at this loc with the value of (f node args)</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L189" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L189" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -196,7 +201,7 @@ nil if no children</pre>
   <pre id="var-docstr">Returns true if loc represents the end of a depth-first walk</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L232" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L232" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -208,7 +213,7 @@ nil if no children</pre>
 without moving</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L194" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L194" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -220,7 +225,7 @@ without moving</pre>
 without moving</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L165" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L165" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -232,7 +237,7 @@ without moving</pre>
 without moving</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L174" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L174" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -243,7 +248,7 @@ without moving</pre>
   <pre id="var-docstr">Returns the loc of the left sibling of the node at this loc, or nil</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L150" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L150" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -254,7 +259,7 @@ without moving</pre>
   <pre id="var-docstr">Returns the loc of the leftmost sibling of the node at this loc, or self</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L157" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L157" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -265,7 +270,7 @@ without moving</pre>
   <pre id="var-docstr">Returns a seq of the left siblings of this loc</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L87" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L87" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -277,7 +282,7 @@ without moving</pre>
 children. The loc is only used to supply the constructor.</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L76" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L76" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -290,7 +295,7 @@ the end, returns a distinguished loc detectable via end?. If already
 at the end, stays there.</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L206" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L206" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -301,7 +306,7 @@ at the end, stays there.</pre>
   <pre id="var-docstr">Returns the node at loc</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L60" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L60" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -312,7 +317,7 @@ at the end, stays there.</pre>
   <pre id="var-docstr">Returns a seq of nodes leading to this loc</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L82" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L82" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -324,7 +329,7 @@ at the end, stays there.</pre>
 at the root, returns nil.</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L221" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L221" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -336,7 +341,7 @@ at the root, returns nil.</pre>
 it in a depth-first walk.</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L237" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L237" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -347,7 +352,7 @@ it in a depth-first walk.</pre>
   <pre id="var-docstr">Replaces the node at this loc, without moving</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L183" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L183" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -358,7 +363,7 @@ it in a depth-first walk.</pre>
   <pre id="var-docstr">Returns the loc of the right sibling of the node at this loc, or nil</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L135" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L135" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -369,7 +374,7 @@ it in a depth-first walk.</pre>
   <pre id="var-docstr">Returns the loc of the rightmost sibling of the node at this loc, or self</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L142" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L142" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -380,7 +385,7 @@ it in a depth-first walk.</pre>
   <pre id="var-docstr">Returns a seq of the right siblings of this loc</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L92" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L92" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -392,7 +397,7 @@ it in a depth-first walk.</pre>
 changes.</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L124" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L124" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -403,7 +408,7 @@ changes.</pre>
   <pre id="var-docstr">Returns a zipper for nested sequences, given a root sequence</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L34" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L34" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -415,7 +420,7 @@ changes.</pre>
 the top</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L111" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L111" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -426,7 +431,7 @@ the top</pre>
   <pre id="var-docstr">Returns a zipper for nested vectors, given a root vector</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L42" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L42" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -438,7 +443,7 @@ the top</pre>
 given a root element</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L50" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L50" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -459,7 +464,7 @@ children, returns a new branch node with the supplied children.
 root is the root node.</pre>
   
   
-  <a href="http://github.com/richhickey/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L18" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L18" id="var-source">Source</a>
 </div>
 
 
@@ -469,7 +474,7 @@ root is the root node.</pre>
           </div>
 	</div>
 	<div id="foot">
-	  <div style="text-align: center;" id="copyright">Copyright 2007-2009 by Rich Hickey</div>
+	  <div style="text-align: center;" id="copyright">Copyright 2007-2010 by Rich Hickey</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />

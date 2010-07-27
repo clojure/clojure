@@ -1,7 +1,7 @@
 
 body {margin: 0;padding: 0;background-color: #e3e3e3;border-top: 4px solid #b3ccfe;color: #272727}
 body, .wiki, #Content, .wikipage {font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 12px;line-height: 18px;}
-#leftcolumn .wiki_link, #toc, #toc a {font-size: 11px;line-height: 18px;text-decoration: none}
+#leftcolumn .wiki_link, #toc, #toc a, .toc-header {font-size: 11px;line-height: 18px;text-decoration: none}
 img {border: 0;}
 #AllContentContainer {max-width: 96em;min-width: 663px;background: #fff url(space/content-background.gif) right repeat-y;padding: 0 40px 18px 0;}
 
@@ -20,12 +20,13 @@ img {border: 0;}
 
 #leftcolumn ul {list-style: none;margin: 0;padding: 0;}
 
+#leftcolumn .toc-header {font-weight: bold;display: block;background: transparent url(space/left-nav-divider.gif) repeat-x;padding: 6px 0 0 17px;margin: 12px 0 0 0;}
 #leftcolumn a {font-weight: bold;display: block;background: transparent url(space/left-nav-divider.gif) repeat-x;padding: 6px 0 0 17px;margin: 12px 0 0 0;}
 #leftcolumn li a {font-weight: normal;background:none;margin: 0;padding: 0 0 0 17px;}
 #leftcolumn br {display: none;}
 #leftcolumn .menu {margin-top: 14px;background: #fff url(space/left-nav-background.gif) repeat-y;}
 
-#leftcolumn a:link , #leftcolumn a:visited , #leftcolumn a:active {color: #666;}
+#leftcolumn a:link , #leftcolumn a:visited , #leftcolumn a:active, .toc-header {color: #666;}
 #leftcolumn a:hover {text-decoration: underline;color: #222;}
 
 #rightcolumn {margin-left: 220px;}
