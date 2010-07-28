@@ -3002,18 +3002,18 @@ else expr is unevaluated</pre>
   "A doc string for AProtocol abstraction"
 
 ;method signatures
-  (bar [a b] "bar docs")
-  (baz [a] [a b] [a b c] "baz docs"))
+  (bar [this a b] "bar docs")
+  (baz [this a] [this a b] [this a b c] "baz docs"))
 
 No implementations are provided. Docs can be specified for the
 protocol overall and for each method. The above yields a set of
 polymorphic functions and a protocol object. All are
 namespace-qualified by the ns enclosing the definition The resulting
-functions dispatch on the type of their first argument, and thus
-must have at least one argument. defprotocol is dynamic, has no
-special compile-time effect, and defines no new types or classes
-Implementations of the protocol methods can be provided using
-extend.
+functions dispatch on the type of their first argument, which is
+required and corresponds to the implicit target object ('this' in 
+Java parlance). defprotocol is dynamic, has no special compile-time 
+effect, and defines no new types or classes. Implementations of 
+the protocol methods can be provided using extend.
 
 defprotocol will automatically generate a corresponding interface,
 with the same name as the protocol, i.e. given a protocol:
@@ -3025,26 +3025,28 @@ Note that you should not use this interface with deftype or
 reify, as they support the protocol directly:
 
 (defprotocol P 
-  (foo [x]) 
-  (bar-me [x] [x y]))
+  (foo [this]) 
+  (bar-me [this] [this y]))
 
 (deftype Foo [a b c] 
  P
-  (foo [] a)
-  (bar-me [] b)
-  (bar-me [y] (+ c y)))
+  (foo [this] a)
+  (bar-me [this] b)
+  (bar-me [this y] (+ c y)))
 
-(bar-me (Foo 1 2 3) 42)
+(bar-me (Foo. 1 2 3) 42)
+=&gt; 45
 
 (foo 
   (let [x 42]
     (reify P 
-      (foo [] 17)
-      (bar-me [] x)
-      (bar-me [y] x))))</pre>
+      (foo [this] 17)
+      (bar-me [this] x)
+      (bar-me [this y] x))))
+=&gt; 17</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L576" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L576" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -3113,7 +3115,7 @@ map (nil for none), and one taking only the fields (using nil for
 meta and extension fields).</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L230" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L230" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -3191,7 +3193,7 @@ writes the .class file to the *compile-path* directory.
 One constructors will be defined, taking the designated fields.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L324" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L324" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -3686,7 +3688,7 @@ false.</pre>
  extends?, satisfies?, extenders</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L628" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L630" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -3697,13 +3699,13 @@ false.</pre>
   <pre id="var-docstr">Useful when you want to provide several implementations of the same
 protocol all at once. Takes a single protocol and the implementation
 of that protocol for one or more types. Expands into calls to
-extend-type and extend-class:
+extend-type:
 
 (extend-protocol Protocol
-  ::AType
+  AType
     (foo [x] ...)
     (bar [x y] ...)
-  ::BType
+  BType
     (foo [x] ...)
     (bar [x y] ...)
   AClass
@@ -3716,13 +3718,13 @@ extend-type and extend-class:
 expands into:
 
 (do
- (clojure.core/extend-type ::AType Protocol 
+ (clojure.core/extend-type AType Protocol 
    (foo [x] ...) 
    (bar [x y] ...))
- (clojure.core/extend-type ::BType Protocol 
+ (clojure.core/extend-type BType Protocol 
    (foo [x] ...) 
    (bar [x y] ...))
- (clojure.core/extend-class AClass Protocol 
+ (clojure.core/extend-type AClass Protocol 
    (foo [x] ...) 
    (bar [x y] ...))
  (clojure.core/extend-type nil Protocol 
@@ -3730,7 +3732,7 @@ expands into:
    (bar [x y] ...)))</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L728" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L730" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -3760,7 +3762,7 @@ expands into:
     :bar (fn [x y] ...)})</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L696" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L698" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -3771,7 +3773,7 @@ expands into:
   <pre id="var-docstr">Returns a collection of the types explicitly extending protocol</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L451" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L451" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -3782,7 +3784,7 @@ expands into:
   <pre id="var-docstr">Returns true if atype extends protocol</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L444" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L444" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -5345,7 +5347,7 @@ the result by calling (f val-in-result val-in-latter).</pre>
   <pre id="var-docstr">Convert a Clojure namespace name to a legal Java package name.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L13" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L13" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -6501,11 +6503,11 @@ clashes. Use :use in the ns macro in preference to calling this directly.</pre>
  or more method bodies:
 
  protocol-or-interface-or-Object
- (methodName [args*] body)*
+ (methodName [args+] body)*
 
  Methods should be supplied for all methods of the desired
  protocol(s) and interface(s). You can also define overrides for
- methods of Object. Note that a parameter must be supplied to
+ methods of Object. Note that the first parameter must be supplied to
  correspond to the target object ('this' in Java parlance). Thus
  methods for interfaces will take one more argument than do the
  interface declarations.  Note also that recur calls to the method
@@ -6528,16 +6530,16 @@ clashes. Use :use in the ns macro in preference to calling this directly.</pre>
  
  (str (let [f "foo"] 
       (reify Object 
-        (toString [] f))))
+        (toString [this] f))))
  == "foo"
 
  (seq (let [f "foo"] 
       (reify clojure.lang.Seqable 
-        (seq [] (seq f)))))
+        (seq [this] (seq f)))))
  == (\f \o \o))</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L62" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L62" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -6874,7 +6876,7 @@ which (test (.. sc comparator (compare ek key)) 0) is true</pre>
   <pre id="var-docstr">Returns true if x satisfies the protocol</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/c2b229e6847762324398f7b7cb67b1da4e902b2c/src/clj/clojure/core_deftype.clj#L457" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/973ea840118fa1deca8eb92c81130ae61525a74a/src/clj/clojure/core_deftype.clj#L457" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
