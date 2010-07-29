@@ -49,3 +49,15 @@
        (report {:type :fail, :message ~msg,
                 :expected '~form, :actual t#})))))
 
+
+(defn get-field
+  "Access to private or protected field.  field-name is a symbol or
+  keyword."
+  ([klass field-name]
+     (get-field klass field-name nil))
+  ([klass field-name inst]
+     (-> klass (.getDeclaredField (name field-name))
+         (doto (.setAccessible true))
+         (.get inst))))
+
+
