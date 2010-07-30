@@ -2,6 +2,7 @@ Changes to Clojure in Version 1.2
 
 = CONTENTS =
 
+ 0 Changes from beta1 to RC1
  1 Deprecated and Removed Features
     1.1 metadata reader macro is now ^
  2 New/Improved Features in clojure.core
@@ -27,7 +28,16 @@ Changes to Clojure in Version 1.2
     3.6 clojure.string
  4 Functions with Improved Performance
  5 Bug Fixes
-   
+
+= 0 Changes from beta1 to RC1 =
+
+  * switch to soft refs for class and keyword cache
+  * update reify, defprotocol, extend-protocol docstrings (#340)
+  * fix fieldless defrecord corner case (#402)
+  * sh reads stdout and stderr in parallel
+  * sh stdin, stdout default to UTF-8 (#413)
+  * gen-class checks validity of method names (#407)
+ 
 = 1 Deprecated and Removed Features =
 
 == 1.1 metadata reader macro is now ^ ==
