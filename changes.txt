@@ -102,7 +102,10 @@ compile-time literal
     (case version
      (0.9 1.0 1.1) "History"
      1.2           "Right now"
-     :sentient     "RSN"))
+     :sentient     "RSN"
+     "The default"))
+
+The string "The default" represents the default clause and can be any expression, not only a compile-time literal.
 
 
 == 2.5 Duplicate Key Prevention ==
@@ -116,8 +119,9 @@ hash-set now prevent duplicate keys:
 
 == 2.6 Primitive Vectors ==
 
-vector-of creates a vector of unboxed Java primitives, which follows
-the contract of Clojure vectors.
+vector-of creates a vector of unboxed Java primitives, which follows the contract of Clojure vectors.  It 
+takes one keyword argument corresponding to its primitive type that can be any of :int, :long, :float, 
+:double, :byte, :short, :boolean, or :char.
 
 
 == 2.7 Agent Error Handling ==
