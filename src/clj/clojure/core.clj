@@ -4495,6 +4495,8 @@
          :descendants (tf (:descendants h) parent ta tag td)})
       h))))
 
+(declare flatten)
+
 (defn underive
   "Removes a parent/child relationship between parent and
   tag. h must be a hierarchy obtained from make-hierarchy, if not
@@ -4502,20 +4504,18 @@
   {:added "1.0"}
   ([tag parent] (alter-var-root #'global-hierarchy underive tag parent) nil)
   ([h tag parent]
-   (let [tp (:parents h)
-         td (:descendants h)
-         ta (:ancestors h)
-         tf (fn [m source sources target targets]
-              (reduce
-               (fn [ret k]
-                 (assoc ret k
-                        (reduce disj (get targets k) (cons target (targets target)))))
-               m (cons source (sources source))))]
-     (if (contains? (tp tag) parent)
-       {:parent (assoc (:parents h) tag (disj (get tp tag) parent))
-        :ancestors (tf (:ancestors h) tag td parent ta)
-        :descendants (tf (:descendants h) parent ta tag td)}
-       h))))
+    (let [parentMap (:parents h)
+	  childsParents (if (parentMap tag)
+			  (disj (parentMap tag) parent) #{})
+	  newParents (if (not-empty childsParents)
+		       (assoc parentMap tag childsParents)
+		       (dissoc parentMap tag))
+	  deriv-seq (flatten (map #(cons (key %) (interpose (key %) (val %)))
+				       (seq newParents)))]
+      (if (contains? (parentMap tag) parent)
+	(reduce #(apply derive %1 %2) (make-hierarchy)
+		(partition 2 deriv-seq))
+	h))))
 
 
 (defn distinct?
