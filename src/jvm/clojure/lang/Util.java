@@ -27,11 +27,17 @@ static public boolean equiv(Object k1, Object k2){
 		{
 		if(k1 instanceof Number && k2 instanceof Number)
 			return Numbers.equiv(k1, k2);
-		else if(k1 instanceof IPersistentCollection && k2 instanceof IPersistentCollection)
-			return ((IPersistentCollection)k1).equiv(k2);
+		else if(k1 instanceof IPersistentCollection || k2 instanceof IPersistentCollection)
+			return pcequiv(k1,k2);
 		return k1.equals(k2);
 		}
 	return false;
+}
+
+static public boolean pcequiv(Object k1, Object k2){
+	if(k1 instanceof IPersistentCollection)
+		return ((IPersistentCollection)k1).equiv(k2);
+	return ((IPersistentCollection)k2).equiv(k1);
 }
 
 static public boolean equals(Object k1, Object k2){

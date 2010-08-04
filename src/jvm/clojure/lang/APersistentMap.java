@@ -13,7 +13,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.*;
 
-public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable {
+public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable, MapEquivalence {
 int _hash = -1;
 
 public String toString(){
@@ -45,15 +45,19 @@ public IPersistentCollection cons(Object o){
 }
 
 public boolean equals(Object obj){
-	if(this == obj) return true;
+	return mapEquals(this, obj);
+}
+
+static public boolean mapEquals(IPersistentMap m1, Object obj){
+	if(m1 == obj) return true;
 	if(!(obj instanceof Map))
 		return false;
 	Map m = (Map) obj;
 
-	if(m.size() != size() || m.hashCode() != hashCode())
+	if(m.size() != m1.count() || m.hashCode() != m1.hashCode())
 		return false;
 
-	for(ISeq s = seq(); s != null; s = s.next())
+	for(ISeq s = m1.seq(); s != null; s = s.next())
 		{
 		Map.Entry e = (Map.Entry) s.first();
 		boolean found = m.containsKey(e.getKey());
@@ -68,6 +72,9 @@ public boolean equals(Object obj){
 public boolean equiv(Object obj){
 	if(!(obj instanceof Map))
 		return false;
+	if(obj instanceof IPersistentMap && !(obj instanceof MapEquivalence))
+		return false;
+	
 	Map m = (Map) obj;
 
 	if(m.size() != size())
@@ -87,18 +94,20 @@ public boolean equiv(Object obj){
 public int hashCode(){
 	if(_hash == -1)
 		{
-		//int hash = count();
-		int hash = 0;
-		for(ISeq s = seq(); s != null; s = s.next())
-			{
-			Map.Entry e = (Map.Entry) s.first();
-			hash += (e.getKey() == null ? 0 : e.getKey().hashCode()) ^
-			        (e.getValue() == null ? 0 : e.getValue().hashCode());
-			//hash ^= Util.hashCombine(Util.hash(e.getKey()), Util.hash(e.getValue()));
-			}
-		this._hash = hash;
+		this._hash = mapHash(this);
 		}
 	return _hash;
+}
+
+static public int mapHash(IPersistentMap m){
+	int hash = 0;
+	for(ISeq s = m.seq(); s != null; s = s.next())
+		{
+		Map.Entry e = (Map.Entry) s.first();
+		hash += (e.getKey() == null ? 0 : e.getKey().hashCode()) ^
+				(e.getValue() == null ? 0 : e.getValue().hashCode());
+		}
+	return hash;
 }
 
 static public class KeySeq extends ASeq{
