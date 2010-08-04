@@ -151,14 +151,8 @@
      [(eqhash [[i m]] 
         [i
          (conj m 
-               `(hashCode [this#] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
-               `(equals [this# ~gs] 
-                        (boolean 
-                         (or (identical? this# ~gs)
-                             (when (identical? (class this#) (class ~gs))
-                               (let [~gs ~(with-meta gs {:tag tagname})]
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
-                                       (= ~'__extmap (. ~gs ~'__extmap)))))))))])
+               `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
+               `(equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])
       (iobj [[i m]] 
             [(conj i 'clojure.lang.IObj)
              (conj m `(meta [this#] ~'__meta)
@@ -190,7 +184,13 @@
                    `(count [this#] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [this#] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
                    `(cons [this# e#] ((var imap-cons) this# e#))
-                   `(equiv [this# o#] (.equals this# o#))
+                   `(equiv [this# ~gs] 
+                        (boolean 
+                         (or (identical? this# ~gs)
+                             (when (identical? (class this#) (class ~gs))
+                               (let [~gs ~(with-meta gs {:tag tagname})]
+                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
+                                       (= ~'__extmap (. ~gs ~'__extmap))))))))
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
