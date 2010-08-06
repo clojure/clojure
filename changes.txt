@@ -2,7 +2,9 @@ Changes to Clojure in Version 1.2
 
 = CONTENTS =
 
- 0 Changes from beta1 to RC1
+ 0 Changes from beta -> RC1 -> RC2
+    0.1 Changes from RC1 to RC2
+    0.2 Changes from beta1 to RC1
  1 Deprecated and Removed Features
     1.1 metadata reader macro is now ^
  2 New/Improved Features in clojure.core
@@ -29,7 +31,31 @@ Changes to Clojure in Version 1.2
  4 Functions with Improved Performance
  5 Bug Fixes
 
-= 0 Changes from beta1 to RC1 =
+= 0 Changes from beta1 -> RC1 -> RC2
+
+= 0.1 Changes from RC1 to RC2
+
+Record/map equality is now symmetric in all cases. There are two
+variants:
+
+  * In most cases, you should use =. Calls to = include type
+    information, so instances of different record types can never be =
+    to each other, or to plain maps.
+
+  * Calls to .equals are different. They respect the Java semantics
+    for maps, which is a requirement for correct interop. Type
+    information is *not* included, so any kind of map can be .equals
+    to any other.
+
+Possible impacts for your programs:
+  
+  * If you create a custom implementation of Clojure's IPersistentMap,
+    you probably want it to be able to be = to other maps. If so, all
+    you need to do is implement the marker interface
+    clojure.lang.MapEquivalence. Note that APersistentMap does this
+    for you.
+
+= 0.2 Changes from beta1 to RC1 =
 
   * switch to soft refs for class and keyword cache
   * update reify, defprotocol, extend-protocol docstrings (#340)
