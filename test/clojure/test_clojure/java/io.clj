@@ -8,10 +8,11 @@
 
 (ns clojure.test-clojure.java.io
   (:use clojure.test clojure.java.io)
-  (:import (java.io File FileInputStream BufferedInputStream
-                    FileOutputStream OutputStreamWriter InputStreamReader
+  (:import (java.io File BufferedInputStream
+                    FileInputStream InputStreamReader InputStream
+                    FileOutputStream OutputStreamWriter OutputStream
                     ByteArrayInputStream ByteArrayOutputStream)
-           (java.net URL URI)))
+           (java.net URL URI Socket ServerSocket)))
 
 (defn temp-file
   [prefix suffix]
@@ -193,3 +194,13 @@
     (is (not (.isDirectory (file tmp "test-make-parents" "child" "grandchild"))))
     (delete-file (file tmp "test-make-parents" "child"))
     (delete-file (file tmp "test-make-parents"))))
+
+(deftest test-socket-iofactory
+  (let [port 65321
+        server-socket (ServerSocket. port)
+        client-socket (Socket. "localhost" port)]
+    (try
+      (is (instance? InputStream (input-stream client-socket)))
+      (is (instance? OutputStream (output-stream client-socket)))
+      (finally (.close server-socket)
+               (.close client-socket)))))

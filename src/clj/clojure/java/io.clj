@@ -260,7 +260,7 @@
   IOFactory
   (assoc default-streams-impl
     :make-input-stream (fn [^Socket x opts] (.getInputStream x))
-    :output-stream (fn [^Socket x opts] (output-stream (.getOutputStream x) opts))))
+    :make-output-stream (fn [^Socket x opts] (.getOutputStream x))))
 
 (extend byte-array-type
   IOFactory
