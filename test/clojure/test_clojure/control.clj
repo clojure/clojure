@@ -14,7 +14,7 @@
 
 (ns clojure.test-clojure.control
   (:use clojure.test
-        [clojure.test-clojure.test-utils :only (exception)]))
+        [clojure.test-clojure.helpers :only (exception)]))
 
 ;; *** Helper functions ***
 
