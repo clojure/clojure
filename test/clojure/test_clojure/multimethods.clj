@@ -9,7 +9,7 @@
 ; Author: Frantisek Sodomka, Robert Lachlan
 
 (ns clojure.test-clojure.multimethods
-  (:use clojure.test)
+  (:use clojure.test [clojure.test-clojure.helpers :only (with-var-roots)])
   (:require [clojure.set :as set]))
 
 ; http://clojure.org/multimethods
@@ -20,25 +20,6 @@
 ; prefer-method
 ; methods
 ; prefers
-
-(defn set-var-roots
-  [maplike]
-  (doseq [[var val] maplike]
-    (alter-var-root var (fn [_] val))))
-
-(defn with-var-roots*
-  "Temporarily set var roots, run block, then put original roots back."
-  [root-map f & args]
-  (let [originals (doall (map (fn [[var _]] [var @var]) root-map))]
-    (set-var-roots root-map)
-    (try
-     (apply f args)
-     (finally
-      (set-var-roots originals)))))
-
-(defmacro with-var-roots
-  [root-map & body]
-  `(with-var-roots* ~root-map (fn [] ~@body)))
 
 (defmacro for-all
   [& args]
