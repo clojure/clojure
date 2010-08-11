@@ -11,4 +11,11 @@
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>javadoc</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.clojure.contrib</groupId>
+      <artifactId>shell</artifactId>
+      <version>1.3.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 </project>
