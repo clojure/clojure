@@ -43,7 +43,7 @@
         <configuration>
           <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
         </configuration>
-        <!-- <executions>
+        <executions>
           <execution>
             <id>compile-clojure</id>
             <phase>compile</phase>
@@ -58,7 +58,7 @@
               <goal>test</goal>
             </goals>
           </execution>
-        </executions> -->
+        </executions>
       </plugin>
     </plugins>
   </build>

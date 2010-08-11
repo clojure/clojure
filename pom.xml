@@ -62,7 +62,6 @@
     <module>modules/miglayout</module>
     <module>modules/mmap</module>
     <module>modules/mock</module>
-    <module>modules/mock-test-adapter</module>
     <module>modules/monadic-io-streams</module>
     <module>modules/monads</module>
     <module>modules/ns-utils</module>
