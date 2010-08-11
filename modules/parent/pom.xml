@@ -41,7 +41,9 @@
         <artifactId>clojure-maven-plugin</artifactId>
         <version>1.3.3</version>
         <configuration>
-          <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
+	  <namespaces>
+	    <namespace>!clojure\.contrib\.javadoc</namespace>
+	  </namespaces>
         </configuration>
         <executions>
           <execution>
