@@ -259,8 +259,8 @@
 (extend Socket
   IOFactory
   (assoc default-streams-impl
-    :make-input-stream (fn [^Socket x opts] (.getInputStream x))
-    :make-output-stream (fn [^Socket x opts] (.getOutputStream x))))
+    :make-input-stream (fn [^Socket x opts] (make-input-stream (.getInputStream x) opts))
+    :make-output-stream (fn [^Socket x opts] (make-output-stream (.getOutputStream x) opts))))
 
 (extend byte-array-type
   IOFactory
