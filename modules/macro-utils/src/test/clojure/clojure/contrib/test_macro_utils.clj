@@ -15,9 +15,7 @@
   (:use [clojure.test :only (deftest is are run-tests use-fixtures)]
 	[clojure.contrib.macro-utils
 	 :only (macrolet symbol-macrolet defsymbolmacro with-symbol-macros
-		mexpand-1 mexpand mexpand-all)]
-	[clojure.contrib.monads
-	 :only (with-monad domonad)]))
+		mexpand-1 mexpand mexpand-all)]))
 
 (use-fixtures :each
   (fn [f] (binding [*ns* (the-ns 'clojure.contrib.test-macro-utils)]
@@ -49,13 +47,14 @@
 	   '(symbol-macrolet [x foo z bar]
 	      (fn f ([x y] [x y z]) ([x y z] [x y z]))))
 	 '(do (fn* f ([x y] [x y bar]) ([x y z] [x y z])))))
-  (is (= (nth (second (macroexpand-1
+  (comment
+    (is (= (nth (second (macroexpand-1
 		       '(symbol-macrolet [x xx y yy z zz]
 			  (domonad m [a x b y x z] [a b x z])))) 2)
 	 '(do (m-bind xx (fn* ([a]
 	      (m-bind yy (fn* ([b]
 	      (m-bind zz (fn* ([x]
-	      (m-result [a b x zz]))))))))))))))
+	      (m-result [a b x zz])))))))))))))))
 
 (deftest symbol-test
   (defsymbolmacro sum-2-3 (plus 2 3))
