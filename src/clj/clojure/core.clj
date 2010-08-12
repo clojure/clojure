@@ -5410,7 +5410,7 @@
   return it on all subsequent calls to deref/@. If the computation has
   not yet finished, calls to deref/@ will block."
   {:added "1.1"}
-  [& body] `(future-call (fn [] ~@body)))
+  [& body] `(future-call (^{:once true} fn* [] ~@body)))
 
 
 (defn future-cancel
