@@ -3,8 +3,9 @@ Changes to Clojure in Version 1.2
 = CONTENTS =
 
  0 Changes from beta -> RC1 -> RC2
-    0.1 Changes from RC1 to RC2
-    0.2 Changes from beta1 to RC1
+    0.1 Changes from RC2 to RC3
+    0.2 Changes from RC1 to RC2
+    0.3 Changes from beta1 to RC1
  1 Deprecated and Removed Features
     1.1 metadata reader macro is now ^
  2 New/Improved Features in clojure.core
@@ -33,7 +34,14 @@ Changes to Clojure in Version 1.2
 
 = 0 Changes from beta1 -> RC1 -> RC2
 
-= 0.1 Changes from RC1 to RC2
+= 0.1 Changes from RC2 to RC 3
+
+  * #382 underive fixed
+  * #423 future now clears closed-over variables, allowing gc
+  * #404 clojure.java.io: reader and writer work correctly for sockets
+  * #422 fixed corner case in finally blocks where code could execute twice
+
+= 0.2 Changes from RC1 to RC2
 
 Record/map equality is now symmetric in all cases. There are two
 variants:
@@ -55,7 +63,7 @@ Possible impacts for your programs:
     clojure.lang.MapEquivalence. Note that APersistentMap does this
     for you.
 
-= 0.2 Changes from beta1 to RC1 =
+= 0.3 Changes from beta1 to RC1 =
 
   * switch to soft refs for class and keyword cache
   * update reify, defprotocol, extend-protocol docstrings (#340)
