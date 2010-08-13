@@ -19,6 +19,9 @@
     <!-- The parent module defines common configuration for all modules. -->
     <module>modules/parent</module>
 
+    <!-- The complete module depends on all other modules. -->
+    <module>modules/complete</module>
+
     <module>modules/accumulators</module>
     <module>modules/agent-utils</module>
     <module>modules/apply-macro</module>
