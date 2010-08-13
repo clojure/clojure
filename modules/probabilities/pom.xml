@@ -10,7 +10,7 @@
     <version>1.3.0-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
-  <artifactId>probabilities-finite-distributions</artifactId>
+  <artifactId>probabilities</artifactId>
   <dependencies>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
