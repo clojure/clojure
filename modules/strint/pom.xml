@@ -12,5 +12,10 @@
   </parent>
   <artifactId>strint</artifactId>
   <dependencies>
+    <dependency>
+      <groupId>org.clojure.contrib</groupId>
+      <artifactId>with-ns</artifactId>
+      <version>1.3.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

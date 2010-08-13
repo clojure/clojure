@@ -22,5 +22,10 @@
       <artifactId>seq</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.clojure.contrib</groupId>
+      <artifactId>ns-utils</artifactId>
+      <version>1.3.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

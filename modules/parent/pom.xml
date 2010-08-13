@@ -6,7 +6,7 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <properties>
-    <clojure.version>1.2.0-RC1</clojure.version>
+    <clojure.version>1.2.0-RC3</clojure.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <groupId>org.clojure.contrib</groupId>
@@ -64,4 +64,26 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>clojure-snapshots</id>
+      <url>http://build.clojure.org/snapshots</url>
+      <releases>
+	<enabled>false</enabled>
+      </releases>
+      <snapshots>
+	<enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>clojure-releases</id>
+      <url>http://build.clojure.org/releases</url>
+      <releases>
+	<enabled>true</enabled>
+      </releases>
+      <snapshots>
+	<enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>
