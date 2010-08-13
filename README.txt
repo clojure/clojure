@@ -32,17 +32,22 @@ http://build.clojure.org/
 = Building Clojure-contrib =
 
 If you downloaded a release distribution or pre-compiled JAR, you
-don't need to do anything.
+do NOT need to build anything.
 
 If you downloaded the sources from Github, you will need Apache Maven
 (2.0 or higher) to run the build.  See http://maven.apache.org/
 
-Run the following command in this directory:
+AFTER version 1.2.0, clojure-contrib is divided into many small modules.
 
-    mvn package
+To build all the modules, run the following command in this directory:
 
-This will produce the file target/clojure-contrib-${VERSION}.jar that
-you can add to your Java classpath.
+    mvn install
+
+This will compile and test all modules and store them in your local
+Maven repository cache (usually $HOME/.m2/repository).
+
+There is also an "uberjar" containing all compiled modules at
+./modules/complete/target/complete-$VERSION-jar-with-dependencies.jar
 
 Additional build commands are available:
 
@@ -63,20 +68,6 @@ to the mvn command line.
 
 
 
-== Compiling with Local clojure.jar ==
-
-If you want to compile/build with a customized clojure.jar file, use
-the following command:
-
-    mvn package -Dclojure.jar=/path/to/clojure.jar
-
-The /path/to/clojure.jar MUST be an absolute path.  
-
-Maven will still download other dependencices,
-such as clojure-maven-plugin.
-
-
-
 = Clojure-contrib Versions =
 
 Versions of clojure-contrib are matched to versions of Clojure.
@@ -85,11 +76,10 @@ If you are using Clojure 1.0, use clojure-contrib 1.0.*
 
 If you are using Clojure 1.1, use clojure-contrib 1.1.*
 
+If you are using Clojure 1.2, use clojure-contrib 1.2.*
+
 If you are using Clojure from the "master" branch on Github, use
 clojure-contrib from the "master" branch on Github.
-
-If you are using Clojure from the "new" branch on Github, use
-clojure-contrib from the "new" branch on Github.
 
 
 
