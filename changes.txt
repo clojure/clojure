@@ -2,7 +2,8 @@ Changes to Clojure in Version 1.2
 
 = CONTENTS =
 
- 0 Changes from beta -> RC1 -> RC2
+ 0 Changes from beta up to 1.2
+    0.0 Clojure 1.2 is Clojure 1.2 RC3
     0.1 Changes from RC2 to RC3
     0.2 Changes from RC1 to RC2
     0.3 Changes from beta1 to RC1
@@ -34,7 +35,11 @@ Changes to Clojure in Version 1.2
 
 = 0 Changes from beta1 -> RC1 -> RC2
 
-= 0.1 Changes from RC2 to RC 3
+= 0.0 Clojure 1.2 is the same code as Clojure RC3
+
+  * only change is build metadata and changes.txt
+
+= 0.1 Changes from RC2 to RC3
 
   * #382 underive fixed
   * #423 future now clears closed-over variables, allowing gc
