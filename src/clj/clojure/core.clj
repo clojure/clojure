@@ -3207,12 +3207,11 @@
      (apply pr more))))
 
 (defn newline
-  "Writes a newline to the output stream that is the current value of
-  *out*"
+  "Writes a platform-specific newline to *out*"
   {:added "1.0"
    :static true}
   []
-    (. *out* (append \newline))
+    (. *out* (append (System/getProperty "line.separator")))
     nil)
 
 (defn flush
