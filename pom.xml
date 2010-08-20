@@ -24,6 +24,7 @@
 
     <module>modules/accumulators</module>
     <module>modules/agent-utils</module>
+    <module>modules/apply-macro</module>
     <module>modules/base64</module>
     <module>modules/classpath</module>
     <module>modules/combinatorics</module>
@@ -45,10 +46,13 @@
     <module>modules/generic</module>
     <module>modules/graph</module>
     <module>modules/greatest-least</module>
+    <module>modules/http-agent</module>
+    <module>modules/http-connection</module>
     <module>modules/import-static</module>
     <module>modules/io</module>
     <module>modules/jar</module>
     <module>modules/java-utils</module>
+    <module>modules/javadoc</module>
     <module>modules/jmx</module>
     <module>modules/json</module>
     <module>modules/lazy-seqs</module>
@@ -68,6 +72,7 @@
     <module>modules/priority-map</module>
     <module>modules/probabilities</module>
     <module>modules/profile</module>
+    <module>modules/properties</module>
     <module>modules/prxml</module>
     <module>modules/reflect</module>
     <module>modules/repl-ln</module>
@@ -86,6 +91,7 @@
     <module>modules/string</module>
     <module>modules/strint</module>
     <module>modules/swing-utils</module>
+    <module>modules/test-is</module>
     <module>modules/trace</module>
     <module>modules/types</module>
     <module>modules/with-ns</module>
