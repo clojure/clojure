@@ -179,6 +179,12 @@
 (deftest characters-in-symbols-are-escaped
   (is (= "\"foo\\u1b1b\"" (json-str (symbol "foo\u1b1b")))))
 
+(deftest default-throws-on-eof
+  (is (thrown? java.io.EOFException (read-json ""))))
+
+(deftest can-accept-eof
+  (is (= ::eof (read-json "" true false ::eof))))
+
 ;;; Pretty-printer
 
 (deftest pretty-printing

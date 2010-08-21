@@ -29,9 +29,9 @@
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
   (loop [i (.read stream), result (transient [])]
+    (when (neg? i) (throw (EOFException. "JSON error (end-of-file inside array)")))
     (let [c (char i)]
       (cond
-       (= i -1) (throw (EOFException. "JSON error (end-of-file inside array)"))
        (Character/isWhitespace c) (recur (.read stream) result)
        (= c \,) (recur (.read stream) result)
        (= c \]) (persistent! result)
@@ -43,10 +43,9 @@
   ;; Expects to be called with the head of the stream AFTER the
   ;; opening bracket.
   (loop [i (.read stream), key nil, result (transient {})]
+    (when (neg? i) (throw (EOFException. "JSON error (end-of-file inside array)")))
     (let [c (char i)]
       (cond
-       (= i -1) (throw (EOFException. "JSON error (end-of-file inside object)"))
-
        (Character/isWhitespace c) (recur (.read stream) key result)
 
        (= c \,) (recur (.read stream) nil result)
@@ -100,9 +99,9 @@
   ;; opening quotation mark.
   (let [buffer (StringBuilder.)]
     (loop [i (.read stream)]
+      (when (neg? i) (throw (EOFException. "JSON error (end-of-file inside array)")))
       (let [c (char i)]
         (cond
-         (= i -1) (throw (EOFException. "JSON error (end-of-file inside string)"))
          (= c \") (str buffer)
          (= c \\) (do (.append buffer (read-json-escaped-character stream))
                       (recur (.read stream)))
@@ -112,56 +111,55 @@
 (defn- read-json-reader
   ([^PushbackReader stream keywordize? eof-error? eof-value]
      (loop [i (.read stream)]
-       (let [c (char i)]
-         (cond
-          ;; Handle end-of-stream
-          (= i -1) (if eof-error?
-                     (throw (EOFException. "JSON error (end-of-file)"))
-                     eof-value)
+       (if (neg? i) ;; Handle end-of-stream
+	 (if eof-error?
+	   (throw (EOFException. "JSON error (end-of-file)"))
+	   eof-value)
+	 (let [c (char i)]
+	   (cond
+	    ;; Ignore whitespace
+	    (Character/isWhitespace c) (recur (.read stream))
 
-          ;; Ignore whitespace
-          (Character/isWhitespace c) (recur (.read stream))
+	    ;; Read numbers, true, and false with Clojure reader
+	    (#{\- \0 \1 \2 \3 \4 \5 \6 \7 \8 \9} c)
+	    (do (.unread stream i)
+		(read stream true nil))
 
-          ;; Read numbers, true, and false with Clojure reader
-          (#{\- \0 \1 \2 \3 \4 \5 \6 \7 \8 \9} c)
-          (do (.unread stream i)
-              (read stream true nil))
+	    ;; Read strings
+	    (= c \") (read-json-quoted-string stream)
 
-          ;; Read strings
-          (= c \") (read-json-quoted-string stream)
+	    ;; Read null as nil
+	    (= c \n) (let [ull [(char (.read stream))
+				(char (.read stream))
+				(char (.read stream))]]
+		       (if (= ull [\u \l \l])
+			 nil
+			 (throw (Exception. (str "JSON error (expected null): " c ull)))))
 
-          ;; Read null as nil
-          (= c \n) (let [ull [(char (.read stream))
-                              (char (.read stream))
-                              (char (.read stream))]]
-                     (if (= ull [\u \l \l])
-                       nil
-                       (throw (Exception. (str "JSON error (expected null): " c ull)))))
+	    ;; Read true
+	    (= c \t) (let [rue [(char (.read stream))
+				(char (.read stream))
+				(char (.read stream))]]
+		       (if (= rue [\r \u \e])
+			 true
+			 (throw (Exception. (str "JSON error (expected true): " c rue)))))
 
-          ;; Read true
-          (= c \t) (let [rue [(char (.read stream))
-                              (char (.read stream))
-                              (char (.read stream))]]
-                     (if (= rue [\r \u \e])
-                       true
-                       (throw (Exception. (str "JSON error (expected true): " c rue)))))
+	    ;; Read false
+	    (= c \f) (let [alse [(char (.read stream))
+				 (char (.read stream))
+				 (char (.read stream))
+				 (char (.read stream))]]
+		       (if (= alse [\a \l \s \e])
+			 false
+			 (throw (Exception. (str "JSON error (expected false): " c alse)))))
 
-          ;; Read false
-          (= c \f) (let [alse [(char (.read stream))
-                               (char (.read stream))
-                               (char (.read stream))
-                               (char (.read stream))]]
-                     (if (= alse [\a \l \s \e])
-                       false
-                       (throw (Exception. (str "JSON error (expected false): " c alse)))))
+	    ;; Read JSON objects
+	    (= c \{) (read-json-object stream keywordize?)
 
-          ;; Read JSON objects
-          (= c \{) (read-json-object stream keywordize?)
+	    ;; Read JSON arrays
+	    (= c \[) (read-json-array stream keywordize?)
 
-          ;; Read JSON arrays
-          (= c \[) (read-json-array stream keywordize?)
-
-          :else (throw (Exception. (str "JSON error (unexpected character): " c))))))))
+	    :else (throw (Exception. (str "JSON error (unexpected character): " c)))))))))
 
 (defprotocol Read-JSON-From
   (read-json-from [input keywordize? eof-error? eof-value]
