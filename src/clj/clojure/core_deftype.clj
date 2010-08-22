@@ -70,11 +70,11 @@
   or more method bodies:
 
   protocol-or-interface-or-Object
-  (methodName [args*] body)*
+  (methodName [args+] body)*
 
   Methods should be supplied for all methods of the desired
   protocol(s) and interface(s). You can also define overrides for
-  methods of Object. Note that a parameter must be supplied to
+  methods of Object. Note that the first parameter must be supplied to
   correspond to the target object ('this' in Java parlance). Thus
   methods for interfaces will take one more argument than do the
   interface declarations.  Note also that recur calls to the method
@@ -97,12 +97,12 @@
   
   (str (let [f \"foo\"] 
        (reify Object 
-         (toString [] f))))
+         (toString [this] f))))
   == \"foo\"
 
   (seq (let [f \"foo\"] 
        (reify clojure.lang.Seqable 
-         (seq [] (seq f)))))
+         (seq [this] (seq f)))))
   == (\\f \\o \\o))"
   {:added "1.2"} 
   [& opts+specs]
@@ -151,14 +151,8 @@
      [(eqhash [[i m]] 
         [i
          (conj m 
-               `(hashCode [this#] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
-               `(equals [this# ~gs] 
-                        (boolean 
-                         (or (identical? this# ~gs)
-                             (when (identical? (class this#) (class ~gs))
-                               (let [~gs ~(with-meta gs {:tag tagname})]
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
-                                       (= ~'__extmap (. ~gs ~'__extmap)))))))))])
+               `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
+               `(equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])
       (iobj [[i m]] 
             [(conj i 'clojure.lang.IObj)
              (conj m `(meta [this#] ~'__meta)
@@ -190,13 +184,19 @@
                    `(count [this#] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [this#] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
                    `(cons [this# e#] ((var imap-cons) this# e#))
-                   `(equiv [this# o#] (.equals this# o#))
+                   `(equiv [this# ~gs] 
+                        (boolean 
+                         (or (identical? this# ~gs)
+                             (when (identical? (class this#) (class ~gs))
+                               (let [~gs ~(with-meta gs {:tag tagname})]
+                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
+                                       (= ~'__extmap (. ~gs ~'__extmap))))))))
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
                                               (clojure.lang.MapEntry. k# v#))))
-                   `(seq [this#] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
-                                          ~'__extmap))
+                   `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                                              ~'__extmap)))
                    `(assoc [this# k# ~gs]
                      (condp identical? k#
                        ~@(mapcat (fn [fld]
@@ -212,7 +212,7 @@
                  (conj m
                        `(size [this#] (.count this#))
                        `(isEmpty [this#] (= 0 (.count this#)))
-                       `(containsValue [this# v#] (-> this# vals (.contains v#)))
+                       `(containsValue [this# v#] (boolean (some #{v#} (vals this#))))
                        `(get [this# k#] (.valAt this# k#))
                        `(put [this# k# v#] (throw (UnsupportedOperationException.)))
                        `(remove [this# k#] (throw (UnsupportedOperationException.)))
@@ -581,18 +581,18 @@
     \"A doc string for AProtocol abstraction\"
 
   ;method signatures
-    (bar [a b] \"bar docs\")
-    (baz [a] [a b] [a b c] \"baz docs\"))
+    (bar [this a b] \"bar docs\")
+    (baz [this a] [this a b] [this a b c] \"baz docs\"))
 
   No implementations are provided. Docs can be specified for the
   protocol overall and for each method. The above yields a set of
   polymorphic functions and a protocol object. All are
   namespace-qualified by the ns enclosing the definition The resulting
-  functions dispatch on the type of their first argument, and thus
-  must have at least one argument. defprotocol is dynamic, has no
-  special compile-time effect, and defines no new types or classes
-  Implementations of the protocol methods can be provided using
-  extend.
+  functions dispatch on the type of their first argument, which is
+  required and corresponds to the implicit target object ('this' in 
+  Java parlance). defprotocol is dynamic, has no special compile-time 
+  effect, and defines no new types or classes. Implementations of 
+  the protocol methods can be provided using extend.
 
   defprotocol will automatically generate a corresponding interface,
   with the same name as the protocol, i.e. given a protocol:
@@ -604,23 +604,25 @@
   reify, as they support the protocol directly:
 
   (defprotocol P 
-    (foo [x]) 
-    (bar-me [x] [x y]))
+    (foo [this]) 
+    (bar-me [this] [this y]))
 
   (deftype Foo [a b c] 
    P
-    (foo [] a)
-    (bar-me [] b)
-    (bar-me [y] (+ c y)))
+    (foo [this] a)
+    (bar-me [this] b)
+    (bar-me [this y] (+ c y)))
   
-  (bar-me (Foo 1 2 3) 42)
+  (bar-me (Foo. 1 2 3) 42)
+  => 45
 
   (foo 
     (let [x 42]
       (reify P 
-        (foo [] 17)
-        (bar-me [] x)
-        (bar-me [y] x))))"
+        (foo [this] 17)
+        (bar-me [this] x)
+        (bar-me [this y] x))))
+  => 17"
   {:added "1.2"} 
   [name & opts+sigs]
   (emit-protocol name opts+sigs))
@@ -729,13 +731,13 @@
   "Useful when you want to provide several implementations of the same
   protocol all at once. Takes a single protocol and the implementation
   of that protocol for one or more types. Expands into calls to
-  extend-type and extend-class:
+  extend-type:
 
   (extend-protocol Protocol
-    ::AType
+    AType
       (foo [x] ...)
       (bar [x y] ...)
-    ::BType
+    BType
       (foo [x] ...)
       (bar [x y] ...)
     AClass
@@ -748,13 +750,13 @@
   expands into:
 
   (do
-   (clojure.core/extend-type ::AType Protocol 
+   (clojure.core/extend-type AType Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
-   (clojure.core/extend-type ::BType Protocol 
+   (clojure.core/extend-type BType Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
-   (clojure.core/extend-class AClass Protocol 
+   (clojure.core/extend-type AClass Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
    (clojure.core/extend-type nil Protocol 

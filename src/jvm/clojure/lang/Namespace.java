@@ -79,11 +79,14 @@ public Var intern(Symbol sym){
 }
 
 private void warnOrFailOnReplace(Symbol sym, Object o, Object v){
-    if (o instanceof Var) {
-        if (((Var)o).ns != RT.CLOJURE_NS) {
+    if (o instanceof Var)
+        {
+        Namespace ns = ((Var)o).ns;
+        if (ns == this)
+            return;
+        if (ns != RT.CLOJURE_NS)
             throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
         }
-    }
 	RT.errPrintWriter().println("WARNING: " + sym + " already refers to: " + o + " in namespace: " + name
 		+ ", being replaced by: " + v);
 }

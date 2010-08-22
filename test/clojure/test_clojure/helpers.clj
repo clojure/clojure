@@ -49,3 +49,38 @@
        (report {:type :fail, :message ~msg,
                 :expected '~form, :actual t#})))))
 
+
+(defn get-field
+  "Access to private or protected field.  field-name is a symbol or
+  keyword."
+  ([klass field-name]
+     (get-field klass field-name nil))
+  ([klass field-name inst]
+     (-> klass (.getDeclaredField (name field-name))
+         (doto (.setAccessible true))
+         (.get inst))))
+
+(defn set-var-roots
+  [maplike]
+  (doseq [[var val] maplike]
+    (alter-var-root var (fn [_] val))))
+
+(defn with-var-roots*
+  "Temporarily set var roots, run block, then put original roots back."
+  [root-map f & args]
+  (let [originals (doall (map (fn [[var _]] [var @var]) root-map))]
+    (set-var-roots root-map)
+    (try
+     (apply f args)
+     (finally
+      (set-var-roots originals)))))
+
+(defmacro with-var-roots
+  [root-map & body]
+  `(with-var-roots* ~root-map (fn [] ~@body)))
+
+(defn exception
+  "Use this function to ensure that execution of a program doesn't
+  reach certain point."
+  []
+  (throw (new Exception "Exception which should never occur")))

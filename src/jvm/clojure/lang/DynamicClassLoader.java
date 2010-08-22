@@ -14,18 +14,20 @@ package clojure.lang;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.net.URLClassLoader;
 import java.net.URL;
-import java.lang.ref.WeakReference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
-static ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Object> >classCache =
-        new ConcurrentHashMap<String, Map.Entry<WeakReference<Class>,Object> >();
+static ConcurrentHashMap<String, SoftReference<Class>>classCache =
+        new ConcurrentHashMap<String, SoftReference<Class> >();
 
 static final URL[] EMPTY_URLS = new URL[]{};
+
+static final ReferenceQueue rq = new ReferenceQueue();
 
 public DynamicClassLoader(){
     //pseudo test in lieu of hasContextClassLoader()
@@ -39,29 +41,20 @@ public DynamicClassLoader(ClassLoader parent){
 }
 
 public Class defineClass(String name, byte[] bytes, Object srcForm){
-//    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
-//    if(ce != null)
-//        {
-//        WeakReference<Class> cr = ce.getKey();
-//        Class c = cr.get();
-//        if((c != null) && srcForm.equals(ce.getValue()))
-//            return c;
-//        }
+	Util.clearCache(rq, classCache);
 	Class c = defineClass(name, bytes, 0, bytes.length);
-    classCache.put(name, new MapEntry(new WeakReference(c), null));
+    classCache.put(name, new SoftReference(c,rq));
     return c;
 }
 
 protected Class<?> findClass(String name) throws ClassNotFoundException{
-    Map.Entry<WeakReference<Class>,Object> ce = classCache.get(name);
-    if(ce != null)
-        {
-        WeakReference<Class> cr = ce.getKey();
-        Class c = cr.get();
+    SoftReference<Class> cr = classCache.get(name);
+	if(cr != null)
+		{
+		Class c = cr.get();
         if(c != null)
             return c;
-        classCache.remove(name);
-        }
+		}
 	return super.findClass(name);
 }
 

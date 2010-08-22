@@ -847,19 +847,19 @@
 ;; reduce is defined again later after InternalReduce loads
 (defn ^:private ^:static
   reduce1
-  ([f coll]
-     (let [s (seq coll)]
-       (if s
+       ([f coll]
+             (let [s (seq coll)]
+               (if s
          (reduce1 f (first s) (next s))
-         (f))))
-  ([f val coll]
-     (let [s (seq coll)]
-       (if s
-         (if (chunked-seq? s)
-           (recur f 
-                  (.reduce (chunk-first s) f val)
-                  (chunk-next s))
-           (recur f (f val (first s)) (next s)))
+                 (f))))
+       ([f val coll]
+          (let [s (seq coll)]
+            (if s
+              (if (chunked-seq? s)
+                (recur f 
+                       (.reduce (chunk-first s) f val)
+                       (chunk-next s))
+                (recur f (f val (first s)) (next s)))
          val))))
 
 (defn reverse
@@ -4884,6 +4884,8 @@
          :descendants (tf (:descendants h) parent ta tag td)})
       h))))
 
+(declare flatten)
+
 (defn underive
   "Removes a parent/child relationship between parent and
   tag. h must be a hierarchy obtained from make-hierarchy, if not
@@ -4891,20 +4893,18 @@
   {:added "1.0"}
   ([tag parent] (alter-var-root #'global-hierarchy underive tag parent) nil)
   ([h tag parent]
-   (let [tp (:parents h)
-         td (:descendants h)
-         ta (:ancestors h)
-         tf (fn [m source sources target targets]
-              (reduce1
-               (fn [ret k]
-                 (assoc ret k
-                        (reduce1 disj (get targets k) (cons target (targets target)))))
-               m (cons source (sources source))))]
-     (if (contains? (tp tag) parent)
-       {:parent (assoc (:parents h) tag (disj (get tp tag) parent))
-        :ancestors (tf (:ancestors h) tag td parent ta)
-        :descendants (tf (:descendants h) parent ta tag td)}
-       h))))
+    (let [parentMap (:parents h)
+	  childsParents (if (parentMap tag)
+			  (disj (parentMap tag) parent) #{})
+	  newParents (if (not-empty childsParents)
+		       (assoc parentMap tag childsParents)
+		       (dissoc parentMap tag))
+	  deriv-seq (flatten (map #(cons (key %) (interpose (key %) (val %)))
+				       (seq newParents)))]
+      (if (contains? (parentMap tag) parent)
+	(reduce1 #(apply derive %1 %2) (make-hierarchy)
+		(partition 2 deriv-seq))
+	h))))
 
 
 (defn distinct?
@@ -5745,7 +5745,6 @@
 (load "gvec")
 
 ;; redefine reduce with internal-reduce
-
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then
@@ -5802,11 +5801,11 @@
 
 (defn spit
   "Opposite of slurp.  Opens f with writer, writes content, then
-  closes f."
+  closes f. Options passed to clojure.java.io/writer."
   {:added "1.2"}
   [f content & options]
   (with-open [#^java.io.Writer w (apply jio/writer f options)]
-    (.write w content)))
+    (.write w (str content))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 
@@ -5833,9 +5832,8 @@
   invoke the body in another thread, and will cache the result and
   return it on all subsequent calls to deref/@. If the computation has
   not yet finished, calls to deref/@ will block."
-  {:added "1.1"
-   :static true}
-  [& body] `(future-call (fn [] ~@body)))
+  {:added "1.1"}
+  [& body] `(future-call (^{:once true} fn* [] ~@body)))
 
 
 (defn future-cancel

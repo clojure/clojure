@@ -311,14 +311,19 @@ and :suffix."
   {:added "1.2", :arglists '[[options* body]]}
   [& args]
   (let [[options body] (parse-lb-options #{:prefix :per-line-prefix :suffix} args)]
-    `(do (if (level-exceeded) 
+    `(do (if (#'clojure.pprint/level-exceeded) 
            (.write ^java.io.Writer *out* "#")
-           (binding [*current-level* (inc *current-level*)
-                     *current-length* 0] 
-             (start-block *out*
-                          ~(:prefix options) ~(:per-line-prefix options) ~(:suffix options))
-             ~@body
-             (end-block *out*)))
+           (do 
+             (push-thread-bindings {#'clojure.pprint/*current-level*
+                                    (inc (var-get #'clojure.pprint/*current-level*))
+                                    #'clojure.pprint/*current-length* 0})
+             (try  
+              (#'clojure.pprint/start-block *out*
+                           ~(:prefix options) ~(:per-line-prefix options) ~(:suffix options))
+              ~@body
+              (#'clojure.pprint/end-block *out*)
+              (finally 
+               (pop-thread-bindings)))))
          nil)))
 
 (defn pprint-newline

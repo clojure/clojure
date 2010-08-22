@@ -8,10 +8,11 @@
 
 (ns clojure.test-clojure.java.io
   (:use clojure.test clojure.java.io)
-  (:import (java.io File FileInputStream BufferedInputStream
-                    FileOutputStream OutputStreamWriter InputStreamReader
+  (:import (java.io File BufferedInputStream
+                    FileInputStream InputStreamReader InputStream
+                    FileOutputStream OutputStreamWriter OutputStream
                     ByteArrayInputStream ByteArrayOutputStream)
-           (java.net URL URI)))
+           (java.net URL URI Socket ServerSocket)))
 
 (defn temp-file
   [prefix suffix]
@@ -124,7 +125,6 @@
 (deftest test-as-url
   (are [file-part input] (= (URL. (str "file:" file-part)) (as-url input))
        "foo" "file:foo"
-       "/foo" (File. "/foo")
        "baz" (URL. "file:baz")
        "quux" (URI. "file:quux"))
   (is (nil? (as-url nil))))
@@ -141,11 +141,11 @@
   (testing "strings"
     (is (= "foo" (as-relative-path "foo"))))
   (testing "absolute path strings are forbidden"
-    (is (thrown? IllegalArgumentException (as-relative-path (str File/separator "baz")))))
+    (is (thrown? IllegalArgumentException (as-relative-path (.getAbsolutePath (File. "baz"))))))
   (testing "relative File paths"
     (is (= "bar" (as-relative-path (File. "bar")))))
   (testing "absolute File paths are forbidden"
-    (is (thrown? IllegalArgumentException (as-relative-path (File. (str File/separator "quux")))))))
+    (is (thrown? IllegalArgumentException (as-relative-path (File. (.getAbsolutePath (File. "quux"))))))))
 
 (defn stream-should-have [stream expected-bytes msg]
   (let [actual-bytes (byte-array (alength expected-bytes))]
@@ -194,3 +194,13 @@
     (is (not (.isDirectory (file tmp "test-make-parents" "child" "grandchild"))))
     (delete-file (file tmp "test-make-parents" "child"))
     (delete-file (file tmp "test-make-parents"))))
+
+(deftest test-socket-iofactory
+  (let [port 65321
+        server-socket (ServerSocket. port)
+        client-socket (Socket. "localhost" port)]
+    (try
+      (is (instance? InputStream (input-stream client-socket)))
+      (is (instance? OutputStream (output-stream client-socket)))
+      (finally (.close server-socket)
+               (.close client-socket)))))
