@@ -20,7 +20,7 @@
            (clojure.lang RT Compiler Compiler$C))
   (:require [clojure.contrib.string :as s])
   (:use [clojure.contrib.seq :only (indexed)]
-        [clojure.contrib.javadoc.browse :only (browse-url)]))
+        [clojure.java.browse :only (browse-url)]))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Java classes

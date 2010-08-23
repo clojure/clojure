@@ -49,7 +49,6 @@
     <module>modules/io</module>
     <module>modules/jar</module>
     <module>modules/java-utils</module>
-    <module>modules/javadoc</module>
     <module>modules/jmx</module>
     <module>modules/json</module>
     <module>modules/lazy-seqs</module>
