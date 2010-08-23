@@ -41,7 +41,7 @@
   ;; an error condition function is called with the name of the function
   ;; being mocked, the expected form and the actual value. These
   ;; error functions can be overridden to allow easy integration into
-  ;; test frameworks such as test-is by reporting errors in the function
+  ;; test frameworks such as clojure.test by reporting errors in the function
   ;; overrides.
 
   ) ;; end comment

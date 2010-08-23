@@ -86,7 +86,6 @@
     <module>modules/string</module>
     <module>modules/strint</module>
     <module>modules/swing-utils</module>
-    <module>modules/test-is</module>
     <module>modules/trace</module>
     <module>modules/types</module>
     <module>modules/with-ns</module>
