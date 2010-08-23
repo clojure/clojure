@@ -152,11 +152,6 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>http-agent</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>http-connection</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>

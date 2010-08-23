@@ -45,7 +45,6 @@
     <module>modules/generic</module>
     <module>modules/graph</module>
     <module>modules/greatest-least</module>
-    <module>modules/http-agent</module>
     <module>modules/http-connection</module>
     <module>modules/import-static</module>
     <module>modules/io</module>
