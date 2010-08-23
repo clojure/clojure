@@ -15,12 +15,11 @@
   (:use
    (clojure.contrib
     [except :only (throwf throw-arg)]
-    [properties :only (as-properties)]
     [seq :only (indexed)]))
   (:import
    (clojure.lang RT)
    (java.sql BatchUpdateException DriverManager SQLException Statement)
-   (java.util Hashtable Map)
+   (java.util Hashtable Map Properties)
    (javax.naming InitialContext Name)
    (javax.sql DataSource)))
 
@@ -47,6 +46,22 @@
      (deref (:rollback *db*)))
   ([val]
      (swap! (:rollback *db*) (fn [_] val))))
+
+(defn- as-str
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
+
+(defn- ^Properties as-properties
+  "Convert any seq of pairs to a java.utils.Properties instance.
+   Uses as-str to convert both keys and values into strings."
+  {:tag Properties}
+  [m]
+  (let [p (Properties.)]
+    (doseq [[k v] m]
+      (.setProperty p (as-str k) (as-str v)))
+    p))
 
 (defn get-connection
   "Creates a connection to a database. db-spec is a map containing values

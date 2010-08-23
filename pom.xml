@@ -69,7 +69,6 @@
     <module>modules/priority-map</module>
     <module>modules/probabilities</module>
     <module>modules/profile</module>
-    <module>modules/properties</module>
     <module>modules/prxml</module>
     <module>modules/reflect</module>
     <module>modules/repl-ln</module>
