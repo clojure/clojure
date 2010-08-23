@@ -475,7 +475,6 @@ emits the generated HTML to the path named by path."
      'clojure.zip   
      'clojure.xml
      'clojure.contrib.accumulators
-     'clojure.contrib.apply-macro
      'clojure.contrib.auto-agent
      'clojure.contrib.combinatorics
      'clojure.contrib.command-line

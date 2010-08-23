@@ -24,7 +24,6 @@
 
     <module>modules/accumulators</module>
     <module>modules/agent-utils</module>
-    <module>modules/apply-macro</module>
     <module>modules/base64</module>
     <module>modules/classpath</module>
     <module>modules/combinatorics</module>

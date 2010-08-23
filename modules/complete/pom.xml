@@ -47,11 +47,6 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>apply-macro</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>base64</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
