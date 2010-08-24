@@ -307,16 +307,6 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>shell</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>shell-out</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>singleton</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>

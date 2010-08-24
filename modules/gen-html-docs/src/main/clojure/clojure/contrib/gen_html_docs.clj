@@ -509,7 +509,6 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.repl-utils
      'clojure.contrib.seq
      'clojure.contrib.server-socket
-     'clojure.contrib.shell
      'clojure.contrib.sql
      'clojure.contrib.stream-utils
      'clojure.contrib.string
@@ -532,7 +531,6 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.test-clojure.printer
      'clojure.contrib.test-clojure.reader
      'clojure.contrib.test-clojure.sequences
-     'clojure.contrib.test-contrib.shell
      'clojure.contrib.test-contrib.string
      'clojure.contrib.zip-filter.xml
      ]))

@@ -76,8 +76,6 @@
     <module>modules/seq-utils</module>
     <module>modules/server-socket</module>
     <module>modules/set</module>
-    <module>modules/shell</module>
-    <module>modules/shell-out</module>
     <module>modules/singleton</module>
     <module>modules/sql</module>
     <module>modules/str-utils</module>
