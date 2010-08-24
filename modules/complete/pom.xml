@@ -11,15 +11,16 @@
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>complete</artifactId>
+  <packaging>pom</packaging>
   <build>
     <plugins>
       <plugin>
 	<artifactId>maven-assembly-plugin</artifactId>
         <version>2.2-beta-5</version>
         <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
+          <descriptors>
+            <descriptor>src/main/assemblies/bin.xml</descriptor>
+          </descriptors>
         </configuration>
 	<executions>
 	  <execution>
