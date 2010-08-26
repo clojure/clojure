@@ -46,7 +46,6 @@
     <module>modules/graph</module>
     <module>modules/greatest-least</module>
     <module>modules/import-static</module>
-    <module>modules/io</module>
     <module>modules/jar</module>
     <module>modules/java-utils</module>
     <module>modules/jmx</module>

@@ -46,8 +46,7 @@
      :doc "Generates a single HTML page that contains the documentation for
 one or more Clojure libraries."} 
   clojure.contrib.gen-html-docs
-  (:require [clojure.contrib.io :as io]
-            [clojure.contrib.string :as s])
+  (:require [clojure.contrib.string :as s])
   (:use [clojure.contrib repl-utils def prxml])
   (:import [java.lang Exception]
 	   [java.util.regex Pattern]))
@@ -458,7 +457,7 @@ libraries."
   "Calls generate-documentation on the libraries named by libs and
 emits the generated HTML to the path named by path."
   [path libs]
-  (io/spit path (generate-documentation libs)))
+  (spit path (generate-documentation libs)))
 
 (comment 
   (generate-documentation-to-file 
@@ -481,7 +480,6 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.complex-numbers
      'clojure.contrib.cond
      'clojure.contrib.def
-     'clojure.contrib.io
      'clojure.contrib.enum
      'clojure.contrib.error-kit
      'clojure.contrib.except
