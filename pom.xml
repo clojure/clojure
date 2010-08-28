@@ -46,7 +46,6 @@
     <module>modules/greatest-least</module>
     <module>modules/import-static</module>
     <module>modules/jar</module>
-    <module>modules/java-utils</module>
     <module>modules/jmx</module>
     <module>modules/json</module>
     <module>modules/lazy-seqs</module>
