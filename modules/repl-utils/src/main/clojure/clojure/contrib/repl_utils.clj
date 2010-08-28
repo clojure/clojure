@@ -116,55 +116,6 @@
                 (printf "[%2d] %s\n" i (:text m)))))))))
 
 ;; ----------------------------------------------------------------------
-;; Examine Clojure functions (Vars, really)
-
-(defn get-source
-  "Returns a string of the source code for the given symbol, if it can
-  find it.  This requires that the symbol resolve to a Var defined in
-  a namespace for which the .clj is in the classpath.  Returns nil if
-  it can't find the source.  For most REPL usage, 'source' is more
-  convenient.
-  
-  Example: (get-source 'filter)"
-  {:deprecated "1.2"}
-  [x]
-  (when-let [v (resolve x)]
-    (when-let [filepath (:file (meta v))]
-      (when-let [strm (.getResourceAsStream (RT/baseLoader) filepath)]
-        (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
-          (dotimes [_ (dec (:line (meta v)))] (.readLine rdr))
-          (let [text (StringBuilder.)
-                pbr (proxy [PushbackReader] [rdr]
-                      (read [] (let [i (proxy-super read)]
-                                 (.append text (char i))
-                                 i)))]
-            (read (PushbackReader. pbr))
-            (str text)))))))
-
-(defmacro source
-  "Prints the source code for the given symbol, if it can find it.
-  This requires that the symbol resolve to a Var defined in a
-  namespace for which the .clj is in the classpath.
-  
-  Example: (source filter)"
-  {:deprecated "1.2"}
-  [n]
-  `(println (or (get-source '~n) (str "Source not found"))))
-
-(defn apropos
-  "Given a regular expression or stringable thing, return a seq of 
-all definitions in all currently-loaded namespaces that match the
-str-or-pattern."
-  {:deprecated "1.2"}
-  [str-or-pattern]
-  (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
-                   #(re-find str-or-pattern (str %))
-                   #(.contains (str %) (str str-or-pattern)))]
-    (mapcat (fn [ns]
-              (filter matches? (keys (ns-publics ns))))
-            (all-ns))))
-
-;; ----------------------------------------------------------------------
 ;; Handle Ctrl-C keystrokes
 
 (def ^{:doc "Threads to stop when Ctrl-C is pressed.  See 'add-break-thread!'"}

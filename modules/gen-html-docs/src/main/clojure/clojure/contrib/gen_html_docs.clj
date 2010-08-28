@@ -47,7 +47,8 @@
 one or more Clojure libraries."} 
   clojure.contrib.gen-html-docs
   (:require [clojure.string :as s])
-  (:use [clojure.contrib repl-utils def prxml])
+  (:use [clojure [repl :only [source-fn]]])
+  (:use [clojure.contrib def prxml])
   (:import [java.lang Exception]
 	   [java.util.regex Pattern]))
 
@@ -290,7 +291,7 @@ function toggle(targetid, linkid, textWhenOpen, textWhenClosed)
   (try
    (let [docs (:doc (meta v)) 
 	 src (if-let [ns (find-ns libid)]
-	       (get-source (symbol-for ns memberid)))]
+	       (source-fn (symbol-for ns memberid)))]
      (if (and src docs)
        (doc-elided-src docs src)
        src))
