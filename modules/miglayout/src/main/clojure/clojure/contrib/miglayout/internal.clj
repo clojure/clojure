@@ -20,8 +20,7 @@
   (:use (clojure.contrib
          [core :only (new-by-name)]
          [except :only (throwf)]
-         [fcase :only (fcase)]
-         [string :only (as-str)])))
+         [fcase :only (fcase)])))
 
 (def MigLayout "net.miginfocom.swing.MigLayout")
 (def LayoutCallback "net.miginfocom.layout.LayoutCallback")
@@ -43,6 +42,12 @@
      set?     (apply concat (interpose [", "] (map format-constraints c)))
      (throwf IllegalArgumentException
              "unrecognized constraint: %s (%s)" c (class c)))])
+
+(defn- as-str
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
 
 (defn format-constraints
   "Returns a string representing all the constraints for one keyword-item

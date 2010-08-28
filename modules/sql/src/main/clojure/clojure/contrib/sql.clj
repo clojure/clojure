@@ -21,9 +21,7 @@
      :see-also [["http://github.com/richhickey/clojure-contrib/blob/master/src/test/clojure/clojure/contrib/test_sql.clj"
                  "Example code"]]}
   clojure.contrib.sql
-  (:use (clojure.contrib
-         [def :only (defalias)]
-         [string :only (as-str)])
+  (:use (clojure.contrib [def :only (defalias)])
         clojure.contrib.sql.internal))
 
 (defalias find-connection find-connection*)
@@ -99,6 +97,12 @@
       (.addBatch stmt))
     (transaction
      (seq (.executeBatch stmt)))))
+
+(defn- as-str
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
 
 (defn create-table
   "Creates a table on the open database connection given a table name and

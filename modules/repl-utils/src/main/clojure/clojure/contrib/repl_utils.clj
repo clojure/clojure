@@ -18,23 +18,44 @@
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
            (clojure.lang RT Compiler Compiler$C))
-  (:require [clojure.contrib.string :as s])
   (:use [clojure.contrib.seq :only (indexed)]
-        [clojure.java.browse :only (browse-url)]))
+        [clojure.java.browse :only (browse-url)]
+        [clojure.string :only (join)]))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Java classes
 
+(defn- spartition
+  "Splits the string into a lazy sequence of substrings, alternating
+  between substrings that match the patthern and the substrings
+  between the matches.  The sequence always starts with the substring
+  before the first match, or an empty string if the beginning of the
+  string matches.
+
+  For example: (spartition #\"[a-z]+\" \"abc123def\")
+  returns: (\"\" \"abc\" \"123\" \"def\")"
+  [^Pattern re ^String s]
+  (let [m (re-matcher re s)]
+    ((fn step [prevend]
+       (lazy-seq
+        (if (.find m)
+          (cons (.subSequence s prevend (.start m))
+                (cons (re-groups m)
+                      (step (+ (.start m) (count (.group m))))))
+          (when (< prevend (.length s))
+            (list (.subSequence s prevend (.length s)))))))
+     0)))
+
 (defn- sortable [t]
   (apply str (map (fn [[a b]] (str a (format "%04d" (Integer. b))))
-                  (partition 2 (concat (s/partition #"\d+" t) [0])))))
+                  (spartition 2 (concat (spartition #"\d+" t) [0])))))
 
 (defn- param-str [m]
-  (str " (" (s/join
+  (str " (" (join
               "," (map (fn [[c i]]
                          (if (> i 3)
                            (str (.getSimpleName c) "*" i)
-                           (s/join "," (replicate i (.getSimpleName c)))))
+                           (join "," (replicate i (.getSimpleName c)))))
                        (reduce (fn [pairs y] (let [[x i] (peek pairs)]
                                                (if (= x y)
                                                  (conj (pop pairs) [y (inc i)])
@@ -138,7 +159,7 @@ str-or-pattern."
   [str-or-pattern]
   (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
                    #(re-find str-or-pattern (str %))
-                   #(s/substring? (str str-or-pattern) (str %)))]
+                   #(.contains (str %) (str str-or-pattern)))]
     (mapcat (fn [ns]
               (filter matches? (keys (ns-publics ns))))
             (all-ns))))

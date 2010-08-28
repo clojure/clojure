@@ -17,8 +17,7 @@
   To write JSON, use json-str, write-json, or write-json.
   To read JSON, use read-json."}
     clojure.contrib.json
-  (:use [clojure.contrib.pprint :only (write formatter-out)]
-        [clojure.contrib.string :only (as-str)])
+  (:use [clojure.contrib.pprint :only (write formatter-out)])
   (:import (java.io PrintWriter PushbackReader StringWriter
                     StringReader Reader EOFException)))
 
@@ -227,6 +226,12 @@
          :else (.append sb (format "\\u%04x" cp)))))
     (.append sb \")
     (.print out (str sb))))
+
+(defn- as-str
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
 
 (defn- write-json-object [m ^PrintWriter out] 
   (.print out \{)

@@ -72,7 +72,6 @@
   clojure.contrib.jmx
   (:refer-clojure :exclude [read])
   (:use clojure.contrib.def
-        [clojure.contrib.string :only [as-str]]
         [clojure.stacktrace :only (root-cause)]
         [clojure.walk :only [postwalk]])
   (:import [clojure.lang Associative]
@@ -82,6 +81,12 @@
 
 (defvar *connection* (ManagementFactory/getPlatformMBeanServer)
   "The connection to be used for JMX ops. Defaults to the local process.")
+
+(defn- as-str
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
 
 (load "jmx/data")
 (load "jmx/client")

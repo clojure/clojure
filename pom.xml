@@ -78,7 +78,6 @@
     <module>modules/singleton</module>
     <module>modules/sql</module>
     <module>modules/stream-utils</module>
-    <module>modules/string</module>
     <module>modules/strint</module>
     <module>modules/swing-utils</module>
     <module>modules/trace</module>
