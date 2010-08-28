@@ -77,7 +77,6 @@
     <module>modules/set</module>
     <module>modules/singleton</module>
     <module>modules/sql</module>
-    <module>modules/str-utils2</module>
     <module>modules/stream-utils</module>
     <module>modules/string</module>
     <module>modules/strint</module>
