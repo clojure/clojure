@@ -19,7 +19,7 @@
         clojure.contrib.datalog.magic
         clojure.contrib.datalog.rules
         clojure.contrib.datalog.database)
-  (:use [clojure.contrib.set :only (subset?)]))
+  (:use [clojure.set :only (subset?)]))
 
 
 

@@ -18,8 +18,7 @@
   (:use clojure.contrib.datalog.util)
   (:use clojure.contrib.datalog.literals
        clojure.contrib.datalog.database)
-  (:use [clojure.set :only (union intersection difference)])
-  (:use [clojure.contrib.set :only (subset?)])
+  (:use [clojure.set :only (union intersection difference subset?)])
   (:use [clojure.contrib.except :only (throwf)])
   (:import java.io.Writer))
 
