@@ -35,7 +35,6 @@
     <module>modules/dataflow</module>
     <module>modules/datalog</module>
     <module>modules/def</module>
-    <module>modules/duck-streams</module>
     <module>modules/error-kit</module>
     <module>modules/except</module>
     <module>modules/fcase</module>
