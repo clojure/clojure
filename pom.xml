@@ -61,7 +61,6 @@
     <module>modules/monadic-io-streams</module>
     <module>modules/monads</module>
     <module>modules/ns-utils</module>
-    <module>modules/pprint</module>
     <module>modules/priority-map</module>
     <module>modules/probabilities</module>
     <module>modules/profile</module>
