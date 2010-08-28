@@ -69,7 +69,6 @@
     <module>modules/repl-ln</module>
     <module>modules/repl-utils</module>
     <module>modules/seq</module>
-    <module>modules/seq-utils</module>
     <module>modules/server-socket</module>
     <module>modules/set</module>
     <module>modules/singleton</module>

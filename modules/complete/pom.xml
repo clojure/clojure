@@ -272,11 +272,6 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>seq-utils</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>server-socket</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
