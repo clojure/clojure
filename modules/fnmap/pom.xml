@@ -11,4 +11,17 @@
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>fnmap</artifactId>
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>com.theoryinpractise</groupId>
+	<artifactId>clojure-maven-plugin</artifactId>
+	<configuration>
+	  <namespaces>
+	    <namespace>clojure\.contrib\.fnmap\.PersistentFnMap</namespace>
+	  </namespaces>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

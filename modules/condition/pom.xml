@@ -23,4 +23,17 @@
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>com.theoryinpractise</groupId>
+	<artifactId>clojure-maven-plugin</artifactId>
+	<configuration>
+	  <namespaces>
+	    <namespace>clojure\.contrib\.condition\.Condition</namespace>
+	  </namespaces>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
