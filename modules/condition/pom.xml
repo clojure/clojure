@@ -12,6 +12,12 @@
   </parent>
   <artifactId>condition</artifactId>
   <dependencies>
+    <!-- AOT-compilation necessitates a specific Clojure dependency. -->
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>1.2.0</version>
+    </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>def</artifactId>

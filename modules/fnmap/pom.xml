@@ -11,6 +11,14 @@
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>fnmap</artifactId>
+  <dependencies>
+    <!-- AOT-compilation necessitates a specific Clojure dependency. -->
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>
