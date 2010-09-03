@@ -64,3 +64,8 @@
 	 '(do (+ 1 (clojure.core/+ 2 3)))))
   (ns-unmap *ns* 'sum-2-3))
 
+(deftest mexpand-all-test
+  (is (= (mexpand-all '(let [object (fn [] 3)] (object)))
+	 '(let* [object (fn* ([] 3))] (object))))
+  (is (= (mexpand-all '(let [or (fn [] 3)] (or)))
+	 '(let* [or (fn* ([] 3))] (or)))))

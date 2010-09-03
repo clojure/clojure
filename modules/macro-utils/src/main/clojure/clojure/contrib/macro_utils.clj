@@ -1,7 +1,7 @@
 ;; Macrolet and symbol-macrolet
 
 ;; by Konrad Hinsen
-;; last updated January 14, 2010
+;; last updated September 3, 2010
 
 ;; Copyright (c) Konrad Hinsen, 2009-2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -47,18 +47,19 @@
 ; Symbols defined inside let forms or function arguments.
 (defvar- protected-symbols #{})
 
-(defn- reserved?
+(defn- protected?
   [symbol]
-  "Return true if symbol is a reserved symbol (starting or ending with a dot)."
-  (let [s (str symbol)]
-    (or (= "." (subs s 0 1))
-	(= "." (subs s (dec (count s)))))))
+  "Return true if symbol is a reserved symbol (starting or ending with a dot)
+   or a symbol bound in a surrounding let form or as a function argument."
+  (or (contains? protected-symbols symbol)
+      (let [s (str symbol)]
+	(or (= "." (subs s 0 1))
+	    (= "." (subs s (dec (count s))))))))
 
 (defn- expand-symbol
   "Expand symbol macros"
   [symbol]
-  (cond (contains? protected-symbols symbol) symbol
-	(reserved? symbol)                   symbol
+  (cond (protected? symbol)                   symbol
 	(contains? macro-symbols symbol)     (get macro-symbols symbol)
 	:else (let [v (resolve symbol)
 		    m (meta v)]
@@ -74,10 +75,14 @@
       (let [f (first form)]
         (cond (contains? special-forms f) form
 	      (contains? macro-fns f)     (apply (get macro-fns f) (rest form))
-	      (symbol? f)                 (let [exp (expand-symbol f)]
-					    (if (= exp f)
-					      (clojure.core/macroexpand-1 form)
-					      (cons exp (rest form))))
+	      (symbol? f)  (cond
+			    (protected? f) form
+			    ; macroexpand-1 fails if f names a class
+			    (class? (ns-resolve *ns* f)) form
+			    :else    (let [exp (expand-symbol f)]
+				       (if (= exp f)
+					 (clojure.core/macroexpand-1 form)
+					 (cons exp (rest form)))))
 	      ; handle defmacro macros and Java method special forms
 	      :else (clojure.core/macroexpand-1 form)))
     (symbol? form)
