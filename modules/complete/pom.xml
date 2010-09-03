@@ -11,15 +11,16 @@
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>complete</artifactId>
+  <packaging>pom</packaging>
   <build>
     <plugins>
       <plugin>
 	<artifactId>maven-assembly-plugin</artifactId>
         <version>2.2-beta-5</version>
         <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
+          <descriptors>
+            <descriptor>src/main/assemblies/bin.xml</descriptor>
+          </descriptors>
         </configuration>
 	<executions>
 	  <execution>
@@ -42,11 +43,6 @@
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>agent-utils</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>apply-macro</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -106,11 +102,6 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>duck-streams</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>error-kit</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
@@ -156,37 +147,12 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>http-agent</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>http-connection</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>import-static</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>io</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>jar</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>java-utils</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>javadoc</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -266,11 +232,6 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>pprint</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>priority-map</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
@@ -282,11 +243,6 @@
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>profile</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>properties</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -316,27 +272,12 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>seq-utils</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>server-socket</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>set</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>shell</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>shell-out</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -351,22 +292,7 @@
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
-      <artifactId>str-utils</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>str-utils2</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
       <artifactId>stream-utils</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>string</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -377,11 +303,6 @@
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>swing-utils</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure.contrib</groupId>
-      <artifactId>test-is</artifactId>
       <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>

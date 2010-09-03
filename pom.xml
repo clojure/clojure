@@ -24,7 +24,6 @@
 
     <module>modules/accumulators</module>
     <module>modules/agent-utils</module>
-    <module>modules/apply-macro</module>
     <module>modules/base64</module>
     <module>modules/classpath</module>
     <module>modules/combinatorics</module>
@@ -36,7 +35,6 @@
     <module>modules/dataflow</module>
     <module>modules/datalog</module>
     <module>modules/def</module>
-    <module>modules/duck-streams</module>
     <module>modules/error-kit</module>
     <module>modules/except</module>
     <module>modules/fcase</module>
@@ -46,13 +44,8 @@
     <module>modules/generic</module>
     <module>modules/graph</module>
     <module>modules/greatest-least</module>
-    <module>modules/http-agent</module>
-    <module>modules/http-connection</module>
     <module>modules/import-static</module>
-    <module>modules/io</module>
     <module>modules/jar</module>
-    <module>modules/java-utils</module>
-    <module>modules/javadoc</module>
     <module>modules/jmx</module>
     <module>modules/json</module>
     <module>modules/lazy-seqs</module>
@@ -68,30 +61,21 @@
     <module>modules/monadic-io-streams</module>
     <module>modules/monads</module>
     <module>modules/ns-utils</module>
-    <module>modules/pprint</module>
     <module>modules/priority-map</module>
     <module>modules/probabilities</module>
     <module>modules/profile</module>
-    <module>modules/properties</module>
     <module>modules/prxml</module>
     <module>modules/reflect</module>
     <module>modules/repl-ln</module>
     <module>modules/repl-utils</module>
     <module>modules/seq</module>
-    <module>modules/seq-utils</module>
     <module>modules/server-socket</module>
     <module>modules/set</module>
-    <module>modules/shell</module>
-    <module>modules/shell-out</module>
     <module>modules/singleton</module>
     <module>modules/sql</module>
-    <module>modules/str-utils</module>
-    <module>modules/str-utils2</module>
     <module>modules/stream-utils</module>
-    <module>modules/string</module>
     <module>modules/strint</module>
     <module>modules/swing-utils</module>
-    <module>modules/test-is</module>
     <module>modules/trace</module>
     <module>modules/types</module>
     <module>modules/with-ns</module>

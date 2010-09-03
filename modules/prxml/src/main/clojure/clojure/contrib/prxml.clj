@@ -27,7 +27,7 @@
      :doc "Compact syntax for generating XML. See the documentation of \"prxml\" 
 for details."}
   clojure.contrib.prxml
-  (:use [clojure.contrib.string :only (escape as-str)]))
+  (:use [clojure.string :only (escape)]))
 
 (def
  ^{:doc "If true, empty tags will have a space before the closing />"}
@@ -43,11 +43,17 @@ for details."}
 (def ^{:private true} print-xml)  ; forward declaration
 
 (defn- escape-xml [s]
-  (escape {\< "&lt;"
-           \> "&gt;"
-           \& "&amp;"
-           \' "&apos;"
-           \" "&quot;"} s))
+  (escape s {\< "&lt;"
+             \> "&gt;"
+             \& "&amp;"
+             \' "&apos;"
+             \" "&quot;"}))
+
+(defn- as-str
+  [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
 
 (defn- prxml-attribute [name value]
   (print " ")

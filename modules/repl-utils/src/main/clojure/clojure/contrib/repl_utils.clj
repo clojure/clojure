@@ -18,23 +18,44 @@
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
            (java.lang.reflect Modifier Method Constructor)
            (clojure.lang RT Compiler Compiler$C))
-  (:require [clojure.contrib.string :as s])
   (:use [clojure.contrib.seq :only (indexed)]
-        [clojure.contrib.javadoc.browse :only (browse-url)]))
+        [clojure.java.browse :only (browse-url)]
+        [clojure.string :only (join)]))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Java classes
 
+(defn- spartition
+  "Splits the string into a lazy sequence of substrings, alternating
+  between substrings that match the patthern and the substrings
+  between the matches.  The sequence always starts with the substring
+  before the first match, or an empty string if the beginning of the
+  string matches.
+
+  For example: (spartition #\"[a-z]+\" \"abc123def\")
+  returns: (\"\" \"abc\" \"123\" \"def\")"
+  [^Pattern re ^String s]
+  (let [m (re-matcher re s)]
+    ((fn step [prevend]
+       (lazy-seq
+        (if (.find m)
+          (cons (.subSequence s prevend (.start m))
+                (cons (re-groups m)
+                      (step (+ (.start m) (count (.group m))))))
+          (when (< prevend (.length s))
+            (list (.subSequence s prevend (.length s)))))))
+     0)))
+
 (defn- sortable [t]
   (apply str (map (fn [[a b]] (str a (format "%04d" (Integer. b))))
-                  (partition 2 (concat (s/partition #"\d+" t) [0])))))
+                  (spartition 2 (concat (spartition #"\d+" t) [0])))))
 
 (defn- param-str [m]
-  (str " (" (s/join
+  (str " (" (join
               "," (map (fn [[c i]]
                          (if (> i 3)
                            (str (.getSimpleName c) "*" i)
-                           (s/join "," (replicate i (.getSimpleName c)))))
+                           (join "," (replicate i (.getSimpleName c)))))
                        (reduce (fn [pairs y] (let [[x i] (peek pairs)]
                                                (if (= x y)
                                                  (conj (pop pairs) [y (inc i)])
@@ -93,55 +114,6 @@
             (doseq [[i m] (indexed members)]
               (when (pred m)
                 (printf "[%2d] %s\n" i (:text m)))))))))
-
-;; ----------------------------------------------------------------------
-;; Examine Clojure functions (Vars, really)
-
-(defn get-source
-  "Returns a string of the source code for the given symbol, if it can
-  find it.  This requires that the symbol resolve to a Var defined in
-  a namespace for which the .clj is in the classpath.  Returns nil if
-  it can't find the source.  For most REPL usage, 'source' is more
-  convenient.
-  
-  Example: (get-source 'filter)"
-  {:deprecated "1.2"}
-  [x]
-  (when-let [v (resolve x)]
-    (when-let [filepath (:file (meta v))]
-      (when-let [strm (.getResourceAsStream (RT/baseLoader) filepath)]
-        (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
-          (dotimes [_ (dec (:line (meta v)))] (.readLine rdr))
-          (let [text (StringBuilder.)
-                pbr (proxy [PushbackReader] [rdr]
-                      (read [] (let [i (proxy-super read)]
-                                 (.append text (char i))
-                                 i)))]
-            (read (PushbackReader. pbr))
-            (str text)))))))
-
-(defmacro source
-  "Prints the source code for the given symbol, if it can find it.
-  This requires that the symbol resolve to a Var defined in a
-  namespace for which the .clj is in the classpath.
-  
-  Example: (source filter)"
-  {:deprecated "1.2"}
-  [n]
-  `(println (or (get-source '~n) (str "Source not found"))))
-
-(defn apropos
-  "Given a regular expression or stringable thing, return a seq of 
-all definitions in all currently-loaded namespaces that match the
-str-or-pattern."
-  {:deprecated "1.2"}
-  [str-or-pattern]
-  (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
-                   #(re-find str-or-pattern (str %))
-                   #(s/substring? (str str-or-pattern) (str %)))]
-    (mapcat (fn [ns]
-              (filter matches? (keys (ns-publics ns))))
-            (all-ns))))
 
 ;; ----------------------------------------------------------------------
 ;; Handle Ctrl-C keystrokes

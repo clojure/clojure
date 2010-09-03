@@ -12,7 +12,7 @@
     ^{:author "Chris Houser", 
        :doc "Process command-line arguments according to a given cmdspec"}
     clojure.contrib.command-line
-    (:use     (clojure.contrib [string :only (join)])))
+    (:use     (clojure [string :only (join)])))
 
 (defn make-map [args cmdspec]
   (let [{spec true [rest-sym] false} (group-by vector? cmdspec)

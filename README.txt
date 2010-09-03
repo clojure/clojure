@@ -1,20 +1,20 @@
 = Clojure-contrib =
 
-The user contributions library, clojure.contrib, is a collection of
-namespaces each of which implements features that we believe may be
-useful to a large part of the Clojure community.
+The user contributions library, clojure-contrib, is a collection of
+namespaces implementing features that may be useful to a large part of
+the Clojure community.
 
 Clojure-contrib is open source under the Eclipse Public License and is
 copyrighted by Rich Hickey and the various contributors.
 
 Download releases from
-http://code.google.com/p/clojure-contrib/downloads
+http://clojure.org/downloads
 
 The official source repository for clojure-contrib is
-http://github.com/richhickey/clojure-contrib
+http://github.com/clojure/clojure-contrib
 
 Documentation and APIs are available at
-http://richhickey.github.com/clojure-contrib/
+http://clojure.github.com/clojure-contrib/
 
 Issues are maintained in the Assembla space at
 http://www.assembla.com/spaces/clojure-contrib
@@ -24,8 +24,9 @@ http://groups.google.com/group/clojure
 and developer discussions are in the Clojure Dev Google group at
 http://groups.google.com/group/clojure-dev
 
-Compiled JARs of development snapshots are available at
-http://build.clojure.org/
+Compiled JARs of released versions are available in the Maven
+repository http://build.clojure.org/releases and SNAPSHOT versions are
+available at http://build.clojure.org/snapshots
 
 
 

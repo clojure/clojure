@@ -11,4 +11,25 @@
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>fnmap</artifactId>
+  <dependencies>
+    <!-- AOT-compilation necessitates a specific Clojure dependency. -->
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>com.theoryinpractise</groupId>
+	<artifactId>clojure-maven-plugin</artifactId>
+	<configuration>
+	  <namespaces>
+	    <namespace>clojure\.contrib\.fnmap\.PersistentFnMap</namespace>
+	  </namespaces>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

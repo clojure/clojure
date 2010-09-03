@@ -46,9 +46,9 @@
      :doc "Generates a single HTML page that contains the documentation for
 one or more Clojure libraries."} 
   clojure.contrib.gen-html-docs
-  (:require [clojure.contrib.io :as io]
-            [clojure.contrib.string :as s])
-  (:use [clojure.contrib repl-utils def prxml])
+  (:require [clojure.string :as s])
+  (:use [clojure [repl :only [source-fn]]])
+  (:use [clojure.contrib def prxml])
   (:import [java.lang Exception]
 	   [java.util.regex Pattern]))
 
@@ -227,7 +227,7 @@ function toggle(targetid, linkid, textWhenOpen, textWhenClosed)
 	(if (= 0 (count l)) 
 	  [:span {:class "library-member-doc-whitespace"} " "] ; We need something here to make the blank line show up
 	  l)]) 
-     (s/split #"\n" docs)) 
+     (s/split docs #"\n"))
     ""))
 
 (defn- member-type 
@@ -271,7 +271,7 @@ function toggle(targetid, linkid, textWhenOpen, textWhenClosed)
 (defn- elide-to-one-line 
   "Elides a string down to one line."
   [s]
-  (s/replace-re #"(\n.*)+" "..." s))
+  (s/replace s #"(\n.*)+" "..."))
 
 (defn- elide-string 
   "Returns a string that is at most the first limit characters of s"
@@ -283,19 +283,15 @@ function toggle(targetid, linkid, textWhenOpen, textWhenClosed)
 (defn- doc-elided-src 
   "Returns the src with the docs elided."
   [docs src]
-  (s/replace-re (re-pattern (str "\"" (Pattern/quote docs) "\"")) 
-	  (str "\""
-		  (elide-to-one-line docs)
-;; 	          (elide-string docs 10)
-;;	          "..."
-		  "\"")
-	  src))
+  (s/replace src
+             (re-pattern (str "\"" (Pattern/quote docs) "\""))
+             (str "\"" (elide-to-one-line docs) "\"")))
 
 (defn- format-source [libid memberid v]
   (try
    (let [docs (:doc (meta v)) 
 	 src (if-let [ns (find-ns libid)]
-	       (get-source (symbol-for ns memberid)))]
+	       (source-fn (symbol-for ns memberid)))]
      (if (and src docs)
        (doc-elided-src docs src)
        src))
@@ -458,7 +454,7 @@ libraries."
   "Calls generate-documentation on the libraries named by libs and
 emits the generated HTML to the path named by path."
   [path libs]
-  (io/spit path (generate-documentation libs)))
+  (spit path (generate-documentation libs)))
 
 (comment 
   (generate-documentation-to-file 
@@ -475,14 +471,12 @@ emits the generated HTML to the path named by path."
      'clojure.zip   
      'clojure.xml
      'clojure.contrib.accumulators
-     'clojure.contrib.apply-macro
      'clojure.contrib.auto-agent
      'clojure.contrib.combinatorics
      'clojure.contrib.command-line
      'clojure.contrib.complex-numbers
      'clojure.contrib.cond
      'clojure.contrib.def
-     'clojure.contrib.io
      'clojure.contrib.enum
      'clojure.contrib.error-kit
      'clojure.contrib.except
@@ -510,7 +504,6 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.repl-utils
      'clojure.contrib.seq
      'clojure.contrib.server-socket
-     'clojure.contrib.shell
      'clojure.contrib.sql
      'clojure.contrib.stream-utils
      'clojure.contrib.string
@@ -533,7 +526,6 @@ emits the generated HTML to the path named by path."
      'clojure.contrib.test-clojure.printer
      'clojure.contrib.test-clojure.reader
      'clojure.contrib.test-clojure.sequences
-     'clojure.contrib.test-contrib.shell
      'clojure.contrib.test-contrib.string
      'clojure.contrib.zip-filter.xml
      ]))
