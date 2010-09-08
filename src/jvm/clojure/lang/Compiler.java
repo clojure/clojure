@@ -1483,7 +1483,18 @@ static class StaticMethodExpr extends MethodExpr{
 			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
 			gen.invokeStatic(type, m);
 			//if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
-			HostExpr.emitBoxReturn(objx, gen, method.getReturnType());
+			Class retClass = method.getReturnType();
+			if(context == C.STATEMENT)
+				{
+				if(retClass == long.class || retClass == double.class)
+					gen.pop2();
+				else if(retClass != void.class)
+					gen.pop();
+				}
+			else
+				{
+				HostExpr.emitBoxReturn(objx, gen, method.getReturnType());
+				}
 			}
 		else
 			{
@@ -1497,9 +1508,9 @@ static class StaticMethodExpr extends MethodExpr{
 				method.emitClearLocals(gen);
 				}
 			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
+			if(context == C.STATEMENT)
+				gen.pop();
 			}
-		if(context == C.STATEMENT)
-			gen.pop();
 	}
 
 	public boolean hasJavaClass(){
