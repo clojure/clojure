@@ -36,7 +36,7 @@
   be used as the log-ns (similar to how the java class name is usually used).
   Note: your log configuration should display the name that was passed to the
   logging implementation, and not perform stack-inspection, otherwise you'll see
-  something like \"fn__72$impl_write_BANG__39__auto____81\" in your logs.
+  some ugly and unhelpful text in your logs.
 
   Use the enabled? macro to write conditional code against the logging level
   (beyond simply whether or not to call log, which is handled automatically).
@@ -258,37 +258,37 @@
 
 (defmacro trace
   "Trace level logging using print-style args."
-  {:arglists '([level message & more] [level throwable message & more])}
+  {:arglists '([message & more] [throwable message & more])}
   [& args]
   `(logp :trace ~@args))
 
 (defmacro debug
   "Debug level logging using print-style args."
-  {:arglists '([level message & more] [level throwable message & more])}
+  {:arglists '([message & more] [throwable message & more])}
   [& args]
   `(logp :debug ~@args))
 
 (defmacro info
   "Info level logging using print-style args."
-  {:arglists '([level message & more] [level throwable message & more])}
+  {:arglists '([message & more] [throwable message & more])}
   [& args]
   `(logp :info ~@args))
 
 (defmacro warn
   "Warn level logging using print-style args."
-  {:arglists '([level message & more] [level throwable message & more])}
+  {:arglists '([message & more] [throwable message & more])}
   [& args]
   `(logp :warn ~@args))
 
 (defmacro error
   "Error level logging using print-style args."
-  {:arglists '([level message & more] [level throwable message & more])}
+  {:arglists '([message & more] [throwable message & more])}
   [& args]
   `(logp :error ~@args))
 
 (defmacro fatal
   "Fatal level logging using print-style args."
-  {:arglists '([level message & more] [level throwable message & more])}
+  {:arglists '([message & more] [throwable message & more])}
   [& args]
   `(logp :fatal ~@args))
 
