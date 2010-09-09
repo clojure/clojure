@@ -72,3 +72,70 @@ str-or-pattern."
   [nsname]
   `(doseq [v# (dir-fn '~nsname)]
      (println v#)))
+
+(def ^:private demunge-map
+  (into {"$" "/"} (map (fn [[k v]] [v k]) clojure.lang.Compiler/CHAR_MAP)))
+
+(def ^:private demunge-pattern
+  (re-pattern (apply str (interpose "|" (map #(str "\\Q" % "\\E")
+                                             (keys demunge-map))))))
+
+(defn- re-replace [re s f]
+  (let [m (re-matcher re s)
+        mseq (take-while identity
+                         (repeatedly #(when (re-find m)
+                                        [(re-groups m) (.start m) (.end m)])))]
+    (apply str
+           (concat
+             (mapcat (fn [[_ _ start] [groups end]]
+                       (if end
+                         [(subs s start end) (f groups)]
+                         [(subs s start)]))
+                     (cons [0 0 0] mseq)
+                     (concat mseq [nil]))))))
+
+(defn demunge
+  "Given a string representation of a fn class,
+  as in a stack trace element, returns a readable version."
+  {:added "1.3"}
+  [fn-name]
+  (re-replace demunge-pattern fn-name demunge-map))
+
+(defn root-cause
+  "Returns the initial cause of an exception or error by peeling off all of
+  its wrappers"
+  {:added "1.3"}
+  [^Throwable t]
+  (loop [cause t]
+    (if-let [cause (.getCause cause)]
+      (recur cause)
+      cause)))
+
+(defn stack-element-str
+  "Returns a (possibly unmunged) string representation of a StackTraceElement"
+  {:added "1.3"}
+  [^StackTraceElement el]
+  (let [file (.getFileName el)
+        clojure-fn? (and file (or (.endsWith file ".clj")
+                                  (= file "NO_SOURCE_FILE")))]
+    (str (if clojure-fn?
+           (demunge (.getClassName el))
+           (str (.getClassName el) "." (.getMethodName el)))
+         " (" (.getFileName el) ":" (.getLineNumber el) ")")))
+
+(defn pst
+  "Prints a stack trace of the exception. If none supplied, uses the root cause of the
+  most recent repl exception (*e)."
+  {:added "1.3"}
+  ([]
+     (when-let [e *e]
+       (pst (root-cause e))))
+  ([e]
+     (.println *err* (.getMessage e))
+     (doseq [el (.getStackTrace e)]
+       (when-not (#{"clojure.lang.RestFn" "clojure.lang.AFn"} (.getClassName el))
+         (.println *err* (str \tab (stack-element-str el)))))
+     (when (.getCause e)
+       (.println *err* "Caused by:")
+       (pst (.getCause e)))))
+

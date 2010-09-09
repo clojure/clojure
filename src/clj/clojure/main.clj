@@ -13,7 +13,8 @@
   clojure.main
   (:refer-clojure :exclude [with-bindings])
   (:import (clojure.lang Compiler Compiler$CompilerException
-                         LineNumberingPushbackReader RT)))
+                         LineNumberingPushbackReader RT))
+  (:use [clojure.repl :only (demunge root-cause stack-element-str)]))
 
 (declare main)
 
@@ -93,27 +94,19 @@
         (skip-if-eol *in*)
         input)))
 
-(defn- root-cause
-  "Returns the initial cause of an exception or error by peeling off all of
-  its wrappers"
-  [^Throwable throwable]
-  (loop [cause throwable]
-    (if-let [cause (.getCause cause)]
-      (recur cause)
-      cause)))
-
 (defn repl-exception
-  "Returns CompilerExceptions in tact, but only the root cause of other
-  throwables"
+  "Returns the root cause of throwables"
   [throwable]
-  (if (instance? Compiler$CompilerException throwable)
-    throwable
-    (root-cause throwable)))
+  (root-cause throwable))
 
 (defn repl-caught
   "Default :caught hook for repl"
   [e]
-  (.println *err* (repl-exception e)))
+  (let [ex (repl-exception e)
+        el (aget (.getStackTrace ex) 0)]
+    (.println *err*
+              (str ex " "
+                   (stack-element-str el)))))
 
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
@@ -194,7 +187,7 @@
       (catch Throwable e
         (caught e)
         (set! *e e)))
-     (use '[clojure.repl :only (source apropos dir)])
+     (use '[clojure.repl :only (source apropos dir pst)])
      (use '[clojure.java.javadoc :only (javadoc)])
      (use '[clojure.pprint :only (pp pprint)])
      (prompt)
