@@ -5781,9 +5781,11 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 }
 
 static public class CompilerException extends Exception{
-
+	final public String source;
+	
 	public CompilerException(String source, int line, Throwable cause){
 		super(errorMsg(source, line, cause.toString()), cause);
+		this.source = source;
 	}
 
 	public String toString(){
@@ -5956,7 +5958,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 }
 
 static String errorMsg(String source, int line, String s){
-	return String.format("%s (%s:%d)", s, source, line);
+	return String.format("%s, compiling:(%s:%d)", s, source, line);
 }
 
 public static Object eval(Object form) throws Exception{
@@ -6003,10 +6005,9 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 			}
 		catch(Throwable e)
 			{
-			if(!(e instanceof CompilerException))
-				throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
-			else
-				throw (CompilerException) e;
+			if(!(e instanceof Exception))
+				throw new RuntimeException(e);
+			throw (Exception)e;
 			}
 		finally
 			{

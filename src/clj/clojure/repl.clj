@@ -107,9 +107,12 @@ str-or-pattern."
   {:added "1.3"}
   [^Throwable t]
   (loop [cause t]
-    (if-let [cause (.getCause cause)]
-      (recur cause)
-      cause)))
+    (if (and (instance? clojure.lang.Compiler$CompilerException cause)
+             (not= (.source ^clojure.lang.Compiler$CompilerException cause) "NO_SOURCE_FILE"))
+      cause
+      (if-let [cause (.getCause cause)]
+        (recur cause)
+        cause))))
 
 (defn stack-element-str
   "Returns a (possibly unmunged) string representation of a StackTraceElement"
@@ -124,18 +127,24 @@ str-or-pattern."
          " (" (.getFileName el) ":" (.getLineNumber el) ")")))
 
 (defn pst
-  "Prints a stack trace of the exception. If none supplied, uses the root cause of the
-  most recent repl exception (*e)."
+  "Prints a stack trace of the exception, to the depth requested. If none supplied, uses the root cause of the
+  most recent repl exception (*e), and a depth of 12."
   {:added "1.3"}
-  ([]
+  ([] (pst 12))
+  ([depth]
      (when-let [e *e]
-       (pst (root-cause e))))
-  ([e]
+       (pst (root-cause e) depth)))
+  ([^Throwable e depth]
      (.println *err* (.getMessage e))
-     (doseq [el (.getStackTrace e)]
-       (when-not (#{"clojure.lang.RestFn" "clojure.lang.AFn"} (.getClassName el))
-         (.println *err* (str \tab (stack-element-str el)))))
-     (when (.getCause e)
-       (.println *err* "Caused by:")
-       (pst (.getCause e)))))
+     (let [st (.getStackTrace e)
+           cause (.getCause e)]
+       (doseq [el (take depth
+                        (remove #(#{"clojure.lang.RestFn" "clojure.lang.AFn"} (.getClassName %))
+                                st))]
+         (.println *err* (str \tab (stack-element-str el))))
+       (when cause
+         (.println *err* "Caused by:")
+         (pst cause (min depth
+                         (+ 2 (- (count (.getStackTrace cause))
+                                 (count st)))))))))
 
