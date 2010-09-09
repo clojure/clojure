@@ -105,7 +105,7 @@
   (let [ex (repl-exception e)
         el (aget (.getStackTrace ex) 0)]
     (.println *err*
-              (str ex
+              (str (-> ex class .getSimpleName)
                    (when-not (instance? clojure.lang.Compiler$CompilerException ex)
                      (str " " (stack-element-str el)))))))
 

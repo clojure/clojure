@@ -135,7 +135,7 @@ str-or-pattern."
      (when-let [e *e]
        (pst (root-cause e) depth)))
   ([^Throwable e depth]
-     (.println *err* (.getMessage e))
+     (.println *err* (str (-> e class .getSimpleName) " " (.getMessage e)))
      (let [st (.getStackTrace e)
            cause (.getCause e)]
        (doseq [el (take depth
