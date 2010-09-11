@@ -106,6 +106,7 @@
         el (aget (.getStackTrace ex) 0)]
     (.println *err*
               (str (-> ex class .getSimpleName)
+                   " " (.getMessage ex) " "
                    (when-not (instance? clojure.lang.Compiler$CompilerException ex)
                      (str " " (stack-element-str el)))))))
 
