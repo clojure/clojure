@@ -16,46 +16,24 @@
      :doc "Utilities meant to be used interactively at the REPL"}
   clojure.contrib.repl-utils
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
-           (java.lang.reflect Modifier Method Constructor)
+           (java.lang.reflect Modifier Field Method Constructor)
            (clojure.lang RT Compiler Compiler$C))
   (:use [clojure.contrib.seq :only (indexed)]
         [clojure.java.browse :only (browse-url)]
-        [clojure.string :only (join)]))
+        [clojure.string :as str :only ()]))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Java classes
 
-(defn- spartition
-  "Splits the string into a lazy sequence of substrings, alternating
-  between substrings that match the patthern and the substrings
-  between the matches.  The sequence always starts with the substring
-  before the first match, or an empty string if the beginning of the
-  string matches.
-
-  For example: (spartition #\"[a-z]+\" \"abc123def\")
-  returns: (\"\" \"abc\" \"123\" \"def\")"
-  [^Pattern re ^String s]
-  (let [m (re-matcher re s)]
-    ((fn step [prevend]
-       (lazy-seq
-        (if (.find m)
-          (cons (.subSequence s prevend (.start m))
-                (cons (re-groups m)
-                      (step (+ (.start m) (count (.group m))))))
-          (when (< prevend (.length s))
-            (list (.subSequence s prevend (.length s)))))))
-     0)))
-
 (defn- sortable [t]
-  (apply str (map (fn [[a b]] (str a (format "%04d" (Integer. b))))
-                  (spartition 2 (concat (spartition #"\d+" t) [0])))))
+  (str/replace t #"\d+" #(format "%04d" (Integer/parseInt %))))
 
 (defn- param-str [m]
-  (str " (" (join
+  (str " (" (str/join
               "," (map (fn [[c i]]
                          (if (> i 3)
                            (str (.getSimpleName c) "*" i)
-                           (join "," (replicate i (.getSimpleName c)))))
+                           (str/join "," (replicate i (.getSimpleName c)))))
                        (reduce (fn [pairs y] (let [[x i] (peek pairs)]
                                                (if (= x y)
                                                  (conj (pop pairs) [y (inc i)])
@@ -76,6 +54,10 @@
                    (str (.getSimpleName (.getReturnType m)) (param-str m))
                    (str (.getSimpleName (.getType m))))))]
     (assoc (bean m)
+           :static? static?
+           :method? method?
+           :field? (instance? Field m)
+           :ctor? ctor?
            :sort-val [(not static?) method? (sortable text)]
            :text text
            :member m)))
