@@ -12,7 +12,7 @@
             (try
              (with-temp-ns
                (throw (RuntimeException. (str (ns-name *ns*)))))
-             (catch clojure.lang.Compiler$CompilerException e
-               (-> e .getCause .getMessage)))]
-        (is (re-find #"^sym.*$" ns-name-str))
+             (catch Throwable e
+               (-> e .getMessage)))]
+        (is (re-find #"sym.*auto" ns-name-str))
         (is (not (some #{(symbol ns-name-str)} (all-ns-names))))))))
