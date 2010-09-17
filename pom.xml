@@ -81,4 +81,16 @@
     <module>modules/with-ns</module>
     <module>modules/zip-filter</module>
   </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.0-beta-9</version>
+	<configuration>
+	  <autoVersionSubmodules>true</autoVersionSubmodules>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
