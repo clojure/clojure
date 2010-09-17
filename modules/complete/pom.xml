@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.clojure.contrib</groupId>
     <artifactId>parent</artifactId>
-    <version>1.3.0</version>
+    <version>1.3.1-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>complete</artifactId>
@@ -35,292 +35,292 @@
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>accumulators</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>agent-utils</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>base64</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>classpath</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>combinatorics</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>command-line</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>complex-numbers</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>cond</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>condition</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>core</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>dataflow</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>datalog</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>def</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>error-kit</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>except</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>fcase</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>find-namespaces</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>fnmap</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>gen-html-docs</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>generic</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>graph</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>greatest-least</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>import-static</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>jar</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>jmx</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>json</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>lazy-seqs</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>lazy-xml</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>logging</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>macro-utils</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>macros</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>map-utils</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>math</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>miglayout</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>mmap</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>mock</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>monadic-io-streams</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>monads</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>ns-utils</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>priority-map</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>probabilities</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>profile</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>prxml</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>reflect</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>repl-ln</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>repl-utils</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>seq</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>server-socket</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>set</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>singleton</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>sql</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>stream-utils</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>strint</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>swing-utils</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>trace</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>types</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>with-ns</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>zip-filter</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
