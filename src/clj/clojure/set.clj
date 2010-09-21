@@ -145,7 +145,7 @@
    :tag Boolean}
   [set1 set2]
   (and (<= (count set1) (count set2))
-       (every? set2 set1)))
+       (every? #(contains? set2 %) set1)))
 
 (defn superset? 
   "Is set1 a superset of set2?"
@@ -153,7 +153,7 @@
    :tag Boolean}
   [set1 set2]
   (and (>= (count set1) (count set2))
-       (every? set1 set2)))
+       (every? #(contains? set1 %) set2)))
 
 (comment
 (refer 'set)
