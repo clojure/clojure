@@ -37,7 +37,7 @@ namespace.
     </ul>
     <span class="toc-header">Namespaces</span>
     <ul id="left-sidebar-list">
-      <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.java.browse-api.html" class="wiki_link">clojure.java.browse</a></li><li><a href="clojure.java.io-api.html" class="wiki_link">clojure.java.io</a></li><li><a href="clojure.java.javadoc-api.html" class="wiki_link">clojure.java.javadoc</a></li><li><a href="clojure.java.shell-api.html" class="wiki_link">clojure.java.shell</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.string-api.html" class="wiki_link">clojure.string</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
+      <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
     </ul>
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
@@ -60,21 +60,13 @@ namespace.
     <div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/apropos">apropos</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/demunge">demunge</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/dir">dir</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/dir-fn">dir-fn</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/pst">pst</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/root-cause">root-cause</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/source">source</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/source-fn">source-fn</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/stack-element-str">stack-element-str</a>
     </div>
     <br />
   </div>
@@ -111,18 +103,6 @@ str-or-pattern.</pre>
 </div><div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.repl/demunge">demunge</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (demunge fn-name)
-</pre>
-  <pre id="var-docstr">Given a string representation of a fn class,
-as in a stack trace element, returns a readable version.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  <a href="http://github.com/clojure/clojure/blob/1c0468dbe5228bb8c228e1370133bbe1d018e058/src/clj/clojure/repl.clj#L97" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
   <h2 id="clojure.repl/dir">dir</h2>
   <span id="var-type">macro</span><br />
   <pre id="var-usage">Usage: (dir nsname)
@@ -143,32 +123,6 @@ a namespace</pre>
   
   
   <a href="http://github.com/clojure/clojure/blob/1c0468dbe5228bb8c228e1370133bbe1d018e058/src/clj/clojure/repl.clj#L64" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/pst">pst</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (pst)
-       (pst depth)
-       (pst e depth)
-</pre>
-  <pre id="var-docstr">Prints a stack trace of the exception, to the depth requested. If none supplied, uses the root cause of the
-most recent repl exception (*e), and a depth of 12.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  <a href="http://github.com/clojure/clojure/blob/1c0468dbe5228bb8c228e1370133bbe1d018e058/src/clj/clojure/repl.clj#L129" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/root-cause">root-cause</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (root-cause t)
-</pre>
-  <pre id="var-docstr">Returns the initial cause of an exception or error by peeling off all of
-its wrappers</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  <a href="http://github.com/clojure/clojure/blob/1c0468dbe5228bb8c228e1370133bbe1d018e058/src/clj/clojure/repl.clj#L104" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -201,17 +155,6 @@ Example: (source-fn 'filter)</pre>
   
   
   <a href="http://github.com/clojure/clojure/blob/1c0468dbe5228bb8c228e1370133bbe1d018e058/src/clj/clojure/repl.clj#L21" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/stack-element-str">stack-element-str</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (stack-element-str el)
-</pre>
-  <pre id="var-docstr">Returns a (possibly unmunged) string representation of a StackTraceElement</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  <a href="http://github.com/clojure/clojure/blob/1c0468dbe5228bb8c228e1370133bbe1d018e058/src/clj/clojure/repl.clj#L117" id="var-source">Source</a>
 </div>
 
 

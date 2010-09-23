@@ -37,7 +37,7 @@ namespace.
     </ul>
     <span class="toc-header">Namespaces</span>
     <ul id="left-sidebar-list">
-      <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.java.browse-api.html" class="wiki_link">clojure.java.browse</a></li><li><a href="clojure.java.io-api.html" class="wiki_link">clojure.java.io</a></li><li><a href="clojure.java.javadoc-api.html" class="wiki_link">clojure.java.javadoc</a></li><li><a href="clojure.java.shell-api.html" class="wiki_link">clojure.java.shell</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.string-api.html" class="wiki_link">clojure.string</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
+      <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
     </ul>
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
@@ -108,7 +108,7 @@ namespace.
 beginning with @ or @/ are considered relative to classpath.</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L209" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L206" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -147,7 +147,7 @@ Paths may be absolute or relative in the filesystem or relative to
 classpath. Classpath-relative paths have prefix of @ or @/</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L313" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L310" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -199,7 +199,7 @@ are sequential keyword-value pairs. Available options and their defaults:
      default: repl-caught</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L113" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L118" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -210,7 +210,7 @@ are sequential keyword-value pairs. Available options and their defaults:
   <pre id="var-docstr">Default :caught hook for repl</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L102" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L113" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -218,10 +218,11 @@ are sequential keyword-value pairs. Available options and their defaults:
   <span id="var-type">function</span><br />
   <pre id="var-usage">Usage: (repl-exception throwable)
 </pre>
-  <pre id="var-docstr">Returns the root cause of throwables</pre>
+  <pre id="var-docstr">Returns CompilerExceptions in tact, but only the root cause of other
+throwables</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L97" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L105" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -232,7 +233,7 @@ are sequential keyword-value pairs. Available options and their defaults:
   <pre id="var-docstr">Default :prompt hook for repl</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L42" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L41" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -252,7 +253,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF into a single
       - returns the object.</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L79" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L78" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -268,7 +269,7 @@ its behavior of both supporting .unread and collapsing all of CR, LF, and
 CRLF to a single \newline.</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L47" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L46" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -286,7 +287,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
 \newline.</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L61" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L60" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -300,7 +301,7 @@ that often need to be set!: *ns* *warn-on-reflection* *math-context*
 *command-line-args* *1 *2 *3 *e</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L21" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/ef0cc8786ca02a34abd14b04e5324aeb106b4c8a/src/clj/clojure/main.clj#L20" id="var-source">Source</a>
 </div>
 
 
