@@ -1,0 +1,27 @@
+Changes to Clojure in Version 1.3 Alpha 1
+
+= CONTENTS =
+
+ 0 Changes from 1.2 to 1.3 Alpha 1
+ 1 About Alpha Releases
+
+= 0 Changes from 1.2 to 1.3 Alpha 1
+
+  * enhanced primitive support 
+    (http://dev.clojure.org/display/doc/Enhanced+Primitive+Support)
+  * better exception reporting
+  * ancillary namespaces no longer auto-load on startup:
+    clojure.set, clojure.xml, clojure.zip
+
+= 1 About Alpha Releases
+
+1.3 is the first release of Clojure that will include a series of
+alpha builds. We are adding these builds to support maven and
+leiningen users, who want a specific artifact that they can target (as
+opposed to building from master or "moving-target" snapshots).
+
+If you are the kind of person who used to track master by building
+from source, but no longer do so because you are using maven or
+leiningen, alpha releases are for you.
+
+
