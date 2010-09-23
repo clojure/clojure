@@ -213,7 +213,20 @@
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
   </target>
 
-  <target name="deploy" depends="ci-build,dist" description="Build and deploy to remote stable repository.">
+  <target name="nightly-build" depends="ci-build"
+          description="Build and deploy to nightly (snapshot) repository.">
+    <sequential>
+      <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
+      <mvn:deploy file="${clojure_jar}">
+        <pom file="pom.xml"/>
+        <attach file="${src_jar}" classifier="sources"/>
+        <attach file="${slim_jar}" classifier="slim"/>
+        <remoteRepository url="file:@{snapshot.repo.dir}"/>
+      </mvn:deploy>
+    </sequential>
+  </target>
+
+  <target name="release" depends="ci-build,dist" description="Build and deploy to remote stable repository.">
     <sequential>
       <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
       <mvn:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
@@ -236,16 +249,6 @@
       <attach file="${src_jar}" classifier="sources"/>
       <attach file="${slim_jar}" classifier="slim"/>
     </mvn:install>
-  </target>
-
-  <target name="nightly-build" depends="ci-build"
-          description="Build and deploy to nightly (snapshot) repository.">
-    <deploy target-dir="${snapshot.repo.dir}"/>
-  </target>
-
-
-  <target name="stable-build" depends="ci-build" description="Build and deploy to stable repository.">
-    <deploy target-dir="${stable.repo.dir}"/>
   </target>
 
   <target name="dist" depends="clean,clojure-jar"
