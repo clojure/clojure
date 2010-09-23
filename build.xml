@@ -221,7 +221,7 @@
         <pom file="pom.xml"/>
         <attach file="${src_jar}" classifier="sources"/>
         <attach file="${slim_jar}" classifier="slim"/>
-        <remoteRepository url="file:@{snapshot.repo.dir}"/>
+        <remoteRepository url="file:${snapshot.repo.dir}"/>
       </mvn:deploy>
     </sequential>
   </target>
