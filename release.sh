@@ -32,6 +32,6 @@ git tag -a -m "$VERSION" $VERSION
 if [ -z $CLOJURE_DEPLOY_URL ]; then
   CLOJURE_DEPLOY_URL=scp://build.clojure.org/srv/www/releases
 fi
-ant deploy -Ddeployment.url=$CLOJURE_DEPLOY_URL
+ant release -Ddeployment.url=$CLOJURE_DEPLOY_URL
 
 echo "Build is complete. git push if you are satisfied with the result."
