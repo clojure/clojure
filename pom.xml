@@ -88,6 +88,14 @@
 	  <autoVersionSubmodules>true</autoVersionSubmodules>
 	</configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/dist.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <distributionManagement>
