@@ -13,15 +13,16 @@
       <outputDirectory>/</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <includes>
-        <include>README.*</include>
-        <include>epl-v10.*</include>
-        <include>NOTICE.*</include>
-        <include>Revisions</include>
-        <include>pom.xml</include>
-        <include>src/**</include>
-        <include>target/*.jar</include>
-        <include>launchers/**</include>
-        <include>clojurescript/**</include>
+	<include>README.txt</include>
+	<include>Revisions</include>
+	<include>clojurescript/**</include>
+	<include>config/**</include>
+	<include>doc/**</include>
+	<include>epl-v10.html</include>
+	<include>launchers/**</include>
+	<include>modules/**</include>
+	<include>pom.xml</include>
+	<include>src/**</include>
       </includes>
     </fileSet>
   </fileSets>
