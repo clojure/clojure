@@ -4,11 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
   <properties>
     <clojure.version>1.3.0-master-SNAPSHOT</clojure.version>
+    <clojure.contrib.version>1.3.0-SNAPSHOT</clojure.contrib.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <groupId>org.clojure.contrib</groupId>
   <artifactId>parent</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>${clojure.contrib.version}</version>
   <packaging>pom</packaging>
   <name>Clojure Contrib parent module</name>
   <dependencies>
