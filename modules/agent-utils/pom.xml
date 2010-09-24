@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.clojure.contrib</groupId>
     <artifactId>parent</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>${clojure.contrib.version}</version>
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>agent-utils</artifactId>
