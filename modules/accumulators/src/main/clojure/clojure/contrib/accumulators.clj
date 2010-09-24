@@ -26,7 +26,8 @@
   (:refer-clojure :exclude (deftype))
   (:use [clojure.contrib.types :only (deftype)])
   (:use [clojure.contrib.def :only (defvar defvar- defmacro-)])
-  (:require [clojure.contrib.generic.arithmetic :as ga]))
+  (:require [clojure.contrib.generic.arithmetic :as ga]
+	    clojure.set))
 
 (defmulti add
   "Add item to the accumulator acc. The exact meaning of adding an
