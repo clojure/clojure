@@ -120,7 +120,7 @@ for a longer description.)"}
 	    (when v-seqs
 	       (cons (map first v-seqs)
 		     (lazy-seq (step (increment v-seqs)))))))]
-    (when (every? first seqs)
+    (when (every? seq seqs)
       (lazy-seq (step v-original-seqs)))))
 
 
