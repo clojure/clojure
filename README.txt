@@ -48,7 +48,7 @@ This will compile and test all modules and store them in your local
 Maven repository cache (usually $HOME/.m2/repository).
 
 There is also an "uberjar" containing all compiled modules at
-./modules/complete/target/complete-$VERSION-jar-with-dependencies.jar
+./modules/complete/target/complete-$VERSION-bin.jar
 
 Additional build commands are available:
 
@@ -69,6 +69,30 @@ to the mvn command line.
 
 
 
+= Building Against Specific Released Clojure Versions =
+
+You can specify -Dclojure.version=VERSION on the command line to select a different Clojure version.
+
+
+
+= Building Against a Custom Clojure JAR =
+
+To build against a customized Clojure JAR, build *Clojure* like this:
+
+1. Modify the Clojure sources with your custom changes
+
+2. Set a custom version number in src/clj/clojure/version.properties
+
+3. Download maven-ant-tasks.jar from http://maven.apache.org/ant-tasks/download.html
+
+4. In the Clojure source directory, run:
+
+    ant -lib /path/to/maven-ant-tasks.jar ci-build
+
+THEN, build clojure-contrib with -Dclojure.version=YOUR_CUSTOM_VERSION
+
+
+
 = Clojure-contrib Versions =
 
 Versions of clojure-contrib are matched to versions of Clojure.
@@ -78,6 +102,8 @@ If you are using Clojure 1.0, use clojure-contrib 1.0.*
 If you are using Clojure 1.1, use clojure-contrib 1.1.*
 
 If you are using Clojure 1.2, use clojure-contrib 1.2.*
+
+If you are using Clojure 1.3, use clojure-contrib 1.3.*
 
 If you are using Clojure from the "master" branch on Github, use
 clojure-contrib from the "master" branch on Github.
