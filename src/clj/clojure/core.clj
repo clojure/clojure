@@ -2177,6 +2177,7 @@
   fn (right-to-left) to the result, etc."
   {:added "1.0"
    :static true}
+  ([] identity)
   ([f] f)
   ([f g] 
      (fn 
