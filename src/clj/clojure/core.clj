@@ -3305,7 +3305,7 @@
    :inline-arities #{2}
    :added "1.0"}
   ([array idx]
-   (clojure.lang.Reflector/prepRet (. Array (get array idx))))
+   (clojure.lang.Reflector/prepRet (.getComponentType (class array)) (. Array (get array idx))))
   ([array idx & idxs]
    (apply aget (aget array idx) idxs)))
 

@@ -725,7 +725,7 @@ static Object nthFrom(Object coll, int n){
 	else if(coll instanceof CharSequence)
 		return Character.valueOf(((CharSequence) coll).charAt(n));
 	else if(coll.getClass().isArray())
-		return Reflector.prepRet(Array.get(coll, n));
+		return Reflector.prepRet(coll.getClass().getComponentType(),Array.get(coll, n));
 	else if(coll instanceof RandomAccess)
 		return ((List) coll).get(n);
 	else if(coll instanceof Matcher)
@@ -776,7 +776,7 @@ static Object nthFrom(Object coll, int n, Object notFound){
 	}
 	else if(coll.getClass().isArray()) {
 		if(n < Array.getLength(coll))
-			return Reflector.prepRet(Array.get(coll, n));
+			return Reflector.prepRet(coll.getClass().getComponentType(),Array.get(coll, n));
 		return notFound;
 	}
 	else if(coll instanceof RandomAccess) {

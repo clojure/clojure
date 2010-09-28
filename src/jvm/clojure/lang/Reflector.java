@@ -87,7 +87,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		}
 	try
 		{
-		return prepRet(m.invoke(target, boxedArgs));
+		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
 		}
 	catch(InvocationTargetException e)
 		{
@@ -213,7 +213,7 @@ public static Object getStaticField(Class c, String fieldName) throws Exception{
 	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{
-		return prepRet(f.get(null));
+		return prepRet(f.getType(), f.get(null));
 		}
 	throw new IllegalArgumentException("No matching field found: " + fieldName
 		+ " for " + c);
@@ -240,7 +240,7 @@ public static Object getInstanceField(Object target, String fieldName) throws Ex
 	Field f = getField(c, fieldName, false);
 	if(f != null)
 		{
-		return prepRet(f.get(target));
+		return prepRet(f.getType(), f.get(target));
 		}
 	throw new IllegalArgumentException("No matching field found: " + fieldName
 		+ " for " + target.getClass());
@@ -273,7 +273,7 @@ public static Object invokeInstanceMember(Object target, String name) throws Exc
 	Field f = getField(c, name, false);
 	if(f != null)  //field get
 		{
-		return prepRet(f.get(target));
+		return prepRet(f.getType(), f.get(target));
 		}
 	return invokeInstanceMethod(target, name, RT.EMPTY_ARRAY);
 }
@@ -446,9 +446,9 @@ static boolean isCongruent(Class[] params, Object[] args){
 	return ret;
 }
 
-public static Object prepRet(Object x){
-//	if(c == boolean.class)
-//		return ((Boolean) x).booleanValue() ? RT.T : null;
+public static Object prepRet(Class c, Object x){
+	if (!(c.isPrimitive() || c == Boolean.class))
+		return x;
 	if(x instanceof Boolean)
 		return ((Boolean) x)?Boolean.TRUE:Boolean.FALSE;
 	else if(x instanceof Integer)
