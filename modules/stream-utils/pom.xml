@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.clojure.contrib</groupId>
     <artifactId>parent</artifactId>
-    <version>${clojure.contrib.version}</version>
+    <version>1.3.0-alpha1</version>
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>stream-utils</artifactId>
@@ -12,27 +12,27 @@
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>def</artifactId>
-      <version>${clojure.contrib.version}</version>
+      <version>1.3.0-alpha1</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>monads</artifactId>
-      <version>${clojure.contrib.version}</version>
+      <version>1.3.0-alpha1</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>types</artifactId>
-      <version>${clojure.contrib.version}</version>
+      <version>1.3.0-alpha1</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>seq</artifactId>
-      <version>${clojure.contrib.version}</version>
+      <version>1.3.0-alpha1</version>
     </dependency>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
       <artifactId>generic</artifactId>
-      <version>${clojure.contrib.version}</version>
+      <version>1.3.0-alpha1</version>
     </dependency>
   </dependencies>
 </project>
