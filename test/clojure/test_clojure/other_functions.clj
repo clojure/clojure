@@ -74,6 +74,19 @@
 
 ; partial
 ; comp
+
+(deftest test-comp
+  (let [c0 (comp)]
+    (are [x] (= (identity x) (c0 x))
+         nil
+         42
+         [1 2 3]
+         #{}
+         :foo)
+    (are [x y] (= (identity x) (c0 y))
+         (+ 1 2 3) 6
+         (keyword "foo") :foo)))
+
 ; complement
 ; constantly
 
