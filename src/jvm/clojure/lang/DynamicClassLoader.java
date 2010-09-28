@@ -54,6 +54,8 @@ protected Class<?> findClass(String name) throws ClassNotFoundException{
 		Class c = cr.get();
         if(c != null)
             return c;
+		else
+	        classCache.remove(name, cr);
 		}
 	return super.findClass(name);
 }

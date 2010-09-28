@@ -36,6 +36,7 @@ public static Keyword intern(Symbol sym){
 	if(existingk != null)
 		return existingk;
 	//entry died in the interim, do over
+	table.remove(sym, existingRef);
 	return intern(sym);
 }
 
