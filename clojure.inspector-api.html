@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>clojure.xml - Clojure v1.2 API documentation</title>
+    <title>clojure.inspector - Clojure v1.2 API documentation</title>
     <link href="static/favicon.png" rel="icon" />
     <link href="static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
@@ -58,23 +58,27 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.xml/parse">parse</a>
+      <a href="#clojure.inspector/inspect">inspect</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.inspector/inspect-table">inspect-table</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.inspector/inspect-tree">inspect-tree</a>
     </div>
     <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.xml</span>
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.inspector</span>
   - <span id="header-project">Clojure</span> <span id="header-version">v1.2</span> (<span id="header-status">stable</span>)
   </h1>
 <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
 <br />Usage:
 <pre>
 (ns your-namespace
-  (:require <span id="long-name">clojure.xml</span>))
+  (:require <span id="long-name">clojure.inspector</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr">XML reading/writing.</pre>
+<pre id="namespace-docstr">Graphical object inspector for Clojure data structures.</pre>
 
 
 <br />
@@ -82,20 +86,38 @@ namespace.
 <div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.xml/parse">parse</h2>
+  <h2 id="clojure.inspector/inspect">inspect</h2>
   <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (parse s)
-       (parse s startparse)
+  <pre id="var-usage">Usage: (inspect x)
 </pre>
-  <pre id="var-docstr">Parses and loads the source s, which can be a File, InputStream or
-String naming a URI. Returns a tree of the xml/element struct-map,
-which has the keys :tag, :attrs, and :content. and accessor fns tag,
-attrs, and content. Other parsers can be supplied by passing
-startparse, a fn taking a source and a ContentHandler and returning
-a parser</pre>
+  <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied object</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/xml.clj#L78" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L150" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.inspector/inspect-table">inspect-table</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (inspect-table data)
+</pre>
+  <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied regular
+data, which must be a sequential data structure of data structures
+of equal length</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+  
+  <a href="http://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L96" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.inspector/inspect-tree">inspect-tree</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (inspect-tree data)
+</pre>
+  <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied hierarchical data</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+  
+  <a href="http://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L87" id="var-source">Source</a>
 </div>
 
 

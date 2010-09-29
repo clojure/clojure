@@ -1,11 +1,11 @@
 <html>
   <head>
-    <title>clojure.xml - Clojure v1.2 API documentation</title>
-    <link href="static/favicon.png" rel="icon" />
-    <link href="static/favicon.png" rel="shortcut icon" />
-    <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="static/wiki.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="static/internal.css" rel="stylesheet" />
+    <title>clojure.template - Clojure next API documentation</title>
+    <link href="../static/favicon.png" rel="icon" />
+    <link href="../static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/internal.css" rel="stylesheet" />
     <!-- TODO: are we using these (from clojure.org)? If so, add the files -->
     <script src="file/view/code_highlighter.js" type="text/javascript"></script>
     <script src="file/view/clojure.js" type="text/javascript"></script>
@@ -24,13 +24,13 @@ namespace.
   <body>
     <div id="AllContentContainer">
       <div id="Header">
-	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="static/clojure-icon.gif" /></a>
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="../static/clojure-icon.gif" /></a>
 	<h1><a title="page header title" id="page-header" href="index.html">Clojure Core API Reference</a></h1>
       </div>
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.2</span> API</span><br />
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">next</span> API</span><br />
     <ul>
       <li><a class="wiki_link" href="index.html">Overview</a></li>
       <li><a class="wiki_link" href="api-index.html">API Index</a></li>
@@ -42,7 +42,7 @@ namespace.
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
       <ul id="left-sidebar-branch-list">
-        <li><a href="branch-1.1.x/index.html" class="wiki_link">v1.1 (stable)</a></li><li><a href="branch-master/index.html" class="wiki_link">next (in development)</a></li>
+        <li><a href="../index.html" class="wiki_link">v1.2 (stable)</a></li><li><a href="../branch-1.1.x/index.html" class="wiki_link">v1.1 (stable)</a></li>
       </ul>
     </div>
     <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
@@ -58,23 +58,25 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.xml/parse">parse</a>
+      <a href="#clojure.template/apply-template">apply-template</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.template/do-template">do-template</a>
     </div>
     <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.xml</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.2</span> (<span id="header-status">stable</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.template</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">next</span> (<span id="header-status">in development</span>)
   </h1>
-<span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
+<span id="author-line">by <span id="author-name">Stuart Sierra</span><br /></span>
 <br />Usage:
 <pre>
 (ns your-namespace
-  (:require <span id="long-name">clojure.xml</span>))
+  (:require <span id="long-name">clojure.template</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr">XML reading/writing.</pre>
+<pre id="namespace-docstr">Macros that expand to repeated copies of a template expression.</pre>
 
 
 <br />
@@ -82,20 +84,38 @@ namespace.
 <div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.xml/parse">parse</h2>
+  <h2 id="clojure.template/apply-template">apply-template</h2>
   <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (parse s)
-       (parse s startparse)
+  <pre id="var-usage">Usage: (apply-template argv expr values)
 </pre>
-  <pre id="var-docstr">Parses and loads the source s, which can be a File, InputStream or
-String naming a URI. Returns a tree of the xml/element struct-map,
-which has the keys :tag, :attrs, and :content. and accessor fns tag,
-attrs, and content. Other parsers can be supplied by passing
-startparse, a fn taking a source and a ContentHandler and returning
-a parser</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+  <pre id="var-docstr">For use in macros.  argv is an argument list, as in defn.  expr is
+a quoted expression using the symbols in argv.  values is a sequence
+of values to be used for the arguments.
+
+apply-template will recursively replace argument symbols in expr
+with their corresponding values, returning a modified expr.
+
+Example: (apply-template '[x] '(+ x x) '[2])
+         ;=&gt; (+ 2 2)</pre>
   
-  <a href="http://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/xml.clj#L78" id="var-source">Source</a>
+  
+  <a href="http://github.com/clojure/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L30" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.template/do-template">do-template</h2>
+  <span id="var-type">macro</span><br />
+  <pre id="var-usage">Usage: (do-template argv expr &amp; values)
+</pre>
+  <pre id="var-docstr">Repeatedly copies expr (in a do block) for each group of arguments
+in values.  values are automatically partitioned by the number of
+arguments in argv, an argument vector as in defn.
+
+Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
+         ;=&gt; (do (+ 4 2) (+ 5 3))</pre>
+  
+  
+  <a href="http://github.com/clojure/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj#L45" id="var-source">Source</a>
 </div>
 
 

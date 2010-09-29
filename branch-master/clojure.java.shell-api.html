@@ -1,11 +1,11 @@
 <html>
   <head>
-    <title>clojure.repl - Clojure v1.2 API documentation</title>
-    <link href="static/favicon.png" rel="icon" />
-    <link href="static/favicon.png" rel="shortcut icon" />
-    <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="static/wiki.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="static/internal.css" rel="stylesheet" />
+    <title>clojure.java.shell - Clojure next API documentation</title>
+    <link href="../static/favicon.png" rel="icon" />
+    <link href="../static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/internal.css" rel="stylesheet" />
     <!-- TODO: are we using these (from clojure.org)? If so, add the files -->
     <script src="file/view/code_highlighter.js" type="text/javascript"></script>
     <script src="file/view/clojure.js" type="text/javascript"></script>
@@ -24,13 +24,13 @@ namespace.
   <body>
     <div id="AllContentContainer">
       <div id="Header">
-	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="static/clojure-icon.gif" /></a>
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="../static/clojure-icon.gif" /></a>
 	<h1><a title="page header title" id="page-header" href="index.html">Clojure Core API Reference</a></h1>
       </div>
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.2</span> API</span><br />
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">next</span> API</span><br />
     <ul>
       <li><a class="wiki_link" href="index.html">Overview</a></li>
       <li><a class="wiki_link" href="api-index.html">API Index</a></li>
@@ -42,7 +42,7 @@ namespace.
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
       <ul id="left-sidebar-branch-list">
-        <li><a href="branch-1.1.x/index.html" class="wiki_link">v1.1 (stable)</a></li><li><a href="branch-master/index.html" class="wiki_link">next (in development)</a></li>
+        <li><a href="../index.html" class="wiki_link">v1.2 (stable)</a></li><li><a href="../branch-1.1.x/index.html" class="wiki_link">v1.1 (stable)</a></li>
       </ul>
     </div>
     <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
@@ -58,31 +58,28 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/apropos">apropos</a>
+      <a href="#clojure.java.shell/sh">sh</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/dir">dir</a>
+      <a href="#clojure.java.shell/with-sh-dir">with-sh-dir</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/dir-fn">dir-fn</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/source">source</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/source-fn">source-fn</a>
+      <a href="#clojure.java.shell/with-sh-env">with-sh-env</a>
     </div>
     <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.repl</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.2</span> (<span id="header-status">stable</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.java.shell</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">next</span> (<span id="header-status">in development</span>)
   </h1>
-<span id="author-line">by <span id="author-name">Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim, Christophe Grande</span><br /></span>
+<span id="author-line">by <span id="author-name">Chris Houser, Stuart Halloway</span><br /></span>
 <br />Usage:
 <pre>
 (ns your-namespace
-  (:require <span id="long-name">clojure.repl</span>))
+  (:require <span id="long-name">clojure.java.shell</span>))
 </pre><pre>
 </pre><h2>Overview</h2>
-<pre id="namespace-docstr">Utilities meant to be used interactively at the REPL</pre>
+<pre id="namespace-docstr">Conveniently launch a sub-process providing its stdin and
+collecting its stdout</pre>
 
 
 <br />
@@ -90,71 +87,64 @@ namespace.
 <div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.repl/apropos">apropos</h2>
+  <h2 id="clojure.java.shell/sh">sh</h2>
   <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (apropos str-or-pattern)
+  <pre id="var-usage">Usage: (sh &amp; args)
 </pre>
-  <pre id="var-docstr">Given a regular expression or stringable thing, return a seq of
-all definitions in all currently-loaded namespaces that match the
-str-or-pattern.</pre>
-  
-  
-  <a href="http://github.com/clojure/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L52" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/dir">dir</h2>
-  <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (dir nsname)
-</pre>
-  <pre id="var-docstr">Prints a sorted directory of public vars in a namespace</pre>
-  
-  
-  <a href="http://github.com/clojure/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L70" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/dir-fn">dir-fn</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (dir-fn ns)
-</pre>
-  <pre id="var-docstr">Returns a sorted seq of symbols naming public vars in
-a namespace</pre>
-  
-  
-  <a href="http://github.com/clojure/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L64" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/source">source</h2>
-  <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (source n)
-</pre>
-  <pre id="var-docstr">Prints the source code for the given symbol, if it can find it.
-This requires that the symbol resolve to a Var defined in a
-namespace for which the .clj is in the classpath.
+  <pre id="var-docstr">Passes the given strings to Runtime.exec() to launch a sub-process.
 
-Example: (source filter)</pre>
+Options are
+
+:in      may be given followed by a String or byte array specifying input
+         to be fed to the sub-process's stdin.
+:in-enc  option may be given followed by a String, used as a character
+         encoding name (for example "UTF-8" or "ISO-8859-1") to
+         convert the input string specified by the :in option to the
+         sub-process's stdin.  Defaults to UTF-8.
+         If the :in option provides a byte array, then the bytes are passed
+         unencoded, and this option is ignored.
+:out-enc option may be given followed by :bytes or a String. If a
+         String is given, it will be used as a character encoding
+         name (for example "UTF-8" or "ISO-8859-1") to convert
+         the sub-process's stdout to a String which is returned.
+         If :bytes is given, the sub-process's stdout will be stored
+         in a byte array and returned.  Defaults to UTF-8.
+:env     override the process env with a map (or the underlying Java
+         String[] if you are a masochist).
+:dir     override the process dir with a String or java.io.File.
+
+You can bind :env or :dir for multiple operations using with-sh-env
+and with-sh-dir.
+
+sh returns a map of
+  :exit =&gt; sub-process's exit code
+  :out  =&gt; sub-process's stdout (as byte[] or String)
+  :err  =&gt; sub-process's stderr (String via platform default encoding)</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  
-  <a href="http://github.com/clojure/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L43" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/278af620d00907c24999b69131adaef95f804988/src/clj/clojure/java/shell.clj#L79" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.repl/source-fn">source-fn</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (source-fn x)
+  <h2 id="clojure.java.shell/with-sh-dir">with-sh-dir</h2>
+  <span id="var-type">macro</span><br />
+  <pre id="var-usage">Usage: (with-sh-dir dir &amp; forms)
 </pre>
-  <pre id="var-docstr">Returns a string of the source code for the given symbol, if it can
-find it.  This requires that the symbol resolve to a Var defined in
-a namespace for which the .clj is in the classpath.  Returns nil if
-it can't find the source.  For most REPL usage, 'source' is more
-convenient.
-
-Example: (source-fn 'filter)</pre>
+  <pre id="var-docstr">Sets the directory for use with sh, see sh for details.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
+  <a href="http://github.com/clojure/clojure/blob/278af620d00907c24999b69131adaef95f804988/src/clj/clojure/java/shell.clj#L21" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.java.shell/with-sh-env">with-sh-env</h2>
+  <span id="var-type">macro</span><br />
+  <pre id="var-usage">Usage: (with-sh-env env &amp; forms)
+</pre>
+  <pre id="var-docstr">Sets the environment for use with sh, see sh for details.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/40f3dc93b926721e94b75a10a9c88815ea4691aa/src/clj/clojure/repl.clj#L21" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/278af620d00907c24999b69131adaef95f804988/src/clj/clojure/java/shell.clj#L28" id="var-source">Source</a>
 </div>
 
 
