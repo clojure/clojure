@@ -23,6 +23,7 @@ clojure.test-clojure.java.javadoc
 clojure.test-clojure.java.shell
 clojure.test-clojure.java-interop
 clojure.test-clojure.keywords
+clojure.test-clojure.load
 clojure.test-clojure.logic
 clojure.test-clojure.macros
 clojure.test-clojure.main
