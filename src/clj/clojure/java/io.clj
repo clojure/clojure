@@ -54,7 +54,7 @@
   (as-file [u]
     (if (= "file" (.getProtocol u))
       (as-file (.getPath u))
-      (throw (IllegalArgumentException. "Not a file: " u))))
+      (throw (IllegalArgumentException. (str "Not a file: " u)))))
 
   URI
   (as-url [u] (.toURL u))
