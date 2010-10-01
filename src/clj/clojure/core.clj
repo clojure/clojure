@@ -2491,9 +2491,10 @@
   ([n x] (take n (repeat x))))
 
 (defn replicate
-  "Returns a lazy seq of n xs."
+  "DEPRECATED: Use 'repeat' instead.
+   Returns a lazy seq of n xs."
   {:added "1.0"
-   :static true}
+   :deprecated "1.3"}
   [n x] (take n (repeat x)))
 
 (defn iterate
