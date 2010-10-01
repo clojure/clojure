@@ -29,7 +29,7 @@
   [e]
   (let [class (.getClassName e)
 	method (.getMethodName e)] 
-    (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" class)]
+    (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" (str class))]
       (if (and match (= "invoke" method))
 	(apply printf "%s/%s" (rest match))
 	(printf "%s.%s" class method))))
