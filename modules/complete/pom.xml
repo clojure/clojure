@@ -8,7 +8,7 @@
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>complete</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <dependencies>
     <dependency>
       <groupId>org.clojure.contrib</groupId>
