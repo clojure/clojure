@@ -19,6 +19,9 @@
     <!-- The complete module depends on all other modules. -->
     <module>modules/complete</module>
 
+    <!-- The standalone module packages all other modules. -->
+    <module>modules/standalone</module>
+
     <module>modules/accumulators</module>
     <module>modules/agent-utils</module>
     <module>modules/base64</module>
@@ -96,20 +99,6 @@
             <descriptor>src/main/assembly/dist.xml</descriptor>
           </descriptors>
         </configuration>
-        <executions>
-          <execution>
-            <id>standalone</id>
-            <phase>package</phase>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/standalone.xml</descriptor>
-              </descriptors>
-            </configuration>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
