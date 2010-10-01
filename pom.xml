@@ -90,11 +90,26 @@
       </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-5</version>
         <configuration>
           <descriptors>
             <descriptor>src/main/assembly/dist.xml</descriptor>
           </descriptors>
         </configuration>
+        <executions>
+          <execution>
+            <id>standalone</id>
+            <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/standalone.xml</descriptor>
+              </descriptors>
+            </configuration>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
