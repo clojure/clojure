@@ -145,6 +145,8 @@
    (defn test-ns-hook []
      (arithmetic))
 
+   Note: test-ns-hook prevents execution of fixtures (see below).
+
 
    OMITTING TESTS FROM PRODUCTION CODE
 
@@ -153,7 +155,7 @@
    being created by \"with-test\" or \"deftest\".
 
 
-   FIXTURES (new)
+   FIXTURES
 
    Fixtures allow you to run code before and after tests, to set up
    the context in which tests should be run.
@@ -186,6 +188,9 @@
 
    Attach \"once\" fixtures to the current namespace like this:
    (use-fixtures :once fixture1 fixture2 ...)
+
+   Note: Fixtures and test-ns-hook are mutually incompatible.  If you
+   are using test-ns-hook, fixture functions will *never* be run.
 
 
    SAVING TEST OUTPUT TO A FILE
