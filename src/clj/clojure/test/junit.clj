@@ -187,8 +187,9 @@
   `(binding [t/report junit-report
              *var-context* (list)
              *depth* 1]
-     (println "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-     (println "<testsuites>")
+     (t/with-test-out
+       (println "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+       (println "<testsuites>"))
      (let [result# ~@body]
-       (println "</testsuites>")
+       (t/with-test-out (println "</testsuites>"))
        result#)))
