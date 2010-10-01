@@ -76,7 +76,8 @@
 (deftest writing-attributes
   (let [mem "java.lang:type=Memory"]
     (jmx/write! mem :Verbose true)
-    (is (true? (jmx/raw-read mem :Verbose)))
+    ;; need boolean cast to fix Boolean object identity error
+    (is (true? (boolean (jmx/raw-read mem :Verbose))))
     (jmx/write! mem :Verbose false)))
 
 (deftest test-invoke-operations
