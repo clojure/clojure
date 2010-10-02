@@ -138,6 +138,11 @@
             </artifactItem>
             <artifactItem>
               <groupId>org.clojure.contrib</groupId>
+              <artifactId>java-utils</artifactId>
+              <version>1.3.0-SNAPSHOT</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.clojure.contrib</groupId>
               <artifactId>jmx</artifactId>
               <version>1.3.0-SNAPSHOT</version>
             </artifactItem>
