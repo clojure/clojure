@@ -15,7 +15,7 @@ The implementation of Datalog that is provided (in this library) departs a bit f
 
 ### The Database ###
 
-Clojure Datalog supports an in memory relational database format, implemented in clojure.contrib.datalog.database ([here](http://github.com/richhickey/clojure-contrib/blob/master/src/clojure/contrib/datalog/database.clj)).  It supports relations (tables) with named columns and simple hash based indexes.  At the present time it does not support any integrity constraints (perhaps later).
+Clojure Datalog supports an in memory relational database format, implemented in clojure.contrib.datalog.database ([here](http://github.com/richhickey/clojure-contrib/blob/master/src/clojure/contrib/datalog/database.cl)).  It supports relations (tables) with named columns and simple hash based indexes.  At the present time it does not support any integrity constraints (perhaps later).
 
 Tables are built with `make-database`, like this:
 
@@ -140,6 +140,6 @@ Where wp is the result of (build-work-plan ...) and db is a database.  The last 
 
 ### Examples ###
 
-A completed example is provided at [http://github.com/richhickey/clojure-contrib/blob/master/src/clojure/contrib/datalog/example.clj](http://github.com/richhickey/clojure-contrib/blob/master/src/clojure/contrib/datalog/example.clj).
+A completed example is provided at [http://github.com/clojure/clojure-contrib/blob/master/modules/datalog/src/examples/clojure/examples/datalog.clj](http://github.com/clojure/clojure-contrib/blob/master/modules/datalog/src/examples/clojure/examples/datalog.clj).
 
 

@@ -18,7 +18,7 @@
 (ns
   ^{:author "Stephen C. Gilardi",
      :doc "A Clojure interface to sql databases via jdbc."
-     :see-also [["http://github.com/richhickey/clojure-contrib/blob/master/src/test/clojure/clojure/contrib/test_sql.clj"
+     :see-also [["http://github.com/clojure/clojure-contrib/blob/master/modules/sql/src/test/clojure/clojure/contrib/test_sql.clj"
                  "Example code"]]}
   clojure.contrib.sql
   (:use (clojure.contrib [def :only (defalias)])
