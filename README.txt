@@ -77,19 +77,8 @@ You can specify -Dclojure.version=VERSION on the command line to select a differ
 
 = Building Against a Custom Clojure JAR =
 
-To build against a customized Clojure JAR, build *Clojure* like this:
-
-1. Modify the Clojure sources with your custom changes
-
-2. Set a custom version number in src/clj/clojure/version.properties
-
-3. Download maven-ant-tasks.jar from http://maven.apache.org/ant-tasks/download.html
-
-4. In the Clojure source directory, run:
-
-    ant -lib /path/to/maven-ant-tasks.jar ci-build
-
-THEN, build clojure-contrib with -Dclojure.version=YOUR_CUSTOM_VERSION
+To build against a customized Clojure JAR, you can specify
+-Dclojure.jar=/absolute/path/to/clojure.jar on the command line.
 
 
 

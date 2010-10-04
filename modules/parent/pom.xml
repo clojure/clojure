@@ -11,13 +11,6 @@
   <version>1.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Clojure Contrib parent module</name>
-  <dependencies>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-      <version>${clojure.version}</version>
-    </dependency>
-  </dependencies>
   <build>
     <resources>
       <resource>
@@ -64,6 +57,38 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+          <version>${clojure.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>custom-clojure</id>
+      <activation>
+        <property>
+          <name>clojure.jar</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+          <version>CUSTOM</version>
+          <scope>system</scope>
+          <systemPath>${clojure.jar}</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
   <repositories>
     <repository>
       <id>clojure-snapshots</id>
