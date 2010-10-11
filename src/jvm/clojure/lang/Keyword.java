@@ -54,7 +54,11 @@ private Keyword(Symbol sym){
 }
 
 public static Keyword find(Symbol sym){
-    return table.get(sym).get();
+    SoftReference<Keyword> ref = table.get(sym);
+    if (ref != null)
+        return ref.get();
+    else
+        return null;
 }
 
 public static Keyword find(String ns, String name){

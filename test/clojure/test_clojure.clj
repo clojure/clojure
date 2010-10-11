@@ -63,6 +63,7 @@
       :java.shell
       :transients
       :def
+      :keywords
       ])
 
 (def test-namespaces
