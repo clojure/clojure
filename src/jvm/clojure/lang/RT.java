@@ -277,19 +277,18 @@ static public void addURL(Object url) throws Exception{
 }
 
 static{
-	Keyword dockw = Keyword.intern(null, "doc");
 	Keyword arglistskw = Keyword.intern(null, "arglists");
 	Symbol namesym = Symbol.create("name");
 	OUT.setTag(Symbol.create("java.io.Writer"));
 	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
-	AGENT.setMeta(map(dockw, "The agent currently running an action on this thread, else nil"));
+	AGENT.setMeta(map(DOC_KEY, "The agent currently running an action on this thread, else nil"));
 	AGENT.setTag(Symbol.create("clojure.lang.Agent"));
 	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
 	Var nv = Var.intern(CLOJURE_NS, NAMESPACE, bootNamespace);
 	nv.setMacro();
 	Var v;
 	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
-	v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
+	v.setMeta(map(DOC_KEY, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
 	              arglistskw, list(vector(namesym))));
 	v = Var.intern(CLOJURE_NS, LOAD_FILE,
 	               new AFn(){
@@ -297,7 +296,7 @@ static{
 			               return Compiler.loadFile((String) arg1);
 		               }
 	               });
-	v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
+	v.setMeta(map(DOC_KEY, "Sequentially read and evaluate the set of forms contained in the file.",
 	              arglistskw, list(vector(namesym))));
 	try {
 		doInit();
