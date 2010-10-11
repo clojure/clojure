@@ -53,6 +53,18 @@ private Keyword(Symbol sym){
 	hash = sym.hashCode() + 0x9e3779b9;
 }
 
+public static Keyword find(Symbol sym){
+    return table.get(sym).get();
+}
+
+public static Keyword find(String ns, String name){
+    return find(Symbol.intern(ns, name));
+}
+
+public static Keyword find(String nsname){
+    return find(Symbol.intern(nsname));
+}
+
 public final int hashCode(){
 	return hash;
 }
