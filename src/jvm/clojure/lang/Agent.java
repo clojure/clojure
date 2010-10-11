@@ -12,9 +12,11 @@
 
 package clojure.lang;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.Map;
 
 public class Agent extends ARef {
 
@@ -34,18 +36,33 @@ static final Keyword CONTINUE = Keyword.intern(null, "continue");
 static final Keyword FAIL = Keyword.intern(null, "fail");
 
 volatile Object state;
-    AtomicReference<ActionQueue> aq = new AtomicReference(ActionQueue.EMPTY);
+    AtomicReference<ActionQueue> aq = new AtomicReference<ActionQueue>(ActionQueue.EMPTY);
 
     volatile Keyword errorMode = CONTINUE;
     volatile IFn errorHandler = null;
 
-final public static ExecutorService pooledExecutor =
-		Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
+final private static AtomicLong sendThreadPoolCounter = new AtomicLong(0);
 
-final public static ExecutorService soloExecutor = Executors.newCachedThreadPool();
+final private static AtomicLong sendOffThreadPoolCounter = new AtomicLong(0);
+
+final public static ExecutorService pooledExecutor =
+	Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors(), 
+		createThreadFactory("clojure-agent-send-pool-%d", sendThreadPoolCounter));
+
+final public static ExecutorService soloExecutor = Executors.newCachedThreadPool(
+	createThreadFactory("clojure-agent-send-off-pool-%d", sendOffThreadPoolCounter));
 
 final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();
 
+private static ThreadFactory createThreadFactory(final String format, final AtomicLong threadPoolCounter) {
+	return new ThreadFactory() {
+		@Override public Thread newThread(Runnable runnable) {
+			Thread thread = new Thread(runnable);
+			thread.setName(String.format(format, threadPoolCounter.getAndIncrement()));
+			return thread;
+		}
+	};
+}
 
 public static void shutdown(){
 	soloExecutor.shutdown();
