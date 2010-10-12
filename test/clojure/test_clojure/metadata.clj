@@ -26,7 +26,8 @@
     clojure.java.browse
     clojure.java.javadoc
     clojure.java.shell
-    clojure.string])
+    clojure.string
+    clojure.data])
 
 (doseq [ns public-namespaces]
   (require ns))

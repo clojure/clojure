@@ -30,13 +30,13 @@
 
 (declare diff)
 
-(defprotocol EqualityPartition
+(defprotocol ^{:added "1.3"} EqualityPartition
   "Implementation detail. Subject to change."
-  (equality-partition [x] "Implementation detail. Subject to change."))
+  (^{:added "1.3"} equality-partition [x] "Implementation detail. Subject to change."))
 
-(defprotocol Diff
+(defprotocol ^{:added "1.3"} Diff
   "Implementation detail. Subject to change."
-  (diff-similar [a b] "Implementation detail. Subject to change."))
+  (^{:added "1.3"} diff-similar [a b] "Implementation detail. Subject to change."))
 
 (extend nil
         Diff
@@ -101,6 +101,7 @@
     by their indexes, with results returned as vectors.
   * Everything else (including strings!) is treated as
     an atom and compared for equality."
+  {:added "1.3"}
   [a b]
   (if (= (equality-partition a) (equality-partition b))
     (diff-similar a b)
