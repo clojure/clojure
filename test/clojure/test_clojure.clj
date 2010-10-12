@@ -64,6 +64,7 @@
       :transients
       :def
       :keywords
+      :data
       ])
 
 (def test-namespaces
