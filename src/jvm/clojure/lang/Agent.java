@@ -56,7 +56,7 @@ final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistent
 
 private static ThreadFactory createThreadFactory(final String format, final AtomicLong threadPoolCounter) {
 	return new ThreadFactory() {
-		@Override public Thread newThread(Runnable runnable) {
+		public Thread newThread(Runnable runnable) {
 			Thread thread = new Thread(runnable);
 			thread.setName(String.format(format, threadPoolCounter.getAndIncrement()));
 			return thread;
