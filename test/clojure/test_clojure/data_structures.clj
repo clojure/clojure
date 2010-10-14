@@ -112,40 +112,45 @@
 ;; *** Collections ***
 
 (deftest test-count
-  (are [x y] (= x y)
-      (count nil) 0
+  (let [EMPTY clojure.lang.PersistentQueue/EMPTY]
+    (are [x y] (= (count x) y)
+         EMPTY 0 
+         (into EMPTY [:a :b]) 2
+         (-> (into EMPTY [:a :b]) pop pop) 0
+         
+         nil 0
 
-      (count ()) 0
-      (count '(1)) 1
-      (count '(1 2 3)) 3
+         () 0
+         '(1) 1
+         '(1 2 3) 3
 
-      (count []) 0
-      (count [1]) 1
-      (count [1 2 3]) 3
+         [] 0
+         [1] 1
+         [1 2 3] 3
 
-      (count #{}) 0
-      (count #{1}) 1
-      (count #{1 2 3}) 3
+         #{} 0
+         #{1} 1
+         #{1 2 3} 3
 
-      (count {}) 0
-      (count {:a 1}) 1
-      (count {:a 1 :b 2 :c 3}) 3
+         {} 0
+         {:a 1} 1
+         {:a 1 :b 2 :c 3} 3
 
-      (count "") 0
-      (count "a") 1
-      (count "abc") 3
+         "" 0
+         "a" 1
+         "abc" 3
 
-      (count (into-array [])) 0
-      (count (into-array [1])) 1
-      (count (into-array [1 2 3])) 3
+         (into-array []) 0
+         (into-array [1]) 1
+         (into-array [1 2 3]) 3
 
-      (count (java.util.ArrayList. [])) 0
-      (count (java.util.ArrayList. [1])) 1
-      (count (java.util.ArrayList. [1 2 3])) 3
+         (java.util.ArrayList. []) 0
+         (java.util.ArrayList. [1]) 1
+         (java.util.ArrayList. [1 2 3]) 3
 
-      (count (java.util.HashMap. {})) 0
-      (count (java.util.HashMap. {:a 1})) 1
-      (count (java.util.HashMap. {:a 1 :b 2 :c 3})) 3 )
+         (java.util.HashMap. {}) 0
+         (java.util.HashMap. {:a 1}) 1
+         (java.util.HashMap. {:a 1 :b 2 :c 3}) 3 ))
 
   ; different types
   (are [x]  (= (count [x]) 1)
