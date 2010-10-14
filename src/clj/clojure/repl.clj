@@ -131,20 +131,23 @@ str-or-pattern."
   most recent repl exception (*e), and a depth of 12."
   {:added "1.3"}
   ([] (pst 12))
-  ([depth]
-     (when-let [e *e]
-       (pst (root-cause e) depth)))
+  ([e-or-depth]
+     (if (instance? Throwable e-or-depth)
+       (pst e-or-depth 12)
+       (when-let [e *e]
+         (pst (root-cause e) e-or-depth))))
   ([^Throwable e depth]
-     (.println *err* (str (-> e class .getSimpleName) " " (.getMessage e)))
-     (let [st (.getStackTrace e)
-           cause (.getCause e)]
-       (doseq [el (take depth
-                        (remove #(#{"clojure.lang.RestFn" "clojure.lang.AFn"} (.getClassName %))
-                                st))]
-         (.println *err* (str \tab (stack-element-str el))))
-       (when cause
-         (.println *err* "Caused by:")
-         (pst cause (min depth
-                         (+ 2 (- (count (.getStackTrace cause))
-                                 (count st)))))))))
+     (binding [*out* *err*]
+       (println (str (-> e class .getSimpleName) " " (.getMessage e)))
+       (let [st (.getStackTrace e)
+             cause (.getCause e)]
+         (doseq [el (take depth
+                          (remove #(#{"clojure.lang.RestFn" "clojure.lang.AFn"} (.getClassName %))
+                                  st))]
+           (println (str \tab (stack-element-str el))))
+         (when cause
+           (println "Caused by:")
+           (pst cause (min depth
+                           (+ 2 (- (count (.getStackTrace cause))
+                                   (count st))))))))))
 
