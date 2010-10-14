@@ -120,6 +120,7 @@
       <arg value="clojure.java.browse-ui"/>
       <arg value="clojure.string"/>
       <arg value="clojure.data"/>
+      <arg value="clojure.reflect"/>
     </java>
   </target>
 

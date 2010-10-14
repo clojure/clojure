@@ -65,6 +65,7 @@
       :def
       :keywords
       :data
+      :reflect
       ])
 
 (def test-namespaces
