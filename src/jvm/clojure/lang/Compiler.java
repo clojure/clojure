@@ -34,51 +34,51 @@ import java.lang.reflect.Modifier;
 
 public class Compiler implements Opcodes{
 
-static final Symbol DEF = Symbol.create("def");
-static final Symbol LOOP = Symbol.create("loop*");
-static final Symbol RECUR = Symbol.create("recur");
-static final Symbol IF = Symbol.create("if");
-static final Symbol LET = Symbol.create("let*");
-static final Symbol LETFN = Symbol.create("letfn*");
-static final Symbol DO = Symbol.create("do");
-static final Symbol FN = Symbol.create("fn*");
-static final Symbol QUOTE = Symbol.create("quote");
-static final Symbol THE_VAR = Symbol.create("var");
-static final Symbol DOT = Symbol.create(".");
-static final Symbol ASSIGN = Symbol.create("set!");
-//static final Symbol TRY_FINALLY = Symbol.create("try-finally");
-static final Symbol TRY = Symbol.create("try");
-static final Symbol CATCH = Symbol.create("catch");
-static final Symbol FINALLY = Symbol.create("finally");
-static final Symbol THROW = Symbol.create("throw");
-static final Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
-static final Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
-static final Symbol IMPORT = Symbol.create("clojure.core", "import*");
-//static final Symbol INSTANCE = Symbol.create("instance?");
-static final Symbol DEFTYPE = Symbol.create("deftype*");
-static final Symbol CASE = Symbol.create("case*");
+static final Symbol DEF = Symbol.intern("def");
+static final Symbol LOOP = Symbol.intern("loop*");
+static final Symbol RECUR = Symbol.intern("recur");
+static final Symbol IF = Symbol.intern("if");
+static final Symbol LET = Symbol.intern("let*");
+static final Symbol LETFN = Symbol.intern("letfn*");
+static final Symbol DO = Symbol.intern("do");
+static final Symbol FN = Symbol.intern("fn*");
+static final Symbol QUOTE = Symbol.intern("quote");
+static final Symbol THE_VAR = Symbol.intern("var");
+static final Symbol DOT = Symbol.intern(".");
+static final Symbol ASSIGN = Symbol.intern("set!");
+//static final Symbol TRY_FINALLY = Symbol.intern("try-finally");
+static final Symbol TRY = Symbol.intern("try");
+static final Symbol CATCH = Symbol.intern("catch");
+static final Symbol FINALLY = Symbol.intern("finally");
+static final Symbol THROW = Symbol.intern("throw");
+static final Symbol MONITOR_ENTER = Symbol.intern("monitor-enter");
+static final Symbol MONITOR_EXIT = Symbol.intern("monitor-exit");
+static final Symbol IMPORT = Symbol.intern("clojure.core", "import*");
+//static final Symbol INSTANCE = Symbol.intern("instance?");
+static final Symbol DEFTYPE = Symbol.intern("deftype*");
+static final Symbol CASE = Symbol.intern("case*");
 
-//static final Symbol THISFN = Symbol.create("thisfn");
-static final Symbol CLASS = Symbol.create("Class");
-static final Symbol NEW = Symbol.create("new");
-static final Symbol THIS = Symbol.create("this");
-static final Symbol REIFY = Symbol.create("reify*");
-//static final Symbol UNQUOTE = Symbol.create("unquote");
-//static final Symbol UNQUOTE_SPLICING = Symbol.create("unquote-splicing");
-//static final Symbol SYNTAX_QUOTE = Symbol.create("clojure.core", "syntax-quote");
-static final Symbol LIST = Symbol.create("clojure.core", "list");
-static final Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
-static final Symbol VECTOR = Symbol.create("clojure.core", "vector");
-static final Symbol IDENTITY = Symbol.create("clojure.core", "identity");
+//static final Symbol THISFN = Symbol.intern("thisfn");
+static final Symbol CLASS = Symbol.intern("Class");
+static final Symbol NEW = Symbol.intern("new");
+static final Symbol THIS = Symbol.intern("this");
+static final Symbol REIFY = Symbol.intern("reify*");
+//static final Symbol UNQUOTE = Symbol.intern("unquote");
+//static final Symbol UNQUOTE_SPLICING = Symbol.intern("unquote-splicing");
+//static final Symbol SYNTAX_QUOTE = Symbol.intern("clojure.core", "syntax-quote");
+static final Symbol LIST = Symbol.intern("clojure.core", "list");
+static final Symbol HASHMAP = Symbol.intern("clojure.core", "hash-map");
+static final Symbol VECTOR = Symbol.intern("clojure.core", "vector");
+static final Symbol IDENTITY = Symbol.intern("clojure.core", "identity");
 
-static final Symbol _AMP_ = Symbol.create("&");
-static final Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
+static final Symbol _AMP_ = Symbol.intern("&");
+static final Symbol ISEQ = Symbol.intern("clojure.lang.ISeq");
 
 static final Keyword inlineKey = Keyword.intern(null, "inline");
 static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 static final Keyword staticKey = Keyword.intern(null, "static");
 static final Keyword arglistsKey = Keyword.intern(null, "arglists");
-static final Symbol INVOKE_STATIC = Symbol.create("invokeStatic");
+static final Symbol INVOKE_STATIC = Symbol.intern("invokeStatic");
 
 static final Keyword volatileKey = Keyword.intern(null, "volatile");
 static final Keyword implementsKey = Keyword.intern(null, "implements");
@@ -87,13 +87,13 @@ static final String COMPILE_STUB_PREFIX = "compile__stub";
 static final Keyword protocolKey = Keyword.intern(null, "protocol");
 static final Keyword onKey = Keyword.intern(null, "on");
 
-static final Symbol NS = Symbol.create("ns");
-static final Symbol IN_NS = Symbol.create("in-ns");
+static final Symbol NS = Symbol.intern("ns");
+static final Symbol IN_NS = Symbol.intern("in-ns");
 
-//static final Symbol IMPORT = Symbol.create("import");
-//static final Symbol USE = Symbol.create("use");
+//static final Symbol IMPORT = Symbol.intern("import");
+//static final Symbol USE = Symbol.intern("use");
 
-//static final Symbol IFN = Symbol.create("clojure.lang", "IFn");
+//static final Symbol IFN = Symbol.intern("clojure.lang", "IFn");
 
 static final public IPersistentMap specials = PersistentHashMap.create(
 		DEF, new DefExpr.Parser(),
@@ -213,25 +213,25 @@ static final public Var IN_CATCH_FINALLY = Var.create(null);
 static final public Var LOADER = Var.create();
 
 //String
-static final public Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                            Symbol.create("*source-path*"), "NO_SOURCE_FILE");
+static final public Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                            Symbol.intern("*source-path*"), "NO_SOURCE_FILE");
 
 //String
-static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                 Symbol.create("*file*"), "NO_SOURCE_PATH");
+static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                 Symbol.intern("*file*"), "NO_SOURCE_PATH");
 
 //String
-static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                  Symbol.create("*compile-path*"), null);
+static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                  Symbol.intern("*compile-path*"), null);
 //boolean
-static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                   Symbol.create("*compile-files*"), Boolean.FALSE);
+static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                   Symbol.intern("*compile-files*"), Boolean.FALSE);
 
-static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                            Symbol.create("instance?"));
+static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                            Symbol.intern("instance?"));
 
-static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                            Symbol.create("add-annotations"));
+static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                            Symbol.intern("add-annotations"));
 
 //Integer
 static final public Var LINE = Var.create(0);
@@ -305,7 +305,7 @@ static Symbol resolveSymbol(Symbol sym){
 		Namespace ns = namespaceFor(sym);
 		if(ns == null || ns.name.name == sym.ns)
 			return sym;
-		return Symbol.create(ns.name.name, sym.name);
+		return Symbol.intern(ns.name.name, sym.name);
 		}
 	Object o = currentNS().getMapping(sym);
 	if(o == null)
@@ -315,7 +315,7 @@ static Symbol resolveSymbol(Symbol sym){
 	else if(o instanceof Var)
 			{
 			Var v = (Var) o;
-			return Symbol.create(v.ns.name.name, v.sym.name);
+			return Symbol.intern(v.ns.name.name, v.sym.name);
 			}
 	return null;
 
@@ -331,7 +331,7 @@ static class DefExpr implements Expr{
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
 	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
-	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String, String)");
+	final static Method symintern = Method.getMethod("clojure.lang.Symbol intern(String, String)");
 
 	public DefExpr(String source, int line, Var var, Expr init, Expr meta, boolean initProvided){
 		this.source = source;
@@ -3610,7 +3610,7 @@ static public class ObjExpr implements Expr{
 	}
 
 	final static Method kwintern = Method.getMethod("clojure.lang.Keyword intern(String, String)");
-	final static Method symcreate = Method.getMethod("clojure.lang.Symbol create(String)");
+	final static Method symintern = Method.getMethod("clojure.lang.Symbol intern(String)");
 	final static Method varintern =
 			Method.getMethod("clojure.lang.Var intern(clojure.lang.Symbol, clojure.lang.Symbol)");
 
@@ -4093,7 +4093,7 @@ static public class ObjExpr implements Expr{
 			gen.push(((Symbol) value).ns);
 			gen.push(((Symbol) value).name);
 			gen.invokeStatic(Type.getType(Symbol.class),
-							 Method.getMethod("clojure.lang.Symbol create(String,String)"));
+							 Method.getMethod("clojure.lang.Symbol intern(String,String)"));
 			}
 		else if(value instanceof Keyword)
 			{
@@ -6148,7 +6148,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		{
 		if(namespaceFor(sym) == null)
 			{
-			Symbol nsSym = Symbol.create(sym.ns);
+			Symbol nsSym = Symbol.intern(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
@@ -6209,7 +6209,7 @@ static Namespace namespaceFor(Symbol sym){
 static Namespace namespaceFor(Namespace inns, Symbol sym){
 	//note, presumes non-nil sym.ns
 	// first check against currentNS' aliases...
-	Symbol nsSym = Symbol.create(sym.ns);
+	Symbol nsSym = Symbol.intern(sym.ns);
 	Namespace ns = inns.lookupAlias(nsSym);
 	if(ns == null)
 		{
@@ -6227,7 +6227,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) th
 		if(ns == null)
 			throw new Exception("No such namespace: " + sym.ns);
 
-		Var v = ns.findInternedVar(Symbol.create(sym.name));
+		Var v = ns.findInternedVar(Symbol.intern(sym.name));
 		if(v == null)
 			throw new Exception("No such var: " + sym);
 		else if(v.ns != currentNS() && !v.isPublic() && !allowPrivate)
@@ -6270,7 +6270,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
 			return null;
-		Var v = ns.findInternedVar(Symbol.create(sym.name));
+		Var v = ns.findInternedVar(Symbol.intern(sym.name));
 		if(v == null)
 			return null;
 		return v;
@@ -6302,7 +6302,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 		if(ns == null)
 			return null;
 		//throw new Exception("No such namespace: " + sym.ns);
-		Symbol name = Symbol.create(sym.name);
+		Symbol name = Symbol.intern(sym.name);
 		if(internNew && ns == currentNS())
 			var = currentNS().intern(name);
 		else
@@ -6320,7 +6320,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 				{
 				//introduce a new var in the current ns
 				if(internNew)
-					var = currentNS().intern(Symbol.create(sym.name));
+					var = currentNS().intern(Symbol.intern(sym.name));
 				}
 			else if(o instanceof Var)
 				{
@@ -6478,8 +6478,8 @@ static public void writeClassFile(String internalName, byte[] bytecode) throws E
 }
 
 public static void pushNS(){
-	Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
-	                                                           Symbol.create("*ns*")), null));
+	Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
+	                                                           Symbol.intern("*ns*")), null));
 }
 
 public static ILookupThunk getLookupThunk(Object target, Keyword k){
@@ -7124,7 +7124,7 @@ public static class NewInstanceMethod extends ObjMethod{
 				if(tag != null)
 					hinted = true;
 				if(p.getNamespace() != null)
-					p = Symbol.create(p.name);
+					p = Symbol.intern(p.name);
 				Class pclass = tagClass(tag);
 				pclasses[i] = pclass;
 				psyms[i] = p;

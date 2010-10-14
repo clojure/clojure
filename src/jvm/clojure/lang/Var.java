@@ -79,10 +79,10 @@ public String toString(){
 public static Var find(Symbol nsQualifiedSym){
 	if(nsQualifiedSym.ns == null)
 		throw new IllegalArgumentException("Symbol must be namespace-qualified");
-	Namespace ns = Namespace.find(Symbol.create(nsQualifiedSym.ns));
+	Namespace ns = Namespace.find(Symbol.intern(nsQualifiedSym.ns));
 	if(ns == null)
 		throw new IllegalArgumentException("No such namespace: " + nsQualifiedSym.ns);
-	return ns.findInternedVar(Symbol.create(nsQualifiedSym.name));
+	return ns.findInternedVar(Symbol.intern(nsQualifiedSym.name));
 }
 
 public static Var intern(Symbol nsName, Symbol sym){

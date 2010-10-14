@@ -29,189 +29,189 @@ import java.nio.charset.Charset;
 
 public class RT{
 
-static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null, "t"));
-static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.create(null, "t"));
+static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.intern(null, "t"));
+static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.intern(null, "t"));
 static final public String LOADER_SUFFIX = "__init";
 
 //simple-symbol->class
 final static IPersistentMap DEFAULT_IMPORTS = map(
-//												  Symbol.create("RT"), "clojure.lang.RT",
-//                                                  Symbol.create("Num"), "clojure.lang.Num",
-//                                                  Symbol.create("Symbol"), "clojure.lang.Symbol",
-//                                                  Symbol.create("Keyword"), "clojure.lang.Keyword",
-//                                                  Symbol.create("Var"), "clojure.lang.Var",
-//                                                  Symbol.create("Ref"), "clojure.lang.Ref",
-//                                                  Symbol.create("IFn"), "clojure.lang.IFn",
-//                                                  Symbol.create("IObj"), "clojure.lang.IObj",
-//                                                  Symbol.create("ISeq"), "clojure.lang.ISeq",
-//                                                  Symbol.create("IPersistentCollection"),
+//												  Symbol.intern("RT"), "clojure.lang.RT",
+//                                                  Symbol.intern("Num"), "clojure.lang.Num",
+//                                                  Symbol.intern("Symbol"), "clojure.lang.Symbol",
+//                                                  Symbol.intern("Keyword"), "clojure.lang.Keyword",
+//                                                  Symbol.intern("Var"), "clojure.lang.Var",
+//                                                  Symbol.intern("Ref"), "clojure.lang.Ref",
+//                                                  Symbol.intern("IFn"), "clojure.lang.IFn",
+//                                                  Symbol.intern("IObj"), "clojure.lang.IObj",
+//                                                  Symbol.intern("ISeq"), "clojure.lang.ISeq",
+//                                                  Symbol.intern("IPersistentCollection"),
 //                                                  "clojure.lang.IPersistentCollection",
-//                                                  Symbol.create("IPersistentMap"), "clojure.lang.IPersistentMap",
-//                                                  Symbol.create("IPersistentList"), "clojure.lang.IPersistentList",
-//                                                  Symbol.create("IPersistentVector"), "clojure.lang.IPersistentVector",
-Symbol.create("Boolean"), Boolean.class,
-Symbol.create("Byte"), Byte.class,
-Symbol.create("Character"), Character.class,
-Symbol.create("Class"), Class.class,
-Symbol.create("ClassLoader"), ClassLoader.class,
-Symbol.create("Compiler"), Compiler.class,
-Symbol.create("Double"), Double.class,
-Symbol.create("Enum"), Enum.class,
-Symbol.create("Float"), Float.class,
-Symbol.create("InheritableThreadLocal"), InheritableThreadLocal.class,
-Symbol.create("Integer"), Integer.class,
-Symbol.create("Long"), Long.class,
-Symbol.create("Math"), Math.class,
-Symbol.create("Number"), Number.class,
-Symbol.create("Object"), Object.class,
-Symbol.create("Package"), Package.class,
-Symbol.create("Process"), Process.class,
-Symbol.create("ProcessBuilder"), ProcessBuilder.class,
-Symbol.create("Runtime"), Runtime.class,
-Symbol.create("RuntimePermission"), RuntimePermission.class,
-Symbol.create("SecurityManager"), SecurityManager.class,
-Symbol.create("Short"), Short.class,
-Symbol.create("StackTraceElement"), StackTraceElement.class,
-Symbol.create("StrictMath"), StrictMath.class,
-Symbol.create("String"), String.class,
-Symbol.create("StringBuffer"), StringBuffer.class,
-Symbol.create("StringBuilder"), StringBuilder.class,
-Symbol.create("System"), System.class,
-Symbol.create("Thread"), Thread.class,
-Symbol.create("ThreadGroup"), ThreadGroup.class,
-Symbol.create("ThreadLocal"), ThreadLocal.class,
-Symbol.create("Throwable"), Throwable.class,
-Symbol.create("Void"), Void.class,
-Symbol.create("Appendable"), Appendable.class,
-Symbol.create("CharSequence"), CharSequence.class,
-Symbol.create("Cloneable"), Cloneable.class,
-Symbol.create("Comparable"), Comparable.class,
-Symbol.create("Iterable"), Iterable.class,
-Symbol.create("Readable"), Readable.class,
-Symbol.create("Runnable"), Runnable.class,
-Symbol.create("Callable"), Callable.class,
-Symbol.create("BigInteger"), BigInteger.class,
-Symbol.create("BigDecimal"), BigDecimal.class,
-Symbol.create("ArithmeticException"), ArithmeticException.class,
-Symbol.create("ArrayIndexOutOfBoundsException"), ArrayIndexOutOfBoundsException.class,
-Symbol.create("ArrayStoreException"), ArrayStoreException.class,
-Symbol.create("ClassCastException"), ClassCastException.class,
-Symbol.create("ClassNotFoundException"), ClassNotFoundException.class,
-Symbol.create("CloneNotSupportedException"), CloneNotSupportedException.class,
-Symbol.create("EnumConstantNotPresentException"), EnumConstantNotPresentException.class,
-Symbol.create("Exception"), Exception.class,
-Symbol.create("IllegalAccessException"), IllegalAccessException.class,
-Symbol.create("IllegalArgumentException"), IllegalArgumentException.class,
-Symbol.create("IllegalMonitorStateException"), IllegalMonitorStateException.class,
-Symbol.create("IllegalStateException"), IllegalStateException.class,
-Symbol.create("IllegalThreadStateException"), IllegalThreadStateException.class,
-Symbol.create("IndexOutOfBoundsException"), IndexOutOfBoundsException.class,
-Symbol.create("InstantiationException"), InstantiationException.class,
-Symbol.create("InterruptedException"), InterruptedException.class,
-Symbol.create("NegativeArraySizeException"), NegativeArraySizeException.class,
-Symbol.create("NoSuchFieldException"), NoSuchFieldException.class,
-Symbol.create("NoSuchMethodException"), NoSuchMethodException.class,
-Symbol.create("NullPointerException"), NullPointerException.class,
-Symbol.create("NumberFormatException"), NumberFormatException.class,
-Symbol.create("RuntimeException"), RuntimeException.class,
-Symbol.create("SecurityException"), SecurityException.class,
-Symbol.create("StringIndexOutOfBoundsException"), StringIndexOutOfBoundsException.class,
-Symbol.create("TypeNotPresentException"), TypeNotPresentException.class,
-Symbol.create("UnsupportedOperationException"), UnsupportedOperationException.class,
-Symbol.create("AbstractMethodError"), AbstractMethodError.class,
-Symbol.create("AssertionError"), AssertionError.class,
-Symbol.create("ClassCircularityError"), ClassCircularityError.class,
-Symbol.create("ClassFormatError"), ClassFormatError.class,
-Symbol.create("Error"), Error.class,
-Symbol.create("ExceptionInInitializerError"), ExceptionInInitializerError.class,
-Symbol.create("IllegalAccessError"), IllegalAccessError.class,
-Symbol.create("IncompatibleClassChangeError"), IncompatibleClassChangeError.class,
-Symbol.create("InstantiationError"), InstantiationError.class,
-Symbol.create("InternalError"), InternalError.class,
-Symbol.create("LinkageError"), LinkageError.class,
-Symbol.create("NoClassDefFoundError"), NoClassDefFoundError.class,
-Symbol.create("NoSuchFieldError"), NoSuchFieldError.class,
-Symbol.create("NoSuchMethodError"), NoSuchMethodError.class,
-Symbol.create("OutOfMemoryError"), OutOfMemoryError.class,
-Symbol.create("StackOverflowError"), StackOverflowError.class,
-Symbol.create("ThreadDeath"), ThreadDeath.class,
-Symbol.create("UnknownError"), UnknownError.class,
-Symbol.create("UnsatisfiedLinkError"), UnsatisfiedLinkError.class,
-Symbol.create("UnsupportedClassVersionError"), UnsupportedClassVersionError.class,
-Symbol.create("VerifyError"), VerifyError.class,
-Symbol.create("VirtualMachineError"), VirtualMachineError.class,
-Symbol.create("Thread$UncaughtExceptionHandler"), Thread.UncaughtExceptionHandler.class,
-Symbol.create("Thread$State"), Thread.State.class,
-Symbol.create("Deprecated"), Deprecated.class,
-Symbol.create("Override"), Override.class,
-Symbol.create("SuppressWarnings"), SuppressWarnings.class
+//                                                  Symbol.intern("IPersistentMap"), "clojure.lang.IPersistentMap",
+//                                                  Symbol.intern("IPersistentList"), "clojure.lang.IPersistentList",
+//                                                  Symbol.intern("IPersistentVector"), "clojure.lang.IPersistentVector",
+Symbol.intern("Boolean"), Boolean.class,
+Symbol.intern("Byte"), Byte.class,
+Symbol.intern("Character"), Character.class,
+Symbol.intern("Class"), Class.class,
+Symbol.intern("ClassLoader"), ClassLoader.class,
+Symbol.intern("Compiler"), Compiler.class,
+Symbol.intern("Double"), Double.class,
+Symbol.intern("Enum"), Enum.class,
+Symbol.intern("Float"), Float.class,
+Symbol.intern("InheritableThreadLocal"), InheritableThreadLocal.class,
+Symbol.intern("Integer"), Integer.class,
+Symbol.intern("Long"), Long.class,
+Symbol.intern("Math"), Math.class,
+Symbol.intern("Number"), Number.class,
+Symbol.intern("Object"), Object.class,
+Symbol.intern("Package"), Package.class,
+Symbol.intern("Process"), Process.class,
+Symbol.intern("ProcessBuilder"), ProcessBuilder.class,
+Symbol.intern("Runtime"), Runtime.class,
+Symbol.intern("RuntimePermission"), RuntimePermission.class,
+Symbol.intern("SecurityManager"), SecurityManager.class,
+Symbol.intern("Short"), Short.class,
+Symbol.intern("StackTraceElement"), StackTraceElement.class,
+Symbol.intern("StrictMath"), StrictMath.class,
+Symbol.intern("String"), String.class,
+Symbol.intern("StringBuffer"), StringBuffer.class,
+Symbol.intern("StringBuilder"), StringBuilder.class,
+Symbol.intern("System"), System.class,
+Symbol.intern("Thread"), Thread.class,
+Symbol.intern("ThreadGroup"), ThreadGroup.class,
+Symbol.intern("ThreadLocal"), ThreadLocal.class,
+Symbol.intern("Throwable"), Throwable.class,
+Symbol.intern("Void"), Void.class,
+Symbol.intern("Appendable"), Appendable.class,
+Symbol.intern("CharSequence"), CharSequence.class,
+Symbol.intern("Cloneable"), Cloneable.class,
+Symbol.intern("Comparable"), Comparable.class,
+Symbol.intern("Iterable"), Iterable.class,
+Symbol.intern("Readable"), Readable.class,
+Symbol.intern("Runnable"), Runnable.class,
+Symbol.intern("Callable"), Callable.class,
+Symbol.intern("BigInteger"), BigInteger.class,
+Symbol.intern("BigDecimal"), BigDecimal.class,
+Symbol.intern("ArithmeticException"), ArithmeticException.class,
+Symbol.intern("ArrayIndexOutOfBoundsException"), ArrayIndexOutOfBoundsException.class,
+Symbol.intern("ArrayStoreException"), ArrayStoreException.class,
+Symbol.intern("ClassCastException"), ClassCastException.class,
+Symbol.intern("ClassNotFoundException"), ClassNotFoundException.class,
+Symbol.intern("CloneNotSupportedException"), CloneNotSupportedException.class,
+Symbol.intern("EnumConstantNotPresentException"), EnumConstantNotPresentException.class,
+Symbol.intern("Exception"), Exception.class,
+Symbol.intern("IllegalAccessException"), IllegalAccessException.class,
+Symbol.intern("IllegalArgumentException"), IllegalArgumentException.class,
+Symbol.intern("IllegalMonitorStateException"), IllegalMonitorStateException.class,
+Symbol.intern("IllegalStateException"), IllegalStateException.class,
+Symbol.intern("IllegalThreadStateException"), IllegalThreadStateException.class,
+Symbol.intern("IndexOutOfBoundsException"), IndexOutOfBoundsException.class,
+Symbol.intern("InstantiationException"), InstantiationException.class,
+Symbol.intern("InterruptedException"), InterruptedException.class,
+Symbol.intern("NegativeArraySizeException"), NegativeArraySizeException.class,
+Symbol.intern("NoSuchFieldException"), NoSuchFieldException.class,
+Symbol.intern("NoSuchMethodException"), NoSuchMethodException.class,
+Symbol.intern("NullPointerException"), NullPointerException.class,
+Symbol.intern("NumberFormatException"), NumberFormatException.class,
+Symbol.intern("RuntimeException"), RuntimeException.class,
+Symbol.intern("SecurityException"), SecurityException.class,
+Symbol.intern("StringIndexOutOfBoundsException"), StringIndexOutOfBoundsException.class,
+Symbol.intern("TypeNotPresentException"), TypeNotPresentException.class,
+Symbol.intern("UnsupportedOperationException"), UnsupportedOperationException.class,
+Symbol.intern("AbstractMethodError"), AbstractMethodError.class,
+Symbol.intern("AssertionError"), AssertionError.class,
+Symbol.intern("ClassCircularityError"), ClassCircularityError.class,
+Symbol.intern("ClassFormatError"), ClassFormatError.class,
+Symbol.intern("Error"), Error.class,
+Symbol.intern("ExceptionInInitializerError"), ExceptionInInitializerError.class,
+Symbol.intern("IllegalAccessError"), IllegalAccessError.class,
+Symbol.intern("IncompatibleClassChangeError"), IncompatibleClassChangeError.class,
+Symbol.intern("InstantiationError"), InstantiationError.class,
+Symbol.intern("InternalError"), InternalError.class,
+Symbol.intern("LinkageError"), LinkageError.class,
+Symbol.intern("NoClassDefFoundError"), NoClassDefFoundError.class,
+Symbol.intern("NoSuchFieldError"), NoSuchFieldError.class,
+Symbol.intern("NoSuchMethodError"), NoSuchMethodError.class,
+Symbol.intern("OutOfMemoryError"), OutOfMemoryError.class,
+Symbol.intern("StackOverflowError"), StackOverflowError.class,
+Symbol.intern("ThreadDeath"), ThreadDeath.class,
+Symbol.intern("UnknownError"), UnknownError.class,
+Symbol.intern("UnsatisfiedLinkError"), UnsatisfiedLinkError.class,
+Symbol.intern("UnsupportedClassVersionError"), UnsupportedClassVersionError.class,
+Symbol.intern("VerifyError"), VerifyError.class,
+Symbol.intern("VirtualMachineError"), VirtualMachineError.class,
+Symbol.intern("Thread$UncaughtExceptionHandler"), Thread.UncaughtExceptionHandler.class,
+Symbol.intern("Thread$State"), Thread.State.class,
+Symbol.intern("Deprecated"), Deprecated.class,
+Symbol.intern("Override"), Override.class,
+Symbol.intern("SuppressWarnings"), SuppressWarnings.class
 
-//                                                  Symbol.create("Collection"), "java.util.Collection",
-//                                                  Symbol.create("Comparator"), "java.util.Comparator",
-//                                                  Symbol.create("Enumeration"), "java.util.Enumeration",
-//                                                  Symbol.create("EventListener"), "java.util.EventListener",
-//                                                  Symbol.create("Formattable"), "java.util.Formattable",
-//                                                  Symbol.create("Iterator"), "java.util.Iterator",
-//                                                  Symbol.create("List"), "java.util.List",
-//                                                  Symbol.create("ListIterator"), "java.util.ListIterator",
-//                                                  Symbol.create("Map"), "java.util.Map",
-//                                                  Symbol.create("Map$Entry"), "java.util.Map$Entry",
-//                                                  Symbol.create("Observer"), "java.util.Observer",
-//                                                  Symbol.create("Queue"), "java.util.Queue",
-//                                                  Symbol.create("RandomAccess"), "java.util.RandomAccess",
-//                                                  Symbol.create("Set"), "java.util.Set",
-//                                                  Symbol.create("SortedMap"), "java.util.SortedMap",
-//                                                  Symbol.create("SortedSet"), "java.util.SortedSet"
+//                                                  Symbol.intern("Collection"), "java.util.Collection",
+//                                                  Symbol.intern("Comparator"), "java.util.Comparator",
+//                                                  Symbol.intern("Enumeration"), "java.util.Enumeration",
+//                                                  Symbol.intern("EventListener"), "java.util.EventListener",
+//                                                  Symbol.intern("Formattable"), "java.util.Formattable",
+//                                                  Symbol.intern("Iterator"), "java.util.Iterator",
+//                                                  Symbol.intern("List"), "java.util.List",
+//                                                  Symbol.intern("ListIterator"), "java.util.ListIterator",
+//                                                  Symbol.intern("Map"), "java.util.Map",
+//                                                  Symbol.intern("Map$Entry"), "java.util.Map$Entry",
+//                                                  Symbol.intern("Observer"), "java.util.Observer",
+//                                                  Symbol.intern("Queue"), "java.util.Queue",
+//                                                  Symbol.intern("RandomAccess"), "java.util.RandomAccess",
+//                                                  Symbol.intern("Set"), "java.util.Set",
+//                                                  Symbol.intern("SortedMap"), "java.util.SortedMap",
+//                                                  Symbol.intern("SortedSet"), "java.util.SortedSet"
 );
 
 // single instance of UTF-8 Charset, so as to avoid catching UnsupportedCharsetExceptions everywhere
 static public Charset UTF8 = Charset.forName("UTF-8");
 
-static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.create("clojure.core"));
-//static final Namespace USER_NS = Namespace.findOrCreate(Symbol.create("user"));
+static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.intern("clojure.core"));
+//static final Namespace USER_NS = Namespace.findOrCreate(Symbol.intern("user"));
 final static public Var OUT =
-		Var.intern(CLOJURE_NS, Symbol.create("*out*"), new OutputStreamWriter(System.out));
+		Var.intern(CLOJURE_NS, Symbol.intern("*out*"), new OutputStreamWriter(System.out));
 final static public Var IN =
-		Var.intern(CLOJURE_NS, Symbol.create("*in*"),
+		Var.intern(CLOJURE_NS, Symbol.intern("*in*"),
 		           new LineNumberingPushbackReader(new InputStreamReader(System.in)));
 final static public Var ERR =
-		Var.intern(CLOJURE_NS, Symbol.create("*err*"),
+		Var.intern(CLOJURE_NS, Symbol.intern("*err*"),
 		           new PrintWriter(new OutputStreamWriter(System.err), true));
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
-final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
-final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), T);
-final static public Var ASSERT = Var.intern(CLOJURE_NS, Symbol.create("*assert*"), T);
-final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
+final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.intern("*agent*"), null);
+final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), T);
+final static public Var ASSERT = Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), T);
+final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.intern("*math-context*"), null);
 static Keyword LINE_KEY = Keyword.intern(null, "line");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 static Keyword DECLARED_KEY = Keyword.intern(null, "declared");
 static Keyword DOC_KEY = Keyword.intern(null, "doc");
 final static public Var USE_CONTEXT_CLASSLOADER =
-		Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), T);
-//final static public Var CURRENT_MODULE = Var.intern(Symbol.create("clojure.core", "current-module"),
+		Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), T);
+//final static public Var CURRENT_MODULE = Var.intern(Symbol.intern("clojure.core", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 
-final static Symbol LOAD_FILE = Symbol.create("load-file");
-final static Symbol IN_NAMESPACE = Symbol.create("in-ns");
-final static Symbol NAMESPACE = Symbol.create("ns");
-static final Symbol IDENTICAL = Symbol.create("identical?");
-final static Var CMD_LINE_ARGS = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
+final static Symbol LOAD_FILE = Symbol.intern("load-file");
+final static Symbol IN_NAMESPACE = Symbol.intern("in-ns");
+final static Symbol NAMESPACE = Symbol.intern("ns");
+static final Symbol IDENTICAL = Symbol.intern("identical?");
+final static Var CMD_LINE_ARGS = Var.intern(CLOJURE_NS, Symbol.intern("*command-line-args*"), null);
 //symbol
-final public static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),
+final public static Var CURRENT_NS = Var.intern(CLOJURE_NS, Symbol.intern("*ns*"),
                                                 CLOJURE_NS);
 
-final static Var FLUSH_ON_NEWLINE = Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), T);
-final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
-final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
-final static Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), F);
-final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
-final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), F);
+final static Var FLUSH_ON_NEWLINE = Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), T);
+final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), F);
+final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), T);
+final static Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), F);
+final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), F);
+final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), F);
 
-final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), F);
-final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.create("ns"), F);
-static final Var PRINT_INITIALIZED = Var.intern(CLOJURE_NS, Symbol.create("print-initialized"));
-static final Var PR_ON = Var.intern(CLOJURE_NS, Symbol.create("pr-on"));
-//final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.create("*imports*"), DEFAULT_IMPORTS);
+final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.intern("in-ns"), F);
+final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.intern("ns"), F);
+static final Var PRINT_INITIALIZED = Var.intern(CLOJURE_NS, Symbol.intern("print-initialized"));
+static final Var PR_ON = Var.intern(CLOJURE_NS, Symbol.intern("pr-on"));
+//final static Var IMPORTS = Var.intern(CLOJURE_NS, Symbol.intern("*imports*"), DEFAULT_IMPORTS);
 final static IFn inNamespace = new AFn(){
 	public Object invoke(Object arg1) throws Exception{
 		Symbol nsname = (Symbol) arg1;
@@ -278,12 +278,12 @@ static public void addURL(Object url) throws Exception{
 
 static{
 	Keyword arglistskw = Keyword.intern(null, "arglists");
-	Symbol namesym = Symbol.create("name");
-	OUT.setTag(Symbol.create("java.io.Writer"));
-	CURRENT_NS.setTag(Symbol.create("clojure.lang.Namespace"));
+	Symbol namesym = Symbol.intern("name");
+	OUT.setTag(Symbol.intern("java.io.Writer"));
+	CURRENT_NS.setTag(Symbol.intern("clojure.lang.Namespace"));
 	AGENT.setMeta(map(DOC_KEY, "The agent currently running an action on this thread, else nil"));
-	AGENT.setTag(Symbol.create("clojure.lang.Agent"));
-	MATH_CONTEXT.setTag(Symbol.create("java.math.MathContext"));
+	AGENT.setTag(Symbol.intern("clojure.lang.Agent"));
+	MATH_CONTEXT.setTag(Symbol.intern("java.math.MathContext"));
 	Var nv = Var.intern(CLOJURE_NS, NAMESPACE, bootNamespace);
 	nv.setMacro();
 	Var v;
@@ -419,8 +419,8 @@ static void doInit() throws Exception{
 			RT.map(CURRENT_NS, CURRENT_NS.deref(),
 			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
 	try {
-		Symbol USER = Symbol.create("user");
-		Symbol CLOJURE = Symbol.create("clojure.core");
+		Symbol USER = Symbol.intern("user");
+		Symbol CLOJURE = Symbol.intern("clojure.core");
 
 		Var in_ns = var("clojure.core", "in-ns");
 		Var refer = var("clojure.core", "refer");

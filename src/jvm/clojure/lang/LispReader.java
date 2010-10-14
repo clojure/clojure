@@ -22,22 +22,22 @@ import java.lang.*;
 
 public class LispReader{
 
-static final Symbol QUOTE = Symbol.create("quote");
-static final Symbol THE_VAR = Symbol.create("var");
-//static Symbol SYNTAX_QUOTE = Symbol.create(null, "syntax-quote");
-static Symbol UNQUOTE = Symbol.create("clojure.core", "unquote");
-static Symbol UNQUOTE_SPLICING = Symbol.create("clojure.core", "unquote-splicing");
-static Symbol CONCAT = Symbol.create("clojure.core", "concat");
-static Symbol SEQ = Symbol.create("clojure.core", "seq");
-static Symbol LIST = Symbol.create("clojure.core", "list");
-static Symbol APPLY = Symbol.create("clojure.core", "apply");
-static Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
-static Symbol HASHSET = Symbol.create("clojure.core", "hash-set");
-static Symbol VECTOR = Symbol.create("clojure.core", "vector");
-static Symbol WITH_META = Symbol.create("clojure.core", "with-meta");
-static Symbol META = Symbol.create("clojure.core", "meta");
-static Symbol DEREF = Symbol.create("clojure.core", "deref");
-//static Symbol DEREF_BANG = Symbol.create("clojure.core", "deref!");
+static final Symbol QUOTE = Symbol.intern("quote");
+static final Symbol THE_VAR = Symbol.intern("var");
+//static Symbol SYNTAX_QUOTE = Symbol.intern(null, "syntax-quote");
+static Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
+static Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
+static Symbol CONCAT = Symbol.intern("clojure.core", "concat");
+static Symbol SEQ = Symbol.intern("clojure.core", "seq");
+static Symbol LIST = Symbol.intern("clojure.core", "list");
+static Symbol APPLY = Symbol.intern("clojure.core", "apply");
+static Symbol HASHMAP = Symbol.intern("clojure.core", "hash-map");
+static Symbol HASHSET = Symbol.intern("clojure.core", "hash-set");
+static Symbol VECTOR = Symbol.intern("clojure.core", "vector");
+static Symbol WITH_META = Symbol.intern("clojure.core", "with-meta");
+static Symbol META = Symbol.intern("clojure.core", "meta");
+static Symbol DEREF = Symbol.intern("clojure.core", "deref");
+//static Symbol DEREF_BANG = Symbol.intern("clojure.core", "deref!");
 
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
@@ -50,8 +50,8 @@ static Pattern intPat =
 				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?");
-static final Symbol SLASH = Symbol.create("/");
-static final Symbol CLOJURE_SLASH = Symbol.create("clojure.core","/");
+static final Symbol SLASH = Symbol.intern("/");
+static final Symbol CLOJURE_SLASH = Symbol.intern("clojure.core","/");
 //static Pattern accessorPat = Pattern.compile("\\.[a-zA-Z_]\\w*");
 //static Pattern instanceMemberPat = Pattern.compile("\\.([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
 //static Pattern staticMemberPat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.([a-zA-Z_]\\w*)");
@@ -929,7 +929,7 @@ public static class ListReader extends AFn{
 }
 
 static class CtorReader extends AFn{
-	static final Symbol cls = Symbol.create("class");
+	static final Symbol cls = Symbol.intern("class");
 
 	public Object invoke(Object reader, Object leftangle) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
