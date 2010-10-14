@@ -55,6 +55,14 @@
     (is (true? (instance? ArithmeticException (second @err))))
     (is (thrown? RuntimeException (send agt inc)))))
 
+(deftest can-send-from-error-handler-before-popping-action-that-caused-error
+  (let [handler (fn [agt err]
+                  (send *agent* (constantly :sent-after-error)))
+        failing-agent (agent nil :error-handler handler)]
+    (send failing-agent (fn [_] (throw (RuntimeException.))))
+    (await-for 1000 failing-agent)
+    (is (= :sent-after-error @failing-agent))))
+
 (deftest restart-no-clear
   (let [p (promise)
         agt (agent 1 :error-mode :fail)]
