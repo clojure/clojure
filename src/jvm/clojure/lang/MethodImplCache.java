@@ -30,7 +30,7 @@ public final int shift;
 public final int mask;
 public final Object[] table;    //[class, entry. class, entry ...]
 
-volatile Entry mre = null;
+Entry mre = null;
 
 public MethodImplCache(IPersistentMap protocol, Keyword methodk){
 	this(protocol, methodk, 0, 0, RT.EMPTY_ARRAY);
