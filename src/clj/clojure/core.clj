@@ -1753,7 +1753,29 @@
   nil if no var with that name."
   {:added "1.0"
    :static true}
- [sym] (. clojure.lang.Var (find sym)))
+  [sym] (. clojure.lang.Var (find sym)))
+
+(defn binding-conveyor-fn
+  {:private true
+   :added "1.3"}
+  [f]
+  (let [frame (clojure.lang.Var/getThreadBindingFrame)]
+    (fn 
+      ([]
+         (clojure.lang.Var/resetThreadBindingFrame frame)
+         (f))
+      ([x]
+         (clojure.lang.Var/resetThreadBindingFrame frame)
+         (f x))
+      ([x y]
+         (clojure.lang.Var/resetThreadBindingFrame frame)
+         (f x y))
+      ([x y z]
+         (clojure.lang.Var/resetThreadBindingFrame frame)
+         (f x y z))
+      ([x y z & args] 
+         (clojure.lang.Var/resetThreadBindingFrame frame)
+         (apply f x y z args)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn ^{:private true}
@@ -1809,7 +1831,7 @@
   {:added "1.0"
    :static true}
   [^clojure.lang.Agent a f & args]
-    (. a (dispatch f args false)))
+  (. a (dispatch (binding-conveyor-fn f) args false)))
 
 (defn send-off
   "Dispatch a potentially blocking action to an agent. Returns the
@@ -1820,7 +1842,7 @@
   {:added "1.0"
    :static true}
   [^clojure.lang.Agent a f & args]
-    (. a (dispatch f args true)))
+  (. a (dispatch (binding-conveyor-fn f) args true)))
 
 (defn release-pending-sends
   "Normally, actions sent directly or indirectly during another action
@@ -5834,8 +5856,9 @@
   not yet finished, calls to deref/@ will block."
   {:added "1.1"
    :static true}
-  [^Callable f]
-  (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
+  [f]
+  (let [f (binding-conveyor-fn f)
+        fut (.submit clojure.lang.Agent/soloExecutor ^Callable f)]
     (reify 
      clojure.lang.IDeref 
       (deref [_] (.get fut))

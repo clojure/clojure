@@ -12,26 +12,36 @@
 
 package clojure.lang;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public final class Var extends ARef implements IFn, IRef, Settable{
 
+static class TBox{
+
+volatile Object val;
+final Thread thread;
+
+public TBox(Thread t, Object val){
+	this.thread = t;
+	this.val = val;
+}
+}
 
 static class Frame{
-	//Var->Box
+	//Var->TBox
 	Associative bindings;
 	//Var->val
-	Associative frameBindings;
+//	Associative frameBindings;
 	Frame prev;
 
 
 	public Frame(){
-		this(PersistentHashMap.EMPTY, PersistentHashMap.EMPTY, null);
+		this(PersistentHashMap.EMPTY, null);
 	}
 
-	public Frame(Associative frameBindings, Associative bindings, Frame prev){
-		this.frameBindings = frameBindings;
+	public Frame(Associative bindings, Frame prev){
+//		this.frameBindings = frameBindings;
 		this.bindings = bindings;
 		this.prev = prev;
 	}
@@ -52,11 +62,22 @@ static Keyword nsKey = Keyword.intern(null, "ns");
 //static Keyword tagKey = Keyword.intern(null, "tag");
 
 volatile Object root;
-transient final AtomicInteger count;
+transient final AtomicBoolean threadBound;
 public final Symbol sym;
 public final Namespace ns;
 
 //IPersistentMap _meta;
+
+public static Object getThreadBindingFrame(){
+	Frame f = dvals.get();
+	if(f != null)
+		return f;
+	return new Frame();
+}
+
+public static void resetThreadBindingFrame(Object frame){
+	dvals.set((Frame) frame);
+}
 
 public static Var intern(Namespace ns, Symbol sym, Object root){
 	return intern(ns, sym, root, true);
@@ -113,7 +134,7 @@ public static Var create(Object root){
 Var(Namespace ns, Symbol sym){
 	this.ns = ns;
 	this.sym = sym;
-	this.count = new AtomicInteger();
+	this.threadBound = new AtomicBoolean(false);
 	this.root = dvals;  //use dvals as magic not-bound value
 	setMeta(PersistentHashMap.EMPTY);
 }
@@ -124,17 +145,17 @@ Var(Namespace ns, Symbol sym, Object root){
 }
 
 public boolean isBound(){
-	return hasRoot() || (count.get() > 0 && dvals.get().bindings.containsKey(this));
+	return hasRoot() || (threadBound.get() && dvals.get().bindings.containsKey(this));
 }
 
 final public Object get(){
-	if(count.get() == 0 && root != dvals)
+	if(!threadBound.get() && root != dvals)
 		return root;
 	return deref();
 }
 
 final public Object deref(){
-	Box b = getThreadBinding();
+	TBox b = getThreadBinding();
 	if(b != null)
 		return b.val;
 	if(hasRoot())
@@ -155,15 +176,13 @@ public Object alter(IFn fn, ISeq args) throws Exception{
 
 public Object set(Object val){
 	validate(getValidator(), val);
-	Box b = getThreadBinding();
+	TBox b = getThreadBinding();
 	if(b != null)
+		{
+		if(Thread.currentThread() != b.thread)
+			throw new IllegalStateException(String.format("Can't set!: %s from non-binding thread", sym));
 		return (b.val = val);
-	//jury still out on this
-//	if(hasRoot())
-//		{
-//		bindRoot(val);
-//		return val;
-//		}
+		}
 	throw new IllegalStateException(String.format("Can't change/establish root binding of: %s with set", sym));
 }
 
@@ -285,34 +304,17 @@ public static void pushThreadBindings(Associative bindings){
 		IMapEntry e = (IMapEntry) bs.first();
 		Var v = (Var) e.key();
 		v.validate(v.getValidator(), e.val());
-		v.count.incrementAndGet();
-		bmap = bmap.assoc(v, new Box(e.val()));
+		v.threadBound.set(true);
+		bmap = bmap.assoc(v, new TBox(Thread.currentThread(), e.val()));
 		}
-	dvals.set(new Frame(bindings, bmap, f));
+	dvals.set(new Frame(bmap, f));
 }
 
 public static void popThreadBindings(){
 	Frame f = dvals.get();
 	if(f.prev == null)
 		throw new IllegalStateException("Pop without matching push");
-	for(ISeq bs = RT.keys(f.frameBindings); bs != null; bs = bs.next())
-		{
-		Var v = (Var) bs.first();
-		v.count.decrementAndGet();
-		}
 	dvals.set(f.prev);
-}
-
-public static void releaseThreadBindings(){
-	Frame f = dvals.get();
-	if(f.prev == null)
-		throw new IllegalStateException("Release without full unwind");
-	for(ISeq bs = RT.keys(f.bindings); bs != null; bs = bs.next())
-		{
-		Var v = (Var) bs.first();
-		v.count.decrementAndGet();
-		}
-	dvals.set(null);
 }
 
 public static Associative getThreadBindings(){
@@ -322,18 +324,18 @@ public static Associative getThreadBindings(){
 		{
 		IMapEntry e = (IMapEntry) bs.first();
 		Var v = (Var) e.key();
-		Box b = (Box) e.val();
+		TBox b = (TBox) e.val();
 		ret = ret.assoc(v, b.val);
 		}
 	return ret;
 }
 
-public final Box getThreadBinding(){
-	if(count.get() > 0)
+public final TBox getThreadBinding(){
+	if(threadBound.get())
 		{
 		IMapEntry e = dvals.get().bindings.entryAt(this);
 		if(e != null)
-			return (Box) e.val();
+			return (TBox) e.val();
 		}
 	return null;
 }
