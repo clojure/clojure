@@ -236,14 +236,14 @@
 
 ;;; USER-MODIFIABLE GLOBALS
 
-(defonce
+(defonce ^:dynamic
   ^{:doc "True by default.  If set to false, no test functions will
    be created by deftest, set-test, or with-test.  Use this to omit
    tests when compiling or loading production code."
     :added "1.1"}
   *load-tests* true)
 
-(def
+(def ^:dynamic
  ^{:doc "The maximum depth of stack traces to print when an Exception
   is thrown during a test.  Defaults to nil, which means print the 
   complete stack trace."
@@ -253,16 +253,16 @@
 
 ;;; GLOBALS USED BY THE REPORTING FUNCTIONS
 
-(def *report-counters* nil)	  ; bound to a ref of a map in test-ns
+(def ^:dynamic *report-counters* nil)	  ; bound to a ref of a map in test-ns
 
-(def *initial-report-counters*  ; used to initialize *report-counters*
+(def ^:dynamic *initial-report-counters*  ; used to initialize *report-counters*
      {:test 0, :pass 0, :fail 0, :error 0})
 
-(def *testing-vars* (list))  ; bound to hierarchy of vars being tested
+(def ^:dynamic *testing-vars* (list))  ; bound to hierarchy of vars being tested
 
-(def *testing-contexts* (list)) ; bound to hierarchy of "testing" strings
+(def ^:dynamic *testing-contexts* (list)) ; bound to hierarchy of "testing" strings
 
-(def *test-out* *out*)         ; PrintWriter for test reporting output
+(def ^:dynamic *test-out* *out*)         ; PrintWriter for test reporting output
 
 (defmacro with-test-out
   "Runs body with *out* bound to the value of *test-out*."

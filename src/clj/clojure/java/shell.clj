@@ -15,8 +15,8 @@ collecting its stdout"}
   (:import (java.io OutputStreamWriter ByteArrayOutputStream StringWriter)
            (java.nio.charset Charset)))
 
-(def *sh-dir* nil)
-(def *sh-env* nil)
+(def ^:dynamic *sh-dir* nil)
+(def ^:dynamic *sh-env* nil)
 
 (defmacro with-sh-dir
   "Sets the directory for use with sh, see sh for details."

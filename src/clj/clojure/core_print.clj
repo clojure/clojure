@@ -12,7 +12,7 @@
 
 (import '(java.io Writer))
 
-(def
+(def ^:dynamic
  ^{:doc "*print-length* controls how many items of each collection the
   printer will print. If it is bound to logical false, there is no
   limit. Otherwise, it must be bound to an integer indicating the maximum
@@ -23,7 +23,7 @@
    :added "1.0"}
  *print-length* nil)
 
-(def
+(def ^:dynamic
  ^{:doc "*print-level* controls how many levels deep the printer will
   print nested objects. If it is bound to logical false, there is no
   limit. Otherwise, it must be bound to an integer indicating the maximum

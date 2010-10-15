@@ -19,7 +19,7 @@
 
 ; declare intern binding find-var var
 
-(def a)
+(def ^:dynamic a)
 (deftest test-binding
   (are [x y] (= x y)
       (eval `(binding [a 4] a)) 4     ; regression in Clojure SVN r1370

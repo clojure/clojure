@@ -289,7 +289,7 @@
     (pprint-simple-code-list alis)))
 
 ;;; The map of symbols that are defined in an enclosing #() anonymous function
-(def ^{:private true} *symbol-map* {})
+(def ^:dynamic ^{:private true} *symbol-map* {})
 
 (defn- pprint-anon-func [alis]
   (let [args (second alis)
@@ -342,7 +342,7 @@
                     %))
                amap))))
 
-(def ^{:private true} *code-table*
+(def ^:dynamic ^{:private true} *code-table*
      (two-forms
       (add-core-ns
        {'def pprint-hold-first, 'defonce pprint-hold-first, 

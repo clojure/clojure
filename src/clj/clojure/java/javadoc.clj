@@ -13,17 +13,17 @@
   (:import
    (java.io File)))
 
-(def *feeling-lucky-url* "http://www.google.com/search?btnI=I%27m%20Feeling%20Lucky&q=allinurl:")
-(def *feeling-lucky* true)
+(def ^:dynamic *feeling-lucky-url* "http://www.google.com/search?btnI=I%27m%20Feeling%20Lucky&q=allinurl:")
+(def ^:dynamic *feeling-lucky* true)
 
-(def *local-javadocs* (ref (list)))
+(def ^:dynamic *local-javadocs* (ref (list)))
  
-(def *core-java-api*
+(def ^:dynamic *core-java-api*
   (if (= "1.5" (System/getProperty "java.specification.version"))
     "http://java.sun.com/j2se/1.5.0/docs/api/"
     "http://java.sun.com/javase/6/docs/api/"))
 
-(def *remote-javadocs*
+(def ^:dynamic *remote-javadocs*
  (ref (sorted-map
        "java." *core-java-api*
        "javax." *core-java-api*

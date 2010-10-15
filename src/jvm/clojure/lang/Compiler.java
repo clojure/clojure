@@ -86,6 +86,7 @@ static final String COMPILE_STUB_PREFIX = "compile__stub";
 
 static final Keyword protocolKey = Keyword.intern(null, "protocol");
 static final Keyword onKey = Keyword.intern(null, "on");
+static Keyword dynamicKey = Keyword.intern("dynamic");
 
 static final Symbol NS = Symbol.intern("ns");
 static final Symbol IN_NS = Symbol.intern("in-ns");
@@ -174,58 +175,58 @@ static
 
 
 //symbol->localbinding
-static final public Var LOCAL_ENV = Var.create(null);
+static final public Var LOCAL_ENV = Var.create(null).setDynamic();
 
 //vector<localbinding>
-static final public Var LOOP_LOCALS = Var.create();
+static final public Var LOOP_LOCALS = Var.create().setDynamic();
 
 //Label
-static final public Var LOOP_LABEL = Var.create();
+static final public Var LOOP_LABEL = Var.create().setDynamic();
 
 //vector<object>
-static final public Var CONSTANTS = Var.create();
+static final public Var CONSTANTS = Var.create().setDynamic();
 
 //IdentityHashMap
-static final public Var CONSTANT_IDS = Var.create();
+static final public Var CONSTANT_IDS = Var.create().setDynamic();
 
 //vector<keyword>
-static final public Var KEYWORD_CALLSITES = Var.create();
+static final public Var KEYWORD_CALLSITES = Var.create().setDynamic();
 
 //vector<var>
-static final public Var PROTOCOL_CALLSITES = Var.create();
+static final public Var PROTOCOL_CALLSITES = Var.create().setDynamic();
 
 //vector<var>
-static final public Var VAR_CALLSITES = Var.create();
+static final public Var VAR_CALLSITES = Var.create().setDynamic();
 
 //keyword->constid
-static final public Var KEYWORDS = Var.create();
+static final public Var KEYWORDS = Var.create().setDynamic();
 
 //var->constid
-static final public Var VARS = Var.create();
+static final public Var VARS = Var.create().setDynamic();
 
 //FnFrame
-static final public Var METHOD = Var.create(null);
+static final public Var METHOD = Var.create(null).setDynamic();
 
 //null or not
-static final public Var IN_CATCH_FINALLY = Var.create(null);
+static final public Var IN_CATCH_FINALLY = Var.create(null).setDynamic();
 
 //DynamicClassLoader
-static final public Var LOADER = Var.create();
+static final public Var LOADER = Var.create().setDynamic();
 
 //String
 static final public Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                            Symbol.intern("*source-path*"), "NO_SOURCE_FILE");
+                                            Symbol.intern("*source-path*"), "NO_SOURCE_FILE").setDynamic();
 
 //String
 static final public Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                 Symbol.intern("*file*"), "NO_SOURCE_PATH");
+                                                 Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
 //String
 static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                  Symbol.intern("*compile-path*"), null);
+                                                  Symbol.intern("*compile-path*"), null).setDynamic();
 //boolean
 static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                   Symbol.intern("*compile-files*"), Boolean.FALSE);
+                                                   Symbol.intern("*compile-files*"), Boolean.FALSE).setDynamic();
 
 static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                             Symbol.intern("instance?"));
@@ -234,31 +235,31 @@ static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symb
                                             Symbol.intern("add-annotations"));
 
 //Integer
-static final public Var LINE = Var.create(0);
+static final public Var LINE = Var.create(0).setDynamic();
 
 //Integer
-static final public Var LINE_BEFORE = Var.create(0);
-static final public Var LINE_AFTER = Var.create(0);
+static final public Var LINE_BEFORE = Var.create(0).setDynamic();
+static final public Var LINE_AFTER = Var.create(0).setDynamic();
 
 //Integer
-static final public Var NEXT_LOCAL_NUM = Var.create(0);
+static final public Var NEXT_LOCAL_NUM = Var.create(0).setDynamic();
 
 //Integer
-static final public Var RET_LOCAL_NUM = Var.create();
+static final public Var RET_LOCAL_NUM = Var.create().setDynamic();
 
 
-static final public Var COMPILE_STUB_SYM = Var.create(null);
-static final public Var COMPILE_STUB_CLASS = Var.create(null);
+static final public Var COMPILE_STUB_SYM = Var.create(null).setDynamic();
+static final public Var COMPILE_STUB_CLASS = Var.create(null).setDynamic();
 
 
 //PathNode chain
-static final public Var CLEAR_PATH = Var.create(null);
+static final public Var CLEAR_PATH = Var.create(null).setDynamic();
 
 //tail of PathNode chain
-static final public Var CLEAR_ROOT = Var.create(null);
+static final public Var CLEAR_ROOT = Var.create(null).setDynamic();
 
 //LocalBinding -> Set<LocalBindingExpr>
-static final public Var CLEAR_SITES = Var.create(null);
+static final public Var CLEAR_SITES = Var.create(null).setDynamic();
 
     public enum C{
 	STATEMENT,  //value ignored
@@ -326,19 +327,22 @@ static class DefExpr implements Expr{
 	public final Expr init;
 	public final Expr meta;
 	public final boolean initProvided;
+	public final boolean isDynamic;
 	public final String source;
 	public final int line;
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
 	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
+	final static Method setDynamicMethod = Method.getMethod("clojure.lang.Var setDynamic(boolean)");
 	final static Method symintern = Method.getMethod("clojure.lang.Symbol intern(String, String)");
 
-	public DefExpr(String source, int line, Var var, Expr init, Expr meta, boolean initProvided){
+	public DefExpr(String source, int line, Var var, Expr init, Expr meta, boolean initProvided, boolean isDynamic){
 		this.source = source;
 		this.line = line;
 		this.var = var;
 		this.init = init;
 		this.meta = meta;
+		this.isDynamic = isDynamic;
 		this.initProvided = initProvided;
 	}
 
@@ -370,7 +374,7 @@ static class DefExpr implements Expr{
                 if (initProvided || true)//includesExplicitMetadata((MapExpr) meta))
 				    var.setMeta((IPersistentMap) meta.eval());
 				}
-			return var;
+			return var.setDynamic(isDynamic);
 			}
 		catch(Throwable e)
 			{
@@ -383,6 +387,11 @@ static class DefExpr implements Expr{
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		objx.emitVar(gen, var);
+		if(isDynamic)
+			{
+			gen.push(isDynamic);
+			gen.invokeVirtual(VAR_TYPE, setDynamicMethod);
+			}
 		if(meta != null)
 			{
             if (initProvided || true)//includesExplicitMetadata((MapExpr) meta))
@@ -440,6 +449,14 @@ static class DefExpr implements Expr{
 					throw new Exception("Can't create defs outside of current ns");
 				}
 			IPersistentMap mm = sym.meta();
+			boolean isDynamic = RT.booleanCast(RT.get(mm,dynamicKey));
+			if(!isDynamic && sym.name.startsWith("*") && sym.name.endsWith("*") && sym.name.length() > 1)
+				{
+				RT.errPrintWriter().format("Var %s not marked :dynamic true, setting to :dynamic. You should fix this before next release!\n",
+				                           sym);
+				isDynamic = true;
+				mm = (IPersistentMap) RT.assoc(mm,dynamicKey, RT.T);
+				}
 			if(RT.booleanCast(RT.get(mm, staticKey)))
 				{
 				IPersistentMap vm = v.meta();
@@ -456,7 +473,7 @@ static class DefExpr implements Expr{
 			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr((String) SOURCE.deref(), (Integer) LINE.deref(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
-			                   meta, RT.count(form) == 3);
+			                   meta, RT.count(form) == 3, isDynamic);
 		}
 	}
 }
@@ -3117,7 +3134,6 @@ static class InvokeExpr implements Expr{
 	public java.lang.reflect.Method onMethod;
 	static Keyword onKey = Keyword.intern("on");
 	static Keyword methodMapKey = Keyword.intern("method-map");
-	static Keyword dynamicKey = Keyword.intern("dynamic");
 
 	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args) throws Exception{
 		this.source = source;
@@ -6479,7 +6495,7 @@ static public void writeClassFile(String internalName, byte[] bytecode) throws E
 
 public static void pushNS(){
 	Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
-	                                                           Symbol.intern("*ns*")), null));
+	                                                           Symbol.intern("*ns*")).setDynamic(), null));
 }
 
 public static ILookupThunk getLookupThunk(Object target, Keyword k){

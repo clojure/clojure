@@ -58,9 +58,9 @@ static final Symbol CLOJURE_SLASH = Symbol.intern("clojure.core","/");
 //static Pattern classNamePat = Pattern.compile("([a-zA-Z_][\\w\\.]*)\\.");
 
 //symbol->gensymbol
-static Var GENSYM_ENV = Var.create(null);
+static Var GENSYM_ENV = Var.create(null).setDynamic();
 //sorted-map num->gensymbol
-static Var ARG_ENV = Var.create(null);
+static Var ARG_ENV = Var.create(null).setDynamic();
 
     static
 	{

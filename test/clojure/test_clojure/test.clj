@@ -89,7 +89,7 @@
 ;; compares the event with the message, then calls the original
 ;; 'report' with modified arguments.
 
-(declare original-report)
+(declare ^:dynamic original-report)
 
 (defn custom-report [data]
   (let [event (:type data)

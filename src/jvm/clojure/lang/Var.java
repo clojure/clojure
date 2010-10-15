@@ -47,12 +47,14 @@ static class Frame{
 	}
 }
 
-static ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
+static final ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
 
 	protected Frame initialValue(){
 		return new Frame();
 	}
 };
+
+static public volatile int rev = 0;
 
 static Keyword privateKey = Keyword.intern(null, "private");
 static IPersistentMap privateMeta = new PersistentArrayMap(new Object[]{privateKey, Boolean.TRUE});
@@ -62,6 +64,7 @@ static Keyword nsKey = Keyword.intern(null, "ns");
 //static Keyword tagKey = Keyword.intern(null, "tag");
 
 volatile Object root;
+volatile boolean dynamic = false;
 transient final AtomicBoolean threadBound;
 public final Symbol sym;
 public final Namespace ns;
@@ -77,6 +80,20 @@ public static Object getThreadBindingFrame(){
 
 public static void resetThreadBindingFrame(Object frame){
 	dvals.set((Frame) frame);
+}
+
+public Var setDynamic(){
+	this.dynamic = true;
+	return this;
+}
+
+public Var setDynamic(boolean b){
+	this.dynamic = b;
+	return this;
+}
+
+public final boolean isDynamic(){
+	return dynamic;
 }
 
 public static Var intern(Namespace ns, Symbol sym, Object root){
@@ -257,6 +274,7 @@ synchronized public void bindRoot(Object root){
 	validate(getValidator(), root);
 	Object oldroot = hasRoot()?this.root:null;
 	this.root = root;
+	++rev;
     try
         {
         alterMeta(dissoc, RT.list(macroKey));
@@ -272,11 +290,13 @@ synchronized void swapRoot(Object root){
 	validate(getValidator(), root);
 	Object oldroot = hasRoot()?this.root:null;
 	this.root = root;
+	++rev;
     notifyWatches(oldroot,root);
 }
 
 synchronized public void unbindRoot(){
 	this.root = dvals;
+	++rev;
 }
 
 synchronized public void commuteRoot(IFn fn) throws Exception{
@@ -284,6 +304,7 @@ synchronized public void commuteRoot(IFn fn) throws Exception{
 	validate(getValidator(), newRoot);
 	Object oldroot = getRoot();
 	this.root = newRoot;
+	++rev;
     notifyWatches(oldroot,newRoot);
 }
 
@@ -292,6 +313,7 @@ synchronized public Object alterRoot(IFn fn, ISeq args) throws Exception{
 	validate(getValidator(), newRoot);
 	Object oldroot = getRoot();
 	this.root = newRoot;
+	++rev;
     notifyWatches(oldroot,newRoot);
 	return newRoot;
 }
@@ -303,6 +325,8 @@ public static void pushThreadBindings(Associative bindings){
 		{
 		IMapEntry e = (IMapEntry) bs.first();
 		Var v = (Var) e.key();
+		if(!v.dynamic)
+			throw new IllegalStateException(String.format("Can't dynamically bind non-dynamic var: %s/%s", v.ns, v.sym));
 		v.validate(v.getValidator(), e.val());
 		v.threadBound.set(true);
 		bmap = bmap.assoc(v, new TBox(Thread.currentThread(), e.val()));

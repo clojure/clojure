@@ -17,7 +17,7 @@
   (-> "os.name" System/getProperty .toLowerCase
     (.startsWith "mac os x")))
 
-(def *open-url-script* (when (macosx?) "/usr/bin/open"))
+(def ^:dynamic *open-url-script* (when (macosx?) "/usr/bin/open"))
 
 (defn- open-url-in-browser
   "Opens url (a string) in the default system web browser.  May not

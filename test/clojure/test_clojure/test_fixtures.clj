@@ -14,9 +14,9 @@
 (ns clojure.test-clojure.test-fixtures
   (:use clojure.test))
 
-(declare *a* *b* *c* *d*)
+(declare ^:dynamic *a* ^:dynamic *b* ^:dynamic *c* ^:dynamic *d*)
 
-(def *n* 0)
+(def ^:dynamic *n* 0)
 
 (defn fixture-a [f]
   (binding [*a* 3] (f)))

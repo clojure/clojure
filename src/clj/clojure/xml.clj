@@ -12,10 +12,10 @@
   (:import (org.xml.sax ContentHandler Attributes SAXException)
            (javax.xml.parsers SAXParser SAXParserFactory)))
 
-(def *stack*)
-(def *current*)
-(def *state*) ; :element :chars :between
-(def *sb*)
+(def ^:dynamic *stack*)
+(def ^:dynamic *current*)
+(def ^:dynamic *state*) ; :element :chars :between
+(def ^:dynamic *sb*)
 
 (defstruct element :tag :attrs :content)
 

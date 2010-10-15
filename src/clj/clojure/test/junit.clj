@@ -45,8 +45,8 @@
 (defn- escape-xml [text]
   (apply str (map #(escape-xml-map % %) text)))
 
-(def *var-context*)
-(def *depth*)
+(def ^:dynamic *var-context*)
+(def ^:dynamic *depth*)
 
 (defn indent
   []
