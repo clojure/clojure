@@ -44,5 +44,6 @@ complete documentation on the the clojure web site on github.",
 (load "pprint/pprint_base")
 (load "pprint/cl_format")
 (load "pprint/dispatch")
+(load "pprint/print_table")
 
 nil
