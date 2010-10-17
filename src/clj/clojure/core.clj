@@ -3122,6 +3122,7 @@
    :static true}
   [x] (cond
        (instance? BigInteger x) x
+       (instance? clojure.lang.BigInt x) (.toBigInteger ^clojure.lang.BigInt x)
        (decimal? x) (.toBigInteger ^BigDecimal x)
        (ratio? x) (.bigIntegerValue ^clojure.lang.Ratio x)
        (number? x) (BigInteger/valueOf (long x))
