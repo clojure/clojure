@@ -3333,14 +3333,14 @@ static class InvokeExpr implements Expr{
 				}
 			}
 
-		if(fexpr instanceof VarExpr && context != C.EVAL)
-			{
-			Var v = ((VarExpr)fexpr).var;
-			if(RT.booleanCast(RT.get(RT.meta(v),staticKey)))
-				{
-				return StaticInvokeExpr.parse(v, RT.next(form), tagOf(form));
-				}
-			}
+//		if(fexpr instanceof VarExpr && context != C.EVAL)
+//			{
+//			Var v = ((VarExpr)fexpr).var;
+//			if(RT.booleanCast(RT.get(RT.meta(v),staticKey)))
+//				{
+//				return StaticInvokeExpr.parse(v, RT.next(form), tagOf(form));
+//				}
+//			}
 		
 		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && KEYWORD_CALLSITES.isBound())
 			{
@@ -3457,7 +3457,7 @@ static public class FnExpr extends ObjExpr{
 				{
 				Symbol nm = (Symbol) RT.second(form);
 				fn.thisName = nm.name;
-				fn.isStatic = RT.booleanCast(RT.get(nm.meta(), staticKey));
+				fn.isStatic = false; //RT.booleanCast(RT.get(nm.meta(), staticKey));
 				form = RT.cons(FN, RT.next(RT.next(form)));
 				}
 
@@ -4617,7 +4617,11 @@ public static class FnMethod extends ObjMethod{
 					{
 					Class pc = tagClass(tagOf(p));
 					if(pc.isPrimitive() && !isStatic)
-						throw new Exception("Non-static fn can't have primitive parameter: " + p);
+						{
+						pc = Object.class;
+						p = (Symbol) ((IObj) p).withMeta((IPersistentMap) RT.assoc(RT.meta(p), RT.TAG_KEY, null));
+						}
+//						throw new Exception("Non-static fn can't have primitive parameter: " + p);
 					if(pc.isPrimitive() && !(pc == double.class || pc == long.class))
 						throw new IllegalArgumentException("Only long and double primitives are supported: " + p);
 
