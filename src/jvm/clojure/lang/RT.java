@@ -950,9 +950,10 @@ static public int intCast(float x){
 }
 
 static public int intCast(long x){
-	if(x < Integer.MIN_VALUE || x > Integer.MAX_VALUE)
+	int i = (int) x;
+	if(i != x)
 		throw new IllegalArgumentException("Value out of range for int: " + x);
-	return (int) x;
+	return i;
 }
 
 static public int intCast(double x){
