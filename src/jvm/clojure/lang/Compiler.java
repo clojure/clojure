@@ -195,7 +195,7 @@ static final public Var KEYWORD_CALLSITES = Var.create().setDynamic();
 //vector<var>
 static final public Var PROTOCOL_CALLSITES = Var.create().setDynamic();
 
-//vector<var>
+//set<var>
 static final public Var VAR_CALLSITES = Var.create().setDynamic();
 
 //keyword->constid
@@ -532,8 +532,9 @@ public static class VarExpr implements Expr, AssignableExpr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		objx.emitVar(gen, var);
-		gen.invokeVirtual(VAR_TYPE, getMethod);
+//		objx.emitVar(gen, var);
+//		gen.invokeVirtual(VAR_TYPE, getMethod);
+		objx.emitVarValue(gen,var);
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -3170,15 +3171,16 @@ static class InvokeExpr implements Expr{
 					}
 				}
 			else if(pvar == null && VAR_CALLSITES.isBound()
-			        && fvar.ns.name.name.startsWith("clojure")
+			     //   && fvar.ns.name.name.startsWith("clojure")
 					&& !RT.booleanCast(RT.get(RT.meta(fvar),dynamicKey))
 //			        && !fvar.sym.name.equals("report")
 //			        && fvar.isBound() && fvar.get() instanceof IFn
 					)
 				{
 				//todo - more specific criteria for binding these
-//				this.isDirect = true;
-//				this.siteIndex = registerVarCallsite(((VarExpr) fexpr).var);
+				this.isDirect = true;
+//				this.siteIndex =
+						registerVarCallsite(((VarExpr) fexpr).var);
 				}
 			}
 		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
@@ -3210,20 +3212,22 @@ static class InvokeExpr implements Expr{
 			}
 		else if(isDirect)
 			{
-			Label callLabel = gen.newLabel();
-
-			gen.getStatic(objx.objtype, objx.varCallsiteName(siteIndex), IFN_TYPE);
-			gen.dup();
-			gen.ifNonNull(callLabel);
-
-			gen.pop();
 			fexpr.emit(C.EXPRESSION, objx, gen);
-			gen.checkCast(IFN_TYPE);
-//			gen.dup();
-//			gen.putStatic(objx.objtype, objx.varCallsiteName(siteIndex), IFN_TYPE);
-
-			gen.mark(callLabel);
 			emitArgsAndCall(0, context,objx,gen);
+//			Label callLabel = gen.newLabel();
+//
+//			gen.getStatic(objx.objtype, objx.varCallsiteName(siteIndex), IFN_TYPE);
+//			gen.dup();
+//			gen.ifNonNull(callLabel);
+//
+//			gen.pop();
+//			fexpr.emit(C.EXPRESSION, objx, gen);
+//			gen.checkCast(IFN_TYPE);
+////			gen.dup();
+////			gen.putStatic(objx.objtype, objx.varCallsiteName(siteIndex), IFN_TYPE);
+//
+//			gen.mark(callLabel);
+//			emitArgsAndCall(0, context,objx,gen);
 			}
 		else
 			{
@@ -3449,7 +3453,7 @@ static public class FnExpr extends ObjExpr{
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,
 					       PROTOCOL_CALLSITES, PersistentVector.EMPTY,
-					       VAR_CALLSITES, PersistentVector.EMPTY
+					       VAR_CALLSITES, emptyVarCallSites()
 					));
 
 			//arglist might be preceded by symbol naming this fn
@@ -3507,7 +3511,7 @@ static public class FnExpr extends ObjExpr{
 			fn.constants = (PersistentVector) CONSTANTS.deref();
 			fn.keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
 			fn.protocolCallsites = (IPersistentVector) PROTOCOL_CALLSITES.deref();
-			fn.varCallsites = (IPersistentVector) VAR_CALLSITES.deref();
+			fn.varCallsites = (IPersistentSet) VAR_CALLSITES.deref();
 
 			fn.constantsID = RT.nextID();
 //			DynamicClassLoader loader = (DynamicClassLoader) LOADER.get();
@@ -3569,7 +3573,7 @@ static public class ObjExpr implements Expr{
 
 	IPersistentVector keywordCallsites;
 	IPersistentVector protocolCallsites;
-	IPersistentVector varCallsites;
+	IPersistentSet varCallsites;
 	boolean onceOnly = false;
 
 	Object src;
@@ -3726,11 +3730,11 @@ static public class ObjExpr implements Expr{
 			              null, null);
 			}
 
-		for(int i=0;i<varCallsites.count();i++)
-			{
-			cv.visitField(ACC_PRIVATE + ACC_STATIC + ACC_FINAL
-					, varCallsiteName(i), IFN_TYPE.getDescriptor(), null, null);
-			}
+//		for(int i=0;i<varCallsites.count();i++)
+//			{
+//			cv.visitField(ACC_PRIVATE + ACC_STATIC + ACC_FINAL
+//					, varCallsiteName(i), IFN_TYPE.getDescriptor(), null, null);
+//			}
 
 		//static init for constants, keywords and vars
 		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
@@ -3749,6 +3753,7 @@ static public class ObjExpr implements Expr{
 		if(keywordCallsites.count() > 0)
 			emitKeywordCallsites(clinitgen);
 
+		/*
 		for(int i=0;i<varCallsites.count();i++)
 			{
 			Label skipLabel = clinitgen.newLabel();
@@ -3774,7 +3779,7 @@ static public class ObjExpr implements Expr{
 
 			clinitgen.mark(endLabel);
 			}
-
+        */
 		clinitgen.returnValue();
 
 		clinitgen.endMethod();
@@ -3823,6 +3828,64 @@ static public class ObjExpr implements Expr{
 			cv.visitField(ACC_PRIVATE, cachedProtoImplName(i), IFN_TYPE.getDescriptor(), null, null);			
 			}
 
+		//instance fields for cached vars
+		for(ISeq es = RT.seq(vars);es != null;es = es.next())
+			{
+			Map.Entry e = (Map.Entry)es.first();
+			Var v = (Var)e.getKey();
+			Integer i = (Integer) e.getValue();
+			if(!v.isDynamic())
+				cv.visitField(ACC_PRIVATE, cachedVarName(i),
+			              varCallsites.contains(v)?IFN_TYPE.getDescriptor():OBJECT_TYPE.getDescriptor(), null, null);
+			}
+
+		//track var rev if we use any vars
+		if(vars.count() > 0)
+			{
+			cv.visitField(ACC_PRIVATE, "__varrev__", Type.INT_TYPE.getDescriptor(), null, null);
+
+			final Method getMethod = Method.getMethod("Object getRawRoot()");
+			Method meth = new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{});
+
+			GeneratorAdapter gen = new GeneratorAdapter(ACC_PRIVATE,
+												meth,
+												null,
+												null,
+												cv);
+			gen.visitCode();
+			Label repeat = new Label();
+
+
+			gen.visitLabel(repeat);
+			gen.loadThis();
+			gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+			gen.putField(objtype, "__varrev__", Type.INT_TYPE);
+
+			for(ISeq es = RT.seq(vars);es != null;es = es.next())
+				{
+				Map.Entry e = (Map.Entry)es.first();
+				Var v = (Var)e.getKey();
+				Integer i = (Integer) e.getValue();
+				if(!v.isDynamic())
+					{
+					gen.loadThis();
+					emitConstant(gen,i);
+					gen.invokeVirtual(VAR_TYPE, getMethod);
+					Type ft = varCallsites.contains(v)?IFN_TYPE:OBJECT_TYPE;
+					gen.checkCast(ft);
+					gen.putField(objtype(), cachedVarName(i), ft);
+					}
+				}
+
+			gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+			gen.loadThis();
+			gen.getField(objtype, "__varrev__", Type.INT_TYPE);
+			gen.ifICmp(GeneratorAdapter.NE,repeat);
+
+			gen.returnValue();
+			gen.endMethod();
+			}
+
 		//ctor that takes closed-overs and inits base + fields
 		Method m = new Method("<init>", Type.VOID_TYPE, ctorTypes());
 		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
@@ -3845,6 +3908,16 @@ static public class ObjExpr implements Expr{
 //			}
 //		else
 //			ctorgen.invokeConstructor(aFnType, voidctor);
+
+		if(vars.count() > 0)
+			{
+			ctorgen.loadThis();
+			ctorgen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+			ctorgen.push(-1);
+			ctorgen.visitInsn(Opcodes.IADD);
+			ctorgen.putField(objtype, "__varrev__", Type.INT_TYPE);
+			}
+
 		if(!isDeftype())
 			{
 			ctorgen.loadThis();
@@ -4447,6 +4520,23 @@ static public class ObjExpr implements Expr{
 		//gen.getStatic(fntype, munge(var.sym.toString()), VAR_TYPE);
 	}
 
+	final static Method varGetMethod = Method.getMethod("Object get()");
+
+	public void emitVarValue(GeneratorAdapter gen, Var v){
+		Integer i = (Integer) vars.valAt(v);
+		if(varCallsites != null && !v.isDynamic())
+			{
+			Type ft = varCallsites.contains(v)?IFN_TYPE:OBJECT_TYPE;
+			gen.loadThis();
+			gen.getField(objtype(), cachedVarName(i), ft);
+			}
+		else
+			{
+			emitConstant(gen, i);
+			gen.invokeVirtual(VAR_TYPE, varGetMethod);
+			}
+	}
+
 	public void emitKeyword(GeneratorAdapter gen, Keyword k){
 		Integer i = (Integer) keywords.valAt(k);
 		emitConstant(gen, i);
@@ -4476,6 +4566,10 @@ static public class ObjExpr implements Expr{
 
 	String cachedClassName(int n){
 		return "__cached_class__" + n;
+	}
+
+	String cachedVarName(int n){
+		return "__cached_var__" + n;
 	}
 
 	String cachedProtoFnName(int n){
@@ -4753,10 +4847,22 @@ public static class FnMethod extends ObjMethod{
 		                                            cv);
 		gen.visitCode();
 		Label loopLabel = gen.mark();
+		Label bodyLabel = new Label();
 		gen.visitLineNumber(line, loopLabel);
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
+			if(fn.vars().count() > 0)
+				{
+				gen.loadThis();
+				gen.getField(fn.objtype, "__varrev__", Type.INT_TYPE);
+				gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+				gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
+				gen.loadThis();
+				gen.invokeVirtual(fn.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
+				}
+
+			gen.visitLabel(bodyLabel);
 			body.emit(C.RETURN, fn, gen);
 			Label end = gen.mark();
 
@@ -4946,10 +5052,22 @@ abstract public static class ObjMethod{
 		                                            cv);
 		gen.visitCode();
 		Label loopLabel = gen.mark();
+		Label bodyLabel = new Label();
 		gen.visitLineNumber(line, loopLabel);
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
+			if(fn.vars().count() > 0)
+				{
+				gen.loadThis();
+				gen.getField(fn.objtype, "__varrev__", Type.INT_TYPE);
+				gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+				gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
+				gen.loadThis();
+				gen.invokeVirtual(fn.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
+				}
+
+			gen.visitLabel(bodyLabel);
 			body.emit(C.RETURN, fn, gen);
 			Label end = gen.mark();
 			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
@@ -6102,15 +6220,15 @@ private static int registerProtocolCallsite(Var v){
 	return protocolCallsites.count()-1;
 }
 
-private static int registerVarCallsite(Var v){
+private static void registerVarCallsite(Var v){
 	if(!VAR_CALLSITES.isBound())
 		throw new IllegalAccessError("VAR_CALLSITES is not bound");
 
-	IPersistentVector varCallsites = (IPersistentVector) VAR_CALLSITES.deref();
+	IPersistentCollection varCallsites = (IPersistentCollection) VAR_CALLSITES.deref();
 
 	varCallsites = varCallsites.cons(v);
 	VAR_CALLSITES.set(varCallsites);
-	return varCallsites.count()-1;
+//	return varCallsites.count()-1;
 }
 
 static ISeq fwdPath(PathNode p1){
@@ -6821,7 +6939,7 @@ static public class NewInstanceExpr extends ObjExpr{
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,
 					       PROTOCOL_CALLSITES, PersistentVector.EMPTY,
-					       VAR_CALLSITES, PersistentVector.EMPTY
+					       VAR_CALLSITES, emptyVarCallSites()
 							));
 			if(ret.isDeftype())
 				{
@@ -6848,7 +6966,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			ret.constantsID = RT.nextID();
 			ret.keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
 			ret.protocolCallsites = (IPersistentVector) PROTOCOL_CALLSITES.deref();
-			ret.varCallsites = (IPersistentVector) VAR_CALLSITES.deref();
+			ret.varCallsites = (IPersistentSet) VAR_CALLSITES.deref();
 			}
 		finally
 			{
@@ -7272,10 +7390,23 @@ public static class NewInstanceMethod extends ObjMethod{
 			}
 		gen.visitCode();
 		Label loopLabel = gen.mark();
+		Label bodyLabel = new Label();
+		
 		gen.visitLineNumber(line, loopLabel);
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
+			if(obj.vars().count() > 0)
+				{
+				gen.loadThis();
+				gen.getField(obj.objtype, "__varrev__", Type.INT_TYPE);
+				gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+				gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
+				gen.loadThis();
+				gen.invokeVirtual(obj.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
+				}
+
+			gen.visitLabel(bodyLabel);
 			emitBody(objx, gen, retClass, body);
 			Label end = gen.mark();
 			gen.visitLocalVariable("this", obj.objtype.getDescriptor(), null, loopLabel, end, 0);
@@ -7510,5 +7641,7 @@ public static class CaseExpr extends UntypedExpr{
 		}
 	}
 }
+
+static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;}
 
 }

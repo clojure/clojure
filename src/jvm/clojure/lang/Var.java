@@ -28,6 +28,22 @@ public TBox(Thread t, Object val){
 }
 }
 
+static public class Unbound extends AFn{
+	final public Var v;
+
+	public Unbound(Var v){
+		this.v = v;
+	}
+
+	public String toString(){
+		return "Unbound: " + v;
+	}
+
+	public Object throwArity(int n){
+		throw new IllegalStateException("Attempting to call unbound fn: " + v);
+	}
+}
+
 static class Frame{
 	//Var->TBox
 	Associative bindings;
@@ -159,6 +175,7 @@ Var(Namespace ns, Symbol sym){
 Var(Namespace ns, Symbol sym, Object root){
 	this(ns, sym);
 	this.root = root;
+	++rev;
 }
 
 public boolean isBound(){
@@ -247,7 +264,9 @@ public Object getRoot(){
 }
 
 public Object getRawRoot(){
+	if(hasRoot())
 		return root;
+	return new Unbound(this);
 }
 
 public Object getTag(){

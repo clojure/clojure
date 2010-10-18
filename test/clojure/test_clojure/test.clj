@@ -78,10 +78,10 @@
 ;; still have to declare the symbol before testing unbound symbols
 (declare does-not-exist)
 
-(deftest can-test-unbound-symbol
+#_(deftest can-test-unbound-symbol
   (is (= nil does-not-exist) "Should error"))
 
-(deftest can-test-unbound-function
+#_(deftest can-test-unbound-function
   (is (does-not-exist) "Should error"))
 
 
