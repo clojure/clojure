@@ -436,7 +436,6 @@ static public Object applyToHelper(IFn ifn, ISeq arglist) throws Exception{
 public Object throwArity(int n){
 	String name = getClass().getSimpleName();
 	int suffix = name.lastIndexOf("__");
-	throw new IllegalArgumentException("Wrong number of args (" + n + ") passed to: "
-	                                   + (suffix == -1 ? name : name.substring(0, suffix)).replace('_', '-'));
+	throw new ArityException(n, (suffix == -1 ? name : name.substring(0, suffix)).replace('_', '-'));
 }
 }

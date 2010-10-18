@@ -6027,7 +6027,15 @@ public static Object macroexpand1(Object x) throws Exception{
 		Var v = isMacro(op);
 		if(v != null)
 			{
-			return v.applyTo(RT.cons(form,RT.cons(LOCAL_ENV.get(),form.next())));
+				try
+					{
+						return v.applyTo(RT.cons(form,RT.cons(LOCAL_ENV.get(),form.next())));
+					}
+				catch(ArityException e)
+					{
+						// hide the 2 extra params for a macro
+						throw new ArityException(e.actual - 2, e.name, e);
+					}
 			}
 		else
 			{
