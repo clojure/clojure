@@ -3256,12 +3256,13 @@ static class InvokeExpr implements Expr{
 			gen.ifZCmp(GeneratorAdapter.NE, onLabel);
 			}
 
-		gen.mark(callLabel); //target
 		gen.dup(); //target, target
 		gen.invokeStatic(UTIL_TYPE,Method.getMethod("Class classOf(Object)")); //target,class
 		gen.loadThis();
 		gen.swap();
 		gen.putField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target
+
+		gen.mark(callLabel); //target
 		objx.emitVar(gen, v);
 		gen.invokeVirtual(VAR_TYPE, Method.getMethod("Object getRawRoot()")); //target, proto-fn
 		gen.swap();
