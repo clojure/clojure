@@ -3827,27 +3827,27 @@ static public class ObjExpr implements Expr{
 			cv.visitField(ACC_PRIVATE, cachedProtoFnName(i), AFUNCTION_TYPE.getDescriptor(), null, null);
 			cv.visitField(ACC_PRIVATE, cachedProtoImplName(i), IFN_TYPE.getDescriptor(), null, null);			
 			}
-
-		//instance fields for cached vars
+  //*
+		//static fields for cached vars
 		for(ISeq es = RT.seq(vars);es != null;es = es.next())
 			{
 			Map.Entry e = (Map.Entry)es.first();
 			Var v = (Var)e.getKey();
 			Integer i = (Integer) e.getValue();
 			if(!v.isDynamic())
-				cv.visitField(ACC_PRIVATE, cachedVarName(i),
+				cv.visitField(ACC_PRIVATE + ACC_STATIC, cachedVarName(i),
 			              varCallsites.contains(v)?IFN_TYPE.getDescriptor():OBJECT_TYPE.getDescriptor(), null, null);
 			}
 
 		//track var rev if we use any vars
 		if(vars.count() > 0)
 			{
-			cv.visitField(ACC_PRIVATE, "__varrev__", Type.INT_TYPE.getDescriptor(), null, null);
+			cv.visitField(ACC_PRIVATE + ACC_STATIC, "__varrev__", Type.INT_TYPE.getDescriptor(), null, null);
 
-			final Method getMethod = Method.getMethod("Object getRawRoot()");
+			final Method getMethod = Method.getMethod("Object getRawRootOrUnbound()");
 			Method meth = new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{});
 
-			GeneratorAdapter gen = new GeneratorAdapter(ACC_PRIVATE,
+			GeneratorAdapter gen = new GeneratorAdapter(ACC_PRIVATE + ACC_STATIC,
 												meth,
 												null,
 												null,
@@ -3857,9 +3857,9 @@ static public class ObjExpr implements Expr{
 
 
 			gen.visitLabel(repeat);
-			gen.loadThis();
+			//gen.loadThis();
 			gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
-			gen.putField(objtype, "__varrev__", Type.INT_TYPE);
+			gen.putStatic(objtype, "__varrev__", Type.INT_TYPE);
 
 			for(ISeq es = RT.seq(vars);es != null;es = es.next())
 				{
@@ -3868,24 +3868,24 @@ static public class ObjExpr implements Expr{
 				Integer i = (Integer) e.getValue();
 				if(!v.isDynamic())
 					{
-					gen.loadThis();
+					//gen.loadThis();
 					emitConstant(gen,i);
 					gen.invokeVirtual(VAR_TYPE, getMethod);
 					Type ft = varCallsites.contains(v)?IFN_TYPE:OBJECT_TYPE;
 					gen.checkCast(ft);
-					gen.putField(objtype(), cachedVarName(i), ft);
+					gen.putStatic(objtype(), cachedVarName(i), ft);
 					}
 				}
 
 			gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
-			gen.loadThis();
-			gen.getField(objtype, "__varrev__", Type.INT_TYPE);
+			//gen.loadThis();
+			gen.getStatic(objtype, "__varrev__", Type.INT_TYPE);
 			gen.ifICmp(GeneratorAdapter.NE,repeat);
 
 			gen.returnValue();
 			gen.endMethod();
 			}
-
+    //*/
 		//ctor that takes closed-overs and inits base + fields
 		Method m = new Method("<init>", Type.VOID_TYPE, ctorTypes());
 		GeneratorAdapter ctorgen = new GeneratorAdapter(ACC_PUBLIC,
@@ -3909,14 +3909,14 @@ static public class ObjExpr implements Expr{
 //		else
 //			ctorgen.invokeConstructor(aFnType, voidctor);
 
-		if(vars.count() > 0)
-			{
-			ctorgen.loadThis();
-			ctorgen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
-			ctorgen.push(-1);
-			ctorgen.visitInsn(Opcodes.IADD);
-			ctorgen.putField(objtype, "__varrev__", Type.INT_TYPE);
-			}
+//		if(vars.count() > 0)
+//			{
+//			ctorgen.loadThis();
+//			ctorgen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+//			ctorgen.push(-1);
+//			ctorgen.visitInsn(Opcodes.IADD);
+//			ctorgen.putField(objtype, "__varrev__", Type.INT_TYPE);
+//			}
 
 		if(!isDeftype())
 			{
@@ -4527,8 +4527,8 @@ static public class ObjExpr implements Expr{
 		if(varCallsites != null && !v.isDynamic())
 			{
 			Type ft = varCallsites.contains(v)?IFN_TYPE:OBJECT_TYPE;
-			gen.loadThis();
-			gen.getField(objtype(), cachedVarName(i), ft);
+			//gen.loadThis();
+			gen.getStatic(objtype(), cachedVarName(i), ft);
 			}
 		else
 			{
@@ -5038,12 +5038,12 @@ abstract public static class ObjMethod{
 		if(fn.vars().count() > 0)
 			{
 			Label bodyLabel = new Label();
-			gen.loadThis();
-			gen.getField(fn.objtype, "__varrev__", Type.INT_TYPE);
+			//gen.loadThis();
+			gen.getStatic(fn.objtype, "__varrev__", Type.INT_TYPE);
 			gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
 			gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
-			gen.loadThis();
-			gen.invokeVirtual(fn.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
+			//gen.loadThis();
+			gen.invokeStatic(fn.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
 			gen.visitLabel(bodyLabel);
 			}
 	}

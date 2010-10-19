@@ -264,6 +264,10 @@ public Object getRoot(){
 }
 
 public Object getRawRoot(){
+		return root;
+}
+
+public Object getRawRootOrUnbound(){
 	if(hasRoot())
 		return root;
 	return new Unbound(this);
