@@ -4846,23 +4846,14 @@ public static class FnMethod extends ObjMethod{
 		                                            EXCEPTION_TYPES,
 		                                            cv);
 		gen.visitCode();
+		emitVarReloadPreamble(fn, gen);
+
 		Label loopLabel = gen.mark();
-		Label bodyLabel = new Label();
 		gen.visitLineNumber(line, loopLabel);
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
-			if(fn.vars().count() > 0)
-				{
-				gen.loadThis();
-				gen.getField(fn.objtype, "__varrev__", Type.INT_TYPE);
-				gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
-				gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
-				gen.loadThis();
-				gen.invokeVirtual(fn.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
-				}
 
-			gen.visitLabel(bodyLabel);
 			body.emit(C.RETURN, fn, gen);
 			Label end = gen.mark();
 
@@ -4882,6 +4873,8 @@ public static class FnMethod extends ObjMethod{
 		//gen.visitMaxs(1, 1);
 		gen.endMethod();
 	}
+
+
 
 	public final PersistentVector reqParms(){
 		return reqParms;
@@ -5041,6 +5034,19 @@ abstract public static class ObjMethod{
 	abstract Type getReturnType();
 	abstract Type[] getArgTypes();
 
+	void emitVarReloadPreamble(ObjExpr fn, GeneratorAdapter gen){
+		if(fn.vars().count() > 0)
+			{
+			Label bodyLabel = new Label();
+			gen.loadThis();
+			gen.getField(fn.objtype, "__varrev__", Type.INT_TYPE);
+			gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
+			gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
+			gen.loadThis();
+			gen.invokeVirtual(fn.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
+			gen.visitLabel(bodyLabel);
+			}
+	}
 	public void emit(ObjExpr fn, ClassVisitor cv){
 		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
 
@@ -5051,23 +5057,14 @@ abstract public static class ObjMethod{
 		                                            EXCEPTION_TYPES,
 		                                            cv);
 		gen.visitCode();
+		emitVarReloadPreamble(fn,gen);
+
 		Label loopLabel = gen.mark();
-		Label bodyLabel = new Label();
 		gen.visitLineNumber(line, loopLabel);
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
-			if(fn.vars().count() > 0)
-				{
-				gen.loadThis();
-				gen.getField(fn.objtype, "__varrev__", Type.INT_TYPE);
-				gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
-				gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
-				gen.loadThis();
-				gen.invokeVirtual(fn.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
-				}
 
-			gen.visitLabel(bodyLabel);
 			body.emit(C.RETURN, fn, gen);
 			Label end = gen.mark();
 			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
@@ -7389,24 +7386,15 @@ public static class NewInstanceMethod extends ObjMethod{
 			addParameterAnnotation(gen, meta, i);
 			}
 		gen.visitCode();
+		emitVarReloadPreamble(obj,gen);
+
 		Label loopLabel = gen.mark();
-		Label bodyLabel = new Label();
-		
+
 		gen.visitLineNumber(line, loopLabel);
 		try
 			{
 			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
-			if(obj.vars().count() > 0)
-				{
-				gen.loadThis();
-				gen.getField(obj.objtype, "__varrev__", Type.INT_TYPE);
-				gen.getStatic(VAR_TYPE,"rev",Type.INT_TYPE);
-				gen.ifICmp(GeneratorAdapter.EQ,bodyLabel);
-				gen.loadThis();
-				gen.invokeVirtual(obj.objtype(), new Method("__reloadVars__",Type.VOID_TYPE, new Type[]{}));
-				}
 
-			gen.visitLabel(bodyLabel);
 			emitBody(objx, gen, retClass, body);
 			Label end = gen.mark();
 			gen.visitLocalVariable("this", obj.objtype.getDescriptor(), null, loopLabel, end, 0);
