@@ -457,10 +457,10 @@ static class DefExpr implements Expr{
 				isDynamic = true;
 				mm = (IPersistentMap) RT.assoc(mm,dynamicKey, RT.T);
 				}
-			if(RT.booleanCast(RT.get(mm, staticKey)))
+			if(RT.booleanCast(RT.get(mm, arglistsKey)))
 				{
 				IPersistentMap vm = v.meta();
-				vm = (IPersistentMap) RT.assoc(vm,staticKey,RT.T);
+				//vm = (IPersistentMap) RT.assoc(vm,staticKey,RT.T);
 				//drop quote
 				vm = (IPersistentMap) RT.assoc(vm,arglistsKey,RT.second(mm.valAt(arglistsKey)));
 				v.setMeta(vm);
@@ -3345,7 +3345,28 @@ static class InvokeExpr implements Expr{
 //				return StaticInvokeExpr.parse(v, RT.next(form), tagOf(form));
 //				}
 //			}
-		
+
+		if(fexpr instanceof VarExpr && context != C.EVAL)
+			{
+			Var v = ((VarExpr)fexpr).var;
+			Object arglists = RT.get(RT.meta(v), arglistsKey);
+			int arity = RT.count(form.next());
+			for(ISeq s = RT.seq(arglists); s != null; s = s.next())
+				{
+				IPersistentVector args = (IPersistentVector) s.first();
+				if(args.count() == arity)
+					{
+					String primc = FnMethod.primInterface(args);
+					if(primc != null)
+						return analyze(context,
+						               RT.listStar(Symbol.intern(".invokePrim"),
+						                        ((Symbol) form.first()).withMeta(RT.map(RT.TAG_KEY, Symbol.intern(primc))),
+						                        form.next()));
+					break;
+					}
+				}
+			}
+
 		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && KEYWORD_CALLSITES.isBound())
 			{
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
@@ -3444,6 +3465,7 @@ static public class FnExpr extends ObjExpr{
 		fn.name = basename + simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.objtype = Type.getObjectType(fn.internalName);
+		ArrayList<String> prims = new ArrayList();
 		try
 			{
 			Var.pushThreadBindings(
@@ -3486,6 +3508,8 @@ static public class FnExpr extends ObjExpr{
 					methodArray[f.reqParms.count()] = f;
 				else
 					throw new Exception("Can't have 2 overloads with same arity");
+				if(f.prim != null)
+					prims.add(f.prim);
 				}
 			if(variadicMethod != null)
 				{
@@ -3521,7 +3545,11 @@ static public class FnExpr extends ObjExpr{
 			{
 			Var.popThreadBindings();
 			}
-		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",null,fn.onceOnly);
+		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",
+		           (prims.size() == 0)?
+		            null
+					:prims.toArray(new String[prims.size()]),
+		            fn.onceOnly);
 		fn.getCompiledClass();
 
 		if(origForm instanceof IObj && ((IObj) origForm).meta() != null)
@@ -4645,9 +4673,39 @@ public static class FnMethod extends ObjMethod{
 	Type[] argtypes;
 	Class[] argclasses;
 	Class retClass;
+	String prim ;
 
 	public FnMethod(ObjExpr objx, ObjMethod parent){
 		super(objx, parent);
+	}
+
+	static public char classChar(Object x){
+		Class c = null;
+		if(x instanceof Class)
+			c = (Class) x;
+		else if(x instanceof Symbol)
+			c = primClass((Symbol) x);
+		if(c == null || !c.isPrimitive())
+			return 'O';
+		if(c == long.class)
+			return 'L';
+		if(c == double.class)
+			return 'D';
+		throw new IllegalArgumentException("Only long and double primitives are supported");
+	}
+
+	static public String primInterface(IPersistentVector arglist) throws Exception{
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<arglist.count();i++)
+			sb.append(classChar(tagOf(arglist.nth(i))));
+		sb.append(classChar(tagOf(arglist)));
+		String ret = sb.toString();
+		boolean prim = ret.contains("L") || ret.contains("D");
+		if(prim && arglist.count() > 4)
+			throw new IllegalArgumentException("fns taking primitives support only 4 or fewer args");
+		if(prim)
+			return "clojure.lang.IFn$" + ret;
+		return null;
 	}
 
 	static FnMethod parse(ObjExpr objx, ISeq form, boolean isStatic) throws Exception{
@@ -4672,6 +4730,10 @@ public static class FnMethod extends ObjMethod{
                             ,CLEAR_ROOT, pnode
                             ,CLEAR_SITES, PersistentHashMap.EMPTY
                         ));
+
+			method.prim = primInterface(parms);
+			if(method.prim != null)
+				method.prim = method.prim.replace('.', '/');
 
 			method.retClass = tagClass(tagOf(parms));
 			if(method.retClass.isPrimitive() && !(method.retClass == double.class || method.retClass == long.class))
@@ -4709,25 +4771,28 @@ public static class FnMethod extends ObjMethod{
 
 				else
 					{
-					Class pc = tagClass(tagOf(p));
-					if(pc.isPrimitive() && !isStatic)
-						{
-						pc = Object.class;
-						p = (Symbol) ((IObj) p).withMeta((IPersistentMap) RT.assoc(RT.meta(p), RT.TAG_KEY, null));
-						}
+					Class pc = primClass(tagClass(tagOf(p)));
+//					if(pc.isPrimitive() && !isStatic)
+//						{
+//						pc = Object.class;
+//						p = (Symbol) ((IObj) p).withMeta((IPersistentMap) RT.assoc(RT.meta(p), RT.TAG_KEY, null));
+//						}
 //						throw new Exception("Non-static fn can't have primitive parameter: " + p);
 					if(pc.isPrimitive() && !(pc == double.class || pc == long.class))
 						throw new IllegalArgumentException("Only long and double primitives are supported: " + p);
 
 					if(state == PSTATE.REST && tagOf(p) != null)
 						throw new Exception("& arg cannot have type hint");
+					if(state == PSTATE.REST && method.prim != null)
+						throw new Exception("fns taking primitives cannot be variadic");
+					                        
 					if(state == PSTATE.REST)
 						pc = ISeq.class;
 					argtypes.add(Type.getType(pc));
 					argclasses.add(pc);
-					LocalBinding lb = isStatic?
-					                  registerLocal(p,null, new MethodParamExpr(pc), true)
-					                  :registerLocal(p, state == PSTATE.REST ? ISEQ : tagOf(p), null, true);
+					LocalBinding lb = pc.isPrimitive() ?
+					                  registerLocal(p, null, new MethodParamExpr(pc), true)
+					                           : registerLocal(p, state == PSTATE.REST ? ISEQ : tagOf(p), null, true);
 					argLocals = argLocals.cons(lb);
 					switch(state)
 						{
@@ -4748,7 +4813,8 @@ public static class FnMethod extends ObjMethod{
 				throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
 			LOOP_LOCALS.set(argLocals);
 			method.argLocals = argLocals;
-			if(isStatic)
+//			if(isStatic)
+			if(method.prim != null)
 				{
 				method.argtypes = argtypes.toArray(new Type[argtypes.size()]);
 				method.argclasses = argclasses.toArray(new Class[argtypes.size()]);
@@ -4768,7 +4834,9 @@ public static class FnMethod extends ObjMethod{
 	}
 
 	public void emit(ObjExpr fn, ClassVisitor cv){
-		if(fn.isStatic)
+		if(prim != null)
+			doEmitPrim(fn, cv);
+		else if(fn.isStatic)
 			doEmitStatic(fn,cv);
 		else
 			doEmit(fn,cv);
@@ -4836,6 +4904,72 @@ public static class FnMethod extends ObjMethod{
 
 	}
 
+	public void doEmitPrim(ObjExpr fn, ClassVisitor cv){
+		Method ms = new Method("invokePrim", getReturnType(), argtypes);
+
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_FINAL,
+		                                            ms,
+		                                            null,
+		                                            //todo don't hardwire this
+		                                            EXCEPTION_TYPES,
+		                                            cv);
+		gen.visitCode();
+
+		emitVarReloadPreamble(fn, gen);
+
+		Label loopLabel = gen.mark();
+		gen.visitLineNumber(line, loopLabel);
+		try
+			{
+			Var.pushThreadBindings(RT.map(LOOP_LABEL, loopLabel, METHOD, this));
+			emitBody(objx, gen, retClass, body);
+
+			Label end = gen.mark();
+			gen.visitLocalVariable("this", "Ljava/lang/Object;", null, loopLabel, end, 0);
+			for(ISeq lbs = argLocals.seq(); lbs != null; lbs = lbs.next())
+				{
+				LocalBinding lb = (LocalBinding) lbs.first();
+				gen.visitLocalVariable(lb.name, argtypes[lb.idx-1].getDescriptor(), null, loopLabel, end, lb.idx);
+				}
+			}
+		catch(Exception e)
+			{
+			throw new RuntimeException(e);
+			}
+		finally
+			{
+			Var.popThreadBindings();
+			}
+
+		gen.returnValue();
+		//gen.visitMaxs(1, 1);
+		gen.endMethod();
+
+	//generate the regular invoke, calling the prim method
+		Method m = new Method(getMethodName(), OBJECT_TYPE, getArgTypes());
+
+		gen = new GeneratorAdapter(ACC_PUBLIC,
+		                           m,
+		                           null,
+		                           //todo don't hardwire this
+		                           EXCEPTION_TYPES,
+		                           cv);
+		gen.visitCode();
+		gen.loadThis();
+		for(int i = 0; i < argtypes.length; i++)
+			{
+			gen.loadArg(i);
+			HostExpr.emitUnboxArg(fn, gen, argclasses[i]);
+			}
+		gen.invokeInterface(Type.getType("L"+prim+";"), ms);
+		gen.box(getReturnType());
+
+
+		gen.returnValue();
+		//gen.visitMaxs(1, 1);
+		gen.endMethod();
+
+	}
 	public void doEmit(ObjExpr fn, ClassVisitor cv){
 		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
 
@@ -4897,7 +5031,7 @@ public static class FnMethod extends ObjMethod{
 	}
 
 	Type getReturnType(){
-		if(objx.isStatic)
+		if(prim != null) //objx.isStatic)
 			return Type.getType(retClass);
 		return OBJECT_TYPE;
 	}
@@ -7453,6 +7587,10 @@ public static class NewInstanceMethod extends ObjMethod{
 		if(c == null)
 			c = HostExpr.tagToClass(tag);
 		return c;
+	}
+
+	static Class primClass(Class c){
+		return c.isPrimitive()?c:Object.class;
 	}
 
 static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
