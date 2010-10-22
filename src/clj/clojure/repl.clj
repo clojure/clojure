@@ -9,11 +9,124 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns
-  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim, Christophe Grande"
+  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
      :doc "Utilities meant to be used interactively at the REPL"}
   clojure.repl
   (:import (java.io LineNumberReader InputStreamReader PushbackReader)
            (clojure.lang RT Reflector)))
+
+(def ^:private special-doc-map
+  '{. {:url "java_interop#dot"
+       :forms [(.instanceMember instance args*)
+               (.instanceMember Classname args*)
+               (Classname/staticMethod args*)
+               Classname/staticField]
+       :doc "The instance member form works for both fields and methods.
+  They all expand into calls to the dot operator at macroexpansion time."}
+    def {:forms [(def symbol init?)]
+         :doc "Creates and interns a global var with the name
+  of symbol in the current namespace (*ns*) or locates such a var if
+  it already exists.  If init is supplied, it is evaluated, and the
+  root binding of the var is set to the resulting value.  If init is
+  not supplied, the root binding of the var is unaffected."}
+    do {:forms [(do exprs*)]
+        :doc "Evaluates the expressions in order and returns the value of
+  the last. If no expressions are supplied, returns nil."}
+    if {:forms [(if test then else?)]
+        :doc "Evaluates test. If not the singular values nil or false,
+  evaluates and yields then, otherwise, evaluates and yields else. If
+  else is not supplied it defaults to nil."}
+    monitor-enter {:forms [(monitor-enter x)]
+                   :doc "Synchronization primitive that should be avoided
+  in user code. Use the 'locking' macro."}
+    monitor-exit {:forms [(monitor-exit x)]
+                  :doc "Synchronization primitive that should be avoided
+  in user code. Use the 'locking' macro."}
+    new {:forms [(Classname. args*) (new Classname args*)]
+         :url "java_interop#new"
+         :doc "The args, if any, are evaluated from left to right, and
+  passed to the constructor of the class named by Classname. The
+  constructed object is returned."}
+    quote {:forms [(quote form)]
+           :doc "Yields the unevaluated form."}
+    recur {:forms [(recur exprs*)]
+           :doc "Evaluates the exprs in order, then, in parallel, rebinds
+  the bindings of the recursion point to the values of the exprs.
+  Execution then jumps back to the recursion point, a loop or fn method."}
+    set! {:forms[(set! var-symbol expr)
+                 (set! (. instance-expr instanceFieldName-symbol) expr)
+                 (set! (. Classname-symbol staticFieldName-symbol) expr)]
+          :url "vars#set"
+          :doc "Used to set thread-local-bound vars, Java object instance
+fields, and Java class static fields."}
+    throw {:forms [(throw expr)]
+           :doc "The expr is evaluated and thrown, therefore it should
+  yield an instance of some derivee of Throwable."}
+    try {:forms [(try expr* catch-clause* finally-clause?)]
+         :doc "catch-clause => (catch classname name expr*)
+  finally-clause => (finally expr*)
+
+  Catches and handles Java exceptions."}
+    var {:forms [(var symbol)]
+         :doc "The symbol must resolve to a var, and the Var object
+itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
+
+(defn- special-doc [name-symbol]
+  (assoc (or (special-doc-map name-symbol) (meta (resolve name-symbol)))
+         :name name-symbol
+         :special-form true))
+
+(defn- namespace-doc [nspace]
+  (assoc (meta nspace) :name (ns-name nspace)))
+
+(defn- print-doc [m]
+  (println "-------------------------")
+  (println (str (when-let [ns (:ns m)] (str (ns-name ns) "/")) (:name m)))
+  (cond
+    (:forms m) (doseq [f (:forms m)]
+                 (print "  ")
+                 (prn f))
+    (:arglists m) (prn (:arglists m)))
+  (if (:special-form m)
+    (do
+      (println "Special Form")
+      (println " " (:doc m)) 
+      (if (contains? m :url)
+        (when (:url m)
+          (println (str "\n  Please see http://clojure.org/" (:url m))))
+        (println (str "\n  Please see http://clojure.org/special_forms#"
+                      (:name m)))))
+    (do
+      (when (:macro m)
+        (println "Macro")) 
+      (println " " (:doc m)))))
+
+(defn find-doc
+  "Prints documentation for any var whose documentation or name
+ contains a match for re-string-or-pattern"
+  {:added "1.0"}
+  [re-string-or-pattern]
+    (let [re (re-pattern re-string-or-pattern)
+          ms (concat (mapcat #(sort-by :name (map meta (vals (ns-interns %))))
+                             (all-ns))
+                     (map namespace-doc (all-ns))
+                     (map special-doc (keys special-doc-map)))]
+      (doseq [m ms
+              :when (and (:doc m)
+                         (or (re-find (re-matcher re (:doc m)))
+                             (re-find (re-matcher re (str (:name m))))))]
+               (print-doc m))))
+
+(defmacro doc
+  "Prints documentation for a var or special form given its name"
+  {:added "1.0"}
+  [name]
+  (if-let [special-name ('{& fn catch try finally try} name)]
+    (#'print-doc (#'special-doc special-name))
+    (cond
+      (special-doc-map name) `(#'print-doc (#'special-doc '~name))
+      (resolve name) `(#'print-doc (meta (var ~name)))
+      (find-ns name) `(#'print-doc (namespace-doc (find-ns '~name))))))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Clojure functions (Vars, really)

@@ -190,7 +190,7 @@
       (catch Throwable e
         (caught e)
         (set! *e e)))
-     (use '[clojure.repl :only (source apropos dir pst)])
+     (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
      (use '[clojure.java.javadoc :only (javadoc)])
      (use '[clojure.pprint :only (pp pprint)])
      (prompt)
