@@ -1,7 +1,7 @@
 ;; Macrolet and symbol-macrolet
 
 ;; by Konrad Hinsen
-;; last updated September 3, 2010
+;; last updated October 23, 2010
 
 ;; Copyright (c) Konrad Hinsen, 2009-2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
@@ -41,11 +41,11 @@
 ; form, imitating dynamic scoping.
 ;
 ; Local macros.
-(defvar- macro-fns {})
+(defvar- ^:dynamic macro-fns {})
 ; Local symbol macros.
-(defvar- macro-symbols {})
+(defvar- ^:dynamic macro-symbols {})
 ; Symbols defined inside let forms or function arguments.
-(defvar- protected-symbols #{})
+(defvar- ^:dynamic protected-symbols #{})
 
 (defn- protected?
   [symbol]
