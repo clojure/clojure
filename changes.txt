@@ -1,11 +1,20 @@
-Changes to Clojure in Version 1.3 Alpha 1
+Changes to Clojure in Version 1.3 Alpha 2
 
 = CONTENTS =
 
- 0 Changes from 1.2 to 1.3 Alpha 1
- 1 About Alpha Releases
+ 0 Changes from 1.3 Alpha 1 to 1.3 Alpha 2
+ 1 Changes from 1.2 to 1.3 Alpha 1
+ 2 About Alpha Releases
 
-= 0 Changes from 1.2 to 1.3 Alpha 1
+= 0 Changes from 1.3 Alpha 1 to 1.3 Alpha 2
+
+  * code path for using vars is now *much* faster for the common case,
+    and you must explicitly ask for :dynamic bindability
+  * new: clojure.reflect/reflect
+    http://dev.clojure.org/display/design/Reflection+API 
+  * new: clojure.data/diff
+
+= 1 Changes from 1.2 to 1.3 Alpha 1
 
   * enhanced primitive support 
     (http://dev.clojure.org/display/doc/Enhanced+Primitive+Support)
@@ -13,7 +22,7 @@ Changes to Clojure in Version 1.3 Alpha 1
   * ancillary namespaces no longer auto-load on startup:
     clojure.set, clojure.xml, clojure.zip
 
-= 1 About Alpha Releases
+= 2 About Alpha Releases
 
 1.3 is the first release of Clojure that will include a series of
 alpha builds. We are adding these builds to support maven and
