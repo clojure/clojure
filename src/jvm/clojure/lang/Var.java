@@ -79,7 +79,8 @@ static Keyword nameKey = Keyword.intern(null, "name");
 static Keyword nsKey = Keyword.intern(null, "ns");
 //static Keyword tagKey = Keyword.intern(null, "tag");
 
-volatile Object root;
+private volatile Object root;
+
 volatile boolean dynamic = false;
 transient final AtomicBoolean threadBound;
 public final Symbol sym;
@@ -168,7 +169,7 @@ Var(Namespace ns, Symbol sym){
 	this.ns = ns;
 	this.sym = sym;
 	this.threadBound = new AtomicBoolean(false);
-	this.root = dvals;  //use dvals as magic not-bound value
+	this.root = new Unbound(this);
 	setMeta(PersistentHashMap.EMPTY);
 }
 
@@ -183,7 +184,7 @@ public boolean isBound(){
 }
 
 final public Object get(){
-	if(!threadBound.get() && root != dvals)
+	if(!threadBound.get())
 		return root;
 	return deref();
 }
@@ -192,14 +193,12 @@ final public Object deref(){
 	TBox b = getThreadBinding();
 	if(b != null)
 		return b.val;
-	if(hasRoot())
-		return root;
-	throw new IllegalStateException(String.format("Var %s/%s is unbound.", ns, sym));
+	return root;
 }
 
 public void setValidator(IFn vf){
 	if(hasRoot())
-		validate(vf, getRoot());
+		validate(vf, root);
 	validator = vf;
 }
 
@@ -257,20 +256,8 @@ public boolean isPublic(){
 	return !RT.booleanCast(meta().valAt(privateKey));
 }
 
-public Object getRoot(){
-	if(hasRoot())
+final public Object getRawRoot(){
 		return root;
-	throw new IllegalStateException(String.format("Var %s/%s is unbound.", ns, sym));
-}
-
-public Object getRawRoot(){
-		return root;
-}
-
-public Object getRawRootOrUnbound(){
-	if(hasRoot())
-		return root;
-	return new Unbound(this);
 }
 
 public Object getTag(){
@@ -289,13 +276,13 @@ public void setTag(Symbol tag) {
 }
 
 final public boolean hasRoot(){
-	return root != dvals;
+	return !(root instanceof Unbound);
 }
 
 //binding root always clears macro flag
 synchronized public void bindRoot(Object root){
 	validate(getValidator(), root);
-	Object oldroot = hasRoot()?this.root:null;
+	Object oldroot = this.root;
 	this.root = root;
 	++rev;
     try
@@ -311,21 +298,21 @@ synchronized public void bindRoot(Object root){
 
 synchronized void swapRoot(Object root){
 	validate(getValidator(), root);
-	Object oldroot = hasRoot()?this.root:null;
+	Object oldroot = this.root;
 	this.root = root;
 	++rev;
     notifyWatches(oldroot,root);
 }
 
 synchronized public void unbindRoot(){
-	this.root = dvals;
+	this.root = new Unbound(this);
 	++rev;
 }
 
 synchronized public void commuteRoot(IFn fn) throws Exception{
 	Object newRoot = fn.invoke(root);
 	validate(getValidator(), newRoot);
-	Object oldroot = getRoot();
+	Object oldroot = root;
 	this.root = newRoot;
 	++rev;
     notifyWatches(oldroot,newRoot);
@@ -334,7 +321,7 @@ synchronized public void commuteRoot(IFn fn) throws Exception{
 synchronized public Object alterRoot(IFn fn, ISeq args) throws Exception{
 	Object newRoot = fn.applyTo(RT.cons(root, args));
 	validate(getValidator(), newRoot);
-	Object oldroot = getRoot();
+	Object oldroot = root;
 	this.root = newRoot;
 	++rev;
     notifyWatches(oldroot,newRoot);
