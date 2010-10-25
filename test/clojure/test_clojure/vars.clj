@@ -25,10 +25,18 @@
       (eval `(binding [a 4] a)) 4     ; regression in Clojure SVN r1370
   ))
 
-; with-local-vars var-get var-set alter-var-root [var? (predicates.clj)]
+; var-get var-set alter-var-root [var? (predicates.clj)]
 ; with-in-str with-out-str
 ; with-open
-; with-precision
+
+(deftest test-with-local-vars
+  (let [factorial (fn [x]
+                    (with-local-vars [acc 1, cnt x]
+                      (while (> @cnt 0)
+                        (var-set acc (* @acc @cnt))
+                        (var-set cnt (dec @cnt)))
+                      @acc))]
+    (is (= (factorial 5) 120))))
 
 (deftest test-with-precision
   (are [x y] (= x y)

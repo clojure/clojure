@@ -3747,7 +3747,7 @@
      (vector? name-vals-vec) "a vector for its binding"
      (even? (count name-vals-vec)) "an even number of forms in binding vector")
   `(let [~@(interleave (take-nth 2 name-vals-vec)
-                       (repeat '(. clojure.lang.Var (create))))]
+                       (repeat '(.. clojure.lang.Var create setDynamic)))]
      (. clojure.lang.Var (pushThreadBindings (hash-map ~@name-vals-vec)))
      (try
       ~@body
