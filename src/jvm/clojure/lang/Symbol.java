@@ -37,6 +37,16 @@ public String getName(){
 	return name;
 }
 
+// the create thunks preserve binary compatibility with code compiled
+// against earlier version of Clojure and can be removed (at some point).
+static public Symbol create(String ns, String name) {
+    return Symbol.intern(ns, name);
+}
+
+static public Symbol create(String nsname) {
+    return Symbol.intern(nsname);
+}
+    
 static public Symbol intern(String ns, String name){
 	return new Symbol(ns == null ? null : ns.intern(), name.intern());
 }
