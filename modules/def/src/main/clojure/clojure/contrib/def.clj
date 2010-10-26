@@ -71,7 +71,7 @@ making private definitions more succinct."}
      `(do
         (alter-meta!
          (if (.hasRoot (var ~orig))
-           (def ~name (.getRoot (var ~orig)))
+           (def ~name (.getRawRoot (var ~orig)))
            (def ~name))
          ;; When copying metadata, disregard {:macro false}.
          ;; Workaround for http://www.assembla.com/spaces/clojure/tickets/273
