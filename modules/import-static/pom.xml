@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.clojure.contrib</groupId>
     <artifactId>parent</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0-alpha2</version>
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>import-static</artifactId>

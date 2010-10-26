@@ -8,7 +8,7 @@
   </properties>
   <groupId>org.clojure.contrib</groupId>
   <artifactId>parent</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>1.3.0-alpha2</version>
   <packaging>pom</packaging>
   <name>Clojure Contrib parent module</name>
   <build>
