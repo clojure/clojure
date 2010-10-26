@@ -210,6 +210,8 @@ static final public Var METHOD = Var.create(null).setDynamic();
 //null or not
 static final public Var IN_CATCH_FINALLY = Var.create(null).setDynamic();
 
+static final public Var NO_RECUR = Var.create(null).setDynamic();
+
 //DynamicClassLoader
 static final public Var LOADER = Var.create().setDynamic();
 
@@ -1995,13 +1997,18 @@ public static class TryExpr implements Expr{
 				if(!Util.equals(op, CATCH) && !Util.equals(op, FINALLY))
 					{
 					if(caught)
-						throw new Exception("Only catch or finally clause can follow catch in try expression");
+                                            throw new Exception("Only catch or finally clause can follow catch in try expression");
 					body = body.cons(f);
 					}
 				else
 					{
-                    if(bodyExpr == null)
-                        bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
+                                            if(bodyExpr == null)
+                                                try {
+                                                    Var.pushThreadBindings(RT.map(NO_RECUR, true));
+                                                    bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
+                                                } finally {
+                                                    Var.popThreadBindings();
+                                                }
 					if(Util.equals(op, CATCH))
 						{
 						Class c = HostExpr.maybeClass(RT.second(f), false);
@@ -2049,8 +2056,17 @@ public static class TryExpr implements Expr{
 						}
 					}
 				}
-            if(bodyExpr == null)
-                bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
+                        if(bodyExpr == null) {
+                            try 
+                                {
+                                    Var.pushThreadBindings(RT.map(NO_RECUR, true));
+                                    bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
+                                } 
+                            finally
+                                {
+                                    Var.popThreadBindings();
+                                }
+                        }
 
 			return new TryExpr(bodyExpr, catches, finallyExpr, retLocal,
 			                   finallyLocal);
@@ -3468,7 +3484,8 @@ static public class FnExpr extends ObjExpr{
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,
 					       PROTOCOL_CALLSITES, PersistentVector.EMPTY,
-					       VAR_CALLSITES, emptyVarCallSites()
+					       VAR_CALLSITES, emptyVarCallSites(),
+                                               NO_RECUR, null
 					));
 
 			//arglist might be preceded by symbol naming this fn
@@ -5613,9 +5630,11 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 						if(isLoop)
 							{
 							PathNode root = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
-							Var.pushThreadBindings(
+                                                        Var.pushThreadBindings(
 								RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,root),
-									   CLEAR_ROOT, new PathNode(PATHTYPE.PATH,root)));
+                                                                       CLEAR_ROOT, new PathNode(PATHTYPE.PATH,root),
+                                                                       NO_RECUR, null));
+                                                       
 							}
 						bodyExpr = (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body);
 						}
@@ -5843,6 +5862,8 @@ public static class RecurExpr implements Expr{
 				throw new UnsupportedOperationException("Can only recur from tail position");
 			if(IN_CATCH_FINALLY.deref() != null)
 				throw new UnsupportedOperationException("Cannot recur from catch/finally");
+                        if(NO_RECUR.deref() != null)
+                            throw new UnsupportedOperationException("Cannot recur across try");
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 				{
@@ -7000,8 +7021,8 @@ static public class NewInstanceExpr extends ObjExpr{
 					       VARS, PersistentHashMap.EMPTY,
 					       KEYWORD_CALLSITES, PersistentVector.EMPTY,
 					       PROTOCOL_CALLSITES, PersistentVector.EMPTY,
-					       VAR_CALLSITES, emptyVarCallSites()
-							));
+					       VAR_CALLSITES, emptyVarCallSites(),
+                                               NO_RECUR, null));
 			if(ret.isDeftype())
 				{
 				Var.pushThreadBindings(RT.map(METHOD, null,

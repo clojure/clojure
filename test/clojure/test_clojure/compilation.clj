@@ -50,3 +50,26 @@
 (deftest test-compiler-resolution
   (testing "resolve nonexistent class create should return nil (assembla #262)"
     (is (nil? (resolve 'NonExistentClass.)))))
+
+(deftest test-no-recur-across-try
+  (testing "don't recur to function from inside try"
+    (is (thrown? Exception (eval '(fn [x] (try (recur 1)))))))
+  (testing "don't recur to loop from inside try"
+    (is (thrown? Exception (eval '(loop [x] (try (recur 1)))))))
+  (testing "don't get confused about what the recur is targeting"
+    (is (thrown? Exception (eval '(loop [x] (try (fn [x]) (recur 1)))))))
+  (testing "don't allow recur accross binding"
+    (is (thrown? Exception (eval '(fn [x] (binding [+ *] (recur 1)))))))
+  (testing "allow loop/recur inside try"
+    (is (try
+          (eval '(try (loop [x 3] (if (zero? x) x (recur (dec x))))))
+          (catch Exception _))))
+  (testing "allow fn/recur inside try"
+    (is (try
+          (eval '(try
+                   ((fn [x]
+                      (if (zero? x)
+                        x
+                        (recur (dec x))))
+                    3)))
+          (catch Exception _)))))
