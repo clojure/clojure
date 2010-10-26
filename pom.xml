@@ -16,6 +16,12 @@
     <!-- The parent module defines common configuration for all modules. -->
     <module>modules/parent</module>
 
+    <!-- The complete module depends on all other modules. -->
+    <module>modules/complete</module>
+
+    <!-- The standalone module packages all other modules. -->
+    <module>modules/standalone</module>
+
     <module>modules/accumulators</module>
     <module>modules/agent-utils</module>
     <module>modules/base64</module>
@@ -75,12 +81,6 @@
     <module>modules/types</module>
     <module>modules/with-ns</module>
     <module>modules/zip-filter</module>
-
-    <!-- The complete module depends on all other modules. -->
-    <module>modules/complete</module>
-
-    <!-- The standalone module packages all other modules. -->
-    <module>modules/standalone</module>
   </modules>
   <build>
     <plugins>
