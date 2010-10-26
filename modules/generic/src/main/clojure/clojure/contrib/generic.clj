@@ -1,9 +1,9 @@
 ;; Support code for generic interfaces
 
 ;; by Konrad Hinsen
-;; last updated May 4, 2009
+;; last updated October 26, 2010
 
-;; Copyright (c) Konrad Hinsen, 2009. All rights reserved.  The use
+;; Copyright (c) Konrad Hinsen, 2009-2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
@@ -22,8 +22,7 @@
            collections) and partly provide additional functions that
            can be defined for a wide variety of types (functors, math
            functions). More functions will be added in the future."}
-  clojure.contrib.generic
-  (:use [clojure.contrib.types :only (defadt)]))
+  clojure.contrib.generic)
 
 ;
 ; A dispatch function that separates nulary, unary, binary, and
