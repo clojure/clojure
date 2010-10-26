@@ -3714,7 +3714,7 @@
   {:added "1.0"
    :static true}
   [alias namespace-sym]
-  (.addAlias *ns* alias (find-ns namespace-sym)))
+  (.addAlias *ns* alias (the-ns namespace-sym)))
 
 (defn ns-aliases
   "Returns a map of the aliases for the namespace."

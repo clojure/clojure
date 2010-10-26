@@ -26,6 +26,9 @@
 ; require use
 ; loaded-libs
 
+(deftest test-alias
+	(is (thrown-with-msg? Exception #"No namespace: epicfail found" (alias 'bogus 'epicfail))))
+	
 (deftest test-require
          (is (thrown? Exception (require :foo)))
          (is (thrown? Exception (require))))
