@@ -6193,3 +6193,38 @@
   [fdecl]
   (if-let [bad-args (seq (remove #(vector? %) (map first fdecl)))]
     (throw (IllegalArgumentException. (str "Parameter declaration " (first bad-args) " should be a vector")))))
+
+(defn with-redefs-fn
+  "Temporarily redefines Vars during a call to func.  Each val of
+  binding-map will replace the root value of its key which must be
+  a Var.  After func is called with no args, the root values of all
+  the Vars will be set back to their old values.  These temporary
+  changes will be visible in all threads.  Useful for mocking out
+  functions during testing."
+  {:added "1.3"}
+  [binding-map func]
+  (let [root-bind (fn [m]
+                    (doseq [[a-var a-val] m]
+                      (.bindRoot ^clojure.lang.Var a-var a-val)))
+        old-vals (zipmap (keys binding-map)
+                         (map deref (keys binding-map)))]
+    (try
+      (root-bind binding-map)
+      (func)
+      (finally
+        (root-bind old-vals)))))
+
+(defmacro with-redefs
+  "binding => var-symbol temp-value-expr
+
+  Temporarily redefines Vars while executing the body.  The
+  temp-value-exprs will be evaluated and each resulting value will
+  replace in parallel the root value of its Var.  After the body is
+  executed, the root values of all the Vars will be set back to their
+  old values.  These temporary changes will be visible in all threads.
+  Useful for mocking out functions during testing."
+  {:added "1.3"}
+  [bindings & body]
+  `(with-redefs-fn ~(zipmap (map #(list `var %) (take-nth 2 bindings))
+                            (take-nth 2 (next bindings)))
+                    (fn [] ~@body)))
