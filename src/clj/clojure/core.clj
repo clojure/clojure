@@ -621,22 +621,22 @@
   [& body]
   (list 'new 'clojure.lang.LazySeq (list* '^{:once true} fn* [] body)))    
 
-(defn ^:static chunk-buffer ^clojure.lang.ChunkBuffer [capacity]
+(defn ^:static ^clojure.lang.ChunkBuffer chunk-buffer ^clojure.lang.ChunkBuffer [capacity]
   (clojure.lang.ChunkBuffer. capacity))
 
 (defn ^:static chunk-append [^clojure.lang.ChunkBuffer b x]
   (.add b x))
 
-(defn ^:static chunk [^clojure.lang.ChunkBuffer b]
+(defn ^:static ^clojure.lang.IChunk chunk [^clojure.lang.ChunkBuffer b]
   (.chunk b))
 
-(defn ^:static chunk-first ^clojure.lang.IChunk [^clojure.lang.IChunkedSeq s]
+(defn ^:static  ^clojure.lang.IChunk chunk-first ^clojure.lang.IChunk [^clojure.lang.IChunkedSeq s]
   (.chunkedFirst s))
 
-(defn ^:static chunk-rest ^clojure.lang.ISeq [^clojure.lang.IChunkedSeq s]
+(defn ^:static ^clojure.lang.ISeq chunk-rest ^clojure.lang.ISeq [^clojure.lang.IChunkedSeq s]
   (.chunkedMore s))
 
-(defn ^:static chunk-next ^clojure.lang.ISeq [^clojure.lang.IChunkedSeq s]
+(defn ^:static ^clojure.lang.ISeq chunk-next ^clojure.lang.ISeq [^clojure.lang.IChunkedSeq s]
   (.chunkedNext s))
 
 (defn ^:static chunk-cons [chunk rest]
