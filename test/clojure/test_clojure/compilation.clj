@@ -61,6 +61,18 @@
     (is (thrown? Compiler$CompilerException
                  (eval '(loop [x 5]
                           (try (recur 1)))))))
+  (testing "don't recur to loop from inside of catch inside of try"
+    (is (thrown? Compiler$CompilerException
+                 (eval '(loop [x 5]
+                          (try
+                            (catch Exception e
+                              (recur 1))))))))
+  (testing "don't recur to loop from inside of finally inside of try"
+    (is (thrown? Compiler$CompilerException
+                 (eval '(loop [x 5]
+                          (try
+                            (finally
+                              (recur 1))))))))
   (testing "don't get confused about what the recur is targeting"
     (is (thrown? Compiler$CompilerException
                  (eval '(loop [x 5]
@@ -71,6 +83,20 @@
   (testing "allow loop/recur inside try"
     (is (= 0 (eval '(try (loop [x 3]
                            (if (zero? x) x (recur (dec x)))))))))
+  (testing "allow loop/recur fully inside catch"
+    (is (= 3 (eval '(try
+                      (throw (Exception.))
+                      (catch Exception e
+                        (loop [x 0]
+                          (if (< x 3) (recur (inc x)) x))))))))
+  (testing "allow loop/recur fully inside finally"
+    (is (= "012" (eval '(with-out-str
+                          (try
+                            :return-val-discarded-because-of-with-out-str
+                            (finally (loop [x 0]
+                                       (when (< x 3)
+                                         (print x)
+                                         (recur (inc x)))))))))))
   (testing "allow fn/recur inside try"
     (is (= 0 (eval '(try
                       ((fn [x]

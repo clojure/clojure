@@ -2133,7 +2133,7 @@ public static class TryExpr implements Expr{
                                             if(bodyExpr == null)
                                                 try {
                                                     Var.pushThreadBindings(RT.map(NO_RECUR, true));
-                                                    bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
+						    bodyExpr = (new BodyExpr.Parser()).parse(C.EXPRESSION, RT.seq(body));
                                                 } finally {
                                                     Var.popThreadBindings();
                                                 }
@@ -2159,7 +2159,7 @@ public static class TryExpr implements Expr{
 							                                (Symbol) (RT.second(f) instanceof Symbol ? RT.second(f)
 							                                                                         : null),
 							                                null,false);
-							Expr handler = (new BodyExpr.Parser()).parse(context, RT.next(RT.next(RT.next(f))));
+							Expr handler = (new BodyExpr.Parser()).parse(C.EXPRESSION, RT.next(RT.next(RT.next(f))));
 							catches = catches.cons(new CatchClause(c, lb, handler));
 							}
 						finally
@@ -2188,7 +2188,7 @@ public static class TryExpr implements Expr{
                             try 
                                 {
                                     Var.pushThreadBindings(RT.map(NO_RECUR, true));
-                                    bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
+				    bodyExpr = (new BodyExpr.Parser()).parse(C.EXPRESSION, RT.seq(body));
                                 } 
                             finally
                                 {
@@ -6144,8 +6144,6 @@ public static class RecurExpr implements Expr{
 			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.deref();
 			if(context != C.RETURN || loopLocals == null)
 				throw new UnsupportedOperationException("Can only recur from tail position");
-			if(IN_CATCH_FINALLY.deref() != null)
-				throw new UnsupportedOperationException("Cannot recur from catch/finally");
                         if(NO_RECUR.deref() != null)
                             throw new UnsupportedOperationException("Cannot recur across try");
 			PersistentVector args = PersistentVector.EMPTY;
