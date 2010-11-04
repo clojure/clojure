@@ -310,6 +310,13 @@
       (write-tokens this buf true)
       (setf :buffer []))))
 
+(defn- write-white-space [^Writer this]
+  (when-let [^String tws (getf :trailing-white-space)]
+    ; (prlabel wws (str "*" tws "*"))
+    (.write (getf :base) tws)
+    (dosync
+     (setf :trailing-white-space nil))))
+
 ;;; If there are newlines in the string, print the lines up until the last newline, 
 ;;; making the appropriate adjustments. Return the remainder of the string
 (defn- write-initial-lines 
@@ -326,7 +333,9 @@
              (setf :pos newpos)
              (add-to-buffer this (make-buffer-blob l nil oldpos newpos))
              (write-buffered-output this))
-           (.write (getf :base) l))
+           (do
+             (write-white-space this)
+             (.write (getf :base) l)))
          (.write (getf :base) (int \newline))
          (doseq [^String l (next (butlast lines))]
            (.write (getf :base) l)
@@ -336,12 +345,6 @@
          (setf :buffering :writing)
          (last lines))))))
 
-
-(defn- write-white-space [^Writer this]
-  (if-let [^String tws (getf :trailing-white-space)]
-    (dosync
-     (.write (getf :base) tws)
-     (setf :trailing-white-space nil))))
 
 (defn- p-write-char [^Writer this ^Integer c]
   (if (= (getf :mode) :writing)
