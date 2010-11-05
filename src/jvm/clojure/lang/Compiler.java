@@ -5728,9 +5728,13 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			ObjMethod method = (ObjMethod) METHOD.deref();
 			IPersistentMap backupMethodLocals = method.locals;
 			IPersistentMap backupMethodIndexLocals = method.indexlocals;
-			PersistentVector recurMismatches = null;
+			IPersistentVector recurMismatches = PersistentVector.EMPTY;
+			for (int i = 0; i < bindings.count()/2; i++)
+				{
+				recurMismatches = recurMismatches.cons(RT.F);
+				}
 
-			//we might repeat once if a loop with a recurMistmatch, return breaks
+			//may repeat once for each binding with a mismatch, return breaks
 			while(true){
 				IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
 														NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref());
@@ -5757,7 +5761,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 						Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 						if(isLoop)
 							{
-							if(recurMismatches != null && ((LocalBinding)recurMismatches.nth(i/2)).recurMistmatch)
+							if(recurMismatches != null && RT.booleanCast(recurMismatches.nth(i/2)))
 								{
 								init = new StaticMethodExpr("", 0, null, RT.class, "box", RT.vector(init));
 								if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
@@ -5779,6 +5783,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 					if(isLoop)
 						LOOP_LOCALS.set(loopLocals);
 					Expr bodyExpr;
+					boolean moreMismatches = false;
 					try {
 						if(isLoop)
 							{
@@ -5795,16 +5800,18 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 						if(isLoop)
 							{
 						    Var.popThreadBindings();
-							recurMismatches = null;
 							for(int i = 0;i< loopLocals.count();i++)
 								{
 								LocalBinding lb = (LocalBinding) loopLocals.nth(i);
 								if(lb.recurMistmatch)
-									recurMismatches = loopLocals;
+									{
+									recurMismatches = (IPersistentVector)recurMismatches.assoc(i, RT.T);
+									moreMismatches = true;
+									}
 								}
 							}
 						}
-					if(recurMismatches == null)
+					if(!moreMismatches)
 						return new LetExpr(bindingInits, bodyExpr, isLoop);
 					}
 				finally
