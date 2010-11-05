@@ -70,11 +70,15 @@ namespace.
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/root-cause">root-cause</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.repl/set-break-handler!">set-break-handler!</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/source">source</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/source-fn">source-fn</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.repl/stack-element-str">stack-element-str</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.repl/thread-stopper">thread-stopper</a>
     </div>
     <br />
   </div>
@@ -107,7 +111,7 @@ all definitions in all currently-loaded namespaces that match the
 str-or-pattern.</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L52" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L52" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -119,7 +123,7 @@ str-or-pattern.</pre>
 as in a stack trace element, returns a readable version.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L97" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L97" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -130,7 +134,7 @@ as in a stack trace element, returns a readable version.</pre>
   <pre id="var-docstr">Prints a sorted directory of public vars in a namespace</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L70" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L70" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -142,7 +146,7 @@ as in a stack trace element, returns a readable version.</pre>
 a namespace</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L64" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L64" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -156,7 +160,7 @@ a namespace</pre>
 most recent repl exception (*e), and a depth of 12.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L129" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L129" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -168,7 +172,21 @@ most recent repl exception (*e), and a depth of 12.</pre>
 its wrappers</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L104" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L104" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.repl/set-break-handler!">set-break-handler!</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (set-break-handler!)
+       (set-break-handler! f)
+</pre>
+  <pre id="var-docstr">Register INT signal handler.  After calling this, Ctrl-C will cause
+the given function f to be called with a single argument, the signal.
+Uses thread-stopper if no function given.</pre>
+  
+  
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L163" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -183,7 +201,7 @@ namespace for which the .clj is in the classpath.
 Example: (source filter)</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L43" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L43" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -200,7 +218,7 @@ convenient.
 Example: (source-fn 'filter)</pre>
   
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L21" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L21" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -211,7 +229,20 @@ Example: (source-fn 'filter)</pre>
   <pre id="var-docstr">Returns a (possibly unmunged) string representation of a StackTraceElement</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/da538484009666d17015a5f275d257c2e2b8120f/src/clj/clojure/repl.clj#L117" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L117" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.repl/thread-stopper">thread-stopper</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (thread-stopper)
+       (thread-stopper thread)
+</pre>
+  <pre id="var-docstr">Returns a function that takes one arg and uses that as an exception message
+to stop the given thread.  Defaults to the current thread</pre>
+  
+  
+  <a href="http://github.com/clojure/clojure/blob/eef9686ddc1ceb412c6c9890a912f8e67f27ab5d/src/clj/clojure/repl.clj#L157" id="var-source">Source</a>
 </div>
 
 
