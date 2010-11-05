@@ -5,15 +5,17 @@
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
+;
 
-;; Author: Tom Faulhaber
+;;  clojure.test-helper
+;;
+;;  Utility functions shared by various tests in the Clojure
+;;  test suite
+;;
+;;  tomfaulhaber (gmail)
+;;  Created 04 November 2010
 
-(ns clojure.test-clojure.pprint
-  (:refer-clojure :exclude [format])
-  (:use [clojure.test :only (deftest are run-tests)]
-        [clojure.test-helper :only [platform-newlines]]
-        clojure.test-clojure.pprint.test-helper
-        clojure.pprint))
+(ns clojure.test-helper)
 
-(load "pprint/test_cl_format")
-(load "pprint/test_pretty")
+(let [nl (System/getProperty "line.separator")] 
+  (defn platform-newlines [s] (.replace s "\n" nl)))

@@ -48,12 +48,7 @@
       (binding [*print-radix* true      ;print the integer 10 and 
             *print-base* pb]            ;the ratio 1/10 in bases 2, 
         (cl-format true "~&~S  ~S~%" 10 1/10))))        ;3, 8, 10, 16
-  "#b1010  #b1/1010
-#3r101  #3r1/101
-#o12  #o1/12
-10.  #10r1/10
-#xa  #x1/a
-")
+  "#b1010  #b1/1010\n#3r101  #3r1/101\n#o12  #o1/12\n10.  #10r1/10\n#xa  #x1/a\n")
 
 
 
@@ -222,11 +217,11 @@
   "The quick brown elephant jumped over 5 lazy dogs"
   (cl-format nil "The quick brown ~&~a jumped over ~d lazy dogs" 'elephant 5)
   "The quick brown \nelephant jumped over 5 lazy dogs"
-  (cl-format nil "The quick brown ~&~a jumped\n~& over ~d lazy dogs" 'elephant 5)
+  (cl-format nil (platform-newlines "The quick brown ~&~a jumped\n~& over ~d lazy dogs") 'elephant 5)
   "The quick brown \nelephant jumped\n over 5 lazy dogs"
-  (cl-format nil "~&The quick brown ~&~a jumped\n~& over ~d lazy dogs" 'elephant 5)
+  (cl-format nil (platform-newlines "~&The quick brown ~&~a jumped\n~& over ~d lazy dogs") 'elephant 5)
   "The quick brown \nelephant jumped\n over 5 lazy dogs"
-  (cl-format nil "~3&The quick brown ~&~a jumped\n~& over ~d lazy dogs" 'elephant 5)
+  (cl-format nil (platform-newlines "~3&The quick brown ~&~a jumped\n~& over ~d lazy dogs") 'elephant 5)
   "\n\nThe quick brown \nelephant jumped\n over 5 lazy dogs"
   (cl-format nil "~@{~&The quick brown ~a jumped over ~d lazy dogs~}" 'elephant 5 'fox 10)
   "The quick brown elephant jumped over 5 lazy dogs\nThe quick brown fox jumped over 10 lazy dogs"

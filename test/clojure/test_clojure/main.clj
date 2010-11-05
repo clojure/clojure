@@ -10,19 +10,20 @@
 
 
 (ns clojure.test-clojure.main
-  (:use clojure.test)
+  (:use clojure.test
+        [clojure.test-helper :only [platform-newlines]])
   (:require [clojure.main :as main]))
 
 (deftest eval-opt
   (testing "evals and prints forms"
-    (is (= "2\n4\n" (with-out-str (#'clojure.main/eval-opt "(+ 1 1) (+ 2 2)")))))
+    (is (= (platform-newlines "2\n4\n") (with-out-str (#'clojure.main/eval-opt "(+ 1 1) (+ 2 2)")))))
 
   (testing "skips printing nils"
-    (is (= ":a\n:c\n" (with-out-str (#'clojure.main/eval-opt ":a nil :c")))))
+    (is (= (platform-newlines ":a\n:c\n") (with-out-str (#'clojure.main/eval-opt ":a nil :c")))))
 
   (testing "does not block access to *in* (#299)"
     (with-in-str "(+ 1 1)"
-      (is (= "(+ 1 1)\n" (with-out-str (#'clojure.main/eval-opt "(read)")))))))
+      (is (= (platform-newlines "(+ 1 1)\n") (with-out-str (#'clojure.main/eval-opt "(read)")))))))
 
 (defmacro with-err-str
   "Evaluates exprs in a context in which *err* is bound to a fresh

@@ -15,13 +15,17 @@
 ;; This is just a macro to make my tests a little cleaner
 
 (ns clojure.test-clojure.pprint.test-helper
-  (:use [clojure.test :only (deftest is)]))
+  (:use [clojure.test :only (deftest is)]
+        [clojure.test-helper :only [platform-newlines]]))
 
 (defn- back-match [x y] (re-matches y x))
+
 (defmacro simple-tests [name & test-pairs]
   `(deftest ~name
      ~@(for [[x y] (partition 2 test-pairs)]
-         (if (instance? java.util.regex.Pattern y)
-           `(is (#'clojure.test-clojure.pprint.test-helper/back-match ~x ~y))
-           `(is (= ~x ~y))))))
+         (cond 
+          (instance? java.util.regex.Pattern y)
+          `(is (#'clojure.test-clojure.pprint.test-helper/back-match ~x ~y))
+          (instance? java.lang.String y) `(is (= ~x (platform-newlines ~y)))
+          :else `(is (= ~x ~y))))))
 

@@ -7,7 +7,8 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.test-clojure.java.io
-  (:use clojure.test clojure.java.io)
+  (:use clojure.test clojure.java.io
+        [clojure.test-helper :only [platform-newlines]])
   (:import (java.io File BufferedInputStream
                     FileInputStream InputStreamReader InputStream
                     FileOutputStream OutputStreamWriter OutputStream
@@ -27,7 +28,7 @@
     (is (= "foobar" (slurp f :encoding "UTF-16")))
     (testing "deprecated arity"
       (is (=
-           "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n"
+           (platform-newlines "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n")
            (with-out-str
              (is (= "foobar" (slurp f "UTF-16")))))))))
   
