@@ -249,7 +249,7 @@ print the object to the currently bound value of *out*."
          (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
            (write-out object)))
        (if (not (= 0 (get-column *out*)))
-         (.write *out* (int \newline))))))
+         (prn)))))
 
 (defmacro pp 
   "A convenience macro that pretty prints the last thing output. This is
