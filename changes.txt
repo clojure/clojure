@@ -1,4 +1,4 @@
-Changes to Clojure in Version 1.3 Alpha 2
+Changes to Clojure in Version 1.3 Alpha 3
 
 = CONTENTS =
 
