@@ -56,6 +56,15 @@
     (is (thrown? RuntimeException (send agt inc)))))
 
 (deftest can-send-from-error-handler-before-popping-action-that-caused-error
+  (let [target-agent (agent :before-error)
+        handler (fn [agt err]
+                  (send target-agent (constantly :sent-after-error)))
+        failing-agent (agent nil :error-handler handler)]
+    (send failing-agent (fn [_] (throw (RuntimeException.))))
+    (await-for 1000 failing-agent)
+    (is (= :sent-after-error @target-agent))))
+
+(deftest can-send-to-self-from-error-handler-before-popping-action-that-caused-error
   (let [handler (fn [agt err]
                   (send *agent* (constantly :sent-after-error)))
         failing-agent (agent nil :error-handler handler)]
