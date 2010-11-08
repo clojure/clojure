@@ -1821,7 +1821,8 @@
   {:added "1.0"
    :static true}
   [^clojure.lang.Agent a f & args]
-  (. a (dispatch (binding-conveyor-fn f) args false)))
+  (binding [*agent* a]
+    (.dispatch a (binding-conveyor-fn f) args false)))
 
 (defn send-off
   "Dispatch a potentially blocking action to an agent. Returns the
@@ -1832,7 +1833,8 @@
   {:added "1.0"
    :static true}
   [^clojure.lang.Agent a f & args]
-  (. a (dispatch (binding-conveyor-fn f) args true)))
+  (binding [*agent* a]
+    (.dispatch a (binding-conveyor-fn f) args true)))
 
 (defn release-pending-sends
   "Normally, actions sent directly or indirectly during another action

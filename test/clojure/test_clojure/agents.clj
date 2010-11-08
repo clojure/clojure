@@ -108,6 +108,12 @@
     (is (= 10 @agt))
     (is (nil? (agent-error agt)))))
 
+(deftest earmuff-agent-bound
+  (let [a (agent 1)]
+    (send a (fn [_] *agent*))
+    (await a)
+    (is (= a @a))))
+
 ; http://clojure.org/agents
 
 ; agent
