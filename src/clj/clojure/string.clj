@@ -187,6 +187,12 @@ Design notes for clojure.string:
   [^CharSequence s]
   (.. s toString trim))
 
+(defn whitespace?
+  "True if c is a whitespace."
+  {:added "1.3"}
+  [^Character c]
+  (Character/isWhitespace c))
+
 (defn ^String triml
   "Removes whitespace from the left side of string."
   {:added "1.2"}
@@ -194,7 +200,7 @@ Design notes for clojure.string:
   (loop [index (int 0)]
     (if (= (.length s) index)
       ""
-      (if (Character/isWhitespace (.charAt s index))
+      (if (whitespace? (.charAt s index))
         (recur (inc index))
         (.. s (subSequence index (.length s)) toString)))))
 
@@ -205,7 +211,7 @@ Design notes for clojure.string:
   (loop [index (.length s)]
     (if (zero? index)
       ""
-      (if (Character/isWhitespace (.charAt s (dec index)))
+      (if (whitespace? (.charAt s (dec index)))
         (recur (dec index))
         (.. s (subSequence 0 index) toString)))))
 
@@ -230,7 +236,7 @@ Design notes for clojure.string:
     (loop [index (int 0)]
       (if (= (.length s) index)
         true
-        (if (Character/isWhitespace (.charAt s index))
+        (if (whitespace? (.charAt s index))
           (recur (inc index))
           false)))
     true))

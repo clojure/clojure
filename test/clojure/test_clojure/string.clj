@@ -118,3 +118,9 @@
     (is (vector? result)))
   (is (= (list "foo") (s/split-lines "foo"))))
 
+(deftest t-whitespace
+  (is (s/whitespace? \space))
+  (is (s/whitespace? \newline))
+  (is (s/whitespace? \return))
+  (is (s/whitespace? \tab))
+  (is (not (s/whitespace? \x))))
