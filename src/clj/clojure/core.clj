@@ -303,7 +303,7 @@
                     m))
               m (conj (if (meta name) (meta name) {}) m)]
           (list 'def (with-meta name m)
-                (cons `fn fdecl) ))))
+                (cons `fn (cons name fdecl)) ))))
 
 (. (var defn) (setMacro))
 
