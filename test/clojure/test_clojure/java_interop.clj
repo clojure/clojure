@@ -118,6 +118,21 @@
 
 ; proxy, proxy-super
 
+(deftest test-proxy-chain
+  (testing "That the proxy functions can chain"
+    (are [x y] (= x y)
+        (-> (get-proxy-class Object) 
+            construct-proxy
+            (init-proxy {}) 
+            (update-proxy {"toString" (fn [this] "chain chain chain")}) 
+            str)
+        "chain chain chain"
+
+        (-> (proxy [Object] [] (toString [] "superfuzz bigmuff")) 
+            (update-proxy {"toString" (fn [this] "chain chain chain")}) 
+            str)
+        "chain chain chain")))
+
 
 (deftest test-bases
   (are [x y] (= x y)
