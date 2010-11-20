@@ -100,12 +100,12 @@
 (deftest illegal-extending
   (testing "you cannot extend a protocol to a type that implements the protocol inline"
     (is (fails-with-cause? IllegalArgumentException #".*HasProtocolInline already directly implements interface"
-          (eval '(extend clojure.test-clojure.protocols.HasProtocolInline
+          (eval '(extend clojure.test_clojure.protocols.HasProtocolInline
                          clojure.test-clojure.protocols.examples/ExampleProtocol
                          {:foo (fn [_] :extended)})))))
   (testing "you cannot extend to an interface"
     (is (fails-with-cause? IllegalArgumentException #"interface clojure.test_clojure.protocols.examples.ExampleProtocol is not a protocol"
-          (eval '(extend clojure.test-clojure.protocols.HasProtocolInline
+          (eval '(extend clojure.test_clojure.protocols.HasProtocolInline
                          clojure.test_clojure.protocols.examples.ExampleProtocol
                          {:foo (fn [_] :extended)}))))))
 

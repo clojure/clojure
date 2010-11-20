@@ -136,7 +136,7 @@
   {:added "1.2"}
   [tagname name fields interfaces methods]
   (let [tag (keyword (str *ns*) (str tagname))
-        classname (with-meta (symbol (str *ns* "." name)) (meta name))
+        classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
         interfaces (vec interfaces)
         interface-set (set (map resolve interfaces))
         methodname-set (set (map first methods))
@@ -292,7 +292,7 @@
   [name [& fields] & opts+specs]
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
-        classname (symbol (str *ns* "." gname))
+        classname (symbol (str (namespace-munge *ns*) "." gname))
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
@@ -316,7 +316,7 @@
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
-  (let [classname (with-meta (symbol (str *ns* "." name)) (meta name))]
+  (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
     `(deftype* ~tagname ~classname ~fields 
        :implements ~interfaces 
        ~@methods)))
@@ -384,7 +384,7 @@
   [name [& fields] & opts+specs]
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
-        classname (symbol (str *ns* "." gname))
+        classname (symbol (str (namespace-munge *ns*) "." gname))
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
@@ -519,7 +519,7 @@
                      (str "function " (.sym v)))))))))
 
 (defn- emit-protocol [name opts+sigs]
-  (let [iname (symbol (str (munge *ns*) "." (munge name)))
+  (let [iname (symbol (str (munge (namespace-munge *ns*)) "." (munge name)))
         [opts sigs]
         (loop [opts {:on (list 'quote iname) :on-interface iname} sigs opts+sigs]
           (condp #(%1 %2) (first sigs) 
