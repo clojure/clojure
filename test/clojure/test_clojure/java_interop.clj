@@ -124,12 +124,12 @@
         (-> (get-proxy-class Object) 
             construct-proxy
             (init-proxy {}) 
-            (update-proxy {"toString" (fn [this] "chain chain chain")}) 
+            (update-proxy {"toString" (fn [_] "chain chain chain")}) 
             str)
         "chain chain chain"
 
         (-> (proxy [Object] [] (toString [] "superfuzz bigmuff")) 
-            (update-proxy {"toString" (fn [this] "chain chain chain")}) 
+            (update-proxy {"toString" (fn [_] "chain chain chain")}) 
             str)
         "chain chain chain")))
 
