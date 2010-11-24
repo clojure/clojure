@@ -49,17 +49,17 @@
 (defn get-system-property 
   "Get a system property."
   ([stringable]
-   (System/getProperty (as-str stringable)))
+   (System/getProperty (name stringable)))
   ([stringable default]
-   (System/getProperty (as-str stringable) default)))
+   (System/getProperty (name stringable) default)))
 
 (defn set-system-properties
   "Set some system properties. Nil clears a property."
   [settings]
   (doseq [[name val] settings]
     (if val
-      (System/setProperty (as-str name) (as-str val))
-      (System/clearProperty (as-str name)))))
+      (System/setProperty (name name) (name val))
+      (System/clearProperty (name name)))))
 
 (defmacro with-system-properties
   "setting => property-name value
@@ -83,12 +83,12 @@
 ; Not there is no corresponding props->map. Just destructure!
 (defn ^Properties as-properties
   "Convert any seq of pairs to a java.utils.Properties instance.
-   Uses as-str to convert both keys and values into strings."
+   Uses name to convert both keys and values into strings."
   {:tag Properties}
   [m]
   (let [p (Properties.)]
     (doseq [[k v] m]
-      (.setProperty p (as-str k) (as-str v)))
+      (.setProperty p (name k) (name v)))
     p))
 
 (defn read-properties
