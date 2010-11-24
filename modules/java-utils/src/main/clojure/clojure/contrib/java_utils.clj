@@ -44,7 +44,8 @@
   clojure.contrib.java-utils
   (:import [java.io File FileOutputStream]
 	   [java.util Properties]
-           [java.net URI URL]))
+           [java.net URI URL])
+  (:use [clojure.java.io :only [file]]))
 
 (defn get-system-property 
   "Get a system property."
