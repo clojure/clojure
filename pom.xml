@@ -104,10 +104,4 @@
       </plugin>
     </plugins>
   </build>
-  <distributionManagement>
-    <repository>
-      <id>clojure-releases</id>
-      <url>scp://build.clojure.org/srv/www/releases</url>
-    </repository>
-  </distributionManagement>
 </project>
