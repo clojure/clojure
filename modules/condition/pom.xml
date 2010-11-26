@@ -32,6 +32,8 @@
 	<groupId>com.theoryinpractise</groupId>
 	<artifactId>clojure-maven-plugin</artifactId>
 	<configuration>
+	  <temporaryOutputDirectory>false</temporaryOutputDirectory>
+	  <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
 	  <namespaces>
 	    <namespace>clojure\.contrib\.condition\.Condition</namespace>
 	  </namespaces>
