@@ -10,7 +10,8 @@
   <packaging>pom</packaging>
   <scm>
     <connection>scm:git:git://github.com/clojure/clojure-contrib.git</connection>
-    <url>http://github.com/clojure/clojure-contrib/</url>
+    <developerConnection>scm:git:git@github.com:clojure/clojure-contrib.git</developerConnection>
+    <url>git@github.com:clojure/clojure-contrib.git</url>
   </scm>
   <modules>
     <!-- The parent module defines common configuration for all modules. -->
