@@ -13,6 +13,11 @@
     <developerConnection>scm:git:git@github.com:clojure/clojure-contrib.git</developerConnection>
     <url>git@github.com:clojure/clojure-contrib.git</url>
   </scm>
+  <parent>
+    <groupId>org.clojure</groupId>
+    <artifactId>pom.contrib</artifactId>
+    <version>0.0.19</version>
+  </parent>
   <modules>
     <!-- The parent module defines common configuration for all modules. -->
     <module>modules/parent</module>
