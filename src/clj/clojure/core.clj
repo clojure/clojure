@@ -3031,6 +3031,49 @@
    :added "1.0"}
   [x] (clojure.lang.RT/booleanCast x))
 
+(defn unchecked-byte
+  "Coerce to byte. Subject to rounding or truncation."
+  {:inline (fn  [x] `(. clojure.lang.RT (uncheckedByteCast ~x)))
+   :added "1.3"}
+  [^Number x] (clojure.lang.RT/uncheckedByteCast x))
+
+(defn unchecked-short
+  "Coerce to short. Subject to rounding or truncation."
+  {:inline (fn  [x] `(. clojure.lang.RT (uncheckedShortCast ~x)))
+   :added "1.3"}
+  [^Number x] (clojure.lang.RT/uncheckedShortCast x))
+
+(defn unchecked-char
+  "Coerce to char. Subject to rounding or truncation."
+  {:inline (fn  [x] `(. clojure.lang.RT (uncheckedCharCast ~x)))
+   :added "1.3"}
+  [x] (. clojure.lang.RT (uncheckedCharCast x)))
+
+(defn unchecked-int
+  "Coerce to int. Subject to rounding or truncation."
+  {:inline (fn  [x] `(. clojure.lang.RT (uncheckedIntCast ~x)))
+   :added "1.3"}
+  [^Number x] (clojure.lang.RT/uncheckedIntCast x))
+
+(defn unchecked-long
+  "Coerce to long. Subject to rounding or truncation."
+  {:inline (fn  [x] `(. clojure.lang.RT (uncheckedLongCast ~x)))
+   :added "1.3"}
+  [^Number x] (clojure.lang.RT/uncheckedLongCast x))
+
+(defn unchecked-float
+  "Coerce to float. Subject to rounding."
+  {:inline (fn  [x] `(. clojure.lang.RT (uncheckedFloatCast ~x)))
+   :added "1.3"}
+  [^Number x] (clojure.lang.RT/uncheckedFloatCast x))
+
+(defn unchecked-double
+  "Coerce to double. Subject to rounding."
+  {:inline (fn  [x] `(. clojure.lang.RT (uncheckedDoubleCast ~x)))
+   :added "1.3"}
+  [^Number x] (clojure.lang.RT/uncheckedDoubleCast x))
+
+
 (defn number?
   "Returns true if x is a Number"
   {:added "1.0"
@@ -5832,14 +5875,11 @@
   {:added "1.0"}
   ([f & opts]
      (let [opts (normalize-slurp-opts opts)
-           sb (StringBuilder.)]
+           sb (StringBuilder.)
+           sw (java.io.StringWriter.)]
        (with-open [#^java.io.Reader r (apply jio/reader f opts)]
-         (loop [c (.read r)]
-           (if (neg? c)
-             (str sb)
-             (do
-               (.append sb (char c))
-               (recur (.read r)))))))))
+         (jio/copy r sw)
+         (str sw)))))
 
 (defn spit
   "Opposite of slurp.  Opens f with writer, writes content, then

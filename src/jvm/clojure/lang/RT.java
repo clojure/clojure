@@ -1055,6 +1055,214 @@ static public double doubleCast(double x){
 	return x;
 }
 
+static public byte uncheckedByteCast(Object x){
+    return ((Number) x).byteValue();
+}
+
+static public byte uncheckedByteCast(byte x){
+    return x;
+}
+
+static public byte uncheckedByteCast(short x){
+    return (byte) x;
+}
+
+static public byte uncheckedByteCast(int x){
+    return (byte) x;
+}
+
+static public byte uncheckedByteCast(long x){
+    return (byte) x;
+}
+
+static public byte uncheckedByteCast(float x){
+    return (byte) x;
+}
+
+static public byte uncheckedByteCast(double x){
+    return (byte) x;
+}
+
+static public short uncheckedShortCast(Object x){
+    return ((Number) x).shortValue();
+}
+
+static public short uncheckedShortCast(byte x){
+    return x;
+}
+
+static public short uncheckedShortCast(short x){
+    return x;
+}
+
+static public short uncheckedShortCast(int x){
+    return (short) x;
+}
+
+static public short uncheckedShortCast(long x){
+    return (short) x;
+}
+
+static public short uncheckedShortCast(float x){
+    return (short) x;
+}
+
+static public short uncheckedShortCast(double x){
+    return (short) x;
+}
+
+static public char uncheckedCharCast(Object x){
+    if(x instanceof Character)
+	return ((Character) x).charValue();
+    return (char) ((Number) x).longValue();
+}
+
+static public char uncheckedCharCast(byte x){
+    return (char) x;
+}
+
+static public char uncheckedCharCast(short x){
+    return (char) x;
+}
+
+static public char uncheckedCharCast(char x){
+    return x;
+}
+
+static public char uncheckedCharCast(int x){
+    return (char) x;
+}
+
+static public char uncheckedCharCast(long x){
+    return (char) x;
+}
+
+static public char uncheckedCharCast(float x){
+    return (char) x;
+}
+
+static public char uncheckedCharCast(double x){
+    return (char) x;
+}
+
+static public int uncheckedIntCast(Object x){
+    if(x instanceof Number)
+	return ((Number)x).intValue();
+    return ((Character) x).charValue();
+}
+
+static public int uncheckedIntCast(byte x){
+    return x;
+}
+
+static public int uncheckedIntCast(short x){
+    return x;
+}
+
+static public int uncheckedIntCast(char x){
+    return x;
+}
+
+static public int uncheckedIntCast(int x){
+    return x;
+}
+
+static public int uncheckedIntCast(long x){
+    return (int) x;
+}
+
+static public int uncheckedIntCast(float x){
+    return (int) x;
+}
+
+static public int uncheckedIntCast(double x){
+    return (int) x;
+}
+
+static public long uncheckedLongCast(Object x){
+    return ((Number) x).longValue();
+}
+
+static public long uncheckedLongCast(byte x){
+    return x;
+}
+
+static public long uncheckedLongCast(short x){
+    return x;
+}
+
+static public long uncheckedLongCast(int x){
+    return x;
+}
+
+static public long uncheckedLongCast(long x){
+    return x;
+}
+
+static public long uncheckedLongCast(float x){
+    return (long) x;
+}
+
+static public long uncheckedLongCast(double x){
+    return (long) x;
+}
+
+static public float uncheckedFloatCast(Object x){
+    return ((Number) x).floatValue();
+}
+
+static public float uncheckedFloatCast(byte x){
+    return x;
+}
+
+static public float uncheckedFloatCast(short x){
+    return x;
+}
+
+static public float uncheckedFloatCast(int x){
+    return x;
+}
+
+static public float uncheckedFloatCast(long x){
+    return x;
+}
+
+static public float uncheckedFloatCast(float x){
+    return x;
+}
+
+static public float uncheckedFloatCast(double x){
+    return (float) x;
+}
+
+static public double uncheckedDoubleCast(Object x){
+    return ((Number) x).doubleValue();
+}
+
+static public double uncheckedDoubleCast(byte x){
+    return x;
+}
+
+static public double uncheckedDoubleCast(short x){
+    return x;
+}
+
+static public double uncheckedDoubleCast(int x){
+    return x;
+}
+
+static public double uncheckedDoubleCast(long x){
+    return x;
+}
+
+static public double uncheckedDoubleCast(float x){
+    return x;
+}
+
+static public double uncheckedDoubleCast(double x){
+    return x;
+}
+
 static public IPersistentMap map(Object... init){
 	if(init == null)
 		return PersistentArrayMap.EMPTY;

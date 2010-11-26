@@ -12,7 +12,8 @@
 ;;
 
 (ns clojure.test-clojure.numbers
-  (:use clojure.test))
+  (:use clojure.test
+        clojure.template))
 
 
 ; TODO:
@@ -36,6 +37,91 @@
     Long/MAX_VALUE
     13178456923875639284562345789M
     13178456923875639284562345789N))
+
+(deftest unchecked-cast-num-obj
+  (do-template [prim-array cast]
+    (are [n]
+      (let [a (prim-array 1)]
+        (aset a 0 (cast n)))
+      (Byte. Byte/MAX_VALUE)
+      (Short. Short/MAX_VALUE)
+      (Integer. Integer/MAX_VALUE)
+      (Long. Long/MAX_VALUE)
+      (Float. Float/MAX_VALUE)
+      (Double. Double/MAX_VALUE))
+    byte-array
+    unchecked-byte
+    short-array
+    unchecked-short
+    char-array
+    unchecked-char
+    int-array
+    unchecked-int
+    long-array
+    unchecked-long
+    float-array
+    unchecked-float
+    double-array
+    unchecked-double))
+
+(deftest unchecked-cast-num-prim
+  (do-template [prim-array cast]
+    (are [n]
+      (let [a (prim-array 1)]
+        (aset a 0 (cast n)))
+      Byte/MAX_VALUE
+      Short/MAX_VALUE
+      Integer/MAX_VALUE
+      Long/MAX_VALUE
+      Float/MAX_VALUE
+      Double/MAX_VALUE)
+    byte-array
+    unchecked-byte
+    short-array
+    unchecked-short
+    char-array
+    unchecked-char
+    int-array
+    unchecked-int
+    long-array
+    unchecked-long
+    float-array
+    unchecked-float
+    double-array
+    unchecked-double))
+
+(deftest unchecked-cast-char
+  ; in keeping with the checked cast functions, char and Character can only be cast to int
+  (is (unchecked-int (char 0xFFFF)))
+  (is (let [c (char 0xFFFF)] (unchecked-int c)))) ; force primitive char
+
+(def expected-casts
+  [
+   [:input           [-1            0           1           Byte/MAX_VALUE  Short/MAX_VALUE  Integer/MAX_VALUE  Long/MAX_VALUE         Float/MAX_VALUE    Double/MAX_VALUE]]
+   [char             [:error        (char 0)    (char 1)    (char 127)      (char 32767)     :error             :error                 :error             :error]]
+   [unchecked-char   [(char 65535)  (char 0)    (char 1)    (char 127)      (char 32767)     (char 65535)       (char 65535)           (char 65535)       (char 65535)]]
+   [byte             [-1            0           1           Byte/MAX_VALUE  :error           :error             :error                 :error             :error]]
+   [unchecked-byte   [-1            0           1           Byte/MAX_VALUE  -1               -1                 -1                     -1                 -1]]
+   [short            [-1            0           1           Byte/MAX_VALUE  Short/MAX_VALUE  :error             :error                 :error             :error]]
+   [unchecked-short  [-1            0           1           Byte/MAX_VALUE  Short/MAX_VALUE  -1                 -1                     -1                 -1]] 
+   [int              [-1            0           1           Byte/MAX_VALUE  Short/MAX_VALUE  Integer/MAX_VALUE  :error                 :error             :error]]
+   [unchecked-int    [-1            0           1           Byte/MAX_VALUE  Short/MAX_VALUE  Integer/MAX_VALUE  -1                     Integer/MAX_VALUE  Integer/MAX_VALUE]]
+   [long             [-1            0           1           Byte/MAX_VALUE  Short/MAX_VALUE  Integer/MAX_VALUE  Long/MAX_VALUE         Long/MAX_VALUE     Long/MAX_VALUE]]
+   [unchecked-long   [-1            0           1           Byte/MAX_VALUE  Short/MAX_VALUE  Integer/MAX_VALUE  Long/MAX_VALUE         Long/MAX_VALUE     Long/MAX_VALUE]]
+                                                                                             ;; 2.14748365E9 if when float/double conversion is avoided...
+   [float            [-1.0          0.0         1.0         127.0           32767.0          2.147483648E9      9.223372036854776E18   Float/MAX_VALUE    :error]]
+   [unchecked-float  [-1.0          0.0         1.0         127.0           32767.0          2.147483648E9      9.223372036854776E18   Float/MAX_VALUE    Float/POSITIVE_INFINITY]]
+   [double           [-1.0          0.0         1.0         127.0           32767.0          2.147483647E9      9.223372036854776E18   Float/MAX_VALUE    Double/MAX_VALUE]]
+   [unchecked-double [-1.0          0.0         1.0         127.0           32767.0          2.147483647E9      9.223372036854776E18   Float/MAX_VALUE    Double/MAX_VALUE]]])
+
+(deftest test-expected-casts
+  (let [[[_ inputs] & expectations] expected-casts]
+    (doseq [[f vals] expectations]
+      (let [wrapped (fn [x]
+                      (try
+                       (f x)
+                       (catch IllegalArgumentException e :error)))]
+        (is (= vals (map wrapped inputs)))))))
 
 ;; *** Functions ***
 
@@ -394,3 +480,4 @@ Math/pow overflows to Infinity."
   (is (== (numerator 1/2) 1))
   (is (= (bigint (/ 100000000000000000000 3)) 33333333333333333333))
   (is (= (long 10000000000000000000/3) 3333333333333333333)))
+
