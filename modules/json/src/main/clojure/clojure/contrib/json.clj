@@ -238,9 +238,7 @@
       (let [[k v] (first x)]
         (when (nil? k)
           (throw (Exception. "JSON object keys cannot be nil/null")))
-        (.print out \")
-        (.print out (as-str k))
-        (.print out \")
+	(write-json-string (as-str k) out)
         (.print out \:)
         (write-json v out))
       (let [nxt (next x)]

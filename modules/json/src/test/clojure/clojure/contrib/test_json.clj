@@ -185,6 +185,9 @@
 (deftest can-accept-eof
   (is (= ::eof (read-json "" true false ::eof))))
 
+(deftest characters-in-map-keys-are-escaped
+  (is (= (json-str {"\"" 42}) "{\"\\\"\":42}")))
+
 ;;; Pretty-printer
 
 (deftest pretty-printing
