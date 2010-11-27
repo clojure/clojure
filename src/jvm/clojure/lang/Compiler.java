@@ -234,6 +234,10 @@ static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.inte
 static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                             Symbol.intern("add-annotations"));
 
+//boolean
+static final public Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                   Symbol.intern("*unchecked-math*"), Boolean.FALSE).setDynamic();
+
 //Integer
 static final public Var LINE = Var.create(0).setDynamic();
 
@@ -797,18 +801,36 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				{
 				Method m = null;
 				gen.checkCast(NUMBER_TYPE);
-				if(paramType == int.class)
-					m = Method.getMethod("int intCast(Object)");
-				else if(paramType == float.class)
-					m = Method.getMethod("float floatCast(Object)");
-				else if(paramType == double.class)
-					m = Method.getMethod("double doubleCast(Object)");
-				else if(paramType == long.class)
-					m = Method.getMethod("long longCast(Object)");
-				else if(paramType == byte.class)
-					m = Method.getMethod("byte byteCast(Object)");
-				else if(paramType == short.class)
-					m = Method.getMethod("short shortCast(Object)");
+				if(RT.booleanCast(UNCHECKED_MATH.deref()))
+					{
+					if(paramType == int.class)
+						m = Method.getMethod("int uncheckedIntCast(Object)");
+					else if(paramType == float.class)
+						m = Method.getMethod("float uncheckedFloatCast(Object)");
+					else if(paramType == double.class)
+						m = Method.getMethod("double uncheckedDoubleCast(Object)");
+					else if(paramType == long.class)
+						m = Method.getMethod("long uncheckedLongCast(Object)");
+					else if(paramType == byte.class)
+						m = Method.getMethod("byte uncheckedByteCast(Object)");
+					else if(paramType == short.class)
+						m = Method.getMethod("short uncheckedShortCast(Object)");					
+					}
+				else
+					{
+					if(paramType == int.class)
+						m = Method.getMethod("int intCast(Object)");
+					else if(paramType == float.class)
+						m = Method.getMethod("float floatCast(Object)");
+					else if(paramType == double.class)
+						m = Method.getMethod("double doubleCast(Object)");
+					else if(paramType == long.class)
+						m = Method.getMethod("long longCast(Object)");
+					else if(paramType == byte.class)
+						m = Method.getMethod("byte byteCast(Object)");
+					else if(paramType == short.class)
+						m = Method.getMethod("short shortCast(Object)");
+					}
 				gen.invokeStatic(RT_TYPE, m);
 				}
 			}
@@ -1204,7 +1226,10 @@ static abstract class MethodExpr extends HostExpr{
 					{
 					final MaybePrimitiveExpr pe = (MaybePrimitiveExpr) e;
 					pe.emitUnboxed(C.EXPRESSION, objx, gen);
-					gen.invokeStatic(RT_TYPE, Method.getMethod("int intCast(long)"));
+					if(RT.booleanCast(UNCHECKED_MATH.deref()))
+						gen.invokeStatic(RT_TYPE, Method.getMethod("int uncheckedIntCast(long)"));
+					else
+						gen.invokeStatic(RT_TYPE, Method.getMethod("int intCast(long)"));
 					}
 				else if(primc == float.class && parameterTypes[i] == double.class)
 					{
@@ -6598,6 +6623,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber()
+			       ,UNCHECKED_MATH, UNCHECKED_MATH.deref()
 			));
 
 	try
@@ -6714,6 +6740,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       CONSTANT_IDS, new IdentityHashMap(),
 			       KEYWORDS, PersistentHashMap.EMPTY,
 			       VARS, PersistentHashMap.EMPTY
+					,UNCHECKED_MATH, UNCHECKED_MATH.deref()
 			   //    ,LOADER, RT.makeClassLoader()
 			));
 

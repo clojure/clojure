@@ -303,7 +303,9 @@
                     m))
               m (conj (if (meta name) (meta name) {}) m)]
           (list 'def (with-meta name m)
-                (cons `fn (cons name fdecl)) ))))
+                ;;todo - restore propagation of fn name
+                ;;must figure out how to convey primitive hints to self calls first
+                (cons `fn fdecl) ))))
 
 (. (var defn) (setMacro))
 
@@ -814,7 +816,7 @@
 (defn int
   "Coerce to int"
   {
-   :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))
+   :inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedIntCast 'intCast) ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (intCast x)))
 
@@ -854,7 +856,7 @@
 (defn inc
   "Returns a number one greater than num. Does not auto-promote
   longs, will throw on overflow. See also: inc'"
-  {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))
+  {:inline (fn [x] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_inc 'inc) ~x)))
    :added "1.2"}
   [x] (. clojure.lang.Numbers (inc x)))
 
@@ -899,7 +901,7 @@
 (defn +
   "Returns the sum of nums. (+) returns 0. Does not auto-promote
   longs, will throw on overflow. See also: +'"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (add ~x ~y)))
+  {:inline (fn [x y] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_add 'add) ~x ~y)))
    :inline-arities #{2}
    :added "1.2"}
   ([] 0)
@@ -923,7 +925,7 @@
 (defn *
   "Returns the product of nums. (*) returns 1. Does not auto-promote
   longs, will throw on overflow. See also: *'"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (multiply ~x ~y)))
+  {:inline (fn [x y] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_multiply 'multiply) ~x ~y)))
    :inline-arities #{2}
    :added "1.2"}
   ([] 1)
@@ -959,7 +961,7 @@
   "If no ys are supplied, returns the negation of x, else subtracts
   the ys from x and returns the result. Does not auto-promote
   longs, will throw on overflow. See also: -'"
-  {:inline (fn [& args] `(. clojure.lang.Numbers (minus ~@args)))
+  {:inline (fn [& args] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_minus 'minus) ~@args)))
    :inline-arities #{1 2}
    :added "1.2"}
   ([x] (. clojure.lang.Numbers (minus x)))
@@ -1055,7 +1057,7 @@
 (defn dec
   "Returns a number one less than num. Does not auto-promote
   longs, will throw on overflow. See also: dec'"
-  {:inline (fn [x] `(. clojure.lang.Numbers (dec ~x)))
+  {:inline (fn [x] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_dec 'dec) ~x)))
    :added "1.2"}
   [x] (. clojure.lang.Numbers (dec x)))
 
@@ -2984,7 +2986,7 @@
 
 (defn float
   "Coerce to float"
-  {:inline (fn  [x] `(. clojure.lang.RT (floatCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedFloatCast 'floatCast) ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/floatCast x))
 
@@ -2996,19 +2998,19 @@
 
 (defn short
   "Coerce to short"
-  {:inline (fn  [x] `(. clojure.lang.RT (shortCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedShortCast 'shortCast) ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/shortCast x))
 
 (defn byte
   "Coerce to byte"
-  {:inline (fn  [x] `(. clojure.lang.RT (byteCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedByteCast 'byteCast) ~x)))
    :added "1.0"}
   [^Number x] (clojure.lang.RT/byteCast x))
 
 (defn char
   "Coerce to char"
-  {:inline (fn  [x] `(. clojure.lang.RT (charCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedCharCast 'charCast) ~x)))
    :added "1.1"}
   [x] (. clojure.lang.RT (charCast x)))
 
@@ -5657,6 +5659,11 @@
 (add-doc-and-meta *compile-files*
   "Set to true when compiling files, false otherwise."
   {:added "1.0"})
+
+(add-doc-and-meta *unchecked-math*
+  "While bound to true, compilations of +, -, *, inc, dec and the
+  coercions will be done without overflow checks. Default: false."
+  {:added "1.3"})
 
 (add-doc-and-meta *ns*
   "A clojure.lang.Namespace object representing the current namespace."

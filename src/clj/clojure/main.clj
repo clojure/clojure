@@ -32,6 +32,7 @@
              *print-level* *print-level*
              *compile-path* (System/getProperty "clojure.compile.path" "classes")
              *command-line-args* *command-line-args*
+             *unchecked-math* *unchecked-math*
              *assert* *assert*
              *1 nil
              *2 nil
