@@ -4,12 +4,9 @@
 ;; by Mark Engelberg (mark.engelberg@gmail.com)
 ;; July 16, 2010
 
-(ns clojure.contrib.priority-map
-  (:use clojure.test)
-  (:import clojure.lang.MapEntry java.util.Map clojure.lang.PersistentTreeMap))
-
-(comment
-"A priority map is very similar to a sorted map, but whereas a sorted map produces a
+(ns 
+  ^{:author "Mark Engelberg",
+     :doc "A priority map is very similar to a sorted map, but whereas a sorted map produces a
 sequence of the entries sorted by key, a priority map produces the entries sorted by value.
 In addition to supporting all the functions a sorted map supports, a priority map
 can also be thought of as a queue of [item priority] pairs.  To support usage as
@@ -145,7 +142,10 @@ bottleneck in your program.
 
 All in all, I hope you will find priority maps to be an easy-to-use and useful addition
 to Clojure's assortment of built-in maps (hash-map and sorted-map).
-")
+"}
+    clojure.contrib.priority-map
+  (:use clojure.test)
+  (:import clojure.lang.MapEntry java.util.Map clojure.lang.PersistentTreeMap))
 
 ; Note that the plan is to eventually support subseq, but this will require
 ; some changes to core:
