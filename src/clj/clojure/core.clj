@@ -1066,12 +1066,12 @@
    :added "1.0"}
   [x] (. clojure.lang.Numbers (unchecked_int_inc x)))
 
-(defn unchecked-inc-long
+(defn unchecked-inc
   "Returns a number one greater than x, a long.
   Note - uses a primitive operator subject to overflow."
-  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_long_inc ~x)))
+  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_inc ~x)))
    :added "1.0"}
-  [x] (. clojure.lang.Numbers (unchecked_long_inc x)))
+  [x] (. clojure.lang.Numbers (unchecked_inc x)))
 
 (defn unchecked-dec-int
   "Returns a number one less than x, an int.
@@ -1080,12 +1080,12 @@
    :added "1.0"}
   [x] (. clojure.lang.Numbers (unchecked_int_dec x)))
 
-(defn unchecked-dec-long
+(defn unchecked-dec
   "Returns a number one less than x, a long.
   Note - uses a primitive operator subject to overflow."
-  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_long_dec ~x)))
+  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_dec ~x)))
    :added "1.0"}
-  [x] (. clojure.lang.Numbers (unchecked_long_dec x)))
+  [x] (. clojure.lang.Numbers (unchecked_dec x)))
 
 (defn unchecked-negate-int
   "Returns the negation of x, an int.
@@ -1094,12 +1094,12 @@
    :added "1.0"}
   [x] (. clojure.lang.Numbers (unchecked_int_negate x)))
 
-(defn unchecked-negate-long
+(defn unchecked-negate
   "Returns the negation of x, a long.
   Note - uses a primitive operator subject to overflow."
-  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_long_negate ~x)))
+  {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_minus ~x)))
    :added "1.0"}
-  [x] (. clojure.lang.Numbers (unchecked_long_negate x)))
+  [x] (. clojure.lang.Numbers (unchecked_minus x)))
 
 (defn unchecked-add-int
   "Returns the sum of x and y, both int.
@@ -1108,12 +1108,12 @@
    :added "1.0"}
   [x y] (. clojure.lang.Numbers (unchecked_int_add x y)))
 
-(defn unchecked-add-long
+(defn unchecked-add
   "Returns the sum of x and y, both long.
   Note - uses a primitive operator subject to overflow."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_long_add ~x ~y)))
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_add ~x ~y)))
    :added "1.0"}
-  [x y] (. clojure.lang.Numbers (unchecked_long_add x y)))
+  [x y] (. clojure.lang.Numbers (unchecked_add x y)))
 
 (defn unchecked-subtract-int
   "Returns the difference of x and y, both int.
@@ -1122,12 +1122,12 @@
    :added "1.0"}
   [x y] (. clojure.lang.Numbers (unchecked_int_subtract x y)))
 
-(defn unchecked-subtract-long
+(defn unchecked-subtract
   "Returns the difference of x and y, both long.
   Note - uses a primitive operator subject to overflow."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_long_subtract ~x ~y)))
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_minus ~x ~y)))
    :added "1.0"}
-  [x y] (. clojure.lang.Numbers (unchecked_long_subtract x y)))
+  [x y] (. clojure.lang.Numbers (unchecked_minus x y)))
 
 (defn unchecked-multiply-int
   "Returns the product of x and y, both int.
@@ -1136,12 +1136,12 @@
    :added "1.0"}
   [x y] (. clojure.lang.Numbers (unchecked_int_multiply x y)))
 
-(defn unchecked-multiply-long
+(defn unchecked-multiply
   "Returns the product of x and y, both long.
   Note - uses a primitive operator subject to overflow."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_long_multiply ~x ~y)))
+  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_multiply ~x ~y)))
    :added "1.0"}
-  [x y] (. clojure.lang.Numbers (unchecked_long_multiply x y)))
+  [x y] (. clojure.lang.Numbers (unchecked_multiply x y)))
 
 (defn unchecked-divide-int
   "Returns the division of x by y, both int.
@@ -1150,26 +1150,12 @@
    :added "1.0"}
   [x y] (. clojure.lang.Numbers (unchecked_int_divide x y)))
 
-(defn unchecked-divide-long
-  "Returns the division of x by y, both long.
-  Note - uses a primitive operator subject to truncation."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_long_divide ~x ~y)))
-   :added "1.0"}
-  [x y] (. clojure.lang.Numbers (unchecked_long_divide x y)))
-
 (defn unchecked-remainder-int
   "Returns the remainder of division of x by y, both int.
   Note - uses a primitive operator subject to truncation."
   {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_int_remainder ~x ~y)))
    :added "1.0"}
   [x y] (. clojure.lang.Numbers (unchecked_int_remainder x y)))
-
-(defn unchecked-remainder-long
-  "Returns the remainder of division of x by y, both long.
-  Note - uses a primitive operator subject to truncation."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_long_remainder ~x ~y)))
-   :added "1.0"}
-  [x y] (. clojure.lang.Numbers (unchecked_long_remainder x y)))
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
@@ -1188,14 +1174,16 @@
 (defn quot
   "quot[ient] of dividing numerator by denominator."
   {:added "1.0"
-   :static true}
+   :static true
+   :inline (fn [x y] `(. clojure.lang.Numbers (quotient ~x ~y)))}
   [num div]
     (. clojure.lang.Numbers (quotient num div)))
 
 (defn rem
   "remainder of dividing numerator by denominator."
   {:added "1.0"
-   :static true}
+   :static true
+   :inline (fn [x y] `(. clojure.lang.Numbers (remainder ~x ~y)))}
   [num div]
     (. clojure.lang.Numbers (remainder num div)))
 
@@ -2354,7 +2342,7 @@
        (loop [~i 0]
          (when (< ~i n#)
            ~@body
-           (recur (unchecked-inc-long ~i)))))))
+           (recur (unchecked-inc ~i)))))))
 
 (defn map
   "Returns a lazy sequence consisting of the result of applying f to the
@@ -2726,7 +2714,7 @@
                            needrec (steppair 0)
                            subform (steppair 1)
                            recform-chunk 
-                             `(recur ~seq- ~chunk- ~count- (unchecked-inc-long ~i-))
+                             `(recur ~seq- ~chunk- ~count- (unchecked-inc ~i-))
                            steppair-chunk (step recform-chunk (nnext exprs))
                            subform-chunk (steppair-chunk 1)]
                        [true
@@ -2832,7 +2820,7 @@
        (loop [~i 0]
          (when (< ~i n#)
            ~@body
-           (recur (unchecked-inc-long ~i)))))))
+           (recur (unchecked-inc ~i)))))))
 
 #_(defn into
   "Returns a new coll consisting of to-coll with all of the items of
@@ -4073,12 +4061,12 @@
                                           (= k :when) `(if ~v
                                                          ~(do-cmod etc)
                                                          (recur
-                                                           (unchecked-inc-long ~gi)))
+                                                           (unchecked-inc ~gi)))
                                           (keyword? k)
                                             (err "Invalid 'for' keyword " k)
                                           :else
                                             `(do (chunk-append ~gb ~body-expr)
-                                                 (recur (unchecked-inc-long ~gi)))))]
+                                                 (recur (unchecked-inc ~gi)))))]
                           `(fn ~giter [~gxs]
                              (lazy-seq
                                (loop [~gxs ~gxs]
@@ -4583,7 +4571,7 @@
        (if (< ~idx  (alength a#))
          (do
            (aset ~ret ~idx ~expr)
-           (recur (unchecked-inc-long ~idx)))
+           (recur (unchecked-inc ~idx)))
          ~ret))))
 
 (defmacro areduce
@@ -4595,7 +4583,7 @@
   `(let [a# ~a]
      (loop  [~idx 0 ~ret ~init]
        (if (< ~idx  (alength a#))
-         (recur (unchecked-inc-long ~idx) ~expr)
+         (recur (unchecked-inc ~idx) ~expr)
          ~ret))))
 
 (defn float-array

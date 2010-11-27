@@ -185,21 +185,24 @@ static public Number divide(Object x, Object y){
 	return ops(x).combine(yops).divide((Number)x, (Number)y);
 }
 
-static public Number quotient(Number x, Number y){
+static public Number quotient(Object x, Object y){
 	Ops yops = ops(y);
-	if(yops.isZero(y))
+	if(yops.isZero((Number) y))
 		throw new ArithmeticException("Divide by zero");
-	return ops(x).combine(yops).quotient(x, y);
+	return ops(x).combine(yops).quotient((Number)x, (Number)y);
 }
 
-static public Number remainder(Number x, Number y){
+static public Number remainder(Object x, Object y){
 	Ops yops = ops(y);
-	if(yops.isZero(y))
+	if(yops.isZero((Number) y))
 		throw new ArithmeticException("Divide by zero");
-	return ops(x).combine(yops).remainder(x, y);
+	return ops(x).combine(yops).remainder((Number)x, (Number)y);
 }
 
-static double quotient(double n, double d){
+static public double quotient(double n, double d){
+	if(d == 0)
+		throw new ArithmeticException("Divide by zero");
+
 	double q = n / d;
 	if(q <= Long.MAX_VALUE && q >= Long.MIN_VALUE)
 		{
@@ -211,7 +214,10 @@ static double quotient(double n, double d){
 		}
 }
 
-static double remainder(double n, double d){
+static public double remainder(double n, double d){
+	if(d == 0)
+		throw new ArithmeticException("Divide by zero");
+
 	double q = n / d;
 	if(q <= Long.MAX_VALUE && q >= Long.MIN_VALUE)
 		{
@@ -1717,29 +1723,61 @@ static public Number num(long x){
 	return Long.valueOf(x);
 }
 
-static public long unchecked_long_add(long x, long y){
-	return x + y;
-}
+static public long unchecked_add(long x, long y){return x + y;}
+static public long unchecked_minus(long x, long y){return x - y;}
+static public long unchecked_multiply(long x, long y){return x * y;}
+static public long unchecked_minus(long x){return -x;}
+static public long unchecked_inc(long x){return x + 1;}
+static public long unchecked_dec(long x){return x - 1;}
 
-static public long unchecked_long_subtract(long x, long y){
-	return x - y;
-}
+static public Number unchecked_add(Object x, Object y){return add(x,y);}
+static public Number unchecked_minus(Object x, Object y){return minus(x,y);}
+static public Number unchecked_multiply(Object x, Object y){return multiply(x,y);}
+static public Number unchecked_minus(Object x){return minus(x);}
+static public Number unchecked_inc(Object x){return inc(x);}
+static public Number unchecked_dec(Object x){return dec(x);}
 
-static public long unchecked_long_negate(long x){
-	return -x;
-}
+static public double unchecked_add(double x, double y){return add(x,y);}
+static public double unchecked_minus(double x, double y){return minus(x,y);}
+static public double unchecked_multiply(double x, double y){return multiply(x,y);}
+static public double unchecked_minus(double x){return minus(x);}
+static public double unchecked_inc(double x){return inc(x);}
+static public double unchecked_dec(double x){return dec(x);}
 
-static public long unchecked_long_inc(long x){
-	return x + 1;
-}
+static public double unchecked_add(double x, Object y){return add(x,y);}
+static public double unchecked_minus(double x, Object y){return minus(x,y);}
+static public double unchecked_multiply(double x, Object y){return multiply(x,y);}
+static public double unchecked_add(Object x, double y){return add(x,y);}
+static public double unchecked_minus(Object x, double y){return minus(x,y);}
+static public double unchecked_multiply(Object x, double y){return multiply(x,y);}
 
-static public long unchecked_long_dec(long x){
-	return x - 1;
-}
+static public double unchecked_add(double x, long y){return add(x,y);}
+static public double unchecked_minus(double x, long y){return minus(x,y);}
+static public double unchecked_multiply(double x, long y){return multiply(x,y);}
+static public double unchecked_add(long x, double y){return add(x,y);}
+static public double unchecked_minus(long x, double y){return minus(x,y);}
+static public double unchecked_multiply(long x, double y){return multiply(x,y);}
 
-static public long unchecked_long_multiply(long x, long y){
-	return x * y;
-}
+static public Number unchecked_add(long x, Object y){return add(x,y);}
+static public Number unchecked_minus(long x, Object y){return minus(x,y);}
+static public Number unchecked_multiply(long x, Object y){return multiply(x,y);}
+static public Number unchecked_add(Object x, long y){return add(x,y);}
+static public Number unchecked_minus(Object x, long y){return minus(x,y);}
+static public Number unchecked_multiply(Object x, long y){return multiply(x,y);}
+
+static public Number quotient(double x, Object y){return quotient((Object)x,y);}
+static public Number quotient(Object x, double y){return quotient(x,(Object)y);}
+static public Number quotient(long x, Object y){return quotient((Object)x,y);}
+static public Number quotient(Object x, long y){return quotient(x,(Object)y);}
+static public double quotient(double x, long y){return quotient(x,(double)y);}
+static public double quotient(long x, double y){return quotient((double)x,y);}
+
+static public Number remainder(double x, Object y){return remainder((Object)x,y);}
+static public Number remainder(Object x, double y){return remainder(x,(Object)y);}
+static public Number remainder(long x, Object y){return remainder((Object)x,y);}
+static public Number remainder(Object x, long y){return remainder(x,(Object)y);}
+static public double remainder(double x, long y){return remainder(x,(double)y);}
+static public double remainder(long x, double y){return remainder((double)x,y);}
 
 static public long add(long x, long y){
 	long ret = x + y;
@@ -1820,11 +1858,11 @@ static public Number multiplyP(long x, long y){
 	return num(ret);
 }
 
-static public long unchecked_long_divide(long x, long y){
+static public long quotient(long x, long y){
 	return x / y;
 }
 
-static public long unchecked_long_remainder(long x, long y){
+static public long remainder(long x, long y){
 	return x % y;
 }
 
