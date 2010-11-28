@@ -5870,11 +5870,14 @@
   {:added "1.0"}
   ([f & opts]
      (let [opts (normalize-slurp-opts opts)
-           sb (StringBuilder.)
-           sw (java.io.StringWriter.)]
+           sb (StringBuilder.)]
        (with-open [#^java.io.Reader r (apply jio/reader f opts)]
-         (jio/copy r sw)
-         (str sw)))))
+         (loop [c (.read r)]
+           (if (neg? c)
+             (str sb)
+             (do
+               (.append sb (char c))
+               (recur (.read r)))))))))
 
 (defn spit
   "Opposite of slurp.  Opens f with writer, writes content, then
