@@ -114,6 +114,19 @@
     (await a)
     (is (= a @a))))
 
+(def ^:dynamic *bind-me* :root-binding)
+
+(deftest thread-conveyance-to-agents
+  (let [a (agent nil)]
+    (doto (Thread.
+           (fn []
+             (binding [*bind-me* :thread-binding]
+               (send a (constantly *bind-me*)))
+             (await a)))
+      (.start)
+      (.join))
+    (is (= @a :thread-binding))))
+
 ; http://clojure.org/agents
 
 ; agent
