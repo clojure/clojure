@@ -5106,7 +5106,7 @@
 
   (ns foo.bar
     (:refer-clojure :exclude [ancestors printf])
-    (:require (clojure.contrib sql sql.tests))
+    (:require (clojure.contrib sql combinatorics))
     (:use (my.lib this that))
     (:import (java.util Date Timer Random)
              (java.sql Connection Statement)))"
