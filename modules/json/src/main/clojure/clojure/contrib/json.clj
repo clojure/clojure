@@ -303,7 +303,11 @@
         {:write-json write-json-generic})
 
 (defn json-str
-  "Converts x to a JSON-formatted string."
+  "Converts x to a JSON-formatted string.
+
+  Valid options are:
+    :escape-unicode false
+        to turn of \uXXXX escapes of Unicode characters."
   [x & options]
   (let [{:keys [escape-unicode] :or {escape-unicode true}} options
 	sw (StringWriter.)
@@ -312,7 +316,11 @@
     (.toString sw)))
 
 (defn print-json
-  "Write JSON-formatted output to *out*"
+  "Write JSON-formatted output to *out*.
+
+  Valid options are:
+    :escape-unicode false
+        to turn off \uXXXX escapes of Unicode characters."
   [x & options]
   (let [{:keys [escape-unicode] :or {escape-unicode true}} options]
     (write-json x *out* escape-unicode)))
@@ -342,7 +350,11 @@
         :else (pprint-json-generic x escape-unicode)))
 
 (defn pprint-json
-  "Pretty-prints JSON representation of x to *out*"
+  "Pretty-prints JSON representation of x to *out*.
+
+  Valid options are:
+    :escape-unicode false
+        to turn off \uXXXX escapes of Unicode characters."
   [x & options]
   (let [{:keys [escape-unicode] :or {escape-unicode true}} options]
     (write x :dispatch #(pprint-json-dispatch % escape-unicode))))
