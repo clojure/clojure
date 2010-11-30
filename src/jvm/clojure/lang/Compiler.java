@@ -6624,6 +6624,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber()
 			       ,UNCHECKED_MATH, UNCHECKED_MATH.deref()
+					,RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
 			));
 
 	try
@@ -6741,6 +6742,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       KEYWORDS, PersistentHashMap.EMPTY,
 			       VARS, PersistentHashMap.EMPTY
 					,UNCHECKED_MATH, UNCHECKED_MATH.deref()
+					,RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
 			   //    ,LOADER, RT.makeClassLoader()
 			));
 
