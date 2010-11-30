@@ -75,13 +75,13 @@
    :author "Stuart Sierra",
    :doc "Print stack traces oriented towards Clojure, not Java."}
   {:source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.string-api.html",
    :name "clojure.string",
    :author "Stuart Sierra, Stuart Halloway, David Liebke",
    :doc
-   "Clojure String utilities\n\nIt is poor form to (:use clojure.string). Instead, use require\nwith :as to specify a prefix, e.g.\n\n(ns your.namespace.here\n  (:require '[clojure.string :as str]))\n\nDesign notes for clojure.string:\n\n1. Strings are objects (as opposed to sequences). As such, the\n   string being manipulated is the first argument to a function;\n   passing nil will result in a NullPointerException unless\n   documented otherwise. If you want sequence-y behavior instead,\n   use a sequence.\n\n2. Functions are generally not lazy, and call straight to host\n   methods where those are available and efficient.\n\n3. Functions take advantage of String implementation details to\n   write high-performing loop/recurs instead of using higher-order\n   functions. (This is not idiomatic in general-purpose application\n   code.)\n\n4. When a function is documented to accept a string argument, it\n   will take any implementation of the correct *interface* on the\n   host platform. In Java, this is CharSequence, which is more\n   general than String. In ordinary usage you will almost always\n   pass concrete strings. If you are doing something unusual,\n   e.g. passing a mutable implementation of CharSequence, then\n   thead-safety is your responsibility."}
+   "Clojure String utilities\n\nIt is poor form to (:use clojure.string). Instead, use require\nwith :as to specify a prefix, e.g.\n\n(ns your.namespace.here\n  (:require [clojure.string :as str]))\n\nDesign notes for clojure.string:\n\n1. Strings are objects (as opposed to sequences). As such, the\n   string being manipulated is the first argument to a function;\n   passing nil will result in a NullPointerException unless\n   documented otherwise. If you want sequence-y behavior instead,\n   use a sequence.\n\n2. Functions are generally not lazy, and call straight to host\n   methods where those are available and efficient.\n\n3. Functions take advantage of String implementation details to\n   write high-performing loop/recurs instead of using higher-order\n   functions. (This is not idiomatic in general-purpose application\n   code.)\n\n4. When a function is documented to accept a string argument, it\n   will take any implementation of the correct *interface* on the\n   host platform. In Java, this is CharSequence, which is more\n   general than String. In ordinary usage you will almost always\n   pass concrete strings. If you are doing something unusual,\n   e.g. passing a mutable implementation of CharSequence, then\n   thead-safety is your responsibility."}
   {:source-url
    "http://github.com/clojure/clojure/blob/787938361128c2bc21ed896dd4523651b59cb420/src/clj/clojure/template.clj",
    :wiki-url
@@ -1240,7 +1240,7 @@
    :name "bean",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L369",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L372",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
@@ -1249,7 +1249,7 @@
    :doc
    "Takes a Java object and returns a read-only implementation of the\nmap abstraction based upon its JavaBean properties.",
    :var-type "function",
-   :line 369,
+   :line 372,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([x]),
@@ -2020,7 +2020,7 @@
    :name "construct-proxy",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L264",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L264",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
@@ -3448,7 +3448,7 @@
    :name "get-proxy-class",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L250",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L250",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
@@ -3681,14 +3681,14 @@
    :name "init-proxy",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L271",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L271",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/init-proxy",
    :doc
-   "Takes a proxy instance and a map of strings (which must\ncorrespond to methods of the proxy superclass/superinterfaces) to\nfns (which must take arguments matching the corresponding method,\nplus an additional (explicit) first arg corresponding to this, and\nsets the proxy's fn map.",
+   "Takes a proxy instance and a map of strings (which must\ncorrespond to methods of the proxy superclass/superinterfaces) to\nfns (which must take arguments matching the corresponding method,\nplus an additional (explicit) first arg corresponding to this, and\nsets the proxy's fn map.  Returns the proxy.",
    :var-type "function",
    :line 271,
    :file
@@ -5407,7 +5407,7 @@
    :name "proxy",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L300",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L303",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
@@ -5416,14 +5416,14 @@
    :doc
    "class-and-interfaces - a vector of class names\n\nargs - a (possibly empty) vector of arguments to the superclass\nconstructor.\n\nf => (name [params*] body) or\n(name ([params*] body) ([params+] body) ...)\n\nExpands to code which creates a instance of a proxy class that\nimplements the named class/interface(s) by calling the supplied\nfns. A single class, if provided, must be first. If not provided it\ndefaults to Object.\n\nThe interfaces names must be valid interface types. If a method fn\nis not provided for a class method, the superclass methd will be\ncalled. If a method fn is not provided for an interface method, an\nUnsupportedOperationException will be thrown should it be\ncalled. Method fns are closures and can capture the environment in\nwhich proxy is called. Each method fn takes an additional implicit\nfirst arg, which is bound to 'this. Note that while method fns can\nbe provided to override protected methods, they have no other access\nto protected members, nor to super, as these capabilities cannot be\nproxied.",
    :var-type "macro",
-   :line 300,
+   :line 303,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([proxy]),
    :name "proxy-mappings",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L294",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L297",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
@@ -5431,14 +5431,14 @@
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/proxy-mappings",
    :doc "Takes a proxy instance and returns the proxy's fn map.",
    :var-type "function",
-   :line 294,
+   :line 297,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([meth & args]),
    :name "proxy-super",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L362",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L365",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
@@ -5447,7 +5447,7 @@
    :doc
    "Use to call a superclass method in the body of a proxy method. \nNote, expansion captures 'this",
    :var-type "macro",
-   :line 362,
+   :line 365,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([bindings]),
@@ -7422,16 +7422,16 @@
    :name "update-proxy",
    :namespace "clojure.core",
    :source-url
-   "http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L281",
+   "http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L282",
    :added "1.0",
    :raw-source-url
    "http://github.com/clojure/clojure/raw/8bb9789f0ff510ccb0b48891923a1e5148bdfe69/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/update-proxy",
    :doc
-   "Takes a proxy instance and a map of strings (which must\ncorrespond to methods of the proxy superclass/superinterfaces) to\nfns (which must take arguments matching the corresponding method,\nplus an additional (explicit) first arg corresponding to this, and\nupdates (via assoc) the proxy's fn map. nil can be passed instead of\na fn, in which case the corresponding method will revert to the\ndefault behavior. Note that this function can be used to update the\nbehavior of an existing instance without changing its identity.",
+   "Takes a proxy instance and a map of strings (which must\ncorrespond to methods of the proxy superclass/superinterfaces) to\nfns (which must take arguments matching the corresponding method,\nplus an additional (explicit) first arg corresponding to this, and\nupdates (via assoc) the proxy's fn map. nil can be passed instead of\na fn, in which case the corresponding method will revert to the\ndefault behavior. Note that this function can be used to update the\nbehavior of an existing instance without changing its identity.\nReturns the proxy.",
    :var-type "function",
-   :line 281,
+   :line 282,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([& args]),
@@ -9261,10 +9261,10 @@
    :name "blank?",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L225",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L225",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/blank?",
    :doc "True if s is nil, empty, or contains only whitespace.",
@@ -9276,10 +9276,10 @@
    :name "capitalize",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L146",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L146",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/capitalize",
    :doc
@@ -9292,10 +9292,10 @@
    :name "escape",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L238",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L238",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/escape",
    :doc
@@ -9308,10 +9308,10 @@
    :name "join",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L130",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L130",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/join",
    :doc
@@ -9324,10 +9324,10 @@
    :name "lower-case",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L163",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L163",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/lower-case",
    :doc "Converts string to all lower-case.",
@@ -9339,10 +9339,10 @@
    :name "replace",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L63",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L63",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/replace",
    :doc
@@ -9355,10 +9355,10 @@
    :name "replace-first",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L103",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L103",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/replace-first",
    :doc
@@ -9371,10 +9371,10 @@
    :name "reverse",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L46",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L46",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/reverse",
    :doc "Returns s with its characters reversed.",
@@ -9386,10 +9386,10 @@
    :name "split",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L169",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L169",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/split",
    :doc
@@ -9402,10 +9402,10 @@
    :name "split-lines",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L178",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L178",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/split-lines",
    :doc "Splits s on \\n or \\r\\n.",
@@ -9417,10 +9417,10 @@
    :name "trim",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L184",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L184",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/trim",
    :doc "Removes whitespace from both ends of string.",
@@ -9432,10 +9432,10 @@
    :name "trim-newline",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L212",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L212",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/trim-newline",
    :doc
@@ -9448,10 +9448,10 @@
    :name "triml",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L190",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L190",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/triml",
    :doc "Removes whitespace from the left side of string.",
@@ -9463,10 +9463,10 @@
    :name "trimr",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L201",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L201",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/trimr",
    :doc "Removes whitespace from the right side of string.",
@@ -9478,10 +9478,10 @@
    :name "upper-case",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L157",
+   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L157",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/upper-case",
    :doc "Converts string to all upper-case.",

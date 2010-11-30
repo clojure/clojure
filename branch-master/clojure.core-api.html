@@ -2206,7 +2206,7 @@ to timeout, non-nil otherwise.</pre>
 map abstraction based upon its JavaBean properties.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L369" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L372" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -2898,7 +2898,7 @@ the rest.</pre>
 creates and returns an instance of the proxy.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L264" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L264" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -4489,7 +4489,7 @@ classes. The resulting value is cached and used for any subsequent
 requests for the same class set. Returns a Class object.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L250" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L250" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -4685,10 +4685,10 @@ See also: inc</pre>
 correspond to methods of the proxy superclass/superinterfaces) to
 fns (which must take arguments matching the corresponding method,
 plus an additional (explicit) first arg corresponding to this, and
-sets the proxy's fn map.</pre>
+sets the proxy's fn map.  Returns the proxy.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L271" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L271" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -6194,7 +6194,7 @@ to protected members, nor to super, as these capabilities cannot be
 proxied.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L300" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L303" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -6205,7 +6205,7 @@ proxied.</pre>
   <pre id="var-docstr">Takes a proxy instance and returns the proxy's fn map.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L294" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L297" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -6217,7 +6217,7 @@ proxied.</pre>
 Note, expansion captures 'this</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L362" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L365" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -8041,10 +8041,11 @@ plus an additional (explicit) first arg corresponding to this, and
 updates (via assoc) the proxy's fn map. nil can be passed instead of
 a fn, in which case the corresponding method will revert to the
 default behavior. Note that this function can be used to update the
-behavior of an existing instance without changing its identity.</pre>
+behavior of an existing instance without changing its identity.
+Returns the proxy.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
   
-  <a href="http://github.com/clojure/clojure/blob/cc8372f12074b4cccbdd9cde3cfacfae069c57d3/src/clj/clojure/core_proxy.clj#L281" id="var-source">Source</a>
+  <a href="http://github.com/clojure/clojure/blob/3a3bf705c6d8029f98f82b8cc1d7a3030a3cf5d3/src/clj/clojure/core_proxy.clj#L282" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
