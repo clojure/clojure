@@ -199,10 +199,10 @@
 ;;; JSON PRINTER
 
 (defprotocol Write-JSON
-  (write-json [object out]
+  (write-json [object out escape-unicode?]
               "Print object to PrintWriter out as JSON"))
 
-(defn- write-json-string [^CharSequence s ^PrintWriter out]
+(defn- write-json-string [^CharSequence s ^PrintWriter out escape-unicode?]
   (let [sb (StringBuilder. ^Integer (count s))]
     (.append sb \")
     (dotimes [i (count s)]
@@ -220,8 +220,11 @@
          (= cp 10) (.append sb "\\n")
          (= cp 13) (.append sb "\\r")
          (= cp 9) (.append sb "\\t")
-         ;; Any other character is Hexadecimal-escaped
-         :else (.append sb (format "\\u%04x" cp)))))
+	 ;; Any other character is Unicode
+         :else (if escape-unicode?
+		 ;; Hexadecimal-escaped
+		 (.append sb (format "\\u%04x" cp))
+		 (.appendCodePoint sb cp)))))
     (.append sb \")
     (.print out (str sb))))
 
@@ -231,49 +234,49 @@
     (name x)
     (str x)))
 
-(defn- write-json-object [m ^PrintWriter out] 
+(defn- write-json-object [m ^PrintWriter out escape-unicode?] 
   (.print out \{)
   (loop [x m]
     (when (seq m)
       (let [[k v] (first x)]
         (when (nil? k)
           (throw (Exception. "JSON object keys cannot be nil/null")))
-	(write-json-string (as-str k) out)
+	(write-json-string (as-str k) out escape-unicode?)
         (.print out \:)
-        (write-json v out))
+        (write-json v out escape-unicode?))
       (let [nxt (next x)]
         (when (seq nxt)
           (.print out \,)
           (recur nxt)))))
   (.print out \}))
 
-(defn- write-json-array [s ^PrintWriter out]
+(defn- write-json-array [s ^PrintWriter out escape-unicode?]
   (.print out \[)
   (loop [x s]
     (when (seq x)
       (let [fst (first x)
             nxt (next x)]
-        (write-json fst out)
+        (write-json fst out escape-unicode?)
         (when (seq nxt)
           (.print out \,)
           (recur nxt)))))
   (.print out \]))
 
-(defn- write-json-bignum [x ^PrintWriter out]
+(defn- write-json-bignum [x ^PrintWriter out escape-unicode]
   (.print out (str x)))
 
-(defn- write-json-plain [x ^PrintWriter out]
+(defn- write-json-plain [x ^PrintWriter out escape-unicode?]
   (.print out x))
 
-(defn- write-json-null [x ^PrintWriter out]
+(defn- write-json-null [x ^PrintWriter out escape-unicode?]
   (.print out "null"))
 
-(defn- write-json-named [x ^PrintWriter out]
-  (write-json-string (name x) out))
+(defn- write-json-named [x ^PrintWriter out escape-unicode?]
+  (write-json-string (name x) out escape-unicode?))
 
-(defn- write-json-generic [x out]
+(defn- write-json-generic [x out escape-unicode?]
   (if (.isArray (class x))
-    (write-json (seq x) out)
+    (write-json (seq x) out escape-unicode?)
     (throw (Exception. (str "Don't know how to write JSON of " (class x))))))
   
 (extend nil Write-JSON
@@ -301,42 +304,45 @@
 
 (defn json-str
   "Converts x to a JSON-formatted string."
-  [x]
-  (let [sw (StringWriter.)
+  [x & options]
+  (let [{:keys [escape-unicode] :or {escape-unicode true}} options
+	sw (StringWriter.)
         out (PrintWriter. sw)]
-    (write-json x out)
+    (write-json x out escape-unicode)
     (.toString sw)))
 
 (defn print-json
   "Write JSON-formatted output to *out*"
-  [x]
-  (write-json x *out*))
+  [x & options]
+  (let [{:keys [escape-unicode] :or {escape-unicode true}} options]
+    (write-json x *out* escape-unicode)))
 
 
 ;;; JSON PRETTY-PRINTER
 
 ;; Based on code by Tom Faulhaber
 
-(defn- pprint-json-array [s] 
+(defn- pprint-json-array [s escape-unicode] 
   ((formatter-out "~<[~;~@{~w~^, ~:_~}~;]~:>") s))
 
-(defn- pprint-json-object [m]
+(defn- pprint-json-object [m escape-unicode]
   ((formatter-out "~<{~;~@{~<~w:~_~w~:>~^, ~_~}~;}~:>") 
    (for [[k v] m] [(as-str k) v])))
 
-(defn- pprint-json-generic [x]
+(defn- pprint-json-generic [x escape-unicode]
   (if (.isArray (class x))
-    (pprint-json-array (seq x))
-    (print (json-str x))))
+    (pprint-json-array (seq x) escape-unicode)
+    (print (json-str x :escape-unicode escape-unicode))))
   
-(defn- pprint-json-dispatch [x]
+(defn- pprint-json-dispatch [x escape-unicode]
   (cond (nil? x) (print "null")
-        (instance? java.util.Map x) (pprint-json-object x)
-        (instance? java.util.Collection x) (pprint-json-array x)
-        (instance? clojure.lang.ISeq x) (pprint-json-array x)
-        :else (pprint-json-generic x)))
+        (instance? java.util.Map x) (pprint-json-object x escape-unicode)
+        (instance? java.util.Collection x) (pprint-json-array x escape-unicode)
+        (instance? clojure.lang.ISeq x) (pprint-json-array x escape-unicode)
+        :else (pprint-json-generic x escape-unicode)))
 
 (defn pprint-json
   "Pretty-prints JSON representation of x to *out*"
-  [x]
-  (write x :dispatch pprint-json-dispatch))
+  [x & options]
+  (let [{:keys [escape-unicode] :or {escape-unicode true}} options]
+    (write x :dispatch #(pprint-json-dispatch % escape-unicode))))

@@ -144,6 +144,9 @@
 (deftest can-print-unicode
   (is (= "\"\\u1234\\u4567\"" (json-str "\u1234\u4567"))))
 
+(deftest can-print-nonescaped-unicode
+  (is (= "\"\u1234\u4567\"" (json-str "\u1234\u4567" :escape-unicode false))))
+
 (deftest can-print-json-null
   (is (= "null" (json-str nil))))
 
@@ -193,3 +196,6 @@
 (deftest pretty-printing
   (let [x (read-json *pass1-string* false)]
     (is (= x (read-json (with-out-str (pprint-json x)) false)))))
+
+(deftest can-pretty-print-nonescaped-unicode
+  (is (= "\"\u1234\u4567\"" (with-out-str (pprint-json "\u1234\u4567" :escape-unicode false)))))
