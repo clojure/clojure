@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.clojure.contrib</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.3.0-SNAPSHOT</version>
+    <relativePath>../parent</relativePath>
+  </parent>
+  <artifactId>generic</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.clojure.contrib</groupId>
+      <artifactId>types</artifactId>
+      <version>1.3.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

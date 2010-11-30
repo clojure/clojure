@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <head>
+    <title>ClojureScript REPL</title>
+    <style type="text/css">
+      body {
+        font-family: Monaco,monospace;
+        font-size: 10pt;
+      }
+      .pad {
+        height: 20em;
+      }
+      #log {
+        height: 20em;
+        overflow: auto;
+        white-space: pre-wrap;
+      }
+      #log table {
+        border-collapse: collapse;
+      }
+      #log td {
+        vertical-align: top;
+        padding: 0;
+      }
+      .ns {
+        float: left;
+      }
+      .cg {
+        color: #00b;
+      }
+      .err {
+        color: #b00;
+      }
+      textarea#input {
+        padding: 0;
+        margin: 0;
+        border: none;
+        width: 90%;
+        height: 6em;
+        background: #f3f3f3;
+      }
+    </style>
+    <script type="text/javascript" src="../rt.js"></script>
+    <script type="text/javascript" src="../core.js"></script>
+    <script type="text/javascript" src="repl.js"></script>
+  </head>
+  <body>
+    <div id="log">
+      <div class="pad"></div>
+    </div>
+    <div class="ns cg">
+      user=&gt;&nbsp;<br />
+      <img id="status" src="blank.gif">
+    </div>
+    <textarea id="input"></textarea>
+    <applet id="applet" code="clojure.contrib.clojurescript.applet"
+      archive="clojurescript-applet.jar" width="100" height="100">
+    </applet>
+  </body>
+</html>
