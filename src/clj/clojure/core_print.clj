@@ -325,6 +325,8 @@
                                      (agent-error o))
                               " FAILED"
                               ""))
-                    pr-on, "", ">", (list (if (and (future? o) (not (future-done? o))) :pending @o)), w))
+                    pr-on, "", ">", (list (cond (and (future? o) (not (future-done? o))) :pending
+                                                (and (instance? clojure.lang.IPromiseImpl o) (not (.hasValue o))) :not-delivered
+                                                :else @o)), w))
 
 (def ^{:private true} print-initialized true)

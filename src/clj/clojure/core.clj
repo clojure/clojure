@@ -5955,6 +5955,9 @@
     (reify 
      clojure.lang.IDeref
       (deref [_] (.await d) @v)
+     clojure.lang.IPromiseImpl
+      (hasValue [this]
+       (= 0 (.getCount d)))
      clojure.lang.IFn
       (invoke [this x]
         (locking d

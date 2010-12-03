@@ -107,8 +107,6 @@
 
 (def ^{:private true} pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
 
-;;; TODO: don't block on promise (currently impossible)
-
 (def ^{:private true} 
      type-map {"core$future_call" "Future",
                "core$promise" "Promise"})
@@ -133,6 +131,7 @@
                            (pprint-newline :linear)
                            (write-out (cond 
                                        (and (future? o) (not (future-done? o))) :pending
+                                       (and (instance? clojure.lang.IPromiseImpl o) (not (.hasValue o))) :not-delivered
                                        :else @o)))))
 
 (def ^{:private true} pprint-pqueue (formatter-out "~<<-(~;~@{~w~^ ~_~}~;)-<~:>"))
