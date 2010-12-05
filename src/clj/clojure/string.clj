@@ -133,9 +133,9 @@ Design notes for clojure.string:
   {:added "1.2"}
   ([coll]
      (apply str coll))
-  ([separator [x & more]]
-     (loop [sb (StringBuilder. (str x))
-            more more
+  ([separator coll]
+     (loop [sb (StringBuilder. (str (first coll)))
+            more (next coll)
             sep (str separator)]
        (if more
          (recur (-> sb (.append sep) (.append (str (first more))))
