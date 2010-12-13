@@ -104,12 +104,13 @@
   "Default :caught hook for repl"
   [e]
   (let [ex (repl-exception e)
-        el (aget (.getStackTrace ex) 0)]
+        tr (.getStackTrace ex)
+        el (when-not (zero? (count tr)) (aget tr 0))]
     (binding [*out* *err*]
       (println (str (-> ex class .getSimpleName)
                     " " (.getMessage ex) " "
                     (when-not (instance? clojure.lang.Compiler$CompilerException ex)
-                      (str " " (stack-element-str el))))))))
+                      (str " " (if el (stack-element-str el) "[trace missing]"))))))))
 
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
