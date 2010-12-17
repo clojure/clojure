@@ -9,7 +9,7 @@
 ; Author: Frantisek Sodomka, Robert Lachlan
 
 (ns clojure.test-clojure.multimethods
-  (:use clojure.test [clojure.test-clojure.helpers :only (with-var-roots)])
+  (:use clojure.test [clojure.test-helper :only (with-var-roots)])
   (:require [clojure.set :as set]))
 
 ; http://clojure.org/multimethods

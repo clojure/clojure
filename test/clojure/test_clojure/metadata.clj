@@ -10,7 +10,7 @@
 
 (ns clojure.test-clojure.metadata
   (:use clojure.test
-        [clojure.test-clojure.helpers :only (eval-in-temp-ns)]))
+        [clojure.test-helper :only (eval-in-temp-ns)]))
 
 (def public-namespaces
   '[clojure.core

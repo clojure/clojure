@@ -13,7 +13,7 @@
 
 (ns clojure.test-clojure.logic
   (:use clojure.test
-        [clojure.test-clojure.helpers :only (exception)]))
+        [clojure.test-helper :only (exception)]))
 
 
 ;; *** Tests ***

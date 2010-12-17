@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.test-clojure.def
-  (:use clojure.test clojure.test-clojure.helpers
+  (:use clojure.test clojure.test-helper
         clojure.test-clojure.protocols))
 
 (deftest defn-error-messages

@@ -9,7 +9,7 @@
 (ns ^{:doc "Tests for clojure.core/gen-class"
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass
-  (:use clojure.test clojure.test-clojure.helpers)
+  (:use clojure.test clojure.test-helper)
   (:import [clojure.test_clojure.genclass.examples ExampleClass
                                                    ExampleAnnotationClass]
            [java.lang.annotation ElementType

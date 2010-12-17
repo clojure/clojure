@@ -9,7 +9,7 @@
 ; Author: Stuart Halloway
 
 (ns clojure.test-clojure.rt
-  (:use clojure.test clojure.test-clojure.helpers))
+  (:use clojure.test clojure.test-helper))
 
 (defmacro with-err-print-writer
   "Evaluate with err pointing to a temporary PrintWriter, and
