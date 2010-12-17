@@ -9,7 +9,8 @@
 ;; Author: Shawn Hoover
 
 (ns clojure.test-clojure.agents
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import [java.util.concurrent CountDownLatch TimeUnit]))
 
 (deftest handle-all-throwables-during-agent-actions
   ;; Bug fixed in r1198; previously hung Clojure or didn't report agent errors
@@ -56,21 +57,23 @@
     (is (thrown? RuntimeException (send agt inc)))))
 
 (deftest can-send-from-error-handler-before-popping-action-that-caused-error
-  (let [target-agent (agent :before-error)
+  (let [latch (CountDownLatch. 1)
+        target-agent (agent :before-error)
         handler (fn [agt err]
-                  (send target-agent (constantly :sent-after-error)))
+                  (send target-agent
+                        (fn [_] (.countDown latch))))
         failing-agent (agent nil :error-handler handler)]
     (send failing-agent (fn [_] (throw (RuntimeException.))))
-    (await-for 1000 failing-agent)
-    (is (= :sent-after-error @target-agent))))
+    (is (.await latch 10 TimeUnit/SECONDS))))
 
-#_(deftest can-send-to-self-from-error-handler-before-popping-action-that-caused-error
-  (let [handler (fn [agt err]
-                  (send *agent* (constantly :sent-after-error)))
+(deftest can-send-to-self-from-error-handler-before-popping-action-that-caused-error
+  (let [latch (CountDownLatch. 1)
+        handler (fn [agt err]
+                  (send *agent*
+                        (fn [_] (.countDown latch))))
         failing-agent (agent nil :error-handler handler)]
     (send failing-agent (fn [_] (throw (RuntimeException.))))
-    (await-for 1000 failing-agent)
-    (is (= :sent-after-error @failing-agent))))
+    (is (.await latch 10 TimeUnit/SECONDS))))
 
 (deftest restart-no-clear
   (let [p (promise)
