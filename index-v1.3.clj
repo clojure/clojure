@@ -42,7 +42,7 @@
    :doc
    "Conveniently launch a sub-process providing its stdin and\ncollecting its stdout"}
   {:source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.main-api.html",
    :name "clojure.main",
    :doc nil}
@@ -8250,54 +8250,54 @@
    :name "load-script",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L210",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L211",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/load-script",
    :doc
    "Loads Clojure source from a file or resource given its path. Paths\nbeginning with @ or @/ are considered relative to classpath.",
    :var-type "function",
-   :line 210,
+   :line 211,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([& args]),
    :name "main",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L324",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L325",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/main",
    :doc
    "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]\n\nWith no options or args, runs an interactive Read-Eval-Print Loop\n\ninit options:\n  -i, --init path     Load a file or resource\n  -e, --eval string   Evaluate expressions in string; print non-nil values\n\nmain options:\n  -m, --main ns-name  Call the -main function from a namespace with args\n  -r, --repl          Run a repl\n  path                Run a script from from a file or resource\n  -                   Run a script from standard input\n  -h, -?, --help      Print this help message and exit\n\noperation:\n\n  - Establishes thread-local bindings for commonly set!-able vars\n  - Enters the user namespace\n  - Binds *command-line-args* to a seq of strings containing command line\n    args that appear after any main option\n  - Runs all init options in order\n  - Calls a -main function or runs a repl or script if requested\n\nThe init options may be repeated and mixed freely, but must appear before\nany main option. The appearance of any eval option before running a repl\nsuppresses the usual repl greeting message: \"Clojure ~(clojure-version)\".\n\nPaths may be absolute or relative in the filesystem or relative to\nclasspath. Classpath-relative paths have prefix of @ or @/",
    :var-type "function",
-   :line 324,
+   :line 325,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([& options]),
    :name "repl",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L114",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L115",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl",
    :doc
    "Generic, reusable, read-eval-print loop. By default, reads from *in*,\nwrites to *out*, and prints exception summaries to *err*. If you use the\ndefault :read hook, *in* must either be an instance of\nLineNumberingPushbackReader or duplicate its behavior of both supporting\n.unread and collapsing CR, LF, and CRLF into a single \\newline. Options\nare sequential keyword-value pairs. Available options and their defaults:\n\n   - :init, function of no arguments, initialization hook called with\n     bindings for set!-able vars in place.\n     default: #()\n\n   - :need-prompt, function of no arguments, called before each\n     read-eval-print except the first, the user will be prompted if it\n     returns true.\n     default: (if (instance? LineNumberingPushbackReader *in*)\n                #(.atLineStart *in*)\n                #(identity true))\n\n   - :prompt, function of no arguments, prompts for more input.\n     default: repl-prompt\n\n   - :flush, function of no arguments, flushes output\n     default: flush\n\n   - :read, function of two arguments, reads from *in*:\n       - returns its first argument to request a fresh prompt\n         - depending on need-prompt, this may cause the repl to prompt\n           before reading again\n       - returns its second argument to request an exit from the repl\n       - else returns the next object read from the input stream\n     default: repl-read\n\n   - :eval, funtion of one argument, returns the evaluation of its\n     argument\n     default: eval\n\n   - :print, function of one argument, prints its argument to the output\n     default: prn\n\n   - :caught, function of one argument, a throwable, called when\n     read, eval, or print throws an exception or error\n     default: repl-caught",
    :var-type "function",
-   :line 114,
+   :line 115,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([e]),
    :name "repl-caught",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L103",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L103",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-caught",
    :doc "Default :caught hook for repl",
@@ -8309,9 +8309,9 @@
    :name "repl-exception",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L98",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L98",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-exception",
    :doc "Returns the root cause of throwables",
@@ -8323,9 +8323,9 @@
    :name "repl-prompt",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L43",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L43",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-prompt",
    :doc "Default :prompt hook for repl",
@@ -8337,9 +8337,9 @@
    :name "repl-read",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L80",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L80",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-read",
    :doc
@@ -8352,9 +8352,9 @@
    :name "skip-if-eol",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L48",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L48",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/skip-if-eol",
    :doc
@@ -8367,9 +8367,9 @@
    :name "skip-whitespace",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L62",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L62",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/skip-whitespace",
    :doc
@@ -8382,9 +8382,9 @@
    :name "with-bindings",
    :namespace "clojure.main",
    :source-url
-   "http://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj#L21",
+   "http://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L21",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/main.clj",
+   "http://github.com/clojure/clojure/raw/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/with-bindings",
    :doc
