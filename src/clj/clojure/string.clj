@@ -128,8 +128,8 @@ Design notes for clojure.string:
 
 
 (defn ^String join
-  "Returns a string of all elements in coll, separated by
-   an optional separator.  Like Perl's join."
+  "Returns a string of all elements in coll, as returned by (seq coll),
+   separated by an optional separator."
   {:added "1.2"}
   ([coll]
      (apply str coll))
