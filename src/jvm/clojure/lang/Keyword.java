@@ -27,6 +27,8 @@ public final Symbol sym;
 final int hash;
 
 public static Keyword intern(Symbol sym){
+	if(sym.meta() != null)
+		sym = (Symbol) sym.withMeta(null);
 	Util.clearCache(rq, table);
 	Keyword k = new Keyword(sym);
 	SoftReference<Keyword> existingRef = table.putIfAbsent(sym, new SoftReference<Keyword>(k,rq));
