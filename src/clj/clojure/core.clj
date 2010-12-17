@@ -3206,12 +3206,15 @@
      (recur (first more) nmore)
      (apply pr more))))
 
+(def ^:private ^String system-newline
+     (System/getProperty "line.separator"))
+
 (defn newline
   "Writes a platform-specific newline to *out*"
   {:added "1.0"
    :static true}
   []
-    (. *out* (append (System/getProperty "line.separator")))
+    (. *out* (append system-newline))
     nil)
 
 (defn flush
