@@ -5908,18 +5908,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 
-(let [version-stream (.getResourceAsStream (clojure.lang.RT/baseLoader) 
-                                           "clojure/version.properties")
+(let [version-stream (.getResourceAsStream
+		      (clojure.lang.RT/baseLoader) 
+		      "clojure/version.properties")
       properties     (doto (new java.util.Properties) (.load version-stream))
-      prop (fn [k] (.getProperty properties (str "clojure.version." k)))
-      clojure-version {:major       (Integer/valueOf ^String (prop "major"))
-                       :minor       (Integer/valueOf ^String (prop "minor"))
-                       :incremental (Integer/valueOf ^String (prop "incremental"))
-                       :qualifier   (prop "qualifier")}]
-  (def ^:dynamic *clojure-version* 
-    (if (not (= (prop "interim") "false"))
-      (clojure.lang.RT/assoc clojure-version :interim true)
-      clojure-version)))
+      version-string (.getProperty properties "version")
+      [_ major minor incremental qualifier snapshot]
+      (re-matches
+       #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
+       version-string)
+      clojure-version {:major       (Integer/valueOf ^String major)
+		       :minor       (Integer/valueOf ^String minor)
+		       :incremental (Integer/valueOf ^String incremental)
+		       :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
+  (def ^:dynamic *clojure-version*
+       (if (.contains version-string "SNAPSHOT")
+	 (clojure.lang.RT/assoc clojure-version :interim true)
+	 clojure-version)))
       
 (add-doc-and-meta *clojure-version*
   "The version info for Clojure core, as a map containing :major :minor 
@@ -5941,7 +5946,7 @@
        (when-let [q (:qualifier *clojure-version*)]
          (when (pos? (count q)) (str "-" q)))
        (when (:interim *clojure-version*)
-         "-SNAPSHOT")))
+	 "-SNAPSHOT")))
 
 (defn promise
   "Alpha - subject to change.

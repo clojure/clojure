@@ -10,8 +10,24 @@
 Docs: http://clojure.org
 Feedback: http://groups.google.com/group/clojure
 
-To Run: java -cp clojure.jar clojure.main
-To Build: ant
+
+To run:  java -cp clojure-${VERSION}.jar clojure.main
+
+To build locally with Ant:  ant
+
+
+Maven 2 build instructions:
+
+  To build:  mvn package 
+  The built JARs will be in target/
+
+  To build without testing:  mvn package -Dmaven.test.skip=true
+
+  To build and install in local Maven repository:  mvn install
+
+  To build a ZIP distribution:  mvn package -Pdistribution
+  The built .zip will be in target/
+
 
 --------------------------------------------------------------------------
 This program uses the ASM bytecode engineering library which is distributed

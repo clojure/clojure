@@ -1,0 +1,32 @@
+<assembly>
+  <id>slim</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>src/clj</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>src/resources</directory>
+      <outputDirectory>/</outputDirectory>
+      <filtered>true</filtered>
+    </fileSet>
+    <fileSet>
+      <directory>target/classes/clojure/asm</directory>
+      <outputDirectory>clojure/asm</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>target/classes/clojure/lang</directory>
+      <outputDirectory>clojure/lang</outputDirectory>
+    </fileSet>
+  </fileSets>
+  <files>
+    <file>
+      <source>target/classes/clojure/main.class</source>
+      <outputDirectory>clojure</outputDirectory>
+    </file>
+  </files>
+</assembly>

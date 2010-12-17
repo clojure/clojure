@@ -1,87 +1,35 @@
-<project name="clojure" default="all" xmlns:mvn="urn:maven-artifact-ant">
+<project name="clojure" default="all">
 
   <description>
-    Build with "ant jar" and then start the
+    Build with "ant" and then start the
     REPL with: "java -cp clojure.jar clojure.main".
-    You will need to install the Maven Ant
-    Tasks to ${ant.home}/lib in order to execute
-    the nightly-build or stable-build targets.
   </description>
 
   <property name="src" location="src"/>
   <property name="test" location="test"/>
   <property name="jsrc" location="${src}/jvm"/>
   <property name="cljsrc" location="${src}/clj"/>
-  <property name="build" location="classes"/>
-  <property name="test-classes" location="test-classes"/>
+  <property name="cljscript" location="${src}/script"/>
+  <property name="test-script" location="${cljscript}/run_tests.clj"/>
+  <property name="compile-script" location="${cljscript}/bootstrap_compile.clj"/>
+  <property name="target" location="target"/>
+  <property name="build" location="${target}/classes"/>
+  <property name="test-classes" location="${target}/test-classes"/>
   <property name="dist" location="dist"/>
-  <!-- override this with -Ddeployment.url=scp://build.clojure.org/srv/test-deploy to test a deployment -->
-  <property name="deployment.url" value="scp://build.clojure.org/srv/www/releases"/>
 
-  <target name="debug">
-	<echo message="${deployment.url}"/>
-  </target>
+  <!-- Get the version string out of the POM -->
+  <xmlproperty file="pom.xml" prefix="pom"/>
+  <property name="clojure.version.label" value="${pom.project.version}"/>
+  <property name="version.properties" value="${build}/clojure/version.properties"/>
 
-  <!-- version related properties -->
-  <property file="${cljsrc}/clojure/version.properties"/>
-  <!-- ensures all version properties are present -->
-  <fail unless="clojure.version.major"/>
-  <fail unless="clojure.version.minor"/>
-  <fail unless="clojure.version.interim"/>
-
-  <condition property="clojure.version.incremental.label"
-             value=".${clojure.version.incremental}"
-             else="">
-  	<length string="${clojure.version.incremental}" when="greater" length="0" />
-  </condition>
-  <condition property="clojure.version.qualifier.label"
-             value="-${clojure.version.qualifier}"
-             else="">
-  	<length string="${clojure.version.qualifier}" when="greater" length="0" />
-  </condition>
-  <condition property="clojure.version.interim.label"
-             value="-SNAPSHOT"
-	         else="">
-    <!-- We place -SNAPSHOT whenever interim is not set to false, not only
-         if interim is set to true (this is less typo prone in the worst case -->
-  	<not><equals arg1="${clojure.version.interim}" arg2="false" trim="true"/></not>
-  </condition>
-	
-	
-  <property name="clojure.version.label" 
-    value="${clojure.version.major}.${clojure.version.minor}${clojure.version.incremental.label}${clojure.version.qualifier.label}${clojure.version.interim.label}"/>
-	
-  <!-- general filterset for use when clojure version must be copied -->
-  <filterset id="clojure-version-filterset">
-    <filter token="clojure-version" value="${clojure.version.label}"/>
-  </filterset>
-	
-  <property name="clojure_noversion_jar" location="clojure.jar"/>
-  <property name="slim_noversion_jar" location="clojure-slim.jar"/>
-  <property name="src_noversion_jar" location="clojure-sources.jar"/>
   <property name="clojure_jar" location="clojure-${clojure.version.label}.jar"/>
-  <property name="slim_jar" location="clojure-slim-${clojure.version.label}.jar"/>
-  <property name="src_jar" location="clojure-sources-${clojure.version.label}.jar"/>
-
-  <!-- These make sense for building on tapestry.formos.com -->
-
-  <property name="snapshot.repo.dir" location="/var/www/maven-snapshot-repository"/>
-  <property name="stable.repo.dir" location="/var/www/maven-repository"/>
+  <property name="clojure_noversion_jar" location="clojure.jar"/>
 
   <target name="init" depends="clean">
     <tstamp/>
     <mkdir dir="${build}"/>
-  	<antcall target="init-version"/>
-  </target>
-
-  <target name="init-version">
-    <copy file="pom-template.xml" 
-          tofile="pom.xml">
-    	<filterset refid="clojure-version-filterset"/>
-    </copy>
-  	<!--prevents users from modifying accidentally the generated pom.xml
-  	    works only on linux.-->
-  	<chmod file="pom.xml" perm="ugo-w"/>
+    <mkdir dir="${build}/clojure"/>
+    <echo file="${version.properties}">version=${clojure.version.label}</echo>
   </target>
 
   <target name="compile-java" depends="init"
@@ -90,7 +38,7 @@
            debug="true" target="1.5"/>
   </target>
 
-  <target name="compile-clojure" depends="compile-java"
+  <target name="compile-clojure"
           description="Compile Clojure sources.">
     <java classname="clojure.lang.Compile"
           classpath="${build}:${cljsrc}"
@@ -124,17 +72,14 @@
     </java>
   </target>
 
-  <target name="build"
-          description="Build Clojure (compilation only, no tests)."
-          depends="compile-java, compile-clojure"/>
-
   <target name="compile-tests" 
           description="Compile the subset of tests that require compilation.">
     <delete dir="${test-classes}"/>
     <mkdir dir="${test-classes}"/>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
-          failonerror="true">
+          failonerror="true"
+	  fork="true">
       <sysproperty key="clojure.compile.path" value="${test-classes}"/>
       <arg value="clojure.test-clojure.protocols.examples"/>
       <arg value="clojure.test-clojure.genclass.examples"/>
@@ -144,132 +89,44 @@
   <target name="test"
           description="Run clojure tests without recompiling clojure."
           depends="compile-tests">
-    <java classname="clojure.main" failonerror="true">
+    <java classname="clojure.main" failonerror="true" fork="true">
       <classpath>
         <path location="${test-classes}"/>
         <path location="${test}"/>
         <path location="${build}"/>
-		<path location="${cljsrc}"/>
+	<path location="${cljsrc}"/>
       </classpath>
-      <arg value="-e"/>
-      <arg value="(require '(clojure [test-clojure :as main])) (main/run-ant)"/>
+      <arg value="${test-script}"/>
     </java>
   </target>
 
-  <target name="clojure-jar" depends="build"
+  <target name="build"
+          description="Build Clojure (compilation only, no tests)."
+          depends="compile-java, compile-clojure"/>
+
+  <target name="jar" depends="build"
           description="Create clojure jar file.">
     <jar jarfile="${clojure_jar}" basedir="${build}">
       <fileset dir="${cljsrc}">
         <include name="**/*.clj"/>
-        <include name="clojure/version.properties"/>
       </fileset>
       <manifest>
         <attribute name="Main-Class" value="clojure.main"/>
         <attribute name="Class-Path" value="."/>
       </manifest>
     </jar>
-    <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}" />
+    <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}"/>
   </target>
-
-  <target name="clojure-jar-slim" depends="build"
-          description="Create clojure-slim jar file (omits compiled Clojure code).">
-    <jar jarfile="${slim_jar}">
-      <fileset dir="${build}" includes="clojure/asm/**"/>
-      <fileset dir="${build}" includes="clojure/lang/**"/>
-      <fileset dir="${build}" includes="clojure/main.class"/>
-      <fileset dir="${cljsrc}">
-        <include name="**/*.clj"/>
-        <include name="clojure/version.properties"/>
-      </fileset>
-      <manifest>
-        <attribute name="Main-Class" value="clojure.main"/>
-        <attribute name="Class-Path" value="."/>
-      </manifest>
-    </jar>
-    <copy file="${slim_jar}" tofile="${slim_noversion_jar}" />
-  </target>
-
-  <target name="clojure-jar-sources" depends="build"
-          description="Create a JAR of Java sources.">
-    <jar jarfile="${src_jar}" basedir="${jsrc}" includes="**/*">
-      <fileset dir="${cljsrc}"
-               includes="clojure/version.properties"/>
-    </jar>
-    <copy file="${src_jar}" tofile="${src_noversion_jar}" />
-  </target>
-
-  <target name="all" depends="build,test,clojure-jar,clojure-jar-slim,clojure-jar-sources"/>
+  
+  <target name="all" depends="build,test,jar"/>
 
   <target name="clean"
           description="Remove autogenerated files and directories.">
-    <delete dir="${build}"/>
-    <delete dir="${test-classes}"/>
-    <delete dir="${dist}"/>
-    <delete file="pom.xml"/>
+    <delete dir="${target}"/>
     <delete verbose="true">
       <fileset dir="${basedir}" includes="*.jar"/>
       <fileset dir="${basedir}" includes="*.zip"/>
     </delete>
   </target>
 
-  <target name="setup-maven">
-    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
-  </target>
-
-  <target name="nightly-build" depends="ci-build"
-          description="Build and deploy to nightly (snapshot) repository.">
-    <sequential>
-      <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
-      <mvn:deploy file="${clojure_jar}">
-        <pom file="pom.xml"/>
-        <attach file="${src_jar}" classifier="sources"/>
-        <attach file="${slim_jar}" classifier="slim"/>
-        <remoteRepository url="file:${snapshot.repo.dir}"/>
-      </mvn:deploy>
-    </sequential>
-  </target>
-
-  <target name="release" depends="ci-build,dist" description="Build and deploy to remote stable repository.">
-    <sequential>
-      <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
-      <mvn:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
-      <echo message="Deploying to ${deployment.url}"/>
-      <mvn:deploy file="${clojure_jar}">
-        <pom file="pom.xml"/>
-        <attach file="${src_jar}" classifier="sources"/>
-        <attach file="${slim_jar}" classifier="slim"/>
-        <remoteRepository url="${deployment.url}">
-          <authentication username="root" privateKey="${user.home}/.ssh/id_rsa"/>
-        </remoteRepository>
-      </mvn:deploy>
-    </sequential>
-  </target>
-
-  <target name="ci-build" depends="clean,all,setup-maven"
-          description="Continous integration build, installed to local repository.">
-    <mvn:install file="${clojure_jar}">
-      <pom file="pom.xml"/>
-      <attach file="${src_jar}" classifier="sources"/>
-      <attach file="${slim_jar}" classifier="slim"/>
-    </mvn:install>
-  </target>
-
-  <target name="dist" depends="clean,clojure-jar"
-          description="Build distribution ZIP file.">
-    <property name="distdir" value="${dist}/clojure-${clojure.version.label}"/>
-    <mkdir dir="${distdir}"/>
-    <copy todir="${distdir}" includeEmptyDirs="false">
-      <fileset dir="${basedir}">
-        <exclude name="pom.xml"/>
-        <exclude name="**/.git/**"/>
-        <exclude name="**/*.class"/>
-        <exclude name="**/*.iml"/>
-        <exclude name="**/*.ipr"/>
-        <exclude name="**/*.iws"/>
-        <exclude name="**/*.jar"/>
-      </fileset>
-    </copy>
-    <copy file="${clojure_noversion_jar}" todir="${distdir}"/>
-    <zip basedir="${dist}" destfile="clojure-${clojure.version.label}.zip"/>
-  </target>
 </project>
