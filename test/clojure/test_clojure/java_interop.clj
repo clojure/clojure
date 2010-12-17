@@ -269,7 +269,8 @@
   (is (thrown? IllegalArgumentException (into-array [1 "abc" :kw])))
   (is (thrown? IllegalArgumentException (into-array [1.2 4])))
   (is (thrown? IllegalArgumentException (into-array [(byte 2) (short 3)])))
-
+  (is (thrown? IllegalArgumentException (into-array Byte/TYPE [100000000000000])))
+  
   ; simple case
   (let [v [1 2 3 4 5]
         a (into-array v)]
@@ -278,13 +279,22 @@
         (vec a) v
         (class (first a)) (class (first v)) ))
 
-  ; given type
-  #_(let [a (into-array Integer/TYPE [(byte 2) (short 3) (int 4)])]
-    (are [x] (= x Long)
-        (class (aget a 0))
-        (class (aget a 1))
-        (class (aget a 2)) ))
-
+  (is (= \a (aget (into-array Character/TYPE [\a \b \c]) 0)))
+  
+  (let [types [Integer/TYPE
+               Byte/TYPE
+               Float/TYPE
+               Short/TYPE
+               Double/TYPE
+               Long/TYPE]
+        values [(byte 2) (short 3) (int 4) 5]]
+    (for [t types]
+      (let [a (into-array t values)]
+        (is (== (aget a 0) 2))
+        (is (== (aget a 1) 3))
+        (is (== (aget a 2) 4))
+        (is (== (aget a 3) 5)))))
+  
   ; different kinds of collections
   (are [x] (and (= (alength (into-array x)) (count x))
                 (= (vec (into-array x)) (vec x))
