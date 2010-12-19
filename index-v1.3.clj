@@ -75,7 +75,7 @@
    :author "Stuart Sierra",
    :doc "Print stack traces oriented towards Clojure, not Java."}
   {:source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.string-api.html",
    :name "clojure.string",
@@ -9236,10 +9236,10 @@
    :name "blank?",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L225",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L225",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/blank?",
    :doc "True if s is nil, empty, or contains only whitespace.",
@@ -9251,10 +9251,10 @@
    :name "capitalize",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L146",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L146",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/capitalize",
    :doc
@@ -9267,10 +9267,10 @@
    :name "escape",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L238",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L238",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/escape",
    :doc
@@ -9279,18 +9279,18 @@
    :line 238,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
-  {:arglists ([coll] [separator [x & more]]),
+  {:arglists ([coll] [separator coll]),
    :name "join",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L130",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L130",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/join",
    :doc
-   "Returns a string of all elements in coll, separated by\nan optional separator.  Like Perl's join.",
+   "Returns a string of all elements in coll, as returned by (seq coll),\nseparated by an optional separator.",
    :var-type "function",
    :line 130,
    :file
@@ -9299,10 +9299,10 @@
    :name "lower-case",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L163",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L163",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/lower-case",
    :doc "Converts string to all lower-case.",
@@ -9314,10 +9314,10 @@
    :name "replace",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L63",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L63",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/replace",
    :doc
@@ -9330,10 +9330,10 @@
    :name "replace-first",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L103",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L103",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/replace-first",
    :doc
@@ -9346,10 +9346,10 @@
    :name "reverse",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L46",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L46",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/reverse",
    :doc "Returns s with its characters reversed.",
@@ -9361,10 +9361,10 @@
    :name "split",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L169",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L169",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/split",
    :doc
@@ -9377,10 +9377,10 @@
    :name "split-lines",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L178",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L178",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/split-lines",
    :doc "Splits s on \\n or \\r\\n.",
@@ -9392,10 +9392,10 @@
    :name "trim",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L184",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L184",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/trim",
    :doc "Removes whitespace from both ends of string.",
@@ -9407,10 +9407,10 @@
    :name "trim-newline",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L212",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L212",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/trim-newline",
    :doc
@@ -9423,10 +9423,10 @@
    :name "triml",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L190",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L190",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/triml",
    :doc "Removes whitespace from the left side of string.",
@@ -9438,10 +9438,10 @@
    :name "trimr",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L201",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L201",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/trimr",
    :doc "Removes whitespace from the right side of string.",
@@ -9453,10 +9453,10 @@
    :name "upper-case",
    :namespace "clojure.string",
    :source-url
-   "http://github.com/clojure/clojure/blob/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj#L157",
+   "http://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L157",
    :added "1.2",
    :raw-source-url
-   "http://github.com/clojure/clojure/raw/3072bd7928f2e3a23b3144da89d5965b696528eb/src/clj/clojure/string.clj",
+   "http://github.com/clojure/clojure/raw/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.string-api.html#clojure.string/upper-case",
    :doc "Converts string to all upper-case.",
