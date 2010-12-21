@@ -24,9 +24,11 @@ public class Compile{
 
 private static final String PATH_PROP = "clojure.compile.path";
 private static final String REFLECTION_WARNING_PROP = "clojure.compile.warn-on-reflection";
+private static final String UNCHECKED_MATH_PROP = "clojure.compile.unchecked-math";
 private static final Var compile_path = RT.var("clojure.core", "*compile-path*");
 private static final Var compile = RT.var("clojure.core", "compile");
 private static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
+private static final Var unchecked_math = RT.var("clojure.core", "*unchecked-math*");
 
 public static void main(String[] args) throws Exception{
 
@@ -44,10 +46,11 @@ public static void main(String[] args) throws Exception{
 		}
 
     boolean warnOnReflection = System.getProperty(REFLECTION_WARNING_PROP, "false").equals("true");
+    boolean uncheckedMath = System.getProperty(UNCHECKED_MATH_PROP, "false").equals("true");
 
 	try
 		{
-		Var.pushThreadBindings(RT.map(compile_path, path, warn_on_reflection, warnOnReflection));
+               Var.pushThreadBindings(RT.map(compile_path, path, warn_on_reflection, warnOnReflection, unchecked_math, uncheckedMath));
 
 		for(String lib : args)
         {
