@@ -35,7 +35,8 @@ See documentation for pprint and cl-format for more information or
 complete documentation on the the clojure web site on github.",
        :added "1.2"}
     clojure.pprint
-    (:refer-clojure :exclude (deftype)))
+    (:refer-clojure :exclude (deftype))
+    (:use [clojure.walk :only [walk]]))
 
 
 (load "pprint/utilities")

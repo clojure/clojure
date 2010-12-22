@@ -65,7 +65,7 @@
 ;;; (def pprint-simple-list (formatter-out "~:<~@{~w~^ ~_~}~:>"))
 (defn- pprint-simple-list [alis]
   (pprint-logical-block :prefix "(" :suffix ")"
-    (loop [alis (seq alis)]
+    (print-length-loop [alis (seq alis)]
       (when alis
 	(write-out (first alis))
 	(when (next alis)
@@ -80,7 +80,7 @@
 ;;; (def pprint-vector (formatter-out "~<[~;~@{~w~^ ~_~}~;]~:>"))
 (defn- pprint-vector [avec]
   (pprint-logical-block :prefix "[" :suffix "]"
-    (loop [aseq (seq avec)]
+    (print-length-loop [aseq (seq avec)]
       (when aseq
 	(write-out (first aseq))
 	(when (next aseq)
@@ -93,12 +93,13 @@
 ;;; (def pprint-map (formatter-out "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
 (defn- pprint-map [amap]
   (pprint-logical-block :prefix "{" :suffix "}"
-    (loop [aseq (seq amap)]
+    (print-length-loop [aseq (seq amap)]
       (when aseq
 	(pprint-logical-block 
           (write-out (ffirst aseq))
           (.write ^java.io.Writer *out* " ")
           (pprint-newline :linear)
+          (set! *current-length* 0)     ; always print both parts of the [k v] pair
           (write-out (fnext (first aseq))))
         (when (next aseq)
           (.write ^java.io.Writer *out* ", ")
@@ -218,7 +219,7 @@
 
 (defn- pprint-binding-form [binding-vec]
   (pprint-logical-block :prefix "[" :suffix "]"
-    (loop [binding binding-vec]
+    (print-length-loop [binding binding-vec]
       (when (seq binding)
         (pprint-logical-block binding
           (write-out (first binding))
@@ -255,7 +256,7 @@
     (when (next alis)
       (.write ^java.io.Writer *out* " ")
       (pprint-newline :linear)
-     (loop [alis (next alis)]
+     (print-length-loop [alis (next alis)]
        (when alis
          (pprint-logical-block alis
           (write-out (first alis))
@@ -273,7 +274,7 @@
     (pprint-logical-block :prefix "(" :suffix ")"
       (pprint-indent :block 1)
       (apply (formatter-out "~w ~@_~w ~@_~w ~_") alis)
-      (loop [alis (seq (drop 3 alis))]
+      (print-length-loop [alis (seq (drop 3 alis))]
         (when alis
           (pprint-logical-block alis
             (write-out (first alis))
@@ -315,7 +316,7 @@
 (defn- pprint-simple-code-list [alis]
   (pprint-logical-block :prefix "(" :suffix ")"
     (pprint-indent :block 1)
-    (loop [alis (seq alis)]
+    (print-length-loop [alis (seq alis)]
       (when alis
 	(write-out (first alis))
 	(when (next alis)
