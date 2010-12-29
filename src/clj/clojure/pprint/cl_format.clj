@@ -1526,7 +1526,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
 
   (\W 
    [] 
-   #{:at :colon :both} {}
+   #{:at :colon :both :pretty} {}
    (if (or (:at params) (:colon params))
      (let [bindings (concat
                      (if (:at params) [:level nil :length nil] [])
