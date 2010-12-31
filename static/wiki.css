@@ -13,14 +13,10 @@
 .wiki #toc h1 { font-weight: normal; font-size: 1.2em; padding: 0; }
 .wiki #toc a:hover { color: #00D; background: #FFD; }
 
-.wiki .nob td { border: 0; }
 .wiki hr { height: 1px; color: #AAA; background-color: #AAA; border: 0; margin: 0 10px; }
 .wiki ul { padding: .5em 0 0 3em; margin: 0; }
 .wiki ol { padding: .5em 0 0 3em; margin: 0; }
 .wiki ul.quotelist { list-style: none; }
-.wiki a.ext { background: url(/i/a.gif) center right no-repeat; padding-right: 10px; }
-.wiki a.wiki_link_new { color: #600; }
-.wiki a.wiki_link_ext { background: url(/i/a.gif) center right no-repeat; padding-right: 10px; }
 .wiki tt { font-size: small; }
 .wiki img { border: 0; padding: 4px; }
 
