@@ -167,7 +167,9 @@ static public Number minus(Object x, Object y){
 
 static public Number minusP(Object x, Object y){
 	Ops yops = ops(y);
-	return ops(x).combine(yops).addP((Number)x, yops.negateP((Number)y));
+	Number negativeY = yops.negateP((Number) y);
+	Ops negativeYOps = ops(negativeY);
+	return ops(x).combine(negativeYOps).addP((Number)x, negativeY);
 }
 
 static public Number multiply(Object x, Object y){
