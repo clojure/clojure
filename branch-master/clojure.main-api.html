@@ -102,7 +102,7 @@ namespace.
 beginning with @ or @/ are considered relative to classpath.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L211" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L214" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -115,15 +115,14 @@ beginning with @ or @/ are considered relative to classpath.</pre>
 With no options or args, runs an interactive Read-Eval-Print Loop
 
 init options:
-  -i, --init path     Load a file or resource
-  -e, --eval string   Evaluate expressions in string; print non-nil values
+  -i, --init path   Load a file or resource
+  -e, --eval string Evaluate expressions in string; print non-nil values
 
 main options:
-  -m, --main ns-name  Call the -main function from a namespace with args
-  -r, --repl          Run a repl
-  path                Run a script from from a file or resource
-  -                   Run a script from standard input
-  -h, -?, --help      Print this help message and exit
+  -r, --repl        Run a repl
+  path              Run a script from from a file or resource
+  -                 Run a script from standard input
+  -h, -?, --help    Print this help message and exit
 
 operation:
 
@@ -132,7 +131,7 @@ operation:
   - Binds *command-line-args* to a seq of strings containing command line
     args that appear after any main option
   - Runs all init options in order
-  - Calls a -main function or runs a repl or script if requested
+  - Runs a repl or script if requested
 
 The init options may be repeated and mixed freely, but must appear before
 any main option. The appearance of any eval option before running a repl
@@ -142,7 +141,7 @@ Paths may be absolute or relative in the filesystem or relative to
 classpath. Classpath-relative paths have prefix of @ or @/</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L325" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L318" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -194,7 +193,7 @@ are sequential keyword-value pairs. Available options and their defaults:
      default: repl-caught</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L115" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L118" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -205,7 +204,7 @@ are sequential keyword-value pairs. Available options and their defaults:
   <pre id="var-docstr">Default :caught hook for repl</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L103" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L113" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -213,10 +212,11 @@ are sequential keyword-value pairs. Available options and their defaults:
   <span id="var-type">function</span><br />
   <pre id="var-usage">Usage: (repl-exception throwable)
 </pre>
-  <pre id="var-docstr">Returns the root cause of throwables</pre>
+  <pre id="var-docstr">Returns CompilerExceptions in tact, but only the root cause of other
+throwables</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L98" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L105" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -227,7 +227,7 @@ are sequential keyword-value pairs. Available options and their defaults:
   <pre id="var-docstr">Default :prompt hook for repl</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L43" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L41" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -247,7 +247,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF into a single
       - returns the object.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L80" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L78" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -263,7 +263,7 @@ its behavior of both supporting .unread and collapsing all of CR, LF, and
 CRLF to a single \newline.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L48" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L46" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -281,7 +281,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
 \newline.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L62" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L60" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -295,7 +295,7 @@ that often need to be set!: *ns* *warn-on-reflection* *math-context*
 *command-line-args* *1 *2 *3 *e</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L21" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L20" id="var-source">Source</a>
 </div>
 
 
