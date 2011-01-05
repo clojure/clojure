@@ -99,7 +99,7 @@
    :doc
    "A unit testing framework.\n\nASSERTIONS\n\nThe core of the library is the \"is\" macro, which lets you make\nassertions of any arbitrary expression:\n\n(is (= 4 (+ 2 2)))\n(is (instance? Integer 256))\n(is (.startsWith \"abcde\" \"ab\"))\n\nYou can type an \"is\" expression directly at the REPL, which will\nprint a message if it fails.\n\n    user> (is (= 5 (+ 2 2)))\n\n    FAIL in  (:1)\n    expected: (= 5 (+ 2 2))\n      actual: (not (= 5 4))\n    false\n\nThe \"expected:\" line shows you the original expression, and the\n\"actual:\" shows you what actually happened.  In this case, it\nshows that (+ 2 2) returned 4, which is not = to 5.  Finally, the\n\"false\" on the last line is the value returned from the\nexpression.  The \"is\" macro always returns the result of the\ninner expression.\n\nThere are two special assertions for testing exceptions.  The\n\"(is (thrown? c ...))\" form tests if an exception of class c is\nthrown:\n\n(is (thrown? ArithmeticException (/ 1 0))) \n\n\"(is (thrown-with-msg? c re ...))\" does the same thing and also\ntests that the message on the exception matches the regular\nexpression re:\n\n(is (thrown-with-msg? ArithmeticException #\"Divide by zero\"\n                      (/ 1 0)))\n\nDOCUMENTING TESTS\n\n\"is\" takes an optional second argument, a string describing the\nassertion.  This message will be included in the error report.\n\n(is (= 5 (+ 2 2)) \"Crazy arithmetic\")\n\nIn addition, you can document groups of assertions with the\n\"testing\" macro, which takes a string followed by any number of\nassertions.  The string will be included in failure reports.\nCalls to \"testing\" may be nested, and all of the strings will be\njoined together with spaces in the final report, in a style\nsimilar to RSpec <http://rspec.info/>\n\n(testing \"Arithmetic\"\n  (testing \"with positive integers\"\n    (is (= 4 (+ 2 2)))\n    (is (= 7 (+ 3 4))))\n  (testing \"with negative integers\"\n    (is (= -4 (+ -2 -2)))\n    (is (= -1 (+ 3 -4)))))\n\nNote that, unlike RSpec, the \"testing\" macro may only be used\nINSIDE a \"deftest\" or \"with-test\" form (see below).\n\n\nDEFINING TESTS\n\nThere are two ways to define tests.  The \"with-test\" macro takes\na defn or def form as its first argument, followed by any number\nof assertions.  The tests will be stored as metadata on the\ndefinition.\n\n(with-test\n    (defn my-function [x y]\n      (+ x y))\n  (is (= 4 (my-function 2 2)))\n  (is (= 7 (my-function 3 4))))\n\nAs of Clojure SVN rev. 1221, this does not work with defmacro.\nSee http://code.google.com/p/clojure/issues/detail?id=51\n\nThe other way lets you define tests separately from the rest of\nyour code, even in a different namespace:\n\n(deftest addition\n  (is (= 4 (+ 2 2)))\n  (is (= 7 (+ 3 4))))\n\n(deftest subtraction\n  (is (= 1 (- 4 3)))\n  (is (= 3 (- 7 4))))\n\nThis creates functions named \"addition\" and \"subtraction\", which\ncan be called like any other function.  Therefore, tests can be\ngrouped and composed, in a style similar to the test framework in\nPeter Seibel's \"Practical Common Lisp\"\n<http://www.gigamonkeys.com/book/practical-building-a-unit-test-framework.html>\n\n(deftest arithmetic\n  (addition)\n  (subtraction))\n\nThe names of the nested tests will be joined in a list, like\n\"(arithmetic addition)\", in failure reports.  You can use nested\ntests to set up a context shared by several tests.\n\n\nRUNNING TESTS\n\nRun tests with the function \"(run-tests namespaces...)\":\n\n(run-tests 'your.namespace 'some.other.namespace)\n\nIf you don't specify any namespaces, the current namespace is\nused.  To run all tests in all namespaces, use \"(run-all-tests)\".\n\nBy default, these functions will search for all tests defined in\na namespace and run them in an undefined order.  However, if you\nare composing tests, as in the \"arithmetic\" example above, you\nprobably do not want the \"addition\" and \"subtraction\" tests run\nseparately.  In that case, you must define a special function\nnamed \"test-ns-hook\" that runs your tests in the correct order:\n\n(defn test-ns-hook []\n  (arithmetic))\n\nNote: test-ns-hook prevents execution of fixtures (see below).\n\n\nOMITTING TESTS FROM PRODUCTION CODE\n\nYou can bind the variable \"*load-tests*\" to false when loading or\ncompiling code in production.  This will prevent any tests from\nbeing created by \"with-test\" or \"deftest\".\n\n\nFIXTURES\n\nFixtures allow you to run code before and after tests, to set up\nthe context in which tests should be run.\n\nA fixture is just a function that calls another function passed as\nan argument.  It looks like this:\n\n(defn my-fixture [f]\n   Perform setup, establish bindings, whatever.\n  (f)  Then call the function we were passed.\n   Tear-down / clean-up code here.\n )\n\nFixtures are attached to namespaces in one of two ways.  \"each\"\nfixtures are run repeatedly, once for each test function created\nwith \"deftest\" or \"with-test\".  \"each\" fixtures are useful for\nestablishing a consistent before/after state for each test, like\nclearing out database tables.\n\n\"each\" fixtures can be attached to the current namespace like this:\n(use-fixtures :each fixture1 fixture2 ...)\nThe fixture1, fixture2 are just functions like the example above.\nThey can also be anonymous functions, like this:\n(use-fixtures :each (fn [f] setup... (f) cleanup...))\n\nThe other kind of fixture, a \"once\" fixture, is only run once,\naround ALL the tests in the namespace.  \"once\" fixtures are useful\nfor tasks that only need to be performed once, like establishing\ndatabase connections, or for time-consuming tasks.\n\nAttach \"once\" fixtures to the current namespace like this:\n(use-fixtures :once fixture1 fixture2 ...)\n\nNote: Fixtures and test-ns-hook are mutually incompatible.  If you\nare using test-ns-hook, fixture functions will *never* be run.\n\n\nSAVING TEST OUTPUT TO A FILE\n\nAll the test reporting functions write to the var *test-out*.  By\ndefault, this is the same as *out*, but you can rebind it to any\nPrintWriter.  For example, it could be a file opened with\nclojure.java.io/writer.\n\n\nEXTENDING TEST-IS (ADVANCED)\n\nYou can extend the behavior of the \"is\" macro by defining new\nmethods for the \"assert-expr\" multimethod.  These methods are\ncalled during expansion of the \"is\" macro, so they should return\nquoted forms to be evaluated.\n\nYou can plug in your own test-reporting framework by rebinding\nthe \"report\" function: (report event)\n\nThe 'event' argument is a map.  It will always have a :type key,\nwhose value will be a keyword signaling the type of event being\nreported.  Standard events with :type value of :pass, :fail, and\n:error are called when an assertion passes, fails, and throws an\nexception, respectively.  In that case, the event will also have\nthe following keys:\n\n  :expected   The form that was expected to be true\n  :actual     A form representing what actually occurred\n  :message    The string message given as an argument to 'is'\n\nThe \"testing\" strings will be a list in \"*testing-contexts*\", and\nthe vars being tested will be a list in \"*testing-vars*\".\n\nYour \"report\" function should wrap any printing calls in the\n\"with-test-out\" macro, which rebinds *out* to the current value\nof *test-out*.\n\nFor additional event types, see the examples in the code."}
   {:source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.walk-api.html",
    :name "clojure.walk",
    :author "Stuart Sierra",
@@ -9946,156 +9946,156 @@
    :name "keywordize-keys",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L95",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L91",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/keywordize-keys",
    :doc
    "Recursively transforms all map keys from strings to keywords.",
    :var-type "function",
-   :line 95,
+   :line 91,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([form]),
    :name "macroexpand-all",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L127",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L123",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/macroexpand-all",
    :doc "Recursively performs all possible macroexpansions in form.",
    :var-type "function",
-   :line 127,
+   :line 123,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([f form]),
    :name "postwalk",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L53",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L50",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/postwalk",
    :doc
-   "Performs a depth-first, post-order traversal of form.  Calls f on\neach sub-form, uses f's return value in place of the original.\nRecognizes all Clojure data structures except sorted-map-by.\nConsumes seqs as with doall.",
+   "Performs a depth-first, post-order traversal of form.  Calls f on\neach sub-form, uses f's return value in place of the original.\nRecognizes all Clojure data structures. Consumes seqs as with doall.",
    :var-type "function",
-   :line 53,
+   :line 50,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([form]),
    :name "postwalk-demo",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L81",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L77",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/postwalk-demo",
    :doc
    "Demonstrates the behavior of postwalk by printing each form as it is\nwalked.  Returns form.",
    :var-type "function",
-   :line 81,
+   :line 77,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([smap form]),
    :name "postwalk-replace",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L119",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L115",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/postwalk-replace",
    :doc
    "Recursively transforms form by replacing keys in smap with their\nvalues.  Like clojure/replace but works on any data structure.  Does\nreplacement at the leaves of the tree first.",
    :var-type "function",
-   :line 119,
+   :line 115,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([f form]),
    :name "prewalk",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L62",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L58",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/prewalk",
    :doc "Like postwalk, but does pre-order traversal.",
    :var-type "function",
-   :line 62,
+   :line 58,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([form]),
    :name "prewalk-demo",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L88",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L84",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/prewalk-demo",
    :doc
    "Demonstrates the behavior of prewalk by printing each form as it is\nwalked.  Returns form.",
    :var-type "function",
-   :line 88,
+   :line 84,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([smap form]),
    :name "prewalk-replace",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L111",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L107",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/prewalk-replace",
    :doc
    "Recursively transforms form by replacing keys in smap with their\nvalues.  Like clojure/replace but works on any data structure.  Does\nreplacement at the root of the tree first.",
    :var-type "function",
-   :line 111,
+   :line 107,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([m]),
    :name "stringify-keys",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L103",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L99",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/stringify-keys",
    :doc
    "Recursively transforms all map keys from keywords to strings.",
    :var-type "function",
-   :line 103,
+   :line 99,
    :file
    "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([inner outer form]),
    :name "walk",
    :namespace "clojure.walk",
    :source-url
-   "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj#L35",
+   "https://github.com/clojure/clojure/blob/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj#L35",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/walk.clj",
+   "https://github.com/clojure/clojure/raw/c5673086d40f206135b99a37001c80a4016c3877/src/clj/clojure/walk.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.walk-api.html#clojure.walk/walk",
    :doc
-   "Traverses form, an arbitrary data structure.  inner and outer are\nfunctions.  Applies inner to each element of form, building up a\ndata structure of the same type, then applies outer to the result.\nRecognizes all Clojure data structures except sorted-map-by.\nConsumes seqs as with doall.",
+   "Traverses form, an arbitrary data structure.  inner and outer are\nfunctions.  Applies inner to each element of form, building up a\ndata structure of the same type, then applies outer to the result.\nRecognizes all Clojure data structures. Consumes seqs as with doall.",
    :var-type "function",
    :line 35,
    :file
