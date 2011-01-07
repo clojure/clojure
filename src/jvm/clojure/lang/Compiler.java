@@ -4571,8 +4571,8 @@ static public class ObjExpr implements Expr{
 
 	Type constantType(int id){
 		Object o = constants.nth(id);
-		Class c = o.getClass();
-		if(Modifier.isPublic(c.getModifiers()))
+		Class c = clojure.lang.Util.classOf(o);
+		if(c!= null && Modifier.isPublic(c.getModifiers()))
 			{
 			//can't emit derived fn types due to visibility
 			if(LazySeq.class.isAssignableFrom(c))
