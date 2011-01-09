@@ -7,7 +7,8 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.test-clojure.data
-  (:use clojure.data clojure.test))
+  (:use clojure.data clojure.test)
+  (import java.util.HashSet))
 
 (deftest diff-test
   (are [d x y] (= d (diff x y))
@@ -23,5 +24,6 @@
        [#{:a} #{:b} #{:c :d}] #{:a :c :d} #{:b :c :d}
        [nil nil {:a 1}] {:a 1} {:a 1}
        [{:a #{2}} {:a #{4}} {:a #{3}}] {:a #{2 3}} {:a #{3 4}}
+       [#{1} #{3} #{2}] (HashSet. [1 2]) (HashSet. [2 3]) 
        [{:a {:c [1]}} {:a {:c [0]}} {:a {:c [nil 2] :b 1}}] {:a {:b 1 :c [1 2]}} {:a {:b 1 :c [0 2]}}))
 
