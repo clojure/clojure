@@ -12,6 +12,8 @@
   clojure.data
   (:require [clojure.set :as set]))
 
+(declare diff)
+
 (defn- atom-diff
   "Internal helper for diff."
   [a b]
@@ -28,7 +30,23 @@
      (vec (repeat (apply max (keys m))  nil))
      m)))
 
-(declare diff)
+(defn- diff-associative
+  "Diff associative things a and b, comparing only keys in ks."
+  [a b ks]
+  (reduce
+   (fn [diff1 diff2]
+     (map merge diff1 diff2))
+   [nil nil nil]
+   (map
+    (fn [k] (map #(when % {k %}) (diff (get a k) (get b k))))
+    ks)))
+
+(defn- diff-sequential
+  [a b]
+  (vec (map vectorize (diff-associative
+                       (if (vector? a) a (vec a))
+                       (if (vector? b) b (vec b))
+                       (range (max (count a) (count b)))))))
 
 (defprotocol ^{:added "1.3"} EqualityPartition
   "Implementation detail. Subject to change."
@@ -44,20 +62,9 @@
 
 (extend Object
         Diff
-        {:diff-similar atom-diff}
+        {:diff-similar (fn [a b] ((if (.. a getClass isArray) diff-sequential atom-diff) a b))}
         EqualityPartition
         {:equality-partition (fn [x] (if (.. x getClass isArray) :sequential :atom))})
-
-(defn- diff-associative
-  "Diff associative things a and b, comparing only keys in ks."
-  [a b ks]
-  (reduce
-   (fn [diff1 diff2]
-     (map merge diff1 diff2))
-   [nil nil nil]
-   (map
-    (fn [k] (map #(when % {k %}) (diff (get a k) (get b k))))
-    ks)))
 
 (extend-protocol EqualityPartition
   nil
@@ -88,10 +95,7 @@
   
   java.util.List
   (diff-similar [a b]
-    (vec (map vectorize (diff-associative
-                         (if (vector? a) a (vec a))
-                         (if (vector? b) b (vec b))
-                         (range (max (count a) (count b)))))))
+    (diff-sequential a b))
   
   java.util.Map
   (diff-similar [a b]
