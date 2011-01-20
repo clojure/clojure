@@ -470,11 +470,21 @@ static ISeq seqFrom(Object coll){
 }
 
 static public ISeq keys(Object coll){
-	return APersistentMap.KeySeq.create(seq(coll));
+	if(coll == null)
+		return null;
+	else if (coll instanceof Map)
+		return APersistentMap.KeySeq.create(seq(coll));
+	else
+		throw new IllegalArgumentException("Don't know how to get keys from: " + coll.getClass().getName());
 }
 
 static public ISeq vals(Object coll){
-	return APersistentMap.ValSeq.create(seq(coll));
+	if(coll == null)
+		return null;
+	else if (coll instanceof Map)
+		return APersistentMap.ValSeq.create(seq(coll));
+	else
+		throw new IllegalArgumentException("Don't know how to get vals from: " + coll.getClass().getName());
 }
 
 static public IPersistentMap meta(Object x){

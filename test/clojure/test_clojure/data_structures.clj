@@ -440,11 +440,12 @@
 
 
 (deftest test-keys
-  (are [x y] (= x y)      ; other than map data structures
-      (keys ()) nil
-      (keys []) nil
-      (keys #{}) nil
-      (keys "") nil )
+  (are [x] (thrown? Exception (keys x))
+       ;; other than map data structures
+       ()
+       []
+       #{}
+       "")
 
   (are [x y] (= x y)
       ; (class {:a 1}) => clojure.lang.PersistentArrayMap
@@ -464,11 +465,12 @@
 
 
 (deftest test-vals
-  (are [x y] (= x y)      ; other than map data structures
-      (vals ()) nil
-      (vals []) nil
-      (vals #{}) nil
-      (vals "") nil )
+  (are [x] (thrown? Exception (vals x))
+       ;; other than map data structures
+       ()
+       []
+       #{}
+       "")
 
   (are [x y] (= x y)
       ; (class {:a 1}) => clojure.lang.PersistentArrayMap
