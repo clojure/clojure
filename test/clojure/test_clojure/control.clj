@@ -285,7 +285,7 @@
                  {:r 2 :d 2} :droid
                  #{2 3 4 5} :set
                  [1 [[[2]]]] :deeply-nested
-		 nil :nil
+                 nil :nil
                  :default)]
       (are [result input] (= result (test-fn input))
            :number 1
@@ -306,7 +306,7 @@
            :default #{2 3 4 5 6}
            :droid {:r 2 :d 2}
            :deeply-nested [1 [[[two]]]]
-	   :nil nil
+           :nil nil
            :default :anything-not-appearing-above)))
   (testing "throws IllegalArgumentException if no match"
     (is (thrown-with-msg?
