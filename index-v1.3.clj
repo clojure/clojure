@@ -55,7 +55,7 @@
    :doc
    "A Pretty Printer for Clojure\n\nclojure.pprint implements a flexible system for printing structured data\nin a pleasing, easy-to-understand format. Basic use of the pretty printer is \nsimple, just call pprint instead of println. More advanced users can use \nthe building blocks provided to create custom output formats. \n\nOut of the box, pprint supports a simple structured format for basic data \nand a specialized format for Clojure source code. More advanced formats, \nincluding formats that don't look like Clojure data at all like XML and \nJSON, can be rendered by creating custom dispatch functions. \n\nIn addition to the pprint function, this module contains cl-format, a text \nformatting function which is fully compatible with the format function in \nCommon Lisp. Because pretty printing directives are directly integrated with\ncl-format, it supports very concise custom dispatch. It also provides\na more powerful alternative to Clojure's standard format function.\n\nSee documentation for pprint and cl-format for more information or \ncomplete documentation on the the clojure web site on github."}
   {:source-url
-   "https://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.repl-api.html",
    :name "clojure.repl",
    :author
@@ -8093,9 +8093,9 @@
    :name "apropos",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj#L52",
+   "https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L52",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/apropos",
    :doc
@@ -8107,9 +8107,9 @@
    :name "dir",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj#L70",
+   "https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L70",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/dir",
    :doc "Prints a sorted directory of public vars in a namespace",
@@ -8120,9 +8120,9 @@
    :name "dir-fn",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj#L64",
+   "https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L64",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/dir-fn",
    :doc
@@ -8134,9 +8134,9 @@
    :name "source",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj#L43",
+   "https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L43",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/source",
    :doc
@@ -8148,9 +8148,9 @@
    :name "source-fn",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj#L21",
+   "https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L21",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/40da6266790a264ea6a13ee93ca38a0555718aa2/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/source-fn",
    :doc
