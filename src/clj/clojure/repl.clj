@@ -23,7 +23,7 @@
                Classname/staticField]
        :doc "The instance member form works for both fields and methods.
   They all expand into calls to the dot operator at macroexpansion time."}
-    def {:forms [(def symbol init?)]
+    def {:forms [(def symbol doc-string? init?)]
          :doc "Creates and interns a global var with the name
   of symbol in the current namespace (*ns*) or locates such a var if
   it already exists.  If init is supplied, it is evaluated, and the
