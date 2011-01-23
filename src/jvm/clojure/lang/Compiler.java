@@ -3221,7 +3221,7 @@ static class InvokeExpr implements Expr{
 			PersistentVector argvs = PersistentVector.EMPTY;
 			for(int i = 0; i < args.count(); i++)
 				argvs = argvs.cons(((Expr) args.nth(i)).eval());
-			return fn.applyTo(RT.seq(argvs));
+			return fn.applyTo(RT.seq( Util.ret1(argvs, argvs = null) ));
 			}
 		catch(Throwable e)
 			{
