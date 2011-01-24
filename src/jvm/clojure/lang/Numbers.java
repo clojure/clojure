@@ -1633,12 +1633,41 @@ static public long and(long x, long y){
 	return x & y;
 }
 
+static public Number and(Object x, long y){
+	return and(x, (Object)y);
+}
+
+static public Number and(long x, Object y){
+	return and((Object)x, y);
+}
+
+static public long andNot(long x, long y){
+	return x & ~y;
+}
+
+static public Number andNot(Object x, long y){
+	return andNot((Number)x, (Number)y);
+}
+
+static public Number andNot(long x, Object y){
+	return andNot((Number)x, (Number)y);
+}
+
+
 //static public int or(int x, int y){
 //	return x | y;
 //}
 
 static public long or(long x, long y){
-	return x | y;
+    return x | y;
+}
+
+static public Number or(Object x, long y){
+    return or(x, (Object)y);
+}
+
+static public Number or(long x, Object y){
+    return or((Object)x, y);
 }
 
 //static public int xor(int x, int y){
@@ -1646,7 +1675,15 @@ static public long or(long x, long y){
 //}
 
 static public long xor(long x, long y){
-	return x ^ y;
+    return x ^ y;
+}
+
+static public Number xor(Object x, long y){
+    return xor(x, (Object)y);
+}
+
+static public Number xor(long x, Object y){
+    return xor((Object)x, y);
 }
 
 //static public int minus(int x, int y){
@@ -3784,7 +3821,11 @@ static public double divide(double x, long y){
 }
 
 static public double divide(long x, double y){
-	return x / y;
+    return x / y;
+}
+
+static public Number divide(long x, long y){
+	return divide((Number)x, (Number)y);
 }
 
 static public boolean lt(long x, Object y){
