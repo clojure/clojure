@@ -252,16 +252,14 @@
       (is (false? (.contains r :bar)))
       (is (false? (.isEmpty r)))))
   (testing "you can't define a method twice"
-    (is (fails-with-cause?
-         java.lang.ClassFormatError #"^(Repetitive|Duplicate) method name"
+    (is (thrown? Exception
          (eval '(reify
                  java.util.List
                  (size [_] 10)
                  java.util.Collection
                  (size [_] 20))))))
   (testing "you can't define a method not on an interface/protocol/j.l.Object"
-    (is (fails-with-cause? 
-         IllegalArgumentException #"^Can't define method not in interfaces: foo"
+    (is (thrown? Exception
          (eval '(reify java.util.List (foo [_]))))))
   (testing "of a protocol"
     (let [r (reify
@@ -288,8 +286,7 @@
       (is (= :done (.get r 1)))))
   (testing "disambiguating with type hints"
     (testing "you must hint an overloaded method"
-      (is (fails-with-cause?
-            IllegalArgumentException #"Must hint overloaded method: hinted"
+      (is (thrown? Exception
             (eval '(reify clojure.test_clojure.protocols.examples.ExampleInterface (hinted [_ o]))))))
     (testing "hinting"
       (let [r (reify
