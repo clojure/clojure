@@ -10,7 +10,6 @@
 package clojure.lang;
 
 public abstract class RestFn extends AFunction{
-
 abstract public int getRequiredArity();
 
 protected Object doInvoke(Object args) throws Exception{
@@ -549,21 +548,63 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1,arg1=null), 
+                                                        Util.ret1(arg2,arg2=null), 
+                                                        Util.ret1(arg3,arg3=null), 
+                                                        Util.ret1(arg4,arg4=null), 
+                                                        Util.ret1(arg5,arg5=null), 
+                                                        Util.ret1(arg6,arg6=null), 
+                                                        Util.ret1(arg7,arg7=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7));
+			return doInvoke(Util.ret1(arg1,arg1=null), ArraySeq.create(Util.ret1(arg2,arg2=null), 
+                                                                                   Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), ArraySeq.create(Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), ArraySeq.create(Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), ArraySeq.create(Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), ArraySeq.create(Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), ArraySeq.create(Util.ret1(arg7,arg7=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, null);
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), null);
 		default:
 			return throwArity(7);
 		}
@@ -575,23 +616,79 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1,arg1=null), 
+                                                        Util.ret1(arg2,arg2=null), 
+                                                        Util.ret1(arg3,arg3=null), 
+                                                        Util.ret1(arg4,arg4=null), 
+                                                        Util.ret1(arg5,arg5=null), 
+                                                        Util.ret1(arg6,arg6=null), 
+                                                        Util.ret1(arg7,arg7=null), 
+                                                        Util.ret1(arg8,arg8=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+			return doInvoke(Util.ret1(arg1,arg1=null), ArraySeq.create(Util.ret1(arg2,arg2=null), 
+                                                                                   Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), ArraySeq.create(Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), ArraySeq.create(Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), ArraySeq.create(Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), ArraySeq.create(Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), ArraySeq.create(Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), ArraySeq.create(Util.ret1(arg8,arg8=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, null);
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), 
+                                        Util.ret1(arg8,arg8=null), null);
 		default:
 			return throwArity(8);
 		}
@@ -603,25 +700,97 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1,arg1=null), 
+                                                        Util.ret1(arg2,arg2=null), 
+                                                        Util.ret1(arg3,arg3=null), 
+                                                        Util.ret1(arg4,arg4=null), 
+                                                        Util.ret1(arg5,arg5=null), 
+                                                        Util.ret1(arg6,arg6=null), 
+                                                        Util.ret1(arg7,arg7=null), 
+                                                        Util.ret1(arg8,arg8=null), 
+                                                        Util.ret1(arg9,arg9=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), ArraySeq.create(Util.ret1(arg2,arg2=null), 
+                                                                                   Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), ArraySeq.create(Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), ArraySeq.create(Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), ArraySeq.create(Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), ArraySeq.create(Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), ArraySeq.create(Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), ArraySeq.create(Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), 
+                                        Util.ret1(arg8,arg8=null), ArraySeq.create(Util.ret1(arg9,arg9=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, null);
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), 
+                                        Util.ret1(arg8,arg8=null), 
+                                        Util.ret1(arg9,arg9=null), null);
 		default:
 			return throwArity(9);
 		}
@@ -633,27 +802,120 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+			return doInvoke(ArraySeq.create(Util.ret1(arg1,arg1=null), 
+                                                        Util.ret1(arg2,arg2=null), 
+                                                        Util.ret1(arg3,arg3=null), 
+                                                        Util.ret1(arg4,arg4=null), 
+                                                        Util.ret1(arg5,arg5=null), 
+                                                        Util.ret1(arg6,arg6=null), 
+                                                        Util.ret1(arg7,arg7=null), 
+                                                        Util.ret1(arg8,arg8=null), 
+                                                        Util.ret1(arg9,arg9=null), 
+                                                        Util.ret1(arg10,arg10=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), ArraySeq.create(Util.ret1(arg2,arg2=null), 
+                                                                                   Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), ArraySeq.create(Util.ret1(arg3,arg3=null), 
+                                                                                   Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), ArraySeq.create(Util.ret1(arg4,arg4=null), 
+                                                                                   Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), ArraySeq.create(Util.ret1(arg5,arg5=null), 
+                                                                                   Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), ArraySeq.create(Util.ret1(arg6,arg6=null), 
+                                                                                   Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), ArraySeq.create(Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), ArraySeq.create(Util.ret1(arg8,arg8=null), 
+                                                                                   Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10));
+			return doInvoke(Util.ret1(arg1,arg1=null), 
+                                        Util.ret1(arg2,arg2=null), 
+                                        Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), 
+                                        Util.ret1(arg5,arg5=null), 
+                                        Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), 
+                                        Util.ret1(arg8,arg8=null), ArraySeq.create(Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), ArraySeq.create(
+ Util.ret1(arg10,arg10=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), null);
 		default:
 			return throwArity(10);
 		}
@@ -665,29 +927,161 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10, arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ArraySeq.create(arg11));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), ArraySeq.create(
+ Util.ret1(arg11,arg11=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), null);
 		default:
 			return throwArity(11);
 		}
@@ -699,31 +1093,187 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10, arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ArraySeq.create(arg11, arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, ArraySeq.create(arg12));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), ArraySeq.create(
+ Util.ret1(arg12,arg12=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), null);
 		default:
 			return throwArity(12);
 		}
@@ -737,45 +1287,227 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 		{
 		case 0:
 			return doInvoke(
-					ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+					ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                      
+ Util.ret1(arg13,arg13=null)));
 		case 2:
-			return doInvoke(arg1, arg2,
-			                ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null),
+			                ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3,
-			                ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null),
+			                ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4,
-			                ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null),
+			                ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5,
-			                ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null),
+			                ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-			                ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null),
+			                ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-			                ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null),
+			                ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-			                ArraySeq.create(arg9, arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null),
+			                ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-			                ArraySeq.create(arg10, arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null),
+			                ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null),
+			                ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null),
+			                ArraySeq.create(
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(
+ Util.ret1(arg13,arg13=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), null);
 		default:
 			return throwArity(13);
 		}
@@ -788,49 +1520,259 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                arg13, arg14));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                      
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                            arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                            
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3,
-			                ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null),
+			                ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4,
-			                ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null),
+			                ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5,
-			                ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null),
+			                ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-			                ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null),
+			                ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-			                ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null),
+			                ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-			                ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null),
+			                ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-			                ArraySeq.create(arg10, arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null),
+			                ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null),
+			                ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null),
+			                ArraySeq.create(
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13, arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ArraySeq.create(arg14));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null),
+			                ArraySeq.create(
+ Util.ret1(arg14,arg14=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
 			                null);
 		default:
 			return throwArity(14);
@@ -844,53 +1786,293 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                arg13, arg14, arg15));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                      
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                            arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                            
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                  arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                  
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4,
-			                ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null),
+			                ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5,
-			                ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null),
+			                ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-			                ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null),
+			                ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-			                ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null),
+			                ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-			                ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null),
+			                ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-			                ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null),
+			                ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null),
+			                ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null),
+			                ArraySeq.create(
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13, arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ArraySeq.create(arg14, arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null),
+			                ArraySeq.create(
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                ArraySeq.create(arg15));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                ArraySeq.create(
+ Util.ret1(arg15,arg15=null)));
 		case 15:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), null);
 		default:
 			return throwArity(15);
 		}
@@ -903,56 +2085,328 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                arg13, arg14, arg15, arg16));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                      
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                            arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                            
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                  arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                  
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                        arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                        
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5,
-			                ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null),
+			                ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-			                ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null),
+			                ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-			                ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null),
+			                ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-			                ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null),
+			                ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-			                ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null),
+			                ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null),
+			                ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null),
+			                ArraySeq.create(
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13, arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ArraySeq.create(arg14, arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null),
+			                ArraySeq.create(
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                ArraySeq.create(arg15, arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                ArraySeq.create(
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null)));
 		case 15:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, ArraySeq.create(arg16));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), ArraySeq.create(
+ Util.ret1(arg16,arg16=null)));
 		case 16:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), null);
 		default:
 			return throwArity(16);
 		}
@@ -965,59 +2419,365 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                      
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                            arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                            
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                  arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                  
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                        arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                        
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                              arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                              
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-			                ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null),
+			                ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-			                ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null),
+			                ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-			                ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null),
+			                ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-			                ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null),
+			                ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null),
+			                ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null),
+			                ArraySeq.create(
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13, arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ArraySeq.create(arg14, arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null),
+			                ArraySeq.create(
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                ArraySeq.create(arg15, arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                ArraySeq.create(
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 15:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, ArraySeq.create(arg16, arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), ArraySeq.create(
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null)));
 		case 16:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, ArraySeq.create(arg17));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), ArraySeq.create(
+ Util.ret1(arg17,arg17=null)));
 		case 17:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), null);
 		default:
 			return throwArity(17);
 		}
@@ -1030,63 +2790,405 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                      
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                            arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                            
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                  arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                  
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                        arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                        
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                              arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                              
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                                    arg13, arg14, arg15, arg16, arg17,
-			                                                                    arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                                    
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null),
+			                                                                    
+ Util.ret1(arg18,arg18=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-			                ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null),
+			                ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-			                ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null),
+			                ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-			                ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null),
+			                ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null),
+			                ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null),
+			                ArraySeq.create(
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13, arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ArraySeq.create(arg14, arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null),
+			                ArraySeq.create(
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                ArraySeq.create(arg15, arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                ArraySeq.create(
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 15:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, ArraySeq.create(arg16, arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), ArraySeq.create(
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 16:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, ArraySeq.create(arg17, arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), ArraySeq.create(
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null)));
 		case 17:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, ArraySeq.create(arg18));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), ArraySeq.create(
+ Util.ret1(arg18,arg18=null)));
 		case 18:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), null);
 		default:
 			return throwArity(18);
 		}
@@ -1099,69 +3201,448 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    ISeq packed = PersistentList.EMPTY;
+			return doInvoke(
+                                        Util.ret1(arg1,arg1=null), ArraySeq.create(Util.ret1(arg2,arg2=null),
+                    Util.ret1(arg3,arg3=null),
+                    Util.ret1(arg4,arg4=null),
+                    Util.ret1(arg5,arg5=null),
+                    Util.ret1(arg6,arg6=null),
+                    Util.ret1(arg7,arg7=null),
+                    Util.ret1(arg8,arg8=null),
+                    Util.ret1(arg9,arg9=null),
+                    Util.ret1(arg10,arg10=null),
+                    Util.ret1(arg11,arg11=null),
+                    Util.ret1(arg12,arg12=null),
+                    Util.ret1(arg13,arg13=null),
+                    Util.ret1(arg14,arg14=null),
+                    Util.ret1(arg15,arg15=null),
+                    Util.ret1(arg16,arg16=null),
+                    Util.ret1(arg17,arg17=null),
+                    Util.ret1(arg18,arg18=null),
+                    Util.ret1(arg19,arg19=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                            arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                            
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                  arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), ArraySeq.create(
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                  
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                        arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), ArraySeq.create(
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                        
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                              arg13, arg14, arg15, arg16, arg17, arg18,
-			                                                              arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), ArraySeq.create(
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                              
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null),
+			                                                              
+ Util.ret1(arg19,arg19=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                                    arg13, arg14, arg15, arg16, arg17,
-			                                                                    arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), ArraySeq.create(
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                                    
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null),
+			                                                                    
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11, arg12,
-			                                                                          arg13, arg14, arg15, arg16, arg17,
-			                                                                          arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), ArraySeq.create(
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                                          
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null),
+			                                                                          
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11, arg12,
-			                                                                                arg13, arg14, arg15, arg16,
-			                                                                                arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), ArraySeq.create(
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                                                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null),
+			                                                                                
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-			                ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null),
+			                ArraySeq.create(
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null),
+			                ArraySeq.create(
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null),
+			                ArraySeq.create(
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ArraySeq.create(arg14, arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null),
+			                ArraySeq.create(
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                ArraySeq.create(arg15, arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                ArraySeq.create(
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 15:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, ArraySeq.create(arg16, arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), ArraySeq.create(
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 16:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, ArraySeq.create(arg17, arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), ArraySeq.create(
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 17:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, ArraySeq.create(arg18, arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), ArraySeq.create(
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null)));
 		case 18:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, ArraySeq.create(arg19));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), ArraySeq.create(
+ Util.ret1(arg19,arg19=null)));
 		case 19:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, arg19, null);
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null), 
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null),
+			                
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null), null);
 		default:
 			return throwArity(19);
 		}
@@ -1175,80 +3656,232 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(ArraySeq.create(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null), 
+ Util.ret1(arg20,arg20=null)));
 		case 1:
-			return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                      arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), ArraySeq.create(
+ Util.ret1(arg2,arg2=null), 
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                      
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null), 
+ Util.ret1(arg20,arg20=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                            arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(
+ Util.ret1(arg1,arg1=null), 
+ Util.ret1(arg2,arg2=null), ArraySeq.create(
+ Util.ret1(arg3,arg3=null), 
+ Util.ret1(arg4,arg4=null), 
+ Util.ret1(arg5,arg5=null), 
+ Util.ret1(arg6,arg6=null), 
+ Util.ret1(arg7,arg7=null), 
+ Util.ret1(arg8,arg8=null), 
+ Util.ret1(arg9,arg9=null), 
+ Util.ret1(arg10,arg10=null), 
+ Util.ret1(arg11,arg11=null), 
+ Util.ret1(arg12,arg12=null),
+			                                            
+ Util.ret1(arg13,arg13=null), 
+ Util.ret1(arg14,arg14=null), 
+ Util.ret1(arg15,arg15=null), 
+ Util.ret1(arg16,arg16=null), 
+ Util.ret1(arg17,arg17=null), 
+ Util.ret1(arg18,arg18=null), 
+ Util.ret1(arg19,arg19=null), 
+ Util.ret1(arg20,arg20=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                  arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        ArraySeq.create(Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null),
+                                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                        Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                        arg13, arg14, arg15, arg16, arg17, arg18, arg19,
-			                                                        arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), ArraySeq.create(Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), Util.ret1(arg7,arg7=null), 
+                                                                                   Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), Util.ret1(arg10,arg10=null), 
+                                                                                   Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                   Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null), 
+                                                                                   Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null),
+                                                                                   Util.ret1(arg20,arg20=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                              arg13, arg14, arg15, arg16, arg17, arg18,
-			                                                              arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), ArraySeq.create(Util.ret1(arg6,arg6=null), Util.ret1(arg7,arg7=null), 
+                                                                                                              Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                                                                              Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), 
+                                                                                                              Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                                              Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                                              Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                                              Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                                              Util.ret1(arg20,arg20=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12,
-			                                                                    arg13, arg14, arg15, arg16, arg17,
-			                                                                    arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        ArraySeq.create(Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null),
+                                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                        Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11, arg12,
-			                                                                          arg13, arg14, arg15, arg16, arg17,
-			                                                                          arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), ArraySeq.create(Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                                                   Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), 
+                                                                                   Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                   Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                   Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null),
+                                                                                   Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                   Util.ret1(arg20,arg20=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11, arg12,
-			                                                                                arg13, arg14, arg15, arg16,
-			                                                                                arg17, arg18, arg19,
-			                                                                                arg20));
+			return doInvoke(
+                                        Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), ArraySeq.create(Util.ret1(arg9,arg9=null), Util.ret1(arg10,arg10=null), 
+                                                                                                              Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null),
+                                                                                                              Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), 
+                                                                                                              Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null),
+                                                                                                              Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                                              Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10, arg11, arg12,
-			                                                                                      arg13, arg14, arg15,
-			                                                                                      arg16, arg17, arg18,
-			                                                                                      arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        ArraySeq.create(Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null),
+                                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null),
+                                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null),
+                                                        Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-			                ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), ArraySeq.create(Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                                                                     Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), 
+                                                                                     Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null), 
+                                                                                     Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                     Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(
+                                        Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), ArraySeq.create(Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                                                  Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                                                  Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                                                  Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+ Util.ret1(arg20,arg20=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ArraySeq.create(arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null),
+			                ArraySeq.create(Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                        Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ArraySeq.create(arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), ArraySeq.create(Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                     Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                     Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                     Util.ret1(arg20,arg20=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                ArraySeq.create(arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), ArraySeq.create(Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null), 
+                                                                                                                  Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                                                  Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 15:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, ArraySeq.create(arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null),
+                                        ArraySeq.create(Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                        Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 16:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, ArraySeq.create(arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), ArraySeq.create(Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                     Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 17:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, ArraySeq.create(arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), ArraySeq.create(Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                                                  Util.ret1(arg20,arg20=null)));
 		case 18:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, ArraySeq.create(arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                        ArraySeq.create(Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 19:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, arg19, ArraySeq.create(arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                        Util.ret1(arg19,arg19=null), ArraySeq.create(Util.ret1(arg20,arg20=null)));
 		case 20:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, arg19, arg20, null);
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                        Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null), null);
 		default:
 			return throwArity(20);
 		}
-
+        
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
@@ -1258,84 +3891,189 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	switch(getRequiredArity())
 		{
 		case 0:
-			return doInvoke(ontoArrayPrepend(args, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                                 arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(ontoArrayPrepend(args, Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                                         Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                                         Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null),
+                                                         Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                                         Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null),
+                                                         Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                         Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 1:
-			return doInvoke(arg1, ontoArrayPrepend(args, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                                       arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), ontoArrayPrepend(args, Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                                                                    Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), 
+                                                                                    Util.ret1(arg6,arg6=null), Util.ret1(arg7,arg7=null), 
+                                                                                    Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                                                    Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null),
+                                                                                    Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                    Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                    Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                    Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                    Util.ret1(arg20,arg20=null)));
 		case 2:
-			return doInvoke(arg1, arg2, ontoArrayPrepend(args, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                                             arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19,
-			                                             arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), ontoArrayPrepend(args, Util.ret1(arg3,arg3=null), 
+                                                                                                               Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), 
+                                                                                                               Util.ret1(arg6,arg6=null), Util.ret1(arg7,arg7=null), 
+                                                                                                               Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                                                                               Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null),
+                                                                                                               Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                                               Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                                               Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                                               Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null),
+                                                                                                               Util.ret1(arg20,arg20=null)));
 		case 3:
-			return doInvoke(arg1, arg2, arg3, ontoArrayPrepend(args, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                                                   arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19,
-			                                                   arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        ontoArrayPrepend(args, Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                                         Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                         Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                                         Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                         Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                         Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 4:
-			return doInvoke(arg1, arg2, arg3, arg4, ontoArrayPrepend(args, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                                                         arg12, arg13, arg14, arg15, arg16, arg17, arg18,
-			                                                         arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), ontoArrayPrepend(args, Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), Util.ret1(arg7,arg7=null), 
+                                                                                    Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), Util.ret1(arg10,arg10=null), 
+                                                                                    Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null),
+                                                                                    Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null), 
+                                                                                    Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                    Util.ret1(arg20,arg20=null)));
 		case 5:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, ontoArrayPrepend(args, arg6, arg7, arg8, arg9, arg10, arg11,
-			                                                               arg12, arg13, arg14, arg15, arg16, arg17,
-			                                                               arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null),
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), ontoArrayPrepend(args, Util.ret1(arg6,arg6=null), Util.ret1(arg7,arg7=null), 
+                                                                                                               Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                                                                               Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null),
+                                                                                                               Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                                               Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                                               Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null),
+                                                                                                               Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                                               Util.ret1(arg20,arg20=null)));
 		case 6:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ontoArrayPrepend(args, arg7, arg8, arg9, arg10, arg11,
-			                                                                     arg12, arg13, arg14, arg15, arg16,
-			                                                                     arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        ontoArrayPrepend(args, Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                         Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                                         Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                         Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                         Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 7:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ontoArrayPrepend(args, arg8, arg9, arg10, arg11,
-			                                                                           arg12, arg13, arg14, arg15,
-			                                                                           arg16, arg17, arg18, arg19,
-			                                                                           arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null),
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), ontoArrayPrepend(args, Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                                                                    Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null),
+                                                                                    Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                    Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null),
+                                                                                    Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                    Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null),
+                                                                                    Util.ret1(arg20,arg20=null)));
 		case 8:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ontoArrayPrepend(args, arg9, arg10, arg11,
-			                                                                                 arg12, arg13, arg14, arg15,
-			                                                                                 arg16, arg17, arg18, arg19,
-			                                                                                 arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), ontoArrayPrepend(args, Util.ret1(arg9,arg9=null), Util.ret1(arg10,arg10=null), 
+                                                                                                               Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                                                                                               Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), 
+                                                                                                               Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null), 
+                                                                                                               Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                                               Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 9:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ontoArrayPrepend(args, arg10, arg11,
-			                                                                                       arg12, arg13, arg14,
-			                                                                                       arg15, arg16, arg17,
-			                                                                                       arg18, arg19,
-			                                                                                       arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        ontoArrayPrepend(args, Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                                         Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                         Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                         Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 10:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ontoArrayPrepend(args, arg11,
-			                                                                                              arg12, arg13,
-			                                                                                              arg14, arg15,
-			                                                                                              arg16, arg17,
-			                                                                                              arg18, arg19,
-			                                                                                              arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), ontoArrayPrepend(args, Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                                                                      Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), 
+                                                                                      Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null), 
+                                                                                      Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                      Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 11:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-			                ontoArrayPrepend(args, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(
+                                        Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), ontoArrayPrepend(args, Util.ret1(arg12,arg12=null), Util.ret1(arg13,arg13=null), 
+                                                                                                                   Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                                                   Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                                                   Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                                                   Util.ret1(arg20,arg20=null)));
 		case 12:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-			                ontoArrayPrepend(args, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(
+                                        Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null),
+                                        ontoArrayPrepend(args, Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                         Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                         Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 13:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-			                ontoArrayPrepend(args, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), ontoArrayPrepend(args, Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                                                                      Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), 
+                                                                                      Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                      Util.ret1(arg20,arg20=null)));
 		case 14:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                ontoArrayPrepend(args, arg15, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), ontoArrayPrepend(args, Util.ret1(arg15,arg15=null), Util.ret1(arg16,arg16=null), 
+                                                                                                                   Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                                                   Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 15:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, ontoArrayPrepend(args, arg16, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        ontoArrayPrepend(args, Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                         Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 16:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, ontoArrayPrepend(args, arg17, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), ontoArrayPrepend(args, Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                                                                      Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 17:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, ontoArrayPrepend(args, arg18, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), ontoArrayPrepend(args, Util.ret1(arg18,arg18=null), Util.ret1(arg19,arg19=null), 
+                                                                                                                   Util.ret1(arg20,arg20=null)));
 		case 18:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, ontoArrayPrepend(args, arg19, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                        ontoArrayPrepend(args, Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null)));
 		case 19:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, arg19, ontoArrayPrepend(args, arg20));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                        Util.ret1(arg19,arg19=null), ontoArrayPrepend(args, Util.ret1(arg20,arg20=null)));
 		case 20:
-			return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-			                arg15, arg16, arg17, arg18, arg19, arg20, ArraySeq.create(args));
+			return doInvoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null), 
+                                        Util.ret1(arg4,arg4=null), Util.ret1(arg5,arg5=null), Util.ret1(arg6,arg6=null), 
+                                        Util.ret1(arg7,arg7=null), Util.ret1(arg8,arg8=null), Util.ret1(arg9,arg9=null), 
+                                        Util.ret1(arg10,arg10=null), Util.ret1(arg11,arg11=null), Util.ret1(arg12,arg12=null), 
+                                        Util.ret1(arg13,arg13=null), Util.ret1(arg14,arg14=null), Util.ret1(arg15,arg15=null), 
+                                        Util.ret1(arg16,arg16=null), Util.ret1(arg17,arg17=null), Util.ret1(arg18,arg18=null), 
+                                        Util.ret1(arg19,arg19=null), Util.ret1(arg20,arg20=null), ArraySeq.create(args));
 		default:
 			return throwArity(21);
 		}
