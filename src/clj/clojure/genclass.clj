@@ -71,14 +71,22 @@
 
 (def ^{:private true} prim->class
      {'int Integer/TYPE
+      'ints (Class/forName "[I")
       'long Long/TYPE
+      'longs (Class/forName "[J")
       'float Float/TYPE
+      'floats (Class/forName "[F")
       'double Double/TYPE
+      'doubles (Class/forName "[D")
       'void Void/TYPE
       'short Short/TYPE
+      'shorts (Class/forName "[S")
       'boolean Boolean/TYPE
+      'booleans (Class/forName "[Z")
       'byte Byte/TYPE
-      'char Character/TYPE})
+      'bytes (Class/forName "[B")
+      'char Character/TYPE
+      'chars (Class/forName "[C")})
 
 (defn- ^Class the-class [x] 
   (cond 
@@ -623,14 +631,7 @@
   fully-qualified class name given as a string or symbol
   (such as 'java.lang.String)"
   [c]
-  (if (or (instance? Class c) (prim->class c))
-    (Type/getType (the-class c))
-    (let [strx (str c)]
-      (Type/getObjectType 
-       (.replace (if (some #{\.} strx)
-                   strx
-                   (str "java.lang." strx)) 
-                 "." "/")))))
+  (Type/getType (the-class c)))
 
 (defn- generate-interface
   [{:keys [name extends methods]}]
