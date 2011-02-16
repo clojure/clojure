@@ -255,7 +255,7 @@ void enqueue(Action action){
 		queued = aq.compareAndSet(prior, new ActionQueue((IPersistentStack)prior.q.cons(action), prior.error));
 		}
 
-	if(prior.q.count() == 0 && prior.error == null)
+	if(prior.q.peek() == null && prior.error == null)
 		action.execute();
 }
 
