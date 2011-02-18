@@ -5929,21 +5929,21 @@
        #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
        version-string)
       clojure-version {:major       (Integer/valueOf ^String major)
-		       :minor       (Integer/valueOf ^String minor)
-		       :incremental (Integer/valueOf ^String incremental)
-		       :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
+                       :minor       (Integer/valueOf ^String minor)
+                       :incremental (Integer/valueOf ^String incremental)
+                       :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
   (def ^:dynamic *clojure-version*
-       (if (.contains version-string "SNAPSHOT")
-	 (clojure.lang.RT/assoc clojure-version :interim true)
-	 clojure-version)))
-      
+    (if (.contains version-string "SNAPSHOT")
+      (clojure.lang.RT/assoc clojure-version :interim true)
+      clojure-version)))
+
 (add-doc-and-meta *clojure-version*
   "The version info for Clojure core, as a map containing :major :minor 
   :incremental and :qualifier keys. Feature releases may increment 
   :minor and/or :major, bugfix releases will increment :incremental. 
   Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   {:added "1.0"})
-      
+
 (defn
   clojure-version 
   "Returns clojure version as a printable string."
@@ -5957,7 +5957,7 @@
        (when-let [q (:qualifier *clojure-version*)]
          (when (pos? (count q)) (str "-" q)))
        (when (:interim *clojure-version*)
-	 "-SNAPSHOT")))
+         "-SNAPSHOT")))
 
 (defn promise
   "Alpha - subject to change.
