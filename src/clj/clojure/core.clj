@@ -5918,10 +5918,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 
-(let [version-stream (.getResourceAsStream
-		      (clojure.lang.RT/baseLoader) 
-		      "clojure/version.properties")
-      properties     (doto (new java.util.Properties) (.load version-stream))
+(let [properties (with-open [version-stream (.getResourceAsStream
+                                             (clojure.lang.RT/baseLoader)
+                                             "clojure/version.properties")]
+                   (doto (new java.util.Properties)
+                     (.load version-stream)))
       version-string (.getProperty properties "version")
       [_ major minor incremental qualifier snapshot]
       (re-matches
