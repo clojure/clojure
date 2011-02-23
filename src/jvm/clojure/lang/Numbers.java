@@ -1641,19 +1641,6 @@ static public Number and(long x, Object y){
 	return and((Object)x, y);
 }
 
-static public long andNot(long x, long y){
-	return x & ~y;
-}
-
-static public Number andNot(Object x, long y){
-	return andNot((Number)x, (Number)y);
-}
-
-static public Number andNot(long x, Object y){
-	return andNot((Number)x, (Number)y);
-}
-
-
 //static public int or(int x, int y){
 //	return x | y;
 //}
