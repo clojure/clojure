@@ -209,13 +209,6 @@ Usage: *hello*
 (deliver promise-filled '(first second third))
 (def promise-unfilled (promise))
 (def basic-agent (agent '(first second third)))
-(defn failed-agent
-  "must be a fn because you cannot await agents during load"
-  []
-  (let [a (agent "foo")]
-    (send a +)
-    (try (await-for 100 a) (catch RuntimeException re))
-    a))
 (def basic-atom (atom '(first second third)))
 (def basic-ref (ref '(first second third)))
 (def delay-forced (delay '(first second third)))
@@ -230,7 +223,6 @@ Usage: *hello*
  ;; This hangs currently, cause we can't figure out whether a promise is filled
  ;;(tst-pprint 20 promise-unfilled) #"#<Promise@[0-9a-f]+: \r?\n  :pending>"
  (tst-pprint 20 basic-agent) #"#<Agent@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\)>"
- #_(tst-pprint 20 (failed-agent)) #_#"#<Agent@[0-9a-f]+ FAILED: \r?\n  \"foo\">"
  (tst-pprint 20 basic-atom) #"#<Atom@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\r?\)>"
  (tst-pprint 20 basic-ref) #"#<Ref@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\)>"
  (tst-pprint 20 delay-forced) #"#<Delay@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\)>"
