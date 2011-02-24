@@ -1021,7 +1021,10 @@ public static class VectorReader extends AFn{
 public static class MapReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) throws Exception{
 		PushbackReader r = (PushbackReader) reader;
-		return RT.map(readDelimitedList('}', r, true).toArray());
+		Object[] a = readDelimitedList('}', r, true).toArray();
+		if((a.length & 1) == 1)
+			throw new Exception("Map literal must contain an even number of forms");
+		return RT.map(a);
 	}
 
 }
