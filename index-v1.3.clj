@@ -3216,10 +3216,10 @@
    :name "gen-class",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6fddcabebd1dec50ea535d7576615da57fc0112/src/clj/clojure/genclass.clj#L484",
+   "https://github.com/clojure/clojure/blob/e006863d50a164976627311f577726fcd917a9ff/src/clj/clojure/genclass.clj#L484",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6fddcabebd1dec50ea535d7576615da57fc0112/src/clj/clojure/genclass.clj",
+   "https://github.com/clojure/clojure/raw/e006863d50a164976627311f577726fcd917a9ff/src/clj/clojure/genclass.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/gen-class",
    :doc
@@ -3231,10 +3231,10 @@
    :name "gen-interface",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6fddcabebd1dec50ea535d7576615da57fc0112/src/clj/clojure/genclass.clj#L661",
+   "https://github.com/clojure/clojure/blob/e006863d50a164976627311f577726fcd917a9ff/src/clj/clojure/genclass.clj#L661",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6fddcabebd1dec50ea535d7576615da57fc0112/src/clj/clojure/genclass.clj",
+   "https://github.com/clojure/clojure/raw/e006863d50a164976627311f577726fcd917a9ff/src/clj/clojure/genclass.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/gen-interface",
    :doc
