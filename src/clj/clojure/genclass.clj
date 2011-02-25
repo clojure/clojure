@@ -16,7 +16,7 @@
 ;(defn method-sig [^java.lang.reflect.Method meth]
 ;  [(. meth (getName)) (seq (. meth (getParameterTypes)))])
 
-(defn- non-private-methods [^Class c]
+(defn- filter-methods [^Class c invalid-method?]
   (loop [mm {}
          considered #{}
          c c]
@@ -32,16 +32,29 @@
                       mods (. meth (getModifiers))
                       mk (method-sig meth)]
                   (if (or (considered mk)
-                          (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
-                          ;(. Modifier (isPrivate mods))
-                          (. Modifier (isStatic mods))
-                          (. Modifier (isFinal mods))
-                          (= "finalize" (.getName meth)))
+                          (invalid-method? meth))
                     (recur mm (conj considered mk) (next meths))
                     (recur (assoc mm mk meth) (conj considered mk) (next meths))))
                 [mm considered]))]
         (recur mm considered (. c (getSuperclass))))
       mm)))
+
+(defn- non-private-methods [^Class c]
+  (let [not-overridable? (fn [^java.lang.reflect.Method meth]
+                           (let [mods (. meth (getModifiers))]
+                             (or (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
+                                 (. Modifier (isStatic mods))
+                                 (. Modifier (isFinal mods))
+                                 (= "finalize" (.getName meth)))))]
+    (filter-methods c not-overridable?)))
+
+(defn- protected-final-methods [^Class c]
+  (let [not-exposable? (fn [^java.lang.reflect.Method meth]
+                         (let [mods (. meth (getModifiers))]
+                           (not (and (Modifier/isProtected mods)
+                                     (Modifier/isFinal mods)
+                                     (not (Modifier/isStatic mods))))))]
+    (filter-methods c not-exposable?)))
 
 (defn- ctor-sigs [^Class super]
   (for [^Constructor ctor (. super (getDeclaredConstructors))
@@ -415,7 +428,8 @@
        (doseq [[local-mname ^java.lang.reflect.Method m] (reduce1 (fn [ms [[name _ _] m]]
                               (if (contains? exposes-methods (symbol name))
                                 (conj ms [((symbol name) exposes-methods) m])
-                                ms)) [] (seq mm))]
+                                ms)) [] (concat (seq mm)
+                                                (seq (protected-final-methods super))))]
          (let [ptypes (to-types (.getParameterTypes m))
                rtype (totype (.getReturnType m))
                exposer-m (new Method (str local-mname) rtype ptypes)

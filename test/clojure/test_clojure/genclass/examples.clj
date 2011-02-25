@@ -41,6 +41,17 @@
                                                              java.lang.annotation.ElementType/PARAMETER]}
                            String] void]])
 
+(gen-class :name clojure.test_clojure.genclass.examples.ProtectedFinalTester
+           :extends java.lang.ClassLoader
+           :main false
+           :prefix "pf-"
+           :exposes-methods {findSystemClass superFindSystemClass})
+
+(defn pf-findSystemClass
+  "This function should never be called."
+  [_ name]
+  clojure.lang.RT)
+
 (definterface ArrayDefInterface
   ; primitive array sugar
   (^void takesByteArray [^bytes a])
