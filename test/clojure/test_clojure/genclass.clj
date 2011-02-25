@@ -10,8 +10,12 @@
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass
   (:use clojure.test clojure.test-helper)
-  (:import [clojure.test_clojure.genclass.examples ExampleClass
-                                                   ExampleAnnotationClass]
+  (:import [clojure.test_clojure.genclass.examples
+            ExampleClass
+            ExampleAnnotationClass
+            ArrayDefInterface
+            ArrayGenInterface]
+
            [java.lang.annotation ElementType
                                  Retention
                                  RetentionPolicy
@@ -64,3 +68,77 @@
 (deftest genclass-option-validation
   (is (fails-with-cause? IllegalArgumentException #"Not a valid method name: has-hyphen"
         (@#'clojure.core/validate-generate-class-options {:methods '[[fine [] void] [has-hyphen [] void]]}))))
+
+(deftest interface-array-type-hints
+  (let [array-types       {:ints     (class (int-array 0))
+                           :bytes    (class (byte-array 0))
+                           :shorts   (class (short-array 0))
+                           :chars    (class (char-array 0))
+                           :longs    (class (long-array 0))
+                           :floats   (class (float-array 0))
+                           :doubles  (class (double-array 0))
+                           :booleans (class (boolean-array 0))
+                           :maps     (class (into-array java.util.Map []))}
+        array-types       (assoc array-types
+                                 :maps-2d (class (into-array (:maps array-types) [])))
+        method-with-name  (fn [name methods] (first (filter #(= name (.getName %)) methods)))
+        parameter-type    (fn [method] (first (.getParameterTypes method)))
+        return-type       (fn [method] (.getReturnType method))]
+    (testing "definterface"
+      (let [method-with-name #(method-with-name % (.getMethods ArrayDefInterface))]
+        (testing "sugar primitive array hints"
+          (are [name type] (= (type array-types)
+                              (parameter-type (method-with-name name)))
+               "takesByteArray"    :bytes
+               "takesCharArray"    :chars
+               "takesShortArray"   :shorts
+               "takesIntArray"     :ints
+               "takesLongArray"    :longs
+               "takesFloatArray"   :floats
+               "takesDoubleArray"  :doubles
+               "takesBooleanArray" :booleans))
+        (testing "raw primitive array hints"
+          (are [name type] (= (type array-types)
+                              (return-type (method-with-name name)))
+               "returnsByteArray"    :bytes
+               "returnsCharArray"    :chars
+               "returnsShortArray"   :shorts
+               "returnsIntArray"     :ints
+               "returnsLongArray"    :longs
+               "returnsFloatArray"   :floats
+               "returnsDoubleArray"  :doubles
+               "returnsBooleanArray" :booleans))
+        (testing "object array types"
+          (is (= (:maps array-types)
+                 (parameter-type (method-with-name "takesMapArray"))))
+          (is (= (:maps-2d array-types)
+                 (return-type (method-with-name "returnsMap2dArray")))))))
+    (testing "gen-interface"
+      (let [method-with-name #(method-with-name % (.getMethods ArrayGenInterface))]
+        (testing "sugar primitive array hints"
+          (are [name type] (= (type array-types)
+                              (parameter-type (method-with-name name)))
+               "takesByteArray"    :bytes
+               "takesCharArray"    :chars
+               "takesShortArray"   :shorts
+               "takesIntArray"     :ints
+               "takesLongArray"    :longs
+               "takesFloatArray"   :floats
+               "takesDoubleArray"  :doubles
+               "takesBooleanArray" :booleans))
+        (testing "raw primitive array hints"
+          (are [name type] (= (type array-types)
+                              (return-type (method-with-name name)))
+               "returnsByteArray"    :bytes
+               "returnsCharArray"    :chars
+               "returnsShortArray"   :shorts
+               "returnsIntArray"     :ints
+               "returnsLongArray"    :longs
+               "returnsFloatArray"   :floats
+               "returnsDoubleArray"  :doubles
+               "returnsBooleanArray" :booleans))
+        (testing "object array types"
+          (is (= (:maps array-types)
+                 (parameter-type (method-with-name "takesMapArray"))))
+          (is (= (:maps-2d array-types)
+                 (return-type (method-with-name "returnsMap2dArray")))))))))

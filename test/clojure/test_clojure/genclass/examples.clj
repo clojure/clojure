@@ -40,3 +40,50 @@
                              java.lang.annotation.Target    [java.lang.annotation.ElementType/TYPE
                                                              java.lang.annotation.ElementType/PARAMETER]}
                            String] void]])
+
+(definterface ArrayDefInterface
+  ; primitive array sugar
+  (^void takesByteArray [^bytes a])
+  (^void takesCharArray [^chars a])
+  (^void takesShortArray [^shorts a])
+  (^void takesIntArray [^ints a])
+  (^void takesLongArray [^longs a])
+  (^void takesFloatArray [^floats a])
+  (^void takesDoubleArray [^doubles a])
+  (^void takesBooleanArray [^booleans a])
+  ; raw primitive arrays
+  (^"[B" returnsByteArray [])
+  (^"[C" returnsCharArray [])
+  (^"[I" returnsIntArray [])
+  (^"[S" returnsShortArray [])
+  (^"[J" returnsLongArray [])
+  (^"[F" returnsFloatArray [])
+  (^"[D" returnsDoubleArray [])
+  (^"[Z" returnsBooleanArray [])
+  ; Object arrays
+  (^void takesMapArray [^"[Ljava.util.Map;" a])
+  (^"[[Ljava.util.Map;" returnsMap2dArray []))
+
+(gen-interface
+  :name clojure.test_clojure.genclass.examples.ArrayGenInterface
+  :methods [; sugar
+            [takesByteArray [bytes] void]
+            [takesCharArray [chars] void]
+            [takesShortArray [shorts] void]
+            [takesIntArray [ints] void]
+            [takesLongArray [longs] void]
+            [takesFloatArray [floats] void]
+            [takesDoubleArray [doubles] void]
+            [takesBooleanArray [booleans] void]
+            ; raw primitive types
+            [returnsByteArray [] "[B"]
+            [returnsCharArray [] "[C"]
+            [returnsShortArray [] "[S"]
+            [returnsIntArray [] "[I"]
+            [returnsLongArray [] "[J"]
+            [returnsFloatArray [] "[F"]
+            [returnsDoubleArray [] "[D"]
+            [returnsBooleanArray [] "[Z"]
+            ; object arrays
+            [takesMapArray ["[Ljava.util.Map;"] void]
+            [returnsMap2dArray [] "[[Ljava.util.Map;"]])
