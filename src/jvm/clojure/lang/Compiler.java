@@ -5755,6 +5755,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 
 
 	public void doEmit(C context, ObjExpr objx, GeneratorAdapter gen, boolean emitUnboxed){
+		HashMap<BindingInit, Label> bindingLabels = new HashMap();
 		for(int i = 0; i < bindingInits.count(); i++)
 			{
 			BindingInit bi = (BindingInit) bindingInits.nth(i);
@@ -5769,6 +5770,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 				bi.init.emit(C.EXPRESSION, objx, gen);
 				gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 				}
+			bindingLabels.put(bi, gen.mark());
 			}
 		Label loopLabel = gen.mark();
 		if(isLoop)
@@ -5803,10 +5805,10 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 				lname += RT.nextID();
 			Class primc = maybePrimitiveType(bi.init);
 			if(primc != null)
-				gen.visitLocalVariable(lname, Type.getDescriptor(primc), null, loopLabel, end,
+				gen.visitLocalVariable(lname, Type.getDescriptor(primc), null, bindingLabels.get(bi), end,
 				                       bi.binding.idx);
 			else
-				gen.visitLocalVariable(lname, "Ljava/lang/Object;", null, loopLabel, end, bi.binding.idx);
+				gen.visitLocalVariable(lname, "Ljava/lang/Object;", null, bindingLabels.get(bi), end, bi.binding.idx);
 			}
 	}
 
