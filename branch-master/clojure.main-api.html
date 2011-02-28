@@ -55,6 +55,8 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.main/demunge">demunge</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.main/load-script">load-script</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.main/main">main</a>
@@ -69,9 +71,13 @@ namespace.
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.main/repl-read">repl-read</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.main/root-cause">root-cause</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.main/skip-if-eol">skip-if-eol</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.main/skip-whitespace">skip-whitespace</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.main/stack-element-str">stack-element-str</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a href="#clojure.main/with-bindings">with-bindings</a>
     </div>
@@ -94,6 +100,18 @@ namespace.
 <div id="var-entry">
   <br />
   <hr />
+  <h2 id="clojure.main/demunge">demunge</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (demunge fn-name)
+</pre>
+  <pre id="var-docstr">Given a string representation of a fn class,
+as in a stack trace element, returns a readable version.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+  
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L51" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
   <h2 id="clojure.main/load-script">load-script</h2>
   <span id="var-type">function</span><br />
   <pre id="var-usage">Usage: (load-script path)
@@ -102,7 +120,7 @@ namespace.
 beginning with @ or @/ are considered relative to classpath.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L214" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L214" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -141,7 +159,7 @@ Paths may be absolute or relative in the filesystem or relative to
 classpath. Classpath-relative paths have prefix of @ or @/</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L318" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L318" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -193,7 +211,7 @@ are sequential keyword-value pairs. Available options and their defaults:
      default: repl-caught</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L118" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L118" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -204,7 +222,7 @@ are sequential keyword-value pairs. Available options and their defaults:
   <pre id="var-docstr">Default :caught hook for repl</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L113" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L167" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -212,11 +230,10 @@ are sequential keyword-value pairs. Available options and their defaults:
   <span id="var-type">function</span><br />
   <pre id="var-usage">Usage: (repl-exception throwable)
 </pre>
-  <pre id="var-docstr">Returns CompilerExceptions in tact, but only the root cause of other
-throwables</pre>
+  <pre id="var-docstr">Returns the root cause of throwables</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L105" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L162" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -227,7 +244,7 @@ throwables</pre>
   <pre id="var-docstr">Default :prompt hook for repl</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L41" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L107" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -247,7 +264,19 @@ supporting .unread and collapsing all of CR, LF, and CRLF into a single
       - returns the object.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L78" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L144" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.main/root-cause">root-cause</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (root-cause t)
+</pre>
+  <pre id="var-docstr">Returns the initial cause of an exception or error by peeling off all of
+its wrappers</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+  
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L58" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -263,7 +292,7 @@ its behavior of both supporting .unread and collapsing all of CR, LF, and
 CRLF to a single \newline.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L46" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L112" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -281,7 +310,18 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
 \newline.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L60" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L126" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.main/stack-element-str">stack-element-str</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (stack-element-str el)
+</pre>
+  <pre id="var-docstr">Returns a (possibly unmunged) string representation of a StackTraceElement</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+  
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L71" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -295,7 +335,7 @@ that often need to be set!: *ns* *warn-on-reflection* *math-context*
 *command-line-args* *1 *2 *3 *e</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/7f303fc06b5e1d925a2fecef54b2597410c47111/src/clj/clojure/main.clj#L20" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L85" id="var-source">Source</a>
 </div>
 
 

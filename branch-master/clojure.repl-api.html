@@ -54,17 +54,7 @@ namespace.
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
-    <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/apropos">apropos</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/dir">dir</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/dir-fn">dir-fn</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/source">source</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.repl/source-fn">source-fn</a>
-    </div>
+    
     <br />
   </div>
 </div>
@@ -72,7 +62,7 @@ namespace.
                 <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.repl</span>
   - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span> (<span id="header-status">in development</span>)
   </h1>
-<span id="author-line">by <span id="author-name">Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim, Christophe Grande</span><br /></span>
+<span id="author-line">by <span id="author-name">Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.repl</span>
 <p></p>
 <h2>Overview</h2>
@@ -81,75 +71,7 @@ namespace.
 
 <br />
 <h2>Public Variables and Functions</h2>
-<div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/apropos">apropos</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (apropos str-or-pattern)
-</pre>
-  <pre id="var-docstr">Given a regular expression or stringable thing, return a seq of
-all definitions in all currently-loaded namespaces that match the
-str-or-pattern.</pre>
-  
-  
-  <a href="https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L52" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/dir">dir</h2>
-  <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (dir nsname)
-</pre>
-  <pre id="var-docstr">Prints a sorted directory of public vars in a namespace</pre>
-  
-  
-  <a href="https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L70" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/dir-fn">dir-fn</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (dir-fn ns)
-</pre>
-  <pre id="var-docstr">Returns a sorted seq of symbols naming public vars in
-a namespace</pre>
-  
-  
-  <a href="https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L64" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/source">source</h2>
-  <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (source n)
-</pre>
-  <pre id="var-docstr">Prints the source code for the given symbol, if it can find it.
-This requires that the symbol resolve to a Var defined in a
-namespace for which the .clj is in the classpath.
 
-Example: (source filter)</pre>
-  
-  
-  <a href="https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L43" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.repl/source-fn">source-fn</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (source-fn x)
-</pre>
-  <pre id="var-docstr">Returns a string of the source code for the given symbol, if it can
-find it.  This requires that the symbol resolve to a Var defined in
-a namespace for which the .clj is in the classpath.  Returns nil if
-it can't find the source.  For most REPL usage, 'source' is more
-convenient.
-
-Example: (source-fn 'filter)</pre>
-  
-  
-  <a href="https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj#L21" id="var-source">Source</a>
-</div>
 
 
 </div>
