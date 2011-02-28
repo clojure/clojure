@@ -35,7 +35,7 @@
   [a b ks]
   (reduce
    (fn [diff1 diff2]
-     (map merge diff1 diff2))
+     (doall (map merge diff1 diff2)))
    [nil nil nil]
    (map
     (fn [k] (map #(when % {k %}) (diff (get a k) (get b k))))
