@@ -411,7 +411,12 @@ static class DefExpr implements Expr{
 		if(initProvided)
 			{
 			gen.dup();
-			init.emit(C.EXPRESSION, objx, gen);
+			if(init instanceof FnExpr)
+				{
+				((FnExpr)init).emitForDefn(objx, gen);
+				}
+			else
+				init.emit(C.EXPRESSION, objx, gen);
 			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
 			}
 
@@ -3414,6 +3419,7 @@ static public class FnExpr extends ObjExpr{
 	//if there is a variadic overload (there can only be one) it is stored here
 	FnMethod variadicMethod = null;
 	IPersistentCollection methods;
+	private boolean hasPrimSigs;
 	//	String superName = null;
 
 	public FnExpr(Object tag){
@@ -3556,6 +3562,7 @@ static public class FnExpr extends ObjExpr{
 			{
 			Var.popThreadBindings();
 			}
+		fn.hasPrimSigs = prims.size() > 0;
 		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",
 		           (prims.size() == 0)?
 		            null
@@ -3580,6 +3587,22 @@ static public class FnExpr extends ObjExpr{
 
 	public final IPersistentCollection methods(){
 		return methods;
+	}
+
+	public void emitForDefn(ObjExpr objx, GeneratorAdapter gen){
+		if(!hasPrimSigs && closes.count() == 0)
+			{
+			Type thunkType = Type.getType(FnLoaderThunk.class);
+			//presumes var on stack
+			gen.dup();
+			gen.newInstance(thunkType);
+			gen.dupX1();
+			gen.swap();
+			gen.push(internalName.replace('/','.'));
+			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
+			}
+		else
+			emit(C.EXPRESSION,objx,gen);
 	}
 }
 
@@ -6702,6 +6725,13 @@ public static void pushNS(){
 	                                                           Symbol.intern("*ns*")).setDynamic(), null));
 }
 
+public static void pushNSandLoader(ClassLoader loader){
+	Var.pushThreadBindings(RT.map(Var.intern(Symbol.intern("clojure.core"),
+	                                         Symbol.intern("*ns*")).setDynamic(),
+	                              null,
+	                              RT.FN_LOADER_VAR, loader));
+}
+
 public static ILookupThunk getLookupThunk(Object target, Keyword k){
 	return null;  //To change body of created methods use File | Settings | File Templates.
 }
@@ -6857,7 +6887,10 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		for(int n = 0;n<numInits;n++)
 			clinitgen.invokeStatic(objx.objtype, Method.getMethod("void __init" + n + "()"));
 
-		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void pushNS()"));
+		clinitgen.push(objx.internalName.replace('/','.'));
+		clinitgen.invokeStatic(CLASS_TYPE, Method.getMethod("Class forName(String)"));
+		clinitgen.invokeVirtual(CLASS_TYPE,Method.getMethod("ClassLoader getClassLoader()"));
+		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void pushNSandLoader(ClassLoader)"));
 		clinitgen.mark(startTry);
 		clinitgen.invokeStatic(objx.objtype, Method.getMethod("void load()"));
 		clinitgen.mark(endTry);

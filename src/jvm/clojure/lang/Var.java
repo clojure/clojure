@@ -79,7 +79,7 @@ static Keyword nameKey = Keyword.intern(null, "name");
 static Keyword nsKey = Keyword.intern(null, "ns");
 //static Keyword tagKey = Keyword.intern(null, "tag");
 
-private volatile Object root;
+volatile Object root;
 
 volatile boolean dynamic = false;
 transient final AtomicBoolean threadBound;
