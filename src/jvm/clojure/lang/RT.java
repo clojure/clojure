@@ -307,6 +307,9 @@ static{
 	}
 }
 
+static public Keyword keyword(String ns, String name){
+	return Keyword.intern((Symbol.intern(ns, name)));
+}
 
 static public Var var(String ns, String name){
 	return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name));

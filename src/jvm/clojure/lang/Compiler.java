@@ -31,6 +31,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.regex.Pattern;
 
 public class Compiler implements Opcodes{
 
@@ -481,7 +482,15 @@ static class DefExpr implements Expr{
             mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, source_path);
 			if (docstring != null)
 			  mm = (IPersistentMap) RT.assoc(mm, RT.DOC_KEY, docstring);
-			Expr meta = analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
+//			mm = mm.without(RT.DOC_KEY)
+//					.without(Keyword.intern(null, "arglists"))
+//					.without(RT.FILE_KEY)
+//					.without(RT.LINE_KEY)
+//					.without(Keyword.intern(null, "ns"))
+//					.without(Keyword.intern(null, "name"))
+//					.without(Keyword.intern(null, "added"))
+//					.without(Keyword.intern(null, "static"));
+			Expr meta = mm.count()==0 ? null:analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr((String) SOURCE.deref(), (Integer) LINE.deref(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
 			                   meta, RT.count(form) == 3, isDynamic);
@@ -4134,9 +4143,18 @@ static public class ObjExpr implements Expr{
 		boolean partial = true;
 		//System.out.println(value.getClass().toString());
 
-		if(value instanceof String)
+		if(value == null)
+			gen.visitInsn(Opcodes.ACONST_NULL);
+		else if(value instanceof String)
 			{
 			gen.push((String) value);
+			}
+		else if(value instanceof Boolean)
+			{
+			if(((Boolean) value).booleanValue())
+				gen.getStatic(BOOLEAN_OBJECT_TYPE,"TRUE",BOOLEAN_OBJECT_TYPE);
+			else
+				gen.getStatic(BOOLEAN_OBJECT_TYPE,"FALSE",BOOLEAN_OBJECT_TYPE);
 			}
 		else if(value instanceof Integer)
 			{
@@ -4191,9 +4209,10 @@ static public class ObjExpr implements Expr{
 			}
 		else if(value instanceof Keyword)
 			{
-			emitValue(((Keyword) value).sym, gen);
-			gen.invokeStatic(Type.getType(Keyword.class),
-							 Method.getMethod("clojure.lang.Keyword intern(clojure.lang.Symbol)"));
+			gen.push(((Keyword) value).sym.ns);
+			gen.push(((Keyword) value).sym.name);
+			gen.invokeStatic(RT_TYPE,
+							 Method.getMethod("clojure.lang.Keyword keyword(String,String)"));
 			}
 //						else if(value instanceof KeywordCallSite)
 //								{
@@ -4226,6 +4245,12 @@ static public class ObjExpr implements Expr{
 			gen.invokeStatic(RT_TYPE, Method.getMethod(
 					"clojure.lang.IPersistentVector vector(Object[])"));
 			}
+		else if(value instanceof PersistentHashSet)
+			{
+			emitListAsObjectArray(RT.seq(value), gen);
+			gen.invokeStatic(Type.getType(PersistentHashSet.class), Method.getMethod(
+					"clojure.lang.PersistentHashSet create(Object[])"));
+			}
 		else if(value instanceof ISeq || value instanceof IPersistentList)
 			{
 			emitListAsObjectArray(value, gen);
@@ -4235,13 +4260,19 @@ static public class ObjExpr implements Expr{
 							 Method.getMethod(
 									 "clojure.lang.IPersistentList create(java.util.List)"));
 			}
+		else if(value instanceof Pattern)
+			{
+			emitValue(value.toString(), gen);
+			gen.invokeStatic(Type.getType(Pattern.class),
+							 Method.getMethod("java.util.regex.Pattern compile(String)"));
+			}
 		else
 			{
 			String cs = null;
 			try
 				{
 				cs = RT.printString(value);
-				//System.out.println("WARNING SLOW CODE: " + value.getClass() + " -> " + cs);
+//				System.out.println("WARNING SLOW CODE: " + Util.classOf(value) + " -> " + cs);
 				}
 			catch(Exception e)
 				{
