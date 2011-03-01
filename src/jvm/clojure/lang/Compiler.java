@@ -3429,6 +3429,7 @@ static public class FnExpr extends ObjExpr{
 	FnMethod variadicMethod = null;
 	IPersistentCollection methods;
 	private boolean hasPrimSigs;
+	private boolean hasMeta;
 	//	String superName = null;
 
 	public FnExpr(Object tag){
@@ -3437,6 +3438,10 @@ static public class FnExpr extends ObjExpr{
 
 	public boolean hasJavaClass() throws Exception{
 		return true;
+	}
+
+	boolean supportsMeta(){
+		return hasMeta;
 	}
 
 	public Class getJavaClass() throws Exception{
@@ -3572,6 +3577,12 @@ static public class FnExpr extends ObjExpr{
 			Var.popThreadBindings();
 			}
 		fn.hasPrimSigs = prims.size() > 0;
+		IPersistentMap fmeta = RT.meta(origForm);
+		if(fmeta != null)
+			fmeta = fmeta.without(RT.LINE_KEY).without(RT.FILE_KEY);
+
+		fn.hasMeta = RT.count(fmeta) > 0;
+
 		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",
 		           (prims.size() == 0)?
 		            null
@@ -3579,9 +3590,12 @@ static public class FnExpr extends ObjExpr{
 		            fn.onceOnly);
 		fn.getCompiledClass();
 
-		if(origForm instanceof IObj && ((IObj) origForm).meta() != null)
+		if(fn.supportsMeta())
+			{
+			//System.err.println(name + " supports meta");
 			return new MetaExpr(fn, MapExpr
-					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) origForm).meta()));
+					.parse(context == C.EVAL ? context : C.EXPRESSION, fmeta));
+			}
 		else
 			return fn;
 	}
@@ -3731,7 +3745,7 @@ static public class ObjExpr implements Expr{
 
 
 	Type[] ctorTypes(){
-		IPersistentVector tv = isDeftype()?PersistentVector.EMPTY:RT.vector(IPERSISTENTMAP_TYPE);
+		IPersistentVector tv = !supportsMeta()?PersistentVector.EMPTY:RT.vector(IPERSISTENTMAP_TYPE);
 		for(ISeq s = RT.keys(closes); s != null; s = s.next())
 			{
 			LocalBinding lb = (LocalBinding) s.first();
@@ -3854,7 +3868,7 @@ static public class ObjExpr implements Expr{
 		clinitgen.returnValue();
 
 		clinitgen.endMethod();
-		if(!isDeftype())
+		if(supportsMeta())
 			{
 			cv.visitField(ACC_FINAL, "__meta", IPERSISTENTMAP_TYPE.getDescriptor(), null, null);
 			}
@@ -3931,14 +3945,14 @@ static public class ObjExpr implements Expr{
 //			ctorgen.putField(objtype, "__varrev__", Type.INT_TYPE);
 //			}
 
-		if(!isDeftype())
+		if(supportsMeta())
 			{
 			ctorgen.loadThis();
 			ctorgen.visitVarInsn(IPERSISTENTMAP_TYPE.getOpcode(Opcodes.ILOAD), 1);
 			ctorgen.putField(objtype, "__meta", IPERSISTENTMAP_TYPE);
 			}
 
-		int a = isDeftype()?1:2;
+		int a = supportsMeta()?2:1;
 		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
 			{
 			LocalBinding lb = (LocalBinding) s.first();
@@ -3991,7 +4005,7 @@ static public class ObjExpr implements Expr{
 			ctorgen.endMethod();
 			}
 
-		if(!isDeftype())
+		if(supportsMeta())
 			{
 					//ctor that takes closed-overs but not meta
 			Type[] ctorTypes = ctorTypes();
@@ -4152,7 +4166,7 @@ static public class ObjExpr implements Expr{
 		else if(value instanceof Boolean)
 			{
 			if(((Boolean) value).booleanValue())
-				gen.getStatic(BOOLEAN_OBJECT_TYPE,"TRUE",BOOLEAN_OBJECT_TYPE);
+				gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
 			else
 				gen.getStatic(BOOLEAN_OBJECT_TYPE,"FALSE",BOOLEAN_OBJECT_TYPE);
 			}
@@ -4247,9 +4261,15 @@ static public class ObjExpr implements Expr{
 			}
 		else if(value instanceof PersistentHashSet)
 			{
-			emitListAsObjectArray(RT.seq(value), gen);
-			gen.invokeStatic(Type.getType(PersistentHashSet.class), Method.getMethod(
+			ISeq vs = RT.seq(value);
+			if(vs == null)
+				gen.getStatic(Type.getType(PersistentHashSet.class),"EMPTY",Type.getType(PersistentHashSet.class));
+			else
+				{
+				emitListAsObjectArray(vs, gen);
+				gen.invokeStatic(Type.getType(PersistentHashSet.class), Method.getMethod(
 					"clojure.lang.PersistentHashSet create(Object[])"));
+				}
 			}
 		else if(value instanceof ISeq || value instanceof IPersistentList)
 			{
@@ -4340,6 +4360,9 @@ static public class ObjExpr implements Expr{
 		return fields != null;
 	}
 
+	boolean supportsMeta(){
+		return !isDeftype();
+	}
 	void emitClearCloses(GeneratorAdapter gen){
 //		int a = 1;
 //		for(ISeq s = RT.keys(closes); s != null; s = s.next(), ++a)
@@ -4419,7 +4442,8 @@ static public class ObjExpr implements Expr{
 			{
 			gen.newInstance(objtype);
 			gen.dup();
-			gen.visitInsn(Opcodes.ACONST_NULL);				
+			if(supportsMeta())
+				gen.visitInsn(Opcodes.ACONST_NULL);
 			for(ISeq s = RT.seq(closesExprs); s != null; s = s.next())
 				{
                 LocalBindingExpr lbe = (LocalBindingExpr) s.first();

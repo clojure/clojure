@@ -19,6 +19,10 @@ public abstract class AFunction extends AFn implements IObj, Comparator, Fn, Ser
 
 public volatile MethodImplCache __methodImplCache;
 
+public IPersistentMap meta(){
+	return null;
+}
+
 public int compare(Object o1, Object o2){
 	try
 		{
