@@ -23,6 +23,26 @@ public IPersistentMap meta(){
 	return null;
 }
 
+public IObj withMeta(final IPersistentMap meta){
+	return new RestFn(){
+		protected Object doInvoke(Object args) throws Exception{
+			return AFunction.this.applyTo((ISeq) args);
+		}
+
+		public IPersistentMap meta(){
+			return meta;
+		}
+
+		public IObj withMeta(IPersistentMap meta){
+			return AFunction.this.withMeta(meta);
+		}
+
+		public int getRequiredArity(){
+			return 0;
+		}
+	};
+}
+
 public int compare(Object o1, Object o2){
 	try
 		{
