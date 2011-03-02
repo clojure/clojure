@@ -631,7 +631,14 @@
   fully-qualified class name given as a string or symbol
   (such as 'java.lang.String)"
   [c]
-  (Type/getType (the-class c)))
+  (if (or (instance? Class c) (prim->class c))
+    (Type/getType (the-class c))
+    (let [strx (str c)]
+      (Type/getObjectType 
+       (.replace (if (some #{\. \[} strx)
+                   strx
+                   (str "java.lang." strx)) 
+                 "." "/")))))
 
 (defn- generate-interface
   [{:keys [name extends methods]}]

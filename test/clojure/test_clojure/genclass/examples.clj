@@ -59,10 +59,12 @@
   (^"[J" returnsLongArray [])
   (^"[F" returnsFloatArray [])
   (^"[D" returnsDoubleArray [])
-  (^"[Z" returnsBooleanArray [])
-  ; Object arrays
-  (^void takesMapArray [^"[Ljava.util.Map;" a])
-  (^"[[Ljava.util.Map;" returnsMap2dArray []))
+  (^"[Z" returnsBooleanArray []))
+
+(definterface UsesPreviousInterfaceFromThisFile
+  (^clojure.test-clojure.genclass.examples.ArrayDefInterface
+   identity
+   [^clojure.test-clojure.genclass.examples.ArrayDefInterface a]))
 
 (gen-interface
   :name clojure.test_clojure.genclass.examples.ArrayGenInterface
@@ -83,7 +85,4 @@
             [returnsLongArray [] "[J"]
             [returnsFloatArray [] "[F"]
             [returnsDoubleArray [] "[D"]
-            [returnsBooleanArray [] "[Z"]
-            ; object arrays
-            [takesMapArray ["[Ljava.util.Map;"] void]
-            [returnsMap2dArray [] "[[Ljava.util.Map;"]])
+            [returnsBooleanArray [] "[Z"]])

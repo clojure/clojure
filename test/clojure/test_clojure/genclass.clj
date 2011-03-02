@@ -107,12 +107,7 @@
                "returnsLongArray"    :longs
                "returnsFloatArray"   :floats
                "returnsDoubleArray"  :doubles
-               "returnsBooleanArray" :booleans))
-        (testing "object array types"
-          (is (= (:maps array-types)
-                 (parameter-type (method-with-name "takesMapArray"))))
-          (is (= (:maps-2d array-types)
-                 (return-type (method-with-name "returnsMap2dArray")))))))
+               "returnsBooleanArray" :booleans))))
     (testing "gen-interface"
       (let [method-with-name #(method-with-name % (.getMethods ArrayGenInterface))]
         (testing "sugar primitive array hints"
@@ -136,9 +131,4 @@
                "returnsLongArray"    :longs
                "returnsFloatArray"   :floats
                "returnsDoubleArray"  :doubles
-               "returnsBooleanArray" :booleans))
-        (testing "object array types"
-          (is (= (:maps array-types)
-                 (parameter-type (method-with-name "takesMapArray"))))
-          (is (= (:maps-2d array-types)
-                 (return-type (method-with-name "returnsMap2dArray")))))))))
+               "returnsBooleanArray" :booleans))))))
