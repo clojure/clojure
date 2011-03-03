@@ -12,6 +12,7 @@
 
 package clojure.lang;
 
+import java.lang.ref.Reference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,8 +23,8 @@ import java.lang.ref.SoftReference;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
-static ConcurrentHashMap<String, SoftReference<Class>>classCache =
-        new ConcurrentHashMap<String, SoftReference<Class> >();
+static ConcurrentHashMap<String, Reference<Class>>classCache =
+        new ConcurrentHashMap<String, Reference<Class> >();
 
 static final URL[] EMPTY_URLS = new URL[]{};
 
@@ -48,7 +49,7 @@ public Class defineClass(String name, byte[] bytes, Object srcForm){
 }
 
 protected Class<?> findClass(String name) throws ClassNotFoundException{
-    SoftReference<Class> cr = classCache.get(name);
+    Reference<Class> cr = classCache.get(name);
 	if(cr != null)
 		{
 		Class c = cr.get();

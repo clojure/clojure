@@ -14,6 +14,8 @@ package clojure.lang;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -21,7 +23,7 @@ import java.lang.ref.SoftReference;
 
 public final class Keyword implements IFn, Comparable, Named, Serializable {
 
-private static ConcurrentHashMap<Symbol, SoftReference<Keyword>> table = new ConcurrentHashMap();
+private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new ConcurrentHashMap();
 static final ReferenceQueue rq = new ReferenceQueue();
 public final Symbol sym;
 final int hash;
@@ -31,7 +33,7 @@ public static Keyword intern(Symbol sym){
 		sym = (Symbol) sym.withMeta(null);
 	Util.clearCache(rq, table);
 	Keyword k = new Keyword(sym);
-	SoftReference<Keyword> existingRef = table.putIfAbsent(sym, new SoftReference<Keyword>(k,rq));
+	Reference<Keyword> existingRef = table.putIfAbsent(sym, new WeakReference<Keyword>(k,rq));
 	if(existingRef == null)
 		return k;
 	Keyword existingk = existingRef.get();
@@ -56,7 +58,7 @@ private Keyword(Symbol sym){
 }
 
 public static Keyword find(Symbol sym){
-    SoftReference<Keyword> ref = table.get(sym);
+    Reference<Keyword> ref = table.get(sym);
     if (ref != null)
         return ref.get();
     else
