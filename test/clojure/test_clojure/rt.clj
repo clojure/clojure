@@ -11,33 +11,6 @@
 (ns clojure.test-clojure.rt
   (:use clojure.test clojure.test-helper))
 
-(defmacro with-err-print-writer
-  "Evaluate with err pointing to a temporary PrintWriter, and
-   return err contents as a string."
-  [& body]
-  `(let [s# (java.io.StringWriter.)
-         p# (java.io.PrintWriter. s#)]
-     (binding [*err* p#]
-       ~@body
-       (str s#))))
-
-(defmacro with-err-string-writer
-  "Evaluate with err pointing to a temporary StringWriter, and
-   return err contents as a string."
-  [& body]
-  `(let [s# (java.io.StringWriter.)]
-     (binding [*err* s#]
-       ~@body
-       (str s#))))
-
-(defmacro should-print-err-message
-  "Turn on all warning flags, and test that error message prints
-   correctly for all semi-reasonable bindings of *err*."
-  [msg-re form]
-  `(binding [*warn-on-reflection* true]
-    (is (re-matches ~msg-re (with-err-string-writer (eval-in-temp-ns ~form))))
-    (is (re-matches ~msg-re (with-err-print-writer (eval-in-temp-ns ~form))))))
-
 (defn bare-rt-print
   "Return string RT would print prior to print-initialize"
   [x]

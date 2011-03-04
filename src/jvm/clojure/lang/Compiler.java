@@ -1212,6 +1212,31 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
+static Class maybeJavaClass(Collection<Expr> exprs){
+    Class match = null;
+    try
+    {
+    for (Expr e : exprs)
+        {
+        if (e instanceof ThrowExpr)
+            continue;
+        if (!e.hasJavaClass())
+            return null;
+        Class c = e.getJavaClass();
+        if (match == null)
+            match = c;
+        else if (match != c)
+            return null;
+        }
+    }
+    catch(Exception e)
+    {
+        return null;
+    }
+    return match;
+}
+
+
 static abstract class MethodExpr extends HostExpr{
 	static void emitArgsAsArray(IPersistentVector args, ObjExpr objx, GeneratorAdapter gen){
 		gen.push(args.count());
@@ -7700,23 +7725,32 @@ static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 	}
 }
 
-public static class CaseExpr extends UntypedExpr{
+public static class CaseExpr implements Expr, MaybePrimitiveExpr{
 	public final LocalBindingExpr expr;
 	public final int shift, mask, low, high;
 	public final Expr defaultExpr;
-	public final HashMap<Integer,Expr> tests;
+	public final SortedMap<Integer,Expr> tests;
 	public final HashMap<Integer,Expr> thens;
-	public final boolean allKeywords;
-
+	public final Keyword switchType;
+	public final Keyword testType;
+	public final Set<Integer> skipCheck;
+	public final Class returnType;
 	public final int line;
+
+	final static Type NUMBER_TYPE = Type.getType(Number.class);
+	final static Method intValueMethod = Method.getMethod("int intValue()");
 
 	final static Method hashMethod = Method.getMethod("int hash(Object)");
 	final static Method hashCodeMethod = Method.getMethod("int hashCode()");
-	final static Method equalsMethod = Method.getMethod("boolean equals(Object, Object)");
-
-
+	final static Method equivMethod = Method.getMethod("boolean equiv(Object, Object)");
+    final static Keyword compactKey = Keyword.intern(null, "compact");
+    final static Keyword sparseKey = Keyword.intern(null, "sparse");
+    final static Keyword hashIdentityKey = Keyword.intern(null, "hash-identity");
+    final static Keyword hashEquivKey = Keyword.intern(null, "hash-equiv");
+    final static Keyword intKey = Keyword.intern(null, "int");
+	//(case* expr shift mask default map<minhash, [test then]> table-type test-type skip-check?)
 	public CaseExpr(int line, LocalBindingExpr expr, int shift, int mask, int low, int high, Expr defaultExpr,
-	                HashMap<Integer,Expr> tests,HashMap<Integer,Expr> thens, boolean allKeywords){
+	        SortedMap<Integer,Expr> tests,HashMap<Integer,Expr> thens, Keyword switchType, Keyword testType, Set<Integer> skipCheck){
 		this.expr = expr;
 		this.shift = shift;
 		this.mask = mask;
@@ -7726,66 +7760,217 @@ public static class CaseExpr extends UntypedExpr{
 		this.tests = tests;
 		this.thens = thens;
 		this.line = line;
-		this.allKeywords = allKeywords;
+		if (switchType != compactKey && switchType != sparseKey)
+		    throw new IllegalArgumentException("Unexpected switch type: "+switchType);
+		this.switchType = switchType;
+        if (testType != intKey && testType != hashEquivKey && testType != hashIdentityKey)
+            throw new IllegalArgumentException("Unexpected test type: "+switchType);
+		this.testType = testType;
+		this.skipCheck = skipCheck;
+		Collection<Expr> returns = new ArrayList(thens.values());
+		returns.add(defaultExpr);
+		this.returnType = maybeJavaClass(returns);
+        if(RT.count(skipCheck) > 0 && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+            {
+            RT.errPrintWriter()
+              .format("Performance warning, %s:%d - hash collision of some case test constants; if selected, those entries will be tested sequentially.\n",
+                      SOURCE_PATH.deref(), line);
+            }
+	}
+
+	public boolean hasJavaClass(){
+	    return returnType != null;
+	}
+
+	public boolean canEmitPrimitive(){
+	return Util.isPrimitive(returnType);
+	}
+
+	public Class getJavaClass(){
+	    return returnType;
 	}
 
 	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval case");
 	}
 
-	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+    public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+        doEmit(context, objx, gen, false);
+    }
+
+    public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
+        doEmit(context, objx, gen, true);
+    }
+
+	public void doEmit(C context, ObjExpr objx, GeneratorAdapter gen, boolean emitUnboxed){
 		Label defaultLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
-		HashMap<Integer,Label> labels = new HashMap();
+		SortedMap<Integer,Label> labels = new TreeMap();
 
 		for(Integer i : tests.keySet())
 			{
 			labels.put(i, gen.newLabel());
 			}
 
-		Label[] la = new Label[(high-low)+1];
+        gen.visitLineNumber(line, gen.mark());
 
-		for(int i=low;i<=high;i++)
-			{
-			la[i-low] = labels.containsKey(i) ? labels.get(i) : defaultLabel;
-			}
+        Class primExprClass = maybePrimitiveType(expr);
+        Type primExprType = primExprClass == null ? null : Type.getType(primExprClass);
 
-		gen.visitLineNumber(line, gen.mark());
-		expr.emit(C.EXPRESSION, objx, gen);
-			gen.invokeStatic(UTIL_TYPE,hashMethod);
-		gen.push(shift);
-		gen.visitInsn(ISHR);
-		gen.push(mask);
-		gen.visitInsn(IAND);
-		gen.visitTableSwitchInsn(low, high, defaultLabel, la);
+        if (testType == intKey)
+		    emitExprForInts(objx, gen, primExprType, defaultLabel);
+        else
+            emitExprForHashes(objx, gen);
+
+        if (switchType == sparseKey)
+            {
+            Label[] la = new Label[labels.size()];
+            la = labels.values().toArray(la);
+            int[] ints = Numbers.int_array(tests.keySet());
+            gen.visitLookupSwitchInsn(defaultLabel, ints, la);
+            }
+        else
+            {
+            Label[] la = new Label[(high-low)+1];
+            for(int i=low;i<=high;i++)
+                {
+                la[i-low] = labels.containsKey(i) ? labels.get(i) : defaultLabel;
+                }
+            gen.visitTableSwitchInsn(low, high, defaultLabel, la);
+            }
 
 		for(Integer i : labels.keySet())
 			{
 			gen.mark(labels.get(i));
-			expr.emit(C.EXPRESSION, objx, gen);
-			tests.get(i).emit(C.EXPRESSION, objx, gen);
-			if(allKeywords)
-				{
-				gen.visitJumpInsn(IF_ACMPNE, defaultLabel);
-				}
+			if (testType == intKey)
+			    emitThenForInts(objx, gen, primExprType, tests.get(i), thens.get(i), defaultLabel, emitUnboxed);
+			else if (RT.contains(skipCheck, i) == RT.T)
+			    emitExpr(objx, gen, thens.get(i), emitUnboxed);
 			else
-				{
-				gen.invokeStatic(UTIL_TYPE, equalsMethod);
-				gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
-				}
-			thens.get(i).emit(C.EXPRESSION,objx,gen);
+			    emitThenForHashes(objx, gen, tests.get(i), thens.get(i), defaultLabel, emitUnboxed);
 			gen.goTo(endLabel);
 			}
 
 		gen.mark(defaultLabel);
-		defaultExpr.emit(C.EXPRESSION, objx, gen);
+		emitExpr(objx, gen, defaultExpr, emitUnboxed);
 		gen.mark(endLabel);
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
 
+	private boolean isShiftMasked(){
+	    return  mask != 0;
+	}
+
+	private void emitShiftMask(GeneratorAdapter gen){
+	    if (isShiftMasked())
+	        {
+            gen.push(shift);
+            gen.visitInsn(ISHR);
+            gen.push(mask);
+            gen.visitInsn(IAND);
+	        }
+	}
+
+    private void emitExprForInts(ObjExpr objx, GeneratorAdapter gen, Type exprType, Label defaultLabel){
+        if (exprType == null)
+            {
+            if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                {
+                RT.errPrintWriter()
+                  .format("Performance warning, %s:%d - case has int tests, but tested expression is not primitive.\n",
+                          SOURCE_PATH.deref(), line);
+                }
+            expr.emit(C.EXPRESSION, objx, gen);
+            gen.instanceOf(NUMBER_TYPE);
+            gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
+            expr.emit(C.EXPRESSION, objx, gen);
+            gen.checkCast(NUMBER_TYPE);
+            gen.invokeVirtual(NUMBER_TYPE, intValueMethod);
+            emitShiftMask(gen);
+            }
+        else if (exprType == Type.LONG_TYPE
+                || exprType == Type.INT_TYPE
+                || exprType == Type.SHORT_TYPE
+                || exprType == Type.BYTE_TYPE)
+            {
+            expr.emitUnboxed(C.EXPRESSION, objx, gen);
+            gen.cast(exprType, Type.INT_TYPE);
+            emitShiftMask(gen);
+            }
+        else
+            {
+            gen.goTo(defaultLabel);
+            }
+    }
+
+    private void emitThenForInts(ObjExpr objx, GeneratorAdapter gen, Type exprType, Expr test, Expr then, Label defaultLabel, boolean emitUnboxed){
+        if (exprType == null)
+            {
+            expr.emit(C.EXPRESSION, objx, gen);
+            test.emit(C.EXPRESSION, objx, gen);
+            gen.invokeStatic(UTIL_TYPE, equivMethod);
+            gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
+            emitExpr(objx, gen, then, emitUnboxed);
+            }
+        else if (exprType == Type.LONG_TYPE)
+            {
+            ((NumberExpr)test).emitUnboxed(C.EXPRESSION, objx, gen);
+            expr.emitUnboxed(C.EXPRESSION, objx, gen);
+            gen.ifCmp(Type.LONG_TYPE, GeneratorAdapter.NE, defaultLabel);
+            emitExpr(objx, gen, then, emitUnboxed);
+            }
+        else if (exprType == Type.INT_TYPE
+                || exprType == Type.SHORT_TYPE
+                || exprType == Type.BYTE_TYPE)
+            {
+            if (isShiftMasked())
+                {
+                ((NumberExpr)test).emitUnboxed(C.EXPRESSION, objx, gen);
+                expr.emitUnboxed(C.EXPRESSION, objx, gen);
+                gen.cast(exprType, Type.LONG_TYPE);
+                gen.ifCmp(Type.LONG_TYPE, GeneratorAdapter.NE, defaultLabel);
+                }
+            // else direct match
+            emitExpr(objx, gen, then, emitUnboxed);
+            }
+        else
+            {
+            gen.goTo(defaultLabel);
+            }
+    }
+
+    private void emitExprForHashes(ObjExpr objx, GeneratorAdapter gen){
+        expr.emit(C.EXPRESSION, objx, gen);
+        gen.invokeStatic(UTIL_TYPE,hashMethod);
+        emitShiftMask(gen);
+    }
+
+    private void emitThenForHashes(ObjExpr objx, GeneratorAdapter gen, Expr test, Expr then, Label defaultLabel, boolean emitUnboxed){
+        expr.emit(C.EXPRESSION, objx, gen);
+        test.emit(C.EXPRESSION, objx, gen);
+        if(testType == hashIdentityKey)
+            {
+            gen.visitJumpInsn(IF_ACMPNE, defaultLabel);
+            }
+        else
+            {
+            gen.invokeStatic(UTIL_TYPE, equivMethod);
+            gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
+            }
+        emitExpr(objx, gen, then, emitUnboxed);
+    }
+
+    private static void emitExpr(ObjExpr objx, GeneratorAdapter gen, Expr expr, boolean emitUnboxed){
+        if (emitUnboxed && expr instanceof MaybePrimitiveExpr)
+            ((MaybePrimitiveExpr)expr).emitUnboxed(C.EXPRESSION,objx,gen);
+        else
+            expr.emit(C.EXPRESSION,objx,gen);
+    }
+
+
 	static class Parser implements IParser{
-		//(case* expr shift mask low high default map<minhash, [test then]> identity?)
+		//(case* expr shift mask default map<minhash, [test then]> table-type test-type skip-check?)
 		//prepared by case macro and presumed correct
 		//case macro binds actual expr in let so expr is always a local,
 		//no need to worry about multiple evaluation
@@ -7794,25 +7979,43 @@ public static class CaseExpr extends UntypedExpr{
 			if(context == C.EVAL)
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 			PersistentVector args = PersistentVector.create(form.next());
-			HashMap<Integer,Expr> tests = new HashMap();
-			HashMap<Integer,Expr> thens = new HashMap();
 
-            LocalBindingExpr testexpr = (LocalBindingExpr) analyze(C.EXPRESSION, args.nth(0));
+			Object exprForm = args.nth(0);
+			int shift = ((Number)args.nth(1)).intValue();
+			int mask = ((Number)args.nth(2)).intValue();
+			Object defaultForm = args.nth(3);
+			Map caseMap = (Map)args.nth(4);
+			Keyword switchType = ((Keyword)args.nth(5));
+			Keyword testType = ((Keyword)args.nth(6));
+			Set skipCheck = RT.count(args) < 8 ? null : (Set)args.nth(7);
+
+            ISeq keys = RT.keys(caseMap);
+            int low = ((Number)RT.first(keys)).intValue();
+            int high = ((Number)RT.nth(keys, RT.count(keys)-1)).intValue();
+
+            LocalBindingExpr testexpr = (LocalBindingExpr) analyze(C.EXPRESSION, exprForm);
 			testexpr.shouldClear = false;
-            
+
+            SortedMap<Integer,Expr> tests = new TreeMap();
+            HashMap<Integer,Expr> thens = new HashMap();
+
             PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
-			for(Object o : ((Map)args.nth(6)).entrySet())
+
+			for(Object o : caseMap.entrySet())
 				{
 				Map.Entry e = (Map.Entry) o;
 				Integer minhash = ((Number)e.getKey()).intValue();
-				MapEntry me = (MapEntry) e.getValue();
-				Expr testExpr = new ConstantExpr(me.getKey());
-				tests.put(minhash, testExpr);
+                Object pair = e.getValue(); // [test-val then-expr]
+                Expr testExpr = testType == intKey
+                                    ? NumberExpr.parse(((Number)RT.first(pair)).intValue())
+                                    : new ConstantExpr(RT.first(pair));
+                tests.put(minhash, testExpr);
+
                 Expr thenExpr;
                 try {
                     Var.pushThreadBindings(
                             RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                    thenExpr = analyze(context, me.getValue());
+                    thenExpr = analyze(context, RT.second(pair));
                     }
                 finally{
                     Var.popThreadBindings();
@@ -7824,21 +8027,15 @@ public static class CaseExpr extends UntypedExpr{
             try {
                 Var.pushThreadBindings(
                         RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                defaultExpr = analyze(context, args.nth(5));
+                defaultExpr = analyze(context, args.nth(3));
                 }
             finally{
                 Var.popThreadBindings();
                 }
 
-			return new CaseExpr(((Number)LINE.deref()).intValue(),
-			                  testexpr,
-			                  ((Number)args.nth(1)).intValue(),
-			                  ((Number)args.nth(2)).intValue(),
-			                  ((Number)args.nth(3)).intValue(),
-			                  ((Number)args.nth(4)).intValue(),
-			                  defaultExpr,
-			                  tests,thens,args.nth(7) != RT.F);
-
+            int line = ((Number)LINE.deref()).intValue();
+			return new CaseExpr(line, testexpr, shift, mask, low, high,
+			        defaultExpr, tests, thens, switchType, testType, skipCheck);
 		}
 	}
 }

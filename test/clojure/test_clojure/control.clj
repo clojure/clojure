@@ -14,7 +14,7 @@
 
 (ns clojure.test-clojure.control
   (:use clojure.test
-        [clojure.test-helper :only (exception)]))
+        clojure.test-helper))
 
 ;; *** Helper functions ***
 
@@ -323,6 +323,90 @@
            :map (sorted-map :a 1 :b 2)
            :set #{3 2 1}
            :set (sorted-set 2 1 3))))
+  (testing "test number equivalence"
+    (is (= :1 (case 1N 1 :1 :else))))
+  (testing "test warn when boxing/hashing expr for all-ints case"
+    (should-print-err-message
+      #"Performance warning, .*:\d+ - case has int tests, but tested expression is not primitive..*\r?\n"
+      (let [x (Object.)] (case x 1 1 2))))
+  (testing "test correct behavior on sparse ints"
+    (are [result input] (= result (case input
+                                    2r1000000000000000000000000000000 :big
+                                    1 :small
+                                    :else))
+         :small 1
+         :big 1073741824
+         :else 2)
+    (are [result input] (= result (case input
+                                    1 :small
+                                    2r1000000000000000000000000000000 :big
+                                    :else))
+         :small 1
+         :big 1073741824
+         :else 2))
+  (testing "test emits return types"
+    (should-not-reflect (Long. (case 1 1 1))) ; new Long(long)
+    (should-not-reflect (Long. (case 1 1 "1")))) ; new Long(String)
+  (testing "non-equivalence of chars and nums"
+    (are [result input] (= result (case input 97 :97 :else))
+      :else \a
+      :else (char \a)
+      :97 (int \a))
+    (are [result input] (= result (case input \a :a :else))
+      :else 97
+      :else 97N
+      :a (char 97)))
+  (testing "test error on duplicate test constants"
+    (is (thrown-with-msg?
+          IllegalArgumentException
+          #"Duplicate case test constant: 1"
+          (eval `(case 0 1 :x 1 :y)))))
+  (testing "test correct behaviour on Number truncation"
+    (let [^Object x (Long. 8589934591)  ; force bindings to not be emitted as a primitive long
+          ^Object y (Long. -1)]
+      (is (= :diff (case x -1 :oops :diff)))
+      (is (= :same (case y -1 :same :oops)))))
+  (testing "test correct behavior on hash collision"
+    (is (== (hash 1) (hash 9223372039002259457N)))
+    (are [result input] (= result (case input
+                                    1 :long
+                                    9223372039002259457N :big
+                                    :else))
+         :long 1
+         :big 9223372039002259457N
+         :else 4294967296
+         :else 2)
+    (are [result input] (= result (case input
+                                    9223372039002259457N :big
+                                    1 :long
+                                    :else))
+         :long 1
+         :big 9223372039002259457N
+         :else 4294967296
+         :else 2)
+    (are [result input] (= result (case input
+                                    0 :zero
+                                    -1 :neg1
+                                    2 :two
+                                    :oops :OOPS))
+         :zero 0
+         :neg1 -1
+         :two 2
+         :OOPS :oops)
+    (are [result input] (= result (case input
+                                    1204766517646190306 :a
+                                    1 :b
+                                    -2 :c
+                                    :d))
+         :a 1204766517646190306
+         :b 1
+         :c -2
+         :d 4294967296
+         :d 3))
+  (testing "test warn for hash collision"
+    (should-print-err-message
+     #"Performance warning, .*:\d+ - hash collision of some case test constants; if selected, those entries will be tested sequentially..*\r?\n"
+     (case 1 1 :long 9223372039002259457N :big 2)))
   (testing "test constants are *not* evaluated"
     (let [test-fn
           ;; never write code like this...
