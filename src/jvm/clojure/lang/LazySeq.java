@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public final class LazySeq extends Obj implements ISeq, List{
+public final class LazySeq extends Obj implements ISeq, Sequential, List{
 
 private IFn fn;
 private Object sv;

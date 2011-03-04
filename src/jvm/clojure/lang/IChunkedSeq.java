@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public interface IChunkedSeq extends ISeq{
+public interface IChunkedSeq extends ISeq, Sequential {
 
 IChunk chunkedFirst() throws Exception;
 

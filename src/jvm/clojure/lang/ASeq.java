@@ -13,7 +13,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.*;
 
-public abstract class ASeq extends Obj implements ISeq, List, Serializable {
+public abstract class ASeq extends Obj implements ISeq, Sequential, List, Serializable {
 transient int _hash = -1;
 
 public String toString(){

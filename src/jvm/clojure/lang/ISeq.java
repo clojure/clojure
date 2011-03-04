@@ -16,7 +16,7 @@ package clojure.lang;
  * ISeqs are immutable values, i.e. neither first(), nor rest() changes
  * or invalidates the ISeq
  */
-public interface ISeq extends IPersistentCollection, Sequential{
+public interface ISeq extends IPersistentCollection {
 
 Object first();
 

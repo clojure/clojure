@@ -10,7 +10,7 @@
 
 package clojure.lang;
 
-public interface IndexedSeq extends ISeq, Counted{
+public interface IndexedSeq extends ISeq, Sequential, Counted{
 
 public int index();
 }
