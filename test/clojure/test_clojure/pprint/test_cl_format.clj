@@ -253,6 +253,8 @@
   (cl-format nil "~:(~A~)" 'kludgy-hash-search) "Kludgy-Hash-Search" 
   (cl-format nil "~:(~A~)" "DON'T!") "Don'T!"     ;not "Don't!" 
   (cl-format nil "~:(~A~)" "pipe 13a, foo16c") "Pipe 13a, Foo16c"
+  (cl-format nil "~:(~A~)" nil) "Nil"
+  (cl-format nil "~:(~A~)" "") ""
 )
 
 (simple-tests square-bracket-tests
