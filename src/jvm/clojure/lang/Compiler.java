@@ -461,13 +461,12 @@ static class DefExpr implements Expr{
 				}
 			IPersistentMap mm = sym.meta();
 			boolean isDynamic = RT.booleanCast(RT.get(mm,dynamicKey));
-			if(!isDynamic && sym.name.startsWith("*") && sym.name.endsWith("*") && sym.name.length() > 1)
-				{
-				RT.errPrintWriter().format("Var %s not marked :dynamic true, setting to :dynamic. You should fix this before next release!\n",
-				                           sym);
-				isDynamic = true;
-				mm = (IPersistentMap) RT.assoc(mm,dynamicKey, RT.T);
-				}
+            if(!isDynamic && sym.name.startsWith("*") && sym.name.endsWith("*") && sym.name.length() > 1)
+                {
+                RT.errPrintWriter().format("Warning: %1$s not declared dynamic and thus is not dynamically rebindable, "
+                                          +"but its name suggests otherwise. Please either indicate ^:dynamic %1$s or change the name.\n",
+                                           sym);
+                }
 			if(RT.booleanCast(RT.get(mm, arglistsKey)))
 				{
 				IPersistentMap vm = v.meta();
