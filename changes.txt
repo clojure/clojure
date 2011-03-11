@@ -1,3 +1,10 @@
+Changed to Clojure from 1.2 to 1.2.1
+
+* keyword map uses weak refs, reduces strain on permgen
+* fixes genclass namespace munging CLJ-432
+* fix stack overflow in Keyword.intern CLJ-444
+* detect and report cyclic load CLJ-8
+
 Changes to Clojure in Version 1.2
 
 = CONTENTS =
