@@ -1,36 +1,43 @@
-Changes to Clojure in Version 1.3 Alpha 5
-
 = CONTENTS =
 
- 0 Changes from 1.3 Alpha 3 to 1.3 Alpha 5
- 1 Changes from 1.3 Alpha 3 to 1.3 Alpha 4
- 2 Changes from 1.3 Alpha 2 to 1.3 Alpha 3
- 3 Changes from 1.3 Alpha 1 to 1.3 Alpha 2
- 4 Changes from 1.2 to 1.3 Alpha 1
- 5 About Alpha Releases
+ 0 Changes from 1.3 Alpha 5 to 1.3 Alpha 6
+ 1 Changes from 1.3 Alpha 4 to 1.3 Alpha 5
+ 2 Changes from 1.3 Alpha 3 to 1.3 Alpha 4
+ 3 Changes from 1.3 Alpha 2 to 1.3 Alpha 3
+ 4 Changes from 1.3 Alpha 1 to 1.3 Alpha 2
+ 5 Changes from 1.2 to 1.3 Alpha 1
+ 6 About Alpha Releases
 
 Issue Tracking: http://dev.clojure.org/jira
 
-= 0 Changes from 1.3 Alpha 4 to 1.3 Alpha 5 (01/14/2011)
+= 0 Changes from 1.3 Alpha 5 to 1.3 Alpha 6 (03/11/2011)
+
+  * improved startup time 
+  * several "holding onto head" fixes (CLJ-708)
+  * internal keyword map uses weak refs 
+  * fix perf on some numeric overloads (CLJ-380)
+  * detect and report cyclic load dependencies (CLJ-8)
+
+= 1 Changes from 1.3 Alpha 4 to 1.3 Alpha 5 (01/14/2011)
 
   * pprint respects *print-length*
   * into-array now coerces numeric types
   * Java's line.separator property for newline
   * compilation and deployment via Maven
 
-= 0 Changes from 1.3 Alpha 3 to 1.3 Alpha 4 (12/12/2010)
+= 2 Changes from 1.3 Alpha 3 to 1.3 Alpha 4 (12/12/2010)
  
   * normalized unchecked-* fn names
   * added *unchecked-math* support
   * fixes to binding conveyance (and *agent*)
   
-= 1 Changes from 1.3 Alpha 2 to 1.3 Alpha 3 (11/05/2010)
+= 3 Changes from 1.3 Alpha 2 to 1.3 Alpha 3 (11/05/2010)
   
   * fixed filter performance issue introduced in 1.3A2 
   * with-redefs macro (useful for stubbing)
   * print-table
 
-= 2 Changes from 1.3 Alpha 1 to 1.3 Alpha 2 (10/10/2010)
+= 4 Changes from 1.3 Alpha 1 to 1.3 Alpha 2 (10/10/2010)
 
   * code path for using vars is now *much* faster for the common case,
     and you must explicitly ask for :dynamic bindability
@@ -38,7 +45,7 @@ Issue Tracking: http://dev.clojure.org/jira
     http://dev.clojure.org/display/design/Reflection+API 
   * new: clojure.data/diff
 
-= 3 Changes from 1.2 to 1.3 Alpha 1 (09/23/2010)
+= 5 Changes from 1.2 to 1.3 Alpha 1 (09/23/2010)
 
   * enhanced primitive support 
     (http://dev.clojure.org/display/doc/Enhanced+Primitive+Support)
@@ -46,7 +53,7 @@ Issue Tracking: http://dev.clojure.org/jira
   * ancillary namespaces no longer auto-load on startup:
     clojure.set, clojure.xml, clojure.zip
 
-= 4 About Alpha Releases
+= 6 About Alpha Releases
 
 1.3 is the first release of Clojure that will include a series of
 alpha builds. We are adding these builds to support maven and
