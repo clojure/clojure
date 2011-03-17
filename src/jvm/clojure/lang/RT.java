@@ -188,6 +188,10 @@ static Keyword DECLARED_KEY = Keyword.intern(null, "declared");
 static Keyword DOC_KEY = Keyword.intern(null, "doc");
 final static public Var USE_CONTEXT_CLASSLOADER =
 		Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), T).setDynamic();
+//boolean
+static final public Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                   Symbol.intern("*unchecked-math*"), Boolean.FALSE).setDynamic();
+
 //final static public Var CURRENT_MODULE = Var.intern(Symbol.intern("clojure.core", "current-module"),
 //                                                    Module.findOrCreateModule("clojure/user"));
 
@@ -399,7 +403,8 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 		try {
 			Var.pushThreadBindings(
 					RT.map(CURRENT_NS, CURRENT_NS.deref(),
-					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()
+							,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
 			loaded = (loadClassForName(scriptbase.replace('/', '.') + LOADER_SUFFIX) != null);
 		}
 		finally {
@@ -421,7 +426,8 @@ static void doInit() throws Exception{
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.deref(),
-			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()
+					,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
 	try {
 		Symbol USER = Symbol.intern("user");
 		Symbol CLOJURE = Symbol.intern("clojure.core");
