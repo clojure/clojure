@@ -619,7 +619,7 @@
   "Takes a body of expressions that returns an ISeq or nil, and yields
   a Seqable object that will invoke the body only the first time seq
   is called, and will cache the result and return it on all subsequent
-  seq calls."
+  seq calls. See also - realized?"
   {:added "1.0"}
   [& body]
   (list 'new 'clojure.lang.LazySeq (list* '^{:once true} fn* [] body)))    
@@ -682,7 +682,7 @@
   "Takes a body of expressions and yields a Delay object that will
   invoke the body only the first time it is forced (with force or deref/@), and
   will cache the result and return it on all subsequent force
-  calls."
+  calls. See also - realized?"
   {:added "1.0"}
   [& body]
     (list 'new 'clojure.lang.Delay (list* `^{:once true} fn* [] body)))
@@ -2003,15 +2003,20 @@
     r)))
 
 (defn deref
-  "Also reader macro: @ref/@agent/@var/@atom/@delay/@future. Within a transaction,
+  "Also reader macro: @ref/@agent/@var/@atom/@delay/@future/@promise. Within a transaction,
   returns the in-transaction-value of ref, else returns the
   most-recently-committed value of ref. When applied to a var, agent
   or atom, returns its current state. When applied to a delay, forces
   it if not already forced. When applied to a future, will block if
-  computation not complete"
+  computation not complete. When applied to a promise, will block
+  until a value is delivered.  The variant taking a timeout can be
+  used for blocking references (futures and promises), and will return
+  timeout-val of the timeout (in milliseconds) is reached before a
+  value is available. See also - realized?."
   {:added "1.0"
    :static true}
-  [^clojure.lang.IDeref ref] (.deref ref))
+  ([^clojure.lang.IDeref ref] (.deref ref))
+  ([^clojure.lang.IBlockingDeref ref timeout-ms timeout-val] (.deref ref timeout-ms timeout-val)))
 
 (defn atom
   "Creates and returns an Atom with an initial value of x and zero or
@@ -5838,7 +5843,8 @@
   "Takes a function of no args and yields a future object that will
   invoke the function in another thread, and will cache the result and
   return it on all subsequent calls to deref/@. If the computation has
-  not yet finished, calls to deref/@ will block."
+  not yet finished, calls to deref/@ will block, unless the variant
+  with timeout is used. See also - realized?."
   {:added "1.1"
    :static true}
   [f]
@@ -5846,7 +5852,15 @@
         fut (.submit clojure.lang.Agent/soloExecutor ^Callable f)]
     (reify 
      clojure.lang.IDeref 
-      (deref [_] (.get fut))
+     (deref [_] (.get fut))
+     clojure.lang.IBlockingDeref
+     (deref
+      [_ timeout-ms timeout-val]
+      (try (.get fut timeout-ms java.util.concurrent.TimeUnit/MILLISECONDS)
+           (catch java.util.concurrent.TimeoutException e
+             timeout-val)))
+     clojure.lang.IPending
+     (isRealized [_] (.isDone fut))
      java.util.concurrent.Future
       (get [_] (.get fut))
       (get [_ timeout unit] (.get fut timeout unit))
@@ -5858,7 +5872,8 @@
   "Takes a body of expressions and yields a future object that will
   invoke the body in another thread, and will cache the result and
   return it on all subsequent calls to deref/@. If the computation has
-  not yet finished, calls to deref/@ will block."
+  not yet finished, calls to deref/@ will block, unless the variant of
+  deref with timeout is used. See also - realized?."
   {:added "1.1"}
   [& body] `(future-call (^{:once true} fn* [] ~@body)))
 
@@ -5963,8 +5978,9 @@
   "Alpha - subject to change.
   Returns a promise object that can be read with deref/@, and set,
   once only, with deliver. Calls to deref/@ prior to delivery will
-  block. All subsequent derefs will return the same delivered value
-  without blocking."
+  block, unless the variant of deref with timeout is used. All
+  subsequent derefs will return the same delivered value without
+  blocking. See also - realized?."
   {:added "1.1"
    :static true}
   []
@@ -5972,9 +5988,15 @@
         v (atom nil)]
     (reify 
      clojure.lang.IDeref
-      (deref [_] (.await d) @v)
-     clojure.lang.IPromiseImpl
-      (hasValue [this]
+       (deref [_] (.await d) @v)
+     clojure.lang.IBlockingDeref
+       (deref
+        [_ timeout-ms timeout-val]
+        (if (.await d timeout-ms java.util.concurrent.TimeUnit/MILLISECONDS)
+          @v
+          timeout-val))  
+     clojure.lang.IPending
+      (isRealized [this]
        (= 0 (.getCount d)))
      clojure.lang.IFn
       (invoke [this x]
@@ -6222,3 +6244,8 @@
   `(with-redefs-fn ~(zipmap (map #(list `var %) (take-nth 2 bindings))
                             (take-nth 2 (next bindings)))
                     (fn [] ~@body)))
+
+(defn realized?
+  "Returns true if a value has been produced for a promise, delay, future or lazy sequence."
+  {:added "1.3"}
+  [^clojure.lang.IPending x] (.isRealized x))

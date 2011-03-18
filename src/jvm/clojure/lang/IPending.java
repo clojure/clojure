@@ -10,6 +10,6 @@
 
 package clojure.lang;
 
-public interface IPromiseImpl {
-    boolean hasValue();
+public interface IPending{
+    boolean isRealized();
 }

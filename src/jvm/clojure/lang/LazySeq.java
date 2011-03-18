@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public final class LazySeq extends Obj implements ISeq, Sequential, List{
+public final class LazySeq extends Obj implements ISeq, Sequential, List, IPending{
 
 private IFn fn;
 private Object sv;
@@ -255,4 +255,7 @@ public boolean addAll(int index, Collection c){
 }
 
 
+synchronized public boolean isRealized(){
+	return fn == null;
+}
 }

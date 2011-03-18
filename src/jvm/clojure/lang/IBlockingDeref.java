@@ -8,35 +8,10 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Jun 28, 2007 */
+/* rich 3/18/11 */
 
 package clojure.lang;
 
-public class Delay implements IDeref, IPending{
-Object val;
-IFn fn;
-
-public Delay(IFn fn){
-	this.fn = fn;
-	this.val = null;
-}
-
-static public Object force(Object x) throws Exception{
-	return (x instanceof Delay) ?
-	       ((Delay) x).deref()
-	       : x;
-}
-
-synchronized public Object deref() throws Exception{
-	if(fn != null)
-		{
-		val = fn.invoke();
-		fn = null;
-		}
-	return val;
-}
-
-synchronized public boolean isRealized(){
-	return fn == null;
-}
+public interface IBlockingDeref{
+Object deref(long ms, Object timeoutValue) throws Exception;
 }
