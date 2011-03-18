@@ -2011,7 +2011,7 @@
   computation not complete. When applied to a promise, will block
   until a value is delivered.  The variant taking a timeout can be
   used for blocking references (futures and promises), and will return
-  timeout-val of the timeout (in milliseconds) is reached before a
+  timeout-val if the timeout (in milliseconds) is reached before a
   value is available. See also - realized?."
   {:added "1.0"
    :static true}
@@ -5844,7 +5844,7 @@
   invoke the function in another thread, and will cache the result and
   return it on all subsequent calls to deref/@. If the computation has
   not yet finished, calls to deref/@ will block, unless the variant
-  with timeout is used. See also - realized?."
+  of deref with timeout is used. See also - realized?."
   {:added "1.1"
    :static true}
   [f]
