@@ -13,5 +13,5 @@
 package clojure.lang;
 
 public interface Reversible{
-ISeq rseq() throws Exception;
+ISeq rseq() ;
 }

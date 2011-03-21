@@ -54,7 +54,7 @@ public IChunk dropFirst(){
 	return new ArrayChunk(array, off + 1, end);
 }
 
-public Object reduce(IFn f, Object start) throws Exception{
+public Object reduce(IFn f, Object start) {
 		Object ret = f.invoke(start, array[off]);
 		for(int x = off + 1; x < end; x++)
 			ret = f.invoke(ret, array[x]);

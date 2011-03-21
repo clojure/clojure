@@ -94,12 +94,12 @@ public boolean containsKey(Object key){
 	return entryAt(key) != null;
 }
 
-public PersistentTreeMap assocEx(Object key, Object val) throws Exception{
+public PersistentTreeMap assocEx(Object key, Object val) {
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
 	if(t == null)   //null == already contains key
 		{
-		throw new Exception("Key already present");
+		throw Util.runtimeException("Key already present");
 		}
 	return new PersistentTreeMap(comp, t.blacken(), _count + 1, meta());
 }
@@ -141,7 +141,7 @@ public IPersistentCollection empty(){
 	return new PersistentTreeMap(meta(), comp);	
 }
 
-public ISeq rseq() throws Exception{
+public ISeq rseq() {
 	if(_count > 0)
 		return Seq.create(tree, false, _count);
 	return null;

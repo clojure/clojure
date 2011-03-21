@@ -244,7 +244,7 @@ public boolean addAll(int i, Collection c){
 }
 
 
-public Object invoke(Object arg1) throws Exception{
+public Object invoke(Object arg1) {
 	if(Util.isInteger(arg1))
 		return nth(((Number) arg1).intValue());
 	throw new IllegalArgumentException("Key must be integer");
@@ -445,14 +445,14 @@ public int compareTo(Object o){
 		return new APersistentVector.Seq(meta, v, i);
 	}
 
-	public Object reduce(IFn f) throws Exception{
+	public Object reduce(IFn f) {
 		Object ret = v.nth(i);
 		for(int x = i + 1; x < v.count(); x++)
 			ret = f.invoke(ret, v.nth(x));
 		return ret;
 	}
 
-	public Object reduce(IFn f, Object start) throws Exception{
+	public Object reduce(IFn f, Object start) {
 		Object ret = f.invoke(start, v.nth(i));
 		for(int x = i + 1; x < v.count(); x++)
 			ret = f.invoke(ret, v.nth(x));

@@ -173,11 +173,11 @@ static public class ValSeq extends ASeq{
 }
 
 
-public Object invoke(Object arg1) throws Exception{
+public Object invoke(Object arg1) {
 	return valAt(arg1);
 }
 
-public Object invoke(Object arg1, Object notFound) throws Exception{
+public Object invoke(Object arg1, Object notFound) {
 	return valAt(arg1, notFound);
 }
 

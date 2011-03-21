@@ -21,13 +21,13 @@ public Delay(IFn fn){
 	this.val = null;
 }
 
-static public Object force(Object x) throws Exception{
+static public Object force(Object x) {
 	return (x instanceof Delay) ?
 	       ((Delay) x).deref()
 	       : x;
 }
 
-synchronized public Object deref() throws Exception{
+synchronized public Object deref() {
 	if(fn != null)
 		{
 		val = fn.invoke();

@@ -25,7 +25,7 @@ public IPersistentMap meta(){
 
 public IObj withMeta(final IPersistentMap meta){
 	return new RestFn(){
-		protected Object doInvoke(Object args) throws Exception{
+		protected Object doInvoke(Object args) {
 			return AFunction.this.applyTo((ISeq) args);
 		}
 
@@ -60,7 +60,7 @@ public int compare(Object o1, Object o2){
 		}
 	catch(Exception e)
 		{
-		throw new RuntimeException(e);
+		throw Util.runtimeException(e);
 		}
 }
 }

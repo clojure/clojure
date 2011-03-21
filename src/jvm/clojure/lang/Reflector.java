@@ -20,20 +20,20 @@ import java.util.Arrays;
 
 public class Reflector{
 
-public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) throws Exception{
+public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
 	try
 		{
 		Class c = target.getClass();
 		List methods = getMethods(c, args.length, methodName, false);
 		return invokeMatchingMethod(methodName, methods, target, args);
 		}
-	catch(InvocationTargetException e)
+	catch(Exception e)
 		{
 		if(e.getCause() instanceof Exception)
-			throw (Exception) e.getCause();
+			throw Util.runtimeException(e.getCause());
 		else if(e.getCause() instanceof Error)
 			throw (Error) e.getCause();
-		throw e;
+		throw Util.runtimeException(e);
 		}
 }
 
@@ -42,7 +42,7 @@ private static String noMethodReport(String methodName, Object target){
 			+ (target==null?"":" for " + target.getClass());
 }
 static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
-		throws Exception{
+		{
 	Method m = null;
 	Object[] boxedArgs = null;
 	if(methods.isEmpty())
@@ -89,13 +89,13 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		{
 		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
 		}
-	catch(InvocationTargetException e)
+	catch(Exception e)
 		{
 		if(e.getCause() instanceof Exception)
-			throw (Exception) e.getCause();
+			throw Util.runtimeException(e.getCause());
 		else if(e.getCause() instanceof Error)
 			throw (Error) e.getCause();
-		throw e;
+		throw Util.runtimeException(e);
 		}
 
 }
@@ -127,7 +127,7 @@ public static Method getAsMethodOfPublicBase(Class c, Method m){
 	return getAsMethodOfPublicBase(sc, m);
 }
 
-public static Object invokeConstructor(Class c, Object[] args) throws Exception{
+public static Object invokeConstructor(Class c, Object[] args) {
 	try
 		{
 		Constructor[] allctors = c.getConstructors();
@@ -164,101 +164,129 @@ public static Object invokeConstructor(Class c, Object[] args) throws Exception{
 				+ " for " + c);
 			}
 		}
-	catch(InvocationTargetException e)
+	catch(Exception e)
 		{
 		if(e.getCause() instanceof Exception)
-			throw (Exception) e.getCause();
+			throw Util.runtimeException(e.getCause());
 		else if(e.getCause() instanceof Error)
 			throw (Error) e.getCause();
-		throw e;
+		throw Util.runtimeException(e);
 		}
 }
 
-public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) throws Exception{
+public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) {
 	return invokeStaticMethod(className, methodName, args);
 
 }
 
-public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception{
+public static Object invokeStaticMethod(String className, String methodName, Object[] args) {
 	Class c = RT.classForName(className);
 	try
 		{
 		return invokeStaticMethod(c, methodName, args);
 		}
-	catch(InvocationTargetException e)
+	catch(Exception e)
 		{
 		if(e.getCause() instanceof Exception)
-			throw (Exception) e.getCause();
+			throw Util.runtimeException(e.getCause());
 		else if(e.getCause() instanceof Error)
 			throw (Error) e.getCause();
-		throw e;
+		throw Util.runtimeException(e);
 		}
 }
 
-public static Object invokeStaticMethod(Class c, String methodName, Object[] args) throws Exception{
+public static Object invokeStaticMethod(Class c, String methodName, Object[] args) {
 	if(methodName.equals("new"))
 		return invokeConstructor(c, args);
 	List methods = getMethods(c, args.length, methodName, true);
 	return invokeMatchingMethod(methodName, methods, null, args);
 }
 
-public static Object getStaticField(String className, String fieldName) throws Exception{
+public static Object getStaticField(String className, String fieldName) {
 	Class c = RT.classForName(className);
 	return getStaticField(c, fieldName);
 }
 
-public static Object getStaticField(Class c, String fieldName) throws Exception{
+public static Object getStaticField(Class c, String fieldName) {
 //	if(fieldName.equals("class"))
 //		return c;
 	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{
-		return prepRet(f.getType(), f.get(null));
+		try
+			{
+			return prepRet(f.getType(), f.get(null));
+			}
+		catch(IllegalAccessException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		}
 	throw new IllegalArgumentException("No matching field found: " + fieldName
 		+ " for " + c);
 }
 
-public static Object setStaticField(String className, String fieldName, Object val) throws Exception{
+public static Object setStaticField(String className, String fieldName, Object val) {
 	Class c = RT.classForName(className);
 	return setStaticField(c, fieldName, val);
 }
 
-public static Object setStaticField(Class c, String fieldName, Object val) throws Exception{
+public static Object setStaticField(Class c, String fieldName, Object val) {
 	Field f = getField(c, fieldName, true);
 	if(f != null)
 		{
-		f.set(null, boxArg(f.getType(), val));
+		try
+			{
+			f.set(null, boxArg(f.getType(), val));
+			}
+		catch(IllegalAccessException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		return val;
 		}
 	throw new IllegalArgumentException("No matching field found: " + fieldName
 		+ " for " + c);
 }
 
-public static Object getInstanceField(Object target, String fieldName) throws Exception{
+public static Object getInstanceField(Object target, String fieldName) {
 	Class c = target.getClass();
 	Field f = getField(c, fieldName, false);
 	if(f != null)
 		{
-		return prepRet(f.getType(), f.get(target));
+		try
+			{
+			return prepRet(f.getType(), f.get(target));
+			}
+		catch(IllegalAccessException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		}
 	throw new IllegalArgumentException("No matching field found: " + fieldName
 		+ " for " + target.getClass());
 }
 
-public static Object setInstanceField(Object target, String fieldName, Object val) throws Exception{
+public static Object setInstanceField(Object target, String fieldName, Object val) {
 	Class c = target.getClass();
 	Field f = getField(c, fieldName, false);
 	if(f != null)
 		{
-		f.set(target, boxArg(f.getType(), val));
+		try
+			{
+			f.set(target, boxArg(f.getType(), val));
+			}
+		catch(IllegalAccessException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		return val;
 		}
 	throw new IllegalArgumentException("No matching field found: " + fieldName
 		+ " for " + target.getClass());
 }
 
-public static Object invokeNoArgInstanceMember(Object target, String name) throws Exception{
+public static Object invokeNoArgInstanceMember(Object target, String name) {
 	//favor method over field
 	List meths = getMethods(target.getClass(), 0, name, false);
 	if(meths.size() > 0)
@@ -267,30 +295,44 @@ public static Object invokeNoArgInstanceMember(Object target, String name) throw
 		return getInstanceField(target, name);
 }
 
-public static Object invokeInstanceMember(Object target, String name) throws Exception{
+public static Object invokeInstanceMember(Object target, String name) {
 	//check for field first
 	Class c = target.getClass();
 	Field f = getField(c, name, false);
 	if(f != null)  //field get
 		{
-		return prepRet(f.getType(), f.get(target));
+		try
+			{
+			return prepRet(f.getType(), f.get(target));
+			}
+		catch(IllegalAccessException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		}
 	return invokeInstanceMethod(target, name, RT.EMPTY_ARRAY);
 }
 
-public static Object invokeInstanceMember(String name, Object target, Object arg1) throws Exception{
+public static Object invokeInstanceMember(String name, Object target, Object arg1) {
 	//check for field first
 	Class c = target.getClass();
 	Field f = getField(c, name, false);
 	if(f != null)  //field set
 		{
-		f.set(target, boxArg(f.getType(), arg1));
+		try
+			{
+			f.set(target, boxArg(f.getType(), arg1));
+			}
+		catch(IllegalAccessException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		return arg1;
 		}
 	return invokeInstanceMethod(target, name, new Object[]{arg1});
 }
 
-public static Object invokeInstanceMember(String name, Object target, Object... args) throws Exception{
+public static Object invokeInstanceMember(String name, Object target, Object... args) {
 	return invokeInstanceMethod(target, name, args);
 }
 

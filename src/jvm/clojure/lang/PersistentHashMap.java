@@ -153,9 +153,9 @@ public Object valAt(Object key){
 	return valAt(key, null);
 }
 
-public IPersistentMap assocEx(Object key, Object val) throws Exception{
+public IPersistentMap assocEx(Object key, Object val) {
 	if(containsKey(key))
-		throw new Exception("Key already present");
+		throw Util.runtimeException("Key already present");
 	return assoc(key, val);
 }
 

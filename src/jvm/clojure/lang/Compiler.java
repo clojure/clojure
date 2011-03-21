@@ -28,6 +28,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 //*/
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -152,7 +153,8 @@ final static Type IPERSISTENTMAP_TYPE = Type.getType(IPersistentMap.class);
 final static Type IOBJ_TYPE = Type.getType(IObj.class);
 
 private static final Type[][] ARG_TYPES;
-private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
+//private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
+private static final Type[] EXCEPTION_TYPES = {};
 
 static
 	{
@@ -273,13 +275,13 @@ static final public Var CLEAR_SITES = Var.create(null).setDynamic();
 }
 
 interface Expr{
-	Object eval() throws Exception;
+	Object eval() ;
 
 	void emit(C context, ObjExpr objx, GeneratorAdapter gen);
 
-	boolean hasJavaClass() throws Exception;
+	boolean hasJavaClass() ;
 
-	Class getJavaClass() throws Exception;
+	Class getJavaClass() ;
 }
 
 public static abstract class UntypedExpr implements Expr{
@@ -294,7 +296,7 @@ public static abstract class UntypedExpr implements Expr{
 }
 
 interface IParser{
-	Expr parse(C context, Object form) throws Exception;
+	Expr parse(C context, Object form) ;
 }
 
 static boolean isSpecial(Object sym){
@@ -362,7 +364,7 @@ static class DefExpr implements Expr{
         return false;
     }
 
-    public Object eval() throws Exception{
+    public Object eval() {
 		try
 			{
 			if(initProvided)
@@ -431,7 +433,7 @@ static class DefExpr implements Expr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object form) throws Exception{
+		public Expr parse(C context, Object form) {
 			//(def x) or (def x initexpr) or (def x "docstring" initexpr)
 			String docstring = null;
 			if(RT.count(form) == 4 && (RT.third(form) instanceof String)) {
@@ -439,23 +441,23 @@ static class DefExpr implements Expr{
 				form = RT.list(RT.first(form), RT.second(form), RT.fourth(form));
 			}
 			if(RT.count(form) > 3)
-				throw new Exception("Too many arguments to def");
+				throw Util.runtimeException("Too many arguments to def");
 			else if(RT.count(form) < 2)
-				throw new Exception("Too few arguments to def");
+				throw Util.runtimeException("Too few arguments to def");
 			else if(!(RT.second(form) instanceof Symbol))
-					throw new Exception("First argument to def must be a Symbol");
+					throw Util.runtimeException("First argument to def must be a Symbol");
 			Symbol sym = (Symbol) RT.second(form);
 			Var v = lookupVar(sym, true);
 			if(v == null)
-				throw new Exception("Can't refer to qualified var that doesn't exist");
+				throw Util.runtimeException("Can't refer to qualified var that doesn't exist");
 			if(!v.ns.equals(currentNS()))
 				{
 				if(sym.ns == null)
 					v = currentNS().intern(sym);
-//					throw new Exception("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
+//					throw Util.runtimeException("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
 //					                    " refers to:" + v);
 				else
-					throw new Exception("Can't create defs outside of current ns");
+					throw Util.runtimeException("Can't create defs outside of current ns");
 				}
 			IPersistentMap mm = sym.meta();
 			boolean isDynamic = RT.booleanCast(RT.get(mm,dynamicKey));
@@ -504,7 +506,7 @@ public static class AssignExpr implements Expr{
 		this.val = val;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		return target.evalAssign(val);
 	}
 
@@ -512,16 +514,16 @@ public static class AssignExpr implements Expr{
 		target.emitAssign(context, objx, gen, val);
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return val.hasJavaClass();
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return val.getJavaClass();
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			if(RT.length(form) != 3)
 				throw new IllegalArgumentException("Malformed assignment, expecting (set! target val)");
@@ -544,7 +546,7 @@ public static class VarExpr implements Expr, AssignableExpr{
 		this.tag = tag != null ? tag : var.getTag();
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		return var.deref();
 	}
 
@@ -560,11 +562,11 @@ public static class VarExpr implements Expr, AssignableExpr{
 		return tag != null;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return HostExpr.tagToClass(tag);
 	}
 
-	public Object evalAssign(Expr val) throws Exception{
+	public Object evalAssign(Expr val) {
 		return var.set(val.eval());
 	}
 
@@ -585,7 +587,7 @@ public static class TheVarExpr implements Expr{
 		this.var = var;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		return var;
 	}
 
@@ -599,17 +601,17 @@ public static class TheVarExpr implements Expr{
 		return true;
 	}
 
-	public Class getJavaClass() throws ClassNotFoundException{
+	public Class getJavaClass() {
 		return Var.class;
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object form) throws Exception{
+		public Expr parse(C context, Object form) {
 			Symbol sym = (Symbol) RT.second(form);
 			Var v = lookupVar(sym, false);
 			if(v != null)
 				return new TheVarExpr(v);
-			throw new Exception("Unable to resolve var: " + sym + " in this context");
+			throw Util.runtimeException("Unable to resolve var: " + sym + " in this context");
 		}
 	}
 }
@@ -640,7 +642,7 @@ public static class KeywordExpr extends LiteralExpr{
 		return true;
 	}
 
-	public Class getJavaClass() throws ClassNotFoundException{
+	public Class getJavaClass() {
 		return Keyword.class;
 	}
 }
@@ -655,7 +657,7 @@ public static class ImportExpr implements Expr{
 		this.c = c;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		Namespace ns = (Namespace) RT.CURRENT_NS.deref();
 		ns.importClass(RT.classForName(c));
 		return null;
@@ -676,12 +678,12 @@ public static class ImportExpr implements Expr{
 		return false;
 	}
 
-	public Class getJavaClass() throws ClassNotFoundException{
+	public Class getJavaClass() {
 		throw new IllegalArgumentException("ImportExpr has no Java class");
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object form) throws Exception{
+		public Expr parse(C context, Object form) {
 			return new ImportExpr((String) RT.second(form));
 		}
 	}
@@ -696,7 +698,7 @@ public static abstract class LiteralExpr implements Expr{
 }
 
 static interface AssignableExpr{
-	Object evalAssign(Expr val) throws Exception;
+	Object evalAssign(Expr val) ;
 
 	void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen, Expr val);
 }
@@ -854,7 +856,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			//(. x fieldname-sym) or
 			//(. x 0-ary-method)
@@ -911,7 +913,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		}
 	}
 
-	private static Class maybeClass(Object form, boolean stringOk) throws Exception{
+	private static Class maybeClass(Object form, boolean stringOk) {
 		if(form instanceof Class)
 			return (Class) form;
 		Class c = null;
@@ -968,7 +970,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		 return className;
 	 }
  */
-	static Class tagToClass(Object tag) throws Exception{
+	static Class tagToClass(Object tag) {
 		Class c = maybeClass(tag, true);
 		if(tag instanceof Symbol)
 			{
@@ -1015,7 +1017,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
 
-	public InstanceFieldExpr(int line, Expr target, String fieldName, Symbol tag) throws Exception{
+	public InstanceFieldExpr(int line, Expr target, String fieldName, Symbol tag) {
 		this.target = target;
 		this.targetClass = target.hasJavaClass() ? target.getJavaClass() : null;
 		this.field = targetClass != null ? Reflector.getField(targetClass, fieldName, false) : null;
@@ -1030,7 +1032,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			}
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		return Reflector.invokeNoArgInstanceMember(target.eval(), fieldName);
 	}
 
@@ -1075,15 +1077,15 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return field != null || tag != null;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return tag != null ? HostExpr.tagToClass(tag) : field.getType();
 	}
 
-	public Object evalAssign(Expr val) throws Exception{
+	public Object evalAssign(Expr val) {
 		return Reflector.setInstanceField(target.eval(), fieldName, val.eval());
 	}
 
@@ -1121,17 +1123,24 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 //	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
 	final int line;
 
-	public StaticFieldExpr(int line, Class c, String fieldName, Symbol tag) throws Exception{
+	public StaticFieldExpr(int line, Class c, String fieldName, Symbol tag) {
 		//this.className = className;
 		this.fieldName = fieldName;
 		this.line = line;
 		//c = Class.forName(className);
 		this.c = c;
-		field = c.getField(fieldName);
+		try
+			{
+			field = c.getField(fieldName);
+			}
+		catch(NoSuchFieldException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		this.tag = tag;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		return Reflector.getStaticField(c, fieldName);
 	}
 
@@ -1163,13 +1172,13 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		//Class c = Class.forName(className);
 		//java.lang.reflect.Field field = c.getField(fieldName);
 		return tag != null ? HostExpr.tagToClass(tag) : field.getType();
 	}
 
-	public Object evalAssign(Expr val) throws Exception{
+	public Object evalAssign(Expr val) {
 		return Reflector.setStaticField(c, fieldName, val.eval());
 	}
 
@@ -1199,7 +1208,7 @@ static Class maybePrimitiveType(Expr e){
 		}
 	catch(Exception ex)
 		{
-		throw new RuntimeException(ex);
+		throw Util.runtimeException(ex);
 		}
 	return null;
 }
@@ -1285,7 +1294,7 @@ static class InstanceMethodExpr extends MethodExpr{
 
 
 	public InstanceMethodExpr(String source, int line, Symbol tag, Expr target, String methodName, IPersistentVector args)
-			throws Exception{
+			{
 		this.source = source;
 		this.line = line;
 		this.args = args;
@@ -1334,7 +1343,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			}
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		try
 			{
 			Object targetval = target.eval();
@@ -1428,7 +1437,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		return method != null || tag != null;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return tag != null ? HostExpr.tagToClass(tag) : method.getReturnType();
 	}
 }
@@ -1449,7 +1458,7 @@ static class StaticMethodExpr extends MethodExpr{
 
 
 	public StaticMethodExpr(String source, int line, Symbol tag, Class c, String methodName, IPersistentVector args)
-			throws Exception{
+			{
 		this.c = c;
 		this.methodName = methodName;
 		this.args = args;
@@ -1483,7 +1492,7 @@ static class StaticMethodExpr extends MethodExpr{
 			}
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		try
 			{
 			Object[] argvals = new Object[args.count()];
@@ -1578,7 +1587,7 @@ static class StaticMethodExpr extends MethodExpr{
 		return method != null || tag != null;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return tag != null ? HostExpr.tagToClass(tag) : method.getReturnType();
 	}
 }
@@ -1594,7 +1603,7 @@ static class UnresolvedVarExpr implements Expr{
 		return false;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		throw new IllegalArgumentException(
 				"UnresolvedVarExpr has no Java class");
 	}
@@ -1602,7 +1611,7 @@ static class UnresolvedVarExpr implements Expr{
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new IllegalArgumentException(
 				"UnresolvedVarExpr cannot be evalled");
 	}
@@ -1630,7 +1639,7 @@ static class NumberExpr extends LiteralExpr implements MaybePrimitiveExpr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
@@ -1705,7 +1714,7 @@ static class ConstantExpr extends LiteralExpr{
 		//return false;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return v.getClass();
 		//throw new IllegalArgumentException("Has no Java class");
 	}
@@ -1748,7 +1757,7 @@ static class NilExpr extends LiteralExpr{
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return null;
 	}
 }
@@ -1782,7 +1791,7 @@ static class BooleanExpr extends LiteralExpr{
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return Boolean.class;
 	}
 }
@@ -1810,7 +1819,7 @@ static class StringExpr extends LiteralExpr{
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return String.class;
 	}
 }
@@ -1823,7 +1832,7 @@ static class MonitorEnterExpr extends UntypedExpr{
 		this.target = target;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval monitor-enter");
 	}
 
@@ -1834,7 +1843,7 @@ static class MonitorEnterExpr extends UntypedExpr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object form) throws Exception{
+		public Expr parse(C context, Object form) {
 			return new MonitorEnterExpr(analyze(C.EXPRESSION, RT.second(form)));
 		}
 	}
@@ -1847,7 +1856,7 @@ static class MonitorExitExpr extends UntypedExpr{
 		this.target = target;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval monitor-exit");
 	}
 
@@ -1858,7 +1867,7 @@ static class MonitorExitExpr extends UntypedExpr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object form) throws Exception{
+		public Expr parse(C context, Object form) {
 			return new MonitorExitExpr(analyze(C.EXPRESSION, RT.second(form)));
 		}
 	}
@@ -1896,7 +1905,7 @@ public static class TryExpr implements Expr{
 		this.finallyLocal = finallyLocal;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval try");
 	}
 
@@ -1973,17 +1982,17 @@ public static class TryExpr implements Expr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return tryExpr.hasJavaClass();
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return tryExpr.getJavaClass();
 	}
 
 	static class Parser implements IParser{
 
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 //			if(context == C.EVAL || context == C.EXPRESSION)
 			if(context != C.RETURN)
@@ -2008,7 +2017,7 @@ public static class TryExpr implements Expr{
 				if(!Util.equals(op, CATCH) && !Util.equals(op, FINALLY))
 					{
 					if(caught)
-                                            throw new Exception("Only catch or finally clause can follow catch in try expression");
+                                            throw Util.runtimeException("Only catch or finally clause can follow catch in try expression");
 					body = body.cons(f);
 					}
 				else
@@ -2030,7 +2039,7 @@ public static class TryExpr implements Expr{
 									"Bad binding form, expected symbol, got: " + RT.third(f));
 						Symbol sym = (Symbol) RT.third(f);
 						if(sym.getNamespace() != null)
-							throw new Exception("Can't bind qualified name:" + sym);
+							throw Util.runtimeException("Can't bind qualified name:" + sym);
 
 						IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
 						                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref(),
@@ -2054,7 +2063,7 @@ public static class TryExpr implements Expr{
 					else //finally
 						{
 						if(fs.next() != null)
-							throw new Exception("finally clause must be last in try expression");
+							throw Util.runtimeException("finally clause must be last in try expression");
 						try
 							{
 							Var.pushThreadBindings(RT.map(IN_CATCH_FINALLY, RT.T));
@@ -2095,7 +2104,7 @@ public static class TryExpr implements Expr{
 //		this.finallyExpr = finallyExpr;
 //	}
 //
-//	public Object eval() throws Exception{
+//	public Object eval() {
 //		throw new UnsupportedOperationException("Can't eval try");
 //	}
 //
@@ -2117,16 +2126,16 @@ public static class TryExpr implements Expr{
 //		gen.mark(end);
 //	}
 //
-//	public boolean hasJavaClass() throws Exception{
+//	public boolean hasJavaClass() {
 //		return tryExpr.hasJavaClass();
 //	}
 //
-//	public Class getJavaClass() throws Exception{
+//	public Class getJavaClass() {
 //		return tryExpr.getJavaClass();
 //	}
 //
 //	static class Parser implements IParser{
-//		public Expr parse(C context, Object frm) throws Exception{
+//		public Expr parse(C context, Object frm) {
 //			ISeq form = (ISeq) frm;
 //			//(try-finally try-expr finally-expr)
 //			if(form.count() != 3)
@@ -2150,8 +2159,8 @@ static class ThrowExpr extends UntypedExpr{
 	}
 
 
-	public Object eval() throws Exception{
-		throw new Exception("Can't eval throw");
+	public Object eval() {
+		throw Util.runtimeException("Can't eval throw");
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
@@ -2161,7 +2170,7 @@ static class ThrowExpr extends UntypedExpr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object form) throws Exception{
+		public Expr parse(C context, Object form) {
 			if(context == C.EVAL)
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
 			return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
@@ -2191,7 +2200,7 @@ static public boolean subsumes(Class[] c1, Class[] c2){
 
 static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, IPersistentVector argexprs,
                              List<Class> rets)
-		throws Exception{
+		{
 	//presumes matching lengths
 	int matchIdx = -1;
 	boolean tied = false;
@@ -2254,7 +2263,7 @@ public static class NewExpr implements Expr{
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 
 
-	public NewExpr(Class c, IPersistentVector args, int line) throws Exception{
+	public NewExpr(Class c, IPersistentVector args, int line) {
 		this.args = args;
 		this.c = c;
 		Constructor[] allctors = c.getConstructors();
@@ -2289,13 +2298,20 @@ public static class NewExpr implements Expr{
 			}
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		Object[] argvals = new Object[args.count()];
 		for(int i = 0; i < args.count(); i++)
 			argvals[i] = ((Expr) args.nth(i)).eval();
 		if(this.ctor != null)
 			{
-			return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), argvals));
+			try
+				{
+				return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), argvals));
+				}
+			catch(Exception e)
+				{
+				throw Util.runtimeException(e);
+				}
 			}
 		return Reflector.invokeConstructor(c, argvals);
 	}
@@ -2334,17 +2350,17 @@ public static class NewExpr implements Expr{
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return c;
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			int line = (Integer) LINE.deref();
 			ISeq form = (ISeq) frm;
 			//(new Classname args...)
 			if(form.count() < 2)
-				throw new Exception("wrong number of arguments, expecting: (new Classname args...)");
+				throw Util.runtimeException("wrong number of arguments, expecting: (new Classname args...)");
 			Class c = HostExpr.maybeClass(RT.second(form), false);
 			if(c == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
@@ -2369,7 +2385,7 @@ public static class MetaExpr implements Expr{
 		this.meta = meta;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		return ((IObj) expr.eval()).withMeta((IPersistentMap) meta.eval());
 	}
 
@@ -2385,11 +2401,11 @@ public static class MetaExpr implements Expr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return expr.hasJavaClass();
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return expr.getJavaClass();
 	}
 }
@@ -2408,7 +2424,7 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 		this.line = line;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		Object t = testExpr.eval();
 		if(t != null && t != Boolean.FALSE)
 			return thenExpr.eval();
@@ -2448,7 +2464,7 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 			}
 		catch(Exception e)
 			{
-			throw new RuntimeException(e);
+			throw Util.runtimeException(e);
 			}
 		if(emitUnboxed)
 			((MaybePrimitiveExpr)thenExpr).emitUnboxed(context, objx, gen);
@@ -2465,7 +2481,7 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 		gen.mark(endLabel);
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return thenExpr.hasJavaClass()
 		       && elseExpr.hasJavaClass()
 		       &&
@@ -2489,7 +2505,7 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 			}
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		Class thenClass = thenExpr.getJavaClass();
 		if(thenClass != null)
 			return thenClass;
@@ -2497,13 +2513,13 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			//(if test then) or (if test then else)
 			if(form.count() > 4)
-				throw new Exception("Too many arguments to if");
+				throw Util.runtimeException("Too many arguments to if");
 			else if(form.count() < 3)
-				throw new Exception("Too few arguments to if");
+				throw Util.runtimeException("Too few arguments to if");
             PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
             Expr testexpr = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
             Expr thenexpr, elseexpr;
@@ -2584,7 +2600,7 @@ public static class EmptyExpr implements Expr{
 		this.coll = coll;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		return coll;
 	}
 
@@ -2605,11 +2621,11 @@ public static class EmptyExpr implements Expr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		if(coll instanceof IPersistentList)
 			return IPersistentList.class;
 		else if(coll instanceof IPersistentVector)
@@ -2632,7 +2648,7 @@ public static class ListExpr implements Expr{
 		this.args = args;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		IPersistentVector ret = PersistentVector.EMPTY;
 		for(int i = 0; i < args.count(); i++)
 			ret = (IPersistentVector) ret.cons(((Expr) args.nth(i)).eval());
@@ -2646,11 +2662,11 @@ public static class ListExpr implements Expr{
 			gen.pop();
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return IPersistentList.class;
 	}
 
@@ -2665,7 +2681,7 @@ public static class MapExpr implements Expr{
 		this.keyvals = keyvals;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		Object[] ret = new Object[keyvals.count()];
 		for(int i = 0; i < keyvals.count(); i++)
 			ret[i] = ((Expr) keyvals.nth(i)).eval();
@@ -2679,16 +2695,16 @@ public static class MapExpr implements Expr{
 			gen.pop();
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return IPersistentMap.class;
 	}
 
 
-	static public Expr parse(C context, IPersistentMap form) throws Exception{
+	static public Expr parse(C context, IPersistentMap form) {
 		IPersistentVector keyvals = PersistentVector.EMPTY;
 		boolean constant = true;
 		for(ISeq s = RT.seq(form); s != null; s = s.next())
@@ -2730,7 +2746,7 @@ public static class SetExpr implements Expr{
 		this.keys = keys;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		Object[] ret = new Object[keys.count()];
 		for(int i = 0; i < keys.count(); i++)
 			ret[i] = ((Expr) keys.nth(i)).eval();
@@ -2744,16 +2760,16 @@ public static class SetExpr implements Expr{
 			gen.pop();
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return IPersistentSet.class;
 	}
 
 
-	static public Expr parse(C context, IPersistentSet form) throws Exception{
+	static public Expr parse(C context, IPersistentSet form) {
 		IPersistentVector keys = PersistentVector.EMPTY;
 		boolean constant = true;
 
@@ -2794,7 +2810,7 @@ public static class VectorExpr implements Expr{
 		this.args = args;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		IPersistentVector ret = PersistentVector.EMPTY;
 		for(int i = 0; i < args.count(); i++)
 			ret = (IPersistentVector) ret.cons(((Expr) args.nth(i)).eval());
@@ -2808,15 +2824,15 @@ public static class VectorExpr implements Expr{
 			gen.pop();
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return IPersistentVector.class;
 	}
 
-	static public Expr parse(C context, IPersistentVector form) throws Exception{
+	static public Expr parse(C context, IPersistentVector form) {
 		boolean constant = true;
 
 		IPersistentVector args = PersistentVector.EMPTY;
@@ -2866,7 +2882,7 @@ static class KeywordInvokeExpr implements Expr{
 		this.siteIndex = registerKeywordCallsite(kw.k);
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		try
 			{
 			return kw.k.invoke(target.eval());
@@ -2913,11 +2929,11 @@ static class KeywordInvokeExpr implements Expr{
             gen.pop();
     }
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return tag != null;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return HostExpr.tagToClass(tag);
 	}
 
@@ -2937,7 +2953,7 @@ static class KeywordInvokeExpr implements Expr{
 //		this.tag = tag;
 //	}
 //
-//	public Object eval() throws Exception{
+//	public Object eval() {
 //		try
 //			{
 //			KeywordCallSite s = (KeywordCallSite) site.eval();
@@ -2965,11 +2981,11 @@ static class KeywordInvokeExpr implements Expr{
 //			gen.pop();
 //	}
 //
-//	public boolean hasJavaClass() throws Exception{
+//	public boolean hasJavaClass() {
 //		return tag != null;
 //	}
 //
-//	public Class getJavaClass() throws Exception{
+//	public Class getJavaClass() {
 //		return HostExpr.tagToClass(tag);
 //	}
 //
@@ -2984,7 +3000,7 @@ public static class InstanceOfExpr implements Expr, MaybePrimitiveExpr{
 		this.c = c;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		if(c.isInstance(expr.eval()))
 			return RT.T;
 		return RT.F;
@@ -3006,11 +3022,11 @@ public static class InstanceOfExpr implements Expr, MaybePrimitiveExpr{
 			gen.pop();
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return Boolean.TYPE;
 	}
 
@@ -3036,7 +3052,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 		this.tag = tag;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval StaticInvokeExpr");
 	}
 
@@ -3053,11 +3069,11 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return tag != null ? HostExpr.tagToClass(tag) : retClass;
 	}
 
@@ -3086,7 +3102,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 					}
 				catch(Exception ex)
 					{
-					throw new RuntimeException(ex);
+					throw Util.runtimeException(ex);
 					}
 				}
 			IPersistentVector restArgs = RT.subvec(args,paramclasses.length - 1,args.count());
@@ -3103,7 +3119,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 		return Type.getType(retClass);
 	}
 
-	public static Expr parse(Var v, ISeq args, Symbol tag) throws Exception{
+	public static Expr parse(Var v, ISeq args, Symbol tag) {
 		IPersistentCollection paramlists = (IPersistentCollection) RT.get(v.meta(), arglistsKey);
 		if(paramlists == null)
 			throw new IllegalStateException("Can't call static fn with no arglists: " + v);
@@ -3187,7 +3203,7 @@ static class InvokeExpr implements Expr{
 	static Keyword onKey = Keyword.intern("on");
 	static Keyword methodMapKey = Keyword.intern("method-map");
 
-	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args) throws Exception{
+	public InvokeExpr(String source, int line, Symbol tag, Expr fexpr, IPersistentVector args) {
 		this.source = source;
 		this.fexpr = fexpr;
 		this.args = args;
@@ -3225,7 +3241,7 @@ static class InvokeExpr implements Expr{
 		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		try
 			{
 			IFn fn = (IFn) fexpr.eval();
@@ -3336,15 +3352,15 @@ static class InvokeExpr implements Expr{
 		                                                                                   args.count())]));
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return tag != null;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return HostExpr.tagToClass(tag);
 	}
 
-	static public Expr parse(C context, ISeq form) throws Exception{
+	static public Expr parse(C context, ISeq form) {
 		if(context != C.EVAL)
 			context = C.EXPRESSION;
 		Expr fexpr = analyze(context, form.first());
@@ -3433,7 +3449,7 @@ static public class FnExpr extends ObjExpr{
 		super(tag);
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
@@ -3441,7 +3457,7 @@ static public class FnExpr extends ObjExpr{
 		return hasMeta;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return AFunction.class;
 	}
 
@@ -3467,7 +3483,7 @@ static public class FnExpr extends ObjExpr{
 			}
 	}
 
-	static Expr parse(C context, ISeq form, String name) throws Exception{
+	static Expr parse(C context, ISeq form, String name) {
 		ISeq origForm = form;
 		FnExpr fn = new FnExpr(tagOf(form));
 		fn.src = form;
@@ -3530,12 +3546,12 @@ static public class FnExpr extends ObjExpr{
 					if(variadicMethod == null)
 						variadicMethod = f;
 					else
-						throw new Exception("Can't have more than 1 variadic overload");
+						throw Util.runtimeException("Can't have more than 1 variadic overload");
 					}
 				else if(methodArray[f.reqParms.count()] == null)
 					methodArray[f.reqParms.count()] = f;
 				else
-					throw new Exception("Can't have 2 overloads with same arity");
+					throw Util.runtimeException("Can't have 2 overloads with same arity");
 				if(f.prim != null)
 					prims.add(f.prim);
 				}
@@ -3543,7 +3559,7 @@ static public class FnExpr extends ObjExpr{
 				{
 				for(int i = variadicMethod.reqParms.count() + 1; i <= MAX_POSITIONAL_ARITY; i++)
 					if(methodArray[i] != null)
-						throw new Exception(
+						throw Util.runtimeException(
 								"Can't have fixed arity function with more params than variadic function");
 				}
 
@@ -3580,11 +3596,18 @@ static public class FnExpr extends ObjExpr{
 
 		fn.hasMeta = RT.count(fmeta) > 0;
 
-		fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",
-		           (prims.size() == 0)?
-		            null
-					:prims.toArray(new String[prims.size()]),
-		            fn.onceOnly);
+		try
+			{
+			fn.compile(fn.isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction",
+			           (prims.size() == 0)?
+			            null
+						:prims.toArray(new String[prims.size()]),
+			            fn.onceOnly);
+			}
+		catch(IOException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		fn.getCompiledClass();
 
 		if(fn.supportsMeta())
@@ -3757,7 +3780,7 @@ static public class ObjExpr implements Expr{
 		return ret;
 	}
 
-	void compile(String superName, String[] interfaceNames, boolean oneTimeUse) throws Exception{
+	void compile(String superName, String[] interfaceNames, boolean oneTimeUse) throws IOException{
 		//create bytecode for a class
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
@@ -4201,7 +4224,7 @@ static public class ObjExpr implements Expr{
 				else if ( cc == int.class ) bt = Type.getType(Integer.class);
 				else if ( cc == long.class ) bt = Type.getType(Long.class);
 				else if ( cc == short.class ) bt = Type.getType(Short.class);
-				else throw new RuntimeException(
+				else throw Util.runtimeException(
 						"Can't embed unknown primitive in code: " + value);
 				gen.getStatic( bt, "TYPE", Type.getType(Class.class) );
 				}
@@ -4293,16 +4316,16 @@ static public class ObjExpr implements Expr{
 				}
 			catch(Exception e)
 				{
-				throw new RuntimeException(
+				throw Util.runtimeException(
 						"Can't embed object in code, maybe print-dup not defined: " +
 						value);
 				}
 			if(cs.length() == 0)
-				throw new RuntimeException(
+				throw Util.runtimeException(
 						"Can't embed unreadable object in code: " + value);
 
 			if(cs.startsWith("#<"))
-				throw new RuntimeException(
+				throw Util.runtimeException(
 						"Can't embed unreadable object in code: " + cs);
 
 			gen.push(cs);
@@ -4389,15 +4412,22 @@ static public class ObjExpr implements Expr{
 				}
 			catch(Exception e)
 				{
-				throw new RuntimeException(e);
+				throw Util.runtimeException(e);
 				}
 		return compiledClass;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		if(isDeftype())
 			return null;
-		return getCompiledClass().newInstance();
+		try
+			{
+			return getCompiledClass().newInstance();
+			}
+		catch(Exception e)
+			{
+			throw Util.runtimeException(e);
+			}
 	}
 
 	public void emitLetFnInits(GeneratorAdapter gen, ObjExpr objx, IPersistentSet letFnLocals){
@@ -4456,11 +4486,11 @@ static public class ObjExpr implements Expr{
 			gen.pop();
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return (compiledClass != null) ? compiledClass
 			: (tag != null) ? HostExpr.tagToClass(tag)
 			: IFn.class;
@@ -4722,7 +4752,7 @@ public static class FnMethod extends ObjMethod{
 		throw new IllegalArgumentException("Only long and double primitives are supported");
 	}
 
-	static public String primInterface(IPersistentVector arglist) throws Exception{
+	static public String primInterface(IPersistentVector arglist) {
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<arglist.count();i++)
 			sb.append(classChar(tagOf(arglist.nth(i))));
@@ -4736,7 +4766,7 @@ public static class FnMethod extends ObjMethod{
 		return null;
 	}
 
-	static FnMethod parse(ObjExpr objx, ISeq form, boolean isStatic) throws Exception{
+	static FnMethod parse(ObjExpr objx, ISeq form, boolean isStatic) {
 		//([args] body...)
 		IPersistentVector parms = (IPersistentVector) RT.first(form);
 		ISeq body = RT.next(form);
@@ -4786,15 +4816,15 @@ public static class FnMethod extends ObjMethod{
 					throw new IllegalArgumentException("fn params must be Symbols");
 				Symbol p = (Symbol) parms.nth(i);
 				if(p.getNamespace() != null)
-					throw new Exception("Can't use qualified name as parameter: " + p);
+					throw Util.runtimeException("Can't use qualified name as parameter: " + p);
 				if(p.equals(_AMP_))
 					{
 //					if(isStatic)
-//						throw new Exception("Variadic fns cannot be static");
+//						throw Util.runtimeException("Variadic fns cannot be static");
 					if(state == PSTATE.REQ)
 						state = PSTATE.REST;
 					else
-						throw new Exception("Invalid parameter list");
+						throw Util.runtimeException("Invalid parameter list");
 					}
 
 				else
@@ -4805,14 +4835,14 @@ public static class FnMethod extends ObjMethod{
 //						pc = Object.class;
 //						p = (Symbol) ((IObj) p).withMeta((IPersistentMap) RT.assoc(RT.meta(p), RT.TAG_KEY, null));
 //						}
-//						throw new Exception("Non-static fn can't have primitive parameter: " + p);
+//						throw Util.runtimeException("Non-static fn can't have primitive parameter: " + p);
 					if(pc.isPrimitive() && !(pc == double.class || pc == long.class))
 						throw new IllegalArgumentException("Only long and double primitives are supported: " + p);
 
 					if(state == PSTATE.REST && tagOf(p) != null)
-						throw new Exception("& arg cannot have type hint");
+						throw Util.runtimeException("& arg cannot have type hint");
 					if(state == PSTATE.REST && method.prim != null)
-						throw new Exception("fns taking primitives cannot be variadic");
+						throw Util.runtimeException("fns taking primitives cannot be variadic");
 					                        
 					if(state == PSTATE.REST)
 						pc = ISeq.class;
@@ -4833,12 +4863,12 @@ public static class FnMethod extends ObjMethod{
 							break;
 
 						default:
-							throw new Exception("Unexpected parameter");
+							throw Util.runtimeException("Unexpected parameter");
 						}
 					}
 				}
 			if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
-				throw new Exception("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
+				throw Util.runtimeException("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
 			LOOP_LOCALS.set(argLocals);
 			method.argLocals = argLocals;
 //			if(isStatic)
@@ -4896,7 +4926,7 @@ public static class FnMethod extends ObjMethod{
 			}
 		catch(Exception e)
 			{
-			throw new RuntimeException(e);
+			throw Util.runtimeException(e);
 			}
 		finally
 			{
@@ -4960,7 +4990,7 @@ public static class FnMethod extends ObjMethod{
 			}
 		catch(Exception e)
 			{
-			throw new RuntimeException(e);
+			throw Util.runtimeException(e);
 			}
 		finally
 			{
@@ -5146,7 +5176,7 @@ abstract public static class ObjMethod{
 		this.objx = objx;
 	}
 
-	static void emitBody(ObjExpr objx, GeneratorAdapter gen, Class retClass, Expr body) throws Exception{
+	static void emitBody(ObjExpr objx, GeneratorAdapter gen, Class retClass, Expr body) {
 			MaybePrimitiveExpr be = (MaybePrimitiveExpr) body;
 			if(Util.isPrimitive(retClass) && be.canEmitPrimitive())
 				{
@@ -5278,7 +5308,7 @@ public static class LocalBinding{
 	public boolean recurMistmatch = false;
 
     public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg,PathNode clearPathRoot)
-                throws Exception{
+                {
 		if(maybePrimitiveType(init) != null && tag != null)
 			throw new UnsupportedOperationException("Can't type hint a local with a primitive initializer");
 		this.idx = num;
@@ -5290,7 +5320,7 @@ public static class LocalBinding{
 		name = munge(sym.name);
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		if(init != null && init.hasJavaClass()
 		   && Util.isPrimitive(init.getJavaClass())
 		   && !(init instanceof MaybePrimitiveExpr))
@@ -5299,7 +5329,7 @@ public static class LocalBinding{
 		       || (init != null && init.hasJavaClass());
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return tag != null ? HostExpr.tagToClass(tag)
 		                   : init.getJavaClass();
 	}
@@ -5319,7 +5349,7 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 
 
 	public LocalBindingExpr(LocalBinding b, Symbol tag)
-            throws Exception{
+            {
 		if(b.getPrimitiveType() != null && tag != null)
 			throw new UnsupportedOperationException("Can't type hint a primitive local");
 		this.b = b;
@@ -5357,7 +5387,7 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
             }
  	    }
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval locals");
 	}
 
@@ -5374,7 +5404,7 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 			objx.emitLocal(gen, b, shouldClear);
 	}
 
-	public Object evalAssign(Expr val) throws Exception{
+	public Object evalAssign(Expr val) {
 		throw new UnsupportedOperationException("Can't eval locals");
 	}
 
@@ -5384,11 +5414,11 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 			objx.emitLocal(gen, b, false);
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return tag != null || b.hasJavaClass();
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		if(tag != null)
 			return HostExpr.tagToClass(tag);
 		return b.getJavaClass();
@@ -5409,7 +5439,7 @@ public static class BodyExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frms) throws Exception{
+		public Expr parse(C context, Object frms) {
 			ISeq forms = (ISeq) frms;
 			if(Util.equals(RT.first(forms), DO))
 				forms = RT.next(forms);
@@ -5429,7 +5459,7 @@ public static class BodyExpr implements Expr, MaybePrimitiveExpr{
 		}
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		Object ret = null;
 		for(Object o : exprs)
 			{
@@ -5463,11 +5493,11 @@ public static class BodyExpr implements Expr, MaybePrimitiveExpr{
 		last.emit(context, objx, gen);
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return lastExpr().hasJavaClass();
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return lastExpr().getJavaClass();
 	}
 
@@ -5504,7 +5534,7 @@ public static class LetFnExpr implements Expr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			//(letfns* [var (fn [args] body) ...] body...)
 			if(!(RT.second(form) instanceof IPersistentVector))
@@ -5535,7 +5565,7 @@ public static class LetFnExpr implements Expr{
 								"Bad binding form, expected symbol, got: " + bindings.nth(i));
 					Symbol sym = (Symbol) bindings.nth(i);
 					if(sym.getNamespace() != null)
-						throw new Exception("Can't let qualified name: " + sym);
+						throw Util.runtimeException("Can't let qualified name: " + sym);
 					LocalBinding lb = registerLocal(sym, tagOf(sym), null,false);
 					lb.canBeCleared = false;
 					lbs = lbs.cons(lb);
@@ -5559,7 +5589,7 @@ public static class LetFnExpr implements Expr{
 		}
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval letfns");
 	}
 
@@ -5610,11 +5640,11 @@ public static class LetFnExpr implements Expr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return body.hasJavaClass();
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return body.getJavaClass();
 	}
 }
@@ -5631,7 +5661,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			//(let [var val var2 val2 ...] body...)
 			boolean isLoop = RT.first(form).equals(LOOP);
@@ -5676,7 +5706,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 									"Bad binding form, expected symbol, got: " + bindings.nth(i));
 						Symbol sym = (Symbol) bindings.nth(i);
 						if(sym.getNamespace() != null)
-							throw new Exception("Can't let qualified name: " + sym);
+							throw Util.runtimeException("Can't let qualified name: " + sym);
 						Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 						if(isLoop)
 							{
@@ -5738,7 +5768,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 		}
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval let/loop");
 	}
 
@@ -5809,11 +5839,11 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			}
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return body.hasJavaClass();
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return body.getJavaClass();
 	}
 
@@ -5837,7 +5867,7 @@ public static class RecurExpr implements Expr{
 		this.source = source;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval recur");
 	}
 
@@ -5894,7 +5924,7 @@ public static class RecurExpr implements Expr{
 					}
 				catch(Exception e)
 					{
-					throw new RuntimeException(e);
+					throw Util.runtimeException(e);
 					}
 				}
 			else
@@ -5921,16 +5951,16 @@ public static class RecurExpr implements Expr{
 		gen.goTo(loopLabel);
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return true;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return null;
 	}
 
 	static class Parser implements IParser{
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			int line = (Integer) LINE.deref();
 			String source = (String) SOURCE.deref();
 
@@ -5993,7 +6023,7 @@ public static class RecurExpr implements Expr{
 	}
 }
 
-private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init, boolean isArg) throws Exception{
+private static LocalBinding registerLocal(Symbol sym, Symbol tag, Expr init, boolean isArg) {
 	int num = getAndIncLocalNum();
 	LocalBinding b = new LocalBinding(num, sym, tag, init, isArg, clearPathRoot());
 	IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.deref();
@@ -6013,11 +6043,11 @@ private static int getAndIncLocalNum(){
 	return num;
 }
 
-public static Expr analyze(C context, Object form) throws Exception{
+public static Expr analyze(C context, Object form) {
 	return analyze(context, form, null);
 }
 
-private static Expr analyze(C context, Object form, String name) throws Exception{
+private static Expr analyze(C context, Object form, String name) {
 	//todo symbol macro expansion?
 	try
 		{
@@ -6074,7 +6104,7 @@ private static Expr analyze(C context, Object form, String name) throws Exceptio
 		}
 }
 
-static public class CompilerException extends Exception{
+static public class CompilerException extends RuntimeException{
 	final public String source;
 	
 	public CompilerException(String source, int line, Throwable cause){
@@ -6087,7 +6117,7 @@ static public class CompilerException extends Exception{
 	}
 }
 
-static public Var isMacro(Object op) throws Exception{
+static public Var isMacro(Object op) {
 	//no local macros for now
 	if(op instanceof Symbol && referenceLocal((Symbol) op) != null)
 		return null;
@@ -6104,7 +6134,7 @@ static public Var isMacro(Object op) throws Exception{
 	return null;
 }
 
-static public IFn isInline(Object op, int arity) throws Exception{
+static public IFn isInline(Object op, int arity) {
 	//no local inlines for now
 	if(op instanceof Symbol && referenceLocal((Symbol) op) != null)
 		return null;
@@ -6140,7 +6170,7 @@ public static Object preserveTag(ISeq src, Object dst) {
 	return dst;
 }
 
-public static Object macroexpand1(Object x) throws Exception{
+public static Object macroexpand1(Object x) {
 	if(x instanceof ISeq)
 		{
 		ISeq form = (ISeq) x;
@@ -6213,14 +6243,14 @@ public static Object macroexpand1(Object x) throws Exception{
 	return x;
 }
 
-static Object macroexpand(Object form) throws Exception{
+static Object macroexpand(Object form) {
 	Object exf = macroexpand1(form);
 	if(exf != form)
 		return macroexpand(exf);
 	return form;
 }
 
-private static Expr analyzeSeq(C context, ISeq form, String name) throws Exception{
+private static Expr analyzeSeq(C context, ISeq form, String name) {
 	Integer line = (Integer) LINE.deref();
 	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
 		line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
@@ -6263,11 +6293,11 @@ static String errorMsg(String source, int line, String s){
 	return String.format("%s, compiling:(%s:%d)", s, source, line);
 }
 
-public static Object eval(Object form) throws Exception{
+public static Object eval(Object form) {
 	return eval(form, true);
 }
 
-public static Object eval(Object form, boolean freshLoader) throws Exception{
+public static Object eval(Object form, boolean freshLoader) {
 	boolean createdLoader = false;
 	if(true)//!LOADER.isBound())
 		{
@@ -6307,9 +6337,9 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 			}
 		catch(Throwable e)
 			{
-			if(!(e instanceof Exception))
-				throw new RuntimeException(e);
-			throw (Exception)e;
+			if(!(e instanceof RuntimeException))
+				throw Util.runtimeException(e);
+			throw (RuntimeException)e;
 			}
 		finally
 			{
@@ -6414,7 +6444,7 @@ static void addAnnotation(Object visitor, IPersistentMap meta){
 	}
 	catch (Exception e)
 		{
-		throw new RuntimeException(e);
+		throw Util.runtimeException(e);
 		}
 }
 
@@ -6425,11 +6455,11 @@ static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i){
 	}
 	catch (Exception e)
 		{
-		throw new RuntimeException(e);
+		throw Util.runtimeException(e);
 		}
 }
 
-private static Expr analyzeSymbol(Symbol sym) throws Exception{
+private static Expr analyzeSymbol(Symbol sym) {
 	Symbol tag = tagOf(sym);
 	if(sym.ns == null) //ns-qualified syms are always Vars
 		{
@@ -6449,7 +6479,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 				{
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr((Integer) LINE.deref(), c, sym.name, tag);
-				throw new Exception("Unable to find static field: " + sym.name + " in " + c);
+				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
 				}
 			}
 		}
@@ -6462,7 +6492,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 		{
 		Var v = (Var) o;
 		if(isMacro(v) != null)
-			throw new Exception("Can't take value of a macro: " + v);
+			throw Util.runtimeException("Can't take value of a macro: " + v);
 		registerVar(v);
 		return new VarExpr(v, tag);
 		}
@@ -6471,7 +6501,7 @@ private static Expr analyzeSymbol(Symbol sym) throws Exception{
 	else if(o instanceof Symbol)
 			return new UnresolvedVarExpr((Symbol) o);
 
-	throw new Exception("Unable to resolve symbol: " + sym + " in this context");
+	throw Util.runtimeException("Unable to resolve symbol: " + sym + " in this context");
 
 }
 
@@ -6489,11 +6519,11 @@ static Type getType(Class c){
 	return Type.getType(descriptor);
 }
 
-static Object resolve(Symbol sym, boolean allowPrivate) throws Exception{
+static Object resolve(Symbol sym, boolean allowPrivate) {
 	return resolveIn(currentNS(), sym, allowPrivate);
 }
 
-static Object resolve(Symbol sym) throws Exception{
+static Object resolve(Symbol sym) {
 	return resolveIn(currentNS(), sym, false);
 }
 
@@ -6514,17 +6544,17 @@ static Namespace namespaceFor(Namespace inns, Symbol sym){
 	return ns;
 }
 
-static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) throws Exception{
+static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
 		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
-			throw new Exception("No such namespace: " + sym.ns);
+			throw Util.runtimeException("No such namespace: " + sym.ns);
 
 		Var v = ns.findInternedVar(Symbol.intern(sym.name));
 		if(v == null)
-			throw new Exception("No such var: " + sym);
+			throw Util.runtimeException("No such var: " + sym);
 		else if(v.ns != currentNS() && !v.isPublic() && !allowPrivate)
 			throw new IllegalStateException("var: " + sym + " is not public");
 		return v;
@@ -6550,7 +6580,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) th
 				}
 			else
 				{
-				throw new Exception("Unable to resolve symbol: " + sym + " in this context");
+				throw Util.runtimeException("Unable to resolve symbol: " + sym + " in this context");
 				}
 			}
 		return o;
@@ -6558,7 +6588,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) th
 }
 
 
-static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
+static public Object maybeResolveIn(Namespace n, Symbol sym) {
 	//note - ns-qualified vars must already exist
 	if(sym.ns != null)
 		{
@@ -6587,7 +6617,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) throws Exception{
 }
 
 
-static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
+static Var lookupVar(Symbol sym, boolean internNew) {
 	Var var = null;
 
 	//note - ns-qualified vars in other namespaces must already exist
@@ -6596,7 +6626,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 		Namespace ns = namespaceFor(sym);
 		if(ns == null)
 			return null;
-		//throw new Exception("No such namespace: " + sym.ns);
+		//throw Util.runtimeException("No such namespace: " + sym.ns);
 		Symbol name = Symbol.intern(sym.name);
 		if(internNew && ns == currentNS())
 			var = currentNS().intern(name);
@@ -6623,7 +6653,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 				}
 			else
 				{
-				throw new Exception("Expecting var, but " + sym + " is mapped to " + o);
+				throw Util.runtimeException("Expecting var, but " + sym + " is mapped to " + o);
 				}
 			}
 	if(var != null)
@@ -6631,7 +6661,7 @@ static Var lookupVar(Symbol sym, boolean internNew) throws Exception{
 	return var;
 }
 
-private static void registerVar(Var var) throws Exception{
+private static void registerVar(Var var) {
 	if(!VARS.isBound())
 		return;
 	IPersistentMap varsMap = (IPersistentMap) VARS.deref();
@@ -6664,7 +6694,7 @@ static void closeOver(LocalBinding b, ObjMethod method){
 }
 
 
-static LocalBinding referenceLocal(Symbol sym) throws Exception{
+static LocalBinding referenceLocal(Symbol sym) {
 	if(!LOCAL_ENV.isBound())
 		return null;
 	LocalBinding b = (LocalBinding) RT.get(LOCAL_ENV.deref(), sym);
@@ -6685,7 +6715,7 @@ private static Symbol tagOf(Object o){
 	return null;
 }
 
-public static Object loadFile(String file) throws Exception{
+public static Object loadFile(String file) throws IOException{
 //	File fo = new File(file);
 //	if(!fo.exists())
 //		return null;
@@ -6701,11 +6731,11 @@ public static Object loadFile(String file) throws Exception{
 		}
 }
 
-public static Object load(Reader rdr) throws Exception{
+public static Object load(Reader rdr) {
 	return load(rdr, null, "NO_SOURCE_FILE");
 }
 
-public static Object load(Reader rdr, String sourcePath, String sourceName) throws Exception{
+public static Object load(Reader rdr, String sourcePath, String sourceName) {
 	Object EOF = new Object();
 	Object ret = null;
 	LineNumberingPushbackReader pushbackReader =
@@ -6747,10 +6777,10 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 	return ret;
 }
 
-static public void writeClassFile(String internalName, byte[] bytecode) throws Exception{
+static public void writeClassFile(String internalName, byte[] bytecode) throws IOException{
 	String genPath = (String) COMPILE_PATH.deref();
 	if(genPath == null)
-		throw new Exception("*compile-path* not set");
+		throw Util.runtimeException("*compile-path* not set");
 	String[] dirs = internalName.split("/");
 	String p = genPath;
 	for(int i = 0; i < dirs.length - 1; i++)
@@ -6790,7 +6820,7 @@ public static ILookupThunk getLookupThunk(Object target, Keyword k){
 	return null;  //To change body of created methods use File | Settings | File Templates.
 }
 
-static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) throws Exception{
+static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) {
 	Integer line = (Integer) LINE.deref();
 	if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
 		line = (Integer) RT.meta(form).valAt(RT.LINE_KEY);
@@ -6824,9 +6854,9 @@ static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) throws Exc
 		}
 }
 
-public static Object compile(Reader rdr, String sourcePath, String sourceName) throws Exception{
+public static Object compile(Reader rdr, String sourcePath, String sourceName) throws IOException{
 	if(COMPILE_PATH.deref() == null)
-		throw new Exception("*compile-path* not set");
+		throw Util.runtimeException("*compile-path* not set");
 
 	Object EOF = new Object();
 	Object ret = null;
@@ -6991,7 +7021,7 @@ static public class NewInstanceExpr extends ObjExpr{
 	}
 
 	static class DeftypeParser implements IParser{
-		public Expr parse(C context, final Object frm) throws Exception{
+		public Expr parse(C context, final Object frm) {
 			ISeq rform = (ISeq) frm;
 			//(deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
 			rform = RT.next(rform);
@@ -7015,7 +7045,7 @@ static public class NewInstanceExpr extends ObjExpr{
 	}
 
 	static class ReifyParser implements IParser{
-	public Expr parse(C context, Object frm) throws Exception{
+	public Expr parse(C context, Object frm) {
 		//(reify this-name? [interfaces] (method-name [args] body)*)
 		ISeq form = (ISeq) frm;
 		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
@@ -7044,7 +7074,7 @@ static public class NewInstanceExpr extends ObjExpr{
 
 	static ObjExpr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym,
 	                     String tagName, Symbol className,
-	                  Symbol typeTag, ISeq methodForms, Object frm) throws Exception{
+	                  Symbol typeTag, ISeq methodForms, Object frm) {
 		NewInstanceExpr ret = new NewInstanceExpr(null);
 
 		ret.src = frm;
@@ -7145,7 +7175,14 @@ static public class NewInstanceExpr extends ObjExpr{
 			Var.popThreadBindings();
 			}
 
-		ret.compile(slashname(superClass),inames,false);
+		try
+			{
+			ret.compile(slashname(superClass),inames,false);
+			}
+		catch(IOException e)
+			{
+			throw Util.runtimeException(e);
+			}
 		ret.getCompiledClass();
 		return ret;
 		}
@@ -7381,7 +7418,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	}
 
 	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Symbol thistag,
-	                               Map overrideables) throws Exception{
+	                               Map overrideables) {
 		//(methodname [this-name args*] body...)
 		//this-name might be nil
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
@@ -7578,7 +7615,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			}
 		catch(Exception e)
 			{
-			throw new RuntimeException(e);
+			throw Util.runtimeException(e);
 			}
 		finally
 			{
@@ -7616,7 +7653,7 @@ public static class NewInstanceMethod extends ObjMethod{
 		return c;
 	}
 
-	static Class tagClass(Object tag) throws Exception{
+	static Class tagClass(Object tag) {
 		if(tag == null)
 			return Object.class;
 		Class c = null;
@@ -7638,19 +7675,19 @@ static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 		this.c = c;
 	}
 
-	public Object eval() throws Exception{
-		throw new Exception("Can't eval");
+	public Object eval() {
+		throw Util.runtimeException("Can't eval");
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		throw new RuntimeException("Can't emit");
+		throw Util.runtimeException("Can't emit");
 	}
 
-	public boolean hasJavaClass() throws Exception{
+	public boolean hasJavaClass() {
 		return c != null;
 	}
 
-	public Class getJavaClass() throws Exception{
+	public Class getJavaClass() {
 		return c;
 	}
 
@@ -7659,7 +7696,7 @@ static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
-		throw new RuntimeException("Can't emit");
+		throw Util.runtimeException("Can't emit");
 	}
 }
 
@@ -7692,7 +7729,7 @@ public static class CaseExpr extends UntypedExpr{
 		this.allKeywords = allKeywords;
 	}
 
-	public Object eval() throws Exception{
+	public Object eval() {
 		throw new UnsupportedOperationException("Can't eval case");
 	}
 
@@ -7752,7 +7789,7 @@ public static class CaseExpr extends UntypedExpr{
 		//prepared by case macro and presumed correct
 		//case macro binds actual expr in let so expr is always a local,
 		//no need to worry about multiple evaluation
-		public Expr parse(C context, Object frm) throws Exception{
+		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			if(context == C.EVAL)
 				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));

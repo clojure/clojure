@@ -378,7 +378,7 @@ Object run(Callable fn) throws Exception{
 			}
 		}
 	if(!done)
-		throw new Exception("Transaction failed after reaching retry limit");
+		throw Util.runtimeException("Transaction failed after reaching retry limit");
 	return ret;
 }
 
@@ -456,7 +456,7 @@ void doEnsure(Ref ref){
 		ensures.add(ref);
 }
 
-Object doCommute(Ref ref, IFn fn, ISeq args) throws Exception{
+Object doCommute(Ref ref, IFn fn, ISeq args) {
 	if(!info.running())
 		throw retryex;
 	if(!vals.containsKey(ref))
@@ -506,7 +506,7 @@ public static void main(String[] args){
 			}
 
 		class Incr extends AFn{
-			public Object invoke(Object arg1) throws Exception{
+			public Object invoke(Object arg1) {
 				Integer i = (Integer) arg1;
 				return i + 1;
 			}
@@ -529,7 +529,7 @@ public static void main(String[] args){
 				this.incr = new Incr();
 			}
 
-			public Object call() throws Exception{
+			public Object call() {
 				long nanos = 0;
 				for(int i = 0; i < niters; i++)
 					{
@@ -540,7 +540,7 @@ public static void main(String[] args){
 				return nanos;
 			}
 
-			public Object invoke() throws Exception{
+			public Object invoke() {
 				for(Ref tref : items)
 					{
 					LockingTransaction.getEx().doCommute(tref, incr);
@@ -564,7 +564,7 @@ public static void main(String[] args){
 				this.items = items;
 			}
 
-			public Object call() throws Exception{
+			public Object call() {
 				long nanos = 0;
 				for(int i = 0; i < niters; i++)
 					{
@@ -575,7 +575,7 @@ public static void main(String[] args){
 				return nanos;
 			}
 
-			public Object invoke() throws Exception{
+			public Object invoke() {
 				for(Ref tref : items)
 					{
 					//Transaction.get().doTouch(tref);

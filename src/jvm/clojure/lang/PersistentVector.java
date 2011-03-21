@@ -261,7 +261,7 @@ static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
 		this.offset = offset;
 	}
 
-	public IChunk chunkedFirst() throws Exception{
+	public IChunk chunkedFirst() {
 		return new ArrayChunk(node, offset);
 		}
 
@@ -536,7 +536,7 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 		return notFound;
 	}
 
-	public Object invoke(Object arg1) throws Exception{
+	public Object invoke(Object arg1) {
 		//note - relies on ensureEditable in nth
 		if(Util.isInteger(arg1))
 			return nth(((Number) arg1).intValue());

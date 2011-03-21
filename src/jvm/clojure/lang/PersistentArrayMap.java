@@ -103,12 +103,12 @@ public IMapEntry entryAt(Object key){
 	return null;
 }
 
-public IPersistentMap assocEx(Object key, Object val) throws Exception{
+public IPersistentMap assocEx(Object key, Object val) {
 	int i = indexOf(key);
 	Object[] newArray;
 	if(i >= 0)
 		{
-		throw new Exception("Key already present");
+		throw Util.runtimeException("Key already present");
 		}
 	else //didn't have key, grow
 		{

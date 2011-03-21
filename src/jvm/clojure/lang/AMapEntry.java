@@ -78,7 +78,7 @@ public String toString(){
 	catch(Exception e)
 		{
 		//checked exceptions stink!
-		throw new RuntimeException(e);
+		throw Util.runtimeException(e);
 		}
 	return sw.toString();
 }
@@ -141,7 +141,7 @@ public Object peek(){
 }
 
 
-public ISeq rseq() throws Exception{
+public ISeq rseq() {
 	return asVector().rseq();
 }
 */

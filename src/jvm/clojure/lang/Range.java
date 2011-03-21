@@ -43,14 +43,14 @@ public ISeq next(){
 	return null;
 }
 
-public Object reduce(IFn f) throws Exception{
+public Object reduce(IFn f) {
 	Object ret = n;
 	for(int x = n+1;x < end;x++)
 		ret = f.invoke(ret, x);
 	return ret;
 }
 
-public Object reduce(IFn f, Object start) throws Exception{
+public Object reduce(IFn f, Object start) {
 	Object ret = f.invoke(start,n);
 	for(int x = n+1;x < end;x++)
 		ret = f.invoke(ret, x);

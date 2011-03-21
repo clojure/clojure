@@ -30,7 +30,7 @@ public Object deref(){
 	return state.get();
 }
 
-public Object swap(IFn f) throws Exception{
+public Object swap(IFn f) {
 	for(; ;)
 		{
 		Object v = deref();
@@ -44,7 +44,7 @@ public Object swap(IFn f) throws Exception{
 		}
 }
 
-public Object swap(IFn f, Object arg) throws Exception{
+public Object swap(IFn f, Object arg) {
 	for(; ;)
 		{
 		Object v = deref();
@@ -58,7 +58,7 @@ public Object swap(IFn f, Object arg) throws Exception{
 		}
 }
 
-public Object swap(IFn f, Object arg1, Object arg2) throws Exception{
+public Object swap(IFn f, Object arg1, Object arg2) {
 	for(; ;)
 		{
 		Object v = deref();
@@ -72,7 +72,7 @@ public Object swap(IFn f, Object arg1, Object arg2) throws Exception{
 		}
 }
 
-public Object swap(IFn f, Object x, Object y, ISeq args) throws Exception{
+public Object swap(IFn f, Object x, Object y, ISeq args) {
 	for(; ;)
 		{
 		Object v = deref();

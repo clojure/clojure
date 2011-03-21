@@ -114,11 +114,11 @@ private Object readResolve() throws ObjectStreamException{
 	return intern(ns, name);
 }
 
-public Object invoke(Object obj) throws Exception{
+public Object invoke(Object obj) {
 	return RT.get(obj, this);
 }
 
-public Object invoke(Object obj, Object notFound) throws Exception{
+public Object invoke(Object obj, Object notFound) {
 	return RT.get(obj, this, notFound);
 }
 

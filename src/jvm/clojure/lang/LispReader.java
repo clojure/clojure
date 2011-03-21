@@ -98,12 +98,19 @@ static boolean isWhitespace(int ch){
 	return Character.isWhitespace(ch) || ch == ',';
 }
 
-static void unread(PushbackReader r, int ch) throws IOException{
+static void unread(PushbackReader r, int ch) {
 	if(ch != -1)
-		r.unread(ch);
+		try
+			{
+			r.unread(ch);
+			}
+		catch(IOException e)
+			{
+			throw Util.runtimeException(e);
+			}
 }
 
-public static class ReaderException extends Exception{
+public static class ReaderException extends RuntimeException{
 	final int line;
 
 	public ReaderException(int line, Throwable cause){
@@ -112,22 +119,33 @@ public static class ReaderException extends Exception{
 	}
 }
 
+static public int read1(Reader r){
+	try
+		{
+		return r.read();
+		}
+	catch(IOException e)
+		{
+		throw Util.runtimeException(e);
+		}
+}
+
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
-		throws Exception{
+		{
 
 	try
 		{
 		for(; ;)
 			{
-			int ch = r.read();
+			int ch = read1(r);
 
 			while(isWhitespace(ch))
-				ch = r.read();
+				ch = read1(r);
 
 			if(ch == -1)
 				{
 				if(eofIsError)
-					throw new Exception("EOF while reading");
+					throw Util.runtimeException("EOF while reading");
 				return eofValue;
 				}
 
@@ -153,7 +171,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 
 			if(ch == '+' || ch == '-')
 				{
-				int ch2 = r.read();
+				int ch2 = read1(r);
 				if(Character.isDigit(ch2))
 					{
 					unread(r, ch2);
@@ -174,20 +192,20 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 	catch(Exception e)
 		{
 		if(isRecursive || !(r instanceof LineNumberingPushbackReader))
-			throw e;
+			throw Util.runtimeException(e);
 		LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) r;
-		//throw new Exception(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()), e);
+		//throw Util.runtimeException(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()), e);
 		throw new ReaderException(rdr.getLineNumber(), e);
 		}
 }
 
-static private String readToken(PushbackReader r, char initch) throws Exception{
+static private String readToken(PushbackReader r, char initch) {
 	StringBuilder sb = new StringBuilder();
 	sb.append(initch);
 
 	for(; ;)
 		{
-		int ch = r.read();
+		int ch = read1(r);
 		if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
 			{
 			unread(r, ch);
@@ -197,13 +215,13 @@ static private String readToken(PushbackReader r, char initch) throws Exception{
 		}
 }
 
-static private Object readNumber(PushbackReader r, char initch) throws Exception{
+static private Object readNumber(PushbackReader r, char initch) {
 	StringBuilder sb = new StringBuilder();
 	sb.append(initch);
 
 	for(; ;)
 		{
-		int ch = r.read();
+		int ch = read1(r);
 		if(ch == -1 || isWhitespace(ch) || isMacro(ch))
 			{
 			unread(r, ch);
@@ -219,7 +237,7 @@ static private Object readNumber(PushbackReader r, char initch) throws Exception
 	return n;
 }
 
-static private int readUnicodeChar(String token, int offset, int length, int base) throws Exception{
+static private int readUnicodeChar(String token, int offset, int length, int base) {
 	if(token.length() != offset + length)
 		throw new IllegalArgumentException("Invalid unicode character: \\" + token);
 	int uc = 0;
@@ -233,14 +251,14 @@ static private int readUnicodeChar(String token, int offset, int length, int bas
 	return (char) uc;
 }
 
-static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) throws Exception{
+static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) {
 	int uc = Character.digit(initch, base);
 	if(uc == -1)
 		throw new IllegalArgumentException("Invalid digit: " + initch);
 	int i = 1;
 	for(; i < length; ++i)
 		{
-		int ch = r.read();
+		int ch = read1(r);
 		if(ch == -1 || isWhitespace(ch) || isMacro(ch))
 			{
 			unread(r, ch);
@@ -256,7 +274,7 @@ static private int readUnicodeChar(PushbackReader r, int initch, int base, int l
 	return uc;
 }
 
-static private Object interpretToken(String s) throws Exception{
+static private Object interpretToken(String s) {
 	if(s.equals("nil"))
 		{
 		return null;
@@ -283,7 +301,7 @@ static private Object interpretToken(String s) throws Exception{
 	if(ret != null)
 		return ret;
 
-	throw new Exception("Invalid token: " + s);
+	throw Util.runtimeException("Invalid token: " + s);
 }
 
 
@@ -387,19 +405,19 @@ static private boolean isTerminatingMacro(int ch){
 public static class RegexReader extends AFn{
 	static StringReader stringrdr = new StringReader();
 
-	public Object invoke(Object reader, Object doublequote) throws Exception{
+	public Object invoke(Object reader, Object doublequote) {
 		StringBuilder sb = new StringBuilder();
 		Reader r = (Reader) reader;
-		for(int ch = r.read(); ch != '"'; ch = r.read())
+		for(int ch = read1(r); ch != '"'; ch = read1(r))
 			{
 			if(ch == -1)
-				throw new Exception("EOF while reading regex");
+				throw Util.runtimeException("EOF while reading regex");
 			sb.append( (char) ch );
 			if(ch == '\\')	//escape
 				{
-				ch = r.read();
+				ch = read1(r);
 				if(ch == -1)
-					throw new Exception("EOF while reading regex");
+					throw Util.runtimeException("EOF while reading regex");
 				sb.append( (char) ch ) ;
 				}
 			}
@@ -408,19 +426,19 @@ public static class RegexReader extends AFn{
 }
 
 public static class StringReader extends AFn{
-	public Object invoke(Object reader, Object doublequote) throws Exception{
+	public Object invoke(Object reader, Object doublequote) {
 		StringBuilder sb = new StringBuilder();
 		Reader r = (Reader) reader;
 
-		for(int ch = r.read(); ch != '"'; ch = r.read())
+		for(int ch = read1(r); ch != '"'; ch = read1(r))
 			{
 			if(ch == -1)
-				throw new Exception("EOF while reading string");
+				throw Util.runtimeException("EOF while reading string");
 			if(ch == '\\')	//escape
 				{
-				ch = r.read();
+				ch = read1(r);
 				if(ch == -1)
-					throw new Exception("EOF while reading string");
+					throw Util.runtimeException("EOF while reading string");
 				switch(ch)
 					{
 					case 't':
@@ -444,9 +462,9 @@ public static class StringReader extends AFn{
 						break;
 					case 'u':
 					{
-					ch = r.read();
+					ch = read1(r);
 					if (Character.digit(ch, 16) == -1)
-					    throw new Exception("Invalid unicode escape: \\u" + (char) ch);
+					    throw Util.runtimeException("Invalid unicode escape: \\u" + (char) ch);
 					ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
 					break;
 					}
@@ -456,10 +474,10 @@ public static class StringReader extends AFn{
 						{
 						ch = readUnicodeChar((PushbackReader) r, ch, 8, 3, false);
 						if(ch > 0377)
-							throw new Exception("Octal escape sequence must be in range [0, 377].");
+							throw Util.runtimeException("Octal escape sequence must be in range [0, 377].");
 						}
 					else
-						throw new Exception("Unsupported escape character: \\" + (char) ch);
+						throw Util.runtimeException("Unsupported escape character: \\" + (char) ch);
 					}
 					}
 				}
@@ -470,12 +488,12 @@ public static class StringReader extends AFn{
 }
 
 public static class CommentReader extends AFn{
-	public Object invoke(Object reader, Object semicolon) throws Exception{
+	public Object invoke(Object reader, Object semicolon) {
 		Reader r = (Reader) reader;
 		int ch;
 		do
 			{
-			ch = r.read();
+			ch = read1(r);
 			} while(ch != -1 && ch != '\n' && ch != '\r');
 		return r;
 	}
@@ -483,7 +501,7 @@ public static class CommentReader extends AFn{
 }
 
 public static class DiscardReader extends AFn{
-	public Object invoke(Object reader, Object underscore) throws Exception{
+	public Object invoke(Object reader, Object underscore) {
 		PushbackReader r = (PushbackReader) reader;
 		read(r, true, null, true);
 		return r;
@@ -497,7 +515,7 @@ public static class WrappingReader extends AFn{
 		this.sym = sym;
 	}
 
-	public Object invoke(Object reader, Object quote) throws Exception{
+	public Object invoke(Object reader, Object quote) {
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
 		return RT.list(sym, o);
@@ -514,7 +532,7 @@ public static class DeprecatedWrappingReader extends AFn{
                 this.macro = macro;
 	}
 
-	public Object invoke(Object reader, Object quote) throws Exception{
+	public Object invoke(Object reader, Object quote) {
                 System.out.println("WARNING: reader macro " + macro +
                                    " is deprecated; use " + sym.getName() +
                                    " instead");
@@ -526,7 +544,7 @@ public static class DeprecatedWrappingReader extends AFn{
 }
 
 public static class VarReader extends AFn{
-	public Object invoke(Object reader, Object quote) throws Exception{
+	public Object invoke(Object reader, Object quote) {
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
 //		if(o instanceof Symbol)
@@ -542,11 +560,11 @@ public static class VarReader extends AFn{
 /*
 static class DerefReader extends AFn{
 
-	public Object invoke(Object reader, Object quote) throws Exception{
+	public Object invoke(Object reader, Object quote) {
 		PushbackReader r = (PushbackReader) reader;
-		int ch = r.read();
+		int ch = read1(r);
 		if(ch == -1)
-			throw new Exception("EOF while reading character");
+			throw Util.runtimeException("EOF while reading character");
 		if(ch == '!')
 			{
 			Object o = read(r, true, null, true);
@@ -564,13 +582,13 @@ static class DerefReader extends AFn{
 */
 
 public static class DispatchReader extends AFn{
-	public Object invoke(Object reader, Object hash) throws Exception{
-		int ch = ((Reader) reader).read();
+	public Object invoke(Object reader, Object hash) {
+		int ch = read1((Reader) reader);
 		if(ch == -1)
-			throw new Exception("EOF while reading character");
+			throw Util.runtimeException("EOF while reading character");
 		IFn fn = dispatchMacros[ch];
 		if(fn == null)
-			throw new Exception(String.format("No dispatch macro for: %c", (char) ch));
+			throw Util.runtimeException(String.format("No dispatch macro for: %c", (char) ch));
 		return fn.invoke(reader, ch);
 	}
 }
@@ -580,7 +598,7 @@ static Symbol garg(int n){
 }
 
 public static class FnReader extends AFn{
-	public Object invoke(Object reader, Object lparen) throws Exception{
+	public Object invoke(Object reader, Object lparen) {
 		PushbackReader r = (PushbackReader) reader;
 		if(ARG_ENV.deref() != null)
 			throw new IllegalStateException("Nested #()s are not allowed");
@@ -588,7 +606,7 @@ public static class FnReader extends AFn{
 			{
 			Var.pushThreadBindings(
 					RT.map(ARG_ENV, PersistentTreeMap.EMPTY));
-			r.unread('(');
+			unread(r, '(');
 			Object form = read(r, true, null, true);
 
 			PersistentVector args = PersistentVector.EMPTY;
@@ -639,13 +657,13 @@ static Symbol registerArg(int n){
 }
 
 static class ArgReader extends AFn{
-	public Object invoke(Object reader, Object pct) throws Exception{
+	public Object invoke(Object reader, Object pct) {
 		PushbackReader r = (PushbackReader) reader;
 		if(ARG_ENV.deref() == null)
 			{
 			return interpretToken(readToken(r, '%'));
 			}
-		int ch = r.read();
+		int ch = read1(r);
 		unread(r, ch);
 		//% alone is first arg
 		if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
@@ -662,7 +680,7 @@ static class ArgReader extends AFn{
 }
 
 public static class MetaReader extends AFn{
-	public Object invoke(Object reader, Object caret) throws Exception{
+	public Object invoke(Object reader, Object caret) {
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
 		if(r instanceof LineNumberingPushbackReader)
@@ -699,7 +717,7 @@ public static class MetaReader extends AFn{
 }
 
 public static class SyntaxQuoteReader extends AFn{
-	public Object invoke(Object reader, Object backquote) throws Exception{
+	public Object invoke(Object reader, Object backquote) {
 		PushbackReader r = (PushbackReader) reader;
 		try
 			{
@@ -715,7 +733,7 @@ public static class SyntaxQuoteReader extends AFn{
 			}
 	}
 
-	static Object syntaxQuote(Object form) throws Exception{
+	static Object syntaxQuote(Object form) {
 		Object ret;
 		if(Compiler.isSpecial(form))
 			ret = RT.list(Compiler.QUOTE, form);
@@ -809,7 +827,7 @@ public static class SyntaxQuoteReader extends AFn{
 		return ret;
 	}
 
-	private static ISeq sqExpandList(ISeq seq) throws Exception{
+	private static ISeq sqExpandList(ISeq seq) {
 		PersistentVector ret = PersistentVector.EMPTY;
 		for(; seq != null; seq = seq.next())
 			{
@@ -846,11 +864,11 @@ static boolean isUnquote(Object form){
 }
 
 static class UnquoteReader extends AFn{
-	public Object invoke(Object reader, Object comma) throws Exception{
+	public Object invoke(Object reader, Object comma) {
 		PushbackReader r = (PushbackReader) reader;
-		int ch = r.read();
+		int ch = read1(r);
 		if(ch == -1)
-			throw new Exception("EOF while reading character");
+			throw Util.runtimeException("EOF while reading character");
 		if(ch == '@')
 			{
 			Object o = read(r, true, null, true);
@@ -867,11 +885,11 @@ static class UnquoteReader extends AFn{
 }
 
 public static class CharacterReader extends AFn{
-	public Object invoke(Object reader, Object backslash) throws Exception{
+	public Object invoke(Object reader, Object backslash) {
 		PushbackReader r = (PushbackReader) reader;
-		int ch = r.read();
+		int ch = read1(r);
 		if(ch == -1)
-			throw new Exception("EOF while reading character");
+			throw Util.runtimeException("EOF while reading character");
 		String token = readToken(r, (char) ch);
 		if(token.length() == 1)
 			return Character.valueOf(token.charAt(0));
@@ -891,26 +909,26 @@ public static class CharacterReader extends AFn{
 		    {
 			 char c = (char) readUnicodeChar(token, 1, 4, 16);
 			 if(c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
-			     throw new Exception("Invalid character constant: \\u" + Integer.toString(c, 16));
+			     throw Util.runtimeException("Invalid character constant: \\u" + Integer.toString(c, 16));
 			 return c;
 		    }
 		else if(token.startsWith("o"))
 			{
 			int len = token.length() - 1;
 			if(len > 3)
-				throw new Exception("Invalid octal escape sequence length: " + len);
+				throw Util.runtimeException("Invalid octal escape sequence length: " + len);
 			int uc = readUnicodeChar(token, 1, len, 8);
 			if(uc > 0377)
-				throw new Exception("Octal escape sequence must be in range [0, 377].");
+				throw Util.runtimeException("Octal escape sequence must be in range [0, 377].");
 			return (char) uc;
 			}
-		throw new Exception("Unsupported character: \\" + token);
+		throw Util.runtimeException("Unsupported character: \\" + token);
 	}
 
 }
 
 public static class ListReader extends AFn{
-	public Object invoke(Object reader, Object leftparen) throws Exception{
+	public Object invoke(Object reader, Object leftparen) {
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
 		if(r instanceof LineNumberingPushbackReader)
@@ -931,14 +949,14 @@ public static class ListReader extends AFn{
 static class CtorReader extends AFn{
 	static final Symbol cls = Symbol.intern("class");
 
-	public Object invoke(Object reader, Object leftangle) throws Exception{
+	public Object invoke(Object reader, Object leftangle) {
 		PushbackReader r = (PushbackReader) reader;
 		// #<class classname>
 		// #<classname args*>
 		// #<classname/staticMethod args*>
 		List list = readDelimitedList('>', r, true);
 		if(list.isEmpty())
-			throw new Exception("Must supply 'class', classname or classname/staticMethod");
+			throw Util.runtimeException("Must supply 'class', classname or classname/staticMethod");
 		Symbol s = (Symbol) list.get(0);
 		Object[] args = list.subList(1, list.size()).toArray();
 		if(s.equals(cls))
@@ -960,10 +978,10 @@ static class CtorReader extends AFn{
 }
 
 public static class EvalReader extends AFn{
-	public Object invoke(Object reader, Object eq) throws Exception{
+	public Object invoke(Object reader, Object eq) {
 		if (!RT.booleanCast(RT.READEVAL.deref()))
 	    {
-		  throw new Exception("EvalReader not allowed when *read-eval* is false.");
+		  throw Util.runtimeException("EvalReader not allowed when *read-eval* is false.");
 	    }
 		
 		PushbackReader r = (PushbackReader) reader;
@@ -995,7 +1013,7 @@ public static class EvalReader extends AFn{
 				{
 				return ((IFn) v).applyTo(RT.next(o));
 				}
-			throw new Exception("Can't resolve " + fs);
+			throw Util.runtimeException("Can't resolve " + fs);
 			}
 		else
 			throw new IllegalArgumentException("Unsupported #= form");
@@ -1003,7 +1021,7 @@ public static class EvalReader extends AFn{
 }
 
 //static class ArgVectorReader extends AFn{
-//	public Object invoke(Object reader, Object leftparen) throws Exception{
+//	public Object invoke(Object reader, Object leftparen) {
 //		PushbackReader r = (PushbackReader) reader;
 //		return ArgVector.create(readDelimitedList('|', r, true));
 //	}
@@ -1011,7 +1029,7 @@ public static class EvalReader extends AFn{
 //}
 
 public static class VectorReader extends AFn{
-	public Object invoke(Object reader, Object leftparen) throws Exception{
+	public Object invoke(Object reader, Object leftparen) {
 		PushbackReader r = (PushbackReader) reader;
 		return LazilyPersistentVector.create(readDelimitedList(']', r, true));
 	}
@@ -1019,18 +1037,18 @@ public static class VectorReader extends AFn{
 }
 
 public static class MapReader extends AFn{
-	public Object invoke(Object reader, Object leftparen) throws Exception{
+	public Object invoke(Object reader, Object leftparen) {
 		PushbackReader r = (PushbackReader) reader;
 		Object[] a = readDelimitedList('}', r, true).toArray();
 		if((a.length & 1) == 1)
-			throw new Exception("Map literal must contain an even number of forms");
+			throw Util.runtimeException("Map literal must contain an even number of forms");
 		return RT.map(a);
 	}
 
 }
 
 public static class SetReader extends AFn{
-	public Object invoke(Object reader, Object leftbracket) throws Exception{
+	public Object invoke(Object reader, Object leftbracket) {
 		PushbackReader r = (PushbackReader) reader;
 		return PersistentHashSet.createWithCheck(readDelimitedList('}', r, true));
 	}
@@ -1038,19 +1056,19 @@ public static class SetReader extends AFn{
 }
 
 public static class UnmatchedDelimiterReader extends AFn{
-	public Object invoke(Object reader, Object rightdelim) throws Exception{
-		throw new Exception("Unmatched delimiter: " + rightdelim);
+	public Object invoke(Object reader, Object rightdelim) {
+		throw Util.runtimeException("Unmatched delimiter: " + rightdelim);
 	}
 
 }
 
 public static class UnreadableReader extends AFn{
-	public Object invoke(Object reader, Object leftangle) throws Exception{
-		throw new Exception("Unreadable form");
+	public Object invoke(Object reader, Object leftangle) {
+		throw Util.runtimeException("Unreadable form");
 	}
 }
 
-public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) throws Exception{
+public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) {
 	final int firstline =
 		(r instanceof LineNumberingPushbackReader) ?
 		((LineNumberingPushbackReader) r).getLineNumber() : -1;
@@ -1059,17 +1077,17 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 
 	for(; ;)
 		{
-		int ch = r.read();
+		int ch = read1(r);
 
 		while(isWhitespace(ch))
-			ch = r.read();
+			ch = read1(r);
 
 		if(ch == -1)
 			{
 			if(firstline < 0)
-				throw new Exception("EOF while reading");
+				throw Util.runtimeException("EOF while reading");
 			else
-				throw new Exception("EOF while reading, starting at line " + firstline);
+				throw Util.runtimeException("EOF while reading, starting at line " + firstline);
 			}
 
 		if(ch == delim)

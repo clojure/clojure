@@ -27,7 +27,7 @@ public class AReference implements IReference {
         return _meta;
     }
 
-    synchronized public IPersistentMap alterMeta(IFn alter, ISeq args) throws Exception {
+    synchronized public IPersistentMap alterMeta(IFn alter, ISeq args)  {
         _meta = (IPersistentMap) alter.applyTo(new Cons(_meta, args));
         return _meta;
     }

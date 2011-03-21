@@ -13,5 +13,5 @@
 package clojure.lang;
 
 public interface IBlockingDeref{
-Object deref(long ms, Object timeoutValue) throws Exception;
+Object deref(long ms, Object timeoutValue) ;
 }

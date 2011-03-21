@@ -33,7 +33,7 @@ public abstract class ATransientSet extends AFn implements ITransientSet{
 		return this != impl.valAt(key, this);
 	}
 
-	public ITransientSet disjoin(Object key) throws Exception {
+	public ITransientSet disjoin(Object key)  {
 		ITransientMap m = impl.without(key);
 		if (m != impl) this.impl = m;
 		return this;
@@ -43,11 +43,11 @@ public abstract class ATransientSet extends AFn implements ITransientSet{
 		return impl.valAt(key);
 	}
 
-	public Object invoke(Object key, Object notFound) throws Exception {
+	public Object invoke(Object key, Object notFound)  {
 		return impl.valAt(key, notFound);
 	}
 
-	public Object invoke(Object key) throws Exception {
+	public Object invoke(Object key)  {
 		return impl.valAt(key);	
 	}
 	

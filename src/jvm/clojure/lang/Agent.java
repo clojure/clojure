@@ -166,23 +166,23 @@ static class Action implements Runnable{
 	}
 }
 
-public Agent(Object state) throws Exception{
+public Agent(Object state) {
 	this(state,null);
 }
 
-public Agent(Object state, IPersistentMap meta) throws Exception {
+public Agent(Object state, IPersistentMap meta)  {
     super(meta);
     setState(state);
 }
 
-boolean setState(Object newState) throws Exception{
+boolean setState(Object newState) {
 	validate(newState);
 	boolean ret = state != newState;
 	state = newState;
 	return ret;
 }
 
-public Object deref() throws Exception{
+public Object deref() {
 	return state;
 }
 
@@ -209,7 +209,7 @@ public IFn getErrorHandler(){
 synchronized public Object restart(Object newState, boolean clearActions){
 	if(getError() == null)
 		{
-		throw new RuntimeException("Agent does not need a restart");
+		throw Util.runtimeException("Agent does not need a restart");
 		}
 	validate(newState);
 	state = newState;
@@ -237,7 +237,7 @@ public Object dispatch(IFn fn, ISeq args, boolean solo) {
 	Throwable error = getError();
 	if(error != null)
 		{
-		throw new RuntimeException("Agent is failed, needs restart", error);
+		throw Util.runtimeException("Agent is failed, needs restart", error);
 		}
 	Action action = new Action(this, fn, args, solo);
 	dispatchAction(action);

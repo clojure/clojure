@@ -35,17 +35,17 @@ Entry entryAt(Object k){
 	return mapAt(binFor(k)).entryAt(k);
 }
 
-public TransactionalHashMap() throws Exception{
+public TransactionalHashMap() {
 	this(421);
 }
 
-public TransactionalHashMap(int nBins) throws Exception{
+public TransactionalHashMap(int nBins) {
 	bins = new Ref[nBins];
 	for(int i = 0; i < nBins; i++)
 		bins[i] = new Ref(PersistentHashMap.EMPTY);
 }
 
-public TransactionalHashMap(Map<? extends K, ? extends V> m) throws Exception{
+public TransactionalHashMap(Map<? extends K, ? extends V> m) {
 	this(m.size());
 	putAll(m);
 }
@@ -93,7 +93,7 @@ public V remove(Object k){
 		}
 	catch(Exception e)
 		{
-		throw new RuntimeException(e);
+		throw Util.runtimeException(e);
 		}
 	return (V) ret;
 }
@@ -163,7 +163,7 @@ public boolean remove(Object k, Object v){
 			}
 		catch(Exception ex)
 			{
-			throw new RuntimeException(ex);
+			throw Util.runtimeException(ex);
 			}
 		return true;
 		}

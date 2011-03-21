@@ -26,30 +26,37 @@ public FnLoaderThunk(Var v, String fnClassName){
 	fn = null;
 }
 
-public Object invoke(Object arg1) throws Exception{
+public Object invoke(Object arg1) {
 	load();
 	return fn.invoke(arg1);
 }
 
-public Object invoke(Object arg1, Object arg2) throws Exception{
+public Object invoke(Object arg1, Object arg2) {
 	load();
 	return fn.invoke(arg1,arg2);
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3) {
 	load();
 	return fn.invoke(arg1,arg2,arg3);
 }
 
-protected Object doInvoke(Object args) throws Exception{
+protected Object doInvoke(Object args) {
 	load();
 	return fn.applyTo((ISeq) args);
 }
 
-private void load() throws Exception{
+private void load() {
 	if(fn == null)
 		{
-		fn = (IFn) Class.forName(fnClassName,true,loader).newInstance();
+		try
+			{
+			fn = (IFn) Class.forName(fnClassName,true,loader).newInstance();
+			}
+		catch(Exception e)
+			{
+			throw Util.runtimeException(e);
+			}
 		v.root = fn;
 		}
 }

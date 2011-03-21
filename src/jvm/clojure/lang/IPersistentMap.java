@@ -16,8 +16,8 @@ public interface IPersistentMap extends Iterable, Associative, Counted{
 
 IPersistentMap assoc(Object key, Object val);
 
-IPersistentMap assocEx(Object key, Object val) throws Exception;
+IPersistentMap assocEx(Object key, Object val) ;
 
-IPersistentMap without(Object key) throws Exception;
+IPersistentMap without(Object key) ;
 
 }

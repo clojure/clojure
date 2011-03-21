@@ -83,11 +83,11 @@ volatile int maxHistory = 10;
 
 static final AtomicLong ids = new AtomicLong();
 
-public Ref(Object initVal) throws Exception{
+public Ref(Object initVal) {
 	this(initVal, null);
 }
 
-public Ref(Object initVal,IPersistentMap meta) throws Exception{
+public Ref(Object initVal,IPersistentMap meta) {
     super(meta);
     this.id = ids.getAndIncrement();
 	this.faults = new AtomicInteger();
@@ -165,11 +165,11 @@ public Object set(Object val){
 	return LockingTransaction.getEx().doSet(this, val);
 }
 
-public Object commute(IFn fn, ISeq args) throws Exception{
+public Object commute(IFn fn, ISeq args) {
 	return LockingTransaction.getEx().doCommute(this, fn, args);
 }
 
-public Object alter(IFn fn, ISeq args) throws Exception{
+public Object alter(IFn fn, ISeq args) {
 	LockingTransaction t = LockingTransaction.getEx();
 	return t.doSet(this, fn.applyTo(RT.cons(t.doGet(this), args)));
 }
@@ -236,7 +236,7 @@ final public IFn fn(){
 	return (IFn) deref();
 }
 
-public Object call() throws Exception{
+public Object call() {
 	return invoke();
 }
 
@@ -247,110 +247,110 @@ public void run(){
 		}
 	catch(Exception e)
 		{
-		throw new RuntimeException(e);
+		throw Util.runtimeException(e);
 		}
 }
 
-public Object invoke() throws Exception{
+public Object invoke() {
 	return fn().invoke();
 }
 
-public Object invoke(Object arg1) throws Exception{
+public Object invoke(Object arg1) {
 	return fn().invoke(arg1);
 }
 
-public Object invoke(Object arg1, Object arg2) throws Exception{
+public Object invoke(Object arg1, Object arg2) {
 	return fn().invoke(arg1, arg2);
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3) {
 	return fn().invoke(arg1, arg2, arg3);
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) {
 	return fn().invoke(arg1, arg2, arg3, arg4);
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5);
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
-		throws Exception{
+		{
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8) throws Exception{
+                     Object arg8) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9) throws Exception{
+                     Object arg8, Object arg9) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10) throws Exception{
+                     Object arg8, Object arg9, Object arg10) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10, Object arg11) throws Exception{
+                     Object arg8, Object arg9, Object arg10, Object arg11) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) throws Exception{
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
-		throws Exception{
+		{
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
-		throws Exception{
+		{
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15) throws Exception{
+                     Object arg15) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16) throws Exception{
+                     Object arg15, Object arg16) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
 	                   arg16);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16, Object arg17) throws Exception{
+                     Object arg15, Object arg16, Object arg17) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
 	                   arg16, arg17);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16, Object arg17, Object arg18) throws Exception{
+                     Object arg15, Object arg16, Object arg17, Object arg18) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
 	                   arg16, arg17, arg18);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) throws Exception{
+                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) {
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
 	                   arg16, arg17, arg18, arg19);
 }
@@ -358,7 +358,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
-		throws Exception{
+		{
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
 	                   arg16, arg17, arg18, arg19, arg20);
 }
@@ -367,12 +367,12 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20,
                      Object... args)
-		throws Exception{
+		{
 	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
 	                   arg16, arg17, arg18, arg19, arg20, args);
 }
 
-public Object applyTo(ISeq arglist) throws Exception{
+public Object applyTo(ISeq arglist) {
 	return AFn.applyToHelper(this, arglist);
 }
 

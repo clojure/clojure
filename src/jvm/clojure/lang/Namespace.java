@@ -140,7 +140,7 @@ Class referenceClass(Symbol sym, Class val){
     throw new IllegalStateException(sym + " already refers to: " + c + " in namespace: " + name);
 }
 
-public void unmap(Symbol sym) throws Exception{
+public void unmap(Symbol sym) {
 	if(sym.ns != null)
 		{
 		throw new IllegalArgumentException("Can't unintern namespace-qualified symbol");
@@ -225,7 +225,7 @@ public void addAlias(Symbol alias, Namespace ns){
 		                                   + name + ", aliasing " + map.valAt(alias));
 }
 
-public void removeAlias(Symbol alias) throws Exception{
+public void removeAlias(Symbol alias) {
 	IPersistentMap map = getAliases();
 	while(map.containsKey(alias))
 		{

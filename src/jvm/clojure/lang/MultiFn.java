@@ -29,7 +29,7 @@ static final Var dissoc = RT.var("clojure.core", "dissoc");
 static final Var isa = RT.var("clojure.core", "isa?");
 static final Var parents = RT.var("clojure.core", "parents");
 
-public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hierarchy) throws Exception{
+public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hierarchy) {
 	this.name = name;
 	this.dispatchFn = dispatchFn;
 	this.defaultDispatchVal = defaultDispatchVal;
@@ -46,19 +46,19 @@ synchronized public MultiFn reset(){
 	return this;
 }
 
-synchronized public MultiFn addMethod(Object dispatchVal, IFn method) throws Exception{
+synchronized public MultiFn addMethod(Object dispatchVal, IFn method) {
 	methodTable = getMethodTable().assoc(dispatchVal, method);
 	resetCache();
 	return this;
 }
 
-synchronized public MultiFn removeMethod(Object dispatchVal) throws Exception{
+synchronized public MultiFn removeMethod(Object dispatchVal) {
 	methodTable = getMethodTable().without(dispatchVal);
 	resetCache();
 	return this;
 }
 
-synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) throws Exception{
+synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) {
 	if(prefers(dispatchValY, dispatchValX))
 		throw new IllegalStateException(
 				String.format("Preference conflict in multimethod '%s': %s is already preferred to %s",
@@ -71,7 +71,7 @@ synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchVal
 	return this;
 }
 
-private boolean prefers(Object x, Object y) throws Exception{
+private boolean prefers(Object x, Object y) {
 	IPersistentSet xprefs = (IPersistentSet) getPreferTable().valAt(x);
 	if(xprefs != null && xprefs.contains(y))
 		return true;
@@ -88,21 +88,21 @@ private boolean prefers(Object x, Object y) throws Exception{
 	return false;
 }
 
-private boolean isA(Object x, Object y) throws Exception{
+private boolean isA(Object x, Object y) {
     return RT.booleanCast(isa.invoke(hierarchy.deref(), x, y));
 }
 
-private boolean dominates(Object x, Object y) throws Exception{
+private boolean dominates(Object x, Object y) {
 	return prefers(x, y) || isA(x, y);
 }
 
-private IPersistentMap resetCache() throws Exception{
+private IPersistentMap resetCache() {
 	methodCache = getMethodTable();
 	cachedHierarchy = hierarchy.deref();
 	return methodCache;
 }
 
-synchronized public IFn getMethod(Object dispatchVal) throws Exception{
+synchronized public IFn getMethod(Object dispatchVal) {
 	if(cachedHierarchy != hierarchy.deref())
 		resetCache();
 	IFn targetFn = (IFn) methodCache.valAt(dispatchVal);
@@ -115,7 +115,7 @@ synchronized public IFn getMethod(Object dispatchVal) throws Exception{
 	return targetFn;
 }
 
-private IFn getFn(Object dispatchVal) throws Exception{
+private IFn getFn(Object dispatchVal) {
 	IFn targetFn = getMethod(dispatchVal);
 	if(targetFn == null)
 		throw new IllegalArgumentException(String.format("No method in multimethod '%s' for dispatch value: %s",
@@ -123,7 +123,7 @@ private IFn getFn(Object dispatchVal) throws Exception{
 	return targetFn;
 }
 
-private IFn findAndCacheBestMethod(Object dispatchVal) throws Exception{
+private IFn findAndCacheBestMethod(Object dispatchVal) {
 	Map.Entry bestEntry = null;
 	for(Object o : getMethodTable())
 		{
@@ -155,25 +155,25 @@ private IFn findAndCacheBestMethod(Object dispatchVal) throws Exception{
 		}
 }
 
-public Object invoke() throws Exception{
+public Object invoke() {
 	return getFn(dispatchFn.invoke()).invoke();
 }
 
-public Object invoke(Object arg1) throws Exception{
+public Object invoke(Object arg1) {
 	return getFn(dispatchFn.invoke(arg1)).invoke(Util.ret1(arg1,arg1=null));
 }
 
-public Object invoke(Object arg1, Object arg2) throws Exception{
+public Object invoke(Object arg1, Object arg2) {
 	return getFn(dispatchFn.invoke(arg1, arg2)).
                      invoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null));
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3)).
                      invoke(Util.ret1(arg1,arg1=null), Util.ret1(arg2,arg2=null), Util.ret1(arg3,arg3=null));
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -181,7 +181,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) throws 
                             Util.ret1(arg4,arg4=null));
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -190,7 +190,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                             Util.ret1(arg5,arg5=null));
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) throws Exception{
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -201,7 +201,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
-		throws Exception{
+		{
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -213,7 +213,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8) throws Exception{
+                     Object arg8) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -226,7 +226,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9) throws Exception{
+                     Object arg8, Object arg9) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -240,7 +240,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10) throws Exception{
+                     Object arg8, Object arg9, Object arg10) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -255,7 +255,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10, Object arg11) throws Exception{
+                     Object arg8, Object arg9, Object arg10, Object arg11) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -271,7 +271,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) throws Exception{
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -288,7 +288,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13) throws Exception{
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13) {
 	return getFn(dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)).
                      invoke(Util.ret1(arg1,arg1=null),
                             Util.ret1(arg2,arg2=null),
@@ -307,7 +307,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
-		throws Exception{
+		{
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)).
                         invoke(Util.ret1(arg1,arg1=null),
@@ -328,7 +328,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15) throws Exception{
+                     Object arg15) {
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                  arg15)).
@@ -351,7 +351,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16) throws Exception{
+                     Object arg15, Object arg16) {
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                  arg15, arg16)).
@@ -375,7 +375,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16, Object arg17) throws Exception{
+                     Object arg15, Object arg16, Object arg17) {
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                  arg15, arg16, arg17)).
@@ -400,7 +400,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16, Object arg17, Object arg18) throws Exception{
+                     Object arg15, Object arg16, Object arg17, Object arg18) {
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                  arg15, arg16, arg17, arg18)).
@@ -426,7 +426,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) throws Exception{
+                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) {
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                  arg15, arg16, arg17, arg18, arg19)).
@@ -454,7 +454,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
-		throws Exception{
+		{
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                  arg15, arg16, arg17, arg18, arg19, arg20)).
@@ -483,7 +483,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20, Object... args)
-		throws Exception{
+		{
 	return getFn(
 			dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
 			                  arg15, arg16, arg17, arg18, arg19, arg20, args)).

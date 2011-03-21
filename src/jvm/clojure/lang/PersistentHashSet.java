@@ -87,7 +87,7 @@ PersistentHashSet(IPersistentMap meta, IPersistentMap impl){
 	this._meta = meta;
 }
 
-public IPersistentSet disjoin(Object key) throws Exception{
+public IPersistentSet disjoin(Object key) {
 	if(contains(key))
 		return new PersistentHashSet(meta(),impl.without(key));
 	return this;

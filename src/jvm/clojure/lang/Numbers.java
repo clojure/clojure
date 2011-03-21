@@ -2338,14 +2338,14 @@ static public class F{
 		return xs;
 	}
 
-	static public float[] vmap(IFn fn, float[] x) throws Exception{
+	static public float[] vmap(IFn fn, float[] x) {
 		float[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i])).floatValue();
 		return xs;
 	}
 
-	static public float[] vmap(IFn fn, float[] x, float[] ys) throws Exception{
+	static public float[] vmap(IFn fn, float[] x, float[] ys) {
 		float[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).floatValue();
@@ -2766,14 +2766,14 @@ static public class D{
 		return xs;
 	}
 
-	static public double[] vmap(IFn fn, double[] x) throws Exception{
+	static public double[] vmap(IFn fn, double[] x) {
 		double[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i])).doubleValue();
 		return xs;
 	}
 
-	static public double[] vmap(IFn fn, double[] x, double[] ys) throws Exception{
+	static public double[] vmap(IFn fn, double[] x, double[] ys) {
 		double[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).doubleValue();
@@ -3193,14 +3193,14 @@ static public class I{
 		return xs;
 	}
 
-	static public int[] vmap(IFn fn, int[] x) throws Exception{
+	static public int[] vmap(IFn fn, int[] x) {
 		int[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i])).intValue();
 		return xs;
 	}
 
-	static public int[] vmap(IFn fn, int[] x, int[] ys) throws Exception{
+	static public int[] vmap(IFn fn, int[] x, int[] ys) {
 		int[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).intValue();
@@ -3622,14 +3622,14 @@ static public class L{
 		return xs;
 	}
 
-	static public long[] vmap(IFn fn, long[] x) throws Exception{
+	static public long[] vmap(IFn fn, long[] x) {
 		long[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i])).longValue();
 		return xs;
 	}
 
-	static public long[] vmap(IFn fn, long[] x, long[] ys) throws Exception{
+	static public long[] vmap(IFn fn, long[] x, long[] ys) {
 		long[] xs = x.clone();
 		for(int i = 0; i < xs.length; i++)
 			xs[i] = ((Number) fn.invoke(xs[i], ys[i])).longValue();

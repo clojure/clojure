@@ -13,5 +13,5 @@
 package clojure.lang;
 
 public interface IDeref{
-Object deref() throws Exception;
+Object deref() ;
 }

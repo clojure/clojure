@@ -45,7 +45,7 @@ public ISeq seq(){
 	return RT.keys(impl);
 }
 
-public Object invoke(Object arg1) throws Exception{
+public Object invoke(Object arg1) {
 	return get(arg1);
 }
 
