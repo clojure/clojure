@@ -11,7 +11,7 @@
     :doc "Conveniently launch a sub-process providing its stdin and
 collecting its stdout"}
   clojure.java.shell
-  (:use [clojure.java.io :only (as-file copy)])
+  (:use [clojure.java.io :only (as-file copy input-stream)])
   (:import (java.io OutputStreamWriter ByteArrayOutputStream StringWriter)
            (java.nio.charset Charset)))
 
@@ -82,7 +82,9 @@ collecting its stdout"}
   Options are
 
   :in      may be given followed by a String or byte array specifying input
-           to be fed to the sub-process's stdin.
+           to be fed to the sub-process's stdin. If :in isn't a String or
+           a byte array the value is passed to the clojure.java.io/input-stream
+           function and directly copied to the sub-process's stdin.
   :in-enc  option may be given followed by a String, used as a character
            encoding name (for example \"UTF-8\" or \"ISO-8859-1\") to
            convert the input string specified by the :in option to the
@@ -98,6 +100,16 @@ collecting its stdout"}
   :env     override the process env with a map (or the underlying Java
            String[] if you are a masochist).
   :dir     override the process dir with a String or java.io.File.
+  :out-fn  a custom one argument function to process the stdout
+           java.io.InputStream of the java.lang.Process. The stream
+           obtains data piped from the standard output stream (stdout) of
+           the process represented by the underlying Process object.
+           You don't need to take care of closing the java.io.InputStream.
+  :err-fn  a custom one argument function to process the stderr
+           java.io.InputStream of the java.lang.Process. The stream
+           obtains data piped from the error output stream (stderr) of
+           the process represented by the underlying Process object.
+           You don't need to take care of closing the java.io.InputStream.
 
   You can bind :env or :dir for multiple operations using with-sh-env
   and with-sh-dir.
@@ -113,19 +125,29 @@ collecting its stdout"}
 		    ^"[Ljava.lang.String;" (into-array cmd) 
 		    (as-env-strings (:env opts))
 		    (as-file (:dir opts)))
-        {:keys [in in-enc out-enc]} opts]
+        {:keys [in in-enc out-enc out-fn err-fn]} opts]
     (if in
       (future
-       (if (instance? (class (byte-array 0)) in)
+       (cond
+        (string? in)
+         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) ^String in-enc)]
+           (.write osw ^String in))
+        (instance? (class (byte-array 0)) in)   
          (with-open [os (.getOutputStream proc)]
            (.write os ^"[B" in))
-         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) ^String in-enc)]
-           (.write osw ^String in))))
+        :else
+          (with-open [os (.getOutputStream proc)
+                      is (input-stream in)]
+           (copy is os))))
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
-      (let [out (future (stream-to-enc stdout out-enc))
-            err (future (stream-to-string stderr))
+      (let [out (future (if (fn? out-fn)
+                          (out-fn stdout)
+                          (stream-to-enc stdout out-enc)))
+            err (future (if (fn? err-fn)
+                          (err-fn stderr)
+                          (stream-to-string stderr)))
             exit-code (.waitFor proc)]
         {:exit exit-code :out @out :err @err}))))
 
