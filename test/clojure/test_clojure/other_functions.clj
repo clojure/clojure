@@ -88,7 +88,43 @@
          (keyword "foo") :foo)))
 
 ; complement
+
+(deftest test-complement
+  (let [not-contains? (complement contains?)]
+    (is (= true (not-contains? [2 3 4] 5)))
+    (is (= false (not-contains? [2 3 4] 2))))
+  (let [first-elem-not-1? (complement (fn [x] (= 1 (first x))))]
+    (is (= true (first-elem-not-1? [2 3])))
+    (is (= false (first-elem-not-1? [1 2])))))
+
 ; constantly
+
+(deftest test-constantly
+  (let [c0 (constantly 10)]
+    (are [x] (= 10 (c0 x))
+         nil
+         42
+         "foo")))
+;juxt
+
+(deftest test-juxt
+  ;; juxt for colls
+  (let [m0 {:a 1 :b 2}
+        a0 [1 2]]
+    (is (= [1 2] ((juxt :a :b) m0)))
+    (is (= [2 1] ((juxt fnext first) a0))))
+  ;; juxt for fns
+  (let [a1 (fn [a] (+ 2 a))
+        b1 (fn [b] (* 2 b))]
+    (is (= [5 6] ((juxt a1 b1) 3)))))
+
+;partial
+
+(deftest test-partial
+  (let [p1 (partial + 20)
+        p2 (partial conj [1 2])]
+    (is (= 40 (p1 20)))
+    (is (= [1 2 3] (p2 3)))))
 
 ; every-pred
 (deftest test-every-pred
