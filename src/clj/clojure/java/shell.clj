@@ -12,7 +12,7 @@
 collecting its stdout"}
   clojure.java.shell
   (:use [clojure.java.io :only (as-file copy)])
-  (:import (java.io OutputStreamWriter ByteArrayOutputStream StringWriter)
+  (:import (java.io InputStream File Reader OutputStreamWriter ByteArrayOutputStream StringWriter)
            (java.nio.charset Charset)))
 
 (def ^:dynamic *sh-dir* nil)
@@ -81,8 +81,8 @@ collecting its stdout"}
 
   Options are
 
-  :in      may be given followed by a String or byte array specifying input
-           to be fed to the sub-process's stdin.
+  :in      may be given followed by an InputStream, Reader, File, byte[], or
+           String input to be fed to the sub-process's stdin.
   :in-enc  option may be given followed by a String, used as a character
            encoding name (for example \"UTF-8\" or \"ISO-8859-1\") to
            convert the input string specified by the :in option to the
@@ -110,17 +110,14 @@ collecting its stdout"}
   [& args]
   (let [[cmd opts] (parse-args args)
         proc (.exec (Runtime/getRuntime) 
-		    ^"[Ljava.lang.String;" (into-array cmd) 
-		    (as-env-strings (:env opts))
-		    (as-file (:dir opts)))
+               ^"[Ljava.lang.String;" (into-array cmd)
+               (as-env-strings (:env opts))
+               (as-file (:dir opts)))
         {:keys [in in-enc out-enc]} opts]
     (if in
       (future
-       (if (instance? (class (byte-array 0)) in)
-         (with-open [os (.getOutputStream proc)]
-           (.write os ^"[B" in))
-         (with-open [osw (OutputStreamWriter. (.getOutputStream proc) ^String in-enc)]
-           (.write osw ^String in))))
+        (with-open [os (.getOutputStream proc)]
+          (copy in os :encoding in-enc)))
       (.close (.getOutputStream proc)))
     (with-open [stdout (.getInputStream proc)
                 stderr (.getErrorStream proc)]
@@ -134,6 +131,7 @@ collecting its stdout"}
 (println (sh "ls" "-l"))
 (println (sh "ls" "-l" "/no-such-thing"))
 (println (sh "sed" "s/[aeiou]/oo/g" :in "hello there\n"))
+(println (sh "sed" "s/[aeiou]/oo/g" :in (java.io.StringReader. "hello there\n")))
 (println (sh "cat" :in "x\u25bax\n"))
 (println (sh "echo" "x\u25bax"))
 (println (sh "echo" "x\u25bax" :out-enc "ISO-8859-1")) ; reads 4 single-byte chars
