@@ -5985,7 +5985,7 @@
    :static true}
   []
   (let [d (java.util.concurrent.CountDownLatch. 1)
-        v (atom nil)]
+        v (atom d)]
     (reify 
      clojure.lang.IDeref
        (deref [_] (.await d) @v)
@@ -5997,15 +5997,14 @@
           timeout-val))  
      clojure.lang.IPending
       (isRealized [this]
-       (= 0 (.getCount d)))
+       (zero? (.getCount d)))
      clojure.lang.IFn
-      (invoke [this x]
-        (locking d
-          (if (pos? (.getCount d))
-            (do (reset! v x)
-                (.countDown d)
-                this)
-            (throw (IllegalStateException. "Multiple deliver calls to a promise"))))))))
+     (invoke
+      [this x]
+      (when (and (pos? (.getCount d))
+                 (compare-and-set! v d x))
+        (.countDown d)
+        this)))))
 
 (defn deliver
   "Alpha - subject to change.
