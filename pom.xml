@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.clojure</groupId>
-  <artifactId>clojure</artifactId>
-  <name>clojure</name>
+  <groupId>org.lava</groupId>
+  <artifactId>lava</artifactId>
+  <name>lava</name>
   <packaging>jar</packaging>
   <version>1.3.0-master-SNAPSHOT</version>
 
-  <url>http://clojure.org/</url>
-  <description>Clojure core environment and runtime library.</description>
+  <url>http://lava.org/</url>
+  <description>Lava core environment and runtime library.</description>
 
   <developers>
     <developer>
@@ -33,9 +33,9 @@
   </parent>
 
   <scm>
-    <connection>scm:git:git@github.com:clojure/clojure.git</connection>
-    <developerConnection>scm:git:git@github.com:clojure/clojure.git</developerConnection>
-    <url>git@github.com:clojure/clojure.git</url>
+    <connection>scm:git:git@github.com:lava/lava.git</connection>
+    <developerConnection>scm:git:git@github.com:lava/lava.git</developerConnection>
+    <url>git@github.com:lava/lava.git</url>
   </scm>
 
   <build>
@@ -64,19 +64,19 @@
 	<version>1.6</version>
 	<executions>
 	  <execution>
-	    <id>clojure-compile</id>
+	    <id>lava-compile</id>
 	    <phase>compile</phase>
 	    <goals>
 	      <goal>run</goal>
 	    </goals>
 	    <configuration>
 	      <target>
-		<ant target="compile-clojure" />
+		<ant target="compile-lava" />
 	      </target>
 	    </configuration>
 	  </execution>
 	  <execution>
-	    <id>clojure-test</id>
+	    <id>lava-test</id>
 	    <phase>compile</phase>
 	    <goals>
 	      <goal>run</goal>
@@ -95,7 +95,7 @@
         <version>1.5</version>
         <executions>
           <execution>
-            <id>add-clojure-source-dirs</id>
+            <id>add-lava-source-dirs</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>add-source</goal>
@@ -113,7 +113,7 @@
         <version>2.2</version>
 	<executions>
 	  <execution>
-	    <id>clojure-slim-jar</id>
+	    <id>lava-slim-jar</id>
 	    <phase>package</phase>
 	    <goals>
 	      <goal>single</goal>
@@ -124,7 +124,7 @@
 	      </descriptors>
 	      <archive>
 		<manifest>
-		  <mainClass>clojure.main</mainClass>
+		  <mainClass>lava.main</mainClass>
 		</manifest>
 	      </archive>
 	    </configuration>
@@ -137,7 +137,7 @@
 	<configuration>
 	  <archive>
 	    <manifest>
-	      <mainClass>clojure.main</mainClass>
+	      <mainClass>lava.main</mainClass>
 	    </manifest>
 	  </archive>
 	</configuration>
@@ -190,7 +190,7 @@
 	    <version>2.2</version>
 	    <executions>
 	      <execution>
-		<id>clojure-distribution</id>
+		<id>lava-distribution</id>
 		<phase>package</phase>
 		<goals>
 		  <goal>single</goal>

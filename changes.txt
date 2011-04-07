@@ -8,7 +8,7 @@
  5 Changes from 1.2 to 1.3 Alpha 1
  6 About Alpha Releases
 
-Issue Tracking: http://dev.clojure.org/jira
+Issue Tracking: http://dev.lava.org/jira
 
 = 0 Changes from 1.3 Alpha 5 to 1.3 Alpha 6 (03/11/2011)
 
@@ -41,21 +41,21 @@ Issue Tracking: http://dev.clojure.org/jira
 
   * code path for using vars is now *much* faster for the common case,
     and you must explicitly ask for :dynamic bindability
-  * new: clojure.reflect/reflect
-    http://dev.clojure.org/display/design/Reflection+API 
-  * new: clojure.data/diff
+  * new: lava.reflect/reflect
+    http://dev.lava.org/display/design/Reflection+API 
+  * new: lava.data/diff
 
 = 5 Changes from 1.2 to 1.3 Alpha 1 (09/23/2010)
 
   * enhanced primitive support 
-    (http://dev.clojure.org/display/doc/Enhanced+Primitive+Support)
+    (http://dev.lava.org/display/doc/Enhanced+Primitive+Support)
   * better exception reporting
   * ancillary namespaces no longer auto-load on startup:
-    clojure.set, clojure.xml, clojure.zip
+    lava.set, lava.xml, lava.zip
 
 = 6 About Alpha Releases
 
-1.3 is the first release of Clojure that will include a series of
+1.3 is the first release of Lava that will include a series of
 alpha builds. We are adding these builds to support maven and
 leiningen users, who want a specific artifact that they can target (as
 opposed to building from master or "moving-target" snapshots).

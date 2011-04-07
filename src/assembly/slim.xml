@@ -15,18 +15,18 @@
       <filtered>true</filtered>
     </fileSet>
     <fileSet>
-      <directory>target/classes/clojure/asm</directory>
-      <outputDirectory>clojure/asm</outputDirectory>
+      <directory>target/classes/lava/asm</directory>
+      <outputDirectory>lava/asm</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>target/classes/clojure/lang</directory>
-      <outputDirectory>clojure/lang</outputDirectory>
+      <directory>target/classes/lava/lang</directory>
+      <outputDirectory>lava/lang</outputDirectory>
     </fileSet>
   </fileSets>
   <files>
     <file>
-      <source>target/classes/clojure/main.class</source>
-      <outputDirectory>clojure</outputDirectory>
+      <source>target/classes/lava/main.class</source>
+      <outputDirectory>lava</outputDirectory>
     </file>
   </files>
 </assembly>

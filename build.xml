@@ -1,8 +1,8 @@
-<project name="clojure" default="all">
+<project name="lava" default="all">
 
   <description>
     Build with "ant" and then start the
-    REPL with: "java -cp clojure.jar clojure.main".
+    REPL with: "java -cp lava.jar lava.main".
   </description>
 
   <property name="src" location="src"/>
@@ -19,17 +19,17 @@
 
   <!-- Get the version string out of the POM -->
   <xmlproperty file="pom.xml" prefix="pom"/>
-  <property name="clojure.version.label" value="${pom.project.version}"/>
-  <property name="version.properties" value="${build}/clojure/version.properties"/>
+  <property name="lava.version.label" value="${pom.project.version}"/>
+  <property name="version.properties" value="${build}/lava/version.properties"/>
 
-  <property name="clojure_jar" location="clojure-${clojure.version.label}.jar"/>
-  <property name="clojure_noversion_jar" location="clojure.jar"/>
+  <property name="lava_jar" location="lava-${lava.version.label}.jar"/>
+  <property name="lava_noversion_jar" location="lava.jar"/>
 
   <target name="init" depends="clean">
     <tstamp/>
     <mkdir dir="${build}"/>
-    <mkdir dir="${build}/clojure"/>
-    <echo file="${version.properties}">version=${clojure.version.label}</echo>
+    <mkdir dir="${build}/lava"/>
+    <echo file="${version.properties}">version=${lava.version.label}</echo>
   </target>
 
   <target name="compile-java" depends="init"
@@ -38,37 +38,37 @@
            debug="true" target="1.5"/>
   </target>
 
-  <target name="compile-clojure"
-          description="Compile Clojure sources.">
-    <java classname="clojure.lang.Compile"
+  <target name="compile-lava"
+          description="Compile Lava sources.">
+    <java classname="lava.lang.Compile"
           classpath="${build}:${cljsrc}"
           failonerror="true"
           fork="true">
-      <sysproperty key="clojure.compile.path" value="${build}"/>
-      <!-- <sysproperty key="clojure.compile.warn-on-reflection" value="true"/> -->
-      <arg value="clojure.core"/>
-      <arg value="clojure.core.protocols"/>
-      <arg value="clojure.main"/>
-      <arg value="clojure.set"/>
-      <arg value="clojure.xml"/>
-      <arg value="clojure.zip"/>
-      <arg value="clojure.inspector"/>
-      <arg value="clojure.walk"/>
-      <arg value="clojure.stacktrace"/>
-      <arg value="clojure.template"/>
-      <arg value="clojure.test"/>
-      <arg value="clojure.test.tap"/>
-      <arg value="clojure.test.junit"/>
-      <arg value="clojure.pprint"/>
-      <arg value="clojure.java.io"/>
-      <arg value="clojure.repl"/>
-      <arg value="clojure.java.browse"/>
-      <arg value="clojure.java.javadoc"/>
-      <arg value="clojure.java.shell"/>
-      <arg value="clojure.java.browse-ui"/>
-      <arg value="clojure.string"/>
-      <arg value="clojure.data"/>
-      <arg value="clojure.reflect"/>
+      <sysproperty key="lava.compile.path" value="${build}"/>
+      <!-- <sysproperty key="lava.compile.warn-on-reflection" value="true"/> -->
+      <arg value="lava.core"/>
+      <arg value="lava.core.protocols"/>
+      <arg value="lava.main"/>
+      <arg value="lava.set"/>
+      <arg value="lava.xml"/>
+      <arg value="lava.zip"/>
+      <arg value="lava.inspector"/>
+      <arg value="lava.walk"/>
+      <arg value="lava.stacktrace"/>
+      <arg value="lava.template"/>
+      <arg value="lava.test"/>
+      <arg value="lava.test.tap"/>
+      <arg value="lava.test.junit"/>
+      <arg value="lava.pprint"/>
+      <arg value="lava.java.io"/>
+      <arg value="lava.repl"/>
+      <arg value="lava.java.browse"/>
+      <arg value="lava.java.javadoc"/>
+      <arg value="lava.java.shell"/>
+      <arg value="lava.java.browse-ui"/>
+      <arg value="lava.string"/>
+      <arg value="lava.data"/>
+      <arg value="lava.reflect"/>
     </java>
   </target>
 
@@ -77,21 +77,21 @@
           unless="maven.test.skip">
     <delete dir="${test-classes}"/>
     <mkdir dir="${test-classes}"/>
-    <java classname="clojure.lang.Compile"
+    <java classname="lava.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
           failonerror="true"
 	  fork="true">
-      <sysproperty key="clojure.compile.path" value="${test-classes}"/>
-      <arg value="clojure.test-clojure.protocols.examples"/>
-      <arg value="clojure.test-clojure.genclass.examples"/>
+      <sysproperty key="lava.compile.path" value="${test-classes}"/>
+      <arg value="lava.test-lava.protocols.examples"/>
+      <arg value="lava.test-lava.genclass.examples"/>
     </java>
   </target>
 
   <target name="test"
-          description="Run clojure tests without recompiling clojure."
+          description="Run lava tests without recompiling lava."
           depends="compile-tests"
           unless="maven.test.skip">
-    <java classname="clojure.main" failonerror="true" fork="true">
+    <java classname="lava.main" failonerror="true" fork="true">
       <classpath>
         <path location="${test-classes}"/>
         <path location="${test}"/>
@@ -103,21 +103,21 @@
   </target>
 
   <target name="build"
-          description="Build Clojure (compilation only, no tests)."
-          depends="compile-java, compile-clojure"/>
+          description="Build Lava (compilation only, no tests)."
+          depends="compile-java, compile-lava"/>
 
   <target name="jar" depends="build"
-          description="Create clojure jar file.">
-    <jar jarfile="${clojure_jar}" basedir="${build}">
+          description="Create lava jar file.">
+    <jar jarfile="${lava_jar}" basedir="${build}">
       <fileset dir="${cljsrc}">
         <include name="**/*.clj"/>
       </fileset>
       <manifest>
-        <attribute name="Main-Class" value="clojure.main"/>
+        <attribute name="Main-Class" value="lava.main"/>
         <attribute name="Class-Path" value="."/>
       </manifest>
     </jar>
-    <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}"/>
+    <copy file="${lava_jar}" tofile="${lava_noversion_jar}"/>
   </target>
   
   <target name="all" depends="build,test,jar"/>

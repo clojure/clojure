@@ -1,5 +1,5 @@
 *.jar
 target
-clojure.iws
-clojure.ipr
+lava.iws
+lava.ipr
 nbproject/private/

@@ -1,4 +1,4 @@
- *   Clojure
+ *   Lava
  *   Copyright (c) Rich Hickey. All rights reserved.
  *   The use and distribution terms for this software are covered by the
  *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
@@ -7,11 +7,11 @@
  * 	 the terms of this license.
  *   You must not remove this notice, or any other, from this software.
 
-Docs: http://clojure.org
-Feedback: http://groups.google.com/group/clojure
+Docs: http://lava.org
+Feedback: http://groups.google.com/group/lava
 
 
-To run:  java -cp clojure-${VERSION}.jar clojure.main
+To run:  java -cp lava-${VERSION}.jar lava.main
 
 To build locally with Ant:  ant
 
