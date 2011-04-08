@@ -8115,10 +8115,10 @@
    :name "cl-format",
    :namespace "clojure.pprint",
    :source-url
-   "https://github.com/clojure/clojure/blob/9052ca1854b7b6202dba21fe2a45183a4534c501/src/clj/clojure/pprint/cl_format.clj#L27",
+   "https://github.com/clojure/clojure/blob/f0a46155ba3b7243477515613573c6217c0291ab/src/clj/clojure/pprint/cl_format.clj#L27",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/9052ca1854b7b6202dba21fe2a45183a4534c501/src/clj/clojure/pprint/cl_format.clj",
+   "https://github.com/clojure/clojure/raw/f0a46155ba3b7243477515613573c6217c0291ab/src/clj/clojure/pprint/cl_format.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/cl-format",
    :doc
