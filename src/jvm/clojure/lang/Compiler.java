@@ -6260,7 +6260,7 @@ static public Var isMacro(Object op) {
 		return null;
 	if(op instanceof Symbol || op instanceof Var)
 		{
-		Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false);
+                Var v = (op instanceof Var) ? (Var) op : lookupVar((Symbol) op, false, false);
 		if(v != null && v.isMacro())
 			{
 			if(v.ns != currentNS() && !v.isPublic())
@@ -6757,7 +6757,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 }
 
 
-static Var lookupVar(Symbol sym, boolean internNew) {
+static Var lookupVar(Symbol sym, boolean internNew, boolean registerMacro) {
 	Var var = null;
 
 	//note - ns-qualified vars in other namespaces must already exist
@@ -6796,9 +6796,12 @@ static Var lookupVar(Symbol sym, boolean internNew) {
 				throw Util.runtimeException("Expecting var, but " + sym + " is mapped to " + o);
 				}
 			}
-	if(var != null)
+	if(var != null && (!var.isMacro() || registerMacro))
 		registerVar(var);
 	return var;
+}
+static Var lookupVar(Symbol sym, boolean internNew) {
+    return lookupVar(sym, internNew, true);
 }
 
 private static void registerVar(Var var) {
