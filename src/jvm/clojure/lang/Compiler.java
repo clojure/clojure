@@ -1724,17 +1724,16 @@ static class ConstantExpr extends LiteralExpr{
 
 			if(v == null)
 				return NIL_EXPR;
-//			Class fclass = v.getClass();
-//			if(fclass == Keyword.class)
-//				return registerKeyword((Keyword) v);
-//			else if(v instanceof Num)
-//				return new NumExpr((Num) v);
-//			else if(fclass == String.class)
-//				return new StringExpr((String) v);
-//			else if(fclass == Character.class)
-//				return new CharExpr((Character) v);
-//			else if(v instanceof IPersistentCollection && ((IPersistentCollection) v).count() == 0)
-//				return new EmptyExpr(v);
+			else if(v == Boolean.TRUE)
+				return TRUE_EXPR;
+			else if(v == Boolean.FALSE)
+				return FALSE_EXPR;
+			if(v instanceof Number)
+				return NumberExpr.parse((Number)v);
+			else if(v instanceof String)
+				return new StringExpr((String) v);
+			else if(v instanceof IPersistentCollection && ((IPersistentCollection) v).count() == 0)
+				return new EmptyExpr(v);
 			else
 				return new ConstantExpr(v);
 		}
@@ -6492,6 +6491,8 @@ private static Expr analyzeSymbol(Symbol sym) {
 		Var v = (Var) o;
 		if(isMacro(v) != null)
 			throw Util.runtimeException("Can't take value of a macro: " + v);
+		if(RT.booleanCast(RT.get(v.meta(),RT.CONST_KEY)))
+			return analyze(C.EXPRESSION, RT.list(QUOTE, v.get()));
 		registerVar(v);
 		return new VarExpr(v, tag);
 		}
