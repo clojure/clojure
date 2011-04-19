@@ -3632,18 +3632,18 @@ static public class FnExpr extends ObjExpr{
 	}
 
 	public void emitForDefn(ObjExpr objx, GeneratorAdapter gen){
-		if(!hasPrimSigs && closes.count() == 0)
-			{
-			Type thunkType = Type.getType(FnLoaderThunk.class);
-			//presumes var on stack
-			gen.dup();
-			gen.newInstance(thunkType);
-			gen.dupX1();
-			gen.swap();
-			gen.push(internalName.replace('/','.'));
-			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
-			}
-		else
+//		if(!hasPrimSigs && closes.count() == 0)
+//			{
+//			Type thunkType = Type.getType(FnLoaderThunk.class);
+////			presumes var on stack
+//			gen.dup();
+//			gen.newInstance(thunkType);
+//			gen.dupX1();
+//			gen.swap();
+//			gen.push(internalName.replace('/','.'));
+//			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
+//			}
+//		else
 			emit(C.EXPRESSION,objx,gen);
 	}
 }
