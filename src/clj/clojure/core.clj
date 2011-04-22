@@ -1502,6 +1502,19 @@
               (list form x)))
   ([x form & more] `(->> (->> ~x ~form) ~@more)))
 
+(def map)
+
+(defn check-options
+  "Throws an exception if the given option map contains keys not listed
+  as valid, else returns nil."
+  [options & valid-keys]
+  (when (seq (apply disj (apply hash-set (keys options)) valid-keys))
+    (throw
+      (IllegalArgumentException.
+        (apply str "Only these options are valid: "
+          (first valid-keys)
+          (map #(str ", " %) (rest valid-keys)))))))
+
 ;;multimethods
 (def global-hierarchy)
 
@@ -1541,6 +1554,7 @@
     (let [options   (apply hash-map options)
           default   (get options :default :default)
           hierarchy (get options :hierarchy #'global-hierarchy)]
+      (check-options options :default :hierarchy)
       `(let [v# (def ~mm-name)]
          (when-not (and (.hasRoot v#) (instance? clojure.lang.MultiFn (deref v#)))
            (def ~(with-meta mm-name m)
