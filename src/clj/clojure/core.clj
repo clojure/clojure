@@ -1504,7 +1504,7 @@
 
 (def map)
 
-(defn check-options
+(defn ^:private check-valid-options
   "Throws an exception if the given option map contains keys not listed
   as valid, else returns nil."
   [options & valid-keys]
@@ -1554,7 +1554,7 @@
     (let [options   (apply hash-map options)
           default   (get options :default :default)
           hierarchy (get options :hierarchy #'global-hierarchy)]
-      (check-options options :default :hierarchy)
+      (check-valid-options options :default :hierarchy)
       `(let [v# (def ~mm-name)]
          (when-not (and (.hasRoot v#) (instance? clojure.lang.MultiFn (deref v#)))
            (def ~(with-meta mm-name m)
