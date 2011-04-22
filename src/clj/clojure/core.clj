@@ -3196,7 +3196,9 @@
 
 (def ^:dynamic ^{:private true} print-initialized false)
 
-(defmulti print-method (fn [x writer] (type x)))
+(defmulti print-method (fn [x writer]
+                         (let [t (get (meta x) :type)]
+                           (if (keyword? t) t (class x)))))
 (defmulti print-dup (fn [x writer] (class x)))
 
 (defn pr-on
