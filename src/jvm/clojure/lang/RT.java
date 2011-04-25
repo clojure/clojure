@@ -905,6 +905,50 @@ static public char charCast(Object x){
 	return (char) n;
 }
 
+static public char charCast(byte x){
+    char i = (char) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for char: " + x);
+    return i;
+}
+
+static public char charCast(short x){
+    char i = (char) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for char: " + x);
+    return i;
+}
+
+static public char charCast(char x){
+    return x;
+}
+
+static public char charCast(int x){
+    char i = (char) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for char: " + x);
+    return i;
+}
+
+static public char charCast(long x){
+    char i = (char) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for char: " + x);
+    return i;
+}
+
+static public char charCast(float x){
+    if(x >= Character.MIN_VALUE && x <= Character.MAX_VALUE)
+        return (char) x;
+    throw new IllegalArgumentException("Value out of range for char: " + x);
+}
+
+static public char charCast(double x){
+    if(x >= Character.MIN_VALUE && x <= Character.MAX_VALUE)
+        return (char) x;
+    throw new IllegalArgumentException("Value out of range for char: " + x);
+}
+
 static public boolean booleanCast(Object x){
 	if(x instanceof Boolean)
 		return ((Boolean) x).booleanValue();
@@ -925,6 +969,43 @@ static public byte byteCast(Object x){
 	return (byte) n;
 }
 
+static public byte byteCast(byte x){
+    return x;
+}
+
+static public byte byteCast(short x){
+    byte i = (byte) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for byte: " + x);
+    return i;
+}
+
+static public byte byteCast(int x){
+    byte i = (byte) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for byte: " + x);
+    return i;
+}
+
+static public byte byteCast(long x){
+    byte i = (byte) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for byte: " + x);
+    return i;
+}
+
+static public byte byteCast(float x){
+    if(x >= Byte.MIN_VALUE && x <= Byte.MAX_VALUE)
+        return (byte) x;
+    throw new IllegalArgumentException("Value out of range for byte: " + x);
+}
+
+static public byte byteCast(double x){
+    if(x >= Byte.MIN_VALUE && x <= Byte.MAX_VALUE)
+        return (byte) x;
+    throw new IllegalArgumentException("Value out of range for byte: " + x);
+}
+
 static public short shortCast(Object x){
 	if(x instanceof Short)
 		return ((Short) x).shortValue();
@@ -933,6 +1014,40 @@ static public short shortCast(Object x){
 		throw new IllegalArgumentException("Value out of range for short: " + x);
 
 	return (short) n;
+}
+
+static public short shortCast(byte x){
+	return x;
+}
+
+static public short shortCast(short x){
+	return x;
+}
+
+static public short shortCast(int x){
+    short i = (short) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for short: " + x);
+    return i;
+}
+
+static public short shortCast(long x){
+    short i = (short) x;
+    if(i != x)
+        throw new IllegalArgumentException("Value out of range for short: " + x);
+    return i;
+}
+
+static public short shortCast(float x){
+    if(x >= Short.MIN_VALUE && x <= Short.MAX_VALUE)
+        return (short) x;
+    throw new IllegalArgumentException("Value out of range for short: " + x);
+}
+
+static public short shortCast(double x){
+    if(x >= Short.MIN_VALUE && x <= Short.MAX_VALUE)
+        return (short) x;
+    throw new IllegalArgumentException("Value out of range for short: " + x);
 }
 
 static public int intCast(Object x){
@@ -1008,6 +1123,14 @@ static public long longCast(Object x){
 	    return longCast(((Number)x).doubleValue());
 }
 
+static public long longCast(byte x){
+    return x;
+}
+
+static public long longCast(short x){
+    return x;
+}
+
 static public long longCast(int x){
 	return x;
 }
@@ -1040,6 +1163,14 @@ static public float floatCast(Object x){
 
 }
 
+static public float floatCast(byte x){
+    return x;
+}
+
+static public float floatCast(short x){
+    return x;
+}
+
 static public float floatCast(int x){
 	return x;
 }
@@ -1061,6 +1192,14 @@ static public float floatCast(double x){
 
 static public double doubleCast(Object x){
 	return ((Number) x).doubleValue();
+}
+
+static public double doubleCast(byte x){
+    return x;
+}
+
+static public double doubleCast(short x){
+    return x;
 }
 
 static public double doubleCast(int x){
