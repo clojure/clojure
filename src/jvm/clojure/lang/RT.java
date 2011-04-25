@@ -1000,7 +1000,12 @@ static public long longCast(Object x){
 		else
 			throw new IllegalArgumentException("Value out of range for long: " + x);
 		}
-	return ((Number) x).longValue();
+	else if (x instanceof Byte || x instanceof Short)
+	    return ((Number) x).longValue();
+	else if (x instanceof Ratio)
+	    return longCast(((Ratio)x).bigIntegerValue());
+	else
+	    return longCast(((Number)x).doubleValue());
 }
 
 static public long longCast(int x){
