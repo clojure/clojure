@@ -133,8 +133,9 @@ static public <K,V> void clearCache(ReferenceQueue rq, ConcurrentHashMap<K, Refe
 			;
 		for(Map.Entry<K, Reference<V>> e : cache.entrySet())
 			{
-			if(e.getValue().get() == null)
-				cache.remove(e.getKey(), e.getValue());
+            Reference<V> val = e.getValue();
+			if(val != null && val.get() == null)
+				cache.remove(e.getKey(), val);
 			}
 		}
 }
