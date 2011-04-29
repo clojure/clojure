@@ -1268,11 +1268,25 @@
    :added "1.0"}
   [x n] (. clojure.lang.Numbers shiftRight x n))
 
+(defn integer?
+  "Returns true if n is an integer"
+  {:added "1.0"
+   :static true}
+  [n]
+  (or (instance? Integer n)
+      (instance? Long n)
+      (instance? clojure.lang.BigInt n)
+      (instance? BigInteger n)
+      (instance? Short n)
+      (instance? Byte n)))
+
 (defn even?
   "Returns true if n is even, throws an exception if n is not an integer"
   {:added "1.0"
    :static true}
-  [n] (zero? (bit-and n 1)))
+   [n] (if (integer? n)
+        (zero? (bit-and (clojure.lang.RT/uncheckedLongCast n) 1))
+        (throw (IllegalArgumentException. (str "Argument must be an integer: " n)))))
 
 (defn odd?
   "Returns true if n is odd, throws an exception if n is not an integer"
@@ -3090,18 +3104,6 @@
    :static true}
   [x]
   (instance? Number x))
-
-(defn integer?
-  "Returns true if n is an integer"
-  {:added "1.0"
-   :static true}
-  [n]
-  (or (instance? Integer n)
-      (instance? Long n)
-      (instance? clojure.lang.BigInt n)
-      (instance? BigInteger n)
-      (instance? Short n)
-      (instance? Byte n)))
 
 (defn mod
   "Modulus of num and div. Truncates toward negative infinity."
