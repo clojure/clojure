@@ -1488,7 +1488,7 @@ static public Number num(Object x){
 }
 
 static public Number num(float x){
-	return Double.valueOf(x);
+	return Float.valueOf(x);
 }
 
 static public Number num(double x){

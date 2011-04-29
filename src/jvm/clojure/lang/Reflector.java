@@ -497,8 +497,8 @@ public static Object prepRet(Class c, Object x){
 		{
 		return ((Integer)x).longValue();
 		}
-	else if(x instanceof Float)
-			return Double.valueOf(((Float) x).doubleValue());
+//	else if(x instanceof Float)
+//			return Double.valueOf(((Float) x).doubleValue());
 	return x;
 }
 }
