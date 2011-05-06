@@ -89,8 +89,9 @@ collecting its stdout</pre>
 
 Options are
 
-:in      may be given followed by a String or byte array specifying input
-         to be fed to the sub-process's stdin.
+:in      may be given followed by any legal input source for
+         clojure.java.io/copy, e.g. InputStream, Reader, File, byte[],
+         or String, to be fed to the sub-process's stdin.
 :in-enc  option may be given followed by a String, used as a character
          encoding name (for example "UTF-8" or "ISO-8859-1") to
          convert the input string specified by the :in option to the
@@ -116,7 +117,7 @@ sh returns a map of
   :err  =&gt; sub-process's stderr (String via platform default encoding)</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/shell.clj#L79" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/fe0cfc71e6ec7b546066188c555b01dae0e368e8/src/clj/clojure/java/shell.clj#L79" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -127,7 +128,7 @@ sh returns a map of
   <pre id="var-docstr">Sets the directory for use with sh, see sh for details.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/shell.clj#L21" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/fe0cfc71e6ec7b546066188c555b01dae0e368e8/src/clj/clojure/java/shell.clj#L21" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -138,7 +139,7 @@ sh returns a map of
   <pre id="var-docstr">Sets the environment for use with sh, see sh for details.</pre>
   <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
   
-  <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/shell.clj#L28" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/fe0cfc71e6ec7b546066188c555b01dae0e368e8/src/clj/clojure/java/shell.clj#L28" id="var-source">Source</a>
 </div>
 
 
