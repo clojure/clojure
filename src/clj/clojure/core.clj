@@ -1033,18 +1033,20 @@
 (defn max
   "Returns the greatest of the nums."
   {:added "1.0"
-   :static true}
+   :inline-arities #{2}
+   :inline (fn [x y] `(. clojure.lang.Numbers (max ~x ~y)))}
   ([x] x)
-  ([x y] (if (> x y) x y))
+  ([x y] (. clojure.lang.Numbers (max x y)))
   ([x y & more]
    (reduce1 max (max x y) more)))
 
 (defn min
   "Returns the least of the nums."
   {:added "1.0"
-   :static true}
+   :inline-arities #{2}
+   :inline (fn [x y] `(. clojure.lang.Numbers (min ~x ~y)))}
   ([x] x)
-  ([x y] (if (< x y) x y))
+  ([x y] (. clojure.lang.Numbers (min x y)))
   ([x y & more]
    (reduce1 min (min x y) more)))
 
