@@ -8,6 +8,7 @@
   <property name="src" location="src"/>
   <property name="test" location="test"/>
   <property name="jsrc" location="${src}/jvm"/>
+  <property name="jtestsrc" location="${test}/java"/>
   <property name="cljsrc" location="${src}/clj"/>
   <property name="cljscript" location="${src}/script"/>
   <property name="test-script" location="${cljscript}/run_tests.clj"/>
@@ -77,6 +78,8 @@
           unless="maven.test.skip">
     <delete dir="${test-classes}"/>
     <mkdir dir="${test-classes}"/>
+    <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
+           debug="true" target="1.5" includeantruntime="no"/>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
           failonerror="true"

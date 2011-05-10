@@ -2250,6 +2250,7 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
             {
             if(!foundExact || matchIdx == -1 || rets.get(matchIdx).isAssignableFrom(rets.get(i)))
                 matchIdx = i;
+            tied = false;
             foundExact = true;
             }
 		else if(match && !foundExact)

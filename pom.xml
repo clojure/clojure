@@ -48,6 +48,7 @@
 	<directory>src/clj</directory>
       </resource>
     </resources>
+    <testSourceDirectory>test/java</testSourceDirectory>
     <plugins>
       <plugin>
 	<groupId>org.apache.maven.plugins</groupId>

@@ -10,7 +10,8 @@
 
 
 (ns clojure.test-clojure.compilation
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import compilation.TestDispatch))
 
 ; http://clojure.org/compilation
 
@@ -73,3 +74,9 @@
                         (recur (dec x))))
                     3)))
           (catch Exception _)))))
+
+(deftest test-numeric-dispatch
+  (is (= "(int, int)" (TestDispatch/someMethod (int 1) (int 1))))
+  (is (= "(int, long)" (TestDispatch/someMethod (int 1) (long 1))))
+  (is (= "(long, long)" (TestDispatch/someMethod (long 1) (long 1)))))
+
