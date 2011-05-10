@@ -36,15 +36,15 @@
      (defn foo [x] (.blah x))))
   (testing "reflection cannot resolve instance method"
     (should-print-err-message
-     #"Reflection warning, .*:\d+ - call to zap can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+ - call to zap can't be resolved with arguments of type \(long\)\.\r?\n"
      (defn foo [x] (.zap x 1))))
   (testing "reflection cannot resolve static method"
     (should-print-err-message
-     #"Reflection warning, .*:\d+ - call to valueOf can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+ - call to valueOf can't be resolved with arguments of type \(java.util.regex.Pattern\)\.\r?\n"
      (defn foo [] (Integer/valueOf #"boom"))))
   (testing "reflection cannot resolve constructor"
     (should-print-err-message
-     #"Reflection warning, .*:\d+ - call to java.lang.String ctor can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+ - call to java.lang.String ctor can't be resolved with arguments of type \(long, long, long\)\.\r?\n"
      (defn foo [] (String. 1 2 3)))))
 
 (def example-var)
