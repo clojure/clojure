@@ -33,7 +33,9 @@
   *print-level*, the printer prints '#' to represent it. The root binding
   is nil indicating no limit."
    :added "1.0"}
-*print-level* nil)
+ *print-level* nil)
+
+(def ^:dynamic *verbose-defrecords* false)
 
 (defn- print-sequential [^String begin, print-one, ^String sep, ^String end, sequence, ^Writer w]
   (binding [*print-level* (and (not *print-dup*) *print-level* (dec *print-level*))]
@@ -150,6 +152,7 @@
  (print-ctor o #(print-sequential "[" print-dup " " "]" %1 %2) w))
 
 (defmethod print-dup clojure.lang.IPersistentCollection [o, ^Writer w]
+  (print " ipcpd ")
   (print-meta o w)
   (.write w "#=(")
   (.write w (.getName ^Class (class o)))
@@ -191,7 +194,7 @@
 (defn- print-map [m print-one w]
   (print-sequential 
    "{"
-   (fn [e  ^Writer w] 
+   (fn [e  ^Writer w]
      (do (print-one (key e) w) (.append w \space) (print-one (val e) w)))
    ", "
    "}"
@@ -212,7 +215,26 @@
   (print-map m print-dup w)
   (.write w ")"))
 
+(defmethod print-method clojure.lang.IRecord [r, ^Writer w]
+  (print-meta r w)
+  (.write w "#")
+  (.write w (.getName (class r)))
+  (print-map r pr-on w))
+
+(defmethod print-dup clojure.lang.IRecord [r, ^Writer w]
+  (print-meta r w)
+  (.write w "#")
+  (.write w (.getName (class r)))
+  (if *verbose-defrecords*
+    (print-map r print-dup w)
+    (print-sequential "[" pr-on ", " "]" (vals r) w)))
+
+(prefer-method print-method clojure.lang.IRecord java.util.Map)
+(prefer-method print-method clojure.lang.IRecord clojure.lang.IPersistentMap)
+(prefer-method print-dup clojure.lang.IRecord clojure.lang.IPersistentMap)
 (prefer-method print-dup clojure.lang.IPersistentCollection java.util.Map)
+(prefer-method print-dup clojure.lang.IRecord clojure.lang.IPersistentCollection)
+(prefer-method print-dup clojure.lang.IRecord java.util.Map)
 
 (defmethod print-method clojure.lang.IPersistentSet [s, ^Writer w]
   (print-meta s w)
@@ -244,7 +266,7 @@
 (defmethod print-dup java.math.BigDecimal [o w] (print-method o w))
 (defmethod print-dup clojure.lang.BigInt [o w] (print-method o w))
 (defmethod print-dup java.math.BigInteger [o w] (print-method o w))
-(defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
+(defmethod print-dup clojure.lang.PersistentHashMap [o w] (print " phmpd ") (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
 (defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))

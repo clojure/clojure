@@ -15,8 +15,15 @@ package clojure.lang;
 //*
 
 import clojure.asm.*;
-import clojure.asm.commons.Method;
 import clojure.asm.commons.GeneratorAdapter;
+import clojure.asm.commons.Method;
+
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.regex.Pattern;
+
 //*/
 /*
 
@@ -26,13 +33,6 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.objectweb.asm.util.CheckClassAdapter;
 //*/
-
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.regex.Pattern;
 
 public class Compiler implements Opcodes{
 
@@ -1723,6 +1723,7 @@ static class ConstantExpr extends LiteralExpr{
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		objx.emitConstant(gen, id);
+
 		if(context == C.STATEMENT)
 			{
 			gen.pop();
@@ -3692,6 +3693,9 @@ static public class ObjExpr implements Expr{
 	//symbol->lb
 	IPersistentMap fields = null;
 
+	//hinted fields
+	IPersistentVector hintedFields = PersistentVector.EMPTY;
+
 	//Keyword->KeywordExpr
 	IPersistentMap keywords = PersistentHashMap.EMPTY;
 	IPersistentMap vars = PersistentHashMap.EMPTY;
@@ -4052,7 +4056,7 @@ static public class ObjExpr implements Expr{
 
 		if(supportsMeta())
 			{
-					//ctor that takes closed-overs but not meta
+			//ctor that takes closed-overs but not meta
 			Type[] ctorTypes = ctorTypes();
 			Type[] noMetaCtorTypes = new Type[ctorTypes.length-1];
 			for(int i=1;i<ctorTypes.length;i++)
@@ -4119,7 +4123,8 @@ static public class ObjExpr implements Expr{
 			gen.returnValue();
 			gen.endMethod();
 			}
-		
+
+		emitStatics(cv);
 		emitMethods(cv);
 
 		if(keywordCallsites.count() > 0)
@@ -4180,6 +4185,9 @@ static public class ObjExpr implements Expr{
 			clinitgen.putStatic(objtype, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE);
 			clinitgen.putStatic(objtype, thunkNameStatic(i), ILOOKUP_THUNK_TYPE);
 			}
+	}
+
+	protected void emitStatics(ClassVisitor gen){
 	}
 
 	protected void emitMethods(ClassVisitor gen){
@@ -4285,6 +4293,19 @@ static public class ObjExpr implements Expr{
 			gen.push(var.ns.name.toString());
 			gen.push(var.sym.toString());
 			gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+			}
+		else if(value instanceof IRecord)
+			{
+			Method createMethod = Method.getMethod(value.getClass().getName() + " create(clojure.lang.IPersistentMap)");
+			List entries = new ArrayList();
+			for(Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet())
+				{
+				entries.add(entry.getKey());
+				entries.add(entry.getValue());
+				}
+			emitListAsObjectArray(entries, gen);
+			gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.IPersistentMap map(Object[])"));
+			gen.invokeStatic(getType(value.getClass()), createMethod);
 			}
 		else if(value instanceof IPersistentMap)
 			{
@@ -6111,6 +6132,8 @@ private static Expr analyze(C context, Object form, String name) {
 				return analyzeSeq(context, (ISeq) form, name);
 		else if(form instanceof IPersistentVector)
 				return VectorExpr.parse(context, (IPersistentVector) form);
+		else if(form instanceof IRecord)
+				return new ConstantExpr(form);
 		else if(form instanceof IPersistentMap)
 				return MapExpr.parse(context, (IPersistentMap) form);
 		else if(form instanceof IPersistentSet)
@@ -7174,6 +7197,8 @@ static public class NewInstanceExpr extends ObjExpr{
 				                              LOCAL_ENV, ret.fields
 						, COMPILE_STUB_SYM, Symbol.intern(null, tagName)
 						, COMPILE_STUB_CLASS, stub));
+
+				ret.hintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret.altCtorDrops);
 				}
 
 			//now (methodname [args] body)*
@@ -7302,6 +7327,82 @@ static public class NewInstanceExpr extends ObjExpr{
 		return c.getName().replace('.', '/');
 	}
 
+	protected void emitStatics(ClassVisitor cv) {
+		if(this.isDeftype())
+			{
+			//getBasis()
+			Method meth = Method.getMethod("clojure.lang.IPersistentVector getBasis()");
+			GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
+												meth,
+												null,
+												null,
+												cv);
+			emitValue(hintedFields, gen);
+			gen.returnValue();
+			gen.endMethod();
+
+			if (this.isDeftype() && this.fields.count() > this.hintedFields.count())
+				{
+				//create(IPersistentMap)
+				String className = name.replace('.', '/');
+				int i = 1;
+				int fieldCount = hintedFields.count();
+
+				MethodVisitor mv = cv.visitMethod(ACC_PUBLIC + ACC_STATIC, "create", "(Lclojure/lang/IPersistentMap;)L"+className+";", null, null);
+				mv.visitCode();
+
+				for(ISeq s = RT.seq(hintedFields); s!=null; s=s.next(), i++)
+					{
+					String bName = ((Symbol)s.first()).name;
+					Class k = tagClass(tagOf(s.first()));
+
+					mv.visitVarInsn(ALOAD, 0);
+					mv.visitLdcInsn(bName);
+					mv.visitMethodInsn(INVOKESTATIC, "clojure/lang/Keyword", "intern", "(Ljava/lang/String;)Lclojure/lang/Keyword;");
+					mv.visitInsn(ACONST_NULL);
+					mv.visitMethodInsn(INVOKEINTERFACE, "clojure/lang/IPersistentMap", "valAt", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+					if(k.isPrimitive())
+						{
+						mv.visitTypeInsn(CHECKCAST, Type.getType(boxClass(k)).getInternalName());
+						}
+					mv.visitVarInsn(ASTORE, i);
+					mv.visitVarInsn(ALOAD, 0);
+					mv.visitLdcInsn(bName);
+					mv.visitMethodInsn(INVOKESTATIC, "clojure/lang/Keyword", "intern", "(Ljava/lang/String;)Lclojure/lang/Keyword;");
+					mv.visitMethodInsn(INVOKEINTERFACE, "clojure/lang/IPersistentMap", "without", "(Ljava/lang/Object;)Lclojure/lang/IPersistentMap;");
+					mv.visitVarInsn(ASTORE, 0);
+					}
+
+				mv.visitTypeInsn(Opcodes.NEW, className);
+				mv.visitInsn(DUP);
+
+				Method ctor = new Method("<init>", Type.VOID_TYPE, ctorTypes());
+
+				if(hintedFields.count() > 0)
+					for(i=1; i<=fieldCount; i++)
+						{
+						mv.visitVarInsn(ALOAD, i);
+						Class k = tagClass(tagOf(hintedFields.nth(i-1)));
+						if(k.isPrimitive())
+							{
+							String b = Type.getType(boxClass(k)).getInternalName();
+							String p = Type.getType(k).getDescriptor();
+							String n = k.getName();
+
+							mv.visitMethodInsn(INVOKEVIRTUAL, b, n+"Value", "()"+p);
+							}
+						}
+
+				mv.visitInsn(ACONST_NULL);
+				mv.visitVarInsn(ALOAD, 0);
+				mv.visitMethodInsn(INVOKESTATIC, "clojure/lang/RT", "seqOrElse", "(Ljava/lang/Object;)Ljava/lang/Object;");
+				mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", ctor.getDescriptor());
+				mv.visitInsn(ARETURN);
+				mv.visitMaxs(4+fieldCount, 1+fieldCount);
+				mv.visitEnd();
+				}
+			}
+	}
 
 	protected void emitMethods(ClassVisitor cv){
 		for(ISeq s = RT.seq(methods); s != null; s = s.next())
@@ -7693,6 +7794,33 @@ public static class NewInstanceMethod extends ObjMethod{
 
 	static Class primClass(Class c){
 		return c.isPrimitive()?c:Object.class;
+	}
+
+	static Class boxClass(Class p) {
+		if(!p.isPrimitive())
+			return p;
+
+		Class c = null;
+		Type  t = Type.getType(p);
+
+		if(t == Type.INT_TYPE)
+			c = Integer.class;
+		else if(t == Type.LONG_TYPE)
+			c = Long.class;
+		else if(t == Type.FLOAT_TYPE)
+			c = Float.class;
+		else if(t == Type.DOUBLE_TYPE)
+			c = Double.class;
+		else if(t == Type.CHAR_TYPE)
+			c = Character.class;
+		else if(t == Type.SHORT_TYPE)
+			c = Short.class;
+		else if(t == Type.BYTE_TYPE)
+			c = Byte.class;
+		else if(t == Type.BOOLEAN_TYPE)
+			c = Boolean.class;
+
+		return c;
 	}
 
 static public class MethodParamExpr implements Expr, MaybePrimitiveExpr{

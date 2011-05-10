@@ -488,6 +488,10 @@ static ISeq seqFrom(Object coll){
 	}
 }
 
+static public Object seqOrElse(Object o) {
+	return seq(o) == null ? null : o;
+}
+
 static public ISeq keys(Object coll){
 	return APersistentMap.KeySeq.create(seq(coll));
 }

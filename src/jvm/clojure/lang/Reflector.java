@@ -12,11 +12,13 @@
 
 package clojure.lang;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Arrays;
 
 public class Reflector{
 
@@ -105,8 +107,7 @@ public static Method getAsMethodOfPublicBase(Class c, Method m){
 		{
 		for(Method im : iface.getMethods())
 			{
-			if(im.getName().equals(m.getName())
-			   && Arrays.equals(m.getParameterTypes(), im.getParameterTypes()))
+			if(isMatch(im, m))
 				{
 				return im;
 				}
@@ -117,14 +118,36 @@ public static Method getAsMethodOfPublicBase(Class c, Method m){
 		return null;
 	for(Method scm : sc.getMethods())
 		{
-		if(scm.getName().equals(m.getName())
-		   && Arrays.equals(m.getParameterTypes(), scm.getParameterTypes())
-		   && Modifier.isPublic(scm.getDeclaringClass().getModifiers()))
+		if(isMatch(scm, m))
 			{
 			return scm;
 			}
 		}
 	return getAsMethodOfPublicBase(sc, m);
+}
+
+public static boolean isMatch(Method lhs, Method rhs) {
+	if(!lhs.getName().equals(rhs.getName())
+			|| !Modifier.isPublic(lhs.getDeclaringClass().getModifiers()))
+		{
+		return false;
+		}
+
+		Class[] types1 = lhs.getParameterTypes();
+		Class[] types2 = rhs.getParameterTypes();
+		if(types1.length != types2.length)
+			return false;
+
+		boolean match = true;
+		for (int i=0; i<types1.length; ++i)
+			{
+			if(!types1[i].isAssignableFrom(types2[i]))
+				{
+				match = false;
+				break;
+				}
+			}
+		return match;
 }
 
 public static Object invokeConstructor(Class c, Object[] args) {

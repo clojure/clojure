@@ -10,15 +10,31 @@
 
 package clojure.lang;
 
-import java.io.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.io.IOException;
+import java.io.PushbackReader;
+import java.io.Reader;
+import java.lang.Character;
+import java.lang.Class;
+import java.lang.Exception;
+import java.lang.IllegalArgumentException;
+import java.lang.IllegalStateException;
+import java.lang.Integer;
+import java.lang.Number;
+import java.lang.NumberFormatException;
+import java.lang.Object;
+import java.lang.RuntimeException;
+import java.lang.String;
+import java.lang.StringBuilder;
+import java.lang.Throwable;
+import java.lang.UnsupportedOperationException;
+import java.lang.reflect.Constructor;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.math.BigInteger;
-import java.math.BigDecimal;
-import java.lang.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LispReader{
 
@@ -61,6 +77,7 @@ static final Symbol CLOJURE_SLASH = Symbol.intern("clojure.core","/");
 static Var GENSYM_ENV = Var.create(null).setDynamic();
 //sorted-map num->gensymbol
 static Var ARG_ENV = Var.create(null).setDynamic();
+static IFn ctorReader = new CtorReader();
 
     static
 	{
@@ -587,8 +604,17 @@ public static class DispatchReader extends AFn{
 		if(ch == -1)
 			throw Util.runtimeException("EOF while reading character");
 		IFn fn = dispatchMacros[ch];
-		if(fn == null)
-			throw Util.runtimeException(String.format("No dispatch macro for: %c", (char) ch));
+
+		// Try the ctor reader first
+		if(fn == null) {
+			unread((PushbackReader) reader, ch);
+			Object result = ctorReader.invoke(reader, ch);
+
+			if(result != null)
+				return result;
+			else
+				throw Util.runtimeException(String.format("No dispatch macro for: %c", (char) ch));
+		}
 		return fn.invoke(reader, ch);
 	}
 }
@@ -946,6 +972,7 @@ public static class ListReader extends AFn{
 
 }
 
+/*
 static class CtorReader extends AFn{
 	static final Symbol cls = Symbol.intern("class");
 
@@ -974,8 +1001,8 @@ static class CtorReader extends AFn{
 			return Reflector.invokeConstructor(RT.classForName(s.name), args);
 			}
 	}
-
 }
+*/
 
 public static class EvalReader extends AFn{
 	public Object invoke(Object reader, Object eq) {
@@ -1113,6 +1140,99 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 
 
 	return a;
+}
+
+public static class CtorReader extends AFn{
+	public Object invoke(Object reader, Object firstChar){
+		PushbackReader r = (PushbackReader) reader;
+
+		Object recordName = read(r, true, null, false);
+		Class recordClass = RT.classForName(recordName.toString());
+		int ch = read1(r);
+		char endch;
+		boolean shortForm = true;
+
+		// A defrecord ctor can take two forms. Check for map->R version first.
+		if(ch == '{')
+			{
+				endch = '}';
+				shortForm = false;
+			}
+		else if (ch == '[')
+			endch = ']';
+		else
+			throw Util.runtimeException("Unreadable constructor form starting with \"#" + recordName + (char) ch + "\"");
+
+		Object[] recordEntries = readDelimitedList(endch, r, true).toArray();
+		Object ret = null;
+		Constructor[] allctors = ((Class)recordClass).getConstructors();
+
+		if(shortForm)
+			{
+			boolean ctorFound = false;
+			for (Constructor ctor : allctors)
+				if(ctor.getParameterTypes().length == recordEntries.length)
+					ctorFound = true;
+
+			if(!ctorFound)
+				throw Util.runtimeException("Unexpected number of constructor arguments to " + recordClass.toString() + ": got " + recordEntries.length);
+
+            ret = Reflector.invokeConstructor(recordClass, RT.seqToArray(resolveEach(recordEntries)));
+			}
+		else
+			{
+            ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{RT.map(RT.seqToArray(resolveEach(recordEntries)))});
+			}
+
+	return ret;
+	}
+
+	static public ISeq resolveEach(Object[] a) {
+		ISeq ret = null;
+		for(int i = a.length - 1; i >= 0; --i)
+			ret = (ISeq) RT.cons(resolve(a[i]), ret);
+		return ret;
+	}
+
+	static private Object resolve(Object o) {
+		if(o instanceof Symbol)
+			{
+			try
+				{
+				return RT.classForName(o.toString());
+				}
+			catch(Exception cfe)
+				{
+				throw new IllegalArgumentException("Constructor literal can only contain constants or statics. "
+													+ o.toString()
+													+ " does not name a known class.");
+				}
+            }
+		else if(o instanceof ISeq)
+			{
+			Symbol fs = (Symbol) RT.first(o);
+
+			if(fs == null && o == PersistentList.EMPTY)
+				{
+				return o;
+				}
+
+			throw new IllegalArgumentException("Constructor literal can only contain constants or statics. " + o.toString());
+			}
+		else if(o instanceof IPersistentCollection && ((IPersistentCollection) o).count() == 0 ||
+				o instanceof IPersistentCollection ||
+				o instanceof Number  ||
+				o instanceof String  ||
+				o instanceof Keyword ||
+				o instanceof Symbol  ||
+				o == Boolean.TRUE    ||
+				o == Boolean.FALSE   ||
+				o == null) {
+			return o;
+		}
+		else
+			throw new IllegalArgumentException("Constructor literal can only contain constants or statics. " + o.toString());
+	}
 }
 
 /*

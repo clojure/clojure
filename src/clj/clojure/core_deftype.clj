@@ -148,7 +148,10 @@
       (throw (IllegalArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))
     (let [gs (gensym)]
     (letfn 
-     [(eqhash [[i m]] 
+     [(irecord [[i m]]
+        [(conj i 'clojure.lang.IRecord)
+         m])
+      (eqhash [[i m]] 
         [i
          (conj m 
                `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
@@ -222,7 +225,7 @@
                        `(values [this#] (vals this#))
                        `(entrySet [this#] (set this#)))])
       ]
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap ijavamap)]
+     (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap ijavamap)]
        `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m))))))
@@ -292,26 +295,20 @@
   [name [& fields] & opts+specs]
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
-        classname (symbol (str (namespace-munge *ns*) "." gname))
+        ns-part (namespace-munge *ns*)
+        classname (symbol (str ns-part "." gname))
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
     `(let []
        ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods)
-       (defmethod print-method ~classname [o# w#]
-           ((var print-defrecord) o# w#))
        (import ~classname)
-       #_(defn ~name
+       (defn ~(symbol (str '-> name))
          ([~@fields] (new ~classname ~@fields nil nil))
-         ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#))))))
-
-(defn- print-defrecord [o ^Writer w]
-  (print-meta o w)
-  (.write w "#:")
-  (.write w (.getName (class o)))
-  (print-map
-    o
-    pr-on w))
+         ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#)))
+       (defn ~(symbol (str 'map-> name))
+         ([m#] (~(symbol (str classname "/create")) m#)))
+       ~classname)))
 
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
@@ -384,16 +381,35 @@
   [name [& fields] & opts+specs]
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
-        classname (symbol (str (namespace-munge *ns*) "." gname))
+        ns-part (namespace-munge *ns*)
+        classname (symbol (str ns-part "." gname))
         tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
     `(let []
        ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods)
-       (import ~classname))))
+       (import ~classname)
+       (defmethod print-method ~classname [o# w#]
+         ((var print-deftype) o# w#))
+       (defmethod print-dup ~classname [o# w#]
+         ((var printdup-deftype) o# w#))
+       (defn ~(symbol (str '-> name))
+         ([~@fields] (new ~classname ~@fields)))
+       ~classname)))
 
+(defn- print-deftype [o ^Writer w]
+  (.write w "#")
+  (.write w (.getName (class o)))
+  (let [basii (for [fld (map str (clojure.lang.Reflector/invokeStaticMethod (class o) "getBasis" (to-array [])))]
+                (clojure.lang.Reflector/getInstanceField o fld))]
+    (print-sequential "[" pr-on ", " "]" basii w)))
 
-
+(defn- printdup-deftype [o ^Writer w]
+  (.write w "#")
+  (.write w (.getName (class o)))
+  (let [basii (for [fld (map str (clojure.lang.Reflector/invokeStaticMethod (class o) "getBasis" (to-array [])))]
+                (clojure.lang.Reflector/getInstanceField o fld))]
+    (print-sequential "[" pr-on ", " "]" basii w)))
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
