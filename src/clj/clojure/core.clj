@@ -887,11 +887,28 @@
     (reduce1 conj () coll))
 
 ;;math stuff
+(defn ^:private nary-inline
+  ([op]
+    (fn
+      ([x] `(. clojure.lang.Numbers (~op ~x)))
+      ([x y] `(. clojure.lang.Numbers (~op ~x ~y)))
+      ([x y & more]
+        (reduce1
+          (fn [a b] `(. clojure.lang.Numbers (~op ~a ~b)))
+          `(. clojure.lang.Numbers (~op ~x ~y)) more))))
+  ([op unchecked-op]
+    (if *unchecked-math*
+      (nary-inline unchecked-op)
+      (nary-inline op))))
+
+(defn ^:private >1? [n] (clojure.lang.Numbers/gt n 1))
+(defn ^:private >0? [n] (clojure.lang.Numbers/gt n 0))
+
 (defn +'
   "Returns the sum of nums. (+) returns 0. Supports arbitrary precision.
   See also: +"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (addP ~x ~y)))
-   :inline-arities #{2}
+  {:inline (nary-inline 'addP)
+   :inline-arities >1?
    :added "1.0"}
   ([] 0)
   ([x] (cast Number x))
@@ -902,8 +919,8 @@
 (defn +
   "Returns the sum of nums. (+) returns 0. Does not auto-promote
   longs, will throw on overflow. See also: +'"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_add 'add) ~x ~y)))
-   :inline-arities #{2}
+  {:inline (nary-inline 'add 'unchecked_add)
+   :inline-arities >1?
    :added "1.2"}
   ([] 0)
   ([x] (cast Number x))
@@ -914,8 +931,8 @@
 (defn *'
   "Returns the product of nums. (*) returns 1. Supports arbitrary precision.
   See also: *"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (multiplyP ~x ~y)))
-   :inline-arities #{2}
+  {:inline (nary-inline 'multiplyP)
+   :inline-arities >1?
    :added "1.0"}
   ([] 1)
   ([x] (cast Number x))
@@ -926,8 +943,8 @@
 (defn *
   "Returns the product of nums. (*) returns 1. Does not auto-promote
   longs, will throw on overflow. See also: *'"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_multiply 'multiply) ~x ~y)))
-   :inline-arities #{2}
+  {:inline (nary-inline 'multiply 'unchecked_multiply)
+   :inline-arities >1?
    :added "1.2"}
   ([] 1)
   ([x] (cast Number x))
@@ -938,8 +955,8 @@
 (defn /
   "If no denominators are supplied, returns 1/numerator,
   else returns numerator divided by all of the denominators."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (divide ~x ~y)))
-   :inline-arities #{2}
+  {:inline (nary-inline 'divide)
+   :inline-arities >1?
    :added "1.0"}
   ([x] (/ 1 x))
   ([x y] (. clojure.lang.Numbers (divide x y)))
@@ -950,8 +967,8 @@
   "If no ys are supplied, returns the negation of x, else subtracts
   the ys from x and returns the result. Supports arbitrary precision.
   See also: -"
-  {:inline (fn [& args] `(. clojure.lang.Numbers (minusP ~@args)))
-   :inline-arities #{1 2}
+  {:inline (nary-inline 'minusP)
+   :inline-arities >0?
    :added "1.0"}
   ([x] (. clojure.lang.Numbers (minusP x)))
   ([x y] (. clojure.lang.Numbers (minusP x y)))
@@ -962,8 +979,8 @@
   "If no ys are supplied, returns the negation of x, else subtracts
   the ys from x and returns the result. Does not auto-promote
   longs, will throw on overflow. See also: -'"
-  {:inline (fn [& args] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_minus 'minus) ~@args)))
-   :inline-arities #{1 2}
+  {:inline (nary-inline 'minus 'unchecked_minus)
+   :inline-arities >0?
    :added "1.2"}
   ([x] (. clojure.lang.Numbers (minus x)))
   ([x y] (. clojure.lang.Numbers (minus x y)))
@@ -1210,27 +1227,40 @@
 
 (defn bit-and
   "Bitwise and"
-   {:inline (fn [x y] `(. clojure.lang.Numbers (and ~x ~y)))
+   {:inline (nary-inline 'and)
+    :inline-arities >1?
     :added "1.0"}
-  [x y] (. clojure.lang.Numbers and x y))
+   ([x y] (. clojure.lang.Numbers and x y))
+   ([x y & more]
+      (reduce1 bit-and (bit-and x y) more)))
 
 (defn bit-or
   "Bitwise or"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (or ~x ~y)))
+  {:inline (nary-inline 'or)
+   :inline-arities >1?
    :added "1.0"}
-  [x y] (. clojure.lang.Numbers or x y))
+  ([x y] (. clojure.lang.Numbers or x y))
+  ([x y & more]
+    (reduce1 bit-or (bit-or x y) more)))
 
 (defn bit-xor
   "Bitwise exclusive or"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (xor ~x ~y)))
+  {:inline (nary-inline 'xor)
+   :inline-arities >1?
    :added "1.0"}
-  [x y] (. clojure.lang.Numbers xor x y))
+  ([x y] (. clojure.lang.Numbers xor x y))
+  ([x y & more]
+    (reduce1 bit-xor (bit-xor x y) more)))
 
 (defn bit-and-not
   "Bitwise and with complement"
-  {:added "1.0"
+  {:inline (nary-inline 'andNot)
+   :inline-arities >1?
+   :added "1.0"
    :static true}
-  [x y] (. clojure.lang.Numbers andNot x y))
+  ([x y] (. clojure.lang.Numbers andNot x y))
+  ([x y & more]
+    (reduce1 bit-and-not (bit-and-not x y) more)))
 
 
 (defn bit-clear
