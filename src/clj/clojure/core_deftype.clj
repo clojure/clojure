@@ -135,8 +135,7 @@
   "Do not use this directly - use defrecord"
   {:added "1.2"}
   [tagname name fields interfaces methods]
-  (let [tag (keyword (str *ns*) (str tagname))
-        classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
+  (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
         interfaces (vec interfaces)
         interface-set (set (map resolve interfaces))
         methodname-set (set (map first methods))
@@ -293,7 +292,6 @@
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
         classname (symbol (str (namespace-munge *ns*) "." gname))
-        tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
     `(let []
@@ -385,7 +383,6 @@
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
         classname (symbol (str (namespace-munge *ns*) "." gname))
-        tag (keyword (str *ns*) (str name))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
     `(let []
