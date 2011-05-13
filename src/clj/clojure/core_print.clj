@@ -152,7 +152,6 @@
  (print-ctor o #(print-sequential "[" print-dup " " "]" %1 %2) w))
 
 (defmethod print-dup clojure.lang.IPersistentCollection [o, ^Writer w]
-  (print " ipcpd ")
   (print-meta o w)
   (.write w "#=(")
   (.write w (.getName ^Class (class o)))
@@ -266,7 +265,7 @@
 (defmethod print-dup java.math.BigDecimal [o w] (print-method o w))
 (defmethod print-dup clojure.lang.BigInt [o w] (print-method o w))
 (defmethod print-dup java.math.BigInteger [o w] (print-method o w))
-(defmethod print-dup clojure.lang.PersistentHashMap [o w] (print " phmpd ") (print-method o w))
+(defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
 (defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))
