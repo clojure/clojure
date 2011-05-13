@@ -396,25 +396,21 @@
     (is (= (RecordToTestLongHint. 42) (map->RecordToTestLongHint {:a 42})))
     (is (= (RecordToTestLongHint. 42) (->RecordToTestLongHint 42)))
     (testing "that invalid primitive types on hinted defrecord fields fails"
-      (is (thrown-with-msg?
+      (is (thrown?
             ClassCastException
-            #"java.lang.String cannot be cast to java.lang.Long.*"
             (read-string "#clojure.test_clojure.protocols.RecordToTestLongHint{:a \"\"}")))
       (is (thrown-with-msg?
             IllegalArgumentException
             #"Unexpected param type, expected: long, given: java.lang.String.*"
             (read-string "#clojure.test_clojure.protocols.RecordToTestLongHint[\"\"]")))
-      (is (thrown-with-msg?
+      (is (thrown?
             ClassCastException
-            #"java.lang.String cannot be cast to java.lang.Long.*"
             (clojure.test_clojure.protocols.RecordToTestLongHint/create {:a ""})))
-      (is (thrown-with-msg?
+      (is (thrown?
             ClassCastException
-            #"java.lang.String cannot be cast to java.lang.Long.*"
             (map->RecordToTestLongHint {:a ""})))
-      (is (thrown-with-msg?
+      (is (thrown?
             ClassCastException
-            #"java.lang.String cannot be cast to java.lang.Number.*"
             (->RecordToTestLongHint "")))))
   (testing "that primitive hinting requiring coercion works as expected"
     (is (= (RecordToTestByteHint. 42) (clojure.test_clojure.protocols.RecordToTestByteHint/create {:a (byte 42)})))
