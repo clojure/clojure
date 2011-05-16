@@ -1493,7 +1493,7 @@ static public long clearBit(long x, Object y){
     return clearBit(x,bitOpsCast(y));
 }
 static public long clearBit(long x, long n){
-    return x & (1L << n);
+    return x & ~(1L << n);
 }
 
 static public long setBit(Object x, Object y){

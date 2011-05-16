@@ -466,6 +466,21 @@ Math/pow overflows to Infinity."
        )
   (is (thrown? IllegalArgumentException (bit-shift-right 1N 1))))
 
+(deftest test-bit-clear
+  (is (= 2r1101 (bit-clear 2r1111 1)))
+  (is (= 2r1101 (bit-clear 2r1101 1))))
+
+(deftest test-bit-set
+  (is (= 2r1111 (bit-set 2r1111 1)))
+  (is (= 2r1111 (bit-set 2r1101 1))))
+
+(deftest test-bit-flip
+  (is (= 2r1101 (bit-flip 2r1111 1)))
+  (is (= 2r1111 (bit-flip 2r1101 1))))
+
+(deftest test-bit-test
+  (is (true? (bit-test 2r1111 1)))
+  (is (false? (bit-test 2r1101 1))))
 
 ;; arrays
 (deftest test-array-types
