@@ -376,11 +376,11 @@
     (let [r   (RecordToTestPrinting. 1 2)]
       (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting{:a 1, :b 2}"
              (pr-str r)))
-      (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting[#=(java.lang.Long. \"1\"), #=(java.lang.Long. \"2\")]"
+      (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting[1, 2]"
              (binding [*print-dup* true] (pr-str r))))
-      (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting{:a #=(java.lang.Long. \"1\"), :b #=(java.lang.Long. \"2\")}"
+      (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting{:a 1, :b 2}"
              (binding [*print-dup* true *verbose-defrecords* true] (pr-str r))))
-      (is (= "#clojure.test_clojure.protocols.TypeToTestLiterals[#=(java.lang.Long. \"42\")]"
+      (is (= "#clojure.test_clojure.protocols.TypeToTestLiterals[42]"
              (binding [*print-dup* true] (pr-str (TypeToTestLiterals. 42))))))))
 
 (defrecord RecordToTestLongHint [^long a])

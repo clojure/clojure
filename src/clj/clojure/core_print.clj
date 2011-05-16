@@ -259,7 +259,7 @@
   nil)
 
 (defmethod print-dup java.lang.Character [c w] (print-method c w))
-(defmethod print-dup java.lang.Integer [o w] (print-method o w))
+(defmethod print-dup java.lang.Long [o w] (print-method o w))
 (defmethod print-dup java.lang.Double [o w] (print-method o w))
 (defmethod print-dup clojure.lang.Ratio [o w] (print-method o w))
 (defmethod print-dup java.math.BigDecimal [o w] (print-method o w))
