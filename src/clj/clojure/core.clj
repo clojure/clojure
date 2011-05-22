@@ -5795,15 +5795,6 @@
                   shift (range 0 31)]
               [shift mask]))))
 
-(defn- min-hash 
-  "takes a collection of keys and returns [shift mask]"
-  [keys]
-  (let [hashes (map hash keys)
-        _ (when-not (apply distinct? hashes)
-            (throw (IllegalArgumentException. "Hashes must be distinct")))
-        sm (maybe-min-hash hashes)]
-    (or sm (throw (IllegalArgumentException. "No distinct mapping found")))))
-
 (defn- case-map
   "Transforms a sequence of test constants and a corresponding sequence of then
   expressions into a sorted map to be consumed by case*. The form of the map

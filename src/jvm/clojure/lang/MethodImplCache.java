@@ -12,6 +12,8 @@
 
 package clojure.lang;
 
+import java.util.Map;
+
 public final class MethodImplCache{
 
 static public class Entry{
@@ -29,6 +31,7 @@ public final Keyword methodk;
 public final int shift;
 public final int mask;
 public final Object[] table;    //[class, entry. class, entry ...]
+public final Map map;
 
 Entry mre = null;
 
@@ -37,11 +40,21 @@ public MethodImplCache(IPersistentMap protocol, Keyword methodk){
 }
 
 public MethodImplCache(IPersistentMap protocol, Keyword methodk, int shift, int mask, Object[] table){
-	this.protocol = protocol;
-	this.methodk = methodk;
-	this.shift = shift;
-	this.mask = mask;
-	this.table = table;
+    this.protocol = protocol;
+    this.methodk = methodk;
+    this.shift = shift;
+    this.mask = mask;
+    this.table = table;
+    this.map = null;
+}
+
+public MethodImplCache(IPersistentMap protocol, Keyword methodk, Map map){
+    this.protocol = protocol;
+    this.methodk = methodk;
+    this.shift = 0;
+    this.mask = 0;
+    this.table = null;
+    this.map = map;
 }
 
 public IFn fnFor(Class c){
@@ -52,14 +65,23 @@ public IFn fnFor(Class c){
 }
 
 IFn findFnFor(Class c){
-	int idx = ((Util.hash(c) >> shift) & mask) << 1;
-	if(idx < table.length && table[idx] == c)
-		{
-		Entry e = ((Entry) table[idx + 1]);
-		mre = e;
-		return  e != null ? e.fn : null;
-		}
-	return null;
+    if (map != null)
+        {
+        Entry e = (Entry) map.get(c);
+        mre = e;
+        return  e != null ? e.fn : null;
+        }
+    else
+        {
+        int idx = ((Util.hash(c) >> shift) & mask) << 1;
+        if(idx < table.length && table[idx] == c)
+            {
+            Entry e = ((Entry) table[idx + 1]);
+            mre = e;
+            return  e != null ? e.fn : null;
+            }
+        return null;
+        }
 }
 
 
