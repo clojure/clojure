@@ -3143,7 +3143,7 @@
    :static true}
   [num div] 
   (let [m (rem num div)] 
-    (if (or (zero? m) (pos? (* num div))) 
+    (if (or (zero? m) (= (pos? num) (pos? div)))
       m 
       (+ m div))))
 
