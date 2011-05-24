@@ -1148,9 +1148,13 @@ public static class CtorReader extends AFn{
 
 		Object recordName = read(r, true, null, false);
 		Class recordClass = RT.classForName(recordName.toString());
-		int ch = read1(r);
 		char endch;
 		boolean shortForm = true;
+		int ch = read1(r);
+
+		// flush whitespace
+		//while(isWhitespace(ch))
+		//	ch = read1(r);
 
 		// A defrecord ctor can take two forms. Check for map->R version first.
 		if(ch == '{')
@@ -1177,61 +1181,21 @@ public static class CtorReader extends AFn{
 			if(!ctorFound)
 				throw Util.runtimeException("Unexpected number of constructor arguments to " + recordClass.toString() + ": got " + recordEntries.length);
 
-            ret = Reflector.invokeConstructor(recordClass, RT.seqToArray(resolveEach(recordEntries)));
+			ret = Reflector.invokeConstructor(recordClass, recordEntries);
 			}
 		else
 			{
-            ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{RT.map(RT.seqToArray(resolveEach(recordEntries)))});
+
+			IPersistentMap vals = RT.map(recordEntries);
+			for(ISeq s = RT.keys(vals); s != null; s = s.next())
+				{
+				if(!(s.first() instanceof Keyword))
+					throw Util.runtimeException("Unreadable defrecord form: key must be of type clojure.lang.Keyword, got " + s.first().toString());
+				}
+			ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{vals});
 			}
 
 	return ret;
-	}
-
-	static public ISeq resolveEach(Object[] a) {
-		ISeq ret = null;
-		for(int i = a.length - 1; i >= 0; --i)
-			ret = (ISeq) RT.cons(resolve(a[i]), ret);
-		return ret;
-	}
-
-	static private Object resolve(Object o) {
-		if(o instanceof Symbol)
-			{
-			try
-				{
-				return RT.classForName(o.toString());
-				}
-			catch(Exception cfe)
-				{
-				throw new IllegalArgumentException("Constructor literal can only contain constants or statics. "
-													+ o.toString()
-													+ " does not name a known class.");
-				}
-            }
-		else if(o instanceof ISeq)
-			{
-			Symbol fs = (Symbol) RT.first(o);
-
-			if(fs == null && o == PersistentList.EMPTY)
-				{
-				return o;
-				}
-
-			throw new IllegalArgumentException("Constructor literal can only contain constants or statics. " + o.toString());
-			}
-		else if(o instanceof IPersistentCollection && ((IPersistentCollection) o).count() == 0 ||
-				o instanceof IPersistentCollection ||
-				o instanceof Number  ||
-				o instanceof String  ||
-				o instanceof Keyword ||
-				o instanceof Symbol  ||
-				o == Boolean.TRUE    ||
-				o == Boolean.FALSE   ||
-				o == null) {
-			return o;
-		}
-		else
-			throw new IllegalArgumentException("Constructor literal can only contain constants or statics. " + o.toString());
 	}
 }
 

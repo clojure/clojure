@@ -214,6 +214,8 @@
   (print-map m print-dup w)
   (.write w ")"))
 
+;; Records
+
 (defmethod print-method clojure.lang.IRecord [r, ^Writer w]
   (print-meta r w)
   (.write w "#")
@@ -234,6 +236,22 @@
 (prefer-method print-dup clojure.lang.IPersistentCollection java.util.Map)
 (prefer-method print-dup clojure.lang.IRecord clojure.lang.IPersistentCollection)
 (prefer-method print-dup clojure.lang.IRecord java.util.Map)
+
+;; Types
+
+(defn- print-deftype [o ^Writer w]
+  (.write w "#")
+  (.write w (.getName (class o)))
+  (let [basii (for [fld (map str (clojure.lang.Reflector/invokeStaticMethod (class o) "getBasis" (to-array [])))]
+                (clojure.lang.Reflector/getInstanceField o fld))]
+    (print-sequential "[" pr-on ", " "]" basii w)))
+
+(defmethod print-method clojure.lang.IType [o ^Writer w]
+  (print-deftype o w))
+
+(defmethod print-dup clojure.lang.IType [o ^Writer w]
+  (print-deftype o w))
+
 
 (defmethod print-method clojure.lang.IPersistentSet [s, ^Writer w]
   (print-meta s w)

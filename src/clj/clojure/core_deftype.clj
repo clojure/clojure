@@ -229,6 +229,31 @@
           :implements ~(vec i) 
           ~@m))))))
 
+(defn- build-positional-factory
+  "Used to build a positional factory for a given type/record.  Because of the
+  limitation of 20 arguments to Clojure functions, this factory needs to be
+  constructed to deal with more arguments.  It does this by building a straight
+  forward type/record ctor call in the <=20 case, and a call to the same
+  ctor pulling the extra args out of the & overage parameter.  Finally, the
+  arity is constrained to the number of expected fields and an ArityException
+  will be thrown at runtime if the actual arg count does not match."
+  [nom classname fields]
+  (let [fn-name (symbol (str '-> nom))
+        [field-args over] (split-at 20 fields)
+        field-count (count fields)
+        arg-count (count field-args)
+        over-count (count over)]
+    `(defn ~fn-name
+       [~@field-args ~@(if (seq over) '[& overage] [])]
+       ~(if (seq over)
+          `(if (= (count ~'overage) ~over-count)
+             (new ~classname
+                  ~@field-args
+                  ~@(for [i (range 0 (count over))]
+                      (list `nth 'overage i)))
+             (throw (clojure.lang.ArityException. (+ ~arg-count (count ~'overage)) (name '~fn-name))))
+          `(new ~classname ~@field-args)))))
+
 (defmacro defrecord
   "Alpha - subject to change
   
@@ -301,17 +326,16 @@
     `(let []
        ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods)
        (import ~classname)
-       (defn ~(symbol (str '-> name))
-         ([~@fields] (new ~classname ~@fields nil nil))
-         ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#)))
-       (defn ~(symbol (str 'map-> name))
+       ~(build-positional-factory gname classname fields)
+       (defn ~(symbol (str 'map-> gname))
          ([m#] (~(symbol (str classname "/create")) m#)))
        ~classname)))
 
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
-  (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
+  (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
+        interfaces (conj interfaces 'clojure.lang.IType)]
     `(deftype* ~tagname ~classname ~fields 
        :implements ~interfaces 
        ~@methods)))
@@ -382,31 +406,13 @@
         ns-part (namespace-munge *ns*)
         classname (symbol (str ns-part "." gname))
         hinted-fields fields
-        fields (vec (map #(with-meta % nil) fields))]
+        fields (vec (map #(with-meta % nil) fields))
+        [field-args over] (split-at 20 fields)]
     `(let []
        ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods)
        (import ~classname)
-       (defmethod print-method ~classname [o# w#]
-         ((var print-deftype) o# w#))
-       (defmethod print-dup ~classname [o# w#]
-         ((var printdup-deftype) o# w#))
-       (defn ~(symbol (str '-> name))
-         ([~@fields] (new ~classname ~@fields)))
+       ~(build-positional-factory gname classname fields)
        ~classname)))
-
-(defn- print-deftype [o ^Writer w]
-  (.write w "#")
-  (.write w (.getName (class o)))
-  (let [basii (for [fld (map str (clojure.lang.Reflector/invokeStaticMethod (class o) "getBasis" (to-array [])))]
-                (clojure.lang.Reflector/getInstanceField o fld))]
-    (print-sequential "[" pr-on ", " "]" basii w)))
-
-(defn- printdup-deftype [o ^Writer w]
-  (.write w "#")
-  (.write w (.getName (class o)))
-  (let [basii (for [fld (map str (clojure.lang.Reflector/invokeStaticMethod (class o) "getBasis" (to-array [])))]
-                (clojure.lang.Reflector/getInstanceField o fld))]
-    (print-sequential "[" pr-on ", " "]" basii w)))
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -4295,17 +4295,34 @@ static public class ObjExpr implements Expr{
 			gen.push(var.sym.toString());
 			gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
 			}
+		else if(value instanceof IType)
+			{
+			Method ctor = new Method("<init>", Type.getConstructorDescriptor(value.getClass().getConstructors()[0]));
+			gen.newInstance(Type.getType(value.getClass()));
+			gen.dup();
+			IPersistentVector fields = (IPersistentVector) Reflector.invokeStaticMethod(value.getClass(), "getBasis", new Object[]{});
+			for(ISeq s = RT.seq(fields); s != null; s = s.next())
+				{
+				Symbol field = (Symbol) s.first();
+				Class k = tagClass(tagOf(field));
+				Object val = Reflector.getInstanceField(value, field.name);
+				emitValue(val, gen);
+
+				if(k.isPrimitive())
+					{
+					Type b = Type.getType(boxClass(k));
+					String p = Type.getType(k).getDescriptor();
+					String n = k.getName();
+
+					gen.invokeVirtual(b, new Method(n+"Value", "()"+p));
+					}
+				}
+			gen.invokeConstructor(Type.getType(value.getClass()), ctor);
+			}
 		else if(value instanceof IRecord)
 			{
 			Method createMethod = Method.getMethod(value.getClass().getName() + " create(clojure.lang.IPersistentMap)");
-			List entries = new ArrayList();
-			for(Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet())
-				{
-				entries.add(entry.getKey());
-				entries.add(entry.getValue());
-				}
-			emitListAsObjectArray(entries, gen);
-			gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.IPersistentMap map(Object[])"));
+            emitValue(PersistentArrayMap.create((java.util.Map) value), gen);
 			gen.invokeStatic(getType(value.getClass()), createMethod);
 			}
 		else if(value instanceof IPersistentMap)
@@ -6142,6 +6159,8 @@ private static Expr analyze(C context, Object form, String name) {
 				return VectorExpr.parse(context, (IPersistentVector) form);
 		else if(form instanceof IRecord)
 				return new ConstantExpr(form);
+		else if(form instanceof IType)
+				return new ConstantExpr(form);
 		else if(form instanceof IPersistentMap)
 				return MapExpr.parse(context, (IPersistentMap) form);
 		else if(form instanceof IPersistentSet)
@@ -6376,12 +6395,13 @@ public static Object eval(Object form, boolean freshLoader) {
 					eval(RT.first(s), false);
 				return eval(RT.first(s), false);
 				}
-			else if(form instanceof IPersistentCollection
-			        && !(RT.first(form) instanceof Symbol
-			             && ((Symbol) RT.first(form)).name.startsWith("def")))
+			else if((form instanceof IType) ||
+					(form instanceof IPersistentCollection
+					&& !(RT.first(form) instanceof Symbol
+						&& ((Symbol) RT.first(form)).name.startsWith("def"))))
 				{
 				ObjExpr fexpr = (ObjExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form),
-				                                  "eval" + RT.nextID());
+													"eval" + RT.nextID());
 				IFn fn = (IFn) fexpr.eval();
 				return fn.invoke();
 				}
@@ -7809,23 +7829,22 @@ public static class NewInstanceMethod extends ObjMethod{
 			return p;
 
 		Class c = null;
-		Type  t = Type.getType(p);
 
-		if(t == Type.INT_TYPE)
+		if(p == Integer.TYPE)
 			c = Integer.class;
-		else if(t == Type.LONG_TYPE)
+		else if(p == Long.TYPE)
 			c = Long.class;
-		else if(t == Type.FLOAT_TYPE)
+		else if(p == Float.TYPE)
 			c = Float.class;
-		else if(t == Type.DOUBLE_TYPE)
+		else if(p == Double.TYPE)
 			c = Double.class;
-		else if(t == Type.CHAR_TYPE)
+		else if(p == Character.TYPE)
 			c = Character.class;
-		else if(t == Type.SHORT_TYPE)
+		else if(p == Short.TYPE)
 			c = Short.class;
-		else if(t == Type.BYTE_TYPE)
+		else if(p == Byte.TYPE)
 			c = Byte.class;
-		else if(t == Type.BOOLEAN_TYPE)
+		else if(p == Boolean.TYPE)
 			c = Boolean.class;
 
 		return c;
