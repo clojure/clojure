@@ -79,7 +79,7 @@
     <delete dir="${test-classes}"/>
     <mkdir dir="${test-classes}"/>
     <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
-           debug="true" target="1.5" includeantruntime="no"/>
+           debug="true" target="1.5"/>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
           failonerror="true"
