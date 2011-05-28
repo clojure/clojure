@@ -2231,10 +2231,10 @@
   the value that was swapped in."
   {:added "1.0"
    :static true}
-  ([^clojure.lang.Atom atom f] (.swap atom f))
-  ([^clojure.lang.Atom atom f x] (.swap atom f x))
-  ([^clojure.lang.Atom atom f x y] (.swap atom f x y))
-  ([^clojure.lang.Atom atom f x y & args] (.swap atom f x y args)))
+  ([^clojure.lang.IAtom atom f] (.swap atom f))
+  ([^clojure.lang.IAtom atom f x] (.swap atom f x))
+  ([^clojure.lang.IAtom atom f x y] (.swap atom f x y))
+  ([^clojure.lang.IAtom atom f x y & args] (.swap atom f x y args)))
 
 (defn compare-and-set!
   "Atomically sets the value of atom to newval if and only if the
@@ -2242,14 +2242,14 @@
   set happened, else false"
   {:added "1.0"
    :static true}
-  [^clojure.lang.Atom atom oldval newval] (.compareAndSet atom oldval newval))
+  [^clojure.lang.IAtom atom oldval newval] (.compareAndSet atom oldval newval))
 
 (defn reset!
   "Sets the value of atom to newval without regard for the
   current value. Returns newval."
   {:added "1.0"
    :static true}
-  [^clojure.lang.Atom atom newval] (.reset atom newval))
+  [^clojure.lang.IAtom atom newval] (.reset atom newval))
 
 (defn set-validator!
   "Sets the validator-fn for a var/ref/agent/atom. validator-fn must be nil or a

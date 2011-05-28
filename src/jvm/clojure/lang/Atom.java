@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-final public class Atom extends ARef{
+final public class Atom extends ARef implements IAtom{
 final AtomicReference state;
 
 public Atom(Object state){
