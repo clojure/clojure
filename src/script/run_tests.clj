@@ -37,6 +37,7 @@ clojure.test-clojure.pprint
 clojure.test-clojure.predicates
 clojure.test-clojure.printer
 clojure.test-clojure.protocols
+clojure.test-clojure.protocols.hash-collisions
 clojure.test-clojure.reader
 clojure.test-clojure.reflect
 clojure.test-clojure.refs
