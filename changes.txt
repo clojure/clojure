@@ -1,8 +1,8 @@
 Changes to Clojure in Version 1.3 Beta
 
 = CONTENTS =
-  
-  1 Deprecated and Removed Features
+
+ 1 Deprecated and Removed Features
     1.1 Earmuffed Vars Are No Longer Automatically Considered Dynamic.
     1.2 ISeq No Longer Inherits From Sequential
     1.3 Disallow recur across try
@@ -97,9 +97,9 @@ Better error messages:
   * In the REPL
   * Add "starting at <line>" to EOF while reading exceptions
   * Better compilation error reporting
-    
 
-== 2.4 clojure.reflect/reflect == 
+
+== 2.4 clojure.reflect/reflect ==
 
 Full details here: http://dev.clojure.org/display/design/Reflection+API
 
@@ -116,7 +116,7 @@ every-pred takes a set of predicates and returns a function f that returns true 
 
   ((every-pred even?) 2 4 6)
   => true
-  
+
   ((every-pred even?) 2 4 5)
   =>false
 
@@ -160,19 +160,19 @@ Prints a stack trace of the exception
 
   pst
   => (pst (IllegalArgumentException.))
-    IllegalArgumentException 
-		user/eval27 (NO_SOURCE_FILE:18)
-		clojure.lang.Compiler.eval (Compiler.java:6355)
-		clojure.lang.Compiler.eval (Compiler.java:6322)
-		clojure.core/eval (core.clj:2699)
-		clojure.main/repl/read-eval-print--5906 (main.clj:244)
-		clojure.main/repl/fn--5911 (main.clj:265)
-		clojure.main/repl (main.clj:265)
-		clojure.main/repl-opt (main.clj:331)
-		clojure.main/main (main.clj:427)
-		clojure.lang.Var.invoke (Var.java:397)
-		clojure.lang.Var.applyTo (Var.java:518)
-	  clojure.main.main (main.java:37)
+    IllegalArgumentException
+        user/eval27 (NO_SOURCE_FILE:18)
+        clojure.lang.Compiler.eval (Compiler.java:6355)
+        clojure.lang.Compiler.eval (Compiler.java:6322)
+        clojure.core/eval (core.clj:2699)
+        clojure.main/repl/read-eval-print--5906 (main.clj:244)
+        clojure.main/repl/fn--5911 (main.clj:265)
+        clojure.main/repl (main.clj:265)
+        clojure.main/repl-opt (main.clj:331)
+        clojure.main/main (main.clj:427)
+        clojure.lang.Var.invoke (Var.java:397)
+        clojure.lang.Var.applyTo (Var.java:518)
+        clojure.main.main (main.java:37)
 
 == 2.11 clojure.pprint/print-table
 
@@ -182,8 +182,8 @@ Prints a collection of maps in a textual table.
   => ===============
      :fred | :barney
      ===============
-     ethel |        
-     wilma | betty  
+     ethel |
+     wilma | betty
      ===============
 
 == 2.12 pprint respects *print-length* ==
@@ -226,7 +226,7 @@ defmulti will check to verify that its options are valid. For example, the follo
 
   (defmulti fred :ethel :lucy :ricky)
   => IllegalArgumentException
-  
+
 == 2.18 Removed Checked Exceptions ==
 
 Clojure does not throw checked exceptions
@@ -279,7 +279,7 @@ Adds special form docs to the REPL
 
 This adds InputStream, Reader, File, byte[] to the list of inputs for clojure.java.shell/sh
 
-== 2.28 Interrupte Handler Promoted to clojure.repl ==
+== 2.28 Interrupt Handler Promoted to clojure.repl ==
 
 Promoting this library eliminates the need for a dependency on old contrib.
 
@@ -300,12 +300,13 @@ Patch causes thread names like:
 
 defs can now have docstrings
 
-== 2.32 Comp function returns identity when called with zero arity == 
+== 2.32 Comp function returns identity when called with zero arity ==
 
   (= (comp) identity)
   => true
 
 = 3 Performance Enhancements =
+
   * Code path for using vars is now much faster for the common case
   * Improved startup time
   * Fix performance on some numeric overloads
@@ -318,7 +319,8 @@ defs can now have docstrings
   * inline n-ary min & max
   * PersistentQueue count is now O(1)
 
-= 4 Bug Fixes = 
+= 4 Bug Fixes =
+
 The complete list of JIRA issues is here: http://dev.clojure.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10052
 
   * CLJ-8 detect and report cyclic load dependencies
@@ -346,7 +348,7 @@ The complete list of JIRA issues is here: http://dev.clojure.org/jira/secure/Iss
   * CLJ-433 munge should not munge $ (which isJavaIdentifierPart), should munge ' (which is not)
 
   * CLJ-435 stackoverflow exception in printing meta with :type
-  ** Patch fixes exception beeing thrown on certain type metadata  
+  ** Patch fixes exception being thrown on certain type metadata
     (with-meta {:value 2} {:type Object})
     => No message. [Thrown class java.lang.StackOverflowError]
 
@@ -378,7 +380,7 @@ The complete list of JIRA issues is here: http://dev.clojure.org/jira/secure/Iss
   * CLJ-739 version.properties file is not closed
   ** Patch properly closes version.properties file
 
-  * CLJ-751 cl-format: ~( thows an exception with an empty string
+  * CLJ-751 cl-format: ~( throws an exception with an empty string
   ** Patch fixes the following bug in cl-format when format is nil
     (cl-format nil "~:(~a~)" "")
     => NullPointerException
