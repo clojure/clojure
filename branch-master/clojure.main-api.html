@@ -120,7 +120,7 @@ as in a stack trace element, returns a readable version.</pre>
 beginning with @ or @/ are considered relative to classpath.</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L214" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L275" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -133,14 +133,15 @@ beginning with @ or @/ are considered relative to classpath.</pre>
 With no options or args, runs an interactive Read-Eval-Print Loop
 
 init options:
-  -i, --init path   Load a file or resource
-  -e, --eval string Evaluate expressions in string; print non-nil values
+  -i, --init path     Load a file or resource
+  -e, --eval string   Evaluate expressions in string; print non-nil values
 
 main options:
-  -r, --repl        Run a repl
-  path              Run a script from from a file or resource
-  -                 Run a script from standard input
-  -h, -?, --help    Print this help message and exit
+  -m, --main ns-name  Call the -main function from a namespace with args
+  -r, --repl          Run a repl
+  path                Run a script from from a file or resource
+  -                   Run a script from standard input
+  -h, -?, --help      Print this help message and exit
 
 operation:
 
@@ -149,7 +150,7 @@ operation:
   - Binds *command-line-args* to a seq of strings containing command line
     args that appear after any main option
   - Runs all init options in order
-  - Runs a repl or script if requested
+  - Calls a -main function or runs a repl or script if requested
 
 The init options may be repeated and mixed freely, but must appear before
 any main option. The appearance of any eval option before running a repl
@@ -159,7 +160,7 @@ Paths may be absolute or relative in the filesystem or relative to
 classpath. Classpath-relative paths have prefix of @ or @/</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L318" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L389" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
@@ -211,7 +212,7 @@ are sequential keyword-value pairs. Available options and their defaults:
      default: repl-caught</pre>
   
   
-  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L118" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/71930b6b6537a796cdf13c4ffa7cf93eb53b6235/src/clj/clojure/main.clj#L179" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />

@@ -92,41 +92,11 @@ namespace.
                 <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.string</span>
   - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span> (<span id="header-status">in development</span>)
   </h1>
-<span id="author-line">by <span id="author-name">Stuart Sierra, Stuart Halloway, David Liebke</span><br /></span>
+
 <br />Full namespace name: <span id="long-name">clojure.string</span>
 <p></p>
 <h2>Overview</h2>
-<pre id="namespace-docstr">Clojure String utilities
-
-It is poor form to (:use clojure.string). Instead, use require
-with :as to specify a prefix, e.g.
-
-(ns your.namespace.here
-  (:require '[clojure.string :as str]))
-
-Design notes for clojure.string:
-
-1. Strings are objects (as opposed to sequences). As such, the
-   string being manipulated is the first argument to a function;
-   passing nil will result in a NullPointerException unless
-   documented otherwise. If you want sequence-y behavior instead,
-   use a sequence.
-
-2. Functions are generally not lazy, and call straight to host
-   methods where those are available and efficient.
-
-3. Functions take advantage of String implementation details to
-   write high-performing loop/recurs instead of using higher-order
-   functions. (This is not idiomatic in general-purpose application
-   code.)
-
-4. When a function is documented to accept a string argument, it
-   will take any implementation of the correct *interface* on the
-   host platform. In Java, this is CharSequence, which is more
-   general than String. In ordinary usage you will almost always
-   pass concrete strings. If you are doing something unusual,
-   e.g. passing a mutable implementation of CharSequence, then
-   thead-safety is your responsibility.</pre>
+<pre id="namespace-docstr"></pre>
 
 
 <br />
