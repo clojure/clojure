@@ -282,7 +282,6 @@
 (defmethod print-dup clojure.lang.Ratio [o w] (print-method o w))
 (defmethod print-dup java.math.BigDecimal [o w] (print-method o w))
 (defmethod print-dup clojure.lang.BigInt [o w] (print-method o w))
-(defmethod print-dup java.math.BigInteger [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
@@ -322,10 +321,6 @@
 (defmethod print-method clojure.lang.BigInt [b, ^Writer w]
   (.write w (str b))
   (.write w "N"))
-
-(defmethod print-method java.math.BigInteger [b, ^Writer w]
-  (.write w (str b))
-  (.write w "BIGINT"))
 
 (defmethod print-method java.util.regex.Pattern [p ^Writer w]
   (.write w "#\"")
