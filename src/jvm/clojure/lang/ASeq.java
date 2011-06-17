@@ -165,20 +165,19 @@ public boolean containsAll(Collection c){
 	return true;
 }
 
-public Object[] toArray(Object[] a){
-	if(a.length >= count())
-		{
-		ISeq s = seq();
-		for(int i = 0; s != null; ++i, s = s.next())
-			{
-			a[i] = s.first();
-			}
-		if(a.length > count())
-			a[count()] = null;
-		return a;
-		}
-	else
-		return toArray();
+public Object[] toArray(Object[] a) {
+	int count = count();
+	if(a.length < count) {
+		a = new Object[count];
+	} else if(a.length > count) {
+		a[count] = null;
+	}
+	
+	ISeq s = seq();
+	for(int i = 0; s != null; ++i, s = s.next()) 
+		a[i] = s.first();
+
+	return a;
 }
 
 public int size(){
