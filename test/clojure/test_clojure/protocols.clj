@@ -430,9 +430,7 @@
       (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting[1, 2]"
              (binding [*print-dup* true] (pr-str r))))
       (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting{:a 1, :b 2}"
-             (binding [*print-dup* true *verbose-defrecords* true] (pr-str r))))
-      (is (= "#clojure.test_clojure.protocols.TypeToTestLiterals[42]"
-             (binding [*print-dup* true] (pr-str (TypeToTestLiterals. 42))))))))
+             (binding [*print-dup* true *verbose-defrecords* true] (pr-str r)))))))
 
 (defrecord RecordToTestLongHint [^long a])
 (defrecord RecordToTestByteHint [^byte a])
