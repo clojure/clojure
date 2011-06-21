@@ -417,7 +417,8 @@
    the file they represent."
   {:added "1.2"}
   [f & more]
-  (.mkdirs (.getParentFile ^File (apply file f more))))
+  (when-let [parent (.getParentFile ^File (apply file f more))]
+    (.mkdirs parent)))
 
 (defn ^URL resource
   "Returns the URL for a named resource. Use the context class loader
