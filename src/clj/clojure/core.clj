@@ -6230,7 +6230,7 @@
         (assoc! ret k (conj (get ret k []) x))))
     (transient {}) coll)))
 
-(defn partition-by 
+(defn partition-by
   "Applies f to each value in coll, splitting it each time f returns
    a new value.  Returns a lazy seq of partitions."
   {:added "1.2"
@@ -6240,8 +6240,8 @@
    (when-let [s (seq coll)]
      (let [fst (first s)
            fv (f fst)
-           run (cons fst (take-while #(= fv (f %)) (rest s)))]
-       (cons run (partition-by f (drop (count run) s)))))))
+           run (cons fst (take-while #(= fv (f %)) (next s)))]
+       (cons run (partition-by f (seq (drop (count run) s))))))))
 
 (defn frequencies
   "Returns a map from distinct items in coll to the number of times
