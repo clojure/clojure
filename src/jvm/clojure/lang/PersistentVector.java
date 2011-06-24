@@ -520,6 +520,19 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 		throw new IndexOutOfBoundsException();
 	}
 
+	private Object[] editableArrayFor(int i){
+		if(i >= 0 && i < cnt)
+			{
+			if(i >= tailoff())
+				return tail;
+			Node node = root;
+			for(int level = shift; level > 0; level -= 5)
+				node = ensureEditable((Node) node.array[(i >>> level) & 0x01f]);
+			return node.array;
+			}
+		throw new IndexOutOfBoundsException();
+	}
+
 	public Object valAt(Object key){
 		//note - relies on ensureEditable in 2-arg valAt
 		return valAt(key, null);
@@ -615,7 +628,7 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 			return this;
 			}
 
-		Object[] newtail = arrayFor(cnt - 2);
+		Object[] newtail = editableArrayFor(cnt - 2);
 
 		Node newroot = popTail(shift, root);
 		int newshift = shift;
