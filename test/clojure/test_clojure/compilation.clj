@@ -10,7 +10,8 @@
 
 
 (ns clojure.test-clojure.compilation
-  (:use clojure.test))
+  (:use clojure.test
+        [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
 
 ; http://clojure.org/compilation
 
@@ -88,3 +89,53 @@
                   x
                   (recur y ^Long(rem x y)))))]
       (is (= 4 (gcd 8 100))))))
+
+;; ensure proper use of hints / type decls
+
+(defn hinted
+  (^String [])
+  (^Integer [a])
+  (^java.util.List [a & args]))
+
+;; fn names need to be fully-qualified because should-not-reflect evals its arg in a throwaway namespace
+
+(deftest recognize-hinted-arg-vector
+  (should-not-reflect #(.substring (clojure.test-clojure.compilation/hinted) 0))
+  (should-not-reflect #(.floatValue (clojure.test-clojure.compilation/hinted "arg")))
+  (should-not-reflect #(.size (clojure.test-clojure.compilation/hinted :many :rest :args :here))))
+
+(defn ^String hinting-conflict ^Integer [])
+
+(deftest calls-use-arg-vector-hint
+  (should-not-reflect #(.floatValue (clojure.test-clojure.compilation/hinting-conflict)))
+  (should-print-err-message #"(?s)Reflection warning.*"
+    #(.substring (clojure.test-clojure.compilation/hinting-conflict) 0)))
+
+(deftest deref-uses-var-tag
+  (should-not-reflect #(.substring clojure.test-clojure.compilation/hinting-conflict 0))
+  (should-print-err-message #"(?s)Reflection warning.*"
+    #(.floatValue clojure.test-clojure.compilation/hinting-conflict)))
+
+(defn ^String legacy-hinting [])
+
+(deftest legacy-call-hint
+  (should-not-reflect #(.substring (clojure.test-clojure.compilation/legacy-hinting) 0)))
+
+(defprotocol HintedProtocol
+  (hintedp ^String [a]
+           ^Integer [a b]))
+
+(deftest hinted-protocol-arg-vector
+  (should-not-reflect #(.substring (clojure.test-clojure.compilation/hintedp "") 0))
+  (should-not-reflect #(.floatValue (clojure.test-clojure.compilation/hintedp :a :b))))
+
+(defn primfn
+  (^long [])
+  (^double [a]))
+
+(deftest primitive-return-decl
+  (should-not-reflect #(loop [k 5] (recur (clojure.test-clojure.compilation/primfn))))
+  (should-not-reflect #(loop [k 5.0] (recur (clojure.test-clojure.compilation/primfn 0))))
+  
+  (should-print-err-message #"(?s).*k is not matching primitive.*"
+    #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))

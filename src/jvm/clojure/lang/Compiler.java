@@ -3265,7 +3265,25 @@ static class InvokeExpr implements Expr{
 					}
 				}
 			}
-		this.tag = tag != null ? tag : (fexpr instanceof VarExpr ? ((VarExpr) fexpr).tag : null);
+		
+		if (tag != null) {
+		    this.tag = tag;
+		} else if (fexpr instanceof VarExpr) {
+		    Object arglists = RT.get(RT.meta(((VarExpr) fexpr).var), arglistsKey);
+		    Object sigTag = null;
+		    for(ISeq s = RT.seq(arglists); s != null; s = s.next()) {
+                APersistentVector sig = (APersistentVector) s.first();
+                int restOffset = sig.indexOf(_AMP_);
+                if (args.count() == sig.count() || (restOffset > -1 && args.count() >= restOffset)) {
+                    sigTag = tagOf(sig);
+                    break;
+                }
+            }
+		    
+		    this.tag = sigTag == null ? ((VarExpr) fexpr).tag : sigTag;
+		} else {
+		    this.tag = null;
+		}
 	}
 
 	public Object eval() {
