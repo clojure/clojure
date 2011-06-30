@@ -351,7 +351,7 @@ public static void loadResourceScript(Class c, String name) throws IOException{
 public static void loadResourceScript(Class c, String name, boolean failIfNotFound) throws IOException{
 	int slash = name.lastIndexOf('/');
 	String file = slash >= 0 ? name.substring(slash + 1) : name;
-	InputStream ins = baseLoader().getResourceAsStream(name);
+	InputStream ins = resourceAsStream(baseLoader(), name);
 	if(ins != null) {
 		try {
 			Compiler.load(new InputStreamReader(ins, UTF8), name, file);
@@ -379,7 +379,7 @@ static public long lastModified(URL url, String libfile) throws IOException{
 }
 
 static void compile(String cljfile) throws IOException{
-	InputStream ins = baseLoader().getResourceAsStream(cljfile);
+        InputStream ins = resourceAsStream(baseLoader(), cljfile);
 	if(ins != null) {
 		try {
 			Compiler.compile(new InputStreamReader(ins, UTF8), cljfile,
@@ -401,8 +401,8 @@ static public void load(String scriptbase) throws IOException, ClassNotFoundExce
 static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException{
 	String classfile = scriptbase + LOADER_SUFFIX + ".class";
 	String cljfile = scriptbase + ".clj";
-	URL classURL = baseLoader().getResource(classfile);
-	URL cljURL = baseLoader().getResource(cljfile);
+	URL classURL = getResource(baseLoader(),classfile);
+	URL cljURL = getResource(baseLoader(), cljfile);
 	boolean loaded = false;
 
 	if((classURL != null &&
@@ -1988,6 +1988,22 @@ static public ClassLoader baseLoader(){
 	else if(booleanCast(USE_CONTEXT_CLASSLOADER.deref()))
 		return Thread.currentThread().getContextClassLoader();
 	return Compiler.class.getClassLoader();
+}
+
+static public InputStream resourceAsStream(ClassLoader loader, String name){
+    if (loader == null) {
+        return ClassLoader.getSystemResourceAsStream(name);
+    } else {
+        return loader.getResourceAsStream(name);
+    }
+}
+
+static public URL getResource(ClassLoader loader, String name){
+    if (loader == null) {
+        return ClassLoader.getSystemResource(name);
+    } else {
+        return loader.getResource(name);
+    }
 }
 
 static public Class classForName(String name) {
