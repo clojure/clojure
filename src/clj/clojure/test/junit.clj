@@ -139,7 +139,7 @@
                 (prn actual))))
 
 ;; This multimethod will override test-is/report
-(defmulti junit-report :type)
+(defmulti ^:dynamic junit-report :type)
 
 (defmethod junit-report :begin-test-ns [m]
   (t/with-test-out

@@ -69,7 +69,7 @@
   (println "not ok" msg))
 
 ;; This multimethod will override test/report
-(defmulti tap-report (fn [data] (:type data)))
+(defmulti ^:dynamic tap-report (fn [data] (:type data)))
 
 (defmethod tap-report :default [data]
   (t/with-test-out
