@@ -124,4 +124,57 @@ public int bitLength(){
 	return toBigInteger().bitLength();
 }
 
+public Number add(BigInt y) {
+    if ((bipart == null) && (y.bipart == null)) {
+        long ret = lpart + y.lpart;
+        if ((ret ^ lpart) >= 0 || (ret ^ y.lpart) >= 0)
+            return ret;
+    }
+    return BigInt.fromBigInteger(this.toBigInteger().add(y.toBigInteger()));
+}
+
+public Number multiply(BigInt y) {
+    if ((bipart == null) && (y.bipart == null)) {
+        long ret = lpart * y.lpart;
+            if (y.lpart == 0 || ret / y.lpart == lpart)
+                return ret;
+        }
+    return BigInt.fromBigInteger(this.toBigInteger().multiply(y.toBigInteger()));
+}
+
+public Number quotient(BigInt y) {
+    if ((bipart == null) && (y.bipart == null)) {
+        return lpart / y.lpart;
+    }
+    return BigInt.fromBigInteger(this.toBigInteger().divide(y.toBigInteger()));
+}
+
+public Number remainder(BigInt y) {
+    if ((bipart == null) && (y.bipart == null)) {
+        return lpart % y.lpart;
+    }
+    return BigInt.fromBigInteger(this.toBigInteger().remainder(y.toBigInteger()));
+}
+
+public boolean lt(BigInt y) {
+    if ((bipart == null) && (y.bipart == null)) {
+        return lpart < y.lpart;
+    }
+    return this.toBigInteger().compareTo(y.toBigInteger()) < 0;
+}
+
+public Number inc() {
+    if (bipart == null) {
+		return Numbers.inc(this.lpart);
+    }
+    return BigInt.fromBigInteger(this.toBigInteger().add(BigInteger.ONE));
+}
+
+public Number dec() {
+    if (bipart == null) {
+		return Numbers.dec(this.lpart);
+    }
+    return BigInt.fromBigInteger(this.toBigInteger().subtract(BigInteger.ONE));
+}
+
 }

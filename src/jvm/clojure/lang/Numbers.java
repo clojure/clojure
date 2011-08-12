@@ -776,11 +776,11 @@ final static class BigIntOps extends OpsP{
 	}
 
 	final public Number add(Number x, Number y){
-		return BigInt.fromBigInteger(toBigInteger(x).add(toBigInteger(y)));
+        return toBigInt(x).add(toBigInt(y));
 	}
 
 	final public Number multiply(Number x, Number y){
-		return BigInt.fromBigInteger(toBigInteger(x).multiply(toBigInteger(y)));
+        return toBigInt(x).multiply(toBigInt(y));
 	}
 
 	public Number divide(Number x, Number y){
@@ -788,11 +788,11 @@ final static class BigIntOps extends OpsP{
 	}
 
 	public Number quotient(Number x, Number y){
-		return BigInt.fromBigInteger(toBigInteger(x).divide(toBigInteger(y)));
+        return toBigInt(x).quotient(toBigInt(y));
 	}
 
 	public Number remainder(Number x, Number y){
-		return BigInt.fromBigInteger(toBigInteger(x).remainder(toBigInteger(y)));
+        return toBigInt(x).remainder(toBigInt(y));
 	}
 
 	public boolean equiv(Number x, Number y){
@@ -800,7 +800,7 @@ final static class BigIntOps extends OpsP{
 	}
 
 	public boolean lt(Number x, Number y){
-		return toBigInteger(x).compareTo(toBigInteger(y)) < 0;
+        return toBigInt(x).lt(toBigInt(y));
 	}
 
 	//public Number subtract(Number x, Number y);
