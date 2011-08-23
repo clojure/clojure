@@ -163,18 +163,4 @@ public boolean lt(BigInt y) {
     return this.toBigInteger().compareTo(y.toBigInteger()) < 0;
 }
 
-public Number inc() {
-    if (bipart == null) {
-		return Numbers.inc(this.lpart);
-    }
-    return BigInt.fromBigInteger(this.toBigInteger().add(BigInteger.ONE));
-}
-
-public Number dec() {
-    if (bipart == null) {
-		return Numbers.dec(this.lpart);
-    }
-    return BigInt.fromBigInteger(this.toBigInteger().subtract(BigInteger.ONE));
-}
-
 }
