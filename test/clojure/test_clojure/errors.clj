@@ -30,3 +30,18 @@
         (macroexpand `(m0 1))))
   (is (thrown-with-msg? ArityException #"Wrong number of args \(2\) passed to"
         (macroexpand `(m1 1 2)))))
+
+(deftest assert-arg-messages
+  ; used to ensure that error messages properly use local names for macros
+  (refer 'clojure.core :rename '{with-open renamed-with-open})
+  
+  ; would have used `are` here, but :line meta on &form doesn't survive successive macroexpansions
+  (doseq [[msg-regex-str form] [["if-let .* in %s:\\d+" '(if-let [a 5
+                                                                 b 6]
+                                                          true nil)]
+                                ["let .* in %s:\\d+" '(let [a])] 
+                                ["let .* in %s:\\d+" '(let (a))]
+                                ["renamed-with-open .* in %s:\\d+" '(renamed-with-open [a])]]]
+    (is (thrown-with-msg? IllegalArgumentException
+                          (re-pattern (format msg-regex-str *ns*))
+                          (macroexpand form)))))

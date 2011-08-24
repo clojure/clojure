@@ -1655,13 +1655,14 @@
 
 ;;;;;;;;; var stuff
 
-(defmacro ^{:private true} assert-args [fnname & pairs]
+(defmacro ^{:private true} assert-args
+  [& pairs]
   `(do (when-not ~(first pairs)
          (throw (IllegalArgumentException.
-                  ~(str fnname " requires " (second pairs)))))
+                  (str (first ~'&form) " requires " ~(second pairs) " in " ~'*ns* ":" (:line (meta ~'&form))))))
      ~(let [more (nnext pairs)]
         (when more
-          (list* `assert-args fnname more)))))
+          (list* `assert-args more)))))
 
 (defmacro if-let
   "bindings => binding-form test
@@ -1672,7 +1673,7 @@
   ([bindings then]
    `(if-let ~bindings ~then nil))
   ([bindings then else & oldform]
-   (assert-args if-let
+   (assert-args
      (and (vector? bindings) (nil? oldform)) "a vector for its binding"
      (= 2 (count bindings)) "exactly 2 forms in binding vector")
    (let [form (bindings 0) tst (bindings 1)]
@@ -1688,7 +1689,7 @@
   When test is true, evaluates body with binding-form bound to the value of test"
   {:added "1.0"}
   [bindings & body]
-  (assert-args when-let
+  (assert-args
      (vector? bindings) "a vector for its binding"
      (= 2 (count bindings)) "exactly 2 forms in binding vector")
    (let [form (bindings 0) tst (bindings 1)]
@@ -1741,7 +1742,7 @@
   before the vars are bound to their new values."
   {:added "1.0"}
   [bindings & body]
-  (assert-args binding
+  (assert-args
     (vector? bindings) "a vector for its binding"
     (even? (count bindings)) "an even number of forms in binding vector")
   (let [var-ize (fn [var-vals]
@@ -2800,7 +2801,7 @@
   the head of the sequence. Returns nil."
   {:added "1.0"}
   [seq-exprs & body]
-  (assert-args doseq
+  (assert-args
      (vector? seq-exprs) "a vector for its binding"
      (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [step (fn step [recform exprs]
@@ -2898,7 +2899,7 @@
   bound to integers from 0 through n-1."
   {:added "1.0"}
   [bindings & body]
-  (assert-args dotimes
+  (assert-args
      (vector? bindings) "a vector for its binding"
      (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [i (first bindings)
@@ -3379,7 +3380,7 @@
   name in reverse order."
   {:added "1.0"}
   [bindings & body]
-  (assert-args with-open
+  (assert-args
      (vector? bindings) "a vector for its binding"
      (even? (count bindings)) "an even number of forms in binding vector")
   (cond
@@ -3855,7 +3856,7 @@
   var-set"
   {:added "1.0"}
   [name-vals-vec & body]
-  (assert-args with-local-vars
+  (assert-args
      (vector? name-vals-vec) "a vector for its binding"
      (even? (count name-vals-vec)) "an even number of forms in binding vector")
   `(let [~@(interleave (take-nth 2 name-vals-vec)
@@ -3958,7 +3959,7 @@
   therein."
   {:added "1.0", :special-form true, :forms '[(let [bindings*] exprs*)]}
   [bindings & body]
-  (assert-args let
+  (assert-args
      (vector? bindings) "a vector for its binding"
      (even? (count bindings)) "an even number of forms in binding vector")
   `(let* ~(destructure bindings) ~@body))
@@ -4028,7 +4029,7 @@
   therein. Acts as a recur target."
   {:added "1.0", :special-form true, :forms '[(loop [bindings*] exprs*)]}
   [bindings & body]
-    (assert-args loop
+    (assert-args
       (vector? bindings) "a vector for its binding"
       (even? (count bindings)) "an even number of forms in binding vector")
     (let [db (destructure bindings)]
@@ -4053,7 +4054,7 @@
   Same as (when (seq xs) (let [x (first xs)] body))"
   {:added "1.0"}
   [bindings & body]
-  (assert-args when-first
+  (assert-args
      (vector? bindings) "a vector for its binding"
      (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [[x xs] bindings]
@@ -4083,7 +4084,7 @@
   (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)] [x y]))"
   {:added "1.0"}
   [seq-exprs body-expr]
-  (assert-args for
+  (assert-args
      (vector? seq-exprs) "a vector for its binding"
      (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [to-groups (fn [seq-exprs]
