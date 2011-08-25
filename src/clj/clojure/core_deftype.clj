@@ -103,7 +103,13 @@
   (seq (let [f \"foo\"] 
        (reify clojure.lang.Seqable 
          (seq [this] (seq f)))))
-  == (\\f \\o \\o))"
+  == (\\f \\o \\o))
+  
+  reify always implements clojure.lang.IObj and transfers meta
+  data of the form to the created object.
+  
+  (meta ^{:k :v} (reify Object (toString [this] \"foo\")))
+  == {:k :v}"
   {:added "1.2"} 
   [& opts+specs]
   (let [[interfaces methods] (parse-opts+specs opts+specs)]
