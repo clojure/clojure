@@ -52,6 +52,8 @@ static interface Ops{
 	public boolean equiv(Number x, Number y);
 
 	public boolean lt(Number x, Number y);
+	public boolean lte(Number x, Number y);
+	public boolean gte(Number x, Number y);
 
 	public Number negate(Number x);
 	public Number negateP(Number x);
@@ -220,7 +222,7 @@ static public boolean lt(Object x, Object y){
 }
 
 static public boolean lte(Object x, Object y){
-	return !ops(x).combine(ops(y)).lt((Number)y, (Number)x);
+	return ops(x).combine(ops(y)).lte((Number)x, (Number)y);
 }
 
 static public boolean gt(Object x, Object y){
@@ -228,7 +230,7 @@ static public boolean gt(Object x, Object y){
 }
 
 static public boolean gte(Object x, Object y){
-	return !ops(x).combine(ops(y)).lt((Number)x, (Number)y);
+	return ops(x).combine(ops(y)).gte((Number)x, (Number)y);
 }
 
 static public int compare(Number x, Number y){
@@ -519,6 +521,14 @@ final static class LongOps implements Ops{
 		return x.longValue() < y.longValue();
 	}
 
+	public boolean lte(Number x, Number y){
+		return x.longValue() <= y.longValue();
+	}
+
+	public boolean gte(Number x, Number y){
+		return x.longValue() >= y.longValue();
+	}
+
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
 		long val = x.longValue();
@@ -619,6 +629,14 @@ final static class DoubleOps extends OpsP{
 
 	public boolean lt(Number x, Number y){
 		return x.doubleValue() < y.doubleValue();
+	}
+
+	public boolean lte(Number x, Number y){
+		return x.doubleValue() <= y.doubleValue();
+	}
+
+	public boolean gte(Number x, Number y){
+		return x.doubleValue() >= y.doubleValue();
 	}
 
 	//public Number subtract(Number x, Number y);
@@ -738,6 +756,18 @@ final static class RatioOps extends OpsP{
 		return Numbers.lt(rx.numerator.multiply(ry.denominator), ry.numerator.multiply(rx.denominator));
 	}
 
+	public boolean lte(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		return Numbers.lte(rx.numerator.multiply(ry.denominator), ry.numerator.multiply(rx.denominator));
+	}
+
+	public boolean gte(Number x, Number y){
+		Ratio rx = toRatio(x);
+		Ratio ry = toRatio(y);
+		return Numbers.gte(rx.numerator.multiply(ry.denominator), ry.numerator.multiply(rx.denominator));
+	}
+
 	//public Number subtract(Number x, Number y);
 	final public Number negate(Number x){
 		Ratio r = (Ratio) x;
@@ -826,6 +856,14 @@ final static class BigIntOps extends OpsP{
 
 	public boolean lt(Number x, Number y){
         return toBigInt(x).lt(toBigInt(y));
+	}
+
+	public boolean lte(Number x, Number y){
+		return toBigInteger(x).compareTo(toBigInteger(y)) <= 0;
+	}
+
+	public boolean gte(Number x, Number y){
+		return toBigInteger(x).compareTo(toBigInteger(y)) >= 0;
 	}
 
 	//public Number subtract(Number x, Number y);
@@ -928,6 +966,14 @@ final static class BigDecimalOps extends OpsP{
 
 	public boolean lt(Number x, Number y){
 		return toBigDecimal(x).compareTo(toBigDecimal(y)) < 0;
+	}
+
+	public boolean lte(Number x, Number y){
+		return toBigDecimal(x).compareTo(toBigDecimal(y)) <= 0;
+	}
+
+	public boolean gte(Number x, Number y){
+		return toBigDecimal(x).compareTo(toBigDecimal(y)) >= 0;
 	}
 
 	//public Number subtract(Number x, Number y);
