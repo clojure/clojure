@@ -12,6 +12,10 @@
   (:use clojure.test)
   (:import [java.util.concurrent CountDownLatch TimeUnit]))
 
+;; tests are fragile. If wait fails, could indicate that
+;; build box is thrashing.
+(def fragile-wait 1000)
+
 (deftest handle-all-throwables-during-agent-actions
   ;; Bug fixed in r1198; previously hung Clojure or didn't report agent errors
   ;; after OutOfMemoryError, yet wouldn't execute new actions.
@@ -19,7 +23,7 @@
     (send agt (fn [state] (throw (Throwable. "just testing Throwables"))))
     (try
      ;; Let the action finish; eat the "agent has errors" error that bubbles up
-     (await-for 100 agt)
+     (await-for fragile-wait agt)
      (catch RuntimeException _))
     (is (instance? Throwable (first (agent-errors agt))))
     (is (= 1 (count (agent-errors agt))))
@@ -28,7 +32,7 @@
     (clear-agent-errors agt)
     (is (= nil @agt))
     (send agt nil?)
-    (is (true? (await-for 100 agt)))
+    (is (true? (await-for fragile-wait agt)))
     (is (true? @agt))))
 
 (deftest default-modes
@@ -39,7 +43,7 @@
   (let [err (atom nil)
         agt (agent 0 :error-mode :continue :error-handler #(reset! err %&))]
     (send agt /)
-    (is (true? (await-for 100 agt)))
+    (is (true? (await-for fragile-wait agt)))
     (is (= 0 @agt))
     (is (nil? (agent-error agt)))
     (is (= agt (first @err)))
@@ -87,7 +91,7 @@
     (is (= 0 @agt))
     (is (= ArithmeticException (class (agent-error agt))))
     (restart-agent agt 10)
-    (is (true? (await-for 100 agt)))
+    (is (true? (await-for fragile-wait agt)))
     (is (= 12 @agt))
     (is (nil? (agent-error agt)))))
 
@@ -103,11 +107,11 @@
     (is (= 0 @agt))
     (is (= ArithmeticException (class (agent-error agt))))
     (restart-agent agt 10 :clear-actions true)
-    (is (true? (await-for 100 agt)))
+    (is (true? (await-for fragile-wait agt)))
     (is (= 10 @agt))
     (is (nil? (agent-error agt)))
     (send agt inc)
-    (is (true? (await-for 100 agt)))
+    (is (true? (await-for fragile-wait agt)))
     (is (= 11 @agt))
     (is (nil? (agent-error agt)))))
 
@@ -124,7 +128,7 @@
     (is (= IllegalStateException (class (agent-error agt))))
     (is (thrown? RuntimeException (restart-agent agt 5)))
     (restart-agent agt 6)
-    (is (true? (await-for 100 agt)))
+    (is (true? (await-for fragile-wait agt)))
     (is (= 10 @agt))
     (is (nil? (agent-error agt)))))
 
