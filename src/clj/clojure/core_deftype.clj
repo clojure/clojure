@@ -303,8 +303,9 @@
   interfaces generated automatically: IObj (metadata support) and
   IPersistentMap, and all of their superinterfaces.
 
-  In addition, defrecord will define type-and-value-based equality and
-  hashCode.
+  In addition, defrecord will define type-and-value-based =,
+  and will defined Java .hashCode and .equals consistent with the
+  contract for java.util.Map.
 
   When AOT compiling, generates compiled bytecode for a class with the
   given name (a symbol), prepends the current ns as the package, and
