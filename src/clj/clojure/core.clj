@@ -888,18 +888,18 @@
 
 ;;math stuff
 (defn ^:private nary-inline
-  ([op]
-    (fn
-      ([x] `(. clojure.lang.Numbers (~op ~x)))
-      ([x y] `(. clojure.lang.Numbers (~op ~x ~y)))
-      ([x y & more]
-        (reduce1
-          (fn [a b] `(. clojure.lang.Numbers (~op ~a ~b)))
-          `(. clojure.lang.Numbers (~op ~x ~y)) more))))
+  ([op] (nary-inline op op))
   ([op unchecked-op]
-    (if *unchecked-math*
-      (nary-inline unchecked-op)
-      (nary-inline op))))
+     (fn
+       ([x] (let [op (if *unchecked-math* unchecked-op op)]
+              `(. clojure.lang.Numbers (~op ~x))))
+       ([x y] (let [op (if *unchecked-math* unchecked-op op)]
+                `(. clojure.lang.Numbers (~op ~x ~y))))
+       ([x y & more]
+          (let [op (if *unchecked-math* unchecked-op op)]
+            (reduce1
+             (fn [a b] `(. clojure.lang.Numbers (~op ~a ~b)))
+             `(. clojure.lang.Numbers (~op ~x ~y)) more))))))
 
 (defn ^:private >1? [n] (clojure.lang.Numbers/gt n 1))
 (defn ^:private >0? [n] (clojure.lang.Numbers/gt n 0))
