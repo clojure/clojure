@@ -15,6 +15,7 @@ clojure.test-clojure.data-structures
 clojure.test-clojure.def
 clojure.test-clojure.errors
 clojure.test-clojure.evaluation
+clojure.test-clojure.fn
 clojure.test-clojure.for
 clojure.test-clojure.genclass.examples
 clojure.test-clojure.genclass

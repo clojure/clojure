@@ -11,9 +11,46 @@
         clojure.test-clojure.protocols))
 
 (deftest defn-error-messages
-  (testing "bad arglist forms"
-    (is (fails-with-cause? IllegalArgumentException '#"Parameter declaration arg1 should be a vector"
-          (eval-in-temp-ns (defn foo (arg1 arg2)))))))
+  (testing "multiarity syntax invalid parameter declaration"
+    (is (fails-with-cause? 
+          IllegalArgumentException 
+          #"Parameter declaration arg1 should be a vector"
+          (eval-in-temp-ns (defn foo (arg1 arg2))))))
+
+  (testing "multiarity syntax invalid signature"
+    (is (fails-with-cause? 
+          IllegalArgumentException 
+          #"Invalid signature \[a b\] should be a list"
+          (eval-in-temp-ns (defn foo 
+                             ([a] 1)
+                             [a b])))))
+
+  (testing "assume single arity syntax"
+    (is (fails-with-cause? 
+          IllegalArgumentException 
+          #"Parameter declaration a should be a vector"
+          (eval-in-temp-ns (defn foo a)))))
+
+  (testing "bad name"
+    (is (fails-with-cause? 
+          IllegalArgumentException 
+          #"First argument to defn must be a symbol"
+          (eval-in-temp-ns (defn "bad docstring" testname [arg1 arg2])))))
+         
+  (testing "missing parameter/signature"
+    (is (fails-with-cause? 
+          IllegalArgumentException 
+          #"Parameter declaration missing"
+          (eval-in-temp-ns (defn testname)))))
+
+  (testing "allow trailing map"
+    (is (eval-in-temp-ns (defn a "asdf" ([a] 1) {:a :b}))))
+
+  (testing "don't allow interleaved map"
+    (is (fails-with-cause? 
+          IllegalArgumentException 
+          #"Invalid signature \{:a :b\} should be a list"
+          (eval-in-temp-ns (defn a "asdf" ([a] 1) {:a :b} ([] 1)))))))
 
 (deftest dynamic-redefinition
   ;; too many contextual things for this kind of caching to work...
