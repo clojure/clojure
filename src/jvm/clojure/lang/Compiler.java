@@ -1545,6 +1545,29 @@ static class StaticMethodExpr extends MethodExpr{
 		return method != null && Util.isPrimitive(method.getReturnType());
 	}
 
+	public boolean canEmitIntrinsicPredicate(){
+		return method != null && RT.get(Intrinsics.preds, method.toString()) != null;
+	}
+
+	public void emitIntrinsicPredicate(C context, ObjExpr objx, GeneratorAdapter gen, Label falseLabel){
+		gen.visitLineNumber(line, gen.mark());
+		if(method != null)
+			{
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			if(context == C.RETURN)
+				{
+				ObjMethod method = (ObjMethod) METHOD.deref();
+				method.emitClearLocals(gen);
+				}
+			Object[] predOps = (Object[]) RT.get(Intrinsics.preds, method.toString());
+			for(int i=0;i<predOps.length-1;i++)
+				gen.visitInsn((Integer)predOps[i]);
+			gen.visitJumpInsn((Integer)predOps[predOps.length-1],falseLabel);
+			}
+		else
+			throw new UnsupportedOperationException("Unboxed emit of unknown member");
+	}
+
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
@@ -1556,9 +1579,23 @@ static class StaticMethodExpr extends MethodExpr{
 				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
-			Type type = Type.getType(c);
-			Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
-			gen.invokeStatic(type, m);
+			Object ops = RT.get(Intrinsics.ops, method.toString());
+			if(ops != null)
+				{
+				if(ops instanceof Object[])
+					{
+					for(Object op : (Object[])ops)
+						gen.visitInsn((Integer) op);
+					}
+				else
+					gen.visitInsn((Integer) ops);
+				}
+			else
+				{
+				Type type = Type.getType(c);
+				Method m = new Method(methodName, Type.getReturnType(method), Type.getArgumentTypes(method));
+				gen.invokeStatic(type, m);
+				}
 			}
 		else
 			throw new UnsupportedOperationException("Unboxed emit of unknown member");
@@ -2475,7 +2512,11 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 
 		try
 			{
-			if(maybePrimitiveType(testExpr) == boolean.class)
+			if(testExpr instanceof StaticMethodExpr && ((StaticMethodExpr)testExpr).canEmitIntrinsicPredicate())
+				{
+				((StaticMethodExpr) testExpr).emitIntrinsicPredicate(C.EXPRESSION, objx, gen, falseLabel);
+				}
+			else if(maybePrimitiveType(testExpr) == boolean.class)
 				{
 				((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, objx, gen);
 				gen.ifZCmp(gen.EQ, falseLabel);
