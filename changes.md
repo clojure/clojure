@@ -313,7 +313,9 @@ Patch causes thread names like:
 
 ### 2.31 Add docstring support to def
 
-defs can now have docstrings
+A def can now have a docstring between name and value.
+
+    (def foo "a foo" :foo)
 
 ### 2.32 Comp function returns identity when called with zero arity
 
