@@ -124,34 +124,34 @@ public int bitLength(){
 	return toBigInteger().bitLength();
 }
 
-public Number add(BigInt y) {
+public BigInt add(BigInt y) {
     if ((bipart == null) && (y.bipart == null)) {
         long ret = lpart + y.lpart;
         if ((ret ^ lpart) >= 0 || (ret ^ y.lpart) >= 0)
-            return ret;
+            return BigInt.valueOf(ret);
     }
     return BigInt.fromBigInteger(this.toBigInteger().add(y.toBigInteger()));
 }
 
-public Number multiply(BigInt y) {
+public BigInt multiply(BigInt y) {
     if ((bipart == null) && (y.bipart == null)) {
         long ret = lpart * y.lpart;
             if (y.lpart == 0 || ret / y.lpart == lpart)
-                return ret;
+                return BigInt.valueOf(ret);
         }
     return BigInt.fromBigInteger(this.toBigInteger().multiply(y.toBigInteger()));
 }
 
-public Number quotient(BigInt y) {
+public BigInt quotient(BigInt y) {
     if ((bipart == null) && (y.bipart == null)) {
-        return lpart / y.lpart;
+        return BigInt.valueOf(lpart / y.lpart);
     }
     return BigInt.fromBigInteger(this.toBigInteger().divide(y.toBigInteger()));
 }
 
-public Number remainder(BigInt y) {
+public BigInt remainder(BigInt y) {
     if ((bipart == null) && (y.bipart == null)) {
-        return lpart % y.lpart;
+        return BigInt.valueOf(lpart % y.lpart);
     }
     return BigInt.fromBigInteger(this.toBigInteger().remainder(y.toBigInteger()));
 }
