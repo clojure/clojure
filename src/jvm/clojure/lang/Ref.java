@@ -47,24 +47,21 @@ public Ref setMaxHistory(int maxHistory){
 public static class TVal{
 	Object val;
 	long point;
-	long msecs;
 	TVal prior;
 	TVal next;
 
-	TVal(Object val, long point, long msecs, TVal prior){
+	TVal(Object val, long point, TVal prior){
 		this.val = val;
 		this.point = point;
-		this.msecs = msecs;
 		this.prior = prior;
 		this.next = prior.next;
 		this.prior.next = this;
 		this.next.prior = this;
 	}
 
-	TVal(Object val, long point, long msecs){
+	TVal(Object val, long point){
 		this.val = val;
 		this.point = point;
-		this.msecs = msecs;
 		this.next = this;
 		this.prior = this;
 	}
@@ -92,7 +89,7 @@ public Ref(Object initVal,IPersistentMap meta) {
     this.id = ids.getAndIncrement();
 	this.faults = new AtomicInteger();
 	this.lock = new ReentrantReadWriteLock();
-	tvals = new TVal(initVal, 0, System.currentTimeMillis());
+	tvals = new TVal(initVal, 0);
 }
 
 //the latest val
