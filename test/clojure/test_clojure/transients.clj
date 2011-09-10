@@ -14,3 +14,13 @@
     (is (= 31 (let [pv (vec (range 34))]
                 (-> pv transient pop! pop! pop! (conj! 42))
                 (nth pv 31)))))
+
+(defn- hash-obj [hash]
+  (reify Object (hashCode [this] hash)))
+
+(deftest dissocing
+  (testing "dissocing colliding keys"
+    (is (= [0 {}] (let [ks (concat (range 7) [(hash-obj 42) (hash-obj 42)])
+                        m (zipmap ks ks)
+                        dm (persistent! (reduce dissoc! (transient m) (keys m)))]
+                    [(count dm) dm])))))
