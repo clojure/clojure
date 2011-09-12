@@ -432,6 +432,20 @@
       (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting{:a 1, :b 2}"
              (binding [*print-dup* true *verbose-defrecords* true] (pr-str r)))))))
 
+(defrecord RecordToTest__ [__a ___b])
+(defrecord TypeToTest__   [__a ___b])
+
+(deftest test-record-and-type-field-names
+  (testing "that types and records allow names starting with double-underscore.
+            This is a regression test for CLJ-837."
+    (let [r (RecordToTest__. 1 2)
+          t (TypeToTest__. 3 4)]
+      (are [x y] =
+           1 (:__a r)
+           2 (:___ b r)
+           3 (.__a t)
+           4 (.___b t)))))
+
 (defrecord RecordToTestLongHint [^long a])
 (defrecord RecordToTestByteHint [^byte a])
 (defrecord RecordToTestBoolHint [^boolean a])
