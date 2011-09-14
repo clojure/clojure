@@ -398,6 +398,33 @@
       (contains? #{1 2 3} 10) false
       (contains? #{1 2 3} nil) false)
 
+  ; contains? also works on java.util.Map and java.util.Set.
+  (are [x y] (= x y)
+      (contains? (java.util.HashMap. {}) :a) false
+      (contains? (java.util.HashMap. {}) nil) false
+
+      (contains? (java.util.HashMap. {:a 1}) :a) true
+      (contains? (java.util.HashMap. {:a 1}) :b) false
+      (contains? (java.util.HashMap. {:a 1}) nil) false
+
+      (contains? (java.util.HashMap. {:a 1 :b 2}) :a) true
+      (contains? (java.util.HashMap. {:a 1 :b 2}) :b) true
+      (contains? (java.util.HashMap. {:a 1 :b 2}) :c) false
+      (contains? (java.util.HashMap. {:a 1 :b 2}) nil) false
+
+      ; sets
+      (contains? (java.util.HashSet. #{}) 1) false
+      (contains? (java.util.HashSet. #{}) nil) false
+
+      (contains? (java.util.HashSet. #{1}) 1) true
+      (contains? (java.util.HashSet. #{1}) 2) false
+      (contains? (java.util.HashSet. #{1}) nil) false
+
+      (contains? (java.util.HashSet. #{1 2 3}) 1) true
+      (contains? (java.util.HashSet. #{1 2 3}) 3) true
+      (contains? (java.util.HashSet. #{1 2 3}) 10) false
+      (contains? (java.util.HashSet. #{1 2 3}) nil) false)
+
   ; numerically indexed collections (e.g. vectors and Java arrays)
   ; => test if the numeric key is WITHIN THE RANGE OF INDEXES
   (are [x y] (= x y)

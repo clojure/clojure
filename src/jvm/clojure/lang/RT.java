@@ -700,6 +700,10 @@ static public Object contains(Object coll, Object key){
 		Map m = (Map) coll;
 		return m.containsKey(key) ? T : F;
 	}
+	else if(coll instanceof Set) {
+		Set s = (Set) coll;
+		return s.contains(key) ? T : F;
+	}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll);
