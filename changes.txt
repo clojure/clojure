@@ -42,6 +42,7 @@ Changes to Clojure in Version 1.3
     2.31 Add docstring support to def
     2.32 Comp function returns identity when called with zero arity
     2.33 Type hints can be applied to arg vectors
+    2.34 Binding Conveyance
  3 Performance Enhancements
  4 Bug Fixes
  5 Modular Contrib
@@ -77,7 +78,7 @@ Full details here: http://dev.clojure.org/display/doc/Enhanced+Primitive+Support
 
 == 2.2 defrecord and deftype Improvements ==
 
-Details here: http://dev.clojure.org/display/design/defrecord+improvements?focusedCommentId=1573364#comment-1573364
+Details here: http://dev.clojure.org/display/design/defrecord+improvements
 
 == 2.3 Better Exception Reporting ==
 
@@ -101,8 +102,8 @@ Full details here: http://dev.clojure.org/display/design/Reflection+API
 
 Recursively compares a and b, returning a tuple of [things-only-in-a things-only-in-b things-in-both]
 
-  (diff {:fred :ethel} {:fred :ethel})
-  => [nil nil {:fred :ethel}]
+  (diff {:a 1 :b 2} {:a 1 :b 22 :c 3})
+  => ({:b 2} {:c 3, :b 22} {:a 1})
 
 == 2.6 clojure.core/every-pred and clojure.core/some-fn Combinators ==
 
@@ -310,6 +311,14 @@ You can hint different arities separately:
 
 This is preferred over hinting the function name. Hinting the function name is still allowed for backward compatibility, but will likely be deprecated in a future release.
 
+== 2.34 Binding Conveyance ==
+
+Clojure APIs that pass work off to other threads (e.g. send, send-off, pmap, future) now convey the dynamic bindings of the calling thread:
+
+  (def ^:dynamic *num* 1)
+  (binding [*num* 2] (future (println *num*)))
+  ;; prints "2", not "1"
+
 = 3 Performance Enhancements =
 
   * Code path for using vars is now much faster for the common case
@@ -411,4 +420,4 @@ The complete list of JIRA issues is here: http://dev.clojure.org/jira/secure/Iss
 
 In 1.3, the monolithic clojure-contrib.jar has been replaced by a modular system of contrib libraries, so that production systems can include only the code they actually need. This also allows individual contribs to have their own release cycles. Many contribs have moved forward by several point versions already. Documentation for updating applications to use the new contrib libraries is at http://dev.clojure.org/display/design/Where+Did+Clojure.Contrib+Go
 
-Important Note: Many of the new modular contribs are compatible with both 1.2 and 1.3. This offers an incremental migration path: First, upgrade your contrib libraries while holding Clojure at 1.2, Then, in a separate step, upgrare to Clojure 1.3.
+Important Note: Many of the new modular contribs are compatible with both 1.2 and 1.3. This offers an incremental migration path: First, upgrade your contrib libraries while holding Clojure at 1.2, Then, in a separate step, upgrade to Clojure 1.3.
