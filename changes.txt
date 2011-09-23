@@ -183,7 +183,7 @@ Prints a collection of maps in a textual table.
 
 == 2.12 pprint respects *print-length* ==
 
-Assigning *print-length* now effects output of pprint
+Assigning *print-length* now affects output of pprint
 
 == 2.13 compilation and deployment via Maven ==
 
