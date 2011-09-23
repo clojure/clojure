@@ -11,19 +11,8 @@
 (ns clojure.test-clojure.annotations
   (:use clojure.test))
 
-(defn vm-has-ws-annotations?
-  "Does the vm have the ws annotations we use to test some
-   annotation features. If not, fall back to Java 5 tests."
-  []
-  (try
-   (doseq [n ["javax.xml.ws.soap.Addressing"
-              "javax.xml.ws.WebServiceRef"
-              "javax.xml.ws.WebServiceRefs"]]
-     (Class/forName n))
-   true
-   (catch ClassNotFoundException e
-     false)))
+(case (System/getProperty "java.specification.version")
+      "1.5" (load "annotations/java_5")
+      "1.6" (load "annotations/java_6")
+      nil)
 
-(if (vm-has-ws-annotations?)
-  (load "annotations/java_6_and_later")
-  (load "annotations/java_5"))
