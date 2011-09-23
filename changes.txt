@@ -3,11 +3,11 @@ Changes to Clojure in Version 1.3
 = CONTENTS =
 
  1 Deprecated and Removed Features
-    1.1 Earmuffed Vars Are No Longer Automatically Considered Dynamic.
-    1.2 ISeq No Longer Inherits From Sequential
-    1.3 Removed Bit Operation support for boxed numbers
-    1.4 Ancillary Namespaces No Longer Auto-Load on Startup:
-    1.5 Replicate has been deprecated in favor of repeat
+    1.1 Earmuffed Vars are No Longer Automatically Considered Dynamic
+    1.2 ISeq No Longer Inherits from Sequential
+    1.3 Removed Bit Operation Support for Boxed Numbers
+    1.4 Ancillary Namespaces No Longer Auto-Load on Startup
+    1.5 Replicate Deprecated
  2 New/Improved Features
     2.1 Enhanced Primitive Support
     2.2 defrecord and deftype Improvements
@@ -53,11 +53,11 @@ Changes to Clojure in Version 1.3
   (def *fred*)
   => Warning: *fred* not declared dynamic and thus is not dynamically rebindable, but its name suggests otherwise. Please either indicate ^:dynamic ** or change the name.
 
-== 1.2 ISeq No Longer Inherits From Sequential ==
+== 1.2 ISeq No Longer Inherits from Sequential ==
 
-This allows anything that implements ISeq from being exclusively in the map or set equality partition.
+This allows ISeq implementers to be in the map or set equality partition.
 
-== 1.3 Removed Bit Operation support for boxed numbers ==
+== 1.3 Removed Bit Operation Support for Boxed Numbers ==
 
 Bit Operations map directly to primitive operations
 
@@ -65,7 +65,7 @@ Bit Operations map directly to primitive operations
 
 The following namespaces are no longer loaded on startup: clojure.set, clojure.xml, clojure.zip
 
-== 1.5 replicate has been deprecated ==
+== 1.5 Replicate Deprecated ==
 
 Use repeat instead.
 
@@ -287,8 +287,8 @@ It's a best practice to name the threads in an executor thread pool with a custo
 
 Patch causes thread names like:
 
-    clojure-agent-send-pool-%d ��� should be fixed # of threads
-    clojure-agent-send-off-pool-%d ��� will be added and removed over time
+    clojure-agent-send-pool-%d  (should be fixed # of threads)
+    clojure-agent-send-off-pool-%d (will be added and removed over time)
 
 == 2.31 Add docstring support to def ==
 
@@ -409,6 +409,6 @@ The complete list of JIRA issues is here: http://dev.clojure.org/jira/secure/Iss
 
 = 5 Modular Contrib =
 
-In 1.3, the monolithic clojure-contrib.jar has been replaced by a modular system of contrib libraries, so that production systems can include only the code they actually need. This also allows individual contribs to have their own release cycles. Many contribs have moved forward by several point versions already. Documentation for updating applications to use the new contrib libraries is at http://dev.clojure.org/display/design/Where+Did+Clojure.Contrib+Go.
+In 1.3, the monolithic clojure-contrib.jar has been replaced by a modular system of contrib libraries, so that production systems can include only the code they actually need. This also allows individual contribs to have their own release cycles. Many contribs have moved forward by several point versions already. Documentation for updating applications to use the new contrib libraries is at http://dev.clojure.org/display/design/Where+Did+Clojure.Contrib+Go
 
 Important Note: Many of the new modular contribs are compatible with both 1.2 and 1.3. This offers an incremental migration path: First, upgrade your contrib libraries while holding Clojure at 1.2, Then, in a separate step, upgrare to Clojure 1.3.
