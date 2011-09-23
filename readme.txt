@@ -9,7 +9,7 @@
 
 Docs: http://clojure.org
 Feedback: http://groups.google.com/group/clojure
-
+Getting Started: http://dev.clojure.org/display/doc/Getting+Started
 
 To run:  java -cp clojure-${VERSION}.jar clojure.main
 

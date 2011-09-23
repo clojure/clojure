@@ -1,4 +1,4 @@
-Changes to Clojure in Version 1.3 Beta
+Changes to Clojure in Version 1.3
 
 = CONTENTS =
 
@@ -9,7 +9,7 @@ Changes to Clojure in Version 1.3 Beta
     1.4 Removed Bit Operation support for boxed numbers
     1.5 Ancillary Namespaces No Longer Auto-Load on Startup:
     1.6 Replicate has been deprecated in favor of repeat
-  2 New/Improved Features
+ 2 New/Improved Features
     2.1 Enhanced Primitive Support
     2.2 defrecord and deftype Improvements
     2.3 Better Exception Reporting
@@ -43,8 +43,9 @@ Changes to Clojure in Version 1.3 Beta
     2.31 Add docstring support to def
     2.32 Comp function returns identity when called with zero arity
     2.33 Type hints can be applied to arg vectors
-  3 Performance Enhancements
-  4 Bug Fixes
+ 3 Performance Enhancements
+ 4 Bug Fixes
+ 5 Modular Contrib
 
 = 1 Deprecated and Removed Features =
 
@@ -330,6 +331,7 @@ This is preferred over hinting the function name. Hinting the function name is s
   * inline bit-functions & math ops
   * inline n-ary min & max
   * PersistentQueue count is now O(1)
+  * Intrinsics: unchecked math operators now emit bytecodes directly where possible
 
 = 4 Bug Fixes =
 
@@ -373,6 +375,9 @@ The complete list of JIRA issues is here: http://dev.clojure.org/jira/secure/Iss
   * CLJ-444 Infinite recursion in Keyword.intern leads to stack overflow
   ** No more infinite recursion with patch
 
+  * CLJ-673 use system class loader when base loader is null
+  ** facilitates placing Clojure on bootclasspath
+
   * CLJ-678 into-array should work with all primitive types
 
   * CLJ-680 printing promises should not block
@@ -405,3 +410,9 @@ The complete list of JIRA issues is here: http://dev.clojure.org/jira/secure/Iss
   * several "holding onto head" fixes
     * Stop top-level defs from hanging onto the head of an expression that uses a lazy seq
     * Stop multimethods from holding onto heads of their arguments
+
+= 5 Modular Contrib =
+
+In 1.3, the monolithic clojure-contrib.jar has been replaced by a modular system of contrib libraries, so that production systems can include only the code they actually need. This also allows individual contribs to have their own release cycles. Many contribs have moved forward by several point versions already. Documentation for updating applications to use the new contrib libraries is at http://dev.clojure.org/display/design/Where+Did+Clojure.Contrib+Go.
+
+Important Note: Many of the new modular contribs are compatible with both 1.2 and 1.3. This offers an incremental migration path: First, upgrade your contrib libraries while holding Clojure at 1.2, Then, in a separate step, upgrare to Clojure 1.3.
