@@ -456,6 +456,11 @@ static public int nextID(){
 	return id.getAndIncrement();
 }
 
+// Load a library in the System ClassLoader instead of Clojure's own.
+public static void loadLibrary(String libname){
+    System.loadLibrary(libname);
+}
+
 
 ////////////// Collections support /////////////////////////////////
 
