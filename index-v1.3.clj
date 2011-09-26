@@ -360,7 +360,7 @@
    :var-type "var",
    :line 15,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
   {:name "*print-level*",
    :namespace "clojure.core",
    :source-url
@@ -376,7 +376,7 @@
    :var-type "var",
    :line 26,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
   {:raw-source-url nil,
    :source-url nil,
    :wiki-url
@@ -1226,7 +1226,7 @@
    :var-type "function",
    :line 372,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([x]),
    :name "bigdec",
    :namespace "clojure.core",
@@ -1652,7 +1652,7 @@
    :var-type "var",
    :line 164,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
   {:name "char-name-string",
    :namespace "clojure.core",
    :source-url
@@ -1666,7 +1666,7 @@
    :var-type "var",
    :line 244,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_print.clj"}
   {:arglists ([x]),
    :name "char?",
    :namespace "clojure.core",
@@ -2006,7 +2006,7 @@
    :var-type "function",
    :line 264,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([coll key]),
    :name "contains?",
    :namespace "clojure.core",
@@ -2277,7 +2277,7 @@
    :var-type "macro",
    :line 600,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([name [& fields] & opts+specs]),
    :name "defrecord",
    :namespace "clojure.core",
@@ -2293,7 +2293,7 @@
    :var-type "macro",
    :line 257,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([name & keys]),
    :name "defstruct",
    :namespace "clojure.core",
@@ -2323,7 +2323,7 @@
    :var-type "macro",
    :line 344,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([& body]),
    :name "delay",
    :namespace "clojure.core",
@@ -2856,7 +2856,7 @@
    :var-type "function",
    :line 654,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([p & specs]),
    :name "extend-protocol",
    :namespace "clojure.core",
@@ -2872,7 +2872,7 @@
    :var-type "macro",
    :line 754,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([t & specs]),
    :name "extend-type",
    :namespace "clojure.core",
@@ -2888,7 +2888,7 @@
    :var-type "macro",
    :line 722,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([protocol]),
    :name "extenders",
    :namespace "clojure.core",
@@ -2904,7 +2904,7 @@
    :var-type "function",
    :line 475,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([protocol atype]),
    :name "extends?",
    :namespace "clojure.core",
@@ -2919,7 +2919,7 @@
    :var-type "function",
    :line 468,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([x]),
    :name "false?",
    :namespace "clojure.core",
@@ -3357,7 +3357,7 @@
    :var-type "macro",
    :line 492,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/genclass.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/genclass.clj"}
   {:arglists ([& options]),
    :name "gen-interface",
    :namespace "clojure.core",
@@ -3373,7 +3373,7 @@
    :var-type "macro",
    :line 669,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/genclass.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/genclass.clj"}
   {:arglists ([] [prefix-string]),
    :name "gensym",
    :namespace "clojure.core",
@@ -3449,7 +3449,7 @@
    :var-type "function",
    :line 250,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([]),
    :name "get-thread-bindings",
    :namespace "clojure.core",
@@ -3681,7 +3681,7 @@
    :var-type "function",
    :line 271,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([c x]),
    :name "instance?",
    :namespace "clojure.core",
@@ -4587,7 +4587,7 @@
    :var-type "function",
    :line 13,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([x]),
    :name "neg?",
    :namespace "clojure.core",
@@ -5419,7 +5419,7 @@
    :var-type "macro",
    :line 303,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([proxy]),
    :name "proxy-mappings",
    :namespace "clojure.core",
@@ -5434,7 +5434,7 @@
    :var-type "function",
    :line 297,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([meth & args]),
    :name "proxy-super",
    :namespace "clojure.core",
@@ -5450,7 +5450,7 @@
    :var-type "macro",
    :line 365,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([bindings]),
    :name "push-thread-bindings",
    :namespace "clojure.core",
@@ -5898,7 +5898,7 @@
    :var-type "macro",
    :line 62,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([]),
    :name "release-pending-sends",
    :namespace "clojure.core",
@@ -6242,7 +6242,7 @@
    :var-type "function",
    :line 481,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_deftype.clj"}
   {:arglists ([x]),
    :name "second",
    :namespace "clojure.core",
@@ -7478,7 +7478,7 @@
    :var-type "function",
    :line 282,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core_proxy.clj"}
   {:arglists ([& args]),
    :name "use",
    :namespace "clojure.core",
@@ -7623,7 +7623,7 @@
    :var-type "function",
    :line 452,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/gvec.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/gvec.clj"}
   {:arglists ([x]),
    :name "vector?",
    :namespace "clojure.core",
@@ -7920,7 +7920,7 @@
    :var-type "function",
    :line 150,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/inspector.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/inspector.clj"}
   {:arglists ([data]),
    :name "inspect-table",
    :namespace "clojure.inspector",
@@ -7936,7 +7936,7 @@
    :var-type "function",
    :line 96,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/inspector.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/inspector.clj"}
   {:arglists ([data]),
    :name "inspect-tree",
    :namespace "clojure.inspector",
@@ -7952,7 +7952,7 @@
    :var-type "function",
    :line 87,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/inspector.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/inspector.clj"}
   {:arglists ([url]),
    :name "browse-url",
    :namespace "clojure.java.browse",
@@ -7980,7 +7980,7 @@
    :var-type "var",
    :line 34,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:name "IOFactory",
    :namespace "clojure.java.io",
    :source-url
@@ -7995,7 +7995,7 @@
    :var-type "var",
    :line 63,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:raw-source-url nil,
    :source-url nil,
    :wiki-url
@@ -8021,7 +8021,7 @@
    :var-type "function",
    :line 385,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:raw-source-url nil,
    :source-url nil,
    :wiki-url
@@ -8047,7 +8047,7 @@
    :var-type "function",
    :line 368,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:arglists ([f & [silently]]),
    :name "delete-file",
    :namespace "clojure.java.io",
@@ -8063,7 +8063,7 @@
    :var-type "function",
    :line 407,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:arglists ([arg] [parent child] [parent child & more]),
    :name "file",
    :namespace "clojure.java.io",
@@ -8079,7 +8079,7 @@
    :var-type "function",
    :line 395,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:arglists ([x & opts]),
    :name "input-stream",
    :namespace "clojure.java.io",
@@ -8095,7 +8095,7 @@
    :var-type "function",
    :line 115,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:raw-source-url nil,
    :source-url nil,
    :wiki-url
@@ -8131,7 +8131,7 @@
    :var-type "function",
    :line 415,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:raw-source-url nil,
    :source-url nil,
    :wiki-url
@@ -8167,7 +8167,7 @@
    :var-type "function",
    :line 132,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:arglists ([x & opts]),
    :name "reader",
    :namespace "clojure.java.io",
@@ -8183,7 +8183,7 @@
    :var-type "function",
    :line 80,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:arglists ([n] [n loader]),
    :name "resource",
    :namespace "clojure.java.io",
@@ -8199,7 +8199,7 @@
    :var-type "function",
    :line 423,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:arglists ([x & opts]),
    :name "writer",
    :namespace "clojure.java.io",
@@ -8215,7 +8215,7 @@
    :var-type "function",
    :line 98,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/io.clj"}
   {:arglists ([path]),
    :name "add-local-javadoc",
    :namespace "clojure.java.javadoc",
@@ -8230,7 +8230,7 @@
    :var-type "function",
    :line 38,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/javadoc.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/javadoc.clj"}
   {:arglists ([package-prefix url]),
    :name "add-remote-javadoc",
    :namespace "clojure.java.javadoc",
@@ -8246,7 +8246,7 @@
    :var-type "function",
    :line 44,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/javadoc.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/javadoc.clj"}
   {:arglists ([class-or-object]),
    :name "javadoc",
    :namespace "clojure.java.javadoc",
@@ -8262,7 +8262,7 @@
    :var-type "function",
    :line 72,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/javadoc.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/javadoc.clj"}
   {:arglists ([& args]),
    :name "sh",
    :namespace "clojure.java.shell",
@@ -8278,7 +8278,7 @@
    :var-type "function",
    :line 79,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/shell.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/shell.clj"}
   {:arglists ([dir & forms]),
    :name "with-sh-dir",
    :namespace "clojure.java.shell",
@@ -8293,7 +8293,7 @@
    :var-type "macro",
    :line 21,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/shell.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/shell.clj"}
   {:arglists ([env & forms]),
    :name "with-sh-env",
    :namespace "clojure.java.shell",
@@ -8308,7 +8308,7 @@
    :var-type "macro",
    :line 28,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/java/shell.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/java/shell.clj"}
   {:arglists ([fn-name]),
    :name "demunge",
    :namespace "clojure.main",
@@ -8324,7 +8324,7 @@
    :var-type "function",
    :line 51,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([path]),
    :name "load-script",
    :namespace "clojure.main",
@@ -8339,7 +8339,7 @@
    :var-type "function",
    :line 275,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([& args]),
    :name "main",
    :namespace "clojure.main",
@@ -8354,7 +8354,7 @@
    :var-type "function",
    :line 389,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([& options]),
    :name "repl",
    :namespace "clojure.main",
@@ -8369,7 +8369,7 @@
    :var-type "function",
    :line 179,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([e]),
    :name "repl-caught",
    :namespace "clojure.main",
@@ -8383,7 +8383,7 @@
    :var-type "function",
    :line 167,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([throwable]),
    :name "repl-exception",
    :namespace "clojure.main",
@@ -8397,7 +8397,7 @@
    :var-type "function",
    :line 162,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([]),
    :name "repl-prompt",
    :namespace "clojure.main",
@@ -8411,7 +8411,7 @@
    :var-type "function",
    :line 107,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([request-prompt request-exit]),
    :name "repl-read",
    :namespace "clojure.main",
@@ -8426,7 +8426,7 @@
    :var-type "function",
    :line 144,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([t]),
    :name "root-cause",
    :namespace "clojure.main",
@@ -8442,7 +8442,7 @@
    :var-type "function",
    :line 58,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([s]),
    :name "skip-if-eol",
    :namespace "clojure.main",
@@ -8457,7 +8457,7 @@
    :var-type "function",
    :line 112,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([s]),
    :name "skip-whitespace",
    :namespace "clojure.main",
@@ -8472,7 +8472,7 @@
    :var-type "function",
    :line 126,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([el]),
    :name "stack-element-str",
    :namespace "clojure.main",
@@ -8488,7 +8488,7 @@
    :var-type "function",
    :line 71,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:arglists ([& body]),
    :name "with-bindings",
    :namespace "clojure.main",
@@ -8503,7 +8503,7 @@
    :var-type "macro",
    :line 85,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/main.clj"}
   {:name "*print-base*",
    :namespace "clojure.pprint",
    :source-url
@@ -8518,7 +8518,7 @@
    :var-type "var",
    :line 87,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-miser-width*",
    :namespace "clojure.pprint",
    :source-url
@@ -8534,7 +8534,7 @@
    :var-type "var",
    :line 47,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-pprint-dispatch*",
    :namespace "clojure.pprint",
    :source-url
@@ -8550,7 +8550,7 @@
    :var-type "var",
    :line 34,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-pretty*",
    :namespace "clojure.pprint",
    :source-url
@@ -8565,7 +8565,7 @@
    :var-type "var",
    :line 30,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-radix*",
    :namespace "clojure.pprint",
    :source-url
@@ -8581,7 +8581,7 @@
    :var-type "var",
    :line 80,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-right-margin*",
    :namespace "clojure.pprint",
    :source-url
@@ -8597,7 +8597,7 @@
    :var-type "var",
    :line 40,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-suppress-namespaces*",
    :namespace "clojure.pprint",
    :source-url
@@ -8613,7 +8613,7 @@
    :var-type "var",
    :line 72,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([writer format-in & args]),
    :name "cl-format",
    :namespace "clojure.pprint",
@@ -8629,7 +8629,7 @@
    :var-type "function",
    :line 27,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
   {:arglists ([format-in]),
    :name "formatter",
    :namespace "clojure.pprint",
@@ -8645,7 +8645,7 @@
    :var-type "macro",
    :line 1858,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
   {:arglists ([format-in]),
    :name "formatter-out",
    :namespace "clojure.pprint",
@@ -8661,7 +8661,7 @@
    :var-type "macro",
    :line 1878,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
   {:arglists ([]),
    :name "fresh-line",
    :namespace "clojure.pprint",
@@ -8677,7 +8677,7 @@
    :var-type "function",
    :line 1188,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
   {:arglists ([writer]),
    :name "get-pretty-writer",
    :namespace "clojure.pprint",
@@ -8693,7 +8693,7 @@
    :var-type "function",
    :line 1146,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/cl_format.clj"}
   {:arglists ([]),
    :name "pp",
    :namespace "clojure.pprint",
@@ -8709,7 +8709,7 @@
    :var-type "macro",
    :line 254,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([object] [object writer]),
    :name "pprint",
    :namespace "clojure.pprint",
@@ -8725,7 +8725,7 @@
    :var-type "function",
    :line 241,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([relative-to n]),
    :name "pprint-indent",
    :namespace "clojure.pprint",
@@ -8741,7 +8741,7 @@
    :var-type "function",
    :line 341,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists [[options* body]],
    :name "pprint-logical-block",
    :namespace "clojure.pprint",
@@ -8757,7 +8757,7 @@
    :var-type "macro",
    :line 302,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([kind]),
    :name "pprint-newline",
    :namespace "clojure.pprint",
@@ -8773,7 +8773,7 @@
    :var-type "function",
    :line 329,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([kind colnum colinc]),
    :name "pprint-tab",
    :namespace "clojure.pprint",
@@ -8789,7 +8789,7 @@
    :var-type "function",
    :line 356,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([bindings & body]),
    :name "print-length-loop",
    :namespace "clojure.pprint",
@@ -8805,7 +8805,7 @@
    :var-type "macro",
    :line 391,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([ks rows] [rows]),
    :name "print-table",
    :namespace "clojure.pprint",
@@ -8821,7 +8821,7 @@
    :var-type "function",
    :line 11,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/print_table.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/print_table.clj"}
   {:arglists ([function]),
    :name "set-pprint-dispatch",
    :namespace "clojure.pprint",
@@ -8837,7 +8837,7 @@
    :var-type "function",
    :line 260,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([function & body]),
    :name "with-pprint-dispatch",
    :namespace "clojure.pprint",
@@ -8853,7 +8853,7 @@
    :var-type "macro",
    :line 274,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([object & kw-args]),
    :name "write",
    :namespace "clojure.pprint",
@@ -8869,7 +8869,7 @@
    :var-type "function",
    :line 197,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([object]),
    :name "write-out",
    :namespace "clojure.pprint",
@@ -8885,7 +8885,7 @@
    :var-type "function",
    :line 171,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
   {:arglists ([str-or-pattern]),
    :name "apropos",
    :namespace "clojure.repl",
@@ -8900,7 +8900,7 @@
    :var-type "function",
    :line 165,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([fn-name]),
    :name "demunge",
    :namespace "clojure.repl",
@@ -8916,7 +8916,7 @@
    :var-type "function",
    :line 210,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([nsname]),
    :name "dir",
    :namespace "clojure.repl",
@@ -8930,7 +8930,7 @@
    :var-type "macro",
    :line 183,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([ns]),
    :name "dir-fn",
    :namespace "clojure.repl",
@@ -8945,7 +8945,7 @@
    :var-type "function",
    :line 177,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([name]),
    :name "doc",
    :namespace "clojure.repl",
@@ -8961,7 +8961,7 @@
    :var-type "macro",
    :line 120,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([re-string-or-pattern]),
    :name "find-doc",
    :namespace "clojure.repl",
@@ -8977,7 +8977,7 @@
    :var-type "function",
    :line 104,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([] [e-or-depth] [e depth]),
    :name "pst",
    :namespace "clojure.repl",
@@ -8993,7 +8993,7 @@
    :var-type "function",
    :line 242,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([t]),
    :name "root-cause",
    :namespace "clojure.repl",
@@ -9009,7 +9009,7 @@
    :var-type "function",
    :line 217,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([] [f]),
    :name "set-break-handler!",
    :namespace "clojure.repl",
@@ -9024,7 +9024,7 @@
    :var-type "function",
    :line 276,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([n]),
    :name "source",
    :namespace "clojure.repl",
@@ -9039,7 +9039,7 @@
    :var-type "macro",
    :line 156,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([x]),
    :name "source-fn",
    :namespace "clojure.repl",
@@ -9054,7 +9054,7 @@
    :var-type "function",
    :line 134,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([el]),
    :name "stack-element-str",
    :namespace "clojure.repl",
@@ -9070,7 +9070,7 @@
    :var-type "function",
    :line 230,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([] [thread]),
    :name "thread-stopper",
    :namespace "clojure.repl",
@@ -9085,7 +9085,7 @@
    :var-type "function",
    :line 270,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/repl.clj"}
   {:arglists ([s1] [s1 s2] [s1 s2 & sets]),
    :name "difference",
    :namespace "clojure.set",
@@ -9101,7 +9101,7 @@
    :var-type "function",
    :line 48,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([xrel ks]),
    :name "index",
    :namespace "clojure.set",
@@ -9117,7 +9117,7 @@
    :var-type "function",
    :line 95,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([s1] [s1 s2] [s1 s2 & sets]),
    :name "intersection",
    :namespace "clojure.set",
@@ -9132,7 +9132,7 @@
    :var-type "function",
    :line 32,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([xrel yrel] [xrel yrel km]),
    :name "join",
    :namespace "clojure.set",
@@ -9148,7 +9148,7 @@
    :var-type "function",
    :line 111,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([m]),
    :name "map-invert",
    :namespace "clojure.set",
@@ -9163,7 +9163,7 @@
    :var-type "function",
    :line 106,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([xrel ks]),
    :name "project",
    :namespace "clojure.set",
@@ -9179,7 +9179,7 @@
    :var-type "function",
    :line 71,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([xrel kmap]),
    :name "rename",
    :namespace "clojure.set",
@@ -9195,7 +9195,7 @@
    :var-type "function",
    :line 89,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([map kmap]),
    :name "rename-keys",
    :namespace "clojure.set",
@@ -9211,7 +9211,7 @@
    :var-type "function",
    :line 77,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([pred xset]),
    :name "select",
    :namespace "clojure.set",
@@ -9226,7 +9226,7 @@
    :var-type "function",
    :line 64,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([set1 set2]),
    :name "subset?",
    :namespace "clojure.set",
@@ -9241,7 +9241,7 @@
    :var-type "function",
    :line 142,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([set1 set2]),
    :name "superset?",
    :namespace "clojure.set",
@@ -9256,7 +9256,7 @@
    :var-type "function",
    :line 150,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([] [s1] [s1 s2] [s1 s2 & sets]),
    :name "union",
    :namespace "clojure.set",
@@ -9271,7 +9271,7 @@
    :var-type "function",
    :line 19,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/set.clj"}
   {:arglists ([]),
    :name "e",
    :namespace "clojure.stacktrace",
@@ -9374,7 +9374,7 @@
    :var-type "function",
    :line 225,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "capitalize",
    :namespace "clojure.string",
@@ -9390,7 +9390,7 @@
    :var-type "function",
    :line 146,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s cmap]),
    :name "escape",
    :namespace "clojure.string",
@@ -9406,7 +9406,7 @@
    :var-type "function",
    :line 238,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([coll] [separator coll]),
    :name "join",
    :namespace "clojure.string",
@@ -9422,7 +9422,7 @@
    :var-type "function",
    :line 130,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "lower-case",
    :namespace "clojure.string",
@@ -9437,7 +9437,7 @@
    :var-type "function",
    :line 163,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s match replacement]),
    :name "replace",
    :namespace "clojure.string",
@@ -9453,7 +9453,7 @@
    :var-type "function",
    :line 63,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s match replacement]),
    :name "replace-first",
    :namespace "clojure.string",
@@ -9469,7 +9469,7 @@
    :var-type "function",
    :line 103,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "reverse",
    :namespace "clojure.string",
@@ -9484,7 +9484,7 @@
    :var-type "function",
    :line 46,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s re] [s re limit]),
    :name "split",
    :namespace "clojure.string",
@@ -9500,7 +9500,7 @@
    :var-type "function",
    :line 169,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "split-lines",
    :namespace "clojure.string",
@@ -9515,7 +9515,7 @@
    :var-type "function",
    :line 178,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "trim",
    :namespace "clojure.string",
@@ -9530,7 +9530,7 @@
    :var-type "function",
    :line 184,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "trim-newline",
    :namespace "clojure.string",
@@ -9546,7 +9546,7 @@
    :var-type "function",
    :line 212,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "triml",
    :namespace "clojure.string",
@@ -9561,7 +9561,7 @@
    :var-type "function",
    :line 190,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "trimr",
    :namespace "clojure.string",
@@ -9576,7 +9576,7 @@
    :var-type "function",
    :line 201,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([s]),
    :name "upper-case",
    :namespace "clojure.string",
@@ -9591,7 +9591,7 @@
    :var-type "function",
    :line 157,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/string.clj"}
   {:arglists ([argv expr values]),
    :name "apply-template",
    :namespace "clojure.template",
@@ -10069,7 +10069,7 @@
    :var-type "function",
    :line 91,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([form]),
    :name "macroexpand-all",
    :namespace "clojure.walk",
@@ -10084,7 +10084,7 @@
    :var-type "function",
    :line 123,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([f form]),
    :name "postwalk",
    :namespace "clojure.walk",
@@ -10100,7 +10100,7 @@
    :var-type "function",
    :line 50,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([form]),
    :name "postwalk-demo",
    :namespace "clojure.walk",
@@ -10116,7 +10116,7 @@
    :var-type "function",
    :line 77,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([smap form]),
    :name "postwalk-replace",
    :namespace "clojure.walk",
@@ -10132,7 +10132,7 @@
    :var-type "function",
    :line 115,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([f form]),
    :name "prewalk",
    :namespace "clojure.walk",
@@ -10147,7 +10147,7 @@
    :var-type "function",
    :line 58,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([form]),
    :name "prewalk-demo",
    :namespace "clojure.walk",
@@ -10163,7 +10163,7 @@
    :var-type "function",
    :line 84,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([smap form]),
    :name "prewalk-replace",
    :namespace "clojure.walk",
@@ -10179,7 +10179,7 @@
    :var-type "function",
    :line 107,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([m]),
    :name "stringify-keys",
    :namespace "clojure.walk",
@@ -10195,7 +10195,7 @@
    :var-type "function",
    :line 99,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([inner outer form]),
    :name "walk",
    :namespace "clojure.walk",
@@ -10211,7 +10211,7 @@
    :var-type "function",
    :line 35,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/walk.clj"}
   {:arglists ([s] [s startparse]),
    :name "parse",
    :namespace "clojure.xml",
@@ -10227,7 +10227,7 @@
    :var-type "function",
    :line 78,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/xml.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/xml.clj"}
   {:arglists ([loc item]),
    :name "append-child",
    :namespace "clojure.zip",
@@ -10243,7 +10243,7 @@
    :var-type "function",
    :line 223,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "branch?",
    :namespace "clojure.zip",
@@ -10258,7 +10258,7 @@
    :var-type "function",
    :line 69,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "children",
    :namespace "clojure.zip",
@@ -10274,7 +10274,7 @@
    :var-type "function",
    :line 75,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "down",
    :namespace "clojure.zip",
@@ -10290,7 +10290,7 @@
    :var-type "function",
    :line 109,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc f & args]),
    :name "edit",
    :namespace "clojure.zip",
@@ -10306,7 +10306,7 @@
    :var-type "function",
    :line 210,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "end?",
    :namespace "clojure.zip",
@@ -10321,7 +10321,7 @@
    :var-type "function",
    :line 258,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc item]),
    :name "insert-child",
    :namespace "clojure.zip",
@@ -10337,7 +10337,7 @@
    :var-type "function",
    :line 216,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc item]),
    :name "insert-left",
    :namespace "clojure.zip",
@@ -10353,7 +10353,7 @@
    :var-type "function",
    :line 183,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc item]),
    :name "insert-right",
    :namespace "clojure.zip",
@@ -10369,7 +10369,7 @@
    :var-type "function",
    :line 193,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "left",
    :namespace "clojure.zip",
@@ -10385,7 +10385,7 @@
    :var-type "function",
    :line 166,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "leftmost",
    :namespace "clojure.zip",
@@ -10401,7 +10401,7 @@
    :var-type "function",
    :line 174,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "lefts",
    :namespace "clojure.zip",
@@ -10416,7 +10416,7 @@
    :var-type "function",
    :line 96,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc node children]),
    :name "make-node",
    :namespace "clojure.zip",
@@ -10432,7 +10432,7 @@
    :var-type "function",
    :line 83,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "next",
    :namespace "clojure.zip",
@@ -10448,7 +10448,7 @@
    :var-type "function",
    :line 230,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "node",
    :namespace "clojure.zip",
@@ -10463,7 +10463,7 @@
    :var-type "function",
    :line 64,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "path",
    :namespace "clojure.zip",
@@ -10478,7 +10478,7 @@
    :var-type "function",
    :line 90,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "prev",
    :namespace "clojure.zip",
@@ -10494,7 +10494,7 @@
    :var-type "function",
    :line 246,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "remove",
    :namespace "clojure.zip",
@@ -10510,7 +10510,7 @@
    :var-type "function",
    :line 264,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc node]),
    :name "replace",
    :namespace "clojure.zip",
@@ -10525,7 +10525,7 @@
    :var-type "function",
    :line 203,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "right",
    :namespace "clojure.zip",
@@ -10541,7 +10541,7 @@
    :var-type "function",
    :line 149,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "rightmost",
    :namespace "clojure.zip",
@@ -10557,7 +10557,7 @@
    :var-type "function",
    :line 157,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "rights",
    :namespace "clojure.zip",
@@ -10572,7 +10572,7 @@
    :var-type "function",
    :line 102,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "root",
    :namespace "clojure.zip",
@@ -10588,7 +10588,7 @@
    :var-type "function",
    :line 137,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([root]),
    :name "seq-zip",
    :namespace "clojure.zip",
@@ -10603,7 +10603,7 @@
    :var-type "function",
    :line 35,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([loc]),
    :name "up",
    :namespace "clojure.zip",
@@ -10619,7 +10619,7 @@
    :var-type "function",
    :line 123,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([root]),
    :name "vector-zip",
    :namespace "clojure.zip",
@@ -10634,7 +10634,7 @@
    :var-type "function",
    :line 44,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([root]),
    :name "xml-zip",
    :namespace "clojure.zip",
@@ -10650,7 +10650,7 @@
    :var-type "function",
    :line 53,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:arglists ([branch? children make-node root]),
    :name "zipper",
    :namespace "clojure.zip",
@@ -10666,7 +10666,7 @@
    :var-type "function",
    :line 18,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/zip.clj"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/d2fce54ccfcf46815524c2af94d1939573c1e9a9/src/clj/clojure/core/protocols.clj",
    :source-url
@@ -10676,7 +10676,7 @@
    :namespace "clojure.core.protocols",
    :line 11,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/core/protocols.clj",
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/core/protocols.clj",
    :var-type "var",
    :doc
    "Protocol for concrete seq types that can reduce themselves\nfaster than first/next recursion. Called by clojure.core/reduce.",
@@ -10696,7 +10696,7 @@
    :var-type "macro",
    :line 182,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/test/junit.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/test/junit.clj"}
   {:arglists ([data]),
    :name "print-tap-diagnostic",
    :namespace "clojure.test.tap",
@@ -10712,7 +10712,7 @@
    :var-type "function",
    :line 51,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
   {:arglists ([msg]),
    :name "print-tap-fail",
    :namespace "clojure.test.tap",
@@ -10728,7 +10728,7 @@
    :var-type "function",
    :line 65,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
   {:arglists ([msg]),
    :name "print-tap-pass",
    :namespace "clojure.test.tap",
@@ -10744,7 +10744,7 @@
    :var-type "function",
    :line 59,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
   {:arglists ([n]),
    :name "print-tap-plan",
    :namespace "clojure.test.tap",
@@ -10760,7 +10760,7 @@
    :var-type "function",
    :line 45,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"}
   {:arglists ([& body]),
    :name "with-tap-output",
    :namespace "clojure.test.tap",
@@ -10776,4 +10776,4 @@
    :var-type "macro",
    :line 110,
    :file
-   "/home/tom/src/clj/autodoc-stable/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"})}
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/test/tap.clj"})}
