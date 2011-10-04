@@ -262,7 +262,7 @@
      (flush)
      (loop []
        (when-not 
-       	 (try (= (read-eval-print) request-exit)
+       	 (try (identical? (read-eval-print) request-exit)
 	  (catch Throwable e
 	   (caught e)
 	   (set! *e e)
