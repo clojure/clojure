@@ -70,6 +70,10 @@ static public boolean equiv(boolean k1, Object k2){
 	return equiv((Object)k1, k2);
 }
 
+static public boolean equiv(char c1, char c2) {
+    return c1 == c2;
+}
+
 static public boolean pcequiv(Object k1, Object k2){
 	if(k1 instanceof IPersistentCollection)
 		return ((IPersistentCollection)k1).equiv(k2);
