@@ -37,7 +37,7 @@
       <filtered>true</filtered>
     </file>
     <file>
-      <source>changes.txt</source>
+      <source>changes.md</source>
     </file>
     <file>
       <source>clojure.iml</source>
