@@ -732,7 +732,7 @@
                         (cons (apply vector (vary-meta target assoc :tag c) args)
                               body))
                       specs)))]
-    [p (zipmap (map #(-> % first keyword) fs)
+    [p (zipmap (map #(-> % first name keyword) fs)
                (map #(cons 'fn (hint (drop 1 %))) fs))]))
 
 (defn- emit-extend-type [c specs]

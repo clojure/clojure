@@ -558,3 +558,26 @@
         (is (= 2 (.hinted r 1)))
         (is (= "xoxo" (.hinted r "xo")))))))
 
+
+; see CLJ-845
+(defprotocol SyntaxQuoteTestProtocol
+  (sqtp [p]))
+
+(defmacro try-extend-type [c]
+  `(extend-type ~c
+     SyntaxQuoteTestProtocol
+     (sqtp [p#] p#)))
+
+(defmacro try-extend-protocol [c]
+  `(extend-protocol SyntaxQuoteTestProtocol
+     ~c
+     (sqtp [p#] p#)))
+
+(try-extend-type String)
+(try-extend-protocol clojure.lang.Keyword)
+
+(deftest test-no-ns-capture
+  (is (= "foo" (sqtp "foo")))
+  (is (= :foo (sqtp :foo))))
+
+
