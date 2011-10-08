@@ -5,6 +5,12 @@
    :name "clojure.core",
    :doc "Fundamental library of the Clojure language"}
   {:source-url
+   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+   :wiki-url "http://clojure.github.com/clojure/clojure.data-api.html",
+   :name "clojure.data",
+   :author "Stuart Halloway",
+   :doc "Non-core data functions."}
+  {:source-url
    "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.inspector-api.html",
@@ -50,6 +56,14 @@
    :author "Tom Faulhaber",
    :doc
    "A Pretty Printer for Clojure\n\nclojure.pprint implements a flexible system for printing structured data\nin a pleasing, easy-to-understand format. Basic use of the pretty printer is \nsimple, just call pprint instead of println. More advanced users can use \nthe building blocks provided to create custom output formats. \n\nOut of the box, pprint supports a simple structured format for basic data \nand a specialized format for Clojure source code. More advanced formats, \nincluding formats that don't look like Clojure data at all like XML and \nJSON, can be rendered by creating custom dispatch functions. \n\nIn addition to the pprint function, this module contains cl-format, a text \nformatting function which is fully compatible with the format function in \nCommon Lisp. Because pretty printing directives are directly integrated with\ncl-format, it supports very concise custom dispatch. It also provides\na more powerful alternative to Clojure's standard format function.\n\nSee documentation for pprint and cl-format for more information or \ncomplete documentation on the the clojure web site on github."}
+  {:source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure/clojure.reflect-api.html",
+   :name "clojure.reflect",
+   :author "Stuart Halloway",
+   :doc
+   "Reflection on Host Types\nAlpha - subject to change.\n\nTwo main entry points: \n\n* type-reflect reflects on something that implements TypeReference.\n* reflect (for REPL use) reflects on the class of an instance, or\n  on a class if passed a class\n\nKey features:\n\n* Exposes the read side of reflection as pure data. Reflecting\n  on a type returns a map with keys :bases, :flags, and :members.\n\n* Canonicalizes class names as Clojure symbols. Types can extend\n  to the TypeReference protocol to indicate that they can be\n  unambiguously resolved as a type name. The canonical format\n  requires one non-Java-ish convention: array brackets are <>\n  instead of [] so they can be part of a Clojure symbol.\n\n* Pluggable Reflectors for different implementations. The default\n  JavaReflector is good when you have a class in hand, or use\n  the AsmReflector for \"hands off\" reflection without forcing\n  classes to load.\n\nPlatform implementers must:\n\n* Create an implementation of Reflector.\n* Create one or more implementations of TypeReference.\n* def default-reflector to be an instance that satisfies Reflector."}
   {:source-url
    "https://github.com/clojure/clojure/blob/553f4879cad019dd9dc1727165d8a41c216bd086/src/clj/clojure/repl.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.repl-api.html",
@@ -7906,6 +7920,70 @@
    :var-type "function",
    :line 2651,
    :file "clojure/core.clj"}
+  {:name "Diff",
+   :namespace "clojure.data",
+   :source-url
+   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L55",
+   :added "1.3",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/Diff",
+   :doc "Implementation detail. Subject to change.",
+   :var-type "var",
+   :line 55,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/data.clj"}
+  {:name "EqualityPartition",
+   :namespace "clojure.data",
+   :source-url
+   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L51",
+   :added "1.3",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/EqualityPartition",
+   :doc "Implementation detail. Subject to change.",
+   :var-type "var",
+   :line 51,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/data.clj"}
+  {:arglists ([a b]),
+   :name "diff",
+   :namespace "clojure.data",
+   :source-url
+   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L104",
+   :added "1.3",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/diff",
+   :doc
+   "Recursively compares a and b, returning a tuple of\n[things-only-in-a things-only-in-b things-in-both].\nComparison rules:\n\n* For equal a and b, return [nil nil a].\n* Maps are subdiffed where keys match and values differ.\n* Sets are never subdiffed.\n* All sequential things are treated as associative collections\n  by their indexes, with results returned as vectors.\n* Everything else (including strings!) is treated as\n  an atom and compared for equality.",
+   :var-type "function",
+   :line 104,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/data.clj"}
+  {:raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/diff-similar",
+   :namespace "clojure.data",
+   :added "1.3",
+   :var-type "function",
+   :arglists ([a b]),
+   :doc "Implementation detail. Subject to change.",
+   :name "diff-similar"}
+  {:raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/equality-partition",
+   :namespace "clojure.data",
+   :added "1.3",
+   :var-type "function",
+   :arglists ([x]),
+   :doc "Implementation detail. Subject to change.",
+   :name "equality-partition"}
   {:arglists ([x]),
    :name "inspect",
    :namespace "clojure.inspector",
@@ -8886,6 +8964,99 @@
    :line 171,
    :file
    "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/pprint/pprint_base.clj"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L44",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/Reflector",
+   :namespace "clojure.reflect",
+   :line 44,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/reflect.clj",
+   :var-type "var",
+   :doc "Protocol for reflection implementers.",
+   :name "Reflector"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L48",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/TypeReference",
+   :namespace "clojure.reflect",
+   :line 48,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/reflect.clj",
+   :var-type "var",
+   :doc
+   "A TypeReference can be unambiguously converted to a type name on\nthe host platform.\n\nAll typerefs are normalized into symbols. If you need to\nnormalize a typeref yourself, call typesym.",
+   :name "TypeReference"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj#L71",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/flag-descriptors",
+   :namespace "clojure.reflect",
+   :line 71,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/reflect/java.clj",
+   :var-type "var",
+   :doc
+   "The Java access bitflags, along with their friendly names and\nthe kinds of objects to which they can apply.",
+   :name "flag-descriptors"}
+  {:arglists ([obj & options]),
+   :name "reflect",
+   :namespace "clojure.reflect",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L115",
+   :added "1.3",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/reflect",
+   :doc
+   "Alpha - subject to change.\nReflect on the type of obj (or obj itself if obj is a class).\nReturn value and options are the same as for type-reflect. ",
+   :var-type "function",
+   :line 115,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/reflect.clj"}
+  {:raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/resolve-class",
+   :namespace "clojure.reflect",
+   :var-type "function",
+   :arglists ([this name]),
+   :doc
+   "Given a class name, return that typeref's class bytes as an InputStream.",
+   :name "resolve-class"}
+  {:arglists ([typeref & options]),
+   :name "type-reflect",
+   :namespace "clojure.reflect",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L58",
+   :added "1.3",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/type-reflect",
+   :doc
+   "Alpha - subject to change.\n Reflect on a typeref, returning a map with :bases, :flags, and\n:members. In the discussion below, names are always Clojure symbols.\n\n :bases            a set of names of the type's bases\n :flags            a set of keywords naming the boolean attributes\n                   of the type.\n :members          a set of the type's members. Each membrer is a map\n                   and can be a constructor, method, or field.\n\n Keys common to all members:\n :name             name of the type \n :declaring-class  name of the declarer\n :flags            keyword naming boolean attributes of the member\n\n Keys specific to constructors:\n :parameter-types  vector of parameter type names\n :exception-types  vector of exception type names\n\n Key specific to methods:\n :parameter-types  vector of parameter type names\n :exception-types  vector of exception type names\n :return-type      return type name\n\n Keys specific to fields:\n :type             type name\n\n Options:\n\n   :ancestors     in addition to the keys described above, also\n                  include an :ancestors key with the entire set of\n                  ancestors, and add all ancestor members to\n                  :members.\n   :reflector     implementation to use. Defaults to JavaReflector,\n                  AsmReflector is also an option.",
+   :var-type "function",
+   :line 58,
+   :file
+   "/home/tom/src/clj/autodoc/../autodoc-work-area/clojure/src/src/clj/clojure/reflect.clj"}
+  {:raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/typename",
+   :namespace "clojure.reflect",
+   :var-type "function",
+   :arglists ([o]),
+   :doc
+   "Returns Java name as returned by ASM getClassName, e.g. byte[], java.lang.String[]",
+   :name "typename"}
   {:arglists ([str-or-pattern]),
    :name "apropos",
    :namespace "clojure.repl",

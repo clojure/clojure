@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>clojure.java.javadoc - Clojure v1.4 API documentation</title>
+    <title>clojure.data - Clojure v1.4 API documentation</title>
     <link href="../static/favicon.png" rel="icon" />
     <link href="../static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
@@ -57,24 +57,28 @@ namespace.
   <div style="margin-left: 1em;" class="toc-section">
     <a href="#toc0">Overview</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.java.javadoc/add-local-javadoc">add-local-javadoc</a>
+      <a href="#clojure.data/Diff">Diff</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.java.javadoc/add-remote-javadoc">add-remote-javadoc</a>
+      <a href="#clojure.data/EqualityPartition">EqualityPartition</a>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.java.javadoc/javadoc">javadoc</a>
+      <a href="#clojure.data/diff">diff</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.data/diff-similar">diff-similar</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clojure.data/equality-partition">equality-partition</a>
     </div>
     <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.java.javadoc</span>
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.data</span>
   - <span id="header-project">Clojure</span> <span id="header-version">v1.4</span> (<span id="header-status">in development</span>)
   </h1>
-<span id="author-line">by <span id="author-name">Christophe Grand, Stuart Sierra</span><br /></span>
-<br />Full namespace name: <span id="long-name">clojure.java.javadoc</span>
+<span id="author-line">by <span id="author-name">Stuart Halloway</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.data</span>
 <p></p>
 <h2>Overview</h2>
-<pre id="namespace-docstr">A repl helper to quickly open javadocs.</pre>
+<pre id="namespace-docstr">Non-core data functions.</pre>
 
 
 <br />
@@ -82,38 +86,66 @@ namespace.
 <div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.java.javadoc/add-local-javadoc">add-local-javadoc</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (add-local-javadoc path)
-</pre>
-  <pre id="var-docstr">Adds to the list of local Javadoc paths.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+  <h2 id="clojure.data/Diff">Diff</h2>
+  <span id="var-type">var</span><br />
+  <pre id="var-usage"></pre>
+  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
   
-  <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/javadoc.clj#L38" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L55" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.java.javadoc/add-remote-javadoc">add-remote-javadoc</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (add-remote-javadoc package-prefix url)
-</pre>
-  <pre id="var-docstr">Adds to the list of remote Javadoc URLs.  package-prefix is the
-beginning of the package name that has docs at this URL.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+  <h2 id="clojure.data/EqualityPartition">EqualityPartition</h2>
+  <span id="var-type">var</span><br />
+  <pre id="var-usage"></pre>
+  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
   
-  <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/javadoc.clj#L44" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L51" id="var-source">Source</a>
 </div><div id="var-entry">
   <br />
   <hr />
-  <h2 id="clojure.java.javadoc/javadoc">javadoc</h2>
+  <h2 id="clojure.data/diff">diff</h2>
   <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (javadoc class-or-object)
+  <pre id="var-usage">Usage: (diff a b)
 </pre>
-  <pre id="var-docstr">Opens a browser window displaying the javadoc for the argument.
-Tries *local-javadocs* first, then *remote-javadocs*.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+  <pre id="var-docstr">Recursively compares a and b, returning a tuple of
+[things-only-in-a things-only-in-b things-in-both].
+Comparison rules:
+
+* For equal a and b, return [nil nil a].
+* Maps are subdiffed where keys match and values differ.
+* Sets are never subdiffed.
+* All sequential things are treated as associative collections
+  by their indexes, with results returned as vectors.
+* Everything else (including strings!) is treated as
+  an atom and compared for equality.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
   
-  <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/javadoc.clj#L72" id="var-source">Source</a>
+  <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L104" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.data/diff-similar">diff-similar</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (diff-similar a b)
+</pre>
+  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clojure.data/equality-partition">equality-partition</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (equality-partition x)
+</pre>
+  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+  
+  
 </div>
 
 
