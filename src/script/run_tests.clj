@@ -50,6 +50,7 @@ clojure.test-clojure.string
 clojure.test-clojure.test
 clojure.test-clojure.test-fixtures
 clojure.test-clojure.transients
+clojure.test-clojure.try-catch
 clojure.test-clojure.vars
 clojure.test-clojure.vectors
 ])
