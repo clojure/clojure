@@ -9,7 +9,9 @@
 ; Author: Paul M Bauer 
 
 (ns clojure.test-clojure.try-catch
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import [clojure.test ReflectorTryCatchFixture 
+                         ReflectorTryCatchFixture$Cookies]))
 
 (defn- get-exception [expression]
   (try (eval expression)
@@ -17,8 +19,17 @@
     (catch java.lang.Throwable t
       t)))
 
-(deftest catch-receives-checked-exception
+(deftest catch-receives-checked-exception-from-eval
   (are [expression expected-exception] (= expected-exception
                                           (type (get-exception expression)))
     "Eh, I'm pretty safe" nil
     '(java.io.FileReader. "CAFEBABEx0/idonotexist") java.io.FileNotFoundException))
+
+
+(defn fail [x]
+  (ReflectorTryCatchFixture/fail x))
+
+(deftest catch-receives-checked-exception-from-reflective-call
+  (is (thrown-with-msg? ReflectorTryCatchFixture$Cookies #"Long" (fail 1)))
+  (is (thrown-with-msg? ReflectorTryCatchFixture$Cookies #"Double" (fail 1.0))))
+    
