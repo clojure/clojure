@@ -4297,7 +4297,7 @@
   (count (re-seq re s)))
 
 (defn re-count-uniq
-  "Returns the total number of unique matches in a string."
+  "Returns the total number of unique matches of pattern in string."
   [re s]
   (count (set (re-seq re s))))
 
