@@ -4292,7 +4292,6 @@
 
 (defn re-count
   "Returns the total number of matches of pattern in string."
-  {}
   [re s]
   (count (re-seq re s)))
 
