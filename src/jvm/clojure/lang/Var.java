@@ -254,7 +254,7 @@ public void setMacro() {
         }
     catch (Exception e)
         {
-        throw Util.runtimeException(e);
+        throw Util.sneakyThrow(e);
         }
 }
 
@@ -285,7 +285,7 @@ public void setTag(Symbol tag) {
         }
     catch (Exception e)
         {
-        throw Util.runtimeException(e);
+        throw Util.sneakyThrow(e);
         }
 }
 
@@ -305,7 +305,7 @@ synchronized public void bindRoot(Object root){
         }
     catch (Exception e)
         {
-        throw Util.runtimeException(e);
+        throw Util.sneakyThrow(e);
         }
     notifyWatches(oldroot,this.root);
 }
@@ -403,7 +403,7 @@ public void run(){
 		}
 	catch(Exception e)
 		{
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 }
 
@@ -547,7 +547,10 @@ static IFn dissoc = new AFn() {
 		    }
 	    catch(Exception e)
 		    {
-		    return Util.runtimeException(e);
+// TODO:CLJ-855 "throw Util.sneakyThrow(e)" instead?
+// I don't understand why we are *returing* the exception here instead
+// of just throwing it.
+			return e; 
 		    }
     }
 };

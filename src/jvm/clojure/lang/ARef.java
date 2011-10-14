@@ -53,7 +53,7 @@ public void setValidator(IFn vf){
 		}
 	catch(Exception e)
 		{
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 	validator = vf;
 }
@@ -78,7 +78,7 @@ synchronized public IRef removeWatch(Object key){
 		}
 	catch(Exception e)
 		{
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 
 	return this;
@@ -99,7 +99,7 @@ public void notifyWatches(Object oldval, Object newval){
 				}
 			catch(Exception e1)
 				{
-				throw Util.runtimeException(e1);
+				throw Util.sneakyThrow(e1);
 				}
 			}
 		}

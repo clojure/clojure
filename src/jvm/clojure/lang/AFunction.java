@@ -60,7 +60,7 @@ public int compare(Object o1, Object o2){
 		}
 	catch(Exception e)
 		{
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 }
 }

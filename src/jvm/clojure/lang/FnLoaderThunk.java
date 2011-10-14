@@ -55,7 +55,7 @@ private void load() {
 			}
 		catch(Exception e)
 			{
-			throw Util.runtimeException(e);
+			throw Util.sneakyThrow(e);
 			}
 		v.root = fn;
 		}

@@ -78,7 +78,7 @@ public String toString(){
 	catch(Exception e)
 		{
 		//checked exceptions stink!
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 	return sw.toString();
 }

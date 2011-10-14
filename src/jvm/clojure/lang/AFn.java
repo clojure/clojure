@@ -25,7 +25,7 @@ public void run(){
 		}
 	catch(Exception e)
 		{
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 }
 

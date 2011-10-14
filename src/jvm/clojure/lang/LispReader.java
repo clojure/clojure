@@ -123,7 +123,7 @@ static void unread(PushbackReader r, int ch) {
 			}
 		catch(IOException e)
 			{
-			throw Util.runtimeException(e);
+			throw Util.sneakyThrow(e);
 			}
 }
 
@@ -143,7 +143,7 @@ static public int read1(Reader r){
 		}
 	catch(IOException e)
 		{
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 }
 
@@ -209,7 +209,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 	catch(Exception e)
 		{
 		if(isRecursive || !(r instanceof LineNumberingPushbackReader))
-			throw Util.runtimeException(e);
+			throw Util.sneakyThrow(e);
 		LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) r;
 		//throw Util.runtimeException(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()), e);
 		throw new ReaderException(rdr.getLineNumber(), e);

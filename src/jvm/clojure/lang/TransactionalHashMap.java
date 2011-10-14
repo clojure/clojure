@@ -93,7 +93,7 @@ public V remove(Object k){
 		}
 	catch(Exception e)
 		{
-		throw Util.runtimeException(e);
+		throw Util.sneakyThrow(e);
 		}
 	return (V) ret;
 }
@@ -163,7 +163,7 @@ public boolean remove(Object k, Object v){
 			}
 		catch(Exception ex)
 			{
-			throw Util.runtimeException(ex);
+			throw Util.sneakyThrow(ex);
 			}
 		return true;
 		}
