@@ -38,6 +38,10 @@
     (should-print-err-message
      #"Reflection warning, .*:\d+ - call to zap can't be resolved with arguments of type \(long\)\.\r?\n"
      (defn foo [x] (.zap x 1))))
+  (testing "reflection cannot resolve instance method, with nil literal"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+ - call to zap can't be resolved with arguments of type \(nil\)\.\r?\n"
+     (defn foo [x] (.zap x nil))))
   (testing "reflection cannot resolve static method"
     (should-print-err-message
      #"Reflection warning, .*:\d+ - call to valueOf can't be resolved with arguments of type \(java.util.regex.Pattern\)\.\r?\n"
