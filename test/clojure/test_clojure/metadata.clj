@@ -74,4 +74,14 @@
                  (def quux 1))
                (def-quux)
                #'quux)]
-        (is (nil? (-> v meta :e)))))))
+        (is (nil? (-> v meta :e))))))
+  (testing "IllegalArgumentException should not be thrown"
+    (testing "when defining var whose value is calculated with a primitive fn."
+      (testing "This case fails without a fix for CLJ-852"
+        (is (eval-in-temp-ns
+             (defn foo ^long [^long x] x)
+             (def x (inc (foo 10))))))
+      (testing "This case should pass even without a fix for CLJ-852"
+        (is (eval-in-temp-ns
+             (defn foo ^long [^long x] x)
+             (def x (foo (inc 10)))))))))
