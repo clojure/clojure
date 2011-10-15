@@ -966,7 +966,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 						c = RT.classForName(sym.name);
 						}
 						catch(Exception e){
-							//aargh
+							// aargh
+							// leave c set to null -> return null
 						}
 						}
 					}
@@ -1013,17 +1014,33 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				else if(sym.name.equals("longs"))
 					c = long[].class;
 				else if(sym.name.equals("floats"))
-						c = float[].class;
-					else if(sym.name.equals("doubles"))
-							c = double[].class;
-						else if(sym.name.equals("chars"))
-								c = char[].class;
-							else if(sym.name.equals("shorts"))
-									c = short[].class;
-								else if(sym.name.equals("bytes"))
-										c = byte[].class;
-									else if(sym.name.equals("booleans"))
-											c = boolean[].class;
+					c = float[].class;
+				else if(sym.name.equals("doubles"))
+					c = double[].class;
+				else if(sym.name.equals("chars"))
+					c = char[].class;
+				else if(sym.name.equals("shorts"))
+					c = short[].class;
+				else if(sym.name.equals("bytes"))
+					c = byte[].class;
+				else if(sym.name.equals("booleans"))
+					c = boolean[].class;
+				else if(sym.name.equals("int"))
+					c = Integer.TYPE;
+				else if(sym.name.equals("long"))
+					c = Long.TYPE;
+				else if(sym.name.equals("float"))
+					c = Float.TYPE;
+				else if(sym.name.equals("double"))
+					c = Double.TYPE;
+				else if(sym.name.equals("char"))
+					c = Character.TYPE;
+				else if(sym.name.equals("short"))
+					c = Short.TYPE;
+				else if(sym.name.equals("byte"))
+					c = Byte.TYPE;
+				else if(sym.name.equals("boolean"))
+					c = Boolean.TYPE;
 				}
 			}
 		if(c != null)
