@@ -13,7 +13,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.*;
 
-public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable, MapEquivalence {
+public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable, MapEquivalence, IHashEq {
 int _hash = -1;
 
 public String toString(){
@@ -54,7 +54,7 @@ static public boolean mapEquals(IPersistentMap m1, Object obj){
 		return false;
 	Map m = (Map) obj;
 
-	if(m.size() != m1.count() || m.hashCode() != m1.hashCode())
+	if(m.size() != m1.count())
 		return false;
 
 	for(ISeq s = m1.seq(); s != null; s = s.next())
@@ -106,6 +106,17 @@ static public int mapHash(IPersistentMap m){
 		Map.Entry e = (Map.Entry) s.first();
 		hash += (e.getKey() == null ? 0 : e.getKey().hashCode()) ^
 				(e.getValue() == null ? 0 : e.getValue().hashCode());
+		}
+	return hash;
+}
+
+public int hasheq(){
+	int hash = 0;
+	for(ISeq s = this.seq(); s != null; s = s.next())
+		{
+		Map.Entry e = (Map.Entry) s.first();
+		hash += Util.hasheq(e.getKey()) ^
+				Util.hasheq(e.getValue());
 		}
 	return hash;
 }

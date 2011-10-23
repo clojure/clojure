@@ -116,6 +116,16 @@ static public int hash(Object o){
 	return o.hashCode();
 }
 
+static public int hasheq(Object o){
+	if(o == null)
+		return 0;
+	if(o instanceof Number)
+		return Numbers.hasheq((Number)o);
+	else if(o instanceof IHashEq)
+		return ((IHashEq)o).hasheq();
+	return o.hashCode();
+}
+
 static public int hashCombine(int seed, int hash){
 	//a la boost
 	seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);

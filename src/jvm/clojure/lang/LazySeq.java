@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.*;
 
-public final class LazySeq extends Obj implements ISeq, Sequential, List, IPending{
+public final class LazySeq extends Obj implements ISeq, Sequential, List, IPending, IHashEq{
 
 private IFn fn;
 private Object sv;
@@ -116,6 +116,13 @@ public int hashCode(){
 	if(s == null)
 		return 1;
 	return Util.hash(seq());
+}
+
+public int hasheq(){
+	ISeq s = seq();
+	if(s == null)
+		return 1;
+	return Util.hasheq(seq());
 }
 
 public boolean equals(Object o){

@@ -117,16 +117,20 @@ public PersistentHashMap(IPersistentMap meta, int count, INode root, boolean has
 	this.nullValue = nullValue;
 }
 
+static int hash(Object k){
+	return Util.hasheq(k);
+}
+
 public boolean containsKey(Object key){
 	if(key == null)
 		return hasNull;
-	return (root != null) ? root.find(0, Util.hash(key), key, NOT_FOUND) != NOT_FOUND : false;
+	return (root != null) ? root.find(0, hash(key), key, NOT_FOUND) != NOT_FOUND : false;
 }
 
 public IMapEntry entryAt(Object key){
 	if(key == null)
 		return hasNull ? new MapEntry(null, nullValue) : null;
-	return (root != null) ? root.find(0, Util.hash(key), key) : null;
+	return (root != null) ? root.find(0, hash(key), key) : null;
 }
 
 public IPersistentMap assoc(Object key, Object val){
@@ -137,7 +141,7 @@ public IPersistentMap assoc(Object key, Object val){
 	}
 	Box addedLeaf = new Box(null);
 	INode newroot = (root == null ? BitmapIndexedNode.EMPTY : root) 
-			.assoc(0, Util.hash(key), key, val, addedLeaf);
+			.assoc(0, hash(key), key, val, addedLeaf);
 	if(newroot == root)
 		return this;
 	return new PersistentHashMap(meta(), addedLeaf.val == null ? count : count + 1, newroot, hasNull, nullValue);
@@ -146,7 +150,7 @@ public IPersistentMap assoc(Object key, Object val){
 public Object valAt(Object key, Object notFound){
 	if(key == null)
 		return hasNull ? nullValue : notFound;
-	return root != null ? root.find(0, Util.hash(key), key, notFound) : notFound;
+	return root != null ? root.find(0, hash(key), key, notFound) : notFound;
 }
 
 public Object valAt(Object key){
@@ -164,7 +168,7 @@ public IPersistentMap without(Object key){
 		return hasNull ? new PersistentHashMap(meta(), count - 1, root, false, null) : this;
 	if(root == null)
 		return this;
-	INode newroot = root.without(0, Util.hash(key), key);
+	INode newroot = root.without(0, hash(key), key);
 	if(newroot == root)
 		return this;
 	return new PersistentHashMap(meta(), count - 1, newroot, hasNull, nullValue); 
@@ -238,7 +242,7 @@ static final class TransientHashMap extends ATransientMap {
 //		Box leafFlag = new Box(null);
 		leafFlag.val = null;
 		INode n = (root == null ? BitmapIndexedNode.EMPTY : root)
-			.assoc(edit, 0, Util.hash(key), key, val, leafFlag);
+			.assoc(edit, 0, hash(key), key, val, leafFlag);
 		if (n != this.root)
 			this.root = n; 
 		if(leafFlag.val != null) this.count++;
@@ -256,7 +260,7 @@ static final class TransientHashMap extends ATransientMap {
 		if (root == null) return this;
 //		Box leafFlag = new Box(null);
 		leafFlag.val = null;
-		INode n = root.without(edit, 0, Util.hash(key), key, leafFlag);
+		INode n = root.without(edit, 0, hash(key), key, leafFlag);
 		if (n != root)
 			this.root = n;
 		if(leafFlag.val != null) this.count--;
@@ -276,7 +280,7 @@ static final class TransientHashMap extends ATransientMap {
 				return notFound;
 		if (root == null)
 			return null;
-		return root.find(0, Util.hash(key), key, notFound);
+		return root.find(0, hash(key), key, notFound);
 	}
 
 	int doCount() {
@@ -525,7 +529,7 @@ final static class BitmapIndexedNode implements INode{
 						if (array[j] == null)
 							nodes[i] = (INode) array[j+1];
 						else
-							nodes[i] = EMPTY.assoc(shift + 5, Util.hash(array[j]), array[j], array[j+1], addedLeaf);
+							nodes[i] = EMPTY.assoc(shift + 5, hash(array[j]), array[j], array[j+1], addedLeaf);
 						j += 2;
 					}
 				return new ArrayNode(null, n + 1, nodes);
@@ -670,7 +674,7 @@ final static class BitmapIndexedNode implements INode{
 						if (array[j] == null)
 							nodes[i] = (INode) array[j+1];
 						else
-							nodes[i] = EMPTY.assoc(edit, shift + 5, Util.hash(array[j]), array[j], array[j+1], addedLeaf);
+							nodes[i] = EMPTY.assoc(edit, shift + 5, hash(array[j]), array[j], array[j+1], addedLeaf);
 						j += 2;
 					}
 				return new ArrayNode(edit, n + 1, nodes);
@@ -976,7 +980,7 @@ private static Object[] removePair(Object[] array, int i) {
 }
 
 private static INode createNode(int shift, Object key1, Object val1, int key2hash, Object key2, Object val2) {
-	int key1hash = Util.hash(key1);
+	int key1hash = hash(key1);
 	if(key1hash == key2hash)
 		return new HashCollisionNode(null, key1hash, 2, new Object[] {key1, val1, key2, val2});
 	Box _ = new Box(null);
@@ -987,7 +991,7 @@ private static INode createNode(int shift, Object key1, Object val1, int key2has
 }
 
 private static INode createNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2) {
-	int key1hash = Util.hash(key1);
+	int key1hash = hash(key1);
 	if(key1hash == key2hash)
 		return new HashCollisionNode(null, key1hash, 2, new Object[] {key1, val1, key2, val2});
 	Box _ = new Box(null);

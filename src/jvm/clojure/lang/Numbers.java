@@ -941,11 +941,11 @@ static public enum Category {INTEGER, FLOATING, DECIMAL, RATIO};
 static Ops ops(Object x){
 	Class xc = x.getClass();
 
-	if(xc == Integer.class)
+	if(xc == Long.class)
 		return LONG_OPS;
 	else if(xc == Double.class)
 		return DOUBLE_OPS;
-	else if(xc == Long.class)
+	else if(xc == Integer.class)
 		return LONG_OPS;
 	else if(xc == Float.class)
 		return DOUBLE_OPS;
@@ -959,6 +959,20 @@ static Ops ops(Object x){
 		return BIGDECIMAL_OPS;
 	else
 		return LONG_OPS;
+}
+
+static int hasheq(Number x){
+	Class xc = x.getClass();
+
+	if(xc == Long.class
+		|| xc == Integer.class
+		|| xc == Short.class
+		|| xc == Byte.class)
+		{
+		long lpart = x.longValue();
+		return (int) (lpart ^ (lpart >>> 32));
+		}
+	return x.hashCode();
 }
 
 static Category category(Object x){
