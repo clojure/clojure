@@ -472,7 +472,9 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 	if(paramType == int.class)
 		return argType == Integer.class
 		       || argType == long.class
-				|| argType == Long.class;// || argType == FixNum.class;
+				|| argType == Long.class
+				|| argType == short.class
+				|| argType == byte.class;// || argType == FixNum.class;
 	else if(paramType == float.class)
 		return argType == Float.class
 				|| argType == double.class;
@@ -481,7 +483,9 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 				|| argType == float.class;// || argType == DoubleNum.class;
 	else if(paramType == long.class)
 		return argType == Long.class
-				|| argType == int.class;// || argType == BigNum.class;
+				|| argType == int.class
+				|| argType == short.class
+				|| argType == byte.class;// || argType == BigNum.class;
 	else if(paramType == char.class)
 		return argType == Character.class;
 	else if(paramType == short.class)
@@ -516,10 +520,10 @@ public static Object prepRet(Class c, Object x){
 		return x;
 	if(x instanceof Boolean)
 		return ((Boolean) x)?Boolean.TRUE:Boolean.FALSE;
-	else if(x instanceof Integer)
-		{
-		return ((Integer)x).longValue();
-		}
+//	else if(x instanceof Integer)
+//		{
+//		return ((Integer)x).longValue();
+//		}
 //	else if(x instanceof Float)
 //			return Double.valueOf(((Float) x).doubleValue());
 	return x;
