@@ -682,7 +682,11 @@
 
     (interleave [] [3 4]) ()
     (interleave [1 2] []) ()
-    (interleave [] []) () ))
+    (interleave [] []) ()
+
+    (interleave [1]) '(1)
+
+    (interleave) () ))
 
 
 (deftest test-zipmap
