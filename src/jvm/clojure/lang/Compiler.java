@@ -769,8 +769,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					{
 					if(returnType == int.class)
 						{
-						gen.visitInsn(I2L);
-						gen.invokeStatic(NUMBERS_TYPE, Method.getMethod("Number num(long)"));
+						gen.invokeStatic(INTEGER_TYPE, intValueOfMethod);
+//						gen.visitInsn(I2L);
+//						gen.invokeStatic(NUMBERS_TYPE, Method.getMethod("Number num(long)"));
 						}
 					else if(returnType == float.class)
 						{
