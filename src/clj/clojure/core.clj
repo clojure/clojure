@@ -727,10 +727,10 @@
   ([x] true)
   ([x y] (clojure.lang.Util/equiv x y))
   ([x y & more]
-   (if (= x y)
+   (if (clojure.lang.Util/equiv x y)
      (if (next more)
        (recur y (first more) (next more))
-       (= y (first more)))
+       (clojure.lang.Util/equiv y (first more)))
      false)))
 
 ;equals-based
