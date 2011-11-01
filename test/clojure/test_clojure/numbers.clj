@@ -547,3 +547,19 @@ Math/pow overflows to Infinity."
     (is (= java.lang.Long (class (min 1.0 -10 2.0))))
     (is (= java.lang.Long (class (min 1.0 2.0 -10))))
     (is (= java.lang.Double (class (min 1 2 -10.0 3 4 5))))))
+
+(deftest clj-868
+  (testing "min/max: NaN is contagious"
+    (letfn [(fnan? [^Float x] (Float/isNaN x))
+            (dnan? [^double x] (Double/isNaN x))]
+      (are [minmax]
+           (are [nan? nan zero]
+                (every? nan? (map minmax
+                                  [ nan zero zero]
+                                  [zero  nan zero]
+                                  [zero zero  nan]))
+                fnan?  Float/NaN  (Float. 0.0)
+                dnan? Double/NaN          0.0)
+           min
+           max))))
+
