@@ -507,3 +507,43 @@ Math/pow overflows to Infinity."
        clojure.lang.BigInt  (class (-' 0 -9223372036854775808))
        java.lang.Long       (class (-' 0 -9223372036854775807))))
 
+(deftest test-min-max
+  (testing "min/max on different numbers of floats and doubles"
+    (are [xmin xmax a]
+         (and (= (Float. xmin) (min (Float. a)))
+              (= (Float. xmax) (max (Float. a)))
+              (= xmin (min a))
+              (= xmax (max a)))
+         0.0 0.0 0.0)
+    (are [xmin xmax a b]
+         (and (= (Float. xmin) (min (Float. a) (Float. b)))
+              (= (Float. xmax) (max (Float. a) (Float. b)))
+              (= xmin (min a b))
+              (= xmax (max a b)))
+         -1.0  0.0  0.0 -1.0
+         -1.0  0.0 -1.0  0.0
+         0.0  1.0  0.0  1.0
+         0.0  1.0  1.0  0.0)
+    (are [xmin xmax a b c]
+         (and (= (Float. xmin) (min (Float. a) (Float. b) (Float. c)))
+              (= (Float. xmax) (max (Float. a) (Float. b) (Float. c)))
+              (= xmin (min a b c))
+              (= xmax (max a b c)))
+         -1.0  1.0  0.0  1.0 -1.0
+         -1.0  1.0  0.0 -1.0  1.0
+         -1.0  1.0 -1.0  1.0  0.0))
+  (testing "min/max preserves type of winner"
+    (is (= java.lang.Long (class (max 10))))
+    (is (= java.lang.Long (class (max 1.0 10))))
+    (is (= java.lang.Long (class (max 10 1.0))))
+    (is (= java.lang.Long (class (max 10 1.0 2.0))))
+    (is (= java.lang.Long (class (max 1.0 10 2.0))))
+    (is (= java.lang.Long (class (max 1.0 2.0 10))))
+    (is (= java.lang.Double (class (max 1 2 10.0 3 4 5))))
+    (is (= java.lang.Long (class (min 10))))
+    (is (= java.lang.Long (class (min 1.0 -10))))
+    (is (= java.lang.Long (class (min -10 1.0))))
+    (is (= java.lang.Long (class (min -10 1.0 2.0))))
+    (is (= java.lang.Long (class (min 1.0 -10 2.0))))
+    (is (= java.lang.Long (class (min 1.0 2.0 -10))))
+    (is (= java.lang.Double (class (min 1 2 -10.0 3 4 5))))))
