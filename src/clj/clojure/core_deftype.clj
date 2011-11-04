@@ -178,11 +178,11 @@
                            ~@(let [hinted-target (with-meta 'gtarget {:tag tagname})] 
                                (mapcat 
                                 (fn [fld]
-                                  [(keyword fld) 
-                                   `(reify clojure.lang.ILookupThunk 
-                                           (get [~'thunk ~'gtarget] 
-                                                (if (identical? (class ~'gtarget) ~'gclass) 
-                                                  (. ~hinted-target ~(keyword fld))
+                                  [(keyword fld)
+                                   `(reify clojure.lang.ILookupThunk
+                                           (get [~'thunk ~'gtarget]
+                                                (if (identical? (class ~'gtarget) ~'gclass)
+                                                  (. ~hinted-target ~(symbol (str "-" fld)))
                                                   ~'thunk)))])
                                 base-fields))
                            nil))))])
@@ -197,7 +197,7 @@
                          (or (identical? this# ~gs)
                              (when (identical? (class this#) (class ~gs))
                                (let [~gs ~(with-meta gs {:tag tagname})]
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~(keyword fld)))) base-fields)
+                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~(symbol (str "-" fld))))) base-fields)
                                        (= ~'__extmap (. ~gs ~'__extmap))))))))
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
