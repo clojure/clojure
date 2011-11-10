@@ -57,7 +57,7 @@ static public Symbol intern(String ns, String name){
 }
 
 static public Symbol intern(String nsname){
-	int i = nsname.lastIndexOf('/');
+	int i = nsname.indexOf('/');
 	if(i == -1 || nsname.equals("/"))
 		return new Symbol(null, nsname.intern());
 	else

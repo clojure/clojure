@@ -460,6 +460,14 @@
 
 (deftest t-read)
 
+(deftest division
+  (is (= clojure.core// /))
+  (binding [*ns* *ns*]
+    (eval '(do (ns foo
+                 (:require [clojure.core :as bar])
+                 (:use [clojure.test]))
+               (is (= clojure.core// bar//))))))
+
 (deftest Instants
   (testing "Instants are read as java.util.Date by default"
     (is (= java.util.Date (class #inst "2010-11-12T13:14:15.666"))))
