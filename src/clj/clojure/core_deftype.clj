@@ -325,6 +325,8 @@
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
     `(let []
+       (declare ~(symbol (str  '-> gname)))
+       (declare ~(symbol (str 'map-> gname)))
        ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods)
        (import ~classname)
        ~(build-positional-factory gname classname fields)
