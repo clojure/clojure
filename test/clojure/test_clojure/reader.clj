@@ -18,6 +18,9 @@
 
 (ns clojure.test-clojure.reader
   (:use clojure.test)
+  (:use [clojure.instant :only [read-instant-date
+                                read-instant-calendar
+                                read-instant-timestamp]])
   (:import clojure.lang.BigInt))
 
 ;; Symbols
@@ -315,3 +318,36 @@
 ;; (read stream eof-is-error eof-value is-recursive)
 
 (deftest t-read)
+
+
+(deftest Instants
+  (testing "Instants are read as java.util.Date by default"
+    (is (= java.util.Date (class #@2010-11-12T13:14:15.666))))
+  (let [s "#@2010-11-12T13:14:15.666-06:00"]
+    (binding [*instant-reader* read-instant-date]
+      (testing "read-instant-date produces java.util.Date"
+        (is (= java.util.Date (class (read-string s)))))
+      (testing "java.util.Date instants round-trips"
+        (is (= (-> s read-string)
+               (-> s read-string pr-str read-string)))))
+    (binding [*instant-reader* read-instant-calendar]
+      (testing "read-instant-calendar produces java.util.Calendar"
+        (is (instance? java.util.Calendar (read-string s))))
+      (testing "java.util.Calendar round-trips"
+        (is (= (-> s read-string)
+               (-> s read-string pr-str read-string))))
+      (testing "java.util.Calendar remembers timezone in literal"
+        (is (= "#@2010-11-12T13:14:15.666-06:00"
+               (-> s read-string pr-str)))
+        (is (= (-> s read-string)
+               (-> s read-string pr-str read-string))))
+      (testing "java.util.Calendar preserves milliseconds"
+        (is (= 666 (-> s read-string
+                       (.get java.util.Calendar/MILLISECOND)))))))
+  (let [s "#@2010-11-12T13:14:15.123456789"]
+    (binding [*instant-reader* read-instant-timestamp]
+      (testing "read-instant-timestamp produces java.sql.Timestamp"
+        (is (= java.sql.Timestamp (class (read-string s)))))
+      (testing "java.sql.Timestamp preserves nanoseconds"
+        (is (= 123456789 (-> s read-string .getNanos)))
+        (is (= 123456789 (-> s read-string pr-str read-string .getNanos)))))))

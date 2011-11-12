@@ -5998,6 +5998,7 @@
 (load "core_deftype")
 (load "core/protocols")
 (load "gvec")
+(load "instant")
 
 ;; redefine reduce with internal-reduce
 (defn reduce
