@@ -352,3 +352,21 @@
            (vector-of :int (sorted-set 1 2 3 4))
            (vector-of :int 1 2 "3")
            (vector-of :int "1" "2" "3")))))
+
+(defn =vec
+  [expected v] (and (vector? v) (= expected v)))
+
+(deftest test-mapv
+  (are [r c1] (=vec r (mapv + c1))
+       [1 2 3] [1 2 3])
+  (are [r c1 c2] (=vec r (mapv + c1 c2))
+       [2 3 4] [1 2 3] (repeat 1))
+  (are [r c1 c2 c3] (=vec r (mapv + c1 c2 c3))
+       [3 4 5] [1 2 3] (repeat 1) (repeat 1))
+  (are [r c1 c2 c3 c4] (=vec r (mapv + c1 c2 c3 c4))
+       [4 5 6] [1 2 3] [1 1 1] [1 1 1] [1 1 1]))
+
+(deftest test-filterv
+  (are [r c1] (=vec r (filterv even? c1))
+       [] [1 3 5]
+       [2 4] [1 2 3 4 5]))
