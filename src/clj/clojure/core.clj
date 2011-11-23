@@ -3765,7 +3765,9 @@
           nspublics (ns-publics ns)
           rename (or (:rename fs) {})
           exclude (set (:exclude fs))
-          to-do (or (:only fs) (keys nspublics))]
+          to-do (if (= :all (:refer fs))
+                  (keys nspublics)
+                  (or (:refer fs) (:only fs) (keys nspublics)))]
       (doseq [sym to-do]
         (when-not (exclude sym)
           (let [v (nspublics sym)]
@@ -5256,7 +5258,7 @@
                    (or reload (not require) (not loaded))
                    load-one)
         need-ns (or as use)
-        filter-opts (select-keys opts '(:exclude :only :rename))]
+        filter-opts (select-keys opts '(:exclude :only :rename :refer))]
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
         (load lib need-ns require)
@@ -5268,7 +5270,7 @@
         (when *loading-verbosely*
           (printf "(clojure.core/alias '%s '%s)\n" as lib))
         (alias as lib))
-      (when use
+      (when (or use (:refer filter-opts))
         (when *loading-verbosely*
           (printf "(clojure.core/refer '%s" lib)
           (doseq [opt filter-opts]
@@ -5284,7 +5286,7 @@
         opts (interleave flags (repeat true))
         args (filter (complement keyword?) args)]
     ; check for unsupported options
-    (let [supported #{:as :reload :reload-all :require :use :verbose} 
+    (let [supported #{:as :reload :reload-all :require :use :verbose :refer}
           unsupported (seq (remove supported flags))]
       (throw-if unsupported
                 (apply str "Unsupported option(s) supplied: "
@@ -5343,9 +5345,11 @@
   A libspec is a lib name or a vector containing a lib name followed by
   options expressed as sequential keywords and arguments.
 
-  Recognized options: :as
+  Recognized options:
   :as takes a symbol as its argument and makes that symbol an alias to the
     lib's namespace in the current namespace.
+  :refer takes a list of symbols to refer from the namespace or the :all
+    keyword to bring in all public vars.
 
   Prefix Lists
 

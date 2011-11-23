@@ -19,3 +19,14 @@
     (testing "a->b->c->d->b"
       (is (thrown-with-msg? Exception #".*Cyclic load dependency.*"
             (require 'clojure.test-clojure.load.cyclic3))))))
+
+(deftest test-require-refer
+  (try
+    (binding [*ns* *ns*]
+      (ns clojure.test-clojure.require-scratch
+        (:require [clojure.set :refer [difference]]
+                  [clojure.main :refer :all]))
+      (is (fn? (eval 'difference)))
+      (is (every? fn? (map eval '[demunge root-cause repl main]))))
+    (finally
+     (remove-ns 'clojure.test-clojure.require-scratch))))
