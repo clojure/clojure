@@ -115,8 +115,19 @@
        (File. "foo") "foo"
        (File. "bar") (File. "bar")
        (File. "baz") (URL. "file:baz")
+       (File. "bar+baz") (URL. "file:bar+baz")
+       (File. "bar baz qux") (URL. "file:bar%20baz%20qux")
        (File. "quux") (URI. "file:quux")
        nil nil))
+
+(deftest test-resources-with-spaces
+  (let [file-with-spaces (temp-file "test resource 2" "txt")
+        url (as-url (.getParentFile file-with-spaces))
+        loader (java.net.URLClassLoader. (into-array [url]))
+        r (resource (.getName file-with-spaces) loader)]
+    (is (= r (as-url file-with-spaces)))
+    (spit r "foobar")
+    (is (= "foobar" (slurp r)))))
 
 (deftest test-file
   (are [result args] (= (File. result) (apply file args))

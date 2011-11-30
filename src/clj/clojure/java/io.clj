@@ -10,6 +10,7 @@
   ^{:author "Stuart Sierra, Chas Emerick, Stuart Halloway",
      :doc "This file defines polymorphic I/O utility functions for Clojure."}
     clojure.java.io
+    (:require clojure.string)
     (:import 
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File OutputStream
@@ -47,13 +48,22 @@
   
   File
   (as-file [f] f)
-  (as-url [f] (.toURL f))
+  (as-url [f] (.toURL (.toURI f)))
 
   URL
   (as-url [u] u)
   (as-file [u]
     (if (= "file" (.getProtocol u))
-      (as-file (.getPath u))
+      (as-file
+        (clojure.string/replace
+          (.replace (.getFile u) \/ File/separatorChar)
+          #"%.."
+          (fn [escape]
+            (-> escape
+                (.substring 1 3)
+                (Integer/parseInt 16)
+                (char)
+                (str)))))
       (throw (IllegalArgumentException. (str "Not a file: " u)))))
 
   URI
@@ -229,11 +239,11 @@
     :make-input-stream (fn [^URL x opts]
                          (make-input-stream
                           (if (= "file" (.getProtocol x))
-                            (FileInputStream. (.getPath x))
+                            (FileInputStream. (as-file x))
                             (.openStream x)) opts))
     :make-output-stream (fn [^URL x opts]
                           (if (= "file" (.getProtocol x))
-                            (make-output-stream (File. (.getPath x)) opts)
+                            (make-output-stream (as-file x) opts)
                             (throw (IllegalArgumentException. (str "Can not write to non-file URL <" x ">")))))))
 
 (extend URI
