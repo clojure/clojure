@@ -466,8 +466,8 @@ static class DefExpr implements Expr{
             if(!isDynamic && sym.name.startsWith("*") && sym.name.endsWith("*") && sym.name.length() > 1)
                 {
                 RT.errPrintWriter().format("Warning: %1$s not declared dynamic and thus is not dynamically rebindable, "
-                                          +"but its name suggests otherwise. Please either indicate ^:dynamic %1$s or change the name.\n",
-                                           sym);
+                                          +"but its name suggests otherwise. Please either indicate ^:dynamic %1$s or change the name. (%2$s:%3$d)\n",
+                                           sym, SOURCE_PATH.get(), LINE.get());
                 }
 			if(RT.booleanCast(RT.get(mm, arglistsKey)))
 				{
