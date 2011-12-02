@@ -251,7 +251,9 @@ str-or-pattern."
          (pst (root-cause e) e-or-depth))))
   ([^Throwable e depth]
      (binding [*out* *err*]
-       (println (str (-> e class .getSimpleName) " " (.getMessage e)))
+       (println (str (-> e class .getSimpleName) " "
+                     (.getMessage e)
+                     (when-let [info (ex-data e)] (str " " (pr-str info)))))
        (let [st (.getStackTrace e)
              cause (.getCause e)]
          (doseq [el (take depth

@@ -4221,6 +4221,26 @@
     (with-out-str
      (apply println xs)))
 
+(import clojure.lang.ExceptionInfo)
+(defn ex-info
+  "Alpha - subject to change.
+   Create an instance of ExceptionInfo, a RuntimeException subclass
+   that carries a map of additional data."
+  {:added "1.4"}
+  ([msg map]
+     (ExceptionInfo. msg map))
+  ([msg map cause]
+     (ExceptionInfo. msg map cause)))
+
+(defn ex-data
+  "Alpha - subject to change.
+   Returns exception data (a map) if ex is an ExceptionInfo.
+   Otherwise returns nil."
+  {:added "1.4"}
+  [ex]
+  (when (instance? ExceptionInfo ex)
+    (.getData ^ExceptionInfo ex)))
+
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to
   logical true."
