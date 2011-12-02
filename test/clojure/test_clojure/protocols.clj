@@ -440,9 +440,9 @@
             This is a regression test for CLJ-837."
     (let [r (RecordToTest__. 1 2)
           t (TypeToTest__. 3 4)]
-      (are [x y] =
+      (are [x y] (= x y)
            1 (:__a r)
-           2 (:___ b r)
+           2 (:___b r)
            3 (.__a t)
            4 (.___b t)))))
 
