@@ -94,6 +94,7 @@
              *print-meta* *print-meta*
              *print-length* *print-length*
              *print-level* *print-level*
+             *data-readers* *data-readers*
              *compile-path* (System/getProperty "clojure.compile.path" "classes")
              *command-line-args* *command-line-args*
              *unchecked-math* *unchecked-math*
