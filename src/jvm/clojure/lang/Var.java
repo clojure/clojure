@@ -61,6 +61,13 @@ static class Frame{
 		this.bindings = bindings;
 		this.prev = prev;
 	}
+
+    	protected Object clone() {
+		Frame f = new Frame();
+		f.bindings = this.bindings;
+		return f;
+    	}
+
 }
 
 static final ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
@@ -90,6 +97,13 @@ public final Namespace ns;
 
 public static Object getThreadBindingFrame(){
 	Frame f = dvals.get();
+	if(f != null)
+		return f;
+	return new Frame();
+}
+
+public static Object cloneThreadBindingFrame(){
+	Frame f = (Frame) dvals.get().clone();
 	if(f != null)
 		return f;
 	return new Frame();

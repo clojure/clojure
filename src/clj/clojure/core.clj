@@ -1812,7 +1812,7 @@
   {:private true
    :added "1.3"}
   [f]
-  (let [frame (clojure.lang.Var/getThreadBindingFrame)]
+  (let [frame (clojure.lang.Var/cloneThreadBindingFrame)]
     (fn 
       ([]
          (clojure.lang.Var/resetThreadBindingFrame frame)
