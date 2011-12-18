@@ -21,12 +21,13 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 
 
-public final class Keyword implements IFn, Comparable, Named, Serializable {
+public class Keyword implements IFn, Comparable, Named, Serializable {
 
 private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new ConcurrentHashMap();
 static final ReferenceQueue rq = new ReferenceQueue();
 public final Symbol sym;
 final int hash;
+String _str;
 
 public static Keyword intern(Symbol sym){
 	if(sym.meta() != null)
@@ -78,7 +79,9 @@ public final int hashCode(){
 }
 
 public String toString(){
-	return ":" + sym;
+	if(_str == null)
+		_str = (":" + sym).intern();
+	return _str;
 }
 
 public Object throwArity(){

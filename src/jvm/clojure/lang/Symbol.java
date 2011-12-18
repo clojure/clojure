@@ -22,11 +22,16 @@ final String ns;
 final String name;
 final int hash;
 final IPersistentMap _meta;
+String _str;
 
 public String toString(){
-	if(ns != null)
-		return ns + "/" + name;
-	return name;
+	if(_str == null){
+		if(ns != null)
+			_str = (ns + "/" + name).intern();
+		else
+			_str = name;
+	}
+	return _str;
 }
 
 public String getNamespace(){
