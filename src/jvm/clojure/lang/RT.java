@@ -644,6 +644,10 @@ static Object getFrom(Object coll, Object key){
 		IPersistentSet set = (IPersistentSet) coll;
 		return set.get(key);
 	}
+	else if(coll instanceof ITransientSet) {
+		ITransientSet set = (ITransientSet) coll;
+		return set.get(key);
+	}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		if(n >= 0 && n < count(coll))
@@ -675,6 +679,12 @@ static Object getFrom(Object coll, Object key, Object notFound){
 			return set.get(key);
 		return notFound;
 	}
+	else if (coll instanceof ITransientSet) {
+		ITransientSet set = (ITransientSet) coll;
+		if (set.contains(key))
+			return set.get(key);
+		return notFound;
+	}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
@@ -696,6 +706,8 @@ static public Object contains(Object coll, Object key){
 		return ((Associative) coll).containsKey(key) ? T : F;
 	else if(coll instanceof IPersistentSet)
 		return ((IPersistentSet) coll).contains(key) ? T : F;
+	else if(coll instanceof ITransientSet)
+		return ((ITransientSet) coll).contains(key) ? T : F;
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		return m.containsKey(key) ? T : F;

@@ -279,7 +279,7 @@ static final class TransientHashMap extends ATransientMap {
 			else
 				return notFound;
 		if (root == null)
-			return null;
+			return notFound;
 		return root.find(0, hash(key), key, notFound);
 	}
 
