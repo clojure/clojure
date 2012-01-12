@@ -32,6 +32,10 @@ public LineNumberingPushbackReader(Reader r){
 	super(new LineNumberReader(r));
 }
 
+public LineNumberingPushbackReader(Reader r, int size){
+	super(new LineNumberReader(r, size));
+}
+
 public int getLineNumber(){
 	return ((LineNumberReader) in).getLineNumber() + 1;
 }
