@@ -156,17 +156,17 @@ with invalid arguments."
 
 
 ;;; ------------------------------------------------------------------------
-;;; print integeration
+;;; print integration
 
 (defn- fixup-offset
   [^String s]
-  (let [x (- (count s) 2)]
+  (let [x (- (count s) 3)]
     (str (.substring s 0 x) ":" (.substring s x))))
 
 (defn- caldate->rfc3339
   "format java.util.Date or java.util.Calendar as RFC3339 timestamp."
   [d]
-  (fixup-offset (format "#@%1$tFT%1$tT.%1$tL%1$tz" d)))
+  (fixup-offset (format "#inst \"%1$tFT%1$tT.%1$tL%1$tz\"" d)))
 
 (defmethod print-method java.util.Date
   [^java.util.Date d, ^java.io.Writer w]
@@ -193,9 +193,9 @@ with invalid arguments."
 (defn- timestamp->rfc3339
   [^java.sql.Timestamp ts]
   (->> ts
-       (format "#@%1$tFT%1$tT.%1$tN%1$tz") ; %1$tN prints 9 digits for frac.
-       fixup-offset                        ; second, but last 6 are always
-       (fixup-nanos (.getNanos ts))))      ; 0 though timestamp has getNanos
+       (format "#inst \"%1$tFT%1$tT.%1$tN%1$tz\"") ; %1$tN prints 9 digits for frac.
+       fixup-offset                                ; second, but last 6 are always
+       (fixup-nanos (.getNanos ts))))              ; 0 though timestamp has getNanos
 
 (defmethod print-method java.sql.Timestamp
   [^java.sql.Timestamp t, ^java.io.Writer w]
@@ -258,5 +258,7 @@ java.sql.Timestamp. Timestamp preserves fractional seconds with
 nanosecond precision."
      (partial parse-timestamp (validated construct-timestamp)))
 
-(alter-var-root #'clojure.core/*instant-reader*
-                (constantly read-instant-date))
+(alter-var-root #'clojure.core/*data-readers*
+                assoc
+                'inst
+                read-instant-date)
