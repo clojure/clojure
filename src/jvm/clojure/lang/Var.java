@@ -103,9 +103,9 @@ public static Object getThreadBindingFrame(){
 }
 
 public static Object cloneThreadBindingFrame(){
-	Frame f = (Frame) dvals.get().clone();
+	Frame f = dvals.get();
 	if(f != null)
-		return f;
+		return f.clone();
 	return new Frame();
 }
 
