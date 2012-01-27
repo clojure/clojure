@@ -258,7 +258,3 @@ java.sql.Timestamp. Timestamp preserves fractional seconds with
 nanosecond precision."
      (partial parse-timestamp (validated construct-timestamp)))
 
-(alter-var-root #'clojure.core/*data-readers*
-                assoc
-                'inst
-                read-instant-date)
