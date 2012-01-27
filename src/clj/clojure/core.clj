@@ -5997,6 +5997,7 @@
 (load "core/protocols")
 (load "gvec")
 (load "instant")
+(load "uuid")
 
 ;; redefine reduce with internal-reduce
 (defn reduce
@@ -6562,7 +6563,8 @@
 (def ^{:added "1.4"} default-data-readers
   "Default map of data reader functions provided by Clojure. May be
   overridden by binding *data-readers*."
-  {'inst #'clojure.instant/read-instant-date})
+  {'inst #'clojure.instant/read-instant-date
+   'uuid #'clojure.uuid/default-uuid-reader})
 
 (def ^{:added "1.4" :dynamic true} *data-readers*
   "Map from reader tag symbols to data reader Vars.

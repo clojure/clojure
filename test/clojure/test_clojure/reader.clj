@@ -352,3 +352,16 @@
         (is (= 123456789 (-> s read-string .getNanos)))
         ;; bad ATM 
         #_(is (= 123456789 (-> s read-string pr-str read-string .getNanos)))))))
+
+;; UUID Literals
+;; #uuid "550e8400-e29b-41d4-a716-446655440000"
+
+(deftest UUID
+  (is (= java.util.UUID (class #uuid "550e8400-e29b-41d4-a716-446655440000")))
+  (is (.equals #uuid "550e8400-e29b-41d4-a716-446655440000"
+               #uuid "550e8400-e29b-41d4-a716-446655440000"))
+  (is (not (identical? #uuid "550e8400-e29b-41d4-a716-446655440000"
+                       #uuid "550e8400-e29b-41d4-a716-446655440000")))
+  (is (= 4 (.version #uuid "550e8400-e29b-41d4-a716-446655440000")))
+  (is (= (print-str #uuid "550e8400-e29b-41d4-a716-446655440000")
+         "#uuid \"550e8400-e29b-41d4-a716-446655440000\"")))
