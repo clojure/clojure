@@ -17,7 +17,13 @@
   (-> "os.name" System/getProperty .toLowerCase
     (.startsWith "mac os x")))
 
-(def ^:dynamic *open-url-script* (when (macosx?) "/usr/bin/open"))
+(defn- freedesktop? []
+  (not (.startsWith "which" (:out (sh/sh "which" "xdg-open")))))
+
+(def ^:dynamic *open-url-script*
+  (cond
+    (macosx?) "/usr/bin/open"
+    (freedesktop?) "xdg-open"))
 
 (defn- open-url-in-browser
   "Opens url (a string) in the default system web browser.  May not
