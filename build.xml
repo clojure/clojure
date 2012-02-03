@@ -36,6 +36,7 @@
   <target name="compile-java" depends="init"
           description="Compile Java sources.">
     <javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes"
+           includeAntRuntime="false"
            debug="true" source="1.5" target="1.5"/>
   </target>
 
