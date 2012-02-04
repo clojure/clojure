@@ -399,7 +399,10 @@ private static Object matchNumber(String s){
 	m = ratioPat.matcher(s);
 	if(m.matches())
 		{
-		return Numbers.divide(Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(m.group(1)))),
+            String numerator = m.group(1);
+            if (numerator.startsWith("+")) numerator = numerator.substring(1);
+
+            return Numbers.divide(Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(numerator))),
 		                      Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(m.group(2)))));
 		}
 	return null;

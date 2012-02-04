@@ -21,7 +21,7 @@
   (:use [clojure.instant :only [read-instant-date
                                 read-instant-calendar
                                 read-instant-timestamp]])
-  (:import clojure.lang.BigInt
+  (:import [clojure.lang BigInt Ratio]
            java.io.File
            java.util.TimeZone))
 
@@ -273,6 +273,10 @@
 
   (is (instance? BigDecimal -1.0M))
   (is (instance? BigDecimal -1.M))
+
+  (is (instance? Ratio 1/2))
+  (is (instance? Ratio -1/2))
+  (is (instance? Ratio +1/2))
 )
 
 ;; Characters
