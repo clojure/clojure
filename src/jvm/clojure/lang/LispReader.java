@@ -262,7 +262,7 @@ static private int readUnicodeChar(String token, int offset, int length, int bas
 		{
 		int d = Character.digit(token.charAt(i), base);
 		if(d == -1)
-			throw new IllegalArgumentException("Invalid digit: " + (char) d);
+			throw new IllegalArgumentException("Invalid digit: " + token.charAt(i));
 		uc = uc * base + d;
 		}
 	return (char) uc;
@@ -271,7 +271,7 @@ static private int readUnicodeChar(String token, int offset, int length, int bas
 static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) {
 	int uc = Character.digit(initch, base);
 	if(uc == -1)
-		throw new IllegalArgumentException("Invalid digit: " + initch);
+		throw new IllegalArgumentException("Invalid digit: " + (char) initch);
 	int i = 1;
 	for(; i < length; ++i)
 		{
