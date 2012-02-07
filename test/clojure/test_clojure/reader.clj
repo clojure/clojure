@@ -21,7 +21,8 @@
   (:use [clojure.instant :only [read-instant-date
                                 read-instant-calendar
                                 read-instant-timestamp]])
-  (:import clojure.lang.BigInt))
+  (:import clojure.lang.BigInt
+           java.util.TimeZone))
 
 ;; Symbols
 
@@ -319,7 +320,6 @@
 
 (deftest t-read)
 
-
 (deftest Instants
   (testing "Instants are read as java.util.Date by default"
     (is (= java.util.Date (class #inst "2010-11-12T13:14:15.666"))))
@@ -329,7 +329,25 @@
         (is (= java.util.Date (class (read-string s)))))
       (testing "java.util.Date instants round-trips"
         (is (= (-> s read-string)
-               (-> s read-string pr-str read-string)))))
+               (-> s read-string pr-str read-string))))
+      (testing "java.util.Date instants round-trip throughout the year"
+        (doseq [month (range 1 13) day (range 1 29) hour (range 1 23)]
+          (let [s (format "#inst \"2010-%02d-%02dT%02d:14:15.666-06:00\"" month day hour)]
+            (is (= (-> s read-string)
+                   (-> s read-string pr-str read-string))))))
+      (testing "java.util.Date handling DST in time zones"
+        (let [dtz (TimeZone/getDefault)]
+          (try
+            ;; A timezone with DST in effect during 2010-11-12
+            (TimeZone/setDefault (TimeZone/getTimeZone "Australia/Sydney"))
+            (is (= (-> s read-string)
+                   (-> s read-string pr-str read-string)))
+            (finally (TimeZone/setDefault dtz)))))
+      (testing "java.util.Date should always print in UTC"
+        (let [d (read-string s)
+              pstr (print-str d)
+              len (.length pstr)]
+          (is (= (subs pstr (- len 7)) "-00:00\"")))))
     (binding [*data-readers* {'inst read-instant-calendar}]
       (testing "read-instant-calendar produces java.util.Calendar"
         (is (instance? java.util.Calendar (read-string s))))
@@ -344,15 +362,35 @@
       (testing "java.util.Calendar preserves milliseconds"
         (is (= 666 (-> s read-string
                        (.get java.util.Calendar/MILLISECOND)))))))
-  (let [s "#inst \"2010-11-12T13:14:15.123456789\""]
+  (let [s "#inst \"2010-11-12T13:14:15.123456789\""
+        s2 "#inst \"2010-11-12T13:14:15.123\""
+        s3 "#inst \"2010-11-12T13:14:15.123456789123\""]
     (binding [*data-readers* {'inst read-instant-timestamp}]
       (testing "read-instant-timestamp produces java.sql.Timestamp"
         (is (= java.sql.Timestamp (class (read-string s)))))
       (testing "java.sql.Timestamp preserves nanoseconds"
         (is (= 123456789 (-> s read-string .getNanos)))
-        ;; bad ATM 
-        #_(is (= 123456789 (-> s read-string pr-str read-string .getNanos)))))))
-
+        (is (= 123456789 (-> s read-string pr-str read-string .getNanos)))
+        ;; truncate at nanos for s3
+        (is (= 123456789 (-> s3 read-string pr-str read-string .getNanos))))
+      (testing "java.sql.Timestamp should compare nanos"
+        (is (= (read-string s) (read-string s3)))
+        (is (not= (read-string s) (read-string s2)))))
+    (binding [*data-readers* {'inst read-instant-date}]
+      (testing "read-instant-date should truncate at milliseconds"
+        (is (= (read-string s) (read-string s2)) (read-string s3)))))
+  (let [s "#inst \"2010-11-12T03:14:15.123+05:00\""
+        s2 "#inst \"2010-11-11T22:14:15.123Z\""]
+    (binding [*data-readers* {'inst read-instant-date}]
+      (testing "read-instant-date should convert to UTC"
+        (is (= (read-string s) (read-string s2)))))
+    (binding [*data-readers* {'inst read-instant-timestamp}]
+      (testing "read-instant-timestamp should convert to UTC"
+        (is (= (read-string s) (read-string s2)))))
+    (binding [*data-readers* {'inst read-instant-calendar}]
+      (testing "read-instant-calendar should preserve timezone"
+        (is (not= (read-string s) (read-string s2)))))))
+      
 ;; UUID Literals
 ;; #uuid "550e8400-e29b-41d4-a716-446655440000"
 
