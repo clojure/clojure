@@ -302,26 +302,28 @@
               (recur)))))))
 
 (defmethod do-copy [InputStream Writer] [#^InputStream input #^Writer output opts]
-  (let [#^"[B" buffer (make-array Byte/TYPE (buffer-size opts))]
+  (let [#^"[C" buffer (make-array Character/TYPE (buffer-size opts))
+        in (InputStreamReader. input (encoding opts))]
     (loop []
-      (let [size (.read input buffer)]
-        (when (pos? size)
-          (let [chars (.toCharArray (String. buffer 0 size (encoding opts)))]
-            (do (.write output chars)
-                (recur))))))))
+      (let [size (.read in buffer 0 (alength buffer))]
+        (if (pos? size)
+          (do (.write output buffer 0 size)
+              (recur)))))))
 
 (defmethod do-copy [InputStream File] [#^InputStream input #^File output opts]
   (with-open [out (FileOutputStream. output)]
     (do-copy input out opts)))
 
 (defmethod do-copy [Reader OutputStream] [#^Reader input #^OutputStream output opts]
-  (let [#^"[C" buffer (make-array Character/TYPE (buffer-size opts))]
+  (let [#^"[C" buffer (make-array Character/TYPE (buffer-size opts))
+        out (OutputStreamWriter. output (encoding opts))]
     (loop []
       (let [size (.read input buffer)]
-        (when (pos? size)
-          (let [bytes (.getBytes (String. buffer 0 size) (encoding opts))]
-            (do (.write output bytes)
-                (recur))))))))
+        (if (pos? size)
+          (do
+            (.write out buffer 0 size)
+            (recur))
+          (.flush out))))))
 
 (defmethod do-copy [Reader Writer] [#^Reader input #^Writer output opts]
   (let [#^"[C" buffer (make-array Character/TYPE (buffer-size opts))]

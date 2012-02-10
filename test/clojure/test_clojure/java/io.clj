@@ -21,17 +21,20 @@
     (.deleteOnExit)))
 
 (deftest test-spit-and-slurp
-  (let [f (temp-file "clojure.java.io" "test")]
-    (spit f "foobar")
-    (is (= "foobar" (slurp f)))
-    (spit f "foobar" :encoding "UTF-16")
-    (is (= "foobar" (slurp f :encoding "UTF-16")))
+  (let [f (temp-file "clojure.java.io" "test")
+        content (apply str (concat "a" (repeat 500 "\u226a\ud83d\ude03")))]
+    (spit f content)
+    (is (= content (slurp f)))
+    ;; UTF-16 must be last for the following test
+    (doseq [enc [ "UTF-8" "UTF-16BE" "UTF-16LE" "UTF-32" "UTF-16" ]]
+      (spit f content :encoding enc)
+      (is (= content (slurp f :encoding enc))))
     (testing "deprecated arity"
       (is (=
            (platform-newlines "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n")
            (with-out-str
-             (is (= "foobar" (slurp f "UTF-16")))))))))
-  
+             (is (= content (slurp f "UTF-16")))))))))
+
 (deftest test-streams-defaults
   (let [f (temp-file "clojure.java.io" "test-reader-writer")
         content "testing"]
@@ -63,17 +66,21 @@
 (defn data-fixture
   "in memory fixture data for tests"
   [encoding]
-  (let [bs (.getBytes "hello" encoding)
-        cs (.toCharArray "hello")
+  (let [s (apply str (concat "a" (repeat 500 "\u226a\ud83d\ude03")))
+        bs (.getBytes s encoding)
+        cs (.toCharArray s)
         i (ByteArrayInputStream. bs)
-        r (InputStreamReader. i)
+        ;; Make UTF-8 encoding explicit for the InputStreamReader and
+        ;; OutputStreamWriter, since some JVMs use a different default
+        ;; encoding.
+        r (InputStreamReader. i "UTF-8")
         o (ByteArrayOutputStream.)
-        w (OutputStreamWriter. o)]
+        w (OutputStreamWriter. o "UTF-8")]
     {:bs bs
      :i i
      :r r
      :o o
-     :s "hello"
+     :s s
      :cs cs
      :w w}))
 
@@ -90,7 +97,7 @@
           {:in :bs :out :w}]
          
          opts
-         [{} {:buffer-size 256}]]
+         [{} {:buffer-size 16} {:buffer-size 256}]]
      (let [{:keys [s o] :as d} (data-fixture "UTF-8")]
        (apply copy (in d) (out d) (flatten (vec opts)))
        #_(when (= out :w) (.flush (:w d)))
@@ -100,15 +107,16 @@
                            (str "combination " test opts))))))
 
 (deftest test-copy-encodings
-  (testing "from inputstream UTF-16 to writer UTF-8"
-    (let [{:keys [i s o w bs]} (data-fixture "UTF-16")]
-      (copy i w :encoding "UTF-16")
-      (.flush w)
-      (bytes-should-equal (.getBytes s "UTF-8") (.toByteArray o) "")))
-  (testing "from reader UTF-8 to output-stream UTF-16"
-    (let [{:keys [r o s]} (data-fixture "UTF-8")]
-      (copy r o :encoding "UTF-16")
-      (bytes-should-equal (.getBytes s "UTF-16") (.toByteArray o) ""))))
+  (doseq [enc [ "UTF-8" "UTF-16" "UTF-16BE" "UTF-16LE" "UTF-32" ]]
+    (testing (str "from inputstream " enc " to writer UTF-8")
+      (let [{:keys [i s o w bs]} (data-fixture enc)]
+        (copy i w :encoding enc :buffer-size 16)
+        (.flush w)
+        (bytes-should-equal (.getBytes s "UTF-8") (.toByteArray o) "")))
+    (testing (str "from reader UTF-8 to output-stream " enc)
+      (let [{:keys [r o s]} (data-fixture "UTF-8")]
+        (copy r o :encoding enc :buffer-size 16)
+        (bytes-should-equal (.getBytes s enc) (.toByteArray o) "")))))
 
 (deftest test-as-file
   (are [result input] (= result (as-file input))
@@ -167,8 +175,9 @@
 
 (deftest test-input-stream
   (let [file (temp-file "test-input-stream" "txt")
-        bytes (.getBytes "foobar")]
-    (spit file "foobar")
+        content (apply str (concat "a" (repeat 500 "\u226a\ud83d\ude03")))
+        bytes (.getBytes content "UTF-8")]
+    (spit file content)
     (doseq [[expr msg]
             [[file File]
              [(FileInputStream. file) FileInputStream]
