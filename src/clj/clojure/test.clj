@@ -568,7 +568,15 @@
   Note: This breaks some reporting features, such as line numbers."
   {:added "1.1"}
   [argv expr & args]
-  `(temp/do-template ~argv (is ~expr) ~@args))
+  (if (or
+       ;; (are [] true) is meaningless but ok
+       (and (empty? argv) (empty? args))
+       ;; Catch wrong number of args
+       (and (pos? (count argv))
+            (pos? (count args))
+            (zero? (mod (count args) (count argv)))))
+    `(temp/do-template ~argv (is ~expr) ~@args)
+    (throw (IllegalArgumentException. "The number of args doesn't match are's argv."))))
 
 (defmacro testing
   "Adds a new string to the list of testing contexts.  May be nested,

@@ -41,14 +41,14 @@
       (. Math (abs -7)) )
 
   ; (. target -prop)
-  (are [x y] (= x y)
-      (let [p (java.awt.Point. 1 2)]
-        1 (.-x p)
-        2 (.-y p)
-        1 (. p -x)
-        2 (. p -y)
-        1 (. (java.awt.Point. 1 2) -x)
-        2 (. (java.awt.Point. 1 2) -y)))
+  (let [p (java.awt.Point. 1 2)]
+    (are [x y] (= x y)
+       1 (.-x p)
+       2 (.-y p)
+       1 (. p -x)
+       2 (. p -y)
+       1 (. (java.awt.Point. 1 2) -x)
+       2 (. (java.awt.Point. 1 2) -y)))
   
   ; Classname/staticField
   (are [x] (= x 2147483647)
