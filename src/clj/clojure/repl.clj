@@ -125,8 +125,8 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
     (#'print-doc (#'special-doc special-name))
     (cond
       (special-doc-map name) `(#'print-doc (#'special-doc '~name))
-      (resolve name) `(#'print-doc (meta (var ~name)))
-      (find-ns name) `(#'print-doc (namespace-doc (find-ns '~name))))))
+      (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
+      (resolve name) `(#'print-doc (meta (var ~name))))))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Clojure functions (Vars, really)

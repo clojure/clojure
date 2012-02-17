@@ -2,7 +2,13 @@
   (:use clojure.test
         clojure.repl
         [clojure.test-helper :only [platform-newlines]]
-        clojure.test-clojure.repl.example))
+        clojure.test-clojure.repl.example)
+  (:require [clojure.string :as str]))
+
+(deftest test-doc
+  (testing "with namespaces"
+    (is (= "clojure.pprint"
+           (second (str/split-lines (with-out-str (doc clojure.pprint))))))))
 
 (deftest test-source
   (is (= "(defn foo [])" (source-fn 'clojure.test-clojure.repl.example/foo)))
