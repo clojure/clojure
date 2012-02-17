@@ -248,8 +248,10 @@
         [field-args over] (split-at 20 fields)
         field-count (count fields)
         arg-count (count field-args)
-        over-count (count over)]
+        over-count (count over)
+        docstring (str "Positional factory function for class " classname ".")]
     `(defn ~fn-name
+       ~docstring
        [~@field-args ~@(if (seq over) '[& overage] [])]
        ~(if (seq over)
           `(if (= (count ~'overage) ~over-count)
@@ -329,7 +331,11 @@
   map (nil for none), and one taking only the fields (using nil for
   meta and extension fields). Note that the field names __meta
   and __extmap are currently reserved and should not be used when
-  defining your own records."
+  defining your own records.
+
+  Given (defrecord TypeName ...), two factory functions will be
+  defined: ->TypeName, taking positional parameters for the fields,
+  and map->TypeName, taking a map of keywords to field values."
   {:added "1.2"}
 
   [name [& fields] & opts+specs]
@@ -347,6 +353,7 @@
        (import ~classname)
        ~(build-positional-factory gname classname fields)
        (defn ~(symbol (str 'map-> gname))
+         ~(str "Factory function for class " classname ", taking a map of keywords to field values.")
          ([m#] (~(symbol (str classname "/create")) m#)))
        ~classname)))
 
@@ -418,7 +425,10 @@
 
   One constructor will be defined, taking the designated fields.  Note
   that the field names __meta and __extmap are currently reserved and
-  should not be used when defining your own types."
+  should not be used when defining your own types.
+
+  Given (deftype TypeName ...), a factory function called ->TypeName
+  will be defined, taking positional parameters for the fields"
   {:added "1.2"}
 
   [name [& fields] & opts+specs]
