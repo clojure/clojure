@@ -455,15 +455,10 @@
       (contains? (into-array [1 2 3]) 3) false
       (contains? (into-array [1 2 3]) -1) false)
 
-  ; 'contains?' operates constant or logarithmic time,
-  ; it WILL NOT perform a linear search for a value.
-  (are [x]  (= x false)
-      (contains? '(1 2 3) 0)
-      (contains? '(1 2 3) 1)
-      (contains? '(1 2 3) 3)
-      (contains? '(1 2 3) 10)
-      (contains? '(1 2 3) nil)
-      (contains? '(1 2 3) ()) ))
+  ; 'contains?' will not operate on non-associative things
+  (are [x]  (is (thrown? Exception (contains? x 1)))
+       '(1 2 3)
+       3))
 
 
 (deftest test-keys

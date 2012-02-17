@@ -710,7 +710,7 @@ static public Object contains(Object coll, Object key){
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll);
 	}
-	return F;
+	throw new IllegalArgumentException("contains? not supported on type: " + coll.getClass().getName());
 }
 
 static public Object find(Object coll, Object key){
