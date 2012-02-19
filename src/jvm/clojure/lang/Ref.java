@@ -241,14 +241,7 @@ public Object call() {
 }
 
 public void run(){
-	try
-		{
-		invoke();
-		}
-	catch(Exception e)
-		{
-		throw Util.runtimeException(e);
-		}
+        invoke();
 }
 
 public Object invoke() {
