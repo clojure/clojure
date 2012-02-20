@@ -273,6 +273,29 @@
       (to-array [])
       (to-array [1 2 3]) ))
 
+(defn queue [& contents]
+  (apply conj (clojure.lang.PersistentQueue/EMPTY) contents))
+
+(defn array-typed-equals [expected actual]
+  (and (= (class expected) (class actual))
+       (java.util.Arrays/equals expected actual)))
+
+(defmacro test-to-passed-array-for [collection-type]
+  `(deftest ~(symbol (str "test-to-passed-array-for-" collection-type))
+     (let [string-array# (make-array String 5)
+           shorter# (~collection-type "1" "2" "3")
+           same-length# (~collection-type "1" "2" "3" "4" "5")
+           longer# (~collection-type "1" "2" "3" "4" "5" "6")]
+       (are [expected actual] (array-typed-equals expected actual)
+            (into-array String ["1" "2" "3" nil nil]) (.toArray shorter# string-array#)
+            (into-array String ["1" "2" "3" "4" "5"]) (.toArray same-length# string-array#)
+            (into-array String ["1" "2" "3" "4" "5" "6"]) (.toArray longer# string-array#)))))
+
+
+(test-to-passed-array-for vector)
+(test-to-passed-array-for list)
+(test-to-passed-array-for hash-set)
+(test-to-passed-array-for queue)
 
 (deftest test-into-array
   ; compatible types only

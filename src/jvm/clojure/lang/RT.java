@@ -1570,6 +1570,21 @@ static public Object[] seqToArray(ISeq seq){
 	return ret;
 }
 
+    // supports java Collection.toArray(T[])
+    static public Object[] seqToPassedArray(ISeq seq, Object[] passed){
+        Object[] dest = passed;
+        int len = count(seq);
+        if (len > dest.length) {
+            dest = (Object[]) Array.newInstance(passed.getClass().getComponentType(), len);
+        }
+        for(int i = 0; seq != null; ++i, seq = seq.next())
+            dest[i] = seq.first();
+        if (len < passed.length) {
+            dest[len] = null;
+        }
+        return dest;
+    }
+
 static public Object seqToTypedArray(ISeq seq) {
 	Class type = (seq != null) ? seq.first().getClass() : Object.class;
 	return seqToTypedArray(type, seq);
