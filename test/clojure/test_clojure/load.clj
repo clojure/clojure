@@ -25,8 +25,8 @@
     (binding [*ns* *ns*]
       (ns clojure.test-clojure.require-scratch
         (:require [clojure.set :refer [difference]]
-                  [clojure.main :refer :all]))
+                  [clojure.walk :refer :all]))
       (is (fn? (eval 'difference)))
-      (is (every? fn? (map eval '[demunge root-cause repl main]))))
+      (is (every? fn? (map eval '[postwalk-replace prewalk-replace walk]))))
     (finally
      (remove-ns 'clojure.test-clojure.require-scratch))))
