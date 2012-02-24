@@ -6285,9 +6285,12 @@ private static Expr analyze(C context, Object form, String name) {
 static public class CompilerException extends RuntimeException{
 	final public String source;
 	
+	final public int line;
+
 	public CompilerException(String source, int line, Throwable cause){
 		super(errorMsg(source, line, cause.toString()), cause);
 		this.source = source;
+		this.line = line;
 	}
 
 	public String toString(){
