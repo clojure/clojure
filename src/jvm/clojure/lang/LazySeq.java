@@ -37,19 +37,8 @@ public Obj withMeta(IPersistentMap meta){
 final synchronized Object sval(){
 	if(fn != null)
 		{
-		try
-			{
 			sv = fn.invoke();
 			fn = null;
-			}
-		catch(RuntimeException e)
-			{
-			throw e;
-			}
-		catch(Exception e)
-			{
-			throw Util.runtimeException(e);
-			}
 		}
 	if(sv != null)
 		return sv;

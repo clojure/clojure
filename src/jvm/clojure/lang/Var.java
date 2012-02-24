@@ -397,14 +397,7 @@ public Object call() {
 }
 
 public void run(){
-	try
-		{
-		invoke();
-		}
-	catch(Exception e)
-		{
-		throw Util.runtimeException(e);
-		}
+        invoke();
 }
 
 public Object invoke() {
@@ -541,14 +534,7 @@ static IFn assoc = new AFn(){
 static IFn dissoc = new AFn() {
     @Override
     public Object invoke(Object c, Object k)  {
-	    try
-		    {
-		    return RT.dissoc(c, k);
-		    }
-	    catch(Exception e)
-		    {
-		    return Util.runtimeException(e);
-		    }
+            return RT.dissoc(c, k);
     }
 };
 }

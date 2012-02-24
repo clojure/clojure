@@ -1703,12 +1703,7 @@ static public String printString(Object x){
 
 static public Object readString(String s){
 	PushbackReader r = new PushbackReader(new StringReader(s));
-	try {
-		return LispReader.read(r, true, null, false);
-	}
-	catch(Exception e) {
-		throw Util.runtimeException(e);
-	}
+        return LispReader.read(r, true, null, false);
 }
 
 static public void print(Object x, Writer w) throws IOException{
