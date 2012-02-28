@@ -22,6 +22,7 @@
                                 read-instant-calendar
                                 read-instant-timestamp]])
   (:import clojure.lang.BigInt
+           java.io.File
            java.util.TimeZone))
 
 ;; Symbols
@@ -47,11 +48,72 @@
 
 ;; Strings
 
+(defn temp-file
+  [prefix suffix]
+  (doto (File/createTempFile prefix suffix)
+    (.deleteOnExit)))
+
+(defn read-from
+  [source file form]
+  (if (= :string source)
+    (read-string form)
+    (do
+      (spit file form)
+      (load-file (str file)))))
+
+(defn code-units
+  [s]
+  (and (instance? String s) (map int s)))
+
 (deftest Strings
   (is (= "abcde" (str \a \b \c \d \e)))
   (is (= "abc
   def" (str \a \b \c \newline \space \space \d \e \f)))
-  )
+  (let [f (temp-file "clojure.core-reader" "test")]
+    (doseq [source [:string :file]]
+      (testing (str "Valid string literals read from " (name source))
+        (are [x form] (= x (code-units
+                            (read-from source f (str "\"" form "\""))))
+             [] ""
+             [34] "\\\""
+             [10] "\\n"
+
+             [0] "\\0"
+             [0] "\\000"
+             [3] "\\3"
+             [3] "\\03"
+             [3] "\\003"
+             [0 51] "\\0003"
+             [3 48] "\\0030"
+             [0377] "\\377"
+             [0 56] "\\0008"
+
+             [0] "\\u0000"
+             [0xd7ff] "\\ud7ff"
+             [0xd800] "\\ud800"
+             [0xdfff] "\\udfff"
+             [0xe000] "\\ue000"
+             [0xffff] "\\uffff"
+             [4 49] "\\u00041"))
+      (testing (str "Errors reading string literals from " (name source))
+        (are [err msg form] (thrown-with-msg? err msg
+                              (read-from source f (str "\"" form "\"")))
+             Exception #"EOF while reading string" "\\"
+             Exception #"Unsupported escape character: \\o" "\\o"
+
+             Exception #"Octal escape sequence must be in range \[0, 377\]" "\\400"
+             Exception #"Invalid digit: 8" "\\8"
+             Exception #"Invalid digit: 8" "\\8000"
+             Exception #"Invalid digit: 8" "\\0800"
+             Exception #"Invalid digit: 8" "\\0080"
+             Exception #"Invalid digit: a" "\\2and"
+
+             Exception #"Invalid unicode escape: \\u" "\\u"
+             Exception #"Invalid unicode escape: \\ug" "\\ug"
+             Exception #"Invalid unicode escape: \\ug" "\\ug000"
+             Exception #"Invalid character length: 1, should be: 4" "\\u0"
+             Exception #"Invalid character length: 3, should be: 4" "\\u004"
+             Exception #"Invalid digit: g" "\\u004g")))))
 
 ;; Numbers
 
@@ -215,7 +277,43 @@
 
 ;; Characters
 
-(deftest t-Characters)
+(deftest t-Characters
+  (let [f (temp-file "clojure.core-reader" "test")]
+    (doseq [source [:string :file]]
+      (testing (str "Valid char literals read from " (name source))
+        (are [x form] (= x (read-from source f form))
+             (first "o") "\\o"
+             (char 0) "\\o0"
+             (char 0) "\\o000"
+             (char 047) "\\o47"
+             (char 0377) "\\o377"
+
+             (first "u") "\\u"
+             (first "A") "\\u0041"
+             (char 0) "\\u0000"
+             (char 0xd7ff) "\\ud7ff"
+             (char 0xe000) "\\ue000"
+             (char 0xffff) "\\uffff"))
+      (testing (str "Errors reading char literals from " (name source))
+        (are [err msg form] (thrown-with-msg? err msg (read-from source f form))
+             Exception #"EOF while reading character" "\\"
+             Exception #"Unsupported character: \\00" "\\00"
+             Exception #"Unsupported character: \\0009" "\\0009"
+
+             Exception #"Invalid digit: 8" "\\o378"
+             Exception #"Octal escape sequence must be in range \[0, 377\]" "\\o400"
+             Exception #"Invalid digit: 8" "\\o800"
+             Exception #"Invalid digit: a" "\\oand"
+             Exception #"Invalid octal escape sequence length: 4" "\\o0470"
+
+             Exception #"Invalid unicode character: \\u0" "\\u0"
+             Exception #"Invalid unicode character: \\ug" "\\ug"
+             Exception #"Invalid unicode character: \\u000" "\\u000"
+             Exception #"Invalid character constant: \\ud800" "\\ud800"
+             Exception #"Invalid character constant: \\udfff" "\\udfff"
+             Exception #"Invalid unicode character: \\u004" "\\u004"
+             Exception #"Invalid unicode character: \\u00041" "\\u00041"
+             Exception #"Invalid digit: g" "\\u004g")))))
 
 ;; nil
 
