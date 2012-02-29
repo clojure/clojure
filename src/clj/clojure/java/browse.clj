@@ -10,14 +10,34 @@
   ^{:author "Christophe Grand",
     :doc "Start a web browser from Clojure"}
   clojure.java.browse
-  (:require [clojure.java.shell :as sh]) 
+  (:require [clojure.java.shell :as sh]
+            [clojure.string :as str])
   (:import (java.net URI)))
 
 (defn- macosx? []
   (-> "os.name" System/getProperty .toLowerCase
     (.startsWith "mac os x")))
 
-(def ^:dynamic *open-url-script* (when (macosx?) "/usr/bin/open"))
+(defn- xdg-open-loc []
+  ;; try/catch needed to mask exception on Windows without Cygwin
+  (let [which-out (try (:out (sh/sh "which" "xdg-open"))
+                       (catch Exception e ""))]
+    (if (= which-out "")
+      nil
+      (str/trim-newline which-out))))
+
+(defn- open-url-script-val []
+  (if (macosx?)
+    "/usr/bin/open"
+    (xdg-open-loc)))
+
+;; We could assign (open-url-script-val) to *open-url-script* right
+;; away in the def below, but clojure.java.shell/sh creates a future
+;; that causes a long wait for the JVM to exit during Clojure compiles
+;; (unless we can somehow here make it call (shutdown-agents) later).
+;; Better to initialize it when we first need it, in browse-url.
+
+(def ^:dynamic *open-url-script* (atom :uninitialized))
 
 (defn- open-url-in-browser
   "Opens url (a string) in the default system web browser.  May not
@@ -47,6 +67,10 @@
   "Open url in a browser"
   {:added "1.2"}
   [url]
-  (or (open-url-in-browser url)
-      (when *open-url-script* (sh/sh *open-url-script* (str url)) true)
-      (open-url-in-swing url)))
+  (let [script @*open-url-script*
+        script (if (= :uninitialized script)
+                 (reset! *open-url-script* (open-url-script-val))
+                 script)]
+    (or (when script (sh/sh script (str url)) true)
+        (open-url-in-browser url)
+        (open-url-in-swing url))))
