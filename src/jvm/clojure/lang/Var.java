@@ -547,10 +547,7 @@ static IFn dissoc = new AFn() {
 		    }
 	    catch(Exception e)
 		    {
-// TODO:CLJ-855 "throw Util.sneakyThrow(e)" instead?
-// I don't understand why we are *returing* the exception here instead
-// of just throwing it.
-			return e; 
+            throw Util.sneakyThrow(e);
 		    }
     }
 };
