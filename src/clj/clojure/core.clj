@@ -5707,6 +5707,11 @@
   coercions will be done without overflow checks. Default: false."
   {:added "1.3"})
 
+(add-doc-and-meta *elide-meta*
+  "Bind to a collection of metadata keys to elide during compilation.
+  Alpha, subject to change."
+  {:added "1.4"})
+
 (add-doc-and-meta *ns*
   "A clojure.lang.Namespace object representing the current namespace."
   {:added "1.0"})

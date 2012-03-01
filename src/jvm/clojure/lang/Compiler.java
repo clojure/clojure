@@ -239,6 +239,23 @@ static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.inte
 static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                             Symbol.intern("add-annotations"));
 
+//collection of keys
+static final public Var ELIDE_META = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                  Symbol.intern("*elide-meta*"), null).setDynamic();
+
+static Object elideMeta(Object m){
+        Collection<Object> elides = (Collection<Object>) ELIDE_META.get();
+        if(elides != null)
+            {
+            for(Object k : elides)
+                {
+                //System.out.println("Eliding:" + k + " : " + RT.get(m, k));
+                m = RT.dissoc(m, k);
+                }
+//            System.out.println("Remaining: " + RT.keys(m));
+            }
+        return m;
+    }
 
 //Integer
 static final public Var LINE = Var.create(0).setDynamic();
@@ -490,6 +507,7 @@ static class DefExpr implements Expr{
 //					.without(Keyword.intern(null, "name"))
 //					.without(Keyword.intern(null, "added"))
 //					.without(Keyword.intern(null, "static"));
+            mm = (IPersistentMap) elideMeta(mm);
 			Expr meta = mm.count()==0 ? null:analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr((String) SOURCE.deref(), (Integer) LINE.deref(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
@@ -4465,7 +4483,8 @@ static public class ObjExpr implements Expr{
 			if(value instanceof IObj && RT.count(((IObj) value).meta()) > 0)
 				{
 				gen.checkCast(IOBJ_TYPE);
-				emitValue(((IObj) value).meta(), gen);
+                Object m = ((IObj) value).meta();
+				emitValue(elideMeta(m), gen);
 				gen.checkCast(IPERSISTENTMAP_TYPE);
 				gen.invokeInterface(IOBJ_TYPE,
 				                    Method.getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)"));

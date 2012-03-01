@@ -47,6 +47,7 @@
           failonerror="true"
           fork="true">
       <sysproperty key="clojure.compile.path" value="${build}"/>
+         <!--<sysproperty key="clojure.elide.meta" value="[:doc :file :line :added :static :private :arglists]"/>-->
       <!-- <sysproperty key="clojure.compile.warn-on-reflection" value="true"/> -->
       <arg value="clojure.core"/>
       <arg value="clojure.core.protocols"/>
@@ -86,6 +87,7 @@
           failonerror="true"
 	  fork="true">
       <sysproperty key="clojure.compile.path" value="${test-classes}"/>
+        <!--<sysproperty key="clojure.elide.meta" value="[:doc]"/>-->
       <arg value="clojure.test-clojure.protocols.examples"/>
       <arg value="clojure.test-clojure.genclass.examples"/>
     </java>

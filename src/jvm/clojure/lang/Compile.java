@@ -25,10 +25,13 @@ public class Compile{
 private static final String PATH_PROP = "clojure.compile.path";
 private static final String REFLECTION_WARNING_PROP = "clojure.compile.warn-on-reflection";
 private static final String UNCHECKED_MATH_PROP = "clojure.compile.unchecked-math";
+private static final String ELIDE_META_PROP = "clojure.elide.meta";
+
 private static final Var compile_path = RT.var("clojure.core", "*compile-path*");
 private static final Var compile = RT.var("clojure.core", "compile");
 private static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
 private static final Var unchecked_math = RT.var("clojure.core", "*unchecked-math*");
+private static final Var elide_meta = RT.var("clojure.core", "*elide-meta*");
 
 public static void main(String[] args) throws IOException{
 
@@ -47,10 +50,14 @@ public static void main(String[] args) throws IOException{
 
     boolean warnOnReflection = System.getProperty(REFLECTION_WARNING_PROP, "false").equals("true");
     boolean uncheckedMath = System.getProperty(UNCHECKED_MATH_PROP, "false").equals("true");
+    Object elide = RT.readString(System.getProperty(ELIDE_META_PROP, "nil"));
 
 	try
 		{
-               Var.pushThreadBindings(RT.map(compile_path, path, warn_on_reflection, warnOnReflection, unchecked_math, uncheckedMath));
+               Var.pushThreadBindings(RT.map(compile_path, path,
+                       warn_on_reflection, warnOnReflection,
+                       unchecked_math, uncheckedMath,
+                       elide_meta, elide));
 
 		for(String lib : args)
         {
