@@ -23,16 +23,9 @@ import java.util.List;
 public class Reflector{
 
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
-	try
-		{
-		Class c = target.getClass();
-		List methods = getMethods(c, args.length, methodName, false);
-		return invokeMatchingMethod(methodName, methods, target, args);
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
+	Class c = target.getClass();
+	List methods = getMethods(c, args.length, methodName, false);
+	return invokeMatchingMethod(methodName, methods, target, args);
 }
 
 private static Throwable getCauseOrElse(Exception e) {
@@ -204,14 +197,7 @@ public static Object invokeStaticMethodVariadic(String className, String methodN
 
 public static Object invokeStaticMethod(String className, String methodName, Object[] args) {
 	Class c = RT.classForName(className);
-	try
-		{
-		return invokeStaticMethod(c, methodName, args);
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
+	return invokeStaticMethod(c, methodName, args);
 }
 
 public static Object invokeStaticMethod(Class c, String methodName, Object[] args) {
