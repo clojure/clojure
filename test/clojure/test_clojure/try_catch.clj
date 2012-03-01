@@ -29,7 +29,11 @@
 (defn fail [x]
   (ReflectorTryCatchFixture/fail x))
 
+(defn make-instance []
+  (ReflectorTryCatchFixture.))
+
 (deftest catch-receives-checked-exception-from-reflective-call
   (is (thrown-with-msg? ReflectorTryCatchFixture$Cookies #"Long" (fail 1)))
-  (is (thrown-with-msg? ReflectorTryCatchFixture$Cookies #"Double" (fail 1.0))))
-    
+  (is (thrown-with-msg? ReflectorTryCatchFixture$Cookies #"Double" (fail 1.0)))
+  (is (thrown-with-msg? ReflectorTryCatchFixture$Cookies #"Wrapped"
+        (.failWithCause (make-instance) 1.0))))

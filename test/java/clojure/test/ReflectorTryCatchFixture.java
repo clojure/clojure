@@ -10,7 +10,12 @@ public class ReflectorTryCatchFixture {
 		throw new Cookies("Double");
 	}
 	
+        public void failWithCause(Double y) throws Cookies {
+                throw new Cookies("Wrapped", new Cookies("Cause"));
+	}
+	
 	public static class Cookies extends Exception {
+                public Cookies(String msg, Throwable cause) { super(msg, cause); }
 		public Cookies(String msg) { super(msg); }
 	}
 
