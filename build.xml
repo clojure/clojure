@@ -78,10 +78,9 @@
   <target name="compile-tests" 
           description="Compile the subset of tests that require compilation."
           unless="maven.test.skip">
-    <delete dir="${test-classes}"/>
     <mkdir dir="${test-classes}"/>
-    <!-- <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes" -->
-    <!--        debug="true" source="1.5" target="1.5" includeantruntime="no"/> -->
+    <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
+           debug="true" source="1.5" target="1.5" includeantruntime="no"/>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
           failonerror="true"
