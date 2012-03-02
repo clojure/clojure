@@ -20,6 +20,12 @@
       (is (thrown-with-msg? Exception #".*Cyclic load dependency.*"
             (require 'clojure.test-clojure.load.cyclic3))))))
 
+(deftest test-load-lib
+  (testing "Shouldn't leak failed namespace"
+    (try (require 'clojure.test-clojure.load.invalid)
+         (catch Exception _))
+    (is (nil? (find-ns 'clojure.test-clojure.load.invalid)))))
+
 (deftest test-require-refer
   (try
     (binding [*ns* *ns*]

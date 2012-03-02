@@ -5268,10 +5268,16 @@
                    (or reload (not require) (not loaded))
                    load-one)
         need-ns (or as use)
-        filter-opts (select-keys opts '(:exclude :only :rename :refer))]
+        filter-opts (select-keys opts '(:exclude :only :rename :refer))
+        undefined-on-entry (not (find-ns lib))]
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
-        (load lib need-ns require)
+        (try
+          (load lib need-ns require)
+          (catch Exception e
+            (when undefined-on-entry
+              (remove-ns lib))
+            (throw e)))
         (throw-if (and need-ns (not (find-ns lib)))
                   "namespace '%s' not found" lib))
       (when (and need-ns *loading-verbosely*)
