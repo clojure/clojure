@@ -71,3 +71,17 @@
        expected-annotations
        (into #{} (map annotation->map (.getAnnotations (.getMethod Bar "foo" nil)))))))
 
+(gen-class :name foo.Bar
+           :extends clojure.lang.Box
+           :constructors {^{Deprecated true} [Object] [Object]}
+           :init init
+           :prefix "foo")
+
+(defn foo-init [obj]
+  [[obj] nil])
+
+(deftest test-annotations-on-constructor
+  (is (some #(instance? Deprecated %)
+            (for [ctor (.getConstructors (Class/forName "foo.Bar"))
+                  annotation (.getAnnotations ctor)]
+              annotation))))

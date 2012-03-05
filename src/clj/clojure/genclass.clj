@@ -301,13 +301,15 @@
     
                                         ;ctors
     (doseq [[pclasses super-pclasses] ctor-sig-map]
-      (let [pclasses (map the-class pclasses)
+      (let [constructor-annotations (meta pclasses)
+            pclasses (map the-class pclasses)
             super-pclasses (map the-class super-pclasses)
             ptypes (to-types pclasses)
             super-ptypes (to-types super-pclasses)
             m (new Method "<init>" (. Type VOID_TYPE) ptypes)
             super-m (new Method "<init>" (. Type VOID_TYPE) super-ptypes)
             gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
+            _ (add-annotations gen constructor-annotations)
             no-init-label (. gen newLabel)
             end-label (. gen newLabel)
             no-post-init-label (. gen newLabel)

@@ -92,6 +92,7 @@
         <!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
       <arg value="clojure.test-clojure.protocols.examples"/>
       <arg value="clojure.test-clojure.genclass.examples"/>
+      <arg value="clojure.test-clojure.annotations"/>
     </java>
   </target>
 
