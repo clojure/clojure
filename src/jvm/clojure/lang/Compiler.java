@@ -1268,18 +1268,11 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 }
 
 static Class maybePrimitiveType(Expr e){
-	try
-		{
-		if(e instanceof MaybePrimitiveExpr && e.hasJavaClass() && ((MaybePrimitiveExpr)e).canEmitPrimitive())
-			{
-			Class c = e.getJavaClass();
-			if(Util.isPrimitive(c))
-				return c;
-			}
-		}
-	catch(Exception ex)
-		{
-		throw Util.sneakyThrow(ex);
+        if(e instanceof MaybePrimitiveExpr && e.hasJavaClass() && ((MaybePrimitiveExpr)e).canEmitPrimitive())
+                {
+                Class c = e.getJavaClass();
+                if(Util.isPrimitive(c))
+                        return c;
 		}
 	return null;
 }
@@ -6793,25 +6786,13 @@ static PathNode commonPath(PathNode n1, PathNode n2){
 }
 
 static void addAnnotation(Object visitor, IPersistentMap meta){
-	try{
 	if(meta != null && ADD_ANNOTATIONS.isBound())
 		 ADD_ANNOTATIONS.invoke(visitor, meta);
-	}
-	catch (Exception e)
-		{
-		throw Util.sneakyThrow(e);
-		}
 }
 
 static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i){
-	try{
 	if(meta != null && ADD_ANNOTATIONS.isBound())
 		 ADD_ANNOTATIONS.invoke(visitor, meta, i);
-	}
-	catch (Exception e)
-		{
-		throw Util.sneakyThrow(e);
-		}
 }
 
 private static Expr analyzeSymbol(Symbol sym) {

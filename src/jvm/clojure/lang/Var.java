@@ -248,14 +248,7 @@ public void setMeta(IPersistentMap m) {
 }
 
 public void setMacro() {
-    try
-        {
-        alterMeta(assoc, RT.list(macroKey, RT.T));
-        }
-    catch (Exception e)
-        {
-        throw Util.sneakyThrow(e);
-        }
+    alterMeta(assoc, RT.list(macroKey, RT.T));
 }
 
 public boolean isMacro(){
@@ -279,14 +272,7 @@ public Object getTag(){
 }
 
 public void setTag(Symbol tag) {
-    try
-        {
-        alterMeta(assoc, RT.list(RT.TAG_KEY, tag));
-        }
-    catch (Exception e)
-        {
-        throw Util.sneakyThrow(e);
-        }
+    alterMeta(assoc, RT.list(RT.TAG_KEY, tag));
 }
 
 final public boolean hasRoot(){
@@ -299,14 +285,7 @@ synchronized public void bindRoot(Object root){
 	Object oldroot = this.root;
 	this.root = root;
 	++rev;
-    try
-        {
         alterMeta(dissoc, RT.list(macroKey));
-        }
-    catch (Exception e)
-        {
-        throw Util.sneakyThrow(e);
-        }
     notifyWatches(oldroot,this.root);
 }
 
@@ -397,14 +376,7 @@ public Object call() {
 }
 
 public void run(){
-	try
-		{
-		invoke();
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(e);
-		}
+        invoke();
 }
 
 public Object invoke() {
@@ -745,14 +717,7 @@ static IFn assoc = new AFn(){
 static IFn dissoc = new AFn() {
     @Override
     public Object invoke(Object c, Object k)  {
-	    try
-		    {
-		    return RT.dissoc(c, k);
-		    }
-	    catch(Exception e)
-		    {
-            throw Util.sneakyThrow(e);
-		    }
+            return RT.dissoc(c, k);
     }
 };
 }

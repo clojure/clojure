@@ -87,14 +87,7 @@ public V remove(Object k){
 	IPersistentMap map = (IPersistentMap) r.deref();
 	Object ret = map.valAt(k);
 	//checked exceptions are a bad idea, especially in an interface
-	try
-		{
-		r.set(map.without(k));
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(e);
-		}
+	r.set(map.without(k));
 	return (V) ret;
 }
 
@@ -157,14 +150,7 @@ public boolean remove(Object k, Object v){
 	if(e != null && e.getValue().equals(v))
 		{
 		//checked exceptions are a bad idea, especially in an interface
-		try
-			{
-			r.set(map.without(k));
-			}
-		catch(Exception ex)
-			{
-			throw Util.sneakyThrow(ex);
-			}
+		r.set(map.without(k));
 		return true;
 		}
 	return false;
