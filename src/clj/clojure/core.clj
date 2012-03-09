@@ -2998,7 +2998,7 @@
   ([^clojure.lang.ITransientSet set key]
    (. set (disjoin key)))
   ([set key & ks]
-   (let [ret (disj set key)]
+   (let [ret (. set (disjoin key))]
      (if ks
        (recur ret (first ks) (next ks))
        ret))))
