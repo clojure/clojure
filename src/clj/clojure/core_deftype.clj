@@ -317,7 +317,7 @@
   IPersistentMap, and all of their superinterfaces.
 
   In addition, defrecord will define type-and-value-based =,
-  and will defined Java .hashCode and .equals consistent with the
+  and will define Java .hashCode and .equals consistent with the
   contract for java.util.Map.
 
   When AOT compiling, generates compiled bytecode for a class with the
