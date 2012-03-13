@@ -239,17 +239,23 @@ static final public Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.inte
 static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                             Symbol.intern("add-annotations"));
 
-//collection of keys
-static final public Var ELIDE_META = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                  Symbol.intern("*elide-meta*"), null).setDynamic();
+static final public Keyword disableLocalsClearingKey = Keyword.intern("disable-locals-clearing");
+static final public Keyword elideMetaKey = Keyword.intern("elide-meta");
+
+static final public Var COMPILER_OPTIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                      Symbol.intern("*compiler-options*"), null).setDynamic();
+
+static public Object getCompilerOption(Keyword k){
+	return RT.get(COMPILER_OPTIONS.deref(),k);
+}
 
 static Object elideMeta(Object m){
-        Collection<Object> elides = (Collection<Object>) ELIDE_META.get();
+        Collection<Object> elides = (Collection<Object>) getCompilerOption(elideMetaKey);
         if(elides != null)
             {
             for(Object k : elides)
                 {
-                //System.out.println("Eliding:" + k + " : " + RT.get(m, k));
+//                System.out.println("Eliding:" + k + " : " + RT.get(m, k));
                 m = RT.dissoc(m, k);
                 }
 //            System.out.println("Remaining: " + RT.keys(m));
@@ -5450,7 +5456,7 @@ public static class LocalBinding{
 	public final String name;
 	public final boolean isArg;
     public final PathNode clearPathRoot;
-	public boolean canBeCleared = true;
+	public boolean canBeCleared = !RT.booleanCast(getCompilerOption(disableLocalsClearingKey));
 	public boolean recurMistmatch = false;
 
     public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg,PathNode clearPathRoot)

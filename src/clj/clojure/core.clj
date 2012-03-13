@@ -5707,8 +5707,12 @@
   coercions will be done without overflow checks. Default: false."
   {:added "1.3"})
 
-(add-doc-and-meta *elide-meta*
-  "Bind to a collection of metadata keys to elide during compilation.
+(add-doc-and-meta *compiler-options*
+  "A map of keys to options.
+  Note, when binding dynamically make sure to merge with previous value.
+  Supported options:
+  :elide-meta - a collection of metadata keys to elide during compilation.
+  :disable-locals-clearing - set to true to disable clearing, useful for using a debugger
   Alpha, subject to change."
   {:added "1.4"})
 
