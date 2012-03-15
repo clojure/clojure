@@ -2544,7 +2544,7 @@
 
 (defn drop-while
   "Returns a lazy sequence of the items in coll starting from the first
-  item for which (pred item) returns nil."
+  item for which (pred item) returns logical false."
   {:added "1.0"
    :static true}
   [pred coll]
