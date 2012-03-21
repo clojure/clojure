@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.math.BigInteger;
+import java.math.BigDecimal;
 
 public final class BigInt extends Number{
 
@@ -64,6 +65,13 @@ public BigInteger toBigInteger(){
 		return BigInteger.valueOf(lpart);
 	else
 		return bipart;
+}
+
+public BigDecimal toBigDecimal(){
+	if(bipart == null)
+		return BigDecimal.valueOf(lpart);
+	else
+		return new BigDecimal(bipart);
 }
 
 ///// java.lang.Number:

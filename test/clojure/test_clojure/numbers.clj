@@ -25,7 +25,7 @@
 
 
 (deftest Coerced-BigDecimal
-  (let [v (bigdec 3)]
+  (doseq [v [(bigdec 3) (bigdec (inc (bigint Long/MAX_VALUE)))]]
     (are [x] (true? x)
      (instance? BigDecimal v)
      (number? v)
