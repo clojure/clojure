@@ -55,16 +55,25 @@ namespace.
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0">Overview</a>
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.xml/parse">parse</a>
+      <a class="toc-entry-anchor" href="#clojure.xml/parse">parse</a>
+      
     </div>
-    <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.xml</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.4</span> (<span id="header-status">in development</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.xml">clojure.xml</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.4</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.xml</span>
@@ -74,24 +83,30 @@ namespace.
 
 
 <br />
-<h2>Public Variables and Functions</h2>
-<div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.xml/parse">parse</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (parse s)
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.xml/parse">parse</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (parse s)
        (parse s startparse)
 </pre>
-  <pre id="var-docstr">Parses and loads the source s, which can be a File, InputStream or
+    <pre id="var-docstr">Parses and loads the source s, which can be a File, InputStream or
 String naming a URI. Returns a tree of the xml/element struct-map,
 which has the keys :tag, :attrs, and :content. and accessor fns tag,
 attrs, and content. Other parsers can be supplied by passing
 startparse, a fn taking a source and a ContentHandler and returning
 a parser</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/xml.clj#L78" id="var-source">Source</a>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/xml.clj#L78" id="var-source">Source</a>
+  </div>
 </div>
 
 

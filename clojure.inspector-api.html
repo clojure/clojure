@@ -55,20 +55,31 @@ namespace.
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0">Overview</a>
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.inspector/inspect">inspect</a>
+      <a class="toc-entry-anchor" href="#clojure.inspector/inspect">inspect</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.inspector/inspect-table">inspect-table</a>
+      <a class="toc-entry-anchor" href="#clojure.inspector/inspect-table">inspect-table</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.inspector/inspect-tree">inspect-tree</a>
+      <a class="toc-entry-anchor" href="#clojure.inspector/inspect-tree">inspect-tree</a>
+      
     </div>
-    <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.inspector</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span> (<span id="header-status">stable</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.inspector">clojure.inspector</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.inspector</span>
@@ -78,42 +89,48 @@ namespace.
 
 
 <br />
-<h2>Public Variables and Functions</h2>
-<div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.inspector/inspect">inspect</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (inspect x)
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.inspector/inspect">inspect</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (inspect x)
 </pre>
-  <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied object</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L150" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.inspector/inspect-table">inspect-table</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (inspect-table data)
+    <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied object</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L150" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.inspector/inspect-table">inspect-table</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (inspect-table data)
 </pre>
-  <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied regular
+    <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied regular
 data, which must be a sequential data structure of data structures
 of equal length</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L96" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.inspector/inspect-tree">inspect-tree</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (inspect-tree data)
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L96" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.inspector/inspect-tree">inspect-tree</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (inspect-tree data)
 </pre>
-  <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied hierarchical data</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L87" id="var-source">Source</a>
+    <pre id="var-docstr">creates a graphical (Swing) inspector on the supplied hierarchical data</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L87" id="var-source">Source</a>
+  </div>
 </div>
 
 

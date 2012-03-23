@@ -55,20 +55,31 @@ namespace.
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0">Overview</a>
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.java.shell/sh">sh</a>
+      <a class="toc-entry-anchor" href="#clojure.java.shell/sh">sh</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.java.shell/with-sh-dir">with-sh-dir</a>
+      <a class="toc-entry-anchor" href="#clojure.java.shell/with-sh-dir">with-sh-dir</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.java.shell/with-sh-env">with-sh-env</a>
+      <a class="toc-entry-anchor" href="#clojure.java.shell/with-sh-env">with-sh-env</a>
+      
     </div>
-    <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.java.shell</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.2</span> (<span id="header-status">stable</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.java.shell">clojure.java.shell</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.2</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Chris Houser, Stuart Halloway</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.java.shell</span>
@@ -79,15 +90,20 @@ collecting its stdout</pre>
 
 
 <br />
-<h2>Public Variables and Functions</h2>
-<div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.java.shell/sh">sh</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (sh &amp; args)
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.shell/sh">sh</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (sh &amp; args)
 </pre>
-  <pre id="var-docstr">Passes the given strings to Runtime.exec() to launch a sub-process.
+    <pre id="var-docstr">Passes the given strings to Runtime.exec() to launch a sub-process.
 
 Options are
 
@@ -116,31 +132,32 @@ sh returns a map of
   :exit =&gt; sub-process's exit code
   :out  =&gt; sub-process's stdout (as byte[] or String)
   :err  =&gt; sub-process's stderr (String via platform default encoding)</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a2c95ef1bf6e34a455b469ac9ff18ddff7e9cef7/src/clj/clojure/java/shell.clj#L79" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.java.shell/with-sh-dir">with-sh-dir</h2>
-  <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (with-sh-dir dir &amp; forms)
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a2c95ef1bf6e34a455b469ac9ff18ddff7e9cef7/src/clj/clojure/java/shell.clj#L79" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.shell/with-sh-dir">with-sh-dir</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-sh-dir dir &amp; forms)
 </pre>
-  <pre id="var-docstr">Sets the directory for use with sh, see sh for details.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a2c95ef1bf6e34a455b469ac9ff18ddff7e9cef7/src/clj/clojure/java/shell.clj#L21" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.java.shell/with-sh-env">with-sh-env</h2>
-  <span id="var-type">macro</span><br />
-  <pre id="var-usage">Usage: (with-sh-env env &amp; forms)
+    <pre id="var-docstr">Sets the directory for use with sh, see sh for details.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a2c95ef1bf6e34a455b469ac9ff18ddff7e9cef7/src/clj/clojure/java/shell.clj#L21" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.shell/with-sh-env">with-sh-env</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-sh-env env &amp; forms)
 </pre>
-  <pre id="var-docstr">Sets the environment for use with sh, see sh for details.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a2c95ef1bf6e34a455b469ac9ff18ddff7e9cef7/src/clj/clojure/java/shell.clj#L28" id="var-source">Source</a>
+    <pre id="var-docstr">Sets the environment for use with sh, see sh for details.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a2c95ef1bf6e34a455b469ac9ff18ddff7e9cef7/src/clj/clojure/java/shell.clj#L28" id="var-source">Source</a>
+  </div>
 </div>
 
 

@@ -55,24 +55,35 @@ namespace.
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0">Overview</a>
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#proto-section" style="margin-top: 3px;">Protocols</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.data/Diff">Diff</a>
+      <a class="toc-entry-anchor" href="#clojure.data/Diff">Diff</a>
+      <div style="margin-left: 1em;" class="toc-subentry">
+        <a class="toc-subentry-anchor" href="#clojure.data/diff-similar">diff-similar</a>
+      </div>
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.data/EqualityPartition">EqualityPartition</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.data/diff">diff</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.data/diff-similar">diff-similar</a>
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.data/equality-partition">equality-partition</a>
+      <a class="toc-entry-anchor" href="#clojure.data/EqualityPartition">EqualityPartition</a>
+      <div style="margin-left: 1em;" class="toc-subentry">
+        <a class="toc-subentry-anchor" href="#clojure.data/equality-partition">equality-partition</a>
+      </div>
     </div>
-    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.data/diff">diff</a>
+      
+    </div>
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.data</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span> (<span id="header-status">stable</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.data">clojure.data</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Stuart Halloway</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.data</span>
@@ -82,35 +93,66 @@ namespace.
 
 
 <br />
-<h2>Public Variables and Functions</h2>
-<div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.data/Diff">Diff</h2>
-  <span id="var-type">var</span><br />
-  <pre id="var-usage"></pre>
-  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L55" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.data/EqualityPartition">EqualityPartition</h2>
-  <span id="var-type">var</span><br />
-  <pre id="var-usage"></pre>
-  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L51" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.data/diff">diff</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (diff a b)
+
+<div id="proto-section">
+  <p></p>
+  <h2>Protocols</h2>
+  <div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.data/Diff">Diff</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Implementation detail. Subject to change.</pre>
+    Known implementations: <span id="proto-impls">java.util.List, java.util.Map, java.util.Set, nil, Object</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.data/diff-similar">diff-similar</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (diff-similar a b)
 </pre>
-  <pre id="var-docstr">Recursively compares a and b, returning a tuple of
+      <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+      
+      
+    </div>
+    <span class="proto-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L55" id="proto-source">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.data/EqualityPartition">EqualityPartition</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Implementation detail. Subject to change.</pre>
+    Known implementations: <span id="proto-impls">java.util.List, java.util.Map, java.util.Set, nil, Object</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.data/equality-partition">equality-partition</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (equality-partition x)
+</pre>
+      <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+      
+      
+    </div>
+    <span class="proto-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L51" id="proto-source">Source</a>
+  </div>
+</div>
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.data/diff">diff</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (diff a b)
+</pre>
+    <pre id="var-docstr">Recursively compares a and b, returning a tuple of
 [things-only-in-a things-only-in-b things-in-both].
 Comparison rules:
 
@@ -121,31 +163,10 @@ Comparison rules:
   by their indexes, with results returned as vectors.
 * Everything else (including strings!) is treated as
   an atom and compared for equality.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L104" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.data/diff-similar">diff-similar</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (diff-similar a b)
-</pre>
-  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.data/equality-partition">equality-partition</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (equality-partition x)
-</pre>
-  <pre id="var-docstr">Implementation detail. Subject to change.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
-  
-  
+    <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L104" id="var-source">Source</a>
+  </div>
 </div>
 
 

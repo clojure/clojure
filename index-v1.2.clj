@@ -7615,44 +7615,6 @@
    :var-type "function",
    :line 46,
    :file "src/clj/clojure/java/browse.clj"}
-  {:name "Coercions",
-   :namespace "clojure.java.io",
-   :source-url
-   "https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L34",
-   :added "1.2",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/Coercions",
-   :doc "Coerce between various 'resource-namish' things.",
-   :var-type "var",
-   :line 34,
-   :file "src/clj/clojure/java/io.clj"}
-  {:name "IOFactory",
-   :namespace "clojure.java.io",
-   :source-url
-   "https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L63",
-   :added "1.2",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/IOFactory",
-   :doc
-   "Factory functions that create ready-to-use, buffered versions of\nthe various Java I/O stream types, on top of anything that can\nbe unequivocally converted to the requested kind of stream.\n\nCommon options include\n\n  :append    true to open stream in append mode\n  :encoding  string name of encoding to use, e.g. \"UTF-8\".\n\nCallers should generally prefer the higher level API provided by\nreader, writer, input-stream, and output-stream.",
-   :var-type "var",
-   :line 63,
-   :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x]),
-   :name "as-file",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-file",
-   :doc "Coerce argument to a file.",
-   :var-type "function",
-   :file nil}
   {:arglists ([x]),
    :name "as-relative-path",
    :namespace "clojure.java.io",
@@ -7668,17 +7630,6 @@
    :var-type "function",
    :line 385,
    :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x]),
-   :name "as-url",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-url",
-   :doc "Coerce argument to a URL.",
-   :var-type "function",
-   :file nil}
   {:arglists ([input output & opts]),
    :name "copy",
    :namespace "clojure.java.io",
@@ -7739,28 +7690,6 @@
    :var-type "function",
    :line 115,
    :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x opts]),
-   :name "make-input-stream",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-input-stream",
-   :doc "Creates a BufferedInputStream. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
-  {:arglists ([x opts]),
-   :name "make-output-stream",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-output-stream",
-   :doc "Creates a BufferedOutputStream. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
   {:arglists ([f & more]),
    :name "make-parents",
    :namespace "clojure.java.io",
@@ -7776,28 +7705,6 @@
    :var-type "function",
    :line 415,
    :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x opts]),
-   :name "make-reader",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-reader",
-   :doc "Creates a BufferedReader. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
-  {:arglists ([x opts]),
-   :name "make-writer",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-writer",
-   :doc "Creates a BufferedWriter. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
   {:arglists ([x & opts]),
    :name "output-stream",
    :namespace "clojure.java.io",
@@ -7858,6 +7765,99 @@
    :var-type "function",
    :line 98,
    :file "src/clj/clojure/java/io.clj"}
+  {:name "Coercions",
+   :namespace "clojure.java.io",
+   :source-url
+   "https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L34",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/Coercions",
+   :doc "Coerce between various 'resource-namish' things.",
+   :var-type "protocol",
+   :line 34,
+   :file "src/clj/clojure/java/io.clj"}
+  {:name "IOFactory",
+   :namespace "clojure.java.io",
+   :source-url
+   "https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L63",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/IOFactory",
+   :doc
+   "Factory functions that create ready-to-use, buffered versions of\nthe various Java I/O stream types, on top of anything that can\nbe unequivocally converted to the requested kind of stream.\n\nCommon options include\n\n  :append    true to open stream in append mode\n  :encoding  string name of encoding to use, e.g. \"UTF-8\".\n\nCallers should generally prefer the higher level API provided by\nreader, writer, input-stream, and output-stream.",
+   :var-type "protocol",
+   :line 63,
+   :file "src/clj/clojure/java/io.clj"}
+  {:arglists ([x]),
+   :name "as-file",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-file",
+   :doc "Coerce argument to a file.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x]),
+   :name "as-url",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-url",
+   :doc "Coerce argument to a URL.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-input-stream",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-input-stream",
+   :doc "Creates a BufferedInputStream. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-output-stream",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-output-stream",
+   :doc "Creates a BufferedOutputStream. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-reader",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-reader",
+   :doc "Creates a BufferedReader. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-writer",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-writer",
+   :doc "Creates a BufferedWriter. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
   {:arglists ([path]),
    :name "add-local-javadoc",
    :namespace "clojure.java.javadoc",
@@ -10039,10 +10039,20 @@
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce",
    :namespace "clojure.core.protocols",
    :line 11,
-   :var-type "var",
+   :var-type "protocol",
    :doc
    "Protocol for concrete seq types that can reduce themselves\nfaster than first/next recursion. Called by clojure.core/reduce.",
    :name "InternalReduce"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/internal-reduce",
+   :namespace "clojure.core.protocols",
+   :var-type "function",
+   :arglists ([seq f start]),
+   :doc nil,
+   :name "internal-reduce"}
   {:arglists ([& body]),
    :name "with-junit-output",
    :namespace "clojure.test.junit",

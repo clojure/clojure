@@ -55,38 +55,58 @@ namespace.
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0">Overview</a>
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/difference">difference</a>
+      <a class="toc-entry-anchor" href="#clojure.set/difference">difference</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/index">index</a>
+      <a class="toc-entry-anchor" href="#clojure.set/index">index</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/intersection">intersection</a>
+      <a class="toc-entry-anchor" href="#clojure.set/intersection">intersection</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/join">join</a>
+      <a class="toc-entry-anchor" href="#clojure.set/join">join</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/map-invert">map-invert</a>
+      <a class="toc-entry-anchor" href="#clojure.set/map-invert">map-invert</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/project">project</a>
+      <a class="toc-entry-anchor" href="#clojure.set/project">project</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/rename">rename</a>
+      <a class="toc-entry-anchor" href="#clojure.set/rename">rename</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/rename-keys">rename-keys</a>
+      <a class="toc-entry-anchor" href="#clojure.set/rename-keys">rename-keys</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/select">select</a>
+      <a class="toc-entry-anchor" href="#clojure.set/select">select</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/subset?">subset?</a>
+      <a class="toc-entry-anchor" href="#clojure.set/subset?">subset?</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/superset?">superset?</a>
+      <a class="toc-entry-anchor" href="#clojure.set/superset?">superset?</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.set/union">union</a>
+      <a class="toc-entry-anchor" href="#clojure.set/union">union</a>
+      
     </div>
-    <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.set</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.2</span> (<span id="header-status">stable</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.set">clojure.set</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.2</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.set</span>
@@ -96,150 +116,156 @@ namespace.
 
 
 <br />
-<h2>Public Variables and Functions</h2>
-<div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/difference">difference</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (difference s1)
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/difference">difference</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (difference s1)
        (difference s1 s2)
        (difference s1 s2 &amp; sets)
 </pre>
-  <pre id="var-docstr">Return a set that is the first set without elements of the remaining sets</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L48" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/index">index</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (index xrel ks)
+    <pre id="var-docstr">Return a set that is the first set without elements of the remaining sets</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L48" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/index">index</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (index xrel ks)
 </pre>
-  <pre id="var-docstr">Returns a map of the distinct values of ks in the xrel mapped to a
+    <pre id="var-docstr">Returns a map of the distinct values of ks in the xrel mapped to a
 set of the maps in xrel with the corresponding values of ks.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L95" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/intersection">intersection</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (intersection s1)
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L95" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/intersection">intersection</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (intersection s1)
        (intersection s1 s2)
        (intersection s1 s2 &amp; sets)
 </pre>
-  <pre id="var-docstr">Return a set that is the intersection of the input sets</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L32" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/join">join</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (join xrel yrel)
+    <pre id="var-docstr">Return a set that is the intersection of the input sets</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L32" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/join">join</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (join xrel yrel)
        (join xrel yrel km)
 </pre>
-  <pre id="var-docstr">When passed 2 rels, returns the rel corresponding to the natural
+    <pre id="var-docstr">When passed 2 rels, returns the rel corresponding to the natural
 join. When passed an additional keymap, joins on the corresponding
 keys.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L111" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/map-invert">map-invert</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (map-invert m)
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L111" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/map-invert">map-invert</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (map-invert m)
 </pre>
-  <pre id="var-docstr">Returns the map with the vals mapped to the keys.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L106" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/project">project</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (project xrel ks)
+    <pre id="var-docstr">Returns the map with the vals mapped to the keys.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L106" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/project">project</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (project xrel ks)
 </pre>
-  <pre id="var-docstr">Returns a rel of the elements of xrel with only the keys in ks</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L71" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/rename">rename</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (rename xrel kmap)
+    <pre id="var-docstr">Returns a rel of the elements of xrel with only the keys in ks</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L71" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/rename">rename</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (rename xrel kmap)
 </pre>
-  <pre id="var-docstr">Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L89" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/rename-keys">rename-keys</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (rename-keys map kmap)
+    <pre id="var-docstr">Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L89" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/rename-keys">rename-keys</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (rename-keys map kmap)
 </pre>
-  <pre id="var-docstr">Returns the map with the keys in kmap renamed to the vals in kmap</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L77" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/select">select</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (select pred xset)
+    <pre id="var-docstr">Returns the map with the keys in kmap renamed to the vals in kmap</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L77" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/select">select</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (select pred xset)
 </pre>
-  <pre id="var-docstr">Returns a set of the elements for which pred is true</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L64" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/subset?">subset?</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (subset? set1 set2)
+    <pre id="var-docstr">Returns a set of the elements for which pred is true</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L64" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/subset?">subset?</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (subset? set1 set2)
 </pre>
-  <pre id="var-docstr">Is set1 a subset of set2?</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L142" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/superset?">superset?</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (superset? set1 set2)
+    <pre id="var-docstr">Is set1 a subset of set2?</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L142" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/superset?">superset?</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (superset? set1 set2)
 </pre>
-  <pre id="var-docstr">Is set1 a superset of set2?</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L150" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.set/union">union</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (union)
+    <pre id="var-docstr">Is set1 a superset of set2?</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L150" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.set/union">union</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (union)
        (union s1)
        (union s1 s2)
        (union s1 s2 &amp; sets)
 </pre>
-  <pre id="var-docstr">Return a set that is the union of the input sets</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L19" id="var-source">Source</a>
+    <pre id="var-docstr">Return a set that is the union of the input sets</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/a07040032714a2f88c23b76c6484c1b8acd462b0/src/clj/clojure/set.clj#L19" id="var-source">Source</a>
+  </div>
 </div>
 
 

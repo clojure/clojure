@@ -7912,32 +7912,38 @@
    :var-type "function",
    :line 2651,
    :file "src/clj/clojure/core.clj"}
-  {:name "Diff",
-   :namespace "clojure.data",
-   :source-url
-   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L55",
-   :added "1.3",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/Diff",
-   :doc "Implementation detail. Subject to change.",
-   :var-type "var",
-   :line 55,
-   :file "src/clj/clojure/data.clj"}
-  {:name "EqualityPartition",
-   :namespace "clojure.data",
-   :source-url
-   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L51",
-   :added "1.3",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ArrayChunk",
+   :namespace "clojure.core",
+   :var-type "type",
+   :name "ArrayChunk"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/EqualityPartition",
-   :doc "Implementation detail. Subject to change.",
-   :var-type "var",
-   :line 51,
-   :file "src/clj/clojure/data.clj"}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/Vec",
+   :namespace "clojure.core",
+   :var-type "type",
+   :name "Vec"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/VecNode",
+   :namespace "clojure.core",
+   :var-type "type",
+   :name "VecNode"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/VecSeq",
+   :namespace "clojure.core",
+   :var-type "type",
+   :name "VecSeq"}
   {:arglists ([a b]),
    :name "diff",
    :namespace "clojure.data",
@@ -7952,6 +7958,32 @@
    "Recursively compares a and b, returning a tuple of\n[things-only-in-a things-only-in-b things-in-both].\nComparison rules:\n\n* For equal a and b, return [nil nil a].\n* Maps are subdiffed where keys match and values differ.\n* Sets are never subdiffed.\n* All sequential things are treated as associative collections\n  by their indexes, with results returned as vectors.\n* Everything else (including strings!) is treated as\n  an atom and compared for equality.",
    :var-type "function",
    :line 104,
+   :file "src/clj/clojure/data.clj"}
+  {:name "Diff",
+   :namespace "clojure.data",
+   :source-url
+   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L55",
+   :added "1.3",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/Diff",
+   :doc "Implementation detail. Subject to change.",
+   :var-type "protocol",
+   :line 55,
+   :file "src/clj/clojure/data.clj"}
+  {:name "EqualityPartition",
+   :namespace "clojure.data",
+   :source-url
+   "https://github.com/clojure/clojure/blob/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj#L51",
+   :added "1.3",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/1aeb592afc0059c8d66a635699c460f70b81a102/src/clj/clojure/data.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.data-api.html#clojure.data/EqualityPartition",
+   :doc "Implementation detail. Subject to change.",
+   :var-type "protocol",
+   :line 51,
    :file "src/clj/clojure/data.clj"}
   {:arglists ([a b]),
    :name "diff-similar",
@@ -8033,44 +8065,6 @@
    :var-type "function",
    :line 46,
    :file "src/clj/clojure/java/browse.clj"}
-  {:name "Coercions",
-   :namespace "clojure.java.io",
-   :source-url
-   "https://github.com/clojure/clojure/blob/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj#L34",
-   :added "1.2",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/Coercions",
-   :doc "Coerce between various 'resource-namish' things.",
-   :var-type "var",
-   :line 34,
-   :file "src/clj/clojure/java/io.clj"}
-  {:name "IOFactory",
-   :namespace "clojure.java.io",
-   :source-url
-   "https://github.com/clojure/clojure/blob/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj#L63",
-   :added "1.2",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/IOFactory",
-   :doc
-   "Factory functions that create ready-to-use, buffered versions of\nthe various Java I/O stream types, on top of anything that can\nbe unequivocally converted to the requested kind of stream.\n\nCommon options include\n\n  :append    true to open stream in append mode\n  :encoding  string name of encoding to use, e.g. \"UTF-8\".\n\nCallers should generally prefer the higher level API provided by\nreader, writer, input-stream, and output-stream.",
-   :var-type "var",
-   :line 63,
-   :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x]),
-   :name "as-file",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-file",
-   :doc "Coerce argument to a file.",
-   :var-type "function",
-   :file nil}
   {:arglists ([x]),
    :name "as-relative-path",
    :namespace "clojure.java.io",
@@ -8086,17 +8080,6 @@
    :var-type "function",
    :line 385,
    :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x]),
-   :name "as-url",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-url",
-   :doc "Coerce argument to a URL.",
-   :var-type "function",
-   :file nil}
   {:arglists ([input output & opts]),
    :name "copy",
    :namespace "clojure.java.io",
@@ -8157,28 +8140,6 @@
    :var-type "function",
    :line 115,
    :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x opts]),
-   :name "make-input-stream",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-input-stream",
-   :doc "Creates a BufferedInputStream. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
-  {:arglists ([x opts]),
-   :name "make-output-stream",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-output-stream",
-   :doc "Creates a BufferedOutputStream. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
   {:arglists ([f & more]),
    :name "make-parents",
    :namespace "clojure.java.io",
@@ -8194,28 +8155,6 @@
    :var-type "function",
    :line 415,
    :file "src/clj/clojure/java/io.clj"}
-  {:arglists ([x opts]),
-   :name "make-reader",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-reader",
-   :doc "Creates a BufferedReader. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
-  {:arglists ([x opts]),
-   :name "make-writer",
-   :namespace "clojure.java.io",
-   :source-url nil,
-   :added "1.2",
-   :raw-source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-writer",
-   :doc "Creates a BufferedWriter. See also IOFactory docs.",
-   :var-type "function",
-   :file nil}
   {:arglists ([x & opts]),
    :name "output-stream",
    :namespace "clojure.java.io",
@@ -8276,6 +8215,99 @@
    :var-type "function",
    :line 98,
    :file "src/clj/clojure/java/io.clj"}
+  {:name "Coercions",
+   :namespace "clojure.java.io",
+   :source-url
+   "https://github.com/clojure/clojure/blob/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj#L34",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/Coercions",
+   :doc "Coerce between various 'resource-namish' things.",
+   :var-type "protocol",
+   :line 34,
+   :file "src/clj/clojure/java/io.clj"}
+  {:name "IOFactory",
+   :namespace "clojure.java.io",
+   :source-url
+   "https://github.com/clojure/clojure/blob/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj#L63",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/93ee4fe90072d4b75f7b3fc2684f93dcd55cad2b/src/clj/clojure/java/io.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/IOFactory",
+   :doc
+   "Factory functions that create ready-to-use, buffered versions of\nthe various Java I/O stream types, on top of anything that can\nbe unequivocally converted to the requested kind of stream.\n\nCommon options include\n\n  :append    true to open stream in append mode\n  :encoding  string name of encoding to use, e.g. \"UTF-8\".\n\nCallers should generally prefer the higher level API provided by\nreader, writer, input-stream, and output-stream.",
+   :var-type "protocol",
+   :line 63,
+   :file "src/clj/clojure/java/io.clj"}
+  {:arglists ([x]),
+   :name "as-file",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-file",
+   :doc "Coerce argument to a file.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x]),
+   :name "as-url",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-url",
+   :doc "Coerce argument to a URL.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-input-stream",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-input-stream",
+   :doc "Creates a BufferedInputStream. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-output-stream",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-output-stream",
+   :doc "Creates a BufferedOutputStream. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-reader",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-reader",
+   :doc "Creates a BufferedReader. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
+  {:arglists ([x opts]),
+   :name "make-writer",
+   :namespace "clojure.java.io",
+   :source-url nil,
+   :added "1.2",
+   :raw-source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-writer",
+   :doc "Creates a BufferedWriter. See also IOFactory docs.",
+   :var-type "function",
+   :file nil}
   {:arglists ([path]),
    :name "add-local-javadoc",
    :namespace "clojure.java.javadoc",
@@ -8903,31 +8935,6 @@
    :var-type "function",
    :line 171,
    :file "src/clj/clojure/pprint/pprint_base.clj"}
-  {:file "src/clj/clojure/reflect.clj",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
-   :source-url
-   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L44",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/Reflector",
-   :namespace "clojure.reflect",
-   :line 44,
-   :var-type "var",
-   :doc "Protocol for reflection implementers.",
-   :name "Reflector"}
-  {:file "src/clj/clojure/reflect.clj",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
-   :source-url
-   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L48",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/TypeReference",
-   :namespace "clojure.reflect",
-   :line 48,
-   :var-type "var",
-   :doc
-   "A TypeReference can be unambiguously converted to a type name on\nthe host platform.\n\nAll typerefs are normalized into symbols. If you need to\nnormalize a typeref yourself, call typesym.",
-   :name "TypeReference"}
   {:file "src/clj/clojure/reflect/java.clj",
    :raw-source-url
    "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj",
@@ -8956,17 +8963,6 @@
    :var-type "function",
    :line 115,
    :file "src/clj/clojure/reflect.clj"}
-  {:file nil,
-   :raw-source-url nil,
-   :source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/resolve-class",
-   :namespace "clojure.reflect",
-   :var-type "function",
-   :arglists ([this name]),
-   :doc
-   "Given a class name, return that typeref's class bytes as an InputStream.",
-   :name "resolve-class"}
   {:arglists ([typeref & options]),
    :name "type-reflect",
    :namespace "clojure.reflect",
@@ -8982,6 +8978,104 @@
    :var-type "function",
    :line 58,
    :file "src/clj/clojure/reflect.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/AsmReflector",
+   :namespace "clojure.reflect",
+   :var-type "type",
+   :name "AsmReflector"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/Constructor",
+   :namespace "clojure.reflect",
+   :var-type "record",
+   :name "Constructor"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/Field",
+   :namespace "clojure.reflect",
+   :var-type "record",
+   :name "Field"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/JavaReflector",
+   :namespace "clojure.reflect",
+   :var-type "type",
+   :name "JavaReflector"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/Method",
+   :namespace "clojure.reflect",
+   :var-type "record",
+   :name "Method"}
+  {:file "src/clj/clojure/reflect/java.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj#L184",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/ClassResolver",
+   :namespace "clojure.reflect",
+   :line 184,
+   :var-type "protocol",
+   :doc nil,
+   :name "ClassResolver"}
+  {:file "src/clj/clojure/reflect.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L44",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/Reflector",
+   :namespace "clojure.reflect",
+   :line 44,
+   :var-type "protocol",
+   :doc "Protocol for reflection implementers.",
+   :name "Reflector"}
+  {:file "src/clj/clojure/reflect.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L48",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/TypeReference",
+   :namespace "clojure.reflect",
+   :line 48,
+   :var-type "protocol",
+   :doc
+   "A TypeReference can be unambiguously converted to a type name on\nthe host platform.\n\nAll typerefs are normalized into symbols. If you need to\nnormalize a typeref yourself, call typesym.",
+   :name "TypeReference"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/resolve-class",
+   :namespace "clojure.reflect",
+   :var-type "function",
+   :arglists ([this name]),
+   :doc
+   "Given a class name, return that typeref's class bytes as an InputStream.",
+   :name "resolve-class"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.reflect-api.html#clojure.reflect/do-reflect",
+   :namespace "clojure.reflect",
+   :var-type "function",
+   :arglists ([reflector typeref]),
+   :doc nil,
+   :name "do-reflect"}
   {:file nil,
    :raw-source-url nil,
    :source-url nil,
@@ -10704,10 +10798,20 @@
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce",
    :namespace "clojure.core.protocols",
    :line 11,
-   :var-type "var",
+   :var-type "protocol",
    :doc
    "Protocol for concrete seq types that can reduce themselves\nfaster than first/next recursion. Called by clojure.core/reduce.",
    :name "InternalReduce"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/internal-reduce",
+   :namespace "clojure.core.protocols",
+   :var-type "function",
+   :arglists ([seq f start]),
+   :doc nil,
+   :name "internal-reduce"}
   {:arglists ([& body]),
    :name "with-junit-output",
    :namespace "clojure.test.junit",

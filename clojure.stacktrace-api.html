@@ -55,26 +55,40 @@ namespace.
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0">Overview</a>
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
     <div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.stacktrace/e">e</a>
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/e">e</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.stacktrace/print-cause-trace">print-cause-trace</a>
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-cause-trace">print-cause-trace</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.stacktrace/print-stack-trace">print-stack-trace</a>
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-stack-trace">print-stack-trace</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.stacktrace/print-throwable">print-throwable</a>
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-throwable">print-throwable</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.stacktrace/print-trace-element">print-trace-element</a>
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-trace-element">print-trace-element</a>
+      
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a href="#clojure.stacktrace/root-cause">root-cause</a>
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/root-cause">root-cause</a>
+      
     </div>
-    <br />
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.stacktrace</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span> (<span id="header-status">stable</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.stacktrace">clojure.stacktrace</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.3</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Stuart Sierra</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.stacktrace</span>
@@ -84,78 +98,84 @@ namespace.
 
 
 <br />
-<h2>Public Variables and Functions</h2>
-<div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.stacktrace/e">e</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (e)
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/e">e</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (e)
 </pre>
-  <pre id="var-docstr">REPL utility.  Prints a brief stack trace for the root cause of the
+    <pre id="var-docstr">REPL utility.  Prints a brief stack trace for the root cause of the
 most recent exception.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L74" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.stacktrace/print-cause-trace">print-cause-trace</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (print-cause-trace tr)
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L74" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-cause-trace">print-cause-trace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-cause-trace tr)
        (print-cause-trace tr n)
 </pre>
-  <pre id="var-docstr">Like print-stack-trace but prints chained exceptions (causes).</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L64" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.stacktrace/print-stack-trace">print-stack-trace</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (print-stack-trace tr)
+    <pre id="var-docstr">Like print-stack-trace but prints chained exceptions (causes).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L64" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-stack-trace">print-stack-trace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-stack-trace tr)
        (print-stack-trace tr n)
 </pre>
-  <pre id="var-docstr">Prints a Clojure-oriented stack trace of tr, a Throwable.
+    <pre id="var-docstr">Prints a Clojure-oriented stack trace of tr, a Throwable.
 Prints a maximum of n stack frames (default: unlimited).
 Does not print chained exceptions (causes).</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L44" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.stacktrace/print-throwable">print-throwable</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (print-throwable tr)
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L44" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-throwable">print-throwable</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-throwable tr)
 </pre>
-  <pre id="var-docstr">Prints the class and message of a Throwable.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L38" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.stacktrace/print-trace-element">print-trace-element</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (print-trace-element e)
+    <pre id="var-docstr">Prints the class and message of a Throwable.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L38" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-trace-element">print-trace-element</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-trace-element e)
 </pre>
-  <pre id="var-docstr">Prints a Clojure-oriented view of one element in a stack trace.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L26" id="var-source">Source</a>
-</div><div id="var-entry">
-  <br />
-  <hr />
-  <h2 id="clojure.stacktrace/root-cause">root-cause</h2>
-  <span id="var-type">function</span><br />
-  <pre id="var-usage">Usage: (root-cause tr)
+    <pre id="var-docstr">Prints a Clojure-oriented view of one element in a stack trace.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L26" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/root-cause">root-cause</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (root-cause tr)
 </pre>
-  <pre id="var-docstr">Returns the last 'cause' Throwable in a chain of Throwables.</pre>
-  <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
-  
-  <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L18" id="var-source">Source</a>
+    <pre id="var-docstr">Returns the last 'cause' Throwable in a chain of Throwables.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L18" id="var-source">Source</a>
+  </div>
 </div>
 
 
