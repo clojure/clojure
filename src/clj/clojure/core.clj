@@ -2421,6 +2421,7 @@
   f should accept number-of-colls arguments."
   {:added "1.0"
    :static true}
+  ([f] ())
   ([f coll]
    (lazy-seq
     (when-let [s (seq coll)]
@@ -6050,6 +6051,7 @@
   f should accept number-of-colls arguments."
   {:added "1.4"
    :static true}
+  ([f] [])
   ([f coll]
      (-> (reduce (fn [v o] (conj! v (f o))) (transient []) coll)
          persistent!))
@@ -6164,6 +6166,7 @@
   the coordination overhead."
   {:added "1.0"
    :static true}
+  ([f] ())
   ([f coll]
    (let [n (+ 2 (.. Runtime getRuntime availableProcessors))
          rets (map #(future (f %)) coll)

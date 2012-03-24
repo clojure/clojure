@@ -357,6 +357,8 @@
   [expected v] (and (vector? v) (= expected v)))
 
 (deftest test-mapv
+  (are [r] (=vec r (mapv +))
+       [])
   (are [r c1] (=vec r (mapv + c1))
        [1 2 3] [1 2 3])
   (are [r c1 c2] (=vec r (mapv + c1 c2))
