@@ -72,7 +72,7 @@
   "Returns a rel of the elements of xrel with only the keys in ks"
   {:added "1.0"}
   [xrel ks]
-    (set (map #(select-keys % ks) xrel)))
+  (with-meta (set (map #(select-keys % ks) xrel)) (meta xrel)))
 
 (defn rename-keys
   "Returns the map with the keys in kmap renamed to the vals in kmap"
@@ -89,7 +89,7 @@
   "Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap"
   {:added "1.0"}
   [xrel kmap]
-    (set (map #(rename-keys % kmap) xrel)))
+  (with-meta (set (map #(rename-keys % kmap) xrel)) (meta xrel)))
 
 (defn index
   "Returns a map of the distinct values of ks in the xrel mapped to a

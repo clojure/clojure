@@ -1445,7 +1445,7 @@
              (conj ret entry)
              ret)
            (next keys)))
-        ret)))
+        (with-meta ret (meta map)))))
 
 (defn keys
   "Returns a sequence of the map's keys."
@@ -6134,7 +6134,7 @@
    :static true}
   [to from]
   (if (instance? clojure.lang.IEditableCollection to)
-    (persistent! (reduce conj! (transient to) from))
+    (with-meta (persistent! (reduce conj! (transient to) from)) (meta to))
     (reduce conj to from)))
 
 (defn mapv
