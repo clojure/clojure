@@ -210,6 +210,10 @@
   (cl-format nil "~3f" -1) "-1."
   (cl-format nil "~4f" -1) "-1.0"
   (cl-format nil "~8f" -1) "    -1.0"
+  (cl-format nil "~12,10f" 1.23456789014) "1.2345678901"
+  (cl-format nil "~12,10f" 1.23456789016) "1.2345678902"
+  (cl-format nil "~13,10f" -1.23456789014) "-1.2345678901"
+  (cl-format nil "~13,10f" -1.23456789016) "-1.2345678902"
   (cl-format nil "~1,1f" 0.1) ".1")
 
 (simple-tests ampersand-tests
