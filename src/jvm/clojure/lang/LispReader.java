@@ -129,10 +129,12 @@ static void unread(PushbackReader r, int ch) {
 
 public static class ReaderException extends RuntimeException{
 	final int line;
+	final int column;
 
-	public ReaderException(int line, Throwable cause){
+	public ReaderException(int line, int column, Throwable cause){
 		super(cause);
 		this.line = line;
+		this.column = column;
 	}
 }
 
@@ -212,7 +214,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 			throw Util.sneakyThrow(e);
 		LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) r;
 		//throw Util.runtimeException(String.format("ReaderError:(%d,1) %s", rdr.getLineNumber(), e.getMessage()), e);
-		throw new ReaderException(rdr.getLineNumber(), e);
+		throw new ReaderException(rdr.getLineNumber(), rdr.getColumnNumber(), e);
 		}
 }
 
@@ -712,8 +714,12 @@ public static class MetaReader extends AFn{
 	public Object invoke(Object reader, Object caret) {
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
+		int column = -1;
 		if(r instanceof LineNumberingPushbackReader)
+      {
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
+			column = ((LineNumberingPushbackReader) r).getColumnNumber();
+      }
 		Object meta = read(r, true, null, true);
 		if(meta instanceof Symbol || meta instanceof String)
 			meta = RT.map(RT.TAG_KEY, meta);
@@ -726,7 +732,9 @@ public static class MetaReader extends AFn{
 		if(o instanceof IMeta)
 			{
 			if(line != -1 && o instanceof ISeq)
-				meta = ((IPersistentMap) meta).assoc(RT.LINE_KEY, line);
+        {
+				meta = ((IPersistentMap) meta).assoc(RT.LINE_KEY, line).assoc(RT.COLUMN_KEY, column);
+        }
 			if(o instanceof IReference)
 				{
 				((IReference)o).resetMeta((IPersistentMap) meta);
@@ -850,8 +858,8 @@ public static class SyntaxQuoteReader extends AFn{
 
 		if(form instanceof IObj && RT.meta(form) != null)
 			{
-			//filter line numbers
-			IPersistentMap newMeta = ((IObj) form).meta().without(RT.LINE_KEY);
+			//filter line and column numbers
+			IPersistentMap newMeta = ((IObj) form).meta().without(RT.LINE_KEY).without(RT.COLUMN_KEY);
 			if(newMeta.count() > 0)
 				return RT.list(WITH_META, ret, syntaxQuote(((IObj) form).meta()));
 			}
@@ -962,15 +970,21 @@ public static class ListReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) {
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
+    int column = -1;
 		if(r instanceof LineNumberingPushbackReader)
+      {
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
+			column = ((LineNumberingPushbackReader) r).getColumnNumber();
+      }
 		List list = readDelimitedList(')', r, true);
 		if(list.isEmpty())
 			return PersistentList.EMPTY;
 		IObj s = (IObj) PersistentList.create(list);
 //		IObj s = (IObj) RT.seq(list);
 		if(line != -1)
-			return s.withMeta(RT.map(RT.LINE_KEY, line));
+      {
+			return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
+      }
 		else
 			return s;
 	}

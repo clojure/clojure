@@ -27,6 +27,7 @@ private static final int newline = (int) '\n';
 
 private boolean _atLineStart = true;
 private boolean _prev;
+private int _columnNumber = 1;
 
 public LineNumberingPushbackReader(Reader r){
 	super(new LineNumberReader(r));
@@ -40,16 +41,30 @@ public int getLineNumber(){
 	return ((LineNumberReader) in).getLineNumber() + 1;
 }
 
+public int getColumnNumber(){
+	return _columnNumber;
+}
+
 public int read() throws IOException{
     int c = super.read();
     _prev = _atLineStart;
-    _atLineStart = (c == newline) || (c == -1);
+    if((c == newline) || (c == -1))
+        {
+        _atLineStart = true;
+        _columnNumber = 1;
+        }
+    else
+        {
+        _atLineStart = false;
+        _columnNumber++;
+        }
     return c;
 }
 
 public void unread(int c) throws IOException{
     super.unread(c);
     _atLineStart = _prev;
+    _columnNumber--;
 }
 
 public String readLine() throws IOException{
@@ -68,6 +83,7 @@ public String readLine() throws IOException{
         line = (rest == null) ? first : first + rest;
         _prev = false;
         _atLineStart = true;
+        _columnNumber = 1;
         break;
     }
     return line;

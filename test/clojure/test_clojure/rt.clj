@@ -33,19 +33,19 @@
      (defn prefers [] (throw (RuntimeException. "rebound!")))))
   (testing "reflection cannot resolve field"
     (should-print-err-message
-     #"Reflection warning, .*:\d+ - reference to field blah can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - reference to field blah can't be resolved\.\r?\n"
      (defn foo [x] (.blah x))))
   (testing "reflection cannot resolve instance method"
     (should-print-err-message
-     #"Reflection warning, .*:\d+ - call to zap can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - call to zap can't be resolved\.\r?\n"
      (defn foo [x] (.zap x 1))))
   (testing "reflection cannot resolve static method"
     (should-print-err-message
-     #"Reflection warning, .*:\d+ - call to valueOf can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - call to valueOf can't be resolved\.\r?\n"
      (defn foo [] (Integer/valueOf #"boom"))))
   (testing "reflection cannot resolve constructor"
     (should-print-err-message
-     #"Reflection warning, .*:\d+ - call to java.lang.String ctor can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - call to java.lang.String ctor can't be resolved\.\r?\n"
      (defn foo [] (String. 1 2 3)))))
 
 (def example-var)

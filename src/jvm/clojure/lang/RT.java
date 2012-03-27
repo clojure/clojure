@@ -187,6 +187,7 @@ final static public Var DEFAULT_DATA_READERS = Var.intern(CLOJURE_NS, Symbol.int
 final static public Var ASSERT = Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), T).setDynamic();
 final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.intern("*math-context*"), null).setDynamic();
 static Keyword LINE_KEY = Keyword.intern(null, "line");
+static Keyword COLUMN_KEY = Keyword.intern(null, "column");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 static Keyword DECLARED_KEY = Keyword.intern(null, "declared");
 static Keyword DOC_KEY = Keyword.intern(null, "doc");
@@ -1669,6 +1670,12 @@ static public Character peekChar(Reader r) throws IOException{
 static public int getLineNumber(Reader r){
 	if(r instanceof LineNumberingPushbackReader)
 		return ((LineNumberingPushbackReader) r).getLineNumber();
+	return 0;
+}
+
+static public int getColumnNumber(Reader r){
+	if(r instanceof LineNumberingPushbackReader)
+		return ((LineNumberingPushbackReader) r).getColumnNumber();
 	return 0;
 }
 
