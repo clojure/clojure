@@ -583,11 +583,24 @@ string, or one character longer."
 (defn- round-str [m e d w]
   (if (or d w)
     (let [len (count m)
-          round-pos (if d (+ e d 1))
-          round-pos (if (and w (< (inc e) (dec w)) 
-                             (or (nil? round-pos) (< (dec w) round-pos)))
-                      (dec w)
-                      round-pos)
+          ;; Every formatted floating point number should include at
+          ;; least one decimal digit and a decimal point.
+          w (if w (max 2 w))
+          round-pos (cond
+                     ;; If d was given, that forces the rounding
+                     ;; position, regardless of any width that may
+                     ;; have been specified.
+                     d (+ e d 1)
+                     ;; Otherwise w was specified, so pick round-pos
+                     ;; based upon that.
+                     ;; If e>=0, then abs value of number is >= 1.0,
+                     ;; and e+1 is number of decimal digits before the
+                     ;; decimal point when the number is written
+                     ;; without scientific notation.  Never round the
+                     ;; number before the decimal point.
+                     (>= e 0) (max (inc e) (dec w))
+                     ;; e < 0, so number abs value < 1.0
+                     :else (+ w e))
           [m1 e1 round-pos len] (if (= round-pos 0) 
                                   [(str "0" m) (inc e) 1 (inc len)]
                                   [m e round-pos len])]
@@ -600,16 +613,21 @@ string, or one character longer."
               (if (>= (int round-char) (int \5))
                 (let [round-up-result (inc-s result)
                       expanded (> (count round-up-result) (count result))]
-                  [round-up-result e1 expanded])
+                  [(if expanded
+                     (subs round-up-result 0 (dec (count round-up-result)))
+                     round-up-result)
+                   e1 expanded])
                 [result e1 false]))
             [m e false]))
         [m e false]))
     [m e false]))
 
 (defn- expand-fixed [m e d]
-  (let [m1 (if (neg? e) (str (apply str (repeat (dec (- e)) \0)) m) m)
+  (let [[m1 e1] (if (neg? e)
+                  [(str (apply str (repeat (dec (- e)) \0)) m) -1]
+                  [m e])
         len (count m1)
-        target-len (if d (+ e d 1) (inc e))]
+        target-len (if d (+ e1 d 1) (inc e1))]
     (if (< len target-len) 
       (str m1 (apply str (repeat (- target-len len) \0))) 
       m1)))
@@ -646,6 +664,13 @@ string, or one character longer."
         [rounded-mantissa scaled-exp expanded] (round-str mantissa scaled-exp 
                                                           d (if w (- w (if add-sign 1 0))))
         fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
+        fixed-repr (if (and w d
+                            (>= d 1)
+                            (= (.charAt fixed-repr 0) \0)
+                            (= (.charAt fixed-repr 1) \.)
+                            (> (count fixed-repr) (- w (if add-sign 1 0))))
+                     (subs fixed-repr 1)  ; chop off leading 0
+                     fixed-repr)
         prepend-zero (= (first fixed-repr) \.)]
     (if w
       (let [len (count fixed-repr)
