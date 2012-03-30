@@ -166,6 +166,79 @@
 (declare pprint-simple-code-list)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Format the namespace ("ns") macro. This is quite complicated because of all the
+;;; different forms supported and because programmers can choose lists or vectors
+;;; in various places.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- brackets
+  "Figure out which kind of brackets to use"
+  [form]
+  (if (vector? form)
+    ["[" "]"]
+    ["(" ")"]))
+
+(defn- pprint-ns-reference
+  "Pretty print a single reference (import, use, etc.) from a namespace decl"
+  [reference]
+  (if (sequential? reference)
+    (let [[start end] (brackets reference)
+          [keyw & args] reference]
+      (pprint-logical-block :prefix start :suffix end
+        ((formatter-out "~w~:i") keyw)
+        (loop [args args]
+          (when (seq args)
+            ((formatter-out " "))
+            (let [arg (first args)]
+              (if (sequential? arg)
+                (let [[start end] (brackets arg)]
+                  (pprint-logical-block :prefix start :suffix end
+                    (if (and (= (count arg) 3) (keyword? (second arg)))
+                      (let [[ns kw lis] arg]
+                        ((formatter-out "~w ~w ") ns kw)
+                        (if (sequential? lis)
+                          ((formatter-out (if (vector? lis)
+                                            "~<[~;~@{~w~^ ~:_~}~;]~:>"
+                                            "~<(~;~@{~w~^ ~:_~}~;)~:>"))
+                           lis)
+                          (write-out lis)))
+                      (apply (formatter-out "~w ~:i~@{~w~^ ~:_~}") arg)))
+                  (when (next args)
+                    ((formatter-out "~_"))))
+                (do
+                  (write-out arg)
+                  (when (next args)
+                    ((formatter-out "~:_"))))))
+            (recur (next args))))))
+    (write-out reference)))
+
+(defn- pprint-ns
+  "The pretty print dispatch chunk for the ns macro"
+  [alis]
+  (if (next alis) 
+    (let [[ns-sym ns-name & stuff] alis
+          [doc-str stuff] (if (string? (first stuff))
+                            [(first stuff) (next stuff)]
+                            [nil stuff])
+          [attr-map references] (if (map? (first stuff))
+                                  [(first stuff) (next stuff)]
+                                  [nil stuff])]
+      (pprint-logical-block :prefix "(" :suffix ")"
+        ((formatter-out "~w ~1I~@_~w") ns-sym ns-name)
+        (when (or doc-str attr-map (seq references))
+          ((formatter-out "~@:_")))
+        (when doc-str
+          (cl-format true "\"~a\"~:[~;~:@_~]" doc-str (or attr-map (seq references))))
+        (when attr-map
+          ((formatter-out "~w~:[~;~:@_~]") attr-map (seq references)))
+        (loop [references references]
+          (pprint-ns-reference (first references))
+          (when-let [references (next references)]
+            (pprint-newline :linear)
+            (recur references)))))
+    (write-out alis)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Format something that looks like a simple def (sans metadata, since the reader
 ;;; won't give it to us now).
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -356,7 +429,7 @@
         'fn* pprint-anon-func,
         '. pprint-hold-first, '.. pprint-hold-first, '-> pprint-hold-first,
         'locking pprint-hold-first, 'struct pprint-hold-first,
-        'struct-map pprint-hold-first, 
+        'struct-map pprint-hold-first, 'ns pprint-ns 
         })))
 
 (defn- pprint-code-list [alis]

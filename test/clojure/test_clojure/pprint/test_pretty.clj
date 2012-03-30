@@ -124,49 +124,27 @@ Usage: *hello*
   "'foo"
 )
 
-(simple-tests code-block-tests 
- (with-out-str
-   (with-pprint-dispatch code-dispatch 
-     (pprint 
-      '(defn cl-format 
-         "An implementation of a Common Lisp compatible format function"
-         [stream format-in & args]
-         (let [compiled-format (if (string? format-in) (compile-format format-in) format-in)
-               navigator (init-navigator args)]
-           (execute-format stream compiled-format navigator))))))
- "(defn cl-format
+(defmacro code-block
+  "Read a string then print it with code-dispatch and succeed if it comes out the same"
+  [test-name & blocks]
+  `(simple-tests ~test-name
+     ~@(apply concat
+              (for [block blocks]
+                `[(with-out-str
+                    (with-pprint-dispatch code-dispatch
+                      (pprint (read-string ~block))))
+                  (str ~block "\n")]))))
+
+(code-block code-block-tests
+  "(defn cl-format
   \"An implementation of a Common Lisp compatible format function\"
   [stream format-in & args]
   (let [compiled-format (if (string? format-in)
                           (compile-format format-in)
                           format-in)
         navigator (init-navigator args)]
-    (execute-format stream compiled-format navigator)))
-"
+    (execute-format stream compiled-format navigator)))"
 
- (with-out-str
-   (with-pprint-dispatch code-dispatch 
-     (pprint 
-      '(defn pprint-defn [writer alis]
-         (if (next alis) 
-           (let [[defn-sym defn-name & stuff] alis
-                 [doc-str stuff] (if (string? (first stuff))
-                                   [(first stuff) (next stuff)]
-                                   [nil stuff])
-                 [attr-map stuff] (if (map? (first stuff))
-                                    [(first stuff) (next stuff)]
-                                    [nil stuff])]
-             (pprint-logical-block writer :prefix "(" :suffix ")"
-                                   (cl-format true "~w ~1I~@_~w" defn-sym defn-name)
-                                   (if doc-str
-                                     (cl-format true " ~_~w" doc-str))
-                                   (if attr-map
-                                     (cl-format true " ~_~w" attr-map))
-                                   ;; Note: the multi-defn case will work OK for malformed defns too
-                                   (cond
-                                    (vector? (first stuff)) (single-defn stuff (or doc-str attr-map))
-                                    :else (multi-defn stuff (or doc-str attr-map)))))
-           (pprint-simple-code-list writer alis))))))
  "(defn pprint-defn [writer alis]
   (if (next alis)
     (let [[defn-sym defn-name & stuff] alis
@@ -190,9 +168,41 @@ Usage: *hello*
                                     stuff
                                     (or doc-str attr-map))
           :else (multi-defn stuff (or doc-str attr-map)))))
-    (pprint-simple-code-list writer alis)))
-")
+    (pprint-simple-code-list writer alis)))")
 
+(code-block ns-macro-test
+  "(ns slam.hound.stitch
+  (:use [slam.hound.prettify :only [prettify]]))"
+  
+  "(ns slam.hound.prettify
+  \"Format a namespace declaration using pretty print with custom dispatch.\"
+  (:use [clojure.pprint :only [cl-format code-dispatch formatter-out
+                               pprint pprint-logical-block
+                               pprint-newline with-pprint-dispatch
+                               write-out]]))"
+
+  "(ns autodoc.build-html
+  \"This is the namespace that builds the HTML pages themselves.
+It is implemented with a number of custom enlive templates.\"
+  {:skip-wiki true, :author \"Tom Faulhaber\"}
+  (:refer-clojure :exclude [empty complement])
+  (:import [java.util.jar JarFile]
+           [java.io File FileWriter BufferedWriter StringReader
+                    BufferedInputStream BufferedOutputStream
+                    ByteArrayOutputStream FileReader FileInputStream]
+           [java.util.regex Pattern])
+  (:require [clojure.string :as str])
+  (:use [net.cgrand.enlive-html :exclude (deftemplate)]
+        [clojure.java.io :only (as-file file writer)]
+        [clojure.java.shell :only (sh)]
+        [clojure.pprint :only (pprint cl-format pprint-ident
+                               pprint-logical-block set-pprint-dispatch
+                               get-pretty-writer fresh-line)]
+        [clojure.data.json :only (pprint-json)]
+        [autodoc.collect-info :only (contrib-info)]
+        [autodoc.params :only (params expand-classpath)])
+  (:use clojure.set clojure.java.io clojure.data clojure.java.browse
+        clojure.inspector clojure.zip clojure.stacktrace))")
 
 (defn tst-pprint
   "A helper function to pprint to a string with a restricted right margin"
