@@ -107,7 +107,7 @@
                            (str "combination " test opts))))))
 
 (deftest test-copy-encodings
-  (doseq [enc [ "UTF-8" "UTF-16" "UTF-16BE" "UTF-16LE" "UTF-32" ]]
+  (doseq [enc [ "UTF-8" "UTF-16" "UTF-16BE" "UTF-16LE" ]]
     (testing (str "from inputstream " enc " to writer UTF-8")
       (let [{:keys [i s o w bs]} (data-fixture enc)]
         (copy i w :encoding enc :buffer-size 16)
