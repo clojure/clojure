@@ -26,7 +26,7 @@
     (spit f content)
     (is (= content (slurp f)))
     ;; UTF-16 must be last for the following test
-    (doseq [enc [ "UTF-8" "UTF-16BE" "UTF-16LE" "UTF-32" "UTF-16" ]]
+    (doseq [enc [ "UTF-8" "UTF-16BE" "UTF-16LE" "UTF-16" ]]
       (spit f content :encoding enc)
       (is (= content (slurp f :encoding enc))))
     (testing "deprecated arity"
