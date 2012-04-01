@@ -9,6 +9,7 @@
 ; Author: Stuart Halloway
 
 (ns clojure.test-clojure.rt
+  (:require clojure.set)
   (:use clojure.test clojure.test-helper))
 
 (defn bare-rt-print
