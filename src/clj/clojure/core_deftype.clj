@@ -588,22 +588,23 @@
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
             [opts sigs]))
-        sigs (reduce1 (fn [m s]
-                       (let [name-meta (meta (first s))
-                             mname (with-meta (first s) nil)
-                             [arglists doc]
-                               (loop [as [] rs (rest s)]
-                                 (if (vector? (first rs))
-                                   (recur (conj as (first rs)) (next rs))
-                                   [(seq as) (first rs)]))]
-                         (when (some #{0} (map count arglists))
-                           (throw (IllegalArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))
-                         (assoc m (keyword mname)
-                                (merge name-meta
-                                       {:name (vary-meta mname assoc :doc doc :arglists arglists)
-                                        :arglists arglists
-                                        :doc doc}))))
-                     {} sigs)
+        sigs (when sigs
+               (reduce1 (fn [m s]
+                          (let [name-meta (meta (first s))
+                                mname (with-meta (first s) nil)
+                                [arglists doc]
+                                (loop [as [] rs (rest s)]
+                                  (if (vector? (first rs))
+                                    (recur (conj as (first rs)) (next rs))
+                                    [(seq as) (first rs)]))]
+                            (when (some #{0} (map count arglists))
+                              (throw (IllegalArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))
+                            (assoc m (keyword mname)
+                                   (merge name-meta
+                                          {:name (vary-meta mname assoc :doc doc :arglists arglists)
+                                           :arglists arglists
+                                           :doc doc}))))
+                        {} sigs))
         meths (mapcat (fn [sig]
                         (let [m (munge (:name sig))]
                           (map #(vector m (vec (repeat (dec (count %))'Object)) 'Object) 
@@ -613,7 +614,8 @@
      (defonce ~name {})
      (gen-interface :name ~iname :methods ~meths)
      (alter-meta! (var ~name) assoc :doc ~(:doc opts))
-     (#'assert-same-protocol (var ~name) '~(map :name (vals sigs)))
+     ~(when sigs
+        `(#'assert-same-protocol (var ~name) '~(map :name (vals sigs))))
      (alter-var-root (var ~name) merge 
                      (assoc ~opts 
                        :sigs '~sigs 

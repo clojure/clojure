@@ -8,6 +8,9 @@
   (^String baz [a] [a b] "method with multiple arities")
   (with-quux [a] "method name with a hyphen"))
 
+(defprotocol MarkerProtocol
+  "a protocol with no methods")
+
 (definterface ExampleInterface
   (hinted [^int i])
   (hinted [^String s]))

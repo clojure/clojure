@@ -76,7 +76,9 @@
     (eval '(defprotocol Elusive (new-method [x])))
     (is (= :new-method (eval '(new-method (reify Elusive (new-method [x] :new-method))))))
     (is (fails-with-cause? IllegalArgumentException #"No method of interface: .*\.Elusive found for function: old-method of protocol: Elusive \(The protocol method may have been defined before and removed\.\)"
-          (eval '(old-method (reify Elusive (new-method [x] :new-method))))))))
+          (eval '(old-method (reify Elusive (new-method [x] :new-method)))))))
+  (testing "you can define a marker protocol"
+    (is (= '() (method-names clojure.test_clojure.protocols.examples.MarkerProtocol)))))
 
 (deftype ExtendTestWidget [name])
 (deftype HasProtocolInline []
