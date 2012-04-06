@@ -279,6 +279,13 @@ static class Iter implements Iterator{
 
 }
 
+public Object kvreduce(IFn f, Object init){
+    for(int i=0;i < array.length;i+=2){
+        init = f.invoke(init, array[i], array[i+1]);
+        }
+    return init;
+}
+
 public ITransientMap asTransient(){
 	return new TransientArrayMap(array);
 }

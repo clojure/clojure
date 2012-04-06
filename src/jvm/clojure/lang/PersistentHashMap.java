@@ -178,6 +178,14 @@ public Iterator iterator(){
 	return new SeqIterator(seq());
 }
 
+public Object kvreduce(IFn f, Object init){
+    init = hasNull?f.invoke(init,null,nullValue):init;
+    if(root != null){
+        return root.kvreduce(f,init);
+    }
+    return init;
+}
+
 public int count(){
 	return count;
 }
@@ -311,6 +319,9 @@ static interface INode extends Serializable {
 	INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf);
 
 	INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf);
+
+    public Object kvreduce(IFn f, Object init);
+
 }
 
 final static class ArrayNode implements INode{
@@ -370,6 +381,16 @@ final static class ArrayNode implements INode{
 	public ISeq nodeSeq(){
 		return Seq.create(array);
 	}
+
+    public Object kvreduce(IFn f, Object init){
+        for(INode node : array)
+            {
+            if(node != null)
+                init = node.kvreduce(f,init);
+            }
+        return init;
+    }
+
 
 	private ArrayNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
@@ -600,6 +621,11 @@ final static class BitmapIndexedNode implements INode{
 		return NodeSeq.create(array);
 	}
 
+    public Object kvreduce(IFn f, Object init){
+         return NodeSeq.kvreduce(array,f,init);
+    }
+
+
 	private BitmapIndexedNode ensureEditable(AtomicReference<Thread> edit){
 		if(this.edit == edit)
 			return this;
@@ -783,6 +809,10 @@ final static class HashCollisionNode implements INode{
 	public ISeq nodeSeq(){
 		return NodeSeq.create(array);
 	}
+
+    public Object kvreduce(IFn f, Object init){
+         return NodeSeq.kvreduce(array,f,init);
+    }
 
 	public int findIndex(Object key){
 		for(int i = 0; i < 2*count; i+=2)
@@ -1016,6 +1046,21 @@ static final class NodeSeq extends ASeq {
 	static ISeq create(Object[] array) {
 		return create(array, 0, null);
 	}
+
+    static public Object kvreduce(Object[] array, IFn f, Object init){
+         for(int i=0;i<array.length;i+=2)
+             {
+             if(array[i] != null)
+                 init = f.invoke(init, array[i], array[i+1]);
+             else
+                 {
+                 INode node = (INode) array[i+1];
+                 if(node != null)
+                     init = node.kvreduce(f,init);
+                 }
+             }
+        return init;
+    }
 
 	private static ISeq create(Object[] array, int i, ISeq s) {
 		if(s != null)

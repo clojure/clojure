@@ -205,6 +205,13 @@ public NodeIterator iterator(){
 	return new NodeIterator(tree, true);
 }
 
+public Object kvreduce(IFn f, Object init){
+    if(tree != null)
+        return tree.kvreduce(f,init);
+    return init;
+}
+
+
 public NodeIterator reverseIterator(){
 	return new NodeIterator(tree, false);
 }
@@ -528,6 +535,16 @@ static abstract class Node extends AMapEntry{
 	}
 
 	abstract Node replace(Object key, Object val, Node left, Node right);
+
+    public Object kvreduce(IFn f, Object init){
+        init = f.invoke(init, key(), val());
+        if(left() != null)
+            init = left().kvreduce(f, init);
+        if(right() != null)
+            init = right().kvreduce(f, init);
+        return init;
+    }
+
 
 }
 

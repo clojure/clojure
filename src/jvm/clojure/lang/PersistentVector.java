@@ -232,6 +232,17 @@ public ISeq seq(){
 	return chunkedSeq();
 }
 
+public Object kvreduce(IFn f, Object init){
+    int step = 0;
+    for(int i=0;i<cnt;i+=step){
+        Object[] array = arrayFor(i);
+        for(int j =0;j<array.length;++j)
+            init = f.invoke(init,j+i,array[j]);
+        step = array.length;
+    }
+    return init;
+}
+
 static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
 
 	public final PersistentVector vec;
