@@ -6025,12 +6025,9 @@
   items, returns val and f is not called."
   {:added "1.0"}
   ([f coll]
-     (if-let [s (seq coll)]
-       (reduce f (first s) (next s))
-       (f)))
+     (clojure.core.protocols/coll-reduce coll f))
   ([f val coll]
-     (let [s (seq coll)]
-       (clojure.core.protocols/internal-reduce s f val))))
+     (clojure.core.protocols/coll-reduce coll f val)))
 
 (extend-protocol clojure.core.protocols/IKVReduce
  ;;slow path default
