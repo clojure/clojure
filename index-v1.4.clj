@@ -124,7 +124,7 @@
    :doc
    "Functional hierarchical zipper, with navigation, editing,\nand enumeration.  See Huet"}
   {:source-url
-   "https://github.com/clojure/clojure/blob/1f90942690d5395330347cb31fdb3d69cea1ec56/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/blob/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.core.protocols-api.html",
    :name "clojure.core.protocols",
@@ -11083,9 +11083,9 @@
    :file "src/clj/clojure/zip.clj"}
   {:file "src/clj/clojure/core/protocols.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/1f90942690d5395330347cb31fdb3d69cea1ec56/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/1f90942690d5395330347cb31fdb3d69cea1ec56/src/clj/clojure/core/protocols.clj#L13",
+   "https://github.com/clojure/clojure/blob/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj#L13",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/CollReduce",
    :namespace "clojure.core.protocols",
@@ -11096,9 +11096,22 @@
    :name "CollReduce"}
   {:file "src/clj/clojure/core/protocols.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/1f90942690d5395330347cb31fdb3d69cea1ec56/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/1f90942690d5395330347cb31fdb3d69cea1ec56/src/clj/clojure/core/protocols.clj#L19",
+   "https://github.com/clojure/clojure/blob/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj#L159",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/IKVReduce",
+   :namespace "clojure.core.protocols",
+   :line 159,
+   :var-type "protocol",
+   :doc
+   "Protocol for concrete associative types that can reduce themselves\nvia a function of key and val faster than first/next recursion over map\nentries. Called by clojure.core/reduce-kv, and has same\nsemantics (just different arg order).",
+   :name "IKVReduce"}
+  {:file "src/clj/clojure/core/protocols.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj#L19",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce",
    :namespace "clojure.core.protocols",
@@ -11117,6 +11130,16 @@
    :arglists ([coll f] [coll f val]),
    :doc nil,
    :name "coll-reduce"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/kv-reduce",
+   :namespace "clojure.core.protocols",
+   :var-type "function",
+   :arglists ([amap f init]),
+   :doc nil,
+   :name "kv-reduce"}
   {:file nil,
    :raw-source-url nil,
    :source-url nil,

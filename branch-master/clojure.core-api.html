@@ -1716,6 +1716,11 @@ namespace.
         <a class="toc-subentry-anchor" href="#clojure.core.protocols/coll-reduce">coll-reduce</a>
       </div>
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.protocols/IKVReduce">IKVReduce</a>
+      <div style="margin-left: 1em;" class="toc-subentry">
+        <a class="toc-subentry-anchor" href="#clojure.core.protocols/kv-reduce">kv-reduce</a>
+      </div>
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core.protocols/InternalReduce">InternalReduce</a>
       <div style="margin-left: 1em;" class="toc-subentry">
         <a class="toc-subentry-anchor" href="#clojure.core.protocols/internal-reduce">internal-reduce</a>
@@ -9385,7 +9390,31 @@ implementation defined in terms of Iterable.</pre>
     </div>
     
     
-    <a href="https://github.com/clojure/clojure/blob/1f90942690d5395330347cb31fdb3d69cea1ec56/src/clj/clojure/core/protocols.clj#L13" id="proto-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj#L13" id="proto-source">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.protocols/IKVReduce">IKVReduce</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Protocol for concrete associative types that can reduce themselves
+via a function of key and val faster than first/next recursion over map
+entries. Called by clojure.core/reduce-kv, and has same
+semantics (just different arg order).</pre>
+    Known implementations: <span id="proto-impls">clojure.lang.IPersistentMap, clojure.lang.PersistentArrayMap, clojure.lang.PersistentHashMap, clojure.lang.PersistentTreeMap, clojure.lang.PersistentVector</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.core.protocols/kv-reduce">kv-reduce</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (kv-reduce amap f init)
+</pre>
+      <pre id="var-docstr"></pre>
+      
+      
+      
+    </div>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj#L159" id="proto-source">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -9407,7 +9436,7 @@ faster than first/next recursion. Called by clojure.core/reduce.</pre>
     </div>
     
     
-    <a href="https://github.com/clojure/clojure/blob/1f90942690d5395330347cb31fdb3d69cea1ec56/src/clj/clojure/core/protocols.clj#L19" id="proto-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/df2b35266fb6c6f791f37a4e6cbd77514ce77838/src/clj/clojure/core/protocols.clj#L19" id="proto-source">Source</a>
   </div>
 </div>
 
