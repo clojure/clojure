@@ -23,7 +23,7 @@
 (ns ^{:doc "clojure.test extensions for the Test Anything Protocol (TAP)
 
   TAP is a simple text-based syntax for reporting test results.  TAP
-  was originally develped for Perl, and now has implementations in
+  was originally developed for Perl, and now has implementations in
   several languages.  For more information on TAP, see
   http://testanything.org/ and
   http://search.cpan.org/~petdance/TAP-1.0.0/TAP.pm
