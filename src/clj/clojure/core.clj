@@ -6618,11 +6618,11 @@
   "Map from reader tag symbols to data reader Vars.
 
   When Clojure starts, it searches for files named 'data_readers.clj'
-  at the root of the classpath. Each such file must contain pairs of
-  symbols, like this:
+  at the root of the classpath. Each such file must contain a literal
+  map of symbols, like this:
 
-      foo/bar my.project.foo/bar
-      foo/baz my.prjoect/baz
+      {foo/bar my.project.foo/bar
+       foo/baz my.project/baz}
 
   The first symbol in each pair is a tag that will be recognized by
   the Clojure reader. The second symbol in the pair is the
