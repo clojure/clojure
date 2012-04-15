@@ -6,6 +6,7 @@
 
 <pre>
  1 Deprecated and Removed Features
+    1.1 Fields that Start With a Dash Can No Longer Be Accessed Using Dot Syntax
  2 New/Improved Features
     2.1 Reader Literals
     2.2 clojure.core/mapv
@@ -28,7 +29,6 @@
     2.19 Java int is boxed as java.lang.Integer
  3 Performance Enhancements
  4 Bug Fixes
- 5 Modular Contrib
 </pre>
 
 ## 1 Deprecated and Removed Features
@@ -152,7 +152,7 @@ if the exception is an instance of `ExceptionInfo`.
 ### 2.5 clojure.core/reduce-kv
 
 `reduce-kv` reduces an associative collection. It takes a function `f`,
-an initial value `init` and an association collection `coll`. `f` should 
+an initial value `init` and an associative collection `coll`. `f` should 
 be a function of 3 arguments. Returns the result of applying `f` to `init`, 
 the first key and the first value in `coll`, then applying `f` to that result 
 and the 2nd key and value, etc. If `coll` contains no entries, returns `init`
@@ -234,6 +234,12 @@ should be set to a collection of keywords.
 * `:disable-locals-clearing`: Set to true to disable clearing. Useful for
 using a debugger.
 
+The main function of the Clojure compiler sets the
+`*compiler-options*` from properties prefixed by `clojure.compiler`,
+e.g.
+
+    java -Dclojure.compiler.elide-meta='[:doc :file :line]'
+
 ### 2.15 Improved Reporting of Invalid Characters in Unicode String Literals
 
 When the reader finds an invalid character in a Unicode string literal, it
@@ -275,14 +281,14 @@ for more information.
 * [CLJ-773](http://dev.clojure.org/jira/browse/CLJ-773)
   Macros that are expanded away still have their vars referenced in the emitted byte code
 * [CLJ-837](http://dev.clojure.org/jira/browse/CLJ-837)
-  java.lang.VerifyError when compiling deftype or defrecord with argument name starting with double underscore characters.
+  java.lang.VerifyError when compiling deftype or defrecord with argument name starting with double underscore characters
 * [CLJ-369](http://dev.clojure.org/jira/browse/CLJ-369)
   Check for invalid interface method names
 * [CLJ-845](http://dev.clojure.org/jira/browse/CLJ-845)
   Unexpected interaction between protocol extension and namespaced method keyword/symbols
   * Ignoring namespace portion of symbols used to name methods in extend-type and extend-protocol
 * [CLJ-852](http://dev.clojure.org/jira/browse/CLJ-852)
-  IllegalArgumentException thrown when defining a var whose value is calculated with a primitive fn.
+  IllegalArgumentException thrown when defining a var whose value is calculated with a primitive fn
 * [CLJ-855](http://dev.clojure.org/jira/browse/CLJ-855)
   catch receives a RuntimeException rather than the expected checked exception
 * [CLJ-876](http://dev.clojure.org/jira/browse/CLJ-876)
@@ -294,7 +300,7 @@ for more information.
   * obey contract for toArray return type
 * [CLJ-898](http://dev.clojure.org/jira/browse/CLJ-898)
   Agent sends consume heap
-  * Only capture a shallow copy of the current Frame in binding-conveyor-fn, so that sends in agent actions don't built infinite Frame stacks.
+  * Only capture a shallow copy of the current Frame in binding-conveyor-fn, so that sends in agent actions don't build infinite Frame stacks
 * [CLJ-928](http://dev.clojure.org/jira/browse/CLJ-928)
   Instant literal for Date and Timestamp should print in UTC
 * [CLJ-931](http://dev.clojure.org/jira/browse/CLJ-933)
