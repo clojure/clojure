@@ -94,7 +94,7 @@
      (print-tap-diagnostic (t/testing-contexts-str)))
    (when (:message data)
      (print-tap-diagnostic (:message data)))
-   (print-tap-diagnostic "expected:" (pr-str (:expected data)))
+   (print-tap-diagnostic (str "expected:" (pr-str (:expected data))))
    (print-tap-diagnostic "  actual: ")
    (print-tap-diagnostic
     (with-out-str
