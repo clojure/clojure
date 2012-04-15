@@ -898,7 +898,7 @@ final static class BigDecimalOps extends OpsP{
 	}
 
 	public boolean equiv(Number x, Number y){
-		return toBigDecimal(x).equals(toBigDecimal(y));
+		return toBigDecimal(x).compareTo(toBigDecimal(y)) == 0;
 	}
 
 	public boolean lt(Number x, Number y){
