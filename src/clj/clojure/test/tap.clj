@@ -78,7 +78,7 @@
 (defmethod tap-report :pass [data]
   (t/with-test-out
    (t/inc-report-counter :pass)
-   (print-tap-pass (t/testing-vars-str))
+   (print-tap-pass (t/testing-vars-str data))
    (when (seq t/*testing-contexts*)
      (print-tap-diagnostic (t/testing-contexts-str)))
    (when (:message data)
@@ -89,7 +89,7 @@
 (defmethod tap-report :error [data]
   (t/with-test-out
    (t/inc-report-counter :error)
-   (print-tap-fail (t/testing-vars-str))
+   (print-tap-fail (t/testing-vars-str data))
    (when (seq t/*testing-contexts*)
      (print-tap-diagnostic (t/testing-contexts-str)))
    (when (:message data)
