@@ -3929,10 +3929,14 @@
                              ret))))
                      pmap
                      (fn [bvec b v]
-                       (let [gmap (or (:as b) (gensym "map__"))
+                       (let [gmap (gensym "map__")
                              defaults (:or b)]
                          (loop [ret (-> bvec (conj gmap) (conj v)
-                                        (conj gmap) (conj `(if (seq? ~gmap) (apply hash-map ~gmap) ~gmap)))
+                                        (conj gmap) (conj `(if (seq? ~gmap) (apply hash-map ~gmap) ~gmap))
+                                        ((fn [ret]
+                                           (if (:as b)
+                                             (conj ret (:as b) gmap)
+                                             ret))))
                                 bes (reduce1
                                      (fn [bes entry]
                                        (reduce1 #(assoc %1 %2 ((val entry) %2))
