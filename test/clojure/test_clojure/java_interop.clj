@@ -123,6 +123,11 @@
         (:alpha b) 255
         (:transparency b) 1
 
+        (:missing b) nil
+        (:missing b :default) :default
+        (get b :missing) nil
+        (get b :missing :default) :default
+
         (:class b) java.awt.Color )))
 
 

@@ -394,7 +394,7 @@
            []
       (containsKey [k] (contains? pmap k))
       (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
-      (valAt ([k] (v k))
+      (valAt ([k] (when (contains? pmap k) (v k)))
 	     ([k default] (if (contains? pmap k) (v k) default)))
       (cons [m] (conj (snapshot) m))
       (count [] (count pmap))
