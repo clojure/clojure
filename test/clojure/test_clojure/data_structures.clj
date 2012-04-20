@@ -579,6 +579,19 @@
          (get-in m [] 0) m
          (get-in m nil 0) m)))
 
+(deftest test-nested-map-destructuring
+  (let [sample-map {:a 1 :b {:a 2}}
+        {ao1 :a {ai1 :a} :b} sample-map
+        {ao2 :a {ai2 :a :as m1} :b :as m2} sample-map
+        {ao3 :a {ai3 :a :as m} :b :as m} sample-map
+        {{ai4 :a :as m} :b ao4 :a :as m} sample-map]
+    (are [i o] (and (= i 2)
+                    (= o 1))
+         ai1 ao1
+         ai2 ao2
+         ai3 ao3
+         ai4 ao4)))
+
 ;; *** Sets ***
 
 (deftest test-hash-set
