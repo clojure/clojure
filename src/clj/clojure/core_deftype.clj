@@ -148,7 +148,8 @@
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))
         base-fields fields
-        fields (conj fields '__meta '__extmap)]
+        fields (conj fields '__meta '__extmap)
+        type-hash (hash classname)]
     (when (some #{:volatile-mutable :unsynchronized-mutable} (mapcat (comp keys meta) hinted-fields))
       (throw (IllegalArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))
     (let [gs (gensym)]
@@ -157,8 +158,9 @@
         [(conj i 'clojure.lang.IRecord)
          m])
       (eqhash [[i m]] 
-        [i
-         (conj m 
+        [(conj i 'clojure.lang.IHashEq)
+         (conj m
+               `(hasheq [this#] (bit-xor ~type-hash (.hashCode this#)))
                `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
                `(equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])
       (iobj [[i m]] 
