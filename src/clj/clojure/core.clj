@@ -3932,7 +3932,7 @@
                        (let [gmap (gensym "map__")
                              defaults (:or b)]
                          (loop [ret (-> bvec (conj gmap) (conj v)
-                                        (conj gmap) (conj `(if (seq? ~gmap) (apply hash-map ~gmap) ~gmap))
+                                        (conj gmap) (conj `(if (seq? ~gmap) (clojure.lang.PersistentHashMap/create ~gmap) ~gmap))
                                         ((fn [ret]
                                            (if (:as b)
                                              (conj ret (:as b) gmap)
