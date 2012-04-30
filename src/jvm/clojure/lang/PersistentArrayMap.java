@@ -282,6 +282,8 @@ static class Iter implements Iterator{
 public Object kvreduce(IFn f, Object init){
     for(int i=0;i < array.length;i+=2){
         init = f.invoke(init, array[i], array[i+1]);
+	    if(RT.isReduced(init))
+		    return ((IDeref)init).deref();
         }
     return init;
 }

@@ -180,7 +180,9 @@ public Iterator iterator(){
 
 public Object kvreduce(IFn f, Object init){
     init = hasNull?f.invoke(init,null,nullValue):init;
-    if(root != null){
+	if(RT.isReduced(init))
+		return ((IDeref)init).deref();
+	if(root != null){
         return root.kvreduce(f,init);
     }
     return init;
@@ -383,11 +385,13 @@ final static class ArrayNode implements INode{
 	}
 
     public Object kvreduce(IFn f, Object init){
-        for(INode node : array)
-            {
-            if(node != null)
+        for(INode node : array){
+            if(node != null){
                 init = node.kvreduce(f,init);
-            }
+	            if(RT.isReduced(init))
+		            return ((IDeref)init).deref();
+	            }
+	        }
         return init;
     }
 
@@ -1058,6 +1062,8 @@ static final class NodeSeq extends ASeq {
                  if(node != null)
                      init = node.kvreduce(f,init);
                  }
+             if(RT.isReduced(init))
+	             return ((IDeref)init).deref();
              }
         return init;
     }

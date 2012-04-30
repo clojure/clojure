@@ -538,11 +538,20 @@ static abstract class Node extends AMapEntry{
 
     public Object kvreduce(IFn f, Object init){
         init = f.invoke(init, key(), val());
-        if(left() != null)
+	    if(RT.isReduced(init))
+		    return ((IDeref)init).deref();
+
+	    if(left() != null){
             init = left().kvreduce(f, init);
-        if(right() != null)
+	        if(RT.isReduced(init))
+		        return ((IDeref)init).deref();
+	        }
+	    if(right() != null){
             init = right().kvreduce(f, init);
-        return init;
+	        if(RT.isReduced(init))
+		        return ((IDeref)init).deref();
+	        }
+	    return init;
     }
 
 

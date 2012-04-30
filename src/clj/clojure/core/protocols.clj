@@ -66,14 +66,20 @@
         (if (.hasNext iter)
           (loop [ret (.next iter)]
             (if (.hasNext iter)
-              (recur (f ret (.next iter)))
+              (let [ret (f ret (.next iter))]
+                (if (reduced? ret)
+                  @ret
+                  (recur ret)))
               ret))
           (f))))
    ([coll f val]
       (let [iter (.iterator coll)]
         (loop [ret val]
           (if (.hasNext iter)
-            (recur (f ret (.next iter)))
+            (let [ret (f ret (.next iter))]
+                (if (reduced? ret)
+                  @ret
+                  (recur ret)))
             ret)))))
   )
 
@@ -89,9 +95,12 @@
    [s f val]
    (if-let [s (seq s)]
      (if (chunked-seq? s)
-       (recur (chunk-next s)
-              f
-              (.reduce (chunk-first s) f val))
+       (let [ret (.reduce (chunk-first s) f val)]
+         (if (reduced? ret)
+           @ret
+           (recur (chunk-next s)
+                  f
+                  ret)))
        (internal-reduce s f val))
      val))
  
@@ -102,7 +111,10 @@
      (loop [i (.i str-seq)
             val val]
        (if (< i (.length s))
-         (recur (inc i) (f val (.charAt s i)))
+         (let [ret (f val (.charAt s i))]
+                (if (reduced? ret)
+                  @ret
+                  (recur (inc i) ret)))
          val))))
   
   clojure.lang.ArraySeq
@@ -112,7 +124,10 @@
          (loop [i (.index a-seq)
                 val val]
            (if (< i (alength arr))
-             (recur (inc i) (f val (aget arr i)))
+             (let [ret (f val (aget arr i))]
+                (if (reduced? ret)
+                  @ret
+                  (recur (inc i) ret)))
              val))))
   
   java.lang.Object
@@ -125,7 +140,10 @@
      (if-let [s (seq s)]
        ;; roll over to faster implementation if underlying seq changes type
        (if (identical? (class s) cls)
-         (recur cls (next s) f (f val (first s)))
+         (let [ret (f val (first s))]
+                (if (reduced? ret)
+                  @ret
+                  (recur cls (next s) f ret)))
          (internal-reduce s f val))
        val))))
 
@@ -136,7 +154,10 @@
          (loop [i (.index a-seq)
                 val val]
            (if (< i (alength arr))
-             (recur (inc i) (f val (aget arr i)))
+             (let [ret (f val (aget arr i))]
+                (if (reduced? ret)
+                  @ret
+                  (recur (inc i) ret)))
              val)))))
 
 (defn- emit-array-impls*

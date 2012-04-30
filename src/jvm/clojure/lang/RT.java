@@ -1680,6 +1680,10 @@ static public boolean isLineNumberingReader(Reader r){
 	return r instanceof LineNumberingPushbackReader;
 }
 
+static public boolean isReduced(Object r){
+	return r instanceof Reduced;
+}
+
 static public String resolveClassNameInContext(String className){
 	//todo - look up in context var
 	return className;

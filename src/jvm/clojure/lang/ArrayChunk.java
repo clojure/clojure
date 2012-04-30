@@ -56,8 +56,14 @@ public IChunk dropFirst(){
 
 public Object reduce(IFn f, Object start) {
 		Object ret = f.invoke(start, array[off]);
+		if(RT.isReduced(ret))
+			return ret;
 		for(int x = off + 1; x < end; x++)
+			{
 			ret = f.invoke(ret, array[x]);
+			if(RT.isReduced(ret))
+				return ret;
+			}
 		return ret;
 }
 }

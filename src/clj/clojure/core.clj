@@ -6001,6 +6001,21 @@
           (let [[shift mask imap switch-type skip-check] (prep-hashes ge default tests thens)]
             `(let [~ge ~e] (case* ~ge ~shift ~mask ~default ~imap ~switch-type :hash-identity ~skip-check))))))))
 
+
+;; redefine reduce with internal-reduce
+(defn reduced
+  "Wraps x in a way such that a reduce will terminate with the value x"
+  {:added "1.5"}
+  [x]
+  (clojure.lang.Reduced. x))
+
+(defn reduced?
+  "Returns true if x is the result of a call to reduced"
+  {:inline (fn [x] `(clojure.lang.RT/isReduced ~x ))
+   :inline-arities #{1}
+   :added "1.5"}
+  ([x] (clojure.lang.RT/isReduced x)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 (load "core_proxy")
@@ -6012,7 +6027,6 @@
 (load "instant")
 (load "uuid")
 
-;; redefine reduce with internal-reduce
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then
