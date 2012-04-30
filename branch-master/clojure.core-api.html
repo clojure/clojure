@@ -1732,6 +1732,33 @@ namespace.
         <a class="toc-subentry-anchor" href="#clojure.core.protocols/internal-reduce">internal-reduce</a>
       </div>
     </div>
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#clojure.core.reduce" style="margin-top: 3px;">clojure.core.reduce</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/drop">drop</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/filter">filter</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/flatten">flatten</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/map">map</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/reducer">reducer</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/remove">remove</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/take">take</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reduce/take-while">take-while</a>
+      
+    </div>
   </div>
 </div>
 </div>
@@ -9469,6 +9496,112 @@ faster than first/next recursion. Called by clojure.core/reduce.</pre>
 </div>
 
 
+<br />
+<h2 id="clojure.core.reduce">clojure.core.reduce</h2>
+<pre id="namespace-docstr"></pre>
+
+
+<br />
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/drop">drop</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (drop n coll)
+</pre>
+    <pre id="var-docstr">Elides the first n values from the reduction of coll.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L80" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/filter">filter</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (filter pred coll)
+</pre>
+    <pre id="var-docstr">Retains values in the reduction of coll for which (pred val) returns logical true</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L36" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/flatten">flatten</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (flatten coll)
+</pre>
+    <pre id="var-docstr">Takes any nested combination of sequential things (lists, vectors,
+etc.) and returns their contents as a single, flat reducible
+collection.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L94" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/map">map</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (map f coll)
+</pre>
+    <pre id="var-docstr">Applies f to every value in the reduction of coll</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L27" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/reducer">reducer</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (reducer coll xf)
+</pre>
+    <pre id="var-docstr">Given a reducible collection, and a transformation function xf,
+returns a reducible collection, where any supplied reducing
+fn will be transformed by xf. xf is a function of reducing fn to
+reducing fn.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L14" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/remove">remove</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (remove pred coll)
+</pre>
+    <pre id="var-docstr">Removes values in the reduction of coll for which (pred val) returns logical true</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L48" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/take">take</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (take n coll)
+</pre>
+    <pre id="var-docstr">Ends the reduction of coll after consuming n values.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L66" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reduce/take-while">take-while</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (take-while pred coll)
+</pre>
+    <pre id="var-docstr">Ends the reduction of coll when (pred val) returns logical false.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L54" id="var-source">Source</a>
+  </div>
+</div>
 
 
 </div>
