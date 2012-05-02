@@ -130,12 +130,6 @@
    :name "clojure.core.protocols",
    :doc nil}
   {:source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure/clojure.core.reduce-api.html",
-   :name "clojure.core.reduce",
-   :doc nil}
-  {:source-url
    "https://github.com/clojure/clojure/blob/36642c984cbf52456e45a8af0a96e4b7e7417041/src/clj/clojure/test/junit.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.test.junit-api.html",
@@ -9233,7 +9227,7 @@
    :doc
    "The Java access bitflags, along with their friendly names and\nthe kinds of objects to which they can apply.",
    :name "flag-descriptors"}
-  {:arglists ([m__1092__auto__]),
+  {:arglists ([m__1050__auto__]),
    :name "map->Constructor",
    :namespace "clojure.reflect",
    :source-url
@@ -9247,7 +9241,7 @@
    :var-type "function",
    :line 109,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1092__auto__]),
+  {:arglists ([m__1050__auto__]),
    :name "map->Field",
    :namespace "clojure.reflect",
    :source-url
@@ -9261,7 +9255,7 @@
    :var-type "function",
    :line 148,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1092__auto__]),
+  {:arglists ([m__1050__auto__]),
    :name "map->Method",
    :namespace "clojure.reflect",
    :source-url
@@ -11185,123 +11179,6 @@
    :arglists ([seq f start]),
    :doc nil,
    :name "internal-reduce"}
-  {:arglists ([n coll]),
-   :name "drop",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L80",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/drop",
-   :doc "Elides the first n values from the reduction of coll.",
-   :var-type "function",
-   :line 80,
-   :file "src/clj/clojure/core/reduce.clj"}
-  {:arglists ([pred coll]),
-   :name "filter",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L36",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/filter",
-   :doc
-   "Retains values in the reduction of coll for which (pred val) returns logical true",
-   :var-type "function",
-   :line 36,
-   :file "src/clj/clojure/core/reduce.clj"}
-  {:arglists ([coll]),
-   :name "flatten",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L94",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/flatten",
-   :doc
-   "Takes any nested combination of sequential things (lists, vectors,\netc.) and returns their contents as a single, flat reducible\ncollection.",
-   :var-type "function",
-   :line 94,
-   :file "src/clj/clojure/core/reduce.clj"}
-  {:arglists ([f coll]),
-   :name "map",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L27",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/map",
-   :doc "Applies f to every value in the reduction of coll",
-   :var-type "function",
-   :line 27,
-   :file "src/clj/clojure/core/reduce.clj"}
-  {:arglists ([coll xf]),
-   :name "reducer",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L14",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/reducer",
-   :doc
-   "Given a reducible collection, and a transformation function xf,\nreturns a reducible collection, where any supplied reducing\nfn will be transformed by xf. xf is a function of reducing fn to\nreducing fn.",
-   :var-type "function",
-   :line 14,
-   :file "src/clj/clojure/core/reduce.clj"}
-  {:arglists ([pred coll]),
-   :name "remove",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L48",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/remove",
-   :doc
-   "Removes values in the reduction of coll for which (pred val) returns logical true",
-   :var-type "function",
-   :line 48,
-   :file "src/clj/clojure/core/reduce.clj"}
-  {:arglists ([n coll]),
-   :name "take",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L66",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/take",
-   :doc "Ends the reduction of coll after consuming n values.",
-   :var-type "function",
-   :line 66,
-   :file "src/clj/clojure/core/reduce.clj"}
-  {:arglists ([pred coll]),
-   :name "take-while",
-   :namespace "clojure.core.reduce",
-   :source-url
-   "https://github.com/clojure/clojure/blob/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj#L54",
-   :added "1.5",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/4a22e3a44df48ea0d37dd034bc3f6cb3092117a9/src/clj/clojure/core/reduce.clj",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reduce/take-while",
-   :doc
-   "Ends the reduction of coll when (pred val) returns logical false.",
-   :var-type "function",
-   :line 54,
-   :file "src/clj/clojure/core/reduce.clj"}
   {:arglists ([& body]),
    :name "with-junit-output",
    :namespace "clojure.test.junit",
