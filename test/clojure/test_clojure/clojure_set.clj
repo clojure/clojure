@@ -162,8 +162,9 @@
 
 (deftest test-rename-keys
   (are [x y] (= x y)
-    (set/rename-keys {:a "one" :b "two"} {:a :z}) {:z "one" :b "two"}
-    ))
+       (set/rename-keys {:a "one" :b "two"} {:a :z}) {:z "one" :b "two"}
+       (set/rename-keys {:a "one" :b "two"} {:a :z :c :y}) {:z "one" :b "two"}
+       (set/rename-keys {:a "one" :b "two" :c "three"} {:a :b :b :a}) {:a "two" :b "one" :c "three"}))
 
 (deftest test-index
   (are [x y] (= x y)
