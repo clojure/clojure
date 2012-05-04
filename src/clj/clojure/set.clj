@@ -80,11 +80,10 @@
   [map kmap]
     (reduce 
      (fn [m [old new]]
-       (if (and (not= old new)
-                (contains? m old))
-         (-> m (assoc new (get m old)) (dissoc old))
+       (if (contains? map old)
+         (assoc m new (get map old))
          m)) 
-     map kmap))
+     (apply dissoc map (keys kmap)) kmap))
 
 (defn rename
   "Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap"
