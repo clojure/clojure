@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -231,6 +232,32 @@ public IChunkedSeq chunkedSeq(){
 public ISeq seq(){
 	return chunkedSeq();
 }
+
+Iterator rangedIterator(final int start, final int end){
+	return new Iterator(){
+		int i = start;
+		int base = i - (i%32);
+		Object[] array = (start < count())?arrayFor(i):null;
+
+		public boolean hasNext(){
+			return i < end;
+			}
+
+		public Object next(){
+			if(i-base == 32){
+				array = arrayFor(i);
+				base += 32;
+				}
+			return array[i++ & 0x01f];
+			}
+
+		public void remove(){
+			throw new UnsupportedOperationException();
+		}
+	};
+}
+
+public Iterator iterator(){return rangedIterator(0,count());}
 
 public Object kvreduce(IFn f, Object init){
     int step = 0;

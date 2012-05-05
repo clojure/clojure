@@ -520,6 +520,8 @@ static class SubVector extends APersistentVector implements IObj{
 		this.end = end;
 	}
 
+	public Iterator iterator(){return ((PersistentVector)v).rangedIterator(start,end);}
+
 	public Object nth(int i){
 		if(start + i >= end)
 			throw new IndexOutOfBoundsException();
