@@ -17,6 +17,7 @@
   <property name="build" location="${target}/classes"/>
   <property name="test-classes" location="${target}/test-classes"/>
   <property name="dist" location="dist"/>
+  <property file="maven-classpath.properties"/>
 
   <!-- Get the version string out of the POM -->
   <xmlproperty file="pom.xml" prefix="pom"/>
@@ -43,7 +44,7 @@
   <target name="compile-clojure"
           description="Compile Clojure sources.">
     <java classname="clojure.lang.Compile"
-          classpath="${build}:${cljsrc}"
+          classpath="${maven.compile.classpath}:${build}:${cljsrc}"
           failonerror="true"
           fork="true">
       <sysproperty key="clojure.compile.path" value="${build}"/>

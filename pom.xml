@@ -38,6 +38,15 @@
     <url>git@github.com:clojure/clojure.git</url>
   </scm>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.jsr166-mirror</groupId>
+      <artifactId>jsr166y</artifactId>
+      <version>1.7.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <resources>
       <resource>
@@ -72,7 +81,8 @@
 	    </goals>
 	    <configuration>
 	      <target>
-		<ant target="compile-clojure" />
+                <property name="maven.compile.classpath" refid="maven.compile.classpath"/>
+		<ant target="compile-clojure"/>
 	      </target>
 	    </configuration>
 	  </execution>

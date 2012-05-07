@@ -13,8 +13,10 @@ Getting Started: http://dev.clojure.org/display/doc/Getting+Started
 
 To run:  java -cp clojure-${VERSION}.jar clojure.main
 
-To build locally with Ant:  ant
+To build locally with Ant:  
 
+   One-time setup:    ./antsetup.sh
+   To build:          ant
 
 Maven 2 build instructions:
 
