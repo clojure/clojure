@@ -8,8 +8,8 @@
 
 (ns ^{:doc
       "A library for reduction and parallel folding. Alpha and subject
-      to change.  Note that fold and its derivatives require
-      jsr166y.jar for fork/join support. See Clojure's pom.xml for the
+      to change.  Note that fold and its derivatives require Java 7+ or
+      Java 6 + jsr166y.jar for fork/join support. See Clojure's pom.xml for the
       dependency info."
       :author "Rich Hickey"}
   clojure.core.reducers
@@ -51,7 +51,7 @@
    (defn- fjfork [task] (.fork ^java.util.concurrent.ForkJoinTask task))
 
    (defn- fjjoin [task] (.join ^java.util.concurrent.ForkJoinTask task)))
- ;; We're running a JDK <6
+ ;; We're running a JDK <7
  (do
    (def pool (delay (jsr166y.ForkJoinPool.)))
 
