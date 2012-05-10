@@ -1595,9 +1595,32 @@
   The docstring and attribute-map are optional.
 
   Options are key-value pairs and may be one of:
-    :default    the default dispatch value, defaults to :default
-    :hierarchy  the isa? hierarchy to use for dispatching
-                defaults to the global hierarchy"
+
+  :default
+
+  The default dispatch value, defaults to :default
+
+  :hierarchy
+
+  The isa? hierarchy value used for dispatch, e.g.
+  (isa? my-hierarchy ::square ::shape)
+
+  Hierarchies are type-like relationships that do not depend upon type
+  inheritance. The hierarchy relationship can be established via derive,
+  and the root ancestor may be obtained from make-hierarchy in order to
+  avoid directly using the global hierarchy map. Multimethods expect the
+  value of the hierarchy option to be supplied as a reference type e.g.
+  a var. You can supply this option via the Var-quote dispatch macro (#').
+  If no hierarchy is supplied, defaults to the global hierarchy.
+
+  Hierarchy example:
+
+  (def my-hierarchy (-> (make-hierarchy)
+                      (derive ::rect ::shape)
+                      (derive ::square ::rect)
+                      (derive ::circle ::shape)))
+
+  (defmulti foo identity :hierarchy #'my-hierarchy)"
   {:arglists '([name docstring? attr-map? dispatch-fn & options])
    :added "1.0"}
   [mm-name & options]
