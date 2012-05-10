@@ -370,3 +370,11 @@
   (are [r c1] (=vec r (filterv even? c1))
        [] [1 3 5]
        [2 4] [1 2 3 4 5]))
+
+(deftest test-subvec
+  (let [v1 (vec (range 100))
+        v2 (subvec v1 50 57)]
+    (is (thrown? IndexOutOfBoundsException (v2 -1)))
+    (is (thrown? IndexOutOfBoundsException (v2 7)))
+    (is (= (v1 50) (v2 0)))
+    (is (= (v1 56) (v2 6)))))
