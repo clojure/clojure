@@ -13,7 +13,7 @@
       dependency info."
       :author "Rich Hickey"}
   clojure.core.reducers
-  (:refer-clojure :exclude [reduce map filter remove take take-while drop flatten])
+  (:refer-clojure :exclude [reduce map mapcat filter remove take take-while drop flatten])
   (:require [clojure.walk :as walk]))
 
 (alias 'core 'clojure.core)
@@ -167,6 +167,17 @@
      (rfn [f1 k]
           ([ret k v]
              (f1 ret (f k v)))))))
+
+(defcurried mapcat
+  "Applies f to every value in the reduction of coll, concatenating the result
+  colls of (f val). Foldable."
+  {:added "1.5"}
+  [f coll]
+  (folder coll
+   (fn [f1]
+     (rfn [f1 k]
+          ([ret k v]
+             (reduce f1 ret (f k v)))))))
 
 (defcurried filter
   "Retains values in the reduction of coll for which (pred val)
