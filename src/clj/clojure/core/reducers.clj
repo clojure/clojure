@@ -199,6 +199,21 @@
   [pred coll]
   (filter (complement pred) coll))
 
+(defcurried flatten
+  "Takes any nested combination of sequential things (lists, vectors,
+  etc.) and returns their contents as a single, flat foldable
+  collection."
+  {:added "1.5"}
+  [coll]
+  (folder coll
+   (fn [f1]
+     (fn
+       ([] (f1))
+       ([ret v]
+          (if (sequential? v)
+            (clojure.core.protocols/coll-reduce (flatten v) f1 ret)
+            (f1 ret v)))))))
+
 (defcurried take-while
   "Ends the reduction of coll when (pred val) returns logical false."
   {:added "1.5"}
@@ -238,27 +253,6 @@
             (if (neg? @cnt)
               (f1 ret k v)
               ret)))))))
-
-(defcurried flatten
-  "Takes any nested combination of sequential things (lists, vectors,
-  etc.) and returns their contents as a single, flat foldable
-  collection."
-  {:added "1.5"}
-  [coll]
-  (let [rf (fn [f1]
-             (fn
-               ([] (f1))
-               ([ret v]
-                  (if (sequential? v)
-                    (clojure.core.protocols/coll-reduce (flatten v) f1 ret)
-                    (f1 ret v)))))]
-    (reify
-     clojure.core.protocols/CollReduce
-     (coll-reduce [this f1] (clojure.core.protocols/coll-reduce this f1 (f1)))
-     (coll-reduce [_  f1 init] (clojure.core.protocols/coll-reduce coll (rf f1) init))
-
-     CollFold
-     (coll-fold [_ n combinef reducef] (coll-fold coll n combinef (rf reducef))))))
 
 ;;do not construct this directly, use cat
 (deftype Cat [cnt left right]
