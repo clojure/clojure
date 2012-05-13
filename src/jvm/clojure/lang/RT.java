@@ -1134,6 +1134,8 @@ static public long longCast(Object x){
 	    return ((Number) x).longValue();
 	else if (x instanceof Ratio)
 	    return longCast(((Ratio)x).bigIntegerValue());
+	else if (x instanceof Character)
+	    return longCast(((Character) x).charValue());
 	else
 	    return longCast(((Number)x).doubleValue());
 }
