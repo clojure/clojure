@@ -4915,10 +4915,9 @@
    :static true}
   [^Class c]
   (when c
-    (let [i (.getInterfaces c)
+    (let [i (seq (.getInterfaces c))
           s (.getSuperclass c)]
-      (not-empty
-       (if s (cons s i) i)))))
+      (if s (cons s i) i))))
 
 (defn supers
   "Returns the immediate and indirect superclasses and interfaces of c, if any"
