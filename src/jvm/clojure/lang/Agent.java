@@ -136,8 +136,12 @@ static class Action implements Runnable{
 				popped = action.agent.aq.compareAndSet(prior, next);
 				}
 
-			if(error == null && next.q.count() > 0)
-				((Action) next.q.peek()).execute();
+			if(error == null) {
+				Action nextAction = (Action) next.q.peek();
+		                if (null != nextAction) {
+					nextAction.execute();
+				}
+		            }
 			}
 		finally
 			{
