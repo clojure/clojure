@@ -24,3 +24,19 @@
                         m (zipmap ks ks)
                         dm (persistent! (reduce dissoc! (transient m) (keys m)))]
                     [(count dm) dm])))))
+
+(deftest contains-testing
+  (testing "empty set contains? nothing"
+    (is (= false (contains? (transient #{}) :k))))
+  (testing "false when asked for a different element"
+    (is (= false (contains? (transient #{:k}) :j))))
+  (testing "true when contains"
+    (is (contains? (transient #{:k}) :k))))
+
+(deftest getting
+  (testing "transient set should (get ...) existing element"
+    (is (= :k (get (transient #{:k}) :k))))
+  (testing "nil when no such element"
+    (is (nil? (get (transient #{:k}) :j))))
+  (testing "nil when set is empty"
+    (is (nil? (get (transient #{}) :k)))))
