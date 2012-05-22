@@ -9236,7 +9236,7 @@
    :doc
    "The Java access bitflags, along with their friendly names and\nthe kinds of objects to which they can apply.",
    :name "flag-descriptors"}
-  {:arglists ([m__1071__auto__]),
+  {:arglists ([m__1223__auto__]),
    :name "map->Constructor",
    :namespace "clojure.reflect",
    :source-url
@@ -9250,7 +9250,7 @@
    :var-type "function",
    :line 109,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1071__auto__]),
+  {:arglists ([m__1223__auto__]),
    :name "map->Field",
    :namespace "clojure.reflect",
    :source-url
@@ -9264,7 +9264,7 @@
    :var-type "function",
    :line 148,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1071__auto__]),
+  {:arglists ([m__1223__auto__]),
    :name "map->Method",
    :namespace "clojure.reflect",
    :source-url
@@ -11188,6 +11188,263 @@
    :arglists ([seq f start]),
    :doc nil,
    :name "internal-reduce"}
+  {:arglists ([cnt left right]),
+   :name "->Cat",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L258",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/->Cat",
+   :doc
+   "Positional factory function for class clojure.core.reducers.Cat.",
+   :var-type "function",
+   :line 258,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([acc x]),
+   :name "append!",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L303",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/append!",
+   :doc ".adds x to acc and returns acc",
+   :var-type "function",
+   :line 303,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([] [ctor] [left right]),
+   :name "cat",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L283",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/cat",
+   :doc
+   "A high-performance combining fn that yields the catenation of the\nreduced values. The result is reducible, foldable, seqable and\ncounted, providing the identity collections are reducible, seqable\nand counted. The single argument version will build a combining fn\nwith the supplied identity constructor. Tests for identity\nwith (zero? (count x)). See also foldcat.",
+   :var-type "function",
+   :line 283,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([n] [n coll]),
+   :name "drop",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L243",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/drop",
+   :doc "Elides the first n values from the reduction of coll.",
+   :var-type "function",
+   :line 243,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([pred] [pred coll]),
+   :name "filter",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L182",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/filter",
+   :doc
+   "Retains values in the reduction of coll for which (pred val)\nreturns logical true. Foldable.",
+   :var-type "function",
+   :line 182,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([] [coll]),
+   :name "flatten",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L202",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/flatten",
+   :doc
+   "Takes any nested combination of sequential things (lists, vectors,\netc.) and returns their contents as a single, flat foldable\ncollection.",
+   :var-type "function",
+   :line 202,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists
+   ([reducef coll] [combinef reducef coll] [n combinef reducef coll]),
+   :name "fold",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L84",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/fold",
+   :doc
+   "Reduces a collection using a (potentially parallel) reduce-combine\nstrategy. The collection is partitioned into groups of approximately\nn (default 512), each of which is reduced with reducef (with a seed\nvalue obtained by calling (combinef) with no arguments). The results\nof these reductions are then reduced with combinef (default\nreducef). combinef must be associative, and, when called with no\narguments, (combinef) must produce its identity element. These\noperations may be performed in parallel, but the results will\npreserve order.",
+   :var-type "function",
+   :line 84,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([coll]),
+   :name "foldcat",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L309",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/foldcat",
+   :doc "Equivalent to (fold cat append! coll)",
+   :var-type "function",
+   :line 309,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([coll xf]),
+   :name "folder",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L114",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/folder",
+   :doc
+   "Given a foldable collection, and a transformation function xf,\nreturns a foldable collection, where any supplied reducing\nfn will be transformed by xf. xf is a function of reducing fn to\nreducing fn.",
+   :var-type "function",
+   :line 114,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([f] [f coll]),
+   :name "map",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L161",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/map",
+   :doc "Applies f to every value in the reduction of coll. Foldable.",
+   :var-type "function",
+   :line 161,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([f] [f coll]),
+   :name "mapcat",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L171",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/mapcat",
+   :doc
+   "Applies f to every value in the reduction of coll, concatenating the result\ncolls of (f val). Foldable.",
+   :var-type "function",
+   :line 171,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([op ctor]),
+   :name "monoid",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L315",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/monoid",
+   :doc
+   "Builds a combining fn out of the supplied operator and identity\nconstructor. op must be associative and ctor called with no args\nmust return an identity value for it.",
+   :var-type "function",
+   :line 315,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([f coll] [f init coll]),
+   :name "reduce",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L71",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/reduce",
+   :doc
+   "Like core/reduce except:\nWhen init is not provided, (f) is used.\nMaps are reduced with reduce-kv",
+   :var-type "function",
+   :line 71,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([coll xf]),
+   :name "reducer",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L100",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/reducer",
+   :doc
+   "Given a reducible collection, and a transformation function xf,\nreturns a reducible collection, where any supplied reducing\nfn will be transformed by xf. xf is a function of reducing fn to\nreducing fn.",
+   :var-type "function",
+   :line 100,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([pred] [pred coll]),
+   :name "remove",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L195",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/remove",
+   :doc
+   "Removes values in the reduction of coll for which (pred val)\nreturns logical true. Foldable.",
+   :var-type "function",
+   :line 195,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([n] [n coll]),
+   :name "take",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L229",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/take",
+   :doc "Ends the reduction of coll after consuming n values.",
+   :var-type "function",
+   :line 229,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:arglists ([pred] [pred coll]),
+   :name "take-while",
+   :namespace "clojure.core.reducers",
+   :source-url
+   "https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L217",
+   :added "1.5",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/take-while",
+   :doc
+   "Ends the reduction of coll when (pred val) returns logical false.",
+   :var-type "function",
+   :line 217,
+   :file "src/clj/clojure/core/reducers.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.reducers/Cat",
+   :namespace "clojure.core.reducers",
+   :var-type "type",
+   :name "Cat"}
   {:arglists ([& body]),
    :name "with-junit-output",
    :namespace "clojure.test.junit",

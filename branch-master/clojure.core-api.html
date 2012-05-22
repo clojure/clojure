@@ -1734,7 +1734,61 @@ namespace.
     </div>
   </div><div style="margin-left: 1em;" class="toc-section">
     <a href="#clojure.core.reducers" style="margin-top: 3px;">clojure.core.reducers</a>
-    
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/Cat">Cat</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/-&gt;Cat">-&gt;Cat</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/append!">append!</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/cat">cat</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/drop">drop</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/filter">filter</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/flatten">flatten</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/fold">fold</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/foldcat">foldcat</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/folder">folder</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/map">map</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/mapcat">mapcat</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/monoid">monoid</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/reduce">reduce</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/reducer">reducer</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/remove">remove</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/take">take</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.reducers/take-while">take-while</a>
+      
+    </div>
   </div>
 </div>
 </div>
@@ -9409,7 +9463,7 @@ functions during testing.</pre>
     <pre id="proto-docstr">Protocol for collection types that can implement reduce faster than
 first/next recursion. Called by clojure.core/reduce. Baseline
 implementation defined in terms of Iterable.</pre>
-    Known implementations: <span id="proto-impls">clojure.lang.ASeq, clojure.lang.LazySeq, clojure.lang.PersistentVector, java.lang.Iterable, nil, Object</span>
+    Known implementations: <span id="proto-impls"><a href="clojure.core.reducers-api.html#clojure.core.reducers/Cat">clojure.core.reducers.Cat</a>, clojure.lang.ASeq, clojure.lang.LazySeq, clojure.lang.PersistentVector, java.lang.Iterable, nil, Object</span>
     <div id="proto-var-entry">
       <br />
       <h3 id="clojure.core.protocols/coll-reduce">coll-reduce</h3>
@@ -9485,8 +9539,253 @@ dependency info.</pre>
 
 <br />
 
-
-
+<div id="type-section">
+  <p></p>
+  <h2>Types</h2>
+  <div id="type-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/Cat">Cat</h2>
+    <span id="type-type">type</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[cnt left right]</span><br />
+    Protocols: <span id="type-protocols"><a href="clojure.core-api.html#clojure.core.protocols/CollReduce">clojure.core.protocols/CollReduce</a>, <a href="#clojure.core.reducers/CollFold">CollFold</a></span><br />
+    Interfaces: <span id="type-interfaces">clojure.lang.Counted, clojure.lang.Seqable</span><br />
+  </div>
+</div>
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/-&gt;Cat">-&gt;Cat</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;Cat cnt left right)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.core.reducers.Cat.</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L258" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/append!">append!</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (append! acc x)
+</pre>
+    <pre id="var-docstr">.adds x to acc and returns acc</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L303" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/cat">cat</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (cat)
+       (cat ctor)
+       (cat left right)
+</pre>
+    <pre id="var-docstr">A high-performance combining fn that yields the catenation of the
+reduced values. The result is reducible, foldable, seqable and
+counted, providing the identity collections are reducible, seqable
+and counted. The single argument version will build a combining fn
+with the supplied identity constructor. Tests for identity
+with (zero? (count x)). See also foldcat.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L283" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/drop">drop</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (drop n)
+       (drop n coll)
+</pre>
+    <pre id="var-docstr">Elides the first n values from the reduction of coll.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L243" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/filter">filter</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (filter pred)
+       (filter pred coll)
+</pre>
+    <pre id="var-docstr">Retains values in the reduction of coll for which (pred val)
+returns logical true. Foldable.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L182" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/flatten">flatten</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (flatten)
+       (flatten coll)
+</pre>
+    <pre id="var-docstr">Takes any nested combination of sequential things (lists, vectors,
+etc.) and returns their contents as a single, flat foldable
+collection.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L202" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/fold">fold</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (fold reducef coll)
+       (fold combinef reducef coll)
+       (fold n combinef reducef coll)
+</pre>
+    <pre id="var-docstr">Reduces a collection using a (potentially parallel) reduce-combine
+strategy. The collection is partitioned into groups of approximately
+n (default 512), each of which is reduced with reducef (with a seed
+value obtained by calling (combinef) with no arguments). The results
+of these reductions are then reduced with combinef (default
+reducef). combinef must be associative, and, when called with no
+arguments, (combinef) must produce its identity element. These
+operations may be performed in parallel, but the results will
+preserve order.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L84" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/foldcat">foldcat</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (foldcat coll)
+</pre>
+    <pre id="var-docstr">Equivalent to (fold cat append! coll)</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L309" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/folder">folder</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (folder coll xf)
+</pre>
+    <pre id="var-docstr">Given a foldable collection, and a transformation function xf,
+returns a foldable collection, where any supplied reducing
+fn will be transformed by xf. xf is a function of reducing fn to
+reducing fn.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L114" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/map">map</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (map f)
+       (map f coll)
+</pre>
+    <pre id="var-docstr">Applies f to every value in the reduction of coll. Foldable.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L161" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/mapcat">mapcat</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (mapcat f)
+       (mapcat f coll)
+</pre>
+    <pre id="var-docstr">Applies f to every value in the reduction of coll, concatenating the result
+colls of (f val). Foldable.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L171" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/monoid">monoid</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (monoid op ctor)
+</pre>
+    <pre id="var-docstr">Builds a combining fn out of the supplied operator and identity
+constructor. op must be associative and ctor called with no args
+must return an identity value for it.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L315" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/reduce">reduce</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (reduce f coll)
+       (reduce f init coll)
+</pre>
+    <pre id="var-docstr">Like core/reduce except:
+When init is not provided, (f) is used.
+Maps are reduced with reduce-kv</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L71" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/reducer">reducer</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (reducer coll xf)
+</pre>
+    <pre id="var-docstr">Given a reducible collection, and a transformation function xf,
+returns a reducible collection, where any supplied reducing
+fn will be transformed by xf. xf is a function of reducing fn to
+reducing fn.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L100" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/remove">remove</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (remove pred)
+       (remove pred coll)
+</pre>
+    <pre id="var-docstr">Removes values in the reduction of coll for which (pred val)
+returns logical true. Foldable.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L195" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/take">take</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (take n)
+       (take n coll)
+</pre>
+    <pre id="var-docstr">Ends the reduction of coll after consuming n values.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L229" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.reducers/take-while">take-while</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (take-while pred)
+       (take-while pred coll)
+</pre>
+    <pre id="var-docstr">Ends the reduction of coll when (pred val) returns logical false.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/2430b7a958fea540071d7f41f37b27294bb009aa/src/clj/clojure/core/reducers.clj#L217" id="var-source">Source</a>
+  </div>
+</div>
 
 
 </div>
