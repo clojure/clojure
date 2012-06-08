@@ -102,6 +102,7 @@
           unless="maven.test.skip">
     <java classname="clojure.main" failonerror="true" fork="true">
       <classpath>
+        <pathelement path="${maven.compile.classpath}"/>
         <path location="${test-classes}"/>
         <path location="${test}"/>
         <path location="${build}"/>
