@@ -102,3 +102,6 @@ beginning of aseq"
   `(prerr ~@(cons (list 'quote prefix) (mapcat #(list (list 'quote %) "=" %) 
                                                   (cons arg (seq more-args))))))
 
+;; Flush the pretty-print buffer without flushing the underlying stream
+(definterface PrettyFlush
+  (^void ppflush []))

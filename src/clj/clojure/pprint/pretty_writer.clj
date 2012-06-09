@@ -380,7 +380,7 @@
                      :miser-width miser-width
                      :trailing-white-space nil
                      :pos 0})]
-    (proxy [Writer IDeref] []
+    (proxy [Writer IDeref PrettyFlush] []
       (deref [] fields)
 
       (write 
@@ -408,12 +408,16 @@
             Long
             (p-write-char this x))))
 
-      (flush []
+      (ppflush []
              (if (= (getf :mode) :buffering)
-               (dosync 
+               (dosync
                 (write-tokens this (getf :buffer) true)
                 (setf :buffer []))
                (write-white-space this)))
+
+      (flush []
+             (.ppflush this)
+             (.flush (getf :base)))
 
       (close []
              (.flush this)))))

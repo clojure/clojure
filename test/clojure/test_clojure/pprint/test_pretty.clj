@@ -326,3 +326,49 @@ It is implemented with a number of custom enlive templates.\"
   "[1, 2, 3, 4, 5, 6]\n"
   )
 
+(defn- flush-alerting-writer
+  [o]
+  (let [flush-count-atom (atom 0)]
+    [
+      (proxy [java.io.BufferedWriter] [o]
+        (flush []
+          (proxy-super flush)
+          (swap! flush-count-atom inc)))
+      flush-count-atom]))
+
+(deftest test-flush-underlying-prn
+  []
+  (let [[out flush-count-atom] (flush-alerting-writer (java.io.StringWriter.))]
+    (binding [*out* out
+              *flush-on-newline* true]
+      (prn (range 50))
+      (prn (range 50)))
+    (is (= @flush-count-atom 2) "println flushes on newline")))
+
+(deftest test-flush-underlying-pprint
+  []
+  (let [[out flush-count-atom] (flush-alerting-writer (java.io.StringWriter.))]
+    (binding [*out* out
+              *flush-on-newline* true]
+      (pprint (range 50))
+      (pprint (range 50)))
+    (is (= @flush-count-atom 2) "pprint flushes on newline")))
+
+(deftest test-noflush-underlying-prn
+  []
+  (let [[out flush-count-atom] (flush-alerting-writer (java.io.StringWriter.))]
+    (binding [*out* out
+              *flush-on-newline* nil]
+      (prn (range 50))
+      (prn (range 50)))
+    (is (= @flush-count-atom 0) "println flushes on newline")))
+
+(deftest test-noflush-underlying-pprint
+  []
+  (let [[out flush-count-atom] (flush-alerting-writer (java.io.StringWriter.))]
+    (binding [*out* out
+              *flush-on-newline* nil]
+      (pprint (range 50))
+      (pprint (range 50)))
+    (is (= @flush-count-atom 0) "pprint flushes on newline")))
+

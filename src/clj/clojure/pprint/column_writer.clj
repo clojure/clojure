@@ -58,6 +58,8 @@
      (let [fields (ref {:max max-columns, :cur 0, :line 0 :base writer})]
        (proxy [Writer IDeref] []
          (deref [] fields)
+         (flush []
+           (.flush writer))
          (write
           ([^chars cbuf ^Integer off ^Integer len] 
              (let [^Writer writer (get-field this :base)] 
