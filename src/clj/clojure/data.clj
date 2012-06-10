@@ -30,6 +30,22 @@
      (vec (repeat (apply max (keys m))  nil))
      m)))
 
+(defn- diff-associative-key
+  "Diff associative things a and b, comparing only the key k."
+  [a b k]
+  (let [va (get a k)
+        vb (get b k)
+        [a* b* ab] (diff va vb)
+        in-a (contains? a k)
+        in-b (contains? b k)
+        same (and in-a in-b
+                  (or (not (nil? ab))
+                      (and (nil? va) (nil? vb))))]
+    [(when (and in-a (or (not (nil? a*)) (not same))) {k a*})
+     (when (and in-b (or (not (nil? b*)) (not same))) {k b*})
+     (when same {k ab})
+     ]))
+
 (defn- diff-associative
   "Diff associative things a and b, comparing only keys in ks."
   [a b ks]
@@ -38,7 +54,7 @@
      (doall (map merge diff1 diff2)))
    [nil nil nil]
    (map
-    (fn [k] (map #(when % {k %}) (diff (get a k) (get b k))))
+    (partial diff-associative-key a b)
     ks)))
 
 (defn- diff-sequential
