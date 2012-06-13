@@ -2341,6 +2341,7 @@
   called, the returned function calls f with args + additional args."
   {:added "1.0"
    :static true}
+  ([f] f)
   ([f arg1]
    (fn [& args] (apply f arg1 args)))
   ([f arg1 arg2]
