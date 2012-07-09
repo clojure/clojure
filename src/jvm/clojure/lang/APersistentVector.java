@@ -261,6 +261,10 @@ public Object invoke(Object arg1) {
 	throw new IllegalArgumentException("Key must be integer");
 }
 
+public Object invoke(Object arg1, Object notFound) {
+	return valAt(arg1, notFound);
+}
+
 public Iterator iterator(){
 	//todo - something more efficient
 	return new Iterator(){
