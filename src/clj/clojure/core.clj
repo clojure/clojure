@@ -6609,7 +6609,7 @@
                     (doseq [[a-var a-val] m]
                       (.bindRoot ^clojure.lang.Var a-var a-val)))
         old-vals (zipmap (keys binding-map)
-                         (map deref (keys binding-map)))]
+                         (map #(.getRawRoot %) (keys binding-map)))]
     (try
       (root-bind binding-map)
       (func)

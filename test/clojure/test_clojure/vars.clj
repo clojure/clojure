@@ -89,3 +89,12 @@
         (throw (Exception. "simulated failure in with-redefs")))))
     (is (= :temp @p))
     (is (= :original stub-me))))
+
+(def ^:dynamic dynamic-var 1)
+
+(deftest test-with-redefs-inside-binding
+  (binding [dynamic-var 2]
+    (is (= 2 dynamic-var))
+    (with-redefs [dynamic-var 3]
+      (is (= 2 dynamic-var))))
+  (is (= 1 dynamic-var)))
