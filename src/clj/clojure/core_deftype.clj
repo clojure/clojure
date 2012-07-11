@@ -16,11 +16,31 @@
   [ns]
   (.replace (str ns) \- \_))
 
+(defn ^:private throw-on-varargs
+  "Throws an exception if arglist contains a varargs declaration.
+  Protocol/interface method impls defined with deftype, defrecord, and reify
+  don't support varags."
+  [arglist]
+  (when (some #(= '& %) arglist)
+    (throw (IllegalArgumentException.
+            "No varargs support for definterface and defprotocol method sigs;
+ditto for method impls defined with deftype, defrecord, and reify."))))
+
+(defn ^:private throw-on-varargs-or-destr
+  "Throws an exception if arglist contains a varargs declaration or a
+  destructuring form.
+  Protocol/interface method signatures shouldn't use varargs/destructuring."
+  [arglist]
+  (when (some #(or (= '& %) (coll? %)) arglist)
+    (throw (IllegalArgumentException.
+            "No varargs nor destructuring support for definterface and defprotocol method sigs."))))
+
 ;for now, built on gen-interface
 (defmacro definterface 
   [name & sigs]
   (let [tag (fn [x] (or (:tag (meta x)) Object))
         psig (fn [[name [& args]]]
+               (throw-on-varargs-or-destr args)
                (vector name (vec (map tag args)) (tag name) (map meta args)))
         cname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
     `(let [] 
@@ -53,6 +73,7 @@
                        (disj 'Object 'java.lang.Object)
                        vec)
         methods (map (fn [[name params & body]]
+                       (throw-on-varargs params)
                        (cons name (maybe-destructured params body)))
                      (apply concat (vals impls)))]
     (when-let [bad-opts (seq (remove #{:no-print} (keys opts)))]
@@ -597,6 +618,8 @@
                                   (if (vector? (first rs))
                                     (recur (conj as (first rs)) (next rs))
                                     [(seq as) (first rs)]))]
+                            (doseq [arglist arglists]
+                              (throw-on-varargs-or-destr arglist))
                             (when (some #{0} (map count arglists))
                               (throw (IllegalArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))
                             (assoc m (keyword mname)
