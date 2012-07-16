@@ -811,7 +811,9 @@ public static class SyntaxQuoteReader extends AFn{
 			throw new IllegalStateException("splice not in list");
 		else if(form instanceof IPersistentCollection)
 			{
-			if(form instanceof IPersistentMap)
+			if(form instanceof IRecord)
+				ret = form;
+			else if(form instanceof IPersistentMap)
 				{
 				IPersistentVector keyvals = flattenMap(form);
                 ret = RT.list(APPLY, HASHMAP, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
