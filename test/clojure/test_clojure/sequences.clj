@@ -944,7 +944,9 @@
       (range -2 -2) ()
       (range -2 -5) ()
 
-      (range 3 9 0) ()
+      (take 3 (range 3 9 0)) '(3 3 3)
+      (take 3 (range 9 3 0)) '(9 9 9)
+      (range 0 0 0) ()
       (range 3 9 1) '(3 4 5 6 7 8)
       (range 3 9 2) '(3 5 7)
       (range 3 9 3) '(3 6)
