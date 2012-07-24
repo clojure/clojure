@@ -5144,6 +5144,11 @@
         references (remove #(= :gen-class (first %)) references)
         ;ns-effect (clojure.core/in-ns name)
         ]
+    (doseq [ref (map first references)]
+      (when-not (and (or (symbol? ref)
+                         (keyword? ref))
+                     (contains? (set ["require" "use" "import" "refer-clojure"]) (clojure.core/name ref)))
+        (throw (IllegalArgumentException. (str ref " is not a valid reference.")))))
     `(do
        (clojure.core/in-ns '~name)
        (with-loading-context
