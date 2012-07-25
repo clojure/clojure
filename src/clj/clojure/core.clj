@@ -4756,18 +4756,25 @@
                              n-or-q
                              (LinkedBlockingQueue. (int n-or-q)))
          NIL (Object.) ;nil sentinel since LBQ doesn't support nils
-         agt (agent (seq s))
+         agt (agent (lazy-seq s)) ; never start with nil; that signifies we've already put eos
+         log-error (fn [q e]
+                     (if (.offer q q)
+                       (throw e)
+                       e))
          fill (fn [s]
-                (try
-                  (loop [[x & xs :as s] s]
-                    (if s
-                      (if (.offer q (if (nil? x) NIL x))
-                        (recur xs)
-                        s)
-                      (.put q q))) ; q itself is eos sentinel
-                  (catch Exception e
-                    (.put q q)
-                    (throw e))))
+                (when s
+                  (if (instance? Exception s) ; we failed to .offer an error earlier
+                    (log-error q s)
+                    (try
+                      (loop [[x & xs :as s] (seq s)]
+                        (if s
+                          (if (.offer q (if (nil? x) NIL x))
+                            (recur xs)
+                            s)
+                          (when-not (.offer q q) ; q itself is eos sentinel
+                            ()))) ; empty seq, not nil, so we know to put eos next time
+                      (catch Exception e
+                        (log-error q e))))))
          drain (fn drain []
                  (lazy-seq
                   (let [x (.take q)]
