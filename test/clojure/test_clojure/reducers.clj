@@ -39,3 +39,14 @@
 (defequivtest test-filter
   [filter r/filter #(into [] %)]
   [even? odd? #(< 200 %) identity])
+
+
+(deftest test-sorted-maps
+  (let [m (into (sorted-map)
+                '{1 a, 2 b, 3 c, 4 d})]
+    (is (= "1a2b3c4d" (reduce-kv str "" m))
+        "Sorted maps should reduce-kv in sorted order")
+    (is (= 1 (reduce-kv (fn [acc k v]
+                          (reduced (+ acc k)))
+                        0 m))
+        "Sorted maps should stop reduction when asked")))
