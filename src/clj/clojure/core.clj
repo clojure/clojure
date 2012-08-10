@@ -6768,12 +6768,14 @@
              (throw (ex-info (str "Invalid form in data-reader file")
                              {:url url
                               :form k})))
-           (when (contains? mappings k)
-             (throw (ex-info "Conflicting data-reader mapping"
-                             {:url url
-                              :conflict k
-                              :mappings m})))
-           (assoc m k (data-reader-var v)))
+           (let [v-var (data-reader-var v)]
+             (when (and (contains? mappings k)
+                        (not= (mappings k) v-var))
+               (throw (ex-info "Conflicting data-reader mapping"
+                               {:url url
+                                :conflict k
+                                :mappings m})))
+             (assoc m k v-var)))
          mappings
          new-mappings)))))
 
