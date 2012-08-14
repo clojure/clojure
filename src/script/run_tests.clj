@@ -48,6 +48,7 @@ clojure.test-clojure.sequences
 clojure.test-clojure.serialization
 clojure.test-clojure.special
 clojure.test-clojure.string
+clojure.test-clojure.subs
 clojure.test-clojure.test
 clojure.test-clojure.test-fixtures
 clojure.test-clojure.transients
