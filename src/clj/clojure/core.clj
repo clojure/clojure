@@ -4418,13 +4418,27 @@
    :static true}
   [v] (instance? clojure.lang.Var v))
 
+(defn rindex
+  "Returns the index of s relative to the start when i is positive, or
+  relative to the end when i is negative."
+  {:added "1.5"
+   :static true}
+  [^String s i] (+ i (if (< i 0) (count s) 0)))
+
+
 (defn subs
   "Returns the substring of s beginning at start inclusive, and ending
-  at end (defaults to length of string), exclusive."
+  at end (defaults to length of string), exclusive. The start and end
+  indices are relative from the start of the string when positive, and
+  relative to the end when negative. "
   {:added "1.0"
    :static true}
-  (^String [^String s start] (. s (substring start)))
-  (^String [^String s start end] (. s (substring start end))))
+  (^String [^String s start] (. s (substring (rindex s start))))
+  (^String [^String s start end]
+             (. s (substring (rindex s start) (rindex s end))))
+  #_(^String [^String s start] (. s (substring start)))
+  #_(^String [^String s start end]
+             (. s (substring start end))))
 
 (defn max-key
   "Returns the x for which (k x), a number, is greatest."
