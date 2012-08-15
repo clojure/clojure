@@ -121,8 +121,10 @@
 ;partial
 
 (deftest test-partial
-  (let [p1 (partial + 20)
+  (let [p0 (partial inc)
+        p1 (partial + 20)
         p2 (partial conj [1 2])]
+    (is (= 41 (p0 40)))
     (is (= 40 (p1 20)))
     (is (= [1 2 3] (p2 3)))))
 
