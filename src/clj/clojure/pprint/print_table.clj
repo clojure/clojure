@@ -20,17 +20,17 @@
                      (fn [k]
                        (apply max (count (str k)) (map #(count (str (get % k))) rows)))
                      ks)
-             fmts (map #(str "%-" % "s") widths)
-             fmt-row (fn [row]
-                       (apply str (interpose " | "
-                                             (for [[col fmt] (map vector (map #(get row %) ks) fmts)]
-                                               (format fmt (str col))))))
-             header (fmt-row (zipmap ks ks))
-             bar (apply str (repeat (count header) "="))]
-         (println bar)
-         (println header)
-         (println bar)
+             spacers (map #(apply str (repeat % "-")) widths)
+             fmts (map #(str "%" % "s") widths)
+             fmt-row (fn [leader divider trailer row]
+                       (str leader
+                            (apply str (interpose divider
+                                                  (for [[col fmt] (map vector (map #(get row %) ks) fmts)]
+                                                    (format fmt (str col)))))
+                            trailer))]
+         (println)
+         (println (fmt-row "| " " | " " |" (zipmap ks ks)))
+         (println (fmt-row "|-" "-+-" "-|" (zipmap ks spacers)))
          (doseq [row rows]
-           (println (fmt-row row)))
-         (println bar))))
+           (println (fmt-row "| " " | " " |" row))))))
   ([rows] (print-table (keys (first rows)) rows)))

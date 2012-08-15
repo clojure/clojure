@@ -759,3 +759,25 @@ but it was called with an argument of type short-float.\n")
           '((hot dog) (hamburger) (ice cream) (french fries))) 
   "/hot .../hamburger")
 
+(simple-tests pprint-table-tests
+  (with-out-str
+    (print-table [:b :a]
+                 [{:a 1 :b {:a 'is-a} :c ["hi" "there"]}
+                  {:b 5 :a 7 :c "dog" :d -700}]))
+  "
+|        :b | :a |
+|-----------+----|
+| {:a is-a} |  1 |
+|         5 |  7 |
+"
+  (with-out-str
+    (print-table [:a :e :d :c]
+                 [{:a 54.7e17 :b {:a 'is-a} :c ["hi" "there"]}
+                  {:b 5 :a -2/3 :c "dog" :d 'panda}]))
+  "
+|      :a | :e |    :d |             :c |
+|---------+----+-------+----------------|
+| 5.47E18 |    |       | [\"hi\" \"there\"] |
+|    -2/3 |    | panda |            dog |
+"
+  )
