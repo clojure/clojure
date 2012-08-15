@@ -76,9 +76,29 @@
     (eval '(defprotocol Elusive (new-method [x])))
     (is (= :new-method (eval '(new-method (reify Elusive (new-method [x] :new-method))))))
     (is (fails-with-cause? IllegalArgumentException #"No method of interface: .*\.Elusive found for function: old-method of protocol: Elusive \(The protocol method may have been defined before and removed\.\)"
-          (eval '(old-method (reify Elusive (new-method [x] :new-method)))))))
-  (testing "you can define a marker protocol"
-    (is (= '() (method-names clojure.test_clojure.protocols.examples.MarkerProtocol)))))
+          (eval '(old-method (reify Elusive (new-method [x] :new-method))))))))
+
+(deftype HasMarkers []
+  ExampleProtocol
+  (foo [this] "foo")
+  MarkerProtocol
+  MarkerProtocol2)
+
+(deftype WillGetMarker []
+  ExampleProtocol
+  (foo [this] "foo"))
+
+(extend-type WillGetMarker MarkerProtocol)
+
+(deftest marker-tests
+  (testing "That a marker protocol has no methods"
+    (is (= '() (method-names clojure.test_clojure.protocols.examples.MarkerProtocol))))
+  (testing "That types with markers are reportedly satifying them."
+    (let [hm (HasMarkers.)
+          wgm (WillGetMarker.)]
+      (is (satisfies? MarkerProtocol hm))
+      (is (satisfies? MarkerProtocol2 hm))
+      (is (satisfies? MarkerProtocol wgm)))))
 
 (deftype ExtendTestWidget [name])
 (deftype HasProtocolInline []
