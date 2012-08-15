@@ -12,14 +12,36 @@
 
 (deftest t-replace
   (is (= "faabar" (s/replace "foobar" \o \a)))
+  (is (= "foobar" (s/replace "foobar" \z \a)))
   (is (= "barbarbar" (s/replace "foobarfoo" "foo" "bar")))
-  (is (= "FOObarFOO" (s/replace "foobarfoo" #"foo" s/upper-case))))
+  (is (= "foobarfoo" (s/replace "foobarfoo" "baz" "bar")))
+  (is (= "f$$d" (s/replace "food" "o" "$")))
+  (is (= "f\\\\d" (s/replace "food" "o" "\\")))
+  (is (= "barbarbar" (s/replace "foobarfoo" #"foo" "bar")))
+  (is (= "foobarfoo" (s/replace "foobarfoo" #"baz" "bar")))
+  (is (= "f$$d" (s/replace "food" #"o" (s/re-quote-replacement "$"))))
+  (is (= "f\\\\d" (s/replace "food" #"o" (s/re-quote-replacement "\\"))))
+  (is (= "FOObarFOO" (s/replace "foobarfoo" #"foo" s/upper-case)))
+  (is (= "foobarfoo" (s/replace "foobarfoo" #"baz" s/upper-case)))
+  (is (= "OObarOO" (s/replace "foobarfoo" #"f(o+)" (fn [[m g1]] (s/upper-case g1)))))
+  (is (= "baz\\bang\\" (s/replace "bazslashbangslash" #"slash" (constantly "\\")))))
 
 (deftest t-replace-first
-  (is (= "barbarfoo" (s/replace-first "foobarfoo" "foo" "bar")))
-  (is (= "barbarfoo" (s/replace-first "foobarfoo" #"foo" "bar")))
+  (is (= "faobar" (s/replace-first "foobar" \o \a)))
+  (is (= "foobar" (s/replace-first "foobar" \z \a)))
   (is (= "z.ology" (s/replace-first "zoology" \o \.)))
-  (is (= "FOObarfoo" (s/replace-first "foobarfoo" #"foo" s/upper-case))))
+  (is (= "barbarfoo" (s/replace-first "foobarfoo" "foo" "bar")))
+  (is (= "foobarfoo" (s/replace-first "foobarfoo" "baz" "bar")))
+  (is (= "f$od" (s/replace-first "food" "o" "$")))
+  (is (= "f\\od" (s/replace-first "food" "o" "\\")))
+  (is (= "barbarfoo" (s/replace-first "foobarfoo" #"foo" "bar")))
+  (is (= "foobarfoo" (s/replace-first "foobarfoo" #"baz" "bar")))
+  (is (= "f$od" (s/replace-first "food" #"o" (s/re-quote-replacement "$"))))
+  (is (= "f\\od" (s/replace-first "food" #"o" (s/re-quote-replacement "\\"))))
+  (is (= "FOObarfoo" (s/replace-first "foobarfoo" #"foo" s/upper-case)))
+  (is (= "foobarfoo" (s/replace-first "foobarfoo" #"baz" s/upper-case)))
+  (is (= "OObarfoo" (s/replace-first "foobarfoo" #"f(o+)" (fn [[m g1]] (s/upper-case g1)))))
+  (is (= "baz\\bangslash" (s/replace-first "bazslashbangslash" #"slash" (constantly "\\")))))
 
 (deftest t-join
   (are [x coll] (= x (s/join coll))
@@ -65,6 +87,7 @@
        s/reverse [nil]
        s/replace [nil #"foo" "bar"]
        s/replace-first [nil #"foo" "bar"]
+       s/re-quote-replacement [nil]
        s/capitalize [nil]
        s/upper-case [nil]
        s/lower-case [nil]
@@ -85,6 +108,7 @@
        "baz::quux" s/replace-first ["baz--quux" #"--" "::"]
        "baz::quux" s/replace-first ["baz--quux" (StringBuffer. "--") (StringBuffer. "::")]
        "zim-zam" s/replace-first ["zim zam" #" " (StringBuffer. "-")]
+       "\\\\ \\$" s/re-quote-replacement ["\\ $"]
        "Pow" s/capitalize ["POW"]
        "BOOM" s/upper-case ["boom"]
        "whimper" s/lower-case ["whimPER"]
