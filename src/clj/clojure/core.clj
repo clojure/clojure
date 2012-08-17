@@ -1877,6 +1877,28 @@
                             (if (:error-handler opts) :continue :fail)))
        a)))
 
+(defn set-agent-send-executor!
+  "Sets the ExecutorService to be used by send"
+  {:added "1.5"}
+  [executor]
+  (set! clojure.lang.Agent/pooledExecutor executor))
+
+(defn set-agent-send-off-executor!
+  "Sets the ExecutorService to be used by send-off"
+  {:added "1.5"}
+  [executor]
+  (set! clojure.lang.Agent/soloExecutor executor))
+
+(defn send-via
+  "Dispatch an action to an agent. Returns the agent immediately.
+  Subsequently, in a thread supplied by executor, the state of the agent
+  will be set to the value of:
+
+  (apply action-fn state-of-agent args)"
+  {:added "1.5"}
+  [executor ^clojure.lang.Agent a f & args]
+  (.dispatch a (binding [*agent* a] (binding-conveyor-fn f)) args executor))
+
 (defn send
   "Dispatch an action to an agent. Returns the agent immediately.
   Subsequently, in a thread from a thread pool, the state of the agent
@@ -1886,7 +1908,7 @@
   {:added "1.0"
    :static true}
   [^clojure.lang.Agent a f & args]
-  (.dispatch a (binding [*agent* a] (binding-conveyor-fn f)) args false))
+  (apply send-via clojure.lang.Agent/pooledExecutor a f args))
 
 (defn send-off
   "Dispatch a potentially blocking action to an agent. Returns the
@@ -1897,7 +1919,7 @@
   {:added "1.0"
    :static true}
   [^clojure.lang.Agent a f & args]
-  (.dispatch a (binding [*agent* a] (binding-conveyor-fn f)) args true))
+  (apply send-via clojure.lang.Agent/soloExecutor a f args))
 
 (defn release-pending-sends
   "Normally, actions sent directly or indirectly during another action

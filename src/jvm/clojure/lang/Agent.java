@@ -12,6 +12,7 @@
 
 package clojure.lang;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -45,11 +46,11 @@ final private static AtomicLong sendThreadPoolCounter = new AtomicLong(0);
 
 final private static AtomicLong sendOffThreadPoolCounter = new AtomicLong(0);
 
-final public static ExecutorService pooledExecutor =
+volatile public static ExecutorService pooledExecutor =
 	Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors(), 
 		createThreadFactory("clojure-agent-send-pool-%d", sendThreadPoolCounter));
 
-final public static ExecutorService soloExecutor = Executors.newCachedThreadPool(
+volatile public static ExecutorService soloExecutor = Executors.newCachedThreadPool(
 	createThreadFactory("clojure-agent-send-off-pool-%d", sendOffThreadPoolCounter));
 
 final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();
@@ -73,23 +74,20 @@ static class Action implements Runnable{
 	final Agent agent;
 	final IFn fn;
 	final ISeq args;
-	final boolean solo;
+	final Executor exec;
 
 
-	public Action(Agent agent, IFn fn, ISeq args, boolean solo){
+	public Action(Agent agent, IFn fn, ISeq args, Executor exec){
 		this.agent = agent;
 		this.args = args;
 		this.fn = fn;
-		this.solo = solo;
+		this.exec = exec;
 	}
 
 	void execute(){
 		try
 			{
-			if(solo)
-				soloExecutor.execute(this);
-			else
-				pooledExecutor.execute(this);
+			exec.execute(this);
 			}
 		catch(Throwable error)
 			{
@@ -233,13 +231,13 @@ synchronized public Object restart(Object newState, boolean clearActions){
 	return newState;
 }
 
-public Object dispatch(IFn fn, ISeq args, boolean solo) {
+public Object dispatch(IFn fn, ISeq args, Executor exec) {
 	Throwable error = getError();
 	if(error != null)
 		{
 		throw Util.runtimeException("Agent is failed, needs restart", error);
 		}
-	Action action = new Action(this, fn, args, solo);
+	Action action = new Action(this, fn, args, exec);
 	dispatchAction(action);
 
 	return this;
