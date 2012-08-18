@@ -154,9 +154,7 @@
       (bases java.lang.Math)
         (list java.lang.Object)
       (bases java.lang.Integer)
-        (list java.lang.Number java.lang.Comparable)
-      (bases java.util.List)
-        (list java.util.Collection) ))
+        (list java.lang.Number java.lang.Comparable) ))
 
 (deftest test-supers
   (are [x y] (= x y)
