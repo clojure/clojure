@@ -45,6 +45,18 @@
       <version>1.7.0</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>test.generative</artifactId>
+      <version>0.1.5</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
 
   <build>
@@ -94,6 +106,7 @@
 	    </goals>
 	    <configuration>
 	      <target>
+                <property name="maven.test.classpath" refid="maven.test.classpath" />
 		<ant target="test" />
 	      </target>
 	    </configuration>
