@@ -865,6 +865,9 @@
     (are [x y] (= x y)
       EMPTY EMPTY
       (into EMPTY (range 50)) (into EMPTY (range 50))
+      (conj EMPTY (Long. -1)) (conj EMPTY (Integer. -1))
+      (hash (conj EMPTY (Long. -1))) (hash (conj EMPTY (Integer. -1)))
+      (hash [1 2 3]) (hash (conj EMPTY 1 2 3))
       (range 5) (into EMPTY (range 5))
       (range 1 6) (-> EMPTY
                     (into (range 6))
