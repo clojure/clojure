@@ -353,24 +353,27 @@
 
 (defn hash-map
   "keyval => key val
-  Returns a new hash map with supplied mappings."
+  Returns a new hash map with supplied mappings.  If any keys are
+  equal, they are handled as if by repeated uses of assoc."
   {:added "1.0"
    :static true}
   ([] {})
   ([& keyvals]
-   (. clojure.lang.PersistentHashMap (createWithCheck keyvals))))
+   (. clojure.lang.PersistentHashMap (create keyvals))))
 
 (defn hash-set
-  "Returns a new hash set with supplied keys."
+  "Returns a new hash set with supplied keys.  Any equal keys are
+  handled as if by repeated uses of conj."
   {:added "1.0"
    :static true}
   ([] #{})
   ([& keys]
-   (clojure.lang.PersistentHashSet/createWithCheck keys)))
+   (clojure.lang.PersistentHashSet/create keys)))
 
 (defn sorted-map
   "keyval => key val
-  Returns a new sorted map with supplied mappings."
+  Returns a new sorted map with supplied mappings.  If any keys are
+  equal, they are handled as if by repeated uses of assoc."
   {:added "1.0"
    :static true}
   ([& keyvals]
@@ -378,21 +381,26 @@
 
 (defn sorted-map-by
   "keyval => key val
-  Returns a new sorted map with supplied mappings, using the supplied comparator."
+  Returns a new sorted map with supplied mappings, using the supplied
+  comparator.  If any keys are equal, they are handled as if by
+  repeated uses of assoc."
   {:added "1.0"
    :static true}
   ([comparator & keyvals]
    (clojure.lang.PersistentTreeMap/create comparator keyvals)))
 
 (defn sorted-set
-  "Returns a new sorted set with supplied keys."
+  "Returns a new sorted set with supplied keys.  Any equal keys are
+  handled as if by repeated uses of conj."
   {:added "1.0"
    :static true}
   ([& keys]
    (clojure.lang.PersistentTreeSet/create keys)))
 
 (defn sorted-set-by
-  "Returns a new sorted set with supplied keys, using the supplied comparator."
+  "Returns a new sorted set with supplied keys, using the supplied
+  comparator.  Any equal keys are handled as if by repeated uses of
+  conj."
   {:added "1.1"
    :static true} 
   ([comparator & keys]
@@ -3927,11 +3935,13 @@
   ([env sym] (ns-resolve *ns* env sym)))
 
 (defn array-map
-  "Constructs an array-map."
+  "Constructs an array-map. If any keys are equal, they are handled as
+  if by repeated uses of assoc."
   {:added "1.0"
    :static true}
   ([] (. clojure.lang.PersistentArrayMap EMPTY))
-  ([& keyvals] (clojure.lang.PersistentArrayMap/createWithCheck (to-array keyvals))))
+  ([& keyvals]
+     (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array keyvals))))
 
 ;redefine let and loop  with destructuring
 (defn destructure [bindings]
