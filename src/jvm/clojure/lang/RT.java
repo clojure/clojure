@@ -414,7 +414,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 	   || classURL == null) {
 		try {
 			Var.pushThreadBindings(
-					RT.map(CURRENT_NS, CURRENT_NS.deref(),
+					RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
 					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()
 							,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
 			loaded = (loadClassForName(scriptbase.replace('/', '.') + LOADER_SUFFIX) != null);
@@ -437,7 +437,7 @@ static void doInit() throws ClassNotFoundException, IOException{
 	load("clojure/core");
 
 	Var.pushThreadBindings(
-			RT.map(CURRENT_NS, CURRENT_NS.deref(),
+			RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
 			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()
 					,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
 	try {
@@ -1450,6 +1450,14 @@ static public IPersistentMap map(Object... init){
 	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
 		return PersistentArrayMap.createWithCheck(init);
 	return PersistentHashMap.createWithCheck(init);
+}
+
+static public IPersistentMap mapUniqueKeys(Object... init){
+	if(init == null)
+		return PersistentArrayMap.EMPTY;
+	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
+		return new PersistentArrayMap(init);
+	return PersistentHashMap.create(init);
 }
 
 static public IPersistentSet set(Object... init){

@@ -2808,6 +2808,7 @@ public static class ListExpr implements Expr{
 public static class MapExpr implements Expr{
 	public final IPersistentVector keyvals;
 	final static Method mapMethod = Method.getMethod("clojure.lang.IPersistentMap map(Object[])");
+	final static Method mapUniqueKeysMethod = Method.getMethod("clojure.lang.IPersistentMap mapUniqueKeys(Object[])");
 
 
 	public MapExpr(IPersistentVector keyvals){
@@ -2822,8 +2823,28 @@ public static class MapExpr implements Expr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		boolean allKeysConstant = true;
+		boolean allConstantKeysUnique = true;
+		IPersistentSet constantKeys = PersistentHashSet.EMPTY;
+		for(int i = 0; i < keyvals.count(); i+=2)
+			{
+			Expr k = (Expr) keyvals.nth(i);
+			if(k instanceof LiteralExpr)
+				{
+				Object kval = k.eval();
+				if (constantKeys.contains(kval))
+					allConstantKeysUnique = false;
+				else
+					constantKeys = (IPersistentSet)constantKeys.cons(kval);
+				}
+			else
+				allKeysConstant = false;
+			}
 		MethodExpr.emitArgsAsArray(keyvals, objx, gen);
-		gen.invokeStatic(RT_TYPE, mapMethod);
+		if((allKeysConstant && allConstantKeysUnique) || (keyvals.count() <= 2))
+			gen.invokeStatic(RT_TYPE, mapUniqueKeysMethod);
+		else
+			gen.invokeStatic(RT_TYPE, mapMethod);
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -2839,7 +2860,10 @@ public static class MapExpr implements Expr{
 
 	static public Expr parse(C context, IPersistentMap form) {
 		IPersistentVector keyvals = PersistentVector.EMPTY;
-		boolean constant = true;
+		boolean keysConstant = true;
+		boolean valsConstant = true;
+		boolean allConstantKeysUnique = true;
+		IPersistentSet constantKeys = PersistentHashSet.EMPTY;
 		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			IMapEntry e = (IMapEntry) s.first();
@@ -2847,23 +2871,41 @@ public static class MapExpr implements Expr{
 			Expr v = analyze(context == C.EVAL ? context : C.EXPRESSION, e.val());
 			keyvals = (IPersistentVector) keyvals.cons(k);
 			keyvals = (IPersistentVector) keyvals.cons(v);
-			if(!(k instanceof LiteralExpr && v instanceof LiteralExpr))
-				constant = false;
+			if(k instanceof LiteralExpr)
+				{
+				Object kval = k.eval();
+				if (constantKeys.contains(kval))
+					allConstantKeysUnique = false;
+				else
+					constantKeys = (IPersistentSet)constantKeys.cons(kval);
+				}
+			else
+				keysConstant = false;
+			if(!(v instanceof LiteralExpr))
+				valsConstant = false;
 			}
 
 		Expr ret = new MapExpr(keyvals);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
 			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
-		else if(constant)
+		else if(keysConstant)
 			{
-			IPersistentMap m = PersistentHashMap.EMPTY;
-			for(int i=0;i<keyvals.length();i+= 2)
+			// TBD: Add more detail to exception thrown below.
+			if(!allConstantKeysUnique)
+				throw new IllegalArgumentException("Duplicate constant keys in map");
+			if(valsConstant)
 				{
-				m = m.assoc(((LiteralExpr)keyvals.nth(i)).val(), ((LiteralExpr)keyvals.nth(i+1)).val());
+				IPersistentMap m = PersistentHashMap.EMPTY;
+				for(int i=0;i<keyvals.length();i+= 2)
+					{
+					m = m.assoc(((LiteralExpr)keyvals.nth(i)).val(), ((LiteralExpr)keyvals.nth(i+1)).val());
+					}
+//				System.err.println("Constant: " + m);
+				return new ConstantExpr(m);
 				}
-//			System.err.println("Constant: " + m);
-			return new ConstantExpr(m);
+			else
+				return ret;
 			}
 		else
 			return ret;
@@ -3669,7 +3711,7 @@ static public class FnExpr extends ObjExpr{
 		try
 			{
 			Var.pushThreadBindings(
-					RT.map(CONSTANTS, PersistentVector.EMPTY,
+					RT.mapUniqueKeys(CONSTANTS, PersistentVector.EMPTY,
 					       CONSTANT_IDS, new IdentityHashMap(),
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY,
@@ -4983,7 +5025,7 @@ public static class FnMethod extends ObjMethod{
 			if(pnode == null)
 				pnode = new PathNode(PATHTYPE.PATH,null);
 			Var.pushThreadBindings(
-					RT.map(
+					RT.mapUniqueKeys(
 							METHOD, method,
 							LOCAL_ENV, LOCAL_ENV.deref(),
 							LOOP_LOCALS, null,
@@ -6978,7 +7020,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 			(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
 			new LineNumberingPushbackReader(rdr);
 	Var.pushThreadBindings(
-			RT.map(LOADER, RT.makeClassLoader(),
+			RT.mapUniqueKeys(LOADER, RT.makeClassLoader(),
 			       SOURCE_PATH, sourcePath,
 			       SOURCE, sourceName,
 			       METHOD, null,
@@ -7108,7 +7150,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
 			new LineNumberingPushbackReader(rdr);
 	Var.pushThreadBindings(
-			RT.map(SOURCE_PATH, sourcePath,
+			RT.mapUniqueKeys(SOURCE_PATH, sourcePath,
 			       SOURCE, sourceName,
 			       METHOD, null,
 			       LOCAL_ENV, null,
@@ -7382,7 +7424,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		try
 			{
 			Var.pushThreadBindings(
-					RT.map(CONSTANTS, PersistentVector.EMPTY,
+					RT.mapUniqueKeys(CONSTANTS, PersistentVector.EMPTY,
 					       CONSTANT_IDS, new IdentityHashMap(),
 					       KEYWORDS, PersistentHashMap.EMPTY,
 					       VARS, PersistentHashMap.EMPTY,
@@ -7392,7 +7434,7 @@ static public class NewInstanceExpr extends ObjExpr{
                                                NO_RECUR, null));
 			if(ret.isDeftype())
 				{
-				Var.pushThreadBindings(RT.map(METHOD, null,
+				Var.pushThreadBindings(RT.mapUniqueKeys(METHOD, null,
 				                              LOCAL_ENV, ret.fields
 						, COMPILE_STUB_SYM, Symbol.intern(null, tagName)
 						, COMPILE_STUB_CLASS, stub));
@@ -7767,7 +7809,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			//register as the current method and set up a new env frame
             PathNode pnode =  new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
 			Var.pushThreadBindings(
-					RT.map(
+					RT.mapUniqueKeys(
 							METHOD, method,
 							LOCAL_ENV, LOCAL_ENV.deref(),
 							LOOP_LOCALS, null,
