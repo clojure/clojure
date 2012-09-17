@@ -45,3 +45,10 @@
     (is (thrown-with-msg? IllegalArgumentException
                           (re-pattern (format msg-regex-str *ns*))
                           (macroexpand form)))))
+
+(deftest extract-ex-data
+  (try
+   (throw (ex-info "example error" {:foo 1}))
+   (catch Throwable t
+     (is (= {:foo 1} (ex-data t)))))
+  (is (nil? (ex-data (RuntimeException. "example non ex-data")))))

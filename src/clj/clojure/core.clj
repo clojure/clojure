@@ -4287,7 +4287,7 @@
     (with-out-str
      (apply println xs)))
 
-(import clojure.lang.ExceptionInfo)
+(import clojure.lang.ExceptionInfo clojure.lang.IExceptionInfo)
 (defn ex-info
   "Alpha - subject to change.
    Create an instance of ExceptionInfo, a RuntimeException subclass
@@ -4300,12 +4300,12 @@
 
 (defn ex-data
   "Alpha - subject to change.
-   Returns exception data (a map) if ex is an ExceptionInfo.
+   Returns exception data (a map) if ex is an IExceptionInfo.
    Otherwise returns nil."
   {:added "1.4"}
   [ex]
-  (when (instance? ExceptionInfo ex)
-    (.getData ^ExceptionInfo ex)))
+  (when (instance? IExceptionInfo ex)
+    (.getData ^IExceptionInfo ex)))
 
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to

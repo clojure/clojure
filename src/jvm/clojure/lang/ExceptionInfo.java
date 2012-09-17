@@ -15,7 +15,7 @@ package clojure.lang;
  * richer semantics for exceptions should use this in lieu of defining project-specific
  * exception classes.
  */
-public class ExceptionInfo extends RuntimeException{
+public class ExceptionInfo extends RuntimeException implements IExceptionInfo {
     public final IPersistentMap data;
 
     public ExceptionInfo(String s, IPersistentMap data) {
