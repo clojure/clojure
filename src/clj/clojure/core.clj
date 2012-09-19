@@ -782,7 +782,7 @@
 
 (defmacro and
   "Evaluates exprs one at a time, from left to right. If a form
-  returns logical false (nil or false), and returns that value and
+  returns logical false (nil or false), it returns that value and
   doesn't evaluate any of the other expressions, otherwise it returns
   the value of the last expr. (and) returns true."
   {:added "1.0"}
@@ -794,7 +794,7 @@
 
 (defmacro or
   "Evaluates exprs one at a time, from left to right. If a form
-  returns a logical true value, or returns that value and doesn't
+  returns a logical true value, it returns that value and doesn't
   evaluate any of the other expressions, otherwise it returns the
   value of the last expression. (or) returns nil."
   {:added "1.0"}
