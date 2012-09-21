@@ -287,13 +287,13 @@
   default-streams-impl)
 
 (defmulti
-  #^{:doc "Internal helper for copy"
+  ^{:doc "Internal helper for copy"
      :private true
      :arglists '([input output opts])}
   do-copy
   (fn [input output opts] [(type input) (type output)]))
 
-(defmethod do-copy [InputStream OutputStream] [#^InputStream input #^OutputStream output opts]
+(defmethod do-copy [InputStream OutputStream] [^InputStream input ^OutputStream output opts]
   (let [buffer (make-array Byte/TYPE (buffer-size opts))]
     (loop []
       (let [size (.read input buffer)]
@@ -301,8 +301,8 @@
           (do (.write output buffer 0 size)
               (recur)))))))
 
-(defmethod do-copy [InputStream Writer] [#^InputStream input #^Writer output opts]
-  (let [#^"[C" buffer (make-array Character/TYPE (buffer-size opts))
+(defmethod do-copy [InputStream Writer] [^InputStream input ^Writer output opts]
+  (let [^"[C" buffer (make-array Character/TYPE (buffer-size opts))
         in (InputStreamReader. input (encoding opts))]
     (loop []
       (let [size (.read in buffer 0 (alength buffer))]
@@ -310,12 +310,12 @@
           (do (.write output buffer 0 size)
               (recur)))))))
 
-(defmethod do-copy [InputStream File] [#^InputStream input #^File output opts]
+(defmethod do-copy [InputStream File] [^InputStream input ^File output opts]
   (with-open [out (FileOutputStream. output)]
     (do-copy input out opts)))
 
-(defmethod do-copy [Reader OutputStream] [#^Reader input #^OutputStream output opts]
-  (let [#^"[C" buffer (make-array Character/TYPE (buffer-size opts))
+(defmethod do-copy [Reader OutputStream] [^Reader input ^OutputStream output opts]
+  (let [^"[C" buffer (make-array Character/TYPE (buffer-size opts))
         out (OutputStreamWriter. output (encoding opts))]
     (loop []
       (let [size (.read input buffer)]
@@ -325,56 +325,56 @@
             (recur))
           (.flush out))))))
 
-(defmethod do-copy [Reader Writer] [#^Reader input #^Writer output opts]
-  (let [#^"[C" buffer (make-array Character/TYPE (buffer-size opts))]
+(defmethod do-copy [Reader Writer] [^Reader input ^Writer output opts]
+  (let [^"[C" buffer (make-array Character/TYPE (buffer-size opts))]
     (loop []
       (let [size (.read input buffer)]
         (when (pos? size)
           (do (.write output buffer 0 size)
               (recur)))))))
 
-(defmethod do-copy [Reader File] [#^Reader input #^File output opts]
+(defmethod do-copy [Reader File] [^Reader input ^File output opts]
   (with-open [out (FileOutputStream. output)]
     (do-copy input out opts)))
 
-(defmethod do-copy [File OutputStream] [#^File input #^OutputStream output opts]
+(defmethod do-copy [File OutputStream] [^File input ^OutputStream output opts]
   (with-open [in (FileInputStream. input)]
     (do-copy in output opts)))
 
-(defmethod do-copy [File Writer] [#^File input #^Writer output opts]
+(defmethod do-copy [File Writer] [^File input ^Writer output opts]
   (with-open [in (FileInputStream. input)]
     (do-copy in output opts)))
 
-(defmethod do-copy [File File] [#^File input #^File output opts]
+(defmethod do-copy [File File] [^File input ^File output opts]
   (with-open [in (FileInputStream. input)
               out (FileOutputStream. output)]
     (do-copy in out opts)))
 
-(defmethod do-copy [String OutputStream] [#^String input #^OutputStream output opts]
+(defmethod do-copy [String OutputStream] [^String input ^OutputStream output opts]
   (do-copy (StringReader. input) output opts))
 
-(defmethod do-copy [String Writer] [#^String input #^Writer output opts]
+(defmethod do-copy [String Writer] [^String input ^Writer output opts]
   (do-copy (StringReader. input) output opts))
 
-(defmethod do-copy [String File] [#^String input #^File output opts]
+(defmethod do-copy [String File] [^String input ^File output opts]
   (do-copy (StringReader. input) output opts))
 
-(defmethod do-copy [char-array-type OutputStream] [input #^OutputStream output opts]
+(defmethod do-copy [char-array-type OutputStream] [input ^OutputStream output opts]
   (do-copy (CharArrayReader. input) output opts))
 
-(defmethod do-copy [char-array-type Writer] [input #^Writer output opts]
+(defmethod do-copy [char-array-type Writer] [input ^Writer output opts]
   (do-copy (CharArrayReader. input) output opts))
 
-(defmethod do-copy [char-array-type File] [input #^File output opts]
+(defmethod do-copy [char-array-type File] [input ^File output opts]
   (do-copy (CharArrayReader. input) output opts))
 
-(defmethod do-copy [byte-array-type OutputStream] [#^"[B" input #^OutputStream output opts]
+(defmethod do-copy [byte-array-type OutputStream] [^"[B" input ^OutputStream output opts]
   (do-copy (ByteArrayInputStream. input) output opts))
 
-(defmethod do-copy [byte-array-type Writer] [#^"[B" input #^Writer output opts]
+(defmethod do-copy [byte-array-type Writer] [^"[B" input ^Writer output opts]
   (do-copy (ByteArrayInputStream. input) output opts))
 
-(defmethod do-copy [byte-array-type File] [#^"[B" input #^Writer output opts]
+(defmethod do-copy [byte-array-type File] [^"[B" input ^Writer output opts]
   (do-copy (ByteArrayInputStream. input) output opts))
 
 (defn copy

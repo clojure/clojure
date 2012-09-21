@@ -18,7 +18,7 @@
     (.setEditable htmlpane false)
     (.addHyperlinkListener htmlpane
       (proxy [javax.swing.event.HyperlinkListener] []
-        (hyperlinkUpdate [#^javax.swing.event.HyperlinkEvent e]
+        (hyperlinkUpdate [^javax.swing.event.HyperlinkEvent e]
           (when (= (.getEventType e) (. javax.swing.event.HyperlinkEvent$EventType ACTIVATED))
             (if (instance? javax.swing.text.html.HTMLFrameHyperlinkEvent e)
               (-> htmlpane .getDocument (.processHTMLFrameHyperlinkEvent e))

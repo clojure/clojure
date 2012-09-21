@@ -9,8 +9,8 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns
-  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
-     :doc "Utilities meant to be used interactively at the REPL"}
+  ^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
+    :doc "Utilities meant to be used interactively at the REPL"}
   clojure.repl
   (:import (java.io LineNumberReader InputStreamReader PushbackReader)
            (clojure.lang RT Reflector)))

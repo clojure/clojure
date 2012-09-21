@@ -350,7 +350,7 @@
   (compareTo [this o]
     (if (identical? this o)
       0
-      (let [#^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
+      (let [^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
             vcnt (.count v)]
         (cond
           (< cnt vcnt) -1
