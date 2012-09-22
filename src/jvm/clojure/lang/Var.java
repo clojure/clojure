@@ -84,6 +84,7 @@ static IPersistentMap privateMeta = new PersistentArrayMap(new Object[]{privateK
 static Keyword macroKey = Keyword.intern(null, "macro");
 static Keyword nameKey = Keyword.intern(null, "name");
 static Keyword nsKey = Keyword.intern(null, "ns");
+static Keyword dynamicKey = Keyword.intern(null, "dynamic");
 //static Keyword tagKey = Keyword.intern(null, "tag");
 
 volatile Object root;
@@ -114,12 +115,15 @@ public static void resetThreadBindingFrame(Object frame){
 }
 
 public Var setDynamic(){
-	this.dynamic = true;
-	return this;
+	return setDynamic(true);
 }
 
 public Var setDynamic(boolean b){
 	this.dynamic = b;
+	if (b)
+		this.setMeta(this.meta().assoc(dynamicKey, Boolean.TRUE));
+	else
+		this.setMeta(this.meta().without(dynamicKey));
 	return this;
 }
 
