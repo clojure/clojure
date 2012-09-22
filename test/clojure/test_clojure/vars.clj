@@ -98,3 +98,28 @@
     (with-redefs [dynamic-var 3]
       (is (= 2 dynamic-var))))
   (is (= 1 dynamic-var)))
+
+
+(defn contains [m1 m2]
+  (reduce (fn [r e]
+            (if (not r) r
+                (and (contains? m1 (first e))
+                     (= (get m1 (first e)) (second e)))))
+          true
+          m2))
+
+(def unbound)
+(deftest test-setdynamic-meta-data
+  (let [m (meta #'unbound)]
+    (is (not (:dynamic m)))
+
+    (.setDynamic #'unbound false)
+    (is (not (:dynamic (meta #'unbound))))
+
+    (.setDynamic #'unbound)
+    (is (:dynamic (meta #'unbound)))
+    (is (contains (meta #'unbound) m))
+
+    (.setDynamic #'unbound false)
+    (is (not (:dynamic (meta #'unbound))))
+    (is (contains (meta #'unbound) m))))
