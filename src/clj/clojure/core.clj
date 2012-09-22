@@ -1858,7 +1858,7 @@
 
   :error-mode mode-keyword
 
-  If metadata-map is supplied, it will be come the metadata on the
+  If metadata-map is supplied, it will become the metadata on the
   agent. validate-fn must be nil or a side-effect-free fn of one
   argument, which will be passed the intended new state on any state
   change. If the new state is unacceptable, the validate-fn should
@@ -2067,7 +2067,7 @@
   :min-history (default 0)
   :max-history (default 10)
 
-  If metadata-map is supplied, it will be come the metadata on the
+  If metadata-map is supplied, it will become the metadata on the
   ref. validate-fn must be nil or a side-effect-free fn of one
   argument, which will be passed the intended new state on any state
   change. If the new state is unacceptable, the validate-fn should
@@ -2116,7 +2116,7 @@
 
   :validator validate-fn
 
-  If metadata-map is supplied, it will be come the metadata on the
+  If metadata-map is supplied, it will become the metadata on the
   atom. validate-fn must be nil or a side-effect-free fn of one
   argument, which will be passed the intended new state on any state
   change. If the new state is unacceptable, the validate-fn should
@@ -3803,7 +3803,7 @@
           to-do (if (= :all (:refer fs))
                   (keys nspublics)
                   (or (:refer fs) (:only fs) (keys nspublics)))]
-      (when-not (instance? clojure.lang.Sequential to-do)
+      (when (and to-do (not (instance? clojure.lang.Sequential to-do)))
         (throw (new Exception ":only/:refer value must be a sequential collection of symbols")))
       (doseq [sym to-do]
         (when-not (exclude sym)
@@ -4287,7 +4287,7 @@
     (with-out-str
      (apply println xs)))
 
-(import clojure.lang.ExceptionInfo)
+(import clojure.lang.ExceptionInfo clojure.lang.IExceptionInfo)
 (defn ex-info
   "Alpha - subject to change.
    Create an instance of ExceptionInfo, a RuntimeException subclass
@@ -4300,12 +4300,12 @@
 
 (defn ex-data
   "Alpha - subject to change.
-   Returns exception data (a map) if ex is an ExceptionInfo.
+   Returns exception data (a map) if ex is an IExceptionInfo.
    Otherwise returns nil."
   {:added "1.4"}
   [ex]
-  (when (instance? ExceptionInfo ex)
-    (.getData ^ExceptionInfo ex)))
+  (when (instance? IExceptionInfo ex)
+    (.getData ^IExceptionInfo ex)))
 
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to

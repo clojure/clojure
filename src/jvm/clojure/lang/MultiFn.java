@@ -13,16 +13,18 @@
 package clojure.lang;
 
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MultiFn extends AFn{
 final public IFn dispatchFn;
 final public Object defaultDispatchVal;
 final public IRef hierarchy;
 final String name;
-IPersistentMap methodTable;
-IPersistentMap preferTable;
-IPersistentMap methodCache;
-Object cachedHierarchy;
+final ReentrantReadWriteLock rw;
+volatile IPersistentMap methodTable;
+volatile IPersistentMap preferTable;
+volatile IPersistentMap methodCache;
+volatile Object cachedHierarchy;
 
 static final Var assoc = RT.var("clojure.core", "assoc");
 static final Var dissoc = RT.var("clojure.core", "dissoc");
@@ -30,6 +32,7 @@ static final Var isa = RT.var("clojure.core", "isa?");
 static final Var parents = RT.var("clojure.core", "parents");
 
 public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hierarchy) {
+	this.rw = new ReentrantReadWriteLock();
 	this.name = name;
 	this.dispatchFn = dispatchFn;
 	this.defaultDispatchVal = defaultDispatchVal;
@@ -40,35 +43,63 @@ public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hier
 	cachedHierarchy = null;
 }
 
-synchronized public MultiFn reset(){
-	methodTable = methodCache = preferTable = PersistentHashMap.EMPTY;
-	cachedHierarchy = null;
-	return this;
+public MultiFn reset(){
+	rw.writeLock().lock();
+	try{
+		methodTable = methodCache = preferTable = PersistentHashMap.EMPTY;
+		cachedHierarchy = null;
+		return this;
+	}
+	finally {
+		rw.writeLock().unlock();
+	}
 }
 
-synchronized public MultiFn addMethod(Object dispatchVal, IFn method) {
-	methodTable = getMethodTable().assoc(dispatchVal, method);
-	resetCache();
-	return this;
+public MultiFn addMethod(Object dispatchVal, IFn method) {
+	rw.writeLock().lock();
+	try{
+		methodTable = getMethodTable().assoc(dispatchVal, method);
+		resetCache();
+		return this;
+	}
+	finally {
+		rw.writeLock().unlock();
+	}
 }
 
-synchronized public MultiFn removeMethod(Object dispatchVal) {
-	methodTable = getMethodTable().without(dispatchVal);
-	resetCache();
-	return this;
+public MultiFn removeMethod(Object dispatchVal) {
+	rw.writeLock().lock();
+	try
+		{
+		methodTable = getMethodTable().without(dispatchVal);
+		resetCache();
+		return this;
+		}
+	finally
+		{
+		rw.writeLock().unlock();
+		}
 }
 
-synchronized public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) {
-	if(prefers(dispatchValY, dispatchValX))
-		throw new IllegalStateException(
-				String.format("Preference conflict in multimethod '%s': %s is already preferred to %s",
-				              name, dispatchValY, dispatchValX));
-	preferTable = getPreferTable().assoc(dispatchValX, RT.conj((IPersistentCollection) RT.get(getPreferTable(),
-	                                                                                     dispatchValX,
-	                                                                                     PersistentHashSet.EMPTY),
-	                                                      dispatchValY));
-	resetCache();
-	return this;
+public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) {
+	rw.writeLock().lock();
+	try
+		{
+		if(prefers(dispatchValY, dispatchValX))
+			throw new IllegalStateException(
+					String.format("Preference conflict in multimethod '%s': %s is already preferred to %s",
+					              name, dispatchValY, dispatchValX));
+		preferTable = getPreferTable().assoc(dispatchValX, RT.conj((IPersistentCollection) RT.get(getPreferTable(),
+		                                                                                     dispatchValX,
+		                                                                                     PersistentHashSet.EMPTY),
+		                                                      dispatchValY));
+		resetCache();
+		return this;
+		}
+	finally
+		{
+		rw.writeLock().unlock();
+		}
 }
 
 private boolean prefers(Object x, Object y) {
@@ -97,18 +128,26 @@ private boolean dominates(Object x, Object y) {
 }
 
 private IPersistentMap resetCache() {
-	methodCache = getMethodTable();
-	cachedHierarchy = hierarchy.deref();
-	return methodCache;
+	rw.writeLock().lock();
+	try
+		{
+		methodCache = getMethodTable();
+		cachedHierarchy = hierarchy.deref();
+		return methodCache;
+		}
+	finally
+		{
+		rw.writeLock().unlock();
+		}
 }
 
-synchronized public IFn getMethod(Object dispatchVal) {
+ public IFn getMethod(Object dispatchVal) {
 	if(cachedHierarchy != hierarchy.deref())
 		resetCache();
 	IFn targetFn = (IFn) methodCache.valAt(dispatchVal);
 	if(targetFn != null)
 		return targetFn;
-	targetFn = findAndCacheBestMethod(dispatchVal);
+	 targetFn = findAndCacheBestMethod(dispatchVal);
 	if(targetFn != null)
 		return targetFn;
 	targetFn = (IFn) getMethodTable().valAt(defaultDispatchVal);
@@ -124,34 +163,59 @@ private IFn getFn(Object dispatchVal) {
 }
 
 private IFn findAndCacheBestMethod(Object dispatchVal) {
-	Map.Entry bestEntry = null;
-	for(Object o : getMethodTable())
+	rw.readLock().lock();
+	Map.Entry bestEntry;
+	IPersistentMap mt = methodTable;
+	IPersistentMap pt = preferTable;
+	Object ch = cachedHierarchy;
+	try
 		{
-		Map.Entry e = (Map.Entry) o;
-		if(isA(dispatchVal, e.getKey()))
+		bestEntry = null;
+		for(Object o : getMethodTable())
 			{
-			if(bestEntry == null || dominates(e.getKey(), bestEntry.getKey()))
-				bestEntry = e;
-			if(!dominates(bestEntry.getKey(), e.getKey()))
-				throw new IllegalArgumentException(
-						String.format(
-								"Multiple methods in multimethod '%s' match dispatch value: %s -> %s and %s, and neither is preferred",
-								name, dispatchVal, e.getKey(), bestEntry.getKey()));
+			Map.Entry e = (Map.Entry) o;
+			if(isA(dispatchVal, e.getKey()))
+				{
+				if(bestEntry == null || dominates(e.getKey(), bestEntry.getKey()))
+					bestEntry = e;
+				if(!dominates(bestEntry.getKey(), e.getKey()))
+					throw new IllegalArgumentException(
+							String.format(
+									"Multiple methods in multimethod '%s' match dispatch value: %s -> %s and %s, and neither is preferred",
+									name, dispatchVal, e.getKey(), bestEntry.getKey()));
+				}
+			}
+		if(bestEntry == null)
+			return null;
+		}
+	finally
+		{
+		rw.readLock().unlock();
+		}
+
+
+	//ensure basis has stayed stable throughout, else redo
+	rw.writeLock().lock();
+	try
+		{
+		if( mt == methodTable &&
+		    pt == preferTable &&
+		    ch == cachedHierarchy &&
+			cachedHierarchy == hierarchy.deref())
+			{
+			//place in cache
+			methodCache = methodCache.assoc(dispatchVal, bestEntry.getValue());
+			return (IFn) bestEntry.getValue();
+			}
+		else
+			{
+			resetCache();
+			return findAndCacheBestMethod(dispatchVal);
 			}
 		}
-	if(bestEntry == null)
-		return null;
-	//ensure basis has stayed stable throughout, else redo
-	if(cachedHierarchy == hierarchy.deref())
+	finally
 		{
-		//place in cache
-		methodCache = methodCache.assoc(dispatchVal, bestEntry.getValue());
-		return (IFn) bestEntry.getValue();
-		}
-	else
-		{
-		resetCache();
-		return findAndCacheBestMethod(dispatchVal);
+		rw.writeLock().unlock();
 		}
 }
 
