@@ -85,7 +85,6 @@ static Keyword macroKey = Keyword.intern(null, "macro");
 static Keyword nameKey = Keyword.intern(null, "name");
 static Keyword nsKey = Keyword.intern(null, "ns");
 static Keyword dynamicKey = Keyword.intern(null, "dynamic");
-static IPersistentMap dynamicMeta = new PersistentArrayMap(new Object[]{dynamicKey, Boolean.TRUE});
 //static Keyword tagKey = Keyword.intern(null, "tag");
 
 volatile Object root;
