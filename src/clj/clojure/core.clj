@@ -188,7 +188,10 @@
    ([map key val & kvs]
     (let [ret (assoc map key val)]
       (if kvs
-        (recur ret (first kvs) (second kvs) (nnext kvs))
+        (if (next kvs)
+          (recur ret (first kvs) (second kvs) (nnext kvs))
+          (throw (IllegalArgumentException.
+                  "assoc expects even number of arguments after map/vector, found odd number")))
         ret)))))
 
 ;;;;;;;;;;;;;;;;; metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;
