@@ -32,7 +32,7 @@ package clojure.asm;
 /**
  * An empty {@link MethodVisitor} that delegates to another
  * {@link MethodVisitor}. This class can be used as a super class to quickly
- * implement usefull method adapter classes, just by overriding the necessary
+ * implement useful method adapter classes, just by overriding the necessary
  * methods.
  *
  * @author Eric Bruneton
