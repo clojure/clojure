@@ -210,7 +210,7 @@
          - else returns the next object read from the input stream
        default: repl-read
 
-     - :eval, funtion of one argument, returns the evaluation of its
+     - :eval, function of one argument, returns the evaluation of its
        argument
        default: eval
 

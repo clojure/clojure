@@ -31,7 +31,7 @@ package clojure.asm;
 
 /**
  * An empty {@link ClassVisitor} that delegates to another {@link ClassVisitor}.
- * This class can be used as a super class to quickly implement usefull class
+ * This class can be used as a super class to quickly implement useful class
  * adapter classes, just by overriding the necessary methods.
  *
  * @author Eric Bruneton

@@ -722,7 +722,7 @@
   namespace object or a symbol.
 
   Internally binds *report-counters* to a ref initialized to
-  *inital-report-counters*.  Returns the final, dereferenced state of
+  *initial-report-counters*.  Returns the final, dereferenced state of
   *report-counters*."
   {:added "1.1"}
   [ns]
