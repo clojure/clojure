@@ -1432,7 +1432,7 @@ public void newArray(final Type type){
 }
 
 // ------------------------------------------------------------------------
-// Miscelaneous instructions
+// Miscellaneous instructions
 // ------------------------------------------------------------------------
 
 /**
