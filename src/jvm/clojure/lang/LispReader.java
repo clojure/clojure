@@ -718,7 +718,7 @@ public static class MetaReader extends AFn{
 		if(r instanceof LineNumberingPushbackReader)
       {
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
-			column = ((LineNumberingPushbackReader) r).getColumnNumber();
+			column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
       }
 		Object meta = read(r, true, null, true);
 		if(meta instanceof Symbol || meta instanceof String)
@@ -974,7 +974,7 @@ public static class ListReader extends AFn{
 		if(r instanceof LineNumberingPushbackReader)
       {
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
-			column = ((LineNumberingPushbackReader) r).getColumnNumber();
+			column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
       }
 		List list = readDelimitedList(')', r, true);
 		if(list.isEmpty())
