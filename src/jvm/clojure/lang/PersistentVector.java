@@ -273,7 +273,7 @@ public Object kvreduce(IFn f, Object init){
     return init;
 }
 
-static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
+static public final class ChunkedSeq extends ASeq implements IChunkedSeq,Counted{
 
 	public final PersistentVector vec;
 	final Object[] node;
@@ -333,6 +333,10 @@ static public final class ChunkedSeq extends ASeq implements IChunkedSeq{
 		if(offset + 1 < node.length)
 			return new ChunkedSeq(vec, node, i, offset + 1);
 		return chunkedNext();
+	}
+
+	public int count(){
+		return vec.cnt - (i + offset);
 	}
 }
 
