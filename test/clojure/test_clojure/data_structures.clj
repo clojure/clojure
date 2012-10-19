@@ -10,7 +10,8 @@
 
 
 (ns clojure.test-clojure.data-structures
-  (:use clojure.test))
+  (:use clojure.test
+        [clojure.test.generative :exclude (is)]))
 
 
 ;; *** Helper functions ***
@@ -18,6 +19,16 @@
 (defn diff [s1 s2]
   (seq (reduce disj (set s1) (set s2))))
 
+
+;; *** Generative ***
+(defspec subcollection-counts-are-consistent
+  identity
+  [^collection coll]
+  (let [n (count coll)]
+    (dotimes [i n]
+      (is (= n
+             (+ i (count (nthnext coll i)))
+             (+ i (count (drop i coll))))))))
 
 ;; *** General ***
 
