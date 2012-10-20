@@ -541,3 +541,33 @@
   (is (= 4 (.version #uuid "550e8400-e29b-41d4-a716-446655440000")))
   (is (= (print-str #uuid "550e8400-e29b-41d4-a716-446655440000")
          "#uuid \"550e8400-e29b-41d4-a716-446655440000\"")))
+
+(deftest unknown-tag
+  (let [my-unknown (fn [tag val] {:unknown-tag tag :value val})
+        throw-on-unknown (fn [tag val] (throw (RuntimeException. (str "No data reader function for tag " tag))))
+        my-uuid (partial my-unknown 'uuid)
+        u "#uuid \"550e8400-e29b-41d4-a716-446655440000\""
+        s "#never.heard.of/some-tag [1 2]" ]
+    (binding [*data-readers* {'uuid my-uuid}
+              *default-data-reader-fn* my-unknown]
+      (testing "Unknown tag"
+        (is (= (read-string s)
+               {:unknown-tag 'never.heard.of/some-tag
+                :value [1 2]})))
+      (testing "Override uuid tag"
+        (is (= (read-string u)
+               {:unknown-tag 'uuid
+                :value "550e8400-e29b-41d4-a716-446655440000"}))))
+
+    (binding [*default-data-reader-fn* throw-on-unknown]
+      (testing "Unknown tag with custom throw-on-unknown"
+        (are [err msg form] (thrown-with-msg? err msg (read-string form))
+             Exception #"No data reader function for tag foo" "#foo [1 2]"
+             Exception #"No data reader function for tag bar/foo" "#bar/foo [1 2]"
+             Exception #"No data reader function for tag bar.baz/foo" "#bar.baz/foo [1 2]")))
+
+    (testing "Unknown tag out-of-the-box behavior (like Clojure 1.4)"
+      (are [err msg form] (thrown-with-msg? err msg (read-string form))
+           Exception #"No reader function for tag foo" "#foo [1 2]"
+           Exception #"No reader function for tag bar/foo" "#bar/foo [1 2]"
+           Exception #"No reader function for tag bar.baz/foo" "#bar.baz/foo [1 2]"))))

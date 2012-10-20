@@ -1179,8 +1179,13 @@ public static class CtorReader extends AFn{
 		if(data_reader == null){
                         data_readers = (ILookup)RT.DEFAULT_DATA_READERS.deref();
                         data_reader = (IFn)RT.get(data_readers, tag);
-                        if(data_reader == null)
+                        if(data_reader == null){
+                            IFn default_reader = (IFn)RT.DEFAULT_DATA_READER_FN.deref();
+                            if(default_reader != null)
+                                return default_reader.invoke(tag, o);
+                            else
                                 throw new RuntimeException("No reader function for tag " + tag.toString());
+                        }
                 }
 
                 return data_reader.invoke(o);
