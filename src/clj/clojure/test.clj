@@ -707,17 +707,24 @@
                       :expected nil, :actual e})))
       (do-report {:type :end-test-var, :var v}))))
 
+(defn test-vars
+  "Groups vars by their namespace and runs test-vars on them with
+   appropriate fixtures applied."
+  {:added "1.5"}
+  [vars]
+  (doseq [[ns vars] (group-by (comp :ns meta) vars)]
+    (let [once-fixture-fn (join-fixtures (::once-fixtures (meta ns)))
+          each-fixture-fn (join-fixtures (::each-fixtures (meta ns)))]
+      (once-fixture-fn
+       (fn []
+         (doseq [v vars]
+           (each-fixture-fn (fn [] (test-var v)))))))))
+
 (defn test-all-vars
-  "Calls test-var on every var interned in the namespace, with fixtures."
+  "Calls test-vars on every var interned in the namespace, with fixtures."
   {:added "1.1"}
   [ns]
-  (let [once-fixture-fn (join-fixtures (::once-fixtures (meta ns)))
-        each-fixture-fn (join-fixtures (::each-fixtures (meta ns)))]
-    (once-fixture-fn
-     (fn []
-       (doseq [v (vals (ns-interns ns))]
-         (when (:test (meta v))
-           (each-fixture-fn (fn [] (test-var v)))))))))
+  (test-vars (vals (ns-interns ns))))
 
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
