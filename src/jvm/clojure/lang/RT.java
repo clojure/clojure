@@ -502,7 +502,8 @@ static ISeq seqFrom(Object coll){
 	else {
 		Class c = coll.getClass();
 		Class sc = c.getSuperclass();
-		throw new IllegalArgumentException("Don't know how to create ISeq from: " + c.getName());
+		throw new ExceptionInfo("Don't know how to create ISeq from: " + c.getName(),
+                                        map(Keyword.intern("instance"), coll));
 	}
 }
 
