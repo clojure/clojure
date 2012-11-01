@@ -50,3 +50,7 @@
                           (reduced (+ acc k)))
                         0 m))
         "Sorted maps should stop reduction when asked")))
+
+(deftest test-nil
+  (is (= {:k :v} (reduce-kv assoc {:k :v} nil)))
+  (is (= 0 (r/fold + nil))))

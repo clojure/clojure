@@ -6149,6 +6149,11 @@
      (clojure.core.protocols/coll-reduce coll f val)))
 
 (extend-protocol clojure.core.protocols/IKVReduce
+ nil
+ (kv-reduce
+  [_ f init]
+  init)
+
  ;;slow path default
  clojure.lang.IPersistentMap
  (kv-reduce 
