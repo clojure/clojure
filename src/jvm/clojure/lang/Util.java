@@ -122,8 +122,12 @@ static public int hasheq(Object o){
 	if(o instanceof Number)
 		return Numbers.hasheq((Number)o);
 	else if(o instanceof IHashEq)
-		return ((IHashEq)o).hasheq();
+		return dohasheq(o);
 	return o.hashCode();
+}
+
+public static int dohasheq(Object o) {
+	return ((IHashEq)o).hasheq();
 }
 
 static public int hashCombine(int seed, int hash){
